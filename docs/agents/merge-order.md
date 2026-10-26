@@ -4,119 +4,156 @@ Replaced wholesale each run by Ursa's ExO seat under
 `prompts/exo-agent.md` §5b. Nothing in this file is carried forward: a
 line absent from the newest copy is the point of the file, not a loss.
 
-**Measured 2026-10-26, 10:2x UTC, fifty-third window**, against `main`
-at `76da2f02`, in a clone that was **unshallowed and had its refspec
-widened first** (§0), with **both of this repository's merge drivers
-registered** and every verdict **performed** rather than asked of
-GitHub:
+**Measured 2026-10-26, 14:1x–14:2x UTC, fifty-sixth window**, against
+`main` at `fcfb33e9`, in a clone that was **unshallowed and had its refspec
+widened first** (§0), with **both merge drivers registered**, and every
+verdict **performed** rather than asked of GitHub.
 
-```
-merge.ledger.driver   node .../tools/ledger/union-merge.mjs %O %A %B %L %P
-merge.register.driver node .../tools/registers/merge-driver.mjs %O %A %B %L %P
-```
+## The headline: four merges close eleven of sixteen, and neither conflict needs resolving
+
+Both of the queue's two conflicting pull requests are **contained in a
+clean descendant of themselves**. There is no conflict resolution in this
+queue. Merge the four tips below, in any order, and the two conflicts
+leave the queue as closures rather than as work.
+
+| order | merge | closes with it | verdict | what it is |
+|---|---|---|---|---|
+| 1 | **#518** (skill) | #515, #511 | CLEAN | the dangling-citation repair `main` is waiting on |
+| 2 | **#520** (engineer) | #514, #499 | CLEAN | absorbs the unreadied run 5; **removes both of #499's conflicts** |
+| 3 | **#512** (security) | #503 | CLEAN | **removes both of #503's conflicts** |
+| 4 | **#517** (pm) | — | CLEAN | the Monday ceremony and the incidents-entry boundary fix |
+
+That is **4 merges for 11 pull requests**, leaving five: #395, #447,
+#508, #513, #516.
 
 ## The three depth numbers §5b asks for
 
 | | |
 |---|---|
-| open pull requests | **8** |
-| merged in the last seven days | **82** |
-| age of the oldest open | **#395**, 2026-10-24T21:21:40Z — about 13 hours |
+| open pull requests | **16** |
+| merged in the last seven days | **85** |
+| age of the oldest open | **#395**, `ursa-research/2026-10-24-hook-2` — about 41 hours |
 
-**Open does not outnumber the week's merges** — 8 against 82 — so the
-bolded warning §5b mandates does not fire this run. For the record of the
-trend: 52 open on 2026-10-04, 11 on 2026-10-18, 10 at 09:5xZ today, 8
-now. The queue is not the drag; the drag is named in `#501`.
+**Open does not outnumber the week's merges**, so §5b's bolded warning
+does not fire. Trend, for the record: 52 open on 2026-10-04, 11 on
+2026-10-18, 8 at 10:2xZ today, **16** now. The doubling in four hours is
+not a backlog — it is eight seats each opening this afternoon's draft.
+Eleven of the sixteen are this afternoon's, and eleven of the sixteen
+close on four merges. **Depth measured at the top of an hour when every
+seat has a live draft open is a measurement of the roster, not the
+queue.** Read the containment column before the count.
 
-## The order, and it is almost free
+## Conflicts, performed twice with the instrument named
 
-**No containment chains at all.** Fifty-six ordered pairs checked with
-`git merge-base --is-ancestor`; not one pull request contains another.
-Every one of the eight is based on `main`. That is the second consecutive
-window with no stacks, after the morning cleared four of them, and it
-means **no merge here can close another pull request by deleting its
-base** — the hazard HQ's centralizer wrote to this seat about twice
-yesterday does not exist in this queue right now.
-
-**Seven of eight merge cleanly. One conflicts, and the conflict is
-real.**
-
-| order | PR | seat | behind `main` | verdict |
+| PR | seat | `merge-tree` | real merge in a worktree | conflicting files |
 |---|---|---|---|---|
-| 1 | **#503** | security | 3 | clean — draft |
-| 2 | **#501** | exo | 27 | clean — this window's register work, Tier B |
-| 3 | **#499** | engineer | 41 | clean — draft |
-| 4 | **#496** | frontend | 69 | clean — draft |
-| 5 | **#487** | skill | 103 | clean — draft |
-| 6 | **#447** | exo | 177 | clean — **Tier C, the owner's**, and the lane nothing can merge |
-| 7 | **#395** | research | 455 | clean — oldest, 13 hours |
-| — | **#500** | pm | 41 | **conflict**, `docs/agents/incidents.md`, and it is one duplicated heading |
+| #499 | engineer | exit 1 | exit 1, same set | `docs/provenance/bundle-digests.json`, `.md`, `ursa-major/src/hq/briefing.ts` |
+| #503 | security | exit 1 | exit 1, same set | `scripts/redaction-check.mjs`, `.test.mjs` |
 
-Order is by distance behind `main` ascending, which is the cheapest
-first. Nothing in the list depends on anything else in it, so the order
-is a convenience and not a constraint — with one exception: **#500's
-conflict should be fixed by the PM before anything else merges**, because
-every merge that lands widens the gap it has to resolve.
+Every other open pull request: **CLEAN**, by both instruments.
 
-## #500's conflict, diagnosed rather than reported
+**§0's fourth-line warning fired on this window's own sweep, and this is
+the correction.** The first pass of this sweep ran **before** the merge
+drivers were registered and reported `docs/ideas.md` as a conflicting
+file in **both** rows. With `merge.ledger.driver` registered, the same
+command prints `Auto-merging docs/ideas.md` for both and the file leaves
+both lists. The pull requests still conflict; the file this seat would
+have told two seats to go and fix **does not**. So the published row is
+the second measurement, and a seat reading a `docs/ideas.md` conflict
+verdict from any seat should ask which pass produced it. Install first,
+measure second, and say which you did — the previous copy of this file
+said it did, and that is the only reason this window thought to check.
 
-The `register` driver refused, and its stderr is the diagnosis — read
-before the exit status was believed, per §5b:
+## Containment: the queue is nine objects, not sixteen
 
-```
-register driver: the merger refused docs/agents/incidents.md. Its reason:
-  merge-register: theirs already contains
-  '## INC-2026-10-18-board-runtime-token-printed-twice — …' twice;
-  fix that side first
-```
+`git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>`, exit
+0 = contained, stated in the direction that cannot invert.
 
-**It is not a disagreement between the two branches. It is a duplicate
-inside one of them**, and the driver is refusing to merge a file that is
-already malformed rather than making it worse. Verified:
-
-| | |
+| chain | read as |
 |---|---|
-| copies of that `## ` heading on `origin/main` | **1** |
-| copies on `refs/prs/500` | **2**, at lines 7683 and 7795 |
-| the two bodies | **not identical** — 112 lines and 48 lines |
+| #499 ⊂ #514 ⊂ #520 | engineer: one object, tip **#520** |
+| #511 ⊂ #515 ⊂ #518 | skill: one object, tip **#518** |
+| #503 ⊂ #512 | security: one object, tip **#512** |
+| #508 ⊂ #513 | exo: one object, tip **#513** |
+| #395, #447, #509, #516, #517, #519 | independent |
 
-The second copy is the **older, shorter one**: the 112-line copy carries
-the forty-seventh window's correction ("the mechanics hold and the
-framing was wrong, and the skill seat found it before this seat did") and
-the 48-line copy stops before it. **So the fix is to delete the copy at
-line 7795 and keep the one at 7683**, and the pull request then merges
-clean — nothing has to be re-merged by hand.
+## The class that merges clean and still costs something
 
-**And half the cause is this seat's, which is why it is written here
-rather than only sent.** §5b says a refusal naming an entry is a claim
-about who wrote it, so `git log -S` was run before any resolution was
-proposed. Two commits, both correct in isolation:
+Window 55 reported at 10:59Z that four open branches revert a register
+repair on a merge that exits zero. Quantified here for the whole queue:
+for each clean branch, the merge is performed and the resulting tree is
+diffed against `main`, so the number is **what `main` loses**, not what
+the branch changed.
 
-- `43982c4c` on the PM's chain resolved an earlier conflict and says in
-  its own message that it kept **both** ledger additions, "…+
-  INC-token-printed-twice from this branch's own chain, main's
-  forty-seventh-window correction onward".
-- `65ef085a`, **this seat's window 50**, restored the same entry onto
-  `main` because "its only route to main closed unmerged" —
-  `INC-2026-10-26-the-fork-sweep-deleted-the-only-copy-of-an-entry-that-ever-reached-main`.
+| PR | commits behind `main` | files `main` loses lines in | lines | largest |
+|---|---|---|---|---|
+| #517 | 0 | 3 | 129 | `docs/sprints/dispatch-queue.md` (−79) |
+| #508 / #513 | 40 | 1 | 111 | `docs/agents/merge-order.md` (−111) |
+| #514 / #520 | 0 | 14 | 83 | `ursa-major/src/hq/briefing.ts` (−22) |
+| **#447** | **199** | **1** | **72** | **`prompts/exo-agent.md` (−72)** |
+| #519 | 0 | 3 | 17 | `ursa-major/overlay/app/dashboard/page.tsx` (−13) |
+| #395 | 477 | 2 | 17 | `prompts/research-agent.md` (−16) |
+| #511 / #515 / #518 | 0 | 3 | 15 | `docs/ideas.md` (−7) |
+| #512 | 0 | 3 | 4 | `docs/provenance/bundle-digests.md` (−2) |
+| #509, #516 | 0 | **0** | **0** | — |
 
-One seat preserved the entry on a branch and another restored it on the
-trunk, neither knowing the other had. The duplicate is the join, not
-either act. That is the shared-register-tail class
-(`INC-2026-10-24-shared-register-tail-appends-collide`) with a new
-member: **the driver protects against two seats appending different
-entries, and has no view of two seats rescuing the same one.**
+**Read the "behind" column first, because it is what separates a revert
+from an edit.** A branch at 0 behind removes a line because its own
+author removed it; that is an edit and this table is not an accusation.
+A branch hundreds of commits behind removes lines that arrived after it
+forked, and nobody chose that.
 
-## What the instruments said, so a later window can tell drift from error
+**Three readings, in descending cost:**
 
-- `merge-tree --write-tree --name-only origin/main refs/prs/<n>`, no
-  `2>&1`, drivers registered. Exit 0 on seven, exit 1 on `#500`.
-- The `ledger` driver fired on `#500` and **succeeded** — "docs/ideas.md
-  merged by block identity, 5 block(s) taken from the other branch, 0
-  removed". The conflict is only the register file.
-- `refs/prs/*` was re-fetched immediately before this census. `main`
-  moved from `25f2963d` (09:5xZ) to `76da2f02` and the queue went from
-  ten open to eight in roughly thirty minutes, so a census taken even
-  half an hour earlier would name identifiers in the wrong state. Two
-  of the eight rows here (`#500`, `#503`) did not exist at window 52's
-  reading.
+1. **#508 / #513's 111 lines are this file, and that is by design.**
+   `merge-order.md` is replaced wholesale every window. A line absent
+   from a newer copy is the point. **Not a loss, and not to be reported
+   as one** — including by whatever instrument reads this table next.
+2. **#395's 16 lines are `prompts/research-agent.md`, 477 commits
+   behind.** Another seat's charter, from a branch 41 hours old. This is
+   the genuine stale-root revert and it is the one to rebase.
+3. **#447's 72 lines are this seat's own charter, and the cause is not
+   staleness.** `main`'s charter commit `94e926b7` **is** an ancestor of
+   #447, so this is a rewrite and not a revert. What the rewrite drops is
+   the finding:
+
+   > **#447's §0 keeps the heading "the file you are reading is probably
+   > the stale one", keeps the four bootstrap commands, and no longer
+   > contains the instruction that tells you what to do with their
+   > answer.**
+
+   Absent from #447's 6,015-line copy, present in `main`'s 2,221-line
+   copy: *"read this charter from the newest of those pull requests and
+   not from the checkout you were handed"*, and the
+   `git show refs/prs/<newest>:prompts/exo-agent.md` line that performs
+   it. Zero matches for any of three phrasings anywhere in the file.
+   A later window inserted a fourth bootstrap line about merge drivers
+   and §0's conclusion was displaced out of the section.
+
+   §0 says of itself: *"This block is deliberately short, so that it
+   stays true and stays merged while the rest of this file churns."* The
+   block grew past the point where its own payoff fit inside it. That is
+   the section's stated failure mode happening to the section, and the
+   charter branch carrying it is the one fifteen windows have been trying
+   to land.
+
+   **Not patched here.** #447 is named in an open ask to the owner — the
+   PM has been told the lines parked in it would not move — and the ask
+   is about that diff's disposition. Pushing a fix onto it changes what
+   she is being asked about. Recorded here, commented on the pull request,
+   and the repair goes in whichever copy survives her decision.
+
+## Instruments used, so every verdict above can be re-measured
+
+| verdict | instrument |
+|---|---|
+| conflict | `git merge-tree --write-tree --name-only origin/main refs/prs/<n>`, **and** `git merge --no-commit --no-ff` in a detached worktree off `origin/main`; both agreed on both rows |
+| containment | `git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>` |
+| what `main` loses | `git diff --numstat origin/main $(git merge-tree --write-tree origin/main refs/prs/<n>)` |
+| behind count | `git rev-list --count refs/prs/<n>..origin/main` |
+| repaired-vs-dangling | `node tools/stack/repair-pending.mjs --text '<s>'` (new this window) |
+
+`gh pr list`'s `mergeable` field was **not** used for any row. HQ's
+`tools/check-merge-queue.sh` was not run; §5b requires the widened
+refspec first, which this clone has, but the two instruments above agree
+with each other and a third was not worth the worktree.
