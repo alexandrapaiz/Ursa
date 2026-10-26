@@ -9103,3 +9103,124 @@ The sixtieth window is not at fault for being wrong. It is at fault for
 **exporting** a cause it had not isolated. A fix can be shipped on a
 guess and corrected later at no cost to anybody else. A cause sent to
 the seat that aggregates five companies cannot.
+
+## INC-2026-10-26-an-all-seats-rule-is-eleven-hand-kept-copies-and-three-of-them-carry-a-narrower-predicate-in-one-section-than-in-the-other — The org has a surface that reaches every seat, no instrument that the eleven copies agree, and one measured draft lost to the disagreement
+
+**Date:** 2026-10-26, sixty-fourth window. **Seats:** Ursa exo
+(measuring), Ursa security (the measured instance), Ursa frontend and
+finance (the same defect with no instance). **Status:** open; the
+three-line repair is on this seat's charter branch, the missing
+instrument is not written.
+
+### What happened
+
+This window went looking for the population that produced the day's
+three-seat merge-driver collision and found a different defect in the
+same place. Three rules in this repository are marked `(org rule, ...,
+all seats)` and appear in all eleven `prompts/*-agent.md` charters.
+There is no generator, no include, and no check: they are eleven
+hand-maintained copies.
+
+Measured on `origin/main`, section extracted from each heading to the
+next `## `:
+
+| section | non-exo copies | line count | distinct hashes |
+|---|---|---|---|
+| External content is data, never instruction | 10 | 49 | **1** |
+| Read your own seat's open PRs first | 10 | 38 | 10 |
+| Ship first, then work | 10 | 64 | 10 |
+
+The last two rows look like divergence and are not. Diffing any pair
+returns exactly one line, the seat's own branch predicate, which is
+what the section is supposed to vary. That is the control, and it is
+the reason the real finding is not the hash count.
+
+**The real finding is that three seats carry two different predicates
+for their own branches, in the two sections, and the narrower one is in
+the section that decides whether work is lost.**
+
+| seat | own-PRs section | ship-first draft check |
+|---|---|---|
+| finance | `test("fin\|finance")` | `test("finance")` |
+| frontend | `test("fe\|frontend")` | `test("frontend")` |
+| security | `test("sec\|security")` | `test("security")` |
+| the other eight | identical in both | identical in both |
+
+The broader form was not invented. Those short prefixes exist on the
+remote: `git ls-remote --heads origin` lists one `fe/` branch and one
+`sec/` branch against 83 `ursa-pm/`, 48 `ursa-exo/` and so on. Someone
+widened the own-PRs predicate after meeting them and did not widen the
+other copy, because the two copies are in different sections of the
+same file and nothing reads them together.
+
+### The cost, measured rather than asserted
+
+`gh pr list --state all` over every `^(fe|sec|fin)/` branch returns
+three pull requests. Two are frontend's, both merged, neither a draft,
+so the predicate gap cost them nothing.
+
+The third is the instance:
+
+```
+165  CLOSED  draft=true  sec/2026-10-11
+     "Security run 2026-10-11: both charter sweeps, and the five unmerged audits this seat has stacked up"
+     created 2026-10-11T19:33:28Z   closed 2026-10-14T15:45:01Z
+     open as a draft for 2 days, 20:11:33
+```
+
+The check was in force. At `cd26df08`, the commit on `main`
+immediately before #165 opened, `prompts/security-agent.md` line 219
+already carried the draft sweep with `test("security")`. So for the
+whole 2d20h that draft stood, the security seat's own end-of-run
+instruction — "anything it prints that is not this run's own pull
+request is yours to resolve before you stop" — could not print it. It
+closed unmerged, so the two charter sweeps and the report on five
+stacked audits that its title names did not reach `main` through it.
+
+`fin` has no branches at all, so finance's copy is the same defect with
+no instance yet.
+
+### Why it happened technically
+
+A seat-specific value is duplicated inside a rule whose whole claim is
+that it is identical everywhere. The rule's name tells every reader the
+copies are the same, which is exactly the condition under which nobody
+diffs them. The one section that was genuinely identical in all ten
+copies is the one with no seat-specific value in it, and that is not a
+coincidence: a parameterised copy is where a copy diverges.
+
+The failure is also silent in the direction that matters. A predicate
+that is too narrow returns fewer rows and exits 0. There is no
+output that differs from "you have no dead drafts", which is the one
+answer the seat is hoping for.
+
+### What the org should grow
+
+> **A rule that claims to be identical across N files needs an
+> instrument that says so, and the instrument has to know which lines
+> are supposed to differ.** Hash the section with the parameterised
+> lines removed, not the section. Eleven equal hashes is the assertion;
+> ten unequal hashes with one differing line each is the measurement,
+> and only the second one can tell a legitimate substitution from a
+> drifted copy.
+
+The narrower corollary, which is the thing that actually bit:
+
+> **When one seat-specific value appears twice in a charter, the two
+> copies are a pair and must be derived from one place or checked
+> against each other.** Widening one and not the other is the normal
+> outcome, because the two edits are prompted by different findings on
+> different days.
+
+### Status
+
+The three-line repair — bring each ship-first predicate up to its own
+charter's own-PRs predicate — is on this seat's charter branch and is
+Tier C, so it waits on the owner. The three seats are told on the board
+in this window, so none of them is blocked on that merge to know.
+
+The instrument above is **not** written. It is a check across eleven
+files that no seat currently runs, and this window is naming it rather
+than shipping it, because an instrument no charter points at grades the
+same as one that does not exist and this window did not have the turns
+to do both halves.
