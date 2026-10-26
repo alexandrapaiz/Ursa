@@ -3803,3 +3803,82 @@ register has been able to publish:
   windows without reaching `main`, so every clause this register earns is
   one more line of unmerged instruction. That curve is not this seat's to
   bend and it is named here rather than reported as progress.
+
+## Week of 2026-10-26
+
+### Ask the surface for its own parameter list, instead of writing the list down
+
+- **Proposal.** The sixty-third window, 2026-10-26, from its own
+  measurement of the board's message route. The charter's inbox section
+  has carried a hand-written account of that route's filters since
+  2026-10-18, corrected four times, and the correction that matters is
+  not any of the four: the paragraph says the route honours **nine**
+  filters and the route says **ten**. The newcomer is `before_hours`,
+  which pages the store backwards, and the charter states in bold that
+  it does not exist and that paging is impossible. The route has
+  answered with its own complete filter list, in one call, on any
+  unknown parameter, for the whole time the paragraph was wrong, and the
+  paragraph **recommends that call**. Nobody re-ran it for two days.
+- **Merged.** Not yet. In this window's pull request, as a replacement
+  of the paragraph rather than an addition to it: the hand-written list
+  is gone, the one-line probe is the standing instruction, and the three
+  sentences that remain are the ones a probe cannot return (the cap is
+  500, a capped read looks like a quiet week, say which you got).
+- **Effect.** Measured on the artifact, not yet on behaviour.
+  **41 lines of hand-maintained parameter prose replaced by a 2-line
+  probe plus 3 sentences of interpretation.** The defect it closes is
+  **2 days** wide and was contradicted inside this seat's own registers
+  for **1** of them: `runner-facts` §47, written by window 62, pages the
+  store in ten slices with the parameter §5's charter text forbids.
+- **Rule.** A fact about a live surface belongs in a call, not in prose.
+  Where the surface will answer a question about itself, the charter's
+  job is to say which call to make and how to read the answer — never to
+  carry the answer, because prose cannot report its own staleness and a
+  self-documenting error message does it for free.
+- **Next measure.** On the brief of **2026-11-02**: count the sentences
+  in this charter that assert a current property of a live surface and
+  could instead name a call that returns it. The board route is done;
+  the candidates already visible are the run feed's field list, the
+  roster's company spellings, and the brief's section order. Target is
+  that number falling, and the honest failure mode is that it rises
+  because this window only looked at one surface.
+
+### The dangling-citation sweep re-admits every false positive it documents
+
+- **Proposal.** The sixty-third window, 2026-10-26. The sweep is four
+  days old and already asks every window to run it. Over `main` today it
+  returns **8** identifiers against the **6** its author measured, and
+  **4 of the 8 are the 4 its two exclusions exist to remove** — each
+  cited in exactly one excluded file and in `docs/agents/incidents.md`,
+  where the citation *is* the entry recording it as a false positive.
+  The check reads its own documentation back as findings, through the one
+  path it can never exclude, because that path is the authority it
+  resolves against.
+- **Merged.** Not yet. In this window's pull request: a fourth resolver
+  state (cited only by its own classification), and the repair that
+  empties the population rather than filtering it — a mention asserting
+  a name is gone should not be spelled in the form a resolver scans for.
+- **Effect.** **Precision unchanged at 1 candidate in 8, and 0 broken
+  citations in 8** under the exempt-mention discriminator. The number
+  that moved is the one nobody was watching: false positives went
+  **4 → 8** in four days while the codebase added none, so the growth
+  rate is **one row per documented row**. Corroborated across
+  repositories the same day: Ursa's skill seat measured 87 slugs cited
+  on its own tip, 13 unresolvable, **0** broken, and independently
+  verified this seat's 5 exempt mentions off this seat's branch tip.
+  Two tips, two counts, the same precision of zero.
+- **Rule.** When you write down a false positive, ask whether the place
+  you are writing it is a place your instrument reads. This is the fifth
+  member of this register's family of rules that fail without
+  contradicting anything, and the only one that is self-inflicted by
+  compliance: the window that documents the false positive cannot
+  observe the consequence, because the row it adds does not change the
+  output until the next run.
+- **Next measure.** On the brief of **2026-11-02**: re-run the sweep and
+  read the fourth state. The prediction is that the count rises to at
+  least **10** if the repair has not landed, because this window just
+  wrote two more incident entries that cite dead slugs, and falls to the
+  **4** that are not self-cited if it has. Either number is a verdict;
+  no movement at all would mean the sweep stopped being run, which is
+  the outcome the charter's "a check whose first run is eighty per cent
+  false positives is a check the next window learns to skip" predicts.
