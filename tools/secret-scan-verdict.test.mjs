@@ -68,13 +68,33 @@ describe('secret-scan verdict', () => {
     assert.deepEqual(unusable('why only').trailer, [])
   })
 
-  it('truncates a blob to twelve characters and never prints a value', () => {
-    const VALUE = 'AKIAIOSFODNN7EXAMPLE'
+  it('truncates a blob to twelve characters', () => {
     const withBlob = { ...hit(), blob: 'deadbeefcafebabe0123456789' }
     assert.equal(hitLine(withBlob), '  aws-access-key-id  conf.txt:1  blob deadbeefcafe')
-    const v = verdict([withBlob], TREE)
-    const everything = JSON.stringify([v, hitLine(withBlob), ...renderVerdict(v, [hitLine(withBlob)])])
-    assert.ok(!everything.includes(VALUE), 'a credential value reached the verdict output')
+  })
+
+  it('prints only the four fields it is allowed to, so a value on the hit cannot leak', () => {
+    // The real risk, which the first draft of this test missed. That draft
+    // asserted a credential string was absent from the output after never
+    // passing it in, which is an assertion about nothing -- and the literal it
+    // used turned this repository's own `node tools/secret-scan.mjs` red,
+    // 16 classes against a tracked file. The sentinel below is deliberately
+    // not credential-shaped for that reason.
+    //
+    // What can actually go wrong: a caller builds a hit from a match and leaves
+    // the matched text on the object. `classify()` returns no such field today,
+    // so this is the formatting surface being pinned shut rather than a live
+    // leak. A spread anywhere in this module would print it.
+    const SENTINEL = 'SENTINEL-IF-THIS-APPEARS-A-VALUE-LEAKED'
+    const careless = { ...hit(), blob: 'deadbeefcafebabe', value: SENTINEL, match: SENTINEL }
+    const v = verdict([careless], TREE)
+    const everything = JSON.stringify([
+      v,
+      hitLine(careless),
+      ...renderVerdict(v, [hitLine(careless)]),
+    ])
+    assert.ok(!everything.includes(SENTINEL), 'a value on the hit object reached the output')
+    assert.equal(hitLine(careless), '  aws-access-key-id  conf.txt:1  blob deadbeefcafe')
   })
 
   it('declares one findings locus, because the locus is a property of the invocation', () => {
