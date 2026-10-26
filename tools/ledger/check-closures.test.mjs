@@ -143,7 +143,7 @@ test('a line that tries to be a marker and fails to parse is reported', () => {
   const { violations } = check("<!-- closes: docs/ideas.md 2026-01-04 'An entry that shipped' -->");
   assert.equal(violations.length, 1);
   assert.equal(violations[0].rule, 'CLOSURE_SYNTAX');
-  assert.match(violations[0].message, /title double-quoted/);
+  assert.match(violations[0].message, /the title is double-quoted/);
 });
 
 test('a missing date is a syntax violation rather than a silent skip', () => {
@@ -299,4 +299,44 @@ test('the design document for this gate is clean under this gate', () => {
     [],
   );
   assert.equal(markers, 1, 'exactly one live marker: the fenced payload is not one');
+});
+
+// Detection is wider than acceptance, which is this run's craft scan applied:
+// GitHub accepts nine closing-keyword spellings in any case with an optional
+// colon, and the first draft of this gate accepted one and DETECTED one, so a
+// near-miss was silently unread. See CLOSURE_ATTEMPT's comment for the source.
+
+test('a near-miss marker is reported rather than silently unread', () => {
+  for (const verb of ['fixes', 'resolves', 'closed', 'Closes', 'FIX']) {
+    const body = `<!-- ${verb}: docs/ideas.md 2026-01-04 "An entry that shipped" -->`;
+    const { violations, markers } = check(body);
+    assert.equal(markers, 0, `${verb} must not be accepted as a marker`);
+    assert.equal(violations.length, 1, `${verb} must be reported`);
+    assert.equal(violations[0].rule, 'CLOSURE_SYNTAX');
+    assert.match(violations[0].message, /The one accepted shape is/);
+  }
+});
+
+test('a missing colon after the verb is reported', () => {
+  const { violations } = check('<!-- closes docs/ideas.md 2026-01-04 "An entry that shipped" -->');
+  assert.equal(violations.length, 1);
+  assert.equal(violations[0].rule, 'CLOSURE_SYNTAX');
+});
+
+test('an unrelated HTML comment is not an attempt', () => {
+  // The widened detector must not claim every comment in the repository.
+  for (const body of [
+    '<!-- prettier-ignore -->',
+    '<!-- markdownlint-disable MD013 -->',
+    '<!-- a note to the next reader about what this section closes over -->',
+    '<!-- closeness is not a verb here -->',
+  ]) {
+    assert.deepEqual(check(body).violations, [], `claimed: ${body}`);
+  }
+});
+
+test('the canonical spelling is still the only one accepted', () => {
+  const { violations, markers } = check(marker('2026-01-04', 'An entry that shipped'));
+  assert.equal(markers, 1);
+  assert.deepEqual(violations, []);
 });

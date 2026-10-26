@@ -141,6 +141,26 @@ still had a false-positive class that only appeared when its own
 documentation became part of its input. Writing the artifact *before*
 committing it is what surfaced it.
 
+**A false *negative* class came out of this run's craft scan, and it was
+worse.** GitHub's own closing keywords accept nine verb spellings
+(`close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`,
+`resolves`, `resolved`) in any case, with the colon optional. The first
+draft of this gate keyed both acceptance *and detection* on the single
+literal `closes:`, so a seat writing `<!-- fixes: docs/ideas.md … -->`,
+or omitting the colon, got **silence**: the marker was unread and nothing
+said so. That is this gate's own stated failure mode re-entered one level
+down, and it would have stayed invisible until the day it cost somebody a
+closure.
+
+`CLOSURE_ATTEMPT` is now the nine spellings, case-insensitive, colon
+optional. `CLOSURE_MARKER` still accepts exactly one spelling, because
+one spelling is greppable and nine are not. Liberal in what counts as an
+attempt, strict in what counts as valid, and the gap between the two
+reported with the canonical form named in the message. Four tests cover
+it, including one asserting that ordinary HTML comments
+(`<!-- prettier-ignore -->`, `<!-- markdownlint-disable MD013 -->`) are
+not claimed by the widened detector.
+
 ---
 
 ## 3. System diagram
@@ -238,7 +258,8 @@ type Violation = {
   message: string
 }
 
-/** `<!-- closes: <ledger-path> <YYYY-MM-DD> "<title>" -->`, global. */
+/** `<!-- closes: <ledger-path> <YYYY-MM-DD> "<title>" -->`, global. The one
+ *  accepted spelling. Detection of a near-miss is wider; see §2. */
 const CLOSURE_MARKER: RegExp
 
 /** Every tracked markdown path, repository-relative. Runs `git ls-files`. */
@@ -430,13 +451,13 @@ node tools/ledger/check-closures.mjs; echo "EXIT=$?"
 ```bash
 # cwd: repository root
 node --test tools/ledger/check-closures.test.mjs
-# # tests 26
-# # pass 26
+# # tests 30
+# # pass 30
 # # fail 0
 
 node --test tools/ledger/*.test.mjs
-# # tests 85
-# # pass 85
+# # tests 89
+# # pass 89
 # # fail 0
 
 # the exact file list the CI proposal's `node --test` step names
@@ -447,8 +468,8 @@ node --test \
   tools/ledger/block-kinds.test.mjs \
   tools/ledger/check-closures.test.mjs \
   tools/registers/merge-driver.test.mjs
-# # tests 95
-# # pass 95
+# # tests 99
+# # pass 99
 # # fail 0
 ```
 
@@ -534,6 +555,7 @@ to `alexandrapaiz/ursa-private`.
 | git | 2.43.0 | `git ls-files -z '*.md'` enumerates the documents to read | the subject of the gate is what is committed, so the enumeration must come from the index rather than from a directory walk. A walk would also read `ursa-major/node_modules`, which is 100+ MB of third-party markdown this gate has no business parsing. `-z` because a tracked path may contain a newline. |
 | `tools/ledger/ledger.mjs` | this repository, at this commit | `parseLedger` splits `docs/ideas.md` into blocks | it is the grammar `git merge` already runs. See §4: a second heading regex in this file is the drift `docs/design/ledger-block-kinds.md` records costing weeks of red on `main`. |
 | `tools/ledger/block-kinds.mjs` | this repository, at this commit | `classifyBlock` yields `(date, seatTag, title)`; `statusOf` yields the status word | same reason. It also already distinguishes an idea entry from a craft-scan note, which this gate gets for free: a marker can never resolve to a scan note's heading by accident. |
+| GitHub's closing-keyword specification | the published behaviour of github.com, read 2026-10-26 | the source of `CLOSURE_ATTEMPT`'s nine verb spellings and of the liberal-detection / strict-acceptance split | it is the same mechanism, at population scale, for a decade: a line in one artifact that closes a record in another. No code was taken and nothing depends on it; what was taken is the design decision in §2. Named here because the standard requires every tool named to carry its rationale, and this one informed a regular expression that shipped. GitHub's own auto-close was deliberately **not** taken: see §9. |
 | Python 3 | 3.x, as installed in this session | the two ad-hoc measurements in §6.1 and §6.4 | measurement scripts that run once and are quoted in this document, not committed code. Nothing in the shipped change depends on Python. They are written as heredocs so a reader can re-run them without a file. |
 
 ---
@@ -549,6 +571,18 @@ to `alexandrapaiz/ursa-private`.
   `tools/ledger/` directory's rule is that the merge path and anything
   touching I/O stay separable.
 - **It does not infer closure.** §1.2 has the measurement; 0 of 3.
+- **It does not close anything.** GitHub's equivalent mechanism acts: a
+  `Closes #10` in a pull request description closes issue 10 on merge to
+  the default branch, with no check that the work was done and no reverse
+  check for a keyword whose issue is still open. That is right for
+  issues, which have one permission model. It would be wrong here, and
+  specifically it would be a consent defect: `pm.md` §4 reserves the move
+  out of `proposed` to the owner, so a gate that edited `docs/ideas.md`
+  would let a seat take a decision the standard gives her. This gate only
+  ever reports a contradiction between two committed statements, and a
+  person resolves it by writing a status line that carries its evidence.
+  The asymmetry is the point: the mechanism never acts, so it can be
+  trusted on a file whose statuses encode who is allowed to change them.
 - **It does not report a mistyped marker that is not on its own line, or
   that is inside a fenced code block.** That is the price of §2's two
   narrowings, and it is covered by a test named for it rather than left

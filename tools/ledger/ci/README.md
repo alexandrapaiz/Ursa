@@ -22,7 +22,7 @@ git rm -r tools/ledger/ci && git add .github/workflows && git commit
 Delete this directory in the same commit. A second copy of a live
 workflow is a file that drifts.
 
-- `ledger-gate.yml` runs, on every pull request: the 95 tests its
+- `ledger-gate.yml` runs, on every pull request: the 99 tests its
   `node --test` step names, measured 2026-10-26 by running that step's
   exact file list; `node tools/ledger/check-attributes.mjs`;
   `node tools/ledger/check.mjs docs/ideas.md`; and

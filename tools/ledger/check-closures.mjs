@@ -58,10 +58,28 @@ import { classifyBlock, statusOf } from './block-kinds.mjs';
 export const CLOSURE_MARKER =
   /<!--\s*closes:\s*(\S+)\s+(\d{4}-\d{2}-\d{2})\s+"([^"]+)"\s*-->/g;
 
-/** A line that means to be a marker and is not one. Caught so a typo in the
- *  syntax fails loudly instead of being silently unread, which is the exact
- *  failure mode the marker exists to end. */
-const CLOSURE_ATTEMPT = /<!--\s*closes:/;
+/**
+ * A line that means to be a marker and is not one. Caught so a typo fails
+ * loudly instead of being silently unread, which is the exact failure mode
+ * the marker exists to end.
+ *
+ * Deliberately wider than `CLOSURE_MARKER`: nine verb spellings, any case,
+ * colon optional. Stolen from GitHub's own closing keywords, which accept
+ * `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`,
+ * `resolves` and `resolved`, uppercase or not, with or without a colon
+ * (`docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/
+ * linking-a-pull-request-to-an-issue`, read 2026-10-26 as this run's craft
+ * scan). The first draft of this gate keyed detection on the literal
+ * `closes:`, so a seat writing `<!-- fixes: docs/ideas.md … -->` or omitting
+ * the colon got silence rather than an error: the marker was unread and
+ * nothing said so, which is the defect one level down.
+ *
+ * Liberal in what counts as an attempt, strict in what counts as valid.
+ * `CLOSURE_MARKER` still accepts exactly one spelling, because one spelling
+ * is greppable and nine are not; the gap between the two regexes is reported
+ * as `CLOSURE_SYNTAX` with the canonical form in the message.
+ */
+const CLOSURE_ATTEMPT = /<!--\s*(clos(e|es|ed)|fix(|es|ed)|resolv(e|es|ed))\s*:?\s/i;
 
 /** A line whose first non-space character opens an HTML comment. The syntax
  *  rule is restricted to these, because any other line mentioning the marker
@@ -230,10 +248,12 @@ export function checkDocument({ docPath, docSource, ledgerPath, index }) {
       held: 'seat',
       rule: 'CLOSURE_SYNTAX',
       message:
-        `${docPath}: a line opens "<!-- closes:" and does not parse as a ` +
-        `closure marker. The shape is ` +
-        `<!-- closes: docs/ideas.md YYYY-MM-DD "Entry title" -->, with the ` +
-        `title double-quoted. Got: ${line.trim()}`,
+        `${docPath}: a line opens an HTML comment with a closing verb and ` +
+        `does not parse as a closure marker. The one accepted shape is ` +
+        `<!-- closes: docs/ideas.md YYYY-MM-DD "Entry title" -->: the verb ` +
+        `is "closes", the colon is required, the ledger path and date are ` +
+        `required, and the title is double-quoted and copied verbatim from ` +
+        `the heading text after the em dash. Got: ${line.trim()}`,
     });
   }
 
