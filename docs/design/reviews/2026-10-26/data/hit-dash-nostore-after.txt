@@ -1,0 +1,20 @@
+
+=== phone 390x844 · dash-nostore /dashboard?port=7993 ===
+  box WxH       hit WxH      lines  verdict           control
+  51x16.8       52x44        1      ok                button.dash-action "look again"
+  -> 0 of 1 standalone controls under 44px tall (0 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== tablet 820x1180 · dash-nostore /dashboard?port=7993 ===
+  box WxH       hit WxH      lines  verdict           control
+  51x16.8       52x44        1      ok                button.dash-action "look again"
+  -> 0 of 1 standalone controls under 44px tall (0 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== desktop 1440x900 · dash-nostore /dashboard?port=7993 ===
+  box WxH       hit WxH      lines  verdict           control
+  51x16.8       52x44        1      ok                button.dash-action "look again"
+  -> 0 of 1 standalone controls under 44px tall (0 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== total across every page and viewport ===
+  0 short of 3 standalone, 0 inline and exempt by 2.5.8, 0 document spans (0 not covering their own line), 3 targets seen
+  the floor reached no control on: no page — every page here had at least one standalone control
+  document spans are: none, on no page

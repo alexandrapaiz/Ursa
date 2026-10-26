@@ -43,6 +43,14 @@ const WAIT = Number(arg('wait', 400))
 // 1500ms on one viewport of three while the other two were fine. A
 // timeout tuned until it usually works is not a measurement.
 const UNTIL = arg('until', null)
+// The same `--state` measure-hit-areas.mjs grew on 2026-10-26, for the
+// same reason: a surface that only exists after a control is used cannot
+// be photographed by naming a path. A module whose default export is
+// `async (page, name) => {}`, run after `--until` and before the shutter.
+const STATE = arg('state', null)
+const enterState = STATE
+  ? (await import(new URL(STATE, `file://${process.cwd()}/`).href)).default
+  : null
 
 mkdirSync(OUT, { recursive: true })
 const slug = (p) => (p === '/' ? 'home' : p.replace(/^\/|\/$/g, '').replace(/\//g, '-'))
@@ -58,6 +66,7 @@ for (const [vname, w, h] of VIEWPORTS) {
     const name = `${slug(path)}-${vname}`
     const status = (await page.goto(BASE + path, { waitUntil: 'networkidle' }))?.status()
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
+    if (enterState) await enterState(page, name)
     await page.waitForTimeout(WAIT)
     // `animations: 'disabled'` is the other half of the freeze: lib/freeze.mjs
     // pins the two canvases, which are driven by requestAnimationFrame, and
@@ -94,7 +103,7 @@ const line = (r) => `${r.name.padEnd(32)} ${String(r.status).padStart(3)}  ${Str
 const header = LIVE
   ? '# --live: the sky is animating in these frames. Do not pixel-diff them.'
   : `# frozen at t=${PINNED_MS}ms, seeded Math.random, CSS animations rewound.`
-const settle = `# settled ${WAIT}ms after networkidle${UNTIL ? ` and after \`${UNTIL}\` appeared` : ''} before each shutter.`
+const settle = `# settled ${WAIT}ms after networkidle${UNTIL ? ` and after \`${UNTIL}\` appeared` : ''}${STATE ? `, with \`${STATE}\` run to enter the state` : ''} before each shutter.`
 const report = rows.map(line).join('\n')
 writeFileSync(`${OUT}/measurements.txt`, `${header}\n${settle}\n${report}\n`)
 console.log(report)

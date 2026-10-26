@@ -1,0 +1,6 @@
+panel-desktop.png                         826 px    0.064%  rows 42-84, cols 542-897  (same size)
+panel-phone.png                           826 px    0.251%  rows 42-84, cols 17-372  (same size)
+panel-tablet.png                          826 px    0.085%  rows 42-84, cols 232-587  (same size)
+panel-unlocked-desktop.png                  6 px    0.000%  rows 19-24, cols 545-545  (same size)
+panel-unlocked-phone.png                    6 px    0.002%  rows 19-24, cols 20-20  (same size)
+panel-unlocked-tablet.png                   6 px    0.001%  rows 19-24, cols 235-235  (same size)
