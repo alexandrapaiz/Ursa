@@ -9,7 +9,13 @@
 // evidence lock was built for one directory over.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { parseTriggerTest, similarity, coverage, BIGRAM_DICE_FLOOR } from './trigger-coverage.mjs'
+import {
+  BIGRAM_DICE_FLOOR,
+  coverage,
+  explainShortfall,
+  parseTriggerTest,
+  similarity,
+} from './trigger-coverage.mjs'
 
 const test_doc = `# Trigger test — a-skill
 
@@ -246,4 +252,38 @@ test('a skill is never its own sibling', () => {
     nearMisses: [{ id: '2', text: 'Resolve the record and commit the adjudication beside it.' }],
   }]
   assert.deepEqual(coverage(library), [])
+})
+
+test('the shortfall explanation names the condition that fired, not the usual one', () => {
+  // The regression this holds shut is a wrong diagnosis rather than a wrong
+  // number, which is why it survived: the branch exits 1 either way and the
+  // only thing that differs is the sentence a reader acts on. Until
+  // 2026-10-26 both conditions printed the near-miss arithmetic, so a library
+  // whose only defect was a missing trigger test was told to go count
+  // siblings.
+  const missing = explainShortfall({ gaps: [], missingTrigger: [{ slug: 'a-skill' }] })
+  const joined = missing.join(' ')
+  assert.match(joined, /TRIGGER-TEST\.md/)
+  assert.doesNotMatch(joined, /near miss per adjacent skill/)
+
+  const uncovered = explainShortfall({ gaps: [{ skill: 'a', sibling: 'b' }], missingTrigger: [] })
+  const joinedGaps = uncovered.join(' ')
+  assert.match(joinedGaps, /near miss per adjacent skill/)
+  assert.doesNotMatch(joinedGaps, /TRIGGER-TEST\.md/)
+})
+
+test('each condition names every cause this guard knows, and the gap case orders them', () => {
+  // §5x's mechanical part: one named cause for a condition with several is the
+  // defect. The gap branch has three and the missing-trigger branch has two,
+  // and the gap branch says which to check first, because only one of its
+  // three moves many pairs at once.
+  const both = explainShortfall({
+    gaps: [{ skill: 'a', sibling: 'b' }],
+    missingTrigger: [{ slug: 'c' }],
+  }).join(' ')
+  assert.match(both, /renamed skill directory/)
+  assert.match(both, /paraphrases/)
+  assert.match(both, /check first/)
+  assert.match(both, /never written/)
+  assert.match(both, /another name/)
 })
