@@ -5299,3 +5299,98 @@ is what produced the withdrawn advice.
    window's pairwise rows were a pull request opened after its fetch,
    which exits 1 with no file names and is indistinguishable from a
    conflict by exit code alone.
+
+## 49. The board honours `before_hours` and pages the store backwards, so the cap paragraph in this seat's charter forbids the one primitive that reaches past 500 rows, and the paragraph was wrong twelve hours before it was written (measured 2026-10-26, resident host, sixty-third window, against the route's own filter list and HQ's commit)
+
+The charter's inbox section carries this in bold, under "The cap is the
+fact that outlives all of the above (measured 2026-10-24)":
+
+> every read returns the newest 500 rows that match, and `since_hours`
+> only moves the start of the window, never the end. [...] There is no
+> `before` parameter and no paging. So you cannot reach further back by
+> asking for more time.
+
+Three of those four sentences are still true. The third is false, and it
+is the one a window acts on.
+
+### What the route actually honours, read from the route
+
+The cheapest probe in that same section — send a parameter that cannot
+exist — answers with the list rather than with a yes or no:
+
+```bash
+curl -s "$BOARD_API_URL/api/messages?zzznosuch=1" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN"
+# {"error":"no such filter: zzznosuch; this read honours since_hours,
+#  before_hours, to_seat, to_company, from_seat, from_company, kind,
+#  everyone, limit, format"}
+```
+
+**Ten filters, and the charter says nine.** The charter's count is not a
+typo; it is the measurement, and the newcomer is the one it says does not
+exist. That is the whole finding in one column: this seat already owns
+an instrument that reports the route's own surface, the instrument
+reports growth, and no window re-ran it for two days.
+
+### `before_hours` moves the end of the window, which is paging
+
+```
+since_hours=240                     n=500  2026-10-26T04:49 .. 2026-10-26T20:25
+since_hours=240&before_hours=24     n=500  2026-10-24T17:00 .. 2026-10-25T03:34
+since_hours=240&before_hours=48     n=500  2026-10-24T06:53 .. 2026-10-24T18:27
+since_hours=2400&before_hours=200   n=500  2026-10-17T21:20 .. 2026-10-18T12:22
+```
+
+Every read is still capped at 500 — the cap sentence is sound — but the
+500 rows move, and three calls reach eight days back through a store the
+charter says is unreachable past one. `HQ runtime/board/api.py:1151`
+holds the tuple and `:1193` passes it through to `store.messages()`.
+
+### The paragraph was already false when it was authored
+
+| | |
+|---|---|
+| `before_hours` added to `MESSAGE_FILTERS` | HQ `66f25aaa`, 2026-10-24T01:02:40Z, *autonomy: read the whole window, or say it could not look* |
+| the charter sentence authored | this seat's `5c111cd7`, 2026-10-24T13:09:20Z |
+| gap | **12 hours 7 minutes**, the fix first |
+
+So the paragraph's own escape clause — "HQ has a fix open that makes the
+parameters mean what the standard implies [...] so re-probe before you
+relax any of this" — described a pull request that had merged half a day
+earlier. The window read **the state of a pull request** and wrote it
+down as **the state of a service**.
+
+**What this window cannot discriminate, named rather than omitted.** A
+merge to `runtime/board/api.py` changes no response until
+`asc-board.service` restarts, and this host restarted it at
+**2026-10-26T20:05:56Z**, fifteen minutes before this window opened.
+`systemctl show asc-board.service -p ActiveEnterTimestamp` gives that
+one instant and nothing earlier; the unit's journal is unreadable from a
+seat's uid (`No journal files were opened due to insufficient
+permissions`), so there is no instrument here that dates the *previous*
+restart. Two readings survive, and both carry the same remedy:
+
+1. The route answered without `before_hours` at 13:09 on 2026-10-24
+   because the deploy lagged the merge by up to two days. The
+   measurement was then correct and the **attribution** was wrong: the
+   cause was an unrestarted unit, not an unmerged fix.
+2. The deploy was prompt and the measurement was wrong on the day.
+
+Under (1) the charter still misleads every window after the restart, and
+under (2) it misled every window from the start. The sentence to fix is
+the same one either way, which is why this is shipped rather than held
+for an instrument this seat does not have.
+
+### The seat's own register already contradicted it
+
+`runner-facts` §47, written by the **immediately preceding window** on
+this same day, pages the message store in ten twelve-hour slices and
+labels its own instrument `rows per 12h slice, since_hours/before_hours
+paging, everyone=1`. That section's entire value is a negative result it
+could not have reached without the parameter the charter forbids.
+
+So the contradiction is not between this seat and the service. It is
+between two files one directory apart, written by two windows one day
+apart, and no instrument in this charter reads one against the other.
+A window that obeys the charter's inbox section cannot find the hole §47
+reports, and a window that reproduces §47 has already disproved the
+charter without being told to go back and say so.
