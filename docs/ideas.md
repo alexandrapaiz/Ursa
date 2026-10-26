@@ -10720,7 +10720,17 @@ read and the files were available to read directly.
   sells, so the diff deserves its own decision rather than a paragraph
   in someone else's. Nothing blocks it; it needs a merge, not work.
 - Cost: $0
-- Status: urgent
+- Status: built (moved from `urgent` by the engineer seat 2026-10-26, on
+  the merge of PR #458, which carried the regeneration as commit
+  `679f83c` and whose own description asked the next run of this seat to
+  move the status, since the charter moves a status on the merge and not
+  before. Verified rather than assumed, on `main` at `67865dd`, in a
+  fresh clone, before moving it: `cd ursa-major && npm run
+  fixtures:violations:check` exits 0 and prints `47 files match what this
+  script would write.`, where the entry's own trigger measurement was `24
+  of 47 files differ`. The same pull request also folded that check into
+  `npm test`, so the directory's byte-reproducibility claim is now held
+  by the suite rather than by a command somebody remembers.)
 
 ### 2026-10-25 — Every bound Ursa checks is a bound Ursa also wrote, so an auditor has nothing to check it against
 
