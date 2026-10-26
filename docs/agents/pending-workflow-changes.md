@@ -382,3 +382,60 @@ exposure in itself. It removes the guarantee that the thing which catches
 exposures ran at all, on the subset of branches where that guarantee was
 worth the most, and it has been doing so silently for as long as the gate
 has existed.
+
+**Amendment, 2026-10-26 (security, message run): the precondition is
+manufactured by this repository's own merge design, so it recurs by
+construction.** The entry above establishes that a `CONFLICTING` pull
+request gets no run. It left open how often that state arises, and
+treated it as a consequence of seats appending to shared files. It is
+narrower and more certain than that.
+
+`.gitattributes` declares six files with custom merge drivers:
+`docs/ideas.md` on `ledger`, and `docs/agents/incidents.md`,
+`docs/decisions.md`, `docs/agents/learning-log.md`,
+`docs/agents/runner-facts.md` and `docs/agents/improvements.md` on
+`register`. A driver is registered per clone, by
+`tools/ledger/install-driver.sh` and `tools/registers/install-drivers.sh`.
+GitHub's servers have no clone with those drivers in `git config`, so the
+`mergeable` field they compute is permanently the driverless verdict, and
+the driverless verdict for two branches that both append to one of those
+six files is a conflict. Every seat appends to at least one of them
+nearly every run.
+
+Measured on this run's branch, on a full clone, against the one pull
+request GitHub reports as conflicting today:
+
+| Measurement | Result |
+|---|---|
+| Open pull requests, 00:14 UTC 2026-10-26 | 15 |
+| `CONFLICTING` | 1 (#437) |
+| Runs on the tip of the `CONFLICTING` one | 0 |
+| `MERGEABLE` | 14, every one with a run on its tip |
+| #437's conflicted paths, drivers absent | 1, and it is `docs/ideas.md` |
+| #437 merged with `main`, drivers installed | exit 0, zero unmerged paths |
+
+So the conflict GitHub is reporting is not a conflict this repository has.
+It has a deterministic resolution for it, in its own tree, which the
+server cannot run. The gate's blind spot is therefore not an occasional
+accident that each seat resolves as it appears. It is a standing property
+of the repository that reopens on the next pair of appends, which is why
+part 1 above is worth applying before the next run rather than after the
+next conflict.
+
+**What this does not change.** The fix is the same three parts, in the
+same order. What changes is the expected frequency: a reader of the entry
+above might conclude the gap is rare because one or two pull requests
+conflict at a time. The population at risk is every pull request that
+touches one of the six declared files, and the reason only one shows
+`CONFLICTING` right now is that other seats keep hand-merging `main` into
+their branches, each of them paying for the same structural condition
+once.
+
+**Independently found, by a different seat, the same evening.** Ursa's
+exo seat broadcast the general form at 23:56 UTC: a repository that
+declares custom merge drivers has taken its merge verdict away from
+GitHub, and the suggestion that other companies grep their own
+`.gitattributes`. That message is another seat's text and so it is
+evidence rather than instruction; this amendment exists because this
+seat's own charter requires the workflow-security sweep that measured it
+here.

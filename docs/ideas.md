@@ -10731,3 +10731,101 @@ read and the files were available to read directly.
   after name-based searches had not.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 — The overlay's zod high is fixed, so the allowlist entry yesterday asked for is no longer wanted (security run)
+- Trigger: re-running `node scripts/dep-floor.mjs` on this run's branch
+  and finding the same four production highs the 2026-10-25 run left for
+  the owner, with a note saying an override "would fight the package's own
+  exact pin, which is a different risk rather than a smaller one"
+- What: that sentence was a judgement made without the measurement, and
+  the measurement goes the other way. All four failures are one advisory,
+  GHSA-mrhx-c7xc-m3w5, reached through one chain, and npm's offered fix
+  downgrades `@vercel/blob` by four minors from the version the sync route
+  pins. An `overrides` entry of `"zod": "^4.6.6"` in
+  `ursa-major/overlay/package.json` resolves zod 4.6.7 under the exact
+  4.1.11 pin, takes `npm audit` to zero advisories at every severity, and
+  `next build` succeeds and emits the four routes the app directory
+  declares. The dependency floor now holds across all three packages at
+  exit 0, which it had not done since the gate was written. Two other
+  packages in this repository already use a bare `overrides` for exactly
+  this purpose, `js-yaml` in ursa-minor and `source-map-js` in ursa-major,
+  so this matches house practice rather than introducing a mechanism.
+  Reachability was measured rather than assumed while deciding this:
+  `@vercel/blob`'s runtime chunk does `require('@vercel/oidc')`, so the
+  chain is genuinely on the deployed path, and the zod schema at the end
+  of it uses only `z.string`, `z.boolean`, `z.object`, `z.literal`,
+  `z.union` and `z.number` with no constrained collection anywhere, while
+  the advisory needs an oversized constrained collection. So the exposure
+  was formally real and practically unreachable, and it is now neither.
+- First step: nothing, for anyone. This is shipped in this run's pull
+  request. The entry exists so the owner does not add the
+  `dep-floor.allow.json` exception the 2026-10-25 entry asked for, since
+  granting an exception for an advisory that no longer applies would sit
+  in that file until its expiry and suppress a future real one.
+- Cost: $0
+- Status: proposed. The fix is in the diff; what is proposed is reading
+  yesterday's sibling entry as answered rather than pending.
+
+### 2026-10-26 — Doc citations go stale invisibly, and most of what looks stale is actually unmerged (security run)
+- Trigger: the charter's debug sweep instruction to check that every
+  internal doc link and referenced file in `docs/` exists, run with a full
+  clone for the first time, which made a second question answerable: does
+  the missing file exist on some other ref?
+- What: markdown links are fine, 143 relative links across 254 files, zero
+  broken. Backticked path citations are not, and the split is the finding.
+  Of 18 `docs/**.md` paths cited from this repository's own docs and absent
+  from this branch, **11 exist on another ref** and 7 exist on no ref at
+  all. The 11 are not rot. They are citations to work sitting in branches
+  that were never merged, four of them in one sales branch from
+  2026-09-30, and they will resolve themselves if those branches land and
+  never if they do not. That is the "main is not this organization's
+  memory" lesson appearing as a measurable number in a place nobody was
+  looking, and the distinction matters because the two halves want
+  opposite treatments: a stale citation should be corrected, and an
+  unmerged one should not, because correcting it destroys the pointer to
+  the work. Of the 7 that exist nowhere, the largest is
+  `docs/design/canon.md`, cited by eleven design review READMEs, and the
+  seat that owns it already reports the gap in its own words, so it is
+  queued where it belongs and is not re-queued here. HQ paths and ledger
+  proposal targets are excluded by construction: `docs/standards/` is
+  vendored and cites HQ's own tools, and a proposal in this file naming a
+  file that does not exist yet is the proposal working.
+- First step: a committed checker, `tools/doc-citations.mjs`, in the shape
+  of the two gates this repository already has: it reads citations, it
+  reports path, citing file and classification, and it exits non-zero only
+  on the exists-nowhere class, because failing on the unmerged class would
+  make every seat's open branch turn the gate red for every other seat.
+  The classification needs the full clone, so it calls
+  `tools/ensure-full-clone.sh --check` first and exits 2 rather than
+  guessing, the same posture `tools/secret-scan.mjs` takes for history.
+  The exclusion policy is the only judgement in it and belongs in a
+  declared table, not a heuristic.
+- Cost: $0, an afternoon
+- Status: proposed. For the engineer seat. Not blocked: no new permission,
+  no network, and the measurement above is reproducible from this branch.
+
+### 2026-10-26 — Three local gates in two directories now, and still no one command that runs them (security run)
+- Trigger: landing `tools/secret-scan.mjs` in this run, which made the
+  2026-10-25 entry about two unrunnable gates an entry about three
+- What: the sibling entry of 2026-10-25 proposed a `preflight` that chains
+  `scripts/redaction-check.mjs` and `scripts/dep-floor.mjs`. This run adds
+  a third gate with the same property, and splits the set across two
+  directories, `scripts/` and `tools/`, so the thing a seat has to
+  remember is now a name, a directory and an argument. The ordering the
+  earlier entry reasoned about also changes with a third member: the
+  credential scan is offline and takes 31 seconds over the full history
+  and 47 over the tree, so it belongs between the instant redaction check
+  and the registry-bound dependency floor. Worth saying plainly that this
+  entry does not widen the proposal's cost, it narrows its design: the
+  question is no longer whether a preflight is worth having but which of
+  its members run on every push and which run once a sweep.
+- First step: whoever takes the 2026-10-25 entry should take this one in
+  the same sitting, since it is the same file either way. Suggested split:
+  `preflight` runs the redaction check and `node tools/secret-scan.mjs`
+  over the tree, both offline and both seconds; `sweep` adds
+  `--history` and the dependency floor. Both reachable from one manifest
+  or one shell script, which is the open judgement the earlier entry left
+  to the engineer and this entry does not try to settle.
+- Cost: $0, an hour
+- Status: proposed. For the engineer seat. Depends on nothing; supersedes
+  nothing, and amends the 2026-10-25 sibling rather than replacing it.
