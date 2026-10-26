@@ -14,8 +14,9 @@ cd ursa-minor && npm i -D --no-save playwright && npx playwright install chromiu
 | file | what it does |
 |---|---|
 | `lib/browser.mjs` | Launches chromium. On a host with no root it fetches the shared libraries chromium needs with `apt-get download` and `dpkg-deb -x`, which need no privilege, and retries. |
-| `shoot.mjs` | Full-page PNGs at 1x across the page by viewport matrix, measuring horizontal overflow on each and naming the widest element when a frame overflows. Frames are frozen by default; `--live` lets the sky animate. `--wait <ms>` sets the settle, `--until <selector>` gates the shutter on content, which any page that fetches after hydration needs, and `--state <module.mjs>` drives the page into a state first. |
+| `shoot.mjs` | Full-page PNGs at 1x across the page by viewport matrix, measuring horizontal overflow on each and naming the widest element when a frame overflows. Frames are frozen by default; `--live` lets the sky animate. `--wait <ms>` sets the settle, `--until <selector>` gates the shutter on content, which any page that fetches after hydration needs, and `--state <module.mjs>` drives the page into a state first. `--viewports name=WxH,…` replaces the three-viewport matrix outright, which is how anything below 390 gets photographed at all; the set's `measurements.txt` records which matrix produced it. |
 | `measure-hit-areas.mjs` | The real tappable area of every control, probed outward one CSS pixel at a time so an `::after` overlay is seen rather than parsed. Promoted here on 2026-10-24g from `reviews/2026-10-24e/`, where it was written; `--base`, `--pages name=/path,…`, `--out`, `--json`, `--until`, and `--state` since 2026-10-26. |
+| `measure-narrow.mjs` | What every surface does below 390, which is the narrowest viewport the charter reviews. Reports a clipped edge (unreachable) separately from an overflow (scrollable), attributes offenders to the nearest scroll container, and exempts full-bleed decoration, screen-reader text and closed drawers. Waits for the geometry to stop changing rather than for a settle somebody guessed. Written 2026-10-26b out of L25; its six exemptions and how each was earned are in its own header. `--base`, `--pages`, `--widths`, `--height`, `--until`, `--state`, `--out`, `--json`. |
 | `measure-contrast.mjs` | The WCAG ratio of every run of text against the pixels actually behind it, including placeholders. The backdrop is photographed, never read off the stylesheet, so a starfield, a gradient and an ancestor's `opacity` are all in the number. Reports a per-pixel median, fifth percentile and worst, exempts inactive components under 1.4.3, and refuses to answer for a page that moved between its two frames. Written 2026-10-25c. `--base`, `--pages name=/path,…`, `--only`, `--out`, `--json [path]`, `--until`. |
 | `lib/freeze.mjs` | Pins the animation clock and seeds `Math.random` before any page script runs, so the starfield draws the same sky twice. Without it 6 of the 15 review frames differ from themselves by up to 19,140 pixels. |
 | `diff-frames.py` | Counts the pixels that differ between two frame sets, per frame, with the row and column range. Only meaningful on frozen frames. |
@@ -35,6 +36,23 @@ three other controls afterwards, so three quarters of that surface was
 out of reach of the instrument whose job is to reach it. Its path is
 printed in the output. `reviews/2026-10-26/data/state-panel-unlocked.mjs`
 is the first one.
+
+**The three review viewports start at 390, so a run that wants to know
+what happens below it has to ask on purpose.** `measure-narrow.mjs`
+counts and `shoot.mjs --viewports` photographs. Both were written on
+2026-10-26b, the run after L25 found a panel that was cut off on the left
+and overflowing on the right at the same time below 380, through six
+reviews that could not have seen it. Calibrate the narrow sweep the way
+this README asks for everything else: point it at the overlay, whose
+before and after at these widths are written down in L25, before
+believing it about a surface nobody has measured.
+
+**A sweep like this is mostly exemptions, and getting one wrong looks
+exactly like a pass.** Five of the six in `measure-narrow.mjs` were found
+by the instrument being wrong first, four of them on benchmark sites
+rather than on ours. If you add a sixth surface and it reports a failure
+that never goes away, read the header before believing it, and if it
+reports zero, check that the denominator is not zero too (L19, L23).
 
 **`--until` is a gate on a selector, not on a state.** Measured
 2026-10-26: running the overlay's two dashboard states in one

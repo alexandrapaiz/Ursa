@@ -738,6 +738,72 @@ matrix cannot check that claim. Either the width is a `min()` against
 the viewport or a run has to measure below 390 on purpose. `min(380px,
 100%)` is one character of risk and it changes nothing at 380 or above.
 
+## L26 — Below 390 the field is split, and five of the six exemptions a narrow sweep needs are not obvious
+
+**measured**, 2026-10-26b, two Ursa surfaces and five benchmark sites at
+320, 360, 375 and 390. `reviews/2026-10-26b/data/narrow-minor-after.txt`,
+`narrow-overlay-calibration.txt`, `bench-narrow.txt`.
+
+L25 said a defect below 390 is invisible to every instrument this seat
+owns, and left two instruments to build. Both exist now:
+`review-kit/measure-narrow.mjs`, and `--viewports` on `shoot.mjs` so a
+width below 390 can be photographed as well as counted.
+
+**What Ursa does there.** Nothing goes out of reach on either product at
+any of the four widths. 0 of 20 cells on `ursa-minor`, 0 of 8 on the
+overlay. The overlay reproduces L25's documented after-state exactly,
+which is the calibration the kit README asks for before a number out of
+a new tool is believed.
+
+**What the field does there.**
+
+| site | 320 | 360 | 375 | 390 |
+|---|---|---|---|---|
+| Linear | fits | fits | fits | fits |
+| Vercel | fits, bleeds | fits, bleeds | fits, bleeds | fits, bleeds |
+| Consensus | fits | fits | fits | never came to rest |
+| Stripe | 80px off the right | 90 | 94 | 98 |
+| Elicit | 285px off the left | 265 | 258 | 219 |
+
+Three of five are clean at 320. Two are not, and both of their offenders
+carry zero characters: a testimonial carousel's navigation block on
+Stripe, and a Framer container on Elicit which is 890px wide and centred,
+so it bleeds `(890 - viewport) / 2` off each side at every width and the
+arithmetic holds to within a pixel across all four. So nobody measured
+here loses a word at 320, and two of five do lose boxes.
+
+**The rule.** 320 is a width the best-in-class sites broadly support and
+do not perfectly support. Ursa supporting it fully is cheap today and
+worth keeping, and the standard three-viewport matrix will not keep it,
+because it cannot see down there.
+
+**The part worth more than the result.** A sweep like this is almost all
+exemptions, and only one of the six was obvious before the instrument was
+run. The five that were not, each found by being wrong first:
+
+1. A `position: fixed` decorative layer that bleeds past the viewport is
+   not clipped content. The sky is `matrix(1.05, …)` over `inset: 0`, and
+   counting it made 8 of 20 cells fail forever, which is L19's rule
+   broken by the instrument written to respect it.
+2. A layout still moving is not a layout. The transform arrives after
+   hydration, `networkidle` is not a gate on it, and two consecutive
+   sweeps disagreed. The measurement waits for two reads of every edge to
+   agree, which is L15 rather than a guessed settle.
+3. Text hidden for a screen reader is hidden on purpose. Eight of eight
+   failures on Stripe and Consensus were `p#__next-route-announcer__` and
+   `div.sr-only`, clipped by exactly 1px.
+4. "Past the right edge" is reachable only if the page scrolls there. A
+   fixed box adds nothing to `scrollWidth`, so no gesture brings it back.
+5. A closed off-canvas drawer is unreachable by design. `checkVisibility`,
+   `[aria-hidden]` and `[inert]` are the gate, and it has to run *after*
+   the decoration test, because backdrops are usually `aria-hidden` too
+   and testing exposure first silently swallowed every bleed on this site.
+
+**this seat's judgement.** A narrow sweep belongs in the kit rather than
+in a review folder, and it belongs run against the field as well as
+against us, because four of those five exemptions were found on somebody
+else's markup and none of them would have been found on ours.
+
 ## Open, and not this seat's to close
 
 **Where Ursa's canon comes from.** Fourteen reviews under `reviews/`

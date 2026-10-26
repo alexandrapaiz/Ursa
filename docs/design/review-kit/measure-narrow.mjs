@@ -55,6 +55,45 @@
  *      included it could never have reached zero, which is the one thing
  *      L19 says a measurement must not do.
  *
+ *   7. **"Past the right edge" is only reachable if the page actually
+ *      scrolls there, and a closed drawer is not a defect.** Both found
+ *      on Stripe in the same benchmark pass. It reported `fits` while
+ *      naming `button.hds-button` reaching 688px in a 320px viewport,
+ *      which cannot both be true of a page that scrolls. Neither
+ *      `html` nor `body` clips there (`data/probe-root-clip.mjs`), so
+ *      the button is `position: fixed`, and a fixed box adds nothing to
+ *      `scrollWidth`: no gesture brings it into view. The rule is
+ *      therefore the honest one rather than the easy one. A right-hand
+ *      offender is reachable only if `scrollWidth` reaches its right
+ *      edge, and anything past that joins the unreachable count.
+ *
+ *      Which immediately exposes the opposite error, because the
+ *      commonest fixed box parked off the right of a phone viewport is
+ *      an off-canvas menu that is closed. It is unreachable, and that is
+ *      the whole design. So the walk now skips what the browser itself
+ *      says is not being shown: `checkVisibility`, `[aria-hidden]` and
+ *      `[inert]`. A drawer that opens on a press is exempt; a drawer
+ *      that is visible, exposed and off the side of the screen is not.
+ *
+ *   6. **Text hidden for a screen reader is hidden on purpose.** Found
+ *      by pointing this at the five sites L5 names, which is what the
+ *      benchmark step is for: Stripe and Consensus both came back
+ *      "4 of 4 cells put content out of reach", and on every one of the
+ *      eight the offender was `p#__next-route-announcer__` or
+ *      `div.sr-only`, clipped by exactly 1px. Those are the canonical
+ *      visually-hidden affordances, a 1x1 box holding text meant for
+ *      assistive technology and for nobody's eyes. An instrument that
+ *      calls them a defect would report every Next.js site on the web as
+ *      broken.
+ *
+ *      The gate is the geometry rather than the class name, since
+ *      `sr-only`, `visually-hidden` and `screen-reader-text` are three
+ *      spellings of one idea and the next site will have a fourth:
+ *      2px or less in *both* dimensions is a box nothing legible fits
+ *      in. A hairline rule is 1px in one dimension and hundreds in the
+ *      other, so it does not match, and neither does anything a reader
+ *      was meant to see.
+ *
  *   5. **A layout still moving is not a layout.** Also not foresight.
  *      With clause 4 in, two consecutive sweeps of `ursa-minor`
  *      disagreed about the home page: one reported the sky bleeding
@@ -162,6 +201,17 @@ const probe = () => {
   const clipped = []; // left of zero, reachable by nothing
   const contained = new Map(); // offenders a scroll container owns
   const bleed = [];   // decoration deliberately wider than the viewport
+  let hidden = 0;     // sr-only and friends: 2px or less in both dimensions
+
+  /* Is the browser showing this to anybody? A closed off-canvas drawer
+     is parked off the side of the screen on purpose, and the only
+     difference between it and a clipped panel is whether it is being
+     presented. Ask the browser rather than guess. */
+  const shown = (el) => {
+    if (typeof el.checkVisibility === "function" &&
+        !el.checkVisibility({ checkVisibilityCSS: true, checkOpacity: true })) return false;
+    return !el.closest("[aria-hidden='true'], [inert]");
+  };
 
   for (const el of d.querySelectorAll("*")) {
     const r = el.getBoundingClientRect();
@@ -169,6 +219,7 @@ const probe = () => {
     const over = r.right > vw + 0.5;
     const under = r.left < -0.5;
     if (!over && !under) continue;
+    if (r.width <= 2 && r.height <= 2) { hidden++; continue; }
 
     const sc = scroller(el);
     if (sc) {
@@ -176,10 +227,28 @@ const probe = () => {
       contained.set(k, (contained.get(k) || 0) + 1);
       continue;
     }
-    const row = { sel: name(el), left: +r.left.toFixed(1), right: +r.right.toFixed(1), w: +r.width.toFixed(1) };
+    // How many characters go off the edge with it. A clipped box that
+    // carries no text is a different conversation from one that carries
+    // a paragraph, and the row should not make the reader go and look.
+    const row = {
+      sel: name(el),
+      left: +r.left.toFixed(1),
+      right: +r.right.toFixed(1),
+      w: +r.width.toFixed(1),
+      chars: (el.textContent || "").trim().length,
+    };
+    // Decoration is tested before visibility, not after. Backdrops are
+    // very often `aria-hidden`, correctly so, and checking exposure first
+    // swallowed every bleed on this site into the hidden bucket: the sky
+    // went from 8 cells reported to 0 and the clause above stopped
+    // meaning anything.
     if (isDecoration(el)) { bleed.push(row); continue; }
-    if (under) clipped.push(row);
-    if (over) right.push(row);
+    if (!shown(el)) { hidden++; continue; }
+    // A left-hand clip is unreachable outright. A right-hand one is
+    // unreachable too unless the page can actually be scrolled to it,
+    // which a `position: fixed` box never can.
+    if (under || r.right > d.scrollWidth + 0.5) clipped.push(row);
+    else if (over) right.push(row);
   }
 
   /* The deepest offender is the interesting one for a clip and the
@@ -211,6 +280,7 @@ const probe = () => {
     rightCount: right.length,
     bleed: bleed.slice(0, 4),
     bleedCount: bleed.length,
+    hiddenCount: hidden,
     contained: [...contained].map(([sel, n]) => `${sel}×${n}`),
   };
 };
@@ -222,7 +292,7 @@ const probe = () => {
 const SETTLE_STEP = Number(arg("settle-step", 200));
 const SETTLE_CAP = Number(arg("settle-cap", 4000));
 const sig = (m) =>
-  JSON.stringify([m.overflow, m.main, m.clipped, m.right, m.bleed, m.contained]);
+  JSON.stringify([m.overflow, m.main, m.clipped, m.right, m.bleed, m.contained, m.hiddenCount]);
 
 async function settle(page) {
   let prev = await page.evaluate(probe);
@@ -252,16 +322,26 @@ for (const w of WIDTHS) {
       const m = await settle(page);
       json.push({ width: w, page: label, path, ...m });
       if (!m.settled) unsettled.push(`  ${w} ${label} (${path}): edges still moving after ${SETTLE_CAP}ms`);
+      // Say which edge, because the fix is in a different place for each:
+      // a negative left is a box centred wider than its viewport, and an
+      // unreachable right is usually something fixed or absolutely placed.
+      const worst = m.clipped[0];
       const verdict = m.clippedCount
-        ? `CLIPPED ${Math.abs(m.clipped[0].left).toFixed(0)}px out of reach`
+        ? worst.left < 0
+          ? `CLIPPED ${Math.abs(worst.left).toFixed(0)}px off the left`
+          : `${(worst.right - m.vw).toFixed(0)}px off the right, unscrollable`
         : m.overflow > 0
           ? `overflows ${m.overflow}px, scrollable`
           : "fits";
       rows.push(
         `  ${String(w).padEnd(6)}${label.padEnd(10)}` +
         `${String(m.main ? `${m.main.w} at ${m.main.left}` : "no content box").padEnd(16)}` +
-        `${verdict.padEnd(30)}` +
-        (m.clippedCount ? m.clipped[0].sel : m.rightCount ? `widest ${m.right[0].sel} to ${m.right[0].right.toFixed(0)}` : "") +
+        `${verdict.padEnd(34)}` +
+        (m.clippedCount
+          ? `${m.clipped[0].sel} (${m.clipped[0].chars} chars)`
+          : m.rightCount
+            ? `widest ${m.right[0].sel} to ${m.right[0].right.toFixed(0)}`
+            : "") +
         (m.bleedCount ? `  [bleed: ${m.bleed[0].sel} ${m.bleed[0].left}..${m.bleed[0].right.toFixed(0)}${m.bleedCount > 1 ? ` +${m.bleedCount - 1}` : ""}]` : "") +
         (m.contained.length ? `  [contained: ${m.contained.join(" ")}]` : ""),
       );
@@ -281,7 +361,7 @@ const over = json.filter((r) => !r.clippedCount && r.overflow > 0);
 const out = [
   `  base ${BASE}   widths ${WIDTHS.join(", ")}   height ${HEIGHT}` + (STATE ? `   state ${STATE}` : ""),
   "",
-  "  width page      content box     verdict                       where",
+  "  width page      content box     verdict                           where",
   ...rows,
   "",
   // The headline names its own denominator, because L23 measured that a

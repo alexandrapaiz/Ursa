@@ -1,25 +1,25 @@
   base http://127.0.0.1:4953   widths 320, 360, 375, 390   height 844
 
-  width page      content box     verdict                       where
-  320   home      320 at 0        fits                            [bleed: canvas.pointer-events-none -8..328]
-  320   set       320 at 0        fits                          
-  320   record    320 at 0        fits                          
-  320   address   320 at 0        fits                          
-  320   404       320 at 0        fits                            [bleed: canvas.pointer-events-none -8..328]
-  360   home      360 at 0        fits                            [bleed: canvas.pointer-events-none -9..369]
-  360   set       360 at 0        fits                          
-  360   record    360 at 0        fits                          
-  360   address   360 at 0        fits                          
-  360   404       360 at 0        fits                            [bleed: canvas.pointer-events-none -9..369]
-  375   home      375 at 0        fits                            [bleed: canvas.pointer-events-none -9.4..384]
-  375   set       375 at 0        fits                          
-  375   record    375 at 0        fits                          
-  375   address   375 at 0        fits                          
-  375   404       375 at 0        fits                            [bleed: canvas.pointer-events-none -9.4..384]
-  390   home      390 at 0        fits                            [bleed: canvas.pointer-events-none -9.7..400]
-  390   set       390 at 0        fits                          
-  390   record    390 at 0        fits                          
-  390   address   390 at 0        fits                          
-  390   404       390 at 0        fits                            [bleed: canvas.pointer-events-none -9.7..400]
+  width page      content box     verdict                           where
+  320   home      320 at 0        fits                                [bleed: canvas.pointer-events-none -8..328]
+  320   set       320 at 0        fits                              
+  320   record    320 at 0        fits                              
+  320   address   320 at 0        fits                              
+  320   404       320 at 0        fits                                [bleed: canvas.pointer-events-none -8..328]
+  360   home      360 at 0        fits                                [bleed: canvas.pointer-events-none -9..369]
+  360   set       360 at 0        fits                              
+  360   record    360 at 0        fits                              
+  360   address   360 at 0        fits                              
+  360   404       360 at 0        fits                                [bleed: canvas.pointer-events-none -9..369]
+  375   home      375 at 0        fits                                [bleed: canvas.pointer-events-none -9.4..384]
+  375   set       375 at 0        fits                              
+  375   record    375 at 0        fits                              
+  375   address   375 at 0        fits                              
+  375   404       375 at 0        fits                                [bleed: canvas.pointer-events-none -9.4..384]
+  390   home      390 at 0        fits                                [bleed: canvas.pointer-events-none -9.7..400]
+  390   set       390 at 0        fits                              
+  390   record    390 at 0        fits                              
+  390   address   390 at 0        fits                              
+  390   404       390 at 0        fits                                [bleed: canvas.pointer-events-none -9.7..400]
 
   0 of 20 page-by-width cells put content out of reach; 0 overflow reachably; 8 carry decoration that bleeds on purpose and is not counted.

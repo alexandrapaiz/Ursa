@@ -16,6 +16,7 @@
     "rightCount": 0,
     "bleed": [],
     "bleedCount": 0,
+    "hiddenCount": 0,
     "contained": [],
     "settled": true,
     "settledAfterMs": 200
@@ -37,6 +38,7 @@
     "rightCount": 0,
     "bleed": [],
     "bleedCount": 0,
+    "hiddenCount": 0,
     "contained": [],
     "settled": true,
     "settledAfterMs": 200
@@ -58,6 +60,7 @@
     "rightCount": 0,
     "bleed": [],
     "bleedCount": 0,
+    "hiddenCount": 0,
     "contained": [],
     "settled": true,
     "settledAfterMs": 200
@@ -79,6 +82,7 @@
     "rightCount": 0,
     "bleed": [],
     "bleedCount": 0,
+    "hiddenCount": 0,
     "contained": [],
     "settled": true,
     "settledAfterMs": 200
@@ -100,6 +104,7 @@
     "rightCount": 0,
     "bleed": [],
     "bleedCount": 0,
+    "hiddenCount": 0,
     "contained": [],
     "settled": true,
     "settledAfterMs": 200
@@ -121,6 +126,7 @@
     "rightCount": 0,
     "bleed": [],
     "bleedCount": 0,
+    "hiddenCount": 0,
     "contained": [],
     "settled": true,
     "settledAfterMs": 200
@@ -142,6 +148,7 @@
     "rightCount": 0,
     "bleed": [],
     "bleedCount": 0,
+    "hiddenCount": 0,
     "contained": [],
     "settled": true,
     "settledAfterMs": 200
@@ -163,6 +170,7 @@
     "rightCount": 0,
     "bleed": [],
     "bleedCount": 0,
+    "hiddenCount": 0,
     "contained": [],
     "settled": true,
     "settledAfterMs": 200
