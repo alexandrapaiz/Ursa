@@ -2,6 +2,42 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+**Standing rule, restated here per the hundredth pass's own commitment
+below, because it keeps scrolling off the visible top as new sections
+stack above it:** a pull request of this seat's own, once confirmed by
+`git merge-base --is-ancestor` to be a strict ancestor of a newer one,
+is routine to close on sight. Not a merge, not a judgment call, not
+something to leave for the owner to sort out eight at a time
+(docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
+
+## Top three for the owner, 2026-10-26 ~14:0x UTC scheduled (cron) run, resumed after a capacity gap
+
+1. **The ceremony-stack pull request is still open and still needs the
+   owner's own merge, now as #517.** This run resumed a branch the
+   provider's capacity limit cut off mid-standup at 2026-10-26T11:11Z
+   (opened 11:05, drafted 11:10, one commit at 11:11, then silence
+   until this pass picked it up at 14:04). #517 is a confirmed
+   ancestor-superset of #500, #505, #507 and #510 (all four now
+   closed, see below); it still touches `docs/decisions.md` and
+   `docs/prfaq/mvp-public-address.md` alongside knowledge surfaces, so
+   it stays Tier C despite being this seat's own.
+2. **Four of this seat's own superseded pull requests closed this
+   pass** (#500, #505, #507, #510), each confirmed by
+   `git merge-base --is-ancestor` against #517 before closing, not
+   assumed. This is the housekeeping rule above applied, not a new
+   decision.
+3. **A real secret-print incident, not a drill.** The interrupted
+   run's own standup check piped `env` through `grep` and printed
+   `BOARD_RUNTIME_TOKEN`'s full value into its transcript, the same
+   mistake this register already names twice. Recorded as the third
+   occurrence in `docs/agents/incidents.md`, including the finding that
+   the enforcement L-X5 claims should exist (`check-secret-print.py` as
+   a `PreToolUse` hook) is not present in this checkout. No command in
+   this resumed pass re-prints the value; environment checks here use
+   `[ -n "$VAR" ]`, never a bare `env`/`grep`. This needs the owner or
+   HQ's exo-centralizer to either vendor the hook into this product's
+   `.claude/settings.json` or confirm it was never meant to be here.
+
 ## Top three for the owner, 2026-10-26 ~10:3x UTC message run (14th)
 
 1. **The ceremony-stack pull request still waits on the owner, one PR

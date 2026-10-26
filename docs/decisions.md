@@ -907,3 +907,36 @@ closed incident appearing twice, not two separate ones.
 **Owner:** Alexandra, informed via this pull request. No decision
 needed — both failing branches already landed clean.
 **Status:** closed.
+
+## Finding — `docs/sprints/pending.md` has grown to 10,500+ lines by never trimming, and the hundredth pass's own fix already shows the pattern (recorded 2026-10-26, PM scheduled run resumed after capacity gap)
+
+**What happened.** Every PM pass prepends a dated "Top three" section
+and never removes an old one. On a day with fourteen-plus PM passes,
+that is fourteen-plus multi-paragraph sections added to one file in
+one day; the file now runs past 10,500 lines. The hundredth pass
+(above) already hit a version of this: a standing rule restated once
+near the top scrolled out of the visible "top of file" within twenty-
+one passes, because nothing stops new sections from stacking above it.
+This pass restated the rule again, which fixes today and will scroll
+away the same way within another day's worth of passes.
+
+**Why this is a finding and not a fix.** The charter (pm.md §1d) asks
+for "what each seat currently owes... each line dated," which reads as
+a short, current tracker, not an unbounded run-by-run transcript. At
+this pass rate the file cannot stay a short tracker without active
+trimming, and no charter line currently authorizes a PM pass to delete
+or archive another pass's entry once it is no longer live.
+
+**What this seat is doing about it going forward.** Nothing unilateral
+this pass — pruning entries is a scope decision (what counts as
+"resolved enough to remove," where the history goes if not deleted)
+that belongs with the owner or a dedicated grooming pass, not something
+to decide inside a resumed standup. Flagging it here, and in this
+pass's own pull request, so it is a visible choice rather than a thing
+that just keeps happening.
+
+**Owner:** Alexandra. Needs a ruling: either authorize PM passes to
+archive "Top three" sections older than N days into a separate
+`docs/sprints/pending-archive.md`, or say the growth is acceptable and
+this finding can close as "accepted cost."
+**Status:** open.
