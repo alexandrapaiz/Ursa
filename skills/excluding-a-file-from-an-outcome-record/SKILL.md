@@ -60,7 +60,7 @@ evidence:
     source: ursa-major/src/vendored.ts:301-311
   - ref: E11
     what: the declaration is checked ahead of the blob search and short-circuits it, so a path both declared and findable by identity is reported under the weaker evidence, and a null history read continues rather than excluding
-    source: ursa-major/src/vendored.ts:338-367
+    source: ursa-major/src/vendored.ts:374-403
   - ref: E12
     what: the candidate ceiling and the loop that assigns the relation, where the search stops after forty compared blobs and takes the first match in the order git listed the commits
     source: ursa-major/src/vendored.ts:135-143,368-386

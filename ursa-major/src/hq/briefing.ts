@@ -12,12 +12,15 @@
 // byte for byte.
 
 import type { AxiomEvidence, TuningAxiom, TuningRecord } from '../tuning/types'
-import type { CorrectionLoop, OutcomeRecord } from '../types'
+import type { CorrectionLoop, OneShotCorrection, OutcomeRecord } from '../types'
 import {
   BRIEFING_DISCLAIMER,
   type Briefing,
   type BriefingInput,
   type CaseUnit,
+  type DroppedCase,
+  type DroppedRule,
+  type DroppedUnit,
   type GuardrailUnit,
   type MatchReason,
   type RuleUnit,
@@ -52,7 +55,9 @@ export const GUARDRAIL_CAP = 10
 
 /** Every correction loop in the store, tagged with the record it came
  *  from and the owner's own words where the record carried them.
- *  Exported because semantic.ts embeds exactly this text. */
+ *  Still exported, and still loop-only, because `axiomFiles` below
+ *  resolves an axiom's evidence `ref` against a loop id and a one-shot
+ *  has no id an axiom can cite. */
 export interface IndexedLoop {
   recordId: string
   loop: CorrectionLoop
@@ -76,6 +81,110 @@ export function indexLoops(records: OutcomeRecord[]): IndexedLoop[] {
     }
   }
   return out
+}
+
+/**
+ * One correction, normalized across the two shapes a record can carry it
+ * in. This is what the rankers consume, and what `CaseUnit` is built
+ * from; see that interface in ./types.ts for which shape means what.
+ *
+ * WHY THIS EXISTS (added 2026-10-26, from the engineer seat's own
+ * dogfooding run, sprint-2026-10-26 item 2). Until today the only input
+ * to `nearestCases` was `indexLoops`, so the briefing read
+ * `signals.correctionLoops` and nothing else. `src/signals.ts`
+ * `deriveSignals` returns `correctionLoops: []` for every record with no
+ * chat trace and routes that record's corrections to
+ * `oneShotCorrections` instead, saying so in the record's own `notes`:
+ * "label-stage record (git commit pair): corrections appear once, as
+ * edits; recurrence and loops are unobservable without the chat trace."
+ *
+ * `ursa run` over a repository produces exactly that kind of record. So
+ * the briefing was blind to the whole output of the one command this
+ * product ships. Measured on this repository's own history on 2026-10-26:
+ * 17 records, 0 correction loops, 204 one-shot corrections, and a
+ * briefing that returned 0 cases and printed `0 correction loops across
+ * 17 outcome records`.
+ */
+export interface IndexedCase {
+  /** 'loop' = signals.correctionLoops; 'one_shot' = signals.oneShotCorrections */
+  kind: 'loop' | 'one_shot'
+  recordId: string
+  /** stable within the record: a loop's own id, or `one-shot-<ordinal>` */
+  caseId: string
+  /** a loop's theme; a one-shot's edited path, which is what it carries */
+  theme: string
+  /** paths this correction was made on */
+  targetFiles: string[]
+  /** null on a one-shot: unobservable, not zero */
+  recurrences: number | null
+  resolution: CorrectionLoop['resolution'] | null
+  /** a loop's discoveredSpec, or the one-shot's AGENT/FINAL pair */
+  spec: string
+  complaint?: string
+  mechanism?: string
+}
+
+/** The loop half, lifted into the normalized shape. The three fields the
+ *  semantic ranker embeds (theme, spec, complaint) keep the values they
+ *  had before this normalization existed, so `vectors.json` and every
+ *  recorded cosine in it stay valid. */
+export function asCase(indexed: IndexedLoop): IndexedCase {
+  return {
+    kind: 'loop',
+    recordId: indexed.recordId,
+    caseId: indexed.loop.id,
+    theme: indexed.loop.theme,
+    targetFiles: indexed.loop.targetFiles,
+    recurrences: indexed.loop.recurrences,
+    resolution: indexed.loop.resolution,
+    spec: indexed.loop.discoveredSpec,
+    complaint: indexed.complaint,
+    mechanism: indexed.mechanism,
+  }
+}
+
+/**
+ * Every one-shot correction in the store, in the same normalized shape.
+ *
+ * Two deliberate decisions about what is NOT invented here.
+ *
+ * `recurrences` and `resolution` are null rather than 0 and 'accepted'.
+ * A one-shot record has no user messages, so neither question has an
+ * answer in it, and a surface that answered them anyway would be selling
+ * an unobserved value as a measurement. `src/hq/types.ts` states the same
+ * rule on `CaseUnit`.
+ *
+ * `theme` and `targetFiles` both come from `OneShotCorrection.domain`,
+ * which for a label-stage correction is the edited file's path
+ * (`src/signals.ts` `mutationCorrections` sets it). It is a path and not
+ * a domain tag, so it is scored as a file and never passed to the
+ * briefing's domain term: a request for domain `docs` must not partially
+ * match a correction whose "domain" is `docs/sprints/pending.md`.
+ */
+export function indexOneShots(records: OutcomeRecord[]): IndexedCase[] {
+  const out: IndexedCase[] = []
+  for (const record of records) {
+    const corrections: OneShotCorrection[] = record.signals?.oneShotCorrections ?? []
+    for (const [ordinal, c] of corrections.entries()) {
+      out.push({
+        kind: 'one_shot',
+        recordId: record.task.id,
+        caseId: `one-shot-${ordinal}`,
+        theme: c.domain,
+        targetFiles: c.domain ? [c.domain] : [],
+        recurrences: null,
+        resolution: null,
+        spec: c.text,
+      })
+    }
+  }
+  return out
+}
+
+/** Both shapes, loops first so a store holding both ranks the measured
+ *  lesson above the single edit when their scores tie. */
+export function indexCases(records: OutcomeRecord[]): IndexedCase[] {
+  return [...indexLoops(records).map(asCase), ...indexOneShots(records)]
 }
 
 /**
@@ -159,20 +268,69 @@ function toRuleUnit(axiom: TuningAxiom, why: MatchReason): RuleUnit {
   }
 }
 
-function toCaseUnit(indexed: IndexedLoop, why: MatchReason): CaseUnit {
-  const { loop } = indexed
+function toCaseUnit(indexed: IndexedCase, why: MatchReason): CaseUnit {
   return {
     recordId: oneLine(indexed.recordId, ID_MAX),
-    loopId: oneLine(loop.id, ID_MAX),
-    theme: oneLine(loop.theme),
-    targetFiles: loop.targetFiles.map((f) => oneLine(normalizePath(f), PATH_MAX)),
-    recurrences: loop.recurrences,
-    resolution: loop.resolution,
-    discoveredSpec: oneLine(loop.discoveredSpec),
+    kind: indexed.kind,
+    loopId: oneLine(indexed.caseId, ID_MAX),
+    theme: oneLine(indexed.theme),
+    targetFiles: indexed.targetFiles.map((f) => oneLine(normalizePath(f), PATH_MAX)),
+    recurrences: indexed.recurrences,
+    resolution: indexed.resolution,
+    discoveredSpec: oneLine(indexed.spec),
     complaint: indexed.complaint === undefined ? undefined : oneLine(indexed.complaint),
     mechanism: indexed.mechanism === undefined ? undefined : oneLine(indexed.mechanism),
     why,
   }
+}
+
+/**
+ * The units a request scored and did not serve, highest-scoring first.
+ *
+ * WHY THIS EXISTS (added 2026-10-26, from the ledger entry "The briefing
+ * can say why a unit was surfaced and has no answer for why one was
+ * not"). `renderWhy` prints a full score breakdown for every unit that
+ * came back, and the floor one line above discarded the identical
+ * breakdown for every unit that did not. So `None on these files` over a
+ * store of 204 real corrections was a dead end: the reader could not
+ * tell a unit that was scored and judged too far from a unit that scored
+ * nothing at all, and those two ask opposite things of the agent reading
+ * them.
+ *
+ * TWO REASONS, NOT ONE, and this is the deviation from the ledger
+ * entry's own first step, which named the below-floor half alone. A unit
+ * can also miss because the request asked for three cases and the store
+ * had four that cleared the floor. Reporting only the below-floor half
+ * would reproduce this function's own motivating defect one level up: an
+ * empty `dropped` list would mean either "nothing was near" or "plenty
+ * was near and the ceiling cut it", which is again two answers wearing
+ * one face. `bound` carries the number that did the cutting, so the
+ * remedy is a value the reader can raise rather than a guess.
+ *
+ * Order. The over-cap units all scored at or above the floor and the
+ * below-floor units all scored under it, so concatenating the two in
+ * that order is already score-descending and no second sort is needed.
+ *
+ * @param ranked  every scored unit, floor not yet applied, in rank order
+ * @param kept    the same list filtered to units that cleared the floor
+ * @param cap     the effective ceiling the kept list was sliced at
+ * @param limit   how many to return; 0 or less returns an empty list
+ */
+function collectDropped<S extends { unit: T }, T>(
+  ranked: S[],
+  kept: S[],
+  cap: number,
+  limit: number
+): DroppedUnit<T>[] {
+  if (limit <= 0) return []
+  const keptSet = new Set(kept)
+  const overCap: DroppedUnit<T>[] = kept
+    .slice(cap)
+    .map(({ unit }) => ({ unit, reason: 'over_cap' as const, bound: cap }))
+  const belowFloor: DroppedUnit<T>[] = ranked
+    .filter((s) => !keptSet.has(s))
+    .map(({ unit }) => ({ unit, reason: 'below_floor' as const, bound: MIN_RELEVANCE }))
+  return [...overCap, ...belowFloor].slice(0, limit)
 }
 
 /**
@@ -208,15 +366,16 @@ export function buildBriefing(
   const query = buildQuery(input.domain, input.files)
   const maxRules = input.maxRules ?? DEFAULT_MAX_RULES
   const maxCases = input.maxCases ?? DEFAULT_MAX_CASES
+  const wantDropped = input.dropped ?? 0
   const loops = indexLoops(records)
+  const cases = indexCases(records)
   const servable = tuning.axioms.filter((a) => a.status !== 'revoked')
 
-  const scoredRules = servable
+  const rankedRules = servable
     .map((axiom) => ({
       axiom,
       unit: toRuleUnit(axiom, score(query, axiom.domain, axiomFiles(axiom, records, loops), axiom.statement)),
     }))
-    .filter(({ unit }) => query.empty || unit.why.score >= MIN_RELEVANCE)
     .sort((a, b) =>
       compareScored(
         a,
@@ -227,33 +386,52 @@ export function buildBriefing(
       )
     )
 
+  // PARTITION, NOT FILTER (changed 2026-10-26). The floor used to be a
+  // `.filter()` in the chain above, which threw away both the unit and
+  // the `why` block the scorer had already computed for it. The ranking
+  // and the cut are unchanged: `clearsFloor` is the same predicate, and
+  // sorting before the cut rather than after cannot reorder the kept
+  // units, because `compareScored` is a total order with a stable id
+  // tiebreak. What is new is that the rejected side survives long enough
+  // to be reported when the caller asks for it.
+  const clearsFloor = (unit: { why: MatchReason }) => query.empty || unit.why.score >= MIN_RELEVANCE
+  const scoredRules = rankedRules.filter(({ unit }) => clearsFloor(unit))
+
   const rules = scoredRules.slice(0, maxRules).map(({ unit }) => unit)
 
-  const scoredCases = loops
+  const rankedCases = cases
     .map((indexed) => ({
       indexed,
       unit: toCaseUnit(
         indexed,
         score(
           query,
+          // Deliberately '': neither shape carries a domain tag. A loop
+          // has none at all, and a one-shot's `domain` field holds a file
+          // path, which is scored below as a file instead.
           '',
-          indexed.loop.targetFiles,
+          indexed.targetFiles,
           caseText(indexed),
-          semantics?.get(caseKey(indexed.recordId, indexed.loop.id)) ?? null
+          semantics?.get(caseKey(indexed.recordId, indexed.caseId)) ?? null
         )
       ),
     }))
-    .filter(({ unit }) => query.empty || unit.why.score >= MIN_RELEVANCE)
     .sort((a, b) =>
       compareScored(
         a,
         b,
         (x) => x.unit.why,
-        (x) => recurrenceBonus(x.indexed.loop.recurrences + 1),
-        (x) => `${x.indexed.recordId}::${x.indexed.loop.id}`
+        // The recurrence tiebreak is "how many times was this
+        // independently seen". A loop seen once plus its recurrences; a
+        // one-shot exactly once, which is 0 bonus — the honest value,
+        // since `recurrences: null` means unobservable and an
+        // unobservable count cannot buy a rank.
+        (x) => recurrenceBonus((x.indexed.recurrences ?? 0) + 1),
+        (x) => `${x.indexed.recordId}::${x.indexed.caseId}`
       )
     )
 
+  const scoredCases = rankedCases.filter(({ unit }) => clearsFloor(unit))
   const nearestCases = scoredCases.slice(0, maxCases).map(({ unit }) => unit)
 
   // Guardrails ride with the rules they belong to: an agent being told
@@ -284,11 +462,21 @@ export function buildBriefing(
     rules,
     nearestCases,
     guardrails: guardrails.slice(0, GUARDRAIL_CAP),
+    // Absent rather than empty when the caller did not ask: see
+    // `Briefing.dropped` in ./types.ts for why the two must stay
+    // distinguishable.
+    ...(wantDropped > 0
+      ? {
+          dropped: collectDropped(rankedCases, scoredCases, maxCases, wantDropped) as DroppedCase[],
+          droppedRules: collectDropped(rankedRules, scoredRules, maxRules, wantDropped) as DroppedRule[],
+        }
+      : {}),
     coverage: {
       axiomsConsidered: servable.length,
       axiomsReturned: rules.length,
       recordsConsidered: records.length,
       loopsConsidered: loops.length,
+      oneShotsConsidered: cases.length - loops.length,
       casesReturned: nearestCases.length,
       retrieval: semantics ? 'semantic-v1' : 'lexical-v0',
       ...(semantics && semanticModel ? { retrievalModel: semanticModel } : {}),
@@ -298,8 +486,27 @@ export function buildBriefing(
   }
 }
 
-function renderWhy(why: MatchReason): string {
-  if (why.score === 0) return 'served because the request named no domain and no files'
+/**
+ * The one-line account of why a unit scored what it did.
+ *
+ * @param unfiltered  `coverage.unfiltered` for this briefing, which the
+ *   zero-score branch below needs and cannot derive. A score of 0 has
+ *   two different causes and they are not interchangeable: on a request
+ *   that named neither a domain nor any files there was nothing to rank
+ *   against, and on a request that named both there was and nothing
+ *   matched. Until 2026-10-26 this function printed the first sentence
+ *   unconditionally, which was true of every caller it then had, because
+ *   a filtered request dropped its zero-scoring units before rendering.
+ *   `--dropped` prints exactly those units, so the sentence became
+ *   reachable on a request that had in fact named files, and it said the
+ *   opposite of what the reader could see one line above.
+ */
+function renderWhy(why: MatchReason, unfiltered: boolean): string {
+  if (why.score === 0) {
+    return unfiltered
+      ? 'the request named no domain and no files, so nothing ranked it'
+      : 'nothing in common with the request: no domain, no file and no word matched (score 0)'
+  }
   const parts: string[] = []
   if (why.domain) parts.push(`${why.domain} domain match`)
   if (why.filesExact.length > 0) parts.push(`learned on ${why.filesExact.join(', ')}`)
@@ -320,6 +527,83 @@ function renderWhy(why: MatchReason): string {
   }
   return `${parts.join('; ')} (score ${why.score})`
 }
+
+/**
+ * The "## Considered and not shown" section, printed only when the
+ * caller asked for it with `request.dropped`.
+ *
+ * One bullet and one reason line per unit, which is the same two-line
+ * shape the sections above use, deliberately: a reader who has learned
+ * to read a surfaced unit should not have to learn a second format to
+ * read a rejected one. What differs is the first line's tail, which
+ * names the bound rather than the provenance, because the bound is the
+ * one thing a reader of this section can act on.
+ *
+ * The totals come out of `coverage` rather than out of the arrays below,
+ * so a request that asked for 3 and held back 198 says so instead of
+ * implying 3 was all there was.
+ */
+function renderDropped(briefing: Briefing): string[] {
+  const dropped = briefing.dropped
+  const droppedRules = briefing.droppedRules
+  if (!dropped && !droppedRules) return []
+
+  const cov = briefing.coverage
+  const casesHeld = cov.loopsConsidered + cov.oneShotsConsidered - cov.casesReturned
+  const rulesHeld = cov.axiomsConsidered - cov.axiomsReturned
+  const asked = briefing.request.dropped ?? 0
+  const lines: string[] = ['## Considered and not shown', '']
+
+  if (casesHeld === 0 && rulesHeld === 0) {
+    lines.push(
+      'Nothing was held back. Every rule and case this request scored is ' +
+        'printed above, so an empty section above is a statement about the ' +
+        'store rather than about the bounds.'
+    )
+    lines.push('')
+    return lines
+  }
+
+  lines.push(
+    `You asked for up to ${asked} of the units this request scored and did not ` +
+      `return. ${rulesHeld} rule${rulesHeld === 1 ? '' : 's'} and ${casesHeld} ` +
+      `case${casesHeld === 1 ? '' : 's'} were held back in total. Each line below ` +
+      `names the bound that held it, so raising that number is the remedy.`
+  )
+  lines.push('')
+
+  const why = (u: { reason: string; bound: number }) =>
+    u.reason === 'below_floor'
+      ? `scored under the relevance floor of ${u.bound}`
+      : `cleared the floor and lost the cut at ${u.bound}`
+
+  if (droppedRules && droppedRules.length > 0) {
+    lines.push('Rules:')
+    for (const d of droppedRules) {
+      const verb = d.unit.polarity === 'prefer' ? 'Prefer' : 'Avoid'
+      lines.push(
+        `- ${verb}: ${oneLine(d.unit.statement)} (${oneLine(d.unit.axiomId, ID_MAX)}) — ${why(d)}`
+      )
+      lines.push(`  - Would have been surfaced because: ${renderWhy(d.unit.why, cov.unfiltered)}`)
+    }
+    lines.push('')
+  }
+
+  if (dropped && dropped.length > 0) {
+    lines.push('Cases:')
+    for (const d of dropped) {
+      lines.push(
+        `- ${oneLine(d.unit.theme)} (${oneLine(d.unit.recordId, ID_MAX)}/` +
+          `${oneLine(d.unit.loopId, ID_MAX)}) — ${why(d)}`
+      )
+      lines.push(`  - Would have been surfaced because: ${renderWhy(d.unit.why, cov.unfiltered)}`)
+    }
+    lines.push('')
+  }
+
+  return lines
+}
+
 
 /**
  * Render the briefing as the markdown an agent actually reads — the same
@@ -383,7 +667,7 @@ export function renderBriefing(briefing: Briefing): string {
           (r.status === 'user-edited' ? ', edited by the owner' : '')
       )
       if (r.firstEvidence?.quote) lines.push(`  - Her words: "${oneLine(r.firstEvidence.quote)}"`)
-      lines.push(`  - Surfaced because: ${renderWhy(r.why)}`)
+      lines.push(`  - Surfaced because: ${renderWhy(r.why, briefing.coverage.unfiltered)}`)
     }
     lines.push('')
   }
@@ -395,15 +679,35 @@ export function renderBriefing(briefing: Briefing): string {
     lines.push('')
   } else {
     for (const c of briefing.nearestCases) {
+      // The parenthetical says which shape this case is, because the two
+      // are worth different amounts to the reader and the lines below
+      // differ accordingly. A loop carries a measured recurrence; a
+      // one-shot carries none, and printing `Took 0 repeats` for it would
+      // state as a measurement the one thing its record cannot observe.
+      const provenance = c.kind === 'loop' ? `${c.resolution}` : 'one-shot edit'
       lines.push(
-        `- **${oneLine(c.theme)}** (${oneLine(c.recordId, 64)}/${oneLine(c.loopId, 64)}, ${c.resolution})`
+        `- **${oneLine(c.theme)}** (${oneLine(c.recordId, 64)}/${oneLine(c.loopId, 64)}, ${provenance})`
       )
       lines.push(`  - Files: ${c.targetFiles.map((f) => oneLine(f, 128)).join(', ') || 'not recorded'}`)
-      lines.push(`  - Took ${c.recurrences} repeat${c.recurrences === 1 ? '' : 's'} after the first ask`)
+      if (c.recurrences === null) {
+        lines.push(
+          '  - How often she had to repeat it: not recorded. This record is a git' +
+            ' commit pair, so the correction appears once, as the edit itself, and' +
+            ' recurrence is unobservable rather than zero.'
+        )
+      } else {
+        lines.push(`  - Took ${c.recurrences} repeat${c.recurrences === 1 ? '' : 's'} after the first ask`)
+      }
       if (c.complaint) lines.push(`  - She said: "${oneLine(c.complaint)}"`)
       if (c.mechanism) lines.push(`  - What actually fixed it: ${oneLine(c.mechanism)}`)
-      if (c.discoveredSpec) lines.push(`  - The spec nobody could state up front: ${oneLine(c.discoveredSpec)}`)
-      lines.push(`  - Surfaced because: ${renderWhy(c.why)}`)
+      if (c.discoveredSpec) {
+        lines.push(
+          c.kind === 'loop'
+            ? `  - The spec nobody could state up front: ${oneLine(c.discoveredSpec)}`
+            : `  - What she changed: ${oneLine(c.discoveredSpec)}`
+        )
+      }
+      lines.push(`  - Surfaced because: ${renderWhy(c.why, briefing.coverage.unfiltered)}`)
     }
     lines.push('')
   }
@@ -426,12 +730,20 @@ export function renderBriefing(briefing: Briefing): string {
     lines.push('')
   }
 
+  lines.push(...renderDropped(briefing))
+
   const cov = briefing.coverage
   lines.push('## Coverage')
   lines.push('')
+  // Three counts, not two. The one-shot figure is printed beside the loop
+  // figure rather than folded into it, because a store built by `ursa run`
+  // over a repository has only one-shots, and a line reading `0 correction
+  // loops` with no second number told a reader that store held nothing to
+  // learn from. See BriefingCoverage.oneShotsConsidered in ./types.ts.
   lines.push(
-    `Considered ${cov.axiomsConsidered} active rule${cov.axiomsConsidered === 1 ? '' : 's'} and ` +
-      `${cov.loopsConsidered} correction loop${cov.loopsConsidered === 1 ? '' : 's'} across ` +
+    `Considered ${cov.axiomsConsidered} active rule${cov.axiomsConsidered === 1 ? '' : 's'}, ` +
+      `${cov.loopsConsidered} correction loop${cov.loopsConsidered === 1 ? '' : 's'} and ` +
+      `${cov.oneShotsConsidered} one-shot correction${cov.oneShotsConsidered === 1 ? '' : 's'} across ` +
       `${cov.recordsConsidered} outcome record${cov.recordsConsidered === 1 ? '' : 's'}; ` +
       `returned ${cov.axiomsReturned} rule${cov.axiomsReturned === 1 ? '' : 's'} and ` +
       `${cov.casesReturned} case${cov.casesReturned === 1 ? '' : 's'}. ` +
@@ -548,8 +860,8 @@ export async function briefWithSemantics(
 ): Promise<Briefing> {
   if (!embedder) return buildBriefing(tuning, records, input, now)
   const request = queryText(input.domain, input.files)
-  const cases = indexLoops(records).map((indexed) => ({
-    key: caseKey(indexed.recordId, indexed.loop.id),
+  const cases = indexCases(records).map((indexed) => ({
+    key: caseKey(indexed.recordId, indexed.caseId),
     text: caseText(indexed),
   }))
   const semantics = await embedAndRank(embedder, cache, request, cases)

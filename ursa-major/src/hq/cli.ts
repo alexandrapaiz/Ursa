@@ -2,7 +2,7 @@
 //
 //   npx tsx src/hq/cli.ts brief <projectPath> [--domain motion] \
 //     [--files src/app/page.tsx,src/app/globals.css] \
-//     [--max-rules 8] [--max-cases 3] [--json] [--semantic] \
+//     [--max-rules 8] [--max-cases 3] [--dropped 5] [--json] [--semantic] \
 //     [--tuning <path>] [--records <dir>] [--embeddings <path>]
 //
 // Defaults follow the project store (src/store.ts): the tuning record is
@@ -11,6 +11,16 @@
 // briefing can be taken against a fixture without a project on disk.
 //
 // Output is markdown on stdout by default, JSON with --json.
+//
+// `--dropped N` adds a section listing the N highest-scoring units this
+// request scored and did not return, each with the score breakdown it
+// would have been surfaced with and the bound that held it out. It
+// answers the second question a thin briefing provokes and cannot
+// otherwise answer: `None on these files` can mean the store has nothing
+// near these files, or that the nearest thing scored one point under the
+// floor. Off by default, because the floor and the two ceilings exist to
+// protect an agent's opening context and a briefing that volunteered
+// every rejection would spend what they protect.
 //
 // `--semantic` additionally ranks the nearest cases by meaning rather
 // than by word overlap alone (src/hq/semantic.ts, plan §12). It is
@@ -41,7 +51,7 @@ import { loadCache, loadMiniLM, saveCache } from './embedding'
 import type { BriefingInput } from './types'
 
 const USAGE = `ursa brief <projectPath> [--domain <tag>] [--files a.ts,b.ts]
-       [--max-rules N] [--max-cases N] [--json] [--semantic]
+       [--max-rules N] [--max-cases N] [--dropped N] [--json] [--semantic]
        [--tuning <tuning.json>] [--records <records dir>]
        [--embeddings <embeddings.json>]`
 
@@ -67,6 +77,7 @@ export async function main(argv: string[]): Promise<number> {
       files: { type: 'string' },
       'max-rules': { type: 'string' },
       'max-cases': { type: 'string' },
+      dropped: { type: 'string' },
       json: { type: 'boolean', default: false },
       tuning: { type: 'string' },
       records: { type: 'string' },
@@ -93,6 +104,10 @@ export async function main(argv: string[]): Promise<number> {
       .filter((f) => f.length > 0),
     maxRules: values['max-rules'] ? Number(values['max-rules']) : DEFAULT_MAX_RULES,
     maxCases: values['max-cases'] ? Number(values['max-cases']) : DEFAULT_MAX_CASES,
+    // Absent rather than 0 when the flag was not passed, so the briefing
+    // omits the field entirely and a reader of the JSON can tell "not
+    // asked" from "asked, nothing held back" (src/hq/types.ts).
+    ...(values.dropped === undefined ? {} : { dropped: Number(values.dropped) }),
   }
 
   const embeddingsPath = values.embeddings ? absPath(values.embeddings) : join(root, '.ursa', 'embeddings.json')

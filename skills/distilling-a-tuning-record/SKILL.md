@@ -54,7 +54,7 @@ evidence:
     source: ursa-major/src/tuning/distill.ts:11-18,136-146
   - ref: E11
     what: the default runner is the local Claude Code CLI in print mode with the prompt on stdin
-    source: ursa-major/src/tuning/distill.ts:154-166,172
+    source: ursa-major/src/tuning/distill.ts:154-166,170
   - ref: E12
     what: merge sets evidenceCount to the length of the axiom's evidence array, both when it creates and when it reinforces
     source: ursa-major/src/tuning/merge.ts:57-64,76-83
@@ -132,7 +132,7 @@ evidence:
     source: docs/vision.md:53-56 (section 1)
   - ref: E37
     what: the tuning test's only fixture declares the episode accepted with an acceptance basis of retention
-    source: ursa-major/src/tuning/tuning.test.ts:18-26
+    source: ursa-major/src/tuning/tuning.test.ts:19-27
   - ref: E38
     what: both sides of a one-shot correction are read from the extents the record already stores rather than rebuilt from the diff, because a rebuild had been shipping reconstructed text as a verbatim quote
     source: ursa-major/src/signals.ts:65-81
