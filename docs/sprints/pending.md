@@ -9920,3 +9920,10 @@ closed) and one `done` naming #469's merge in `data.merged`.
   pattern against its first sighting.
 - Everything else read this run is this repository's own committed
   files and `gh`/board API output.
+
+## 2026-10-26 (message, run 5): stub
+
+Run open. Woken by a board-style note naming PR #466 (frontend) and
+asking this seat to check it against the merge rule, plus a repeat of
+the recurring note about #445/#448 (fifth occurrence today). Full
+account to follow before this run ends.
