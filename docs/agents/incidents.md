@@ -8338,3 +8338,258 @@ was the probe being wrong. This one is the probe being **right and run
 too early**, which is the hardest of the four to see, because a correct
 instrument returning a correct failing reading is indistinguishable from
 diligence.
+
+## INC-2026-10-26-a-hand-resolution-moved-a-correction-between-two-register-entries-and-every-merge-after-it-is-clean — Sixty-three lines of a correction about the ledger merge driver now sit inside an incident about a printed token, and the merge that lands them there exits zero
+
+**What happened.** Ursa's PM told this seat at 2026-10-26T10:26:14Z that
+it had resolved the duplicate heading this seat diagnosed: it deleted the
+second copy of
+`INC-2026-10-18-board-runtime-token-printed-twice` at line 7795 of
+`docs/agents/incidents.md` on `#507` and kept the first at 7683, adding
+nothing to the kept copy "since it already carries the forty-seventh
+window correction that the deleted copy stopped before."
+
+Every claim in that message is true of the bytes. One copy of the heading
+survives, the second is gone, and the surviving copy does carry a block
+headed `**Correction, 2026-10-26, forty-seventh window**`.
+
+**That correction is not about this entry.** It is sixty-three lines
+about the ledger merge driver, the owner's green button, and the
+nineteen merges in which the driver had something to decide. On the merge
+base `25f2963d` and on `origin/main` today it sits inside
+`INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`,
+which is the entry it is a correction to. On `#507` it sits inside the
+token-print entry, two headings later.
+
+**The measurement, per entry rather than per file**, counting lines from
+each heading to the next:
+
+| ref | driverless-merge entry | token-print entry |
+|---|---|---|
+| merge base `25f2963d` | **230** | **48** |
+| `origin/main` today | **230** | **48** |
+| `refs/prs/507` | **166** | **111** |
+
+The sixty-three lines are byte-identical in both positions, so this is a
+move and not a rewrite. Nothing was lost and nothing was invented.
+
+**Why it happened, and it was not the deletion.** `97dfec0d^`, the parent
+of the PM's delete commit, already reads 166. The move entered at
+`43982c4c` at 06:15:50Z, whose own subject is "merge main into message
+run 7: keep both ledger additions". That is a hand resolution of a
+register conflict, taken under
+`INC-2026-10-26-the-fork-sweep-deleted-the-only-copy-of-an-entry-that-ever-reached-main`,
+where a window of this seat had removed the only landed copy of the entry
+and the PM restored it by hand. The restoration put the entry back and
+put the boundary in the wrong place.
+
+**Why no instrument reports it, which is the whole finding.** Merging
+`#507` into `main` with both drivers registered exits **0**. The heading
+census is right: one copy, as asked. The conflict sweep is right: nothing
+conflicts. The register driver's unit is the **entry**, so it sees one
+side that grew an entry by sixty-three lines and another that did not,
+takes the grown one, and is correct by its own rule. Performed rather
+than reasoned: the merged tree carries the token entry at 111 lines with
+the correction at its line 7417, and the driverless-merge entry at 166.
+
+So the class is **a hand resolution that misplaces an entry boundary**.
+Content-presence instruments cannot see it, because the text is present
+in the file. Heading instruments cannot see it, because the headings are
+right. `tools/stack/absent-text.py` cannot see it, because every line is
+`exact` somewhere in the tip. The only reading that fires is per-entry
+line counts against the merge base, and no check in this organization
+took one.
+
+**The fix, and whose it is.** The block belongs under the
+driverless-merge heading. The edit is on the PM's own open branch and so
+it is the PM's to make, which is why this was reported to that seat at
+10:33:44Z with the table above and not patched from here. Reported before
+the merge deliberately, because after the merge the same repair costs a
+second pull request against `main`.
+
+**What the org grows from it.** The standing check is in
+`prompts/exo-agent.md` under §5b: whenever this seat measures a branch
+that touches a register the `register` driver manages, compare per-entry
+line counts against the merge base and read every entry the branch did
+not mean to touch. One command, and it is the only instrument that can
+return a finding here:
+
+```sh
+sizes() { git show "$1":docs/agents/incidents.md \
+  | awk '/^## /{h=$2;o[++k]=h;n[h]=0} h{n[h]++} END{for(i=1;i<=k;i++) print n[o[i]], o[i]}'; }
+diff <(sizes "$(git merge-base origin/main refs/prs/<n>)") <(sizes refs/prs/<n>)
+```
+
+**Status:** open. The sixty-three lines are misfiled on `#507` and the
+repair is the PM's. This seat's half is shipped: the account here and the
+per-entry check in the charter.
+
+## INC-2026-10-26-this-seat-renamed-its-own-accepted-incident-identifier-and-a-siblings-ledger-cites-the-dead-one — The forty-seventh window wrote "the identifier stays" into an entry whose identifier this seat had already changed, and two ledger rows in another seat's lane still point at the old one
+
+**What happened.** The dangling-citation check this charter added on
+2026-10-26 fired for the first time with a true positive. Run over
+`origin/main`, excluding HQ's vendored lessons register and the design
+docs as the check requires, it returns six identifiers cited in `docs/`
+and absent from this register's headings. Paired with the authoring
+probe the check also requires:
+
+| identifier | authoring commits | reading |
+|---|---|---|
+| `INC-2026-09-24-prohibition-supplies-the-string` | 0 | foreign or illustrative, not a finding |
+| `INC-2026-09-24-test-suite-ran-zero-tests` | 0 | same |
+| `INC-2026-10-12-meta-review-proposal-merged-never-deployed` | 0 | same |
+| `INC-2026-10-24-dup-slug` | 0 | invented example, as the check's own note says |
+| `INC-2026-10-18-board-runtime-token` | 13 | **a prefix**, see below |
+| `INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares` | 2 | **the real finding** |
+
+**The real one.** `86acd4ff` created that heading. `422b248f` rewrote the
+entry and renamed it to
+`INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`.
+Both commits are this seat's. The old slug appears zero times in
+`origin/main:docs/agents/incidents.md` and twice in
+`origin/main:docs/ideas.md`, at lines 11485 and 11755, written by
+`ursa-skill` in `961952ee` at 2026-10-26T00:47:24Z.
+
+**Why it is worse than an ordinary broken pointer.** The entry that was
+renamed is the same entry whose forty-seventh-window correction says, in
+this seat's own words, that "the identifier stays", that renaming a slug
+"would break every citation of it", and that a frozen identifier is not
+a frozen finding. That paragraph was written to refuse the skill seat's
+request for a retitle. It is three days downstream of a rename this seat
+had already performed on the same entry and never cited forward, and the
+citations it broke are the skill seat's.
+
+**The sixth row, which is a defect in the check itself.** The regex
+`INC-[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+` stops at a line break, so a
+citation wrapped across two lines of prose yields a truncated slug. The
+charter's pairing rule reads a zero authoring count as "foreign or
+invented" and gives no reading for a non-zero count on a slug that is a
+**prefix** of a live one. That is a third class, and it is the class a
+register of long slugs and seventy-two-column prose produces constantly.
+Resolve the basename before reporting, exactly as §3 already requires for
+tool paths:
+
+```sh
+git show origin/main:docs/agents/incidents.md | grep -qE "^## $slug" \
+  || git show origin/main:docs/agents/incidents.md | grep -qE "^## $slug[a-z0-9-]+" \
+  && echo "PREFIX of a live heading, not dangling"
+```
+
+**Whose the repair is.** `docs/ideas.md` is the ledger, which this seat
+may not edit under its own boundary, and the two rows are the skill
+seat's. Told that seat on the board with both line numbers and the new
+slug. The renaming itself cannot be undone, because the new identifier is
+now cited across three registers and reversing it is the defect Ursa
+incident 5 exists to prevent, so the surviving duty is the forward
+pointer.
+
+**Status:** open on the two ledger rows, which are the skill seat's.
+Closed on this seat's half: the check's prefix class is in the charter
+and the account is here.
+
+## INC-2026-10-26-main-carries-the-repaired-register-and-four-open-pull-requests-silently-revert-it — The entry boundary my predecessor asked a sibling to repair was already right on `main`, and four of that sibling's open branches will undo the repair on a merge that exits zero
+
+**Opened** 2026-10-26, fifty-fifth window (message: the centralizer's
+`done` at 10:42:43Z and `#501`'s merge). **Status: open**, handed to
+Ursa's PM with a deadline, because the four branches are that seat's.
+
+### The direction was backwards, and that is the whole finding
+
+The fifty-fourth window measured the two entries on `refs/prs/507`,
+found 166 and 111 where it expected 230 and 48, and carried the check
+forward as *"is the sibling's repair in yet"*, with an ask to Ursa's PM
+at 10:33:44Z and a deadline of 12:33Z. That framing has one unstated
+premise: that `main` holds the defect and the branch holds the cure.
+
+Measured this window, on the same three-line `sizes()` reading:
+
+| ref | `…board-runtime-token-printed-twice` | `…githubs-merge-verdict-…-cannot-reach-the-gate` |
+|---|---|---|
+| `origin/main` | **48** | **230** |
+| `refs/prs/507` | 111 | 166 |
+| `refs/prs/510` | 111 | 166 |
+| `refs/prs/500` | 160 | 166 |
+| `refs/prs/505` | 160 | 166 |
+| every other open branch, nine of them | 48 | 230 |
+
+`main` is correct, and has been since `65ef085a` at **06:07:25Z**, this
+seat's own window 49 commit titled `restore
+INC-2026-10-18-board-runtime-token-printed-twice`. So nothing is owed on
+the branch in the direction the ask named. What is owed is the opposite:
+**those four branches hold the pre-restore shape, and merging one lands
+it on `main`.**
+
+**And the premise was not unmeasured, which is the sharper version of
+this (corrected in the same window, after reading the predecessor's
+`improvements.md` entry rather than only its carried list).** Window 54
+printed the trunk's value. Its own entry reads: *"Per-entry line counts
+against the merge base read 230/48 at the base and on `main`, and
+166/111 on the branch."* It had the number. What it did not have was the
+**direction of the action that follows from it**, and the two live in
+different artifacts: the number went into `improvements.md` and the
+prescription went into the carried list, which is the only one of the
+two a successor reads first.
+
+So this is not a missed reading. It is a **correct reading whose
+consequence was written down backwards one file away**, and that is the
+worse failure of the two, because no re-measurement finds it. The
+carried list said "read whether the sixty-three lines are back under
+their own heading … on `main` after it merges", which treats the merge as
+the thing that *resolves* the question. The merge is the thing that
+*causes* it. Four branches rather than one, nine clean, and the gate sees
+zero.
+
+> **A check and the action it implies must live in the same sentence, or
+> the action will be written from the frame the check was opened in
+> rather than from the number it returned.**
+
+### The merge exits zero, which is why no instrument reports it
+
+Simulated in a scratch worktree, `origin/main` merged with
+`refs/prs/510`, both register drivers registered and their path asserted
+against this checkout:
+
+```
+merge exit=0
+111 INC-2026-10-18-board-runtime-token-printed-twice
+166 INC-2026-10-25-githubs-merge-verdict-…-cannot-reach-the-gate
+```
+
+Sixty-three lines of a correction about the ledger merge driver move back
+under the heading about a printed token, and the gate sees a clean merge.
+The register driver is entry-identified, so it resolves per entry and
+takes the branch's copy of each; it has no notion that one of the two
+copies is a *restore* and the other is what the restore repaired. This is
+`INC-2026-10-26-a-hand-resolution-moved-a-correction-between-two-register-entries-and-every-merge-after-it-is-clean`
+with its sign established: the clean merge does not merely preserve the
+mistake, it **reintroduces** it onto a trunk that no longer has it.
+
+### Why the fifty-fourth window could not have seen it
+
+It read the branch and not `main`, and that is the correct reading for
+every other check in this file, because `main` is the subset of this
+org's memory the owner has merged and is therefore the *stale* side by
+default. Here it was the fresh side, because the repair had already
+merged and the branch had been cut before it. So the standing habit
+inverted:
+
+> **A register check reads both sides or it cannot tell a pending repair
+> from a pending regression.** The two are the same observation — branch
+> and trunk disagree — and they have opposite owners and opposite
+> actions.
+
+### The census is one command and it is now a standing sweep
+
+The reading above is cheap enough to run over the whole open queue, and
+it is the only form that localises the defect to a seat rather than to a
+file. Four of one seat's chain, nine other branches clean: that is a
+chain-shaped fault, not a register-shaped one, and it tells you who to
+tell.
+
+### Actions
+
+1. Ursa's PM, told at this window's send time with a `data.deadline`: the
+   four branches need `main`'s copy of those two entries before any of
+   them merges. Not this seat's files to edit.
+2. The charter clause, on the charter lane: read both sides, and run the
+   per-entry census over the open queue rather than over one branch.

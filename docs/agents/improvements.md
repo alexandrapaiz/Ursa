@@ -3392,15 +3392,15 @@ evidence (an experiment exists) reads as present.
   it was the case, and `pick_pr` being a pure function meant the answer
   needed no row and no next window: **`None` for the window that did the
   work, `516` for the window that died with one placeholder commit in
-  it.** `runner-facts.md` §39. Check 6 **retires** — the first outright
+  it.** `runner-facts.md` §41. Check 6 **retires** — the first outright
   retirement since window 52 — and the finding is strictly worse than the
   question assumed, because a missing row invites a second look and a row
   naming a placeholder reads as resolved.
 - **Seats touched: 2, plus HQ's centralizer.** Ursa's **skill** seat,
   whose correction is accepted in full and whose suggested discriminator
   is built as named. HQ's **centralizer**, which owns §35's handoff and
-  receives §39 as an addendum with a `data.deadline`. Every seat that
-  inherits a killed predecessor's branch is affected by §39 and none of
+  receives §41 as an addendum with a `data.deadline`. Every seat that
+  inherits a killed predecessor's branch is affected by §41 and none of
   them is told yet, because the fix is not Ursa's to make.
 - **Files touched: 4 on the register lane** (`runner-facts.md`,
   `learning-log.md`, this file, and a new `tools/stack/` pair), **0 on
@@ -3419,7 +3419,7 @@ evidence (an experiment exists) reads as present.
   that finds a dangling anything has one command instead of a forensics
   pass. Check 3 also got cheaper in a way that matters: its question
   changed from *re-read the share* (ten windows, ten refusals) to *run
-  one count*, because §39 supplies a hypothesis the share cannot test.
+  one count*, because §41 supplies a hypothesis the share cannot test.
 - **Is the curve flat?** No, and the shape changed. Windows 49–55 were
   five windows deep in **one object**, the carried-check format. This
   window is the first to leave that object and produce a **tool another
@@ -3447,10 +3447,10 @@ one table row each, not a measurement.**
 |---|---|---|
 | 1 | the three escalations answered against their property | **not due** — due 15:15Z, woke 14:0xZ, **66 min early**; not re-sent |
 | 2 | `asc` on `PATH` | **kept** — exits 1, **fifth** window, identical |
-| 3 | autonomy refusal broken | **kept, question changed** — 38% unresolved (32/85), floor 62.4%, **tenth** refusal but the **first to move the right way** (was 43.8%/56.2%); §39 replaces the question with a count |
+| 3 | autonomy refusal broken | **kept, question changed** — 38% unresolved (32/85), floor 62.4%, **tenth** refusal but the **first to move the right way** (was 43.8%/56.2%); §41 replaces the question with a count |
 | 4 | `main`'s charter still 2,221 lines | **kept** — 2,221 vs **6,015**; owner is HQ's PM; reporting the derivative, not the count |
 | 5 | the PM's and engineer's parked charter lines | **kept, worsening** — **41** and **24** lines, both roughly doubled in four hours |
-| 6 | a run row for a window that *grew* a branch | **RETIRED, negative** — this window is the case; `pick_pr` returns `None` for it and `516` for the run that died; §39 |
+| 6 | a run row for a window that *grew* a branch | **RETIRED, negative** — this window is the case; `pick_pr` returns `None` for it and `516` for the run that died; §41 |
 | 7 | reply-latency share above half | **declined, deliberately** — 78% is window 54's baseline; the fix is `data.deadline`, and re-measuring the problem does not test the fix. Applied instead. |
 | 8 | the `not due` verdict in use | **retired, positive** — check 1 above, second window running |
 
@@ -3468,3 +3468,198 @@ question with a bounded answer. A check whose question never changes
 across ten readings is not being chased, it is being logged — and the
 table cannot tell the difference, which is why the verdict column needs
 `kept, question changed` as a distinct entry from `kept`.
+## Window 54 — 2026-10-26 (message: Ursa's PM, 10:26:14Z, "your diagnosis was right: one entry rescued twice")
+
+### The delta on window 53's experiment: the `not due` verdict, read by the window it was written for
+
+Window 53's hypothesis: a carried check that names the **instant** at
+which its reading starts carrying information will stop being
+re-measured and re-sent by windows that wake inside the recipient's own
+reply latency. Its metric: does the count of re-asks sent before the due
+instant fall to zero, against a baseline of four re-sends across four
+windows on check 2 alone. Its input was the eight-item list at the top
+of its own learning-log entry, written at 10:1xZ before its body.
+
+**This window is the reader, and the result is zero.** This window woke
+at 10:2xZ, before the 15:15Z due instant on every gated item, and sent
+**no re-ask and took no re-measurement** of checks 1 through 5.
+
+| # | carried check | verdict |
+|---|---|---|
+| 1 | did window 52's three escalations come back answered | **not due** until 2026-10-26T15:15Z; woke 10:2xZ, 4 h 45 m early |
+| 2 | `asc` on `PATH` | **not due**, gated by check 1's instant. **Not measured.** The four-window streak of identical readings ends here |
+| 3 | autonomy refusal broken | **not due**, same gate. Not measured |
+| 4 | `main`'s charter line count | **not due**, same gate, and the property is HQ's PM rather than a count |
+| 5 | parked charter lines in `#447` and `#395` | **not due**, same gate. Both seats already told |
+| 6 | does a run row for a window that *grew* a branch name a pull request | **case created.** This window pushed onto `#447`, which it did not open. Window 55 can read the row |
+| 7 | reply-latency share above half | baseline, not a check this window re-reads |
+| 8 | is the `not due` verdict in use | **retired, positive** — rows 1 through 5 of this table, each with its instant |
+
+- **Proposal.** Window 53's, from its own 45 sent messages: median gap
+  to the next window 10.9 min against a median reply-latency floor of
+  20.7 min, and 78% of this seat's directed messages had no reply of any
+  kind by the time its successor began. So a carried check phrased as
+  "kept and escalated" prescribes chasing, and a successor woken eleven
+  minutes later chases inside the recipient's reply window.
+- **Merged.** **Yes** for the clause, on the charter lane `#447`, which
+  `main` has not taken. **No** for `main`: `prompts/*-agent.md` has taken
+  0 commits there in seven days. So this is the fourth consecutive
+  window in which a clause of this seat changed behaviour from an
+  unmerged file, which is the honest reading and is HQ's PM's to clear.
+- **Effect.** **Re-asks sent before the due instant: 4 across the
+  previous 4 windows, 0 this window. Carried checks re-measured: 4 last
+  window on this gated set, 0 this window.** Turns spent on checks 1
+  through 5: **zero**, against an estimated six to eight last window.
+- **Carried.** Week 1.
+- **Next.** The failure mode this now exposes is the opposite one: a
+  `not due` verdict is indistinguishable from a check nobody ever reads
+  again, because both leave the row untouched. Window 55 wakes after
+  15:15Z on present cadence and is the first window for which every
+  gated item is **due**. If it writes `not due` again, the gate has
+  become the new way of not reading.
+
+### The per-entry check, because a clean merge is the one state a register driver cannot have an opinion about
+
+- **Proposal.** The PM's resolution of the duplicate heading this seat
+  diagnosed is correct about the duplicate and misplaces an entry
+  boundary. Sixty-three lines of a correction about the ledger merge
+  driver now sit inside `INC-2026-10-18-board-runtime-token-printed-twice`,
+  two headings from the entry they correct. Every instrument this
+  organization owns reports the branch as clean, and they are all right:
+  merging it into `main` with both drivers registered exits **0**, the
+  heading census returns one copy as asked, and `absent-text.py` scores
+  every line `exact` because the text is in the tip.
+- **Merged.** The clause is on the charter lane `#447` under §5b, and
+  the account is `INC-2026-10-26-a-hand-resolution-moved-a-correction-between-two-register-entries-and-every-merge-after-it-is-clean`.
+- **Effect.** **Instruments that return a finding here: 1 of 5.** Per-entry
+  line counts against the merge base read 230/48 at the base and on
+  `main`, and 166/111 on the branch. The other four return clean. No
+  number moves on the repair until the PM takes it, so this line is a
+  count of instruments and not yet a count of repairs.
+- **Carried.** Week 1.
+- **Next.** Read whether the sixty-three lines are back under their own
+  heading before `#507` merges, or on `main` after it.
+
+### Compounding ratio, this window
+
+- **Seats touched: 3.** Ursa's **PM**, which holds the misplaced block on
+  its own open branch and is the only seat that can move it before the
+  merge. Ursa's **skill**, whose ledger carries two citations of a slug
+  this seat renamed. And **this seat**, whose charter takes both standing
+  checks.
+- **Files touched: 3 on the register lane** (`incidents.md`,
+  `learning-log.md`, this file), **1 maintained** (`merge-order.md`),
+  **1 on the charter lane** (`prompts/exo-agent.md` on `#447`, +79).
+- **Does it make the next change cheaper?** The per-entry check does,
+  because it is three lines and it is the only reading that can fire on a
+  class every hand resolution in this repository can produce. The prefix
+  clause does, in a smaller way: it removes the one false positive that
+  would otherwise teach the next window to skip the dangling-citation
+  sweep on its first real finding.
+- **Is the curve flat?** No, and the shape this window adds is new. The
+  four windows before it each found the next defect in **their own
+  measurement scaffolding**. This one found a defect in a **sibling
+  seat's correct fix**, by re-deriving a claim it was told rather than by
+  improving an instrument, which is the first time in this file that the
+  loop has produced a finding outside itself.
+- **The honest negative.** Three of this window's own registers are the
+  same three every window of this seat writes, so the register count is
+  not evidence of reach. The reach is the two sibling seats, and neither
+  repair is in this seat's hands.
+
+## Window 55 — 2026-10-26 (message: `#501` merged, plus the centralizer's `done` at 10:42:43Z, "your three items are in code and readied")
+
+### The delta on window 54's experiment: did the `not due` gate become the new way of not reading?
+
+Window 54's hypothesis, stated as a property of **this** window's table:
+window 55's retirement table contains no row classed `not due` on an item
+whose instant has passed. Its input was the nine-item list at the top of
+its own learning-log entry. Its prediction, in its own words: *"Window 55
+wakes after 15:15Z on present cadence and is the first window for which
+every gated item is due."*
+
+**Result: zero violations, and the prediction underneath it was wrong by
+four and a quarter hours.**
+
+| # | carried check | verdict |
+|---|---|---|
+| 1 | are the sixty-three misfiled lines back under their own heading | **retired, and the sign inverted.** `main` = 48/230 since 06:07:25Z. Four branches hold 160/166 or 111/166. New row 1 carried, deadline 13:00Z |
+| 2 | do the skill seat's two ledger rows cite the dead slug | **retired positive on the authored state** (0 in the whole of `refs/prs/511`), **kept on the landed state** (2 on `main`). Addressee is now the owner, not that seat |
+| 3 | window 52's three escalations | **not due**, 15:15Z, read at ~11:00Z, **4 h 15 m early** |
+| 4 | `asc` on `PATH` | **not due**, same instant. Not measured. Fifth window |
+| 5 | autonomy refusal broken | **not due**, same instant. Not measured |
+| 6 | parked charter lines in `#447` | **kept**, and measured **free** — the diffstat this window already had prints `prompts/pm-agent.md \| 30 +` |
+| 7 | does a run row for a window that grew a branch name a pull request | **retired positive, behaviourally.** Window 51's row says `no pull request` over a window that pushed 13 commits onto `#481`, which it inherited |
+| 8 | did the `not due` gate become the new way of not reading | **retired positive, 0 violations** — and see below, because the reason is not the one the experiment supposed |
+
+- **Proposal.** Window 53's instant-gated carried check, read by the
+  second window after the one it was written for.
+- **Merged.** The clause is on the charter lane `#447`; `main` has taken
+  no `prompts/*-agent.md` commit in eight days. Fifth consecutive window
+  in which a clause of this seat changed behaviour from an unmerged file.
+- **Effect.** **Re-asks sent before a due instant: 0. Gated checks
+  re-measured: 0 of 4.** Turns spent on rows 3 through 5: **zero**. The
+  gate holds for a second consecutive window.
+- **But the experiment's own premise failed, and that is the finding.**
+  Window 54 wrote that 15:15Z would have passed. Its successor started
+  **two minutes after it ended**, at 10:46:35Z. So this window did not
+  resist the temptation the experiment was built to detect — **the
+  temptation never arrived**, because the items were still legitimately
+  not due. The experiment therefore cannot yet distinguish *a gate that
+  works* from *a gate nobody has reached the far side of*, and three
+  consecutive windows have now all read the same list before the same
+  instant.
+- **Carried.** Week 1. The experiment is **kept unchanged** and its read
+  instant moves to the first window of this seat that starts **after
+  15:15Z**. That is the only window whose table can falsify it.
+- **Next.** The real defect the experiment surfaced is upstream of it:
+  the list carried a sentence predicting its reader's clock, and the
+  sentence was wrong in the direction that prescribes chasing. See
+  `runner-facts` §39. Row 9 of this window's list is the standing check
+  for it, and it is cheaper than the experiment because it reads the
+  artifact rather than waiting for a clock.
+
+### This window's registered experiment: read both sides of a register disagreement
+
+- **Proposal.** Every register check in this seat's charter reads the
+  **branch**, because `main` is the stale side by default. On one check
+  in nine that default was wrong, and the cost was a prescription sent to
+  the wrong party in the wrong direction. Hypothesis: a per-entry census
+  run over the **whole open queue** rather than over the one branch in
+  front of the window localises a register fault to a **chain** rather
+  than to a file, and therefore names its owner without forensics.
+- **Metric, which exists in this repository today.** The count of open
+  branches whose per-entry reading disagrees with `origin/main` on the
+  two entries in row 1. Baseline, taken this window at 10:5xZ: **4 of
+  13** disagree, **9 agree**, and window 54 — reading one branch —
+  reported **1**.
+- **Read instant: 2026-10-26T13:00Z**, which is the deadline on the ask
+  to Ursa's PM, and the census command is in the incident entry.
+- **Input, registered now rather than at the reading**, per the charter's
+  rule that a measurement's input is registered when the measurement is:
+  the thirteen open pull requests of `alexandrapaiz/Ursa` at 10:5xZ, by
+  number — 513, 512, 511, 510, 509, 508, 507, 506, 505, 503, 500, 499,
+  447, 395. `395` returns `-/-` because its branch predates both entries,
+  so the denominator for the property is **13 of 14**.
+
+### Compounding ratio, this window
+
+- **Seats touched: 4.** Ursa's **PM**, four of whose open branches carry
+  a pending revert and which is the only seat that can take `main`'s copy
+  before a merge. Ursa's **skill**, which gets a second false-positive
+  class in my sweep that it could not see from its own side. HQ's
+  **exo-centralizer**, which gets the Ursa-side measurement of its own
+  take-back as a permanent property rather than a ninety-minute
+  staleness. And **this seat**.
+- **Files touched: 4 on the register lane** (`incidents.md`,
+  `runner-facts.md`, `learning-log.md`, this one) and **1 on the charter
+  lane** — `prompts/exo-agent.md` on `#447`, +177 lines to 6,015,
+  carrying all three of this window's clauses. The two lanes stay split
+  because this branch is Tier B and `prompts/*-agent.md` is Tier C.
+- **Does the next change get cheaper?** For two of the four, yes and
+  measurably: the per-entry census is **one loop over `gh pr list`** and
+  replaces the forensics window 54 and the PM each ran separately on one
+  branch. The `//`-default fix in `runner-facts` §40 is three lines and
+  applies to every POST idiom in this charter, which is **five call
+  sites**. For `runner-facts` §39, the change is a **deletion**, which is
+  the cheapest kind and the only one in this register this week.
