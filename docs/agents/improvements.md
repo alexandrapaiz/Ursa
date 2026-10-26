@@ -2673,3 +2673,122 @@ cleared a handover list in one pass.
   compounding across the org and **flat within this seat**, and those
   are different curves. This seat's own instruments found nothing today
   that another seat had not already found.
+
+## Window 48 — 2026-10-26 (message: `#442` merged, "continue with the next item in your lane")
+
+### The delta on window 47's experiment, read
+
+- **What window 47 registered.** That this charter's standing rules fail
+  in production through their **unstated premises** rather than their
+  stated conditions, and that the premises are detectable at writing
+  time by one question: does this sentence assert that an act is safe
+  without saying what makes it safe. Metric: the count of sentences in
+  `prompts/exo-agent.md` asserting safety, correctness or sufficiency of
+  an act, against how many state a check a later window can run.
+  Predicted delta: **two to five** unpaired claims besides the fork
+  sweep's. Zero refutes it.
+- **The census, and it needed a filter the hypothesis did not
+  anticipate.** The regex population is **31** sentences across 5,124
+  lines, 13 of which sit in a paragraph carrying a command and 18 of
+  which do not. That 18 is not the answer. Read by hand, most of the
+  regex's hits are not claims about **acts** at all: they are claims
+  about hosts ("on Actions it works and costs nothing"), about readings
+  ("accurate about the merge base"), and about prose ("the cut is always
+  at the end"). The vocabulary of safety is shared by sentences that are
+  not safety claims, which is the same discriminator failure window 46
+  recorded for its own metric: greppable and discriminating are
+  different properties.
+- **The answer, graded by reading, which is the honest form.** Ten of
+  the 31 assert that performing an act is safe or sufficient. **Seven
+  carry a check. Three do not:**
+
+  | claim | line | the unstated premise |
+  |---|---|---|
+  | "an already-open pull request of your own seat **satisfies it exactly**" | §"Read your own seat's open PRs first" | that its merge route is your work's route |
+  | "Containment **costs the queue nothing** the moment the older one merges, because yours is a descendant and merges clean either way" | same section | that your branches are descendants, which this seat's own split-by-copy practice stopped guaranteeing |
+  | "This block is deliberately short, **so that it stays true and stays merged**" | §0 | that shortness is what gets a block merged |
+
+- **Verdict: confirmed and kept.** Three is inside the predicted two to
+  five. The prediction was made blind, from one failed instance, and it
+  landed.
+- **And the first of the three was live, not hypothetical, which is what
+  makes this a reading rather than a census.** This window obeyed that
+  sentence, pushed onto `#447`, and moved 460 lines of Tier B register
+  work into a queue that has merged **0 of 54** in seven days. The
+  account is
+  `INC-2026-10-26-growing-the-open-pull-request-remerged-the-split-that-exists-to-avoid-the-owner`,
+  the charter now carries the tier predicate as two commands, and the
+  split was performed this window rather than only recommended.
+- **The third is self-refuting on measurement, which is worth one
+  sentence.** §0's claim that staying short keeps it merged is checkable
+  in one command, and it is false: `main`'s copy of this charter is
+  `94e926b7` of 2026-10-18, so §0's own fourth line, added 2026-10-24,
+  has never reached a fresh clone. Shortness was never the mechanism.
+  The owner's merge was, and §0 does not control it.
+- **Honest residue.** "Asserts the safety of an act" is a judgement this
+  window made by reading 31 sentences, not a number a script returned,
+  and a successor recounting may get eight or twelve for the
+  denominator. The three unpaired members are each quoted, so the
+  finding is checkable even where the denominator is soft. Same residue
+  window 46 declared, same reason, and it is now twice in a row that
+  this seat's metric population had to be hand-filtered. That is itself
+  the result worth carrying: **this charter's rules are not countable by
+  grep, because its vocabulary of safety is its ordinary vocabulary.**
+
+### This window's experiment
+
+- **Hypothesis.** The three unpaired claims above share a stronger
+  property than "no check": each was true when written and was falsified
+  by **this seat changing its own process**, not by the world moving.
+  The grow rule was true until window 42 created a second merge route.
+  The containment claim was true until window 28 started splitting by
+  content copy. §0's claim was true until the charter freeze. If that is
+  the class, then every process change this seat makes should be
+  followed by a sweep of the rules that assumed the old process, and the
+  register already names the trigger: a window that invents a new
+  relation between its artifacts.
+- **Metric, and it exists in this repository.** The count of this
+  charter's own named process changes (the authority split, the
+  split-by-content-copy retarget, the ready-at-coherence inversion, the
+  fork sweep's rescheduling) against, for each, the number of older
+  rules in the same file whose text assumes the superseded process.
+  Today the first number is **4** and the second is **3 found in one
+  read**, all three in the one section the split touched.
+- **Read on.** The next window of this seat, on either half.
+- **Predicted delta.** At least two more, in the sections the
+  ready-at-coherence inversion touched, because that change moved an act
+  and this file already records that its checks were not moved with it.
+  If the sweep of the other three process changes returns zero, the
+  class is specific to the authority split and the general claim is
+  refuted.
+
+### Compounding ratio, this window
+
+- **Seats touched: 2.** This seat's charter directly. The PM seat
+  through the §3e claim-shape finding, which is a fact about its
+  messages rather than an instruction to it, and through the dangling
+  citation whose only live route is its `#450`.
+- **Files touched: 5 on the charter half** (`prompts/exo-agent.md`,
+  `docs/agents/incidents.md`, `docs/agents/runner-facts.md`,
+  `docs/agents/learning-log.md`, this file) **and 5 on the register
+  half**, which is the same set minus the charter plus
+  `docs/agents/merge-order.md`.
+- **Does it make the next change cheaper?** Yes, in one specific way:
+  the tier predicate is two commands that replace a decision every
+  window of this seat makes on its first turn and that two consecutive
+  windows made differently. The claim-shape fix is a type check that
+  replaces a key census nobody can finish.
+- **Is the curve flat?** Not this window, and for the opposite reason to
+  window 47's. Both of that window's findings were handed to it by
+  sibling seats and its own sweeps came back empty, which it graded
+  honestly as flat inside the seat. This window's finding came from the
+  experiment window 47 registered, found before any sibling raised it,
+  and its first instance was this seat's own push forty minutes earlier.
+  A registered experiment that catches its author's own live defect is
+  the loop working inside the seat rather than across the org.
+- **The number that has not moved in nine windows.** `main`'s copy of
+  this charter is still 2,221 lines, dated 2026-10-18. The live copy is
+  **5,190**. Zero of fifty-four merges in seven days touched any
+  `prompts/*-agent.md`. Every amendment of the last eight days, this
+  window's included, is still invisible to every fresh clone, and the
+  compounding stays in the writing rather than in the reading.
