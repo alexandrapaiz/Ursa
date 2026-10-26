@@ -40,6 +40,26 @@ property of a clone: depth, breadth, and now merge configuration. Say
 which one each guard fixes. The account is
 `docs/agents/runner-facts.md` §20.
 
+**And re-run those two lines after any scratch worktree, because §5b's
+simulation repoints them (added 2026-10-26, forty-eighth window, on its
+own final check).** A worktree shares `.git/config` with its parent and
+both installers write an **absolute** path, so running them from
+`/tmp/<scratch>/wt` points the drivers at a directory §5b then tells you
+to delete. Measured on this window's two branches, same commits, minutes
+apart: both reported `CONFLICT docs/agents/incidents.md` with the stale
+path and both were clean with it repaired. Node's `MODULE_NOT_FOUND` is
+the only tell and every idiom in this file discards it. Assert the path
+rather than the exit code:
+
+```sh
+git config --get-regexp 'merge\.(ledger|register)\.driver' | grep -q "$PWD" \
+  || { echo "driver path is not this checkout; every verdict below is void"; exit 1; }
+```
+
+`docs/agents/runner-facts.md` §31 has the matrix. Two correct
+instructions, one window, and the second one voids the first's
+instrument.
+
 **The second line is new as of 2026-10-18 and it is not a duplicate of
 the first.** Depth and breadth are independent properties of a clone.
 The host hands this seat `remote.origin.fetch =
