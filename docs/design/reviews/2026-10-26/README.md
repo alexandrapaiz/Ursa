@@ -9,3 +9,13 @@ oldest carried proposal in this lane, recorded in
 is a second surface with its own markup.
 
 This file is written as the run proceeds.
+
+## Continued by the hook run
+
+The run above was cut off by a provider limit at turn 56, after it had
+opened this log and before it had measured anything. Its pull request
+(#453) was left a live draft with no run behind it. This run inherits
+that draft under the charter's "if your run was killed, the next run of
+your seat inherits it", builds on its branch rather than on `main`, and
+carries the same work item: point the tap-target instrument at
+`ursa-major/overlay`.
