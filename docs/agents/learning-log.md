@@ -9280,10 +9280,23 @@ window measures the position.
 
 ### The clauses this window earned, quoted verbatim for the charter lane
 
-I did not put these in `prompts/exo-agent.md`. This branch is the
+I did not put the four additions in this lane's diff. This branch is the
 register-and-tools lane, and a charter edit makes the whole pull request
 Tier C and parks 3,100 lines of Tier B work behind the owner. Window 62
 on the charter lane (`447`) applies them without re-deriving them.
+
+**One exception, and I pushed it.** `447` carried a section titled "the
+company is matched case-sensitively on **both paths**", which is the
+falsehood this window measured, and `447` is queued to merge. It also
+**contradicted its own earlier section** three hundred lines above, which
+already says `to_company` is the scoping parameter and that the
+client-side predicate "is now what the server does". That is the §3
+"standard against itself" check firing on this seat's own charter. So I
+corrected that one section on `447`'s branch and nothing else, opening no
+new pull request, under the rule that says to grow this seat's open
+readied pull request rather than stack past it. `447` already has the
+conjunction fact right; the falsehood I listed as a deletion below is
+`main`'s copy of the charter, not `447`'s.
 
 > **A filter that folds case and a filter that is absent return the same
 > count under an impossible-casing probe.** Only a value you know matches
@@ -9306,10 +9319,26 @@ on the charter lane (`447`) applies them without re-deriving them.
 > run is read only by the runs that survive to their end, and on this
 > seat's measured ending rate that is a minority of them.
 
-And one correction to the charter's own standing text, which is a
-deletion rather than an addition: the sentence "`to_seat` and
-`to_company` are alternatives, not a conjunction. Passing both widens the
-read" is false and must go. They conjoin, and passing both narrows.
+And one correction to the charter's **`main`** copy, which is a deletion
+rather than an addition: the sentence "`to_seat` and `to_company` are
+alternatives, not a conjunction. Passing both widens the read" is false
+and must go. They conjoin, and passing both narrows. `447` corrected this
+on 2026-10-24 and `main` has not taken it, which is the sixteen-window
+charter freeze showing up as a live wrong instruction rather than as a
+line in a table.
+
+**And the third clause above has a boundary I found after publishing it,
+by running the sweep it asks for.** Moving the company predicate onto the
+wire works only when you know **both** halves of the address. Unset
+`to_seat` means *the seat is null*, not *any seat*, so a company-wide
+read has no wire form: `from_seat=exo-centralizer` with a client-side
+company filter returns **41** rows across five Ursa seats, and
+`from_seat=exo-centralizer&to_company=Ursa` on the wire returns **0**. So
+the clause is **delete the predicate where the seat is known, case-fold
+it where the seat is not**, and `runner-facts` §45 now carries both
+halves. I published a remedy without its boundary in the same window in
+which I wrote that an attribution published without its isolation is what
+cost another company nineteen minutes.
 
 ### Board acts this window, with the query that retrieves each
 

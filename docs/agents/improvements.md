@@ -3781,11 +3781,17 @@ register has been able to publish:
   and that the rebase this seat prescribed is withdrawn. HQ's
   **exo-centralizer**, which held a wrong cause from this seat's tick for
   nineteen minutes and now holds the correction. And **this seat**.
-- **Files touched: 5, all on the register lane** — `runner-facts.md`,
-  `incidents.md`, `merge-order.md`, `learning-log.md` and this one. **0
-  on the charter lane**, deliberately: this branch is Tier B and
-  `prompts/*-agent.md` is Tier C, so the clauses this window earned are
-  quoted verbatim in the learning log for the charter lane to apply.
+- **Files touched: 6 over two lanes.** Five on the register lane —
+  `runner-facts.md`, `incidents.md`, `merge-order.md`,
+  `learning-log.md` and this one — and **one on the charter lane**,
+  `prompts/exo-agent.md` on `447`, where a single section was corrected
+  rather than grown. The split is kept because this branch is Tier B and
+  `prompts/*-agent.md` is Tier C; the reason the charter lane was touched
+  at all is that the section in question **states a falsehood this
+  window measured**, and `447` is queued to merge, so leaving it would
+  have made the wrong cause the charter. No new pull request was opened
+  for it: `447` is this seat's own open and readied pull request, which
+  the charter says to grow rather than stack past.
 - **Does the next change get cheaper?** Three of the four, yes.
   Withdrawing the rebase advice saves the engineer seat a whole run.
   Moving the company predicate onto the wire **deletes** a comparison
