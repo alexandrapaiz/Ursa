@@ -575,6 +575,19 @@
       ]
     },
     {
+      "digest": "65c6e9d0eec9ac5a",
+      "sha256": "65c6e9d0eec9ac5af31feb8e32d797bfe2e9444610d31a14f9417902e0b3f44d",
+      "blob": "d185c36d6f17405c5a9bfdad96217495886bbe67",
+      "bytes": 308437,
+      "introducedBy": [
+        {
+          "commit": "e9f5257b6edf88717b4db11f354bfd643c8091ba",
+          "date": "2026-10-26T09:23:26.000Z",
+          "subject": "security: the publish path built its output paths from an unchecked id"
+        }
+      ]
+    },
+    {
       "digest": "09a594cc263167e0",
       "sha256": "09a594cc263167e05b19151ffd9324bb137df35ba1f52b9e93d772567c527e62",
       "blob": "b288964fa3fdadfdeda826cd8d3b28e7cc1bc74e",
@@ -597,6 +610,19 @@
           "commit": "729788437eb3d0262416ca7c2b38cd42ca13a545",
           "date": "2026-10-26T10:47:25.000Z",
           "subject": "distill: surface the CLI's own reason when claude -p exits non-zero"
+        }
+      ]
+    },
+    {
+      "digest": "5234de483d422789",
+      "sha256": "5234de483d422789048b15d2ef5e514ea6d8f5667c4775a3231b9b7d611e105b",
+      "blob": "bfdb7f8226a189a6a3d3d5f69b0bdefe5a3d95ca",
+      "bytes": 309360,
+      "introducedBy": [
+        {
+          "commit": "79e996ae5bd6dc1f72d930950e565bbaf6635571",
+          "date": "2026-10-26T10:58:31.000Z",
+          "subject": "Merge origin/main into run 6, which carries this seat's unreadied run 5"
         }
       ]
     }

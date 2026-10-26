@@ -486,8 +486,27 @@ export function buildBriefing(
   }
 }
 
-function renderWhy(why: MatchReason): string {
-  if (why.score === 0) return 'served because the request named no domain and no files'
+/**
+ * The one-line account of why a unit scored what it did.
+ *
+ * @param unfiltered  `coverage.unfiltered` for this briefing, which the
+ *   zero-score branch below needs and cannot derive. A score of 0 has
+ *   two different causes and they are not interchangeable: on a request
+ *   that named neither a domain nor any files there was nothing to rank
+ *   against, and on a request that named both there was and nothing
+ *   matched. Until 2026-10-26 this function printed the first sentence
+ *   unconditionally, which was true of every caller it then had, because
+ *   a filtered request dropped its zero-scoring units before rendering.
+ *   `--dropped` prints exactly those units, so the sentence became
+ *   reachable on a request that had in fact named files, and it said the
+ *   opposite of what the reader could see one line above.
+ */
+function renderWhy(why: MatchReason, unfiltered: boolean): string {
+  if (why.score === 0) {
+    return unfiltered
+      ? 'the request named no domain and no files, so nothing ranked it'
+      : 'nothing in common with the request: no domain, no file and no word matched (score 0)'
+  }
   const parts: string[] = []
   if (why.domain) parts.push(`${why.domain} domain match`)
   if (why.filesExact.length > 0) parts.push(`learned on ${why.filesExact.join(', ')}`)
@@ -565,7 +584,7 @@ function renderDropped(briefing: Briefing): string[] {
       lines.push(
         `- ${verb}: ${oneLine(d.unit.statement)} (${oneLine(d.unit.axiomId, ID_MAX)}) — ${why(d)}`
       )
-      lines.push(`  - Would have been surfaced because: ${renderWhy(d.unit.why)}`)
+      lines.push(`  - Would have been surfaced because: ${renderWhy(d.unit.why, cov.unfiltered)}`)
     }
     lines.push('')
   }
@@ -577,7 +596,7 @@ function renderDropped(briefing: Briefing): string[] {
         `- ${oneLine(d.unit.theme)} (${oneLine(d.unit.recordId, ID_MAX)}/` +
           `${oneLine(d.unit.loopId, ID_MAX)}) — ${why(d)}`
       )
-      lines.push(`  - Would have been surfaced because: ${renderWhy(d.unit.why)}`)
+      lines.push(`  - Would have been surfaced because: ${renderWhy(d.unit.why, cov.unfiltered)}`)
     }
     lines.push('')
   }
@@ -648,7 +667,7 @@ export function renderBriefing(briefing: Briefing): string {
           (r.status === 'user-edited' ? ', edited by the owner' : '')
       )
       if (r.firstEvidence?.quote) lines.push(`  - Her words: "${oneLine(r.firstEvidence.quote)}"`)
-      lines.push(`  - Surfaced because: ${renderWhy(r.why)}`)
+      lines.push(`  - Surfaced because: ${renderWhy(r.why, briefing.coverage.unfiltered)}`)
     }
     lines.push('')
   }
@@ -688,7 +707,7 @@ export function renderBriefing(briefing: Briefing): string {
             : `  - What she changed: ${oneLine(c.discoveredSpec)}`
         )
       }
-      lines.push(`  - Surfaced because: ${renderWhy(c.why)}`)
+      lines.push(`  - Surfaced because: ${renderWhy(c.why, briefing.coverage.unfiltered)}`)
     }
     lines.push('')
   }
