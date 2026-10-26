@@ -1,0 +1,19 @@
+ok                     8 (want 8)  text runs seen
+ok                    ok (want ok)  (1) white on black is ok
+ok                  true (want true)  (1) and it reads 21.0:1
+ok                 SHORT (want SHORT)  (2) 4.31:1 body text is SHORT
+ok                  true (want true)  (2) and the arithmetic is right, not just the verdict
+ok    inactive and exempt (want inactive and exempt)  (3) the same grey in a disabled control is exempt
+ok                  true (want true)  (3) and it is still measured rather than skipped
+ok                    ok (want ok)  (4) 4.31:1 at 28px passes the large-text floor
+ok                     3 (want 3)  (4) and it was judged against 3:1
+ok                 SHORT (want SHORT)  (5) declared alpha composites to 3.00:1 and is SHORT
+ok                  true (want true)  (5) and the composite arithmetic is right
+ok                 SHORT (want SHORT)  (6) an ancestor's opacity reaches the same 3.00:1
+ok       short in places (want short in places)  (7) a run crossing a lighter patch is short in places
+ok                  true (want true)  (7) with its median still at 21
+ok                  true (want true)  (7) and its fifth percentile down at 3.45
+ok            UNMEASURED (want UNMEASURED)  (8) invisible text is UNMEASURED, never ok
+ok                     0 (want 0)  (8) and it is the dangerous reason, not a small glyph
+
+all 17 expectations hold

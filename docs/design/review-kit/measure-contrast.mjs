@@ -35,11 +35,34 @@
 //      same colour as its backdrop is invisible to a differencing method,
 //      and invisible is exactly what the failing case looks like. A tool
 //      that printed "clean" there would be lying in the one case that
-//      matters.
+//      matters. The two reasons a run can be unmeasured are reported
+//      apart, because only one of them is a defect: a glyph with fewer
+//      than five core pixels is a punctuation mark too small to sample,
+//      while a glyph no pixel of which differs from its backdrop is text
+//      nobody can see.
 //
 // The thresholds are WCAG 1.4.3: 4.5:1 for body text, 3:1 for large text,
 // which is 24px and up, or 18.66px and up at weight 700. Letter-spaced
 // 11px mono is body text no matter how decorative it looks.
+//
+// **And the method has one precondition, which is checked rather than
+// assumed.** Two shutters only describe one page if the page held still
+// between them. Our own frames are frozen (`lib/freeze.mjs`), and the
+// freeze makes two *loads* of this site bit-identical, which is what it
+// was built and verified for. It does not make two *shutters* on one
+// load identical: measured 2026-10-25c, two consecutive full-page
+// screenshots of the loaded home page at 390px differ by 4,456 pixels of
+// sky, where the same page loaded twice differs by none. So the backdrop
+// frame is taken from a second load in a second context that has the
+// glyphs hidden from before its first paint, never from a style applied
+// to the page already photographed.
+// A vendor's marketing page, measured for a benchmark, often does not:
+// it reveals on scroll, swaps a hero video, finishes a font. So every
+// run reports `drift`, the share of the frame outside every text box
+// that changed between the two shutters, and calls the whole page
+// untrustworthy above a fifth of a percent. Ledger L15's posture, which
+// is that an instrument should say it could not look rather than
+// return a number it cannot stand behind.
 //
 // Checked against known answers by `selftest/check-contrast.mjs`, which
 // is the only reason to believe any number below.
@@ -133,11 +156,43 @@ const COLLECT = () => {
     }
   }
   walk(document)
+  // A placeholder is text a reader has to read and it is not a text node,
+  // so the walk above cannot see it. It is collected here with its own
+  // `::placeholder` colour and the field's box: the pixel test below only
+  // counts pixels that sit on the line between that colour and the
+  // measured backdrop, so the rest of the field's box costs nothing.
+  for (const el of document.querySelectorAll('input[placeholder], textarea[placeholder]')) {
+    if (el.value) continue
+    const cs = getComputedStyle(el)
+    if (cs.visibility === 'hidden' || cs.display === 'none') continue
+    const ph = getComputedStyle(el, '::placeholder')
+    const b = el.getBoundingClientRect()
+    if (b.width < 1 || b.height < 1) continue
+    let op = 1
+    for (let p = el; p && p.nodeType === 1; p = p.parentElement) op *= Number(getComputedStyle(p).opacity || 1)
+    const colour = parseRgb(ph.color || cs.color) || [255, 255, 255, 1]
+    out.push({
+      id: id++,
+      tag: el.tagName.toLowerCase() + '::placeholder',
+      cls: String(el.getAttribute('class') || '').split(/\s+/).filter(Boolean).slice(0, 2).join('.'),
+      text: el.getAttribute('placeholder').slice(0, 42),
+      fontSize: Math.round(parseFloat(ph.fontSize || cs.fontSize) * 10) / 10,
+      weight: Number(ph.fontWeight || cs.fontWeight) || 400,
+      colour: [colour[0], colour[1], colour[2], colour[3] * op],
+      inactive: !!el.closest('[disabled], [aria-disabled="true"], fieldset[disabled]') || el.disabled,
+      rects: [{
+        x: Math.floor(b.left + window.scrollX),
+        y: Math.floor(b.top + window.scrollY),
+        w: Math.ceil(b.width),
+        h: Math.ceil(b.height),
+      }],
+    })
+  }
   return out
 }
 
 // Everything that draws a glyph goes transparent, including generated
-// content, so the second frame is the backdrop and nothing else. This
+// content, so the backdrop frame is the backdrop and nothing else. This
 // changes no layout: `color` does not reflow.
 const HIDE_CSS = `*, *::before, *::after, ::selection {
   color: transparent !important;
@@ -167,6 +222,24 @@ const SCORE = async (page, shotA, shotB, items) => page.evaluate(
     const srl = (c) => { const s = c / 255; return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4 }
     const lum = (r, g, b) => 0.2126 * srl(r) + 0.7152 * srl(g) + 0.0722 * srl(b)
     const ratio = (l1, l2) => (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)
+    // Everything outside every text box that moved between the shutters.
+    // Inside the boxes, a difference is the point; outside them it is the
+    // page having carried on while the instrument was looking away.
+    const mask = new Uint8Array(B.w * B.h)
+    for (const it of items) {
+      for (const r of it.rects) {
+        for (let y = Math.max(0, r.y - 2); y < Math.min(r.y + r.h + 2, B.h); y++) {
+          mask.fill(1, y * B.w + Math.max(0, r.x - 2), y * B.w + Math.min(r.x + r.w + 2, B.w))
+        }
+      }
+    }
+    let drifted = 0
+    for (let i = 0, p = 0; p < mask.length; p++, i += 4) {
+      if (mask[p]) continue
+      if (Math.abs(A.d[i] - B.d[i]) + Math.abs(A.d[i + 1] - B.d[i + 1]) + Math.abs(A.d[i + 2] - B.d[i + 2]) > 6) drifted++
+    }
+    const drift = drifted / (mask.length || 1)
+
     const res = []
     for (const it of items) {
       const [tr, tg, tb, ta] = it.colour
@@ -198,10 +271,10 @@ const SCORE = async (page, shotA, shotB, items) => page.evaluate(
           }
         }
       }
-      if (ratios.length < 5) { res.push({ id: it.id, pixels: ratios.length, maxCov: Math.round(maxCov * 100) / 100, unmeasured: true }); continue }
+      if (ratios.length < 5) { res.push({ id: it.id, drift, pixels: ratios.length, maxCov: Math.round(maxCov * 100) / 100, unmeasured: true }); continue }
       ratios.sort((p, q) => p - q)
       const at = (f) => ratios[Math.min(ratios.length - 1, Math.floor(f * ratios.length))]
-      res.push({ id: it.id, pixels: seen, maxCov: Math.round(maxCov * 100) / 100, min: ratios[0], p5: at(0.05), median: at(0.5) })
+      res.push({ id: it.id, drift, pixels: seen, maxCov: Math.round(maxCov * 100) / 100, min: ratios[0], p5: at(0.05), median: at(0.5) })
     }
     return res
   },
@@ -212,36 +285,62 @@ const threshold = (it) => (it.fontSize >= 24 || (it.fontSize >= 18.66 && it.weig
 
 const browser = await launch()
 const rows = []
+const drifts = []
 for (const [vname, w, h] of VIEWPORTS) {
   if (ONLY && ONLY !== vname) continue
-  const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1 })
-  if (!LIVE) await freezeContext(ctx)
+  const vp = { viewport: { width: w, height: h }, deviceScaleFactor: 1 }
+  const ctx = await browser.newContext(vp)
+  // The second context is the first one with every glyph transparent from
+  // before its first paint, so its frames are a second load rather than a
+  // second shutter. See the note above about the 4,456 pixels of sky.
+  const hidden = await browser.newContext(vp)
+  if (!LIVE) { await freezeContext(ctx); await freezeContext(hidden) }
+  await hidden.addInitScript((css) => {
+    const install = () => {
+      const el = document.createElement('style')
+      el.textContent = css
+      ;(document.head || document.documentElement).appendChild(el)
+    }
+    if (document.documentElement) install()
+    else document.addEventListener('readystatechange', install, { once: true })
+  }, HIDE_CSS)
   const page = await ctx.newPage()
+  const back = await hidden.newPage()
   const scorer = await ctx.newPage()
   await scorer.goto('about:blank')
+  const opts = { fullPage: true, scale: 'css', ...(LIVE ? {} : { animations: 'disabled' }) }
   for (const [name, path] of PAGES) {
     await page.goto(BASE + path, { waitUntil: 'networkidle' })
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
     await page.waitForTimeout(WAIT)
     const items = await page.evaluate(COLLECT)
-    const opts = { fullPage: true, scale: 'css', ...(LIVE ? {} : { animations: 'disabled' }) }
     const shotA = `data:image/png;base64,${(await page.screenshot(opts)).toString('base64')}`
-    await page.addStyleTag({ content: HIDE_CSS })
-    await page.waitForTimeout(60)
-    const shotB = `data:image/png;base64,${(await page.screenshot(opts)).toString('base64')}`
+    await back.goto(BASE + path, { waitUntil: 'networkidle' })
+    if (UNTIL) await back.waitForSelector(UNTIL, { timeout: 30000 })
+    await back.waitForTimeout(WAIT)
+    // Belt and braces: the init script runs before the page's own scripts,
+    // and this covers a page that replaces <head> wholesale after it.
+    await back.addStyleTag({ content: HIDE_CSS })
+    const shotB = `data:image/png;base64,${(await back.screenshot(opts)).toString('base64')}`
     const scored = await SCORE(scorer, shotA, shotB, items)
     const byId = new Map(scored.map((s) => [s.id, s]))
+    drifts.push({ page: name, viewport: vname, drift: scored[0]?.drift ?? 0 })
     for (const it of items) {
       const s = byId.get(it.id) || { unmeasured: true, pixels: 0 }
       rows.push({ page: name, viewport: vname, ...it, ...s, threshold: threshold(it) })
     }
   }
   await ctx.close()
+  await hidden.close()
 }
 await browser.close()
 
 const fmt = (n) => (n == null ? '  -  ' : n.toFixed(2).padStart(5))
 const label = (r) => `${r.tag}${r.cls ? '.' + r.cls : ''}`
+// The two unmeasured reasons, kept apart: `too small` is a `·` or a `+`
+// with fewer core pixels than the floor, and `invisible` is a run the
+// renderer drew in its backdrop's own colour.
+const why = (r) => ((r.maxCov ?? 0) > 0 ? 'too small to sample' : 'nothing differs from the backdrop')
 const verdict = (r) =>
   r.unmeasured ? 'UNMEASURED'
   : r.median >= r.threshold ? (r.p5 < r.threshold ? 'short in places' : 'ok')
@@ -252,7 +351,7 @@ for (const r of rows.filter((r) => verdict(r) !== 'ok')) {
   lines.push(
     `${(r.page + '/' + r.viewport).padEnd(28)} ${label(r).padEnd(22)} ${String(r.fontSize).padStart(4)}px/${r.weight}  ` +
     `median ${fmt(r.median)}  p5 ${fmt(r.p5)}  min ${fmt(r.min)}  needs ${r.threshold.toFixed(1)}  ` +
-    `${verdict(r)}${r.unmeasured ? ` (best coverage ${r.maxCov ?? 0})` : ''}  "${r.text}"`,
+    `${verdict(r)}${r.unmeasured ? ` (${why(r)}, ${r.pixels} px, best coverage ${r.maxCov ?? 0})` : ''}  "${r.text}"`,
   )
 }
 const counts = {
@@ -261,12 +360,22 @@ const counts = {
   inactive: rows.filter((r) => verdict(r) === 'inactive and exempt').length,
   partial: rows.filter((r) => verdict(r) === 'short in places').length,
   unmeasured: rows.filter((r) => verdict(r) === 'UNMEASURED').length,
+  invisible: rows.filter((r) => verdict(r) === 'UNMEASURED' && why(r) !== 'too small to sample').length,
 }
 const headline =
   `${counts.short} of ${counts.runs} text runs below their threshold at the median, ` +
   `${counts.inactive} inactive and exempt under 1.4.3, ` +
-  `${counts.partial} short in places only, ${counts.unmeasured} unmeasured`
-const report = `${headline}\n\n${lines.join('\n') || 'nothing below threshold'}\n`
+  `${counts.partial} short in places only, ${counts.unmeasured} unmeasured ` +
+  `(${counts.unmeasured - counts.invisible} too small to sample, ${counts.invisible} drawn in their backdrop's own colour)`
+// A page that moved between the shutters is named, with its number, and
+// its runs are not offered as a measurement at all.
+const DRIFT_LIMIT = 0.002
+const moved = drifts.filter((d) => d.drift > DRIFT_LIMIT)
+const driftReport = moved.length
+  ? '\nthese pages moved between the two shutters, so nothing above is a measurement of them:\n' +
+    moved.map((d) => `  ${d.page}/${d.viewport}  ${(d.drift * 100).toFixed(2)}% of the frame outside its text changed`).join('\n') + '\n'
+  : `\nevery page held still between the two shutters (worst drift ${((Math.max(0, ...drifts.map((d) => d.drift))) * 100).toFixed(3)}% of the frame), so the backdrops above are the backdrops a reader sees.\n`
+const report = `${headline}\n${driftReport}\n${lines.join('\n') || 'nothing below threshold'}\n`
 writeFileSync(`${OUT}/contrast.txt`, report)
 if (JSON_I !== -1) writeFileSync(JSON_OUT || `${OUT}/contrast.json`, JSON.stringify(rows, null, 1))
 console.log(report)

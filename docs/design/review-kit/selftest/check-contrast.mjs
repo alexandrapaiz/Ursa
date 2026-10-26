@@ -86,6 +86,7 @@ try {
     ["(7) with its median still at 21", near(by("White text crossing").median, 21, 0.3), true],
     ["(7) and its fifth percentile down at 3.45", near(by("White text crossing").p5, 3.45, 0.1), true],
     ["(8) invisible text is UNMEASURED, never ok", verdict(by("Invisible text")), "UNMEASURED"],
+    ["(8) and it is the dangerous reason, not a small glyph", by("Invisible text").maxCov, 0],
   ];
 
   let bad = 0;
