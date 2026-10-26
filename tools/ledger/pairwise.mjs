@@ -59,20 +59,10 @@ import { mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const argv = process.argv.slice(2);
-const asJson = argv.includes('--json');
-const baseIdx = argv.indexOf('--base');
-const base = baseIdx === -1 ? 'origin/main' : argv[baseIdx + 1];
-const explicit = argv.filter((a) => /^[0-9]+$/.test(a)).map(Number);
 
-if (baseIdx !== -1 && !base) {
-  console.error('usage: pairwise.mjs [--json] [--base <ref>] [<pr-number>...]');
-  process.exit(2);
-}
-
-const root = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
 const git = (dir, args, opts = {}) =>
   spawnSync('git', ['-C', dir, ...args], { encoding: 'utf8', ...opts });
+
 const gitOk = (dir, args) => {
   const r = git(dir, args);
   if (r.status !== 0) {
@@ -81,7 +71,185 @@ const gitOk = (dir, args) => {
   return (r.stdout || '').trim();
 };
 
-/** Open pull requests, newest first, as {number, headRefName, title}. */
+/** The repository this process is standing in. */
+export const toplevel = (cwd = process.cwd()) =>
+  execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8', cwd }).trim();
+
+/**
+ * A probe clone of `root` with NO merge driver registered: the unregistered
+ * case, which is also GitHub's case. Both post-conditions are checked rather
+ * than assumed, because an arm that silently has the driver active makes the
+ * two arms one measurement and every pair then reports `driver-resolvable`.
+ */
+export function makeProbe(root, refs) {
+  const parent = mkdtempSync(join(tmpdir(), 'pairwise-'));
+  const dir = join(parent, 'probe');
+  gitOk(root, ['clone', '--local', '--quiet', root, dir]);
+  // A local clone brings the object database but only the source's branches,
+  // so the refs this run names are fetched explicitly. A missing ref then
+  // fails here instead of halfway through a merge.
+  if (refs.length) gitOk(dir, ['fetch', '--quiet', root, ...refs.map((r) => `+${r}:${r}`)]);
+  const registered = (git(dir, ['config', '--get-regexp', '^merge\\.']).stdout || '').trim();
+  if (registered !== '') {
+    throw new Error(
+      'the probe clone already has a merge driver registered, so the `default` ' +
+        `arm would not measure the unregistered case:\n${registered}`,
+    );
+  }
+  if (existsSync(join(dir, '.git', 'info', 'attributes'))) {
+    throw new Error('the probe clone carries .git/info/attributes; the arms would be identical');
+  }
+  return { dir, parent };
+}
+
+/** Register every driver this repository declares, in the probe clone only. */
+export function installDrivers(root, probe) {
+  // The installer is taken from `root`, the live checkout, and run with `cwd`
+  // set to the probe, because it resolves its target from
+  // `git rev-parse --show-toplevel`. Taking it from the probe's own worktree
+  // would fail whenever `base` predates the installer's own commit.
+  const r = spawnSync('bash', [join(root, 'tools/registers/install-drivers.sh')], {
+    encoding: 'utf8',
+    cwd: probe,
+  });
+  if (r.status !== 0) {
+    throw new Error(`install-drivers.sh exited ${r.status} in the probe clone\n${r.stderr || ''}`);
+  }
+  const registered = (git(probe, ['config', '--get-regexp', '^merge\\.']).stdout || '').trim();
+  if (!registered.includes('merge.ledger.driver')) {
+    throw new Error('install-drivers.sh exited 0 without registering merge.ledger.driver');
+  }
+}
+
+/** Paths `ref` changes relative to `base`, as a Set. */
+export function changedPaths(probe, base, ref) {
+  const out = gitOk(probe, ['diff', '--name-only', `${base}...${ref}`]);
+  return new Set(out === '' ? [] : out.split('\n'));
+}
+
+const conflictedNow = (probe) => {
+  const u = (git(probe, ['diff', '--name-only', '--diff-filter=U']).stdout || '').trim();
+  return u === '' ? [] : u.split('\n');
+};
+
+/** Merge `ref` onto `base` alone. Used to separate the trunk-conflict lane. */
+export function againstBase(probe, base, ref) {
+  git(probe, ['merge', '--abort']);
+  gitOk(probe, ['checkout', '--quiet', '--detach', base]);
+  gitOk(probe, ['reset', '--hard', '--quiet', base]);
+  const status = git(probe, ['merge', '--no-commit', '--no-ff', ref]).status;
+  const paths = conflictedNow(probe);
+  git(probe, ['merge', '--abort']);
+  return { status, paths };
+}
+
+/**
+ * Merge `first` then `second` onto `base`. Returns the conflicted paths of
+ * the SECOND merge, or null when the first merge is itself conflicted — that
+ * pair belongs to tools/ledger/requeue.sh's branch-versus-trunk lane.
+ */
+export function sequence(probe, base, first, second) {
+  git(probe, ['merge', '--abort']);
+  gitOk(probe, ['checkout', '--quiet', '--detach', base]);
+  gitOk(probe, ['reset', '--hard', '--quiet', base]);
+  if (git(probe, ['merge', '--no-edit', '--quiet', first]).status !== 0) {
+    git(probe, ['merge', '--abort']);
+    return null;
+  }
+  const status = git(probe, ['merge', '--no-commit', '--no-ff', second]).status;
+  const paths = conflictedNow(probe);
+  git(probe, ['merge', '--abort']);
+  return { status, paths };
+}
+
+export function classify(dflt, driver) {
+  if (dflt.status === 0 && dflt.paths.length === 0) return 'independent';
+  if (driver && driver.status === 0 && driver.paths.length === 0) return 'driver-resolvable';
+  return 'needs-human';
+}
+
+/**
+ * The whole measurement, with no dependency on `gh`.
+ *
+ * @param {object} o
+ * @param {string} o.root     repository to clone the probe from
+ * @param {string} o.base     the trunk ref, e.g. `origin/main`
+ * @param {{id: string|number, ref: string, label?: string}[]} o.heads
+ * @returns {{base: string, baseSha: string, heads: number, candidates: number,
+ *            sequences: number, stuckOnBase: {id: any, paths: string[]}[],
+ *            findings: object[]}}
+ */
+export function measurePairs({ root, base, heads }) {
+  const { dir: probe, parent } = makeProbe(root, heads.map((h) => h.ref));
+  try {
+    const baseSha = gitOk(probe, ['rev-parse', '--short', base]);
+    const paths = new Map(heads.map((h) => [h.id, changedPaths(probe, base, h.ref)]));
+
+    // Heads that do not merge onto the trunk at all are the other lane's, and
+    // are excluded from every pair: a sequence whose FIRST merge conflicts
+    // measures the first merge, not the pair.
+    const stuckOnBase = [];
+    const ok = [];
+    for (const h of heads) {
+      const r = againstBase(probe, base, h.ref);
+      if (r.paths.length || r.status !== 0) stuckOnBase.push({ id: h.id, paths: r.paths });
+      else ok.push(h);
+    }
+
+    // Exact prefilter: a conflict is always reported on a path both sides
+    // changed, so heads with disjoint changed-path sets cannot collide.
+    const candidates = [];
+    for (let i = 0; i < ok.length; i++) {
+      for (let j = i + 1; j < ok.length; j++) {
+        const shared = [...paths.get(ok[i].id)].filter((f) => paths.get(ok[j].id).has(f));
+        if (shared.length) candidates.push({ a: ok[i], b: ok[j], shared });
+      }
+    }
+
+    // Both orders, because the remedy is named per order and the owner picks
+    // the order. A pair that collides one way and not the other is a fact
+    // about the merge order, so it is reported rather than averaged away.
+    const orders = [];
+    for (const c of candidates) {
+      for (const [first, second] of [
+        [c.a, c.b],
+        [c.b, c.a],
+      ]) {
+        orders.push({ first, second, shared: c.shared, dflt: sequence(probe, base, first.ref, second.ref) });
+      }
+    }
+    const collide = orders.filter((o) => o.dflt && (o.dflt.status !== 0 || o.dflt.paths.length));
+
+    if (collide.length) installDrivers(root, probe);
+    const findings = collide.map((o) => {
+      const driver = sequence(probe, base, o.first.ref, o.second.ref);
+      return {
+        first: o.first.id,
+        second: o.second.id,
+        firstLabel: o.first.label || o.first.ref,
+        secondLabel: o.second.label || o.second.ref,
+        shared: o.shared,
+        conflictedUnderDefault: o.dflt.paths,
+        conflictedUnderDriver: driver ? driver.paths : o.dflt.paths,
+        className: classify(o.dflt, driver),
+      };
+    });
+
+    return {
+      base,
+      baseSha,
+      heads: heads.length,
+      candidates: candidates.length,
+      sequences: orders.length,
+      stuckOnBase,
+      findings,
+    };
+  } finally {
+    rmSync(parent, { recursive: true, force: true });
+  }
+}
+
+/** Open pull requests as {number, headRefName, title}. */
 function openPulls() {
   const r = spawnSync(
     'gh',
@@ -96,210 +264,102 @@ function openPulls() {
   return JSON.parse(r.stdout);
 }
 
-/**
- * A probe clone with no merge driver registered: the unregistered case,
- * which is also GitHub's case. Returns its path.
- */
-function makeProbe(refs) {
-  const dir = join(mkdtempSync(join(tmpdir(), 'pairwise-')), 'probe');
-  gitOk(root, ['clone', '--local', '--quiet', root, dir]);
-  // A local clone brings the object database but only the source's branches.
-  // Fetch the refs this run names, explicitly, so a missing ref fails here
-  // rather than halfway through a merge.
-  gitOk(dir, ['fetch', '--quiet', root, ...refs.map((r) => `+${r}:${r}`)]);
-  const registered = git(dir, ['config', '--get-regexp', '^merge\\.']).stdout || '';
-  if (registered.trim() !== '') {
-    throw new Error(
-      `the probe clone already has a merge driver registered, so the ` +
-        `\`default\` arm would not measure the unregistered case:\n${registered}`,
+function report(result) {
+  console.log(`base: ${result.base} @ ${result.baseSha}`);
+  console.log(
+    `heads: ${result.heads} open, ${result.candidates} pair(s) share a changed path, ` +
+      `${result.sequences} ordered sequence(s) merged, ${result.findings.length} collide ` +
+      `under the default line merge`,
+  );
+  if (result.stuckOnBase.length) {
+    console.log(
+      `skipped (conflict with ${result.base} itself, which is ` +
+        `tools/ledger/requeue.sh's lane): ` +
+        result.stuckOnBase.map((s) => `#${s.id} on ${s.paths.join(', ')}`).join('; '),
     );
   }
-  if (existsSync(join(dir, '.git', 'info', 'attributes'))) {
-    throw new Error('the probe clone carries .git/info/attributes; the arms would be identical');
-  }
-  return dir;
-}
-
-/** Register every driver this repository declares, in the probe clone only. */
-function installDrivers(probe) {
-  const r = spawnSync('bash', [join(root, 'tools/registers/install-drivers.sh')], {
-    encoding: 'utf8',
-    cwd: probe,
-  });
-  if (r.status !== 0) {
-    throw new Error(`install-drivers.sh exited ${r.status} in the probe clone\n${r.stderr || ''}`);
-  }
-  const registered = git(probe, ['config', '--get-regexp', '^merge\\.']).stdout || '';
-  if (!registered.includes('merge.ledger.driver')) {
-    throw new Error('install-drivers.sh exited 0 without registering merge.ledger.driver');
-  }
-}
-
-/** Paths a ref changes relative to `base`, as a Set. */
-function changedPaths(probe, ref) {
-  const out = gitOk(probe, ['diff', '--name-only', `${base}...${ref}`]);
-  return new Set(out === '' ? [] : out.split('\n'));
-}
-
-/**
- * Merge `first` then `second` onto `base` in the probe clone. Returns the
- * conflicted paths of the SECOND merge, or null when the first merge is
- * itself conflicted (that pair belongs to requeue.sh's branch-vs-trunk
- * lane, not to this tool).
- */
-function sequence(probe, first, second) {
-  git(probe, ['merge', '--abort']);
-  gitOk(probe, ['checkout', '--quiet', '--detach', base]);
-  gitOk(probe, ['reset', '--hard', '--quiet', base]);
-  if (git(probe, ['merge', '--no-edit', '--quiet', first]).status !== 0) {
-    git(probe, ['merge', '--abort']);
-    return null;
-  }
-  const r = git(probe, ['merge', '--no-commit', '--no-ff', second]);
-  const conflicted = (git(probe, ['diff', '--name-only', '--diff-filter=U']).stdout || '')
-    .trim();
-  git(probe, ['merge', '--abort']);
-  return { status: r.status, paths: conflicted === '' ? [] : conflicted.split('\n') };
-}
-
-function classify(dflt, driver) {
-  if (dflt.paths.length === 0 && dflt.status === 0) return 'independent';
-  if (driver.paths.length === 0 && driver.status === 0) return 'driver-resolvable';
-  return 'needs-human';
-}
-
-function main() {
-  const pulls = openPulls();
-  const chosen = explicit.length
-    ? pulls.filter((p) => explicit.includes(p.number))
-    : pulls;
-  if (explicit.length) {
-    const missing = explicit.filter((n) => !chosen.some((p) => p.number === n));
-    if (missing.length) {
-      console.error(`not open pull requests: ${missing.join(', ')}`);
-      process.exit(2);
+  console.log('');
+  for (const f of result.findings) {
+    console.log(`#${f.first} then #${f.second} — ${f.className}`);
+    console.log(`  ${f.firstLabel} then ${f.secondLabel}`);
+    console.log(`  conflicts under the merge button on: ${f.conflictedUnderDefault.join(', ')}`);
+    if (f.className === 'driver-resolvable') {
+      console.log('  clean once a merge driver is registered. No judgment is needed.');
+      console.log(`  remedy, after #${f.first} lands on ${result.base}:`);
+      console.log(`    bash tools/ledger/requeue.sh --push ${f.second}`);
+    } else {
+      console.log(
+        `  still conflicts with the drivers registered, on: ${f.conflictedUnderDriver.join(', ')}`,
+      );
+      console.log(`  remedy: a human resolves #${f.second} against #${f.first}.`);
     }
+    console.log('');
+  }
+  if (result.findings.length === 0) {
+    console.log('No pair of trunk-clean heads collides. Nothing for this tool to report.');
+  }
+  const needsHuman = result.findings.filter((f) => f.className === 'needs-human');
+  console.log(
+    `Needs a human: ${
+      needsHuman.length ? needsHuman.map((f) => `#${f.first}/#${f.second}`).join(', ') : 'none'
+    }`,
+  );
+}
+
+function main(argv) {
+  const asJson = argv.includes('--json');
+  const baseIdx = argv.indexOf('--base');
+  if (baseIdx !== -1 && !argv[baseIdx + 1]) {
+    console.error('usage: pairwise.mjs [--json] [--base <ref>] [<pr-number>...]');
+    return 2;
+  }
+  const base = baseIdx === -1 ? 'origin/main' : argv[baseIdx + 1];
+  const explicit = argv
+    .filter((a, i) => /^[0-9]+$/.test(a) && !(baseIdx !== -1 && i === baseIdx + 1))
+    .map(Number);
+
+  const root = toplevel();
+  const pulls = openPulls();
+  const chosen = explicit.length ? pulls.filter((p) => explicit.includes(p.number)) : pulls;
+  const missing = explicit.filter((n) => !chosen.some((p) => p.number === n));
+  if (missing.length) {
+    console.error(`not open pull requests: ${missing.join(', ')}`);
+    return 2;
   }
   if (chosen.length < 2) {
     console.log('Fewer than two open pull requests. No pair to measure.');
     return 0;
   }
 
-  // Fetch every head into the root as refs/prs/<n> so the probe can take
-  // them by name and so a reader can reproduce any single pair by hand.
+  // Fetch each head into the root as refs/prs/<n>, so the probe can take them
+  // by name and so a reader can reproduce any single pair by hand.
   for (const p of chosen) {
-    const r = git(root, ['fetch', '--quiet', 'origin', `pull/${p.number}/head:refs/prs/${p.number}`, '-f']);
+    const r = git(root, [
+      'fetch', '--quiet', '-f', 'origin',
+      `pull/${p.number}/head:refs/prs/${p.number}`,
+    ]);
     if (r.status !== 0) {
       console.error(`cannot fetch pull/${p.number}/head: ${r.stderr || ''}`);
-      process.exit(2);
+      return 2;
     }
   }
   git(root, ['fetch', '--quiet', 'origin']);
 
-  const refs = chosen.map((p) => `refs/prs/${p.number}`);
-  const probe = makeProbe(refs);
-  try {
-    const paths = new Map(chosen.map((p) => [p.number, changedPaths(probe, `refs/prs/${p.number}`)]));
-
-    // Heads that do not merge onto the base at all are the other lane's.
-    const vsBase = new Map();
-    for (const p of chosen) {
-      git(probe, ['merge', '--abort']);
-      gitOk(probe, ['checkout', '--quiet', '--detach', base]);
-      gitOk(probe, ['reset', '--hard', '--quiet', base]);
-      const st = git(probe, ['merge', '--no-commit', '--no-ff', `refs/prs/${p.number}`]).status;
-      const u = (git(probe, ['diff', '--name-only', '--diff-filter=U']).stdout || '').trim();
-      git(probe, ['merge', '--abort']);
-      vsBase.set(p.number, { status: st, paths: u === '' ? [] : u.split('\n') });
-    }
-
-    const candidates = [];
-    for (let i = 0; i < chosen.length; i++) {
-      for (let j = i + 1; j < chosen.length; j++) {
-        const a = chosen[i].number;
-        const b = chosen[j].number;
-        if (vsBase.get(a).paths.length || vsBase.get(b).paths.length) continue;
-        const shared = [...paths.get(a)].filter((f) => paths.get(b).has(f));
-        if (shared.length === 0) continue;
-        candidates.push({ a, b, shared });
-      }
-    }
-
-    // Both orders, because the remedy is named per order and the owner
-    // chooses the order. A pair that collides one way and not the other is a
-    // fact about the merge order, so it is reported rather than averaged.
-    const orders = [];
-    for (const c of candidates) {
-      for (const [first, second] of [[c.a, c.b], [c.b, c.a]]) {
-        orders.push({ first, second, shared: c.shared, dflt: sequence(probe, `refs/prs/${first}`, `refs/prs/${second}`) });
-      }
-    }
-    const collide = orders.filter((o) => o.dflt && (o.dflt.status !== 0 || o.dflt.paths.length));
-
-    installDrivers(probe);
-    const findings = collide.map((o) => {
-      const driver = sequence(probe, `refs/prs/${o.first}`, `refs/prs/${o.second}`);
-      return {
-        first: o.first,
-        second: o.second,
-        shared: o.shared,
-        conflictedUnderDefault: o.dflt.paths,
-        conflictedUnderDriver: driver ? driver.paths : [],
-        className: classify(o.dflt, driver || { status: 1, paths: o.dflt.paths }),
-      };
-    });
-
-    const titleOf = (n) => chosen.find((p) => p.number === n);
-    const needsHuman = findings.filter((f) => f.className === 'needs-human');
-
-    if (asJson) {
-      console.log(JSON.stringify({ base, measured: candidates.length, findings }, null, 2));
-    } else {
-      console.log(`base: ${base} @ ${gitOk(probe, ['rev-parse', '--short', base])}`);
-      console.log(
-        `heads: ${chosen.length} open, ${candidates.length} pair(s) share a changed path, ` +
-          `${orders.length} ordered sequence(s) merged, ${findings.length} collide under ` +
-          `the default line merge`,
-      );
-      const stuckVsBase = [...vsBase.entries()].filter(([, v]) => v.paths.length).map(([n]) => n);
-      if (stuckVsBase.length) {
-        console.log(
-          `skipped (conflict with ${base} itself, which is ` +
-            `tools/ledger/requeue.sh's lane): ${stuckVsBase.map((n) => '#' + n).join(', ')}`,
-        );
-      }
-      console.log('');
-      for (const f of findings) {
-        console.log(`#${f.first} then #${f.second} — ${f.className}`);
-        console.log(`  ${titleOf(f.first).headRefName} then ${titleOf(f.second).headRefName}`);
-        console.log(`  conflicts under the merge button on: ${f.conflictedUnderDefault.join(', ')}`);
-        if (f.className === 'driver-resolvable') {
-          console.log(`  clean once a merge driver is registered. No judgment is needed.`);
-          console.log(`  remedy, after #${f.first} lands on ${base}:`);
-          console.log(`    bash tools/ledger/requeue.sh --push ${f.second}`);
-        } else {
-          console.log(
-            `  still conflicts with the drivers registered, on: ` +
-              `${f.conflictedUnderDriver.join(', ')}`,
-          );
-          console.log(`  remedy: a human resolves #${f.second} against #${f.first}.`);
-        }
-        console.log('');
-      }
-      if (findings.length === 0) {
-        console.log('No pair of trunk-clean heads collides. Nothing for this tool to report.');
-      }
-      console.log(`Needs a human: ${needsHuman.length ? needsHuman.map((f) => `#${f.first}/#${f.second}`).join(', ') : 'none'}`);
-    }
-    return needsHuman.length ? 1 : 0;
-  } finally {
-    rmSync(join(probe, '..'), { recursive: true, force: true });
-  }
+  const result = measurePairs({
+    root,
+    base,
+    heads: chosen.map((p) => ({ id: p.number, ref: `refs/prs/${p.number}`, label: p.headRefName })),
+  });
+  if (asJson) console.log(JSON.stringify(result, null, 2));
+  else report(result);
+  return result.findings.some((f) => f.className === 'needs-human') ? 1 : 0;
 }
 
-try {
-  process.exit(main());
-} catch (err) {
-  console.error(String(err && err.message ? err.message : err));
-  process.exit(2);
+if (process.argv[1] && process.argv[1].endsWith('pairwise.mjs')) {
+  try {
+    process.exit(main(process.argv.slice(2)));
+  } catch (err) {
+    console.error(String(err && err.message ? err.message : err));
+    process.exit(2);
+  }
 }
