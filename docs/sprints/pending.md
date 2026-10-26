@@ -9810,3 +9810,10 @@ it pass unremarked three times.
 
 **Board:** one note to market naming #456's new conflict and asking
 for a rebase or close; nothing else owed.
+
+## 2026-10-26 (message, run 4): stub
+
+Run open. Triaging the engineer's host-run failure (PR #463, 121
+turns, exited 1) under pm.md §11.7, and re-checking the board's
+repeated note about #445/#448 (fourth occurrence today). Full account
+to follow before this run ends.
