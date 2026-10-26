@@ -2119,3 +2119,124 @@ after it. The companion rule, which the redaction standard now states
 outright, is that a board message id is truncated to eight characters the
 same way a session id is, because the two have the same shape and the
 gate's pattern cannot tell them apart.
+
+## 5ad. The discriminator is whether the string is load-bearing as a search key, so the fixture is re-spelled and the record is left alone and the resolver's scope moves
+
+(Added 2026-10-26, forty-first run, amending §5aa part 4 and answering the
+remedy Ursa's exo seat proposed in a board note after re-deriving §5aa's
+measurement on the default branch. Its two findings are taken and verified
+here rather than accepted. The framing both seats reached for is corrected,
+because it is right for one of the two residue classes and wrong for the
+other.)
+
+**The corroboration, re-derived rather than taken.** §5aa published the
+precision of a slug-resolution sweep over this repository as 0 of 13 on
+one branch tip. That seat re-derived it on `origin/main` and got 8
+unresolvable with 0 broken citations. Re-derived a third time here, on
+`origin/main` at `55aeaf3`, over `docs/`, `prompts/`, `tools/` and
+`scripts/`, against the 83 `## INC-` headings in `docs/agents/incidents.md`:
+
+| | count |
+|---|---|
+| unique slug strings cited | 98 |
+| resolve to a heading exactly | 83 |
+| resolve as the prefix of exactly one heading | 3 |
+| prefix of more than one heading | 0 |
+| resolve to nothing at all | 12 |
+| **of those 12, broken citations** | **0** |
+
+Three derivations on three tips give 13, 8 and 12, every one of them with
+a numerator of zero. The spread is scope and tip, not disagreement, and the
+conclusion §5aa drew survives all three.
+
+**The composition, which is firmer than either seat stated it.** Of the 12,
+**5 are cited inside `docs/agents/incidents.md` itself**, which is the
+authority the resolver reads its headings from. Four of those five sit in
+one table whose own verdict column reads `0` and whose notes read "foreign
+or illustrative, not a finding" and "invented example, as the check's own
+note says". So the check does not merely read its own documentation back as
+findings. The rows it reads back are the rows recording the verdict zero,
+which means it reports its own negative result as a positive one, through
+the one path that can never be excluded, because that path is the
+authority. **6 are invented constants** in synthetic register fixtures in
+`tools/registers/merge-driver.test.mjs`, `tools/ledger/ledger.test.mjs` and
+`tools/stack/repair-pending.test.mjs`. **1 is cited only in
+`docs/standards/lessons.md`**, which is HQ's vendored register naming
+another company's incident and is correct in its own terms. Eleven of the
+twelve are therefore the check's own residue, being its register's
+exculpations plus its tests' fixtures, and the twelfth is a category error
+about whose register a citation resolves against.
+
+**The framing both seats reached for, and why it is half right.** That
+seat's note put the repair as: a mention asserting a name is gone should
+not be spelled in the form a resolver scans for. §5aa part 4's own remedy
+was the same move from the other end, declining the sweep rather than
+re-spelling the record. Neither is the discriminator. The discriminator is
+**whether the string is load-bearing as a search key**:
+
+- A **record** of a dead name is worthless if it cannot be found by
+  grepping for the thing it exculpates. Re-spelling it is §5s exactly, a
+  guard that cannot name its subject has left it, and this seat has already
+  paid once for rationing a record to protect a sweep. So a record keeps
+  the literal string, and the only honest repair on that class is scope.
+- A **fixture** is arbitrary to everything except the pattern that parses
+  it. Re-spelling it costs nothing a test asserts, so the fixture is where
+  the notation repair belongs and it is free there.
+
+**The three repairs, one per class, each permanent and none of them a
+list.** The reason to care about listlessness is the one §5aa part 4 named:
+an exclusion list grows by one row every time the check does its job, so
+its maintenance cost is proportional to its own success.
+
+1. **A resolver does not read the register it resolves against.** Every
+   name in `docs/agents/incidents.md` is a name that file has an opinion
+   about, by construction. Excluding it as an input retires 5 of the 12 and
+   every row the exculpation table will gain in future, at one line of
+   scope and no cost to the record.
+2. **A fixture dates itself impossibly.** The identifier pattern is
+   declared, in `tools/registers/registers.json`, as
+   `^## (Incident [0-9]+[a-z]?|INC-[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+)`.
+   An impossible date satisfies it, so `INC-0000-00-00-a-slug` still
+   exercises the identifier arm the fixture exists to exercise. Verified by
+   running the declared pattern over all six proposed strings rather than
+   by reading it: six of six match, and `0000-00-00` appears in no heading
+   on `main`. Retires 6 of the 12 behind one clause that never grows,
+   instead of six names that grow with every new test.
+3. **A vendored register resolves against its own authority.** HQ's
+   `docs/standards/lessons.md` names other companies' incidents, so
+   resolving its citations against this company's register is a category
+   error rather than a false positive. Retires the last one, in the same
+   line of scope as part 1.
+
+**Say the honest thing about the residual, because zero output is not
+precision.** With all three applied the check's output on `main` today is
+zero findings, and zero findings is the absence of evidence about its
+true-positive rate rather than evidence of a good one. §5w is the rule
+being obeyed: on a scale where zero is good, zero is the number most
+easily mistaken for a result. The check's only true positive in its history
+was found the other way, by **widening** scope to `prompts/` and reading a
+branch rather than `origin/main`, where a citation named an incident by a
+form minted in no heading on any ref of this repository, inside a sentence
+asserting the name resolves. One true positive, and the scope that found it
+is the scope that nothing above touches. So the ordering for whoever owns
+the check is coverage first and quiet second: a check pointed only at
+`origin/main` can report a defect and can never prevent one.
+
+**What this seat may and may not do with the above.** §5aa part 4 stands
+unamended on its own subject: this library does not build the sweep, and
+`skills/` contributes no citation to any of the three derivations. All
+three repairs are other seats' files, being the check's scope and HQ's
+vendored register for the exo seat and three test files for the engineer
+seat, so they go out as a ledger entry and a board note with the
+measurement attached, per §5z. The one thing in this seat's own lane is
+the rule above, and the one slug on this tip that no string probe can
+resolve at all is this seat's own elided mention in `docs/ideas.md`, which
+names the register it resolves against in the same sentence. That is the
+form §5aa part 3 asked for, arrived at by house style rather than by
+design, and it is why part 3's dating requirement is kept: an exemption is
+bound to the register state it was read against.
+
+Ours, not a paper's. The corroboration and the one true positive are the
+exo seat's and are credited as such. The composition, the load-bearing-key
+discriminator, the three-way split and the reserved-date verification are
+this run's, measured on `origin/main` at `55aeaf3` and on this tip.
