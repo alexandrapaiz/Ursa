@@ -2,7 +2,63 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Top three for the owner, 2026-10-26 ~09:3x UTC message run (9th)
+## Top three for the owner, 2026-10-26 ~09:4x UTC message run (10th)
+
+Woken by two events: the skill seat's run failing (exit 1, 101 turns,
+pull request #487 already open), and a lane note repeating the same
+draft-disposition and market-PR items this seat's own #491 (one pass
+earlier, closed below as subsumed) had already checked and acted on.
+Confirmed the lane note's claims against current GitHub state rather
+than re-running the work; two of its three named items (#463, #482,
+and #489) were already closed or merged before this run started.
+
+1. **Three more Tier B merges this pass, each verified on all six
+   conditions myself: #485 (engineer, the conflict #491 had handed off
+   — resolved itself in the few minutes between that pass and this
+   one), #484 (frontend, the `redaction-gate` leak that had failed
+   three times straight — green on its fourth run, at 09:37:42Z), and
+   #493 (market's 27th run, `CONFLICTING` on open — a docs-only
+   conflict against `docs/ideas.md`, which Tier B condition 5 lets
+   this seat resolve directly; done on the market seat's own branch,
+   both ledger additions kept, pushed, then merged once checks came
+   back green).** All three scoped to docs and product files, no
+   `prompts/`, no workflow, no secret.
+2. **This PR (#495) subsumes #491, #488 and #486** (all three
+   confirmed ancestors with `git merge-base --is-ancestor`); closed
+   all three pointing here to cut the queue from four open PM pull
+   requests to one. Nothing in any of them is lost.
+3. **#495 itself still waits on another merger, same reason #491
+   did.** Its diff carries `docs/prfaq/mvp-public-address.md` and
+   `docs/decisions.md` alongside the Tier A knowledge surfaces
+   (`docs/sprints/`, `docs/agents/incidents.md`, `docs/ideas.md`
+   grooming), so it is not a pure-knowledge-surface diff and this
+   seat cannot self-merge it under Tier A. It needs the owner or a
+   chair.
+
+**The skill run (§11.7 triage).** `ursa-skill/2026-10-26-message`
+exited 1 at 09:08:26Z after 101 turns in 18 minutes (confirmed on the
+board's `run.failed` event, not just the wake's text). Its pull
+request, #487, exists, is a draft, checks green, `MERGEABLE`/`CLEAN`,
+diff limited to one file (`docs/runs/skill-2026-10-26-message-27.md`),
+body still reads "Body filled in as the run proceeds" — the run died
+mid-write, most likely to a turn or time cap, the way the ship-first
+rule describes. Classified **tripwire false alarm**: the run's PR
+exists, so no rerun and no dispatch; the skill seat's own next wake
+inherits and finishes its draft under the ship-first handover rule.
+Logged as a `note` on the board, not escalated.
+
+**Also checked, no new action:**
+- **#461 (security)** — still draft, unchanged since 04:42Z (now ~5
+  hours idle). Security's own #490 ("rebase and finish #461") is
+  also still draft and unchanged since 09:24Z. Left alone; this is
+  the owning seat's branch to finish, not a dispatch case while
+  `PM_DISPATCH_ENABLED` reads empty.
+- **The lane note's tool, `tools/check-draft-prs.sh`,** still does
+  not exist in this repository, as #491 already found. Every
+  disposition above came from `gh pr view`/`diff`/`checks` run
+  directly.
+
+## Top three for the owner, 2026-10-26 ~09:3x UTC message run (9th, closed, subsumed by #495 above)
 
 Woken by a board note from exo naming a draft-disposition sweep already
 done by this seat's own #488 one pass earlier, plus exo's own #481 to
