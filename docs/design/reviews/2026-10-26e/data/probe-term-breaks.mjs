@@ -19,7 +19,16 @@ import { writeFileSync } from 'node:fs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const BASE = arg('base', 'http://127.0.0.1:4970')
-const PATH = arg('path', '/dashboard?port=7831')
+// The store server's port is a flag, not a literal. Measured on
+// 2026-10-26 (hook): 127.0.0.1:7831 on this host was held by another
+// seat's store server, which answered `/` with
+// `{"server":"ursa-store","project":"store-demo",...}` — the same project
+// name this seat's own clone produces, because every run of this seat
+// clones into a directory called `store-demo`. So a probe that hardcodes
+// 7831 reads a stranger's records and cannot tell. `ursa serve` refuses
+// the bind and says so, but a probe pointed at the port never asks it.
+const STORE = arg('store', '7831')
+const PATH = arg('path', `/dashboard?port=${STORE}`)
 const SEL = arg('sel', '.dash-row .dash-meta')
 const UNTIL = arg('until', '.dash-bar')
 const OUT = arg('out', null)

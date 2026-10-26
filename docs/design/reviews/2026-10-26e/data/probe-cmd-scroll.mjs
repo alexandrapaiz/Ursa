@@ -14,6 +14,15 @@ import { freezeContext } from '../../../review-kit/lib/freeze.mjs'
 import { writeFileSync } from 'node:fs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
+// The store server's port is a flag, not a literal. Measured on
+// 2026-10-26 (hook): 127.0.0.1:7831 on this host was held by another
+// seat's store server, which answered `/` with
+// `{"server":"ursa-store","project":"store-demo",...}` — the same project
+// name this seat's own clone produces, because every run of this seat
+// clones into a directory called `store-demo`. So a probe that hardcodes
+// 7831 reads a stranger's records and cannot tell. `ursa serve` refuses
+// the bind and says so, but a probe pointed at the port never asks it.
+const STORE = arg('store', '7831')
 const BASE = arg('base', 'http://127.0.0.1:4978')
 const OUT = arg('out', null)
 
@@ -21,7 +30,7 @@ const browser = await launch()
 const ctx = await browser.newContext({ viewport: { width: 320, height: 844 }, deviceScaleFactor: 1 })
 await freezeContext(ctx)
 const page = await ctx.newPage()
-await page.goto(`${BASE}/dashboard?port=7831`, { waitUntil: 'networkidle' })
+await page.goto(`${BASE}/dashboard?port=${STORE}`, { waitUntil: 'networkidle' })
 await page.waitForSelector('.dash-bar', { timeout: 60000 })
 await page.locator('.dash-row .dash-action', { hasText: 'forget this' }).first().click()
 await page.waitForSelector('.dash-cmd', { timeout: 30000 })
