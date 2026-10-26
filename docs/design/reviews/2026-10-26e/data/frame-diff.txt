@@ -1,2 +1,2 @@
-dashboard?port=7831-narrow.png          14972 px    1.975%  rows 107-2073, cols 20-294  (same size)
-dashboard?port=7831-small.png            1027 px    0.124%  rows 107-2032, cols 100-333  (same size)
+dashboard?port=7831-narrow.png           1307 px    0.160%  rows 107-818, cols 33-298  (same size)
+dashboard?port=7831-phone.png            1640 px    0.174%  rows 82-691, cols 33-368  (same size)
