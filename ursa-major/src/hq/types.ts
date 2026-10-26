@@ -29,7 +29,43 @@ export interface BriefingInput {
   /** hard ceilings, so a briefing fits an agent's context window */
   maxRules?: number
   maxCases?: number
+  /**
+   * How many of the units that were NOT returned to include, with their
+   * score breakdown intact. Omitted or 0 means none, which is the
+   * default and the shape every caller before 2026-10-26 got.
+   *
+   * WHY THIS IS OPT-IN AND NOT ALWAYS ON. The floor and the ceilings
+   * exist because an agent's opening context is the scarce thing
+   * (MIN_RELEVANCE, DEFAULT_MAX_CASES in ./briefing.ts), so a briefing
+   * that volunteered everything it rejected would spend the budget those
+   * bounds were written to protect. The flag is for the reader who has
+   * already seen a thin briefing and is asking a second question about
+   * it: was there nothing, or was there something just out of reach?
+   */
+  dropped?: number
 }
+
+/** Which bound kept a scored unit out of the briefing. Two values rather
+ *  than one, because they answer opposite questions for the agent
+ *  reading a thin briefing: `below_floor` says the HQ has something on
+ *  this subject and judged it too far away, `over_cap` says the HQ had
+ *  more than the request asked to be shown. */
+export type DropReason = 'below_floor' | 'over_cap'
+
+/** A unit the briefing scored and did not serve, with the bound that
+ *  kept it out. The bound is carried as a number so the remedy can name
+ *  a value instead of a placeholder, the same discipline
+ *  `DroppedUnits.minChars` follows in ../launch.ts. */
+export interface DroppedUnit<T> {
+  unit: T
+  reason: DropReason
+  /** MIN_RELEVANCE when `reason` is 'below_floor'; the effective
+   *  `maxCases` or `maxRules` when it is 'over_cap' */
+  bound: number
+}
+
+export type DroppedCase = DroppedUnit<CaseUnit>
+export type DroppedRule = DroppedUnit<RuleUnit>
 
 /** What the semantic ranker concluded about one case (semantic.ts).
  *  All four numbers are printed in the briefing, because the lead term
@@ -212,6 +248,23 @@ export interface Briefing {
   rules: RuleUnit[]
   nearestCases: CaseUnit[]
   guardrails: GuardrailUnit[]
+  /**
+   * The highest-scoring cases that were scored and not returned, at most
+   * `request.dropped` of them, score-descending (added 2026-10-26).
+   *
+   * Absent when the caller did not ask, which is not the same as empty.
+   * Empty means "asked, and there was nothing held back"; absent means
+   * "never asked", and a reader who confuses the two concludes the store
+   * is bare on evidence that says nothing of the kind.
+   *
+   * The total held back is not repeated here because `coverage` already
+   * determines it: `loopsConsidered + oneShotsConsidered - casesReturned`
+   * for cases and `axiomsConsidered - axiomsReturned` for rules. One
+   * number in one place, so the two cannot disagree.
+   */
+  dropped?: DroppedCase[]
+  /** the same, for rules. See `dropped` above for what absent means. */
+  droppedRules?: DroppedRule[]
   coverage: BriefingCoverage
   /** the §0b discipline, carried in the payload so it reaches the model
    *  that reads the briefing, not only the human who reads this file */

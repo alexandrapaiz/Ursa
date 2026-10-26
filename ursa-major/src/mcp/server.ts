@@ -159,6 +159,18 @@ export const GET_BRIEFING_INPUT = {
     .positive()
     .optional()
     .describe(`ceiling on prior cases returned (default ${DEFAULT_MAX_CASES})`),
+  dropped: z
+    .number()
+    .int()
+    .nonnegative()
+    .optional()
+    .describe(
+      'how many of the units this request scored and did not return to include, ' +
+        'each with its score breakdown and the bound that held it out; omit or 0 ' +
+        'for none. Ask for this when a briefing came back thin and you need to ' +
+        'know whether the store has nothing nearby or has something just under ' +
+        'the relevance floor'
+    ),
 }
 
 /**

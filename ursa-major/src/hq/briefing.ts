@@ -18,6 +18,9 @@ import {
   type Briefing,
   type BriefingInput,
   type CaseUnit,
+  type DroppedCase,
+  type DroppedRule,
+  type DroppedUnit,
   type GuardrailUnit,
   type MatchReason,
   type RuleUnit,
@@ -282,6 +285,55 @@ function toCaseUnit(indexed: IndexedCase, why: MatchReason): CaseUnit {
 }
 
 /**
+ * The units a request scored and did not serve, highest-scoring first.
+ *
+ * WHY THIS EXISTS (added 2026-10-26, from the ledger entry "The briefing
+ * can say why a unit was surfaced and has no answer for why one was
+ * not"). `renderWhy` prints a full score breakdown for every unit that
+ * came back, and the floor one line above discarded the identical
+ * breakdown for every unit that did not. So `None on these files` over a
+ * store of 204 real corrections was a dead end: the reader could not
+ * tell a unit that was scored and judged too far from a unit that scored
+ * nothing at all, and those two ask opposite things of the agent reading
+ * them.
+ *
+ * TWO REASONS, NOT ONE, and this is the deviation from the ledger
+ * entry's own first step, which named the below-floor half alone. A unit
+ * can also miss because the request asked for three cases and the store
+ * had four that cleared the floor. Reporting only the below-floor half
+ * would reproduce this function's own motivating defect one level up: an
+ * empty `dropped` list would mean either "nothing was near" or "plenty
+ * was near and the ceiling cut it", which is again two answers wearing
+ * one face. `bound` carries the number that did the cutting, so the
+ * remedy is a value the reader can raise rather than a guess.
+ *
+ * Order. The over-cap units all scored at or above the floor and the
+ * below-floor units all scored under it, so concatenating the two in
+ * that order is already score-descending and no second sort is needed.
+ *
+ * @param ranked  every scored unit, floor not yet applied, in rank order
+ * @param kept    the same list filtered to units that cleared the floor
+ * @param cap     the effective ceiling the kept list was sliced at
+ * @param limit   how many to return; 0 or less returns an empty list
+ */
+function collectDropped<S extends { unit: T }, T>(
+  ranked: S[],
+  kept: S[],
+  cap: number,
+  limit: number
+): DroppedUnit<T>[] {
+  if (limit <= 0) return []
+  const keptSet = new Set(kept)
+  const overCap: DroppedUnit<T>[] = kept
+    .slice(cap)
+    .map(({ unit }) => ({ unit, reason: 'over_cap' as const, bound: cap }))
+  const belowFloor: DroppedUnit<T>[] = ranked
+    .filter((s) => !keptSet.has(s))
+    .map(({ unit }) => ({ unit, reason: 'below_floor' as const, bound: MIN_RELEVANCE }))
+  return [...overCap, ...belowFloor].slice(0, limit)
+}
+
+/**
  * Build the briefing.
  *
  * The signature an MCP `get_briefing` handler calls, and the one the
@@ -314,16 +366,16 @@ export function buildBriefing(
   const query = buildQuery(input.domain, input.files)
   const maxRules = input.maxRules ?? DEFAULT_MAX_RULES
   const maxCases = input.maxCases ?? DEFAULT_MAX_CASES
+  const wantDropped = input.dropped ?? 0
   const loops = indexLoops(records)
   const cases = indexCases(records)
   const servable = tuning.axioms.filter((a) => a.status !== 'revoked')
 
-  const scoredRules = servable
+  const rankedRules = servable
     .map((axiom) => ({
       axiom,
       unit: toRuleUnit(axiom, score(query, axiom.domain, axiomFiles(axiom, records, loops), axiom.statement)),
     }))
-    .filter(({ unit }) => query.empty || unit.why.score >= MIN_RELEVANCE)
     .sort((a, b) =>
       compareScored(
         a,
@@ -334,9 +386,20 @@ export function buildBriefing(
       )
     )
 
+  // PARTITION, NOT FILTER (changed 2026-10-26). The floor used to be a
+  // `.filter()` in the chain above, which threw away both the unit and
+  // the `why` block the scorer had already computed for it. The ranking
+  // and the cut are unchanged: `clearsFloor` is the same predicate, and
+  // sorting before the cut rather than after cannot reorder the kept
+  // units, because `compareScored` is a total order with a stable id
+  // tiebreak. What is new is that the rejected side survives long enough
+  // to be reported when the caller asks for it.
+  const clearsFloor = (unit: { why: MatchReason }) => query.empty || unit.why.score >= MIN_RELEVANCE
+  const scoredRules = rankedRules.filter(({ unit }) => clearsFloor(unit))
+
   const rules = scoredRules.slice(0, maxRules).map(({ unit }) => unit)
 
-  const scoredCases = cases
+  const rankedCases = cases
     .map((indexed) => ({
       indexed,
       unit: toCaseUnit(
@@ -353,7 +416,6 @@ export function buildBriefing(
         )
       ),
     }))
-    .filter(({ unit }) => query.empty || unit.why.score >= MIN_RELEVANCE)
     .sort((a, b) =>
       compareScored(
         a,
@@ -369,6 +431,7 @@ export function buildBriefing(
       )
     )
 
+  const scoredCases = rankedCases.filter(({ unit }) => clearsFloor(unit))
   const nearestCases = scoredCases.slice(0, maxCases).map(({ unit }) => unit)
 
   // Guardrails ride with the rules they belong to: an agent being told
@@ -399,6 +462,15 @@ export function buildBriefing(
     rules,
     nearestCases,
     guardrails: guardrails.slice(0, GUARDRAIL_CAP),
+    // Absent rather than empty when the caller did not ask: see
+    // `Briefing.dropped` in ./types.ts for why the two must stay
+    // distinguishable.
+    ...(wantDropped > 0
+      ? {
+          dropped: collectDropped(rankedCases, scoredCases, maxCases, wantDropped) as DroppedCase[],
+          droppedRules: collectDropped(rankedRules, scoredRules, maxRules, wantDropped) as DroppedRule[],
+        }
+      : {}),
     coverage: {
       axiomsConsidered: servable.length,
       axiomsReturned: rules.length,
@@ -436,6 +508,83 @@ function renderWhy(why: MatchReason): string {
   }
   return `${parts.join('; ')} (score ${why.score})`
 }
+
+/**
+ * The "## Considered and not shown" section, printed only when the
+ * caller asked for it with `request.dropped`.
+ *
+ * One bullet and one reason line per unit, which is the same two-line
+ * shape the sections above use, deliberately: a reader who has learned
+ * to read a surfaced unit should not have to learn a second format to
+ * read a rejected one. What differs is the first line's tail, which
+ * names the bound rather than the provenance, because the bound is the
+ * one thing a reader of this section can act on.
+ *
+ * The totals come out of `coverage` rather than out of the arrays below,
+ * so a request that asked for 3 and held back 198 says so instead of
+ * implying 3 was all there was.
+ */
+function renderDropped(briefing: Briefing): string[] {
+  const dropped = briefing.dropped
+  const droppedRules = briefing.droppedRules
+  if (!dropped && !droppedRules) return []
+
+  const cov = briefing.coverage
+  const casesHeld = cov.loopsConsidered + cov.oneShotsConsidered - cov.casesReturned
+  const rulesHeld = cov.axiomsConsidered - cov.axiomsReturned
+  const asked = briefing.request.dropped ?? 0
+  const lines: string[] = ['## Considered and not shown', '']
+
+  if (casesHeld === 0 && rulesHeld === 0) {
+    lines.push(
+      'Nothing was held back. Every rule and case this request scored is ' +
+        'printed above, so an empty section above is a statement about the ' +
+        'store rather than about the bounds.'
+    )
+    lines.push('')
+    return lines
+  }
+
+  lines.push(
+    `You asked for up to ${asked} of the units this request scored and did not ` +
+      `return. ${rulesHeld} rule${rulesHeld === 1 ? '' : 's'} and ${casesHeld} ` +
+      `case${casesHeld === 1 ? '' : 's'} were held back in total. Each line below ` +
+      `names the bound that held it, so raising that number is the remedy.`
+  )
+  lines.push('')
+
+  const why = (u: { reason: string; bound: number }) =>
+    u.reason === 'below_floor'
+      ? `scored under the relevance floor of ${u.bound}`
+      : `cleared the floor and lost the cut at ${u.bound}`
+
+  if (droppedRules && droppedRules.length > 0) {
+    lines.push('Rules:')
+    for (const d of droppedRules) {
+      const verb = d.unit.polarity === 'prefer' ? 'Prefer' : 'Avoid'
+      lines.push(
+        `- ${verb}: ${oneLine(d.unit.statement)} (${oneLine(d.unit.axiomId, ID_MAX)}) — ${why(d)}`
+      )
+      lines.push(`  - Would have been surfaced because: ${renderWhy(d.unit.why)}`)
+    }
+    lines.push('')
+  }
+
+  if (dropped && dropped.length > 0) {
+    lines.push('Cases:')
+    for (const d of dropped) {
+      lines.push(
+        `- ${oneLine(d.unit.theme)} (${oneLine(d.unit.recordId, ID_MAX)}/` +
+          `${oneLine(d.unit.loopId, ID_MAX)}) — ${why(d)}`
+      )
+      lines.push(`  - Would have been surfaced because: ${renderWhy(d.unit.why)}`)
+    }
+    lines.push('')
+  }
+
+  return lines
+}
+
 
 /**
  * Render the briefing as the markdown an agent actually reads — the same
@@ -561,6 +710,8 @@ export function renderBriefing(briefing: Briefing): string {
     }
     lines.push('')
   }
+
+  lines.push(...renderDropped(briefing))
 
   const cov = briefing.coverage
   lines.push('## Coverage')

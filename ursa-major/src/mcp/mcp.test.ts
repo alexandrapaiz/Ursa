@@ -77,13 +77,17 @@ describe('the MCP surface advertises what it serves', () => {
     expect(resources.find((r) => r.uri === TUNING_URI)?.mimeType).toBe('text/markdown')
   })
 
-  it('lists get_briefing as a read-only tool whose schema names the four inputs', async () => {
+  it('lists get_briefing as a read-only tool whose schema names the five inputs', async () => {
     const { tools } = await withClient(memoryStore(), (c) => c.listTools())
     const brief = tools.find((t) => t.name === 'get_briefing')
     expect(brief).toBeDefined()
     expect(brief!.annotations?.readOnlyHint).toBe(true)
     expect(Object.keys(brief!.inputSchema.properties ?? {}).sort()).toEqual([
       'domain',
+      // `dropped` joined the four on 2026-10-26: how many of the units
+      // this request scored and did not return to show, with the bound
+      // that held each one out. See src/hq/types.ts BriefingInput.
+      'dropped',
       'files',
       'maxCases',
       'maxRules',
