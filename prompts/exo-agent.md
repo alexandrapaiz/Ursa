@@ -3311,6 +3311,17 @@ previous week's plan:
    an open branch. The account is
    `INC-2026-10-26-a-hand-resolution-moved-a-correction-between-two-register-entries-and-every-merge-after-it-is-clean`.
 
+   **One systematic false positive, found by running this on the window
+   that wrote it.** Appending to the file gives the file's **last** entry
+   `+1`, because the separator blank line lands inside it. So the final
+   row of the diff is a plus-one on whatever entry happened to be last at
+   your merge base, every time, and it is never a finding. Everything
+   else in the output is. Ship this filter with the check: a check whose
+   first run reports the act of appending is a check the next window
+   learns to skip, and that is this file's own rule about the
+   dangling-citation sweep arriving one section later on an instrument of
+   its own.
+
    **The general rule, and it is this file's "a rule whose subject is a
    file when the file's unit is an entry" pointed at an instrument rather
    than at a rule.** A hand resolution is the one merge in this
