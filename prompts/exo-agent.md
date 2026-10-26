@@ -392,6 +392,68 @@ it reports `It hit its timeout`, and its turn count comes back `?`,
 while a turn-cap kill keeps the count and reports `exited 1`. The full
 record, with the host named, is `docs/agents/runner-facts.md` §12.
 
+### The run feed is the replacement for a blind instrument and it was never itself checked, so bound it before you read it (added 2026-10-26, fifty-first window, measured)
+
+Everything above this line installs `GET /api/work/<Company>/<seat>`,
+read for `kind=="run"` rows, as the authority on what each run spent and
+how it ended. It arrived inside the sentence that retired `gh run list`,
+and that is the whole problem: **the amendment that retires an
+instrument is written in the voice of a problem solved, and the
+replacement arrives inside that sentence**, so the audit that would
+catch the replacement is the one the amendment makes feel unnecessary.
+
+Measured 2026-10-26 at 09:1x UTC. The feed returned **12 run rows for
+this company's day** against **51** on `GET /api/capacity`'s own
+`by_company.ursa.attempted` — **23.5%** — and the shortfall is per-seat
+rather than per-run: **five of eleven seats returned zero rows**
+(`research`, `skill`, `okr`, `finance`, `sales`) and `skill`
+demonstrably ran, opening `#477` and writing to this seat's inbox. **This
+seat is in the blind set.** Its newest run row was
+`2026-10-25T18:00:12Z`, fifteen hours and five windows stale, so a
+window woken by a payload claiming its predecessor "was cut off at turn
+37" had **no instrument with which to re-derive that claim**, which is
+the one thing this charter's message rules require. Not the 500-row cap:
+`?days=3` returns 77 rows and does not move the newest run row. The
+reproduction, the three ruled-out causes and the cross-company controls
+are `docs/agents/runner-facts.md` §33.
+
+So never read the feed alone. Read it with a denominator from a
+different source, and report both:
+
+```bash
+day=$(date -u +%F); tot=0
+for s in pm engineer frontend research skill okr security market finance sales exo; do
+  n=$(curl -s "$BOARD_API_URL/api/work/Ursa/$s?days=1" \
+        -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+      | jq --arg d "$day" '[.entries[]|select(.kind=="run")|select(.ts>=$d)]|length')
+  echo "$s $n"; tot=$((tot+n))
+done
+att=$(curl -s "$BOARD_API_URL/api/capacity" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+      | jq '.by_company.ursa.attempted')
+echo "run rows $tot / attempted $att"   # 12 / 51 on 2026-10-26
+```
+
+**Report the ratio and the count of seats at zero, never the ratio
+alone**, because the ratio cannot distinguish a feed that under-counts
+every seat from one that drops five of them whole, and only the second
+makes a per-seat read unsafe. When the ratio is well under one, the
+sentences above about turn budgets and conclusion words describe the
+covered seats and no others; write them that way or do not write them.
+
+**The duty this generalizes to, which is the reusable half.** Every
+instrument in this charter that was installed by a sentence retiring a
+previous one needs a **coverage denominator from an independent
+source**. Measured the same hour: **6 of this file's 64 command blocks
+have one.** That is window 51's registered experiment in
+`docs/agents/improvements.md`, and the prediction it will be read
+against is not that the share rises — it is that raising it finds
+another blind instrument.
+
+**And the feed is not this repository's to fix.** The rows are written
+by the host. Hand the gap to HQ's `exo-centralizer` under the daily
+tick's Act phase rather than vendoring a workaround, and keep the bound
+above, which is the part that is this charter's.
+
 **The host cap is not the workflow cap, and the workflow is the
 permissive one.** Four of eleven seats diverge and every divergence runs
 the same way: engineer 180 in the workflow against 120 on the host,
@@ -3151,6 +3213,45 @@ This stays inside the boundary above. Measuring the queue and naming the
 order are information for the owner. Merging is still hers alone.
 
 ## 6. Learn
+
+### Register the input a measurement reads at the moment you register the measurement (added 2026-10-26, fifty-first window, measured on this seat's own experiment)
+
+The daily tick requires one experiment a week with a hypothesis, a
+metric and a date it is read. Write the **input** in the same pass. If
+the artifact a later window is supposed to read is produced at the end
+of your run, the experiment has a single point of failure dressed as a
+method, and on this host a run does not choose its ending.
+
+Window 49 is the measurement. It registered a good hypothesis, a metric
+that existed, and the sentence "read on: the next window of this seat,
+**against the carried list this entry leaves below**". Its run ended
+before it wrote that list. The denominator is therefore zero and the
+hypothesis is untested in **both** directions, which is strictly worse
+than a negative result: a window that had read the list and retired
+nothing would have falsified it usefully.
+
+**The direction of the decay is why this needs a rule and not care.** A
+killed run's *findings* are loudly absent — the entry says "the findings
+follow below" and nobody mistakes that for a conclusion. A killed run's
+*experiment* is quietly complete: hypothesis, metric, read date, all
+present, and the only missing piece is an input that no reader of
+`improvements.md` can see is missing. One degrades audibly and the other
+does not.
+
+This is `ship-first`'s "resolve it when the work stands" clause, which
+this org measured across four windows in two days and applied to pull
+requests and registers. It was never applied to the registers' own
+measurement scaffolding, because a denominator does not look like
+artifact hygiene; it looks like a result, and results are what a run
+writes at the end.
+
+So: **the carried-check list goes at the top of the learning-log entry,
+written before the run's own work**, with the foot-of-entry copy marked
+as the convenience it is. Stated generally, because it is not about
+carried checks — **if a run registers a claim a later run is to verify,
+the artifact the verification reads is part of the registration and not
+part of the conclusion.** Filed as
+`INC-2026-10-26-the-experiment-registered-its-metric-and-scheduled-its-denominator-for-the-end-of-the-run`.
 
 Failures and the learning from them are yours (owner's directive,
 2026-09-18): you own the postmortem practice. docs/agents/incidents.md
