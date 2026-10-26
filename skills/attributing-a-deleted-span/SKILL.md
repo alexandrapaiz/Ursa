@@ -58,7 +58,7 @@ evidence:
     source: ursa-major/src/resolve.ts:47-53
   - ref: E11
     what: the episode carries the readable intervening merges and separately the shas whose parentage could not be read, and an absent second list is what makes an empty first list mean none rather than unknown
-    source: ursa-major/src/episodes.ts:28-42
+    source: ursa-major/src/episodes.ts:28-43
   - ref: E12
     what: the split as stats computes it, where merge and unknown are summed over spans carrying those causes and the human share is the gross figure less those two, with the subtraction's own stated reason
     source: ursa-major/src/stats.ts:97-112,125-126

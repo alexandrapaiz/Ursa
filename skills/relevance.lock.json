@@ -349,6 +349,111 @@
     "what": "d683dc80c7fc5235",
     "passages": "f96ffbf032161be6"
   },
+  "attributing-a-deleted-span/E1": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "96f1e1354d3a4423",
+    "what": "b6e4f2b377d33b41",
+    "passages": "5cd9178cb9ce652c"
+  },
+  "attributing-a-deleted-span/E10": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "575b33ed4d636d51",
+    "what": "4009c030acbba09e",
+    "passages": "850de01331412969"
+  },
+  "attributing-a-deleted-span/E11": {
+    "verdict": "widened",
+    "read": "2026-10-26",
+    "lines": "3d11ae9af02cdd77",
+    "what": "50ff4c4ad937616c",
+    "passages": "d8ff3849f70b3e73"
+  },
+  "attributing-a-deleted-span/E12": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "a177a8ebcea7a8d3",
+    "what": "10b1a7585769a1d3",
+    "passages": "22dbfb021b2ace67"
+  },
+  "attributing-a-deleted-span/E13": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "2c713009d87f6fad",
+    "what": "0830ac0aaa9fe07a",
+    "passages": "962be89032df124d"
+  },
+  "attributing-a-deleted-span/E14": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "8daf186964baf973",
+    "what": "d141190c838aecb3",
+    "passages": "548938b2a455817a"
+  },
+  "attributing-a-deleted-span/E15": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "8e5161c169567d10",
+    "what": "7c4ed777d40f6f4f",
+    "passages": "7b3265d95905a82d"
+  },
+  "attributing-a-deleted-span/E2": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "56ad262f0314c5ae",
+    "what": "8709a9b2e9d51244",
+    "passages": "a47bad7b5b5b4fec"
+  },
+  "attributing-a-deleted-span/E3": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "7fd7d76862ab2759",
+    "what": "3422b642f0da3c67",
+    "passages": "65971a788c57b139"
+  },
+  "attributing-a-deleted-span/E4": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "967cfea037722bfb",
+    "what": "6deb5f8fbecc8a8c",
+    "passages": "a14998af9fd06b37"
+  },
+  "attributing-a-deleted-span/E5": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "ff73d0ffb58d0f17",
+    "what": "7ef8ad3e1fe9c473",
+    "passages": "c049b72259ed1511"
+  },
+  "attributing-a-deleted-span/E6": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "c6878d206a325edb",
+    "what": "90f6d674c4820bc6",
+    "passages": "921f6382c416c44e"
+  },
+  "attributing-a-deleted-span/E7": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "278370f30325e13e",
+    "what": "a877678a268fd964",
+    "passages": "826011fd62488f66"
+  },
+  "attributing-a-deleted-span/E8": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "001eda19aa629894",
+    "what": "f3ff5e58b4399231",
+    "passages": "bc3d96372171ee46"
+  },
+  "attributing-a-deleted-span/E9": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "94cb98302194cc71",
+    "what": "7c8a101318467fdc",
+    "passages": "58da835031d14aa7"
+  },
   "auditing-a-detected-correction-loop/E1": {
     "verdict": "widened",
     "read": "2026-10-24",
