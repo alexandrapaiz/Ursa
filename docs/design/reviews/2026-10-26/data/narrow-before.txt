@@ -1,0 +1,9 @@
+  width page       main box   left    horizontal
+  320   panel      main 380    left -16     overflow 60    widest main. at 364
+  320   dashboard  main 320    left 0       overflow 0     
+  360   panel      main 380    left -4      overflow 20    widest main. at 376
+  360   dashboard  main 360    left 0       overflow 0     
+  375   panel      main 380    left 0       overflow 5     widest main. at 380
+  375   dashboard  main 375    left 0       overflow 0     
+  390   panel      main 380    left 5       overflow 0     
+  390   dashboard  main 390    left 0       overflow 0     
