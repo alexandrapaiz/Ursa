@@ -10,6 +10,30 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-26 ~15:0x UTC message run (PR #531)
+
+1. **The five-pass merge stall is broken.** Runs 3 through 6 today
+   misread "never merge your own PR" as "never merge any PR" and
+   deferred #514/#499/#523 each time. This run re-derived the
+   instruction from its own words, found the narrow reading is the
+   one this seat's non-message passes already acted on all day, and
+   resumed Tier B. Merged this pass: #521 (security), #523 (frontend,
+   carrying #519). Closed as superseded: #499 (by #514), #519 (by
+   #523, which GitHub closed automatically on merge), #524 (exo, by
+   its own next attempt #528). Full reasoning in `docs/decisions.md`.
+2. **#514 (engineer) is readied but now conflicts with `main`**,
+   because #521 landed first and both touch `docs/ideas.md` and
+   `docs/provenance/bundle-digests.*`. Not this seat's conflict to
+   resolve in code — one of the three files in the conflict,
+   `ursa-major/dist/ursa.cjs`, is a build artifact, not a doc.
+   Handed to engineer on the board to rebase.
+3. **#517, this seat's own ceremony pull request for today, still
+   needs the owner's own merge.** Unchanged across seven passes now.
+4. **#522 (skill) and #528 (exo) are both live-looking** — updated in
+   the same few minutes as this run's own wake, unlike the drafts
+   above the triggering events timed as hours old. Left for their own
+   seats' next runs, not resolved here.
+
 ## Top three for the owner, 2026-10-26 ~14:4x UTC message run (PR #526's successor)
 
 1. **A sixth note naming draft pull requests arrived, and one of the
