@@ -1124,3 +1124,84 @@ check taxes the honest record of its own true positives. §5h taught that a
 skill reporting a defect must be re-read when the defect is fixed. This
 teaches the adjacent thing: a skill, or a ledger row, reporting a *broken
 name* must be written so that reporting it does not count as repeating it.
+
+## 5u. A count a trigger test states about the library is a count the landing run owes, because the tool already knows the right answer
+
+(Added 2026-10-26, thirtieth run, after the ninth skill falsified nine
+sentences in eight files that no guard reads.)
+
+§5r gave the near-miss debt an owner and a deadline: the run that lands a
+skill owes a near miss to every skill already in the library, in their
+files, in the same pull request, and `trigger-coverage.mjs --check` exits 1
+until it does. That rule is now paid in full and it covers only the
+prompts. It says nothing about the prose around them, and every
+`TRIGGER-TEST.md` in this library opens by stating how many neighbours the
+skill has and how many near misses that buys.
+
+**What that cost, measured on this run.** Landing the ninth skill
+falsified 21 statements across 9 files, and fixing them was the largest
+single edit in this run's diff after the skill itself.
+
+The sharper half of the measurement is that **seven of the eight sibling
+headers were already false before this run touched them**, checked
+against `trigger-coverage.mjs`'s own output on the pre-run tree, where
+every skill had seven neighbours:
+
+```
+  skill                         header said          tool said
+  adding-a-bound                5 misses, 5 nbrs     7 misses, 7 nbrs
+  adjudicating-uncertain        7 misses, 5 nbrs     9 misses, 7 nbrs
+  auditing-a-correction-loop    6 misses, 6 nbrs     7 misses, 7 nbrs
+  auditing-a-durability-walk    7 misses, 7 nbrs     7 misses, 7 nbrs  ok
+  clearing-a-record             5 misses, 5 nbrs     7 misses, 7 nbrs
+  distilling-a-tuning-record    5 misses, 5 nbrs     7 misses, 7 nbrs
+  quoting-a-number              5 misses, 5 nbrs     7 misses, 7 nbrs
+  running-an-outcome-trial      6 misses                8 misses
+```
+
+Four of them said "five neighbours", which was true when the library held
+six skills, so the seventh skill falsified them and the eighth falsified
+them again. Both of those landing runs paid §5r's prompt debt in these
+same files and in the same pull requests, and neither touched the
+sentence that counts the prompts it was adding. The only current header
+belonged to the newest skill, which is the one shape this failure always
+takes.
+
+Every guard was green through all of it, and the reason is worth naming
+rather than treating as an oversight: `check-evidence` fingerprints cited
+ranges in other files, and a header's neighbour count cites nothing. It
+is a claim about `skills/` itself, which is the one subject none of the
+receipt guards has.
+
+So: **the run that changes the number of skills in the library updates
+every sentence that states it, in the same pull request as the skill**,
+and the owner of that duty is the landing run for the same reason §5r and
+§5q give, which is that an obligation with no deadline lands on whoever
+is unlucky.
+
+Two things make this cheap rather than another chore. The counts are
+derivable, so no reading is required: `node skills/trigger-coverage.mjs`
+already prints the live per-file prompt counts and the sibling-boundary
+denominator, which is the neighbour count. And the statements are few,
+because a header states it once.
+
+**The mechanical part, deliberately not built this run.** The honest
+version of this check is not a string search for number words. It is
+`trigger-coverage.mjs` comparing its own computed denominator against the
+number the file states, which means teaching it to read a count out of
+prose, and a check that parses English for a number will have false
+positives on every sentence that mentions a count historically. This
+library has two such sentences already, `skills/README.md`'s note that
+`adjudicating-uncertain-spans` had "then five neighbours" and §5r's own
+account of "15 of 30 ordered pairs", and both are correct as written and
+must stay. The ledger entry filed with this section proposes the shape
+that survives that: the header states its count in a fenced marker the
+tool reads, rather than in prose the tool guesses at, so a historical
+sentence is invisible to the check by construction.
+
+Ours: the general form, and it is the third instance of one pattern in
+this file. §5g found a hash that outlived its lines, §5o a reading that
+outlived them, and this is a *count* that outlived them. All three are the
+same failure, a derived fact recorded by hand beside the thing it is
+derived from, and the remedy is always one of two: have the tool compute
+it, or have the tool check it. Never have the author remember it.

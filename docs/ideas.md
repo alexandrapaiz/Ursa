@@ -12969,3 +12969,106 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   dead identifier gets one canonical mention.
 - Cost: $0.
 - Status: proposed
+
+### 2026-10-26 (skill, thirtieth run) — The comment above the deletion split says the subtraction protects the discard rate from a cause added later, and the subtraction is what delivers that cause into it
+
+- Trigger: writing `skills/attributing-a-deleted-span` and reading
+  `ursa-major/src/stats.ts:97-126` against its own comment, which is the
+  only place in the codebase that explains why the human share of the
+  deletion split is computed the way it is.
+- What: the comment at `ursa-major/src/stats.ts:101-103` says the human
+  share "is computed by subtraction rather than by counting `human_edit`
+  spans, so a cause added later is excluded from the discard rate by
+  default instead of landing in it silently." Read against the four lines
+  underneath it, the subtraction does the opposite of what the sentence
+  claims. `mergeDeleted` and `unknownDeleted` are sums over spans whose
+  `deletion.cause` equals those two strings. `generatedDeleted` is
+  `generatedTotal - generatedSurvived - generatedNotGenerated`, a residual
+  over generation characters that knows nothing about causes. And
+  `humanDeleted` is `generatedDeleted - mergeDeleted - unknownDeleted`. So
+  a fourth `DeletionCause` added to the union in
+  `ursa-major/src/types.ts:63` would appear inside `generatedDeleted`, be
+  matched by neither filter, and land inside `humanDeletedChars` by
+  default, silently. The rejected implementation is the one that would
+  have behaved as described: counting `human_edit` spans leaves the new
+  cause's characters outside all three fields, which breaks the identity
+  `DELETION_SPLIT_EXACT` checks, and the gate fires on the next record
+  rather than on nobody. The chosen one fails quietly and the rejected one
+  fails loudly, which is the inversion.
+- The measurement, because the claim is about what reads a label rather
+  than about arithmetic:
+
+  ```
+  grep -rn "'human_edit'" ursa-major/src --include=*.ts | grep -v '\.test\.'
+  ```
+
+  returns three lines on `main` at the time of writing: the union in
+  `types.ts`, the `HUMAN` constant in `deletion.ts`, and the resolver's
+  default at `resolve.ts:536`. None is in `stats.ts` and none is in
+  `invariants.ts`. The string `human_edit` is written onto spans and read
+  by no figure and no bound, so `humanDeletedChars` has never consulted
+  the label whose name it carries.
+- Why it matters beyond a comment: `humanDeletedChars` is the number
+  `ursa-major/src/types.ts:59-61` says Ursa Minor sells as a discard rate,
+  and `CLAUDE.md` §1 calls `generated_deleted` the correction expressed as
+  an edit. A residual that absorbs every cause the code does not name is a
+  commercial figure that grows quietly whenever the schema grows. The same
+  shape already bit this module once in the other direction, and the
+  module's own header records it: before `blobLookup` split absent from
+  unreadable, every hole in a repository fell through to `human_edit`, and
+  `ursa-major/src/deletion.ts:36-37` says the direction of that error was
+  always the same, toward blaming the person.
+- First step: not this seat's to make, because `ursa-major/src/` is
+  outside the skill seat's write surface. Two candidates for whoever takes
+  it, and they are not equivalent. The small one is to fix the comment, so
+  the next reader is not told the figure is protected when it is not. The
+  real one is to make the behaviour match the comment: compute the human
+  share by counting `human_edit` spans, keep `DELETION_SPLIT_EXACT` as the
+  check that the three named causes still account for the gross figure,
+  and let it fail on the first record carrying a cause nothing sums. That
+  turns a silent inflation of the discard rate into a red gate, which is
+  the trade this repository has made everywhere else. The owner's call is
+  whether a bound may start failing on records already on disk; nothing on
+  disk today carries a fourth cause, so the answer is probably that it may.
+- Cost: $0 for the comment. Small for the behaviour, plus one new
+  violation fixture under `ursa-major/fixtures/violations/`.
+- Status: proposed
+
+### 2026-10-26 (skill, thirtieth run) — A trigger test states its own neighbour count in prose, and the tool that knows the right answer cannot read it
+
+- Trigger: `prompts/skill-extract.md` §5u, written this run after landing
+  the ninth skill falsified 21 count statements across 9 files in
+  `skills/`, 7 of the 8 sibling headers having already been false before
+  this run touched them.
+- What: §5r gave the near-miss debt an owner, a deadline and a gate, and
+  `node skills/trigger-coverage.mjs --check` now exits 1 on an untested
+  boundary. It reads prompts and headings. It does not read the paragraph
+  above them, where every `TRIGGER-TEST.md` in this library states how
+  many neighbours the skill has and how many near misses that buys, and
+  that paragraph is false in seven of eight files the moment a skill
+  lands. The tool already computes both numbers: the per-file prompt
+  counts it prints, and the sibling-boundary denominator, which *is* the
+  neighbour count. The two facts sit in the same process and never meet.
+- Why the obvious check is the wrong one: a string search for number
+  words in a trigger test will fire on every sentence that states a count
+  historically, and this library has at least two that are correct as
+  written and must stay. `skills/README.md` records that
+  `adjudicating-uncertain-spans` had "then five neighbours", and §5r's own
+  text reports "15 of 30 ordered pairs" from the day it was written. A
+  guard whose first alarms are false gets suppressed, which is §5i's
+  warning and §5q's reason for not making the absent-word signal a gate.
+- First step: the shape that survives that problem is to stop writing the
+  count in prose the tool has to guess at. A header declares it in a
+  marker the tool reads, for example an HTML comment
+  `<!-- trigger-coverage: neighbours=8 near-misses=8 -->` beside the
+  paragraph, and `trigger-coverage.mjs --check` compares the declaration
+  against what it computed and exits 1 on a mismatch, naming both numbers.
+  A historical sentence in prose is then invisible to the check by
+  construction rather than by a heuristic, and the prose stays the place a
+  reader learns why the budget is what it is. This is in the skill seat's
+  own write surface, `skills/trigger-coverage.mjs` plus its test file, and
+  it is deliberately not built this run, for the reason the twenty-eighth
+  run declined its ninth guard: half of a guard shipped is worse than
+  none, and this run's deliverable is the skill.
+- Cost: $0.
+- Status: proposed
