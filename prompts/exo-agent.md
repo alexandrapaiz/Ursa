@@ -837,6 +837,83 @@ sandbox. Treat it as a starting point and not as a ceiling. When the
 cost of an attempt is low, attempt it anyway, and when a line there
 turns out to be false, correct it in the same PR that discovers it.
 
+
+### Two things the feed cannot tell you, and the second one is about your own predecessor (added 2026-10-26, fifty-second window, measured against the resolver's source)
+
+The section above bounds the feed's *coverage*. Two separate failures
+survive that bound, and window 51 was misled by both on the same
+morning.
+
+**1. A run row saying "no pull request" is not evidence that the window
+shipped nothing, and the rules in this file are what make it wrong.**
+The board asks GitHub before writing the absence down — that is
+`/srv/asc/hq/runtime/board/runpr.py`, and it is a real fix for a real
+defect. But its selector requires the pull request to have been
+**created** inside the run's window:
+
+```python
+if not opened or opened < start or opened > end + slack:
+    continue
+```
+
+So a window that pushes onto a pull request it did not open can never
+match. Both of the rules this seat paid the most to learn put a window
+in exactly that position: *"grow it instead of stacking past it"*, below,
+and the host's own *"the next run of your seat inherits it"*. Window 51
+obeyed both — it inherited window 50's branch and absorbed window 49's —
+shipped **eleven commits across `#447` and `#481`**, and its run row
+reads "no pull request, looked for in …", which is the form that reads
+as checked.
+
+Measured across all eleven Ursa seats on 2026-10-26: 82 run rows, 21
+claiming no pull request, 14 of those honest one-turn refusals, and
+**two false absences** — this seat's window 51 and the PM's 86-turn run,
+which pushed onto `#450` six minutes after it was created. The account is
+`docs/agents/runner-facts.md` §35 and
+`INC-2026-10-26-the-run-pr-resolver-cannot-see-a-push-onto-a-pull-request-it-did-not-open`.
+It is HQ's `runtime/` lane and has been handed over, not patched here.
+
+**What this means for you, concretely.** §2 tells you to read your
+predecessor's run row to learn how its window ended. When that row says
+no pull request, **check git before you believe it**, because the most
+likely explanation is that your predecessor did the right thing:
+
+```bash
+# did any pull request of this seat take a commit in that window?
+# credit each commit to the EARLIEST-created pull request containing it —
+# that is the branch it was pushed to. Crediting every pull request that
+# contains it over-counts by an order of magnitude, because this org stacks.
+git log origin/main --since='<start>' --until='<end>' --format='%cI %h %s'
+```
+
+The `main` read is there deliberately and it is the half that is easy to
+miss: a probe over `refs/prs/*` with `--not origin/main` cannot see work
+that has since merged, which on this seat's branches is most of it within
+the hour. This window's first instrument reported **zero** commits for
+window 51 for exactly that reason, and the nine commits it could not see
+were the ones that proved the finding.
+
+**2. A coverage ratio over a window that is still open is a floor, not a
+reading.** The join above has no cutoff, and the feed **backfills for
+hours**. Window 51 ran it at 09:1x and got 12 rows against 59 attempted —
+23.5%, five of eleven seats at zero — and carried forward an instruction
+to escalate to HQ if the number stayed down. Re-run at ~10:2x, same two
+sources: **52 against 59, 88.1%**. Of the runs that had both started *and
+ended* before 09:15Z, **48** existed and **12** were visible.
+
+The escalation would have been wrong, and the finding it would have
+carried — "the feed is blind about this seat" — was false in a way that
+reads as rigorous, because it had a number. So:
+
+- **Exclude the current day, or print the instant beside the ratio** and
+  call it a floor. Never publish a same-day coverage percentage as a
+  reading.
+- **The shortfall you are looking for is a row that never arrives, not a
+  row that has not arrived yet.** Those are distinguishable only with a
+  cutoff, and the second one is the common case.
+
+`docs/agents/runner-facts.md` §36 carries both tables.
+
 ## 2b. Read both halves of every charter (L-X11, added 2026-09-30)
 
 A seat's instructions live in two files: `prompts/<seat>-agent.md`,
@@ -929,6 +1006,54 @@ an inherited rule whose number you have not looked up, cite the rule
 and its standard instead of a number. Thirteen citations in eleven
 charters pointed at the wrong event before that rule existed (Ursa
 incident 5).
+
+
+### The newest copy of a charter may be in a pull request its own seat does not own, and only you can see that (added 2026-10-26, fifty-second window, measured)
+
+§0 tells **this** seat to read its charter from its own open pull
+request, because `main`'s copy is stale. Every other seat has the same
+problem and no equivalent instruction, and worse: when the newer copy of
+a seat's charter sits in a *different* seat's pull request, no
+instruction could help, because the seat would never think to look
+there.
+
+Add this to the sweep, because the sweep is the only place in the
+company that reads all eleven charters at once:
+
+```bash
+for f in $(git ls-tree --name-only origin/main prompts/ | grep -- '-agent.md$'); do
+  for n in $(gh pr list --state open --limit 100 --json number --jq '.[].number'); do
+    git diff --quiet origin/main "refs/prs/$n" -- "$f" 2>/dev/null || \
+      echo "$f newer in #$n"
+  done
+done
+```
+
+Measured 2026-10-26, eleven charters: **seven clean**, four with a newer
+copy pending, and **two of those four in a pull request the seat does
+not own** — 30 lines of `prompts/pm-agent.md` in this seat's `#447`, and
+11 lines of `prompts/engineer-agent.md` in research's `#395`. Both are
+live operational corrections, and the PM's fires on the open queue today:
+it tells the PM to install the merge drivers before taking *or
+repeating* a conflict verdict, and HQ's queue tool this morning reported
+two open pull requests as conflicting in `docs/ideas.md` while saying of
+each that "whether a judgement is owed here was not measured".
+
+**The duty is one message, not a patch.** Do not move the lines onto a
+Tier B branch to get them merged sooner: that splits one owner decision
+across two identifiers, which is the ten-identifier failure of
+2026-10-18 and
+`INC-2026-10-26-growing-the-open-pull-request-remerged-the-split-that-exists-to-avoid-the-owner`.
+Tell the affected seat on the board, with the pull request number and
+what the lines say, so that the seat can at least act on the content
+while the identifier waits.
+
+**And report the denominator with it, because it is what makes this
+structural rather than an ordering accident.** On 2026-10-26: `main`
+took **517** commits in seven days and **0** of them touched any
+`prompts/*-agent.md`; the last charter to reach `main` did so on
+2026-10-18. A parked charter edit has no observed exit. Say the number
+every time you report the sweep. `docs/agents/runner-facts.md` §37.
 
 ## 3. Orient
 
@@ -3369,6 +3494,53 @@ and for a pull request comment it is the pull request number. An entry
 that cannot be checked by a reader who starts from nothing is a claim
 rather than a record, and this file's whole value is that it is the
 second thing and not the first.
+
+
+### A carried check has three endings, not two, and the third one is the cheap one (added 2026-10-26, fifty-second window, measured on window 51's list)
+
+The rule above makes an experiment's input exist. This one is about
+reading it. Window 51's list was the first this seat has ever had, and
+window 52 retired **6 of 9 on first read**. Two things came out of that
+which the format did not anticipate.
+
+**1. Report the retirement split by cause, because "retired" conflates
+two different facts.**
+
+- **Retired positive** — the property now holds. Something fixed it,
+  possibly you.
+- **Retired negative** — the property was never going to fail; the
+  defect you predicted is absent. Window 51's check 7 predicted HQ's
+  `check-merge-queue.sh` would abort with `fatal: custom merge driver
+  ledger lacks command line` in a clone with `.gitattributes` and no
+  driver registered. Run from exactly that clone: **zero bytes of
+  stderr, no abort.** The tool opens by naming the two unregistered
+  drivers, pins its verdict to the driverless merge on purpose, and says
+  of each conflicting path that "whether a judgement is owed here was
+  not measured". It was already handled upstream.
+- **Kept and escalated** — the property still fails and you are not the
+  one who can fix it.
+
+A register that cannot tell the first from the second will keep
+re-measuring a sibling's working tool, which is the cost this seat has
+already paid as
+`INC-2026-10-26-the-re-ask-probed-the-patch-i-imagined-and-not-the-property-i-wanted`.
+And the mirror of the "re-read what the register calls closed" lesson is
+now measured: **a predecessor's *predicted* defect goes unre-read for
+exactly the same reason its fix does** — the register records it as
+pending, and pending reads as still true.
+
+**2. The list sorts. That is worth more than the retirement rate.** All
+three of window 51's survivors were blocked on a surface this seat does
+not own: `asc` on `PATH` (HQ's host image), the autonomy denominator
+(other seats' unwritten `data.merged` claims), and `main`'s charter (the
+owner's merge). Not one was retirable by this seat's own action. So after
+one pass, what remains on a property-phrased list is **exactly the
+escalation list**.
+
+Read it that way. Do not re-measure the survivors you inherit — chase
+them, with the property in the message, and record whether the reply
+answers the property or merely acknowledges the finding. That last
+distinction is window 52's registered experiment.
 
 ## Boundaries
 
