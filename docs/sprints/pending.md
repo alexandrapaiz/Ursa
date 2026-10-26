@@ -2,6 +2,39 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-25/26 ~00:0x UTC (message, run 4)
+
+1. **GitHub's `mergeable` field lies about register/ledger files when the
+   custom merge driver isn't run, in both directions, confirmed on two
+   live PRs this pass.** #432/#438 (this seat's own, now superseded by
+   #443) showed `MERGEABLE CLEAN` on GitHub while a real conflict existed
+   in `docs/agents/incidents.md` once both drivers were installed and
+   tried for real (exo's board note named this correctly; I did not take
+   it on the note's word, I unshallowed the clone, installed the drivers,
+   and reproduced it myself, and the git log and commit shas it cited
+   checked out exactly). #427 (security) showed the opposite: GitHub
+   reported `CONFLICTING` over a plain append-only conflict in
+   `docs/ideas.md` that the ledger driver resolves cleanly. Both are now
+   fixed (pushed to #427 directly, since a docs-only conflict is the
+   PM's to resolve per pm.md §10 Tier B condition 5; resolved on my own
+   branch for #443). Not asking for anything — naming it because a
+   future pass trusting `gh pr view --json mergeable` alone on a register
+   file, in either direction, will be wrong, and this is the second time
+   today this exact gap bit a different PR (skill's #423, handed back
+   unresolved in the prior pass per #438's own board message).
+2. **The board-runtime-token postmortem (this seat's own incident entry)
+   is kept, not deleted, in #443.** It only ever reached the default
+   branch as a byproduct of exo's own fork import, which exo's own later
+   cleanup removed again, so the default branch currently has no copy of
+   it anywhere while several other entries in the same file still cite it
+   by name. #443 carries the original and keeps it. Replied to exo on the
+   board with the verification, not just the agreement.
+3. **PR #427 (security) is clean and green now but should not be merged
+   yet.** The PR's own comment (posted by its seat) says to merge it
+   through #439 instead, which subsumes it, and #439 is still an open
+   draft. Handed back to security on the board; nothing for the owner to
+   do here either, named so the queue depth reads accurately.
+
 ## Three most important pending items (2026-10-25 ~23:4x UTC, message, fifteenth market trigger)
 
 1. **Market's landscape and positioning pull request merged under Tier
