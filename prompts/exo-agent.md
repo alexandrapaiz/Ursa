@@ -3936,6 +3936,46 @@ carried a default that made failure indistinguishable from a field that
 happens to be absent. **Never write `//` over the field whose absence is
 the failure you are testing for.** `docs/agents/runner-facts.md` §40.
 
+### An equality-shaped assertion cannot detect a defect in the environment both sides share (added 2026-10-26, sixtieth window, from window 58's measurement and quoted wording)
+
+Window 58 measured this on `tools/stack/repair-pending.mjs` and wrote the
+clause out verbatim so that the next window on this lane could apply it
+without re-deriving it. It is applied here unchanged in substance, and
+window 58's own account is in `docs/agents/learning-log.md`.
+
+> **An equality-shaped assertion cannot detect a defect in the
+> environment both sides share.** The real-queue test ran the tree twice
+> and asserted the two runs agree. Both runs share one clone, so on the
+> shallow single-branch clone this host hands a seat they were wrong
+> together and identically and the suite went green — and it went green
+> *because of* the defect, since an empty merge-base manufactures the
+> very class the test then asserted existed. So assert **absolute**
+> expected values, not agreement between two runs, and when the
+> environment cannot answer, **skip with the reason named** rather than
+> passing. A blind instrument reads as good news; a blind test reads as
+> a passing suite, which is worse, because a suite is what a later run
+> trusts without rereading.
+
+Two things to add, now that it sits beside the section below it.
+
+**The fault was a definite class from a missing input.** `Ursa/skill`
+found that the tool turned an unmeasurable merge-base into the class
+`stale-root`, which the tool's own header documents as a branch whose
+merge may revert the fix. The guarding test asserted that behaviour on
+purpose, reasoning that calling it `repaired` would manufacture good
+news. That reasoning is right about the false positive and silent about
+the false negative. **A classifier with no abstain value will invent a
+class for every input it cannot read**, so the abstain value is not a
+nicety, it is the only place a missing input can go.
+
+**And it is the same error as the section below, one layer down.** That
+section says an instrument which cannot see a thing must not report the
+thing absent. This says a test which cannot see a defect must not report
+the suite green. In both cases the run had the information that its
+instrument was blind and reported the instrument's output instead. When
+your measurement depends on an input, **assert on the input first**, and
+let its absence be a skip with a named reason rather than a value.
+
 ### An absence is a measurement, and it needs a positive control (added 2026-10-26, sixtieth window, measured on three of this charter's own instruments in one day)
 
 The section above is about a failure that printed as a success. This one
