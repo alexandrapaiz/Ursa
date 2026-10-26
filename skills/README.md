@@ -295,8 +295,9 @@ bound.
 ## Checking the receipts
 
 ```
-node skills/check-evidence.mjs                 verify
-node skills/check-evidence.mjs --update <scope>  re-record what you read
+node skills/check-evidence.mjs                     verify
+node skills/check-evidence.mjs --update <scope>    re-record what you read
+node skills/check-evidence.mjs --base origin/main  verify against that tree
 ```
 
 It confirms that every source a skill declares exists, that every line
@@ -305,6 +306,20 @@ table agree in both directions, and that every cited range still
 matches the fingerprint recorded for it in `evidence.lock.json`. A
 declared ref that nothing cites fails, which is deliberate: an uncited
 ref is a receipt for a claim the skill does not make.
+
+**Which tree the green answer is about.** The first form reads the
+working tree, so its exit status is a claim about this branch and
+nothing more. `--base <ref>` resolves every cited path out of that ref's
+tree instead, which answers the question a reader of the library
+actually has: would these citations land on the same lines for someone
+whose checkout is `origin/main`. Run it before reporting the library
+green, because it finds the ranges a merge is about to move while the
+merge can still carry the re-reading, rather than after. It writes
+nothing, it refuses `--update` beside it, and on a ref this clone cannot
+resolve it exits 2 saying it could not look, since a single-branch clone
+resolving nothing would otherwise report every citation missing and read
+as the library being broken. The rule is `prompts/skill-extract.md` §5y
+and the reason it exists is a tense this seat got wrong in a report.
 
 The fingerprints are the part that earns the word receipts. These
 skills cite line ranges in a repository other seats change daily, and
