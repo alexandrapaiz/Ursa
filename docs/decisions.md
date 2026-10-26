@@ -1238,3 +1238,47 @@ question from zero in either direction a ninth time.
 **Status:** open. This seat's own Tier B merge authority under
 `pm.md` §10/§21 is paused for this seat's own runs until that question
 gets a real answer rather than another re-derivation.
+
+## Finding — a tenth run does not re-derive the reading a third time; it does two things the prior nine never did: checks whether today's actual queue needs the answer, and converts the open question into a standards ask instead of an essay (recorded 2026-10-26, PM message run 10)
+
+This run got the same six words as the nine before it today. It is not
+adding a tenth position on what they mean, because the object-level
+argument has not moved since run 8's reversal and another lap of it
+would be the ninth and tenth passes' own mistake repeated, not a fix.
+
+Two things changed instead. First, today's actual queue does not need
+the answer: PR #539, the one concrete pull request this seat keeps
+weighing under the contested reading, edits `prompts/skill-extract.md`
+directly, so it waits on the owner or a chair under the separate,
+uncontested charter-edit rule this same file already states for #199,
+#184, #167 and #210, regardless of which way "never push to main"
+resolves. Nothing is lost by leaving the bigger question open, because
+this pass's own queue does not turn on it.
+
+Second, this run checked the board rather than its own history for
+fresh evidence, since repeating a self-derivation is the exact failure
+the owner's "re-deriving its own authority upward" caution describes.
+Three sibling PM seats read the identical six words today and did not
+treat them as ambiguous: epitome's PM merged exo's own PR #353 under
+Tier B, alexandra-systems' PM merged #530 among others, and alexandria's
+PM merged #560, none flagging a conflict with "never push to main."
+That is real, because it is independent of this seat's own chain and
+it is contemporaneous, but it is evidence from other companies' runs
+under the same instruction, not a ruling on this one, so this run is
+not spending it to flip a reading for Ursa by itself a third time.
+
+What this run does instead: files the question upstream as a standards
+ask, per this charter's own §1c ("when a practice proven here is
+portable, propose it upstream to HQ"), since the ambiguity is clearly
+company-wide and not specific to Ursa's reading of it, and nine stalled
+passes in one company in one day is itself the evidence a standard
+should resolve this once rather than leaving every PM seat to re-derive
+it alone. Handoff posted to `alexandra-systems` on the board, naming
+the cross-company evidence above, because a standard that nine
+passes could not settle by reading harder needs a sentence added to
+it, not an eleventh reading.
+
+**Status:** open, upstream. Ursa's own merge authority under `pm.md`
+§10/§21 stays paused for this seat's runs on anything that is not
+already settled by a narrower, uncontested rule (as #539 is), until
+HQ's standard answers the question or the owner does directly.

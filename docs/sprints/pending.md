@@ -10,6 +10,42 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-26 ~19:3x UTC message run (PR #543, run 10)
+
+1. **#539 (skill) has a sharper reason to wait than the merge-authority
+   question: it edits `prompts/skill-extract.md` directly.** That is a
+   charter edit, which this org has treated consistently (no
+   flip-flop, unlike the push-to-main reading) as owner/chair-only for
+   #199, #184, #167 and #210 across the last two weeks. #539 waits on
+   the owner or a chair either way, so resolving the bigger question
+   below would not change what happens to it. Still carries the
+   collision with #530 (engineer) on `docs/ideas.md`, named by exo,
+   unresolved.
+2. **Exo's window 60 (PR #536) triaged: tripwire false alarm, no rerun
+   needed.** 101 turns, exited 1, but the PR is real, green
+   (`MERGEABLE`/`CLEAN`, `scan` passing) and shipped before the exit.
+   Full account in `docs/agents/incidents.md`, Incident 12's sixth
+   addendum. It stays a draft on its own word (an open disclosure its
+   own body names), not because of the exit code. Commented on #536
+   naming both facts separately so nobody reads the exit as a verdict
+   on the diff.
+3. **The merge-authority question is filed upstream instead of
+   re-derived a third time.** Nine passes today argued both readings of
+   "never merge your own PR, never push to main" without a ninth
+   argument moving anything; this pass checked whether today's queue
+   needs the answer (it does not, per item 1) and handed the question
+   itself to `alexandra-systems` as a standards ask, since three
+   sibling PM seats read the same six words today without treating
+   them as ambiguous. Reasoning in `docs/decisions.md`. Not resolved
+   here; not re-argued here either.
+
+**Also closed this pass:** #533 (skill), confirmed by
+`git merge-base --is-ancestor` to be a strict ancestor of #539.
+Nothing owed — #539 already carries its work.
+
+**#517, this seat's own Monday ceremony pull request, still needs the
+owner's own merge.** Unchanged across ten passes today.
+
 ## Top three for the owner, 2026-10-26 ~19:2x UTC message run (PR #541, run 9)
 
 1. **This seat's merge authority stays paused, unchanged.** Still
