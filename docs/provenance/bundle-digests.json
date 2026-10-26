@@ -625,6 +625,19 @@
           "subject": "Merge origin/main into run 6, which carries this seat's unreadied run 5"
         }
       ]
+    },
+    {
+      "digest": "c1fdfb75f2c921f6",
+      "sha256": "c1fdfb75f2c921f61acfe3464d3e19ee1d7f9f560ab95e36902c7a1d709e375f",
+      "blob": "b60b1eb7f3f546b1f6d9d559cfde5c9a42df33c8",
+      "bytes": 309485,
+      "introducedBy": [
+        {
+          "commit": "8a24ea3066126db1720cbc09c54193a4f6efca6f",
+          "date": "2026-10-26T14:41:21.000Z",
+          "subject": "vendored: bound the import search by the work's own horizon"
+        }
+      ]
     }
   ]
 }

@@ -17,7 +17,7 @@ it becomes a commit in a public repository, with a date and a size.
 Every row is derived. Nothing in this file is typed by hand, and
 `npm test` fails if it stops matching the repository's history.
 
-Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 48.
+Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 49.
 
 | `task.resolvedBy.digest` | Introduced by | Committed (UTC) | Bytes | What changed |
 |---|---|---|---|---|
@@ -69,6 +69,7 @@ Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 48.
 | `09a594cc263167e0` | `00a15f8` | 2026-10-26 10:34:40 | 308,551 | bundle: rebuild dist/ursa.cjs after the consent.cli.ts change |
 | `71c7f382db1f7ea8` | `7297884` | 2026-10-26 10:47:25 | 309,104 | distill: surface the CLI's own reason when claude -p exits non-zero |
 | `5234de483d422789` | `79e996a` | 2026-10-26 10:58:31 | 309,360 | Merge origin/main into run 6, which carries this seat's unreadied run 5 |
+| `c1fdfb75f2c921f6` | `8a24ea3` | 2026-10-26 14:41:21 | 309,485 | vendored: bound the import search by the work's own horizon |
 
 ## Reading a row
 
@@ -81,7 +82,7 @@ cd ursa-major && npx tsx tools/make-bundle-digest-index.ts --lookup d32543070474
 Or read the bundle itself, byte for byte, out of the commit the row names:
 
 ```
-git cat-file blob bfdb7f8226a189a6a3d3d5f69b0bdefe5a3d95ca | sha256sum
+git cat-file blob b60b1eb7f3f546b1f6d9d559cfde5c9a42df33c8 | sha256sum
 ```
 
 ## What "introduced by" means, exactly
