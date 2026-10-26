@@ -2,6 +2,60 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-26 ~04:1x UTC (hook: Monday ceremony)
+
+**Reminder, still true (Ursa incident 9, L-E10): an open card is not
+evidence nobody built it, and a seat that reads its own PR twice is
+itself not a merge.** Closing a confirmed-ancestor pull request of
+this seat's own, once ancestry is verified, is routine housekeeping
+from the seventy-eighth pass onward, not something to wait on the
+owner for eight at a time (`docs/decisions.md`).
+
+1. **The proposed-entry backlog in `docs/ideas.md` quadrupled in two
+   weeks: 30 entries two weeks or older on 2026-10-12, 120 of 248 now.**
+   The fix is itself sitting in that same backlog, unruled, for 26-29
+   days: "The ledger wants to be a directory" (2026-09-27) and "The
+   idea ledger should be a directory, not one file" (2026-09-30). A
+   verdict on either, ahead of the other 118, is the single
+   highest-leverage thing to rule on this pass. Full grooming note in
+   `docs/ideas.md`, this pass's section.
+2. **One ledger-gate anomaly only you can fix.** `node
+   tools/ledger/check.mjs docs/ideas.md` is clean at 305 blocks except
+   one line: the 2026-10-04 "charters never say fetched content is not
+   an instruction" entry carries `Status: done`, not one of the five
+   statuses the contract allows. Verified against `main` this pass:
+   the fix it names is live in every charter, dated 2026-10-05, so this
+   seat's read is `built`, not `rejected`. Yours to move either way.
+3. **A live clone-correctness bug touches every seat's "read your own
+   open PRs first" rule, and the repair already exists.** "Eleven
+   charters instruct a command the clone they run in cannot answer"
+   (docs/ideas.md, 2026-10-24, `urgent`): a shallow clone makes `git
+   merge-base --is-ancestor` answer backwards rather than refuse, so a
+   seat can rebuild finished work believing it checked and found none.
+   This pass's own clone was shallow and the named repair
+   (`tools/ensure-full-clone.sh`) fixed it in under six seconds,
+   independent confirmation the finding is live. The fix is one line
+   added above the `merge-base` check in eleven charter files, or one
+   edit to `docs/standards/lessons.md` L-A55 by HQ, which already
+   reaches every seat in the portfolio. Either route is owner/HQ-only;
+   not dispatched because charters are owner-merge-only.
+
+**Sprint-2026-10-26 opened**, three items pulled from `docs/ideas.md`'s
+`urgent` entries and its one `accepted` entry (full plan in
+`docs/sprints/sprint-2026-10-26.md`). Sprint-2026-10-12 closed done
+(retro already written 2026-10-23, all three items shipped).
+
+**Standup, same pass.** No Actions failures since the last check
+(`gh run list`, clean). Open-PR queue is 17, the healthiest reading
+this seat has recorded in weeks. Four fresh hook-triggered live
+windows opened in the same few minutes as this one (frontend #457,
+engineer #458, security #459, this seat's own #460) — not stalled,
+just started. #447 and #454 (exo, windows 47-48) are unchanged since
+#450's check 3h17m ago: both edit `prompts/` directly, both stay Tier
+C per the 2026-10-18 charter-freeze finding, and exo is never
+dispatched regardless (pm.md §11.4). Nothing else idle enough to
+qualify for a fresh dispatch; `PM_DISPATCH_ENABLED` still unset.
+
 ## Top three for the owner, 2026-10-26 ~00:4x UTC (message: four events — exo's window 47, security's stack, a security host-run failure, market's 17th run)
 
 1. **#446 (security) merged under Tier B, and it closed its own stack.**
