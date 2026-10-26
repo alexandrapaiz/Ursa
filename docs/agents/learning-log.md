@@ -7517,3 +7517,278 @@ shipped against zero owed, so the owed queue stays at zero.
    compute over the same files without them. Today it is six
    `.gitattributes` entries and two registered drivers against three
    shared instruments that ignore both.
+
+## 2026-10-26, window 47 (message: three directed notes, the newest 00:09:30Z) — both of today's findings were handed to me by sibling seats, and autonomy grades zero on fifty of fifty
+
+**The trigger, and what it cost to read it.** Three directed notes: a
+granted handoff from HQ's centralizer, a `done` from the PM, and a `note`
+from the skill seat. The third arrived **cut at 1338 of 2166
+characters**, and what the cut took was the sender's disposition — its
+closing four paragraphs, which contain the measurement that lowers the
+stakes of the whole question and the sentence "nothing owed back to me".
+A window reading only the payload would have seen a seat still arguing.
+The wake section's standing prediction held exactly: the cut is always at
+the end and this house puts the disposition last.
+
+**Observe.** Sixteen open pull requests; fourteen of them under two hours
+old. Fifty merged in the last seven days. **All fifty merged by the
+owner. Zero landed without her.**
+
+**Orient, against HQ's own reading of the ten attributes rather than
+mine.** The weakest is **autonomy (9)**, and it grades zero on the
+standard's own stated surface: "the share of pull requests that landed
+without the owner". The number is 0 of 50. The standard anticipates
+precisely this company's shape — "a queue that is healthy only because
+one person cleared it is not autonomy" — and the queue *is* healthy.
+Throughput is fifty a week and nothing is stale. So the finding is not
+congestion. It is that **every** merge is one human's act, and tonight is
+the first measured cost of that rather than a prediction of one.
+
+The runner-up is **algorithms (3)**, for a reason the skill seat
+established and I reproduced: this repository has two merge drivers, they
+are correct, and they have never run on the path that writes `main`. An
+algorithm that cannot reach the surface where the judgement is made is
+prose with a shebang.
+
+**And the two are the same finding.** The fork problem is a derivative of
+owner-gated merging. Seats fork shared registers because entries do not
+land; the PM's entry was unmerged for eight days while two chains grew
+around it. Nothing in the fork sweep is wrong about forks. The forks
+exist because the merge is rate-limited to one person's attention.
+
+**What I learned, in the order it changes what a later window does.**
+
+1. **A safety claim read by a memoryless successor is indistinguishable
+   from a safety guarantee.** My sweep's "deleting is safe in both merge
+   orders" was verified once, on one pair of feature branches, and
+   written down as a conclusion. Three windows later the premise — that
+   the author has a live chain adding the entry — was false, and the
+   conclusion was applied anyway. The author's commit had **never
+   merged**, so my import was the entry's only route to `main` and my
+   cleanup deleted it. Six citations across three registers resolve to
+   nothing on `main` right now. When you write that an act is safe,
+   write the check, in the imperative.
+
+2. **An instrument built to remove a component must be tested on a case
+   where that component provably changes the answer.** Three windows of
+   mine, one incident and two sibling seats used
+   `-c merge.<name>.driver=` to mean "the merge GitHub performs". It
+   means nothing of the kind: the empty string is registered *as* the
+   driver, git fails to run it, and a `recursive = binary` path then
+   resolves to **ours, verbatim, exit 0, silently**. It fails open in
+   both directions, reporting conflict on one pull request and clean
+   silence on another, which is why it survived three windows of
+   single readings. One assertion catches it.
+
+3. **Being right for the wrong reason is still worth reporting as an
+   error.** The conclusion that instrument was built to prove is
+   correct — I reproduced it with an override on the *attribute*, via
+   `.git/info/attributes`, which outranks the in-tree file. Nineteen
+   merges, the same five owner merges the skill seat named, five of five
+   driverless, seven of fourteen seat merges on the driver. The finding
+   stands and the published proof of it was never evidence.
+
+4. **A seat that reproduces your number and then disputes your
+   conclusion is giving you the more valuable half.** The skill seat did
+   not contest the measurement; it contested what follows, which is
+   where my entry was actually wrong. Its sentence is the right one: the
+   driverless merge is not an instrument that cannot read our semantics,
+   it is the only merge `main` has ever had. I declined its retitle and
+   said why — this register freezes identifiers and the merge driver
+   keys on them — and corrected the finding in place instead. **A frozen
+   identifier is not a frozen finding.**
+
+5. **My loop is compounding across the org and flat inside this seat.**
+   Both of today's findings came from peers. My own sweep, run over all
+   four shared registers, came back clean and found nothing. That is the
+   honest grade, and it is the one number in this entry I would not have
+   volunteered if the compounding clause did not ask for it.
+
+## 2026-10-26, window 48 (message: `#442` merged, "continue with the next item in your lane") — the item in my lane was the experiment window 47 registered, and the first thing it caught was my own first turn
+
+**The trigger, read whole.** The wake was a merge notification for `#442`
+plus "continue with the next item in your lane on the board". No new
+directed mail existed: the three notes window 47 answered at 00:09:30,
+00:01:26 and 23:53:52 are still the newest three addressed to this seat.
+The brief came back whole from `/api/brief` at 1,065 characters. The
+wake text was read out of the process table rather than from memory and
+carries `--max-turns 100`.
+
+So the next item in my lane was the only thing in it: **the experiment
+window 47 registered in `docs/agents/improvements.md`, with its read due
+on the next window of this seat.** That is what I took, and it is said
+plainly in the pull request because the dispatch asked.
+
+**Observe.** Twelve open pull requests, six of them drafts. Fifty-four
+merged in the seven days to today. Oldest open `#395` at 27 hours. Open
+does not outnumber the week's merges, so the depth warning does not
+fire. Zero `agent-*` runs on Actions, as expected since the clocks
+moved; a `--limit 200` read reaches back 26 hours, which is wide enough
+today. Nine `redaction-gate` failures in 24 hours, eight of them
+superseded by a later green run on the same branch; the ninth is on
+`ursa-frontend/2026-10-25-hook`, whose pull request `#412` closed
+unmerged, so nothing shipped over a red gate. Capacity says Ursa
+attempted ten runs today, three finished, **two failed, and Ursa holds
+both of the portfolio's two failures.**
+
+**Orient, on HQ's reading of the ten attributes.** Weakest is still
+**autonomy (9)**, on the standard's own surface. **48.1% of merges
+unattributed over the thirty hours the board actually returned**, and
+75.9% if the seven-day merge list is joined to that same read. Both are
+above the one-third threshold at which HQ's `autonomy.py` refuses to
+grade, so the refusal stands and the thirty-point swing changes no
+verdict. The swing itself is the finding and it is an instrument finding,
+now `runner-facts.md` §30.
+
+**Decide, and it was one thing.** Read window 47's experiment, and if it
+confirmed, fix what it found in the same window rather than filing it.
+
+**Act.**
+
+1. **The experiment read: confirmed and kept.** Predicted two to five
+   unpaired safety claims in this charter besides the fork sweep's; the
+   census found **three**. The population needed hand-filtering, for the
+   second window running, and that is now the standing result: this
+   charter's vocabulary of safety is its ordinary vocabulary, so its
+   rules are not countable by grep.
+2. **The first of the three was live.** `INC-2026-10-26-growing-the-open-pull-request-remerged-the-split-that-exists-to-avoid-the-owner`.
+   I grew `#447` on my first turn, per the all-seats grow rule, and that
+   put 460 lines of Tier B register work into a queue that has merged
+   **0 of 54** in seven days. The charter now carries the tier predicate
+   as two commands and **the split was performed, not recommended**:
+   `#454` is the register half, rooted in `main` with no `prompts/` path.
+3. **§3e's sixth claim divergence is a type.** `{"merged":{"Ursa":377}}`,
+   twice on 2026-10-25, under the oldest key in the table. A census of
+   names cannot see a change of shape.
+4. **`#447`'s body was repaired in place.** Window 47's body carried
+   none of the five standing requirements, which is the second instance
+   of the defect this charter already records under "Replacing the body
+   drops every standing rule about the body". No new identifier was
+   spent, per that section's own remedy.
+
+**The standing sweeps, with their numbers.**
+
+- **Dangling citations on `main`: one, filtered, and it is real.**
+  `INC-2026-10-18-board-runtime-token-printed-twice`, nine citations by
+  name across three registers, entry absent. Re-derived rather than
+  inherited: both pull requests carrying it, `#443` and `#438`, closed as
+  superseded at 00:36 today, and the PM's `#450` contains both and
+  carries the entry whole at 49 lines. **One live route, and it is why
+  `#450` is first in the merge order.** My scan four minutes earlier had
+  found them open, which is this charter's own expiry rule catching a
+  false alarm I was two minutes from publishing.
+- **Fork sweep over all four shared registers: clean.** Every heading
+  either branch adds that `main` lacks is this seat's own, windows 47 and
+  48. No foreign entry carried.
+- **Binding tool sweep: eleven missing** from `pm.md` and `secrets.md`,
+  against **30** names in HQ's narrative register, which is context and
+  not the finding. The `L-*` enforcement sweep returns three:
+  `check-secret-print.py` (L-X5, the live one), `prune-merged-branches.sh`
+  (L-A59, the known false positive), and `merge-register.py` (L-A18,
+  **satisfied here by a local equivalent** — this repository's engineer
+  adopted HQ's merger as `tools/registers/merge-driver.mjs`, so the
+  reference resolves functionally and the sweep cannot tell).
+- **Conflicts: zero of twelve**, with the drivers registered. Four
+  containment relations, so twelve identifiers are nine decisions. The
+  order was simulated in a detached worktree and nine of nine merged with
+  nothing to resolve.
+- **Charter length, the cap every window pays.** 2,221 on `main`,
+  **5,190** live, this window adding 66 lines against zero owed
+  amendments. `main`'s copy has not moved since 2026-10-18.
+
+**Off-repository acts, each with the query that retrieves it.**
+
+| act | addressee | instant | retrieve |
+|---|---|---|---|
+| `done`, the live tips | **broadcast**, no `to_seat` | 00:48:36Z, id `ea34fdc4` | `?limit=400` then `select(.from_seat=="exo")`, newest |
+| `note`, the dangling route and the claim type | Ursa/`pm` | 00:49:00Z, id `ef3d93dd`, **2,155 chars delivered 1,315** | `?to_seat=pm&everyone=0&since_hours=48&limit=500` |
+| `note`, the tail the cut took | Ursa/`pm` | 00:49:15Z, id `8a358328`, 830 of 830 | same |
+| `handoff`, the tick and two re-asks | alexandra-systems/`exo-centralizer` | 00:49:46Z, id `a386cece`, **2,690 delivered 1,302** | `?to_seat=exo-centralizer&everyone=0&limit=500` |
+| `handoff`, the tail | alexandra-systems/`exo-centralizer` | 00:50:01Z, id `18294600`, 1,233 of 1,233 | same |
+| `note`, the owed autonomy correction | alexandra-systems/`exo-centralizer` | 00:54:10Z, id `63486ea0`, 1,200 of 1,200 | same |
+
+**The correction in that last row is the one act of this window that
+§3e exists for, and the previous window is what triggered it.** At 00:26
+today window 47 reported Ursa's autonomy to HQ as **zero of fifty**, read
+from `mergedBy.login` alone. That field reports the owner's credential
+and not the decider on this host, which this seat's own §3e has said
+since 2026-10-18, so the window read the field and not its own rule. The
+joined number is thirteen of twenty-seven claimed over the thirty hours
+the board returned, **48.1% unattributed**. The verdict is unchanged and
+the grade does not move, which is exactly why the correction is owed:
+HQ aggregates the attribute across five companies and was holding a
+number this seat cannot defend. Found by running the end-of-run sweep
+this charter prescribes, against this seat's own outbox, rather than by
+anybody noticing.
+
+**Two board sends were refused before any of those landed, and the
+refusal was invisible in the command's output.** The first carried
+`#454` in its prose and the second had a block over 420 characters. Both
+times the `curl` printed a JSON error object that my `jq` projection
+rendered as three dashes, which reads exactly like a success with
+missing fields. It was caught by the audit read of the feed, which is
+this charter's own "read the artifact back, never the command's output"
+working as written. The write path's own receipt is the better
+instrument and it is now what every send in this window used.
+
+**The two live asks, both still zero.** `install-driver` appears zero
+times in HQ's `check-merge-queue.sh` on `main` (third window). `unresolved`
+appears zero times in HQ's `capacity-retry.py` on `main`, 420 lines
+(fourth window). Both re-sent, with the tail, so the disposition arrived.
+The refspec half of `check-merge-queue.sh` **is** fixed and cites Ursa's
+measurement in its own comments, which is the first of this seat's
+findings to come back as somebody else's code.
+
+**A fourth finding arrived in this window's last five minutes, from its
+own closing check, and it is the experiment's class again.** The final
+conflict sweep reported **both** of this window's branches as
+`CONFLICT docs/agents/incidents.md`. Both are clean. The cause is that
+§5b's order simulation runs `install-drivers.sh` inside a detached
+scratch worktree, a worktree shares `.git/config` with its parent, and
+both installers write an absolute path — so simulating the merge order
+repointed this repository's register drivers at a directory the same
+instruction then tells you to delete. `docs/agents/runner-facts.md` §31
+has the matrix and §0 of the charter now asserts the path rather than
+the exit code.
+
+That is two correct charter instructions where performing the second
+voids the first's instrument, found by printing the raw output instead
+of testing the exit status, which is the 2026-10-18 lesson at the top of
+§0 paying for itself a third time. It is also a free instance of this
+window's registered hypothesis, arriving inside the same run that
+registered it.
+
+### What the next window must check first
+
+1. **Whether `#454` merged and `#447` did not.** That is this window's
+   whole hypothesis about the two routes, and one `gh pr view` each
+   answers it. If `#454` merged and `#447` is still open, the split paid
+   and the tier predicate stays. If both are still open, the split cost
+   one identifier for nothing and say so.
+2. **Whether `#450` merged**, because it is the only live route to `main`
+   for the dangling entry. Re-run the filtered dangling-citation check
+   over `main` first and do not take this entry's state from here.
+3. **This window's experiment**, in `improvements.md`: sweep the other
+   three named process changes of this seat for older rules that assume
+   the superseded process. Predicted at least two more, in the sections
+   the ready-at-coherence inversion touched.
+4. **Whether HQ registered the drivers in `check-merge-queue.sh`.** One
+   call, `grep -c install-driver`. Zero means the ask is live for a
+   fourth window.
+5. **Whether `unresolved` appears in `capacity-retry.py` yet.** Zero
+   means the barren-wake census is live for a fifth.
+
+## 2026-10-26, window 49 (woken by `message`, HQ exo-centralizer) — opening
+
+Run open. Trigger: a note from `alexandra-systems/exo-centralizer`
+addressed to `Ursa/exo` at 05:52:03 UTC, 1,495 characters on the board
+and so **under the 1500 wake cut**, read whole before acting. It says
+both of window 48's two standing re-asks are already satisfied on HQ's
+`main` and that the zero this seat keeps reading is the probe rather
+than the repair. Window 48's own items 4 and 5 under "what the next
+window must check first" are those two re-asks, so this window's first
+duty is to check the sender's claim against the artifact rather than to
+re-run the greps.
+
+Nothing else landed in this entry yet. The findings follow below as they
+are measured.
