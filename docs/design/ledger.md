@@ -932,6 +932,150 @@ seat's reasoning for not writing the files itself rather than restating
 it. Nothing here changes until she answers; the count above is kept so
 the cost of waiting stays visible.
 
+## L29 — A tap target on a wrapper covers the control it is protecting
+
+**measured**, 2026-10-26d, `document.elementFromPoint` and six pointer
+gestures at three viewports. `reviews/2026-10-26d/data/field-pointer-
+before.txt` and `-after.txt`, `README.md` §6.
+
+L3 says the ring belongs to what you see and the target to what you
+press, and the overlay panel's passphrase field implemented it with an
+`::after` on a wrapping `<label>`, because an `<input>` is a replaced
+element and renders no pseudo-element of its own. That reasoning is
+right. The consequence nobody followed through is that **a pseudo-element
+of the label is not a child of the input**, so the overlay is not inside
+the control, it is on top of it, and every pointer event over the field
+landed on the label.
+
+What that cost, measured rather than reasoned about:
+
+```
+                        before              after
+cursor over the field   default             text
+click near left edge    caret at the end    caret where you clicked
+drag across the text    selects nothing     selects
+double click            BLURS the field     selects, keeps focus
+```
+
+**Six reviews and a tap-target sweep passed it, and the reason is the
+useful part.** The only question anyone asked was whether a press opens
+the field, and it does: a label forwards activation to its control
+natively. The instrument asks about activation, and activation was never
+what broke. Everything a pointer does to a text field *other than*
+activate it was gone, and no instrument in the kit asks about any of it.
+
+The rule: **when the target goes on a wrapper rather than on the control,
+the slack has to go outside the control's own box, not over it.** Two
+out-of-flow bands, one above and one below, each
+`height: calc((44px - 100%) / 2)`. The control's own box is then the
+topmost thing over itself; the bands still belong to the label and still
+forward activation. 44 contiguous pressable pixels and none of them over
+the control. The tap-target instrument reads `348x35` drawn and `348x44`
+pressed before and after, and the frame diff is byte-identical.
+
+**`.panel-hit` on the same panel is the same shape and is correct**,
+which is the distinction to carry: its `::after` is on the button itself,
+so it is a child of the control and events over it reach the control.
+Wrapper or control is the whole difference.
+
+**The corollary for the kit.** `measure-hit-areas.mjs` cannot see this
+class of defect, by construction. A tool that probes activation outward
+will report a 44px pass on a control that cannot be typed into. The thing
+that found it was `hover.mjs` refusing to hover the field, which is a
+tool failing usefully.
+
+## L30 — A button does not inherit a font, so the control that names none is the one word in a foreign face
+
+**measured**, 2026-10-26d, `getComputedStyle` on the shipped build.
+`reviews/2026-10-26d/data/font-before.txt`, `README.md` §8.
+
+`misread?` on the overlay panel was drawn in **Arial**, inside a sentence
+set in Inter Tight, at 11px. Chromium's user agent stylesheet gives a
+`<button>` a family of its own and a `<button>` does not inherit one, so
+the single control on that panel that named no family was the single word
+on the page in a typeface nobody in this repository chose. The run button
+escaped it only because `className="mono"` happens to name one.
+
+This is L-shaped with the placeholder colour of the run before it: the
+field named no placeholder colour, Chromium supplied one, and it measured
+4.12 against the panel's own 4.48. **A value no one here chose is a gap,
+not a palette decision being protected.** The two doors are different and
+the answer is the same, so the general form is worth stating once: the
+user agent has an opinion about every property you decline to state, and
+on a `<button>`, `<input>`, `<select>` or `<textarea>` it is not the
+opinion the page around it has.
+
+Cost of the fix, bounded and measured: 280 pixels at every viewport,
+inside the bounding box of that one word, with the frame the same size at
+all three, so the button growing from 12px to 16.5px tall stayed inside
+the line box it sits in.
+
+## L31 — A checker that is wrong whenever you have built the app is a checker nobody runs
+
+**measured**, 2026-10-26d, against this seat's own tree.
+`scripts/redaction-check.mjs`, `reviews/2026-10-26d/README.md` §7.
+
+This seat turned the redaction gate red five times in eleven minutes on
+2026-10-25 and three times on 2026-10-26, both times on the same class of
+string. `redaction-check.mjs` was written after the first of those to ask
+the question locally, before a push. It was not run before the second.
+
+Pointed at the tree afterwards it reported two violations, both inside
+`ursa-major/overlay/.next/`: build output, gitignored, regenerated by the
+`next build` this seat's charter orders **every run**, and invisible to a
+gate that runs on a fresh checkout. So the tool was red on every single
+run of the seat that needed it most, and a real hit would have arrived as
+a third line under two the reader had learned to scroll past.
+
+**The failure is not that the tool was wrong. It is that it was wrong in
+the direction that trains you to ignore it.** A false negative gets found
+by the gate. A false positive on every run gets found by nobody, because
+the behaviour it produces is a seat that stops running the tool, and that
+behaviour leaves no trace in any log.
+
+Hits in gitignored paths are dropped now, the count of what was dropped
+prints on every run including a clean one, and untracked-but-not-ignored
+files are still reported, because a new file about to be committed is the
+case the tool exists for. Four tests, including the no-git case: a filter
+that can silently become a no-op is worse than no filter.
+
+**It paid for itself inside the same run.** The first draft of that
+run's own review quoted the gate's failure log verbatim, which put the
+36-character id back into the tree one directory from where it had been
+removed that morning. The fixed checker caught it on the last commit,
+which is the fourth red run it would otherwise have been.
+
+## L32 — The benchmark you already took beats the benchmark you are about to take
+
+**decided**, 2026-10-26d, `reviews/2026-10-26d/README.md` §3 and §4.
+
+The charter's step three sends every run to the public web to study
+interaction craft, and the owner has named the feel she wants: Elicit's
+bouncy hover. The run that was finally asked to put a hover on the
+overlay panel did not go. The house already owned a measured answer to
+that exact question, taken on 2026-10-24 off Elicit's own animation
+engine rather than off its stylesheet at rest, and recorded with the
+generator command that reproduces it.
+
+Taking a fourth reading of the same site would have produced a second
+spring, and **a second spring is a second identity**. What the run owed
+instead was an audit of the value it was about to reuse, which is cheap
+and which nobody had done: `read-spring.mjs` reads 0.801 damping and 1.50
+percent overshoot back out of the committed literal against the 0.80 and
+1.50 its comment claims, and `make-spring.mjs` regenerates it
+byte-identically from the command the comment records.
+
+That audit found the thing worth finding. **One of the two committed
+copies was unreachable from the surface that needed it**: the overlay's
+was declared on `.dash`, a scoping class on the dashboard page, and
+nothing in that file used it, so the panel could not see it at all. The
+token moved to `:root` in `globals.css`, which the root layout imports.
+
+So: reuse first, audit what you reuse, and spend the web trip on a
+question the repository cannot already answer. "No external sources were
+read" is a legitimate line in a review, and this run's §9 is the first
+one in this folder to say it.
+
 **Ursa Major has two web surfaces and two identities.** Measured on
 2026-10-24 (`reviews/2026-10-24g/README.md` §7): the capture panel is
 drawn at 6px radii in two Google faces with three hues the rest of Ursa
