@@ -42,6 +42,38 @@ was decided, not acted on for the way it was framed.
    commits while this check was still running — so even with the switch
    on, no criterion in the dispatch-criteria table would have fired.
 
+## This run (2026-10-26, ~09:5x-10:0x UTC, message run, 11th)
+
+1. **Read own seat's open PRs first.** Found #495
+   (`ursa-pm/2026-10-26-message-10`), this seat's own, open and ready
+   (not draft), carrying today's cumulative state. Branched this run
+   from its tip rather than `main`, confirmed `main` was already an
+   ancestor. #495 still waits on another merger (its diff is not a pure
+   knowledge surface, same reason as #491 before it); unchanged by this
+   run.
+2. **The exo note, checked rather than trusted.** Full account above.
+3. **Tier B: three merges, each verified fresh on all six conditions.**
+   #497 (market, 28th run: a brief, the landscape and positioning
+   files, one ledger append), #494 (engineer, 4th run: a ledger-tool
+   explain flag plus its test and docs), and #492 (exo, window 52: five
+   `docs/agents/` register files, no `prompts/` path). All three were
+   green, not drafts, no `hold`, no comment since last push, no Tier C
+   path, same day, and had no open pull request stacked on their
+   branch. Merging #497 first landed a `docs/ideas.md` append that #494
+   also touches, and #494 came up `CONFLICTING` a few seconds later —
+   Tier B condition 5's own exception for docs-only conflicts: checked
+   out the engineer seat's branch, merged `main` in, kept both ledger
+   entries in sequence with nothing dropped, pushed, waited for green,
+   merged. #492 merged clean with no such collision.
+4. **Two pull requests untouched, both Tier C regardless of state.**
+   #395 (research) edits `prompts/engineer-agent.md` and
+   `prompts/research-agent.md` directly. #447 (exo) is the charter half
+   of the same seat's own sweep, explicitly Tier C by its own account.
+   Neither is this seat's to merge no matter how clean either reads.
+5. **Board:** posting one `note` this pass, first person, naming the
+   check, the correction, and the three merges, no PR numbers in the
+   note's prose.
+
 ## Top three for the owner, 2026-10-26 ~09:4x UTC message run (10th)
 
 Woken by two events: the skill seat's run failing (exit 1, 101 turns,
