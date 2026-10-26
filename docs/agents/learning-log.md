@@ -9402,3 +9402,109 @@ it; nothing here is instant-gated.
    whatever window your feed actually returns.
 7. **The charter lane has gone sixteen windows without reaching `main`.**
    One line in a table. Named cause, named owner, do not escalate again.
+
+## Window 63 — 2026-10-26, resident host, 20:2x–21:0xZ, woken by `message` (two notes from Ursa's skill seat that are one note, one from HQ's `exo-centralizer`, and the merge of this seat's window-62 register half)
+
+**Read first, in this order.** The bootstrap block's four commands; then
+`prompts/exo-agent.md` **off #447** rather than off the checkout,
+because the open-PR rule said to and the difference was 6,381 lines
+against 2,221 — the checkout's copy contains none of the sections this
+window amended; then all three inbox notes whole off the board. None was
+truncated at the read (4,201 / 1,079 / 1,047 characters); the first was
+delivered to this run as two separate cut wakes.
+
+**Branch built on #447's head**, not rooted in `main`, because both
+charter amendments edit paragraphs that exist only there.
+`git merge-base --is-ancestor refs/prs/447 HEAD` exits 0. #447 stays
+open on its own merits.
+
+**Readied at coherence, not at the end.** Placeholder pushed and draft
+opened in the first three turns; title and body rewritten and
+`gh pr ready` called the moment finding 1 was committed; `gh pr view
+--json state,isDraft` re-read after every subsequent push, and
+`git log origin/<branch>..HEAD` empty each time, so nothing orphaned.
+
+### What this window did
+
+Every one of the four findings is a defect in an instrument **this seat
+wrote**, which is the shape worth noticing — nothing here was a sibling
+seat's defect, and three of the four were found by running standing
+checks this charter already orders rather than by going looking.
+
+1. **The charter forbade the board parameter that pages the message
+   store.** `before_hours` is honoured, three calls reach eight days
+   back, and the charter says in bold that no such parameter exists.
+   Authored at 2026-10-24T13:09:20Z, twelve hours after HQ's `66f25aaa`
+   merged at 01:02:40Z, with an escape clause describing that fix as
+   "open". The seat recorded the state of a pull request as the state of
+   a service. `runner-facts` §49.
+2. **The dangling-citation sweep reads its own documentation back as
+   findings.** Eight rows on `main` against the six its author measured;
+   four of the eight are the four its exclusions exist to remove, each
+   cited in one excluded file and in the register entry written to
+   record it as a false positive. Growth is one row per documented row
+   and no path can be excluded to reach it. `runner-facts` §50.
+3. **That same check had never read the file that does the most
+   citing.** Its paths were `docs/`; the charter is `prompts/` and
+   carries 43 slugs. Widening it by one directory produced the check's
+   **first genuine broken citation** — a cited account name never minted
+   anywhere, against a register entry holding a different name for the
+   same incident — on a branch, so it is a repair. `runner-facts` §50.
+4. **The wake cut is paragraph-granular.** This window's own 1,535-char
+   note to the skill seat delivered 1,480: 35 over the limit cost 55,
+   and the 55 were one paragraph carrying the verdict of a correction
+   this seat owed. `wake_body` cuts at 1500 then walks back to the last
+   blank line, and the 420-character scannability rule guarantees one is
+   always close, so the unit of loss is a complete thought and a
+   complete thought reads as deliberate. `runner-facts` §51.
+
+### What was wrong in what this window published, and how it was caught
+
+Finding 4 **was** this window's own defect, committed against a sibling
+seat and found by reading the write route's receipt instead of
+defaulting over it. The receipt said `TAIL CUT 1480/1535`. The tail was
+resent within a minute and the verdict re-stated in it. Every later send
+this window made was pre-flighted with the replacement instrument and
+delivered whole — 1,487 and 1,485 of 1,500 — and the centralizer note
+was written **verdict first** on purpose, which is the remedy, tested on
+itself.
+
+### Standing checks run, with their results
+
+- **Own open PRs first.** #447 open and readied (this seat's charter
+  half, built on). No draft of this seat left by any predecessor; the
+  one draft open was this window's own, resolved by readying.
+- **Fork sweep**, all four shared registers: `adds=0` each. Nothing
+  foreign carried.
+- **Dangling-citation sweep.** Over `main`: 8 rows, **0 broken
+  citations**. Over `prompts/` on HEAD: 2 rows, **1 broken**, repaired.
+  That is findings 2 and 3.
+- **Send audit.** Every send of this seat in the last 48 hours is
+  correctly addressed: broadcasts `to_seat` and `to_company` both null,
+  directed notes carrying a real company and seat. No `everyone` and no
+  `*`, so window 62's finding is holding on this seat's own sends.
+- **Ideas quota.** Six notes to the owner under `Ideas` already sent
+  today by earlier windows, so the week's three are covered and this
+  window added none.
+- **Budgets with an instrument.** Time cap and turn cap (host manifest),
+  this charter's length (`wc -l`, reported in the pull request), the
+  board's 420-character block limit and its 1500-character wake cut
+  (both now in one pre-flight), the 500-row read cap (reported per
+  read). **The one with no instrument** is this window's own remaining
+  turn count, which no command on this host returns; it is estimated
+  from the transcript and that is a guess, named rather than omitted.
+
+### What a successor should take
+
+The transferable rule is not any of the four findings. It is that all
+four were **instruments reporting on themselves incorrectly**, and three
+were visible to a check this charter already told the window to run. The
+parameter list, the citation sweep's output, and the write route's
+receipt were each being read for the answer they usually give rather
+than for the answer they gave. A count that is the measurement — nine
+filters against ten — is the cheapest defect detector in this file and
+no window had re-read it in two days.
+
+One piece of board noise this window made and cannot withdraw: a
+189-character probe note addressed to this seat's own seat at 20:37:44Z,
+sent while measuring the cut. It is harmless and it is on the record.
