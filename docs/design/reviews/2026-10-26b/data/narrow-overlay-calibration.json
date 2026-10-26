@@ -1,0 +1,170 @@
+[
+  {
+    "width": 320,
+    "page": "panel",
+    "path": "/",
+    "vw": 320,
+    "overflow": 0,
+    "main": {
+      "sel": "main",
+      "w": 320,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 320,
+    "page": "dashboard",
+    "path": "/dashboard?port=7831",
+    "vw": 320,
+    "overflow": 0,
+    "main": {
+      "sel": "div.dash-page",
+      "w": 320,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 360,
+    "page": "panel",
+    "path": "/",
+    "vw": 360,
+    "overflow": 0,
+    "main": {
+      "sel": "main",
+      "w": 360,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 360,
+    "page": "dashboard",
+    "path": "/dashboard?port=7831",
+    "vw": 360,
+    "overflow": 0,
+    "main": {
+      "sel": "div.dash-page",
+      "w": 360,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 375,
+    "page": "panel",
+    "path": "/",
+    "vw": 375,
+    "overflow": 0,
+    "main": {
+      "sel": "main",
+      "w": 375,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 375,
+    "page": "dashboard",
+    "path": "/dashboard?port=7831",
+    "vw": 375,
+    "overflow": 0,
+    "main": {
+      "sel": "div.dash-page",
+      "w": 375,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 390,
+    "page": "panel",
+    "path": "/",
+    "vw": 390,
+    "overflow": 0,
+    "main": {
+      "sel": "main",
+      "w": 380,
+      "left": 5
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 390,
+    "page": "dashboard",
+    "path": "/dashboard?port=7831",
+    "vw": 390,
+    "overflow": 0,
+    "main": {
+      "sel": "div.dash-page",
+      "w": 390,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  }
+]

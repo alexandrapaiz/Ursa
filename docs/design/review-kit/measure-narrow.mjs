@@ -41,6 +41,49 @@
  *      measured, or named in a `COULD NOT LOAD` list that the headline
  *      refuses to call a pass.
  *
+ *   4. **A full-bleed decorative layer is not clipped content.** This
+ *      clause was not foresight. The first version of this file had the
+ *      three above and was run against `ursa-minor`, and it reported
+ *      content out of reach on 8 of 20 cells, at every width including
+ *      390. All eight were `PixelSky`'s canvas, which is `position:
+ *      fixed; inset: 0` under `transform: matrix(1.05, …)`: a deliberate
+ *      five percent overscan, so a 320px viewport gets a 336px canvas
+ *      centred at -8, and 390 gets 409.5 at -9.75. Both numbers are the
+ *      scale arithmetic exactly, measured in `data/probe-canvas.mjs`
+ *      rather than read off the stylesheet. The sky bleeds past the
+ *      viewport on purpose and the reader loses nothing, so a count that
+ *      included it could never have reached zero, which is the one thing
+ *      L19 says a measurement must not do.
+ *
+ *   5. **A layout still moving is not a layout.** Also not foresight.
+ *      With clause 4 in, two consecutive sweeps of `ursa-minor`
+ *      disagreed about the home page: one reported the sky bleeding
+ *      -8..328 at 320px and the next reported no offender on that page
+ *      at all. Neither was a bad read of the pixels. `data/
+ *      probe-canvas-time.mjs` sampled the canvas every 250ms and found
+ *      the transform arriving after hydration rather than with the
+ *      markup: on the 404 page it is `none` on the first sample and
+ *      `matrix(1.05, …)` by the second. `networkidle` had already
+ *      fired both times, so the gate the instrument had was not a gate
+ *      on this.
+ *
+ *      A fixed `--settle` would have hidden it rather than fixed it, and
+ *      L15 is the entry that says a timeout is not a wait. So the
+ *      measurement is taken when the geometry stops changing: the probe
+ *      runs, waits, runs again, and only reports when two consecutive
+ *      reads of every edge agree. `settledAfterMs` is in the JSON and a
+ *      cell that never settles is named rather than reported, because an
+ *      unstable layout is itself the finding.
+ *
+ *      The gate is mechanical rather than a list of selectors to ignore:
+ *      an element is decoration if it cannot be pressed
+ *      (`pointer-events: none`), contains no text, and contains nothing
+ *      focusable. L25's actual defect fails all three of those, because
+ *      the box it was about was `main`. Decorative bleed is still
+ *      reported, in its own column, so that a sky which starts bleeding
+ *      300px is visible; it is just not counted as content put out of
+ *      reach.
+ *
  * Read-only. Nothing is clicked. Geometry is the only thing taken.
  *
  * usage:
@@ -105,9 +148,20 @@ const probe = () => {
     return null;
   };
 
+  /* Decoration, by three mechanical tests rather than by name: it
+     cannot be pressed, it says nothing, and nothing in it can be
+     focused. A sky that bleeds 5% past the viewport passes all three.
+     `main`, which is what L25 was actually about, fails all three. */
+  const isDecoration = (el) => {
+    if (getComputedStyle(el).pointerEvents !== "none") return false;
+    if ((el.textContent || "").trim().length > 0) return false;
+    return !el.querySelector("a, button, input, select, textarea, [tabindex], [contenteditable]");
+  };
+
   const right = [];   // past the right edge, reachable by scrolling the page
   const clipped = []; // left of zero, reachable by nothing
   const contained = new Map(); // offenders a scroll container owns
+  const bleed = [];   // decoration deliberately wider than the viewport
 
   for (const el of d.querySelectorAll("*")) {
     const r = el.getBoundingClientRect();
@@ -123,6 +177,7 @@ const probe = () => {
       continue;
     }
     const row = { sel: name(el), left: +r.left.toFixed(1), right: +r.right.toFixed(1), w: +r.width.toFixed(1) };
+    if (isDecoration(el)) { bleed.push(row); continue; }
     if (under) clipped.push(row);
     if (over) right.push(row);
   }
@@ -134,25 +189,56 @@ const probe = () => {
      descending puts the worst overflow first. */
   clipped.sort((a, b) => a.left - b.left);
   right.sort((a, b) => b.right - a.right);
+  bleed.sort((a, b) => a.left - b.left);
 
-  const main = d.querySelector("main") || document.body.firstElementChild;
+  /* The content box, for the one column that says whether the layout is
+     tracking the viewport at all. Its name is reported with it: the
+     first version fell back to `body.firstElementChild` when there was
+     no `<main>`, and on the overlay's dashboard that is a zero-width
+     node, so the column read `main 0 at 0` on a page that was laid out
+     correctly. A box this instrument could not find has to say so
+     rather than print a zero that reads like a measurement. */
+  const main = d.querySelector("main, .dash-page, [role=main]");
   const mr = main?.getBoundingClientRect();
 
   return {
     vw,
     overflow: d.scrollWidth - vw,
-    main: mr ? { w: +mr.width.toFixed(1), left: +mr.left.toFixed(1) } : null,
+    main: mr ? { sel: name(main), w: +mr.width.toFixed(1), left: +mr.left.toFixed(1) } : null,
     clipped: clipped.slice(0, 4),
     clippedCount: clipped.length,
     right: right.slice(0, 4),
     rightCount: right.length,
+    bleed: bleed.slice(0, 4),
+    bleedCount: bleed.length,
     contained: [...contained].map(([sel, n]) => `${sel}×${n}`),
   };
 };
 
+/* Take the measurement when the page has stopped moving, not after a
+   number of milliseconds somebody guessed. Every edge this instrument
+   reports goes into the signature, so a transform arriving late, a font
+   swapping, or data landing all keep it reading until they are done. */
+const SETTLE_STEP = Number(arg("settle-step", 200));
+const SETTLE_CAP = Number(arg("settle-cap", 4000));
+const sig = (m) =>
+  JSON.stringify([m.overflow, m.main, m.clipped, m.right, m.bleed, m.contained]);
+
+async function settle(page) {
+  let prev = await page.evaluate(probe);
+  for (let waited = SETTLE_STEP; waited <= SETTLE_CAP; waited += SETTLE_STEP) {
+    await page.waitForTimeout(SETTLE_STEP);
+    const next = await page.evaluate(probe);
+    if (sig(next) === sig(prev)) return { ...next, settled: true, settledAfterMs: waited };
+    prev = next;
+  }
+  return { ...prev, settled: false, settledAfterMs: null };
+}
+
 const browser = await launch();
 const rows = [];
 const failures = [];
+const unsettled = [];
 const json = [];
 
 for (const w of WIDTHS) {
@@ -163,8 +249,9 @@ for (const w of WIDTHS) {
       await page.goto(BASE + path, { waitUntil: "networkidle", timeout: 45000 });
       if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 });
       if (enterState) await enterState(page, label);
-      const m = await page.evaluate(probe);
+      const m = await settle(page);
       json.push({ width: w, page: label, path, ...m });
+      if (!m.settled) unsettled.push(`  ${w} ${label} (${path}): edges still moving after ${SETTLE_CAP}ms`);
       const verdict = m.clippedCount
         ? `CLIPPED ${Math.abs(m.clipped[0].left).toFixed(0)}px out of reach`
         : m.overflow > 0
@@ -172,9 +259,10 @@ for (const w of WIDTHS) {
           : "fits";
       rows.push(
         `  ${String(w).padEnd(6)}${label.padEnd(10)}` +
-        `main ${String(m.main ? `${m.main.w} at ${m.main.left}` : "none").padEnd(16)}` +
+        `${String(m.main ? `${m.main.w} at ${m.main.left}` : "no content box").padEnd(16)}` +
         `${verdict.padEnd(30)}` +
         (m.clippedCount ? m.clipped[0].sel : m.rightCount ? `widest ${m.right[0].sel} to ${m.right[0].right.toFixed(0)}` : "") +
+        (m.bleedCount ? `  [bleed: ${m.bleed[0].sel} ${m.bleed[0].left}..${m.bleed[0].right.toFixed(0)}${m.bleedCount > 1 ? ` +${m.bleedCount - 1}` : ""}]` : "") +
         (m.contained.length ? `  [contained: ${m.contained.join(" ")}]` : ""),
       );
     } catch (e) {
@@ -193,16 +281,18 @@ const over = json.filter((r) => !r.clippedCount && r.overflow > 0);
 const out = [
   `  base ${BASE}   widths ${WIDTHS.join(", ")}   height ${HEIGHT}` + (STATE ? `   state ${STATE}` : ""),
   "",
-  "  width page      main box at left  verdict                       where",
+  "  width page      content box     verdict                       where",
   ...rows,
   "",
   // The headline names its own denominator, because L23 measured that a
   // denominator of zero reads exactly like a pass, and it refuses to
   // report a pass while any cell is unmeasured.
-  failures.length
-    ? `  NOT MEASURED: ${failures.length} of ${cells} page-by-width cells could not be loaded, so this run makes no claim about them.`
-    : `  ${clipped.length} of ${cells} page-by-width cells put content out of reach; ${over.length} overflow reachably.`,
+  failures.length || unsettled.length
+    ? `  NOT MEASURED: ${failures.length + unsettled.length} of ${cells} page-by-width cells could not be loaded or never came to rest, so this run makes no claim about them.`
+    : `  ${clipped.length} of ${cells} page-by-width cells put content out of reach; ${over.length} overflow reachably; ` +
+      `${json.filter((r) => r.bleedCount > 0).length} carry decoration that bleeds on purpose and is not counted.`,
   ...(failures.length ? ["", "  COULD NOT LOAD", ...failures] : []),
+  ...(unsettled.length ? ["", "  NEVER CAME TO REST", ...unsettled] : []),
 ].join("\n");
 
 console.log(out);
