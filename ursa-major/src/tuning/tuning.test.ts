@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { OutcomeRecord } from '../types'
-import { buildDistillPrompt, distill, parseDistillOutput } from './distill'
+import { buildDistillPrompt, cliFailureReason, distill, parseDistillOutput } from './distill'
 import { emptyTuning, mergeDistill } from './merge'
 import { renderTuningBlock } from './export'
 import type { DistillOutput } from './types'
@@ -215,6 +215,40 @@ describe('distill with injected runner', () => {
     const runner = () => JSON.stringify(output1)
     const out = distill(record('r1'), emptyTuning('t'), 'sonnet', runner)
     expect(out.axioms).toHaveLength(1)
+  })
+})
+
+describe("the CLI's own reason for failing", () => {
+  // `claude -p --output-format json` exits 1 on an API error and still
+  // prints a complete envelope whose `result` is the reason. execFileSync
+  // throws on the exit code, so the reason never reached the operator.
+  // These three cases are the ones the dogfooding run on 2026-10-26 hit or
+  // could have hit; the first is verbatim from that run, with the
+  // envelope's two identifiers truncated per the charter's redaction
+  // rider and the gate's own eight-character rule.
+  it('reads the reason off the stdout envelope of a non-zero exit', () => {
+    const err = {
+      status: 1,
+      stdout: JSON.stringify({
+        session_id: '635f117d',
+        is_error: true,
+        terminal_reason: 'api_error',
+        result: 'Not logged in · Please run /login',
+        uuid: '11c5adee',
+      }),
+    }
+    expect(cliFailureReason(err)).toBe('Not logged in · Please run /login')
+  })
+
+  it('returns null when there is no envelope, so a missing binary reports as itself', () => {
+    expect(cliFailureReason({ code: 'ENOENT', stdout: '' })).toBeNull()
+    expect(cliFailureReason({ status: 1, stdout: 'not json at all' })).toBeNull()
+    expect(cliFailureReason(new Error('spawn timed out'))).toBeNull()
+  })
+
+  it('returns null on an envelope with no usable result, rather than an empty message', () => {
+    expect(cliFailureReason({ stdout: JSON.stringify({ is_error: true, result: '   ' }) })).toBeNull()
+    expect(cliFailureReason({ stdout: JSON.stringify({ is_error: true }) })).toBeNull()
   })
 })
 
