@@ -10,6 +10,10 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-26 ~15:1x UTC message run (PR #531's successor, in progress)
+
+Run started; full account follows once the triage below is complete.
+
 ## Top three for the owner, 2026-10-26 ~15:0x UTC message run (PR #531)
 
 1. **The five-pass merge stall is broken.** Runs 3 through 6 today
