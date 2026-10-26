@@ -1417,7 +1417,16 @@ message, a ledger `What` field, a `## Where this comes from` paragraph.
    Usually a grep for the identifier the message already named. If the
    cause cannot be falsified in one command, say in the handoff what it
    would take, and hand over the symptom with the hypothesis marked as
-   one.
+   one. **And read the falsifying command's zero as carefully as its
+   one.** This run reached for `grep -c` on a sentence from the
+   classifier's comments to confirm the fix was on the default branch,
+   got `0`, and had the hypothesis "the fix is not merged" available
+   before noticing that the sentence it searched for wraps across two
+   comment lines and `grep` is line-oriented. A zero from a text search
+   has two causes, absent and not-on-one-line, and the second is the
+   likelier one whenever the pattern came from prose rather than from
+   code. `git diff` against the branch answered it in one command and
+   has no such mode.
 3. **Count the paths to the failing branch, not the causes the message
    lists.** A message names the cause its author thought of; the number
    of ways to reach that branch is a property of the code. Where they
