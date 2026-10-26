@@ -1,0 +1,59 @@
+{
+  "phone/panel-unlocked": [
+    {
+      "tag": "button",
+      "cls": "mono",
+      "label": "run",
+      "display": "block",
+      "lines": 1,
+      "boxW": 51,
+      "boxH": 26,
+      "lineH": 26,
+      "hitW": 52,
+      "hitH": 26,
+      "inline": false,
+      "doc": false,
+      "short": true,
+      "coversLine": null,
+      "afterPosition": "static"
+    }
+  ],
+  "tablet/panel-unlocked": [
+    {
+      "tag": "button",
+      "cls": "mono",
+      "label": "run",
+      "display": "block",
+      "lines": 1,
+      "boxW": 51,
+      "boxH": 26,
+      "lineH": 26,
+      "hitW": 52,
+      "hitH": 26,
+      "inline": false,
+      "doc": false,
+      "short": true,
+      "coversLine": null,
+      "afterPosition": "static"
+    }
+  ],
+  "desktop/panel-unlocked": [
+    {
+      "tag": "button",
+      "cls": "mono",
+      "label": "run",
+      "display": "block",
+      "lines": 1,
+      "boxW": 51,
+      "boxH": 26,
+      "lineH": 26,
+      "hitW": 52,
+      "hitH": 26,
+      "inline": false,
+      "doc": false,
+      "short": true,
+      "coversLine": null,
+      "afterPosition": "static"
+    }
+  ]
+}

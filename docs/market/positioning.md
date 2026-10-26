@@ -167,6 +167,35 @@ this, but the next run that needs the bulk-content comp should start
 here instead of re-discovering the aggregator problem from scratch.
 [corpusbridge.com/learn/ai-data-licensing-deals](https://corpusbridge.com/learn/ai-data-licensing-deals).
 
+**A magnitude anchor from an adjacent market, not the gap itself, found
+2026-10-26 (17th message run).** Erik Newsham, founder of Grepped, a
+startup that buys private companies' internal data and brokers it to
+AI labs, posted on X (2026-10-24) that the firm's average deal size
+moved from "$250-400k" to "closer to $1.1-$1.3m" after it started
+targeting larger data holders, with a "far more spread out
+distribution." This is a founder's own unverified figure, for a single
+company, in the business-data-licensing market, not the RLHF-specific
+contract the gap above asks about, and no named buyer, seller, or
+individual deal backs it. It is still the first dated, named-source
+number this file has found that lands inside the exact band CLAUDE.md
+§4 already assumes for Minor's own contracts ("six to seven figures
+depending on lab tier") rather than above or below it. Read
+conservatively: one adjacent vendor's self-reported average sitting
+inside Minor's own assumed range is a plausibility check, not a
+confirmation, since Grepped sells bulk private company datasets and
+Minor sells a structurally different thing (consented, derived
+outcome signal, not raw data). Worth citing in KR4.1's lab brief as
+"here is what a neighboring data-licensing business says its own deals
+run" if a lab asks where the six-to-seven-figure assumption comes
+from, with the caveat stated in the same breath. Checked whether
+aidata.broker (the tracker this file points to above) and Grepped
+share an owner, since both operate in the same niche; they do not —
+aidata.broker is operated by O-mega Enterprise, Inc per its own
+footer, a separate company from Grepped (see the dated note added to
+docs/market/landscape.md's aidata.broker entry this run, flagging that
+aidata.broker is itself a commercial participant in this market, not a
+neutral tracker). [Erik Newsham on X, 2026-10-24](https://x.com/eriknewsha/status/2113785567095742730), [FourWeekMBA: AI Data Broker Says Deals Now Run $1.1M-$1.3M](https://fourweekmba.com/ai-the-data-wars-ai-data-broker-says-deals-now-run-1-1m-1-3m/).
+
 ## Category 3 read: why would a user adopt Ursa Major when memory is
 already built into ChatGPT for free?
 
@@ -187,6 +216,29 @@ Google ship a portable-memory *standard* jointly (unlikely, given
 CLAUDE.md's own naming of model providers as a competitive threat, but
 not impossible under regulatory pressure), that closes Ursa Major's gap
 overnight. Nothing found this run suggests that's in motion.
+
+**Update 2026-10-26: the first concrete regulatory instrument found,
+and why it doesn't reach this gap.** The EU Data Act's cloud-switching
+chapter has been in force since 2025-09-12 and bans switching/data-
+extraction fees outright from 2027-01-12, with a documented-format,
+30-day portability mandate in between. Checked its scope directly
+rather than taking the "AI regulation" framing some coverage gives it
+at face value: Chapter VI binds providers of IaaS/PaaS/SaaS "data
+processing services" that a customer *runs workloads on*
+(infrastructure a business builds on top of, named examples AWS,
+Azure, GCP, Render, Railway, Fly.io), not consumer-facing applications
+a user talks to. ChatGPT's or Claude's own memory feature is the
+application, not the infrastructure underneath it, so it sits outside
+this chapter's own definition on the reading available. This is real
+regulatory motion, the first this file has found with a name and a
+date, and it still doesn't close Major's gap: it is the opposite
+layer, enterprise cloud switching, from the consumer AI-memory
+portability the honest risk above names. The risk stands exactly as
+stated. Separately, MacPaw Research's "Portable Memory" `.mem`
+proposal (docs/market/landscape.md, 2026-10-26 update) is a private,
+unfunded spec with no vendor backing, not regulatory pressure at all;
+grouped here only because both surfaced in the same pass and neither
+changes the answer. [sota.io: EU Data Act 2025, Cloud Switching Rights Developer Guide](https://sota.io/blog/eu-data-act-2025-cloud-switching-rights-developer-guide), [Kennedys Law: From hitch to switch](https://www.kennedyslaw.com/en/thought-leadership/article/2025/from-hitch-to-switch-how-the-eu-data-act-will-overhaul-switching-and-portability-terms-in-cloud-contracts-ukeu/).
 
 ## A bound on Minor's target, not a price (2026-09-30)
 
@@ -730,6 +782,43 @@ Major itself.
   pointer for the enterprise-contract-size gap: a larger (130-deal),
   better-sourced tracker, same result (no RLHF-specific deal among
   them). The gap stays open. No pricing recommendation made.
+- 2026-10-26 (event-driven, message, 17th run) — found the first
+  dated, named-source magnitude anchor in the business-data-licensing
+  market that lands inside CLAUDE.md §4's own six-to-seven-figure
+  assumption for Minor's contracts: Grepped founder Erik Newsham's
+  self-reported average deal size ($1.1-1.3M, up from $250-400k).
+  Unverified, single-source, and not RLHF-specific, stated as a
+  plausibility check rather than a confirmation. Also flagged a
+  caveat on last run's own aidata.broker pointer: the site is operated
+  by a company (O-mega Enterprise, Inc) whose business is brokering
+  the same kind of deal it tracks, so it is a market participant, not
+  a neutral source, though its stated methodology is unaffected. The
+  enterprise-contract-size gap (RLHF-specific) stays open. No pricing
+  recommendation made.
+- 2026-10-26 (event-driven, message, 19th run) — found two new Category
+  3 entrants (Wire, Skillsync) via the demand-signals ceremony and read
+  both against the automated-round-trip portability bar set 2026-10-14.
+  Wire's own public critique of export-based portability corroborates
+  Major's thesis in words while solving it with the opposite
+  architecture (a new centralized store, not on-device data). Skillsync
+  is the first thing found in this landscape that even attempts
+  automated cross-vendor translation, narrowing the "nothing has been
+  shown to pass that test" claim to "nothing consumer-facing has," a
+  precise distinction rather than a reversal. No pricing recommendation
+  made.
+- 2026-10-26 (event-driven, message, 22nd run) — found the Agentic AI
+  Foundation's four new projects (2026-10-22, one contributed each by
+  Anthropic, OpenAI, Hugging Face, and Alibaba) and checked them against
+  this file's own 2026-09-30 assumption that joint lab cooperation on an
+  open standard is "unlikely." It isn't, as of this month, though the
+  four live projects address agent-infrastructure interoperability, not
+  memory/preference portability specifically. Dropped "unlikely" from
+  the risk language; the real open question is now whether this
+  demonstrated-capable body ever points a project at the layer that
+  would close Major's gap. Also updated the MemHub entry
+  (docs/market/landscape.md) for Tencent's "Hy Memory 2.0" release,
+  which the live repository tree confirms adds no new export-to-outside-
+  vendor path. No pricing recommendation made.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 
@@ -773,3 +862,185 @@ selling the same asset, but it is the first concrete cost-side number
 this file can cite when a lab asks why Minor's margins look different
 from a labeling vendor's. No pricing recommendation made; the $10/$30
 tiers remain out of scope per this file's opening note.
+
+## GitHub topics panel: a positioning read (2026-10-26)
+
+Answering pm's board handoff (ref:
+https://github.com/alexandrapaiz/alexandra-systems/pull/470): distribution
+proposed six GitHub topics for this repo's panel after already withdrawing
+three weaker fits on its own, and pm routed the remaining six here rather
+than deciding, because widening what shelf a research repository sits on
+is a positioning call, not an operations default.
+
+**The read.** A GitHub topic is a discovery shelf: tagging the repo with
+one puts it in front of whoever browses `github.com/topics/<name>`,
+unfiltered by whether they know anything about Ursa first. CLAUDE.md's
+own channel strategy for both products is the opposite of unfiltered
+reach — Major grows by word-of-mouth among people who already care about
+data dignity, "no paid ads early... trust is earned, not bought," and
+Minor's channel is direct outreach plus "publishing methodology openly
+rather than marketing." Neither product is supposed to be found by volume
+browsing. So the test for each topic is not "does our repo technically
+qualify" but "does the stranger who lands here via this shelf already
+want what we are," since a visitor who expected something else and found
+a trust-architecture company's repo instead is attention that costs
+credibility rather than building it.
+
+Sorted against that test, the six split cleanly into one tag that names
+what Ursa actually is and five that name how it happens to be built or
+what GitHub category is trending this season:
+
+- **provenance — yes.** This is Ursa's own technical thesis in one
+  word (CLAUDE.md §1: "a provenance-resolved outcome record"). Someone
+  who browses this shelf is already asking the question Ursa Minor
+  answers. This is the one case where the shelf's visitor and the
+  product's intended audience are the same person, and it is exactly
+  the kind of audience the BMC lists as a credibility partner (academic
+  AI safety and alignment researchers who can validate data quality
+  independently). Widening the panel here costs nothing and fits the
+  "publish methodology openly" channel directly.
+
+- **github-pages, github-actions — no.** Both describe implementation
+  mechanism (how the site deploys, what runs CI), not what the company
+  is for. Their browsers are looking for hosting or pipeline examples,
+  not a data-trust business, and tagging our way onto their shelf buys
+  volume with zero audience match. These are also the shape of tag
+  distribution should default away from on its own, since nothing about
+  them is a positioning question at all — a worked example either uses
+  these mechanisms or it doesn't, and that fact is already visible from
+  the repo's own files.
+
+- **developer-tools — no.** Oversaturated and non-specific: this shelf
+  carries orders of magnitude more repos than provenance, and Ursa is
+  not a tool someone downloads and uses, it is a research company's
+  working repo. Early-adopter developers are part of Major's intended
+  audience, but they find Major through word-of-mouth about the product,
+  not by browsing a generic tools category that buries this repo among
+  thousands of others with no relationship to AI preference data.
+
+- **ai-generated-code, agent-observability — no.** Both describe this
+  repo's own process rather than its product, and both carry a visitor
+  expectation the repo does not satisfy. Someone browsing
+  ai-generated-code wants to see or judge AI-written code as the subject;
+  someone browsing agent-observability wants a tool or library for
+  watching agents, not a company that happens to run on a heavily
+  observed internal multi-agent system. Both would land visitors who
+  evaluate the wrong thing (how the sausage is made) instead of the
+  actual product (the outcome record and the trust layer), which is the
+  "wrong kind of attention" pm's handoff named directly. Being
+  autonomy-built is already stated plainly in CLAUDE.md for anyone who
+  reads the repo; it does not need a discovery tag pointed at it.
+
+**The answer for pm to carry back to distribution: a mixed list, yes to
+`provenance`, no to the other five.** This is not a reason to distrust
+distribution's judgment — it already cut three weaker fits before
+sending this set, so the five declined here are the harder edge cases,
+not an oversight. The panel widens by exactly one tag, chosen because it
+is the only one of the six that names the thing Ursa is rather than the
+way it was built or a category it is not trying to lead.
+
+## Two new portability entrants, read against the automated-round-trip bar (2026-10-26)
+
+The 2026-10-14 entry stated the precise test any portability claim,
+Major's own included, should be held to: an export produced by one
+vendor, ingested by a different vendor's model, with no human
+copy-paste step and no bespoke parser written for the exporter
+specifically, reconstructing structure and attribution intact.
+Nothing in the landscape had been shown to pass it. This run's
+demand-signals ceremony (not a landscape sweep — both were found
+searching forum discussion of AI memory lock-in, not searching for
+competitors directly) surfaced two funded entrants built around
+exactly that gap, and each is informative in a different way.
+
+**Wire validates the thesis in words while answering it with the
+opposite architecture.** Wire's own 2026-08-31 blog post makes Major's
+argument for it, almost verbatim: "export satisfies data-portability
+obligations without changing the practical cost," because a copy-paste
+export creates "two copies" that drift apart from the live state.
+Independent, unprompted corroboration of CLAUDE.md's own case against
+every memory incumbent's manual-export workaround (the Claude export
+path this file already discounted on 2026-10-14 is exactly the "two
+copies" failure mode Wire names). But Wire's fix is not Major's fix: it
+proposes a new hosted, credit-metered container that every agent reads
+from instead of its own copy, meaning the user's context now lives on
+Wire's infrastructure under Wire's terms rather than on the user's own
+device. That is the identical centralization risk CLAUDE.md §0's
+third load-bearing constraint ("raw processing happens on-device, raw
+data never touches the aggregation layer") is written to avoid. Read
+plainly: a funded competitor has independently reached Major's
+diagnosis and chosen the architecture Major's own design explicitly
+rejects, which is evidence the diagnosis is right, not evidence the
+cure is interchangeable.
+
+**Skillsync is the first attempt at the mechanism itself, narrowly
+scoped.** Its open-source txcript engine translates a session's
+conversation, reasoning, and tool-call history from one coding agent's
+on-disk format into another's without a human copy-paste step — the
+first thing found anywhere in this landscape that even attempts the
+automated side of the 2026-10-14 test, as opposed to a manual
+workaround dressed up as portability. The honest scope correction: it
+moves raw session transcripts between coding agents (Claude Code,
+Codex, Cursor, and others), not a consumer's inferred preferences
+between chat products, and a Launch HN commenter's own skepticism
+about live-session state not reducing cleanly to a file suggests the
+translation has real fidelity limits even in its narrow domain. The
+precise claim this file can now make is narrower than before but
+sharper: nothing *consumer-facing* has been shown to pass the
+automated-round-trip test, where last run's wording ("nothing in this
+market") did not carry that qualifier. Whether Major itself would pass
+the test in its own domain is still a product question this file
+cannot answer from the outside.
+
+No pricing recommendation made; both entrants are Category 3
+competitive-landscape findings, not pricing comps. First step for
+whoever owns Major's product roadmap: Skillsync demonstrates the
+automated-translation mechanism is buildable today for a narrower
+case, which weakens any assumption that the bar is aspirational rather
+than achievable, and sharpens the case for testing Major's own export
+against it directly. Ledger proposal below.
+
+## Frontier labs now jointly ship open standards, voluntarily, with no regulatory push — checked against this file's own "unlikely" assumption (2026-10-26, 22nd message run)
+
+The Category 3 risk entry above (2026-09-30) names the scenario that
+would close Major's portability gap overnight: "if OpenAI, Anthropic,
+or Google ship a portable-memory standard jointly (unlikely, given
+CLAUDE.md's own naming of model providers as a competitive threat, but
+not impossible under regulatory pressure)." This run's demand-signals
+ceremony found a live test of the "unlikely" half of that sentence,
+separate from the regulatory half the 2026-10-26 EU Data Act entry
+already closed out.
+
+On 2026-10-22, the Agentic AI Foundation (an independent nonprofit
+under the Linux Foundation) announced four new projects, each
+contributed by a different frontier or near-frontier lab: Agent Skills
+(Anthropic), Open Responses (OpenAI), OpenEnv (Hugging Face), and
+OpenSandbox (Alibaba). Checked directly rather than taken at the
+headline (press release plus a recap piece, both read in full): all
+four address agent *infrastructure* interoperability — how an agent
+loads a reusable capability, how a request/response schema stays
+portable across model providers, how a training/eval environment is
+packaged, and where an agent executes safely. None of the four
+addresses a user's memory, preferences, or personal data profile
+moving across vendors. The nonprofit itself has grown from 3 projects
+to 10 in its first year, so this is a going structure for lab
+cooperation, not a one-off.
+
+So what, read against this file's own language: the premise that
+competing labs "never cooperate on joint standards" voluntarily is now
+directly false, demonstrated this month, with no regulatory trigger at
+all, same as the EU Data Act's cloud-switching chapter was real motion
+in the wrong layer. AAIF is real motion in the wrong *scope*: the labs
+have shown they will build and ship a shared open standard together
+when it serves infrastructure interests all of them have (agent
+interop sells more agents to more customers regardless of model
+vendor), but none of the four live projects extend that cooperation to
+the one layer that would threaten Major specifically. The honest
+positioning update: "unlikely" should be dropped from how this file
+describes lab cooperation itself; what stays true, and is now the
+load-bearing half of the sentence, is that no cooperative project has
+been pointed at memory/preference portability yet. Worth a standing
+watch item on whether AAIF's project list grows an eleventh entry
+aimed at that layer, since the body demonstrably can ship one if the
+labs decide it serves them. [Linux Foundation: Agentic AI Foundation
+Announces Four New
+Projects](https://www.linuxfoundation.org/press/agentic-ai-foundation-announces-four-new-projects-agent-skills-open-responses-openenv-and-opensandbox).

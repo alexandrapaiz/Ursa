@@ -109,7 +109,8 @@
           "start": 156,
           "end": 202,
           "text": "A line the model was never in the running for.",
-          "class": "no_generation_provenance"
+          "class": "no_generation_provenance",
+          "noCandidate": "scored_below_floor"
         }
       ]
     }
@@ -186,6 +187,8 @@
     },
     "uncertainSpans": 0,
     "trivialSpans": 0,
+    "blindSpans": 0,
+    "suppressedTokenSpans": 0,
     "byModel": {
       "test-model": {
         "chars": 152,

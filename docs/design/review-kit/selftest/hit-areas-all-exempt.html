@@ -1,0 +1,36 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>hit-areas self-test — the surface with no standalone control</title>
+<!--
+  The second fixture, added 2026-10-26.
+
+  `hit-areas.html` beside it proves the floor still bites. This one
+  proves the instrument says so when the floor bites nothing, which is
+  the case `ursa-major/overlay`'s dashboard actually is: every control
+  on it is a button inside a sentence, exempt under WCAG 2.5.8, so the
+  headline read "0 of 0 standalone controls under 44px tall" on
+  2026-10-24g and again on 2026-10-26. That sentence is the floor
+  applied to nothing, written in the shape of a surface that cleared it.
+
+  Every control below is inline in a run of prose with bare text on both
+  sides of it, which is the one thing `inlineInFlow` keys on first, so
+  the right answer here is: 3 targets, 0 standalone, 3 inline and
+  exempt, 0 document spans. `check-hit-areas.mjs` asserts that and also
+  reads the printed text, because the defect this fixture exists for was
+  never in the classification. It was in the sentence.
+-->
+<style>
+  body { margin: 0; padding: 24px; font: 16px/1.6 Helvetica, Arial, sans-serif; background: #0b0d10; color: #e8eaed; max-width: 34em; }
+  .act { background: none; border: 0; padding: 0; font: inherit; font-size: 0.7rem; color: #8b93a7; cursor: pointer; text-decoration: underline; }
+</style>
+
+<p>
+  This statement was read from your own machine, on
+  <button class="act">a date</button>
+  that you can check, and the thing you are handed instead of a control
+  that cannot work is
+  <button class="act">the command</button>
+  that does. Nothing here was sent anywhere, and you may
+  <button class="act">withdraw this</button>
+  at any time without asking anyone.
+</p>

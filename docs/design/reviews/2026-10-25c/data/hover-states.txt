@@ -1,0 +1,44 @@
+harness: (hover:hover)=true  (any-hover:hover)=true  (pointer:fine)=true  (prefers-reduced-motion:reduce)=false
+viewport: 1440x900   settle: 520ms   frames: frozen (clock pinned, Math.random seeded)
+
+cta-home             by-design-disabled     .cta on /  (4 matches, button, disabled, box 163x47)
+rec-action-home      changes                .rec-action on /  (2 matches, a, box 541x43)
+                      self.text-decoration-color: rgba(168, 199, 250, 0.4) -> rgb(168, 199, 250)
+quiet-link-404       changes                .quiet-link on /this-page-does-not-exist  (1 match, a, box 230x47)
+                      self.background-color: rgba(232, 237, 247, 0) -> rgba(232, 237, 247, 0.06)
+                      self.border-top-color: rgba(168, 199, 250, 0.4) -> rgba(168, 199, 250, 0.75)
+                      self.border-bottom-color: rgba(168, 199, 250, 0.4) -> rgba(168, 199, 250, 0.75)
+                      self.transform: none -> matrix(1, 0, 0, 1, 0, -1)
+mark-link-404        changes                .mark-link on /this-page-does-not-exist  (1 match, a, box 135x24)
+                      span/0.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(112, 127, 160)
+rec-action-index     changes                .rec-action on /record  (4 matches, a, box 114x17)
+                      self.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(168, 199, 250)
+rec-row-index        changes                .rec-row on /record  (2 matches, button, box 960x106)
+                      span/0.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(168, 199, 250)
+rec-action-record    changes                .rec-action on /record/mini-fixture  (4 matches, button, box 960x17)
+                      self.text-decoration-color: rgba(0, 0, 0, 0) -> rgb(168, 199, 250)
+sp-verbatim          changes                .sp-survived_verbatim on /record/mini-fixture  (2 matches, span, box 504x43)
+                      self.background-color: rgba(168, 199, 250, 0.14) -> rgba(168, 199, 250, 0.26)
+sp-mutated           changes                .sp-survived_mutated on /record/mini-fixture  (1 match, span, box 520x43)
+                      self.background-color: rgba(168, 199, 250, 0.14) -> rgba(168, 199, 250, 0.26)
+sp-ngp               changes                .sp-no_generation_provenance on /record/mini-fixture  (2 matches, span, box 216x19)
+                      self.background-color: rgba(232, 237, 247, 0.05) -> rgba(232, 237, 247, 0.12)
+
+A verdict of `changes` is not yet a verified hover. It says the computed
+style moved. Whether a reader can see it moving is the pixel count from
+  python3 diff-frames.py /tmp/ursa-frontend-2026-10-26-message/states/rest /tmp/ursa-frontend-2026-10-26-message/states/hover
+and a hover worth fewer pixels than the hairline it draws is a finding.
+
+
+=== pixels the hover is worth (diff-frames.py rest hover) ===
+cta-home.png                                0 px    0.000%  identical  (same size)
+mark-link-404.png                         140 px    2.053%  rows 34-34, cols 10-149  (same size)
+quiet-link-404.png                      10995 px   65.642%  rows 9-56, cols 10-239  (same size)
+rec-action-home.png                       113 px    0.320%  rows 29-55, cols 10-551  (same size)
+rec-action-index.png                      114 px    2.299%  rows 27-27, cols 10-123  (same size)
+rec-action-record.png                     379 px    1.045%  rows 26-26, cols 10-969  (same size)
+rec-row-index.png                         218 px    0.177%  rows 27-27, cols 10-227  (same size)
+sp-mutated.png                          10462 px   30.752%  rows 10-51, cols 10-529  (same size)
+sp-ngp.png                               4024 px   43.720%  rows 10-28, cols 10-225  (same size)
+sp-verbatim.png                         10451 px   31.658%  rows 10-53, cols 10-513  (same size)
+

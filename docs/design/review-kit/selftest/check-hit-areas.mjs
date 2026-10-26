@@ -21,6 +21,7 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const port = process.argv[2] ?? "4971";
 const out = join(tmpdir(), `hit-selftest-${process.pid}.json`);
+const outTxt = join(tmpdir(), `hit-selftest-${process.pid}.txt`);
 
 const server = spawn("python3", ["-m", "http.server", port, "-d", here], {
   stdio: "ignore",
@@ -28,6 +29,7 @@ const server = spawn("python3", ["-m", "http.server", port, "-d", here], {
 const stop = () => {
   server.kill();
   try { rmSync(out); } catch {}
+  try { rmSync(outTxt); } catch {}
 };
 
 try {
@@ -48,7 +50,7 @@ try {
       "--base", `http://127.0.0.1:${port}`,
       "--pages", "selftest=/hit-areas.html",
       "--only", "desktop",
-      "--out", join(tmpdir(), `hit-selftest-${process.pid}.txt`),
+      "--out", outTxt,
       "--json", out,
     ],
     { stdio: "ignore" },
@@ -74,11 +76,68 @@ try {
     ["document spans wrongly counted against the floor", docs.filter((r) => r.short).length, 0],
   ];
 
+  // ---- the second fixture: a surface the floor cannot reach ----
+  //
+  // Everything above reads the classification. This reads the sentence,
+  // because the defect found on 2026-10-26 was never in the
+  // classification. Every control on the overlay's dashboard is
+  // correctly exempt under 2.5.8, and the instrument correctly printed
+  // "0 of 0 standalone controls under 44px tall", and that sentence is
+  // indistinguishable from the one a surface prints when it was checked
+  // and cleared. L19 in the ledger forbids a count that can never be
+  // zero; this is the same rule the other way up.
+  const outExempt = join(tmpdir(), `hit-selftest-exempt-${process.pid}.txt`);
+  const jsonExempt = join(tmpdir(), `hit-selftest-exempt-${process.pid}.json`);
+  const run2 = spawn(
+    process.execPath,
+    [
+      join(here, "..", "measure-hit-areas.mjs"),
+      "--base", `http://127.0.0.1:${port}`,
+      "--pages", "allexempt=/hit-areas-all-exempt.html",
+      "--only", "desktop",
+      "--out", outExempt,
+      "--json", jsonExempt,
+    ],
+    { stdio: "ignore" },
+  );
+  const code2 = await new Promise((r) => run2.on("exit", r));
+  if (code2 !== 0) throw new Error(`measure-hit-areas.mjs exited ${code2} on the all-exempt fixture`);
+  const rows2 = Object.values(JSON.parse(readFileSync(jsonExempt, "utf8"))).flat();
+  const text2 = readFileSync(outExempt, "utf8");
+  try { rmSync(outExempt); rmSync(jsonExempt); } catch {}
+
+  want.push(
+    ["all-exempt fixture: targets seen", rows2.length, 3],
+    ["all-exempt fixture: standalone controls", rows2.filter((r) => !r.inline && !r.doc).length, 0],
+    ["all-exempt fixture: inline and exempt", rows2.filter((r) => r.inline).length, 3],
+    [
+      "all-exempt fixture: the headline says the floor reached nothing",
+      text2.includes("NOT MEASURED AGAINST THE FLOOR"),
+      true,
+    ],
+    [
+      "all-exempt fixture: and never prints a zero denominator as a pass",
+      /\b0 of 0 standalone controls/.test(text2),
+      false,
+    ],
+    [
+      "all-exempt fixture: the total names the surface the floor could not reach",
+      text2.includes("the floor reached no control on: desktop/allexempt"),
+      true,
+    ],
+    [
+      "first fixture: its total does NOT claim an unreachable floor",
+      readFileSync(join(tmpdir(), `hit-selftest-${process.pid}.txt`), "utf8")
+        .includes("the floor reached no control on: no page"),
+      true,
+    ],
+  );
+
   let bad = 0;
   for (const [what, got, exp] of want) {
     const ok = got === exp;
     if (!ok) bad++;
-    console.log(`${ok ? "ok  " : "FAIL"}  ${String(got).padStart(2)} (want ${exp})  ${what}`);
+    console.log(`${ok ? "ok  " : "FAIL"}  ${String(got).padStart(5)} (want ${exp})  ${what}`);
   }
   console.log(bad ? `\n${bad} of ${want.length} expectations failed` : `\nall ${want.length} expectations hold`);
   stop();

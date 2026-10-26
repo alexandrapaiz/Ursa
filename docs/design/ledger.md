@@ -137,7 +137,8 @@ that passes. The charter still names Consensus, so it is not dropped
 from this list; what a run owes it until the gate is narrowed is this
 paragraph rather than a URL. The narrowing is a workflow change and
 workflow files are HQ's, so it went to HQ's centralizer as a handoff on
-2026-10-25 and not into a pull request here. `react.dev` stood in for
+2026-10-25 and not into a pull request here. It came back answered the
+same night, and L20 records the answer. `react.dev` stood in for
 the slot in L18 and is not a replacement for Consensus on this list.
 
 Two cautions, both learned the expensive way. Marketing home pages carry
@@ -514,15 +515,307 @@ them, including that the floor still bites and that 2.5.8 survived the
 third category. This is L16 applied to a classifier rather than to a
 colour sample.
 
+## L20 — The redaction gate reads one vendor's URL as a home directory, and the filter that will fix it works a line at a time
+
+**measured by HQ's exo centralizer**, 2026-10-25, one fetch of
+`.github/workflows/redaction-gate.yml` in each of the six portfolio
+repositories. Reported to this seat on the board at 23:55 the same
+night, in answer to the handoff L5 names.
+
+Three findings, and the first one retires a question this seat had
+asked:
+
+- **Ursa is the only repository that carries this gate.** Alexandria,
+  epitome, atelier, the router and HQ have no copy of the file, and
+  HQ's nearest equivalent is a different script with a different
+  pattern. So the portfolio decision this seat handed up does not
+  exist to be made. The blast radius is one repository, and it is this
+  one.
+- **The diagnosis holds where this seat put it.** The first scan's
+  pattern is an absolute home path, and the exclusion filter on the
+  line above it is the right place for one more alternative, because
+  that filter already works by dropping whole lines.
+- **Nobody has edited it, and it is no longer unowned.** The
+  centralizer declined to touch a workflow file in a run that had no
+  other reason to, and routed the file, the two line numbers and the
+  proposed alternative to HQ's product manager. So the gate is still
+  red on a committed Consensus URL today, and the fix has a holder.
+
+**The caveat, which is the part worth writing down.** The exclusion
+filter drops a whole line when the line matches, so adding a web
+address to it means a line that carries both a public URL and a real
+absolute home path will pass the gate. That is a real hole and it is
+acceptable, because this gate is a last line of defence and not the
+only one. What makes it acceptable is that it is written here rather
+than discovered by whoever next reads the gate and assumes a clean run
+means a clean file.
+
+**this seat's judgement.** A line-at-a-time filter is the right trade
+for this gate anyway, and the alternative is worse. A filter that
+matched the home path and the URL separately within one line would need
+to know where each token ends, which is the parsing problem the gate
+deliberately does not have. The honest shape is the cheap filter plus
+this paragraph.
+
+**The rule this leaves behind, which is the reason the handoff was
+worth making.** A gate whose only cheap answer is to delete the
+evidence teaches every seat to delete evidence. This one failed on a
+public vendor URL cited as a measurement, and the fastest green is to
+drop the citation, which costs the next reader the ability to check the
+measurement at all. Until it is narrowed, what a run owes that vendor
+is the paragraph in L5 and not a URL, and this seat says so in the open
+rather than quietly shipping a shorter benchmark list.
+
+## L21 — The site's text is clear of the floor, the one run that is not is exempt, and the margin over the sky is three tenths of a point
+
+**measured**, 2026-10-25c, 533 runs of text across five routes and three
+viewports on the shipped build, with the backdrop photographed rather
+than read off the stylesheet. `review-kit/measure-contrast.mjs`,
+`reviews/2026-10-25c/README.md` §3 and §4.
+
+```
+0 of 533 text runs below their threshold at the median
+3 inactive and exempt under 1.4.3
+24 unmeasured, all of them glyphs too small to sample
+0 drawn in their backdrop's own colour
+worst drift between the two frames: 0.000%
+```
+
+**The dimness two reviews flagged is real and it clears the floor.** The
+muted grey that draws the footer credits, the section eyebrows, the stat
+lines under the record bar, the ghost buttons beside the address fields
+and all nine placeholders reads 5.13:1 on the flat pages. The 2026-10-25b
+review flagged five of those spans, could not substantiate them, and said
+so. They are substantiated now, as passes.
+
+**The one short run is the hero's call to action**, `Get Polaris`, at
+4.04:1 on phone and tablet, 4.06 on desktop, and 3.64 where the sky is
+brightest behind it. It ships `disabled` at `opacity: 0.55`, and 1.4.3
+exempts text that is part of an inactive user interface component, so
+this is not a conformance failure.
+
+**this seat's judgement, and the owner can overrule it in one sentence.**
+Leave it. The dimness is the only thing on that page saying Polaris is
+not released, the control cannot be pressed, and raising it to clear 4.5
+would weaken a true signal to fix something the standard does not ask to
+be fixed. If she would rather the hero's one button read at full
+strength, the change is one number and this entry is the thing to revise.
+
+**The thinnest real margin on the site is 4.82**, the same muted grey
+over the starfield on the 404 page and the home masthead. The sky costs
+it 0.31 against the 5.13 it reads on flat ground. Nothing in the build
+watches that, so a slightly brighter sky or a slightly dimmer grey would
+cross the floor silently. The instrument is the watch now, and this line
+is the number it should be read against.
+
+## L22 — Two of the three sites this seat can still benchmark ship text under the floor on their own home page
+
+**measured**, 2026-10-25c, home pages at 1440 only, with the same
+instrument and the same thresholds used on this site.
+`reviews/2026-10-25c/data/bench-*.txt`.
+
+| site | runs seen | below 4.5 at the median | drift | usable |
+|---|---|---|---|---|
+| this site, five routes, three viewports | 533 | 0 | 0.000% | yes |
+| Linear | 610 | 76 | 0.053% | yes |
+| `react.dev` | 534 | 12 | 0.116% | yes |
+| Vercel | 154 | not published | 8.75% | no |
+
+**Vercel is the instrument working, not a gap in the table.** Its home
+page moved 8.75% of its own frame between the two loads the method needs,
+so the tool refused to publish a ratio for it. A number from a page that
+would not hold still is a number about the page's animation.
+
+**What this does not say.** It does not say this site is better designed
+than Linear. Most of Linear's 76 are one grey, `#62666D`, and a large
+share of those sit inside the app mockups on its home page, which are
+illustration rather than interface. `react.dev`'s twelve include its
+search control at 2.20 and its keycaps at 2.59, which are not
+illustration.
+
+**this seat's judgement.** What the row supports is narrower and still
+worth having: shipping zero is a choice rather than the industry's floor,
+this site is currently making it, and the cost of keeping it is now one
+command rather than an argument. Contrast is also the one axis of craft
+that can be measured without taste, which is exactly why it is the wrong
+axis to feel superior on.
+
+## L23 — A denominator of zero reads exactly like a pass
+
+**measured**, 2026-10-26 (hook run), two surfaces of
+`ursa-major/overlay` at three viewports, and the same instrument on
+`ursa-minor`'s five routes for contrast.
+`reviews/2026-10-26/README.md` §3.
+
+L19 says a count that can never be zero is not a pass. This is the same
+rule stood on its head and it was sitting in this repository for two
+days before anyone read it as a defect.
+
+Every control on the overlay's dashboard is a `<button>` inside a
+sentence, correctly exempt under WCAG 2.5.8. So the floor applies to
+none of them and the instrument printed **"0 of 0 standalone controls
+under 44px tall"**, on 2026-10-24g and again today. Nothing in that
+sentence is false. It is also, character for character, the shape of
+the sentence `ursa-minor` prints on five routes where 54 standalone
+controls were each checked and each cleared.
+
+**The rule.** An instrument that applied its test to nothing has to say
+so in different words from one that applied its test and found nothing
+wrong. A reader scanning headlines cannot tell those two apart
+otherwise, and the second of them is the state in which a real defect
+goes unseen. The zero denominator now gets its own sentence, and the
+total names the surfaces the floor could not reach so that the finding
+does not depend on anyone reading every page block.
+
+**And the exempt surface still owes a check**, which is L19's other
+half and is not yet paid here. The dashboard's inline controls are
+exempt from the 44px floor and they are not exempt from being hittable,
+and this run did not put a second check under them. It is named in
+`reviews/2026-10-26/README.md` §11 rather than left implied.
+
+## L24 — A control inside a sentence gets its line box and not one pixel more
+
+**measured**, 2026-10-26 (hook run), five home pages at 1440x900.
+`reviews/2026-10-26/data/bench-inline.json`.
+
+This seat leans on 2.5.8's inline exemption harder every run, because
+the exemption is the whole reason the dashboard reads as a pass. So the
+question was put to the field rather than to the standard.
+
+| site | inline controls | hit heights | under L1's 24px | given extra height |
+|---|---|---|---|---|
+| Stripe | 6 | 16 to 18px | 5 of 6 | 0 |
+| Elicit | 1 | 22px | 1 of 1 | 0 |
+| Linear | 0 | — | — | — |
+| Vercel | 0 | — | — | — |
+| Consensus | 0 | — | — | — |
+
+**The three zeroes are the finding and not a failure to load.** Those
+pages rendered 145, 177 and 35 controls between them and not one sits
+inside a sentence. Their home pages are layout rather than prose, so
+every control on them is standalone and answers the floor.
+
+**7 of 7, where the pattern exists at all, get exactly their line box.**
+Nobody lifts an inline control, and 6 of the 7 sit under L1's 24px,
+which is the only line in this ledger that 127 standalone controls had
+never broken. So the exemption is real practice and not a loophole this
+seat invented, and the dashboard's 44px overlay on inline controls is
+an overshoot past what anyone measured does. L2 licenses that only
+because it is free, and L14 measured on that page that it takes
+nothing.
+
+**Elicit answered.** L5 records it failing to load inside 45 seconds on
+three consecutive runs. It loaded today, which makes the L5 row a
+record of three attempts rather than a property of the site.
+
+## L25 — The three review viewports start at 390, so nothing below 390 has ever been reviewed
+
+**measured**, 2026-10-26 (hook run), two surfaces at 320, 360, 375 and
+390. `reviews/2026-10-26/data/narrow-before.txt`.
+
+`main` in the overlay's stylesheet was `width: 380px` with
+`margin: 0 auto`. Centring a box that does not fit drives the left
+margin negative, so below 380 the panel overflowed on the right **and**
+was cut off on the left at the same time, and the clipped half is not
+reachable by scrolling the way a reader would try.
+
+| width | main box | left edge | horizontal overflow |
+|---|---|---|---|
+| 320 | 380 | **-16** | 60 |
+| 360 | 380 | **-4** | 20 |
+| 375 | 380 | 0 | 5 |
+| 390 | 380 | 5 | 0 |
+
+375 is an iPhone SE and an iPhone 8. Six reviews of this surface never
+found it, and the reason is structural rather than careless: the
+charter fixes three viewports and the narrowest is 390, so a defect
+that only exists below 390 is invisible to every instrument this seat
+owns.
+
+**The rule.** A fixed pixel width in a layout is a claim about the
+narrowest viewport that will ever load it, and this seat's standard
+matrix cannot check that claim. Either the width is a `min()` against
+the viewport or a run has to measure below 390 on purpose. `min(380px,
+100%)` is one character of risk and it changes nothing at 380 or above.
+
+## L26 — Below 390 the field is split, and five of the six exemptions a narrow sweep needs are not obvious
+
+**measured**, 2026-10-26b, two Ursa surfaces and five benchmark sites at
+320, 360, 375 and 390. `reviews/2026-10-26b/data/narrow-minor-after.txt`,
+`narrow-overlay-calibration.txt`, `bench-narrow.txt`.
+
+L25 said a defect below 390 is invisible to every instrument this seat
+owns, and left two instruments to build. Both exist now:
+`review-kit/measure-narrow.mjs`, and `--viewports` on `shoot.mjs` so a
+width below 390 can be photographed as well as counted.
+
+**What Ursa does there.** Nothing goes out of reach on either product at
+any of the four widths. 0 of 20 cells on `ursa-minor`, 0 of 8 on the
+overlay. The overlay reproduces L25's documented after-state exactly,
+which is the calibration the kit README asks for before a number out of
+a new tool is believed.
+
+**What the field does there.**
+
+| site | 320 | 360 | 375 | 390 |
+|---|---|---|---|---|
+| Linear | fits | fits | fits | fits |
+| Vercel | fits, bleeds | fits, bleeds | fits, bleeds | fits, bleeds |
+| Consensus | fits | fits | fits | never came to rest |
+| Stripe | 80px off the right | 90 | 94 | 98 |
+| Elicit | 285px off the left | 265 | 258 | 219 |
+
+Three of five are clean at 320. Two are not, and both of their offenders
+carry zero characters: a testimonial carousel's navigation block on
+Stripe, and a Framer container on Elicit which is 890px wide and centred,
+so it bleeds `(890 - viewport) / 2` off each side at every width and the
+arithmetic holds to within a pixel across all four. So nobody measured
+here loses a word at 320, and two of five do lose boxes.
+
+**The rule.** 320 is a width the best-in-class sites broadly support and
+do not perfectly support. Ursa supporting it fully is cheap today and
+worth keeping, and the standard three-viewport matrix will not keep it,
+because it cannot see down there.
+
+**The part worth more than the result.** A sweep like this is almost all
+exemptions, and only one of the six was obvious before the instrument was
+run. The five that were not, each found by being wrong first:
+
+1. A `position: fixed` decorative layer that bleeds past the viewport is
+   not clipped content. The sky is `matrix(1.05, …)` over `inset: 0`, and
+   counting it made 8 of 20 cells fail forever, which is L19's rule
+   broken by the instrument written to respect it.
+2. A layout still moving is not a layout. The transform arrives after
+   hydration, `networkidle` is not a gate on it, and two consecutive
+   sweeps disagreed. The measurement waits for two reads of every edge to
+   agree, which is L15 rather than a guessed settle.
+3. Text hidden for a screen reader is hidden on purpose. Eight of eight
+   failures on Stripe and Consensus were `p#__next-route-announcer__` and
+   `div.sr-only`, clipped by exactly 1px.
+4. "Past the right edge" is reachable only if the page scrolls there. A
+   fixed box adds nothing to `scrollWidth`, so no gesture brings it back.
+5. A closed off-canvas drawer is unreachable by design. `checkVisibility`,
+   `[aria-hidden]` and `[inert]` are the gate, and it has to run *after*
+   the decoration test, because backdrops are usually `aria-hidden` too
+   and testing exposure first silently swallowed every bleed on this site.
+
+**this seat's judgement.** A narrow sweep belongs in the kit rather than
+in a review folder, and it belongs run against the field as well as
+against us, because four of those five exemptions were found on somebody
+else's markup and none of them would have been found on ours.
+
 ## Open, and not this seat's to close
 
-**Where Ursa's canon comes from.** Thirteen reviews under `reviews/`
+**Where Ursa's canon comes from.** Fourteen reviews under `reviews/`
 have recorded that `canon.md`, `ban-list.md` and `tuning.md` do not
-exist here, and this one makes fourteen. The figure was "nine" until
-2026-10-25; it is counted now rather than carried, with
+exist here. The figure was "nine" until 2026-10-25; it is counted now
+rather than carried, with
 `grep -rl 'canon\.md' docs/design/reviews/*/README.md`, because a
 number kept so the cost of waiting stays visible is worth nothing if it
-is the one number nobody re-reads. L1, L4, L8, L9 and L10 are the kind of measured material canon is
+is the one number nobody re-reads. That command returned thirteen on
+2026-10-25, when this line claimed fourteen, because the review making
+the claim never wrote the string its own command counts; the 2026-10-25c
+review did, so the number and the command agree again. L1, L4, L8, L9 and L10 are the kind of measured material canon is
 made of, and this seat is deliberately not promoting them. A ruling from
 the owner is the unblocker, and it is smaller than writing a file: it is
 whether a line in this ledger marked **measured** may become one.

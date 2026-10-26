@@ -28,6 +28,21 @@ const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -
 const OUT = arg('out', '/tmp/shots')
 const BASE = arg('base', 'http://127.0.0.1:4488')
 const ONLY = arg('only', null)
+// The three charter viewports are the default and `--only` picks one of
+// them. `--viewports name=WxH,…` replaces the matrix outright, which is
+// the other half of L25: the charter's narrowest viewport is 390, so
+// until today nothing below 390 could be *photographed* either, and a
+// measurement saying a surface fits at 320 is not the same claim as a
+// person having looked at it there. Named rather than numbered, so the
+// file names say what they are.
+const VIEWPORT_ARG = arg('viewports', null)
+const MATRIX = VIEWPORT_ARG
+  ? VIEWPORT_ARG.split(',').map((v) => {
+      const [name, dims] = v.split('=')
+      const [w, h] = dims.split('x').map(Number)
+      return [name, w, h]
+    })
+  : VIEWPORTS
 const PAGES = arg('pages', '/,/record,/record/mini-fixture,/record/at,/this-page-does-not-exist').split(',')
 const LIVE = process.argv.includes('--live')
 // How long to let the page settle after `networkidle` before the shutter.
@@ -43,13 +58,21 @@ const WAIT = Number(arg('wait', 400))
 // 1500ms on one viewport of three while the other two were fine. A
 // timeout tuned until it usually works is not a measurement.
 const UNTIL = arg('until', null)
+// The same `--state` measure-hit-areas.mjs grew on 2026-10-26, for the
+// same reason: a surface that only exists after a control is used cannot
+// be photographed by naming a path. A module whose default export is
+// `async (page, name) => {}`, run after `--until` and before the shutter.
+const STATE = arg('state', null)
+const enterState = STATE
+  ? (await import(new URL(STATE, `file://${process.cwd()}/`).href)).default
+  : null
 
 mkdirSync(OUT, { recursive: true })
 const slug = (p) => (p === '/' ? 'home' : p.replace(/^\/|\/$/g, '').replace(/\//g, '-'))
 
 const browser = await launch()
 const rows = []
-for (const [vname, w, h] of VIEWPORTS) {
+for (const [vname, w, h] of MATRIX) {
   if (ONLY && ONLY !== vname) continue
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1 })
   if (!LIVE) await freezeContext(ctx)
@@ -58,6 +81,7 @@ for (const [vname, w, h] of VIEWPORTS) {
     const name = `${slug(path)}-${vname}`
     const status = (await page.goto(BASE + path, { waitUntil: 'networkidle' }))?.status()
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
+    if (enterState) await enterState(page, name)
     await page.waitForTimeout(WAIT)
     // `animations: 'disabled'` is the other half of the freeze: lib/freeze.mjs
     // pins the two canvases, which are driven by requestAnimationFrame, and
@@ -94,9 +118,13 @@ const line = (r) => `${r.name.padEnd(32)} ${String(r.status).padStart(3)}  ${Str
 const header = LIVE
   ? '# --live: the sky is animating in these frames. Do not pixel-diff them.'
   : `# frozen at t=${PINNED_MS}ms, seeded Math.random, CSS animations rewound.`
-const settle = `# settled ${WAIT}ms after networkidle${UNTIL ? ` and after \`${UNTIL}\` appeared` : ''} before each shutter.`
+const settle = `# settled ${WAIT}ms after networkidle${UNTIL ? ` and after \`${UNTIL}\` appeared` : ''}${STATE ? `, with \`${STATE}\` run to enter the state` : ''} before each shutter.`
+// A frame set shot at a width nobody expects has to say so in its own
+// manifest, or the next run compares it against the charter's three and
+// reads the difference as a regression.
+const matrixLine = `# viewports ${MATRIX.map(([n, w, h]) => `${n} ${w}x${h}`).join(', ')}${VIEWPORT_ARG ? ' (--viewports, not the charter default)' : ''}`
 const report = rows.map(line).join('\n')
-writeFileSync(`${OUT}/measurements.txt`, `${header}\n${settle}\n${report}\n`)
+writeFileSync(`${OUT}/measurements.txt`, `${header}\n${settle}\n${matrixLine}\n${report}\n`)
 console.log(report)
 const bad = rows.filter((r) => r.scrollWidth > r.clientWidth)
 console.log(bad.length ? `\n${bad.length} frame(s) overflow` : '\nno frame overflows its viewport')
