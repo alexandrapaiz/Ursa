@@ -3866,6 +3866,80 @@ carried a default that made failure indistinguishable from a field that
 happens to be absent. **Never write `//` over the field whose absence is
 the failure you are testing for.** `docs/agents/runner-facts.md` §40.
 
+### An absence is a measurement, and it needs a positive control (added 2026-10-26, sixtieth window, measured on three of this charter's own instruments in one day)
+
+The section above is about a failure that printed as a success. This one
+is about the reverse, which is more common here and much harder to
+catch: **an instrument that cannot see a thing, reporting that the thing
+is not there.** A search returns "not found" and the run writes "absent".
+Those are different claims, and only the first one was measured.
+
+Three of this charter's own instruments did it on 2026-10-26, in three
+different syntaxes, and all three negatives were false:
+
+| instrument | what it reported | why it could not see |
+|---|---|---|
+| §0's charter-staleness sweep | all eleven charters "newer in `#539`" | `git diff --quiet` against a ref that does not exist exits **128**, and the sweep's `\|\|` cannot tell 128 from 1 |
+| window 56's §0 audit | `#447`'s §0 "no longer contains §0's instruction" | the surviving phrase is split across a 72-column wrap, so `grep 'not from the checkout'` cannot match it |
+| the dangling-citation check | two identifiers "cited and undefined" | the `INC-` regex stops at a line break, so a wrapped citation yields a truncated slug |
+
+Each one is cheap on its own. Together they are a class, and the class
+is worth more than the three fixes, because the next instrument this
+seat writes will be a fourth syntax for the same mistake.
+
+**The rule. Before you report that something is absent, demonstrate that
+your instrument finds it when it is present.** One extra invocation,
+against a case you know is positive. If you cannot construct that case,
+report "not found by <instrument>" and never "absent".
+
+What that costs, per syntax:
+
+```bash
+# a ref comparison: prove both revisions resolve, because 128 is not 1
+git rev-parse --verify -q "refs/prs/$n" >/dev/null || continue
+git diff --quiet origin/main "refs/prs/$n" -- "$f" || echo "$f newer in #$n"
+
+# a phrase in this repository's hard-wrapped prose: unwrap, then search
+git show "$rev:$f" | tr '\n' ' ' | tr -s ' ' | grep -c 'the phrase you want'
+
+# an identifier in wrapped prose: resolve the prefix before reporting
+[ -n "$(grep -oE "^#{2,3} $slug[a-z0-9-]*" "$reg")" ] && echo "prefix, not dangling"
+```
+
+**The second half, which is the one window 56 actually needed.** Two of
+the three above are instrument defects. Window 56's was not: its grep was
+sound and it was searching for **the wrong string**, because the clause
+it tested for had been deliberately amended three windows earlier and it
+grepped the superseded wording. So the duty has a second clause, and it
+is the one that generalizes to every audit this seat performs on its own
+past text:
+
+**When you test whether a clause is still present, test for the
+property, never for the sentence.** §0's property is "the section tells
+you which copy of this charter to read". The sentence that carried it on
+`main` is `read this charter from the newest of those pull requests`. On
+`#447` that sentence is gone and the property is **stronger**, because
+the forty-fifth window replaced `newest` with `whichever carries the
+longest` to close
+`INC-2026-10-25-the-authority-split-inverted-the-bootstrap-block-that-tells-a-window-to-re-read-its-charter`.
+A grep for the old sentence reads a completed repair as a regression.
+
+The cost was not hypothetical. Window 56 published that reading as a
+comment on `#447` and as a row in `docs/agents/merge-order.md`, with the
+recommendation that "whichever copy survives the owner's decision needs
+the sentence back". Acted on, that reverts the fix. A false absence does
+not merely waste a window; it **proposes an undo**, and it arrives
+carrying measurements, which is what makes it persuasive. That is
+`INC-2026-10-26-an-absence-measured-by-an-instrument-that-could-not-see-presence`
+and `docs/agents/runner-facts.md` §41.
+
+**And this is why the carried-check endings matter here.** §6 gives a
+carried check four endings and the fourth is `not due`. This adds the
+shape of a fifth reading that is not an ending at all: `could not
+measure`. A check whose instrument was blind has not come back clean and
+has not come back dirty. Write that, because the next window inherits
+your word and not your shell.
+
 ## Boundaries
 
 - Not the owner's machine. You run either in GitHub Actions or on the
