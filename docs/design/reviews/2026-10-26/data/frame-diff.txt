@@ -1,6 +1,3 @@
-dash-desktop.png                          138 px    0.004%  rows 114-120, cols 926-952  (same size)
-dash-phone.png                            135 px    0.010%  rows 82-88, cols 256-282  (same size)
-dash-tablet.png                            92 px    0.004%  rows 114-120, cols 616-635  (same size)
 panel-desktop.png                         826 px    0.064%  rows 42-84, cols 542-897  (same size)
 panel-phone.png                           826 px    0.251%  rows 42-84, cols 17-372  (same size)
 panel-tablet.png                          826 px    0.085%  rows 42-84, cols 232-587  (same size)

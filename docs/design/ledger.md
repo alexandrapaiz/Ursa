@@ -640,6 +640,104 @@ command rather than an argument. Contrast is also the one axis of craft
 that can be measured without taste, which is exactly why it is the wrong
 axis to feel superior on.
 
+## L23 — A denominator of zero reads exactly like a pass
+
+**measured**, 2026-10-26 (hook run), two surfaces of
+`ursa-major/overlay` at three viewports, and the same instrument on
+`ursa-minor`'s five routes for contrast.
+`reviews/2026-10-26/README.md` §3.
+
+L19 says a count that can never be zero is not a pass. This is the same
+rule stood on its head and it was sitting in this repository for two
+days before anyone read it as a defect.
+
+Every control on the overlay's dashboard is a `<button>` inside a
+sentence, correctly exempt under WCAG 2.5.8. So the floor applies to
+none of them and the instrument printed **"0 of 0 standalone controls
+under 44px tall"**, on 2026-10-24g and again today. Nothing in that
+sentence is false. It is also, character for character, the shape of
+the sentence `ursa-minor` prints on five routes where 54 standalone
+controls were each checked and each cleared.
+
+**The rule.** An instrument that applied its test to nothing has to say
+so in different words from one that applied its test and found nothing
+wrong. A reader scanning headlines cannot tell those two apart
+otherwise, and the second of them is the state in which a real defect
+goes unseen. The zero denominator now gets its own sentence, and the
+total names the surfaces the floor could not reach so that the finding
+does not depend on anyone reading every page block.
+
+**And the exempt surface still owes a check**, which is L19's other
+half and is not yet paid here. The dashboard's inline controls are
+exempt from the 44px floor and they are not exempt from being hittable,
+and this run did not put a second check under them. It is named in
+`reviews/2026-10-26/README.md` §11 rather than left implied.
+
+## L24 — A control inside a sentence gets its line box and not one pixel more
+
+**measured**, 2026-10-26 (hook run), five home pages at 1440x900.
+`reviews/2026-10-26/data/bench-inline.json`.
+
+This seat leans on 2.5.8's inline exemption harder every run, because
+the exemption is the whole reason the dashboard reads as a pass. So the
+question was put to the field rather than to the standard.
+
+| site | inline controls | hit heights | under L1's 24px | given extra height |
+|---|---|---|---|---|
+| Stripe | 6 | 16 to 18px | 5 of 6 | 0 |
+| Elicit | 1 | 22px | 1 of 1 | 0 |
+| Linear | 0 | — | — | — |
+| Vercel | 0 | — | — | — |
+| Consensus | 0 | — | — | — |
+
+**The three zeroes are the finding and not a failure to load.** Those
+pages rendered 145, 177 and 35 controls between them and not one sits
+inside a sentence. Their home pages are layout rather than prose, so
+every control on them is standalone and answers the floor.
+
+**7 of 7, where the pattern exists at all, get exactly their line box.**
+Nobody lifts an inline control, and 6 of the 7 sit under L1's 24px,
+which is the only line in this ledger that 127 standalone controls had
+never broken. So the exemption is real practice and not a loophole this
+seat invented, and the dashboard's 44px overlay on inline controls is
+an overshoot past what anyone measured does. L2 licenses that only
+because it is free, and L14 measured on that page that it takes
+nothing.
+
+**Elicit answered.** L5 records it failing to load inside 45 seconds on
+three consecutive runs. It loaded today, which makes the L5 row a
+record of three attempts rather than a property of the site.
+
+## L25 — The three review viewports start at 390, so nothing below 390 has ever been reviewed
+
+**measured**, 2026-10-26 (hook run), two surfaces at 320, 360, 375 and
+390. `reviews/2026-10-26/data/narrow-before.txt`.
+
+`main` in the overlay's stylesheet was `width: 380px` with
+`margin: 0 auto`. Centring a box that does not fit drives the left
+margin negative, so below 380 the panel overflowed on the right **and**
+was cut off on the left at the same time, and the clipped half is not
+reachable by scrolling the way a reader would try.
+
+| width | main box | left edge | horizontal overflow |
+|---|---|---|---|
+| 320 | 380 | **-16** | 60 |
+| 360 | 380 | **-4** | 20 |
+| 375 | 380 | 0 | 5 |
+| 390 | 380 | 5 | 0 |
+
+375 is an iPhone SE and an iPhone 8. Six reviews of this surface never
+found it, and the reason is structural rather than careless: the
+charter fixes three viewports and the narrowest is 390, so a defect
+that only exists below 390 is invisible to every instrument this seat
+owns.
+
+**The rule.** A fixed pixel width in a layout is a claim about the
+narrowest viewport that will ever load it, and this seat's standard
+matrix cannot check that claim. Either the width is a `min()` against
+the viewport or a run has to measure below 390 on purpose. `min(380px,
+100%)` is one character of risk and it changes nothing at 380 or above.
+
 ## Open, and not this seat's to close
 
 **Where Ursa's canon comes from.** Fourteen reviews under `reviews/`

@@ -14,8 +14,8 @@ cd ursa-minor && npm i -D --no-save playwright && npx playwright install chromiu
 | file | what it does |
 |---|---|
 | `lib/browser.mjs` | Launches chromium. On a host with no root it fetches the shared libraries chromium needs with `apt-get download` and `dpkg-deb -x`, which need no privilege, and retries. |
-| `shoot.mjs` | Full-page PNGs at 1x across the page by viewport matrix, measuring horizontal overflow on each and naming the widest element when a frame overflows. Frames are frozen by default; `--live` lets the sky animate. `--wait <ms>` sets the settle and `--until <selector>` gates the shutter on content, which any page that fetches after hydration needs. |
-| `measure-hit-areas.mjs` | The real tappable area of every control, probed outward one CSS pixel at a time so an `::after` overlay is seen rather than parsed. Promoted here on 2026-10-24g from `reviews/2026-10-24e/`, where it was written; `--base`, `--pages name=/path,…`, `--out`, `--json`, `--until`. |
+| `shoot.mjs` | Full-page PNGs at 1x across the page by viewport matrix, measuring horizontal overflow on each and naming the widest element when a frame overflows. Frames are frozen by default; `--live` lets the sky animate. `--wait <ms>` sets the settle, `--until <selector>` gates the shutter on content, which any page that fetches after hydration needs, and `--state <module.mjs>` drives the page into a state first. |
+| `measure-hit-areas.mjs` | The real tappable area of every control, probed outward one CSS pixel at a time so an `::after` overlay is seen rather than parsed. Promoted here on 2026-10-24g from `reviews/2026-10-24e/`, where it was written; `--base`, `--pages name=/path,…`, `--out`, `--json`, `--until`, and `--state` since 2026-10-26. |
 | `measure-contrast.mjs` | The WCAG ratio of every run of text against the pixels actually behind it, including placeholders. The backdrop is photographed, never read off the stylesheet, so a starfield, a gradient and an ancestor's `opacity` are all in the number. Reports a per-pixel median, fifth percentile and worst, exempts inactive components under 1.4.3, and refuses to answer for a page that moved between its two frames. Written 2026-10-25c. `--base`, `--pages name=/path,…`, `--only`, `--out`, `--json [path]`, `--until`. |
 | `lib/freeze.mjs` | Pins the animation clock and seeds `Math.random` before any page script runs, so the starfield draws the same sky twice. Without it 6 of the 15 review frames differ from themselves by up to 19,140 pixels. |
 | `diff-frames.py` | Counts the pixels that differ between two frame sets, per frame, with the row and column range. Only meaningful on frozen frames. |
@@ -25,6 +25,22 @@ cd ursa-minor && npm i -D --no-save playwright && npx playwright install chromiu
 | `fit-motion.mjs` | Characterises a capture. Fits start time and duration as free parameters, names the curve, and says `UNRESOLVED` rather than guessing when the capture is too sparse. |
 | `read-spring.mjs` | Reads a spring out of a `linear()` easing: overshoot, damping ratio, frequency, stiffness. |
 | `make-spring.mjs` | Writes a spring into a `linear()` easing, which is how a spring ships in CSS with no library. |
+
+**`--state` measures a surface rather than a path.** A module whose
+default export is `async (page, name) => {}`, run after the navigation
+and after `--until`, taken by both `shoot.mjs` and
+`measure-hit-areas.mjs` since 2026-10-26. It exists because the
+overlay's panel draws a passphrase field until a key is derived and
+three other controls afterwards, so three quarters of that surface was
+out of reach of the instrument whose job is to reach it. Its path is
+printed in the output. `reviews/2026-10-26/data/state-panel-unlocked.mjs`
+is the first one.
+
+**`--until` is a gate on a selector, not on a state.** Measured
+2026-10-26: running the overlay's two dashboard states in one
+invocation under `--until "button"` measured one of them in the wrong
+state and reported 1 target where there are 16, and exited 0. Gate each
+state on a selector only that state has.
 
 ## Three things to know before you trust a number out of this
 
