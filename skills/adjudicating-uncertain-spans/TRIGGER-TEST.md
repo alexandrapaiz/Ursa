@@ -1,12 +1,12 @@
 # Trigger test — adjudicating-uncertain-spans
 
-Ten prompts, written against the `description` field in `SKILL.md`,
+Fourteen prompts, written against the `description` field in `SKILL.md`,
 per `prompts/skill-extract.md` section 5. Three should activate the
-skill and seven should not. When this test fails, the description is
+skill and eleven should not. When this test fails, the description is
 what changes, not the test.
 
-The budget is seven near misses rather than two because §5c sets one
-near miss per adjacent skill, and this skill has five neighbours: every
+The budget is ten near misses rather than two because §5c sets one
+near miss per adjacent skill, and this skill has nine neighbours: every
 other skill in the library. Near misses 4 and 5 are this seat's own
 wording and predate the siblings they now sit beside; near misses 6
 through 10 each carry one sibling's own trigger prompt verbatim, which
@@ -233,8 +233,9 @@ list built from artifacts cannot name them.
 Ours: the test that separates a topic from a piece of work is whether a
 skill's inputs and outputs name the same file as its neighbours', which
 is §5e. This file is the case that shows §5e is necessary but not
-sufficient. Two of its five neighbours name no shared file at all, and
-the boundary with them still has to be written down, because what is
+sufficient. Two of its nine neighbours name no shared file at all, the
+record gate and the release ruling, and the boundary with them still
+has to be written down, because what is
 shared is the *shape of the judgment* and a reader matches on shape. So
 the budget of one near miss per neighbour is right even where the
 artifact test already says there is no overlap, and §5e's test should be
@@ -308,3 +309,80 @@ durability denominator and quietly moves a number sold to a lab. That
 makes the new sibling a downstream consumer of this skill's verdicts,
 and it is a reason to be careful here rather than a reason to answer
 its prompts.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**13. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+Both skills take one span and ask what happened to it, and the
+sibling's prompt wears this file's own posture: "did anything actually
+check" is the sentence this skill teaches a reader to ask of a label.
+So the resemblance is in the shape of the judgment rather than in the
+object, which is the case `prompts/skill-extract.md` §5r says the
+artifact test cannot settle.
+
+The object settles it anyway, and mechanically. `uncertain` is a field
+on `FinalSpan`, set on a span over the finished work whose best
+candidate scored below threshold. `deletion` is a field on
+`GenerationSpan`, set only when that segment's fate is
+`generated_deleted`. They are different interfaces over different
+text, and no span carries both: a span this file's skill adjudicates is
+one the resolver could not place, and a span the sibling rules on is
+one it placed in the deleted class. A prompt asking which of the two
+you have is this skill's, and a prompt that has already been told is
+the sibling's.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**14. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. This is the most instructive near miss in this file,
+because the two skills do not merely resemble each other: they run the
+same test on the same field at two different grains, and the sibling's
+schema says so outright.
+
+The field the prompt turns on is an author date, ordered against the
+work's own closing time, and the question is whether a matching commit
+outside the generation's line of descent is a *source* for the finished
+text or a *copy of* it. That is this skill's `rival` evidence exactly.
+`RIVAL_NOT_AFTER_FINAL` is the span-level bound, and the sibling's
+file-level date field is documented as carrying what the `rival`
+variant carries one level down. So a reader cannot tell these two apart
+by the question, and should not try.
+
+Tell them apart by the unit the answer moves. This skill's unit is a
+span: an adjudication settles whether one flagged region descends from a
+generation, and the record keeps the file either way. The sibling's unit
+is a path, and its answer removes the file from `files[]` entirely, so
+no span of it is ever adjudicated. The sibling's prompt has already
+named a path, a whole-file reason and a file-level relation, so the
+file-level refusal has already been made and the only question left is
+whether it was made the right way round. There is no uncertain span in
+it, and there cannot be: an excluded path has no classified spans to
+flag.
+
+The practical rule, ours rather than the schema's: if the prompt holds a
+`relation` it is the sibling's, and if it holds a `DescentEvidence`
+variant it is this skill's. Those two vocabularies are disjoint by
+construction and they are the cheapest discriminator available.

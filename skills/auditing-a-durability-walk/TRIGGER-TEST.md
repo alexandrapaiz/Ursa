@@ -1,12 +1,12 @@
 # Trigger test — auditing-a-durability-walk
 
-Ten prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Seven are near misses that should not.
+Twelve prompts, written against the `description` field in `SKILL.md`.
+Three should activate the skill. Nine are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes and not the test.
 
-The budget is seven near misses because §5c sets one per adjacent skill
-and this skill has seven neighbours, which is every other skill in the
+The budget is eight near misses because §5c sets one per adjacent skill
+and this skill has nine neighbours, which is every other skill in the
 library. Each near miss below is that sibling's own trigger prompt,
 copied rather than paraphrased, per §5r, and its prose names which
 boundary it tests. Near miss 4 is
@@ -19,9 +19,15 @@ boundary it tests. Near miss 4 is
 `clearing-a-record-for-release`'s trigger 1.
 
 §5e's artifact test is the awkward one here and is worth stating
-honestly rather than claimed away. Three of the seven neighbours work
-on `outcome_record.json`, and so does this skill: `durability` and
-`spans[].lifespan` are blocks of that same file. So the artifact test
+honestly rather than claimed away. Six of the nine neighbours rule on
+part of `outcome_record.json`, and so does this skill: `durability` and
+`spans[].lifespan` are blocks of that same file. Named rather than
+counted, because a bare count is the thing that goes stale:
+`adjudicating-uncertain-spans`, `quoting-a-number-from-an-outcome-record`,
+`auditing-a-detected-correction-loop`, `attributing-a-deleted-span`,
+`excluding-a-file-from-an-outcome-record` and
+`running-an-outcome-record-trial`, the last of which produces the file
+rather than reading a block of it and is counted here for that reason. So the artifact test
 does **not** separate this skill from them, and by §5c's letter that is
 the signal to suspect the cut.
 
@@ -229,3 +235,77 @@ direction is owed in
 `quoting-a-number-from-an-outcome-record/TRIGGER-TEST.md`, under §5r's
 rule that the run landing a skill pays the debt in every existing
 skill's file, and this run pays it there rather than claiming it here.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**11. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+These two skills are the only ones in the library whose block is
+computed from git rather than from the record, and they fail in the
+same shape, which is why this near miss is the one worth reading. A
+`testedSpans: 0` here and a `mergeDeletedChars: 0` there are both zeros
+that could be a result or an absence, and both are read off a field
+whose name sounds measured. A reader who learned that shape in this
+file will reach for this file again.
+
+The division is which side of the closing commit the question is on,
+and it is decidable from the prompt alone. This skill walks forward
+from the closing commit to whatever HEAD was when the walk ran, over
+text that survived the episode. The sibling tests backward, at merge
+boundaries that sit inside the episode, over text that never reached
+the finished file at all. Nothing with a `deletion` block is in the
+final blob, so nothing it rules on can be walked forward, and nothing
+this skill rules on has a cause to attribute.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. The pull is that both skills order events against a clock
+and both treat a timestamp as a claim that can be backwards, which is a
+shape no other pair in this library shares.
+
+They order different clocks across different intervals. This skill walks
+forward from the episode's closing commit to whatever HEAD was when the
+walk ran, and its ordering question is whether that window is the window
+a figure is being quoted for. The sibling orders a single commit's
+author date against `task.generatedAt`, which is a point *before* the
+episode closed, and its question is whether a matching copy existed
+early enough to be a source. So the two intervals meet at the closing
+commit and do not overlap on either side of it.
+
+The sharper reason this should not fire is that the sibling's prompt is
+about a file that never entered this skill's population. A durability
+walk follows text that survived the episode and is carried in the
+record's `files[]`. An excluded path is not there, so no span of it has
+a `lifespan` and no part of it is in `durableChars`. The sibling's
+ruling happens one step upstream of everything this skill computes.
+
+What a reader should take from the pair, and the direction of the error
+is worth naming because it is the expensive one: an unrefused import
+inflates durability for exactly the same reason it inflates survival.
+The text sits in the finished tree, nobody touches it afterwards, and
+the walk reports it as durable. That figure is still this skill's to
+qualify, and the qualification it needs is the sibling's refusal having
+been made first.

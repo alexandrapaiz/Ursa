@@ -4,8 +4,22 @@
 // the citation was written. Cheap, but it is the difference between "skills
 // with receipts" and skills with footnotes.
 //
-//   node skills/check-evidence.mjs            verify
-//   node skills/check-evidence.mjs --update   re-record the fingerprints
+//   node skills/check-evidence.mjs                      verify
+//   node skills/check-evidence.mjs --update             re-record the fingerprints
+//   node skills/check-evidence.mjs --base origin/main   verify against that tree
+//
+// What `--base` is for, and why a tense is a defect. Without it this script
+// reads the working tree and nothing else, so a green exit status is a claim
+// about this branch and is silently read as a claim about the library. Ursa's
+// exo seat corrected exactly that sentence of this seat's on 2026-10-26: a
+// repair of two citations was reported as done when it was done on a branch,
+// so the sweep over `main` went on reporting the defect and the two reports
+// were both right. See prompts/skill-extract.md §5y. `--base <ref>` resolves
+// every cited path out of that ref's tree instead of the checkout, which
+// answers the other question: not "do my receipts hold here" but "would they
+// hold for a reader who has that tree". Run it against `origin/main` before
+// claiming the library is green, because the 2026-10-05 failure below is
+// what it looks like when main moved and nobody asked.
 //
 // What this does not do, and what points at the thing that does. Re-recording
 // a fingerprint says the lines changed and somebody read them. It says nothing
@@ -28,6 +42,7 @@
 // the diff shows a human decided.
 import { readdirSync, readFileSync, existsSync, statSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
+import { execFileSync } from 'node:child_process'
 import { join } from 'node:path'
 import { sourcePaths, ranges as lineRanges } from './source-line.mjs'
 import { citingTexts, refsIn, strayCitations } from './citing-files.mjs'
@@ -36,11 +51,50 @@ import { unreadDirs } from './library-dirs.mjs'
 const root = new URL('..', import.meta.url).pathname
 const skillsDir = join(root, 'skills')
 const lockPath = join(skillsDir, 'evidence.lock.json')
-const update = process.argv.includes('--update')
+const argv = process.argv.slice(2)
+const update = argv.includes('--update')
 // What `--update` is allowed to re-record. Empty means everything, which is
 // safe only when nothing has drifted; see the refusal below. A scope is a
 // skill slug, a skill/ref pair, or a whole lock key.
-const scope = process.argv.slice(2).filter((a) => !a.startsWith('--'))
+//
+// The ref of `--base` is parsed out here rather than filtered out of the
+// positionals, because `--base origin/main` read as a scope is the worst of
+// both: a scoped update nobody asked for, over a tree nobody checked out.
+const scope = []
+let base = null
+for (let i = 0; i < argv.length; i++) {
+  const a = argv[i]
+  if (a === '--base') { base = argv[++i] ?? '' ; continue }
+  if (a.startsWith('--base=')) { base = a.slice('--base='.length); continue }
+  if (a.startsWith('--')) continue
+  scope.push(a)
+}
+if (base !== null && (base === '' || base.startsWith('--'))) {
+  console.error('--base wants a git ref, e.g. --base origin/main')
+  process.exit(2)
+}
+// Two refusals, both about the same confusion. Re-recording fingerprints from
+// a tree that is not checked out would write a lock describing content nobody
+// here can read, and a scope is an instruction to re-record, so neither makes
+// sense beside a read-only question about another tree.
+if (base !== null && update) {
+  console.error('--base is a read-only question about another tree, so it cannot be combined with --update')
+  console.error('Verify there first, then re-record against the checkout you actually have.')
+  process.exit(2)
+}
+// §5v: a guard that asks git a question answers from this clone, and the clone
+// is not the repository. A single-branch or shallow clone cannot resolve
+// `origin/main`, and resolving nothing would make every citation look missing,
+// which is a confident wrong answer where an abstention belongs.
+if (base !== null) {
+  try {
+    execFileSync('git', ['rev-parse', '--verify', '--quiet', `${base}^{commit}`], { cwd: root, stdio: 'ignore' })
+  } catch {
+    console.error(`--base ${base}: this clone cannot resolve that ref, so there is no tree to check against`)
+    console.error('Fetch it first (git fetch origin main) rather than reading this as a library failure.')
+    process.exit(2)
+  }
+}
 // Two predicates, and the difference between them is the guard. An empty scope
 // still records everything, so the ordinary authoring path is unchanged, but it
 // names nothing, so any drifted range is unnamed and the refusal fires.
@@ -56,6 +110,38 @@ const problems = []
 // update mode too, because the whole point of the refusal is that the run
 // which is about to re-record them has not read them.
 const drifted = []
+
+// The one place that decides which tree a citation is resolved against, so
+// that every bounds check and every fingerprint below agrees about it. Returns
+// the file's lines, or null when the tree does not carry the path at all.
+// Cached per path because a skill cites the same file many times and `git
+// show` is a process each call.
+const seen = new Map()
+const asLines = (text) => text.replace(/\n$/, '').split('\n')
+const treeLines = (path) => {
+  if (seen.has(path)) return seen.get(path)
+  let lines = null
+  if (base === null) {
+    const abs = join(root, path)
+    // Trailing newline makes split() yield one empty extra element, which
+    // let a citation one line past the end of the file pass.
+    if (existsSync(abs)) lines = asLines(readFileSync(abs, 'utf8'))
+  } else {
+    try {
+      // stderr ignored on purpose: `git show` says "exists on disk, but not
+      // in <sha>" for every absent path, which is this tool's own finding and
+      // is reported below in this tool's own words. Left inherited, 216
+      // problems came back behind 216 lines of git's.
+      lines = asLines(execFileSync('git', ['show', `${base}:${path}`], {
+        cwd: root, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }))
+    } catch { lines = null }
+  }
+  seen.set(path, lines)
+  return lines
+}
+const inTree = base === null ? '' : ` in ${base}`
 
 // The cited lines, whitespace-normalized, hashed. Keyed by skill/ref/path:range
 // so a range that moves gets a new key and cannot inherit an old fingerprint.
@@ -110,32 +196,40 @@ for (const entry of readdirSync(skillsDir)) {
     // 2026-10-18 relevance sweep found was two things less than assumed.
     for (const { path, ranges } of sourcePaths(sourceLine)) {
       checked++
-      const abs = join(root, path)
-      if (!existsSync(abs)) { problems.push(`${entry} ${ref}: missing ${path}`); continue }
+      const body = treeLines(path)
+      if (body === null) { problems.push(`${entry} ${ref}: missing ${path}${base === null ? '' : ' in the base tree'}`); continue }
       if (!ranges) continue
-      // Trailing newline makes split() yield one empty extra element, which
-      // let a citation one line past the end of the file pass.
-      const lines = readFileSync(abs, 'utf8').replace(/\n$/, '').split('\n').length
+      const lines = body.length
       for (const { part, from, to } of lineRanges(ranges)) {
         for (const n of [from, to])
           if (n < 1 || n > lines)
-            problems.push(`${entry} ${ref}: ${path}:${n} out of bounds (${lines} lines)`)
+            problems.push(`${entry} ${ref}: ${path}:${n} out of bounds${base === null ? '' : ' in the base tree'} (${lines} lines)`)
         if (from > to) {
           problems.push(`${entry} ${ref}: ${path}:${part} is inverted`)
           continue
         }
         if (from < 1 || to > lines) continue
-        const body = readFileSync(abs, 'utf8').replace(/\n$/, '').split('\n')
         const key = `${entry}/${ref}/${path}:${part}`
         const fp = fingerprint(body, from, to)
         fresh[key] = fp
         if (key in lock && lock[key] !== fp) drifted.push({ entry, ref, key })
         if (update) continue
         if (!(key in lock)) {
+          // Under `--base` this is not an authoring debt, it is the citation
+          // being newer than the tree, which is the ordinary state of a ref
+          // written on this branch and says nothing about the claim.
+          if (base !== null) continue
           problems.push(`${entry} ${ref}: ${path}:${part} has no recorded fingerprint (new or re-anchored citation; re-read the claim, then --update)`)
         } else if (lock[key] !== fp) {
           stale++
-          problems.push(`${entry} ${ref}: ${path}:${part} has changed since it was cited — the claim may no longer hold (re-read it, re-anchor if it moved, then --update)`)
+          // Two different findings share one comparison. Against the checkout
+          // it means the cited lines changed under a recorded claim. Against
+          // another tree it means this receipt holds here and will not hold
+          // once that tree arrives, so the fix is owed before the merge and
+          // re-recording against a tree nobody has is not it.
+          problems.push(base === null
+            ? `${entry} ${ref}: ${path}:${part} has changed since it was cited — the claim may no longer hold (re-read it, re-anchor if it moved, then --update)`
+            : `${entry} ${ref}: ${path}:${part} resolves in this checkout and not in the base tree — a reader with that tree follows this citation to other lines, so re-anchor and re-read it when that tree arrives`)
         }
       }
     }
@@ -216,10 +310,14 @@ if (update) {
 // quietly accumulate.
 const orphans = Object.keys(lock).filter((k) => !(k in fresh))
 
+// Every line below names the tree when one was given, because the whole point
+// of `--base` is that "the evidence check is green" is a sentence with a tense
+// in it, and a transcript that does not carry the tense loses the only thing
+// that distinguishes the two answers.
 if (problems.length) {
-  console.error(`evidence check FAILED (${problems.length}${stale ? `, ${stale} of them drifted` : ''})`)
+  console.error(`evidence check FAILED${inTree} (${problems.length}${stale ? `, ${stale} of them drifted` : ''})`)
   for (const p of problems) console.error('  ' + p)
   process.exit(1)
 }
-console.log(`evidence check OK: ${checked} sources resolved, ${Object.keys(fresh).length} ranges fingerprinted`)
-if (orphans.length) console.log(`  note: ${orphans.length} stale lock entries, run --update to drop them`)
+console.log(`evidence check OK${inTree}: ${checked} sources resolved, ${Object.keys(fresh).length} ranges fingerprinted`)
+if (orphans.length && base === null) console.log(`  note: ${orphans.length} stale lock entries, run --update to drop them`)

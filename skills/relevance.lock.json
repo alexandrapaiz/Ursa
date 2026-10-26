@@ -349,6 +349,111 @@
     "what": "d683dc80c7fc5235",
     "passages": "f96ffbf032161be6"
   },
+  "attributing-a-deleted-span/E1": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "96f1e1354d3a4423",
+    "what": "b6e4f2b377d33b41",
+    "passages": "5cd9178cb9ce652c"
+  },
+  "attributing-a-deleted-span/E10": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "575b33ed4d636d51",
+    "what": "4009c030acbba09e",
+    "passages": "7fa25a40f89eb61b"
+  },
+  "attributing-a-deleted-span/E11": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "3d11ae9af02cdd77",
+    "what": "50ff4c4ad937616c",
+    "passages": "87c314cf67e0ae72"
+  },
+  "attributing-a-deleted-span/E12": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "a177a8ebcea7a8d3",
+    "what": "10b1a7585769a1d3",
+    "passages": "369a6768b0290ac4"
+  },
+  "attributing-a-deleted-span/E13": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "2c713009d87f6fad",
+    "what": "0830ac0aaa9fe07a",
+    "passages": "66cd8f92de46261c"
+  },
+  "attributing-a-deleted-span/E14": {
+    "verdict": "widened",
+    "read": "2026-10-26",
+    "lines": "8daf186964baf973",
+    "what": "d141190c838aecb3",
+    "passages": "3097d318122bf0d7"
+  },
+  "attributing-a-deleted-span/E15": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "8e5161c169567d10",
+    "what": "7c4ed777d40f6f4f",
+    "passages": "7b3265d95905a82d"
+  },
+  "attributing-a-deleted-span/E2": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "56ad262f0314c5ae",
+    "what": "8709a9b2e9d51244",
+    "passages": "a47bad7b5b5b4fec"
+  },
+  "attributing-a-deleted-span/E3": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "7fd7d76862ab2759",
+    "what": "3422b642f0da3c67",
+    "passages": "ae99117d8a14b9c9"
+  },
+  "attributing-a-deleted-span/E4": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "967cfea037722bfb",
+    "what": "6deb5f8fbecc8a8c",
+    "passages": "a14998af9fd06b37"
+  },
+  "attributing-a-deleted-span/E5": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "ff73d0ffb58d0f17",
+    "what": "7ef8ad3e1fe9c473",
+    "passages": "c049b72259ed1511"
+  },
+  "attributing-a-deleted-span/E6": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "c6878d206a325edb",
+    "what": "90f6d674c4820bc6",
+    "passages": "921f6382c416c44e"
+  },
+  "attributing-a-deleted-span/E7": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "278370f30325e13e",
+    "what": "a877678a268fd964",
+    "passages": "05ffa0a2baa3276c"
+  },
+  "attributing-a-deleted-span/E8": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "001eda19aa629894",
+    "what": "f3ff5e58b4399231",
+    "passages": "3d39aab27dd80e60"
+  },
+  "attributing-a-deleted-span/E9": {
+    "verdict": "widened",
+    "read": "2026-10-26",
+    "lines": "94cb98302194cc71",
+    "what": "7c8a101318467fdc",
+    "passages": "670e580d391ca7ca"
+  },
   "auditing-a-detected-correction-loop/E1": {
     "verdict": "widened",
     "read": "2026-10-24",
@@ -883,9 +988,9 @@
   },
   "clearing-a-record-for-release/E25": {
     "verdict": "widened",
-    "read": "2026-10-25",
-    "lines": "1178797b29d743ac",
-    "what": "1451ba8f05870d44",
+    "read": "2026-10-26",
+    "lines": "607691c1acf4385c",
+    "what": "6e607c1e387957ee",
     "passages": "dce75e1b8c43204e"
   },
   "clearing-a-record-for-release/E26": {
@@ -1016,9 +1121,9 @@
   },
   "clearing-a-record-for-release/E42": {
     "verdict": "supports",
-    "read": "2026-10-25",
-    "lines": "81f5c018ef38c89d",
-    "what": "d19c2a9749b21952",
+    "read": "2026-10-26",
+    "lines": "f6ec51bab7c6533d",
+    "what": "a366c59ff3c85532",
     "passages": "dce75e1b8c43204e"
   },
   "clearing-a-record-for-release/E43": {
@@ -1086,9 +1191,9 @@
   },
   "distilling-a-tuning-record/E11": {
     "verdict": "widened",
-    "read": "2026-10-18",
-    "lines": "205601c2eae4964c",
-    "what": "e461d077ec234969",
+    "read": "2026-10-26",
+    "lines": "bd4465e053d809a5",
+    "what": "482f0179bffb82f8",
     "passages": "743f5484278f37ee"
   },
   "distilling-a-tuning-record/E12": {
@@ -1342,6 +1447,188 @@
     "lines": "806aecf9a2520c4a",
     "what": "52bf4161516a0b73",
     "passages": "9d0b1decee896477"
+  },
+  "excluding-a-file-from-an-outcome-record/E1": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "ea92a18a0c5ede40",
+    "what": "ffc631c02242d51d",
+    "passages": "4dff15e35c7dbf5c"
+  },
+  "excluding-a-file-from-an-outcome-record/E10": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "c8f4523d78bc8825",
+    "what": "08594d9c22ed83f0",
+    "passages": "1f9987ba249121ff"
+  },
+  "excluding-a-file-from-an-outcome-record/E11": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "f263c174247b5a78",
+    "what": "e454b48c6958aa9a",
+    "passages": "8cce36a3b52ca568"
+  },
+  "excluding-a-file-from-an-outcome-record/E12": {
+    "verdict": "narrowed",
+    "read": "2026-10-26",
+    "lines": "42675e9ca658105f",
+    "what": "ba8bc0537a7fa210",
+    "passages": "8e57a19df7974506"
+  },
+  "excluding-a-file-from-an-outcome-record/E13": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "14e776db66587fae",
+    "what": "92be4d0cfeb8c1c4",
+    "passages": "7103a5eeba2128da"
+  },
+  "excluding-a-file-from-an-outcome-record/E14": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "4ae23dacbad6284b",
+    "what": "4b2f906e726a281f",
+    "passages": "6a65df902bf5b1dd"
+  },
+  "excluding-a-file-from-an-outcome-record/E15": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "3f36b8a193f0d610",
+    "what": "daa91174c6926341",
+    "passages": "92c1ea2032f4995b"
+  },
+  "excluding-a-file-from-an-outcome-record/E16": {
+    "verdict": "widened",
+    "read": "2026-10-26",
+    "lines": "5070b02a2596cdd7",
+    "what": "49937552de53aff3",
+    "passages": "1df3348caa5f3e37"
+  },
+  "excluding-a-file-from-an-outcome-record/E17": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "e806c12b412e6bd5",
+    "what": "437b752a5e8b1887",
+    "passages": "167ca0573e0db641"
+  },
+  "excluding-a-file-from-an-outcome-record/E18": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "c495c1aa3675d86a",
+    "what": "2ca89abb4ef3ccee",
+    "passages": "9296d8b7ebc8f90b"
+  },
+  "excluding-a-file-from-an-outcome-record/E19": {
+    "verdict": "widened",
+    "read": "2026-10-26",
+    "lines": "c439507941e1221d",
+    "what": "6e343b67859b8880",
+    "passages": "0bf8b6a6f6485b5a"
+  },
+  "excluding-a-file-from-an-outcome-record/E2": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "554934e563f78d2d",
+    "what": "58ea2f35b87b7798",
+    "passages": "8406694352e687b3"
+  },
+  "excluding-a-file-from-an-outcome-record/E20": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "fd717afdcf2487e8",
+    "what": "42bf0e9f348566b3",
+    "passages": "ccb36f1d4bb2c790"
+  },
+  "excluding-a-file-from-an-outcome-record/E21": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "b201771fd3c7891f",
+    "what": "f6cdd0c42a3c8221",
+    "passages": "f5573a524d349145"
+  },
+  "excluding-a-file-from-an-outcome-record/E22": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "a32ad0be365403fc",
+    "what": "191ebe46a70cbca9",
+    "passages": "f912f1532f61fc84"
+  },
+  "excluding-a-file-from-an-outcome-record/E23": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "b63985f89e811055",
+    "what": "96438d65f3a21800",
+    "passages": "de058b66f0cfb921"
+  },
+  "excluding-a-file-from-an-outcome-record/E24": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "db4dd9c3a5e0ce31",
+    "what": "5ae09fc6e4a0d879",
+    "passages": "f5573a524d349145"
+  },
+  "excluding-a-file-from-an-outcome-record/E25": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "eaf05c52e706310d",
+    "what": "a4f4cdeaa5f2c2fe",
+    "passages": "e3e1411ad6a8b889"
+  },
+  "excluding-a-file-from-an-outcome-record/E26": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "8ca63a66d4e89147",
+    "what": "65394f3cff792078",
+    "passages": "b12b244a6bac08ed"
+  },
+  "excluding-a-file-from-an-outcome-record/E3": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "7359800c8fbbf355",
+    "what": "ed7311194b7bc8d1",
+    "passages": "64f1c9a27c8990e9"
+  },
+  "excluding-a-file-from-an-outcome-record/E4": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "2b539326858e0df5",
+    "what": "fe42630389ac51ce",
+    "passages": "d75399152bc021b9"
+  },
+  "excluding-a-file-from-an-outcome-record/E5": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "29b60f3b3d72fd4a",
+    "what": "f9d62f223e50d0f8",
+    "passages": "149f0b8a80e4ca7b"
+  },
+  "excluding-a-file-from-an-outcome-record/E6": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "55c3a28685d6f573",
+    "what": "54e8db2dc14b23e4",
+    "passages": "3c906ea745cc7f45"
+  },
+  "excluding-a-file-from-an-outcome-record/E7": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "43984189d090316f",
+    "what": "aae85496afa7fcd7",
+    "passages": "44dd16066905c668"
+  },
+  "excluding-a-file-from-an-outcome-record/E8": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "35cbf8ea9d8365e6",
+    "what": "da7836cf93732e5d",
+    "passages": "f55960a46491df35"
+  },
+  "excluding-a-file-from-an-outcome-record/E9": {
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "8fea59793fa299ff",
+    "what": "c064f8cfea106589",
+    "passages": "35e0c69c4acc1456"
   },
   "quoting-a-number-from-an-outcome-record/E1": {
     "verdict": "supports",

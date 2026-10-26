@@ -1,11 +1,11 @@
 # Trigger test — distilling-a-tuning-record
 
-Eight prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Five are near misses that should not.
+Twelve prompts, written against the `description` field in `SKILL.md`.
+Three should activate the skill. Nine are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails the description
-is what changes, not the test. The budget is five near misses rather
+is what changes, not the test. The budget is eight near misses rather
 than two because §5c sets one near miss per adjacent skill, and this
-skill has five neighbours: every other skill in the library.
+skill has nine neighbours: every other skill in the library.
 
 Near miss 4 is `quoting-a-number-from-an-outcome-record`'s own trigger,
 near miss 5 is `running-an-outcome-record-trial`'s, near miss 6 is
@@ -188,7 +188,7 @@ inputs and outputs name the same file as its neighbours'. That was
 proposed as §5e in `prompts/skill-extract.md` by the run that wrote the
 first version of this note, and this test is still the evidence for it:
 `tuning.json` appears in no other skill's inputs or outputs, and that
-single fact is what makes five neighbours a position in a pipeline
+single fact is what makes nine neighbours a position in a pipeline
 rather than a topic.
 
 ## Added 2026-10-24, eighteenth run: the seventh skill's boundary
@@ -254,3 +254,74 @@ of thing an axiom should not be built on, so a run that distils from
 records carrying durability blocks should know what those blocks mean
 first. That is a reason to read the sibling before distilling, not a
 reason to answer its prompts here.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**11. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+This is the easiest of the ninth skill's eight boundaries and the
+artifact test is what makes it easy, which is worth saying because it
+is not true of the other seven. This skill's object is `tuning.json`
+and its question is what a record means about the user. The sibling's
+object is a block inside `outcome_record.json` and its question is what
+happened to one span.
+
+The pull that does exist is one step removed and it is a real hazard
+rather than a trigger. An axiom distilled from deletions the person did
+not make is an axiom resting on the sibling's output being right, and
+on a repo-path record with no attributor injected every deletion is
+attributed to the person by default. So the sibling's failure mode
+arrives here as a false confidence count about a correction nobody
+made. The honest place to guard it is the sibling's own step about
+naming the clone a figure was read on, not a trigger in this file,
+because by the time a distillation pass runs the attribution is already
+in the record and this skill reads it rather than recomputing it.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. §5e's artifact test separates the two cleanly, since this
+skill's object is `tuning.json` and the sibling's is an array inside
+`outcome_record.json`, and the prompt asks for no distillation of
+anything.
+
+The pull is one step removed and is the same shape as this file's near
+miss for the deletion skill: an axiom is only as good as the labels
+under it. What makes the exclusion case worse than the others is scale.
+A wrong span label moves one axiom's confidence count by one. An
+unrefused import hands the distiller tens of thousands of characters of
+someone else's prose as text the person kept, and on this repository's
+own history that was 60,616 characters in a single file, so any axiom
+drawn about tone, structure or length would be an axiom about a standard
+written at another company.
+
+The boundary that matters here is therefore a precondition rather than
+an edge, and it points one way. A distillation inherits whatever
+exclusion ruling was or was not made upstream and has no means to
+revisit it, because `tuning.json` does not carry paths. So the sibling's
+refusal is a thing to have checked before this skill runs, and the right
+place to say so is the sibling's procedure. Not a trigger here, which
+would fire on every distillation prompt and tell the reader nothing
+about which one has the problem.

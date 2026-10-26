@@ -1,16 +1,16 @@
 # Trigger test — clearing-a-record-for-release
 
-Eight prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Five are near misses that should not.
+Twelve prompts, written against the `description` field in `SKILL.md`.
+Three should activate the skill. Nine are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes and not the test.
 
-The budget is five near misses because §5c sets one per adjacent skill
-and this skill has five neighbours, which is every other skill in the
-library. §5e is what says that is not a sign the cut is wrong: the five
+The budget is eight near misses because §5c sets one per adjacent skill
+and this skill has nine neighbours, which is every other skill in the
+library. §5e is what says that is not a sign the cut is wrong: the nine
 work on `outcome_record.json`, on `tuning.json` and on the gate, while
-this one works on what leaves, so its five boundaries are one edge
-counted five times. Near miss 4 is `quoting-a-number-from-an-outcome-record`'s
+this one works on what leaves, so its nine boundaries are one edge
+counted nine times. Near miss 4 is `quoting-a-number-from-an-outcome-record`'s
 own trigger, 5 is `distilling-a-tuning-record`'s, 6 is
 `adjudicating-uncertain-spans`', 7 is `running-an-outcome-record-trial`'s,
 and 8 is `adding-a-bound-to-the-record-gate`'s.
@@ -213,3 +213,84 @@ commit hashes out of the user's own repository are about to leave the
 machine under this skill's rules. That is a genuine handoff and it
 runs durability-side first, because what may leave cannot be settled
 until it is known what is being said.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**11. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+The pull is the phrase "before I call that". A number is about to be
+called something in a document, and this skill's own trigger 1 is a
+person about to paste something into a design doc. The two prompts have
+the same grammar.
+
+They do not have the same question. This skill rules on whether text or
+a number may leave at all, and its three exits have opposite rules
+about raw text. The sibling rules on whether the number is true before
+anyone asks whether it may leave, and its answer can be "nothing
+checked", which is not an exit condition in this file at all. The line
+is also mechanical rather than a matter of taste, in the same way this
+skill's line with the quoting skill is: every field under `stats`
+ships, so a one-record figure like `humanDeletedChars` is never blocked
+here, and nothing in the deletion split is an aggregate across
+contributors. So the sibling's prompt cannot reach any of this skill's
+three exits.
+
+Both directions are handled record-side first, because nothing can be
+cleared for release until it is settled what it is.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. It is the closest of this file's near misses, and the
+reason is in the prompt's last five words rather than in its subject.
+"Fine to cite the exclusion in the methods note" is a question about
+putting part of a record into a document, which is the exact shape of
+this skill's trigger 1, and a methods note is a document this skill has
+ruled on before.
+
+The line is the one this skill draws everywhere and it is worth stating
+plainly, because the surface similarity is high enough to override it.
+This skill rules on whether something *may leave*, and its three exits
+have different rules about raw text. The sibling rules on whether the
+thing is *true*. The prompt's answer is that the citation is false: the
+exclusion's date is an hour after the work closed, so the refusal points
+the wrong way in time and the entry says the opposite of what citing it
+would claim. Nothing about that answer concerns disclosure, consent, or
+which exit the document is.
+
+There is a genuine release question sitting on the same field, and the
+right move is to name it rather than to claim the boundary is clean. An
+exclusion entry carries a commit sha and that commit's subject line,
+kept so the record names the import in the commit author's own words.
+That is text which entered the record from the history rather than from
+the episode's transcript, and a subject line can carry a name, a
+customer, or an internal path. Ruling on whether it may leave is this
+skill's, and it is a thing to check when an exclusion is being quoted
+outward.
+
+So both skills have a claim on a prompt about citing an exclusion, and
+they are answering different questions about it. Ordering, stated once
+and the same in both files: record-side first, because nothing can be
+cleared for release until it is settled what it says.

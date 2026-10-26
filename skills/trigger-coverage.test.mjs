@@ -9,7 +9,14 @@
 // evidence lock was built for one directory over.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { parseTriggerTest, similarity, coverage, BIGRAM_DICE_FLOOR } from './trigger-coverage.mjs'
+import {
+  BIGRAM_DICE_FLOOR,
+  coverage,
+  explainShape,
+  explainShortfall,
+  parseTriggerTest,
+  similarity,
+} from './trigger-coverage.mjs'
 
 const test_doc = `# Trigger test — a-skill
 
@@ -246,4 +253,115 @@ test('a skill is never its own sibling', () => {
     nearMisses: [{ id: '2', text: 'Resolve the record and commit the adjudication beside it.' }],
   }]
   assert.deepEqual(coverage(library), [])
+})
+
+test('the shortfall explanation names the condition that fired, not the usual one', () => {
+  // The regression this holds shut is a wrong diagnosis rather than a wrong
+  // number, which is why it survived: the branch exits 1 either way and the
+  // only thing that differs is the sentence a reader acts on. Until
+  // 2026-10-26 both conditions printed the near-miss arithmetic, so a library
+  // whose only defect was a missing trigger test was told to go count
+  // siblings.
+  const missing = explainShortfall({ gaps: [], missingTrigger: [{ slug: 'a-skill' }] })
+  const joined = missing.join(' ')
+  assert.match(joined, /TRIGGER-TEST\.md/)
+  assert.doesNotMatch(joined, /near miss per adjacent skill/)
+
+  const uncovered = explainShortfall({ gaps: [{ skill: 'a', sibling: 'b' }], missingTrigger: [] })
+  const joinedGaps = uncovered.join(' ')
+  assert.match(joinedGaps, /near miss per adjacent skill/)
+  assert.doesNotMatch(joinedGaps, /TRIGGER-TEST\.md/)
+})
+
+test('each condition names every cause this guard knows, and the gap case orders them', () => {
+  // §5x's mechanical part: one named cause for a condition with several is the
+  // defect. The gap branch has three and the missing-trigger branch has two,
+  // and the gap branch says which to check first, because only one of its
+  // three moves many pairs at once.
+  const both = explainShortfall({
+    gaps: [{ skill: 'a', sibling: 'b' }],
+    missingTrigger: [{ slug: 'c' }],
+  }).join(' ')
+  assert.match(both, /renamed skill directory/)
+  assert.match(both, /paraphrases/)
+  assert.match(both, /check first/)
+  assert.match(both, /never written/)
+  assert.match(both, /another name/)
+})
+
+// The shape branch, which is the fourth instance of the defect `explainShortfall`
+// above was written for and the first one found by looking at exit branches
+// rather than at files. Until this run it summed four disjoint conditions into
+// `N library-shape defects above, listed before the counts.` Every assertion
+// below fails against that line: it carries no condition name, no cause and no
+// repair, and the word `defects` is the only vocabulary it has for all four.
+// prompts/skill-extract.md §5z.
+
+const SHAPE_NONE = { missingSkill: [], unlisted: [], indexedMissing: [], mislabelled: [] }
+
+test('the shape explanation names the condition that fired, not the class', () => {
+  // A library whose only fault is a missing index row must not be told that a
+  // directory is unguarded, and the reverse. This is the regression that
+  // matters, because the branch returns 1 either way and the sentence is the
+  // only thing that differs.
+  const unlisted = explainShape({ ...SHAPE_NONE, unlisted: ['a-skill'] }).join(' ')
+  assert.match(unlisted, /absent from the index/)
+  assert.doesNotMatch(unlisted, /no guard in/)
+
+  const unread = explainShape({ ...SHAPE_NONE, missingSkill: [{ slug: 'a-skill', nearMiss: 'SKILLS.md' }] }).join(' ')
+  assert.match(unread, /no guard in/)
+  assert.doesNotMatch(unread, /absent from the index/)
+})
+
+test('each shape condition names its repair, and the unguarded one is ordered first', () => {
+  // §5z: the order is the repair order, not the declaration order. The unread
+  // directory is the only one of the four where something is actually
+  // unguarded, so it is the one a run with time for exactly one repair should
+  // spend it on, and the text has to say so.
+  const all = explainShape({
+    missingSkill: [{ slug: 'u', nearMiss: null }],
+    unlisted: ['v'],
+    indexedMissing: ['w'],
+    mislabelled: [{ label: 'x', dir: 'y' }],
+  })
+  const joined = all.join(' ')
+  assert.match(joined, /Repair this one first/)
+  assert.match(joined, /Add the row/)
+  assert.match(joined, /fix the row, or delete it/)
+  assert.match(joined, /skills\/README\.md/)
+  // First condition printed is the unguarded one.
+  assert.match(all[0], /no SKILL\.md/)
+  // Last is the cosmetic one, and it says that it is cosmetic.
+  assert.match(all[all.length - 1], /README\.md/)
+  assert.match(joined, /Cosmetic on its own/)
+})
+
+test('a shape condition with more than one cause says so and says how to tell', () => {
+  // The two conditions here that have two causes each must not present one.
+  // A dangling index row is a rename or a row for a skill that never landed,
+  // and those ask for opposite repairs.
+  const dangling = explainShape({ ...SHAPE_NONE, indexedMissing: ['gone'] }).join(' ')
+  assert.match(dangling, /Two causes/)
+  assert.match(dangling, /renamed/)
+  assert.match(dangling, /never landed/)
+  assert.match(dangling, /opposite repairs/)
+
+  const unread = explainShape({ ...SHAPE_NONE, missingSkill: [{ slug: 'u', nearMiss: 'SKILLS.md' }] }).join(' ')
+  assert.match(unread, /Two causes/)
+  assert.match(unread, /rename/)
+  assert.match(unread, /not a skill at all/)
+})
+
+test('no condition fired means no lines, so a clean library gets no explanation', () => {
+  // The branch is only reached when the sum is non-zero, but the function is
+  // exported and pure, and a function that explains a failure that did not
+  // happen is how §5w's dangerous number gets printed.
+  assert.deepEqual(explainShape(SHAPE_NONE), [])
+})
+
+test('the shape lines are singular and plural correctly, because the count is the claim', () => {
+  const one = explainShape({ ...SHAPE_NONE, indexedMissing: ['a'] }).join(' ')
+  assert.match(one, /1 index row points/)
+  const two = explainShape({ ...SHAPE_NONE, indexedMissing: ['a', 'b'] }).join(' ')
+  assert.match(two, /2 index rows point/)
 })
