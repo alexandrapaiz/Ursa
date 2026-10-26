@@ -773,3 +773,8 @@ selling the same asset, but it is the first concrete cost-side number
 this file can cite when a lab asks why Minor's margins look different
 from a labeling vendor's. No pricing recommendation made; the $10/$30
 tiers remain out of scope per this file's opening note.
+
+## GitHub topics panel: a positioning read (2026-10-26, in progress)
+
+Answering pm's board handoff on distribution's six proposed topics.
+Draft placeholder; the actual read follows in this same PR.
