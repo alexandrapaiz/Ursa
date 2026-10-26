@@ -19,5 +19,77 @@ body {
   font-size: 13px;
   line-height: 1.5;
 }
-main { width: 380px; margin: 0 auto; padding: 14px 16px 16px; }
+/* 380px is the window's design width (§16.5) and `min()` is the only
+   change: a bare `380px` with `margin: 0 auto` on a viewport narrower
+   than 380 centres a box that does not fit, so the left margin goes
+   negative and the panel is clipped on BOTH sides at once. Measured
+   2026-10-26 in `reviews/2026-10-26/data/narrow-before.txt`: 60px of
+   overflow and a left edge at -16px at 320, 20px and -4px at 360, 5px
+   and 0 at 375. The three review viewports start at 390, which is why
+   six reviews of this surface never asked. Nothing changes at 380 or
+   above. */
+main { width: min(380px, 100%); margin: 0 auto; padding: 14px 16px 16px; }
 code, .mono { font-family: var(--font-mono), ui-monospace, monospace; }
+
+/* ---------- the panel's own 44px floor and its focus ring ----------
+
+   Added 2026-10-26 by the frontend seat, after the first measurement
+   this surface has ever had. The review kit's hit-area instrument was
+   pointed at `ursa-minor` and at the dashboard, never at the panel, and
+   the panel's controls are mostly behind a derived key, so a tool that
+   could only measure what a URL shows on arrival could not have seen
+   them either. `reviews/2026-10-26/data/` carries the numbers.
+
+   What it found, at all three viewports: the passphrase field draws a
+   35px box and answers a 36px press, 8px under the floor, and the run
+   button draws 26px and answers 26px, 18px under it. Those are the only
+   two standalone controls the panel has, so both of them were short.
+
+   The mechanism is L3's in docs/design/ledger.md and it spends nothing:
+   the target goes on something that draws no pixel, and the control
+   keeps its own box and therefore its own ring. For the button that is
+   an `::after` on the button itself; for the field, which is a replaced
+   element and renders no pseudo-element, it is a wrapping `<label>`,
+   which forwards its activation to the control natively.
+
+   The inset is centred here where `.rec-field`'s is all above, and the
+   difference is a design decision rather than an oversight. A field in
+   ursa-minor is drawn as a rule under its text, so the rule is its
+   bottom edge and slack below it would reach past the field. This field
+   is drawn as a bordered box with two edges of equal standing, and the
+   gaps around it are 12px of header above and 8px of caption below,
+   both free and neither a control. Half of 9px into each is space that
+   was already empty. L14 says to measure that claim rather than assert
+   it, and `data/overlap-after.txt` does. */
+.panel-field {
+  position: relative;
+  display: block;
+}
+
+.panel-field::after {
+  content: "";
+  position: absolute;
+  inset: calc((100% - 44px) / 2) 0;
+}
+
+.panel-hit {
+  position: relative;
+}
+
+.panel-hit::after {
+  content: "";
+  position: absolute;
+  inset: calc((100% - 44px) / 2) 0;
+}
+
+/* The house ring, the same declaration ursa-minor makes once globally
+   and dashboard.css repeats under `.dash`. The panel had none: its one
+   field set `outline: none` inline with nothing in its place, so the
+   control that is focused on arrival showed no sign of it. A ring
+   traces the border box, which is why the target above is on a wrapper
+   and not on padding: the field keeps the 35px box it draws, and the
+   ring keeps tracing what the eye calls the field. */
+main :focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 3px;
+}

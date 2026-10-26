@@ -1,0 +1,6 @@
+# frozen at t=2000ms, seeded Math.random, CSS animations rewound.
+# settled 400ms after networkidle before each shutter.
+# viewports phone 390x844, tablet 820x1180, desktop 1440x900
+record-mini-fixture-phone        200    390/390   overflow    0px  height  2637px
+record-mini-fixture-tablet       200    820/820   overflow    0px  height  2071px
+record-mini-fixture-desktop      200   1440/1440  overflow    0px  height  1927px

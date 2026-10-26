@@ -1,0 +1,3 @@
+tablet: identical
+desktop: identical
+phone: size (390, 2563) -> (390, 2637)

@@ -1,0 +1,64 @@
+
+=== phone 390x844 · dashboard /dashboard?port=7831 ===
+  box WxH       hit WxH      lines  verdict           control
+  40.4x17.9     42x44        1      inline, exempt    button.dash-action "reread"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  -> 0 of 0 standalone controls under 44px tall (16 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== tablet 820x1180 · dashboard /dashboard?port=7831 ===
+  box WxH       hit WxH      lines  verdict           control
+  40.4x17.9     42x44        1      inline, exempt    button.dash-action "reread"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  -> 0 of 0 standalone controls under 44px tall (16 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== desktop 1440x900 · dashboard /dashboard?port=7831 ===
+  box WxH       hit WxH      lines  verdict           control
+  40.4x17.9     42x44        1      inline, exempt    button.dash-action "reread"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  74.1x17.9     76x44        1      inline, exempt    button.dash-action "forget this"
+  -> 0 of 0 standalone controls under 44px tall (16 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== total across every page and viewport ===
+  0 short of 0 standalone, 48 inline and exempt by 2.5.8, 0 document spans (0 not covering their own line), 48 targets seen
+  document spans are: none, on no page

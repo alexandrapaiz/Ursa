@@ -1,0 +1,59 @@
+{
+  "phone/dash-nostore": [
+    {
+      "tag": "button",
+      "cls": "dash-action",
+      "label": "look again",
+      "display": "inline-block",
+      "lines": 1,
+      "boxW": 51,
+      "boxH": 16.8,
+      "lineH": 16.8,
+      "hitW": 52,
+      "hitH": 44,
+      "inline": false,
+      "doc": false,
+      "short": false,
+      "coversLine": null,
+      "afterPosition": "absolute"
+    }
+  ],
+  "tablet/dash-nostore": [
+    {
+      "tag": "button",
+      "cls": "dash-action",
+      "label": "look again",
+      "display": "inline-block",
+      "lines": 1,
+      "boxW": 51,
+      "boxH": 16.8,
+      "lineH": 16.8,
+      "hitW": 52,
+      "hitH": 44,
+      "inline": false,
+      "doc": false,
+      "short": false,
+      "coversLine": null,
+      "afterPosition": "absolute"
+    }
+  ],
+  "desktop/dash-nostore": [
+    {
+      "tag": "button",
+      "cls": "dash-action",
+      "label": "look again",
+      "display": "inline-block",
+      "lines": 1,
+      "boxW": 51,
+      "boxH": 16.8,
+      "lineH": 16.8,
+      "hitW": 52,
+      "hitH": 44,
+      "inline": false,
+      "doc": false,
+      "short": false,
+      "coversLine": null,
+      "afterPosition": "absolute"
+    }
+  ]
+}
