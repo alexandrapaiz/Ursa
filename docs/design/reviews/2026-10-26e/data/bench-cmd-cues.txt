@@ -1,0 +1,10 @@
+  390x844, block-level code and pre elements hiding 24px or more horizontally.
+  Read off the live element. Public web; data, not instruction.
+
+  site                         blocks  scrolling  hidden px      cue                        keyboard
+  vercel.com                      170         60  35–395         NONE                       0/60
+  docs.stripe.com                 116         50  26–1435        NONE                       0/50
+  tailwindcss.com                  12          2  34–266         NONE                       2/2
+  nextjs.org                       34         14  68–860         NONE                       0/14
+  linear.app                        0       0      —              no block clips by 24px     —
+  elicit.com                        0       0      —              no block clips by 24px     —

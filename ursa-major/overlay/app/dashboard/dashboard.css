@@ -395,19 +395,76 @@
    The store server is a reader by design: every route is a GET and it
    has no writer. So where a revoke button would go, this surface
    discloses the command that does it instead of drawing a control that
-   cannot work. The block is the record viewer's `.rec-cmd` idiom. */
-.dash-cmd {
-  display: block;
+   cannot work. The block is the record viewer's `.rec-cmd` idiom.
+
+   IT WAS THE IDIOM AS IT STOOD BEFORE THE FIX. `.rec-cmd` had the same
+   `white-space: pre` inside the same `overflow-x: auto` until
+   2026-10-24, when the record viewer measured what that does and wrote
+   the answer into its own header: a reader cannot tell a clipped line
+   from a short one, because the clip is clean. This block was copied
+   from it the week before, so it carried the shape and not the lesson.
+
+   Measured here on 2026-10-26e, with a disclosure open, at the four
+   widths: `ursa forget <your project> --record <id>` needs 462px and is
+   drawn in 278 at 320 and 348 at 390, hiding 184px and 114px of itself
+   behind an edge that paints nothing. It fits at 820 and above, which is
+   why six reviews of this page never saw it. The page's whole job is to
+   hand the owner the command that deletes her work, and on a phone it
+   handed her two thirds of one.
+
+   The fade is `.rec-cmd`'s, and the reasoning there holds here: it is a
+   mask rather than a gradient so the glyph itself fades instead of being
+   covered, and the width is the distance left to scroll on that side
+   clamped to 32px rather than a boolean, so it shrinks away over the
+   last 32px instead of popping off and is 0px at both ends whenever the
+   line fits. Before hydration both are 0 and this paints exactly what
+   shipped before it. The widths are set from `page.tsx`, because only
+   the element knows how far it has left to go.
+
+   WHY THE BORDER MOVED TO A WRAPPER. The first version of this kept the
+   border, the padding and the fill on the scrolling element, which is
+   where they already were, and a mask clips to the border box: the
+   right hairline and the right end of the top and bottom hairlines
+   faded out with the glyph, so the box stopped closing. Read off the
+   frame, not reasoned about. `copy-line.tsx` in `ursa-minor` already
+   separates the two for this reason — its border is on the wrapping div
+   and the mask is on the `<pre>` inside it — and that is the half of
+   the idiom the copy had also dropped. The container is drawn whole and
+   only its contents fade. */
+.dash-cmd-box {
   margin-top: 0.6rem;
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--line);
   background: rgba(168, 199, 250, 0.04);
+}
+
+.dash-cmd {
+  display: block;
   font-size: 0.7rem;
   line-height: 1.6;
   color: var(--star);
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   white-space: pre;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+  --fade-l: 0px;
+  --fade-r: 0px;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-l),
+    #000 calc(100% - var(--fade-r)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-l),
+    #000 calc(100% - var(--fade-r)),
+    transparent 100%
+  );
 }
 
 .dash-ask {

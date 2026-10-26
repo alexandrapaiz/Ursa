@@ -1,0 +1,12 @@
+  base http://127.0.0.1:4978   320x844   the first record's forget command
+
+  scrolled  left of max   fade left  fade right
+      0px       184px        0px        32px
+      4px       180px        4px        32px
+     92px        92px       32px        32px
+    175px         9px       32px         9px
+    184px         0px       32px         0px
+
+  focus lands on   dash-cmd dash-mono
+  six ArrowRight   scrollLeft 0 -> 182, fade left 32px, fade right 2px
+  verdict          the hidden part is reachable from a keyboard
