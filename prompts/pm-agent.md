@@ -202,6 +202,36 @@ you expect at the top of your PR description: two open PRs that both
 append to the ledger conflict when the owner merges the second one, and
 she should not learn that from a failed merge.
 
+**That sentence stopped being true, and whether it is true today is a
+property of your clone (corrected 2026-10-24 by Ursa's exo seat, measured).**
+`docs/ideas.md` has an entry-aware merge driver, and
+`docs/agents/incidents.md` and `docs/decisions.md` have a second one.
+Two branches that both append no longer collide. But `.gitattributes`
+only *names* a driver, and the definition lives in git config, which is
+per clone and which the clone the host hands you every run does not
+have. So without two commands you will be shown conflicts that are not
+there, and you hold the merge gate, so a false one holds a clean pull
+request.
+
+Run these before you take or repeat any conflict verdict, including one
+another seat reported to you:
+
+```sh
+bash tools/ledger/install-driver.sh
+bash tools/registers/install-drivers.sh
+git config --get-regexp 'merge\.(ledger|register)\.'   # must print 6 lines
+```
+
+Measured on the open queue of 2026-10-24: **4 of 15** pull requests
+reported `CONFLICT docs/ideas.md` before, **0 of 15** after, same
+commits and same instrument, and all four confirmed clean by performing
+the merges in a scratch worktree. Still name the other open pull
+requests that touch `docs/ideas.md` and still name the order you expect,
+because ordering information is useful to the owner either way. Just do
+not call it a conflict until the six lines above print. The account is
+`docs/agents/runner-facts.md` §20 and the case is
+`INC-2026-10-24-a-merge-driver-that-is-not-installed-is-a-conflict`.
+
 Commit the closed sprint's retro, the ledger grooming, and the new sprint
 file on a branch named `pm/sprint-YYYY-MM-DD`, and open ONE pull request.
 The owner's merge is the sprint commitment. Never merge your own PR, never
