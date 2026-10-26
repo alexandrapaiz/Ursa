@@ -167,6 +167,35 @@ this, but the next run that needs the bulk-content comp should start
 here instead of re-discovering the aggregator problem from scratch.
 [corpusbridge.com/learn/ai-data-licensing-deals](https://corpusbridge.com/learn/ai-data-licensing-deals).
 
+**A magnitude anchor from an adjacent market, not the gap itself, found
+2026-10-26 (17th message run).** Erik Newsham, founder of Grepped, a
+startup that buys private companies' internal data and brokers it to
+AI labs, posted on X (2026-10-24) that the firm's average deal size
+moved from "$250-400k" to "closer to $1.1-$1.3m" after it started
+targeting larger data holders, with a "far more spread out
+distribution." This is a founder's own unverified figure, for a single
+company, in the business-data-licensing market, not the RLHF-specific
+contract the gap above asks about, and no named buyer, seller, or
+individual deal backs it. It is still the first dated, named-source
+number this file has found that lands inside the exact band CLAUDE.md
+§4 already assumes for Minor's own contracts ("six to seven figures
+depending on lab tier") rather than above or below it. Read
+conservatively: one adjacent vendor's self-reported average sitting
+inside Minor's own assumed range is a plausibility check, not a
+confirmation, since Grepped sells bulk private company datasets and
+Minor sells a structurally different thing (consented, derived
+outcome signal, not raw data). Worth citing in KR4.1's lab brief as
+"here is what a neighboring data-licensing business says its own deals
+run" if a lab asks where the six-to-seven-figure assumption comes
+from, with the caveat stated in the same breath. Checked whether
+aidata.broker (the tracker this file points to above) and Grepped
+share an owner, since both operate in the same niche; they do not —
+aidata.broker is operated by O-mega Enterprise, Inc per its own
+footer, a separate company from Grepped (see the dated note added to
+docs/market/landscape.md's aidata.broker entry this run, flagging that
+aidata.broker is itself a commercial participant in this market, not a
+neutral tracker). [Erik Newsham on X, 2026-10-24](https://x.com/eriknewsha/status/2113785567095742730), [FourWeekMBA: AI Data Broker Says Deals Now Run $1.1M-$1.3M](https://fourweekmba.com/ai-the-data-wars-ai-data-broker-says-deals-now-run-1-1m-1-3m/).
+
 ## Category 3 read: why would a user adopt Ursa Major when memory is
 already built into ChatGPT for free?
 
@@ -730,6 +759,19 @@ Major itself.
   pointer for the enterprise-contract-size gap: a larger (130-deal),
   better-sourced tracker, same result (no RLHF-specific deal among
   them). The gap stays open. No pricing recommendation made.
+- 2026-10-26 (event-driven, message, 17th run) — found the first
+  dated, named-source magnitude anchor in the business-data-licensing
+  market that lands inside CLAUDE.md §4's own six-to-seven-figure
+  assumption for Minor's contracts: Grepped founder Erik Newsham's
+  self-reported average deal size ($1.1-1.3M, up from $250-400k).
+  Unverified, single-source, and not RLHF-specific, stated as a
+  plausibility check rather than a confirmation. Also flagged a
+  caveat on last run's own aidata.broker pointer: the site is operated
+  by a company (O-mega Enterprise, Inc) whose business is brokering
+  the same kind of deal it tracks, so it is a market participant, not
+  a neutral source, though its stated methodology is unaffected. The
+  enterprise-contract-size gap (RLHF-specific) stays open. No pricing
+  recommendation made.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 

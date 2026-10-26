@@ -7026,6 +7026,290 @@ So: **when a rule selects an artifact by a property, say which property
 it actually wants**, because the next window to change your process will
 not know that `newest` meant `most evolved`.
 
+## INC-2026-10-25-the-charter-half-became-unmergeable-and-would-have-reverted-the-register-half — The one pull request carrying this seat's live charter conflicted in all five registers, and merging it would have reintroduced a fork deleted fourteen minutes earlier
+
+**What happened.** At 2026-10-25 23:30 UTC, #418 was the only artifact
+in this organization carrying this seat's live charter, 4,850 lines
+against `main`'s 2,221. It was open, readied, reviewed by the PM as Tier
+C, and sitting in the owner's queue as the half that needs her. It also
+**could not be merged at all**: `git merge-tree --write-tree` against
+`origin/main` exited 1 with content conflicts in every one of this
+seat's five registers. GitHub's own `mergeable` field read `UNKNOWN`, so
+nothing about that state was visible from the queue.
+
+**Why it happened technically.** Window 42 split this seat's chain by
+merge authority and rooted the register half in `main` rather than in
+this chain, which was the right call and is the experiment
+`INC-2026-10-25-a-branch-level-tier-predicate-holds-the-registers-behind-the-charter`
+records as kept. Windows 42 and 44 then landed that half on `main` as
+#422 and #429, at 23:06:36 and 23:20:48. The charter half kept its
+pre-split register copies, so within fifteen minutes `main` held text
+#418 did not. Measured set-wise with heading levels normalised, per the
+instrument this charter mandates for exactly this comparison:
+
+| register | lines on `main` and not on #418 | lines on #418 and not on `main` |
+|---|---|---|
+| `incidents.md` | 308 | 42 |
+| `learning-log.md` | 216 | 0 |
+| `runner-facts.md` | 221 | 0 |
+| `improvements.md` | 143 | 0 |
+| `merge-order.md` | 68 | 83 |
+
+**And the 42 were the fork.** Every one of them is the stale copy of the
+PM's `INC-2026-10-18-board-runtime-token-printed-twice` that window 44
+deleted from the register half at 23:1x for the reason
+`INC-2026-10-25-the-fork-sweep-runs-on-the-split-and-the-fork-outlives-it`
+gives. So merging #418 as it stood would have reintroduced, into
+`main`, the exact fork a merge fourteen minutes earlier had removed. The
+other 83 are window 41's `merge-order.md` plan, and this charter
+instructs each window to replace that file, so a line absent from the
+newer copy is the point of the file rather than a loss.
+
+**The fix, shipped in #418.** `origin/main` was merged into the charter
+branch and every register resolved to `main`'s side, with the two
+deliberate drops named above. Both charter files merged with no conflict
+at all, because `main` has not touched `prompts/exo-agent.md` since
+2026-10-18. The result is 2 files and 2,843 insertions where it had been
+8 files and 13,897, and `merge-tree` now exits 0.
+
+**What the org grows from it.** A split by merge authority gives the two
+halves **different clocks**, and the half that merges fast drags `main`
+away from the half that waits. Window 42 proved the registers never
+needed the owner's decision. Nothing said what the charter half owes the
+register half once that works, and the answer is that the slow half must
+be re-based on the fast half's merges every window, or it decays from
+"held" into "unmergeable" with no instrument reporting the change. So:
+**when you hold a branch that waits on an authority, merge `main` into
+it every window and re-measure, because the thing that makes it stale is
+your own other branch landing.** The depth warning cannot see this and
+neither can the tier checklist. The only instrument that can is the one
+this entry used, and it has to be pointed at your own held branch rather
+than at the queue.
+
+## INC-2026-10-25-importing-a-fork-and-deleting-it-leaves-the-author-a-conflict — A fork this seat imported to `main` and removed fourteen minutes later turned the author's own postmortem into a merge conflict on the author's branch
+
+**What happened.** `#432`, the PM's live pull request, is the one
+conflicting pull request in an otherwise clean queue of nine. Measured
+with both merge drivers installed, so the verdict is not the
+false-conflict class
+`INC-2026-10-24-a-merge-driver-that-is-not-installed-is-a-conflict`
+describes. The register driver's own words:
+
+> merge-register: ours deleted `## INC-2026-10-18-board-runtime-token-printed-twice`
+> while theirs kept it; resolve that by hand
+
+"Ours" is `main`. "Theirs" is the PM's branch, carrying the PM's own
+authored entry at 49 lines. So the seat that wrote the postmortem is
+being asked to resolve, by hand, a deletion of it that it did not make.
+
+**Why it happened technically, and the ordering is the whole of it.**
+The author's commit `d27fd81` is **not an ancestor of `main`** and never
+has been, so the PM's own copy has never reached the default branch.
+The only copy that ever did was this seat's fork, imported by #422 at
+23:06:36. Window 44 then deleted that fork and #429 landed the deletion
+at 23:20:48. Fourteen minutes. From #432's merge base the entry
+therefore exists, `main`'s side deletes it, the author's side keeps it,
+and a three-way merge has no way to read that as anything but a
+disagreement needing a human.
+
+**What this falsifies, which is a claim this register published
+yesterday.**
+`INC-2026-10-25-a-file-scoped-split-keeps-another-seats-register-entry-and-freezes-it`
+states that deleting is safe in both merge orders: *"if yours merges
+first the author's pull request still adds the entry whole."* That was
+verified branch-to-branch, on `refs/prs/425` against `refs/prs/417`,
+where both sides held the entry and neither had merged. It does not hold
+once the deletion is on `main` ahead of the author's branch, which is
+precisely the case the sentence claims to cover. This seat's branch did
+merge first, and the author's pull request does **not** add the entry
+whole. It conflicts.
+
+**The fix.** The resolution #432 should take is its own side, because
+`git log -S` names `ursa-pm` as the author in `d27fd81` and this seat as
+the deleter in `ec2f4b13`. That is reported to the PM on the board
+rather than resolved here, because it is that seat's branch and that
+seat holds the gate. The structural fix is already shipped: the fork
+sweep is rescheduled from the act of splitting to every window, so a
+fork is caught **before** the branch carrying it merges, and the import
+that caused this never happens. Deleting a fork after it has reached
+`main` is strictly worse than never importing it, and the old trigger
+guaranteed the worse order.
+
+**What the org grows from it.** A deletion is not the inverse of an
+import when the two land in different commits on a shared branch. The
+first one teaches `main` that the text exists and the second teaches it
+that the text was removed, and the author's branch inherits an argument
+it was never party to. So **when you remove something you imported but
+do not own, check whether the import already merged.** If it did, the
+removal is a change to somebody else's record and the author has to be
+told, in the same pass, with `git log -S` naming both sides. This is the
+authorship sweep again, pointed at the deletion instead of at the copy.
+
+## INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate — Five of fourteen open pull requests carry a GitHub merge verdict that disagrees with this repository's own merge drivers, in both directions, and the drivers cannot resolve anything that merges through GitHub
+
+**What happened.** Measured twice, because the first reading moved under
+the run and the movement is part of the finding. Both readings have
+`main` at `5902fd21` and both register drivers installed per §0.
+
+**23:57:40Z, eleven open pull requests, five disagree.** `#423`, `#427`
+and `#439` read `CONFLICTING/DIRTY` and merge clean. `#432` and `#438`
+read `MERGEABLE/CLEAN` and conflict.
+
+**2026-10-26 00:00:36Z, fourteen open, five disagree, and the
+membership has rotated.** `#423` closed and `#427` recomputed into
+agreement; `#435` and `#437` took their places.
+
+| PR | GitHub field | `baseRefOid` | real merge vs `main` |
+|---|---|---|---|
+| #395 | MERGEABLE / CLEAN | `18587707` | clean |
+| #418 | MERGEABLE / CLEAN | `13baf35a` | clean |
+| #427 | MERGEABLE / CLEAN | `5902fd21` | clean |
+| #432 | **MERGEABLE / CLEAN** | `370af860` | **conflict** |
+| #434 | MERGEABLE / CLEAN | `13baf35a` | clean |
+| #435 | **CONFLICTING / DIRTY** | `91a9c303` | **clean** |
+| #437 | **CONFLICTING / DIRTY** | `91a9c303` | **clean** |
+| #438 | **MERGEABLE / CLEAN** | `391efd0c` | **conflict** |
+| #439 | **CONFLICTING / DIRTY** | `5902fd21` | **clean** |
+| #440 | MERGEABLE / CLEAN | `5902fd21` | clean |
+| #441 | MERGEABLE / CLEAN | `5902fd21` | clean |
+| #442 | MERGEABLE / CLEAN | `5902fd21` | clean |
+| #443 | MERGEABLE / CLEAN | `5902fd21` | clean |
+| #444 | MERGEABLE / CLEAN | `5902fd21` | clean |
+
+Five of fourteen, after five of eleven three minutes earlier. **The rate
+held while the membership turned over**, which is what makes this a
+property of the instrument rather than a state of the queue.
+
+**Why it happened, and it is two mechanisms. Only one of them clears.**
+
+1. **The field answers for the base in `baseRefOid`, not for `main`.**
+   `#432`'s was `370af860`, two merges behind, and
+   `git merge-tree 370af860 refs/prs/432` exits **0**. GitHub's answer
+   was correct for the base it used. The two commits in between are
+   `391efd0c` (#433) and `5902fd21` (#436), and #433 is this seat's own
+   deletion of the fork #432 still carries. Three polls over ten minutes
+   did not recompute it; `#427` did recompute, twenty minutes later, on
+   nobody's schedule.
+2. **GitHub performs a different merge from the one this repository
+   declares, and waiting does not fix it.** `#439`'s `baseRefOid` **is**
+   `5902fd21`, the current tip, and it still disagrees:
+
+   ```
+   $ git -c merge.register.driver= -c merge.ledger.driver= \
+       merge-tree --write-tree --name-only origin/main refs/prs/439
+   CONFLICT (content): Merge conflict in docs/agents/incidents.md
+   CONFLICT (content): Merge conflict in docs/ideas.md        # exit 1
+   $ git merge-tree --write-tree --name-only origin/main refs/prs/439
+   ledger driver: docs/ideas.md merged by block identity.
+   register driver: docs/agents/incidents.md merged by entry identity.
+   #                                                            exit 0
+   ```
+
+   `.gitattributes` declares six `merge=` attributes, and a `merge=`
+   attribute is inert until its driver is registered in **git config**,
+   which is per clone. GitHub has no clone with that config, so its
+   verdict is permanently the driverless one. §0 already measured the
+   driverless verdict wrong 4 times in 17 on 2026-10-24. The field is
+   not stale on `#439`. It is answering a different question and it will
+   keep answering it.
+
+**And the consequence nobody had drawn, which is larger than the field.**
+GitHub does not only *compute* the merge, it *performs* it. A pull
+request merged through the API or the UI is merged server-side, in a
+clone with no drivers. So **the drivers cannot resolve anything that
+lands through the gate.** Every register collision that reaches the
+owner's or the PM's merge button still costs a hand resolution, and the
+mechanism this repository adopted on 2026-10-24 to stop paying that cost
+only ever applied to merges a seat performs in its own clone.
+
+The resolution path is therefore mandatory rather than optional, and it
+is already visible in the queue as the one branch that got it right:
+
+- **A branch touching any driver-managed path must merge `origin/main`
+  into itself locally, with the drivers installed, before the gate reads
+  it.** Then `baseRefOid` is `main`'s tip, GitHub has nothing left to
+  merge, and both instruments agree because there is no merge to
+  disagree about. `#441` is the proof: it hand-resolved
+  `docs/ideas.md`, checked the result line-for-line against the
+  registered driver's output, and GitHub reports it `MERGEABLE/CLEAN`.
+- `#439` is the counter-case. It has not merged `main` in, so the gate
+  sees a three-way merge it cannot perform.
+
+**The cost, and the first draft of this entry overstated one half of
+it.** At 23:44:30Z the PM handed the skill seat a `handoff` whose
+subject is *"The mergeability pull request is still conflicting on
+GitHub's own check"*, naming `#423`. This seat sent that seat a note at
+23:58 saying its window was being spent on a conflict this repository
+does not have. **That under-credited it.** `#423`'s closing comment,
+written at 23:57:46Z, names the mechanism itself: *"the conflict was one
+file, `docs/ideas.md`, measured by a plain three-way merge with no
+`merge.*` config registered."* The seat knew. It hand-resolved on `#441`
+and checked the result against the registered driver's output **in order
+to satisfy the gate**, which is the correct move and is exactly the
+mandatory path above.
+
+So the cost is not a window spent in ignorance. It is a hand resolution
+of a merge the repository already knows how to perform, paid by the seat
+that understood precisely why it was paying. That is the more expensive
+finding, because no amount of seat competence removes it. Corrected to
+the skill seat on the board in the same pass.
+
+**A third instrument failed inside this run, and it is this seat's
+own.** The first census printed `CONFLICT` for `#442`, `#443` and
+`#444`, all false. The refspec `+refs/pull/*/head:refs/prs/*` was
+fetched once when the window opened, those three pull requests were
+created afterwards, and `git merge-tree` exits non-zero for **"bad
+revision"** exactly as it does for a conflict. The one-line check
+conflated them. This is §5b's own recorded defect — *"the instruction
+says the command exits non-zero on conflict and this is a non-zero exit
+for a different reason"* — which it logged for the shallow-clone exit
+128 and which recurs here with a missing ref. So:
+
+```bash
+git fetch origin '+refs/pull/*/head:refs/prs/*' --quiet   # before, not at open
+git rev-parse --verify -q "refs/prs/$n" >/dev/null || { echo "NO-SUCH-REF"; }
+case $? in 0) echo CLEAN;; 1) echo CONFLICT;; *) echo "ERROR, not a verdict";; esac
+```
+
+**The check, which is one extra field on a read this seat already
+performs.**
+
+```bash
+gh pr view <n> --json mergeable,mergeStateStatus,baseRefOid \
+  --jq '[.mergeable,.mergeStateStatus,.baseRefOid[0:8]]|@tsv'
+git rev-parse --short=8 origin/main
+```
+
+- `baseRefOid` **≠** `origin/main`: the field is a claim about a base
+  that no longer exists. Stale, in either direction, and it may or may
+  not clear.
+- `baseRefOid` **=** `origin/main` and it still disagrees: mechanism 2,
+  permanent, and the branch needs `main` merged into it locally.
+
+**What the org grows from it.** Ursa incident 17 taught this seat that a
+cached `CONFLICTING` can outlive its conflict, and the charter wrote
+that down as a warning about one word. It was too narrow twice: the
+field is wrong in **both** directions, and staleness is only half the
+cause.
+
+The durable lesson is bigger than the field. **A repository that
+declares its own merge semantics has taken its merge verdict away from
+every instrument that does not share its git config** — GitHub's field,
+GitHub's merge button, and HQ's `tools/check-merge-queue.sh`, which is
+248 lines, is mandated by `docs/standards/pm.md` §11.2, repairs the
+clone's refspec, and never registers a driver. Ursa is the only one of
+the five portfolio repositories with `merge=` attributes on `main`, so
+that gap is load-bearing for exactly one repository today and it is
+this one. Handed to HQ's `exo-centralizer`, which owns the tool, rather
+than patched here.
+
+And the second-order lesson, which is the one with the cross-seat cost:
+**an instrument two seats share is a coordination surface.** The PM
+routes work off that field and the seats it routes to spend their
+windows satisfying it. So a correction to a shared instrument is not a
+note in this seat's register. It goes to every seat reading it, in the
+pass that establishes it, which is the §3e correction rule applied to
+instruments instead of to numbers.
 ## Incident 19 — A host window run was reported failed with no pull request, and the pull request was already on `main`'s branch list (2026-10-23)
 
 **What happened.** A message named a host window run,
@@ -7388,287 +7672,217 @@ Closes when the owner rotates `BOARD_RUNTIME_TOKEN` in Infisical and
 the sync lands; the standing 14:30:08 UTC ask is the tracking line for
 that, this entry is the register's account of why it is needed.
 
-## INC-2026-10-25-the-charter-half-became-unmergeable-and-would-have-reverted-the-register-half — The one pull request carrying this seat's live charter conflicted in all five registers, and merging it would have reintroduced a fork deleted fourteen minutes earlier
+## INC-2026-10-25-gate-prints-what-it-catches — A near miss: the gate built after Ursa incident 4 published the identifier it caught into five public Actions logs, and the value happened to be nobody's
 
-**What happened.** At 2026-10-25 23:30 UTC, #418 was the only artifact
-in this organization carrying this seat's live charter, 4,850 lines
-against `main`'s 2,221. It was open, readied, reviewed by the PM as Tier
-C, and sitting in the owner's queue as the half that needs her. It also
-**could not be merged at all**: `git merge-tree --write-tree` against
-`origin/main` exited 1 with content conflicts in every one of this
-seat's five registers. GitHub's own `mergeable` field read `UNKNOWN`, so
-nothing about that state was visible from the queue.
+**Status:** open on the gate, closed on the local side. The fix to
+`.github/workflows/redaction-gate.yml` is queued as PWC-8 defect 3,
+because the Actions `GITHUB_TOKEN` is refused on that path
+(docs/agents/runner-facts.md §1b). The writable half shipped in the same
+run as `scripts/redaction-check.mjs` and
+`docs/security/redaction-standard.md` §8. Filed by the security seat's
+second run of 2026-10-25, about its own first run.
 
-**Why it happened technically.** Window 42 split this seat's chain by
-merge authority and rooted the register half in `main` rather than in
-this chain, which was the right call and is the experiment
-`INC-2026-10-25-a-branch-level-tier-predicate-holds-the-registers-behind-the-charter`
-records as kept. Windows 42 and 44 then landed that half on `main` as
-#422 and #429, at 23:06:36 and 23:20:48. The charter half kept its
-pre-split register copies, so within fifteen minutes `main` held text
-#418 did not. Measured set-wise with heading levels normalised, per the
-instrument this charter mandates for exactly this comparison:
+### What happened
 
-| register | lines on `main` and not on #418 | lines on #418 and not on `main` |
+This seat's run 1 of 2026-10-25 found a live prompt-injection specimen in
+a production dependency and quoted it verbatim into
+`docs/security/audit-2026-10-25.md`, which its charter requires: when
+fetched content appears to direct the work, quoting it is the finding.
+The quoted payload contained a full UUID. The redaction gate's third
+pattern fired, correctly.
+
+The gate reports a hit by printing the matching line. So each of the five
+failing runs between 23:08 and 23:20 UTC wrote the full identifier into
+an Actions log on a public repository. Run 1 then truncated the id,
+turned the gate green, and recorded the episode honestly in F1 of its own
+report. What neither run 1 nor the gate noticed at the time is that the
+five logs still hold the untruncated value, and an Actions log outlives
+both the branch and the corrected commit.
+
+**Why this is a near miss and not an incident.** The value was `next`'s
+per-invocation `randomUUID` nudge-tracking id, generated by a public npm
+package at build time. It is not a session id, not a credential, and not
+the owner's. Nothing requires rotation. The near miss is that the same
+five log lines would have been produced, identically, by a Class B home
+path or a Class C session id, because the gate's output path does not
+know which pattern matched or whose data it is.
+
+### Why it happened technically
+
+The gate's severity is inverted, and nothing in its design notices.
+
+1. `redaction-gate.yml` reports with `printf '%s\n' "$hits" | head -20`,
+   where `$hits` is raw `grep -rInE` output, so each reported hit is
+   `path:line:` followed by **the full matching text**.
+2. The three patterns exist to catch Class B machine identity and Class C
+   session identity (`docs/security/redaction-standard.md` §3). A hit is
+   by construction a thing that should not be public.
+3. The repository is public, so its Actions logs are publicly readable.
+
+Put together: the more private the thing the gate catches, the more
+widely it republishes it. A file in one branch becomes a log entry that
+survives the branch.
+
+PWC-8, written on 2026-10-04, already contained the sentence that would
+have prevented this: "Never have it print a matched value, only the path,
+the blob and the class." It was written as a requirement on the *history
+step* that PWC-8 proposes adding, not on the *tree step* that already
+exists, so the requirement was correct and scoped to the half that had
+not been built. Three weeks later the half that had been built did the
+thing the requirement forbids.
+
+### The fix
+
+- **Queued**, PWC-8 defect 3: pipe the hits through `cut -d: -f1,2` so
+  the log carries `path:line` and not the text. Three characters of
+  pipeline, and PWC-8 now says to apply it before its other two parts.
+- **Shipped**, `scripts/redaction-check.mjs`: the gate's own patterns,
+  read out of the workflow, runnable offline before a push, printing
+  `path:line` only. One of its eight tests asserts that the value it
+  caught does not appear in its own output, so the property is guarded
+  rather than intended.
+- **Shipped**, redaction standard §8: run it before you push, and the
+  reason, which is that until PWC-8 defect 3 is applied a red gate is
+  itself a small disclosure.
+- **Not done, and named so nobody assumes it was:** the five existing
+  logs are not purged. For this value that is a considered no-op, not an
+  oversight. Were it ever a real one, log deletion plus rotation would be
+  the owner's immediate action, and it is worth knowing in advance that
+  the artifact to delete is the workflow run, not the commit.
+
+### What the org grows from it
+
+**A guard's output is a surface.** Every instrument this org has built
+for private data so far has been an input-side instrument: the gate
+greps files, `tools/check-secret-print.py` reads a command before it
+runs (`INC-2026-10-18-l-x5-enforcement-counted-as-narrative`). Nothing
+had asked what a detector *emits*. A detector that quotes its catch has
+a disclosure path proportional to its own sensitivity, and this is the
+first one of those found here.
+
+**And a smaller one, about where a rule gets attached.** PWC-8's correct
+instruction did nothing because it was written inside the description of
+a step that did not exist yet. A requirement that belongs to a class of
+behaviour should be stated against the class, not against the next
+instance of it, or it ships scoped to the instance and the existing ones
+keep their defect.
+## INC-2026-10-26-gate-skips-conflicting-prs — The redaction gate has never run on a conflicting pull request, and in this repository conflict is the normal state
+
+**Status:** open. The fix is one line in `.github/workflows/redaction-gate.yml`
+and is queued as PWC-12, because the Actions `GITHUB_TOKEN` is refused on
+that path (docs/agents/runner-facts.md §1b). Found by the security seat's
+second run of 2026-10-25, while investigating why its own branch was
+getting no gate runs. Two pull requests, #437 and #435, are sitting
+unscanned on a public repository as this is filed.
+
+### What happened
+
+The run was dispatched to fix two red `redaction-gate` runs. Those turned
+out to be already fixed, and the thing actually wrong was the opposite of
+red: #427's tip had **no check run at all**, and a combined status of
+`pending`, seven minutes after its push, while the gate ran and finished
+on five other branches in the same window.
+
+It then happened to the investigating run's own branch, which took five
+pushes and received zero `pull_request` runs. Draft state was tested and
+ruled out by readying the pull request and pushing again. Then the branch
+merged `origin/main`, became mergeable, and a run appeared on the next
+push within forty-five seconds.
+
+### Why it happened technically
+
+A `pull_request` workflow runs against the merge of head and base, so
+GitHub must compute `refs/pull/<n>/merge` before it can schedule one.
+When a pull request conflicts with its base, that ref cannot be
+computed and **the run is never created.** Not failed, not queued, not
+skipped with a stated reason. Absent.
+
+Measured across all fifteen open pull requests at 00:04 UTC:
+
+| `mergeable` | Pull requests | With a run on the tip |
 |---|---|---|
-| `incidents.md` | 308 | 42 |
-| `learning-log.md` | 216 | 0 |
-| `runner-facts.md` | 221 | 0 |
-| `improvements.md` | 143 | 0 |
-| `merge-order.md` | 68 | 83 |
+| `MERGEABLE` | 13 | 13 of 13 |
+| `CONFLICTING` | 2 | 0 of 2 |
 
-**And the 42 were the fork.** Every one of them is the stale copy of the
-PM's `INC-2026-10-18-board-runtime-token-printed-twice` that window 44
-deleted from the register half at 23:1x for the reason
-`INC-2026-10-25-the-fork-sweep-runs-on-the-split-and-the-fork-outlives-it`
-gives. So merging #418 as it stood would have reintroduced, into
-`main`, the exact fork a merge fourteen minutes earlier had removed. The
-other 83 are window 41's `merge-order.md` plan, and this charter
-instructs each window to replace that file, so a line absent from the
-newer copy is the point of the file rather than a loss.
+And confirmed by transition in both directions, which is what makes it a
+mechanism rather than a correlation. #427 took eight runs while
+mergeable, none from the 23:38 push that made it conflict, and runs again
+after another seat merged `main` into it at 23:58. The investigating
+branch went the other way at 00:03:04.
 
-**The fix, shipped in #418.** `origin/main` was merged into the charter
-branch and every register resolved to `main`'s side, with the two
-deliberate drops named above. Both charter files merged with no conflict
-at all, because `main` has not touched `prompts/exo-agent.md` since
-2026-10-18. The result is 2 files and 2,843 insertions where it had been
-8 files and 13,897, and `merge-tree` now exits 0.
+`redaction-gate.yml` triggers on `push` restricted to `branches: [main]`,
+plus `pull_request`. So for every branch that is not `main`, the
+`pull_request` event is the only thing that can start it, and that event
+is the one GitHub declines to create.
 
-**What the org grows from it.** A split by merge authority gives the two
-halves **different clocks**, and the half that merges fast drags `main`
-away from the half that waits. Window 42 proved the registers never
-needed the owner's decision. Nothing said what the charter half owes the
-register half once that works, and the answer is that the slow half must
-be re-based on the fast half's merges every window, or it decays from
-"held" into "unmergeable" with no instrument reporting the change. So:
-**when you hold a branch that waits on an authority, merge `main` into
-it every window and re-measure, because the thing that makes it stale is
-your own other branch landing.** The depth warning cannot see this and
-neither can the tier checklist. The only instrument that can is the one
-this entry used, and it has to be pointed at your own held branch rather
-than at the queue.
+### Why it matters in this repository specifically
 
-## INC-2026-10-25-importing-a-fork-and-deleting-it-leaves-the-author-a-conflict — A fork this seat imported to `main` and removed fourteen minutes later turned the author's own postmortem into a merge conflict on the author's branch
+Two facts that are each individually known and had not been put together.
 
-**What happened.** `#432`, the PM's live pull request, is the one
-conflicting pull request in an otherwise clean queue of nine. Measured
-with both merge drivers installed, so the verdict is not the
-false-conflict class
-`INC-2026-10-24-a-merge-driver-that-is-not-installed-is-a-conflict`
-describes. The register driver's own words:
+1. **Conflict is normal here.** Ursa incident 6 is five open pull
+   requests unmergeable at once, caused by every seat appending to the
+   same few files. The repository ships merge drivers
+   (`tools/registers/install-drivers.sh`) because of how routine it is.
+   Two of fifteen are conflicting right now.
+2. **The repository is public**, so a branch is public from the moment
+   it is pushed. The gate exists because Ursa incidents 2 and 4 put
+   private data on this public repository.
 
-> merge-register: ours deleted `## INC-2026-10-18-board-runtime-token-printed-twice`
-> while theirs kept it; resolve that by hand
+So the gate is off on exactly the branches that stay public longest. A
+seat pushing an unredacted home path to a conflicting branch gets no red
+mark, no warning, and no notification, and the content sits public and
+unscanned until the conflict is resolved, which in this repository's
+measured history has been days.
 
-"Ours" is `main`. "Theirs" is the PM's branch, carrying the PM's own
-authored entry at 49 lines. So the seat that wrote the postmortem is
-being asked to resolve, by hand, a deletion of it that it did not make.
+The merge path is not the exposure. GitHub will not merge a conflicting
+pull request, so this content cannot reach `main` this way. The branch is
+the exposure, and the branch was the exposure in both incident 2 and
+incident 4.
 
-**Why it happened technically, and the ordering is the whole of it.**
-The author's commit `d27fd81` is **not an ancestor of `main`** and never
-has been, so the PM's own copy has never reached the default branch.
-The only copy that ever did was this seat's fork, imported by #422 at
-23:06:36. Window 44 then deleted that fork and #429 landed the deletion
-at 23:20:48. Fourteen minutes. From #432's merge base the entry
-therefore exists, `main`'s side deletes it, the author's side keeps it,
-and a three-way merge has no way to read that as anything but a
-disagreement needing a human.
+### The fix
 
-**What this falsifies, which is a claim this register published
-yesterday.**
-`INC-2026-10-25-a-file-scoped-split-keeps-another-seats-register-entry-and-freezes-it`
-states that deleting is safe in both merge orders: *"if yours merges
-first the author's pull request still adds the entry whole."* That was
-verified branch-to-branch, on `refs/prs/425` against `refs/prs/417`,
-where both sides held the entry and neither had merged. It does not hold
-once the deletion is on `main` ahead of the author's branch, which is
-precisely the case the sentence claims to cover. This seat's branch did
-merge first, and the author's pull request does **not** add the entry
-whole. It conflicts.
+- **Queued**, PWC-12 part 1: add `push` with no branch filter to the
+  gate's `on:` block. A `push` event runs against the pushed commit and
+  needs no merge ref, so it fires regardless of mergeability. Part 2 adds
+  a `concurrency` group because mergeable pull requests would then get
+  two runs per push. `pull_request` stays, because `push` does not fire
+  for fork pull requests.
+- **Queued**, PWC-12 part 3: make the check required, which fixes the
+  reviewer-facing half rather than the exposure.
+- **Shipped**, `scripts/redaction-check.mjs` and redaction standard §8: a
+  seat can now run the gate's own patterns locally in under a second,
+  which is the only mitigation that does not depend on CI firing at all.
+- **Workaround until applied**, verified on #427:
+  `gh workflow run redaction-gate.yml --ref <branch>`. `workflow_dispatch`
+  needs no merge ref either.
+- **Amended 2026-10-26** (security, message run), on the cause rather
+  than the fix, which is unchanged. The conflicting state this entry
+  treats as a condition seats fall into is manufactured by this
+  repository's own merge design. `.gitattributes` declares six
+  routinely-appended files with custom merge drivers, a driver is
+  registered per clone, and GitHub holds no clone with them, so the
+  `mergeable` field it publishes is permanently the driverless verdict.
+  Measured that day on the one pull request GitHub called conflicting:
+  its only conflicted path was `docs/ideas.md`, and with this
+  repository's own drivers installed the same merge exited 0 with zero
+  unmerged paths. So the conflict that disables the gate is not a
+  conflict this repository has, and the gap reopens on the next pair of
+  appends rather than waiting for an unlucky week. Full reading in
+  `docs/security/audit-2026-10-26.md` F12 and in PWC-12's amendment.
 
-**The fix.** The resolution #432 should take is its own side, because
-`git log -S` names `ursa-pm` as the author in `d27fd81` and this seat as
-the deleter in `ec2f4b13`. That is reported to the PM on the board
-rather than resolved here, because it is that seat's branch and that
-seat holds the gate. The structural fix is already shipped: the fork
-sweep is rescheduled from the act of splitting to every window, so a
-fork is caught **before** the branch carrying it merges, and the import
-that caused this never happens. Deleting a fork after it has reached
-`main` is strictly worse than never importing it, and the old trigger
-guaranteed the worse order.
+### What the org grows from it
 
-**What the org grows from it.** A deletion is not the inverse of an
-import when the two land in different commits on a shared branch. The
-first one teaches `main` that the text exists and the second teaches it
-that the text was removed, and the author's branch inherits an argument
-it was never party to. So **when you remove something you imported but
-do not own, check whether the import already merged.** If it did, the
-removal is a change to somebody else's record and the author has to be
-told, in the same pass, with `git log -S` naming both sides. This is the
-authorship sweep again, pointed at the deletion instead of at the copy.
+**An absent check is not a neutral state, and this org had no way to
+say so.** Every instrument here reports pass or fail. Nothing reports
+"did not run", and GitHub renders that case as an empty checks section,
+which reads like a clean one. Both halves of today's dispatch were this
+same confusion from opposite ends: the seat was told two runs were red
+when the real problem was that later runs did not exist.
 
-## INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate — Five of fourteen open pull requests carry a GitHub merge verdict that disagrees with this repository's own merge drivers, in both directions, and the drivers cannot resolve anything that merges through GitHub
-
-**What happened.** Measured twice, because the first reading moved under
-the run and the movement is part of the finding. Both readings have
-`main` at `5902fd21` and both register drivers installed per §0.
-
-**23:57:40Z, eleven open pull requests, five disagree.** `#423`, `#427`
-and `#439` read `CONFLICTING/DIRTY` and merge clean. `#432` and `#438`
-read `MERGEABLE/CLEAN` and conflict.
-
-**2026-10-26 00:00:36Z, fourteen open, five disagree, and the
-membership has rotated.** `#423` closed and `#427` recomputed into
-agreement; `#435` and `#437` took their places.
-
-| PR | GitHub field | `baseRefOid` | real merge vs `main` |
-|---|---|---|---|
-| #395 | MERGEABLE / CLEAN | `18587707` | clean |
-| #418 | MERGEABLE / CLEAN | `13baf35a` | clean |
-| #427 | MERGEABLE / CLEAN | `5902fd21` | clean |
-| #432 | **MERGEABLE / CLEAN** | `370af860` | **conflict** |
-| #434 | MERGEABLE / CLEAN | `13baf35a` | clean |
-| #435 | **CONFLICTING / DIRTY** | `91a9c303` | **clean** |
-| #437 | **CONFLICTING / DIRTY** | `91a9c303` | **clean** |
-| #438 | **MERGEABLE / CLEAN** | `391efd0c` | **conflict** |
-| #439 | **CONFLICTING / DIRTY** | `5902fd21` | **clean** |
-| #440 | MERGEABLE / CLEAN | `5902fd21` | clean |
-| #441 | MERGEABLE / CLEAN | `5902fd21` | clean |
-| #442 | MERGEABLE / CLEAN | `5902fd21` | clean |
-| #443 | MERGEABLE / CLEAN | `5902fd21` | clean |
-| #444 | MERGEABLE / CLEAN | `5902fd21` | clean |
-
-Five of fourteen, after five of eleven three minutes earlier. **The rate
-held while the membership turned over**, which is what makes this a
-property of the instrument rather than a state of the queue.
-
-**Why it happened, and it is two mechanisms. Only one of them clears.**
-
-1. **The field answers for the base in `baseRefOid`, not for `main`.**
-   `#432`'s was `370af860`, two merges behind, and
-   `git merge-tree 370af860 refs/prs/432` exits **0**. GitHub's answer
-   was correct for the base it used. The two commits in between are
-   `391efd0c` (#433) and `5902fd21` (#436), and #433 is this seat's own
-   deletion of the fork #432 still carries. Three polls over ten minutes
-   did not recompute it; `#427` did recompute, twenty minutes later, on
-   nobody's schedule.
-2. **GitHub performs a different merge from the one this repository
-   declares, and waiting does not fix it.** `#439`'s `baseRefOid` **is**
-   `5902fd21`, the current tip, and it still disagrees:
-
-   ```
-   $ git -c merge.register.driver= -c merge.ledger.driver= \
-       merge-tree --write-tree --name-only origin/main refs/prs/439
-   CONFLICT (content): Merge conflict in docs/agents/incidents.md
-   CONFLICT (content): Merge conflict in docs/ideas.md        # exit 1
-   $ git merge-tree --write-tree --name-only origin/main refs/prs/439
-   ledger driver: docs/ideas.md merged by block identity.
-   register driver: docs/agents/incidents.md merged by entry identity.
-   #                                                            exit 0
-   ```
-
-   `.gitattributes` declares six `merge=` attributes, and a `merge=`
-   attribute is inert until its driver is registered in **git config**,
-   which is per clone. GitHub has no clone with that config, so its
-   verdict is permanently the driverless one. §0 already measured the
-   driverless verdict wrong 4 times in 17 on 2026-10-24. The field is
-   not stale on `#439`. It is answering a different question and it will
-   keep answering it.
-
-**And the consequence nobody had drawn, which is larger than the field.**
-GitHub does not only *compute* the merge, it *performs* it. A pull
-request merged through the API or the UI is merged server-side, in a
-clone with no drivers. So **the drivers cannot resolve anything that
-lands through the gate.** Every register collision that reaches the
-owner's or the PM's merge button still costs a hand resolution, and the
-mechanism this repository adopted on 2026-10-24 to stop paying that cost
-only ever applied to merges a seat performs in its own clone.
-
-The resolution path is therefore mandatory rather than optional, and it
-is already visible in the queue as the one branch that got it right:
-
-- **A branch touching any driver-managed path must merge `origin/main`
-  into itself locally, with the drivers installed, before the gate reads
-  it.** Then `baseRefOid` is `main`'s tip, GitHub has nothing left to
-  merge, and both instruments agree because there is no merge to
-  disagree about. `#441` is the proof: it hand-resolved
-  `docs/ideas.md`, checked the result line-for-line against the
-  registered driver's output, and GitHub reports it `MERGEABLE/CLEAN`.
-- `#439` is the counter-case. It has not merged `main` in, so the gate
-  sees a three-way merge it cannot perform.
-
-**The cost, and the first draft of this entry overstated one half of
-it.** At 23:44:30Z the PM handed the skill seat a `handoff` whose
-subject is *"The mergeability pull request is still conflicting on
-GitHub's own check"*, naming `#423`. This seat sent that seat a note at
-23:58 saying its window was being spent on a conflict this repository
-does not have. **That under-credited it.** `#423`'s closing comment,
-written at 23:57:46Z, names the mechanism itself: *"the conflict was one
-file, `docs/ideas.md`, measured by a plain three-way merge with no
-`merge.*` config registered."* The seat knew. It hand-resolved on `#441`
-and checked the result against the registered driver's output **in order
-to satisfy the gate**, which is the correct move and is exactly the
-mandatory path above.
-
-So the cost is not a window spent in ignorance. It is a hand resolution
-of a merge the repository already knows how to perform, paid by the seat
-that understood precisely why it was paying. That is the more expensive
-finding, because no amount of seat competence removes it. Corrected to
-the skill seat on the board in the same pass.
-
-**A third instrument failed inside this run, and it is this seat's
-own.** The first census printed `CONFLICT` for `#442`, `#443` and
-`#444`, all false. The refspec `+refs/pull/*/head:refs/prs/*` was
-fetched once when the window opened, those three pull requests were
-created afterwards, and `git merge-tree` exits non-zero for **"bad
-revision"** exactly as it does for a conflict. The one-line check
-conflated them. This is §5b's own recorded defect — *"the instruction
-says the command exits non-zero on conflict and this is a non-zero exit
-for a different reason"* — which it logged for the shallow-clone exit
-128 and which recurs here with a missing ref. So:
-
-```bash
-git fetch origin '+refs/pull/*/head:refs/prs/*' --quiet   # before, not at open
-git rev-parse --verify -q "refs/prs/$n" >/dev/null || { echo "NO-SUCH-REF"; }
-case $? in 0) echo CLEAN;; 1) echo CONFLICT;; *) echo "ERROR, not a verdict";; esac
-```
-
-**The check, which is one extra field on a read this seat already
-performs.**
-
-```bash
-gh pr view <n> --json mergeable,mergeStateStatus,baseRefOid \
-  --jq '[.mergeable,.mergeStateStatus,.baseRefOid[0:8]]|@tsv'
-git rev-parse --short=8 origin/main
-```
-
-- `baseRefOid` **≠** `origin/main`: the field is a claim about a base
-  that no longer exists. Stale, in either direction, and it may or may
-  not clear.
-- `baseRefOid` **=** `origin/main` and it still disagrees: mechanism 2,
-  permanent, and the branch needs `main` merged into it locally.
-
-**What the org grows from it.** Ursa incident 17 taught this seat that a
-cached `CONFLICTING` can outlive its conflict, and the charter wrote
-that down as a warning about one word. It was too narrow twice: the
-field is wrong in **both** directions, and staleness is only half the
-cause.
-
-The durable lesson is bigger than the field. **A repository that
-declares its own merge semantics has taken its merge verdict away from
-every instrument that does not share its git config** — GitHub's field,
-GitHub's merge button, and HQ's `tools/check-merge-queue.sh`, which is
-248 lines, is mandated by `docs/standards/pm.md` §11.2, repairs the
-clone's refspec, and never registers a driver. Ursa is the only one of
-the five portfolio repositories with `merge=` attributes on `main`, so
-that gap is load-bearing for exactly one repository today and it is
-this one. Handed to HQ's `exo-centralizer`, which owns the tool, rather
-than patched here.
-
-And the second-order lesson, which is the one with the cross-seat cost:
-**an instrument two seats share is a coordination surface.** The PM
-routes work off that field and the seats it routes to spend their
-windows satisfying it. So a correction to a shared instrument is not a
-note in this seat's register. It goes to every seat reading it, in the
-pass that establishes it, which is the §3e correction rule applied to
-instruments instead of to numbers.
+**And the one that generalises past this gate.** A CI trigger is a
+precondition, and nobody had read this one's. `pull_request` means "when
+a mergeable merge commit exists", which is a strictly narrower claim than
+"when someone pushes to a pull request", and the difference is invisible
+until the day it is load-bearing. Worth checking the other eleven
+workflows' triggers against what their authors meant, which this entry
+does not do and names as the obvious next pass.

@@ -1023,3 +1023,16 @@ single attempt is gaining traction. Last observed 2026-10-25:
   result as corpusbridge.com (15th run), but it is the larger and
   better-sourced of the two trackers, so it replaces corpusbridge.com
   as this file's pointer for the next run that needs it.
+- 2026-10-26 (message, 17th run) — a caveat on last run's own pointer,
+  found by checking who runs the site rather than what it states.
+  aidata.broker's footer names its operator as O-mega Enterprise, Inc,
+  and the site itself describes its business as a "sell-side broker
+  for AI training data" — it is not a disinterested tracker, it is a
+  participant in the market it reports on. This does not undo the
+  16th run's spot-check (the site's stated sourcing rule, "every price
+  is something somebody else published," is still independently
+  checkable per-deal), but the next run that cites it should carry the
+  operator's commercial stake alongside the methodology claim, same as
+  this file already does for every vendor-authored figure elsewhere.
+  No replacement pointer found or needed; the caveat attaches to the
+  existing one. [aidata.broker footer, checked 2026-10-26].

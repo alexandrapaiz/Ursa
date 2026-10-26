@@ -256,6 +256,45 @@ describe('the file-backed store', () => {
     expect(store.records()).toHaveLength(RECORDS.length)
   })
 
+  // A corrupt file used to take the server down with a bare SyntaxError
+  // that named no file, and the stack frames it reached the client with
+  // carried the owner's absolute home path. Both halves are asserted.
+  it('names the corrupt file and leaks no absolute path', () => {
+    const root = mkdtempSync(join(tmpdir(), 'ursa-mcp-corrupt-'))
+    mkdirSync(join(root, '.ursa', 'records'), { recursive: true })
+    writeFileSync(join(root, '.ursa', 'tuning.json'), JSON.stringify(TUNING))
+    writeFileSync(join(root, '.ursa', 'records', 'rec-good.json'), JSON.stringify(RECORDS[0]))
+    writeFileSync(join(root, '.ursa', 'records', 'rec-bad.json'), '{ "task": truncated')
+
+    const store = fileStore(projectPaths(root))
+    let message = ''
+    expect(() => {
+      try {
+        store.records()
+      } catch (e) {
+        message = e instanceof Error ? e.message : String(e)
+        throw e
+      }
+    }).toThrow()
+
+    expect(message).toContain('rec-bad.json')
+    // The file is named, the directory it sits in is not. `root` is a
+    // temporary directory here; on a real machine it is the home path the
+    // redaction standard calls private.
+    expect(message).not.toContain(root)
+    expect(message).toContain('Nothing else in the store was touched')
+  })
+
+  it('still reads a store whose tuning.json is valid and whose records are all valid', () => {
+    const root = mkdtempSync(join(tmpdir(), 'ursa-mcp-ok-'))
+    mkdirSync(join(root, '.ursa', 'records'), { recursive: true })
+    writeFileSync(join(root, '.ursa', 'tuning.json'), JSON.stringify(TUNING))
+    writeFileSync(join(root, '.ursa', 'records', 'rec-good.json'), JSON.stringify(RECORDS[0]))
+    const store = fileStore(projectPaths(root))
+    expect(store.records()).toHaveLength(1)
+    expect(store.tuning().axioms.length).toBeGreaterThan(0)
+  })
+
   it('is empty rather than broken on a project that has never been run', async () => {
     const root = mkdtempSync(join(tmpdir(), 'ursa-mcp-fresh-'))
     const store = fileStore(projectPaths(root))
