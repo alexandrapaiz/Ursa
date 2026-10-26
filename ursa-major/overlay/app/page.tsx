@@ -187,8 +187,18 @@ export default function Overlay() {
         )}
         {payload?.tuning.map((t, i) => (
           <div key={i} style={{ display: 'flex', gap: 8, padding: '3px 0', alignItems: 'baseline' }}>
+            {/* `whiteSpace: nowrap` added 2026-10-26d, from reading the 320
+                frame. `rule ×4` is one term and it was breaking after
+                `rule`, which put `×4` on a second baseline beside the
+                statement's own second line: the left column reads as two
+                labels where there is one
+                (`reviews/2026-10-26d/crops/label-wrap-320-before.png`).
+                `minWidth: 34` is a floor and not a ceiling, so the column
+                still grows to fit and nothing else moves. Only `rule ×N`
+                is wide enough to have ever wrapped; `case` and `tension`
+                are one word each. */}
             <span className="mono" style={{
-              fontSize: 10, minWidth: 34, textAlign: 'right',
+              fontSize: 10, minWidth: 34, textAlign: 'right', whiteSpace: 'nowrap',
               color: t.tension ? 'var(--tension)' : t.evidenceCount > 1 ? 'var(--accent)' : 'var(--dim)',
             }}>
               {t.tension ? 'tension' : t.evidenceCount > 1 ? `rule ×${t.evidenceCount}` : 'case'}
