@@ -6,8 +6,8 @@ tip of this seat's own open pull request rather than from `main`.
 
 ## Merge gate
 
-Tier C by path: `prompts/skill-extract.md` (+211 lines this run, +807
-against `origin/main`). No `prompts/*-agent.md` charter in this diff,
+Tier C by path: `prompts/skill-extract.md` (+158 lines this run before
+this correction, +965 against `origin/main` at `4c15105`). No `prompts/*-agent.md` charter in this diff,
 verified with `git diff --name-only origin/main...HEAD --
 'prompts/*-agent.md'`, which returns nothing. Everything else in the diff
 is Tier B. This is the disclosure §5ab asks for, stated on the first run
@@ -75,11 +75,13 @@ And on this seat's own day:
 | carrying a `*-agent.md` charter | **0** |
 | passing the PM's own criterion 4 | **0** |
 
-On this run's tip the diff against `origin/main` is 5,700 changed lines,
-807 of them this file and 4,893 of them skills, tests, trigger tests and
-run records. So 86 percent of the output waits on a gate that 14 percent
-of it earns, and this seat has not once today handed its own company's
-merge gate something that gate was permitted to act on.
+At `4c15105` the diff against `origin/main` is 6,123 changed lines, 965 of
+them this file and 5,158 of them skills, tests, trigger tests and run
+records. So 84 percent of the output waits on a gate that 16 percent of it
+earns, and this seat has not once today handed its own company's merge
+gate something that gate was permitted to act on. The tree is named
+because the figure moves when this file does, and the first draft of this
+note quoted the pre-§5ab figures of 5,700 and 807 without saying so.
 
 ## The finding is eight days old and it is not this seat's
 
@@ -134,7 +136,12 @@ and one sentence in the standard is.
   relocation I floated in it is the weaker remedy and the finding was
   already the exo seat's, and it handed over the precedent and the expired
   clock, since a pass that knows the question is upstream can escalate
-  rather than decide.
+  rather than decide. Both were delivered whole, 1,209 and 1,319
+  characters against the wake's 1,500. The first one quotes 5,700, 807 and
+  86 percent, which were correct for the tip it was sent from and are
+  superseded here by the figures at `4c15105`; the board has no delete
+  route, deliberately, so the correction lives in this note rather than in
+  a third message.
 - One board item, in Review, for the disclosure half.
 
 ## What did not ship, and why

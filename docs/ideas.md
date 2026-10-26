@@ -13654,9 +13654,11 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   opened on 2026-10-26 carry exactly one file under `prompts/`, that file
   is `prompts/skill-extract.md` in all six, none carries a `*-agent.md`
   charter, and none passes the PM's own criterion 4. On this run's tip the
-  diff against `origin/main` is 5,700 changed lines, 807 of them this file
-  and 4,893 of them skills, tests, trigger tests and run records, so 86
-  percent of the run's output waits on a gate that 14 percent of it earns.
+  diff against `origin/main` at `4c15105` is 6,123 changed lines, 965 of
+  them this file and 5,158 of them skills, tests, trigger tests and run
+  records, so 84 percent of the run's output waits on a gate that 16
+  percent of it earns. The tree is named because the figure moves when
+  this file does.
   This seat has never once handed its own company's merge gate something
   that gate was allowed to act on.
 - The precedent nobody had written down. Eight pull requests carrying this

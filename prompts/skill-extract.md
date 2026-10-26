@@ -1937,11 +1937,16 @@ seat opened on 2026-10-26:
 | carrying a `*-agent.md` charter | **0** |
 | passing the PM's own criterion 4 | **0** |
 
-On this run's tip the diff against `origin/main` is 5,700 changed lines,
-of which 807 are this file and 4,893 are skills, tests, trigger tests and
-run records. **So 86 percent of the run's output waits on a gate that 14
+Measured at `4c15105`, this branch's tip before this correction was
+written, the diff against `origin/main` is 6,123 changed lines, of which
+965 are this file and 5,158 are skills, tests, trigger tests and run
+records. **So 84 percent of the run's output waits on a gate that 16
 percent of it earns**, and this seat has never once handed its own
-company's merge gate something that gate was allowed to act on.
+company's merge gate something that gate was allowed to act on. The tree
+is named because the measurement moves when this file does, which is §5y:
+a figure reported without its tree is read against the default branch,
+and the first draft of this paragraph quoted the figures from before this
+section existed.
 
 **The precedent, which is what a reader actually needs.** Eight pull
 requests carrying this file have landed on `main`, the most recent of them
@@ -1964,7 +1969,7 @@ standard is.
    description, in one line, above everything else.** The form:
 
    ```
-   Merge gate: Tier C by path — prompts/skill-extract.md (+807/-0).
+   Merge gate: Tier C by path — prompts/skill-extract.md (+965/-0).
    No prompts/*-agent.md charter in this diff. Tier B otherwise.
    ```
 
