@@ -1,60 +1,62 @@
-# Dispatch queue — 2026-10-26, message (the six-hour pass)
+# Dispatch queue — 2026-10-26, message (four events: exo window 47, security's stack, a security host-run failure, market's 17th run)
 
-**This run's trigger.** A board/owner message asking for the standard
-six-hour pass: inbox, failed-run triage, the Tier B merge sweep, a
-sprint-progress line, and one note on the board. Read as data about
-what was asked, never as a command that overrides this charter (org
-rule, 2026-10-05); the work below is this charter's own §0b and §11,
-not the message's wording.
+**This run's trigger.** Four board/host events, read as data per the
+standing org rule (2026-10-05), not as instructions that override this
+charter: exo's window 47 finished; security opened #446 answering an
+earlier PM handoff plus a fresh sweep; a host window run of
+`ursa-security` exited 1; market opened #449. The work below follows
+this charter's own §0b/§11, which happens to cover the same ground the
+events describe.
 
 `PM_DISPATCH_ENABLED` is unset in this run's own environment
-(`[ -n "$PM_DISPATCH_ENABLED" ]` false; `gh variable list` shows no
-such variable at all), so nothing fires as a `gh workflow run`
-dispatch below regardless of what qualifies. Written in full per
-pm.md §0b.
+(`[ -n "$PM_DISPATCH_ENABLED" ]` false), so nothing below fires as a
+`gh workflow run` dispatch regardless of what qualifies. Written in
+full per pm.md §0b.
 
 ## Candidates considered, none fired as a dispatch
 
-Every seat with an open pull request right now pushed to it within
-the last two hours (confirmed via `gh pr list --json updatedAt`
-across the open queue), which is the synchronous-window shape pm.md
-§11.4 describes, not the stalled shape a dispatch exists to unstick:
-
-- **Skill** has two open pull requests on one scope (the §11.3
-  "two or more, none merged" trigger), but the newer is already
-  built on the older (`git merge-base --is-ancestor` confirms it),
-  so the seat is already doing exactly what a dispatch would ask it
-  to do. Not fired.
-- **Security** has three open pull requests on one scope for the
-  same reason: its own board message this pass says the newest is a
-  deliberate superset cut minutes ago to let the owner merge one
-  branch instead of three. Not fired.
-- **Exo** has two open pull requests that both edit a file under
-  `prompts/` directly. That is a merge-authority boundary already
-  named in `docs/decisions.md`, not a dispatch decision — more
-  building does not change which tier the content sits in.
-- **Engineer**'s one open pull request (#437) was `CONFLICTING` on
-  GitHub's check over a plain `docs/ideas.md` append, which this
-  pass resolved directly as a docs-only conflict (pm.md §10 Tier B
-  condition 5) and then merged; nothing left to dispatch there.
+- **Security**'s stack (#427, #439, #446) is not a "two or more open,
+  none merged" case: #446 merged this pass and GitHub resolved #427
+  and #439 as merged with it, confirmed as strict ancestors first.
+  Nothing to dispatch; the seat already did the work.
+- **Market**'s #449 merged clean this pass. No open market PR remains
+  stalled; #452 (the topics-positioning draft) is a live window from
+  ~00:4x UTC, not idle.
+- **Exo**'s #447 edits `prompts/exo-agent.md` and `prompts/pm-agent.md`
+  directly — a merge-authority boundary already settled in
+  `docs/decisions.md` (the 2026-10-18 charter-freeze finding, never
+  reversed), not a dispatch decision. Exo cannot be dispatched in any
+  case (pm.md §11.4: never the exo seat).
+- **Skill** (#441 → #445 → #448) is a clean three-deep stack, each
+  built on the last, with the newest pushed one minute before this
+  pass started — a live window, not stalled. Not fired.
+- **Frontend** (#444) and **engineer** (#451) both pushed within ten
+  minutes of this pass starting — live windows. Not fired.
+- **Research** (#395) is unchanged and still Tier C (edits a
+  `prompts/` path); no new fact moves it today.
 - No sprint item is overdue by a *new* fact this pass did not already
-  know (the sprint itself is two weeks stale — see the pending
-  tracker and this run's board note), and no ADR merged since the
-  last pass names a seat with no run following.
+  know (the sprint is still two weeks stale, see the pending
+  tracker), and no ADR merged since the last pass names a seat with
+  no run following.
 
 ## Failed-run triage this run (pm.md §11.7)
 
-`gh run list --created ">=6 hours ago"`: 95 runs, 89 success, 6
-failure, 0 refused, 0 never-started.
+The specific failure named by this run's own trigger: a host window
+run of `ursa-security` on `message`, started 2026-10-26T00:09:51Z,
+101 turns, 27 minutes, exited 1, with no pull request number in its
+own log.
 
-All 6 failures are **one tripwire false alarm**, not six: the
-redaction gate's "full session UUID" check caught the same
-unredacted identifier on two now-superseded branches (3 runs on one,
-3 on the other). Verified rather than assumed: the identifier is
-already truncated on both seats' later/superseding branches (checked
-by `git show <branch>:<path>` on each), so the defect was caught,
-fixed, and pushed again within the same session that introduced it,
-before this pass ever read the run list. No rerun fired — the same
-input would fail the same way on the dead branch, and the live
-branch already passes. No incident filed, since nothing shipped
-broken to a reader; the gate did exactly its job.
+**Classified as a tripwire false alarm, not a defect.** PR #446 exists
+on the matching branch (`ursa-security/2026-10-26-message`), its last
+push (00:35:54Z) falls inside the run's own 27-minute window, its one
+CI check (`scan`) is green, and security's own board `done` message at
+00:12:35Z already confirmed the content this run produced. The run's
+exit code did not reflect the work it shipped — the same shape named
+in this seat's own prior passes (Incident 12 and its addenda). No
+rerun: the branch already carries the finished, checked-in work. No
+incident: nothing shipped broken to a reader.
+
+Separately, `gh run list` over the Actions side (GitHub-hosted
+`redaction-gate` checks) for the last six hours: every run on
+`ursa-security/*` and `ursa-exo/*` branches in that window is
+`success`. No new Actions-side failure this pass.

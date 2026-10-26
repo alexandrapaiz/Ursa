@@ -2,6 +2,57 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-26 ~00:4x UTC (message: four events — exo's window 47, security's stack, a security host-run failure, market's 17th run)
+
+1. **#446 (security) merged under Tier B, and it closed its own stack.**
+   Not a draft, checks green, no Tier C path, merged clean. GitHub
+   resolved #427 and #439 as merged too the moment #446 landed, since
+   this seat verified both were strict ancestors of #446's tip before
+   merging — no separate close needed. #446's diff also carries one
+   thing worth your attention even though it needs nothing from you
+   to act: do **not** add the `dep-floor.allow.json` exception the
+   2026-10-25 ledger asked for, because the advisory it was for no
+   longer applies.
+2. **#449 (market) merged under Tier B**, clean, no Tier C path,
+   docs-only (ledger, two briefs, the landscape register). Its own
+   content answered part of distribution's six-topic ask (board,
+   2026-10-26 00:06 UTC): market said yes to `provenance` alone and no
+   to the other five, and this pass relayed that answer back to
+   distribution on the board so the ask closes instead of being
+   re-proposed to a seat with no memory.
+3. **#447 (exo, window 47) stays Tier C, unchanged from every pass
+   since the charter freeze opened 2026-10-18.** It edits
+   `prompts/exo-agent.md` and `prompts/pm-agent.md` directly. Worth
+   reading regardless: it restores a register entry that this seat's
+   own open branch (the one carrying this file) had already been
+   building as the fix for (authoring commit `d27fd818`, 48 lines),
+   after exo's own prior fork-sweep deleted the only copy that had
+   ever reached `main`. Six citations across three registers point at
+   that entry and resolve to nothing until a PM pull request carrying
+   it merges. This branch already carries it — confirmed with
+   `git merge-base --is-ancestor d27fd818 HEAD`. Merging this PR is
+   therefore also the repair, not only this pass's own report.
+
+**The security host-run that reported exit 1 is a tripwire false
+alarm, not a defect.** The host window run of `ursa-security` on
+`message` (started 00:09:51 UTC, 101 turns, 27 minutes) exited 1 with
+no pull request number in its own log. PR #446 exists on the matching
+branch, its last push (00:35:54 UTC) lines up with the run's own
+window, its checks are green, and security's own board `done` message
+at 00:12:35 UTC already confirmed the content. Classified under
+pm.md §11.7 as a tripwire false alarm: no rerun, no incident — the
+work shipped, only the run's own exit code did not reflect it.
+
+**Nothing idle found to hand off this pass.** Checked every other
+open pull request for the "two or more open, none merged" and "no
+live run behind it" shapes pm.md §11.3/§11.4 describe: #444 (frontend),
+#445/#448 (skill, a clean two-deep stack each building on the last),
+and #451 (engineer) all pushed within the last ten minutes of this
+pass starting — live windows, not stalled ones. #441 (skill) and #395
+(research) are unchanged Tier C/conflict holds already named in the
+six-hour pass's own entry below. No seat qualified for a fresh
+dispatch, and `PM_DISPATCH_ENABLED` is still unset regardless.
+
 ## Top three for the owner, 2026-10-26 ~00:3x UTC (message, the six-hour pass)
 
 1. **Four pull requests merged under Tier B this pass, one of them
