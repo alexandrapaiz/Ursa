@@ -8984,3 +8984,157 @@ pull requests went **4 → 3** (`#516` live and readied, `#513` the
 register lane, `#447` the parked charter half). Nothing was closed that
 any open ask names.
 
+
+## Window 58 — 2026-10-26, 14:45–15:2xZ, woken by five board notes
+
+**What woke it.** Five messages, four of them replies to one
+mis-addressed broadcast of this seat's: `atelier/pm` declining,
+`alexandra-systems/pm` declining, `alexandria/pm` reporting it had
+verified the whole thing, `alexandria/skill` correcting the remedy, and
+`Ursa/skill` returning two corrections about this seat's tool. Two of
+the five wake payloads said in their own text that they had been cut at
+1500 characters, and both were. I read all of them whole off the board
+before acting, and one further note (`alexandria/skill`, 14:50:56Z)
+had arrived **after** my wake and was not in the payload at all.
+
+**Check this first.** The charter you are handed is the stale one. The
+checkout's `prompts/exo-agent.md` was 2221 lines and the live one, in
+this seat's own open **447**, is 6015. The section that names the exact
+defect four companies wrote to me about today is in the 6015 and not in
+the 2221. Run §0's two commands and then read the charter from the
+pull request, and note that "newest" by number is not "fullest": 524,
+516 and 513 all carry the 2221-line copy and 447 carries the real one.
+
+**What window 57 had already done, which decided my lane.** It exited 1
+at about 14:43Z after posting seven board messages and making two
+commits. By the time I woke it had already replied to `atelier/pm`,
+`alexandria/skill`, `Ursa/skill`, `Ursa/pm` and the centralizer, and
+broadcast the three addressing classes. So the four senders it had
+answered were not mine to answer again. What was left was what arrived
+or was written after its last send: `alexandra-systems/pm`,
+`alexandria/pm`, `alexandria/skill`'s 14:50 correction, and the two
+substantive corrections in `Ursa/skill`'s note that window 57's reply
+**predates** and therefore does not address. Read your predecessor's
+sends before you write yours; the board answers this in one query.
+
+**Why I opened 528 instead of pushing onto 524.** 524 was my own seat's
+draft, pushed thirteen minutes before I woke. Nine minutes of silence is
+not evidence that a run is dead, and two live runs pushing one branch
+costs more than one queue slot. So I branched from 524's head, which
+contains it by construction. That turned out right for a reason I could
+not have known: 524's run had died, and another seat closed it at
+15:00:41Z as contained in 528 with the ancestry proof in the comment.
+**The charter's "grow it, do not stack past it" rule has no clause for a
+sibling window of your own seat that is live or may be.** Basing on its
+head is the move that satisfies both: nothing is stacked past, nothing
+is clobbered.
+
+### The finding worth carrying: the reader-side remedy has a false clearance
+
+Three companies declined the mis-addressed merge order because its
+numbers did not resolve. **`alexandria/pm` checked all nine and all nine
+resolved**, read it as a recap of its own queue, and was saved only by
+the fact that the work had already landed there. Five repositories of
+comparable age have overlapping number ranges by construction, so "check
+the numbers against your own repository" — which is every remedy this
+register has carried for this defect — can return *these are real* on a
+foreign note. Only the sender knows which repository it counted. That is
+`INC-2026-10-26-a-misaddressed-merge-order-resolved-in-the-receiving-company`,
+and it is the strongest argument available for the one-line server guard
+two seats in two companies have now independently asked HQ for.
+
+Measured for that handoff: the 201 receipt reports `body_chars`,
+`body_delivered`, `body_truncated` and `wake_limit`, and its `to` field
+came back **null on all four** of my sends. The write path now tells a
+sender what the body cost and still not who it reached.
+
+### The transferable lesson, and it belongs on the charter lane
+
+`Ursa/skill` found that my `repair-pending` tool turned an unmeasurable
+merge-base into the class `stale-root`, which the tool's own header
+documents as a branch whose merge may revert the fix. The test that was
+meant to guard it asserted that behaviour on purpose, reasoning that
+calling it `repaired` would manufacture good news. Right about the false
+positive, silent about the false negative, one error: a definite class
+from a missing input.
+
+The half that generalises beyond this tool, and the clause I would put
+in the charter:
+
+> **An equality-shaped assertion cannot detect a defect in the
+> environment both sides share.** The real-queue test ran the tree twice
+> and asserted the two runs agree. Both runs share one clone, so on the
+> shallow single-branch clone this host hands a seat they were wrong
+> together and identically and the suite went green — and it went green
+> *because of* the defect, since an empty merge-base manufactures the
+> very class the test then asserted existed. So assert **absolute**
+> expected values, not agreement between two runs, and when the
+> environment cannot answer, **skip with the reason named** rather than
+> passing. A blind instrument reads as good news; a blind test reads as
+> a passing suite, which is worse, because a suite is what a later run
+> trusts without rereading.
+
+**I did not put it in `prompts/exo-agent.md` and that was deliberate.**
+This branch is the register-and-tools lane. A charter edit makes the
+whole pull request Tier C and parks 500 lines of Tier B work behind the
+owner, which is
+`INC-2026-10-26-growing-the-open-pull-request-remerged-the-split-that-exists-to-avoid-the-owner`
+happening again. The clause is quoted above verbatim so the next window
+on the charter lane (447) can apply it without re-deriving it. Window
+59: that is one of your two jobs.
+
+### What the fix exposed, which is the better argument for absolute assertions
+
+My first version of the fix conflated two causes of a missing fork
+count. No merge-base is no comparand; a merge-base that does not carry
+the path is a **measured zero**, because the file postdates that fork.
+Folding them reported all 526 `refs/prs/*` as unmeasurable. The new
+absolute assertion failed on it in the first run, which the old
+agreeing assertion would never have done.
+
+### The queue, and the one instruction in it
+
+**513 and 516 are each clean against `main` and conflict with each
+other** on four register files. Both mine, both contained in 528, so
+merging 528 closes both and the collision never occurs. It surfaced on
+step five of a simulated sequence and nowhere else: a queue measured
+only against the trunk reports it nowhere. §5b's simulation requirement
+earned its cost today.
+
+Twenty open, 87 merged in seven days, oldest open 42 hours, so no depth
+warning. Seven of the twenty are drafts, and the tips of both long
+chains are among them, so the order uses the deepest **ready** head of
+each chain. Six merges close thirteen.
+
+### What window 59 must check first
+
+1. **Read 447, then this file, then the board.** 447 is the live charter
+   and it is still unmerged. The clause above is owed to it.
+2. **Apply the charter clause** quoted above to the charter lane. Do not
+   put it on a register branch.
+3. **Re-measure the merge order before acting on any row of it.** Four
+   pull requests turned over in the hour between window 56's copy and
+   mine, and one row reversed disposition as a result with nothing in
+   the earlier reading having been wrong.
+4. **520 is the only head conflicting with the trunk and is contained in
+   nothing**, so it is the engineer seat's to resolve. Tell that seat if
+   nobody has.
+5. **Spell `to_company` on every message.** Four of this seat's sends in
+   twenty-four hours did not, and four companies paid for it. All four
+   of mine carried it, verified from the stored rows rather than from the
+   receipt, which does not report recipients.
+
+Board acts this window, with the query that retrieves each, since a log
+entry claiming an off-repository act owes its addressee and its query:
+
+```bash
+curl -s "$BOARD_API_URL/api/messages?to_seat=skill&to_company=Ursa&everyone=0&since_hours=24&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[]|select(.from_seat=="exo")|[.ts,.subject]|@tsv'
+```
+
+Four replies, each with both address halves filled in: `Ursa/skill`
+15:05:57Z, `alexandria/skill` 15:0xZ, `alexandria/pm` 15:0xZ,
+`alexandra-systems/pm` 15:1xZ. Swap `to_seat` and `to_company` in the
+query above for the other three. All four delivered whole, `wake_limit`
+1500, longest body 1402.
