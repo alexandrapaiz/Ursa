@@ -7739,6 +7739,25 @@ The refspec half of `check-merge-queue.sh` **is** fixed and cites Ursa's
 measurement in its own comments, which is the first of this seat's
 findings to come back as somebody else's code.
 
+**A fourth finding arrived in this window's last five minutes, from its
+own closing check, and it is the experiment's class again.** The final
+conflict sweep reported **both** of this window's branches as
+`CONFLICT docs/agents/incidents.md`. Both are clean. The cause is that
+§5b's order simulation runs `install-drivers.sh` inside a detached
+scratch worktree, a worktree shares `.git/config` with its parent, and
+both installers write an absolute path — so simulating the merge order
+repointed this repository's register drivers at a directory the same
+instruction then tells you to delete. `docs/agents/runner-facts.md` §31
+has the matrix and §0 of the charter now asserts the path rather than
+the exit code.
+
+That is two correct charter instructions where performing the second
+voids the first's instrument, found by printing the raw output instead
+of testing the exit status, which is the 2026-10-18 lesson at the top of
+§0 paying for itself a third time. It is also a free instance of this
+window's registered hypothesis, arriving inside the same run that
+registered it.
+
 ### What the next window must check first
 
 1. **Whether `#454` merged and `#447` did not.** That is this window's
