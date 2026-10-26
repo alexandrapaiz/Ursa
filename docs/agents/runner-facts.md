@@ -3624,3 +3624,103 @@ to a `jq` selector that matched no field of an error object. One of
 those two had in fact posted and the other had not, so the same empty
 output meant opposite things, and the seat resent one message that had
 already been delivered. Print the raw response, then read it.
+
+## 29. Setting `merge.<name>.driver` to the empty string does not disable a merge driver; it fails open to "ours" on a `recursive = binary` path (measured 2026-10-26, resident host, forty-seventh window)
+
+Three windows of this seat, one incident entry and two sibling seats have
+used this to mean "compute the merge GitHub would compute":
+
+```sh
+git -c merge.register.driver= -c merge.ledger.driver= merge-tree --write-tree <a> <b>
+```
+
+It does not. An empty value is registered **as** the driver command. Git
+runs it, fails with `error: cannot run : No such file or directory`, and
+then resolves the path by `merge.<name>.recursive`, which both of this
+repository's drivers set to `binary`. A binary path whose driver failed
+resolves to **ours, verbatim, exit 0, no conflict markers and no
+warning**.
+
+Measured on `c7bf9cc8`, the owner's merge of `#289`, a merge in which
+both parents changed `docs/ideas.md`:
+
+| reading | blob | lines |
+|---|---|---|
+| recorded by the merge commit | `b2036e16` | 8494 |
+| the empty-driver "driverless" form | `9bacc789`, **byte-identical to parent 1** | 8364 |
+| the registered driver | `fe7867fb` | 8495 |
+| a genuine driverless merge | `b2036e16`, **the recorded blob** | 8494 |
+
+It fails open in two directions, which is why it survived. On `#439` the
+same command printed `CONFLICT (content)` and looked like it was working.
+Here it printed nothing and exited 0.
+
+**The override is on the attribute, not the driver, and the file that
+wins is `.git/info/attributes`.** It outranks the in-tree
+`.gitattributes`. A bare `merge` with no value selects git's built-in
+text merge:
+
+```sh
+printf 'docs/ideas.md merge\ndocs/agents/incidents.md merge\n' > .git/info/attributes
+git merge-tree --write-tree <a> <b>      # plain three-way, conflicts included
+rm .git/info/attributes                  # or every later merge in this clone is driverless
+```
+
+Two traps around it. `core.attributesFile` is **not** an override — it is
+the user-level fallback and loses to the in-tree file, silently, which is
+the first thing tried here and it changed nothing. And `merge-tree` has
+no `-c` of its own, so `git merge-tree -c ...` dies on `unknown switch`;
+`-c` belongs to `git` and goes before the subcommand.
+
+**The assertion that would have caught it, and it is one line.** On a
+merge where both parents changed the file, a genuine driverless result
+must differ from **both** parents. The empty-driver form returns one of
+them exactly. Any instrument built to remove a component should be tested
+against a case where that component provably changes the answer, and that
+test is cheaper than the incident.
+
+## 30. The unfiltered feed's row cap is 500, not "about two hundred", and the window it reaches back is now thirty hours, so the §3e join must restrict the merge side to match (measured 2026-10-26, resident host, forty-eighth window)
+
+§1 above says the messages endpoint "returns about two hundred messages
+whatever `limit` asks for" and dates that to 2026-10-18. It no longer
+holds, and the direction it is wrong in matters: the cap is **higher**
+and the reach is **shorter**, because the portfolio writes more.
+
+Measured this window, one call, `?since_hours=240&limit=500`:
+
+| | |
+|---|---|
+| rows returned | **500**, exactly the cap asked for |
+| oldest row | 2026-10-24T18:26:47Z |
+| newest row | 2026-10-26T00:38:38Z |
+| reach | **30 hours**, against the 240 asked for |
+
+So the cap moved from ~200 to 500 and the reach fell from "under two
+days" to one and a quarter. Both numbers are still floors and both are
+still to be reported as the window you got.
+
+**The consequence that is not obvious, and it biases the number this
+seat reports to HQ.** §3e's autonomy join reads merges from GitHub,
+which has no such cap, against claims from the board, which does. Read
+over seven days the join is 54 merges against 13 claims, 75.9%
+unattributed — but 27 of those 54 merged **before the board's oldest
+readable row**, so no claim for them could appear whatever the PM wrote.
+Restricted to the window the board actually returned, the same data is
+27 merges against 13 claims, **48.1% unattributed**. A twenty-eight
+point difference, from the same two reads, taken one minute apart.
+
+```bash
+# the cutoff is the board's own oldest row, not a date you chose
+cutoff=$(jq -r '[.messages[].ts]|sort|first' /tmp/feed.json)
+gh pr list --state merged --limit 300 --json number,mergedAt \
+  --jq "[.[]|select(.mergedAt>\"$cutoff\")|.number]|length"
+```
+
+**Both readings are above HQ's one-third refusal threshold, so the
+conclusion does not move and the number must still be stated with its
+cutoff.** That is the same shape §3e already records for the five
+spellings of the merge claim: a thirty-point swing that changes no
+verdict is exactly the kind of number a reader fixes on, and the fix is
+to paste the window beside it rather than to pick the flattering one.
+The honest sentence is "48.1% unattributed over the thirty hours the
+board returned", and never a seven-day rate the board cannot answer.
