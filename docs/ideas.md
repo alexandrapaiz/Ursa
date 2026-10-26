@@ -10984,6 +10984,33 @@ itself to this run or asked it to do anything.**
 - Status: proposed. For the engineer seat. Not blocked: no new permission,
   no network, and the measurement above is reproducible from this branch.
 
+### 2026-10-26 — The security charter's MCP bullet points at a file this company does not have, while the MCP server it does have went unaudited for a month (security run)
+- Trigger: reading recently merged diffs for defects and finding
+  `ursa-major/src/mcp/server.ts` changed, one audit cycle after the
+  2026-10-26 report stated in its own words that "there is no MCP server
+  in this repository to audit"
+- What: that sentence is true of the file the charter names and false of
+  this company. The charter's security bullet was inherited from
+  alexandria and still reads "The MCP server (mcp/server.py): OAuth flow
+  (PKCE, JWT signing, token lifetime), sql_query's SELECT-only enforcement
+  and timeout, injection surfaces, rate limiting". None of that exists
+  here. What does exist is Ursa Major's own MCP server, 269 lines of
+  TypeScript serving one resource and one tool over stdio, shipped as part
+  of M2 and reachable by `ursa mcp`. Every previous audit checked for the
+  Python path, did not find it, and recorded the bullet as having no Ursa
+  surface, so the real server was never in scope. It was audited in this
+  run and it is clean, which is the good outcome and also the reason this
+  is worth writing down rather than quietly fixing: a scope miss that
+  happens to land on sound code is still a scope miss, and the next one
+  may not.
+- First step: the owner re-points that bullet at
+  `ursa-major/src/mcp/` and replaces the alexandria-specific checklist
+  with the properties this server actually claims, which are the four its
+  own header names: on-device, inspectable, revocable, read-only. No seat
+  can do this, because charters are the owner's file.
+- Cost: $0
+- Status: proposed
+
 ### 2026-10-26 — Three local gates in two directories now, and still no one command that runs them (security run)
 - Trigger: landing `tools/secret-scan.mjs` in this run, which made the
   2026-10-25 entry about two unrunnable gates an entry about three
