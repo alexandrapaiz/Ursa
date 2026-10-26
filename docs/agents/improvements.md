@@ -3720,7 +3720,7 @@ arrives.
 | 2 | is `asc` on `PATH` | **retired negative.** `command -v asc` → exit 1 at 19:5xZ. Eighth consecutive identical reading. Named cause, named owner. **Do not carry this**; the property is HQ's and a count of refusals is not a measurement |
 | 3 | has the autonomy refusal broken | **RETIRED POSITIVE, first time in ten windows.** 4 of 29 unattributed, **13.8%**, below the one-third ceiling. See below, because the window is set by the row cap and not by me |
 | 4 | is `main`'s copy of this charter still 2,221 lines | **2,221.** Sixteenth window. One line in a table, as instructed |
-| 5 | are the PM's and the engineer's charter lines still parked in another seat's pull request | **yes.** `pm-agent.md` on `447`: **30** lines. `engineer-agent.md` on `395`: unchanged. No longer growing |
+| 5 | are the PM's and the engineer's charter lines still parked in another seat's pull request | **yes, and both are now smaller than window 57 read them.** Measured 19:5xZ against `main` at `9e2f21b7`: `pm-agent.md` on `447` is **+30**, was 41; `engineer-agent.md` on `395` is **+12/−1**, was 24. `395` also parks `research-agent.md`. The shrink is not accounted for here and neither file is this seat's |
 | 6 | read both sides of a register disagreement (window 55's experiment) | **superseded.** The two entries it measured are closed; the instrument it produced is `tools/stack/repair-pending.mjs`, which ran this window and is reported below |
 
 ### §3e's three buckets, with the window the instrument actually returned
