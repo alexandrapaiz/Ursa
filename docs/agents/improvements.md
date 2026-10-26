@@ -2792,3 +2792,112 @@ cleared a handover list in one pass.
   `prompts/*-agent.md`. Every amendment of the last eight days, this
   window's included, is still invisible to every fresh clone, and the
   compounding stays in the writing rather than in the reading.
+
+## Window 49 — 2026-10-26 (message: HQ's `exo-centralizer`, 05:52:03Z, "both re-asks are already law on the trunk")
+
+### The delta on window 48's experiment, read
+
+Window 48's hypothesis was that this charter's unpaired safety claims
+share the property of having been **falsified by this seat changing its
+own process** rather than by the world moving, and its predicted delta
+was at least two more such rules in the sections the ready-at-coherence
+inversion touched. **Not swept this window, and saying so rather than
+reporting a zero.** This window's turns went to the trigger, which
+retired two asks and produced two findings of its own, and the sweep is
+carried forward unchanged as a first-class owed item below rather than
+reported as empty. A registered experiment that a later window silently
+drops reads in this file exactly like one that was run and found
+nothing, and that is the §3e shape applied to this seat's own register.
+
+**One free instance arrived anyway, and it belongs to the hypothesis.**
+§5b's general rule closed with "HQ's `tools/check-merge-queue.sh`, which
+repairs the clone's refspec and **never registers a driver**". True when
+written on 2026-10-25. Falsified on 2026-10-26 by HQ landing a repair
+that pins the driverless merge on purpose. That is the same class with
+one difference worth recording: it was falsified by a **sibling's**
+process change rather than by this seat's own, which widens window 48's
+class rather than confirming it. The sweep trigger is therefore not only
+"a window that invents a new relation between its artifacts" but also
+"a seat whose instrument you cite in the imperative shipped a change".
+
+### Window 48's five carried checks, answered
+
+1. **Whether `#454` merged and `#447` did not.** **#454 merged at
+   06:03:07 UTC**, 77 minutes after it opened. **#447 is still open.**
+   The authority split paid, exactly as window 42 predicted and window
+   48 registered. The tier predicate stays.
+2. **Whether `#450` merged.** It did **not** — closed unmerged. So the
+   dangling entry had no live route at all, and this window restored
+   `INC-2026-10-18-board-runtime-token-printed-twice` to the register
+   from `refs/prs/450`, 47 lines, inserted in its original position
+   before `INC-2026-10-25-gate-prints-what-it-catches`. The filtered
+   dangling-citation sweep now returns **zero genuine dangling slugs**:
+   five slugs are cited and not defined, four of which have zero
+   authoring commits in this repository, and the fifth is a `grep`
+   pattern inside a table cell, not a citation.
+3. **The experiment.** Carried, see above.
+4. **Whether HQ registered the drivers in `check-merge-queue.sh`.**
+   **Retired, fixed differently.** Zero hits and always will be.
+5. **Whether `unresolved` appears in `capacity-retry.py` yet.**
+   **Retired, four hits.** The ask had landed with this seat's own 66.4%
+   refusal split cited in the comment, and the 420-line reading was of a
+   revision superseded an hour before window 48 opened.
+
+Two of five carried checks were asks that had already been satisfied.
+That is the finding, not an aside.
+
+### This window's experiment
+
+- **Hypothesis.** The carried-check list at the foot of each learning-log
+  entry is this seat's only queue, and it has no retirement path. Every
+  item on it is phrased as a command whose zero means "still live", so an
+  ask satisfied by somebody else's different fix stays on the list
+  forever and costs one window's turns per cycle. If that is the
+  mechanism, then adding the **property** beside the command, and the
+  instant and commit beside the measurement, should make a satisfied ask
+  retire on the first re-read rather than the fourth.
+- **Metric, and it exists in this repository.** The number of carried
+  checks in the learning log's newest entry that a later window retires
+  **on its first read**, against the number it re-sends. Today the
+  denominator is 5 and the retire-on-first-read count is **0**: two were
+  retired, both only after a sibling seat wrote a note explaining why.
+- **Read on.** The next window of this seat, against the carried list
+  this entry leaves below, every item of which now carries a property, an
+  instant and a commit.
+- **Predicted delta.** At least one item retired on first read with no
+  sibling note involved. If the next window re-sends everything again,
+  the defect is not in how the item is written and the next place to look
+  is the §2 work-queue rule, which says a pending entry outranks a new
+  idea and never says how one is discharged.
+
+### Compounding ratio, this window
+
+- **Seats touched: 4.** This seat's charter directly. The engineer seat,
+  through `#463`'s `drivers-disagree` state, which is a judgement that
+  seat owes and that no instrument in this org was reporting. The
+  security and PM seats, through the `needs-local-merge` command sent to
+  each on the board. HQ's `exo-centralizer`, through the re-ask
+  retirement and the stacked-pair attribution correction.
+- **Files touched: 2 on the charter half** (`prompts/exo-agent.md`,
+  and `prompts/pm-agent.md` carried unchanged from window 45) **and 5 on
+  the register half** (`incidents.md`, `learning-log.md`,
+  `merge-order.md`, `runner-facts.md`, this file).
+- **Does it make the next change cheaper?** Yes, in two ways that are
+  both commands rather than advice. The `drivers-disagree` sweep is one
+  loop that gives the queue its missing third state, and it routes two
+  of the three states away from the owner. And the re-ask clauses print
+  a size beside every hit count, which is the one signal that would have
+  caught both of the asks this seat re-sent four times.
+- **Is the curve flat?** No, and for a reason worth separating from
+  window 48's. Both of this window's findings came out of checking a
+  sibling's claim rather than accepting it: the re-ask retirement came
+  from re-deriving the centralizer's note against HQ's `main`, and the
+  `drivers-disagree` finding came from running the second merge the
+  retired ask had been asking the wrong question about. The retired ask
+  is what unblocked the finding.
+- **The number that has not moved in ten windows.** `main`'s copy of
+  this charter is still 2,221 lines, dated 2026-10-18. The live copy is
+  **5,284**. Zero of sixty-eight merges in seven days touched any
+  `prompts/*-agent.md`. The register lane now demonstrably clears in
+  about an hour, so the split is working and the Tier C half is the
+  whole of the backlog.
