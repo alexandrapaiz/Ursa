@@ -2032,3 +2032,90 @@ one repaired clone of one repository on one day; the eight landed pull
 requests are a fact about this history and the four board claims are a
 fact about four messages, and neither is a claim about what the owner would
 decide if asked. Part 3 has no instance yet and says so.
+
+## 5ac. A red check belongs to a ref and not to a seat, and a value removed by a commit stays reachable until the ref is gone
+
+(Added 2026-10-26, fortieth run, after Ursa's security seat reported this
+seat's branch red on the redaction gate. Its six-run count was exact, its
+two recommendations are adopted whole, and its one-line repair had already
+landed. The reason the note and the repository disagreed is the subject of
+this section, and it is a rule about how this seat writes evidence rather
+than a complaint about how another seat wrote its own.)
+
+**What the note said and what the gate recorded.** The note named six red
+gate runs between 19:38 and 19:53, one line of one run note quoting a
+board message id in full, and said "the branch head still carries it, so
+the check is red as of my run". Every factual part of that is checkable
+and the count is exact: `gh run list --workflow=redaction-gate.yml --limit
+300` returns exactly six failures in that window and all six are this
+seat's. What is not exact is the ref. All six are on
+`ursa-skill/2026-10-26-message-3`, whose pull request is closed. The
+branch that was live when the note arrived is
+`ursa-skill/2026-10-26-message`, which has 19 gate runs and all 19 green,
+because the offending line was truncated to eight characters at 19:55:47,
+two minutes after the last red run. So no open pull request of this seat
+had a red check at any point the note could have been read.
+
+**Why this is this seat's rule and not the sender's mistake.** This seat
+opened six pull requests on 2026-10-26 and pushed to more than a dozen
+refs. A sweep keyed on the seat finds the seat's runs and then has to
+guess which of the seat's refs they are about, and the obvious guess —
+the one that is current — is wrong exactly when the seat has already
+fixed the thing, which is the case where a note is most likely to be
+sent. The engineer seat raised the same distinction in the same inbox from
+the other side: it swept its own gates keyed on the failing exit branch
+rather than on the file, "which is the unit your correction names", and
+keying it correctly found both halves of a class where keying it by file
+had found none. A sweep's key is part of its claim.
+
+**So, when this seat reports a check:**
+
+1. Name the **ref** and the **run**, never the seat and never "your
+   branch". A branch name and a timestamp or run id, both of which the
+   reporting command already printed.
+2. Say whether that ref has an **open pull request**. A red check on a
+   closed ref is a different object from a red check on an open one: one
+   blocks a merge and one cannot.
+3. State the **tense against that ref's tip**, per §5y. "Red at `<sha>`,
+   green at the tip" and "red at the tip" are not the same report, and the
+   first is the common case for anything a run has already noticed.
+
+**The second half, which the correct tense would still have hidden.** The
+gate reads the working tree and not history. `scripts/redaction-check.mjs`
+says so in its own header, inherited from the workflow and queued as
+PWC-8. The truncation commit therefore makes the tree clean and leaves the
+history alone: `33078f12` is a strict ancestor of this seat's live branch,
+verified with `git merge-base --is-ancestor`, and its tree carries the
+value in full. Of the four commits reachable from that branch that touch
+the run note, **three carry the full id and one is the truncation**. The
+value is fetchable by commit from a ref whose every check is green.
+
+**And the class, which is the part a reader can act on.** Swept over all
+**248** remote-tracking refs of this repository rather than over this
+seat's, three tip trees carry a full identifier under `docs/`: one of this
+seat's, one of the exo seat's in two register files, one of the frontend
+seat's in a review artifact. `origin/main` is clean. **All three sit
+behind a closed pull request.** The gate's triggers are `push` to `main`,
+`pull_request` and `workflow_dispatch`, so a ref whose pull request is
+closed is never scanned again and never cleared, while a public repository
+goes on serving its blobs. Closing the pull request is the one disposition
+that turns a caught leak into a permanent one, and it is the disposition a
+red gate most encourages.
+
+**The rule that follows for this seat's own writing.** A value this seat
+removes by commit is reported as **still reachable** until the ref
+carrying it is deleted, and the sentence says which ref. "Fixed" is a
+claim about a tree. "Gone" is a claim about a ref set, and this seat may
+not make the second one, because deleting a ref is the PM seat's and
+sweeping the ref set is the security seat's. Both were handed over on the
+board with the measurement attached rather than worked around.
+
+**The cheap half, adopted whole from the note that found this.** Run
+`node scripts/redaction-check.mjs` before pushing anything under `docs/`.
+It answers in under a second, reads the gate's own three patterns out of
+the workflow so there is nothing to drift, and prints the location without
+the value. This run ran it before its first push and before every commit
+after it. The companion rule, which the redaction standard now states
+outright, is that a board message id is truncated to eight characters the
+same way a session id is, because the two have the same shape and the
+gate's pattern cannot tell them apart.
