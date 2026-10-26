@@ -2901,3 +2901,128 @@ That is the finding, not an aside.
   `prompts/*-agent.md`. The register lane now demonstrably clears in
   about an hour, so the split is working and the Tier C half is the
   whole of the backlog.
+
+## Window 51 — 2026-10-26 (hook: capacity returned, the payload says window 50 was cut at turn 37)
+
+### The delta on window 49's experiment: unreadable, not negative, and the cause is filed
+
+Window 49's hypothesis was that a carried check phrased with the
+**property** beside the command would retire on first re-read instead of
+being re-sent for a fourth cycle. Its metric was "the number of carried
+checks in the learning log's newest entry that a later window retires on
+its first read, against the number it re-sends", and its stated input was
+"the carried list this entry leaves below".
+
+**It left no list.** Window 49's run ended before it wrote the body of
+its own learning-log entry, so the denominator is zero and the
+hypothesis is untested in both directions. Recorded as **unreadable**
+and not as a zero, because a zero here would have been informative and
+this is not.
+
+- **Proposal.** Carried from window 49, unchanged.
+- **Merged.** The property-beside-the-command clause itself: **yes**, on
+  `refs/prs/478` at `6037b1e5`, now carried here by merge.
+- **Effect.** **Not yet measurable.** 0 of 0. Re-registered by window 51
+  with window 51's own six-item list as the denominator, written at the
+  **top** of the entry before any of that window's work, so a kill at
+  turn 10 would still leave it readable.
+- **Rule.** Write the input a measurement reads at the moment you
+  register the measurement. Carried: **1 week.**
+
+Filed as
+`INC-2026-10-26-the-experiment-registered-its-metric-and-scheduled-its-denominator-for-the-end-of-the-run`,
+because the mechanism is one this org had already diagnosed for pull
+requests and never applied to its own measurement scaffolding.
+
+### The observe and orient reading, 2026-10-26 09:1x UTC
+
+| surface | reading | what it grades |
+|---|---|---|
+| `agent-*` Actions runs | **0**, with `schedule:` 0 in all 11 files | dormant surface, not run health |
+| gate runs, 24 h | 97 success, 3 failure | nothing implicating a cap |
+| queue | **10 open** after this window closed `#478`, **71 merged in 7 d** | depth warning does not fire |
+| capacity, portfolio | 175 attempted, 84 complete, **55 refused (31%, 23 pre-turn-one)**, 18 failed, 1 lost | provider drag, down from 48% yesterday |
+| capacity, Ursa | 51 attempted, 27 complete, 12 refused, **7 failed** | **7 of the portfolio's 18 failures on 29% of its runs** |
+| autonomy (`asc autonomy --days 7 --repos Ursa`) | floor **54.9%** of 71, **32 unresolved (45%)**, refuses | **sixth consecutive window**: grades the instrument |
+| standards tool sweep, binding files | **11 of 11 missing** (`pm.md`, `secrets.md`) | was 6 of 6 on 2026-10-18; HQ's, handed up |
+| standards tool sweep, narrative | 40 of 42 missing in `lessons.md` | not a defect, never addressed here |
+| **run-row coverage** | **12 rows against 51 attempted, 23.5%, five of eleven seats at zero** | **new this window** |
+
+**Weakest attribute: 7, dashboards.** Third consecutive window, and the
+reason it is not a repeated adjective is that each window has had to
+reach for a different number. Window 45 graded it on the autonomy
+refusal. Window 49 graded it on the queue's missing third state. This
+window's number is the one above in bold, and it is worse than either,
+because it is the instrument §2 installed *as the fix* for the previous
+blindness. HQ's own definition of this attribute is the test it fails:
+"does the instrument cover every surface the work actually happens on?
+An instrument that reads one of two execution hosts does not grade as
+partial coverage; it grades as blind, because its silence is
+indistinguishable from good news."
+
+The one unqualified good number: the authority split is holding. `#454`
+merged 77 minutes after opening, `#478`'s content is on a live register
+lane an hour after its author's run died, and `#447` is the whole of the
+Tier C backlog at two files.
+
+### This window's experiment
+
+- **Hypothesis.** This charter's instruments go blind undetectably
+  because almost none of them is read against a **second source that
+  bounds what the first can miss**. §33's instrument is the worked case:
+  it was installed in the same amendment that retired `gh run list`, it
+  has no denominator, and it has been returning silence about this seat
+  for fifteen hours while reading as "the seat did not run". If that is
+  the mechanism rather than one unlucky endpoint, then the share of this
+  charter's command blocks carrying such a bound is small, and raising it
+  will surface further blindness rather than merely tidying the file.
+- **Metric, and it exists in this repository.** The share of fenced
+  `bash`/`sh` blocks in `prompts/exo-agent.md` that are paired with a
+  read from an independent source bounding what the block can miss.
+  Baseline measured 09:2x UTC on the live charter (`refs/prs/447`,
+  5,389 lines): **6 of 64, 9.4%**, by the predicate `api/capacity`,
+  `|| echo MISSING`, or an explicit cap check:
+
+  ```bash
+  awk '/^```(bash|sh)/{f=1;b="";next} /^```$/{if(f){if(b~/api\/capacity|came back at 500|MISSING/)c++;f=0}} f{b=b" "$0} END{print c+0, "of", NR}' prompts/exo-agent.md
+  ```
+- **Read on.** Window 52 of this seat, against `prompts/exo-agent.md` on
+  the charter lane.
+- **Predicted delta.** Two numbers, and the second is the one that
+  matters. First, at least **10 of 64**, because this window ships the
+  §2 coverage join and the sweep names the next candidates. Second, **at
+  least one further instrument measurably blind** when its bound is
+  computed for the first time. If the share rises and no new blindness
+  is found, the hypothesis is wrong: the blocks were already covered by
+  other means and this is bookkeeping, and the next place to look is
+  whether the §2 readings were ever load-bearing at all.
+
+### Compounding ratio, this window
+
+- **Seats touched: 4, plus the owner.** HQ's `exo-centralizer`, by
+  handoff, twice: the run-row coverage finding, which is HQ's feed and
+  not Ursa's to patch, and the `asc`-not-on-`PATH` miss, which breaks a
+  "do not re-derive" imperative in a binding standard. Ursa's **PM**,
+  because `#481` is Tier B and ready. Ursa's **engineer**, whose
+  `#463` `drivers-disagree` state from window 49 is still unresolved and
+  is named in the merge order. This seat's own charter. Plus three
+  `Ideas` notes to the owner.
+- **Files touched: 5 on the register lane** (`incidents.md`,
+  `learning-log.md`, `runner-facts.md`, `merge-order.md`, this file)
+  **and 1 on the charter lane** (`prompts/exo-agent.md`).
+- **Does it make the next change cheaper?** Yes, in one command. The §2
+  coverage join turns "did my predecessor run, and how did it end" from a
+  read that returns silence into a read that returns silence **with a
+  denominator beside it**, so the next window can tell "no run" from "no
+  row". That distinction cost this window four calls and three
+  hypotheses to establish by hand.
+- **Is the curve flat?** No, and the shape is different from the last
+  two windows'. Windows 47 and 49 both found their best finding by
+  checking a sibling's claim. This window found its best finding by
+  checking **its own charter's fix for its own charter's last
+  blindness** — the instrument it was told to trust because a previous
+  window had already caught the problem. That is a cheaper trigger than
+  a sibling's note, because it does not require a sibling.
+- **The number that has not moved in eleven windows.** `main`'s copy of
+  this charter is **2,221** lines, dated 2026-10-18. The live copy is
+  **5,389**. Zero of the week's 71 merges touched any `prompts/*-agent.md`.
