@@ -28,6 +28,10 @@ import {
 import { runConsentCommand, type CliIo } from '../consent.cli'
 import { forgetRecordInTuning, releaseBlocked, revokeAxiom } from './revoke'
 import type { DistillOutput, DistilledAxiom, TuningRecord } from './types'
+import {
+  REVOCATION_HOLDS_FORWARD,
+  revocationCannotReachPastedCopies,
+} from '../../overlay/lib/revocation-reach'
 
 const record = (id: string): OutcomeRecord =>
   ({
@@ -570,6 +574,37 @@ describe('what the user is told, and what is not done for her', () => {
     // And the thing it cannot reach is named, with the action that ends it.
     expect(printed).toContain('already pasted into another product is outside what this can reach')
     expect(printed).toContain('ursa tuning export')
+  })
+
+  it('says the same two things the dashboard says, out of one module', async () => {
+    // Added 2026-10-26, sprint-2026-10-26 item 3. The CLI learned both
+    // halves of the scope on 2026-10-24 and the dashboard did not, so the
+    // two surfaces confirmed the same withdrawal in two different scopes
+    // and one of them was false. The words now live in
+    // overlay/lib/revocation-reach.ts and this asserts that neither
+    // surface has drifted back.
+    const { io, lines } = capture()
+    expect(await runConsentCommand(['revoke-axiom', projectWith(twinned()), '--axiom', 'ax-001'], io)).toBe(0)
+    const printed = lines.join('\n')
+    expect(printed).toContain(REVOCATION_HOLDS_FORWARD)
+    expect(printed).toContain(revocationCannotReachPastedCopies('this command'))
+
+    // The dashboard is a Next client component and this suite has no
+    // React, so its copy is asserted from its source text. That is a
+    // weaker check than rendering it and it is the right one here: what
+    // can regress is a sentence being retyped inline instead of imported,
+    // and retyping is exactly what source text shows.
+    const page = readFileSync(
+      join(import.meta.dirname, '..', '..', 'overlay', 'app', 'dashboard', 'page.tsx'),
+      'utf8'
+    )
+    expect(page).toContain("from '../../lib/revocation-reach'")
+    expect(page).toContain('REVOCATION_HOLDS_FORWARD')
+    expect(page).toContain("revocationCannotReachPastedCopies('this page')")
+    // The two unscoped sentences this item removed, named so that putting
+    // either one back fails here rather than shipping.
+    expect(page).not.toContain('stops it being applied or disclosed')
+    expect(page).not.toContain('These are no longer applied and are never disclosed')
   })
 
   it('says nothing extra when the revocation took full effect', async () => {

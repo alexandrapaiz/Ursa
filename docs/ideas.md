@@ -13163,3 +13163,602 @@ one existing command, `bash tools/ledger/requeue.sh --push <second>`.
   names the dependency rather than leaving it to the implementer.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (engineer, message run, 5th) — The briefing can say why a unit was surfaced and has no answer for why one was not
+
+- Trigger: this run's dogfooding of `get_briefing` against this
+  repository's own 17 outcome records (sprint-2026-10-26 item 2). The
+  request named `ursa-major/src/consent.cli.ts` and the consent domain,
+  and the briefing returned `None on these files` over a store holding
+  204 corrections. After this run's fix the coverage line says the 204
+  were considered, which is the honest denominator, and the reader still
+  cannot tell apart the two things that sentence covers: a unit that was
+  scored and fell below `MIN_RELEVANCE`, and a unit that was never a
+  candidate. Those ask opposite things of the agent reading it. The first
+  says the HQ has something nearby and judged it too far; the second says
+  the HQ has nothing on this file at all.
+- What: `renderWhy` in `ursa-major/src/hq/briefing.ts` prints a full
+  score breakdown for every unit that was returned, and `buildBriefing`
+  throws away the `why` of every unit it filters out one line earlier.
+  The information already exists and is computed; it is discarded because
+  nothing asked for it. A `--dropped N` flag on `ursa brief` would print
+  the N highest-scoring units that fell below the floor with their `why`
+  blocks intact and the floor they missed, which turns `None on these
+  files` from a dead end into a bounded answer: either "the nearest thing
+  scored 1 against a floor of 2, here it is" or "nothing scored above
+  zero". It is off by default for the reason the floor exists, which is
+  that an agent's opening context is the scarce thing.
+- First step: add `dropped: CaseUnit[]` and `droppedRules: RuleUnit[]` to
+  the `Briefing` payload, populated only when the caller asks, since
+  `scoredCases` and `scoredRules` already hold every filtered unit with
+  its `why` at the point of the `.filter()` call. Then a `--dropped N`
+  flag on `src/hq/cli.ts` and one section in `renderBriefing`. The
+  `measureBriefing` fixed point absorbs the extra characters with no
+  change, because it measures whatever was rendered.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 5th) — The rules half of the HQ has never been exercised against a real record, because the one command that produces rules cannot run on a seat host
+
+- Trigger: this run tried to complete the dogfood end to end, `ursa run`
+  then `tuning distill` then `ursa brief`, and got as far as 17 real
+  records and no tuning record at all. `claude -p` is installed on this
+  host (`/usr/bin/claude`) and has no credentials: it exits 1 with
+  `"result":"Not logged in · Please run /login"`. So the briefing this
+  run took against real records had 0 rules for a reason that has nothing
+  to do with the records, and every rule-ranking claim this repository
+  makes still rests only on the four synthetic axioms in
+  `ursa-major/src/hq/fixtures.ts`.
+- What: `buildDistillPrompt` is already exported and `distill` already
+  takes an injectable runner, so the prompt a real record produces is
+  obtainable without any model call. What is missing is a door on the
+  CLI. A `--prompt-only` flag on `tuning/cli.ts distill` that writes the
+  prompt to stdout and exits 0 would let any seat produce the exact
+  prompt for a real record, have it answered once by hand, and commit the
+  answer as a fixture. That fixture is the thing the rules half has never
+  had: axioms distilled from this organization's own corrections rather
+  than written to make a test pass. The prompt sizes are small enough
+  that this is cheap rather than a project: measured on these 17 records,
+  3,062 to 27,781 characters, median about 4,600.
+- First step: `--prompt-only` on `src/tuning/cli.ts`, then run it against
+  `ursa-dogfood-2026-10-10-5bb8c6b` (54 one-shot corrections, the
+  richest of the 17), and commit the returned `DistillOutput` under
+  `ursa-major/fixtures/real/` beside the record fixture already there,
+  with the same provenance table that directory's README uses. Redaction
+  applies and is cheap here: these records are built from this public
+  repository's own commits.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 5th) — The redaction gate cannot tell a public identifier from a private one, and one charter permits a form it refuses
+
+- Trigger: a note from the ExO seat on the board at 09:45Z, reporting
+  that `prompts/engineer-agent.md` has a newer copy inside the research
+  seat's open pull request #395, eleven lines longer, and that the eleven
+  lines narrow this seat's redaction rider to the truncated identifier
+  form alone. Probed rather than taken on report: the rider on `main`
+  permits "a truncated **or clearly labelled** identifier", and
+  `.github/workflows/redaction-gate.yml`'s third pattern is a bare UUID
+  regex over every tracked file. A file containing one clearly labelled
+  public board-message identifier and nothing else fails the gate:
+  `node scripts/redaction-check.mjs --root=/tmp/redact-probe` exits 1
+  with "Full private session or conversation UUID. Truncate it to 8
+  characters."
+- What: the gate is right to be blunt and this entry does not propose
+  loosening it. Class-A exposure (Ursa incidents 2 and 4) is worth a
+  false positive on a public identifier, and a gate that tried to read
+  labels would be a gate an author could talk past. What is worth fixing
+  is that one charter's prose and the gate's behaviour disagree, and the
+  prose is the permissive one, so a seat obeying its charter literally
+  writes a line that cannot land. Two repairs, and they are held by
+  different people. The owner's: merge the eleven lines, which already
+  exist and already say "truncate to eight characters" (they are in #395,
+  which also edits two charter files and is therefore the owner's alone
+  to merge, held at Tier C by the PM for exactly that reason). A seat's:
+  nothing, which is why this is filed rather than fixed. This run
+  complied with the narrower rule everywhere it quoted an identifier,
+  because the gate binds mechanically whatever the prose allows, and
+  truncating costs nothing.
+- First step: the owner's, on #395, and it is a merge rather than a code
+  change. If the eleven lines are not what the owner wants, the
+  alternative that needs no charter edit is a sentence in
+  `docs/security/redaction-standard.md` stating that the truncated form
+  is the only writable one in this repository and that the gate's own
+  error message is the authority, which any seat could then cite.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 5th) — Craft scan: ripgrep 14.1.1 and `--stats`, where the denominator of a search is a flag rather than the default
+
+- Trigger: this run's own defect. `get_briefing` reported `0 correction
+  loops across 17 outcome records` over a store holding 204 corrections,
+  and the sentence was read, by this seat and by nobody else because
+  nobody else had run it, as "there is nothing here". So the craft
+  question for today is which tools make a reader able to tell an empty
+  answer from an unasked question, and the clearest published answer in a
+  tool this repository already depends on is ripgrep's.
+  **The thing worth stealing** is that `rg --stats` prints the
+  denominator beside the numerator, in the same block, with no extra
+  invocation. Measured on this host rather than read: `rg --stats -c
+  "nonexistent-token-xyzzy" docs/` on this checkout prints `0 matches`,
+  `0 files contained matches` and `1672 files searched`, and the third
+  line is what makes the first two interpretable. The second thing worth
+  stealing is `--debug`, which ripgrep's own guide describes as "useful
+  for understanding why a particular file might be ignored from search",
+  so the tool answers "why is this not in my results" per file rather
+  than only "here is what is". The preceding entry in this ledger is that
+  idea applied to the briefing, which has the per-unit explanation
+  already computed and discards it.
+  **The thing Ursa does better** is that the coverage block is not a
+  flag. `rg --stats` is opt-in, so ripgrep's default output for a search
+  that found nothing is a bare empty result and the reader has to already
+  suspect something to ask for the denominator — which is the precise
+  failure this run shipped and then found by hand. `renderBriefing`
+  prints its `## Coverage` section on every briefing including the empty
+  one, and after today it prints the two correction populations
+  separately, so the reading "0 loops means nothing to learn" is not
+  available to a reader who did not think to ask a second question. A
+  briefing is read once by an agent that will not ask again, which is why
+  the default matters more here than in an interactive search.
+  **Where ripgrep is ahead and this is not**: its stats are a stable,
+  documented output format that scripts parse, and `--stats` has carried
+  the same field names for years. The briefing's coverage block is prose
+  assembled by string concatenation in `renderBriefing`, and this run
+  changed its wording, which means any board message, pull request or
+  test quoting the old sentence is now stale. The JSON `coverage` object
+  is the stable surface and the markdown is not, and nothing says so
+  where a reader of the markdown would see it.
+  **No first step is filed here**, and the work this scan argues for is
+  the `--dropped` entry two above, filed there with all five fields
+  rather than duplicated. Sources:
+  [ripgrep GUIDE.md](https://raw.githubusercontent.com/BurntSushi/ripgrep/master/GUIDE.md),
+  [ripgrep FAQ.md](https://raw.githubusercontent.com/BurntSushi/ripgrep/master/FAQ.md),
+  and `rg --version` / `rg --stats` on this host.
+
+### 2026-10-26 (engineer, hook run) — No gate in this organization has ever run `ursa run` over this repository, and that is how a live defect stayed live for eleven days
+
+- Trigger: this run's `ursa run --limit 20` over a clone of this
+  repository exited 1 with one invariant violation
+  (`EXCLUSION_NOT_CLASSIFIED`, `docs/market/landscape.md`, 30,287
+  characters dropped on the evidence of a commit from the record's own
+  future). The ledger entry that specified the fix was filed 2026-10-15
+  and said its "expected answer today is none, because both runs produced
+  zero exclusions", so the defect was believed latent for eleven days
+  while it was in fact firing. `npm test` was green on every one of those
+  days, and so was every seat's run, because every test in
+  `ursa-major/src/vendored.test.ts` builds its own temporary repository
+  with git and none of them runs the product over the repository it lives
+  in.
+- What: the one launch this product ships has no end-to-end check against
+  real history. A script under `tools/` that clones or reuses this
+  checkout, runs `npx tsx src/bin/ursa.ts run <root> --limit N`, and
+  asserts two things — exit code 0, and zero violations printed — would
+  have caught today's defect on 2026-10-15, the day the bound that
+  refuses it landed. It is a different kind of test from the 1,015 in
+  `npm test`: those prove the resolver's rules against repositories
+  written to exercise them, and this proves the rules are consistent with
+  each other on history nobody shaped. The cost to keep honest is that
+  the check is only as stable as this repository's own history, so it
+  asserts the exit code and the violation count rather than any figure
+  that moves when `main` moves.
+- First step: `tools/launch-smoke.sh`, fifteen lines, running the command
+  above with `--limit 20` and grepping the summary for `record invariant
+  violated`. Wire it into `tools/ledger/ci/ledger-gate.yml` as a step
+  rather than into `.github/workflows/`, which no seat token may write,
+  and name in `tools/ledger/ci/README.md` the `cp` that installs it. Time
+  it first: today's run took about four minutes wall clock for twenty
+  units on this host, which is a number a gate's author needs before
+  choosing `N`.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run) — The relevance floor is a number with no scale, so the bound a reader is now told to raise means nothing outside this codebase
+
+- Trigger: today's `--dropped` output, read back over the real store. It
+  prints `scored under the relevance floor of 2` and `cleared the floor
+  and lost the cut at 3`, and a reader who has never seen
+  `src/hq/retrieval.ts` cannot tell whether a score of 1 against a floor
+  of 2 means "nearly relevant" or "hopeless". `score` is an unbounded sum
+  of weights — a domain match, an exact path, a path by name, each query
+  word, plus up to `SEMANTIC_CAP` from the embedding — so the maximum
+  achievable score depends on the request, and the same raw 1 means
+  different things on a one-file request and a five-file one. Today's
+  change made the number load-bearing by printing it as the remedy, which
+  is what turned an internal weight into a reader-facing unit.
+- What: report the score normalized against what this request could have
+  scored, beside the raw integer rather than instead of it. The maximum
+  is computable from the query alone — it is what `score` would return
+  for a unit matching the domain exactly, every requested path exactly,
+  every query word, and the semantic cap — so a `MatchReason` can carry
+  `ceiling: number` and a reader gets `score 1 of a possible 11` with no
+  new ranking behaviour and no change to the order. The floor stays an
+  absolute integer, because a proportional floor would move with the
+  request and make two briefings incomparable, which is the opposite of
+  what this fixes.
+- First step: add `ceiling` to `MatchReason` in `src/hq/types.ts`,
+  computed once per request in `buildQuery` or beside it in
+  `src/hq/retrieval.ts`, and print it in `renderWhy` as `(score 1 of 11)`
+  in place of `(score 1)`. One assertion per existing `renderWhy` test
+  updates with it, and `measureBriefing`'s fixed point absorbs the extra
+  characters with no change because it measures whatever was rendered.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run) — Two dogfood runs of the HQ produced different stores and neither can be compared to the other
+
+- Trigger: this run set out to continue the previous run's dogfooding
+  evidence and could not reproduce its store. That run reported 17
+  outcome records and 204 one-shot corrections; this run, on the same
+  repository four hours later, got 20 records and 50 one-shot
+  corrections. Both are correct for their own moment: `.ursa/` is
+  gitignored (correctly, it is derived data), every seat gets a fresh
+  clone, and `ursa run` walks whatever history that clone has, so the
+  store is a function of the clone's head and the `--limit` it was given,
+  neither of which either run recorded next to its numbers. The result is
+  that the one piece of evidence sprint item 2 asks for — what the
+  briefing returned on a real store — is not comparable across the runs
+  that produced it.
+- What: make a dogfood store addressable instead of incidental. Two
+  options and they are not equivalent. The cheap one is a provenance
+  header: `ursa run` already knows the head commit, the `--limit`, the
+  resolver identity and the bound set, and a store manifest at
+  `.ursa/store.json` carrying those four would let a later run state
+  whether its store is the same store. The expensive one is committing a
+  real store under `ursa-major/fixtures/real/store/`, which gives exact
+  reproducibility and costs a redaction review of every record plus a
+  refresh policy, because a committed store ages against the history it
+  came from. The first is this seat's; the second needs the owner,
+  because a committed store is a published artifact.
+- First step: the manifest. `.ursa/store.json` written by
+  `src/bin/ursa.ts` at the end of a run, carrying `head`, `limit`,
+  `resolver` and the bound-set hash the summary already prints, and one
+  line in `renderRunSummary` naming the file. Then `ursa brief` prints
+  the manifest's head and limit in its `## Coverage` section, so a
+  briefing says which store it read rather than only how much of it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run) — Craft scan: Meilisearch's ranking score details and Elasticsearch's Explain API, where one tool answers "why is this here" and the other answers "why is this not"
+
+- Trigger: today's work gave `get_briefing` an answer to "why was this
+  unit not returned", so the craft question is what the search industry
+  already publishes on that exact question, and whether this run's design
+  is behind it.
+  **The thing worth stealing, from Meilisearch.** Its search API carries
+  three related parameters: `showRankingScore`, which adds a
+  `_rankingScore` between 0.0 and 1.0 to every hit; `showRankingScoreDetails`,
+  which adds `_rankingScoreDetails` breaking the score down per ranking
+  rule; and `rankingScoreThreshold`, the floor. The steal is the
+  normalization, not the breakdown: Ursa already has the breakdown and
+  has had it since `MatchReason` existed, but its score is an unbounded
+  integer while Meilisearch's is a fraction of a known maximum, so a
+  Meilisearch user reading `0.42` against a threshold of `0.5` learns
+  something a reader of `score 1` against a floor of `2` does not. That
+  is filed as its own entry above rather than left in this note.
+  **The thing worth stealing, from Elasticsearch.** Its Explain API is
+  documented as "Get information about why a specific document matches,
+  or doesn't match, a query", and it is addressed at one document by id
+  rather than at a result set. That is a shape this briefing does not
+  have: today's `--dropped N` answers "what were the nearest things you
+  did not show me", and it cannot answer "what did you make of THIS
+  record", which is the question a seat asks when it believes a specific
+  prior case applies and the briefing disagrees.
+  **The thing Ursa does better.** Meilisearch's threshold is documented
+  as: "Exclude from the results any document whose ranking score is below
+  this value (between 0.0 and 1.0). Excluded hits do not count toward
+  `estimatedTotalHits`, `totalHits`, or facet distribution." So a
+  Meilisearch caller who raises the threshold cannot see what it cost
+  them, in the score of the excluded hit or even in the total. After
+  today, a briefing's floor is auditable in both directions: the dropped
+  units carry the score breakdown the ranker computed and the bound that
+  held them, and the `## Coverage` block counts every unit considered
+  whether it was served or not, on every briefing, with no flag.
+  **Where both are ahead and this is not.** Both parameters are part of a
+  stable, versioned, documented public API that customers script against.
+  Ursa's briefing markdown is string concatenation in `renderBriefing`
+  and changed shape again today, which is the same stability gap the
+  2026-10-26 ripgrep scan recorded and which nothing has yet closed.
+  **No first step is filed in this note.** The work it argues for is the
+  normalized-score entry above, filed there with all five fields, and the
+  per-record explain shape, which is a design question rather than a
+  day's work and belongs in a later entry once something asks for it.
+  Sources, both read as data and neither acted on as instruction:
+  [Meilisearch search API reference](https://www.meilisearch.com/docs/reference/api/search),
+  [Elasticsearch Explain API reference](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-explain).
+
+### 2026-10-26 (engineer, message run, 7) — Every board write in this repository goes through one poster, and a gate says so
+
+- Trigger: this run's event. Ten rows on the 2026-10-26 bus named the
+  company in a spelling the wake path silently drops, and they came
+  from three different seats. Every one of them was a hand-written
+  `curl` with the company typed from memory, because the only
+  documented way to post is the one-line `curl` in
+  `docs/standards/pm.md` §14. This run shipped
+  `tools/board/post.mjs`, which reads the name out of a committed
+  table and refuses a bad message before it opens a socket. That
+  helps exactly the seats who remember to use it, which is the same
+  class of seat that remembers to capitalise.
+- What: a gate that reads every committed file a seat is instructed
+  from (`prompts/*.md`, `docs/standards/*.md`, anything under
+  `tools/` and `scripts/`) and refuses a `POST` to `/api/messages`
+  written as a raw `curl` or `fetch`, naming `tools/board/post.mjs`
+  as the repair. Reads only, posts nothing, exits 1 with one line per
+  hit. The read routes stay exempt by name, because a `GET` of an
+  inbox has no silent-failure mode and the one-line form is the right
+  size for it. This is the structural half of today's fix: the
+  poster makes the correct spelling available and the gate makes it
+  the only spelling a committed instruction can teach.
+- First step: `tools/board/check-writes.mjs`, with the exemption list
+  for read routes and a test that the one-line `GET` examples in
+  §14 still pass while a hand-written `POST` to `/api/messages`
+  fails. Run it in the same place the redaction gate runs.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 7) — The transcribed constants need a vendored copy, because the host file they check against is absent exactly where it matters
+
+- Trigger: writing `tools/board/check.test.mjs` this run. Five of its
+  thirty-one tests re-read `/srv/asc/hq/runtime/board/store.py` on
+  this host and assert that the constants transcribed into
+  `check.mjs` still match it. They pass here. On a GitHub runner that
+  file does not exist, so all five skip, and a skip means the
+  transcription went unchecked on that run rather than that it
+  passed. The place a drifted transcription would be caught is the
+  one place the check cannot run.
+- What: do for these constants what `tools/registers/vendored.json`
+  and `check-vendored.mjs` already do for the holding company's
+  standards: commit a small vendored copy of the four values
+  (`MAX_PARAGRAPH`, `CODE_RE`, `REASON_RE`, `MESSAGE_KINDS`) with the
+  revision they were read at and a digest, so the test has something
+  to compare against in every environment. The host read then becomes
+  the refresher rather than the only check: on a machine that has the
+  runtime, the test compares host against vendored copy and fails on
+  drift; on one that does not, it compares `check.mjs` against the
+  vendored copy and still fails on a local edit that moved away from
+  it. Same two-level shape the register machinery already proved.
+- First step: extend `tools/registers/vendored.json` with a
+  `board-store-constants` entry rather than inventing a second
+  vendoring mechanism, and have `check.test.mjs` read it. Check
+  whether `check-vendored.mjs` can carry a non-markdown source before
+  assuming it can.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 7) — Nine advisories in the site's dependency tree, and no seat owns the clock on them
+
+- Trigger: the frontend seat's handoff in this seat's inbox, which
+  reports that `ursa-minor`'s dev server stops once on start to name a
+  security advisory in the installed framework and recommend an
+  upgrade, and says it did not act because a framework upgrade is a
+  dependency decision rather than the polish diff its charter allows.
+  This run measured the tree rather than repeating the report:
+  `npm audit --package-lock-only` in `ursa-minor` returns nine
+  advisories, six high and three moderate.
+- What: the six high ones are `@modelcontextprotocol/sdk` at or below
+  1.31.0, `@shadcn/registry`, `body-parser` 2.0.0 to 2.3.0, `shadcn`,
+  `undici` 7.0.0 to 7.30.0, and `zod` below 4.6.6; the three moderate
+  ones are `fast-uri`, `hono` and `ip-address`. The measurement worth
+  recording is that **none of them is in `next` itself**, which is at
+  16.4.3, so the banner the frontend seat saw and the advisories in
+  the tree are two different findings and only one of them is about
+  the framework. Most of these arrive through `shadcn`, which is a
+  component-scaffolding tool rather than a runtime dependency of the
+  deployed site, so the exposure and the urgency are not the same
+  number. What is missing is not the upgrade. It is a decision about
+  which of these reach deployed bytes, taken once and written down,
+  so the next run does not re-measure the same nine.
+- First step: resolve the one question that sizes everything else,
+  which is whether `shadcn` and the MCP SDK are `devDependencies`
+  that never ship. Read `ursa-minor/package.json` and the build
+  output, record the answer in this entry, and only then price the
+  upgrades. Do not bump anything in the same run that measures it.
+- Cost: $0
+- Status: urgent
+
+### 2026-10-26 (engineer, message run, 7) — Craft scan: Slack's `chat.postMessage`, where an unroutable address is an error at the write instead of a stored row nobody receives
+
+- Trigger: this run's whole subject. A message posted to the company
+  board with `to_company` spelled `ursa` is stored, returns `201`,
+  and wakes nobody, because the fan-out matches the name exactly
+  against a table whose Ursa key is capitalised and an unmatched name
+  yields an empty target list. The sender's receipt says success and
+  the recipient's inbox says nothing until it happens to read it.
+  **The thing worth stealing** is that a messaging API with the same
+  shape treats an address it cannot route as a failure of the write.
+  Slack's `chat.postMessage` reference names the cases
+  explicitly: `channel_not_found`, "Value passed for `channel` was
+  invalid"; `is_archived`, "Channel has been archived"; and
+  `not_in_channel`, "Cannot post user messages to a channel they are
+  not in." Three distinct refusals where the board has one silent
+  success, and the distinction between them is exactly the
+  distinction a sender needs, since a name that is wrong, a
+  destination that is closed, and a destination the sender may not
+  reach ask for three different repairs. The property that makes it
+  work is not the error list. It is that the same table decides
+  whether the write is accepted and where the message goes, so there
+  is no state in which one says yes and the other says nobody. The
+  board splits that decision across `store.post_message`, which never
+  reads the company table, and `Bus._targets`, which is the only
+  thing that does.
+  **The thing Ursa does better** is that the board's record is
+  honest by construction. It has no delete route, deliberately, so a
+  message is a permanent part of the company's memory and cannot be
+  quietly withdrawn after the fact. Slack's same reference documents
+  `chat.delete` and message editing, which is the right choice for a
+  chat product and the wrong one for a system of record that seats
+  reason about across runs. The cost of that honesty is that learning
+  a write rule by probing is permanent too, which is the measured
+  reason this run transcribed the store's four rules into a local
+  checker rather than discovering them by refusal. The two
+  properties are not in tension once the refusals happen before the
+  socket opens, which is what `tools/board/post.mjs` does and what
+  this run's first real message demonstrated by being refused for a
+  428-character block and leaving no row behind.
+  **External sources read for this scan**, both as data, neither
+  asking anything of this run: Slack's `chat.postMessage` method
+  reference at `docs.slack.dev` for the error names and their
+  descriptions, quoted above; and `runtime/board/api.py` and
+  `runtime/board/store.py` from the holding company's runtime as
+  deployed on this host, which are committed files of another
+  repository rather than this one and are therefore evidence about
+  the board rather than instructions to this seat.
+
+### 2026-10-26 (engineer, message run, 9) — One grep found the one-named-cause defect twice in one run, and nothing in this repository looks for it
+- Trigger: Ursa's skill seat filed a generalised rule at this seat today,
+  after this seat found the first instance in the ledger gate: a failure
+  message names the cause its author thought of, while the number of ways
+  to reach that branch is a property of the code, so one named cause for a
+  condition with several is a hypothesis wearing the authority of a
+  measurement. Applying it took one grep for disjunctive guards that
+  precede an error, over `ursa-major/src`, `tools/` and `scripts/`. That
+  grep returns 92 candidate sites, 80 in `ursa-major/src` and 12 in
+  `tools/` and `scripts/`, and two of them were live defects, fixed in
+  this run: the `claude -p` envelope guard, duplicated in
+  `src/verdict.ts` and `src/tuning/distill.ts`, where three conditions
+  reached one message and the costliest branch discarded the operator's
+  one-command fix; and `scripts/dep-floor.mjs`, which called an expired
+  owner exception a breached dependency floor. The skill seat
+  independently found a third in its own trigger guard the same day, so
+  three instances across two lanes in one day.
+  The honest reading of 2 in 92 is that most disjunctive guards in this
+  repository are fine, which is an argument for measuring the hit rate
+  before building anything and is why the first step below is a count
+  rather than a tool. An earlier draft of this entry said 40 candidates;
+  that was a truncated grep read as a total, and the corrected number
+  makes the tool less obviously worth writing, not more.
+- What: a reporting-only checker, `tools/diagnostics/one-cause.mjs`, that
+  flags each site where a guard's condition is a disjunction of two or
+  more independent terms and its body raises or exits with a single
+  message that is a string literal with no interpolation of the deciding
+  term. It reports candidates with file, line, the terms it counted and
+  the message it found; it does not fail a build, because "this message
+  names one of its two branches" is sometimes correct and a gate that
+  cannot tell will be switched off. The output is a worklist, which is
+  what `tools/ledger/check.mjs`'s `BLOCK_SEPARATION` rule already is for
+  a byte assertion it cannot localise: the invariant stays elsewhere and
+  the tool's job is to name the line.
+- First step: run the grep that found today's two by hand over the three
+  directories, write the 40 candidates into
+  `docs/design/one-cause-candidates.md` with a verdict on each, and count
+  how many are real. If the hit rate holds near today's, the checker is
+  worth writing and the document is its specification. If it does not,
+  the document is the measurement that says so and the checker is not
+  built, which is the cheaper outcome to discover first.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 9) — Git line-merged a 310KB minified bundle today and the result was byte-correct by luck
+- Trigger: resolving this seat's #520 against `main` in this run. Three
+  files conflicted and `ursa-major/dist/ursa.cjs` was not one of them:
+  git line-merged two different builds of a minified 310,134-byte bundle
+  and reported success. `npm run bundle:check` then confirmed the merged
+  bytes match a fresh build of the merged source exactly, which this run
+  checked rather than assumed, so nothing was shipped wrong. The point is
+  that nothing in the mechanism earned that outcome. A textual hunk merge
+  of minified output has no reason to produce the build of the merged
+  source, and the only thing between a plausible-but-wrong bundle and
+  `main` is `src/bundle-exec.test.ts`, a test that was already red in
+  this run for the unrelated and expected reason that the source had
+  changed. A reviewer reading one red bundle test does not learn which
+  of the two causes it had.
+- What: declare the built artifact unmergeable, so a collision on it is
+  a conflict a person resolves by rebuilding rather than a silent
+  success. One line in `.gitattributes`, `ursa-major/dist/ursa.cjs
+  merge=binary`, makes git refuse to line-merge it and leave both
+  versions for the resolver, whose only correct action is `npm run
+  bundle` followed by the index commit the two-commit discipline in
+  `tools/bundle-digest-index.ts` already requires. This is the same
+  move `.gitattributes` already makes five times for files whose line
+  hunks are meaningless, except that for the registers the answer was a
+  smarter driver and here the answer is no driver at all, because a
+  bundle has exactly one correct merge and it is a rebuild.
+- First step: add the one line, then reproduce today's merge on a scratch
+  branch and confirm git now reports `dist/ursa.cjs` as conflicted where
+  it previously auto-merged. The before and after are both one command,
+  so the entry is verifiable in a few minutes rather than argued.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 9) — The dependency floor gate skips any package with no lockfile and reports the floor as holding
+- Trigger: reading `scripts/dep-floor.mjs` while splitting its summary in
+  this run. `findPackages` collects "any directory with both a
+  package.json and a lockfile", so a package carrying a `package.json`
+  and no `package-lock.json` is not audited, is not counted, is not named
+  in the output, and does not stop the gate printing "Dependency floor
+  holds: no critical anywhere, no high in any production tree" over a
+  tree it never read. Measured on this branch: every `package.json`
+  outside `node_modules` has a lockfile beside it, so there is no live
+  miss today and this is a gate-completeness hole rather than a current
+  misreport. Naming it anyway because the condition that creates one is
+  ordinary. A new package lands lockfile-last, or a `.gitignore` catches
+  the lockfile, and the gate's silence is indistinguishable from its
+  approval. That is the same shape as the incident this repository's own
+  `check-vendored.mjs` header cites: "A missing tool fails loudly. A
+  stale one does not."
+- What: make the skip speak. `findPackages` returns the directories it
+  audited; have it also return the directories it declined and why, and
+  print one line per declined package before the summary. A `package.json`
+  with no lockfile is reported as `not audited: no package-lock.json, so
+  nothing here is covered by the floor`, in the same place the warnings
+  print. Whether it should also fail the gate is a judgement for the
+  owner and not assumed here: `npm audit` genuinely cannot run without a
+  lockfile, so a package that has not got one yet is a real state and not
+  only an error. The defensible first version reports and does not fail,
+  matching how the same file already treats a dev-only high.
+- First step: change `findPackages` to collect both lists, add the
+  reporting line, and add a case to `scripts/dep-floor-summary.test.mjs`
+  asserting that a run with a declined package does not print the
+  unqualified "floor holds" sentence. The fixture is one temporary
+  directory holding a `package.json` and nothing else.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 9) — Craft scan: `claude -p --output-format json`, where the failure path and the success path are the same shape
+- Trigger: this run spent its substance inside two callers of the Claude
+  Code CLI's print mode, so the scan is of the product this seat was
+  actually holding rather than one picked off a list. The adjacent
+  product named in this seat's charter fallback is Anthropic's CLI and
+  skills ecosystem.
+  **The thing worth stealing** is that `claude -p --output-format json`
+  emits one complete, well-formed envelope on failure as well as on
+  success, and carries the machine fact and the human fact in separate
+  fields of it: `is_error` and `terminal_reason` for the caller's
+  branching, `result` for the reader's eyes. That single property is the
+  whole reason `cliFailureReason` in `src/claude-cli.ts` can exist. When
+  the CLI exits 1 on an unauthenticated host, the sentence a person can
+  act on, `Not logged in · Please run /login`, is still sitting in a
+  field at a known name, so a caller can retrieve it instead of
+  surfacing Node's `Command failed: claude -p ...`. The contrast is with
+  every tool that switches to unstructured stderr when it fails, which
+  obliges the caller to write a second parser for the case it understands
+  least and tested least. Ursa Major has a surface with the same
+  obligation: `ursa run` writes a record on success and, before #520,
+  wrote nothing at all for an episode whose every path was an import, so
+  the absence had to be guessed at. `resolve-episode.ts` now answers that
+  with a record that states its own emptiness, which is the same
+  principle arrived at separately. The scan's lesson is to apply it as a
+  rule rather than per incident: every exit of a surface a person reads
+  should carry the same shape as its success.
+  **The thing Ursa does better** is checking the fields of one record
+  against each other. The envelope's shape is honest but it is not
+  constrained: `is_error: true` with an empty `result` is representable,
+  `is_error` absent with `result` absent is representable, and the
+  relationship between the two fields is nowhere stated, which is
+  exactly what let one guard in this repository collapse three
+  conditions into one message for months. `ursa-major/src/invariants.ts`
+  is the thing the envelope has no equivalent of: eighteen named bounds
+  that hold between two numbers measured over the same set of
+  characters in one record, each failing with its own code and both
+  sides of the bound printed. `GEN_CHARS_CONSISTENT` exists because a
+  record once claimed 239,976 characters survived out of 239,841
+  generated and 344 tests passed, and the repair was not a better test
+  but a statement about the record's own arithmetic. An envelope with
+  one such bound, `is_error` implies a non-empty `result`, would have
+  made today's costliest branch unreachable rather than merely
+  better-reported.
+  **External sources read for this scan**: none. The envelope fields
+  quoted above are read from this repository's own committed files,
+  `src/tuning/distill.ts`'s measurement comment of 2026-10-26 and the
+  fixtures in `src/tuning/tuning.test.ts`. Nothing was fetched, so there
+  is nothing here that could have asked anything of this run.
+- Status: proposed

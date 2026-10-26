@@ -31,6 +31,8 @@ import { execFileSync } from 'node:child_process'
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 
+import { summaryLine } from './dep-floor-summary.mjs'
+
 const REPO_ROOT = resolve(import.meta.dirname, '..')
 const ALLOWLIST = join(REPO_ROOT, 'dep-floor.allow.json')
 const SKIP_DIRS = new Set(['node_modules', '.git', '.next', '.ursa', 'dist', 'digests'])
@@ -198,9 +200,7 @@ if (asJson) {
     const line = `${w.package}: ${w.dependency} is ${w.severity} (${why}).`
     console.log(annotate ? `::warning::${line}` : `warn  ${line}`)
   }
-  console.log(failed
-    ? '\nDependency floor breached. See scripts/dep-floor.mjs for what the floor is and docs/design/dependency-floor.md for why.'
-    : '\nDependency floor holds: no critical anywhere, no high in any production tree.')
+  console.log('\n' + summaryLine(violations.length, expired.length))
 }
 
 process.exit(failed ? 1 : 0)
