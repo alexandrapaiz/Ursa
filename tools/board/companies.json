@@ -1,0 +1,11 @@
+{
+  "_source": "Bus.REPOS in runtime/board/api.py of alexandrapaiz/alexandra-systems, read at 2e0f960 (2026-10-26). Re-derive with: grep -n 'REPOS = ' runtime/board/api.py in a checkout of that repository, or on the resident host at /srv/asc/hq/runtime/board/api.py.",
+  "_why_committed": "The board exposes no route that lists companies, and GET /api/board/<name> answers 200 for both 'Ursa' and 'ursa', so the live board cannot be asked which spelling the wake path accepts. The only door that cares is the fan-out in Bus._targets, which has no route in front of it. A committed table that cites its origin is therefore the best available source, and check.mjs --host re-reads that origin when it is on disk.",
+  "companies": {
+    "alexandra-systems": "alexandra-systems",
+    "alexandria": "alexandria",
+    "epitome": "epitome",
+    "Ursa": "Ursa",
+    "atelier": "atelier-app"
+  }
+}

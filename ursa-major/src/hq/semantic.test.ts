@@ -15,7 +15,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { briefWithSemantics, buildBriefing, indexLoops, renderBriefing } from './briefing'
+import { briefWithSemantics, buildBriefing, indexCases, renderBriefing } from './briefing'
 import { RECORDED_QUERIES, RECORDS, TUNING } from './fixtures'
 import {
   caseKey,
@@ -62,8 +62,8 @@ const lexicalBrief = (input: Parameters<typeof buildBriefing>[2]) => buildBriefi
 
 describe('the recorded vectors stay in step with the fixture store', () => {
   it('has a vector for every case and every recorded query', () => {
-    for (const indexed of indexLoops(RECORDS)) {
-      const label = `case:${caseKey(indexed.recordId, indexed.loop.id)}`
+    for (const indexed of indexCases(RECORDS)) {
+      const label = `case:${caseKey(indexed.recordId, indexed.caseId)}`
       expect(RECORDED.texts[label], `${label} missing from vectors.json`).toBe(caseText(indexed))
       expect(RECORDED.vectors[label]).toHaveLength(RECORDED.dims)
     }
@@ -120,9 +120,9 @@ describe('semantic ranking finds what word overlap cannot', () => {
     // clear the raw cosine floor. Only the motion loop leads the field
     // by enough to be worth an agent's context.
     const cases = new Map(
-      indexLoops(RECORDS).map((i) => [
-        caseKey(i.recordId, i.loop.id),
-        RECORDED.vectors[`case:${caseKey(i.recordId, i.loop.id)}`],
+      indexCases(RECORDS).map((i) => [
+        caseKey(i.recordId, i.caseId),
+        RECORDED.vectors[`case:${caseKey(i.recordId, i.caseId)}`],
       ])
     )
     const index = rankSemantic(RECORDED.vectors['query:transitions src/components/Banner.tsx'], cases)
