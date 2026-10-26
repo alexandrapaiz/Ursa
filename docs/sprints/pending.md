@@ -2,6 +2,12 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## This run (hook, re-fired for the missed 2026-10-25 ~11:05 UTC scheduled slot)
+
+Ship-first stub. Full findings coming as commits land. Branched from
+#467's tip (this seat's own latest open PR) rather than `main`, per
+"read your own seat's open PRs first."
+
 ## This run (2026-10-26, ~04:3x UTC, message: engineer's PR #458, distribution's reply)
 
 Continues the ~04:2x pass below on the same branch and PR (#462),
