@@ -10,41 +10,60 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
-## Top three for the owner, 2026-10-26 ~19:3x UTC message run (PR #543, run 10)
+## Top three for the owner, 2026-10-26 ~19:4x UTC message run (PR #546, run 11)
 
-1. **#539 (skill) has a sharper reason to wait than the merge-authority
-   question: it edits `prompts/skill-extract.md` directly.** That is a
-   charter edit, which this org has treated consistently (no
-   flip-flop, unlike the push-to-main reading) as owner/chair-only for
-   #199, #184, #167 and #210 across the last two weeks. #539 waits on
-   the owner or a chair either way, so resolving the bigger question
-   below would not change what happens to it. Still carries the
-   collision with #530 (engineer) on `docs/ideas.md`, named by exo,
-   unresolved.
-2. **Exo's window 60 (PR #536) triaged: tripwire false alarm, no rerun
-   needed.** 101 turns, exited 1, but the PR is real, green
-   (`MERGEABLE`/`CLEAN`, `scan` passing) and shipped before the exit.
-   Full account in `docs/agents/incidents.md`, Incident 12's sixth
-   addendum. It stays a draft on its own word (an open disclosure its
-   own body names), not because of the exit code. Commented on #536
-   naming both facts separately so nobody reads the exit as a verdict
-   on the diff.
-3. **The merge-authority question is filed upstream instead of
-   re-derived a third time.** Nine passes today argued both readings of
-   "never merge your own PR, never push to main" without a ninth
-   argument moving anything; this pass checked whether today's queue
-   needs the answer (it does not, per item 1) and handed the question
-   itself to `alexandra-systems` as a standards ask, since three
-   sibling PM seats read the same six words today without treating
-   them as ambiguous. Reasoning in `docs/decisions.md`. Not resolved
-   here; not re-argued here either.
+1. **#540 (engineer) is the first pull request today the paused merge
+   authority actually costs.** It is Tier B by every line of
+   `pm.md` §10: green (`scan` passing), `CLEAN`/`MERGEABLE`, not a
+   draft, no `hold` label, no owner comment since its last push, under
+   seven days old, and `gh pr diff --name-only` shows no Tier C path
+   (product code under `ursa-major/`, plus docs and tools — nothing in
+   `prompts/`, no secrets, no roster change). Unlike #539/#542, it has
+   no independent, narrower rule that would settle it either way — it
+   turns entirely on the one question nine, now eleven, passes have
+   not gotten an answer to. Checked the board inbox back 24 hours for
+   a reply from `alexandra-systems` to run 10's standards ask: none
+   yet. Held the pause rather than re-deriving a reading a fourth
+   direction on no new evidence — the thing runs 8–10 warned against
+   is exactly re-deriving this seat's own authority upward run over
+   run. **This is now a real, visible cost of the open question, not
+   a hypothetical one**, and the clearest reason to ask HQ or the
+   owner to close it today rather than let it run another day.
+2. **#542 (skill, the 36th run) subsumes four pull requests, not one.**
+   Its own `done` message (board, 19:35:21Z) names
+   `subsumes: [511, 518, 533, 539]`. Verified all four with
+   `git merge-base --is-ancestor` before closing, rather than trusting
+   the claim: #511, #518 and #539 confirmed ancestors (#533 was
+   already closed by run 10). Closed #511, #518 and #539 this pass.
+   #542 itself edits `prompts/skill-extract.md` directly, the same
+   charter-edit rule that held #539 — it waits on the owner or a chair
+   regardless of the merge-authority question, unchanged disposition,
+   now carrying all four predecessors' work. #544 (skill, 37th run,
+   still draft) stacks on top of #542, is Tier C for the same reason,
+   and additionally has a failing `scan` check — not actionable either
+   way, no action taken. The `docs/ideas.md` collision with #530
+   (engineer), named by exo, is unchanged and still unresolved.
+3. **#536 (exo) is still a live, in-progress run — the standing note
+   pointing at it is stale and now self-contradicting.** Checked
+   `/srv/asc/hq/tools/check-draft-prs.sh --repo alexandrapaiz/Ursa`
+   directly rather than the note's prose: its verdict is "idle 2m...
+   run may still be live; leave it alone," and the branch's own last
+   commit (19:41:06Z) postdates every claim in this run's own trigger
+   text that the run "ended 9m ago" or "11m ago." The same stale claim
+   has now repeated across at least three consecutive wakes while the
+   branch kept moving. No action taken, consistent with the tool's own
+   verdict and with run 10's independent finding that #536 stays draft
+   on its own stated disclosure. Worth a line to whoever generates
+   these notes: the "ended Nm ago" clause is measuring something other
+   than the branch's actual last activity.
 
-**Also closed this pass:** #533 (skill), confirmed by
-`git merge-base --is-ancestor` to be a strict ancestor of #539.
-Nothing owed — #539 already carries its work.
+**Also closed this pass:** #511, #518, #539 (all skill), each
+confirmed by `git merge-base --is-ancestor` to be a strict ancestor of
+#542, per #542's own `subsumes` claim, verified rather than trusted.
+#543 (this seat's own run 10), confirmed a strict ancestor of this PR.
 
 **#517, this seat's own Monday ceremony pull request, still needs the
-owner's own merge.** Unchanged across ten passes today.
+owner's own merge.** Unchanged across eleven passes today.
 
 ## Top three for the owner, 2026-10-26 ~19:2x UTC message run (PR #541, run 9)
 

@@ -1282,3 +1282,41 @@ it, not an eleventh reading.
 §10/§21 stays paused for this seat's runs on anything that is not
 already settled by a narrower, uncontested rule (as #539 is), until
 HQ's standard answers the question or the owner does directly.
+
+## Finding — an eleventh run holds the pause against its first real test, because #540 has no narrower rule to hide behind (recorded 2026-10-26, PM message run 11)
+
+Run 10 closed with the pause intact and the question filed upstream,
+and said explicitly that nothing in that pass's own queue turned on
+the answer, because the one live candidate (#539) was independently
+settled by the charter-edit rule. This run's queue is different:
+#540 (engineer) is Tier B clean by every line of `pm.md` §10 — green,
+`CLEAN`/`MERGEABLE`, not draft, no `hold`, no owner comment since its
+last push, under seven days old, no Tier C path in its diff — and has
+no charter edit, no board complication, nothing else to fall back on.
+It is the first pull request today that the paused reading actually
+decides rather than merely touches in passing.
+
+Checked the board inbox (`to_seat=pm&to_company=Ursa`, 24 hours) for
+an HQ reply to run 10's standards ask before deciding anything: none
+has arrived. Absent new information, flipping the reading now would
+be exactly the failure the chain from run 8 onward named — a seat
+re-deriving its own authority upward, run over run, each one citing
+the position that happens to let it act. So this run holds: #540 is
+not merged. It is named here and in `docs/sprints/pending.md` as the
+concrete, now-visible cost of the open question, because a cost that
+was previously hypothetical is a different kind of fact to put in
+front of the owner or HQ than the question alone was.
+
+This run did close three more pull requests as confirmed ancestors —
+#511, #518, #539, all skill, all verified by `git merge-base
+--is-ancestor` against #542 rather than taken on #542's own `subsumes`
+claim — and that is not a merge-authority action in the sense this
+thread means it: run 10 closed #533 the same way under the same
+paused state, and closing a confirmed-ancestor pull request of
+another seat's own chain, proven by ancestry rather than judged on
+its diff, has not been part of the contested reading at any point in
+this chain.
+
+**Status:** open, upstream, unchanged from run 10. #540 is the
+standing example to cite if the question needs urgency it did not
+have an hour ago.
