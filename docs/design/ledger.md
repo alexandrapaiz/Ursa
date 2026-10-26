@@ -466,11 +466,63 @@ because it is a fact about every page rather than about the line you
 wrote. Ask the browser how many it hits before you write the count into
 a comment, and photograph the ones you did not expect.
 
+## L19 — A floor that can never be met is not a finding, and a count that can never be zero is not a pass
+
+**measured**, 2026-10-25 (second message run), 93 targets across five
+routes and three viewports on the shipped build.
+`reviews/2026-10-25b/README.md` §2.
+
+`measure-hit-areas.mjs` had two categories where this site has three.
+Standalone controls answer to the 44px floor; targets inline in a
+sentence are exempt under WCAG 2.5.8. The record viewer's document spans
+are neither, and they fell into whichever category their line wrapping
+put them in, because the inline test ends on
+`getClientRects().length > 1`, and spans inside a `<pre>` have no bare
+text siblings to catch them on the clause before it.
+
+The measurement, on the same five spans: one read as standalone at 390,
+four at 820 and one at 1440, and the rest read as inline and exempt. One
+element, two verdicts, chosen by the viewport.
+
+**The misfiling was not the cost.** The headline was. Four consecutive
+reviews read "6 of 60 standalone controls under 44px tall" on a site
+whose standalone controls were all fine, and carried a proposal to stop
+counting them that nobody took. A number with a floor of six under it
+cannot be read as a pass, so the seventh short control, the real one,
+would have arrived as a seven and looked like the six. With the spans
+filed where they belong the same build reads 0 of 54.
+
+**The rule.** An exemption that is written in prose and not in the
+instrument is not an exemption, it is a permanent false positive, and it
+costs the instrument its zero. Either the instrument knows about the
+exemption or the exemption is not real.
+
+**And an exempt category still owes a check.** A tiled target cannot be
+made taller, because every overlay would reach over its neighbours and
+the topmost one would answer their presses. It can still be required to
+be hittable across the line a reader can see, which all fifteen are. A
+category that is merely skipped is a category nobody is measuring, so
+the members of this one are printed in the output rather than asserted
+in a comment, and a control that lands inside a `<pre>` for some other
+reason is visible the next time anyone looks.
+
+**The instrument now has to prove it can still fail.** Its headline on
+this site is zero, which is also what a tool that had stopped looking
+would print. `selftest/hit-areas.html` is a fixture whose right answers
+are built into it, and `selftest/check-hit-areas.mjs` asserts nine of
+them, including that the floor still bites and that 2.5.8 survived the
+third category. This is L16 applied to a classifier rather than to a
+colour sample.
+
 ## Open, and not this seat's to close
 
-**Where Ursa's canon comes from.** Nine consecutive reviews have
-recorded that `canon.md`, `ban-list.md` and `tuning.md` do not exist
-here. L1, L4, L8, L9 and L10 are the kind of measured material canon is
+**Where Ursa's canon comes from.** Thirteen reviews under `reviews/`
+have recorded that `canon.md`, `ban-list.md` and `tuning.md` do not
+exist here, and this one makes fourteen. The figure was "nine" until
+2026-10-25; it is counted now rather than carried, with
+`grep -rl 'canon\.md' docs/design/reviews/*/README.md`, because a
+number kept so the cost of waiting stays visible is worth nothing if it
+is the one number nobody re-reads. L1, L4, L8, L9 and L10 are the kind of measured material canon is
 made of, and this seat is deliberately not promoting them. A ruling from
 the owner is the unblocker, and it is smaller than writing a file: it is
 whether a line in this ledger marked **measured** may become one.
