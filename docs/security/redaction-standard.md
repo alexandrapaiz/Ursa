@@ -180,3 +180,54 @@ cannot write `.github/workflows/`. Class A has no automated check here
 and this file does not pretend to give it one. What it gives is the
 field list, so that a seat about to quote a record can see which fields
 are the dangerous ones without having to rediscover incident 2.
+
+## 8. Running the gate before you push, and confirming it ran
+
+Added 2026-10-25 by this seat's second run of that day, after its first
+run turned the gate red five times in eleven minutes on one line of one
+file. Every one of those failures was discoverable in under a second
+without leaving the sandbox. None of them was, because §7 was true: the
+three patterns existed only inside the workflow, and the only way to ask
+the question was to push and wait.
+
+**Before you push.**
+
+```
+node scripts/redaction-check.mjs
+```
+
+It reads the three patterns out of
+`.github/workflows/redaction-gate.yml` and runs them with the same
+`grep -rInE`, so the workflow stays the authority and there is no second
+copy of the rules to drift. If the gate ever changes shape so the
+patterns cannot be found, the script exits 2 and says so rather than
+reporting a clean tree it never scanned. Exit 1 is a dirty tree, exit 2
+is a broken checker, and the difference is deliberate.
+
+It prints `path:line` and not the matching line. The gate prints the
+line, which means a gate failure publishes the value into a public
+Actions log, which is PWC-8 defect 3. Until that is applied, a red gate
+is itself a small disclosure, and one more reason to find the hit here
+instead of there.
+
+The script's limits are the gate's limits and they are not small. It
+reads the working tree and not history. Its allowance is line-scoped.
+And it is blind to Class A, the only class that caused Ursa incident 2.
+Passing it is not a redaction review, it is the backstop firing early.
+§1 is still the standard and this is still not a grep.
+
+**After you push, confirm a verdict exists.** An absent check presents
+as an empty checks section rather than a red one, so "the gate did not
+run" and "the gate passed" look the same on the board. Before readying a
+pull request:
+
+```
+gh pr view <n> --json statusCheckRollup \
+  --jq '[.statusCheckRollup[] | [.name, .conclusion] | @tsv]'
+```
+
+An empty list means no verdict, not a passing one. Recover with
+`gh workflow run redaction-gate.yml --ref <your-branch>`, which the gate
+accepts, and which produces a run attached to your tip. The structural
+half of this, making the check required so that its absence blocks the
+merge, needs repository settings and is queued as PWC-12.

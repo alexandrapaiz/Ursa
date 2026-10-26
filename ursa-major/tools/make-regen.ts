@@ -17,7 +17,7 @@ import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { BUNDLE_PATH, historyUnavailable, repoRoot } from './bundle-digest-index'
-import { regenStep } from './regen'
+import { regenCheckVerdict, regenStep } from './regen'
 
 const root = repoRoot()
 if (root === null) {
@@ -57,13 +57,15 @@ if (check) {
   // one artifact wants to know about the other in the same pass.
   const bundle = run('is the committed bundle the one this source builds?', 'node', ['build/bundle.mjs', '--check'])
   const index = run('does the digest index match committed history?', 'npx', ['tsx', 'tools/make-bundle-digest-index.ts', '--check'])
-  const failures = [bundle === 0 ? null : 'the bundle', index === 0 ? null : 'the digest index'].filter(Boolean)
-  if (failures.length > 0) {
-    console.error(`\n${failures.join(' and ')} ${failures.length === 1 ? 'is' : 'are'} stale. Run: npm run regen`)
-    process.exit(1)
-  }
-  console.log('\nclean: the committed bundle is the one this source builds, and the digest index matches history.')
-  process.exit(0)
+
+  // `historyBlocked` is read here and not inferred from `index`, because
+  // the child exits 0 both when the index matches history and when it
+  // could not look. Those are different claims and this pass used to make
+  // the stronger one for both. See `regenCheckVerdict`.
+  const verdict = regenCheckVerdict({ bundle, index, historyBlocked: historyUnavailable(root) })
+  if (verdict.exit === 0) console.log(`\n${verdict.message}`)
+  else console.error(`\n${verdict.message}`)
+  process.exit(verdict.exit)
 }
 
 const built = run('rebuild the product the Action actually executes', 'node', ['build/bundle.mjs'])

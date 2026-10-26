@@ -1,0 +1,158 @@
+
+=== phone 390x844 · home / ===
+  box WxH       hit WxH      lines  verdict           control
+  162.9x47.3    164x48       1      ok                button.cta "Get Polaris"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  115.7x17      116x18       1      inline, exempt    a.rec-action "the record viewer"
+  278.3x42.8    10x18        2      inline, exempt    a.rec-action "a published record"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  -> 0 of 4 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== phone 390x844 · set /record ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  114x17        115x18       2      inline, exempt    a.rec-action "mini-fixture →"
+  168.8x17      169x18       1      inline, exempt    a.rec-action "read it at its own address"
+  326x26.3      326x45       1      ok                input.w-full ""
+  99.8x16.8     101x44       1      ok                button.rec-action "read the site"
+  1x1           183x48       1      ok                input.sr-only ""
+  326x26.3      326x45       1      ok                input.w-full ""
+  53.7x16.8     55x44        1      ok                button.rec-action "read it"
+  -> 0 of 6 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== phone 390x844 · record /record/mini-fixture ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  189x17.9      190x19       1      document, exempt  span.sp "# Field Notes on Provenance"
+  287x41        288x19       2      document, exempt  span.sp "The resolver joins finished work back to"
+  287x64.1      78x19        3      document, exempt  span.sp "Provenance is established by the artifac"
+  266x64.1      92x19        3      document, exempt  span.sp "I wrote this closing sentence entirely o"
+  273x64.1      56x19        3      document, exempt  span.sp "Outcome records give labs a verifier for"
+  326x38.5      326x44       1      ok                button.rec-action "01-claude · turn 1 · claude-opus-563.2% "
+  326x38.5      326x44       1      ok                button.rec-action "02-chatgpt · turn 1 · gpt-5100.0% surviv"
+  208x18        208x19       3      inline, exempt    a.rec-action "/records/mini-fixture.json"
+  138.5x17      138x18       1      inline, exempt    a.rec-action "a record of your own"
+  -> 0 of 3 standalone controls under 44px tall (2 inline, exempt; 5 document spans, 0 not covering their own line)
+
+=== phone 390x844 · address /record/at ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  326x26.3      326x45       1      ok                input.w-full ""
+  115.1x16.8    116x44       1      ok                button.rec-action "read the record"
+  277.3x36.8    112x16       2      inline, exempt    a.rec-action "read the whole set instead"
+  274.4x17      274x18       1      inline, exempt    a.rec-action "Opening the same record through its site"
+  -> 0 of 3 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== phone 390x844 · 404 /this-page-does-not-exist ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  229.6x47.3    230x48       1      ok                a.quiet-link "Back to Ursa Minor"
+  -> 0 of 2 standalone controls under 44px tall (0 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== tablet 820x1180 · home / ===
+  box WxH       hit WxH      lines  verdict           control
+  162.9x47.3    164x48       1      ok                button.cta "Get Polaris"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  541.3x42.8    22x18        2      inline, exempt    a.rec-action "the record viewer"
+  556.1x42.8    10x18        2      inline, exempt    a.rec-action "a published record"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  -> 0 of 4 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== tablet 820x1180 · set /record ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  114x17        115x18       2      inline, exempt    a.rec-action "mini-fixture →"
+  168.8x17      169x18       1      inline, exempt    a.rec-action "read it at its own address"
+  569.1x27.2    570x45       1      ok                input.w-full ""
+  99.8x16.8     100x44       1      ok                button.rec-action "read the site"
+  1x1           183x48       1      ok                input.sr-only ""
+  401.2x27.2    402x45       1      ok                input.w-full ""
+  53.7x16.8     54x44        1      ok                button.rec-action "read it"
+  -> 0 of 6 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== tablet 820x1180 · record /record/mini-fixture ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  216x19        216x20       1      document, exempt  span.sp "# Field Notes on Provenance"
+  560x19        560x20       1      document, exempt  span.sp "The resolver joins finished work back to"
+  592x19        592x20       1      document, exempt  span.sp "Provenance is established by the artifac"
+  624x43.3      16x20        2      document, exempt  span.sp "I wrote this closing sentence entirely o"
+  456x19        456x20       1      document, exempt  span.sp "Outcome records give labs a verifier for"
+  688.8x17.3    599x44       1      ok                button.rec-action "01-claude · turn 1 · claude-opus-563.2% "
+  688.8x17.3    599x44       1      ok                button.rec-action "02-chatgpt · turn 1 · gpt-5100.0% surviv"
+  208x18        208x19       3      inline, exempt    a.rec-action "/records/mini-fixture.json"
+  138.5x17      139x18       1      inline, exempt    a.rec-action "a record of your own"
+  -> 0 of 3 standalone controls under 44px tall (2 inline, exempt; 5 document spans, 0 not covering their own line)
+
+=== tablet 820x1180 · address /record/at ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  553.7x27.2    554x45       1      ok                input.w-full ""
+  115.1x16.8    116x44       1      ok                button.rec-action "read the record"
+  566x36.8      51x16        2      inline, exempt    a.rec-action "read the whole set instead"
+  274.4x17      275x18       1      inline, exempt    a.rec-action "Opening the same record through its site"
+  -> 0 of 3 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== tablet 820x1180 · 404 /this-page-does-not-exist ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  229.6x47.3    230x48       1      ok                a.quiet-link "Back to Ursa Minor"
+  -> 0 of 2 standalone controls under 44px tall (0 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== desktop 1440x900 · home / ===
+  box WxH       hit WxH      lines  verdict           control
+  162.9x47.3    164x48       1      ok                button.cta "Get Polaris"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  541.3x42.8    22x18        2      inline, exempt    a.rec-action "the record viewer"
+  556.1x42.8    10x18        2      inline, exempt    a.rec-action "a published record"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  -> 0 of 4 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== desktop 1440x900 · set /record ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  114x17        115x18       2      inline, exempt    a.rec-action "mini-fixture →"
+  168.8x17      169x18       1      inline, exempt    a.rec-action "read it at its own address"
+  840.3x27.2    599x45       1      ok                input.w-full ""
+  99.8x16.8     100x44       1      ok                button.rec-action "read the site"
+  1x1           183x48       1      ok                input.sr-only ""
+  672.3x27.2    599x45       1      ok                input.w-full ""
+  53.7x16.8     54x44        1      ok                button.rec-action "read it"
+  -> 0 of 6 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== desktop 1440x900 · record /record/mini-fixture ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  216x19        216x20       1      document, exempt  span.sp "# Field Notes on Provenance"
+  504x43.3      504x20       2      document, exempt  span.sp "The resolver joins finished work back to"
+  520x43.3      456x20       2      document, exempt  span.sp "Provenance is established by the artifac"
+  504x43.3      360x20       2      document, exempt  span.sp "I wrote this closing sentence entirely o"
+  512x43.3      224x20       2      document, exempt  span.sp "Outcome records give labs a verifier for"
+  960x17.3      599x44       1      ok                button.rec-action "01-claude · turn 1 · claude-opus-563.2% "
+  960x17.3      599x44       1      ok                button.rec-action "02-chatgpt · turn 1 · gpt-5100.0% surviv"
+  208x18        208x18       3      inline, exempt    a.rec-action "/records/mini-fixture.json"
+  138.5x17      139x18       1      inline, exempt    a.rec-action "a record of your own"
+  -> 0 of 3 standalone controls under 44px tall (2 inline, exempt; 5 document spans, 0 not covering their own line)
+
+=== desktop 1440x900 · address /record/at ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  824.9x27.2    599x45       1      ok                input.w-full ""
+  115.1x16.8    116x44       1      ok                button.rec-action "read the record"
+  566x36.8      51x16        2      inline, exempt    a.rec-action "read the whole set instead"
+  274.4x17      275x18       1      inline, exempt    a.rec-action "Opening the same record through its site"
+  -> 0 of 3 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== desktop 1440x900 · 404 /this-page-does-not-exist ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  229.6x47.3    230x48       1      ok                a.quiet-link "Back to Ursa Minor"
+  -> 0 of 2 standalone controls under 44px tall (0 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== total across every page and viewport ===
+  0 short of 54 standalone, 24 inline and exempt by 2.5.8, 15 document spans (0 not covering their own line), 93 targets seen
+  the floor reached no control on: no page — every page here had at least one standalone control
+  document spans are: span.sp, on record

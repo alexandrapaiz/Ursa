@@ -1,0 +1,45 @@
+########## linear
+
+  width page      content box     verdict                       where
+  320   home      320 at 0        fits                          
+  360   home      360 at 0        fits                          
+  375   home      375 at 0        fits                          
+  390   home      390 at 0        fits                          
+
+  0 of 4 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose and is not counted.
+########## vercel
+
+  width page      content box     verdict                       where
+  320   home      320 at 0        fits                            [bleed: div.absolute -160..480]
+  360   home      360 at 0        fits                            [bleed: div.absolute -140..500]
+  375   home      375 at 0        fits                            [bleed: div.absolute -132.5..508 +2]
+  390   home      390 at 0        fits                            [bleed: div.absolute -125..515]
+
+  0 of 4 page-by-width cells put content out of reach; 0 overflow reachably; 4 carry decoration that bleeds on purpose and is not counted.
+########## stripe
+
+  width page      content box     verdict                       where
+  320   home      320 at 0        80px off the right, unscrollablediv.testimonial-carousel__navigation-customers (0 chars)
+  360   home      360 at 0        90px off the right, unscrollablediv.testimonial-carousel__navigation-customers (0 chars)
+  375   home      375 at 0        94px off the right, unscrollablediv.testimonial-carousel__navigation-customers (0 chars)
+  390   home      390 at 0        98px off the right, unscrollablediv.testimonial-carousel__navigation-customers (0 chars)
+
+  4 of 4 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose and is not counted.
+########## elicit
+
+  width page      content box     verdict                       where
+  320   home      320 at 0        CLIPPED 285px off the left    div.framer-15mmzm (0 chars)
+  360   home      360 at 0        CLIPPED 265px off the left    div.framer-15mmzm (0 chars)
+  375   home      375 at 0        CLIPPED 258px off the left    div.framer-15mmzm (0 chars)
+  390   home      390 at 0        CLIPPED 219px off the left    div.framer-15mmzm (0 chars)
+
+  4 of 4 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose and is not counted.
+########## consensus
+  320   home      320 at 0        fits                            [bleed: div.go1632949049 0..323]
+  360   home      360 at 0        fits                          
+  375   home      375 at 0        fits                          
+
+  NOT MEASURED: 1 of 4 page-by-width cells could not be loaded or never came to rest, so this run makes no claim about them.
+
+  COULD NOT LOAD
+  390 home (/): page.goto: Timeout 45000ms exceeded.

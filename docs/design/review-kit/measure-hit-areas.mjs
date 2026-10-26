@@ -82,6 +82,24 @@ const MIN = 44;
 // for a measurement to be wrong.
 const UNTIL = arg("until", null);
 
+// A page is not the same thing as a surface. The overlay's panel draws a
+// passphrase field until a key is derived, and a verdict line, a quote
+// and a run button after, and the second of those is most of its
+// controls. Every version of this script before 2026-10-26 could only
+// measure what a URL shows on arrival, so those controls had never been
+// measured at any viewport, and a run that reasoned about them instead
+// would be doing the thing L14 was written against.
+//
+// `--state <module.mjs>` names a module whose default export is
+// `async (page, name) => {}`. It runs after the navigation and after
+// `--until`, and whatever it leaves on the screen is what gets measured.
+// Its path is printed in the output, because a measurement of a state
+// nobody can name is not a measurement anyone can repeat.
+const STATE = arg("state", null);
+const enterState = STATE
+  ? (await import(new URL(STATE, `file://${process.cwd()}/`).href)).default
+  : null;
+
 // `name=/path`, comma separated. The default is ursa-minor's five, which
 // is what every run of this script before today measured.
 const PAGES = arg(
@@ -217,10 +235,11 @@ for (const [vname, w, h] of VIEWPORTS) {
   for (const [name, path] of PAGES) {
     await page.goto(BASE + path, { waitUntil: "networkidle" });
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 });
+    if (enterState) await enterState(page, name);
     await page.waitForTimeout(250);
     const rows = await page.evaluate(probe, MIN);
     all[`${vname}/${name}`] = rows;
-    lines.push(`\n=== ${vname} ${w}x${h} · ${name} ${path} ===`);
+    lines.push(`\n=== ${vname} ${w}x${h} · ${name} ${path}${STATE ? ` · state ${STATE}` : ""} ===`);
     lines.push(
       "  " +
         "box WxH".padEnd(14) +
@@ -253,8 +272,23 @@ for (const [vname, w, h] of VIEWPORTS) {
     const standalone = rows.filter((r) => !r.inline && !r.doc);
     const short = standalone.filter((r) => r.short);
     const docs = rows.filter((r) => r.doc);
+    // L19 in docs/design/ledger.md says a count that can never be zero
+    // is not a pass. The other half of that, found on 2026-10-26 when
+    // this was first pointed at `ursa-major/overlay`: a count whose
+    // denominator is zero is not a pass either, and it reads exactly
+    // like one. Every control on the dashboard is inline in a sentence
+    // and exempt under 2.5.8, so the headline there was "0 of 0
+    // standalone controls under 44px tall" on 2026-10-24g and again
+    // today, which is the floor applied to nothing, printed in the
+    // shape of a surface that passed it. A reader cannot tell that from
+    // a surface whose controls were all checked and all cleared. So the
+    // zero denominator gets its own sentence and never borrows the
+    // other one's.
     lines.push(
-      `  -> ${short.length} of ${standalone.length} standalone controls under ${MIN}px tall` +
+      (standalone.length === 0
+        ? `  -> NOT MEASURED AGAINST THE FLOOR: no standalone control on this surface,` +
+          ` so the ${MIN}px floor was applied to nothing`
+        : `  -> ${short.length} of ${standalone.length} standalone controls under ${MIN}px tall`) +
         ` (${rows.filter((r) => r.inline).length} inline, exempt;` +
         ` ${docs.length} document spans, ${docs.filter((r) => r.coversLine === false).length} not covering their own line)`,
     );
@@ -269,10 +303,24 @@ const inl = rowsAll.filter((r) => r.inline);
 const dsp = rowsAll.filter((r) => r.doc);
 const badDoc = dsp.filter((r) => r.coversLine === false);
 lines.push(
-  `\n=== total across every page and viewport ===\n  ${sa.filter((r) => r.short).length} short of ${sa.length} standalone, ` +
+  `\n=== total across every page and viewport ===\n  ` +
+    (sa.length === 0
+      ? `the ${MIN}px floor was applied to NO control anywhere in this run, `
+      : `${sa.filter((r) => r.short).length} short of ${sa.length} standalone, `) +
     `${inl.length} inline and exempt by 2.5.8, ` +
     `${dsp.length} document spans (${badDoc.length} not covering their own line), ` +
     `${rowsAll.length} targets seen`,
+);
+// Which surfaces the floor could not reach, named in the total where a
+// reader looks, rather than left to be noticed per page. A page with no
+// standalone control is not a page that passed; it is a page this
+// instrument has nothing to say about.
+const unfloored = Object.entries(all)
+  .filter(([, rs]) => rs.every((r) => r.inline || r.doc))
+  .map(([k]) => k)
+  .sort();
+lines.push(
+  `  the floor reached no control on: ${unfloored.join(", ") || "no page — every page here had at least one standalone control"}`,
 );
 // The membership of the third category, printed rather than asserted: it
 // is exempt from the floor, so a control that lands in it by accident is

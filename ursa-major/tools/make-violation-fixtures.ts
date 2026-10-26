@@ -3,10 +3,18 @@
 //   npx tsx tools/make-violation-fixtures.ts          # write every fixture
 //   npx tsx tools/make-violation-fixtures.ts --check   # fail if any drifted
 //
+// `--check` is also run inside `npm test`, by `src/violation-fixtures-current.test.ts`,
+// which spawns this script rather than reimplementing the comparison. Added
+// 2026-10-26: before it, `--check` was a by-hand command, and the directory
+// sat drifted on `main` for a day with a green suite because no bound reads
+// the three fields the schema had grown.
+//
 // Why a script and not twenty hand-typed JSON files. The fixtures ARE the
 // artifact: `src/invariants.violations.test.ts` reads only the committed
 // `.json` and `.md` files and never imports this module, so a fixture that
-// stops firing is a test failure whether or not this script still runs. What
+// stops firing is a test failure whether or not this script still runs. That
+// stays true — the test above spawns this file as a child process and the
+// behavioural test still imports nothing from it. What
 // the script buys is that the base record is produced by `resolve()` rather
 // than typed, so each counterexample is one named edit away from a record the
 // resolver really wrote, and the edit is reviewable as a two-line diff

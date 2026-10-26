@@ -1,0 +1,59 @@
+{
+  "phone/panel": [
+    {
+      "tag": "input",
+      "cls": "mono",
+      "label": "",
+      "display": "inline-block",
+      "lines": 1,
+      "boxW": 348,
+      "boxH": 35,
+      "lineH": 35,
+      "hitW": 348,
+      "hitH": 36,
+      "inline": false,
+      "doc": false,
+      "short": true,
+      "coversLine": null,
+      "afterPosition": "static"
+    }
+  ],
+  "tablet/panel": [
+    {
+      "tag": "input",
+      "cls": "mono",
+      "label": "",
+      "display": "inline-block",
+      "lines": 1,
+      "boxW": 348,
+      "boxH": 35,
+      "lineH": 35,
+      "hitW": 348,
+      "hitH": 36,
+      "inline": false,
+      "doc": false,
+      "short": true,
+      "coversLine": null,
+      "afterPosition": "static"
+    }
+  ],
+  "desktop/panel": [
+    {
+      "tag": "input",
+      "cls": "mono",
+      "label": "",
+      "display": "inline-block",
+      "lines": 1,
+      "boxW": 348,
+      "boxH": 35,
+      "lineH": 35,
+      "hitW": 348,
+      "hitH": 36,
+      "inline": false,
+      "doc": false,
+      "short": true,
+      "coversLine": null,
+      "afterPosition": "static"
+    }
+  ]
+}

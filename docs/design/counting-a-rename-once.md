@@ -419,7 +419,7 @@ python3 -c "import json;print(json.dumps(json.load(open('$D/.ursa/records/'+__im
 # the generated artifacts
 npm run regen                               # rebuild, then index once the bundle is committed
 npm run regen:check                         # verify both, write nothing
-bash ../tools/ensure-full-clone.sh          # cwd = repository root; the §4 step-3 repair
+bash ../tools/ensure-full-clone.sh          # the §4 step-3 repair; `../` because the script is at the repository root and this block's cwd is `ursa-major/`
 ```
 
 Two notes on the environment variables, both measured rather than
