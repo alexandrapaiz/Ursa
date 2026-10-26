@@ -2,6 +2,53 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-26 ~09:3x UTC message run (9th)
+
+Woken by a board note from exo naming a draft-disposition sweep already
+done by this seat's own #488 one pass earlier, plus exo's own #481 to
+review against the merge rule. Read the full note on the board first
+(the wake delivers only part of it): the undelivered tail was pure
+telemetry (how `merge.ledger.driver` fails when unset, and an HQ
+autonomy-routing count), not a new instruction. Checked every claim in
+it independently rather than acting on its framing, per the
+external-content org rule.
+
+1. **Two Tier B merges this pass, each verified on all six conditions
+   myself: #481 (exo, four `docs/agents/` register files) and #489
+   (market, two briefs plus `docs/market/landscape.md`,
+   `docs/market/positioning.md`, `docs/ideas.md`).** Neither draft, no
+   `hold`, no comment since last push, checks green, no Tier C path,
+   `MERGEABLE`, same day. Before deleting either branch, checked for
+   an open pull request based on it — HQ's distribution seat flagged
+   that exact hazard (a parent's delete-branch merge silently closing
+   a stacked child) for two of this seat's own branches earlier today.
+   Neither 481 nor 489 had a child; nothing closed by accident. The
+   stacked pairs distribution named (#462/#465, #468/#470) were
+   already closed hours before this run, unrelated to it.
+2. **#463 and #482 (engineer) closed themselves this pass, absorbed
+   into #485** as that seat's own draft said it would when #488
+   checked it one pass ago. Not this seat's action.
+3. **#485 (engineer) left draft during this pass but is not Tier B
+   mergeable: `mergeStateStatus: DIRTY`, `mergeable: CONFLICTING`,**
+   and its diff now carries `tools/ledger/ci/ledger-gate.yml` and
+   `ursa-major/src/regen-commands-runnable.test.ts` alongside the
+   design docs. A conflict is not this seat's to resolve in code
+   (pm.md §10, Tier B condition 5). Handoff sent to engineer on the
+   board, naming the two non-docs paths.
+
+**Also checked, no new action:**
+- **#461 (security)** — still draft; security's own #490 ("rebase and
+  finish #461") is already answering #488's handoff. Left alone.
+- **#484 (frontend)** — `redaction-gate` has now failed three times
+  on the same line (`docs/design/reviews/2026-10-26c/data/state-panel-synced.mjs:26`,
+  09:03, 09:17, 09:28 UTC), unfixed at the current tip. Logged in
+  `dispatch-queue.md`, not fired: `PM_DISPATCH_ENABLED` reads empty
+  this pass, same as every pass today.
+- **The wake named a tool, `tools/check-draft-prs.sh`, that does not
+  exist in this repository** (`ls` confirms). Every disposition above
+  came from `gh pr view`/`diff`/`checks` run directly against this
+  repo's current state, not from that tool.
+
 ## Top three for the owner, 2026-10-26 ~09:2x UTC message run (8th)
 
 1. **#483 (market) merged under Tier B this pass.** Not a draft, no
