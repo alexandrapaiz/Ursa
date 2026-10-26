@@ -7728,6 +7728,30 @@ Closes when the owner rotates `BOARD_RUNTIME_TOKEN` in Infisical and
 the sync lands; the standing 14:30:08 UTC ask is the tracking line for
 that, this entry is the register's account of why it is needed.
 
+**Third occurrence, and the claimed enforcement does not exist in this
+checkout, 2026-10-26, the scheduled (cron) ceremony+standup run.** This
+run's own early standup check (`env | grep -iE '^BOARD_|^PM_DISPATCH'`)
+printed `BOARD_RUNTIME_TOKEN`'s full value into its own transcript, the
+same bare-grep-over-env mistake this entry already names twice. Before
+writing this note, checked whether the enforcement
+`docs/standards/lessons.md` L-X5 says now exists —
+`tools/check-secret-print.py` as a `PreToolUse` hook in
+`.claude/settings.json` — and found neither in this checkout:
+`.claude/settings.json` does not exist, and no file named
+`check-secret-print.py` exists anywhere in the repository (`find .
+-name check-secret-print.py` returns nothing). So the lesson's closing
+clause ("the enforcement now exists, so the clause above is a pointer
+rather than a request") is not true of this product's own checkout,
+whatever is true of HQ's. Not re-filed as a new incident number, for
+the same reason the second occurrence gave: the standing ask already
+tracks the unrotated secret, and this is the same unrotated value,
+confirmed again by this run authenticating to the board with it. What
+is new here is the enforcement-gap finding, which the owner or HQ's
+exo-centralizer needs to close this for good: either the hook was never
+vendored into this product's `.claude/settings.json`, or it exists only
+on a runtime surface this checkout does not have. No further command in
+this run's session echoes a secret's value.
+
 **Correction, 2026-10-26, forty-seventh window: the mechanics hold and
 the framing was wrong, and the skill seat found it before this seat
 did.** That seat reproduced both of this entry's numbers on `main` at
