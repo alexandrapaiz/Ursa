@@ -146,6 +146,58 @@ test('a scan note that files a First step owes all five fields', () => {
   assert.match(res.out, /missing the "- Status:" line/);
 });
 
+test('the violation on a scan note that files a First step names the label as the cause', () => {
+  // The regression this is here for, measured on `main` at 2026-10-26. The
+  // gate was red on the default branch over exactly this shape: a block
+  // headed `Craft scan: tesh 0.3.2 and txm 8.2.0` carrying `- First step: no
+  // adoption proposed`, a first-step line that declines to propose work. The
+  // seat the red gate was handed to read a bare `missing the "- Cost:" line`
+  // and concluded the heading spelling was unrecognised, which it never was.
+  // A message that names only one of a rule's two causes is a message that
+  // picks the diagnosis for its reader, so the message now names both and
+  // says which to look at first.
+  const res = run(
+    [
+      GOOD,
+      '### 2026-10-26 (engineer, hook run) — Craft scan: tesh 0.3.2 and txm 8.2.0',
+      '- Trigger: this run’s own defect',
+      '- What: two tools, both narrow and both older than their problem',
+      '- First step: no adoption proposed. Neither tool fits.',
+      '',
+    ].join('\n'),
+  );
+  assert.equal(res.code, 1, res.out);
+  assert.match(res.out, /missing the "- Cost:" line/);
+  assert.match(res.out, /this heading does announce a scan/);
+  assert.match(res.out, /carries a "- First step:" line/);
+  assert.match(res.out, /say so in prose instead of under that label/);
+  // The sentence a reader must not be able to take away from this message,
+  // because it is the one the 2026-10-26 run took away from its absence.
+  assert.match(res.out, /The spelling of the heading is not the cause\./);
+  // Once for the block, not once per missing field. This fixture is missing
+  // two, and the real block was too.
+  assert.equal(res.out.match(/does announce a scan/g).length, 1, res.out);
+});
+
+test('an ordinary idea’s violation carries no scan paragraph, so the explanation stays a signal', () => {
+  // The other half of the same change. An explanation printed on every
+  // missing field is noise, and noise is what the gate is already fighting:
+  // check.mjs's own header says a permanently red gate is read by nobody.
+  // The paragraph appears only where `announcesScan` is true.
+  const res = run(GOOD.replace('- Cost: $0\n', ''));
+  assert.equal(res.code, 1, res.out);
+  assert.match(res.out, /missing the "- Cost:" line/);
+  assert.doesNotMatch(res.out, /does announce a scan/);
+});
+
+test('the real ledger prints no scan-label explanation, because no block needs one', () => {
+  // The default branch's own state, asserted rather than described. If a
+  // future run appends another declined first step under a scan heading,
+  // this goes red with the explanation in its own failure output.
+  const res = check(new URL('../../docs/ideas.md', import.meta.url).pathname);
+  assert.doesNotMatch(res.out, /does announce a scan/, res.out);
+});
+
 test('a scan note’s volunteered status is still checked', () => {
   const res = run(
     [

@@ -96,15 +96,43 @@ for (const block of blocks) {
   // Rule IDEA_FIELDS_COMPLETE, held by the seat. All five lines of §4, on
   // every idea. Scan notes are exempt by contract, not by vocabulary: see
   // block-kinds.mjs for the measurement that exemption used to be made of.
+  //
+  // The second sentence, and why a violation message carries a paragraph.
+  // One block can be an `idea` for two completely different reasons, and
+  // the repair is different for each. Either its heading never announced a
+  // scan, in which case the five fields are simply owed, or it announced
+  // one and the COMMITS_WORK escape hatch in block-kinds.mjs took the
+  // exemption away because it carries a `- First step:` label. Measured on
+  // `main` at 2026-10-26: a seat handed the second case read the bare
+  // missing-field message, concluded the heading spelling was unrecognised,
+  // and reported a repair to the classifier that would have changed
+  // nothing, because `SCAN_TITLE` matched that heading throughout. The
+  // message is where that run was lost, so the message is what gained the
+  // explanation. `announcesScan` is the field that tells the two apart.
   if (c.kind === 'idea') {
     const present = presentIdeaFields(block.text);
+    const explanation =
+      ' — this heading does announce a scan, and a scan note owes no fields, but it' +
+      ' carries a "- First step:" line, which pm.md §4 defines as "the first day-sized' +
+      ' unit of work", so block-kinds.mjs reads the label as a commitment and holds the' +
+      ' block to all five fields. Two repairs, and the label is the one to look at first:' +
+      ' either file it as an idea with all five lines, or, if it proposes no work, say so' +
+      ' in prose instead of under that label. The spelling of the heading is not the cause.';
+    // Once per block, on the first missing field, not once per field. The
+    // block that caused this was missing two fields and a scan note can be
+    // missing four, and the same paragraph four times is the shape of output
+    // a reader skips. The count of violations stays one per missing field,
+    // because that is what a seat has to repair.
+    let explained = !c.announcesScan;
     for (const field of IDEA_FIELDS) {
       if (!present.includes(field)) {
         violation(
           'seat',
           'IDEA_FIELDS_COMPLETE',
-          `${c.heading} is missing the "- ${field}:" line (pm.md §4)`,
+          `${c.heading} is missing the "- ${field}:" line (pm.md §4)` +
+            (explained ? '' : explanation),
         );
+        explained = true;
       }
     }
   }
