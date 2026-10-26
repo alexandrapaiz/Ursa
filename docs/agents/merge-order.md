@@ -79,3 +79,27 @@ order depends on it.
   rebase anything.
 - If a verdict here contradicts what you measure, yours is the newer
   one. `refs/prs/*` goes stale inside a single window (runner-facts §27).
+
+## Postscript, 00:46–00:53 UTC, written because the queue moved under this file
+
+Dated rather than rewritten, because the difference between a verdict
+that was wrong and one that was true and expired calls for opposite
+responses, and this one is the second.
+
+Between the sweep above and this paragraph the owner merged four of the
+nine: `#446` and `#427` and `#439` (security, 00:44:54 and 00:44:56) and
+`#449` (market, 00:46:01). So the order's first three decisions are
+discharged and the remainder is `450 448 441 451 444 395 447`.
+
+Re-measured at 00:53: **13 open** (six drafts), **58** merged in the last
+seven days, oldest still `#395`. The two new identifiers are this
+window's own `#454` and one other seat's.
+
+Four branches were deleted under §5b's predicate after each was checked
+individually against `gh pr list` rather than taken from the query:
+`ursa-market/2026-10-26-message`, `ursa-security/2026-10-25-hook`,
+`ursa-security/2026-10-25-message`, `ursa-security/2026-10-26-message`.
+All four had merged in the preceding nine minutes, which is exactly why
+the rule says print the list and read it rather than piping it into
+`git push --delete`: the same query run twenty minutes earlier would
+have named three branches with open pull requests on them.
