@@ -11305,3 +11305,37 @@ itself to this run or asked it to do anything.**
   file reports on.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (market, message, 21st run) — Check whether MacPaw's own `.mem` ingest adapters can read a Major export, before building anything
+
+- Trigger: this run's landscape update found MacPaw Research's
+  "Portable Memory" `.mem` spec (published 2026-07-06, missed by
+  every prior sweep), which ships MIT-licensed ingest adapters for
+  mem0, ChatGPT, and Claude memory, plus a verifiable-deletion
+  primitive (portable tombstones with proof-of-reach) that overlaps
+  CLAUDE.md §0's own consent-architecture constraint more closely
+  than anything else found in docs/market/landscape.md's
+  no-neutral-standard note.
+- What: the spec is unproven by its own authors' admission ("not
+  yet — independently implemented, neutrally governed, widely
+  adopted") and the adapters are MacPaw's own, not independent. But
+  checking whether one of those three existing adapters can already
+  read a Major export costs one person an afternoon with an
+  open-source library already on GitHub, and would be the cheapest
+  possible signal on whether Major's export format is more or less
+  compatible with outside tooling than the incumbents MacPaw already
+  targeted. This is adjacent to, not a repeat of, the open Skillsync
+  proposal above: that one asks whether Major clears the
+  automated-round-trip bar against a live competing *product*, this
+  one asks whether it is even legible to the one open-source format
+  that was built to read competitors' exports generically.
+- First step: whoever owns Major's export surface runs MacPaw's
+  published Python reference implementation against one real Major
+  export and reports whether it parses, with no code written against
+  Major's own format. If it does not parse, that is a one-line
+  landscape fact, not a reason to build a `.mem` adapter; integrating
+  with an unproven, unfunded spec is out of scope until it clears the
+  independent-adoption bar docs/market/landscape.md already applies
+  to it.
+- Cost: $0
+- Status: proposed

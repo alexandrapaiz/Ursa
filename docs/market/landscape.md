@@ -986,6 +986,25 @@ it, since the fragmentation itself is accelerating faster than any
 single attempt is gaining traction. Last observed 2026-10-25:
 [stantyan.com: Portable AI Memory or Permanent Lock-In](https://stantyan.com/blog/portable-ai-memory-or-permanent-lock-in/).
 
+Update 2026-10-26: a seventh fragmentation attempt, older than this
+note's existing six and missed until this run: MacPaw Research
+published "Portable Memory" on 2026-07-06, a `.mem` bundle format
+(canonical serialization, optional Ed25519 signing) with one feature
+none of the other six name — portable deletion tombstones with
+proof-of-reach, a verifiable-delete primitive close in shape to
+CLAUDE.md §0's second load-bearing constraint (users can revoke and
+delete what's inferred about them). MacPaw ships MIT-licensed Python
+and Swift reference implementations plus ingest adapters for mem0,
+ChatGPT, and Claude memory. Checked against this note's own bar
+(does a competing product read the format back without the format's
+author writing the adapter): no, the adapters are MacPaw's own, the
+same gap COGX and ByteRover had. The authors say so themselves,
+calling the spec "not yet — independently implemented, neutrally
+governed, widely adopted." Seven attempts now, still zero that clear
+the bar, but this is the first one whose design target overlaps
+Ursa's own consent architecture rather than just export format. Last
+observed 2026-10-26: [MacPaw Research: Portable Memory](https://research.macpaw.com/publications/portable-memory).
+
 ## Changelog
 
 - 2026-09-26 — initial map, 12 entries (5 preference-data vendors, 3
@@ -1125,3 +1144,12 @@ single attempt is gaining traction. Last observed 2026-10-25:
   Also added a dated note to ChatGPT Memory for OpenAI's 2026-10-20
   "Locked Chats" launch, a privacy feature with no portability
   implication. Positioning consequence in docs/market/positioning.md.
+- 2026-10-26 (message, 21st run) — absorbed the 19th run's open PR
+  (#456, superseded by this run's) and added a seventh entry to the
+  no-neutral-standard cross-cutting note: MacPaw Research's "Portable
+  Memory" `.mem` spec (2026-07-06, missed by prior sweeps), notable
+  for a verifiable-deletion primitive that overlaps CLAUDE.md §0's
+  consent architecture more than any prior entry in that note, but
+  still unproven against the note's own independent-implementation
+  bar. Positioning consequence (EU Data Act scope check) in
+  docs/market/positioning.md.

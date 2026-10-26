@@ -217,6 +217,29 @@ CLAUDE.md's own naming of model providers as a competitive threat, but
 not impossible under regulatory pressure), that closes Ursa Major's gap
 overnight. Nothing found this run suggests that's in motion.
 
+**Update 2026-10-26: the first concrete regulatory instrument found,
+and why it doesn't reach this gap.** The EU Data Act's cloud-switching
+chapter has been in force since 2025-09-12 and bans switching/data-
+extraction fees outright from 2027-01-12, with a documented-format,
+30-day portability mandate in between. Checked its scope directly
+rather than taking the "AI regulation" framing some coverage gives it
+at face value: Chapter VI binds providers of IaaS/PaaS/SaaS "data
+processing services" that a customer *runs workloads on*
+(infrastructure a business builds on top of, named examples AWS,
+Azure, GCP, Render, Railway, Fly.io), not consumer-facing applications
+a user talks to. ChatGPT's or Claude's own memory feature is the
+application, not the infrastructure underneath it, so it sits outside
+this chapter's own definition on the reading available. This is real
+regulatory motion, the first this file has found with a name and a
+date, and it still doesn't close Major's gap: it is the opposite
+layer, enterprise cloud switching, from the consumer AI-memory
+portability the honest risk above names. The risk stands exactly as
+stated. Separately, MacPaw Research's "Portable Memory" `.mem`
+proposal (docs/market/landscape.md, 2026-10-26 update) is a private,
+unfunded spec with no vendor backing, not regulatory pressure at all;
+grouped here only because both surfaced in the same pass and neither
+changes the answer. [sota.io: EU Data Act 2025, Cloud Switching Rights Developer Guide](https://sota.io/blog/eu-data-act-2025-cloud-switching-rights-developer-guide), [Kennedys Law: From hitch to switch](https://www.kennedyslaw.com/en/thought-leadership/article/2025/from-hitch-to-switch-how-the-eu-data-act-will-overhaul-switching-and-portability-terms-in-cloud-contracts-ukeu/).
+
 ## A bound on Minor's target, not a price (2026-09-30)
 
 Last run flagged a gap: no disclosed per-unit or per-contract price
