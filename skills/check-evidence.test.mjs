@@ -207,3 +207,111 @@ test('a skill directory with no stray tags is unaffected', () => {
   sibling(dir, 'alpha', 'notes.txt', 'no tags here\n')
   assert.equal(run(dir).status, 0)
 })
+
+// --base: the same library read against another git tree. These exist because
+// the flag's whole claim is that "the evidence check is green" has a tense in
+// it, and a flag that answers the wrong tense silently is worse than no flag.
+// Each test commits the fixture library, then changes the working tree, so the
+// two answers genuinely disagree.
+
+/** The fixture library, clean, committed on a branch called `trunk`. Drift is
+ *  applied afterwards by `driftAfterCommit`, so the committed tree and the
+ *  working tree really can disagree; committing a drifted library would leave
+ *  both trees saying the same thing and the tests would prove nothing. */
+function committed() {
+  const made = library()
+  const git = (...args) => execFileSync('git', args,
+    { cwd: made.dir, stdio: 'ignore', env: { ...process.env, GIT_AUTHOR_NAME: 't', GIT_AUTHOR_EMAIL: 't@t', GIT_COMMITTER_NAME: 't', GIT_COMMITTER_EMAIL: 't@t' } })
+  git('init', '-q', '-b', 'trunk')
+  git('add', '-A')
+  git('commit', '-q', '-m', 'library')
+  return made
+}
+
+/** Change a skill's cited line in the working tree only. */
+const driftAfterCommit = (dir, slug) =>
+  writeFileSync(join(dir, 'src', `${slug}.ts`), `a different line of ${slug}\nfiller\n`)
+
+test('--base reads the cited lines out of that tree, not the checkout', () => {
+  // Committed clean, then alpha's cited line is changed on disk only. The
+  // checkout is drifted and `trunk` is not, so the two answers must differ.
+  const { dir } = committed()
+  driftAfterCommit(dir, 'alpha')
+  const here = run(dir)
+  assert.equal(here.status, 1)
+  assert.match(here.out, /alpha\/E1|alpha E1/)
+  const there = run(dir, '--base', 'trunk')
+  assert.equal(there.status, 0, 'trunk still carries the lines the lock recorded')
+  assert.match(there.out, /evidence check OK in trunk/)
+})
+
+test('--base names the tree in the failing line too, and says the merge owes the fix', () => {
+  // The inverse: the checkout is right and the base tree is not, which is the
+  // case the flag exists for. A receipt green here that a reader on the base
+  // tree would follow to other lines.
+  const { dir } = committed()
+  driftAfterCommit(dir, 'alpha')
+  run(dir, '--update', 'alpha')
+  assert.equal(run(dir).status, 0, 'the checkout is green after re-recording')
+  const there = run(dir, '--base', 'trunk')
+  assert.equal(there.status, 1)
+  assert.match(there.out, /evidence check FAILED in trunk/)
+  assert.match(there.out, /resolves in this checkout and not in the base tree/)
+})
+
+test('--base and --update are refused together, and the lock is untouched', () => {
+  // Re-recording from a tree nobody has checked out would write a lock
+  // describing content this run cannot read.
+  const { dir, lock } = committed()
+  driftAfterCommit(dir, 'alpha')
+  const out = run(dir, '--base', 'trunk', '--update', 'alpha')
+  assert.equal(out.status, 2)
+  assert.match(out.out, /cannot be combined with --update/)
+  assert.deepEqual(lockOf(dir), lock)
+})
+
+test('a ref this clone cannot resolve is an abstention, not a library failure', () => {
+  // §5v. A single-branch or shallow clone has no `origin/main`, and resolving
+  // nothing would make all 437 citations look missing at exit 1, which reads
+  // as the library being broken.
+  const { dir } = committed()
+  const out = run(dir, '--base', 'origin/main')
+  assert.equal(out.status, 2, 'exit 2 is "I could not look", not "it is broken"')
+  assert.match(out.out, /cannot resolve that ref/)
+  assert.doesNotMatch(out.out, /evidence check FAILED/)
+})
+
+test('--base wants a ref, and a bare --base does not silently read the checkout', () => {
+  const { dir } = committed()
+  for (const args of [['--base'], ['--base=']]) {
+    const out = run(dir, ...args)
+    assert.equal(out.status, 2)
+    assert.match(out.out, /--base wants a git ref/)
+  }
+})
+
+test('the ref of --base is not read as an update scope', () => {
+  // `--base trunk` filtered as a positional would have made `trunk` a scope,
+  // which is how a read-only question becomes a write.
+  const { dir, lock } = committed()
+  driftAfterCommit(dir, 'alpha')
+  driftAfterCommit(dir, 'beta')
+  const out = run(dir, '--base', 'trunk')
+  assert.equal(out.status, 0, 'trunk is clean, so the answer about trunk is green')
+  assert.deepEqual(lockOf(dir), lock, 'a --base run writes nothing')
+})
+
+test('a citation with no recorded fingerprint is not a --base finding', () => {
+  // A ref written on this branch is newer than the base tree by construction.
+  // Reporting that as an authoring debt would make every new citation look
+  // like a merge hazard.
+  const { dir } = committed()
+  const lock = lockOf(dir)
+  delete lock['alpha/E1/src/alpha.ts:1']
+  writeFileSync(join(dir, 'skills', 'evidence.lock.json'),
+    JSON.stringify(lock, Object.keys(lock).sort(), 2) + '\n')
+  assert.equal(run(dir).status, 1, 'the checkout still owes the fingerprint')
+  const there = run(dir, '--base', 'trunk')
+  assert.equal(there.status, 0)
+  assert.match(there.out, /evidence check OK in trunk/)
+})
