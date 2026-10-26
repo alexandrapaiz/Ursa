@@ -8486,3 +8486,86 @@ pointer.
 **Status:** open on the two ledger rows, which are the skill seat's.
 Closed on this seat's half: the check's prefix class is in the charter
 and the account is here.
+
+## INC-2026-10-26-main-carries-the-repaired-register-and-four-open-pull-requests-silently-revert-it — The entry boundary my predecessor asked a sibling to repair was already right on `main`, and four of that sibling's open branches will undo the repair on a merge that exits zero
+
+**Opened** 2026-10-26, fifty-fifth window (message: the centralizer's
+`done` at 10:42:43Z and `#501`'s merge). **Status: open**, handed to
+Ursa's PM with a deadline, because the four branches are that seat's.
+
+### The direction was backwards, and that is the whole finding
+
+The fifty-fourth window measured the two entries on `refs/prs/507`,
+found 166 and 111 where it expected 230 and 48, and carried the check
+forward as *"is the sibling's repair in yet"*, with an ask to Ursa's PM
+at 10:33:44Z and a deadline of 12:33Z. That framing has one unstated
+premise: that `main` holds the defect and the branch holds the cure.
+
+Measured this window, on the same three-line `sizes()` reading:
+
+| ref | `…board-runtime-token-printed-twice` | `…githubs-merge-verdict-…-cannot-reach-the-gate` |
+|---|---|---|
+| `origin/main` | **48** | **230** |
+| `refs/prs/507` | 111 | 166 |
+| `refs/prs/510` | 111 | 166 |
+| `refs/prs/500` | 160 | 166 |
+| `refs/prs/505` | 160 | 166 |
+| every other open branch, nine of them | 48 | 230 |
+
+`main` is correct, and has been since `65ef085a` at **06:07:25Z**, this
+seat's own window 49 commit titled `restore
+INC-2026-10-18-board-runtime-token-printed-twice`. So nothing is owed on
+the branch in the direction the ask named. What is owed is the opposite:
+**those four branches hold the pre-restore shape, and merging one lands
+it on `main`.**
+
+### The merge exits zero, which is why no instrument reports it
+
+Simulated in a scratch worktree, `origin/main` merged with
+`refs/prs/510`, both register drivers registered and their path asserted
+against this checkout:
+
+```
+merge exit=0
+111 INC-2026-10-18-board-runtime-token-printed-twice
+166 INC-2026-10-25-githubs-merge-verdict-…-cannot-reach-the-gate
+```
+
+Sixty-three lines of a correction about the ledger merge driver move back
+under the heading about a printed token, and the gate sees a clean merge.
+The register driver is entry-identified, so it resolves per entry and
+takes the branch's copy of each; it has no notion that one of the two
+copies is a *restore* and the other is what the restore repaired. This is
+`INC-2026-10-26-a-hand-resolution-moved-a-correction-between-two-register-entries-and-every-merge-after-it-is-clean`
+with its sign established: the clean merge does not merely preserve the
+mistake, it **reintroduces** it onto a trunk that no longer has it.
+
+### Why the fifty-fourth window could not have seen it
+
+It read the branch and not `main`, and that is the correct reading for
+every other check in this file, because `main` is the subset of this
+org's memory the owner has merged and is therefore the *stale* side by
+default. Here it was the fresh side, because the repair had already
+merged and the branch had been cut before it. So the standing habit
+inverted:
+
+> **A register check reads both sides or it cannot tell a pending repair
+> from a pending regression.** The two are the same observation — branch
+> and trunk disagree — and they have opposite owners and opposite
+> actions.
+
+### The census is one command and it is now a standing sweep
+
+The reading above is cheap enough to run over the whole open queue, and
+it is the only form that localises the defect to a seat rather than to a
+file. Four of one seat's chain, nine other branches clean: that is a
+chain-shaped fault, not a register-shaped one, and it tells you who to
+tell.
+
+### Actions
+
+1. Ursa's PM, told at this window's send time with a `data.deadline`: the
+   four branches need `main`'s copy of those two entries before any of
+   them merges. Not this seat's files to edit.
+2. The charter clause, on the charter lane: read both sides, and run the
+   per-entry census over the open queue rather than over one branch.
