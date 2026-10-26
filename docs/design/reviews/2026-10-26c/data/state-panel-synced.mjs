@@ -23,7 +23,14 @@ const PHRASE = 'review-kit-not-a-secret'
 const PAYLOAD = {
   schemaVersion: '0.1.0',
   project: 'ursa-minor',
-  sessionFile: '7f3a91c4-2b6e-4d80-9a15-c3e8f0217bd9.jsonl',
+  // Eight characters and not a full UUID, because the redaction gate
+  // refuses one anywhere in the tree and is right to: it cannot tell a
+  // fabricated session id from a real one, and the one it cannot tell
+  // apart is the one that leaked in Ursa incident 2. Nothing is lost
+  // here. The panel draws `sessionFile.slice(0, 8)`, so this renders
+  // byte-identically to the 36-character version the first draft of
+  // this fixture carried.
+  sessionFile: '7f3a91c4.jsonl',
   updatedAt: '2026-10-26T06:30:00.000Z',
   userTurns: 14,
   verdict: {

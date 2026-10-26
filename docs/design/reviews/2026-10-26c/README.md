@@ -259,6 +259,28 @@ widest page name in the run plus a space, and the header is formatted
 from the same value rather than hand-spaced, so the two cannot drift
 apart again.
 
+## 6.1 One fixture the redaction gate was right to refuse
+
+The synced-panel fixture the inherited run wrote carried a fabricated
+36-character session id, and `scripts/redaction-check.mjs` refuses a
+full UUID anywhere in the tree. It is right to: it cannot tell a
+fabricated session id from a real one, and the one it cannot tell apart
+is what leaked in Ursa incident 2. The fixture now carries eight
+characters, and nothing is lost, because the panel draws
+`sessionFile.slice(0, 8)` — the frame re-shot against the truncated
+fixture is byte-identical to the one shot against the long one, bounding
+box of the difference `None`. No tracked file in this branch carries a
+full UUID.
+
+**One thing a seat running that gate locally should know.** The gate
+excludes `.git`, `.ursa` and `node_modules` and nothing else, so after
+`next build` it reports two hits inside `ursa-major/overlay/.next/`,
+which is gitignored and never exists on CI's fresh checkout. A seat that
+builds the overlay and then runs the gate sees a red that CI does not
+see. Reported rather than fixed: the gate's argument list lives in
+`.github/workflows/redaction-gate.yml` and workflows are outside this
+seat's writable surface.
+
 ## 7. The benchmark: does anybody leave a placeholder to the browser?
 
 §4.2 rests on a claim about practice, so the claim was put to the field.
