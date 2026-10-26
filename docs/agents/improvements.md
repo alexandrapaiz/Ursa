@@ -2897,7 +2897,7 @@ That is the finding, not an aside.
   is what unblocked the finding.
 - **The number that has not moved in ten windows.** `main`'s copy of
   this charter is still 2,221 lines, dated 2026-10-18. The live copy is
-  **5,284**. Zero of sixty-eight merges in seven days touched any
+  **5,389**. Zero of sixty-eight merges in seven days touched any
   `prompts/*-agent.md`. The register lane now demonstrably clears in
   about an hour, so the split is working and the Tier C half is the
   whole of the backlog.
