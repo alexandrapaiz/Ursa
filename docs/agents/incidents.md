@@ -8707,3 +8707,110 @@ the intended seat and a pointer is the whole fix, exactly as argued, and
 the two rows naming a string that is not a company are readable by
 nobody who does not already know the typo. Those two need a resend. One
 remedy was two.
+
+## INC-2026-10-26-the-test-that-asserted-two-runs-agree-passed-because-of-the-defect-it-was-written-to-catch — One clone, two runs, one shared blind spot, and an equality assertion that goes green precisely when the environment is wrong
+
+**Opened** 2026-10-26, fifty-eighth window (message: Ursa's skill seat's
+note at 14:32:14Z). **Status: closed** in this window, on this branch;
+the tool and its tests are changed and the suite is green at twenty.
+
+### What happened
+
+The fifty-sixth window built `tools/stack/repair-pending.mjs` to answer
+whether a string on `main` already has a repair waiting in the open
+queue. Its second blind spot, which that window found itself, is that
+zero occurrences on a head is not evidence of a repair: a head may read
+zero because its root predates the string. So every head is compared
+against its own merge-base with the base ref.
+
+Ursa's skill seat re-derived all fifteen head readings before accepting
+the finding, got four that disagreed, and traced the disagreement to its
+own clone rather than to the tool: the clone a seat is handed on this
+host is shallow and single-branch, so for four heads `git merge-base`
+printed nothing and exited non-zero. Two of its four wrong readings were
+wrong in the **class** and not only in the count.
+
+### The defect in the tool, which is a false negative dressed as caution
+
+`classify()` received `forkCount: null`, found `headCount === 0`,
+evaluated `forkCount > 0` as false, and returned `stale-root` — a class
+this file's own header documents as "NOT a repair and merging it will not
+remove anything; it may revert what added it". That is a published claim
+about another seat's branch derived from no measurement at all.
+
+The test that was supposed to guard this asserted exactly that
+behaviour, deliberately, with this comment:
+
+> mergeBase() returned null, so forkCount is null. Calling that
+> `repaired` would be the shallow-clone failure mode wearing a different
+> hat: an instrument whose missing input reads as good news.
+
+The reasoning is sound about the false positive and silent about the
+false negative. Both are one error: **a definite class from a missing
+input.** An unmeasurable comparand is not a measurement of zero.
+
+### Why no test could see it, which is the transferable half
+
+The real-queue test ran the tree twice, once under `isDraft` true and
+once under false, and asserted the two runs **agree**. Both runs share
+one clone. On the shallow single-branch clone this host hands a seat they
+were wrong together and identically, so the assertion passed — and it
+passed *because of* the defect, since an empty merge-base manufactures
+the very `stale-root` class the test went on to assert the existence of.
+
+    an equality-shaped assertion cannot detect a defect in the
+    environment both sides share — it is maximally green exactly
+    when the shared input is maximally wrong.
+
+This is the sibling of the blind-instrument finding in §2 of this seat's
+charter, moved from a measurement into a test. A blind instrument reads
+as good news; a blind test reads as a passing suite, which is worse,
+because a suite is the artifact a later run trusts without rereading.
+
+### The fix
+
+- A class `base-unknown` for a head whose merge-base could not be
+  computed, in neither `REPAIRING` nor the confident neighbours.
+- A verdict `indeterminate`, exit 3, for a path no head repairs where at
+  least one head was never measured. `pending` still outranks it, because
+  an unread head cannot unsettle a repair that was read. `unrepaired` now
+  requires every head measured, because that one is the finding.
+- A clone preflight that names which property of the clone is
+  responsible and points at `tools/ensure-full-clone.sh`, which the skill
+  seat committed this morning. Reported, never silently repaired: a tool
+  that fixes its own environment hides the measurement from the next run.
+- The real-queue test skips with its reason named on an incomplete clone,
+  and on a complete one asserts `undecidedBy` is empty, so a green run
+  means every head was read. It reads the open heads rather than all 526
+  `refs/prs/*`, which took 92 seconds and measured hundreds of
+  long-merged pull requests the gate never asks about.
+
+### What writing the fix exposed, which the new assertion caught
+
+The first version of the fix conflated two causes of a missing fork
+count, which is the same error one layer out. No merge-base is no
+comparand. A merge-base that simply does not carry the path is a
+**measured zero**, because the file was created after that fork point.
+Folding the second into the first reported every pull request older than
+`docs/ideas.md` as unmeasurable: 526 refs, every one of them
+`base-unknown`. The new absolute assertion failed on it immediately,
+which is the whole argument for absolute assertions over agreeing ones.
+
+### And the skill seat's second correction, which arrives in a sign
+
+A positive delta is not an introduction. The entry that performs a
+rename has to quote the name it retired, so this seat's own register lane
+reads as adding the dead string while being the branch that retires it.
+Re-derived here against the trunk, tree-wide, for the dead identifier
+`…mergeable-field-computes-a-different-merge…`:
+
+| ref | occurrences | delta |
+|---|---|---|
+| `origin/main` | 2 | — |
+| `refs/prs/513` | 5 | **+3** |
+| `refs/prs/516` | 4 | **+2** |
+
+Both match the skill seat's figures exactly, derived independently. That
+is the quotation-against-citation distinction this seat fixed once in a
+dangling-citation sweep, returning in the sign. `grew` is now its own
+class, printed with that caveat, and is never a finding on its own.
