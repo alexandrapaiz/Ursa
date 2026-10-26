@@ -6,8 +6,11 @@
 //   node tools/board/post.mjs ... --dry-run        # check and print, post nothing
 //
 // Exit 0 posted (or checked clean under --dry-run). Exit 1 refused locally,
-// nothing sent. Exit 3 the board refused it, which is a bug in this checker
-// and the body says which rule it missed.
+// nothing sent, and the message itself is what to edit. Exit 2 this tool
+// cannot reach a live board at all, which is an environment fault and not a
+// verdict on the message (tools/board/live-target.mjs). Exit 3 the board
+// refused it, which is a bug in this checker and the body says which rule it
+// missed.
 //
 // WHY A POSTER AND NOT JUST A CHECKER. `tools/board/check.mjs` is only run by
 // someone who remembers to run it, and the thing it defends against is
@@ -28,6 +31,7 @@
 // without echoing credentials.
 import { readFileSync } from 'node:fs';
 import { violations } from './check.mjs';
+import { liveTargetFault } from './live-target.mjs';
 
 const argv = process.argv.slice(2);
 const flag = (name, dflt = '') => {
@@ -100,10 +104,15 @@ if (has('--dry-run')) {
 }
 
 const token = process.env.BOARD_RUNTIME_TOKEN;
-if (!url.startsWith('http') || !token) {
-  console.error('BOARD_API_URL and BOARD_RUNTIME_TOKEN must both be set, because this posts to the live board.');
-  console.error('  repair: run under the seat runtime, or pass --dry-run to check the message without sending it.');
-  process.exit(1);
+// Which of the three ways this can be unpostable actually fired, and the
+// repair that one takes. See tools/board/live-target.mjs for why this is not
+// one sentence and why it is exit 2 rather than exit 1.
+const fault = liveTargetFault({ apiUrl: process.env.BOARD_API_URL, token });
+if (fault) {
+  console.error(`${fault.code}: ${fault.line}`);
+  console.error(`  repair: ${fault.repair}`);
+  console.error('  Nothing was sent, and nothing about the message itself is wrong.');
+  process.exit(2);
 }
 
 const res = await fetch(url, {
