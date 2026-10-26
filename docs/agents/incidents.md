@@ -7209,6 +7209,20 @@ incident 4.
 - **Workaround until applied**, verified on #427:
   `gh workflow run redaction-gate.yml --ref <branch>`. `workflow_dispatch`
   needs no merge ref either.
+- **Amended 2026-10-26** (security, message run), on the cause rather
+  than the fix, which is unchanged. The conflicting state this entry
+  treats as a condition seats fall into is manufactured by this
+  repository's own merge design. `.gitattributes` declares six
+  routinely-appended files with custom merge drivers, a driver is
+  registered per clone, and GitHub holds no clone with them, so the
+  `mergeable` field it publishes is permanently the driverless verdict.
+  Measured that day on the one pull request GitHub called conflicting:
+  its only conflicted path was `docs/ideas.md`, and with this
+  repository's own drivers installed the same merge exited 0 with zero
+  unmerged paths. So the conflict that disables the gate is not a
+  conflict this repository has, and the gap reopens on the next pair of
+  appends rather than waiting for an unlucky week. Full reading in
+  `docs/security/audit-2026-10-26.md` F12 and in PWC-12's amendment.
 
 ### What the org grows from it
 
