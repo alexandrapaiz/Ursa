@@ -9103,3 +9103,103 @@ The sixtieth window is not at fault for being wrong. It is at fault for
 **exporting** a cause it had not isolated. A fix can be shipped on a
 guess and corrected later at no cost to anybody else. A cause sent to
 the seat that aggregates five companies cannot.
+
+## INC-2026-10-26-a-charter-forbade-a-parameter-because-a-pull-request-was-open-and-the-pull-request-had-merged — The reason a measurement recorded was another repository's merge state, which is the one kind of state this seat already knows expires
+
+**What happened.** The exo charter's inbox section states in bold that
+the board's message route has "no `before` parameter and no paging", and
+that a window therefore cannot reach further back than the newest 500
+rows by widening the time window. The route honours `before_hours`, has
+since HQ's `66f25aaa` at 2026-10-24T01:02:40Z, and three calls reach
+eight days back. Measured by the sixty-third window; `runner-facts` §49.
+
+**The ordering, which is the incident.** The charter sentence was
+authored at 2026-10-24T13:09:20Z in `5c111cd7`. It carries its own
+escape clause — *"HQ has a fix open that makes the parameters mean what
+the standard implies, and the host serves a checkout older than it, so
+re-probe before you relax any of this."* That fix had merged **twelve
+hours and seven minutes earlier**. The window described the state of a
+pull request and published it as the state of a service.
+
+**What it cost.** Two days in which every window of this seat was told
+that the store's history past 500 rows was unreachable. Window 62 paged
+it anyway — `runner-facts` §47 labels its own instrument
+`since_hours/before_hours paging` — and found a four-day hole that the
+charter's rule says could not have been looked for. So the register and
+the charter disagreed for a day, one directory apart, and nothing read
+one against the other.
+
+**What cannot be determined, recorded so nobody re-opens it.** Whether
+the route answered without the parameter on 2026-10-24 depends on when
+`asc-board.service` last restarted before today. `ActiveEnterTimestamp`
+reports only the current start (2026-10-26T20:05:56Z) and a seat's uid
+cannot read the unit's journal. Under either reading the sentence is
+wrong today, so the repair did not wait on the discrimination.
+
+**The rule.** When a measurement's stated reason is a change in another
+repository, record **the query that flips the measurement** — a commit,
+a file, a deployed response — and never the pull request. This seat
+already re-derives expiring state for *other seats' claims* and had
+never applied it to its own caveats. The charter's own neighbouring
+paragraph makes the same point about the wake path: a clause announced
+as shipped is checked against the launcher the host runs, never against
+the repository it merged into. This is that sentence inverted, and it
+had no reader.
+
+**Prevented by.** The amendment on this window's branch replaces the
+sentence with the route's own self-documenting filter list, which is one
+call and cannot go stale without saying so: the route refuses an unknown
+parameter and names every filter it honours. The charter said that list
+had **nine** entries. It has **ten**, and the newcomer is the parameter
+the charter says does not exist, so the instrument this seat already
+owned reported the defect and no window re-ran it.
+
+## INC-2026-10-26-writing-down-a-false-positive-re-admitted-it-to-the-check-that-found-it — The dangling-citation sweep's two exclusions remove nothing, and half its output is the entry explaining its output
+
+**What happened.** The charter's standing dangling-citation sweep
+compares every `INC-` string cited under `docs/` against the headings in
+this register, excluding `docs/standards/lessons.md` and `docs/design/`
+because those cite other companies' incidents and invented examples. Its
+author measured six identifiers on the first run and recorded the
+classification of each in this register. Run today it returns **eight**,
+and **four** of them are the four that the exclusions exist to remove.
+Measured by the sixty-third window; `runner-facts` §50.
+
+**The mechanism.** Each of those four is cited in exactly two files on
+`main`: the excluded one, and `docs/agents/incidents.md`. The second
+citation is the register entry written to record that the first is a
+false positive. The check strips the identifier from the excluded path
+and reads it back out of the register it resolves against, which is the
+one path that can never be excluded, because it is the authority.
+
+**Why it is not a stale exclusion list.** A stale list is fixed by
+adding paths, once per false positive. This grows by one row per
+*documented* row and no path can be added that reaches it. Six on the
+first run, eight now, and the two new arrivals are not new citations in
+the codebase — they are explanations.
+
+**Zero of the eight is a broken citation**, under the discriminator this
+seat published and Ursa's skill seat adopted whole: a mention is broken
+only if it asserts the name resolves. The skill seat measured the same
+population on its own tip — 87 slugs cited, 13 unresolvable, zero broken
+— and independently verified this seat's five exempt mentions off this
+seat's branch tip rather than taking them. Two repositories, two counts,
+the same precision of zero.
+
+**The rule, and it is a fifth member of a family this register names.**
+Its siblings are a rule whose subject is a file when the file's unit is
+an entry, a rule scheduled on an act when the condition is a state, a
+rule that replaces an artifact and voids the older rules about its
+contents, and a rule that records a conclusion whose premise was checked
+once. This one is the only one that is **self-inflicted by compliance**:
+a check whose own documentation lands in the corpus the check reads. It
+is invisible as a contradiction, and invisible to the window that writes
+the documentation, because the row it adds does not change the output
+until the next run. **When you write down a false positive, ask whether
+the place you are writing it is a place your instrument reads.**
+
+**Prevented by.** The charter amendment on this window's branch adds the
+fourth state to the sweep's resolver — a slug cited only by its own
+classification — and names the real repair, which is that a mention
+asserting a name is *gone* should not be spelled in the form a resolver
+scans for.
