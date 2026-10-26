@@ -1,105 +1,121 @@
-# Merge order — replaced for window 48, 2026-10-26
+# Merge order — what the owner can land right now
 
-Measured at 2026-10-26 00:4x–00:5x UTC against `main` at `6bd03363`,
-from a clone unshallowed and widened per §0 of `prompts/exo-agent.md`,
-with both register merge drivers registered
-(`git config --get-regexp 'merge\.(ledger|register)\.'` prints six
-lines). Every verdict below names the instrument that produced it,
-because a conflict verdict with no instrument beside it cannot be
-re-measured by the seat holding the branch.
+Replaced wholesale every run of the ExO seat, per `prompts/exo-agent.md`
+§5b. Measured **2026-10-26 at 06:0x–06:1x UTC** against `main` at
+`5b7bcf61`. An order that has not been simulated is a guess, so the
+order below was performed in a detached scratch worktree in sequence.
 
 ## The three numbers
 
 | | |
 |---|---|
-| open pull requests | **12** (6 of them drafts) |
-| merged in the last seven days | **54** |
-| age of the oldest open | `#395`, opened 2026-10-24T21:21Z, **27 hours** |
+| open pull requests | **17**, six of them drafts |
+| merged in the last seven days | **67** |
+| oldest open | `#395`, 2026-10-24 21:21 UTC, **33 hours** |
 
 Open does not outnumber the week's merges, so the depth warning does not
-fire. The owner is absorbing work faster than the org produces it.
-**One class of file is the exception and it is the same exception as
-four windows ago: zero of the fifty-four merges touched any
-`prompts/*-agent.md`, and `main`'s newest charter commit is `94e926b7`
-of 2026-10-18.** The gate is working and one predicate inside it has not
-moved in eight days.
+fire. One number inside the gate has not moved in eight days:
+**zero of the 67 merges touched any `prompts/*-agent.md`**, and `main`'s
+newest charter commit is `94e926b7` of 2026-10-18 18:50. Instrument:
+`gh pr list --state merged --limit 300 --json number,mergedAt,files` with
+the predicate `test("^prompts/.*-agent\\.md$")`, never the directory.
 
-## Conflicts
+## Nine decisions, not seventeen
 
-Instrument: `git merge-tree --write-tree --name-only origin/main refs/prs/<n>`,
-exit status read with the drivers registered and with the §27 caveat
-that a non-zero exit is not by itself a conflict verdict.
+Containment, instrument
+`git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>`,
+exit 0 = contained. Stated contained-in-tip, never as "ancestor of".
 
-**All twelve are clean.** `#395 #427 #439 #441 #444 #445 #446 #447 #448
-#449 #450 #451`, exit 0 every one.
+| chain | members | tip | decisions saved |
+|---|---|---|---|
+| the PM's | `#462` ⊂ `#465` ⊂ `#467` ⊂ `#468` ⊂ `#470` ⊂ `#472` | **#472** | 5 |
+| the skill seat's | `#441` ⊂ `#445` ⊂ `#448` | **#448** | 2 |
 
-## Containment
+So 17 open pull requests are **nine** decisions: seven standalone
+(`#395 #447 #461 #463 #473 #474 #478`) plus two chain tips.
 
-Instrument: `git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>`,
-exit 0 meaning contained. Stated in the direction that cannot invert.
+**A note on a pair named from outside.** HQ's `exo-centralizer` named
+`[465, 470]` as this seat's stacked pair in a board note at 05:52:03
+UTC. Both are `ursa-pm` branches, both have base `main`, and both are
+interior members of the six-deep chain above whose tip is `#472`. The
+routing in that note is right — the chain is the PM's to resolve — and
+the attribution and the depth are not. Re-derived here, instrument
+`gh pr view <n> --json baseRefName,headRefName`.
 
-- `#445` is contained in `#448` (skill)
-- `#427` is contained in `#439`, and `#439` is contained in `#446` (security)
-- `#427` is contained in `#446` (transitively, checked directly)
+## Two merges, not one, because the instruments answer different questions
 
-So twelve identifiers are **nine decisions**. Merging `#446` closes
-three of the security seat's and merging `#448` closes two of the
-skill seat's.
+HQ's `tools/check-merge-queue.sh` pins the **driverless** merge
+deliberately: GitHub merges server-side in a clone with no drivers, so
+the driverless merge is the button's verdict permanently. That is the
+right question for "what can the owner land right now". It is not the
+same question as "does the result satisfy this repository's own merge
+semantics", and this run measured both. The second command is in
+`docs/agents/runner-facts.md` §32.
 
-## The order, simulated rather than guessed
+| PR | seat | button (driverless) | this repo's drivers | state |
+|---|---|---|---|---|
+| `#478` | exo | clean | merges | **ready** |
+| `#474` | market | clean | merges | ready |
+| `#473` | frontend | clean | merges | ready |
+| `#472` | pm (tip of 6) | clean | merges | ready |
+| `#463` | engineer | clean | **refused** | **drivers-disagree** |
+| `#461` | security | refuses | merges | needs-local-merge |
+| `#448` | skill (tip of 3) | refuses | merges | needs-local-merge |
+| `#447` | exo | clean | merges | ready, **Tier C** |
+| `#395` | research | clean | merges | ready |
 
-Performed in a detached scratch worktree at `origin/main`, drivers
-registered, `git merge --no-edit` in this sequence. **Nine of nine
-merged with no conflict and nothing to resolve by hand:**
+Instruments, one per column and named because a verdict with no
+instrument beside it cannot be re-measured by the seat holding the
+branch:
+
+- button column: `bash tools/check-merge-queue.sh` from HQ's `main`,
+  454 lines, `/srv/asc/repos/alexandra-systems/tools/` on this host,
+  verified byte-identical to HQ's `main` this run.
+- drivers column: `git merge --no-edit refs/prs/<n>` in a detached
+  worktree off `origin/main`, with
+  `tools/ledger/install-driver.sh` and
+  `tools/registers/install-drivers.sh` run in the **parent** clone.
+
+## The landing order, simulated
 
 ```
-450  446  448  441  449  451  444  395  447
+478  474  473  472  447
 ```
 
-`#450` first because it is the PM's own pass and because it is the only
-live route to `main` for
-`INC-2026-10-18-board-runtime-token-printed-twice`, whose 48-line entry
-is absent from `main` while nine citations across three registers name
-it (`docs/agents/improvements.md` 1, `docs/agents/incidents.md` 5,
-`docs/agents/learning-log.md` 3). `#443` and `#438` both carried it and
-both closed as superseded at 00:36 today, correctly and with the
-ancestry pasted; `#450` contains them.
+Five of five merged in sequence with nothing to resolve, in a detached
+scratch worktree off `origin/main`, drivers registered. `#447` is last
+and is the only Tier C item in the list.
 
-`#447` last because it is this seat's charter half and Tier C, so it
-waits on the owner whatever the rest of the queue does. Nothing in the
-order depends on it.
+`#395` merges clean on its own and was simulated separately rather than
+in the order, because at 262 commits behind `main` it is the one branch
+whose position in a sequence changes its diff.
 
-## What a seat holding one of these should know
+**Not in the order, and why, because none of these three wait on her:**
 
-- A `CONFLICTING` or `UNKNOWN` from `gh pr list`'s `mergeable` field
-  disagrees with every verdict above, in both directions, and the
-  account is
-  `INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`.
-  Re-measure with `merge-tree` and the drivers registered before you
-  rebase anything.
-- If a verdict here contradicts what you measure, yours is the newer
-  one. `refs/prs/*` goes stale inside a single window (runner-facts §27).
+- `#463` (engineer) — **drivers-disagree.** The button will accept it;
+  this repository's `ledger` driver refuses it, naming one block in
+  `docs/ideas.md` edited on both sides. Not a judgement the owner owes
+  and not a rebase. The entry's author decides how the two edits
+  combine. `INC-2026-10-26-clean-from-the-button-is-not-clean-from-this-repositorys-own-merge-semantics`.
+- `#461` (security), `#448` (skill, tip of three) —
+  **needs-local-merge.** Mechanical, no judgement, no owner: the
+  authoring seat runs its driver installer, merges `origin/main` into
+  its branch locally, and pushes. After that the button has nothing left
+  to resolve. Both seats were told on the board this run.
 
-## Postscript, 00:46–00:53 UTC, written because the queue moved under this file
+This seat did exactly that to its own two branches this run, which is
+why `#447` and the old `#454` are in the clean column rather than the
+`needs-local-merge` one. Both read `needs-local-merge` at 06:0x and
+clean at 06:1x, and the only thing that changed was one local merge
+each.
 
-Dated rather than rewritten, because the difference between a verdict
-that was wrong and one that was true and expired calls for opposite
-responses, and this one is the second.
+## Housekeeping done this run
 
-Between the sweep above and this paragraph the owner merged four of the
-nine: `#446` and `#427` and `#439` (security, 00:44:54 and 00:44:56) and
-`#449` (market, 00:46:01). So the order's first three decisions are
-discharged and the remainder is `450 448 441 451 444 395 447`.
-
-Re-measured at 00:53: **13 open** (six drafts), **58** merged in the last
-seven days, oldest still `#395`. The two new identifiers are this
-window's own `#454` and one other seat's.
-
-Four branches were deleted under §5b's predicate after each was checked
-individually against `gh pr list` rather than taken from the query:
-`ursa-market/2026-10-26-message`, `ursa-security/2026-10-25-hook`,
-`ursa-security/2026-10-25-message`, `ursa-security/2026-10-26-message`.
-All four had merged in the preceding nine minutes, which is exactly why
-the rule says print the list and read it rather than piping it into
-`git push --delete`: the same query run twenty minutes earlier would
-have named three branches with open pull requests on them.
+Six remote branches deleted under §5b's predicate — every pull request
+that ever pointed at the name is merged — each checked individually with
+`gh pr list --head <branch>` rather than taken from the group query,
+because all six had merged within the preceding two hours:
+`ursa-engineer/2026-10-26-hook`, `ursa-frontend/2026-10-26-hook`,
+`ursa-market/2026-10-26-message-20`, `ursa-market/2026-10-26-message-21`,
+`ursa-market/2026-10-26-message-topics`, `ursa-security/2026-10-26-hook`.
+217 remote branches before, 211 after.
