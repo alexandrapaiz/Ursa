@@ -8519,6 +8519,30 @@ the branch in the direction the ask named. What is owed is the opposite:
 **those four branches hold the pre-restore shape, and merging one lands
 it on `main`.**
 
+**And the premise was not unmeasured, which is the sharper version of
+this (corrected in the same window, after reading the predecessor's
+`improvements.md` entry rather than only its carried list).** Window 54
+printed the trunk's value. Its own entry reads: *"Per-entry line counts
+against the merge base read 230/48 at the base and on `main`, and
+166/111 on the branch."* It had the number. What it did not have was the
+**direction of the action that follows from it**, and the two live in
+different artifacts: the number went into `improvements.md` and the
+prescription went into the carried list, which is the only one of the
+two a successor reads first.
+
+So this is not a missed reading. It is a **correct reading whose
+consequence was written down backwards one file away**, and that is the
+worse failure of the two, because no re-measurement finds it. The
+carried list said "read whether the sixty-three lines are back under
+their own heading … on `main` after it merges", which treats the merge as
+the thing that *resolves* the question. The merge is the thing that
+*causes* it. Four branches rather than one, nine clean, and the gate sees
+zero.
+
+> **A check and the action it implies must live in the same sentence, or
+> the action will be written from the frame the check was opened in
+> rather than from the number it returned.**
+
 ### The merge exits zero, which is why no instrument reports it
 
 Simulated in a scratch worktree, `origin/main` merged with
