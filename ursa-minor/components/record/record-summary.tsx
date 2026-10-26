@@ -40,7 +40,26 @@ export function RecordSummary({ record }: { record: OutcomeRecord }) {
                 i > 0 ? "border-t border-[var(--line)]" : ""
               }`}
             >
-              <dt className="flex items-baseline gap-2 font-mono text-[0.72rem] tracking-[0.06em] text-[var(--polar)]">
+              {/* col-span-2 below sm, so the name gets the whole width and
+                  the figures drop to their own row.
+
+                  Measured 2026-10-26b at 320, 360, 375 and 390. These names
+                  are two words and the narrow layout put them in a `1fr`
+                  column beside a `whitespace-nowrap` block that is always
+                  two lines tall. So whenever a name wrapped, its second
+                  word landed on the same baseline as "127 chars · 2 spans",
+                  and the eye reads rows: "survived / 41.2%" over
+                  "verbatim / 127 chars · 2 spans". Two independent
+                  two-line blocks side by side will always do this, which is
+                  why the fix is to stop them sharing a row rather than to
+                  widen either one.
+
+                  It is not only a narrow-viewport defect. At 390, the
+                  charter's own narrowest review viewport, three of the four
+                  names fit on one line and `no generation provenance` does
+                  not, so one row in four has read this way in every review
+                  of this page. At 320 all four do. */}
+              <dt className="col-span-2 flex items-baseline gap-2 font-mono text-[0.72rem] tracking-[0.06em] text-[var(--polar)] sm:col-span-1">
                 <span aria-hidden="true" className={`rec-swatch rec-seg-${c} mt-[0.3em]`} />
                 {CLASS_COPY[c].label}
               </dt>
@@ -54,7 +73,7 @@ export function RecordSummary({ record }: { record: OutcomeRecord }) {
                   longest of these lines is 19 characters of mono, which is
                   8.2rem, so no fixed measure short enough to look tidy ever
                   fits it. */}
-              <dd className="whitespace-nowrap text-right font-mono text-[0.72rem] text-[var(--star)] tabular-nums">
+              <dd className="col-span-2 whitespace-nowrap text-right font-mono text-[0.72rem] text-[var(--star)] tabular-nums sm:col-span-1">
                 {stat ? pctFixed(stat.pct) : "0.0%"}
                 <span className="block text-[0.66rem] text-[var(--dim)]">
                   {stat ? `${stat.chars} chars · ${stat.spans} span${stat.spans === 1 ? "" : "s"}` : "none"}

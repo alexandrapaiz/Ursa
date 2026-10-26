@@ -1,0 +1,506 @@
+[
+  {
+    "width": 320,
+    "page": "home",
+    "path": "/",
+    "vw": 320,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 320,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [
+      {
+        "sel": "canvas.pointer-events-none",
+        "left": -8,
+        "right": 328,
+        "w": 336,
+        "chars": 0
+      }
+    ],
+    "bleedCount": 1,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 320,
+    "page": "set",
+    "path": "/record",
+    "vw": 320,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 320,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 320,
+    "page": "record",
+    "path": "/record/mini-fixture",
+    "vw": 320,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 320,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 320,
+    "page": "address",
+    "path": "/record/at",
+    "vw": 320,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 320,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 320,
+    "page": "404",
+    "path": "/this-page-does-not-exist",
+    "vw": 320,
+    "overflow": 0,
+    "main": {
+      "sel": "main.relative",
+      "w": 320,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [
+      {
+        "sel": "canvas.pointer-events-none",
+        "left": -8,
+        "right": 328,
+        "w": 336,
+        "chars": 0
+      }
+    ],
+    "bleedCount": 1,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 360,
+    "page": "home",
+    "path": "/",
+    "vw": 360,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 360,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [
+      {
+        "sel": "canvas.pointer-events-none",
+        "left": -9,
+        "right": 369,
+        "w": 378,
+        "chars": 0
+      }
+    ],
+    "bleedCount": 1,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 360,
+    "page": "set",
+    "path": "/record",
+    "vw": 360,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 360,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 360,
+    "page": "record",
+    "path": "/record/mini-fixture",
+    "vw": 360,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 360,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 360,
+    "page": "address",
+    "path": "/record/at",
+    "vw": 360,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 360,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 360,
+    "page": "404",
+    "path": "/this-page-does-not-exist",
+    "vw": 360,
+    "overflow": 0,
+    "main": {
+      "sel": "main.relative",
+      "w": 360,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [
+      {
+        "sel": "canvas.pointer-events-none",
+        "left": -9,
+        "right": 369,
+        "w": 378,
+        "chars": 0
+      }
+    ],
+    "bleedCount": 1,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 375,
+    "page": "home",
+    "path": "/",
+    "vw": 375,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 375,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [
+      {
+        "sel": "canvas.pointer-events-none",
+        "left": -9.4,
+        "right": 384.4,
+        "w": 393.8,
+        "chars": 0
+      }
+    ],
+    "bleedCount": 1,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 375,
+    "page": "set",
+    "path": "/record",
+    "vw": 375,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 375,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 375,
+    "page": "record",
+    "path": "/record/mini-fixture",
+    "vw": 375,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 375,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 375,
+    "page": "address",
+    "path": "/record/at",
+    "vw": 375,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 375,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 375,
+    "page": "404",
+    "path": "/this-page-does-not-exist",
+    "vw": 375,
+    "overflow": 0,
+    "main": {
+      "sel": "main.relative",
+      "w": 375,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [
+      {
+        "sel": "canvas.pointer-events-none",
+        "left": -9.4,
+        "right": 384.4,
+        "w": 393.8,
+        "chars": 0
+      }
+    ],
+    "bleedCount": 1,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 390,
+    "page": "home",
+    "path": "/",
+    "vw": 390,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 390,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [
+      {
+        "sel": "canvas.pointer-events-none",
+        "left": -9.7,
+        "right": 399.8,
+        "w": 409.5,
+        "chars": 0
+      }
+    ],
+    "bleedCount": 1,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 390,
+    "page": "set",
+    "path": "/record",
+    "vw": 390,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 390,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 390,
+    "page": "record",
+    "path": "/record/mini-fixture",
+    "vw": 390,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 390,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 390,
+    "page": "address",
+    "path": "/record/at",
+    "vw": 390,
+    "overflow": 0,
+    "main": {
+      "sel": "main.w-full",
+      "w": 390,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [],
+    "bleedCount": 0,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  },
+  {
+    "width": 390,
+    "page": "404",
+    "path": "/this-page-does-not-exist",
+    "vw": 390,
+    "overflow": 0,
+    "main": {
+      "sel": "main.relative",
+      "w": 390,
+      "left": 0
+    },
+    "clipped": [],
+    "clippedCount": 0,
+    "right": [],
+    "rightCount": 0,
+    "bleed": [
+      {
+        "sel": "canvas.pointer-events-none",
+        "left": -9.7,
+        "right": 399.8,
+        "w": 409.5,
+        "chars": 0
+      }
+    ],
+    "bleedCount": 1,
+    "hiddenCount": 0,
+    "contained": [],
+    "settled": true,
+    "settledAfterMs": 200
+  }
+]

@@ -28,6 +28,21 @@ const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -
 const OUT = arg('out', '/tmp/shots')
 const BASE = arg('base', 'http://127.0.0.1:4488')
 const ONLY = arg('only', null)
+// The three charter viewports are the default and `--only` picks one of
+// them. `--viewports name=WxH,…` replaces the matrix outright, which is
+// the other half of L25: the charter's narrowest viewport is 390, so
+// until today nothing below 390 could be *photographed* either, and a
+// measurement saying a surface fits at 320 is not the same claim as a
+// person having looked at it there. Named rather than numbered, so the
+// file names say what they are.
+const VIEWPORT_ARG = arg('viewports', null)
+const MATRIX = VIEWPORT_ARG
+  ? VIEWPORT_ARG.split(',').map((v) => {
+      const [name, dims] = v.split('=')
+      const [w, h] = dims.split('x').map(Number)
+      return [name, w, h]
+    })
+  : VIEWPORTS
 const PAGES = arg('pages', '/,/record,/record/mini-fixture,/record/at,/this-page-does-not-exist').split(',')
 const LIVE = process.argv.includes('--live')
 // How long to let the page settle after `networkidle` before the shutter.
@@ -57,7 +72,7 @@ const slug = (p) => (p === '/' ? 'home' : p.replace(/^\/|\/$/g, '').replace(/\//
 
 const browser = await launch()
 const rows = []
-for (const [vname, w, h] of VIEWPORTS) {
+for (const [vname, w, h] of MATRIX) {
   if (ONLY && ONLY !== vname) continue
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1 })
   if (!LIVE) await freezeContext(ctx)
@@ -104,8 +119,12 @@ const header = LIVE
   ? '# --live: the sky is animating in these frames. Do not pixel-diff them.'
   : `# frozen at t=${PINNED_MS}ms, seeded Math.random, CSS animations rewound.`
 const settle = `# settled ${WAIT}ms after networkidle${UNTIL ? ` and after \`${UNTIL}\` appeared` : ''}${STATE ? `, with \`${STATE}\` run to enter the state` : ''} before each shutter.`
+// A frame set shot at a width nobody expects has to say so in its own
+// manifest, or the next run compares it against the charter's three and
+// reads the difference as a regression.
+const matrixLine = `# viewports ${MATRIX.map(([n, w, h]) => `${n} ${w}x${h}`).join(', ')}${VIEWPORT_ARG ? ' (--viewports, not the charter default)' : ''}`
 const report = rows.map(line).join('\n')
-writeFileSync(`${OUT}/measurements.txt`, `${header}\n${settle}\n${report}\n`)
+writeFileSync(`${OUT}/measurements.txt`, `${header}\n${settle}\n${matrixLine}\n${report}\n`)
 console.log(report)
 const bad = rows.filter((r) => r.scrollWidth > r.clientWidth)
 console.log(bad.length ? `\n${bad.length} frame(s) overflow` : '\nno frame overflows its viewport')
