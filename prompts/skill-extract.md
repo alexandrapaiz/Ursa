@@ -1289,3 +1289,79 @@ next command reads as a different question entirely. The first act of a
 run that will compare branches is `bash tools/ensure-full-clone.sh`, and
 this run learned that by getting four of fifteen readings wrong before
 noticing.
+
+## 5w. A ratio with nothing to divide is not a ratio of zero, and on a scale where zero is good it is the most dangerous number a tool can print
+
+**Where this comes from.** Ursa's exo seat, on 2026-10-26, having
+accepted two corrections from this seat, returned one of its own in the
+same shape. Its sweep counted occurrences on a head against the head's
+merge-base with `main`, and a missing base count had two causes that it
+had folded into one: *no base at all* is no comparand, while *a base
+that predates the file* is a comparand that genuinely measures zero.
+One missing input, read as a measurement. Its remedy is the part worth
+keeping: the unmeasurable case gets its own name and no class, and the
+verdict is that it cannot tell.
+
+**The same fold, found in this seat's own write surface the same day.**
+`skills/relevance-sweep.mjs` computed the absent-word signal as
+`tokens.length ? miss.length / tokens.length : 0`. A `what` field
+yielding no content word therefore scored `0.000`, and on that scale
+`0.000` is the best score in the library. So three independent readers
+of the number agreed with each other, and all three were wrong in the
+same direction: the queue sorts descending and ranked it last, the
+`--signal` column printed it among the confirmed refs, and the
+distribution the reading threshold is argued from counted it as data.
+
+**Why this one survived longer than the exo seat's.** Its fold pointed
+both ways at once, a false positive on one side and a false negative on
+the other, which is loud enough that re-deriving a published figure
+caught it. Mine pointed one way only, toward safe. A tool that only ever
+makes its subject look better than it is produces no complaint, no
+contradiction, and no second opinion, because the finding it suppresses
+was never printed for anyone to argue with. **Prefer the fold that
+screams.** When you cannot avoid a default, choose the direction that
+makes something fail loudly over the direction that makes it pass
+quietly.
+
+**The rule, for anything under `skills/` that divides.**
+
+1. **An empty denominator returns `null`, never a number.** Not zero,
+   not one, not the mean. `null` is the only value that cannot be
+   mistaken for a reading.
+2. **Every reader of that value handles `null` explicitly.** There is no
+   such thing as one reader. The ratio in this file had three, and
+   fixing the expression without walking all three would have left the
+   distribution table still counting a phantom zero. Grep for the field
+   before you change it, and fix each site in the same commit.
+3. **Publish no statistic over it.** A ref that was never measured is
+   not evidence about the threshold it was never measured by. Count it
+   out of the table, and say in one line how many were counted out, on
+   both branches: "none" is the answer a reader wants and a missing line
+   is not it. This is `docs/standards/pm.md` §15's rule for a saturated
+   page, which says a page that could not be fully read is not an answer
+   and no ratio is published from one, applied one level down.
+4. **List it apart, with the reading it actually needs.** An
+   unmeasurable ref does not belong anywhere on the scale, including the
+   top. This file already had that pattern for the other end, where an
+   unrangeable ref misses 100 percent of its words by construction and
+   is listed separately rather than ranked. The fix was to notice the
+   pattern was already there and apply it to the symmetric case.
+5. **Keep the real zero a zero.** The whole risk of unfolding two cases
+   is moving the one that was right. The test that matters is not the
+   one asserting the new behaviour; it is the one asserting that a ref
+   whose every content word is present still measures `0.000` and still
+   sits in the table.
+
+**Where to look for the next one, cheaply.** The sibling expression.
+`density` in the same file returns `Infinity` for the same shape of
+missing denominator and was always right. The two sat on consecutive
+lines for weeks. When you find one of these, read the lines immediately
+around it before looking anywhere else, because the author made both
+choices in the same minute and only remembered one of them.
+
+Ours, not a paper's, and the honest limit of it: the fault here was
+latent. The library held 292 refs on the day of the fix and none of them
+were in the state, so nothing in it was ever misread on this account.
+What is measured is the reachability, not the harm: `check-evidence.mjs`
+never reads the `what` field's content, so no gate in this library stands
+between a wordless `what` and the best score on the scale.

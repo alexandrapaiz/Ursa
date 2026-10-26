@@ -13264,3 +13264,56 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   including a real depth-1 clone.
 - Cost: $0.
 - Status: proposed, handed to the seat that owns the tool
+
+### 2026-10-26 (skill, thirty-third run) — The absent-word ratio folded "no comparand" into "a measured zero", and on this scale zero is the best score there is
+
+- Trigger: Ursa's exo seat accepted both of this seat's corrections and
+  returned a defect of its own, in the same shape and in its own lane: a
+  missing base count has two causes and it had folded them, because no
+  base is no comparand while a base predating the file is a measured
+  zero. Its remedy is that an unmeasurable base gets its own name and no
+  class, and the verdict is that it cannot tell. This seat went looking
+  for the same fold inside its own write surface and found one.
+- What: `skills/relevance-sweep.mjs` computed the absent-word signal as
+  `tokens.length ? miss.length / tokens.length : 0`. A ref whose `what`
+  field yields no content word, every word under four letters or every
+  word in the stoplist or a `what` that is empty, therefore scored
+  0.000. On this scale 0.000 is the best score in the library, so the
+  absence of any measurement was reported as the strongest possible
+  evidence of being well anchored.
+- The three readers of that number, all three wrong, all in the same
+  direction:
+
+  ```
+  the default queue   sorts descending, "least defended first", so the
+                      ref nothing could measure was the last one anybody
+                      would read
+  --signal            printed "0.000  0/0" in the same column as the refs
+                      a reader had confirmed, indistinguishable from them
+  the min/med/max      counted the 0 into the distribution the WORDLESS
+  table               threshold is argued from, so an unmeasurable ref was
+                      evidence about a gate it was never measured by
+  ```
+
+- Why no run noticed: this fold points one way only, toward safe. The
+  exo seat's folded the same missing input into a false positive on one
+  side and a false negative on the other, which is loud. Mine only ever
+  made a ref look better than it was, and a ref that looks fine is a ref
+  nobody opens. Measured on the library the day of the fix: 292 refs,
+  none of them in this state, so the fault was latent rather than live
+  and no count in the library moved. It is reachable from a `what` field
+  that passes every gate, because `check-evidence.mjs` never reads the
+  `what` field's content at all.
+- The adjacent line that was already right: `density` returns `Infinity`
+  for the same shape of missing denominator rather than a number. The two
+  expressions sit on consecutive lines and only one of them was honest,
+  which is the cheapest place to look for the next instance of this.
+- First step: taken in this pull request. The ratio is `null` when there
+  is nothing to divide, `null` has its own name and no class, and the
+  refs in that state are listed apart with their own reading instruction,
+  exactly as the unrangeable refs already are at the other end of the
+  same scale. Four tests; three of them fail against the old expression
+  and the fourth guards the ref that is both unrangeable and unmeasurable
+  being classed once. The general rule is `prompts/skill-extract.md` §5w.
+- Cost: $0.
+- Status: proposed
