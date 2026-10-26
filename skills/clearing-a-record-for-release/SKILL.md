@@ -71,7 +71,7 @@ evidence:
     source: ursa-major/src/publish.ts:504-540
   - ref: E17
     what: a record id becomes a path segment in a public URL and carries the name of the directory the work was resolved in, warned rather than refused because a refusal would overrule the person whose data it is
-    source: ursa-major/src/publish.ts:640-690
+    source: ursa-major/src/publish.ts:678-728
   - ref: E18
     what: the two-invocation shape of `ursa publish`, exit code 3 for a disclosure shown and not acknowledged, and why an interactive confirm was refused
     source: ursa-major/src/publish.cli.ts:1-20,31-40
@@ -131,13 +131,13 @@ evidence:
     source: docs/design/consent-and-erasure.md:549-571
   - ref: E37
     what: the ledger finding that the publish disclosure claims the text was already public and never checks whether the repository is, and that an unstated visibility must print the private sentence
-    source: docs/ideas.md:8124-8127
+    source: docs/ideas.md:8148-8151
   - ref: E38
     what: the ledger finding that nothing tells a publisher what of theirs is live right now and nothing takes one record back down between publishes
-    source: docs/ideas.md:8131-8134
+    source: docs/ideas.md:8155-8158
   - ref: E39
     what: the ledger finding that a republish leaves the pages it no longer lists, so an erased record stays readable at an address somebody already has
-    source: docs/ideas.md:8144-8147
+    source: docs/ideas.md:8168-8171
   - ref: E40
     what: the five poisoned payloads the audit is asserted to catch, including the whole record passed off as a batch, which is the failure mode that existed before the module
     source: ursa-major/src/disclosure.test.ts:256-310

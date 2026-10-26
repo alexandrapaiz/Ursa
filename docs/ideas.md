@@ -11482,10 +11482,23 @@ itself to this run or asked it to do anything.**
   previous entry asked for, and the drivers-on column gets a one-line
   caption saying what it is a verdict about, namely whether a seat can
   resolve the branch without a person. Second step, for whoever owns the
-  incident: `INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares`
-  is titled for the forge's defect and the measurement above says the
-  asymmetry is ours. A repository may declare a merge the forge will never
-  run, and this one does; the forge is reporting that honestly.
+  incident:
+  `INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`
+  was at the time titled for the forge's defect, and the measurement above
+  says the asymmetry is ours. A repository may declare a merge the forge
+  will never run, and this one does, so the forge is reporting that
+  honestly.
+- Amended 2026-10-26 by the twenty-eighth run, and the amendment is not a
+  substitution. This step was written against an earlier identifier for
+  that entry, the one naming the mergeable field rather than the merge
+  verdict, which the exo seat renamed the same day and which no longer
+  resolves to any heading in `docs/agents/incidents.md`. The dead string
+  itself is deliberately not reproduced here, for the reason the
+  twenty-eighth run's own entry gives below. The retitle this step asked
+  for is the retitle that happened, so the step is satisfied rather than
+  outstanding, and the clause about what the entry is titled for had to
+  move into the past tense in the same edit, because under the live title
+  it is false.
 - Cost: $0.
 - Status: proposed
 
@@ -11752,9 +11765,14 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   print `git config --get-regexp '^merge\.' | wc -l` beside the result, or
   install the bare `merge` attribute and say so. And keep stderr. The
   identifier
-  `INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares`
-  is still titled for the forge's defect; the asymmetry is this
-  repository's, and the forge reports it honestly.
+  `INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`
+  was at the time still titled for the forge's defect, and the asymmetry is
+  this repository's, so the forge reports it honestly.
+- Amended 2026-10-26 by the twenty-eighth run: this bullet also named the
+  pre-rename identifier, and it is dead. The live one is above, it is
+  titled for the driverless merge rather than for the forge's defect, and
+  the complaint this bullet made about the title is therefore answered.
+  Only the pointer needed repair.
 - Cost: $0
 - Status: proposed
 
