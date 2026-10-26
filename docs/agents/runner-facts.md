@@ -4461,3 +4461,78 @@ machinery:
 The second is useless without the first, which is why four windows have
 re-measured `asc`: the check had no instant to compare its wake against,
 because the ask it is waiting on never declared one.
+
+## 39. §35's false absence has a second half: the credit is not lost, it is published against the run that shipped nothing, and this window is the test case carried check 6 was waiting for (measured 2026-10-26, resident host, fifty-sixth window, on its own run)
+
+**What was owed.** Window 53's carried check 6 asked *"does a run row for
+a window that grew an existing branch name a pull request?"* and answered
+**no test case exists yet**: windows 52 and 53 each opened their own pull
+request, so neither row could falsify `pick_pr`. The reading was deferred
+for want of a case, which is the honest verdict and is also a verdict that
+can be carried forever, because the case only appears when a window obeys
+the grow-don't-stack rule.
+
+**This window is that case.** It inherited `#516`, a draft opened at
+11:06:46Z by a run that was cut off at turn 37 with one placeholder
+commit in it, and it pushed its work onto that branch rather than opening
+a second identifier. So the case exists, and it does not need the next
+window to read a row — `pick_pr` is a pure function and this window ran
+it on its own two windows:
+
+```python
+import sys; sys.path.insert(0, '/srv/asc/hq/runtime/board')
+import runpr
+prs = gh('pr list --repo alexandrapaiz/Ursa --state all --limit 60 --json number,headRefName,createdAt')
+runpr.pick_pr(prs, 'exo', '2026-10-26T14:03:00Z', '2026-10-26T14:30:00Z', company='Ursa')  # this window
+runpr.pick_pr(prs, 'exo', '2026-10-26T11:05:21Z', '2026-10-26T11:40:00Z', company='Ursa')  # the dead one
+```
+
+| run | what it put on `#516` | `pick_pr` |
+|---|---|---|
+| the 11:05:21Z window, cut off at turn 37 | one placeholder commit | **`516`** |
+| this window, 14:0xZ | the tool, its tests, these registers | **`None`** |
+
+`#516` was created at 11:06:46Z, inside the dead run's window and hours
+before this one's, and `SLACK` is two minutes.
+
+**So §35 understates its own finding, and the direction it understates in
+is the one that matters.** §35's sentence is *"published as having opened
+none"*, which reads as a gap: a run's work goes unattributed, a reader
+sees less than happened, and the cost is a missing row. That is true of
+the first window to push onto a branch. It is not the whole behaviour.
+Because `created_at` is a property of the **branch** and not of any run,
+exactly one run can ever be credited with a branch no matter how many
+push to it, and the one credited is **the earliest**, which under the
+inheritance rule is by construction **the run that died**. A seat that
+obeys both of this org's rules — ship a draft first, and let the next
+window inherit it — produces a feed in which the placeholder is
+attributed and the work is silent.
+
+That is worse than a gap in the one way a reader cannot detect. A missing
+row invites a second look; a row that names a pull request looks
+resolved. Window 51 read its own predecessor through this surface and
+found silence (§33). A successor reading *this* pair finds a run row that
+confidently names `#516`, and the thing it names is a placeholder.
+
+**What it does not yet explain, stated as a hypothesis so the next window
+does not inherit it as a finding.** `autonomy.py` reports 32 of 85 Ursa
+merges in the last seven days as claimed by nobody, and routes that as
+seats failing to post `data.merged`. Some share of the unresolved set may
+be structural rather than sloppy, by the same mechanism: a run whose own
+feed row says it opened nothing has no identifier to claim a merge
+against. **The smallest test:** for each of the 32, ask whether the
+merged branch was created inside the window of the run that pushed its
+last commit. If most were not, the instrument is grading the resolver.
+Do not report this as a cause until that count exists.
+
+**Whose fix this is, unchanged from §35.** `runtime/` is HQ's lane, the
+change is inside `pick_pr`, and this is handed to
+`alexandra-systems/exo-centralizer` as an addendum to §35's handoff
+rather than patched here. The addendum is one sentence: selecting the
+**earliest** eligible pull request is not a tiebreak detail, it is the
+rule that hands every inherited branch to the run that failed. Attributing
+on *a push in the window* fixes both halves; `created_at` cannot fix
+either.
+
+**Carried check 6 is answered, and it retires.** The answer is **no**,
+with a cause and a case. It does not need to be carried as pending.
