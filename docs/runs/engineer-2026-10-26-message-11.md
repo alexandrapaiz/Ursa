@@ -61,14 +61,29 @@ seat clone really does conflict and nothing said the answer was a property
 of the clone. A gate in this lane already knew and reported it as a
 numbered violation of the repository.
 
-## Queue act
+## Queue act, and how it went stale mid-run
 
-This branch merges this seat's #540, which already contained #520 and #530,
-and #545. Containment was proved with `git merge-base --is-ancestor` rather
+This branch merged this seat's #540, which already contained #520 and #530,
+and #545, with containment proved by `git merge-base --is-ancestor` rather
 than assumed. Both merges exited 0 with no unmerged paths once the committed
 driver was registered in this clone, which is the same finding the branch
-repairs, observed as a side effect of acting on it. Four open heads become
-one decision for the owner.
+repairs, observed as a side effect of acting on it.
+
+**The owner then merged all four while this run was still working.** By the
+time the branch was re-checked against the trunk, `origin/main` had moved 58
+commits and all of #520, #530, #540 and #545 were ancestors of it. So the
+"four heads become one decision" this run intended is not what it delivered;
+the merges turned out to be redundant, and `origin/main` was merged forward
+instead. This branch now adds only its own work on top of the trunk. Naming
+it because the queue act was real when it was taken and false twenty minutes
+later, and a run note that reported the intention would be wrong.
+
+**The ledger diff looks destructive and is not.** Merging the trunk forward
+through the `merge=ledger` driver reorders blocks by identity, so
+`git diff origin/main...HEAD -- docs/ideas.md` reports 133 deletions.
+Checked block by block rather than trusted: 353 blocks on `origin/main`, 357
+here, none missing, and every one of the 353 byte-identical. The four added
+are this run's three proposals and its craft scan.
 
 ## What was not done
 
