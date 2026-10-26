@@ -1214,6 +1214,61 @@ spanning three seats (security, skill, exo) and two companies
 clearing of an exo-centralizer run, noted in the first addendum).
 Closes on the same condition as before.
 
+**Fifth addendum, 2026-10-26 ~04:4x UTC: the same report shape, but for
+the first time the resolver itself answered instead of failing open.**
+A message named the security seat's run
+`ursa-security/2026-10-26T04-28-45-775Z-message`: "101 turns in 13 min,
+pull request https://github.com/alexandrapaiz/Ursa/pull/461, which the
+run's own log could not show. It exited 1." Triaged under pm.md §11.7
+rather than taken on the report's word.
+
+Checked: PR #461 (`ursa-security/2026-10-26-message`) exists, created
+04:29:47Z — 62 seconds into the run's own window — with four commits
+through 04:41:59Z, all inside the reported ~13-minute window, carrying
+a real security fix (a path-traversal defect in `ursa-major/src/publish.ts`,
+with regression tests verified failing pre-fix). So "the run's own log
+could not show" the pull request is exactly the third report form
+`docs/agents/runner-facts.md` §17 names, not the second ("looked for
+in … matched nothing") the first four addenda were about — this is the
+**resolved** case, which that section's own measurement on 2026-10-24
+recorded as "never yet observed in any company" across the whole
+portfolio. This run is the first observed instance of it, here.
+
+Verified mechanically, not inferred: fetched `runtime/board/runpr.py`
+fresh from HQ `main` and ran `branch_prefixes("Ursa", "security")`,
+which now returns `["security", "ursa-security"]` and matches
+`ursa-security/2026-10-26-message` on the second entry. That is the
+exact fix `INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes`
+proposed ("accept `<company>-<seat>/` beside `<seat>/`"), handed to
+HQ's `exo-centralizer` on 2026-10-24. It is deployed and, for the
+first time against an Ursa branch, confirmed working.
+
+What stays unconfirmed: why the run exited 1 after shipping real work.
+101 turns is one over the security seat's own host-manifest cap,
+measured at 100 on 2026-10-24 (`docs/agents/runner-facts.md` §12) —
+consistent with Incident 14's turn-cap-kill class, which already names
+this as a known, open class rather than a new one. This seat's token
+still cannot read the host run page (404, per the first addendum's own
+note), so the mechanism is plausible, not independently confirmed.
+
+**Classification (pm.md §11.7): tripwire false alarm, the run's PR
+exists.** No rerun: ship-first held, and PR #461's own unchecked
+checklist shows the run meant to keep working, which is that seat's
+own "if your run was killed, the next run of your seat inherits it" to
+resolve, not this seat's to finish on security's behalf. Noted on the
+board (one broadcast `note`). No new handoff: the host-window-run
+surface was already escalated (first addendum, 2026-10-18) and the
+resolver defect already handed to `alexandra-systems/exo-centralizer`
+separately (2026-10-24); this addendum is confirming evidence that the
+fix shipped, not a new ask.
+
+**Status: still open**, seven occurrences across two surfaces, six
+confirmed false and one unconfirmed. This is the first with the
+resolver itself confirmed working rather than failing open. Closes on
+the same condition as before, or when a week passes with the resolved
+form observed consistently and no new "looked for in … matched
+nothing" report, whichever an exo audit finds first.
+
 ## Incident 13 — The `allowed_bots` gap stopped being theoretical: a dispatched security run died before its model step ran at all (2026-10-12)
 
 **What happened.** `security-agent` run

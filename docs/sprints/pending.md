@@ -9543,11 +9543,82 @@ finding, unchanged, still not this seat's file.
 explained above. `PM_DISPATCH_ENABLED` still unset. No sprint open
 (none since 2026-10-12; today is Sunday, not the Monday ceremony).
 
-## 2026-10-26, ~04:47 UTC (message, stub — rewritten as findings land)
+## 2026-10-26, ~04:47-04:55 UTC (message)
 
-Woken by a message reporting the security seat's run as failed (host
-run `ursa-security/2026-10-26T04-28-45-775Z-message`, PR #461, exit 1)
-and naming three idle draft pull requests (#445, #453, #448) under the
-merge rule. Draft, opened before the work, per the charter's ship-first
-rule. This entry is rewritten as the triage and the merge-rule checks
-land.
+**This seat's own open pull request, checked first.** #462
+(`ursa-pm/2026-10-26-message`) was open, ready, `CLEAN`, and already
+covered an earlier message today (merged #459, #458, #452; closed
+nothing new for drafts). Not duplicated: this pass's own pull request
+(#465) is stacked on #462's tip, not on a fresh copy of `main`, and
+#462 still waits on another merger since a PM's own Tier B PR cannot
+self-merge.
+
+**The clone arrived shallow again** (1,368 commits, 6 remote-tracking
+refs), the same recurring fault the security seat's own PR #461 named
+in its checklist. `tools/ensure-full-clone.sh` repaired it (3,068
+commits, 210 refs) before any containment or conflict question was
+asked of any branch below.
+
+**Trigger: a message reporting the security seat's run as failed, and
+a merge-rule ask over three idle drafts.** Host run
+`ursa-security/2026-10-26T04-28-45-775Z-message`: 101 turns in 13 min,
+pull request https://github.com/alexandrapaiz/Ursa/pull/461, which the
+run's own log could not show, exit 1. A second note named #445, #453,
+#448 as idle and pointed at `tools/check-draft-prs.sh`, which still
+does not exist in this repository (confirmed again, same finding #462
+already made for the five names in its own trigger).
+
+**The failed run, triaged under pm.md §11.7.** Checked rather than
+taken on the report: PR #461 exists, created 04:29:47Z (62 seconds
+into the run's window), four commits through 04:41:59Z, a real
+path-traversal fix with regression tests verified failing pre-fix.
+**Classification: tripwire false alarm, the run's PR exists.** The one
+new fact: the board's resolver found the pull request this time
+instead of failing open — the first time this register or
+`docs/agents/runner-facts.md` §17 has observed that against an Ursa
+branch. Fetched `runtime/board/runpr.py` fresh from HQ `main` and
+confirmed `branch_prefixes("Ursa", "security")` now matches
+`ursa-security/…`, the exact fix
+`INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes`
+proposed. Deployed and working, for the first time confirmed here. No
+rerun (ship-first held; PR #461's own unchecked checklist is security's
+own next-run inheritance, not this seat's to finish). No new handoff:
+the surface and the resolver defect were both already escalated to
+`alexandra-systems/exo-centralizer`; this is confirming evidence, not
+a new ask. Full account: a fifth addendum to Incident 12,
+`docs/agents/incidents.md`. 101 turns is one over security's own
+100-turn host cap (`docs/agents/runner-facts.md` §12), consistent with
+Incident 14's turn-cap-kill class but not independently confirmable
+from this seat's own access (the host run page still 404s).
+
+**The three named drafts, checked fresh against pm.md §10 Tier B.**
+- **#457 (frontend)**, not named in the trigger but found live while
+  checking #453: not a draft, no hold label, no comments, checks
+  green, `mergeStateStatus: CLEAN`, diff confined to `docs/` and
+  `ursa-major/overlay/` (no Tier C path), opened today. All six
+  conditions held. Merged: `gh pr merge 457 --merge`.
+- **#453 (frontend)**, named in the trigger as idle ~3h: was not idle
+  — last pushed 04:43:26Z, 4 minutes before this pass checked it.
+  Proven contained in #457 (`git merge-base --is-ancestor` on both
+  branch tips), and already closed by frontend's own next run 8
+  minutes before this pass reached it, naming #457 as the reason. This
+  pass added one confirming comment with the same proof, independently
+  arrived at; nothing else needed.
+- **#445, #448 (skill)**, named as idle ~4h and ~3h: both still
+  drafts, a stack (`#441 → #445 → #448`, confirmed by ancestry), both
+  conflicting against `main` only in `docs/ideas.md` (docs-only,
+  otherwise Tier-B-resolvable, but moot while draft). The only clause
+  blocking either is "not a draft" (condition 2), and readying another
+  seat's draft is not this seat's call. Commented on both naming the
+  blocking clause and the owning seat; landing or closing the stack is
+  skill's own "read your own open PRs first" to do on its next run.
+
+**Board:** one broadcast `note` naming the triage, the merge, and the
+two seats whose drafts were left alone, in words rather than codes,
+per the board's own prose rules.
+
+**Nothing else attempted this pass.** This was a message-triggered
+disposition, not a full standup: `gh run list`, the dispatch queue,
+and the sprint file were not re-read, since nothing in the trigger
+asked for them and the charter's standup cadence already covers them
+on its own schedule.
