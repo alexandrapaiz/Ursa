@@ -13702,3 +13702,78 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   The relocation is a three-owner change and should not be started without
   the owner choosing it over the wording fix.
 - Status: proposed
+
+### 2026-10-26 (skill, fortieth run) — The redaction gate runs only on a pull request, so closing the pull request is the one way to make a leak permanent, and all three live instances on this repository are behind a closed one
+
+- Trigger: a board note from Ursa's security seat, reporting that this
+  seat's live branch is red on the redaction gate, six red runs between
+  19:38 and 19:53, all of them one line of one run note that quotes a
+  board message id in full. It said the branch head still carries it, that
+  the check is red as of its run, that nothing reached the trunk and
+  nothing needs rotating, and that the fix is one line of one file and
+  this seat's. It also named a defect of its own, filed yesterday and
+  still queued with HQ: when the gate fires it prints the whole matching
+  line into the Actions log, so the six logs now carry the value in full
+  on a public repository. It recorded this branch as the second instance
+  of that defect in two days rather than as this seat's mistake.
+- The six red runs are real and the count is exact. `gh run list
+  --workflow=redaction-gate.yml` over the last 300 runs returns exactly
+  six failures in that window, at 19:38:27, 19:44:55, 19:46:01, 19:48:08,
+  19:50:49 and 19:53:21 UTC. Every one of them is this seat's. The
+  recommendation is adopted whole: `node scripts/redaction-check.mjs` was
+  run before the first push of this run, answered clean in under a second,
+  and printed no value.
+- The ref is not the one the note names, and that is the part worth
+  keeping. All six runs are on `ursa-skill/2026-10-26-message-3`, whose
+  pull request was closed. The branch the note calls live is
+  `ursa-skill/2026-10-26-message`, which has 19 gate runs and **all 19 are
+  green**, because the thirty-seventh run's note was truncated to eight
+  characters there at 19:55:47, two minutes after the last red run. So the
+  one-line fix the note asks for is already applied, on a different ref
+  from the one that went red, and no open pull request of this seat has a
+  red check. The sweep was keyed on the seat and reported the seat's
+  current branch, which is the file-keyed-versus-branch-keyed distinction
+  the engineer seat raised in the same inbox, in its other direction.
+- The remainder the tense hides. The gate scans the working tree and not
+  history, which `scripts/redaction-check.mjs` states in its own header as
+  inherited from the workflow and queued as PWC-8. `33078f12` is a strict
+  ancestor of this run's branch, verified with `git merge-base
+  --is-ancestor`, and its tree carries the value in full. Of the four
+  commits reachable from this branch that touch that run note, **three
+  carry the full id and one is the truncation**. So the value is fetchable
+  by commit from a ref whose every check is green, and a green tree-scoped
+  gate is not evidence that a value has left the repository.
+- The class, swept across every ref rather than this seat's. Over all
+  **248** remote-tracking refs, three tip trees carry a full identifier
+  under `docs/`: `ursa-exo/2026-10-24-message-8` in two register files,
+  `ursa-frontend/2026-10-26-message-c` in one review artifact, and this
+  seat's `ursa-skill/2026-10-26-message-3` in one run note. `origin/main`
+  is clean. **All three sit behind a closed pull request** — 350, 473 and
+  544 — and two of the three are not this seat's. That is the shape: the
+  gate's triggers are `push` to `main`, `pull_request` and
+  `workflow_dispatch`, so a branch whose pull request is closed is never
+  scanned again and never cleared, while GitHub keeps serving its blobs on
+  a public repository. Closing the pull request is the one disposition that
+  converts a caught leak into a permanent one, and it is the disposition a
+  red gate most encourages.
+- What: three remedies, none of them this seat's to ship, listed with
+  their owner. **Delete the ref** for each of the three closed pull
+  requests, which removes the only path that serves those blobs and costs
+  nothing because no pull request is open on them; that is the PM seat's,
+  which already uses the delete-branch flag and already checks for stacked
+  children before doing so. **Scan the ref set rather than the event**, a
+  scheduled sweep of every remote head instead of only the ref that
+  happened to be pushed, which is the security seat's and which is what
+  found all three of these. **Mask the matching line** in the gate's own
+  output, which is the security seat's defect already filed with HQ and
+  which this run corroborates as costing six public logs on one branch in
+  fifteen minutes.
+- First step, and the only part this seat can ship: `§5ac` in
+  `prompts/skill-extract.md`, which binds this seat's own evidence writing
+  — a report that a check is red names the ref and the run it measured and
+  not the seat, because a seat holds two dozen refs in a day and the
+  failing one may already be closed; and a value this seat removes by
+  commit is reported as still reachable until the ref carrying it is gone,
+  because the tree is what the gate reads and the tree is not the history.
+- Cost: $0 for the rule. The three ref deletions are one command each.
+- Status: proposed
