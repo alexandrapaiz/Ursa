@@ -11281,3 +11281,143 @@ itself to this run or asked it to do anything.**
   [txm on npm](https://registry.npmjs.org/txm).
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (engineer, message run) — A test that reads the ambient checkout has two ways to lie, and this repository now has one of each
+
+- Trigger: fixing the first one found the second. The 2026-10-26 hook-run
+  entry on `tools/ensure-full-clone.test.mjs` subtest 13 was taken this
+  run and the test replaced. Running the full `ursa-major` suite
+  afterwards, on the checkout the repair had just completed, turned up
+  `src/regen-commands-runnable.test.ts` failing: **993 tests, 1 failed**,
+  on a file that had been green all day. It was green because every run
+  that read it had an unrepaired checkout.
+- What: both defects are a test asserting something about the sandbox
+  while claiming to assert something about the code, and they point
+  opposite ways, which is why one of them hid for two days and the other
+  hid until the moment someone fixed the first.
+  - **False red.** Subtest 13 asserted `--check` exits 0 on the ambient
+    checkout. Seat sandboxes arrive `--depth 1 --single-branch`, so it
+    was red on every one of them: measured 17 pass / 1 fail on this
+    sandbox as it arrived, 18 / 0 after the repair.
+  - **False green.** `regen-commands-runnable.test.ts` asserted
+    `expect(out).toContain('ensure-full-clone')` on the output of `bash
+    ../tools/ensure-full-clone.sh --check`. The script has two outputs,
+    and only one of them contains that string: `ensure-full-clone:
+    <fault>` on stderr when a repair is needed, versus `clone is
+    complete: 3068 commits, 210 remote-tracking refs under origin/.` on
+    stdout when none is. So the assertion held on exactly the population
+    that could not run the other branch.
+  The second is the worse of the two, because the file it sits in was
+  shipped the same day for the express purpose of closing this class, and
+  because its own comment says "what is being asserted is that the script
+  understands the question, not what this particular checkout's answer
+  is", which is what the assertion three lines below it stopped doing.
+  Both are fixed on this run's branch, each with the fix measured in both
+  shapes rather than in the one the sandbox happened to have.
+- First step: already taken for these two. The generalisation worth a day
+  is a convention rather than a gate, and it is cheap: **a test that
+  reads `process.cwd()`, `process.env`, the network, or the clock states
+  the reading it took in its own name**, as
+  `--check agrees with git about this repository own checkout, whichever
+  shape it is in (this one: unrepaired: depth + refspec)` now does. The
+  measurable version of that is a grep: count the tests under
+  `ursa-major/src/` and `tools/` that touch `process.cwd()` or
+  `process.env` and do not derive an expected value from the same
+  reading. That count, not a proposal, is what the next run on this
+  should produce.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run) — The blind-spot measurement the 2026-10-26 hook entry asked for, taken in both shapes
+
+- Trigger: the hook run's own entry, "A green `npm test` means two
+  different things depending on the shape of the checkout, and says
+  nothing about which", whose first step is "decide the policy before
+  writing code" and whose blocking requirement is a measurement nobody
+  had taken. Taken this run, on one branch, two clones, same commit.
+- What: the numbers, so the policy argument has something under it.
+  `npx vitest run --reporter=json` in `ursa-major/`, on this branch, in a
+  complete checkout and in a `git clone --depth 1 --single-branch` of the
+  same branch over `file://`:
+
+  | Checkout | passed | failed | skipped | what the skips are |
+  |---|---|---|---|---|
+  | complete | 988 | 1 | 4 | the four `LIVE`-gated tests in `src/hq/semantic.live.test.ts` |
+  | `--depth 1 --single-branch` | 983 | 0 | 10 | those four, plus all six of `src/provenance-index.test.ts` |
+
+  So the gap is **six tests, one file**, and the file is the staleness
+  gate on `docs/provenance/bundle-digests.json`, the index a buyer
+  follows a `task.resolvedBy.digest` through. The 1 failed on the
+  complete side is the false green in the sibling entry above, found by
+  this same measurement and fixed on this branch, which is the second
+  reason to take the reading in both shapes rather than one.
+- What this corrects in the hook entry: that entry says the reason is
+  reachable only by `--reporter=verbose`, and concludes that a reason
+  nobody reads is no reason at all. Measured this run, the reason is
+  reachable two ways and one of them is cheap. `--reporter=tree` prints
+  `↓ src/provenance-index.test.ts (6 tests | 6 skipped)` and under it the
+  suite name carrying the whole reason, in two lines rather than six.
+  `--reporter=verbose` repeats the reason on every test. The default
+  reporter prints neither, for a fully skipped file: the entire output is
+  `Test Files  1 skipped (1)` and `Tests  6 skipped (6)`, with no path, no
+  suite name and no reason. `npx vitest run --help` on vitest 5.0.5 lists
+  no flag between those two settings; `--hideSkippedTests` only removes
+  more.
+- First step: so the honest option set is three, not two, and the third
+  is new and the cheapest. **Option C: a second reporter.** Vitest takes
+  `--reporter` more than once, so a ~20-line custom reporter that prints
+  only the skipped suites' names alongside the default one gives pytest's
+  `-rs` behaviour with no change to the exit code, no change to what a
+  green run means, and no seat sandbox turning red. Options A (fail when
+  history is unreadable and `origin` is reachable) and B (a pretest
+  `--check`) both change what `npm test` does to a seat; C changes only
+  what it says. Build C, measure the output on both shapes, and leave A
+  and B as proposals that C makes less urgent rather than more.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run) — Craft scan: pytest 8's `-r` summary flag, the thing vitest's default reporter has no setting for
+
+- Trigger: this run's own measurement, directly. Six tests vanish from a
+  seat sandbox's suite and the default reporter says nothing that names
+  them, so the question became whether any mature runner treats a skip as
+  reportable by default, or whether every one of them buries it.
+- What: pytest answers it with a flag whose whole job is this.
+  **`-r`**, the "short test summary info" control, takes a set of
+  characters: `f` failed, `E` error, `s` skipped, `x` xfailed, `X`
+  xpassed, `p` passed, `P` passed with output, plus the group selectors
+  `a` for all except `pP`, `A` for all, and `N` for none. **Its default
+  is `fE`**, so out of the box pytest reports failures and errors and
+  stays quiet about skips, exactly as vitest does. The difference is that
+  pytest ships the dial: `pytest -ra` adds lines of the form `SKIPPED [1]
+  test_example.py:22: skipping this test`, which is the file, the line and
+  the reason on one line per skip.
+  **Worth stealing: the reason belongs on one line in the summary, not in
+  a tree the reader has to ask for.** pytest's `-rs` line is three facts
+  in a row at the bottom of the run, where a reader is already looking.
+  Vitest's equivalent is a whole alternate reporter: `--reporter=tree`
+  reprints the entire run as a tree to get at the same fact. That is the
+  shape of Option C in the entry above, and pytest is the existence proof
+  that it is a 20-line reporter and not a redesign.
+  **What Ursa does better: the reason is written for a person and it is
+  specific.** pytest's documented example reason is "skipping this test",
+  which is the default quality of a `pytest.mark.skip(reason=...)`
+  string. `src/provenance-index.test.ts` composes its suite name as
+  `` `the resolver bundle digest index (skipped: ${blocked})` ``, where
+  `blocked` is computed by `historyUnavailable(root)` and reads "this is a
+  shallow clone, so the commits the index names are not all present (clone
+  with fetch-depth: 0)" — the fault, its consequence for this specific
+  index, and the command that fixes it. Having the right sentence and no
+  surface for it is a better position than having the surface and a
+  placeholder in it.
+  **Where pytest is ahead and this is not**: `-r` covers seven outcome
+  classes, including `X` xpassed, "this was expected to fail and did
+  not", which has no vitest equivalent and is the class that most often
+  means a bug was fixed and nobody noticed. Nothing in Ursa models an
+  expected failure at all.
+- First step: no adoption proposed, and nothing to install. pytest is not
+  a dependency here and this repository has no Python test suite. The
+  borrowable piece is the one line of design above, and the place to
+  apply it is Option C in the preceding entry.
+- Cost: $0
+- Status: proposed
