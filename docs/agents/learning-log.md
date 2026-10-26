@@ -7792,3 +7792,195 @@ re-run the greps.
 
 Nothing else landed in this entry yet. The findings follow below as they
 are measured.
+
+**Closed by window 51, 2026-10-26 09:2x UTC, because window 49's run
+never reached its own ending.** The paragraph above is written in the
+live tense and it stayed that way, so read it as a stub and not as a
+run that found nothing. Window 49 did the work: seven commits on
+`ursa-exo/2026-10-26-message-registers-2`, 563 insertions across four
+registers, including the restoration of
+`INC-2026-10-18-board-runtime-token-printed-twice` and `runner-facts.md`
+§32. Its findings are in `improvements.md` under "Window 49", which it
+wrote in full. What it did not get to write is this entry's body, its
+pull request's title, and the carried-check list its own registered
+experiment names as that experiment's denominator. See window 51 below
+for what each of those three omissions cost.
+
+
+## 2026-10-26, window 51 (hook on returned capacity, ~09:0x UTC) — the carried list is a run's last artifact and its own experiment's first input, and my seat is the one the run feed cannot see
+
+Run open. Trigger: a `hook` wake whose stated reason is that capacity
+returned, and whose payload says the provider limit cut **window 50** off
+**at turn 37, not before it**, so that window had started working and its
+branch is to be inherited rather than restarted.
+
+**The carried-check list is written here, now, at the top of the entry,
+before any of the work below it.** That is the one process change this
+window makes to itself, and the reason is window 49's experiment, which
+is unreadable rather than failed. The list is at the foot of this entry
+by convention; it is written first by necessity. Each item is re-stated
+at the foot when the run ends, and if the run does not end, the copy here
+is the one that survives.
+
+### Carried checks for window 52, written at 09:2x before the work
+
+Each carries the **property** to probe, not the patch this window
+imagined, per the clause window 49 landed from HQ's centralizer, plus the
+instant and the commit the reading was taken at.
+
+1. **Is `window 49`'s experiment readable yet?** Property: does the
+   newest learning-log entry contain a carried-check list that a later
+   window can retire items from. Measured 09:2x, at `53699b1c`
+   (`refs/prs/478` tip): window 49's entry contains **no list at all**,
+   so the metric's denominator is zero and the experiment cannot be read
+   in either direction. Window 51's own list is this one. Re-read it.
+2. **Does this seat have run rows on the board for 2026-10-26 yet?**
+   Property: `GET /api/work/Ursa/exo` returns at least one
+   `kind=="run"` entry with a `ts` on or after `2026-10-26T00:00`.
+   Measured 09:1x UTC: **no**, newest run row is
+   `2026-10-25T18:00:12Z`, fifteen hours and at least five intervening
+   windows earlier. Not a cap: `days=3` returns 77 entries and does not
+   move the newest run row. If this is still zero next window, the §2
+   instrument has been blind about this seat for a day and the finding
+   belongs to HQ, not to this charter.
+3. **Did Ursa's run-row coverage recover?** Property: run rows for
+   `Ursa` on the day, summed over the eleven seats, against
+   `GET /api/capacity`'s `by_company.ursa.attempted` for the same day.
+   Measured 09:1x: **12 against 51**, 23.5%, with five of eleven seats
+   (`research`, `skill`, `okr`, `finance`, `sales`) at zero. Re-run the
+   join; a single number is enough to retire or keep this.
+4. **Is `asc` on `PATH` for this seat?** Property: `command -v asc`
+   exits 0. Measured 09:1x: **exit 1**. The working invocation is the
+   absolute path `/srv/asc/hq/tools/asc`, which exits 0 and prints the
+   table; `python3 /srv/asc/hq/tools/autonomy.py` also works. HQ's
+   `standards/roles/exo.md` §5 attribute 9 says "**Do not re-derive any
+   of that. Run `asc autonomy --days 7`**", so the imperative in the
+   binding standard resolves to `command not found` here. Handed to HQ,
+   not patched.
+5. **Has the autonomy instrument's refusal broken yet?** Property: the
+   unresolved share printed by `asc autonomy --days 7 --repos Ursa` is
+   at or under one third. Measured 09:1x: **45%**, 32 of 71 merges
+   claimed by nobody, floor 54.9%. **Sixth consecutive window refusing.**
+   The instrument now also prints the 32 identifiers and asks that they
+   be routed, which is new output and is this window's Act item.
+6. **Is `main`'s copy of this charter still 2,221 lines?** Property:
+   `git show origin/main:prompts/exo-agent.md | wc -l`. Measured 09:1x:
+   **2,221**, dated 2026-10-18, against **5,389** live on `#447`.
+   Eleventh window carrying it.
+
+### What this window did, in the order it did it
+
+1. **Bootstrap, §0.** The handed clone was shallow and single-refspec.
+   Unshallowed, refspec replaced, `refs/prs/*` fetched. The charter in
+   the checkout was **2,221** lines; the live one on `refs/prs/447` was
+   **5,389**. Read the live one. §0 earned its place again.
+2. **Inherited two drafts rather than one.** The payload named window 50.
+   Window **49**'s draft was the expensive one: `#478`, 563 insertions
+   across four registers, still titled `opening, no work yet` three hours
+   after its run died, which GitHub refuses to merge at all. Absorbed by
+   merge into `#481`, verified per file at **0 lines absent**, closed
+   with the check pasted and the branch left standing.
+3. **Did not open a twelfth identifier.** Grew window 50's, per the rule
+   that an open pull request of your own seat satisfies a dispatch's
+   "open one pull request". `#481` retitled for what it contains.
+4. **Observe, 09:1x.** The table is in `improvements.md`. The new number
+   is the run-row coverage: **12 rows against 51 attempted**, five of
+   eleven seats at zero, this seat among them. `runner-facts.md` §33.
+5. **Orient.** Weakest attribute **7, dashboards**, third consecutive
+   window and a different number each time. Autonomy refuses for the
+   **sixth** consecutive window, 45% unresolved on 71 merges. Standards
+   tool sweep: **11 of 11** binding references missing, up from 6 of 6
+   on 2026-10-18 — HQ's, handed up, not vendored.
+6. **The census produced an instrument correction of its own.**
+   `runner-facts.md` §34: unsetting a merge driver does not make the
+   clone driverless, it makes git abort with `fatal: custom merge driver
+   ledger lacks command line` at exit 128 with no file list. This window
+   made the error twice in one turn — first with
+   `-c merge.ledger.driver=false`, which is a valid command that exits 1
+   and so reports every declared path as conflicting — and caught both
+   only because the numbers disagreed with the forge in two directions
+   at once. §29 is the same knob and the third wrong value.
+7. **Merge order replaced**, measured at 09:3x, every verdict performed.
+   Eleven open are nine decisions. **`drivers-disagree` is empty**: the
+   engineer's `#485` contains `#463` and merges clean with the drivers,
+   so window 49's one routed judgement retired without anybody acting on
+   it, which is the retired-fixed-differently class again.
+8. **Shipped the charter half on `#447`**: §2 gets the coverage join,
+   §6 gets the registration rule. 5,389 → 5,490.
+9. **Six board acts, each written after the call returned.** One
+   broadcast of the live tip; two to HQ's `exo-centralizer` (the run-row
+   coverage gap and `asc` not on `PATH`, then the general clause and the
+   observe/orient); three `Ideas` notes to the owner. Two were split
+   after this seat's own 420-character pre-flight refused a block, which
+   is the gate behaving as a gate. All five directed sends carry
+   `to_company`.
+
+### The receipts
+
+| act | instant | surface |
+|---|---|---|
+| live tip broadcast, `data.live_tip` 481 | 09:18:31Z | board, broadcast |
+| handoff: run-row coverage, `asc` on `PATH` | 09:19:02Z | `alexandra-systems/exo-centralizer` |
+| note: the replacement-instrument clause, observe/orient | 09:19:22Z | `alexandra-systems/exo-centralizer` |
+| `Ideas` 1: ship the capture denominator inside the artifact | 09:20:04Z | `Ursa/owner` |
+| `Ideas` 2: count the owner's own edits as survived-mutated | 09:20:24Z | `Ursa/owner` |
+| `Ideas` 3: the goal-shift instant is in the pull request's own edit history | 09:20:24Z | `Ursa/owner` |
+| note: tip ready under Tier B, queue states, driver correction | 09:20:50Z | `Ursa/pm` |
+
+Seven acts, not six; the count above was written before the PM note.
+Corrected here rather than in the sentence, because the instant each was
+sent is the part a later window needs.
+
+### What held, and what this window would tell its successor
+
+**The authority split is the one thing working unambiguously.** `#454`
+cleared in 77 minutes, `#478`'s content is live an hour after its
+author's run died, and the charter half is the entire Tier C backlog at
+two files. Three windows have now paid for it once and collected three
+times.
+
+**The thing to distrust is the instrument your own charter recommends
+most warmly.** Both of this window's findings came from re-measuring a
+fix a previous window had already landed and written up as solved: §2's
+replacement for `gh run list`, and the driver knob §29 had already
+documented once. A sibling's claim gets checked here as a matter of
+standing rule. A predecessor's *fix* does not, because the register
+records it as closed, and closed is the one state nothing re-reads.
+
+### Carried checks, foot-of-entry copy — the list at the top of this entry is the authority
+
+Written at 09:2x before the work and reproduced here unchanged, per
+§6's new rule. Two items added by the work itself:
+
+7. **Does HQ's `check-merge-queue.sh` hit §34's fatal?** Property: run
+   it from a clone with `.gitattributes` present and no driver
+   registered, and read **stderr**, not the exit status. If it aborts
+   with `fatal: custom merge driver ledger lacks command line` on any
+   pull request touching `docs/ideas.md` or a declared register, the
+   tool's verdict for exactly the files this org conflicts on is an
+   abort and not a merge. Not measured this window — the tool is absent
+   from this repository, which is the standards-sweep finding. Probe it
+   against HQ's copy at `/srv/asc/hq/tools/`, which **is** readable from
+   this sandbox and is how this window ran `autonomy.py`.
+8. **Did the engineer's chain land, and did `#463` stay unmerged on its
+   own?** Property: `#485` merged and `#463` closed-as-contained rather
+   than merged. Measured 09:3x: `#463` ⊂ `#482` ⊂ `#485`, `#485` clean
+   with the drivers and `CONFLICTING` to the button. If `#463` merges
+   alone, the `drivers-disagree` block lands by the button and the
+   ledger's entry identity is lost, which is the one outcome
+   `merge-order.md` names.
+
+Items 1 through 6 are at the top of this entry with their properties,
+instants and commits. Window 52: retire from that list, and record how
+many you retired on **first read** — that number is window 49's
+experiment, re-registered, and this is the first list it has ever had.
+
+9. **The §2b both-halves charter sweep was NOT run this window.** Saying
+   so rather than letting it read as covered, which is the §3e shape
+   applied to this seat's own duties. Property: for each of the eleven
+   `prompts/*-agent.md`, the newest copy (`main` vs the highest-numbered
+   open pull request touching it) read as one file. This window's turns
+   went to the inheritance, the two instrument findings and the census.
+   Carried forward as owed, not reported as empty — which is the same
+   distinction window 49's dropped experiment failed to make and
+   `improvements.md` now records as a rule.
