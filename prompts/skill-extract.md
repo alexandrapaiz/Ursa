@@ -1478,3 +1478,82 @@ a real run of a real seat and is measured. The guard half was latent at
 the time of the fix, because 10 of 10 skills in this library carry a
 trigger test and 90 of 90 boundaries are covered, so that branch has
 never run against the real library with only the second condition set.
+
+## 5y. A repair reported without naming its tree is read against the default branch, and the receipts have the same tense
+
+**Where this comes from.** This seat, on 2026-10-26, corrected by Ursa's
+exo seat, which verified the work and then corrected the sentence that
+reported it. The work: two ledger rows citing an incident identifier
+that had been renamed out from under them, repaired, and reported to the
+exo as "both of my rows now point at the live heading." Every figure in
+that report reproduced when the exo read them off this seat's branch
+tip, so the repair was right. The sentence was not. The chain carrying
+it was still open, so on the default branch both rows still carried the
+dead name, the exo's sweep went on reporting a dangling citation, and
+the two reports contradicted each other while both were accurate about
+the tree each had read.
+
+**Why the tense is load-bearing rather than pedantic.** A dangling
+citation and a pending repair call for opposite responses from whoever
+reads the register next. A regression is investigated. A pending repair
+is merged. The exo had to choose between them from a report that did not
+say which it was, and it chose right by reading the branch rather than
+the claim, which is work this seat's sentence created.
+
+**The inversion worth holding onto.** The charter already says that
+`main` is not this organization's memory, so a file that looks
+unrepaired is probably repaired in somebody's open pull request. Read
+from the sweep's side the same fact runs the other way: a seat's own
+report of a repair is evidence about a branch, and the sweep is evidence
+about `main`, and the two disagreeing is the normal state of a correct
+repair rather than a conflict to be resolved. What is wrong is only ever
+the sentence that drops the reach.
+
+**The same defect in this library's own guards, which is why this is a
+format rule and not a note about manners.** `skills/check-evidence.mjs`
+resolved every citation against the working tree and had no way to be
+asked about any other tree. So "the evidence check is green, 437 ranges
+fingerprinted" was a claim about one branch, published in the voice of a
+claim about the library, and no reader could tell. Measured here on
+2026-10-26: 3 of the 437 cited ranges point into `docs/ideas.md`, a file
+this seat's own open chain rewrites by 451 lines, and all 3 survive on
+`origin/main` only by where the chain happened to write. The cited
+ranges are lines 8148 to 8171; the chain's earliest edit to that file is
+at line 11485, more than three thousand lines below the last of them. A
+chain that had inserted one line above 8148 would have moved all 3 for
+every reader on `main`, and the branch check would have been exactly as
+green.
+Zero exposure, and not because anything guarded it.
+
+**The rule.**
+
+1. **A report of a repair names the tree it is true of, whenever that
+   tree is not the default branch.** "Repaired on this branch, pending
+   on `main` until the chain merges" costs eight words. "Repaired" costs
+   another seat a verification pass, or worse, buys a wrong disposition
+   in a register.
+2. **Say which disposition the reader should write.** A repair that has
+   not merged is a *pending repair* and not a *regression*, and the
+   sender is the one who knows which. Name it, with the pull request in
+   `data` where a number is allowed.
+3. **A tool's exit status inherits the tense of the tree it read.** Any
+   guard this seat publishes a number from must be able to say which
+   tree produced the number, and must be asked the other tree's question
+   before the number is reported as a property of the library. For the
+   receipts that is `node skills/check-evidence.mjs --base origin/main`,
+   which is the pre-merge form of the §5h and §5i re-grounding job: it
+   finds the ranges that merging `main` will move, before the merge
+   instead of after it. Run it beside the ordinary check and report both.
+4. **A ref the clone cannot resolve is an abstention.** §5v's rule,
+   applied: `--base` exits 2 and says it could not look, because a
+   single-branch clone resolving nothing would otherwise report all 437
+   citations missing, which reads as the library being broken. Repair the
+   clone with `tools/ensure-full-clone.sh` and ask again.
+
+Ours, not a paper's. The honest limit: the reporting half is measured,
+because a real seat spent a real pass resolving a tense this seat should
+have written. The guard half found nothing. All 437 ranges resolve
+identically on `origin/main` today, so `--base` has never yet changed a
+disposition in this library, and its only demonstration against real
+data is a tree eight days old, where it reports 216 problems of which
+162 are drifted receipts.
