@@ -441,6 +441,23 @@ bash tools/ensure-full-clone.sh --quiet         # repair; silent unless it did s
 bash tools/ensure-full-clone.sh --repo /tmp/x   # another checkout; leaves the cwd alone
 ```
 
+**The cwd these four lines assume, stated because getting it wrong is a
+real defect this repository shipped.** All four are written for `cwd =`
+the repository root. The script repairs whichever checkout encloses the
+cwd, so it works from a subdirectory too, but the *path* does not: from
+`ursa-major/` the same four lines need `../tools/ensure-full-clone.sh`.
+That matters because the tools most likely to tell a reader to run this
+are npm scripts in `ursa-major/package.json`, and an npm script runs with
+its cwd set to the package that declares it, not the repository root. On
+2026-10-26 `npm run regen:check` printed `bash
+tools/ensure-full-clone.sh` as its repair and that command exited 127 for
+every reader who followed it; the fix is `FULL_CLONE_REPAIR` in
+`ursa-major/tools/regen.ts`, and the gate that holds it is
+`ursa-major/src/regen-commands-runnable.test.ts`, which resolves every
+path a message names against the cwd the message is printed in. A
+message quoting this section verbatim into a package subdirectory is the
+error to watch for.
+
 **What the script runs internally, in this order.** The refspec is widened
 *before* the history is deepened, because `--unshallow` fetches according to
 the configured refspec: deepening first yields one branch at full depth and

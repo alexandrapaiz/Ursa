@@ -1,0 +1,37 @@
+==== phone 390x844
+  locked .panel-field: drawn box 35px, overlay reaches 4.5px each way
+    at   -3px: owned by the control = true; under it = main. (not a control) "Ursaheld in memory only; it never leaves"
+    at   -2px: owned by the control = true; under it = main. (not a control) "Ursaheld in memory only; it never leaves"
+    at   37px: owned by the control = true; under it = form. (not a control) "held in memory only; it never leaves thi"
+    at   39px: owned by the control = true; under it = form. (not a control) "held in memory only; it never leaves thi"
+  unlocked .panel-hit: drawn box 26px, overlay reaches 9px each way
+    at   -8px: owned by the control = true; under it = footer. (not a control) "sync 500run"
+    at   -4px: owned by the control = true; under it = footer. (not a control) "sync 500run"
+    at   31px: owned by the control = true; under it = main. (not a control) "…sync 500sync 500run"
+    at   34px: owned by the control = true; under it = main. (not a control) "…sync 500sync 500run"
+
+==== tablet 820x1180
+  locked .panel-field: drawn box 35px, overlay reaches 4.5px each way
+    at   -3px: owned by the control = true; under it = main. (not a control) "Ursaheld in memory only; it never leaves"
+    at   -2px: owned by the control = true; under it = main. (not a control) "Ursaheld in memory only; it never leaves"
+    at   37px: owned by the control = true; under it = form. (not a control) "held in memory only; it never leaves thi"
+    at   39px: owned by the control = true; under it = form. (not a control) "held in memory only; it never leaves thi"
+  unlocked .panel-hit: drawn box 26px, overlay reaches 9px each way
+    at   -8px: owned by the control = true; under it = footer. (not a control) "sync 500run"
+    at   -4px: owned by the control = true; under it = footer. (not a control) "sync 500run"
+    at   31px: owned by the control = true; under it = main. (not a control) "…sync 500sync 500run"
+    at   34px: owned by the control = true; under it = main. (not a control) "…sync 500sync 500run"
+
+==== desktop 1440x900
+  locked .panel-field: drawn box 35px, overlay reaches 4.5px each way
+    at   -3px: owned by the control = true; under it = main. (not a control) "Ursaheld in memory only; it never leaves"
+    at   -2px: owned by the control = true; under it = main. (not a control) "Ursaheld in memory only; it never leaves"
+    at   37px: owned by the control = true; under it = form. (not a control) "held in memory only; it never leaves thi"
+    at   39px: owned by the control = true; under it = form. (not a control) "held in memory only; it never leaves thi"
+  unlocked .panel-hit: drawn box 26px, overlay reaches 9px each way
+    at   -8px: owned by the control = true; under it = footer. (not a control) "sync 500run"
+    at   -4px: owned by the control = true; under it = footer. (not a control) "sync 500run"
+    at   31px: owned by the control = true; under it = main. (not a control) "…sync 500sync 500run"
+    at   34px: owned by the control = true; under it = main. (not a control) "…sync 500sync 500run"
+
+presses either overlay takes from ANOTHER control, across all three viewports and both states: 0

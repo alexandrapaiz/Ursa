@@ -22,6 +22,7 @@ import {
   type MatchReason,
   type RuleUnit,
 } from './types'
+import { oneLine } from '../tuning/export'
 import { buildQuery, compareScored, normalizePath, recurrenceBonus, score } from './retrieval'
 import { caseKey, caseText, embedAndRank, queryText, type SemanticIndex } from './semantic'
 import type { Embedder, EmbeddingCache } from './embedding'
@@ -277,6 +278,31 @@ function renderWhy(why: MatchReason): string {
  * shape `tuning export` uses for humans, with the provenance kept in.
  * The JSON is the interface; this is the surface.
  */
+/**
+ * The briefing as the markdown an agent actually reads.
+ *
+ * CONTAINMENT, ADDED 2026-10-25. Every field spliced in below is
+ * record-derived: an axiom statement, a correction loop's theme, the
+ * owner's quoted words. All of it is distilled from session text, which
+ * means text a model generated or a stranger's content passed through,
+ * and this function is what puts it into the instruction positions of a
+ * markdown document an agent treats as its standing orders. So each of
+ * those fields goes through `oneLine` from src/tuning/export.ts, which
+ * flattens line breaks, strips control characters, removes a leading
+ * markdown marker and bounds length.
+ *
+ * `renderTuningBlock` has done this since 2026-10-17 and this function
+ * did not, which made the hardened path the one a human pastes by hand
+ * and the unhardened one the path an agent reads automatically. That
+ * asymmetry was the 2026-10-17 audit's F3.
+ *
+ * This is containment, not authentication, on exactly the terms
+ * `oneLine` states: it stops injected text from occupying a block's
+ * instruction positions and cannot stop a one-sentence rule from being a
+ * harmful rule. A well-formed axiom is a short single-line rule, so every
+ * existing one renders byte for byte as before and `measureBriefing`'s
+ * fixed point is undisturbed.
+ */
 export function renderBriefing(briefing: Briefing): string {
   const lines: string[] = ['# Briefing', '', briefing.disclaimer, '']
 
@@ -301,13 +327,14 @@ export function renderBriefing(briefing: Briefing): string {
   } else {
     for (const r of briefing.rules) {
       const verb = r.polarity === 'prefer' ? 'Prefer' : 'Avoid'
-      const tension = r.contradicts.length > 0 ? ` [tension with ${r.contradicts.join(', ')}]` : ''
-      lines.push(`- **${verb}: ${r.statement}**${tension}`)
+      const contradicts = r.contradicts.map((c) => oneLine(c, 64))
+      const tension = contradicts.length > 0 ? ` [tension with ${contradicts.join(', ')}]` : ''
+      lines.push(`- **${verb}: ${oneLine(r.statement)}**${tension}`)
       lines.push(
-        `  - ${r.axiomId}, domain ${r.domain}, ${r.basis}, seen ${r.evidenceCount}x` +
+        `  - ${oneLine(r.axiomId, 64)}, domain ${oneLine(r.domain, 64)}, ${r.basis}, seen ${r.evidenceCount}x` +
           (r.status === 'user-edited' ? ', edited by the owner' : '')
       )
-      if (r.firstEvidence?.quote) lines.push(`  - Her words: "${r.firstEvidence.quote}"`)
+      if (r.firstEvidence?.quote) lines.push(`  - Her words: "${oneLine(r.firstEvidence.quote)}"`)
       lines.push(`  - Surfaced because: ${renderWhy(r.why)}`)
     }
     lines.push('')
@@ -320,12 +347,14 @@ export function renderBriefing(briefing: Briefing): string {
     lines.push('')
   } else {
     for (const c of briefing.nearestCases) {
-      lines.push(`- **${c.theme}** (${c.recordId}/${c.loopId}, ${c.resolution})`)
-      lines.push(`  - Files: ${c.targetFiles.join(', ') || 'not recorded'}`)
+      lines.push(
+        `- **${oneLine(c.theme)}** (${oneLine(c.recordId, 64)}/${oneLine(c.loopId, 64)}, ${c.resolution})`
+      )
+      lines.push(`  - Files: ${c.targetFiles.map((f) => oneLine(f, 128)).join(', ') || 'not recorded'}`)
       lines.push(`  - Took ${c.recurrences} repeat${c.recurrences === 1 ? '' : 's'} after the first ask`)
-      if (c.complaint) lines.push(`  - She said: "${c.complaint}"`)
-      if (c.mechanism) lines.push(`  - What actually fixed it: ${c.mechanism}`)
-      if (c.discoveredSpec) lines.push(`  - The spec nobody could state up front: ${c.discoveredSpec}`)
+      if (c.complaint) lines.push(`  - She said: "${oneLine(c.complaint)}"`)
+      if (c.mechanism) lines.push(`  - What actually fixed it: ${oneLine(c.mechanism)}`)
+      if (c.discoveredSpec) lines.push(`  - The spec nobody could state up front: ${oneLine(c.discoveredSpec)}`)
       lines.push(`  - Surfaced because: ${renderWhy(c.why)}`)
     }
     lines.push('')
@@ -340,8 +369,11 @@ export function renderBriefing(briefing: Briefing): string {
     lines.push('Each of these exists because an agent once went further than asked.')
     lines.push('')
     for (const g of briefing.guardrails) {
-      lines.push(`- From ${g.axiomId} ("${g.statement}"), ${g.recordId} step ${g.steps.join(', ')}:`)
-      lines.push(g.quote ? `  - Her words: "${g.quote}"` : '  - No verbatim words recorded; the rule above is the whole receipt.')
+      lines.push(
+        `- From ${oneLine(g.axiomId, 64)} ("${oneLine(g.statement)}"), ` +
+          `${oneLine(g.recordId, 64)} step ${g.steps.join(', ')}:`
+      )
+      lines.push(g.quote ? `  - Her words: "${oneLine(g.quote)}"` : '  - No verbatim words recorded; the rule above is the whole receipt.')
     }
     lines.push('')
   }

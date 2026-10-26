@@ -1,14 +1,14 @@
-# fixtures/violations — twenty-two records the gate must refuse
+# fixtures/violations — twenty-three records the gate must refuse
 
 Every other fixture in this repository is a record the resolver got
-right. This directory holds the opposite: twenty-three committed
-`OutcomeRecord` files, one clean base and twenty-two counterexamples,
+right. This directory holds the opposite: twenty-four committed
+`OutcomeRecord` files, one clean base and twenty-three counterexamples,
 each one the base plus a single named edit that violates exactly the
 bound it is named after.
 
 ## Why a directory of broken records exists
 
-`src/invariants.ts` states seventeen bounds a record must satisfy, and
+`src/invariants.ts` states eighteen bounds a record must satisfy, and
 `ursa run` and `ursa ci` both exit non-zero when one of them fails. Until
 this directory existed, no record anywhere in the repository violated any
 of them, and that absence had two measurable costs.
@@ -39,7 +39,7 @@ because no fixture is allowed to be wrong" (`docs/ideas.md`, 2026-10-10).
 
 | File | What it is |
 |---|---|
-| `base.json` | A record that passes all seventeen bounds. Every counterexample is this file plus one edit, so a reviewer reads a two-line `diff` rather than a 7 KB JSON file. |
+| `base.json` | A record that passes all eighteen bounds. Every counterexample is this file plus one edit, so a reviewer reads a two-line `diff` rather than a 7 KB JSON file. |
 | `<slug>.json` | One counterexample. `<slug>` is the lower-case, hyphenated form of the invariant code it fires, for example `gen-survived-bounded.json` for `GEN_SURVIVED_BOUNDED`. |
 | `<slug>.md` | That fixture's note: the exact edit, what the record now claims, and the gate's own `observed` string with both sides of every number in it. |
 
@@ -58,7 +58,7 @@ edited "holds it whole" into "holds the whole of it", one
 `no_generation_provenance` span, and one generation segment the person
 threw away.
 
-Six of the seventeen bounds read nothing else, and all six are
+Six of the eighteen bounds read nothing else, and all six are
 *vacuously* true on a record that lacks their structure — which is why
 neither fixture already committed here (`fixtures/mini/record/` and
 `fixtures/real/`) could serve as the base:
@@ -84,8 +84,8 @@ are byte-reproducible" below.
 
 ## Two bounds are backstops, not independent statements
 
-Eighteen of the twenty-two fixtures fire exactly one violation, and
-four fire two or three. Two of the seventeen bounds cannot be broken
+Nineteen of the twenty-three fixtures fire exactly one violation, and
+four fire two or three. Two of the eighteen bounds cannot be broken
 alone, as a matter of arithmetic rather than of how hard anyone tried:
 
 - **`GEN_CLAIM_BOUNDED`** bounds the merged length of the source extents
@@ -102,7 +102,7 @@ alone, as a matter of arithmetic rather than of how hard anyone tried:
 
 Both are real guards against their neighbours being wrong. Neither is a
 statement a record can break on its own, and
-`src/invariants.violations.test.ts` asserts that count — eighteen
+`src/invariants.violations.test.ts` asserts that count — nineteen
 single-bound fixtures, three pairs and one triple — so a future edit to
 `src/invariants.ts` that makes either one independently reachable fails
 the suite and gets the note corrected.
@@ -117,7 +117,7 @@ removal of a whole file from every figure in the record — and a fixture
 firing only one of them would assert that the two levels share a check
 when they do not.
 
-## Twenty-two fixtures, seventeen bounds
+## Twenty-three fixtures, eighteen bounds
 
 There is normally one fixture per bound, and the suite checks that every
 declared bound is fired by some fixture. Three bounds have more than
@@ -193,12 +193,21 @@ the script still runs. The script exists so the base is resolver-produced
 rather than typed, and so each note quotes the gate instead of
 paraphrasing it.
 
+That test asks what the gate does with these files. A second test,
+`src/violation-fixtures-current.test.ts`, asks the other question: are
+the committed bytes the bytes the script would write today. It spawns
+`fixtures:violations:check` rather than reimplementing the comparison,
+so there is one definition of "drifted". Added 2026-10-26, after the
+check was found red on `main` with the suite green — see "Why the
+records are byte-reproducible" below for what that cost.
+
 ```bash
 cd ursa-major
 npm run fixtures:violations          # rewrite every file in this directory
 npm run fixtures:violations:check    # exit non-zero if any file drifted
+                                     # (also run inside npm test, 2026-10-26)
 npx vitest run src/invariants.violations.test.ts
-npx tsx src/invariants.cli.ts fixtures/violations   # 27 violations, exit 1
+npx tsx src/invariants.cli.ts fixtures/violations   # 28 violations, exit 1
 ```
 
 To add a bound's counterexample, append a `Case` to `CASES` in
@@ -245,3 +254,21 @@ fixture that changes on every run cannot be diffed and
 consequence — that a buyer handed a record cannot reproduce it
 byte-for-byte from its stated inputs — is a ledger entry rather than
 something to fix from a fixture script.
+
+### What this claim cost before anything enforced it
+
+On 2026-10-25 `fixtures:violations:check` was found red on `main`, 24 of
+47 files, and the full test suite was green. The drift was three fields
+the record schema grew on 2026-10-24 and these files never received:
+`noCandidate` on a span, `blindSpans` and `suppressedTokenSpans` in
+`stats`. No bound reads any of the three, so every assertion in
+`src/invariants.violations.test.ts` passed — adding an optional field
+changes no bound's verdict and no bound's `observed` string.
+
+The cost was not cosmetic. A reviewer who ran the command this file
+documents was told the directory had drifted, with no way to tell a
+stale regeneration from a real corruption, and the records this project
+points at as its counterexamples were not the records its current
+resolver would write. Both were fixed on 2026-10-26 by regenerating,
+and the gap that allowed it was closed the same day by running the
+check inside `npm test`.

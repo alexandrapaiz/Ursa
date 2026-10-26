@@ -37,6 +37,37 @@
 /** The sixteen hex characters a record carries, from a full SHA-256. */
 export const SHORT_DIGEST_LEN = 16
 
+/**
+ * The repair for an unreadable history, written for the cwd it is
+ * printed in rather than for the repository root.
+ *
+ * WHY THE `../` IS LOAD-BEARING. `ensure-full-clone.sh` lives at the
+ * repository root's `tools/`, not at `ursa-major/tools/`, and both
+ * messages below reach a reader through `npm run regen` or `npm run
+ * regen:check`. An npm script runs with the cwd set to the package that
+ * declares it, so the reader is standing in `ursa-major/` when the
+ * sentence arrives. Measured on 2026-10-26 in a `--depth 1` clone, with
+ * the un-prefixed form this constant replaces: `bash
+ * tools/ensure-full-clone.sh` printed by `npm run regen:check`, then run
+ * verbatim from that same cwd, is `bash: tools/ensure-full-clone.sh: No
+ * such file or directory`, exit 127. With the `../`, from the same cwd:
+ * `clone completed: 1 -> 1327 commits, 2 -> 4 remote-tracking refs`,
+ * exit 0, and the next `npm run regen:check` prints the `clean:` line
+ * that names the index.
+ *
+ * So this is the same defect the function below exists to fix, one layer
+ * out. `regenCheckVerdict` stopped the tool claiming an artifact was
+ * verified when it was not; this stops the tool naming a repair that
+ * cannot be run. In both cases the sentence was the product and the
+ * sentence was wrong.
+ *
+ * It is a constant rather than two string literals so that
+ * `src/regen-commands-runnable.test.ts` has one thing to resolve against
+ * the filesystem, and so a reader who moves the script has one line to
+ * change.
+ */
+export const FULL_CLONE_REPAIR = 'bash ../tools/ensure-full-clone.sh'
+
 export interface RegenInputs {
   /** SHA-256 of `ursa-major/dist/ursa.cjs` as it sits in the working tree after the rebuild */
   rebuiltSha256: string
@@ -49,7 +80,7 @@ export interface RegenInputs {
   /**
    * Why committed history cannot be read, from `historyUnavailable()` in
    * `tools/bundle-digest-index.ts`; null when it can. A shallow clone is
-   * the case this reports, and `tools/ensure-full-clone.sh` is its repair.
+   * the case this reports, and `FULL_CLONE_REPAIR` above is its repair.
    */
   historyBlocked: string | null
   /**
@@ -110,7 +141,7 @@ export function regenStep(input: RegenInputs): RegenStep {
       message:
         `dist/ursa.cjs matches HEAD (${short(input.rebuiltSha256)}), and the digest index was ` +
         `left alone because ${input.historyBlocked}. Repair the checkout with ` +
-        '`bash tools/ensure-full-clone.sh`, then run `npm run regen` again.',
+        `\`${FULL_CLONE_REPAIR}\`, then run \`npm run regen\` again.`,
       runAgain: true,
     }
   }
@@ -130,5 +161,88 @@ export function regenStep(input: RegenInputs): RegenStep {
       `clean: dist/ursa.cjs matches HEAD (${short(input.rebuiltSha256)}) and the digest index ` +
       'matches history. Nothing to regenerate.',
     runAgain: false,
+  }
+}
+
+export interface RegenCheckInputs {
+  /** exit status of `node build/bundle.mjs --check` */
+  bundle: number
+  /** exit status of `npx tsx tools/make-bundle-digest-index.ts --check` */
+  index: number
+  /**
+   * Why committed history cannot be read, or null when it can. The same
+   * string `historyUnavailable()` returns, and the same input the write
+   * path above already takes.
+   */
+  historyBlocked: string | null
+}
+
+export interface RegenCheckVerdict {
+  /** what `npm run regen:check` exits with */
+  exit: 0 | 1
+  message: string
+  /** true only when both artifacts were actually compared and both passed */
+  bothVerified: boolean
+}
+
+/**
+ * What `npm run regen:check` should say and exit, given the two child
+ * statuses and whether history was readable.
+ *
+ * WHY THIS EXISTS SEPARATELY FROM `regenStep`. The write path above has
+ * had an `index-unverifiable` state since it was written, because it
+ * takes `historyBlocked` and says so. The `--check` path did not: it read
+ * the two exit codes, and on 0 and 0 printed "clean: the committed bundle
+ * is the one this source builds, and the digest index matches history."
+ *
+ * The second half of that sentence can be false at the moment it is
+ * printed. `tools/make-bundle-digest-index.ts --check` exits 0 on a
+ * shallow clone, deliberately and with its reason printed, because the
+ * index cannot be verified there and failing would be a false failure.
+ * The parent then collapsed that 0 into a claim that the index matches
+ * history, which is the one thing the child had just said it could not
+ * determine. Measured on 2026-10-26 in a shallow checkout of this
+ * repository: `npm run regen:check` printed `skipped: this is a shallow
+ * clone` and then the `clean:` line above, three lines apart.
+ *
+ * WHY THE EXIT CODE DOES NOT CHANGE. The skip is still a 0 here. The
+ * child's reasoning for exiting 0 is sound and is not this function's to
+ * overturn, and the Action checkouts that hit this path would start
+ * failing on a condition nothing is wrong with. What changes is only the
+ * claim: an unverified artifact is no longer reported as a verified one.
+ *
+ * Pure, so `src/regen.test.ts` can assert the whole table without a
+ * build, a git repository or a clock.
+ */
+export function regenCheckVerdict(input: RegenCheckInputs): RegenCheckVerdict {
+  const failures = [
+    input.bundle === 0 ? null : 'the bundle',
+    input.index === 0 ? null : 'the digest index',
+  ].filter(Boolean) as string[]
+
+  if (failures.length > 0) {
+    return {
+      exit: 1,
+      message: `${failures.join(' and ')} ${failures.length === 1 ? 'is' : 'are'} stale. Run: npm run regen`,
+      bothVerified: false,
+    }
+  }
+
+  if (input.historyBlocked !== null) {
+    return {
+      exit: 0,
+      message:
+        'the committed bundle is the one this source builds. The digest index was NOT ' +
+        `checked, because ${input.historyBlocked}, so this pass says nothing about it. ` +
+        `Repair the checkout with \`${FULL_CLONE_REPAIR}\` and run ` +
+        '`npm run regen:check` again to check it.',
+      bothVerified: false,
+    }
+  }
+
+  return {
+    exit: 0,
+    message: 'clean: the committed bundle is the one this source builds, and the digest index matches history.',
+    bothVerified: true,
   }
 }

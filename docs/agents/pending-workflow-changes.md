@@ -116,8 +116,13 @@ rather than to all eleven.
 **Queued by:** security seat, 2026-10-04 run. PWC-7 is held by the
 engineer seat's dependency-floor gate in PR #36, so this takes 8.
 
-**Evidence.** Two defects in `redaction-gate.yml`, both found by running
-the gate's own patterns in a wider scope than the gate does.
+**Amended 2026-10-25** by this seat's second run of that day, which
+added defect (3). It was found the way the first two were not: by the
+gate firing, five times in eleven minutes, on this seat's own branch.
+
+**Evidence.** Three defects in `redaction-gate.yml`. The first two were
+found by running the gate's own patterns in a wider scope than the gate
+does. The third was found by watching it work.
 
 1. The gate greps the working tree only. Sixteen blobs across five
    files, all reachable from `origin/main`, carry the three classes it
@@ -129,6 +134,19 @@ the gate's own patterns in a wider scope than the gate does.
    discards the entire matching line, so a genuinely leaked path that
    happens to share a line with a `/home/runner/` path is not reported.
    Narrow, but it is a bypass in a gate whose whole job is to have none.
+3. **The failure output republishes the value.** The tree step runs
+   `printf '%s\n' "$hits" | head -20`, so a hit is reported as the whole
+   matching line. On 2026-10-25 the gate caught a full identifier in
+   `docs/security/audit-2026-10-25.md` and printed it, in full, into
+   five Actions logs on a public repository, where the logs outlive the
+   branch and the commit that is later corrected. That is the gate
+   doing the thing it exists to prevent, at a wider blast radius than
+   the file it was guarding. In that instance the value was a vendor's
+   per-invocation tracking id rather than anything of the owner's, so
+   it needed no rotation and the audit of that run says so. The
+   mechanism does not know the difference. A Class B home path or a
+   Class C session id tripping the same pattern is published the same
+   way. Run ids are in the 2026-10-25 audit, F9.
 
 **Change.** For (2), anchor the allowance to the pattern rather than the
 line, by removing the matched CI prefixes from the line before testing
@@ -141,12 +159,28 @@ to fail only on blobs reachable from `origin/main`, so an in-flight
 branch that the gate is about to reject on its tree is not also reported
 twice.
 
+For (3), replace `printf '%s\n' "$hits" | head -20` with a form that
+emits only the location, for example piping the hits through
+`cut -d: -f1,2`, which leaves `path:line` and discards the matched text.
+The seat that has to fix a hit needs the location and already has the
+file; it never needs CI to quote the value back. Apply this one first if
+only one gets applied, because it is three characters of pipeline and it
+closes a live publication path. `scripts/redaction-check.mjs`, landed
+2026-10-25, already behaves this way, and its suite asserts that the
+value it caught does not appear in its own output.
+
 Expect it to fail on the first run, because F2 is currently true. Either
 apply it after the F2 decision, or land it in report-only mode first.
 
 **Verification after applying.** The step reports the sixteen known
 blobs before the F2 decision and reports nothing after a purge. Never
 have it print a matched value, only the path, the blob and the class.
+That last sentence was written for the history step and is now a
+requirement on both: after applying (3), re-run the gate against a
+branch carrying a known synthetic hit and confirm the Actions log names
+the file and the line and does not contain the value. Easiest check,
+needing no fixture: `node scripts/redaction-check.mjs` already satisfies
+it, so compare the two outputs on the same dirty tree.
 
 ---
 
@@ -254,3 +288,154 @@ every hit sitting between the two markers.
 grants no execution, but the mitigation that exists today is a
 disposition written in prose in every charter, and the structural
 version costs six lines per file.
+
+---
+
+## PWC-12 — The gate does not run on a conflicting pull request, so it is off on exactly the branches that sit public longest
+
+**Queued by:** security seat, 2026-10-25 run 2 (message). Queued because
+the run cannot apply it: `.github/workflows/` is refused to the Actions
+`GITHUB_TOKEN`, per docs/agents/runner-facts.md §1b. Part 3 is a
+branch-protection setting and needs the owner in repository settings.
+
+**Evidence.** A `pull_request` workflow runs against the merge of head
+and base, so GitHub must compute `refs/pull/<n>/merge` before it can
+schedule one. When a pull request conflicts, that ref does not exist and
+**the run is never created** — not failed, not queued, not skipped with a
+reason. Measured across all fifteen open pull requests at 00:04 UTC on
+2026-10-26, and the correlation is total:
+
+| `mergeable` | Pull requests | With a run on the tip |
+|---|---|---|
+| `MERGEABLE` | 13 | 13 of 13 |
+| `CONFLICTING` | 2 (#437, #435) | 0 of 2 |
+
+Confirmed by transition in both directions rather than by correlation
+alone. #427 took eight `pull_request` runs while mergeable, then none
+from the 23:38 push that made it conflict, then runs again after another
+seat merged `main` into it at 23:58. This entry's own branch was cut from
+#427 while it conflicted, inherited the conflict, took five pushes with
+zero runs, and received one within forty-five seconds of the merge that
+made it mergeable at 00:03:04. Draft state was tested and ruled out.
+`workflow_dispatch` succeeds throughout, so neither the workflow nor the
+tree is implicated. Full reading in the 2026-10-25 audit, F10, and on the
+register as `INC-2026-10-26-gate-skips-conflicting-prs`.
+
+**Why it matters here more than it would elsewhere.** Conflict is this
+repository's normal state, not its exceptional one. Ursa incident 6 is
+five open pull requests unmergeable at once from shared-file appends, and
+`tools/registers/install-drivers.sh` exists because of how routine it is.
+And the repository is public, so a branch is public on push. So the gate
+that exists because incidents 2 and 4 put private data on a public
+repository is off on the branches that stay public longest. The merge
+path is not the exposure; GitHub refuses to merge a conflicting pull
+request. The branch is the exposure, which is what it was in both
+incidents.
+
+**Change.** Three parts, in descending order of value.
+
+1. **Add `push` on all branches to the gate's triggers.** Today it reads
+   `push: branches: [main]` plus `pull_request`. A `push` event runs
+   against the pushed commit itself and needs no merge ref, so it fires
+   whether or not the pull request can be merged. This is the whole fix
+   for the exposure and it is one line:
+
+   ```yaml
+   on:
+     push:
+     pull_request:
+     workflow_dispatch:
+   ```
+
+2. **Add a `concurrency` block**, because part 1 means a mergeable pull
+   request gets two runs per push, one per event. Group on the ref and
+   cancel in progress:
+
+   ```yaml
+   concurrency:
+     group: redaction-gate-${{ github.ref }}
+     cancel-in-progress: true
+   ```
+
+   Keeping `pull_request` alongside `push` rather than replacing it is
+   deliberate: `push` does not fire for pull requests from forks, and
+   `pull_request` does. Neither event covers the other's case, which is
+   why this is two triggers and a concurrency group rather than a swap.
+
+3. **Make `redaction-gate / scan` a required status check on `main`** in
+   branch protection. This does not fix the exposure, because a
+   conflicting pull request already cannot merge. It fixes the
+   reviewer-facing half: a required check that has not reported is
+   visibly blocking, where an absent check today is an empty checks
+   section that reads like a clean one.
+
+**Verification after applying.** Push to a deliberately conflicting
+branch and confirm a run appears for the `push` event while the pull
+request still reports `CONFLICTING`. Then re-run the measurement above
+and expect every open pull request to carry a run on its tip regardless
+of `mergeable`. Then confirm a mergeable pull request produces one
+surviving run per push rather than two.
+
+**Severity.** High, revised up from the medium this entry was first filed
+at, when the symptom looked like a single dropped event. It is not an
+exposure in itself. It removes the guarantee that the thing which catches
+exposures ran at all, on the subset of branches where that guarantee was
+worth the most, and it has been doing so silently for as long as the gate
+has existed.
+
+**Amendment, 2026-10-26 (security, message run): the precondition is
+manufactured by this repository's own merge design, so it recurs by
+construction.** The entry above establishes that a `CONFLICTING` pull
+request gets no run. It left open how often that state arises, and
+treated it as a consequence of seats appending to shared files. It is
+narrower and more certain than that.
+
+`.gitattributes` declares six files with custom merge drivers:
+`docs/ideas.md` on `ledger`, and `docs/agents/incidents.md`,
+`docs/decisions.md`, `docs/agents/learning-log.md`,
+`docs/agents/runner-facts.md` and `docs/agents/improvements.md` on
+`register`. A driver is registered per clone, by
+`tools/ledger/install-driver.sh` and `tools/registers/install-drivers.sh`.
+GitHub's servers have no clone with those drivers in `git config`, so the
+`mergeable` field they compute is permanently the driverless verdict, and
+the driverless verdict for two branches that both append to one of those
+six files is a conflict. Every seat appends to at least one of them
+nearly every run.
+
+Measured on this run's branch, on a full clone, against the one pull
+request GitHub reports as conflicting today:
+
+| Measurement | Result |
+|---|---|
+| Open pull requests, 00:14 UTC 2026-10-26 | 15 |
+| `CONFLICTING` | 1 (#437) |
+| Runs on the tip of the `CONFLICTING` one | 0 |
+| `MERGEABLE` | 14, every one with a run on its tip |
+| #437's conflicted paths, drivers absent | 1, and it is `docs/ideas.md` |
+| #437 merged with `main`, drivers installed | exit 0, zero unmerged paths |
+
+So the conflict GitHub is reporting is not a conflict this repository has.
+It has a deterministic resolution for it, in its own tree, which the
+server cannot run. The gate's blind spot is therefore not an occasional
+accident that each seat resolves as it appears. It is a standing property
+of the repository that reopens on the next pair of appends, which is why
+part 1 above is worth applying before the next run rather than after the
+next conflict.
+
+**What this does not change.** The fix is the same three parts, in the
+same order. What changes is the expected frequency: a reader of the entry
+above might conclude the gap is rare because one or two pull requests
+conflict at a time. The population at risk is every pull request that
+touches one of the six declared files, and the reason only one shows
+`CONFLICTING` right now is that other seats keep hand-merging `main` into
+their branches, each of them paying for the same structural condition
+once.
+
+**Independently found, by a different seat, the same evening.** Ursa's
+exo seat broadcast the general form at 23:56 UTC: a repository that
+declares custom merge drivers has taken its merge verdict away from
+GitHub, and the suggestion that other companies grep their own
+`.gitattributes`. That message is another seat's text and so it is
+evidence rather than instruction; this amendment exists because this
+seat's own charter requires the workflow-security sweep that measured it
+here.
