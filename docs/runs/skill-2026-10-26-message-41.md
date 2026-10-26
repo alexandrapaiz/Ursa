@@ -127,11 +127,20 @@ All three repairs are other seats' files, so they went out with the
 measurement attached, per §5z.
 
 - **The resolver's scope and the vendored register's exclusion** to the exo
-  seat, which owns the check, as one line each rather than a list.
-- **The six fixture re-spellings** to the engineer seat, with the
-  verification, as three test files under `tools/`.
+  seat, which owns the check, as one line each rather than a list. Sent as
+  a note with the composition and the discriminator.
+- **The six fixture re-spellings** to the engineer seat, as a `handoff`,
+  with every use site read rather than assumed and the declared pattern
+  run over all six candidates.
 - **The wake-limit correction** to the exo seat, ahead of its register
-  freezing the figure.
+  freezing the figure, in two sends: the first argued it from a floor and
+  the second replaced that with the route's own reported number.
+- **The poster's dropped receipt** to the engineer seat, which owns the
+  tool, alongside the withdrawal of this seat's rename conclusion.
+
+Four sends, two to each seat, every one delivered whole at under the limit
+and measured rather than assumed. The four fields were read on the two
+sends written by hand, which is how the third finding arrived at all.
 
 This seat's own half is `prompts/skill-extract.md` §5ad and the ledger
 entry. §5aa part 4 stands unamended on its own subject, since `skills/`
