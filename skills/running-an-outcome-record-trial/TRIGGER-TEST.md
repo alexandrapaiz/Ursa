@@ -264,3 +264,36 @@ why the boundary is a handoff rather than a wall: the capture path
 decides whether there are any loops to score at all, since the git path
 produces no chat trace and therefore an empty loop array. A reader who
 chose the wrong path has a trial problem, and that is this skill's.
+
+## Added 2026-10-26, twenty-fourth run: the eighth skill's boundary
+
+The run that landed `auditing-a-durability-walk` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**11. "Two records, one from the site project and one from alexandria,
+report `decayRate` 0.31 and 0.62. Is the second project really twice as
+bad at keeping what the model wrote?"**
+
+`auditing-a-durability-walk`'s own trigger 3, and it should not fire
+here.
+
+The prompt names two trials this skill chose and ran, and it reads as
+a question about the projects, which is this skill's subject. It is
+not. It is a question about two measurements, and the first thing it
+needs is whether the two walks ended at comparable tips, which is the
+new sibling's step 2 and not a property of either repository.
+
+The reason this boundary is worth a near miss rather than being
+obvious: the honest answer to the prompt may well end up back here. A
+repository whose episodes close at the tip yields nothing to walk, and
+the design doc measured exactly that on Ursa's own history, where all
+five records came back with no tested spans. If the comparison fails
+because one project cannot produce a walkable record at all, the
+remedy is a trial choice and this skill owns it.
+
+So the routing is: the durability skill answers whether the two
+numbers measured comparable things, and hands back here only if the
+answer is that one of the projects was never a viable trial.

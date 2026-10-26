@@ -189,3 +189,38 @@ about, and an auditor who has just read a transcript is the person most
 likely to quote from it. Both directions are release-side first,
 because nothing should be pasted anywhere while the question of whether
 it may leave is open.
+
+## Added 2026-10-26, twenty-fourth run: the eighth skill's boundary
+
+The run that landed `auditing-a-durability-walk` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**10. "This record says `decayRate: 0`. Can I put 'none of the model's
+output was later removed' in the methods note?"**
+
+`auditing-a-durability-walk`'s own trigger 1, and it should not fire
+here.
+
+These two are the library's only pair of skills whose job is auditing
+a derived block rather than reading a label, so they share the shape
+of the judgment even where they share no field: both read a computed
+number against the material it was computed from, and both exist
+because a field name promises more than the code delivers. A reader
+matches on that shape, which is why the boundary needed writing down
+despite the artifact test separating the blocks cleanly.
+
+The material is what differs. This skill's block is derived from the
+conversation trace and cannot be computed at all without one. The new
+sibling's block is derived from git history after the episode closed
+and cannot be computed without that. A record can carry either, both
+or neither.
+
+Where they will genuinely meet, so a later reader does not take this
+answer as permanent: the design doc records that having `signals.ts`
+treat a decayed span as evidence against `accepted_tacitly` is the
+obvious next move and was deliberately left undone. If that lands, a
+prompt about a decayed span contradicting a tacit acceptance sits on a
+real new edge, and this section is what has to be read again.

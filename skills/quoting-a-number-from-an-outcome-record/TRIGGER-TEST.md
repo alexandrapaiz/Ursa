@@ -239,3 +239,50 @@ the detector emitted is not a statistic the resolver counted. Once a
 recurrence count is going into the lab brief, both fire, and the order
 is sibling first, because this skill cannot rule on a sentence whose
 subject has not been established.
+
+## Added 2026-10-26, twenty-fourth run: the eighth skill's boundary
+
+The run that landed `auditing-a-durability-walk` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request. That is `prompts/skill-extract.md` §5r, and this section
+is this file's payment. The prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+This is the hardest of the seven boundaries the new skill creates, and
+it is the one the library should expect to get wrong, so it gets more
+prose than the others.
+
+**10. "Two records, one from the site project and one from alexandria,
+report `decayRate` 0.31 and 0.62. Is the second project really twice as
+bad at keeping what the model wrote?"**
+
+`auditing-a-durability-walk`'s own trigger 3, and it should not fire
+here, on a technicality that is really the substance.
+
+Everything about the prompt says this skill. It holds two record
+statistics, it asks whether they may be compared, and comparability
+across records is this skill's central question. If the two numbers
+were span-class shares out of `stats` it would be trigger 1 of this
+file with different nouns.
+
+`decayRate` is not like the other statistics, and that is the whole
+distinction. Every number this skill governs is a function of the
+episode, settled when the episode closed, so two of them differ only
+in what they are a share of. `decayRate` is a function of the commits
+after the closing commit, walked to whatever HEAD was at the time, so
+two of them can differ because the walks ended at different tips with
+nothing about either episode differing at all. There is a prior
+question, and it is not "what is this a share of".
+
+So the order is: the durability skill establishes that the two walks
+measured comparable things, by reading each block's `closingSha` and
+`tipSha` and whether the revision cap bound, and then this skill
+decides whether the two numbers may be stated side by side. A prompt
+that arrives already past the window check belongs here. This one does
+not, because nothing in it shows anyone has looked.
+
+The practical test, for a reader who has both skills and has to pick
+one. Ask whether the question would survive someone answering "those
+two walks ended at different commits". If that answer dissolves the
+question, it was the durability skill's. If the question is still there
+afterwards, it is this skill's. `skills/README.md` records the order.

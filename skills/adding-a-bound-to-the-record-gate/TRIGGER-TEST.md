@@ -246,3 +246,40 @@ So the prompt is the sibling's, and if the audit that follows concludes
 a rule about every record should exist, the proposal crosses to this
 skill then, as a proposal, under step 1's bound-or-measurement test.
 Arriving here first produces an invariant nobody can write.
+
+## Added 2026-10-26, twenty-fourth run: the eighth skill's boundary
+
+The run that landed `auditing-a-durability-walk` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**10. "The durability block has `durableSpans: 0` and `durableChars:
+1840`. One of those has to be a bug. Which?"**
+
+`auditing-a-durability-walk`'s own trigger 2, and it should not fire
+here.
+
+This is the closest of the eighth skill's boundaries to this file,
+because the prompt is an arithmetic question about two fields of a
+record and it arrives already framed as "one of these must be wrong",
+which is a sentence away from "the gate should catch it". That framing
+is this skill's trigger shape.
+
+It should not fire, because neither field is wrong and there is no
+rule being proposed. The two numbers are not the same partition of the
+same set: the span counts partition the tested spans by fate, and
+`durableChars` accumulates surviving characters over every tested span
+whatever its fate, so an eroded span contributes to one and not the
+other. Reading that is the sibling's step 4.
+
+The trap in the other direction is live and is the reason this near
+miss is worth more than its heading. Somebody will arrive here
+proposing exactly the bound the prompt implies, that `durableChars` is
+zero whenever `durableSpans` is zero, and it is false on any record
+holding one eroded span. This skill's own step for separating a bound
+from a measurement is what should catch it, and the sibling is where
+the person doing that separating learns the arithmetic. So the
+handoff runs durability-side first when a proposed bound is about a
+durability field.

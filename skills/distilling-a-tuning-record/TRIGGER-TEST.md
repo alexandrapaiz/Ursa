@@ -219,3 +219,38 @@ signals block is not `tuning.json`. The direction when a prompt spans
 both is signals-side first, for the same reason the record-side
 ordering in this file's other near misses runs that way. An axiom
 cannot be judged against a number whose definition is still open.
+
+## Added 2026-10-26, twenty-fourth run: the eighth skill's boundary
+
+The run that landed `auditing-a-durability-walk` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**10. "This record says `decayRate: 0`. Can I put 'none of the model's
+output was later removed' in the methods note?"**
+
+`auditing-a-durability-walk`'s own trigger 1, and it should not fire
+here.
+
+§5e's artifact test separates these two cleanly, since this skill's
+object is `tuning.json` and the sibling's is a block of
+`outcome_record.json`. The near miss is owed anyway, under §5r, and it
+earns its place for a reason the artifact test cannot see: both skills
+are about a claim being made more confidently than its evidence
+carries. This skill's whole first half is what an axiom may assert
+from how many records; the sibling's is what a rate may assert from
+how the walk measured it. The prompt above is recognisably that kind
+of question, and a reader holding this skill will feel the pull.
+
+It is still not an axiom. Nothing is being distilled, nothing is being
+merged into a store, and the sentence in question is about the model's
+output rather than about the user.
+
+The handoff is real and runs toward this skill. A decayed span is
+evidence that a kept verdict was overturned, which is exactly the kind
+of thing an axiom should not be built on, so a run that distils from
+records carrying durability blocks should know what those blocks mean
+first. That is a reason to read the sibling before distilling, not a
+reason to answer its prompts here.

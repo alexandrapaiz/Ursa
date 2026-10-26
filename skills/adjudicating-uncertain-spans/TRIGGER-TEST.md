@@ -273,3 +273,38 @@ have surviving characters, and that is the input the sibling's
 `closedStep` is computed from. So an adjudication pass can move a
 loop's resolution, and the sibling is downstream of this skill rather
 than beside it.
+
+## Added 2026-10-26, twenty-fourth run: the eighth skill's boundary
+
+The run that landed `auditing-a-durability-walk` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**12. "This record says `decayRate: 0`. Can I put 'none of the model's
+output was later removed' in the methods note?"**
+
+`auditing-a-durability-walk`'s own trigger 1, and it should not fire
+here.
+
+The two skills work on the same spans of the same file and point in
+opposite directions in time, which is why the artifact test cannot
+separate them and the boundary had to be written down. This skill
+decides whether a span descends from a generation, a question about
+the past of the text, settled at the closing commit. The new sibling
+decides what happened to the span afterwards, and it takes the class
+this skill produces as its input: the decay rate is computed only over
+spans already classed `survived_verbatim` or `survived_mutated`.
+
+So a prompt about a `decayRate` presupposes that adjudication is
+finished. There is no uncertain span in it, no descent question, and
+nothing to commit beside the record.
+
+The handoff worth knowing in the other direction, since it is the one
+a reader of this skill will meet. A span wrongly adjudicated as
+surviving does not just add a false positive to `stats`; it enters the
+durability denominator and quietly moves a number sold to a lab. That
+makes the new sibling a downstream consumer of this skill's verdicts,
+and it is a reason to be careful here rather than a reason to answer
+its prompts.
