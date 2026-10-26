@@ -18,7 +18,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { indexLoops } from './briefing'
+import { indexCases } from './briefing'
 import { cosine, loadMiniLM, MODEL_DIMS, type Embedder, type Vector } from './embedding'
 import { RECORDED_QUERIES, RECORDS } from './fixtures'
 import { caseKey, caseText, queryText } from './semantic'
@@ -59,10 +59,10 @@ describe.skipIf(!LIVE)('the live model agrees with the recorded vectors', () => 
 
   it('still puts the motion loop nearest a request about transitions', async () => {
     const request = queryText('transitions', ['src/components/Banner.tsx'])
-    const cases = indexLoops(RECORDS)
+    const cases = indexCases(RECORDS)
     const vectors = await embedder!.embed([request, ...cases.map(caseText)])
     const ranked = cases
-      .map((c, i) => ({ key: caseKey(c.recordId, c.loop.id), cos: cosine(vectors[0], vectors[i + 1]) }))
+      .map((c, i) => ({ key: caseKey(c.recordId, c.caseId), cos: cosine(vectors[0], vectors[i + 1]) }))
       .sort((a, b) => b.cos - a.cos)
     expect(ranked[0].key).toBe('rec-site-001::loop-a')
   }, 300_000)

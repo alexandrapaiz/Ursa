@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { buildBriefing, measureBriefing, MIN_RELEVANCE, renderBriefing } from './briefing'
 import { buildQuery, score, words } from './retrieval'
-import { RECORDS, TUNING } from './fixtures'
+import { emptySignals, makeRecord, RECORDS, TUNING } from './fixtures'
 import { renderTuningBlock } from '../tuning/export'
 import type { TuningRecord } from '../tuning/types'
 import { loadRecords, loadTuning, main } from './cli'
@@ -131,6 +131,125 @@ describe('buildBriefing', () => {
     const a = buildBriefing(TUNING, RECORDS, { files: ['src/app/page.tsx'] }, NOW)
     const b = buildBriefing(TUNING, RECORDS, { files: ['src/app/page.tsx'] }, NOW)
     expect(JSON.stringify(a)).toBe(JSON.stringify(b))
+  })
+})
+
+// The record shape `ursa run` over a repository actually produces, which
+// until 2026-10-26 was the one shape this surface could not read. There is
+// no chat trace, so `src/signals.ts` returns `correctionLoops: []` and
+// routes every correction into `oneShotCorrections` instead. Measured on
+// this repository's own history that day: 17 records, 0 loops, 204
+// one-shots, 0 cases returned.
+const GIT_PAIR_RECORDS = [
+  makeRecord('rec-repo-003', ['docs/sprints/pending.md'], {
+    ...emptySignals(),
+    method: 'auto-detected',
+    oneShotCorrections: [
+      {
+        step: 4,
+        text: 'AGENT: the queue is healthy and nothing is blocked\nFINAL: four pull requests are open and two conflict',
+        domain: 'docs/sprints/pending.md',
+        quotes: [],
+      },
+      {
+        step: 9,
+        text: 'AGENT: this will likely ship tomorrow\nFINAL: this has no date and no owner',
+        domain: 'docs/sprints/pending.md',
+        quotes: [],
+      },
+    ],
+    notes: [
+      'label-stage record (git commit pair): corrections appear once, as edits;',
+      'recurrence and loops are unobservable without the chat trace.',
+    ],
+  }),
+]
+
+const EMPTY_TUNING: TuningRecord = {
+  schemaVersion: '0.1.0',
+  owner: 'local',
+  updatedAt: NOW,
+  sources: [],
+  axioms: [],
+}
+
+const gitPairBrief = (input: Parameters<typeof buildBriefing>[2]) =>
+  buildBriefing(EMPTY_TUNING, GIT_PAIR_RECORDS, input, NOW)
+
+describe('a record built from a git commit pair', () => {
+  it('serves its corrections as cases instead of returning nothing', () => {
+    const b = gitPairBrief({ files: ['docs/sprints/pending.md'] })
+    expect(b.nearestCases).toHaveLength(2)
+    expect(b.nearestCases.map((c) => c.loopId)).toEqual(['one-shot-0', 'one-shot-1'])
+    expect(b.nearestCases[0].kind).toBe('one_shot')
+    expect(b.nearestCases[0].discoveredSpec).toContain('FINAL: four pull requests are open')
+    // The exact-path term is what surfaced it: the one-shot's own
+    // `domain` field is the edited path.
+    expect(b.nearestCases[0].why.filesExact).toEqual(['docs/sprints/pending.md'])
+  })
+
+  it('counts the two correction shapes separately in coverage and in the render', () => {
+    const b = gitPairBrief({ files: ['docs/sprints/pending.md'] })
+    expect(b.coverage.loopsConsidered).toBe(0)
+    expect(b.coverage.oneShotsConsidered).toBe(2)
+    expect(renderBriefing(b)).toContain(
+      'Considered 0 active rules, 0 correction loops and 2 one-shot corrections across 1 outcome record'
+    )
+  })
+
+  it('reports recurrence as unobservable rather than as zero', () => {
+    const b = gitPairBrief({ files: ['docs/sprints/pending.md'] })
+    expect(b.nearestCases[0].recurrences).toBeNull()
+    expect(b.nearestCases[0].resolution).toBeNull()
+    const md = renderBriefing(b)
+    // The defect this asserts against: a one-shot rendered through the
+    // loop path printed `Took 0 repeats after the first ask`, which states
+    // as a measurement the one thing the record cannot observe.
+    expect(md).not.toContain('Took 0 repeats')
+    expect(md).toContain('How often she had to repeat it: not recorded')
+    expect(md).toContain('unobservable rather than zero')
+  })
+
+  it('does not read a one-shot\'s path-shaped domain as a domain tag', () => {
+    // 'docs' is contained by 'docs/sprints/pending.md', so passing the
+    // field to the domain term would buy a partial-domain match worth
+    // more than the real signal. The path is scored as a path.
+    const b = gitPairBrief({ domain: 'docs' })
+    for (const c of b.nearestCases) expect(c.why.domain).toBeNull()
+  })
+
+  it('ranks a measured loop above a single edit when the two tie on relevance', () => {
+    // Same file, one correction of each shape, nothing else to separate
+    // them. The loop wins on the recurrence tiebreak, which a one-shot
+    // cannot buy because its count is unobservable.
+    const mixed = [
+      makeRecord('rec-mixed-004', ['src/app/page.tsx'], {
+        ...emptySignals(),
+        correctionLoops: [
+          {
+            id: 'loop-m',
+            theme: 'the same ask, three times',
+            targetFiles: ['src/app/page.tsx'],
+            openedStep: 1,
+            promptSteps: [1, 5, 9],
+            recurrences: 2,
+            regressionSteps: [],
+            closedStep: 10,
+            resolution: 'accepted',
+            resolvingSteps: [9],
+            discoveredSpec: 'a spec stated after the third ask',
+            quotes: [],
+          },
+        ],
+        oneShotCorrections: [
+          { step: 2, text: 'AGENT: a\nFINAL: b', domain: 'src/app/page.tsx', quotes: [] },
+        ],
+      }),
+    ]
+    const b = buildBriefing(EMPTY_TUNING, mixed, { files: ['src/app/page.tsx'] }, NOW)
+    expect(b.nearestCases.map((c) => c.kind)).toEqual(['loop', 'one_shot'])
+    expect(b.coverage.loopsConsidered).toBe(1)
+    expect(b.coverage.oneShotsConsidered).toBe(1)
   })
 })
 

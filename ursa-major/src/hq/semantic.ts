@@ -36,7 +36,7 @@
 // points it bought, and `renderWhy` prints all four — so the arithmetic
 // is still recomputable by hand from the briefing itself.
 
-import type { IndexedLoop } from './briefing'
+import type { IndexedCase } from './briefing'
 import { cosine, embedCached, type EmbeddingCache, type Embedder, type Vector } from './embedding'
 import { normalizePath } from './retrieval'
 import type { SemanticReason } from './types'
@@ -104,15 +104,34 @@ export function queryText(domain?: string, files?: string[]): string {
 
 /** The text of a case, as the model sees it: the same three fields the
  *  lexical ranker reads, so the two rankers disagree about meaning and
- *  never about what they were shown. */
-export function caseText(indexed: IndexedLoop): string {
-  return `${indexed.loop.theme} ${indexed.loop.discoveredSpec} ${indexed.complaint ?? ''}`.trim()
+ *  never about what they were shown.
+ *
+ *  Reads `IndexedCase` rather than `IndexedLoop` since 2026-10-26, so a
+ *  one-shot correction is embeddable too. The loop expression is
+ *  unchanged: `asCase` carries `theme`, `discoveredSpec` and `complaint`
+ *  across verbatim, so every text and vector recorded in vectors.json
+ *  stays byte-identical. */
+export function caseText(indexed: IndexedCase): string {
+  if (indexed.kind === 'loop') {
+    return `${indexed.theme} ${indexed.spec} ${indexed.complaint ?? ''}`.trim()
+  }
+  // A one-shot's `theme` IS its edited path, and the path is already
+  // scored by retrieval.ts's file term. Including it here counts one piece
+  // of evidence twice, and the double count is large enough to invert a
+  // ranking: measured on a store holding one correction of each shape on
+  // the same requested file, the one-shot scored 6 and a loop the owner
+  // had to repeat three times scored 3, entirely because 'src', 'app',
+  // 'page' and 'tsx' occur in a path and not in an English theme. So the
+  // ranked text of a one-shot is the correction itself and nothing else.
+  return indexed.spec.trim()
 }
 
-/** `${recordId}::${loopId}` — the key a SemanticIndex is looked up by,
- *  and the same string briefing.ts already uses to break ranking ties. */
-export function caseKey(recordId: string, loopId: string): string {
-  return `${recordId}::${loopId}`
+/** `${recordId}::${caseId}` — the key a SemanticIndex is looked up by,
+ *  and the same string briefing.ts already uses to break ranking ties.
+ *  `caseId` is a loop's own id, so keys recorded before one-shots were
+ *  indexed still resolve. */
+export function caseKey(recordId: string, caseId: string): string {
+  return `${recordId}::${caseId}`
 }
 
 /** What the semantic ranker concluded about each case, keyed by caseKey. */
