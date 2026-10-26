@@ -1,11 +1,11 @@
 # Trigger test — distilling-a-tuning-record
 
-Eight prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Eight are near misses that should not.
+Twelve prompts, written against the `description` field in `SKILL.md`.
+Three should activate the skill. Nine are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes, not the test. The budget is eight near misses rather
 than two because §5c sets one near miss per adjacent skill, and this
-skill has eight neighbours: every other skill in the library.
+skill has nine neighbours: every other skill in the library.
 
 Near miss 4 is `quoting-a-number-from-an-outcome-record`'s own trigger,
 near miss 5 is `running-an-outcome-record-trial`'s, near miss 6 is
@@ -188,7 +188,7 @@ inputs and outputs name the same file as its neighbours'. That was
 proposed as §5e in `prompts/skill-extract.md` by the run that wrote the
 first version of this note, and this test is still the evidence for it:
 `tuning.json` appears in no other skill's inputs or outputs, and that
-single fact is what makes eight neighbours a position in a pipeline
+single fact is what makes nine neighbours a position in a pipeline
 rather than a topic.
 
 ## Added 2026-10-24, eighteenth run: the seventh skill's boundary

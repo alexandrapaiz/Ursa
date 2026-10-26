@@ -1,11 +1,11 @@
 # Trigger test — running-an-outcome-record-trial
 
-Nine prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Nine are near misses that should not.
+Thirteen prompts, written against the `description` field in `SKILL.md`.
+Three should activate the skill. Ten are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails, the description
 is what changes, not the test.
 
-The library now holds six skills, so this test carries a second job
+The library now holds ten skills, so this test carries a second job
 beyond activation: §5c asks one near miss per adjacent skill, and every
 other skill in the library is adjacent to this one. Near misses 4 and 5
 are this seat's own wording from the days when this skill had one

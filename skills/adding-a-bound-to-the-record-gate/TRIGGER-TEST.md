@@ -1,7 +1,7 @@
 # Trigger test — adding-a-bound-to-the-record-gate
 
-Seven prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Eight are near misses that should not.
+Twelve prompts, written against the `description` field in `SKILL.md`.
+Three should activate the skill. Nine are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes, not the test. The reasoning below points at the
 skill's own steps and limits rather than at evidence refs. When this
@@ -15,7 +15,7 @@ what the code says, and routing through a step keeps one claim in one
 place instead of two.
 
 The budget is eight near misses rather than two because §5c sets one
-near miss per adjacent skill, and this skill has eight neighbours: every
+near miss per adjacent skill, and this skill has nine neighbours: every
 other skill in the library. §5e is what says that is not a sign the cut
 is wrong, and the note at the end is the argument.
 
@@ -182,21 +182,29 @@ itself, which is exactly the distinction step 1 exists for.
 ## Note on the boundary, which is one edge and not five
 
 §5c warns that a skill with three or more neighbours is probably
-describing a topic rather than a piece of work. This skill has five and
+describing a topic rather than a piece of work. This skill has nine and
 should not be re-cut, for the reason §5e gives: count artifacts, not
 neighbours.
 
-Seven of the eight neighbours work on two artifacts,
+Eight of the nine neighbours work on two artifacts,
 `outcome_record.json` and `tuning.json`, and both of those are data a
-run produced. This skill works on `ursa-major/src/invariants.ts` and
-the committed records under `ursa-major/fixtures/violations/`, which
-are the checker and its counterexamples. So those seven boundaries are
-the same boundary counted four times, between the records and the
-thing that checks them, and each of those near misses fails by sitting
-on the records side of it.
+run produced. Named rather than counted, because a bare count is the
+thing that goes stale: `adjudicating-uncertain-spans`,
+`running-an-outcome-record-trial`,
+`quoting-a-number-from-an-outcome-record`,
+`auditing-a-detected-correction-loop`, `auditing-a-durability-walk`,
+`attributing-a-deleted-span` and
+`excluding-a-file-from-an-outcome-record` on the record, and
+`distilling-a-tuning-record` on the tuning file. This skill works on
+`ursa-major/src/invariants.ts` and the committed records under
+`ursa-major/fixtures/violations/`, which are the checker and its
+counterexamples. So those eight boundaries are the same boundary
+counted eight times, between the records and the thing that checks
+them, and each of those near misses fails by sitting on the records
+side of it.
 
-The fifth, near miss 8, fails on a different axis and is worth keeping
-separate rather than folded into the count.
+The ninth neighbour, near miss 8, fails on a different axis and is
+worth keeping separate rather than folded into the count.
 `clearing-a-record-for-release` does not work on an artifact at all; it
 works on a boundary. So that pair is not records-against-checker but
 checker-against-destination, and the two skills do not share an object

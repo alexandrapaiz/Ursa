@@ -1,12 +1,12 @@
 # Trigger test — auditing-a-detected-correction-loop
 
-Nine prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Eight are near misses that should not.
+Twelve prompts, written against the `description` field in `SKILL.md`.
+Three should activate the skill. Nine are near misses that should not.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes and not the test.
 
 The budget is eight near misses because §5c sets one per adjacent skill
-and this skill has eight neighbours, which is every other skill in the
+and this skill has nine neighbours, which is every other skill in the
 library. Each near miss below is that sibling's own trigger prompt,
 copied rather than paraphrased, per §5r, and its prose names which
 boundary it tests. Near miss 4 is `quoting-a-number-from-an-outcome-record`'s
