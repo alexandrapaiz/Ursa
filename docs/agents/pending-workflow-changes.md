@@ -291,77 +291,94 @@ version costs six lines per file.
 
 ---
 
-## PWC-12 — No check at all looks the same as a passing check, and nothing in the process can tell
+## PWC-12 — The gate does not run on a conflicting pull request, so it is off on exactly the branches that sit public longest
 
 **Queued by:** security seat, 2026-10-25 run 2 (message). Queued because
-the run cannot apply it: it is a branch-protection setting rather than a
-file, so it needs the owner in repository settings. The runner's token
-can write neither `.github/workflows/` (runner-facts §1b) nor the
-repository's protection rules.
+the run cannot apply it: `.github/workflows/` is refused to the Actions
+`GITHUB_TOKEN`, per docs/agents/runner-facts.md §1b. Part 3 is a
+branch-protection setting and needs the owner in repository settings.
 
-**Evidence, measured today.** Commit `be4695c` was pushed to
-`ursa-security/2026-10-25-hook` at 23:38:22 UTC, the tip of open pull
-request #427. Seven minutes later the GitHub API reported zero check
-runs against it and a combined status of `pending`:
+**Evidence.** A `pull_request` workflow runs against the merge of head
+and base, so GitHub must compute `refs/pull/<n>/merge` before it can
+schedule one. When a pull request conflicts, that ref does not exist and
+**the run is never created** — not failed, not queued, not skipped with a
+reason. Measured across all fifteen open pull requests at 00:04 UTC on
+2026-10-26, and the correlation is total:
 
-```
-gh api repos/alexandrapaiz/Ursa/commits/be4695c.../check-runs --jq .total_count
-# 0
-gh api repos/alexandrapaiz/Ursa/commits/be4695c.../status      --jq .state
-# pending
-```
+| `mergeable` | Pull requests | With a run on the tip |
+|---|---|---|
+| `MERGEABLE` | 13 | 13 of 13 |
+| `CONFLICTING` | 2 (#437, #435) | 0 of 2 |
 
-That was not queue latency. In the same seven-minute window the gate ran
-and finished on five other branches, and the five commits *before*
-`be4695c` on this same branch each got a run. The `pull_request` event
-for that one push produced no run.
+Confirmed by transition in both directions rather than by correlation
+alone. #427 took eight `pull_request` runs while mergeable, then none
+from the 23:38 push that made it conflict, then runs again after another
+seat merged `main` into it at 23:58. This entry's own branch was cut from
+#427 while it conflicted, inherited the conflict, took five pushes with
+zero runs, and received one within forty-five seconds of the merge that
+made it mergeable at 00:03:04. Draft state was tested and ruled out.
+`workflow_dispatch` succeeds throughout, so neither the workflow nor the
+tree is implicated. Full reading in the 2026-10-25 audit, F10, and on the
+register as `INC-2026-10-26-gate-skips-conflicting-prs`.
 
-**It then reproduced, which is why this entry exists rather than a note.**
-The branch this entry was written on, `ursa-security/2026-10-25-message`
-(#439), took four pushes and received **zero** `pull_request` runs, ever,
-while `ursa-skill`, `ursa-pm`, `ursa-exo` and `ursa-engineer` branches
-received eight between them in the same window. Counts by event, and the
-hypotheses they rule out, are in the 2026-10-25 audit, F10.
-`workflow_dispatch` succeeds on both affected branches, so the gate works
-on precisely the trees it declines to run on by event. The cause is not
-established and this entry does not guess, because the change below does
-not depend on knowing it: a required check that never reports blocks the
-merge whatever the reason it did not report.
+**Why it matters here more than it would elsewhere.** Conflict is this
+repository's normal state, not its exceptional one. Ursa incident 6 is
+five open pull requests unmergeable at once from shared-file appends, and
+`tools/registers/install-drivers.sh` exists because of how routine it is.
+And the repository is public, so a branch is public on push. So the gate
+that exists because incidents 2 and 4 put private data on a public
+repository is off on the branches that stay public longest. The merge
+path is not the exposure; GitHub refuses to merge a conflicting pull
+request. The branch is the exposure, which is what it was in both
+incidents.
 
-**The shape, which is the finding.** `redaction-gate` attaches to
-`pull_request`. A pull request whose gate never ran presents to a
-reviewer as a pull request with nothing wrong: the checks section is
-empty rather than red. The board cannot distinguish "scanned and clean"
-from "never scanned", and no seat is asked to confirm that a verdict
-exists before readying its own pull request. A gate that can be absent
-without anyone noticing is advisory, not a gate, which is the exact
-sentence `scripts/dep-floor.mjs` opens with about a different gate.
+**Change.** Three parts, in descending order of value.
 
-For this pull request the content was in fact clean. This run proved it
-by dispatching the gate by hand (`gh workflow run redaction-gate.yml
---ref ursa-security/2026-10-25-hook`, run 40246150644, success), which is
-also the workaround until this is applied. The point is that nothing
-other than a run that went looking would have produced that fact.
+1. **Add `push` on all branches to the gate's triggers.** Today it reads
+   `push: branches: [main]` plus `pull_request`. A `push` event runs
+   against the pushed commit itself and needs no merge ref, so it fires
+   whether or not the pull request can be merged. This is the whole fix
+   for the exposure and it is one line:
 
-**Change.** Two parts, and the first is most of the value.
+   ```yaml
+   on:
+     push:
+     pull_request:
+     workflow_dispatch:
+   ```
 
-1. Make `redaction-gate / scan` a **required status check** on `main` in
-   branch protection. A required check that has not reported blocks the
-   merge, which converts the silent case into a visible one. This is the
-   whole fix for the reviewer-facing half.
-2. Add `workflow_dispatch` as the documented recovery, which the gate
-   already accepts, and record in `docs/security/redaction-standard.md`
-   that a seat confirms its own tip carries a verdict before readying.
-   The second half of that is applied in this run; this entry is the
-   half that needs settings.
+2. **Add a `concurrency` block**, because part 1 means a mergeable pull
+   request gets two runs per push, one per event. Group on the ref and
+   cancel in progress:
 
-**Verification after applying.** Open a scratch pull request, push a
-commit, and confirm the merge button reports the required check as
-expected before it reports it as passing. Then re-run the measurement
-above against any open pull request's tip and expect a non-zero count or
-a blocked merge, never both zero and mergeable.
+   ```yaml
+   concurrency:
+     group: redaction-gate-${{ github.ref }}
+     cancel-in-progress: true
+   ```
 
-**Severity.** Medium, and it is a reliability finding more than an
-exposure. It does not create a leak. It removes the guarantee that the
-thing which catches leaks ran at all, which is what two incidents and
-three PWC entries have been spent on.
+   Keeping `pull_request` alongside `push` rather than replacing it is
+   deliberate: `push` does not fire for pull requests from forks, and
+   `pull_request` does. Neither event covers the other's case, which is
+   why this is two triggers and a concurrency group rather than a swap.
+
+3. **Make `redaction-gate / scan` a required status check on `main`** in
+   branch protection. This does not fix the exposure, because a
+   conflicting pull request already cannot merge. It fixes the
+   reviewer-facing half: a required check that has not reported is
+   visibly blocking, where an absent check today is an empty checks
+   section that reads like a clean one.
+
+**Verification after applying.** Push to a deliberately conflicting
+branch and confirm a run appears for the `push` event while the pull
+request still reports `CONFLICTING`. Then re-run the measurement above
+and expect every open pull request to carry a run on its tip regardless
+of `mergeable`. Then confirm a mergeable pull request produces one
+surviving run per push rather than two.
+
+**Severity.** High, revised up from the medium this entry was first filed
+at, when the symptom looked like a single dropped event. It is not an
+exposure in itself. It removes the guarantee that the thing which catches
+exposures ran at all, on the subset of branches where that guarantee was
+worth the most, and it has been doing so silently for as long as the gate
+has existed.

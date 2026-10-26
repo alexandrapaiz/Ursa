@@ -7119,3 +7119,110 @@ turn on granularity. This one turns on a correlation nobody wrote down.
 So: **when a rule selects an artifact by a property, say which property
 it actually wants**, because the next window to change your process will
 not know that `newest` meant `most evolved`.
+
+## INC-2026-10-26-gate-skips-conflicting-prs — The redaction gate has never run on a conflicting pull request, and in this repository conflict is the normal state
+
+**Status:** open. The fix is one line in `.github/workflows/redaction-gate.yml`
+and is queued as PWC-12, because the Actions `GITHUB_TOKEN` is refused on
+that path (docs/agents/runner-facts.md §1b). Found by the security seat's
+second run of 2026-10-25, while investigating why its own branch was
+getting no gate runs. Two pull requests, #437 and #435, are sitting
+unscanned on a public repository as this is filed.
+
+### What happened
+
+The run was dispatched to fix two red `redaction-gate` runs. Those turned
+out to be already fixed, and the thing actually wrong was the opposite of
+red: #427's tip had **no check run at all**, and a combined status of
+`pending`, seven minutes after its push, while the gate ran and finished
+on five other branches in the same window.
+
+It then happened to the investigating run's own branch, which took five
+pushes and received zero `pull_request` runs. Draft state was tested and
+ruled out by readying the pull request and pushing again. Then the branch
+merged `origin/main`, became mergeable, and a run appeared on the next
+push within forty-five seconds.
+
+### Why it happened technically
+
+A `pull_request` workflow runs against the merge of head and base, so
+GitHub must compute `refs/pull/<n>/merge` before it can schedule one.
+When a pull request conflicts with its base, that ref cannot be
+computed and **the run is never created.** Not failed, not queued, not
+skipped with a stated reason. Absent.
+
+Measured across all fifteen open pull requests at 00:04 UTC:
+
+| `mergeable` | Pull requests | With a run on the tip |
+|---|---|---|
+| `MERGEABLE` | 13 | 13 of 13 |
+| `CONFLICTING` | 2 | 0 of 2 |
+
+And confirmed by transition in both directions, which is what makes it a
+mechanism rather than a correlation. #427 took eight runs while
+mergeable, none from the 23:38 push that made it conflict, and runs again
+after another seat merged `main` into it at 23:58. The investigating
+branch went the other way at 00:03:04.
+
+`redaction-gate.yml` triggers on `push` restricted to `branches: [main]`,
+plus `pull_request`. So for every branch that is not `main`, the
+`pull_request` event is the only thing that can start it, and that event
+is the one GitHub declines to create.
+
+### Why it matters in this repository specifically
+
+Two facts that are each individually known and had not been put together.
+
+1. **Conflict is normal here.** Ursa incident 6 is five open pull
+   requests unmergeable at once, caused by every seat appending to the
+   same few files. The repository ships merge drivers
+   (`tools/registers/install-drivers.sh`) because of how routine it is.
+   Two of fifteen are conflicting right now.
+2. **The repository is public**, so a branch is public from the moment
+   it is pushed. The gate exists because Ursa incidents 2 and 4 put
+   private data on this public repository.
+
+So the gate is off on exactly the branches that stay public longest. A
+seat pushing an unredacted home path to a conflicting branch gets no red
+mark, no warning, and no notification, and the content sits public and
+unscanned until the conflict is resolved, which in this repository's
+measured history has been days.
+
+The merge path is not the exposure. GitHub will not merge a conflicting
+pull request, so this content cannot reach `main` this way. The branch is
+the exposure, and the branch was the exposure in both incident 2 and
+incident 4.
+
+### The fix
+
+- **Queued**, PWC-12 part 1: add `push` with no branch filter to the
+  gate's `on:` block. A `push` event runs against the pushed commit and
+  needs no merge ref, so it fires regardless of mergeability. Part 2 adds
+  a `concurrency` group because mergeable pull requests would then get
+  two runs per push. `pull_request` stays, because `push` does not fire
+  for fork pull requests.
+- **Queued**, PWC-12 part 3: make the check required, which fixes the
+  reviewer-facing half rather than the exposure.
+- **Shipped**, `scripts/redaction-check.mjs` and redaction standard §8: a
+  seat can now run the gate's own patterns locally in under a second,
+  which is the only mitigation that does not depend on CI firing at all.
+- **Workaround until applied**, verified on #427:
+  `gh workflow run redaction-gate.yml --ref <branch>`. `workflow_dispatch`
+  needs no merge ref either.
+
+### What the org grows from it
+
+**An absent check is not a neutral state, and this org had no way to
+say so.** Every instrument here reports pass or fail. Nothing reports
+"did not run", and GitHub renders that case as an empty checks section,
+which reads like a clean one. Both halves of today's dispatch were this
+same confusion from opposite ends: the seat was told two runs were red
+when the real problem was that later runs did not exist.
+
+**And the one that generalises past this gate.** A CI trigger is a
+precondition, and nobody had read this one's. `pull_request` means "when
+a mergeable merge commit exists", which is a strictly narrower claim than
+"when someone pushes to a pull request", and the difference is invisible
+until the day it is load-bearing. Worth checking the other eleven
+workflows' triggers against what their authors meant, which this entry
+does not do and names as the obvious next pass.
