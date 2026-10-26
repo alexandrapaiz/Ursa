@@ -43,7 +43,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import type { OutcomeRecord } from '../types'
 import type { TuningRecord } from '../tuning/types'
 import { emptyTuning } from '../tuning/merge'
@@ -77,18 +77,50 @@ export const SERVER_NAME = 'ursa-major'
  * knows nothing yet — which `renderBriefing` already prints in those
  * words. Failing instead would make a fresh install look broken.
  */
+/**
+ * Read one JSON file from the store, or fail with a message that names it.
+ *
+ * WHY THIS WRAPPER EXISTS. `JSON.parse` on a corrupt file throws
+ * `SyntaxError: Unexpected token ... in JSON at position 412`, which says
+ * nothing about which file, and on this path that exception is unhandled:
+ * one bad file in `records/` took the whole server down. The user then
+ * sees their MCP client lose a server and reads it as "Ursa is broken"
+ * rather than "one of my files is broken", which is the opposite of true
+ * and not actionable.
+ *
+ * It is also a small disclosure fix. An unhandled throw here reaches the
+ * client as a stack trace, and the frames carry absolute paths, which on
+ * a real machine means the owner's home directory and username. The
+ * redaction standard calls that a private path, and the gate in
+ * `.github/workflows/redaction-gate.yml` exists because it leaked once
+ * already. Naming the file relative to nothing and raising a plain Error
+ * keeps the one fact the user needs and drops the frames.
+ */
+function readJsonFile<T>(file: string, what: string): T {
+  const text = readFileSync(file, 'utf8')
+  try {
+    return JSON.parse(text) as T
+  } catch (e) {
+    throw new Error(
+      `${what} at ${basename(file)} is not valid JSON and was not read: ` +
+        `${e instanceof Error ? e.message : String(e)}. ` +
+        `Nothing else in the store was touched.`
+    )
+  }
+}
+
 export function fileStore(paths: { tuningPath: string; recordsDir: string }): UrsaStore {
   return {
     tuning: () =>
       existsSync(paths.tuningPath)
-        ? (JSON.parse(readFileSync(paths.tuningPath, 'utf8')) as TuningRecord)
+        ? readJsonFile<TuningRecord>(paths.tuningPath, 'the tuning record')
         : emptyTuning('local'),
     records: () =>
       existsSync(paths.recordsDir)
         ? readdirSync(paths.recordsDir)
             .filter((f) => f.endsWith('.json'))
             .sort()
-            .map((f) => JSON.parse(readFileSync(join(paths.recordsDir, f), 'utf8')) as OutcomeRecord)
+            .map((f) => readJsonFile<OutcomeRecord>(join(paths.recordsDir, f), 'an outcome record'))
         : [],
   }
 }
