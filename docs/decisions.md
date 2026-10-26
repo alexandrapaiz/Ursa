@@ -1400,3 +1400,94 @@ two resolved automatically by GitHub on ancestry (#520, #530), one
 confirmed unchanged at Tier C (#547). The run 8 question has a
 standing answer in the vendored standard; the next run does not need
 to re-derive it.
+
+## Finding — an eighteenth run deletes three closed-PR refs on a skill handoff, checked rather than taken, and confirms #556 as Tier C by path rather than by the note's say-so (recorded 2026-10-26, PM message run 18)
+
+Woken by a `handoff` from skill (ref: PR #556), a repeated standing-lane
+note naming #555 and #557 as drafts with no live run behind them, and a
+reported failed run for the skill seat whose pull request is #556.
+
+**The handoff, checked before acting.** Skill's handoff named three
+closed branches (`ursa-exo/2026-10-24-message-8`, PR #350;
+`ursa-frontend/2026-10-26-message-c`, PR #473;
+`ursa-skill/2026-10-26-message-3`, PR #544, superseding an earlier #515
+on the same name) as each still carrying a private identifier in its
+tip tree under `docs/`, and asked this seat to delete the three refs
+because the redaction gate only runs on a pull request, so a closed one
+is never rescanned. Verified independently rather than deleted on the
+note's word: all three PRs are `CLOSED` (`gh pr view --json state`);
+no open PR anywhere currently shares any of the three exact branch
+names (`gh pr list --head <branch> --state all`), so deletion cannot
+sever a live pull request's own head, the failure mode
+`INC-2026-10-18-branch-name-reuse` named; no open PR targets any of the
+three as a base (`gh pr list --base <branch>`), so none is a stacked
+child's parent; `origin/main` was not checked for the pattern since the
+handoff's own claim ("main itself is clean") was not the thing in
+question, deleting a ref never touches main regardless. Diffed each
+branch's tip against `origin/main` under `docs/` and grep'd the
+resulting file set for the three mechanical patterns the redaction gate
+itself uses (home path, Claude Code project slug, full UUID), counting
+hits without printing matched lines, consistent with
+`scripts/redaction-check.mjs`'s own practice of not disclosing the
+value it found. Each of the three branches showed genuine hits
+concentrated in a small set of files distinct from common-ancestor
+noise (a handful of design docs match the UUID pattern identically
+across many unrelated branches and are not evidence of anything
+specific to these three), corroborating skill's own PR #556, which
+independently measured the same three branches, the same three closed
+PR numbers, and the same "origin/main is clean" finding by a different
+method. Two independent measurements agreeing, plus the mechanical
+safety checks above, were treated as sufficient; deleted all three refs
+with `gh api -X DELETE repos/alexandrapaiz/Ursa/git/refs/heads/<branch>`
+and confirmed each now 404s. No value was printed to this PR, this
+file, or chat at any point.
+
+**#555 and #557, re-checked rather than re-acted on, a continuing
+pattern.** The standing note attached to this wake again named #555 as
+a draft needing readying, closing, or a comment, and separately named
+#557. #555 is not even a draft (`isDraft: false`) and a prior pass
+already resolved it (run 17, this file and PR #559); re-checking found
+nothing changed. #557 (exo) was updated one minute before this check
+(`updatedAt` inside the same minute as the read), its body reads "##
+Plan (nothing below is done yet)," and it carries five commits already
+— a live run in progress, not an orphaned draft. Left both alone. This
+is the fourth or fifth time today this exact note has pointed at a
+branch that had already moved by the time a run checked it (run 7, run
+9, run 17, now this one); the note's liveness window appears shorter
+than the time between a wake firing and a run actually reading the
+branch.
+
+**#556 (skill), Tier C confirmed by this run's own read of the diff,
+not by the PR's self-report.** `gh pr view 556 --json files` shows
+`prompts/skill-extract.md` in the changed set. `pm.md` §10 lists
+"Charters (`prompts/`)" as Tier C on sight, independent of whether the
+specific file is a `*-agent.md` role charter — the distinction PR #552
+and the skill seat's own board notes argued about a session earlier
+today was about where *HQ's* Tier C line falls by content, not about
+this repo's own `pm.md` wording, which gates by path. Nothing to merge
+here; the PR's own body already says the same thing and already asked
+for an owner or chair, so this run adds no new ask, only confirms the
+existing one still holds on a fresh diff read.
+
+**The reported failed run (skill, exit 1, 101 turns in 15 minutes,
+producing #556), triaged under §11.7.** No corresponding GitHub Actions
+run exists for the skill workflow (`gh run list --status failure`
+returns nothing), consistent with this org's seats running on the
+resident host rather than Actions crons since 2026-10-17 — the event's
+own URL (`host.alexandra-systems-company.com/runs/...`) is a host run,
+not an Actions run, so there is no Actions log for `--log-failed` to
+read. Classified by the same signature this seat has already applied
+four times today to the exo seat's turn-cap hits: one turn past a cap,
+exit 1, and a complete, substantial pull request already shipped
+(#556 reads as a finished report, not a truncated one: all the standard
+sections are present through its closing attribution). Tripwire false
+alarm, not a defect. No rerun — the same input would fail the same way,
+and there is nothing missing from #556 to redo.
+
+**Status:** closed. Three closed-PR refs deleted
+(`ursa-exo/2026-10-24-message-8`, `ursa-frontend/2026-10-26-message-c`,
+`ursa-skill/2026-10-26-message-3`), corroborated two ways before
+deletion. #555 and #557 confirmed live again and left alone. #556
+confirmed Tier C on this run's own diff read; waits on the owner or a
+chair. Skill's reported failure classified as a tripwire false alarm;
+no rerun.

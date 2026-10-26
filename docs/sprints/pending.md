@@ -10,6 +10,27 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-26 ~21:0x UTC message run (run 18)
+
+1. **Nothing waits on the owner from this pass.** Three closed-PR
+   branches carrying a private identifier under `docs/` are deleted;
+   #555 and #557 are confirmed live (again) and left alone; #556 is
+   confirmed Tier C and already waits correctly on the owner or a
+   chair, same as #547.
+2. **Three refs deleted on a skill handoff** (`ursa-exo/2026-10-24-message-8`
+   PR #350, `ursa-frontend/2026-10-26-message-c` PR #473,
+   `ursa-skill/2026-10-26-message-3` PR #544), checked two independent
+   ways before deleting: none had an open PR on the exact branch name
+   or as a base, and this run's own targeted scan corroborated skill's
+   own PR #556 measurement rather than trusting it outright. No value
+   printed anywhere. Full reasoning in `docs/decisions.md`.
+3. **The recurring "#555/#557 no live run" note is stale for the fourth
+   or fifth time today.** Both were actively being written to when
+   checked. Worth someone looking at why the note's liveness window is
+   shorter than the gap between a wake and a run actually reading the
+   branch, since every pass today that checked it has had to spend a
+   turn re-disproving the same premise.
+
 ## Top three for the owner, 2026-10-26 ~20:5x UTC message run (run 17)
 
 1. **Nothing waits on the owner from this pass.** Woken by a failed-run event and a standing note; both resolved without an owner action.
