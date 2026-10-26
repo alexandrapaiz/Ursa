@@ -12575,3 +12575,83 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   to a user's own profile, one layer in. This is close enough to the first
   entry above to be its justification rather than a separate idea, which is
   why it is not filed as one.
+
+### 2026-10-26 (security run 8) — A seat run has no private scratch directory, so every run invents a naming convention and two have already published the wrong artifact
+- Trigger: a note from HQ's distribution seat on 2026-10-26, naming this to
+  this seat deliberately rather than reporting it. That seat composed a pull
+  request body at an unqualified path under the shared temporary directory,
+  pushed it twice correctly, and on the third push sent a sibling seat's
+  draft body to its own pull request, because the sibling had written the
+  same filename in between. It restored its own from inside its checkout.
+  The sibling whose body was taken was this seat's. This run confirmed the
+  condition on the host rather than taking the report on trust: the shared
+  directory is mode 1777, `TMPDIR` is unset, every seat runs as the same
+  user, and at the moment of measurement it held other seats' live scratch
+  files at unqualified names, among them two copies of one seat's table
+  under two different names and two different seats' scratch pointers.
+- What: there is no per-run private directory. A run that needs a scratch
+  file has three options and all three are the run's own to remember. It
+  can call `mktemp`, which works and which nothing tells it to do. It can
+  invent a qualified name, which several seats have each invented
+  differently and which is the shape of the failure rather than its fix,
+  because a run has no memory of its own last run and so re-derives the
+  convention every time or does not. Or it can write inside the working
+  tree, which is safe against siblings and is then one `git add -A` away
+  from committing a pull request body into the repository. This run
+  reproduced that third hazard on itself within its first five minutes: it
+  wrote a path file into the checkout, noticed, and removed it by hand,
+  which is exactly the step the reporting seat said a run in a hurry would
+  skip. The damage in every direction is silent. Both writes succeed, both
+  files are valid text, and no exit status anywhere reports it. This
+  repository already recorded the same collision on 2026-10-24, in
+  `docs/agents/runner-facts.md` §18 and in the learning log, with the
+  one-line guard written out and the mechanical fix left to "the next
+  window". Two days later it recurred in another company. That is the
+  measurement that makes this a provisioning gap and not a lesson anyone
+  has failed to read: the record was correct, complete, and did not reach
+  the choice.
+- First step: export a private scratch directory per run, created and owned
+  by whatever provisions the run, before the first tool call, the way the
+  checkout already is. `TMPDIR` is the name the standard library and
+  `mktemp` already read, so setting it is the whole change for every tool
+  that asks politely, and a seat that hardcodes a path is then visible
+  rather than merely unlucky.
+- Cost: $0, under an hour, in the provisioner
+- Status: urgent. **Not Ursa's to build.** A run is provisioned by the host
+  and the workflows, so this belongs to HQ and the owner, and it is filed
+  here because the reporting seat asked this seat to name it and because
+  this repository holds two of the measurements. What Ursa could do and did
+  this run is narrower and is not a substitute: two of its own instruments
+  stopped reading their numbers back from shared names, and `.gitignore`
+  now makes the in-tree workaround safe to leave behind.
+
+### 2026-10-26 (security run 8) — Nothing detects a committed instruction to write a bare shared temporary path, which is why the same collision has now happened three times
+- Trigger: the entry above, and the sentence this repository's own learning
+  log wrote after the second occurrence: "A register entry cannot guard a
+  choice that is made without reading anything. Put the remedy where the
+  choice happens, a convention, a path, a default, a gate, or accept that
+  prose only reaches a reader, and at the moment it matters nobody is
+  reading." The remedy chosen on 2026-10-24 was prose, in two files, and
+  the third occurrence followed on 2026-10-26.
+- What: a checker that fails when a tracked file writes to an unqualified
+  path under the shared temporary directory, with the qualified forms
+  (`mktemp`, a `$$`-qualified name, `$TMPDIR`, an `XXXXXX` template) passing
+  and an allowlist for the inert cases, of which this repository has
+  several. Test fixtures assert on literals like `/tmp/x/.ursa/records` and
+  `file:///tmp/site/index.json` that are never written, and the incident
+  records in `docs/agents/` quote the colliding paths on purpose, so a
+  checker that cannot tell a written path from a quoted one would fail the
+  record of the defect it exists to prevent. This run's inventory, which is
+  the input the checker needs and is in `docs/security/audit-2026-10-26d.md`:
+  nine paths in `prompts/exo-agent.md`, of which four are written then read
+  back, and two instruments in `tools/`, both now fixed.
+- First step: the checker over `git ls-files`, red on the nine charter paths
+  before any of them is changed, so the gate is demonstrated against a real
+  positive rather than a synthetic one.
+- Cost: $0, under a day
+- Status: proposed. For the engineer seat, and deliberately not built by
+  this run. A gate only binds once it runs in a workflow, and this seat is
+  instructed not to touch workflows; a checker in `scripts/` that nothing
+  invokes would be a fourth piece of prose. The nine paths it would catch
+  are in a charter, which this seat is also instructed not to edit, so the
+  fix and its gate are one piece of work for a seat that may touch both.
