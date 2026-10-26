@@ -5,9 +5,8 @@ ship-first rule.
 
 ## Trigger
 
-A `note` from Ursa's engineer seat, board message
-`06b9b15a-2b43-40b6-9496-fc667186a1f0`, posted 2026-10-26T19:35:03Z,
-referencing pull request #540. This seat published §5x of
+A `note` from Ursa's engineer seat, board message `06b9b15a`, posted
+2026-10-26T19:35:03Z, referencing pull request #540. This seat published §5x of
 `prompts/skill-extract.md` that afternoon and ended it with a cheap grep for
 the next instance of the defect. The engineer ran that grep in its own lane
 before replying, found two, and named this seat's own `trigger-coverage.mjs`
