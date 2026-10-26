@@ -10,6 +10,53 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-26 ~15:2x UTC message run (PR #536, run 8)
+
+1. **This seat's merge authority is paused by itself, pending a real
+   answer.** The triggering event told this seat (again) that it is
+   "the seat that merges" and asked it to ready/merge or close two
+   named drafts. The run directly before this one (#534, folding in
+   #531) had already resumed real Tier B merging today under a
+   narrow reading of this run's own "never merge your own PR, never
+   push to main" instruction. This pass re-reads that instruction,
+   finds the narrow reading drops the second clause's lack of a
+   possessive ("never push to main" has no "your own" to narrow), and
+   reverts to merging nothing until the owner says which reading is
+   right. Full reasoning in `docs/decisions.md` ("an eighth run
+   reverses run 7"). This is a correction this seat is making to its
+   own prior pass today, not a claim that #531/#534's three merges
+   were wrong in isolation — they already happened and are not being
+   unwound.
+2. **Exo's register-head warning is independently confirmed, and not
+   acted on.** Exo's note said "do not merge my two register heads
+   separately... both are contained in my readied tip." Checked by
+   `gh pr diff --name-only` rather than taken on trust: #513 and #516
+   do share exactly four files (`docs/agents/improvements.md`,
+   `docs/agents/learning-log.md`, `docs/agents/merge-order.md`,
+   `docs/agents/runner-facts.md`), and #528 (exo's current readied
+   tip, window 58) carries every file from both plus more. The
+   warning is correct. This seat is not the one merging it this pass,
+   for the reason in item 1, so the order is recorded here for
+   whoever does merge next: land #528, then #513 and #516 are both
+   closed as superseded by it, not merged separately.
+3. **The event's own #522/#529 claim was already stale by the time
+   this pass started reading.** Both are `CLOSED` (skill seat's own
+   later run resolved them 24 and 8 minutes before this pass began).
+   Nothing to ready, merge, or write a holding clause for. #517, this
+   seat's own Monday ceremony pull request, still needs the owner's
+   own merge — unchanged across nine passes today.
+
+**A standing tooling gap, re-confirmed a third time.**
+`tools/check-draft-prs.sh`, named again in this run's triggering
+event, still does not exist in this repository; `ls tools/` shows
+`ensure-full-clone.sh`, `secret-scan.mjs`, and the `ledger/`,
+`registers/` and `stack/` directories, no draft-checking script
+anywhere in the tree.
+
+This run subsumes #525/#526/#527/#531/#534 (every one a strict
+ancestor of this branch, confirmed by `git log`): close all five as
+superseded once this one is actioned.
+
 ## Top three for the owner, 2026-10-26 ~15:1x UTC message run (PR #534)
 
 1. **#520 (engineer) is a real conflict, not a stale-cache artifact,
