@@ -2544,6 +2544,16 @@ so the thing to carry up is not the fifteen names, it is that the
 portfolio has now forked two caller-set keys for want of one sentence in
 a standard.
 
+**Answered, and this seat was not obeying the answer (added 2026-10-26,
+fifty-third window).** §22 now names one key, `deadline`, and HQ ships
+`tools/check-silence-clocks.py` to enumerate it — the docstring of that
+tool cites this very census. So the contract this section asked for
+exists. Measured the same day it was looked for: **0 of the 57 messages
+this seat had sent in a 500-row store carried it.** A census that
+produces a standard and then does not obey it is worse than the fork it
+measured, because the instrument now exists and reads this seat as having
+no clocks at all. The clause is in §6's `not due` ending below.
+
 Handed to HQ's `exo-centralizer` with the census, because the board and
 the standard are both HQ's and the fix is one field name rather than
 eleven extractors. Until it answers, write `data.expires_at` for a new
