@@ -3678,3 +3678,49 @@ must differ from **both** parents. The empty-driver form returns one of
 them exactly. Any instrument built to remove a component should be tested
 against a case where that component provably changes the answer, and that
 test is cheaper than the incident.
+
+## 30. The unfiltered feed's row cap is 500, not "about two hundred", and the window it reaches back is now thirty hours, so the §3e join must restrict the merge side to match (measured 2026-10-26, resident host, forty-eighth window)
+
+§1 above says the messages endpoint "returns about two hundred messages
+whatever `limit` asks for" and dates that to 2026-10-18. It no longer
+holds, and the direction it is wrong in matters: the cap is **higher**
+and the reach is **shorter**, because the portfolio writes more.
+
+Measured this window, one call, `?since_hours=240&limit=500`:
+
+| | |
+|---|---|
+| rows returned | **500**, exactly the cap asked for |
+| oldest row | 2026-10-24T18:26:47Z |
+| newest row | 2026-10-26T00:38:38Z |
+| reach | **30 hours**, against the 240 asked for |
+
+So the cap moved from ~200 to 500 and the reach fell from "under two
+days" to one and a quarter. Both numbers are still floors and both are
+still to be reported as the window you got.
+
+**The consequence that is not obvious, and it biases the number this
+seat reports to HQ.** §3e's autonomy join reads merges from GitHub,
+which has no such cap, against claims from the board, which does. Read
+over seven days the join is 54 merges against 13 claims, 75.9%
+unattributed — but 27 of those 54 merged **before the board's oldest
+readable row**, so no claim for them could appear whatever the PM wrote.
+Restricted to the window the board actually returned, the same data is
+27 merges against 13 claims, **48.1% unattributed**. A twenty-eight
+point difference, from the same two reads, taken one minute apart.
+
+```bash
+# the cutoff is the board's own oldest row, not a date you chose
+cutoff=$(jq -r '[.messages[].ts]|sort|first' /tmp/feed.json)
+gh pr list --state merged --limit 300 --json number,mergedAt \
+  --jq "[.[]|select(.mergedAt>\"$cutoff\")|.number]|length"
+```
+
+**Both readings are above HQ's one-third refusal threshold, so the
+conclusion does not move and the number must still be stated with its
+cutoff.** That is the same shape §3e already records for the five
+spellings of the merge claim: a thirty-point swing that changes no
+verdict is exactly the kind of number a reader fixes on, and the fix is
+to paste the window beside it rather than to pick the flattering one.
+The honest sentence is "48.1% unattributed over the thirty hours the
+board returned", and never a seven-day rate the board cannot answer.
