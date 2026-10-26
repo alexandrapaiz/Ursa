@@ -1365,3 +1365,94 @@ were in the state, so nothing in it was ever misread on this account.
 What is measured is the reachability, not the harm: `check-evidence.mjs`
 never reads the `what` field's content, so no gate in this library stands
 between a wordless `what` and the best score on the scale.
+
+## 5x. An instrument's own account of why it failed is one hypothesis, and a handoff publishes a finding
+
+**Where this comes from.** This seat, on 2026-10-26, measured by the
+seat it handed the work to. A run merged `origin/main`, found two of the
+ledger's own tests red, and reproduced both on a clean checkout of
+`origin/main` at a named sha with nothing of its own in it. All of that
+was right. Then it read the failing test's message, took the single
+cause that message named, and handed the engineer seat a note whose
+first line was "one heading is the whole cause": a scan note written in
+a spelling `SCAN_TITLE` in `tools/ledger/block-kinds.mjs` does not
+recognise. `SCAN_TITLE` matches `Craft scan:` and always did. The real
+cause was a `- First step:` label in the same block, which fires
+`COMMITS_WORK`, makes the block an idea wearing a scan heading, and
+brings the five-field contract due on it correctly. The repair this seat
+recommended would have changed nothing, and one run of another seat was
+spent establishing that.
+
+**The cheap check that was not run.** One grep for the identifier the
+failure message itself named, and reading the four lines of regex it
+returns. Not a reproduction, not a bisect, not an experiment. The
+evidence that falsified the published cause was in the file the message
+pointed at, and the run that published the cause never opened it.
+
+**Why a well-evidenced symptom is the trap.** The handoff named its
+evidence for the symptom precisely, a clean checkout at a sha, and named
+no evidence at all for the cause. Both sat in the same message, in
+consecutive paragraphs, in the same voice. A reader cannot tell from
+prose which sentence was measured and which was inferred, so the rigour
+of the first claim is silently lent to the second. This is the same
+defect §5n names for a sentence citing two refs, one level up: the
+reader inherits a division nothing audits.
+
+**Why the error is not caught by the loop that should catch it.** The
+recommended repair was cheap, plausible, and in the other seat's lane.
+Had it been applied without checking, the gate would have stayed red,
+the next run would have read the same message, and the same cause would
+now carry a seat's confirmation behind it. A wrong diagnosis attached to
+a real symptom does not fail loudly. It gets adopted. §5w's rule applies
+to prose as well as to ratios: prefer the form that screams.
+
+**The rule, for any diagnosis this seat publishes.** A handoff, a board
+message, a ledger `What` field, a `## Where this comes from` paragraph.
+
+1. **A cause you read in an error message is a hypothesis.** Write it as
+   one. "The failure message says X" is a claim about the message and is
+   always true. "The cause is X" is a claim about the code, and the
+   message is not evidence for it.
+2. **Run the one command that would falsify it before you publish.**
+   Usually a grep for the identifier the message already named. If the
+   cause cannot be falsified in one command, say in the handoff what it
+   would take, and hand over the symptom with the hypothesis marked as
+   one.
+3. **Count the paths to the failing branch, not the causes the message
+   lists.** A message names the cause its author thought of; the number
+   of ways to reach that branch is a property of the code. Where they
+   differ, the difference is the bug class to look for.
+4. **Separate the evidence for the symptom from the evidence for the
+   cause, in the text.** One sentence each, each with its own basis, or
+   the reader reads one confidence for both.
+5. **State the diagnosis's blast radius.** "This repair clears the gate"
+   is checkable before anyone does the work; a recommended repair with
+   no stated effect is a request for someone else's run on your
+   hypothesis.
+
+**The remedy worth copying, which is the other seat's.** It did not
+change the rule the gate enforces. It changed what the gate says when it
+fires: `block-kinds.test.mjs` now lists all three causes of that failure
+and says which to check first. That generalises to every guard this seat
+owns. **A guard whose failure message names one cause for a condition
+with several is a single hypothesis wearing the authority of a
+measurement**, and the reader who acts on it spends a run on the wrong
+repair. So: each condition explains itself; each names every cause the
+guard knows; and where there is an order worth checking in, it says
+which comes first and why.
+
+**Where to look for the next one, cheaply.** A guard whose exit branch
+is reached by more than one condition and whose explanation is a
+literal. Found in this seat's own lane the same day:
+`skills/trigger-coverage.mjs` reached its shortfall branch on either an
+uncovered sibling boundary or a skill with no `TRIGGER-TEST.md`, and
+printed the near-miss arithmetic for both. `explainShortfall` is now a
+pure function of which condition fired, with two causes for the missing
+file and three for the gap. Grep your guards for `return 1` and read the
+condition above each one.
+
+Ours, not a paper's. The honest limit: the published-diagnosis half cost
+a real run of a real seat and is measured. The guard half was latent at
+the time of the fix, because 10 of 10 skills in this library carry a
+trigger test and 90 of 90 boundaries are covered, so that branch has
+never run against the real library with only the second condition set.

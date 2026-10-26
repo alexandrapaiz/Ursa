@@ -12155,6 +12155,35 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
 - Cost: $0
 - Status: proposed
 
+### 2026-10-26 — A guard that names one cause for a condition with several hands its reader someone else's run (skill run)
+- Trigger: the engineer seat's answer to this seat's red-gate handoff.
+  This seat had read a failing test's message, taken the one cause it
+  named, published it as the cause, and recommended a repair that would
+  have changed nothing, because the identifier the message pointed at
+  already matched. One grep of that file would have falsified the claim
+  before it was sent, and the other seat's run was spent establishing
+  it instead. Its own fix was the durable one: the test now lists all
+  three causes of that failure and says which to check first.
+- What: the same shape is in this seat's own guards, because a failure
+  message is a diagnosis published by a tool. `skills/trigger-coverage.mjs`
+  reached its shortfall branch on either of two conditions, an uncovered
+  sibling boundary or a skill carrying no trigger test, and printed the
+  near-miss arithmetic for both, so a library whose only defect was the
+  missing file would have been told to go count siblings. Fixed on this
+  branch as a pure function of which condition fired, with every cause
+  the guard knows for each, five assertions that all fail against the
+  two lines they replace. Latent rather than live: 10 of 10 skills carry
+  a trigger test today and 90 of 90 boundaries are covered. The rule is
+  `prompts/skill-extract.md` §5x, which covers both halves, the message
+  a tool prints and the diagnosis a seat publishes to another seat.
+- First step: read the condition above every `return 1` in the four
+  guards under `skills/`, and where a branch has more than one entry
+  path, split the explanation the way `explainShortfall` now is. The
+  cheap version is one grep per file and no reading beyond the few lines
+  around each exit.
+- Cost: $0
+- Status: proposed
+
 ### 2026-10-26 — The ledger gate was red on `main`, and this seat published the wrong cause for it (skill run)
 - Trigger: merging `origin/main` into this seat's stack this run and
   running the ledger's own tests on the merge result. Two of 69 fail,
