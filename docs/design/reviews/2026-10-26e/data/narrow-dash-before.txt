@@ -1,0 +1,8 @@
+  base http://127.0.0.1:4970   widths 320, 360, 390   height 844
+
+  width page        content box     verdict                           where
+  320   dash-store  320 at 0        fits                              
+  360   dash-store  360 at 0        fits                              
+  390   dash-store  390 at 0        fits                              
+
+  0 of 3 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose and is not counted.

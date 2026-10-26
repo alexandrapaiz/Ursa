@@ -481,12 +481,29 @@ export default function Dashboard() {
                           record and not in this index.
                         </p>
                       ) : (
+                        /* Each figure and the word it counts are one term,
+                           held together the way the dates above are. Measured
+                           2026-10-26e: without this every record row broke
+                           "2.1% / edited" at 320 and two of seven broke
+                           "94.4% / yours" at 390, which orphans a percentage
+                           onto a line where it reads as the tail of the term
+                           before it. The whole line is not `nowrap`, because
+                           it has to be allowed to break somewhere, and the
+                           middots are where. */
                         <p className="dash-meta dash-mono">
-                          {n(r.finalChars)} chars ·{' '}
-                          {pct(r.charsByClass.survived_verbatim, r.finalChars)} as written ·{' '}
-                          {pct(r.charsByClass.survived_mutated, r.finalChars)} edited ·{' '}
-                          {pct(r.charsByClass.no_generation_provenance, r.finalChars)} yours ·{' '}
-                          {pct(uncovered(r), r.finalChars)} no span
+                          <span className="dash-nowrap">{n(r.finalChars)} chars</span> ·{' '}
+                          <span className="dash-nowrap">
+                            {pct(r.charsByClass.survived_verbatim, r.finalChars)} as written
+                          </span> ·{' '}
+                          <span className="dash-nowrap">
+                            {pct(r.charsByClass.survived_mutated, r.finalChars)} edited
+                          </span> ·{' '}
+                          <span className="dash-nowrap">
+                            {pct(r.charsByClass.no_generation_provenance, r.finalChars)} yours
+                          </span> ·{' '}
+                          <span className="dash-nowrap">
+                            {pct(uncovered(r), r.finalChars)} no span
+                          </span>
                         </p>
                       )}
                       {/* A separate line because it has a separate whole.
