@@ -5181,12 +5181,16 @@ function loadPublishable(projectPath) {
       skipped.push({ id, reason: "unreadable" });
       continue;
     }
+    if (record.task.id !== id) {
+      skipped.push({ id, reason: "unsafe-id" });
+      continue;
+    }
     records.push(record);
   }
   return { records, skipped };
 }
 function isRecordShaped(r) {
-  return Array.isArray(r.files) && Array.isArray(r.generations) && Array.isArray(r.conversations) && typeof r.task?.id === "string" && typeof r.stats?.finalChars === "number" && typeof r.stats?.byClass === "object";
+  return Array.isArray(r.files) && Array.isArray(r.generations) && Array.isArray(r.conversations) && typeof r.task?.id === "string" && typeof r.artifact?.kind === "string" && typeof r.stats?.finalChars === "number" && typeof r.stats?.byClass === "object" && typeof r.stats?.generated?.charsWritten === "number" && typeof r.stats?.generated?.deletedChars === "number";
 }
 function publish(opts) {
   const { records, skipped } = loadPublishable(opts.projectPath);

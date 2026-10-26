@@ -696,6 +696,59 @@ can show it fixed than to a structural conflict of interest it can't
 undo. No pricing recommendation made; this sharpens a trust argument,
 not a price.
 
+## The "build task and verifier" comparison has to hold against a market, not three names (2026-10-26, 29th message run)
+
+The Mercor/Deeptune (2026-10-14), Halluminate (2026-10-24), and micro1
+(2026-10-25) entries each named the same weakness against a single
+named vendor: a constructed task with a built-in verifier is not a
+real deliverable joined backward to its own generation history. This
+run's landscape watch (docs/market/landscape.md, new cross-cutting
+note) found an independent directory naming 42 companies in this exact
+sub-category, with real funding behind several (AfterQuery $30.5M,
+Bespoke Labs $40M, Fleet AI $15M, Datacurve $17.7M) and the
+category's own incumbents (Scale AI, Mercor, Surge AI) now also
+building in it. The positioning consequence is a scope correction, not
+a new argument: whoever writes the sentence distinguishing Minor's
+outcome record from a gym should not write it as if the comparison is
+against three recent pivots. It is against an already-funded,
+already-mapped market at least 42 names deep, and the one structural
+gap checked across all three names examined individually so far holds
+across the sample, not just the sample's size. No pricing
+recommendation made; this sharpens how large a claim "we are not a
+constructed verifier" has to support, not what Minor charges for not
+being one. First step, not yet taken: spot-check two or three of the
+better-funded, unexamined names (AfterQuery, Bespoke Labs, Fleet AI)
+the way Halluminate and micro1 already were, since a sample of three
+out of 42 is not yet strong enough to claim the gap holds market-wide
+rather than just vendor-by-vendor. Ledger proposal below.
+
+## The spot-check this entry asked for came back 6 of 6, still too thin to call market-wide (2026-10-26, 30th message run)
+
+Checked the three names the entry above named. Bespoke Labs and Fleet
+AI both describe their own product, in their own words, as vendor-
+constructed simulations ("company-scale simulations," "gyms" that
+"replicate" enterprise software), and neither names a frontier-lab
+customer — Fleet AI's independent directory listing states plainly
+that no lab customer is named or verified for it at all. AfterQuery is
+closer to real-world sourcing than either (300,000+ "verified
+practitioners" producing "expert-demonstrated trajectories" in actual
+professional domains) but a demonstration performed on request to
+generate training data is still not the object CLAUDE.md §1 means by a
+deliverable joined backward to its own generation history; it is
+closer to the gap than a synthetic gym, not across it. Tally: 6 of 42
+checked, 6 of 6 authored-not-real. The positioning consequence is the
+same scope caution as the entry above, now with twice the sample
+behind it and no counterexample yet: the sentence distinguishing
+Minor's outcome record from a constructed verifier can be written with
+a bit more confidence than three-of-three gave it, but 6 of 42 is
+still a minority of the mapped market, and this entry is not the place
+to round that up to "market-wide" on a 14% sample. No pricing
+recommendation made. Whoever writes the lab brief's verifier-gap claim
+should decide, independently of this file, whether 6 of 6 clears the
+bar they need or whether the brief should wait for a cheaper sweep
+method (ledger proposal below) to widen the sample before citing the
+number.
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
@@ -860,6 +913,20 @@ not a price.
   added Mercor's APEX benchmark suite as a second named vendor (after
   Surge's Tuesday Work Index) using "measure AI on real work" language
   close to CLAUDE.md §1's own framing. No pricing recommendation made.
+- 2026-10-26 (event-driven, message, 29th run) — found an independent
+  directory (rl-list.com) mapping 42 named companies in the "build the
+  task and the verifier" sub-category this file had tracked one vendor
+  at a time (Mercor/Deeptune, Halluminate, micro1). Scope correction:
+  the structural gap already named against those three names has to
+  hold against an already-funded market, not a handful of recent
+  pivots. No pricing recommendation made; flagged a first step (spot-
+  check two or three unexamined, better-funded names) not yet taken.
+- 2026-10-26 (event-driven, message, 30th run) — spot-checked the
+  three names the 29th run's entry flagged (AfterQuery, Bespoke Labs,
+  Fleet AI); all three read as authored, not real-deliverable,
+  bringing the tally to 6 of 42 checked and 6 of 6 authored. No pricing
+  recommendation made; still too thin a sample (14%) to call the gap
+  market-wide.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 

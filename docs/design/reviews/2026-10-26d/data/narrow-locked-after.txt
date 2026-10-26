@@ -1,0 +1,9 @@
+  base http://127.0.0.1:4962   widths 320, 360, 375, 390   height 844
+
+  width page          content box     verdict                           where
+  320   panel-locked  320 at 0        fits                              
+  360   panel-locked  360 at 0        fits                              
+  375   panel-locked  375 at 0        fits                              
+  390   panel-locked  380 at 5        fits                              
+
+  0 of 4 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose and is not counted.

@@ -1,0 +1,16 @@
+# Frame diff, the synced panel (both buttons), before vs after.
+# node docs/design/review-kit/diff-frames.py before/synced after/synced
+# Frozen frames, 1x. Every rule on both buttons moved from an inline
+# style object into globals.css. The claim is that nothing at rest
+# changed except the one word that changed typeface.
+
+home-desktop.png                          280 px    0.022%  rows 161-171, cols 704-749  (same size)
+home-phone.png                            280 px    0.085%  rows 161-171, cols 179-224  (same size)
+home-tablet.png                           280 px    0.029%  rows 161-171, cols 394-439  (same size)
+
+
+# 280 pixels, same count at all three viewports, inside rows 161-171 and
+# a 45px span of columns: the bounding box of the word misread? and
+# nothing else. Same frame size at every viewport, so the button growing
+# from 12px to 16.5px tall stayed inside the line box it sits in and
+# moved no other element.

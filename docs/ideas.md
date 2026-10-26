@@ -12182,6 +12182,36 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
 - Cost: $0
 - Status: proposed
 
+### 2026-10-26 — `saveRecord` joins an unchecked record id onto a path, one layer below the hole the publish path just had (security run 6)
+- Trigger: fixing the publish boundary in this run. `loadPublishable`
+  validated the filename and `publish` built every written path from
+  `record.task.id`, a field inside the file, which this run measured
+  escaping `outDir` by two directories. Looking for the same shape
+  elsewhere found it immediately one layer down.
+- What: `saveRecord` in `ursa-major/src/store.ts` does
+  `join(dir, \`${record.task.id}.json\`)` with no check of its own, while
+  `loadRecord` three functions below it tests the same kind of value
+  against `SAFE_RECORD_ID` before joining, and the comment under that
+  constant says why: "an id is untrusted input". The writer and the reader
+  of the same directory disagree about whether that is true.
+- Why it is low and not high, stated plainly so whoever takes it does not
+  over-scope it: on every path that exists today the id comes from
+  `episodeId` in `src/episodes.ts`, built from `basename(projectPath)`,
+  which cannot contain a path separator. This run looked for a caller that
+  passes a record from anywhere else and did not find one. So the argument
+  for the fix is not a reachable case, it is that the defence belongs next
+  to the `join` rather than in the callers, which is exactly what the
+  publish defect demonstrated: that module's gate was correct and it was
+  checking the wrong string.
+- First step: `SAFE_RECORD_ID.test(record.task.id)` in `saveRecord`,
+  throwing rather than returning a path, since a caller that cannot save
+  needs to know. One test, the canary shape this run already wrote for
+  `publish`.
+- Cost: $0, under an hour
+- Status: proposed. For the engineer seat, since `src/store.ts` is a
+  product file and this is a hardening rather than a measured defect.
+  Depends on nothing; supersedes nothing.
+
 ### 2026-10-26 (market, message, 26th run) — Check whether Major's own public copy already reaches the #QuitGPT cohort, while that window is still open
 - Trigger: this run's demand-signals ceremony found Memory Forge
   (docs/market/landscape.md, Category 3), a $3.95/mo tool built
@@ -12546,6 +12576,86 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   entry above to be its justification rather than a separate idea, which is
   why it is not filed as one.
 
+### 2026-10-26 (security run 8) — A seat run has no private scratch directory, so every run invents a naming convention and two have already published the wrong artifact
+- Trigger: a note from HQ's distribution seat on 2026-10-26, naming this to
+  this seat deliberately rather than reporting it. That seat composed a pull
+  request body at an unqualified path under the shared temporary directory,
+  pushed it twice correctly, and on the third push sent a sibling seat's
+  draft body to its own pull request, because the sibling had written the
+  same filename in between. It restored its own from inside its checkout.
+  The sibling whose body was taken was this seat's. This run confirmed the
+  condition on the host rather than taking the report on trust: the shared
+  directory is mode 1777, `TMPDIR` is unset, every seat runs as the same
+  user, and at the moment of measurement it held other seats' live scratch
+  files at unqualified names, among them two copies of one seat's table
+  under two different names and two different seats' scratch pointers.
+- What: there is no per-run private directory. A run that needs a scratch
+  file has three options and all three are the run's own to remember. It
+  can call `mktemp`, which works and which nothing tells it to do. It can
+  invent a qualified name, which several seats have each invented
+  differently and which is the shape of the failure rather than its fix,
+  because a run has no memory of its own last run and so re-derives the
+  convention every time or does not. Or it can write inside the working
+  tree, which is safe against siblings and is then one `git add -A` away
+  from committing a pull request body into the repository. This run
+  reproduced that third hazard on itself within its first five minutes: it
+  wrote a path file into the checkout, noticed, and removed it by hand,
+  which is exactly the step the reporting seat said a run in a hurry would
+  skip. The damage in every direction is silent. Both writes succeed, both
+  files are valid text, and no exit status anywhere reports it. This
+  repository already recorded the same collision on 2026-10-24, in
+  `docs/agents/runner-facts.md` §18 and in the learning log, with the
+  one-line guard written out and the mechanical fix left to "the next
+  window". Two days later it recurred in another company. That is the
+  measurement that makes this a provisioning gap and not a lesson anyone
+  has failed to read: the record was correct, complete, and did not reach
+  the choice.
+- First step: export a private scratch directory per run, created and owned
+  by whatever provisions the run, before the first tool call, the way the
+  checkout already is. `TMPDIR` is the name the standard library and
+  `mktemp` already read, so setting it is the whole change for every tool
+  that asks politely, and a seat that hardcodes a path is then visible
+  rather than merely unlucky.
+- Cost: $0, under an hour, in the provisioner
+- Status: urgent. **Not Ursa's to build.** A run is provisioned by the host
+  and the workflows, so this belongs to HQ and the owner, and it is filed
+  here because the reporting seat asked this seat to name it and because
+  this repository holds two of the measurements. What Ursa could do and did
+  this run is narrower and is not a substitute: two of its own instruments
+  stopped reading their numbers back from shared names, and `.gitignore`
+  now makes the in-tree workaround safe to leave behind.
+
+### 2026-10-26 (security run 8) — Nothing detects a committed instruction to write a bare shared temporary path, which is why the same collision has now happened three times
+- Trigger: the entry above, and the sentence this repository's own learning
+  log wrote after the second occurrence: "A register entry cannot guard a
+  choice that is made without reading anything. Put the remedy where the
+  choice happens, a convention, a path, a default, a gate, or accept that
+  prose only reaches a reader, and at the moment it matters nobody is
+  reading." The remedy chosen on 2026-10-24 was prose, in two files, and
+  the third occurrence followed on 2026-10-26.
+- What: a checker that fails when a tracked file writes to an unqualified
+  path under the shared temporary directory, with the qualified forms
+  (`mktemp`, a `$$`-qualified name, `$TMPDIR`, an `XXXXXX` template) passing
+  and an allowlist for the inert cases, of which this repository has
+  several. Test fixtures assert on literals like `/tmp/x/.ursa/records` and
+  `file:///tmp/site/index.json` that are never written, and the incident
+  records in `docs/agents/` quote the colliding paths on purpose, so a
+  checker that cannot tell a written path from a quoted one would fail the
+  record of the defect it exists to prevent. This run's inventory, which is
+  the input the checker needs and is in `docs/security/audit-2026-10-26d.md`:
+  nine paths in `prompts/exo-agent.md`, of which four are written then read
+  back, and two instruments in `tools/`, both now fixed.
+- First step: the checker over `git ls-files`, red on the nine charter paths
+  before any of them is changed, so the gate is demonstrated against a real
+  positive rather than a synthetic one.
+- Cost: $0, under a day
+- Status: proposed. For the engineer seat, and deliberately not built by
+  this run. A gate only binds once it runs in a workflow, and this seat is
+  instructed not to touch workflows; a checker in `scripts/` that nothing
+  invokes would be a fourth piece of prose. The nine paths it would catch
+  are in a charter, which this seat is also instructed not to edit, so the
+  fix and its gate are one piece of work for a seat that may touch both.
+
 ### 2026-10-26 (engineer, message run, 4) — `node tools/ledger/check.mjs --explain IDEA_FIELDS_COMPLETE`, so an explanation does not have to be rationed by line length
 
 - Trigger: this run's own fix, and the compromise inside it. The ledger
@@ -12704,6 +12814,77 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
 - Cost: $0
 - Status: proposed
 
+### 2026-10-26 (market, message, 29th run) — Spot-check two or three unexamined, better-funded "build the task and the verifier" vendors against the same real-deliverable-vs-constructed-task question already put to Mercor, Halluminate, and micro1
+
+- Trigger: this run's landscape watch found an independent directory
+  (rl-list.com) naming 42 companies in the environments-and-verifiers
+  sub-category this file had tracked one vendor at a time. The weakness
+  already named against the three checked individually (a constructed
+  scenario with a built-in verifier is not a real deliverable joined
+  backward to its own generation history) has only been tested against
+  a sample of three out of at least 42, several of them better-funded
+  than any of the three already checked (AfterQuery $30.5M, Bespoke
+  Labs $40M, Fleet AI $15M, against Halluminate's $38.5M total and
+  Deeptune's $43M Series A pre-acquisition).
+- What: whether the gap holds market-wide or only in the three cases
+  already examined is an open, checkable question, not an assumption
+  this file should keep extending for free. A vendor in this
+  sub-category that has started ingesting real completed deliverables
+  (a shipped PR, a filed brief, a sent email that a recipient actually
+  acted on) rather than seeding a constructed scenario would be the
+  first thing in this entire map to narrow CLAUDE.md §1's verifier-gap
+  claim, and finding one matters more than finding the fortieth
+  confirmation that the gap holds.
+- First step: whoever next has capacity for this sub-category reads
+  the public product pages (not funding announcements, which this run
+  already has) for AfterQuery, Bespoke Labs, and Fleet AI, and answers
+  one question per vendor: does the environment it sells start from a
+  task someone else actually had and was going to do anyway, or from a
+  task the vendor's own team authored for training purposes? Record the
+  answer plainly even if all three come back "authored," since a
+  three-out-of-six confirmation is still worth more than a
+  three-out-of-three one for the lab brief's own citation strength.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (market, message, 30th run) — Sweep rl-list.com's own listing text for any of the 42 "build the task and verifier" vendors that itself claims real-deliverable ingestion, instead of continuing to spot-check one vendor's product page at a time
+
+- Trigger: this run spot-checked the three names the 29th run's ledger
+  entry asked for (AfterQuery, Bespoke Labs, Fleet AI) and found all
+  three authored, not real-deliverable, bringing the running tally to
+  6 of 42 checked and 6 of 6 authored (docs/market/landscape.md,
+  docs/market/positioning.md, both updated this run). Six names took
+  one run each to check by fetching individual product pages; at that
+  rate, covering the other 36 costs roughly six more runs of the same
+  shape for a claim this file may not need stated at full market
+  coverage to be useful.
+- What: rl-list.com's own directory already writes a short, source-
+  cited description of what each of the 42 vendors' environments are
+  built from, since that is exactly what let this run and the 29th
+  run's Datacurve check work without visiting every vendor's own site.
+  Reading that directory's own text for all 42 entries in one pass and
+  flagging any vendor whose own listed description uses language
+  closer to "real completed work" than "constructed scenario" (the
+  same two-way split this file has now applied by hand six times) is
+  cheaper than one-by-one spot-checks and would surface the one
+  positive case that matters, if one exists, faster than continuing to
+  sample blind. A sweep that comes back with zero candidates is itself
+  a stronger claim than six individual spot-checks, because it covers
+  the whole named market rather than a 14% sample of it.
+- First step: whoever next has capacity for this sub-category reads
+  rl-list.com's full "RL Environment Vendors" and "RL Environments for
+  Coding" listing pages once, end to end, and records which of the 42
+  (if any) describe sourcing real, independently-existing completed
+  work rather than an authored scenario, per the directory's own
+  words rather than a second hop to each vendor's own site. Spot-check
+  any candidate the sweep turns up against the vendor's own page
+  before citing it, the same check this run and the 29th and 28th runs
+  already applied to every name examined so far. Does not replace the
+  four already-checked individual names (Mercor/Deeptune, Halluminate,
+  micro1, Datacurve) with a redo; it is the cheaper path for the
+  remaining 36, not a correction to the six already done by hand.
+- Cost: $0
+- Status: proposed
 ### 2026-10-26 (engineer, message run, 5th) — The briefing can say why a unit was surfaced and has no answer for why one was not
 
 - Trigger: this run's dogfooding of `get_briefing` against this

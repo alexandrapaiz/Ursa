@@ -207,33 +207,76 @@ function axiomFiles(axiom: TuningAxiom, records: OutcomeRecord[], loops: Indexed
   return [...files]
 }
 
-function toRuleUnit(axiom: TuningAxiom, why: MatchReason): RuleUnit {
+/**
+ * CONTAINMENT AT THE BUILD BOUNDARY, ADDED 2026-10-26.
+ *
+ * `renderBriefing` below has flattened every record-derived field since
+ * 2026-10-25, and that was the whole of the fix for the 2026-10-17
+ * audit's F3. It is not enough any more, because `renderBriefing` is no
+ * longer the only way a model reads a briefing. `src/mcp/server.ts`
+ * returns `measureBriefing`'s markdown *and* the typed `Briefing` as the
+ * tool result's `structuredContent`, and that object comes straight out
+ * of this function. Measured through a real MCP client: with an axiom
+ * statement that opens its own heading and bullet, the markdown half
+ * carries neither as a line of its own and the `structuredContent` half
+ * carries both, over five lines. So F3's asymmetry came back one layer
+ * up, with the hardened surface the one a client may ignore and the
+ * unhardened one the one its own description recommends.
+ *
+ * Fixed here rather than in the MCP handler because every consumer of
+ * `buildBriefing` has the same exposure and there is no reason for the
+ * typed object to be the dangerous one. `renderBriefing` keeps its own
+ * `oneLine` calls: they are idempotent on contained text, and a renderer
+ * that trusts its input is the thing that failed twice already.
+ *
+ * Bounds are the ones `renderBriefing` already uses, field for field, so
+ * a well-formed briefing is byte-identical in both halves and
+ * `measureBriefing`'s fixed point is undisturbed.
+ */
+const ID_MAX = 64
+const PATH_MAX = 128
+
+/** Contain one piece of axiom evidence. Its `quote` is the owner's own
+ *  words from a session, which is the field most likely to carry text
+ *  somebody else wrote. `steps` and `kind` are numbers and a closed
+ *  union, so there is nothing in them to flatten. */
+function containEvidence(e: AxiomEvidence): AxiomEvidence {
   return {
-    axiomId: axiom.id,
-    statement: axiom.statement,
-    domain: axiom.domain,
+    ...e,
+    recordId: oneLine(e.recordId, ID_MAX),
+    ref: oneLine(e.ref, ID_MAX),
+    ...(e.quote === undefined ? {} : { quote: oneLine(e.quote) }),
+  }
+}
+
+function toRuleUnit(axiom: TuningAxiom, why: MatchReason): RuleUnit {
+  const first = axiom.evidence[0]
+  return {
+    axiomId: oneLine(axiom.id, ID_MAX),
+    statement: oneLine(axiom.statement),
+    domain: oneLine(axiom.domain, ID_MAX),
     polarity: axiom.polarity,
     basis: axiom.basis,
     evidenceCount: axiom.evidenceCount,
-    contradicts: [...axiom.contradicts],
+    contradicts: axiom.contradicts.map((c) => oneLine(c, ID_MAX)),
     status: axiom.status,
-    firstEvidence: axiom.evidence[0],
+    firstEvidence: first === undefined ? undefined : containEvidence(first),
     why,
   }
 }
 
 function toCaseUnit(indexed: IndexedCase, why: MatchReason): CaseUnit {
   return {
-    recordId: indexed.recordId,
+    recordId: oneLine(indexed.recordId, ID_MAX),
     kind: indexed.kind,
-    loopId: indexed.caseId,
-    theme: indexed.theme,
-    targetFiles: indexed.targetFiles.map(normalizePath),
+    loopId: oneLine(indexed.caseId, ID_MAX),
+    theme: oneLine(indexed.theme),
+    targetFiles: indexed.targetFiles.map((f) => oneLine(normalizePath(f), PATH_MAX)),
     recurrences: indexed.recurrences,
     resolution: indexed.resolution,
-    discoveredSpec: indexed.spec,
-    complaint: indexed.complaint,
-    mechanism: indexed.mechanism,
+    discoveredSpec: oneLine(indexed.spec),
+    complaint: indexed.complaint === undefined ? undefined : oneLine(indexed.complaint),
+    mechanism: indexed.mechanism === undefined ? undefined : oneLine(indexed.mechanism),
     why,
   }
 }
@@ -340,7 +383,12 @@ export function buildBriefing(
     if (!relevantAxiomIds.has(axiom.id)) continue
     for (const e of axiom.evidence) {
       if (e.kind !== 'defensive-guardrail') continue
-      guardrails.push({ ...(e as AxiomEvidence), axiomId: axiom.id, statement: axiom.statement, domain: axiom.domain })
+      guardrails.push({
+        ...containEvidence(e as AxiomEvidence),
+        axiomId: oneLine(axiom.id, ID_MAX),
+        statement: oneLine(axiom.statement),
+        domain: oneLine(axiom.domain, ID_MAX),
+      })
     }
   }
 

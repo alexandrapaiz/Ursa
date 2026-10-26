@@ -521,14 +521,18 @@ Ursa is a portfolio product of
 [Alexandra Systems Company](https://github.com/alexandrapaiz/alexandra-systems)
 and runs on its agent-seat model. Charters live in `prompts/`,
 workflows in `.github/workflows/`, and the standards in
-`docs/standards/`. Eleven seats hold charters. Eight of them shipped a
-pull request in the seven days to 2026-10-18: pm, engineer, exo,
-frontend, security, research, skill and market. Three did not, and the
-last pull request from each is older than it should be for a seat the
-roster calls active: finance on 2026-10-05, sales on 2026-10-05 and okr
-on 2026-10-06. Sales is deliberately dormant because Ursa has nothing to
-sell yet. The other two are not, and the okr seat's silence means
-purpose-drift auditing has not run for twelve days.
+`docs/standards/`. Eleven seats hold charters. **Eight of them shipped a
+pull request in the seven days to 2026-10-26** — pm (64), exo (33),
+market (30), engineer (28), research (26), frontend (21), skill (19) and
+security (9) — plus four from HQ's `distribution` seat, which holds no
+charter here. **Three did not**, and the last pull request from each is
+older than it should be for a seat the roster calls active: finance on
+2026-10-05, sales on 2026-10-05, okr on 2026-10-06. Sales is
+deliberately dormant because Ursa has nothing to sell yet. The other two
+are not, and the okr seat's silence means purpose-drift auditing has not
+run for **twenty days**. That is eight days longer than the last time
+this paragraph was measured, with nothing else in the sentence changed,
+which is the shape of a dormancy nobody owns.
 
 Each seat's clock is an entry in the host manifest rather than a cron
 block in its workflow, as of 2026-10-17, so a seat is woken by the event
