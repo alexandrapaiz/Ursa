@@ -130,7 +130,7 @@
 
 import { execFileSync } from 'node:child_process'
 import { commitsTouchingPath, type CommitInfo } from './pairfinder'
-import { relatives } from './corroborate'
+import { authoredAfterHorizon, relatives } from './corroborate'
 
 /**
  * Candidate commits whose blob oid is compared per path before the search
@@ -322,6 +322,37 @@ const EMPTY_BLOB = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
  * @param commits `listCommits(projectPath)`. The parent and child edges
  *   are what separate a rival commit from a descendant of the generation,
  *   and `ursa run` already walks the graph once per run.
+ *
+ * THE TIME BOUND, ADDED 2026-10-26. Byte identity is symmetric and this
+ * function used to read no clock at all, so a copy of the finished file
+ * committed on a side branch AFTER the work closed excluded the file just
+ * as readily as a copy that predated it. In that direction the refusal is
+ * backwards: the later commit is a copy OF this work, not a source for
+ * it, and the record drops a whole file the person did write out of every
+ * figure it reports.
+ *
+ * Nothing used to notice at search time and the gate noticed afterwards.
+ * `EXCLUSION_NOT_CLASSIFIED` in src/invariants.ts gained a third clause
+ * on 2026-10-15 refusing exactly this record, which left `ursa run`
+ * writing a record its own gate rejects and the person with no recourse,
+ * filed the same day as the ledger entry "The gate now refuses a record
+ * `ursa run` will go on writing, and the person's recourse is nothing".
+ * It stopped being latent on 2026-10-26: a default `ursa run --limit 20`
+ * over this repository excluded `docs/market/landscape.md`, 30,287
+ * characters, on the evidence of a commit authored two days after the
+ * record's own `task.generatedAt`, and exited 1.
+ *
+ * The horizon is `ep.finalSha`, which is the same horizon the span-level
+ * search already uses (`gitDescentCorroborator`), and the predicate is
+ * `authoredAfterHorizon` itself rather than a second copy of the rule, so
+ * the two levels cannot drift apart. The ledger entry proposed threading
+ * `ep.closedAt` through instead; this needs no new parameter, because
+ * `ep.finalSha` is already here and `task.generatedAt` IS that commit's
+ * author date on the git path (src/resolve-episode.ts). Ancestors of the
+ * generation and ancestors of the horizon are exempt inside the
+ * predicate, which is what keeps a `pre_existing` match — an ancestor
+ * whose author date a rebase can move — and a branch merged into the work
+ * excludable as before.
  */
 export function vendoredPaths(
   projectPath: string,
@@ -330,6 +361,11 @@ export function vendoredPaths(
   commits: CommitInfo[],
 ): VendoredPath[] {
   const { ancestors, descendants } = relatives(commits, ep.generatedSha)
+  // One graph walk for the whole episode, built from the arguments this
+  // function already takes. Returns a predicate that is always false when
+  // the horizon is not in `commits`, so a narrowed caller behaves exactly
+  // as this module did before the bound existed.
+  const afterHorizon = authoredAfterHorizon(commits, ep.generatedSha, ep.finalSha)
   const found: VendoredPath[] = []
   // Two git calls for the whole episode, skipped entirely when there is
   // nothing to ask about. Generation before final: a declaration on the
@@ -373,6 +409,12 @@ export function vendoredPaths(
       if (oid === null) continue
       compared++
       if (oid !== finalOid) continue
+      // `continue`, not `break`: a candidate from the record's own future
+      // is not evidence, and an earlier commit further down this list may
+      // still be a real ancestor holding the same bytes. Breaking here
+      // would turn one late sibling into "no import found" and lose a
+      // legitimate `pre_existing` exclusion behind it.
+      if (afterHorizon(c.sha)) continue
       found.push({
         path,
         sha: c.sha.slice(0, SHORT),

@@ -29,7 +29,43 @@ export interface BriefingInput {
   /** hard ceilings, so a briefing fits an agent's context window */
   maxRules?: number
   maxCases?: number
+  /**
+   * How many of the units that were NOT returned to include, with their
+   * score breakdown intact. Omitted or 0 means none, which is the
+   * default and the shape every caller before 2026-10-26 got.
+   *
+   * WHY THIS IS OPT-IN AND NOT ALWAYS ON. The floor and the ceilings
+   * exist because an agent's opening context is the scarce thing
+   * (MIN_RELEVANCE, DEFAULT_MAX_CASES in ./briefing.ts), so a briefing
+   * that volunteered everything it rejected would spend the budget those
+   * bounds were written to protect. The flag is for the reader who has
+   * already seen a thin briefing and is asking a second question about
+   * it: was there nothing, or was there something just out of reach?
+   */
+  dropped?: number
 }
+
+/** Which bound kept a scored unit out of the briefing. Two values rather
+ *  than one, because they answer opposite questions for the agent
+ *  reading a thin briefing: `below_floor` says the HQ has something on
+ *  this subject and judged it too far away, `over_cap` says the HQ had
+ *  more than the request asked to be shown. */
+export type DropReason = 'below_floor' | 'over_cap'
+
+/** A unit the briefing scored and did not serve, with the bound that
+ *  kept it out. The bound is carried as a number so the remedy can name
+ *  a value instead of a placeholder, the same discipline
+ *  `DroppedUnits.minChars` follows in ../launch.ts. */
+export interface DroppedUnit<T> {
+  unit: T
+  reason: DropReason
+  /** MIN_RELEVANCE when `reason` is 'below_floor'; the effective
+   *  `maxCases` or `maxRules` when it is 'over_cap' */
+  bound: number
+}
+
+export type DroppedCase = DroppedUnit<CaseUnit>
+export type DroppedRule = DroppedUnit<RuleUnit>
 
 /** What the semantic ranker concluded about one case (semantic.ts).
  *  All four numbers are printed in the briefing, because the lead term
@@ -87,19 +123,48 @@ export interface RuleUnit {
   why: MatchReason
 }
 
-/** A prior correction loop on nearby files: the expensive lesson, with
- *  the owner's verbatim complaint and the spec that closed it. */
+/** A prior correction on nearby files: the expensive lesson, with the
+ *  owner's verbatim complaint and the spec that closed it.
+ *
+ *  TWO SHAPES, ONE UNIT (added 2026-10-26). A record carries corrections
+ *  in whichever of two shapes its own evidence supports, and
+ *  `src/signals.ts` decides which from one question: does the record have
+ *  a chat trace?
+ *
+ *    `kind: 'loop'` — from `signals.correctionLoops`. The user's own
+ *    messages are present and ordered, so the same ask repeating is
+ *    observable and `recurrences` is a measurement.
+ *
+ *    `kind: 'one_shot'` — from `signals.oneShotCorrections`. The record is
+ *    a git commit pair, so there are no user messages at all: the
+ *    correction appears once, as the edit itself, and recurrence is not
+ *    zero but unobservable. This is the ONLY shape `ursa run` over a
+ *    repository can produce, which is why a briefing that indexed only
+ *    loops returned nothing on a store built from real git history.
+ *
+ *  The two fields that are a measurement on a loop and not available on a
+ *  one-shot are therefore nullable, and `null` here means "this record
+ *  cannot answer that", never zero. */
 export interface CaseUnit {
   recordId: string
+  /** which of the two correction shapes above this unit came from */
+  kind: 'loop' | 'one_shot'
+  /** the loop's own id, or `one-shot-<ordinal>` within the record */
   loopId: string
-  /** what the loop was about, as the record states it */
+  /** what the loop was about, as the record states it; on a one-shot, the
+   *  path the edit was made in, which is what the record states instead */
   theme: string
-  /** the files the loop was fought over */
+  /** the files the loop was fought over; on a one-shot, the edited file */
   targetFiles: string[]
-  /** repetitions after the first ask — how expensive this lesson was */
-  recurrences: number
-  resolution: CorrectionLoop['resolution']
-  /** the requirement the owner could not state up front, articulated after */
+  /** repetitions after the first ask — how expensive this lesson was.
+   *  `null` on a one-shot: unobservable without a chat trace. */
+  recurrences: number | null
+  /** `null` on a one-shot: an edit that was kept carries no stated
+   *  resolution, and 'accepted' would be this surface inventing one. */
+  resolution: CorrectionLoop['resolution'] | null
+  /** the requirement the owner could not state up front, articulated
+   *  after. On a one-shot, the correction itself: the agent's text and
+   *  the text the owner replaced it with, both quoted from the record. */
   discoveredSpec: string
   /** the owner's verbatim words that opened the loop, when the record has them */
   complaint?: string
@@ -126,6 +191,21 @@ export interface BriefingCoverage {
   axiomsReturned: number
   recordsConsidered: number
   loopsConsidered: number
+  /**
+   * One-shot corrections looked at, counted separately from
+   * `loopsConsidered` (added 2026-10-26).
+   *
+   * Two numbers rather than one total, because they are not the same
+   * evidence and a reader who cannot tell them apart is misinformed in a
+   * specific direction. A loop is a correction the owner had to make more
+   * than once; a one-shot is an edit she made and moved on from. A store
+   * built by `ursa run` over a repository has only the second kind, by
+   * construction, so a coverage line that said `0 correction loops` and
+   * nothing else read as "nothing to learn from here" when the true
+   * statement was "204 corrections, none of them in the shape this
+   * sentence counts".
+   */
+  oneShotsConsidered: number
   casesReturned: number
   /** ranking implementation that produced the order; see retrieval.ts.
    *  'lexical-v0' = word overlap only. 'semantic-v1' = MiniLM cosine
@@ -168,6 +248,23 @@ export interface Briefing {
   rules: RuleUnit[]
   nearestCases: CaseUnit[]
   guardrails: GuardrailUnit[]
+  /**
+   * The highest-scoring cases that were scored and not returned, at most
+   * `request.dropped` of them, score-descending (added 2026-10-26).
+   *
+   * Absent when the caller did not ask, which is not the same as empty.
+   * Empty means "asked, and there was nothing held back"; absent means
+   * "never asked", and a reader who confuses the two concludes the store
+   * is bare on evidence that says nothing of the kind.
+   *
+   * The total held back is not repeated here because `coverage` already
+   * determines it: `loopsConsidered + oneShotsConsidered - casesReturned`
+   * for cases and `axiomsConsidered - axiomsReturned` for rules. One
+   * number in one place, so the two cannot disagree.
+   */
+  dropped?: DroppedCase[]
+  /** the same, for rules. See `dropped` above for what absent means. */
+  droppedRules?: DroppedRule[]
   coverage: BriefingCoverage
   /** the §0b discipline, carried in the payload so it reaches the model
    *  that reads the briefing, not only the human who reads this file */

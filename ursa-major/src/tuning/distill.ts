@@ -4,7 +4,7 @@
 // subscription — nothing leaves except the API call Claude Code itself
 // makes.
 
-import { execFileSync } from 'node:child_process'
+import { runClaudePrint } from '../claude-cli'
 import type { OutcomeRecord } from '../types'
 import type { DistillOutput, DistilledAxiom, TuningRecord } from './types'
 
@@ -146,24 +146,22 @@ function validateAxiom(a: DistilledAxiom): void {
   }
 }
 
+/** The interpretation pass reads a whole outcome record, so it gets five
+ *  minutes where the verdict reader gets two (src/verdict.ts). */
+const DISTILL_TIMEOUT_MS = 300_000
+
 export interface DistillRunner {
   (prompt: string, model: string): string
 }
 
-/** Default runner: Claude Code CLI, print mode, local machine. */
-export const claudeRunner: DistillRunner = (prompt, model) => {
-  const out = execFileSync('claude', ['-p', '--model', model, '--output-format', 'json'], {
-    input: prompt,
-    encoding: 'utf8',
-    maxBuffer: 16 * 1024 * 1024,
-    timeout: 300_000,
-  })
-  const envelope = JSON.parse(out) as { result?: string; is_error?: boolean }
-  if (envelope.is_error || typeof envelope.result !== 'string') {
-    throw new Error('claude -p returned an error envelope')
-  }
-  return envelope.result
-}
+/** Default runner: Claude Code CLI, print mode, local machine.
+ *
+ *  The call, the envelope reading and the failure messages all live in
+ *  src/claude-cli.ts, shared with `claudeVerdictRunner` in src/verdict.ts.
+ *  They were two copies until 2026-10-26, which is how `cliFailureReason`
+ *  came to be applied here and not there; see that file's header. */
+export const claudeRunner: DistillRunner = (prompt, model) =>
+  runClaudePrint(prompt, model, DISTILL_TIMEOUT_MS)
 
 export function distill(
   record: OutcomeRecord,
