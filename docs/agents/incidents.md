@@ -9220,7 +9220,7 @@ invented. The other is a genuine broken citation:
 
 | | |
 |---|---|
-| cited in the charter | `INC-2026-10-24-the-run-pr-resolver-matches-hq-s-branch-shape` |
+| cited in the charter | the 2026-10-24 date-slug carrying `the-run-pr-resolver-matches-hq-s-branch-shape` |
 | the entry that exists | `INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes` |
 | authoring commits for the cited form | **0** — it was never minted anywhere |
 | the sentence around it | *"The account is X"*, which asserts the name resolves |

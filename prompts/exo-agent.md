@@ -4517,7 +4517,7 @@ Run it over `prompts/` and two slugs do not resolve. One is
 invented. The other is the find:
 
 ```
-cited:  INC-2026-10-24-the-run-pr-resolver-matches-hq-s-branch-shape
+cited:  <the 2026-10-24 date-slug> + the-run-pr-resolver-matches-hq-s-branch-shape
 actual: INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes
 authoring commits for the cited form: 0
 ```

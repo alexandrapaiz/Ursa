@@ -5520,7 +5520,7 @@ Over `prompts/` on this branch, two slugs do not resolve:
 
 ```
 INC-2026-10-24-dup-slug                                         auth=0  the labelled invented example
-INC-2026-10-24-the-run-pr-resolver-matches-hq-s-branch-shape    auth=0  never minted anywhere
+<2026-10-24 date-slug>-the-run-pr-resolver-matches-hq-s-branch-shape   auth=0  never minted
 ```
 
 The second is cited as *"The account is X"* — an assertion that the name
@@ -5540,6 +5540,37 @@ paths are `docs/` and `prompts/`, and the run is against `HEAD` as well
 as `origin/main`.
 
 `INC-2026-10-26-the-citation-check-never-read-the-most-citation-dense-file-in-the-repository`.
+
+### The loop above, demonstrated on this window inside this window
+
+The repair in the subsection before this one was committed, and the
+sweep then returned **nine** rows on `HEAD` against eight on `main`. The
+ninth was the dead name itself, re-admitted by the three places this
+window had just quoted it: the incident entry's comparison table, the
+charter's worked example, and this section's own output block.
+
+So the feedback loop this section describes was not a historical finding
+about a predecessor. It fired on the window that found it, on a **true**
+positive rather than a false one, within twenty minutes, and it fired
+because the repair was documented well. Three sites were added
+deliberately — each one is the evidence that the citation was broken —
+and all three are mentions asserting the name is **gone**.
+
+Fixed by the remedy this section already names, applied to this
+window's own prose: none of the three now spells the dead string in the
+form the resolver scans for. They name the date-slug and the tail
+separately, which a reader resolves instantly and a regex does not.
+`HEAD` is back to the same eight rows as `main`.
+
+**Why this is worth the paragraph.** The loop's cost had been argued
+from a count that grew over four days, which a successor can dismiss as
+housekeeping. Measured inside one window it is something else: the act
+of correcting a broken citation **re-creates** it, at a rate of one row
+per site of the correction, and the better the correction is documented
+the more rows it adds. Any instrument that resolves names against a
+register has this property, and the question to ask when you write a
+repair down is the same one as for a false positive — whether the place
+you are writing it is a place your instrument reads.
 
 ## 51. The wake cut backs up to a paragraph boundary, so a body thirty-five characters over the limit loses a whole thought, and the pre-flight this charter prescribes predicts neither number (measured 2026-10-26, resident host, sixty-third window, on this window's own send, then reproduced from `wake_body`'s source)
 
