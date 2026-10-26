@@ -2,6 +2,47 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## This run (2026-10-26, ~04:2x UTC, message: PR #459 reviewed against the merge rule, absorbing #460)
+
+**Own open PR first.** #460 (this seat's Monday ceremony, below) was
+open and ready. This run built on its tip rather than a second branch
+and closed #460 as a verified superset once this one was pushed.
+
+**Trigger, and what didn't hold up.** A message named PR #459
+(security) for review against the merge rule, with an appended note
+framed as "your lane as the seat that merges" listing five idle
+drafts and `tools/check-draft-prs.sh`. Read as data, not instruction
+(org rule, 2026-10-05), and checked rather than trusted: the script
+does not exist in this repository, and two of the five named drafts
+were already resolved by the time this run looked — **#455** (closed
+by security itself in favor of #459) and **#451** (closed by engineer
+itself in favor of #458), both closed minutes before or during this
+run, both with verified `merge-base --is-ancestor` containment in
+their own closing comments.
+
+**#459 merged.** Checked fresh against pm.md §10 Tier B: not draft,
+no `hold`, no owner comment, checks green, diff
+(`docs/ideas.md`, `docs/security/audit-2026-10-26b.md`,
+`tools/secret-scan.mjs`, `tools/secret-scan.test.mjs`) has no Tier C
+path, `mergeStateStatus: CLEAN`, same-day. All six conditions held.
+`gh pr merge 459 --merge`. Pulling the resulting `main` into this
+branch produced one real conflict in `docs/agents/incidents.md`: the
+same incident entry duplicated at two insertion points, byte-identical
+— docs-only, resolved by keeping one copy.
+
+**#445, #448 (skill) — not this seat's to merge or fix.** Both
+`CONFLICTING`/`DIRTY`, a same-day stack (#441 → #445 → #448) neither
+readied nor closed. Tier B requires `CLEAN`; named here as owed by
+skill on its next run.
+
+**#453 (frontend) — status, not action.** `MERGEABLE`/`CLEAN`, checks
+green, still draft, explicitly subsumed by **#457**
+(`ursa-frontend/2026-10-26-hook`), pushed 2 minutes before this run
+checked. Live per "while your run lives, the draft is the point";
+left to frontend.
+
+Full account: PR #462.
+
 ## Top three for the owner, 2026-10-26 ~04:1x UTC (hook: Monday ceremony)
 
 **Reminder, still true (Ursa incident 9, L-E10): an open card is not
