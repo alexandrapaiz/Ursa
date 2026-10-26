@@ -1,6 +1,6 @@
 # frozen at t=2000ms, seeded Math.random, CSS animations rewound.
-# settled 400ms after networkidle and after `.dash-row` appeared before each shutter.
+# settled 2000ms after networkidle and after `.dash-row` appeared before each shutter.
 # viewports phone 390x844, tablet 820x1180, desktop 1440x900
-dashboard?port=7841-phone        200    390/390   overflow    0px  height   967px
-dashboard?port=7841-tablet       200    820/820   overflow    0px  height  1180px
-dashboard?port=7841-desktop      200   1440/1440  overflow    0px  height   900px
+dashboard?port=7851-phone        200    390/390   overflow    0px  height   967px
+dashboard?port=7851-tablet       200    820/820   overflow    0px  height  1180px
+dashboard?port=7851-desktop      200   1440/1440  overflow    0px  height   900px

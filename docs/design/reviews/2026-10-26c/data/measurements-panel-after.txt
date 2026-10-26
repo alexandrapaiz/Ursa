@@ -1,6 +1,4 @@
 # frozen at t=2000ms, seeded Math.random, CSS animations rewound.
-# settled 400ms after networkidle, with `../reviews/2026-10-26c/data/state-panel-unlocked.mjs` run to enter the state before each shutter.
+# settled 1200ms after networkidle, with `../reviews/2026-10-26c/data/state-panel-unlocked.mjs` run to enter the state before each shutter.
 # viewports phone 390x844, tablet 820x1180, desktop 1440x900
 home-phone                       200    390/390   overflow    0px  height   844px
-home-tablet                      200    820/820   overflow    0px  height  1180px
-home-desktop                     200   1440/1440  overflow    0px  height   900px

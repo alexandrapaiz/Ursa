@@ -290,6 +290,17 @@
 .dash .dash-nothing {
   margin-top: 0.8rem;
   margin-bottom: 0.5rem;
+  /* The same 38em `.dash-empty` carries, and for L9's reason rather than
+     for symmetry. Without it this paragraph inherits the row's full
+     width, and the row is as wide as the page: counted a character at a
+     time at 1440 it ran 128 characters a line against the 84 of the
+     page's own prose two blocks above it, which makes the smallest type
+     on the page the longest line on it. That is the exact drift L9 was
+     written against. 38em of 0.7rem is 426px and lands at 85, so this
+     sentence now reads at the width every other sentence here reads at,
+     and nothing about the page's overall measure moved: narrowing that
+     is L10's open proposal and the owner's to decide, not this run's. */
+  max-width: 38em;
 }
 
 .dash-seg-verbatim { background: var(--polar); }
