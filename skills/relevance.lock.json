@@ -141,17 +141,17 @@
   },
   "adding-a-bound-to-the-record-gate/E28": {
     "verdict": "supports",
-    "read": "2026-10-18",
-    "lines": "16a48a2d85b7074c",
-    "what": "7493fc267c7f838d",
-    "passages": "fc3a5b4b5ba8a876"
+    "read": "2026-10-26",
+    "lines": "2bffba8c2a099e20",
+    "what": "f4e06764f3bfb2cc",
+    "passages": "701a7e751c8b0198"
   },
   "adding-a-bound-to-the-record-gate/E29": {
-    "verdict": "supports",
-    "read": "2026-10-23",
-    "lines": "e247f095cd1dbdca",
-    "what": "b8b9172f70f63497",
-    "passages": "a4045a5a51c9bb51"
+    "verdict": "re-pointed",
+    "read": "2026-10-26",
+    "lines": "e52a80dcfd3016b8",
+    "what": "b89654a72f780883",
+    "passages": "92c7c946804cdbe2"
   },
   "adding-a-bound-to-the-record-gate/E3": {
     "verdict": "supports",
@@ -175,9 +175,9 @@
     "passages": "2811b683e73e2bf9"
   },
   "adding-a-bound-to-the-record-gate/E32": {
-    "verdict": "widened",
-    "read": "2026-10-18",
-    "lines": "7315a66a58df0c1d",
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "91d9630bf4d26809",
     "what": "1f1ad4ce643ebfea",
     "passages": "7fc038acab08f7a8"
   },
@@ -1295,9 +1295,9 @@
     "passages": "bcdb3cf5add30aa6"
   },
   "distilling-a-tuning-record/E39": {
-    "verdict": "widened",
-    "read": "2026-10-18",
-    "lines": "057e419c8e294dff",
+    "verdict": "supports",
+    "read": "2026-10-26",
+    "lines": "cd33f2bf6a4f2cb8",
     "what": "79395de398ea503d",
     "passages": "804e6ab642df6680"
   },

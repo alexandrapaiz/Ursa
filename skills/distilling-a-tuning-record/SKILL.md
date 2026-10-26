@@ -14,12 +14,12 @@ description: >
   the axioms distilled from it, for adding or rewording a bound in the
   record gate, or for clearing anything other than a tuning block for
   release.
-version: 0.4.1
+version: 0.4.2
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-05
-revised: 2026-10-24
+revised: 2026-10-26
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -138,7 +138,7 @@ evidence:
     source: ursa-major/src/signals.ts:65-81
   - ref: E39
     what: the four free-text axiom fields, id, statement, domain and each contradicts id, are flattened to one line, stripped of control characters and of a leading list, heading, quote or fence marker, and length-bounded before they are rendered, because the block is instructions and an axiom's text is model-written from session content the user may have pasted from elsewhere; basis, polarity and evidenceCount are rendered without the sanitizer
-    source: ursa-major/src/tuning/export.ts:8-40,50-56,80-84
+    source: ursa-major/src/tuning/export.ts:8-46,50-56,80-84
 supersedes: []
 ---
 
