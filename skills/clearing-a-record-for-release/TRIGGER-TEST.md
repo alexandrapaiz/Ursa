@@ -146,3 +146,70 @@ inside one record and can only catch a record contradicting itself,
 which is a question about the gate and never about what may leave.
 The two skills meet in exactly one place, which is that neither can be
 answered from the other's artifact.
+
+## Added 2026-10-24, eighteenth run: the seventh skill's boundary
+
+The run that landed `auditing-a-detected-correction-loop` owes a near
+miss to every skill already in the library, in their own files, in the
+same pull request. That is `prompts/skill-extract.md` §5r, and this
+section is this file's payment. The prompt is the new sibling's own
+trigger, copied rather than paraphrased, and this skill's `description`
+was widened in the same commit to carry the exclusion the prompt found
+missing.
+
+**9. "The signals block says one loop with two recurrences, but I count
+three places she complains about the constellation being dark. Which
+one is right?"**
+
+`auditing-a-detected-correction-loop`'s own trigger 1, and it should
+not fire here. The overlap is in the raw material rather than in the
+question. Counting where she complained means reading
+`conversations[].prompts[].text`, which is the field this skill's own
+table marks private by default and names as the field that leaked. A
+reader holding this skill sees that field named and reaches.
+
+Reading it on the machine it is already on is not an exit. This skill's
+first step is to establish which of the three exits a thing is taking,
+and this prompt is taking none of them: nothing is being disclosed,
+published or quoted anywhere. The exclusion added for this boundary
+says so.
+
+The reason it is worth one near miss anyway is that the sibling's work
+produces exactly the material this skill governs, and the auditor is
+the person most likely to paste a transcript into a finding. So the
+handoff is real and it runs release-side first in both directions:
+nothing should be quoted out while the question of whether it may leave
+is open.
+
+## Added 2026-10-26, twenty-fourth run: the eighth skill's boundary
+
+The run that landed `auditing-a-durability-walk` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**10. "This record says `decayRate: 0`. Can I put 'none of the model's
+output was later removed' in the methods note?"**
+
+`auditing-a-durability-walk`'s own trigger 1, and it should not fire
+here.
+
+The pull toward this file is real and comes from one word. "Put it in
+the methods note" is a departure, and this skill's first step is
+establishing which of the three exits a thing is taking. A reader
+holding this skill sees text leaving the machine and reaches.
+
+It should not fire, because what is leaving is one derived number and
+the question asked about it is not whether it may leave. It is whether
+it is true. No raw text is involved, nothing in the prompt touches a
+conversation or a prompt string, and the answer that the sentence is
+unsupportable is reached entirely inside the record.
+
+Where the two do meet, stated so the edge is usable rather than just
+asserted: if the answer to the sibling's question is "quote the rate
+with its `closingSha` and `tipSha` so a reader can check it", then two
+commit hashes out of the user's own repository are about to leave the
+machine under this skill's rules. That is a genuine handoff and it
+runs durability-side first, because what may leave cannot be settled
+until it is known what is being said.

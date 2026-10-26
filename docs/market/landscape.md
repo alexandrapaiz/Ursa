@@ -239,6 +239,60 @@ extends Deeptune's environments into anything that resembles an
 outcome record rather than a graded simulation. Last observed
 2026-10-14: [SiliconANGLE: Mercor buys Deeptune](https://siliconangle.com/2026/07/09/mercor-buys-deeptune-build-training-environments-ai-agents/), [Fortune: AI unicorn Mercor acquires Deeptune](https://fortune.com/2026/07/09/ai-unicorn-mercor-acquires-deeptune-brendan-foody-investor-a16z-openai-anthropic/).
 
+Update 2026-10-26 (message, 24th run), two items missed across seven
+prior passes over this entry. First: Mercor's APEX benchmark suite
+(launched October 2025, named explicitly by Mercor's own research-team
+post, 2026-10-08, as "whether frontier AI models can do professional
+work") turned one year old this run's observation window and has
+expanded from its original four domains to also cover software
+engineering, with the stated mission to "measure models in the
+environments where the work actually happens." That phrase, and the
+post's own framing question ("how do you measure a model against a job
+that AI itself is changing?"), is the same pitch-collision risk this
+file already named for Surge's Tuesday Work Index (2026-10-07 update):
+language close enough to CLAUDE.md §1's own "real work" framing that a
+buyer could mistake it for a competing version of the outcome record.
+It is not one: Mercor's own methodology page describes experts
+authoring tasks, defining standards, and judging against a rubric,
+which is still the "label supplied by a grader" structure CLAUDE.md §1
+contrasts against, not a real deliverable joined backward to its own
+generation history. Worth naming alongside the Surge entry in whatever
+lab brief first has to explain the distinction, since this is now two
+of the category's largest vendors using nearly identical language.
+
+Second, more load-bearing: a supply-chain breach via the open-source
+tool LiteLLM, disclosed by Mercor around 2026-03-31/04-04, exposed
+roughly 4TB of contractor data (Social Security numbers, government
+ID, facial biometric data, voice recordings, AI video-interview
+footage), and Meta paused all its contracts with Mercor indefinitely
+in response, with other frontier-lab customers reported reassessing
+the relationship at the time. Mercor's own 2026-06-25 investigation
+summary states the exposed scope was more limited than first reported
+and that "all frontier model company customers had increased their
+engagement over the past several months" since, though no source
+found this run names Meta specifically as having resumed. Read against
+this map's own neutrality thesis (Scale AI entry above, "a data vendor
+that is perceived as compromised loses its top customers overnight"):
+this is a different axis of the same question, and the two cases point
+different ways. Scale's compromise was structural (an equity stake,
+not reversible short of divestment) and its customer losses are not
+reported as recovered. Mercor's compromise was operational (a security
+incident, not an ownership change) and, by the vendor's own account,
+customer engagement grew rather than collapsed in the following
+months. Neither case is Ursa's own yet, since Minor has never sold
+data to anyone, but it sharpens the "trust has a provenance axis too"
+entry in docs/market/positioning.md: there may be more than one kind
+of compromise a lab buyer judges a vendor on, and they are not
+reported as equally durable. Last observed 2026-10-26: [Mercor: Why
+Mercor is building a research team](https://www.mercor.com/blog/why-mercor-is-building-a-research-team/),
+[Mercor: APEX methodology](https://www.mercor.com/apex/methodology/),
+[TechCrunch: After data breach, $10B-valued startup Mercor is having a
+month](https://techcrunch.com/2026/04/09/after-data-breach-10b-valued-startup-mercor-is-having-a-month/),
+[AOL/Business Insider: Meta paused its work with AI training startup
+Mercor after a data
+breach](https://www.aol.com/articles/meta-paused-ai-training-startup-042644659.html),
+BigGo Finance, "Mercor's annualized revenue tops $2 billion" (2026-06-25; link omitted here because the article's URL slug is itself UUID-shaped and trips the redaction gate's private-session-UUID check, see docs/market/briefs/2026-10-26-message-24.md).
+
 ### Prolific
 
 What it is: an academic-research participant marketplace that has
@@ -1200,3 +1254,17 @@ observed 2026-10-26: [MacPaw Research: Portable Memory](https://research.macpaw.
   still unproven against the note's own independent-implementation
   bar. Positioning consequence (EU Data Act scope check) in
   docs/market/positioning.md.
+- 2026-10-26 (message, 24th run) — two items added to the Mercor
+  entry, both missed across seven prior passes over it. First: APEX,
+  Mercor's own "measure AI on real work" benchmark suite, turned one
+  year old this run and expanded to software engineering, a second
+  named vendor (after Surge's Tuesday Work Index) using language close
+  enough to CLAUDE.md §1's own framing to need explicit distinguishing
+  in a lab brief. Second, more load-bearing: a LiteLLM supply-chain
+  breach (disclosed 2026-03-31/04-04) exposed ~4TB of contractor data
+  including biometrics, and Meta paused all Mercor contracts
+  indefinitely, while Mercor's own 2026-06-25 summary reports other
+  frontier-lab customers increased engagement in the months after —
+  a different axis and a different outcome than Scale AI's
+  equity-driven, not-reported-as-recovered customer exodus above.
+  Positioning consequence in docs/market/positioning.md.

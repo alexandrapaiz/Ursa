@@ -1,17 +1,29 @@
 # Trigger test — quoting-a-number-from-an-outcome-record
 
-Six prompts, written against the `description` field in `SKILL.md`.
-Four should activate the skill. Two are near misses that should not.
-The fourth was added on 2026-10-15 under the §5 budget-is-a-floor rule,
-after the skill gained the `survived_verbatim` redefinition.
-Per `prompts/skill-extract.md` §5, when the test fails the description
-is what changes, not the test.
+Nine prompts, written against the `description` field in `SKILL.md`.
+Four should activate the skill. Five are near misses that should not.
+The fourth should-fire prompt was added on 2026-10-15 under the §5
+budget-is-a-floor rule, after the skill gained the `survived_verbatim`
+redefinition. Per `prompts/skill-extract.md` §5, when the test fails
+the description is what changes, not the test.
 
-The library now holds three skills over outcome records, so this test
-carries the sibling job as well. Near miss 4 is
-`adjudicating-uncertain-spans`' own trigger and near miss 5 is
-`running-an-outcome-record-trial`'s own trigger, which means both
-boundaries this skill has are tested rather than one.
+The budget is five near misses because §5c sets one per adjacent skill
+and this skill has five neighbours, which is every other skill in the
+library. Near miss 4 is `adjudicating-uncertain-spans`' own trigger, 5
+is `running-an-outcome-record-trial`'s, 6 is
+`adding-a-bound-to-the-record-gate`'s, 7 is
+`clearing-a-record-for-release`'s, and 8 is
+`distilling-a-tuning-record`'s.
+
+Near misses 6, 7 and 8 were added on 2026-10-24, and the description's
+exclusion clause was widened with them. Until then this file said that
+"both boundaries this skill has are tested rather than one", which was
+true when it was written and had been wrong for three weeks: the
+library went from three skills to six and nothing brought the sentence
+with it. That is the general case rather than this file's lapse, and
+`skills/trigger-coverage.mjs` is the measurement, 15 of 30 boundaries
+tested across the library on the day it was written, with coverage
+tracking each skill's age exactly.
 
 ## Should fire
 
@@ -94,6 +106,93 @@ which presupposes a record exists, and it explicitly does not fire "for
 producing a record" or "for choosing a trial subject". No record exists
 yet in this prompt, so there is no number to quote.
 
+**6. "Add a bound that a record's verbatim-survived character count
+never exceeds its generated character count. It is obviously true and
+the gate should catch it."**
+
+`adding-a-bound-to-the-record-gate`'s own trigger, and on subject
+matter the closest pair in the library, because the two skills do the
+same arithmetic. This skill fires for deciding what a statistic is a
+share of and whether two of a record's numbers may be compared or
+added; that prompt asks whether one character count may exceed
+another. Both are reasoning about the relation between two fields of
+the same record, in the same units, over the same set of characters.
+
+The line is not the arithmetic, it is what the answer becomes. This
+skill's output is a sentence a reader will trust, and the description
+says so by listing its destinations: the methods document, a lab brief,
+a deck, a README, a claim to a buyer. The gate's output is a check in
+`invariants.ts` that holds over every record there will ever be, plus a
+committed record that breaks it. So the two differ by quantifier. A
+quoted number is about the record in front of you; a bound is about all
+of them, which is why it needs a counterexample and a quoted number
+needs a denominator.
+
+The reciprocal is already written down and worth reading beside this:
+that skill's own near miss 6 is this skill's trigger 3, and it is
+excluded there because no bound can see across two records at all. Each
+side of this boundary is tested from its own side, and the two
+arguments are different, which is what §5c is for.
+
+**7. "The gate workflow is green on my record, so I'm pasting the
+conversation into the design doc as the example payload. Any reason not
+to?"**
+
+`clearing-a-record-for-release`'s own trigger. This is the near miss
+`skills/README.md` singles out as the one worth reading, and it is
+mutual: the two skills share every noun, and that skill's own near miss
+4 is this skill's trigger 1. Both of them are about a thing out of a
+record going into a document somebody else will read. This skill's
+first destination is the methods document; that skill's third exit is a
+person quoting a passage into a design document. Same sentence shape,
+same artifact, same direction of travel.
+
+The line is what is travelling, and it is mechanical rather than a
+matter of degree. This skill rules on a number, which the description
+says in its first clause: a percentage, rate or count. What is pasted
+here is the conversation, which is raw text and carries no statistic at
+all. So there is nothing for this skill to rule on, and the question
+that remains is a release question: which of the three exits this is,
+and what that exit demands of raw text.
+
+Also worth naming because it is the half a reader gets wrong in the
+other direction: a statistic out of one record is never blocked by the
+release skill either. Every field under `stats` ships. So these two
+skills do not overlap on numbers at all, and the appearance that they
+might is what makes the near miss worth keeping.
+
+**8. "`ursa run` just produced four records for the site project.
+Distill them into tuning.json so I can paste the block into ChatGPT."**
+
+`distilling-a-tuning-record`'s own trigger. Close on two hooks rather
+than one. It ends in something being pasted where it will be trusted,
+which is this skill's whole situation, and the thing being pasted
+contains a count: an axiom carries an `evidenceCount`, and reading the
+confidence count on a rule is one of that skill's own stated triggers.
+So there is a number, a destination and a reader.
+
+The line is in the description's first clause, which requires a number
+"taken from an outcome record". An `evidenceCount` is taken from a
+tuning record, and it counts evidence entries rather than characters or
+spans, so none of this skill's procedure applies to it: there is no
+denominator to establish, because it is a count of pointers and not a
+share of anything. Asking what an `evidenceCount` is a share of is a
+category error, and the skill that knows that is the one that owns the
+field.
+
+That skill already carries the rule for the case, which settles the
+boundary rather than merely arguing it: its store section says to name
+the project whenever you quote a confidence count, because one store
+per project means an axiom confirmed in three projects reads as three
+single-evidence hypotheses. That is the same *kind* of caveat this
+skill issues about denominators, written by the skill that owns the
+number. Two skills issuing it would be two places for it to drift.
+
+The related prompt that *would* fire is "the deck says this axiom is
+backed by four records and the tuning file says `x4`, is that the same
+four", because that is a quantitative sentence being audited against
+the field it cites, which is this skill's fourth stated trigger.
+
 ## Note on the overlap this test exposes
 
 Prompt 3 and near miss 5 both involve choosing between a prose record
@@ -106,3 +205,84 @@ which is likely once the corpus is near five, the trial skill should
 run first and this one should run on its output. That ordering is not
 encoded anywhere yet and is a ledger entry rather than a solved
 problem.
+
+## Added 2026-10-24, eighteenth run: the seventh skill's boundary
+
+The run that landed `auditing-a-detected-correction-loop` owes a near
+miss to every skill already in the library, in their own files, in the
+same pull request. That is `prompts/skill-extract.md` §5r, and this
+section is this file's payment. The prompt is the new sibling's own
+trigger, copied rather than paraphrased, and this skill's `description`
+was widened in the same commit to carry the exclusion the prompt found
+missing.
+
+**9. "The signals block says one loop with two recurrences, but I count
+three places she complains about the constellation being dark. Which
+one is right?"**
+
+`auditing-a-detected-correction-loop`'s own trigger 1, and it should
+not fire here. The pull is strong and it is the description's "checking
+whether two records' numbers can be compared or added" that pulls,
+because a disputed recurrence count is exactly a comparability
+question. The reason it lands on the sibling is the half of this
+skill's trigger the prompt does not have: nothing is about to be
+written into something a reader will trust. There is no methods doc, no
+brief and no buyer. There is a reader trying to work out what a field
+counts.
+
+This skill's step 8 is the near relative and the tell. "Read the
+field's definition, not its label" is the same move the sibling makes
+on `recurrences`, and this skill demonstrates it on
+`turnsToAcceptance`, which is a `stats` field. The exclusion added for
+this boundary names the object rather than the move: a trajectory entry
+the detector emitted is not a statistic the resolver counted. Once a
+recurrence count is going into the lab brief, both fire, and the order
+is sibling first, because this skill cannot rule on a sentence whose
+subject has not been established.
+
+## Added 2026-10-26, twenty-fourth run: the eighth skill's boundary
+
+The run that landed `auditing-a-durability-walk` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request. That is `prompts/skill-extract.md` §5r, and this section
+is this file's payment. The prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+This is the hardest of the seven boundaries the new skill creates, and
+it is the one the library should expect to get wrong, so it gets more
+prose than the others.
+
+**10. "Two records, one from the site project and one from alexandria,
+report `decayRate` 0.31 and 0.62. Is the second project really twice as
+bad at keeping what the model wrote?"**
+
+`auditing-a-durability-walk`'s own trigger 3, and it should not fire
+here, on a technicality that is really the substance.
+
+Everything about the prompt says this skill. It holds two record
+statistics, it asks whether they may be compared, and comparability
+across records is this skill's central question. If the two numbers
+were span-class shares out of `stats` it would be trigger 1 of this
+file with different nouns.
+
+`decayRate` is not like the other statistics, and that is the whole
+distinction. Every number this skill governs is a function of the
+episode, settled when the episode closed, so two of them differ only
+in what they are a share of. `decayRate` is a function of the commits
+after the closing commit, walked to whatever HEAD was at the time, so
+two of them can differ because the walks ended at different tips with
+nothing about either episode differing at all. There is a prior
+question, and it is not "what is this a share of".
+
+So the order is: the durability skill establishes that the two walks
+measured comparable things, by reading each block's `closingSha` and
+`tipSha` and whether the revision cap bound, and then this skill
+decides whether the two numbers may be stated side by side. A prompt
+that arrives already past the window check belongs here. This one does
+not, because nothing in it shows anyone has looked.
+
+The practical test, for a reader who has both skills and has to pick
+one. Ask whether the question would survive someone answering "those
+two walks ended at different commits". If that answer dissolves the
+question, it was the durability skill's. If the question is still there
+afterwards, it is this skill's. `skills/README.md` records the order.

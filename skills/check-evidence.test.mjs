@@ -21,8 +21,11 @@ import { join } from 'node:path'
 const hash = (text) => createHash('sha256').update(text).digest('hex').slice(0, 16)
 
 const CHECKER = new URL('check-evidence.mjs', import.meta.url).pathname
-// The checker imports these; a temp library has to carry them too.
-const IMPORTS = ['source-line.mjs', 'citing-files.mjs']
+// The checker imports these; a temp library has to carry them too. Adding one
+// and forgetting this line makes every test here fail at exit 1 with a module
+// resolution error, which looks identical to the checker reporting a problem;
+// that is how the 2026-10-26 run learned the list is load-bearing.
+const IMPORTS = ['source-line.mjs', 'citing-files.mjs', 'library-dirs.mjs']
   .map((f) => new URL(f, import.meta.url).pathname)
 
 /** A library with two skills, each citing one line of its own file, and a lock

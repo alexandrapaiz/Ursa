@@ -10,18 +10,19 @@ description: >
   three exits a release is taking and what that exit demands, and for
   honouring an erasure or a revocation so that it reaches everything
   already derived. Does not fire for choosing a span's label, for
-  deciding what a record statistic is a share of, for running a trial,
-  for distilling axioms, or for adding a bound to the record gate.
-version: 0.1.0
+  deciding what a record statistic is a share of, for auditing the
+  trajectory signals a record carries, for running a trial, for
+  distilling axioms, or for adding a bound to the record gate.
+version: 0.1.1
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-23
-revised: 2026-10-23
+revised: 2026-10-24
 evidence_scheme: repo
 evidence:
   - ref: E1
-    what: disclosure.ts is the only code allowed to turn a record into something that may leave the device, the four places a record holds raw text, that a comment is not a boundary, and the plan's three crossing edges with the survival_stats SQL
+    what: disclosure.ts is the only code allowed to turn a record into something that may leave the device, the three fields a record holds raw text in, that a comment is not a boundary, and the plan's three crossing edges with the survival_stats SQL
     source: ursa-major/src/disclosure.ts:1-24
   - ref: E2
     what: building the payload out of counters alone would be correct and not checkable, so auditBatch re-derives the guarantee from outside the projection with two independent checks, and a check that cannot fail proves nothing
@@ -82,22 +83,22 @@ evidence:
     source: ursa-major/src/consent.ts:106-141
   - ref: E21
     what: forget deletes the record file, strips the record from the tuning, and tombstones the id so a later run does not rebuild it from the git history it came from
-    source: ursa-major/src/consent.ts:197-240
+    source: ursa-major/src/consent.ts:197-247
   - ref: E22
     what: `ursa consent disclose` has no --audit flag, because an opt-in audit is a check that gets skipped on the day it would have mattered
-    source: ursa-major/src/consent.cli.ts:1-17
+    source: ursa-major/src/consent.cli.ts:1-18
   - ref: E23
     what: what `ursa consent show` prints, including the active and revoked inference counts, the erasures with what each removed, and the closing sentence that differs by consent state
-    source: ursa-major/src/consent.cli.ts:68-104
+    source: ursa-major/src/consent.cli.ts:86-157
   - ref: E24
-    what: revoking a scope is a stop and not an undo, and deletion of what was already sent is a request to the aggregation layer
-    source: ursa-major/src/consent.cli.ts:119-129
+    what: revoking a scope is a stop and not an undo, deletion of what was already sent is a request to the aggregation layer, and the state the scope returns to is withheld
+    source: ursa-major/src/consent.cli.ts:172-181; ursa-major/src/consent.ts:194-201
   - ref: E25
-    what: revoke-axiom keeps the axiom as a tombstone so a later distillation cannot bring it back, and excludes it from every export and from the overlay
-    source: ursa-major/src/consent.cli.ts:131-145
+    what: revoke-axiom keeps the axiom as a tombstone so a later distillation cannot bring it back, and excludes it from every export and from the overlay, which is six call sites filtering on the status it sets
+    source: ursa-major/src/consent.cli.ts:184-192; ursa-major/src/tuning/revoke.ts:166-174; ursa-major/src/tuning/types.ts:63-69
   - ref: E26
     what: the order disclose runs in, project then report the withholdings then audit, and that a single finding means nothing is written and the command exits 1
-    source: ursa-major/src/consent.cli.ts:147-171
+    source: ursa-major/src/consent.cli.ts:255-269
   - ref: E27
     what: the redaction standard is field-level rather than pattern-level, because the workflow gate catches three regular expressions and not the ordinary English that actually leaked
     source: docs/security/redaction-standard.md:11-27
@@ -121,28 +122,37 @@ evidence:
     source: docs/design/consent-and-erasure.md:83-85
   - ref: E34
     what: erasure against revocation, mechanism by mechanism, and why an axiom grounded only in the erased record is deleted outright rather than tombstoned
-    source: docs/design/consent-and-erasure.md:410-436
+    source: docs/design/consent-and-erasure.md:427-438,480-487
   - ref: E35
     what: aggregate() is the reference implementation of what the ingest route owes, and the two schema defects reported rather than patched around, the missing character total and the collapsed survival scalar
-    source: docs/design/consent-and-erasure.md:438-461
+    source: docs/design/consent-and-erasure.md:505-519
   - ref: E36
     what: what the consent change does not do, including that zone B is unbuilt, that the existing bridge is not gated by consent.json, and that the audit checks text rather than inference
-    source: docs/design/consent-and-erasure.md:489-513
+    source: docs/design/consent-and-erasure.md:549-571
   - ref: E37
     what: the ledger finding that the publish disclosure claims the text was already public and never checks whether the repository is, and that an unstated visibility must print the private sentence
-    source: docs/ideas.md:8117-8120
+    source: docs/ideas.md:8124-8127
   - ref: E38
     what: the ledger finding that nothing tells a publisher what of theirs is live right now and nothing takes one record back down between publishes
-    source: docs/ideas.md:8124-8127
+    source: docs/ideas.md:8131-8134
   - ref: E39
     what: the ledger finding that a republish leaves the pages it no longer lists, so an erased record stays readable at an address somebody already has
-    source: docs/ideas.md:8137-8140
+    source: docs/ideas.md:8144-8147
   - ref: E40
     what: the five poisoned payloads the audit is asserted to catch, including the whole record passed off as a batch, which is the failure mode that existed before the module
     source: ursa-major/src/disclosure.test.ts:256-310
   - ref: E41
     what: the standard installs nothing, Class A has no automated check in it, and what it gives instead is the field list so a seat about to quote a record need not rediscover the incident
-    source: docs/security/redaction-standard.md:173-181
+    source: docs/security/redaction-standard.md:173-182
+  - ref: E42
+    what: revoke-axiom prints in the same breath that a block the user already pasted into another product is outside what the command can reach and keeps working until she replaces it herself
+    source: ursa-major/src/consent.cli.ts:214
+  - ref: E43
+    what: the paste channel's unreachability is permanent rather than unbuilt, because enforcing a revocation across a delegated channel needs deny state and a receipt from the gateway holding the delegation and this gateway is a text field in software Ursa does not run, and a user who reads her tuning through the MCP server instead does not have the limitation
+    source: docs/design/consent-and-erasure.md:583-604
+  - ref: E44
+    what: both revoke-axiom and consent show report the axioms that still say nearly the same thing as the revoked one and were deliberately left alone, show covering revocations already made and revoke-axiom covering the one just made
+    source: ursa-major/src/consent.cli.ts:215-229, ursa-major/src/consent.cli.ts:108-126
 supersedes: []
 ---
 
@@ -266,9 +276,12 @@ would report a leak the moment anyone resolves this repository [E9].
 Leaf values are joined by a run of NUL characters at least one shingle
 wide, so no window can span two values and manufacture a match [E9].
 
-Output: either a `batch.json` whose every string is one of thirty-two
-literals or an ISO date [E7], or an exit status of 1 and a list of
-findings.
+Output: either a `batch.json` whose every string is one of the
+thirty-four literals the two vocabularies and the two fixed strings add
+up to, or an ISO date [E7], or an exit status of 1 and a list of
+findings. Count them rather than reading the number off the comment
+above `isPermittedString`, which says thirty-two and has said so since
+the commit that introduced both vocabularies.
 
 ### 3. Publication: the manifest is the consent, so print it first
 
@@ -393,7 +406,7 @@ implementation detail [E34].
 | The user is saying | Command | What happens |
 |---|---|---|
 | stop disclosing anything at all | `ursa consent revoke --scope minor-aggregate` | the scope goes back to withheld [E24], and the transition is appended to the history [E19] |
-| this inference about me is wrong | `ursa consent revoke-axiom --axiom ax-003` | the axiom is kept as a tombstone so a later distillation cannot revive it, and it leaves every export and the overlay [E25] |
+| this inference about me is wrong | `ursa consent revoke-axiom --axiom ax-003` | the axiom is kept as a tombstone so a later distillation cannot revive it, and every export and overlay from then on leaves it out [E25], while a block already pasted elsewhere keeps working [E42] and any near-duplicate axiom keeps saying the same thing [E44] |
 | erase this piece of my work | `ursa forget --record <id>` | the record file goes, evidence is stripped, and an axiom grounded only in this record is deleted outright rather than tombstoned [E34] |
 
 The third row's asymmetry is the one to understand before explaining it
@@ -409,6 +422,30 @@ Say the limit out loud rather than letting the command imply otherwise.
 Revoking a scope reaches nothing already handed over, so it is a stop
 and not an undo, and deletion of what was sent is a request to the
 aggregation layer [E24].
+
+Revoking an axiom has two limits of its own, and the command now prints
+both rather than leaving them for a release note. The first is the
+paste channel. `ursa tuning export` renders a block the user pastes
+into somebody else's settings field, and revoking an axiom changes
+every render from that moment on [E25] while changing nothing about the
+copy already pasted, which keeps instructing that model until she
+replaces it by hand [E42]. The second is the near-duplicate. An axiom written
+before the store checked for duplicates can be the same rule twice
+under two ids, so withdrawing one id leaves the other one working, and
+both `revoke-axiom` and `consent show` now list the twins and say
+plainly that nothing in the list was changed for her [E44].
+
+Treat the first of those as permanent when you write the clause, not as
+a gap waiting on a build. Enforcing a revocation across a delegated
+channel requires the gateway holding the delegation to install deny
+state and return a receipt saying it did, and this channel's gateway is
+a text field inside software Ursa does not run and cannot enumerate, so
+it can neither emit a receipt nor be listed [E43]. The same sentence
+carries the way out, which is a delivery channel with a gateway Ursa
+can address: a user who reads her tuning through the MCP server rather
+than a block copied once does not have this limitation [E43]. Output:
+the clause names which delivery channel the revocation was enforced on,
+because "revoked" is true of the store and not of every copy.
 
 ### 7. Write down the clause, because the next reader cannot re-derive it
 
