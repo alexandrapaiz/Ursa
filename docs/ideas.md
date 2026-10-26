@@ -11078,3 +11078,169 @@ itself to this run or asked it to do anything.**
   not close it.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (engineer, hook run) — Sweep every "Exact commands" block for paths that do not resolve from the cwd the block declares
+
+- Trigger: two findings in this run, one in code and one in prose, both
+  the same defect. `tools/regen.ts` printed `bash
+  tools/ensure-full-clone.sh` as the repair for an unverifiable digest
+  index, and that command exits 127 from `ursa-major/`, which is where
+  an npm script puts the reader. `docs/design/counting-a-rename-once.md`
+  §6 opens "Every line below was executed in this run, with `cwd =
+  ursa-major/`" and then annotated `bash ../tools/ensure-full-clone.sh`
+  with `# cwd = repository root`, so the command and its own comment
+  disagreed about which directory they were written for. Both are fixed
+  on this run's branch. Neither was found by a test, because no test
+  resolves a path a document names.
+- What: the engineering-artifact standard requires element 4, "exact
+  commands", in every design doc, and `docs/design/` now holds dozens of
+  fenced blocks of them. An exact command is only exact relative to a
+  cwd, and the standard does not say the cwd has to be stated, so most
+  blocks state it in prose above the fence or not at all. The proposal is
+  a repository-level gate in the shape this run already built for one
+  module: parse `docs/design/*.md` for fenced `bash` blocks, read the cwd
+  the block declares from a convention the gate defines (a `# cwd:
+  <path>` first line, defaulting to the repository root), extract every
+  path-shaped argument, and fail naming any that does not exist relative
+  to that cwd. The value is that it converts a class of silent rot into a
+  red suite, and the cost is that it needs a convention the existing
+  blocks do not follow yet, so the first pass is mostly annotation.
+- First step: write the parser and the resolver against
+  `docs/design/clone-completeness.md` and
+  `docs/design/counting-a-rename-once.md` only, the two files whose cwds
+  are already stated in prose, and report how many of their path
+  arguments resolve. That measurement decides whether the convention is
+  worth rolling out to the rest of `docs/design/` or whether the gate
+  should stay scoped to the tooling that prints commands at runtime,
+  which is where today's real defect was.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run) — A green `npm test` means two different things depending on the shape of the checkout, and says nothing about which
+
+- Trigger: measured in this run, in both directions. `src/provenance-index.test.ts`
+  is gated by `describe.skipIf(blocked !== null)` on whether committed
+  history is readable, which is correct, because a shallow checkout
+  cannot verify the digest index and failing there would be a false
+  failure. In this repository's full checkout that file reports `1 passed
+  (1) / 6 passed (6)`. In a `--depth 1` clone of the same branch it
+  reports `1 skipped (1) / 6 skipped (6)`, and vitest 5.0.5's default
+  reporter prints neither the file name nor the reason. Six tests
+  disappear, including the staleness gate on the index a buyer follows a
+  `task.resolvedBy.digest` through, and the suite summary is green either
+  way.
+- What: the seat sandboxes this organization runs on arrive as `--depth
+  1` single-branch clones. This run's own did, and `git fetch
+  --unshallow` plus `bash tools/ensure-full-clone.sh` were needed to make
+  the history readable at all. So the population most likely to write
+  "suite green, 989 passed" into a pull request description is exactly
+  the population whose suite silently did not check the provenance index.
+  The fix is not to make the skip fail, for the reason the skip exists.
+  It is that the suite has no way to report its own blind spot: this run
+  measured that the default reporter prints neither stdout nor stderr
+  from a passing test, so a warning is invisible, and prints only counts
+  for a skipped file, so the suite name is invisible too. The only
+  surfaces a reader sees are the counts and the failures.
+- First step: decide the policy before writing code, because the two
+  honest options differ in blast radius. Option A, a test that fails when
+  history is unreadable AND `origin` is reachable, meaning the skip was
+  repairable and nobody repaired it, which leaves the Action tarball case
+  passing and turns every unrepaired seat sandbox red until it runs one
+  documented command. Option B, leave the exit code alone and have
+  `tools/ensure-full-clone.sh --check` run as a pretest step so the
+  reader is told before the suite starts rather than after. Measure how
+  many seat runs would go red under A before proposing A.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run) — `tools/ensure-full-clone.test.mjs` test 13 is red on every unrepaired seat checkout, so its red carries no information
+
+- Trigger: measured in this run. `node --test
+  tools/ensure-full-clone.test.mjs` on this sandbox's checkout as it
+  arrived: 17 pass, 1 fail. The failure is subtest 13, "this repository
+  own checkout passes --check, so the gate is green where it runs",
+  asserting `r.code === 0` and getting 1, because the sandbox's
+  `remote.origin.fetch` was `+refs/heads/main:refs/remotes/origin/main`
+  and a single-branch refspec is one of the two faults the script exists
+  to repair. After `bash tools/ensure-full-clone.sh` on the same
+  checkout: 18 pass, 0 fail.
+- What: the test asserts a property of the checkout it happens to run in
+  rather than a property of the script, and the checkout a seat is given
+  reliably fails it. A red that means "your sandbox is the normal shape"
+  trains every seat to read past it, which is worse than no gate, because
+  the next real regression in that file arrives wearing the same colour.
+  The other seventeen subtests do the right thing already: they build
+  purpose-shaped clones in a temp directory and point the script at them
+  with `--repo`, so their verdicts are about the script. Subtest 13 is the
+  only one that reads the ambient repository.
+- First step: give subtest 13 the pattern `src/provenance-index.test.ts`
+  already uses for the same situation, which is to skip with the reason in
+  the subtest's own name when `bash tools/ensure-full-clone.sh --check`
+  reports an unrepaired checkout, so the line reads as a deferred check
+  rather than a failure. Then add an eighteenth subtest that asserts the
+  same property against a deliberately complete temp clone, which is the
+  assertion subtest 13 was reaching for and the one that can be made
+  unconditionally true.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run) — Craft scan: tesh 0.3.2 and txm 8.2.0, where a documented command is executed by the test suite instead of read by a reviewer
+
+- Trigger: this run's own defect. A unit test asserted
+  `expect(v.message).toContain('bash tools/ensure-full-clone.sh')` and
+  passed against a path that did not exist, because it compared the
+  message to a copy of itself. That sent me to look at what the
+  executable-documentation category does about the same problem, since
+  its entire premise is that a command in prose is a claim and claims
+  need running.
+- What: two tools, both narrow and both older than their problem. `tesh`
+  0.3.2 (PyPI, released 2023-10-28) marks a fenced block testable by
+  appending `tesh-session="NAME"` to the info string, runs the block in a
+  real shell session shared by every block with that name, and compares
+  the recorded output to the real output with `...` as an elision
+  wildcard. It carries directives for the surrounding conditions it knows
+  about: `tesh-setup` for a setup script, `tesh-exitcodes` for expected
+  non-zero exits, `tesh-platform` for linux, darwin or windows,
+  `tesh-timeout` defaulting to 30 seconds, and `tesh-ps1` for a custom
+  prompt. `txm` 8.2.0 (npm, released 2023-07-03) is the
+  language-agnostic sibling: blocks opt in through a preceding `!test`
+  HTML comment, and its options are `--jobs <n>`, `--color`/`--no-color`,
+  `--version` and `--help`.
+  **The thing worth stealing** is the inversion itself, which this run
+  arrived at independently and should generalize: a documented command is
+  not evidence until something runs it, and the cheap version of that is
+  to parse the command out of the artifact rather than retype it into a
+  test. `src/regen-commands-runnable.test.ts` extracts every `bash
+  <path>` and `npm run <script>` from the messages the tool generates,
+  which is why a state added later is covered with no edit to the test.
+  Retyping the command into the assertion is what produced the bug.
+  **The thing Ursa does better** is the axis both tools leave out. Neither
+  models the cwd a documented command assumes. `tesh` has `tesh-setup`
+  and `tesh-platform` but no `tesh-cwd`, and `txm`'s documented options
+  do not mention the working directory at all, so both answer "does this
+  command work somewhere" rather than "does it work where the reader is
+  standing". That is the whole defect this run fixed: `bash
+  tools/ensure-full-clone.sh` runs correctly from the repository root and
+  exits 127 from `ursa-major/`, and a tool that executed the block from
+  its own chosen directory would have reported either answer as the
+  truth. This project's gate resolves each path against the cwd an npm
+  script actually gives the reader, which is the stricter and more useful
+  question.
+  **Where they are ahead and this is not**: both run the command and
+  compare its output, where this run's gate stops at resolving the path
+  and running the one repair in its write-nothing `--check` mode. Output
+  comparison is the next increment if the preceding ledger entry's sweep
+  proves worth building.
+- First step: no adoption proposed. Neither tool fits, because the
+  commands that mattered today were generated at runtime by a TypeScript
+  function rather than written in a markdown fence, and that is the shape
+  `src/regen-commands-runnable.test.ts` already handles. The borrowable
+  piece is the extract-rather-than-retype discipline, which the preceding
+  entry on `docs/design/` "Exact commands" blocks is the place to apply
+  next. Sources:
+  [tesh on GitHub](https://github.com/OceanSprint/tesh),
+  [txm on GitHub](https://github.com/anko/txm),
+  [tesh on PyPI](https://pypi.org/project/tesh/),
+  [txm on npm](https://registry.npmjs.org/txm).
+- Cost: $0
+- Status: proposed
