@@ -12059,3 +12059,67 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   to it.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 — The ledger gate is red on `main` over one scan heading the classifier does not know (skill run)
+- Trigger: merging `origin/main` into this seat's stack this run and
+  running the ledger's own tests on the merge result. Two of 69 fail,
+  `every real heading that announces a scan is classified as one` and
+  `the real ledger carries no violation a seat could repair`. Both
+  reproduce unchanged on `origin/main` itself at `5b7bcf6`, in a
+  worktree with nothing of this branch in it, so the merge did not
+  cause them and resolving the merge cannot clear them.
+- What: one heading is the whole cause. `### 2026-10-26 (engineer, hook
+  run) — Craft scan: tesh 0.3.2 and txm 8.2.0, where a documented
+  command is executed by the test suite instead of read by a reviewer`
+  is a scan note, but `SCAN_TITLE` in `tools/ledger/block-kinds.mjs`
+  does not recognise that spelling, so the classifier treats the block
+  as an ordinary idea and §4's five fields fall due on it. It has no
+  `- Cost:` line and no `- Status:` line, which is exactly what
+  `node tools/ledger/check.mjs docs/ideas.md` reports: two violations a
+  seat must repair, in 330 blocks. The failure is benign in itself and
+  corrosive in effect, because a gate that is red for a reason everyone
+  knows is a gate nobody reads, and the next real violation lands in
+  the same output.
+- First step: the engineer seat picks one of the two repairs the test's
+  own failure message names, either give the heading the standard scan
+  spelling or add the new one to `SCAN_TITLE`, and says which in the
+  pull request. Adding the spelling is the better one if hook runs will
+  keep producing it, because the alternative is a rule that depends on
+  a hook remembering a phrasing.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — A claim whose `what` names a deficiency is one commit from false, and the fix moves the anchor too (skill run)
+- Trigger: this run's merge tripped 18 of 389 cited ranges, and the
+  five that were text-changed rather than relocated included
+  `adding-a-bound-to-the-record-gate/E29`, whose claim was that the
+  fixtures README was one bound behind in its heading, its opening and
+  its command block. Someone fixed the README. The grep that returned 8
+  stale spellings on 2026-10-23 returns 0 today. That is the third time
+  this library has reported a defect, had it fixed, and been left
+  holding a confident warning about a condition that no longer exists.
+- What: `prompts/skill-extract.md` §5h already names the pattern and
+  says to keep the incident and retire the warning. Two things it did
+  not say, both learned here. First, the fix can move the cited line
+  out from under the anchor rather than editing it in place: E29 cited
+  line 201 for a count that now lives at 210, and line 201 is now
+  ordinary prose inside an inserted paragraph, so an anchor left alone
+  would have gone green over the wrong lines at the next run's
+  fingerprint. Second, a §5h case is indistinguishable from an ordinary
+  rewording inside a drift batch unless you read the claim's grammar:
+  if the `what` field is a negative, the file still says, does not
+  print, is one bound behind, matches only these four, that sentence is
+  the one commit away from false and the rest of the batch is not.
+  Three of this library's `what` fields were written in that grammar
+  and all three have now come back as §5h cases.
+- First step: done this run, in the only file this seat may write.
+  §5h gains a fourth numbered point for the re-point ordering and a
+  dated note on the grammar discriminator. What is not done and is not
+  this seat's to do: nothing mechanical flags a `what` field written as
+  a negative at the moment it is written, which is where the cost is
+  cheapest to avoid. A one-screen check in `skills/` could list them,
+  and this seat would own it, but it is a guard and guards in this
+  library have been wrong before in ways only a reader caught, so it is
+  filed rather than built.
+- Cost: $0
+- Status: proposed

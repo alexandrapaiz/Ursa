@@ -332,11 +332,37 @@ a risk or a thing to watch out for:
    decision needs to know which way the code errs and why. The widened
    marker narrows what a run claims rather than widening it, and that
    sentence is worth more than the regex it replaced.
+4. **The fix may move the line out from under the anchor, so re-point
+   before rewriting.** (Added 2026-10-26, twenty-sixth run, third
+   instance.) The first two instances were defects in code and the fix
+   edited the cited lines in place, so §5g's relocation question did
+   not arise. This one was a defect in documentation prose, the
+   fixtures README's hand-written counts, and the fix inserted a
+   paragraph above the count. The ref cited `README.md:1-11,201` for
+   three stale spellings, and after the fix line 201 is ordinary prose
+   inside the inserted paragraph while the count it named lives at 210.
+   An anchor left alone there does not go red a second time, because
+   the next run's fingerprint is taken over whatever text now sits at
+   201. So the order is: re-point the range at the thing the claim is
+   about, re-record the fingerprint, then rewrite the prose. Doing it
+   the other way leaves a correct hash over the wrong lines, which is
+   the §5j failure arriving through the §5h door.
 
 Ours: this is the one drift case where the skill was right and still
 has to change, which is why it is easy to skip. Every other entry in a
 drift report feels like a correction to make. This one feels like
 vindication, and it is the one that will mislead a reader hardest.
+
+Ours, 2026-10-26: how to spot one inside a batch. The mechanical pass
+sorts a drift batch into relocated, text-changed and ambiguous, and a
+§5h case always lands in text-changed, but so does every ordinary
+rewording. The cheap discriminator is the claim's own grammar rather
+than the diff. If the `what` field is a negative or a deficiency, the
+file still says, does not print, is one bound behind, matches only
+these four, then read the fix first and the lines second, because that
+sentence is one commit away from being false and nothing else in the
+batch is. Three of this library's `what` fields were written that way
+and all three have now come back as §5h cases.
 
 ## 5i. Budget a re-grounding pass by content, not by the drift count
 
