@@ -4,7 +4,7 @@
 // subscription — nothing leaves except the API call Claude Code itself
 // makes.
 
-import { execFileSync } from 'node:child_process'
+import { runClaudePrint } from '../claude-cli'
 import type { OutcomeRecord } from '../types'
 import type { DistillOutput, DistilledAxiom, TuningRecord } from './types'
 
@@ -146,67 +146,22 @@ function validateAxiom(a: DistilledAxiom): void {
   }
 }
 
+/** The interpretation pass reads a whole outcome record, so it gets five
+ *  minutes where the verdict reader gets two (src/verdict.ts). */
+const DISTILL_TIMEOUT_MS = 300_000
+
 export interface DistillRunner {
   (prompt: string, model: string): string
 }
 
-/**
- * The reason `claude -p` gives for its own failure, read off the JSON
- * envelope it prints on stdout even when it exits non-zero.
+/** Default runner: Claude Code CLI, print mode, local machine.
  *
- * WHY THIS EXISTS. `claude -p --output-format json` exits 1 on an API
- * error and still prints a complete, well-formed envelope whose `result`
- * field is the human-readable reason. `execFileSync` throws on the exit
- * code, so the specific message below this function used to be
- * unreachable in exactly the case it was written for, and the caller got
- * Node's own `Command failed: claude -p --model sonnet --output-format
- * json` with the envelope dumped as an unlabelled field of the error
- * object.
- *
- * Measured 2026-10-26 by the engineer seat's own dogfooding run
- * (sprint-2026-10-26 item 2), distilling a real outcome record on a host
- * where the CLI is installed and has no credentials. The envelope carried
- * `"is_error":true`, `"terminal_reason":"api_error"` and
- * `"result":"Not logged in · Please run /login"`, which is a one-line fix
- * the operator can act on, and none of it reached the operator.
- *
- * Returns null when the error carries no parseable envelope, so a
- * genuinely missing binary or a timeout still reports as itself.
- */
-export function cliFailureReason(err: unknown): string | null {
-  const stdout = (err as { stdout?: unknown })?.stdout
-  if (typeof stdout !== 'string' || stdout.trim().length === 0) return null
-  let envelope: unknown
-  try {
-    envelope = JSON.parse(stdout)
-  } catch {
-    return null
-  }
-  const result = (envelope as { result?: unknown })?.result
-  return typeof result === 'string' && result.trim().length > 0 ? result.trim() : null
-}
-
-/** Default runner: Claude Code CLI, print mode, local machine. */
-export const claudeRunner: DistillRunner = (prompt, model) => {
-  let out: string
-  try {
-    out = execFileSync('claude', ['-p', '--model', model, '--output-format', 'json'], {
-      input: prompt,
-      encoding: 'utf8',
-      maxBuffer: 16 * 1024 * 1024,
-      timeout: 300_000,
-    })
-  } catch (err) {
-    const reason = cliFailureReason(err)
-    if (reason) throw new Error(`claude -p failed: ${reason}`)
-    throw err
-  }
-  const envelope = JSON.parse(out) as { result?: string; is_error?: boolean }
-  if (envelope.is_error || typeof envelope.result !== 'string') {
-    throw new Error('claude -p returned an error envelope')
-  }
-  return envelope.result
-}
+ *  The call, the envelope reading and the failure messages all live in
+ *  src/claude-cli.ts, shared with `claudeVerdictRunner` in src/verdict.ts.
+ *  They were two copies until 2026-10-26, which is how `cliFailureReason`
+ *  came to be applied here and not there; see that file's header. */
+export const claudeRunner: DistillRunner = (prompt, model) =>
+  runClaudePrint(prompt, model, DISTILL_TIMEOUT_MS)
 
 export function distill(
   record: OutcomeRecord,

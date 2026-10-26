@@ -30,7 +30,7 @@
 // TRANSCRIPT_CHAR_LIMIT inside one long message is never shown to the
 // model at all (cases.json, v16; counted as knownMiss).
 
-import { execFileSync } from 'node:child_process'
+import { runClaudePrint } from './claude-cli'
 import type { UserPrompt } from './types'
 
 export interface Verdict {
@@ -56,20 +56,20 @@ export interface VerdictRunner {
   (prompt: string, model: string): string
 }
 
-/** Default runner: Claude Code CLI, print mode, local machine. */
-export const claudeVerdictRunner: VerdictRunner = (prompt, model) => {
-  const out = execFileSync('claude', ['-p', '--model', model, '--output-format', 'json'], {
-    input: prompt,
-    encoding: 'utf8',
-    maxBuffer: 16 * 1024 * 1024,
-    timeout: 120_000,
-  })
-  const envelope = JSON.parse(out) as { result?: string; is_error?: boolean }
-  if (envelope.is_error || typeof envelope.result !== 'string') {
-    throw new Error('claude -p returned an error envelope')
-  }
-  return envelope.result
-}
+/** One verdict read is one short prompt, so two minutes where the
+ *  distiller's whole-record pass gets five (src/tuning/distill.ts). */
+const VERDICT_TIMEOUT_MS = 120_000
+
+/** Default runner: Claude Code CLI, print mode, local machine.
+ *
+ *  The call, the envelope reading and the failure messages all live in
+ *  src/claude-cli.ts, shared with `claudeRunner` in src/tuning/distill.ts.
+ *  Until 2026-10-26 this was a second copy of those eight lines, and the
+ *  copy is why this path never got the repair that one did: a non-zero
+ *  exit here threw Node's `Command failed: claude -p ...` and dropped the
+ *  `Not logged in · Please run /login` sitting in the envelope. */
+export const claudeVerdictRunner: VerdictRunner = (prompt, model) =>
+  runClaudePrint(prompt, model, VERDICT_TIMEOUT_MS)
 
 const INSTRUCTION = `You are reading the user's own messages from a working session with an AI coding agent. Your only job: find whether the user STATED a verdict on the work, in their own words.
 

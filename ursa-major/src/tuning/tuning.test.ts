@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { OutcomeRecord } from '../types'
-import { buildDistillPrompt, cliFailureReason, distill, parseDistillOutput } from './distill'
+import { buildDistillPrompt, distill, parseDistillOutput } from './distill'
+import { cliFailureReason } from '../claude-cli'
 import { emptyTuning, mergeDistill } from './merge'
 import { renderTuningBlock } from './export'
 import type { DistillOutput } from './types'
