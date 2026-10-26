@@ -216,23 +216,27 @@ export default function Overlay() {
           <span style={{ color: verdictColor }}>
             {payload ? verdictText : 'no verdict yet'}
             {v?.accepted !== null && v?.quote && (
+              /* Presentation moved to `.panel-action` in globals.css on
+                 2026-10-26d. It was an inline style object, and `:hover`
+                 cannot be written in one, which is the mechanical reason
+                 this control never answered the pointer. The resting
+                 pixels are unchanged. */
               <button
                 onClick={() => setShowQuote(!showQuote)}
-                style={{
-                  background: 'none', border: 'none', color: 'var(--dim)', cursor: 'pointer',
-                  fontSize: 11, marginLeft: 6, textDecoration: 'underline dotted', padding: 0,
-                }}
+                className="panel-action"
               >misread?</button>
             )}
           </span>
+          {/* `.panel-hit` is the 44px target and stays; `.panel-run` is the
+              presentation and the hover, moved out of an inline style on
+              2026-10-26d for the same reason as `misread?` above. `wait`
+              while running is now `.panel-run:disabled`, keyed off the
+              same `disabled` attribute instead of off a second copy of
+              the condition. */}
           <button
             onClick={run}
             disabled={running}
-            className="mono panel-hit"
-            style={{
-              background: 'var(--panel)', color: 'var(--accent)', border: '1px solid var(--line)',
-              borderRadius: 6, padding: '4px 14px', cursor: running ? 'wait' : 'pointer', fontSize: 12,
-            }}
+            className="mono panel-hit panel-run"
           >{running ? 'running…' : 'run'}</button>
         </div>
         {showQuote && v?.quote && (
