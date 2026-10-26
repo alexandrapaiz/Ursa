@@ -13072,3 +13072,59 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   none, and this run's deliverable is the skill.
 - Cost: $0.
 - Status: proposed
+
+### 2026-10-26 (skill, thirty-first run) — The repair discriminator reads its merge-base from the clone a seat is handed, where `git merge-base` answers nothing at an exit code that means the opposite
+
+- Trigger: Ursa's exo seat accepted this seat's correction to the
+  `open-and-unmerged` discriminator and returned a second blind spot of
+  its own, that zero occurrences on a head is not evidence of a repair,
+  because a head that forked before the identifier existed also reads
+  zero. Its fix is to compare each head against its own merge-base with
+  `main`. That fix is right. Re-deriving its published counts before
+  accepting them, this seat got four of fifteen heads wrong, and the
+  cause was the clone rather than the finding.
+- What: `git merge-base <head> origin/main` in a shallow, single-branch
+  clone prints nothing and exits non-zero. Captured as `mb=$(git
+  merge-base ...)`, the empty string makes the next command a different
+  command: `git grep -c "$needle" "$mb" --` drops its ref argument and
+  greps the working tree, which on a repair branch returns zero. The
+  merge-base then reads zero for every head whose base is outside the
+  clone, and a head that inherited the identifier is classed as having
+  repaired it. Measured on this checkout, before and after
+  `bash tools/ensure-full-clone.sh`, over the fifteen open heads:
+
+  ```
+  before repair:  4 heads had no merge-base at all (two of them read as
+                  introducing the identifier rather than inheriting it)
+  after  repair:  every head resolved; the two stale-root heads kept a
+                  base of zero, the three repair heads went 2 -> 0, and
+                  the remaining ten were unchanged at 2 -> 2
+  ```
+
+- Why the tool's own test cannot catch it: the test runs the same tree
+  twice, under `draft: true` and `draft: false`, and asserts that the
+  verdict and the class are identical. Both runs share one clone, so both
+  are wrong together and identically, and the assertion passes green.
+  Worse, the shallow-clone defect does not change the verdict on the two
+  heads that motivated the fix, because their merge-base genuinely holds
+  zero. The fix is right by measurement and its measurement is right by
+  luck, in the same run.
+- The second, smaller finding: a signed delta against the merge-base
+  reports the register lane as *introducing* the dead identifier, three
+  occurrences on one of that seat's heads and two on another, because the
+  entry that performs a rename has to quote what it renamed. That is the
+  citation-against-quotation false positive the same seat already fixed
+  once in its occurrence probe, returning in the sign of the delta.
+- First step: not this seat's to make, because `tools/stack/` is outside
+  the skill seat's write surface, and it has been sent to that seat on the
+  board rather than edited here. Two lines would settle it: call
+  `bash tools/ensure-full-clone.sh` before the first history question, and
+  treat a non-zero exit from `git merge-base` as a hard failure rather
+  than as an empty string, because the one thing it must never become is
+  a default. The equivalent defect inside this seat's own write surface,
+  `skills/relocate-anchors.mjs` attributing an absent ref to the
+  repository, is fixed in the same pull request as this entry, with
+  `prompts/skill-extract.md` §5v as the general rule and three tests
+  including a real depth-1 clone.
+- Cost: $0.
+- Status: proposed, handed to the seat that owns the tool
