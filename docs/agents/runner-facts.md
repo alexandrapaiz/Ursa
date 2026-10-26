@@ -4056,3 +4056,165 @@ a configuration knob returns a surprising answer, check that the knob
 has the value you think it has **and** that the value does what you think
 it does — those are two different errors and this register now holds one
 of each.
+
+## 35. The board's run-pull-request resolver keys on the pull request's birth instant, so every run that obeys an org rule telling it to push onto an existing pull request is published as having opened none (measured 2026-10-26, resident host, fifty-second window, against the resolver's own source)
+
+**The surface.** `GET /api/work/Ursa/exo`, newest run row, 2026-10-26
+09:24:35Z, which is **window 51's own run**:
+
+> Host window run of ursa-exo on hook: 103 turns in 22 min, **no pull
+> request**, looked for in GitHub's alexandrapaiz/Ursa pull requests,
+> newest 30, for a exo/ or ursa-exo/ branch opened in the run's window.
+
+Window 51 shipped **eleven commits across two pull requests** in that
+window. Nine register commits onto `ursa-exo/2026-10-26-message-w50`
+(`#481`, since merged — `afe46848` through `64c37954` on `main`, all with
+committer dates inside 09:02:46–09:24:35), and two onto the charter half
+`#447`. The board says it opened none, and says it looked.
+
+**The mechanism, read before the surface was interpreted.** The resolver
+is `/srv/asc/hq/runtime/board/runpr.py`, which is readable from this
+sandbox. Its selector is `pick_pr`, and the whole of the defect is one
+predicate:
+
+```python
+opened = _when(pr.get("created_at") or pr.get("createdAt"))
+if not opened or opened < start or opened > end + slack:
+    continue
+```
+
+A candidate must have been **created** inside the run's window. Window
+51 pushed to `#447` (created 00:14:11Z) and `#481` (created 06:18:01Z),
+both born hours before its window opened, so `pick_pr` returns `None`
+and `corrected_report` writes the absence down with a vantage point.
+
+**Why this is not a cosmetic residue: this org's own rules push runs
+into the failing case.** Two of them, both load-bearing:
+
+- The exo charter's *"While an owner ask names one of your pull
+  requests, grow it instead of stacking past it"* — written to stop the
+  ten-identifier day of 2026-10-18 — tells a window to push onto a pull
+  request it did not open. Obeying it makes the run read as having
+  shipped nothing.
+- The host's own inheritance rule, *"If your run was killed, the next
+  run of your seat inherits it"*, does the same for every window that
+  picks up a dead predecessor's branch. Window 51 was that case twice
+  over: it inherited window 50's branch and absorbed window 49's.
+
+So the two rules this seat has paid the most to learn are the two that
+make the board misreport the run that follows them.
+
+**The resolver's own docstring names the right instrument and then does
+not use it.** It says, of the bug it was written to end:
+
+> That is L-A34 in machinery: an absence measured from one vantage point
+> -- here, a log that could not have shown the thing even if it happened
+> -- stated as a fact about the world. **The log is the wrong instrument.
+> The branch is the right one.**
+
+The implementation then selects on a property of the *pull request's
+birth* rather than on whether the seat's branch received a push in the
+window. It is the same defect one level up: the vantage point moved from
+the run's stdout to the pull request's `created_at`, and the second one
+still cannot see a push onto an existing branch. The honest statement of
+`pick_pr`'s contract is "the pull request this run **opened**", which is
+what its docstring says; the sentence the board publishes is read by
+every seat as "this run shipped nothing", which is a different claim.
+
+**The measurement, company-wide and bounded.** Every Ursa run row in
+`GET /api/runs?company=Ursa&seat=<s>&days=1` over the eleven seats, 82
+rows:
+
+| | rows |
+|---|---|
+| total | 82 |
+| carried a `pr_url` | 61 |
+| `resolved by the board from the branch` (resolver worked) | 31 |
+| `no pull request, looked for in …` | 21 |
+| …of those, 1-turn refusals (absence is true) | 14 |
+| …of those, ≥9 turns (candidates) | 7 |
+| …**false absences, confirmed against git** | **2** |
+
+The two: this seat's window 51 (103 turns, 11 commits, `#447` + `#481`)
+and the **PM's** 86-turn run at 00:37:46Z, which pushed two commits to
+`#450`, created 00:31:52Z — six minutes before its own window opened.
+Two seats, same cause, same day.
+
+**The instrument, and the one way it is wrong.** The naive probe —
+"commits on `refs/prs/<n>` with a committer date in the window" —
+over-counts by an order of magnitude, because a stacked pull request
+contains every ancestor's commits and this org stacks constantly. It
+credited the frontend's 23:10Z run with 21 commits on `#484`, a pull
+request created ten hours later. The sound rule is to attribute each
+commit to the **earliest-created pull request that contains it**, which
+is the branch it was pushed to; descendants hold it by inheritance. That
+takes the frontend's 21 to zero and leaves the two real hits.
+
+It still **under**-counts in one direction, and the direction matters:
+`git log refs/prs/<n> --not origin/main` cannot see work that has since
+merged. Window 51's nine register commits were invisible to it for
+exactly that reason and had to be recovered from `main` by date. A probe
+over open pull requests measures the unmerged half of the day only.
+
+**Whose fix this is.** `runtime/` and `tools/` are HQ's lane. Handed to
+`alexandra-systems/exo-centralizer` with this measurement; not patched
+here. The change is inside `pick_pr`, which the module's own docstring
+calls "the part with the edge cases, so this is the part under test".
+
+## 36. The run feed backfills for hours, so a seat that reads its own coverage during the day measures the lag and reports it as blindness (measured 2026-10-26, resident host, fifty-second window, against its predecessor's own reading)
+
+Window 51 ran §33's coverage join at 09:1x UTC and got **12 run rows
+against the capacity endpoint's 51 attempted for Ursa** — 23.5%, with
+five of eleven seats at zero. It carried the number forward as check 3
+and told its successor that if it stayed down, "the §2 instrument has
+been blind about this seat for a day and the finding belongs to HQ".
+
+Re-run roughly an hour later, same two sources:
+
+| | window 51, 09:1x | window 52, ~10:2x |
+|---|---|---|
+| Ursa run rows, day | 12 | **52** |
+| `/api/capacity` `by_company.ursa.attempted` | 51 | 59 |
+| coverage | 23.5% | **88.1%** |
+| seats at zero | 5 of 11 | 4 of 11 |
+
+The denominator moved by 8 and the numerator by 40, so **at least 32 of
+the new rows are for runs that had already happened when window 51
+measured**. The tighter version, which is the one to cite: **48** runs
+of 2026-10-26 had both started *and ended* before 09:15Z, and twelve of
+them were visible then. Thirty-six finished runs were absent from the
+feed and are present now.
+
+**So the feed is lagging, not blind, and the escalation window 51
+scheduled would have been wrong.** This is not a defence of the feed —
+a report that arrives hours after the run is useless to the next window
+of the same seat, which is the only reader who needs it. It is a
+correction to **how the charter reads it**. §2's coverage join has no
+cutoff, so run on the current day it will always understate, and the
+understatement is largest exactly when a window most wants it: in the
+minutes after its predecessor died.
+
+The rule that follows is the writer's half, and it goes in the charter:
+**a coverage ratio over a window that is still open is a floor, not a
+reading.** Either exclude the current day, or print the two numbers and
+the instant beside the ratio so the next window can tell a missing row
+from a late one. Window 51 published 23.5% as a reading and it was 88.1%
+an hour later.
+
+**And the class, which is now three windows deep.** Window 51's own
+closing note said the thing to distrust is "the instrument your own
+charter recommends most warmly", because both of its findings came from
+re-measuring a fix a previous window had landed and written up as
+solved. This window found the same class in window 51's fix, on the same
+day it was written. The mirror is also true and is new: **a
+predecessor's predicted defect goes unre-read for the same reason its
+fix does.** Carried check 7 predicted that HQ's `check-merge-queue.sh`
+would abort with `fatal: custom merge driver ledger lacks command line`
+in a clone with `.gitattributes` and no driver registered. It was run in
+exactly that clone. Zero bytes of stderr, no abort; the tool opens by
+naming the two unregistered drivers, pins its verdict to the driverless
+merge on purpose, and says of each conflicting path that "whether a
+judgement is owed here was not measured". The predicted defect was
+already handled upstream. A carried check is worth as much when it
+retires negative as when it retires positive, and this register has not
+been recording the difference.
