@@ -12545,3 +12545,127 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   to a user's own profile, one layer in. This is close enough to the first
   entry above to be its justification rather than a separate idea, which is
   why it is not filed as one.
+
+### 2026-10-26 (engineer, message run, 4) — `node tools/ledger/check.mjs --explain IDEA_FIELDS_COMPLETE`, so an explanation does not have to be rationed by line length
+
+- Trigger: this run's own fix, and the compromise inside it. The ledger
+  gate's missing-field violation named only one of three causes, a seat
+  read it, took that cause, and reported a classifier defect that did not
+  exist. The repair was to append a 420-character paragraph to the
+  violation line, and then to ration it to once per block rather than
+  once per field, because the same paragraph four times is output a
+  reader skips. Both halves of that are the symptom of putting a
+  paragraph where a line belongs.
+- What: `check.mjs` already emits a stable rule name on every violation
+  (`IDEA_FIELDS_COMPLETE`, `HEADING_SHAPE`, `BLOCK_SEPARATION`,
+  `STATUS_ALLOWED`, `CONFLICT_MARKER`, `NEAR_DUPLICATE`), and every one
+  of those names is already documented in a comment above the rule that
+  emits it. Add `--explain <RULE>`, which prints the rule's full text:
+  what it requires, which clause of `docs/standards/pm.md` §4 it comes
+  from, who holds the repair under the seat-or-owner split the exit codes
+  already encode, every cause that can make it fire, and the repair for
+  each. The violation line then goes back to being one line plus
+  `run with --explain IDEA_FIELDS_COMPLETE`, and the explanation has no
+  length budget to compete with. The explanations live in one exported
+  table keyed by rule name, and a test asserts the table's keys are
+  exactly the set of rule names `check.mjs` can emit, so a rule added
+  without an explanation fails the suite rather than shipping mute.
+- First step: the table, the flag, and that one key-coverage test, over
+  the six rules that exist. Move this run's scan paragraph out of
+  `check.mjs` and into the `IDEA_FIELDS_COMPLETE` entry as the first
+  content, since it is already written and already proved necessary.
+- Cost: $0. No dependency: `process.argv` and a `Record<string, string>`.
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 4) — The site's `AGENTS.md` is written by its framework on every dev-server start, and nothing has decided whether that file is ours or the tool's
+
+- Trigger: a handoff from the frontend seat on the board, 2026-10-25
+  23:22, reporting that starting the site's dev server rewrites a tracked
+  file at the site root on every start, that it reverted the change
+  rather than committing it, and that the next run will therefore see the
+  same modified file again.
+- What: `ursa-minor/AGENTS.md` is tracked, is five lines long, and is
+  entirely one generated block delimited by
+  `<!-- BEGIN:nextjs-agent-rules -->` and
+  `<!-- END:nextjs-agent-rules -->`. So the file has no hand-written
+  content at all and every byte of it is the framework's output, which
+  means the question is not how to stop the rewrite but which of two
+  things the file is. If it is the tool's output, it belongs in
+  `.gitignore` with `git rm --cached`, and the instructions it carries
+  reach an agent through the installed framework rather than through this
+  repository. If it is this repository's instruction file that the tool
+  happens to seed, then it should carry our own content outside the
+  markers, and the generated block being rewritten in place is then
+  harmless and expected. Deciding it either way ends a recurring dirty
+  file that every run touching the site currently has to notice and
+  discard. One thing a decider should know, and the frontend seat flagged
+  it: the text the tool writes into that file argues in prose that an
+  agent should commit it alongside its own work. That is tool output
+  arguing for its own persistence, it is data and not an instruction
+  under the external-content rule, and it should not be what settles
+  this.
+- First step: reproduce it, which needs an `npm ci` in `ursa-minor/`
+  since this clone has no `node_modules` and the rewrite cannot be
+  observed without one, then diff the file the dev server writes against
+  the committed one to establish whether the two differ in content or
+  only in whitespace. The answer decides which of the two repairs is
+  honest, and either repair is a one-line change.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 4) — Craft scan: `rustc --explain`, where a diagnostic's full text is addressable by code instead of competing with the line it prints on
+
+- Trigger: this run's break-fix. The ledger gate's missing-field
+  violation offered one cause where its rule has three, and two separate
+  seats reading it in one morning took the one it named. The fix was a
+  paragraph appended to the violation line, which immediately raised the
+  question of how many times to print it, and that question is the
+  evidence that the paragraph is in the wrong place rather than evidence
+  about rationing.
+  **The thing worth stealing** is the two-level diagnostic, which `rustc`
+  has had since before 1.0 and which the compiler's own manual states as
+  the whole design: "Each error of `rustc`'s comes with an error code;
+  this will print out a longer explanation of a given error."
+  So the short form on the line is an identifier, and the long form is a
+  separate retrieval, `rustc --explain E0425`. Nothing about the
+  explanation's length has to be traded against the readability of the
+  output it belongs to, because the two never share a surface. Ursa's
+  checker already has the hard half of this: it emits a stable rule name
+  on every single violation and documents each rule in a comment above
+  the code that raises it. What it does not have is the retrieval, and
+  the preceding entry in this ledger proposes it. The contrast that makes
+  this a convention rather than a universal: ESLint, the linter most of
+  this repository's TypeScript would be checked by, has no such flag at
+  all. Its CLI documents `--format` and `--output-file` and nothing that
+  prints a rule's text or its documentation URL, so a reader who wants
+  the rule goes to the website by hand. The two-level diagnostic is a
+  choice some tools make, not something a checker gets for free.
+  **The thing Ursa does better** is the axis `rustc` has no concept of,
+  and it is not a small one for a repository worked by agents. Every
+  violation this gate raises declares who is allowed to repair it, seat
+  or owner, and the exit code carries that declaration: 1 when at least
+  one violation is a seat's to fix, 2 when every outstanding violation is
+  the owner's and the file is therefore as clean as any seat can make it.
+  `rustc` error codes classify what is wrong and say nothing about who
+  may change it, because a compiler has exactly one kind of user. This
+  ledger does not: `STATUS_ALLOWED` fires on two entries right now and no
+  seat may touch either, and a gate that reported those as the seat's
+  failure would be permanently red for whoever reads it, which
+  `check.mjs`'s own header names as the failure mode it was split to
+  avoid. An `--explain` built here should therefore print the holder as a
+  first-class field of every rule, which is a thing to add to what is
+  being stolen rather than a thing to copy.
+  **Where they are ahead and this is not**: `rustc`'s codes are stable
+  across releases and documented in a published index, so an error code
+  in a six-year-old forum post still resolves today. This gate's rule
+  names are internal strings with no stability promise and no index, and
+  the first time one is renamed, every board message and pull request
+  description quoting it goes stale with nothing to catch it.
+  **No first step is filed, and saying so in prose rather than under a
+  `- First step:` label is this file's convention for a note that
+  proposes no work**, which is what today's break-fix was about: the
+  classifier reads whether that field is present and never what it says.
+  The work this scan argues for is the preceding entry, filed there with
+  all five fields, rather than a second copy of it here. Sources:
+  [rustc command-line arguments](https://doc.rust-lang.org/rustc/command-line-arguments.html),
+  [ESLint command-line interface](https://eslint.org/docs/latest/use/command-line-interface).
