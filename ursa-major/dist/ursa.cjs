@@ -536,6 +536,7 @@ function declaration(repoPath, sha) {
 }
 function vendoredPaths(projectPath, ep, paths, commits) {
   const { ancestors, descendants } = relatives(commits, ep.generatedSha);
+  const afterHorizon = authoredAfterHorizon(commits, ep.generatedSha, ep.finalSha);
   const found = [];
   const declared = paths.length === 0 ? [] : [declaration(projectPath, ep.generatedSha), declaration(projectPath, ep.finalSha)];
   for (const path of paths) {
@@ -564,6 +565,7 @@ function vendoredPaths(projectPath, ep, paths, commits) {
       if (oid === null) continue;
       compared++;
       if (oid !== finalOid) continue;
+      if (afterHorizon(c.sha)) continue;
       found.push({
         path,
         sha: c.sha.slice(0, SHORT2),
@@ -3913,6 +3915,18 @@ var init_revocation = __esm({
   }
 });
 
+// overlay/lib/revocation-reach.ts
+function revocationCannotReachPastedCopies(surface) {
+  return `A block you already pasted into another product is outside what this can reach. That copy is a text field in somebody else's settings, ${surface} cannot find it or change it, and it keeps working until you replace it yourself. Run \`ursa tuning export\` again and paste the new block over the old one everywhere you put it.`;
+}
+var REVOCATION_HOLDS_FORWARD;
+var init_revocation_reach = __esm({
+  "overlay/lib/revocation-reach.ts"() {
+    "use strict";
+    REVOCATION_HOLDS_FORWARD = "It is kept as a tombstone so a later distillation cannot bring it back, and every export and every overlay from here on leaves it out.";
+  }
+});
+
 // src/consent.cli.ts
 var consent_cli_exports = {};
 __export(consent_cli_exports, {
@@ -4029,8 +4043,8 @@ async function runConsentCommand(argv, io = stdio) {
       const tuning = revokeAxiom(tPath, axiom);
       const target = tuning.axioms.find((a) => a.id === axiom);
       io.out(`Revoked ${axiom}: "${target.statement}"`);
-      io.out("It is kept as a tombstone so a later distillation cannot bring it back, and every export and every overlay from here on leaves it out.");
-      io.out("A block you already pasted into another product is outside what this can reach. That copy is a text field in somebody else's settings, this command cannot find it or change it, and it keeps working until you replace it yourself. Run `ursa tuning export` again and paste the new block over the old one everywhere you put it.");
+      io.out(REVOCATION_HOLDS_FORWARD);
+      io.out(revocationCannotReachPastedCopies("this command"));
       const twins = revocationTwins(tuning, axiom);
       if (twins.length > 0) {
         io.out("");
@@ -4129,6 +4143,7 @@ var init_consent_cli = __esm({
     init_disclosure();
     init_revoke();
     init_revocation();
+    init_revocation_reach();
     stdio = { out: (l) => console.log(l), err: (l) => console.error(l) };
   }
 });
@@ -5754,6 +5769,18 @@ function validateAxiom(a) {
     if (!Array.isArray(e.steps)) throw new Error(`Evidence without steps on "${a.statement}"`);
   }
 }
+function cliFailureReason(err) {
+  const stdout = err?.stdout;
+  if (typeof stdout !== "string" || stdout.trim().length === 0) return null;
+  let envelope;
+  try {
+    envelope = JSON.parse(stdout);
+  } catch {
+    return null;
+  }
+  const result = envelope?.result;
+  return typeof result === "string" && result.trim().length > 0 ? result.trim() : null;
+}
 function distill(record, tuning, model, runner = claudeRunner) {
   const prompt = buildDistillPrompt(record, tuning);
   return parseDistillOutput(runner(prompt, model));
@@ -5775,12 +5802,19 @@ var init_distill = __esm({
     BEGIN_EVIDENCE = "BEGIN EVIDENCE";
     END_EVIDENCE = "END EVIDENCE";
     claudeRunner = (prompt, model) => {
-      const out = (0, import_node_child_process6.execFileSync)("claude", ["-p", "--model", model, "--output-format", "json"], {
-        input: prompt,
-        encoding: "utf8",
-        maxBuffer: 16 * 1024 * 1024,
-        timeout: 3e5
-      });
+      let out;
+      try {
+        out = (0, import_node_child_process6.execFileSync)("claude", ["-p", "--model", model, "--output-format", "json"], {
+          input: prompt,
+          encoding: "utf8",
+          maxBuffer: 16 * 1024 * 1024,
+          timeout: 3e5
+        });
+      } catch (err) {
+        const reason = cliFailureReason(err);
+        if (reason) throw new Error(`claude -p failed: ${reason}`);
+        throw err;
+      }
       const envelope = JSON.parse(out);
       if (envelope.is_error || typeof envelope.result !== "string") {
         throw new Error("claude -p returned an error envelope");

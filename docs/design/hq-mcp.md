@@ -775,3 +775,295 @@ across 28 files, up from 486 passing on `main` at `b84a6f8`.
 `dist/ursa.cjs is current`, and `node scripts/dep-floor.mjs` from the
 repository root reports "Dependency floor holds: no critical anywhere, no
 high in any production tree".
+
+---
+
+## 11. Addendum, 2026-10-26: the briefing accounts for what it did not say
+
+Written by the engineer seat's hook run of 2026-10-26, on the ledger
+entry "The briefing can say why a unit was surfaced and has no answer
+for why one was not" (`docs/ideas.md`, 2026-10-26, filed by this seat's
+own previous run from its dogfooding session).
+
+### 11.1 The defect, in the words the surface actually printed
+
+A briefing taken over this repository's own store, twenty outcome
+records built by `ursa run` from real git history, naming the two files
+the run was about to edit:
+
+```
+## Nearest prior cases
+
+None on these files.
+
+## Coverage
+
+Considered 0 active rules, 0 correction loops and 50 one-shot
+corrections across 20 outcome records; returned 0 rules and 0 cases.
+```
+
+`None on these files` is true and it is a dead end. Two different
+states of the world produce it:
+
+1. the store holds nothing about these files, and the nearest thing in
+   it scored zero;
+2. the store holds something adjacent, it was scored, and it landed one
+   point under `MIN_RELEVANCE`.
+
+Those ask opposite things of the agent reading the briefing. The first
+says go ahead, there is no prior art. The second says look closer, the
+HQ nearly spoke. And the information needed to tell them apart already
+existed and was already computed: `renderWhy` prints a full score
+breakdown for every unit that was returned, and the `.filter()` one
+line above it discarded the identical breakdown for every unit that was
+not.
+
+### 11.2 System diagram, amended node by node
+
+Nodes, named as the code names them:
+
+| Node | What it is | Where |
+|---|---|---|
+| `indexCases` | every correction in the store, normalized across the loop and one-shot shapes | `ursa-major/src/hq/briefing.ts` |
+| `score` | the lexical ranker: domain, exact path, path by name, query words, plus the semantic term when one is supplied | `ursa-major/src/hq/retrieval.ts` |
+| `buildBriefing` | scores, ranks, applies the floor and the ceilings, assembles the `Briefing` | `ursa-major/src/hq/briefing.ts` |
+| `collectDropped` | **new.** the units `buildBriefing` scored and did not serve, with the bound that held each one out | `ursa-major/src/hq/briefing.ts` |
+| `renderDropped` | **new.** the `## Considered and not shown` section of the markdown | `ursa-major/src/hq/briefing.ts` |
+| `measureBriefing` | the fixed point that makes `coverage.renderedChars` the true length of the string it is printed in | `ursa-major/src/hq/briefing.ts` |
+| `main` (`ursa brief`) | the CLI that turns `--dropped N` into `BriefingInput.dropped` | `ursa-major/src/hq/cli.ts` |
+| `GET_BRIEFING_INPUT` | the MCP tool's argument schema, which is the same call the CLI makes | `ursa-major/src/mcp/server.ts` |
+
+Edges, each labelled with the data that crosses it:
+
+- `indexCases` → `buildBriefing`: `IndexedCase[]`.
+- `buildBriefing` → `score`: a `Query` plus one unit's domain, files and
+  text; back a `MatchReason`, which is the score and its five
+  components.
+- **CHANGED** inside `buildBriefing`: `rankedCases: Array<{ indexed, unit }>`
+  now holds every scored unit, and `scoredCases` is the subset that
+  cleared the floor. Before this addendum the floor was a `.filter()` in
+  the same chain, so the rejected side had no name and no lifetime.
+- **NEW** `buildBriefing` → `collectDropped`: the four values
+  `(ranked, kept, cap, limit)`; back `DroppedUnit<T>[]`.
+- **NEW** `buildBriefing` → `Briefing.dropped` / `Briefing.droppedRules`:
+  `DroppedCase[]` and `DroppedRule[]`, present only when
+  `request.dropped` is above zero.
+- **NEW** `renderBriefing` → `renderDropped`: the whole `Briefing`; back
+  the lines of one markdown section, or none at all.
+- `main` → `buildBriefing`: `BriefingInput`, now with `dropped?: number`.
+- `GET_BRIEFING_INPUT` → `briefingFor`: the same field, as a
+  non-negative integer in the tool's JSON schema, so an MCP client can
+  ask the question an agent would ask.
+
+### 11.3 Interfaces at the boundaries this adds
+
+```ts
+// ursa-major/src/hq/types.ts
+export interface BriefingInput {
+  domain?: string
+  files?: string[]
+  maxRules?: number
+  maxCases?: number
+  /** how many of the units that were NOT returned to include, with
+   *  their score breakdown; omitted or 0 means none */
+  dropped?: number
+}
+
+export type DropReason = 'below_floor' | 'over_cap'
+
+export interface DroppedUnit<T> {
+  unit: T
+  reason: DropReason
+  /** MIN_RELEVANCE for 'below_floor'; the effective ceiling for 'over_cap' */
+  bound: number
+}
+
+export type DroppedCase = DroppedUnit<CaseUnit>
+export type DroppedRule = DroppedUnit<RuleUnit>
+
+export interface Briefing {
+  // ...unchanged fields...
+  dropped?: DroppedCase[]
+  droppedRules?: DroppedRule[]
+}
+
+// ursa-major/src/hq/briefing.ts
+function collectDropped<S extends { unit: T }, T>(
+  ranked: S[],
+  kept: S[],
+  cap: number,
+  limit: number,
+): DroppedUnit<T>[]
+
+function renderWhy(why: MatchReason, unfiltered: boolean): string
+```
+
+**Absent is not empty, and the type says so.** `dropped?:` is optional
+rather than defaulted to `[]` because the two states are different
+answers: absent means the caller never asked, empty means the caller
+asked and the bounds held nothing back. A reader who cannot tell them
+apart concludes the store is bare on evidence that says nothing of the
+kind, which is the same class of error this addendum exists to remove.
+
+**`renderWhy` gained a parameter and it is not cosmetic.** A score of
+zero had one printed explanation, "served because the request named no
+domain and no files". That was true of every caller the function had,
+because a filtered request dropped its zero-scoring units before
+rendering. Printing rejected units makes the sentence reachable on a
+request that named files, where it is false and contradicts the line
+above it. The parameter is `coverage.unfiltered`, so the function now
+says which of the two causes of a zero applies.
+
+### 11.4 Two reasons rather than one, which is a deviation worth naming
+
+The ledger entry's first step named the below-floor half alone: "print
+the N highest-scoring units that fell below the floor". `collectDropped`
+also reports units that cleared the floor and lost the cut at
+`maxCases` or `maxRules`.
+
+The reason is that the narrower version reproduces the motivating defect
+one level up. With only below-floor drops reported, an empty
+`## Considered and not shown` section would mean either "nothing was
+near" or "plenty was near and the ceiling cut it" — again two states of
+the world wearing one face. The real store makes this concrete rather
+than theoretical: in §11.5's second briefing, 47 cases were held back
+and **every one of the top-ranked ones was over the cap, not under the
+floor**, so a below-floor-only section would have printed nothing at
+all on a request the HQ had plenty to say about.
+
+`bound` carries the number that did the cutting for the same reason
+`DroppedUnits.minChars` carries the size floor in
+`ursa-major/src/launch.ts`: the remedy should be a value the reader can
+raise, not a guess.
+
+### 11.5 Exact commands, and the real output they produced
+
+Run from `ursa-major/`, against a store this run built with `ursa run`
+over a clone of this repository. The clone directory's own name is
+folded into every record id by `src/episodes.ts` and is written below as
+`<clone>`; everything after it is a real commit prefix.
+
+```bash
+# build the store: twenty work units from this repository's own history
+npx tsx src/bin/ursa.ts run "$(git rev-parse --show-toplevel)" --limit 20
+
+# the dead end, as it reads today without the flag
+npx tsx src/hq/cli.ts brief "$(git rev-parse --show-toplevel)" \
+  --files ursa-major/src/hq/briefing.ts,ursa-major/src/hq/types.ts \
+  --domain docs
+
+# the same request, asking what was held back
+npx tsx src/hq/cli.ts brief "$(git rev-parse --show-toplevel)" \
+  --files ursa-major/src/hq/briefing.ts,ursa-major/src/hq/types.ts \
+  --domain docs --dropped 3
+```
+
+The third command's new section, verbatim:
+
+```
+## Considered and not shown
+
+You asked for up to 3 of the units this request scored and did not
+return. 0 rules and 50 cases were held back in total. Each line below
+names the bound that held it, so raising that number is the remedy.
+
+Cases:
+- docs/sprints/pending.md (<clone>-2026-10-04-401dfbd/one-shot-16)
+  — scored under the relevance floor of 2
+  - Would have been surfaced because: words in common: docs (score 1)
+- docs/sprints/pending.md (<clone>-2026-10-04-401dfbd/one-shot-5)
+  — scored under the relevance floor of 2
+  - Would have been surfaced because: words in common: docs (score 1)
+- docs/sprints/pending.md (<clone>-2026-10-08-c459bf1/one-shot-0)
+  — scored under the relevance floor of 2
+  - Would have been surfaced because: words in common: ursa (score 1)
+```
+
+That is a bounded answer where there was a dead end. The nearest fifty
+corrections in this store matched on the single word `docs` or `ursa`
+and nothing else, so `None on these files` was the first of the two
+states §11.1 lists: the HQ genuinely holds nothing about the HQ module.
+
+The second briefing, on a file this store does know:
+
+```bash
+npx tsx src/hq/cli.ts brief "$(git rev-parse --show-toplevel)" \
+  --files docs/sprints/pending.md --dropped 2
+```
+
+```
+You asked for up to 2 of the units this request scored and did not
+return. 0 rules and 47 cases were held back in total.
+
+Cases:
+- docs/sprints/pending.md (<clone>-2026-10-04-401dfbd/one-shot-1)
+  — cleared the floor and lost the cut at 3
+  - Would have been surfaced because: learned on docs/sprints/pending.md (score 3)
+- docs/sprints/pending.md (<clone>-2026-10-04-401dfbd/one-shot-10)
+  — cleared the floor and lost the cut at 3
+  - Would have been surfaced because: learned on docs/sprints/pending.md (score 3)
+```
+
+Both reasons demonstrated on real data, which is what §11.4 rests on.
+
+The cost, measured rather than asserted, through
+`coverage.renderedChars`: the first request's briefing is 856 characters
+without the flag and 1,686 with `--dropped 3`. That is why the flag is
+off by default. An agent's opening context is the scarce thing the floor
+and the two ceilings exist to protect.
+
+### 11.6 Tooling
+
+| Tool, at the version installed | Its job here | Why it, over what was considered |
+|---|---|---|
+| `tsx` 4.23.15 (devDependency) | runs `src/hq/cli.ts` and `src/bin/ursa.ts` for every command in §11.5 | the briefing is a read of a real store on disk, so the evidence has to come from the CLI a person types rather than from a test double of it |
+| `vitest` 5.0.5 (devDependency) | runs the 11 tests this addendum adds to `src/hq/hq.test.ts`, and the one it amends in `src/mcp/mcp.test.ts` | already this package's runner; no second runner enters the tree for eleven tests |
+| `typescript` 5.9.3 (devDependency) | `npm run typecheck`; the optional-versus-empty distinction in §11.3 is a type-level claim and this is what checks it | the alternative was a runtime assertion, which would have proved the same thing later and to fewer readers |
+| `zod` 4.6.7 (dependency) | declares `dropped` in `GET_BRIEFING_INPUT` as a non-negative integer, which the MCP SDK turns into the tool's published JSON schema | already how the other four arguments are declared; a hand-written JSON schema beside a zod one would be two sources for one contract |
+
+**Suite totals after this addendum.** `npm test` in `ursa-major/` is
+1,015 passed, 4 skipped, 0 failed across 48 files (47 passed, 1
+skipped), up from 1,004 passing before it. `npm run typecheck` is
+clean. `src/hq/hq.test.ts` alone is 40 passed, up from 29.
+
+### 11.7 Terms used in this section
+
+- **relevance floor** — `MIN_RELEVANCE`, the value 2 in
+  `src/hq/briefing.ts`. The lowest score that requires a real signal
+  rather than one incidental word in common. A filtered request drops
+  everything below it; an unfiltered request has no floor, because there
+  is nothing for a unit to be irrelevant to.
+- **ceiling** — `maxRules` and `maxCases`, the caller's two limits on
+  how many units a briefing returns, defaulting to 8 and 3.
+- **below the floor** — `DropReason` `'below_floor'`: the unit was
+  scored and the score was under the relevance floor.
+- **over the cap** — `DropReason` `'over_cap'`: the unit cleared the
+  floor and was ranked below the ceiling's cut.
+- **one-shot correction** — a correction from a record with no chat
+  trace, where the edit itself is the whole correction and recurrence is
+  unobservable rather than zero. Every record `ursa run` builds from a
+  repository carries only these.
+- **fixed point of the rendered size** — the definition of
+  `coverage.renderedChars`: the number `n` such that rendering the
+  briefing with `renderedChars: n` produces a string of exactly `n`
+  characters. The new section is inside the string it measures, so the
+  fixed point is what keeps the printed figure reproducible by a reader
+  who counts.
+
+### 11.8 What this does not do
+
+- **It does not lower the floor or raise the ceilings.** Both bounds are
+  unchanged and the ranking is unchanged. `clearsFloor` is the same
+  predicate the `.filter()` applied, and sorting before the cut rather
+  than after cannot reorder the kept units, because `compareScored` is a
+  total order with a stable identifier tiebreak.
+- **It does not explain a unit the ranker never scored,** because there
+  is no such unit. Every active rule and every indexed correction is
+  scored on every request, so "never a candidate" is not a state this
+  store can be in, and the honest answer to the second question in
+  §11.1 is always a number.
+- **It does not report drops in `guardrails`.** A guardrail rides with
+  any axiom that cleared the floor, including one ranked below the rule
+  ceiling, so the only guardrail a request can lose is one belonging to
+  a rule that was itself below the floor — which `droppedRules` already
+  names.

@@ -922,16 +922,18 @@ Same stack as §7, re-measured in the run that produced this section.
 
 ### 10.9 What this does not do
 
-- **`vendoredPaths` still applies no time bound of its own.** The
+- **`vendoredPaths` still applies no time bound of its own.**
+  **Closed 2026-10-26 by §11 below**, after the case stopped being
+  hypothetical. The paragraph as written on 2026-10-15 said: the
   resolver goes on excluding a file whose only matching commit is from
   the episode's future, and the gate is what refuses the resulting
-  record. Fixing the search would mean threading the episode's close
+  record; fixing the search would mean threading the episode's close
   time into a module that currently takes none, and it changes which
   records exist rather than which are refused, so it is a separate
   change with a separate cost. The end-to-end test in
-  `src/vendored.test.ts` is written to fail on the day somebody makes
-  it, because the record will stop being refused, and that failure is
-  the signal to update this section.
+  `src/vendored.test.ts` was written to fail on the day somebody made
+  it, and that failure was the signal to update this section. It failed
+  on 2026-10-26 and this section was updated.
 - **A `declared` import's date is stored and never compared.** It names
   a commit in another repository, so there is no clock to compare it
   against from inside this record. Whether an upstream repository's
@@ -946,3 +948,273 @@ Same stack as §7, re-measured in the run that produced this section.
   argument for exempting it, and the author date on such a commit is
   still information a reader might want ordered. No bound reads it
   today.
+
+---
+
+## 11. The search gets the same clock the gate has (2026-10-26)
+
+Written by the engineer seat's hook run of 2026-10-26, which found the
+defect §10.9 predicted by running the product rather than by reading
+about it.
+
+### 11.1 The defect, as a live run rather than a hypothesis
+
+`ursa run` over a fresh clone of this repository, default bounds,
+twenty work units:
+
+```
+20 work units found, 20 resolved into records.
+12,440 chars survived your editing verbatim, 1,799 survived edited.
+6 files came in whole from elsewhere and were not read as your work,
+starting with docs/market/landscape.md.
+
+1 record invariant violated. The records are written and are still the
+evidence, but the numbers above cannot all be true at once, so this run
+is not reporting success.
+EXCLUSION_NOT_CLASSIFIED  <clone>-2026-09-30-cb6f2ef exclusions[0]
+    (docs/market/landscape.md)
+    observed: sibling copy 2168f0c authored 2026-10-07T06:33:14+00:00,
+    which is after task.generatedAt 2026-10-05T03:21:22+00:00, so the
+    30287 chars of this file were dropped from every figure on the
+    evidence of a commit from the record's own future
+```
+
+Exit code 1. `<clone>` stands for the clone directory's own name, which
+`src/episodes.ts` folds into every record id; the rest of the
+identifier is the real commit prefix.
+
+Three facts in that output, in the order that matters:
+
+1. **A file the person wrote left the record.** `docs/market/landscape.md`
+   is 30,287 characters. The run's whole headline figure is 12,440
+   characters surviving verbatim, so the excluded file is more than
+   twice the size of everything the record went on to claim.
+2. **The evidence for excluding it is from the record's own future.**
+   Commit `2168f0c` was authored 2026-10-07. The episode closed
+   2026-10-05. A commit that did not exist while the person was working
+   is not somewhere the text could have been copied from. It is a copy
+   **of** the work.
+3. **The gate caught it and the resolver wrote it anyway.** That is the
+   worst of the three available positions, and §10.9 said so in
+   advance: worse than refusing at the search, where the file simply
+   gets resolved correctly, and worse than not checking at all, where
+   the figures are wrong but the run completes. As shipped, `ursa run`
+   produced a record its own gate rejects and the person had no move.
+
+### 11.2 System diagram, amended node by node
+
+Only the one edge changes. Nodes, named as the code names them:
+
+| Node | What it is | Where |
+|---|---|---|
+| `listCommits` | reads the whole commit graph once per run: sha, parents, author date (`%aI`), subject | `ursa-major/src/pairfinder.ts` |
+| `buildEpisodes` | turns generated/edited commit pairs into `Episode` values, each carrying `generatedSha`, `finalSha` and `closedAt` | `ursa-major/src/episodes.ts` |
+| `vendoredPaths` | the file-level refusal: which finished paths arrived whole from outside the generation's descent | `ursa-major/src/vendored.ts` |
+| `authoredAfterHorizon` | the time bound, as a predicate over one candidate sha, already used by the span-level search since 2026-10-14 | `ursa-major/src/corroborate.ts` |
+| `resolveEpisode` | turns an `Episode` plus its exclusions into an `OutcomeRecord` | `ursa-major/src/resolve-episode.ts` |
+| `checkRecord` | the eighteen bounds, including `EXCLUSION_NOT_CLASSIFIED` | `ursa-major/src/invariants.ts` |
+
+Edges, each labelled with the data that crosses it:
+
+- `listCommits` → `vendoredPaths`: `CommitInfo[]`, which is
+  `{ sha, parents, date, subject }` per commit. Existed before; now also
+  feeds the new edge below.
+- `buildEpisodes` → `vendoredPaths`: `{ generatedSha: string, finalSha: string }`,
+  the two shas bounding the work. Existed before. **No new field.**
+- **NEW** `vendoredPaths` → `authoredAfterHorizon`: the triple
+  `(CommitInfo[], generatedSha, finalSha)`, and back a
+  `(sha: string) => boolean`. This is the whole of the change. The
+  predicate is called once per candidate blob that matched by identity,
+  inside the loop that already read that blob.
+- `vendoredPaths` → `resolveEpisode`: `VendoredPath[]`, unchanged in
+  shape. What changes is its contents: a candidate the predicate rejects
+  no longer appears.
+- `resolveEpisode` → `checkRecord`: `OutcomeRecord`, with
+  `exclusions: Exclusion[]`. `EXCLUSION_NOT_CLASSIFIED`'s third clause
+  is now unreachable from a record this resolver wrote, which is what a
+  bound in this module is supposed to be.
+
+### 11.3 Interfaces, as the signatures a caller writes against
+
+```ts
+// ursa-major/src/vendored.ts — UNCHANGED signature, new behaviour
+export function vendoredPaths(
+  projectPath: string,
+  ep: { generatedSha: string; finalSha: string },
+  paths: string[],
+  commits: CommitInfo[],
+): VendoredPath[]
+
+// ursa-major/src/corroborate.ts — already exported, now a second caller
+export function authoredAfterHorizon(
+  commits: CommitInfo[],
+  generatedSha: string,
+  horizonSha: string | undefined,
+): (sha: string) => boolean
+```
+
+**No parameter was added, and the 2026-10-15 ledger entry that specified
+this fix expected one.** It proposed threading `ep.closedAt` into
+`vendoredPaths`. That is not needed: `ep.finalSha` is already in the
+signature, and on the git path `task.generatedAt` **is** that commit's
+author date (`src/resolve-episode.ts` sets `generatedAt: ep.closedAt`,
+and `ep.closedAt` is the closing commit's date). So the horizon the
+search now uses and the horizon the bound compares against are the same
+instant by construction rather than by coincidence, which is the
+property that keeps the bound a restatement of a resolver rule.
+
+The exemptions come out of the shared predicate instead of a
+relation-name check inside `vendoredPaths`:
+
+- an **ancestor of the generation** is never rejected, so a
+  `pre_existing` match whose author date a rebase moved is excluded
+  exactly as before;
+- an **ancestor of the horizon** is never rejected, so a branch merged
+  into the work between `generatedSha` and `finalSha` stays excludable,
+  which a relation-name check would have got wrong;
+- a candidate with **no readable date** is never rejected, because an
+  unreadable clock is not evidence of anything.
+
+### 11.4 The one line of control flow, and why it is `continue`
+
+```ts
+compared++
+if (oid !== finalOid) continue
+if (afterHorizon(c.sha)) continue   // added 2026-10-26
+found.push({ /* ... */ })
+break
+```
+
+`continue` and not `break`. The candidate list is every commit touching
+this path, and a late sibling appearing before a genuine ancestor is
+ordinary. Breaking on the rejected candidate would turn one copy-of-the-
+work into "no import found" and lose the legitimate `pre_existing`
+exclusion sitting behind it in the same list.
+
+### 11.5 On-disk layout, with a real payload
+
+Nothing on disk changed shape. What changed is which entries appear. A
+real surviving exclusion, from
+`<clone>/.ursa/records/<clone>-2026-10-08-c459bf1.json` as written by
+the run in §11.6, with the clone directory's name replaced in the id
+and nothing else altered:
+
+```json
+{
+  "task": {
+    "id": "<clone>-2026-10-08-c459bf1",
+    "generatedAt": "2026-10-08T20:45:46+00:00"
+  },
+  "exclusions": [
+    {
+      "path": "docs/sprints/dispatch-queue.md",
+      "reason": "imported_whole",
+      "sha": "a97b311",
+      "subject": "PM message pass 2026-10-08: triage frontend's failed run (37835424738), close two empty frontend stubs, propose a build-on-141 dispatch",
+      "relation": "sibling",
+      "chars": 4490,
+      "date": "2026-10-08T20:45:46+00:00"
+    }
+  ],
+  "stats": { "finalChars": 11241 }
+}
+```
+
+This one survives the new bound and should: its date equals
+`task.generatedAt` rather than exceeding it, so the copy existed as the
+work closed and the exclusion is a claim about the present rather than
+the future. The entry removed by this change is the
+`docs/market/landscape.md` one quoted in §11.1, whose `date` was
+2026-10-07 against a `task.generatedAt` of 2026-10-05.
+
+### 11.6 Exact commands, and the numbers they produced
+
+Run from the repository root, with `node_modules` installed by
+`npm ci` in `ursa-major/`:
+
+```bash
+# the live defect, before the change (exit 1)
+cd ursa-major
+npx tsx src/bin/ursa.ts run "$(git rev-parse --show-toplevel)" --limit 20
+
+# the same command after the change (exit 0)
+npx tsx src/bin/ursa.ts run "$(git rev-parse --show-toplevel)" --limit 20
+
+# the two suites that hold this behaviour
+npx vitest run src/vendored.test.ts src/invariants.violations.test.ts
+
+# the whole product, plus the bundle the Action runs
+npm test
+npm run bundle && npm run bundle:check
+npm run provenance:bundles && npm run regen:check
+```
+
+Measured on this repository, same command, same twenty work units:
+
+| Figure | Before | After |
+|---|---|---|
+| exit code of `ursa run` | 1 | 0 |
+| record invariant violations | 1 | 0 |
+| files excluded as imports | 6 | 5 |
+| characters surviving verbatim | 12,440 | 18,548 |
+| characters surviving edited | 1,799 | 1,937 |
+| characters generated | 82,411 | 104,068 |
+| draft discarded, as a share of traceable characters | 52% | 42% |
+| records carrying corrections | 7 | 8 |
+
+The generated figure rises as much as the survival figure because an
+excluded file leaves **both** sides of the ratio, not just the
+numerator. That is the measured reason this defect was expensive: it did
+not bias a percentage, it deleted a file from the sample.
+
+Test counts after the change: `npm test` is 1,015 passed, 4 skipped, 0
+failed, 47 files passed and 1 skipped;
+`src/vendored.test.ts` and `src/invariants.violations.test.ts` together
+are 55 passed, 0 failed.
+
+### 11.7 Tooling
+
+| Tool | Version | Its job here | Why it, over what was considered |
+|---|---|---|---|
+| `git` | 2.43.0 (the sandbox's system git) | supplies the commit graph and every author date, through `git log --date=iso-strict` in `src/pairfinder.ts` | the dates are already in the one graph read per run, so the bound costs no subprocess. A library reimplementation of `git log` would be a second parser of the same bytes |
+| `tsx` | 4.23.15 (devDependency) | runs `src/bin/ursa.ts` from TypeScript source for the two measured runs in §11.6 | the launch is a source-tree launch by design (`src/resolver-identity.ts`); compiling first would measure a different artifact from the one `ursa run` executes |
+| `vitest` | 5.0.5 (devDependency) | runs the inverted end-to-end test, which builds a real git repository in a temp directory | the test's value is that it uses real `git` rather than a mock graph, and vitest is already this package's runner, so no second runner enters the tree |
+| `typescript` | 5.9.3 (devDependency) | `npm run typecheck`, which is the first half of `npm test` | the change is behavioural rather than structural, so the typechecker proves only that no caller's contract moved. Stated rather than skipped because a reader should know which guarantees are which |
+| `esbuild` | 0.28.2 (devDependency, via `build/bundle.mjs`) | rebuilds `dist/ursa.cjs`, the single file the GitHub Action runs | `src/vendored.ts` is on the resolver path, so the committed bundle went stale with this change and two tests said so by name |
+
+### 11.8 Terms used in this section
+
+- **horizon** — the author date of the episode's `finalSha`, the last
+  commit of the work. The instant after which a commit cannot have been
+  a source for this work.
+- **candidate** — a commit that touches the path in question and whose
+  blob at that path the search read, to compare against the finished
+  blob.
+- **sibling** — a candidate that is neither an ancestor nor a descendant
+  of the generation. The only relation whose claim rests on a clock,
+  which is why it is the only one the bound polices.
+- **`pre_existing`** — a candidate that is an ancestor of the
+  generation. Vouched for by the commit graph, so exempt from the time
+  bound.
+- **exclusion** — a finished file the record declines to classify,
+  because its bytes arrived whole from outside the generation. Carries
+  its own character count, so `stats.finalChars` plus the exclusions is
+  the size of every path the run was willing to read.
+- **`EXCLUSION_NOT_CLASSIFIED`** — the bound in
+  `ursa-major/src/invariants.ts` that refuses a record whose exclusions
+  and classified files disagree, or whose exclusion states an
+  unorderable or future date. Its third clause is the one this section
+  makes unreachable from a record this resolver wrote.
+
+### 11.9 What this does not do
+
+- **The five remaining exclusions were not audited one by one.** Each
+  carries a date at or before its record's `task.generatedAt`, which is
+  what the bound checks, and no stronger claim is made here.
+- **No record on disk was rewritten.** Records are derived from git
+  history by `ursa run`, so the next run writes the corrected figures
+  and there is nothing to migrate. Any record published before today
+  that carried a future-dated sibling exclusion is wrong in the
+  direction §11.1 describes, and this repository has published none.
+- **The `pre_existing` exemption is still wider than it has to be**, for
+  the reason §10.9's third bullet gives. Unchanged by this section.
