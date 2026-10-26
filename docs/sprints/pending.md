@@ -2,6 +2,77 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-26 ~00:3x UTC (message, the six-hour pass)
+
+1. **Four pull requests merged under Tier B this pass, one of them
+   after this seat fixed its conflict first.** #442 (exo registers),
+   #434 (frontend tap-target work), #440 (market landscape/
+   positioning), and #437 (engineer's bound-count fix). #437 showed
+   `CONFLICTING` on GitHub over a plain `docs/ideas.md` append; on a
+   full clone (the shallow-clone hazard #443 already named, hit again
+   here until `git fetch --unshallow` ran) the only real conflict was
+   that one docs file, so this pass installed the ledger driver,
+   merged `main` into the branch, verified nothing was dropped from
+   either side, pushed, then merged under Tier B condition 5 (a
+   docs-only conflict is the PM's to resolve). Not asking you to act;
+   naming it so the queue depth reads accurately.
+2. **Six failed runs in the last six hours were one false alarm, not
+   six, and all already fixed.** The redaction gate caught the same
+   unredacted session UUID on two branches that had already pushed
+   the fix later in the same session — this seat's own now-superseded
+   #432 (fixed in what became #443, carried into this branch) and
+   security's #427 (fixed in #439 and again in #446). No rerun, no
+   incident: the live tip of both lineages already passes. Zero
+   refused, zero never-started this window.
+3. **Six pull requests still wait, five on you and one on security's
+   own next move, not on anything this seat can close.** #447 (exo),
+   #418 (exo), #441 (skill), and #395 (research) each edit a file
+   under `prompts/` directly — Tier C regardless of how clean the
+   rest of the diff is. #427 and #439 (security) wait on #446, which
+   security opened this pass as a deliberate superset of both so you
+   can merge one branch instead of three; #446 is still a draft, so
+   none of the three are ready yet. Separately: distribution found
+   Ursa's repository has no `LICENSE` file and a null license field
+   while our own positioning says free forever (`alexandra-systems`
+   PR #466). Choosing a license is your grant to make; my
+   recommendation, if you want one, is MIT for maximum portability or
+   Apache-2.0 if patent language matters to you. Not urgent, not
+   asked on your phone; logged here until you decide.
+
+**Also this pass:** two board asks from `distribution` answered in
+full — the six proposed GitHub topics handed to market (a positioning
+call, not an operations one) rather than decided here, and the
+license gap above logged rather than acted on. Neither sits
+unanswered going into the next pass. One note posted to the owner
+summarizing the pass (first attempt truncated by the board's 1500-
+character wake limit before it reached the disposition; resent
+shorter with the ask first — a fact worth knowing for any future note
+this long).
+
+**The org chart is about a month stale and this pass did not rewrite
+it.** `docs/agents/org-chart.md` still describes GitHub Actions cron
+times for every seat (last touched 2026-09-27/30), and the board's own
+run feed today shows every seat waking on `window:message` or
+`window:hook` instead, which matches decision 056 moving seat
+schedules to the host roster rather than GitHub cron. Market's own
+line still reads "1 dispatch... none yet" while its pull requests this
+pass alone number in the double digits. A full rewrite is ceremony-
+sized work this pass's budget does not cover; naming it as a finding
+rather than silently leaving it wrong.
+
+**The sprint is stale and this run did not open a ceremony.** The
+current sprint file is dated two weeks ago (2026-10-12) with its
+retrospective section still blank. Every PM run since then, including
+this one, has been message-triggered rather than the Monday cron that
+opens a ceremony (pm.md §0b/§11.1), so none of them opened a retro,
+groomed the ledger, or planned a new sprint, following the same
+precedent #443 named explicitly for itself. This is not a decision for
+you to make; it is a fact about which trigger has and has not fired.
+Today happens to be a Monday, but a message is not the cron, and the
+actual cron-triggered ceremony run, whenever it next fires, inherits
+an overdue retrospective and should say so rather than treat the gap
+as new.
+
 ## Top three for the owner, 2026-10-25/26 ~00:0x UTC (message, run 4)
 
 1. **GitHub's `mergeable` field lies about register/ledger files when the
