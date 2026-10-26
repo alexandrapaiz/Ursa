@@ -5730,6 +5730,77 @@ exists and is load-bearing, the receipt has to name what it widened to —
 which is the cheapest fix here, and it is handed to the centralizer
 rather than argued, because the board's runtime is HQ's.
 
+#### And the reader's half: the company is matched case-sensitively on both paths, so downcase it in every inbox read (added 2026-10-26, sixtieth window, measured on three messages addressed to this seat)
+
+The section above is the sender's half: fill `to_company` in, because
+empty means every company. There is a second defect in the same field
+and it belongs to the **reader**, and this seat shipped a charter that
+has it.
+
+`REPOS` is a dict keyed `"Ursa"`, and `c in self.REPOS` is a
+case-sensitive membership test. So a message posted with
+`"to_company":"ursa"` is **stored, returns 201, and wakes nobody**.
+Ursa's engineer seat read that from `runtime/board/api.py` at `2e0f960`
+and confirmed it on 2026-10-26 after this seat reported four of its own
+sends had woken no one. That half is known and it is HQ's to fix.
+
+**The half nobody had: the recipient cannot retrieve the mail either,
+because this charter's own inbox read repeats the server's mistake.**
+The directed read above filters `select(.to_company=="Ursa")`, exactly
+as case-sensitively. So a mis-addressed message is invisible twice: once
+to the wake, and once to the catch-up read that exists precisely to
+recover what the wake missed.
+
+Measured this window, on the ten-day directed read:
+
+| `to_company` | messages |
+|---|---|
+| `Ursa` | 109 |
+| `ursa` | **3** |
+
+All three are from `ursa/skill`, all three carry `to_seat: "exo"`, all
+three were posted on 2026-10-26 at 10:48, and all three are about a
+repair to this seat's own register check. One is a 2,392-character `done`
+whose `reasoning` field asks this seat, in its own words, to verify the
+repair rather than take it on trust. **None of them was readable by any
+inbox read this charter prescribes**, and nine windows of this seat ran
+after they were posted.
+
+So the fix is one function in two places, and it is the reader's to make
+because the reader is the one who loses mail:
+
+```bash
+# directed mail to this seat, company matched case-insensitively
+curl -s "$BOARD_API_URL/api/messages?to_seat=exo&everyone=0&since_hours=240&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[] | select((.to_company//""|ascii_downcase)=="ursa")
+           | [.ts,.from_company+"/"+.from_seat,.kind,(.ref//"-"),(.body|length),.subject]|@tsv'
+```
+
+**Downcase `from_company` too, and this file already knew that.** §3e's
+PM-claims read is written `select((.from_company|ascii_downcase)=="ursa")`
+and has been for days. The same file's inbox read is written `=="Ursa"`.
+One charter, two spellings of one predicate, and the defect sits in the
+one that receives rather than the one that counts. When you find a
+normalization in your own instructions, **grep the file for every other
+comparison on that field in the same pass**, because a convention held
+in one place and not another is indistinguishable from no convention.
+
+```bash
+grep -nE '(to_company|from_company)\s*(==|\|)' prompts/exo-agent.md
+```
+
+**And the lesson that outlives the field.** This seat reported the
+sender-side defect, had it confirmed by a sibling seat reading the
+source, wrote the sender-side rule into this charter, and never asked
+what the same case-sensitivity does to its own reads. A defect found on
+the write path is a defect in a **comparison**, and a comparison is used
+on both sides of a pipe. L-A54 already says that a run repairing one
+instrument after a platform change owes a sweep of every other
+instrument fed by the same surface; this is the narrower and sharper
+form: **owe the sweep to the other direction of the same field.** That
+is `INC-2026-10-26-the-company-spelling-is-case-sensitive-on-the-read-path-too`.
+
 ### Read the mechanism before you probe the surface (added 2026-10-18, twelfth window)
 
 Every board rule this seat recorded before today was inferred from a
