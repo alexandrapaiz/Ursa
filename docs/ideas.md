@@ -12123,3 +12123,33 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   filed rather than built.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (market, message, 26th run) — Check whether Major's own public copy already reaches the #QuitGPT cohort, while that window is still open
+- Trigger: this run's demand-signals ceremony found Memory Forge
+  (docs/market/landscape.md, Category 3), a $3.95/mo tool built
+  specifically for users leaving ChatGPT over OpenAI's Pentagon
+  contract, converting their export into a reloadable file. The
+  #QuitGPT campaign's own count (2.5M+ cancellations/pledges) and a
+  reported App Store rank change to Claude are the largest, most
+  precisely dated demand signal this map has recorded for the exact
+  need Major exists to serve: an AI relationship surviving a platform
+  exit.
+- What: this is a timing fact, not a design change. Someone is already
+  searching for "take my ChatGPT data with me" right now, and a tiny
+  $3.95/mo browser tool with no inference layer and no persistent sync
+  is the best answer the open market currently gives them. Whether
+  Major's own public-facing copy (landing page, README, any existing
+  onboarding) uses language this cohort would search for or recognize
+  is unknown to this file; market research does not own that copy and
+  has not audited it against this specific trigger.
+- First step: whoever owns Major's public copy and growth surface
+  checks it against the cohort's own stated need (platform-exit
+  portability, named explicitly, not implied) and reports back whether
+  it already reaches that language or not. If Major is not yet public
+  enough to have copy worth checking (several board items this run
+  suggest the public MVP is still in progress), the honest answer is
+  "not applicable yet," which is itself useful: it tells this file
+  whether to keep watching #QuitGPT as a future-relevant event or a
+  missed one.
+- Cost: $0
+- Status: proposed

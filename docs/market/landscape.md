@@ -1033,6 +1033,39 @@ transcript doesn't go into a file — it goes into a live session")
 suggests even this narrower translation has real fidelity limits. Last
 observed 2026-10-26: [Launch HN: Skillsync (YC W26)](https://news.ycombinator.com/item?id=49743049), [YesPress: Skillsync (YC W26)](https://yespress.io/skillsync-yc-w26).
 
+### Memory Forge (Phoenix Grove Systems)
+
+What it is: a browser-based conversion tool that turns a raw ChatGPT,
+Claude, or Gemini conversation export into a single portable markdown
+"memory chip" file, reloadable into any AI that accepts file uploads
+by prompting it to "activate memory chip." Who it serves: individual
+consumers switching AI platforms, surfaced specifically by the
+#QuitGPT boycott of OpenAI's Pentagon contract (campaign launched late
+February 2026; QuitGPT's own count puts cancellations and cancellation
+pledges above 2.5 million, with reporting that Claude passed ChatGPT
+in the US App Store for the first time during the same window).
+Pricing: $3.95/mo for unlimited conversions, no token fees, files
+remain usable after cancellation. Strengths: conversion is claimed to
+run entirely in the browser, "no cloud, no upload," the same on-device
+principle CLAUDE.md §0 states as a hard constraint for Ursa, and this
+is the most direct evidence this map has found of a consumer paying,
+in real time, for a worse version of what Ursa Major gives away free —
+a manual export-and-reload step with no persistent sync, no
+cross-model inference layer, and a one-shot "activate" prompt the user
+has to remember to issue each session. Weakness against Ursa: it moves
+a raw transcript file, not a provenance-resolved preference profile;
+there is no inference, no revealed-preference structure, and nothing
+analogous to the consent/revoke surface CLAUDE.md §0 requires, so it
+feeds nothing into anything resembling Minor's side of the flywheel.
+It is a bridge a user builds by hand during a specific exodus event,
+not an ongoing relationship. No independent traction numbers found for
+the tool itself; the article's "becoming the unofficial exit ramp" is
+the vendor's own framing via a single syndicated piece, not an
+independent count. Last observed 2026-10-26: [Programming Insider:
+ChatGPT Protesters Are Using Memory Forge to Take Their Data With
+Them](https://programminginsider.com/chatgpt-protesters-are-using-memory-forge-to-take-their-data-with-them/),
+[Memory Forge product page](https://pgsgrove.com/memoryforgeland).
+
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
 Checked whether a neutral, cross-vendor memory-portability standard
@@ -1267,4 +1300,13 @@ observed 2026-10-26: [MacPaw Research: Portable Memory](https://research.macpaw.
   frontier-lab customers increased engagement in the months after —
   a different axis and a different outcome than Scale AI's
   equity-driven, not-reported-as-recovered customer exodus above.
+  Positioning consequence in docs/market/positioning.md.
+- 2026-10-26 (message, 26th run) — added Memory Forge / Phoenix Grove
+  Systems (Category 3, now 18 entries), found via the demand-signals
+  ceremony. A $3.95/mo browser-based tool that converts an AI
+  conversation export into a portable file, surfaced by the #QuitGPT
+  boycott of OpenAI's Pentagon contract (2.5M+ cancellations/pledges
+  claimed, reported App Store rank change to Claude). The most direct
+  evidence yet of a consumer paying for a worse, manual version of
+  Major's free value proposition during a real, dated exodus event.
   Positioning consequence in docs/market/positioning.md.
