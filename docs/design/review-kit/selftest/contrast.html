@@ -1,0 +1,80 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>contrast self-test</title>
+<!--
+  A fixture whose right answers are known, so that `measure-contrast.mjs`
+  can be shown to still find a failure. Added 2026-10-25c, the day the
+  tool was written, because its headline on the real site is one short
+  run and zero is what a tool that had stopped looking would print.
+
+  Every number below is hand-computable from WCAG 1.4.3 and nothing here
+  depends on the site. Serve this directory and point the tool at it:
+
+    python3 -m http.server 4972 -d docs/design/review-kit/selftest &
+    node docs/design/review-kit/measure-contrast.mjs \
+      --base http://127.0.0.1:4972 --pages selftest=/contrast.html \
+      --only desktop --out /tmp/x --json /tmp/x/contrast.json
+
+  Expected, and asserted by `check-contrast.mjs` beside this file:
+  2 ok, 3 SHORT, 1 inactive and exempt, 1 short in places, 1 UNMEASURED.
+-->
+<style>
+  body {
+    margin: 0;
+    padding: 24px;
+    background: #000;
+    font: 17px/1.6 Helvetica, Arial, sans-serif;
+  }
+  p { margin: 0 0 20px; }
+
+  /* (1) white on black: 21.00:1, the easiest pass there is. */
+  #pass-body { color: #fff; }
+
+  /* (2) #717171 on black: 4.31:1, under the 4.5 body floor. SHORT. */
+  #fail-body { color: #717171; }
+
+  /* (3) the same 4.31:1 inside a disabled control. 1.4.3 exempts text that
+     is part of an inactive component, so this is exempt and still printed
+     with its number. */
+  #inactive { color: #717171; background: none; border: 0; font: inherit; padding: 0; }
+
+  /* (4) the same 4.31:1 at 28px, which is large text and answers to 3:1.
+     Passes, and that is the large-text rule being exercised rather than
+     assumed. */
+  #large { color: #717171; font-size: 28px; }
+
+  /* (5) white at 35% alpha over black composites to #595959, 3.00:1.
+     SHORT, and it is the declared-alpha path that is under test. */
+  #alpha { color: rgba(255, 255, 255, 0.35); }
+
+  /* (6) the same 3.00:1 reached through an ancestor's opacity instead of
+     the text's own alpha, which is the inherited-opacity model. SHORT. */
+  #dim-parent { opacity: 0.35; }
+  #dim-parent p { color: #fff; }
+
+  /* (7) white text crossing a background that is black for 70% of the line
+     and #8a8a8a for the rest, where the ratio falls to 3.45:1. The median
+     stays at 21 and the fifth percentile does not, which is the whole
+     reason this tool measures per pixel instead of per element. */
+  #patch {
+    color: #fff;
+    /* the line has to reach the patch, so the box is narrowed to the text
+       rather than left at the body width, where the glyphs all sit in the
+       black 70% and the case under test never happens */
+    max-width: 30ch;
+    background: linear-gradient(to right, #000 0 70%, #8a8a8a 70% 100%);
+  }
+
+  /* (8) #0a0a0a on #0a0a0a. Invisible, and invisible is what the failing
+     case looks like, so this must come back UNMEASURED and never ok. */
+  #invisible { color: #0a0a0a; background: #0a0a0a; }
+</style>
+
+<p id="pass-body">White body text on black, twenty one to one.</p>
+<p id="fail-body">Grey body text that misses the floor by a fifth of a point.</p>
+<p><button id="inactive" type="button" disabled>Disabled control at the same grey</button></p>
+<p id="large">Large grey text answering to three to one</p>
+<p id="alpha">White text at thirty five percent alpha over black.</p>
+<div id="dim-parent"><p>White text under an ancestor carrying opacity.</p></div>
+<p id="patch">White text crossing a lighter patch near the end of its own line here.</p>
+<p id="invisible">Invisible text, which is not the same thing as passing text.</p>
