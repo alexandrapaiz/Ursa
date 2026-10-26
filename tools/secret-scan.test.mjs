@@ -181,3 +181,76 @@ describe('the class table is the tool\'s declared surface', () => {
     assert.ok(names.length >= 16, 'a class was removed without lowering this floor on purpose');
   });
 });
+
+// Both regressions below were live defects found by the 2026-10-26 run in
+// the version of this tool merged that morning. Each is the same shape: the
+// scanner detected a credential and then reported clean, which is the one
+// failure mode a scanner must not have.
+describe('a credential this tool already detected is never reported clean', () => {
+  test('finds an assignment written across two lines, not only on one', () => {
+    // `["'\s]*[=:]["'\s]*` glues key to value in three classes, and `\s`
+    // matches a newline, so this is in range of the pattern. The scanner
+    // used to gate on the whole text and then search line by line, so the
+    // gate said yes, the per-line pass said no, and classify returned
+    // nothing. Ordinary YAML, not a contrived input.
+    const repo = mkdtempSync(join(tmpdir(), 'secret-scan-multiline-'));
+    try {
+      git(repo, 'init', '-q', '-b', 'main');
+      git(repo, 'config', 'user.email', 'suite@invalid');
+      git(repo, 'config', 'user.name', 'suite');
+      const value = `${'z9'.repeat(14)}`; // assembled, never literal
+      writeFileSync(join(repo, 'config.yml'), `client${'_'}secret:\n  "${value}"\n`);
+      git(repo, 'add', '-A');
+      git(repo, 'commit', '-qm', 'the two-line form');
+
+      const r = run(repo, '--json');
+      assert.equal(r.code, 1, 'a credential split over two lines must not exit 0');
+      const out = JSON.parse(r.stdout);
+      assert.ok(
+        out.hits.some((h) => h.class === 'secret-shaped-assignment'),
+        'the class whose own pattern matches this text must be the class reported'
+      );
+      assert.ok(!`${r.stdout}${r.stderr}`.includes(value), 'the value must not be printed');
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
+  test('scans a file that is tracked but not yet committed', () => {
+    // The tree scan read `git show HEAD:<path>`. A staged file does not
+    // exist at HEAD, so `git ls-files` listed it, the read threw, and the
+    // catch turned it into a clean result. That is the moment the scan is
+    // most worth running, because nothing has been pushed yet.
+    const repo = mkdtempSync(join(tmpdir(), 'secret-scan-staged-'));
+    try {
+      git(repo, 'init', '-q', '-b', 'main');
+      git(repo, 'config', 'user.email', 'suite@invalid');
+      git(repo, 'config', 'user.name', 'suite');
+      writeFileSync(join(repo, 'README.md'), '# nothing here\n');
+      git(repo, 'add', '-A');
+      git(repo, 'commit', '-qm', 'clean baseline');
+
+      writeFileSync(join(repo, 'staged.env'), `KEY=${CANARIES['aws-access-key-id']}\n`);
+      git(repo, 'add', 'staged.env'); // staged, deliberately never committed
+
+      const r = run(repo, '--json');
+      assert.equal(r.code, 1, 'a staged credential must not exit 0');
+      const out = JSON.parse(r.stdout);
+      assert.ok(out.hits.some((h) => h.where === 'staged.env'));
+      assert.ok(
+        !`${r.stdout}${r.stderr}`.includes(CANARIES['aws-access-key-id']),
+        'the value must not be printed'
+      );
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  });
+
+  test('a file it could not read is counted, never silently dropped', () => {
+    // The symmetry with skipped_oversize in history mode: a hole in the
+    // measurement is reported so the reader owns it.
+    const r = run(ROOT, '--json');
+    const out = JSON.parse(r.stdout);
+    assert.equal(typeof out.skipped_unreadable, 'number');
+  });
+});

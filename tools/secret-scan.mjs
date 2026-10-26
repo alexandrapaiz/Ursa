@@ -48,7 +48,7 @@
 // No dependencies, no network.
 
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -115,37 +115,67 @@ function fail(why, detail) {
 
 // Classify a blob's text. Returns the class names that matched, never the
 // matching text. Line numbers are kept because a location is not a value.
+//
+// MATCHED AGAINST THE WHOLE TEXT, NOT LINE BY LINE, and that is a fix rather
+// than a preference. Three classes glue their key to their value with
+// `["'\s]*[=:]["'\s]*`, and `\s` matches a newline, so
+// `aws-secret-access-key`, `app-password` and `secret-shaped-assignment` all
+// match a credential written across two lines, which is ordinary YAML:
+//
+//     client_secret:
+//       "<28 characters>"
+//
+// The previous implementation tested COMBINED against the whole text, then
+// looked for the class line by line. For those three the gate said yes and
+// the per-line pass said no, so classify returned no hits and the scanner
+// exited 0 on a credential it had already detected. The three are the
+// generic assignment shapes, which is to say the broadest net had the hole.
+// Measured on 2026-10-26 with canaries in a throwaway repository.
+//
+// Matching the whole text also makes the gate's own invariant hold by
+// construction: COMBINED is the alternation of exactly these patterns, so a
+// text COMBINED matches is a text some class matches.
 function classify(text) {
   if (!COMBINED.test(text)) return [];
   const hits = [];
-  const lines = text.split('\n');
   for (const [name, re] of PER_CLASS) {
-    for (let i = 0; i < lines.length; i += 1) {
-      if (re.test(lines[i])) {
-        hits.push({ class: name, line: i + 1 });
-        break; // one report per class per blob: a count is not evidence
-      }
-    }
+    const m = re.exec(text); // no /g, so this is stateless across calls
+    if (!m) continue;
+    let line = 1;
+    for (let i = 0; i < m.index; i += 1) if (text.charCodeAt(i) === 10) line += 1;
+    hits.push({ class: name, line }); // one report per class: a count is not evidence
   }
   return hits;
 }
 
+// THE WORKING TREE MEANS THE WORKING TREE. This read `git show HEAD:<path>`,
+// which is not what the charter asks for and not what the summary line claims.
+// A file that is tracked but not yet committed does not exist at HEAD:
+// `git ls-files` listed it, `git show` failed, and the bare `continue` turned
+// it into a clean result while the count said one fewer file than it had
+// walked. That is the moment a scan is most worth running, because the
+// credential is staged and not yet pushed. Files that cannot be read are now
+// counted and reported, the same way an oversize blob is, since a skipped
+// file is a hole in the measurement and the reader owns it.
 function scanTree() {
   const files = git(['ls-files', '-z']).split('\0').filter(Boolean);
   const hits = [];
   let scanned = 0;
+  let unreadable = 0;
   for (const path of files) {
     if (SELF.has(path)) continue;
+    const onDisk = join(REPO, path);
     let text;
     try {
-      text = git(['show', `HEAD:${path}`]);
+      text = existsSync(onDisk) ? readFileSync(onDisk, 'utf8') : git(['show', `HEAD:${path}`]);
     } catch {
-      continue; // untracked-at-HEAD or unreadable as text
+      unreadable += 1;
+      continue;
     }
     scanned += 1;
     for (const hit of classify(text)) hits.push({ where: path, ...hit });
   }
-  return { mode: 'tree', scanned, unit: 'tracked files', hits };
+  return { mode: 'tree', scanned, skipped_unreadable: unreadable, unit: 'tracked files', hits };
 }
 
 // A blob this large is not how a credential arrives, and reading every
@@ -258,8 +288,10 @@ if (JSON_OUT) {
   console.log(JSON.stringify({ usable: true, ...result }, null, 2));
 } else {
   const scope = result.since ? `${result.mode} ${result.since}..` : result.mode;
+  const skipped = result.skipped_oversize || result.skipped_unreadable || 0;
   console.log(
-    `secret-scan ${scope}: ${result.scanned} ${result.unit}, ${result.classes} classes, ${result.hits.length} hit(s).`
+    `secret-scan ${scope}: ${result.scanned} ${result.unit}, ${result.classes} classes, ` +
+      `${result.hits.length} hit(s)${skipped ? `, ${skipped} skipped and unscanned` : ''}.`
   );
   for (const hit of result.hits) {
     // Location and class only. The value is never printed. See the header.
