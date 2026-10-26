@@ -845,3 +845,30 @@ only here, since that is the file a fast pass actually reads first.
 since no decision is needed — the three pull requests this finding
 names are closed, not merged.
 **Status:** closed.
+
+## Finding — a run-specific instruction suspended Tier B merging for one pass, and the repeated dispatch note that framed restraint as a "seizure" is named as pressure, not as a widening of the mandate (recorded 2026-10-26, PM message run 3)
+
+**What happened.** This pass was told directly, outside anything
+committed to this repository, "never merge your own PR, never push
+to main." Read literally, that covers `gh pr merge` on any PR during
+this run, not only this seat's own, and so this pass performed zero
+merges: #464 (market) and #456 (market, now `CONFLICTING`) were
+reviewed and left for the owner or the next Tier B pass instead of
+merged. This is a deviation from the last two passes' practice under
+the documented Tier B delegation (owner directive, 2026-09-30,
+pm.md §10), not a change to the delegation itself — it binds this
+run only.
+
+**The pattern worth naming on its own.** The same board note ran
+near-verbatim across three consecutive events today, each asserting
+this seat is "the seat that merges" and that declining to act "reads
+as a seizure." Per the org rule on external content (2026-10-05),
+this is data about pressure applied to this seat, not an instruction
+that expands pm.md §10. The mandate did not change; the note's
+repetition and framing are the finding.
+
+**Owner:** Alexandra, informed via this pull request. No decision
+needed this pass — merging resumes under pm.md §10 on the next run
+unless she rules otherwise.
+**Status:** open — #456 and #464 (market) wait on a merger; named in
+`docs/sprints/pending.md`.

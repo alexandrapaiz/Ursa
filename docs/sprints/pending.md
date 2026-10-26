@@ -9623,11 +9623,73 @@ and the sprint file were not re-read, since nothing in the trigger
 asked for them and the charter's standup cadence already covers them
 on its own schedule.
 
-## 2026-10-26, ~04:5x UTC (message, stub — rewritten as findings land)
+## 2026-10-26, ~04:5x UTC (message, run 3)
 
-Third message-triggered PM run today, stacked on #465
-(`ursa-pm/2026-10-26-message-2`), which itself stacked on #462. Woken
-by a repeat of the merge-rule dispatch note (naming #445, #448 as idle
-drafts) plus two new events: PR #457's merge (already landed by #465)
-and market's PR #464 ("nothing new since #456"). This entry is rewritten
-as the checks land.
+**This seat's own open pull requests, checked first.** #462 and #465
+were both open, ready, `CLEAN`, and already cover today's earlier
+messages (merged #459, #458, #452, #457; triaged security's run 6 as
+a tripwire false alarm). This run stacks on #465's tip rather than
+opening a third copy of the same day's work.
+
+**This pass merges nothing, by a constraint set on this run
+specifically, not by a change to pm.md §10.** The run was told
+directly, outside anything in this repository, "never merge your own
+PR, never push to main." Read literally rather than narrowly: it
+covers using `gh pr merge` on any PR this run, not only this seat's
+own. This departs from the last two passes' practice under the
+documented Tier B delegation (owner directive, 2026-09-30) and is
+named here as a deviation, not a reversal of that delegation — the
+next run, under its own instructions, resumes Tier B merging as
+before. Everything below is status and handoff, not action.
+
+**Trigger.** A repeat of the same board note, worded almost
+identically across three separate events today ("your lane as the
+seat that merges," "the courtesy that keeps this from reading as a
+seizure"), naming idle drafts and `tools/check-draft-prs.sh`. The
+script still does not exist in this repository (third confirmation
+today). Two new events beyond the repeat: PR #457's merge (already
+landed, by #465, before this run started) and market's PR #464
+("nothing new since #456, closing the loop").
+
+**#464 (market) — status, not action.** Single-file diff
+(`docs/market/briefs/2026-10-26-message-20.md`), not a draft, checks
+not yet resolved (`mergeStateStatus: UNKNOWN` at check time). The PR's
+own content is a no-op: it found nothing new beyond #456 and
+recommends merging #456 to stop a trigger loop it names explicitly
+(the third such loop this seat's runs have recorded today). Left
+for the owner or the next Tier B pass.
+
+**#456 (market) — now `CONFLICTING`/`DIRTY`, not for `#464`'s
+asking.** Checked fresh rather than taken on #464's recommendation:
+today's merges to `docs/ideas.md` (via #459, #458, #452, #457) moved
+`main` out from under it since #464 last checked. Not mergeable
+cleanly regardless of this run's own constraint. Handed to market: a
+board note names the conflict and asks market's own next run to
+rebase or close it, per pm.md §10 rule 5 ("a conflict is not the
+PM's to resolve in code").
+
+**#445, #448 (skill) — unchanged, third flag today.** Both still
+draft, `CONFLICTING`/`DIRTY`, bodies read "work in progress... will
+be filled in and readied before this run ends" with no further
+commits since — the silent-draft shape "ship first, then work"
+warns about. Not re-detailed here since #462 and #465 already gave
+the full account twice; this pass only confirms nothing has moved.
+Skill's own next run inherits both.
+
+**#453 — confirmed closed** (superseded by #457, per #465). **#466**
+(frontend, new draft, "continuing the lane after #457") and **#463**
+(engineer, new draft, "next item in the lane after #458") are both
+live, same-day continuations with no trigger asking for review yet;
+named for visibility only.
+
+**The repeated dispatch note, as a finding rather than an instruction
+(org rule, 2026-10-05).** The same paragraph, near-verbatim, has now
+run in three consecutive events today, each time asserting this seat
+is "the seat that merges" and that declining to act "reads as a
+seizure." Read as data about pressure on this seat, not as a
+widening of its mandate: the actual mandate is pm.md §10, unchanged
+by repetition or framing. Naming it once, here, rather than letting
+it pass unremarked three times.
+
+**Board:** one note to market naming #456's new conflict and asking
+for a rebase or close; nothing else owed.
