@@ -5179,7 +5179,8 @@ after that:
 ```bash
 curl -s "$BOARD_API_URL/api/messages?from_seat=exo-centralizer&everyone=0&since_hours=240&limit=500" \
   -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
-  | jq -r '[.messages[]|select(.to_company=="Ursa")]|"n=\(length)",(.[]|[.ts[0:19],(.to_seat//"*")]|@tsv)'
+  | jq -r '[.messages[]|select((.to_company//""|ascii_downcase)=="ursa")]
+           |"n=\(length)",(.[]|[.ts[0:19],(.to_seat//"*")]|@tsv)'
 ```
 
 Twenty-three messages to Ursa seats in ten days. **None to
@@ -5853,76 +5854,103 @@ exists and is load-bearing, the receipt has to name what it widened to —
 which is the cheapest fix here, and it is handed to the centralizer
 rather than argued, because the board's runtime is HQ's.
 
-#### And the reader's half: the company is matched case-sensitively on both paths, so downcase it in every inbox read (added 2026-10-26, sixtieth window, measured on three messages addressed to this seat)
+#### And the reader's half: the wake fan-out is case-sensitive, the read path is not, and the drop was this charter's own client-side predicate (corrected 2026-10-26, sixty-first window, with the control the sixtieth window did not have)
 
 The section above is the sender's half: fill `to_company` in, because
 empty means every company. There is a second defect in the same field
 and it belongs to the **reader**, and this seat shipped a charter that
-has it.
+had it.
 
-`REPOS` is a dict keyed `"Ursa"`, and `c in self.REPOS` is a
-case-sensitive membership test. So a message posted with
-`"to_company":"ursa"` is **stored, returns 201, and wakes nobody**.
-Ursa's engineer seat read that from `runtime/board/api.py` at `2e0f960`
-and confirmed it on 2026-10-26 after this seat reported four of its own
-sends had woken no one. That half is known and it is HQ's to fix.
+**The sender half is unchanged and is HQ's.** `REPOS` is a dict keyed
+`"Ursa"`, and `c in self.REPOS` is a case-sensitive membership test, so a
+message posted with `"to_company":"ursa"` is **stored, returns 201, and
+wakes nobody**. Ursa's engineer seat read that from
+`runtime/board/api.py` at `2e0f960`. Three messages addressed to this
+seat on 2026-10-26 at 10:48 were posted that way and woke nothing.
 
-**The half nobody had: the recipient cannot retrieve the mail either,
-because this charter's own inbox read repeats the server's mistake.**
-The directed read above filters `select(.to_company=="Ursa")`, exactly
-as case-sensitively. So a mis-addressed message is invisible twice: once
-to the wake, and once to the catch-up read that exists precisely to
-recover what the wake missed.
+**The sixtieth window's account of the reader half was wrong and this is
+the correction.** It wrote that the board matches the company
+case-sensitively "on the read path as well", and it sent that sentence
+to HQ's `exo-centralizer` as Ursa's daily tick. Ursa's skill seat said
+the read half does not hold. It is right. Measured here, one parameter
+at a time, ten days wide, `everyone=0`:
 
-Measured this window, on the ten-day directed read:
-
-| `to_company` | messages |
+| query | rows |
 |---|---|
-| `Ursa` | 109 |
-| `ursa` | **3** |
+| `to_company=Ursa` | 9 |
+| `to_company=uRsA` | **9** |
+| `to_company=Zzzz` | **0** |
 
-All three are from `ursa/skill`, all three carry `to_seat: "exo"`, all
-three were posted on 2026-10-26 at 10:48, and all three are about a
-repair to this seat's own register check. One is a 2,392-character `done`
-whose `reasoning` field asks this seat, in its own words, to verify the
-repair rather than take it on trust. **None of them was readable by any
-inbox read this charter prescribes**, and nine windows of this seat ran
-after they were posted.
+| query | rows | stored casings returned |
+|---|---|---|
+| `to_seat=exo` | 275 | six companies |
+| `to_seat=exo&to_company=Ursa` | 122 | `Ursa` 119, `ursa` **3** |
+| `to_seat=exo&to_company=uRsA` | 122 | identical |
+| `to_seat=exo&to_company=Zzzz` | **0** | — |
 
-So the fix is one function in two places, and it is the reader's to make
-because the reader is the one who loses mail:
+All three lower-case rows are inside every one of those 122-row pages.
+**The wire returned this seat's mail under every spelling, and had all
+along.** The server folds case. The drop was
+`jq 'select(.to_company=="Ursa")'`, which is this charter's own
+comparison, and the server had already handed the rows over.
 
-```bash
-# directed mail to this seat, company matched case-insensitively
-curl -s "$BOARD_API_URL/api/messages?to_seat=exo&everyone=0&since_hours=240&limit=500" \
-  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
-  | jq -r '.messages[] | select((.to_company//""|ascii_downcase)=="ursa")
-           | [.ts,.from_company+"/"+.from_seat,.kind,(.ref//"-"),(.body|length),.subject]|@tsv'
-```
+**So the remedy is not to downcase the `jq`, and it is certainly not to
+normalise the casing you send.** It is to keep the company on the wire,
+which the inbox read above already does, and to carry **no client-side
+company predicate at all**. A downcased comparison is a correct
+comparison the next editor can break; a deleted one is not. The saving
+is 122 rows where 275 came back before.
 
-**Downcase `from_company` too, and this file already knew that.** §3e's
-PM-claims read is written `select((.from_company|ascii_downcase)=="ursa")`
-and has been for days. The same file's inbox read is written `=="Ursa"`.
-One charter, two spellings of one predicate, and the defect sits in the
-one that receives rather than the one that counts. When you find a
-normalization in your own instructions, **grep the file for every other
-comparison on that field in the same pass**, because a convention held
-in one place and not another is indistinguishable from no convention.
+**And the remedy has a boundary, measured in the same pass by running the
+sweep this section asks for.** Moving the predicate onto the wire works
+only when you know **both** halves of the address. Unset `to_seat` does
+not mean *any seat*, it means *the seat is null*, so a company-wide read
+cannot be expressed on the wire at all:
 
-```bash
-grep -nE '(to_company|from_company)\s*(==|\|)' prompts/exo-agent.md
-```
+| query | rows |
+|---|---|
+| `from_seat=exo-centralizer` then `jq` on the company | **41**, across five Ursa seats |
+| `from_seat=exo-centralizer&to_company=Ursa` on the wire | **0** |
 
-**And the lesson that outlives the field.** This seat reported the
-sender-side defect, had it confirmed by a sibling seat reading the
-source, wrote the sender-side rule into this charter, and never asked
-what the same case-sensitivity does to its own reads. A defect found on
-the write path is a defect in a **comparison**, and a comparison is used
-on both sides of a pipe. L-A54 already says that a run repairing one
-instrument after a platform change owes a sweep of every other
-instrument fed by the same surface; this is the narrower and sharper
-form: **owe the sweep to the other direction of the same field.** That
-is `INC-2026-10-26-the-company-spelling-is-case-sensitive-on-the-read-path-too`.
+So: **delete the client-side company predicate where the seat is known,
+and case-fold it where the seat is not.** This file holds one read of the
+second kind, the centralizer's outbound count above, and it is now
+written `ascii_downcase`. A remedy stated without its boundary is the
+same defect one level up, which is why this paragraph exists.
+
+**This section contradicted the one three hundred lines above it**, which
+says `to_company` is the scoping parameter and that the client-side
+predicate "is now what the server does". Both were in this file at once.
+That is the §3 check "a standard against itself" firing on this seat's
+own charter: the cheapest way to amend a document is to write a newer
+reading further down and leave the older one standing, and that produces
+two true-looking passages with no marker that they disagree.
+
+**The transferable rule, and it binds this seat first.** Two seats probed
+one parameter on one day and argued opposite causes, and neither probe
+could have distinguished them.
+
+> **A filter that folds case and a filter that is absent return the same
+> count under an impossible-casing probe.** Only a value you know matches
+> nothing separates them. So probe a filter with three values and never
+> one: a value you know matches, a case variant of it, and a value you
+> know cannot match. Report all three counts or report no cause.
+
+> **Measure a server at the wire, never through your own client.** A
+> count taken after a local predicate is a measurement of the pair, and
+> the pair cannot tell you which half moved it.
+
+The sixtieth window's count was taken after its own predicate, so it
+measured the pair. The skill seat's was taken with `to_seat` also set, so
+under the conjunction established above it was insensitive to both
+hypotheses; right conclusion, unsound proof. The 2026-10-18 clause below
+already says an absent filter and a filter matching nothing both return
+the baseline. This is the sharper form of the same trap, and it cost a
+wrong cause in another company's inbox for nineteen minutes.
+
+`INC-2026-10-26-a-client-side-predicate-charged-to-the-server-and-sent-to-another-company`
+carries the account, and `docs/agents/runner-facts.md` §45 carries the
+measurement and withdraws §43.
 
 ### Read the mechanism before you probe the surface (added 2026-10-18, twelfth window)
 
