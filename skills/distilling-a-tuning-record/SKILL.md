@@ -9,14 +9,17 @@ description: >
   on a rule, for choosing which tuning store a record accrues into,
   and for deciding what may leave the machine with a tuning block.
   Does not fire for producing an outcome record, for settling the
-  label on an individual span, or for quoting a statistic out of a
-  record.
-version: 0.3.3
+  label on an individual span, for quoting a statistic out of a
+  record, for auditing the signals block a record carries rather than
+  the axioms distilled from it, for adding or rewording a bound in the
+  record gate, or for clearing anything other than a tuning block for
+  release.
+version: 0.4.2
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-05
-revised: 2026-10-18
+revised: 2026-10-26
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -27,40 +30,40 @@ evidence:
     source: ursa-major/src/tuning/types.ts:10-12
   - ref: E3
     what: the evidence shape, a record id, one of six signal kinds, a ref, step ordinals, and an optional verbatim quote of the user's own words
-    source: ursa-major/src/tuning/types.ts:14-30
+    source: ursa-major/src/tuning/types.ts:17-33
   - ref: E4
     what: evidenceCount is code-owned and documented as independent evidence entries, with recurrence across records named as the confidence signal
-    source: ursa-major/src/tuning/types.ts:42-46
+    source: ursa-major/src/tuning/types.ts:45-49
   - ref: E5
     what: contradictions are surfaced and never averaged, and revoked axioms are kept as tombstones
-    source: ursa-major/src/tuning/types.ts:48,52-53
+    source: ursa-major/src/tuning/types.ts:51,55-56
   - ref: E6
     what: the distiller refuses a record with no signals block
     source: ursa-major/src/tuning/distill.ts:40-42
   - ref: E7
     what: the prompt's rules for the model, cite the evidence, prefer the general why, basis definitions, match an existing axiom rather than reword it, never resurrect a revoked one, emit both sides of a genuine conflict, three to twelve axioms
-    source: ursa-major/src/tuning/distill.ts:66-78
+    source: ursa-major/src/tuning/distill.ts:74-86
   - ref: E8
     what: the prompt's acceptance rule, accepted false means survived text is not endorsed and axioms come from the corrections, null means survival is weak evidence at most
-    source: ursa-major/src/tuning/distill.ts:79-85
+    source: ursa-major/src/tuning/distill.ts:87-93
   - ref: E9
     what: the prompt carries the user's verbatim prompts, read off conversations[].prompts
-    source: ursa-major/src/tuning/distill.ts:51-53,109
+    source: ursa-major/src/tuning/distill.ts:59-61,118
   - ref: E10
     what: validation is shape only, a statement, a legal polarity and basis, a non-empty evidence array, a known kind, and steps being an array
-    source: ursa-major/src/tuning/distill.ts:11-18,127-137
+    source: ursa-major/src/tuning/distill.ts:11-18,136-146
   - ref: E11
     what: the default runner is the local Claude Code CLI in print mode with the prompt on stdin
-    source: ursa-major/src/tuning/distill.ts:145-157,163
+    source: ursa-major/src/tuning/distill.ts:154-166,172
   - ref: E12
     what: merge sets evidenceCount to the length of the axiom's evidence array, both when it creates and when it reinforces
-    source: ursa-major/src/tuning/merge.ts:45-62
+    source: ursa-major/src/tuning/merge.ts:57-64,76-83
   - ref: E13
     what: a matched revoked axiom gains nothing, and a user-edited statement is sovereign so only evidence accrues to it
-    source: ursa-major/src/tuning/merge.ts:45-54
+    source: ursa-major/src/tuning/merge.ts:57-66
   - ref: E14
     what: contradictions among axioms new in one pass are resolved through a map keyed by statement text, then wired symmetrically
-    source: ursa-major/src/tuning/merge.ts:36-37,75-89
+    source: ursa-major/src/tuning/merge.ts:39-40,95-109
   - ref: E15
     what: distill, merge and write happen in one invocation, and the only double-distill guard is a task-id lookup in sources
     source: ursa-major/src/tuning/cli.ts:32-41
@@ -69,10 +72,10 @@ evidence:
     source: ursa-major/src/tuning/cli.ts:42-46
   - ref: E17
     what: the exported block tells its reader that confidence is independent evidence count and to follow high-confidence rules from the first message
-    source: ursa-major/src/tuning/export.ts:59-67
+    source: ursa-major/src/tuning/export.ts:65-73
   - ref: E18
     what: export drops revoked axioms, groups by domain, orders by evidenceCount, and lists tensions with an ask-do-not-guess instruction
-    source: ursa-major/src/tuning/export.ts:43-57,69-92
+    source: ursa-major/src/tuning/export.ts:49-63,75-98
   - ref: E19
     what: a commit-pair record has no chat trace, so loops, translations, regressions and guardrails come back empty and only one-shot corrections are emitted, one per survived_mutated span that carries a diff and a source and is not formatting-only
     source: ursa-major/src/signals.ts:1-7,40-46,62-63,111-137
@@ -84,10 +87,10 @@ evidence:
     source: ursa-major/src/signals.ts:30-39
   - ref: E22
     what: ursa run builds one git-adapter conversation per commit pair with userTurns zero and no prompts array
-    source: ursa-major/src/resolve-episode.ts:170,192-200
+    source: ursa-major/src/resolve-episode.ts:183,205-213
   - ref: E23
     what: prompts are populated only by the session and paste parsers, and the schema calls them raw data that stays local
-    source: ursa-major/src/parse.ts:13,51,75,107, ursa-major/src/types.ts:476-477
+    source: ursa-major/src/parse.ts:14,57,81,113, ursa-major/src/types.ts:654-655
   - ref: E24
     what: an episode id is the project slug, the generated commit date, and the first seven characters of the generated commit sha
     source: ursa-major/src/episodes.ts:60-64
@@ -96,7 +99,7 @@ evidence:
     source: ursa-major/src/episodes.ts:27,74, ursa-major/src/store.ts:91-93
   - ref: E26
     what: records, the episode index, the distillation watermark and tuning.json all live in a per-project .ursa directory, nothing global and nothing commingled
-    source: ursa-major/src/store.ts:1-3,12-14,62-64, ursa-major/src/consent.ts:90-92
+    source: ursa-major/src/store.ts:1-3,12-14,62-64, ursa-major/src/consent.ts:96-98
   - ref: E27
     what: the per-project decision, and its rider that cross-project aggregation should be an explicit later command rather than an implicit default
     source: docs/design/product-plan.md:91-96
@@ -110,8 +113,8 @@ evidence:
     what: today's correction signals are hand annotations, and KR1.2 is what retires manual annotation
     source: docs/design/tuning-pipeline.md:51-58, docs/okrs/2026-q4.md:20-26 (O1 KR1.2)
   - ref: E31
-    what: the bridge reads the project's own tuning.json, drops revoked axioms, and pushes only ciphertext to the sync route
-    source: ursa-major/src/bridge/index.ts:82-98,140-150
+    what: the overlay reads the project's own tuning.json through serve.ts's tuningUnits, the one reader, which sorts by evidenceCount; the bridge drops revoked axioms and pushes only ciphertext to the sync route
+    source: ursa-major/src/serve.ts:225-228,243; ursa-major/src/bridge/index.ts:93-95,197-207
   - ref: E32
     what: this repository ignores .ursa with the comment that it is raw data and never committed
     source: .gitignore:8-9
@@ -135,7 +138,7 @@ evidence:
     source: ursa-major/src/signals.ts:65-81
   - ref: E39
     what: the four free-text axiom fields, id, statement, domain and each contradicts id, are flattened to one line, stripped of control characters and of a leading list, heading, quote or fence marker, and length-bounded before they are rendered, because the block is instructions and an axiom's text is model-written from session content the user may have pasted from elsewhere; basis, polarity and evidenceCount are rendered without the sanitizer
-    source: ursa-major/src/tuning/export.ts:8-40,44-50,74-78
+    source: ursa-major/src/tuning/export.ts:8-46,50-56,80-84
 supersedes: []
 ---
 
@@ -211,7 +214,8 @@ allowed to teach.
 one.** `--tuning` is a path like any other, and storage is per-project
 by decision, with cross-project aggregation named as an explicit later
 command rather than an implicit default [E26, E27]. The overlay reads
-the project's own `.ursa/tuning.json` and nothing else [E31]. Output:
+the project's own `.ursa/tuning.json` and nothing else, through the one
+shared reader rather than opening the file itself [E31]. Output:
 the store path, recorded somewhere outside your shell history, because
 the confidence numbers in step 8 mean nothing except relative to one
 store.

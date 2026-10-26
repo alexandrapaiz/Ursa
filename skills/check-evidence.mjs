@@ -31,6 +31,7 @@ import { createHash } from 'node:crypto'
 import { join } from 'node:path'
 import { sourcePaths, ranges as lineRanges } from './source-line.mjs'
 import { citingTexts, refsIn, strayCitations } from './citing-files.mjs'
+import { unreadDirs } from './library-dirs.mjs'
 
 const root = new URL('..', import.meta.url).pathname
 const skillsDir = join(root, 'skills')
@@ -63,6 +64,21 @@ const fingerprint = (lines, from, to) =>
     .update(lines.slice(from - 1, to).map((l) => l.trim()).join('\n'))
     .digest('hex')
     .slice(0, 16)
+
+// A directory under skills/ that this loop's own `continue` would skip. It is
+// reported before the loop rather than inside it, because the point is that
+// such a directory never reaches any check below, including strayCitations,
+// whose whole job is to catch a citation in a file nothing reads. See
+// ./library-dirs.mjs for the probe that measured this and
+// prompts/skill-extract.md §5s for the rule.
+for (const d of unreadDirs(skillsDir)) {
+  const why = d.nearMiss
+    ? `holds ${d.nearMiss} and no SKILL.md, which is one character from a skill nothing guards`
+    : d.frontmatter
+      ? 'has no SKILL.md, and a markdown file in it opens with frontmatter, so it reads as a skill nothing guards'
+      : 'has no SKILL.md, so no tool here reads it'
+  problems.push(`${d.slug}: ${why} — rename it, or move it out of skills/ if it is not a skill`)
+}
 
 for (const entry of readdirSync(skillsDir)) {
   const file = join(skillsDir, entry, 'SKILL.md')

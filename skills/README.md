@@ -16,12 +16,23 @@ run, quality over count. The owner's merge is the gate.
 | [quoting-a-number-from-an-outcome-record](quoting-a-number-from-an-outcome-record/SKILL.md) | What a record statistic is a share of, and whether two records' numbers may be compared or added | 32 | draft, `validated: false` |
 | [distilling-a-tuning-record](distilling-a-tuning-record/SKILL.md) | What an axiom may claim, what its confidence count means, and what may leave the machine with a tuning block | 39 | draft, `validated: false` |
 | [adding-a-bound-to-the-record-gate](adding-a-bound-to-the-record-gate/SKILL.md) | Whether a proposed rule about outcome records is a bound or a measurement, how its statement and its committed counterexample are written, and whether a violation means the bound or the resolver is wrong | 32 | draft, `validated: false` |
+| [clearing-a-record-for-release](clearing-a-record-for-release/SKILL.md) | Which of the three exits a release is taking, what that exit demands of raw text, and what an erasure has to reach once something has already left | 41 | draft, `validated: false` |
+| [auditing-a-detected-correction-loop](auditing-a-detected-correction-loop/SKILL.md) | Whether a detected correction loop is the loop the user actually ran, what `recurrences`, `openedStep`, `closedStep` and `resolution` compute rather than name, and where a complaint the user plainly made went when no signal carries it | 32 | draft, `validated: false` |
+| [auditing-a-durability-walk](auditing-a-durability-walk/SKILL.md) | Whether the forward walk behind a `durability` block ran at all, over which window and to which tip, and what `decayRate`, `durableChars`, `fate` and `medianIntactSeconds` compute rather than name | 27 | draft, `validated: false` |
 
-## Three areas, and the edges between them
+## Six areas, and the edges between them
 
-The first three skills work on `outcome_record.json`. The fourth works
-on `tuning.json`. The fifth works on neither: it works on the checker
-those records are held against. Every near miss in
+The first three skills work on `files[].spans` and `stats` inside
+`outcome_record.json`. The fourth works on `tuning.json`. The fifth
+works on neither: it works on the checker those records are held
+against. The sixth works on none of the three: it works on what leaves
+the machine. The seventh is back inside the record and still its own
+area, because it works on `signals`, which is the one block no span
+label and no percentage can settle. The eighth is inside the record
+too and is cut by time rather than by object: `durability` and
+`spans[].lifespan` are the only blocks computed from what happened
+*after* the episode closed, so they are the only ones that can answer
+differently tomorrow. Every near miss in
 `distilling-a-tuning-record/TRIGGER-TEST.md` and in
 `adding-a-bound-to-the-record-gate/TRIGGER-TEST.md` fails by sitting on
 the record side of its own edge, which is what `prompts/skill-extract.md`
@@ -31,6 +42,19 @@ the record side of its own edge, which is what `prompts/skill-extract.md`
 vocabulary, so each ships a `TRIGGER-TEST.md` whose near misses include
 its siblings' triggers. Read those before adding another skill in this
 area.
+
+As of 2026-10-24 every skill in the library does, for every other skill
+in the library, which `node skills/trigger-coverage.mjs` measures and
+the section below describes. Closing the last nine of those boundaries
+turned up the limit of the artifact test: two of
+`adjudicating-uncertain-spans`' then five neighbours named no file in
+common with it at all, and the boundary with them still had to be written down,
+because what they share is the *shape of the judgment* rather than the
+object, and a reader matches on shape. A rule about every record and a
+departure from the machine are both things a span-adjudication skill can
+plausibly be asked to rule on. So §5e is an argument against re-cutting a
+skill with many neighbours, and not a licence to skip a near miss for a
+neighbour it says does not overlap.
 
 They sit in order along one pipeline. The trial skill chooses what to
 resolve and runs it, the adjudication skill settles the labels the
@@ -49,14 +73,98 @@ what the axiom may claim.
 **The gate area.** `adding-a-bound-to-the-record-gate` is the first
 skill here whose object is code rather than a record:
 `ursa-major/src/invariants.ts` and the committed counterexamples under
-`ursa-major/fixtures/violations/`. It therefore has all four others as
-neighbours and is still one edge, between the records and the thing
-that checks them. A prompt that spans the edge is handled records-side
+`ursa-major/fixtures/violations/`. It therefore has every other skill
+in the library as a neighbour and is still one edge, between the
+records and the thing that checks them. A prompt that spans the edge is handled records-side
 first in one direction and gate-side first in the other. Which label a
 span carries is never a gate question, because a bound can only catch a
 record contradicting itself. Whether a rule about records should exist
 at all is never a record question, because no record can say what it
 was checked against.
+
+**The release area.** `clearing-a-record-for-release` is the only skill
+here whose object is not an artifact at all. It is a boundary: the three
+exits by which something derived from a record becomes readable by
+someone else, which are the disclosure batch to Ursa Minor, a public
+publication, and a person quoting a passage into a document. Two of the
+three are governed by opposite rules about raw text, raw text never
+crosses the Minor edge and raw text is the whole point of a published
+page, and all three are called *disclosure* in the code and in the
+prose. So reaching for the nearest check is a live way to be wrong in
+either direction, which is the argument the skill is built on.
+
+It has every other skill as a neighbour and still one edge, and the
+edge is a handoff rather than a border: the others decide what a record
+says, this one decides what may leave with it. Both directions are handled
+record-side first, because nothing can be cleared for release until it
+is settled what it is. The near miss worth reading is the quoting
+skill's own first trigger, since the two share every noun. The line is
+mechanical and not a matter of taste: every field under `stats` ships,
+so a one-record statistic is never blocked here, and the only number
+this skill rules on is an aggregate across contributors, which no single
+record carries.
+
+**The signals area.** `auditing-a-detected-correction-loop` is back
+inside `outcome_record.json` and is still its own area, which is the
+one place in this library where the artifact test alone would have cut
+wrong. It shares the file with the three record skills and shares every
+noun with all six siblings. What separates it is which block of the
+record it rules on: the others rule on `files[].spans` and on `stats`,
+and this one rules on `signals`, the block `deriveSignals` writes after
+the labels are settled. No span label and no percentage can answer its
+question, because a loop is a fact about the sequence of prompts and
+not about any one piece of text.
+
+Its edge is the same handoff shape as the release skill's, counted six
+times rather than six different edges, and it runs last of the three
+record-side stages: the trial produces the record, adjudication settles
+the labels, and only then is there a signals block to audit. Two
+directions are worth knowing cold. A number out of `signals` that is
+going into a document a reader will trust is a quoting question first,
+because this skill says what `recurrences` counts and the quoting skill
+says what may be said about it. What a loop implies about the user is a
+distilling question, never this one, because the detector is lexical
+and deterministic and says nothing about a person. That last point is
+the skill's own ref E5, over `ursa-major/src/loops.ts:11-13`; it is
+named in longhand here rather than as an `[E5]` tag, because this file
+is not inside a skill directory and so no tool in `skills/` would
+fingerprint a tag written in it. See "Where a citation may stand".
+
+
+**The durability area.** `auditing-a-durability-walk` is the second
+skill inside `outcome_record.json` whose cut the artifact test cannot
+make, and it is a sharper case than the signals area, because its two
+blocks are not even the only things it shares. `durability` is a
+record-level block of rates, exactly like `stats`, and
+`spans[].lifespan` sits on the same spans the first three skills rule
+on. By §5e's letter this should be re-cut into them.
+
+What separates it is time rather than object. Every other block of an
+outcome record is a function of the episode, computed from the finished
+work and the generations behind it, so it is settled the moment the
+episode closes and will read the same a year later. `durability` is a
+function of the commits that came *after* the closing commit, along
+whatever branch was checked out, up to whatever `HEAD` was when the
+walk ran. It is the only part of a record that can give a different
+answer tomorrow with nothing about the episode having changed, and the
+block stores `closingSha` and `tipSha` precisely because of that.
+
+So the order, which matters most against the quoting skill and is the
+sharpest boundary in this library. This skill runs **first**, and
+decides whether the two walks behind two numbers measured comparable
+things: whether anything was tested at all, over which window, and
+whether the revision cap or a rename sits underneath. The quoting skill
+then decides what may be said about the numbers and whether they may be
+combined. The practical test for a reader holding both is whether the
+question would survive the answer "those two walks ended at different
+commits". If that dissolves the question, it was this skill's.
+
+Against the other six the edges are ordinary. The trial skill chooses
+work whose history can be walked, adjudication settles the classes this
+skill's denominator is built from, and the gate, release, tuning and
+signals edges are the same handoff shape those skills already have,
+counted seven times rather than seven different edges.
+
 
 ## Checking the receipts
 
@@ -80,6 +188,45 @@ proved. When a fingerprint fails, re-point the anchor and then re-read
 the claim against the new lines, since the second does not follow from
 the first, and record the fingerprint in the same commit so the lock
 diff shows a person decided. `prompts/skill-extract.md` §5g is the rule.
+
+## Whether a skill ever fires
+
+```
+node skills/trigger-coverage.mjs           report
+node skills/trigger-coverage.mjs --pairs   every ordered pair's score
+node skills/trigger-coverage.mjs --check    exit 1 if any boundary is untested
+```
+
+The other two guards are about receipts. This one is about the half of a
+skill that decides whether it runs at all, which nothing checked until
+2026-10-24. `prompts/skill-extract.md` §5c asks every skill for one near
+miss per adjacent skill, and adjacency here is every other skill in the
+library, so the tool reads all 30 ordered pairs and asks whether this
+skill's near misses carry that sibling's own trigger prompt.
+
+The failure it exists to catch is arithmetic rather than carelessness.
+The budget is one near miss per neighbour, so landing a sixth skill put
+all five already in the library one short, in five files that run's diff
+never touched, with both receipt guards green and nothing to say so. When
+it was first run the library scored 15 of 30, and the 15 were exactly
+rank by age: the oldest skill covered none of its five boundaries and the
+newest covered all five, six skills and six distinct values in order with
+no ties. The newest looked compliant for the same reason the oldest
+looked negligent, which is position in a sequence.
+
+It is green as of 2026-10-24, at 30 of 30, and that is the state to keep
+it in. Two mechanics a run adding the seventh skill will meet:
+
+- A near miss has to carry the sibling's **own** prompt, not a
+  paraphrase. A paraphrase tests the test's author; the sibling's words
+  test the description, which is the half that would actually catch a
+  false positive. The tool credits a paraphrase whose prose names the
+  sibling, and reports it separately as argued-without-the-prompt.
+- A prompt kept outside the two canonical headings has to say "should
+  not fire" in its own prose, because that is where the tool reads a
+  verdict when there is no heading to inherit from. A prompt that says
+  nothing is reported as unclassified rather than guessed at, since a
+  near miss filed as a should-fire prompt inflates coverage.
 
 ## When main moves under the library
 
@@ -121,6 +268,8 @@ node --test skills/relocate-anchors.test.mjs
 node --test skills/check-evidence.test.mjs
 node --test skills/source-line.test.mjs
 node --test skills/relevance-sweep.test.mjs
+node --test skills/trigger-coverage.test.mjs
+node --test skills/library-dirs.test.mjs
 ```
 
 ## Whether a receipt supports its sentence
@@ -131,7 +280,16 @@ node skills/relevance-sweep.mjs <skill>[/<ref>] one ref's dossier
 node skills/relevance-sweep.mjs --audited       what has been read, and when
 node skills/relevance-sweep.mjs --record <scope>  bind a verdict to what was read
 node skills/relevance-sweep.mjs --stale           exit 1 if any verdict is unbound or stale
+node skills/relevance-sweep.mjs --signal          every ref's absent-word ratio, beside its verdict
 ```
+
+`--signal` is the one of these that is not a check. It reports how much of
+each `what` field is missing from the lines it cites, which is the signal a
+reader uses when no fingerprint can help, and it sets apart the refs where a
+single file's range holds none of its claim. Those are mis-anchored until a
+reader says otherwise. The threshold and the measurement behind it are in
+`relevance-audit.md`, and so is the reason it is a reading rule rather than a
+third failure class on `--stale`.
 
 Everything above checks that a citation still points where it pointed. None
 of it checks that the lines support the sentence citing them, and a range can
@@ -175,8 +333,21 @@ and a fingerprint. `prompts/skill-extract.md` §5j, §5l, §5m and §5n.
   own, which is weaker than a second reader and is stated as such in
   `relevance-audit.md`.
 
-**143 of 143 refs read as of 2026-10-23: 102 sound as cited, 33 ranges
-widened, eight claims wrong.**
+- The sixth skill, 2026-10-24, 41 refs, read in a sweep afterwards because
+  the run that wrote them did not read them and reported that it had. Ten of
+  the 41 needed a second pass, one claim wrong and nine ranges re-pointed or
+  widened, which is 24 percent. Four of the ten are a single cause: anchored
+  at line numbers from a revision of `consent.cli.ts` that two commits
+  replaced on the day the skill was written, which left three refs sitting on
+  the next ref's receipt. Two more were transposed onto each other's sections.
+  None of it was visible to `check-evidence.mjs`, because the run never
+  recorded a fingerprint; the sweep's absent-word column had flagged five of
+  the six at 0.85 or above and nobody was reading it.
+  `prompts/skill-extract.md` §5q.
+
+**184 of 184 refs read as of 2026-10-24: 132 sound as cited, 43 ranges
+widened, nine claims wrong.** Counted from `relevance-audit.md` rather than
+added by hand, taking the latest verdict where a ref was read twice.
 
 ## A verdict is only as good as the lines it was read against
 
@@ -226,6 +397,28 @@ the claim into a file a reader would look in. `skills/citing-files.mjs` is the
 one place that answers which files count, shared for the reason
 `source-line.mjs` is shared: two tools disagreeing about scope leave a ref
 half-defended and neither says so. `prompts/skill-extract.md` §5p.
+
+## Which directories count
+
+A directory under `skills/` is part of this library exactly when it holds a
+`SKILL.md`. That predicate was implicit in three tools and wrong in all
+three at once until 2026-10-26: `skills/decoy-skill/SKILLS.md`, with
+correct frontmatter, a declared ref and an `[E1]` tag in its body, passed
+`check-evidence.mjs`, `trigger-coverage.mjs` and `relevance-sweep.mjs`,
+all at exit 0, one character wrong in one filename. `strayCitations` is
+the check written for precisely that and it sits after the `continue` that
+skips the directory, so it never ran.
+
+`skills/library-dirs.mjs` is the one place that answers which directories
+count, shared for the same reason `citing-files.mjs` and `source-line.mjs`
+are. Two guards now report an unread directory by name and
+`trigger-coverage.mjs` exits 1 for it without `--check`, since whether this
+library is the set of things it says it is was never a judgement a flag
+should gate. The `## The library` index above is checked against the
+directory listing in both directions by the same tool, which is what closes
+the gap that let a skill ship unlisted for three runs.
+
+The rule, and the probe that found it: `prompts/skill-extract.md` §5s.
 
 Nothing renders this library on a web surface yet. `ursa-minor/` has no
 skills route, so the receipts are readable only with the repo checked

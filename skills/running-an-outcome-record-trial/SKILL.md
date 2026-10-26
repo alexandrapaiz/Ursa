@@ -10,13 +10,16 @@ description: >
   that cannot be used, and for judging what a trial's deletion and
   survival numbers are allowed to mean. Does not fire for adjudicating
   spans a record already flagged uncertain, for changing the resolver's
-  code, or for redacting a record so it can be published.
-version: 0.4.1
+  code, for adding or changing a bound in the record gate, for turning a
+  record into tuning axioms, for auditing the trajectory signals a
+  finished record carries, or for redacting a record or otherwise
+  deciding what may leave the machine.
+version: 0.5.1
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-09-30
-revised: 2026-10-18
+revised: 2026-10-24
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -24,40 +27,40 @@ evidence:
     source: ursa-major/src/cli.ts:1-7; ursa-major/src/bin/ursa.ts:1-7
   - ref: E2
     what: the git path's pairing rule, a marked generated commit joined to the next unmarked commit touching an overlapping path
-    source: ursa-major/src/pairfinder.ts:1-8,598-620,658-660,698-712
+    source: ursa-major/src/pairfinder.ts:1-8,655-677,715-717,755-769
   - ref: E3
     what: three tests mark a commit as generated and two of them share one machine-identity pattern, the co-author trailer and the author name, while the owner-declared list is a hand-written set of substrings matched against name and email, and the author test alone is suppressed when it matches the whole history
-    source: ursa-major/src/pairfinder.ts:221-266,317; ursa-major/src/pairfinder.ts:520-531,544-548,566-577; docs/design/agent-coauthor-detection.md:71-80,175-180
+    source: ursa-major/src/pairfinder.ts:269-314,365; ursa-major/src/pairfinder.ts:568-579,592-596,623-634; docs/design/agent-coauthor-detection.md:71-80,175-180
   - ref: E4
     what: a merge commit is never a pairing target, because the human did not write that diff, and the exclusion is written against parent count
-    source: ursa-major/src/pairfinder.ts:631-634,644
+    source: ursa-major/src/pairfinder.ts:688-691,701
   - ref: E5
     what: the commit walk covers every branch by default, and walks one revision range instead when a caller passes one
-    source: ursa-major/src/pairfinder.ts:343-349
+    source: ursa-major/src/pairfinder.ts:391-397
   - ref: E6
     what: the git path records zero user turns, so it carries no user words, and its turnIndex counts files inside one commit pair rather than conversational turns, which is what turnsToAcceptance then takes a maximum over
-    source: ursa-major/src/resolve-episode.ts:122-134,192-200; ursa-major/src/stats.ts:128,136-138
+    source: ursa-major/src/resolve-episode.ts:123-135,205-213; ursa-major/src/stats.ts:132,140-142
   - ref: E7
     what: on the git path the model attribution is whatever marker string classified the commit
-    source: ursa-major/src/resolve-episode.ts:133,196; ursa-major/src/episodes.ts:25
+    source: ursa-major/src/resolve-episode.ts:134,209; ursa-major/src/episodes.ts:25
   - ref: E8
-    what: min-chars defaults to 200 and limit truncates, both paths share one size-floor predicate that exempts refusal-only records, and ursa run drops below-threshold episodes without naming them while the CI path counts its drops
-    source: ursa-major/src/bin/ursa.ts:471-472; ursa-major/src/bin/ursa.ts:494; ursa-major/src/bin/ursa.ts:515; ursa-major/src/ci/run.ts:230; ursa-major/src/launch.ts:62-78
+    what: min-chars defaults to 200 and limit truncates, both launches ask the keep-or-drop decision through one shared predicate that exempts refusal-only records from the floor, and both keep one shared tally of which bound dropped each unit, which ursa run prints along with the lowest floor that would have kept one
+    source: ursa-major/src/bin/ursa.ts:596-597; ursa-major/src/bin/ursa.ts:619; ursa-major/src/bin/ursa.ts:126-147; ursa-major/src/bin/ursa.ts:630-633,644-648; ursa-major/src/ci/run.ts:220-223; ursa-major/src/launch.ts:107-123; ursa-major/src/launch.ts:266-295
   - ref: E9
     what: the two paths accept different file extensions, and only the git path reads py, yml, toml and sql
-    source: ursa-major/src/cli.ts:21-24; ursa-major/src/resolve-episode.ts:33-36
+    source: ursa-major/src/cli.ts:21-24; ursa-major/src/resolve-episode.ts:34-37
   - ref: E10
     what: both paths cap file size, at different limits, and only the session path says so on stderr
-    source: ursa-major/src/cli.ts:27; ursa-major/src/cli.ts:89-91; ursa-major/src/resolve-episode.ts:38
+    source: ursa-major/src/cli.ts:27; ursa-major/src/cli.ts:89-91; ursa-major/src/resolve-episode.ts:39
   - ref: E11
     what: path-filter narrows which generations are kept at parse time, before any matching happens
-    source: ursa-major/src/cli.ts:117-119,133; ursa-major/src/parse.ts:71-72
+    source: ursa-major/src/cli.ts:117-119,133; ursa-major/src/parse.ts:77-78
   - ref: E12
     what: prose segments by sentence and code by line, and the choice is made from the file extension alone
     source: ursa-major/src/segment.ts:1-3; ursa-major/src/segment.ts:13-15
   - ref: E13
     what: acceptance is a declaration, and the undeclared default states that retention is not acceptance
-    source: ursa-major/src/signals.ts:30-39; ursa-major/src/bin/ursa.ts:474-479
+    source: ursa-major/src/signals.ts:30-39; ursa-major/src/bin/ursa.ts:599-604
   - ref: E14
     what: the two paths measure different stages of the funnel, 82 percent deletion against 7 percent, and a record should state which stage it measured
     source: docs/beyond-preference-pairs.md:232-240
@@ -75,7 +78,7 @@ evidence:
     source: docs/agents/incidents.md:204-210
   - ref: E19
     what: the session path's two input shapes, a Claude Code JSONL that lives on the user's own machine and where every Write or Edit is a generation, and a pasted-markdown format, and both of them record the human's real prompts rather than only assistant output
-    source: ursa-major/trial/README.md:11-40; ursa-major/src/parse.ts:13,62-63; ursa-major/src/parse.ts:75,103-108,131-141,161
+    source: ursa-major/trial/README.md:11-40; ursa-major/src/parse.ts:14,31,56-58,68-69; ursa-major/src/parse.ts:81,109-114,147-157,177,185-198
   - ref: E20
     what: abandoned work is declared with a flag rather than inferred from the record
     source: ursa-major/src/cli.ts:7; ursa-major/src/cli.ts:52
@@ -118,9 +121,17 @@ Not this:
   adjudicating. That is `skills/adjudicating-uncertain-spans`.
 - The resolver's matching, segmentation or signal code needs changing.
   That is the engineer's work, not a trial.
-- A record needs to become publishable. That is a redaction pass, which
-  is the security seat's standard and the owner's per-record sign-off
-  [E18].
+- A record needs to become publishable. Nothing generated from a record
+  ships public before the security seat's redaction pass and the owner's
+  per-record sign-off [E18]. The wider question of what may leave the
+  machine at all, including exits that are not public, is
+  `skills/clearing-a-record-for-release`, which owns three of them and
+  governs them by different rules.
+- A property of a record should become a rule the gate enforces on every
+  record. A trial reasons about one subject; a bound is a claim about all
+  of them. That is `skills/adding-a-bound-to-the-record-gate`.
+- A record exists and is about to become tuning axioms. This skill stops
+  at the record. That is `skills/distilling-a-tuning-record`.
 
 ## The procedure
 
@@ -182,11 +193,14 @@ path drops any episode whose generated side is under 200 characters, and
 truncates to `--limit` when given. Both paths now ask that through one
 predicate, which exempts a record that carries exclusions, so an episode
 whose every path was an import still produces the record whose only job
-is to say so [E8]. `ursa run` does not name what it dropped. The CI path
-does, counting its below-threshold drops separately [E8]. So on a local
-run, if step 2 counted more pairs than the run produced records, that gap
-is the default threshold rather than a bug, and you have to reconstruct
-it yourself. *Output: the two counts, and the reason for any difference.*
+is to say so [E8]. Both launches also name what they dropped, from one
+shared tally: the run summary says how many work units were found and not
+recorded, which bound dropped each, and for the ones under the floor the
+lowest `--min-chars` that would have kept at least one [E8]. So read the
+gap between step 2's count and the record count off the summary rather
+than reconstructing it. The local launch dropped silently until
+2026-10-24 and only the CI comment named the bounds [E8], so a run on an
+older build still needs the reconstruction by hand. *Output: the two counts, and the reason for any difference.*
 
 **8. Write down what the record measured, next to the record.** A record
 should state which stage of the funnel it came from [E14]. Also state

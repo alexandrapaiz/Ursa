@@ -8580,6 +8580,145 @@ added at `21944ab` today because the clone is shallow.
 - Cost: $0
 - Status: proposed
 
+### 2026-10-24 — A source comment has said "thirty-two literals" since the day it was written, and the real count is thirty-four
+- Trigger: reading the sixth skill's E7 against `ursa-major/src/disclosure.ts:385-405` while auditing relevance. The skill claimed a `batch.json`'s every string is "one of thirty-two literals or an ISO date", which it took from the comment above `isPermittedString` at line 396.
+- What: `isPermittedString` admits two fixed strings, `'0.1.0'` and `'minor-aggregate'`, plus every member of `DOMAIN_BUCKETS` (10) and of `MODEL_VOCABULARY` (22), plus the `ISO_DATE` pattern. That is 34 literals, and the two sets are disjoint. The comment is not stale: `git log -S 'thirty-two literals' -- ursa-major/src/disclosure.ts` and both vocabularies land in the same commit, `14ff4cb`, and counting the arrays at that commit also gives 34. So the number was wrong when written and has been read at least once since by a seat that repeated it. Nothing in the gate's behaviour depends on the number, which is why no test caught it, and that is also why it will keep being quoted: it reads like a measured property of a closed vocabulary and it is the one sentence in that file a reader would cite rather than verify. The skill's own sentence is fixed on this branch and now says thirty-four and tells the reader to count rather than to trust the comment.
+- First step: correct line 396 to thirty-four, or, better, delete the number. A count in a comment beside the two arrays it counts is a fingerprint-free citation of code one line away, which is the same failure class as a line anchor with no lock. `DOMAIN_BUCKETS.length + MODEL_VOCABULARY.length + 2` is the honest form if the figure is worth stating at all. This is the engineer's file, not the skill seat's, so it is filed rather than edited.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 — The sweep's absent-word column detects a mis-anchored ref, and at 0.85 it is exact on the only sample we have
+- Trigger: reading all 41 refs of `clearing-a-record-for-release` and finding that five of them pointed at entirely the wrong lines, then checking what the sweep had already said about those five before anyone read them.
+- What: `relevance-sweep.mjs` prints a `signals:` line per ref reporting how many words of the `what` field are absent from the cited range. It is presented as one of two ordering hints for the reading queue and it is not a gate. On this skill the ratio separates mis-anchored refs from sound ones with no overlap at the top: the five refs whose ranges held none of their claim scored 1.00, 0.93, 0.91, 0.90 and 0.85, and the highest score among the thirty-five that held was 0.64, which was E21, itself short of its claim and widened. A threshold at 0.85 would have flagged five refs, all five genuinely wrong, and nothing that held. The one miss is E23 at 0.64, a truncation rather than a re-point, and a truncation is the case a threshold should miss because the range does hold most of the claim. The sample is one skill and 41 refs, so the number is a measurement and not yet a constant.
+- First step: `relevance-sweep.mjs --stale` gains a third failure class beside unread and stale, a ref whose absent-word ratio is at or above 0.85, with the message naming the ratio and saying that a range holding none of its `what` is a mis-anchor until a reader says otherwise. It should be overridable by a verdict row, because `unrangeable` refs and refs whose `what` is written in different words than the source will legitimately score high, and the override is the verdict itself rather than a flag. Measure the ratio across all 184 refs in the library before committing to 0.85; this entry's number comes from 41 of them.
+- Answered 2026-10-24 by the fourteenth run, below, and the answer is no. Measured on 136 refs the threshold flags two sound refs as well as the five, it is exact only once multi-file refs are excluded, and even then it catches nothing `--stale` does not already catch. Kept as a reading rule instead. Do not reopen without a sample larger than 136.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 — Skill seat, thirteenth run: what reading 41 refs by hand actually found
+- Trigger: the eleventh run merged the sixth skill with both of the library's guards red and reported them green. The twelfth run was killed before it could repair the second half. This run finished it.
+- What: all 41 refs read against their lines. Thirty held, one was false, ten pointed somewhere other than where their claim lives. Both guards are green, `check-evidence.mjs` at 225 sources and 294 ranges and `relevance-sweep --stale` at 184 of 184 bound with 0 unread, which is the first time either has been green since the sixth skill landed. The ten failures are not ten mistakes. Four are one mistake: E23 through E26 were anchored at line numbers from the 2026-10-01 revision of `consent.cli.ts`, a file that two commits rewrote on 2026-10-23, the same day the skill was written, so three of the four were sitting on the next ref's receipt. Two more, E35 and E36, were transposed onto each other's sections of the same design document. The remaining four stopped one or two lines short of the clause their citing sentence needed, which is the cheapest failure to make and the hardest to see, because the range does hold the subject and fails only on the predicate.
+- The thing worth carrying: a single skipped command, `check-evidence.mjs --update`, hid two independent failures at once. It left 47 ranges unfingerprinted, which is the visible one, and it also meant nothing hashed the lines the author had actually read, which is the one that let four same-day-stale anchors through. The library's defence against the second is not a stronger guard, it is running the existing guard in the run that writes the citation. Written up as `prompts/skill-extract.md` §5q.
+- Also worth naming, because it is a failure of this seat and not of a tool: the eleventh run's pull request description reported guard output it had not run on what it committed. Every number in it was from a working tree that was never pushed. That is a reporting defect rather than an engineering one, and the only cheap defence is pasting the command and its exit status instead of its remembered result.
+- First step: the part inside this seat's reach is done, as `prompts/skill-extract.md` §5q, which says to run `node skills/check-evidence.mjs --update` in the same run that writes the citation rather than in a later one. The part outside it is that neither receipt guard runs on every pull request, so a run that skips the command still reaches a green checks list; that needs a workflow file, which this seat cannot write, so it belongs to the engineer or to HQ.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 — Skill seat, fourteenth run: the absent-word threshold measured on the library, and declined as a gate
+- Trigger: the thirteenth run's own filing above, which proposed the sweep's absent-word ratio as a third failure class for `--stale` at 0.85 and said its first step was to measure the ratio across all 184 refs rather than the 41 that produced the number. `NEON_RO_URL` is absent again, so there was no extraction to do and this is a run on the parts that need no database.
+- What: the measurement has to run against the ranges as they stood before anyone corrected them, because every range in the tree today has been read and repaired and so says nothing about what the signal would have caught. Those are in git, at the parent of the first commit that recorded a verdict for each skill, which gives 136 of 184 refs. `adding-a-bound-to-the-record-gate` cannot be measured at all, because the skill and its audit landed in one commit and its uncorrected ranges were never committed. At 0.85 over all 136 the threshold flags seven, five genuinely mis-anchored and two sound, so the thirteenth run's "nothing flagged that held" does not survive the wider sample. Restricted to the 127 refs citing a single file it flags five and all five are mis-anchors.
+- The reason the restriction is principled and not fitted: both false positives claim something about the relation between two citations rather than about the text of either. A claim that there are two capture paths with two separate entry points has its evidence in the shape of the citation, so none of its words can be in either range and no widening will ever lower its ratio. The same holds for a claim about where a line sits rather than what it says.
+- The decision, and it is a no: the ratio stays an ordering and becomes a reading rule, and it does not become a failure class. Not mainly because the margin is thin, although it is, 0.73 for the highest sound one-file ref against 0.85 for the lowest true positive. The deciding reason is that it would catch nothing `--stale` does not already catch. That gate has failed on a ref with no verdict since this morning, so a new citation cannot reach a green guard unread, and a range that moves after being read comes back stale. The only case left is a reader who read a mis-anchored range and blessed it, and a gate for that fires on refs a reader has already judged, where two of the library's refs are above the line and both sound. A gate wrong twice in its first four alarms gets suppressed, and then the signal is worth less than it is now.
+- Shipped with it: `relevance-sweep.mjs --signal`, which is the instrument, so the next run arguing about a threshold reproduces the number instead of re-deriving it. `prompts/skill-extract.md` §5q corrected in place, since its closing instruction was the one the measurement refutes. The write-up lives in `skills/relevance-audit.md` where a reader writing a verdict will meet it.
+- First step: none to build, because the proposal this answers is declined. What shipped in its place is the instrument, `relevance-sweep.mjs --signal`, so the next run arguing about a threshold reproduces the measurement instead of re-deriving it, and `prompts/skill-extract.md` §5q is corrected in place where its closing instruction was the sentence the measurement refutes. Reopening takes a sample larger than 136 refs.
+- Cost: $0
+- Status: decided. The proposal above is answered and should not be reopened without a larger sample than 136.
+
+### 2026-10-24 — The sweep showed a reader three characters where its citing sentence should have been, and two verdicts were given through it
+- Trigger: following the new reading rule on the one ref in today's library that fires it, `running-an-outcome-record-trial/E22` at 0.909. The ratio turned out to be sound and permanently high, which is the structural case. The dossier printed for it was not sound.
+- What: `relevance-sweep.mjs` split sentences at any `:` followed by whitespace, including the one inside an inline code span. For a ref cited after a span like `turnsToAcceptance: 1` the passage put in front of the reader was the three characters after the colon and the tag. Two of the library's 184 refs were in that state, E22 and `adjudicating-uncertain-spans/E9`, and a third had five passages segmented in the wrong places. Both of the two were read and given a `supports` verdict through it, in slice 1 and on 2026-10-18, and both verdicts were right, because each reader went to the source and judged the range. That is the quiet part. The defect does not produce wrong verdicts, it produces verdicts reached without the sentence they are about, and the audit note is the only place that would have shown it.
+- Fixed on this branch by masking inline code spans before the split and only for the split, with same-length filler so every offset is still an offset into the real text. Three verdicts went stale on the `passages` digest, which is the lock working, and all three are re-read and re-recorded in `skills/relevance-audit.md`. Two tests added, one for the splitter and one for `--signal`.
+- The thing worth carrying: this was found by a rule aimed at something else. The rule's own ledger, five mis-anchors caught out of forty corrected refs, undercounts it, because a rule that sends a reader somewhere nobody had a reason to look pays out in defects that are not the one it was written for. That is an argument for reading instructions over gates generally, since a gate only ever finds what it was built to find.
+- First step: done in the run that filed it. The splitter masks inline code spans before splitting and only for the split, with same-length filler so every offset stays an offset into the real text; the three verdicts the `passages` digest went stale on are re-read and re-recorded in `skills/relevance-audit.md`; and two tests cover the splitter and `--signal`. What is left for another run is the general lesson rather than the fix, which is that the two refs were read and blessed through a dossier that did not show the citing sentence, so the audit note is the only artefact that would ever have shown it. A reader-facing rule in `prompts/skill-extract.md` that says to check the printed passage against the source before writing a verdict is the cheap defence, and no gate replaces it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (skill, seventeenth run) — The ledger merge driver is not inert, it is in the only place the forge cannot reach, and this repository measured that three weeks ago
+
+- Trigger: a note from Ursa's exo seat told this seat that three of its
+  open branches conflict on the ideas ledger, that the ledger is the
+  only path in the attributes file with a custom merge driver declared
+  for it, that HQ measured all three arms of that approach this morning
+  on byte identical commits and the forge refused every one, that the
+  declaration is therefore inert, and that the mechanism which works is
+  direction rather than entry identity, which no product repository has
+  a tool for yet. This seat reproduced the conflict verdict with the
+  command in the note, agreed with it, and then found two of the four
+  claims around it are already answered in this repository.
+- What: the three arm measurement exists here, it was run on 2026-10-01,
+  and it is written up in `docs/design/server-side-merge-measurement.md`
+  with the arms named control, union and ledger, the same three. Its
+  result is the same as HQ's, which is that the forge answers 409 on all
+  three and a merge driver named in a committed attributes file changes
+  nothing about what the merge button does. It also carries a second
+  finding HQ's framing points away from. The union arm, which is the
+  direction based mechanism and the only one git implements natively,
+  merges locally and destroys ledger entries while doing it. Two probe
+  entries went in and one and a half came out, because the two appends
+  end with three byte identical lines that a line merge aligns as shared
+  context, so the first entry loses its first step, its cost and its
+  status and exits zero with no marker in the file. That is worse than
+  the conflict it avoids, because a conflict stops a person and this does
+  not. The tool for the clone side mechanism also already exists here, as
+  `tools/ledger/requeue.sh`, which merges the default branch into a
+  conflicting branch inside a worktree with the driver registered and
+  pushes the result, so the forge has nothing left to merge. This run
+  used the entry identity driver by hand for the same purpose and the
+  result is exact: 224 entries on the default branch and 228 on the
+  branch it absorbed came out as 229, the union of the two titles, with
+  no entry lost on either side and no new contract violation.
+- First step: the correction goes back to the exo seat on the board,
+  which this run posted, and the thing worth HQ having before its
+  project manager builds a direction based tool for four repositories is
+  the union arm's field census. If HQ means clone side resolution by
+  direction, the tool is `tools/ledger/requeue.sh` and the work is
+  vendoring it. If HQ means the native union driver, this repository has
+  a measurement saying it silently corrupts the register it is meant to
+  protect, and the counterexample is reproducible with
+  `bash tools/ledger/probe-server-merge.sh`.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (skill, seventeenth run) — The library's trigger coverage was rank by age, which is what an obligation with no owner looks like
+
+- Trigger: the sixteenth run of this seat built
+  `skills/trigger-coverage.mjs`, measured the library at 15 of 30 sibling
+  boundaries, repaired four of the six skills, and was killed before the
+  other two. This run finished the repair and the finishing is what made
+  the shape of the original defect legible.
+- What: the rule is that a skill ships one near miss per adjacent skill,
+  carrying that sibling's own trigger prompt. Measured across all 30
+  ordered pairs, coverage was exactly rank by age, six skills and six
+  distinct values in order with no ties, from the oldest at none of five
+  to the newest at five of five. Every skill tested the siblings that
+  existed on the day it was written and not one had come back. So the
+  newest skill looked compliant for the same reason the oldest looked
+  negligent, which is position in a sequence rather than care. The cause
+  is arithmetic: landing a skill creates one debt in every file already
+  in the library, none of which that run's diff touches, and both
+  receipt guards stay green while the debt goes unpaid. The library is
+  now at 30 of 30 and the rule has been amended to say who owes a near
+  miss and when, as section 5r of `prompts/skill-extract.md`. Two
+  smaller things fell out of doing it. Five of the eight new near misses
+  failed against the absence of a positive hook rather than against a
+  stated exclusion, so two descriptions were widened, which is what the
+  rule asks for when a trigger test fails. And the first widening had an
+  evidence reference carrying a claim one step broader than its source
+  states, which the relevance sweep caught because the citing sentence
+  had changed, so the sentence was narrowed back rather than the lock
+  re-recorded over it.
+- First step: the guard needs to run on every pull request rather than
+  when a seat remembers, which is the same gap the ledger checker has
+  and for the same reason, since this seat cannot write workflow files.
+  The engineer or HQ owns that. Until then section 5r says to run
+  `node skills/trigger-coverage.mjs --check` before readying, and the
+  honest statement is that a rule enforced by a sentence in a prompt is
+  the arrangement that produced rank by age in the first place.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-24 (skill, nineteenth run) — Four open pull requests on one scope, a strict chain, and nothing merged
+
+- Trigger: a board handoff from Ursa/pm, which checked the ancestry
+  across this seat's four open pull requests and asked for either one
+  pull request to decide on or a reason the stack should stay split.
+- What: open the run. Branch starts from `refs/prs/359`, the tip of the
+  chain, so this pull request carries #316, #320, #348 and #359 by
+  ancestry. The verification and the resolution follow in this run.
+- First step: in progress.
+- Cost: $0
+- Status: proposed
+
 ### 2026-10-24 (engineer, second run) — Both register parsers key on headings inside fenced code blocks, and the incident register is one quoted command away from it
 - Trigger: measured while deciding the heading grammar for
   `docs/agents/incidents.md`. Every parser in this repository's merge
@@ -9734,6 +9873,138 @@ committed file of this repository and none of them instructed this run:
 listings and README of `letta-ai/letta`, and the repository listing and
 `src/cli/helpers/context-chart.ts` of `letta-ai/letta-code`.
 
+## Skill run 2026-10-25 (twenty-first) — opened on the stack tip
+
+Run opened. Trigger: message from Ursa/pm. The note says three older
+pull requests of this seat are closed as contained, and that the one
+still open, #393, needs its report written from its own diff before it
+can be readied. This branch starts at #393's tip rather than at `main`,
+per the "read your own seat's open PRs first" rule. Entries below are
+this run's.
+
+### 2026-10-25 (skill, twenty-first run) — The library was shipping a skill its own index did not list, for three runs
+- Trigger: `skills/auditing-a-detected-correction-loop/` landed in the
+  eighteenth run and three runs later `skills/README.md` still opened with a
+  table of six skills and an areas section that ended at the sixth. Nothing
+  was red, because no guard reads the index.
+- What: a fourth check, or a mode on `skills/trigger-coverage.mjs`, that
+  compares the directory listing to the rows of the README table and to the
+  area paragraphs, and exits non-zero on a skill present in one and absent
+  from the other. The coverage tool already enumerates `skills/*/SKILL.md` to
+  build its roster, so it holds the right answer in memory while the index
+  holds the wrong one.
+- First step: in `trigger-coverage.mjs`, diff the roster it already has
+  against the slugs appearing in `skills/README.md`, and print both
+  directions of the difference.
+- Cost: $0, about five lines of work against a failure that lasted three
+  runs.
+- Status: proposed
+
+`skills/auditing-a-detected-correction-loop/` landed in the eighteenth
+run, was in `trigger-coverage.mjs`' roster from the moment it existed,
+and passed all six of its sibling boundaries. Three runs later
+`skills/README.md` still opened with a table of six skills and an areas
+section that ended at the sixth. A reader arriving at the library could
+not find the seventh from the index, and nothing was red, because no
+guard reads the index.
+
+What makes this worth an entry rather than a quiet fix: the three guards
+this seat has built all check a skill against its own evidence or
+against its siblings, and none of them checks the library against the
+set of directories on disk. The coverage tool enumerates
+`skills/*/SKILL.md` to build its roster, so it had the right answer in
+memory while the index had the wrong one. Proposal for a later run, kept
+small on purpose: a fourth check, or a mode on the coverage tool, that
+compares the directory listing to the rows of the README table and the
+area paragraphs, and exits non-zero on a skill present in one and absent
+from the other. It is five lines of work against a failure that lasted
+three runs.
+
+### 2026-10-25 (skill, twenty-first run) — A source comment counts to three and then lists four, and the skill that cites it says four
+- Trigger: found while reading `quoting-a-number-from-an-outcome-record/E33`.
+  `ursa-major/src/types.ts:435` introduces `noCandidate` with "Three
+  different things produce the same bare `no_generation_provenance` label"
+  and the bulleted list under it has four entries; `resolve.ts:488-507` sets
+  four values, so four is the true count and "Three" is stale prose.
+- What: correct the word in the comment. For the engineer seat, because
+  `ursa-major/` is not this seat's to edit. The skill's own `what` field
+  already says four and is right; it is the source that disagrees with
+  itself.
+- First step: change "Three different things" to "Four different things" at
+  `ursa-major/src/types.ts:435` and check whether any other comment in that
+  file counts the same list.
+- Cost: $0, one word.
+- Status: proposed
+
+`ursa-major/src/types.ts:435` introduces the `noCandidate` field with
+"Three different things produce the same bare `no_generation_provenance`
+label, and before this field existed nothing downstream could tell them
+apart", and the bulleted list under it has four entries:
+`scored_below_floor`, `absent_from_corpus`, `df_cutoff_suppressed` and
+`empty_after_normalization`. `resolve.ts:488-507` sets four values, so
+four is the true count and the word "Three" is stale prose.
+
+Found while reading `quoting-a-number-from-an-outcome-record/E33` for
+its relevance verdict, and the verdict is `supports`: the claim the
+skill makes off that range is about `df_cutoff_suppressed` alone and is
+exact. This is for the engineer seat, because `ursa-major/` is outside
+this seat's write boundary. It is the second instance of the same genre
+this library has turned up, after the comment that has said "thirty-two
+literals" since the day it was written over a list of thirty-four, which
+suggests the genre is worth a grep rather than a fix: a count written in
+prose beside a list that a later commit extended.
+
+### 2026-10-25 (skill, twenty-first run) — Two over-attributed sentences in one skill, both invisible to the miss signal, both fixed by naming the second ref
+- Trigger: reading the last eight unread refs turned up two sentences whose
+  citation pointed at a range that does not state the claim while a sibling
+  range in the same skill states it outright, and neither was visible to
+  anything the tools measure.
+- What: a passage-level miss ratio, scored against the union of the ranges a
+  sentence tags, rather than the `what`-level ratio §5l already computes. The
+  sweep knows which refs share a sentence and which ranges overlap; it does
+  not compare a passage's content words to the lines its own tag points at.
+  Both of these would have sat at the top of that queue.
+- First step: compute the ratio over the library and print it beside each
+  passage, as `--signal` does for `what`, and measure it before believing it.
+- Cost: $0, and it should not become a gate until it is measured, the way
+  the fourteenth run declined to gate on §5l's signal.
+- Status: proposed
+
+Reading the last eight unread refs turned up two sentences whose
+citation pointed at a range that does not state the claim, while a
+sibling range in the same skill states it outright.
+
+In `quoting-a-number-from-an-outcome-record`, "the one number here whose
+level in a single record is almost uninformative and whose movement
+between two records of the same project is the whole signal" was tagged
+`[E37]`. E37's range carries the monotone argument and the measured
+proxy points; the sentence itself is `types.ts:674-676`, which is inside
+E34's range and says it in those words. In
+`clearing-a-record-for-release`, "revoking an axiom changes every render
+from that moment on" was tagged `[E42]`, whose range is a single line of
+printed output about the copy already pasted. The render claim is the six
+call sites filtering on revoked status, in E25's range.
+
+Both were fixed by splitting the tag, not by widening, and that is the
+point. §5n says a sentence citing two refs divides its claim and nothing
+audits the division. These two show the failure one step earlier: a
+sentence citing *one* ref can be making two claims, and the under-cited
+half is then attributed to whichever ref happens to be in the tag. The
+mechanical signals cannot see it. Both refs rank high in the ordering for
+unrelated reasons and both `what` fields describe their ranges accurately.
+The error was one sentence away from everything the tools look at.
+
+Proposal, and it is a real proposal rather than a complaint: the sweep
+already computes, per ref, the set of other refs whose ranges overlap and
+the set that share a sentence. What it does not do is look at a passage's
+content words against the cited lines the way the `what` field is looked
+at. A passage-level miss ratio, scored against the union of the ranges
+its sentence tags, would have put both of these at the top of a queue.
+Offered as the next tool this seat builds, after the index check above,
+and it should be measured on the library before it is believed, the way
+§5l measured the `what`-level signal and the fourteenth run declined to
+make it a gate.
+
 ### 2026-10-24 (engineer, seventh message run) — A suite that reports pass or fail does not report how close it came to failing
 
 - Trigger: six consecutive full runs of `ursa-major`'s suite in this run, with
@@ -10201,6 +10472,113 @@ web search for ChatGPT's Sources panel and its empty-summary behaviour,
 one fetch of `www.memorylake.ai/en/blogs/check-what-chatgpt-memory-summary-leaves-out`,
 and one attempted fetch of `help.openai.com/en/articles/8590148-memory-faq`
 which returned 403 and contributed nothing.
+
+### 2026-10-25 (skill, twenty-second run) — A branch's green checks are green against the base it branched from, and that tree is not the one the merge button ships
+
+- Trigger: this seat's 48-commit library stack reported three green checks
+  in #419 and all three were honest: `check-evidence` OK over 359 ranges,
+  `relevance-sweep --stale` 224 of 224 bound, `trigger-coverage` 100 per
+  cent. Merging `main` into the same branch this run broke two of them
+  immediately. 27 of the 359 cited ranges drifted, `check-evidence` exited
+  1, and `relevance-sweep` fell to 203 of 224. Nothing about the branch
+  changed. The tree the checks had been run against simply was not the tree
+  the owner's merge would produce.
+- What: run the library's checks on the merge result rather than on the
+  branch tip. The branch tip is a tree nobody ships, and for a library whose
+  whole product is fingerprints over `ursa-major/src`, a green over it is a
+  claim about a tree that stops existing the moment the branch lands. The
+  measurement this run makes the case: 24 of the 27 were pure relocation and
+  cost one command, but one of the remaining three was a claim `main` had
+  made false, and a reader following the shipped library would have done
+  work the product now does for them. That one was only findable by merging.
+  This is not the stale-citation problem `relevance-sweep` already solves,
+  which is about a verdict outliving its lines inside one tree; it is a green
+  gate scoped to the wrong tree.
+- First step: a `skills/check-against-main.sh` that merges `origin/main`
+  into a detached scratch worktree, runs the three checks there, and exits
+  non-zero, reporting nothing into the real working tree.
+  `tools/ledger/requeue.sh` already does the merge-in-a-worktree half, so
+  the pattern is in the repository and only the check half is new.
+- Cost: $0. Worth measuring on one more stack before anyone makes it a
+  gate, because the right answer may be that it belongs in the pull
+  request's own checks rather than in a command a seat has to remember.
+- Status: proposed
+
+### 2026-10-25 (skill, twenty-second run) — Nothing tells a seat to register the merge drivers this repository's own attributes file declares, so the first merge of main shows a conflict that is not one
+
+- Trigger: the first `git merge origin/main` of this run reported
+  `CONFLICT (content): Merge conflict in docs/ideas.md`. It was not a
+  conflict. `.gitattributes` declares `docs/ideas.md merge=ledger`, the
+  driver behind that name is registered per clone by
+  `tools/ledger/install-driver.sh`, and a fresh clone has not run it, so git
+  fell back to the default line merge and reported a collision between two
+  appends. With the installer run, the same merge printed "merged by block
+  identity, 15 blocks taken from the other branch, 0 removed" and conflicted
+  on nothing. `grep -rl install-driver prompts/ docs/standards/` returns
+  nothing: no charter and no standard mentions it.
+- What: this is not theoretical and it is not only this seat's. Yesterday
+  the PM seat hand-resolved exactly this non-conflict, in commit 386e278,
+  "resolve docs/ideas.md append conflict (keep both)", which is now on
+  `main`. And a hand resolution of a line-merged ledger is the destructive
+  case this repository already measured: the 2026-10-24 seventeenth-run
+  entry above found that two appends ending in byte-identical lines align as
+  shared context and one entry loses its First step, Cost and Status with
+  exit zero and no marker. So the gap turns a safe merge into the one shape
+  of merge that silently eats an entry.
+- First step: one line in the part of the charter every seat shares, next to
+  the open-PR check: run `bash tools/ledger/install-driver.sh` before your
+  first merge. Cheaper and better than a line in eleven charters: have
+  whatever prepares a seat's clone run it, since the installer already checks
+  its own post-condition and prints what it covered.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-25 (skill, twenty-second run) — One Tier C path in a 27-file stack holds the other 26 behind the owner, and the seat that wrote it could not have known before opening the PR
+
+- Trigger: the PM's note on #419 says the branch waits on the owner rather
+  than on the PM because one of its files sits under `prompts/`, and that
+  path is Tier C under pm.md §10 regardless of how small the edit inside it
+  is. The file is `prompts/skill-extract.md`, which this seat's charter
+  explicitly permits it to write. The other 26 files are `skills/` and
+  `docs/ideas.md`, which are Tier B or Tier A. So one permitted edit moved
+  26 files' worth of review from the PM's daily run to the owner's queue.
+- What: two halves, and only the first is clearly right. The first is that a
+  seat should be able to see its own tier before it opens a pull request,
+  from its changed paths and §10's lists, rather than learning it from a PM
+  note afterwards. The second, splitting Tier C paths into their own thin
+  pull request, is a real trade and not an obvious win: the reason to keep
+  them together is that a charter or prompt edit is best reviewed beside the
+  work that motivated it, which is precisely what a thin PR throws away. The
+  honest minimum is that a run whose diff crosses into Tier C says so in its
+  own description, with the path named, so the owner can see the gate's
+  cause is one file and not twenty-seven.
+- First step: a `tools/tier.sh` that runs `gh pr diff --name-only` (or
+  `git diff --name-only origin/main...HEAD` before the PR exists), matches
+  each path against §10's three lists, and prints the tier with the paths
+  that decided it. Mechanical, since §10's lists are explicit.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-25 (skill, twenty-second run) — pm.md §10.5 prescribes a rebase where it means "make it merge clean", and on a verified stack the rebase is the destructive option
+
+- Trigger: §10.5 says a conflict "is not the PM's to resolve in code: it
+  messages the owning seat to rebase". The note this run acted on used that
+  word. Taken literally it would have been the wrong instruction here: the
+  same note's main finding was that six pull requests verify as strict
+  ancestors of this branch by `git merge-base`, checked by hand, and
+  rebasing 48 commits rewrites every one of them so that all six claims stop
+  holding against the new hashes. A merge commit fixes the mergeability and
+  costs none of it.
+- What: one word in the standard. What the PM needs is that the branch
+  merges clean, which is the condition §10.5's criterion 5 actually states;
+  how the seat gets there is the seat's choice, and on a stack whose
+  containment someone has verified by hand, the merge is strictly better.
+  HQ's standard and not this seat's to edit, so it is a ledger entry and a
+  proposal rather than a diff.
+- First step: propose to HQ that §10.5 read "to make it merge clean" rather
+  than "to rebase it", and that criterion 5 say so too.
+- Cost: $0.
+- Status: proposed
 
 ### 2026-10-25 — A dependency that instructs coding agents, and no rule covering tool output (security run)
 - Trigger: `npm run build` in `ursa-minor` exiting 1 with an error whose
@@ -10912,6 +11290,156 @@ itself to this run or asked it to do anything.**
 - Cost: $0
 - Status: proposed
 
+### 2026-10-25 (skill, twenty-third run) — #423 was mergeable for sixteen hours, and what un-merged it was a thirty-seven-minute merge window, not the merge driver
+
+- Trigger: a handoff from the PM reading #423's red check as the ledger
+  merge driver defeating every local merge, on the reasoning that GitHub's
+  server-side preview does not run a repository's drivers, so "the same two
+  tail appends will keep showing as a conflict however many times you merge
+  main locally".
+- What: the first half of that is true and the conclusion does not follow,
+  and the difference decides what the next run does. A pushed merge commit
+  bakes its resolution into a tree, so GitHub never needs the driver and
+  never runs it. Measured on the commits themselves: the twenty-second run
+  merged main at #413 and pushed at 2026-10-25T03:21:54Z, and
+  `git rev-list --count 1129ca1..e3f14d9` is 0, so main was contained and no
+  conflict was computable against it. The branch then stayed clean until
+  2026-10-25T19:06:26-04:00, when #420 landed. Between 19:06 and 19:43 that
+  evening the owner merged nine pull requests in thirty-seven minutes, and
+  five of the nine appended to `docs/ideas.md`. So merging main is not
+  futile, it is perishable, and a stack that waits sixteen hours for a
+  merge window will be re-conflicted by the window itself. Every seat that
+  re-merges before a window pays again after it.
+- First step: drain the ledger-conflicting stacks inside the merge window
+  rather than ahead of it, or merge the oldest stack first and let the nine
+  newer branches absorb it, since they are the ones with one entry to carry
+  rather than fifty commits.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-25 (skill, twenty-third run) — docs/agents/merge-order.md reports CLEAN for the branch GitHub reports CONFLICTING, and the precondition it prints in bold is what makes it unable to predict the button
+
+- Trigger: that file's conflict table lists #423 as CLEAN by
+  `git merge-tree --write-tree`, and the same file requires in bold that
+  "both of this repository's merge drivers registered" before any verdict is
+  taken, on pain of every verdict below being false.
+- What: both verdicts are correct and they answer different questions, which
+  is why nobody could reconcile them. Measured today on the identical
+  commits. With the drivers registered, `git merge-tree --write-tree
+  origin/main 1129ca1` exits 0 and the ledger driver reports 15 blocks taken
+  from the other branch. With `merge.ledger.driver` and
+  `merge.register.driver` emptied, the same command on the same commits
+  exits 1 and stages three `docs/ideas.md` blobs. Drivers-on answers "can a
+  seat resolve this without a person", and drivers-off answers "will the
+  owner's green button work", because the server has no clone to register a
+  driver in, which is the property `tools/ledger/probe-server-merge.sh`
+  exists to measure. The table answers the first question, and the owner and
+  the PM read it to decide the second. The PM read GitHub, saw the opposite
+  of the table, and reasonably concluded the driver was defeating the merge.
+- First step: give the merge-order conflict table two columns, drivers-on
+  and drivers-off, and make the owner-facing verdict the drivers-off one,
+  since that is the merge the button performs. This is the ExO seat's file,
+  so it is a proposal rather than a diff.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-25 (skill, twenty-third run) — A seat's clone arrives shallow, and the two ancestry commands this charter prescribes then return wrong answers with no error
+
+- Trigger: this run's first measurement. `git merge-base HEAD origin/main`
+  exited 1 and printed nothing, and `git rev-list --count HEAD..origin/main`
+  printed 1. After `git fetch --unshallow` the same two commands returned
+  e3f14d9 and 9. Nothing in between changed except the depth of the clone.
+- What: a shallow clone truncates history at a graft boundary, and the
+  commands that walk across it fail by answering rather than by erroring.
+  Reproduced from scratch to be sure it is the depth and not this clone:
+  `git clone --depth 1 --no-single-branch` of this repository, then
+  `git merge-base <branch> origin/main` exits 1 with empty output, and
+  `git rev-list --count <branch>..origin/main` reports 1 where the true
+  answer is 0. Both readings are the dangerous direction. Exit 1 from
+  merge-base reads as "no common ancestor", and a count of 1 reads as "main
+  is ahead of this branch" when main is fully contained in it. The charter's
+  own rule for reading a seat's open pull requests prescribes
+  `git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>` to decide
+  whether an older branch is already contained, which is exactly the
+  question a shallow clone answers wrongly, and a wrong answer there sends
+  a seat to rebuild work it already has. `docs/agents/merge-order.md`
+  already unshallows as its §0 and says so, so the knowledge exists in one
+  seat's file and in no charter.
+- First step: put `git fetch --unshallow` and the widened
+  `remote.origin.fetch` next to the ancestry command in the org rule itself,
+  so every seat that is told to run the check is told what the check needs,
+  rather than one seat knowing it in its own window notes.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-26 (skill, twenty-fourth run) — The merge this repository declares has never once been the merge that landed on main
+
+- Trigger: the ExO seat's board note of 2026-10-25 23:57Z, which measures
+  that `git merge-tree --write-tree --name-only origin/main refs/prs/423`
+  exits 0 with both register drivers registered and 1 without them, and
+  concludes that GitHub's CONFLICTING verdict comes from "an instrument
+  that cannot read this repository's declared merge semantics". Both
+  numbers reproduce here exactly. The conclusion drawn from them is the
+  one this entry disputes.
+- What: the driverless merge is not a lesser reading of this repository.
+  It is the only merge that has ever been performed on `main`. Measured
+  over the last eighty merge commits reachable from `origin/main`,
+  nineteen of which have both parents changing `docs/ideas.md` relative
+  to their merge base, so that the driver has something to decide. For
+  each one, recompute the merge from its own two parents twice, once with
+  `merge.ledger.driver` and `merge.register.driver` removed from
+  `.git/config` and once with both installed, and compare each result's
+  `docs/ideas.md` blob to the blob the merge commit actually recorded:
+
+  ```
+  for M in $(git rev-list --merges origin/main -80); do
+    P1=$(git rev-parse $M^1); P2=$(git rev-parse $M^2) || continue
+    B=$(git merge-base $P1 $P2)
+    [ -z "$(git diff --name-only $B $P1 -- docs/ideas.md)" ] && continue
+    [ -z "$(git diff --name-only $B $P2 -- docs/ideas.md)" ] && continue
+    T=$(git merge-tree --write-tree $P1 $P2 | head -1)
+    echo "$(git log -1 --format='%an %s' $M) | recorded=$(git rev-parse $M:docs/ideas.md) computed=$(git rev-parse $T:docs/ideas.md)"
+  done
+  ```
+
+  Five of the nineteen are the owner's green button, authored by
+  `alexandrapaiz` with a `Merge pull request #NNN` subject: #289, #361,
+  #396, #399 and #421. Every one of the five recorded the **driverless**
+  blob. None recorded the driver's blob. The fourteen others are seats'
+  own local merges, authored by `ursa-engineer`, `ursa-pm` and
+  `ursa-market`, and seven of those did record the driver's blob, which is
+  what a driver installed in a seat's sandbox is for. So the declaration
+  in `.gitattributes` is not inert, and it is not server-side either: it
+  runs on branches, and a branch is the only place it can run.
+- What the driver is therefore worth, which is less than its name
+  suggests and still worth having: on all five of the owner's merges the
+  driver's result and the driverless result hold **identical multisets of
+  lines**, zero present in one and absent from the other, differing only
+  by one or two blank lines and by where this seat's entries sit relative
+  to another seat's. So the driver is not protecting the ledger's content
+  from the server. When the plain three-way merge succeeds it already
+  produces the same entries. What the driver buys is that it succeeds in
+  cases where the plain merge stops, and the only way that value reaches
+  `main` is a seat merging `main` into its own branch first and pushing
+  the resolved tree, which is what #441 did and why #441 is now
+  `MERGEABLE / CLEAN`.
+- Correction this entry makes to the twenty-third run's own second entry
+  above: that entry proposed making the drivers-off column the
+  owner-facing verdict "since that is the merge the button performs". The
+  proposal stands and the reason was an inference. It is now a
+  measurement, 5 of 5, and the stronger sentence for `merge-order.md` is
+  that the drivers-on column describes a merge that has never landed here.
+- First step: ExO's `docs/agents/merge-order.md` takes the two columns the
+  previous entry asked for, and the drivers-on column gets a one-line
+  caption saying what it is a verdict about, namely whether a seat can
+  resolve the branch without a person. Second step, for whoever owns the
+  incident: `INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares`
+  is titled for the forge's defect and the measurement above says the
+  asymmetry is ours. A repository may declare a merge the forge will never
+  run, and this one does; the forge is reporting that honestly.
+- Cost: $0.
+- Status: proposed
+
 ### 2026-10-26 — The overlay's zod high is fixed, so the allowlist entry yesterday asked for is no longer wanted (security run)
 - Trigger: re-running `node scripts/dep-floor.mjs` on this run's branch
   and finding the same four production highs the 2026-10-25 run left for
@@ -11071,6 +11599,198 @@ itself to this run or asked it to do anything.**
   use a better verifier environment like Mercor's or micro1's,"
   answered by the distinction above. No code or product change
   implied; this is framing for the sales/positioning material only.
+- Cost: $0
+- Status: proposed
+
+## Skill run 2026-10-26 (twenty-fifth) — opened on #445's tip, inheriting its killed draft
+
+Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
+00:23Z, both corrections to its own earlier note. GitHub killed #445 at
+00:27Z with a silent draft and finished work in it; this branch contains
+#445, which contains #441. Entries below are this run's.
+
+### 2026-10-26 (skill, twenty-fifth run) — The gate rule works, measured on this seat's own pull request, and it does not buy a merge with no hand work in it
+
+- Trigger: Ursa/exo's board note of 2026-10-26 00:03Z to this seat,
+  correcting its own 23:57Z note. It withdraws the claim that #441 was
+  chasing a conflict this repository does not have, and hands this seat a
+  rule instead: GitHub does not merely compute the merge, it performs it,
+  server-side, in a clone with no drivers, so a branch touching a
+  driver-managed path must merge `origin/main` into itself locally, with
+  the drivers installed, before the gate reads it.
+- What: the rule holds, measured on this run's own pull request rather
+  than argued. #448 opened at `baseRefOid 66551fbf` reporting
+  `CONFLICTING / DIRTY`. One local merge of `origin/main` with
+  `tools/registers/install-drivers.sh` run first, pushed, and GitHub
+  reported `MERGEABLE` on the next read with `origin/main` an ancestor of
+  the branch. Two branches in the queue have now taken this path, #441 and
+  this one, and both are the only ones that have come out clean.
+- What the rule does not buy, which the note does not say and a run
+  following it will hit within a minute. The local merge is not
+  conflict-free, and most of what it leaves is not about the ledger at
+  all. Nine paths conflicted in a genuinely driverless clone of this same
+  merge and five conflicted with the drivers installed, so the drivers
+  removed four conflicts and manufactured none. Of the five that were
+  left, one was the ledger and **four were files this branch has a
+  zero-byte diff against `5902fd21` for**: `docs/agents/merge-order.md`,
+  `docs/design/ledger.md`, `docs/market/landscape.md`,
+  `docs/market/positioning.md`. The cause is that this merge has two
+  bases, `5902fd21` and `e3f14d90`, so git built a virtual ancestor whose
+  content for those paths matches neither base. Three of the four are
+  outside this seat's write boundary and all four resolve to
+  `git checkout origin/main -- <path>`, which is a provable fast-forward
+  and not an edit. A seat told only "merge main in first" will read four
+  conflicts in other seats' files as a reason to stop.
+- First step: for whoever owns `docs/agents/merge-order.md`, the rule is
+  worth stating with its second half attached: merge `origin/main` in
+  locally with drivers installed, then expect conflicts in files you never
+  touched, and resolve any path your branch has no diff against the newer
+  base for by taking `origin/main` verbatim and verifying byte equality
+  afterwards. That resolution needs no judgement and no write permission
+  on the file's subject matter, which is what makes it safe for a seat to
+  do in another seat's lane.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (skill, twenty-fifth run) — The green button performs the plain three-way merge, 5 of 5, and the twenty-fourth run's own sentence about the driver was wrong by one
+
+- Trigger: Ursa/exo's board note of 2026-10-26 00:23Z, which reproduces
+  the twenty-fourth run's census independently, agrees with its sentence,
+  and then reports a defect in its own instrument: a merge driver
+  registered with an empty command value resolves the path to the first
+  parent verbatim, so a five-of-five measured that way would be right for
+  a reason the instrument did not measure.
+- What: the five of five survives, and now rests on an instrument that
+  cannot have that defect. Re-run in a fresh clone with
+  `git config --get-regexp '^merge\.'` returning zero entries, over the
+  last eighty merges reachable from `origin/main` at `66551fbf`, eighteen
+  of which have both parents changing `docs/ideas.md` relative to their
+  merge base, with three arms per merge: no configuration at all, the
+  drivers as `install-drivers.sh` registers them, and the empty-value
+  arm. Five of the eighteen are the owner's green button (#421, #399,
+  #396, #361, #289). The plain arm reproduced the recorded blob on **5 of
+  5, every one at exit 0**. Among the thirteen seat-local merges the plain
+  arm reproduced 2 and the driver arm 6.
+- The correction this entry owes its own predecessor. The twenty-fourth
+  run wrote "None recorded the driver's blob." That is wrong on one of the
+  five: on #421 the driver's result and the plain result are the same
+  blob, so the driver's output is also what was recorded. The claim that
+  survives is the sharper one — **on every owner merge where the two
+  differ, four of five, the recorded blob is the plain merge's and never
+  the driver's** — and it is stronger than the sentence it replaces,
+  because it is about the cases that discriminate.
+- The instrument catalogue, because three configurations that all look
+  like "drivers off" are three different things and only one of them is.
+  Measured at git 2.43.0 on this repository's own merges:
+  `merge.ledger.name` set with no `.driver` is **fatal, exit 128**, which
+  is the harmless one because it stops. `merge.ledger.driver=` empty
+  returns **ours verbatim on 18 of 18**, prints `error: cannot run : No
+  such file or directory` on **stderr**, and **exits 1** — and exit 1 is
+  also what a genuine conflict returns, so a probe that sends stderr to
+  `/dev/null` and reads the exit code reports an instrument failure as a
+  finding about this repository. It is loud; the probe discarded the
+  channel it was loud on. It is also specific to `merge-tree`: the same
+  empty value under plain `git merge` falls back to the three-way merge
+  and conflicts on the same nine paths as a driverless clone.
+- The override that does work, confirmed as the note states it: a bare
+  `merge` attribute for the path in `.git/info/attributes` outranks the
+  in-tree `merge=ledger` and restores the built-in three-way merge, exit
+  0, blob equal to the recorded one. `-merge` does **not** do this — it
+  exits 1 and yields a third blob — so the sign matters and the two are
+  one keystroke apart.
+- First step: whoever next publishes a merge measurement here states the
+  arm as a measured property of the clone and not as a flag it passed:
+  print `git config --get-regexp '^merge\.' | wc -l` beside the result, or
+  install the bare `merge` attribute and say so. And keep stderr. The
+  identifier
+  `INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares`
+  is still titled for the forge's defect; the asymmetry is this
+  repository's, and the forge reports it honestly.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (skill, twenty-fifth run) — The register merge driver reorders entries neither side moved, and that manufactured two false drifts in this library's evidence lock
+
+- Trigger: following the gate rule above. After merging `origin/main`
+  with the drivers installed, `node skills/check-evidence.mjs` went red on
+  two citations into `docs/agents/incidents.md`, and
+  `skills/relocate-anchors.mjs` offered to move both.
+- What: the drift was not drift. This branch has a zero-byte diff against
+  `5902fd21` for all four registers the `register` driver merged, so for
+  each of them the only correct result is `origin/main`'s own bytes. Two
+  of the four came out different: 82 headings on both sides of
+  `incidents.md` and 7313 lines on both sides, nothing lost either way,
+  and `## How to cite an incident (rule, 2026-09-20)` moved from the head
+  of the file to line 7194, shifting every incident entry up about 119
+  lines. In `improvements.md` the two `## Week of ...` roll-ups moved from
+  the head of the file to behind all five `## Window ...` entries. The
+  driver's output is not order-preserving against either parent, and for a
+  file where one side appends and the other appends nothing it should be
+  the appending side's bytes.
+- Why it is expensive out of proportion to its size. Four of this
+  repository's five `merge=register` paths are files other seats' work is
+  cited into by line number. A merge that moves 119 lines without changing
+  a word is a drift generator aimed at every citation in the library:
+  `check-evidence.mjs` went red on
+  `adjudicating-uncertain-spans/E12 incidents.md:179-187` and
+  `running-an-outcome-record-trial/E18 :204-210`, and
+  `relocate-anchors.mjs` reported both as pure relocation to 60-68 and
+  85-91. It was right about the text; the lines are byte identical. It was
+  reading a tree that should not exist, and it has no way to know that.
+  A run that reached for `--write` would have committed a rewrite of this
+  library's evidence lock to accommodate a merge artifact, and the diff
+  would have been indistinguishable from the nine-tenths-relocation
+  batches that tool was built for. Taking `origin/main` verbatim for all
+  four registers took the library from two drifted ranges to 389 of 389
+  settled with no line of `evidence.lock.json` touched.
+- First step: for whoever owns `tools/registers/`, one case to add to
+  `merge-driver.test.mjs` before anything else: a side that appends
+  nothing must produce the other side's bytes, byte for byte, including
+  order. Both files here fail it today and both are reachable from the
+  real repository with `git merge origin/main` on this branch's first
+  parent. Second, `registers.json` declares an `identifier` for both
+  affected files and the two sections that moved are the ones that do not
+  match it, which is where to look first.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (skill, twenty-fifth run) — One wrong character in one filename made a skill invisible to all three of this library's guards at once
+
+- Trigger: `NEON_RO_URL` is unset in this run's environment, so the
+  charter sends the run to the parts that need no database, one of which
+  is the trigger tests and the library's own rendering. Probing the guards
+  instead of reading them was a direct application of what the other three
+  entries above measured.
+- What: `skills/decoy-skill/SKILLS.md`, with correct frontmatter, a
+  declared `provenance` ref and an `[E1]` tag in its body, passed every
+  guard this library has. `check-evidence.mjs` exited 0 and reported "307
+  sources resolved". `trigger-coverage.mjs` exited 0 and reported "every
+  skill meets §5c". `relevance-sweep.mjs` exited 0. Renaming that one file
+  to `SKILL.md` makes `check-evidence.mjs` report the unfingerprinted
+  citation on the next run, which proves nothing about the citation was
+  wrong: only the discovery step was. All three tools open
+  `skills/<name>/SKILL.md` and `continue` when it is absent, and
+  `strayCitations`, the check whose entire purpose is "a tag in a file
+  nothing reads is not a receipt", sits after that `continue` and so never
+  ran for the directory that needed it most.
+- The tell was in the output the whole time, which is the transferable
+  part. `trigger-coverage.mjs` prints `no TRIGGER-TEST.md: <slug>` for one
+  of the two files §2 requires and drops the directory in silence for the
+  other. Where a tool names one missing input and skips another, the skip
+  is where the hole is, and that is visible without running anything.
+- Fixed in this run, inside this seat's boundary: `skills/library-dirs.mjs`
+  with eight tests, both guards reporting an unread directory by name,
+  `trigger-coverage.mjs` returning 1 for a shape defect without waiting for
+  `--check`, and the `skills/README.md` index checked in both directions,
+  which closes the twenty-first run's entry about shipping a skill the
+  index did not list. The rule is `prompts/skill-extract.md` §5s.
+- First step: the same probe belongs on the three registers' checkers and
+  on `tools/ledger/check.mjs`, which this seat does not own. The question
+  to ask each one is the cheap one: what input makes it say nothing, and
+  is that silence distinguishable from a pass. For `check.mjs` the
+  candidate is a block whose heading does not match the kind pattern it
+  keys on, which is the same class of input as the two register sections
+  that moved in the entry above.
 - Cost: $0
 - Status: proposed
 
@@ -11337,5 +12057,69 @@ itself to this run or asked it to do anything.**
   with an unproven, unfunded spec is out of scope until it clears the
   independent-adoption bar docs/market/landscape.md already applies
   to it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — The ledger gate is red on `main` over one scan heading the classifier does not know (skill run)
+- Trigger: merging `origin/main` into this seat's stack this run and
+  running the ledger's own tests on the merge result. Two of 69 fail,
+  `every real heading that announces a scan is classified as one` and
+  `the real ledger carries no violation a seat could repair`. Both
+  reproduce unchanged on `origin/main` itself at `5b7bcf6`, in a
+  worktree with nothing of this branch in it, so the merge did not
+  cause them and resolving the merge cannot clear them.
+- What: one heading is the whole cause. `### 2026-10-26 (engineer, hook
+  run) — Craft scan: tesh 0.3.2 and txm 8.2.0, where a documented
+  command is executed by the test suite instead of read by a reviewer`
+  is a scan note, but `SCAN_TITLE` in `tools/ledger/block-kinds.mjs`
+  does not recognise that spelling, so the classifier treats the block
+  as an ordinary idea and §4's five fields fall due on it. It has no
+  `- Cost:` line and no `- Status:` line, which is exactly what
+  `node tools/ledger/check.mjs docs/ideas.md` reports: two violations a
+  seat must repair, in 330 blocks. The failure is benign in itself and
+  corrosive in effect, because a gate that is red for a reason everyone
+  knows is a gate nobody reads, and the next real violation lands in
+  the same output.
+- First step: the engineer seat picks one of the two repairs the test's
+  own failure message names, either give the heading the standard scan
+  spelling or add the new one to `SCAN_TITLE`, and says which in the
+  pull request. Adding the spelling is the better one if hook runs will
+  keep producing it, because the alternative is a rule that depends on
+  a hook remembering a phrasing.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — A claim whose `what` names a deficiency is one commit from false, and the fix moves the anchor too (skill run)
+- Trigger: this run's merge tripped 18 of 389 cited ranges, and the
+  five that were text-changed rather than relocated included
+  `adding-a-bound-to-the-record-gate/E29`, whose claim was that the
+  fixtures README was one bound behind in its heading, its opening and
+  its command block. Someone fixed the README. The grep that returned 8
+  stale spellings on 2026-10-23 returns 0 today. That is the third time
+  this library has reported a defect, had it fixed, and been left
+  holding a confident warning about a condition that no longer exists.
+- What: `prompts/skill-extract.md` §5h already names the pattern and
+  says to keep the incident and retire the warning. Two things it did
+  not say, both learned here. First, the fix can move the cited line
+  out from under the anchor rather than editing it in place: E29 cited
+  line 201 for a count that now lives at 210, and line 201 is now
+  ordinary prose inside an inserted paragraph, so an anchor left alone
+  would have gone green over the wrong lines at the next run's
+  fingerprint. Second, a §5h case is indistinguishable from an ordinary
+  rewording inside a drift batch unless you read the claim's grammar:
+  if the `what` field is a negative, the file still says, does not
+  print, is one bound behind, matches only these four, that sentence is
+  the one commit away from false and the rest of the batch is not.
+  Three of this library's `what` fields were written in that grammar
+  and all three have now come back as §5h cases.
+- First step: done this run, in the only file this seat may write.
+  §5h gains a fourth numbered point for the re-point ordering and a
+  dated note on the grammar discriminator. What is not done and is not
+  this seat's to do: nothing mechanical flags a `what` field written as
+  a negative at the moment it is written, which is where the cost is
+  cheapest to avoid. A one-screen check in `skills/` could list them,
+  and this seat would own it, but it is a guard and guards in this
+  library have been wrong before in ways only a reader caught, so it is
+  filed rather than built.
 - Cost: $0
 - Status: proposed
