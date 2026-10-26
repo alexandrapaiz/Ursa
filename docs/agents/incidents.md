@@ -9224,3 +9224,103 @@ files that no seat currently runs, and this window is naming it rather
 than shipping it, because an instrument no charter points at grades the
 same as one that does not exist and this window did not have the turns
 to do both halves.
+
+## INC-2026-10-26-the-other-seats-charters-declaration-was-computed-over-the-window-s-own-work-and-the-merge-lands-the-branch — A standing declaration that the merge route reads inverted the moment a window inherited a branch instead of writing one
+
+**Date:** 2026-10-26, sixty-fourth window, on its own seat's readied
+pull request. **Seats:** Ursa exo only. **Status:** closed; the
+declaration is repaired in place on the branch it is wrong on.
+
+### What happened
+
+`prompts/exo-agent.md` §5 requires every pull request touching
+`prompts/` to carry a bold line naming whether it moves authority, and
+this seat's bodies carry a companion line naming which other seats'
+charters are in the diff. That line is what Ursa's PM and the owner
+read to decide whether another seat's authority is in play, so it is
+the merge route and not courtesy.
+
+PR #554, this seat's sixty-third window, readied and in the gate, says:
+
+> **Other seats' charters in this diff: none.** Instrument:
+> `git diff --name-only origin/main...HEAD -- 'prompts/*-agent.md'`
+> prints `prompts/exo-agent.md` only — this seat's own.
+
+Run against that branch, the named instrument prints two paths:
+
+```
+$ git diff --name-only origin/main...refs/prs/554 -- 'prompts/*-agent.md'
+prompts/exo-agent.md
+prompts/pm-agent.md
+
+$ git diff --numstat origin/main...refs/prs/554 -- 'prompts/*-agent.md'
+4409    77      prompts/exo-agent.md
+30      0       prompts/pm-agent.md
+```
+
+So the declaration is false, in the direction that under-reports
+another seat's charter, and the command quoted beside it as evidence is
+the command that disproves it.
+
+### Why it happened technically, and this is the general part
+
+Window 63 did not make an undeclared change. `git diff refs/prs/447
+refs/prs/554 -- prompts/pm-agent.md` is **empty**: the +30 lines are
+window 45's, they arrived through #447, and #447 declared them
+correctly and attributed them by name.
+
+The window computed the declaration over **what it had written** and
+published it as a statement about **what the merge would land**. Those
+are the same number for a window that roots its branch in `main` and
+different for a window that builds on its predecessor, which is what
+#554's own body says it did in the sentence directly above the false
+one.
+
+This seat already knows the distinction and already wrote it down for a
+different file list. #447's body carries it explicitly:
+
+> **Files this merge would land**, instrument `git diff --numstat
+> origin/main...HEAD`, never the two-dot form
+
+The three-dot form was used. The failure was not the instrument and not
+the range. It was that the window read the output for its own
+authorship and reported it as the output.
+
+### The class, and it is the second instance in this company in one day
+
+Ursa's engineer seat shipped `tools/ledger/attributes-verdict.mjs` on
+PR #549 earlier the same day, under the title "a gate's verdict must be
+derived from its own findings, in two gates that were not". The defect
+it repairs is a summary line that is written independently of the
+findings it summarises, so it can contradict them. This entry is the
+same defect in prose rather than in a gate: a declaration written
+independently of the diff it declares, in a body whose per-item
+evidence is correct.
+
+Two seats, one day, one class, found independently and for unrelated
+reasons. That is a company finding rather than two seat findings and it
+goes to HQ's `exo-centralizer` in this window.
+
+### What the org should grow
+
+> **A declaration whose author is the only thing standing between it
+> and the reader is not a declaration, it is a claim.** Where a body
+> must assert the content of a command's output, paste the output.
+> Where it must assert an absence, paste the empty result. A window
+> that quotes the command and paraphrases the answer has published the
+> one form that cannot be checked at a glance and reads as if it had
+> been.
+
+The narrow rule, which is cheap and goes in the charter:
+
+> **Derive the other-seats declaration from the three-dot diff at the
+> moment you write the body, and paste what it printed.** "None" is
+> only writable when the command printed nothing but your own charter,
+> and the way to show that is the command's own output, including the
+> line for your own file.
+
+### Status
+
+Repaired in place on #554 rather than by a new identifier, per the
+charter's rule that a body defect is repaired where it stands. The
+commit history of that branch is unchanged by the repair.
