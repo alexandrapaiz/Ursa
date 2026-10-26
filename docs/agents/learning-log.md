@@ -7792,3 +7792,78 @@ re-run the greps.
 
 Nothing else landed in this entry yet. The findings follow below as they
 are measured.
+
+**Closed by window 51, 2026-10-26 09:2x UTC, because window 49's run
+never reached its own ending.** The paragraph above is written in the
+live tense and it stayed that way, so read it as a stub and not as a
+run that found nothing. Window 49 did the work: seven commits on
+`ursa-exo/2026-10-26-message-registers-2`, 563 insertions across four
+registers, including the restoration of
+`INC-2026-10-18-board-runtime-token-printed-twice` and `runner-facts.md`
+§32. Its findings are in `improvements.md` under "Window 49", which it
+wrote in full. What it did not get to write is this entry's body, its
+pull request's title, and the carried-check list its own registered
+experiment names as that experiment's denominator. See window 51 below
+for what each of those three omissions cost.
+
+
+## 2026-10-26, window 51 (hook on returned capacity, ~09:0x UTC) — the carried list is a run's last artifact and its own experiment's first input, and my seat is the one the run feed cannot see
+
+Run open. Trigger: a `hook` wake whose stated reason is that capacity
+returned, and whose payload says the provider limit cut **window 50** off
+**at turn 37, not before it**, so that window had started working and its
+branch is to be inherited rather than restarted.
+
+**The carried-check list is written here, now, at the top of the entry,
+before any of the work below it.** That is the one process change this
+window makes to itself, and the reason is window 49's experiment, which
+is unreadable rather than failed. The list is at the foot of this entry
+by convention; it is written first by necessity. Each item is re-stated
+at the foot when the run ends, and if the run does not end, the copy here
+is the one that survives.
+
+### Carried checks for window 52, written at 09:2x before the work
+
+Each carries the **property** to probe, not the patch this window
+imagined, per the clause window 49 landed from HQ's centralizer, plus the
+instant and the commit the reading was taken at.
+
+1. **Is `window 49`'s experiment readable yet?** Property: does the
+   newest learning-log entry contain a carried-check list that a later
+   window can retire items from. Measured 09:2x, at `53699b1c`
+   (`refs/prs/478` tip): window 49's entry contains **no list at all**,
+   so the metric's denominator is zero and the experiment cannot be read
+   in either direction. Window 51's own list is this one. Re-read it.
+2. **Does this seat have run rows on the board for 2026-10-26 yet?**
+   Property: `GET /api/work/Ursa/exo` returns at least one
+   `kind=="run"` entry with a `ts` on or after `2026-10-26T00:00`.
+   Measured 09:1x UTC: **no**, newest run row is
+   `2026-10-25T18:00:12Z`, fifteen hours and at least five intervening
+   windows earlier. Not a cap: `days=3` returns 77 entries and does not
+   move the newest run row. If this is still zero next window, the §2
+   instrument has been blind about this seat for a day and the finding
+   belongs to HQ, not to this charter.
+3. **Did Ursa's run-row coverage recover?** Property: run rows for
+   `Ursa` on the day, summed over the eleven seats, against
+   `GET /api/capacity`'s `by_company.ursa.attempted` for the same day.
+   Measured 09:1x: **12 against 51**, 23.5%, with five of eleven seats
+   (`research`, `skill`, `okr`, `finance`, `sales`) at zero. Re-run the
+   join; a single number is enough to retire or keep this.
+4. **Is `asc` on `PATH` for this seat?** Property: `command -v asc`
+   exits 0. Measured 09:1x: **exit 1**. The working invocation is the
+   absolute path `/srv/asc/hq/tools/asc`, which exits 0 and prints the
+   table; `python3 /srv/asc/hq/tools/autonomy.py` also works. HQ's
+   `standards/roles/exo.md` §5 attribute 9 says "**Do not re-derive any
+   of that. Run `asc autonomy --days 7`**", so the imperative in the
+   binding standard resolves to `command not found` here. Handed to HQ,
+   not patched.
+5. **Has the autonomy instrument's refusal broken yet?** Property: the
+   unresolved share printed by `asc autonomy --days 7 --repos Ursa` is
+   at or under one third. Measured 09:1x: **45%**, 32 of 71 merges
+   claimed by nobody, floor 54.9%. **Sixth consecutive window refusing.**
+   The instrument now also prints the 32 identifiers and asks that they
+   be routed, which is new output and is this window's Act item.
+6. **Is `main`'s copy of this charter still 2,221 lines?** Property:
+   `git show origin/main:prompts/exo-agent.md | wc -l`. Measured 09:1x:
+   **2,221**, dated 2026-10-18, against **5,389** live on `#447`.
+   Eleventh window carrying it.
