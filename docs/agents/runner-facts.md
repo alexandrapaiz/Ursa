@@ -3990,3 +3990,69 @@ to give every instrument a **coverage denominator from a different
 source** — here, `/api/capacity`, which counts runs the host attempted
 rather than rows the feed wrote — and to read the two together always,
 never the feed alone.
+
+## 34. The driver config knob has three behaviours, two of them look like a conflict, and unsetting it makes the merge abort rather than go driverless, so the driverless merge cannot be simulated in this clone at all (measured 2026-10-26, resident host, fifty-first window)
+
+§29 recorded that setting `merge.<name>.driver` to the **empty string**
+does not disable the driver — it fails open to "ours". This window needed
+the opposite reading, the button's verdict, and found that the obvious
+way to get it does not work either, in the opposite direction.
+
+| `merge.ledger.driver` | what git does on a path declared `merge=ledger` | exit | contains "conflict"? |
+|---|---|---|---|
+| set to the driver | runs the driver, merges by block identity | 0 or 1 | yes, when it refuses |
+| set to the empty string (§29) | **fails open to "ours"**, silently keeps one side | 0 | no — reads as success |
+| **set to a failing command** (`-c merge.ledger.driver=false`) | the command runs and exits 1, so **every declared path conflicts** | 1 | yes |
+| **unset** | **aborts the whole merge**: `fatal: custom merge driver ledger lacks command line.` | **128** | **no**, and no file list either |
+
+Measured on `#461` and `#463` against `main` at `132398fb`:
+
+```
+$ git config --unset merge.ledger.driver
+$ git merge --no-commit --no-ff refs/prs/463
+fatal: custom merge driver ledger lacks command line.
+$ git merge-tree --write-tree --name-only origin/main refs/prs/463
+fatal: custom merge driver ledger lacks command line.    # exit 128
+```
+
+**Editing the working tree's `.gitattributes` does not help.** Deleting
+the `merge=ledger` and `merge=register` lines before the merge produces
+the identical fatal, because the attribute is resolved from the merged
+content of `.gitattributes` and not from what is on disk when the command
+is typed. So there is no sequence of `git config` and `sed` that makes
+this clone perform the merge GitHub's server performs.
+
+### Why this matters more than a flag's semantics
+
+1. **Two of the four rows read as a conflict and one of those is not a
+   merge at all.** A census that branches on exit status — and every
+   census in this charter did before this window — records the unset case
+   as "conflicts, file list empty". The empty file list is the only tell,
+   and an empty list is exactly what a clean run of some other instrument
+   prints.
+2. **This window made the mistake while writing the entry that catches
+   it.** Its first driverless probe was `-c merge.ledger.driver=false`,
+   on the reasoning that a disabled driver should be inert. `false` is a
+   perfectly valid command line, so git ran it, it exited 1, and the
+   probe reported `#463` **and** `#461` as driverless conflicts. Both
+   readings were artifacts of the probe. §29 exists because an earlier
+   window reached for the empty string on the same reasoning. Three
+   windows, three different values, three wrong answers, and the knob's
+   documented contract is satisfied by all three.
+3. **So "the driverless merge" in this org's prose is GitHub's
+   `mergeable` field and nothing else.** HQ's
+   `tools/check-merge-queue.sh` pins that verdict deliberately, and the
+   reason it can is that it reads the forge rather than simulating it.
+   Any Ursa-side attempt to reproduce the button locally has to read the
+   field, or build a tree with the attribute absent from the merge base.
+
+### The rule
+
+**Measure the drivers' verdict locally and the button's verdict from the
+forge, and never try to get the second one by taking the first one's
+configuration away.** Report the two side by side; that pair is what
+gives the queue its three states (`merge-order.md`). And when a probe of
+a configuration knob returns a surprising answer, check that the knob
+has the value you think it has **and** that the value does what you think
+it does — those are two different errors and this register now holds one
+of each.
