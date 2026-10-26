@@ -1159,3 +1159,33 @@ whether bytes round-trip. No pricing or positioning change follows
 from this alone; it sharpens how the existing open tests should be
 read when they are run, which is still a product task this file
 cannot do from the outside. No pricing recommendation made.
+
+## A third "neutral by design" entrant, and the same self-graded gap as the other two (2026-10-26, 28th message run)
+
+docs/market/landscape.md this run added MemoryLake, a bootstrapped
+(no outside funding, per Tracxn) hosted memory store pitched almost
+word for word like Wire's: memory is "a genuine feature and a
+retention mechanism" at once, and the fix is a store the user owns
+"outside any single vendor." Found via the same demand-signals search
+pattern that surfaced Wire and Skillsync on 2026-10-26 (searching
+lock-in discussion, not competitor lists), which is itself now a
+pattern worth naming: three separate teams converging on the identical
+diagnosis within the same stretch of weeks is independent evidence the
+diagnosis is widely held, not a coincidence of search terms.
+
+Read against the price ladder (2026-09-26) rather than the
+automated-round-trip bar this time, because MemoryLake's claim is
+about accuracy and reach, not translation mechanics. It connects to
+eight named AI products plus "any API-compatible system" (the broadest
+reach found in Category 3 to date) and cites a 94.03% LoCoMo score as
+"the highest score in this evaluation." That number is worth exactly
+as much as any vendor's self-graded benchmark and no more: it is
+published on MemoryLake's own page, about MemoryLake's own product,
+with no third party named as having reproduced it. This is the same
+shape of gap the reward-model-unreliability packet (now seven sources,
+positioning.md throughout) has already found at every other layer it
+checked — a grader grading itself. The honest read for whoever prices
+against this comp: MemoryLake is evidence the market wants a neutral
+store, priced in the same $19-199/mo band Wire and MemoryLake both
+now occupy, not evidence any named product currently delivers
+verified neutrality. No pricing recommendation made.

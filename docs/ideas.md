@@ -12545,3 +12545,37 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   to a user's own profile, one layer in. This is close enough to the first
   entry above to be its justification rather than a separate idea, which is
   why it is not filed as one.
+
+### 2026-10-26 (market, message, 28th run) — Check whether MemoryLake's own MCP/REST ingest can read a Major export back in, a second live-product test alongside the 21st run's MacPaw proposal
+
+- Trigger: this run's demand-signals ceremony surfaced MemoryLake, a
+  bootstrapped "neutral by design" memory store that connects to eight
+  named AI products plus any MCP/REST-compatible system, making the
+  same architectural pitch Wire already made (19th run) and tested with
+  no third party found reading its export back in.
+- What: the 21st run proposed checking MacPaw's `.mem` adapters against
+  a Major export, a file-format test. This is the same idea applied to
+  a live hosted product reachable over MCP and REST today, no adapter
+  code to write first: if MemoryLake already ingests arbitrary
+  MCP/REST memory writes from "any API-compatible system" as its own
+  marketing claims, then whether it can take a Major export and make it
+  readable back out to a different model is a cheap, concrete check of
+  the symmetric-portability claim against a real product rather than a
+  spec. A negative result narrows nothing MacPaw's test wouldn't also
+  narrow; a positive result would be the first entry in this file to
+  clear the automated-round-trip bar through an existing third party,
+  which is a stronger claim than clearing it through a bespoke adapter
+  Major's own team wrote.
+- First step: whoever owns Major's export surface tries MemoryLake's
+  free tier (300K tokens/month, no credit card) first, before any
+  adapter work: push a Major export through MemoryLake's documented
+  MCP or REST write path, then read it back out through a different
+  connected AI (e.g. ChatGPT or Gemini, both named as supported) and
+  record whether structure and attribution survive. If the free tier's
+  token ceiling blocks a full test, that ceiling itself is worth
+  reporting, since it bounds how large a real profile could be tested
+  at $0. Does not supersede the 19th or 21st run's proposals; it is a
+  third, independent live-product test run in parallel with them,
+  not a replacement for either.
+- Cost: $0
+- Status: proposed
