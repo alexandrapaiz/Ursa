@@ -268,6 +268,8 @@ node --test skills/relocate-anchors.test.mjs
 node --test skills/check-evidence.test.mjs
 node --test skills/source-line.test.mjs
 node --test skills/relevance-sweep.test.mjs
+node --test skills/trigger-coverage.test.mjs
+node --test skills/library-dirs.test.mjs
 ```
 
 ## Whether a receipt supports its sentence
@@ -395,6 +397,28 @@ the claim into a file a reader would look in. `skills/citing-files.mjs` is the
 one place that answers which files count, shared for the reason
 `source-line.mjs` is shared: two tools disagreeing about scope leave a ref
 half-defended and neither says so. `prompts/skill-extract.md` §5p.
+
+## Which directories count
+
+A directory under `skills/` is part of this library exactly when it holds a
+`SKILL.md`. That predicate was implicit in three tools and wrong in all
+three at once until 2026-10-26: `skills/decoy-skill/SKILLS.md`, with
+correct frontmatter, a declared ref and an `[E1]` tag in its body, passed
+`check-evidence.mjs`, `trigger-coverage.mjs` and `relevance-sweep.mjs`,
+all at exit 0, one character wrong in one filename. `strayCitations` is
+the check written for precisely that and it sits after the `continue` that
+skips the directory, so it never ran.
+
+`skills/library-dirs.mjs` is the one place that answers which directories
+count, shared for the same reason `citing-files.mjs` and `source-line.mjs`
+are. Two guards now report an unread directory by name and
+`trigger-coverage.mjs` exits 1 for it without `--check`, since whether this
+library is the set of things it says it is was never a judgement a flag
+should gate. The `## The library` index above is checked against the
+directory listing in both directions by the same tool, which is what closes
+the gap that let a skill ship unlisted for three runs.
+
+The rule, and the probe that found it: `prompts/skill-extract.md` §5s.
 
 Nothing renders this library on a web surface yet. `ursa-minor/` has no
 skills route, so the receipts are readable only with the repo checked

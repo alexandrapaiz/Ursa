@@ -11184,3 +11184,195 @@ read and the files were available to read directly.
   implied; this is framing for the sales/positioning material only.
 - Cost: $0
 - Status: proposed
+
+## Skill run 2026-10-26 (twenty-fifth) — opened on #445's tip, inheriting its killed draft
+
+Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
+00:23Z, both corrections to its own earlier note. GitHub killed #445 at
+00:27Z with a silent draft and finished work in it; this branch contains
+#445, which contains #441. Entries below are this run's.
+
+### 2026-10-26 (skill, twenty-fifth run) — The gate rule works, measured on this seat's own pull request, and it does not buy a merge with no hand work in it
+
+- Trigger: Ursa/exo's board note of 2026-10-26 00:03Z to this seat,
+  correcting its own 23:57Z note. It withdraws the claim that #441 was
+  chasing a conflict this repository does not have, and hands this seat a
+  rule instead: GitHub does not merely compute the merge, it performs it,
+  server-side, in a clone with no drivers, so a branch touching a
+  driver-managed path must merge `origin/main` into itself locally, with
+  the drivers installed, before the gate reads it.
+- What: the rule holds, measured on this run's own pull request rather
+  than argued. #448 opened at `baseRefOid 66551fbf` reporting
+  `CONFLICTING / DIRTY`. One local merge of `origin/main` with
+  `tools/registers/install-drivers.sh` run first, pushed, and GitHub
+  reported `MERGEABLE` on the next read with `origin/main` an ancestor of
+  the branch. Two branches in the queue have now taken this path, #441 and
+  this one, and both are the only ones that have come out clean.
+- What the rule does not buy, which the note does not say and a run
+  following it will hit within a minute. The local merge is not
+  conflict-free, and most of what it leaves is not about the ledger at
+  all. Nine paths conflicted in a genuinely driverless clone of this same
+  merge and five conflicted with the drivers installed, so the drivers
+  removed four conflicts and manufactured none. Of the five that were
+  left, one was the ledger and **four were files this branch has a
+  zero-byte diff against `5902fd21` for**: `docs/agents/merge-order.md`,
+  `docs/design/ledger.md`, `docs/market/landscape.md`,
+  `docs/market/positioning.md`. The cause is that this merge has two
+  bases, `5902fd21` and `e3f14d90`, so git built a virtual ancestor whose
+  content for those paths matches neither base. Three of the four are
+  outside this seat's write boundary and all four resolve to
+  `git checkout origin/main -- <path>`, which is a provable fast-forward
+  and not an edit. A seat told only "merge main in first" will read four
+  conflicts in other seats' files as a reason to stop.
+- First step: for whoever owns `docs/agents/merge-order.md`, the rule is
+  worth stating with its second half attached: merge `origin/main` in
+  locally with drivers installed, then expect conflicts in files you never
+  touched, and resolve any path your branch has no diff against the newer
+  base for by taking `origin/main` verbatim and verifying byte equality
+  afterwards. That resolution needs no judgement and no write permission
+  on the file's subject matter, which is what makes it safe for a seat to
+  do in another seat's lane.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (skill, twenty-fifth run) — The green button performs the plain three-way merge, 5 of 5, and the twenty-fourth run's own sentence about the driver was wrong by one
+
+- Trigger: Ursa/exo's board note of 2026-10-26 00:23Z, which reproduces
+  the twenty-fourth run's census independently, agrees with its sentence,
+  and then reports a defect in its own instrument: a merge driver
+  registered with an empty command value resolves the path to the first
+  parent verbatim, so a five-of-five measured that way would be right for
+  a reason the instrument did not measure.
+- What: the five of five survives, and now rests on an instrument that
+  cannot have that defect. Re-run in a fresh clone with
+  `git config --get-regexp '^merge\.'` returning zero entries, over the
+  last eighty merges reachable from `origin/main` at `66551fbf`, eighteen
+  of which have both parents changing `docs/ideas.md` relative to their
+  merge base, with three arms per merge: no configuration at all, the
+  drivers as `install-drivers.sh` registers them, and the empty-value
+  arm. Five of the eighteen are the owner's green button (#421, #399,
+  #396, #361, #289). The plain arm reproduced the recorded blob on **5 of
+  5, every one at exit 0**. Among the thirteen seat-local merges the plain
+  arm reproduced 2 and the driver arm 6.
+- The correction this entry owes its own predecessor. The twenty-fourth
+  run wrote "None recorded the driver's blob." That is wrong on one of the
+  five: on #421 the driver's result and the plain result are the same
+  blob, so the driver's output is also what was recorded. The claim that
+  survives is the sharper one — **on every owner merge where the two
+  differ, four of five, the recorded blob is the plain merge's and never
+  the driver's** — and it is stronger than the sentence it replaces,
+  because it is about the cases that discriminate.
+- The instrument catalogue, because three configurations that all look
+  like "drivers off" are three different things and only one of them is.
+  Measured at git 2.43.0 on this repository's own merges:
+  `merge.ledger.name` set with no `.driver` is **fatal, exit 128**, which
+  is the harmless one because it stops. `merge.ledger.driver=` empty
+  returns **ours verbatim on 18 of 18**, prints `error: cannot run : No
+  such file or directory` on **stderr**, and **exits 1** — and exit 1 is
+  also what a genuine conflict returns, so a probe that sends stderr to
+  `/dev/null` and reads the exit code reports an instrument failure as a
+  finding about this repository. It is loud; the probe discarded the
+  channel it was loud on. It is also specific to `merge-tree`: the same
+  empty value under plain `git merge` falls back to the three-way merge
+  and conflicts on the same nine paths as a driverless clone.
+- The override that does work, confirmed as the note states it: a bare
+  `merge` attribute for the path in `.git/info/attributes` outranks the
+  in-tree `merge=ledger` and restores the built-in three-way merge, exit
+  0, blob equal to the recorded one. `-merge` does **not** do this — it
+  exits 1 and yields a third blob — so the sign matters and the two are
+  one keystroke apart.
+- First step: whoever next publishes a merge measurement here states the
+  arm as a measured property of the clone and not as a flag it passed:
+  print `git config --get-regexp '^merge\.' | wc -l` beside the result, or
+  install the bare `merge` attribute and say so. And keep stderr. The
+  identifier
+  `INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares`
+  is still titled for the forge's defect; the asymmetry is this
+  repository's, and the forge reports it honestly.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (skill, twenty-fifth run) — The register merge driver reorders entries neither side moved, and that manufactured two false drifts in this library's evidence lock
+
+- Trigger: following the gate rule above. After merging `origin/main`
+  with the drivers installed, `node skills/check-evidence.mjs` went red on
+  two citations into `docs/agents/incidents.md`, and
+  `skills/relocate-anchors.mjs` offered to move both.
+- What: the drift was not drift. This branch has a zero-byte diff against
+  `5902fd21` for all four registers the `register` driver merged, so for
+  each of them the only correct result is `origin/main`'s own bytes. Two
+  of the four came out different: 82 headings on both sides of
+  `incidents.md` and 7313 lines on both sides, nothing lost either way,
+  and `## How to cite an incident (rule, 2026-09-20)` moved from the head
+  of the file to line 7194, shifting every incident entry up about 119
+  lines. In `improvements.md` the two `## Week of ...` roll-ups moved from
+  the head of the file to behind all five `## Window ...` entries. The
+  driver's output is not order-preserving against either parent, and for a
+  file where one side appends and the other appends nothing it should be
+  the appending side's bytes.
+- Why it is expensive out of proportion to its size. Four of this
+  repository's five `merge=register` paths are files other seats' work is
+  cited into by line number. A merge that moves 119 lines without changing
+  a word is a drift generator aimed at every citation in the library:
+  `check-evidence.mjs` went red on
+  `adjudicating-uncertain-spans/E12 incidents.md:179-187` and
+  `running-an-outcome-record-trial/E18 :204-210`, and
+  `relocate-anchors.mjs` reported both as pure relocation to 60-68 and
+  85-91. It was right about the text; the lines are byte identical. It was
+  reading a tree that should not exist, and it has no way to know that.
+  A run that reached for `--write` would have committed a rewrite of this
+  library's evidence lock to accommodate a merge artifact, and the diff
+  would have been indistinguishable from the nine-tenths-relocation
+  batches that tool was built for. Taking `origin/main` verbatim for all
+  four registers took the library from two drifted ranges to 389 of 389
+  settled with no line of `evidence.lock.json` touched.
+- First step: for whoever owns `tools/registers/`, one case to add to
+  `merge-driver.test.mjs` before anything else: a side that appends
+  nothing must produce the other side's bytes, byte for byte, including
+  order. Both files here fail it today and both are reachable from the
+  real repository with `git merge origin/main` on this branch's first
+  parent. Second, `registers.json` declares an `identifier` for both
+  affected files and the two sections that moved are the ones that do not
+  match it, which is where to look first.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (skill, twenty-fifth run) — One wrong character in one filename made a skill invisible to all three of this library's guards at once
+
+- Trigger: `NEON_RO_URL` is unset in this run's environment, so the
+  charter sends the run to the parts that need no database, one of which
+  is the trigger tests and the library's own rendering. Probing the guards
+  instead of reading them was a direct application of what the other three
+  entries above measured.
+- What: `skills/decoy-skill/SKILLS.md`, with correct frontmatter, a
+  declared `provenance` ref and an `[E1]` tag in its body, passed every
+  guard this library has. `check-evidence.mjs` exited 0 and reported "307
+  sources resolved". `trigger-coverage.mjs` exited 0 and reported "every
+  skill meets §5c". `relevance-sweep.mjs` exited 0. Renaming that one file
+  to `SKILL.md` makes `check-evidence.mjs` report the unfingerprinted
+  citation on the next run, which proves nothing about the citation was
+  wrong: only the discovery step was. All three tools open
+  `skills/<name>/SKILL.md` and `continue` when it is absent, and
+  `strayCitations`, the check whose entire purpose is "a tag in a file
+  nothing reads is not a receipt", sits after that `continue` and so never
+  ran for the directory that needed it most.
+- The tell was in the output the whole time, which is the transferable
+  part. `trigger-coverage.mjs` prints `no TRIGGER-TEST.md: <slug>` for one
+  of the two files §2 requires and drops the directory in silence for the
+  other. Where a tool names one missing input and skips another, the skip
+  is where the hole is, and that is visible without running anything.
+- Fixed in this run, inside this seat's boundary: `skills/library-dirs.mjs`
+  with eight tests, both guards reporting an unread directory by name,
+  `trigger-coverage.mjs` returning 1 for a shape defect without waiting for
+  `--check`, and the `skills/README.md` index checked in both directions,
+  which closes the twenty-first run's entry about shipping a skill the
+  index did not list. The rule is `prompts/skill-extract.md` §5s.
+- First step: the same probe belongs on the three registers' checkers and
+  on `tools/ledger/check.mjs`, which this seat does not own. The question
+  to ask each one is the cheap one: what input makes it say nothing, and
+  is that silence distinguishable from a pass. For `check.mjs` the
+  candidate is a block whose heading does not match the kind pattern it
+  keys on, which is the same class of input as the two register sections
+  that moved in the entry above.
+- Cost: $0
+- Status: proposed
