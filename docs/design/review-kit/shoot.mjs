@@ -68,7 +68,22 @@ const enterState = STATE
   : null
 
 mkdirSync(OUT, { recursive: true })
-const slug = (p) => (p === '/' ? 'home' : p.replace(/^\/|\/$/g, '').replace(/\//g, '-'))
+// The query string is dropped before the name is built. A path like
+// `/dashboard?port=7831` is one surface, not one per port, and the port is
+// a fact about this sandbox: it changes every run and it belongs in
+// `measurements.txt`, which records the base URL, rather than in
+// twenty-three file names. A `?` in a file name also has to be
+// percent-escaped in every markdown link that points at it, so a review
+// whose frames carry one is a review whose images quietly do not load.
+//
+// Measured on 2026-10-26e: that run renamed four frames by hand, then shot
+// four more an hour later and got the query string straight back, because
+// the rename never reached the thing generating the names. A cleanup the
+// tool undoes on its next run is not a fix.
+const slug = (p) => {
+  const bare = p.replace(/[?#].*$/, '')
+  return bare === '/' || bare === '' ? 'home' : bare.replace(/^\/|\/$/g, '').replace(/\//g, '-')
+}
 
 const browser = await launch()
 const rows = []

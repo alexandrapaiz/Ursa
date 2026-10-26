@@ -1,0 +1,18 @@
+  base http://127.0.0.1:4961   1440x900   sampled from the frame, not the stylesheet
+  every row of each swatch, brightest reported: a 6px swatch can carry a 2px inset.
+
+  swatch                                  rows  brightest rgb    vs page   verdict
+  legend: kept as written                    1  168,199,250       11.99   passes 1.4.11
+  legend: kept and edited                    2  168,199,250       11.99   passes 1.4.11
+  legend: yours, no generation behind it     1  106,108,115        3.93   passes 1.4.11
+  legend: covered by no span                 1  20,27,43           1.20   UNDER 3:1
+
+  the page behind them                          2,3,8
+
+  neighbours 0 and 1                                               1.00   same fill; told apart by an inset row
+  neighbours 1 and 2                                               3.05   passes
+  neighbours 2 and 3                                               3.28   passes
+
+  legend: kept and edited: 2 distinct rows, 168,199,250 / 2,3,8
+
+  1 of 4 legend swatches are under 3:1 against the page behind them.

@@ -588,54 +588,15 @@
       ]
     },
     {
-      "digest": "09a594cc263167e0",
-      "sha256": "09a594cc263167e05b19151ffd9324bb137df35ba1f52b9e93d772567c527e62",
-      "blob": "b288964fa3fdadfdeda826cd8d3b28e7cc1bc74e",
-      "bytes": 308551,
+      "digest": "80d47d927ef45245",
+      "sha256": "80d47d927ef45245f276dcf6f84b5e3b05eac7bf92711446a8f937abc9db6c2e",
+      "blob": "86d7b7d8b7b6e1c19599b644f6819ec38c5b7ff5",
+      "bytes": 309086,
       "introducedBy": [
         {
-          "commit": "00a15f8ed020bdb58ea20b77bffb8e4f06ee1192",
-          "date": "2026-10-26T10:34:40.000Z",
-          "subject": "bundle: rebuild dist/ursa.cjs after the consent.cli.ts change"
-        }
-      ]
-    },
-    {
-      "digest": "71c7f382db1f7ea8",
-      "sha256": "71c7f382db1f7ea854ee5859f754f893460d915f375f0f8538fc05496a986458",
-      "blob": "17bc846d78993a164c4e628d194692e279d41914",
-      "bytes": 309104,
-      "introducedBy": [
-        {
-          "commit": "729788437eb3d0262416ca7c2b38cd42ca13a545",
-          "date": "2026-10-26T10:47:25.000Z",
-          "subject": "distill: surface the CLI's own reason when claude -p exits non-zero"
-        }
-      ]
-    },
-    {
-      "digest": "5234de483d422789",
-      "sha256": "5234de483d422789048b15d2ef5e514ea6d8f5667c4775a3231b9b7d611e105b",
-      "blob": "bfdb7f8226a189a6a3d3d5f69b0bdefe5a3d95ca",
-      "bytes": 309360,
-      "introducedBy": [
-        {
-          "commit": "79e996ae5bd6dc1f72d930950e565bbaf6635571",
-          "date": "2026-10-26T10:58:31.000Z",
-          "subject": "Merge origin/main into run 6, which carries this seat's unreadied run 5"
-        }
-      ]
-    },
-    {
-      "digest": "c1fdfb75f2c921f6",
-      "sha256": "c1fdfb75f2c921f61acfe3464d3e19ee1d7f9f560ab95e36902c7a1d709e375f",
-      "blob": "b60b1eb7f3f546b1f6d9d559cfde5c9a42df33c8",
-      "bytes": 309485,
-      "introducedBy": [
-        {
-          "commit": "8a24ea3066126db1720cbc09c54193a4f6efca6f",
-          "date": "2026-10-26T14:41:21.000Z",
-          "subject": "vendored: bound the import search by the work's own horizon"
+          "commit": "252180aa663c977f7308deca8317a87176a0ff11",
+          "date": "2026-10-26T10:48:49.000Z",
+          "subject": "security: rebuild the committed bundle the inherited branch left stale"
         }
       ]
     }

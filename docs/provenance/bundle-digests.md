@@ -17,7 +17,7 @@ it becomes a commit in a public repository, with a date and a size.
 Every row is derived. Nothing in this file is typed by hand, and
 `npm test` fails if it stops matching the repository's history.
 
-Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 49.
+Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 46.
 
 | `task.resolvedBy.digest` | Introduced by | Committed (UTC) | Bytes | What changed |
 |---|---|---|---|---|
@@ -66,10 +66,7 @@ Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 49.
 | `623f2f07ba34dce4` | `b5515a1` | 2026-10-25 23:13:39 | 308,181 | rebuild dist/ursa.cjs for the window-width change |
 | `89aa5998394ca017` | `21bd70c` | 2026-10-25 23:21:08 | 308,181 | three ledger entries and the craft scan, plus the date in four comments |
 | `65c6e9d0eec9ac5a` | `e9f5257` | 2026-10-26 09:23:26 | 308,437 | security: the publish path built its output paths from an unchecked id |
-| `09a594cc263167e0` | `00a15f8` | 2026-10-26 10:34:40 | 308,551 | bundle: rebuild dist/ursa.cjs after the consent.cli.ts change |
-| `71c7f382db1f7ea8` | `7297884` | 2026-10-26 10:47:25 | 309,104 | distill: surface the CLI's own reason when claude -p exits non-zero |
-| `5234de483d422789` | `79e996a` | 2026-10-26 10:58:31 | 309,360 | Merge origin/main into run 6, which carries this seat's unreadied run 5 |
-| `c1fdfb75f2c921f6` | `8a24ea3` | 2026-10-26 14:41:21 | 309,485 | vendored: bound the import search by the work's own horizon |
+| `80d47d927ef45245` | `252180a` | 2026-10-26 10:48:49 | 309,086 | security: rebuild the committed bundle the inherited branch left stale |
 
 ## Reading a row
 
@@ -82,7 +79,7 @@ cd ursa-major && npx tsx tools/make-bundle-digest-index.ts --lookup d32543070474
 Or read the bundle itself, byte for byte, out of the commit the row names:
 
 ```
-git cat-file blob b60b1eb7f3f546b1f6d9d559cfde5c9a42df33c8 | sha256sum
+git cat-file blob 86d7b7d8b7b6e1c19599b644f6819ec38c5b7ff5 | sha256sum
 ```
 
 ## What "introduced by" means, exactly

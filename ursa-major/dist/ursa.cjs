@@ -7338,6 +7338,7 @@ async function main(argv) {
       console.error("a passphrase is required; it derives the key and the blob id");
       return 2;
     }
+    warnIfWeakPassphrase(passphrase);
     const { startBridge: startBridge2 } = await Promise.resolve().then(() => (init_ursa_bridge_stub(), ursa_bridge_stub_exports));
     const handle = await startBridge2({
       projectPath: (0, import_node_path11.resolve)(project),
@@ -7419,6 +7420,22 @@ ${gate.report}`);
     return 1;
   }
   return 0;
+}
+var WEAK_PASSPHRASE_CHARS = 20;
+function warnIfWeakPassphrase(passphrase) {
+  if (passphrase.length >= WEAK_PASSPHRASE_CHARS) return;
+  console.error(
+    `warning: that passphrase is ${passphrase.length} characters. It is the only secret protecting`
+  );
+  console.error(
+    "         your synced records, and the salt it is stretched with is the same for everyone,"
+  );
+  console.error(
+    "         so a short one can be found offline and then read straight off the sync URL."
+  );
+  console.error(
+    `         Prefer four or five words, ${WEAK_PASSPHRASE_CHARS} characters or more. Continuing.`
+  );
 }
 function promptHidden(question) {
   return new Promise((resolve2) => {

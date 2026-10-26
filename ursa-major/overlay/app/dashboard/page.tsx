@@ -28,7 +28,7 @@
 // presses, which is also the honest answer to "is this current": the
 // payload carries `readAt` and the header shows it.
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   REVOCATION_HOLDS_FORWARD,
   revocationCannotReachPastedCopies,
@@ -161,6 +161,81 @@ function tensionPairs(units: TuningUnit[]): [TuningUnit, TuningUnit][] {
   return pairs
 }
 
+/**
+ * A command the owner is meant to run, which is longer than the box it
+ * is drawn in on a phone.
+ *
+ * `.dash-cmd` scrolls sideways and, until this was written, nothing said
+ * so: `ursa forget <your project> --record <id>` needs 462px and is
+ * given 278 at 320 and 348 at 390, so 184px and 114px of it sat behind a
+ * clean edge that looks exactly like the end of a short line. The record
+ * viewer settled this on 2026-10-24 and `.rec-cmd` carries the full
+ * reasoning; this is that reasoning applied to the other product, which
+ * had copied the shape before the lesson existed.
+ *
+ * Two things this adds, and the measurement each answers:
+ *
+ * The fade. Both widths are the distance left to scroll on that side
+ * clamped to 32px, so they are 0 whenever the line fits and the fade is
+ * absent rather than decorative. Measured on the next frame rather than
+ * on a timer, because `scroll` fires per frame on a trackpad; a
+ * ResizeObserver covers the viewport changing, and `document.fonts.ready`
+ * covers the monospace face landing after first paint, which changes
+ * scrollWidth without resizing anything.
+ *
+ * The tab stop. A scroll container with nothing focusable inside it
+ * cannot be scrolled from a keyboard at all, so those 184px were
+ * reachable by pointer only. `tabIndex` makes the block itself focusable,
+ * which is what the arrow keys need, and the group role with a label
+ * says what has taken focus. Only the open disclosure's block is in the
+ * document, so this is one stop and not nine.
+ */
+function DashCmd({ children }: { children: ReactNode }) {
+  const el = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const node = el.current
+    if (!node) return
+    let frame = 0
+    const measure = () => {
+      frame = 0
+      const max = node.scrollWidth - node.clientWidth
+      const x = node.scrollLeft
+      const clamp = (v: number) => `${Math.max(0, Math.min(32, v))}px`
+      node.style.setProperty('--fade-l', clamp(x))
+      node.style.setProperty('--fade-r', clamp(max - x))
+    }
+    const schedule = () => void (frame ||= requestAnimationFrame(measure))
+    measure()
+    node.addEventListener('scroll', schedule, { passive: true })
+    const ro = new ResizeObserver(schedule)
+    ro.observe(node)
+    void document.fonts?.ready.then(schedule)
+    return () => {
+      if (frame) cancelAnimationFrame(frame)
+      node.removeEventListener('scroll', schedule)
+      ro.disconnect()
+    }
+  }, [children])
+
+  // The border and the fill are on the wrapper and the scroll and the
+  // mask are on the code, because a mask clips to the border box and
+  // would otherwise fade the right hairline off with the glyph.
+  return (
+    <div className="dash-cmd-box">
+      <code
+        ref={el}
+        className="dash-cmd dash-mono"
+        tabIndex={0}
+        role="group"
+        aria-label="command, scrolls sideways"
+      >
+        {children}
+      </code>
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const [payload, setPayload] = useState<StorePayload | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -213,7 +288,7 @@ export default function Dashboard() {
             machine already holds, so it needs the command that serves it.
             Nothing here reaches the network.
           </p>
-          <code className="dash-cmd dash-mono">{serveCmd}</code>
+          <DashCmd>{serveCmd}</DashCmd>
           <p style={{ marginTop: '1.5rem' }}>
             <button className="dash-action dash-hit dash-mono" onClick={() => void read(port)}>
               {loading ? 'looking…' : 'look again'}
@@ -329,9 +404,9 @@ export default function Dashboard() {
                       <p className="dash-ask">
                         {revocationCannotReachPastedCopies('this page')}
                       </p>
-                      <code className="dash-cmd dash-mono">
+                      <DashCmd>
                         ursa consent revoke-axiom &lt;your project&gt; --axiom {u.id}
-                      </code>
+                      </DashCmd>
                     </>
                   )}
                 </article>
@@ -366,9 +441,9 @@ export default function Dashboard() {
                     <p className="dash-meta dash-mono">
                       {u.domain} · {u.basis} · evidence ×{n(u.evidenceCount)}
                     </p>
-                    <code className="dash-cmd dash-mono">
+                    <DashCmd>
                       ursa consent revoke-axiom &lt;your project&gt; --axiom {u.id}
-                    </code>
+                    </DashCmd>
                   </div>
                 ))}
               </article>
@@ -509,12 +584,29 @@ export default function Dashboard() {
                           record and not in this index.
                         </p>
                       ) : (
+                        /* Each figure and the word it counts are one term,
+                           held together the way the dates above are. Measured
+                           2026-10-26e: without this every record row broke
+                           "2.1% / edited" at 320 and two of seven broke
+                           "94.4% / yours" at 390, which orphans a percentage
+                           onto a line where it reads as the tail of the term
+                           before it. The whole line is not `nowrap`, because
+                           it has to be allowed to break somewhere, and the
+                           middots are where. */
                         <p className="dash-meta dash-mono">
-                          {n(r.finalChars)} chars ·{' '}
-                          {pct(r.charsByClass.survived_verbatim, r.finalChars)} as written ·{' '}
-                          {pct(r.charsByClass.survived_mutated, r.finalChars)} edited ·{' '}
-                          {pct(r.charsByClass.no_generation_provenance, r.finalChars)} yours ·{' '}
-                          {pct(uncovered(r), r.finalChars)} no span
+                          <span className="dash-nowrap">{n(r.finalChars)} chars</span> ·{' '}
+                          <span className="dash-nowrap">
+                            {pct(r.charsByClass.survived_verbatim, r.finalChars)} as written
+                          </span> ·{' '}
+                          <span className="dash-nowrap">
+                            {pct(r.charsByClass.survived_mutated, r.finalChars)} edited
+                          </span> ·{' '}
+                          <span className="dash-nowrap">
+                            {pct(r.charsByClass.no_generation_provenance, r.finalChars)} yours
+                          </span> ·{' '}
+                          <span className="dash-nowrap">
+                            {pct(uncovered(r), r.finalChars)} no span
+                          </span>
                         </p>
                       )}
                       {/* A separate line because it has a separate whole.
@@ -535,9 +627,9 @@ export default function Dashboard() {
                             difference between forgetting work and withdrawing a
                             conclusion.
                           </p>
-                          <code className="dash-cmd dash-mono">
+                          <DashCmd>
                             ursa forget &lt;your project&gt; --record {r.id}
-                          </code>
+                          </DashCmd>
                         </>
                       )}
                     </article>
