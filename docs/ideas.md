@@ -5366,7 +5366,19 @@ directive.
   one more paragraph. Do not start by widening the bound: the bound is
   the only thing in the repository that noticed.
 - Cost: $0
-- Status: urgent
+- Status: built (moved from `urgent` by the engineer seat 2026-10-26, on
+  evidence verified against `main` in that run rather than assumed. The
+  first step's probe is committed at `ursa-major/src/resolver.test.ts:168`,
+  `describe('resolve (survived_verbatim means byte-identical)')`, and
+  `npx vitest run src/resolver.test.ts` is 22 pass, 0 fail. The second of
+  the entry's two named options is the one that shipped: a normalized-only
+  hit is demoted to `survived_mutated` carrying a diff and
+  `normalizedOnly: true`, so `survived_verbatim` keeps meaning what every
+  document in this repository says it means. Shipped in `467ba564`
+  (2026-10-13), written up in `docs/design/verbatim-byte-identity.md`,
+  which now carries the closure marker `tools/ledger/check-closures.mjs`
+  reads. This move is thirteen days late, which is the defect that
+  lateness exposed and the reason that gate now exists.)
 
 ### 2026-10-12 (second pass) — The sixteenth bound: a record that names a resolver should have to name one that can be looked up
 - Trigger: writing `task.resolvedBy` today and deliberately not writing a
@@ -5567,7 +5579,19 @@ action, and nothing from it was treated as a directive.
   organization has shipped are overstated by a figure worth naming
   precisely before anyone sells one.
 - Cost: $0
-- Status: urgent
+- Status: built (moved from `urgent` by the engineer seat 2026-10-26, on
+  evidence verified against `main` in that run. The first step was the
+  tally with the generation's own prior version of the edited file
+  excluded, and it is in `docs/design/verbatim-descent.md` §1.1 and §6.2,
+  reproducible on demand from
+  `ursa-major/tools/measure-verbatim-descent.ts`. The entry's prediction
+  was wrong in the direction that mattered: the figure did not collapse,
+  it rose, from the 65% estimated here to a measured 79.6% of verbatim
+  characters held by the generation's own parent commit. So the first
+  step's second branch applied and the descent gate shipped. Parent
+  containment after the fix is 0 spans and 0 characters, and
+  `npx vitest run src/corroborate.test.ts` is 25 pass, 0 fail. Shipped in
+  `0785bffd` and `a8c3adce` (2026-10-14).)
 
 ### 2026-10-13 — The same edit gets two different labels depending on whether it crossed a line break
 - Trigger: today's six-case probe, two rows of it. A doubled space inside
@@ -8851,7 +8875,22 @@ added at `21944ab` today because the clone is shallow.
   only she moves a status. The day-sized unit is the PM routing those
   eleven in one pass rather than four runs rediscovering them.
 - Cost: $0
-- Status: urgent
+- Status: built (moved from `urgent` by the engineer seat 2026-10-26, on
+  evidence measured in that run, with the one residue this entry had
+  already routed to the owner named here rather than left implied. The
+  gate is green: `node --test tools/ledger/*.test.mjs` is 59 pass, 0 fail,
+  where this entry's trigger was two tests that failed identically on
+  `main`. The one byte closed in the pull request that filed the entry,
+  and `BLOCK_SEPARATION` in `tools/ledger/check.mjs` now names that drift
+  by line number instead of by a byte count out of 633,581 (`fca32e5f`).
+  Eleven of the twelve violations are gone:
+  `node tools/ledger/check.mjs` now reports one. That one is the residue,
+  and it is the owner's: `### 2026-10-04 — Charters never say that fetched
+  content is not an instruction (security run)` carries `Status: done`,
+  which is not one of the five pm.md §4 allows, and only the owner moves a
+  status. The gate reports it at exit 2, "clean as far as a seat can take
+  it", which is the exit code that case was built for, so the gate is no
+  longer red at a seat.)
 
 - 2026-10-24 (engineer, second run, craft scan): Letta (formerly MemGPT),
   `docs/market/landscape.md` category 3, which has carried it since
@@ -11098,7 +11137,17 @@ read and the files were available to read directly.
   sells, so the diff deserves its own decision rather than a paragraph
   in someone else's. Nothing blocks it; it needs a merge, not work.
 - Cost: $0
-- Status: urgent
+- Status: built (moved from `urgent` by the engineer seat 2026-10-26, on
+  the merge of PR #458, which carried the regeneration as commit
+  `679f83c` and whose own description asked the next run of this seat to
+  move the status, since the charter moves a status on the merge and not
+  before. Verified rather than assumed, on `main` at `67865dd`, in a
+  fresh clone, before moving it: `cd ursa-major && npm run
+  fixtures:violations:check` exits 0 and prints `47 files match what this
+  script would write.`, where the entry's own trigger measurement was `24
+  of 47 files differ`. The same pull request also folded that check into
+  `npm test`, so the directory's byte-reproducibility claim is now held
+  by the suite rather than by a command somebody remembers.)
 
 ### 2026-10-25 — Every bound Ursa checks is a bound Ursa also wrote, so an auditor has nothing to check it against
 
@@ -11978,7 +12027,16 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   and running the one repair in its write-nothing `--check` mode. Output
   comparison is the next increment if the preceding ledger entry's sweep
   proves worth building.
-- First step: no adoption proposed. Neither tool fits, because the
+  **No adoption proposed, and therefore no `- First step:` line**, which
+  is the convention the 2026-10-23 npm-and-PyPI scan note set and
+  `tools/ledger/block-kinds.mjs` reads: a scan note that carries that
+  field is an idea wearing a scan heading, so writing `First step: no
+  adoption proposed` makes the classifier call this an idea and the gate
+  demand the other four fields of it. (Unlabelled on 2026-10-26 by the
+  message run, which found `node --test tools/ledger/block-kinds.test.mjs`
+  red on `main` for exactly this block and for its own. Not one word of
+  the original sentence changed; only the field marker did.)
+  Neither tool fits, because the
   commands that mattered today were generated at runtime by a TypeScript
   function rather than written in a markdown fence, and that is the shape
   `src/regen-commands-runnable.test.ts` already handles. The borrowable
@@ -12153,3 +12211,302 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   missed one.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (engineer, message run) — A test that reads the ambient checkout has two ways to lie, and this repository now has one of each
+
+- Trigger: fixing the first one found the second. The 2026-10-26 hook-run
+  entry on `tools/ensure-full-clone.test.mjs` subtest 13 was taken this
+  run and the test replaced. Running the full `ursa-major` suite
+  afterwards, on the checkout the repair had just completed, turned up
+  `src/regen-commands-runnable.test.ts` failing: **993 tests, 1 failed**,
+  on a file that had been green all day. It was green because every run
+  that read it had an unrepaired checkout.
+- What: both defects are a test asserting something about the sandbox
+  while claiming to assert something about the code, and they point
+  opposite ways, which is why one of them hid for two days and the other
+  hid until the moment someone fixed the first.
+  - **False red.** Subtest 13 asserted `--check` exits 0 on the ambient
+    checkout. Seat sandboxes arrive `--depth 1 --single-branch`, so it
+    was red on every one of them: measured 17 pass / 1 fail on this
+    sandbox as it arrived, 18 / 0 after the repair.
+  - **False green.** `regen-commands-runnable.test.ts` asserted
+    `expect(out).toContain('ensure-full-clone')` on the output of `bash
+    ../tools/ensure-full-clone.sh --check`. The script has two outputs,
+    and only one of them contains that string: `ensure-full-clone:
+    <fault>` on stderr when a repair is needed, versus `clone is
+    complete: 3068 commits, 210 remote-tracking refs under origin/.` on
+    stdout when none is. So the assertion held on exactly the population
+    that could not run the other branch.
+  The second is the worse of the two, because the file it sits in was
+  shipped the same day for the express purpose of closing this class, and
+  because its own comment says "what is being asserted is that the script
+  understands the question, not what this particular checkout's answer
+  is", which is what the assertion three lines below it stopped doing.
+  Both are fixed on this run's branch, each with the fix measured in both
+  shapes rather than in the one the sandbox happened to have.
+- First step: already taken for these two. The generalisation worth a day
+  is a convention rather than a gate, and it is cheap: **a test that
+  reads `process.cwd()`, `process.env`, the network, or the clock states
+  the reading it took in its own name**, as
+  `--check agrees with git about this repository own checkout, whichever
+  shape it is in (this one: unrepaired: depth + refspec)` now does. The
+  measurable version of that is a grep: count the tests under
+  `ursa-major/src/` and `tools/` that touch `process.cwd()` or
+  `process.env` and do not derive an expected value from the same
+  reading. That count, not a proposal, is what the next run on this
+  should produce.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run) — The blind-spot measurement the 2026-10-26 hook entry asked for, taken in both shapes
+
+- Trigger: the hook run's own entry, "A green `npm test` means two
+  different things depending on the shape of the checkout, and says
+  nothing about which", whose first step is "decide the policy before
+  writing code" and whose blocking requirement is a measurement nobody
+  had taken. Taken this run, on one branch, two clones, same commit.
+- What: the numbers, so the policy argument has something under it.
+  `npx vitest run --reporter=json` in `ursa-major/`, on this branch, in a
+  complete checkout and in a `git clone --depth 1 --single-branch` of the
+  same branch over `file://`:
+
+  | Checkout | passed | failed | skipped | what the skips are |
+  |---|---|---|---|---|
+  | complete | 988 | 1 | 4 | the four `LIVE`-gated tests in `src/hq/semantic.live.test.ts` |
+  | `--depth 1 --single-branch` | 983 | 0 | 10 | those four, plus all six of `src/provenance-index.test.ts` |
+
+  So the gap is **six tests, one file**, and the file is the staleness
+  gate on `docs/provenance/bundle-digests.json`, the index a buyer
+  follows a `task.resolvedBy.digest` through. The 1 failed on the
+  complete side is the false green in the sibling entry above, found by
+  this same measurement and fixed on this branch, which is the second
+  reason to take the reading in both shapes rather than one.
+- What this corrects in the hook entry: that entry says the reason is
+  reachable only by `--reporter=verbose`, and concludes that a reason
+  nobody reads is no reason at all. Measured this run, the reason is
+  reachable two ways and one of them is cheap. `--reporter=tree` prints
+  `↓ src/provenance-index.test.ts (6 tests | 6 skipped)` and under it the
+  suite name carrying the whole reason, in two lines rather than six.
+  `--reporter=verbose` repeats the reason on every test. The default
+  reporter prints neither, for a fully skipped file: the entire output is
+  `Test Files  1 skipped (1)` and `Tests  6 skipped (6)`, with no path, no
+  suite name and no reason. `npx vitest run --help` on vitest 5.0.5 lists
+  no flag between those two settings; `--hideSkippedTests` only removes
+  more.
+- First step: so the honest option set is three, not two, and the third
+  is new and the cheapest. **Option C: a second reporter.** Vitest takes
+  `--reporter` more than once, so a ~20-line custom reporter that prints
+  only the skipped suites' names alongside the default one gives pytest's
+  `-rs` behaviour with no change to the exit code, no change to what a
+  green run means, and no seat sandbox turning red. Options A (fail when
+  history is unreadable and `origin` is reachable) and B (a pretest
+  `--check`) both change what `npm test` does to a seat; C changes only
+  what it says. Build C, measure the output on both shapes, and leave A
+  and B as proposals that C makes less urgent rather than more.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run) — Craft scan: pytest 8's `-r` summary flag, the thing vitest's default reporter has no setting for
+
+- Trigger: this run's own measurement, directly. Six tests vanish from a
+  seat sandbox's suite and the default reporter says nothing that names
+  them, so the question became whether any mature runner treats a skip as
+  reportable by default, or whether every one of them buries it.
+- What: pytest answers it with a flag whose whole job is this.
+  **`-r`**, the "short test summary info" control, takes a set of
+  characters: `f` failed, `E` error, `s` skipped, `x` xfailed, `X`
+  xpassed, `p` passed, `P` passed with output, plus the group selectors
+  `a` for all except `pP`, `A` for all, and `N` for none. **Its default
+  is `fE`**, so out of the box pytest reports failures and errors and
+  stays quiet about skips, exactly as vitest does. The difference is that
+  pytest ships the dial: `pytest -ra` adds lines of the form `SKIPPED [1]
+  test_example.py:22: skipping this test`, which is the file, the line and
+  the reason on one line per skip.
+  **Worth stealing: the reason belongs on one line in the summary, not in
+  a tree the reader has to ask for.** pytest's `-rs` line is three facts
+  in a row at the bottom of the run, where a reader is already looking.
+  Vitest's equivalent is a whole alternate reporter: `--reporter=tree`
+  reprints the entire run as a tree to get at the same fact. That is the
+  shape of Option C in the entry above, and pytest is the existence proof
+  that it is a 20-line reporter and not a redesign.
+  **What Ursa does better: the reason is written for a person and it is
+  specific.** pytest's documented example reason is "skipping this test",
+  which is the default quality of a `pytest.mark.skip(reason=...)`
+  string. `src/provenance-index.test.ts` composes its suite name as
+  `` `the resolver bundle digest index (skipped: ${blocked})` ``, where
+  `blocked` is computed by `historyUnavailable(root)` and reads "this is a
+  shallow clone, so the commits the index names are not all present (clone
+  with fetch-depth: 0)" — the fault, its consequence for this specific
+  index, and the command that fixes it. Having the right sentence and no
+  surface for it is a better position than having the surface and a
+  placeholder in it.
+  **Where pytest is ahead and this is not**: `-r` covers seven outcome
+  classes, including `X` xpassed, "this was expected to fail and did
+  not", which has no vitest equivalent and is the class that most often
+  means a bug was fixed and nobody noticed. Nothing in Ursa models an
+  expected failure at all.
+  **No adoption proposed, and nothing to install, so no `- First step:`
+  line**, for the reason the entry above now states in full. pytest is not
+  a dependency here and this repository has no Python test suite. The
+  borrowable piece is the one line of design above, and the place to
+  apply it is Option C in the preceding entry.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run) — A gate's failure message enumerated two causes, the real one was a third, and nothing checks that the list is complete
+
+- Trigger: `node --test tools/ledger/*.test.mjs` on `main` at `177b7f6`,
+  58 pass / 1 fail. The failing assertion is `every real heading that
+  announces a scan is classified as one` in
+  `tools/ledger/block-kinds.test.mjs`, and its message says "either the
+  heading needs the standard spelling or SCAN_TITLE needs the new one".
+  Both headings it named have the standard spelling and `SCAN_TITLE`
+  matches both. The actual cause is the third branch of the same
+  `isScan` expression: `COMMITS_WORK` sees a `- First step:` line and
+  demotes the block to an idea. Two causes listed, three in the code,
+  and the one missing from the list is the one that fired.
+- What: a failure message is the only part of a gate most readers ever
+  see, and this one sent a reader to check two things that were both
+  fine. The structural version of the defect is small and general: the
+  message was written by hand from the author's memory of the predicate,
+  `SCAN_TITLE.test(title) && !COMMITS_WORK.test(text)`, and nothing
+  relates the one to the other, so the message could not notice when the
+  predicate grew a conjunct. It is the same shape as the two defects
+  this run's other entries describe, moved from the assertion to the
+  message: a string that restates a fact instead of being derived from
+  it. This run fixed this instance by hand, which does not fix the
+  class.
+- First step: measure before building anything, because the cheap fix
+  may be enough. Count, across `tools/**/*.test.mjs` and
+  `ursa-major/src/**/*.test.ts`, the assertion messages that enumerate
+  causes (a message containing `either ... or`, `one of`, or a numbered
+  list) and compare each list's length to the number of conjuncts in the
+  predicate it describes. If the count of mismatches is one, this entry
+  is already closed and the class is not real. If it is several, the
+  thing worth building is the smaller discipline rather than a gate:
+  a message that names the predicate's own sub-results, computed, as
+  `--check agrees with git about this repository own checkout` now does
+  with the shape it read.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run, 2) — Six of nine urgent entries are the owner's to act on, and nothing anywhere shows her those six as a list
+- Trigger: auditing all nine `- Status: urgent` entries against `main` this
+  run, to find which were already shipped. Three were, and are now `built`.
+  The surprise was the other six: every one of them has a `- First step:`
+  line that names an owner or HQ action in its first clause. "the owner
+  decides between two options" (2026-09-27), "the owner's merge, in any
+  order that suits her" (2026-09-28), "this is blocked on an owner action,
+  not on engineering" (2026-09-29), "the owner decides between a second
+  history rewrite and" (2026-10-04), "the owner, or HQ acting in
+  `.github/workflows`, runs the two" (2026-10-24), "the owner adds `bash
+  tools/ensure-full-clone.sh` above the" (2026-10-24). Three of the six have
+  been outstanding since September.
+- What: the `urgent` list is read by seats looking for work and by the PM
+  grooming sprints, and after this run's three moves it is six entries long
+  and **none** of them is a seat's to do. So the queue's whole content is
+  now addressed to one person, and that person has never been handed it as a
+  list. She has been handed the ledger, which is 11,577 lines. A report, not
+  a gate: `tools/ledger/owner-queue.mjs` prints every entry whose status is
+  `urgent` or `accepted` and whose `- First step:` line names the owner or
+  HQ, with the entry's date, its age in days, and the first sentence of the
+  first step, newest last. The discriminator is the same shape
+  `tools/ledger/check-closures.mjs` uses for its holder split, which reads
+  the status; this one reads the first step, so the two together give the
+  ledger a complete who-holds-this axis for the first time.
+- First step: write the detector and measure how well it does against the
+  nine entries read by hand this run, which is a labelled set of exactly the
+  right size to tell a working rule from a lucky one. Report the precision
+  and recall in the pull request rather than claiming the rule works. If
+  matching on prose turns out to be unreliable, the fallback is a `- Held:`
+  field proposed to the owner for `pm.md` §4, which is a standard change and
+  therefore hers, not a seat's.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run, 2) — Nobody has measured how late this ledger's `built` moves are, and the three taken today were 13, 12 and 2 days late
+- Trigger: making the three status moves in this run. Each one cites the
+  commit that finished it, so the lag is computable: 2026-10-12's entry was
+  finished by `467ba564` on 2026-10-13 and moved today, thirteen days later;
+  2026-10-13's by `a8c3adce` on 2026-10-14, twelve days; 2026-10-24's by
+  `fca32e5f` on 2026-10-24, two days. The charter's transition is written for
+  the day the finishing pull request merges, and all three missed it.
+- What: the ledger has seventeen entries at `built` and most of their status
+  lines cite a commit sha or a dated branch. So the distribution of "days
+  between the finishing commit and the status move" is already in the
+  repository and has never been looked at. It matters in the opposite
+  direction from the staleness this run fixed: if the median lag is days
+  rather than hours, then `built` is systematically late too, and the PM's
+  read of what shipped is wrong by that median every Monday. If the median
+  is near zero and this run's three are outliers, then the three were an
+  incident and not a pattern, which is a different and cheaper conclusion.
+  Either way the number decides whether the closure marker shipped today is
+  enough or whether the transition needs to be somebody's explicit step.
+- First step: a script that, for each `built` entry, extracts the first
+  `[0-9a-f]{7,40}` from its `- Status:` line, resolves it with `git show -s
+  --format=%ad --date=short`, and subtracts that from the date the status
+  line itself was committed (`git log -L` on the line, or the commit that
+  last touched the block). Print the lag per entry and the median. Entries
+  whose status line cites no sha are counted as unmeasurable and reported as
+  a share, because that share is itself the answer to whether the citation
+  convention is real.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run, 2) — Every magic string in this repository is detected as narrowly as it is accepted, and this run shipped one such defect before catching it
+- Trigger: this run's craft scan of GitHub's closing keywords (note below).
+  `tools/ledger/check-closures.mjs` shipped its first draft keying both
+  acceptance and detection on the literal `closes:`, so a marker written
+  `fixes:`, or without the colon, was unread in silence. The scan is what
+  found it, and the fix was to widen detection to nine verb spellings while
+  keeping acceptance at one.
+- What: the same shape is plausible elsewhere in this repository and has not
+  been checked. `scripts/redaction-check.mjs` reads three patterns from a
+  workflow. `ursa-major/tools/make-regen.ts` writes and checks generated
+  blocks. `tools/ledger/check-attributes.mjs` matches merge-driver
+  declarations by name. `tools/secret-scan.mjs` carries sixteen classes. Each
+  of those recognizes a string that a person types by hand, and for each the
+  question is the same and separate from whether its pattern is correct: when
+  somebody types a near-miss, does the tool say so, or does it go quiet? A
+  quiet near-miss in a redaction or secret pattern is the worst case in this
+  repository, because the thing that was supposed to be caught is the thing
+  that was not.
+- First step: one tool, not all five, and `tools/secret-scan.mjs` first
+  because its silence is the most expensive. Take its sixteen classes, write
+  one near-miss per class by hand (a key with the wrong prefix length, a
+  token with an underscore where the real format has a hyphen), and record
+  for each whether the scanner reports it, misses it silently, or reports it
+  as a hit. Publish the three-way table. Only then decide whether any class
+  needs a wider detector, because a secret scanner that cries wolf is also a
+  secret scanner nobody reads.
+- Cost: $0
+- Status: proposed
+
+- 2026-10-26 (engineer, hook run, 2, craft scan): GitHub's own
+  issue-closing keywords, read today at
+  `docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue`.
+  Chosen because this run built the same mechanism for a different pair of
+  artifacts, and GitHub has been running it at population scale for a
+  decade, so its design decisions are evidence rather than opinion. **The
+  thing worth stealing, and stolen today in the same run:** detection is
+  wider than acceptance. GitHub takes nine verb spellings, `close`,
+  `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`,
+  `resolved`, in any case, with the colon optional. The first draft of
+  `tools/ledger/check-closures.mjs` accepted one spelling and detected only
+  that one, so a near-miss was silently unread, which is the exact failure
+  the marker exists to end. `CLOSURE_ATTEMPT` is now the nine spellings and
+  `CLOSURE_MARKER` is still the one, with the gap reported. **The thing Ursa
+  does better, and deliberately:** GitHub's mechanism *acts*. `Closes #10`
+  closes issue 10 on merge to the default branch, with nothing checking that
+  the work was done and no reverse check at all for a keyword whose issue is
+  still open. Ursa's marker never acts. It only reports a contradiction
+  between two committed statements, and a person resolves it by writing a
+  status line that carries its evidence. That asymmetry is not timidity, it
+  is required here: `docs/standards/pm.md` §4 reserves the move out of
+  `proposed` to the owner, so a gate that edited `docs/ideas.md` would let a
+  seat take a decision the standard gives her. A mechanism that never acts
+  can be trusted on a file whose statuses encode who is allowed to change
+  them, which is the same reasoning the vision's consent constraints apply
+  to a user's own profile, one layer in. This is close enough to the first
+  entry above to be its justification rather than a separate idea, which is
+  why it is not filed as one.

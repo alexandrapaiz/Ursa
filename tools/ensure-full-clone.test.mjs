@@ -230,6 +230,25 @@ describe('ensure-full-clone.sh', () => {
     assert.equal(r.code, 0, r.err);
   });
 
+  // The test above reaches `clone is complete` through the repair, so it only
+  // ever sees the state this tool itself wrote. A clone that was never shallow
+  // and never single-branch reaches the same state by a different route, and
+  // it is the shape a developer's own machine and a repaired CI checkout have,
+  // so the gate passing on it is a separate claim rather than the same one.
+  test('--check exits 0 on a clone that was never shallow or single-branch, not only on one this tool repaired', () => {
+    const c = fullClone();
+    // The premise, asserted rather than assumed: `git clone` with no --depth
+    // and no --single-branch produces neither fault, so a non-zero below would
+    // be the gate's verdict and not the fixture's shape.
+    assert.equal(git(c, 'rev-parse', '--is-shallow-repository'), 'false');
+    assert.equal(git(c, 'config', '--get-all', 'remote.origin.fetch'), '+refs/heads/*:refs/remotes/origin/*');
+    const r = run(['--check'], c);
+    assert.equal(r.code, 0, r.err);
+    assert.match(r.out, /^clone is complete: \d+ commits, \d+ remote-tracking refs under origin\/\.$/m);
+    assert.doesNotMatch(r.out, /repaired/, 'nothing was repaired, so nothing may claim it was');
+    assert.equal(r.err, '');
+  });
+
   test('--quiet prints nothing when there is nothing to repair', () => {
     const c = seatClone();
     run([], c);
@@ -270,8 +289,71 @@ describe('ensure-full-clone.sh', () => {
     assert.equal(git(c, 'rev-parse', '--is-shallow-repository'), 'true');
   });
 
-  test('this repository own checkout passes --check, so the gate is green where it runs', () => {
+  // WHAT THIS USED TO BE, and why it changed on 2026-10-26.
+  //
+  // Until this commit the last test here was `this repository own checkout
+  // passes --check, so the gate is green where it runs`, asserting
+  // `r.code === 0` against the ambient repository. The clone a seat is given
+  // is `--depth 1 --single-branch`, which is both faults at once, so the test
+  // was red on every seat checkout that had not already run the repair:
+  // measured 17 pass / 1 fail as the sandbox arrived on 2026-10-24 and again
+  // on 2026-10-26, and 18 pass / 0 fail after `bash tools/ensure-full-clone.sh`
+  // on that same checkout. That is a red whose colour is a property of the
+  // checkout rather than of the script, and a red that is normal is worse than
+  // no gate, because the next real regression in this file arrives wearing it.
+  //
+  // The replacement keeps the ambient checkout in scope — it is the only
+  // real-world input this suite has, the other eighteen tests all being
+  // purpose-shaped temp clones — and changes what is asserted about it, from
+  // "this checkout is complete" (not a claim about the script) to "the gate's
+  // verdict about this checkout is the verdict git's own two readings imply"
+  // (a claim about the script, and true on either shape). The expected value
+  // comes from `git rev-parse --is-shallow-repository` and
+  // `remote.origin.fetch` directly, so the tool is never its own oracle.
+  //
+  // The shape is computed here rather than inside the test so it can go in the
+  // test's own name. node:test's reporters print the name of a test and
+  // nothing else about one that passed, which is the constraint
+  // ursa-major/src/provenance-index.test.ts states for vitest and solves the
+  // same way: a reason only a verbose run would show is a reason nobody reads.
+  const ambient = (() => {
+    const cwd = process.cwd();
+    if (status(cwd, 'git', ['rev-parse', '--git-dir']) !== 0) {
+      return { code: 2, faults: [], label: 'not a git repository' };
+    }
+    let url = '';
+    try { url = git(cwd, 'config', '--get', 'remote.origin.url'); } catch { /* unset exits 1 */ }
+    if (url === '') return { code: 2, faults: [], label: 'no origin remote' };
+    const faults = [];
+    if (git(cwd, 'rev-parse', '--is-shallow-repository') === 'true') faults.push('depth');
+    let refspecs = '';
+    try { refspecs = git(cwd, 'config', '--get-all', 'remote.origin.fetch'); } catch { /* unset exits 1 */ }
+    if (!refspecs.split('\n').includes('+refs/heads/*:refs/remotes/origin/*')) faults.push('refspec');
+    return {
+      code: faults.length === 0 ? 0 : 1,
+      faults,
+      label: faults.length === 0 ? 'complete' : `unrepaired: ${faults.join(' + ')}`,
+    };
+  })();
+
+  test(`--check agrees with git about this repository own checkout, whichever shape it is in (this one: ${ambient.label})`, () => {
     const r = run(['--check'], process.cwd());
-    assert.equal(r.code, 0, `${r.err}\nRun: bash tools/ensure-full-clone.sh`);
+    assert.equal(r.code, ambient.code,
+      `git reads this checkout as ${ambient.label}, so --check should exit ${ambient.code}.\n${r.err}`);
+    // Each fault git found is named, and each fault git did not find is not.
+    // The second half is what stops this passing on a tool that always prints
+    // both lines, which is the failure mode a one-shape checkout cannot see.
+    for (const f of ['depth', 'refspec']) {
+      if (ambient.faults.includes(f)) {
+        assert.match(r.err, new RegExp(`^ensure-full-clone: ${f}:`, 'm'), `${f} is present and must be named`);
+      } else if (ambient.code !== 2) {
+        assert.doesNotMatch(r.err, new RegExp(`^ensure-full-clone: ${f}:`, 'm'), `${f} is absent and must not be claimed`);
+      }
+    }
+    if (ambient.code === 0) assert.equal(r.err, '', 'a complete clone has nothing to report on stderr');
+    // --check is read-only on every path, including this one, where the
+    // repository under test is the one holding this file.
+    assert.equal(git(process.cwd(), 'rev-parse', '--is-shallow-repository'),
+      ambient.faults.includes('depth') ? 'true' : 'false', '--check must not have repaired anything');
   });
 });
