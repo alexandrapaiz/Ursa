@@ -7855,3 +7855,187 @@ a mergeable merge commit exists", which is a strictly narrower claim than
 until the day it is load-bearing. Worth checking the other eleven
 workflows' triggers against what their authors meant, which this entry
 does not do and names as the obvious next pass.
+
+## INC-2026-10-26-the-re-ask-probed-the-patch-i-imagined-and-not-the-property-i-wanted — Two asks re-sent for a third and a fourth window, both already satisfied, both probes a grep for a string from my own proposed fix
+
+**What happened.** Two asks this seat had routed to HQ's
+`exo-centralizer` were carried in the learning log as live and re-sent
+on the board by windows 45, 47 and 48, each time with a measurement
+attached, each time reading zero. Both were satisfied on HQ's `main`
+at the time of the last re-send. The centralizer said so at 05:52:03
+UTC on 2026-10-26 in a note of 1,495 characters, under the wake cut, so
+it arrived whole. This window re-derived both claims against HQ's
+`main` before accepting either, and both check out.
+
+**Re-ask one, which is *fixed differently*.** The carried check was
+"`grep -c install-driver` over HQ's `tools/check-merge-queue.sh`; zero
+means the ask is live." Measured this window: **zero hits, and 454
+lines of a tool that solves the whole of it.** The landed repair
+*pins* the driverless merge on purpose, overriding every declared
+driver for the length of one `git` invocation, and its own comment
+gives this seat's own argument as the reason: GitHub merges
+server-side in a clone with no drivers, so the driverless merge is the
+button's verdict permanently and nothing a repository declares can
+reach it. Installing the drivers would have produced the direction the
+tool's comment calls dangerous, a pull request the button will refuse
+reported clean. The repair also reads all three places a `merge=`
+attribute can come from and names `needs-local-merge` as its own state,
+so a mechanical conflict is not charged to a seat's judgement. None of
+that can contain the string `install-driver`.
+
+**Re-ask two, which is *the wrong revision*.** The carried check was
+"`grep -c unresolved` over HQ's `tools/capacity-retry.py` on `main`;
+zero means the barren-wake census is live." Window 48 published
+"**zero** times ... on `main`, **420 lines**". Measured this window at
+05:5x, instrument
+`gh api repos/alexandrapaiz/alexandra-systems/contents/tools/capacity-retry.py?ref=main`:
+
+| ref | lines | hits for `unresolved` |
+|---|---|---|
+| `2ab9648d` 2026-10-24 13:06 | 233 | 0 |
+| `3ddff966` 2026-10-24 22:09 | 354 | 0 |
+| `00ee4e53` 2026-10-25 03:05 | **420** | **0** |
+| `2c750e4d` 2026-10-25 23:48 (`main` now) | **774** | **4** |
+
+So 420 lines and zero hits was a correct reading of `main` taken
+between 03:05 and 23:48 on 2026-10-25, and window 48 ran from 00:14 to
+00:5x on 2026-10-26, after `2c750e4d`. The number was right about a
+revision that had been superseded for an hour before the window that
+re-sent it existed. The centralizer's note is sharper than the
+diagnosis the seat would have reached on its own: the probe reported a
+count **and a size**, and the size already said the count was about a
+different file.
+
+Two further facts. The four hits include this seat's own refusal split
+at 66.4% with its percentage in the comment, so the ask was not merely
+satisfied, it landed with this seat's measurement cited. And the
+centralizer had said so on the board at **2026-10-25 23:53:52**, under
+the subject "Your refusal split is in at 66.4 per cent" — twenty-one
+minutes before window 48 opened and re-sent the ask. The message was in
+the inbox the whole time.
+
+**Why it happened technically.** Three causes, and the third is the
+only one that is this seat's charter rather than this seat's judgement.
+
+1. **A greppable string from the asker's own fix is not the property
+   asked about.** Both probes tested for an implementation this seat had
+   proposed. A hit count alone cannot tell *not fixed* from *fixed
+   differently* from *you are holding the wrong file*, and those three
+   have different next actions: wait, retire the ask, re-measure.
+2. **A carried check was inherited across windows without its instant.**
+   The learning log's entry reads "`unresolved` appears zero times in
+   HQ's `capacity-retry.py` on `main`, 420 lines (fourth window)". The
+   parenthetical names the *window that measured it* and no window can
+   tell, from that line, whether a later window re-measured or
+   inherited. This charter already requires the writer of a state claim
+   about another seat's live branch to name the instant it was measured
+   (§"And the writer's half"). It never applied the same rule to the
+   claims this seat carries forward in its own register, which is the
+   surface every fresh window reads first.
+3. **The charter's §2 "work queue" rule has no retirement path for an
+   ask whose answer is "already done, differently".** It says an entry
+   marked pending is an unpaid debt that outranks a new idea. It does
+   not say how a debt is discharged by somebody else's different fix.
+
+**The fix.** On the charter branch, in the §3 standards sweep where the
+re-ask is generated:
+
+- Every carried ask states the **property** in a sentence a reader could
+  verify without this seat's diff, beside any string it greps.
+- Every carried measurement names its **instant and the commit**, not
+  the window ordinal.
+- Before re-sending, re-measure at `main` and compare the artifact's
+  **size** as well as the count, because a size that moved is the
+  cheapest available signal that the count is about a different file.
+- Read the artifact's own account of itself first: `--help`, the usage
+  block, the comment above the function. All three of the repairs this
+  seat failed to see are described in their own files in this seat's own
+  words.
+
+**What the org grows from it.** The centralizer filed the general shape
+as a portfolio lesson, `standards/lessons-inbox/2026-10-26-a-re-ask-whose-probe-greps-for-your-own-fix.md`,
+`binds: any, exo, pm`. **It is on HQ's open `#489` and not on HQ's
+`main`**, checked this window with
+`gh api .../contents/standards/lessons-inbox?ref=main`, which does not
+list it. So the lesson is an artifact and not yet portfolio law, which
+is the state the charter's own rule about a sibling's "I have fixed it"
+describes exactly. Nothing in the note misstates this: its subject's
+"already law on the trunk" is about the two **repairs**, which are on
+the trunk and were verified here, and its `data.inbox_entry` is about
+the **lesson**, which is on a pull request. Two facts with two states in
+one message, and the reader owes the second `gh api` call.
+
+What this cost: four seat windows across two companies spent on two
+items that were already law, while this seat's real findings waited
+behind them in the same messages.
+
+## INC-2026-10-26-clean-from-the-button-is-not-clean-from-this-repositorys-own-merge-semantics — The queue instrument answers what the merge button will do, and one open pull request this morning is clean to the button and refused by Ursa's own ledger driver
+
+**What happened.** This window ran HQ's `tools/check-merge-queue.sh`
+over the 16 open pull requests, twice, once with this clone's merge
+drivers unregistered and once with them registered by
+`tools/ledger/install-driver.sh` and `tools/registers/install-drivers.sh`.
+The tool is correct and its two states are the two it names. Then this
+window ran the third measurement the tool does not take, which is the
+merge **with** the drivers, per pull request, against `origin/main`:
+
+| | drivers registered | driverless (what the button does) |
+|---|---|---|
+| `#474 #473 #472 #470 #468 #467 #465 #462 #454 #447 #395` | merges | merges |
+| **`#463`** | **refused** | **merges** |
+
+`#463` is the engineer seat's. The refusal is the `ledger` driver's own
+and it names the block:
+
+```
+ledger driver: 1 block(s) in docs/ideas.md were edited on both sides and need a human:
+  ### 2026-10-26 (engineer, hook run) — Craft scan: tesh 0.3.2 and txm 8.2.0, ...
+```
+
+Verified on both sides against the merge base `177b7f60`. `main`
+removed that block's closing `- Cost: $0` and `- Status: proposed`
+lines; `#463` rewrote the block's `- First step:` line into a paragraph
+explaining why a scan note carries no such field. Both edits are real,
+both are inside one ledger block, and they fall on different lines, so
+git's own three-way merge combines them without noticing and the button
+will accept it.
+
+**Why it happened technically.** `check-merge-queue.sh` pins the
+driverless merge **deliberately and correctly**, because its question is
+"what can the owner actually merge right now" and the answer to that
+question is a property of GitHub's server-side clone, which has no
+drivers. Its `needs-local-merge` state covers the direction where the
+drivers resolve something the button refuses, which is mechanical and
+needs no judgement, and four of the sixteen open pull requests are in
+it. The opposite direction — the button resolves something the
+repository's own semantics refuse — is the direction the tool's own
+comment block calls dangerous, and the tool reports it as `clean`
+because from its question's point of view it **is** clean. Nothing is
+wrong with the instrument. The gap is that this org runs one instrument
+for a question with two halves.
+
+**What is not claimed.** The driverless result passes Ursa's own ledger
+gate: `node tools/ledger/check.mjs` on the merged tree reports 311
+blocks clean with one pre-existing owner-only `STATUS_ALLOWED`
+violation, and `node --test tools/ledger/block-kinds.test.mjs` passes
+11 of 11. So this is not a red `main` waiting to happen. It is a block
+whose two edits were combined by line position rather than by entry
+identity, which is the one judgement the `ledger` driver exists to
+route to a human, and the button will make it silently. Whether the
+combined block is right is the engineer seat's call and the ledger's
+statuses are the owner's, so this seat measures it and hands it over.
+
+**The fix.** In §5b's merge-order duty, on the charter branch: for every
+pull request the queue checker calls `clean` whose diff touches a path
+`.gitattributes` gives a `merge=` attribute, run the merge a second
+time with this repository's drivers registered and report a
+disagreement as its own state, `drivers-disagree`. One column in
+`merge-order.md`, and the command is in `runner-facts.md` §32.
+
+**What the org grows from it.** Window 48 filed this as an idea to the
+owner at 00:27:37 UTC today, under `Ideas: we declare a merge the forge
+will never run, and the cheapest f...`, from first principles and with
+no instance. Nine hours later it has one, measured, in the open queue.
+An idea filed with no instance is cheap to file and this is the first
+time one of this seat's has acquired an instance before the owner
+answered it.
