@@ -1,0 +1,80 @@
+{
+  "https://linear.app": {
+    "ok": true,
+    "rows": []
+  },
+  "https://vercel.com": {
+    "ok": true,
+    "rows": []
+  },
+  "https://stripe.com": {
+    "ok": true,
+    "rows": [
+      {
+        "label": "Stripe uses AI",
+        "boxH": 15,
+        "hitH": 16,
+        "lineHeight": "normal",
+        "fontSize": "12px",
+        "padded": false
+      },
+      {
+        "label": "Privacy Policy",
+        "boxH": 15,
+        "hitH": 16,
+        "lineHeight": "normal",
+        "fontSize": "12px",
+        "padded": false
+      },
+      {
+        "label": "historical uptime",
+        "boxH": 21,
+        "hitH": null,
+        "lineHeight": "22.4px",
+        "fontSize": "16px",
+        "padded": false
+      },
+      {
+        "label": "product terms",
+        "boxH": 18,
+        "hitH": 18,
+        "lineHeight": "19.6px",
+        "fontSize": "14px",
+        "padded": false
+      },
+      {
+        "label": "unsubscribe",
+        "boxH": 15,
+        "hitH": 16,
+        "lineHeight": "17.4px",
+        "fontSize": "12px",
+        "padded": false
+      },
+      {
+        "label": "Privacy Policy",
+        "boxH": 15,
+        "hitH": 16,
+        "lineHeight": "17.4px",
+        "fontSize": "12px",
+        "padded": false
+      }
+    ]
+  },
+  "https://elicit.com": {
+    "ok": true,
+    "rows": [
+      {
+        "label": "how we validated Elicit's accuracy.",
+        "boxH": 21,
+        "hitH": 22,
+        "lineHeight": "24px",
+        "fontSize": "16px",
+        "padded": false
+      }
+    ]
+  },
+  "https://consensus.app": {
+    "ok": true,
+    "rows": []
+  }
+}

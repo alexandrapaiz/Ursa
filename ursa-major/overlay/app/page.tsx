@@ -110,19 +110,25 @@ export default function Overlay() {
           <span style={{ color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.02em' }}>Ursa</span>
         </header>
         <form onSubmit={unlock}>
-          <input
-            type="password"
-            value={phrase}
-            onChange={(e) => setPhrase(e.target.value)}
-            placeholder="passphrase"
-            autoFocus
-            className="mono"
-            style={{
-              width: '100%', padding: '8px 10px', background: 'var(--panel)',
-              border: '1px solid var(--line)', borderRadius: 6, color: 'var(--ink)',
-              fontSize: 13, outline: 'none',
-            }}
-          />
+          {/* The label draws nothing and carries the overlay that makes
+              this a 44px press (`.panel-field` in globals.css). The
+              field keeps its own 35px box, and therefore its own focus
+              ring, which is L3 in docs/design/ledger.md. */}
+          <label className="panel-field">
+            <input
+              type="password"
+              value={phrase}
+              onChange={(e) => setPhrase(e.target.value)}
+              placeholder="passphrase"
+              autoFocus
+              className="mono"
+              style={{
+                width: '100%', padding: '8px 10px', background: 'var(--panel)',
+                border: '1px solid var(--line)', borderRadius: 6, color: 'var(--ink)',
+                fontSize: 13,
+              }}
+            />
+          </label>
           <p style={{ color: 'var(--dim)', marginTop: 8, fontSize: 12 }}>
             {deriving ? 'deriving the key…' : 'held in memory only; it never leaves this page'}
           </p>
@@ -198,7 +204,7 @@ export default function Overlay() {
           <button
             onClick={run}
             disabled={running}
-            className="mono"
+            className="mono panel-hit"
             style={{
               background: 'var(--panel)', color: 'var(--accent)', border: '1px solid var(--line)',
               borderRadius: 6, padding: '4px 14px', cursor: running ? 'wait' : 'pointer', fontSize: 12,
