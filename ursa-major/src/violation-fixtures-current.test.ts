@@ -48,7 +48,7 @@
 // what makes it safe to run from a test at all.
 
 import { spawnSync } from 'node:child_process'
-import { appendFileSync, mkdtempSync } from 'node:fs'
+import { appendFileSync, mkdtempSync, readdirSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join, resolve as resolvePath } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -121,6 +121,43 @@ describe('the committed violation fixtures are what the generator writes', () =>
     // fails one of the two files instead of passing both.
     expect(out).toContain('47 files match')
     expect(1 + 23 * 2).toBe(47)
+  })
+
+  it('holds no file the generator does not write, besides the hand-written README', () => {
+    // WHY `--check` CANNOT SEE THIS. It iterates the files it WOULD write
+    // and compares each against disk, so it is a check for missing and
+    // stale content and not for extra content. A file in this directory
+    // that the generator does not write is invisible to it.
+    //
+    // The behavioural test does not see it either, and the asymmetry is
+    // worth stating because it looks like it should. `SLUGS` there is
+    // built by `readdirSync` filtered to `.json`, so a stray `.json`
+    // does fail — it gets no `Expected codes:` line and the test says so.
+    // A stray `.md` is enumerated by nothing. Measured on 2026-10-26 by
+    // dropping `zz-orphan.md` into the directory: `fixtures:violations:check`
+    // reported all 47 files current and the behavioural test passed 32.
+    //
+    // WHAT IT WOULD MEAN IN PRACTICE. Deleting a `Case` from `CASES`
+    // stops the generator writing that slug's two files, and both are
+    // left behind on disk. The `.json` is caught. The `.md` survives as a
+    // note describing a bound no committed fixture fires, in the one
+    // directory this project points buyers and auditors at, and it
+    // survives looking exactly like the twenty-three that are real.
+    //
+    // The expected set comes from the generator rather than a literal, so
+    // adding a case needs no edit here.
+    const tmp = mkdtempSync(join(tmpdir(), 'ursa-violation-inventory-'))
+    const written = spawnSync(process.execPath, [tsxCli(), SCRIPT], { cwd: tmp, encoding: 'utf8' })
+    expect(written.status, written.stdout + written.stderr).toBe(0)
+
+    const generated = readdirSync(join(tmp, 'fixtures', 'violations')).sort()
+    const committed = readdirSync(join('fixtures', 'violations'))
+      // The only file in here that a person wrote. It explains what the
+      // directory is for, and the generator has never written it.
+      .filter((f) => f !== 'README.md')
+      .sort()
+
+    expect(committed).toEqual(generated)
   })
 
   it('fails on a one-byte change, so the assertion above is not vacuous', () => {
