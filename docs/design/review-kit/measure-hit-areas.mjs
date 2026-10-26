@@ -27,6 +27,32 @@
  *      clicks. So inline-in-flow targets are measured and reported, and
  *      counted separately from the standalone controls the floor is for.
  *
+ *   3. It had two categories where the site has three, so the record
+ *      viewer's document spans fell into whichever one their line
+ *      wrapping happened to put them in (2026-10-25b). `inlineInFlow`
+ *      ends on `getClientRects().length > 1`, which is true of a span
+ *      that wraps and false of the same span at a width where it fits,
+ *      and the spans in a `<pre>` have no bare text siblings to catch
+ *      them on the earlier clause. Measured on the shipped build: of the
+ *      same five spans, one was "standalone" at 390, four at 820, one at
+ *      1440, and the rest were "inline, exempt" — one element, two
+ *      verdicts, decided by the viewport.
+ *
+ *      The cost was not the misfiling. It was that the headline could
+ *      never reach zero. Four consecutive reviews read "6 of 60
+ *      standalone controls under the floor" on a site whose standalone
+ *      controls were all fine, and a number that is never zero cannot be
+ *      read as a pass: the seventh failure, the real one, arrives as a
+ *      seven and looks like the six.
+ *
+ *      So document spans are their own category now, keyed on sitting
+ *      inside a `<pre>`, which is what "this is a document rather than a
+ *      layout" means in markup. They carry their own check rather than a
+ *      pass: a tiled target cannot be made taller, since every overlay
+ *      would reach over its neighbours and the topmost one would answer
+ *      their presses, but it must still be hittable across the line you
+ *      can see, so the check is `hit height >= its own line box`.
+ *
  * Read-only. Nothing is clicked.
  *
  * usage: node measure-hit-areas.mjs out.txt [out.json]
@@ -86,6 +112,17 @@ const probe = (MIN) => {
   };
   const owns = (hit, el) => !!hit && (hit === el || el.contains(hit) || labelFor(hit, el));
 
+  /* Is this target part of a run of preformatted document text, rather
+     than a control in a layout? A `<pre>` is the markup for "these bytes
+     are a document", and the record viewer segments one edge to edge, so
+     every target inside one abuts another target on all four sides. That
+     is the thing the 44px floor cannot be applied to, and it is a fact
+     about where the element sits rather than about how wide the window
+     happens to be. The members of this category are listed in the output
+     so that a control arriving inside a `<pre>` for some other reason is
+     visible rather than silently exempt. */
+  const documentSpan = (el) => !!el.closest("pre");
+
   /** Is this target inline in a run of text? WCAG 2.5.8's exemption. */
   const inlineInFlow = (el) => {
     const d = getComputedStyle(el).display;
@@ -142,7 +179,8 @@ const probe = (MIN) => {
 
     const hitH = extent(el, from, "y");
     const hitW = extent(el, from, "x");
-    const inline = inlineInFlow(el);
+    const doc = documentSpan(el);
+    const inline = !doc && inlineInFlow(el);
     out.push({
       tag: el.tagName.toLowerCase(),
       cls: el.getAttribute("class")?.split(" ")[0] ?? "",
@@ -155,7 +193,11 @@ const probe = (MIN) => {
       hitW,
       hitH,
       inline,
-      short: !inline && hitH !== null && hitH < MIN,
+      doc,
+      short: !inline && !doc && hitH !== null && hitH < MIN,
+      // a tiled target's own floor: you must be able to hit the line you
+      // can read. Null where the question does not apply.
+      coversLine: doc && hitH !== null ? hitH >= Math.round(line.height) : null,
       afterPosition: getComputedStyle(el, "::after").position,
     });
   }
@@ -188,13 +230,17 @@ for (const [vname, w, h] of VIEWPORTS) {
         "control",
     );
     for (const r of rows) {
-      const verdict = r.inline
-        ? "inline, exempt"
-        : r.hitH === null
-          ? "COVERED"
-          : r.hitH < MIN
-            ? `SHORT by ${MIN - r.hitH}`
-            : "ok";
+      const verdict = r.hitH === null
+        ? "COVERED"
+        : r.doc
+          ? r.coversLine
+            ? "document, exempt"
+            : `UNDER LINE by ${Math.round(r.lineH) - r.hitH}`
+          : r.inline
+            ? "inline, exempt"
+            : r.hitH < MIN
+              ? `SHORT by ${MIN - r.hitH}`
+              : "ok";
       lines.push(
         "  " +
           `${r.boxW}x${r.boxH}`.padEnd(14) +
@@ -204,11 +250,13 @@ for (const [vname, w, h] of VIEWPORTS) {
           `${r.tag}.${r.cls} "${r.label}"`,
       );
     }
-    const standalone = rows.filter((r) => !r.inline);
+    const standalone = rows.filter((r) => !r.inline && !r.doc);
     const short = standalone.filter((r) => r.short);
+    const docs = rows.filter((r) => r.doc);
     lines.push(
       `  -> ${short.length} of ${standalone.length} standalone controls under ${MIN}px tall` +
-        ` (${rows.length - standalone.length} inline, exempt)`,
+        ` (${rows.filter((r) => r.inline).length} inline, exempt;` +
+        ` ${docs.length} document spans, ${docs.filter((r) => r.coversLine === false).length} not covering their own line)`,
     );
   }
   await ctx.close();
@@ -216,10 +264,23 @@ for (const [vname, w, h] of VIEWPORTS) {
 await browser.close();
 
 const rowsAll = Object.values(all).flat();
-const sa = rowsAll.filter((r) => !r.inline);
+const sa = rowsAll.filter((r) => !r.inline && !r.doc);
+const inl = rowsAll.filter((r) => r.inline);
+const dsp = rowsAll.filter((r) => r.doc);
+const badDoc = dsp.filter((r) => r.coversLine === false);
 lines.push(
   `\n=== total across every page and viewport ===\n  ${sa.filter((r) => r.short).length} short of ${sa.length} standalone, ` +
-    `${rowsAll.length - sa.length} inline and exempt, ${rowsAll.length} targets seen`,
+    `${inl.length} inline and exempt by 2.5.8, ` +
+    `${dsp.length} document spans (${badDoc.length} not covering their own line), ` +
+    `${rowsAll.length} targets seen`,
+);
+// The membership of the third category, printed rather than asserted: it
+// is exempt from the floor, so a control that lands in it by accident is
+// a control nobody is checking. One line per distinct class and page.
+const docKeys = [...new Set(dsp.map((r) => `${r.tag}.${r.cls}`))].sort();
+lines.push(
+  `  document spans are: ${docKeys.join(", ") || "none"}` +
+    `, on ${[...new Set(Object.entries(all).filter(([, rs]) => rs.some((r) => r.doc)).map(([k]) => k.split("/")[1]))].sort().join(", ") || "no page"}`,
 );
 
 const text = lines.join("\n") + "\n";
