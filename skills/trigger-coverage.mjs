@@ -304,6 +304,80 @@ const pct = (n, d) => (d === 0 ? '0' : ((100 * n) / d).toFixed(0))
  *   conditions that reach the shortfall branch; either may be empty
  * @returns {string[]} lines to print, in order, for the conditions that fired
  */
+/**
+ * Why the library-shape branch failed, as a sentence per condition that fired.
+ *
+ * WHY THIS EXISTS, which is a fact about this file rather than about the
+ * library. `explainShortfall` above was written on 2026-10-26 at 19:09 UTC to
+ * fix exactly one defect: an exit branch reached by two conditions, explained
+ * by one literal. The sweep that fix came with went over all four guards in
+ * this library and declared them clean. Two screens below it, added to this
+ * same file at 00:43 UTC the same day, the shape branch summed FOUR disjoint
+ * conditions into `N library-shape defects above, listed before the counts.`
+ * One class name, four repairs, and the one sentence the reader acts on told
+ * them where to scroll instead of what broke.
+ *
+ * So the finding worth more than the fix: §5x's sweep was keyed to files, and
+ * a sweep keyed to files stops at the first finding in each file. The unit is
+ * the exit branch. See `prompts/skill-extract.md` §5z, which this is the
+ * fourth instance under and the first found by looking at the right unit.
+ *
+ * The four conditions, in the order they are printed, which is the order to
+ * repair them in:
+ *
+ *   1. A directory no guard reads. Its citations are unfingerprinted and its
+ *      trigger boundary unmeasured, so this is the only one of the four where
+ *      something is actually unguarded. First, always.
+ *   2. A skill the index does not list. Guarded, but invisible to a reader of
+ *      skills/README.md, which shipped here for three runs.
+ *   3. An index row pointing at no directory. Two causes, and a listing
+ *      settles which: a renamed directory, or a row for a skill that never
+ *      landed.
+ *   4. A row whose label and target disagree. Cosmetic on its own and listed
+ *      last, but named because a reader checking the other three by eye
+ *      matches labels against slugs and gets a false negative from it.
+ *
+ * Every one of the four is a seat's repair, which is said out loud because
+ * §5z's other half is that a message naming a repair names who may make it,
+ * and the honest answer here is "you, now" for all four.
+ *
+ * @param {{ missingSkill: {slug: string, nearMiss: ?string}[],
+ *           unlisted: string[], indexedMissing: string[],
+ *           mislabelled: {label: string, dir: string}[] }} shape the four
+ *   conditions that reach the branch; any of them may be empty
+ * @returns {string[]} lines to print, in order, for the conditions that fired
+ */
+export function explainShape({ missingSkill, unlisted, indexedMissing, mislabelled }) {
+  const lines = []
+  const count = (n, one, many) => `${n} ${n === 1 ? one : many}`
+  if (missingSkill.length) {
+    lines.push(`${count(missingSkill.length, 'directory', 'directories')} under skills/ has no SKILL.md, so no guard in`)
+    lines.push('this library reads it: its citations are unfingerprinted and its trigger boundary')
+    lines.push('is unmeasured. Repair this one first, because it is the only condition here where')
+    lines.push('something is unguarded rather than unlisted. Two causes, and the listing printed')
+    lines.push('above settles which: the file is there under a near-miss name, which is a rename,')
+    lines.push('or the directory is not a skill at all, which is a move out of skills/.')
+  }
+  if (unlisted.length) {
+    lines.push(`${count(unlisted.length, 'skill is', 'skills are')} guarded but absent from the index in`)
+    lines.push('skills/README.md, so every tool here reads it and no reader finds it. One cause:')
+    lines.push('the run that landed the skill owed the row and did not write it. Add the row.')
+  }
+  if (indexedMissing.length) {
+    lines.push(`${count(indexedMissing.length, 'index row', 'index rows')} points at a directory that is not there.`)
+    lines.push('Two causes: the directory was renamed and the row kept the old slug, or the row was')
+    lines.push('written for a skill that never landed. A directory listing tells you which, and')
+    lines.push('they ask for opposite repairs — fix the row, or delete it.')
+  }
+  if (mislabelled.length) {
+    lines.push(`${count(mislabelled.length, 'index row carries', 'index rows carry')} a label that disagrees with the`)
+    lines.push('directory it links to. Cosmetic on its own, which is why it is listed last, but it')
+    lines.push('is also why the three above are hard to check by eye: a reader matching labels')
+    lines.push('against slugs reads a mislabelled row as a missing one. One word in skills/README.md.')
+  }
+  return lines
+}
+
 export function explainShortfall({ gaps, missingTrigger }) {
   const lines = []
   if (missingTrigger.length) {
@@ -400,9 +474,18 @@ function main(argv) {
   // no guard reads and an index that disagrees with the directory listing are
   // both facts about whether this library is the set of things it says it is,
   // and neither is a judgement call the caller can be given a flag for.
+  //
+  // The sum below is printed broken out rather than collapsed. Until this run
+  // it was one number under one class name, and four library-shape defects
+  // could be four index rows nobody wrote — a two-minute edit to one file — or
+  // four directories whose evidence nothing checks. See `explainShape`.
   const shape = missingSkill.length + mislabelled.length + indexedMissing.length + unlisted.length
   if (shape) {
-    console.log(`${shape} library-shape defect${shape === 1 ? '' : 's'} above, listed before the counts.`)
+    console.log(`${shape} library-shape defect${shape === 1 ? '' : 's'}: ` +
+      `${missingSkill.length} unread, ${unlisted.length} unlisted, ` +
+      `${indexedMissing.length} dangling index row${indexedMissing.length === 1 ? '' : 's'}, ` +
+      `${mislabelled.length} mislabelled. Each is listed above with its own slug.`)
+    for (const line of explainShape({ missingSkill, unlisted, indexedMissing, mislabelled })) console.log(line)
     return 1
   }
   if (gaps.length === 0 && missingTrigger.length === 0) {
