@@ -664,6 +664,19 @@
           "subject": "Merge origin/main into ursa-engineer/2026-10-26-hook"
         }
       ]
+    },
+    {
+      "digest": "67a96ba9ff68633e",
+      "sha256": "67a96ba9ff68633e75f92a7d3dbeb9b420ddd26e9f48de0023d3f4e22bafedf7",
+      "blob": "c5422f81786fbf295e2d786758d1fa0cfa8168c0",
+      "bytes": 311967,
+      "introducedBy": [
+        {
+          "commit": "8914eeb53ee634593318c9afd7fe788b04134543",
+          "date": "2026-10-26T19:26:45.000Z",
+          "subject": "bundle: rebuild dist/ursa.cjs after the claude-cli extraction"
+        }
+      ]
     }
   ]
 }
