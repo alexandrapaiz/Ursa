@@ -332,11 +332,37 @@ a risk or a thing to watch out for:
    decision needs to know which way the code errs and why. The widened
    marker narrows what a run claims rather than widening it, and that
    sentence is worth more than the regex it replaced.
+4. **The fix may move the line out from under the anchor, so re-point
+   before rewriting.** (Added 2026-10-26, twenty-sixth run, third
+   instance.) The first two instances were defects in code and the fix
+   edited the cited lines in place, so §5g's relocation question did
+   not arise. This one was a defect in documentation prose, the
+   fixtures README's hand-written counts, and the fix inserted a
+   paragraph above the count. The ref cited `README.md:1-11,201` for
+   three stale spellings, and after the fix line 201 is ordinary prose
+   inside the inserted paragraph while the count it named lives at 210.
+   An anchor left alone there does not go red a second time, because
+   the next run's fingerprint is taken over whatever text now sits at
+   201. So the order is: re-point the range at the thing the claim is
+   about, re-record the fingerprint, then rewrite the prose. Doing it
+   the other way leaves a correct hash over the wrong lines, which is
+   the §5j failure arriving through the §5h door.
 
 Ours: this is the one drift case where the skill was right and still
 has to change, which is why it is easy to skip. Every other entry in a
 drift report feels like a correction to make. This one feels like
 vindication, and it is the one that will mislead a reader hardest.
+
+Ours, 2026-10-26: how to spot one inside a batch. The mechanical pass
+sorts a drift batch into relocated, text-changed and ambiguous, and a
+§5h case always lands in text-changed, but so does every ordinary
+rewording. The cheap discriminator is the claim's own grammar rather
+than the diff. If the `what` field is a negative or a deficiency, the
+file still says, does not print, is one bound behind, matches only
+these four, then read the fix first and the lines second, because that
+sentence is one commit away from being false and nothing else in the
+batch is. Three of this library's `what` fields were written that way
+and all three have now come back as §5h cases.
 
 ## 5i. Budget a re-grounding pass by content, not by the drift count
 
@@ -770,3 +796,262 @@ skill was one file in practice, and they went quietly wrong when the format
 grew a second file. So when §2 gains a third, this section is what has to be
 read again, and `skills/citing-files.mjs` is the one place that answers which
 files count.
+
+## 5q. The fingerprint is owed by the run that writes the citation, and a skill whose guards are red is not shipped
+
+(Added 2026-10-24, thirteenth run, after reading the sixth skill's 41 refs
+and finding ten of them wrong about where they pointed.)
+
+§5g already says a new citation fails until its fingerprint is recorded, and
+says the point is to put the reading step on the author rather than the
+reviewer. That is the right rule and it was not enough, because it does not
+say *when*, and a rule about an author's obligation with no deadline is
+discharged by the next run or by nobody.
+
+**What it cost, measured.** `clearing-a-record-for-release` merged on
+2026-10-23 as PR #281 with all 47 of its cited ranges unfingerprinted and
+all 41 of its refs unread. Its description reported "224 sources, 291
+ranges" and "184 of 184 bound, 0 refs unread". Neither was true of anything
+committed. On `main` the next morning `check-evidence.mjs` exited 1 with 69
+failures and `relevance-sweep --stale` exited 1 with 41 refs unread. Reading
+the 41 found ten ranges that did not hold, and the four worst share one
+cause: they were written against the 2026-10-01 revision of
+`ursa-major/src/consent.cli.ts`, which two commits rewrote on 2026-10-23,
+the same day the skill was written. Each of the four resolves to its claim
+at `14ff4cb` and to nothing on `main`. Three of them had landed on the next
+ref's receipt: E24's range held the dispatcher's usage string, E25's held
+the branch that is E24's evidence, and E26's held the branch that is E25's.
+
+So the deadline matters more than the rule. A fingerprint recorded in the
+same run would have failed on all four immediately, because the lines it
+hashed were already not the lines the author read. A fingerprint deferred to
+the next run records whatever the tree says by then and certifies the error.
+
+1. **Record the fingerprint in the same run that writes the `source:` line**,
+   before the pull request is readied, not as a cleanup the next run inherits.
+   A citation without a fingerprint is not a weaker citation, it is an
+   unverified one, and the gap is where same-day drift lives.
+2. **Neither guard may be red when the skill is proposed for merge.** Both
+   were red here and the skill merged anyway, which is the part no tool
+   caused. A red `check-evidence.mjs` on a brand-new skill reads as "the
+   author has not got to it yet" rather than as "this is wrong", and those
+   are indistinguishable from outside. Treat the first as the second.
+3. **Do not report a guard's output you did not run on what you committed.**
+   The numbers in #281's description are the numbers of a working tree that
+   was never pushed. The cheap defence is to paste the command and its exit
+   status rather than its remembered result.
+
+**The sweep's absent-word column is the signal that fires when no
+fingerprint exists, and it is sharper than it looks.** The dossier's
+`signals:` line reports how many of a `what` field's words are absent from
+the cited range. Across the sixth skill's 41 refs that ratio separates the
+mis-anchored from the sound almost perfectly:
+
+```
+  E35  17/17  1.00   re-pointed      highest among refs that held:
+  E26  13/14  0.93   re-pointed        E21   7/11  0.64  (widened)
+  E25  10/11  0.91   re-pointed        E33   4/10  0.40  (supports)
+  E24   9/10  0.90   re-pointed        E41   6/16  0.38  (widened)
+  E36  11/13  0.85   re-pointed        E40   5/15  0.33  (supports)
+  E23   9/14  0.64   widened           E11   3/13  0.23  (supports)
+```
+
+At a threshold of 0.85 that is five flagged, five genuinely pointing at the
+wrong lines, and nothing flagged that held.
+
+**Corrected 2026-10-24, on the library instead of one skill of it.** The
+paragraph above was measured on 41 refs in the skill that had just failed,
+which is a threshold fitted to the sample that suggested it. Run
+`node skills/relevance-sweep.mjs --signal` to reproduce the wider
+measurement. Against the ranges as they stood before anyone corrected them,
+recovered from git for 136 of the library's 184 refs, the same threshold
+flags seven and two of the seven are sound:
+
+```
+  all refs           at 0.85: 7 flagged, 5 mis-anchored, 2 held
+  refs citing one file         5 flagged, 5 mis-anchored, 0 held   (127 refs)
+```
+
+Both of the two that held cite two files, and the reason generalises rather
+than being a quirk of those two. `running-an-outcome-record-trial/E1` claims
+there are two capture paths with two separate entry points and cites the
+first seven lines of each. Its evidence is the shape of the citation and not
+the text of either file, so none of the claim's words can appear in either
+range and no widening will ever lower its ratio. The same holds for a claim
+about where a line sits rather than what it says, which is
+`adding-a-bound-to-the-record-gate/E12` at 0.846, a comment stranded a
+hundred lines from the function it describes.
+
+So the rule is narrower than the old paragraph said and it is a reading
+instruction rather than a gate. **A ref at or above 0.85 whose sources name
+a single file is mis-anchored until you have read the lines and said
+otherwise. If the words are absent because the claim is about the position
+or the shape of the citation, the audit note has to say so, because nothing
+mechanical will ever defend that ref again.** `--signal` prints exactly
+that list at the end of its report.
+
+**Why it is not a third failure class in `--stale`, which is what the ledger
+first proposed.** It would not catch anything that gate does not already
+catch. Since 2026-10-24 `--stale` fails on any ref with no verdict, so a new
+citation cannot reach a green guard unread, and a range that moves after
+being read comes back stale. The only case left is a reader who read a
+mis-anchored range and blessed it, and firing on that means firing on refs a
+reader has already judged, where E12 and `E22` at 0.909 show the alarm would
+be false. A gate that re-litigates readings and is wrong twice in its first
+four alarms gets suppressed, and then the signal is worth less than it is
+now.
+
+The first thing the rule caught was not a mis-anchor. Reading `E22` under it
+turned up a defect in the sweep itself: the sentence splitter ended a
+sentence at the colon inside an inline code span, so the passage a reader
+was shown for `E22` was `1` and its tag. Fixed, with the three verdicts it
+unsettled re-read. A rule that sends a reader somewhere nobody had a reason
+to look pays for itself in ways that are not on its own ledger.
+
+Ours: the generalisation is that an obligation with no deadline is an
+obligation on whoever is unlucky, and this library has now paid for that
+twice, once at §5o for a verdict that could expire silently and once here
+for a fingerprint that could be owed forever. When a section adds a duty,
+it should say which run discharges it.
+
+## 5r. The near miss carries the sibling's own words, and a §5c debt falls on the run that creates it
+
+(Added 2026-10-24, seventeenth run, amending §5c and §5e.)
+
+§5c asks for "the adjacent skill's own trigger prompt" and nothing in
+this file ever said who owes it or how to tell whether it is there.
+`skills/trigger-coverage.mjs` now reads all of it, and the first run of
+it found the rule was being broken in a way no seat could have noticed:
+of 30 ordered pairs, 15 carried the sibling's own prompt, and the 15
+were exactly rank by age. Six skills, six distinct coverage values, in
+order, with no ties. Every skill tested the siblings that existed on the
+day it was written and none had come back.
+
+Three rules follow, and the third is the one with teeth.
+
+**The prompt is copied, not paraphrased.** A near miss written in the
+author's own words about the sibling tests the author. The sibling's own
+words test the description, which is the half of §5 that would actually
+catch a false positive. One test in this library paraphrased a sibling's
+trigger, correctly, and the paraphrase scored 0.333 against the original,
+which is below any defensible floor. Say which boundary a near miss
+tests in its prose as well, because a declaration is cheap and an
+author's claim about what a test does is better evidence than any
+resemblance measure. Both, not either.
+
+**A prompt outside the two canonical headings states its own verdict.**
+`TRIGGER-TEST.md` may keep a prompt under its own heading, and there is
+a good reason to: the heading records when a boundary was noticed. The
+cost is that nothing above it says whether it fires, so the prompt's own
+prose has to say "should not fire". Three prompts written in this run
+were missing that sentence and the tool reported them as unclassified
+rather than guessing, which is the correct behaviour and also the
+cheapest possible way to learn this.
+
+**The run that lands a skill owes a near miss to every skill already in
+the library, in their files, in the same pull request.** This is the
+teeth, and it is §5q's rule applied to triggers: an obligation with no
+owner is an obligation on whoever is unlucky. A new skill does not
+create a debt for its own `TRIGGER-TEST.md`; it creates N debts in N
+files the run's diff would otherwise never touch, and both receipt
+guards stay green while they go unpaid. Run
+`node skills/trigger-coverage.mjs --check` before readying the pull
+request. It exits 1 on an untested boundary and prints "every skill
+meets §5c" when there is none.
+
+**One amendment to §5e.** §5e says to count artifacts rather than
+neighbours, and that stands as an argument against re-cutting a skill
+whose many boundaries are one edge counted many times. It is not a
+licence to skip a near miss for a neighbour the artifact test says does
+not overlap. `adjudicating-uncertain-spans` has two neighbours sharing
+no file with it at all, the record gate and the release ruling, and the
+boundary with both of them had to be written down anyway: what is shared
+is the *shape of the judgment*, a rule asserted more confidently than
+its evidence carries, and a reader matches on shape. Those two were also
+the two near misses that failed, because an exclusion list built from
+artifacts cannot name a neighbour that has none.
+
+Ours: the budget is per neighbour and the test for whether a boundary is
+real is not the same as the test for whether it needs writing down. The
+artifact test answers the first. Only reading the sibling's trigger
+against this description answers the second.
+
+## 5s. A guard that skips its subject reports on the subject it has left
+
+(Added 2026-10-26, twenty-fifth run, amending §5k and §5q. Measured
+three times in one day, in three different tools, two of which are not
+this library's.)
+
+§5k says the mechanical pass is a tool whose one failure mode is the ref
+you give it. There is a second failure mode and it sits upstream of the
+ref: **the set the pass enumerated.** A guard reports a verdict about
+what it read. Nothing in its output distinguishes "I read this and it
+passed" from "I did not read this", and the second is the louder lie,
+because a count makes it sound thorough.
+
+**What it cost here, measured by probing the guards rather than reading
+them.** A directory `skills/decoy-skill/` holding one file named
+`SKILLS.md`, with correct frontmatter, a declared `provenance` ref and
+an `[E1]` tag in its body, was invisible to all three guards at once:
+`check-evidence.mjs` exited 0 saying "307 sources resolved",
+`trigger-coverage.mjs` exited 0 saying "every skill meets §5c", and
+`relevance-sweep.mjs` exited 0. One character in one filename. All three
+tools open `skills/<name>/SKILL.md` and `continue` when it is not there,
+and `strayCitations` — the check written for exactly "a tag in a file
+nothing reads is not a receipt" — sits after that `continue`, so it
+never ran for the directory that needed it most.
+
+**The tell, and it was in the output the whole time.**
+`trigger-coverage.mjs` printed `no TRIGGER-TEST.md: <slug>` for one of
+§2's two files and dropped the directory in silence for the other. A
+guard that reports half of a rule cannot be read as enforcing it, and
+the asymmetry is visible without running anything. Look for it: where a
+tool names one missing input and skips another, the skip is where the
+hole is.
+
+**The same shape, twice, outside this library on the same day.** Both
+are in `docs/ideas.md` under this date and both are worth reading,
+because they are what convinced this run the rule is general rather
+than a quirk of three scripts.
+
+1. `git merge-tree` with a merge driver registered as an *empty* command
+   returns the first parent's tree verbatim, prints one line on stderr,
+   and exits 1 — and exit 1 is also what a genuine conflict returns. A
+   probe that discards stderr and reads the exit code cannot tell the
+   two apart, and a finding was published on that basis.
+2. `skills/relocate-anchors.mjs` offered to move two of this library's
+   anchors by 119 lines, reporting them as pure relocation. It was right
+   about the text and reading a tree that should not have existed. The
+   tool has no way to say so; its subject is the working tree it was
+   handed.
+
+**So, two rules, and the second is the one with teeth.**
+
+**Probe a guard with the input it cannot read, not with the input it was
+written for.** Before trusting any check in `skills/`, ask what input
+makes it say nothing, construct that input, and run it. If the silence
+is indistinguishable from a pass, the guard has a hole the size of that
+input. This is cheap: the decoy above took two minutes and one `mkdir`.
+
+**A guard names what it declined to read, before it reports its
+counts.** `skills/library-dirs.mjs` is where that question lives for
+this library now, in the idiom of `source-line.mjs` and
+`citing-files.mjs`: one module for a question two tools were answering
+separately, because when two guards disagree about what counts as a
+member, a skill one reads and the other does not is half-guarded and
+neither says so. `check-evidence.mjs` and `trigger-coverage.mjs` both
+report an unread directory by name, the second returns 1 for it without
+waiting for `--check`, and the index is checked in both directions,
+which closes the twenty-first run's ledger entry about shipping a skill
+the index did not list.
+
+**And a new guard's test carries one input the guard cannot read.** Every
+unit test in `skills/library-dirs.test.mjs` would have passed on the day
+the hole existed. The defect was never in a predicate. It was that no
+caller asked, and only an end-to-end case over a library containing the
+unreadable thing can fail for that.
+
+Ours: the probe is the guard, which is `docs/agents/runner-facts.md` §7's
+sentence about a register that says "re-probe", arrived at independently
+in a different lane on the same day. A green suite is evidence about the
+inputs it enumerated and about nothing else.

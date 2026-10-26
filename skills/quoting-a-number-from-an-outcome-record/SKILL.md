@@ -9,25 +9,29 @@ description: >
   compared or added, for working out why the same product shows two
   different deletion rates, and for auditing a quantitative sentence
   that already exists against the field it cites. Does not fire for
-  producing a record, for choosing a trial subject, or for deciding
-  the label on any individual span.
-version: 0.3.2
+  producing a record, for choosing a trial subject, for deciding
+  the label on any individual span, for writing a rule about records
+  into the record gate, for a count that comes from a tuning record
+  rather than an outcome record, for a trajectory entry the detector
+  emitted rather than a statistic the resolver counted, or for deciding
+  whether a passage of raw text may be released.
+version: 0.4.1
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-01
-revised: 2026-10-18
+revised: 2026-10-24
 evidence_scheme: repo
 evidence:
   - ref: E1
     what: there are three span classes over the final work and four generation fates, and generated_deleted and not_generated are both fates rather than span classes
-    source: ursa-major/src/types.ts:5-8,10-37
+    source: ursa-major/src/types.ts:7-10,12-39
   - ref: E2
     what: byClass covers only the three span classes, and each class carries two percentages, pct over coveredChars and pctOfFinal over finalChars
-    source: ursa-major/src/stats.ts:8-12,66-67
+    source: ursa-major/src/stats.ts:8-12,70-71
   - ref: E3
     what: the schema says coveredChars excludes text no span covers, and reports it separately from finalChars
-    source: ursa-major/src/types.ts:526-531
+    source: ursa-major/src/types.ts:704-709
   - ref: E4
     what: in code mode a span is a trimmed non-empty line, so indentation and blank lines are never covered by any span
     source: ursa-major/src/segment.ts:21-33
@@ -36,22 +40,22 @@ evidence:
     source: ursa-major/src/segment.ts:13-15
   - ref: E6
     what: deletedPct is deleted generated chars over total generated chars, a different population from the final work, and its numerator subtracts not_generated chars while humanDeletedPct narrows it again, and survivalRate divides by the same generated-chars denominator per generation and per conversation
-    source: ursa-major/src/stats.ts:88-91,115-122,126-135,159-165, ursa-major/src/resolve.ts:515
+    source: ursa-major/src/stats.ts:92-95,119-126,130-139,165-171, ursa-major/src/resolve.ts:577
   - ref: E7
     what: the viewer renders the three class tiles and the deleted tile in one row, while the distribution bar below holds only the three
     source: ursa-major/src/viewer.ts:234-266,277-286
   - ref: E8
     what: a below-threshold best match is labelled no_generation_provenance and flagged uncertain, so it sits inside that category's chars
-    source: ursa-major/src/resolve.ts:432-459, ursa-major/src/match.ts:7-8
+    source: ursa-major/src/resolve.ts:465-520, ursa-major/src/match.ts:7-8
   - ref: E9
     what: a short raw-exact match is labelled survived_verbatim with score 1 and flagged trivial so it sits inside that category's chars, unless the descent check demotes it, which drops the trivial flag
-    source: ursa-major/src/resolve.ts:371-384,224-263, ursa-major/src/match.ts:9-10
+    source: ursa-major/src/resolve.ts:380-393,233-272, ursa-major/src/match.ts:9-10
   - ref: E10
     what: residue with no match at all gets the same no_generation_provenance label as an uncertain span
-    source: ursa-major/src/resolve.ts:448-458
+    source: ursa-major/src/resolve.ts:481-512
   - ref: E11
     what: uncertainSpans and trivialSpans are span counts, and no char total is computed for either
-    source: ursa-major/src/types.ts:532-533, ursa-major/src/stats.ts:36-37,52-53
+    source: ursa-major/src/types.ts:710-711, ursa-major/src/stats.ts:36-37,54-55
   - ref: E12
     what: CLAUDE.md lists all four classifications under one heading and calls no_generation_provenance the most valuable
     source: CLAUDE.md:65-70 (section 1, span classifications)
@@ -60,25 +64,25 @@ evidence:
     source: docs/okrs/2026-q4.md:13-18 (O1 KR1.1)
   - ref: E14
     what: turnsToAcceptance is documented as the latest assistant turn that contributed surviving text, and computed as a max over generations with any surviving chars
-    source: ursa-major/src/types.ts:633-634, ursa-major/src/stats.ts:128,136-138
+    source: ursa-major/src/types.ts:841-842, ursa-major/src/stats.ts:132,140-142
   - ref: E15
     what: both the CLI summary and the viewer table label that field turns-to-acceptance
-    source: ursa-major/src/cli.ts:175, ursa-major/src/viewer.ts:570,580
+    source: ursa-major/src/cli.ts:184, ursa-major/src/viewer.ts:570,580
   - ref: E16
     what: CLAUDE.md lists turns to acceptance as trajectory metadata wrapped around the record
     source: CLAUDE.md:72-74 (section 1, trajectory metadata)
   - ref: E17
     what: byModel counts only spans that carry a source, over a denominator that includes spans that carry none
-    source: ursa-major/src/stats.ts:45-57,148-153
+    source: ursa-major/src/stats.ts:47-61,154-159
   - ref: E18
     what: path-filter drops generations at parse time, before any denominator is computed
-    source: ursa-major/src/parse.ts:130, ursa-major/src/cli.ts:58,119
+    source: ursa-major/src/parse.ts:146, ursa-major/src/cli.ts:58,119
   - ref: E19
     what: the record carries a finished flag, set false by --abandoned, and the viewer shows it as a chip
-    source: ursa-major/src/cli.ts:52, ursa-major/src/resolve.ts:523, ursa-major/src/viewer.ts:180
+    source: ursa-major/src/cli.ts:52, ursa-major/src/resolve.ts:585, ursa-major/src/viewer.ts:180
   - ref: E20
     what: the CLI prints finalChars and coveredChars on one line, and gives every class both an of-final and an of-classified column
-    source: ursa-major/src/cli.ts:167-173
+    source: ursa-major/src/cli.ts:167-172
   - ref: E21
     what: the methods document's own limit, n=1 demonstrates label types rather than statistics and every quantitative claim is an existence proof
     source: docs/beyond-preference-pairs.md:157-160
@@ -114,7 +118,22 @@ evidence:
     source: docs/vision.md:33-35 (section 0b, principle 4)
   - ref: E32
     what: survived_verbatim means byte-identical as of 2026-10-13, and a formatting-only match is now survived_mutated with normalizedOnly set and score 1, which 26 of 770 verbatim claims over ten records of this repository were
-    source: ursa-major/src/types.ts:357-388, ursa-major/src/resolve.ts:266-290, ursa-major/src/resolver.test.ts:168
+    source: ursa-major/src/types.ts:444-475, ursa-major/src/resolve.ts:275-299, ursa-major/src/resolver.test.ts:168
+  - ref: E33
+    what: noCandidate names which of four things produced a no_generation_provenance span, and df_cutoff_suppressed is the value that reports the matcher never looked rather than anything about the work
+    source: ursa-major/src/types.ts:483-499, ursa-major/src/resolve.ts:488-507
+  - ref: E34
+    what: Stats carries blindSpans and suppressedTokenSpans as span counts, blindSpans being the df-cutoff-suppressed spans and suppressedTokenSpans a superset that were mostly scored anyway
+    source: ursa-major/src/types.ts:712-741, ursa-major/src/stats.ts:56-57
+  - ref: E35
+    what: blindSpans and notGeneratedChars are both optional and both read as zero when absent, and the schema says absence means a true zero for one and an unknowable value for the other
+    source: ursa-major/src/types.ts:726-731,772-775
+  - ref: E36
+    what: the CLI prints the blind-span line only when the count is non-zero, and its own wording says those spans are counted as no_generation_provenance and should not be
+    source: ursa-major/src/cli.ts:173-181
+  - ref: E37
+    what: the cutoff is an absolute count against a corpus that grows, so the blind share can only grow with it, which makes a rise between two records the signal rather than the level in any one, and both of this project's trials sit where the figure is zero
+    source: ursa-major/src/types.ts:501-516
 supersedes: []
 ---
 
@@ -207,9 +226,41 @@ whitespace collapsing, and differs in raw characters only [E32]. It
 carries `score: 1` like a verbatim match, so a filter written on the
 score alone will not separate them [E32]. Neither
 flag has a character total in the schema, only a span count [E11], so
-the subtraction has to be done from `files[].spans` directly. Output:
-either an adjusted figure with its method stated, or the sentence
-carries the flag counts beside the percentage.
+the subtraction has to be done from `files[].spans` directly.
+
+There is a fourth population and it is the one to subtract first,
+because it is the only one that is not a fact about the work at all. A
+`no_generation_provenance` span now carries `noCandidate`, which says
+which of four things produced the label, and one of the four values is
+`df_cutoff_suppressed`: at least one word of the span is in the
+generation corpus, every word that is was skipped for being too common
+to search on, and so the matcher never scored the span before labelling
+it [E33]. `Stats` counts those as `blindSpans`, beside a wider
+`suppressedTokenSpans` for spans that lost some of their words to the
+cutoff and were scored on the rest [E34]. The CLI says what it thinks
+of them in its own output, that they "are counted as
+no_generation_provenance and should not be" [E36]. Output: the
+`no_generation_provenance` figure with `blindSpans` subtracted, or the
+count quoted beside it.
+
+Ours, on why this one is worth the extra sentence rather than being one
+more flag in a list. The other three flags move a span between two
+honest readings of the same evidence. This one moves work the model may
+well have written into the category CLAUDE.md calls the most valuable
+[E12], and the schema says the direction is not an accident: the
+cutoff is an absolute count against a corpus that grows every time the
+tool runs, so the blind share can only grow with the dataset [E37].
+That makes it the one number here whose level in a single record is
+almost uninformative and whose movement between two records of the same
+project is the whole signal [E34, E37]. That second sentence is the
+schema's own conclusion and not ours: E34's range states it in those
+terms, and E37's carries the monotone shape and the measured proxy
+points it rests on. Both of this project's trials sit at
+the scale where it is zero [E37], which is also why a reader who
+learned the output format from a trial transcript has never seen the
+line that reports it [E36]. Output: either an adjusted figure with its
+method stated, or the sentence carries the flag counts beside the
+percentage.
 
 **5. State the capture path and the funnel stage.** Session capture
 carries the trace and git capture carries the label, which is why the
@@ -252,6 +303,28 @@ document's own limit is that n=1 demonstrates label types rather than
 statistics, and that every quantitative claim in it is an existence
 proof [E21]. Output: the claim is marked as an existence proof, or it
 is held until the corpus supports it.
+
+**11. An absent optional field is not a zero, and two of them disagree
+about what absence means.** `blindSpans` and
+`generated.notGeneratedChars` are both declared optional and both
+documented as read-as-zero when absent, so they look like the same kind
+of field and a reader who learns the rule from one will apply it to the
+other. The schema says they are opposites. For `notGeneratedChars`,
+every record written before 2026-10-14 omits it and zero is the true
+value for those records, because no descent gate ran on them and no
+segment of them could carry the fate. For `blindSpans`, every record
+written before 2026-10-24 omits it and zero is wrong but unknowable,
+because the cutoff was in force in those runs and nothing counted what
+it suppressed, so the true value is unknown rather than zero [E35]. Output: before quoting either field at zero, check whether
+the record predates it, and quote "not measured" rather than zero where
+it does.
+
+Ours: the general form is that optionality in this schema is a
+statement about when a field was added and not about whether its
+subject occurred, so the question to ask of any absent field is which
+of those two the author meant. The schema answers it in prose each
+time, which is the only reason this is checkable, and it is a good
+argument for reading the field's comment rather than its type.
 
 ## Judgment
 

@@ -10,14 +10,15 @@ description: >
   violation a run printed and deciding whether the bound or the
   resolver is wrong, and for any edit that moves the bound count or
   the bounds digest. Does not fire for choosing a span's label, for
-  deciding what a record statistic may be said to mean, for running a
-  trial, or for turning a record into tuning axioms.
-version: 0.1.1
+  deciding what a record statistic may be said to mean, for auditing a
+  trajectory signal the detector emitted, for running a trial, or for
+  turning a record into tuning axioms.
+version: 0.1.3
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-18
-revised: 2026-10-23
+revised: 2026-10-26
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -58,19 +59,19 @@ evidence:
     source: ursa-major/src/invariants.ts:335-339
   - ref: E13
     what: the Case shape a new counterexample is declared as, the codes it must fire and nothing besides, the edit in words a reviewer can check against the diff, the consequence, and why for a multi-code case
-    source: ursa-major/tools/make-violation-fixtures.ts:207-226
+    source: ursa-major/tools/make-violation-fixtures.ts:215-234
   - ref: E14
     what: the generator compares the gate's emitted codes against the declared ones by position and length, and refuses the fixture while printing what the gate actually emitted
-    source: ursa-major/tools/make-violation-fixtures.ts:536-553
+    source: ursa-major/tools/make-violation-fixtures.ts:544-561
   - ref: E15
     what: the base record is checked first and the script exits if it violates anything, because no fixture below would prove anything
-    source: ursa-major/tools/make-violation-fixtures.ts:524-530
+    source: ursa-major/tools/make-violation-fixtures.ts:532-538
   - ref: E16
     what: each note is generated from the case plus the gate's own output, so the Expected codes line, the where and the observed strings are the gate's rather than a paraphrase
-    source: ursa-major/tools/make-violation-fixtures.ts:481-507
+    source: ursa-major/tools/make-violation-fixtures.ts:489-515
   - ref: E17
     what: resolvedBy is pinned and gatedBy is read live, the opposite choice in adjacent lines, because a pinned digest leaves the only clause with teeth unreachable while a live commit makes every fixture's bytes a function of its own commit
-    source: ursa-major/tools/make-violation-fixtures.ts:166-203
+    source: ursa-major/tools/make-violation-fixtures.ts:174-211
   - ref: E18
     what: the suite reads the expected codes out of each note's own Expected codes line rather than duplicating them, so a stale note fails something
     source: ursa-major/src/invariants.violations.test.ts:42-53
@@ -97,16 +98,16 @@ evidence:
     source: ursa-major/src/invariants.violations.test.ts:214-256
   - ref: E26
     what: what gateRecords says when a bound fails, that the records are written and are still the evidence and the run is not reporting success
-    source: ursa-major/src/launch.ts:156-167
+    source: ursa-major/src/launch.ts:201-212
   - ref: E27
     what: why the gate is a command line tool and not only a test, the records worth checking hardest hold verbatim prompts and stay on the user's machine
     source: ursa-major/src/invariants.cli.ts:1-16
   - ref: E28
-    what: the directory's own instructions for adding the next counterexample, and that the suite reads only committed files and never imports the generator
+    what: the directory's own instructions for adding the next counterexample, that the suite reads only committed files and never imports the generator, and the second test added 2026-10-26 that asks whether the committed bytes are the bytes the generator would write today
     source: ursa-major/fixtures/violations/README.md:187-211
   - ref: E29
-    what: that same directory README still says seventeen bounds, twenty-two counterexamples and 27 violations in its heading, its opening and its command block
-    source: ursa-major/fixtures/violations/README.md:1-11,201
+    what: that same directory README's three hand-written counts now agree with the live gate, twenty-three counterexamples over twenty-four records in its heading and opening and 28 violations in its command block, after five days one bound behind in all three
+    source: ursa-major/fixtures/violations/README.md:1-11,210
   - ref: E30
     what: the first-difference window a CLAIM_NOT_WIDER message carries, and why it is there, because naming the reflow on sight is what makes the message actionable
     source: ursa-major/src/invariants.ts:414-433,498-502
@@ -301,27 +302,23 @@ As of 2026-10-18 the numbers a new bound moves are three in the suite,
 violations when the gate is run over the directory [E25], plus the
 hand-written counts in the directory README and the root README.
 
-**Ours, measured 2026-10-18; the spread below re-counted 2026-10-23
-with grep, the gate figures not re-run:** the directory README is one
-bound behind throughout, not in one spot. Three of the
-stale spellings are in the range cited here, the heading's twenty-two
-records, the opening's seventeen bounds, and the command block's
-annotation of the gate run as 27 violations [E29], while the live gate
-reports 18 bounds and 28 violations over 24 records. Those three are
-the ref; the extent is a grep, because an absence-and-spread claim is
-not something a line range can carry (`prompts/skill-extract.md` §5l):
+**Ours, first measured 2026-10-18, re-measured 2026-10-26.** This is
+the one claim in this skill that someone has falsified by fixing the
+thing it described, so it is worth keeping in the revised form rather
+than deleting. On 2026-10-18 the directory README was one bound behind
+throughout rather than in one spot, nine lines of it, and one of those
+lines was a second derived number gone stale the same way: it said
+eighteen of the twenty-two fixtures fire exactly one violation,
+against 19 of 23 live. On 2026-10-26 it is behind in none. The three
+counts this skill cites are the heading's record total, the opening's
+bound count, and the command block's annotation of the gate run, and
+all three now agree with the live gate at twenty-three counterexamples
+over twenty-four records, eighteen bounds, and 28 violations [E29].
 
 ```bash
 grep -cE 'seventeen|twenty-two' ursa-major/fixtures/violations/README.md
-# 8    lines 1, 5, 11, 42, 61, 87, 88 and 120, plus the count on 201
-```
-
-So nine lines rather than three, and one of them, line 87, is a second
-derived number gone stale the same way: it says eighteen of the
-twenty-two fixtures fire exactly one violation, against 19 of 23 live.
-The commands:
-
-```bash
+# 0    was 8 on 2026-10-23, at lines 1, 5, 11, 42, 61, 87, 88 and 120,
+#      plus the count on the command line then numbered 201
 cd ursa-major
 npx tsx -e "import('./src/invariants').then(m => console.log(m.BOUND_COUNT, m.currentGateIdentity().boundsDigest))"
 # 18 10a82f2bc5f1ae6f
@@ -329,11 +326,17 @@ npx tsx src/invariants.cli.ts fixtures/violations | tail -1
 # 24 records checked, 28 violations.
 ```
 
-The root README's own sentence is current, and it says why: the count
-there is `BOUND_COUNT` rather than a word. A prose count that is not
-derived is a count that will be wrong, so prefer deriving it; where
-the prose has to be hand-written, fixing it is part of this step and
-not a later tidy-up.
+Keep the lesson and drop the complaint. A prose count that is not
+derived is a count that will be wrong, which is why the root README's
+own sentence stayed current throughout the five days this one did not:
+the count there is `BOUND_COUNT` rather than a word. So prefer
+deriving it, and where the prose has to be hand-written, fixing it is
+part of this step and not a later tidy-up. The repository has since
+taken the same lesson one step further, for bytes rather than for
+prose: a second test asks whether the committed fixtures are the bytes
+the generator would write today, and it spawns the existing check
+instead of reimplementing the comparison, so there is one definition
+of drifted [E28].
 
 ### 8. Read the gate's refusal as a reader would
 
