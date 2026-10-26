@@ -2,24 +2,28 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Top three for the owner, this run (hook, re-fired for the missed 2026-10-25 ~11:05 UTC slot)
+## Top three for the owner, 2026-10-26 ~06:0x UTC message run 6
 
-1. **Nothing from this run needs your decision.** The one merge it
-   found eligible (#464, market) is done. Everything else open is
-   either this seat's own (waits for you or HQ's PM), a live draft, or
-   a conflict that is its owning seat's to rebase, not this seat's to
-   resolve in code.
-2. **The skill stack (#441, #445, #448) and the exo pair (#447, #454)
-   are still open and `CONFLICTING`, unchanged across at least four PM
-   passes today.** Named again, not re-litigated: neither seat's own
-   next run has picked the stack back up yet, and dispatch cannot wake
-   either one today since `PM_DISPATCH_ENABLED` reads empty in every
-   environment this seat has checked so far.
-3. **#395 (research) still edits two charter files directly
-   (`prompts/engineer-agent.md`, `prompts/research-agent.md`) and is
-   otherwise clean.** Tier C regardless of how clean the diff is;
-   unchanged since the last several passes named it. Yours or a
-   chair's to merge.
+1. **This seat's own queue is consolidated: six open PM pull requests
+   (#462, #465, #467, #468, #470, #472) closed as confirmed ancestors
+   of one survivor, #475.** Each ancestry link was checked fresh with
+   `git merge-base --is-ancestor` rather than trusted from the prior
+   PR's own claim. Nothing in them is lost; nothing here needs your
+   decision.
+2. **Two more Tier B merges landed this pass: #474 (market) and #454
+   (exo).** #454 had been read as `CONFLICTING` by every pass today
+   through run 4; it tested clean on this pass's fresh check and is
+   now merged, so that half of yesterday's "exo pair" note is resolved
+   on its own rather than by anyone's action.
+3. **#447 (exo) and #395 (research) still edit charter files directly
+   and are otherwise clean — Tier C regardless.** Naming #447
+   specifically because it edits `prompts/pm-agent.md`, this seat's own
+   charter, alongside `prompts/exo-agent.md`; #395 touches
+   `prompts/engineer-agent.md` and `prompts/research-agent.md`. Both
+   unchanged since the last several passes named them. Yours or a
+   chair's to merge, not this seat's regardless of how clean either
+   diff is, and never this seat's to merge a change to its own
+   charter.
 
 ## This run (hook, re-fired for the missed 2026-10-25 ~11:05 UTC scheduled slot)
 
@@ -9995,3 +9999,69 @@ from earlier passes today. `/srv/asc/hq/tools/check-draft-prs.sh
 --repo alexandrapaiz/Ursa`, HQ's copy, to confirm the draft disposition
 against the branches rather than the note's prose. Everything else is
 this repository's own committed files and `gh`/board API output.
+
+## 2026-10-26 (message, run 6): queue consolidated, two more Tier B merges, #441's fresh re-conflict handed to skill
+
+Branched from `ursa-pm/2026-10-26-message-5` (#472), itself the tip of
+today's full PM stack (#462 → #465 → #467 → #468 → #470 → #472).
+Re-verified every ancestry link fresh with `git merge-base
+--is-ancestor` after repairing this clone's own shallow history
+(`bash tools/ensure-full-clone.sh`), rather than trusting run 5's own
+account of the chain.
+
+**Woken for the same note as run 5.** The frontend seat's run
+finished (PR #466) and asked for a merge-rule check. Already fully
+done by run 5 before this run started: #466 merged, #445/#448 left to
+skill, the HQ stacked-branch hazard on #465/#470 already retargeted to
+`main`. Re-verified rather than repeated: `gh pr view` on both now
+shows `base: main`, confirming the retarget held.
+
+**Two Tier B merges found fresh, neither the triggering note's
+subject.** #474 (market, docs-only) and #454 (exo, `docs/agents/`
+files not in the Tier A named list) were both green, clean, not draft,
+no `hold`, no owner comment, under seven days old, and carried no
+Tier C path in `gh pr diff --name-only`. Merged both, branches
+deleted. Checked after each merge that no open PR used the deleted
+branch as its base, since that is exactly the hazard the two HQ
+handoffs taught this seat earlier tonight.
+
+**#441 (skill) — re-checked live, found freshly re-conflicted.** The
+branch's own body claims `MERGEABLE/CLEAN` as of its last push, but
+GitHub's async mergeability check, re-polled after a five-second wait
+rather than read from a stale first response, returned
+`mergeable: false, mergeable_state: dirty` just now. A conflict in
+code is the owning seat's to resolve, not this seat's, so this is not
+a Tier B merge; posted a `handoff` to skill on the board (ref: PR
+#441) naming the fresh state and the likely cause (the same
+`docs/ideas.md` tail-append re-conflict its own prior pass already
+diagnosed once today) so skill's next run does not re-derive it from
+nothing.
+
+**Six of this seat's own pull requests closed as confirmed ancestors
+of #475.** #462, #465, #467, #468, #470, #472: each checked with `git
+merge-base --is-ancestor origin/<branch> HEAD` against this run's own
+tip before closing, not assumed from the stack's own prior
+descriptions. Closed with a comment on each naming #475 as the
+survivor and citing this seat's 2026-10-05 housekeeping ruling for
+why a confirmed-ancestor PR of its own is routine to close rather than
+left for the owner to close six at a time.
+
+**Hand-off posted, nothing dispatched.** `PM_DISPATCH_ENABLED` reads
+empty in this run's own environment, same as every pass today, so no
+`gh workflow run` fired. The skill handoff above is the board's own
+event-driven wake (pm.md §16), not an Actions dispatch, and does not
+draw on the daily dispatch budget.
+
+**Board.** Posted a `done` naming the two merges in `data.merged`, the
+six closes in `data.superseded`, and the skill handoff's target PR in
+`data.handoff`.
+
+## External sources read
+
+The board inbox (`GET /api/messages?to_seat=pm&to_company=Ursa`):
+HQ's exo-centralizer and distribution on the stacked-branch hazard
+(already resolved by run 5, re-verified here), a release/claim/done
+triple from HQ's own PM seat about a different company's PR #485
+(not addressed to this seat or company, read and set aside), this
+seat's own prior notes from earlier passes today. Everything else is
+this repository's own committed files and `gh`/board/git output.
