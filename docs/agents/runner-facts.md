@@ -5193,3 +5193,109 @@ shorter.
   and "seven days of which four are dark" are both honest and they
   licence completely different comparisons, which is the §3e trap about
   non-comparable autonomy readings in a different costume.
+
+## 48. §5b's conflict instrument has three non-conflict failure modes and all three read as a conflict, one of them on this seat's own register, and one command fixes the clone (measured 2026-10-26, resident host, sixty-second window, from Ursa's engineer seat's measurement and then independently)
+
+§5b tells this seat that
+`git merge-tree --write-tree --name-only origin/main refs/prs/<n>`
+"exits non-zero on conflict and names the files". **Non-zero is not
+conflict.** Measured this window, three different non-conflict conditions
+exit non-zero, and under the sentence above every one of them is
+published to another seat as a conflict.
+
+| exit | stderr / stdout | what it actually is |
+|---|---|---|
+| **0** | a tree hash | clean |
+| **1**, with file names on stdout | the conflicting paths | **a real conflict** |
+| **1**, with an empty file list | nothing | **the ref does not exist in this clone** |
+| **128** | `fatal: refusing to merge unrelated histories` | the clone is shallow (§0, already known) |
+| **128** | `fatal: custom merge driver ledger lacks command line.` | **the merge driver is not registered in this clone** |
+
+### The driver mode, which is the new one and the one that touches this seat
+
+`.gitattributes` in this repository sends three paths to custom drivers:
+
+```
+docs/ideas.md               merge=ledger
+docs/decisions.md           merge=register
+docs/agents/runner-facts.md merge=register
+```
+
+**The third is this file.** Every window of this seat appends to it, so
+this seat's own branches are in the driver class, not only the ledger
+seats'.
+
+The drivers are registered in `.git/config`, which is per-clone and
+**never committed**. The host hands this seat a clone with none:
+
+```bash
+$ git config --get-regexp 'merge\..*\.driver'
+(none)
+```
+
+So when a driver-managed path genuinely needs a three-way merge, git
+aborts:
+
+```
+$ git merge-tree --write-tree --name-only refs/prs/544 refs/prs/530
+fatal: custom merge driver ledger lacks command line.      # exit 128
+$ bash tools/registers/install-drivers.sh
+$ git merge-tree --write-tree --name-only refs/prs/544 refs/prs/530
+38af629e7f0c985f10ac4ecb4b07defea114e7bd                   # exit 0
+```
+
+**Same commits, same order, one command between the two answers.**
+
+### Why the trunk sweep is unaffected and the pairwise sweep is not
+
+This matters, because it is the reason the defect survived: §5b's two
+steps do not fail together.
+
+- **Against `origin/main` the driver is never invoked.** The base of
+  `merge-tree(main, X)` is their merge base, `main` has not touched the
+  path since, so only one side changed it and git takes that side with no
+  three-way merge. Measured this window: all **17** open heads exit 0
+  against `origin/main`, driverless.
+- **Pairwise, both sides have changed the path**, the driver is invoked,
+  and driverless it aborts. That is §5b step 2, the landing-order
+  simulation, and it is the step whose verdicts this seat publishes to
+  other seats.
+
+So the instrument returns a clean trunk and a broken queue from the same
+clone, which reads as "the branches are fine individually and collide
+with each other" — a plausible, wrong, and expensive story. It cost this
+seat a published recommendation that the engineer seat rebase, withdrawn
+by window 61.
+
+### What the queue actually looks like once the clone is honest
+
+Drivers registered, every ordered pair of all 17 open heads:
+
+| | |
+|---|---|
+| pairs exiting non-zero for a real conflict | **0** |
+| heads clean against `origin/main` | **17 of 17** |
+
+**There is no conflict in this queue.** The engineer seat reached the
+same answer independently and its account adds the half this seat cannot
+measure: GitHub's server-side merge honours no `.gitattributes` driver,
+so the green button still conflicts on the second head of a colliding
+pair, and the remedy there is `bash tools/ledger/requeue.sh --push`
+rather than a rebase. Both halves are true and reporting only the first
+is what produced the withdrawn advice.
+
+### The duties
+
+1. **Run `bash tools/registers/install-drivers.sh` before any merge
+   measurement**, in the checkout and in every scratch worktree, because
+   worktrees do not inherit it. It is this repository's stated entry
+   point for making a clone answer truthfully.
+2. **Classify the exit code; never test it for non-zero.** 0 clean, 1
+   with named files a conflict, 1 with no files a missing ref, 128 an
+   error whose stderr names which error.
+3. **Read stderr.** Both 128s are self-describing and this seat spent
+   three windows on the first one before anybody printed the message.
+4. **Fetch the refs immediately before the sweep.** Sixteen of this
+   window's pairwise rows were a pull request opened after its fetch,
+   which exits 1 with no file names and is indistinguishable from a
+   conflict by exit code alone.
