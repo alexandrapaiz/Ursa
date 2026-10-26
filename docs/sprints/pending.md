@@ -2,10 +2,54 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Top three for the owner, 2026-10-26 ~09:0x UTC hook run (in progress)
+## Top three for the owner, 2026-10-26 ~09:0x UTC hook run
 
-Standup in progress, built on run 7 (#479). Placeholder commit per the
-ship-first rule; filled in below as the checks finish.
+Standup (ceremony already done today, run fb9d779/#460, folded into
+this chain as a confirmed ancestor). Built on run 7 (#479), itself a
+confirmed ancestor of this branch (`git merge-base --is-ancestor`).
+
+1. **The frontend seat's own open draft (#484, `ursa-frontend/2026-10-26-hook`)
+   has a live redaction-gate failure, unresolved as of this pass.**
+   `gh run view` on the failing `scan` job shows a real leaked session
+   UUID (not a workflow-file artifact — read past the failing commit
+   first, per pm.md §11.7, and confirmed there is no later commit on
+   the branch): `docs/design/reviews/2026-10-26c/data/state-panel-synced.mjs:26`
+   carries a full `7f3a91c4-2b6e-4d80-9a15-c3e8f0217bd9`. Same shape as
+   the two session-UUID leaks `docs/decisions.md` already closed out
+   today (security's audit quote, this seat's own echo of it) — the
+   gate is working as designed, catching a model that reused a session
+   ID verbatim. Not this seat's to fix: it's a draft, the fix is one
+   line, and it's the frontend seat's own open branch. Left for
+   frontend's next run; not dispatched (`PM_DISPATCH_ENABLED` reads
+   empty this pass, same as every pass today).
+2. **One Tier B merge this pass: #477 (skill), a large skill-library
+   addition.** Not draft, no `hold`, checks green, `mergeStateStatus:
+   CLEAN`, diff touches `prompts/skill-extract.md` plus `skills/` and
+   `docs/ideas.md`. The `prompts/skill-extract.md` path is not treated
+   as a Tier C charter here, per this seat's own repeated precedent
+   earlier today (run 5's finding, confirmed again by git history:
+   merged under Tier B at least since #278): it is skill-library
+   content, not a role charter. Merged (`gh pr merge 477 --merge
+   --delete-branch`), confirmed no open PR was based on its branch
+   before deleting it.
+3. **Two open PRs edit a charter file directly and are correctly left
+   for the owner, not this seat.** #447 (exo) touches
+   `prompts/exo-agent.md` and `prompts/pm-agent.md` directly — a role
+   charter edit, Tier C, unreviewed by the owner as of this pass.
+   #395 (research, open since 2026-10-24, two days) touches
+   `prompts/engineer-agent.md` and `prompts/research-agent.md`
+   directly and already carries an owner comment ("Reviewed against
+   the merge rule... Not mine to merge") confirming the same
+   disposition. Neither is this seat's to merge regardless of check
+   state.
+
+**Also owed, not the owner's:** the engineer seat's own 2026-10-26
+hook-run ledger entry ("Craft scan: tesh 0.3.2 and txm 8.2.0...") is
+missing its `- Cost:` and `- Status:` lines (`node tools/ledger/check.mjs`,
+`IDEA_FIELDS_COMPLETE`, 2 violations "a seat must repair"). Not fixed
+here: it's the authoring seat's own entry and this pass does not know
+the intended cost/status values. Flagged for the engineer seat's next
+run.
 
 ## Top three for the owner, 2026-10-26 ~06:1x UTC message run 7
 
