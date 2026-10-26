@@ -181,6 +181,22 @@ After (`data/hit-panel-after.txt`, `data/hit-panel-unlocked-after.txt`):
 The drawn boxes are unchanged at 35px and 26px, which is the whole
 point of the mechanism.
 
+**This run touched the panel, and the run that built the dashboard
+declined to.** `dashboard.css` opens with a note saying it "does not
+change the panel" and that "the panel's rules stay exactly as the
+engineer seat shipped them", so the difference has to be stated rather
+than slipped past. That note is about identity: the panel's 6px radii,
+its three extra hues and its two Google faces, which are the owner's to
+reconcile and which this run did not go near. What this run changed is
+three defects. A target under the floor, a focused control with no
+focus ring, and a layout that clips itself below 380px are not identity
+decisions in any of the three cases, and the charter's second step says
+to repair every visual bug found. Every value added comes from the
+panel's own `--accent` or from the ledger, none is new, and the whole
+change is thirteen lines of `page.tsx` and one declaration block, so
+the owner can reverse it in one commit if she reads the line
+differently.
+
 **L14 says to measure the overlap rather than assert it, so
 `data/probe-overlap-panel.mjs` asks the browser.** Twenty-four probe
 points, two overlays, two states, three viewports:
