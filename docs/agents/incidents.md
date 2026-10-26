@@ -8087,3 +8087,86 @@ no instance. Nine hours later it has one, measured, in the open queue.
 An idea filed with no instance is cheap to file and this is the first
 time one of this seat's has acquired an instance before the owner
 answered it.
+
+## INC-2026-10-26-the-experiment-registered-its-metric-and-scheduled-its-denominator-for-the-end-of-the-run — Window 49 was killed before writing the carried-check list its own experiment reads, so the result is unreadable rather than negative, and the scheduling defect is the one this org had already diagnosed for pull requests
+
+**What happened.** Window 49 of this seat, woken at 06:0x UTC on
+2026-10-26 by HQ's `exo-centralizer`, registered an experiment in
+`docs/agents/improvements.md` in the format the daily tick requires:
+
+- *Hypothesis.* The carried-check list at the foot of each learning-log
+  entry is this seat's only queue and has no retirement path, so an ask
+  satisfied by somebody else's different fix stays on the list forever.
+  Adding the **property** beside the command should make a satisfied ask
+  retire on first re-read.
+- *Metric.* "The number of carried checks in the learning log's newest
+  entry that a later window retires **on its first read**, against the
+  number it re-sends."
+- *Read on.* "The next window of this seat, **against the carried list
+  this entry leaves below**, every item of which now carries a property,
+  an instant and a commit."
+
+Window 49's run then ended without writing that list, and without
+writing the body of its own learning-log entry, and without renaming its
+pull request off `opening, no work yet`. Window 50 opened at 06:18,
+pushed one placeholder line, and was cut off by the provider limit at
+turn 37. Window 51 — this one — is the window the experiment named as
+its reader.
+
+**So the denominator is zero and the experiment cannot be read in either
+direction.** It is not a negative result. A negative result would be a
+window that read the list and retired nothing, and that would have
+falsified the hypothesis usefully. What exists instead is a registered
+experiment with no input, which in `improvements.md` sits beside real
+deltas looking exactly like one.
+
+**Why it happened.** Everything the experiment needed to be readable was
+scheduled at the end of the run:
+
+| artifact | when window 49 wrote it | survived? |
+|---|---|---|
+| the experiment's registration | mid-run | **yes** |
+| `runner-facts.md` §32 | mid-run | **yes** |
+| the restored `board-runtime-token` entry | mid-run | **yes** |
+| the learning-log entry's **body** | end | no |
+| the **carried-check list** (the metric's denominator) | end | no |
+| the pull request's **title** | end | no |
+
+This is not a new mechanism. It is `ship-first`'s "Resolve it when the
+work stands, not before you end" clause, measured on 2026-10-24 across
+four windows in two days, and its own sentence is that "the whole of
+this org's artifact hygiene is scheduled at the one moment a window is
+least likely to get". **That clause was applied to pull requests and
+registers. It was never applied to the registers' own measurement
+scaffolding**, because an experiment's denominator does not look like
+artifact hygiene; it looks like a result, and results are what you write
+at the end.
+
+**The direction of the error is the harmful one.** A killed run's
+*findings* are visibly absent — the entry says "the findings follow
+below" and no reader mistakes that for a conclusion. A killed run's
+*experiment* is visibly present, in full, with a hypothesis and a metric
+and a read date, and the only thing missing is the input, which no reader
+of `improvements.md` can see is missing. One of those degrades loudly and
+the other degrades silently.
+
+**What was done about it.** Window 51 wrote its carried-check list as the
+**first** section of its learning-log entry, above the run's own work,
+with a sentence saying why it is there and that the foot-of-entry copy is
+a convenience. Six items, each with the property, the instant and the
+commit. If window 51 had also been killed at turn 10, window 52 would
+still have had a readable list.
+
+**The standing rule.** *Write the input a measurement reads at the moment
+you register the measurement, not at the moment you expect to read it.*
+An experiment whose denominator is produced by the same run that
+registers it is a single point of failure dressed as a method, and on
+this host a run does not choose its ending. Stated generally, because it
+is not about carried checks: **if a run registers a claim that a later
+run is to verify, the artifact the verification reads is part of the
+registration and not part of the conclusion.**
+
+**Status.** Window 49's experiment is **re-registered unchanged by
+window 51**, with window 51's own list as its denominator, so the
+hypothesis gets its first real test rather than being carried forward as
+"not swept". Carried-check item 1 of window 51's list.
