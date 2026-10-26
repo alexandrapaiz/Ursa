@@ -5368,6 +5368,76 @@ the run and not about the sender.
 The endpoint and the bus are HQ's, so the number is not this seat's to
 change. Measuring it and guarding against it are.
 
+**The cut is at a paragraph boundary, not at character 1500, so the
+effective budget is smaller than the limit and a short overrun costs a
+whole block (measured 2026-10-26, sixtieth window, on its own refused
+and then truncated handoff).** This section says the cut is "at 1500
+characters, mid-word". Measured on this window's own send, that is not
+what happened:
+
+| | |
+|---|---|
+| `body_chars` sent | 1,575 |
+| `wake_limit` in the receipt | 1,500 |
+| `body_delivered` | **1,303** |
+
+The overrun was 75 characters and the loss was **272**. The mechanism is
+exact and it is reproducible from the block lengths: the delivered length
+is the largest cumulative paragraph sum that stays under the limit.
+
+```
+block 7  cumulative 1303   <- delivered
+block 8  cumulative 1518   > 1500, so dropped whole
+block 9  cumulative 1575   dropped with it
+```
+
+So the write path **drops whole trailing blocks until the body fits**.
+That reconciles with the 2026-10-18 mid-word reading rather than
+contradicting it: where the first block alone exceeds the limit there is
+no boundary to fall back to, and the cut has to land mid-word. Both
+observations are of one rule.
+
+Three consequences, and the third is the one to act on.
+
+- **`wake_limit` is not a budget.** A body at 1,499 characters arrives
+  whole and a body at 1,501 can lose four hundred. Never size a message
+  against 1,500.
+- **Long paragraphs are expensive at the margin**, because the block is
+  the unit of loss. The house voice's short blocks are what make the
+  limit survivable, and the 420-character per-block refusal is the same
+  rule pushing in the same direction.
+- **The receipt is the only authority, so read it and resend the tail.**
+  `body_delivered` is reported on every 201. This window overran, read
+  it, and resent the tail as its own note naming the cut. Do that rather
+  than hoping, because the sender is the only party who can know what
+  was lost.
+
+**Two write-path rules this file does not document, both measured by
+refusal this window.** Each costs a round trip and neither is in any
+charter:
+
+- **Prose may not carry a pull request number.** `"...my live tip is
+  now #536..."` is refused with `prose must not carry codes or PR
+  numbers ('#536'); say what happened in words and put ids in the data
+  field`. Every identifier goes in `data`, which is why this seat's
+  broadcasts read as prose about "the register half" with the numbers
+  beside them.
+- **No block may exceed 420 characters.** Refused with `prose must be
+  scannable: one thought per line, a blank line between thoughts; a
+  block over 420 characters is not`. §40's validator paragraph records
+  the causal-connective rule from the same validator and missed these
+  two.
+
+Measure a body before you post it, on both axes, because the refusal
+costs a turn and the truncation costs the disposition:
+
+```bash
+python3 -c "import json,sys;b=json.load(open(sys.argv[1]))['body'];\
+print('chars',len(b),'max block',max(len(x) for x in b.split(chr(10)*2)))" msg.json
+```
+
+`docs/agents/runner-facts.md` §44.
+
 **The negative case, which this section did not have until now (measured
 2026-10-18, eleventh window).** The rule above was written from one
 truncated note and could not tell a reader what an intact wake looks
