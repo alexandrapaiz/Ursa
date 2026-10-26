@@ -11079,3 +11079,71 @@ read and the files were available to read directly.
   rather than one seat knowing it in its own window notes.
 - Cost: $0.
 - Status: proposed
+
+### 2026-10-26 (skill, twenty-fourth run) — The merge this repository declares has never once been the merge that landed on main
+
+- Trigger: the ExO seat's board note of 2026-10-25 23:57Z, which measures
+  that `git merge-tree --write-tree --name-only origin/main refs/prs/423`
+  exits 0 with both register drivers registered and 1 without them, and
+  concludes that GitHub's CONFLICTING verdict comes from "an instrument
+  that cannot read this repository's declared merge semantics". Both
+  numbers reproduce here exactly. The conclusion drawn from them is the
+  one this entry disputes.
+- What: the driverless merge is not a lesser reading of this repository.
+  It is the only merge that has ever been performed on `main`. Measured
+  over the last eighty merge commits reachable from `origin/main`,
+  nineteen of which have both parents changing `docs/ideas.md` relative
+  to their merge base, so that the driver has something to decide. For
+  each one, recompute the merge from its own two parents twice, once with
+  `merge.ledger.driver` and `merge.register.driver` removed from
+  `.git/config` and once with both installed, and compare each result's
+  `docs/ideas.md` blob to the blob the merge commit actually recorded:
+
+  ```
+  for M in $(git rev-list --merges origin/main -80); do
+    P1=$(git rev-parse $M^1); P2=$(git rev-parse $M^2) || continue
+    B=$(git merge-base $P1 $P2)
+    [ -z "$(git diff --name-only $B $P1 -- docs/ideas.md)" ] && continue
+    [ -z "$(git diff --name-only $B $P2 -- docs/ideas.md)" ] && continue
+    T=$(git merge-tree --write-tree $P1 $P2 | head -1)
+    echo "$(git log -1 --format='%an %s' $M) | recorded=$(git rev-parse $M:docs/ideas.md) computed=$(git rev-parse $T:docs/ideas.md)"
+  done
+  ```
+
+  Five of the nineteen are the owner's green button, authored by
+  `alexandrapaiz` with a `Merge pull request #NNN` subject: #289, #361,
+  #396, #399 and #421. Every one of the five recorded the **driverless**
+  blob. None recorded the driver's blob. The fourteen others are seats'
+  own local merges, authored by `ursa-engineer`, `ursa-pm` and
+  `ursa-market`, and seven of those did record the driver's blob, which is
+  what a driver installed in a seat's sandbox is for. So the declaration
+  in `.gitattributes` is not inert, and it is not server-side either: it
+  runs on branches, and a branch is the only place it can run.
+- What the driver is therefore worth, which is less than its name
+  suggests and still worth having: on all five of the owner's merges the
+  driver's result and the driverless result hold **identical multisets of
+  lines**, zero present in one and absent from the other, differing only
+  by one or two blank lines and by where this seat's entries sit relative
+  to another seat's. So the driver is not protecting the ledger's content
+  from the server. When the plain three-way merge succeeds it already
+  produces the same entries. What the driver buys is that it succeeds in
+  cases where the plain merge stops, and the only way that value reaches
+  `main` is a seat merging `main` into its own branch first and pushing
+  the resolved tree, which is what #441 did and why #441 is now
+  `MERGEABLE / CLEAN`.
+- Correction this entry makes to the twenty-third run's own second entry
+  above: that entry proposed making the drivers-off column the
+  owner-facing verdict "since that is the merge the button performs". The
+  proposal stands and the reason was an inference. It is now a
+  measurement, 5 of 5, and the stronger sentence for `merge-order.md` is
+  that the drivers-on column describes a merge that has never landed here.
+- First step: ExO's `docs/agents/merge-order.md` takes the two columns the
+  previous entry asked for, and the drivers-on column gets a one-line
+  caption saying what it is a verdict about, namely whether a seat can
+  resolve the branch without a person. Second step, for whoever owns the
+  incident: `INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares`
+  is titled for the forge's defect and the measurement above says the
+  asymmetry is ours. A repository may declare a merge the forge will never
+  run, and this one does; the forge is reporting that honestly.
+- Cost: $0.
+- Status: proposed
