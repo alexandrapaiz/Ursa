@@ -37,6 +37,37 @@
 /** The sixteen hex characters a record carries, from a full SHA-256. */
 export const SHORT_DIGEST_LEN = 16
 
+/**
+ * The repair for an unreadable history, written for the cwd it is
+ * printed in rather than for the repository root.
+ *
+ * WHY THE `../` IS LOAD-BEARING. `ensure-full-clone.sh` lives at the
+ * repository root's `tools/`, not at `ursa-major/tools/`, and both
+ * messages below reach a reader through `npm run regen` or `npm run
+ * regen:check`. An npm script runs with the cwd set to the package that
+ * declares it, so the reader is standing in `ursa-major/` when the
+ * sentence arrives. Measured on 2026-10-26 in a `--depth 1` clone, with
+ * the un-prefixed form this constant replaces: `bash
+ * tools/ensure-full-clone.sh` printed by `npm run regen:check`, then run
+ * verbatim from that same cwd, is `bash: tools/ensure-full-clone.sh: No
+ * such file or directory`, exit 127. With the `../`, from the same cwd:
+ * `clone completed: 1 -> 1327 commits, 2 -> 4 remote-tracking refs`,
+ * exit 0, and the next `npm run regen:check` prints the `clean:` line
+ * that names the index.
+ *
+ * So this is the same defect the function below exists to fix, one layer
+ * out. `regenCheckVerdict` stopped the tool claiming an artifact was
+ * verified when it was not; this stops the tool naming a repair that
+ * cannot be run. In both cases the sentence was the product and the
+ * sentence was wrong.
+ *
+ * It is a constant rather than two string literals so that
+ * `src/regen-commands-runnable.test.ts` has one thing to resolve against
+ * the filesystem, and so a reader who moves the script has one line to
+ * change.
+ */
+export const FULL_CLONE_REPAIR = 'bash ../tools/ensure-full-clone.sh'
+
 export interface RegenInputs {
   /** SHA-256 of `ursa-major/dist/ursa.cjs` as it sits in the working tree after the rebuild */
   rebuiltSha256: string
@@ -49,7 +80,7 @@ export interface RegenInputs {
   /**
    * Why committed history cannot be read, from `historyUnavailable()` in
    * `tools/bundle-digest-index.ts`; null when it can. A shallow clone is
-   * the case this reports, and `tools/ensure-full-clone.sh` is its repair.
+   * the case this reports, and `FULL_CLONE_REPAIR` above is its repair.
    */
   historyBlocked: string | null
   /**
@@ -110,7 +141,7 @@ export function regenStep(input: RegenInputs): RegenStep {
       message:
         `dist/ursa.cjs matches HEAD (${short(input.rebuiltSha256)}), and the digest index was ` +
         `left alone because ${input.historyBlocked}. Repair the checkout with ` +
-        '`bash tools/ensure-full-clone.sh`, then run `npm run regen` again.',
+        `\`${FULL_CLONE_REPAIR}\`, then run \`npm run regen\` again.`,
       runAgain: true,
     }
   }
@@ -203,7 +234,7 @@ export function regenCheckVerdict(input: RegenCheckInputs): RegenCheckVerdict {
       message:
         'the committed bundle is the one this source builds. The digest index was NOT ' +
         `checked, because ${input.historyBlocked}, so this pass says nothing about it. ` +
-        'Repair the checkout with `bash tools/ensure-full-clone.sh` and run ' +
+        `Repair the checkout with \`${FULL_CLONE_REPAIR}\` and run ` +
         '`npm run regen:check` again to check it.',
       bothVerified: false,
     }

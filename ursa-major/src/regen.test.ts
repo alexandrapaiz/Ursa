@@ -13,7 +13,7 @@
 // means it is testable only if the strings are asserted.
 
 import { describe, expect, it } from 'vitest'
-import { regenCheckVerdict, regenStep, SHORT_DIGEST_LEN } from '../tools/regen'
+import { FULL_CLONE_REPAIR, regenCheckVerdict, regenStep, SHORT_DIGEST_LEN } from '../tools/regen'
 
 const REBUILT = 'f497687433163312eb6dfcd1bfd7d90e228504d06a931f9a7e6660af07eb6f32'
 const OLDER = 'a6580c3119dcb33a6ac2ae8ec6edcbea16a87bbd1b6b4ee4b02c1aa7ffb0d3a2'
@@ -52,7 +52,13 @@ describe('regenStep, the four states a generated artifact can be in', () => {
     })
     expect(step.state).toBe('index-unverifiable')
     expect(step.runAgain).toBe(true)
-    expect(step.message).toContain('tools/ensure-full-clone.sh')
+    // Against the exported constant, not a hand-copied literal. This line
+    // read `toContain('tools/ensure-full-clone.sh')` until 2026-10-26, and
+    // passed for a path that did not exist, because a message asserted in
+    // the message's own words cannot disagree with it. Whether the command
+    // runs is checked where it can be:
+    // `src/regen-commands-runnable.test.ts`.
+    expect(step.message).toContain(FULL_CLONE_REPAIR)
   })
 
   it('history is only consulted once the bundle matches, so staleness is reported in order', () => {
@@ -138,7 +144,7 @@ describe('regenCheckVerdict, what `npm run regen:check` is allowed to claim', ()
 
   it('names the command that turns the skip into a real check', () => {
     const v = regenCheckVerdict({ ...verified, historyBlocked: 'this is a shallow clone' })
-    expect(v.message).toContain('bash tools/ensure-full-clone.sh')
+    expect(v.message).toContain(FULL_CLONE_REPAIR)
     expect(v.message).toContain('npm run regen:check')
   })
 
