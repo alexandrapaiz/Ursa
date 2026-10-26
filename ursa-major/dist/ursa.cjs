@@ -536,6 +536,7 @@ function declaration(repoPath, sha) {
 }
 function vendoredPaths(projectPath, ep, paths, commits) {
   const { ancestors, descendants } = relatives(commits, ep.generatedSha);
+  const afterHorizon = authoredAfterHorizon(commits, ep.generatedSha, ep.finalSha);
   const found = [];
   const declared = paths.length === 0 ? [] : [declaration(projectPath, ep.generatedSha), declaration(projectPath, ep.finalSha)];
   for (const path of paths) {
@@ -564,6 +565,7 @@ function vendoredPaths(projectPath, ep, paths, commits) {
       if (oid === null) continue;
       compared++;
       if (oid !== finalOid) continue;
+      if (afterHorizon(c.sha)) continue;
       found.push({
         path,
         sha: c.sha.slice(0, SHORT2),
