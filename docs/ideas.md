@@ -13762,3 +13762,123 @@ one existing command, `bash tools/ledger/requeue.sh --push <second>`.
   names the dependency rather than leaving it to the implementer.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 — Craft scan: `npm audit`'s verdict is a histogram and a caller-chosen threshold
+
+- Product scanned: `npm audit`, npm 10.9.8, measured locally in
+  `ursa-major/` rather than recalled. Not in `docs/market/landscape.md`,
+  which maps preference and evaluation products; this is the craft rotation
+  and the engineer seat's scan is of the tool's construction, not its
+  market.
+- What is worth stealing: `npm audit` never reports one number as its
+  verdict. `--json` returns `metadata.vulnerabilities` as a severity-keyed
+  histogram (`{info, low, moderate, high, critical, total}` — measured as
+  all zeroes in `ursa-major/` at this branch's tip, over 287 resolved
+  dependencies), and `total` sits alongside the breakdown rather than
+  replacing it. More importantly the threshold that turns findings into a
+  non-zero exit is a parameter and not the tool's opinion:
+  `--audit-level <info|low|moderate|high|critical|none>`, confirmed in
+  `npm audit --help` at this version. So the caller decides what counts as
+  failure and the tool only decides what is true. That is precisely the
+  split this branch just built by hand in `tools/ledger/attributes-verdict.mjs`:
+  the pure function says what happened, and `check-attributes.mjs` turns it
+  into an exit code.
+- What Ursa does better: `found 0 vulnerabilities` and `found 4
+  vulnerabilities` are the same sentence with a different number, and
+  neither says whose the repair is. Whether a fix exists at all lives in a
+  different command (`npm audit fix`, and its "no fix available" case).
+  Ursa's `scripts/dep-floor.mjs` since today distinguishes an advisory above
+  the floor with nothing allowing it, which a seat repairs, from an owner
+  exception in `dep-floor.allow.json` whose expiry has arrived, which only
+  the owner can renew. A severity histogram answers how bad; it does not
+  answer whose, and whose is the half that decides whether the reader can
+  act at all.
+
+This is a scan note and carries no status line, matching every earlier
+craft-scan entry in this file: it proposes nothing, so there is nothing for
+the owner to accept or reject.
+
+### 2026-10-26 — Every gate exports its verdict as data, so the sweep is a program and not a table
+
+- Trigger: this branch's §4 in `docs/design/verdict-lines.md` is a table of
+  fifteen gates and their failing exit branches, built by grepping for
+  `process.exit([1-9])`. The repair in the same branch breaks that grep:
+  `check-attributes.mjs` now ends in `process.exit(result.exitCode)`, so a
+  text sweep counts one failing branch where the gate has two. The sweep
+  that found this defect class cannot be re-run to prove the class stays
+  fixed, which is L-A33 arriving the same hour the table was written.
+- What: give every gate in `tools/` and `scripts/` the shape the two
+  repaired ones now have — a pure module exporting
+  `verdict(findings, seen) -> {exitCode, line, stream}`, with findings
+  classified by where the repair lives — and then one enumerator that
+  imports each verdict module, drives it with synthetic finding sets, and
+  prints the exit code and actor each branch produces. The inventory becomes
+  a program's output instead of a paragraph, and the property "no verdict
+  contradicts its own findings" becomes checkable for every gate at once
+  rather than for the two somebody happened to repair. This is also the only
+  way to hold the line for gates added later, since nothing in CI can
+  currently tell that a new gate summed two actors into one count.
+- First step: pick the three gates that already derive correctly
+  (`check-closures.mjs`, `check.mjs`, `secret-scan.mjs`) and extract their
+  verdicts without changing a single output string, proving the shape fits
+  code that is already right before touching code that is wrong. If any of
+  the three resists the shape, that is the finding and the idea stops there.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — A gate's exit codes are a contract, and nothing in this repository states it
+
+- Trigger: deciding whether `check-attributes.mjs` could return 2 for a
+  clone-only finding took reading four other gates to learn what 2 already
+  means here, because the convention is real and unwritten.
+  `tools/secret-scan.mjs` uses 2 for "cannot do its job",
+  `scripts/redaction-check.mjs` for "cannot read the gate's rules",
+  `tools/ledger/pairwise.mjs` for a usage or environment fault, and
+  `tools/ledger/check-closures.mjs` for "clean as far as a seat can take
+  it". Those are one idea — the checker's ground is unusable, or the
+  remainder is not the reader's to repair — discovered four times. The
+  merge drivers use 1 for git's own protocol meaning, which is a fifth
+  thing and conflicts with all of them.
+- What: one short page under `docs/standards/` or `docs/design/` stating the
+  codes and what each claims about the reader: 0 nothing to do, 1 the thing
+  checked is defective and you are the one who repairs it, 2 either the
+  checker could not establish the facts or the remainder belongs to someone
+  else, 3 the downstream store refused what this checker passed, which is a
+  bug in the checker. Then one line per gate recording which codes it emits,
+  so a seat writing the next gate picks a number from a table instead of
+  from the last gate it happened to read. The merge drivers get an explicit
+  exemption by name, since their exit status is git's interface and not this
+  repository's.
+- First step: write the page with the five existing gates' codes transcribed
+  from their source, not from their headers, because a header that disagrees
+  with its own code is the likeliest first finding.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — The clone a seat is handed cannot answer a merge question, and only a gate it does not run knows
+
+- Trigger: three seats on one day measured fourteen ledger co-appends as
+  conflicts needing a rebase, because `.git/config` is per-clone and never
+  committed, so a fresh seat clone has every merge attribute and no merge
+  driver. `tools/ledger/check-attributes.mjs --clone` has always known this
+  and said it, but no seat's first act runs it, and until this branch it
+  reported the finding as a numbered violation of the repository rather than
+  as a property of the working copy.
+- What: make the clone's unanswerability impossible to miss rather than
+  discoverable. `tools/ensure-full-clone.sh` is already this repository's
+  answer to "the clone you were given does not answer truthfully", and it is
+  already the thing a seat runs first, so the clone check belongs behind it:
+  run `check-attributes.mjs --clone`, and on exit 2 either register the
+  drivers or print the one command and the consequence. The reason this is a
+  proposal and not a commit is that `ensure-full-clone.sh` changes every
+  seat's first act in every company that inherits it, which is an owner's
+  decision and not a run's. The narrower version, if the broad one is
+  refused: have `tools/ledger/requeue.sh` and `tools/ledger/pairwise.mjs`
+  refuse to report a merge classification from a clone whose drivers are
+  unregistered, since those two are the tools whose answers were wrong.
+- First step: the narrow version, in `pairwise.mjs` alone — call
+  `check-attributes.mjs --clone --repo <dir>` before the sweep, and on exit
+  2 print the verdict line and the install command instead of a
+  classification table. One file, one gate, no change to any seat's startup.
+- Cost: $0
+- Status: proposed
