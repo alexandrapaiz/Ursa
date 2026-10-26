@@ -115,7 +115,7 @@ its own merge gate four times in one day and by the landed record eight
 times in all, while the text of its standard says the opposite. Today's
 pass read the text. The 2026-10-18 pass read the practice. Neither pass
 misread what it read, and that is what makes this an ambiguity rather than
-an error, which is also why arguing it an eleventh time is not the remedy
+an error, which is also why reading that section once more is not the remedy
 and one sentence in the standard is.
 
 ## What shipped

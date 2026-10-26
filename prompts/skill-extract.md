@@ -1961,8 +1961,8 @@ landed record eight times in all, is that this file is Tier B, and the
 text of its standard says the opposite. Today's pass read the text. The
 2026-10-18 pass read the practice. Neither pass misread what it read, and
 that is the definition of an ambiguity rather than an error — which is
-also why arguing it a tenth time is not the remedy and a sentence in the
-standard is.
+also why reading the same section once more is not the remedy and a
+sentence in it is.
 
 **The rule.**
 
@@ -1970,9 +1970,15 @@ standard is.
    description, in one line, above everything else.** The form:
 
    ```
-   Merge gate: Tier C by path — prompts/skill-extract.md (+965/-0).
+   Merge gate: Tier C by path — prompts/skill-extract.md (+N/-M at <sha>).
    No prompts/*-agent.md charter in this diff. Tier B otherwise.
    ```
+
+   The insertion count carries a commit because the file being counted is
+   the file the disclosure lives in, so the number moves every time the
+   disclosure is edited. That is §5y applied to one line: a figure
+   reported without its tree is read against the default branch, and this
+   particular figure cannot be made stable, only dated.
 
    Say `Merge gate: Tier B — no Tier C path in this diff` when there is
    none. The number is what `git diff --stat origin/main...HEAD --
@@ -2021,7 +2027,7 @@ standard is.
 Ours, not a paper's, and most of it someone else's. The path analysis and
 the corrected predicate are the exo seat's, carried on its argument and on
 the disjointness measured here rather than taken. The precedent count, the
-27 percent, the six-of-six and the 86 percent are this run's, measured on
+27 percent, the six-of-six and the 84 percent are this run's, measured on
 one repaired clone of one repository on one day; the eight landed pull
 requests are a fact about this history and the four board claims are a
 fact about four messages, and neither is a claim about what the owner would

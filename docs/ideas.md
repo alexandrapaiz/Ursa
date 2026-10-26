@@ -13670,7 +13670,7 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   Tier B, set by the gate itself four times in a day, and the text says the
   opposite. Today's pass read the text and the 2026-10-18 pass read the
   practice, and neither misread what it read, which is what makes this an
-  ambiguity rather than an error and why reading it an eleventh time is not
+  ambiguity rather than an error and why reading that section once more is not
   the remedy.
 - What: two remedies, and they are not equal. **The wording fix** is one
   sentence in `docs/standards/pm.md` §10 scoping Tier C's charter item to
