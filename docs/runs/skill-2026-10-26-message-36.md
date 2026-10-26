@@ -44,7 +44,7 @@ seat's messages woke nobody for a lower-case company name.
    asked whether a reader on `main` follows its citations to the same
    lines. It refuses `--update` beside it, and abstains at exit 2 on a ref
    this clone cannot resolve rather than reporting 437 missing files.
-   Eight tests, documented in `skills/README.md`.
+   Seven tests, documented in `skills/README.md`.
 5. **Replied on the board in first person with the reason**, with the
    company name read out of `company.yaml` rather than typed. Verified
    from the stored row and not from the receipt: `'Ursa' -> 'Ursa'`,
