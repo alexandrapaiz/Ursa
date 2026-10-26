@@ -11575,3 +11575,124 @@ itself to this run or asked it to do anything.**
   with the shape it read.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (engineer, hook run, 2) — Six of nine urgent entries are the owner's to act on, and nothing anywhere shows her those six as a list
+- Trigger: auditing all nine `- Status: urgent` entries against `main` this
+  run, to find which were already shipped. Three were, and are now `built`.
+  The surprise was the other six: every one of them has a `- First step:`
+  line that names an owner or HQ action in its first clause. "the owner
+  decides between two options" (2026-09-27), "the owner's merge, in any
+  order that suits her" (2026-09-28), "this is blocked on an owner action,
+  not on engineering" (2026-09-29), "the owner decides between a second
+  history rewrite and" (2026-10-04), "the owner, or HQ acting in
+  `.github/workflows`, runs the two" (2026-10-24), "the owner adds `bash
+  tools/ensure-full-clone.sh` above the" (2026-10-24). Three of the six have
+  been outstanding since September.
+- What: the `urgent` list is read by seats looking for work and by the PM
+  grooming sprints, and after this run's three moves it is six entries long
+  and **none** of them is a seat's to do. So the queue's whole content is
+  now addressed to one person, and that person has never been handed it as a
+  list. She has been handed the ledger, which is 11,577 lines. A report, not
+  a gate: `tools/ledger/owner-queue.mjs` prints every entry whose status is
+  `urgent` or `accepted` and whose `- First step:` line names the owner or
+  HQ, with the entry's date, its age in days, and the first sentence of the
+  first step, newest last. The discriminator is the same shape
+  `tools/ledger/check-closures.mjs` uses for its holder split, which reads
+  the status; this one reads the first step, so the two together give the
+  ledger a complete who-holds-this axis for the first time.
+- First step: write the detector and measure how well it does against the
+  nine entries read by hand this run, which is a labelled set of exactly the
+  right size to tell a working rule from a lucky one. Report the precision
+  and recall in the pull request rather than claiming the rule works. If
+  matching on prose turns out to be unreliable, the fallback is a `- Held:`
+  field proposed to the owner for `pm.md` §4, which is a standard change and
+  therefore hers, not a seat's.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run, 2) — Nobody has measured how late this ledger's `built` moves are, and the three taken today were 13, 12 and 2 days late
+- Trigger: making the three status moves in this run. Each one cites the
+  commit that finished it, so the lag is computable: 2026-10-12's entry was
+  finished by `467ba564` on 2026-10-13 and moved today, thirteen days later;
+  2026-10-13's by `a8c3adce` on 2026-10-14, twelve days; 2026-10-24's by
+  `fca32e5f` on 2026-10-24, two days. The charter's transition is written for
+  the day the finishing pull request merges, and all three missed it.
+- What: the ledger has seventeen entries at `built` and most of their status
+  lines cite a commit sha or a dated branch. So the distribution of "days
+  between the finishing commit and the status move" is already in the
+  repository and has never been looked at. It matters in the opposite
+  direction from the staleness this run fixed: if the median lag is days
+  rather than hours, then `built` is systematically late too, and the PM's
+  read of what shipped is wrong by that median every Monday. If the median
+  is near zero and this run's three are outliers, then the three were an
+  incident and not a pattern, which is a different and cheaper conclusion.
+  Either way the number decides whether the closure marker shipped today is
+  enough or whether the transition needs to be somebody's explicit step.
+- First step: a script that, for each `built` entry, extracts the first
+  `[0-9a-f]{7,40}` from its `- Status:` line, resolves it with `git show -s
+  --format=%ad --date=short`, and subtracts that from the date the status
+  line itself was committed (`git log -L` on the line, or the commit that
+  last touched the block). Print the lag per entry and the median. Entries
+  whose status line cites no sha are counted as unmeasurable and reported as
+  a share, because that share is itself the answer to whether the citation
+  convention is real.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, hook run, 2) — Every magic string in this repository is detected as narrowly as it is accepted, and this run shipped one such defect before catching it
+- Trigger: this run's craft scan of GitHub's closing keywords (note below).
+  `tools/ledger/check-closures.mjs` shipped its first draft keying both
+  acceptance and detection on the literal `closes:`, so a marker written
+  `fixes:`, or without the colon, was unread in silence. The scan is what
+  found it, and the fix was to widen detection to nine verb spellings while
+  keeping acceptance at one.
+- What: the same shape is plausible elsewhere in this repository and has not
+  been checked. `scripts/redaction-check.mjs` reads three patterns from a
+  workflow. `ursa-major/tools/make-regen.ts` writes and checks generated
+  blocks. `tools/ledger/check-attributes.mjs` matches merge-driver
+  declarations by name. `tools/secret-scan.mjs` carries sixteen classes. Each
+  of those recognizes a string that a person types by hand, and for each the
+  question is the same and separate from whether its pattern is correct: when
+  somebody types a near-miss, does the tool say so, or does it go quiet? A
+  quiet near-miss in a redaction or secret pattern is the worst case in this
+  repository, because the thing that was supposed to be caught is the thing
+  that was not.
+- First step: one tool, not all five, and `tools/secret-scan.mjs` first
+  because its silence is the most expensive. Take its sixteen classes, write
+  one near-miss per class by hand (a key with the wrong prefix length, a
+  token with an underscore where the real format has a hyphen), and record
+  for each whether the scanner reports it, misses it silently, or reports it
+  as a hit. Publish the three-way table. Only then decide whether any class
+  needs a wider detector, because a secret scanner that cries wolf is also a
+  secret scanner nobody reads.
+- Cost: $0
+- Status: proposed
+
+- 2026-10-26 (engineer, hook run, 2, craft scan): GitHub's own
+  issue-closing keywords, read today at
+  `docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue`.
+  Chosen because this run built the same mechanism for a different pair of
+  artifacts, and GitHub has been running it at population scale for a
+  decade, so its design decisions are evidence rather than opinion. **The
+  thing worth stealing, and stolen today in the same run:** detection is
+  wider than acceptance. GitHub takes nine verb spellings, `close`,
+  `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`,
+  `resolved`, in any case, with the colon optional. The first draft of
+  `tools/ledger/check-closures.mjs` accepted one spelling and detected only
+  that one, so a near-miss was silently unread, which is the exact failure
+  the marker exists to end. `CLOSURE_ATTEMPT` is now the nine spellings and
+  `CLOSURE_MARKER` is still the one, with the gap reported. **The thing Ursa
+  does better, and deliberately:** GitHub's mechanism *acts*. `Closes #10`
+  closes issue 10 on merge to the default branch, with nothing checking that
+  the work was done and no reverse check at all for a keyword whose issue is
+  still open. Ursa's marker never acts. It only reports a contradiction
+  between two committed statements, and a person resolves it by writing a
+  status line that carries its evidence. That asymmetry is not timidity, it
+  is required here: `docs/standards/pm.md` §4 reserves the move out of
+  `proposed` to the owner, so a gate that edited `docs/ideas.md` would let a
+  seat take a decision the standard gives her. A mechanism that never acts
+  can be trusted on a file whose statuses encode who is allowed to change
+  them, which is the same reasoning the vision's consent constraints apply
+  to a user's own profile, one layer in. This is close enough to the first
+  entry above to be its justification rather than a separate idea, which is
+  why it is not filed as one.
