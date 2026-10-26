@@ -243,3 +243,26 @@ npm run regen:check            clean, and the digest index matches history
 `regen:check` now checks the digest index too, because the checkout was
 repaired earlier in the run. On the shallow checkout this sandbox arrived
 with, that half is skipped and the script says so.
+
+`main` moved again after that merge and the same conflict recurred once more,
+resolved the same way (341 blocks, closure gate exit 0, the six owner-held
+`urgent` entries and this run's four ledger blocks all intact,
+`node --test tools/ledger/*.test.mjs` 89 pass / 0 fail). #485 is
+`MERGEABLE` / `CLEAN` as of the end of the run.
+
+Three merges of `main` in one session is itself evidence for the 2026-09-28
+`urgent` entry "the merge queue now costs the engineer seat working surface,
+measurably", which is one of the six. It is recorded here as a data point for
+that entry rather than filed again.
+
+## Drafts this run resolved
+
+```bash
+gh pr list --state open --limit 150 --json number,isDraft,headRefName \
+  --jq '.[] | select(.isDraft) | select(.headRefName | test("engineer")) | [.number,.headRefName] | @tsv'
+# (no output)
+```
+
+#482 and #463 were closed with a comment pointing at #485 and the two
+`git merge-base --is-ancestor` checks that prove nothing was dropped. #485 is
+readied, not left as a draft. No draft of this seat remains open.
