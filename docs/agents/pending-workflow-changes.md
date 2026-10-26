@@ -146,7 +146,7 @@ does. The third was found by watching it work.
    it needed no rotation and the audit of that run says so. The
    mechanism does not know the difference. A Class B home path or a
    Class C session id tripping the same pattern is published the same
-   way. Run ids are in the 2026-10-25 audit, run 2 section, F2.
+   way. Run ids are in the 2026-10-25 audit, F9.
 
 **Change.** For (2), anchor the allowance to the pattern rather than the
 line, by removing the matched CI prefixes from the line before testing
@@ -321,7 +321,7 @@ The branch this entry was written on, `ursa-security/2026-10-25-message`
 (#439), took four pushes and received **zero** `pull_request` runs, ever,
 while `ursa-skill`, `ursa-pm`, `ursa-exo` and `ursa-engineer` branches
 received eight between them in the same window. Counts by event, and the
-hypotheses they rule out, are in the 2026-10-25 audit, run 2 section, F3.
+hypotheses they rule out, are in the 2026-10-25 audit, F10.
 `workflow_dispatch` succeeds on both affected branches, so the gate works
 on precisely the trees it declines to run on by event. The cause is not
 established and this entry does not guess, because the change below does
