@@ -3913,6 +3913,18 @@ var init_revocation = __esm({
   }
 });
 
+// overlay/lib/revocation-reach.ts
+function revocationCannotReachPastedCopies(surface) {
+  return `A block you already pasted into another product is outside what this can reach. That copy is a text field in somebody else's settings, ${surface} cannot find it or change it, and it keeps working until you replace it yourself. Run \`ursa tuning export\` again and paste the new block over the old one everywhere you put it.`;
+}
+var REVOCATION_HOLDS_FORWARD;
+var init_revocation_reach = __esm({
+  "overlay/lib/revocation-reach.ts"() {
+    "use strict";
+    REVOCATION_HOLDS_FORWARD = "It is kept as a tombstone so a later distillation cannot bring it back, and every export and every overlay from here on leaves it out.";
+  }
+});
+
 // src/consent.cli.ts
 var consent_cli_exports = {};
 __export(consent_cli_exports, {
@@ -4029,8 +4041,8 @@ async function runConsentCommand(argv, io = stdio) {
       const tuning = revokeAxiom(tPath, axiom);
       const target = tuning.axioms.find((a) => a.id === axiom);
       io.out(`Revoked ${axiom}: "${target.statement}"`);
-      io.out("It is kept as a tombstone so a later distillation cannot bring it back, and every export and every overlay from here on leaves it out.");
-      io.out("A block you already pasted into another product is outside what this can reach. That copy is a text field in somebody else's settings, this command cannot find it or change it, and it keeps working until you replace it yourself. Run `ursa tuning export` again and paste the new block over the old one everywhere you put it.");
+      io.out(REVOCATION_HOLDS_FORWARD);
+      io.out(revocationCannotReachPastedCopies("this command"));
       const twins = revocationTwins(tuning, axiom);
       if (twins.length > 0) {
         io.out("");
@@ -4129,6 +4141,7 @@ var init_consent_cli = __esm({
     init_disclosure();
     init_revoke();
     init_revocation();
+    init_revocation_reach();
     stdio = { out: (l) => console.log(l), err: (l) => console.error(l) };
   }
 });
