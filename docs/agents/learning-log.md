@@ -8498,6 +8498,14 @@ it should have changed.
    because this branch is Tier B and `prompts/*-agent.md` is Tier C.
 7. **The carried list, read with zero re-measurements**, which is window
    53's registered experiment and the delta is in `improvements.md`.
+8. **Ran the new instrument against this window's own branch**, which is
+   the one test a window can give an instrument it just built. It came
+   back clean on substance and found one systematic false positive:
+   appending to `incidents.md` gives the file's **last** entry `+1`,
+   because the separator blank line lands inside it. The filter is in the
+   charter clause rather than in this entry, because a check whose first
+   run reports the act of appending is a check the next window learns to
+   skip.
 
 ### Off-repository acts
 
