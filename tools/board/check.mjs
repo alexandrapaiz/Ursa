@@ -79,11 +79,18 @@ const MAX_PARAGRAPH = 420;
 const REASON_RE = /\b(because|so that|otherwise|since|which means|therefore|so you|so we|so the|in order to|that way)\b/i;
 const PARAGRAPH_SPLIT = /\n\s*\n|\n(?=[-*•] )/;
 
-// `conversation_violation` is called only for kinds that are not exempt.
-// store.py: "Claims and releases are exempt; notes, asks, handoffs and dones
-// are not." The owner's own messages are exempt too, and no seat is the owner.
-const CONVERSATION_EXEMPT = new Set(['claim', 'release']);
+// store.py gates `conversation_violation` on a positive list, not on an
+// exemption, which is the shape transcribed here because it is the shape that
+// is true: `kind in ("note", "ask", "handoff", "done") and from_seat !=
+// "owner"`. A claim and a release skip both the 40-character minimum and the
+// reason word. The owner skips them too, and no seat is the owner.
+const CONVERSATION_CHECKED = new Set(['note', 'ask', 'handoff', 'done']);
 const KINDS = ['note', 'ask', 'handoff', 'done', 'claim', 'release'];
+
+// A claim or a release with no surface is refused: store.py, "a {kind} needs a
+// surface, e.g. alexandria:.github/workflows". The two kinds this checker lets
+// past the conversation rules are the two that gain a requirement instead.
+const SURFACE_REQUIRED = new Set(['claim', 'release']);
 
 /** Keys in `data` the read side iterates rather than prints. store.py
  *  DATA_PATH_LISTS: a `files` key holding a count instead of a list of paths
@@ -95,7 +102,7 @@ const DATA_PATH_LISTS = ['files'];
  * @typedef {{ code: string, line: string, repair: string }} Violation
  *
  * @typedef {{ kind: string, subject: string, body: string,
- *             toSeat: string, toCompany: string,
+ *             toSeat: string, toCompany: string, surface: string,
  *             data: object | null, everyone: boolean }} Message
  */
 
@@ -115,6 +122,23 @@ export function violations(m) {
       code: 'KIND_UNKNOWN',
       line: `kind ${JSON.stringify(kind)} is not one the board carries`,
       repair: `use one of: ${KINDS.join(', ')}`,
+    });
+  }
+
+  // store.py: "a message needs a subject", before any prose rule runs.
+  if (!subject.trim()) {
+    out.push({
+      code: 'SUBJECT_EMPTY',
+      line: 'the message has no subject, and the store refuses that outright',
+      repair: 'give it one sentence a person understands cold',
+    });
+  }
+
+  if (SURFACE_REQUIRED.has(kind) && !(m.surface || '').trim()) {
+    out.push({
+      code: 'SURFACE_REQUIRED',
+      line: `a ${kind} with no surface is refused by the store`,
+      repair: 'name what is held, e.g. --surface Ursa:tools/board',
     });
   }
 
@@ -166,7 +190,7 @@ export function violations(m) {
     }
   }
 
-  if (!CONVERSATION_EXEMPT.has(kind)) {
+  if (CONVERSATION_CHECKED.has(kind)) {
     if (body.trim().length < 40) {
       out.push({
         code: 'BODY_MINIMUM',
@@ -228,7 +252,7 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
   const has = (name) => argv.includes(name);
 
   if (has('--help') || has('-h')) {
-    console.log('usage: check.mjs --kind K --subject S (--body B | --body-file F) [--to-seat S] [--to-company C] [--data JSON] [--everyone] [--host]');
+    console.log('usage: check.mjs --kind K --subject S (--body B | --body-file F) [--to-seat S] [--to-company C] [--surface S] [--data JSON] [--everyone] [--host]');
     process.exit(0);
   }
 
@@ -270,6 +294,7 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
     toSeat: flag('--to-seat'),
     toCompany: flag('--to-company'),
     data: flag('--data') ? JSON.parse(flag('--data')) : null,
+    surface: flag('--surface'),
     everyone: has('--everyone'),
   };
 
