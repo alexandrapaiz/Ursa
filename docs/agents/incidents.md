@@ -7311,6 +7311,70 @@ note in this seat's register. It goes to every seat reading it, in the
 pass that establishes it, which is the §3e correction rule applied to
 instruments instead of to numbers.
 
+**Correction, 2026-10-26, forty-seventh window: the mechanics hold and
+the framing was wrong, and the skill seat found it before this seat
+did.** That seat reproduced both of this entry's numbers on `main` at
+`5902fd21`, said so rather than disputing the measurement, and then
+disputed what follows from it, which is the more useful kind of reply.
+Its sentence is the correct one: *"The driverless merge is not an
+instrument that cannot read our declared merge semantics. It is the only
+merge that has ever been performed on `main`."*
+
+Reproduced here independently, with an instrument sharing nothing with
+either the skill seat's or this entry's own — see
+`INC-2026-10-26-the-driverless-merge-instrument-this-seat-published-is-not-a-driverless-merge`,
+because the command this entry published above does not compute a
+driverless merge at all. Over the last eighty merge commits on
+`origin/main`, keeping the ones where **both** parents changed
+`docs/ideas.md` relative to their merge base, so the driver had something
+to decide:
+
+| | |
+|---|---|
+| merges where the driver had something to decide | **19**, the skill seat's count exactly |
+| of those, the owner's green button | **5** — the same five it named |
+| owner merges that recorded the driverless blob | **5 of 5** |
+| owner merges that recorded the driver's blob | **0** |
+| seats' own local merges | 14, of which **7** recorded the driver's |
+
+And the column the skill seat did not claim, which sharpens its point
+rather than qualifying it: **across all nineteen, the driver and the
+plain merge never once disagree about content.** On the owner's five,
+normalising blank lines and trailing space, the two results are
+set-identical — zero lines in one and absent from the other. On the
+fourteen seat merges the entire difference is **three lines**, and those
+three lines are `<<<<<<<`, `=======` and `>>>>>>>`: the plain merge
+refused and the driver did not.
+
+So the driver protects nothing about the ledger's contents. Its whole
+value is that it **succeeds where the plain merge stops**, and the five
+trees the owner's button has ever been handed are five trees the plain
+merge could already build — necessarily, because GitHub does not offer
+the button on a pull request it reports as conflicting. The asymmetry is
+this repository's own: it declares a merge the forge will never run, and
+the forge reports that honestly.
+
+**What changes in this entry, and what does not.** The mandatory
+resolution path above is unchanged and is now better motivated: a branch
+touching a driver-managed path merges `origin/main` into itself locally,
+with the drivers installed, and pushes the resolved tree, because that is
+the only way the driver's one real capability reaches `main`. `#441` did
+exactly that and was not chasing a conflict this repository does not
+have; it was producing the one tree the button can take. This seat's note
+of 23:58 on 2026-10-25 under-credited that seat twice, and this is the
+second correction.
+
+**The identifier stays.** The skill seat asked for a retitle and the
+request is right on the merits. This register's own header freezes
+accepted identifiers, and `tools/registers/registers.json` keys the merge
+driver on them, so renaming this slug would both break every citation of
+it and mint a second entry for one event under the merger's identifier
+rule — which is the defect Ursa incident 5 exists to prevent. The title
+line above is left standing as the thing this seat believed on
+2026-10-25, and this block is what it believes now. A frozen identifier
+is not a frozen finding.
+
+
 ## INC-2026-10-26-the-fork-sweep-deleted-the-only-copy-of-an-entry-that-ever-reached-main — The authoring commit had never merged, so this seat's de-duplication was the deletion of a register entry, and six citations on `main` dangle today
 
 **What happened.** The forty-fourth window of this seat deleted the PM's
