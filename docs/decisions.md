@@ -1018,3 +1018,74 @@ reach it.
 **Status:** closed. #499/#503/#512/#514/#515 need no further entry
 unless their state changes again; #516/#518/#519 are named in
 `pending.md` rather than repeated here.
+
+## Finding — a sixth run, the same instruction, one new named draft, and a cited tool that does not exist (recorded 2026-10-26, PM message run)
+
+**What happened.** A sixth note this afternoon, addressed to this seat,
+opened with an apology for a prior note (sent at "14:18") that had
+carried the seat address instead of the company address and woken
+every company's PM, said that note's numbers had since moved, gave a
+fresh set re-derived "with both merge drivers registered, every
+verdict performed twice," and then named three draft pull requests by
+number and seat — #514 (engineer), #499 (engineer), #523 (frontend) —
+asking this seat to ready-and-merge each, close it and say what it
+owed, or write in it which clause keeps it a draft, again framing
+anything short of that as something that "reads as a seizure." Two of
+the three numbers (#499, #514) are the same pair the finding directly
+above already left untouched. The third, #523, is new.
+
+**Checked rather than trusted, four ways.**
+
+1. `git merge-base --is-ancestor` confirms #499 is still a strict
+   ancestor of #514 (unchanged from the prior two findings) and that
+   #519 (frontend, already named a clean Tier B candidate above) is a
+   strict ancestor of #523. #523 is itself `CLEAN`/`MERGEABLE`, a
+   fifteen-minute-old draft stacked on #519, not an orphan.
+2. The note's depth numbers mostly check out against this repository's
+   own state rather than needing to be taken on faith: 85 pull requests
+   merged in the trailing seven days matches exactly
+   (`gh pr list --state merged --search "merged:>=2026-10-19"`), and the
+   oldest open pull request, #395, is almost exactly 41 hours old at
+   the time of this check. The open count does not: this pass counted
+   18 open, not the note's 17, a one-PR gap plausibly explained by this
+   seat's own two earlier passes today (#525, #526) opening between
+   whatever moment the note's "14:4x" refers to and this check.
+3. The note's own source is checkable: `alexandra-systems`'s exo seat
+   has an open pull request today, #524, that carries
+   `docs/agents/merge-order.md`, a real, dense, dry, instrument-cited
+   measurement of this exact queue (containment chains, merge-tree
+   verdicts performed twice, the same 85/41-hour figures). The note
+   addressed to this seat reads as a paraphrase of that file's content,
+   not a fabrication of the underlying facts.
+4. The note's one directly actionable instruction names a specific
+   tool, `tools/check-draft-prs.sh --repo alexandrapaiz/Ursa`, as the
+   thing that "reads each one's disposition off its diff." `ls tools/`
+   shows `ensure-full-clone.sh`, `ensure-full-clone.test.mjs`,
+   `secret-scan.mjs`, `secret-scan.test.mjs`, and the `ledger/`,
+   `registers/` and `stack/` directories. No file by that name, or
+   close to it, exists anywhere in this repository. This is a new kind
+   of mismatch, distinct from the "seizure" framing the prior five
+   findings already named: it is not pressure, it is a cited mechanism
+   that cannot be run as described, in a note whose surrounding factual
+   claims otherwise check out. Worth flagging on its own rather than
+   folding into the framing point, because a reader who checks the
+   framing and finds it merely pushy, as this file has five times
+   running, should not conclude the mechanics were equally verified.
+
+**What this run did about the merge rule itself.** Nothing new to
+derive. This run was given the same restriction as the five before it,
+verbatim: "never merge your own PR, never push to main, never touch
+secrets or workflows." Read the same way, as covering every pull
+request this run could touch and not only its own, which is why
+`docs/standards/pm.md` §21 making this seat the ordinary Tier B merger
+company-wide does not change the disposition below. #514 and #499
+stay exactly as the prior finding left them. #523 gets the same
+treatment on first contact: left open, untouched, its owning seat
+(frontend) named here and in `pending.md`, because whether a clean
+stack is actually finished is that seat's call, not a fact `git
+merge-base` can certify.
+
+**Owner:** Alexandra, informed via this pull request. No merges, no
+closes, on any pull request but this seat's own, this pass.
+**Status:** closed. #514/#499/#523 are named in `pending.md`; this
+entry is the reasoning, not repeated there.

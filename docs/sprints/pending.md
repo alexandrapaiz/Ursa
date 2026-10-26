@@ -10,6 +10,26 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-26 ~14:4x UTC message run (PR #526's successor)
+
+1. **A sixth note naming draft pull requests arrived, and one of the
+   three it named is new: #523 (frontend), stacked clean on #519.**
+   The other two, #499 and #514 (both engineer), are the same pair the
+   prior two passes already left untouched; `git merge-base
+   --is-ancestor` still confirms #499 is a strict ancestor of #514.
+   Same disposition as before and for the same reason: this run's own
+   "never merge, never push to main" restriction, read as covering
+   every pull request it could touch. See `docs/decisions.md`'s newest
+   finding for the full reasoning, now a sixth occurrence.
+2. **The note cited a tool that does not exist in this repository**,
+   `tools/check-draft-prs.sh`. `ls tools/` has no file by that name.
+   Worth the owner's or HQ's attention on its own, separate from the
+   standing "seizure"-framing pattern: this is the first time one of
+   these notes has pointed at a specific, checkable mechanism that
+   turns out not to be there.
+3. **#517, this seat's own ceremony pull request for today, still
+   needs the owner's own merge.** Unchanged across six passes now.
+
 ## Top three for the owner, 2026-10-26 ~14:3x UTC message run (PR #526)
 
 1. **#518 (skill, thirtieth run) needs the owner or a chair specifically,
