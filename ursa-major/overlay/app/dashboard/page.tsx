@@ -411,6 +411,15 @@ export default function Dashboard() {
               <div style={{ marginTop: '1.25rem' }}>
                 {payload.records.map((r) => {
                   const segs = segments(r)
+                  // A record whose finished work has no characters has no
+                  // shares to show, and every figure on the line below is
+                  // `pct`'s `—`. Four dashes under a full empty track read
+                  // as a row that failed to load, and the track is worse
+                  // than silent: the legend calls a bare track "covered by
+                  // no span", so the bar asserts 100% of something while
+                  // the figures beside it refuse to say anything at all.
+                  // Both come out, and the row says the one thing it knows.
+                  const empty = r.finalChars === 0
                   return (
                     <article key={r.id} className="dash-row">
                       <p className="dash-mono" style={{ fontSize: '0.8rem', lineHeight: 1.55 }}>
@@ -437,7 +446,7 @@ export default function Dashboard() {
                           forget this
                         </button>
                       </p>
-                      <div
+                      {!empty && <div
                         className="dash-bar"
                         role="img"
                         aria-label={`of ${n(r.finalChars)} characters: ${pct(
@@ -464,14 +473,22 @@ export default function Dashboard() {
                             style={{ width: `${(s.chars / Math.max(1, r.finalChars)) * 100}%` }}
                           />
                         ))}
-                      </div>
-                      <p className="dash-meta dash-mono">
-                        {n(r.finalChars)} chars ·{' '}
-                        {pct(r.charsByClass.survived_verbatim, r.finalChars)} as written ·{' '}
-                        {pct(r.charsByClass.survived_mutated, r.finalChars)} edited ·{' '}
-                        {pct(r.charsByClass.no_generation_provenance, r.finalChars)} yours ·{' '}
-                        {pct(uncovered(r), r.finalChars)} no span
-                      </p>
+                      </div>}
+                      {empty ? (
+                        <p className="dash-meta dash-nothing">
+                          No characters in the finished work, so there are no
+                          shares to show. Why a record ends up empty is in the
+                          record and not in this index.
+                        </p>
+                      ) : (
+                        <p className="dash-meta dash-mono">
+                          {n(r.finalChars)} chars ·{' '}
+                          {pct(r.charsByClass.survived_verbatim, r.finalChars)} as written ·{' '}
+                          {pct(r.charsByClass.survived_mutated, r.finalChars)} edited ·{' '}
+                          {pct(r.charsByClass.no_generation_provenance, r.finalChars)} yours ·{' '}
+                          {pct(uncovered(r), r.finalChars)} no span
+                        </p>
+                      )}
                       {/* A separate line because it has a separate whole.
                           Everything above is a share of the finished work;
                           this is a count of generated text that never

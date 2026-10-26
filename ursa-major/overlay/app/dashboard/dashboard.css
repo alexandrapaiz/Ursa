@@ -277,6 +277,18 @@
 
 .dash-bar span { display: block; }
 
+/* The share statement for a record whose finished work has no characters,
+   standing where the bar and the figures would be. Both margins were read
+   off a frame rather than guessed. The top one is the bar's own, because
+   without it the sentence butts against the metadata line and reads as a
+   fourth line of it. The bottom one is because the sentence ends in a full
+   stop and the line under it opens with a lowercase "and", which under the
+   bar continues "1.9% no span" correctly and under a sentence does not. */
+.dash-nothing {
+  margin-top: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
 .dash-seg-verbatim { background: var(--polar); }
 
 .dash-seg-mutated {
