@@ -93,7 +93,7 @@ function derivableNumbers(probe, v) {
   return allowed
 }
 
-function checkProbe(gate, probe, v) {
+export function checkProbe(gate, probe, v) {
   const findings = []
   const note = (rule, message) => findings.push({ locus: LOCUS.COMMITTED, rule, message })
   const where = `${gate.id} / ${v.cause || probe.name}`
@@ -149,7 +149,7 @@ function checkProbe(gate, probe, v) {
 /** Two causes that render identically, or one cause that exits two ways, each
  *  defeat the point of naming a cause at all. Checked across a gate's probes
  *  rather than within one. */
-function checkGateWide(gate, driven) {
+export function checkGateWide(gate, driven) {
   const findings = []
   const byLine = new Map()
   const byCause = new Map()
@@ -169,6 +169,16 @@ function checkGateWide(gate, driven) {
 
 // ---------------------------------------------------------------------------
 // Driving
+//
+// `partition`, `driveGate`, `checkProbe` and `checkGateWide` are exported so
+// `enumerate-verdicts.test.mjs` can drive a SYNTHETIC gate -- one that commits
+// the defect on purpose -- through the same code path the committed gates take,
+// without adding it to REGISTRY. The first draft of that suite re-implemented
+// these four functions instead, and a re-implementation is the one thing this
+// suite must not contain: it would prove the checks fire in the copy while the
+// program's own copy could drift green. That is the same error this seat
+// recorded twice in its run 12, a measurement whose instrument cannot see the
+// thing it is about.
 // ---------------------------------------------------------------------------
 
 /** Partition a probe's findings by locus, using whichever key the gate's
@@ -182,7 +192,7 @@ function checkGateWide(gate, driven) {
  *  check silently cannot see, and the one thing this whole exercise is about
  *  is a check whose blind spot looked like a pass. `read-filters.mjs` calls
  *  the same state UNMEASURABLE for a board parameter. */
-function partition(gate, probe) {
+export function partition(gate, probe) {
   const counts = Object.fromEntries(Object.keys(gate.loci).map((l) => [l, 0]))
   let unkeyed = 0
   for (const f of probe.findings) {
@@ -209,7 +219,7 @@ async function loadGates() {
   return { gates, broken }
 }
 
-function driveGate(gate) {
+export function driveGate(gate) {
   const driven = []
   for (const probe of gate.probes) {
     const { counts, unkeyed } = partition(gate, probe)

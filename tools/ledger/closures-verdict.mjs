@@ -36,13 +36,24 @@ import { LOCUS, POSITION, describeGate, verdictOf } from '../gates/verdict-shape
  */
 export function verdict(violations, seen = {}) {
   const { markers = 0, docs = 0, ledgerPath = 'docs/ideas.md' } = seen
-  const bySeat = violations.filter((v) => v.held === LOCUS.SEAT)
   // Anything not explicitly the owner's is the seat's, so a finding added later
-  // with a missing `held` lands on the louder exit code and the actor who is
+  // with a missing `held` lands on the louder exit code and on the actor who is
   // actually reading the output. Guessing `owner` would file a seat's own defect
   // under "not yours to repair", which is the failure this module class exists
   // to prevent.
+  //
+  // THIS WAS A BUG, caught by `closures-verdict.test.mjs` the hour it was
+  // written, and the comment above it asserted the behaviour it did not have.
+  // Both filters tested for equality, so a finding with no `held` joined neither
+  // array, `bySeat.length === 0` held, and the gate exited 2 with the sentence
+  // "0 violation(s) above need the owner" -- a seat's own defect reported as not
+  // the seat's, over a count of nothing. Latent rather than live: all three
+  // construction sites in `check-closures.mjs` set `held`, the innermost via
+  // `?? 'seat'`, so no committed input reaches it and the differential against
+  // the parent commit is byte-identical either way. Inherited from the original
+  // gate rather than introduced by the extraction.
   const byOwner = violations.filter((v) => v.held === LOCUS.OWNER)
+  const bySeat = violations.filter((v) => v.held !== LOCUS.OWNER)
 
   const counted = `${markers} closure marker(s) in ${docs} document(s), against ${ledgerPath}`
 

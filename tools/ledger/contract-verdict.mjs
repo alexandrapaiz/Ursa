@@ -42,8 +42,14 @@ import { LOCUS, describeGate, verdictOf } from '../gates/verdict-shape.mjs'
  */
 export function verdict(violations, seen = {}) {
   const { blocks = 0, path = 'docs/ideas.md' } = seen
-  const bySeat = violations.filter((v) => v.held === LOCUS.SEAT)
+  // Not explicitly the owner's means the seat's. Same correction as
+  // `closures-verdict.mjs`, for the same latent defect and the same reason:
+  // two equality filters drop an unkeyed finding out of both arrays, and the
+  // branch it then lands on tells a seat its own defect is not its to repair.
+  // `check.mjs`'s `violation()` helper takes `held` as its first positional
+  // argument so every call site supplies one, which is why this is latent.
   const byOwner = violations.filter((v) => v.held === LOCUS.OWNER)
+  const bySeat = violations.filter((v) => v.held !== LOCUS.OWNER)
 
   const counted = `${blocks} blocks in ${path}`
 
