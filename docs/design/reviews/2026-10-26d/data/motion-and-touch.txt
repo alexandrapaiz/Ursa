@@ -1,0 +1,15 @@
+prefers-reduced-motion: no-preference
+  .panel-run     border-color, background-color, transform / 0.16s, 0.16s, 0.34s
+  .panel-action  color / 0.16s
+  .panel-run transform while hovered: matrix(1, 0, 0, 1, 0, -1)
+prefers-reduced-motion: reduce
+  .panel-run     border-color, background-color / 0.16s, 0.16s
+  .panel-action  color / 0.001s
+  .panel-run transform while hovered: none
+touch, with the hover media feature forced to none:
+  matchMedia("(hover: hover)")   false
+  .panel-action, pointer over it rgb(139, 147, 167)  (should be the resting --dim)
+  .panel-action, pressed         rgb(168, 199, 250)  (should be --accent)
+  .panel-run, pointer over it    none  (should be none)
+  .panel-run, pressed            matrix(1, 0, 0, 1, 0, 0)  (should be none: the press sits back down)
+  .panel-run, pressed, fill      rgba(168, 199, 250, 0.14)  (should be the --line wash)

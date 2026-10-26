@@ -1,0 +1,3 @@
+home-desktop.png                          280 px    0.022%  rows 161-171, cols 704-749  (same size)
+home-phone.png                            280 px    0.085%  rows 161-171, cols 179-224  (same size)
+home-tablet.png                           280 px    0.029%  rows 161-171, cols 394-439  (same size)
