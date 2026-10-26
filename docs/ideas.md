@@ -12123,6 +12123,7 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   filed rather than built.
 - Cost: $0
 - Status: proposed
+
 ### 2026-10-26 — `saveRecord` joins an unchecked record id onto a path, one layer below the hole the publish path just had (security run 6)
 - Trigger: fixing the publish boundary in this run. `loadPublishable`
   validated the filename and `publish` built every written path from
