@@ -63,6 +63,13 @@ export const CLOSURE_MARKER =
  *  failure mode the marker exists to end. */
 const CLOSURE_ATTEMPT = /<!--\s*closes:/;
 
+/** A line whose first non-space character opens an HTML comment. The syntax
+ *  rule is restricted to these, because any other line mentioning the marker
+ *  is prose about the marker rather than an attempt at one. This gate found
+ *  that out by failing on its own design document, whose §5 table row reads
+ *  "a line contains the literal `<!-- closes:` and does not parse". */
+const OPENS_COMMENT = /^\s*<!--/;
+
 /** The statuses that mean the entry is closed. A closure marker pointing at
  *  one of these is the state this gate wants. */
 const CLOSED_STATUSES = ['built', 'rejected'];
@@ -89,6 +96,40 @@ const HOLDER_BY_STATUS = { proposed: 'owner', accepted: 'seat', urgent: 'seat' }
 /**
  * @typedef {{ held: 'seat' | 'owner', rule: string, message: string }} Violation
  */
+
+/**
+ * The same document with every fenced code block blanked, line count and
+ * line numbering preserved.
+ *
+ * A marker is a claim a seat makes. A marker inside a fence is an
+ * illustration of the syntax, which is exactly what a document teaching the
+ * syntax contains: `docs/design/ledger-closure-backlinks.md` §7.2 quotes a
+ * real marker as a payload, and a tutorial would quote a made-up one. Reading
+ * either as a live claim would make documenting this mechanism impossible,
+ * which is a gate that forbids its own explanation.
+ *
+ * The fence test is a toggle on a line whose first non-space characters are
+ * three backticks or three tildes, which is CommonMark's fenced-block opener
+ * minus the indentation and length generalities. Those generalities do not
+ * occur in this repository's markdown, and a stricter parser here would be a
+ * second markdown implementation to maintain.
+ *
+ * @param {string} source one document's contents
+ * @returns {string} the same number of lines, fenced ones emptied
+ */
+export function stripFences(source) {
+  let inFence = false;
+  return source
+    .split('\n')
+    .map((line) => {
+      if (/^\s*(```|~~~)/.test(line)) {
+        inFence = !inFence;
+        return '';
+      }
+      return inFence ? '' : line;
+    })
+    .join('\n');
+}
 
 /**
  * Every tracked markdown file, as git lists them. `git ls-files` rather than
@@ -139,8 +180,9 @@ export function checkDocument({ docPath, docSource, ledgerPath, index }) {
   /** @type {Violation[]} */
   const violations = [];
   let markers = 0;
+  const live = stripFences(docSource);
 
-  for (const [, markerLedger, date, title] of docSource.matchAll(CLOSURE_MARKER)) {
+  for (const [, markerLedger, date, title] of live.matchAll(CLOSURE_MARKER)) {
     markers += 1;
     if (markerLedger !== ledgerPath) continue;
     const key = `${date}\u0000${title}`;
@@ -177,8 +219,11 @@ export function checkDocument({ docPath, docSource, ledgerPath, index }) {
 
   // A line that tried to be a marker and failed to parse is reported even
   // when its ledger path is not the one under check, because an unparsed
-  // marker names no path at all.
-  for (const line of docSource.split('\n')) {
+  // marker names no path at all. Restricted to lines that open an HTML
+  // comment, outside fences: see OPENS_COMMENT and stripFences for the two
+  // false-positive classes that restriction closes.
+  for (const line of live.split('\n')) {
+    if (!OPENS_COMMENT.test(line)) continue;
     if (!CLOSURE_ATTEMPT.test(line)) continue;
     if (line.match(CLOSURE_MARKER) !== null) continue;
     violations.push({
@@ -210,6 +255,10 @@ export function checkRepository({ cwd, ledgerPath }) {
   for (const docPath of trackedMarkdown(cwd)) {
     const docSource = readFileSync(`${cwd}/${docPath}`, 'utf8');
     if (!CLOSURE_ATTEMPT.test(docSource)) continue;
+    // Counted as a document the gate looked at even when every mention turns
+    // out to be prose or fenced, so the summary line's document count is
+    // "documents that mention the marker" and not "documents that carry one".
+
     docs += 1;
     const r = checkDocument({ docPath, docSource, ledgerPath, index });
     violations.push(...r.violations);

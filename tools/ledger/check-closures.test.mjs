@@ -17,6 +17,7 @@ import {
   checkDocument,
   checkRepository,
   ledgerIndex,
+  stripFences,
   trackedMarkdown,
 } from './check-closures.mjs';
 
@@ -214,4 +215,88 @@ test('trackedMarkdown lists committed markdown and nothing else', () => {
     !files.some((f) => f.includes('node_modules/')),
     'git ls-files is used precisely so dependency trees are not read',
   );
+});
+
+// The two false-positive classes below were not predicted. The gate found
+// them by failing on its own design document the first time that document was
+// tracked: four CLOSURE_SYNTAX violations, from a diagram node, a JSDoc line,
+// and two table rows, every one of them prose about the marker rather than an
+// attempt at one. These tests are that failure, kept.
+
+test('stripFences empties fenced lines and preserves the line count', () => {
+  const body = ['a', '```', 'b', 'c', '```', 'd'].join('\n');
+  assert.equal(stripFences(body), ['a', '', '', '', '', 'd'].join('\n'));
+});
+
+test('stripFences handles a fence with an info string, and tildes', () => {
+  assert.equal(stripFences(['```markdown', 'x', '```'].join('\n')), '\n\n');
+  assert.equal(stripFences(['~~~', 'x', '~~~'].join('\n')), '\n\n');
+});
+
+test('a marker quoted inside a fenced block is an illustration, not a claim', () => {
+  // docs/design/ledger-closure-backlinks.md §7.2 quotes a real marker as its
+  // on-disk payload. Counting it would double-count, and a tutorial quoting a
+  // made-up entry would fail CLOSURE_RESOLVES, which would make the mechanism
+  // impossible to document.
+  const body = ['```markdown', marker('2026-01-03', 'An entry a seat called urgent'), '```'].join(
+    '\n',
+  );
+  const { violations, markers } = check(body);
+  assert.equal(markers, 0);
+  assert.deepEqual(violations, []);
+});
+
+test('a table row describing the marker syntax is not a syntax violation', () => {
+  // The literal row from the design document that first failed.
+  const body =
+    '| `CLOSURE_SYNTAX` | a line contains the literal `<!-- closes:` and does ' +
+    'not parse as a marker | seat | failing loudly is the point |';
+  assert.deepEqual(check(body).violations, []);
+});
+
+test('a diagram line and a JSDoc line mentioning the marker are not violations', () => {
+  const body = [
+    '\u2502 <!-- closes: <path>        \u2502           \u2502',
+    '/** `<!-- closes: <ledger-path> <YYYY-MM-DD> "<title>" -->`, global. */',
+  ].join('\n');
+  assert.deepEqual(check(body).violations, []);
+});
+
+test('a typo in a marker written on its own line is still caught', () => {
+  // The restriction to lines opening an HTML comment must not cost the rule
+  // its subject, which is a marker a seat meant to write and mistyped.
+  const { violations } = check(
+    "   <!-- closes: docs/ideas.md 2026-01-04 'An entry that shipped' -->",
+  );
+  assert.equal(violations.length, 1);
+  assert.equal(violations[0].rule, 'CLOSURE_SYNTAX');
+});
+
+test('a typo inside a fence is not caught, which is the known limitation', () => {
+  // Stated as a test rather than left to be rediscovered: a mistyped marker
+  // inside a fenced block is unread, and this gate will not say so. The
+  // trade is in docs/design/ledger-closure-backlinks.md §9.
+  const body = ['```', "<!-- closes: docs/ideas.md 'bad' -->", '```'].join('\n');
+  assert.deepEqual(check(body).violations, []);
+});
+
+test('the design document for this gate is clean under this gate', () => {
+  // The document explains the syntax, quotes a real marker in a fence, draws
+  // the marker in an ASCII diagram and tabulates the rule that reads it. If
+  // any of those four shapes trips the gate, the gate forbids its own
+  // explanation, which is the defect this block of tests exists for.
+  const docPath = 'docs/design/ledger-closure-backlinks.md';
+  const docSource = readFileSync(`${REPO}/${docPath}`, 'utf8');
+  const index = ledgerIndex(readFileSync(`${REPO}/docs/ideas.md`, 'utf8'));
+  const { violations, markers } = checkDocument({
+    docPath,
+    docSource,
+    ledgerPath: 'docs/ideas.md',
+    index,
+  });
+  assert.deepEqual(
+    violations.map((v) => `${v.rule}: ${v.message}`),
+    [],
+  );
+  assert.equal(markers, 1, 'exactly one live marker: the fenced payload is not one');
 });
