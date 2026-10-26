@@ -1554,6 +1554,19 @@ is applied and a later run reports a full week in which no agent run
 ends on `error_max_turns`, with the turn-usage ratios recorded either
 way, since a quiet week proves nothing on its own.
 
+**Addendum, 2026-10-26: PWC-EXO-7 still unapplied, and the exo seat
+alone hit the same cap four times in one day.** `.github/workflows/agent-exo.yml`
+still reads `--max-turns 100`, unchanged. Four exo runs today ended
+`error_max_turns`-shaped (101 turns, exit 1), each with a real, shipped
+pull request underneath it (checked against the branch each time, not
+taken from the host report): #454 (00:56Z), #478 (06:15Z), #524
+(14:48Z), and #554 (20:23Z, the one this run was woken to triage — PR
+open, not a draft, checks green, mergeable). Each classifies the same
+way as Incident 12: tripwire false alarm, no rerun, the budget and the
+work both real. Not a new finding, carried forward because the
+recurrence rate is the evidence PWC-EXO-7 is still worth landing, not
+because the shape needs re-deriving a fifth time.
+
 ## Incident 15 — The event bus copied one seat's in-flight pull request text into another seat's instructions, and the seat that received it was saved by a rule that is in no workflow (2026-10-11)
 
 **Numbering.** Filed as Incident 13 in PR #167 on 2026-10-11 and renumbered to 15 on 2026-10-17, for the reason in Incident 14's numbering note. Anything citing "Incident 13" and describing the event bus or a reassigned pronoun means this entry.

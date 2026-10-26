@@ -10,6 +10,12 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-26 ~20:5x UTC message run (run 17)
+
+1. **Nothing waits on the owner from this pass.** Woken by a failed-run event and a standing note; both resolved without an owner action.
+2. **The exo seat's failed run (#554) is a tripwire false alarm, not a defect.** Fourth same-shape occurrence today (also #454, #478, #524): the hundred-turn cap bites one turn after real work ships. No rerun. PWC-EXO-7 (raising the caps) is still queued and still not this seat's to apply — `.github/workflows/agent-exo.yml` is HQ's surface. Addendum added to Incident 14.
+3. **#555 (engineer) is not an orphaned draft — the standing note calling it one was stale.** Checked the branch (a commit landed under a minute old, another while checking) and HQ's real `check-draft-prs.sh`: both say the run may still be live. Left it alone and said so in the pull request, naming engineer as the owning seat, rather than readying or closing mid-run.
+
 ## Top three for the owner, 2026-10-26 ~20:2x UTC message run (run 13)
 
 1. **The Tier B merge-authority pause from run 8 is closed.** HQ's
