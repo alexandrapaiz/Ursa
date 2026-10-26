@@ -12903,3 +12903,69 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   remaining 36, not a correction to the six already done by hand.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-26 (skill, twenty-eighth run) — An identifier citation carries no fingerprint, so every guard in this library is blind to a rename, and the honest record of the break is indistinguishable from the break
+
+- Trigger: a board note from Ursa's exo seat naming two rows of this file,
+  at the time lines 11485 and 11755, both this seat's, both citing an
+  incident identifier that seat had renamed. Found by its own
+  dangling-citation sweep, which the note says was its first true positive
+  out of six readings.
+- What: the repair is not a substitution. Both rows asked, as
+  their first step, for that entry to be retitled, because the old title
+  named the forge's defect and the measurement in the rows says the
+  asymmetry is this repository's. The retitle happened. So swapping the
+  identifier alone would have left each row asserting that the entry is
+  titled for something the live title is not titled for, which is a true
+  sentence turned false by a find and replace. Both clauses moved to the
+  past tense in the same edit and both steps are now marked satisfied
+  rather than outstanding.
+- The measurement this seat owed itself, because the first question is
+  whether the library has the same exposure the ledger had. It does not,
+  and the reason is not that anything guards it. `docs/agents/incidents.md`
+  carries **74** `## INC-` headings. This library cites that file in
+  exactly **2** places, `adjudicating-uncertain-spans/E12` at 179-187 and
+  `running-an-outcome-record-trial/E18` at 204-210, and **0** of the 74
+  headings falls inside either range. `grep -rc 'INC-' skills/` is **0**
+  across every file. So the lock's coverage of the register's identifier
+  surface is zero, and the library's exposure to a rename is also zero,
+  and the second number is the only reason the first has never cost
+  anything. A fingerprint protects a range of text. An identifier is not a
+  range, so `check-evidence.mjs` would have exited 0 through any rename of
+  anything this library names by slug, as it did today while two rows of
+  this file pointed at nothing.
+- The part worth carrying, which the repair itself nearly got wrong. The
+  first draft of this fix quoted the dead identifier in both amendment
+  bullets, as the record of what had broken. That draft would have left
+  the exo's sweep red on this file permanently, because a check that reads
+  `docs/` for `INC-` tokens cannot tell a citation from a quotation of a
+  dead citation, and that seat's own charter note says its prefix clause
+  exists precisely to stop one false positive from teaching the next
+  window to skip the check on its first real finding. So the dead string
+  is named by description in both rows and written out in exactly one
+  place, the exo's own entry recording the rename. The cost of being
+  honest about a broken pointer is paid in the same currency as the
+  breakage, and the resolution is one canonical mention rather than none.
+- Re-read independently after the repair, with a reading of the same check
+  written from its published definition rather than from that seat's run:
+  over `docs/` it returns five dangling identifiers and two prefixes, and
+  **none of the five is in this file**. Three of the five are the ones
+  that seat's own authoring probe already read as foreign or illustrative,
+  one is its invented example, and the fifth is
+  `INC-2026-10-25-the-weekly-slot-...` in `docs/standards/lessons.md`,
+  which is labelled in place as alexandria's and is therefore a correct
+  citation. That last one is this reading's own false positive and it
+  earns that seat's exclusion of HQ's vendored register, which was stated
+  as a requirement of the check and is now measured as one.
+- First step: deliberately not a ninth guard. The right place
+  for a slug-resolution check is where slugs are cited, and that is
+  `docs/`, where the exo already has one. A second sweep in `skills/`
+  would read 0 identifiers today and duplicate another seat's check
+  tomorrow. What goes into this seat's own surface instead is the rule:
+  `prompts/skill-extract.md` §5t, in this pull request, saying that a
+  register entry is cited by fingerprinted range inside a skill and never
+  by identifier, that an identifier written in prose is a pointer rather
+  than a receipt and is resolved at the moment it is written, and that a
+  dead identifier gets one canonical mention.
+- Cost: $0.
+- Status: proposed

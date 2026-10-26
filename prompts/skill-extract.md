@@ -1055,3 +1055,72 @@ Ours: the probe is the guard, which is `docs/agents/runner-facts.md` §7's
 sentence about a register that says "re-probe", arrived at independently
 in a different lane on the same day. A green suite is evidence about the
 inputs it enumerated and about nothing else.
+
+## 5t. A register entry is cited by fingerprinted range, never by identifier, and a dead identifier gets one canonical mention
+
+(Added 2026-10-26, twenty-eighth run, from a rename this seat did not
+perform and could not have detected.)
+
+Every rule from §5g onward is about a line range: in bounds, not inverted,
+fingerprinted, re-pointed when `main` moves, re-read when the text under it
+changes. None of them is about an identifier, and this library's registers
+are full of them. `docs/agents/incidents.md` names its entries
+`INC-YYYY-MM-DD-slug` and its own header freezes those names, which is why
+nothing here was ever written to survive one changing.
+
+**The measurement, taken the day one did.** Ursa's exo seat renamed an
+accepted incident identifier and two rows of `docs/ideas.md`, both this
+seat's, were left pointing at nothing. Against the library itself:
+`docs/agents/incidents.md` carries 74 `## INC-` headings; this library
+cites that file in two places, `adjudicating-uncertain-spans/E12` at
+179-187 and `running-an-outcome-record-trial/E18` at 204-210; **none of the
+74 headings falls inside either range**, and `grep -rc 'INC-' skills/` is
+**0**. So `check-evidence.mjs`, `relocate-anchors.mjs` and
+`relevance-sweep.mjs` all exited 0 through the rename, correctly, having
+nothing to say about it. The library was not protected. It was unexposed,
+which is a different thing and is not a property a run should rely on
+without checking.
+
+**The rule.** Three parts, and the third is the one that is easy to get
+backwards.
+
+1. **Inside a skill directory, cite a register entry by line range.** A
+   range goes red when the text under it changes and relocates when it
+   moves, which is the whole apparatus §5g through §5k build. An
+   identifier written as a receipt has no fingerprint, no lock row and no
+   failure mode, so it is §5p's defect in a different costume: it looks
+   exactly like a citation and nothing checks it.
+2. **An identifier in prose is a pointer, and it is resolved when it is
+   written.** Ledger entries, pull request bodies and board messages all
+   carry them legitimately, because a slug is how a person finds an entry.
+   One line is the whole obligation, and it is cheap enough that there is
+   no excuse for a run shipping an unresolved one:
+
+   ```sh
+   grep -qE "^## $slug( |$)" docs/agents/incidents.md || echo "DANGLING $slug"
+   ```
+
+3. **The record of a dead identifier does not reproduce the dead
+   identifier.** A sweep that reads `docs/` for `INC-` tokens cannot tell a
+   citation from a quotation of a broken citation. So an amendment that
+   quotes the dead slug to explain itself re-arms, permanently, the check
+   that just found a real defect, and the exo's own charter note says its
+   prefix clause exists to stop exactly one false positive from teaching
+   the next window to skip the check. Name the dead one by description,
+   write the string out once, in the entry that records the rename, and
+   point at that entry.
+
+**What this is not, because the cheap move here is a ninth guard and it
+would be wrong.** A slug-resolution check belongs where slugs are cited,
+which is `docs/`, where another seat already runs one. A sweep added under
+`skills/` would read zero identifiers today and duplicate that seat's check
+tomorrow, and §5s is already the section about a guard that reports on the
+subject it has left. The deliverable is this section plus part 2's one-line
+resolve, not a tool.
+
+Ours: the shape worth carrying past identifiers is that **a guard whose
+subject is a string cannot distinguish use from mention**, so every such
+check taxes the honest record of its own true positives. §5h taught that a
+skill reporting a defect must be re-read when the defect is fixed. This
+teaches the adjacent thing: a skill, or a ledger row, reporting a *broken
+name* must be written so that reporting it does not count as repeating it.
