@@ -1292,6 +1292,99 @@ Fix what is yours and queue the rest for the owner, and never renumber
 an accepted ADR yourself, because the number is the owner's decision
 and other files already cite it.
 
+#### A carried ask is probed against the property, never against the patch you proposed (added 2026-10-26, forty-ninth window, measured against two of this seat's own)
+
+The sweep above generates asks and hands them to the centralizer. It
+says nothing about how an ask is **retired**, and §2's work-queue rule
+says only that a pending entry is an unpaid debt that outranks a new
+idea. So the carried check a window writes for its successor is whatever
+command that window happened to run, and the successor re-runs it and
+re-sends on a zero. Both of this seat's two live asks were satisfied on
+HQ's `main` and re-sent for a third and a fourth window anyway. The
+measurement and the account are
+`INC-2026-10-26-the-re-ask-probed-the-patch-i-imagined-and-not-the-property-i-wanted`.
+
+**A hit count cannot tell three things apart, and they have three
+different next actions.**
+
+| what zero hits means | next action |
+|---|---|
+| not fixed | wait, or re-send |
+| **fixed differently** | retire the ask and say what landed instead |
+| **you are holding the wrong revision** | re-measure, and correct any number you published |
+
+Both of this seat's asks were in the second and third rows, and the
+probe was a `grep` for a string out of this seat's own proposed fix in
+both cases. `install-driver` appears zero times in HQ's
+`check-merge-queue.sh` because the landed repair pins the driverless
+merge **on purpose**, which is this seat's own argument given back to
+it: the button merges in a clone with no drivers, so that is its verdict
+permanently and nothing a repository declares can reach it. Installing
+them would have reported clean a pull request the button refuses, which
+is the dangerous direction. `unresolved` appeared zero times in
+`capacity-retry.py` because the reading was of `00ee4e53`, 420 lines,
+superseded by `2c750e4d`, 774 lines and four hits, an hour before the
+window that re-sent it opened.
+
+So, four clauses, and the fourth is the cheap one that would have caught
+both.
+
+1. **State the property in a sentence a reader could verify without your
+   diff**, beside any string you grep. "Does this tool's verdict equal
+   the merge the button performs" is a property. "Does this file contain
+   `install-driver`" is a guess at an implementation.
+2. **Read the artifact's own account of itself first.** `--help`, the
+   usage block, the module docstring, the comment above the function.
+   Both repairs this seat failed to see are described in their own files
+   in this seat's own words, one of them citing this repository by name.
+3. **Carry the instant and the commit, never the window ordinal.** The
+   log entry that cost this the most read "zero times ... on `main`, 420
+   lines (fourth window)". The parenthetical names who measured it and
+   no successor can tell, from that line, whether a later window
+   re-measured or inherited. This charter already requires a published
+   state claim about another seat's live branch to carry the instant it
+   was measured. The same rule binds the claims this seat carries
+   forward in its own register, which is the surface a fresh window
+   reads first and the only one it trusts.
+4. **Compare the size, not only the count.** A probe that reports a hit
+   count and a line count, where the line count moved, has already told
+   you the count is about a different file. Print both, every time:
+
+```bash
+f=tools/capacity-retry.py; w=unresolved
+gh api "repos/alexandrapaiz/alexandra-systems/contents/$f?ref=main" --jq .content \
+  | base64 -d > /tmp/probe.txt
+printf '%s: %s lines, %s hits for %s\n' "$f" "$(wc -l < /tmp/probe.txt)" \
+  "$(grep -c "$w" /tmp/probe.txt)" "$w"
+```
+
+**And check the inbox before you re-send, because the answer may already
+be in it.** The centralizer told this seat the refusal split had landed
+at 2026-10-25 23:53:52 UTC. Window 48 opened at 00:14:11 and re-sent the
+ask at 00:50:01. The message was twenty-one minutes old and in the
+directed feed the whole time. A re-send is a message about the state of
+the world, so it is subject to the same rule as any other: re-derive
+before you publish.
+
+**What is not this seat's defect, and keeping that straight matters.**
+The asking was right. Both asks carried a number, both were repeated
+rather than assumed, and the centralizer said so in its own words: the
+defect is in the probe and not in the seat. The general shape is now
+HQ's portfolio lesson, `binds: any, exo, pm`, filed as
+`standards/lessons-inbox/2026-10-26-a-re-ask-whose-probe-greps-for-your-own-fix.md`
+and **on HQ's open `#489`, not on HQ's `main`** as of 06:0x on
+2026-10-26. So cite it as an artifact on a pull request until it syncs,
+and do not call it law in a report to anybody. The note that announced
+it says "already law on the trunk" about the two **repairs**, which is
+true and was verified here, and names the **lesson** in a `data` field,
+which is on a pull request. Two facts, two states, one message, and the
+second one costs the reader one `gh api` call:
+
+```bash
+gh api repos/alexandrapaiz/alexandra-systems/contents/standards/lessons-inbox?ref=main \
+  --jq '.[].name' | grep re-ask   # empty on 2026-10-26 at 06:0x
+```
+
 ### 3e. Count what reached the owner (L-X12, added 2026-09-30)
 
 Every other audit in this company measures a seat against its charter,
