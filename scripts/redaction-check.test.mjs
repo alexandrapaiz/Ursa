@@ -302,6 +302,171 @@ describe('redaction-check', () => {
     });
   });
 
+  // ---------------------------------------------------------- history
+  //
+  // The mode exists because the gate reads the working tree, so a value a
+  // seat truncates in the next commit stays readable at the commit before
+  // it. Every case below therefore has a CLEAN tip and a dirty ancestor,
+  // which is the exact shape tree mode is blind to.
+
+  function gitRepo(commits) {
+    const dir = mkdtempSync(join(tmpdir(), 'redaction-hist-'));
+    const git = (...args) =>
+      execFileSync('git', ['-C', dir, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    git('init', '-q', '-b', 'main');
+    git('config', 'user.email', 'suite@example.invalid');
+    git('config', 'user.name', 'suite');
+    for (const files of commits) {
+      for (const [name, body] of Object.entries(files)) {
+        const path = join(dir, name);
+        mkdirSync(dirname(path), { recursive: true });
+        writeFileSync(path, body);
+      }
+      git('add', '-A');
+      git('commit', '-q', '-m', 'step');
+    }
+    return dir;
+  }
+
+  test('history finds a value the tip no longer carries, and tree mode does not', () => {
+    const dir = gitRepo([
+      { 'audit.md': `evidence\nid: ${fakeSessionId}\n` },
+      { 'audit.md': `evidence\nid: ${fakeSessionId.slice(0, 8)}\n` },
+    ]);
+    try {
+      const tree = runCheck(dir);
+      assert.equal(tree.code, 0, 'the tip is clean, so tree mode must pass');
+
+      const hist = runCheck(dir, ['--history']);
+      assert.equal(hist.code, 1);
+      assert.match(hist.stderr, /session or conversation UUID/);
+      assert.match(hist.stderr, /audit\.md:2 \(blob [0-9a-f]{8}\)/);
+      // The same rule tree mode has, and the reason the mode is safe to
+      // run in CI at all: naming where it is must not republish it.
+      assert.ok(!hist.stderr.includes(fakeSessionId), 'must not reprint the value it caught');
+      assert.match(hist.stderr, /tip-tree fix does not reach them/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('history passes a repository that was never dirty, and counts the blobs', () => {
+    const dir = gitRepo([{ 'a.md': 'clean\n' }, { 'b.md': 'also clean\n' }]);
+    try {
+      const { code, stdout } = runCheck(dir, ['--history']);
+      assert.equal(code, 0);
+      assert.match(stdout, /Redaction history clean: \d+ blob\(s\) reachable from HEAD/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('history honours the gate exclusions, so a path the gate skips is skipped here', () => {
+    const dir = gitRepo([
+      { 'node_modules/dep/readme.md': `id: ${fakeSessionId}\n`, 'ok.md': 'fine\n' },
+      { 'ok.md': 'fine, still\n' },
+    ]);
+    try {
+      const { code, stdout } = runCheck(dir, ['--history']);
+      assert.equal(code, 0, 'node_modules is one of the gate’s own --exclude-dir values');
+      assert.match(stdout, /history clean/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('history takes a ref, so a branch can be swept without checking it out', () => {
+    const dir = gitRepo([{ 'a.md': 'clean\n' }]);
+    try {
+      const git = (...args) =>
+        execFileSync('git', ['-C', dir, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+      git('checkout', '-q', '-b', 'side');
+      writeFileSync(join(dir, 'leak.md'), `id: ${fakeSessionId}\n`);
+      git('add', '-A');
+      git('commit', '-q', '-m', 'side');
+      git('checkout', '-q', 'main');
+
+      assert.equal(runCheck(dir, ['--history=main']).code, 0, 'main never saw it');
+      const side = runCheck(dir, ['--history=side']);
+      assert.equal(side.code, 1, 'the branch did');
+      assert.match(side.stderr, /leak\.md:1/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // A truncated graph that reports clean is the worst answer this mode can
+  // give, because it is indistinguishable from the good one. Same refusal
+  // tools/secret-scan.mjs makes, for the same reason.
+  test('history refuses a shallow clone instead of reporting clean', () => {
+    const origin = gitRepo([
+      { 'audit.md': `id: ${fakeSessionId}\n` },
+      { 'audit.md': `id: ${fakeSessionId.slice(0, 8)}\n` },
+      { 'audit.md': 'clean now\n' },
+    ]);
+    const shallow = mkdtempSync(join(tmpdir(), 'redaction-shallow-'));
+    try {
+      execFileSync('git', ['clone', '-q', '--depth=1', `file://${origin}`, shallow], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+      const { code, stderr } = runCheck(shallow, ['--history']);
+      assert.equal(code, 2, 'exit 2 is "this checker could not do its job"');
+      assert.match(stderr, /shallow/);
+      assert.match(stderr, /ensure-full-clone/);
+    } finally {
+      rmSync(origin, { recursive: true, force: true });
+      rmSync(shallow, { recursive: true, force: true });
+    }
+  });
+
+  // This mode concatenates all of history into one stream, which is its
+  // own invention and nothing else in the repository has to live with it.
+  // An earlier draft prefixed each line with a sentinel and an id, and
+  // this case is what caught it: a gate looking for a digit matched the
+  // prefix on every line and reported findings in a repository that has
+  // none. grep's own `-n` runs after the match, so it cannot.
+  test('its own line framing cannot manufacture a finding', () => {
+    const dir = gitRepo([{ 'a.md': 'aaa\nbbb\n' }, { 'a.md': 'ccc\n' }]);
+    const gate = mkdtempSync(join(tmpdir(), 'redaction-gate-'));
+    try {
+      // A gate that looks for a digit. No committed line here has one.
+      const yml = [
+        '          scan "digits" \\',
+        "               '[0-9]'",
+        '          hits=$(grep -rInE "$pattern" . \\',
+        '            --exclude-dir=.git \\',
+        "            | grep -vE 'nothing-here' || true)",
+        '',
+      ].join('\n');
+      const file = join(gate, 'fake-gate.yml');
+      writeFileSync(file, yml);
+      const { code, stdout } = runCheck(dir, ['--history', `--workflow=${file}`]);
+      assert.equal(code, 0, 'nothing in this repository has a digit in it');
+      assert.match(stdout, /history clean/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+      rmSync(gate, { recursive: true, force: true });
+    }
+  });
+
+  // The same stream, asked the opposite question: a line that really does
+  // match must still be found once the framing is gone.
+  test('finds every matching line in one concatenated stream, with the right line numbers', () => {
+    const dir = gitRepo([
+      { 'a.md': `one\nid: ${fakeSessionId}\nthree\n` },
+      { 'b.md': `x\ny\nid: ${fakeSessionId}\n`, 'a.md': 'cleaned\n' },
+    ]);
+    try {
+      const { code, stderr } = runCheck(dir, ['--history']);
+      assert.equal(code, 1);
+      assert.match(stderr, /a\.md:2 \(blob [0-9a-f]{8}\)/);
+      assert.match(stderr, /b\.md:3 \(blob [0-9a-f]{8}\)/);
+      assert.ok(!stderr.includes(fakeSessionId));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   // Guards the claim in the script's header: the rules are the workflow's.
   test('reads its three patterns out of the real gate, not out of itself', () => {
     const yml = execFileSync('cat', [REAL_WORKFLOW], { encoding: 'utf8' });
