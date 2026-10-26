@@ -1205,3 +1205,87 @@ outlived them, and this is a *count* that outlived them. All three are the
 same failure, a derived fact recorded by hand beside the thing it is
 derived from, and the remedy is always one of two: have the tool compute
 it, or have the tool check it. Never have the author remember it.
+
+## 5v. A guard that asks git a question answers from this clone, and the clone is not the repository
+
+(Added 2026-10-26, thirty-first run, after this seat's own relocation
+tool spent a measurement reporting that files had left the repository
+when what had left was the history it was given.)
+
+Every rule from §5g onward rests on the same move: record a derived fact
+beside the thing it is derived from, then have a tool re-derive it and
+compare. §5u closed that loop for counts. This section closes it for the
+one input none of those tools owns, which is the git history they read
+the old tree out of.
+
+**The clone a seat is handed is not a copy of this repository.** It is a
+copy of one branch's tip. `tools/ensure-full-clone.sh` documents the two
+independent properties, depth and refspec, and L-A77 in
+`docs/standards/lessons.md` names that file by path. What belongs here is
+the consequence for a receipt guard, which is sharper than the general
+lesson: **git does not refuse the questions this clone cannot answer. It
+answers them wrongly, and the wrong answer is indistinguishable from a
+finding.**
+
+**Measured on 2026-10-26, in a scratch repository, before the fix.**
+`relocate-anchors.mjs` recovers the as-cited lines with
+`git show <old-ref>:<path>`, inside a `try` whose `catch` recorded the
+path as absent. Pointed at a sha this clone did not hold, it printed:
+
+```
+  fixture E1  src/f.ts:1
+      src/f.ts is not in the tree at 1111111111111111111111111111111111111111
+```
+
+at exit 1, under the heading `Text changed, read these`. That is a claim
+about what the repository contained at a commit, produced by a tool that
+could not see the commit. The file was in every tree the repository
+actually holds. A reader who acted on the line would have rewritten a
+correct citation by hand; `bash tools/ensure-full-clone.sh` would have
+settled it in one command.
+
+**The shape, which is §5s's with the subject changed.** §5s says a guard
+that skips its subject reports on the subject it has left. This is a
+guard that *cannot reach* its subject and reports on the subject anyway,
+by attributing its own blindness to the thing it was looking at. The
+second is worse than the first, because a skipped subject leaves a
+smaller number and a reader may notice the denominator, while a
+misattributed failure arrives inside the output as a finding with a
+sentence attached.
+
+**So, three rules for anything under `skills/` that shells out to git.**
+
+1. **Resolve the ref once, before any tree is read, and refuse the run.**
+   `git rev-parse --verify --quiet <ref>^{commit}` is the whole check. A
+   ref this checkout does not hold is an input error and exits 2, not a
+   drift report at exit 1. Refusing every range is correct and is not
+   overreach: if the ref is absent, every range would be misattributed,
+   so there is no partial answer worth printing.
+2. **Say which failure it is.** Read `git rev-parse
+   --is-shallow-repository` in the error path and name the shallow clone
+   when it is the cause, with `bash tools/ensure-full-clone.sh` as the
+   repair. A seat reading the message should not have to know L-A77.
+3. **Carry git's own sentence, never a paraphrase.** When a per-path read
+   still fails on a ref the clone does hold, the failure really is about
+   the repository, so the range belongs in the reader's queue. What goes
+   in the queue is git's first stderr line, because this tool's paraphrase
+   of it was a claim it had no way to check, and `exists on disk, but not
+   in <sha>` is a different fact from `does not exist in <sha>`.
+
+**The test that proves it has to be a real clone.** A stub cannot show
+this, because the defect is a property of the clone rather than of the
+code path. `relocate-anchors.test.mjs` now clones a scratch repository at
+`--depth 1` and runs the tool against a commit that is genuinely outside
+the copy, which is the seat's own situation reproduced rather than
+simulated.
+
+Ours, and the honest limit of it: this rule covers the guard reaching for
+history. It does not cover the run reaching for it. A run that measures
+anything across branches, including the containment checks the
+"read your own seat's open PRs first" rule asks for, is reading the same
+truncated graph, and `git merge-base` there prints nothing and exits
+non-zero, which a shell substitution turns into the empty string and the
+next command reads as a different question entirely. The first act of a
+run that will compare branches is `bash tools/ensure-full-clone.sh`, and
+this run learned that by getting four of fifteen readings wrong before
+noticing.
