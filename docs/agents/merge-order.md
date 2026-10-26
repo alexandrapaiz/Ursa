@@ -1,100 +1,114 @@
 # Merge order — replaced each window by Ursa's ExO seat
 
-**Measured 2026-10-25 at 23:1xZ by the forty-fourth window**, on an
-unshallowed clone with `remote.origin.fetch` widened to all heads (§0)
-and **both of this repository's merge drivers registered** before any
-verdict was taken:
+**Measured 2026-10-26 at 00:00:36Z by the forty-sixth window**, on an
+unshallowed clone with `remote.origin.fetch` widened to all heads (§0),
+with `refs/pull/*/head` **re-fetched immediately before the census**,
+and with **both register merge drivers installed**, which is the only
+state in which a conflict verdict here means anything
+(`INC-2026-10-24-a-merge-driver-that-is-not-installed-is-a-conflict`).
+`git config --get-regexp 'merge\.(ledger|register)\.'` printed six lines
+before any verdict below was taken.
 
-```sh
-bash tools/ledger/install-driver.sh
-bash tools/registers/install-drivers.sh
-git config --get-regexp 'merge\..*\.driver'   # two lines, or every verdict below is false
-```
+This is information for the owner and for the PM. Merging is theirs.
 
-## The queue
+## The three numbers
 
 | | |
 |---|---|
-| open pull requests | **11** |
-| merged in the last seven days | **44** |
-| oldest open | 2026-10-24T21:21:40Z |
+| open pull requests | **14** |
+| merged in the last seven days | **50** |
+| age of the oldest open | **27 hours** (#395, 2026-10-24T21:21Z) |
 
-Open does not outnumber the week's merges, so the depth warning does
-not fire. The owner is absorbing work faster than the org produces it.
+**The depth warning does not fire.** Merges outnumber the open queue
+more than three to one and the oldest open pull request is just over a
+day old.
 
-## Conflicts with `main`
+**Fourteen is ten decisions.** Three chains, each one decision:
 
-Instrument: `git merge-tree --write-tree origin/main refs/prs/<n>`,
-drivers registered, **no `2>&1`**, because a driver writes its
-diagnostic to stderr and redirecting it puts that line where the tree
-object identifier was.
-
-| pull request | branch | verdict | instrument |
-|---|---|---|---|
-| #395 | ursa-research/2026-10-24-hook-2 | CLEAN | merge-tree, drivers on |
-| #418 | ursa-exo/2026-10-25-message | **CONFLICT**, one file | merge-tree, drivers on |
-| #423 | ursa-skill/2026-10-25-message-merge | CLEAN | merge-tree, drivers on |
-| #424 | ursa-frontend/2026-10-25-message | CLEAN | merge-tree, drivers on |
-| #425 | ursa-exo/2026-10-25-message-3 | CLEAN | merge-tree, drivers on |
-| #426 | ursa-engineer/2026-10-25-message-2 | CLEAN | merge-tree, drivers on |
-| #427 | ursa-security/2026-10-25-hook | CLEAN | merge-tree, drivers on |
-| #428 | ursa-engineer/2026-10-25-hook | CLEAN | merge-tree, drivers on |
-| #429 | ursa-exo/2026-10-25-hook-2 | CLEAN | merge-tree, drivers on |
-| #430 | ursa-market/2026-10-25-message | CLEAN | merge-tree, drivers on |
-| #431 | ursa-pm/2026-10-25-hook-2 | CLEAN | merge-tree, drivers on |
-
-**Ten of eleven are clean and there is no ordering constraint between
-any of them.** All four register drivers fired on #418 and auto-merged
-all four registers; the full stderr is in this window's pull request.
-
-## The one conflict, and it is the file this charter rewrites
-
-#418's only conflicted path is **`docs/agents/merge-order.md`** — this
-file. It is declared `enabled: false` **by name with the reason** in
-`tools/registers/registers.json`, because this charter replaces it
-wholesale each window and an entry-keyed merge would publish two
-contradictory merge orders. So the conflict is correct, expected, and
-resolved by taking the newer copy:
-
-```sh
-git checkout --theirs docs/agents/merge-order.md
+```
+#432 ⊂ #438 ⊂ #443     the PM's three windows, one body of work
+#434 ⊂ #444            the frontend's two
+#435 ⊂ #442            this seat's two
 ```
 
-## The finding the owner should have before she reads #418
+Each verified with `git merge-base --is-ancestor refs/prs/<contained>
+refs/prs/<tip>`, exit 0, stated in the direction that cannot invert.
 
-**#418's register half is now provably redundant with `main`**, measured
-set-wise with heading levels normalised, after #422 merged at
-2026-10-25T23:06:36Z:
+## Do not read GitHub's merge field this week, in either direction
 
-| file | lines in #418 found nowhere on `main` |
-|---|---|
-| `docs/agents/incidents.md` | **0** |
-| `docs/agents/learning-log.md` | **0** |
-| `docs/agents/runner-facts.md` | **0** |
-| `docs/agents/improvements.md` | **0** |
+**Five of the fourteen carry a GitHub verdict that disagrees with the
+merge git actually performs.** Three read `CONFLICTING` and merge
+clean; two read `MERGEABLE` and conflict. The account, with both
+mechanisms, is
+`INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`.
+The short version for anyone acting on this file:
 
-So everything in #418 except its two charter files has already landed by
-another route. What remains is `prompts/exo-agent.md` (+2,698/-69) and
-`prompts/pm-agent.md` (+30/-0), which is Tier C and hers.
+- GitHub answers for the base in **`baseRefOid`**, which is readable in
+  the same call. When it differs from `origin/main`, the verdict is
+  about a base that no longer exists.
+- When `baseRefOid` **equals** `origin/main` and the verdict still
+  disagrees, that is permanent. GitHub has no clone with this
+  repository's merge drivers registered, so its answer is the
+  driverless merge and always will be.
 
-**The decision in front of her is now a two-file charter decision**,
-where a week ago it was a twelve-file, nine-thousand-line one. That is
-the whole of what window 42's split bought, and it is reported rather
-than acted on: #418 is named in a standing report to the owner, and the
-rule for that case is to post which pull request the decision moves to
-and leave the artifact exactly where the PM placed it. **Nothing in
-#418 has been touched.**
+## The queue, every row with the instrument that produced it
 
-## Landing order
+`real` is `git merge-tree --write-tree --name-only origin/main
+refs/prs/<n>` with the drivers installed, exit 0 read as clean and exit
+1 as conflict. **A non-zero exit that is neither is not a verdict**: the
+first census of this window printed `CONFLICT` for three pull requests
+that had been opened after its refspec was fetched, because
+`merge-tree` exits non-zero for a bad revision exactly as it does for a
+conflict.
 
-There is no ordering constraint to simulate. Any of the ten clean pull
-requests may land in any order. #418 lands whenever its charter question
-is answered, and its one conflict is resolved with the single command
-above.
+| PR | seat | GitHub | `baseRefOid` | real | instrument |
+|---|---|---|---|---|---|
+| #395 | research | MERGEABLE | `18587707` | clean | `merge-tree` + drivers |
+| #418 | exo | MERGEABLE | `13baf35a` | clean | `merge-tree` + drivers |
+| #427 | security | MERGEABLE | `5902fd21` | clean | `merge-tree` + drivers |
+| #432 | pm | **MERGEABLE** | `370af860` | **conflict** | `merge-tree` + drivers |
+| #434 | frontend | MERGEABLE | `13baf35a` | clean | `merge-tree` + drivers |
+| #435 | exo | **CONFLICTING** | `91a9c303` | **clean** | `merge-tree` + drivers |
+| #437 | engineer | **CONFLICTING** | `91a9c303` | **clean** | `merge-tree` + drivers |
+| #438 | pm | **MERGEABLE** | `391efd0c` | **conflict** | `merge-tree` + drivers |
+| #439 | security | **CONFLICTING** | `5902fd21` | **clean** | `merge-tree` + drivers |
+| #440 | market | MERGEABLE | `5902fd21` | clean | `merge-tree` + drivers |
+| #441 | skill | MERGEABLE | `5902fd21` | clean | `merge-tree` + drivers |
+| #442 | exo | MERGEABLE | `5902fd21` | clean | `merge-tree` + drivers |
+| #443 | pm | MERGEABLE | `5902fd21` | clean | `merge-tree` + drivers |
+| #444 | frontend | MERGEABLE | `5902fd21` | clean | `merge-tree` + drivers |
 
-#429 is this window's own and the PM may merge it under §21: it carries
-no `prompts/` path, which is the predicate §10's checklist reads.
+The two conflicting rows are both subsumed. **#443 contains #432 and
+#438 and merges clean**, because the PM resolved that conflict in its
+own favour, which is the resolution this seat recommended at 23:41:22Z
+and the right one: `git log -S` names `d27fd81` as the PM's authoring
+commit. Its forty-eight-line postmortem survives intact on #443. So
+nothing in this queue needs a hand resolution.
 
-```sh
-gh pr diff 429 --name-only | grep '^prompts/'   # no output
+## The landing order, simulated rather than guessed
+
+Ten decisions, merged in ascending order into a **detached** scratch
+worktree created from `origin/main`, with both drivers configured in
+that worktree:
+
 ```
+#395  #418  #427  #437  #439  #440  #441  #442  #443  #444
+```
+
+**All ten merged clean, in that order, in one pass.** Three of them
+(#435's tip #442, plus #437 and #439) are pull requests GitHub's field
+calls dirty or whose chain it calls dirty.
+
+Ascending order is not load-bearing here, since no pair conflicts. What
+is load-bearing is merging the **chain tips** and not their members:
+taking #432 or #438 instead of #443 lands a conflict that #443 has
+already resolved.
+
+## What is owed to whom
+
+- **#418** is this seat's charter half and is Tier C by content. It has
+  waited on the owner since 2026-10-25 02:49Z. It merges clean as it
+  stands, re-measured this window.
+- **#442** is this seat's register half, Tier B by content, and it
+  carries this window's registers.
+- Everything else is its own seat's and is named above with its seat.
