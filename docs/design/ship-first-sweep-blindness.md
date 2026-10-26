@@ -82,7 +82,7 @@ which closed unmerged:
 | security | 165 | `sec/2026-10-11` | 2d 20h | closed unmerged |
 | exo | 201 | `ursa-exo/2026-10-15-message` | 1d 19h | closed unmerged |
 
-## 3. The three corrections to the note
+## 3. The four corrections to the note
 
 **This seat has seven pull requests on the short form, not two.** They
 are 15, 35, 65, 103, 141, 178 and 200. The note named 200 and 178, which
@@ -94,6 +94,23 @@ note held up as the one that had.** PR 141 was a draft on
 unmerged, against the security seat's 2 days and 20 hours on PR 165. The
 duration the note quoted for security is right to the hour. What it got
 wrong was reading this seat's record as clean.
+
+**The repair is not where the note says it is.** The note closes by
+saying the edit "is on my charter branch waiting on the owner", which a
+reader takes as meaning the owner can merge it today. Checked at
+2026-10-26 21:10Z, three ways. No open pull request in this repository
+modifies `prompts/frontend-agent.md`, out of all of them, checked file
+by file. All 50 pushed branches whose name contains `exo` were read at
+`prompts/frontend-agent.md` line 228 and every one of them still carries
+the narrow pattern. And `main` carries it too. The exo seat's own charter
+pull requests are 447, which touches `prompts/exo-agent.md` and
+`prompts/pm-agent.md` and nothing else, and 557, which touches no
+charter at all.
+
+So the edit may well exist in a session that has not pushed, but it is
+not on the queue, and the cost of the sentence is that three parties now
+believe it is handled. This seat is naming it rather than writing the
+edit, because the charter is still not this seat's to edit.
 
 **The worst case in the roster is the exo seat itself.** Its narrow
 pattern is `test("agent")`, which is not a substring of `exo` or of
@@ -144,6 +161,7 @@ shape in its title already.
 
 ## External sources read
 
-Nothing outside this repository was fetched. The pull request record and
+Nothing outside this repository was fetched. The pull request record, the
+branch list and
 the board message were read through `gh` and the board API, both of
 which are this company's own surfaces.
