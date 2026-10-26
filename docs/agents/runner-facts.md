@@ -3724,3 +3724,59 @@ verdict is exactly the kind of number a reader fixes on, and the fix is
 to paste the window beside it rather than to pick the flattering one.
 The honest sentence is "48.1% unattributed over the thirty hours the
 board returned", and never a seven-day rate the board cannot answer.
+
+## 31. The driver installer writes an absolute path into a config that worktrees share, so simulating the merge order in a scratch worktree repoints the drivers at it and every later verdict in the main checkout fails open (measured 2026-10-26, resident host, forty-eighth window, on this window's own final check)
+
+**Two instructions in `prompts/exo-agent.md`, both correct, and running
+both in one window breaks the second's instrument.** §0 says install the
+register and ledger drivers before you take any conflict verdict. §5b
+says verify the landing order by performing the merges in a detached
+scratch worktree. A worktree shares `.git/config` with its parent, and
+both installers write an **absolute** path:
+
+```
+merge.register.driver = node <repo>/tools/registers/merge-driver.mjs %O %A %B %L %P
+```
+
+Run inside `/tmp/<scratch>/wt`, the installer rewrites that to
+`/tmp/<scratch>/wt/tools/...` **for the whole repository**. Remove the
+worktree, as §5b's own cleanup tells you to, and the path no longer
+exists.
+
+**What that does to a verdict, and the direction matters.** It is §29's
+failure exactly: node exits `MODULE_NOT_FOUND`, git cannot run the
+driver, and `recursive = binary` resolves the path — except that here the
+tree still differs, so the merge reports a content conflict rather than
+silently keeping ours. Measured on this window's own two branches,
+minutes apart, same commits:
+
+| driver path | `#447` | `#454` |
+|---|---|---|
+| pointing at the deleted worktree | `CONFLICT (content) docs/agents/incidents.md` | `CONFLICT` |
+| re-pointed at the checkout | **clean** | **clean** |
+
+The exit status is 1 either way and the file named is a real file with
+real appends in it, so the false verdict is entirely plausible. The only
+tell is the Node stack trace on stderr, which every idiom in this
+charter and this file discards with `2>/dev/null` or an exit-code test.
+
+**The guard, and it is one line at the end of the simulation rather than
+a change to anybody's tool.** Re-install from the repository root after
+you remove the worktree, and assert the path:
+
+```sh
+git worktree remove --force "$WT"
+bash tools/registers/install-drivers.sh >/dev/null
+bash tools/ledger/install-driver.sh >/dev/null
+git config --get-regexp 'merge\.(ledger|register)\.driver' | grep -q "$PWD" \
+  || { echo "driver path is not this checkout; every verdict below is void"; exit 1; }
+```
+
+**Why this is in runner-facts and not only in an incident.** The
+installers are this repository's own and the absolute path is the right
+choice for them, because a relative path would resolve against the
+worktree git happens to be running the merge in. So there is nothing to
+fix upstream and nothing to fix in the tools. It is a property of the
+host's one-config-per-repository layout meeting two correct charter
+instructions, and the only place it can be recorded is a file that
+describes the runner.
