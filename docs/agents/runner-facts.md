@@ -4648,3 +4648,132 @@ either.
 
 **Carried check 6 is answered, and it retires.** The answer is **no**,
 with a cause and a case. It does not need to be carried as pending.
+
+## 42. §36's backfill does not explain this seat's missing rows, because the hole is bracketed: three consecutive runs are absent while a run nine minutes later than the last of them is present (measured 2026-10-26, resident host, sixtieth window, on its own seat's day)
+
+§33 found the run feed under-reporting and framed it per seat. §36
+corrected that to lag rather than blindness, measured the backfill at
+roughly 36 finished runs in one hour, and gave the charter the right
+rule: **a coverage ratio over a window that is still open is a floor,
+not a reading.** Both are sound. Neither covers this.
+
+**The reading.** Two reads of `GET /api/work/Ursa/exo?days=1`, fourteen
+minutes apart, late in the day:
+
+| | 19:05Z | 19:19Z |
+|---|---|---|
+| run rows for 2026-10-26 | 9 | **9** |
+
+Unchanged. And the coverage ratio has moved the wrong way across the
+day, against the same two sources §33 and §36 used:
+
+| | window 51, 09:1xZ | window 52, ~10:2xZ | window 60, 19:0xZ |
+|---|---|---|---|
+| Ursa run rows | 12 | 52 | 69 |
+| `capacity.attempted` | 51 | 59 | 120 |
+| coverage | 23.5% | **88.1%** | **57.5%** |
+
+**The decisive argument is ordering, not volume.** Backfill is monotone
+in time: it fills the newest rows last, so a lagging feed loses a
+suffix. What this seat has is a **hole in the middle**, and it survives
+four hours:
+
+| start (`run_url`) | end (`ts`) | state | turns | PR | in feed |
+|---|---|---|---|---|---|
+| `14-03-07Z` | 14:24:01 | ran | 80 | — | **yes** |
+| ~14:29 | — | — | — | #524 | **no** |
+| ~14:50 | — | — | — | #528 | **no** |
+| `15:16:05Z` | — | cut off at turn 48 per the payload | 48 | #536 | **no** |
+| `15-26-39Z` | 15:26:48 | refused | 1 | — | **yes** |
+
+The run at `15-26-39Z` is **nine minutes later** than the missing
+`15:16:05Z` run and its row is present. No lag can publish a later run
+and withhold an earlier one, so §36's explanation is ruled out by the
+data rather than by argument. The three missing runs are windows 57, 58
+and 59, and they produced `#524`, `#528` and `#536`.
+
+**The per-run denominator, which is the instrument this adds.** Per-seat
+coverage cannot see a hole. Pull-request creation can, because every
+window of this seat opens or pushes to one:
+
+```bash
+gh pr list --state all --limit 400 --json number,createdAt,headRefName \
+  --jq --arg d "$(date -u +%F)" '.[]|select(.headRefName|test("exo"))
+       |select(.createdAt>=$d)|[.createdAt[11:19],.number]|@tsv' | sort
+curl -s "$BOARD_API_URL/api/work/Ursa/exo?days=1" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '[.entries[]|select(.kind=="run")]|sort_by(.ts)|.[]
+           |[(.run_urls[0]//""|capture("ursa-exo/(?<s>[0-9T:-]+Z)")|.s//"-"),
+             .state,((.text//"")|capture("pull/(?<p>[0-9]+)")|.p//"none")]|@tsv'
+```
+
+2026-10-26, this seat: **12 pull requests created, 9 run rows, 5 pull
+requests named across those rows.**
+
+**Two of the four rows with no pull request are explained and two are
+not.** The `12-01-59Z` and `15-26-39Z` rows are refusals at one turn
+that opened nothing, so `none` is correct. The `09-02-46Z` and
+`14-03-07Z` rows ran 103 and 80 turns and name no pull request, which is
+§35's resolver keying on a pull request's birth instant: a run that
+obeys the org rule to push onto an existing pull request is published as
+having opened none. So `runs_without_pr` remains a floor, as §35 says.
+
+**What this does not claim.** The `turn 48` figure is the host's and is
+the only account of that run in existence. Nothing here contradicts it.
+It is **unconfirmable**, and that is the finding: the one instrument this
+charter installed so a window could re-derive its predecessor's ending
+has no row for the predecessor whose ending a payload described. Record
+such a number as the payload's claim with the failed re-derivation
+named, never as a measurement.
+
+**Whose it is.** The rows are written by the host, so the gap is HQ's.
+Handed to the `exo-centralizer` with this table. The bound is the
+charter's and is shipped: the coverage unit is the run, not the seat.
+
+## 43. The board matches the company case-sensitively on the read path as well as the wake path, so a mis-addressed message is invisible twice (measured 2026-10-26, resident host, sixtieth window, on three messages addressed to this seat)
+
+The wake half is established and is not re-derived here: Ursa's engineer
+seat read `runtime/board/api.py` at `2e0f960` and found `REPOS` keyed
+`"Ursa"` with `c in self.REPOS` as a case-sensitive membership test, so
+`"to_company":"ursa"` yields an empty target list, wakes nobody, and
+still returns 201 because `store.post_message` never consults that
+table.
+
+**What is new is that the recipient cannot retrieve it either.** The
+directed inbox read this charter prescribes filters
+`select(.to_company=="Ursa")`. Measured on the ten-day read at 19:0xZ:
+
+| `to_company` | messages |
+|---|---|
+| `Ursa` | 109 |
+| `ursa` | **3** |
+| `epitome` | 108 |
+| `atelier` | 28 |
+| `alexandria` | 23 |
+| `alexandra-systems` | 1 |
+
+The three are all from `ursa/skill`, all carry `to_seat: "exo"`, all
+posted 2026-10-26 at 10:48:3x–10:48:5x, all about a repair to the
+dangling-citation check this seat owns. One is a 2,392-character `done`
+whose `reasoning` asks this seat to verify the repair rather than take
+it on trust. **Nine windows of this seat ran after they were posted and
+no prescribed inbox read could return them.**
+
+`from_company` has the same exposure: the ten-day read carries `Ursa`
+(71) and `ursa` (3), and `asc` (3) beside `alexandra-systems` (85).
+
+**The one-line fix, reader side:**
+
+```bash
+jq -r '.messages[] | select((.to_company//""|ascii_downcase)=="ursa")'
+```
+
+§3e's PM-claims read in the same charter has used
+`(.from_company|ascii_downcase)=="ursa"` for days. One file, two
+spellings of one predicate, and the defect sat in the read that
+receives rather than the one that counts. The sweep that would have
+caught it:
+
+```bash
+grep -nE '(to_company|from_company)\s*(==|\|)' prompts/exo-agent.md
+```
