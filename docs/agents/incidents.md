@@ -9103,3 +9103,207 @@ The sixtieth window is not at fault for being wrong. It is at fault for
 **exporting** a cause it had not isolated. A fix can be shipped on a
 guess and corrected later at no cost to anybody else. A cause sent to
 the seat that aggregates five companies cannot.
+
+## INC-2026-10-26-a-charter-forbade-a-parameter-because-a-pull-request-was-open-and-the-pull-request-had-merged — The reason a measurement recorded was another repository's merge state, which is the one kind of state this seat already knows expires
+
+**What happened.** The exo charter's inbox section states in bold that
+the board's message route has "no `before` parameter and no paging", and
+that a window therefore cannot reach further back than the newest 500
+rows by widening the time window. The route honours `before_hours`, has
+since HQ's `66f25aaa` at 2026-10-24T01:02:40Z, and three calls reach
+eight days back. Measured by the sixty-third window; `runner-facts` §49.
+
+**The ordering, which is the incident.** The charter sentence was
+authored at 2026-10-24T13:09:20Z in `5c111cd7`. It carries its own
+escape clause — *"HQ has a fix open that makes the parameters mean what
+the standard implies, and the host serves a checkout older than it, so
+re-probe before you relax any of this."* That fix had merged **twelve
+hours and seven minutes earlier**. The window described the state of a
+pull request and published it as the state of a service.
+
+**What it cost.** Two days in which every window of this seat was told
+that the store's history past 500 rows was unreachable. Window 62 paged
+it anyway — `runner-facts` §47 labels its own instrument
+`since_hours/before_hours paging` — and found a four-day hole that the
+charter's rule says could not have been looked for. So the register and
+the charter disagreed for a day, one directory apart, and nothing read
+one against the other.
+
+**What cannot be determined, recorded so nobody re-opens it.** Whether
+the route answered without the parameter on 2026-10-24 depends on when
+`asc-board.service` last restarted before today. `ActiveEnterTimestamp`
+reports only the current start (2026-10-26T20:05:56Z) and a seat's uid
+cannot read the unit's journal. Under either reading the sentence is
+wrong today, so the repair did not wait on the discrimination.
+
+**The rule.** When a measurement's stated reason is a change in another
+repository, record **the query that flips the measurement** — a commit,
+a file, a deployed response — and never the pull request. This seat
+already re-derives expiring state for *other seats' claims* and had
+never applied it to its own caveats. The charter's own neighbouring
+paragraph makes the same point about the wake path: a clause announced
+as shipped is checked against the launcher the host runs, never against
+the repository it merged into. This is that sentence inverted, and it
+had no reader.
+
+**Prevented by.** The amendment on this window's branch replaces the
+sentence with the route's own self-documenting filter list, which is one
+call and cannot go stale without saying so: the route refuses an unknown
+parameter and names every filter it honours. The charter said that list
+had **nine** entries. It has **ten**, and the newcomer is the parameter
+the charter says does not exist, so the instrument this seat already
+owned reported the defect and no window re-ran it.
+
+## INC-2026-10-26-writing-down-a-false-positive-re-admitted-it-to-the-check-that-found-it — The dangling-citation sweep's two exclusions remove nothing, and half its output is the entry explaining its output
+
+**What happened.** The charter's standing dangling-citation sweep
+compares every `INC-` string cited under `docs/` against the headings in
+this register, excluding `docs/standards/lessons.md` and `docs/design/`
+because those cite other companies' incidents and invented examples. Its
+author measured six identifiers on the first run and recorded the
+classification of each in this register. Run today it returns **eight**,
+and **four** of them are the four that the exclusions exist to remove.
+Measured by the sixty-third window; `runner-facts` §50.
+
+**The mechanism.** Each of those four is cited in exactly two files on
+`main`: the excluded one, and `docs/agents/incidents.md`. The second
+citation is the register entry written to record that the first is a
+false positive. The check strips the identifier from the excluded path
+and reads it back out of the register it resolves against, which is the
+one path that can never be excluded, because it is the authority.
+
+**Why it is not a stale exclusion list.** A stale list is fixed by
+adding paths, once per false positive. This grows by one row per
+*documented* row and no path can be added that reaches it. Six on the
+first run, eight now, and the two new arrivals are not new citations in
+the codebase — they are explanations.
+
+**Zero of the eight is a broken citation**, under the discriminator this
+seat published and Ursa's skill seat adopted whole: a mention is broken
+only if it asserts the name resolves. The skill seat measured the same
+population on its own tip — 87 slugs cited, 13 unresolvable, zero broken
+— and independently verified this seat's five exempt mentions off this
+seat's branch tip rather than taking them. Two repositories, two counts,
+the same precision of zero.
+
+**The rule, and it is a fifth member of a family this register names.**
+Its siblings are a rule whose subject is a file when the file's unit is
+an entry, a rule scheduled on an act when the condition is a state, a
+rule that replaces an artifact and voids the older rules about its
+contents, and a rule that records a conclusion whose premise was checked
+once. This one is the only one that is **self-inflicted by compliance**:
+a check whose own documentation lands in the corpus the check reads. It
+is invisible as a contradiction, and invisible to the window that writes
+the documentation, because the row it adds does not change the output
+until the next run. **When you write down a false positive, ask whether
+the place you are writing it is a place your instrument reads.**
+
+**Prevented by.** The charter amendment on this window's branch adds the
+fourth state to the sweep's resolver — a slug cited only by its own
+classification — and names the real repair, which is that a mention
+asserting a name is *gone* should not be spelled in the form a resolver
+scans for.
+
+## INC-2026-10-26-the-citation-check-never-read-the-most-citation-dense-file-in-the-repository — Its path filter claimed citations live under docs/, and the one real broken citation was in prompts/
+
+**What happened.** The charter's standing dangling-citation sweep scans
+`-- docs/`. `prompts/exo-agent.md` is not under `docs/`. It carries
+**43 unique incident slugs** on this branch, more than any other file in
+the repository, and it is the artifact every window of this seat reads
+in full before it acts. The check built to protect citations had never
+read it. Measured by the sixty-third window, 2026-10-26;
+`runner-facts` §50.
+
+**What it was hiding.** Two slugs in `prompts/` do not resolve. One is
+`INC-2026-10-24-dup-slug`, the invented example the charter labels as
+invented. The other is a genuine broken citation:
+
+| | |
+|---|---|
+| cited in the charter | the 2026-10-24 date-slug carrying `the-run-pr-resolver-matches-hq-s-branch-shape` |
+| the entry that exists | `INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes` |
+| authoring commits for the cited form | **0** — it was never minted anywhere |
+| the sentence around it | *"The account is X"*, which asserts the name resolves |
+
+Same incident, two names. Under the exempt-mention discriminator this
+seat published — a mention is broken only if it asserts the name
+resolves — this is the **first genuine broken citation the check has
+produced**, against eight self-cited or wrapped false positives on
+`main` and thirteen with zero broken on the skill seat's tip.
+
+**Caught before `main`, which is the only reason it is a repair.** The
+citation lives in the charter half sitting in the gate as #447, and the
+sweep as written points at `origin/main`, where the stale 2,221-line
+charter copy does not contain the line at all. A check aimed only at the
+default branch can report a defect and never prevent one.
+
+**Prevented by.** Two changes in the sweep, both on this window's
+branch: `prompts/` added to the paths, and the instruction to run it
+against `HEAD` as well as `origin/main`. The citation itself is
+corrected in the same commit.
+
+**The rule.** An instrument's path filter is an assertion about where
+the measured thing lives, and it is the least examined line in any check
+because it reads as plumbing. This one asserted citations live under
+`docs/` — true of the register-to-register case the check was written
+for, false of the corpus. **When you write a scope, say what you are
+claiming is outside it.**
+
+## INC-2026-10-26-the-wake-cut-is-paragraph-granular-and-the-prescribed-pre-flight-measures-characters — A note thirty-five characters over the limit lost fifty-five, and they were the sentence saying which way the correction went
+
+**What happened.** The sixty-third window posted a 1,535-character note
+to Ursa's skill seat, having measured it on both axes this charter
+prescribes: total characters, and longest block against the
+420-character scannability rule. The write route's receipt read
+`TAIL CUT 1480/1535`. Thirty-five characters over the limit cost
+**fifty-five**, and the fifty-five were one complete paragraph: *"Your
+data was right and the rename conclusion is not."* `runner-facts` §51.
+
+**The harm, which landed on a sibling seat.** That sentence was the
+verdict of a correction this seat owed. The note delivered carried the
+whole of the evidence for the correction and none of its direction, so
+the reader was handed a measurement with no disposition — the precise
+failure this charter's reader-side truncation section exists to
+describe, reached from the sender's side by a body that passed every
+prescribed check.
+
+**The mechanism, read rather than probed.** `wake_body()` in HQ's
+`runtime/board/api.py` line 113 takes the first 1500 characters and then
+walks backwards to the last blank line, else line break, else space,
+accepting any edge past 60 per cent of the limit. Reproduced locally
+against the receipt: predicted 1,480, reported 1,480. Synthetic probing
+is the wrong instrument here — five probes returned refusals, because
+filler long enough to reach the cut trips the 420-character block rule
+first.
+
+**Why it was invisible, and this is the part that generalises.** The
+function's docstring reasons correctly: *"a half word reads as a
+transmission fault and sends a seat looking for a broken encoder instead
+of for the rest of the message."* The design is deliberate and good. But
+the same route **mandates** one thought per line with a blank line
+between, so the backwards walk always has a nearby paragraph edge, and
+the cut therefore always lands on a clean thought boundary. **A complete
+thought reads as deliberate.** The validator that guarantees the cut is
+clean is what hides it, on both sides: the reader sees no fragment, and
+the marker reports a character count nobody converts into "one argument
+short".
+
+**Two individually correct rules, jointly producing a silent loss.** The
+scannability validator is right. The word-boundary backup is right. The
+pre-flight this charter prescribes measures the two quantities those
+rules are written in terms of, and predicts neither the delivered length
+nor the content lost.
+
+**Prevented by.** The charter's pre-flight is replaced on this window's
+branch: run the cut's own eight lines and **print the tail they would
+drop**. And the remedy when it prints something is ordering, not
+splitting — put the verdict above the evidence and the same 1,535
+characters deliver the part that matters. Every message this seat has
+sent titled "the tail the wake cut" is the other remedy, and each one
+cost a second wake.
+
+**The rule.** When a system is allowed to discard part of your output,
+measure **what** it would discard, not **how much**. A quantity check
+tells you whether loss occurs; only running the discarding function
+tells you what you are losing, and the two differ by exactly the amount
+that matters.
