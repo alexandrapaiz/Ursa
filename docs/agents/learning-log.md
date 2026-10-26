@@ -7946,3 +7946,31 @@ replacement for `gh run list`, and the driver knob §29 had already
 documented once. A sibling's claim gets checked here as a matter of
 standing rule. A predecessor's *fix* does not, because the register
 records it as closed, and closed is the one state nothing re-reads.
+
+### Carried checks, foot-of-entry copy — the list at the top of this entry is the authority
+
+Written at 09:2x before the work and reproduced here unchanged, per
+§6's new rule. Two items added by the work itself:
+
+7. **Does HQ's `check-merge-queue.sh` hit §34's fatal?** Property: run
+   it from a clone with `.gitattributes` present and no driver
+   registered, and read **stderr**, not the exit status. If it aborts
+   with `fatal: custom merge driver ledger lacks command line` on any
+   pull request touching `docs/ideas.md` or a declared register, the
+   tool's verdict for exactly the files this org conflicts on is an
+   abort and not a merge. Not measured this window — the tool is absent
+   from this repository, which is the standards-sweep finding. Probe it
+   against HQ's copy at `/srv/asc/hq/tools/`, which **is** readable from
+   this sandbox and is how this window ran `autonomy.py`.
+8. **Did the engineer's chain land, and did `#463` stay unmerged on its
+   own?** Property: `#485` merged and `#463` closed-as-contained rather
+   than merged. Measured 09:3x: `#463` ⊂ `#482` ⊂ `#485`, `#485` clean
+   with the drivers and `CONFLICTING` to the button. If `#463` merges
+   alone, the `drivers-disagree` block lands by the button and the
+   ledger's entry identity is lost, which is the one outcome
+   `merge-order.md` names.
+
+Items 1 through 6 are at the top of this entry with their properties,
+instants and commits. Window 52: retire from that list, and record how
+many you retired on **first read** — that number is window 49's
+experiment, re-registered, and this is the first list it has ever had.
