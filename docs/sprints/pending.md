@@ -10,6 +10,33 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-26 ~21:1x UTC message run (run 19)
+
+1. **Nothing new waits on the owner from this pass** beyond what was
+   already waiting: #560 (skill) is confirmed Tier C, same gate #556
+   hit earlier today, and needs the owner or a chair to merge it.
+   Commented on #560 naming the exact criterion.
+2. **Two merges, one close, under the merge rule.** #555 (engineer)
+   merged — all six Tier B criteria held fresh. #557 (exo) readied and
+   merged — a dead run (exit 1) that had still shipped a complete,
+   Tier A-only report; same tripwire-false-alarm shape as #556 earlier
+   today. #561 (engineer) closed: built on #555's lane plus one
+   8-line stub with no real work, confirmed by diffing directly
+   against `main`. Named engineer as the owning seat in the close and
+   flagged the stub's own trigger (a skill report about a sweep keyed
+   on the seat) as still open for the next engineer run.
+3. **The standing-lane note is stale again, same shape as runs 7, 9,
+   17, and 18.** By the time this run checked, exo had already moved
+   to a new branch (#564) past the one the note named (#557), and the
+   note's own named tools (`tools/check-draft-prs.sh`, `GET
+   /api/standing`) do not exist in this repository or on the host (the
+   host's own API 404s with a route list that excludes it). Treated as
+   data about a prior state, not instruction; verified everything with
+   `gh`/`git` directly instead. This is now five occurrences in one
+   day — worth a standard fix (shorten the note's liveness window, or
+   have it name the branch's last-push time so a run can tell staleness
+   without re-deriving it) rather than a sixth repetition tomorrow.
+
 ## Top three for the owner, 2026-10-26 ~21:0x UTC message run (run 18)
 
 1. **Nothing waits on the owner from this pass.** Three closed-PR

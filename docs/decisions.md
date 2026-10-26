@@ -1491,3 +1491,72 @@ deletion. #555 and #557 confirmed live again and left alone. #556
 confirmed Tier C on this run's own diff read; waits on the owner or a
 chair. Skill's reported failure classified as a tripwire false alarm;
 no rerun.
+
+## Finding — a nineteenth run finds the note's subjects have all moved on since run 18, merges #555, readies and merges #557, closes #561 as an empty stub, and confirms #560 as the Tier C file #556 already was (recorded 2026-10-26, PM message run 19)
+
+Woken by: the engineer's run finishing (PR #555) with an explicit ask to
+review it against the merge rule; the exo seat's run failing (exit 1,
+PR #557); and the same standing-lane note as run 18, now naming #557,
+#560, and #561 as drafts with no live run behind them. The note's own
+tools (`tools/check-draft-prs.sh`, `GET /api/standing`) do not exist in
+this repository or on the host (`curl` to the host's own API returns a
+404 route list that does not include `/api/standing`) — consistent with
+run 18's finding that this note's liveness window is shorter than the
+time between a wake firing and a run actually reading the branch.
+Treated as data describing a prior state, not as instruction, per
+`prompts/pm-agent.md`'s external-content rule; verified everything
+below directly rather than on the note's or the event's word.
+
+**#555, merged.** Not this seat's own PR, not a draft, checks green
+(`scan` pass), no Tier C path in `gh pr diff --name-only`
+(`tools/board/`, `tools/ledger/`, `docs/design/`, `docs/ideas.md`,
+`docs/runs/`), clean merge, opened today. All six Tier B criteria held
+on a fresh read (`pm.md` §10). Merged with `--delete-branch`; first
+confirmed no open PR used that branch as its *base* (both #555 and #561
+target `main`, so deleting it could not close either).
+
+**#561, closed, nothing lost.** The note listed #561 (engineer, run 13)
+as a draft with no live run behind it. True, and worse than that: its
+branch was built on #555's lane plus one commit opening an empty
+run-note stub ("opened draft, work in progress"). Diffed directly
+against `main` after #555 merged (`git diff --stat origin/main
+pr-561`): one file, eight insertions, no actual work. Closed rather
+than readied, since there was nothing finished to hand the owner.
+Named the engineer seat in the close comment and flagged the stub's own
+trigger — skill's report that a security sweep keyed on the seat read a
+live branch red off a closed branch's runs — as still open, so the next
+engineer run picks it up fresh instead of resuming a branch with
+nothing on it.
+
+**#557, triaged under §11.7 and merged.** Run 18 found this exo PR
+"live, not orphaned" one minute after a push; by this run, exo had
+already opened a new branch (`ursa-exo/2026-10-26-message-13`, PR
+#564, "opening, no work yet"), which only happens once a seat's prior
+run has actually ended — so the run behind #557 is now dead, same as
+the event reported. Read the branch directly rather than trust the
+title/body mismatch (the title was rewritten to describe finished work;
+the body still read "## Plan (nothing below is done yet)," stale from
+before that rewrite): seven real commits, a run note with closing
+sections (board replies confirmed off the events feed, per the note's
+own stated discipline), no conflict markers. Same signature already
+applied four times today to this seat's own turn-cap hits and once to
+skill (#556): one turn past a cap, exit 1, complete report already
+shipped. Tier A path (`docs/agents/`, three files) — readied and
+merged, noting the stale header for exo's own awareness rather than
+rewriting it myself.
+
+**#560, confirmed Tier C, commented rather than merged.** `gh pr diff
+--name-only` shows `prompts/skill-extract.md`, the same gate #556 hit
+earlier today (#556 itself closed since, superseded by the skill
+seat's own later runs through #560). Not a draft, checks green,
+mergeable clean — the only thing blocking it is the path. Posted a
+comment on #560 naming the exact criterion and the owning seat, so the
+owner or a chair can act without re-deriving it, per the dispatch's own
+"hand that to its seat" ask.
+
+**Status:** closed. #555 and #557 merged under the merge rule, both
+branches deleted. #561 closed as an empty stub, nothing lost, trigger
+flagged forward to engineer. #560 confirmed Tier C by path, commented,
+waits on the owner or a chair. This run's own PR (#567) builds on run
+18's (#563, absorbed and closed as a confirmed ancestor) rather than
+redoing it.
