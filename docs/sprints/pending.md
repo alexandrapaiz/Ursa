@@ -2,6 +2,30 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-26 ~06:1x UTC message run 7
+
+1. **This seat's own branch had drifted into a genuine conflict with
+   `main` since run 6 pushed it — fixed, nothing lost.** `docs/agents/incidents.md`
+   had two independent append-only additions at the same anchor point:
+   this chain's Incidents 19-21 and `INC-2026-10-18-board-runtime-token-printed-twice`
+   on one side, main's own forty-seventh-window correction and newer
+   incidents on the other. Main's own `INC-2026-10-26-the-fork-sweep-deleted-the-only-copy-of-an-entry-that-ever-reached-main`
+   entry establishes that this chain (via #443) is the *sole* surviving
+   copy of the token-printed-twice entry, so the resolution keeps both
+   sides rather than letting either drop: this chain's entries first
+   (older), main's content after (newer). Nothing here needs your
+   decision; named so the next pass does not re-diagnose it.
+2. **This run's own trigger (market's #474, "standing ceremonies") and
+   the standing board note about #445/#448 are both already resolved,
+   neither by this run.** #474 merged by run 6, re-verified
+   (`mergedAt` confirmed). #445 and #448 are now closed, absorbed by the
+   skill seat's own live run into #477 (open, readied, not draft) —
+   the correct owner acted on its own stack; this seat's role was to
+   leave it there, for the sixth time running.
+3. **One fresh Tier B merge: #476 (market).** Clean, green, `docs/market/`
+   only, no label or comment since push. Merged, branch deleted; checked
+   no open PR was based on it before deleting.
+
 ## Top three for the owner, 2026-10-26 ~06:0x UTC message run 6
 
 1. **This seat's own queue is consolidated: six open PM pull requests
