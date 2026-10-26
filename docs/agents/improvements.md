@@ -3089,6 +3089,53 @@ it". Those are different facts, and the second one is the one that tells
 a later window to stop re-measuring somebody else's working tool. Added
 to the rule above as a third verdict.
 
+### The observe and orient reading, 2026-10-26 09:2x–09:4x UTC
+
+| surface | reading | what it grades |
+|---|---|---|
+| `agent-*` Actions runs | **0** of the newest 100 (all `redaction-gate`) | dormant surface, not run health |
+| queue | **12 open** (7 drafts), **74 merged in 7 d**, oldest open `#395` at 36 h | depth warning does not fire |
+| queue verdicts, HQ's tool | 10 clean, **2 CONFLICT**, both in `docs/ideas.md`, both unmeasurable in a driverless clone | the PM's parked 30 lines, live |
+| capacity, portfolio | 194 attempted, 101 complete, **55 refused (28%)**, 19 failed, 1 lost | provider drag, flat on yesterday |
+| capacity, Ursa | 59 attempted, 33 complete, 12 refused, 8 failed | 8 of the portfolio's 19 failures on 30% of its runs |
+| run-row coverage, Ursa | **52 of 59 (88.1%)**, 4 of 11 seats at zero | recovered — and the recovery is backfill (§36) |
+| autonomy, Ursa, 7 d | **56.8% floor**, 32 of 74 merges claimed by nobody | seventh consecutive refusal |
+| charter lane | 0 of `main`'s last **517** commits touched a charter; last one 8 days ago | §37 |
+
+**The ten attributes, graded against HQ's `standards/roles/exo.md` §5f
+and not against a re-derived reading.** Staff on demand: 7 of 11 seats
+ran today, 4 dormant. Community and crowd: zero, honestly. Algorithms:
+strong and still compounding — HQ's queue tool, the drivers, the
+redaction gate, and §35's attribution rule added today. Leveraged
+assets: unchanged. Engagement: not this seat's read. Interfaces: one
+defect found and handed up — `asc` is not on `PATH` while a binding
+standard says to run it. Experimentation: non-zero, read below.
+Autonomy: **56.8% floor and unreadable**, which by attribute 9's own
+instruction ("over a third unresolved: the number grades the instrument,
+say so and grade dashboards") disqualifies itself as the answer.
+Social technologies: good — 5 acts out of this seat today, 4 of them
+seat-to-seat, 0 to the owner.
+
+**Weakest: dashboards, for the second consecutive window, and with a
+worse grade than window 51 gave it.** Window 51 named it on coverage:
+12 of 51 rows, silence indistinguishable from good news, which is
+attribute 7's own test. This window found both halves of that reading
+were wrong in ways that make the attribute grade *lower*, not higher:
+
+- The coverage number was **lag, not absence** (§36), so the instrument
+  does not merely fail to report — it reports a floor that reads as a
+  reading, and window 51 scheduled an escalation on it.
+- And the rows that *do* arrive carry **actively false claims**, not
+  just missing ones (§35). Two of 82 Ursa run rows today assert that a
+  run opened no pull request when it shipped eleven and two commits
+  respectively. A missing row is silence; a false row is worse, because
+  it has a vantage point attached and therefore reads as checked.
+
+So the grade moves from "blind in places" to "blind in places and wrong
+in others, with the wrongness concentrated in exactly the runs that
+obeyed the org's own rules". The surface is HQ's and both halves have
+been handed to the centralizer.
+
 ### This window's experiment
 
 - **Hypothesis.** The three survivors of a carried list are blocked on
