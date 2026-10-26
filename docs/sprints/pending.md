@@ -2,6 +2,58 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-26 ~09:2x UTC message run (8th)
+
+1. **#483 (market) merged under Tier B this pass.** Not a draft, no
+   hold, checks green, `MERGEABLE`, diff limited to one new
+   `docs/market/briefs/` file. The dispatch that woke this run asked
+   this seat to check #483 against the merge rule and act; it checked
+   out clean on every Tier B condition, so it is merged rather than
+   left for a verdict.
+2. **#486's redaction-gate failure is already fixed, not still red.**
+   The run that opened #486 re-leaked the same session UUID it was
+   quoting while describing #484's finding, the gate caught it (run
+   `40297505887`), and the very next commit on that branch truncated
+   it to 8 characters. `gh pr checks 486` now reads `scan pass`. The
+   dispatch naming this failure is answered: nothing left to fix, and
+   #486 itself (this seat's own standup PR, Tier A, green, not a draft)
+   still waits on a merger other than this seat under this run's own
+   instruction not to merge its own pull request. Whoever merges next
+   (the owner, or another seat empowered to under §10) can take it as
+   it stands.
+3. **Five open drafts checked against the merge rule; none ready to
+   ready-and-merge this pass, each for a different reason, named so
+   the next reader does not re-derive it:**
+   - **#461 (security)** — real work, not a stub: touches
+     `ursa-major/src/publish.ts` and its test plus a new audit file,
+     but `mergeable: CONFLICTING` in a product file, not docs-only, so
+     this seat cannot resolve it in code (pm.md §10, Tier B condition
+     5). Handed to security on the board to rebase and finish; its own
+     checklist is still unchecked, so it also is not done.
+   - **#463 and #482 (engineer)** — both clean and green in isolation,
+     but superseded in place: #485, this same seat's live draft
+     updated one minute before this check, says explicitly "this pull
+     request replaces #482 and #463... will be closed pointing at this
+     one." Merging either now would just be redone by that seat's own
+     collapse. Left alone; not this seat's stack to preempt.
+   - **#484 (frontend)** — the live redaction-gate leak #486 already
+     flagged (`docs/design/reviews/2026-10-26c/data/state-panel-synced.mjs:26`,
+     a full session UUID). Checked again rather than trusted from
+     memory: there is a `redaction-gate` run `in_progress` on this
+     exact branch right now, started the same minute as this check, so
+     the owning seat is actively fixing the thing this seat flagged.
+     Left alone for that reason, not re-flagged.
+   - **#481 (exo)** — clean, green, scoped to `docs/agents/` only
+     (Tier B, no `prompts/` path, no workflow, no product code), but
+     its own plan list has three of four items still unchecked
+     ("Observe/Orient", this window's register entries, the HQ send)
+     and its own body says "Body replaced as the work lands," which
+     this seat reads as still being worked rather than finished and
+     left unready. No Actions run is `in_progress` on it, but exo's
+     host-window runs would not show there either, so absence of an
+     Actions job is not proof the run ended. Left as a draft for the
+     exo seat to ready.
+
 ## Top three for the owner, 2026-10-26 ~09:0x UTC hook run
 
 Standup (ceremony already done today, run fb9d779/#460, folded into
