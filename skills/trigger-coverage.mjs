@@ -66,6 +66,7 @@
 // should add the field, and this comment is the argument it has to beat.
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { unreadDirs, indexedRows } from './library-dirs.mjs'
 
 const SKILLS_DIR = new URL('.', import.meta.url).pathname.replace(/\/$/, '')
 
@@ -278,6 +279,21 @@ function main(argv) {
   const check = argv.includes('--check')
   const library = readLibrary()
   const missingTrigger = library.filter((s) => s.trigger === null)
+  // The other half of §2, which this tool reported for one file and dropped in
+  // silence for the other until 2026-10-26. `readLibrary` above still skips a
+  // directory with no SKILL.md, because every pair computed below needs a
+  // description to compare; the skip is now named instead of implied.
+  const missingSkill = unreadDirs(SKILLS_DIR)
+  // And the index, in both directions. A row pointing at a directory that is
+  // not there, and a skill directory no row points at, are the same defect
+  // read from the two ends; the second one shipped here for three runs.
+  let indexRows = []
+  try { indexRows = indexedRows(readFileSync(join(SKILLS_DIR, 'README.md'), 'utf8')) } catch { indexRows = [] }
+  const mislabelled = indexRows.filter((r) => r.label !== r.dir)
+  const slugs = new Set(library.map((s) => s.slug))
+  const listed = new Set(indexRows.map((r) => r.dir))
+  const indexedMissing = indexRows.filter((r) => !slugs.has(r.dir)).map((r) => r.dir)
+  const unlisted = library.filter((s) => !listed.has(s.slug)).map((s) => s.slug)
   const pairs = coverage(library)
   const covered = pairs.filter((p) => p.covered)
   const gaps = pairs.filter((p) => !p.covered)
@@ -308,6 +324,12 @@ function main(argv) {
   }
   console.log('')
   for (const s of missingTrigger) console.log(`no TRIGGER-TEST.md: ${s.slug}`)
+  for (const d of missingSkill)
+    console.log(`no SKILL.md: ${d.slug}${d.nearMiss ? ` (it holds ${d.nearMiss})` : ''}` +
+      ` — nothing in this library reads this directory`)
+  for (const r of mislabelled) console.log(`index row labelled ${r.label} points at ${r.dir}/`)
+  for (const d of indexedMissing) console.log(`index lists ${d}, which is not a skill directory`)
+  for (const s of unlisted) console.log(`not in the index: ${s}`)
 
   // Three states, not two, because they call for different work. A boundary
   // carrying the sibling's own trigger prompt is what §5c asks for. One only
@@ -321,6 +343,15 @@ function main(argv) {
   console.log(`  ${asked.length} carry the sibling's own trigger prompt, which is what §5c asks (${pct(asked.length, pairs.length)}%)`)
   console.log(`  ${argued.length} argue the boundary in prose without it`)
   console.log(`  ${gaps.length} untested`)
+  // A shape defect is not a §5c gap and does not wait for --check. A directory
+  // no guard reads and an index that disagrees with the directory listing are
+  // both facts about whether this library is the set of things it says it is,
+  // and neither is a judgement call the caller can be given a flag for.
+  const shape = missingSkill.length + mislabelled.length + indexedMissing.length + unlisted.length
+  if (shape) {
+    console.log(`${shape} library-shape defect${shape === 1 ? '' : 's'} above, listed before the counts.`)
+    return 1
+  }
   if (gaps.length === 0 && missingTrigger.length === 0) {
     if (!argued.length) console.log('every skill meets §5c')
     return 0
