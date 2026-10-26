@@ -12,11 +12,27 @@
 // installed without the `workflows` permission the runner does not have.
 //
 // What it does NOT do: define the rules. The workflow is the authority.
-// This script reads the patterns out of the workflow and shells out to the
-// same `grep -rInE`, so there is nothing here to drift. If the workflow
-// changes shape so that the patterns cannot be found, this exits 2 and
-// says so, rather than passing an empty set of checks and reporting
-// clean. A checker that can silently become a no-op is worse than none.
+// This script reads the patterns, the exclusions, the allowance AND the
+// grep flags out of the workflow, so there is nothing here to drift. If
+// the workflow changes shape so that any of them cannot be found, this
+// exits 2 and says so, rather than passing an empty set of checks and
+// reporting clean. A checker that can silently become a no-op is worse
+// than none.
+//
+// The flags were hardcoded as `-rInE` until 2026-10-26 run 13, and the
+// paragraph above claimed they were read. That was the drift this file
+// exists to prevent, arriving in the one field nobody was watching: `-I`
+// tells grep to treat a binary file as if it held no match, PWC-13 asks
+// HQ to drop it, and on the day it lands a checker with its own `-I`
+// reports clean on a tree the gate rejects. Verified both ways against a
+// one pixel PNG carrying a fabricated path and identifier.
+//
+// The second half of the same defect: GNU grep announces a binary hit on
+// standard error and prints nothing on standard output, so reading only
+// standard output catches nothing even with the right flags. Both streams
+// are read now, the notice is turned into a location-only finding, and
+// anything else grep says on standard error exits 2 rather than being
+// swallowed, because a partial scan is not a clean one.
 //
 // What it still cannot do, both inherited from the gate and queued as
 // PWC-8: it reads the working tree and not history, and its allowance is
@@ -35,7 +51,7 @@
 //
 // No dependencies, no network.
 
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -81,6 +97,20 @@ function readGate() {
   );
   if (pairs.length === 0) stale('found no `scan "label" \\ \'pattern\'` calls');
 
+  // The flag cluster the gate passes to grep. Read, never assumed: see the
+  // header. `r`, `n` and `E` are required because this script parses
+  // `file:line` out of the output and hands the gate's own extended
+  // regular expressions to it, so a gate that dropped one of the three
+  // would make this script's parsing wrong rather than merely stale.
+  const flagMatch = yml.match(/\bgrep\s+(-[A-Za-z]+)\s+"\$pattern"/);
+  if (!flagMatch) stale('found no `grep -<flags> "$pattern"` invocation');
+  const flags = flagMatch[1];
+  for (const required of ['r', 'n', 'E']) {
+    if (!flags.includes(required)) {
+      stale(`the gate's grep flags \`${flags}\` no longer include -${required}`);
+    }
+  }
+
   const excludeDirs = [...yml.matchAll(/--exclude-dir=([^\s\\]+)/g)].map(([, d]) => d);
   const excludeFiles = [...yml.matchAll(/--exclude=([^\s\\]+)/g)].map(([, f]) => f);
   if (excludeDirs.length === 0) stale('found no --exclude-dir arguments');
@@ -89,21 +119,55 @@ function readGate() {
   const allowMatch = yml.match(/grep\s+-vE\s+'([^']+)'/);
   if (!allowMatch) stale("found no `grep -vE '<allowance>'` filter");
 
-  return { pairs, excludeDirs, excludeFiles, allowance: allowMatch[1] };
+  return { pairs, flags, excludeDirs, excludeFiles, allowance: allowMatch[1] };
 }
 
 // `grep` exits 1 when it matches nothing, which is not an error here.
-function grepLines(args) {
-  try {
-    return execFileSync('grep', args, {
-      cwd: SCAN_ROOT,
-      encoding: 'utf8',
-      maxBuffer: 64 * 1024 * 1024,
-    });
-  } catch (err) {
-    if (err.status === 1) return '';
-    throw err;
+//
+// Both streams, because a binary hit is announced on standard error and
+// produces no line on standard output. `LC_MESSAGES=C` so the notice is
+// the English sentence this parses and not a translation of it.
+const BINARY_NOTE = ': binary file matches';
+
+function grepStreams(args) {
+  const res = spawnSync('grep', args, {
+    cwd: SCAN_ROOT,
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+    env: { ...process.env, LC_MESSAGES: 'C' },
+  });
+  if (res.error) throw res.error;
+  if (res.status !== 0 && res.status !== 1) {
+    // grep's 2 is "an error occurred", which with a readable tree means a
+    // bad pattern or a bad flag, both of which come from the gate.
+    stale(`grep exited ${res.status}: ${(res.stderr ?? '').trim().split('\n')[0]}`);
   }
+
+  // `grep: ./x.png: binary file matches` carries the path, no line number
+  // and no matched text, which is exactly the location-only shape the
+  // redaction standard asks for. Synthesise it into the `file:line:text`
+  // shape the rest of this script already handles, with `-` for the line.
+  const binary = [];
+  const unexplained = [];
+  for (const line of (res.stderr ?? '').split('\n')) {
+    if (line === '') continue;
+    if (line.endsWith(BINARY_NOTE)) {
+      const body = line.slice(0, -BINARY_NOTE.length);
+      const sep = body.indexOf(': ');
+      binary.push(`${sep === -1 ? body : body.slice(sep + 2)}:-:binary file matches`);
+    } else {
+      unexplained.push(line);
+    }
+  }
+  if (unexplained.length > 0) {
+    // Measured over this whole repository on 2026-10-26, all three gate
+    // patterns, no -I: zero lines. So this is not a channel that is noisy
+    // in normal use, and a line here means part of the tree went unread.
+    stale(`grep wrote to standard error: ${unexplained[0]}`);
+  }
+
+  const stdout = res.stdout ?? '';
+  return binary.length === 0 ? stdout : stdout + binary.join('\n') + '\n';
 }
 
 // Hits in files git ignores, dropped.
@@ -161,11 +225,11 @@ function run() {
   let skipped = 0;
 
   for (const { label, pattern } of gate.pairs) {
-    const args = ['-rInE', pattern, '.'];
+    const args = [gate.flags, pattern, '.'];
     for (const d of gate.excludeDirs) args.push(`--exclude-dir=${d}`);
     for (const f of gate.excludeFiles) args.push(`--exclude=${f}`);
 
-    const raw = grepLines(args);
+    const raw = grepStreams(args);
     if (raw === '') continue;
 
     // Apply the gate's own allowance with the gate's own tool, so the
