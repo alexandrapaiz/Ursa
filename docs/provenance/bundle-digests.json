@@ -573,6 +573,19 @@
           "subject": "three ledger entries and the craft scan, plus the date in four comments"
         }
       ]
+    },
+    {
+      "digest": "65c6e9d0eec9ac5a",
+      "sha256": "65c6e9d0eec9ac5af31feb8e32d797bfe2e9444610d31a14f9417902e0b3f44d",
+      "blob": "d185c36d6f17405c5a9bfdad96217495886bbe67",
+      "bytes": 308437,
+      "introducedBy": [
+        {
+          "commit": "e9f5257b6edf88717b4db11f354bfd643c8091ba",
+          "date": "2026-10-26T09:23:26.000Z",
+          "subject": "security: the publish path built its output paths from an unchecked id"
+        }
+      ]
     }
   ]
 }
