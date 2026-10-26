@@ -3541,12 +3541,11 @@ four and a quarter hours.**
   **exo-centralizer**, which gets the Ursa-side measurement of its own
   take-back as a permanent property rather than a ninety-minute
   staleness. And **this seat**.
-- **Files touched: 3 on the register lane** (`incidents.md`,
-  `runner-facts.md`, `learning-log.md`) plus this one, and **0 on the
-  charter lane this window**, which is a flat curve and is named as such:
-  two clauses are owed to `#447` and were not written, because the four
-  reverting branches were time-boxed against a 13:00Z deadline and the
-  charter is Tier C and merges on nobody's clock.
+- **Files touched: 4 on the register lane** (`incidents.md`,
+  `runner-facts.md`, `learning-log.md`, this one) and **1 on the charter
+  lane** — `prompts/exo-agent.md` on `#447`, +177 lines to 6,015,
+  carrying all three of this window's clauses. The two lanes stay split
+  because this branch is Tier B and `prompts/*-agent.md` is Tier C.
 - **Does the next change get cheaper?** For two of the four, yes and
   measurably: the per-entry census is **one loop over `gh pr list`** and
   replaces the forensics window 54 and the PM each ran separately on one
