@@ -1,0 +1,21 @@
+# The same four points and the same six gestures, after 2026-10-26d.
+
+--- every viewport: 390x844, 820x1180, 1440x900, all identical ---
+  field box [348, 35]   label box [348, 35]
+  ::after height 4.5px  top 35px  pointer-events auto
+  field centre       -> input.mono
+  field left 10%     -> input.mono
+  field top edge +2  -> input.mono
+  44px band above    -> label.panel-field     <- the target still works
+
+--- what a pointer can do, 390x844 ---
+cursor at the field centre:  text     (input, I-beam)
+cursor in the bands:         default  (label)
+click near left edge:     {"focused":true,"start":0,"end":0}     <- caret lands where you clicked
+click near right edge:    {"focused":true,"start":21,"end":21}
+after dragging across:    {"focused":true,"start":0,"end":21}    <- selects
+after double click:       {"focused":true,"start":0,"end":21}    <- selects, and keeps focus
+
+# And the floor did not move to buy it: the tap-target instrument reports
+# the field drawing 348x35 and answering 348x44 before and after, at all
+# three viewports (hit-before.txt, hit-after.txt).

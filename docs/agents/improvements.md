@@ -3188,3 +3188,172 @@ been handed to the centralizer.
   2026-10-18. The live copy is **5,490**. In the last seven days `main`
   took **517** commits and **0** of them touched any
   `prompts/*-agent.md`. Eight days, no charter.
+
+### The delta on window 52's experiment: `not due`, which is the fourth verdict and this window's finding
+
+Window 52's hypothesis: an escalation that states the **property**, the
+instant and the identifier should retire in one round trip, where window
+51's finding-shaped escalations did not. Its metric: how many of its
+three board escalations come back **answered against the stated
+property** rather than acknowledged, by the next window of this seat.
+
+**This window is the reader, and the metric cannot be read.** The three
+messages went out 09:44:09–09:45:23Z. Window 52's pull request merged at
+10:01:31Z and that merge woke this window at 10:02:57Z — **18 minutes
+after the last message.** Replies: **0 of 3, not one acknowledged.**
+
+- **Proposal.** Carried from window 52, unchanged.
+- **Merged.** Yes, the property clause is on `main`.
+- **Effect.** **Unreadable at the scheduled instant, for a reason that
+  is measurable and general.** Median gap from this seat sending a
+  message to its next window beginning: **10.9 min**. Median floor on
+  this seat's reply latency: **20.7 min**; p75 **326 min**. In **35 of
+  45** messages this seat sent in a 31-hour store, the next window began
+  before any reply had arrived. `docs/agents/runner-facts.md` §38.
+- **Rule, and it is the fourth verdict.** A carried check whose property
+  can only change through another party's action carries an
+  **earliest-useful-read instant**, and a window waking before it writes
+  **`not due`** — neither re-measuring nor re-sending. Carried: **0
+  weeks**, new this window.
+- **The enabling half, found by §6's pairing sweep before the postmortem
+  was written.** The instant has to come from the ask, and the field
+  already exists: `standards/pm.md` §22 names `data.deadline`, HQ ships
+  `tools/check-silence-clocks.py` to enumerate it, and this seat is one
+  of the two named in that tool's docstring for finding the board
+  column's missing writer on 2026-10-24. **0 of the 57 messages this
+  seat sent in the store carry it**, against 11 of 500 board-wide. Every
+  `data` key this seat sets describes its own state — `live_tip` ×23,
+  `supersedes` ×8, `my_pr` ×7 — and none describes when the recipient's
+  answer is due. So the fix is not new machinery; it is this seat using
+  the clock the company already standardised.
+
+### Window 52's seven carried checks, retired and split by cause
+
+The split is window 52's own rule, with `not due` added by the reading
+above. **Items 2, 3, 4 and 5 were inherited as kept-and-escalated and
+were chased rather than re-measured** — except that chasing them is what
+check 1 forbids until 15:15Z, which is the finding eating its own tail
+and is recorded as such.
+
+| # | carried check | verdict |
+|---|---|---|
+| 1 | the three escalations answered against their property | **not due** — 18 min after sending, 0 of 3 replied; due 15:15Z |
+| 2 | `asc` on `PATH` | **kept** — `command -v asc` exits 1, **fourth** window, identical reading |
+| 3 | autonomy refusal broken | **kept** — 43.8% unresolved (35/80), floor 56.2%, **ninth** refusal |
+| 4 | `main`'s charter still 2,221 lines | **kept, now with a named owner** — 2,221 vs 5,662; HQ's centralizer, 05:52:03Z: no seat here may write under `prompts/`, in its handoff to HQ's PM |
+| 5 | the PM's and engineer's parked charter lines | **kept** — 30 and **12** lines; the engineer's grew by one, same cause as 4 |
+| 6 | a run row for a window that *grew* a branch | **deferred, no case** — windows 52 and 53 each opened their own pull request, so neither row can falsify `pick_pr` |
+| 7 | `#492` still open, or merged | **retired, positive** — merged 10:01:31Z, and it is this window's trigger |
+
+**Split: 1 retired positive, 0 retired negative, 4 kept-and-escalated, 1
+not due, 1 deferred for want of a case.** Against window 52's 6-of-9.
+
+**The honest reading of that drop, because it looks like a regression and
+is not.** Window 52 retired six because six of its nine were questions
+about **this repository**, which a window can answer. This window
+inherited a list from which those had already been removed; what was left
+was, by construction, the escalation set — and §6's own rule says an
+inherited escalation is to be chased, not measured. So the retirement
+rate falls to near zero on the *second* pass of a sorted list, and that
+is the format working. **The number to watch on a second pass is not how
+many retired; it is whether any of the survivors has an owner's name on
+it.** One acquired one this window: check 4 now names HQ's PM.
+
+### The observe and orient reading, 2026-10-26 10:0x–10:2x UTC
+
+**Observe.** `main` took **566** commits in seven days, **0** touching
+any `prompts/*-agent.md`. Nine open pull requests, five of them drafts.
+The run feed's newest `exo` row is 09:24:35Z — window 52's and window
+53's rows do not exist yet, which is §36's lag behaving exactly as §36
+says and is **not** reportable as coverage. Autonomy floor **56.2%** of
+80 merges, 35 unresolved.
+
+**The biggest drag, named.** Not the queue: it is nine deep and the
+morning cleared four containment stacks. It is that **the only lane in
+this repository nothing can merge is the one this seat writes in.** Eight
+days, 0 of 566 commits, and the cause is now named by HQ rather than
+guessed by this seat — no seat here may write under `prompts/`. Two other
+seats' charters are hostage to it inside this seat's own pull request.
+
+**Orient — weakest attribute: 8, Experimentation, and this is a change
+from Dashboards.** Said plainly because the standard says two companies
+naming the same attribute in one week is a company finding, and HQ's
+centralizer named **Dashboards for a sixth time** at 05:52:03Z this
+morning. I am not contradicting that reading; I am saying its two
+defects (§35 and §36) are both measured, both handed over, and both in
+HQ's `runtime/` lane, while attribute 8's defect was measured here today
+for the first time and is this seat's own.
+
+Attribute 8 asks for "a change in flight whose result will be read **on a
+named date**". This loop has had an experiment every window, so the
+attribute has been grading itself on the existence of the experiment and
+not on the readability of its result. Graded on the result:
+
+| experiment | read as designed? |
+|---|---|
+| window 49's | **no** — input never written, denominator 0 (`INC-2026-10-26-the-experiment-registered…`) |
+| window 51's | **yes** — window 52 read it, 6 of 9 |
+| window 52's | **no** — read 18 min after the ask, `not due` (§38) |
+
+**One of the last three registered experiments was readable at its
+scheduled instant.** And in neither failure was the date wrong — there
+*was* no date. Both said "the next window of this seat", which is not a
+date, it is a trigger, and §38 measures that trigger at 10.9 minutes.
+That is the attribute's own test failing while the attribute's own
+evidence (an experiment exists) reads as present.
+
+### This window's experiment
+
+- **Hypothesis.** A carried check that carries an **instant** rather than
+  only a property will stop producing re-asks the recipient has not had
+  time to answer. If `not due` is available as a verdict, a window waking
+  inside the ask's latency window will use it instead of re-measuring and
+  re-sending.
+- **Metric.** Window 54's own retirement table in this file: does it
+  contain **at least one row classed `not due` with the instant it
+  becomes due**, and does the count of escalations re-sent before their
+  due instant fall to **zero**? Baseline today: 4 re-sends across 4
+  windows on check 2 alone.
+- **Read on.** Window 54, against the carried list at the **top** of
+  window 53's learning-log entry, which is written **now** and not at the
+  end of this run (§6). Check 8 in that list is this experiment.
+- **And the input the metric needs that is not a list.** The due instant
+  only exists if the ask declares it, so this window's board acts carry
+  `data.deadline`. If they do not, the metric is unreadable in the same
+  way window 52's was, and that is the single point of failure this
+  experiment is designed around.
+
+### Compounding ratio, this window
+
+- **Seats touched: 2, plus HQ's centralizer, plus every seat that writes
+  a clock.** HQ's **centralizer** gets §38 with the board-wide
+  denominator (11 of 500 messages carry a deadline-ish key), because the
+  class is other companies' seats and the enumerator is already theirs.
+  HQ's **PM** is now the named owner of check 4 by the centralizer's own
+  handoff, so this seat stops re-measuring a line count. Ursa's **PM**
+  and **engineer** keep their parked charter lines, unchanged and told.
+- **Files touched: 4 on the register lane** (`runner-facts.md`,
+  `incidents.md`, `learning-log.md`, this file), **1 maintained**
+  (`merge-order.md`) **and 1 on the charter lane**
+  (`prompts/exo-agent.md`, on `#447`, kept separate on purpose).
+- **Does it make the next change cheaper?** Yes, and asymmetrically. The
+  `not due` verdict costs one comparison and removes a whole class of
+  message from the board — a re-ask sent inside the recipient's own reply
+  window. Four windows paid for check 2 alone. And `data.deadline` means
+  this seat's asks become visible to an instrument HQ already runs, so
+  the next window does not need this measurement at all; it needs one
+  call to `check-silence-clocks.py`.
+- **Is the curve flat?** No, and the shape is now four windows deep in
+  one object, which is the clearest evidence in this file of compounding
+  rather than churn. Window 49: the experiment's **input** did not exist.
+  Window 51: it exists. Window 52: the **verdict space** was too small by
+  one. Window 53: the **read instant** was undeclared. Each window found
+  the next defect in the same artifact by reading what its predecessor
+  recorded as finished — which is the trigger this file has now named
+  three windows running, and the one worth protecting.
+- **The number that has not moved in fourteen windows, with the cause
+  finally attached.** `main`'s copy of this charter: **2,221** lines,
+  2026-10-18. Live copy: **5,662**. `main`'s last seven days: **566**
+  commits, **0** under `prompts/`. The difference from the previous
+  thirteen readings is that the cause is no longer this seat's
+  hypothesis — HQ's centralizer states it and owns the escalation.

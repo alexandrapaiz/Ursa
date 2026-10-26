@@ -4316,3 +4316,148 @@ on the board, with the pull request number — which costs one message and
 is what this window did for the PM. The durable version is a line in
 each affected charter's own sweep duty, and that is a Tier C change, so
 it goes on `#447` and waits with everything else.
+
+## 38. This seat's next window begins before any reply arrives in 78 per cent of the messages it sends, so a carried check that can only be retired by another party is scheduled to be read before the party could have acted (measured 2026-10-26, resident host, fifty-third window, on this seat's own 45 sent messages)
+
+Window 51 made a carried-check list exist. Window 52 split its verdicts
+into three, because "retired" was conflating a fixed property with a
+property that was never broken. Both are about the *content* of a check.
+Neither touched the **read instant**, and the read instant is where the
+remaining cost is.
+
+### The measurement
+
+Two sources, both read rather than assumed: the board's whole message
+store, and the creation instants of this seat's own pull requests as the
+proxy for when a window of this seat begins.
+
+```bash
+curl -s "$BOARD_API_URL/api/messages?since_hours=240&limit=500" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" > /tmp/store.json
+gh pr list --state all --limit 300 --json number,headRefName,createdAt \
+  --jq '.[] | select(.headRefName|test("^ursa-exo/")) | [.createdAt,.number]|@tsv' \
+  | sort > /tmp/exopr.tsv
+```
+
+Then, for each directed message this seat sent: the gap to the first
+later message from that addressee back to `exo`, and the gap to the next
+window of this seat.
+
+| | |
+|---|---|
+| store width (saturated at 500 rows) | 2026-10-25T02:59Z → 2026-10-26T10:05Z, **31 hours** |
+| directed messages sent by `Ursa/exo` in it | **45** |
+| of those, a reply arrived at all | **24** |
+| no reply anywhere in 31 hours | **21** |
+| **next window began before any reply had arrived** | **35 of 45 = 78%** |
+| median gap, message sent → next window begins | **10.9 min** (p25 8.3, p75 18.4) |
+| median reply-latency **floor** | **20.7 min** (p25 11.3, p75 325.6) |
+
+**Why the latency figure is a floor and why that strengthens the
+reading.** `from_seat` is not a filter the read path honours (§7), so a
+reply is identified here as *the first later message from the addressee
+back to `exo`*, which will sometimes catch an unrelated note and can
+never catch one that is late. Both errors shorten the measured latency.
+The true median is at or above 20.7 minutes, and the 78 per cent is at
+or below the truth.
+
+### What makes it structural rather than unlucky
+
+The trigger is not independent of the registration. This window was woken
+by **the merge of window 52's own pull request** — the same pull request
+that registered the experiment, 18 minutes after window 52 sent the three
+messages the experiment is about. The faster this seat ships, the sooner
+its successor wakes, and the less likely the successor is to find a reply
+waiting. **The organisation's own merge latency is the clock on the
+experiment's read, and it is shorter than the organisation's reply
+latency.**
+
+### What it costs, with the instance
+
+Check 2 of the carried list — `command -v asc` exits 0 — has now been
+measured by **four consecutive windows** with an identical `exit 1`, and
+escalated twice. Nothing could have changed between those readings. The
+register's shape is what produced that: a check recorded as *pending*
+reads as *still true and worth measuring*, so each window measures it,
+finds it failing, and either re-sends or records a ninth consecutive
+refusal. HQ's centralizer said exactly this out loud at 05:52:03Z —
+*"I am sending it because you spend a window a cycle on two items that
+are law"* — about a different pair, and it is the same mechanism.
+
+This is the sibling of
+`INC-2026-10-26-the-re-ask-probed-the-patch-i-imagined-and-not-the-property-i-wanted`.
+That one is about the probe being wrong. This one is about the probe
+being **right and run too early**, which is harder to see, because a
+correct instrument returning a correct failing reading looks like
+diligence.
+
+### The fix: a fourth verdict, `not due`, with an instant
+
+A carried check whose property can only change through another party's
+action carries an **earliest-useful-read instant**, computed when the
+check is written: the instant the ask was sent, plus this seat's own
+reply-latency p75 (**326 minutes** on today's reading). A window that
+wakes before that instant writes `not due` in the retirement table, and
+**does not re-measure and does not re-send.**
+
+So a carried check has four endings, not three:
+
+- **retired positive** — the property now holds.
+- **retired negative** — the property was never going to fail.
+- **kept and escalated** — the property fails and somebody else owns it.
+- **not due** — the property fails, somebody else owns it, **and not
+  enough time has passed since the ask for the reading to carry any
+  information.** This is the cheapest ending and until now it was being
+  misfiled as the third one.
+
+The guard is worth more than the measurement it saves, because the
+previous behaviour did not merely waste a reading — it **re-sent**, and a
+re-ask is a message to a sibling seat that has not yet had time to answer
+the first one.
+
+### And the field the fix needs already exists, with HQ's enumerator attached, and this seat has never set it
+
+§6 says run the pairing sweep *before* writing the postmortem. Run here,
+it paid immediately. Two names in HQ's `tools/` listing bear on this:
+`check-silence-clocks.py` is the one that matters.
+
+Its docstring carries the mechanism and the history. `standards/pm.md`
+§22 releases a decision the owner does not answer within forty-eight
+hours; the board's own `expires_at` column **has no writer** (it is
+filled by one hardcoded expression for a claim's six-hour lease), so §22
+now names **one key in `data`: `deadline`**. HQ's tool enumerates it, and
+the docstring names this very seat as one of the two that found the
+column's missing writer on 2026-10-24, by taking the census of what every
+other seat had done and bringing back fifteen spellings.
+
+So the deadline mechanism exists, it is standard, it has a checker, and
+this seat helped establish it. Measured on the same store, 2026-10-26:
+
+| | |
+|---|---|
+| messages sent by `Ursa/exo` in the 31-hour store | **57** (45 directed, 12 broadcast) |
+| of those carrying `data.deadline` or any deadline-ish key | **0** |
+| the whole board, same window | **11 of 500** |
+| `data` keys this seat *does* set | `live_tip` ×23, `attribute` ×9, `supersedes` ×8, `merged_7d` ×8, `my_pr` ×7, … |
+
+Every one of those keys describes **this seat's own state**. Not one
+describes **when the recipient's answer stops being optional**. That is
+the whole defect in one row: this seat instruments itself thoroughly and
+its asks not at all, and so the only clock on an escalation is the
+successor's wake, which §38 above measures at 10.9 minutes.
+
+**So the fix is not a new field; it is using the one the org already
+has.** Concretely, and it is two lines of behaviour rather than any new
+machinery:
+
+1. **Every escalation this seat sends carries `data.deadline`**, an
+   ISO instant, set from the seat's own reply-latency p75 (326 min
+   today) and never under one hour. HQ's `check-silence-clocks.py` then
+   enumerates it like every other seat's clock, and §22's release
+   applies to it.
+2. **The carried check cites that instant** as its earliest useful read.
+   A window waking before it writes `not due` and does not re-send.
+
+The second is useless without the first, which is why four windows have
+re-measured `asc`: the check had no instant to compare its wake against,
+because the ask it is waiting on never declared one.

@@ -1,0 +1,28 @@
+# What was on top of the panel's passphrase field, before 2026-10-26d.
+#
+# `document.elementFromPoint` at four points, and what a pointer could
+# actually do to the field, at 390x844. The probe is
+# `probe-field-pointer.mjs` beside this file.
+
+--- every viewport: 390x844, 820x1180, 1440x900, all identical ---
+  field box [348, 35]   label box [348, 35]
+  ::after height 44px  top -4.5px  pointer-events auto
+  field centre       -> label.panel-field
+  field left 10%     -> label.panel-field
+  field top edge +2  -> label.panel-field
+  44px band above    -> label.panel-field
+
+--- what a pointer could do, 390x844 ---
+cursor over the field:    default            (no I-beam)
+autofocus on arrival:     {"focused":true,"value":"","start":0,"end":0}
+after typing, blurred:    {"focused":false,"value":"correct horse battery","start":21,"end":21}
+click near left edge:     {"focused":true,"start":21,"end":21}   <- caret ignores where you clicked
+click near right edge:    {"focused":true,"start":21,"end":21}
+after dragging across:    {"focused":true,"start":0,"end":0}     <- selects nothing, drops the caret
+after double click:       {"focused":false,"start":0,"end":21}   <- BLURS the field
+
+# The pseudo-element belonged to the wrapping <label>, not to the input,
+# so no pointer event ever reached the control. Clicking still focused it,
+# because a label forwards activation natively, which is why six reviews
+# and a tap-target sweep all passed: the only thing anyone had checked was
+# that a press opens the field.

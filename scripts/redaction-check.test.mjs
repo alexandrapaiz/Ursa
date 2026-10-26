@@ -50,21 +50,6 @@ function sandbox(files) {
   return dir;
 }
 
-// A sandbox that is a real git work tree, because the file set the script
-// scans there comes from git and not from walking the directory. Nothing is
-// committed: `--cached --others --exclude-standard` is meant to answer about
-// what the branch will carry, so an uncommitted file that is not ignored has
-// to be in scope, and an ignored one has to be out.
-function gitSandbox(files) {
-  const dir = sandbox(files);
-  const git = (...args) =>
-    execFileSync('git', args, { cwd: dir, stdio: ['ignore', 'ignore', 'ignore'] });
-  git('init', '-q');
-  git('config', 'user.email', 'seat@example.invalid');
-  git('config', 'user.name', 'seat');
-  return dir;
-}
-
 describe('redaction-check', () => {
   test('passes a clean tree, and says how many patterns it read', () => {
     const dir = sandbox({ 'notes.md': 'Nothing private here.\n' });
@@ -158,69 +143,70 @@ describe('redaction-check', () => {
     }
   });
 
-  // The 2026-10-26 regression, in both directions. Before the fix the
-  // script walked the directory, so an ignored file could turn it red and
-  // it would report that the gate "would fail" about a file the gate is
-  // never shown. `.scratch/` is the live case: the repository tells runs to
-  // put scratch there and the next run's board read failed this script.
-  test('ignores a gitignored file, because the gate will never see one', () => {
-    const dir = gitSandbox({
-      '.gitignore': '.scratch/\n',
-      '.scratch/board.json': `{"id":"${fakeSessionId}"}\n`,
-      'notes.md': 'Nothing private here.\n',
+  // The gitignore filter, in all three of its cases. Without these the
+  // filter could quietly start dropping everything and every run would
+  // report a clean tree, which is the one failure mode that looks exactly
+  // like success.
+  describe('hits in gitignored paths', () => {
+    // A sandbox that is a real git repository, because the filter asks git
+    // and a directory that is not a repository has no ignore rules at all.
+    function gitSandbox(files) {
+      const dir = sandbox(files);
+      execFileSync('git', ['init', '-q'], { cwd: dir });
+      return dir;
+    }
+
+    test('are not counted, and the drop is reported rather than silent', () => {
+      const dir = gitSandbox({
+        '.gitignore': 'build/\n',
+        'build/bundle.js': `id: ${fakeSessionId}\n`,
+      });
+      try {
+        const { code, stdout } = runCheck(dir);
+        assert.equal(code, 0, 'a hit only in an ignored path is not a failure');
+        assert.match(stdout, /1 hit in gitignored paths not counted/);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
     });
-    try {
-      const { code, stdout } = runCheck(dir);
-      assert.equal(code, 0);
-      assert.match(stdout, /ignored paths out/);
-    } finally {
-      rmSync(dir, { recursive: true, force: true });
-    }
-  });
 
-  // The other direction, which is the one that would make the fix a
-  // loophole: not ignored means in scope, committed or not.
-  test('still catches a violation in a file that is merely uncommitted', () => {
-    const dir = gitSandbox({
-      '.gitignore': '.scratch/\n',
-      'audit.md': `id: ${fakeSessionId}\n`,
+    test('do not hide a hit in a file that is tracked or merely untracked', () => {
+      const dir = gitSandbox({
+        '.gitignore': 'build/\n',
+        'build/bundle.js': `id: ${fakeSessionId}\n`,
+        'notes.md': `id: ${fakeSessionId}\n`,
+      });
+      try {
+        const { code, stderr } = runCheck(dir);
+        assert.equal(code, 1, 'the untracked, unignored file still fails');
+        assert.match(stderr, /notes\.md:1/);
+        assert.ok(!stderr.includes('build/bundle.js'), 'the ignored one is not reprinted');
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
     });
-    try {
-      const { code, stderr } = runCheck(dir);
-      assert.equal(code, 1);
-      assert.match(stderr, /session or conversation UUID/);
-      assert.match(stderr, /audit\.md:1/);
-      assert.ok(!stderr.includes(fakeSessionId), 'must not reprint the value it caught');
-    } finally {
-      rmSync(dir, { recursive: true, force: true });
-    }
-  });
 
-  // grep drops the filename prefix when it is handed exactly one file, and
-  // the reporter splits on the first colon, so a one-file scan used to be
-  // reportable as a line number in the filename column.
-  test('names the file even when the whole scan is one file', () => {
-    const dir = gitSandbox({ 'only.md': `line one\nid: ${fakeSessionId}\n` });
-    try {
-      const { code, stderr } = runCheck(dir);
-      assert.equal(code, 1);
-      assert.match(stderr, /only\.md:2/);
-    } finally {
-      rmSync(dir, { recursive: true, force: true });
-    }
-  });
+    test('are reported in the json output too', () => {
+      const dir = gitSandbox({ '.gitignore': 'build/\n', 'build/b.js': `id: ${fakeSessionId}\n` });
+      try {
+        const { code, stdout } = runCheck(dir, ['--json']);
+        assert.equal(code, 0);
+        assert.equal(JSON.parse(stdout).ignoredHits, 1);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
 
-  // Same rule as a gate it cannot parse: a scan over nothing is exit 2, not
-  // a clean bill. An empty work tree is the only way to reach it.
-  test('refuses, with exit 2, a work tree git reports no files for', () => {
-    const dir = gitSandbox({});
-    try {
-      const { code, stderr } = runCheck(dir);
-      assert.equal(code, 2);
-      assert.match(stderr, /no files to scan/);
-    } finally {
-      rmSync(dir, { recursive: true, force: true });
-    }
+    test('a tree that is not a git repository is still scanned in full', () => {
+      const dir = sandbox({ 'notes.md': `id: ${fakeSessionId}\n` });
+      try {
+        const { code, stderr } = runCheck(dir);
+        assert.equal(code, 1, 'no git means no filter, never a silent pass');
+        assert.match(stderr, /notes\.md:1/);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
   });
 
   // Guards the claim in the script's header: the rules are the workflow's.

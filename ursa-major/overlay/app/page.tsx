@@ -187,8 +187,18 @@ export default function Overlay() {
         )}
         {payload?.tuning.map((t, i) => (
           <div key={i} style={{ display: 'flex', gap: 8, padding: '3px 0', alignItems: 'baseline' }}>
+            {/* `whiteSpace: nowrap` added 2026-10-26d, from reading the 320
+                frame. `rule ×4` is one term and it was breaking after
+                `rule`, which put `×4` on a second baseline beside the
+                statement's own second line: the left column reads as two
+                labels where there is one
+                (`reviews/2026-10-26d/crops/label-wrap-320-before.png`).
+                `minWidth: 34` is a floor and not a ceiling, so the column
+                still grows to fit and nothing else moves. Only `rule ×N`
+                is wide enough to have ever wrapped; `case` and `tension`
+                are one word each. */}
             <span className="mono" style={{
-              fontSize: 10, minWidth: 34, textAlign: 'right',
+              fontSize: 10, minWidth: 34, textAlign: 'right', whiteSpace: 'nowrap',
               color: t.tension ? 'var(--tension)' : t.evidenceCount > 1 ? 'var(--accent)' : 'var(--dim)',
             }}>
               {t.tension ? 'tension' : t.evidenceCount > 1 ? `rule ×${t.evidenceCount}` : 'case'}
@@ -216,23 +226,27 @@ export default function Overlay() {
           <span style={{ color: verdictColor }}>
             {payload ? verdictText : 'no verdict yet'}
             {v?.accepted !== null && v?.quote && (
+              /* Presentation moved to `.panel-action` in globals.css on
+                 2026-10-26d. It was an inline style object, and `:hover`
+                 cannot be written in one, which is the mechanical reason
+                 this control never answered the pointer. The resting
+                 pixels are unchanged. */
               <button
                 onClick={() => setShowQuote(!showQuote)}
-                style={{
-                  background: 'none', border: 'none', color: 'var(--dim)', cursor: 'pointer',
-                  fontSize: 11, marginLeft: 6, textDecoration: 'underline dotted', padding: 0,
-                }}
+                className="panel-action"
               >misread?</button>
             )}
           </span>
+          {/* `.panel-hit` is the 44px target and stays; `.panel-run` is the
+              presentation and the hover, moved out of an inline style on
+              2026-10-26d for the same reason as `misread?` above. `wait`
+              while running is now `.panel-run:disabled`, keyed off the
+              same `disabled` attribute instead of off a second copy of
+              the condition. */}
           <button
             onClick={run}
             disabled={running}
-            className="mono panel-hit"
-            style={{
-              background: 'var(--panel)', color: 'var(--accent)', border: '1px solid var(--line)',
-              borderRadius: 6, padding: '4px 14px', cursor: running ? 'wait' : 'pointer', fontSize: 12,
-            }}
+            className="mono panel-hit panel-run"
           >{running ? 'running…' : 'run'}</button>
         </div>
         {showQuote && v?.quote && (
