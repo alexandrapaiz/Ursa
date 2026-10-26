@@ -7310,3 +7310,169 @@ windows satisfying it. So a correction to a shared instrument is not a
 note in this seat's register. It goes to every seat reading it, in the
 pass that establishes it, which is the §3e correction rule applied to
 instruments instead of to numbers.
+
+## INC-2026-10-26-the-fork-sweep-deleted-the-only-copy-of-an-entry-that-ever-reached-main — The authoring commit had never merged, so this seat's de-duplication was the deletion of a register entry, and six citations on `main` dangle today
+
+**What happened.** The forty-fourth window of this seat deleted the PM's
+`INC-2026-10-18-board-runtime-token-printed-twice` from its own chain, in
+`ec2f4b13`, under the fork-sweep rule in the charter. The deletion was
+correct by the rule's own terms and the rule's safety argument did not
+hold, because the rule asks the wrong question about the other copy.
+
+The PM told this seat so on the board at 00:01:26Z on 2026-10-26, having
+unshallowed its clone, installed both drivers, reproduced the conflict by
+hand and resolved it in favour of keeping the entry. Re-derived here
+rather than taken on its word, and the repository is harsher than the
+PM's own framing:
+
+| claim | command | result |
+|---|---|---|
+| the entry's heading is on `main` | `git show origin/main:docs/agents/incidents.md \| grep '^## INC-2026-10-18-board-runtime-token'` | **absent** |
+| the PM's authoring commit is on `main` | `git merge-base --is-ancestor d27fd818 origin/main` | **no — never merged** |
+| this seat's deletion is on `main` | `git merge-base --is-ancestor ec2f4b13 origin/main` | yes |
+| anything still cites it | `git grep -n 'board-runtime-token-printed-twice' origin/main` | **six hits, three registers** |
+
+So the entry was authored by `ursa-pm` in `d27fd818` on 2026-10-18, that
+commit has never been merged, and the **only** route the entry ever had
+to `main` was this seat's own fork import. Deleting the import did not
+de-duplicate anything. It removed the sole copy, and `main` today carries
+six references by name — in `incidents.md`, `improvements.md` and
+`learning-log.md` — to a forty-eight-line entry that is not there.
+
+**Why it happened.** The charter's sweep says, in terms: *"Deleting is
+safe in both merge orders, which is worth stating because it reads as
+risky: if yours merges first the author's pull request still adds the
+entry whole, and if theirs merges first your branch no longer touches
+it."* Both halves of that sentence are conditioned on a premise the
+sentence does not state — **that the author has a live chain which adds
+the entry.** The window that wrote the rule verified the premise for the
+pair in front of it, on `#417`, and wrote down the conclusion rather than
+the premise. Three windows later the premise was false and the conclusion
+was applied anyway.
+
+It was false for an ordinary reason. An append-only register's entry
+reaches `main` by its author's pull request merging, and in the week to
+2026-10-26 this repository merged a small fraction of what it opened. An
+entry whose author's commit is eight days unmerged is not an entry with a
+redundant copy. It is an entry whose *only* landed copy is somebody
+else's import of it, and the importer is then the last party who should
+delete it.
+
+**What saved it, and it was not the rule.** The PM's `#443` carries the
+entry today only because this seat's forty-sixth window sent that seat a
+note about the conflict, and that seat resolved it by hand in favour of
+keeping it — on the reasoning, which the deletion commit's own message
+never weighed, that several other entries in the register cite it by
+name. Had it resolved in favour of `main`, the entry would be
+unrecoverable from `main` and no instrument in this repository would have
+noticed, because a dangling citation is prose.
+
+**The fix, which is one line added to a sweep that already runs.** Before
+deleting a foreign entry from a shared register, establish that the
+author's own copy has a route to `main` that does not pass through you:
+
+```sh
+# who wrote the entry, and is that commit on main?
+ac=$(git log --format='%H %an' -S'## <the heading>' --all -- <register> | tail -1)
+git merge-base --is-ancestor ${ac%% *} origin/main \
+  && echo "landed by its author: deleting your import is a de-duplication" \
+  || echo "NOT landed: your import may be the only copy. Check the author's open PRs first."
+```
+
+If it has not landed, do not delete it silently. Either leave it and say
+in the pull request that you are carrying a foreign entry on purpose, or
+tell its author on the board before you drop it. The cost of carrying a
+stale fork for one more window is a merge conflict. The cost of dropping
+the last copy is the entry.
+
+**And the citation check, which nothing in this repository runs.** Six
+dangling references survived eight days and two merges to `main` without
+any instrument reporting them. Every identifier in these registers is
+greppable and every heading is greppable, so the check is a set
+difference:
+
+```sh
+cited=$(git grep -ohE 'INC-[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+' origin/main -- docs/ | sort -u)
+have=$(git show origin/main:docs/agents/incidents.md | grep -oE '^## INC-[0-9-a-z]+' | sed 's/^## //' | sort -u)
+comm -23 <(echo "$cited") <(echo "$have")   # cited by name, defined nowhere
+```
+
+**The general shape, and it is the fourth member of a family this
+register already names.** Its siblings are "a rule whose subject is a
+file when the file's unit is an entry", "a rule scheduled on an act when
+the condition is a state", and "a rule that replaces an artifact voids
+the older rules about its contents". This one is: **a rule that records a
+conclusion whose premise was checked once.** The premise was true on
+2026-10-25 and the sentence carries no instruction to re-check it, so
+every later window reads a safety proof and not a safety condition. When
+you write down that an act is safe, write down what makes it safe.
+
+## INC-2026-10-26-the-driverless-merge-instrument-this-seat-published-is-not-a-driverless-merge — Three windows proved a claim about GitHub's merge with a command that fails open to "keep ours", and the claim is true for reasons the command never measured
+
+**What happened.** `INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`
+establishes its central claim with this instrument, which this charter
+and two other seats have since copied:
+
+```sh
+git -c merge.register.driver= -c merge.ledger.driver= \
+    merge-tree --write-tree --name-only origin/main refs/prs/439
+```
+
+Setting `merge.<name>.driver` to the empty string does not remove the
+driver. It registers the empty string **as** the driver, git tries to run
+it, and prints `error: cannot run : No such file or directory`. What
+happens next is decided by `merge.<name>.recursive = binary`, which both
+of this repository's drivers declare: a failed driver on a path marked
+binary resolves to **"ours", verbatim, exit 0, no conflict markers**.
+
+Measured on `c7bf9cc8`, the owner's merge of `#289`:
+
+| reading | blob | lines |
+|---|---|---|
+| what the merge actually recorded | `b2036e16` | 8494 |
+| the published "driverless" instrument | `9bacc789` — **identical to parent 1** | 8364 |
+| the registered driver | `fe7867fb` | 8495 |
+| a genuine driverless merge | `b2036e16` — **the recorded blob** | 8494 |
+
+The instrument reported the merge as having dropped a hundred and thirty
+lines that the merge in fact kept, because it was not merging. It was
+returning `main`'s own side of the file.
+
+**It fails open in two different directions, which is why nobody caught
+it.** On `#439` the same command printed `CONFLICT (content)`, so the
+run that wrote it saw plausible output and stopped. On `c7bf9cc8` it
+printed nothing and exited 0. A broken instrument that sometimes reports
+conflict and sometimes reports clean silence is indistinguishable from a
+working one on any single reading, and the incident it was built for was
+written from single readings of eleven pull requests.
+
+**The correct instrument, and the reason it is not a config flag.** A
+`merge=` attribute is neutralised by overriding the *attribute*, not the
+driver, and `.git/info/attributes` outranks the in-tree `.gitattributes`:
+
+```sh
+# a genuine driverless merge: the built-in text merge, drivers bypassed
+printf 'docs/ideas.md merge\ndocs/agents/incidents.md merge\n' > .git/info/attributes
+git merge-tree --write-tree <a> <b>        # plain three-way, conflicts and all
+rm .git/info/attributes                    # restore, or every later merge is driverless too
+```
+
+Note `core.attributesFile` is **not** an override — it is the user-level
+fallback and loses to the in-tree file. That was the first thing tried
+here and it changed nothing, silently.
+
+**What survived re-measurement, which is the part that matters.** The
+conclusion of the 2026-10-25 incident is **correct**, and it is correct
+on a reproduction that shares no instrument with it. The skill seat
+reached the same place independently and said so on the board at
+00:09:30Z; its census is reproduced in full under that incident's
+correction block below.
+
+**The general shape.** This register already holds *"a number that cannot
+vary with the quantity it is read as measuring is not evidence about that
+quantity"*, written about another seat's instrument. This is the same
+rule turned inward one layer: **an instrument built to remove a component
+must be checked against a case where that component provably changes the
+answer.** One assertion would have caught it — the driverless result must
+differ from both parents on a merge where both parents changed the file —
+and it is cheaper than the incident it would have prevented.
