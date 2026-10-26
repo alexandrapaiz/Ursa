@@ -1697,6 +1697,38 @@ So, two duties:
    advanced over, and adding it here credits a seat with a decision the
    same message declines to claim.
 
+   **The real sixth is not a key at all, it is a value shape under a key
+   you already read (added 2026-10-26, forty-eighth window, measured).**
+   Every rule in this section treats the fork as a naming problem, so
+   every extractor written for it reads a key and then assumes an
+   integer or an array of them. On 2026-10-25 at 02:47:36 and again at
+   02:54:41 the PM wrote `{"merged":{"Ursa":377}}` — the oldest and most
+   canonical key in the table, carrying a **company-to-number object**:
+
+   ```bash
+   jq -r '.messages[] | select(.from_seat=="pm")
+          | select((.data.merged|type)=="object") | [.ts,(.data|tostring)]|@tsv' /tmp/feed.json
+   ```
+
+   `flatten` happens to survive it and `map(select(type=="number"))`
+   silently drops it, so the two obvious ways to finish the extractor
+   above disagree by one merge and neither says so. Validate the type,
+   never only the name:
+
+   ```bash
+   jq -r '[.messages[] | select((.from_company|ascii_downcase)=="ursa" and .from_seat=="pm")
+           | .data // {} | (.merged, .merged_pr, .merged_prs, .merged_this_pass, .merged_tier_b)
+           | if type=="object" then (to_entries|map(.value)) else . end]
+          | flatten | map(select(type=="number")) | unique' /tmp/feed.json
+   ```
+
+   The general form, and it is this file's own rule pointed one layer
+   down: **a missing contract forks the shape as well as the name.** A
+   census of spellings is a census of one of the two ways a caller-set
+   field can diverge, and the other one is invisible to it, because a
+   key that is already in your table does not read as new. Send the
+   type to the centralizer with the names.
+
 2. **Ask for the key to become a contract, once, upstream.** The `data`
    object is the board's and the board is HQ's, so the fix is one field
    name in `docs/standards/pm.md` §15's example and not eleven
@@ -3712,6 +3744,40 @@ was written for is not what it was written about:
   several, and an already-open pull request of your own seat satisfies it
   exactly. Push onto that branch and say in its description that this
   window grew it.
+- **But check the tier before you grow it, because the rule above is
+  about the queue's depth and says nothing about its routes (added
+  2026-10-26, forty-eighth window, measured on this window's own
+  push).** The sentence "satisfies it exactly" has an unstated premise:
+  that the open pull request's merge route is your work's route. That
+  held for every day it was written under, when this seat had one chain.
+  Window 42 created a second route deliberately — the register half
+  rooted in `main` with no `prompts/` path, merging under Tier B in
+  minutes, against the charter half waiting on the owner — and nothing
+  went back to amend this bullet. Window 47 merged both halves onto one
+  branch and window 48 then obeyed this rule and moved **460 lines of
+  register work into a queue that has merged 0 of 54**. Two commands:
+
+  ```bash
+  # the tier of the pull request you are about to grow
+  git diff --name-only origin/main...refs/prs/<n> -- 'prompts/*-agent.md'
+  # the tier of your own window's work
+  git diff --name-only origin/main...HEAD -- 'prompts/*-agent.md'
+  ```
+
+  Non-empty is Tier C. **Growing is free when the two agree and costs
+  you the whole difference between the routes when they do not.** When
+  they disagree, split: keep the charter on the open identifier, root a
+  second branch in `main` carrying only your lane's registers, and say
+  in both descriptions that these are **two decisions by design** and
+  which seat each is for. That is one new identifier against a class of
+  file this repository has not merged in eight days, and it is not the
+  ten-identifier failure this section exists to prevent, because those
+  ten were one body of work awaiting one decision. The account is
+  `INC-2026-10-26-growing-the-open-pull-request-remerged-the-split-that-exists-to-avoid-the-owner`.
+
+  The glob is `'prompts/*-agent.md'` and never `prompts/`, for the
+  reason §5 already gives: `prompts/skill-extract.md` is in that
+  directory, is not a charter, and is one of the busiest files here.
 - **Only a dispatch that names a new branch or pull request, or that
   tells you not to touch an existing one, triggers the exception.** That
   is a sentence written about your situation, which is what the exception
