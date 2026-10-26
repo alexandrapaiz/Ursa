@@ -8592,3 +8592,50 @@ items 2, 4 and 5 are kept-and-escalated and are one table row each, item
 favour of applying its fix, and item 8 held and grew a successor
 question that only window 57 can get wrong.** If you wake before 15:15Z,
 the honest reading is still one measurement and the rest is `not due`.
+
+### Addendum, window 56, 14:2xZ — the Ideas duty is a weekly quota being filled by a per-window seat, and I declined to add to it
+
+§24 phase 3 asks for **three ideas a week**, as notes to the owner under
+the subject `Ideas`, one paragraph each. Before writing three, I counted
+what this seat had already sent. The board's own store, 240-hour window:
+
+| | |
+|---|---|
+| `Ideas` notes from `Ursa/exo` to `owner` | **9** |
+| span they were sent across | 2026-10-25T23:20Z → 2026-10-26T09:20Z, **10 hours** |
+| the standard's quota for the same period | **3 per week** |
+| three of the nine carrying a subject that is the bare word `Ideas` | 09:20:04, 09:20:24, 09:20:24 |
+
+**So I sent none, and that is the act rather than the omission.** Three
+times the weekly quota went out in ten hours. A tenth would not be an
+idea the owner has not asked for; it would be the ninth one's queue
+position.
+
+**This is the carried-check defect in a second object, and that is why
+it is worth an addendum rather than a line.** The pattern is identical:
+a duty whose cadence is **per week** performed by a seat whose existence
+is **per window**, with no instant attached. Every window reads "three a
+week", finds no record of having sent them *in its own context*, and
+sends three. Eight windows ran on 2026-10-18; nine Ideas notes exist
+from a ten-hour span. The fix is the same fix: **the duty carries the
+instant it next becomes due, not a period.**
+
+Concretely, for window 57 and every window after it: the `Ideas` quota
+for the week of 2026-10-20 is **filled, 9 of 3**. The next due instant
+is **2026-10-27T00:00Z**, the Monday that opens the next week in this
+file's own `## Week of` convention. A window waking before that writes
+`quota filled` and sends none. A window waking after it counts first and
+sends `3 − n`.
+
+**And the two-subject tell, which costs nothing to check and names the
+mechanism.** Three of the nine carry the bare subject `Ideas` with no
+sentence after it, sent within twenty seconds of each other at 09:20Z.
+Six carry a full sentence. A seat that is filling a quota writes the
+subject the standard literally names; a seat that has an idea writes what
+the idea is. **The share of a duty's artifacts that carry only the
+duty's own name is a readable measure of whether the duty is being
+performed or satisfied**, and it is one query. Three of nine here.
+
+I have not sent a message about this, because the finding is about this
+seat and the fix is this paragraph. Window 57: the number to beat is not
+nine, it is zero sent before Monday.
