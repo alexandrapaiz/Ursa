@@ -949,3 +949,83 @@ Ours: the budget is per neighbour and the test for whether a boundary is
 real is not the same as the test for whether it needs writing down. The
 artifact test answers the first. Only reading the sibling's trigger
 against this description answers the second.
+
+## 5s. A guard that skips its subject reports on the subject it has left
+
+(Added 2026-10-26, twenty-fifth run, amending §5k and §5q. Measured
+three times in one day, in three different tools, two of which are not
+this library's.)
+
+§5k says the mechanical pass is a tool whose one failure mode is the ref
+you give it. There is a second failure mode and it sits upstream of the
+ref: **the set the pass enumerated.** A guard reports a verdict about
+what it read. Nothing in its output distinguishes "I read this and it
+passed" from "I did not read this", and the second is the louder lie,
+because a count makes it sound thorough.
+
+**What it cost here, measured by probing the guards rather than reading
+them.** A directory `skills/decoy-skill/` holding one file named
+`SKILLS.md`, with correct frontmatter, a declared `provenance` ref and
+an `[E1]` tag in its body, was invisible to all three guards at once:
+`check-evidence.mjs` exited 0 saying "307 sources resolved",
+`trigger-coverage.mjs` exited 0 saying "every skill meets §5c", and
+`relevance-sweep.mjs` exited 0. One character in one filename. All three
+tools open `skills/<name>/SKILL.md` and `continue` when it is not there,
+and `strayCitations` — the check written for exactly "a tag in a file
+nothing reads is not a receipt" — sits after that `continue`, so it
+never ran for the directory that needed it most.
+
+**The tell, and it was in the output the whole time.**
+`trigger-coverage.mjs` printed `no TRIGGER-TEST.md: <slug>` for one of
+§2's two files and dropped the directory in silence for the other. A
+guard that reports half of a rule cannot be read as enforcing it, and
+the asymmetry is visible without running anything. Look for it: where a
+tool names one missing input and skips another, the skip is where the
+hole is.
+
+**The same shape, twice, outside this library on the same day.** Both
+are in `docs/ideas.md` under this date and both are worth reading,
+because they are what convinced this run the rule is general rather
+than a quirk of three scripts.
+
+1. `git merge-tree` with a merge driver registered as an *empty* command
+   returns the first parent's tree verbatim, prints one line on stderr,
+   and exits 1 — and exit 1 is also what a genuine conflict returns. A
+   probe that discards stderr and reads the exit code cannot tell the
+   two apart, and a finding was published on that basis.
+2. `skills/relocate-anchors.mjs` offered to move two of this library's
+   anchors by 119 lines, reporting them as pure relocation. It was right
+   about the text and reading a tree that should not have existed. The
+   tool has no way to say so; its subject is the working tree it was
+   handed.
+
+**So, two rules, and the second is the one with teeth.**
+
+**Probe a guard with the input it cannot read, not with the input it was
+written for.** Before trusting any check in `skills/`, ask what input
+makes it say nothing, construct that input, and run it. If the silence
+is indistinguishable from a pass, the guard has a hole the size of that
+input. This is cheap: the decoy above took two minutes and one `mkdir`.
+
+**A guard names what it declined to read, before it reports its
+counts.** `skills/library-dirs.mjs` is where that question lives for
+this library now, in the idiom of `source-line.mjs` and
+`citing-files.mjs`: one module for a question two tools were answering
+separately, because when two guards disagree about what counts as a
+member, a skill one reads and the other does not is half-guarded and
+neither says so. `check-evidence.mjs` and `trigger-coverage.mjs` both
+report an unread directory by name, the second returns 1 for it without
+waiting for `--check`, and the index is checked in both directions,
+which closes the twenty-first run's ledger entry about shipping a skill
+the index did not list.
+
+**And a new guard's test carries one input the guard cannot read.** Every
+unit test in `skills/library-dirs.test.mjs` would have passed on the day
+the hole existed. The defect was never in a predicate. It was that no
+caller asked, and only an end-to-end case over a library containing the
+unreadable thing can fail for that.
+
+Ours: the probe is the guard, which is `docs/agents/runner-facts.md` §7's
+sentence about a register that says "re-probe", arrived at independently
+in a different lane on the same day. A green suite is evidence about the
+inputs it enumerated and about nothing else.
