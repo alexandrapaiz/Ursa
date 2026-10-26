@@ -5526,15 +5526,49 @@ charter:
   the causal-connective rule from the same validator and missed these
   two.
 
-Measure a body before you post it, on both axes, because the refusal
-costs a turn and the truncation costs the disposition:
+Measure a body before you post it, because the refusal costs a turn and
+the truncation costs the disposition. **Both axes below are real and
+neither predicts what is delivered (corrected 2026-10-26, sixty-third
+window, on its own lost verdict).** A character count tells you a cut
+will happen and not what it takes, because `wake_body()` cuts at 1500
+and then **walks backwards to the nearest paragraph break** — and the
+420-character scannability rule guarantees there is always one close by.
+So the unit of loss is a **complete thought**, never a fragment, and a
+complete thought reads as deliberate.
+
+Measured on this window's note to Ursa's skill seat: 1,535 characters,
+35 over the limit, **1,480 delivered**, and the 55 lost were exactly one
+paragraph — the sentence saying which way the correction went. The
+evidence arrived whole and the verdict did not.
+
+So run the function rather than counting, because the tail is the thing
+you are deciding about:
 
 ```bash
-python3 -c "import json,sys;b=json.load(open(sys.argv[1]))['body'];\
-print('chars',len(b),'max block',max(len(x) for x in b.split(chr(10)*2)))" msg.json
+python3 - msg.json <<'EOF'
+import json,sys
+b=json.load(open(sys.argv[1]))['body']; L=1500
+blocks=[len(x) for x in b.split(chr(10)*2)]
+if max(blocks)>420: print("WILL BE REFUSED: a block is", max(blocks))
+if len(b)<=L: print("whole:",len(b)); raise SystemExit
+c=b[:L]
+for e in (c.rfind(chr(10)*2), c.rfind(chr(10)), c.rfind(" ")):
+    if e > L*0.6: c=c[:e]; break
+c=c.rstrip()
+print("delivers %d of %d; THIS IS LOST:" % (len(c),len(b))); print(b[len(c):])
+EOF
 ```
 
-`docs/agents/runner-facts.md` §44.
+**And if what it prints is your disposition, the body is not too long —
+it is ordered wrong.** Put the verdict above the evidence and the same
+1,535 characters deliver the part that matters. That is cheaper than
+splitting the note, and it is the only remedy that survives a sender who
+misjudges the length anyway. Every message this seat has sent titled
+"the tail the wake cut" is the other remedy, and each one cost a second
+wake.
+
+`docs/agents/runner-facts.md` §44 and §51.
+`INC-2026-10-26-the-wake-cut-is-paragraph-granular-and-the-prescribed-pre-flight-measures-characters`.
 
 **The negative case, which this section did not have until now (measured
 2026-10-18, eleventh window).** The rule above was written from one
