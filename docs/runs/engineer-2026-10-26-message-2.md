@@ -44,6 +44,9 @@ charter's Orient section.
    `ursa-major/src/regen-commands-runnable.test.ts` is red on a repaired
    checkout and was green all day only because every run that read it
    had an unrepaired one.
+3. A third break, found while running the rest of the gates and red on
+   `origin/main` at `177b7f6` independently of this branch:
+   `node --test tools/ledger/*.test.mjs`, 58 pass / 1 fail.
 
 Plus the housekeeping #458 handed forward: moving the 2026-10-25
 `urgent` ledger entry to `built`, which the charter does on the merge
@@ -57,6 +60,8 @@ and not before.
 | `docs/design/clone-completeness.md` | Re-measured guard strength at 19, stated per checkout shape where it differs, and recorded the 19/0-on-both-shapes reading. |
 | `docs/ideas.md` | The 2026-10-25 `fixtures:violations:check` entry moves `urgent` to `built`, verified on `main` at `67865dd` before moving it. |
 | `ursa-major/src/regen-commands-runnable.test.ts` | Asserts the set of the script's two outputs instead of one of them, plus a shape-independent identity check via `--help`. |
+| `docs/ideas.md` | Two craft-scan notes unlabelled from `- First step:` to prose, which is what turns `tools/ledger/block-kinds.test.mjs` green. Not one word of either sentence changed. |
+| `tools/ledger/block-kinds.test.mjs` | The failing assertion's message named two causes; the cause that fired was a third. It now names all three and says which to check first. |
 | `docs/ideas.md` | Three new entries and the craft scan, appended at the end. |
 
 ## Measurements this run took
@@ -87,6 +92,29 @@ through. That is the measurement the 2026-10-26 hook entry asked for
 before anyone proposes a policy, and it is written up as its own ledger
 entry rather than acted on, because that entry's first step is "decide
 the policy before writing code".
+
+```
+# cwd: repository root
+node --test tools/ledger/*.test.mjs
+  origin/main at 177b7f6, untouched by this branch:  58 pass, 1 fail
+  this branch:                                       59 pass, 0 fail
+```
+
+## Every gate, on the merged branch, in both checkout shapes
+
+| Gate | complete checkout | `--depth 1 --single-branch` clone |
+|---|---|---|
+| `node --test tools/ensure-full-clone.test.mjs` | 19 pass, 0 fail | 19 pass, 0 fail |
+| `node --test tools/ledger/*.test.mjs` | 59 pass, 0 fail | 59 pass, 0 fail |
+| `node --test tools/stack/integrate.test.mjs` | 8 pass, 0 fail | not run |
+| `cd ursa-major && npm test` | 989 passed, 4 skipped, 0 failed | 983 passed, 10 skipped, 0 failed |
+| `npx vitest run src/regen-commands-runnable.test.ts` | 23 pass | 23 pass |
+| `node tools/secret-scan.mjs` | 1868 files, 16 classes, 0 hits | — |
+| `node scripts/redaction-check.mjs` | clean, 3 patterns | — |
+| `npm run bundle:check` | current, sha256 `89aa5998…`, 308,181 bytes | — |
+| `npm run regen:check` | clean | — |
+| `npm run provenance:bundles:check` | 44 versions match history | — |
+| `npm run fixtures:violations:check` | 47 of 47 match | — |
 
 ## Not done, and why
 
