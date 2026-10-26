@@ -13610,3 +13610,93 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   instance yet.
 - Cost: $0.
 - Status: proposed
+
+### 2026-10-26 (skill, thirty-ninth run) — One file in a diff of forty-one sends every pull request this seat opens to the owner, the predicate that does it over-reports by 27 percent, and the sentence that fixes it has been in front of her for eight days
+
+- Trigger: a board note from Ursa's PM seat, telling this seat that its
+  thirty-eighth pull request still needs the owner or a chair because the
+  diff touches `prompts/skill-extract.md`, and that the block is the path
+  rather than the content. That note is correct against the text it read.
+  `docs/standards/pm.md` §10 defines the first item of Tier C as
+  "Charters (`prompts/`)", by directory, and criterion 4 of the Tier B
+  list is that `gh pr diff --name-only` shows no Tier C path. The note
+  also read the diff itself rather than the title, and said plainly that
+  it was not asking for a change, which is what made it actionable in one
+  pass.
+- Not a new finding, and the credit is not this seat's. Ursa's exo seat
+  established it on 2026-10-18 at `prompts/exo-agent.md` lines 1127-1186,
+  after two seats made the same mistake in opposite directions inside ten
+  minutes: the charter set is `prompts/*-agent.md`, eleven files, one per
+  seat, and the twelfth file in that directory is a format specification
+  the skill seat writes as ordinary work, named as a write surface by that
+  seat's own charter at `prompts/skill-agent.md` line 56. It named the
+  standard's wording as the upstream defect, said §10 was not its to fix
+  because that section is Tier C and HQ's, and asked that it be added to
+  the escalation the PM carried to the owner at 12:29:59 on 2026-10-18
+  with a silence clock to 2026-10-20 12:30 UTC.
+- That clock expired six days ago. Verified this run: §10 on `origin/main`
+  still reads "Charters (`prompts/`)" at line 286. So nothing is in flight
+  that a seat can rely on, and each pass of the merge gate that meets this
+  file pays for the ambiguity again.
+- Measured, after repairing the clone this run was given, which was
+  shallow and answered **0** to every history question below until
+  `bash tools/ensure-full-clone.sh` took it from 1,648 to 3,482 commits
+  and from 3 to 246 remote-tracking refs. Over the 195 first-parent merges
+  on `origin/main`: 30 pull requests landed touching some `prompts/*.md`,
+  22 of them touching a `*-agent.md` charter, 8 touching
+  `prompts/skill-extract.md`, and **0 touching both**. So the directory
+  predicate calls 30 landed pull requests charter changes and 8 of them,
+  27 percent, changed no charter. The disjointness is the load-bearing
+  half: no pull request in this history has ever bundled this file with a
+  real charter edit, so a path-level exception would cost the gate nothing
+  it currently catches.
+- And measured on this seat's own day. All six pull requests this seat
+  opened on 2026-10-26 carry exactly one file under `prompts/`, that file
+  is `prompts/skill-extract.md` in all six, none carries a `*-agent.md`
+  charter, and none passes the PM's own criterion 4. On this run's tip the
+  diff against `origin/main` is 5,700 changed lines, 807 of them this file
+  and 4,893 of them skills, tests, trigger tests and run records, so 86
+  percent of the run's output waits on a gate that 14 percent of it earns.
+  This seat has never once handed its own company's merge gate something
+  that gate was allowed to act on.
+- The precedent nobody had written down. Eight pull requests carrying this
+  file have landed on `main`, the most recent today. Four of the eight are
+  claimed by the PM seat's own passes in `data.merged` on the board, on
+  2026-10-18 at 13:40, 13:54, 14:17 and 18:33 UTC, and the 14:17 one names
+  itself: "Thirty-sixth pass closed: fixed my own prior pass own Tier C
+  misread, merged the…". So the operative practice is that this file is
+  Tier B, set by the gate itself four times in a day, and the text says the
+  opposite. Today's pass read the text and the 2026-10-18 pass read the
+  practice, and neither misread what it read, which is what makes this an
+  ambiguity rather than an error and why reading it an eleventh time is not
+  the remedy.
+- What: two remedies, and they are not equal. **The wording fix** is one
+  sentence in `docs/standards/pm.md` §10 scoping Tier C's charter item to
+  `prompts/*-agent.md` instead of the directory. It is HQ's, it is already
+  in front of the owner on the exo seat's thread, it fixes the predicate
+  for every seat and every company that vendored the section, and it is
+  the one this seat backs. **The relocation** is moving this file out of
+  `prompts/`, which would make the directory predicate true rather than
+  work around it. It is recorded here with its cost attached because that
+  cost is the argument against doing it first: four files across three
+  owners, none of them this seat's — `.github/workflows/agent-skill.yml`
+  line 81, which is HQ's machinery that no product seat edits;
+  `prompts/skill-agent.md` lines 36 and 56, this seat's own charter and
+  Tier C; and `prompts/exo-agent.md` and `prompts/research-agent.md`,
+  which belong to other seats. It also leaves the predicate wrong for the
+  next non-charter file anyone puts in that directory.
+- First step, and the only part of this this seat can ship: `§5ab` in
+  `prompts/skill-extract.md`, which makes every pull request from this
+  seat state its merge gate in one line at the top of the description, as
+  a path and a predicate the reader can run, with the explicit instruction
+  to state the gate and never argue it. That is the exo seat's own
+  disclosure line turned on the diff that caused it, and it does not fix
+  the ambiguity; it stops the discovery cost landing on the merge gate's
+  pass instead of on this seat's. The finding and both remedies went back
+  to the PM on the board, with the precedent and the expired clock, because
+  a pass that knows the question is already escalated can escalate rather
+  than decide.
+- Cost: $0 for the disclosure line. The wording fix is HQ's one sentence.
+  The relocation is a three-owner change and should not be started without
+  the owner choosing it over the wording fix.
+- Status: proposed
