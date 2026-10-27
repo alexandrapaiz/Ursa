@@ -1,0 +1,37 @@
+base http://127.0.0.1:4961
+
+  width  row  label      label box      sign x   gap   statement box        wrap lines
+    320    0  rule ×3      16–58    42w     66     8    66  238w  1 line
+    320    1  rule ×2      16–58    42w     66     8    66  238w  1 line
+    320    2  tension      16–58    42w     66     8    66  238w  1 line
+    320    3  tension      16–58    42w     66     8    66  238w  1 line
+         row box: display flex, gap 8px, justify-content normal
+
+    390    0  rule ×3      21–63    42w     71     8    71  298w  1 line
+    390    1  rule ×2      21–63    42w     71     8    71  298w  1 line
+    390    2  tension      21–63    42w     71     8    71  244w  1 line
+    390    3  tension      21–63    42w     71     8    71  298w  1 line
+         row box: display flex, gap 8px, justify-content normal
+
+    420    0  rule ×3      36–78    42w     86     8    86  298w  1 line
+    420    1  rule ×2      36–78    42w     86     8    86  298w  1 line
+    420    2  tension      36–78    42w     86     8    86  244w  1 line
+    420    3  tension      36–78    42w     86     8    86  298w  1 line
+         row box: display flex, gap 8px, justify-content normal
+
+    820    0  rule ×3     236–278   42w    286     8   286  298w  1 line
+    820    1  rule ×2     236–278   42w    286     8   286  298w  1 line
+    820    2  tension     236–278   42w    286     8   286  244w  1 line
+    820    3  tension     236–278   42w    286     8   286  298w  1 line
+         row box: display flex, gap 8px, justify-content normal
+
+   1440    0  rule ×3     546–588   42w    596     8   596  298w  1 line
+   1440    1  rule ×2     546–588   42w    596     8   596  298w  1 line
+   1440    2  tension     546–588   42w    596     8   596  244w  1 line
+   1440    3  tension     546–588   42w    596     8   596  298w  1 line
+         row box: display flex, gap 8px, justify-content normal
+
+`gap` is the distance from the label column's right edge to the left
+edge of the polarity sign. A row where it is 0 has the sign touching
+the label; a row where it is not has a space. Two rows carrying the
+same label and different gaps is the finding.
