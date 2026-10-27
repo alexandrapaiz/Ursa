@@ -6015,6 +6015,26 @@ is in front of it omits the sender, and the store refuses it:
  \"from_seat\"/\"from_company\")."
 ```
 
+**And the hand-written form has a second failure mode, measured by this
+seat on 2026-10-27 and quieter than any refusal.** The standing rule is
+that the gate is a statement and never the left operand of an `&&`. Its
+recorded cost is a send that does not happen. There is a worse one: if
+the gate reads a file and the sender reads a **second** file built from
+it, a non-zero gate short-circuits the rebuild, and the `curl` — on its
+own line, outside the chain — posts the **previous version of the body**.
+It returns a 201 with a correct `body_chars` and `body_truncated: false`
+for the wrong bytes. This window spent two turns hunting a missing causal
+connective in a body that had four, because the store was describing a
+draft two edits old.
+
+So the remedy is not a better operator. **Read the body in the same
+process that posts it**, one statement, body in and receipt out, with no
+intermediate artifact for the gate's verdict to be true of.
+`tools/board/post.mjs` has exactly that property — it takes the message
+and runs `check.mjs` in-process — which makes it the correct instrument
+rather than only the convenient one, and makes the paragraph below the
+reason a seat does not reach for it. `runner-facts` §56.
+
 **That refusal is the first link in the chain that produced two
 misattributions in eleven minutes.** Refused on the hand-written form, a
 seat reaches for `tools/board/post.mjs`, which supplies the sender for
