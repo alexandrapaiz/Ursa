@@ -1258,3 +1258,126 @@ the bottom of a 6px swatch, so a centre sample cannot see the one thing
 that distinguishes them. It samples every row now and reports how many
 distinct rows each swatch has, which turns the inset into a fact instead
 of an absence. A swatch is a column, so sample the column.
+
+## L37 — A port answering 200 is not evidence that your build is behind it
+
+**measured**, 2026-10-27 (2026-10-26 scheduled slot).
+`reviews/2026-10-26g/README.md` §7.
+
+This run rebuilt the overlay, ran `pkill -f "next start -p 4961"`,
+started a new server, got `200` from the port, and measured both of its
+fixes as having changed nothing.
+
+The `pkill` matched the npm parent and killed it. The `next-server`
+child it had spawned kept the port, so the new `next start` failed with
+`EADDRINUSE` into a log nobody was reading, and every probe for the next
+several minutes read the old build. Three things made it silent at once:
+the port answered, the pages rendered, and the failure was in a
+background log rather than in an exit status the run saw.
+
+**The check that works is not a status code.** It is whether the thing
+you just changed is in the response. A run that has just edited a width
+can ask for that width. `ss -ltnp` names the process holding the port,
+which is the other half, because the fix is to kill the server and not
+its parent.
+
+This is L34's shape through a second door. There the port was a
+stranger's store and the page could not tell; here it was this run's own
+previous build and the probe could not tell. **An address is not an
+identity**, and that holds for a process you started yourself four
+minutes ago.
+
+## L38 — A floor is not a column, because flex shrinks down to it
+
+**measured and judged**, 2026-10-27.
+`reviews/2026-10-26g/data/tuning-gap-before.txt`, `README.md` §3.
+
+The overlay panel's label column was `minWidth: 34` with `whiteSpace:
+nowrap`, shipped 2026-10-26d under the note *"a floor and not a ceiling,
+so the column still grows to fit and nothing else moves."*
+
+`min-width` floors the **used** width. It does not stop a flex item
+shrinking to that floor, and when the content is `nowrap` the glyphs then
+overflow the box they were given. Measured at 320 across four rows: boxes
+of 34, 34, 41 and 34, with the text overrunning each by up to 8px and
+eating the whole flex gap to the sign beside it. **Two rows carried the
+identical word `tension` in two different boxes**, because flex shares
+shrinkage in proportion to base size and the statement beside each row
+has a different natural width. So the column's right edge was ragged in a
+way no two renderings would repeat.
+
+`flex-shrink: 0` is the repair. The floor restated as `7ch` is L9, and it
+is what makes the floor survive a change of type size; it is not what
+fixed anything.
+
+**The reason this stood for a week is the part worth keeping.** The note
+beside the value was wrong, and nothing could catch it, because this list
+is drawn only when a payload has landed and no instrument had ever put
+one there. A claim in a comment is not a measurement. The surface that
+would have falsified it did not exist until the run that built
+`state/panel-payload.mjs`.
+
+## L39 — At phone width the web does not align the label column, it stops having one
+
+**measured**, 2026-10-27, 390x844, five sites, one load each.
+`reviews/2026-10-26g/data/bench-label-columns.txt`, `README.md` §6.
+
+Asked of `linear.app/changelog`, `vercel.com/changelog`,
+`docs.stripe.com/api`, `elicit.com` and `anthropic.com/news`: in a
+stacked list of rows that put a short label beside body text, do the rows
+share one left edge for that text?
+
+**Nineteen candidate lists. Fifteen put the label above the text rather
+than beside it. Of the four that kept it beside, one was
+indistinguishable because every label was the same width, two were
+ragged, and none held a column.** Zero columns in the sample.
+
+So the craft answer at 390 is not a better gutter. It is that the
+beside-the-text label is itself the wide layout's idea, and the narrow
+layout drops it.
+
+**The strength of this entry is capped by its denominator and the entry
+says so.** Four measured lists on one site is thin. What it supports is
+"the pattern is rare at 390", which fifteen rejections establish
+directly. What it does not support is any claim about which treatment
+reads better, and no such claim is made here.
+
+**The first version of this probe would have answered confidently and
+wrongly.** Without a constraint that rows be stacked in one column and
+the label sit on the body's own first line, it matched a horizontal
+carousel as "8 rows, 8 left edges, 2156px of spread" and a card grid as
+ragged, and would have reported a web full of broken label columns that
+are not label columns. Those numbers were never written to a file. This
+is the kit README's warning about exemptions arriving in person: a sweep
+is mostly exemptions, and getting one wrong looks exactly like a result.
+
+## L40 — Stack the dashboard's polarity tag below 640 (proposal, not a decision)
+
+**proposed**, 2026-10-27. `reviews/2026-10-26g/README.md` §6.
+
+This run gave `.dash-tag` a `4.5em` column below 640, where it previously
+had none, taking the statement's left edge from three distinct values to
+one at 320. That is strictly better than what was there and it is not
+necessarily what the surface wants.
+
+L39 measured the alternative the web actually uses: put the tag above the
+statement at phone width and spend no horizontal gutter at all. On a
+320px line the column costs 46.8px of 280, which is seventeen per cent of
+every statement's measure, and the statements here are long because they
+are sentences about the reader.
+
+**What it buys.** Seventeen per cent more measure on the narrowest
+viewport, on the one surface in this company whose whole job is to be
+read.
+
+**What it costs.** The tag stops being a column at all below 640, so
+scanning down a list for `AVOID` becomes reading each row's first line
+rather than reading one column. It also puts a second line into every
+row, which on a list of six units is six more lines of height. And it
+splits the layout into two shapes rather than one shape at two widths,
+which is more stylesheet than this page currently has.
+
+Not done here, because the charter's repair step is for defects and this
+is a design decision about a surface the owner has not yet seen with
+units in it. `reviews/2026-10-26g/crops/units-320-after.png` is that
+surface as it stands.
