@@ -759,13 +759,26 @@ function wrap(text, width = 70) {
 
 const normalize = (s) => s.replace(/\s+/g, ' ').trim()
 
-/** Where the back pointer belongs in a section: after its dated note when it
- *  has one, and directly under the header when it does not. §5 has no note,
- *  and §5 is the section §5c amends, so this is the live case and not a
- *  hypothetical. */
+/** The last line of the paragraph the back pointer goes after: the section's
+ *  dated note when it has one, and the header itself when it does not. §5 has
+ *  no note, and §5 is the section §5c amends, so this is the live case and not
+ *  a hypothetical. */
 function anchorEnd(sec) {
   const note = openingNote(sec)
   return note ? note.end : 0
+}
+
+/** Which paragraph of the section the back pointer must be, counting the header
+ *  as paragraph 0.
+ *
+ *  Stated as a paragraph index and not as a line offset from the anchor,
+ *  because the first draft compared `start` against `anchorEnd(sec) + 1` and
+ *  forgot the blank line every paragraph break carries. It wrote all seven back
+ *  pointers in the right place and then reported all seven as misplaced, on the
+ *  run right after the one that wrote them. Found by running `--write` twice
+ *  rather than by reading the arithmetic. */
+function wantParagraph(sec) {
+  return openingNote(sec) ? 2 : 1
 }
 
 /**
@@ -825,9 +838,11 @@ export function amendmentDefects(specText) {
     if (have !== normalize(want))
       out.push({ kind: 'stale', from: mine.map((a) => a.from).join(', '), to: sec.id, line: sec.line + at.start, part: null,
         detail: `§${sec.id} says "${have}", the graph says "${want}"` })
-    else if (at.start !== anchorEnd(sec) + 1)
+    else if (paras.indexOf(at) !== wantParagraph(sec))
       out.push({ kind: 'misplaced', from: null, to: sec.id, line: sec.line + at.start, part: null,
-        detail: `§${sec.id}'s back pointer is its paragraph at line ${sec.line + at.start}, not the paragraph under its note` })
+        detail: `§${sec.id}'s back pointer is paragraph ${paras.indexOf(at)} of the section` +
+          ` and belongs at ${wantParagraph(sec)}, so a reader who stops after the first` +
+          ` paragraph does not see it` })
   }
   return out
 }
@@ -1077,6 +1092,11 @@ function amendmentsMode(write) {
     if (text !== specText) writeFileSync(SPEC_PATH, text)
     console.log(`\n${changed} section${changed === 1 ? '' : 's'} carry a generated back pointer` +
       `${text === specText ? ', unchanged' : ', written'}`)
+    // Graded against what was written and not against what was read. The first
+    // draft reported the pre-write defects after repairing them, so a clean
+    // `--write` printed seven failures and told the caller to run the command
+    // it had just run.
+    specText = text
   }
   const defects = amendmentDefects(specText)
   for (const d of defects) console.log(`${SPEC_REL}:${d.line} ${d.kind}: ${d.detail}`)

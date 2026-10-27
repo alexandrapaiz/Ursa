@@ -21,6 +21,12 @@ import {
   libraryCountsInBody,
   explainShortfall,
   explainSpecNeighbours,
+  amendmentEdges,
+  amendmentDefects,
+  backPointerLine,
+  explainAmendments,
+  specSections,
+  withBackPointers,
   parseTriggerTest,
   specNeighbourDefects,
   similarity,
@@ -610,4 +616,110 @@ test('the spec-neighbour explanation names the amended-section cause and refuses
   assert.match(said, /amended the rule and said so in its own header/)
   assert.match(said, /not a recount/)
   assert.deepEqual(explainSpecNeighbours([]), [])
+})
+
+// §5ah, the amendment graph. The fixtures are the shapes this file actually
+// holds, written small: a section with no dated note (§5), a note naming two
+// targets (§5r), a note naming a sub-part (§5aa), and a note that names its
+// target and then mentions the same target again in a sentence that is not a
+// claim about amendment (§5ad). The last one is the only case where a looser
+// pattern gives a plausible wrong answer rather than an error.
+const AMENDED = '(Amended by §5c. Generated line, per §5ah.)'
+const two = (body) => `## 5. The trigger test\n\n${body}\n\n## 5c. A later rule\n\n(Added 2026-10-01, third run, amending §5.)\n\nIts body.\n`
+const kinds = (text) => amendmentDefects(text).map((d) => d.kind)
+
+test('a note that declares an amendment is an edge, and prose that says the same words is not', () => {
+  assert.deepEqual(amendmentEdges(two('Its body.')).map((e) => `${e.from}->${e.to}`), ['5c->5'])
+  // The claim is only read out of the section's own dated note. §5ag's prose
+  // says "§5r's header says it amends §5e" four times, and none of those is a
+  // declaration by §5ag about §5ag.
+  assert.deepEqual(amendmentEdges(
+    '## 5. A\n\nThe body discusses amending §5c at length.\n\n## 5c. B\n\n(Added 2026-10-01.)\n\nIts body.\n'), [])
+})
+
+test('the clause stops at the first thing that is not a reference, which is §5ad\'s live shape', () => {
+  // §5ad's note names §5aa part 4 and then names §5aa again three lines later,
+  // in a sentence about re-deriving a measurement. One edge, not two. A
+  // pattern that ran to the end of the sentence reported the pair twice.
+  const edges = amendmentEdges(
+    '## 5aa. A\n\n(Added, amending §5t part 3.)\n\nIts body.\n\n' +
+    '## 5t. B\n\n(Added, from a rename.)\n\nIts body.\n\n' +
+    '## 5ad. C\n\n(Added 2026-10-26, forty-first run, amending §5aa part 4 and answering the\n' +
+    "remedy a seat proposed after re-deriving §5aa's measurement.)\n\nIts body.\n")
+  assert.deepEqual(edges.map((e) => `${e.from}->${e.to} ${e.part ?? ''}`.trim()),
+    ['5aa->5t part 3', '5ad->5aa part 4'])
+})
+
+test('a sub-part is carried into the back pointer, because §5t part 3 is not all of §5t', () => {
+  assert.equal(backPointerLine([{ from: '5aa', part: 'part 3' }]),
+    '(Amended by §5aa (part 3). Generated line, per §5ah.)')
+  assert.equal(backPointerLine([{ from: '5e', part: null }, { from: '5r', part: null }]),
+    '(Amended by §5e and §5r. Generated line, per §5ah.)')
+})
+
+test('an amended section with no back pointer is the state all seven live edges were in', () => {
+  assert.deepEqual(kinds(two('Its body.')), ['missing'])
+  assert.deepEqual(kinds(two(AMENDED)), [])
+})
+
+test('a back pointer below the first paragraph is misplaced, because that is the whole defect', () => {
+  // §5e carried a prose back reference to §5r nineteen lines down, under the
+  // stale worked example rather than above it, for twenty-two days. Prose
+  // there is still welcome; it is not the index.
+  assert.deepEqual(kinds(two(`Its body.\n\n${AMENDED}`)), ['misplaced'])
+  assert.deepEqual(kinds(two(`${AMENDED}\n\n${AMENDED}`)), ['misplaced'])
+})
+
+test('a back pointer that disagrees with the graph is stale, and names both readings', () => {
+  const d = amendmentDefects(two('(Amended by §5zz. Generated line, per §5ah.)'))
+  assert.deepEqual(d.map((x) => x.kind), ['stale'])
+  assert.match(d[0].detail, /§5zz/)
+  assert.match(d[0].detail, /the graph says/)
+})
+
+test('a back pointer no edge points at is an orphan, and a note pointing nowhere is not repairable', () => {
+  assert.deepEqual(kinds(`## 5. A\n\n${AMENDED}\n\nIts body.\n`), ['orphan'])
+  assert.deepEqual(kinds('## 5c. B\n\n(Added 2026-10-01, amending §5zz.)\n\nIts body.\n'), ['dangling'])
+  assert.deepEqual(kinds('## 5c. B\n\n(Added 2026-10-01, amending §5c.)\n\nIts body.\n'), ['self'])
+})
+
+test('--write is idempotent, and leaves a dangling note alone rather than inventing a section', () => {
+  const once = withBackPointers(two('Its body.'))
+  assert.equal(once.changed, 1)
+  assert.deepEqual(amendmentDefects(once.text), [])
+  const twice = withBackPointers(once.text)
+  assert.equal(twice.text, once.text)
+  const bad = '## 5c. B\n\n(Added 2026-10-01, amending §5zz.)\n\nIts body.\n'
+  assert.equal(withBackPointers(bad).text, bad)
+})
+
+test('the writer puts the line under the dated note, and under the header when there is none', () => {
+  const written = withBackPointers(two('Its body.')).text.split('\n')
+  assert.equal(written[2], AMENDED)       // §5 has no note, so paragraph 1
+  const noted = withBackPointers(
+    '## 5. A\n\n(Added 2026-09-18, first run.)\n\nIts body.\n\n' +
+    '## 5c. B\n\n(Added 2026-10-01, amending §5.)\n\nIts body.\n').text.split('\n')
+  assert.equal(noted[2], '(Added 2026-09-18, first run.)')
+  assert.equal(noted[4], AMENDED)         // §5 has a note, so paragraph 2
+})
+
+test('sections are read in file order, because §5b sits before §6 and §5c after §7', () => {
+  const ids = specSections('## 1. A\n\n## 5b. B\n\n## 6. C\n\n## 5c. D\n').map((s) => s.id)
+  assert.deepEqual(ids, ['1', '5b', '6', '5c'])
+  assert.deepEqual(specSections('### 5. Not a section\n\n#### 5c. Nor this\n'), [])
+})
+
+test('an unreadable spec is this check with nothing to read, not a clean graph', () => {
+  assert.deepEqual(amendmentEdges(null), [])
+  assert.deepEqual(amendmentDefects(null), [])
+})
+
+test('the amendment explanation names the repair and distinguishes the ones --write cannot make', () => {
+  const generated = explainAmendments([{ kind: 'missing' }]).join(' ')
+  assert.match(generated, /--amendments --write/)
+  assert.match(generated, /generated line in the amended one/)
+  const byHand = explainAmendments([{ kind: 'dangling' }]).join(' ')
+  assert.doesNotMatch(byHand, /--amendments --write` and commit/)
+  assert.match(byHand, /fixed by hand/)
+  assert.deepEqual(explainAmendments([]), [])
 })

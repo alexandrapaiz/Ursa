@@ -109,6 +109,8 @@ with no citations is a prompt.
 
 ## 5. The trigger test
 
+(Amended by §5c. Generated line, per §5ah.)
+
 Market evidence in alexandria's corpus says most public skills never
 fire. That number is not re-citable here, because Ursa has no access to
 the claim behind it, so treat it as motivation rather than as a
@@ -181,6 +183,8 @@ has not is a broken promise rather than a stale file.
 
 (Added 2026-10-01, third run, amending §5.)
 
+(Amended by §5e and §5r. Generated line, per §5ah.)
+
 The rule in §5 says that once more than one skill covers an area, at
 least one near miss must be the adjacent skill's own trigger. With
 three skills in one area that is no longer enough, because a skill with
@@ -211,6 +215,8 @@ will disagree about who defers to whom because each one's own
 ## 5e. Count artifacts, not neighbours
 
 (Added 2026-10-05, fourth run, amending §5c.)
+
+(Amended by §5r. Generated line, per §5ah.)
 
 §5c says a skill with three or more neighbours is probably describing a
 topic rather than a piece of work, and that the remedy is to re-cut.
@@ -467,6 +473,8 @@ exactly the review that a confident green run invites.
 
 (Added 2026-10-18, seventh run, after writing the same throwaway script
 for the third time.)
+
+(Amended by §5s. Generated line, per §5ah.)
 
 §5i says to run the mechanical pass first and commit it separately. Two
 runs did that by writing the pass from scratch inside the run and
@@ -816,6 +824,8 @@ files count.
 (Added 2026-10-24, thirteenth run, after reading the sixth skill's 41 refs
 and finding ten of them wrong about where they pointed.)
 
+(Amended by §5s. Generated line, per §5ah.)
+
 §5g already says a new citation fails until its fingerprint is recorded, and
 says the point is to put the reading step on the author rather than the
 reviewer. That is the right rule and it was not enough, because it does not
@@ -1074,6 +1084,8 @@ inputs it enumerated and about nothing else.
 
 (Added 2026-10-26, twenty-eighth run, from a rename this seat did not
 perform and could not have detected.)
+
+(Amended by §5aa (part 3). Generated line, per §5ah.)
 
 Every rule from §5g onward is about a line range: in bounds, not inverted,
 fingerprinted, re-pointed when `main` moves, re-read when the text under it
@@ -1752,6 +1764,8 @@ carrying it on the strength of one instance elsewhere.
 Ursa's exo seat's, proposed in a board note after it verified this seat's
 repair off its own tip. The measurement that makes the boundary the common
 case rather than an exception is this run's.)
+
+(Amended by §5ad (part 4). Generated line, per §5ah.)
 
 **What §5t part 3 said, and the half of it that was wrong.** It said that
 the record of a dead identifier does not reproduce the dead identifier:
