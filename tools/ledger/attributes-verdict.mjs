@@ -64,8 +64,10 @@ function n(count, singular, plural) {
   return `${count} ${count === 1 ? singular : plural}`
 }
 
-export const COMMITTED = 'committed'
-export const CLONE = 'clone'
+import { LOCUS, describeGate, verdictOf } from '../gates/verdict-shape.mjs'
+
+export const COMMITTED = LOCUS.COMMITTED
+export const CLONE = LOCUS.CLONE
 
 /**
  * @typedef {{locus: 'committed' | 'clone', message: string}} Violation
@@ -93,14 +95,15 @@ export function verdict(violations, seen = {}) {
   const committed = violations.filter((v) => v.locus !== CLONE)
 
   if (violations.length === 0) {
-    return {
+    return verdictOf({
       exitCode: 0,
       stream: 'out',
+      cause: 'ALL_DECLARATIONS_REGISTERED',
       line:
         `Merge attributes: ${n(declared, 'declaration', 'declarations')} over ` +
         `${n(drivers.length, 'driver', 'drivers')} (${drivers.join(', ') || 'none'})` +
         `${checkedClone ? ', all registered in this clone' : ''}.`,
-    }
+    })
   }
 
   if (committed.length > 0) {
@@ -110,22 +113,26 @@ export function verdict(violations, seen = {}) {
           `${clone.length === 1 ? 'is' : 'are'} not registered in this clone, which is not ` +
           'committed and is not part of that repair.'
         : ''
-    return {
+    return verdictOf({
       exitCode: 1,
       stream: 'err',
+      cause: 'TRACKED_FILE_WRONG',
+      cites: [COMMITTED, CLONE],
       line:
         `Merge attributes: ${n(committed.length, 'violation', 'violations')} in tracked files, ` +
         `so every checkout of this commit has ${committed.length === 1 ? 'it' : 'them'} and CI ` +
         `does too. Repairing ${committed.length === 1 ? 'it' : 'them'} edits a committed file, ` +
         `which is a pull request.${also}`,
-    }
+    })
   }
 
   // Clone-only. The committed state is correct and this is the finding that
   // reads as a repository defect when it is not one.
-  return {
+  return verdictOf({
     exitCode: 2,
     stream: 'err',
+    cause: 'CLONE_NOT_CONFIGURED',
+    cites: [CLONE],
     line:
       'Merge attributes: the committed state is correct and nothing here needs a pull request. ' +
       `${n(clone.length, 'declaration', 'declarations')} ` +
@@ -134,5 +141,39 @@ export function verdict(violations, seen = {}) {
       'committed, so this is true of this working copy alone. Until it is registered, git ' +
       'falls back to the default line merge and says nothing, and every append-only register ' +
       'co-append in the queue measures as a conflict that is not one. One command above fixes it.',
-  }
+  })
 }
+
+const committed = (message = 'x') => ({ locus: COMMITTED, message })
+const clone = (message = 'x') => ({ locus: CLONE, message })
+
+/** The input space. Outcomes are measured by the enumerator, never declared.
+ *
+ *  THE FOURTH PROBE IS THE REGRESSION. `both loci` is the exact input shape
+ *  that produced `Merge attributes: 3 violation(s).` before the repair of
+ *  2026-10-26: two findings whose repairs belong to different people, summed
+ *  into one count that named neither. `enumerate-verdicts.mjs` checks
+ *  MIXED_LOCI_NAMED against this probe, and
+ *  `tools/gates/enumerate-verdicts.test.mjs` proves the check fails on the old
+ *  line and passes on the new one. That is the only evidence that the
+ *  enumerator can actually detect the class it was built for, rather than
+ *  agreeing with four gates that are already right.
+ */
+export const GATE = describeGate({
+  id: 'tools/ledger/check-attributes.mjs',
+  verdict,
+  loci: {
+    [COMMITTED]: { noun: /in tracked files/ },
+    [CLONE]: { noun: /(in|of) this (clone|working copy)|not registered in this clone/ },
+  },
+  probes: [
+    {
+      name: 'nothing wrong',
+      findings: [],
+      seen: { declared: 6, drivers: ['ledger', 'union'], checkedClone: true },
+    },
+    { name: 'committed only', findings: [committed()], seen: { declared: 6 } },
+    { name: 'clone only', findings: [clone(), clone()], seen: { declared: 6 } },
+    { name: 'both loci', findings: [committed(), clone()], seen: { declared: 6 } },
+  ],
+})
