@@ -16,8 +16,8 @@ split is in §8.
 four gates were ledger and secret checks, three of them already correct, picked
 so the shape was proved on working code. The fifth is `tools/board/post.mjs`,
 picked for the opposite reason: it is the file the **cause** half of the defect
-class was found in. §10 is that extraction, what it cost the shape, and the
-twelve-invocation differential that proves no output string changed. It is §10.
+class was found in. §10 is that extraction: what it cost the shape, and the
+twelve-invocation differential that proves no output string changed.
 
 ---
 
@@ -107,7 +107,7 @@ or a literal format, not a verb.
     the reader, and GitHub Actions log annotations (`::error::`, `::warning::`)
 
 ┌────────────────────────────────┐
-│ tools/board/post-verdict.mjs   │   (the fifth extraction, §11)
+│ tools/board/post-verdict.mjs   │   (the fifth extraction, §10)
 │ verdict(), unreachable(), GATE │
 └────────────────────────────────┘
         │ Verdict                      ▲ {code, line, repair} | null
