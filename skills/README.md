@@ -418,6 +418,23 @@ skill sits across a handoff from the library as it stood the day that
 skill landed, wrong by four and by five, while the `neighbours` key in
 the same directory was right and checked by this same tool.
 
+Since 2026-10-27 it reads one file outside this directory, which is
+`prompts/skill-extract.md`. The two rules above put every markdown file
+in `skills/` under an exit status and neither covered the file they are
+both written in, and that file states counts of the library too. One
+construct there is graded: **a named skill's neighbour count.** A
+backticked slug followed by "has", a spelled number and "neighbours" is
+the §5c denominator, which the tool already computes, so it is compared
+and a disagreement exits 1. That is the whole scope, deliberately. It is
+not a prose-number check, because most of that file's numbers are dated
+measurements and quotations of other files' prose, and correcting a
+quotation would falsify the record of what the quoted file said. §5e's
+worked example is what the rule was written against: it said
+`distilling-a-tuning-record` has three neighbours, which was the whole
+library on 2026-10-05 and is nine now, and §5r had already amended the
+argument around it without touching the numbers. See
+`prompts/skill-extract.md` §5ag.
+
 ## When main moves under the library
 
 ```

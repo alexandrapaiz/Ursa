@@ -113,8 +113,10 @@ and `validated: false` are answering two different questions.
 ## Added 2026-10-01, third run; rewritten 2026-10-24
 
 `prompts/skill-extract.md` §5c now asks for one near miss per adjacent
-skill, and this test was written when this skill had one neighbour. It
-now has five, so this prompt was owed and four more are owed below it.
+skill, and this test was written when this skill had one neighbour.
+Every other skill in the library is adjacent to it now, which is the
+`neighbours` line in the block at the top of this file, so this prompt
+was owed and every prompt under the headings below it was owed with it.
 It is kept under its own heading rather than folded into the list above,
 because the heading is the record of when this boundary was noticed.
 Two consequences of keeping it there, both of them mechanical: every
