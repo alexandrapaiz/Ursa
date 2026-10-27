@@ -215,10 +215,24 @@ will disagree about who defers to whom because each one's own
 §5c says a skill with three or more neighbours is probably describing a
 topic rather than a piece of work, and that the remedy is to re-cut.
 That test misfires as soon as the library covers a second artifact.
-`distilling-a-tuning-record` has three neighbours and is not a topic:
-the three existing skills all work on `outcome_record.json`, it works
-on `tuning.json`, and its three boundaries are one edge counted three
-times.
+`distilling-a-tuning-record` is the case that shows it, and it is not a
+topic. It works on `tuning.json`. Its neighbours inside
+`outcome_record.json` are `adjudicating-uncertain-spans`,
+`quoting-a-number-from-an-outcome-record`,
+`running-an-outcome-record-trial`,
+`auditing-a-detected-correction-loop`, `auditing-a-durability-walk`,
+`attributing-a-deleted-span` and
+`excluding-a-file-from-an-outcome-record`, and the boundary with every
+one of them is the same handoff between those two files, counted once
+per neighbour. Its other two neighbours are
+`adding-a-bound-to-the-record-gate` and
+`clearing-a-record-for-release`, which name no shared file at all, and
+the amendment to this section under §5r is what settles those.
+
+(This paragraph said "has three neighbours" and "the three existing
+skills" from 2026-10-05 until 2026-10-27, and both were true of the
+four-skill library it was written against. The counts are removed
+rather than corrected, and the members are named instead, per §5ag.)
 
 So the test is: **do this skill's inputs and outputs name the same file
 as its neighbours' do?** If yes, the §5c warning stands and the cut is
@@ -2470,3 +2484,104 @@ instead of the files.** So: state each residue as a thing the check does
 not see, in one line, with no verdict on whether it matters. The argument
 for why it is acceptable goes after the list, where it can be wrong
 without taking the item off it.
+
+## 5ag. The two count rules scoped every file in the library except the one they are written in, and this file's worked example for §5e was stale by six
+
+(Added 2026-10-27, by the run after §5af, measuring the one surface
+§5ae and §5af between them never put in scope.)
+
+§5ae put the trigger tests and the index under an exit status. §5af put
+the ten `SKILL.md` bodies under one. Between them that is every markdown
+file in `skills/`. It is not every file that states a count of the
+library, because both rules are written in `prompts/skill-extract.md`,
+and this file states counts of the library too.
+
+**Measured on this tip's parent, 2026-10-27.** One construct is both
+derivable and unambiguous, which is a named skill's neighbour count, so
+it is the one worth grading first. Over this file and every
+`TRIGGER-TEST.md` it appears eight times. Seven are correct and one is
+not. §5e said "`distilling-a-tuning-record` has three neighbours", which
+`node skills/trigger-coverage.mjs` computes as nine, and the two clauses
+depending on it were wrong with it: "the three existing skills all work
+on `outcome_record.json`" is now seven of them, and "its three
+boundaries are one edge counted three times" is now nine boundaries
+across three edges rather than one.
+
+**The cause, and it is a fourth one.** §5ae found a sentence carrying two
+derived numbers keeping the one nobody was thinking about. §5af found
+the library growing under a sentence, and a clause whose referent moved
+to a newer skill. This is none of those. §5r's own header says it
+amends §5e, and it does, 750 lines further down. It amended the rule and
+left the worked example standing with the superseded counts in it, so
+this file disagrees with itself across a cross-reference that announces
+the agreement. Nothing in a diff shows that, because the run that writes
+the amendment never opens the section it amends. **A header that says it
+amends another section is a claim that the two agree, and nothing checks
+it.**
+
+**The rule.** A sentence in `prompts/skill-extract.md` that states a
+named skill's neighbour count is graded against the live denominator.
+`node skills/trigger-coverage.mjs` exits 1 when it disagrees, with no
+flag to ask it not to, for the reason §5ae rule 1 gives.
+
+Three things about the shape of that check, because each is where it
+could have been wrong.
+
+1. **It grades one construct and is not a prose-number check.** §5ae
+   rule 3 declined to teach the tool to read English, and that argument
+   holds for this file more than for any other, because most of this
+   file's numbers are dated measurements and quotations of other files'
+   prose. What makes this construct safe is not the number, it is the
+   backticked slug in front of it. The slug fixes the subject, the
+   denominator is computed from the directory listing, and there is
+   nothing left to guess at.
+2. **The count is graded only where it is the denominator.** §5r's
+   amendment says "`adjudicating-uncertain-spans` has two neighbours
+   sharing no file with it at all", which is a count of a subset and is
+   correct. The discriminator is the word after the noun: a clause
+   boundary means the whole set, and a restrictive modifier means a
+   subset. A subset is not graded, and §5ae rule 2 is what covers it,
+   which is to name the members.
+3. **Present tense only.** "every skill had seven neighbours" in §5u is
+   the header of a measured table and is the record of a tree that is
+   gone. Correcting it would falsify the record, which is the line
+   `ursa-major/src/prose-bound-count.test.ts` drew and §5af restated.
+
+**The recount this run withdrew, which is the more useful half.** The
+first reading of this file flagged §5r's "two neighbours sharing no file
+with it at all" as a second defect, on the arithmetic that
+`distilling-a-tuning-record` works on `tuning.json` and so shares no
+file with `adjudicating-uncertain-spans` either. That is wrong, and
+`skills/adjudicating-uncertain-spans/TRIGGER-TEST.md` is what says so:
+distilling *reads out of* `outcome_record.json`, so its inputs name the
+shared file even though its output does not, and §5e's test is about
+inputs and outputs rather than outputs alone. The library's own near
+miss stopped a wrong repair to the library's own rule. §5ae closed by
+saying a rule about derived counts is exactly where a confident recount
+is most likely to be the error, and it is now the second run in two to
+measure that on itself.
+
+**The residue, listed, with the argument after it.**
+
+- A count of the library in this file that names no skill, as in §5af's
+  "the ten bodies".
+- A `TRIGGER-TEST.md` whose prose states a count its own `counts` block
+  carries. §5ae rule 2 forbids it and no exit status sees it.
+- A cross-reference claiming one section amends another, which is the
+  cause measured above.
+
+The first is held back deliberately, because "the ten bodies" inside a
+dated measurement is a record and the same sentence a week later is a
+falsehood, and no tool can tell them apart without the date. The second
+has one live instance, repaired by hand in this run's diff:
+`running-an-outcome-record-trial/TRIGGER-TEST.md` said "It now has five"
+where its block says nine. The third is the one worth building next and
+it is a ledger entry rather than a check in this run, because the
+mechanical form is not obvious and §5ae's general rule asks for an owner
+and a deadline instead of a guess.
+
+**Ours.** The measurement, the amended-section cause, the
+clause-boundary discriminator and the withdrawn recount are this run's.
+The three exclusions are each paid for by a case in the control set
+rather than by convenience, and the control set is the seven correct
+occurrences the same pattern finds.
