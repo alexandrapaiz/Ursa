@@ -10,6 +10,10 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-27 ~01:4x UTC message run (pass 7 on this branch)
+
+(in progress)
+
 ## Top three for the owner, 2026-10-27 ~01:4x UTC message run (pass 6 on this branch)
 
 **Nothing new to do; everything the wake named was already settled by
