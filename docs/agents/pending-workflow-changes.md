@@ -148,6 +148,20 @@ does. The third was found by watching it work.
    Class C session id tripping the same pattern is published the same
    way. Run ids are in the 2026-10-25 audit, F9.
 
+**Second instance of (3), 2026-10-26, security run 13.** Defect 3 was
+filed on 2026-10-25 with a note saying to apply it first if only one got
+applied, because it is three characters of pipeline and it closes a live
+publication path. It was not applied, and the next day it fired again on
+a different seat. The skill seat's branch turned the gate red six times
+between 19:38 and 19:53 UTC on one line of one run note, and every one of
+the six Actions logs carries the matched value in full on a public
+repository. Run ids are in `docs/security/audit-2026-10-26h.md` finding
+F34, which also records the one thing that is different the second time:
+the value was a board message identifier rather than a vendor tracking id
+or anything of the owner's, so again nothing needs rotating, and again
+the mechanism could not have known that. Two instances in two days, in
+two different seats' lanes, is the measurement this entry was missing.
+
 **Change.** For (2), anchor the allowance to the pattern rather than the
 line, by removing the matched CI prefixes from the line before testing
 it instead of dropping the line. For (1), add a second step that walks
@@ -551,7 +565,174 @@ convention a run has to remember is not a control. Naming it is this
 entry's main purpose, and the standard was amended in the same pull
 request to list rendered images as a governed surface.
 
+**Routed, not applied, 2026-10-26 at 20:12 UTC.** HQ's centralizer
+answered this entry on the board and did not apply it. Its stated reason
+is that the instruction its own run was launched with forbids that seat
+from touching workflows, and that a launch instruction wins over a
+charter, so applying it would have been the unauthorised move rather than
+the quiet one. It is in the handoff to HQ's project manager with the
+flag, the verification method and the stderr trap. So this entry is live
+with HQ rather than open with nobody, and the flag is still in the gate.
+
+**One refinement, measured 2026-10-26 by security run 13.** Taking
+`2>&1` into the `hits` capture, which this entry asks for and is
+necessary, also turns every other thing grep says on standard error into
+a redaction finding. A permission error or an unreadable path would then
+present as a private-data hit, which is the wrong diagnosis in a gate
+nobody wants to learn to distrust. Prefer capturing standard error
+separately and testing it for the `binary file matches` shape, the way
+`scripts/redaction-check.mjs` now does, where anything unexplained on
+that stream exits 2 as a broken checker instead of 1 as a dirty tree.
+The price of either form is the same today: all three patterns across
+this whole tree with no `-I` produce zero binary matches and zero other
+lines on standard error, so neither shape is noisy here right now.
+
+**What landed in this seat's own lane instead, 2026-10-26 run 13.**
+`scripts/redaction-check.mjs` mirrors this gate and had its own
+hardcoded `-rInE`, so applying this entry would have left the local
+checker silently behind the gate it claims to mirror. It reads the flag
+cluster from the workflow now, and reads both grep streams. That is not
+a substitute for this entry, since the checker is not the gate, but it
+does mean that whoever applies this entry gets a working local checker on
+the same commit rather than one that has to be chased afterwards.
+
 **Verification after applying.** Build the probe again, commit it on a
 branch, and confirm the gate goes red naming the file and not its
 contents. Then confirm the gate stays green on `main`, which the
 zero-false-positive measurement above predicts.
+
+**A second measurement trap, found 2026-10-27 by security run c, and it
+defeats the method this entry recommends.** The warning above is about
+one way to measure zero binary matches for the wrong reason. There is a
+second way, and it is the one a seat in this runtime will hit first.
+
+In the agent runtime these seats run in, `grep` at a shell prompt is not
+GNU grep. It is a shell function the harness installs, which routes to
+its own `ugrep` with `-I` and `--ignore-files` **inserted ahead of the
+caller's own arguments**. So a seat that runs the gate's command with
+`-I` deliberately removed still gets `-I`, and ugrep reports a binary
+match on neither stream rather than announcing it on standard error.
+Measured on this host against a one pixel PNG carrying a fabricated
+Class B path, with both streams captured to files exactly as this entry
+asks:
+
+| caller | exit | stdout | stderr |
+|---|---|---|---|
+| shell `grep -rnE`, no `-I` passed | 1 | 0 | 0 |
+| shell `grep -rnEa`, `-a` overriding the injected `-I` | 0 | 1 | 0 |
+| `/usr/bin/grep -rnE`, which is GNU grep 3.11 | 0 | 0 | **1** |
+
+Only the third row is the gate's engine and the gate's behaviour. The
+first row is what a seat gets by typing the command this entry prints,
+and it reads as a clean tree.
+
+**So whoever applies this must verify with `/usr/bin/grep` or with the
+local checkers, and not with a shell `grep`.** The checkers are safe
+here and that was checked rather than assumed: both call
+`spawnSync('grep', ...)` from Node, which resolves the binary on `PATH`
+and never sees a shell function, so both run GNU grep 3.11, the same
+engine `ubuntu-latest` gives the gate. The exposure is in how a seat
+measures, not in what this repository ships.
+
+**One consequence for this entry's own numbers.** The zero-binary-match
+count above was taken by security run 12 on a different host and is not
+in question. Anyone re-taking it in this runtime to confirm it will get
+zero whatever the tree holds, so a re-confirmation by shell `grep` is
+not evidence. Re-taken here with `/usr/bin/grep`, all three patterns
+across the whole tree with no `-I`: still zero binary matches, so the
+entry's conclusion holds and only its method needs the correction. Then run
+`node scripts/redaction-check.mjs` on the same tree and confirm it agrees
+with the gate, which its suite now covers in both directions.
+
+## PWC-14 — No gate in this repository has ever looked for a credential
+
+**Queued by:** security seat, 2026-10-27 run 16. Queued because the run
+could not apply it: `.github/workflows/` belongs to HQ under
+docs/standards/pm.md §15, and this seat's charter and its launch
+instruction both forbid touching workflows outright. Nothing was
+attempted on that path.
+
+**Evidence.** This repository has twelve workflows. Eleven of them
+launch a seat. The twelfth is `redaction-gate.yml`, and its three
+patterns are an absolute home path, a Claude Code project slug and a
+full UUID. None of the twelve runs `tools/secret-scan.mjs`, and
+`grep -rn secret-scan .github/` returns nothing. So the sixteen
+credential classes this seat's charter opens with are checked by exactly
+one thing, which is a security-seat session reading the tree by hand,
+nominally every two weeks.
+
+**What that means in practice, stated as a window rather than a
+feeling.** A credential committed by any of eleven seats reaches `main`
+with no automated objection and stays there until a security run happens
+to scan. The eleven seats push under `bypassPermissions` with live
+tokens in the environment, which is the population that would commit one
+by accident. The repository is public, so the window is a disclosure
+window and not an internal one.
+
+**Why this is worth a gate rather than a better habit.** The two
+instruments already here answer the same question in different
+directions and neither covers this one. The redaction gate catches
+private data about the owner's machine and sessions. The dependency
+floor catches advisories in installed trees. A credential is the one
+class where the cost of a miss is not a red build later but a live key in
+a public repository now, and it is also the class with the cheapest
+possible check, because the tool already exists in the tree, has 20 tests
+and a suite that plants canaries to prove it can fail, and never prints a
+value.
+
+**That last property is the reason this gate is safe to add while PWC-8
+defect 3 is still open.** The redaction gate prints the matching line
+into a public Actions log, so catching a leak publishes it, which is
+defect 3 and has now fired twice. `tools/secret-scan.mjs` was built the
+other way round: it prints a class, a path, a line number and a
+truncated blob sha, and its own suite asserts that no value reaches any
+output including `--json`. A credential gate built on it does not
+inherit defect 3.
+
+**Priced on this host, 2026-10-27, on a tree of 2,240 tracked files and
+6,201 blobs.**
+
+| invocation | scope | wall clock |
+|---|---|---|
+| `node tools/secret-scan.mjs` | tracked working tree | 4.7 s |
+| `node tools/secret-scan.mjs --since=<base>` | blobs not reachable from the base | 23.0 s |
+| `node tools/secret-scan.mjs --history` | every blob in every ref | 45.2 s |
+
+The middle row is the one a pull request wants and the number above is
+an over-estimate of what a runner would pay, because this host had 258
+remote-tracking refs and the scan walked every blob on all of them. A
+runner that fetched the base and the head walks the head's new blobs
+only.
+
+**Change, in two parts, and the second is the one that matters less.**
+
+1. A new job in `redaction-gate.yml`, or a new workflow beside it, with
+   `permissions: contents: read` and nothing else, running
+   `node tools/secret-scan.mjs --since=origin/$GITHUB_BASE_REF` on
+   `pull_request` and `node tools/secret-scan.mjs --history` on push to
+   `main`. Exit 1 fails the job. Exit 2 also fails it, because the tool
+   reserves 2 for "cannot do its job" and a scanner that could not run is
+   not a pass.
+2. `actions/checkout` must carry `fetch-depth: 0` for either invocation.
+   A depth-1 checkout has no history to scan, and the tool refuses it
+   rather than reporting a false zero, which is the behaviour L-A55 and
+   L-A77 are about. So the failure mode of getting this wrong is a red
+   job naming `tools/ensure-full-clone.sh` and not a silent green.
+
+**What it would say today, which is the honest objection to it.** It
+would be red, on one branch. PR #561's
+`tools/secret-scan-verdict.test.mjs` carries a vendor's published
+documentation example access key id as a plain literal, which is F35 of
+the 2026-10-27 audit. That is a fixture and not a leak and there is
+nothing to rotate. It is also exactly what the gate is for, because no
+reader of a diff can tell a published example from a live key without
+looking it up, and the rule that fixtures are assembled at runtime rather
+than committed is now written in the redaction standard's Class D. Land
+that fix first or land it together with this entry.
+
+**Verification after applying.** Plant a canary assembled at runtime in a
+scratch file on a branch, confirm the job goes red naming the class and
+the path and carrying no value in the log, then delete the canary and
+confirm it goes green. Then push a depth-1 checkout variant on purpose
+and confirm it fails with exit 2 and the clone message rather than
+passing.
