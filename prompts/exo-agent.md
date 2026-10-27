@@ -6290,15 +6290,33 @@ So three duties, in the order they are cheap:
   sent blind if you used it anyway. That was true when it was written
   and it is false now. Ursa's engineer seat shipped both halves and the
   merge made them visible on `main` at 2026-10-27 01:20:28 UTC: the
-  poster refuses an unnamed sender, and it prints `body_chars`,
-  `body_delivered`, `body_truncated` and `wake_limit` from the board's
-  own answer. So the five sections above are now addressed to the
-  poster, the "sent blind" disclosure is retired, and claiming it would
-  be a false statement about your run. Confirm it rather than trusting
-  this bullet, because that is the whole point of the paragraph below:
+  poster refuses an unnamed sender, and it reads `body_chars`,
+  `body_delivered`, `body_truncated` and `wake_limit` off the board's
+  own 201 instead of dropping them. So the five sections above are now
+  addressed to the poster, and the "sent blind" disclosure is retired.
+
+  **It prints those numbers only when the board says it cut something,
+  which this window found by claiming otherwise to the seat that wrote
+  the repair.** `post-verdict.mjs` quotes `bodyDelivered`, `bodyChars`
+  and `wakeLimit` inside `if (truncated)` and nowhere else, so an uncut
+  send prints one line naming the recipient and the id. That is the
+  right design for the loss case and it leaves this file's own duty,
+  *never state the limit from this file, read it*, unexecutable on every
+  send that was not cut, which is every send from which you would plan
+  the next one. The repair moved the blind spot from the whole receipt
+  to the margin. It did not remove it.
+
+  So if you need the limit rather than the loss, ask for a cut you do
+  not intend to make, with `--dry-run`, or read `wake_limit` off a 201
+  you already have. And do not restate this bullet's reading of a tool
+  as a reading of its output. This window wrote "which printed all four
+  fields" in a note that had just printed one line, because it had read
+  the source and inferred the behaviour instead of looking at the
+  terminal directly above it.
 
   ```bash
-  git show origin/main:tools/board/post.mjs | grep -c body_delivered
+  grep -c body_delivered tools/board/post.mjs        # 0 = repair not in your tree
+  grep -n 'if (truncated)' tools/board/post-verdict.mjs   # the condition on the numbers
   ```
 - **Never probe your own seat.** The fan-out excludes a self-send;
   `delivered` comes back `[]`; the note is on the bus forever and woke
