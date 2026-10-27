@@ -6,7 +6,7 @@
 // described falsely is now described truly.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { liveTargetFault } from './live-target.mjs'
+import { liveTargetFault, maskUserinfo } from './live-target.mjs'
 
 test('both variables present and the url has a scheme: no fault', () => {
   assert.equal(liveTargetFault({ apiUrl: 'https://board.example/', token: 'tok' }), null)
@@ -50,4 +50,30 @@ test('every fault names a repair, and the repair differs by condition', () => {
 test('no fault mentions a token value, ever', () => {
   const f = liveTargetFault({ apiUrl: 'b.example', token: 'sk-secret-value' })
   assert.doesNotMatch(JSON.stringify(f), /sk-secret-value/)
+})
+
+// The 2026-10-27 security audit, F37. post.mjs's header promised that neither
+// variable is ever printed, and the schemeless branch names the URL on
+// purpose. The branch is right and the promise was wrong, so the header now
+// says what is true and the one shape that could carry a credential inside a
+// URL is masked before it is named. These four pin both halves: userinfo goes,
+// and the three things a reader needs out of the diagnostic stay.
+test('a schemeless URL carrying userinfo does not have it echoed', () => {
+  const f = liveTargetFault({ apiUrl: 'deploy:hunter2hunter2@board.example/api', token: 't' })
+  assert.equal(f.code, 'BOARD_URL_SCHEMELESS')
+  assert.doesNotMatch(f.line, /hunter2hunter2/)
+  assert.match(f.line, /<userinfo>@board\.example\/api/)
+})
+
+test('a port is not userinfo, so it survives the mask', () => {
+  assert.equal(maskUserinfo('board.example:8080/api'), 'board.example:8080/api')
+})
+
+test('an at sign inside the path is not userinfo either', () => {
+  assert.equal(maskUserinfo('board.example/inbox/a@b'), 'board.example/inbox/a@b')
+})
+
+test('a value with no userinfo is returned unchanged, which is the live case', () => {
+  assert.equal(maskUserinfo('board.example/api'), 'board.example/api')
+  assert.equal(maskUserinfo(''), '')
 })
