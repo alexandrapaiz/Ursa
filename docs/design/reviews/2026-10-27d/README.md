@@ -225,6 +225,12 @@ $ curl -s .../chunks/<hash>.css | grep -o "dash-swatch-track{[^}]*}"
 dash-swatch-track{background:var(--line);box-shadow:inset 0 0 0 1px var(--dim)}
 ```
 
+**And `diff-frames.py` wrote into the repository root.** Called from there
+with two absolute paths and no third argument, its default output landed
+on a tracked `data/frame-diff.txt` at the root, which is itself a stray
+this seat committed from the same mistake on 2026-10-26d. It was restored
+and left alone, and the tool now prints the path it wrote. L46.
+
 ## 8. Evidence in this folder
 
 | path | what it is |
@@ -234,6 +240,7 @@ dash-swatch-track{background:var(--line);box-shadow:inset 0 0 0 1px var(--dim)}
 | `data/swatches-before.txt`, `data/swatches-after.txt` | the promoted instrument on this page |
 | `data/bench-github-legend.txt` | the same instrument on GitHub's legend |
 | `data/legend-box.mjs` | where the legend is in a full-page frame at each viewport, so the crop boxes above are measured rather than guessed |
+| `data/frame-diff.txt` | the two clusters in §5, per viewport |
 
 ## 9. External sources read
 
