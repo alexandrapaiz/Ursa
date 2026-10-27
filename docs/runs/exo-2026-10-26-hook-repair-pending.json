@@ -1,0 +1,197 @@
+{
+  "base": "origin/main",
+  "text": "INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares",
+  "unreadableHeads": [
+    "refs/prs/519",
+    "refs/prs/518"
+  ],
+  "findings": [
+    {
+      "path": "docs/ideas.md",
+      "baseCount": 2,
+      "verdict": "pending",
+      "repairedBy": [
+        515,
+        511
+      ],
+      "heads": [
+        {
+          "number": 517,
+          "headRefName": "ursa-pm/2026-10-26-scheduled",
+          "isDraft": true,
+          "ref": "refs/prs/517",
+          "readable": true,
+          "mergeBase": "fcfb33e99df87ce780eb4e9de22bd09b8dd06622",
+          "forkCount": 2,
+          "headCount": 2,
+          "klass": "unchanged"
+        },
+        {
+          "number": 516,
+          "headRefName": "ursa-exo/2026-10-26-message-6",
+          "isDraft": true,
+          "ref": "refs/prs/516",
+          "readable": true,
+          "mergeBase": "fcfb33e99df87ce780eb4e9de22bd09b8dd06622",
+          "forkCount": 2,
+          "headCount": 2,
+          "klass": "unchanged"
+        },
+        {
+          "number": 515,
+          "headRefName": "ursa-skill/2026-10-26-message-3",
+          "isDraft": true,
+          "ref": "refs/prs/515",
+          "readable": true,
+          "mergeBase": "fcfb33e99df87ce780eb4e9de22bd09b8dd06622",
+          "forkCount": 2,
+          "headCount": 0,
+          "klass": "repaired"
+        },
+        {
+          "number": 514,
+          "headRefName": "ursa-engineer/2026-10-26-message-6",
+          "isDraft": true,
+          "ref": "refs/prs/514",
+          "readable": true,
+          "mergeBase": "fcfb33e99df87ce780eb4e9de22bd09b8dd06622",
+          "forkCount": 2,
+          "headCount": 2,
+          "klass": "unchanged"
+        },
+        {
+          "number": 513,
+          "headRefName": "ursa-exo/2026-10-26-message-5",
+          "isDraft": false,
+          "ref": "refs/prs/513",
+          "readable": true,
+          "mergeBase": "354f9df0bf3433c64d7dc1237e344bcb1ae28143",
+          "forkCount": 2,
+          "headCount": 2,
+          "klass": "unchanged"
+        },
+        {
+          "number": 512,
+          "headRefName": "ursa-security/2026-10-26-message-5",
+          "isDraft": true,
+          "ref": "refs/prs/512",
+          "readable": true,
+          "mergeBase": "fcfb33e99df87ce780eb4e9de22bd09b8dd06622",
+          "forkCount": 2,
+          "headCount": 2,
+          "klass": "unchanged"
+        },
+        {
+          "number": 511,
+          "headRefName": "ursa-skill/2026-10-26-message-2",
+          "isDraft": false,
+          "ref": "refs/prs/511",
+          "readable": true,
+          "mergeBase": "fcfb33e99df87ce780eb4e9de22bd09b8dd06622",
+          "forkCount": 2,
+          "headCount": 0,
+          "klass": "repaired"
+        },
+        {
+          "number": 510,
+          "headRefName": "ursa-pm/2026-10-26-message-14",
+          "isDraft": false,
+          "ref": "refs/prs/510",
+          "readable": true,
+          "mergeBase": "25f2963d7333bcbda713110a63897ae2871adda9",
+          "forkCount": 2,
+          "headCount": 2,
+          "klass": "unchanged"
+        },
+        {
+          "number": 509,
+          "headRefName": "ursa-market/2026-10-26-message-31",
+          "isDraft": false,
+          "ref": "refs/prs/509",
+          "readable": true,
+          "mergeBase": "fcfb33e99df87ce780eb4e9de22bd09b8dd06622",
+          "forkCount": 2,
+          "headCount": 2,
+          "klass": "unchanged"
+        },
+        {
+          "number": 508,
+          "headRefName": "ursa-exo/2026-10-26-message-4",
+          "isDraft": false,
+          "ref": "refs/prs/508",
+          "readable": true,
+          "mergeBase": "354f9df0bf3433c64d7dc1237e344bcb1ae28143",
+          "forkCount": 2,
+          "headCount": 2,
+          "klass": "unchanged"
+        },
+        {
+          "number": 507,
+          "headRefName": "ursa-pm/2026-10-26-message-13",
+          "isDraft": false,
+          "ref": "refs/prs/507",
+          "readable": true,
+          "mergeBase": "25f2963d7333bcbda713110a63897ae2871adda9",
+          "forkCount": 2,
+          "headCount": 2,
+          "klass": "unchanged"
+        },
+        {
+          "number": 505,
+          "headRefName": "ursa-pm/2026-10-26-message-12",
+          "isDraft": false,
+          "ref": "refs/prs/505",
+          "readable": true,
+          "mergeBase": "25f2963d7333bcbda713110a63897ae2871adda9",
+          "forkCount": 2,
+          "headCount": 2,
+          "klass": "unchanged"
+        },
+        {
+          "number": 503,
+          "headRefName": "ursa-security/2026-10-26-message-4",
+          "isDraft": true,
+          "ref": "refs/prs/503",
+          "readable": true,
+          "mergeBase": "76da2f02373dd6a7a9ff85d34229ab47cc0f3e63",
+          "forkCount": 2,
+          "headCount": 2,
+          "klass": "unchanged"
+        },
+        {
+          "number": 499,
+          "headRefName": "ursa-engineer/2026-10-26-message-5",
+          "isDraft": true,
+          "ref": "refs/prs/499",
+          "readable": true,
+          "mergeBase": "4cd73a5d82a2bbeb057a7a82562ccbca0d3bd602",
+          "forkCount": 2,
+          "headCount": 2,
+          "klass": "unchanged"
+        },
+        {
+          "number": 447,
+          "headRefName": "ursa-exo/2026-10-26-message",
+          "isDraft": false,
+          "ref": "refs/prs/447",
+          "readable": true,
+          "mergeBase": "132398fb0e08bf0f5dcfaeaa9b8586f438169230",
+          "forkCount": 0,
+          "headCount": 0,
+          "klass": "stale-root"
+        },
+        {
+          "number": 395,
+          "headRefName": "ursa-research/2026-10-24-hook-2",
+          "isDraft": false,
+          "ref": "refs/prs/395",
+          "readable": true,
+          "mergeBase": "18587707a35e5104ec276a618f9eb055cc6e1a9e",
+          "forkCount": 0,
+          "headCount": 0,
+          "klass": "stale-root"
+        }
+      ]
+    }
+  ]
+}

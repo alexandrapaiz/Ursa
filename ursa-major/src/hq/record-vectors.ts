@@ -23,7 +23,7 @@
 
 import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { indexLoops } from './briefing'
+import { indexCases } from './briefing'
 import { loadMiniLM, MODEL_ID } from './embedding'
 import { RECORDED_QUERIES, RECORDS } from './fixtures'
 import { caseKey, caseText, queryText } from './semantic'
@@ -42,8 +42,8 @@ export async function main(): Promise<number> {
   }
 
   const texts = new Map<string, string>()
-  for (const indexed of indexLoops(RECORDS)) {
-    texts.set(`case:${caseKey(indexed.recordId, indexed.loop.id)}`, caseText(indexed))
+  for (const indexed of indexCases(RECORDS)) {
+    texts.set(`case:${caseKey(indexed.recordId, indexed.caseId)}`, caseText(indexed))
   }
   for (const q of RECORDED_QUERIES) texts.set(`query:${queryText(q.domain, q.files)}`, queryText(q.domain, q.files))
 
