@@ -89,6 +89,18 @@ Before you read anything else, find the work your own seat has already
 done and not yet landed:
 
 ```bash
+# First, because every check below lies in the clone this host hands you.
+# The checkout is one branch's tip, one commit deep: `merge-base
+# --is-ancestor` then returns a clean exit code meaning the opposite of the
+# truth, `merge-tree` exits 128 and reads as a conflict, and no
+# `origin/<branch>` but `origin/main` ever resolves however often you fetch
+# it by name. Git refuses none of those questions; it answers them wrongly.
+# HQ's docs/standards/lessons.md names this repair by this path in L-A55 and
+# L-A77. Added to this charter 2026-10-27 by Ursa's exo seat, which had been
+# the only one of the eleven carrying it while all eleven are handed the same
+# clone, and Ursa's research seat is the seat that reported the fault.
+bash tools/ensure-full-clone.sh
+
 gh pr list --state open --limit 100 --json number,headRefName,title,updatedAt \
   --jq '.[] | select(.headRefName | test("^([a-z0-9-]+-)?(sec|security)/"))'
 ```
@@ -98,7 +110,9 @@ touch, merge it into your branch and build on top of it. Do not start
 from `main` and write a second version. The newest one usually contains
 the older ones already, so check with
 `git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>` before you
-assume you have to combine them by hand. This is HQ's L-E10 in
+assume you have to combine them by hand — and run the repair above first,
+or that check will tell you two related branches are unrelated. This is
+HQ's L-E10 in
 docs/standards/lessons.md, "an open card is not evidence that nobody
 built it", stated for the whole roster instead of one seat.
 
@@ -176,6 +190,31 @@ Open the pull request before you do the work, not after. In your first
 few turns, before any substantial thinking: create your branch, make one
 small commit, push it, and open the PR with `gh pr create --draft`. Then
 commit as you go, and call `gh pr ready` when the run is finished.
+
+**Title it for what the branch contains, not for what you intend (added
+to this charter 2026-10-27 by Ursa's exo seat; it had been in one of the
+eleven since 2026-10-18).** The opening commit is a placeholder, so the
+opening title says so: `security YYYY-MM-DD: opening, no work yet`. Rename
+it with `gh pr edit --title` as the work actually lands, and put the plan
+in the body under a heading that marks it as a plan.
+
+The title is written at the one moment in the run when nothing has been
+done, which is why intention is the natural thing to put there, and
+nothing in the loop ever goes back to check it. That is harmless while
+the run lives and rewrites it at the end. **When the run dies instead,
+what is left in the owner's merge queue is a promise that reads exactly
+like finished work.** Ursa incident 16 is two instances of it, and the
+measured case that propagated this rule to the other ten charters is a
+third from a different seat: a draft opened 2026-10-27T00:36Z whose
+title read as a repair already made, whose own run note inside the diff
+said "Intended unit of work", and whose named one-line fix was
+byte-identical to `main`. The file was honest and the title was not,
+because this paragraph was in one charter and the stub convention was in
+all eleven.
+
+Writing the stub honestly is not a substitute. A reader who finds your
+run after it is gone reads the queue, and the queue shows titles.
+
 
 This is not bookkeeping. The rule reaches Ursa through
 docs/standards/pm.md §8, and it was written after two runs in
