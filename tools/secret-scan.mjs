@@ -51,6 +51,8 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { renderVerdict } from './gates/verdict-shape.mjs';
+import { hitLine, unusable, verdict } from './secret-scan-verdict.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -104,13 +106,17 @@ function git(args, opts = {}) {
 }
 
 function fail(why, detail) {
+  // The ground verdict: no findings to derive anything from, so it lives in
+  // ./secret-scan-verdict.mjs as `unusable` rather than as a branch of
+  // `verdict`. JSON callers keep the document they already parse.
+  const v = unusable(why, detail);
   if (JSON_OUT) {
     console.log(JSON.stringify({ ok: false, usable: false, why, detail }, null, 2));
   } else {
-    console.error(`secret-scan: cannot do its job: ${why}`);
-    if (detail) console.error(`  ${detail}`);
+    console.error(v.line);
+    for (const extra of v.trailer) console.error(extra);
   }
-  process.exit(2);
+  process.exit(v.exitCode);
 }
 
 // Classify a blob's text. Returns the class names that matched, never the
@@ -284,24 +290,17 @@ const result = has('history') || since ? scanHistory(since) : scanTree();
 result.classes = CLASSES.length;
 result.ok = result.hits.length === 0;
 
+// The verdict is derived from `result.hits`, the same array the per-hit lines
+// below come from, in ./secret-scan-verdict.mjs. Extracted 2026-10-26 with
+// every output string byte-identical; that file's header records the three ways
+// this gate did not fit the shape the two repaired gates suggested.
+const v = verdict(result.hits, result);
+
 if (JSON_OUT) {
   console.log(JSON.stringify({ usable: true, ...result }, null, 2));
 } else {
-  const scope = result.since ? `${result.mode} ${result.since}..` : result.mode;
-  const skipped = result.skipped_oversize || result.skipped_unreadable || 0;
-  console.log(
-    `secret-scan ${scope}: ${result.scanned} ${result.unit}, ${result.classes} classes, ` +
-      `${result.hits.length} hit(s)${skipped ? `, ${skipped} skipped and unscanned` : ''}.`
-  );
-  for (const hit of result.hits) {
-    // Location and class only. The value is never printed. See the header.
-    console.log(`  ${hit.class}  ${hit.where}:${hit.line}${hit.blob ? `  blob ${hit.blob.slice(0, 12)}` : ''}`);
-  }
-  if (!result.ok) {
-    console.log('');
-    console.log('Do not print, quote or copy the value. Record file, commit and kind,');
-    console.log('mark it urgent in the ledger, and say rotation is the owner\'s action.');
-  }
+  // Location and class only. The value is never printed. See the header.
+  for (const out of renderVerdict(v, result.hits.map(hitLine))) console.log(out);
 }
 
-process.exit(result.ok ? 0 : 1);
+process.exit(v.exitCode);
