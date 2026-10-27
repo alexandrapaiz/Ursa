@@ -749,6 +749,40 @@ bar they need or whether the brief should wait for a cheaper sweep
 method (ledger proposal below) to widen the sample before citing the
 number.
 
+## The one name closest to "real deliverable" in the mapped 42 still builds a constructed digital twin (2026-10-26, 31st message run)
+
+Swept rl-list.com's full listing text for all 42 names in one pass
+(the ledger proposal the entry above pointed to), instead of
+continuing to spot-check vendor pages one at a time. One name reads
+differently from the other 41: Idler (YC S25, $9M seed, Paradigm-led,
+launched August 2026) describes its environments as "built from real
+production work," specifically a decade of an actual multi-brand
+retailer's real operational data (ShelfLife) and a real law firm's
+anonymized records (CorpLaw). That is a more specific real-sourcing
+claim than any of the six names already examined made.
+
+It still does not clear CLAUDE.md §1's bar. Idler's own term for
+ShelfLife is "a digital twin," a constructed reproduction seeded with
+that data, and the grading question ("can an agent execute with
+appropriate judgment and precision" in a simulated leadership role) is
+an authored evaluation, not a real outcome the business's own work was
+judged against after the fact. Idler also names no lab customer by
+name, the same unverified self-claim pattern as the rest. Tally: 7 of
+42 individually examined (6 direct spot-checks across the 29th and
+30th runs, plus Idler via this run's sweep), 7 of 7 authored-not-real,
+and the sweep of the other 35 names' own listed language in the same
+pass surfaced nothing closer.
+
+The positioning consequence: the verifier-gap sentence in a lab brief
+can now cite full-directory coverage rather than a 14% sample, and it
+reads sharper for naming a near-miss than it would from clean
+negatives alone. "Even the vendor whose own marketing leans hardest on
+real operational history still builds a simulation, not a deliverable"
+is a stronger sentence than "nobody in this market does this," because
+it shows the line held against the hardest case the market offers
+rather than one nobody tested. No pricing recommendation made; this is
+evidence for the verifier-gap claim's wording, not a price decision.
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
@@ -927,6 +961,14 @@ number.
   bringing the tally to 6 of 42 checked and 6 of 6 authored. No pricing
   recommendation made; still too thin a sample (14%) to call the gap
   market-wide.
+- 2026-10-26 (event-driven, message, 31st run) — swept rl-list.com's
+  full listing for all 42 names in one pass. Found one name (Idler)
+  whose own marketing claims real-production-data sourcing closer to
+  CLAUDE.md §1's framing than any name checked so far, but its own
+  term for the result ("a digital twin") still names a constructed
+  simulation, not a real deliverable. Tally now 7 of 42 examined, 7 of
+  7 authored-not-real, full-directory coverage rather than a sample.
+  No pricing recommendation made.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 
@@ -1256,3 +1298,83 @@ against this comp: MemoryLake is evidence the market wants a neutral
 store, priced in the same $19-199/mo band Wire and MemoryLake both
 now occupy, not evidence any named product currently delivers
 verified neutrality. No pricing recommendation made.
+
+## Users resist automatic memory itself, not just its visibility — a distinct axis from the transparency gap already closed (2026-10-27, message run)
+
+This run's demand-signals ceremony read the discussion under "Switch to
+Claude without starting over" (Hacker News, ~592 points / 273 comments,
+covering Anthropic's cross-vendor memory-import launch this file already
+maps in docs/market/landscape.md). The thread is seven months old and
+found this run rather than new this week, but the finding survives that:
+it is the first time this file has read past a launch's own coverage to
+the discussion under it, and several of the most-upvoted comments
+converge independently on the same complaint. The top comment argues
+custom instructions and Skills handle preferences better than automatic,
+accumulating memory; one commenter calls seeing their own inferred
+profile "spelt out... icky" even though they'd accepted the same
+inference passively before seeing it stated; another reports Claude
+surfacing an unrelated months-old detail unprompted and disabling memory
+outright afterward. The shared preference across these replies is a
+manually-scoped context (Projects, a custom-instructions file) over one
+the product writes to on its own.
+
+The 2026-09-30 entry above ("Portability over transparency") narrowed
+Major's Category 3 edge to portability after OpenAI shipped per-response
+visibility into inferred memory. This finding names a second axis that
+entry didn't cover, and the two should not be read as the same gap: not
+"can the user see what was inferred" but "did the user choose for
+inference to happen at all." CLAUDE.md's non-negotiable #2 ("the user
+can always see, edit, revoke, and delete") answers the first axis. It is
+silent on the second, which is what this thread's commenters are actually
+arguing about. Whether Major's own product makes inference opt-in per
+category, or opt-out by default with a strong edit/delete surface after
+the fact, is a product question this file cannot answer by reading a
+public page. The honest positioning note: against this specific, sourced
+complaint, "you can revoke and delete" is a weaker promise than "we
+asked before we inferred," and nothing in this file's own mapping of
+Major's non-negotiables currently distinguishes which of the two Major
+is. No pricing recommendation made. No new landscape.md entry: this is
+commentary under an already-mapped product, not a new competitor.
+
+Sources: [Hacker News: Switch to Claude without starting over](https://news.ycombinator.com/item?id=47204571).
+
+## "Opt-in" is not the same claim as "never monetizes the user" — Google's Personal Intelligence shows why consent alone is not the differentiator (2026-10-27, message run)
+
+The prior entry left an open question this file could not answer from
+outside: whether "opt-in per category" or "opt-out with strong
+edit/delete" is a real difference, or whether both end up equally
+defensible once a lab actually ships one. This run's landscape ceremony
+found a real product that ships the first, cleanly, and it answers the
+question in a way that cuts against treating opt-in as sufficient on
+its own.
+
+Google's Gemini Personal Intelligence (new landscape.md entry, this
+run) is opt-in: Personal Intelligence does not read Gmail or Photos
+until the user explicitly enables it, which is exactly the "we asked
+before we inferred" shape the prior entry's Hacker News commenters said
+they wanted. But on 2026-10-16 Google changed its privacy policy so
+that enabling Personal Intelligence also makes that same Gmail and
+Photos content eligible for ad personalization, a carve-out into
+language that previously excluded that content from targeting
+entirely. The opt-in consent and the monetization are gated by the
+same switch. A user who wants Gemini to know their inbox cannot get
+that without also opting their inbox into ads.
+
+This means "did you ask before you inferred" is not, by itself, the
+axis Ursa Major should rest its pitch on. Google can satisfy that
+exact bar — explicit, per-feature, off-by-default consent — while
+still tying the consent to the lab's own revenue. The sharper claim,
+and the one CLAUDE.md's non-negotiable #1 already states but this
+file has not yet pointed at a concrete comparison for, is that Ursa
+Major's consent is never a gate to being monetized directly, full
+stop, not merely a gate the user had to actively open. Major's pitch
+should name this distinction specifically against Personal Intelligence
+rather than resting on "opt-in" as a word, because Google now owns that
+word too. No pricing change follows from this; it sharpens positioning
+language only. No ledger proposal: this is copy guidance for whoever
+owns Major's consent-architecture page, same owner as the prior entry,
+not a new product test to run.
+
+Sources: [9to5Google: Google will target ads based on Gmail, Photos
+data if Personal Intelligence is
+enabled](https://9to5google.com/2026/10/23/google-will-target-ads-based-on-gmail-photos-data-if-personal-intelligence-is-enabled/).

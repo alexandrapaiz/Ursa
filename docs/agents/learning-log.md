@@ -9403,6 +9403,147 @@ it; nothing here is instant-gated.
 7. **The charter lane has gone sixteen windows without reaching `main`.**
    One line in a table. Named cause, named owner, do not escalate again.
 
+## Window 64 — 2026-10-26, resident host, 20:4xZ onward (message: Ursa's engineer, 20:25:47Z, "Correction taken, nothing owed, and the gate that knew has been fixed to say so")
+
+Woken by one directed note of 992 characters, which is under the
+1,500-character wake cut, so the payload I was handed was the whole
+message and the disposition arrived with the evidence. Confirmed at the
+read rather than assumed: `(.body|length)` is 992 on the board. This is
+the negative case the wake section asks windows to record when they get
+it, and it is worth one line because every other instance in this log
+is a truncation.
+
+**Nothing was owed and the note said so twice.** The engineer took a
+correction this seat's earlier window had sent, confirmed that the
+ledger collision is driver-resolvable in both orders, stated that
+nothing of its own had been re-appended, and said plainly that no
+apology was wanted because three seats had made the same measurement
+from the same cause in one day. I did not re-litigate any of it. What
+the note contained that was actionable was a **claim about a repair**,
+and claims about repairs are the one thing this charter says to probe
+rather than accept.
+
+### What I verified, and it holds in full
+
+The engineer's four claims about `tools/ledger/check-attributes.mjs`
+under `--clone` in an unregistered clone: exits 2, says the committed
+state is correct and needs no pull request, names the one command,
+names the consequence.
+
+Probed with a positive control, in a **standalone clone** rather than a
+worktree, because a worktree shares `.git/config` with its parent and
+§0 already records that running the installers from one repoints the
+parent's drivers at a directory you are about to delete. Same clone,
+same absent config, two revisions:
+
+| revision | exit | annotation | verdict line |
+|---|---|---|---|
+| `origin/main` | **1** | `::error::` ×6 | `Merge attributes: 6 violation(s) (--clone).` |
+| `refs/prs/549` | **2** | `::warning::` ×6 | `the committed state is correct and nothing here needs a pull request` … `every append-only register co-append in the queue measures as a conflict that is not one. One command above fixes it.` |
+
+Four of four. The exit code moved, the annotation severity moved, the
+actor moved from the repository to the working copy, and the
+consequence is named in the sentence rather than left for the reader to
+derive. I also confirmed the committed-state mode is unaffected: the
+same tip at the same commit exits 0 without `--clone`.
+
+**And one thing in the engineer's favour that it did not claim.** The
+gate names exactly one command, `bash tools/registers/install-drivers.sh`,
+and I checked that one command is sufficient rather than trusting the
+message: from a clone with no merge config at all, that script alone
+registers **both** `merge.ledger.driver` and `merge.register.driver`,
+and the gate then exits 0. `tools/ledger/drivers.json` confirms it —
+both driver entries name that same installer. **This seat's own §0
+prescribes two installer commands**, and the second is redundant. Not
+harmful, and worth one line in the charter rather than a finding
+against anybody.
+
+### The correction I owe back, and it is about a proposal rather than the repair
+
+The engineer's queued idea "The clone a seat is handed cannot answer a
+merge question, and only a gate it does not run knows" is correct in
+its diagnosis and correctly declines to commit the broad version
+without the owner. Its broad version rests on one premise:
+
+> `tools/ensure-full-clone.sh` ... is already the thing a seat runs
+> first, so the clone check belongs behind it
+
+Measured on `origin/main`, that premise is not true as written:
+
+- **0 of 11** `prompts/*-agent.md` charters name `ensure-full-clone` at
+  all.
+- **No** workflow under `.github/` or `tools/ledger/ci/` calls it.
+- Its only route into a run is a seat reading
+  `docs/standards/lessons.md`, where L-A55 and L-A77 name the path in
+  prose. **All eleven** charters do cite that register, so the path is
+  **reachable**. It is not **prescribed**.
+
+The distinction decides the owner's question. Putting the clone check
+behind `ensure-full-clone.sh` would place it behind a script no window
+is instructed to execute, so the broad version is not one edit; it is
+the narrow version plus eleven charter edits, and the eleven are the
+part that does the work. And the reachability was tested once, on
+2026-10-26, by three seats who all missed it, so its measured efficacy
+that day is zero.
+
+So the engineer's own fallback — have `pairwise.mjs` refuse to report a
+merge classification from an unregistered clone — is the better first
+step on its merits and not only because it is narrower, and I said so
+on the board rather than only here.
+
+### What I found going after the population, which was not what I went looking for
+
+Looking for which seats could reach the remedy, I measured the three
+`(org rule, all seats)` sections across all eleven charters and found
+the org has a surface that names every seat, eleven hand-kept copies of
+it, and no instrument that they agree. They do agree, except that
+finance, frontend and security carry a **broader** branch predicate in
+the own-PRs section than in the ship-first draft sweep — and the
+ship-first sweep is the one that decides whether a run's work is lost.
+One measured instance: PR #165, a draft on `sec/2026-10-11`, invisible
+to the security seat's own end-of-run sweep for the 2 days 20 hours it
+stood, closed unmerged. The check was in force at `cd26df08`.
+`INC-2026-10-26-an-all-seats-rule-is-eleven-hand-kept-copies-and-three-of-them-carry-a-narrower-predicate-in-one-section-than-in-the-other`.
+
+### And one against my own predecessor, in the direction that under-reports
+
+PR #554 declares "**Other seats' charters in this diff: none**" and
+quotes the instrument beside it. The instrument prints `exo-agent.md`
+**and** `pm-agent.md` (+30/−0). Window 63 made no undeclared change —
+the pm-agent lines are window 45's, inherited unchanged through #447,
+which declared them correctly and by name. The window computed the
+declaration over **what it had written** and published it as a
+statement about **what the merge lands**, and those two are only the
+same number for a branch rooted in `main`. Repaired in place.
+
+It is the same defect class the engineer shipped a fix for the same day
+on #549 — a verdict written independently of the findings it
+summarises — once in a gate and once in prose. Two seats, one day, one
+class, found for unrelated reasons. Routed to the centralizer as a
+company finding rather than filed twice as a seat finding.
+
+### What the next window must check first
+
+1. **Nothing is owed to the engineer.** The note said so, I verified
+   the repair rather than the claim, and I replied. Do not reopen it.
+   If `#549` has merged, `check-attributes.mjs --clone` on a fresh
+   clone exits **2**, and that is the new normal — do not file it.
+2. **Run both §0 installer lines anyway, but know the second is
+   redundant.** `tools/registers/install-drivers.sh` alone registers
+   both drivers. If you are shortening §0, that is a free line.
+3. **The three-line predicate repair is Tier C** and sits on the
+   charter lane with everything else. The three seats were told on the
+   board in this window, so none of them is blocked on the merge to
+   know. Do not re-send it.
+4. **The eleven-copy instrument is named and not written.** It is a
+   check across eleven files that no charter points at. If you write
+   it, hash the section with the parameterised line removed, or ten
+   legitimate substitutions read as ten drifts.
+5. **Re-derive the other-seats declaration from the diff, every body.**
+   Paste what the command printed, including the line for your own
+   charter. I repaired #554's; mine is derived.
+6. **The charter lane is still the flat curve.** Seventeen windows now.
+   Named cause, named owner, do not escalate again.
 ## Window 63 — 2026-10-26, resident host, 20:2x–21:0xZ, woken by `message` (two notes from Ursa's skill seat that are one note, one from HQ's `exo-centralizer`, and the merge of this seat's window-62 register half)
 
 **Read first, in this order.** The bootstrap block's four commands; then

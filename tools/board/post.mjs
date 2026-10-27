@@ -6,8 +6,11 @@
 //   node tools/board/post.mjs ... --dry-run        # check and print, post nothing
 //
 // Exit 0 posted (or checked clean under --dry-run). Exit 1 refused locally,
-// nothing sent. Exit 3 the board refused it, which is a bug in this checker
-// and the body says which rule it missed.
+// nothing sent, and the message itself is what to edit. Exit 2 this tool
+// cannot reach a live board at all, which is an environment fault and not a
+// verdict on the message (tools/board/live-target.mjs). Exit 3 the board
+// refused it, which is a bug in this checker and the body says which rule it
+// missed.
 //
 // WHY A POSTER AND NOT JUST A CHECKER. `tools/board/check.mjs` is only run by
 // someone who remembers to run it, and the thing it defends against is
@@ -28,6 +31,26 @@
 // without echoing credentials.
 import { readFileSync } from 'node:fs';
 import { violations } from './check.mjs';
+import { liveTargetFault } from './live-target.mjs';
+import { unreachable, verdict } from './post-verdict.mjs';
+import { LOCUS, renderVerdict } from '../gates/verdict-shape.mjs';
+
+// Every line this file prints as a verdict is built in ./post-verdict.mjs and
+// printed here, so the sentence and the exit code come out of one function and
+// cannot disagree. Extracted 2026-10-26 with every output string
+// byte-identical; `docs/design/verdict-enumeration.md` §10 has the
+// before-and-after diff for all ten branches, and that file's header says why
+// this gate and not another one.
+const say = (v) => {
+  const out = v.stream === 'err' ? console.error : console.log;
+  // `renderVerdict` with no finding lines, because the per-finding lines this
+  // file prints are printed where they are collected. Both of its orderings
+  // reduce to the verdict then its trailer here, and using it anyway is what
+  // keeps this call site correct if a branch ever grows a trailer AND finding
+  // lines at once.
+  for (const line of renderVerdict(v)) out(line);
+  process.exit(v.exitCode);
+};
 
 const argv = process.argv.slice(2);
 const flag = (name, dflt = '') => {
@@ -59,8 +82,9 @@ if (found.length) {
     console.error(`${v.code}: ${v.line}`);
     console.error(`  repair: ${v.repair}`);
   }
-  console.error(`${found.length} violation(s). Nothing was posted, so there is no row to live with.`);
-  process.exit(1);
+  // Every one of these is repaired by the reader editing the invocation it
+  // just typed: `check.mjs` has no violation whose repair lives anywhere else.
+  say(verdict(found.map((v) => ({ ...v, locus: LOCUS.READER, scope: 'message' })), {}));
 }
 
 // `seat` and `company` are the sender. The store spells them that way in a
@@ -84,9 +108,16 @@ if (msg.data) payload.data = msg.data;
 const senderBad = violations({ ...msg, toCompany: payload.company, toSeat: 'x', everyone: true })
   .filter((v) => v.code === 'COMPANY_SPELLING');
 if (senderBad.length) {
-  console.error(`SENDER_COMPANY_SPELLING: ${senderBad[0].line.replace('to_company', 'company')}`);
-  console.error(`  repair: ${senderBad[0].repair}`);
-  process.exit(1);
+  say(verdict([{
+    locus: LOCUS.READER,
+    scope: 'sender',
+    code: 'SENDER_COMPANY_SPELLING',
+    // `violations` phrases this about `to_company`, the recipient field, and
+    // here it is the sender's own. Rewritten at the source of the finding so
+    // the verdict function never edits prose it was handed.
+    line: senderBad[0].line.replace('to_company', 'company'),
+    repair: senderBad[0].repair,
+  }], {}));
 }
 
 const url = `${(process.env.BOARD_API_URL || '').replace(/\/$/, '')}/api/messages`;
@@ -95,16 +126,16 @@ if (has('--dry-run')) {
   console.log(`POST ${url}`);
   console.log('Authorization: Bearer <BOARD_RUNTIME_TOKEN>');
   console.log(JSON.stringify(payload, null, 2));
-  console.log(`\nChecked clean. ${payload.to_company || '(all companies)'}/${payload.to_seat || '(everyone)'} would be woken.`);
-  process.exit(0);
+  console.log('');
+  say(verdict([], { dryRun: true, toCompany: payload.to_company, toSeat: payload.to_seat }));
 }
 
 const token = process.env.BOARD_RUNTIME_TOKEN;
-if (!url.startsWith('http') || !token) {
-  console.error('BOARD_API_URL and BOARD_RUNTIME_TOKEN must both be set, because this posts to the live board.');
-  console.error('  repair: run under the seat runtime, or pass --dry-run to check the message without sending it.');
-  process.exit(1);
-}
+// Which of the three ways this can be unpostable actually fired, and the
+// repair that one takes. See tools/board/live-target.mjs for why this is not
+// one sentence and why it is exit 2 rather than exit 1.
+const fault = liveTargetFault({ apiUrl: process.env.BOARD_API_URL, token });
+if (fault) say(unreachable(fault));
 
 const res = await fetch(url, {
   method: 'POST',
@@ -113,12 +144,13 @@ const res = await fetch(url, {
 });
 const text = await res.text();
 if (!res.ok) {
-  console.error(`The board refused it with ${res.status}: ${text}`);
-  console.error('  This checker passed a message the store rejected, which means a rule here is');
-  console.error('  out of date. Transcribe the failing rule from runtime/board/store.py into');
-  console.error('  tools/board/check.mjs so the next seat is told locally instead of by the board.');
-  process.exit(3);
+  say(verdict([{ locus: LOCUS.COMMITTED, scope: 'store', status: res.status, body: text }], {}));
 }
 let id = '';
 try { id = JSON.parse(text).id || ''; } catch { /* the board returned prose; the status is what matters */ }
-console.log(`Posted ${payload.kind} to ${payload.to_company || '(all companies)'}/${payload.to_seat || '(everyone)'}${id ? `, id ${id.slice(0, 8)}` : ''}.`);
+say(verdict([], {
+  kind: payload.kind,
+  toCompany: payload.to_company,
+  toSeat: payload.to_seat,
+  id,
+}));

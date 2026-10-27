@@ -13067,103 +13067,6 @@ the verdict: all fourteen ordered collisions measured today classify
 `driver-resolvable`, zero need a human, and the remedy named per pair is
 one existing command, `bash tools/ledger/requeue.sh --push <second>`.
 
-### 2026-10-26 (engineer, message run, 10) — Measure a published merge order as a prefix chain, which is n-1 merges, instead of as every ordered pair, which is n(n-1)
-
-- Trigger: this run's own cost. `tools/ledger/pairwise.mjs` measured 23
-  candidate pairs and 46 ordered sequences over 13 open heads to answer one
-  question the exo seat had already narrowed to a single pair, and GitHub's
-  merge queue documentation, read in the same run, shows the cheaper shape:
-  the base of queue position *n* is the trunk plus positions 1 through
-  *n-1*, so a published order of *n* heads needs *n-1* merges and catches
-  every collision the order would actually hit.
-- What: a mode of `tools/ledger/pairwise.mjs` that takes an explicit merge
-  order rather than a set, merges it as a prefix chain in one worktree, and
-  reports the first position whose merge is not clean, measured in both of
-  the arms the tool already has. The pair mode stays, because it answers a
-  different question: pair mode finds collisions that exist for *some*
-  order, which is what you want before an order is published, and chain
-  mode verifies the one order that was published, which is what the exo
-  seat and the owner actually execute. Chain mode is also the only one that
-  can report a collision between three or more heads, where each pair is
-  clean and the third merge is not, and this run measured no such case
-  because its pair-only method cannot see one.
-- First step: add `--order <n>,<n>,<n>` to `tools/ledger/pairwise.mjs`,
-  reusing the exported `sequence` helper by merging cumulatively rather
-  than resetting to the base between positions, and a fixture in
-  `tools/ledger/pairwise.test.mjs` with three heads whose three pairs are
-  all clean and whose three-way chain conflicts. If that fixture cannot be
-  built on this repository's register grammars, record that as the finding
-  and leave pair mode alone.
-- Cost: $0
-- Status: proposed
-
-### 2026-10-26 (engineer, message run, 10) — A seat's fresh clone measures every register co-append as a conflict, because registering the merge drivers is a per-clone step no seat's first act performs
-
-- Trigger: this run's own first measurement was wrong in exactly this way.
-  In the clone as delivered, merging the skill seat's #544 and then this
-  seat's #540 conflicted on `docs/ideas.md`. After one command, `bash
-  tools/registers/install-drivers.sh`, the identical merge of the identical
-  commits exited 0 with zero conflicted paths and the driver's own line,
-  "16 block(s) taken from the other branch, 0 removed." Nothing else
-  changed. The exo seat's note that opened this run reports the same
-  collision as a property of the two branches, and recommends a manual
-  rebase on the strength of it, which is the conclusion a clone without the
-  drivers supports.
-- What: the drivers live in `.git/config`, which is per-clone and never
-  committed, and `tools/registers/install-drivers.sh` is the only thing
-  that writes them. Two tools already refuse to run without it:
-  `tools/ledger/requeue.sh` calls the installer and exits 2 if it fails,
-  and `tools/ledger/pairwise.mjs` (this run) throws if the arm that is
-  supposed to have no driver has one. Everything else a seat does with
-  `git merge` is unprotected, including every merge a seat performs to read
-  another seat's branch. `tools/ensure-full-clone.sh` already exists as
-  this repository's answer to "the clone you were given does not answer
-  history questions truthfully", with a `--check` mode and documented exit
-  codes, and merge truthfulness is the same class of fault: git answers,
-  at exit 0, with a conflict that is not a property of the commits.
-- First step: extend `tools/ensure-full-clone.sh` with a third repair
-  beside depth and refspec, which runs `tools/registers/install-drivers.sh`
-  and reports it in the same one-line-per-repair format, and extend
-  `tools/ensure-full-clone.test.mjs` with the case that fails today: a
-  fresh clone where two register appends conflict before the repair and
-  merge clean after it. Do not move the installer's logic; call it, so the
-  `.gitattributes` agreement check it already performs stays in one place.
-- Cost: $0
-- Status: proposed
-
-### 2026-10-26 (engineer, message run, 10) — The queue depth the owner is told counts heads that contain each other, and nothing names the one head per seat that subsumes the rest
-
-- Trigger: this run checked its own three open heads with `git merge-base
-  --is-ancestor` and found that #540 contains both #520 and #530. So three
-  of the five heads that collide on `docs/ideas.md` today are one piece of
-  work and one decision, and the charter's own rule for this ("the newest
-  one usually contains the older ones already, so check with `git
-  merge-base --is-ancestor`") puts the check on each seat, once per run,
-  by hand, from memory it does not have.
-- What: a report that groups every open head by its branch-name seat
-  prefix, computes the containment relation within each group, and prints
-  the maximal heads plus, for each non-maximal head, the head that contains
-  it. Two things follow from it that nothing produces today. The owner gets
-  a queue depth counted in decisions rather than in heads, which for this
-  seat today is one rather than three. And a seat's first act, which the
-  charter already defines as finding its own unlanded work, becomes reading
-  one line instead of running a pairwise ancestry check it has to remember
-  to run. The relation is cheap: containment needs no merge, only
-  `git merge-base --is-ancestor`, which is why this belongs beside
-  `pairwise.mjs` rather than inside it.
-- First step: `tools/ledger/containment.mjs`, taking the open head list
-  from `gh pr list --json number,headRefName`, fetching each as
-  `refs/prs/<n>`, and printing one block per seat prefix naming the maximal
-  heads and the containment edges. It must call
-  `tools/ensure-full-clone.sh` first and refuse to report otherwise,
-  because `--is-ancestor` on a shallow clone exits non-zero for a contained
-  pair, and non-zero means NOT CONTAINED, which is the opposite of the
-  truth. That failure mode is already written down in
-  `tools/ensure-full-clone.sh`'s own header and is the reason this entry
-  names the dependency rather than leaving it to the implementer.
-- Cost: $0
-- Status: proposed
-
 ### 2026-10-26 (engineer, message run, 5th) — The briefing can say why a unit was surfaced and has no answer for why one was not
 
 - Trigger: this run's dogfooding of `get_briefing` against this
@@ -13762,3 +13665,421 @@ one existing command, `bash tools/ledger/requeue.sh --push <second>`.
   fixtures in `src/tuning/tuning.test.ts`. Nothing was fetched, so there
   is nothing here that could have asked anything of this run.
 - Status: proposed
+
+### 2026-10-26 (engineer, message run, 10) — Measure a published merge order as a prefix chain, which is n-1 merges, instead of as every ordered pair, which is n(n-1)
+
+- Trigger: this run's own cost. `tools/ledger/pairwise.mjs` measured 23
+  candidate pairs and 46 ordered sequences over 13 open heads to answer one
+  question the exo seat had already narrowed to a single pair, and GitHub's
+  merge queue documentation, read in the same run, shows the cheaper shape:
+  the base of queue position *n* is the trunk plus positions 1 through
+  *n-1*, so a published order of *n* heads needs *n-1* merges and catches
+  every collision the order would actually hit.
+- What: a mode of `tools/ledger/pairwise.mjs` that takes an explicit merge
+  order rather than a set, merges it as a prefix chain in one worktree, and
+  reports the first position whose merge is not clean, measured in both of
+  the arms the tool already has. The pair mode stays, because it answers a
+  different question: pair mode finds collisions that exist for *some*
+  order, which is what you want before an order is published, and chain
+  mode verifies the one order that was published, which is what the exo
+  seat and the owner actually execute. Chain mode is also the only one that
+  can report a collision between three or more heads, where each pair is
+  clean and the third merge is not, and this run measured no such case
+  because its pair-only method cannot see one.
+- First step: add `--order <n>,<n>,<n>` to `tools/ledger/pairwise.mjs`,
+  reusing the exported `sequence` helper by merging cumulatively rather
+  than resetting to the base between positions, and a fixture in
+  `tools/ledger/pairwise.test.mjs` with three heads whose three pairs are
+  all clean and whose three-way chain conflicts. If that fixture cannot be
+  built on this repository's register grammars, record that as the finding
+  and leave pair mode alone.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 10) — A seat's fresh clone measures every register co-append as a conflict, because registering the merge drivers is a per-clone step no seat's first act performs
+
+- Trigger: this run's own first measurement was wrong in exactly this way.
+  In the clone as delivered, merging the skill seat's #544 and then this
+  seat's #540 conflicted on `docs/ideas.md`. After one command, `bash
+  tools/registers/install-drivers.sh`, the identical merge of the identical
+  commits exited 0 with zero conflicted paths and the driver's own line,
+  "16 block(s) taken from the other branch, 0 removed." Nothing else
+  changed. The exo seat's note that opened this run reports the same
+  collision as a property of the two branches, and recommends a manual
+  rebase on the strength of it, which is the conclusion a clone without the
+  drivers supports.
+- What: the drivers live in `.git/config`, which is per-clone and never
+  committed, and `tools/registers/install-drivers.sh` is the only thing
+  that writes them. Two tools already refuse to run without it:
+  `tools/ledger/requeue.sh` calls the installer and exits 2 if it fails,
+  and `tools/ledger/pairwise.mjs` (this run) throws if the arm that is
+  supposed to have no driver has one. Everything else a seat does with
+  `git merge` is unprotected, including every merge a seat performs to read
+  another seat's branch. `tools/ensure-full-clone.sh` already exists as
+  this repository's answer to "the clone you were given does not answer
+  history questions truthfully", with a `--check` mode and documented exit
+  codes, and merge truthfulness is the same class of fault: git answers,
+  at exit 0, with a conflict that is not a property of the commits.
+- First step: extend `tools/ensure-full-clone.sh` with a third repair
+  beside depth and refspec, which runs `tools/registers/install-drivers.sh`
+  and reports it in the same one-line-per-repair format, and extend
+  `tools/ensure-full-clone.test.mjs` with the case that fails today: a
+  fresh clone where two register appends conflict before the repair and
+  merge clean after it. Do not move the installer's logic; call it, so the
+  `.gitattributes` agreement check it already performs stays in one place.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, message run, 10) — The queue depth the owner is told counts heads that contain each other, and nothing names the one head per seat that subsumes the rest
+
+- Trigger: this run checked its own three open heads with `git merge-base
+  --is-ancestor` and found that #540 contains both #520 and #530. So three
+  of the five heads that collide on `docs/ideas.md` today are one piece of
+  work and one decision, and the charter's own rule for this ("the newest
+  one usually contains the older ones already, so check with `git
+  merge-base --is-ancestor`") puts the check on each seat, once per run,
+  by hand, from memory it does not have.
+- What: a report that groups every open head by its branch-name seat
+  prefix, computes the containment relation within each group, and prints
+  the maximal heads plus, for each non-maximal head, the head that contains
+  it. Two things follow from it that nothing produces today. The owner gets
+  a queue depth counted in decisions rather than in heads, which for this
+  seat today is one rather than three. And a seat's first act, which the
+  charter already defines as finding its own unlanded work, becomes reading
+  one line instead of running a pairwise ancestry check it has to remember
+  to run. The relation is cheap: containment needs no merge, only
+  `git merge-base --is-ancestor`, which is why this belongs beside
+  `pairwise.mjs` rather than inside it.
+- First step: `tools/ledger/containment.mjs`, taking the open head list
+  from `gh pr list --json number,headRefName`, fetching each as
+  `refs/prs/<n>`, and printing one block per seat prefix naming the maximal
+  heads and the containment edges. It must call
+  `tools/ensure-full-clone.sh` first and refuse to report otherwise,
+  because `--is-ancestor` on a shallow clone exits non-zero for a contained
+  pair, and non-zero means NOT CONTAINED, which is the opposite of the
+  truth. That failure mode is already written down in
+  `tools/ensure-full-clone.sh`'s own header and is the reason this entry
+  names the dependency rather than leaving it to the implementer.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — Craft scan: `npm audit`'s verdict is a histogram and a caller-chosen threshold
+
+- Product scanned: `npm audit`, npm 10.9.8, measured locally in
+  `ursa-major/` rather than recalled. Not in `docs/market/landscape.md`,
+  which maps preference and evaluation products; this is the craft rotation
+  and the engineer seat's scan is of the tool's construction, not its
+  market.
+- What is worth stealing: `npm audit` never reports one number as its
+  verdict. `--json` returns `metadata.vulnerabilities` as a severity-keyed
+  histogram (`{info, low, moderate, high, critical, total}` — measured as
+  all zeroes in `ursa-major/` at this branch's tip, over 287 resolved
+  dependencies), and `total` sits alongside the breakdown rather than
+  replacing it. More importantly the threshold that turns findings into a
+  non-zero exit is a parameter and not the tool's opinion:
+  `--audit-level <info|low|moderate|high|critical|none>`, confirmed in
+  `npm audit --help` at this version. So the caller decides what counts as
+  failure and the tool only decides what is true. That is precisely the
+  split this branch just built by hand in `tools/ledger/attributes-verdict.mjs`:
+  the pure function says what happened, and `check-attributes.mjs` turns it
+  into an exit code.
+- What Ursa does better: `found 0 vulnerabilities` and `found 4
+  vulnerabilities` are the same sentence with a different number, and
+  neither says whose the repair is. Whether a fix exists at all lives in a
+  different command (`npm audit fix`, and its "no fix available" case).
+  Ursa's `scripts/dep-floor.mjs` since today distinguishes an advisory above
+  the floor with nothing allowing it, which a seat repairs, from an owner
+  exception in `dep-floor.allow.json` whose expiry has arrived, which only
+  the owner can renew. A severity histogram answers how bad; it does not
+  answer whose, and whose is the half that decides whether the reader can
+  act at all.
+
+This is a scan note and carries no status line, matching every earlier
+craft-scan entry in this file: it proposes nothing, so there is nothing for
+the owner to accept or reject.
+
+### 2026-10-26 — Every gate exports its verdict as data, so the sweep is a program and not a table
+
+- Trigger: this branch's §4 in `docs/design/verdict-lines.md` is a table of
+  fifteen gates and their failing exit branches, built by grepping for
+  `process.exit([1-9])`. The repair in the same branch breaks that grep:
+  `check-attributes.mjs` now ends in `process.exit(result.exitCode)`, so a
+  text sweep counts one failing branch where the gate has two. The sweep
+  that found this defect class cannot be re-run to prove the class stays
+  fixed, which is L-A33 arriving the same hour the table was written.
+- What: give every gate in `tools/` and `scripts/` the shape the two
+  repaired ones now have — a pure module exporting
+  `verdict(findings, seen) -> {exitCode, line, stream}`, with findings
+  classified by where the repair lives — and then one enumerator that
+  imports each verdict module, drives it with synthetic finding sets, and
+  prints the exit code and actor each branch produces. The inventory becomes
+  a program's output instead of a paragraph, and the property "no verdict
+  contradicts its own findings" becomes checkable for every gate at once
+  rather than for the two somebody happened to repair. This is also the only
+  way to hold the line for gates added later, since nothing in CI can
+  currently tell that a new gate summed two actors into one count.
+- First step: pick the three gates that already derive correctly
+  (`check-closures.mjs`, `check.mjs`, `secret-scan.mjs`) and extract their
+  verdicts without changing a single output string, proving the shape fits
+  code that is already right before touching code that is wrong. If any of
+  the three resists the shape, that is the finding and the idea stops there.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — A gate's exit codes are a contract, and nothing in this repository states it
+
+- Trigger: deciding whether `check-attributes.mjs` could return 2 for a
+  clone-only finding took reading four other gates to learn what 2 already
+  means here, because the convention is real and unwritten.
+  `tools/secret-scan.mjs` uses 2 for "cannot do its job",
+  `scripts/redaction-check.mjs` for "cannot read the gate's rules",
+  `tools/ledger/pairwise.mjs` for a usage or environment fault, and
+  `tools/ledger/check-closures.mjs` for "clean as far as a seat can take
+  it". Those are one idea — the checker's ground is unusable, or the
+  remainder is not the reader's to repair — discovered four times. The
+  merge drivers use 1 for git's own protocol meaning, which is a fifth
+  thing and conflicts with all of them.
+- What: one short page under `docs/standards/` or `docs/design/` stating the
+  codes and what each claims about the reader: 0 nothing to do, 1 the thing
+  checked is defective and you are the one who repairs it, 2 either the
+  checker could not establish the facts or the remainder belongs to someone
+  else, 3 the downstream store refused what this checker passed, which is a
+  bug in the checker. Then one line per gate recording which codes it emits,
+  so a seat writing the next gate picks a number from a table instead of
+  from the last gate it happened to read. The merge drivers get an explicit
+  exemption by name, since their exit status is git's interface and not this
+  repository's.
+- First step: write the page with the five existing gates' codes transcribed
+  from their source, not from their headers, because a header that disagrees
+  with its own code is the likeliest first finding.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — The clone a seat is handed cannot answer a merge question, and only a gate it does not run knows
+
+- Trigger: three seats on one day measured fourteen ledger co-appends as
+  conflicts needing a rebase, because `.git/config` is per-clone and never
+  committed, so a fresh seat clone has every merge attribute and no merge
+  driver. `tools/ledger/check-attributes.mjs --clone` has always known this
+  and said it, but no seat's first act runs it, and until this branch it
+  reported the finding as a numbered violation of the repository rather than
+  as a property of the working copy.
+- What: make the clone's unanswerability impossible to miss rather than
+  discoverable. `tools/ensure-full-clone.sh` is already this repository's
+  answer to "the clone you were given does not answer truthfully", and it is
+  already the thing a seat runs first, so the clone check belongs behind it:
+  run `check-attributes.mjs --clone`, and on exit 2 either register the
+  drivers or print the one command and the consequence. The reason this is a
+  proposal and not a commit is that `ensure-full-clone.sh` changes every
+  seat's first act in every company that inherits it, which is an owner's
+  decision and not a run's. The narrower version, if the broad one is
+  refused: have `tools/ledger/requeue.sh` and `tools/ledger/pairwise.mjs`
+  refuse to report a merge classification from a clone whose drivers are
+  unregistered, since those two are the tools whose answers were wrong.
+- First step: the narrow version, in `pairwise.mjs` alone — call
+  `check-attributes.mjs --clone --repo <dir>` before the sweep, and on exit
+  2 print the verdict line and the install command instead of a
+  classification table. One file, one gate, no change to any seat's startup.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — An accepted-and-ignored filter is the one API failure no seat can see, so probe for it rather than reasoning about it
+
+- Trigger: `/api/events` accepts `company` and `seat` and ignores both. A
+  2-hour window returns 247 rows with no filter and the same 247 with
+  `company=THIS_COMPANY_DOES_NOT_EXIST`, and `store.events()` takes no
+  company argument at all, so the filter cannot exist. The message read had
+  this same hole until 2026-10-18 and its own source comment now says why it
+  matters: "a silent parameter is worse than a missing one, because the
+  caller believes it filtered." That comment sits above the one read where
+  it was fixed. Nobody checked the other two.
+- What: `tools/board/read-filters.mjs`, shipped on this branch, answers the
+  question for the three reads we know about. The idea is the generalization:
+  any JSON read this company depends on should have its filters probed with
+  an impossible value before a number is published from it, because the
+  failure is silent in the direction nothing audits. A read that comes back
+  too small trips every absence rule we have; a read that comes back
+  unfiltered reads as a healthy, busy surface. `tools/autonomy.py` published
+  a 79% autonomy floor for a window that was 93% on exactly this class of
+  mistake, and the ExO's 2026-10-18 measurement found the messages hole only
+  by asking for a sender that cannot exist.
+- First step: run `node tools/board/read-filters.mjs --strict` in whatever
+  check already runs on this repository's tools, so a newly-inert filter on
+  a board read becomes a failing exit here rather than a seat's bad number
+  three weeks later. One line, and the tool is already written and tested.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — The store knows two spellings are one company and the bus does not, which is eighteen dropped wakes and a one-line fix we do not own
+
+- Trigger: counted over the whole message store, 3,481 rows paged in
+  12-hour slices with no saturated slice: 60 addressed messages carry a
+  `to_company` that is not a key of `Bus.REPOS`, so the fan-out list came
+  back empty and no seat was woken. Thirteen are spelled `ursa` and five
+  `atelier-app`. Both of those spellings are already in
+  `store.company_spellings`, which is what makes the READ case-insensitive.
+  So for eighteen of the sixty, the board already holds the knowledge that
+  would have delivered them, in a function sitting beside the one that
+  dropped them.
+- What: the fix is HQ's, one line, and the handoff is written in
+  `docs/design/board-read-conformance.md` §8. Ours is the half we can act
+  on: `tools/board/check.mjs` already refuses the lowercase spelling at the
+  write, which is the only point where the spelling can still be changed,
+  and that is the right defence to keep. What we lack is any instrument that
+  would notice the sixty. The idea is a read-only sweep that reports
+  addressed rows whose `to_company` is not a bus key, as a count by spelling,
+  so this class is visible in a line rather than found by a day of arguing.
+- First step: `tools/board/undeliverable.mjs`, reusing the `pageAll` function
+  already in `read-filters.mjs` and the committed table in
+  `companies.json`. It is a GET-only scan and leaves no rows, so it can run
+  as often as anyone likes. Deliberately not built on this branch: that
+  branch is already carrying a tool, its tests and an artifact, and a second
+  tool would make the day's PR two reviews pretending to be one.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — Competitive scan: Postman's contract tests, and the thing they still cannot tell you
+
+- The product: Postman's API contract testing and its "API Governance"
+  linting (checked 2026-10-26 against its public documentation; no account,
+  no paid tier). Rotated to on the craft scan because this run's whole
+  subject was "does this endpoint do what its documentation says".
+- Worth stealing: Postman asserts a response against a committed OpenAPI
+  schema, so a field that quietly disappears from a response is a failing
+  build and not a surprise three weeks later. That is exactly the shape of
+  the "transcribed:" tests in `tools/board/check.test.mjs` and now in
+  `read-filters.test.mjs`, and it suggests the generalization — our
+  transcriptions of HQ's source are schema assertions written by hand, and
+  the ones we have cover constants but not response shapes. A response-shape
+  assertion over the board reads we depend on is cheap and we do not have it.
+- What we do better, and it is the finding of this whole run: a schema says
+  `company` is a valid query parameter. It cannot say whether sending it
+  changes the result. Every contract-testing tool checks that the response
+  matches its declared shape, and an inert filter returns a perfectly
+  well-shaped response over the wrong rows. The impossible-value test is a
+  *behavioural* assertion, not a structural one, and nothing in the
+  contract-testing category does it, because it requires knowing a value
+  that cannot exist in the caller's data — which is domain knowledge a
+  schema does not carry. That asymmetry is worth writing down before
+  somebody proposes replacing our prober with a linter.
+
+### 2026-10-26 (engineer, re-fired slot) — A board post the store accepted but could not be identified reads as a plain success
+
+- Trigger: extracting `tools/board/post.mjs`'s verdict found its success line
+  has two forms, not one. `id` is set only when the board's response parses
+  as JSON and carries one, so a 2xx answering with prose prints `Posted note
+  to Ursa/pm.` and a 2xx answering with an id prints `Posted note to
+  Ursa/pm, id 01234567.` The shorter form is silent about the difference,
+  which is the same shape as `check-closures.mjs`'s conditional owner clause
+  and is how the branch was noticed at all.
+- What: give the id-less success its own sentence. The row exists either way,
+  so this is not an error and must not become one; what changes is that a
+  seat is told the board accepted the message and returned nothing it could
+  quote, instead of being told nothing. The branch is already named
+  `POSTED_ID_UNREADABLE` in `tools/board/post-verdict.mjs`, driven by the
+  enumerator on every run, and asserted distinct from `POSTED` in
+  `post-verdict.test.mjs`. Only the line is still shared.
+- First step: one line in `post-verdict.mjs` — `Posted ${kind} to ${woken},
+  and the board returned no id this seat could read.` — plus the literal in
+  `post-verdict.test.mjs` and the stub-board `prose` case in the
+  differential, which already exists. Deliberately not done in the
+  extraction: that slice's entire evidence is that no output string changed,
+  and changing one would have dissolved it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, re-fired slot) — `post.mjs --dry-run` prints a request line that is not a request
+
+- Trigger: running `env -u BOARD_API_URL -u BOARD_RUNTIME_TOKEN node
+  tools/board/post.mjs ... --dry-run` in this clone prints `POST
+  /api/messages`, then the payload, then `Checked clean. Ursa/pm would be
+  woken.` and exits 0. The url is built from `BOARD_API_URL` before the
+  live-target check runs, and `--dry-run` returns before that check, so a dry
+  run outside the seat runtime shows a path with no origin.
+- What: the verdict is true and the line above it is not. A dry run exists to
+  show a seat exactly what would be sent, and the one invocation where a seat
+  most needs that — a fresh clone, no runtime, checking a message before a
+  window opens — is the invocation that prints a request to nowhere. The fix
+  is to name the absence rather than to refuse: print the origin when it is
+  known, and `POST <BOARD_API_URL unset>/api/messages` when it is not, so the
+  dry run keeps working offline and stops describing a post it could not make.
+- First step: move the `url` construction below the `liveTargetFault` call and
+  have the dry-run branch render the origin through the same function, then a
+  case in `post-verdict.test.mjs` for each of the two forms. Note the
+  interaction with the entry above: both change output strings on branches the
+  2026-10-26 differential pinned, so they want to land together, in one PR,
+  with the differential re-run and the new lines stated as the intended diff.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, re-fired slot) — Nothing here says which verdict wins when a gate has findings AND unusable ground
+
+- Trigger: the craft scan below, measured rather than recalled. GNU grep 3.11
+  answers `0` for `grep -q hello <file-with-hello> <missing-file>` and `2` for
+  the same two files without `-q`: the quiet flag does not merely suppress
+  output, it decides that "I found what you asked for" outranks "I could not
+  read everything you gave me". `tools/gates/verdict-shape.mjs` has exactly
+  this collision in its `derivedFrom: 'findings' | 'ground'` field and no rule
+  for the case where both hold. Today it cannot arise, because
+  `tools/secret-scan.mjs` picks its mode before it scans and
+  `tools/board/post.mjs` checks its ground before it posts. It arises the
+  first time one gate does two things.
+- What: state the precedence in the exit-code page the ledger already proposes
+  ("A gate's exit codes are a contract, and nothing in this repository states
+  it") and then enforce it in the enumerator. The candidate rule is the
+  opposite of grep's, and the reason is this repository's own: a scanner that
+  found one secret and could not read half of what it was given has not
+  established that the half it read is all there is, so ground loses to
+  nothing and a partial pass is never clean. grep is a search and may
+  reasonably stop at the first answer; a gate is an assurance and may not.
+- First step: a `derivedFrom: 'both'` case in `verdict-shape.mjs` with the
+  precedence written as a sentence in its JSDoc, one synthetic gate in
+  `enumerate-verdicts.test.mjs` that returns a clean line over unusable
+  ground, and the assertion that the enumerator calls it a finding. No
+  committed gate changes, because no committed gate can reach it yet; this is
+  a guardrail written before the input shape arrives rather than after.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — Craft scan: GNU grep 3.11 and git 2.43's exit-code contracts, where the number is the whole product
+
+- The product: the exit-status contracts of two tools already in this
+  repository's dependency list, read out of their own `--help`/manual text and
+  then measured in this sandbox rather than recalled. Rotated to because this
+  run spent its day on what a gate's exit code claims, and these two are the
+  most-read exit-code contracts in software. No account, no network, no paid
+  tier: every number below came from running the binaries.
+- Measured, so the comparison is not from memory:
+  `/usr/bin/grep --version` is GNU grep 3.11. `echo hello | grep hello` is 0,
+  `grep zzz` is 1, and `grep hello /tmp/does-not-exist` is 2. `-s` suppresses
+  the error message and keeps the 2, so the status outranks the prose. And the
+  clause worth the scan: `grep -q hello <has-hello> <missing>` is **0** while
+  the same two paths without `-q` are **2**. The `grep` inside this sandbox's
+  interactive shell is not that binary — it is ugrep 7.8.4 behind a wrapper
+  function — and it answers **2** where GNU answers 0, so two implementations
+  of one documented contract disagree on exactly the clause that decides
+  precedence. `git` 2.43.0: `git diff --exit-code --quiet` is 0 for no
+  difference, 1 for a difference, and 128 for a ref it cannot resolve, which
+  is the same three-way shape this repository arrived at independently as 0,
+  1 and 2.
+- Worth stealing: both tools make the number the deliverable, not a side
+  effect of the prose. `git diff --quiet` prints nothing at all, so the status
+  is the entire output, and no caller can parse a sentence instead. Our gates
+  print a line and a status and CI reads the status, which means a reworded
+  line cannot break a caller — the property `--quiet` gets by construction and
+  we get by having nobody grep our output yet. The stealable thing is narrower
+  than a flag: it is that a tool whose status is its product documents the
+  precedence between two true claims, and we have the collision and not the
+  rule. That is the ledger entry above.
+- What Ursa does better: grep's 2 is one number for "no such file",
+  "permission denied" and "invalid regular expression" — three conditions,
+  three different repairs, three different people, one status and one word.
+  That is the actor form of the defect class in
+  `docs/design/verdict-lines.md` §1, shipped by the most-used command-line
+  tool in the world and unfixable now for compatibility reasons. Our gates
+  name the cause and the locus in the sentence a reader acts on, and as of
+  this run five of them are driven on every CI run to prove they still do.
+  The second difference is scale-free and in our favour: grep's contract is a
+  paragraph in a manual, while ours is `node
+  tools/gates/enumerate-verdicts.mjs`, which prints 23 branches and exits
+  non-zero when one of them stops deriving its verdict from its findings.

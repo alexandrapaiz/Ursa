@@ -567,6 +567,64 @@ AI Training Data Products](https://www.afterquery.com/products),
 [Bespoke Labs](https://bespokelabs.ai/), [rl-list.com: Fleet AI vendor
 profile](https://www.rl-list.com/vendors/fleet-ai).
 
+**Update (2026-10-26, 31st run): a full-directory sweep of all 42
+names found one closer case than the six already checked —
+Idler — and it still reads as constructed, not real-deliverable.**
+Read rl-list.com's own listing text for every one of the 42 names in
+one pass (both the main vendor directory and the RL-environments-for-
+coding subpage), per the 30th run's ledger proposal, instead of
+continuing one-by-one spot-checks. One name's own language stands
+apart from the other 41: Idler (YC S25, $9M seed led by Paradigm,
+launched August 2026) describes its environments as built "from real
+production work." Its two named environments are specific: ShelfLife
+is "a digital twin seeded with the complete operational data of a
+live, profitable, growing multi-brand retailer running 9 stores, 3
+commerce platforms, and a multi-supplier sourcing operation," drawing
+"200 environments... from the company's operational data over the
+past decade"; CorpLaw is "built from a real law firm's anonymized
+data," with grading "grounded in the work the firm produced." That is
+a more specific real-sourcing claim than anything else in the
+directory — Fleet AI's "gyms" that "replicate" software, Bespoke
+Labs' "company-scale simulations," and Andromede's environments
+"programmatically generated... from real-world data" all name no
+specific real company as their substrate.
+
+It still does not cross the line CLAUDE.md §1 draws. Idler's own term
+for ShelfLife is "a digital twin": a constructed reproduction seeded
+with that company's historical data, not the company's live system or
+a real deliverable its own operators produced and judged after the
+fact. The task Idler grades against ("can you deploy an agent in a
+leadership role within this company, and trust it to execute with
+appropriate judgment and precision") is an authored evaluation
+question put to a simulation, not an outcome real work was put
+through. Idler also names no customer by name ("the world's leading
+frontier labs" use it, per its own site, none identified), the same
+unverified self-claim pattern every other checked name in this
+sub-category has. Tally: 7 of 42 now examined individually (6 by
+direct spot-check across the 29th and 30th runs, 1 by this run's
+sweep), 7 of 7 authored-not-real. The sweep of the other 35 names' own
+listed text in the same pass found no other candidate worth a closer
+look; most describe themselves plainly as "gyms," "simulations,"
+"sandboxes," or "digital twins" with no real-production-data claim at
+all.
+
+So what: this is the strongest evidence yet for the market-wide
+claim, covering the full named directory in one pass rather than a
+sample of it, and it still holds. It is also a sharper sentence for a
+lab brief than a clean sweep would have been: "even the one vendor in
+this mapped market whose own marketing leans hardest on real
+operational history still builds a constructed digital twin rather
+than ingesting the real deliverable, and grades agents against an
+authored judgment question rather than what the business's own work
+actually did with the output" tests the line against the market's
+hardest case instead of skipping past it. Positioning consequence in
+docs/market/positioning.md. Last observed 2026-10-26: [rl-list.com: RL
+Environment Vendors](https://www.rl-list.com/), [rl-list.com: RL
+Environments for Coding](https://www.rl-list.com/rl-environments-for-coding),
+[rl-list.com: Idler vendor profile](https://www.rl-list.com/vendors/idler),
+[YC Launch: Idler](https://www.ycombinator.com/launches/SxT-idler-push-the-frontier-of-your-model),
+[runtimewire: Idler launches AI data lab after a $9M Paradigm-led seed](https://runtimewire.com/article/idler-launches-ai-data-lab-9m-paradigm-seed).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -921,6 +979,45 @@ test predates this page, so it has not been re-run against Claude's
 current export. Worth a direct product test before leaning further on
 either "one-directional" or "symmetric" as the precise word. Last
 observed 2026-10-14: [Claude support: Importing and exporting your memory from Claude](https://support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude).
+
+### Gemini Personal Intelligence (Google)
+
+What it is: a cross-app memory layer, reaching all free Google accounts
+in the UK and more widely through 2026, that lets Gemini and AI Mode in
+Search draw context from Gmail, Google Photos, Drive, and other
+first-party apps instead of requiring the user to paste it in. New
+entry, added this run; missed by every prior sweep of this category
+despite being a frontier-lab memory feature on the same axis as ChatGPT
+Memory and Claude Memory Import. Who it serves: Google's own consumer
+accounts. Pricing: included, no separate charge. Strengths: the deepest
+first-party data reach of any entry in this category, because it draws
+on a decade of email and photo history most users already have rather
+than asking them to restate anything. Consent framing: opt-in, and
+Google's own coverage states this is deliberate — the feature requires
+explicit enablement, unlike the always-on-by-default memory ChatGPT and
+Claude ship outside the EEA/UK.
+
+Weakness against Ursa, and the reason this is not simply a point for
+Google's side of last run's open question: on 2026-10-16, Google
+updated its privacy policy to remove language that previously excluded
+Gmail, Drive, and Photos content from ad personalization, replacing it
+with a carve-out — that data stays out of ad targeting "unless you
+choose to make data from these services available to other Google
+services that support personalized ads," which is exactly what
+enabling Personal Intelligence does. The opt-in gate is real, but what
+sits behind it is not just better answers; it is eligibility for ad
+targeting on the same Gmail and Photos content the feature reads. This
+is the sharpest concrete case found yet for why "did you consent
+before inference happened" (last run's finding) is not by itself a
+sufficient promise: Google can truthfully say Personal Intelligence is
+opt-in while the thing the user is opting into also opts their content
+into advertising. CLAUDE.md's non-negotiable #1 (Ursa Major never
+monetizes the user directly) is the exact axis this case argues for
+naming explicitly, not just "opt-in happened" or "you can see what was
+inferred." Last observed 2026-10-26: [9to5Google: Google will target
+ads based on Gmail, Photos data if Personal Intelligence is
+enabled](https://9to5google.com/2026/10/23/google-will-target-ads-based-on-gmail-photos-data-if-personal-intelligence-is-enabled/),
+[DataCamp: Gemini Personal Intelligence](https://www.datacamp.com/blog/gemini-personal-intelligence).
 
 ### MemHub (Tencent Hunyuan Hy-Memory)
 
@@ -1503,3 +1600,24 @@ Upgrade?](https://arxiv.org/abs/2609.05339).
   added; the next run with capacity should spot-check a few of the
   better-funded, unverified names. Positioning consequence in
   docs/market/positioning.md.
+- 2026-10-26 (message, 31st run) — swept rl-list.com's full listing
+  text for all 42 names in one pass instead of continuing one-by-one
+  spot-checks. Found one name, Idler, whose own marketing claims a
+  real-production-data substrate (a decade of an actual retailer's
+  operational history, a real law firm's anonymized records) closer
+  to CLAUDE.md §1's framing than the other 41, but its own term for
+  the result is "a digital twin": a constructed simulation, not a
+  real deliverable. Tally now 7 of 42 individually examined, 7 of 7
+  authored-not-real, and the sweep of the remaining 35 names found no
+  other candidate. Positioning consequence in
+  docs/market/positioning.md.
+- 2026-10-27 (message, 2nd run) — added Gemini Personal Intelligence
+  (Category 3, new entry), Google's own cross-app memory feature,
+  missed by every prior sweep of this category. Found via this run's
+  demand-signals ceremony rather than a landscape sweep: Google updated
+  its privacy policy on 2026-10-16 to carve ad personalization back
+  into Gmail/Photos/Drive content for users who enable the feature,
+  the first concrete case this file has found of an opt-in memory gate
+  that is also an ad-targeting gate, directly extending the prior
+  run's "consent is a distinct axis from transparency" finding.
+  Positioning consequence in docs/market/positioning.md.

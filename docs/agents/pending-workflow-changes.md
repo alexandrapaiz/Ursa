@@ -472,3 +472,86 @@ GitHub, and the suggestion that other companies grep their own
 evidence rather than instruction; this amendment exists because this
 seat's own charter requires the workflow-security sweep that measured it
 here.
+
+---
+
+## PWC-13 — The gate skips every binary file, so an image is an unscanned surface
+
+**Queued by:** security seat, 2026-10-26 run 12. Queued because the run
+could not apply it: `.github/workflows/` belongs to HQ under
+docs/standards/pm.md §15, and this seat's charter forbids touching
+workflows outright. Nothing was attempted on that path.
+
+**Evidence.** The gate's scan runs `grep -rInE`. The `-I` flag means
+"process a binary file as if it did not contain matching data", so every
+one of the three patterns is applied to text files only. That is one
+flag, and it is deliberate in the sense that somebody typed it, but
+there is nothing in the workflow or in the redaction standard saying the
+image surface was considered and accepted.
+
+Verified rather than inferred, because the point of a gate is what it
+does and not what its flags suggest. A one pixel PNG was built carrying
+a fabricated Class B home path and a fabricated Class C full UUID in an
+uncompressed `tEXt` chunk, next to a plain text file carrying the same
+two strings. Under GNU grep 3.11, which is what `ubuntu-latest` runs,
+the gate's own flags report the text file and say nothing about the
+image. The same command without `-I` reports `binary file matches` on
+it. So the flag is the whole of the behaviour, and the probe was
+discarded after measuring.
+
+**How large the surface is.** This repository tracks 1,175 committed
+binary image files, 1,170 of them PNG, almost all of them screenshots
+from the design review practice under `docs/design/reviews/`. It grows
+daily. The single pull request that merged between this run and the
+previous audit added twenty of them.
+
+**Nothing is disclosed today, and that was checked both ways.** Every
+one of the 1,170 committed PNGs was parsed at the chunk level and not
+one carries a `tEXt`, `iTXt` or `zTXt` chunk, so the metadata channel
+holds no content at all. The rendered content was sampled instead, which
+is the half no scanner can read: the dashboard captures render a store
+named `store-demo` with truncated eight character record identifiers,
+and the record viewer captures render the published explainer and the
+`mini-fixture` record. Both are fixtures. No Class A verbatim text from
+a real session was found in any sampled capture.
+
+**What the fix costs, measured instead of guessed.** All three gate
+patterns were run across the whole tree without `-I`, with the gate's
+own exclusions. Binary files matched **zero** times for all three
+patterns, and the text hits were the twenty-nine the allowance already
+covers. So dropping `-I` today adds no false positive anywhere in this
+repository, and the objection that high entropy image data would trip
+the UUID pattern by chance does not hold at this repository's size.
+
+One measurement note for whoever re-runs that, because the first attempt
+here was wrong and silently so. GNU grep suppresses the `binary file
+matches` message when its stdout is `/dev/null`, so a count taken with
+`2>&1 >/dev/null` reports zero binaries whatever the tree contains.
+Capture both streams to files instead. The number above was taken that
+way and the method was proved against the probe first.
+
+**Change.** Remove `-I` from the gate's `grep` invocation. The message
+GNU grep emits for a binary hit carries the path and no line number and
+no matched text, which is the location-only shape PWC-8 (3) asks for
+everywhere, so the two changes agree rather than conflict. Note that the
+message goes to stderr, so the `hits` capture has to take `2>&1` for the
+binary case to set `fail=1` at all. Applying this without that redirect
+produces a gate that looks changed and catches nothing.
+
+**What it does not fix, and this is the larger half.** Removing `-I`
+catches a string sitting in an image's metadata. It cannot read a
+rendered screenshot, where the same path or identifier is pixels. The
+record viewer embeds prompt text by the redaction standard's own §2, so
+a capture of a real record rather than a fixture would put Class A
+verbatim human text into this repository where no gate of any kind can
+see it. The control that keeps that from happening today is a
+convention, which is that the capture harness points at a demo store.
+That is the same shape as the scratch directory finding of run 11: a
+convention a run has to remember is not a control. Naming it is this
+entry's main purpose, and the standard was amended in the same pull
+request to list rendered images as a governed surface.
+
+**Verification after applying.** Build the probe again, commit it on a
+branch, and confirm the gate goes red naming the file and not its
+contents. Then confirm the gate stays green on `main`, which the
+zero-false-positive measurement above predicts.
