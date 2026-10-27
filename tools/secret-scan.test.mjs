@@ -167,6 +167,94 @@ describe('a scanner that cannot do its job never reports clean', () => {
   });
 });
 
+// THE SECOND WAY A CLONE IS INCOMPLETE, which the guard above missed until
+// 2026-10-27. Depth and refspec are independent, `ensure-full-clone.sh` says
+// so and repairs both, and the describe block above only ever proved the
+// depth half. These three expectations were each confirmed to fail against
+// the pre-fix tool: it exited 0 on a full-depth single-branch clone whose
+// other branch carried the plant, printing `1 blobs, 0 hit(s)`.
+describe('a single-branch clone is incomplete at full depth, and is refused too', () => {
+  // A source repository whose canary lives on a branch other than the
+  // default, which is the only shape a refspec can hide. Built here rather
+  // than on ROOT so the suite above keeps its own blob counts.
+  let SRC;
+  let CLONE;
+
+  before(() => {
+    SRC = mkdtempSync(join(tmpdir(), 'secret-scan-refspec-src-'));
+    git(SRC, 'init', '-q', '-b', 'main');
+    git(SRC, 'config', 'user.email', 'suite@invalid');
+    git(SRC, 'config', 'user.name', 'suite');
+    writeFileSync(join(SRC, 'README.md'), '# default branch, nothing on it\n');
+    git(SRC, 'add', '-A');
+    git(SRC, 'commit', '-qm', 'clean default branch');
+
+    git(SRC, 'checkout', '-q', '-b', 'side');
+    writeFileSync(join(SRC, 'deploy.env'), `AWS_ACCESS_KEY_ID=${CANARIES['aws-access-key-id']}\n`);
+    git(SRC, 'add', '-A');
+    git(SRC, 'commit', '-qm', 'the plant, on a branch nobody fetches');
+    git(SRC, 'checkout', '-q', 'main');
+
+    CLONE = mkdtempSync(join(tmpdir(), 'secret-scan-refspec-'));
+    rmSync(CLONE, { recursive: true, force: true });
+    execFileSync('git', ['clone', '-q', '--single-branch', `file://${SRC}`, CLONE]);
+  });
+
+  after(() => {
+    for (const d of [SRC, CLONE]) rmSync(d, { recursive: true, force: true });
+  });
+
+  test('the clone is not shallow, so the old guard had nothing to fire on', () => {
+    assert.equal(git(CLONE, 'rev-parse', '--is-shallow-repository'), 'false');
+    assert.equal(
+      git(CLONE, 'config', '--get-all', 'remote.origin.fetch'),
+      '+refs/heads/main:refs/remotes/origin/main'
+    );
+  });
+
+  test('refuses the history scan, exit 2, naming the refspec and the repair', () => {
+    const r = run(CLONE, '--history');
+    assert.equal(r.code, 2, 'exit 0 here is a one-branch graph reported as a verdict');
+    assert.match(r.stderr, /refspec covers one branch/);
+    assert.match(r.stderr, /ensure-full-clone/);
+    assert.equal(JSON.parse(run(CLONE, '--history', '--json').stdout).usable, false);
+  });
+
+  test('--since is refused on the same clone, for the same reason', () => {
+    const r = run(CLONE, '--since=HEAD');
+    assert.equal(r.code, 2, '--since walks the same graph, so it inherits the same fault');
+  });
+
+  test('measured: the refusal is not pedantry, the repair finds the plant', () => {
+    const repair = join(dirname(fileURLToPath(import.meta.url)), 'ensure-full-clone.sh');
+    execFileSync('bash', [repair, '--quiet', '--repo', CLONE], { stdio: ['ignore', 'pipe', 'pipe'] });
+    const r = run(CLONE, '--history');
+    assert.equal(r.code, 1, 'same clone, same command, refspec widened and nothing else');
+    assert.match(r.stdout, /aws-access-key-id/);
+    assert.ok(!r.stdout.includes(CANARIES['aws-access-key-id']), 'and still never the value');
+  });
+
+  test('a repository with no origin is complete by definition, not refused', () => {
+    // The guard must not over-refuse: a repo with no remote is not a
+    // truncated copy of anything, and this is what keeps ROOT scannable.
+    assert.equal(run(ROOT, '--history').code, 1, 'ROOT has no origin and still scans');
+  });
+
+  test('both faults present means both are named, not just the first', () => {
+    const both = mkdtempSync(join(tmpdir(), 'secret-scan-both-'));
+    rmSync(both, { recursive: true, force: true });
+    execFileSync('git', ['clone', '-q', '--depth', '1', '--single-branch', `file://${SRC}`, both]);
+    try {
+      const r = run(both, '--history');
+      assert.equal(r.code, 2);
+      assert.match(r.stderr, /shallow/);
+      assert.match(r.stderr, /refspec covers one branch/);
+    } finally {
+      rmSync(both, { recursive: true, force: true });
+    }
+  });
+});
+
 describe('the class table is the tool\'s declared surface', () => {
   test('--patterns prints every class and nothing else', () => {
     const r = run(ROOT, '--patterns', '--json');
