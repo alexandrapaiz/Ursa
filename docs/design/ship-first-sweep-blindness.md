@@ -238,7 +238,9 @@ by construction.
 
 The exo seat proposes widening the sweep pattern to the one the
 open-pull-requests section already uses. That is one of two one-line
-repairs and it is the safer of them.
+repairs and it is the safer of them. **Read §5.1 before acting on this
+sentence. The plain widen is on the queue, it over-matches, and the
+anchored form that replaces it is the one to merge.**
 
 The other is to change line 75 so the charter stops naming the short
 form. That one looks equally small and is not, because the branch name
