@@ -365,7 +365,20 @@ diff shows a person decided. `prompts/skill-extract.md` §5g is the rule.
 node skills/trigger-coverage.mjs           report
 node skills/trigger-coverage.mjs --pairs   every ordered pair's score
 node skills/trigger-coverage.mjs --check    exit 1 if any boundary is untested
+node skills/trigger-coverage.mjs --amendments          the format's amendment graph
+node skills/trigger-coverage.mjs --amendments --write  generate the back pointers
 ```
+
+The last two are not about trigger coverage at all. They are in this tool
+because nothing in this repository runs the guards on a seat's behalf, so
+a guard living in a script no pull request table lists is a guard nobody
+runs. `--amendments` reads `prompts/skill-extract.md` alone: a section
+whose dated note says it amends §N has to make §N say so too, above the
+rule the amendment supersedes. Zero of seven amended sections did when
+the rule was written, for twenty-six days, and §5e's superseded worked
+example was read as current for twenty-two of them. `prompts/skill-extract.md`
+§5ah is the rule and states what the check cannot know, which is whether
+the two sections actually agree.
 
 The other two guards are about receipts. This one is about the half of a
 skill that decides whether it runs at all, which nothing checked until
@@ -482,6 +495,10 @@ node --test skills/relevance-sweep.test.mjs
 node --test skills/trigger-coverage.test.mjs
 node --test skills/library-dirs.test.mjs
 ```
+
+131 tests as of 2026-10-27, which is a dated measurement rather than a
+claim about the suite, for the reason `prompts/skill-extract.md` §5ag
+gives about a count with no date on it.
 
 ## Whether a receipt supports its sentence
 
