@@ -10,6 +10,75 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-27 ~01:3x UTC message run (pass 5 on this branch)
+
+1. **Six Tier B merges this pass: #589 (security), #585 (frontend),
+   #584 (market), #583 (finance), #570 (frontend, the redaction-gate
+   fix #585 made green), and #587 (finance).** All six held every
+   condition fresh: not draft, no `hold`, no owner comment, checks
+   green, `gh pr diff --name-only` clean of any `prompts/` path,
+   merged clean. A seventh, **#594 (finance)**, showed `CONFLICTING`
+   only because it predated #587's merge; verified false in a scratch
+   worktree against current `main` (docs-only, no code), pushed a
+   no-op merge of `main` onto its branch to let GitHub recompute, then
+   merged it too once green and `CLEAN`. #594's own description says
+   it subsumes #587 and #583 as well, which is consistent with all
+   three now being one line of history on `main`.
+2. **Three closes, all confirmed ancestors, none a judgment call:**
+   #551 (security) into #582 (security's own later draft), #560
+   (skill) into #586 (skill's own later draft, per #586's own "absorbed,
+   not abandoned" claim), and #586 itself into #593 (skill's newest
+   draft, opened 01:23 UTC, which already contains every commit #586
+   had). Each checked with `git merge-base --is-ancestor` after
+   repairing this clone's shallow history
+   (`bash tools/ensure-full-clone.sh`, 2169 → 3710 commits), not
+   assumed. #586 was also not Tier B-mergeable as it stood even before
+   #593 made the question moot: GitHub read it `CONFLICTING`, and the
+   conflict was real this time (`docs/ideas.md` and a `skills/*.mjs`
+   file), not the false kind several branches hit tonight.
+3. **#582 (security) has a real code conflict, handed back rather than
+   resolved here.** Confirmed in a scratch worktree merge against
+   `main`: genuine content conflicts in `docs/ideas.md` and
+   `tools/board/post.mjs`. The second file is code, so this is not the
+   docs-only case the PM may resolve directly. Board handoff posted
+   (id `59cf9400`) naming both conflicting files and the #551 close.
+   **#571 and #578 (exo, Tier C) now both have a confirmed successor,
+   #588** (`git merge-base --is-ancestor` holds both ways), but left
+   open rather than closed, matching this chain's own established
+   practice: closing a Tier C predecessor is the owner's call, not
+   this seat's, even when containment is confirmed. #588 is itself
+   Tier C by the same path (`prompts/*-agent.md`, eleven charters) and
+   still waits on you or a chair.
+
+**The standing condition on #591, now fully resolved rather than merely
+unacted-on.** Ursa/exo sent this seat a direct note (board message
+`57820ff5`) confirming what this branch's pass 4 had already found
+independently: the condition naming #591 as a stranded draft for this
+seat to ready, merge, or close is a false positive, because
+engineer's run was still live when the draft's tip was written. Exo's
+mechanism (a two-minute clock-skew widening in `runtime/board/standing.py`
+voids the "windows don't overlap" assumption the matcher relies on) is
+a different reason than this seat's own (a draft is excluded from Tier
+B by section ten regardless of which run wrote it, and the tool the
+condition keeps citing, `tools/check-draft-prs.sh`, still does not
+exist in this repository, the fifth confirmation of that today). Both
+reasons point the same way: nothing was done to #591, and nothing
+should have been. Replied to exo in first person on the board (id
+`b8770cb5`) naming the independent basis rather than only agreeing.
+#591 is still open, still a draft, unaffected by this pass, as it
+should be.
+
+**Next lane item: already in motion, nothing to dispatch.**
+`PM_DISPATCH_ENABLED` reads empty this run, same as every pass today,
+so no Actions dispatch fires regardless. Every seat with sprint work
+outstanding already has a live draft open (engineer #591, frontend
+#592, skill #593) or was just handed its own next action directly
+(security #582, via the board handoff above). The one seat with
+neither — market — has no open sprint item assigned to it this week
+(`sprint-2026-10-26.md`'s three items are all engineer's); nothing
+manufactured here to fill that gap, since this is a message pass, not
+the Monday ceremony that grooms assignments.
+
 ## Top three for the owner, 2026-10-27 ~01:1x UTC message run (pass 4 on this branch)
 
 1. **Two more Tier B merges this pass: #580 (engineer, `tools/board/`

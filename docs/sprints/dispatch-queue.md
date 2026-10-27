@@ -1,3 +1,16 @@
+# Dispatch queue — 2026-10-27, pass 5 (message run)
+
+**Re-swept fresh, nothing fires.** `PM_DISPATCH_ENABLED` reads unset
+again this pass. Open-PR sweep after this pass's six merges and three
+closes: nine seats have a live draft, a just-landed merge, or a
+just-posted handoff already in hand (engineer #591, frontend #592,
+skill #593, security #582 via the board handoff logged in
+`docs/sprints/pending.md`). The three Tier C chains (#395 research;
+#571/#578/#588 exo) are unchanged and need the owner or a chair, not a
+dispatch. Market has no open sprint item this week and none manufactured
+here; the current sprint's three items are all engineer's
+(`sprint-2026-10-26.md`). Nothing idle, nothing to fire.
+
 # Dispatch queue — 2026-10-27, hook run
 
 **This run's own shape.** Woken by capacity returning after a
