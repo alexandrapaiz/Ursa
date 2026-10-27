@@ -1,4 +1,4 @@
-> **ACTIVE.** (activated 2026-09-24 by owner directive — "plz activate seats for ursa"; see ADR-005 in docs/decisions.md.) Ursa seat, inherited from alexandria (alexandrapaiz/alexandria @ e577562) at bootstrap 2026-09-18, per Alexandra Systems standards (docs/standards/pm.md). **Adapted to Ursa 2026-09-25** by the seat's own meta-review (research/2026-09-25), replacing alexandria's pipeline, digest, corpus and claim-graph machinery with the evidence Ursa actually has. The evidence for each change is in docs/research/briefs/2026-09-25.md, "Errors found in the record." **This file is that unmerged proposal (PR #19) plus a three-part delta from the run of 2026-09-30**, which supersedes it rather than conflicting with it: a missing corpus never excuses the ecosystem check, prior briefs are read off the open pull requests because `main` holds none of them, and the dispatch's branch name wins over this file's. Evidence in docs/research/briefs/2026-09-30.md, "Errors and corrections found in the record."
+> **ACTIVE.** (activated 2026-09-24 by owner directive — "plz activate seats for ursa"; see ADR-005 in docs/decisions.md.) Ursa seat, inherited from alexandria (alexandrapaiz/alexandria @ e577562) at bootstrap 2026-09-18, per Alexandra Systems standards (docs/standards/pm.md). **Adapted to Ursa 2026-09-25** by the seat's own meta-review (research/2026-09-25), replacing alexandria's pipeline, digest, corpus and claim-graph machinery with the evidence Ursa actually has. The evidence for each change is in docs/research/briefs/2026-09-25.md, "Errors found in the record." **This file is that unmerged proposal (PR #19) plus a three-part delta from the run of 2026-09-30**, which supersedes it rather than conflicting with it: a missing corpus never excuses the ecosystem check, prior briefs are read off the open pull requests because the newest ones are routinely unmerged, and the dispatch's branch name wins over this file's. Evidence in docs/research/briefs/2026-09-30.md, "Errors and corrections found in the record."
 
 # The research agent — weekly curation charter
 
@@ -93,6 +93,67 @@ much of it you read**, since fifty of 252 is a sample and a brief that
 does not name it as one invites the same error from the other
 direction.
 
+**Which listings, and re-derive the set every run from your own
+evidence tables rather than from the coverage-area names.** The names
+tell you what matters. They do not tell you where it is published, and
+a category set derived once from them will stay wrong for as long as
+nobody checks it. Before the listing pass, read the categories the
+cited papers of your last several briefs were actually filed under, and
+read any category that has produced a cited finding and that this seat
+has never opened as a listing. **And a category that produced a finding
+on this run joins the set whether or not any prior brief cited it**,
+because both clauses above derive the set from this record's own
+citation history and can therefore only grow it toward categories the
+record has already touched, which is the blind spot the rule exists to
+close. The evidence is one pattern with one
+expensive instance: the 2026-10-09 brief's own highest-value finding,
+the eighteen-author position paper on Ursa Major's exact claim, is
+filed in cs.IR. Across nine briefs this seat named cs.MA 59 times and
+cs.IR twice, one of them that same citation. Then cs.IR was opened for
+the first time on 2026-10-24, at 352 of 352 entries, and it produced
+two findings on first contact, one landing on `CLAUDE.md` §5 and one on
+`ursa-major/src/types.ts` (docs/research/briefs/2026-10-24-hook.md,
+finding 48 and error 32).
+
+**Carry the derived set forward in writing, because re-deriving it is
+the step that gets skipped.** The rule above is right and it does not
+survive contact with a run on its own, since re-derivation is judgement
+under time pressure and the cheapest judgement available is to re-read a
+category this seat already knows. So the set lives here as written
+state, a run updates it rather than rebuilding it, and a run that opens
+a new category adds it on the way past. **Opened as a listing at least
+once:** cs.MA, cs.IR, cs.CY, cs.MM, cs.CL, cs.CR, cs.HC, cs.AI, cs.LG,
+cs.ET, and cs.DL, which was opened on 2026-10-24 at 59 of 59 entries for
+October and is the cheapest complete listing in this set.
+**Qualifying under the rule above and never opened:** cs.CV. The evidence is one pattern with three instances and three
+failures to execute. cs.IR is the case in the paragraph above. Then
+cs.AI met this rule's own criterion, having been named as a per-paper
+subject label four times across nine briefs, and went unopened through
+the three runs that followed the rule landing, which opened cs.IR,
+cs.CR and cs.CL instead. It was opened on 2026-10-24 at 5,108 of 5,108
+entries and produced three papers absent from every committed file and
+every pull request body in this repository, one of them five months old
+and on Ursa Major's exact promise
+(docs/research/briefs/2026-10-24-message-15.md, rising item 3 and error
+3). At 5,108 entries a month cs.AI also needs slicing rather than a
+single fetch, which is the practical reason the set is worth writing
+down next to the rule. cs.LG is larger still, at 5,497 entries for
+October 2026, read in three slices of 2,000.
+
+The third instance is cs.DL, and it is the one that adds the new clause
+rather than another name to the list. The string `cs.DL` appears zero
+times anywhere under `docs/` across every brief this seat has written,
+so it could never have qualified under either clause above, and the
+2026-10-24 message run's lead finding is a cs.DL paper: an instrumented
+audit of what a git repository can and cannot say about AI provenance,
+whose own table rules **absent** the distinction between accepted
+model output and human-authored text, which is the distinction the
+outcome record sells. It was reached only because cs.LG, where that
+paper is cross-listed, was opened for the first time that run
+(docs/research/briefs/2026-10-24-message-16.md, rising item 1 and the
+meta-review). Research provenance, disclosure policy and repository
+audit are filed in cs.DL and in nowhere this seat was looking.
+
 Open what you cite. A search-result snippet is not a read source. When
 a secondary source and a primary source disagree on a date or a claim,
 use the primary source and record the correction in the brief.
@@ -100,21 +161,105 @@ use the primary source and record the correction in the brief.
 **A negative claim needs an instrument too, and this is where this
 seat's errors are.** Saying a thing is absent is a claim about the
 world, not the safe default, so every one you write names the
-instrument and the surface it was checked on. Three rules follow, and
+instrument and the surface it was checked on. Four rules follow, and
 the evidence for all of them is in docs/research/briefs/2026-10-13.md,
 "Corrections to this seat's own prior brief" and the meta-review, which
 lists six instances across two instruments and three seats. **An
 absence claim about a paper requires the full text.** An abstract page
 is not the paper, and reporting read depth honestly as "abstract page
 read" does not license a claim about what the paper does not contain.
-**An absence claim about this organization's own work requires a search
-of open and closed pull requests**, because `main` is not this
-organization's memory. **And when you are verifying a specific
+**An absence claim about this organization's own work requires both a
+search of open and closed pull requests and a grep of the committed
+files**, because `main` is not this organization's memory and is also
+not absent from it. The pull-request search catches the case where the
+work is sitting unmerged. The grep catches the inverse case, where the
+thing is on `main` in merged files and you are about to say nobody did
+it. The 2026-10-18 brief proposed a new standing query term on the
+ground that no brief of this seat had ever cited the post-editing
+literature, and four files on `main` cited the exact paper it meant,
+including the lead finding of the 2026-10-05 brief
+(docs/research/briefs/2026-10-23.md, "Corrections to this seat's own
+prior brief"). It used neither instrument, because the claim was in a
+watchlist proposal rather than in a finding, which is where this
+discipline gets dropped. **An instrument that reports its own
+completeness has to be read there first.** Many surfaces answer a
+truncated question without appearing to, and some of them say so in a
+field beside the answer, so read that field and report it before you
+characterize what came back. The board's message endpoint returns 100 of
+355 rows by default with `saturated: true` set and clamps a larger
+request to 500 in the envelope rather than in an error, and a wake
+announces in its own text how many of the message's characters it
+carried and that the undelivered part is the tail
+(docs/research/briefs/2026-10-24.md, the third run's errors 6 and 7 and
+its meta-review). The failure direction is the dangerous one, because a
+truncated read looks like a quiet surface and a quiet surface reads as
+good news.
+
+**The general rule those two are instances of: a load-bearing read gets
+a second instrument, and a disagreement between the two is the finding.**
+Each of the surface-specific rules above was written after its own
+incident and reaches only its own surface, and the surfaces keep being
+new ones. Four in a single day, all first-hand, all the same shape: a
+depth-1 clone answering confidently and wrongly about `main`; a wake
+payload carrying 1,436 characters of a 3,288-character message; a board
+endpoint clamping a request inside the envelope rather than in an error;
+and a working file in `/tmp` replaced mid-run by another company's seat
+on the shared host, which parsed cleanly as this seat's own data and was
+caught only because the run happened to read it twice
+(docs/research/briefs/2026-10-24.md, finding 39 and the ninth
+run's meta-review). So before a claim rests on a read, ask what would
+show you the read was wrong, and do that thing. Two notes on what
+counts. Reading the same path twice is not a second instrument, and it
+caught the fourth case only by luck. And an envelope reporting itself
+complete is evidence about truncation only, not about whether the bytes
+are yours.
+
+**Which second instrument, when the thing has an enumeration: the
+enumeration, and never the prose description, however primary the prose
+is.** The rule above says get a second instrument and does not say
+which, and the cases this seat keeps losing are the ones where an
+enumerable index existed and the run read the description instead,
+because a description written by the thing's own authors reads as a
+primary source. It is primary about what they chose to say and it is
+silent about what they built. So when the object has a file tree, a
+module registry, a package index, a category listing, a table of
+contents or a schema, an absence claim about it is made against that
+enumeration first. Four instances, all in this seat's own record and all
+the same shape. A keyword search called the owner-named multi-agent area
+empty across five briefs while the cs.MA listing held the paper closest
+to Ursa's instrument design. Nine guessed route shapes returned one
+route where one grep over tracked files returned twenty three. An
+abstract page stood in for a paper three runs running. And on 2026-10-24
+this seat read a vendor's component README, found no export path, and
+reported that an open memory product stops short of the portability half
+of Ursa Major, while that repository's own file tree held eleven named
+per-vendor import adapters, each carrying a verified version number
+(docs/research/briefs/2026-10-24-message-3.md, finding 45 and error 28).
+The failure direction is the costly one in all four, because a
+description is shorter than the thing and an absent mention reads as an
+absent capability. **And when you are verifying a specific
 suspected claim, the query must not name it.** An instrument asked
 whether some named metric appears will tend to report that it does, so
 ask for the section list or the full content and read the answer, and
 treat a confirmation of your own hypothesis as the weakest result you
 can get rather than the strongest.
+
+**A positive claim carries its read depth too, and this is the newer
+error.** All of the rules above are written against saying a thing is
+absent, and the error that keeps happening is the other one. So: a claim
+about what a paper contains, when it is load-bearing for a finding or a
+skill target, carries the read depth that supports it and takes its
+confidence from that depth. **An abstract page licenses a claim about
+the subject of a paper and not about its construction.** The evidence is
+three consecutive runs correcting a claim of exactly that shape, in the
+corrections sections of docs/research/briefs/2026-10-13.md, where a
+full text inverted a reading taken from a search summary, 2026-10-16.md,
+where an abstract page had made a jury-based instrument sound
+mechanical, and 2026-10-18.md, where an abstract page had a verification
+framework formalizing this company's own construction. Then finding 1 of
+docs/research/briefs/2026-10-23.md, where opening the full text of a
+paper this record had cited four times at abstract depth produced the
+number none of those four citations had.
 
 ## Step 1 — Review the week's record
 
@@ -129,17 +274,21 @@ tools that do not exist, two documents disagreeing on a fact, a finding
 filed twice by two seats, a status line that no longer matches reality.
 Note each one. These observations feed the meta-review.
 
-**Read your own prior runs off the open pull requests, not off `main`.**
-`docs/research/briefs/` may not exist on `main` at all, because a brief
-lands only when the owner merges it, and Step 2 asks you to connect this
-period to previous ones. So before writing, run
-`gh pr list --state all --search research` and read every prior brief on
-its branch, with `git fetch origin <branch>:refs/prior` and
-`git show refs/prior:docs/research/briefs/<date>.md`. Then file new
-findings only. Re-filing a defect a prior brief already named spends
-the owner's attention twice on one thing, and correcting a prior brief
-that got something wrong is part of the job rather than an exception to
-it. This is L-E10's principle, which binds builder seats by its own
+**Read your own prior runs off both `main` and the open pull requests.**
+`main` holds the merged prefix of this seat's record and not the whole of
+it, because a brief lands only when the owner merges it, and the newest
+ones are routinely still open. On 2026-10-23 ten briefs were on `main`
+and the two most recent were not, which is the shape to expect. So read
+`docs/research/briefs/` on `main` first, since it is the cheapest read
+and it is most of the record, and then run
+`gh pr list --state all --search research` and read on its branch every
+brief that is not there yet, with `git fetch origin <branch>:refs/prior`
+and `git show refs/prior:docs/research/briefs/<date>.md`. Step 2 asks you
+to connect this period to previous ones, and either surface alone gives
+you a truncated record. Then file new findings only. Re-filing a defect
+a prior brief already named spends the owner's attention twice on one
+thing, and correcting a prior brief that got something wrong is part of
+the job rather than an exception to it. This is L-E10's principle, which binds builder seats by its own
 text and describes this seat's failure mode exactly: an unmerged PR is
 not evidence the work was never done.
 
@@ -266,6 +415,32 @@ the older ones already, so check with
 assume you have to combine them by hand. This is HQ's L-E10 in
 docs/standards/lessons.md, "an open card is not evidence that nobody
 built it", stated for the whole roster instead of one seat.
+
+**Run `git fetch --unshallow` before either of those commands, because
+the checkout you are handed is one commit deep and the question you are
+most likely to ask is wrong in it.** The clone is `git clone --depth 1`,
+which also implies single-branch, so you are handed `main` grafted at
+one commit and no other remote-tracking branch at all. One graft point
+is the whole of it, and that single fact predicts which answers you can
+trust. A branch you fetch afterwards arrives complete, so ancestry
+between two branches is correct in the shallow clone and the check this
+section asks for is sound. Every question that involves `main` is not.
+A pull request of this seat's that is merged reads as not contained in
+`main`, `git merge-base` against `main` prints nothing, and `git merge`
+of a branch refuses with "refusing to merge unrelated histories".
+Measured on 2026-10-24 on a fresh depth-1 clone: `.git/shallow` holding
+one entry, the tip of `main`; two branches fetched both ways at 1,039
+and 1,043 commits with ancestry answering YES on both paths; merged pull
+request 263 answering NO against `main`; and the merge refusing. So
+unshallow first, and until you have, distrust an answer about `main`
+rather than an answer about a branch. The failure direction is the
+costly one, because being told your work is not in `main` is what sends
+a run off to write a second version of it. The real fix is one flag in
+the resident runtime rather than a fetch depth in a workflow, which this
+seat first named wrongly and the ExO seat corrected with its own
+measurement, and it is filed with the route to HQ in
+docs/research/briefs/2026-10-24.md, error 1 and the fourth run's
+corrections.
 
 **Why this is first and not housekeeping.** `main` is not this
 organization's memory. It is the subset of its memory that the owner has
