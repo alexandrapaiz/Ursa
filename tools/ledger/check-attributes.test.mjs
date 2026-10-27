@@ -98,13 +98,49 @@ test('--clone refuses a declared driver this clone has not registered, and names
   const dir = fixture({ attributes: 'docs/ideas.md merge=ledger\n', registry: ONE_DRIVER });
   assert.equal(gate(dir).code, 0, 'the committed state is fine');
   const before = gate(dir, '--clone');
-  assert.equal(before.code, 1);
+  // Exit 2, not 1, since 2026-10-26: nothing committed is wrong here and the
+  // repair is one command in one working copy rather than a pull request. The
+  // assertion was `1` until the day three seats read a clone-only finding as a
+  // repository defect; see tools/ledger/attributes-verdict.mjs.
+  assert.equal(before.code, 2);
   assert.match(before.err, /this clone has no merge\.ledger\.driver/);
   assert.match(before.err, /Run: bash tools\/registers\/install-drivers\.sh/);
   git(dir, 'config', 'merge.ledger.driver', 'node /dev/null %O %A %B');
   const after = gate(dir, '--clone');
   assert.equal(after.code, 0, after.err);
   assert.match(after.out, /all registered in this clone/);
+});
+
+test('a clone-only finding never claims the committed state is wrong', () => {
+  // The defect the locus split exists for. One command repairs this and it
+  // produces no diff, so the verdict must not send the reader to a tracked
+  // file, must not call for a pull request, and must not be an ::error:: a
+  // reviewer reads as a defect in the branch.
+  const dir = fixture({ attributes: 'docs/ideas.md merge=ledger\n', registry: ONE_DRIVER });
+  const r = gate(dir, '--clone');
+  assert.equal(r.code, 2);
+  assert.match(r.err, /the committed state is correct and nothing here needs a pull request/);
+  assert.match(r.err, /per-clone and never committed/);
+  assert.match(r.err, /measures as a conflict that is not one/);
+  assert.match(r.err, /^::warning::/m);
+  assert.doesNotMatch(r.err, /^::error::/m);
+});
+
+test('a committed violation and a clone finding together report the committed one, at exit 1', () => {
+  // Precedence, and the reason for it: the pull-request-shaped repair is the
+  // one that outlives this working copy, so it owns the verdict. The clone
+  // finding is still named, and is named as separate from that repair.
+  // Both paths are tracked in the fixture, because `git check-attr` is fed
+  // from `git ls-files` and an attribute on an untracked path is never read.
+  const dir = fixture({
+    attributes: 'docs/ideas.md merge=ledger\ndocs/decisions.md merge=union\n',
+    registry: ONE_DRIVER,
+  });
+  const r = gate(dir, '--clone');
+  assert.equal(r.code, 1);
+  assert.match(r.err, /violation in tracked files/);
+  assert.match(r.err, /which is a pull request/);
+  assert.match(r.err, /Separately, 1 declaration is not registered in this clone/);
 });
 
 test('a path sent to a driver its own table does not enable is refused', () => {
