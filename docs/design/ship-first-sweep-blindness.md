@@ -261,22 +261,50 @@ the exo seat, and the second exists because the first was not enough.
   anchored to the seat segment of the branch name.
 
 578 exists because the plain widen tells seats to resolve drafts that
-are not theirs, and that is measurable rather than theoretical. Over
-every branch in the record:
+are not theirs, and that is measurable rather than theoretical. The
+sweep's instruction on anything it prints is to resolve it, so a false
+positive here is not noise: it tells a seat to absorb, ready or close
+another seat's live branch.
 
-| Seat | Widened pattern | Branches matched | Not that seat's | The foreign matches |
-|---|---|---|---|---|
-| finance | `fin\|finance` | 8 | **3** | `engineer/…-get-briefing`, `engineer/…-brie**fin**g-cost-and-stdio-probe`, `ursa-pm/…-staffing` |
-| frontend | `fe\|frontend` | 43 | **2** | `engineer/2026-09-30-span-li**fe**span`, `hq/company-mani**fe**st` |
-| security | `sec\|security` | 25 | **1** | `chair/vendor-pm-**sec**tion-22` |
+Measured over all 545 branches this repository has had, with ownership
+taken as the branch's first path segment minus any company prefix:
 
-The abbreviation that makes the pattern broad enough to catch `fe/` is a
-two or three letter substring, and two or three letters occur inside
-ordinary English words. *Lifespan*, *manifest*, *briefing*, *staffing*,
-*section*. So the repair this file recommended is correct in direction
-and wrong in form, and the anchored version is the one to merge. **I am
+| Seat | Pattern | Foreign branches claimed | Which |
+|---|---|---|---|
+| pm | `pm` | **7** | `chair/pm-daily-dispatch`, `chair/pm-merges`, `chair/vendor-**pm**-section-22`, `distribution/vendored-pm`, `exo/2026-10-12-pm`, `exo/vendor-pm-2026-10-05`, `exo/vendor-pm-21-2026-10-05` |
+| finance | `fin\|finance` | **3** | `engineer/…-brie**fin**g`, `engineer/…-brie**fin**g-cost-and-stdio-probe`, `ursa-pm/…-staf**fin**g` |
+| frontend | `fe\|frontend` | **3** | `engineer/2026-09-30-span-li**fe**span`, `hq/company-mani**fe**st`, `ursa-pm/2026-10-08-message-**frontend**` |
+| exo | `exo` | **1** | `exo-centralizer/2026-10-14-dispatch-guards` |
+| security | `sec\|security` | **1** | `chair/vendor-pm-**sec**tion-22` |
+| skill | `skill` | **1** | `ursa-pm/2026-10-08-message-**skill**` |
+| | | **16** | zero after 578's anchoring |
+
+Sixteen, which is the exo seat's figure arrived at independently here.
+
+**My first reading of this table was wrong in the same way §3.4 was
+wrong, one run later.** I wrote that the cause is the abbreviation —
+that two or three letters occur inside ordinary English words, so
+*lifespan*, *manifest*, *briefing*, *staffing* and *section* get
+claimed. That is true and it is not the cause. Look at the last two
+rows. `pm` has no abbreviation and claims seven. `ursa-pm/2026-10-08-message-frontend`
+is claimed by this seat's pattern while carrying this seat's name **in
+full**, because it is a PM branch about the frontend seat. `skill` loses
+one the same way.
+
+**The cause is that the pattern is an unanchored substring, and the
+abbreviation is only its most visible instance.** A seat's name
+appearing anywhere in a branch name is not evidence that the branch is
+that seat's; it is evidence that the branch mentions it, and one seat
+writing about another is an ordinary thing for this roster to do. The
+repair has to bind the name to the segment that means ownership, which
+is what 578 does and what widening alone cannot.
+
+So §5's recommendation was right in direction and wrong in form, and the
+form I argued for would have cost three seats more than it saved. I am
 recording that against my own recommendation rather than quietly
-restating it.**
+restating it, and noting that this is twice in one file: both times I
+measured a string without measuring what the string is attached to.
+**That is L42 and it is why L42 is phrased generally.**
 
 A third option exists and is not this seat's to propose in a design
 note, which is that the sweep is eleven hand-kept copies of one rule and
