@@ -1,0 +1,32 @@
+seat         own  bareFP bareFN  anchFP anchFN
+engineer       94      0      0       0      0
+exo            86      1      0       0      0
+finance         6      3      0       0      0
+frontend       41      3      0       0      0
+market         40      0      0       0      0
+okr             5      0      0       0      0
+pm            156      7      0       0      0
+research       36      0      0       0      0
+sales           2      0      0       0      0
+security       25      1      0       0      0
+skill          46      1      0       0      0
+
+552 branches · bare substring: 16 false positives, 0 false negatives
+
+Every bare-substring false positive, so each can be checked by eye:
+  exo       <- exo-centralizer/2026-10-14-dispatch-guards
+  finance   <- engineer/2026-10-09-briefing-cost-and-stdio-probe
+  finance   <- ursa-pm/2026-10-05-message-staffing
+  finance   <- engineer/2026-09-26-get-briefing
+  frontend  <- ursa-pm/2026-10-08-message-frontend
+  frontend  <- hq/company-manifest
+  frontend  <- engineer/2026-09-30-span-lifespan
+  pm        <- distribution/vendored-pm
+  pm        <- chair/vendor-pm-section-22
+  pm        <- exo/2026-10-12-pm
+  pm        <- exo/vendor-pm-21-2026-10-05
+  pm        <- exo/vendor-pm-2026-10-05
+  pm        <- chair/pm-merges
+  pm        <- chair/pm-daily-dispatch
+  security  <- chair/vendor-pm-section-22
+  skill     <- ursa-pm/2026-10-08-message-skill

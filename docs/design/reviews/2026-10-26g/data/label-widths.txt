@@ -1,0 +1,14 @@
+font: 10px "JetBrains Mono", "JetBrains Mono Fallback", ui-monospace, monospace
+
+  label        natural width
+  case         24.00px
+  tension      42.00px
+  rule ×2      42.00px
+  rule ×9      42.00px
+  rule ×10     48.00px
+  rule ×99     48.00px
+  rule ×100    54.00px
+
+The shipped floor is 34px. Everything above `case` is wider than it,
+so on any row narrow enough for flex to shrink the column, the glyphs
+leave the box and eat the 8px gap to the polarity sign.

@@ -1258,3 +1258,190 @@ the bottom of a 6px swatch, so a centre sample cannot see the one thing
 that distinguishes them. It samples every row now and reports how many
 distinct rows each swatch has, which turns the inset into a fact instead
 of an absence. A swatch is a column, so sample the column.
+
+## L37 — A port answering 200 is not evidence that your build is behind it
+
+**measured**, 2026-10-27 (2026-10-26 scheduled slot).
+`reviews/2026-10-26g/README.md` §7.
+
+This run rebuilt the overlay, ran `pkill -f "next start -p 4961"`,
+started a new server, got `200` from the port, and measured both of its
+fixes as having changed nothing.
+
+The `pkill` matched the npm parent and killed it. The `next-server`
+child it had spawned kept the port, so the new `next start` failed with
+`EADDRINUSE` into a log nobody was reading, and every probe for the next
+several minutes read the old build. Three things made it silent at once:
+the port answered, the pages rendered, and the failure was in a
+background log rather than in an exit status the run saw.
+
+**The check that works is not a status code.** It is whether the thing
+you just changed is in the response. A run that has just edited a width
+can ask for that width. `ss -ltnp` names the process holding the port,
+which is the other half, because the fix is to kill the server and not
+its parent.
+
+This is L34's shape through a second door. There the port was a
+stranger's store and the page could not tell; here it was this run's own
+previous build and the probe could not tell. **An address is not an
+identity**, and that holds for a process you started yourself four
+minutes ago.
+
+## L38 — A floor is not a column, because flex shrinks down to it
+
+**measured and judged**, 2026-10-27.
+`reviews/2026-10-26g/data/tuning-gap-before.txt`, `README.md` §3.
+
+The overlay panel's label column was `minWidth: 34` with `whiteSpace:
+nowrap`, shipped 2026-10-26d under the note *"a floor and not a ceiling,
+so the column still grows to fit and nothing else moves."*
+
+`min-width` floors the **used** width. It does not stop a flex item
+shrinking to that floor, and when the content is `nowrap` the glyphs then
+overflow the box they were given. Measured at 320 across four rows: boxes
+of 34, 34, 41 and 34, with the text overrunning each by up to 8px and
+eating the whole flex gap to the sign beside it. **Two rows carried the
+identical word `tension` in two different boxes**, because flex shares
+shrinkage in proportion to base size and the statement beside each row
+has a different natural width. So the column's right edge was ragged in a
+way no two renderings would repeat.
+
+`flex-shrink: 0` is the repair. The floor restated as `7ch` is L9, and it
+is what makes the floor survive a change of type size; it is not what
+fixed anything.
+
+**The reason this stood for a week is the part worth keeping.** The note
+beside the value was wrong, and nothing could catch it, because this list
+is drawn only when a payload has landed and no instrument had ever put
+one there. A claim in a comment is not a measurement. The surface that
+would have falsified it did not exist until the run that built
+`state/panel-payload.mjs`.
+
+## L39 — At phone width the web does not align the label column, it stops having one
+
+**measured**, 2026-10-27, 390x844, five sites, one load each.
+`reviews/2026-10-26g/data/bench-label-columns.txt`, `README.md` §6.
+
+Asked of `linear.app/changelog`, `vercel.com/changelog`,
+`docs.stripe.com/api`, `elicit.com` and `anthropic.com/news`: in a
+stacked list of rows that put a short label beside body text, do the rows
+share one left edge for that text?
+
+**Nineteen candidate lists. Fifteen put the label above the text rather
+than beside it. Of the four that kept it beside, one was
+indistinguishable because every label was the same width, two were
+ragged, and none held a column.** Zero columns in the sample.
+
+So the craft answer at 390 is not a better gutter. It is that the
+beside-the-text label is itself the wide layout's idea, and the narrow
+layout drops it.
+
+**The strength of this entry is capped by its denominator and the entry
+says so.** Four measured lists on one site is thin. What it supports is
+"the pattern is rare at 390", which fifteen rejections establish
+directly. What it does not support is any claim about which treatment
+reads better, and no such claim is made here.
+
+**The first version of this probe would have answered confidently and
+wrongly.** Without a constraint that rows be stacked in one column and
+the label sit on the body's own first line, it matched a horizontal
+carousel as "8 rows, 8 left edges, 2156px of spread" and a card grid as
+ragged, and would have reported a web full of broken label columns that
+are not label columns. Those numbers were never written to a file. This
+is the kit README's warning about exemptions arriving in person: a sweep
+is mostly exemptions, and getting one wrong looks exactly like a result.
+
+## L40 — Stack the dashboard's polarity tag below 640 (proposal, not a decision)
+
+**proposed**, 2026-10-27. `reviews/2026-10-26g/README.md` §6.
+
+This run gave `.dash-tag` a `4.5em` column below 640, where it previously
+had none, taking the statement's left edge from three distinct values to
+one at 320. That is strictly better than what was there and it is not
+necessarily what the surface wants.
+
+L39 measured the alternative the web actually uses: put the tag above the
+statement at phone width and spend no horizontal gutter at all. On a
+320px line the column costs 46.8px of 280, which is seventeen per cent of
+every statement's measure, and the statements here are long because they
+are sentences about the reader.
+
+**What it buys.** Seventeen per cent more measure on the narrowest
+viewport, on the one surface in this company whose whole job is to be
+read.
+
+**What it costs.** The tag stops being a column at all below 640, so
+scanning down a list for `AVOID` becomes reading each row's first line
+rather than reading one column. It also puts a second line into every
+row, which on a list of six units is six more lines of height. And it
+splits the layout into two shapes rather than one shape at two widths,
+which is more stylesheet than this page currently has.
+
+Not done here, because the charter's repair step is for defects and this
+is a design decision about a surface the owner has not yet seen with
+units in it. `reviews/2026-10-26g/crops/units-320-after.png` is that
+surface as it stands.
+
+## L41 — Compressing a review's frames moves the numbers they are evidence for
+
+**measured**, 2026-10-27. `reviews/2026-10-26g/README.md` §7.
+
+The charter asks for compressed screenshots so the repository stays
+light, and an adaptive 256-colour palette takes a review folder of dark
+UI frames from 5.1MB to 2.2MB, which is where the last two reviews sit.
+It is also not lossless, and the way it fails is the dangerous way.
+
+Re-running `diff-frames.py` over the quantised hover pairs reproduced
+three counts exactly: 1355, 317 and 246 pixels, the three this run had
+just reported. **Two others had moved.** `rec-row-index` from 218 to
+312, and `sp-verbatim` from 10451 to 11416, which is nine per cent.
+Whether a frame survives quantisation depends on how many distinct
+colours it holds, so the frames with the subtlest washes — exactly the
+ones whose pixel count is the whole finding — are the ones that move.
+
+**Three exact reproductions are not evidence that a transform is
+lossless.** That is the transferable half. A spot check drawn from the
+frames you care most about is drawn from a biased sample, because you
+looked at the ones you had just written numbers for.
+
+The rule this seat follows now: **any frame set a tool reads a number
+off is committed uncompressed**, and everything else is compressed. In
+practice that is `data/hover-*`, and it is re-shot after the compression
+pass rather than restored from it, because a restored frame is only as
+trustworthy as the copy it came from.
+
+This is L6 and L8's family — a review frame that differs from itself —
+with the difference introduced on the way into the repository rather
+than on the way out of the browser.
+
+## L42 — A regex lifted out of a document is not what the document does with it
+
+**measured**, 2026-10-27. `ship-first-sweep-blindness.md` §3.4, which is
+this entry's retraction of this seat's own published measurement.
+
+That file scored eleven seat charters for a split between two branch
+patterns. Its instrument took the first two `test("…")` strings in each
+charter and called them the two sweep patterns. **It never read what
+each pattern was being applied to.**
+
+Ten charters of eleven hold exactly two `test()` calls and both sit to
+the right of `.headRefName`, so on ten rows the shortcut was right by
+luck. The exo charter holds nine, and the second of them is
+`select(.workflowName|test("agent"))` — a filter over the Actions run
+list, not over branches. That seat is the only one of eleven that reads
+other seats through their workflow runs, so it is the only charter that
+has such a filter, which makes the false positive **single-seat by
+construction rather than by chance**. The seat it landed on told me so
+on the board, with the control an absence needs: `agent` matches zero of
+its 67 branches, `exo` matches 67 of 67.
+
+The published row said 19 of 19 drafts invisible. The true row is 0. The
+roster total goes from twenty-one to two, and both survivors are this
+seat's PR 141 and the security seat's PR 165.
+
+**When an extractor is right on ten of eleven cases, the eleventh is not
+noise.** It is the case that tells you what the extractor is actually
+measuring. Bind the field to the left of the pipe.
+
+This is L9's family — the unit a number is in — one level up: not the
+unit of the value, but the identity of the thing the value describes.

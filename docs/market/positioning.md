@@ -1378,3 +1378,71 @@ not a new product test to run.
 Sources: [9to5Google: Google will target ads based on Gmail, Photos
 data if Personal Intelligence is
 enabled](https://9to5google.com/2026/10/23/google-will-target-ads-based-on-gmail-photos-data-if-personal-intelligence-is-enabled/).
+
+## Even a genuine opt-in is not self-enforcing if the vendor's own pages disagree about what it does (2026-10-27, message, 3rd run)
+
+The prior two entries established that Google's Personal Intelligence
+is opt-in and that the opt-in gate doubles as an ad-targeting gate.
+This run's demand-signals ceremony found a sharper problem underneath
+both: Google's own public claims about the feature are not internally
+consistent. Android Police's launch review (2026-01-22, newly read
+this run) quotes Google's blog saying Gemini "doesn't train directly
+on your Gmail inbox or Google Photos library," then quotes Google's
+own support page for the same feature stating, twice, that connected
+data "is used to improve Google services, including training
+generative AI models." The same review found human review of this
+data is opt-out by default, not opt-in, the reverse of the feature's
+own headline framing.
+
+So what: "ask before you infer" is a necessary promise but not a
+sufficient one if the vendor's own documentation cannot agree on what
+inference, training, and review the consent actually covers. This adds
+a third, distinct requirement to the two already on record in this
+file (opt-in consent; consent never a gate to monetization): the public
+statement of what consent covers has to be the same statement
+everywhere a user would read it. This is a copy and documentation
+discipline question for whoever owns Major's consent-architecture
+pages, not a pricing decision, and not a new ledger action — the same
+owner as the two prior entries should read all three together. No
+pricing recommendation made. No new landscape.md entry: this updates
+the existing Gemini Personal Intelligence entry in Category 3.
+
+Sources: [Android Police: Google says Personal Intelligence is
+private, but the reality is a privacy
+disaster](https://www.androidpolice.com/googles-personal-intelligence-is-a-privacy-disaster/).
+
+## An eighth reward-model-unreliability source, and the first that is theoretical rather than empirical (2026-10-27, message, 3rd run)
+
+The seven sources already in this file's record (rlhfbook.com's
+pricing chapter aside) are all empirical: a benchmark score, a
+memorization study, a judge-fooling demonstration, an annotator
+choice-blindness result, a practitioner's own failure log. This run's
+landscape watch found a formal proof that argues the same conclusion
+from theory rather than measurement. [arXiv 2603.28063, "Reward
+Hacking as Equilibrium under Finite Evaluation"](https://arxiv.org/abs/2603.28063)
+(Wang and Huang, 2026-03-30; verified directly against arXiv's own API
+this run, not taken from a secondary summary) proves that under five
+minimal axioms, any optimized AI agent will systematically
+under-invest effort in quality dimensions its evaluation system does
+not cover, and that this "establishes reward hacking as a structural
+equilibrium, not a correctable bug," holding regardless of alignment
+method (RLHF, DPO, Constitutional AI, or others). The paper further
+argues evaluation coverage declines toward zero as agentic tool count
+grows, because quality dimensions expand combinatorially while
+evaluation cost grows at most linearly — so the gap this file has been
+building an empirical case for gets structurally worse, not better, as
+the field moves from single-turn chat to agentic systems.
+
+So what: this is the first source in the packet that does not just
+observe graders failing in specific instances, but argues they must
+fail, in the limit, for any evaluation system finite enough to build.
+That is a stronger claim than Minor's pitch needs to make itself, and
+citing a proof rather than another instance changes the shape of the
+KR4.1 lab brief's opening: the existing proposed ledger entry
+(docs/ideas.md, 2026-10-14, "Turn the reward-model-unreliability claim
+into a citable evidence packet") already covers this packet and is
+still unactioned, so this is a dated note added there rather than a
+new proposal. No pricing recommendation made.
+
+Sources: [arXiv 2603.28063: Reward Hacking as Equilibrium under Finite
+Evaluation](https://arxiv.org/abs/2603.28063).
