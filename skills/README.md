@@ -371,8 +371,12 @@ The other two guards are about receipts. This one is about the half of a
 skill that decides whether it runs at all, which nothing checked until
 2026-10-24. `prompts/skill-extract.md` §5c asks every skill for one near
 miss per adjacent skill, and adjacency here is every other skill in the
-library, so the tool reads all 30 ordered pairs and asks whether this
-skill's near misses carry that sibling's own trigger prompt.
+library, so the tool reads every ordered pair of two distinct skills and
+asks whether this skill's near misses carry that sibling's own trigger
+prompt. It prints the pair count it read rather than this file stating
+one: the count is `n(n-1)` and it moved from 30 to 90 while this
+sentence said 30, which is the defect `prompts/skill-extract.md` §5ae
+rule 2 exists to stop.
 
 The failure it exists to catch is arithmetic rather than carelessness.
 The budget is one near miss per neighbour, so landing a sixth skill put

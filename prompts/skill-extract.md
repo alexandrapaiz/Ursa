@@ -2594,6 +2594,14 @@ it is a ledger entry rather than a check in this run, because the
 mechanical form is not obvious and §5ae's general rule asks for an owner
 and a deadline instead of a guess.
 
+**The third item was taken, 2026-10-27, by §5ah**, which is the next run
+of this seat to edit this file and is the owner that ledger entry named.
+Written here by hand rather than generated, because a residue list is an
+argument about what is worth building and not a derived fact. §5ah's
+back pointer does not cover it, because §5ah does not amend §5ag: the
+rule §5ag states is untouched, and only one of the three items it listed
+has moved.
+
 **Ours.** The measurement, the amended-section cause, the
 clause-boundary discriminator and the withdrawn recount are this run's.
 The three exclusions are each paid for by a case in the control set
@@ -2688,6 +2696,25 @@ reading the arithmetic, which is now a test. A checker and a writer that
 disagree about one line are the same class of defect as the two guards
 §5s found disagreeing about scope, and running the writer twice is the
 cheapest probe for it.
+
+**A fourth surface, found while doing this and left to a hand repair on
+purpose.** `skills/README.md` said in prose that the tool "reads all 30
+ordered pairs". It reads 90, and has since the library reached ten
+skills. That is a count of the library in a file none of the three count
+rules scopes: §5ae scoped the trigger tests and the index table, §5af
+the ten `SKILL.md` bodies, §5ag this file. The obvious next move is to
+point `libraryCountsInBody` at the README, and the measurement refuses
+it. Run against `skills/README.md` on this branch it returns nine hits,
+and the live defect is not one of them, because the detector matches
+spelled words and this one was written as a digit. Of the nine, L377 and
+L409 are the file's own dated record of what the tool scored when it was
+first run, L431 is the quotation of §5e that §5af's rule protects, and
+the rest are prose about numbers rather than claims about the library.
+Nine reports and zero findings is a guard that teaches a reader to skip
+it, which is the one outcome §5w argued is worse than no guard. So the
+line is repaired by hand, the sentence now names how the count is
+derived instead of stating it, and the ledger carries the surface with
+an owner rather than this run carrying a fourth pattern.
 
 **The residue.** §5ag listed three items and this takes the third. The
 first, a count of the library in this file that names no skill, is still
