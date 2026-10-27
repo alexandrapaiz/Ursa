@@ -3802,6 +3802,18 @@ axis now has a policy actor trying to make it a legal one" section.
   rather than leaving a buyer to notice the overlap unprompted.
 - Cost: $0
 - Status: proposed
+- Dated note, 2026-10-27 (message, 5th run): a second instance of the
+  same risk, now in a domain closer to Minor's own language than
+  Surge's "survive a 9 to 5" framing. Taste Labs (docs/market/landscape.md,
+  new Category 1 entry, $18.5M seed) sells solicited preference data
+  for subjective creative quality and states CLAUDE.md §1's own
+  "no verifier for subjective domains" claim almost word for word in
+  its own marketing. Same fix applies: name the distinction (solicited
+  Tastemaker grading vs. real-deliverable-derived outcome) explicitly
+  rather than let a buyer notice two funded vendors converging on the
+  same language unprompted. Not a new proposal, since the fix and the
+  first step are identical; recorded here so the brief-writer sees
+  both instances in one place.
 
 ### 2026-10-08 — Two launches share one resolver and nothing checks they agree
 - Trigger: reconciling PR #92 onto `main` today. The branch had extracted
