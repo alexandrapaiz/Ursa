@@ -54,11 +54,17 @@ describe('the five extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 23 distinct causes with 28 probes, which is the number the text sweep could not see', () => {
+  it('reaches 27 distinct causes with 32 probes, which is the number the text sweep could not see', () => {
     const { json } = run()
-    assert.equal(json.branches.length, 28)
+    // 28 and 23 until 2026-10-27. The four added are all post.mjs's: three
+    // sender branches, where a seat named by neither flag nor variable, a
+    // seat differing from a roster seat only in case, and a company with no
+    // declaration used to be two literal defaults between them; and the
+    // board answering that it cut the body at its wake limit, which this
+    // file's caller used to discard along with three other response fields.
+    assert.equal(json.branches.length, 32)
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
-    assert.equal(causes.size, 23)
+    assert.equal(causes.size, 27)
   })
 
   it('carries an exit 3, which no gate of the first four could have reached', () => {
