@@ -1298,3 +1298,42 @@ against this comp: MemoryLake is evidence the market wants a neutral
 store, priced in the same $19-199/mo band Wire and MemoryLake both
 now occupy, not evidence any named product currently delivers
 verified neutrality. No pricing recommendation made.
+
+## Users resist automatic memory itself, not just its visibility — a distinct axis from the transparency gap already closed (2026-10-27, message run)
+
+This run's demand-signals ceremony read the discussion under "Switch to
+Claude without starting over" (Hacker News, ~592 points / 273 comments,
+covering Anthropic's cross-vendor memory-import launch this file already
+maps in docs/market/landscape.md). The thread is seven months old and
+found this run rather than new this week, but the finding survives that:
+it is the first time this file has read past a launch's own coverage to
+the discussion under it, and several of the most-upvoted comments
+converge independently on the same complaint. The top comment argues
+custom instructions and Skills handle preferences better than automatic,
+accumulating memory; one commenter calls seeing their own inferred
+profile "spelt out... icky" even though they'd accepted the same
+inference passively before seeing it stated; another reports Claude
+surfacing an unrelated months-old detail unprompted and disabling memory
+outright afterward. The shared preference across these replies is a
+manually-scoped context (Projects, a custom-instructions file) over one
+the product writes to on its own.
+
+The 2026-09-30 entry above ("Portability over transparency") narrowed
+Major's Category 3 edge to portability after OpenAI shipped per-response
+visibility into inferred memory. This finding names a second axis that
+entry didn't cover, and the two should not be read as the same gap: not
+"can the user see what was inferred" but "did the user choose for
+inference to happen at all." CLAUDE.md's non-negotiable #2 ("the user
+can always see, edit, revoke, and delete") answers the first axis. It is
+silent on the second, which is what this thread's commenters are actually
+arguing about. Whether Major's own product makes inference opt-in per
+category, or opt-out by default with a strong edit/delete surface after
+the fact, is a product question this file cannot answer by reading a
+public page. The honest positioning note: against this specific, sourced
+complaint, "you can revoke and delete" is a weaker promise than "we
+asked before we inferred," and nothing in this file's own mapping of
+Major's non-negotiables currently distinguishes which of the two Major
+is. No pricing recommendation made. No new landscape.md entry: this is
+commentary under an already-mapped product, not a new competitor.
+
+Sources: [Hacker News: Switch to Claude without starting over](https://news.ycombinator.com/item?id=47204571).
