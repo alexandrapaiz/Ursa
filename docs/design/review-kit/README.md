@@ -24,6 +24,7 @@ cd ursa-minor && npm i -D --no-save playwright && npx playwright install chromiu
 | `hover.mjs` | Hovers an element and scrubs its transition to an exact millisecond, or `--curve` to sweep the whole thing. Host-independent, which is the point. |
 | `sample-motion.mjs` | Captures a hover three ways: a frame series, the inline style writes a library makes, and the browser's own animation engine. |
 | `fit-motion.mjs` | Characterises a capture. Fits start time and duration as free parameters, names the curve, and says `UNRESOLVED` rather than guessing when the capture is too sparse. |
+| `check-redaction.mjs` | The repository's redaction gate, run locally before pushing. Reads the three patterns, the exclusions and the allowlist out of `.github/workflows/redaction-gate.yml` on every run rather than holding a copy, and matches with the same `grep -rInE` the gate calls, so it cannot drift from the thing it predicts. Exits 2 and says so if it cannot parse the gate, because a checker that reports zero rules and a checker that reports zero hits print the same word. `--root`, `--json`. Written 2026-10-27 after the gate was red three times on one fixture line with nothing local able to see it. |
 | `read-spring.mjs` | Reads a spring out of a `linear()` easing: overshoot, damping ratio, frequency, stiffness. |
 | `make-spring.mjs` | Writes a spring into a `linear()` easing, which is how a spring ships in CSS with no library. |
 
@@ -46,6 +47,18 @@ reviews that could not have seen it. Calibrate the narrow sweep the way
 this README asks for everything else: point it at the overlay, whose
 before and after at these widths are written down in L25, before
 believing it about a surface nobody has measured.
+
+**`selftest/check-redaction.mjs` writes its fixtures at run time and
+commits none of them.** A fixture for a redaction checker has to contain
+the three things the gate refuses, so committing one turns the gate red
+on the repository that holds the tool for keeping it green. The fixtures
+are assembled from pieces in code under `tmpdir()`, which is also why
+none of the three patterns appears as a literal in that file. Run it
+with `node docs/design/review-kit/selftest/check-redaction.mjs`; it
+asserts that each of the three rules still fires on its own, that the
+allowlist still forgives what the gate forgives, and that a gate it
+cannot parse is a refusal rather than a pass. The last expectation is
+there because the tool failed it when first written.
 
 **A sweep like this is mostly exemptions, and getting one wrong looks
 exactly like a pass.** Five of the six in `measure-narrow.mjs` were found
