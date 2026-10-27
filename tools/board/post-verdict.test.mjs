@@ -21,6 +21,10 @@ import { describe, it } from 'node:test'
 import { renderVerdict } from '../gates/verdict-shape.mjs'
 import { liveTargetFault } from './live-target.mjs'
 import { GATE, unreachable, verdict } from './post-verdict.mjs'
+import { senderFault } from './sender.mjs'
+
+/** The roster as a fixture, so these cases do not move when company.yaml does. */
+const ROSTER = { company: 'Ursa', seats: ['pm', 'engineer', 'security'] }
 
 const message = (code = 'SUBJECT_EMPTY') => ({
   locus: 'reader',
@@ -30,7 +34,14 @@ const message = (code = 'SUBJECT_EMPTY') => ({
   repair: 'give it one sentence a person understands cold',
 })
 
-const POSTING = { kind: 'note', toCompany: 'Ursa', toSeat: 'pm' }
+// Every field the two bus keys and the sender key are read from. `fromSeat`
+// and `fromCompany` were added 2026-10-27, when the receipt began naming the
+// field that had been wrong in seven rows without ever being printed.
+const POSTING = { kind: 'note', toCompany: 'Ursa', toSeat: 'pm', fromCompany: 'Ursa', fromSeat: 'engineer' }
+
+/** A sender-scope finding as `post.mjs` collects it: the code is passed
+ *  explicitly, because `verdict` names the cause after it. */
+const sender = (f) => ({ locus: 'reader', scope: 'sender', ...f })
 
 describe('post verdict, the branches over findings', () => {
   it('exit 1 when the message is refused locally, counting only what it printed', () => {
@@ -49,12 +60,11 @@ describe('post verdict, the branches over findings', () => {
   })
 
   it('exit 1 on the sender company, with the field name rewritten by the caller', () => {
-    const v = verdict([{
-      locus: 'reader',
-      scope: 'sender',
+    const v = verdict([sender({
+      code: 'SENDER_COMPANY_SPELLING',
       line: 'company "ursa minor" is not one the bus routes',
       repair: 'use one of: Ursa, Atelier',
-    }], POSTING)
+    })], POSTING)
     assert.equal(v.exitCode, 1)
     assert.equal(v.position, 'before')
     assert.equal(v.cause, 'SENDER_COMPANY_SPELLING')
@@ -90,19 +100,25 @@ describe('post verdict, the branches over findings', () => {
     const v = verdict([], { dryRun: true, ...POSTING })
     assert.equal(v.exitCode, 0)
     assert.equal(v.cause, 'CHECKED_CLEAN_DRY_RUN')
-    assert.equal(v.line, 'Checked clean. Ursa/pm would be woken.')
+    assert.equal(
+      v.line,
+      'Checked clean. Ursa/pm would be woken, and the row would say it came from Ursa/engineer.',
+    )
   })
 
   it('keeps both fallbacks, because an unaddressed message really does reach everyone', () => {
     const v = verdict([], { dryRun: true, kind: 'note' })
-    assert.equal(v.line, 'Checked clean. (all companies)/(everyone) would be woken.')
+    assert.equal(
+      v.line,
+      'Checked clean. (all companies)/(everyone) would be woken, and the row would say it came from (no company)/(no seat).',
+    )
   })
 
   it('exit 0 when posted, truncating the id to eight characters', () => {
     const v = verdict([], { ...POSTING, id: '0123456789abcdef0123456789abcdef' })
     assert.equal(v.exitCode, 0)
     assert.equal(v.cause, 'POSTED')
-    assert.equal(v.line, 'Posted note to Ursa/pm, id 01234567.')
+    assert.equal(v.line, 'Posted note from Ursa/engineer to Ursa/pm, id 01234567.')
     // The digits in the id are observed, not counted, so they are declared.
     assert.deepEqual(v.quoted, ['01234567'])
   })
@@ -110,15 +126,106 @@ describe('post verdict, the branches over findings', () => {
   it('names the id-less success separately, which is the branch with no clause and no exit call', () => {
     const v = verdict([], POSTING)
     assert.equal(v.exitCode, 0)
-    assert.equal(v.line, 'Posted note to Ursa/pm.')
+    assert.equal(v.line, 'Posted note from Ursa/engineer to Ursa/pm.')
     assert.equal(v.cause, 'POSTED_ID_UNREADABLE')
     assert.notEqual(v.cause, verdict([], { ...POSTING, id: 'abcdef12' }).cause)
+    // The clause this branch did not print until 2026-10-27, which is why its
+    // receipt was indistinguishable from the readable-id one.
+    assert.deepEqual(v.trailer, [
+      '  The board accepted it and answered with no readable id, so nothing downstream can quote this row.',
+    ])
+    assert.deepEqual(verdict([], { ...POSTING, id: 'abcdef12' }).trailer, [])
+  })
+
+  // The three branches the sender half added on 2026-10-27. Driven through
+  // the real `senderFault`, so a reworded condition in that file fails here
+  // rather than passing against a copy of its prose.
+  const refusals = [
+    ['SENDER_SEAT_UNNAMED', { env: {}, declaration: ROSTER }],
+    ['SENDER_SEAT_SPELLING', { seatFlag: 'Engineer', env: {}, declaration: ROSTER }],
+    ['SENDER_COMPANY_UNDECLARED', { seatFlag: 'pm', declaration: { company: '', seats: [] } }],
+  ]
+
+  for (const [code, inputs] of refusals) {
+    it(`exit 1 with cause ${code}, which the hardcoded cause could not have named`, () => {
+      const fault = senderFault(inputs)
+      assert.equal(fault.code, code)
+      const v = verdict([sender(fault)], POSTING)
+      assert.equal(v.exitCode, 1)
+      assert.equal(v.stream, 'err')
+      assert.equal(v.position, 'before')
+      assert.equal(v.cause, code)
+      assert.deepEqual(renderVerdict(v), [`${code}: ${fault.line}`, `  repair: ${fault.repair}`])
+      // The one thing every refusal has to say, because the alternative to
+      // refusing was a row nobody could attribute.
+      assert.ok(GATE.loci.reader.noun.test(v.line), `${code} names no locus`)
+    })
+  }
+
+  it('keeps the four sender conditions four causes', () => {
+    const causes = new Set([
+      ...refusals.map(([, inputs]) => verdict([sender(senderFault(inputs))], POSTING).cause),
+      verdict([sender({ code: 'SENDER_COMPANY_SPELLING', line: 'x', repair: 'y' })], POSTING).cause,
+    ])
+    assert.equal(causes.size, 4)
+  })
+
+  it('names a cause even for a sender finding that carries no code, rather than printing undefined', () => {
+    // The hardcoded cause used to supply this. A code-less finding is a
+    // caller bug and not a reachable state in post.mjs, and a verdict line
+    // reading "undefined: ..." is the one outcome worse than a wrong name.
+    const v = verdict([sender({ line: 'x', repair: 'y' })], POSTING)
+    assert.equal(v.cause, 'SENDER_REFUSED_UNNAMED_CODE')
+    assert.doesNotMatch(v.line, /undefined/)
+  })
+
+  it('names a cut body, with the three numbers the board answered with', () => {
+    const v = verdict([], {
+      ...POSTING,
+      id: 'abcdef1234567890',
+      truncated: true,
+      bodyDelivered: 1500,
+      bodyChars: 1832,
+      wakeLimit: 1500,
+    })
+    // Still exit 0, because the row exists: this is a fact about delivery and
+    // not a refusal.
+    assert.equal(v.exitCode, 0)
+    assert.equal(v.cause, 'POSTED_BODY_TRUNCATED')
+    assert.equal(
+      v.line,
+      'Posted note from Ursa/engineer to Ursa/pm, id abcdef12, cut at 1500 of 1832 characters.',
+    )
+    assert.deepEqual(v.trailer, [
+      '  The wake limit is 1500 characters, so the recipient has your message cut and not whole.',
+      '  Send the rest as its own message rather than re-sending the whole: the store has no delete route and the row that was cut stays.',
+    ])
+    // The line and POSTED's line are different sentences, which is the gate's
+    // own ONE_CAUSE_PER_OUTCOME rule and the thing the enumerator caught when
+    // the clause lived in the trailer alone.
+    assert.notEqual(v.line, verdict([], { ...POSTING, id: 'abcdef1234567890' }).line)
+    // Every number in the line is the board's answer, so each is declared.
+    for (const n of ['1500', '1832']) assert.ok(v.quoted.includes(n), `${n} undeclared`)
+  })
+
+  it('says nothing about truncation when the board says it cut nothing', () => {
+    const v = verdict([], { ...POSTING, id: 'abcdef1234567890', truncated: false, bodyDelivered: 1382, bodyChars: 1382, wakeLimit: 1500 })
+    assert.equal(v.cause, 'POSTED')
+    assert.deepEqual(v.trailer, [])
+  })
+
+  it('truncation outranks an unreadable id for the cause, and both clauses still print', () => {
+    const v = verdict([], { ...POSTING, truncated: true, bodyDelivered: 1500, bodyChars: 1832, wakeLimit: 1500 })
+    assert.equal(v.cause, 'POSTED_BODY_TRUNCATED')
+    assert.equal(v.trailer.length, 3)
+    assert.match(v.trailer[0], /cut and not whole/)
+    assert.match(v.trailer.at(-1), /no readable id/)
   })
 
   it('reports whichever check actually stopped the run, in post.mjs own order', () => {
     const both = verdict([
       message(),
-      { locus: 'reader', scope: 'sender', line: 'x', repair: 'y' },
+      sender({ code: 'SENDER_SEAT_UNNAMED', line: 'x', repair: 'y' }),
     ], POSTING)
     assert.equal(both.cause, 'MESSAGE_REFUSED_LOCALLY')
   })
@@ -164,8 +271,8 @@ describe('post verdict, the ground branches', () => {
 })
 
 describe('post verdict, the gate spec', () => {
-  it('declares seven findings probes and four ground probes', () => {
-    assert.equal(GATE.probes.length, 7)
+  it('declares eleven findings probes and four ground probes', () => {
+    assert.equal(GATE.probes.length, 11)
     assert.equal(GATE.groundProbes.length, 4)
     assert.equal(GATE.id, 'tools/board/post.mjs')
   })
@@ -179,11 +286,11 @@ describe('post verdict, the gate spec', () => {
     ))
   })
 
-  it('reaches ten distinct causes, where a sweep of exit calls finds four', () => {
+  it('reaches fourteen distinct causes over eleven probes, where a sweep of exit calls finds four', () => {
     const causes = new Set([
       ...GATE.probes.map((p) => GATE.verdict(p.findings, p.seen ?? {}).cause),
       ...GATE.groundProbes.map((p) => p.call().cause),
     ])
-    assert.equal(causes.size, 10)
+    assert.equal(causes.size, 14)
   })
 })

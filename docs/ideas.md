@@ -14083,3 +14083,209 @@ the owner to accept or reject.
   paragraph in a manual, while ours is `node
   tools/gates/enumerate-verdicts.mjs`, which prints 23 branches and exits
   non-zero when one of them stops deriving its verdict from its findings.
+
+### 2026-10-27 — The board should derive `from_seat` from the token that posted, because a client-side guard cannot bind the other four companies
+
+- Trigger: this run repaired `tools/board/post.mjs` so it refuses an unnamed
+  sender rather than defaulting it to the literal `engineer`, after seven rows
+  from four different seats arrived under this seat's name in four hours
+  (`docs/design/board-write-path.md` §8). The repair is real and it is in one
+  file in one company's repository. Every other company's seats, and any seat
+  that writes its own `curl`, still send a `seat` field that nothing checks
+  against the credential they authenticated with.
+- What: the board already knows who is posting, because the request carries a
+  per-seat runtime token. The `seat` and `company` fields in the POST body are
+  the sender asserting an identity the server can already derive, which makes
+  them the only two fields in the whole write path that are unverified claims
+  about the sender rather than facts about the message. The proposal is for
+  `runtime/board/store.py` to derive `from_seat` and `from_company` from the
+  token's own binding and either ignore a disagreeing `seat` field or refuse
+  the write with the two values named. Either shape removes the whole defect
+  class rather than one client's instance of it, including the case this run's
+  repair cannot reach: a seat that names a seat correctly spelled and not its
+  own.
+- First step: this is HQ machinery and a product seat does not edit it
+  (`docs/standards/pm.md` §15, ownership). So the first step is a `handoff` to
+  `alexandra-systems/exo-centralizer` carrying the seven-row table, the three
+  costs each in the rule it breaks, and the one measurement that decides the
+  design — whether the token store already holds a seat binding, or whether
+  tokens are per-company and the seat would have to be added to them. That
+  question is answerable in their repository and not in this one, which is
+  why it is handed over as a question rather than as a patch.
+- Cost: $0 here. Any cost is HQ's and is engineering time in a repository
+  this seat does not write to.
+- Status: proposed
+
+### 2026-10-27 — A gate's success line should have to name every field its branch depended on
+
+- Trigger: the poster's receipt read `Posted note to Ursa/pm, id a1b2c3d4` and
+  was correct in both fields it printed. The field that was wrong was the
+  third one, which the line did not print, and that is why two senders in a
+  row read a correct-looking receipt for a row that named the wrong seat. The
+  enumerator in `tools/gates/enumerate-verdicts.mjs` would not have caught it:
+  all six of its properties are about findings and exit codes, and a success
+  line has no findings, so the one branch where a gate says "this worked" is
+  the branch with the least checking on it.
+- What: a seventh property, `SUCCESS_NAMES_ITS_KEYS`. A gate declares, per
+  branch, which keys of its `seen` object the verdict line has to mention —
+  for `tools/board/post.mjs`'s success branch that is `fromSeat`, `fromCompany`,
+  `toSeat` and `toCompany`, the four values that decide what the row is and who
+  it wakes. The enumerator renders the verdict with distinguishable values for
+  those keys and reports a finding when a declared key's value is absent from
+  the line. This is the same discipline as `QUOTED_IS_QUOTED`, which already
+  checks that a declared quotation really appears, pointed at the opposite
+  problem: not a claim with nothing behind it, but a fact with nothing in
+  front of it.
+- First step: add the property to the enumerator with one synthetic gate in
+  `tools/gates/enumerate-verdicts.test.mjs` whose success line omits a
+  declared key, assert the finding fires, then declare the keys on the five
+  extracted gates and see which of them is already wrong. The census is 31
+  probes over 26 causes today, and 6 of those causes are success or dry-run
+  lines, so the measurement is small enough to read in full.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-27 — A standing condition is served without checking whether its own subject still exists
+
+- Trigger: this run was woken with a standing condition naming pull request
+  561 as an open draft with no live run behind it, and instructing the seat to
+  ready it, close it, or write in it which clause keeps it a draft. That pull
+  request was closed at 00:32:07Z. The standing text was read at 00:36Z, four
+  minutes later, and still named it; confirming it with `GET /api/standing`
+  at 00:47Z returned the same sentence again, with only its "its run ended"
+  clause re-rendered from two hours to three. The condition's own preamble is
+  the instruction to confirm it, which is the right instinct, and the
+  confirmation route returns the stale text rather than resolving it.
+- What: the condition is computed from a snapshot of the queue and rendered
+  with a live clock, so the part that moves (the age) is fresh and the part
+  that decides whether to act at all (the pull request's state) is not. Any
+  seat that obeys it literally spends its first act re-resolving a decision
+  another run already made, which is the exact cost the condition exists to
+  prevent. The repair is for the standing route to re-read the state of
+  anything it names at the moment it is asked, and to return an empty standing
+  rather than a sentence whose subject is gone.
+- First step: a handoff to `alexandra-systems/exo-centralizer` with the three
+  timestamps above and the two reads of `/api/standing` that bracket the
+  closure, since the route is HQ's. The local half, which belongs here and is
+  day-sized: a note in this seat's run record naming the pull request the
+  standing condition was about and what was found, so the next run of this
+  seat can tell a stale condition from a live one without re-reading the
+  forge. This run did that by reading `gh pr view 561` first, which took one
+  call and is the behaviour worth writing down.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-27 — Craft scan: git 2.43.0's author identity, the one product that ships both halves of today's defect
+
+- The product: `git` itself, specifically how it decides who authored a
+  commit. Rotated to because this run spent its day on who a board row says
+  sent it, and git is the most-used tool in the world that has to answer the
+  same question with the same information: a process, an environment, and no
+  person to ask. Already in this repository's dependency list, no account and
+  no network needed. Every number below was measured in this sandbox.
+- Measured, so the comparison is not from memory. In a fresh repository with
+  the global and system configuration pointed at `/dev/null` and the four
+  `GIT_AUTHOR_*`/`GIT_COMMITTER_*` variables unset, `git -c
+  user.useConfigOnly=true commit` exits **128** and prints `Author identity
+  unknown`, then `*** Please tell me who you are.`, then the two `git config`
+  lines that repair it, then `fatal: no email was given and auto-detection is
+  disabled`. The same commit **without** that flag exits **0** and commits as
+  `ursa-engineer <ursa-engineer@agents.<runtime-host>>`, a name and a domain
+  nobody typed, assembled from the process's user and the machine's hostname.
+  The host half is written as a placeholder here under the redaction rider in
+  `prompts/engineer-agent.md`, because a runtime hostname is machine identity;
+  the shape is what the scan is about and the shape is intact.
+- Worth stealing, and it is the second half rather than the first. The
+  refusal is what this run already built. What git does that the poster did
+  not is make the guess **visible in the next thing the operator reads**: the
+  identity it invented is printed by `git log`, is in `git show`, and is in
+  the commit the operator pushes, so a wrong author is discovered by the
+  person who caused it rather than by the person who received it. The board's
+  poster guessed `engineer` and then printed a receipt naming the two fields
+  that were right. Four seats in one evening read a correct-looking receipt
+  and the first person to notice was the recipient of somebody else's note.
+  So the stealable property is narrow and it is not "refuse": it is that a
+  tool which fills in a field the operator did not supply has to print that
+  field back, and the receipt is the only place where that costs nothing. The
+  repair this run shipped does both halves for exactly that reason.
+- What Ursa does better: git's guess is a default that cannot be removed, only
+  switched off per-invocation by a flag (`user.useConfigOnly`) that defaults to
+  false, because thirty million repositories depend on the guess working. This
+  poster has one class of caller, eleven seats in one company, so the guess
+  could be deleted outright rather than flagged, and it was. The second
+  difference is the receipt: `git commit` prints the commit's subject and its
+  statistics and not its author, so the operator sees the invented identity on
+  the next command and not on this one. `tools/board/post.mjs` now prints the
+  sender on the line that confirms the post, which is one command earlier than
+  git manages and is the only reason a seat reading its own output can catch
+  this defect at all.
+
+### 2026-10-27 — A credential-shaped fixture is in this branch's history, where a one-line edit cannot reach it
+
+- Trigger: the security seat's note of 00:28Z, delivered to this seat's inbox
+  recorded from this seat (one of the seven misattributed rows this run
+  repaired), reporting the first non-zero result `tools/secret-scan.mjs
+  --history` has returned since it was built. Verified in this clone rather
+  than taken: `node tools/secret-scan.mjs --history` reports 6285 blobs, 16
+  classes, 1 hit, class `aws-access-key-id`, in
+  `tools/secret-scan-verdict.test.mjs` at line 72, blob `ef90504da7db`. The
+  value is not printed here, per the scanner's own instruction and the
+  security charter.
+- What: the repair the note asked for is already at this branch's tip. The
+  test now uses a sentinel that is deliberately not credential-shaped, and
+  says so in a comment naming the earlier draft that was. The flagged blob is
+  in commit `88bb0bf3`, "tools: tests for the three extractions and the
+  enumerator", which belongs to the branch of the closed pull request 561 and
+  reaches this branch through the merge that absorbed it. So a one-line edit
+  cannot clear it: the hit is in history, not in the tree, and
+  `node tools/secret-scan.mjs` over the tree is 0 hits over 2255 tracked
+  files. The security seat's reason for caring stands and is the actual
+  finding: a permanent known hit makes the next real one a second line in a
+  report that already says one, and it would turn their queued credential gate
+  red on the day it lands.
+- First step: the disposition is the owner's, because all three candidate
+  repairs are hers. **One**, merge this branch with a squash, which puts the
+  tip's clean blob on `main` and leaves `88bb0bf3` unreachable from it, so
+  nothing is rewritten and the hit never enters the default branch's history.
+  **Two**, a cited baseline in the scanner: one entry naming this blob, this
+  class and the sentence explaining that the value is a vendor's published
+  documentation example, which is the shape `dep-floor.allow.json` already
+  uses for an accepted advisory. **Three**, a history rewrite, which is the
+  only one that removes the blob and the only one that invalidates the
+  merge-base checks three open pull requests depend on. This seat's
+  recommendation is one, then two if a merge commit is wanted; never three for
+  a value that is not a credential.
+- Cost: $0, and no rotation: the class is credential-shaped by pattern and the
+  value is a published example, so there is nothing live to rotate. Rotation
+  would be the owner's call if it were.
+- Status: urgent
+
+### 2026-10-27 — The wake limit is not the length a message is cut at, measured 214 characters apart
+
+- Trigger: the truncation clause this run added to `tools/board/post.mjs`
+  fired on the first message it carried, which was this run's own report to
+  the project manager. The receipt read `cut at 1286 of 1906 characters` while
+  the same response's `wake_limit` was 1500. So the board cut at 1286, which
+  is 214 characters below the limit it reports, and a seat that sizes its
+  message against 1500 is sizing against a number the cut does not use.
+- What: every seat that has tried to stay inside this limit has been told the
+  limit and not the rule. The cut almost certainly lands at a boundary — a
+  paragraph or a sentence — at or before 1500 rather than at 1500 exactly,
+  which means the usable length depends on where a seat's paragraph breaks
+  fall and cannot be computed from the limit alone. The consequence for this
+  repository is small and specific: nothing should pre-trim a body to
+  `wake_limit`, because that is neither necessary nor sufficient, and the only
+  reliable figure is `body_delivered`, which arrives after the post. The
+  consequence for the standard is larger, since `docs/standards/pm.md` §15
+  tells seats to write a conversation and says nothing about a length at all.
+- First step: three posts of known lengths bracketing the limit, from this
+  seat to itself, which wakes nobody because the fan-out excludes a self
+  send, reading `body_delivered` off each response to find whether the cut is
+  at a paragraph break, a sentence end or a hard character count. That is
+  three permanent rows on a store with no delete route, which is the cost and
+  is why the measurement is specified before it is taken rather than probed
+  for. Then one sentence in the ledger stating the rule, and a handoff to the
+  holding company if the rule turns out to be a hard count that the field name
+  misdescribes.
+- Cost: $0, plus three permanent self-addressed rows on the board.
+- Status: proposed
