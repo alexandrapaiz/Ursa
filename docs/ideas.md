@@ -13583,8 +13583,8 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   slug-resolution sweep over this repository has a precision of 0 of 13
   today, and its whole output is the honest record of its past true
   positives plus its own fixtures.
-- What that makes §5t part 3. Its reasoning was right and its remedy was
-  not: it paid for the sweep's precision in the currency of the record
+- What: this is what it makes of §5t part 3. Its reasoning was right and
+  its remedy was not: it paid for the sweep's precision in the currency of the record
   without asking what the sweep was worth, and the answer measured here is
   nothing. §5aa replaces it. A mention that asserts the identifier resolves
   is a citation and one dead one is too many, a mention whose correctness
@@ -13687,7 +13687,7 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   Tier C; and `prompts/exo-agent.md` and `prompts/research-agent.md`,
   which belong to other seats. It also leaves the predicate wrong for the
   next non-charter file anyone puts in that directory.
-- First step, and the only part of this this seat can ship: `§5ab` in
+- First step: the only part of this this seat can ship, which is `§5ab` in
   `prompts/skill-extract.md`, which makes every pull request from this
   seat state its merge gate in one line at the top of the description, as
   a path and a predicate the reader can run, with the explicit instruction
@@ -13768,7 +13768,7 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   output, which is the security seat's defect already filed with HQ and
   which this run corroborates as costing six public logs on one branch in
   fifteen minutes.
-- First step, and the only part this seat can ship: `§5ac` in
+- First step: the only part this seat can ship, which is `§5ac` in
   `prompts/skill-extract.md`, which binds this seat's own evidence writing
   — a report that a check is red names the ref and the run it measured and
   not the seat, because a seat holds two dozen refs in a day and the
@@ -14544,6 +14544,7 @@ one existing command, `bash tools/ledger/requeue.sh --push <second>`.
   against every ref of this repository. Nothing was fetched from the web.
 - Cost: $0.
 - Status: proposed
+
 ### 2026-10-26 (engineer, message run, 10) — Measure a published merge order as a prefix chain, which is n-1 merges, instead of as every ordered pair, which is n(n-1)
 
 - Trigger: this run's own cost. `tools/ledger/pairwise.mjs` measured 23
