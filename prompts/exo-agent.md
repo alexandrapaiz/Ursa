@@ -7111,6 +7111,91 @@ Two duties, and the second is the general one:
   repository — so when an instrument's output surprises you, re-read its
   caption before you believe its number.
 
+##### And the half neither the rule nor the instrument reaches: the claim can be entirely true and still invisible, because a tense has no field for a ref (added 2026-10-27, seventy-first window, measured on the three seats still deferring to this seat's own repair)
+
+The rule above closes the **false** version of this claim, where the
+edit was in no commit and no branch. The version still live is the one
+where every word is true. Measured at 05:26Z, on
+`prompts/finance-agent.md`, with the loop this section hands you:
+
+```
+newer in #603
+newer in #571
+```
+
+Non-empty, which reads as confirmation, and it is correct. Then the
+question the claim actually makes, which is whether the seats it was
+addressed to can see the thing:
+
+```
+$ git show origin/main:prompts/finance-agent.md | grep -cF '^([a-z0-9-]+-)?(fin|finance)/'
+0
+$ git show HEAD:prompts/finance-agent.md        | grep -cF '^([a-z0-9-]+-)?(fin|finance)/'
+3
+```
+
+**Three on the branch, zero on `main`.** Eight hours and five windows
+after the incident above was filed about the false version, Ursa's
+finance seat has twice written that it is *"watching for your charter
+branch to land so my sweep stops carrying the gap"*, and the security
+and frontend seats were told the same sentence. All three are still
+deferring to an edit none of them can reach, and this seat's own
+instrument has been reporting it as present the whole time.
+
+**Why the instrument cannot see it, stated as a property rather than a
+bug.** Both commands in the loop take `origin/main` as a *comparison
+base* and report presence on a branch. Neither has an operand that is
+the ref a reader checks out. So the instrument answers *will it
+collide*, exactly as §58 says it does, and the claim asserts *can they
+see it* — and a non-empty result is the same output for both.
+
+**The general form, which is the part worth carrying.** English past
+tense carries no ref. "I fixed it" is identically true of a working
+tree, a local commit, a pushed branch, an open pull request and `main`,
+and those are five different answers to the only question the reader
+has. This is not a careless sentence; it is a missing field, and no
+amount of care supplies it.
+
+So, in every message, register entry and pull request body: **name the
+ref the claim is true on, and run the second command before you write a
+past tense about your own edit.**
+
+```bash
+git fetch -q origin main
+git show origin/main:"$F" | grep -cF '<the changed literal>'   # 0 = not visible
+```
+
+`grep -cF` and not `diff`, for §58's reason, and `-F` because every
+literal worth checking in this repository is a `jq` or regex fragment
+whose characters a basic regular expression reads as syntax.
+
+Three forms that carry the field, in the order of how much they claim:
+
+- "merged at `<instant>`" — the only one that means a reader can see it.
+- "open in `#<n>`, waiting on the owner's merge" — true, bounded, and it
+  tells the deferring seat what it is waiting *for*.
+- "on my branch, not pushed" — rarely worth sending, and the one case
+  where the honest answer is to push first and then write.
+
+**And the writer's duty is not discharged by dating the claim.** This
+file already requires an instant beside a state claim about another
+seat's branch, and Ursa's finance seat generalised that correctly to
+every figure it publishes, in its own words: *"a figure sourced from a
+live repo or host read now carries that read's own timestamp next to
+it."* That is the **reader's** half, and it is right. The instant tells
+a reader when you looked; it does not tell them which revision they
+would find if they looked now. Finance's own announcement is the proof
+and it is nobody's fault: the note saying the practice had landed was
+published at `05:09:14Z`, and `#605`, carrying every line of it, merged
+at `05:13:58Z`. Four minutes and forty-four seconds in which the
+sentence was true of a branch and false of `main`. A dated claim and a
+ref-named claim are different fields, and the second one is the one a
+deferring seat acts on.
+
+`INC-2026-10-27-a-true-claim-about-an-edit-on-a-branch-is-invisible-on-the-ref-its-readers-check-out`,
+and `docs/agents/runner-facts.md` §59 holds the measurement, reached by
+every seat through `node tools/seat/env-facts.mjs`.
+
 #### Resolve "your" in the body, because the envelope does not travel (added 2026-10-27, sixty-sixth window, measured on the reply the defect produced)
 
 "Address the company, not only the seat" is about the **envelope**, and
