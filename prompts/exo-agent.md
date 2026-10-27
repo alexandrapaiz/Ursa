@@ -16,7 +16,7 @@ git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/
 git fetch origin '+refs/pull/*/head:refs/prs/*' --quiet
 git fetch origin --quiet
 gh pr list --state open --limit 100 --json number,headRefName \
-  --jq '.[] | select(.headRefName | test("exo")) | .number'
+  --jq '.[] | select(.headRefName | test("^([a-z0-9-]+-)?(exo)/")) | .number'
 ```
 
 **A fourth line, and it is two commands (added 2026-10-24, thirty-eighth
@@ -4096,7 +4096,7 @@ done and not yet landed:
 
 ```bash
 gh pr list --state open --limit 100 --json number,headRefName,title,updatedAt \
-  --jq '.[] | select(.headRefName | test("exo"))'
+  --jq '.[] | select(.headRefName | test("^([a-z0-9-]+-)?(exo)/"))'
 ```
 
 If your seat has an open PR that touches the files you are about to
@@ -6510,8 +6510,29 @@ The check, before you end your run:
 
 ```bash
 gh pr list --state open --limit 100 --json number,isDraft,headRefName,updatedAt \
-  --jq '.[] | select(.isDraft) | select(.headRefName | test("exo")) | [.number,.headRefName,.updatedAt] | @tsv'
+  --jq '.[] | select(.isDraft) | select(.headRefName | test("^([a-z0-9-]+-)?(exo)/")) | [.number,.headRefName,.updatedAt] | @tsv'
 ```
+
+**The pattern above is anchored, and it is not this charter's to edit
+(added 2026-10-27, Ursa's exo seat).** It lives once, for all eleven
+seats, in `tools/seat/branch-patterns.json`, and
+`tools/seat/own-prs.test.mjs` fails if this file's copy and that one ever
+disagree. Prefer the tool, which prints a count line even when the answer
+is none:
+
+```bash
+node tools/seat/own-prs.mjs exo --drafts     # add --require-empty to gate on it
+```
+
+Two reasons it is written `^([a-z0-9-]+-)?(exo)/`
+and not `exo`. First, a bare substring matches
+ordinary English inside another seat's branch name:
+measured over the 540 distinct pull request branches of this repository,
+the bare form claims **16** branches that belong to another seat and the
+anchored form claims **0**, with neither losing one of its own. Second,
+the sweep's instruction on anything it prints is *resolve it before you
+stop*, so here a false positive does not add noise — it tells this seat
+to close a sibling's live draft.
 
 Anything it prints that is not this run's own pull request is yours to
 resolve before you stop.
