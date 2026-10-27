@@ -92,6 +92,37 @@ export function hitLine(hit) {
 }
 
 /**
+ * One line per hit a `tools/secret-scan.baseline.json` entry accounts for.
+ *
+ * WHY THESE PRINT AT ALL, rather than being subtracted in silence. The reason
+ * the baseline was asked for is that a permanent known hit makes the next real
+ * hit a second line in a report that already says one. A suppression that
+ * prints nothing solves that by making the known hit invisible, which is the
+ * same reader problem rotated: the log stops saying the repository contains a
+ * credential-shaped object, so the fact survives only in a JSON file nobody
+ * opens. So the accepted hit keeps its line, carries `accepted:` where a hit
+ * would carry nothing, and carries the entry's own sentence. A reader of a
+ * green run still sees exactly what is in there and why.
+ *
+ * WHY IT IS A SEPARATE FORMATTER AND NOT PART OF THE VERDICT. The enumerator
+ * in `tools/gates/enumerate-verdicts.mjs` checks every integer in a verdict's
+ * `line` and `trailer` against the numbers derivable from the findings and the
+ * census (COUNTS_DERIVED). A blob id contains digit runs that are not derived
+ * from anything, so putting one in the verdict's own text would report this
+ * gate as computing numbers it did not observe. Findings lines are not subject
+ * to that check, which is the correct place for an identifier, and is already
+ * where `hitLine` puts one.
+ *
+ * The value is still never printed. An accepted entry holds a blob id, a class
+ * name, a line, a path and prose, and this function can only reach those.
+ *
+ * @param {{entry: object, hit: Hit}} pair
+ */
+export function acceptedLine({ entry, hit }) {
+  return `  accepted: ${hit.class}  ${hit.where}:${hit.line}  blob ${hit.blob.slice(0, 12)}  ${entry.why_not_a_credential}`
+}
+
+/**
  * The findings-derived verdict: exit 0 on nothing found, exit 1 on at least one
  * hit.
  *
@@ -103,19 +134,42 @@ export function hitLine(hit) {
  * @returns {import('./gates/verdict-shape.mjs').Verdict}
  */
 export function verdict(hits, seen) {
-  const { mode, since = null, scanned = 0, unit = 'files', classes = 0 } = seen
+  const { mode, since = null, scanned = 0, unit = 'files', classes = 0, baselined = 0 } = seen
   const scope = since ? `${mode} ${since}..` : mode
   const skipped = seen.skipped_oversize || seen.skipped_unreadable || 0
   const line =
     `secret-scan ${scope}: ${scanned} ${unit}, ${classes} classes, ` +
-    `${hits.length} hit(s)${skipped ? `, ${skipped} skipped and unscanned` : ''}.`
+    `${hits.length} hit(s)${skipped ? `, ${skipped} skipped and unscanned` : ''}` +
+    `${baselined ? `, ${baselined} accepted by baseline` : ''}.`
 
-  if (hits.length === 0) {
+  if (hits.length === 0 && baselined === 0) {
     return verdictOf({
       exitCode: 0,
       cause: 'NOTHING_FOUND',
       position: POSITION.BEFORE,
       line,
+    })
+  }
+
+  // A clean run that is clean BECAUSE of the baseline is not the same outcome
+  // as a clean run, and must not print the same sentence. `hits` here is
+  // already the unaccounted set, so the count is the number a reader acts on,
+  // and the accepted ones are named on their own lines above this trailer.
+  // ONE_CAUSE_PER_OUTCOME in the enumerator is what makes this a second cause
+  // rather than a second route into NOTHING_FOUND: same exit code, different
+  // condition, so it needs its own name and its own line.
+  if (hits.length === 0) {
+    return verdictOf({
+      exitCode: 0,
+      cause: 'ALL_HITS_BASELINED',
+      position: POSITION.BEFORE,
+      line,
+      trailer: [
+        '',
+        'Every hit is accounted for by a cited entry in tools/secret-scan.baseline.json,',
+        'each pinned to one blob id, so any other byte sequence in the same file is a',
+        'new hit and not an accepted one. Re-run with --no-baseline to see the raw set.',
+      ],
     })
   }
 
@@ -130,6 +184,40 @@ export function verdict(hits, seen) {
       'Do not print, quote or copy the value. Record file, commit and kind,',
       "mark it urgent in the ledger, and say rotation is the owner's action.",
     ],
+  })
+}
+
+/**
+ * The ground verdict for a baseline the scanner cannot trust: exit 2, no
+ * findings, never clean.
+ *
+ * WHY A BROKEN BASELINE IS GROUND AND NOT A FINDING. A findings verdict says
+ * "the thing I checked is defective". This says "I cannot establish what is
+ * accepted", which is the same class of answer as a shallow clone: the
+ * scanner's own instrument is in an unknown state. Reading a malformed
+ * baseline as zero entries would exit 1 and look conscientious, but reading it
+ * as anything at all is a guess about a suppression set, and a suppression set
+ * of unknown size is the one outcome worse than having no baseline. So the run
+ * refuses rather than reports.
+ *
+ * @param {{code: string, message: string, detail?: string}} fault from
+ *   `secret-scan-baseline.mjs`.
+ * @returns {import('./gates/verdict-shape.mjs').Verdict}
+ */
+export function baselineUnusable(fault) {
+  return verdictOf({
+    exitCode: 2,
+    stream: 'err',
+    derivedFrom: 'ground',
+    // The fault's own code, not one hardcoded string. Nine conditions in
+    // `secret-scan-baseline.mjs` have nine distinct repairs, and a single
+    // cause name over all of them would tell a reader the exit code they
+    // already know. This is the shape `tools/board/post-verdict.mjs` took for
+    // its sender faults on 2026-10-27 and the reason is the same.
+    cause: fault.code,
+    position: POSITION.BEFORE,
+    line: `secret-scan: cannot do its job: ${fault.message}`,
+    trailer: fault.detail ? [`  ${fault.detail}`] : [],
   })
 }
 
@@ -186,6 +274,23 @@ export const GATE = describeGate({
       seen: { ...TREE, skipped_oversize: 3 },
     },
     {
+      // The branch that exists because of the 2026-10-27 history hit: a run
+      // whose only hit is one a cited entry accounts for. Exit 0, and a
+      // different cause and a different line from a run that found nothing,
+      // which is what ONE_CAUSE_PER_OUTCOME is checking here.
+      name: 'the only hit is accepted by the baseline',
+      findings: [],
+      seen: { mode: 'history', scanned: 6452, unit: 'blobs', classes: 16, baselined: 1 },
+    },
+    {
+      // The branch that matters more: an accepted hit must never hide an
+      // unaccepted one, so the count a reader acts on is the unaccounted one
+      // and the exit code is still 1.
+      name: 'one hit accepted, one unaccounted',
+      findings: [{ ...hit(), blob: 'deadbeefcafebabe0123' }],
+      seen: { mode: 'history', scanned: 6452, unit: 'blobs', classes: 16, baselined: 1 },
+    },
+    {
       name: 'history since a baseline',
       findings: [{ ...hit(), blob: 'deadbeefcafebabe0123' }],
       seen: {
@@ -204,6 +309,18 @@ export const GATE = describeGate({
     {
       name: 'shallow clone refuses a history scan',
       call: () => unusable('--history needs full history', 'run tools/ensure-full-clone.sh'),
+    },
+    {
+      // A baseline the scanner cannot trust is the second way it can fail to
+      // establish the facts, and the enumerator should see it as ground rather
+      // than as a findings branch with an empty findings array.
+      name: 'an unparseable baseline refuses the run',
+      call: () =>
+        baselineUnusable({
+          code: 'BASELINE_UNPARSEABLE',
+          message: 'the baseline file is not valid JSON, so the set of accepted hits is unknown',
+          detail: 'Unexpected token } in JSON',
+        }),
     },
   ],
 })
