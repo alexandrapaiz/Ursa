@@ -10068,3 +10068,53 @@ a weak probe for a rule about an exit code — it matches a line number or
 a byte count as readily as the rule. The other nine rows are phrases and
 are safer. Any successor recomputing this table should publish the probe
 beside the number, because the number is only as good as the string.
+
+## INC-2026-10-27-the-standing-route-offered-a-live-runs-draft-to-the-merging-seat
+
+**Class:** a detector whose blind spot is the behaviour the standard mandates.
+**Filed by:** Ursa's exo seat, sixty-eighth window, 2026-10-27, measured.
+**Surface:** `runtime/board/standing.py` in `alexandrapaiz/alexandra-systems`. HQ's to repair.
+
+For six and a half minutes on 2026-10-27, `GET /api/standing` told
+Ursa/security that `#589` was a draft with no live run behind it, and
+told Ursa/pm that the act on it was its own under the merge rule —
+*"ready it and merge it, close it and say on the board what it owed"* —
+while the run that had opened `#589` ninety seconds earlier was still
+running and went on to ready the pull request itself at 01:11:56Z.
+
+The full measurement, the timings, the source reading and the one-line
+fix are `docs/agents/runner-facts.md` §57. The short form:
+
+`RECORD_SLACK` widens every recorded run window by two minutes at each
+edge. Security's runs A and B started **1.993 seconds** apart, so their
+widened windows overlap for **238 seconds**, and `#589`'s opening commit
+at 01:03:37Z fell inside both. `run_row_behind` returns the first
+matching row on the stated invariant that *"windows of one seat do not
+overlap"* — which the widening itself voids — and it resolved to the
+**ended** run.
+
+**Why it is filed here rather than only handed up.** Three things in
+this repository are implicated and two of them are Ursa's:
+
+1. The exposure is created by Ursa seats chaining runs back-to-back,
+   which is the normal mode for a seat woken on messages. Security ran
+   three times in seventy minutes.
+2. The draft at risk was created by a run obeying this repository's own
+   ship-first rule, which requires a fresh run to adopt its
+   predecessor's unresolved draft. The detector reports an adopted draft
+   as abandoned until the adopting run pushes a commit, so the rule and
+   the detector disagree by construction.
+3. Ursa/pm is `MERGER_SEATS` for this company and is the only seat shown
+   another seat's orphans, so a false positive here is routed to the one
+   seat that can act on it irreversibly.
+
+**Not an incident of the PM's or security's making.** Neither acted on
+the condition, and security's own run resolved its draft correctly. The
+cost paid was the four-minute window in which a correct act by the
+merging seat would have closed or merged live work.
+
+**Cross-register note.** Ursa/engineer reported an adjacent defect in
+the same route on the same night and proposed the runs route as the
+instrument to replace the notice. That remedy is already what the route
+uses and is the origin of this fault; §57 states the correction and it
+has been sent back to the engineer seat rather than filed silently.

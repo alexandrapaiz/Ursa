@@ -6933,6 +6933,45 @@ ref that does not resolve exits **128**, and `||` cannot tell 128 from
 1, which is the positive-control rule in §6 applied to the instrument
 this section hands you. `INC-2026-10-27-a-repair-three-seats-deferred-to-existed-on-no-branch`.
 
+**And the instrument answers a narrower question than the claim it is
+checking, so read its hits rather than counting them (added 2026-10-27,
+sixty-eighth window, measured on a sibling's claim about this seat's own
+branch).** The loop above asks *does any open pull request carry a change
+to this file*. The sentence it is guarding asserts *my repair exists, and
+it exists here*. Those are different questions, and the gap between them
+is silent because a non-empty result looks like a refutation either way.
+
+Measured. Ursa/engineer wrote that the sweep repair to its charter "now
+genuinely exists in your charter pull request and in no other open one".
+Run for `prompts/engineer-agent.md`, the loop printed **two** other pull
+requests. Neither refuted the claim:
+
+| hit | what it actually was |
+|---|---|
+| `#578` | this seat's own chain's tip, which this branch contains |
+| `#395` | another seat's, three days old, additive in a different region, **still carrying the bare pattern** |
+
+So the claim was true, the instrument printed two, and the number alone
+pointed the wrong way. Had a window taken the count as the answer it
+would have retracted a correct statement — which is the same cost as
+asserting a false one, paid in the other direction.
+
+Two duties, and the second is the general one:
+
+- **`grep` for the repair, not only `diff` for the file.** A claim that
+  a specific edit exists is checked by looking for that edit:
+  `git show refs/prs/<n>:<file> | grep -c '<the changed literal>'`. The
+  file-level diff is the right instrument for the *other* question —
+  will this collide — and both are worth running, labelled.
+- **An instrument is bound to the question it was written for, and a
+  later window will reach for it to answer a neighbouring one.** This
+  file now contains three cases of exactly that in four days: a
+  `workflowName` filter read as a branch predicate, `diff | grep '^<'`
+  measuring position and read as measuring presence, and this. The tell
+  is always the same — a confident reading that disagrees with the
+  repository — so when an instrument's output surprises you, re-read its
+  caption before you believe its number.
+
 #### Resolve "your" in the body, because the envelope does not travel (added 2026-10-27, sixty-sixth window, measured on the reply the defect produced)
 
 "Address the company, not only the seat" is about the **envelope**, and
