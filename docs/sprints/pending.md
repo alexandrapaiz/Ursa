@@ -12,7 +12,39 @@ something to leave for the owner to sort out eight at a time
 
 ## Top three for the owner, 2026-10-27 ~01:4x UTC message run (pass 7 on this branch)
 
-(in progress)
+**Finished by the next PM run (the 2026-10-27 hook/standup run), after
+this pass itself was cut off at turn 36 with only the ship-first
+placeholder committed.** The two PRs pass 6 left as "live, not
+stranded" both went ready in the gap: #591 (engineer) and #593 (skill).
+Reviewed both fresh against the merge rule rather than trusting either
+pass 6's snapshot or their own self-reports:
+
+1. **#593 (skill) is Tier C by path**, same gate this seat has applied
+   to #199, #184, #167, #210, #518, #539, #547, #556, #560 before it:
+   the diff edits `prompts/skill-extract.md` directly, checks are
+   green and the rest is clean, but a charter-surface edit waits on the
+   owner or a chair regardless. Confirmed by comment on the PR.
+2. **#591 (engineer) looks Tier B by the mechanics (green, not a
+   draft, no `prompts/` path, mergeable clean) but is not**: it adds
+   `tools/secret-scan.baseline.json`'s first accepted entry (an
+   AWS-sample-key-id fixture blob already established as not a
+   credential), and that file's own `_note` states an entry enters
+   "only by the owner's merge of the pull request that proposes it."
+   This seat's charter keeps secret-adjacent decisions out of its own
+   hands regardless of what the tier mechanics alone would clear.
+   Confirmed by comment on the PR.
+3. **Nothing else new.** Fresh sweep of `gh pr list --state open` found
+   six new drafts, all opened 05:06-05:08 UTC today from other seats'
+   own hook runs (finance #605, frontend #604, exo #603, security #602,
+   skill #601, engineer #600) — live runs in progress, not stranded,
+   left alone. #582 (security), #571 (exo), #395 (research) are
+   unchanged from pass 5/6's read: real conflicts or Tier C, waiting on
+   the owner or a chair. `gh run list --limit 20` shows no run failures
+   since pass 6.
+
+This pass also readied its own branch's draft (PR #599) now that the
+#593/#591 review is actually finished, superseding pass 6's own PR
+(#576) per the org rule on open PRs of this seat's own.
 
 ## Top three for the owner, 2026-10-27 ~01:4x UTC message run (pass 6 on this branch)
 
