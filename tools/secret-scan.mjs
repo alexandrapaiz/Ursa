@@ -37,9 +37,14 @@
 //   node tools/secret-scan.mjs --since=<rev>   # blobs not reachable from <rev>
 //   node tools/secret-scan.mjs --json          # same exit codes, JSON out
 //   node tools/secret-scan.mjs --patterns      # print the class table and stop
+//   node tools/secret-scan.mjs --no-baseline   # ignore the cited baseline
 //
-// Exit 0 nothing found. Exit 1 at least one hit. Exit 2 the scanner could
-// not do its job, which is never reported as clean.
+// Exit 0 nothing found, or every hit accounted for by a cited baseline entry,
+// which prints a different sentence and names each accepted hit. Exit 1 at
+// least one hit nothing accounts for. Exit 2 the scanner could not do its job,
+// which is never reported as clean, and now includes a baseline it cannot
+// trust: see tools/secret-scan-baseline.mjs for why an unreadable suppression
+// set is worse than none.
 //
 // Test seams, documented so nobody mistakes them for configuration:
 // --repo=<dir> scans another checkout, which is how the suite plants
@@ -52,7 +57,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { renderVerdict } from './gates/verdict-shape.mjs';
-import { hitLine, unusable, verdict } from './secret-scan-verdict.mjs';
+import { baselineFault, partitionHits } from './secret-scan-baseline.mjs';
+import { acceptedLine, baselineUnusable, hitLine, unusable, verdict } from './secret-scan-verdict.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -288,6 +294,52 @@ if (has('patterns')) {
 const since = flag('since');
 const result = has('history') || since ? scanHistory(since) : scanTree();
 result.classes = CLASSES.length;
+
+// THE CITED BASELINE. One entry per blob whose credential-shaped value has
+// been established not to be a credential, with the sentence that says why.
+// `tools/secret-scan-baseline.mjs` carries the whole argument for why the unit
+// is a blob and not a path, and why a working-tree hit can never be
+// suppressed. Two things are true of the code here and both are load-bearing:
+// the baseline is read AFTER the scan, so it cannot narrow what is walked, and
+// a fault in it is an exit 2 rather than a suppression set of unknown size.
+//
+// `--no-baseline` exists so the raw set is always one flag away. An auditor
+// who wants the number the scanner would print with nothing accepted should
+// not have to move the file aside to get it.
+const BASELINE_PATH = join(REPO, 'tools', 'secret-scan.baseline.json');
+let baselined = 0;
+let accepted = [];
+if (!has('no-baseline')) {
+  const raw = existsSync(BASELINE_PATH) ? readFileSync(BASELINE_PATH, 'utf8') : null;
+  const loaded = baselineFault(raw, CLASSES.map(([name]) => name));
+  let problem = loaded.fault;
+  if (!problem) {
+    // `full` is the only scope that walks every blob in every ref, so it is
+    // the only one in which an entry that matched nothing is stale rather than
+    // out of scope. A --since scan deliberately excludes the old blobs.
+    const split = partitionHits(result.hits, loaded.entries, { full: has('history') && !since });
+    problem = split.fault;
+    if (!problem) {
+      result.hits = split.unaccounted;
+      accepted = split.accepted;
+      baselined = accepted.length;
+    }
+  }
+  if (problem) {
+    const v = baselineUnusable(problem);
+    if (JSON_OUT) {
+      console.log(
+        JSON.stringify({ ok: false, usable: false, why: problem.message, detail: problem.detail }, null, 2)
+      );
+    } else {
+      console.error(v.line);
+      for (const extra of v.trailer) console.error(extra);
+    }
+    process.exit(v.exitCode);
+  }
+}
+
+result.baselined = baselined;
 result.ok = result.hits.length === 0;
 
 // The verdict is derived from `result.hits`, the same array the per-hit lines
@@ -297,10 +349,16 @@ result.ok = result.hits.length === 0;
 const v = verdict(result.hits, result);
 
 if (JSON_OUT) {
-  console.log(JSON.stringify({ usable: true, ...result }, null, 2));
+  // The accepted hits travel in their own key rather than being dropped. A
+  // consumer that only reads `hits` gets the set it has to act on; one that
+  // asks what was accepted can see every field of the entry that accepted it.
+  console.log(JSON.stringify({ usable: true, ...result, accepted }, null, 2));
 } else {
   // Location and class only. The value is never printed. See the header.
-  for (const out of renderVerdict(v, result.hits.map(hitLine))) console.log(out);
+  // Accepted hits keep a line of their own, above the trailer, so a green run
+  // still says what is in the history and why it is allowed to be.
+  const lines = [...result.hits.map(hitLine), ...accepted.map(acceptedLine)];
+  for (const out of renderVerdict(v, lines)) console.log(out);
 }
 
 process.exit(v.exitCode);

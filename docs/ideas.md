@@ -14301,3 +14301,138 @@ the owner to accept or reject.
   misdescribes.
 - Cost: $0, plus three permanent self-addressed rows on the board.
 - Status: proposed
+
+### 2026-10-27 — Nothing in continuous integration runs the credential scanner, and the one gate that does run has no credential rule
+
+- Trigger: building the cited baseline for the history hit today and then asking
+  what would have caught `88bb0bf3` on its own. Nothing would have. Measured in
+  this clone: `grep -rn "secret-scan" .github/` returns nothing, and
+  `grep -rln "node --test\|npm test" .github/workflows/` returns nothing, so
+  neither `tools/secret-scan.mjs` nor the 352-case test suite runs on any push
+  or any pull request. The only non-agent workflow is `redaction-gate.yml`, and
+  its three rules are a home path, a Claude Code project slug, and a full UUID.
+  None of the scanner's 16 credential classes is among them. The hit was found
+  on 2026-10-27 by a seat running the scanner by hand, a day after the commit
+  landed and after it had already reached `main`.
+- What: the repository has a credential scanner good enough to find a real hit
+  in 6455 blobs, a suite that proves it can fail by planting canaries, and no
+  automation that runs either. So the scanner's quality is a property of
+  whichever seat remembers to invoke it, which on the evidence of this week is
+  one seat on one day. The gate that does run is the one written after
+  incident 4, and it covers exactly the class of that incident. That is the
+  shape of a repository that gates the last thing that went wrong rather than
+  the things it can already detect. Two jobs are missing and they are different
+  jobs: a tree scan plus the suite on every pull request, which is cheap and
+  bounded, and a full `--history` scan on a schedule, which is the only scope in
+  which a baseline entry can be judged stale and which takes minutes rather than
+  seconds.
+- First step: not this seat's to take, and that is the point worth recording
+  rather than a reason to drop it. The engineer charter's boundaries forbid
+  touching `.github/workflows/`, and the scanner belongs to the security seat.
+  So the first step is this entry plus a note to that seat, and the day-sized
+  unit of work after the owner accepts it is theirs: one job running
+  `node tools/secret-scan.mjs` and `node --test "tools/**/*.test.mjs"` on pull
+  requests, with the history scan on a separate schedule so a seven-minute walk
+  never sits in front of a review.
+- Cost: $0. Both jobs are GitHub-hosted minutes on a public repository.
+- Status: proposed
+
+### 2026-10-27 — The sentinel convention that repaired the credential fixture is written nowhere, so the next fixture author re-derives it
+
+- Trigger: reading why `88bb0bf3` happened before writing the baseline that
+  accepts it. The fixture is in a test whose entire subject is that a formatter
+  must never print a credential value, written by a seat being careful about
+  exactly this, and it was given a real-looking key id anyway because a test
+  about redaction wants something that looks like the thing being redacted. The
+  next commit, `a8a8c866`, replaced it with `deadbeefcafebabe0123456789`, which
+  matches no class in the table. That repair is correct and it is recorded in no
+  convention: nothing in the scanner, the suite or the standards says "a fixture
+  that must look credential-shaped uses a sentinel that is deliberately not",
+  and nothing checks it.
+- What: the cost of getting this wrong is not a failing test, it is a permanent
+  object in the default branch's history and a baseline entry forever. That
+  asymmetry is what makes it worth a convention rather than a habit. The
+  convention has two halves. The written half is a named sentinel shape per
+  class, in the scanner's header next to the class table, so a fixture author
+  reads it in the same file that defines what will flag them. The executable
+  half is narrower than it first looks and should not be a new gate: the tree
+  scan already fails on a credential-shaped fixture, so what is missing is not
+  detection but the sentence a failing author reads. The scanner's exit 1
+  trailer currently says to record and escalate, which is right for a real
+  credential and wrong for a fixture, and it is the only instruction the author
+  of the next fixture will see.
+- First step: add the sentinel table to the scanner's header and a second
+  sentence to the exit 1 trailer naming it, then pin both in
+  `secret-scan-verdict.test.mjs` the way the other five lines are pinned. One
+  session, and it touches no behaviour: the exit codes and the hit lines do not
+  move.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-27 — Two open branches of one seat can each be clean against the trunk and duplicate each other, and nothing either branch can read will say so
+
+- Trigger: the correction from alexandra-systems/exo-centralizer in this seat's
+  inbox today, read on the board. Their run eleven and run fourteen each closed
+  the same two findings of this seat's handoff, four hours apart, producing two
+  resolvers, two docstrings and two independent counts of the same sixty rows.
+  Both pull requests read mergeable and clean, because each was clean against
+  the trunk; they conflict only with each other, so no check on either branch
+  could have reported it and a reviewer of either one counts one resolver and is
+  right. This seat is one run away from the same shape today: #580 and #591 are
+  both open, both touch `docs/ideas.md`, and the only thing preventing a second
+  implementation of the same repair is that this run read its own open pull
+  requests first and stacked on it.
+- What: the guard HQ added is the right one for a single file, a test that
+  counts the implementations in a class and fails above one. It is still a
+  per-branch check, so it holds only where someone thought to write it, and it
+  cannot see the other branch. The missing instrument measures the pair: for
+  one seat's open heads, which are ancestors of which, and which pairs touch a
+  common path with no containment relation between them. The first is already
+  the charter's `git merge-base --is-ancestor` ceremony done by hand for one
+  pair; the second is what nobody runs. `tools/stack/integrate.sh` merges other
+  branches in and `tools/stack/repair-pending.mjs` asks whether a string on the
+  base is repaired on some head, and neither answers this question.
+- First step: a `--pairs` mode on a new `tools/stack/overlap.mjs` that takes the
+  seat's open head refs, fetches them, and prints one row per pair: contained,
+  disjoint, or overlapping-and-independent with the shared paths named. Exit 1
+  only on the third. Hermetic test over a local bare origin, the way
+  `integrate.test.mjs` already builds one, so it needs no network.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-27 — Craft scan: gitleaks, the one product whose suppression format answers today's question differently
+
+- Product: gitleaks, the credential scanner, read today at
+  `raw.githubusercontent.com/gitleaks/gitleaks/master/README.md`. Chosen because
+  this run built a suppression mechanism and the honest way to check a design is
+  against the product that has shipped one for years.
+- Worth stealing: the inline `#gitleaks:allow` comment. The acceptance lives on
+  the line it accepts, so a reader of the code sees it without opening a second
+  file, and deleting the line deletes the acceptance, which means that form can
+  never go stale. Ursa's baseline has the opposite property by design, and the
+  staleness check added today exists only because the acceptance is remote from
+  the thing accepted. The limit is real and worth stating with the idea: an
+  inline marker cannot accept anything in history, because a past blob cannot be
+  edited, so the two forms are complementary rather than alternatives. Inline
+  would be the right answer for the working tree, which the blob-pinned baseline
+  deliberately cannot touch at all.
+- What Ursa does better, and it is the same property twice: the unit. A
+  gitleaks fingerprint is
+  `cd5226711335c68be1e720b318b7bc3135a30eb2:cmd/generate/config/rules/sidekiq.go:sidekiq-secret:23`,
+  which is commit, path, rule and line, so it names a coordinate and not a
+  content. Nothing in it refers to what is at that coordinate, so it cannot
+  notice that the coordinate now holds a different secret, and a rebase or a
+  squash changes the commit and silently invalidates it. The allowlist's `paths`
+  and `regexes` options are broader still: both suppress a class of future
+  findings. `tools/secret-scan.baseline.json` keys on a blob id, which is the
+  content, so an entry accepts exactly one byte sequence, there is no wildcard
+  of any kind, and no edit to an accepted file can be hidden by it. Second, a
+  `.gitleaksignore` line is an identifier with no field for the reason, so the
+  record of why something was accepted lives wherever the person who accepted it
+  happened to put it. Every Ursa entry carries the sentence, the citation, the
+  date, and a `rotation_required` that must be false, and the run refuses rather
+  than scans if any of them is missing.
+- Status: not an idea, a scan note. The stealable half is written up above as
+  the sentinel entry's neighbour rather than as a fourth entry, because inline
+  acceptance for the tree and a sentinel convention for the tree are two answers
+  to one question and the owner should pick one rather than accept both.
