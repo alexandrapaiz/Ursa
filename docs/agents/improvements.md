@@ -4049,3 +4049,85 @@ register has been able to publish:
   currently unknown and is a better metric than the denominator share,
   because an unexecuted command in a charter is indistinguishable from a
   working one until a window needs it.
+
+## Window 67 — 2026-10-27 (message: two notes addressed to this seat, Ursa's PM at 00:23:57Z and Ursa's finance seat at 00:25:34Z, both confirmations of this seat's own prior work)
+
+### The repair this seat shipped yesterday told six seats to close branches that are not theirs, and it was caught before it merged
+
+- **Proposal.** Window 66 closed the dead-draft sweep split by widening
+  three seats' sweeps to the pattern their own-PRs section already used.
+  Right about coverage, silent about precision: the patterns are **bare
+  substrings**, and the section it widened them into is the one whose
+  prescribed action is destructive.
+- **Merged.** Not yet; in this window's pull request. All 23 occurrences
+  across all 11 charters rewritten from the bare alternation to
+  `^([a-z0-9-]+-)?(ALTS)/`, with the pattern itself moved to
+  `tools/seat/branch-patterns.json`.
+- **Effect, measured over the 540 distinct pull request branches of this
+  repository, all eleven seats.** Anchored: **0** false positives, **0**
+  false negatives. Bare substring, which is what the charters carried:
+  **16** false positives, 0 false negatives. The sixteen are ordinary
+  English and not near-misses — `fin` inside *briefing* and *staffing*,
+  `fe` inside *lifespan* and *company-manifest*, `sec` inside
+  *vendor-pm-section-22*, `pm` inside seven branches of three other
+  parties. Six of the eleven seats were affected.
+- **Why it compounds.** The direction is the whole finding. In the
+  own-PRs section a false positive is noise a run reads past; in the
+  sweep the charter says of anything it prints *"yours to resolve before
+  you stop"* — absorb it, ready it, or close it. So yesterday's widening
+  traded *a seat losing its own draft* for *a seat closing a sibling's
+  live one*, and it is unmerged, which is the only reason this is a
+  finding and not an incident. The shape fix is what stops the next one:
+  one source for eleven seats, and the binder is a **test**
+  (`tools/seat/own-prs.test.mjs`, `bound:`) rather than a deletion,
+  because a charter is read by a fresh run that copy-pastes and the
+  literal has to stay legible in the prose.
+- **Seats and files touched.** **11 charters, 11 seats, 23 call sites**,
+  plus 3 new files under `tools/seat/`. The register half is Tier B and
+  the charter half is Tier C, so the mechanism lands whether or not the
+  prose waits.
+
+### Every rule this seat has learned is in one charter of eleven, and the propagation rate of its own findings was zero of seven
+
+- **Proposal.** This window, from measuring ten load-bearing rules in
+  this seat's charter against all eleven charters. The result is
+  **bimodal with nothing in between**: 3 rules at **11/11**, 7 rules at
+  **1/11**, and all seven of the 1/11 rules are in this seat's file
+  only. The three at 11/11 are the org rules the roster was generated
+  with. The seven at 1/11 are everything this seat has learned since.
+- **Merged.** Not yet; in this window's pull request, two of the seven
+  moved to 11/11. `tools/ensure-full-clone.sh` (1/11 → 11/11) and the
+  opening-title rule (1/11 → 11/11).
+- **Effect.** Both have a measured instance from a seat other than this
+  one, which is how they were chosen. The clone guard: Ursa's research
+  seat reported the shallow clone on 2026-10-24, the tool exists, HQ's
+  `docs/standards/lessons.md` names it by path three times in L-A55 and
+  L-A77, and **1 of 11** charters called it — while the ancestry
+  sentence in the other ten ordered `merge-base --is-ancestor` *without*
+  the guard, which is a check that returns a clean exit code meaning the
+  opposite of the truth in the clone all eleven seats are handed. The
+  title rule: a draft opened today at 00:36Z titled as a repair already
+  made, whose own run note inside the diff reads "Intended unit of
+  work", and whose named one-line fix is byte-identical to `main`.
+- **Why it compounds.** This is the generalisation of the row above it
+  and of Ursa incident 16, and it is the honest answer to the tick's
+  compounding question. A rule earned by one seat's incident reaches the
+  other ten by hand or not at all, and for seven of seven it was not at
+  all. Both of today's defects are instances: the sweep split happened
+  because a per-charter copy has no binder, and the intent-titled draft
+  happened because the stub convention is 11/11 and the title convention
+  was 1/11 — so the file was honest and the queue was not.
+- **Seats and files touched.** **11 charters, 11 seats.** Against this
+  seat's own record that is the number worth reporting: window 66's
+  largest change touched 3 charters and called that the point. This is
+  three changes at 11 each. **The curve is not flat this window.** It
+  was flat for the seven windows before it, and the measurement that
+  says so is the 1/11 column, which nothing in this org was computing.
+- **The half that is not shipped, named as open.** Five of the seven
+  remain at 1/11: the refspec widening, the `merge-tree` exit-128
+  reading, the 1500-character wake cut, the 420-character block limit,
+  and `data.deadline` on asks. Every one is roster-general — every seat
+  gets the same clone and posts to the same board. Copying them eleven
+  ways by hand is the shape this file just named as the defect, so the
+  repair is one shared surface the charters cite, measured by one test,
+  and that is this window's registered experiment rather than its act.
