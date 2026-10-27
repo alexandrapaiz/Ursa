@@ -3738,6 +3738,26 @@ dataset sold to a lab that difference is the whole product.
 - Cost: $0
 - Status: proposed
 
+**Dated note, 2026-10-27 (message, 4th run):** this axis now has a
+named policy actor pushing it toward regulation rather than leaving it
+as a reputational question for lab buyers alone. A report titled
+"American AI Advantage Is for Sale" (CASE, a free-market advocacy
+nonprofit, 2026-10-26) calls for Congress and the administration to
+restrict sales of proprietary AI-training products to CCP- or
+military-linked Chinese entities, with disclosure requirements for
+federal contractors serving those buyers, and names Surge AI
+specifically as holding US military contracts (Air Force, Army) while
+also supplying Tencent, which the Pentagon designated a "Chinese
+military company" in 2025. This is a policy ask, not an enacted rule —
+nothing in law has changed — but if a disclosure rule along these
+lines ever lands, Minor's structure has nothing to disclose under it,
+since it has never sold contractor labor to anyone. Raises the stakes
+of the owner's decision above; does not change it. Source: [Townhall:
+New report scrutinizes US AI data sales to
+China](https://townhall.com/news/tayte-christensen/2026/10/26/new-report-scrutinizes-us-ai-data-sales-to-china-n2685323).
+Full reasoning in docs/market/positioning.md's "The provenance-trust
+axis now has a policy actor trying to make it a legal one" section.
+
 ### 2026-10-07 (market) — No exploited-contractor exposure, as a trust claim distinct from "cheaper"
 - Trigger: this run's landscape watch (docs/market/landscape.md,
   Mercor update). A Gazetteer SF investigation (2026-05-05, by Cydney
