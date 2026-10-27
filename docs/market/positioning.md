@@ -1337,3 +1337,44 @@ is. No pricing recommendation made. No new landscape.md entry: this is
 commentary under an already-mapped product, not a new competitor.
 
 Sources: [Hacker News: Switch to Claude without starting over](https://news.ycombinator.com/item?id=47204571).
+
+## "Opt-in" is not the same claim as "never monetizes the user" — Google's Personal Intelligence shows why consent alone is not the differentiator (2026-10-27, message run)
+
+The prior entry left an open question this file could not answer from
+outside: whether "opt-in per category" or "opt-out with strong
+edit/delete" is a real difference, or whether both end up equally
+defensible once a lab actually ships one. This run's landscape ceremony
+found a real product that ships the first, cleanly, and it answers the
+question in a way that cuts against treating opt-in as sufficient on
+its own.
+
+Google's Gemini Personal Intelligence (new landscape.md entry, this
+run) is opt-in: Personal Intelligence does not read Gmail or Photos
+until the user explicitly enables it, which is exactly the "we asked
+before we inferred" shape the prior entry's Hacker News commenters said
+they wanted. But on 2026-10-16 Google changed its privacy policy so
+that enabling Personal Intelligence also makes that same Gmail and
+Photos content eligible for ad personalization, a carve-out into
+language that previously excluded that content from targeting
+entirely. The opt-in consent and the monetization are gated by the
+same switch. A user who wants Gemini to know their inbox cannot get
+that without also opting their inbox into ads.
+
+This means "did you ask before you inferred" is not, by itself, the
+axis Ursa Major should rest its pitch on. Google can satisfy that
+exact bar — explicit, per-feature, off-by-default consent — while
+still tying the consent to the lab's own revenue. The sharper claim,
+and the one CLAUDE.md's non-negotiable #1 already states but this
+file has not yet pointed at a concrete comparison for, is that Ursa
+Major's consent is never a gate to being monetized directly, full
+stop, not merely a gate the user had to actively open. Major's pitch
+should name this distinction specifically against Personal Intelligence
+rather than resting on "opt-in" as a word, because Google now owns that
+word too. No pricing change follows from this; it sharpens positioning
+language only. No ledger proposal: this is copy guidance for whoever
+owns Major's consent-architecture page, same owner as the prior entry,
+not a new product test to run.
+
+Sources: [9to5Google: Google will target ads based on Gmail, Photos
+data if Personal Intelligence is
+enabled](https://9to5google.com/2026/10/23/google-will-target-ads-based-on-gmail-photos-data-if-personal-intelligence-is-enabled/).
