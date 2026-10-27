@@ -14462,3 +14462,92 @@ the owner to accept or reject.
   to cover every gate-caught leak and not only incident 2's two refs.
 - Cost: $0. The fix is documentation in this seat's own file.
 - Status: built
+
+### 2026-10-27 (security, message, run c) — The recommended disposition for the history hit expired eleven minutes before it was written, so the scanner is now permanently dirty on `main`
+
+- Trigger: this run's history scan, run as the charter requires. It returns
+  the same one hit as run 16 and the same conclusion about it: a vendor's
+  published documentation example access key id, in
+  `tools/secret-scan-verdict.test.mjs` line 72, blob `ef90504da7db`. Not a
+  credential, nothing to rotate, value not reproduced here. What is new is
+  where it is reachable from.
+- What: the engineer seat's entry above, `2026-10-27 — A credential-shaped
+  fixture is in this branch's history`, is on `main`, is filed `urgent`, and
+  recommends **option one**, a squash merge, on the stated ground that it
+  "leaves `88bb0bf3` unreachable from it, so nothing is rewritten and the hit
+  never enters the default branch's history". That option no longer exists.
+  Measured in a complete clone this run: `git merge-base --is-ancestor
+  88bb0bf3 origin/main` exits 0, the commit reached `main` through the merge
+  of PR #573 at `b0a3a7d6`, and `node tools/secret-scan.mjs --history
+  origin/main` returns the hit against `main`'s own history alone. So the
+  blob is on the default branch and a squash of any later branch cannot
+  remove it.
+- Why nobody was careless: the timestamps are eleven minutes apart. `b0a3a7d6`
+  merged at 2026-10-27 00:47:36 UTC. The entry was committed at 00:58:53 UTC,
+  on a branch that is **not** a descendant of that merge, which this run
+  checked rather than assumed. From inside that branch the blob really did
+  reach only that branch, and squashing it really would have been sufficient.
+  The entry was accurate about its own branch and void about `main`, and no
+  read available from the branch could tell the author which. This is the
+  charter's "`main` is not this organization's memory" with the subject
+  changed: not a seat rebuilding work that was already done, but a seat
+  recommending a disposition that was already unavailable.
+- What it costs, which is the instrument and not the data: both earlier
+  entries named this cost while it was still avoidable. The scan's value is
+  that its answer is normally zero, so a permanent known hit turns the next
+  real one into a second line in a report that already says one, and it would
+  turn PWC-14's proposed credential gate red on the day it lands. That is now
+  the state of `main` rather than a risk to `main`.
+- First step: the owner's, because the remaining options are both hers. **Option one is gone.** **Option two**, a cited baseline in
+  `tools/secret-scan.mjs`: one entry naming this blob, this class, and the
+  sentence saying the value is a vendor's published documentation example, in
+  the shape `dep-floor.allow.json` already uses for an accepted advisory. This
+  seat can build that in well under a day once she chooses it, and it is the
+  only option that gets the scan back to a meaningful zero without rewriting
+  anything. **Option three**, a history rewrite, still removes the blob and
+  still invalidates every merge-base check the open pull requests depend on,
+  and is still the wrong price for a value that is not a credential. The
+  recommendation is two, and nothing should be built until she says so,
+  because an allowance added without her is a scanner made quieter by a seat.
+- Cost: $0, and no rotation. The class is credential-shaped by pattern and the
+  value is a published example, so there is nothing live to rotate. Rotation
+  would be the owner's call if there were.
+- Status: urgent
+
+### 2026-10-27 (security, message, run c) — The local checker read the gate's rules and wrote its own flags, which is the same hole one argument to the left
+
+- Trigger: the security lane's open board item, "Every kind of file we commit
+  gets checked for private data, images included", whose own text says the
+  code change belongs to HQ and the rule belongs to this seat. Both halves
+  were already done. What neither covered is the tool the seat that commits
+  the images actually runs before pushing.
+- What: `docs/design/review-kit/check-redaction.mjs` reads the gate's
+  patterns, its exclusions and its allowlist out of
+  `.github/workflows/redaction-gate.yml` on every run, and refuses to run if
+  it cannot find any of the three. Its header explains at length why: a local
+  check that restates a gate's rules is a second source of truth, and a
+  second source of truth for a gate is worse than no local check at all,
+  because it goes green while the gate goes red and the person it misleads is
+  the one who trusted it. The grep flag cluster was the literal `-rInE` in
+  that same file. The flags are rules. PWC-13 is live with HQ and removes
+  `-I`, so the day it lands this checker goes green on a committed image the
+  gate reds, for the seat whose practice has committed over a thousand of
+  them.
+- Why it was invisible: with `-I` in the gate, a checker that hardcodes `-I`
+  and a checker that reads `-I` behave identically, so no measurement taken
+  before PWC-13 lands could distinguish them. This seat's own
+  `scripts/redaction-check.mjs` had the same defect and run 13 fixed it there
+  on 2026-10-26, which is why the fix is a transplant and not a design.
+- Built, in this run's pull request. The cluster is read from the gate with a
+  refusal path, and `-I`'s removal is handled rather than survived: GNU grep
+  announces a binary hit on standard error and writes nothing to standard
+  output, so the right flags alone would still have found nothing. Verified a
+  no-op on today's tree, same verdict and same zero findings. Three new
+  selftest expectations, each confirmed to fail against the pre-fix tool,
+  which scanned with flags of its own invention and reported a hit rather
+  than refusing.
+- First step: none here. The remaining half is PWC-13 itself, which is HQ's,
+  and this run added the measurement trap that defeats its printed
+  verification method to that entry.
+- Cost: $0
+- Status: built
