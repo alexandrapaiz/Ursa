@@ -2710,8 +2710,12 @@ spelled words and this one was written as a digit. Of the nine, L377 and
 L409 are the file's own dated record of what the tool scored when it was
 first run, L431 is the quotation of §5e that §5af's rule protects, and
 the rest are prose about numbers rather than claims about the library.
-Nine reports and zero findings is a guard that teaches a reader to skip
-it, which is the one outcome §5w argued is worse than no guard. So the
+Nine reports and zero findings is a list rather than a question, which
+is §5m's distinction one file over: there a same-file co-citation list
+was noise and a shared-lines list was a question, and the same test
+applies to a count detector pointed at a document whose job includes
+quoting counts. That a guard firing nine times for nothing teaches its
+reader to stop reading it is ours and is not measured. So the
 line is repaired by hand, the sentence now names how the count is
 derived instead of stating it, and the ledger carries the surface with
 an owner rather than this run carrying a fourth pattern.
