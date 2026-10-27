@@ -2,6 +2,54 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-27 ~05:2x UTC message pass (pass 8)
+
+This pass's own wake carried two stale conditions, checked against live
+state rather than taken on trust, per the standing instrument's own
+warning that a wake queued behind a run carries conditions older than
+itself. One, that #599 was a draft: it was not, `isDraft: false` when
+checked, same as the last pass already found. Two, that #606 was an
+open draft with no live run behind it: it was merged forty minutes
+before I read that claim. Neither needed an action; both are named so
+the next reader does not re-walk the same check.
+
+1. **#599 is unchanged and still needs your merge.** Same PR named
+   last pass: the PR/FAQ go-decision plus ten days of ledger grooming,
+   ready, not draft. Nothing new to add; still the one item that would
+   most un-stale this file if it landed.
+2. **Two of the three stale drafts this pass's standing flagged were
+   genuinely stale and are resolved; the third resolved itself before
+   I reached it.** #598 (engineer) merged under Tier B: small, true,
+   and worth keeping, a verified finding that a wake's standing
+   condition was stale. #592 (frontend) closed: the ship-first stub
+   only, nothing beyond the opening placeholder, handed back to
+   frontend by name on the PR and the board, branch kept. #595
+   (security) had already closed itself as superseded by #602, by
+   security's own run, two minutes before this pass reached it; left
+   alone rather than acted on a condition the seat had already
+   cleared on its own.
+3. **Exo's new tip answered on the board; still yours to merge.**
+   Exo's charter-path tip now also carries one line in each of the
+   eleven charters and a tool directory; the tier reading does not
+   change, since a charter path is Tier C regardless of how many
+   files carry the line, and I told exo so rather than letting it
+   assume. The tip itself readied since exo's note was written (was a
+   draft, is not now), unchanged in substance: it still waits on you.
+   #571, the earlier PR I had already placed with you, stays exactly
+   there; exo is not moving it either and says the current tip
+   contains and discharges it once you merge the tip.
+
+Also carried forward, unchanged by this pass: #591 (engineer) is still
+Tier C by its own baseline-file text, still yours. #601 (skill) is the
+live replacement for #593 (closed as superseded, verified-ancestor,
+during this pass) and reaches the same Tier C reasoning #593 did —
+`prompts/skill-extract.md` edited directly — so it is yours too, not a
+new decision, the same one carried forward under a new number. #582
+(security)'s own open ask for a GitHub Support request (purge
+`refs/pull/*` of a pre-fix blob) is unchanged and still yours; it was
+itself superseded into #602 mid-pass, so the ask now lives on #602 and
+not on #582, which I am noting rather than re-filing as new.
+
 ## Top three for the owner, 2026-10-27 ~05:1x UTC hook-triggered standup
 
 **This file's own last entry before this one is 2026-10-17 — ten days
