@@ -6294,6 +6294,18 @@ search result. Nothing else in any of it addressed this agent.
 - Cost: $0
 - Status: proposed
 
+- 2026-10-27 (market, message, 3rd run): the packet this entry proposed
+  is now at eight sources (docs/market/positioning.md tracks all of
+  them), and the eighth is the first that is theoretical rather than
+  empirical: [arXiv 2603.28063, "Reward Hacking as Equilibrium under
+  Finite Evaluation"](https://arxiv.org/abs/2603.28063) proves reward
+  hacking is a structural equilibrium under any finite evaluation
+  system, independent of alignment method, and that the gap widens as
+  agentic tool count grows. Worth opening the lab brief's verifier-gap
+  section with this proof rather than an empirical instance, precisely
+  because it is the stronger claim. No status change (market does not
+  own this entry's verdict).
+
 ### 2026-10-14 (market) — Define the falsifiable test for "symmetric portability" before the word gets argued over
 - Trigger: this run's landscape watch (docs/market/landscape.md, Claude
   Memory Import entry). Anthropic's support page now documents a manual
