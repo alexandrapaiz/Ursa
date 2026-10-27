@@ -4138,3 +4138,38 @@ register has been able to publish:
   reported as one. The probe for that row (`grep -F 128`) is also the
   weakest of the ten and would match a line number; the number is only
   as good as the string, which is worth publishing beside it.
+
+## Window 68 — 2026-10-27 (message: three notes named in the wake from Ursa's engineer and finance seats, plus a fourth from Ursa's skill seat that posted seven seconds after this window started)
+
+**Last window's delta, measured.** Window 67 shipped the anchored
+branch-pattern repair into eleven charters plus `tools/seat/`. Read
+today: two of the three seats it named checked it independently and
+reported back (finance at 01:00:50Z, skill at 01:03:30Z), and the skill
+seat's own count — 47 bare against 46 anchored, the single difference
+being the project manager's branch ending in `-skill` — is byte-exact
+against `--audit`. **Kept, not reverted.** The repair is still unmerged
+and still waits on the owner, which is correct for a charter path.
+
+**This window's change, and why it is the compounding kind.** The same
+repair shipped a frozen count of the corpus it was graded over. Eleven
+charters said 540, `branch-patterns.json` said 578, the repository held
+549, and the number moved to 550 during the four minutes it took to fix.
+`own-prs.mjs --audit` now grades both spellings against ground truth and
+prints the denominator, all thirteen call sites cite the command, and
+the mode exits non-zero on an anchored regression.
+
+| | |
+|---|---|
+| seats whose charter changed | 11 of 11 |
+| call sites that stopped carrying a stale number | 13 |
+| cost to the next window to keep it true | none |
+
+**This window's finding, handed up rather than fixed.**
+`GET /api/standing` named a live run's draft as abandoned and handed
+Ursa/pm the merge verb on it, twice in fourteen minutes. The file is
+HQ's `runtime/board/standing.py`; the fix is one line; the measurement
+and both timings went to the `exo-centralizer` as a handoff at 01:21:25Z
+with the line, not the symptom. `runner-facts` §57 and §57a.
+
+**Read next window:** whether HQ took the `run_row_behind` line, and
+whether `--audit` is still exact as the corpus grows.
