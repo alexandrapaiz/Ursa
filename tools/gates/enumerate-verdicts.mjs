@@ -65,6 +65,7 @@ const REGISTRY = [
   './../ledger/contract-verdict.mjs',
   './../ledger/attributes-verdict.mjs',
   './../secret-scan-verdict.mjs',
+  './../board/post-verdict.mjs',
 ]
 
 // ---------------------------------------------------------------------------
@@ -91,6 +92,15 @@ function derivableNumbers(probe, v) {
     else if (Array.isArray(value)) allowed.add(value.length)
   }
   return allowed
+}
+
+/** Is `n` inside one of the substrings this verdict declared it quotes from
+ *  its input? Matched as a substring of the declared quotation and not of the
+ *  whole line, because the whole line is where the computed counts live too:
+ *  scanning the line would exempt every number the moment any quotation was
+ *  declared, which is the opposite of the point. */
+function quotesNumber(v, n) {
+  return (v.quoted ?? []).some((q) => integersIn(String(q)).includes(n))
 }
 
 export function checkProbe(gate, probe, v) {
@@ -136,9 +146,22 @@ export function checkProbe(gate, probe, v) {
   // The number half. A count in the verdict that no partition and no census
   // field supports is independent of the findings, which is the same defect
   // arriving as arithmetic instead of as a noun.
+  // A verdict may quote its input verbatim: the HTTP status a store answered
+  // with, a record id. Those are facts about the response and no partition of
+  // the findings produces them, so they are exempt -- but only from inside a
+  // string the gate declared in `quoted`, and only once that string is really
+  // in the line. A declared quotation that does not appear is an exemption
+  // with nothing behind it, which is how this check would get weakened without
+  // anyone editing it.
+  for (const q of v.quoted ?? []) {
+    if (q !== '' && !whole.includes(q)) {
+      note('QUOTED_IS_QUOTED', `${where}: the verdict declares it quotes ${JSON.stringify(q)} but its own text does not contain that string, so the COUNTS_DERIVED exemption it buys covers numbers the verdict computed rather than observed`)
+    }
+  }
+
   const allowed = derivableNumbers(probe, v)
   for (const n of integersIn(v.line)) {
-    if (!allowed.has(n)) {
+    if (!allowed.has(n) && !quotesNumber(v, n)) {
       note('COUNTS_DERIVED', `${where}: the verdict line claims ${n}, which is not any locus count, the total, the exit code, or a census field, so it cannot have come from the findings`)
     }
   }

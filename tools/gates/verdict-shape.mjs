@@ -60,7 +60,13 @@ export const POSITION = { BEFORE: 'before', AFTER: 'after' }
 
 /**
  * @typedef {object} Verdict
- * @property {0 | 1 | 2} exitCode
+ * @property {0 | 1 | 2 | 3} exitCode 3 was added 2026-10-26 when
+ *   `tools/board/post.mjs` became the fifth gate extracted. It is the one code
+ *   in this repository that means "the downstream store refused what this
+ *   checker passed", which is a defect in the checker and not in the thing
+ *   checked. The four ledger and secret gates emit 0, 1 and 2 only, so the
+ *   first four extractions could not have discovered this; widening the type
+ *   is what the fifth one cost.
  * @property {'out' | 'err'} stream which handle the gate actually writes to.
  *   Recorded rather than normalised: these four gates disagree today and the
  *   disagreement is a finding, not something for this file to paper over.
@@ -76,6 +82,22 @@ export const POSITION = { BEFORE: 'before', AFTER: 'after' }
  *   the same defect as one gate reporting two faults at a single exit code.
  * @property {string[]} cites the loci whose counts this line is allowed to
  *   quote. Used by the COUNTS_DERIVED check.
+ * @property {string[]} quoted substrings of `line` the gate took verbatim from
+ *   an input it observed rather than computed from its findings: an HTTP status
+ *   the board answered with, a response body, a record id. Integers inside one
+ *   of these are exempt from COUNTS_DERIVED, and nothing else is.
+ *
+ *   WHY THIS FIELD EXISTS, since an exemption is the last thing a check like
+ *   this should grow casually. COUNTS_DERIVED reads every integer in a verdict
+ *   line and demands the findings support it, which is right for a count and
+ *   wrong for a quotation. `tools/board/post.mjs` prints `The board refused it
+ *   with 422: {"error": ...}` and `Posted note to Ursa/pm, id a1b2c3d4`. The
+ *   422 and the id are facts about the response, so no partition of the
+ *   findings can produce them, and without this field the honest line fails
+ *   the check. The exemption is narrow on purpose: the number has to appear
+ *   inside a string the gate DECLARED, so an invented count cannot reach it,
+ *   and a gate that declares a quotation it does not print is itself a
+ *   finding (QUOTED_IS_QUOTED in tools/gates/enumerate-verdicts.mjs).
  */
 
 /**
@@ -92,6 +114,7 @@ export function verdictOf(v) {
     trailer: [],
     derivedFrom: 'findings',
     cites: [],
+    quoted: [],
     ...v,
   }
 }
