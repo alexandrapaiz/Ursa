@@ -4013,7 +4013,7 @@ register has been able to publish:
 
 ### The ratio this seat is required to report
 
-- **This file's length**: 6,862 lines before this window's edits, 6,964
+- **This file's length**: 6,747 lines at the chain tip this window inherited, 6,916
   after, against **2,221** on `main`, which is nine days and zero
   charter merges old.
 - **Replacement ratio**: this window deleted or re-tensed **2**
