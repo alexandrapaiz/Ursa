@@ -12727,6 +12727,35 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
     anyway. It stays urgent, it stays the operator's, and no amount of
     further prose in this file is going to reach the moment where the
     choice is made.
+- **Update 2026-10-27 (security run d): the fifth instance is this seat's
+  own, and it is the first one with a measured margin rather than a
+  mechanism.** One short bullet, because the sentence above is right that
+  more prose does not reach the choice. What is new is only the number.
+  - This run wrote its pull request body to a bare name in the shared
+    directory and called `gh pr create --body-file` on it. The pull request
+    was created at 05:06:17 UTC. **The same path was overwritten by another
+    run's pull request body at 05:06:54 UTC**, 37 seconds later, with a body
+    that names a different seat's cut-off run. So the read beat the
+    collision by 37 seconds, and the only reason the right body was
+    published is the order the two runs happened to arrive in.
+  - Every earlier instance in this entry was either reported by the seat
+    whose text was taken or recorded as "nothing was observed to collide."
+    This one is the collision, timestamped on both sides. That converts the
+    entry's claim that both writes succeed silently from a description of
+    the mechanism into a measurement of how much room there is: under a
+    minute, on a weekday night, between two runs that were not coordinating.
+  - The same run also held the only copy of a security fix at a bare shared
+    name for the length of one verification step, while restoring the
+    pre-fix file to prove three new expectations failed against it. Had a
+    sibling written that name in that window, this branch would carry a file
+    that is not the one this run wrote, and nothing would have reported it.
+  - Re-measured on the host at 05:10 UTC: `TMPDIR` still unset, the shared
+    directory still mode 1777 with every seat the same user, **671
+    collision-shaped files at unqualified names, 59 of them written in the
+    previous two hours.** Against 27 at the last reading. Nothing applied.
+  - The run that did this is a run of the seat that owns this entry, which
+    is the fifth consecutive demonstration of its central claim. The status
+    does not change.
 
 ### 2026-10-26 (security run 8) — Nothing detects a committed instruction to write a bare shared temporary path, which is why the same collision has now happened three times
 - Trigger: the entry above, and the sentence this repository's own learning
@@ -12788,6 +12817,21 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   `check.mjs` and into the `IDEA_FIELDS_COMPLETE` entry as the first
   content, since it is already written and already proved necessary.
 - Cost: $0. No dependency: `process.argv` and a `Record<string, string>`.
+- Note added 2026-10-27 (security run d), found by typing this entry's own
+  title into a shell: today `node tools/ledger/check.mjs --explain
+  IDEA_FIELDS_COMPLETE` does not print "unknown flag", it exits with a raw
+  `ENOENT` stack trace, because `check.mjs` reads `process.argv[2] ??
+  'docs/ideas.md'` and so treats any argument as a path to the ledger. So
+  the first flag this gate ever gets will arrive at a line that cannot tell
+  a flag from a filename, and a reader who mistypes one gets a node trace
+  instead of a usage line. Small and worth folding into this entry rather
+  than filed separately, but it carries one question that is the builder's
+  and not this seat's to answer: **which exit code a bad invocation gets.**
+  This gate's 2 already means "clean as far as a seat can take it", which is
+  a reassuring code, so mapping a typo onto it would make a mistyped
+  invocation read as a pass. 0, 1 and 2 are all spoken for by the
+  seat-or-owner split in the header. That is a contract choice for the gate's
+  owner, which is why this run reported it instead of picking one.
 - Status: proposed
 
 ### 2026-10-26 (engineer, message run, 4) — The site's `AGENTS.md` is written by its framework on every dev-server start, and nothing has decided whether that file is ours or the tool's
@@ -14551,3 +14595,72 @@ the owner to accept or reject.
   verification method to that entry.
 - Cost: $0
 - Status: built
+
+### 2026-10-27 (security, hook, run d) — The credential scanner's history refusal covered depth and not refspec, so 19% of this repository's history was outside every "full history" result this seat has published
+
+- Trigger: reading this seat's own tool rather than its output. The clone a
+  seat is handed is `--single-branch`, `tools/ensure-full-clone.sh` treats
+  depth and refspec as two independent faults and repairs both, and
+  `tools/secret-scan.mjs --history` guarded against one of them.
+- What: the guard tested for `.git/shallow` and said nothing about
+  `remote.origin.fetch`. A clone made with `--single-branch` at full depth
+  has no shallow marker, so the guard passed, and `rev-list --objects --all`
+  then walked one branch's objects and printed `history: ... 0 hit(s)` at
+  exit 0. That is the same indistinguishable zero the file's own header
+  refuses for depth, arriving by the other door, in the one tool whose
+  output is supposed to mean that nothing credential-shaped exists anywhere
+  in this repository's history.
+  Measured both ways in a throwaway repository with an AWS-key-shaped canary
+  on a branch other than the default: cloned `--single-branch` at full
+  depth, the pre-fix tool reported `1 blobs, 0 hit(s)`, exit 0. Refspec
+  widened by `ensure-full-clone.sh`, nothing else changed, same clone, same
+  command: `1 hit(s)`, exit 1. The probe was built outside this repository
+  and destroyed, and its value appears in no stream, commit or file here.
+  And on this repository, which is the figure that says what the hole was
+  worth: this run's first history scan walked 5,304 blobs in the clone it
+  was given. After the refspec repair alone it walked 6,532. So 1,228 blobs,
+  19% of this repository's history, were outside every `--history` result
+  this seat has reported since 2026-10-25, and not one of those results said
+  so. Still one hit, still the known vendor documentation example in
+  `tools/secret-scan-verdict.test.mjs`. Nothing is leaked and there is
+  nothing to rotate: what was wrong was the coverage claim, not the verdict.
+- First step: none. Fixed in this run's pull request. The guard now names
+  every fault it finds instead of the first, asks `git rev-parse
+  --is-shallow-repository` rather than testing for a path, and does not
+  refuse a repository with no `origin`, whose own refs are the whole graph.
+  Six new expectations, three of them confirmed to fail against the pre-fix
+  tool. The same path-versus-git half was fixed in
+  `scripts/redaction-check.mjs`, where a linked worktree of a shallow clone
+  has no `.git/shallow` and `rev-parse` still answers `true`; its refspec
+  half does not apply, because that scan walks one named ref rather than
+  `--all`, so the caller declares the scope.
+- Cost: $0
+- Status: built
+
+### 2026-10-27 (security, hook, run d) — Every audit this seat has published since 2026-10-25 states a history figure whose scope it could not see, and nothing in the report format would have shown it
+
+- Trigger: F44 above. The fix closes the hole going forward and says nothing
+  about the eight audit reports already on `main` that quote a blob count.
+- What: a history scan's blob count is the scope of its own claim, and until
+  F44 it was a function of the clone the run happened to be handed. Two runs
+  of this seat on the same commit could therefore publish 5,304 and 6,532
+  for the same repository, both reported as `history`, with nothing in
+  either line distinguishing them and no reader able to tell which was
+  complete. The reports are not wrong about what they found. They are
+  unfalsifiable about what they looked at, which for a credential scan is
+  the load-bearing half, and this seat's own audit format asked for the
+  count without ever asking for the denominator it is a count of.
+  The narrow repair shipped in F44 is a refusal, so from now on an
+  incomplete clone produces no number at all rather than a small one. What
+  is not repaired is the record: nothing re-states the earlier figures, and
+  a reader comparing this run's 6,532 against run 17's 5,337 would read a
+  growing repository rather than a widening scope.
+- First step: have the scan report the graph it walked alongside the count,
+  which is two numbers it already has to hand (`rev-list --count --all` and
+  the remote-tracking ref count `ensure-full-clone.sh` already prints), so
+  that two audits are comparable without a reader reconstructing either
+  run's clone. Then one line in the audit template requiring them. This is
+  the engineer's shape rather than a fix, because it changes a gate's output
+  contract and every pinned literal in `secret-scan-verdict.test.mjs`.
+- Cost: $0, half a day, in `tools/secret-scan.mjs` and its verdict module
+- Status: proposed
