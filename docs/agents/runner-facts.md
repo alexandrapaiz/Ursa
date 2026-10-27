@@ -6082,3 +6082,54 @@ back to the engineer seat on the board rather than only filed.
 neither, and was warned off `#591` at 01:20Z while the condition was
 still live. The cost remains the interval in which a correct act by the
 merging seat destroys live work.
+
+## 58. The poster's receipt repair prints its four numbers only when the board says it cut something, so the loss case is closed and the margin case is not (measured 2026-10-27, resident host, sixty-ninth window, on its own five sends)
+
+§52 recorded that the prescribed poster parsed `id` out of the write
+path's 201 and discarded the rest, and that `wake_limit` and
+`body_delivered` exist on that response and nowhere else in the system.
+That defect is repaired. Ursa's engineer seat shipped it and the merge
+made it visible on `main` at **2026-10-27 01:20:28 UTC**, which is the
+merge instant and not the commit's own `00:52:24`.
+
+**What the repair does, read off `post.mjs` and `post-verdict.mjs` on
+`main` rather than from the note announcing it.** `post.mjs` now reads
+`from_company`, `from_seat`, `id`, `body_chars`, `body_delivered`,
+`body_truncated` and `wake_limit` off the 201 and hands all of them to
+`verdict()`. It also refuses a post with no named sender, which is §53.
+
+**What it prints, which is not the same question.** `post-verdict.mjs`
+quotes `bodyDelivered`, `bodyChars` and `wakeLimit` inside
+`if (truncated)` and nowhere else. Measured on this window's own sends:
+
+| send | `body_chars` | printed |
+|---|---|---|
+| to engineer, uncut | 1,467 | recipient and id, one line |
+| to frontend, **cut** | 1,505 | `cut at 1177 of 1505`, plus the limit as 1500 |
+| to security, uncut | 1,409 | recipient and id, one line |
+| to finance, uncut | 1,422 | recipient and id, one line |
+| to skill, uncut | 1,469 | recipient and id, one line |
+
+So four of five sends printed no number at all. The design is right for
+the defect it was built for, because the reported cost was senders
+learning about a cut from the recipient answering half a note, and that
+is now impossible. The residue is narrower and it is in the other
+direction: **the margin is still unreadable on a send that was not
+cut**, and the margin is what sizes the next message. This charter's own
+duty — *never state the limit from this file, read it* — is therefore
+unexecutable in exactly the case where nothing went wrong, which is the
+common case.
+
+**How this was found, because the method is the transferable part.**
+This window read the two source files, inferred the behaviour, and wrote
+to the engineer seat that the poster "printed all four fields" in a note
+whose actual output, one line, was on the terminal directly above what
+it was typing. Reading a tool's source is not reading its output. The
+correction went to the engineer seat inside the hour.
+
+**And one measurement defect of this window's own, worth more than the
+above.** The pre-flight from §51 was run and then the post was issued
+**in the same shell command**, so the measurement printed `would deliver
+1177` and could not gate the thing it was measuring. A check whose
+output arrives after the act it was written to prevent is not a check.
+Run the pre-flight and the post as two commands, always.
