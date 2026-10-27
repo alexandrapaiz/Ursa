@@ -2249,3 +2249,98 @@ Ours, not a paper's. The corroboration and the one true positive are the
 exo seat's and are credited as such. The composition, the load-bearing-key
 discriminator, the three-way split and the reserved-date verification are
 this run's, measured on `origin/main` at `55aeaf3` and on this tip.
+
+## 5ae. A count rule paid by convention is paid once, by the run that writes it, so the count gets a block and an exit status
+
+(Added 2026-10-27, after measuring §5u's own rule one day and two runs
+after it was written.)
+
+§5u found a derived count going stale beside the thing it is derived
+from, named the general form, and closed with the remedy: have the tool
+compute it, or have the tool check it, never have the author remember it.
+Then it left the check unbuilt, deliberately and with a reason, and filed
+a ledger entry proposing the shape. This section is what the next
+measurement of those same files found, and the finding is not that a seat
+forgot.
+
+**Measured on this tip's parent, 2026-10-27.** Nine of the ten trigger
+tests state a near-miss budget. Eight of the nine stated one that
+disagreed with the §5c denominator in the same breath, seven saying "the
+budget is eight near misses" and one "ten", each of them in a sentence
+whose next clause says "and this skill has nine neighbours". The one
+correct sentence belongs to the newest skill, whose own landing run wrote
+it, which is the shape §5u already named for the headers one layer up.
+Separately, three of the ten rows of `skills/README.md` stated a ref count
+that was wrong, by one, by four and by five. Every receipt guard was green
+over all of it, for the reason §5u gives: a count about `skills/` cites
+nothing, so nothing fingerprints it.
+
+**The part that makes this a different section rather than a repeat.** The
+run that paid §5u's debt had its hand on the exact sentence. Commit
+`5e6bed9`, whose message is "pay 5u's count debt", edits
+`attributing-a-deleted-span/TRIGGER-TEST.md` and changes `has eight
+neighbours` to `has nine neighbours` inside the sentence that opens "The
+budget is eight near misses", leaving that number alone. One sentence, two
+derived numbers, one commit, one of them corrected. The same edit landed
+in six other files. So the failure is not reach and it is not
+forgetfulness. It is that **a convention is applied to the number the
+author is thinking about**, and a sentence carrying two derived numbers
+will keep the one nobody is thinking about.
+
+So, three rules, and the first two are cheap.
+
+1. **State a derived count once, in a place a tool reads.** Every
+   `TRIGGER-TEST.md` opens with a fenced `counts` block holding
+   `prompts`, `should-fire`, `near-misses` and `neighbours`, and the
+   index's `Refs` column holds the ref count. `node
+   skills/trigger-coverage.mjs` measures all five from the files and
+   exits 1 on a disagreement, with no flag to ask it to, because a
+   published count that contradicts the library is a falsehood rather
+   than a judgement a caller can be mid-repair on.
+2. **No sentence states two derived numbers, and prose states none the
+   block already carries.** The argument belongs in the prose, the
+   arithmetic belongs in the block, and a sentence that needs a count to
+   make its point names its members instead, which is what §5u's own
+   repair did for two sentences and is the only part of it that survived
+   the next run.
+3. **A fenced block rather than a cleverer parser.** §5u's reason for
+   declining to build this holds and is why the shape is what it is: a
+   check that reads English cannot tell `skills/README.md`'s note about
+   "then five neighbours" or §5r's "15 of 30 ordered pairs" from a stale
+   claim, and both are correct as written and must stay. A block is
+   invisible to that problem by construction, so the check needs no
+   judgement and the prose stays free.
+
+**The general rule, which is about writing rules and not about counts.**
+A section here that names a mechanical repair and declines to build it has
+set a deadline on itself, and the deadline is the next run that touches
+those files. §5u's ledger entry was the right instinct and it was filed
+where proposals go rather than where work is assigned, so two runs passed
+through the files and paid the half of the rule that was visible in the
+diff they were already making. From now on: **a rule whose repair is
+mechanical either ships with the check, or ships with the check's owner
+and its deadline named in the same ledger entry.** Writing the rule down
+is the cheap half and it is the half that decays.
+
+**Ours, and the residue stated rather than hidden.** The measurement, the
+one-sentence-two-numbers cause and the block are this run's. Three counts a
+reader might trust that this check still does not see. The index's heading
+says "Eight areas" over ten skills, and that one is deliberate: an area is
+a judgement about where an edge falls, so no tool can derive it, and the
+heading now says in its own first sentence that nothing checks it. A count
+stated inside a `SKILL.md` body is not measured here either, and that is a
+different case rather than a gap of the same kind, because a body's counts
+are claims about records and are covered by the receipts. And the check
+cannot tell whether the number it measures is the number the sentence
+means, since the parser counts the prompts it can see while §5e decides
+which of them is a boundary. The last one is not closeable by a tool at
+all, and it is why the block holds four keys rather than one.
+
+This run also checked a count before repairing it and found the count
+right. The first draft of this section said the index's heading was stale
+and the first draft of the heading said so too, on the reading that ten
+skills cannot have eight areas. They can: the first three share one. The
+repair was written, measured against the eight area paragraphs, and
+withdrawn, which is the §5w discipline applied to a defect rather than to
+a ratio. A rule about derived counts is exactly the place where a
+confident recount is most likely to be the error.
