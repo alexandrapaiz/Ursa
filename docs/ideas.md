@@ -14962,10 +14962,50 @@ the owner to accept or reject.
   tools/gates/enumerate-verdicts.mjs`, which prints 23 branches and exits
   non-zero when one of them stops deriving its verdict from its findings.
 
-## Skill run 2026-10-27 (message) — opened
+## Skill run 2026-10-27 (message)
 
 - Run start. `NEON_RO_URL` is absent in this run's environment, so per
   charter §Data access there is no silver extraction this run. The lane is
   the no-database half: extract prompt, skill format, trigger tests,
   library rendering, plus the two dead drafts this seat left behind
   (#566, #569) which are mine to resolve before I stop.
+- **Ledger, for the engineer: step 4 of this charter has no surface in this
+  repository.** The charter asks each run to check that `site/skills`
+  parsing handles the frontmatter it ships and to flag rendering gaps here
+  rather than editing the site. There is no `site/` in Ursa and nothing
+  under `ursa-minor/app` reads `skills/`: the app is a record viewer. So
+  the library's frontmatter has no renderer to be compatible with, which
+  means the `version`, `status`, `provenance` and `validated` fields are
+  specified and guarded and have never been displayed to anyone. This is
+  not a defect to repair blind. It is a question for whoever owns the
+  Minor app: is the skill library a published surface at all, or is it an
+  internal artifact whose reader is a seat with a checkout? The answer
+  decides whether §6 of `prompts/skill-extract.md` is a live contract or a
+  dead one, and no run of this seat can answer it, because the site is not
+  this seat's to write. Raised here rather than silently skipped, which is
+  what three weeks of runs have done with step 4.
+- **Worth stealing, and it was already ours.**
+  `ursa-major/src/prose-bound-count.test.ts` is the engineer seat's gate on
+  an English word counting a derived set, and its header is the best
+  statement of this defect class anywhere in the repository: deriving the
+  constant "fixed every place that could read a constant. It fixed nothing
+  in prose, because a sentence cannot import a module, and prose is where
+  the stale number was in the first place." It also records that two seats
+  had written the drift down seven days before anybody failed a test over
+  it, and names the reason: "noticing produced a note and not a failing
+  test, and a note is read by whoever goes looking for it." That sentence
+  is the argument for this run's §5af shipping with an exit status instead
+  of a rule, and for §5ae's general rule one run earlier. Two seats
+  arrived at the same finding in two directories within ten days, which
+  suggests the right home for it is `docs/standards/`, not two prompt
+  files. Not this seat's to put there.
+- **What that gate deliberately leaves to us, and the line is the useful
+  part.** It puts `skills/` out of its own scope partly because a skill's
+  count is often a quotation of another file's prose, and "correcting a
+  quotation to match today's count would falsify the record of what the
+  quoted file said." E29 in this library is exactly that: a skill quoting
+  a document that was wrong, correctly. So the two gates had to meet
+  without overlapping, and the trigger this run chose, the library naming
+  itself as a set, is what keeps them apart. Any future count check over
+  `skills/` should inherit that trigger rather than reach for a number
+  pattern.
