@@ -15081,6 +15081,13 @@ the owner to accept or reject.
   left to whoever is unlucky, because §5ae's own ledger entry proposing the
   count check sat unbuilt for one run and two sections while two runs paid
   the visible half of it, which is the cost that rule exists to stop.
+- Built 2026-10-27 by the run after this one, as §5ah: the graph printed
+  first as asked, zero of seven amended sections carrying a back pointer,
+  which is what decided that the line is generated rather than required.
+  `node skills/trigger-coverage.mjs --amendments` prints the graph and exits
+  1; `--write` generates the paragraph. The status is left where it is
+  because this entry is `proposed` and pm.md §4 gives `proposed` to the owner
+  and only `accepted` to the building seat.
 - Status: proposed
 
 ### 2026-10-27 — The board should derive `from_seat` from the token that posted, because a client-side guard cannot bind the other four companies
@@ -15287,4 +15294,42 @@ the owner to accept or reject.
   holding company if the rule turns out to be a hard count that the field name
   misdescribes.
 - Cost: $0, plus three permanent self-addressed rows on the board.
+- Status: proposed
+
+### 2026-10-27 (skill) — The README states counts of the library in prose, and the detector built for skill bodies finds nine of them and none of the defect
+
+- Trigger: measured while building §5ah, not recalled. `skills/README.md` said
+  the coverage tool "reads all 30 ordered pairs". It reads 90, and has since
+  the library reached ten skills, because the figure is `n(n-1)` and the
+  sentence was written when the library held six. Three count rules now scope
+  three surfaces, the trigger tests and the index table under §5ae, the
+  `SKILL.md` bodies under §5af, and `prompts/skill-extract.md` under §5ag.
+  The README's prose is the fourth and is scoped by none of them, even though
+  the index table inside the same file is the single most-checked surface of
+  the four.
+- What: the obvious repair is to point `libraryCountsInBody` at
+  `skills/README.md`, and this run ran that before proposing it. It returns
+  nine hits and the live defect is not one of them, because the detector
+  matches spelled number words and this one was written as a digit. Of the
+  nine, two are the file's own dated record of what the tool scored when it
+  was first run, one is the quotation of §5e that §5af's rule exists to
+  protect, and the rest are prose about numbers rather than claims about the
+  library. So the finding is not "widen the scope". It is that the README is a
+  different kind of document from a skill body: its job includes recording and
+  quoting counts, so the discriminator that works on a body, which is that any
+  present-tense count of the library is wrong there, is false here. What is
+  wanted is the §5ag shape rather than the §5af shape, which is one gradeable
+  construct with a computable denominator, not a pattern over prose.
+- First step: list every present-tense claim in `skills/README.md` whose
+  subject is the library and whose value the tool already computes, as this run
+  did by hand for one of them, and see whether more than one construct repeats.
+  One construct repeating twice is a check. One construct appearing once is a
+  hand repair and a note, which is what this run did, and the entry should then
+  be closed as answered rather than built. The measurement decides, and it is
+  half a day.
+- Cost: $0
+- Owner and deadline, per §5ae's general rule: this seat, and the next run of
+  this seat that edits `skills/README.md`. Named rather than left open because
+  §5ag's own entry sat one run before it was built and said in its own text
+  that naming an owner is what stops that.
 - Status: proposed
