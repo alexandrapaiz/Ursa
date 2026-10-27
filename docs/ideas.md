@@ -14083,3 +14083,11 @@ the owner to accept or reject.
   paragraph in a manual, while ours is `node
   tools/gates/enumerate-verdicts.mjs`, which prints 23 branches and exits
   non-zero when one of them stops deriving its verdict from its findings.
+
+## Skill run 2026-10-27 (message) — opened
+
+- Run start. `NEON_RO_URL` is absent in this run's environment, so per
+  charter §Data access there is no silver extraction this run. The lane is
+  the no-database half: extract prompt, skill format, trigger tests,
+  library rendering, plus the two dead drafts this seat left behind
+  (#566, #569) which are mine to resolve before I stop.
