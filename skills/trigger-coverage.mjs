@@ -71,6 +71,13 @@ import { declaredRefs } from './citing-files.mjs'
 
 const SKILLS_DIR = new URL('.', import.meta.url).pathname.replace(/\/$/, '')
 
+/** The format specification, which §5ag puts in this guard's scope because it
+ *  is the one file stating counts of the library that §5ae and §5af between
+ *  them never covered. Resolved from this file rather than from the process
+ *  cwd, for the reason §5v gives about a guard asking its clone a question. */
+const SPEC_REL = 'prompts/skill-extract.md'
+const SPEC_PATH = join(SKILLS_DIR, '..', SPEC_REL)
+
 /**
  * The floor above which one prompt is "the sibling's own trigger prompt".
  *
@@ -521,6 +528,126 @@ export function bodyCountDefects(library) {
   return out
 }
 
+/** The spelled counts this guard can grade, as a word-to-number map. `one` is
+ *  in, unlike in LIBRARY_COUNT, because here the subject is pinned by a slug
+ *  and "`<slug>` has one neighbour" cannot be the pronoun. */
+const SPELLED = {
+  one: 1, two: 2, three: 3, four: 4, five: 5, six: 6,
+  seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12,
+}
+
+/**
+ * A named skill's neighbour count, stated in the present tense, where the noun
+ * ends its clause. Three parts, and each one is an exclusion paid for by a case
+ * in the control set below rather than chosen for convenience.
+ *
+ *   * The backticked slug. This is what makes the construct gradeable at all,
+ *     and it is the reason this is not the prose-number check §5ae rule 3
+ *     declined to build. The slug fixes the subject, the denominator comes from
+ *     the directory listing, and nothing is left to guess at. `prompts/skill-
+ *     extract.md` §5u's "every skill has nine neighbours" has no slug and is
+ *     not graded here; its subject is whichever skill the paragraph is about.
+ *   * `has`, not `had`. §5u's measured table is headed "every skill had seven
+ *     neighbours" and is the record of a tree that no longer exists. Correcting
+ *     it would falsify the record, which is the line
+ *     `ursa-major/src/prose-bound-count.test.ts` drew and §5af restated.
+ *   * The clause boundary after the noun. §5r's amendment says
+ *     "`adjudicating-uncertain-spans` has two neighbours sharing no file with
+ *     it at all", which is a count of a subset and is correct. A restrictive
+ *     modifier means a subset, and a subset has no computable denominator, so
+ *     §5ae rule 2 covers it instead: name the members, which that sentence
+ *     does.
+ *
+ * Two of those three cost something to get right, and both were found by this
+ * run's own control set rather than reasoned about in advance.
+ *
+ *   * **A hard line wrap is not a clause boundary.** The first draft ended the
+ *     lookahead with `\s*$` under the `m` flag, so a restrictive modifier that
+ *     happened to wrap onto the next line read as the end of a clause. It
+ *     flagged §5ag's own quotation of §5r, which is the correct sentence, in
+ *     the paragraph explaining why that sentence is correct. Prose in this
+ *     repository is hard-wrapped at about 72 columns, so end-of-line carries no
+ *     grammatical information at all and the lookahead now requires real
+ *     punctuation or a conjunction.
+ *   * **A quotation mark is not a clause boundary either, deliberately.** §5af
+ *     drew the line this guard must not cross, which is that correcting a
+ *     quotation to match today's number falsifies the record of what the quoted
+ *     file said. §5ag quotes §5e's stale sentence in order to report it, so a
+ *     guard that policed quotations would demand the repair be written as a
+ *     falsehood. `"` is therefore absent from the boundary class on purpose
+ *     rather than by oversight.
+ */
+const NEIGHBOUR_CLAIM = new RegExp(
+  '`([a-z][a-z0-9-]+)`' +            // the slug, backticked
+  '\\s+has\\s+(' + Object.keys(SPELLED).join('|') + ')' +
+  '\\s+(neighbours?)' +
+  '(?=[,.;:)]|\\s+(?:and|but|so|which|because|rather)\\b)',
+  'g',
+)
+
+/**
+ * Every present-tense neighbour count in `prompts/skill-extract.md` that
+ * disagrees with the live denominator, as `{ file, line, slug, said, measured,
+ * quote }`.
+ *
+ * WHY THIS FILE. §5ae put the trigger tests and the index under an exit status
+ * and §5af put the ten `SKILL.md` bodies under one, which between them is every
+ * markdown file in `skills/`. It is not every file that states a count of the
+ * library, because both rules are written in `prompts/skill-extract.md` and
+ * that file states counts of the library too. Nothing scoped the file the rules
+ * are written in. See §5ag.
+ *
+ * WHY IT GRADES RATHER THAN REFUSES, unlike `bodyCountDefects` one layer down.
+ * There the subset a sentence meant was a §5e judgement with no number to
+ * compare against. Here the slug names the subject and `neighbours` is the §5c
+ * denominator, which `COUNT_KEYS` already computes, so there is a right answer
+ * and the repair is to copy it in.
+ *
+ * Measured on this tip's parent, 2026-10-27. The pattern finds eight
+ * occurrences across this file and the ten trigger tests. One is wrong: §5e's
+ * worked example said "`distilling-a-tuning-record` has three neighbours",
+ * which was the whole library on 2026-10-05 and is nine now. The other seven
+ * are the control set, and the three exclusions above are each there for one of
+ * them. The cause is new: §5r's own header says it amends §5e, and it amended
+ * the rule 750 lines further down while leaving the worked example standing
+ * with the superseded counts in it.
+ */
+export function specNeighbourDefects(specText, library) {
+  if (!specText) return []
+  const out = []
+  const measured = COUNT_KEYS.neighbours(null, library)
+  for (const m of specText.matchAll(NEIGHBOUR_CLAIM)) {
+    const [, slug, word, noun] = m
+    if (!library.some((s) => s.slug === slug)) continue
+    const said = SPELLED[word]
+    if (said === measured) continue
+    const line = specText.slice(0, m.index).split('\n').length
+    out.push({
+      file: SPEC_REL, line, slug, said, measured,
+      quote: `\`${slug}\` has ${word} ${noun}`,
+    })
+  }
+  return out
+}
+
+/** Why a spec neighbour count is wrong, and the one cause this guard knows.
+ *  One condition, so one explanation, per §5z. */
+export function explainSpecNeighbours(defects) {
+  if (!defects.length) return []
+  return [
+    'A neighbour count in prompts/skill-extract.md is the §5c denominator written by',
+    'hand in the file that defines it, so it goes stale the moment a skill lands and',
+    'no receipt guard is ever red about it, because a count of skills/ cites no file.',
+    'The cause this guard was built from is not a seat forgetting. A later section',
+    'amended the rule and said so in its own header, and the worked example under the',
+    'amended section kept the counts the amendment superseded. A diff cannot show',
+    'that, because the run writing the amendment never opens the section it amends.',
+    'The repair is not a recount and it is not an update: name the members, as slugs,',
+    'per §5ae rule 2, and if the sentence is a record of an older library say so with',
+    'its date and put it in the past tense. See §5ag.',
+  ]
+}
+
 /** Why a body count is refused, and what to write instead. One condition, so
  *  one explanation, per §5z. */
 export function explainBodyCounts(defects) {
@@ -768,7 +895,22 @@ function main(argv) {
     console.log(`${d.file}:${d.line} counts the library instead of naming it` +
       ` (${d.counts.join(', ')}): "${d.quote}…"`)
 
+  // The same fact again, read in the file that states the rule rather than in
+  // a file the rule governs. §5ag is why this is a third surface and not a
+  // repeat of the two above.
+  let specText = null
+  try { specText = readFileSync(SPEC_PATH, 'utf8') } catch { specText = null }
+  const specCounts = specNeighbourDefects(specText, library)
+  for (const d of specCounts)
+    console.log(`${d.file}:${d.line} says "${d.quote}", the library says ${d.measured}`)
+
   const shape = missingSkill.length + mislabelled.length + indexedMissing.length + unlisted.length
+  if (specCounts.length && !shape) {
+    console.log(`${specCounts.length} neighbour count${specCounts.length === 1 ? '' : 's'} in ` +
+      `${SPEC_REL} disagree${specCounts.length === 1 ? 's' : ''} with the library, listed above.`)
+    for (const line of explainSpecNeighbours(specCounts)) console.log(line)
+    return 1
+  }
   if (bodyCounts.length && !shape) {
     console.log(`${bodyCounts.length} skill body paragraph${bodyCounts.length === 1 ? '' : 's'} ` +
       `count${bodyCounts.length === 1 ? 's' : ''} the library, listed above.`)

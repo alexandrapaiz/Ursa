@@ -20,7 +20,9 @@ import {
   explainShape,
   libraryCountsInBody,
   explainShortfall,
+  explainSpecNeighbours,
   parseTriggerTest,
+  specNeighbourDefects,
   similarity,
 } from './trigger-coverage.mjs'
 
@@ -542,4 +544,70 @@ test('an index with no counts block is reported as the absence, like a trigger t
   // And omitted entirely, which is what every caller before this run passed,
   // asks nothing about the index at all.
   assert.equal(countDefects(lib, []).length, 0)
+})
+
+// §5ag: the spec file is the third surface for one fact, and every case below
+// is one of the eight occurrences the pattern found in the live tree on
+// 2026-10-27. The defect is the first; the other seven are the control set, and
+// the three exclusions in NEIGHBOUR_CLAIM exist for them.
+const nine = () => ['a-skill', 'b-skill', 'c-skill', 'd-skill', 'e-skill',
+  'f-skill', 'g-skill', 'h-skill', 'i-skill', 'j-skill']
+  .map((slug) => ({ slug, trigger: null, refs: 0, shouldFire: [], nearMisses: [] }))
+
+test('a named skill\'s stale neighbour count in the spec is graded against the library', () => {
+  const spec = 'Some rule.\n\n`a-skill` has three neighbours and is not a topic.\n'
+  assert.deepEqual(specNeighbourDefects(spec, nine()).map((d) => [d.line, d.slug, d.said, d.measured]),
+    [[3, 'a-skill', 3, 9]])
+})
+
+test('the live count is not a defect, which is what seven of the eight occurrences are', () => {
+  assert.deepEqual(specNeighbourDefects('`a-skill` has nine neighbours: every other skill.', nine()), [])
+})
+
+test('a subset count is not the denominator, so a restrictive modifier is not graded', () => {
+  // prompts/skill-extract.md §5r, which is correct as written and names its
+  // two members. There is no computable denominator for a subset, so §5ae
+  // rule 2 covers it instead of this check.
+  assert.deepEqual(specNeighbourDefects(
+    '`a-skill` has two neighbours sharing no file with it at all, b and c.', nine()), [])
+})
+
+test('a hard line wrap is not a clause boundary, which is the bug the control set found', () => {
+  // The first draft matched `\s*$` under the m flag and flagged this, the
+  // correct sentence, inside the paragraph explaining that it is correct.
+  assert.deepEqual(specNeighbourDefects(
+    '`a-skill` has two neighbours\nsharing no file with it at all.', nine()), [])
+})
+
+test('the past tense is a record of a tree that is gone and is left alone', () => {
+  assert.deepEqual(specNeighbourDefects('`a-skill` had seven neighbours, per the table.', nine()), [])
+})
+
+test('a count with no slug has no subject this check can pin, so it is not graded', () => {
+  assert.deepEqual(specNeighbourDefects('and this skill has nine neighbours, which is the point.', nine()), [])
+  assert.deepEqual(specNeighbourDefects('a skill with two neighbours has two boundaries.', nine()), [])
+})
+
+test('a quotation is not policed, because correcting one falsifies the record', () => {
+  // §5af's line, drawn from the product side in prose-bound-count.test.ts:
+  // §5ag has to quote §5e's stale sentence in order to report it.
+  assert.deepEqual(specNeighbourDefects(
+    '§5e said "`a-skill` has three neighbours", which the tool computes as nine.', nine()), [])
+})
+
+test('a slug the library does not hold is not this check\'s business', () => {
+  // ursa-pm/2026-10-08-message-skill is the shape: a name that looks like a
+  // slug and is not one. The library listing is the authority, not the pattern.
+  assert.deepEqual(specNeighbourDefects('`not-a-skill` has three neighbours, apparently.', nine()), [])
+})
+
+test('an unreadable spec is this check with nothing to read, not a clean spec', () => {
+  assert.deepEqual(specNeighbourDefects(null, nine()), [])
+})
+
+test('the spec-neighbour explanation names the amended-section cause and refuses a recount', () => {
+  const said = explainSpecNeighbours([{ file: 'f', line: 1, slug: 'a', said: 3, measured: 9, quote: 'q' }]).join(' ')
+  assert.match(said, /amended the rule and said so in its own header/)
+  assert.match(said, /not a recount/)
+  assert.deepEqual(explainSpecNeighbours([]), [])
 })
