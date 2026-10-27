@@ -8,6 +8,7 @@
 //   node tools/registers/check-ids.mjs --next ADR --heads     # the allocator
 //   node tools/registers/check-ids.mjs --json out.json        # the findings as data
 //   node tools/registers/check-ids.mjs --no-fetch --heads     # use the refs already here
+//   node tools/registers/check-ids.mjs --repo <dir> --base main  # another checkout
 //
 // Exit 0 every identifier is defined once and no burned one is reissued.
 // Exit 1 a collision a seat can repair. Exit 2 either a collision only the
@@ -43,8 +44,6 @@ import { fileURLToPath } from 'node:url'
 import { renderVerdict } from '../gates/verdict-shape.mjs'
 import { manifestFault, manifestUnusable, scopeUnreadable, verdict } from './id-verdict.mjs'
 
-const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const MANIFEST_PATH = join(REPO_ROOT, 'tools/registers/id-namespaces.json')
 const argv = process.argv.slice(2)
 
 const flag = (name) => argv.includes(name)
@@ -53,9 +52,18 @@ const value = (name) => {
   return i === -1 ? undefined : argv[i + 1]
 }
 
+// `--repo` exists so the scan itself is testable. The manifest, the registers
+// and the refs all come from one checkout, and pointing all three at a fixture
+// repository is the only way to drive the two scan rules -- one identifier with
+// two texts, and one text twice inside one ref -- without committing a
+// collision to this repository on purpose. It is the same escape hatch
+// `tools/ledger/check-attributes.mjs --repo` has, for the same reason.
+const REPO_ROOT = value('--repo') ?? resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
+const MANIFEST_PATH = join(REPO_ROOT, 'tools/registers/id-namespaces.json')
+
 if (flag('--help') || flag('-h')) {
   console.log(
-    'usage: check-ids.mjs [--base <ref>] [--heads] [--no-fetch] [--next <NAMESPACE>] [--json <path>]',
+    'usage: check-ids.mjs [--base <ref>] [--heads] [--no-fetch] [--next <NAMESPACE>] [--json <path>] [--repo <dir>]',
   )
   process.exit(0)
 }
@@ -129,7 +137,7 @@ try {
 }
 
 if (wantHeads) {
-  if (!flag('--no-fetch')) {
+  if (!flag('--no-fetch') && value('--repo') === undefined) {
     try {
       git('fetch', '--quiet', 'origin', '+refs/pull/*/head:refs/prs/*')
     } catch (error) {
@@ -141,23 +149,39 @@ if (wantHeads) {
       )
     }
   }
-  let open
-  try {
-    open = JSON.parse(
-      execFileSync('gh', ['pr', 'list', '--state', 'open', '--limit', '300', '--json', 'number'], {
-        encoding: 'utf8',
-      }),
-    )
-  } catch (error) {
-    finish(
-      scopeUnreadable({
-        code: 'OPEN_SET_UNKNOWN',
-        detail: `gh pr list failed, so the set of open heads is unknown and silence would read as clean: ${String(error.message).split('\n')[0]}`,
-      }),
-    )
+  // WHERE THE OPEN SET COMES FROM, and why it is two sources rather than one.
+  // `gh` speaks about the repository its own working directory belongs to, so
+  // in `--repo` mode it would answer about THIS repository while the refs are
+  // read from another one, and the two would disagree silently. So a named
+  // checkout contributes the `refs/prs/` refs it actually carries, and only
+  // the default checkout asks the forge what is open. The difference matters:
+  // the forge's answer is authoritative about openness and the local refs are
+  // not, which is exactly why a missing ref is a fault below rather than a
+  // branch that is quietly skipped.
+  let numbers
+  if (value('--repo') !== undefined) {
+    numbers = git('for-each-ref', '--format=%(refname)', 'refs/prs/')
+      .split('\n')
+      .filter((l) => l !== '')
+      .map((l) => Number(l.replace('refs/prs/', '')))
+  } else {
+    try {
+      numbers = JSON.parse(
+        execFileSync('gh', ['pr', 'list', '--state', 'open', '--limit', '300', '--json', 'number'], {
+          encoding: 'utf8',
+        }),
+      ).map((pr) => pr.number)
+    } catch (error) {
+      finish(
+        scopeUnreadable({
+          code: 'OPEN_SET_UNKNOWN',
+          detail: `gh pr list failed, so the set of open heads is unknown and silence would read as clean: ${String(error.message).split('\n')[0]}`,
+        }),
+      )
+    }
   }
   const missing = []
-  for (const { number } of open) {
+  for (const number of numbers) {
     const ref = `refs/prs/${number}`
     try {
       git('rev-parse', '--verify', '--quiet', `${ref}^{commit}`)

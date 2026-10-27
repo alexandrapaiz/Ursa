@@ -1,5 +1,5 @@
 // Does the enumerator detect the defect it was built for, and does it stay
-// quiet on the five gates that are already right?
+// quiet on the six gates that are already right?
 //
 // THE ONE TEST THAT MATTERS IS `the historical defect`. Four gates passing
 // proves nothing on its own: a check that always returns "clean" passes four
@@ -46,7 +46,7 @@ function run(args = []) {
   }
 }
 
-describe('the five extracted gates, end to end', () => {
+describe('the six extracted gates, end to end', () => {
   it('exits 0 and reports every branch holding its properties', () => {
     const { code, json } = run()
     assert.equal(code, 0)
@@ -54,7 +54,7 @@ describe('the five extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 29 distinct causes with 35 probes, which is the number the text sweep could not see', () => {
+  it('reaches 33 distinct causes with 39 probes, which is the number the text sweep could not see', () => {
     const { json } = run()
     // 23 and 28 until 2026-10-27, then 27 and 32 earlier the same day. The
     // four added then were all post.mjs's: three sender branches, where a seat
@@ -73,9 +73,18 @@ describe('the five extracted gates, end to end', () => {
     // what is accepted, the same class of answer as a shallow clone, and it
     // takes its cause from the fault's own code so that nine distinct repairs
     // are not one name.
-    assert.equal(json.branches.length, 35)
+    //
+    // The four added after those are tools/registers/check-ids.mjs's, the
+    // register identifier gate. All four are findings branches and the shape
+    // is deliberately the same as check-closures.mjs's, because the question
+    // is the same one: some collisions a seat may repair and some are an
+    // owner's decision record. Its two ground branches, a manifest it cannot
+    // trust and a scope it cannot read, are not probed here; they are driven
+    // directly in tools/registers/id-verdict.test.mjs, because the probe
+    // space this file declares is a findings space.
+    assert.equal(json.branches.length, 39)
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
-    assert.equal(causes.size, 29)
+    assert.equal(causes.size, 33)
   })
 
   it('carries an exit 3, which no gate of the first four could have reached', () => {
@@ -307,7 +316,7 @@ describe('the historical defect, which is the only proof the checks can fail', (
   })
 })
 
-describe('the five committed gates, through the same functions', () => {
+describe('the six committed gates, through the same functions', () => {
   it('produce no findings when driven directly', () => {
     for (const gate of [CLOSURES, CONTRACT, ATTRS, SCAN, POST]) {
       assert.deepEqual(driveForTest(gate).findings, [], gate.id)

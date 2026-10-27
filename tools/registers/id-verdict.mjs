@@ -290,13 +290,13 @@ export const GATE = describeGate({
     [LOCUS.OWNER]: { noun: /(need|needs) the owner|the owner holds/ },
   },
   probes: [
-    { name: 'nothing found', findings: [], seen: { ids: 22, namespaces: 4 } },
-    { name: 'seat only', findings: [seat()], seen: { ids: 22, namespaces: 4 } },
-    { name: 'owner only', findings: [owner()], seen: { ids: 22, namespaces: 4 } },
+    { name: 'nothing found', findings: [], seen: { ids: 22, namespaces: 4, refs: 16 } },
+    { name: 'seat only', findings: [seat()], seen: { ids: 22, namespaces: 4, refs: 16 } },
+    { name: 'owner only', findings: [owner()], seen: { ids: 22, namespaces: 4, refs: 16 } },
     {
       name: 'both loci',
       findings: [seat(), owner(), owner('BURNED_REISSUED')],
-      seen: { ids: 22, namespaces: 4 },
+      seen: { ids: 22, namespaces: 4, refs: 16 },
     },
   ],
 })
