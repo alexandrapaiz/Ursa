@@ -33,10 +33,11 @@
 //    `engineer/...-brie-fin-g` and `ursa-pm/...-staf-fin-g`; `test("fe|frontend")`
 //    matches `engineer/...-li-fe-span` and `hq/company-mani-fe-st`;
 //    `test("sec|security")` matches `chair/vendor-pm-sec-tion-22`; `test("pm")`
-//    matches seven branches of four other seats. Over all 578 pull request
-//    branches of this repository: anchoring to the first path segment gives 0
-//    false positives and 0 false negatives for all eleven seats, where the bare
-//    substring gives 0 false negatives and 16 false positives across six seats.
+//    matches seven branches of four other seats. Anchoring to the first path
+//    segment is exact in both directions for all eleven seats, where the bare
+//    substring loses none of a seat's own and claims a sibling's. The counts
+//    and the corpus they were graded over live in `--audit` and in no comment,
+//    charter or JSON field — see the note on that mode below for why.
 //
 //    The direction matters. The sweep's prescribed action on anything it prints
 //    is "yours to resolve before you stop" — absorb it, ready it, or close it.

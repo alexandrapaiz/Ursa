@@ -268,9 +268,24 @@ node tools/seat/own-prs.mjs finance --drafts     # add --require-empty to gate o
 Two reasons it is written `^([a-z0-9-]+-)?(fin|finance)/`
 and not `fin|finance`. First, a bare substring matches
 ordinary English inside another seat's branch name:
-measured over the 540 distinct pull request branches of this repository,
-the bare form claims **16** branches that belong to another seat and the
-anchored form claims **0**, with neither losing one of its own. Second,
+graded against ground truth over every pull request branch this
+repository has had, the bare form claims branches that belong to another
+seat and the anchored form claims none, with neither losing one of its
+own. **Do not take that from this sentence; the numbers are not written
+here on purpose.** One command prints them with the denominator they
+were measured over, and exits non-zero if the anchored form has
+regressed:
+
+```bash
+node tools/seat/own-prs.mjs --audit
+```
+
+The count used to be a literal in this paragraph, and on 2026-10-27 the
+eleven charters said one number, `tools/seat/branch-patterns.json` said
+a second, and the repository was a third — because the denominator grows
+every time any seat opens a pull request, so it was stale in whichever
+file was edited last. A measurement whose value changes without anyone
+touching it cannot live in prose. Second,
 the sweep's instruction on anything it prints is *resolve it before you
 stop*, so here a false positive does not add noise — it tells this seat
 to close a sibling's live draft.
