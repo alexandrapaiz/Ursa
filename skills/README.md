@@ -398,6 +398,26 @@ it in. Two mechanics a run adding the seventh skill will meet:
   nothing is reported as unclassified rather than guessed at, since a
   near miss filed as a should-fire prompt inflates coverage.
 
+Since 2026-10-27 the same command checks the counts this library states
+about itself, in three places: the `counts` block at the head of each
+trigger test, the `Refs` column in the table above, and the `skills` key
+in the block under "Eight areas". Each is measured from the files and a
+disagreement exits 1 with no flag to ask for it, because a published
+count that contradicts the library is a falsehood rather than a
+judgement a caller can be mid-repair on.
+
+It also refuses one thing rather than measuring it. **A skill body may
+not count the library.** A paragraph of a `SKILL.md` that names the
+skills as a set states no number; it names the siblings, as slugs. There
+is nothing for the tool to compare against, because which subset a
+sentence means is a `prompts/skill-extract.md` §5e judgement and no
+parser makes it, and there is no need for one, because naming the
+members has a determinate repair and leaves a sentence that cannot go
+stale. Two of the five paragraphs the rule was written against said a
+skill sits across a handoff from the library as it stood the day that
+skill landed, wrong by four and by five, while the `neighbours` key in
+the same directory was right and checked by this same tool.
+
 ## When main moves under the library
 
 ```

@@ -2344,3 +2344,129 @@ repair was written, measured against the eight area paragraphs, and
 withdrawn, which is the §5w discipline applied to a defect rather than to
 a ratio. A rule about derived counts is exactly the place where a
 confident recount is most likely to be the error.
+
+## 5af. A count of the library inside a skill body is the one residue §5ae declared safe, and two of the five were already wrong
+
+(Added 2026-10-27, by the run after the one that wrote §5ae, measuring the
+residue §5ae stated rather than the rule it built.)
+
+§5ae built the exit status §5u had proposed and declined to build, over
+the trigger tests and the index, and closed by naming three counts the
+check still does not see. One of the three was dismissed rather than
+listed: "a count stated inside a `SKILL.md` body is not measured here
+either, and that is a different case rather than a gap of the same kind,
+because a body's counts are claims about records and are covered by the
+receipts."
+
+That is true of every body count about a record, and false of the
+subclass that counts the library. A count of the library cites no file,
+so no fingerprint reaches it and no receipt guard can be red about it,
+which is the same sentence §5u wrote about the trigger-test headers one
+layer up.
+
+**Measured over the ten bodies, 2026-10-27.** Five paragraphs name the
+skills as a set. All five stated a count. Two were wrong.
+`adding-a-bound-to-the-record-gate` said it sits across a handoff from
+"all four", and `clearing-a-record-for-release` from "all five", each
+being the library as it stood on the day that skill landed, six and four
+skills ago. In both directories the `counts` block of `TRIGGER-TEST.md`
+said `neighbours: 9` and was checked, by the same tool, on the same run.
+Two files, one fact, one of them guarded.
+
+**The third case, which is a cause neither §5u nor §5ae names.**
+`quoting-a-number-from-an-outcome-record` said "It does not fire for
+producing a record, for choosing a subject, or for deciding the label on
+a span. Those are the two sibling skills." Three clauses, two skills, and
+it was right when it was written: the trial skill decided what a record
+covered, so two of the three clauses were one sibling. Then the tenth
+skill landed and took the subject question over, and the count became
+wrong without the sentence being touched and without the number it names
+being the number that changed. So a derived count can go stale in a third
+way: not because the library grew under it, and not because the author
+fixed the other number in the sentence, but because **the referent of one
+clause moved to a new skill.** Nothing in a diff shows that. The repair is
+the same one.
+
+**The rule.** A paragraph of a `SKILL.md` that names the library states no
+count of it. It names the siblings, as slugs. `node
+skills/trigger-coverage.mjs` refuses the construct and exits 1, and
+`skills/README.md` documents it under "Whether a skill ever fires".
+
+Three things about the shape of that check, because each is a decision a
+reader would otherwise have to take on trust.
+
+1. **It refuses rather than measures,** unlike every other count that tool
+   checks. Which subset a sentence means is a §5e judgement: "the three
+   skills in the record area" was right while "four skills", one directory
+   over, meant every other skill in the library and was wrong by five. So
+   there is no number to compare against, and §5ae rule 2 already supplies
+   the repair that needs no comparison, which is to name the members. A
+   named sibling is also a slug a reader can check and a wrong one is
+   visible, so the repair converts an unguarded number into a guarded
+   name.
+2. **The paragraph is the unit, not the sentence.** §5ae's measured cause
+   is a sentence carrying two derived numbers where the one nobody is
+   thinking about survives the repair. Scoped to the sentence, this rule
+   reproduces that exactly: "Those four skills work on
+   `outcome_record.json`" names the library and the sentence after it,
+   "it sits across a handoff from all four", does not. A count in such a
+   paragraph that is about something other than the library is not a false
+   positive but a second thought, and its repair is a blank line, which is
+   this house's prose rule anyway.
+3. **The refusal is a closed set of spelled words,** not a number pattern,
+   and the exclusions are paid for rather than convenient. `one` is a
+   pronoun in this voice far more often than a count, and the paragraph
+   that produced this rule contains "This one works on the gate itself",
+   so including it would flag the sentence doing the repair. Digits are
+   excluded because a body's digits are version strings, percentages and
+   reference ids, and `0.5.0` in `adjudicating-uncertain-spans` is three
+   digit runs and no count. `both` is in, because a count of two is the
+   one this library has already published stale in prose.
+
+**The line this rule must not cross, and the seat that drew it from the
+other side.** `ursa-major/src/prose-bound-count.test.ts` is the engineer
+seat's gate on the same defect class in the product: a bound count
+written as an English word, checked against the derivation. Its header
+puts `skills/` out of its own scope for two reasons, and the second is the
+one that matters here. A skill's mentions of a count are often
+quotations of another file's prose, "which is the one category a gate
+like this must not police", because correcting a quotation to match
+today's number falsifies the record of what the quoted file said. This
+library's own E29 is exactly that: a skill correctly quoting a document
+that was wrong.
+
+This rule stays on the right side of that line by construction, because
+its trigger is the library naming itself. A paragraph quoting another
+file's count is only reachable if it also names the skills as a set, and
+no paragraph in the ten bodies does both. So the two gates meet without
+overlapping: the engineer's checks a count the product derives, and this
+one refuses a count the library makes about itself, and neither touches a
+count a skill is reporting on somebody else's behalf.
+
+**Ours, and the residue stated rather than hidden.** The measurement, the
+moved-clause cause and the refusal are this run's. The residue is a
+library count written in digits, which no paragraph in this library does
+and which rule 2 of §5ae covers in prose but no exit status covers.
+
+**The second instance, in §5ae's own residue paragraph.**
+`skills/README.md` said "Eight areas over ten skills, because the first
+three share one," and then: "The count is in the heading and nothing
+checks it ... an area is a judgement about where an edge falls and no tool
+can derive it." The disclaimer is correct about areas. The sentence it was
+written in carries the library's size as well, which is mechanical and
+checkable, and the disclaimer exempted it by standing next to it. That is
+§5ae's own one-sentence-two-numbers cause, inside §5ae's own statement of
+what it had chosen not to check, one run later. Both numbers now sit in a
+`counts` block, `skills` is measured, and `areas` is declared
+underivable in the block's own prose.
+
+**The general rule, which is about writing residue and not about counts.**
+§5ae's closing section was right to state what its check does not reach;
+that paragraph is why this one exists and was found in a day rather than
+in three weeks. What it got wrong is the form: it argued one of the three
+residues away instead of listing it. **A residue argued away is a residue
+nobody will measure, because the argument is what the next reader reads
+instead of the files.** So: state each residue as a thing the check does
+not see, in one line, with no verdict on whether it matters. The argument
+for why it is acceptable goes after the list, where it can be wrong
+without taking the item off it.

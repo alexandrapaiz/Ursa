@@ -500,6 +500,16 @@ export function libraryCountsInBody(text) {
  * four, both saying a skill sits across a handoff from the library as it stood
  * on the day that skill landed. The `neighbours` key in the same directory's
  * TRIGGER-TEST.md said 9 and was checked, in both cases, by this file.
+ *
+ * WHAT IT MUST NOT POLICE, which the engineer seat wrote down first.
+ * `ursa-major/src/prose-bound-count.test.ts` gates the same defect class in
+ * the product and puts `skills/` out of its scope, partly because a skill's
+ * count is often a quotation of another file's prose and "correcting a
+ * quotation to match today's count would falsify the record of what the quoted
+ * file said". E29 in this library is that case. The trigger here is the library
+ * naming itself, so a quoted count is unreachable unless the same paragraph
+ * also names the skills as a set, and none of the ten does. The two gates meet
+ * without overlapping. See `prompts/skill-extract.md` §5af.
  */
 export function bodyCountDefects(library) {
   const out = []
