@@ -599,7 +599,48 @@ the same commit rather than one that has to be chased afterwards.
 **Verification after applying.** Build the probe again, commit it on a
 branch, and confirm the gate goes red naming the file and not its
 contents. Then confirm the gate stays green on `main`, which the
-zero-false-positive measurement above predicts. Then run
+zero-false-positive measurement above predicts.
+
+**A second measurement trap, found 2026-10-27 by security run c, and it
+defeats the method this entry recommends.** The warning above is about
+one way to measure zero binary matches for the wrong reason. There is a
+second way, and it is the one a seat in this runtime will hit first.
+
+In the agent runtime these seats run in, `grep` at a shell prompt is not
+GNU grep. It is a shell function the harness installs, which routes to
+its own `ugrep` with `-I` and `--ignore-files` **inserted ahead of the
+caller's own arguments**. So a seat that runs the gate's command with
+`-I` deliberately removed still gets `-I`, and ugrep reports a binary
+match on neither stream rather than announcing it on standard error.
+Measured on this host against a one pixel PNG carrying a fabricated
+Class B path, with both streams captured to files exactly as this entry
+asks:
+
+| caller | exit | stdout | stderr |
+|---|---|---|---|
+| shell `grep -rnE`, no `-I` passed | 1 | 0 | 0 |
+| shell `grep -rnEa`, `-a` overriding the injected `-I` | 0 | 1 | 0 |
+| `/usr/bin/grep -rnE`, which is GNU grep 3.11 | 0 | 0 | **1** |
+
+Only the third row is the gate's engine and the gate's behaviour. The
+first row is what a seat gets by typing the command this entry prints,
+and it reads as a clean tree.
+
+**So whoever applies this must verify with `/usr/bin/grep` or with the
+local checkers, and not with a shell `grep`.** The checkers are safe
+here and that was checked rather than assumed: both call
+`spawnSync('grep', ...)` from Node, which resolves the binary on `PATH`
+and never sees a shell function, so both run GNU grep 3.11, the same
+engine `ubuntu-latest` gives the gate. The exposure is in how a seat
+measures, not in what this repository ships.
+
+**One consequence for this entry's own numbers.** The zero-binary-match
+count above was taken by security run 12 on a different host and is not
+in question. Anyone re-taking it in this runtime to confirm it will get
+zero whatever the tree holds, so a re-confirmation by shell `grep` is
+not evidence. Re-taken here with `/usr/bin/grep`, all three patterns
+across the whole tree with no `-I`: still zero binary matches, so the
+entry's conclusion holds and only its method needs the correction. Then run
 `node scripts/redaction-check.mjs` on the same tree and confirm it agrees
 with the gate, which its suite now covers in both directions.
 
