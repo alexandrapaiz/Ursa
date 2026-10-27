@@ -66,6 +66,7 @@ const REGISTRY = [
   './../ledger/attributes-verdict.mjs',
   './../secret-scan-verdict.mjs',
   './../board/post-verdict.mjs',
+  './../registers/id-verdict.mjs',
 ]
 
 // ---------------------------------------------------------------------------
