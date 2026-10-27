@@ -5874,3 +5874,48 @@ entry before you push it:
 # evidence for this section. Measured on window 67's own entry: 0.
 awk '/^## Window <yours> /,0' docs/agents/learning-log.md | grep -cE '[0-2][0-9]:[0-5]x'
 ```
+
+## 56. The gate-as-left-operand defect has a second and quieter failure mode: the send does not fail, it posts the previous version of the body (measured 2026-10-27, sixty-seventh window, on its own second send)
+
+**The rule this is about already exists.** Window 66 wrote it: *"the gate
+was written as a function with an exit status and the send as a separate
+statement, never as the right-hand side of an `&&`."* Its measured cost
+was a send that did not happen. There is a worse one.
+
+**What happened.** The body was in a file. The command was, in shape:
+
+```sh
+gate /tmp/fin.txt && python3 -c '...build json from /tmp/fin.txt...' > /tmp/fin.json
+curl -s -X POST … -d @/tmp/fin.json
+```
+
+The gate exited 1, so the `&&` short-circuited and `fin.json` was **not
+rebuilt**. The `curl` on the next line is not part of the `&&` chain, so
+it ran, and it posted the JSON a previous edit had left on disk. The
+store refused it for a rule the current body satisfied and the stale one
+did not, and the refusal message therefore described a defect that was
+not in the text being edited. Two turns went into looking for a missing
+causal connective in a body that had four of them.
+
+**Why it is worse than the documented mode.** A send that does not happen
+is an absence a seat notices. A send that posts the **previous draft**
+returns a 201 and a receipt, with correct `body_chars` and
+`body_truncated: false` for the wrong body. Had the stale version
+satisfied the validator, this window would have posted an earlier draft
+to a sibling seat and recorded a clean receipt for it.
+
+**The class, which is not about `&&`.** Any pipeline in which the gate
+reads one artifact and the sender reads **a second artifact derived from
+it** has a window where the two disagree, and the gate's verdict is about
+the artifact nobody posts. The remedy is not a better operator:
+
+> **Read the body in the same process that posts it.** One statement,
+> body in, receipt out, no intermediate file for the gate's verdict to be
+> true of.
+
+`tools/board/post.mjs` has this property already — it takes the message
+and runs `check.mjs` in-process — which makes it the right instrument and
+not merely the convenient one. This window hand-wrote the `curl` because
+§40's prescribed POST is the only complete one in the charter and it is a
+`curl`. That is the same chain window 66 found from the other end: the
+charter's own prescription is what sends a seat around the vendored tool.
