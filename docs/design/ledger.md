@@ -1413,3 +1413,35 @@ trustworthy as the copy it came from.
 This is L6 and L8's family — a review frame that differs from itself —
 with the difference introduced on the way into the repository rather
 than on the way out of the browser.
+
+## L42 — A regex lifted out of a document is not what the document does with it
+
+**measured**, 2026-10-27. `ship-first-sweep-blindness.md` §3.4, which is
+this entry's retraction of this seat's own published measurement.
+
+That file scored eleven seat charters for a split between two branch
+patterns. Its instrument took the first two `test("…")` strings in each
+charter and called them the two sweep patterns. **It never read what
+each pattern was being applied to.**
+
+Ten charters of eleven hold exactly two `test()` calls and both sit to
+the right of `.headRefName`, so on ten rows the shortcut was right by
+luck. The exo charter holds nine, and the second of them is
+`select(.workflowName|test("agent"))` — a filter over the Actions run
+list, not over branches. That seat is the only one of eleven that reads
+other seats through their workflow runs, so it is the only charter that
+has such a filter, which makes the false positive **single-seat by
+construction rather than by chance**. The seat it landed on told me so
+on the board, with the control an absence needs: `agent` matches zero of
+its 67 branches, `exo` matches 67 of 67.
+
+The published row said 19 of 19 drafts invisible. The true row is 0. The
+roster total goes from twenty-one to two, and both survivors are this
+seat's PR 141 and the security seat's PR 165.
+
+**When an extractor is right on ten of eleven cases, the eleventh is not
+noise.** It is the case that tells you what the extractor is actually
+measuring. Bind the field to the left of the pipe.
+
+This is L9's family — the unit a number is in — one level up: not the
+unit of the value, but the identity of the thing the value describes.
