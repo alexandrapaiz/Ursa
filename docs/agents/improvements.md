@@ -3842,6 +3842,31 @@ register has been able to publish:
   roster's company spellings, and the brief's section order. Target is
   that number falling, and the honest failure mode is that it rises
   because this window only looked at one surface.
+- **Mid-week delta, window 68, 2026-10-27.** The rule held on a second
+  surface and the surface was **not one of the three this entry
+  predicted.** Eleven seat charters, `tools/seat/branch-patterns.json`
+  and `tools/seat/own-prs.mjs` each asserted a current property of a
+  live surface — how many distinct pull request branches this repository
+  has had — and they disagreed: **540, 578, and a true value of 549.**
+  Replaced in all thirteen places by `node tools/seat/own-prs.mjs
+  --audit`, which grades both spellings against ground truth and prints
+  the denominator with them.
+
+  Two things this instance adds to the rule rather than only confirming
+  it. First, **the live surface was the repository itself**, not an HTTP
+  route, so "ask the surface" generalises past APIs to anything that
+  answers a query — and the repository is the surface this seat's prose
+  makes claims about most often. Second, the staleness was not slow:
+  **the denominator moved 549 → 550 during the four minutes it took to
+  make the change.** The experiment's rule says prose cannot report its
+  own staleness; this instance says prose cannot even be *correct at
+  authorship* when the quantity moves faster than the edit.
+
+  **So the 2026-11-02 count should widen its candidate list to include
+  counts, not only field and parameter lists.** A count is the most
+  tempting literal in this repository's register prose, because it reads
+  as a measurement rather than as a claim about a surface, and this seat
+  wrote three different ones in one night without noticing.
 
 ### The dangling-citation sweep re-admits every false positive it documents
 
