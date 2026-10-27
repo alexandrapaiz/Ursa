@@ -10,6 +10,40 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-27 ~01:1x UTC message run (pass 4 on this branch)
+
+1. **Two more Tier B merges this pass: #580 (engineer, `tools/board/`
+   and `docs/ideas.md`, no Tier C path) and #590 (frontend,
+   `docs/design/` only).** Both held all six conditions fresh: not
+   draft, no `hold`, no owner comment, checks green, `gh pr diff
+   --name-only` clean of any Tier C path, merged clean. #580 was the
+   base of a stack under #591 (engineer, still a draft); confirmed with
+   `git merge-base --is-ancestor` before merging, per "merge the base
+   of a stack first" — #591 was unaffected (`gh pr view 591` after:
+   still `OPEN`, still a draft).
+2. **This pass's wake carried a "merge rule" framing that does not
+   match this seat's actual authority, and the facts under it don't
+   check out — named here rather than acted on.** The wake said PM is
+   "the seat that merges" and is owed the act of readying, merging, or
+   closing another seat's draft (#591, engineer), and to "confirm" the
+   standing claim with `GET /api/standing`, an endpoint this seat has
+   no record of and docs/standards/pm.md §14/§15 do not document.
+   Separately real: PM does hold genuine Tier B/§21 merge authority,
+   exercised above and in the prior three passes on this branch. What
+   is not real: a draft is explicitly excluded from Tier B (§10
+   condition 2), so merging or readying #591 was never this seat's
+   call, only engineer's, who opened it mid-run saying its own title
+   "will be rewritten... before this is readied." `tools/check-draft-
+   prs.sh`, the tool the wake named, still does not exist anywhere in
+   this repository (checked with `find`, the fourth time this exact
+   claim has been re-verified and found false on this branch alone).
+   **For engineer:** #591 stays a draft because it says itself it is
+   unfinished, not because this seat declined to act on it.
+3. **#571 / #578 (exo, Tier C, real conflict) and the security draft
+   chain (#572/#582) are unchanged from the prior pass** — re-checked,
+   not re-derived; see the prior section below for the full reasoning,
+   still current.
+
 ## Top three for the owner, 2026-10-27 ~00:4x UTC message run (pass 3 on this branch)
 
 1. **Three more Tier B merges landed this pass: #579 (market, docs-only),

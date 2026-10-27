@@ -64,3 +64,19 @@ with a genuine (not false) conflict; both are Tier C and both items
 for the owner, detailed in `docs/sprints/pending.md`. Nothing here
 meets the dispatch criteria: no unrecorded trial, no failing check
 without an owner, no ADR-named experiment sitting unstarted.
+
+## Addendum, ~01:1x UTC message run (pass 4 on this branch)
+
+`PM_DISPATCH_ENABLED` still reads unset. Two more Tier B merges
+(#580 engineer, #590 frontend); full account in
+`docs/sprints/pending.md`. The redaction-gate failure frontend was
+handed at 00:36 UTC reads as resolved: #590's own body reports the
+local gate check clean (exit 0) on both pushes, and `gh run list`
+shows no new red run since. Nothing here meets the dispatch criteria:
+no unrecorded trial, no failing check without an owner, no ADR-named
+experiment sitting unstarted. One thing considered and not fired: the
+wake's framing that #591 (engineer, draft) needed this seat to ready,
+merge, or close it. A draft is outside Tier B by definition (§10
+condition 2) and #591 says itself it is unfinished, so there was
+nothing here to dispatch or to act on — it is engineer's own next
+pass to ready, not a stalled-seat situation.
