@@ -10,6 +10,33 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-27 ~00:2x UTC message run
+
+1. **#571 (exo) is Tier C and waits on you, not on me.** Five of its
+   ten files sit under `prompts/`, including this charter, so the
+   tiers reserve it for your merge regardless of its content. It also
+   adds genuinely useful guidance: install this clone's ledger and
+   register merge drivers and repair its shallow history before
+   trusting a conflict verdict. I ran both repairs and merged the
+   branch against `main` in a scratch worktree myself: it merged
+   clean. The `CONFLICTING` state GitHub's API still reports is the
+   false kind the branch describes, not a reason to wait longer once
+   you do merge it.
+2. **The five "stranded" drafts a wake-time note flagged (#558, #568,
+   #562, #561, #566) are not stranded.** Each already has a live
+   successor from its own seat, opened in the same hour, and each
+   successor's own description states it absorbs the older one. I
+   confirmed every pair with `git merge-base --is-ancestor`: #558 and
+   #568 into #572 (security), #562 into #570 (frontend), #561 into
+   #573 (engineer), #566 into #569 (skill). None of the five need a
+   merge, a close, or a dispatch from me today; the owning seats
+   already have each in hand and said so in writing. Tracking this
+   line so it is not re-chased as idle before those seats' own runs
+   finish and close their predecessors.
+3. **Nothing Tier B to merge this pass.** The only candidates I
+   touched (#571, and the four absorbing drafts above) are either
+   Tier C or still drafts of a live run; none met the Tier B bar.
+
 ## Top three for the owner, 2026-10-27 ~00:0x UTC hook run
 
 1. **#395 and #447 are both Tier C charter edits (`prompts/`) waiting
