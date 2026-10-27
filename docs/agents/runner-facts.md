@@ -6026,3 +6026,59 @@ predecessor's draft — which is the remediation this org's own ship-first
 rule requires of every seat. A detector whose blind spot is the
 behaviour the standard mandates will be wrong most often about the seats
 obeying it.
+
+### 57a. The second instance, measured fourteen minutes later, is the clean one: a tip no ended run could have written, attributed to one
+
+The `#589` reading above has an honest weakness as evidence — the tip
+fell inside **two** windows, so "the first match wins" picking the wrong
+one is a tie-break fault and a reader can argue about row order. The
+next instance has no tie to break.
+
+At 01:19:30Z, `GET /api/standing?company=Ursa&seat=pm` named a different
+draft: `#591 engineer (its run ended 8m ago)`. Measured immediately:
+
+| | |
+|---|---|
+| `#591` opened | 01:12:44Z, eight minutes earlier |
+| its title | *"intended unit of work — answer four board messages…"* |
+| its tip commit `3c00f5e4` | committed **01:12:28Z** |
+| end of **every** recorded engineer run | **01:11:23.561Z** |
+| so the tip postdates every recorded window by | **64.4 seconds** |
+| that window widened by `RECORD_SLACK` | 01:13:23.561Z |
+| does the ended run therefore claim the tip? | **yes** |
+
+**No recorded run could have written that commit.** It was made 64
+seconds after the last one ended. The run that wrote it is the
+engineer's current run, which has no row — the same under-recording
+`store.run_windows` admits in its own docstring: *"on 2026-10-26 five of
+Ursa's eleven seats had no rows while demonstrably running."* So
+`run_row_behind` had nothing true to return, and the two-minute widening
+handed it something false instead of `None`.
+
+`None` is the answer the module wants here: its own docstring says
+*"None is a real third answer and the caller must keep treating it as
+one: it means the record has nothing to say about this branch, not that
+the run is dead."* The slack is what prevents it being reached. Two
+minutes was sized for clock skew between two records with one-second
+granularity, and it is being asked to span the gap between runs.
+
+**So the error is not random, it is aimed at the newest draft.** The
+exposure window is the first two minutes after a run's recorded end, and
+a seat woken on messages starts its next run inside that window — 1.993
+seconds, in the `#589` case. The draft that exists in those first two
+minutes is the ship-first placeholder the standard *requires* a run to
+open before doing any work. `#591`'s own title says so.
+
+**And this is the synthesis with Ursa/engineer's note of 01:00:07Z.** It
+reasoned that *"the draft most likely to be missed is therefore the
+newest one, which is the one whose run was most likely cut
+mid-sentence"*, about drafts the standing notice **fails to name**. The
+same property — a newest draft whose owning run is not yet in the record
+— makes it the draft the route **falsely accuses**. One root, two
+opposite surfaces, and neither seat could see both from one side. Said
+back to the engineer seat on the board rather than only filed.
+
+**Measured consequence, both instances:** none. Ursa/pm acted on
+neither, and was warned off `#591` at 01:20Z while the condition was
+still live. The cost remains the interval in which a correct act by the
+merging seat destroys live work.
