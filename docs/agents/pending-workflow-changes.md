@@ -602,3 +602,96 @@ contents. Then confirm the gate stays green on `main`, which the
 zero-false-positive measurement above predicts. Then run
 `node scripts/redaction-check.mjs` on the same tree and confirm it agrees
 with the gate, which its suite now covers in both directions.
+
+## PWC-14 — No gate in this repository has ever looked for a credential
+
+**Queued by:** security seat, 2026-10-27 run 16. Queued because the run
+could not apply it: `.github/workflows/` belongs to HQ under
+docs/standards/pm.md §15, and this seat's charter and its launch
+instruction both forbid touching workflows outright. Nothing was
+attempted on that path.
+
+**Evidence.** This repository has twelve workflows. Eleven of them
+launch a seat. The twelfth is `redaction-gate.yml`, and its three
+patterns are an absolute home path, a Claude Code project slug and a
+full UUID. None of the twelve runs `tools/secret-scan.mjs`, and
+`grep -rn secret-scan .github/` returns nothing. So the sixteen
+credential classes this seat's charter opens with are checked by exactly
+one thing, which is a security-seat session reading the tree by hand,
+nominally every two weeks.
+
+**What that means in practice, stated as a window rather than a
+feeling.** A credential committed by any of eleven seats reaches `main`
+with no automated objection and stays there until a security run happens
+to scan. The eleven seats push under `bypassPermissions` with live
+tokens in the environment, which is the population that would commit one
+by accident. The repository is public, so the window is a disclosure
+window and not an internal one.
+
+**Why this is worth a gate rather than a better habit.** The two
+instruments already here answer the same question in different
+directions and neither covers this one. The redaction gate catches
+private data about the owner's machine and sessions. The dependency
+floor catches advisories in installed trees. A credential is the one
+class where the cost of a miss is not a red build later but a live key in
+a public repository now, and it is also the class with the cheapest
+possible check, because the tool already exists in the tree, has 20 tests
+and a suite that plants canaries to prove it can fail, and never prints a
+value.
+
+**That last property is the reason this gate is safe to add while PWC-8
+defect 3 is still open.** The redaction gate prints the matching line
+into a public Actions log, so catching a leak publishes it, which is
+defect 3 and has now fired twice. `tools/secret-scan.mjs` was built the
+other way round: it prints a class, a path, a line number and a
+truncated blob sha, and its own suite asserts that no value reaches any
+output including `--json`. A credential gate built on it does not
+inherit defect 3.
+
+**Priced on this host, 2026-10-27, on a tree of 2,240 tracked files and
+6,201 blobs.**
+
+| invocation | scope | wall clock |
+|---|---|---|
+| `node tools/secret-scan.mjs` | tracked working tree | 4.7 s |
+| `node tools/secret-scan.mjs --since=<base>` | blobs not reachable from the base | 23.0 s |
+| `node tools/secret-scan.mjs --history` | every blob in every ref | 45.2 s |
+
+The middle row is the one a pull request wants and the number above is
+an over-estimate of what a runner would pay, because this host had 258
+remote-tracking refs and the scan walked every blob on all of them. A
+runner that fetched the base and the head walks the head's new blobs
+only.
+
+**Change, in two parts, and the second is the one that matters less.**
+
+1. A new job in `redaction-gate.yml`, or a new workflow beside it, with
+   `permissions: contents: read` and nothing else, running
+   `node tools/secret-scan.mjs --since=origin/$GITHUB_BASE_REF` on
+   `pull_request` and `node tools/secret-scan.mjs --history` on push to
+   `main`. Exit 1 fails the job. Exit 2 also fails it, because the tool
+   reserves 2 for "cannot do its job" and a scanner that could not run is
+   not a pass.
+2. `actions/checkout` must carry `fetch-depth: 0` for either invocation.
+   A depth-1 checkout has no history to scan, and the tool refuses it
+   rather than reporting a false zero, which is the behaviour L-A55 and
+   L-A77 are about. So the failure mode of getting this wrong is a red
+   job naming `tools/ensure-full-clone.sh` and not a silent green.
+
+**What it would say today, which is the honest objection to it.** It
+would be red, on one branch. PR #561's
+`tools/secret-scan-verdict.test.mjs` carries a vendor's published
+documentation example access key id as a plain literal, which is F35 of
+the 2026-10-27 audit. That is a fixture and not a leak and there is
+nothing to rotate. It is also exactly what the gate is for, because no
+reader of a diff can tell a published example from a live key without
+looking it up, and the rule that fixtures are assembled at runtime rather
+than committed is now written in the redaction standard's Class D. Land
+that fix first or land it together with this entry.
+
+**Verification after applying.** Plant a canary assembled at runtime in a
+scratch file on a branch, confirm the job goes red naming the class and
+the path and carrying no value in the log, then delete the canary and
+confirm it goes green. Then push a depth-1 checkout variant on purpose
+and confirm it fails with exit 2 and the clone message rather than
+passing.
