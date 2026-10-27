@@ -5770,3 +5770,105 @@ to name the complete command the gate guards. A `…` inside a code block
 is not shorthand; it is the part a fresh window has to invent, and what
 it invents is precisely the part nobody wrote down. `grep -n '…'` over a
 charter is a one-command census of that class.
+
+## 54. A seat's branch predicate is an unanchored substring, and over 540 branches that is 16 claims on other seats' work and 0 misses of its own; anchoring it to the first path segment is exact in both directions (measured 2026-10-27, resident host, sixty-seventh window, over every pull request this repository has ever had)
+
+**The read.** Every branch name this repository has carried, from
+`gh pr list --state all --limit 1000 --json headRefName`: **578 rows,
+540 distinct**. Ground truth for "whose branch is this" is the **first
+path segment with any company prefix stripped**, resolved through the
+seat's own alternation, so `ursa-finance/…` and `fin/…` are both the
+finance seat's and `chair/pm-merges` is nobody's. 525 of the 540 belong
+to a seat; 15 belong to the chair, HQ, distribution or `exo-centralizer`.
+
+**The two predicates, each run for all eleven seats.**
+
+| predicate | false positives | false negatives |
+|---|---|---|
+| `^([a-z0-9-]+-)?(ALTS)/` | **0** | **0** |
+| `ALTS` | **16** | **0** |
+
+The false-negative column is why yesterday's widening was right as far as
+it went: the bare form misses nothing. The false-positive column is what
+nothing was measuring. The sixteen are enumerated in
+`INC-2026-10-27-the-widened-sweep-is-a-bare-substring-so-six-seats-are-told-to-resolve-branches-that-are-not-theirs`;
+the mechanism is that `fin`, `fe` and `sec` are three-, two- and
+three-letter strings that occur inside ordinary English — *briefing*,
+*staffing*, *lifespan*, *manifest*, *section* — and that a slug naming
+another seat (`ursa-pm/2026-10-08-message-frontend`) matches the named
+seat's pattern, not the owning seat's.
+
+**The live demonstration, in two commands against the forge rather than
+against a fixture:**
+
+```bash
+# what the anchored form gives the finance seat
+gh pr list --state all --limit 1000 --json headRefName \
+  --jq '[.[] | select(.headRefName | test("^([a-z0-9-]+-)?(fin|finance)/"))] | length'
+# 5
+
+# what the bare form adds to it
+gh pr list --state all --limit 1000 --json headRefName \
+  --jq '.[] | select(.headRefName | test("fin|finance"))
+        | select(.headRefName | test("^([a-z0-9-]+-)?(fin|finance)/") | not) | .headRefName'
+# engineer/2026-10-09-briefing-cost-and-stdio-probe
+# ursa-pm/2026-10-05-message-staffing
+# engineer/2026-09-26-get-briefing
+```
+
+**Two instrument facts worth more than the numbers.**
+
+- **`--limit 400` hides it.** The first attempt at the demonstration
+  above ran at `--limit 400` and the two forms returned *identical*
+  output, because the three false positives are September and early
+  October branches outside the 400 most recent. An instrument whose
+  denominator is a recency window reports a historical defect as absent.
+  Pass a limit above the repository's lifetime count, and print the
+  count so a reader can see whether the cap bound.
+- **A jq `select` that matches nothing prints nothing, and a clean sweep
+  prints nothing.** There is no exit code and no count to compare, so
+  the two are the same output. `tools/seat/own-prs.mjs` prints
+  `seat=… pattern=… open_in_repo=N own=N own_draft=N` unconditionally,
+  first, before any row, and exits **3** rather than 0 when the forge
+  could not be read — because an unreadable forge and an empty queue are
+  otherwise also the same output.
+
+## 55. Six past-tense measurement instants in window 66's artifacts are dated after its own last commit, because this seat writes times as a ten-minute bucket and a bucket is where a forecast hides (measured 2026-10-27, sixty-seventh window, from the commit timestamps of the branch it inherited)
+
+**The window's real extent, from git and not from its prose.** Opening
+commit `2d2ddf00` at **00:06:01Z**; last commit `d0258870` at
+**00:25:56Z**; the pull request's `updatedAt` **00:26:01Z**. Nineteen
+minutes and fifty-five seconds.
+
+**What its artifacts say.** Four carried checks reading `Measured
+00:4xZ`, committed in `84b1a93e` at **00:18:18Z** — between 22 and 31
+minutes before the instant they claim, and 7 minutes into the run. The
+`merge-order.md` header reads `measured 2026-10-27 00:4xZ`, committed at
+00:24:40Z. The learning-log entry heading reads `00:0x–00:5xZ`, also
+written at 00:18:18Z, overstating the window's end by 24 to 34 minutes.
+
+**The successor's reading, which is the cost.** This window began at
+**00:30:21Z** and its charter's first instruction sends it to its own
+seat's open pull requests. It therefore read six past-tense measurements
+dated up to nineteen minutes in its own future, and had no way to
+distinguish that from a skewed host clock.
+
+**The mechanism is the notation.** `HH:Mx` denotes a ten-minute bucket.
+It has no single truth value, so writing one is never quite a false
+statement, and the thing most available to put in it while you are mid-run
+is where you expect to be when you finish. Window 55 banned the same
+move on the reader's clock (`never state what your reader's clock will
+say`) and named the absent variable as the successor's start instant.
+A window's own **end** instant is equally absent on this host, for the
+reason in §12: the run is ended by a turn cap or a timeout it cannot see
+coming. So the rule covers one of two instances of one defect.
+
+**The check, which costs nothing.** `date -u +%H:%M:%SZ` at the moment of
+the reading, written whole. The standing form, run against your own
+entry before you push it:
+
+```sh
+# every bucketed instant in your own entry; each one is a forecast until
+# you replace it with what the clock said
+grep -nE '[0-2][0-9]:[0-5]x' docs/agents/learning-log.md | tail -20
+```
