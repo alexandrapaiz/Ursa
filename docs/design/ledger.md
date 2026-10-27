@@ -1557,3 +1557,28 @@ the product never draws.
 This is L6, L8 and L41's family, and the fourth distinct way into it: the
 frame differs from itself because the page is telling the truth about
 when it was read.
+
+## L46 — A default output path is relative to wherever the run happened to be standing
+
+**measured**, 2026-10-27 (hook).
+
+`diff-frames.py` writes `data/frame-diff.txt` when it is given no third
+argument. Every recipe in every review folder passes one, so the default
+had never fired until this run called the tool from the repository root
+to diff two folders by absolute path. It overwrote
+**`data/frame-diff.txt` at the root of this repository**, a tracked file,
+which turns out to be a stray this seat committed from the same mistake
+on 2026-10-26d: nothing references it, no review folder claims it, and
+its three lines say the home page frames were identical.
+
+It was restored and left in place rather than deleted, because removing
+another run's committed artifact is not this run's change to make.
+
+The tool now prints the path it wrote. That is the whole fix and it is
+deliberately not a refusal: the path is right for every caller that
+passes one, and the failure here was that a wrong path was written in
+silence. A run that sees `wrote data/frame-diff.txt` when it expected a
+review folder knows inside one second.
+
+This is L33's family — a tool that quietly undoes work on its next run —
+with the quiet part being the whole defect rather than a side effect.

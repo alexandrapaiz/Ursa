@@ -231,7 +231,7 @@ for (let i = 1; i < scored.length; i++) {
   const same = a.brightest.join(',') === b.brightest.join(',')
   const r = ratio(a.brightest, b.brightest)
   const note = same
-    ? `same brightest mark; told apart by ${a.colours.length > 1 || b.colours.length > 1 ? 'a second mark inside one of them' : 'nothing'}`
+    ? `same mark; told apart by ${a.colours.length > 1 || b.colours.length > 1 ? 'a second mark inside one of them' : 'nothing'}`
     : (r >= FLOOR ? 'passes' : 'under 3:1, told apart by hue')
   lines.push(`  ${('neighbours ' + (i - 1) + ' and ' + i).padEnd(38)}  ${' '.repeat(38)}  ${r.toFixed(2).padStart(6)}   ${note}`)
 }
@@ -244,7 +244,7 @@ for (const s of scored) {
 lines.push('')
 const under = scored.filter((s) => !s.pass)
 lines.push(`  ${under.length} of ${scored.length} legend swatches fail: ${under.map((s) => s.what.replace('legend: ', '')).join(', ') || 'none'}`)
-lines.push(`  a swatch passes on two conditions: its brightest mark clears ${FLOOR}:1 against BOTH the page`)
+lines.push(`  a swatch passes on two conditions: its mark clears ${FLOOR}:1 against BOTH the page`)
 lines.push(`  and the pixel beside it, and more than ${MIN_SHARE * 100}% of the swatch carries that mark, so neither`)
 lines.push('  a bare dark fill nor a single bright pixel passes.')
 
