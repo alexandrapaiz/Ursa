@@ -160,24 +160,57 @@ export function verdict(findings, seen = {}) {
 
   const id = String(seen.id ?? '')
   const shown = id.slice(0, 8)
+
+  // Three causes over one successful post, and the precedence between them is
+  // stated rather than incidental. A truncated body means the recipient did
+  // not get the message; an unreadable id means only that nobody can quote
+  // the row. The first outranks the second, so a post that is both names the
+  // truncation, and the trailer still carries both clauses, because the
+  // precedence decides which cause a reader is told and never which facts
+  // they are given.
+  const truncated = seen.truncated === true
+  const delivered = String(seen.bodyDelivered ?? '')
+  const total = String(seen.bodyChars ?? '')
+  const limit = String(seen.wakeLimit ?? '')
+
+  const trailer = []
+  if (truncated) {
+    trailer.push(
+      `  The wake limit is ${limit} characters, so the recipient has your message cut and not whole.`,
+      '  Send the rest as its own message rather than re-sending the whole: the store has no delete route and the row that was cut stays.',
+    )
+  }
+  // The second defect `docs/design/verdict-enumeration.md` §10 found and
+  // deferred: this branch used to print a line indistinguishable from the
+  // readable-id one, so a seat could not tell from its own receipt that the
+  // row it just wrote cannot be quoted. Said in the trailer rather than in
+  // the verdict line, because the post did succeed.
+  if (!shown) {
+    trailer.push('  The board accepted it and answered with no readable id, so nothing downstream can quote this row.')
+  }
+
   return verdictOf({
     exitCode: 0,
-    // Two causes and not one, for the same reason check-closures.mjs has two
-    // forms of its exit-1 line: the shorter form omits a clause a reader would
-    // act on. A 2xx response whose body does not parse as JSON, or parses
-    // without an `id`, means the row exists and this seat cannot name it, so
-    // nothing downstream can quote it in a follow-up.
-    cause: shown ? 'POSTED' : 'POSTED_ID_UNREADABLE',
-    line: `Posted ${seen.kind} from ${from} to ${woken}${shown ? `, id ${shown}` : ''}.`,
-    // The second defect `docs/design/verdict-enumeration.md` §10 found and
-    // deferred: this branch used to print a line indistinguishable from the
-    // readable-id one, so a seat could not tell from its own receipt that the
-    // row it just wrote cannot be quoted. Said in the trailer rather than in
-    // the verdict line, because the post did succeed.
-    trailer: shown
-      ? []
-      : ['  The board accepted it and answered with no readable id, so nothing downstream can quote this row.'],
-    quoted: shown ? [shown] : [],
+    // Two of these would be one cause if the condition were "it posted". The
+    // same reason check-closures.mjs has two forms of its exit-1 line: a
+    // shorter form omits a clause a reader would act on.
+    cause: truncated ? 'POSTED_BODY_TRUNCATED' : shown ? 'POSTED' : 'POSTED_ID_UNREADABLE',
+    // The truncation goes in the LINE and not only in the trailer, and the
+    // enumerator is why: driven with a truncated probe it reported
+    // ONE_CAUSE_PER_OUTCOME, because `POSTED` and `POSTED_BODY_TRUNCATED` had
+    // identical exit codes and identical lines and differed only in a trailer
+    // the rule does not read. A reader quoting the verdict would have quoted
+    // the same sentence for both. That check found this in the first run after
+    // the branch was written, which is the first time it has caught something
+    // that was not planted.
+    line: `Posted ${seen.kind} from ${from} to ${woken}${shown ? `, id ${shown}` : ''}${
+      truncated ? `, cut at ${delivered} of ${total} characters` : ''
+    }.`,
+    trailer,
+    // Every number in the line and the trailer is the board's own answer, so
+    // each is declared. An integer this gate computed could not reach any of
+    // these strings.
+    quoted: [shown, truncated ? delivered : '', truncated ? total : '', truncated ? limit : ''].filter(Boolean),
   })
 }
 
@@ -245,6 +278,11 @@ export const GATE = describeGate({
   probes: [
     { name: 'posted, id readable', findings: [], seen: { kind: 'note', toCompany: 'Ursa', toSeat: 'pm', ...FROM, id: 'a1b2c3d4e5f6' } },
     { name: 'posted, id unreadable', findings: [], seen: { kind: 'note', toCompany: 'Ursa', toSeat: 'pm', ...FROM } },
+    {
+      name: 'posted, and the board cut the body at its wake limit',
+      findings: [],
+      seen: { kind: 'note', toCompany: 'Ursa', toSeat: 'pm', ...FROM, id: 'a1b2c3d4e5f6', truncated: true, bodyDelivered: 1500, bodyChars: 1832, wakeLimit: 1500 },
+    },
     { name: 'dry run, nothing wrong', findings: [], seen: { dryRun: true, kind: 'note', toCompany: 'Ursa', ...FROM } },
     { name: 'one message violation', findings: [refused()], seen: { kind: '', toCompany: 'Ursa' } },
     { name: 'three message violations', findings: [refused(), refused('KIND_UNKNOWN'), refused('BODY_MINIMUM')], seen: { kind: '', toCompany: 'Ursa' } },

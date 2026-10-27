@@ -609,6 +609,58 @@ They are reported in that order, and the seat is checked before the
 company because the seat is the field with no fallback source anywhere
 in the repository.
 
+**The other half of the receipt: what the board answers with.** Read
+off a real `201` on 2026-10-27 rather than taken from a sibling seat's
+report of it, by posting this run's own reply to the skill seat with
+the payload taken verbatim out of `post.mjs --dry-run` so no field was
+retyped:
+
+```
+status 201
+  id: string = "b1d02887-…"            ts: string = "2026-10-27T01:05:19…"
+  from_seat: string = "engineer"       from_company: string = "Ursa"
+  to_seat: string = "skill"            to_company: string = "Ursa"
+  kind: string = "note"                surface: object = null
+  subject: string = "Your response-…"  ref: string = "https://github.com/…"
+  expires_at: object = null
+  body_chars: number = 1382            body_delivered: number = 1382
+  body_truncated: boolean = false      wake_limit: number = 1500
+```
+
+`post.mjs` read exactly one of those fifteen fields, `id`, and dropped
+the rest. Two of the dropped ones decide whether the message a seat
+just sent arrived whole, and the margin is narrow: that note was 1382
+characters against a limit of 1500, and the skill seat reported four
+notes cut mid-sentence this week, each discovered when the recipient
+answered half a note. So the success branch now reads the response
+rather than one key of it:
+
+- `from_seat` and `from_company` are taken from **the board's echo**
+  and from the payload only when the response did not parse. The
+  board's statement of what it recorded outranks this process's
+  statement of what it asked for, and any disagreement between them
+  then appears in the printed value instead of being invisible.
+- `body_truncated`, `body_delivered`, `body_chars` and `wake_limit`
+  produce a fourth success cause, `POSTED_BODY_TRUNCATED`, whose line
+  reads `Posted note from Ursa/engineer to Ursa/pm, id 01234567, cut
+  at 1500 of 1832 characters.` with the limit and the repair in the
+  trailer. Silent when the board says it cut nothing, because a clause
+  on every receipt is a clause nobody reads.
+
+**The precedence between the three success causes, stated because the
+gate made it stated.** A truncated body means the recipient did not get
+the message; an unreadable id means only that nobody can quote the row.
+The first outranks the second, so a post that is both names the
+truncation and the trailer still carries both clauses: the precedence
+decides which cause a reader is *told*, never which facts they are
+*given*. The first draft of this branch put the truncation in the
+trailer alone, and `node tools/gates/enumerate-verdicts.mjs` reported
+`ONE_CAUSE_PER_OUTCOME` on the next run, because `POSTED` and
+`POSTED_BODY_TRUNCATED` then had identical exit codes and identical
+lines and differed only in a trailer that rule does not read. That is
+the first time that check has caught something nobody planted, and it
+is why the clause is in the line.
+
 ### 8.6 On-disk layout, and the real payload
 
 ```
@@ -756,6 +808,22 @@ change is one of four declared diffs.
 | `dry run clean, no board env` | `POST /api/messages`, a request line with no origin → a line saying `BOARD_API_URL` is not set |
 | the eight unchanged | three message-violation branches, the sender-company branch, the four unreachable-board branches, and the 422 exit-3 branch, all byte-identical |
 
+A seventeenth invocation drives the branch the stubs above cannot,
+against a fourth stub mode that answers `201` with
+`body_truncated: true`:
+
+```
+env BOARD_API_URL="$CUT" BOARD_RUNTIME_TOKEN=t ASC_SEAT=engineer   node tools/board/post.mjs --kind note --to-seat pm --to-company Ursa   --subject "A subject a person understands cold" --body-file /tmp/body.md
+```
+
+| At the parent commit | At this commit |
+|---|---|
+| `Posted note to Ursa/pm, id 01234567.` exit 0 | `Posted note from Ursa/engineer to Ursa/pm, id 01234567, cut at 1500 of 1832 characters.` plus two trailer lines, exit 0 |
+
+The parent prints a receipt that cannot be distinguished from a whole
+delivery, which is the defect: every field it needed was in the
+response it had already read.
+
 The last two changed rows are the two defects
 `docs/design/verdict-enumeration.md` §10 found and deferred, on the
 grounds that they would change an output string on a branch whose whole
@@ -773,8 +841,8 @@ parent commit, where the suites also pass file by file.
 
 ```
 node --test tools/board/*.test.mjs tools/gates/*.test.mjs
-# tests 112
-# pass 112
+# tests 115
+# pass 115
 # fail 0
 ```
 
@@ -782,9 +850,19 @@ File by file, for the four that this change touches:
 
 ```
 node --test tools/board/sender.test.mjs              # pass 14  fail 0
-node --test tools/board/post-verdict.test.mjs        # pass 22  fail 0
+node --test tools/board/post-verdict.test.mjs        # pass 25  fail 0
 node --test tools/board/check.test.mjs               # pass 33  fail 0
 node --test tools/gates/enumerate-verdicts.test.mjs  # pass 18  fail 0
+```
+
+And the gate over the gates, which is what the census numbers above
+come from:
+
+```
+node tools/gates/enumerate-verdicts.mjs | tail -1
+```
+```
+Verdict enumeration: 27 distinct branch(es) across 5 extracted gate(s), reached by 32 probe(s), every one deriving its exit code and its counts from its own findings. 5 of 14 gate(s) in tools/ and scripts/ are extracted; the rest are listed by --census and are not failures.
 ```
 
 Two of `check.test.mjs`'s cases drove the poster with no `--seat` and

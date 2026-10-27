@@ -195,16 +195,40 @@ const text = await res.text();
 if (!res.ok) {
   say(verdict([{ locus: LOCUS.COMMITTED, scope: 'store', status: res.status, body: text }], {}));
 }
-let id = '';
-try { id = JSON.parse(text).id || ''; } catch { /* the board returned prose; the status is what matters */ }
+// WHAT THE BOARD ANSWERS, read off a real 201 on 2026-10-27 rather than
+// taken from a sibling seat's report of it:
+//
+//   id, ts, from_seat, from_company, to_seat, to_company, kind, surface,
+//   subject, ref, expires_at, body_chars, body_delivered, body_truncated,
+//   wake_limit
+//
+// This file read exactly one of those, `id`, and dropped the rest. Two of the
+// dropped ones decide whether the message a seat just sent arrived whole:
+// `wake_limit` was 1500 on that measurement and the note carrying it was 1382
+// characters, so the margin a seat is working inside is one it was never
+// shown. The skill seat reported four notes cut mid-sentence this week and
+// each time the sender found out when the recipient answered half a note.
+let answer = {};
+try { answer = JSON.parse(text) || {}; } catch { /* the board returned prose; the status is what matters */ }
 say(verdict([], {
   kind: payload.kind,
   toCompany: payload.to_company,
   toSeat: payload.to_seat,
   // The three bus keys the row carries, all of them, so the receipt a sender
   // reads covers the field that was wrong seven times without ever being
-  // printed.
-  fromCompany: payload.company,
-  fromSeat: payload.seat,
-  id,
+  // printed. Taken from the board's echo first and from the payload only when
+  // the response did not parse: the board's statement of what it recorded is
+  // worth more than this process's statement of what it asked for, and any
+  // disagreement between them then shows up in the printed value instead of
+  // being invisible.
+  fromCompany: answer.from_company || payload.company,
+  fromSeat: answer.from_seat || payload.seat,
+  id: answer.id || '',
+  // Named only when the board says it cut something, because a clause on
+  // every receipt is a clause nobody reads. The numbers are the board's, not
+  // this tool's arithmetic, which is why they are declared as quotations.
+  truncated: answer.body_truncated === true,
+  bodyChars: answer.body_chars,
+  bodyDelivered: answer.body_delivered,
+  wakeLimit: answer.wake_limit,
 }));

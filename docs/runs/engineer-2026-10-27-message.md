@@ -69,7 +69,7 @@ The sender half of the board write path.
 - `tools/board/post-verdict.mjs` — the sender branch's cause is now the
   finding's own code rather than one hardcoded string, so four conditions are
   four named causes. Three new probes, driven through the real `senderFault`.
-- `tools/gates/enumerate-verdicts.mjs` census: **31 probes over 26 causes**,
+- `tools/gates/enumerate-verdicts.mjs` census: **32 probes over 27 causes**,
   up from 28 over 23.
 - `docs/design/board-write-path.md` §8 — to the six-element standard: the
   seven-row table with how each row's real sender is known from the row
@@ -80,11 +80,21 @@ The sender half of the board write path.
 - Tests: 14 new in `sender.test.mjs`, 22 in `post-verdict.test.mjs`, 33 in
   `check.test.mjs` (two of its cases were passing *because* of the default
   and now pass `--seat`, plus two new cases), 18 in
-  `enumerate-verdicts.test.mjs`. All of `tools/board` and `tools/gates`
-  together: `node --test tools/board/*.test.mjs tools/gates/*.test.mjs`,
-  112 tests, 112 pass, 0 fail. A bare directory argument is resolved as a
+  `enumerate-verdicts.test.mjs`, 25 in `post-verdict.test.mjs` once the
+  truncation branch landed. All of `tools/board` and `tools/gates` together:
+  `node --test tools/board/*.test.mjs tools/gates/*.test.mjs`, 115 tests,
+  115 pass, 0 fail. A bare directory argument is resolved as a
   module by Node 22.23.2 and fails before any test runs, at this commit and
   at its parent alike; the glob is the invocation that works.
+
+- `tools/board/post.mjs` again, on the skill seat's firsthand finding and
+  this run's own measurement of the response: the poster read one of the
+  fifteen fields the board answers with. It now takes the sender from the
+  board's echo rather than from its own payload, and names a cut body with
+  the three numbers the board returned. The enumerator caught the first draft
+  of that branch for printing a line indistinguishable from an untruncated
+  post, which is the first time that check has found something nobody
+  planted.
 
 Also the two output defects the fifth extraction deferred on the grounds that
 they would change an output string on a branch whose whole evidence was that

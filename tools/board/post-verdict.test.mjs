@@ -179,6 +179,49 @@ describe('post verdict, the branches over findings', () => {
     assert.doesNotMatch(v.line, /undefined/)
   })
 
+  it('names a cut body, with the three numbers the board answered with', () => {
+    const v = verdict([], {
+      ...POSTING,
+      id: 'abcdef1234567890',
+      truncated: true,
+      bodyDelivered: 1500,
+      bodyChars: 1832,
+      wakeLimit: 1500,
+    })
+    // Still exit 0, because the row exists: this is a fact about delivery and
+    // not a refusal.
+    assert.equal(v.exitCode, 0)
+    assert.equal(v.cause, 'POSTED_BODY_TRUNCATED')
+    assert.equal(
+      v.line,
+      'Posted note from Ursa/engineer to Ursa/pm, id abcdef12, cut at 1500 of 1832 characters.',
+    )
+    assert.deepEqual(v.trailer, [
+      '  The wake limit is 1500 characters, so the recipient has your message cut and not whole.',
+      '  Send the rest as its own message rather than re-sending the whole: the store has no delete route and the row that was cut stays.',
+    ])
+    // The line and POSTED's line are different sentences, which is the gate's
+    // own ONE_CAUSE_PER_OUTCOME rule and the thing the enumerator caught when
+    // the clause lived in the trailer alone.
+    assert.notEqual(v.line, verdict([], { ...POSTING, id: 'abcdef1234567890' }).line)
+    // Every number in the line is the board's answer, so each is declared.
+    for (const n of ['1500', '1832']) assert.ok(v.quoted.includes(n), `${n} undeclared`)
+  })
+
+  it('says nothing about truncation when the board says it cut nothing', () => {
+    const v = verdict([], { ...POSTING, id: 'abcdef1234567890', truncated: false, bodyDelivered: 1382, bodyChars: 1382, wakeLimit: 1500 })
+    assert.equal(v.cause, 'POSTED')
+    assert.deepEqual(v.trailer, [])
+  })
+
+  it('truncation outranks an unreadable id for the cause, and both clauses still print', () => {
+    const v = verdict([], { ...POSTING, truncated: true, bodyDelivered: 1500, bodyChars: 1832, wakeLimit: 1500 })
+    assert.equal(v.cause, 'POSTED_BODY_TRUNCATED')
+    assert.equal(v.trailer.length, 3)
+    assert.match(v.trailer[0], /cut and not whole/)
+    assert.match(v.trailer.at(-1), /no readable id/)
+  })
+
   it('reports whichever check actually stopped the run, in post.mjs own order', () => {
     const both = verdict([
       message(),
@@ -228,8 +271,8 @@ describe('post verdict, the ground branches', () => {
 })
 
 describe('post verdict, the gate spec', () => {
-  it('declares ten findings probes and four ground probes', () => {
-    assert.equal(GATE.probes.length, 10)
+  it('declares eleven findings probes and four ground probes', () => {
+    assert.equal(GATE.probes.length, 11)
     assert.equal(GATE.groundProbes.length, 4)
     assert.equal(GATE.id, 'tools/board/post.mjs')
   })
@@ -243,11 +286,11 @@ describe('post verdict, the gate spec', () => {
     ))
   })
 
-  it('reaches thirteen distinct causes, where a sweep of exit calls finds four', () => {
+  it('reaches fourteen distinct causes over eleven probes, where a sweep of exit calls finds four', () => {
     const causes = new Set([
       ...GATE.probes.map((p) => GATE.verdict(p.findings, p.seen ?? {}).cause),
       ...GATE.groundProbes.map((p) => p.call().cause),
     ])
-    assert.equal(causes.size, 13)
+    assert.equal(causes.size, 14)
   })
 })
