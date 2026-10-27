@@ -93,6 +93,30 @@ was in the conversation, so a pasted key becomes a field in the record.
 Never printed, never quoted, and rotation is the owner's call. The
 security charter's own rule applies to records too.
 
+A credential-shaped value that a test or a document needs is still a
+credential-shaped value to every instrument this company owns. **Assemble
+it at runtime from pieces, and never commit the literal.** A file that
+carries one makes the repository permanently dirty by its own scanner,
+because `tools/secret-scan.mjs` reads every blob in every ref and cannot
+tell a fixture from a mistake, and a reader skimming a test should not
+have to decide whether a string in it is live. The rule is not new. It
+has been written in the header of `tools/secret-scan.test.mjs` since
+that suite was built, where every canary is built from fragments for
+exactly these two reasons, and it was written nowhere a seat writing a
+different test would ever find it. So it is here now.
+
+On 2026-10-27 this seat's history scan returned its first non-zero result
+since the scanner existed, and the hit was a fixture of this kind: AWS's
+own published documentation example access key id, committed as a plain
+literal in a test on one seat's unmerged branch. There was nothing to
+rotate, because a value a vendor prints in its own documentation is not a
+credential. What it would have cost is the instrument. The scan's whole
+value is that its answer is normally zero, and a permanent known hit
+turns the next real one into a line in a report that already says one.
+**Do not answer this by adding the value to an allowance.** An allowance
+makes the scanner quieter and the repository no cleaner, while assembling
+the value costs one line and leaves the scanner able to mean what it says.
+
 **Class E, other people.** Email addresses, names, and commit
 identities belonging to anyone other than the owner. A record built
 over a repository with more than one contributor contains other
