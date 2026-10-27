@@ -11,11 +11,14 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   BIGRAM_DICE_FLOOR,
+  bodyCountDefects,
   countDefects,
   coverage,
   declaredCounts,
+  explainBodyCounts,
   explainCounts,
   explainShape,
+  libraryCountsInBody,
   explainShortfall,
   parseTriggerTest,
   similarity,
@@ -446,4 +449,97 @@ test('the count explanation separates a wrong statement from a missing one', () 
   assert.match(missing, /nothing to check/)
   assert.doesNotMatch(missing, /goes stale/)
   assert.deepEqual(explainCounts([]), [])
+})
+
+// The body-count rule, added 2026-10-27. These cover the three decisions the
+// rule makes that a reader would otherwise have to take on trust: that the
+// paragraph and not the sentence is the unit, that `one` and a version string
+// are not counts, and that naming the siblings is what clears it.
+
+const body = (prose) => `---\nname: a-skill\nwhat: four skills and eight areas\n---\n\n${prose}\n`
+
+test('a skill body that counts the library is reported with the words it counted', () => {
+  const hits = libraryCountsInBody(body(
+    'Those four skills work on `outcome_record.json`. This one works on the gate.'))
+  assert.equal(hits.length, 1)
+  assert.deepEqual(hits[0].counts, ['four'])
+})
+
+test('the unit is the paragraph, so the second number in the same thought is caught too', () => {
+  // This is §5ae's measured cause and the reason the rule is not scoped to the
+  // sentence: the sentence naming the library carries one `four` and the next
+  // sentence carries the other, so a sentence-scoped rule would repair the half
+  // the author was thinking about and leave the other, which is exactly what
+  // the run that paid §5u's debt did.
+  const [hit] = libraryCountsInBody(body(
+    'Those four skills work on one artifact.\nIt sits across a handoff from all four.'))
+  assert.deepEqual(hit.counts, ['four', 'four'])
+})
+
+test('a paragraph that names the library without counting it is clean, which is the repair', () => {
+  assert.deepEqual(libraryCountsInBody(body(
+    'The skills that take that output as an input are `a-skill` and `b-skill`.')), [])
+})
+
+test('`one` is a pronoun here and a version string is not a count', () => {
+  // Both of these are in the five paragraphs the rule was written against.
+  // Flagging either would make the rule refuse its own repair.
+  assert.deepEqual(libraryCountsInBody(body(
+    'Those skills work on the record. This one works on the gate, as of 0.5.0.')), [])
+})
+
+test('frontmatter and fenced blocks are not prose, so neither reaches the rule', () => {
+  // `body()` puts "four skills and eight areas" in a `what` field on purpose.
+  assert.deepEqual(libraryCountsInBody(body('It works on the gate.')), [])
+  assert.deepEqual(libraryCountsInBody(body('```\nthree skills\n```')), [])
+})
+
+test('the reported line is the paragraph a reader will open the file to find', () => {
+  const [hit] = libraryCountsInBody('---\nname: a\n---\n\nfiller\n\nThose two skills are siblings.\n')
+  assert.equal(hit.line, 7)
+})
+
+test('a body count is reported per skill with its own path', () => {
+  const lib = [
+    { slug: 'a-skill', trigger: null, refs: 0, shouldFire: [], nearMisses: [],
+      skillText: body('Those three skills work on the record.') },
+    { slug: 'b-skill', trigger: null, refs: 0, shouldFire: [], nearMisses: [],
+      skillText: body('The skills `a-skill` and `c-skill` are its siblings.') },
+  ]
+  assert.deepEqual(bodyCountDefects(lib).map((d) => [d.file, d.counts]),
+    [['skills/a-skill/SKILL.md', ['three']]])
+})
+
+test('a library with no body text is this check with nothing to read, not a clean library', () => {
+  // readLibrary never produces this, because it skips a directory with no
+  // SKILL.md. A caller constructing entries by hand can, and silence is the
+  // right answer rather than a defect against a file that was not read.
+  assert.deepEqual(bodyCountDefects([{ slug: 'a', trigger: null, refs: 0, shouldFire: [], nearMisses: [] }]), [])
+})
+
+test('the body-count explanation names the repair and refuses to ask for a recount', () => {
+  const said = explainBodyCounts([{ slug: 'a', file: 'f', line: 1, counts: ['four'], quote: 'q' }]).join(' ')
+  assert.match(said, /name the siblings instead of/)
+  assert.match(said, /not a recount/)
+  assert.deepEqual(explainBodyCounts([]), [])
+})
+
+test("the index's own counts block carries the library size and only that is measured", () => {
+  const lib = [entry('a', counted(12, 3, 9, 1), 3, 9), entry('b', counted(12, 3, 9, 1), 3, 9)]
+  const index = '# The library\n\n```counts\nskills: 2\nareas: 1\n```\n'
+  assert.equal(countDefects(lib, [], index).length, 0)
+  // An area count that disagrees with nothing is not a defect: no tool can
+  // derive where an edge falls, which is why the block says so in its prose.
+  assert.equal(countDefects(lib, [], '# L\n\n```counts\nskills: 2\nareas: 9\n```\n').length, 0)
+  assert.deepEqual(countDefects(lib, [], '# L\n\n```counts\nskills: 3\nareas: 1\n```\n')
+    .map((d) => [d.file, d.key, d.said, d.measured]), [['skills/README.md', 'skills', 3, 2]])
+})
+
+test('an index with no counts block is reported as the absence, like a trigger test with none', () => {
+  const lib = [entry('a', counted(12, 3, 9, 0), 3, 9)]
+  assert.deepEqual(countDefects(lib, [], '# The library\n\nTen skills over eight areas.\n')
+    .map((d) => [d.slug, d.key, d.said]), [['the library', 'counts block', null]])
+  // And omitted entirely, which is what every caller before this run passed,
+  // asks nothing about the index at all.
+  assert.equal(countDefects(lib, []).length, 0)
 })

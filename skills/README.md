@@ -24,13 +24,26 @@ run, quality over count. The owner's merge is the gate.
 
 ## Eight areas, and the edges between them
 
-Eight areas over ten skills, because the first three share one. The count
-is in the heading and nothing checks it: unlike the `Refs` column above
-and the `counts` block in each trigger test, which
-`node skills/trigger-coverage.mjs` measures and fails on, an area is a
-judgement about where an edge falls and no tool can derive it. So the
-number here is kept by hand on purpose, and `prompts/skill-extract.md`
-§5ae is why that is stated rather than left to be noticed.
+```counts
+skills: 10
+areas: 8
+```
+
+Two numbers of different kinds, which is why they sit in a block rather
+than in a sentence. `skills` is derived from the directory listing, and
+`node skills/trigger-coverage.mjs` measures it and fails on a
+disagreement. `areas` is a judgement about where an edge falls, no tool
+can derive it, and it is kept by hand on purpose. There are fewer areas
+than skills because the first three share one.
+
+The first draft of this paragraph said "the count is in the heading and
+nothing checks it", and it meant the areas. The sentence it was in
+carried the library's size as well, which is mechanical, so a disclaimer
+written about the judgement exempted the derivable number standing beside
+it. That is `prompts/skill-extract.md` §5ae's own cause reappearing
+inside §5ae's own statement of residue, which is why §5af exists and why
+these two numbers are no longer in one sentence. The heading still says
+eight, because a heading is prose and the block is what the tool reads.
 
 The first three skills work on `files[].spans` and `stats` inside
 `outcome_record.json`. The fourth works on `tuning.json`. The fifth

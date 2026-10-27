@@ -161,8 +161,10 @@ confidence is the one field in the whole artifact that a reader is told
 to act on from the first message [E17].
 
 It does not fire for producing a record, for settling a span label, or
-for quoting a record statistic. Those are the three skills in the
-record area, and all three end where this one begins: they work on
+for quoting a record statistic. Those are
+`running-an-outcome-record-trial`, `adjudicating-uncertain-spans` and
+`quoting-a-number-from-an-outcome-record`, which are the record area,
+and each of them ends where this one begins: they work on
 `outcome_record.json`, and this one works on `tuning.json`.
 
 What this serves is the Ursa Major half of the mission, importing your

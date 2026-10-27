@@ -217,7 +217,9 @@ export function readLibrary(dir = SKILLS_DIR) {
     let skillText = null
     try { skillText = readFileSync(join(abs, 'SKILL.md'), 'utf8') } catch { skillText = null }
     if (skillText === null) continue
-    out.push({ slug: name, trigger, refs: declaredRefs(skillText).length,
+    // The body text is kept, not just its ref count, because `bodyCountDefects`
+    // below reads the prose. Same read, two questions, one open of the file.
+    out.push({ slug: name, trigger, skillText, refs: declaredRefs(skillText).length,
       ...(trigger ? parseTriggerTest(trigger) : { shouldFire: [], nearMisses: [], unclassified: [] }) })
   }
   return out
@@ -373,7 +375,7 @@ const COUNT_KEYS = {
  * and a reader who has to run two commands to learn that a count is stale will
  * run one.
  */
-export function countDefects(library, indexRows) {
+export function countDefects(library, indexRows, indexText = null) {
   const out = []
   for (const s of library) {
     if (s.trigger === null) continue
@@ -389,6 +391,19 @@ export function countDefects(library, indexRows) {
       else if (said[key] !== measured) out.push({ slug: s.slug, file, key, said: said[key], measured })
     }
   }
+  // The index's own `counts` block, which holds the library's size and the
+  // area count beside it. Only `skills` is measured: an area is a judgement
+  // §5e makes and this tool cannot, which the block says in its own prose. The
+  // two live in one block rather than one sentence because that sentence is
+  // what went wrong -- see skills/README.md under "Eight areas" and §5af.
+  if (indexText !== null) {
+    const said = declaredCounts(indexText)
+    const file = 'skills/README.md'
+    if (said === null) out.push({ slug: 'the library', file, key: 'counts block', said: null, measured: null })
+    else if (!('skills' in said)) out.push({ slug: 'the library', file, key: 'skills', said: null, measured: library.length })
+    else if (said.skills !== library.length) out.push({ slug: 'the library', file, key: 'skills', said: said.skills, measured: library.length })
+  }
+
   const byDir = new Map(library.map((s) => [s.slug, s]))
   for (const row of indexRows) {
     const s = byDir.get(row.dir)
@@ -398,6 +413,121 @@ export function countDefects(library, indexRows) {
     else if (row.refs !== measured) out.push({ slug: row.dir, file: 'skills/README.md', key: 'refs', said: row.refs, measured })
   }
   return out
+}
+
+/** The library named as a bare noun, which is the only thing a skill body ever
+ *  counts in units of skills. `skills/` the directory, `skills[].x` a field and
+ *  a hyphenated word are all excluded, so the trigger is the English word. */
+const LIBRARY_NOUN = /(?<![/`\w-])skills(?![/\w-])/
+
+/** The counts this rule refuses, as a closed set of spelled words rather than
+ *  as a number pattern. Three exclusions, each paid for:
+ *
+ *    * `one` is a pronoun in this house voice far more often than a count --
+ *      "This one works on the gate itself" is in the paragraph that produced
+ *      this rule -- so including it would flag the sentence doing the repair.
+ *    * Digits are excluded because a skill body's digits are version strings,
+ *      percentages and reference ids. `0.5.0` in
+ *      `adjudicating-uncertain-spans` is three digit runs and no count.
+ *    * `both` is included, because a count of two is the one this library has
+ *      already gone stale on in prose: `quoting-...`'s trigger test said "both
+ *      boundaries this skill has are tested" for three weeks after it had five.
+ *
+ *  The residue is therefore a library count written in digits, which no
+ *  paragraph in this library does and which §5ae's one-sentence-one-number rule
+ *  covers in prose. */
+const LIBRARY_COUNT = /\b(two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|both)\b/gi
+
+/** Frontmatter and fenced blocks blanked to the same number of lines, so a
+ *  `what` field or a code sample cannot reach the prose rule and line numbers
+ *  still point where a reader will look. */
+const proseOnly = (text) => text
+  .replace(/^---\n[\s\S]*?\n---\n/, (m) => '\n'.repeat(m.split('\n').length - 1))
+  .replace(/^```[\s\S]*?^```/gm, (m) => '\n'.repeat(m.split('\n').length - 1))
+
+/**
+ * Every paragraph of a SKILL.md body that names the library and states a count
+ * of it, as `{ line, counts, quote }`.
+ *
+ * WHY THE PARAGRAPH AND NOT THE SENTENCE, which is the whole design. §5ae's
+ * measured cause is a sentence carrying two derived numbers, where the one
+ * nobody is thinking about survives the repair. Scoped to the sentence, this
+ * rule reproduces that: `Those four skills work on outcome_record.json` names
+ * the library and the sentence after it, `it sits across a handoff from all
+ * four`, does not, so the second `four` would stay. Scoped to the paragraph
+ * both are caught, and a count in that paragraph about something other than the
+ * library is not a false positive but a second thought, whose repair is a blank
+ * line -- which is this house's prose rule anyway.
+ *
+ * WHY A REFUSAL AND NOT A MEASUREMENT, unlike every other count this file
+ * checks. The subset a sentence means is a judgement §5e makes and no parser
+ * can: `the three skills in the record area` was right while `four skills`,
+ * one directory over, meant every other skill in the library and was wrong by
+ * five. So there is no number to compare against. What there is instead is
+ * §5ae's own rule 2 -- a sentence that needs a count names its members -- which
+ * has a determinate repair, needs no judgement from the checker, and leaves a
+ * paragraph that cannot go stale, because a named sibling is a path a receipt
+ * guard already resolves.
+ */
+export function libraryCountsInBody(text) {
+  const out = []
+  const prose = proseOnly(text)
+  let offset = 0
+  for (const para of prose.split(/\n\s*\n/)) {
+    const line = prose.slice(0, prose.indexOf(para, offset)).split('\n').length
+    offset = prose.indexOf(para, offset) + para.length
+    if (!LIBRARY_NOUN.test(para)) continue
+    const counts = [...para.matchAll(LIBRARY_COUNT)].map((m) => m[0])
+    if (counts.length) out.push({ line, counts, quote: para.replace(/\s+/g, ' ').trim().slice(0, 90) })
+  }
+  return out
+}
+
+/**
+ * Every skill body that counts the library instead of naming it, as
+ * `{ slug, file, line, counts, quote }`.
+ *
+ * WHAT THIS IS FOR. §5ae built the count check one layer up, for the trigger
+ * tests and the index, and declared one residue safe by argument: "a count
+ * stated inside a SKILL.md body is not measured here either, and that is a
+ * different case rather than a gap of the same kind, because a body's counts
+ * are claims about records and are covered by the receipts." That is true of
+ * every body count about a record and false of the subclass that counts the
+ * library, which cites nothing and so is fingerprinted by nothing.
+ *
+ * Measured on this tip's parent, 2026-10-27. Five paragraphs in the ten bodies
+ * name the library; all five stated a count; two were wrong by five and by
+ * four, both saying a skill sits across a handoff from the library as it stood
+ * on the day that skill landed. The `neighbours` key in the same directory's
+ * TRIGGER-TEST.md said 9 and was checked, in both cases, by this file.
+ */
+export function bodyCountDefects(library) {
+  const out = []
+  for (const s of library) {
+    if (s.skillText === null || s.skillText === undefined) continue
+    for (const hit of libraryCountsInBody(s.skillText))
+      out.push({ slug: s.slug, file: `skills/${s.slug}/SKILL.md`, ...hit })
+  }
+  return out
+}
+
+/** Why a body count is refused, and what to write instead. One condition, so
+ *  one explanation, per §5z. */
+export function explainBodyCounts(defects) {
+  if (!defects.length) return []
+  return [
+    'A skill body that counts the library is stating a derived fact that nothing can',
+    'check, because a count about skills/ cites no file and so no receipt guard',
+    'fingerprints it. It is also the count most certain to decay: a body says where',
+    'its skill sits among its neighbours, and the next skill to land changes that',
+    'without touching the file. Two of the five paragraphs this rule was written',
+    'against were already wrong, by four and by five, while the `neighbours` key in',
+    'the same directory was right and checked.',
+    'The repair is §5ae rule 2 and it is not a recount: name the siblings instead of',
+    'counting them, as slugs, so the sentence says what it means and a wrong name',
+    'becomes visible. If the paragraph needs a number for something that is not the',
+    'library, that is a second thought and takes a blank line.',
+  ]
 }
 
 /**
@@ -606,17 +736,36 @@ function main(argv) {
   // it is reported next to the shape defects and exits 1 on its own, rather than
   // waiting for --check, which is for the §5c budget a caller may be mid-repair
   // on. See countDefects for what one day of §5u-as-a-convention cost.
-  const counts = countDefects(library, indexRows)
+  let indexText = null
+  try { indexText = readFileSync(join(SKILLS_DIR, 'README.md'), 'utf8') } catch { indexText = null }
+  const counts = countDefects(library, indexRows, indexText)
   for (const d of counts) {
     // The index is one file holding ten rows, so its path alone does not say
     // which row is wrong; a trigger test's path already names its skill.
-    const where = d.file === 'skills/README.md' ? `skills/README.md row ${d.slug}` : d.file
+    const where = d.file !== 'skills/README.md' ? d.file
+      : d.slug === 'the library' ? 'skills/README.md counts block'
+      : `skills/README.md row ${d.slug}`
     console.log(d.key === 'counts block'
       ? `${where} declares no counts block, so nothing checks what it says about itself`
       : `${where} says ${d.key} ${d.said === null ? 'nowhere' : d.said}, the library says ${d.measured}`)
   }
 
+  // A body that counts the library is the same fact as a stale `counts` block,
+  // read in the file next door, so it prints with them and exits the same way.
+  // §5ae declared this residue safe and it was not; see `bodyCountDefects`.
+  const bodyCounts = bodyCountDefects(library)
+  for (const d of bodyCounts)
+    console.log(`${d.file}:${d.line} counts the library instead of naming it` +
+      ` (${d.counts.join(', ')}): "${d.quote}…"`)
+
   const shape = missingSkill.length + mislabelled.length + indexedMissing.length + unlisted.length
+  if (bodyCounts.length && !shape) {
+    console.log(`${bodyCounts.length} skill body paragraph${bodyCounts.length === 1 ? '' : 's'} ` +
+      `count${bodyCounts.length === 1 ? 's' : ''} the library, listed above.`)
+    for (const line of explainBodyCounts(bodyCounts)) console.log(line)
+    for (const line of explainCounts(counts)) console.log(line)
+    return 1
+  }
   if (counts.length && !shape) {
     console.log(`${counts.length} stated count${counts.length === 1 ? '' : 's'} disagree${counts.length === 1 ? 's' : ''} with the library, listed above.`)
     for (const line of explainCounts(counts)) console.log(line)

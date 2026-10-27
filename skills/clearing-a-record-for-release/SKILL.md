@@ -186,13 +186,14 @@ for about a day, and then returned the next day through new files,
 because nothing written down said which fields were dangerous [E27].
 
 It does not fire for choosing a span's label, for deciding what a record
-statistic is a share of, for running a trial, for distilling axioms, or
-for adding a bound to the record gate. Those five skills work on
-`outcome_record.json`, on `tuning.json` and on the gate. This one works
-on what leaves, which is `batch.json`, a published site, and the
-paragraph you are about to put in a document, so it sits across a
-handoff from all five rather than beside any of them
-(`prompts/skill-extract.md` §5e).
+statistic is a share of, for running a trial, for distilling axioms, for
+auditing a correction loop or a durability walk, for attributing a
+deleted span, for excluding a file from a record, or for adding a bound
+to the record gate. Every one of those works on `outcome_record.json`,
+on `tuning.json` or on the gate. This one works on what leaves, which is
+`batch.json`, a published site, and the paragraph you are about to put in
+a document, so it sits across a handoff from every one of them rather
+than beside any of them (`prompts/skill-extract.md` §5e).
 
 **The edge against the quoting skill is worth stating exactly, because
 the two share every noun.** Every field under `stats` ships, along with
