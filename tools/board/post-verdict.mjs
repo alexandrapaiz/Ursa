@@ -48,6 +48,7 @@
 
 import { LOCUS, POSITION, describeGate, verdictOf } from '../gates/verdict-shape.mjs'
 import { liveTargetFault } from './live-target.mjs'
+import { senderFault } from './sender.mjs'
 
 /**
  * One thing wrong, already classified by where its repair lives.
@@ -70,7 +71,8 @@ import { liveTargetFault } from './live-target.mjs'
  *   collects them. The caller has already printed one `code: line` and one
  *   `  repair: ...` line per `message`-scope finding.
  * @param {{dryRun?: boolean, kind?: string, toCompany?: string,
- *   toSeat?: string, id?: string}} seen what the invocation knows about itself.
+ *   toSeat?: string, fromCompany?: string, fromSeat?: string, id?: string}}
+ *   seen what the invocation knows about itself.
  * @returns {import('../gates/verdict-shape.mjs').Verdict}
  */
 export function verdict(findings, seen = {}) {
@@ -86,6 +88,15 @@ export function verdict(findings, seen = {}) {
   // no `to_seat` really does wake everyone in the company named.
   const woken = `${seen.toCompany || '(all companies)'}/${seen.toSeat || '(everyone)'}`
 
+  // The third bus key, and the one the receipt did not print until
+  // 2026-10-27. Both recipient fields were right in all seven misattributed
+  // rows; the field that was wrong is the one the sender never saw, which is
+  // why neither of the first two senders caught it in two tries. The
+  // fallbacks are unreachable through `./post.mjs`, which refuses an unnamed
+  // sender before it reaches any success line, and are written out because
+  // this function is pure and the enumerator calls it directly.
+  const from = `${seen.fromCompany || '(no company)'}/${seen.fromSeat || '(no seat)'}`
+
   // Order is post.mjs's own order and not a preference. The message checks run
   // before the sender check, which runs before anything is sent, so a run with
   // findings of two scopes reports the one that actually stopped it.
@@ -100,14 +111,21 @@ export function verdict(findings, seen = {}) {
   }
 
   if (sender.length > 0) {
+    // The cause is the finding's own code rather than one hardcoded string.
+    // Until 2026-10-27 the only way a sender could be refused was a company
+    // the bus does not route; there are now four, and one named cause per
+    // condition is this shape's own rule (`../gates/verdict-shape.mjs`). The
+    // SENDER_COMPANY_SPELLING line is byte-identical to the hardcoded form it
+    // replaces, which `./post-verdict.test.mjs` pins against a literal.
+    const first = sender[0]
     return verdictOf({
       exitCode: 1,
       stream: 'err',
       position: POSITION.BEFORE,
-      cause: 'SENDER_COMPANY_SPELLING',
+      cause: first.code || 'SENDER_REFUSED_UNNAMED_CODE',
       cites: [LOCUS.READER],
-      line: `SENDER_COMPANY_SPELLING: ${sender[0].line}`,
-      trailer: [`  repair: ${sender[0].repair}`],
+      line: `${first.code || 'SENDER_REFUSED_UNNAMED_CODE'}: ${first.line}`,
+      trailer: [`  repair: ${first.repair}`],
     })
   }
 
@@ -136,7 +154,7 @@ export function verdict(findings, seen = {}) {
     return verdictOf({
       exitCode: 0,
       cause: 'CHECKED_CLEAN_DRY_RUN',
-      line: `Checked clean. ${woken} would be woken.`,
+      line: `Checked clean. ${woken} would be woken, and the row would say it came from ${from}.`,
     })
   }
 
@@ -150,7 +168,15 @@ export function verdict(findings, seen = {}) {
     // without an `id`, means the row exists and this seat cannot name it, so
     // nothing downstream can quote it in a follow-up.
     cause: shown ? 'POSTED' : 'POSTED_ID_UNREADABLE',
-    line: `Posted ${seen.kind} to ${woken}${shown ? `, id ${shown}` : ''}.`,
+    line: `Posted ${seen.kind} from ${from} to ${woken}${shown ? `, id ${shown}` : ''}.`,
+    // The second defect `docs/design/verdict-enumeration.md` §10 found and
+    // deferred: this branch used to print a line indistinguishable from the
+    // readable-id one, so a seat could not tell from its own receipt that the
+    // row it just wrote cannot be quoted. Said in the trailer rather than in
+    // the verdict line, because the post did succeed.
+    trailer: shown
+      ? []
+      : ['  The board accepted it and answered with no readable id, so nothing downstream can quote this row.'],
     quoted: shown ? [shown] : [],
   })
 }
@@ -187,6 +213,18 @@ const refused = (code = 'SUBJECT_EMPTY') => ({
   repair: 'y',
 })
 
+/** A sender-scope finding built by calling the real `senderFault`, for the
+ *  same reason the ground probes call the real `liveTargetFault`: a reworded
+ *  or renamed condition in that file then shows up in this gate's census
+ *  instead of staying hidden behind a hand-written fixture. */
+const senderRefusal = (inputs) => ({ locus: LOCUS.READER, scope: 'sender', ...senderFault(inputs) })
+
+/** The roster as a fixture, so the probes do not move when company.yaml does. */
+const ROSTER = { company: 'Ursa', seats: ['pm', 'engineer', 'security'] }
+
+/** What a success or dry-run line now names about the sender. */
+const FROM = { fromCompany: 'Ursa', fromSeat: 'engineer' }
+
 /** The input space. Outcomes are measured by the enumerator, never declared. */
 export const GATE = describeGate({
   id: 'tools/board/post.mjs',
@@ -195,21 +233,43 @@ export const GATE = describeGate({
     // The reader edits the invocation it just typed. Named by the clause that
     // tells it nothing is on the bus yet, which is the part that makes the
     // edit worth making.
-    [LOCUS.READER]: { noun: /Nothing was posted|^SENDER_COMPANY_SPELLING/m },
+    // Widened 2026-10-27 from `^SENDER_COMPANY_SPELLING` to every sender
+    // code, because the sender branch grew from one condition to four and a
+    // pattern naming only the first would have reported the other three as
+    // lines that name no locus.
+    [LOCUS.READER]: { noun: /Nothing was posted|^SENDER_[A-Z_]+:/m },
     // The repair is a rule in a tracked file, so every clone and CI has the
     // same gap. Named by the file to transcribe it into.
     [LOCUS.COMMITTED]: { noun: /tools\/board\/check\.mjs/ },
   },
   probes: [
-    { name: 'posted, id readable', findings: [], seen: { kind: 'note', toCompany: 'Ursa', toSeat: 'pm', id: 'a1b2c3d4e5f6' } },
-    { name: 'posted, id unreadable', findings: [], seen: { kind: 'note', toCompany: 'Ursa', toSeat: 'pm' } },
-    { name: 'dry run, nothing wrong', findings: [], seen: { dryRun: true, kind: 'note', toCompany: 'Ursa' } },
+    { name: 'posted, id readable', findings: [], seen: { kind: 'note', toCompany: 'Ursa', toSeat: 'pm', ...FROM, id: 'a1b2c3d4e5f6' } },
+    { name: 'posted, id unreadable', findings: [], seen: { kind: 'note', toCompany: 'Ursa', toSeat: 'pm', ...FROM } },
+    { name: 'dry run, nothing wrong', findings: [], seen: { dryRun: true, kind: 'note', toCompany: 'Ursa', ...FROM } },
     { name: 'one message violation', findings: [refused()], seen: { kind: '', toCompany: 'Ursa' } },
     { name: 'three message violations', findings: [refused(), refused('KIND_UNKNOWN'), refused('BODY_MINIMUM')], seen: { kind: '', toCompany: 'Ursa' } },
     {
       name: 'the sender company is not a bus key',
-      findings: [{ locus: LOCUS.READER, scope: 'sender', code: 'COMPANY_SPELLING', line: 'company "ursa minor" is not one the bus routes', repair: 'use one of: Ursa, Atelier' }],
+      // post.mjs rewrites `violations`' `to_company` wording to `company` at
+      // the collection site and passes the code explicitly, so this probe
+      // carries the code the same way the caller does.
+      findings: [{ locus: LOCUS.READER, scope: 'sender', code: 'SENDER_COMPANY_SPELLING', line: 'company "ursa minor" is not one the bus routes', repair: 'use one of: Ursa, Atelier' }],
       seen: { kind: 'note', toCompany: 'Ursa' },
+    },
+    {
+      name: 'the sender seat was never named',
+      findings: [senderRefusal({ env: {}, declaration: ROSTER })],
+      seen: { kind: 'note', toCompany: 'Ursa', toSeat: 'pm' },
+    },
+    {
+      name: 'the sender seat differs from a roster seat only in case',
+      findings: [senderRefusal({ seatFlag: 'Engineer', env: {}, declaration: ROSTER })],
+      seen: { kind: 'note', toCompany: 'Ursa', toSeat: 'pm' },
+    },
+    {
+      name: 'the sender company has no declaration to come from',
+      findings: [senderRefusal({ seatFlag: 'pm', declaration: { company: '', seats: [] } })],
+      seen: { kind: 'note', toCompany: 'Ursa', toSeat: 'pm' },
     },
     {
       name: 'the store refused what the local checks passed',

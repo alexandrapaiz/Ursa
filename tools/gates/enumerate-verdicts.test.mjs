@@ -54,11 +54,15 @@ describe('the five extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 23 distinct causes with 28 probes, which is the number the text sweep could not see', () => {
+  it('reaches 26 distinct causes with 31 probes, which is the number the text sweep could not see', () => {
     const { json } = run()
-    assert.equal(json.branches.length, 28)
+    // 28 and 23 until 2026-10-27. The three added are post.mjs's sender
+    // branches: a seat named by neither flag nor variable, a seat differing
+    // from a roster seat only in case, and a company with no declaration to
+    // come from. Every one of them used to be a default rather than a branch.
+    assert.equal(json.branches.length, 31)
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
-    assert.equal(causes.size, 23)
+    assert.equal(causes.size, 26)
   })
 
   it('carries an exit 3, which no gate of the first four could have reached', () => {
