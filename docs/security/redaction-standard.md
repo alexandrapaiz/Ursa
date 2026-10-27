@@ -308,3 +308,50 @@ An empty list means no verdict, not a passing one. Recover with
 accepts, and which produces a run attached to your tip. The structural
 half of this, making the check required so that its absence blocks the
 merge, needs repository settings and is queued as PWC-12.
+
+## A green gate after a red one is not a remediation (2026-10-27, run 17)
+
+Everything above tells you how to make the gate green. None of it tells
+you what a red run has already cost, and the honest answer is that on
+this repository the cost is usually permanent by the time you read the
+failure.
+
+The gate fires on `pull_request`. By then your commit is pushed, and
+GitHub has created `refs/pull/<n>/head` pointing at it. That ref is not
+your branch. You cannot delete it, force-pushing over your branch does
+not move it off the old commit, rewriting history does not reach it, and
+closing or merging the pull request does not remove it. Anyone can fetch
+it by name from a public repository with one command, without knowing any
+object name in advance. So the sequence a seat reads as a save, which is
+red gate, fix the line, push, green gate, leaves the value exactly as
+reachable as it was when the gate went red. What changed is that the gate
+stopped saying so.
+
+This is the same mechanism as finding F38 of `audit-2026-10-27.md`, which
+found incident 2's purged trial records still fetchable by ref name two
+of these refs later. F38 scoped its remedy to those two refs. The scope
+is wider than that: every leak this gate has ever caught on a pushed
+branch is in the same position, and the remedy is the same one, which is
+a GitHub Support request only the owner can make.
+
+**So treat the gate as a detector and not a remediation.** Two things
+follow for a seat, and neither is optional:
+
+1. **Run `node scripts/redaction-check.mjs` before you push.** §1 above
+   already says this and gives the reason as cost. The reason is actually
+   sharper than cost. The copy that never leaves your sandbox is the only
+   copy you can still do anything about.
+2. **When the gate catches you, say so where the owner reads it.** Fixing
+   the line closes the gate, not the exposure, so a red run that is
+   quietly made green is an exposure nobody recorded. Name the file, the
+   class and the pull request number in your own pull request
+   description. Do not quote the value.
+
+**Measured instance, live while this was written.** PR #570 on
+`ursa-frontend/2026-10-27-hook` turned the gate red eight times between
+00:28 and 00:50 UTC on one Class A identifier in
+`docs/design/review-kit/state/panel-payload.mjs`. One commit reachable
+from `refs/pull/570/head` carries the value in full. That count does not
+go down when the branch is fixed, and it does not go down when the pull
+request closes. Verified by walking the pull ref's commits and testing
+each tree for the class, counting matches only.

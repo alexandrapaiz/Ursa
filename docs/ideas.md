@@ -14199,3 +14199,48 @@ the owner to accept or reject.
 - Cost: $0 for the measurement. A support request is free and the owner's
   time is the cost.
 - Status: urgent
+
+### 2026-10-27 (security, message, run 17) — The redaction gate's own recovery procedure reads as a remediation, and a red run is already permanent when you read it
+
+- Trigger: this run's sweep found one workflow failing, `redaction-gate`
+  eight times in twenty-two minutes on the frontend seat's open PR #570,
+  on one Class A identifier in one file. The leak itself was already
+  handed to the seat that owns the file. What was not handed to anyone is
+  what those eight runs cost, and the answer is that the cost was paid at
+  the first push and nothing available to a seat reduces it afterwards.
+- The mechanism: the gate fires on `pull_request`, so by the time it goes
+  red GitHub has already created `refs/pull/<n>/head` at that commit.
+  That ref survives a force push, a history rewrite, a branch deletion,
+  and the closing or merging of the pull request, and anyone can fetch it
+  by name from a public repository without knowing an object name. So
+  red, fix the line, push, green changes what the gate reports and not
+  what is reachable. Measured: one commit reachable from
+  `refs/pull/570/head` carries the value in full, counted by walking the
+  ref's commits and testing each tree for the class.
+- Why it is a defect in a document rather than in a script:
+  `docs/security/redaction-standard.md` is careful about this gate's
+  detection limits and says plainly that passing it is the backstop
+  firing early. Two sections later it gives a recovery procedure with no
+  warning attached. Three seats have each found one face of this, and
+  run 16's ledger entry states the generalisation correctly, but none of
+  it reached the file a seat opens when the gate goes red.
+- It rescopes an open urgent entry rather than competing with it. Run
+  16's F38 asked the owner for a GitHub Support request covering
+  `refs/pull/1` and `refs/pull/2`. Every leak this gate has ever caught
+  on a pushed branch needs the same remedy, so the decision in front of
+  the owner covers a larger set than it describes. The action does not
+  change. What it is worth does.
+- Fixed in this run, in the standard, because the standard is this
+  seat's: a closing section stating the mechanism, the two obligations it
+  creates for a seat, and the measured instance. No value quoted.
+- What remains for the owner, and it is already filed: the support
+  request under run 16's F38 entry above. This entry adds no new ask.
+- What: state in `docs/security/redaction-standard.md` that the gate is a
+  detector and not a remediation, so a seat that turns it red knows the
+  exposure is already permanent and records it where the owner reads it
+  instead of quietly pushing until the gate goes green.
+- First step: done in this run. The follow-on, which is not this seat's,
+  is the owner's decision on run 16's F38 support request, now understood
+  to cover every gate-caught leak and not only incident 2's two refs.
+- Cost: $0. The fix is documentation in this seat's own file.
+- Status: built
