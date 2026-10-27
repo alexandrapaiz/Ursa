@@ -980,6 +980,45 @@ current export. Worth a direct product test before leaning further on
 either "one-directional" or "symmetric" as the precise word. Last
 observed 2026-10-14: [Claude support: Importing and exporting your memory from Claude](https://support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude).
 
+### Gemini Personal Intelligence (Google)
+
+What it is: a cross-app memory layer, reaching all free Google accounts
+in the UK and more widely through 2026, that lets Gemini and AI Mode in
+Search draw context from Gmail, Google Photos, Drive, and other
+first-party apps instead of requiring the user to paste it in. New
+entry, added this run; missed by every prior sweep of this category
+despite being a frontier-lab memory feature on the same axis as ChatGPT
+Memory and Claude Memory Import. Who it serves: Google's own consumer
+accounts. Pricing: included, no separate charge. Strengths: the deepest
+first-party data reach of any entry in this category, because it draws
+on a decade of email and photo history most users already have rather
+than asking them to restate anything. Consent framing: opt-in, and
+Google's own coverage states this is deliberate — the feature requires
+explicit enablement, unlike the always-on-by-default memory ChatGPT and
+Claude ship outside the EEA/UK.
+
+Weakness against Ursa, and the reason this is not simply a point for
+Google's side of last run's open question: on 2026-10-16, Google
+updated its privacy policy to remove language that previously excluded
+Gmail, Drive, and Photos content from ad personalization, replacing it
+with a carve-out — that data stays out of ad targeting "unless you
+choose to make data from these services available to other Google
+services that support personalized ads," which is exactly what
+enabling Personal Intelligence does. The opt-in gate is real, but what
+sits behind it is not just better answers; it is eligibility for ad
+targeting on the same Gmail and Photos content the feature reads. This
+is the sharpest concrete case found yet for why "did you consent
+before inference happened" (last run's finding) is not by itself a
+sufficient promise: Google can truthfully say Personal Intelligence is
+opt-in while the thing the user is opting into also opts their content
+into advertising. CLAUDE.md's non-negotiable #1 (Ursa Major never
+monetizes the user directly) is the exact axis this case argues for
+naming explicitly, not just "opt-in happened" or "you can see what was
+inferred." Last observed 2026-10-26: [9to5Google: Google will target
+ads based on Gmail, Photos data if Personal Intelligence is
+enabled](https://9to5google.com/2026/10/23/google-will-target-ads-based-on-gmail-photos-data-if-personal-intelligence-is-enabled/),
+[DataCamp: Gemini Personal Intelligence](https://www.datacamp.com/blog/gemini-personal-intelligence).
+
 ### MemHub (Tencent Hunyuan Hy-Memory)
 
 What it is: a local-first desktop-and-CLI product, open-sourced this
@@ -1572,3 +1611,13 @@ Upgrade?](https://arxiv.org/abs/2609.05339).
   authored-not-real, and the sweep of the remaining 35 names found no
   other candidate. Positioning consequence in
   docs/market/positioning.md.
+- 2026-10-27 (message, 2nd run) — added Gemini Personal Intelligence
+  (Category 3, new entry), Google's own cross-app memory feature,
+  missed by every prior sweep of this category. Found via this run's
+  demand-signals ceremony rather than a landscape sweep: Google updated
+  its privacy policy on 2026-10-16 to carve ad personalization back
+  into Gmail/Photos/Drive content for users who enable the feature,
+  the first concrete case this file has found of an opt-in memory gate
+  that is also an ad-targeting gate, directly extending the prior
+  run's "consent is a distinct axis from transparency" finding.
+  Positioning consequence in docs/market/positioning.md.
