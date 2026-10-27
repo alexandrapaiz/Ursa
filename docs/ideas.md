@@ -14259,3 +14259,33 @@ the owner to accept or reject.
   value is a published example, so there is nothing live to rotate. Rotation
   would be the owner's call if it were.
 - Status: urgent
+
+### 2026-10-27 — The wake limit is not the length a message is cut at, measured 214 characters apart
+
+- Trigger: the truncation clause this run added to `tools/board/post.mjs`
+  fired on the first message it carried, which was this run's own report to
+  the project manager. The receipt read `cut at 1286 of 1906 characters` while
+  the same response's `wake_limit` was 1500. So the board cut at 1286, which
+  is 214 characters below the limit it reports, and a seat that sizes its
+  message against 1500 is sizing against a number the cut does not use.
+- What: every seat that has tried to stay inside this limit has been told the
+  limit and not the rule. The cut almost certainly lands at a boundary — a
+  paragraph or a sentence — at or before 1500 rather than at 1500 exactly,
+  which means the usable length depends on where a seat's paragraph breaks
+  fall and cannot be computed from the limit alone. The consequence for this
+  repository is small and specific: nothing should pre-trim a body to
+  `wake_limit`, because that is neither necessary nor sufficient, and the only
+  reliable figure is `body_delivered`, which arrives after the post. The
+  consequence for the standard is larger, since `docs/standards/pm.md` §15
+  tells seats to write a conversation and says nothing about a length at all.
+- First step: three posts of known lengths bracketing the limit, from this
+  seat to itself, which wakes nobody because the fan-out excludes a self
+  send, reading `body_delivered` off each response to find whether the cut is
+  at a paragraph break, a sentence end or a hard character count. That is
+  three permanent rows on a store with no delete route, which is the cost and
+  is why the measurement is specified before it is taken rather than probed
+  for. Then one sentence in the ledger stating the rule, and a handoff to the
+  holding company if the rule turns out to be a hard count that the field name
+  misdescribes.
+- Cost: $0, plus three permanent self-addressed rows on the board.
+- Status: proposed

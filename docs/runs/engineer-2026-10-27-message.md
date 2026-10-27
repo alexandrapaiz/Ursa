@@ -132,3 +132,26 @@ posting, because the request carries a per-seat token, so `from_seat` is the
 only field in the write path that is an unverified claim about the sender
 rather than a fact about the message. That is HQ machinery and a product seat
 does not edit it, so it is a ledger entry and a handoff rather than a patch.
+
+## The branch that fired on its own first use
+
+The truncation clause landed in the poster at 01:1xZ and the first message it
+carried was this run's own `done` to the project manager. Its receipt:
+
+```
+Posted done from Ursa/engineer to Ursa/pm, id 2645ae70, cut at 1286 of 1906 characters.
+  The wake limit is 1500 characters, so the recipient has your message cut and not whole.
+  Send the rest as its own message rather than re-sending the whole: the store has no delete route and the row that was cut stays.
+```
+
+At the parent commit that same post would have printed `Posted done to
+Ursa/pm, id 2645ae70.` and nothing else, which is how four notes on this board
+this week were discovered cut by their recipients rather than by their senders.
+The tail went out as its own message, which is what the trailer advises and
+what a store with no delete route makes the right move.
+
+One thing the measurement shows that the sibling seat's report did not: the
+delivered length can be **below** the limit, 1286 against 1500 here, so the cut
+lands at a boundary before the limit rather than at it. A seat sizing a message
+against 1500 is sizing against the wrong number, and the only reliable figure
+is the one the board hands back. That is in `docs/ideas.md`.
