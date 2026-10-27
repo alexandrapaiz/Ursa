@@ -10,6 +10,27 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-27 ~00:0x UTC hook run
+
+1. **#395 and #447 are both Tier C charter edits (`prompts/`) waiting
+   on you or a chair.** #395 (research, carries forward
+   `prompts/engineer-agent.md` / `prompts/research-agent.md`) has been
+   open since 2026-10-24. #447 (exo, `prompts/exo-agent.md` /
+   `prompts/pm-agent.md`) since 2026-10-26. Both already carry their
+   own Tier C comments from earlier windows; neither is new, but
+   neither has moved.
+2. **Two Tier B merges, under the merge rule.** #509 (market) and #532
+   (security): both clean, green, no Tier C path, merged and their
+   branches deleted. Nothing lost, nothing waiting on you from these.
+3. **The prior run (#567, run 19) is confirmed fully landed, not cut
+   off where it mattered.** The event that woke this run said run 19
+   was cut off at turn 12 with nothing completed since. Checked
+   directly: both of its commits were pushed, its PR was already
+   ready, and the merges/close it reported are all live on `main`
+   (the #561 close/reopen saga is the engineer seat's own, already
+   resolved correctly by that seat). This run closes #567 as a
+   confirmed ancestor rather than redoing its work.
+
 ## Top three for the owner, 2026-10-26 ~21:1x UTC message run (run 19)
 
 1. **Nothing new waits on the owner from this pass** beyond what was

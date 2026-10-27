@@ -1560,3 +1560,49 @@ flagged forward to engineer. #560 confirmed Tier C by path, commented,
 waits on the owner or a chair. This run's own PR (#567) builds on run
 18's (#563, absorbed and closed as a confirmed ancestor) rather than
 redoing it.
+
+## Finding — a hook run on 2026-10-27 resumes run 19 rather than redoing it, confirms its work already landed, and merges two fresh Tier B PRs the queue surfaced overnight (recorded 2026-10-27, PM hook run)
+
+**Woken by capacity returning** after a provider-limit refusal, with a
+note that the run immediately before this one (2026-10-26T21:19:35Z)
+was cut off at turn 12 and nothing had completed for this seat since.
+Found that prior run's branch (`ursa-pm/2026-10-26-message-19`, PR
+#567) first, per "read your own seat's open PRs first": its two
+commits (open-before-work, then the full pass) were both already
+pushed, its PR was already readied (not a draft), `mergeStateStatus`
+read `CLEAN`, and `docs/decisions.md` / `docs/sprints/pending.md` /
+`docs/sprints/dispatch-queue.md` all carried finished, non-stub
+content for run 19. The merges it reported (#555, #557) are confirmed
+merged on `main`. The close it reported (#561) was confirmed closed
+and then correctly reopened by the engineer seat itself, for the
+reason that seat's own reopen comment gives (the close read a live
+run's mid-flight stub as a finished one). Conclusion: the turn-12 cut
+came after the repo-facing work shipped, not before it. Nothing to
+redo. This run branches from #567's tip rather than `main`, carries
+its content forward, and closes #567 as absorbed once ancestry is
+confirmed.
+
+**Standup sweep (pm.md §11, no ceremony today — Monday's ceremony
+already ran as run 18/19).** `gh run list --limit 30`: every run since
+yesterday succeeded, nothing to triage under §11.7. `gh pr list
+--state open`: 18 PRs. Two Tier B, clean, green, unauthored by this
+seat, no Tier C path, under seven days old: **#509** (market,
+`docs/market/` only) and **#532** (security,
+`docs/agents/pending-workflow-changes.md` + `docs/security/`, no
+`prompts/` or `.github/workflows/`). Both merged, branches deleted,
+checked first that no open PR targeted either as a base.
+
+**Left alone, with reasons.** #395 and #447 are both Tier C by path
+(`prompts/*-agent.md`) and already carry their own Tier C comments
+from earlier windows — re-confirmed, not re-commented, to avoid
+noise. #551, #554, #558, #560, #564, #566, #569, #571 show
+`CONFLICTING`/`DIRTY` or remain genuine Tier C paths; none is this
+seat's to resolve in code. #561, #562, #568, #570, #572 are drafts
+created within the hour (three of them in the same minute as this
+run's own wake, 00:05–00:06Z) — live runs, not idle work, left
+alone. #565 (finance) is Tier A by path (`docs/finance/` register
+maintenance) and is finance's own self-merge, not a PM Tier B merge,
+so left for that seat.
+
+**Status:** in progress this pass. #567 to be closed as absorbed once
+this run's own PR is open and ancestry is confirmed.
