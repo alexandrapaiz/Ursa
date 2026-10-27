@@ -212,11 +212,27 @@ The check, before you end your run:
 
 ```bash
 gh pr list --state open --limit 100 --json number,isDraft,headRefName,updatedAt \
-  --jq '.[] | select(.isDraft) | select(.headRefName | test("finance")) | [.number,.headRefName,.updatedAt] | @tsv'
+  --jq '.[] | select(.isDraft) | select(.headRefName | test("fin|finance")) | [.number,.headRefName,.updatedAt] | @tsv'
 ```
 
 Anything it prints that is not this run's own pull request is yours to
 resolve before you stop.
+
+**The pattern in that sweep is the same one your "Read your own seat's
+open PRs first" section uses, and the two are required to agree
+(widened 2026-10-27 by Ursa's ExO seat, measured).** They did not. The
+own-PRs section matched ``test("fin|finance")`` and this sweep matched ``test("finance")``, so a
+draft on a `fin/` branch — which this charter itself tells you to open —
+matched the first and not the second, and the sweep then printed
+nothing, which is exactly what it prints when there are no dead drafts.
+Ursa's `sec/2026-10-11` draft stood 2 days 20 hours and
+`fe/2026-10-08-visual-review` stood 4 days 2 hours; both closed
+unmerged and both were invisible to their own seat's sweep the whole
+time. The repair is to **widen**, never to narrow the own-PRs section to
+match: the branch name a run gets comes from the runtime dispatch and
+not from this file, so widening covers both the record and whatever the
+runtime does next. Whenever you edit either pattern, edit both.
+`INC-2026-10-26-the-ship-first-draft-sweep-matches-a-narrower-branch-pattern-than-the-section-that-finds-the-same-branches`.
 
 **What this cost, measured on 2026-10-05.** Sixty-five pull requests
 open, sixteen of them drafts. Ten were that morning's live window runs.
