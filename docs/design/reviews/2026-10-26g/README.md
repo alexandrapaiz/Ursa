@@ -200,12 +200,24 @@ can see. The pixels, from `diff-frames.py`:
 
 ```
   panel-run-overlay     1355 px  41.5% of the element's box
-  panel-action-overlay   317 px  13.6%
-  dash-action-overlay    246 px  10.8%
+  panel-action-overlay   315 px  13.5%
+  dash-action-overlay    247 px  10.8%
 ```
 
 None is below the hairline it draws. All fourteen targets are in
-`data/hover-all/`.
+`data/hover-all/`, and the full table is `data/hover-pixels.txt`.
+
+**The overlay's three reproduce within two pixels across two runs on one
+host; ursa-minor's eleven reproduce exactly.** This folder's frames were
+shot twice, once before the compression pass of §7 and once after, and
+the eleven ursa-minor counts are identical between the two sets to the
+pixel — 218, 10451, 10462, 4024, 114, 379 and the rest — while the three
+overlay ones moved by 0, 1 and 2. The numbers above are from the second
+set, which is the one committed. **No cause for the wobble is offered
+here because none was established.** It is small enough not to change any
+verdict and large enough that a future run comparing against these three
+figures should expect a pixel or two rather than equality, which is why
+it is written down rather than rounded away.
 
 ## 5. The command block nobody had seen
 
@@ -307,6 +319,23 @@ waiting. Not a defect — the kit's README states the order — but it is the
 first thing anyone pointing `--state` at a late-rendering surface will
 hit, so it is written down.
 
+**Compressing a review's frames changes some of the pixel counts a later
+run would read off them, and a spot check says it does not.** The
+charter asks for compressed frames, and an adaptive 256-colour palette
+takes this folder from 5.1MB to 2.2MB, which is where the last two
+reviews sit. Re-running `diff-frames.py` over the quantised hover pairs
+reproduced `panel-run-overlay` at 1355, `panel-action-overlay` at 317
+and `dash-action-overlay` at 246, all three exact, which is where this
+run nearly stopped checking. Two further frames had moved:
+`rec-row-index` from 218 to 312 and `sp-verbatim` from 10451 to 11416,
+the second by nine per cent. A hover worth a few hundred pixels is a
+quantity this ledger has reasoned about before, so a committed frame
+that no longer diffs to what its own review reports is a trap for the
+next run and not a rounding detail. **Everything under `data/hover-*` is
+therefore left uncompressed**, re-shot after the compression pass rather
+than restored from it, and the numbers in §4 come from those frames.
+Everything else in the folder is quantised. That is L41.
+
 **The legend key at 1.20:1 is still open**, from 2026-10-26e §6. Both
 repairs are palette decisions and the choice is the owner's. Untouched.
 
@@ -329,6 +358,9 @@ Three entries and one proposal, in `docs/design/ledger.md`.
 - **L40 (proposal, not a decision)** — stack the dashboard's polarity tag
   above the statement below 640, which spends no gutter on a 320px line.
   §6. Named with what it costs as well as what it buys.
+- **L41** — compressing a review's frames moves some of the pixel counts
+  they are evidence for, and three exact reproductions do not mean it
+  did not. §7.
 
 ## 9. Reduced motion and touch
 

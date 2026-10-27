@@ -1381,3 +1381,35 @@ Not done here, because the charter's repair step is for defects and this
 is a design decision about a surface the owner has not yet seen with
 units in it. `reviews/2026-10-26g/crops/units-320-after.png` is that
 surface as it stands.
+
+## L41 — Compressing a review's frames moves the numbers they are evidence for
+
+**measured**, 2026-10-27. `reviews/2026-10-26g/README.md` §7.
+
+The charter asks for compressed screenshots so the repository stays
+light, and an adaptive 256-colour palette takes a review folder of dark
+UI frames from 5.1MB to 2.2MB, which is where the last two reviews sit.
+It is also not lossless, and the way it fails is the dangerous way.
+
+Re-running `diff-frames.py` over the quantised hover pairs reproduced
+three counts exactly: 1355, 317 and 246 pixels, the three this run had
+just reported. **Two others had moved.** `rec-row-index` from 218 to
+312, and `sp-verbatim` from 10451 to 11416, which is nine per cent.
+Whether a frame survives quantisation depends on how many distinct
+colours it holds, so the frames with the subtlest washes — exactly the
+ones whose pixel count is the whole finding — are the ones that move.
+
+**Three exact reproductions are not evidence that a transform is
+lossless.** That is the transferable half. A spot check drawn from the
+frames you care most about is drawn from a biased sample, because you
+looked at the ones you had just written numbers for.
+
+The rule this seat follows now: **any frame set a tool reads a number
+off is committed uncompressed**, and everything else is compressed. In
+practice that is `data/hover-*`, and it is re-shot after the compression
+pass rather than restored from it, because a restored frame is only as
+trustworthy as the copy it came from.
+
+This is L6 and L8's family — a review frame that differs from itself —
+with the difference introduced on the way into the repository rather
+than on the way out of the browser.

@@ -34,7 +34,7 @@ panel-action-overlay changes                .panel-action on http://127.0.0.1:49
                       self.border-bottom-color: rgb(139, 147, 167) -> rgb(168, 199, 250)
                       self.text-decoration-color: rgb(139, 147, 167) -> rgb(168, 199, 250)
                       self.outline-color: rgb(139, 147, 167) -> rgb(168, 199, 250)
-dash-action-overlay  changes                .dash-action on http://127.0.0.1:4961/dashboard?port=7842  (10 matches, button, box 40x18)
+dash-action-overlay  changes                .dash-action on http://127.0.0.1:4961/dashboard?port=7842  (26 matches, button, box 40x18)
                       self.color: rgb(112, 127, 160) -> rgb(168, 199, 250)
                       self.border-top-color: rgb(112, 127, 160) -> rgb(168, 199, 250)
                       self.border-bottom-color: rgb(112, 127, 160) -> rgb(168, 199, 250)

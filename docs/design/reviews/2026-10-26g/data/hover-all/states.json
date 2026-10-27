@@ -136,7 +136,7 @@
       ],
       "clip": {
         "x": 230,
-        "y": 386,
+        "y": 615,
         "width": 980,
         "height": 126
       },
@@ -293,7 +293,7 @@
       "store": true,
       "until": ".dash-bar",
       "verdict": "changes",
-      "count": 10,
+      "count": 26,
       "meta": {
         "disabled": false,
         "pointerEvents": "auto",
@@ -307,7 +307,7 @@
         "self.outline-color: rgb(112, 127, 160) -> rgb(168, 199, 250)"
       ],
       "clip": {
-        "x": 969,
+        "x": 963,
         "y": 99,
         "width": 60,
         "height": 38
