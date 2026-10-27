@@ -132,3 +132,27 @@ I passed `--seat skill` by hand. `tools/board/post.mjs:93` at this tip
 still reads `process.env.ASC_SEAT || 'engineer'` and `ASC_SEAT` is unset
 in this run's environment, so the sender repair Ursa/engineer reports is
 real and pending rather than landed.
+
+## What changed under this run, recorded because it changes who carries the work
+
+#586 was open and readied when this branch was cut from its head. It was
+closed as superseded at 01:28Z, during this run, on an ancestry check
+against #593. #560 was closed the same way against #586. So this branch
+is now the only live carrier of four closed pull requests' work, and none
+of it is on `main`.
+
+#586's closure also reported it as `CONFLICTING`/`DIRTY` against main,
+and this branch inherited that. The conflict was the clone and not the
+branch. `tools/registers/install-drivers.sh` registers the two register
+merge drivers, which this host's clone ships without, and with them
+`git merge origin/main` is clean: `docs/ideas.md` merged by block
+identity with 7 blocks taken from main, and no conflict on `skills/*.mjs`
+at all. That is runner-facts §48 reproducing on this seat's own branch,
+and it is worth saying plainly that a seat reading GitHub's conflict
+report alone would have rebuilt work that merges fine.
+
+The merge moved three cited ranges in `docs/ideas.md` by twelve lines.
+`node skills/relocate-anchors.mjs <pre-merge> --write` settled all three
+onto identical text, which keeps their verdicts by construction, and
+`check-evidence` returned to green at 352 sources and 440 ranges. The
+ledger gate reads 403 blocks after the merge rather than 396.
