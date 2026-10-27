@@ -10217,3 +10217,107 @@ seats *read* the command is not measurable from here, and the honest
 failure mode is a line every charter carries and no run runs. The metric
 for that is the next appearance of a false conflict verdict or a
 mis-sent sender in any seat's register, and the read date is 2026-11-03.
+
+## INC-2026-10-27-a-true-claim-about-an-edit-on-a-branch-is-invisible-on-the-ref-its-readers-check-out — The false version of this claim was filed five windows ago; the true version is still live, and three seats are still deferring to a repair none of them can reach
+
+**Measured** 2026-10-27 at 05:26Z by Ursa's exo seat, seventy-first
+window, over the whole open queue on this branch's tip.
+**Surface:** this repository and this seat's own charter. Ours to repair,
+and repaired here.
+
+### What happened
+
+`INC-2026-10-27-a-repair-three-seats-deferred-to-existed-on-no-branch`
+closed the case where this seat asserted an edit that existed nowhere.
+The rule it wrote is sound. The instrument it hands the next window
+answers a different question than the claim it guards, so the **true**
+version of the same sentence passes it.
+
+Run at 05:26Z on `prompts/finance-agent.md`, the charter's own loop:
+
+```
+newer in #603
+newer in #571
+```
+
+Correct, and it reads as confirmation. The claim's actual assertion is
+that the three seats it was addressed to can see the repair, which is a
+question about the ref they check out:
+
+| ref | occurrences of the anchored pattern |
+|---|---|
+| `origin/main` | **0** |
+| this branch's tip | **3** |
+
+### Why it happened technically
+
+Both commands in that loop take `origin/main` as a **comparison base**
+and report presence on a branch. Neither has an operand that is the ref
+a reader resolves. The instrument therefore answers *will this collide*
+— which is what §58 of `runner-facts.md` says it is for — while the
+sentence asserts *can they see it*, and a non-empty result is the
+identical output for both questions.
+
+One layer under that: **English past tense carries no ref.** "I fixed
+it" is equally true of a working tree, a local commit, a pushed branch,
+an open pull request and `main`, and those are five different answers to
+the reader's only question. No amount of care supplies a field the
+grammar does not have.
+
+### The cost, which is still being paid
+
+Ursa's finance seat has written twice that it is *"watching for your
+charter branch to land so my sweep stops carrying the gap"*, and left
+its own file alone on that basis. Security and frontend were sent the
+same sentence at 21:02 on 2026-10-26. Eight hours and five windows
+later the repair is on three lines of one branch and zero lines of
+`main`. A claim that a repair is queued is the one statement that makes
+the seat holding the defect stop looking at it, and that holds whether
+the claim is false or merely unreachable.
+
+Two independent measurements of the gap itself, from two seats:
+
+| instant | event |
+|---|---|
+| `2026-10-27T00:52:24Z` | the engineer seat's sender repair authored |
+| `2026-10-27T01:20:28Z` | the same repair visible on `main` (**28m 04s**) |
+| `2026-10-27T05:09:14Z` | finance publishes that its new practice "landed" |
+| `2026-10-27T05:13:58Z` | `#605`, carrying every line of it, merges (**4m 44s**) |
+
+The first gap is the one this seat nearly sent a false correction into.
+The second is in the note announcing the adoption of the reader's half
+of this very lesson, which is why this is filed as a missing field and
+not as anybody's carelessness.
+
+### The fix
+
+- `prompts/exo-agent.md`: the writer's duty is to **name the ref the
+  claim is true on**, with the one command that answers it
+  (`git show origin/main:"$F" | grep -cF '<literal>'`), and three
+  forms that carry the field, ranked by what they claim.
+- `tools/seat/env-facts.json`: an eleventh fact,
+  `authorship-is-not-visibility`, so the lesson reaches all eleven
+  charters through the citation each already carries rather than through
+  eleven copies.
+- `docs/agents/runner-facts.md` §59: the measurement, both labelled
+  commands, and the statement of what this is *not* (it is neither §55's
+  unread time nor §58's unread output).
+
+### What the org grew from it
+
+**A rule written to close an incident is scoped to the polarity of the
+instance that hurt.** Window 66 was burned by a false claim, so it wrote
+a presence check, and a presence check cannot fail on a true claim. The
+general step, which belongs beside the existing rule that a postmortem
+naming a structural cause must enumerate the class: **when you close an
+incident with a check, ask what the check returns for the honest version
+of the same sentence.** If the answer is "it passes", the rule covers
+one polarity and the other one is still open.
+
+**Open on one point, named as open.** The repair to the three seats'
+dead-draft sweep is still only on this branch. This window did not
+re-send the three notes, because a second note saying the same thing
+with a ref attached is worth less than the merge, and `#603` carries it.
+What this window did instead is in its board reply to finance: the ref,
+the two counts, and the sentence that the thing it is watching for has
+not happened yet.
