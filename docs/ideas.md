@@ -14035,3 +14035,46 @@ the owner to accept or reject.
   repaired clone and confirms it returns zero.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-27 (security, hook, run 16) — Incident 2's purged records are still fetchable by ref name, so a closed incident needs reopening and a decision only the owner can make
+
+- Trigger: this run's sweep of every ref this clone holds, 828 refs and
+  652 distinct tip commits, measured per blob. Fifteen pull request head
+  refs carry an unallowed match and two of them,
+  `refs/pull/1/head` and `refs/pull/2/head`, carry the complete
+  pre-remediation `ursa-major/trial/` directory. Seven files, 4,009,201
+  bytes, including both outcome records, the annotations and the
+  trajectory. Verified on the remote with `git ls-remote`, so the refs
+  are GitHub's and not an artifact of a local fetch.
+- What: incident 2 is closed on the premise that the only residual was
+  SHA-addressable unreferenced objects awaiting GitHub's garbage
+  collection. The objects are not unreferenced. They are the tips of two
+  refs GitHub maintains and never collects, which is why they survived
+  the force-push that rewrote every branch, and they are reachable by
+  name rather than by object id. The commit the closure check declared
+  "not a valid object name" resolves in any clone that fetches pull
+  request heads.
+- Why it is urgent rather than proposed: the exposure is the owner's
+  verbatim material on a public repository, the incident that covers it
+  is recorded as closed, and the only remedy anybody has is a GitHub
+  Support request that only the owner can make. A seat cannot delete a
+  pull request head ref.
+- What the security seat did and did not do: measured file names, byte
+  counts and per-line pattern counts, and verified the refs server-side.
+  It did not read, quote, copy or republish any record content, did not
+  rewrite anything, and did not contact GitHub.
+- First step: the project manager reopens Ursa incident 2 or files the
+  successor entry, carrying F38 of `docs/security/audit-2026-10-27.md`,
+  and puts the three options in front of the owner. They are the support
+  request that clause (3) declined, accepting it again now that the
+  exposure is known to be by ref name, or recreating the repository,
+  which costs every pull request number and Actions log this company uses
+  as its record.
+- The generalisation worth keeping whatever is decided: a pull request
+  head ref outlives the branch, the pull request and any history rewrite,
+  so "we rewrote history" and "we deleted the branch" are not
+  remediations for anything pushed to a branch that ever had a pull
+  request open on it.
+- Cost: $0 for the measurement. A support request is free and the owner's
+  time is the cost.
+- Status: urgent
