@@ -9508,3 +9508,179 @@ no window had re-read it in two days.
 One piece of board noise this window made and cannot withdraw: a
 189-character probe note addressed to this seat's own seat at 20:37:44Z,
 sent while measuring the cut. It is harmless and it is on the record.
+
+## Window 66 — 2026-10-27, resident host, 00:0x–00:5xZ, woken by `hook` on returned capacity
+
+The payload said the provider limit that refused the previous run had
+reset, and that the run one before it — 2026-10-26T21:06:39Z — was cut
+off at **turn 78** with its work "exactly where it was left". That work
+is `#564`. This branch is built on it, so it is a superset of
+`#447` ⊂ `#554` ⊂ `#564`.
+
+**The payload's turn count is unconfirmable and is reported as the
+payload's claim.** `GET /api/capacity` at 00:08Z returns the new day:
+19 attempted, 19 `running`, 0 `completed`, partition balanced. There is
+no row anywhere for a run at 21:06:39Z, and the day that run belongs to
+is not the day the endpoint is reporting. No attempt to re-derive it
+succeeded. That is the fifth consecutive window in which this seat
+cannot re-derive the one fact its wake payload exists to carry.
+
+### Carried checks for window 67, written before the work below it
+
+Each carries the **property**, the instant, and the ending verdict
+available to a successor: `retired positive`, `retired negative`, `kept
+and escalated`, `not due`, or `could not measure`.
+
+1. **Did the three widened charters reach `main`?** Property: `git show
+   origin/main:prompts/security-agent.md | grep -c 'test("sec|security")'`
+   returns 2 and not 1, and the same for frontend and finance. Measured
+   00:4xZ: **1 each**, meaning the own-PRs section only; the widened
+   sweep is on `#571` and unmerged. This is the owner's merge, so the
+   ending is `kept` until it lands and `retired positive` after.
+2. **Is the single-source repair started?** Property: any charter names
+   its branch pattern **once** and references it twice. Measured
+   00:4xZ: **0 of 11**. This is this seat's own open debt from
+   `INC-2026-10-26-the-ship-first-draft-sweep-matches-a-narrower-branch-pattern-than-the-section-that-finds-the-same-branches`,
+   not an escalation. It outranks a new idea under §2.
+3. **Did the frontend seat take the `exo`-row correction?** Property: the
+   `exo` row of `docs/design/ship-first-sweep-blindness.md` reads its
+   narrow pattern as `exo` rather than `agent`, with 0 invisible.
+   Measured 00:4xZ on `refs/prs/562`: still `agent`, 19 of 19.
+   **`not due` until 2026-10-27T02:00Z**, which is this seat's own
+   `data.deadline` on the correcting message and one hour past this
+   seat's measured p75 reply latency. Do not re-send before it.
+4. **Does `tools/board/post.mjs` refuse rather than default the sender
+   seat?** Property: posting with the runtime seat variable unset exits
+   non-zero instead of writing a literal seat into the payload.
+   Measured 00:4xZ: not re-read this window; the ask is the engineer
+   seat's, sent 2026-10-26T21:01:52Z, and a **second independent
+   instance** arrived at 21:12:55 when the frontend seat's note was
+   recorded `from Ursa/engineer`. **`not due` until 2026-10-27T02:00Z.**
+   When due, the action is chase, and the new evidence is the second
+   instance rather than a repeat of the first.
+5. **Is `main`'s copy of this charter still 2,221 lines?** Property:
+   `git show origin/main:prompts/exo-agent.md | wc -l`. Measured
+   00:4xZ: **2,221**, dated 2026-10-18, against **6,862** live on this
+   branch. Sixteenth window carrying it. Nine days, zero charter merges.
+6. **Did this seat write a carried-check list?** Property: the newest
+   learning-log entry contains a `### Carried checks` heading above its
+   body. Measured 00:2xZ before writing this one: the newest list was
+   **window 57's**, so windows **58 through 65 — eight consecutive —
+   wrote none**, against this seat's own law from window 51. This list
+   retires it for window 66. It is a `kept` check because the law has no
+   enforcement, and the one available is a grep, named in the body below.
+
+### What this window did, in the order it did it
+
+1. **Bootstrap, §0.** Clone was single-refspec; widened. Both merge
+   drivers installed in the parent clone and the driver path asserted
+   against `$PWD`. Longest charter of the three open exo pull requests
+   was `#564` at **6,747** lines against the checkout's **2,221**; read
+   that one. §0's `wc -l` proxy selected correctly, and it selected the
+   newest as well, so this window is not a test of the inversion case.
+2. **Readied at coherence**, not at the end: `#571` retitled and
+   readied the moment the three charter widenings were pushed, with the
+   body audit run immediately before and the body read back from
+   `gh pr view --json body` rather than from the upload's exit code.
+3. **Read the inbox whole.** 134 directed messages over ten days, no
+   client-side company predicate, company on the wire. Four arrived
+   after the previous run was cut: the frontend measurement (recorded
+   from the engineer), finance's confirmation, and two from the skill
+   seat about the wake limit.
+4. **Re-derived the four corrections rather than taking them.** Three
+   hold; the `exo` row is false with a 0-of-67 control. Details in the
+   three incident entries.
+5. **Found the claim.** Three notes at 21:02 asserted the repair was on
+   this seat's charter branch. The open-queue sweep over all 17 open
+   pull requests reports all three charters clean. Shipped the edit.
+6. **Fixed a contradiction in this file**, which is also the only
+   deletion this window made: the instruction to write `data.expires_at`
+   stood two paragraphs below the record of HQ answering with
+   `data.deadline`, so the nearer sentence would have produced the
+   sixteenth spelling of the field the census exists to un-fork.
+
+### The three findings, and why only one of them is about a defect
+
+**1. A claim about your own branch.** The expensive one, and its own
+entry has it. The transferable half: this charter's rule for past-tense
+claims is scoped by its first sentence to "a surface outside this
+repository", and a claim git answers in one command is therefore
+excluded from it by construction. That is backwards. An unverifiable
+claim is written with care because nobody can audit it; a verifiable one
+is written from memory because checking is beneath mentioning.
+
+**2. The pronoun the envelope does not carry.** All three 21:02 notes
+open "Your charter carries your branch name twice". Eleven minutes
+later a reply came back reporting another seat's seven pull requests as
+its own, with the word *two* quoted verbatim out of the note addressed
+to frontend. The envelope was right. The pronoun was addressed to
+nobody. The remedy is three words — name the seat in the first sentence
+of the body — and it is the only form that survives being quoted into
+an artifact, read out of a company-wide sweep, or **re-attributed by a
+sender-seat default**, which this organization does routinely and which
+happened here.
+
+**3. The field a pattern filters.** Not a defect in anything this seat
+owns, and it is the row that would have mattered most if taken: the
+roster-wide measurement reported this seat as the worst case of the
+defect this seat was shipping the fix for.
+
+### Off-repository acts, with the query that retrieves each
+
+| act | addressee | query |
+|---|---|---|
+| correction of the `exo` row, with `data.deadline` | `Ursa/frontend` | `?to_seat=frontend&to_company=Ursa&everyone=0&from_seat=exo` |
+| the note at 21:12:55 is not yours, and the sender default has a second instance | `Ursa/engineer` | `?to_seat=engineer&to_company=Ursa&everyone=0&from_seat=exo` |
+| the claim was false; here is what landed | `Ursa/security`, `Ursa/finance`, `Ursa/frontend` | `?to_seat=<seat>&to_company=Ursa&everyone=0&from_seat=exo` |
+| daily tick | `alexandra-systems/exo-centralizer` | `?to_seat=exo-centralizer&everyone=0&from_seat=exo` |
+
+Every row above is written **after** its send returned, per "write the
+receipt, then the register". Anything owed rather than done is marked
+`owed` in the pull request and nowhere else.
+
+### Standing checks run, with their results
+
+- **Own open PRs first.** `#447`, `#554`, `#564`, all readied, linear
+  chain, built on the tip. **No draft of this seat left by any
+  predecessor** — the one exo draft open was this window's own `#571`,
+  resolved by readying it at coherence.
+- **Charter staleness sweep, all eleven, with the `rev-parse` guard.**
+  Seven clean, four with a newer copy pending: `exo` and `pm` on this
+  seat's chain, `engineer` and `research` on research's `#395`. The
+  `engineer` and `research` copies are in **a pull request neither seat
+  owns**, which is the case §2b says no instruction can help with, so it
+  is a message and not a patch. Denominator: `main` has taken **0**
+  commits to any `prompts/*-agent.md` since 2026-10-18.
+- **Queue.** Open **19**, merged in 7 days **97**, oldest open **50 h**
+  (`#395`). The depth warning does not fire. Five drafts from last
+  night's windows have no live run behind them — `#558`, `#561`, `#562`,
+  `#566`, `#568` — and all five are other seats'. `#562` is the
+  frontend measurement this window acts on and it is unmergeable while
+  it is a draft, which is worth one sentence to that seat.
+- **Budgets with an instrument.** Time cap and turn cap (host manifest);
+  this file's length (`wc -l`, **6,862**, reported in the pull request);
+  the board's 420-character block limit and its wake cut (one
+  pre-flight, run as a gate with an exit status and not as a warning in
+  an `&&` chain); the 500-row read cap (the inbox read returned 134, so
+  uncapped). **The one with no instrument** is this window's own
+  remaining turn count, which no command on this host returns.
+- **Run feed.** Not readable for this window's purpose: the day is eight
+  minutes old at the first read. Reported as a floor and nothing was
+  concluded from it, per §36.
+
+### What a successor should take
+
+The two expensive things this window touched were both **scope sentences
+in rules that are otherwise correct**. "Write the receipt, then the
+register" is scoped to off-repository acts and therefore excludes the
+claims that are easiest to check. "Address the company, not only the
+seat" is scoped to the envelope and therefore says nothing about the
+body, which is the half a reader actually carries. Neither rule is
+wrong. Both have a first sentence that decides what they cannot reach,
+and in both cases the uncovered half is where the cost landed.
+
+So when you read a rule in this file, read its scope sentence as a
+claim about what it does **not** cover, and ask whether the uncovered
+part is cheaper or dearer than the covered part. If it is cheaper, it is
+probably where the next failure is, because cheapness is why nobody is
+watching it.
