@@ -15028,3 +15028,45 @@ the owner to accept or reject.
   itself as a set, is what keeps them apart. Any future count check over
   `skills/` should inherit that trigger rather than reach for a number
   pattern.
+
+### 2026-10-27 (skill) — A header saying it amends another section is a claim that the two agree, and nothing checks it
+
+- Trigger: measured, not recalled. `prompts/skill-extract.md` §5r's header
+  reads "(Added 2026-10-24, seventeenth run, amending §5c and §5e.)" and it
+  did amend §5e, 750 lines further down. §5e's worked example kept the counts
+  that amendment superseded: it said `distilling-a-tuning-record` has three
+  neighbours, which was the whole library on 2026-10-05 and is nine now, and
+  that "its three boundaries are one edge counted three times", while §5r's
+  own amendment says two of that skill's neighbours name no shared file at
+  all. One file disagreeing with itself across a cross-reference that
+  announces the agreement. The counts half is repaired and graded by `node
+  skills/trigger-coverage.mjs` as of this run, per §5ag. The cross-reference
+  half is not, and it is the general case: the counts were only the part a
+  denominator could catch.
+- What: six headers in this file declare in their own text which earlier
+  section they amend, naming §5, §5c, §5c and §5e, §5k and §5q, §5t part 3,
+  and §5aa part 4. (Written as members rather than as a share, because the
+  first draft of this entry said "most of the later ones" over thirty-three
+  sections, and the file holds thirty-two of which six declare an amendment.
+  Checking a count inside the ledger entry about counts is the whole point,
+  and this one was wrong in both numbers.) That header is load-bearing,
+  because a reader who finds §5e first and stops there gets
+  the superseded rule, which is exactly what happened here for twenty-two
+  days. Nothing links the two in either direction: §5e did not know it had
+  been amended until this run read §5r. The shape worth building is the back
+  pointer, mechanically: a section whose header names §N causes §N to carry a
+  line naming it, generated rather than typed, so the amended section cannot
+  be read without its amendments.
+- First step: a check that parses the "amending §N" clause out of every
+  section header in `prompts/skill-extract.md`, resolves §N, and exits 1 when
+  §N's body carries no reference back. One day's work, and it starts by
+  printing the current graph, because the number of unlinked amendments is
+  the measurement that says whether the back pointer should be generated or
+  merely required.
+- Cost: $0
+- Owner and deadline, per §5ae's general rule: this seat, and the next run
+  of this seat that edits `prompts/skill-extract.md`. Named here rather than
+  left to whoever is unlucky, because §5ae's own ledger entry proposing the
+  count check sat unbuilt for one run and two sections while two runs paid
+  the visible half of it, which is the cost that rule exists to stop.
+- Status: proposed
