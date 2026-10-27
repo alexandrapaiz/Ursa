@@ -1,13 +1,22 @@
 # Trigger test — running-an-outcome-record-trial
 
-Thirteen prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Ten are near misses that should not.
+```counts
+prompts: 13
+should-fire: 3
+near-misses: 10
+neighbours: 9
+```
+
+The counts above are checked by `node skills/trigger-coverage.mjs`,
+which goes red when they drift, per `prompts/skill-extract.md` §5ae,
+so they are the only place this file states them. The prompts below
+are written against the `description` field in `SKILL.md`.
 Per `prompts/skill-extract.md` §5, when the test fails, the description
 is what changes, not the test.
 
-The library now holds ten skills, so this test carries a second job
-beyond activation: §5c asks one near miss per adjacent skill, and every
-other skill in the library is adjacent to this one. Near misses 4 and 5
+This test carries a second job beyond activation: §5c asks one near miss
+per adjacent skill, and every other skill in the library is adjacent to
+this one, which is the `neighbours` line above. Near misses 4 and 5
 are this seat's own wording from the days when this skill had one
 neighbour. Near miss 6 was appended on 2026-10-01 for the quoting
 skill and rewritten on 2026-10-24, for the reason stated under it.

@@ -45,7 +45,7 @@ import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { join } from 'node:path'
 import { sourcePaths, ranges as lineRanges } from './source-line.mjs'
-import { citingTexts, refsIn, strayCitations } from './citing-files.mjs'
+import { citingTexts, declaredRefs, refsIn, strayCitations } from './citing-files.mjs'
 import { unreadDirs } from './library-dirs.mjs'
 
 const root = new URL('..', import.meta.url).pathname
@@ -188,8 +188,10 @@ for (const entry of readdirSync(skillsDir)) {
     problems.push(`${entry}: ${file} cites ${refs.join(', ')}, and nothing reads that file — move the claim into a .md file or drop the tag`)
 
   const declared = new Set()
-  for (const m of fm[1].matchAll(/- ref:\s*(\S+)\n(?:.*\n)*?\s*source:\s*(.+)/g)) {
-    const [, ref, sourceLine] = m
+  // One parser for the evidence table, in ./citing-files.mjs, because
+  // trigger-coverage.mjs counts the same declarations to check the index's
+  // `Refs` column and a second regex here would be a second answer.
+  for (const { ref, sourceLine } of declaredRefs(text)) {
     declared.add(ref)
     // One source line may hold several path[:ranges] plus prose; see
     // ./source-line.mjs for what the pattern can and cannot see, which the

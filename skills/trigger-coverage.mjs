@@ -67,6 +67,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { unreadDirs, indexedRows } from './library-dirs.mjs'
+import { declaredRefs } from './citing-files.mjs'
 
 const SKILLS_DIR = new URL('.', import.meta.url).pathname.replace(/\/$/, '')
 
@@ -209,10 +210,15 @@ export function readLibrary(dir = SKILLS_DIR) {
     if (!isDir(abs)) continue
     let trigger
     try { trigger = readFileSync(join(abs, 'TRIGGER-TEST.md'), 'utf8') } catch { trigger = null }
-    let skill = true
-    try { statSync(join(abs, 'SKILL.md')) } catch { skill = false }
-    if (!skill) continue
-    out.push({ slug: name, trigger, ...(trigger ? parseTriggerTest(trigger) : { shouldFire: [], nearMisses: [], unclassified: [] }) })
+    // The skill file is read rather than stat-ed, because `refs` below is the
+    // number the index's `Refs` column claims and this is where that number
+    // actually lives. One parser for it, in ./citing-files.mjs, shared with
+    // check-evidence.mjs.
+    let skillText = null
+    try { skillText = readFileSync(join(abs, 'SKILL.md'), 'utf8') } catch { skillText = null }
+    if (skillText === null) continue
+    out.push({ slug: name, trigger, refs: declaredRefs(skillText).length,
+      ...(trigger ? parseTriggerTest(trigger) : { shouldFire: [], nearMisses: [], unclassified: [] }) })
   }
   return out
 }
@@ -304,6 +310,122 @@ const pct = (n, d) => (d === 0 ? '0' : ((100 * n) / d).toFixed(0))
  *   conditions that reach the shortfall branch; either may be empty
  * @returns {string[]} lines to print, in order, for the conditions that fired
  */
+/** The counts a trigger test states about itself, in a fenced `counts` block
+ *  rather than in its prose. Four keys, all integers:
+ *
+ *      ```counts
+ *      prompts: 13
+ *      should-fire: 4
+ *      near-misses: 9
+ *      neighbours: 9
+ *      ```
+ *
+ *  Returns `null` when the file declares no block, which is itself a defect
+ *  below, and an object of the keys it does declare otherwise. Unknown keys are
+ *  returned too, so a typo surfaces as an unchecked key rather than as silence.
+ *
+ *  WHY A BLOCK AND NOT THE PROSE. This is the shape §5u proposed and declined
+ *  to build, for the reason it gives: the honest check is not a search for
+ *  number words. Two sentences in this library state a count historically,
+ *  skills/README.md on a neighbour count that was true of a smaller library
+ *  and §5r's own "15 of 30 ordered pairs", and both are correct as written and
+ *  must stay. A check that parses English cannot tell them from a stale claim.
+ *  A fenced block is invisible to that problem by construction: the file states
+ *  its counts once, in one place, and the prose beside it is free to argue
+ *  about any number it likes. */
+export function declaredCounts(text) {
+  const m = text.match(/^```counts\n([\s\S]*?)^```/m)
+  if (!m) return null
+  const out = {}
+  for (const line of m[1].split('\n')) {
+    const kv = line.match(/^\s*([a-z-]+)\s*:\s*(\d+)\s*$/)
+    if (kv) out[kv[1]] = Number(kv[2])
+  }
+  return out
+}
+
+/** The four keys every trigger test declares, each with the function that
+ *  measures it. `neighbours` is the §5c denominator, which is every other
+ *  skill in the library. */
+const COUNT_KEYS = {
+  prompts: (s, lib) => s.shouldFire.length + s.nearMisses.length,
+  'should-fire': (s) => s.shouldFire.length,
+  'near-misses': (s) => s.nearMisses.length,
+  neighbours: (s, lib) => lib.length - 1,
+}
+
+/**
+ * Every count this library states about itself that disagrees with the library,
+ * as `{ slug, file, key, said, measured }`, with `said` null when the statement
+ * is missing rather than wrong.
+ *
+ * WHAT THIS IS FOR. §5u found nine false sentences in eight trigger tests after
+ * the ninth skill landed, named the general form — a derived fact recorded by
+ * hand beside the thing it is derived from — and left the check unbuilt. One
+ * day later, on 2026-10-27, six of the ten trigger tests still said "the budget
+ * is eight near misses" with nine neighbours, and three of the ten rows of
+ * skills/README.md stated a ref count that was wrong by up to five. §5u's own
+ * rule had been paid once, by the run that wrote it. So the rule is not the
+ * repair here; the exit status is.
+ *
+ * The index's `Refs` column is checked in the same pass and not in a second
+ * tool, because it is the same defect in the same library with the same cause,
+ * and a reader who has to run two commands to learn that a count is stale will
+ * run one.
+ */
+export function countDefects(library, indexRows) {
+  const out = []
+  for (const s of library) {
+    if (s.trigger === null) continue
+    const file = `skills/${s.slug}/TRIGGER-TEST.md`
+    const said = declaredCounts(s.trigger)
+    if (said === null) {
+      out.push({ slug: s.slug, file, key: 'counts block', said: null, measured: null })
+      continue
+    }
+    for (const [key, measure] of Object.entries(COUNT_KEYS)) {
+      const measured = measure(s, library)
+      if (!(key in said)) out.push({ slug: s.slug, file, key, said: null, measured })
+      else if (said[key] !== measured) out.push({ slug: s.slug, file, key, said: said[key], measured })
+    }
+  }
+  const byDir = new Map(library.map((s) => [s.slug, s]))
+  for (const row of indexRows) {
+    const s = byDir.get(row.dir)
+    if (!s) continue
+    const measured = s.refs
+    if (row.refs === null) out.push({ slug: row.dir, file: 'skills/README.md', key: 'refs', said: null, measured })
+    else if (row.refs !== measured) out.push({ slug: row.dir, file: 'skills/README.md', key: 'refs', said: row.refs, measured })
+  }
+  return out
+}
+
+/**
+ * Why a stated count is wrong, by the one cause this guard knows and the one it
+ * cannot distinguish from it. Same discipline as explainShape: a condition
+ * explains itself and nothing else.
+ */
+export function explainCounts(defects) {
+  const lines = []
+  const stale = defects.filter((d) => d.said !== null)
+  const missing = defects.filter((d) => d.said === null)
+  if (stale.length) {
+    lines.push('A stated count is a derived fact kept by hand, so it goes stale the moment the')
+    lines.push('library changes shape, and every receipt guard stays green because a count about')
+    lines.push('skills/ cites nothing. The usual cause is a landing run that paid §5r\'s prompt')
+    lines.push('debt in a sibling\'s file and did not touch the sentence counting the prompts it')
+    lines.push('added. The numbers above are measured from the files, so the repair is to copy')
+    lines.push('them in, in this pull request, per §5u.')
+  }
+  if (missing.length) {
+    lines.push('A count with no statement is not a defect in the library, it is this check with')
+    lines.push('nothing to check: the file declares no `counts` block, or the index row has no')
+    lines.push('`Refs` cell, so nothing there can go stale and nothing there can be trusted')
+    lines.push('either. Add the block, or the cell, with the measured numbers above.')
+  }
+  return lines
+}
+
 /**
  * Why the library-shape branch failed, as a sentence per condition that fired.
  *
@@ -479,7 +601,27 @@ function main(argv) {
   // it was one number under one class name, and four library-shape defects
   // could be four index rows nobody wrote — a two-minute edit to one file — or
   // four directories whose evidence nothing checks. See `explainShape`.
+  // A stated count that disagrees with the library is the same kind of fact as a
+  // dangling index row: published, derived, and checkable without judgement. So
+  // it is reported next to the shape defects and exits 1 on its own, rather than
+  // waiting for --check, which is for the §5c budget a caller may be mid-repair
+  // on. See countDefects for what one day of §5u-as-a-convention cost.
+  const counts = countDefects(library, indexRows)
+  for (const d of counts) {
+    // The index is one file holding ten rows, so its path alone does not say
+    // which row is wrong; a trigger test's path already names its skill.
+    const where = d.file === 'skills/README.md' ? `skills/README.md row ${d.slug}` : d.file
+    console.log(d.key === 'counts block'
+      ? `${where} declares no counts block, so nothing checks what it says about itself`
+      : `${where} says ${d.key} ${d.said === null ? 'nowhere' : d.said}, the library says ${d.measured}`)
+  }
+
   const shape = missingSkill.length + mislabelled.length + indexedMissing.length + unlisted.length
+  if (counts.length && !shape) {
+    console.log(`${counts.length} stated count${counts.length === 1 ? '' : 's'} disagree${counts.length === 1 ? 's' : ''} with the library, listed above.`)
+    for (const line of explainCounts(counts)) console.log(line)
+    return 1
+  }
   if (shape) {
     console.log(`${shape} library-shape defect${shape === 1 ? '' : 's'}: ` +
       `${missingSkill.length} unread, ${unlisted.length} unlisted, ` +

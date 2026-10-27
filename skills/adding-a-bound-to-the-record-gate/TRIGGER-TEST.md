@@ -1,7 +1,16 @@
 # Trigger test — adding-a-bound-to-the-record-gate
 
-Twelve prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Nine are near misses that should not.
+```counts
+prompts: 12
+should-fire: 3
+near-misses: 9
+neighbours: 9
+```
+
+The counts above are checked by `node skills/trigger-coverage.mjs`,
+which goes red when they drift, per `prompts/skill-extract.md` §5ae,
+so they are the only place this file states them. The prompts below
+are written against the `description` field in `SKILL.md`.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes, not the test. The reasoning below points at the
 skill's own steps and limits rather than at evidence refs. When this

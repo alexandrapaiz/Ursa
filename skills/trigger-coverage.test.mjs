@@ -11,7 +11,10 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   BIGRAM_DICE_FLOOR,
+  countDefects,
   coverage,
+  declaredCounts,
+  explainCounts,
   explainShape,
   explainShortfall,
   parseTriggerTest,
@@ -364,4 +367,83 @@ test('the shape lines are singular and plural correctly, because the count is th
   assert.match(one, /1 index row points/)
   const two = explainShape({ ...SHAPE_NONE, indexedMissing: ['a', 'b'] }).join(' ')
   assert.match(two, /2 index rows point/)
+})
+
+// The stated-count check, added 2026-10-27. What these cover is the one thing
+// §5u said a count check must not do, which is guess at a number in prose.
+
+const counted = (prompts, sf, nm, nbrs) =>
+  `# Trigger test — a-skill\n\n\`\`\`counts\nprompts: ${prompts}\nshould-fire: ${sf}\n` +
+  `near-misses: ${nm}\nneighbours: ${nbrs}\n\`\`\`\n\nFifteen prompts once, and §5r's own 15 of 30 ordered pairs.\n`
+
+/** A library entry shaped like readLibrary's, with the prompt counts faked so
+ *  the count check can be tested without a whole trigger test per case. */
+const entry = (slug, trigger, sf, nm, refs = 0) => ({
+  slug, trigger, refs,
+  shouldFire: Array.from({ length: sf }, (_, i) => ({ id: `${i + 1}`, text: 'x', reasoning: '' })),
+  nearMisses: Array.from({ length: nm }, (_, i) => ({ id: `${i + 9}`, text: 'y', reasoning: '' })),
+})
+
+test('declaredCounts reads the fenced block and nothing else in the file', () => {
+  const said = declaredCounts(counted(12, 3, 9, 9))
+  assert.deepEqual(said, { prompts: 12, 'should-fire': 3, 'near-misses': 9, neighbours: 9 })
+})
+
+test('a historical number in the prose is invisible to the check, which is the point', () => {
+  // §5u declined to build this check because a search for number words cannot
+  // tell skills/README.md's "then five neighbours" from a stale claim. The
+  // fixture above says "Fifteen prompts once" and "15 of 30 ordered pairs" in
+  // its prose, both correct as written, and neither reaches the result.
+  const said = declaredCounts(counted(12, 3, 9, 0))
+  assert.equal(said.prompts, 12)
+  assert.equal(countDefects([entry('a-skill', counted(12, 3, 9, 0), 3, 9)], []).length, 0)
+})
+
+test('no block at all is reported as the absence rather than as a wrong count', () => {
+  const defects = countDefects([entry('a-skill', '# Trigger test — a-skill\n\nTwelve prompts.\n', 3, 9)], [])
+  assert.deepEqual(defects, [{ slug: 'a-skill', file: 'skills/a-skill/TRIGGER-TEST.md', key: 'counts block', said: null, measured: null }])
+})
+
+test('every stated count is compared, and the measured number comes from the files', () => {
+  // The library has one skill here, so the §5c denominator is zero neighbours.
+  const defects = countDefects([entry('a-skill', counted(13, 4, 9, 9), 3, 9)], [])
+  assert.deepEqual(defects.map((d) => [d.key, d.said, d.measured]), [
+    ['prompts', 13, 12],
+    ['should-fire', 4, 3],
+    ['neighbours', 9, 0],
+  ])
+})
+
+test('the neighbour count is the library minus this skill, so landing one moves every file', () => {
+  // This is the arithmetic §5u measured: two landing runs left four headers
+  // saying "five neighbours" in a library of nine. One skill, nothing stale;
+  // add a second and both files owe a new number.
+  const lib = [entry('a', counted(12, 3, 9, 1), 3, 9), entry('b', counted(12, 3, 9, 1), 3, 9)]
+  assert.equal(countDefects(lib, []).length, 0)
+  lib.push(entry('c', counted(12, 3, 9, 2), 3, 9))
+  assert.deepEqual(countDefects(lib, []).map((d) => `${d.slug}:${d.key}:${d.said}->${d.measured}`),
+    ['a:neighbours:1->2', 'b:neighbours:1->2'])
+})
+
+test("the index's Refs column is checked against the skill's own declarations", () => {
+  const lib = [entry('a-skill', counted(12, 3, 9, 0), 3, 9, 45)]
+  assert.deepEqual(countDefects(lib, [{ label: 'a-skill', dir: 'a-skill', refs: 41 }]),
+    [{ slug: 'a-skill', file: 'skills/README.md', key: 'refs', said: 41, measured: 45 }])
+  assert.equal(countDefects(lib, [{ label: 'a-skill', dir: 'a-skill', refs: 45 }]).length, 0)
+})
+
+test('an index row for a directory that is not a skill is the shape check\'s finding, not this one', () => {
+  // Reporting it here too would be two guards disagreeing about one rule, which
+  // is the argument library-dirs.mjs makes about the missing trigger test.
+  assert.deepEqual(countDefects([], [{ label: 'ghost', dir: 'ghost', refs: 3 }]), [])
+})
+
+test('the count explanation separates a wrong statement from a missing one', () => {
+  const stale = explainCounts([{ slug: 'a', file: 'f', key: 'prompts', said: 12, measured: 13 }]).join(' ')
+  assert.match(stale, /derived fact kept by hand/)
+  assert.doesNotMatch(stale, /declares no/)
+  const missing = explainCounts([{ slug: 'a', file: 'f', key: 'counts block', said: null, measured: null }]).join(' ')
+  assert.match(missing, /nothing to check/)
+  assert.doesNotMatch(missing, /goes stale/)
+  assert.deepEqual(explainCounts([]), [])
 })

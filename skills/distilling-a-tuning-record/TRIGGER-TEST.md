@@ -1,11 +1,21 @@
 # Trigger test — distilling-a-tuning-record
 
-Twelve prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Nine are near misses that should not.
+```counts
+prompts: 12
+should-fire: 3
+near-misses: 9
+neighbours: 9
+```
+
+The counts above are checked by `node skills/trigger-coverage.mjs`,
+which goes red when they drift, per `prompts/skill-extract.md` §5ae,
+so they are the only place this file states them. The prompts below
+are written against the `description` field in `SKILL.md`.
 Per `prompts/skill-extract.md` §5, when the test fails the description
-is what changes, not the test. The budget is eight near misses rather
-than two because §5c sets one near miss per adjacent skill, and this
-skill has nine neighbours: every other skill in the library.
+is what changes, not the test. The near-miss budget is one per adjacent skill rather than §5's
+floor of two, because §5c says so,
+and every other skill in the library is adjacent, so the `neighbours`
+line above is the budget and `near-misses` is what this file spends.
 
 Near miss 4 is `quoting-a-number-from-an-outcome-record`'s own trigger,
 near miss 5 is `running-an-outcome-record-trial`'s, near miss 6 is

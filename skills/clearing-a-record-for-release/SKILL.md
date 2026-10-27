@@ -13,12 +13,12 @@ description: >
   deciding what a record statistic is a share of, for auditing the
   trajectory signals a record carries, for running a trial, for
   distilling axioms, or for adding a bound to the record gate.
-version: 0.1.1
+version: 0.1.2
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-23
-revised: 2026-10-24
+revised: 2026-10-27
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -103,20 +103,20 @@ evidence:
     what: the redaction standard is field-level rather than pattern-level, because the workflow gate catches three regular expressions and not the ordinary English that actually leaked
     source: docs/security/redaction-standard.md:11-27
   - ref: E28
-    what: the four surfaces a record reaches the public through, that the viewer is a second full copy of the sensitive fields rather than a rendering of the safe ones, and that redaction happens before entry rather than at rendering
-    source: docs/security/redaction-standard.md:29-49
+    what: the five surfaces a record reaches the public through, that the viewer is a second full copy of the sensitive fields rather than a rendering of the safe ones, that a screenshot of any surface carries that surface's text as pixels, and that redaction happens before entry rather than at rendering, so redacting at capture time is the same mistake
+    source: docs/security/redaction-standard.md:29-59
   - ref: E29
     what: the five classes, verbatim human text, machine and account identity, session identity, credentials, and other people
-    source: docs/security/redaction-standard.md:53-78
+    source: docs/security/redaction-standard.md:63-88
   - ref: E30
     what: the field-by-field dispositions and the pattern behind them, that every field which labels the outcome ships and every field which reproduces the work does not
-    source: docs/security/redaction-standard.md:91-117
+    source: docs/security/redaction-standard.md:101-127
   - ref: E31
     what: the four clauses under which a Class A field may ship, that the owner sign-off is per record and does not generalise, and that retention is not sign-off
-    source: docs/security/redaction-standard.md:119-138
+    source: docs/security/redaction-standard.md:129-148
   - ref: E32
     what: the fixture record passes every mechanical class while carrying three Class A fields, so a real record of the same shape would pass the gate and not be safe
-    source: docs/security/redaction-standard.md:157-171
+    source: docs/security/redaction-standard.md:167-181
   - ref: E33
     what: the one edge that crosses the device boundary and what it carries, and that the records, the tuning and the consent file have no outbound edge at all
     source: docs/design/consent-and-erasure.md:83-85
@@ -143,7 +143,7 @@ evidence:
     source: ursa-major/src/disclosure.test.ts:256-310
   - ref: E41
     what: the standard installs nothing, Class A has no automated check in it, and what it gives instead is the field list so a seat about to quote a record need not rediscover the incident
-    source: docs/security/redaction-standard.md:173-182
+    source: docs/security/redaction-standard.md:183-192
   - ref: E42
     what: revoke-axiom prints in the same breath that a block the user already pasted into another product is outside what the command can reach and keeps working until she replaces it herself, and since 2026-10-26 the sentence is a shared function taking only the surface's own name for itself, so the page cannot admit less than the command does
     source: ursa-major/overlay/lib/revocation-reach.ts:52-60; ursa-major/src/consent.cli.ts:218
@@ -153,6 +153,9 @@ evidence:
   - ref: E44
     what: both revoke-axiom and consent show report the axioms that still say nearly the same thing as the revoked one and were deliberately left alone, show covering revocations already made and revoke-axiom covering the one just made
     source: ursa-major/src/consent.cli.ts:219-233, ursa-major/src/consent.cli.ts:112-130
+  - ref: E45
+    what: the gate runs grep with -I, which skips every binary file, so none of its three patterns has ever been applied to a screenshot, and the rendered half of that surface is checkable by nothing, so its rule is a rule for people, capture fixtures and never a real project's records
+    source: docs/security/redaction-standard.md:194-204
 supersedes: []
 ---
 
@@ -373,6 +376,22 @@ copies to clear, not one. The viewer embeds prompt text, so it is a
 second full copy of the sensitive fields rather than a rendering of the
 safe ones, and a viewer that redacts beside a JSON file that does not
 has protected nothing, because both ship together [E28].
+
+**A picture of either copy is a third one.** Since 2026-10-26 the
+standard names a fifth surface, which is a screenshot of any of the
+other four, because a capture of the viewer carries the prompt text the
+viewer embeds and the pixels hold it exactly as the HTML did [E28]. Two
+things follow, and the second is the one that catches a careful seat.
+Redacting at the moment of capture is the same mistake as redacting at
+the moment of rendering, because the unredacted page had to exist to be
+photographed [E28]. And the gate cannot help here at all: it runs `grep`
+with `-I`, which skips every binary file, so not one of its three
+patterns has ever been applied to an image, and the half that is drawn
+into the picture is checkable by nothing [E45]. So the rule for this
+surface is a rule for people rather than a gate, which is to capture
+fixtures and never a real project's records, and if a point genuinely
+needs real data to land, that is the owner's decision and not a
+judgement call at capture time [E45].
 
 Output: a passage, plus a written note of which clause it went out
 under.

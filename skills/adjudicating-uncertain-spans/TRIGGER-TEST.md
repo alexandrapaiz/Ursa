@@ -1,13 +1,24 @@
 # Trigger test — adjudicating-uncertain-spans
 
-Fourteen prompts, written against the `description` field in `SKILL.md`,
-per `prompts/skill-extract.md` section 5. Three should activate the
-skill and eleven should not. When this test fails, the description is
-what changes, not the test.
+```counts
+prompts: 14
+should-fire: 3
+near-misses: 11
+neighbours: 9
+```
 
-The budget is ten near misses rather than two because §5c sets one
-near miss per adjacent skill, and this skill has nine neighbours: every
-other skill in the library. Near misses 4 and 5 are this seat's own
+The counts above are checked by `node skills/trigger-coverage.mjs`,
+which goes red when they drift, per `prompts/skill-extract.md` §5ae,
+so they are the only place this file states them. The prompts below
+are written against the `description` field in `SKILL.md`.
+When this test fails, the description is what changes, not the test, per
+`prompts/skill-extract.md` section 5.
+
+The near-miss budget is one per adjacent skill rather than §5's floor of
+two, because §5c says so, and every other skill in the library is
+adjacent. This file spends more than the budget, which §5 permits since
+the budget is a floor, and the two lines above are the budget and the
+spend. Near misses 4 and 5 are this seat's own
 wording and predate the siblings they now sit beside; near misses 6
 through 10 each carry one sibling's own trigger prompt verbatim, which
 is what §5c literally asks for and what §5 means by putting the test in

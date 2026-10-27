@@ -1,13 +1,22 @@
 # Trigger test — excluding-a-file-from-an-outcome-record
 
-Twelve prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Nine are near misses that should not.
+```counts
+prompts: 12
+should-fire: 3
+near-misses: 9
+neighbours: 9
+```
+
+The counts above are checked by `node skills/trigger-coverage.mjs`,
+which goes red when they drift, per `prompts/skill-extract.md` §5ae,
+so they are the only place this file states them. The prompts below
+are written against the `description` field in `SKILL.md`.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes and not the test.
 
-The budget is nine near misses because §5c sets one per adjacent skill
-and this skill has nine neighbours, which is every other skill in the
-library. Each near miss below is that sibling's own trigger prompt,
+The near-miss budget is one per adjacent skill, which is what §5c sets,
+and every other skill in the library is adjacent, so the `neighbours`
+line above is the budget and `near-misses` is what this file spends. Each near miss below is that sibling's own trigger prompt,
 copied rather than paraphrased, per §5r, and its prose names which
 boundary it tests. Near miss 4 is
 `quoting-a-number-from-an-outcome-record`'s trigger 1, 5 is

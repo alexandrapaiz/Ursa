@@ -70,18 +70,33 @@ test('a missing TRIGGER-TEST.md is not this check, so unreadDirs stays quiet abo
   assert.equal(readLibraryDirs(dir)[0].hasTrigger, false)
 })
 
-test('indexedRows returns the label and the target separately', () => {
+test('indexedRows returns the label, the target and the stated ref count separately', () => {
+  const rows = indexedRows([
+    '| Skill | What | Refs | Status |',
+    '|---|---|---|---|',
+    '| [alpha](alpha/SKILL.md) | decides a thing | 12 | draft |',
+    '| [beta](betaa/SKILL.md) | typo in the target | 7 | draft |',
+    'prose mentioning [gamma](gamma/SKILL.md) outside a table row',
+  ].join('\n'))
+  assert.deepEqual(rows, [
+    { label: 'alpha', dir: 'alpha', refs: 12 },
+    { label: 'beta', dir: 'betaa', refs: 7 },
+  ])
+})
+
+test('a row with no ref count reads as null and not as zero', () => {
+  // The two have to stay distinguishable: zero refs is a skill with no
+  // receipts, which is a defect, and an absent cell is a table shaped some
+  // other way, which is a different one. Collapsing them would make the
+  // narrower index of this test's own first version report ten skills with no
+  // evidence at all.
   const rows = indexedRows([
     '| Skill | What |',
     '|---|---|',
     '| [alpha](alpha/SKILL.md) | decides a thing |',
-    '| [beta](betaa/SKILL.md) | typo in the target |',
-    'prose mentioning [gamma](gamma/SKILL.md) outside a table row',
+    '| [beta](beta/SKILL.md) | decides another | not a number | draft |',
   ].join('\n'))
-  assert.deepEqual(rows, [
-    { label: 'alpha', dir: 'alpha' },
-    { label: 'beta', dir: 'betaa' },
-  ])
+  assert.deepEqual(rows.map((r) => r.refs), [null, null])
 })
 
 test('check-evidence.mjs exits 1 on a library whose skill file is misnamed', () => {
