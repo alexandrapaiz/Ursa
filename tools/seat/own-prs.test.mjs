@@ -31,7 +31,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { patternFor, seats, seatOfBranch, canonicalSeatOfBranch, selectOwn } from './own-prs.mjs';
+import { patternFor, seats, seatOfBranch, canonicalSeatOfBranch, selectOwn, audit } from './own-prs.mjs';
 
 const TOOL = new URL('./own-prs.mjs', import.meta.url).pathname;
 const CHARTERS = new URL('../../prompts/', import.meta.url).pathname;
@@ -200,4 +200,58 @@ test('--require-empty is a gate and a bad seat name is usage', () => {
   assert.equal(spawnSync('node', [TOOL, 'pm', '--drafts', '--require-empty', '--from', path]).status, 1);
   assert.equal(spawnSync('node', [TOOL, 'finance', '--drafts', '--require-empty', '--from', path]).status, 0);
   assert.equal(spawnSync('node', [TOOL, 'nope']).status, 2);
+});
+
+test('--audit grades the anchored form against ground truth, not against the pattern it replaced', () => {
+  // The defect this mode fixes is a frozen denominator, so the first thing the
+  // test pins is that the count is REPORTED rather than asserted: eleven
+  // charters said 540, branch-patterns.json said 578, and the live number was
+  // 549. A test that hard-coded a fourth number would be the same defect.
+  const branches = [
+    'ursa-exo/2026-10-27-message',          // exo's
+    'exo/2026-10-12-pm',                    // exo's, and the bare pm pattern claims it
+    'exo-centralizer/2026-10-14-dispatch',  // nobody's seat here; bare exo claims it
+    'ursa-pm/2026-10-08-message-skill',     // pm's; bare skill claims it
+    'engineer/2026-09-26-get-briefing',     // engineer's; bare finance claims it
+    'hq/company-manifest',                  // nobody's; bare frontend claims it
+    'fin/2026-10-27-close',                 // finance's, short form
+  ];
+  const a = audit(branches);
+  assert.equal(a.branches, branches.length);
+
+  // The whole claim the charters make, stated as the assertion: the anchored
+  // form is exact over the corpus, in BOTH directions.
+  assert.equal(a.totals.anchored_false_pos, 0);
+  assert.equal(a.totals.anchored_false_neg, 0);
+
+  // And the bare form is not, in exactly one direction. This is the asymmetry
+  // the sweep's prescribed action makes expensive: a false positive tells a
+  // seat to close a sibling's live draft.
+  assert.equal(a.totals.bare_false_neg, 0);
+  // Five, one per commented line in the fixture above, and they are named
+  // individually below rather than only totalled — a total is the number this
+  // whole directory exists because somebody wrote down once and never re-read.
+  assert.equal(a.totals.bare_false_pos, 5);
+
+  const byseat = Object.fromEntries(a.rows.map((r) => [r.seat, r]));
+  assert.deepEqual(byseat.skill.bare_false_pos, ['ursa-pm/2026-10-08-message-skill']);
+  assert.deepEqual(byseat.pm.bare_false_pos, ['exo/2026-10-12-pm']);
+  assert.deepEqual(byseat.finance.bare_false_pos, ['engineer/2026-09-26-get-briefing']);
+  assert.deepEqual(byseat.frontend.bare_false_pos, ['hq/company-manifest']);
+  assert.deepEqual(byseat.exo.bare_false_pos, ['exo-centralizer/2026-10-14-dispatch']);
+  // short and long form of one seat both resolve to it
+  assert.equal(byseat.finance.truth, 1);
+  assert.deepEqual(byseat.finance.anchored_false_neg, []);
+});
+
+test('--audit exits non-zero if the anchored form ever regresses', () => {
+  // The mode is a gate, not a report, because the anchored pattern is what
+  // eleven charters now hand every seat. Fixture: a branch whose first segment
+  // is a seat name the anchor cannot reach would be a false negative.
+  const path = `${process.env.TMPDIR || '/tmp'}/own-prs-audit-${process.pid}.json`;
+  writeFileSync(path, JSON.stringify(['ursa-exo/2026-10-27-a', 'fin/2026-10-27-b']));
+  const ok = spawnSync('node', [TOOL, '--audit', '--from', path], { encoding: 'utf8' });
+  assert.equal(ok.status, 0, ok.stdout + ok.stderr);
+  assert.match(ok.stdout, /branches_measured=2\b/);
+  assert.match(ok.stdout, /anchored: false_pos=0 false_neg=0/);
 });

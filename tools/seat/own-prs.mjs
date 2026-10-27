@@ -4,6 +4,7 @@
 //
 //     node tools/seat/own-prs.mjs <seat> [--drafts] [--all] [--json]
 //                                        [--require-empty] [--from <file>]
+//     node tools/seat/own-prs.mjs --audit [--json] [--from <file>]
 //
 // Exit 0 when the read succeeded, 1 when --require-empty was passed and the
 // selection is non-empty, 2 on usage, 3 when the forge could not be read.
@@ -118,15 +119,113 @@ function readForge() {
   }
 }
 
+/**
+ * The audit: grade BOTH spellings against ground truth over every branch this
+ * repository has ever had, and print the denominator with them.
+ *
+ * WHY THIS IS A MODE AND NOT A SENTENCE. The false-positive measurement was
+ * written into prose, and prose freezes. Measured 2026-10-27 by the
+ * sixty-eighth window: eleven seat charters said the sweep was validated over
+ * "540 distinct pull request branches", `branch-patterns.json` said "578", and
+ * the live count was 549 — three numbers for one measurement, in files one
+ * chain shipped together, and no instrument could tell which was current.
+ * A denominator that grows every time a seat opens a pull request cannot live
+ * in a literal. So the charters now cite this command and carry no number, and
+ * this is the only place the count is spelled.
+ *
+ * It grades the anchored form too, rather than diffing the two spellings
+ * against each other. Comparing a pattern to the pattern it replaced tells you
+ * they differ; it cannot tell you the replacement is right.
+ */
+export function audit(branches) {
+  const rows = [];
+  let bareFp = 0, bareFn = 0, anchFp = 0, anchFn = 0;
+  for (const seat of seats()) {
+    const alts = SPEC.seats[seat];
+    const bare = new RegExp(alts.join('|'));
+    const anch = new RegExp(patternFor(seat));
+    const truth = branches.filter((b) => canonicalSeatOfBranch(b) === seat);
+    const t = new Set(truth);
+    const bfp = branches.filter((b) => bare.test(b) && !t.has(b));
+    const bfn = truth.filter((b) => !bare.test(b));
+    const afp = branches.filter((b) => anch.test(b) && !t.has(b));
+    const afn = truth.filter((b) => !anch.test(b));
+    bareFp += bfp.length; bareFn += bfn.length;
+    anchFp += afp.length; anchFn += afn.length;
+    rows.push({ seat, truth: truth.length,
+                bare_false_pos: bfp, bare_false_neg: bfn,
+                anchored_false_pos: afp, anchored_false_neg: afn });
+  }
+  return { branches: branches.length, rows,
+           totals: { bare_false_pos: bareFp, bare_false_neg: bareFn,
+                     anchored_false_pos: anchFp, anchored_false_neg: anchFn } };
+}
+
+function readAllBranches() {
+  const r = spawnSync(
+    'gh',
+    ['pr', 'list', '--state', 'all', '--limit', '1000', '--json', 'headRefName'],
+    { encoding: 'utf8' },
+  );
+  if (r.status !== 0) return { error: (r.stderr || 'gh failed').trim() };
+  try {
+    return { branches: [...new Set(JSON.parse(r.stdout).map((p) => p.headRefName))].sort() };
+  } catch (e) {
+    return { error: `gh returned unparseable JSON: ${e.message}` };
+  }
+}
+
+function runAudit(argv, flags) {
+  const fromIdx = argv.indexOf('--from');
+  let branches;
+  if (fromIdx !== -1) {
+    const raw = JSON.parse(readFileSync(argv[fromIdx + 1], 'utf8'));
+    branches = [...new Set(raw.map((p) => (typeof p === 'string' ? p : p.headRefName)))].sort();
+  } else {
+    const r = readAllBranches();
+    if (r.error) {
+      console.error(`could not read the forge: ${r.error}`);
+      console.log('AUDIT COULD NOT MEASURE');
+      return 3;
+    }
+    branches = r.branches;
+  }
+  const a = audit(branches);
+  if (flags.has('--json')) {
+    console.log(JSON.stringify(a, null, 2));
+  } else {
+    console.log(
+      `branches_measured=${a.branches}  ` +
+      `bare: false_pos=${a.totals.bare_false_pos} false_neg=${a.totals.bare_false_neg}  ` +
+      `anchored: false_pos=${a.totals.anchored_false_pos} false_neg=${a.totals.anchored_false_neg}`);
+    console.log('seat\tbranches\tbare_fp\tbare_fn\tanch_fp\tanch_fn');
+    for (const r of a.rows) {
+      console.log([r.seat, r.truth, r.bare_false_pos.length, r.bare_false_neg.length,
+                   r.anchored_false_pos.length, r.anchored_false_neg.length].join('\t'));
+      for (const b of r.bare_false_pos) console.log(`   bare claims, not ${r.seat}'s: ${b}`);
+      for (const b of r.bare_false_neg) console.log(`   bare misses ${r.seat}'s own: ${b}`);
+      for (const b of r.anchored_false_pos) console.log(`   ANCHORED claims, not ${r.seat}'s: ${b}`);
+      for (const b of r.anchored_false_neg) console.log(`   ANCHORED misses ${r.seat}'s own: ${b}`);
+    }
+  }
+  // The anchored form is what eleven charters now tell every seat to use, so a
+  // regression in it is a gate failure and not a report.
+  if (a.totals.anchored_false_pos > 0 || a.totals.anchored_false_neg > 0) return 1;
+  return 0;
+}
+
 function main(argv) {
   const flags = new Set(argv.filter((a) => a.startsWith('--')));
   const positional = argv.filter((a) => !a.startsWith('--'));
   const fromIdx = argv.indexOf('--from');
   const seat = positional[0];
 
+  if (flags.has('--audit')) return runAudit(argv, flags);
+
   if (!seat || flags.has('--help')) {
     console.error(
       'usage: own-prs.mjs <seat> [--drafts] [--all] [--json] [--require-empty] [--from <file>]\n' +
+      '       own-prs.mjs --audit [--json] [--from <file>]\n' +
       `seats: ${seats().join(', ')}`,
     );
     return 2;
