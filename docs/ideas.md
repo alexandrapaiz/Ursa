@@ -14083,6 +14083,7 @@ the owner to accept or reject.
   paragraph in a manual, while ours is `node
   tools/gates/enumerate-verdicts.mjs`, which prints 23 branches and exits
   non-zero when one of them stops deriving its verdict from its findings.
+
 ### 2026-10-26 (security, message, run 13) — Make the pre-push redaction check run itself, because three seats in two days have proved that asking does not work
 
 - Trigger: this run's debug sweep found six red redaction-gate runs in
