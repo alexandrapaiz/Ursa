@@ -1,8 +1,8 @@
 # Trigger test — clearing-a-record-for-release
 
 ```counts
-prompts: 12
-should-fire: 3
+prompts: 13
+should-fire: 4
 near-misses: 9
 neighbours: 9
 ```
@@ -11,8 +11,11 @@ The counts above are checked by `node skills/trigger-coverage.mjs`,
 which goes red when they drift, per `prompts/skill-extract.md` §5ae,
 so they are the only place this file states them. The prompts below
 are written against the `description` field in `SKILL.md`.
-Per `prompts/skill-extract.md` §5, when the test fails the description
-is what changes and not the test.
+The fourth should-fire prompt was added on 2026-10-27, when the security
+standard named a fifth surface and the description was widened to reach
+it, which §5 permits because its budget is a floor. Per
+`prompts/skill-extract.md` §5, when the test fails the description is
+what changes and not the test.
 
 The near-miss budget is one per adjacent skill, which is what §5c sets,
 and every other skill in the library is adjacent, so the `neighbours`
@@ -87,6 +90,29 @@ pages the new index no longer names [E38, E39].
 A reader who only has the first half closes this as not-a-bug. A
 reader who only has the second half files a defect against code that
 is correct. The skill's step 5 is what keeps both.
+
+**3b. "The span colouring is easier to show than to describe, so I'm
+attaching a screenshot of the record viewer to the pull request. The
+redaction gate is green on the branch, so that's covered, right?"**
+
+Fires, and it is the fourth should-fire prompt, added 2026-10-27 under
+§5's budget-is-a-floor rule when the standard named a fifth surface and
+the description was widened to reach it. It arrives through "committing
+or attaching a screenshot of a record, of its viewer or of a page
+rendered from it", and the answer is the one sentence a reader is least
+likely to have: the capture carries the prompt text the viewer embeds,
+because the pixels hold it exactly as the HTML did [E28]. The green
+check is worth nothing here, and not merely little. The gate runs
+`grep` with `-I`, which skips every binary file, so no pattern of it has
+ever been applied to an image at all [E45].
+
+Two near-miss directions sit close to this one and are worth stating
+rather than testing, because neither is a sibling's trigger. A
+screenshot of a `stats` tile with no raw text in frame is still this
+skill's question and still arrives at step 4, since what settles it is
+the field table rather than the medium. And a question about whether
+the viewer should redact by default is engineering work on the viewer,
+not a release decision, because nothing is leaving yet.
 
 ## Should not fire
 

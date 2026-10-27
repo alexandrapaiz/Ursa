@@ -6,13 +6,15 @@ description: >
   Fires for emitting a disclosure batch to Ursa with `ursa consent
   disclose`, for publishing records to a public address with `ursa
   publish`, for quoting a record or a tuning axiom into a pull request,
-  a design document or a ledger entry, for deciding which of those
-  three exits a release is taking and what that exit demands, and for
-  honouring an erasure or a revocation so that it reaches everything
-  already derived. Does not fire for choosing a span's label, for
-  deciding what a record statistic is a share of, for auditing the
-  trajectory signals a record carries, for running a trial, for
-  distilling axioms, or for adding a bound to the record gate.
+  a design document or a ledger entry, for committing or attaching a
+  screenshot of a record, of its viewer or of a page rendered from it,
+  for deciding which of those three exits a release is taking and what
+  that exit demands, and for honouring an erasure or a revocation so
+  that it reaches everything already derived. Does not fire for
+  choosing a span's label, for deciding what a record statistic is a
+  share of, for auditing the trajectory signals a record carries, for
+  running a trial, for distilling axioms, or for adding a bound to the
+  record gate.
 version: 0.1.2
 status: draft
 validated: false

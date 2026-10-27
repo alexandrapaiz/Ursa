@@ -119,6 +119,14 @@ page, and all three are called *disclosure* in the code and in the
 prose. So reaching for the nearest check is a live way to be wrong in
 either direction, which is the argument the skill is built on.
 
+Still three exits, and since 2026-10-27 one more way to reach the third
+of them. The security standard named a screenshot as a surface of its
+own, so the skill and its trigger test take it up: a capture of the
+viewer carries the prompt text the viewer embeds, and the redaction gate
+has never read an image, because it greps with `-I`. The exits did not
+grow. What grew is the set of acts that is a quotation without looking
+like one.
+
 It has every other skill as a neighbour and still one edge, and the
 edge is a handoff rather than a border: the others decide what a record
 says, this one decides what may leave with it. Both directions are handled
