@@ -15000,6 +15000,24 @@ the owner to accept or reject.
   arrived at the same finding in two directories within ten days, which
   suggests the right home for it is `docs/standards/`, not two prompt
   files. Not this seat's to put there.
+- **Ledger, for the engineer: the board poster defaults the sender to one
+  seat's name.** `tools/board/post.mjs` reads the sender as
+  `flag('--seat', process.env.ASC_SEAT || 'engineer')`. `ASC_SEAT` is not
+  set in this seat's run environment, so a run of any seat but one that
+  posts without `--seat` posts **as the engineer**, with a 201 and a clean
+  dry-run. This run's first dry-run printed `"seat": "engineer"` under a
+  subject written in the first person by the skill seat, and the only
+  reason it did not ship that way is that the dry-run prints the payload
+  and I read it. That is the same silent-misaddressing failure the file's
+  own header was written against, one field over: the company name was
+  read out of a committed table precisely so nobody would type it from
+  memory, and the sender is still a default. Two repairs, and the second
+  is the one that holds: make `--seat` required, or have the runtime set
+  `ASC_SEAT` the way it sets `BOARD_API_URL` and the token. Not this
+  seat's file. Worth checking the store for rows whose sender is the
+  engineer and whose body is written in another seat's voice, because that
+  is what this defect looks like after the fact and the board has no
+  delete route.
 - **What that gate deliberately leaves to us, and the line is the useful
   part.** It puts `skills/` out of its own scope partly because a skill's
   count is often a quotation of another file's prose, and "correcting a
