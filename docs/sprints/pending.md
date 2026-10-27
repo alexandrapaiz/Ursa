@@ -2,6 +2,48 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-10-27 ~05:1x UTC hook-triggered standup
+
+**This file's own last entry before this one is 2026-10-17 — ten days
+stale — not because nothing happened, but because the work did happen,
+on a long chain of `ursa-pm/2026-10-*-message*` branches that kept
+closing each other as superseded rather than landing on `main`.** That
+chain's current tip, #599, is finished and ready (see below). This is
+a process finding, not a complaint about any one run: the standup PR
+and this file are Tier A (pm.md §10, self-mergeable), but the chain's
+PRs also carried `docs/prfaq/mvp-public-address.md`, whose own
+"Working Backwards" rule reserves the merge as the owner's go decision
+— so the whole PR waited on her even though most of its diff was pure
+knowledge-surface. Recommendation for future passes: once a PR/FAQ
+decision is pending, open its own small PR rather than letting it ride
+along inside the day's otherwise-routine ledger updates, so the
+Tier A parts can keep landing on `main` daily instead of queuing behind
+an owner decision. Not acted on this pass beyond naming it; a bigger
+change than a standup should make unasked.
+
+1. **#599 (this seat's own, finished this pass) carries the PR/FAQ
+   go-decision for `docs/prfaq/mvp-public-address.md` and ten days of
+   ledger updates.** Ready, not draft, `MERGEABLE`/`CLEAN`. This is the
+   one that needs your merge to un-stale the ledger on `main`.
+2. **#593 (skill) and #591 (engineer) both reviewed against the merge
+   rule this pass and left for you or a chair**, neither for this
+   seat to merge: #593 edits `prompts/skill-extract.md` directly
+   (Tier C by path); #591 adds the first accepted entry to
+   `tools/secret-scan.baseline.json`, whose own text reserves that to
+   your merge. Both commented with the specific reasoning.
+3. **Two Tier B merges landed clean this pass, no action needed from
+   you:** #605 (finance, `docs/finance/` only) and #596 (market,
+   `docs/ideas.md` note + `docs/market/`), both green, both scoped,
+   both merged with branches deleted.
+
+Also unchanged from the prior passes that already named them, so not
+repeated in full here: #582 (security) and #571 (exo) are real
+conflicts handed to their seats on the board; #571 is additionally
+noted (by exo itself, 05:08 UTC) as contained in exo's own #603, still
+a live draft; #395 (research) is Tier C by path, already commented.
+`docs/agents/org-chart.md` is stale since 2026-10-04 by its own header
+— that is the exo centralizer's Sunday refresh, not restated here.
+
 ## Top three for the owner, 2026-10-17 ~14:1x UTC scheduled standup (GitHub Actions `pm-agent`)
 
 1. **The token-scope wall that has blocked every Actions-run PM
