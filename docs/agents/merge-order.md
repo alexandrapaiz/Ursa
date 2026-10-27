@@ -1,4 +1,4 @@
-# Merge order for the owner — measured 2026-10-27, window 68, queue read 01:24:05Z
+# Merge order for the owner — measured 2026-10-27, window 71, queue read 05:32:29Z
 
 Replaced whole each window, by this charter's own instruction, which is
 why `tools/registers/registers.json` declares this file `enabled: false`
@@ -8,81 +8,95 @@ and why it belongs on exactly one branch at a time.
 
 | | |
 |---|---|
-| open pull requests | **18** (read 01:24:05Z) |
-| merged in the last 7 days | **105** |
-| oldest open | #395, created 2026-10-24T21:21:40Z (2d4h) |
+| open pull requests | **12** (read 05:32:29Z) |
+| merged in the last 7 days | **116** (read 05:26:52Z) |
+| oldest open | #395, created 2026-10-24T21:21:40Z (2d8h) |
 
-**Open does not outnumber the last seven days' merges** — 18 against
-105 — so the depth warning this charter requires in bold does not fire.
-That ratio has inverted since early October, when three consecutive
-windows reported 17, 37 and 52 open against single-digit merges. The
-gate is absorbing faster than the roster produces.
+**Open does not outnumber the last seven days' merges** — 12 against
+116 — so the depth warning this charter requires in bold does not fire.
+The gate is absorbing faster than the roster produces, and has been
+since mid-October.
 
-The queue is also *churning* fast rather than sitting: three of the
-eighteen were opened in the four minutes before this read, and none of
-the eighteen is older than 2d4h.
+**The queue is churning, not sitting, and the read instants above are
+load-bearing for that reason.** Four of the twelve were opened in the
+twenty-six minutes before this read, and the first pass of this
+measurement, taken at 05:32:01Z, held two pull requests whose
+`refs/prs/*` did not yet resolve. Twenty-eight seconds and one refetch
+later both were clean. A verdict on this queue has a shelf life in
+minutes, which is why every row below carries the instrument that
+produced it and the instant it was produced.
 
 ## What actually conflicts, performed rather than asked
 
 Drivers installed first (`tools/ledger/install-driver.sh`,
 `tools/registers/install-drivers.sh`; `git config --get-regexp '^merge\.'`
-returns 6 lines here, and empty would be the defect). No `2>&1` on any
-`merge-tree` call. Cross-checked against HQ's `check-merge-queue.sh`
-fetched from HQ's `main`, not from the host's checkout.
+returns **6** lines here, and empty would be the defect). PR refs
+refetched with an explicit destination before any `merge-tree` call, so
+an exit of 128 cannot be read as a conflict.
 
-`git merge-tree` with this repository's drivers registered calls **all
-of the queue clean**. HQ's script, which additionally reports what
-GitHub's driverless merge will do, splits them three ways:
+**GitHub's cached field is unusable on this queue and the number is
+worth stating.** `mergeable` read at 05:32:47Z returned `UNKNOWN` for
+**7 of 12**, including every pull request older than twenty-six minutes.
+It is not a conflict instrument here. The merge was performed instead.
+
+Two instruments, agreeing, and the split is the whole value:
 
 | class | count | whose act |
 |---|---|---|
-| clean both ways | 12 | **the owner's merge** |
-| conflicts only because the forge runs no custom merge driver | 5 | the authoring seat's: install drivers, merge `main`, push |
-| real conflict | 1 | the authoring seat's to rebase |
+| clean both ways | **10** | **the owner's merge** |
+| conflicts only because the forge runs no custom merge driver | **1** | the authoring seat's — and it is this seat's own |
+| real conflict | **1** | the authoring seat's to rebase |
 
-- **Real conflict:** `#582` (security). Theirs to rebase under
-  `docs/standards/pm.md` §11.3, not a decision owed by the owner.
-- **Needs a local merge, not a judgement:** `#593` and `#586` (skill),
-  `#560` (skill), `#551` (security), `#578` and `#571` (this seat).
-  Every conflicting path in these declares a merge driver that this
-  repository ships and the forge does not run. **Reporting these to her
-  as conflicts dispatches a decision nobody has to make; reporting them
-  as waiting on her merge is worse, because the button will refuse.**
+- **Real conflict:** `#599` (PM), in `docs/sprints/dispatch-queue.md`
+  and `docs/sprints/pending.md`. Theirs to rebase under
+  `docs/standards/pm.md` §11.3, not a decision owed by the owner. The
+  PM has `#609` open and clean as of 05:32, and `#599` is **not**
+  contained in it (`git merge-base --is-ancestor refs/prs/599
+  refs/prs/609` exits non-zero), so the two are separate bodies of work
+  and landing `#609` does not resolve `#599`.
+- **Driverless conflict, and it is mine:** `#571` (this seat), in
+  `docs/agents/incidents.md` and `docs/agents/learning-log.md`. Every
+  conflicting path declares a `merge=register` driver and this
+  repository's drivers resolve all of them; GitHub's merge runs in a
+  clone that has none. **No action is being taken on it and that is
+  deliberate.** `#571` is contained in `#603`
+  (`git merge-base --is-ancestor refs/prs/571 refs/prs/603`, exit 0),
+  `#603` is clean both ways, and Ursa's PM placed `#571` with the owner
+  at 00:23:57Z for a charter path. Merging `main` into a superseded
+  branch would move an artifact a sibling seat has promised her would
+  not move, to clear a conflict on content that `#603` already carries.
+  **The owner's decision on `#603` closes `#571`'s content either way.**
 
-This seat's own two are in that list and are discharged rather than
-excused: `#588` supersedes both, contains both, and reads `clean
-(behind main by 16)` from the same sweep.
+Instrument column, for every row above: `git merge-tree --write-tree
+--name-only origin/main refs/prs/<n>` with this repository's drivers
+registered, cross-checked against HQ's
+`tools/check-merge-queue.sh` run at 05:33Z from the resident host's
+checkout at `/srv/asc/repos/alexandra-systems/`. The two agree on all
+twelve. HQ's script additionally reports what the forge's driverless
+merge will do, which is the only source of the middle row.
 
-## The order
+## The landing order
 
-Ordered by what unblocks the most work per act, not by age.
+Nine of the ten clean-both-ways pull requests are this morning's live
+window runs on nine different seats, touching nine different lanes, and
+`merge-tree` calls every pair of them clean against `main`. There is no
+ordering constraint to simulate between them: any sequence works.
 
-1. **`#576` (pm, clean).** The merging seat's own pass. It records six
-   Tier B merges and the ancestry ruling on this seat's chain, so
-   merging it first makes the queue's own bookkeeping true before
-   anything else moves.
-2. **`#588` (this seat, clean).** Eleven charters, and it is the only
-   open pull request carrying the anchored branch-pattern repair that
-   three seats have now independently verified and deferred to. While it
-   is unmerged, six seats' dead-draft sweeps keep the defect, and
-   `main`'s `tools/board/post.mjs` keeps attributing every seat's board
-   note to the engineer seat. **Five of its twenty-four files are under
-   `prompts/`, so it is hers alone under the tier rule.**
-3. **`#587`, `#583` (finance, clean), `#584` (market, clean), `#585`,
-   `#570`, `#592` (frontend), `#589` (security, clean).** Independent,
-   single-lane, no cross-dependency. Any order.
-4. **`#395` (research, clean, 680 behind).** Oldest in the queue and
-   still clean. It additively edits three charters including the
-   engineer's; it does not collide with `#588`, measured this window.
-   Worth taking before it drifts further.
-5. **Nothing for her on `#582`, `#593`, `#586`, `#560`, `#551`** until
-   their seats push a local merge.
+Two notes that are about order rather than about conflict:
 
-## One thing to know before acting on a draft in this queue
+1. **`#603` before `#571`.** `#571` is contained in `#603`. Merging
+   `#603` first makes `#571` empty and closable with no decision owed;
+   merging `#571` first costs a second read of the same work.
+2. **`#395` (research, 731 commits behind) is the one row where "clean"
+   deserves a second look before the button.** It merges clean and it
+   predates 731 commits of movement on `main`, so its *content* may have
+   been overtaken even though its *merge* has not. That is a judgement
+   about the work and it is the owner's, not a tracking fact. Named here
+   so it is not mistaken for a conflict.
 
-`#591`, `#592` and `#593` are drafts opened in the last twelve minutes
-by live runs. The standing route named `#591` to Ursa/pm at 01:19:30Z as
-a draft with "no live run behind it" and handed it the merge verb. That
-was a false positive, measured — `runner-facts` §57a — and the PM was
-warned off at 01:20:30Z. **A standing dead-draft condition on a draft
-less than two minutes old is not evidence; check the runs route.**
+## Drafts
+
+Three of the twelve are drafts — `#600` (engineer), `#604` (frontend),
+`#608` (skill) — and all three belong to runs that were live at this
+read. None is a dead draft and none is this seat's. **This seat has no
+open draft**, which is the check its charter requires before a run ends.
