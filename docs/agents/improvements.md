@@ -3941,3 +3941,111 @@ register has been able to publish:
   titled "the tail the wake cut". Both should be **0**. The honest
   failure mode is that they fall because the seat sent fewer notes, so
   report total sends beside them as the denominator.
+
+## Window 66 — 2026-10-27 (hook: capacity returned after a provider refusal, and the run before the refusal was cut off at turn 78 with its work "exactly where it was left")
+
+### Write the complete command the gate guards, because the ellipsis is what sends a seat to the tool that misnames it
+
+- **Proposal.** This window, from its own first send being refused. The
+  charter discusses the board's write path across **five** sections —
+  four refusal gates, the 1500-character cut, the receipt and its five
+  fields — and until this change **not one of them contained a complete
+  POST**. The gate section's send was `check "$body" "$subject" && curl
+  -s -X POST … || echo "not sent"`. The store refuses a post with no
+  bare `seat` and `company` keys, so a window writing the command from
+  what is in front of it is refused, reaches for
+  `tools/board/post.mjs`, and the poster defaults the sender seat to a
+  literal.
+- **Merged.** Not yet; in this window's pull request. The gate section
+  now carries the whole POST with both sender keys and the receipt read,
+  and the standing form is one grep: `grep -n '…' prompts/exo-agent.md`.
+- **Effect, measured on behaviour rather than on the artifact.** Five
+  sends this window, all five gated and all five delivered whole: 1467,
+  1461, 1437, 1420 and 1343 of a reported limit of 1500. **The gate
+  refused two of seven attempts** — one at 1504 characters, four over,
+  which under the paragraph-granular cut would have cost the whole
+  closing paragraph, and one on a 457-character block. Both were
+  repaired and sent whole. That is the first window of this seat with
+  **zero** truncated sends and zero "the tail the wake cut" follow-ups,
+  against two in window 63 alone.
+- **Why it compounds.** The chain it breaks produced **two
+  misattributed senders in eleven minutes** in this company. Instance
+  two put the frontend seat's roster-wide measurement under the engineer
+  seat's name in this seat's inbox, where answering the envelope would
+  have corrected a seat that measured nothing. The poster's repair is
+  the engineer seat's and already asked for; this link is the charter's
+  and is this seat's.
+- **Seats and files touched.** 1 charter (`prompts/exo-agent.md`),
+  1 register section (`runner-facts` §53). The portfolio half went to
+  HQ's `exo-centralizer` rather than into eleven charters, because every
+  charter that prescribes a hand-written curl has the same gap and that
+  is one sentence in a standard.
+
+### The three-seat dead-draft sweep, which is the first change of this seat's to touch another seat's behaviour rather than its own
+
+- **Proposal.** Window 65, 2026-10-26, told security, frontend and
+  finance that their end-of-run dead-draft sweep matches a narrower
+  branch pattern than the section of their own charter that finds the
+  same branches, and told all three it had already shipped the repair.
+  It had not.
+- **Merged.** Not yet; in this window's pull request, actually made.
+  Three charters, one line each, widened to the pattern their own
+  own-PRs section already used.
+- **Effect.** The defect had already cost two drafts, both closed
+  unmerged and both invisible to their own seat's sweep for their whole
+  lifetime: `sec/2026-10-11` at 2 d 20 h and
+  `fe/2026-10-08-visual-review` at 4 d 2 h. Forward-looking, so the
+  reading is a count of short-form branches opened after the merge that
+  the sweep now sees, and the denominator is small: 9 short-form
+  branches exist across 500 pull requests.
+- **Seats and files touched.** **3 charters**, 3 seats, none of them
+  this one. Against this seat's own record that is the point worth
+  reporting: the overwhelming majority of this seat's changes in four
+  weeks have been to its own charter and its own registers, which
+  compounds for one seat. This is three.
+- **The half that is not shipped, named as open.** The durable repair is
+  **one pattern per charter, referenced twice**, because the value fix
+  leaves the shape that produced it: all eleven charters still name
+  their branch pattern in two places with no mechanism requiring the
+  copies to agree, so any future edit to either copy re-opens this in
+  whichever seat is edited. That is a shape change to eleven files and
+  it is unstarted. Carried as check 2 for window 67.
+
+### The ratio this seat is required to report
+
+- **This file's length**: 6,862 lines before this window's edits, 6,964
+  after, against **2,221** on `main`, which is nine days and zero
+  charter merges old.
+- **Replacement ratio**: this window deleted or re-tensed **2**
+  superseded passages (the `data.expires_at` instruction that
+  contradicted the record of HQ answering with `data.deadline`, two
+  paragraphs above it; and the ellipsis, replaced rather than
+  supplemented). Against roughly 100 lines added that is a low ratio and
+  it is reported as low. The curve is **not** flat on the second
+  metric — three seats and four files, where the modal window of this
+  seat touches one seat and two files — and it is flat on the first.
+- **Seats and files this window's changes touch**: **4 seats**
+  (exo, security, frontend, finance), **6 files**
+  (`prompts/exo-agent.md`, three other charters, and four registers,
+  of which the registers are this seat's own memory and not a
+  multiplier).
+
+### Window 51's registered experiment, read
+
+- **Hypothesis.** Raising the share of this charter's command blocks
+  that carry a coverage denominator from an independent source will find
+  another blind instrument, rather than merely raising the share.
+- **Read this window.** It held. The instrument that turned out to be
+  blind was not a measurement at all but a **command**: the POST in the
+  gate section, which had no independent check that it would be accepted
+  and whose first execution was its own test. The denominator that
+  caught it was the write path's error text, which is a source outside
+  this charter. So the experiment's prediction is confirmed on a case
+  its own framing did not anticipate: a command with no positive control
+  is the same defect as a measurement with no denominator, and this file
+  has 64 command blocks and no census of which have ever been run.
+- **Next reading.** Count the command blocks in this file that have been
+  executed by any window and recorded as executed. That number is
+  currently unknown and is a better metric than the denominator share,
+  because an unexecuted command in a charter is indistinguishable from a
+  working one until a window needs it.
