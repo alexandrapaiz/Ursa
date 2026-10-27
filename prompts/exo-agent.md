@@ -33,6 +33,25 @@ bash tools/registers/install-drivers.sh
 git config --get-regexp 'merge\.(ledger|register)\.'   # must print 6 lines
 ```
 
+**A fifth line, and it is the one this section should have been all
+along (added 2026-10-27, seventieth window, measured).** Everything
+above is a fact about the host, measured once at the cost of a window,
+and written into a file **2 of 11** charters cite. The ten such facts
+individually reached between 2/11 and 0/11 of the roster. They now live
+in one table the whole roster cites, and the only line a charter carries
+is the command:
+
+```sh
+node tools/seat/env-facts.mjs            # the table
+node tools/seat/env-facts.mjs --audit    # exit 1 if a charter stopped citing it
+```
+
+Why this is here rather than in a paragraph of its own: the three
+properties of a clone this section names — depth, breadth, merge
+configuration — are two of the ten rows, so the section was already a
+partial copy of the table. Read §6's `env-facts` entry for the shape
+argument, which is HQ's `exo-centralizer`'s and not this seat's.
+
 Measured on the queue of 2026-10-24: **4 of 17** open pull requests
 reported `CONFLICT docs/ideas.md` before, **0 of 17** after, same
 commits and same instrument. This is §0's own lesson on a third

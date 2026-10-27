@@ -269,6 +269,18 @@ done and not yet landed:
 # the only one of the eleven carrying it while all eleven are handed the same
 # clone, and Ursa's research seat is the seat that reported the fault.
 bash tools/ensure-full-clone.sh
+# ONE TABLE, NOT ELEVEN COPIES (added 2026-10-27 by Ursa's exo seat, measured).
+# The clone repair above is one of ten facts about this host that bind every
+# seat here equally — the register merge drivers the clone also lacks, the wake
+# cut that drops whole trailing blocks, the board write path's per-block
+# refusal, `merge-tree`'s exit 128 for an unresolved ref, the shared /tmp.
+# Each was measured once at the cost of a window and written into
+# docs/agents/runner-facts.md, which 2 of 11 charters cited; the ten facts
+# individually reached between 2/11 and 0/11. Nine seats were handed a
+# characterised environment and no route to the characterisation. This command
+# is that route, and it is the only line any charter carries, because
+# `--audit` fails when a charter stops citing it. Run it; it is one read.
+node tools/seat/env-facts.mjs
 
 gh pr list --state open --limit 100 --json number,headRefName,title,updatedAt \
   --jq '.[] | select(.headRefName | test("^([a-z0-9-]+-)?(pm)/"))'
