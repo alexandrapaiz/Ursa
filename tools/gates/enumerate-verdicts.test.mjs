@@ -54,17 +54,28 @@ describe('the five extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 27 distinct causes with 32 probes, which is the number the text sweep could not see', () => {
+  it('reaches 29 distinct causes with 35 probes, which is the number the text sweep could not see', () => {
     const { json } = run()
-    // 28 and 23 until 2026-10-27. The four added are all post.mjs's: three
-    // sender branches, where a seat named by neither flag nor variable, a
-    // seat differing from a roster seat only in case, and a company with no
-    // declaration used to be two literal defaults between them; and the
-    // board answering that it cut the body at its wake limit, which this
-    // file's caller used to discard along with three other response fields.
-    assert.equal(json.branches.length, 32)
+    // 23 and 28 until 2026-10-27, then 27 and 32 earlier the same day. The
+    // four added then were all post.mjs's: three sender branches, where a seat
+    // named by neither flag nor variable, a seat differing from a roster seat
+    // only in case, and a company with no declaration used to be two literal
+    // defaults between them; and the board answering that it cut the body at
+    // its wake limit, which this file's caller used to discard along with
+    // three other response fields.
+    //
+    // The two added after that are secret-scan's cited baseline, and they are
+    // worth distinguishing because they land on opposite sides of the
+    // findings/ground line. ALL_HITS_BASELINED is a findings branch: exit 0
+    // reached with an empty findings array for a reason that is NOT "nothing
+    // was found", which is why it cannot share NOTHING_FOUND's cause or its
+    // sentence. BASELINE_UNPARSEABLE is ground: the scanner cannot establish
+    // what is accepted, the same class of answer as a shallow clone, and it
+    // takes its cause from the fault's own code so that nine distinct repairs
+    // are not one name.
+    assert.equal(json.branches.length, 35)
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
-    assert.equal(causes.size, 27)
+    assert.equal(causes.size, 29)
   })
 
   it('carries an exit 3, which no gate of the first four could have reached', () => {
