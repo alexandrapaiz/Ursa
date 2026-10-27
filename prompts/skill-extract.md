@@ -2599,3 +2599,108 @@ clause-boundary discriminator and the withdrawn recount are this run's.
 The three exclusions are each paid for by a case in the control set
 rather than by convenience, and the control set is the seven correct
 occurrences the same pattern finds.
+
+## 5ah. A note that says it amends §N is a claim about two sections, so §N carries the claim too, and carries it generated
+
+(Added 2026-10-27, by the run that inherited §5ag's branch after a
+provider limit refused one wake and a cut-off ended another. It takes
+the third of the three residue items §5ag listed, which §5ag called the
+one worth building next and handed to a ledger entry rather than
+guessing at the mechanical form. That entry named an owner and a
+deadline, this seat and its next run to edit this file, and this is
+that run.)
+
+**Measured on this branch, 2026-10-27, before this section was
+appended.** This file held 39 sections then and holds 40 with this one.
+Six of them declare in their own dated note which earlier section they
+amend, naming §5, §5c, §5c and §5e, §5k and §5q, §5t part 3, and §5aa
+part 4. That is eight declared amendments over seven amended sections.
+**None of the seven said so.** Not one of them, over the twenty-six days
+since §5c wrote the first such note on 2026-10-01.
+
+That zero is the measurement the ledger entry asked for first, because
+it is what decides the design. A convention paid zero times out of seven
+is not a convention, and §5ae rule 1 already settled what to do with
+one: put it under an exit status, and have the run that writes the rule
+pay the whole debt rather than leave it to whoever is unlucky.
+
+**One of the seven looked like a six.** §5e does mention §5r, in prose,
+nineteen lines below its own header: "the amendment to this section
+under §5r is what settles those." A first reading of the graph scored
+that as linked. It is not, and the reason is the whole rule. Those
+nineteen lines are the stale worked example itself. A reader who opens
+§5e, reads the rule and the example, and stops, has read the superseded
+version and seen nothing to warn them, which is exactly what happened
+for twenty-two days and is what §5ag measured. A back reference below
+the text it supersedes is not an index. The prose sentence stays, because
+it is the author's argument and the generated line is not.
+
+**The rule.** A section whose dated note says it amends §N causes §N to
+carry one generated paragraph naming every section that amends it, as
+its first paragraph after its own dated note, or directly under its
+header when it has none. `node skills/trigger-coverage.mjs --amendments`
+prints the graph and exits 1 on any section that is amended and does not
+say so. `--write` generates the paragraph. There is no flag to ask for
+the exit status to be suppressed, for the reason §5ae rule 1 gives.
+
+Four things about the shape, each of which is where it could have been
+wrong.
+
+1. **Generated, not written.** Everything in the line is derived from
+   the amending notes, so a hand-typed one decays the moment a later
+   section amends the same target, which is the defect one level up. A
+   sub-part is carried through, so §5t's line reads "Amended by §5aa
+   (part 3)" rather than naming all of §5t as superseded.
+2. **The claim is read only out of the section's own dated note.** This
+   file discusses amendment constantly, and §5ag alone says "amends"
+   four times about other sections. A pattern that read the body would
+   find those and invent edges from the file's commentary about itself.
+   The note is the only place a section speaks for itself.
+3. **The clause stops at the first thing that is not a reference.**
+   §5ad's note names §5aa part 4 and then names §5aa again three lines
+   later, in a sentence about re-deriving a measurement. One edge, not
+   two. The first draft ran to the end of the sentence and reported the
+   pair twice.
+4. **A dangling or self reference is left alone.** A note naming a
+   section that does not exist is a typo in an identifier, and `--write`
+   does not invent a section to point at. It is reported and fixed by
+   hand.
+
+**What this check does not do, stated because the gap is the interesting
+part.** It does not detect that two sections disagree. §5ag's defect was
+substantive: §5e's example held counts §5r had superseded, and no tool
+reading cross-references would have known. This check would not have
+caught it. What it would have done is put §5r's name at the top of §5e,
+above the example, where every run that read §5e for twenty-two days
+would have seen it. The check makes the disagreement reachable by a
+reader rather than detectable by a tool, and those are different claims.
+The counts half of §5ag's defect was gradeable and §5ag graded it; this
+is the half that only a human can close, so the rule's job is to put it
+in front of one.
+
+**The check caught its own defect, on the run after it wrote the
+repair.** The placement test first compared the back pointer's line
+against the end of the dated note plus one, which forgets the blank line
+every paragraph break carries. So it wrote all seven paragraphs in the
+right place, exited 0, and then on the second `--write` reported all
+seven as misplaced. Found by running the writer twice rather than by
+reading the arithmetic, which is now a test. A checker and a writer that
+disagree about one line are the same class of defect as the two guards
+§5s found disagreeing about scope, and running the writer twice is the
+cheapest probe for it.
+
+**The residue.** §5ag listed three items and this takes the third. The
+first, a count of the library in this file that names no skill, is still
+held back for §5ag's reason, which is that no tool can tell a dated
+record from a stale claim without the date. The second, a trigger test
+whose prose states a count its own `counts` block carries, had one live
+instance and §5ag repaired it by hand, and it is still true that no exit
+status sees a new one. That is now the only one of the three left open,
+and it is the one that will recur, because the shape is easy to type and
+invisible to a diff.
+
+**Ours.** The zero-of-seven measurement, the argument that a prose back
+reference below the superseded text is not an index, the four shape
+decisions, the stated limit on what a cross-reference check can know,
+and the two-run probe that found the off-by-one are all this run's. The
+owner and deadline this run was working to are §5ag's ledger entry's.
