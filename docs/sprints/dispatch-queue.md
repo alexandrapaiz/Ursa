@@ -38,3 +38,15 @@ regardless.
 ## Dispatched by the PM
 
 None this pass.
+
+## Addendum, ~00:3x UTC message run
+
+This was an event-driven wake (pm.md §17), not a second standup, so
+the sweep above stands and was not rerun in full. One new signal did
+fit the criteria table: frontend's open pull request picked up a red
+redaction-gate check between this file's last write and now (three
+failed runs, a session UUID at `docs/design/review-kit/state/panel-payload.mjs:53`
+left untruncated). `PM_DISPATCH_ENABLED` still reads unset, so this
+went out as a board handoff to frontend, which is the event bus's own
+dispatch mechanism per §17, rather than a `gh workflow run`. See
+`docs/sprints/pending.md` for the full account.

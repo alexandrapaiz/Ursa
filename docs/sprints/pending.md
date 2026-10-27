@@ -10,6 +10,55 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-27 ~00:3x UTC message run
+
+1. **Three Tier B merges landed this pass: #575 (market), #577
+   (finance), and #565 (finance, #577's own base).** All three were
+   docs-only, green, not draft, no `hold`, no owner comment, and under
+   seven days old. #565 was merged first because #577 is stacked on
+   it in content even though its GitHub base field reads `main`; the
+   two together read as one finance story, per #577's own description.
+2. **#577 showed `CONFLICTING` on GitHub while two independent local
+   merges against `main` came back clean**, the same false-conflict
+   signature the prior pass on this branch found on #571. Since the
+   only file involved is `docs/finance/close-2026-10.md`, a docs-only
+   path, the tiers let the PM resolve the conflict directly rather
+   than hand it back: claimed the branch on the board, pushed a
+   no-op merge-of-`main` onto it, watched GitHub's `mergeable_state`
+   flip from `dirty` to `clean` within the push, merged, and released
+   the claim.
+3. **Frontend's open pull request has a red redaction-gate check**:
+   `docs/design/review-kit/state/panel-payload.mjs:53` carries a full
+   session UUID instead of the truncated eight characters the gate
+   requires, failing three runs in a row today. Not mine to edit
+   (code outside the PM's lane), so handed to frontend on the board
+   with the path and line rather than fixed here. This is the §0b
+   dispatch criterion ("a failing check on an open PR") but
+   `PM_DISPATCH_ENABLED` reads empty, so the event-bus handoff is the
+   whole action; no Actions dispatch fired.
+
+**Re-confirmed, unchanged from the prior pass on this branch:**
+
+- **#571 (exo) is still Tier C and still waits on you.** Same finding
+  as before: it touches `prompts/pm-agent.md` itself (an authority
+  change, the one thing section 21 still reserves), it merges clean
+  in a scratch worktree, and GitHub's own `CONFLICTING` reading of it
+  is the same false kind as #577's just was.
+- **The five "stranded" drafts (#558, #568, #562, #561, #566) are
+  still not stranded.** Re-checked `git merge-base --is-ancestor`
+  against their claimed successors (#572, #570, #573, #569): all five
+  still hold. `tools/check-draft-prs.sh`, named in the standing note
+  that keeps repeating this list, does not exist in this repository;
+  verified by `ls`, not assumed. Nothing to merge, close, or dispatch
+  here today.
+- **Board inbox checked against `to_seat=pm&to_company=Ursa`
+  specifically** (not the broadcast feed, which mixes in sister
+  companies' same-named `pm` seats): the four live handoffs from the
+  last day (skill's three-branch cleanup, exo's charter-sweep note,
+  and HQ's two stacked-branch warnings) all point at pull requests or
+  branches that are already closed, merged, or deleted. Nothing
+  outstanding to answer.
+
 ## Top three for the owner, 2026-10-27 ~00:2x UTC message run
 
 1. **#571 (exo) is Tier C and waits on you, not on me.** Five of its
