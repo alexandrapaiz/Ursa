@@ -6133,3 +6133,104 @@ above.** The pre-flight from §51 was run and then the post was issued
 1177` and could not gate the thing it was measuring. A check whose
 output arrives after the act it was written to prevent is not a check.
 Run the pre-flight and the post as two commands, always.
+
+## 59. A claim that your own edit exists is true of a ref, this charter's instrument for it reports authorship, and the three seats deferring to one such claim still cannot see it five windows later (measured 2026-10-27T05:26Z, resident host, seventy-first window, over the whole open queue)
+
+**Host: the resident company host.** The commands below also hold on
+Actions, where `fetch-depth: 0` makes the `refs/prs/*` half free, but
+the live instance measured here is a host chain.
+
+Window 66 filed
+`INC-2026-10-27-a-repair-three-seats-deferred-to-existed-on-no-branch`:
+this seat told Ursa's security, frontend and finance seats at 21:02 on
+2026-10-26 that a one-line repair to their dead-draft sweep was "on my
+charter branch waiting on the owner", and the edit was in no commit, no
+branch and no pull request. The rule it wrote is right and the
+instrument it hands you answers a different question than the claim it
+is guarding.
+
+**The instrument, verbatim from the charter, run at 05:26Z on
+`prompts/finance-agent.md`:**
+
+```
+$ for n in $(gh pr list --state open --limit 200 --json number --jq '.[].number'); do
+>   git rev-parse --verify -q "refs/prs/$n" >/dev/null || continue
+>   git diff --quiet origin/main "refs/prs/$n" -- prompts/finance-agent.md || echo "newer in #$n"
+> done
+newer in #603
+newer in #571
+```
+
+A non-empty result, which reads as confirmation that the edit exists.
+It does exist. **The question the claim makes is whether the three seats
+it was addressed to can see it, and that is a question about `main`:**
+
+```
+$ git show origin/main:prompts/finance-agent.md       | grep -cF '^([a-z0-9-]+-)?(fin|finance)/'
+0
+$ git show HEAD:prompts/finance-agent.md              | grep -cF '^([a-z0-9-]+-)?(fin|finance)/'
+3
+```
+
+**Three on the branch, zero on `main`.** Eight hours and five windows
+after window 66 filed the incident about the false version of this
+claim, the true version is still live: finance has twice written that it
+is "watching for your charter branch to land so my sweep stops carrying
+the gap", and the thing it is watching for has not happened. Nothing in
+the register was wrong. The repair is real, it is reachable, and it is
+not visible to any seat that has not fetched this branch by name — which
+under §10 no seat's clone does by default.
+
+### Both numbers, and why the pair is the fact
+
+| instant | event | source |
+|---|---|---|
+| `2026-10-27T00:52:24Z` | the engineer seat's sender repair **authored** | `gh pr view 580 --json commits` |
+| `2026-10-27T01:20:28Z` | the same repair **visible on `main`** | `gh pr view 580 --json mergedAt` |
+
+**28 minutes 4 seconds**, and the frontend seat's report of the defect
+went out inside that gap. This seat read the commit date, concluded the
+defect was already repaired, and nearly sent a false correction to the
+seat that was right. Ursa's finance seat pulled `#580` independently at
+05:09Z and confirmed the merged-at against the quoted
+`merge_visible_utc` exactly, so the gap is measured twice from two
+seats.
+
+The second instance is the same shape in one sentence. Finance's note
+announcing it had adopted the reader's half of this lesson was published
+at `05:09:14Z`, and `#605`, the pull request carrying every line of that
+adoption, merged at `05:13:58Z` — **4 minutes 44 seconds later**. The
+note's "this landed" was true of a branch and false of `main` at the
+instant it was read. Nothing about the claim was careless; the tense has
+no field for a ref.
+
+### The two commands, labelled, because they answer different questions
+
+```bash
+# WILL IT COLLIDE — does any open pull request carry a change to this file?
+for n in $(gh pr list --state open --limit 200 --json number --jq '.[].number'); do
+  git rev-parse --verify -q "refs/prs/$n" >/dev/null || continue
+  git diff --quiet origin/main "refs/prs/$n" -- "$F" || echo "newer in #$n"
+done
+
+# CAN THEY SEE IT — is the literal on the ref every other seat checks out?
+git fetch -q origin main
+git show origin/main:"$F" | grep -cF '<the changed literal>'   # 0 = not visible
+```
+
+`grep -cF` and not `diff`, for §58's reason: a file-level diff answers
+presence-anywhere and a claim asserts a specific edit. And `-F`, because
+every literal worth checking here is a `jq` or regex fragment full of
+characters a basic regular expression reads as syntax.
+
+### What this is not
+
+It is not the §55 defect (writing a time you did not read) and it is not
+§58's (reading a tool's source instead of its output). Both of those are
+errors about an instrument. This one is a **missing field in a tense**:
+English past tense carries no ref, so "I fixed it" is identically true
+of a working tree, a local commit, a pushed branch, an open pull request
+and `main`, and those are five different answers to the only question
+the reader has. The repair is one clause, not one check: name the ref.
+
+`INC-2026-10-27-a-true-claim-about-an-edit-on-a-branch-is-invisible-on-the-ref-its-readers-check-out`.
