@@ -6,19 +6,21 @@ description: >
   Fires for emitting a disclosure batch to Ursa with `ursa consent
   disclose`, for publishing records to a public address with `ursa
   publish`, for quoting a record or a tuning axiom into a pull request,
-  a design document or a ledger entry, for deciding which of those
-  three exits a release is taking and what that exit demands, and for
-  honouring an erasure or a revocation so that it reaches everything
-  already derived. Does not fire for choosing a span's label, for
-  deciding what a record statistic is a share of, for auditing the
-  trajectory signals a record carries, for running a trial, for
-  distilling axioms, or for adding a bound to the record gate.
-version: 0.1.1
+  a design document or a ledger entry, for committing or attaching a
+  screenshot of a record, of its viewer or of a page rendered from it,
+  for deciding which of those three exits a release is taking and what
+  that exit demands, and for honouring an erasure or a revocation so
+  that it reaches everything already derived. Does not fire for
+  choosing a span's label, for deciding what a record statistic is a
+  share of, for auditing the trajectory signals a record carries, for
+  running a trial, for distilling axioms, or for adding a bound to the
+  record gate.
+version: 0.1.2
 status: draft
 validated: false
 owner_seat: skill
 created: 2026-10-23
-revised: 2026-10-24
+revised: 2026-10-27
 evidence_scheme: repo
 evidence:
   - ref: E1
@@ -71,7 +73,7 @@ evidence:
     source: ursa-major/src/publish.ts:504-540
   - ref: E17
     what: a record id becomes a path segment in a public URL and carries the name of the directory the work was resolved in, warned rather than refused because a refusal would overrule the person whose data it is
-    source: ursa-major/src/publish.ts:640-690
+    source: ursa-major/src/publish.ts:678-728
   - ref: E18
     what: the two-invocation shape of `ursa publish`, exit code 3 for a disclosure shown and not acknowledged, and why an interactive confirm was refused
     source: ursa-major/src/publish.cli.ts:1-20,31-40
@@ -89,34 +91,34 @@ evidence:
     source: ursa-major/src/consent.cli.ts:1-18
   - ref: E23
     what: what `ursa consent show` prints, including the active and revoked inference counts, the erasures with what each removed, and the closing sentence that differs by consent state
-    source: ursa-major/src/consent.cli.ts:86-157
+    source: ursa-major/src/consent.cli.ts:90-161
   - ref: E24
     what: revoking a scope is a stop and not an undo, deletion of what was already sent is a request to the aggregation layer, and the state the scope returns to is withheld
-    source: ursa-major/src/consent.cli.ts:172-181; ursa-major/src/consent.ts:194-201
+    source: ursa-major/src/consent.cli.ts:176-185; ursa-major/src/consent.ts:194-201
   - ref: E25
-    what: revoke-axiom keeps the axiom as a tombstone so a later distillation cannot bring it back, and excludes it from every export and from the overlay, which is six call sites filtering on the status it sets
-    source: ursa-major/src/consent.cli.ts:184-192; ursa-major/src/tuning/revoke.ts:166-174; ursa-major/src/tuning/types.ts:63-69
+    what: revoke-axiom keeps the axiom as a tombstone so a later distillation cannot bring it back, and excludes it from every export and from the overlay, which is six call sites filtering on the status it sets; since 2026-10-26 the sentence the command prints is one exported constant the dashboard imports too, so the two surfaces cannot word the promise differently
+    source: ursa-major/overlay/lib/revocation-reach.ts:35-41; ursa-major/src/consent.cli.ts:193-196; ursa-major/src/tuning/revoke.ts:166-174; ursa-major/src/tuning/types.ts:63-69
   - ref: E26
     what: the order disclose runs in, project then report the withholdings then audit, and that a single finding means nothing is written and the command exits 1
-    source: ursa-major/src/consent.cli.ts:255-269
+    source: ursa-major/src/consent.cli.ts:259-273
   - ref: E27
     what: the redaction standard is field-level rather than pattern-level, because the workflow gate catches three regular expressions and not the ordinary English that actually leaked
     source: docs/security/redaction-standard.md:11-27
   - ref: E28
-    what: the four surfaces a record reaches the public through, that the viewer is a second full copy of the sensitive fields rather than a rendering of the safe ones, and that redaction happens before entry rather than at rendering
-    source: docs/security/redaction-standard.md:29-49
+    what: the five surfaces a record reaches the public through, that the viewer is a second full copy of the sensitive fields rather than a rendering of the safe ones, that a screenshot of any surface carries that surface's text as pixels, and that redaction happens before entry rather than at rendering, so redacting at capture time is the same mistake
+    source: docs/security/redaction-standard.md:29-59
   - ref: E29
     what: the five classes, verbatim human text, machine and account identity, session identity, credentials, and other people
-    source: docs/security/redaction-standard.md:53-78
+    source: docs/security/redaction-standard.md:63-88
   - ref: E30
     what: the field-by-field dispositions and the pattern behind them, that every field which labels the outcome ships and every field which reproduces the work does not
-    source: docs/security/redaction-standard.md:91-117
+    source: docs/security/redaction-standard.md:101-127
   - ref: E31
     what: the four clauses under which a Class A field may ship, that the owner sign-off is per record and does not generalise, and that retention is not sign-off
-    source: docs/security/redaction-standard.md:119-138
+    source: docs/security/redaction-standard.md:129-148
   - ref: E32
     what: the fixture record passes every mechanical class while carrying three Class A fields, so a real record of the same shape would pass the gate and not be safe
-    source: docs/security/redaction-standard.md:157-171
+    source: docs/security/redaction-standard.md:167-181
   - ref: E33
     what: the one edge that crosses the device boundary and what it carries, and that the records, the tuning and the consent file have no outbound edge at all
     source: docs/design/consent-and-erasure.md:83-85
@@ -131,28 +133,31 @@ evidence:
     source: docs/design/consent-and-erasure.md:549-571
   - ref: E37
     what: the ledger finding that the publish disclosure claims the text was already public and never checks whether the repository is, and that an unstated visibility must print the private sentence
-    source: docs/ideas.md:8124-8127
+    source: docs/ideas.md:8148-8151
   - ref: E38
     what: the ledger finding that nothing tells a publisher what of theirs is live right now and nothing takes one record back down between publishes
-    source: docs/ideas.md:8131-8134
+    source: docs/ideas.md:8155-8158
   - ref: E39
     what: the ledger finding that a republish leaves the pages it no longer lists, so an erased record stays readable at an address somebody already has
-    source: docs/ideas.md:8144-8147
+    source: docs/ideas.md:8168-8171
   - ref: E40
     what: the five poisoned payloads the audit is asserted to catch, including the whole record passed off as a batch, which is the failure mode that existed before the module
     source: ursa-major/src/disclosure.test.ts:256-310
   - ref: E41
     what: the standard installs nothing, Class A has no automated check in it, and what it gives instead is the field list so a seat about to quote a record need not rediscover the incident
-    source: docs/security/redaction-standard.md:173-182
+    source: docs/security/redaction-standard.md:183-192
   - ref: E42
-    what: revoke-axiom prints in the same breath that a block the user already pasted into another product is outside what the command can reach and keeps working until she replaces it herself
-    source: ursa-major/src/consent.cli.ts:214
+    what: revoke-axiom prints in the same breath that a block the user already pasted into another product is outside what the command can reach and keeps working until she replaces it herself, and since 2026-10-26 the sentence is a shared function taking only the surface's own name for itself, so the page cannot admit less than the command does
+    source: ursa-major/overlay/lib/revocation-reach.ts:52-60; ursa-major/src/consent.cli.ts:218
   - ref: E43
     what: the paste channel's unreachability is permanent rather than unbuilt, because enforcing a revocation across a delegated channel needs deny state and a receipt from the gateway holding the delegation and this gateway is a text field in software Ursa does not run, and a user who reads her tuning through the MCP server instead does not have the limitation
     source: docs/design/consent-and-erasure.md:583-604
   - ref: E44
     what: both revoke-axiom and consent show report the axioms that still say nearly the same thing as the revoked one and were deliberately left alone, show covering revocations already made and revoke-axiom covering the one just made
-    source: ursa-major/src/consent.cli.ts:215-229, ursa-major/src/consent.cli.ts:108-126
+    source: ursa-major/src/consent.cli.ts:219-233, ursa-major/src/consent.cli.ts:112-130
+  - ref: E45
+    what: the gate runs grep with -I, which skips every binary file, so none of its three patterns has ever been applied to a screenshot, and the rendered half of that surface is checkable by nothing, so its rule is a rule for people, capture fixtures and never a real project's records
+    source: docs/security/redaction-standard.md:194-204
 supersedes: []
 ---
 
@@ -373,6 +378,22 @@ copies to clear, not one. The viewer embeds prompt text, so it is a
 second full copy of the sensitive fields rather than a rendering of the
 safe ones, and a viewer that redacts beside a JSON file that does not
 has protected nothing, because both ship together [E28].
+
+**A picture of either copy is a third one.** Since 2026-10-26 the
+standard names a fifth surface, which is a screenshot of any of the
+other four, because a capture of the viewer carries the prompt text the
+viewer embeds and the pixels hold it exactly as the HTML did [E28]. Two
+things follow, and the second is the one that catches a careful seat.
+Redacting at the moment of capture is the same mistake as redacting at
+the moment of rendering, because the unredacted page had to exist to be
+photographed [E28]. And the gate cannot help here at all: it runs `grep`
+with `-I`, which skips every binary file, so not one of its three
+patterns has ever been applied to an image, and the half that is drawn
+into the picture is checkable by nothing [E45]. So the rule for this
+surface is a rule for people rather than a gate, which is to capture
+fixtures and never a real project's records, and if a point genuinely
+needs real data to land, that is the owner's decision and not a
+judgement call at capture time [E45].
 
 Output: a passage, plus a written note of which clause it went out
 under.

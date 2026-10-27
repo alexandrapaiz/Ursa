@@ -67,6 +67,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { unreadDirs, indexedRows } from './library-dirs.mjs'
+import { declaredRefs } from './citing-files.mjs'
 
 const SKILLS_DIR = new URL('.', import.meta.url).pathname.replace(/\/$/, '')
 
@@ -209,10 +210,15 @@ export function readLibrary(dir = SKILLS_DIR) {
     if (!isDir(abs)) continue
     let trigger
     try { trigger = readFileSync(join(abs, 'TRIGGER-TEST.md'), 'utf8') } catch { trigger = null }
-    let skill = true
-    try { statSync(join(abs, 'SKILL.md')) } catch { skill = false }
-    if (!skill) continue
-    out.push({ slug: name, trigger, ...(trigger ? parseTriggerTest(trigger) : { shouldFire: [], nearMisses: [], unclassified: [] }) })
+    // The skill file is read rather than stat-ed, because `refs` below is the
+    // number the index's `Refs` column claims and this is where that number
+    // actually lives. One parser for it, in ./citing-files.mjs, shared with
+    // check-evidence.mjs.
+    let skillText = null
+    try { skillText = readFileSync(join(abs, 'SKILL.md'), 'utf8') } catch { skillText = null }
+    if (skillText === null) continue
+    out.push({ slug: name, trigger, refs: declaredRefs(skillText).length,
+      ...(trigger ? parseTriggerTest(trigger) : { shouldFire: [], nearMisses: [], unclassified: [] }) })
   }
   return out
 }
@@ -273,6 +279,249 @@ export function coverage(library, floor = BIGRAM_DICE_FLOOR) {
 }
 
 const pct = (n, d) => (d === 0 ? '0' : ((100 * n) / d).toFixed(0))
+
+/**
+ * The closing explanation, as a pure function of which condition fired, so
+ * that a reader cannot be told the cause of a failure they do not have.
+ *
+ * WHY THIS IS A FUNCTION AND NOT TWO LITERAL LINES. Until 2026-10-26 the
+ * shortfall branch printed one cause unconditionally: "a new skill puts every
+ * skill already in the library one short; that is the usual cause." That
+ * branch is reached on either of two conditions, an uncovered sibling
+ * boundary or a skill with no `TRIGGER-TEST.md` at all, and the sentence
+ * explains only the first. A library with full coverage and one missing
+ * trigger test would therefore have been handed a diagnosis about near-miss
+ * arithmetic, which is not its defect and whose repair would not have cleared
+ * it. Latent rather than live: measured on this library the same day, 10 of
+ * 10 skills carry a trigger test and 90 of 90 boundaries are covered, so this
+ * branch has never run against the real library with only the second
+ * condition set.
+ *
+ * It is the same error this seat published to another seat that morning, one
+ * directory over, and `prompts/skill-extract.md` §5x is the rule both are
+ * filed under: an instrument that names one cause for a condition with
+ * several is a single hypothesis wearing the authority of a measurement, and
+ * the reader who acts on it spends a run on the wrong repair. So each
+ * condition explains itself, each names every cause this guard knows for it,
+ * and where there is an order worth checking in, it says which to check
+ * first.
+ *
+ * @param {{ gaps: unknown[], missingTrigger: unknown[] }} counts the two
+ *   conditions that reach the shortfall branch; either may be empty
+ * @returns {string[]} lines to print, in order, for the conditions that fired
+ */
+/** The counts a trigger test states about itself, in a fenced `counts` block
+ *  rather than in its prose. Four keys, all integers:
+ *
+ *      ```counts
+ *      prompts: 13
+ *      should-fire: 4
+ *      near-misses: 9
+ *      neighbours: 9
+ *      ```
+ *
+ *  Returns `null` when the file declares no block, which is itself a defect
+ *  below, and an object of the keys it does declare otherwise. Unknown keys are
+ *  returned too, so a typo surfaces as an unchecked key rather than as silence.
+ *
+ *  WHY A BLOCK AND NOT THE PROSE. This is the shape §5u proposed and declined
+ *  to build, for the reason it gives: the honest check is not a search for
+ *  number words. Two sentences in this library state a count historically,
+ *  skills/README.md on a neighbour count that was true of a smaller library
+ *  and §5r's own "15 of 30 ordered pairs", and both are correct as written and
+ *  must stay. A check that parses English cannot tell them from a stale claim.
+ *  A fenced block is invisible to that problem by construction: the file states
+ *  its counts once, in one place, and the prose beside it is free to argue
+ *  about any number it likes. */
+export function declaredCounts(text) {
+  const m = text.match(/^```counts\n([\s\S]*?)^```/m)
+  if (!m) return null
+  const out = {}
+  for (const line of m[1].split('\n')) {
+    const kv = line.match(/^\s*([a-z-]+)\s*:\s*(\d+)\s*$/)
+    if (kv) out[kv[1]] = Number(kv[2])
+  }
+  return out
+}
+
+/** The four keys every trigger test declares, each with the function that
+ *  measures it. `neighbours` is the §5c denominator, which is every other
+ *  skill in the library. */
+const COUNT_KEYS = {
+  prompts: (s, lib) => s.shouldFire.length + s.nearMisses.length,
+  'should-fire': (s) => s.shouldFire.length,
+  'near-misses': (s) => s.nearMisses.length,
+  neighbours: (s, lib) => lib.length - 1,
+}
+
+/**
+ * Every count this library states about itself that disagrees with the library,
+ * as `{ slug, file, key, said, measured }`, with `said` null when the statement
+ * is missing rather than wrong.
+ *
+ * WHAT THIS IS FOR. §5u found nine false sentences in eight trigger tests after
+ * the ninth skill landed, named the general form — a derived fact recorded by
+ * hand beside the thing it is derived from — and left the check unbuilt. One
+ * day later, on 2026-10-27, six of the ten trigger tests still said "the budget
+ * is eight near misses" with nine neighbours, and three of the ten rows of
+ * skills/README.md stated a ref count that was wrong by up to five. §5u's own
+ * rule had been paid once, by the run that wrote it. So the rule is not the
+ * repair here; the exit status is.
+ *
+ * The index's `Refs` column is checked in the same pass and not in a second
+ * tool, because it is the same defect in the same library with the same cause,
+ * and a reader who has to run two commands to learn that a count is stale will
+ * run one.
+ */
+export function countDefects(library, indexRows) {
+  const out = []
+  for (const s of library) {
+    if (s.trigger === null) continue
+    const file = `skills/${s.slug}/TRIGGER-TEST.md`
+    const said = declaredCounts(s.trigger)
+    if (said === null) {
+      out.push({ slug: s.slug, file, key: 'counts block', said: null, measured: null })
+      continue
+    }
+    for (const [key, measure] of Object.entries(COUNT_KEYS)) {
+      const measured = measure(s, library)
+      if (!(key in said)) out.push({ slug: s.slug, file, key, said: null, measured })
+      else if (said[key] !== measured) out.push({ slug: s.slug, file, key, said: said[key], measured })
+    }
+  }
+  const byDir = new Map(library.map((s) => [s.slug, s]))
+  for (const row of indexRows) {
+    const s = byDir.get(row.dir)
+    if (!s) continue
+    const measured = s.refs
+    if (row.refs === null) out.push({ slug: row.dir, file: 'skills/README.md', key: 'refs', said: null, measured })
+    else if (row.refs !== measured) out.push({ slug: row.dir, file: 'skills/README.md', key: 'refs', said: row.refs, measured })
+  }
+  return out
+}
+
+/**
+ * Why a stated count is wrong, by the one cause this guard knows and the one it
+ * cannot distinguish from it. Same discipline as explainShape: a condition
+ * explains itself and nothing else.
+ */
+export function explainCounts(defects) {
+  const lines = []
+  const stale = defects.filter((d) => d.said !== null)
+  const missing = defects.filter((d) => d.said === null)
+  if (stale.length) {
+    lines.push('A stated count is a derived fact kept by hand, so it goes stale the moment the')
+    lines.push('library changes shape, and every receipt guard stays green because a count about')
+    lines.push('skills/ cites nothing. The usual cause is a landing run that paid §5r\'s prompt')
+    lines.push('debt in a sibling\'s file and did not touch the sentence counting the prompts it')
+    lines.push('added. The numbers above are measured from the files, so the repair is to copy')
+    lines.push('them in, in this pull request, per §5u.')
+  }
+  if (missing.length) {
+    lines.push('A count with no statement is not a defect in the library, it is this check with')
+    lines.push('nothing to check: the file declares no `counts` block, or the index row has no')
+    lines.push('`Refs` cell, so nothing there can go stale and nothing there can be trusted')
+    lines.push('either. Add the block, or the cell, with the measured numbers above.')
+  }
+  return lines
+}
+
+/**
+ * Why the library-shape branch failed, as a sentence per condition that fired.
+ *
+ * WHY THIS EXISTS, which is a fact about this file rather than about the
+ * library. `explainShortfall` above was written on 2026-10-26 at 19:09 UTC to
+ * fix exactly one defect: an exit branch reached by two conditions, explained
+ * by one literal. The sweep that fix came with went over all four guards in
+ * this library and declared them clean. Two screens below it, added to this
+ * same file at 00:43 UTC the same day, the shape branch summed FOUR disjoint
+ * conditions into `N library-shape defects above, listed before the counts.`
+ * One class name, four repairs, and the one sentence the reader acts on told
+ * them where to scroll instead of what broke.
+ *
+ * So the finding worth more than the fix: §5x's sweep was keyed to files, and
+ * a sweep keyed to files stops at the first finding in each file. The unit is
+ * the exit branch. See `prompts/skill-extract.md` §5z, which this is the
+ * fourth instance under and the first found by looking at the right unit.
+ *
+ * The four conditions, in the order they are printed, which is the order to
+ * repair them in:
+ *
+ *   1. A directory no guard reads. Its citations are unfingerprinted and its
+ *      trigger boundary unmeasured, so this is the only one of the four where
+ *      something is actually unguarded. First, always.
+ *   2. A skill the index does not list. Guarded, but invisible to a reader of
+ *      skills/README.md, which shipped here for three runs.
+ *   3. An index row pointing at no directory. Two causes, and a listing
+ *      settles which: a renamed directory, or a row for a skill that never
+ *      landed.
+ *   4. A row whose label and target disagree. Cosmetic on its own and listed
+ *      last, but named because a reader checking the other three by eye
+ *      matches labels against slugs and gets a false negative from it.
+ *
+ * Every one of the four is a seat's repair, which is said out loud because
+ * §5z's other half is that a message naming a repair names who may make it,
+ * and the honest answer here is "you, now" for all four.
+ *
+ * @param {{ missingSkill: {slug: string, nearMiss: ?string}[],
+ *           unlisted: string[], indexedMissing: string[],
+ *           mislabelled: {label: string, dir: string}[] }} shape the four
+ *   conditions that reach the branch; any of them may be empty
+ * @returns {string[]} lines to print, in order, for the conditions that fired
+ */
+export function explainShape({ missingSkill, unlisted, indexedMissing, mislabelled }) {
+  const lines = []
+  const count = (n, one, many) => `${n} ${n === 1 ? one : many}`
+  if (missingSkill.length) {
+    lines.push(`${count(missingSkill.length, 'directory', 'directories')} under skills/ has no SKILL.md, so no guard in`)
+    lines.push('this library reads it: its citations are unfingerprinted and its trigger boundary')
+    lines.push('is unmeasured. Repair this one first, because it is the only condition here where')
+    lines.push('something is unguarded rather than unlisted. Two causes, and the listing printed')
+    lines.push('above settles which: the file is there under a near-miss name, which is a rename,')
+    lines.push('or the directory is not a skill at all, which is a move out of skills/.')
+  }
+  if (unlisted.length) {
+    lines.push(`${count(unlisted.length, 'skill is', 'skills are')} guarded but absent from the index in`)
+    lines.push('skills/README.md, so every tool here reads it and no reader finds it. One cause:')
+    lines.push('the run that landed the skill owed the row and did not write it. Add the row.')
+  }
+  if (indexedMissing.length) {
+    lines.push(`${count(indexedMissing.length, 'index row', 'index rows')} points at a directory that is not there.`)
+    lines.push('Two causes: the directory was renamed and the row kept the old slug, or the row was')
+    lines.push('written for a skill that never landed. A directory listing tells you which, and')
+    lines.push('they ask for opposite repairs — fix the row, or delete it.')
+  }
+  if (mislabelled.length) {
+    lines.push(`${count(mislabelled.length, 'index row carries', 'index rows carry')} a label that disagrees with the`)
+    lines.push('directory it links to. Cosmetic on its own, which is why it is listed last, but it')
+    lines.push('is also why the three above are hard to check by eye: a reader matching labels')
+    lines.push('against slugs reads a mislabelled row as a missing one. One word in skills/README.md.')
+  }
+  return lines
+}
+
+export function explainShortfall({ gaps, missingTrigger }) {
+  const lines = []
+  if (missingTrigger.length) {
+    lines.push('A skill with no TRIGGER-TEST.md has no boundary to measure, so it is listed above')
+    lines.push('rather than scored. Two causes: the trigger test was never written, which the')
+    lines.push('landing run owes under §5q, or the file is there under another name, which a')
+    lines.push('directory listing settles in one command. Check the listing first; §5p allows')
+    lines.push('refs in any markdown file of the directory but the trigger test itself is one')
+    lines.push('fixed filename.')
+  }
+  if (gaps.length) {
+    lines.push('§5c asks one near miss per adjacent skill, and three things leave a boundary')
+    lines.push('untested. A new skill puts every skill already in the library one short, which')
+    lines.push('is the usual cause and the one to check first, because it is the only one that')
+    lines.push('moves many pairs at once. A renamed skill directory leaves the near misses')
+    lines.push('that cited the old name pointing at nothing. And a near miss that paraphrases')
+    lines.push("the sibling instead of quoting its own trigger prompt is reported above as")
+    lines.push('argued rather than asked, and needs the sibling\'s words rather than a new')
+    lines.push('section.')
+  }
+  return lines
+}
 
 function main(argv) {
   const showPairs = argv.includes('--pairs')
@@ -347,17 +596,45 @@ function main(argv) {
   // no guard reads and an index that disagrees with the directory listing are
   // both facts about whether this library is the set of things it says it is,
   // and neither is a judgement call the caller can be given a flag for.
+  //
+  // The sum below is printed broken out rather than collapsed. Until this run
+  // it was one number under one class name, and four library-shape defects
+  // could be four index rows nobody wrote — a two-minute edit to one file — or
+  // four directories whose evidence nothing checks. See `explainShape`.
+  // A stated count that disagrees with the library is the same kind of fact as a
+  // dangling index row: published, derived, and checkable without judgement. So
+  // it is reported next to the shape defects and exits 1 on its own, rather than
+  // waiting for --check, which is for the §5c budget a caller may be mid-repair
+  // on. See countDefects for what one day of §5u-as-a-convention cost.
+  const counts = countDefects(library, indexRows)
+  for (const d of counts) {
+    // The index is one file holding ten rows, so its path alone does not say
+    // which row is wrong; a trigger test's path already names its skill.
+    const where = d.file === 'skills/README.md' ? `skills/README.md row ${d.slug}` : d.file
+    console.log(d.key === 'counts block'
+      ? `${where} declares no counts block, so nothing checks what it says about itself`
+      : `${where} says ${d.key} ${d.said === null ? 'nowhere' : d.said}, the library says ${d.measured}`)
+  }
+
   const shape = missingSkill.length + mislabelled.length + indexedMissing.length + unlisted.length
+  if (counts.length && !shape) {
+    console.log(`${counts.length} stated count${counts.length === 1 ? '' : 's'} disagree${counts.length === 1 ? 's' : ''} with the library, listed above.`)
+    for (const line of explainCounts(counts)) console.log(line)
+    return 1
+  }
   if (shape) {
-    console.log(`${shape} library-shape defect${shape === 1 ? '' : 's'} above, listed before the counts.`)
+    console.log(`${shape} library-shape defect${shape === 1 ? '' : 's'}: ` +
+      `${missingSkill.length} unread, ${unlisted.length} unlisted, ` +
+      `${indexedMissing.length} dangling index row${indexedMissing.length === 1 ? '' : 's'}, ` +
+      `${mislabelled.length} mislabelled. Each is listed above with its own slug.`)
+    for (const line of explainShape({ missingSkill, unlisted, indexedMissing, mislabelled })) console.log(line)
     return 1
   }
   if (gaps.length === 0 && missingTrigger.length === 0) {
     if (!argued.length) console.log('every skill meets §5c')
     return 0
   }
-  console.log('§5c asks one near miss per adjacent skill, and a new skill puts every skill')
-  console.log('already in the library one short; that is the usual cause.')
+  for (const line of explainShortfall({ gaps, missingTrigger })) console.log(line)
   return check ? 1 : 0
 }
 

@@ -9,7 +9,17 @@
 // evidence lock was built for one directory over.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { parseTriggerTest, similarity, coverage, BIGRAM_DICE_FLOOR } from './trigger-coverage.mjs'
+import {
+  BIGRAM_DICE_FLOOR,
+  countDefects,
+  coverage,
+  declaredCounts,
+  explainCounts,
+  explainShape,
+  explainShortfall,
+  parseTriggerTest,
+  similarity,
+} from './trigger-coverage.mjs'
 
 const test_doc = `# Trigger test — a-skill
 
@@ -246,4 +256,194 @@ test('a skill is never its own sibling', () => {
     nearMisses: [{ id: '2', text: 'Resolve the record and commit the adjudication beside it.' }],
   }]
   assert.deepEqual(coverage(library), [])
+})
+
+test('the shortfall explanation names the condition that fired, not the usual one', () => {
+  // The regression this holds shut is a wrong diagnosis rather than a wrong
+  // number, which is why it survived: the branch exits 1 either way and the
+  // only thing that differs is the sentence a reader acts on. Until
+  // 2026-10-26 both conditions printed the near-miss arithmetic, so a library
+  // whose only defect was a missing trigger test was told to go count
+  // siblings.
+  const missing = explainShortfall({ gaps: [], missingTrigger: [{ slug: 'a-skill' }] })
+  const joined = missing.join(' ')
+  assert.match(joined, /TRIGGER-TEST\.md/)
+  assert.doesNotMatch(joined, /near miss per adjacent skill/)
+
+  const uncovered = explainShortfall({ gaps: [{ skill: 'a', sibling: 'b' }], missingTrigger: [] })
+  const joinedGaps = uncovered.join(' ')
+  assert.match(joinedGaps, /near miss per adjacent skill/)
+  assert.doesNotMatch(joinedGaps, /TRIGGER-TEST\.md/)
+})
+
+test('each condition names every cause this guard knows, and the gap case orders them', () => {
+  // §5x's mechanical part: one named cause for a condition with several is the
+  // defect. The gap branch has three and the missing-trigger branch has two,
+  // and the gap branch says which to check first, because only one of its
+  // three moves many pairs at once.
+  const both = explainShortfall({
+    gaps: [{ skill: 'a', sibling: 'b' }],
+    missingTrigger: [{ slug: 'c' }],
+  }).join(' ')
+  assert.match(both, /renamed skill directory/)
+  assert.match(both, /paraphrases/)
+  assert.match(both, /check first/)
+  assert.match(both, /never written/)
+  assert.match(both, /another name/)
+})
+
+// The shape branch, which is the fourth instance of the defect `explainShortfall`
+// above was written for and the first one found by looking at exit branches
+// rather than at files. Until this run it summed four disjoint conditions into
+// `N library-shape defects above, listed before the counts.` Every assertion
+// below fails against that line: it carries no condition name, no cause and no
+// repair, and the word `defects` is the only vocabulary it has for all four.
+// prompts/skill-extract.md §5z.
+
+const SHAPE_NONE = { missingSkill: [], unlisted: [], indexedMissing: [], mislabelled: [] }
+
+test('the shape explanation names the condition that fired, not the class', () => {
+  // A library whose only fault is a missing index row must not be told that a
+  // directory is unguarded, and the reverse. This is the regression that
+  // matters, because the branch returns 1 either way and the sentence is the
+  // only thing that differs.
+  const unlisted = explainShape({ ...SHAPE_NONE, unlisted: ['a-skill'] }).join(' ')
+  assert.match(unlisted, /absent from the index/)
+  assert.doesNotMatch(unlisted, /no guard in/)
+
+  const unread = explainShape({ ...SHAPE_NONE, missingSkill: [{ slug: 'a-skill', nearMiss: 'SKILLS.md' }] }).join(' ')
+  assert.match(unread, /no guard in/)
+  assert.doesNotMatch(unread, /absent from the index/)
+})
+
+test('each shape condition names its repair, and the unguarded one is ordered first', () => {
+  // §5z: the order is the repair order, not the declaration order. The unread
+  // directory is the only one of the four where something is actually
+  // unguarded, so it is the one a run with time for exactly one repair should
+  // spend it on, and the text has to say so.
+  const all = explainShape({
+    missingSkill: [{ slug: 'u', nearMiss: null }],
+    unlisted: ['v'],
+    indexedMissing: ['w'],
+    mislabelled: [{ label: 'x', dir: 'y' }],
+  })
+  const joined = all.join(' ')
+  assert.match(joined, /Repair this one first/)
+  assert.match(joined, /Add the row/)
+  assert.match(joined, /fix the row, or delete it/)
+  assert.match(joined, /skills\/README\.md/)
+  // First condition printed is the unguarded one.
+  assert.match(all[0], /no SKILL\.md/)
+  // Last is the cosmetic one, and it says that it is cosmetic.
+  assert.match(all[all.length - 1], /README\.md/)
+  assert.match(joined, /Cosmetic on its own/)
+})
+
+test('a shape condition with more than one cause says so and says how to tell', () => {
+  // The two conditions here that have two causes each must not present one.
+  // A dangling index row is a rename or a row for a skill that never landed,
+  // and those ask for opposite repairs.
+  const dangling = explainShape({ ...SHAPE_NONE, indexedMissing: ['gone'] }).join(' ')
+  assert.match(dangling, /Two causes/)
+  assert.match(dangling, /renamed/)
+  assert.match(dangling, /never landed/)
+  assert.match(dangling, /opposite repairs/)
+
+  const unread = explainShape({ ...SHAPE_NONE, missingSkill: [{ slug: 'u', nearMiss: 'SKILLS.md' }] }).join(' ')
+  assert.match(unread, /Two causes/)
+  assert.match(unread, /rename/)
+  assert.match(unread, /not a skill at all/)
+})
+
+test('no condition fired means no lines, so a clean library gets no explanation', () => {
+  // The branch is only reached when the sum is non-zero, but the function is
+  // exported and pure, and a function that explains a failure that did not
+  // happen is how §5w's dangerous number gets printed.
+  assert.deepEqual(explainShape(SHAPE_NONE), [])
+})
+
+test('the shape lines are singular and plural correctly, because the count is the claim', () => {
+  const one = explainShape({ ...SHAPE_NONE, indexedMissing: ['a'] }).join(' ')
+  assert.match(one, /1 index row points/)
+  const two = explainShape({ ...SHAPE_NONE, indexedMissing: ['a', 'b'] }).join(' ')
+  assert.match(two, /2 index rows point/)
+})
+
+// The stated-count check, added 2026-10-27. What these cover is the one thing
+// §5u said a count check must not do, which is guess at a number in prose.
+
+const counted = (prompts, sf, nm, nbrs) =>
+  `# Trigger test — a-skill\n\n\`\`\`counts\nprompts: ${prompts}\nshould-fire: ${sf}\n` +
+  `near-misses: ${nm}\nneighbours: ${nbrs}\n\`\`\`\n\nFifteen prompts once, and §5r's own 15 of 30 ordered pairs.\n`
+
+/** A library entry shaped like readLibrary's, with the prompt counts faked so
+ *  the count check can be tested without a whole trigger test per case. */
+const entry = (slug, trigger, sf, nm, refs = 0) => ({
+  slug, trigger, refs,
+  shouldFire: Array.from({ length: sf }, (_, i) => ({ id: `${i + 1}`, text: 'x', reasoning: '' })),
+  nearMisses: Array.from({ length: nm }, (_, i) => ({ id: `${i + 9}`, text: 'y', reasoning: '' })),
+})
+
+test('declaredCounts reads the fenced block and nothing else in the file', () => {
+  const said = declaredCounts(counted(12, 3, 9, 9))
+  assert.deepEqual(said, { prompts: 12, 'should-fire': 3, 'near-misses': 9, neighbours: 9 })
+})
+
+test('a historical number in the prose is invisible to the check, which is the point', () => {
+  // §5u declined to build this check because a search for number words cannot
+  // tell skills/README.md's "then five neighbours" from a stale claim. The
+  // fixture above says "Fifteen prompts once" and "15 of 30 ordered pairs" in
+  // its prose, both correct as written, and neither reaches the result.
+  const said = declaredCounts(counted(12, 3, 9, 0))
+  assert.equal(said.prompts, 12)
+  assert.equal(countDefects([entry('a-skill', counted(12, 3, 9, 0), 3, 9)], []).length, 0)
+})
+
+test('no block at all is reported as the absence rather than as a wrong count', () => {
+  const defects = countDefects([entry('a-skill', '# Trigger test — a-skill\n\nTwelve prompts.\n', 3, 9)], [])
+  assert.deepEqual(defects, [{ slug: 'a-skill', file: 'skills/a-skill/TRIGGER-TEST.md', key: 'counts block', said: null, measured: null }])
+})
+
+test('every stated count is compared, and the measured number comes from the files', () => {
+  // The library has one skill here, so the §5c denominator is zero neighbours.
+  const defects = countDefects([entry('a-skill', counted(13, 4, 9, 9), 3, 9)], [])
+  assert.deepEqual(defects.map((d) => [d.key, d.said, d.measured]), [
+    ['prompts', 13, 12],
+    ['should-fire', 4, 3],
+    ['neighbours', 9, 0],
+  ])
+})
+
+test('the neighbour count is the library minus this skill, so landing one moves every file', () => {
+  // This is the arithmetic §5u measured: two landing runs left four headers
+  // saying "five neighbours" in a library of nine. One skill, nothing stale;
+  // add a second and both files owe a new number.
+  const lib = [entry('a', counted(12, 3, 9, 1), 3, 9), entry('b', counted(12, 3, 9, 1), 3, 9)]
+  assert.equal(countDefects(lib, []).length, 0)
+  lib.push(entry('c', counted(12, 3, 9, 2), 3, 9))
+  assert.deepEqual(countDefects(lib, []).map((d) => `${d.slug}:${d.key}:${d.said}->${d.measured}`),
+    ['a:neighbours:1->2', 'b:neighbours:1->2'])
+})
+
+test("the index's Refs column is checked against the skill's own declarations", () => {
+  const lib = [entry('a-skill', counted(12, 3, 9, 0), 3, 9, 45)]
+  assert.deepEqual(countDefects(lib, [{ label: 'a-skill', dir: 'a-skill', refs: 41 }]),
+    [{ slug: 'a-skill', file: 'skills/README.md', key: 'refs', said: 41, measured: 45 }])
+  assert.equal(countDefects(lib, [{ label: 'a-skill', dir: 'a-skill', refs: 45 }]).length, 0)
+})
+
+test('an index row for a directory that is not a skill is the shape check\'s finding, not this one', () => {
+  // Reporting it here too would be two guards disagreeing about one rule, which
+  // is the argument library-dirs.mjs makes about the missing trigger test.
+  assert.deepEqual(countDefects([], [{ label: 'ghost', dir: 'ghost', refs: 3 }]), [])
+})
+
+test('the count explanation separates a wrong statement from a missing one', () => {
+  const stale = explainCounts([{ slug: 'a', file: 'f', key: 'prompts', said: 12, measured: 13 }]).join(' ')
+  assert.match(stale, /derived fact kept by hand/)
+  assert.doesNotMatch(stale, /declares no/)
+  const missing = explainCounts([{ slug: 'a', file: 'f', key: 'counts block', said: null, measured: null }]).join(' ')
+  assert.match(missing, /nothing to check/)
+  assert.doesNotMatch(missing, /goes stale/)
+  assert.deepEqual(explainCounts([]), [])
 })

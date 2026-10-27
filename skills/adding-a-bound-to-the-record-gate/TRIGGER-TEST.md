@@ -1,7 +1,16 @@
 # Trigger test — adding-a-bound-to-the-record-gate
 
-Seven prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Four are near misses that should not.
+```counts
+prompts: 12
+should-fire: 3
+near-misses: 9
+neighbours: 9
+```
+
+The counts above are checked by `node skills/trigger-coverage.mjs`,
+which goes red when they drift, per `prompts/skill-extract.md` §5ae,
+so they are the only place this file states them. The prompts below
+are written against the `description` field in `SKILL.md`.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes, not the test. The reasoning below points at the
 skill's own steps and limits rather than at evidence refs. When this
@@ -14,8 +23,8 @@ test argues about where the description's edge falls and not about
 what the code says, and routing through a step keeps one claim in one
 place instead of two.
 
-The budget is five near misses rather than two because §5c sets one
-near miss per adjacent skill, and this skill has five neighbours: every
+The budget is eight near misses rather than two because §5c sets one
+near miss per adjacent skill, and this skill has nine neighbours: every
 other skill in the library. §5e is what says that is not a sign the cut
 is wrong, and the note at the end is the argument.
 
@@ -182,21 +191,29 @@ itself, which is exactly the distinction step 1 exists for.
 ## Note on the boundary, which is one edge and not five
 
 §5c warns that a skill with three or more neighbours is probably
-describing a topic rather than a piece of work. This skill has five and
+describing a topic rather than a piece of work. This skill has nine and
 should not be re-cut, for the reason §5e gives: count artifacts, not
 neighbours.
 
-Four of the five neighbours work on two artifacts,
+Eight of the nine neighbours work on two artifacts,
 `outcome_record.json` and `tuning.json`, and both of those are data a
-run produced. This skill works on `ursa-major/src/invariants.ts` and
-the committed records under `ursa-major/fixtures/violations/`, which
-are the checker and its counterexamples. So those four boundaries are
-the same boundary counted four times, between the records and the
-thing that checks them, and each of those near misses fails by sitting
-on the records side of it.
+run produced. Named rather than counted, because a bare count is the
+thing that goes stale: `adjudicating-uncertain-spans`,
+`running-an-outcome-record-trial`,
+`quoting-a-number-from-an-outcome-record`,
+`auditing-a-detected-correction-loop`, `auditing-a-durability-walk`,
+`attributing-a-deleted-span` and
+`excluding-a-file-from-an-outcome-record` on the record, and
+`distilling-a-tuning-record` on the tuning file. This skill works on
+`ursa-major/src/invariants.ts` and the committed records under
+`ursa-major/fixtures/violations/`, which are the checker and its
+counterexamples. So those eight boundaries are the same boundary
+counted eight times, between the records and the thing that checks
+them, and each of those near misses fails by sitting on the records
+side of it.
 
-The fifth, near miss 8, fails on a different axis and is worth keeping
-separate rather than folded into the count.
+The ninth neighbour, near miss 8, fails on a different axis and is
+worth keeping separate rather than folded into the count.
 `clearing-a-record-for-release` does not work on an artifact at all; it
 works on a boundary. So that pair is not records-against-checker but
 checker-against-destination, and the two skills do not share an object
@@ -283,3 +300,90 @@ from a measurement is what should catch it, and the sibling is where
 the person doing that separating learns the arithmetic. So the
 handoff runs durability-side first when a proposed bound is about a
 durability field.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**11. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+The pull is real and it is one sentence long. "Did anything actually
+check" is a question about whether a test ran, and the reflex answer in
+this file is to make the gate run it. Somebody will arrive proposing
+exactly that bound: `mergeDeletedChars` is non-zero whenever the
+episode had intervening merges. It is false on a correct record,
+because a merge can touch a paired path and leave every generation span
+of that path intact, which is the ordinary case rather than an edge
+one. This skill's own step for separating a bound from a measurement is
+what should catch it.
+
+The sharper reason it should not fire is already in this skill's
+evidence. `DELETION_SPLIT_EXACT` holds the three-way split exact
+against the gross figure, and it holds on a record every one of whose
+deletion figures is a default, because the identity is true by
+construction of the subtraction that produces the human share. So the
+gate is green on precisely the record the sibling exists to catch. That
+is not a missing bound. It is a claim no bound can reach, because the
+evidence that would settle a cause is a git tree and no record carries
+one, and a bound can only catch a record contradicting itself.
+
+The handoff therefore runs sibling-side first in both directions when a
+prompt is about a deletion cause, and gate-side first when it is about
+a rule.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. This is the hardest near miss in this file, because the
+prompt describes a condition the gate already checks. The third clause
+of `EXCLUSION_NOT_CLASSIFIED` holds that a `sibling` exclusion's date
+is no later than the record's own `task.generatedAt`, and the record in
+the prompt violates it. So a reader who knows the gate will recognize
+the rule before recognizing the question, and will land here.
+
+The division is the same one this file argues everywhere and it holds
+with no special pleading: this skill's object is the checker and the
+sibling's object is a record. The prompt proposes no bound, changes no
+bound, and asks nothing about whether a violation means the bound or the
+resolver is wrong. It asks what one entry in one record is evidence for.
+That the gate would catch the entry is a fact about the record's state,
+not a question about the gate's design.
+
+Two things are worth taking from this pair, both of them about what a
+bound can and cannot be asked to do.
+
+The first is an asymmetry the gate cannot close. It can catch a refusal
+that was computed and then not applied, because both halves of that
+contradiction are inside the record and the first clause of the same
+bound is that same-set arithmetic. It can never catch a refusal that
+should have been made and was not, because no record carries the object
+store that would settle it. So the sibling's most expensive failure is
+structurally out of this skill's reach, and a seat proposing a bound
+against it should be told so rather than talked out of it.
+
+The second is that the sibling is a consumer of three bounds and one
+audit check rather than an author of any, which is the ordinary relation
+between a record skill and this one. A prompt that genuinely spans the
+two is handled gate-side first, for the reason this file gives for every
+such prompt: a record cannot be judged against a rule while the rule
+itself is in question.

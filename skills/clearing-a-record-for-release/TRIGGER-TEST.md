@@ -1,16 +1,28 @@
 # Trigger test — clearing-a-record-for-release
 
-Eight prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Five are near misses that should not.
-Per `prompts/skill-extract.md` §5, when the test fails the description
-is what changes and not the test.
+```counts
+prompts: 13
+should-fire: 4
+near-misses: 9
+neighbours: 9
+```
 
-The budget is five near misses because §5c sets one per adjacent skill
-and this skill has five neighbours, which is every other skill in the
-library. §5e is what says that is not a sign the cut is wrong: the five
-work on `outcome_record.json`, on `tuning.json` and on the gate, while
-this one works on what leaves, so its five boundaries are one edge
-counted five times. Near miss 4 is `quoting-a-number-from-an-outcome-record`'s
+The counts above are checked by `node skills/trigger-coverage.mjs`,
+which goes red when they drift, per `prompts/skill-extract.md` §5ae,
+so they are the only place this file states them. The prompts below
+are written against the `description` field in `SKILL.md`.
+The fourth should-fire prompt was added on 2026-10-27, when the security
+standard named a fifth surface and the description was widened to reach
+it, which §5 permits because its budget is a floor. Per
+`prompts/skill-extract.md` §5, when the test fails the description is
+what changes and not the test.
+
+The near-miss budget is one per adjacent skill, which is what §5c sets,
+and every other skill in the library is adjacent, so the `neighbours`
+line above is the budget and `near-misses` is what this file spends. §5e is what says a budget that large is not a
+sign the cut is wrong: the siblings work on `outcome_record.json`, on
+`tuning.json` and on the gate, while this one works on what leaves, so
+every boundary it has is one edge counted once per sibling. Near miss 4 is `quoting-a-number-from-an-outcome-record`'s
 own trigger, 5 is `distilling-a-tuning-record`'s, 6 is
 `adjudicating-uncertain-spans`', 7 is `running-an-outcome-record-trial`'s,
 and 8 is `adding-a-bound-to-the-record-gate`'s.
@@ -78,6 +90,29 @@ pages the new index no longer names [E38, E39].
 A reader who only has the first half closes this as not-a-bug. A
 reader who only has the second half files a defect against code that
 is correct. The skill's step 5 is what keeps both.
+
+**3b. "The span colouring is easier to show than to describe, so I'm
+attaching a screenshot of the record viewer to the pull request. The
+redaction gate is green on the branch, so that's covered, right?"**
+
+Fires, and it is the fourth should-fire prompt, added 2026-10-27 under
+§5's budget-is-a-floor rule when the standard named a fifth surface and
+the description was widened to reach it. It arrives through "committing
+or attaching a screenshot of a record, of its viewer or of a page
+rendered from it", and the answer is the one sentence a reader is least
+likely to have: the capture carries the prompt text the viewer embeds,
+because the pixels hold it exactly as the HTML did [E28]. The green
+check is worth nothing here, and not merely little. The gate runs
+`grep` with `-I`, which skips every binary file, so no pattern of it has
+ever been applied to an image at all [E45].
+
+Two near-miss directions sit close to this one and are worth stating
+rather than testing, because neither is a sibling's trigger. A
+screenshot of a `stats` tile with no raw text in frame is still this
+skill's question and still arrives at step 4, since what settles it is
+the field table rather than the medium. And a question about whether
+the viewer should redact by default is engineering work on the viewer,
+not a release decision, because nothing is leaving yet.
 
 ## Should not fire
 
@@ -213,3 +248,84 @@ commit hashes out of the user's own repository are about to leave the
 machine under this skill's rules. That is a genuine handoff and it
 runs durability-side first, because what may leave cannot be settled
 until it is known what is being said.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**11. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+The pull is the phrase "before I call that". A number is about to be
+called something in a document, and this skill's own trigger 1 is a
+person about to paste something into a design doc. The two prompts have
+the same grammar.
+
+They do not have the same question. This skill rules on whether text or
+a number may leave at all, and its three exits have opposite rules
+about raw text. The sibling rules on whether the number is true before
+anyone asks whether it may leave, and its answer can be "nothing
+checked", which is not an exit condition in this file at all. The line
+is also mechanical rather than a matter of taste, in the same way this
+skill's line with the quoting skill is: every field under `stats`
+ships, so a one-record figure like `humanDeletedChars` is never blocked
+here, and nothing in the deletion split is an aggregate across
+contributors. So the sibling's prompt cannot reach any of this skill's
+three exits.
+
+Both directions are handled record-side first, because nothing can be
+cleared for release until it is settled what it is.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. It is the closest of this file's near misses, and the
+reason is in the prompt's last five words rather than in its subject.
+"Fine to cite the exclusion in the methods note" is a question about
+putting part of a record into a document, which is the exact shape of
+this skill's trigger 1, and a methods note is a document this skill has
+ruled on before.
+
+The line is the one this skill draws everywhere and it is worth stating
+plainly, because the surface similarity is high enough to override it.
+This skill rules on whether something *may leave*, and its three exits
+have different rules about raw text. The sibling rules on whether the
+thing is *true*. The prompt's answer is that the citation is false: the
+exclusion's date is an hour after the work closed, so the refusal points
+the wrong way in time and the entry says the opposite of what citing it
+would claim. Nothing about that answer concerns disclosure, consent, or
+which exit the document is.
+
+There is a genuine release question sitting on the same field, and the
+right move is to name it rather than to claim the boundary is clean. An
+exclusion entry carries a commit sha and that commit's subject line,
+kept so the record names the import in the commit author's own words.
+That is text which entered the record from the history rather than from
+the episode's transcript, and a subject line can carry a name, a
+customer, or an internal path. Ruling on whether it may leave is this
+skill's, and it is a thing to check when an exclusion is being quoted
+outward.
+
+So both skills have a claim on a prompt about citing an exclusion, and
+they are answering different questions about it. Ordering, stated once
+and the same in both files: record-side first, because nothing can be
+cleared for release until it is settled what it says.

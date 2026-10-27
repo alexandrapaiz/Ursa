@@ -1,15 +1,24 @@
 # Trigger test — quoting-a-number-from-an-outcome-record
 
-Nine prompts, written against the `description` field in `SKILL.md`.
-Four should activate the skill. Five are near misses that should not.
+```counts
+prompts: 13
+should-fire: 4
+near-misses: 9
+neighbours: 9
+```
+
+The counts above are checked by `node skills/trigger-coverage.mjs`,
+which goes red when they drift, per `prompts/skill-extract.md` §5ae,
+so they are the only place this file states them. The prompts below
+are written against the `description` field in `SKILL.md`.
 The fourth should-fire prompt was added on 2026-10-15 under the §5
 budget-is-a-floor rule, after the skill gained the `survived_verbatim`
 redefinition. Per `prompts/skill-extract.md` §5, when the test fails
 the description is what changes, not the test.
 
-The budget is five near misses because §5c sets one per adjacent skill
-and this skill has five neighbours, which is every other skill in the
-library. Near miss 4 is `adjudicating-uncertain-spans`' own trigger, 5
+The near-miss budget is one per adjacent skill, which is what §5c sets,
+and every other skill in the library is adjacent, so the `neighbours`
+line above is the budget and `near-misses` is what this file spends. Near miss 4 is `adjudicating-uncertain-spans`' own trigger, 5
 is `running-an-outcome-record-trial`'s, 6 is
 `adding-a-bound-to-the-record-gate`'s, 7 is
 `clearing-a-record-for-release`'s, and 8 is
@@ -286,3 +295,81 @@ one. Ask whether the question would survive someone answering "those
 two walks ended at different commits". If that answer dissolves the
 question, it was the durability skill's. If the question is still there
 afterwards, it is this skill's. `skills/README.md` records the order.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**11. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here. It is the hardest near miss in this file and the closest boundary
+in the library, so the division is stated in full rather than asserted.
+
+Both skills rule on the same four fields of `stats.generated`, and the
+sibling's prompt quotes two numbers and a rate name, which is this
+skill's trigger shape almost exactly. What separates them is which half
+of the sentence is in question. This skill rules on what a number is a
+share of: `deletedPct` divides by generated characters rather than by
+the finished work, and its numerator has the `not_generated` characters
+subtracted out while the denominator keeps them. The sibling rules on
+whether the numerator names a person at all, which is a question about
+whether a git test ran and what it could read.
+
+The sibling's prompt is entirely the second question. It has already
+named the right field, `humanDeletedChars`, and already given the right
+denominator, 307 generated characters, so there is no share-of ruling
+left to make. What it asks is whether anything checked, and no field in
+`stats` answers that.
+
+The ordering rule, stated once and the same in both files: a prompt
+that genuinely spans the two is handled quoting-side first, because a
+cause cannot be audited until it is settled which population the figure
+covers. This prompt does not span them, because it arrives with the
+population already settled.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. The pull is real and comes from the last six words: a
+prompt asking whether something may be cited in a methods note is this
+skill's trigger shape almost exactly, and trigger 1 of this file is a
+methods doc for KR2.1.
+
+What separates them is that the sibling's prompt contains no number. It
+holds a path, a reason, a relation and two timestamps, and the ruling it
+wants is whether the refusal those four fields record points the right
+way in time. This skill rules on what a quantity is a share of, and
+there is no quantity here to take a denominator.
+
+The boundary that does exist between the two skills runs the other way
+and is worth naming, because a reader who finds it will arrive from this
+side. An exclusion changes the *domain* of this skill's figures: a path
+the record excludes is absent from `files[]` and therefore from
+`finalChars` and `coveredChars`, so every percentage this skill rules
+on is computed over the paths that survived the refusal. The ordering
+rule, stated once and the same in both files: a prompt that genuinely
+spans the two is handled exclusion-side first, because what a number is
+a share of cannot be settled until it is settled which paths are in the
+population at all. That is the reverse of the order this file takes with
+`attributing-a-deleted-span` under near miss 11, and the asymmetry is
+not an inconsistency. A deletion cause is read *out of* a figure, so the
+figure has to be pinned first. An exclusion decides which figure there
+is.
