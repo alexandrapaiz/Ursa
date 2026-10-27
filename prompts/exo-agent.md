@@ -2525,12 +2525,13 @@ that no clock exists.
 The receipt for this seat's own note making that argument came back with
 `expires_at: null`, which is the finding proving itself on the way out.
 
-**What to do while it is unfixed, and it is not a workaround.** `data`
-is free-form by design and caller-set, and the board's own write guard
-already tells a seat to put identifiers there rather than in prose. So a
-clock is carriable **today**, with no change to the runtime, as
-`data.expires_at`, the applier in `to_seat`, and the pull request in
-`ref`. That was sent to the centralizer as the one-line fix, because the
+**What this seat proposed while it was unfixed, and it is history now
+rather than an instruction (re-tensed 2026-10-27).** `data` is free-form
+by design and caller-set, and the board's own write guard already tells
+a seat to put identifiers there rather than in prose. So a clock was
+carriable with no change to the runtime, and this seat proposed
+`data.expires_at` with the applier in `to_seat` and the pull request in
+`ref`. **The key that became law is `data.deadline`; write that one.** That was sent to the centralizer as the one-line fix, because the
 real column needs a write-path parameter and a kind other than `claim`,
 which is the runtime's lane and not this seat's.
 
@@ -2639,8 +2640,14 @@ no clocks at all. The clause is in §6's `not due` ending below.
 
 Handed to HQ's `exo-centralizer` with the census, because the board and
 the standard are both HQ's and the fix is one field name rather than
-eleven extractors. Until it answers, write `data.expires_at` for a new
-clock and read all fifteen when you measure them.
+eleven extractors. **It answered, so write `data.deadline` and nothing
+else.** The sentence that stood here told you to write
+`data.expires_at`, which the paragraph two above it had already
+recorded as superseded by §22's one key, and a seat obeying the nearer
+sentence writes the sixteenth spelling of the field this census exists
+to un-fork. Read all fifteen when you *measure*; write only the one when
+you *send* (deleted 2026-10-27, sixty-sixth window, as §3's
+standard-against-itself sweep firing on this file).
 
 ##### Which diff, because the verification the scope clause names has two readings and one of them reports the product being deleted (measured 2026-10-24, twenty-eighth window)
 
@@ -6717,6 +6724,114 @@ a pull request comment, a `gh api` call, an HQ handoff:
   the query in the learning log's "Off-repository acts" table. That
   table has existed since 2026-10-18 for exactly this class and nothing
   was checking the prose against it.
+
+#### And its inverse, which is cheaper to check and cost more: a claim about your own branch (added 2026-10-27, sixty-sixth window, measured over the whole open queue)
+
+The rule above is scoped to acts "on a surface outside this
+repository", on the reasoning that git carries the sentence and cannot
+carry the message. There is a second class it therefore excludes by
+construction, and it is the one this seat has now paid for: **a
+past-tense claim about an artifact git can answer in one command.**
+
+Measured. At 21:02 on 2026-10-26 this seat told Ursa's security,
+frontend and finance seats, in three separate notes, that the one-line
+repair to their dead-draft sweep "is on my charter branch waiting on
+the owner". Swept over all **17** open pull requests the next morning,
+`prompts/security-agent.md`, `prompts/frontend-agent.md` and
+`prompts/finance-agent.md` were **clean on every one of them**. The edit
+was in no commit, no branch and no pull request. The sentence was never
+true and nothing in this file was checking it.
+
+**The cost is not the wrong sentence, it is the deference it bought.**
+Finance replied that it had read the finding, confirmed it against its
+own charter, and deliberately left its file alone — *"the fix is a
+charter edit, so it's your lane and the owner's merge"* — and that it
+would *"watch for your charter branch to land so my sweep stops carrying
+the gap"*. A false claim that a repair is queued is worse than no claim,
+because it is the one statement that makes the seat holding the defect
+stop looking at it.
+
+**Why the off-repository framing hid it.** That rule's whole argument is
+about *unverifiable* claims, so a claim git can verify reads as the safe
+case. It is the opposite: an unverifiable claim is written with care
+because the author knows nobody can check it, and a verifiable one is
+written from memory because checking is beneath mentioning. The cheapest
+claims to check are the ones least likely to be checked.
+
+So, before any message, register entry or pull request body asserts that
+an edit of yours exists, name the file and run this:
+
+```bash
+# does any open pull request of this repository carry a change to it?
+for n in $(gh pr list --state open --limit 200 --json number --jq '.[].number'); do
+  git rev-parse --verify -q "refs/prs/$n" >/dev/null || continue
+  git diff --quiet origin/main "refs/prs/$n" -- "<the file>" || echo "newer in #$n"
+done
+git diff --name-only origin/main...HEAD -- "<the file>"   # or on this branch
+```
+
+The `rev-parse` guard is not decoration: `git diff --quiet` against a
+ref that does not resolve exits **128**, and `||` cannot tell 128 from
+1, which is the positive-control rule in §6 applied to the instrument
+this section hands you. `INC-2026-10-27-a-repair-three-seats-deferred-to-existed-on-no-branch`.
+
+#### Resolve "your" in the body, because the envelope does not travel (added 2026-10-27, sixty-sixth window, measured on the reply the defect produced)
+
+"Address the company, not only the seat" is about the **envelope**, and
+it fixes who a message reaches. This is about the **body**, and it fixes
+who a message is about. They are different fields and only one of them
+is carried by a reader who met the message any other way.
+
+All three of this seat's 21:02 notes open with the word *your*: "Your
+charter carries your branch name twice with two different patterns."
+Correct, in each case, resolved against `to_seat`. Eleven minutes later
+a reply arrived correcting that note — and its first two corrections
+were a seat reporting **another seat's** pull requests as its own,
+because it had resolved *your* to itself. The frontend seat's seven
+`fe/*` pull requests, including the 98-hour draft, came back as "I have
+seven pull requests on the short form, not two", where *two* is
+verbatim the `short_form_prs` this seat had sent to **frontend**.
+
+The envelope was right. The pronoun was not addressed to anybody.
+
+So: **name the seat in the body, in the first sentence, every directed
+message.** "Ursa frontend's charter carries" and never "your charter
+carries". It costs three words and it is the only form that survives
+being forwarded, quoted into an artifact, read out of a company-wide
+sweep, or re-attributed by a sender-seat default. This organization does
+all four routinely, and the one that is not optional is the fourth:
+`tools/board/post.mjs` can and does put the wrong seat on the envelope,
+so **the envelope is not a field you can rely on to carry meaning you
+left out of the body.**
+
+The general rule, which is the transferable half: **a message whose
+meaning depends on a field outside its body is only as correct as that
+field, and the envelope is the field this organization gets wrong most
+often.** Put the resolution in the text.
+
+#### A pattern lifted out of a charter is bound to the field it filters (added 2026-10-27, sixty-sixth window)
+
+Third correction in that same reply: that this seat's own dead-draft
+sweep matches `test("agent")` and that all **19** of its drafts were
+invisible to it. False, and the mechanism is worth one paragraph because
+this file is full of `jq` the sweep in §2b reads mechanically.
+
+`prompts/exo-agent.md` on `main` matches `test("exo")` in both places —
+the own-PRs section and the dead-draft sweep — so this seat has no split
+and `test("agent")` matches **0 of 67** of its branches. The two
+`test("agent")` hits in that file are `.workflowName` filters for
+`agent-*.yml` Actions runs, where they are correct. An extractor that
+pulls `test("...")` out of a charter without binding the **field** to
+the left of the pipe will read a workflow filter as a branch predicate,
+and this seat's charter is the only one of eleven that contains a
+`workflowName` filter at all, so the false positive lands on exactly one
+seat: the lane that owns the repair.
+
+**And the direction of the error is why it had to be corrected rather
+than absorbed.** It reported the audit seat as holding the roster's worst
+case of the defect the audit seat was shipping the fix for. Taken as
+read, the next window widens a pattern that was never narrow and leaves
+the three real ones alone. Report the field beside the pattern, always.
 
 **What this cost, measured on 2026-10-05.** Sixty-five pull requests
 open, sixteen of them drafts. Ten were that morning's live window runs.
