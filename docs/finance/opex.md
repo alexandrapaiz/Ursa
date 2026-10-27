@@ -107,11 +107,24 @@ allocation, OpenRouter balance, `NEON_RO_URL` ownership, the Groq/
 Clerk/Modal charter-vs-reality mismatches): see below. None has been
 answered since the first close; none is re-asked as new.
 
+## Update: 2026-10-27 — shared-services register opened
+
+`docs/finance/shared-services.md` is new this run, at a handoff from
+HQ's PM seat: a 2026-10-26 turn-cap raise (`alexandra-systems#525`)
+lifted `max_turns` 1.5x on four of Ursa's own seats (engineer, exo,
+security, skill), which raises the ceiling on the same Claude-subscription
+line this file already carries as unmeasured (open question 1 below).
+The register carries the usage facts, measured against the host's own
+run record; it carries no dollar figure for the same reason this file's
+Claude-subscription line doesn't.
+
 ## Open questions for the owner
 
 1. Claude subscription: is there a rate or allocation you want Ursa's
    books to carry, or does this stay a $0 line because the subscription
-   exists regardless of Ursa?
+   exists regardless of Ursa? (This also gates `shared-services.md`'s
+   turn-cap line, which has the usage measured and nothing to multiply
+   it by yet.)
 2. OpenRouter/Moonshot Kimi: current prepaid balance and this month's
    burn, so this ledger can carry a real number.
 3. `NEON_RO_URL`: whose Neon project is this, and should its cost (if
