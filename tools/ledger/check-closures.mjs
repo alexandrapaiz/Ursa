@@ -46,6 +46,7 @@
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
+import { verdict } from './closures-verdict.mjs';
 import { parseLedger } from './ledger.mjs';
 import { classifyBlock, statusOf } from './block-kinds.mjs';
 
@@ -295,27 +296,15 @@ const invokedDirectly =
 if (invokedDirectly) {
   const ledgerPath = process.argv[2] ?? 'docs/ideas.md';
   const { violations, markers, docs } = checkRepository({ cwd: process.cwd(), ledgerPath });
-  const bySeat = violations.filter((v) => v.held === 'seat');
-  const byOwner = violations.filter((v) => v.held === 'owner');
   for (const v of violations) {
     const level = v.held === 'seat' ? 'error' : 'warning';
     console.log(`::${level}::${v.rule}: ${v.message}`);
   }
-  const counted = `${markers} closure marker(s) in ${docs} document(s), against ${ledgerPath}`;
-  if (violations.length === 0) {
-    console.log(`Closure backlinks: ${counted}, all resolved and all closed. Exit 0.`);
-    process.exit(0);
-  }
-  if (bySeat.length === 0) {
-    console.log(
-      `Closure backlinks: ${counted}, clean as far as a seat can take it. ` +
-        `${byOwner.length} violation(s) above need the owner, not a seat. Exit 2.`,
-    );
-    process.exit(2);
-  }
-  console.log(
-    `Closure backlinks: ${counted}, ${bySeat.length} violation(s) a seat can repair` +
-      `${byOwner.length > 0 ? ` and ${byOwner.length} the owner holds` : ''}. Exit 1.`,
-  );
-  process.exit(1);
+  // The verdict is derived from the same array those lines came from, in
+  // ./closures-verdict.mjs, so it cannot contradict them. Extracted 2026-10-26
+  // with every output string byte-identical; see that file's header for why.
+  const v = verdict(violations, { markers, docs, ledgerPath });
+  (v.stream === 'err' ? console.error : console.log)(v.line);
+  for (const extra of v.trailer) (v.stream === 'err' ? console.error : console.log)(extra);
+  process.exit(v.exitCode);
 }

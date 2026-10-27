@@ -13962,3 +13962,124 @@ the owner to accept or reject.
   that cannot exist in the caller's data — which is domain knowledge a
   schema does not carry. That asymmetry is worth writing down before
   somebody proposes replacing our prober with a linter.
+
+### 2026-10-26 (engineer, re-fired slot) — A board post the store accepted but could not be identified reads as a plain success
+
+- Trigger: extracting `tools/board/post.mjs`'s verdict found its success line
+  has two forms, not one. `id` is set only when the board's response parses
+  as JSON and carries one, so a 2xx answering with prose prints `Posted note
+  to Ursa/pm.` and a 2xx answering with an id prints `Posted note to
+  Ursa/pm, id 01234567.` The shorter form is silent about the difference,
+  which is the same shape as `check-closures.mjs`'s conditional owner clause
+  and is how the branch was noticed at all.
+- What: give the id-less success its own sentence. The row exists either way,
+  so this is not an error and must not become one; what changes is that a
+  seat is told the board accepted the message and returned nothing it could
+  quote, instead of being told nothing. The branch is already named
+  `POSTED_ID_UNREADABLE` in `tools/board/post-verdict.mjs`, driven by the
+  enumerator on every run, and asserted distinct from `POSTED` in
+  `post-verdict.test.mjs`. Only the line is still shared.
+- First step: one line in `post-verdict.mjs` — `Posted ${kind} to ${woken},
+  and the board returned no id this seat could read.` — plus the literal in
+  `post-verdict.test.mjs` and the stub-board `prose` case in the
+  differential, which already exists. Deliberately not done in the
+  extraction: that slice's entire evidence is that no output string changed,
+  and changing one would have dissolved it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, re-fired slot) — `post.mjs --dry-run` prints a request line that is not a request
+
+- Trigger: running `env -u BOARD_API_URL -u BOARD_RUNTIME_TOKEN node
+  tools/board/post.mjs ... --dry-run` in this clone prints `POST
+  /api/messages`, then the payload, then `Checked clean. Ursa/pm would be
+  woken.` and exits 0. The url is built from `BOARD_API_URL` before the
+  live-target check runs, and `--dry-run` returns before that check, so a dry
+  run outside the seat runtime shows a path with no origin.
+- What: the verdict is true and the line above it is not. A dry run exists to
+  show a seat exactly what would be sent, and the one invocation where a seat
+  most needs that — a fresh clone, no runtime, checking a message before a
+  window opens — is the invocation that prints a request to nowhere. The fix
+  is to name the absence rather than to refuse: print the origin when it is
+  known, and `POST <BOARD_API_URL unset>/api/messages` when it is not, so the
+  dry run keeps working offline and stops describing a post it could not make.
+- First step: move the `url` construction below the `liveTargetFault` call and
+  have the dry-run branch render the origin through the same function, then a
+  case in `post-verdict.test.mjs` for each of the two forms. Note the
+  interaction with the entry above: both change output strings on branches the
+  2026-10-26 differential pinned, so they want to land together, in one PR,
+  with the differential re-run and the new lines stated as the intended diff.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 (engineer, re-fired slot) — Nothing here says which verdict wins when a gate has findings AND unusable ground
+
+- Trigger: the craft scan below, measured rather than recalled. GNU grep 3.11
+  answers `0` for `grep -q hello <file-with-hello> <missing-file>` and `2` for
+  the same two files without `-q`: the quiet flag does not merely suppress
+  output, it decides that "I found what you asked for" outranks "I could not
+  read everything you gave me". `tools/gates/verdict-shape.mjs` has exactly
+  this collision in its `derivedFrom: 'findings' | 'ground'` field and no rule
+  for the case where both hold. Today it cannot arise, because
+  `tools/secret-scan.mjs` picks its mode before it scans and
+  `tools/board/post.mjs` checks its ground before it posts. It arises the
+  first time one gate does two things.
+- What: state the precedence in the exit-code page the ledger already proposes
+  ("A gate's exit codes are a contract, and nothing in this repository states
+  it") and then enforce it in the enumerator. The candidate rule is the
+  opposite of grep's, and the reason is this repository's own: a scanner that
+  found one secret and could not read half of what it was given has not
+  established that the half it read is all there is, so ground loses to
+  nothing and a partial pass is never clean. grep is a search and may
+  reasonably stop at the first answer; a gate is an assurance and may not.
+- First step: a `derivedFrom: 'both'` case in `verdict-shape.mjs` with the
+  precedence written as a sentence in its JSDoc, one synthetic gate in
+  `enumerate-verdicts.test.mjs` that returns a clean line over unusable
+  ground, and the assertion that the enumerator calls it a finding. No
+  committed gate changes, because no committed gate can reach it yet; this is
+  a guardrail written before the input shape arrives rather than after.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — Craft scan: GNU grep 3.11 and git 2.43's exit-code contracts, where the number is the whole product
+
+- The product: the exit-status contracts of two tools already in this
+  repository's dependency list, read out of their own `--help`/manual text and
+  then measured in this sandbox rather than recalled. Rotated to because this
+  run spent its day on what a gate's exit code claims, and these two are the
+  most-read exit-code contracts in software. No account, no network, no paid
+  tier: every number below came from running the binaries.
+- Measured, so the comparison is not from memory:
+  `/usr/bin/grep --version` is GNU grep 3.11. `echo hello | grep hello` is 0,
+  `grep zzz` is 1, and `grep hello /tmp/does-not-exist` is 2. `-s` suppresses
+  the error message and keeps the 2, so the status outranks the prose. And the
+  clause worth the scan: `grep -q hello <has-hello> <missing>` is **0** while
+  the same two paths without `-q` are **2**. The `grep` inside this sandbox's
+  interactive shell is not that binary — it is ugrep 7.8.4 behind a wrapper
+  function — and it answers **2** where GNU answers 0, so two implementations
+  of one documented contract disagree on exactly the clause that decides
+  precedence. `git` 2.43.0: `git diff --exit-code --quiet` is 0 for no
+  difference, 1 for a difference, and 128 for a ref it cannot resolve, which
+  is the same three-way shape this repository arrived at independently as 0,
+  1 and 2.
+- Worth stealing: both tools make the number the deliverable, not a side
+  effect of the prose. `git diff --quiet` prints nothing at all, so the status
+  is the entire output, and no caller can parse a sentence instead. Our gates
+  print a line and a status and CI reads the status, which means a reworded
+  line cannot break a caller — the property `--quiet` gets by construction and
+  we get by having nobody grep our output yet. The stealable thing is narrower
+  than a flag: it is that a tool whose status is its product documents the
+  precedence between two true claims, and we have the collision and not the
+  rule. That is the ledger entry above.
+- What Ursa does better: grep's 2 is one number for "no such file",
+  "permission denied" and "invalid regular expression" — three conditions,
+  three different repairs, three different people, one status and one word.
+  That is the actor form of the defect class in
+  `docs/design/verdict-lines.md` §1, shipped by the most-used command-line
+  tool in the world and unfixable now for compatibility reasons. Our gates
+  name the cause and the locus in the sentence a reader acts on, and as of
+  this run five of them are driven on every CI run to prove they still do.
+  The second difference is scale-free and in our favour: grep's contract is a
+  paragraph in a manual, while ours is `node
+  tools/gates/enumerate-verdicts.mjs`, which prints 23 branches and exits
+  non-zero when one of them stops deriving its verdict from its findings.
