@@ -1,3 +1,17 @@
+# Dispatch queue — 2026-10-27, pass 6 (message run)
+
+**Nothing fires.** `PM_DISPATCH_ENABLED` still reads unset. This
+pass's wake repeated conditions pass 5 already closed out (#594
+merged, #591/#593 correctly untouched); see `docs/sprints/pending.md`
+for the verification. One new non-draft PR (#596, market) swept and
+left for its own seat's next pass rather than merged, since it reads
+as a live run in progress, not a stalled one. No idle seat, no
+unstarted ADR experiment, no milestone within three days.
+
+## Dispatched by the PM
+
+None this pass.
+
 # Dispatch queue — 2026-10-27, pass 5 (message run)
 
 **Re-swept fresh, nothing fires.** `PM_DISPATCH_ENABLED` reads unset

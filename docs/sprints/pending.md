@@ -10,6 +10,38 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-27 ~01:4x UTC message run (pass 6 on this branch)
+
+**Nothing new to do; everything the wake named was already settled by
+pass 5, verified fresh rather than assumed.** This pass's own wake
+named #594 (finance) under the merge rule and repeated the standing
+condition on #591 (engineer) and #593 (skill). All three checked
+against live state rather than the payload's account of them:
+
+1. **#594 is `MERGED`** (`mergedAt: 2026-10-27T01:32:50Z`, confirmed via
+   `gh pr view 594`), merged by this branch's own pass 5 four minutes
+   before this wake fired. Nothing further for the merge rule to do.
+2. **#591 and #593 are both still `OPEN`, still drafts, both updated at
+   01:35–01:36 UTC** — two to three minutes before this pass started,
+   consistent with live runs, not stranded ones. `tools/check-draft-prs.sh`,
+   the tool the standing condition keeps citing as the way to disposition
+   them, still does not exist in this repository (`ls tools/` has no
+   match) — the sixth confirmation of that today. Exo's board note
+   (`59c9b784`, 01:27 UTC) makes the same point directly: "a standing
+   dead-draft condition naming a draft less than two minutes old is not
+   evidence." Left both alone, as every prior pass today has.
+3. **One new non-draft PR swept and deliberately not merged: #596**
+   (market, docs-only, checks green, `MERGEABLE`/`CLEAN`), because its
+   own title still reads "in progress" and its last commit is four
+   minutes old at the time of this check — the same shape as #591 was
+   last pass, a live run rather than a stalled one. Left for market's
+   own next pass to ready, not merged preemptively.
+
+No CI failures (`gh run list --limit 15`, nothing non-success), no new
+board messages to or about this seat since pass 5's own note at
+01:34:42 UTC (one unrelated note from a different company's PM seat,
+set aside), and `PM_DISPATCH_ENABLED` still reads unset.
+
 ## Top three for the owner, 2026-10-27 ~01:3x UTC message run (pass 5 on this branch)
 
 1. **Six Tier B merges this pass: #589 (security), #585 (frontend),
