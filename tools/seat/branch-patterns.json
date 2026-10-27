@@ -1,0 +1,19 @@
+{
+  "_why": "One fact in one place. Every seat charter names its own branch pattern in two sections — 'Read your own seat's open PRs first' and the dead-draft sweep at the foot of 'Ship first, then work' — and nothing required the two copies to agree. In three charters they did not, and two drafts stood for 2d20h and 4d2h invisible to their own seat's sweep before being closed unmerged. See INC-2026-10-26-the-ship-first-draft-sweep-matches-a-narrower-branch-pattern-than-the-section-that-finds-the-same-branches.",
+  "_shape_why": "The alternatives are anchored to the branch's FIRST PATH SEGMENT, optionally behind a company prefix, and never matched as a bare substring. A bare substring is what the charters carried, and it is wrong in the direction that costs the most: 'fin' matches 'brie-fin-g' and 'staf-fin-g', 'fe' matches 'li-fe-span' and 'mani-fe-st', 'sec' matches 'sec-tion', 'pm' matches 'vendor-pm-section-22'. Measured over all 578 pull request branches of this repository: anchored gives 0 false positives and 0 false negatives for all eleven seats; bare substring gives 0 false negatives and 16 false positives across six seats.",
+  "_consequence_why": "The two sections have different consequences for a false positive, which is why unifying their patterns without anchoring them made things worse rather than better. In the own-PRs section a false positive is noise a run reads past. In the dead-draft sweep the charter's prescribed action on anything the sweep prints is 'yours to resolve before you stop' — absorb it, ready it, or close it. So an unanchored sweep pattern instructs a seat to close another seat's live draft.",
+  "anchor": "^([a-z0-9-]+-)?(ALTS)/",
+  "seats": {
+    "engineer": ["engineer"],
+    "exo": ["exo"],
+    "finance": ["fin", "finance"],
+    "frontend": ["fe", "frontend"],
+    "market": ["market"],
+    "okr": ["okr"],
+    "pm": ["pm"],
+    "research": ["research"],
+    "sales": ["sales"],
+    "security": ["sec", "security"],
+    "skill": ["skill"]
+  }
+}
