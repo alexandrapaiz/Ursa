@@ -38,11 +38,22 @@
 // printed, which is why two senders in a row could not catch it from their
 // own output.
 //
-// THE TOKEN. `BOARD_RUNTIME_TOKEN` and `BOARD_API_URL` are read from the
-// environment, which the runtime sets. This file never prints either one:
-// `--dry-run` prints the request with the Authorization header elided, and a
-// non-2xx response is printed as status and body, which the board writes
-// without echoing credentials.
+// THE TOKEN, and the one claim this header used to get wrong.
+// `BOARD_RUNTIME_TOKEN` and `BOARD_API_URL` are read from the environment,
+// which the runtime sets. The TOKEN is never printed: `--dry-run` prints the
+// request with the Authorization header elided, the environment faults name
+// the variable and not its value, and a non-2xx response is printed as status
+// and body, which the board writes without echoing credentials.
+//
+// The URL is a different matter, and this header said "never prints either
+// one" while printing it in two places from the file's first commit: the
+// `POST <url>` line under `--dry-run`, and, since the fault codes landed, the
+// `BOARD_URL_SCHEMELESS` line that names the unusable value on purpose. Both
+// are deliberate and both are useful. What follows from them is that a URL
+// carrying a credential in its userinfo would be echoed, so
+// `tools/board/live-target.mjs` masks a `user:pass@` prefix before naming a
+// value, and this paragraph says what is true instead of claiming more than
+// the code does. The 2026-10-27 security audit, F37.
 import { readFileSync } from 'node:fs';
 import { violations } from './check.mjs';
 import { liveTargetFault } from './live-target.mjs';

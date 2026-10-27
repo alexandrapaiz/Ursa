@@ -14301,3 +14301,253 @@ the owner to accept or reject.
   misdescribes.
 - Cost: $0, plus three permanent self-addressed rows on the board.
 - Status: proposed
+
+### 2026-10-26 (security, message, run 13) — Make the pre-push redaction check run itself, because three seats in two days have proved that asking does not work
+
+- Trigger: this run's debug sweep found six red redaction-gate runs in
+  the last two hundred, all of them on one branch in fifteen minutes,
+  all of them on one line of one file. That is the third seat in two
+  days to pay a push-and-wait cycle for a hit that
+  `node scripts/redaction-check.mjs` answers in under a second without
+  leaving the sandbox. The script was built on 2026-10-25 for exactly
+  this, after this seat's own run turned the gate red five times in
+  eleven minutes, and the redaction standard §8 has said "before you
+  push" ever since. The instruction is written down, it is correct, and
+  it is not being followed.
+- What: the check cannot run itself today, because there is nothing for
+  it to hang on. This repository has no root `package.json`, so there is
+  no root npm script, and git hooks are not cloned, so a committed hook
+  does nothing until somebody opts in. The shape that fits is a
+  `.githooks/pre-push` in the tree plus one line of opt-in,
+  `git config core.hooksPath .githooks`, run once per sandbox by
+  whatever already bootstraps a seat's clone. The hook calls the script,
+  exits non-zero on 1, and passes through on 2 with a loud warning,
+  since a broken checker must not become a block on every push in the
+  window where the gate changes shape. Whether seats are bootstrapped
+  somewhere that can carry that one line is the part this seat cannot
+  see from inside one sandbox, and is the first thing to check.
+- Why it is not fixed in this run: a hook that runs on every push is new
+  behaviour on every seat's critical path, not a behaviour-preserving
+  fix, so it belongs to the engineer through this ledger rather than to
+  the security sweep. It also fails in a way worth thinking about before
+  shipping, which is that a seat whose push is blocked at the end of a
+  run under a job cap may lose the run's whole output rather than one
+  file, and the ship-first rule exists because that has happened here.
+  So the hook may need to warn rather than block on the first push of a
+  branch and block only on later ones, which is a design decision and
+  not a line of shell.
+- First step: whoever picks this up checks whether a seat's clone is
+  bootstrapped by anything this repository controls. If it is, the hook
+  plus the `core.hooksPath` line is a short change and the open question
+  is only warn-versus-block. If it is not, the honest answer is that
+  this is unfixable in the tree and the finding belongs upstream to HQ
+  as a runner change, which is a different queue.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-27 (security, hook, run 16) — One line in one test, because a committed credential literal makes the repository permanently dirty by its own scanner
+
+- Trigger: this run's history secret scan returned the first non-zero
+  result since `tools/secret-scan.mjs` was built. The hit is a fixture
+  and not a leak. `tools/secret-scan-verdict.test.mjs` line 72, on the
+  branch behind PR #561, carries a vendor's published documentation
+  example access key id as a plain literal. There is nothing to rotate,
+  and the value is not reproduced here or anywhere in the security
+  seat's pull request.
+- What: build the value from fragments instead of writing it, which is
+  what `tools/secret-scan.test.mjs` already does for every one of its
+  canaries and says so in its header. One line. The test's purpose is
+  unaffected, because it asserts that a credential value never reaches
+  the verdict output and an assembled value proves that just as well.
+- Why it matters more than its size: the scan's whole value is that its
+  answer is normally zero. A permanent known hit turns the next real one
+  into a line in a report that already says one, and it would turn
+  PWC-14's proposed credential gate red on the day it lands. The rule
+  that prevents it is now in Class D of
+  `docs/security/redaction-standard.md`, which is the half the security
+  seat could ship.
+- Why the security seat did not fix it: the file is the engineer seat's
+  and it exists on no branch this seat can write. It is not merged, so
+  the cheapest repair is on that branch before it lands.
+- First step: whoever takes PR #561 forward replaces the literal with an
+  assembled value, then runs `node tools/secret-scan.mjs --history` on a
+  repaired clone and confirms it returns zero.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-27 (security, hook, run 16) — Incident 2's purged records are still fetchable by ref name, so a closed incident needs reopening and a decision only the owner can make
+
+- Trigger: this run's sweep of every ref this clone holds, 828 refs and
+  652 distinct tip commits, measured per blob. Fifteen pull request head
+  refs carry an unallowed match and two of them,
+  `refs/pull/1/head` and `refs/pull/2/head`, carry the complete
+  pre-remediation `ursa-major/trial/` directory. Seven files, 4,009,201
+  bytes, including both outcome records, the annotations and the
+  trajectory. Verified on the remote with `git ls-remote`, so the refs
+  are GitHub's and not an artifact of a local fetch.
+- What: incident 2 is closed on the premise that the only residual was
+  SHA-addressable unreferenced objects awaiting GitHub's garbage
+  collection. The objects are not unreferenced. They are the tips of two
+  refs GitHub maintains and never collects, which is why they survived
+  the force-push that rewrote every branch, and they are reachable by
+  name rather than by object id. The commit the closure check declared
+  "not a valid object name" resolves in any clone that fetches pull
+  request heads.
+- Why it is urgent rather than proposed: the exposure is the owner's
+  verbatim material on a public repository, the incident that covers it
+  is recorded as closed, and the only remedy anybody has is a GitHub
+  Support request that only the owner can make. A seat cannot delete a
+  pull request head ref.
+- What the security seat did and did not do: measured file names, byte
+  counts and per-line pattern counts, and verified the refs server-side.
+  It did not read, quote, copy or republish any record content, did not
+  rewrite anything, and did not contact GitHub.
+- First step: the project manager reopens Ursa incident 2 or files the
+  successor entry, carrying F38 of `docs/security/audit-2026-10-27.md`,
+  and puts the three options in front of the owner. They are the support
+  request that clause (3) declined, accepting it again now that the
+  exposure is known to be by ref name, or recreating the repository,
+  which costs every pull request number and Actions log this company uses
+  as its record.
+- The generalisation worth keeping whatever is decided: a pull request
+  head ref outlives the branch, the pull request and any history rewrite,
+  so "we rewrote history" and "we deleted the branch" are not
+  remediations for anything pushed to a branch that ever had a pull
+  request open on it.
+- Cost: $0 for the measurement. A support request is free and the owner's
+  time is the cost.
+- Status: urgent
+
+### 2026-10-27 (security, message, run 17) — The redaction gate's own recovery procedure reads as a remediation, and a red run is already permanent when you read it
+
+- Trigger: this run's sweep found one workflow failing, `redaction-gate`
+  eight times in twenty-two minutes on the frontend seat's open PR #570,
+  on one Class A identifier in one file. The leak itself was already
+  handed to the seat that owns the file. What was not handed to anyone is
+  what those eight runs cost, and the answer is that the cost was paid at
+  the first push and nothing available to a seat reduces it afterwards.
+- The mechanism: the gate fires on `pull_request`, so by the time it goes
+  red GitHub has already created `refs/pull/<n>/head` at that commit.
+  That ref survives a force push, a history rewrite, a branch deletion,
+  and the closing or merging of the pull request, and anyone can fetch it
+  by name from a public repository without knowing an object name. So
+  red, fix the line, push, green changes what the gate reports and not
+  what is reachable. Measured: one commit reachable from
+  `refs/pull/570/head` carries the value in full, counted by walking the
+  ref's commits and testing each tree for the class.
+- Why it is a defect in a document rather than in a script:
+  `docs/security/redaction-standard.md` is careful about this gate's
+  detection limits and says plainly that passing it is the backstop
+  firing early. Two sections later it gives a recovery procedure with no
+  warning attached. Three seats have each found one face of this, and
+  run 16's ledger entry states the generalisation correctly, but none of
+  it reached the file a seat opens when the gate goes red.
+- It rescopes an open urgent entry rather than competing with it. Run
+  16's F38 asked the owner for a GitHub Support request covering
+  `refs/pull/1` and `refs/pull/2`. Every leak this gate has ever caught
+  on a pushed branch needs the same remedy, so the decision in front of
+  the owner covers a larger set than it describes. The action does not
+  change. What it is worth does.
+- Fixed in this run, in the standard, because the standard is this
+  seat's: a closing section stating the mechanism, the two obligations it
+  creates for a seat, and the measured instance. No value quoted.
+- What remains for the owner, and it is already filed: the support
+  request under run 16's F38 entry above. This entry adds no new ask.
+- What: state in `docs/security/redaction-standard.md` that the gate is a
+  detector and not a remediation, so a seat that turns it red knows the
+  exposure is already permanent and records it where the owner reads it
+  instead of quietly pushing until the gate goes green.
+- First step: done in this run. The follow-on, which is not this seat's,
+  is the owner's decision on run 16's F38 support request, now understood
+  to cover every gate-caught leak and not only incident 2's two refs.
+- Cost: $0. The fix is documentation in this seat's own file.
+- Status: built
+
+### 2026-10-27 (security, message, run c) — The recommended disposition for the history hit expired eleven minutes before it was written, so the scanner is now permanently dirty on `main`
+
+- Trigger: this run's history scan, run as the charter requires. It returns
+  the same one hit as run 16 and the same conclusion about it: a vendor's
+  published documentation example access key id, in
+  `tools/secret-scan-verdict.test.mjs` line 72, blob `ef90504da7db`. Not a
+  credential, nothing to rotate, value not reproduced here. What is new is
+  where it is reachable from.
+- What: the engineer seat's entry above, `2026-10-27 — A credential-shaped
+  fixture is in this branch's history`, is on `main`, is filed `urgent`, and
+  recommends **option one**, a squash merge, on the stated ground that it
+  "leaves `88bb0bf3` unreachable from it, so nothing is rewritten and the hit
+  never enters the default branch's history". That option no longer exists.
+  Measured in a complete clone this run: `git merge-base --is-ancestor
+  88bb0bf3 origin/main` exits 0, the commit reached `main` through the merge
+  of PR #573 at `b0a3a7d6`, and `node tools/secret-scan.mjs --history
+  origin/main` returns the hit against `main`'s own history alone. So the
+  blob is on the default branch and a squash of any later branch cannot
+  remove it.
+- Why nobody was careless: the timestamps are eleven minutes apart. `b0a3a7d6`
+  merged at 2026-10-27 00:47:36 UTC. The entry was committed at 00:58:53 UTC,
+  on a branch that is **not** a descendant of that merge, which this run
+  checked rather than assumed. From inside that branch the blob really did
+  reach only that branch, and squashing it really would have been sufficient.
+  The entry was accurate about its own branch and void about `main`, and no
+  read available from the branch could tell the author which. This is the
+  charter's "`main` is not this organization's memory" with the subject
+  changed: not a seat rebuilding work that was already done, but a seat
+  recommending a disposition that was already unavailable.
+- What it costs, which is the instrument and not the data: both earlier
+  entries named this cost while it was still avoidable. The scan's value is
+  that its answer is normally zero, so a permanent known hit turns the next
+  real one into a second line in a report that already says one, and it would
+  turn PWC-14's proposed credential gate red on the day it lands. That is now
+  the state of `main` rather than a risk to `main`.
+- First step: the owner's, because the remaining options are both hers. **Option one is gone.** **Option two**, a cited baseline in
+  `tools/secret-scan.mjs`: one entry naming this blob, this class, and the
+  sentence saying the value is a vendor's published documentation example, in
+  the shape `dep-floor.allow.json` already uses for an accepted advisory. This
+  seat can build that in well under a day once she chooses it, and it is the
+  only option that gets the scan back to a meaningful zero without rewriting
+  anything. **Option three**, a history rewrite, still removes the blob and
+  still invalidates every merge-base check the open pull requests depend on,
+  and is still the wrong price for a value that is not a credential. The
+  recommendation is two, and nothing should be built until she says so,
+  because an allowance added without her is a scanner made quieter by a seat.
+- Cost: $0, and no rotation. The class is credential-shaped by pattern and the
+  value is a published example, so there is nothing live to rotate. Rotation
+  would be the owner's call if there were.
+- Status: urgent
+
+### 2026-10-27 (security, message, run c) — The local checker read the gate's rules and wrote its own flags, which is the same hole one argument to the left
+
+- Trigger: the security lane's open board item, "Every kind of file we commit
+  gets checked for private data, images included", whose own text says the
+  code change belongs to HQ and the rule belongs to this seat. Both halves
+  were already done. What neither covered is the tool the seat that commits
+  the images actually runs before pushing.
+- What: `docs/design/review-kit/check-redaction.mjs` reads the gate's
+  patterns, its exclusions and its allowlist out of
+  `.github/workflows/redaction-gate.yml` on every run, and refuses to run if
+  it cannot find any of the three. Its header explains at length why: a local
+  check that restates a gate's rules is a second source of truth, and a
+  second source of truth for a gate is worse than no local check at all,
+  because it goes green while the gate goes red and the person it misleads is
+  the one who trusted it. The grep flag cluster was the literal `-rInE` in
+  that same file. The flags are rules. PWC-13 is live with HQ and removes
+  `-I`, so the day it lands this checker goes green on a committed image the
+  gate reds, for the seat whose practice has committed over a thousand of
+  them.
+- Why it was invisible: with `-I` in the gate, a checker that hardcodes `-I`
+  and a checker that reads `-I` behave identically, so no measurement taken
+  before PWC-13 lands could distinguish them. This seat's own
+  `scripts/redaction-check.mjs` had the same defect and run 13 fixed it there
+  on 2026-10-26, which is why the fix is a transplant and not a design.
+- Built, in this run's pull request. The cluster is read from the gate with a
+  refusal path, and `-I`'s removal is handled rather than survived: GNU grep
+  announces a binary hit on standard error and writes nothing to standard
+  output, so the right flags alone would still have found nothing. Verified a
+  no-op on today's tree, same verdict and same zero findings. Three new
+  selftest expectations, each confirmed to fail against the pre-fix tool,
+  which scanned with flags of its own invention and reported a hit rather
+  than refusing.
+- First step: none here. The remaining half is PWC-13 itself, which is HQ's,
+  and this run added the measurement trap that defeats its printed
+  verification method to that entry.
+- Cost: $0
+- Status: built
