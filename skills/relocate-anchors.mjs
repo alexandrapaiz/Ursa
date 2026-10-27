@@ -37,6 +37,26 @@
 // It never edits prose. A relocated anchor means the claim's text is byte
 // identical modulo whitespace, not that the claim is still well stated, and
 // the sentence citing it is still yours to read.
+//
+// WHAT IT WILL NOT ANSWER FROM. Everything above is about a tree, and this
+// tool gets its tree from `git show <old-ref>:<path>` in whatever clone it is
+// run in. The clone a seat is handed in this organization is shallow and
+// single-branch, so <old-ref> is routinely not in it at all. Until 2026-10-26
+// the failure was silent in the only way that matters: the `git show` throw
+// was caught, the path was recorded as absent, and the range was reported to a
+// person as "<path> is not in the tree at <old-ref>", which is a claim about
+// what the repository contained and not about what this checkout has. Measured
+// that day in a scratch repository against a sha that does not exist: one
+// cited range, one report of a file missing upstream, exit 1, and the file
+// present in every tree the repository actually holds. A reader acting on that
+// line rewrites a citation by hand that `bash tools/ensure-full-clone.sh`
+// would have settled. So the ref is resolved once, up front, and a ref this
+// clone does not hold stops the run at exit 2 instead of being attributed to
+// the repository; and a per-path `git show` failure now carries git's own
+// reason rather than this tool's guess at it. This is the rule in
+// prompts/skill-extract.md 5v, and the lesson it comes from is L-A77 in
+// docs/standards/lessons.md, which named tools/ensure-full-clone.sh by path
+// before that file existed.
 import { readdirSync, readFileSync, existsSync, statSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
@@ -132,15 +152,42 @@ function main(argv) {
     console.error(`no ${lockPath}; run check-evidence.mjs --update first`)
     return 2
   }
+
+  // Resolve <old-ref> before anything reads a tree from it. A clone that does
+  // not hold the commit cannot distinguish "the file was deleted upstream"
+  // from "I was never given this history", and only one of those is the
+  // reader's problem.
+  try {
+    execFileSync('git', ['rev-parse', '--verify', '--quiet', `${oldRef}^{commit}`],
+      { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
+  } catch {
+    const shallow = (() => {
+      try {
+        return execFileSync('git', ['rev-parse', '--is-shallow-repository'],
+          { cwd: root, encoding: 'utf8' }).trim() === 'true'
+      } catch { return false }
+    })()
+    console.error(`relocate-anchors: ${oldRef} is not a commit in this checkout, so there is no tree to recover the as-cited lines from.`)
+    console.error(shallow
+      ? '  This clone is shallow, which is the usual cause. Run: bash tools/ensure-full-clone.sh'
+      : '  Fetch the ref, or pass one this clone holds. If the clone was truncated: bash tools/ensure-full-clone.sh')
+    console.error('  Refusing to report the ranges, because every one of them would be attributed to the repository rather than to this checkout.')
+    return 2
+  }
   const lock = JSON.parse(readFileSync(lockPath, 'utf8'))
 
   const oldFiles = new Map()
+  const oldFileErrors = new Map()
   const atOldRef = (path) => {
     if (!oldFiles.has(path)) {
       try {
         oldFiles.set(path, splitLines(execFileSync('git', ['show', `${oldRef}:${path}`],
           { cwd: root, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 })))
-      } catch {
+      } catch (e) {
+        // Keep git's sentence. This tool used to supply its own, and its own
+        // was a claim about the repository that it had no way to check.
+        const said = String(e?.stderr ?? '').trim().split('\n')[0].replace(/^fatal: /, '')
+        oldFileErrors.set(path, said || 'git could not read it and said nothing about why')
         oldFiles.set(path, null)
       }
     }
@@ -178,7 +225,7 @@ function main(argv) {
     const gone = (why) => needsAPerson.push({ ...r, kind: 'gone', why })
 
     const old = atOldRef(r.path)
-    if (!old) { gone(`${r.path} is not in the tree at ${oldRef}`); continue }
+    if (!old) { gone(`git could not read ${r.path} at ${oldRef}: ${oldFileErrors.get(r.path)}`); continue }
     if (r.from < 1 || r.to > old.length || r.from > r.to) {
       gone(`the range is out of bounds at ${oldRef} too, so the citation was never right`); continue
     }

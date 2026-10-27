@@ -154,10 +154,15 @@ comparison rather than of arithmetic. Adding two percentages, comparing
 two records, or reading a change over time are the three moments where
 a record's denominators stop agreeing.
 
-It does not fire for producing a record, for choosing a subject, or for
-deciding the label on a span. Those are the two sibling skills. This
-one starts after the labels are settled and asks only what the totals
-are allowed to say.
+It does not fire for producing a record, for choosing which files are
+the record's subject, or for deciding the label on a span. Those are
+`running-an-outcome-record-trial`,
+`excluding-a-file-from-an-outcome-record` and
+`adjudicating-uncertain-spans`, named here rather than counted because
+the subject clause changed hands once already: when this skill was
+written the trial skill decided what the record covered, and the tenth
+skill in the library took that question over. This one starts after the
+labels are settled and asks only what the totals are allowed to say.
 
 The standard this serves is not editorial. KR2.1 requires every
 quantitative claim in the methods document to be re-grounded in the

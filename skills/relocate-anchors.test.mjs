@@ -312,3 +312,118 @@ test('two ranges of one ref relocating onto the same key still needs a person', 
   assert.match(out, /2 text changed, needs a person/)
   assert.match(out, /would collide with another citation's fingerprint/)
 })
+
+// The three tests below are the 2026-10-26 defect: until that day this tool
+// answered history questions from whatever clone it happened to be in, and
+// when the clone did not hold the answer it reported one about the repository
+// instead. The first two prove the refusal, the third proves that a failure
+// which really is about the repository still reports git's own sentence and
+// not this tool's paraphrase of it.
+
+const scratch = (prefix) => {
+  const dir = mkdtempSync(join(tmpdir(), prefix))
+  const git = (...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' })
+  git('init', '-q', '-b', 'main')
+  git('config', 'user.email', 'test@example.invalid')
+  git('config', 'user.name', 'test')
+  mkdirSync(join(dir, 'src'), { recursive: true })
+  mkdirSync(join(dir, 'skills', 'fixture'), { recursive: true })
+  for (const f of ['relocate-anchors.mjs', 'source-line.mjs']) {
+    copyFileSync(new URL(f, import.meta.url).pathname, join(dir, 'skills', f))
+  }
+  return { dir, git }
+}
+
+const run = (dir, args) => {
+  try {
+    return { out: execFileSync(process.execPath,
+      [join(dir, 'skills', 'relocate-anchors.mjs'), ...args],
+      { cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }), code: 0 }
+  } catch (e) {
+    return { out: (e.stdout ?? '') + (e.stderr ?? ''), code: e.status }
+  }
+}
+
+test('a ref this clone does not hold stops the run, instead of being reported as the repository deleting files', () => {
+  // Reproduced 2026-10-26 before the fix: one cited range, and the tool said
+  // "src/f.ts is not in the tree at <sha>" at exit 1. The file was in every
+  // tree the repository holds. The clone was the thing that did not have it.
+  const { dir, git } = scratch('relocate-absent-ref-')
+  writeFileSync(join(dir, 'src', 'f.ts'), 'alpha\nbeta\n')
+  writeFileSync(join(dir, 'skills', 'fixture', 'SKILL.md'), skill(`  - ref: E1
+    what: a thing
+    source: src/f.ts:1
+`, 'A claim [E1].'))
+  // A fingerprint that cannot match, so the range drifts and the old tree is
+  // consulted. That consultation is the whole subject of this test.
+  writeFileSync(join(dir, 'skills', 'evidence.lock.json'),
+    JSON.stringify({ 'fixture/E1/src/f.ts:1': 'deadbeefdeadbeef' }, null, 2) + '\n')
+  git('add', '-A')
+  git('commit', '-q', '-m', 'only commit')
+
+  const absent = '1'.repeat(40)
+  const { out, code } = run(dir, [absent])
+  assert.equal(code, 2, 'a ref this clone lacks is an input error, not a drift report')
+  assert.match(out, /is not a commit in this checkout/)
+  assert.match(out, /ensure-full-clone\.sh/)
+  // The old wording, and the old exit code, are the regression.
+  assert.doesNotMatch(out, /is not in the tree at/)
+  assert.doesNotMatch(out, /needs a person/)
+})
+
+test('a shallow clone is named as the cause, because it is the clone every seat is handed', () => {
+  const { dir, git } = scratch('relocate-shallow-origin-')
+  writeFileSync(join(dir, 'src', 'f.ts'), 'alpha\nbeta\n')
+  writeFileSync(join(dir, 'skills', 'fixture', 'SKILL.md'), skill(`  - ref: E1
+    what: a thing
+    source: src/f.ts:1
+`, 'A claim [E1].'))
+  writeFileSync(join(dir, 'skills', 'evidence.lock.json'),
+    JSON.stringify({ 'fixture/E1/src/f.ts:1': 'deadbeefdeadbeef' }, null, 2) + '\n')
+  git('add', '-A')
+  git('commit', '-q', '-m', 'the commit the citation was written against')
+  const oldRef = git('rev-parse', 'HEAD').trim()
+  writeFileSync(join(dir, 'src', 'f.ts'), 'alpha\nbeta\ngamma\n')
+  git('commit', '-qam', 'a second commit, so depth 1 can exclude the first')
+
+  // Clone it at depth 1. The old ref is a real commit of this repository and
+  // is simply not in this copy, which is exactly the seat's situation.
+  const shallow = mkdtempSync(join(tmpdir(), 'relocate-shallow-'))
+  execFileSync('git', ['clone', '-q', '--depth', '1', `file://${dir}`, shallow],
+    { encoding: 'utf8' })
+  assert.equal(execFileSync('git', ['rev-parse', '--is-shallow-repository'],
+    { cwd: shallow, encoding: 'utf8' }).trim(), 'true')
+
+  const { out, code } = run(shallow, [oldRef])
+  assert.equal(code, 2)
+  assert.match(out, /This clone is shallow/)
+  assert.match(out, /ensure-full-clone\.sh/)
+  assert.doesNotMatch(out, /is not in the tree at/)
+})
+
+test('a path genuinely absent at a ref this clone holds reports what git said, not what the tool assumed', () => {
+  const { dir, git } = scratch('relocate-absent-path-')
+  // The cited file does not exist at the old ref. Here the repository really
+  // is the subject, so the range belongs in the reader's queue; what changed
+  // is that the sentence is git's.
+  writeFileSync(join(dir, 'src', 'other.ts'), 'unrelated\n')
+  writeFileSync(join(dir, 'skills', 'fixture', 'SKILL.md'), skill(`  - ref: E1
+    what: a thing
+    source: src/f.ts:1
+`, 'A claim [E1].'))
+  writeFileSync(join(dir, 'skills', 'evidence.lock.json'),
+    JSON.stringify({ 'fixture/E1/src/f.ts:1': 'deadbeefdeadbeef' }, null, 2) + '\n')
+  git('add', '-A')
+  git('commit', '-q', '-m', 'old tree, without the cited file')
+  const oldRef = git('rev-parse', 'HEAD').trim()
+  writeFileSync(join(dir, 'src', 'f.ts'), 'alpha\n')
+  git('add', '-A')
+  git('commit', '-q', '-m', 'the cited file arrives')
+
+  const { out, code } = run(dir, [oldRef])
+  assert.equal(code, 1, 'this one is a real drift report, so it keeps the drift exit code')
+  assert.match(out, /git could not read src\/f\.ts at/)
+  assert.match(out, /needs a person/)
+  // git's own words, carried rather than replaced.
+  assert.match(out, /exists on disk, but not in|does not exist/)
+})

@@ -95,13 +95,15 @@ or for labelling generations. Generation fates are derived rather than
 adjudicated, so they move on their own once span verdicts change [E11].
 
 Three more exits were named in 0.5.0, and they are downstream rather
-than upstream. A span verdict is this skill's output, and three other
-skills take that output as an input: `distilling-a-tuning-record` turns
-verdicts into axioms about a person, `adding-a-bound-to-the-record-gate`
-turns a property of a record into a universal rule in the gate, and
-`clearing-a-record-for-release` rules on what may leave the machine.
-None of those is a span-by-span decision, and this skill's procedure
-produces no axiom, no bound and no release verdict.
+than upstream: a span verdict is this skill's output.
+
+The skills that take that output as an input are
+`distilling-a-tuning-record`, which turns verdicts into axioms about a
+person, `adding-a-bound-to-the-record-gate`, which turns a property of a
+record into a universal rule in the gate, and
+`clearing-a-record-for-release`, which rules on what may leave the
+machine. None of those is a span-by-span decision, and this skill's
+procedure produces no axiom, no bound and no release verdict.
 
 ## The procedure
 

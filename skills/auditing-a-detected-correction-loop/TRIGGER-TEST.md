@@ -1,13 +1,22 @@
 # Trigger test — auditing-a-detected-correction-loop
 
-Nine prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Six are near misses that should not.
+```counts
+prompts: 12
+should-fire: 3
+near-misses: 9
+neighbours: 9
+```
+
+The counts above are checked by `node skills/trigger-coverage.mjs`,
+which goes red when they drift, per `prompts/skill-extract.md` §5ae,
+so they are the only place this file states them. The prompts below
+are written against the `description` field in `SKILL.md`.
 Per `prompts/skill-extract.md` §5, when the test fails the description
 is what changes and not the test.
 
-The budget is six near misses because §5c sets one per adjacent skill
-and this skill has six neighbours, which is every other skill in the
-library. Each near miss below is that sibling's own trigger prompt,
+The near-miss budget is one per adjacent skill, which is what §5c sets,
+and every other skill in the library is adjacent, so the `neighbours`
+line above is the budget and `near-misses` is what this file spends. Each near miss below is that sibling's own trigger prompt,
 copied rather than paraphrased, per §5r, and its prose names which
 boundary it tests. Near miss 4 is `quoting-a-number-from-an-outcome-record`'s
 trigger 3, 5 is `distilling-a-tuning-record`'s trigger 1, 6 is
@@ -224,3 +233,76 @@ treat a decayed span as evidence against `accepted_tacitly` is the
 obvious next move and was deliberately left undone. If that lands, a
 prompt about a decayed span contradicting a tacit acceptance sits on a
 real new edge, and this section is what has to be read again.
+
+## Added 2026-10-26, thirtieth run: the ninth skill's boundary
+
+The run that landed `attributing-a-deleted-span` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**11. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+This is the closest of the ninth skill's boundaries to this file in
+posture, because both skills audit a derived block against what
+actually happened rather than reading it as reported. The reader who
+has learned here that `recurrences` counts something other than what
+its name suggests is exactly the reader who will arrive with the
+sibling's prompt.
+
+The division is the block and the evidence behind it. This skill rules
+on `signals`, which is a fact about the sequence of prompts, and its
+evidence is the transcript. The sibling rules on `deletion`, which is a
+fact about one span's absence from a blob, and its evidence is the git
+trees of intervening merges. The two meet in prose and nowhere in the
+record: a correction the person made by deleting text rather than by
+complaining is a `human_edit` attribution over there, and whether it
+also appears as a loop here is a separate computation from separate
+input. Neither block is derived from the other, so neither can check
+the other.
+
+## Added 2026-10-26, thirty-second run: the tenth skill's boundary
+
+The run that landed `excluding-a-file-from-an-outcome-record` owes a
+near miss to every skill already in the library, in their own files, in
+the same pull request (`prompts/skill-extract.md` §5r). This section is
+this file's payment, and the prompt is the new sibling's own trigger 1,
+copied rather than paraphrased.
+
+**12. "This record excludes `docs/standards/pm.md` as `imported_whole`,
+relation `sibling`, dated 2026-10-09T19:00:00-06:00. The work was
+generated 2026-10-10T00:00:00Z. Fine to cite the exclusion in the
+methods note?"**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 1, and it should
+not fire here. It is the easiest near miss in this file and the argument
+is still worth writing down, because the one thing the two skills share
+is an ordering question and that is enough for a reader to match on.
+
+Both skills check that a derived claim about *when* something happened
+survives contact with the thing it was derived from. This skill orders
+prompts: `openedStep` and `closedStep` are positions in a transcript,
+and a loop whose closure precedes its opening is a defect of the same
+family as a refusal dated after the work it claims to predate. The
+objects are disjoint. This skill's evidence is what the person said, in
+the order she said it. The sibling's evidence is commit author dates in
+the object store, which no transcript contains.
+
+They also cannot change each other's output. No exclusion moves a
+recurrence count, because `signals` is computed from the transcript and
+an excluded path's absence from `files[]` is invisible to it. No loop
+moves an exclusion, for the same reason in reverse.
+
+The one place the two meet is prose about a run, and it is worth naming
+because the error reaches a reader as a claim about the person. An
+import the record failed to refuse makes someone look satisfied with
+text she never wrote and never read, and a loop count sitting beside
+that survival figure inherits the impression without being wrong itself.
+That is a figure problem, handled on the sibling's side, and the honest
+note is that this skill's numbers were never the ones at fault.
