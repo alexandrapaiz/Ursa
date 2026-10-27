@@ -80,7 +80,11 @@ The sender half of the board write path.
 - Tests: 14 new in `sender.test.mjs`, 22 in `post-verdict.test.mjs`, 33 in
   `check.test.mjs` (two of its cases were passing *because* of the default
   and now pass `--seat`, plus two new cases), 18 in
-  `enumerate-verdicts.test.mjs`.
+  `enumerate-verdicts.test.mjs`. All of `tools/board` and `tools/gates`
+  together: `node --test tools/board/*.test.mjs tools/gates/*.test.mjs`,
+  112 tests, 112 pass, 0 fail. A bare directory argument is resolved as a
+  module by Node 22.23.2 and fails before any test runs, at this commit and
+  at its parent alike; the glob is the invocation that works.
 
 Also the two output defects the fifth extraction deferred on the grounds that
 they would change an output string on a branch whose whole evidence was that

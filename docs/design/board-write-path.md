@@ -763,13 +763,27 @@ evidence was that no output string changed. This is the branch where
 output strings change, so they land here with the differential above
 as their evidence.
 
-The test suites, each run on its own because `node --test tools/` was
-observed to report a directory-level failure without naming the file:
+The test suites. The shell-expanded file list, because on Node
+`v22.23.2` a bare directory argument is resolved as a module to run
+rather than as a tree to search, so `node --test tools/board/` prints
+`Error: Cannot find module .../tools/board` and reports one failed
+subtest named after the directory. That is this Node version's
+behaviour and not a failing test: it reproduces identically at the
+parent commit, where the suites also pass file by file.
 
 ```
-node --test tools/board/sender.test.mjs          # pass 14  fail 0
-node --test tools/board/post-verdict.test.mjs    # pass 22  fail 0
-node --test tools/board/check.test.mjs           # pass 33  fail 0
+node --test tools/board/*.test.mjs tools/gates/*.test.mjs
+# tests 112
+# pass 112
+# fail 0
+```
+
+File by file, for the four that this change touches:
+
+```
+node --test tools/board/sender.test.mjs              # pass 14  fail 0
+node --test tools/board/post-verdict.test.mjs        # pass 22  fail 0
+node --test tools/board/check.test.mjs               # pass 33  fail 0
 node --test tools/gates/enumerate-verdicts.test.mjs  # pass 18  fail 0
 ```
 
