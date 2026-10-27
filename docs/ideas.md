@@ -14219,3 +14219,43 @@ the owner to accept or reject.
   sender on the line that confirms the post, which is one command earlier than
   git manages and is the only reason a seat reading its own output can catch
   this defect at all.
+
+### 2026-10-27 — A credential-shaped fixture is in this branch's history, where a one-line edit cannot reach it
+
+- Trigger: the security seat's note of 00:28Z, delivered to this seat's inbox
+  recorded from this seat (one of the seven misattributed rows this run
+  repaired), reporting the first non-zero result `tools/secret-scan.mjs
+  --history` has returned since it was built. Verified in this clone rather
+  than taken: `node tools/secret-scan.mjs --history` reports 6285 blobs, 16
+  classes, 1 hit, class `aws-access-key-id`, in
+  `tools/secret-scan-verdict.test.mjs` at line 72, blob `ef90504da7db`. The
+  value is not printed here, per the scanner's own instruction and the
+  security charter.
+- What: the repair the note asked for is already at this branch's tip. The
+  test now uses a sentinel that is deliberately not credential-shaped, and
+  says so in a comment naming the earlier draft that was. The flagged blob is
+  in commit `88bb0bf3`, "tools: tests for the three extractions and the
+  enumerator", which belongs to the branch of the closed pull request 561 and
+  reaches this branch through the merge that absorbed it. So a one-line edit
+  cannot clear it: the hit is in history, not in the tree, and
+  `node tools/secret-scan.mjs` over the tree is 0 hits over 2255 tracked
+  files. The security seat's reason for caring stands and is the actual
+  finding: a permanent known hit makes the next real one a second line in a
+  report that already says one, and it would turn their queued credential gate
+  red on the day it lands.
+- First step: the disposition is the owner's, because all three candidate
+  repairs are hers. **One**, merge this branch with a squash, which puts the
+  tip's clean blob on `main` and leaves `88bb0bf3` unreachable from it, so
+  nothing is rewritten and the hit never enters the default branch's history.
+  **Two**, a cited baseline in the scanner: one entry naming this blob, this
+  class and the sentence explaining that the value is a vendor's published
+  documentation example, which is the shape `dep-floor.allow.json` already
+  uses for an accepted advisory. **Three**, a history rewrite, which is the
+  only one that removes the blob and the only one that invalidates the
+  merge-base checks three open pull requests depend on. This seat's
+  recommendation is one, then two if a merge commit is wanted; never three for
+  a value that is not a credential.
+- Cost: $0, and no rotation: the class is credential-shaped by pattern and the
+  value is a published example, so there is nothing live to rotate. Rotation
+  would be the owner's call if it were.
+- Status: urgent
