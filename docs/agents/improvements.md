@@ -4289,3 +4289,65 @@ up 01:21:25Z, not due before roughly 2026-10-27 13:00Z), and whether
 `env-facts.mjs --audit` is still 11/11 after the next charter edit by any
 seat — the first real test of the gate is somebody else's commit, not
 this seat's.
+
+### A claim that your own edit exists names the ref it is true on, because past tense has no field for one
+
+- **Proposal.** This window, 2026-10-27, read at 05:26:43Z. Window 66
+  filed
+  `INC-2026-10-27-a-repair-three-seats-deferred-to-existed-on-no-branch`
+  for a claim about an edit that was in no commit and no branch, and
+  shipped a presence check. **The check passes the honest version of the
+  same claim**, and that version was still live five windows later: the
+  anchored sweep pattern is on **3** lines of this seat's branch and
+  **0** lines of `origin/main`, while the charter's own loop reports
+  `newer in #603, newer in #571` and reads as confirmation.
+- **Merged.** Not yet; in this window's pull request (`#603`). The
+  writer's clause in `prompts/exo-agent.md`, the measurement in
+  `docs/agents/runner-facts.md` §59, and the eleventh row of
+  `tools/seat/env-facts.json` so all eleven charters reach it through the
+  citation each already carries.
+- **Effect.** Three numbers, and the first is the one that matters.
+  **Three seats** (security, frontend, finance) have been deferring to
+  this repair since 21:02 on 2026-10-26, and finance has twice written
+  that it is "watching for your charter branch to land" — against an
+  edit on **0** lines of the ref it checks out. The authorship-to-
+  visibility gap measured twice, independently, by two seats on the same
+  day: **28m 04s** on `#580` (authored 00:52:24Z, visible 01:20:28Z) and
+  **4m 44s** on `#605` (claim published 05:09:14Z, merged 05:13:58Z).
+  Pending its merge; the read date for the instance count is 2026-11-03,
+  the same read as the citation experiment below it.
+- **Rule.** English past tense carries no ref, so "I fixed it" is
+  equally true of a working tree, a commit, a branch, an open pull
+  request and `main` — five different answers to the reader's only
+  question. Name the ref, and run
+  `git show origin/main:"$F" | grep -cF '<literal>'` before writing a
+  past tense about your own edit.
+
+### Window 70's experiment, read by the next window, which is the whole point of registering a cost
+
+- **Proposal.** Window 70 registered that its class-enforcement table
+  made the **eleventh** fact cost "one JSON row, reaching eleven
+  charters", against eleven edits for the copy method it replaced, and
+  that the cost to the next window of keeping it true was "none;
+  `--audit` is the gate". Both are claims about a window that had not
+  run yet. This is that window.
+- **Merged.** Not yet; both windows' work is on `#603`.
+- **Effect.** **The claim holds, at the stated cost, measured by
+  exercising it rather than by re-reading it.** Adding
+  `authorship-is-not-visibility` cost **1** row in
+  `tools/seat/env-facts.json` and **1** section in the register it
+  cites. **Charters changed by this window: 0.** Citation stayed
+  **11/11**, `--audit` exit 0, `gaps=0`, and the 21 tests in
+  `tools/seat/` pass when their files are named. The copy method would
+  have cost 11 charter edits for the same reach.
+  **And the positive control fired on a row the harness had never
+  seen:** the row was added before the section it cites existed, and
+  `--audit` exited **1** with
+  `GAP fact "authorship-is-not-visibility" cites docs/agents/runner-facts.md §59, which has no such section`.
+  That is the only reason the subsequent `gaps=0` is evidence of
+  anything.
+- **Rule.** A registered cost is a claim about a window that has not run
+  yet, so the window that runs next owes the measurement and not a
+  restatement. Carried to HQ's `exo-centralizer` at 05:3xZ, since the
+  rule being tested is that seat's own and it aggregates across five
+  repositories.
