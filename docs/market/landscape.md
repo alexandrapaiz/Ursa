@@ -1019,6 +1019,28 @@ ads based on Gmail, Photos data if Personal Intelligence is
 enabled](https://9to5google.com/2026/10/23/google-will-target-ads-based-on-gmail-photos-data-if-personal-intelligence-is-enabled/),
 [DataCamp: Gemini Personal Intelligence](https://www.datacamp.com/blog/gemini-personal-intelligence).
 
+**Update, 2026-10-27 (message, 3rd run): the opt-in claim does not even
+hold consistently across Google's own pages.** Android Police's launch
+review (published 2026-01-22, newly read this run) found Google's blog
+stating Gemini "doesn't train directly on your Gmail inbox or Google
+Photos library" while Google's own support page for the same feature
+states, twice, that connected-app data "is used to improve Google
+services, including training generative AI models" — a direct
+contradiction inside Google's own documentation, not a reading the
+reviewer had to construct. The same review found human review of this
+data defaults to on: the user has to actively opt out of having their
+Personal Intelligence data reviewed by people, which is the opposite
+default from the feature's own "opt-in" framing. So what: this is not a
+second instance of the ad-targeting gate already recorded above. It is
+evidence that even a lab that ships a genuine opt-in control can leave
+its own public claims about what that control does inconsistent nine
+months after launch, which argues that a single, internally consistent
+statement of what consent triggers is itself part of what "ask before
+you infer" has to mean, not just the on/off switch. Last observed
+2026-10-27: [Android Police: Google says Personal Intelligence is
+private, but the reality is a privacy
+disaster](https://www.androidpolice.com/googles-personal-intelligence-is-a-privacy-disaster/).
+
 ### MemHub (Tencent Hunyuan Hy-Memory)
 
 What it is: a local-first desktop-and-CLI product, open-sourced this

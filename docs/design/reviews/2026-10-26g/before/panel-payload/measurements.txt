@@ -1,0 +1,7 @@
+# frozen at t=2000ms, seeded Math.random, CSS animations rewound.
+# settled 800ms after networkidle and after `input[type=password]` appeared, with `../../review-kit/state/panel-payload.mjs` run to enter the state before each shutter.
+# viewports narrow 320x844, phone 390x844, pad 820x1180, desk 1440x900 (--viewports, not the charter default)
+home-narrow                      200    320/320   overflow    0px  height   844px
+home-phone                       200    390/390   overflow    0px  height   844px
+home-pad                         200    820/820   overflow    0px  height  1180px
+home-desk                        200   1440/1440  overflow    0px  height   900px

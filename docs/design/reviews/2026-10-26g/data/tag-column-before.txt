@@ -1,0 +1,88 @@
+base http://127.0.0.1:4961  store 7842
+
+    320  tag font 10.4px  flex-basis auto
+         prefer  tag  45.89w   statement starts at 77.08
+         avoid   tag  34.69w   statement starts at 65.88
+         prefer  tag  45.89w   statement starts at 76.47
+         prefer  tag  45.89w   statement starts at 76.47
+         prefer  tag  45.89w   statement starts at 77.08
+         prefer  tag  45.89w   statement starts at 77.08
+         prefer  tag  45.89w   statement starts at 77.08
+         prefer  tag  45.89w   statement starts at 77.08
+         natural: PREFER 45.89px, AVOID 34.69px, difference 11.20px
+         distinct statement left edges: 3 (77.08, 65.88, 76.47)  RAGGED
+
+    375  tag font 10.4px  flex-basis auto
+         prefer  tag  45.89w   statement starts at 77.08
+         avoid   tag  34.69w   statement starts at 65.88
+         prefer  tag  45.89w   statement starts at 76.47
+         prefer  tag  45.89w   statement starts at 76.47
+         prefer  tag  45.89w   statement starts at 77.08
+         prefer  tag  45.89w   statement starts at 77.08
+         prefer  tag  45.89w   statement starts at 77.08
+         prefer  tag  45.89w   statement starts at 77.08
+         natural: PREFER 45.89px, AVOID 34.69px, difference 11.20px
+         distinct statement left edges: 3 (77.08, 65.88, 76.47)  RAGGED
+
+    390  tag font 10.4px  flex-basis auto
+         prefer  tag  45.89w   statement starts at 77.08
+         avoid   tag  34.69w   statement starts at 65.88
+         prefer  tag  45.89w   statement starts at 76.47
+         prefer  tag  45.89w   statement starts at 76.47
+         prefer  tag  45.89w   statement starts at 77.08
+         prefer  tag  45.89w   statement starts at 77.08
+         prefer  tag  45.89w   statement starts at 77.08
+         prefer  tag  45.89w   statement starts at 77.08
+         natural: PREFER 45.89px, AVOID 34.69px, difference 11.20px
+         distinct statement left edges: 3 (77.08, 65.88, 76.47)  RAGGED
+
+    639  tag font 10.4px  flex-basis auto
+         prefer  tag  45.89w   statement starts at 77.08
+         avoid   tag  34.69w   statement starts at 65.88
+         prefer  tag  45.89w   statement starts at 76.47
+         prefer  tag  45.89w   statement starts at 76.47
+         prefer  tag  45.89w   statement starts at 77.08
+         prefer  tag  45.89w   statement starts at 77.08
+         prefer  tag  45.89w   statement starts at 77.08
+         prefer  tag  45.89w   statement starts at 77.08
+         natural: PREFER 45.89px, AVOID 34.69px, difference 11.20px
+         distinct statement left edges: 3 (77.08, 65.88, 76.47)  RAGGED
+
+    640  tag font 10.4px  flex-basis 67.2px
+         prefer  tag  67.19w   statement starts at 107.98
+         avoid   tag  67.19w   statement starts at 107.98
+         prefer  tag  67.19w   statement starts at 107.38
+         prefer  tag  67.19w   statement starts at 107.38
+         prefer  tag  67.19w   statement starts at 107.98
+         prefer  tag  67.19w   statement starts at 107.98
+         prefer  tag  67.19w   statement starts at 107.98
+         prefer  tag  67.19w   statement starts at 107.98
+         natural: PREFER 45.89px, AVOID 34.69px, difference 11.20px
+         distinct statement left edges: 2 (107.98, 107.38)  RAGGED
+
+    820  tag font 10.4px  flex-basis 67.2px
+         prefer  tag  67.19w   statement starts at 165.98
+         avoid   tag  67.19w   statement starts at 165.98
+         prefer  tag  67.19w   statement starts at 165.38
+         prefer  tag  67.19w   statement starts at 165.38
+         prefer  tag  67.19w   statement starts at 165.98
+         prefer  tag  67.19w   statement starts at 165.98
+         prefer  tag  67.19w   statement starts at 165.98
+         prefer  tag  67.19w   statement starts at 165.98
+         natural: PREFER 45.89px, AVOID 34.69px, difference 11.20px
+         distinct statement left edges: 2 (165.98, 165.38)  RAGGED
+
+   1440  tag font 10.4px  flex-basis 67.2px
+         prefer  tag  67.19w   statement starts at 475.98
+         avoid   tag  67.19w   statement starts at 475.98
+         prefer  tag  67.19w   statement starts at 475.38
+         prefer  tag  67.19w   statement starts at 475.38
+         prefer  tag  67.19w   statement starts at 475.98
+         prefer  tag  67.19w   statement starts at 475.98
+         prefer  tag  67.19w   statement starts at 475.98
+         prefer  tag  67.19w   statement starts at 475.98
+         natural: PREFER 45.89px, AVOID 34.69px, difference 11.20px
+         distinct statement left edges: 2 (475.98, 475.38)  RAGGED
+
+One distinct left edge is a column. More than one is a list of
+statements whose left edge moves with the length of the word beside it.
