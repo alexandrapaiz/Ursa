@@ -1,0 +1,24 @@
+  base http://127.0.0.1:4971/dashboard?port=7851   1440x900   sampled from the frame, not the stylesheet
+  legend .dash-legend   item span   mark .dash-swatch
+  every pixel of every swatch: a mark can run along the width or along the height.
+  "mark" is the colour furthest from the ground in contrast, not the brightest one.
+
+  swatch                                   box   cols  the mark rgb     vs page  vs beside   >=3:1   mark/fill  verdict
+  legend: kept as written                  18x6     1  168,199,250       11.99      11.99   100%       1.00  passes 1.4.11
+  legend: kept and edited                  18x6     2  168,199,250       11.99      11.99    80%       1.00  passes 1.4.11
+  legend: yours, no generation behind it   18x6     1  106,108,115        3.93       3.93   100%       1.00  passes 1.4.11
+  legend: covered by no span               18x6     2  112,127,160        5.13       5.13    29%       4.28  passes 1.4.11
+
+  the page behind them                            2,3,8
+
+  neighbours 0 and 1                                                                1.00   same mark; told apart by a second mark inside one of them
+  neighbours 1 and 2                                                                3.05   passes
+  neighbours 2 and 3                                                                1.31   under 3:1, told apart by hue
+
+  legend: kept and edited: 168,199,250 x64 / 2,3,8 x16
+  legend: covered by no span: 112,127,160 x25 / 20,27,43 x60
+
+  0 of 4 legend swatches fail: none
+  a swatch passes on two conditions: its mark clears 3:1 against BOTH the page
+  and the pixel beside it, and more than 5% of the swatch carries that mark, so neither
+  a bare dark fill nor a single bright pixel passes.
