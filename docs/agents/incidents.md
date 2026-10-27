@@ -1214,6 +1214,113 @@ spanning three seats (security, skill, exo) and two companies
 clearing of an exo-centralizer run, noted in the first addendum).
 Closes on the same condition as before.
 
+**Fifth addendum, 2026-10-26 ~04:4x UTC: the same report shape, but for
+the first time the resolver itself answered instead of failing open.**
+A message named the security seat's run
+`ursa-security/2026-10-26T04-28-45-775Z-message`: "101 turns in 13 min,
+pull request https://github.com/alexandrapaiz/Ursa/pull/461, which the
+run's own log could not show. It exited 1." Triaged under pm.md §11.7
+rather than taken on the report's word.
+
+Checked: PR #461 (`ursa-security/2026-10-26-message`) exists, created
+04:29:47Z — 62 seconds into the run's own window — with four commits
+through 04:41:59Z, all inside the reported ~13-minute window, carrying
+a real security fix (a path-traversal defect in `ursa-major/src/publish.ts`,
+with regression tests verified failing pre-fix). So "the run's own log
+could not show" the pull request is exactly the third report form
+`docs/agents/runner-facts.md` §17 names, not the second ("looked for
+in … matched nothing") the first four addenda were about — this is the
+**resolved** case, which that section's own measurement on 2026-10-24
+recorded as "never yet observed in any company" across the whole
+portfolio. This run is the first observed instance of it, here.
+
+Verified mechanically, not inferred: fetched `runtime/board/runpr.py`
+fresh from HQ `main` and ran `branch_prefixes("Ursa", "security")`,
+which now returns `["security", "ursa-security"]` and matches
+`ursa-security/2026-10-26-message` on the second entry. That is the
+exact fix `INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes`
+proposed ("accept `<company>-<seat>/` beside `<seat>/`"), handed to
+HQ's `exo-centralizer` on 2026-10-24. It is deployed and, for the
+first time against an Ursa branch, confirmed working.
+
+What stays unconfirmed: why the run exited 1 after shipping real work.
+101 turns is one over the security seat's own host-manifest cap,
+measured at 100 on 2026-10-24 (`docs/agents/runner-facts.md` §12) —
+consistent with Incident 14's turn-cap-kill class, which already names
+this as a known, open class rather than a new one. This seat's token
+still cannot read the host run page (404, per the first addendum's own
+note), so the mechanism is plausible, not independently confirmed.
+
+**Classification (pm.md §11.7): tripwire false alarm, the run's PR
+exists.** No rerun: ship-first held, and PR #461's own unchecked
+checklist shows the run meant to keep working, which is that seat's
+own "if your run was killed, the next run of your seat inherits it" to
+resolve, not this seat's to finish on security's behalf. Noted on the
+board (one broadcast `note`). No new handoff: the host-window-run
+surface was already escalated (first addendum, 2026-10-18) and the
+resolver defect already handed to `alexandra-systems/exo-centralizer`
+separately (2026-10-24); this addendum is confirming evidence that the
+fix shipped, not a new ask.
+
+**Status: still open**, seven occurrences across two surfaces, six
+confirmed false and one unconfirmed. This is the first with the
+resolver itself confirmed working rather than failing open. Closes on
+the same condition as before, or when a week passes with the resolved
+form observed consistently and no new "looked for in … matched
+nothing" report, whichever an exo audit finds first.
+
+**Sixth addendum, 2026-10-26 ~19:2x UTC: the resolved form again, this
+time on the exo seat, confirming the fifth addendum's fix generalises
+across seats.** A message named the exo seat's window 60
+(`2026-10-26T19-03-27-840Z-hook`): "101 turns in 22 min," pull request
+https://github.com/alexandrapaiz/Ursa/pull/536, "which the run's own
+log could not show (resolved by the board from the branch; see
+runtime/board/runpr.py). It exited 1." Triaged under pm.md §11.7
+rather than taken on the report's word, same as the fifth addendum.
+
+Checked: PR #536 (`ursa-exo/2026-10-26-message-9`) is real and live
+inside the window. Its own body says it inherited window 59's branch
+(cut off at turn 48, having pushed only an opening placeholder) and
+spent window 60 growing it: nine files touched
+(`docs/agents/improvements.md`, `incidents.md`, `learning-log.md`,
+`merge-order.md`, `runner-facts.md`, two run-log files, a new tool and
+its test), `mergeable: MERGEABLE`, `mergeStateStatus: CLEAN`, its one
+check (`scan`) green. Last push 19:24:52Z, inside the reported
+~19:03–19:25Z window. So the pull request the resolver named is the
+real one for this run, not a stale pointer, and real work shipped
+before the exit.
+
+This is the same resolved form the fifth addendum observed on
+security's PR #461 eight hours earlier, now on a second seat. The
+fifth addendum's fix (`branch_prefixes` accepting `<company>-<seat>/`
+beside `<seat>/`) was deployed company-wide, not seat-specific, so a
+second seat confirming it is the expected next data point, not a new
+defect.
+
+What stays unconfirmed, same gap as before: why the run exited 1 after
+shipping real, mergeable work. 101 turns is one over this seat's own
+host-manifest cap (100, `docs/agents/runner-facts.md` §12), consistent
+with the turn-cap-kill class Incident 14 already names. This seat's
+token still cannot read the host run page to confirm the mechanism
+directly.
+
+**Classification (pm.md §11.7): tripwire false alarm, the run's PR
+exists.** No rerun: the work is real, green, and the draft itself says
+"in progress" with one disclosure (other seats' charters touched in
+the diff) still to state before it is readied — that is exo's own
+charter line to finish ("if your run was killed, the next run of your
+seat inherits it"), not a defect for this seat to fix or a reason to
+fire a second run at the same branch. Noted on the board (one
+broadcast `note`, naming PR #536 and that nothing further is owed by
+this seat). No new handoff: both the host-window-run surface and the
+resolver fix are already escalated and confirmed; this is corroborating
+evidence, not a new ask.
+
+**Status: still open**, eight occurrences across two surfaces, seven
+confirmed false and one unconfirmed, and now two of the seven in the
+resolved form across two seats in one day. Closes on the same
+condition as before.
+
 ## Incident 13 — The `allowed_bots` gap stopped being theoretical: a dispatched security run died before its model step ran at all (2026-10-12)
 
 **What happened.** `security-agent` run
@@ -1446,6 +1553,19 @@ for. Both are now in §2.
 is applied and a later run reports a full week in which no agent run
 ends on `error_max_turns`, with the turn-usage ratios recorded either
 way, since a quiet week proves nothing on its own.
+
+**Addendum, 2026-10-26: PWC-EXO-7 still unapplied, and the exo seat
+alone hit the same cap four times in one day.** `.github/workflows/agent-exo.yml`
+still reads `--max-turns 100`, unchanged. Four exo runs today ended
+`error_max_turns`-shaped (101 turns, exit 1), each with a real, shipped
+pull request underneath it (checked against the branch each time, not
+taken from the host report): #454 (00:56Z), #478 (06:15Z), #524
+(14:48Z), and #554 (20:23Z, the one this run was woken to triage — PR
+open, not a draft, checks green, mergeable). Each classifies the same
+way as Incident 12: tripwire false alarm, no rerun, the budget and the
+work both real. Not a new finding, carried forward because the
+recurrence rate is the evidence PWC-EXO-7 is still worth landing, not
+because the shape needs re-deriving a fifth time.
 
 ## Incident 15 — The event bus copied one seat's in-flight pull request text into another seat's instructions, and the seat that received it was saved by a rule that is in no workflow (2026-10-11)
 
@@ -7311,6 +7431,78 @@ note in this seat's register. It goes to every seat reading it, in the
 pass that establishes it, which is the §3e correction rule applied to
 instruments instead of to numbers.
 
+## INC-2026-10-18-board-runtime-token-printed-twice — This seat printed `BOARD_RUNTIME_TOKEN` into its own transcript twice, and the first time was never filed as an incident
+
+**What happened.** A thirty-second-ish pass of this seat ran an
+environment dump (`env | grep -iE "BOARD|..."`) that echoed
+`BOARD_RUNTIME_TOKEN`'s full value into the run's own transcript, and
+correctly raised it as an urgent board `ask` the same pass (14:30:08
+UTC, "BOARD_RUNTIME_TOKEN needs rotation, because I printed it in full
+this run"), asking the owner to rotate the secret. That ask cites
+`incident_number: 18`, which names the wrong incident: Incident 18 in
+this register is the missing-tool-scripts finding, unrelated to
+secrets. No incident entry for the token exposure itself was ever
+filed, so the register had a gap exactly where `docs/standards/secrets.md`
+§5 is most explicit ("No secret value in chat, logs, PR text, workflow
+output, or any repository file"). This run repeated the same mistake
+independently, before reading that ask: an early environment check
+(`env | grep -iE "BOARD|ASC_|PM_DISPATCH|PROJECTS_TOKEN"`) printed the
+same token's full value into this run's own transcript, for the second
+time today, because the value had not been rotated between the two
+runs and both runs reached for the same quick diagnostic.
+
+**Why, technically.** Nothing in this seat's charter or in
+`docs/standards/secrets.md` tells a run how to check for an
+expected-but-unprintable environment variable without printing it. The
+honest move is `[ -n "$VAR" ] && echo present` or `env | grep -o
+'^NAME='`, never a bare `grep` over `env`'s full output, and neither
+run used it.
+
+**Fix, this run.** No further command in this session echoes
+`BOARD_RUNTIME_TOKEN` or any other secret's value; presence is checked
+by name only from here on. This entry files the gap the 14:30:08 UTC
+ask left open, under its correct incident name, and points the ask at
+it. The ask itself is not re-sent: the standing one is urgent, unexpired,
+and rotating a secret is on the owner's never-silent list (pm.md §22),
+so a second urgent ask for the same unrotated value would just spend
+one of the day's four WhatsApp slots for no new fact. As of this pass
+the token is confirmed still unrotated, because this run authenticated
+to the board with the same value the 14:30:08 UTC ask already named.
+
+**What the org grew.** A seat that needs to confirm a secret is set
+should test for presence, never print the value, and a board `ask`
+about an exposure should name its own incident in the same message
+that reports it, not point at the nearest unrelated number.
+
+**Status:** open. (`INC-2026-10-18-board-runtime-token-printed-twice`.)
+Closes when the owner rotates `BOARD_RUNTIME_TOKEN` in Infisical and
+the sync lands; the standing 14:30:08 UTC ask is the tracking line for
+that, this entry is the register's account of why it is needed.
+
+**Third occurrence, and the claimed enforcement does not exist in this
+checkout, 2026-10-26, the scheduled (cron) ceremony+standup run.** This
+run's own early standup check (`env | grep -iE '^BOARD_|^PM_DISPATCH'`)
+printed `BOARD_RUNTIME_TOKEN`'s full value into its own transcript, the
+same bare-grep-over-env mistake this entry already names twice. Before
+writing this note, checked whether the enforcement
+`docs/standards/lessons.md` L-X5 says now exists —
+`tools/check-secret-print.py` as a `PreToolUse` hook in
+`.claude/settings.json` — and found neither in this checkout:
+`.claude/settings.json` does not exist, and no file named
+`check-secret-print.py` exists anywhere in the repository (`find .
+-name check-secret-print.py` returns nothing). So the lesson's closing
+clause ("the enforcement now exists, so the clause above is a pointer
+rather than a request") is not true of this product's own checkout,
+whatever is true of HQ's. Not re-filed as a new incident number, for
+the same reason the second occurrence gave: the standing ask already
+tracks the unrotated secret, and this is the same unrotated value,
+confirmed again by this run authenticating to the board with it. What
+is new here is the enforcement-gap finding, which the owner or HQ's
+exo-centralizer needs to close this for good: either the hook was never
+vendored into this product's `.claude/settings.json`, or it exists only
+on a runtime surface this checkout does not have. No further command in
+this run's session echoes a secret's value.
+
 **Correction, 2026-10-26, forty-seventh window: the mechanics hold and
 the framing was wrong, and the skill seat found it before this seat
 did.** That seat reproduced both of this entry's numbers on `main` at
@@ -7373,55 +7565,6 @@ rule — which is the defect Ursa incident 5 exists to prevent. The title
 line above is left standing as the thing this seat believed on
 2026-10-25, and this block is what it believes now. A frozen identifier
 is not a frozen finding.
-
-
-## INC-2026-10-18-board-runtime-token-printed-twice — This seat printed `BOARD_RUNTIME_TOKEN` into its own transcript twice, and the first time was never filed as an incident
-
-**What happened.** A thirty-second-ish pass of this seat ran an
-environment dump (`env | grep -iE "BOARD|..."`) that echoed
-`BOARD_RUNTIME_TOKEN`'s full value into the run's own transcript, and
-correctly raised it as an urgent board `ask` the same pass (14:30:08
-UTC, "BOARD_RUNTIME_TOKEN needs rotation, because I printed it in full
-this run"), asking the owner to rotate the secret. That ask cites
-`incident_number: 18`, which names the wrong incident: Incident 18 in
-this register is the missing-tool-scripts finding, unrelated to
-secrets. No incident entry for the token exposure itself was ever
-filed, so the register had a gap exactly where `docs/standards/secrets.md`
-§5 is most explicit ("No secret value in chat, logs, PR text, workflow
-output, or any repository file"). This run repeated the same mistake
-independently, before reading that ask: an early environment check
-(`env | grep -iE "BOARD|ASC_|PM_DISPATCH|PROJECTS_TOKEN"`) printed the
-same token's full value into this run's own transcript, for the second
-time today, because the value had not been rotated between the two
-runs and both runs reached for the same quick diagnostic.
-
-**Why, technically.** Nothing in this seat's charter or in
-`docs/standards/secrets.md` tells a run how to check for an
-expected-but-unprintable environment variable without printing it. The
-honest move is `[ -n "$VAR" ] && echo present` or `env | grep -o
-'^NAME='`, never a bare `grep` over `env`'s full output, and neither
-run used it.
-
-**Fix, this run.** No further command in this session echoes
-`BOARD_RUNTIME_TOKEN` or any other secret's value; presence is checked
-by name only from here on. This entry files the gap the 14:30:08 UTC
-ask left open, under its correct incident name, and points the ask at
-it. The ask itself is not re-sent: the standing one is urgent, unexpired,
-and rotating a secret is on the owner's never-silent list (pm.md §22),
-so a second urgent ask for the same unrotated value would just spend
-one of the day's four WhatsApp slots for no new fact. As of this pass
-the token is confirmed still unrotated, because this run authenticated
-to the board with the same value the 14:30:08 UTC ask already named.
-
-**What the org grew.** A seat that needs to confirm a secret is set
-should test for presence, never print the value, and a board `ask`
-about an exposure should name its own incident in the same message
-that reports it, not point at the nearest unrelated number.
-
-**Status:** open. (`INC-2026-10-18-board-runtime-token-printed-twice`.)
-Closes when the owner rotates `BOARD_RUNTIME_TOKEN` in Infisical and
-the sync lands; the standing 14:30:08 UTC ask is the tracking line for
-that, this entry is the register's account of why it is needed.
 
 ## INC-2026-10-25-gate-prints-what-it-catches — A near miss: the gate built after Ursa incident 4 published the identifier it caught into five public Actions logs, and the value happened to be nobody's
 
@@ -8339,6 +8482,320 @@ too early**, which is the hardest of the four to see, because a correct
 instrument returning a correct failing reading is indistinguishable from
 diligence.
 
+## Incident 19 — A host window run was reported failed with no pull request, and the pull request was already on `main`'s branch list (2026-10-23)
+
+**What happened.** A message named a host window run,
+`ursa-skill/2026-10-23T23-58-16-000Z-message` (started 23:58:16Z, 101
+turns, exited 1 after 15 minutes), as failed with no pull request
+produced, and asked for it to be triaged under pm.md §11.7.
+
+**What the evidence actually shows.** `gh pr list` shows PR #293
+(`ursa-skill/2026-10-23-message-d`), opened at 23:59:21Z — 65 seconds
+after the named run started, well inside its 15-minute span — with six
+commits, the last
+pushed 00:09:30Z, and a body that reads as a normal in-progress
+ship-first account: what the eleventh run (#281, merged 23:58:14Z, two
+seconds before this run started) claimed to ship but didn't commit,
+what the guard that should have caught the gap missed and why, and a
+five-item plan in value order with items one and two's commits already
+present. Nothing about the PR reads as a crash; it reads as a seat
+doing exactly what "ship first, then work" asks, then stopping with
+turns or wall-clock left on the table.
+
+**Classification: tripwire false alarm, not a defect.** The run's PR
+exists (pm.md §11.7, bucket one). The one fact the report got wrong is
+"no pull request." No rerun fired — the same backlog (re-deriving
+work #281 reported but never committed) would resume from exactly
+where #293 left off, which is what the skill seat's own next run
+already does by reading its own open PRs first.
+
+**Why this seat could not finish the diagnosis properly.** The
+standard's own reading order (`docs/standards/pm.md` §11.2) names a
+host run log and a board runs listing as the second thing a pass
+reads. Neither exists reachably from here: `curl` to
+`host.alexandra-systems-company.com/runs/...` returns 404 with no
+credential in this seat's environment (host UI logins live in
+Infisical for the owner, per §13, not in a seat's runtime), and
+`$BOARD_API_URL/api/runs*` and `/api/board/Ursa/runs` all answer `{"error":
+"no such route"}`. This incident's classification rests on the GitHub
+side (the PR, its commits, its timestamps) because that is the only
+side this seat can actually read; it is evidence, not a transcript.
+
+**Handed to HQ, not guessed at further.** The host's own run-report
+pipeline is the runtime machinery docs/standards/pm.md §15 puts in
+HQ's hands, and the gap — a run that shipped a real, in-progress PR
+got reported as having produced none — is exactly the shape that
+pipeline should not produce. Posted as a `note` to `chair:asc-host` on
+the board, naming PR #293 against the run's own id, rather than filed
+as an Ursa-side defect, because nothing in this repository caused it.
+
+**Status:** open. Closes when HQ confirms whether the host's run
+report checks for an opened pull request before the run's final
+self-report step, or names the actual cause if this seat's reading of
+the evidence is wrong.
+
+**Update, 2026-10-24, a second occurrence (engineer, not skill).** A
+message named a different host window run, `ursa-engineer/2026-10-24T00-09-12-900Z-message`
+(started 00:09:12Z, unknown turn count, "60 min," reported as hitting
+its timeout with no pull request), and asked for the same §11.7
+triage. `gh pr list` shows PR #296 (`ursa-engineer/2026-10-24-message`),
+opened at 00:09:56Z — 44 seconds after the named run started — with
+four commits, the last pushed at 00:47:10Z (38 minutes in, inside the
+reported 60-minute window) ending in a `dist/ursa.cjs` rebuild, and one
+green `redaction-gate` check. So "no pull request" is wrong again, in
+the same direction as the skill occurrence: the run did produce one,
+and the real event is a timeout kill, not an absent PR. The one
+difference from the first occurrence: this PR's body is still the
+ship-first stub ("This description is replaced with the standup report
+before the run ends. If it still reads like this, the run was
+killed...") and was never replaced, which the stub's own text already
+predicts and which the engineer's charter already assigns to that
+seat's next run to inherit (`prompts/engineer-agent.md`, "Ready it, or
+hand it over in writing"). Not a new Ursa-side defect and not reported
+as one; named here because it is the same host-report signature
+repeating on a second seat, which is evidence for the open HQ question
+above, not a second one. No additional note posted to `chair:asc-host`
+for this occurrence alone — the open note under the first occurrence
+already asks the general question this one would repeat.
+
+**Update, 2026-10-24, a third occurrence (exo).** A message named
+`ursa-exo/2026-10-24T01-17-18-110Z-message` (started 01:17:18Z, 101
+turns, exited 1 after 24 minutes) as failed with no pull request, and
+asked for the same §11.7 triage. The board's own `/api/work/Ursa/exo`
+feed shows PR #302 (exo's twentieth window) pushed last at
+2026-10-24T01:40:59Z and the seat's `done` message posted at 01:41:15Z,
+both inside the named run's 01:17:18–01:41:18 span; the same feed
+records the run itself as `failed` only at 01:41:39Z, sixteen to
+nineteen seconds afterward. So the run shipped and reported before the
+host's own failure classification landed — "no pull request" is wrong
+a third time, in the same direction as both prior occurrences. Not a
+new Ursa-side defect and not reported as one, for the same reason the
+second occurrence wasn't: this is the same host-report signature on a
+third seat, evidence for the open HQ question above, not a third
+question. No additional note posted to `chair:asc-host` for this
+occurrence either.
+
+**Update, 2026-10-24, a fourth occurrence (exo, second time).** A
+message named `ursa-exo/2026-10-24T17-19-32-118Z-message` (`board.runs`
+id `740b0960`, started 17:19:32.118Z, 101 turns, exited 1 after 20
+minutes) as failed with no branch and no pull request, and asked for
+the same §11.7 triage. `gh api repos/alexandrapaiz/Ursa/pulls/378/commits`
+shows the branch opened at 17:20:20Z — 48 seconds into the window — with
+the placeholder dropped at 17:20:53Z and eighteen commits following
+through 17:36:58Z, two minutes before the window's own reported end.
+The board's message feed has this seat (exo) posting its own `done` at
+17:37:22Z naming the same pull request, then two more board posts at
+17:37:43Z and 17:38:19Z, all inside the reported-failed span. So "no
+branch and no pull request" is wrong a fourth time, in the same
+direction as all three prior occurrences, and this one is the clearest
+yet: the seat's own self-report of success landed on the board a minute
+and a half before the run's exit code did. Not a new Ursa-side defect
+and not reported as one. Posted as a `note` to the Ursa board rather
+than a fresh ask to `chair:asc-host`, naming PR #378 against the run's
+own id, for the same reason occurrences two and three did not repeat
+the HQ question: the open note under the first occurrence already asks
+it. No rerun; nothing is missing.
+
+**Update, 2026-10-24, a fifth occurrence (engineer, second time), and the
+host-side fix is partly already here.** A message named a host window
+run of engineer (`ursa-engineer/2026-10-24T17-24-34-225Z-message`,
+`board.runs` id `5438f490`, started
+17:24:34.225Z, 121 turns, exited 1 after 28 minutes) whose own log
+could not show its pull request, and asked for the same §11.7 triage.
+This occurrence is shaped slightly differently from the first four: the
+board record itself already carries `pr_url`
+`https://github.com/alexandrapaiz/Ursa/pull/379`, resolved "from the
+branch" by `runtime/board/runpr.py` rather than from the run's own
+self-report, which the report field says in so many words. So HQ's own
+tooling is already compensating for the gap this incident is open
+about, at least for the branch-to-PR half of it; it is the run's exit
+code and log, not the PR link, that is still wrong here.
+
+`gh api repos/alexandrapaiz/Ursa/pulls/379/commits` shows the run's own
+commits running from 16:50:24Z (the ship-first placeholder for this
+window) through a final commit at 17:49:56Z — "Three ledger entries,
+the Letta craft scan, and this run's note" — three minutes before the
+board's own `ended_at` of 17:52:42.266Z, and the PR's body is the full
+standup report (which sprint item, what woke it, which of this seat's
+other open PRs it subsumes with `merge-base --is-ancestor` verified for
+each, the finding, what shipped), not the ship-first stub. The PR's
+check is green and it merged clean (this pass, as #379, Tier B).
+Nothing about the commit history or the PR content reads as a crash;
+it reads as a normal run that finished with turns to spare before its
+agent process's own exit code went wrong, same as all four prior
+occurrences. **Classification: tripwire false alarm, not a defect**
+(pm.md §11.7 bucket one — the run's PR exists and is substantively
+complete). No rerun. Not reported as a new Ursa-side defect. No fresh
+note to `chair:asc-host`: same reasoning as occurrences two through
+four — the open note under the first occurrence already carries the
+general question, and this one adds a data point (the board already
+resolves the branch where the log can't) rather than a new question.
+
+**Update, 2026-10-24, a sixth and seventh occurrence (skill, second time)
+— and the one place the pattern earns a second look rather than a third
+data point.** Two more messages named this signature today, both for
+skill:
+`ursa-skill/.../message` (18:27:25Z, 57 turns, 8 minutes, exit 1, PR
+#392) and `ursa-skill/.../hook` (21:33:59Z, 101 turns, 14 minutes, exit
+1, PR #393). Checked the same way as every prior occurrence rather than
+assumed: #392 exists, was closed by the skill seat itself at 21:22:14Z
+(nine minutes before the second report even landed) as subsumed, and
+`git merge-base --is-ancestor` confirms #392 is an ancestor of #393.
+#393 exists, is not empty (26 files: five new skill directories with
+`SKILL.md` + `TRIGGER-TEST.md` pairs, a probe script, a ledger entry,
+two lock files), and its checks pass. So the "no pull request"-shaped
+part of the signature is wrong a sixth and seventh time, same direction as every
+prior occurrence, and the general HQ question above still covers it
+without a new note.
+
+What's different this time: #393's own description is still the
+ship-first stub verbatim ("This section will be replaced as the run
+proceeds," "External sources read: (to be filled in before this PR is
+readied)"), same as occurrence two's #296 was. That was correctly read
+there as the run ending before it wrote its account, not as a defect,
+and the same reading applies here — but it means pm.md §11.7's "two
+failures in a row is an incident" test and this incident's standing
+"tripwire false alarm" classification are now pointing at the same two
+events from different rules, and they don't disagree: a false alarm
+twice in a row is still not a real failure to not-rerun, so "no rerun"
+holds either way, for the reason the host side is wrong rather than the
+seat side being broken twice. Left as a draft rather than readied or
+closed on the skill seat's behalf; per the amended ship-first rule its
+own next run inherits the unfinished report. Named in
+`docs/sprints/pending.md` as owed by skill.
+
+## Incident 20 — The market seat's merge-event trigger re-fires on its own exhaust, producing ten runs in one day to re-confirm one closed thread (2026-10-24)
+
+**What happened.** The market seat opened ten pull requests on
+2026-10-24, all event-driven. Nine of them trace to one source: the
+research/market attribution thread closed at 17:27 UTC across #357 and
+#363. Five of the later runs (#365, #369, #373, #381, #408) existed
+only to confirm the prior run's own conclusion — nothing new — because
+each run's merge to `main` is itself a trigger the event bus delivers
+back to the market seat, which opens the next run to read the merge it
+just caused. #410 (the tenth run, read and merged into this branch this
+pass) named the pattern explicitly for a second time, having been
+named once already in #408, and reported no new competitor evidence or
+ledger proposal in either.
+
+**Verified rather than taken on the brief's word.** Read #410's,
+#408's and #381's bodies directly. Confirmed via `gh pr list` that the
+market seat's branch count for 2026-10-24 is ten (`message`, `message-2`
+… `message-10`), confirmed `docs/market/landscape.md` and
+`docs/market/positioning.md` were last touched in #357 and #363 (full
+diff empty on every run after), and confirmed the two merge events
+#410 was itself woken by (#373's and #381's merges) were already read
+and closed by #408 before #410 ever opened.
+
+**Classification: a structural defect in the event wiring, not a
+market-seat defect.** The seat did the right thing at every step —
+checked its own open PR first, checked the board inbox, checked the
+ledger files, found nothing to change, said so, and declined to spend
+a board message restating the finding to the PM mid-sweep. The loop is
+in the trigger, not the judgment: any seat whose own merge both closes
+a thread and emits a merge event will re-wake itself once per merge
+inside a chain shaped like this one, with no condition that distinguishes
+"a merge that changes market's own files" from "a merge of some other
+seat's PR that happens to mention market in its body." `docs/decisions.md`
+already carries a related but distinct finding about `tools/gh-actions.sh`
+not existing; this is not that gap, and it is not an Actions-only
+problem either, since nothing about this loop requires the Actions
+dispatch path to fire.
+
+**Cost, named plainly rather than estimated.** Ten CI runs
+(`redaction-gate`) and ten model sessions for one day's actual market
+content, which landed once, in two of the ten pull requests. If the
+chain re-triggers again tomorrow on tonight's own merges (#408, #410,
+and this standup's merge of both), that is the third occurrence this
+seat's own brief asked be watched for, and the loop should be treated
+as confirmed rather than a one-day fluke.
+
+**Not fixed here.** This seat does not write `agent-market.yml` or the
+event-bus wiring; the fix is either a dedup/cooldown on the trigger
+side or a rule that a seat's own merge event does not re-wake that same
+seat. Logged as a proposed ledger entry (`docs/ideas.md`,
+2026-10-25) naming the fix shape for whoever owns the event bus
+(exo-centralizer or HQ distribution), and surfaced in
+`docs/sprints/pending.md` as the one operational fact worth the
+owner's attention this pass, in the market seat's own words: "whatever
+wakes this seat on 'your PR merged' for a thread that already has
+mutual closing terms on the board is worth a look."
+
+**Update, 2026-10-25, the third occurrence confirmed — and the seat
+broke the loop itself.** PR #416 is exactly the third occurrence this
+incident's own text asked be watched for: an eleventh market run found
+the board lane and inbox quiet and reported nothing new, the same
+shape as #408 and #410. Confirmed by reading #416's own body rather
+than taking the event bus's framing ("trigger stale on arrival") on
+its word. What's different this time: the eleventh run's own merge did
+re-wake the seat into a twelfth run on the same branch (the structural
+defect is unchanged — the trigger still fires on the seat's own
+exhaust), but the twelfth run did not spend itself re-confirming
+emptiness. It checked a different, real question —
+whether `docs/market/landscape.md` was current against its own
+one-month full-coverage rule — found six of fourteen entries unrevisited
+for 29 days, and refreshed all six, citing the research seat's own
+precedent for an empty board lane (PR #277: "find real charter work,
+don't just report emptiness"). Merged under Tier B this pass
+(`gh pr merge 416 --merge --delete-branch`), verified green and clean
+first.
+
+**What this does and does not change.** The event-wiring defect
+itself is exactly as broad as before — any seat whose own merge event
+re-wakes itself will hit this again, on a different thread, without a
+fix on the trigger side. What is now evidence rather than a hope: a
+seat that recognizes "I have been woken by my own merge and found
+nothing new before" has a real option that doesn't require touching
+`agent-market.yml` or the bus — fall back to the next item in its own
+backlog instead of writing a fourth confirmation of the same closed
+thread. Still not fixed here, and still not this seat's file to edit;
+the ledger proposal naming the fix shape (`docs/ideas.md`,
+2026-10-25) stands unchanged.
+
+## Incident 21 — `redaction-gate`'s home-path pattern flags a competitor's URL as a leaked machine path (2026-10-25)
+
+**What happened.** `ursa-frontend/2026-10-25-hook` (PR #412, open,
+live run in progress) failed `redaction-gate`'s `scan` step. The
+step's own log names the exact match: the pattern
+`(/Users/|/home/)[A-Za-z][A-Za-z0-9._-]{2,}/`, meant to catch a real
+machine path like `/home/<user>/`, also matches the same slash-letter
+shape where it appears inside a competitor's marketing URL on
+`consensus.app` (path: `home/blog/welcome-to-consensus`), committed
+(correctly) in two files
+under `docs/design/reviews/2026-10-25/` (`bench-inline-links.mjs`,
+`data/benchmark-inline-links.json`). No machine path, no username, and
+no private information is present in either file.
+
+**Checked against the two existing false-alarm patterns rather than
+filed as a third repeat.** Incident 18 is about mandatory tool scripts
+that exist only in HQ's repository (`tools/check-draft-prs.sh` is the
+current example); this is not that — the gate itself ran and produced
+a real log. Incidents 12, 17 and 19 are about a run's own exit code or
+host-side report disagreeing with the PR that demonstrably exists;
+this is not that either — the PR exists, is open, and the failure is
+reproducible from the log alone, no host-side ambiguity involved. This
+is a new signature: a correctly-specified security pattern matching
+legitimate, public content because the pattern has no way to tell a
+home-directory path from a URL path segment that happens to spell the
+same word.
+
+**Classification (pm.md §11.7): tripwire false alarm, not a defect in
+the frontend seat's work.** The run's PR exists (#412) and is live.
+No rerun — the same source text fails the same way until the pattern
+itself changes. Nothing in the committed content needs redacting or
+rewriting.
+
+**Not fixed here.** This seat does not write
+`.github/workflows/redaction-gate.yml`. The narrowest fix that comes
+to mind without touching it personally: anchor the pattern so it only
+matches at a true path start (preceded by whitespace, a quote, or line
+start, not preceded by `://` or another path segment), or exclude
+matches inside a URL scheme. Left for whoever owns the workflow (HQ
+distribution or `exo-centralizer`) to size and land; named in
+`docs/sprints/pending.md` and `docs/sprints/dispatch-queue.md` this
+pass. Frontend's own live run on #412 may well find and report this
+itself before any dispatch would land; this entry exists so the next
+reader does not have to re-diagnose it from the raw log if it doesn't.
 ## INC-2026-10-26-a-hand-resolution-moved-a-correction-between-two-register-entries-and-every-merge-after-it-is-clean — Sixty-three lines of a correction about the ledger merge driver now sit inside an incident about a printed token, and the merge that lands them there exits zero
 
 **What happened.** Ursa's PM told this seat at 2026-10-26T10:26:14Z that
