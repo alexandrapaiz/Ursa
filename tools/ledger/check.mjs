@@ -29,6 +29,7 @@ import {
   presentIdeaFields,
   statusOf,
 } from './block-kinds.mjs';
+import { verdict } from './contract-verdict.mjs';
 
 const path = process.argv[2] ?? 'docs/ideas.md';
 const source = readFileSync(path, 'utf8');
@@ -258,19 +259,13 @@ const byOwner = violations.filter((v) => v.held === 'owner');
 for (const v of bySeat) console.error(`::error::${v.rule}: ${v.message}`);
 for (const v of byOwner) console.error(`::warning::${v.rule}: ${v.message}`);
 
-const counted = `${blocks.length} blocks in ${path}`;
-if (bySeat.length > 0) {
-  console.error(
-    `Ledger contract: ${bySeat.length} violation(s) a seat must repair, ` +
-      `${byOwner.length} the owner must resolve, in ${counted}.`,
-  );
-  process.exit(1);
-}
-if (byOwner.length > 0) {
-  console.error(
-    `Ledger contract: ${counted}, clean as far as a seat can take it. ` +
-      `${byOwner.length} violation(s) above need the owner, not a seat. Exit 2.`,
-  );
-  process.exit(2);
-}
-console.log(`Ledger contract: ${counted}, clean.`);
+// The verdict is derived from the same two arrays the annotations above came
+// from, in ./contract-verdict.mjs, so it cannot contradict them. Extracted
+// 2026-10-26 with every output string byte-identical; see that file's header.
+// Note the exit: this gate used to fall off the end of the file on the clean
+// path, so node exited 0 implicitly and no `process.exit` existed for a sweep
+// of exit calls to find. It is explicit now.
+const v = verdict(violations, { blocks: blocks.length, path });
+(v.stream === 'err' ? console.error : console.log)(v.line);
+for (const extra of v.trailer) (v.stream === 'err' ? console.error : console.log)(extra);
+process.exit(v.exitCode);

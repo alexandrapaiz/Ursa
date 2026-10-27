@@ -33,9 +33,22 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { launch } from './lib/browser.mjs'
 import { freezeContext } from './lib/freeze.mjs'
+import { drive as drivePanelPayload } from './state/panel-payload.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const BASE = arg('base', 'http://127.0.0.1:4488')
+// The overlay is a second product on a second port, and until 2026-10-27
+// this file had no way to name it, so every hover rule in
+// `ursa-major/overlay/` was outside the only instrument that checks
+// hover rules. A target declares `app: 'overlay'` and is resolved
+// against this. Absent, those targets are reported as unreached rather
+// than skipped, because a target that vanishes when you forget a flag
+// is the same silence this file was written to end.
+const OVERLAY = arg('overlay-base', null)
+// The port `ursa serve` holds for the dashboard's store. Written into
+// the target's path rather than into the tool, for L34: on a host twenty
+// seats share, a port is an address and not an identity.
+const STORE = arg('store', null)
 const OUT = arg('out', '/tmp/states')
 const ONLY = arg('only', null)
 const PAD = Number(arg('pad', 10))
@@ -75,6 +88,35 @@ const TARGETS = [
   { label: 'sp-verbatim',        path: '/record/mini-fixture',  sel: '.sp-survived_verbatim' },
   { label: 'sp-mutated',         path: '/record/mini-fixture',  sel: '.sp-survived_mutated' },
   { label: 'sp-ngp',             path: '/record/mini-fixture',  sel: '.sp-no_generation_provenance' },
+
+  // Every hover rule in `ursa-major/overlay/`, added 2026-10-27. There
+  // are exactly three of them, from
+  //   grep -n ':hover' app/globals.css app/dashboard/dashboard.css
+  // and before this run none was in this list, so the 2026-10-26d run's
+  // hover on the panel's two controls and the 2026-10-26e run's reading
+  // of `.dash-action` were both verified by pointing a scrubber at a
+  // selector by hand. Which works, does not scale, and means a hover on
+  // this product could be deleted with no instrument noticing. Kept
+  // enumerated here for the same reason the eleven above are: a rule
+  // that stops matching anything is the finding.
+  {
+    label: 'panel-run-overlay', app: 'overlay', path: '/', sel: '.panel-run',
+    until: '.panel-action', drive: (page) => drivePanelPayload(page),
+  },
+  {
+    // `misread?`. Drawn only when the payload carries a verdict with a
+    // quote, which is why `state-panel-unlocked.mjs` could not reach it
+    // and this target uses the payload module instead.
+    label: 'panel-action-overlay', app: 'overlay', path: '/', sel: '.panel-action',
+    until: '.panel-action', drive: (page) => drivePanelPayload(page),
+  },
+  {
+    // The dashboard's `forget this` / `withdraw this` control. Its path
+    // carries the store port, so this target is reached only when the
+    // caller passes `--store`.
+    label: 'dash-action-overlay', app: 'overlay', path: '/dashboard', sel: '.dash-action',
+    store: true, until: '.dash-bar',
+  },
 ]
 
 // The properties any hover rule in this stylesheet touches, plus the ones a
@@ -129,11 +171,28 @@ lines.push('')
 
 for (const t of TARGETS) {
   if (ONLY && t.label !== ONLY) continue
+
+  // Resolve the target's own origin. A target this run cannot reach is
+  // printed with the flag that would have reached it, never dropped:
+  // the whole point of an enumerated list is that an absence shows.
+  const origin = t.app === 'overlay' ? OVERLAY : BASE
+  if (!origin) {
+    lines.push(`${t.label.padEnd(20)} ${'NOT-REACHED'.padEnd(22)} ${t.sel} needs --overlay-base, so nothing here is known about it`)
+    rows.push({ ...t, verdict: 'not-reached', reason: 'no --overlay-base' })
+    continue
+  }
+  if (t.store && !STORE) {
+    lines.push(`${t.label.padEnd(20)} ${'NOT-REACHED'.padEnd(22)} ${t.sel} needs --store <port>, so nothing here is known about it`)
+    rows.push({ ...t, verdict: 'not-reached', reason: 'no --store' })
+    continue
+  }
+  const url = `${origin}${t.path}${t.store ? `?port=${STORE}` : ''}`
+
   const ctx = await browser.newContext({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1, reducedMotion: 'no-preference' })
   await freezeContext(ctx)
   const page = await ctx.newPage()
-  await page.goto(`${BASE}${t.path}`, { waitUntil: 'networkidle' })
-  if (t.drive) await t.drive(page, BASE)
+  await page.goto(url, { waitUntil: 'networkidle' })
+  if (t.drive) await t.drive(page, origin)
 
   // A page that fetches its own data is a race against a fixed settle, and
   // the kit has lost that race twice before. A target on such a page
@@ -159,8 +218,8 @@ for (const t of TARGETS) {
     const note = gate === 'timeout'
       ? `gate ${t.until} never appeared, so nothing here is known about ${t.sel}`
       : gate === 'none'
-        ? `${t.sel} matches nothing on ${t.path}, and this target declares no content gate, so this may be a race rather than a finding`
-        : `${t.sel} matches nothing on ${t.path} after ${t.until} appeared, so the rule is dead`
+        ? `${t.sel} matches nothing on ${url}, and this target declares no content gate, so this may be a race rather than a finding`
+        : `${t.sel} matches nothing on ${url} after ${t.until} appeared, so the rule is dead`
     lines.push(`${t.label.padEnd(20)} ${why.padEnd(22)} ${note}`)
     rows.push({ ...t, verdict: why.toLowerCase(), count: 0, gate })
     await ctx.close()
@@ -221,7 +280,7 @@ for (const t of TARGETS) {
     : meta.disabled ? 'by-design-disabled'
     : 'NO-CHANGE'
 
-  lines.push(`${t.label.padEnd(20)} ${verdict.padEnd(22)} ${t.sel} on ${t.path}  (${count} match${count === 1 ? '' : 'es'}, ${meta.tag}${meta.disabled ? ', disabled' : ''}, box ${Math.round(box.width)}x${Math.round(box.height)})`)
+  lines.push(`${t.label.padEnd(20)} ${verdict.padEnd(22)} ${t.sel} on ${url}  (${count} match${count === 1 ? '' : 'es'}, ${meta.tag}${meta.disabled ? ', disabled' : ''}, box ${Math.round(box.width)}x${Math.round(box.height)})`)
   for (const d of deltas) lines.push(`${' '.repeat(22)}${d}`)
   rows.push({ ...t, verdict, count, meta, deltas, clip, gate })
 

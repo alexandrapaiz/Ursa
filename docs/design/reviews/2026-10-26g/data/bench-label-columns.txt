@@ -1,0 +1,24 @@
+viewport 390x844, one load per site, read-only
+
+  site                       lists  column  ragged  discarded  label-above  not-stacked
+  linear.app                    0       0       0          0         12          0   (nothing measured)
+  vercel.com                    0       0       0          0          1          0   (nothing measured)
+  docs.stripe.com               3       0       2          1          0          0
+  elicit.com                    0       0       0          0          2          0   (nothing measured)
+  www.anthropic.com             1       0       0          1          0          0   (nothing measured)
+
+`column` is a list whose rows share one left edge for the text beside
+the label. `ragged` is a list where that edge moves. `discarded` is a
+list whose labels are all the same width, where the two are
+indistinguishable; L23 says a zero denominator reads exactly like a
+pass, so it is printed rather than folded in.
+
+`label-above` is a candidate list rejected because its short first
+element sits over the body text rather than beside it, and
+`not-stacked` one rejected because its rows are not a single column.
+Those two are why `lists` is small, and they are the answer this trip
+actually returned.
+
+  docs.stripe.com — ragged lists, worst first:
+    DIV.⚙  as-82 as-12 as-83 ⚙1ijl6dh  4 rows, 3 edges, spread 110px
+    DIV.⚙  as-82 as-12 as-83 ⚙1ijl6dh  3 rows, 2 edges, spread 9px

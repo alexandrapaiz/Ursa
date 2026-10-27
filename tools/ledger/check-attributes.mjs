@@ -45,6 +45,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
+import { verdict, COMMITTED, CLONE } from './attributes-verdict.mjs';
 
 const args = process.argv.slice(2);
 const checkClone = args.includes('--clone');
@@ -90,25 +91,36 @@ function declarations() {
   return found;
 }
 
-/** @type {string[]} */
+/** Every finding, classified by WHERE ITS REPAIR LIVES rather than only by
+ *  what is wrong. `committed` means a tracked file is wrong, so every checkout
+ *  of this commit has the defect and the repair is a pull request. `clone`
+ *  means nothing committed is wrong and this one working copy is not set up,
+ *  so the repair is one command and produces no diff. The final verdict is
+ *  derived from these two counts and cannot disagree with the lines above it;
+ *  see tools/ledger/attributes-verdict.mjs for what calling both of them
+ *  "violation(s)" at exit 1 cost on 2026-10-26.
+ *  @type {import('./attributes-verdict.mjs').Violation[]} */
 const violations = [];
 const declared = declarations();
 
 for (const { path, driver } of declared) {
   if (Object.hasOwn(refused, driver)) {
-    violations.push(
-      `${path} declares merge=${driver}, which this repository refuses by name. ${refused[driver]}`,
-    );
+    violations.push({
+      locus: COMMITTED,
+      message: `${path} declares merge=${driver}, which this repository refuses by name. ${refused[driver]}`,
+    });
     continue;
   }
   if (builtins.has(driver)) continue;
   const entry = known[driver];
   if (!entry) {
-    violations.push(
-      `${path} declares merge=${driver}, and no script in this repository registers a driver by that name. ` +
+    violations.push({
+      locus: COMMITTED,
+      message:
+        `${path} declares merge=${driver}, and no script in this repository registers a driver by that name. ` +
         `Add it to tools/ledger/drivers.json with the installer that defines it, or remove the attribute: ` +
         `a name nothing registers is the default line merge wearing a convention's clothes.`,
-    );
+    });
     continue;
   }
   if (checkClone) {
@@ -119,11 +131,15 @@ for (const { path, driver } of declared) {
       configured = '';
     }
     if (!configured) {
-      violations.push(
-        `${path} declares merge=${driver} and this clone has no ${entry.config_key}, ` +
+      violations.push({
+        locus: CLONE,
+        message:
+          `${path} declares merge=${driver} and this clone has no ${entry.config_key}, ` +
           `so git will fall back to the default line merge and say nothing about it. ` +
-          `Run: bash ${entry.installer}`,
-      );
+          `Run: bash ${entry.installer}` +
+          `. If you have just run that installer, then it did not register this driver and the ` +
+          `defect is in the installer rather than in your clone.`,
+      });
     }
   }
 }
@@ -133,7 +149,10 @@ for (const [driver, entry] of Object.entries(known)) {
   if (!entry.table) continue;
   const tablePath = join(repo, entry.table.path);
   if (!existsSync(tablePath)) {
-    violations.push(`driver ${driver} names the table ${entry.table.path}, which does not exist.`);
+    violations.push({
+      locus: COMMITTED,
+      message: `driver ${driver} names the table ${entry.table.path}, which does not exist.`,
+    });
     continue;
   }
   const table = JSON.parse(readFileSync(tablePath, 'utf8'));
@@ -143,34 +162,44 @@ for (const [driver, entry] of Object.entries(known)) {
   const attributed = new Set(declared.filter((d) => d.driver === driver).map((d) => d.path));
   for (const path of attributed) {
     if (!enabled.has(path)) {
-      violations.push(
-        `${path} is declared merge=${driver} but ${entry.table.path} does not enable it, ` +
+      violations.push({
+        locus: COMMITTED,
+        message:
+          `${path} is declared merge=${driver} but ${entry.table.path} does not enable it, ` +
           `so the driver refuses the path by name at merge time and git records a conflict instead.`,
-      );
+      });
     }
   }
   for (const path of enabled) {
     if (!attributed.has(path)) {
-      violations.push(
-        `${entry.table.path} enables ${path} but no .gitattributes line sends it to merge=${driver}, ` +
+      violations.push({
+        locus: COMMITTED,
+        message:
+          `${entry.table.path} enables ${path} but no .gitattributes line sends it to merge=${driver}, ` +
           `so the driver is never called for it and the table's promise is not kept.`,
-      );
+      });
     }
   }
 }
 
-if (violations.length === 0) {
-  const names = [...new Set(declared.map((d) => d.driver))].sort();
-  console.log(
-    `Merge attributes: ${declared.length} declaration(s) over ${names.length} driver(s) ` +
-      `(${names.join(', ') || 'none'})${checkClone ? ', all registered in this clone' : ''}.`,
-  );
+const names = [...new Set(declared.map((d) => d.driver))].sort();
+const result = verdict(violations, {
+  declared: declared.length,
+  drivers: names,
+  checkedClone: checkClone,
+});
+
+if (result.exitCode === 0) {
+  console.log(result.line);
   for (const { path, driver } of declared) console.log(`  ${path} -> ${driver}`);
   process.exit(0);
 }
 
-for (const v of violations) console.error(`::error::${v}`);
-console.error(
-  `Merge attributes: ${violations.length} violation(s)${checkClone ? ' (--clone)' : ''}.`,
-);
-process.exit(1);
+// A clone that is merely unregistered is not an error in anything committed,
+// so it is annotated as a warning. `::error::` in a tracked file's check is
+// what a reviewer treats as a defect in the branch.
+for (const v of violations) {
+  console.error(`::${v.locus === CLONE ? 'warning' : 'error'}::${v.message}`);
+}
+console.error(result.line);
+process.exit(result.exitCode);

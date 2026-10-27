@@ -165,7 +165,24 @@
    (`data/crop-phone-after.png`, first pass). So the tag is an inline
    lead-in there and a column only where there is width to spend on one.
    Same markup either way. */
+/* Below 640 this was `margin-right` and nothing else, so the statement
+   began wherever the tag happened to end and the list had a ragged left
+   edge: PREFER is 45.89px and AVOID is 34.69px in this type, measured in
+   `reviews/2026-10-26g/data/tag-column-before.txt`, so `Never introduce`
+   started 11.2px left of its four neighbours. Visible at 320 in
+   `crops/units-320-before.png`, and invisible to six reviews because the
+   dashboard had never been photographed with a unit in it.
+
+   The wide layout below already decided this should be a column. This is
+   that decision carried down, at the narrow layout's own cost: `4.5em` of
+   the tag's own type is the widest tag it can draw plus a hair, which is
+   L9's rule rather than a pixel somebody picked, and it is 46.8px against
+   4.2rem's 67.2px because a 320px line cannot spend a wide gutter. The
+   tags stay left-aligned here, unlike the wide layout, so both edges of
+   the column are straight; right-aligning in a narrow box would trade a
+   ragged statement edge for a ragged tag edge. */
 .dash-statement > .dash-tag {
+  flex: 0 0 4.5em;
   margin-right: 0.15rem;
   line-height: 1.9;
 }
@@ -201,9 +218,19 @@
 
 /* A tension gets one vertical hairline in --polar, which is the only
    emphasis this palette can spend. No amber, because there is no amber. */
+/* The three declarations are meant to cancel: pull the row a gutter to
+   the left, draw the rule there, and put the content back where every
+   other row's content is. They did not cancel. -1rem + 0.9rem + 1px is
+   -0.6px, so a row in tension sat 0.6px left of the rest of the list at
+   every width, which `data/tag-column-before.txt` shows as two statement
+   left edges where there should be one.
+
+   Nobody can see 0.6px and this is not reported as something a reader
+   noticed. It is changed because the arithmetic was written to come to
+   zero and came to -0.6, and saying so costs one `calc`. */
 .dash-tension {
   border-left: 1px solid var(--polar);
-  padding-left: 0.9rem;
+  padding-left: calc(1rem - 1px);
   margin-left: -1rem;
 }
 

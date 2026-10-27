@@ -193,12 +193,31 @@ export default function Overlay() {
                 statement's own second line: the left column reads as two
                 labels where there is one
                 (`reviews/2026-10-26d/crops/label-wrap-320-before.png`).
-                `minWidth: 34` is a floor and not a ceiling, so the column
-                still grows to fit and nothing else moves. Only `rule ×N`
-                is wide enough to have ever wrapped; `case` and `tension`
-                are one word each. */}
+
+                That run also wrote `minWidth: 34` and this note beside
+                it: "a floor and not a ceiling, so the column still grows
+                to fit and nothing else moves." The first half is true and
+                the second is not, and it took a payload to see it, since
+                this list is empty without one and no review had ever put
+                one here. `minWidth` floors the used width; it does not
+                stop flex from shrinking the item down to it. These spans
+                are `nowrap`, so at 320 the glyphs leave the box and eat
+                the 8px gap to the polarity sign — measured at
+                `data/tuning-gap-before.txt`, where `tension` is drawn in
+                a 34px box twice and a 41px box once, in the same list.
+                Each row shrinks by its own amount because flex
+                distributes shrink in proportion to base size and the
+                statement beside it differs per row, so the column's right
+                edge was ragged as well as overrun.
+
+                `7ch` is the same floor said in the type's own unit, which
+                is L9. This face advances 6px per character at 10px, so
+                `case` (24px), `tension` and `rule ×2`…`rule ×9` (42px
+                each) all fit one column, and `rule ×10` and above still
+                grow it, as before. `flexShrink: 0` is the actual repair:
+                a label column that gives way is not a column. */}
             <span className="mono" style={{
-              fontSize: 10, minWidth: 34, textAlign: 'right', whiteSpace: 'nowrap',
+              fontSize: 10, minWidth: '7ch', flexShrink: 0, textAlign: 'right', whiteSpace: 'nowrap',
               color: t.tension ? 'var(--tension)' : t.evidenceCount > 1 ? 'var(--accent)' : 'var(--dim)',
             }}>
               {t.tension ? 'tension' : t.evidenceCount > 1 ? `rule ×${t.evidenceCount}` : 'case'}

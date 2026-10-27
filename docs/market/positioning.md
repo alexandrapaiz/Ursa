@@ -749,6 +749,40 @@ bar they need or whether the brief should wait for a cheaper sweep
 method (ledger proposal below) to widen the sample before citing the
 number.
 
+## The one name closest to "real deliverable" in the mapped 42 still builds a constructed digital twin (2026-10-26, 31st message run)
+
+Swept rl-list.com's full listing text for all 42 names in one pass
+(the ledger proposal the entry above pointed to), instead of
+continuing to spot-check vendor pages one at a time. One name reads
+differently from the other 41: Idler (YC S25, $9M seed, Paradigm-led,
+launched August 2026) describes its environments as "built from real
+production work," specifically a decade of an actual multi-brand
+retailer's real operational data (ShelfLife) and a real law firm's
+anonymized records (CorpLaw). That is a more specific real-sourcing
+claim than any of the six names already examined made.
+
+It still does not clear CLAUDE.md §1's bar. Idler's own term for
+ShelfLife is "a digital twin," a constructed reproduction seeded with
+that data, and the grading question ("can an agent execute with
+appropriate judgment and precision" in a simulated leadership role) is
+an authored evaluation, not a real outcome the business's own work was
+judged against after the fact. Idler also names no lab customer by
+name, the same unverified self-claim pattern as the rest. Tally: 7 of
+42 individually examined (6 direct spot-checks across the 29th and
+30th runs, plus Idler via this run's sweep), 7 of 7 authored-not-real,
+and the sweep of the other 35 names' own listed language in the same
+pass surfaced nothing closer.
+
+The positioning consequence: the verifier-gap sentence in a lab brief
+can now cite full-directory coverage rather than a 14% sample, and it
+reads sharper for naming a near-miss than it would from clean
+negatives alone. "Even the vendor whose own marketing leans hardest on
+real operational history still builds a simulation, not a deliverable"
+is a stronger sentence than "nobody in this market does this," because
+it shows the line held against the hardest case the market offers
+rather than one nobody tested. No pricing recommendation made; this is
+evidence for the verifier-gap claim's wording, not a price decision.
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
@@ -927,6 +961,14 @@ number.
   bringing the tally to 6 of 42 checked and 6 of 6 authored. No pricing
   recommendation made; still too thin a sample (14%) to call the gap
   market-wide.
+- 2026-10-26 (event-driven, message, 31st run) — swept rl-list.com's
+  full listing for all 42 names in one pass. Found one name (Idler)
+  whose own marketing claims real-production-data sourcing closer to
+  CLAUDE.md §1's framing than any name checked so far, but its own
+  term for the result ("a digital twin") still names a constructed
+  simulation, not a real deliverable. Tally now 7 of 42 examined, 7 of
+  7 authored-not-real, full-directory coverage rather than a sample.
+  No pricing recommendation made.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 
@@ -1256,3 +1298,151 @@ against this comp: MemoryLake is evidence the market wants a neutral
 store, priced in the same $19-199/mo band Wire and MemoryLake both
 now occupy, not evidence any named product currently delivers
 verified neutrality. No pricing recommendation made.
+
+## Users resist automatic memory itself, not just its visibility — a distinct axis from the transparency gap already closed (2026-10-27, message run)
+
+This run's demand-signals ceremony read the discussion under "Switch to
+Claude without starting over" (Hacker News, ~592 points / 273 comments,
+covering Anthropic's cross-vendor memory-import launch this file already
+maps in docs/market/landscape.md). The thread is seven months old and
+found this run rather than new this week, but the finding survives that:
+it is the first time this file has read past a launch's own coverage to
+the discussion under it, and several of the most-upvoted comments
+converge independently on the same complaint. The top comment argues
+custom instructions and Skills handle preferences better than automatic,
+accumulating memory; one commenter calls seeing their own inferred
+profile "spelt out... icky" even though they'd accepted the same
+inference passively before seeing it stated; another reports Claude
+surfacing an unrelated months-old detail unprompted and disabling memory
+outright afterward. The shared preference across these replies is a
+manually-scoped context (Projects, a custom-instructions file) over one
+the product writes to on its own.
+
+The 2026-09-30 entry above ("Portability over transparency") narrowed
+Major's Category 3 edge to portability after OpenAI shipped per-response
+visibility into inferred memory. This finding names a second axis that
+entry didn't cover, and the two should not be read as the same gap: not
+"can the user see what was inferred" but "did the user choose for
+inference to happen at all." CLAUDE.md's non-negotiable #2 ("the user
+can always see, edit, revoke, and delete") answers the first axis. It is
+silent on the second, which is what this thread's commenters are actually
+arguing about. Whether Major's own product makes inference opt-in per
+category, or opt-out by default with a strong edit/delete surface after
+the fact, is a product question this file cannot answer by reading a
+public page. The honest positioning note: against this specific, sourced
+complaint, "you can revoke and delete" is a weaker promise than "we
+asked before we inferred," and nothing in this file's own mapping of
+Major's non-negotiables currently distinguishes which of the two Major
+is. No pricing recommendation made. No new landscape.md entry: this is
+commentary under an already-mapped product, not a new competitor.
+
+Sources: [Hacker News: Switch to Claude without starting over](https://news.ycombinator.com/item?id=47204571).
+
+## "Opt-in" is not the same claim as "never monetizes the user" — Google's Personal Intelligence shows why consent alone is not the differentiator (2026-10-27, message run)
+
+The prior entry left an open question this file could not answer from
+outside: whether "opt-in per category" or "opt-out with strong
+edit/delete" is a real difference, or whether both end up equally
+defensible once a lab actually ships one. This run's landscape ceremony
+found a real product that ships the first, cleanly, and it answers the
+question in a way that cuts against treating opt-in as sufficient on
+its own.
+
+Google's Gemini Personal Intelligence (new landscape.md entry, this
+run) is opt-in: Personal Intelligence does not read Gmail or Photos
+until the user explicitly enables it, which is exactly the "we asked
+before we inferred" shape the prior entry's Hacker News commenters said
+they wanted. But on 2026-10-16 Google changed its privacy policy so
+that enabling Personal Intelligence also makes that same Gmail and
+Photos content eligible for ad personalization, a carve-out into
+language that previously excluded that content from targeting
+entirely. The opt-in consent and the monetization are gated by the
+same switch. A user who wants Gemini to know their inbox cannot get
+that without also opting their inbox into ads.
+
+This means "did you ask before you inferred" is not, by itself, the
+axis Ursa Major should rest its pitch on. Google can satisfy that
+exact bar — explicit, per-feature, off-by-default consent — while
+still tying the consent to the lab's own revenue. The sharper claim,
+and the one CLAUDE.md's non-negotiable #1 already states but this
+file has not yet pointed at a concrete comparison for, is that Ursa
+Major's consent is never a gate to being monetized directly, full
+stop, not merely a gate the user had to actively open. Major's pitch
+should name this distinction specifically against Personal Intelligence
+rather than resting on "opt-in" as a word, because Google now owns that
+word too. No pricing change follows from this; it sharpens positioning
+language only. No ledger proposal: this is copy guidance for whoever
+owns Major's consent-architecture page, same owner as the prior entry,
+not a new product test to run.
+
+Sources: [9to5Google: Google will target ads based on Gmail, Photos
+data if Personal Intelligence is
+enabled](https://9to5google.com/2026/10/23/google-will-target-ads-based-on-gmail-photos-data-if-personal-intelligence-is-enabled/).
+
+## Even a genuine opt-in is not self-enforcing if the vendor's own pages disagree about what it does (2026-10-27, message, 3rd run)
+
+The prior two entries established that Google's Personal Intelligence
+is opt-in and that the opt-in gate doubles as an ad-targeting gate.
+This run's demand-signals ceremony found a sharper problem underneath
+both: Google's own public claims about the feature are not internally
+consistent. Android Police's launch review (2026-01-22, newly read
+this run) quotes Google's blog saying Gemini "doesn't train directly
+on your Gmail inbox or Google Photos library," then quotes Google's
+own support page for the same feature stating, twice, that connected
+data "is used to improve Google services, including training
+generative AI models." The same review found human review of this
+data is opt-out by default, not opt-in, the reverse of the feature's
+own headline framing.
+
+So what: "ask before you infer" is a necessary promise but not a
+sufficient one if the vendor's own documentation cannot agree on what
+inference, training, and review the consent actually covers. This adds
+a third, distinct requirement to the two already on record in this
+file (opt-in consent; consent never a gate to monetization): the public
+statement of what consent covers has to be the same statement
+everywhere a user would read it. This is a copy and documentation
+discipline question for whoever owns Major's consent-architecture
+pages, not a pricing decision, and not a new ledger action — the same
+owner as the two prior entries should read all three together. No
+pricing recommendation made. No new landscape.md entry: this updates
+the existing Gemini Personal Intelligence entry in Category 3.
+
+Sources: [Android Police: Google says Personal Intelligence is
+private, but the reality is a privacy
+disaster](https://www.androidpolice.com/googles-personal-intelligence-is-a-privacy-disaster/).
+
+## An eighth reward-model-unreliability source, and the first that is theoretical rather than empirical (2026-10-27, message, 3rd run)
+
+The seven sources already in this file's record (rlhfbook.com's
+pricing chapter aside) are all empirical: a benchmark score, a
+memorization study, a judge-fooling demonstration, an annotator
+choice-blindness result, a practitioner's own failure log. This run's
+landscape watch found a formal proof that argues the same conclusion
+from theory rather than measurement. [arXiv 2603.28063, "Reward
+Hacking as Equilibrium under Finite Evaluation"](https://arxiv.org/abs/2603.28063)
+(Wang and Huang, 2026-03-30; verified directly against arXiv's own API
+this run, not taken from a secondary summary) proves that under five
+minimal axioms, any optimized AI agent will systematically
+under-invest effort in quality dimensions its evaluation system does
+not cover, and that this "establishes reward hacking as a structural
+equilibrium, not a correctable bug," holding regardless of alignment
+method (RLHF, DPO, Constitutional AI, or others). The paper further
+argues evaluation coverage declines toward zero as agentic tool count
+grows, because quality dimensions expand combinatorially while
+evaluation cost grows at most linearly — so the gap this file has been
+building an empirical case for gets structurally worse, not better, as
+the field moves from single-turn chat to agentic systems.
+
+So what: this is the first source in the packet that does not just
+observe graders failing in specific instances, but argues they must
+fail, in the limit, for any evaluation system finite enough to build.
+That is a stronger claim than Minor's pitch needs to make itself, and
+citing a proof rather than another instance changes the shape of the
+KR4.1 lab brief's opening: the existing proposed ledger entry
+(docs/ideas.md, 2026-10-14, "Turn the reward-model-unreliability claim
+into a citable evidence packet") already covers this packet and is
+still unactioned, so this is a dated note added there rather than a
+new proposal. No pricing recommendation made.
+
+Sources: [arXiv 2603.28063: Reward Hacking as Equilibrium under Finite
+Evaluation](https://arxiv.org/abs/2603.28063).

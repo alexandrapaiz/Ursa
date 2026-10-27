@@ -1,0 +1,52 @@
+base http://127.0.0.1:4961  store 7842
+
+    320  tag font 10.4px  flex-basis 46.8px
+         prefer  tag   46.8w   statement starts at 77.98
+         avoid   tag   46.8w   statement starts at 77.98
+         prefer  tag   46.8w   statement starts at 77.98
+         prefer  tag   46.8w   statement starts at 77.98
+         prefer  tag   46.8w   statement starts at 77.98
+         prefer  tag   46.8w   statement starts at 77.98
+         prefer  tag   46.8w   statement starts at 77.98
+         prefer  tag   46.8w   statement starts at 77.98
+         natural: PREFER 45.89px, AVOID 34.69px, difference 11.20px
+         distinct statement left edges: 1 (77.98)  column
+
+    390  tag font 10.4px  flex-basis 46.8px
+         prefer  tag   46.8w   statement starts at 77.98
+         avoid   tag   46.8w   statement starts at 77.98
+         prefer  tag   46.8w   statement starts at 77.98
+         prefer  tag   46.8w   statement starts at 77.98
+         prefer  tag   46.8w   statement starts at 77.98
+         prefer  tag   46.8w   statement starts at 77.98
+         prefer  tag   46.8w   statement starts at 77.98
+         prefer  tag   46.8w   statement starts at 77.98
+         natural: PREFER 45.89px, AVOID 34.69px, difference 11.20px
+         distinct statement left edges: 1 (77.98)  column
+
+    640  tag font 10.4px  flex-basis 67.2px
+         prefer  tag  67.19w   statement starts at 107.98
+         avoid   tag  67.19w   statement starts at 107.98
+         prefer  tag  67.19w   statement starts at 107.98
+         prefer  tag  67.19w   statement starts at 107.98
+         prefer  tag  67.19w   statement starts at 107.98
+         prefer  tag  67.19w   statement starts at 107.98
+         prefer  tag  67.19w   statement starts at 107.98
+         prefer  tag  67.19w   statement starts at 107.98
+         natural: PREFER 45.89px, AVOID 34.69px, difference 11.20px
+         distinct statement left edges: 1 (107.98)  column
+
+   1440  tag font 10.4px  flex-basis 67.2px
+         prefer  tag  67.19w   statement starts at 475.98
+         avoid   tag  67.19w   statement starts at 475.98
+         prefer  tag  67.19w   statement starts at 475.98
+         prefer  tag  67.19w   statement starts at 475.98
+         prefer  tag  67.19w   statement starts at 475.98
+         prefer  tag  67.19w   statement starts at 475.98
+         prefer  tag  67.19w   statement starts at 475.98
+         prefer  tag  67.19w   statement starts at 475.98
+         natural: PREFER 45.89px, AVOID 34.69px, difference 11.20px
+         distinct statement left edges: 1 (475.98)  column
+
+One distinct left edge is a column. More than one is a list of
+statements whose left edge moves with the length of the word beside it.

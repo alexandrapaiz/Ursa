@@ -172,7 +172,7 @@ test('the poster refuses locally and never reaches the network', () => {
 });
 
 test('--dry-run prints the request and elides the token', () => {
-  const r = run(POST, '--dry-run', '--kind', 'note', '--to-seat', 'pm', '--to-company', 'Ursa',
+  const r = run(POST, '--dry-run', '--seat', 'engineer', '--kind', 'note', '--to-seat', 'pm', '--to-company', 'Ursa',
     '--subject', 'A subject', '--body', 'A body long enough to pass, because it gives a reason.');
   assert.equal(r.code, 0);
   assert.match(r.out, /Bearer <BOARD_RUNTIME_TOKEN>/);
@@ -180,10 +180,31 @@ test('--dry-run prints the request and elides the token', () => {
 });
 
 test('the sender company is checked by the same table as the recipient', () => {
-  const r = run(POST, '--dry-run', '--company', 'ursa', '--kind', 'note', '--to-company', 'Ursa',
+  const r = run(POST, '--dry-run', '--seat', 'engineer', '--company', 'ursa', '--kind', 'note', '--to-company', 'Ursa',
     '--to-seat', 'pm', '--subject', 'A subject', '--body', 'A body long enough to pass, because it gives a reason.');
   assert.equal(r.code, 1);
   assert.match(r.err, /SENDER_COMPANY_SPELLING/);
+});
+
+// The sender half, through the CLI, because `--seat` became required on
+// 2026-10-27 and the two cases above had to grow it. A test that only
+// asserted the old pass would have been quietly satisfied by the default that
+// was the defect.
+test('the poster refuses an unnamed sender rather than defaulting it to a seat name', () => {
+  const r = run(POST, '--dry-run', '--kind', 'note', '--to-seat', 'pm', '--to-company', 'Ursa',
+    '--subject', 'A subject', '--body', 'A body long enough to pass, because it gives a reason.');
+  assert.equal(r.code, 1);
+  assert.match(r.err, /SENDER_SEAT_UNNAMED/);
+  // Nothing of the payload is printed, so a reader cannot mistake the refusal
+  // for a dry run that went through.
+  assert.doesNotMatch(r.out, /Checked clean/);
+});
+
+test('the receipt names the sender, which is the field the old one left out', () => {
+  const r = run(POST, '--dry-run', '--seat', 'security', '--kind', 'note', '--to-seat', 'pm',
+    '--to-company', 'Ursa', '--subject', 'A subject', '--body', 'A body long enough to pass, because it gives a reason.');
+  assert.equal(r.code, 0);
+  assert.match(r.out, /would say it came from Ursa\/security/);
 });
 
 // --- transcribed: the constants against the store they came from ---------
