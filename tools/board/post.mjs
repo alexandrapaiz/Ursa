@@ -38,7 +38,7 @@ import { LOCUS, renderVerdict } from '../gates/verdict-shape.mjs';
 // Every line this file prints as a verdict is built in ./post-verdict.mjs and
 // printed here, so the sentence and the exit code come out of one function and
 // cannot disagree. Extracted 2026-10-26 with every output string
-// byte-identical; `docs/design/verdict-enumeration.md` §11 has the
+// byte-identical; `docs/design/verdict-enumeration.md` §10 has the
 // before-and-after diff for all ten branches, and that file's header says why
 // this gate and not another one.
 const say = (v) => {

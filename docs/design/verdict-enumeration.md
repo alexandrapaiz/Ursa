@@ -7,9 +7,17 @@ the inventory of gate verdicts a program's output, so the class can be
 re-measured instead of re-argued.
 
 **Scope, stated before anything else.** This is the ledger entry's declared
-**first step** and not the whole idea. Four gates of fourteen candidates are
-extracted. The remaining ten are listed by `--census` on every run and are
-reported as "not yet", never as failures. The split is in §8.
+**first step** and the one slice after it, not the whole idea. **Five** gates
+of fourteen candidates are extracted. The remaining nine are listed by
+`--census` on every run and are reported as "not yet", never as failures. The
+split is in §8.
+
+**Second slice, added the same day (2026-10-26, the re-fired slot).** The first
+four gates were ledger and secret checks, three of them already correct, picked
+so the shape was proved on working code. The fifth is `tools/board/post.mjs`,
+picked for the opposite reason: it is the file the **cause** half of the defect
+class was found in. §10 is that extraction, what it cost the shape, and the
+twelve-invocation differential that proves no output string changed. It is §10.
 
 ---
 
@@ -45,11 +53,15 @@ extracted here, and the same branch's repair made it wronger:
 | `tools/ledger/check.mjs` | 2 | **3** | The clean branch had no `process.exit` at all. The script fell off the end of the file and node exited 0 implicitly, so an inventory of exit calls could not see that branch even in principle. |
 | `tools/secret-scan.mjs` | 1 | **3** | Its exit 1 is `process.exit(result.ok ? 0 : 1)`, a computed argument that matches no `[1-9]` literal, and its exit 2 lives in a `fail()` helper called from one site. |
 | `tools/ledger/check-attributes.mjs` | 1 after repair, 2 before | **3** | The repair replaced two literal exits with `process.exit(result.exitCode)`, so the grep that found the defect began under-reporting the repaired gate. |
-| **Total** | **6** | **13** | |
+| `tools/board/post.mjs` | not in §4's table at all | **10** | Three separate reasons, in one file. Its success line has two forms, because the `, id <8 chars>` clause is printed only when the board's response parses as JSON and carries an id, and that branch has no `process.exit` at all: the module falls off its end and node exits 0 implicitly. Its one `process.exit(2)` covers the four conditions `tools/board/live-target.mjs` distinguishes. Its `--dry-run` branch exits through `process.exit(0)`, which the pattern `[1-9]` cannot match. |
+| **Total** | **6** (10 counting post.mjs's four) | **23** | |
 
 So the table was not merely point-in-time, which is `docs/standards/lessons.md`
 L-A33. It was incorrect on the day it was written, and its method degrades as
-the defect is repaired, which is the worst available direction.
+the defect is repaired, which is the worst available direction. The fifth row
+is the strongest case: a text sweep sees four failing exit calls in
+`post.mjs`, the enumerator drives ten named causes, and the three it cannot
+see are unreachable to a text search in principle rather than by accident.
 
 **The generalisation, and where it came from.** `docs/design/verdict-lines.md`
 §4 already records that its sweep was keyed on the failing exit branch rather
@@ -93,6 +105,23 @@ or a literal format, not a verb.
         │ stdout/stderr text lines + process exit status (0 | 1 | 2)
         ▼
     the reader, and GitHub Actions log annotations (`::error::`, `::warning::`)
+
+┌────────────────────────────────┐
+│ tools/board/post-verdict.mjs   │   (the fifth extraction, §11)
+│ verdict(), unreachable(), GATE │
+└────────────────────────────────┘
+        │ Verdict                      ▲ {code, line, repair} | null
+        ▼                              │ (liveTargetFault)
+┌────────────────────────────────┐   ┌──────────────────────────────┐
+│ tools/board/post.mjs (the CLI) │──▶│ tools/board/live-target.mjs  │
+│ say() -> renderVerdict()       │   │ liveTargetFault({apiUrl,     │
+│                                │   │   token})                    │
+└────────────────────────────────┘   └──────────────────────────────┘
+        │ stdout/stderr text lines + process exit status (0 | 1 | 2 | 3)
+        │ and, on the exit-0 path only, an HTTP POST of
+        │ application/json to ${BOARD_API_URL}/api/messages
+        ▼
+    the reader, and the company board's message store
 
         ┌──────────────────────────────────────────────────────────────┐
         │ tools/gates/enumerate-verdicts.mjs                           │
@@ -149,7 +178,7 @@ type Locus = 'reader' | 'committed' | 'clone' | 'seat' | 'owner'
 type Position = 'before' | 'after'
 
 interface Verdict {
-  exitCode: 0 | 1 | 2
+  exitCode: 0 | 1 | 2 | 3   // 3 added 2026-10-26 with post.mjs; see §10
   stream: 'out' | 'err'
   line: string           // the one sentence a reader quotes
   position: Position     // where `line` sits relative to the per-finding lines
@@ -157,6 +186,11 @@ interface Verdict {
   derivedFrom: 'findings' | 'ground'
   cause: string          // the single named condition this branch is for
   cites: Locus[]         // the loci whose counts `line` may quote
+  quoted: string[]       // substrings of `line` taken verbatim from an
+                         // observed input, not computed from findings: an
+                         // HTTP status, a response body, a record id.
+                         // Integers inside one of these are exempt from
+                         // COUNTS_DERIVED, and nothing else is.
 }
 
 interface GateSpec<F = unknown> {
@@ -173,6 +207,42 @@ declare function verdictOf(
 ): Verdict
 declare function renderVerdict(v: Verdict, findingLines?: string[]): string[]
 declare function describeGate<F>(spec: GateSpec<F>): GateSpec<F>  // throws if malformed
+```
+
+```ts
+// tools/board/post-verdict.mjs
+
+interface PostFinding {
+  locus: 'reader' | 'committed'
+  scope: 'message' | 'sender' | 'store'   // which check produced it
+  code?: string                           // the violation code, for its own line
+  line?: string                           // what is wrong, in words
+  repair?: string                         // what the reader does about it
+  status?: number                         // `store` only: the HTTP status
+  body?: string                           // `store` only: the response body
+}
+
+interface PostSeen {
+  dryRun?: boolean
+  kind?: string        // the message kind, for the success line
+  toCompany?: string   // falls back to '(all companies)' in the line
+  toSeat?: string      // falls back to '(everyone)' in the line
+  id?: string          // the row id the board returned, truncated to 8 chars
+}
+
+declare function verdict(findings: PostFinding[], seen: PostSeen): Verdict
+declare function unreachable(
+  fault: { code: string; line: string; repair: string },  // one liveTargetFault
+): Verdict                                                // derivedFrom: 'ground'
+```
+
+```ts
+// tools/board/live-target.mjs, pre-existing, consumed by the above
+declare function liveTargetFault(env: { apiUrl?: string; token?: string }):
+  | null
+  | { code: 'BOARD_ENV_ABSENT' | 'BOARD_URL_ABSENT'
+          | 'BOARD_URL_SCHEMELESS' | 'BOARD_TOKEN_ABSENT'
+      line: string; repair: string }
 ```
 
 ```ts
@@ -252,7 +322,7 @@ code path the committed gates take. The first draft of that suite
 re-implemented them, which would have proved the checks fire in a copy while
 the program's own copy drifted green.
 
-## 5. The five properties, and what each would catch
+## 5. The six properties, and what each would catch
 
 Each is checked per driven probe, or per gate where noted. `rule` is the string
 the enumerator prints in its `::error::` annotation.
@@ -263,7 +333,8 @@ the enumerator prints in its `::error::` annotation.
 | `EXIT_0_WHEN_CLEAN` | exit status is 0 exactly when the findings array is empty | A gate reporting a defect as clean, or going red with nothing to show. |
 | `ACTOR_UNMEASURABLE` | every finding carries a locus, by `locus`, `held`, or the gate's `findingsLocus` | A finding the actor check **cannot see**. Reported, never passed over: a check whose blind spot looks like a pass is this whole document's subject. |
 | `MIXED_LOCI_NAMED` | when findings span two or more loci, the verdict text names each one, matched against that locus's declared `noun` pattern | The actor form of §1 exactly. `Merge attributes: 3 violation(s).` fires this twice, once per unnamed locus. |
-| `COUNTS_DERIVED` | every integer in `line` is a locus count, the findings total, the exit code, or a number in `seen` | A count independent of the findings — the same defect arriving as arithmetic rather than as a missing noun. |
+| `COUNTS_DERIVED` | every integer in `line` is a locus count, the findings total, the exit code, a number in `seen`, or an integer inside a string the gate declared in `Verdict.quoted` | A count independent of the findings — the same defect arriving as arithmetic rather than as a missing noun. |
+| `QUOTED_IS_QUOTED` | every string in `Verdict.quoted` really appears in `line` or `trailer` | An exemption with nothing behind it: a gate buying silence for an invented count by declaring a quotation it never prints. Added with the fifth gate; §10.3 says why the exemption had to exist at all. |
 | `ONE_CAUSE_PER_OUTCOME` (per gate) | no two causes render to an identical exit code and line; no one cause exits two ways | A cause name that does not identify its condition, which makes the other four checks meaningless. |
 
 **Why the checks read `line` and `trailer` together.** A gate is allowed to name
@@ -272,7 +343,7 @@ gate in `tools/gates/enumerate-verdicts.test.mjs`, and it is **not** a property
 of `tools/secret-scan.mjs`: every hit in one `secret-scan` invocation shares one
 locus, so `MIXED_LOCI_NAMED` cannot fire on that gate at all.
 
-**What these five do not check**, stated here because the first draft of
+**What these six do not check**, stated here because the first draft of
 `closures-verdict.mjs` failed on exactly this: whether a gate's *partition
 logic* places findings correctly. All probes supply a locus, so an unkeyed
 finding never reaches the enumerator. The latent defect in §7 was caught by a
@@ -289,12 +360,16 @@ tools/
   gates/
     verdict-shape.mjs              the Verdict and GateSpec contract
     enumerate-verdicts.mjs         the enumerator, and its own verdict
-    enumerate-verdicts.test.mjs    15 cases, incl. the pre-repair regression
+    enumerate-verdicts.test.mjs    18 cases, incl. the pre-repair regression
   ledger/
     closures-verdict.mjs           + closures-verdict.test.mjs    (6 cases)
     contract-verdict.mjs           + contract-verdict.test.mjs    (6 cases)
     attributes-verdict.mjs         + attributes-verdict.test.mjs  (pre-existing)
   secret-scan-verdict.mjs          + secret-scan-verdict.test.mjs (9 cases)
+  board/
+    post-verdict.mjs               + post-verdict.test.mjs        (17 cases)
+    post.mjs                       the CLI, now printing through say()
+    live-target.mjs                the four unreachable-board conditions
 docs/design/
   verdict-lines.md                 the defect class and the two hand repairs
   verdict-enumeration.md           this document
@@ -436,12 +511,17 @@ $ node tools/gates/enumerate-verdicts.mjs --census
 # census, verdict.
 $ node tools/gates/enumerate-verdicts.mjs --json
 
-# The suites. 21 cases over the three new verdict modules, 15 over the
-# enumerator. 36 new cases in total.
+# The suites. 21 cases over the three ledger and secret verdict modules, 17
+# over post-verdict.mjs, 18 over the enumerator. 56 new cases in total.
 $ node --test tools/ledger/closures-verdict.test.mjs \
                tools/ledger/contract-verdict.test.mjs \
                tools/secret-scan-verdict.test.mjs
+$ node --test tools/board/post-verdict.test.mjs
 $ node --test tools/gates/enumerate-verdicts.test.mjs
+
+# The neighbouring suites, for regressions in the files post.mjs imports.
+$ node --test tools/board/check.test.mjs tools/board/live-target.test.mjs
+# -> 70 pass, 0 fail (with the ledger and secret suites above)
 
 # Proof that the checks can fail rather than merely passing four gates. Disable
 # two checks and two cases go red; restore and they pass.
@@ -483,6 +563,65 @@ $ node tools/secret-scan.mjs
 $ node scripts/redaction-check.mjs
 ```
 
+### The fifth gate's differential, which needs a board to answer
+
+`post.mjs` reaches three of its ten branches only against a live HTTP endpoint,
+so the differential runs them against a stub on loopback rather than against the
+company board. Posting eleven test messages to the real board to prove a
+refactor changed nothing would be eleven rows on the bus that nobody asked for.
+
+```bash
+# The stub. One status and one body per mode, nothing else.
+$ cat > /tmp/stub-board.mjs <<'STUB'
+import { createServer } from 'node:http'
+const mode = process.argv[2]
+const bodies = {
+  refuse: [422, '{"error":"a message needs a subject"}'],
+  accept: [201, '{"id":"0123456789abcdef0123456789abcdef"}'],
+  prose:  [201, 'ok, stored'],
+}
+const [status, body] = bodies[mode]
+createServer((req, res) => { res.writeHead(status, {'content-type':'application/json'}); res.end(body) })
+  .listen(Number(process.argv[3]), '127.0.0.1')
+STUB
+
+# The old code to compare against, materialised from the parent commit.
+$ git worktree add /tmp/before HEAD
+
+# One branch, both sides, bytes and status compared. `env -u` is load-bearing:
+# the seat runtime exports BOARD_API_URL and BOARD_RUNTIME_TOKEN, so without
+# it the four ground branches cannot be reached at all.
+$ node /tmp/stub-board.mjs refuse 18311 &
+$ for side in /tmp/before /tmp/epito-ursa-engineer-izUBi5; do
+    (cd $side && env -u BOARD_API_URL -u BOARD_RUNTIME_TOKEN \
+        BOARD_API_URL=http://127.0.0.1:18311 BOARD_RUNTIME_TOKEN=t \
+        node tools/board/post.mjs --kind note --to-seat pm --to-company Ursa \
+          --subject "a message that passes the local checks" \
+          --body-file /tmp/msg.md > $side.out 2> $side.err; echo "rc=$?" >> $side.err)
+  done
+$ diff /tmp/before.err /tmp/epito-ursa-engineer-izUBi5.err && echo IDENTICAL
+
+# The real stderr of that branch, exit 3, verbatim:
+The board refused it with 422: {"error":"a message needs a subject"}
+  This checker passed a message the store rejected, which means a rule here is
+  out of date. Transcribe the failing rule from runtime/board/store.py into
+  tools/board/check.mjs so the next seat is told locally instead of by the board.
+
+# The branch the repair of 2026-10-26 exists for, exit 2, verbatim. The
+# variable IS set, and the sentence says so instead of asking for it again.
+$ env -u BOARD_API_URL BOARD_API_URL=board.example/api BOARD_RUNTIME_TOKEN=t \
+    node tools/board/post.mjs --kind note --to-seat pm --to-company Ursa \
+      --subject "a message that passes the local checks" --body-file /tmp/msg.md
+BOARD_URL_SCHEMELESS: BOARD_API_URL is set to "board.example/api", which carries no http:// or https:// scheme, so fetch cannot use it. It is set; it is not usable.
+  repair: set BOARD_API_URL to a full origin such as https://board.example/ — this is the runtime handing over a value, not a message this seat can edit
+  Nothing was sent, and nothing about the message itself is wrong.
+
+# Proof the new exemption is load-bearing rather than decorative: strip the
+# `quoted` declarations from post-verdict.mjs and the enumerator goes red on
+# five branches, naming the 422 and the four digits of the truncated id.
+$ node tools/gates/enumerate-verdicts.mjs   # -> rc 1, 5 COUNTS_DERIVED findings
+```
+
 ## 9. Tooling list, with versions and the alternative rejected for each
 
 | Tool | Version here | Its job in this system | Chosen over, and why |
@@ -492,8 +631,115 @@ $ node scripts/redaction-check.mjs
 | `node:assert` (strict) | bundled | Literal-equality assertions over whole output lines. `assert.deepEqual` over `renderVerdict`'s array pins the five-line `secret-scan` rendering. | A snapshot library. A snapshot that regenerates on demand is how a reworded verdict line passes silently, which is the failure this whole branch is about. |
 | Git | 2.43.0 | `git ls-files tools scripts` enumerates census candidates; `git show HEAD:<path>` reads committed source so an uncommitted edit cannot change the census; `git worktree add` materialises the parent commit for the differential check. | Reading the working tree with `node:fs`. The census would then describe uncommitted local edits, so two seats on the same commit could get different censuses. |
 | `node:child_process` `execFileSync` | bundled | Invokes `git`, and runs the enumerator as a subprocess in its own end-to-end tests. `execFileSync` takes an argument array. | `exec`/`execSync`, which take a shell string and would make a repository path containing a space or a quote into a shell-injection surface. |
+| `node:http` `createServer` | bundled with Node v22.23.2 | The 40-line stub board in §8 that answers 422, 201-with-id and 201-with-prose, so `post.mjs`'s exit-3 and two exit-0 live branches can be driven in the differential. | Three alternatives, all rejected. Posting to the real company board would put eleven test rows on a bus five seats read. `nock` or `msw` would be a new dependency, and `scripts/dep-floor.mjs` exists to police exactly that. Monkey-patching `globalThis.fetch` would test a patched `post.mjs` rather than the one that ships, and `post.mjs` awaits its `fetch` at module scope, which is why `live-target.mjs` was split out in the first place. |
+| `env -u` (coreutils 8.32) | system | Unsets `BOARD_API_URL` and `BOARD_RUNTIME_TOKEN` for one command, so the four unreachable-board branches are reachable inside a seat runtime that exports both. | `unset` in the calling shell, which would leak into every later command in the run, including the ones that legitimately need a live board. |
+| `diff` (diffutils 3.10) | system | Compares stdout, stderr and exit status between the two worktrees, byte for byte. | Comparing by eye, or asserting on a substring, which is how a trailing-whitespace or newline change passes a refactor that claims byte identity. |
 
-## 10. Terms used in this document
+## 10. The fifth gate: `tools/board/post.mjs`, and what extracting it cost
+
+### 10.1 Why this gate and not the next one in the census
+
+The first four extractions were chosen to be easy: three of them already
+derived their verdicts correctly, so a failure would have been a failure of the
+shape rather than of the gate. `post.mjs` is the opposite choice. It is the file
+the **cause** form of §1 was found in. Its live-target branch used to read:
+
+```js
+if (!url.startsWith('http') || !token) {
+  console.error('BOARD_API_URL and BOARD_RUNTIME_TOKEN must both be set, ...')
+```
+
+One named cause for a condition reachable three ways, and false for one of the
+three: with `BOARD_API_URL=board.example/api` the variable **is** set, and a
+seat told to set it goes looking in the wrong place. That was repaired by hand
+on 2026-10-26 into `tools/board/live-target.mjs`, which returns one of four
+named codes. Until this extraction, nothing could tell whether the repair
+stayed repaired. Now the four conditions are four rows of
+`enumerate-verdicts.mjs` output on every run, and
+`post-verdict.test.mjs` asserts that the schemeless sentence still contains
+"It is set; it is not usable." and still does not contain "must both be set".
+
+### 10.2 The ten branches, and which of them a text sweep can see
+
+| Cause | Exit | Stream | Derived from | Visible to `grep -c 'process.exit([1-9])'` |
+|---|---|---|---|---|
+| `MESSAGE_REFUSED_LOCALLY` — `check.mjs` found something wrong with the message, so nothing was sent | 1 | stderr | findings | yes, one of the four |
+| `SENDER_COMPANY_SPELLING` — the sender's own company is not a key the bus routes, which is how a row reaches a store and wakes nobody | 1 | stderr | findings | yes, one of the four |
+| `STORE_REFUSED_WHAT_CHECKER_PASSED` — the board rejected a message the local rules passed, so a rule in `tools/board/check.mjs` is out of date | 3 | stderr | findings | yes, one of the four |
+| `BOARD_ENV_ABSENT` — neither variable is set, so the run is not under the seat runtime | 2 | stderr | ground | collapsed: all four share one `process.exit(2)` |
+| `BOARD_URL_ABSENT` — the token is set and the url is not, so the token has no board to authenticate to | 2 | stderr | ground | collapsed |
+| `BOARD_URL_SCHEMELESS` — the url is set and carries no scheme, so `fetch` cannot use it; the repair is the runtime's, not the message's | 2 | stderr | ground | collapsed |
+| `BOARD_TOKEN_ABSENT` — the url is set and the token is not, so every post would be refused unauthenticated | 2 | stderr | ground | collapsed |
+| `CHECKED_CLEAN_DRY_RUN` — `--dry-run` found nothing wrong and names who would be woken | 0 | stdout | findings (empty) | no: `process.exit(0)` does not match `[1-9]` |
+| `POSTED` — the row exists and this line names its first eight characters | 0 | stdout | findings (empty) | no: this path has no `process.exit` at all |
+| `POSTED_ID_UNREADABLE` — the row exists and its id could not be read out of the response | 0 | stdout | findings (empty) | no, twice over: no exit call, and no clause of its own |
+
+Four exit calls, ten branches, and the three the sweep misses are the three a
+reader most needs named.
+
+### 10.3 What the extraction cost the Verdict shape, and why that is the point
+
+Two widenings, both of them things the first four gates could not have
+discovered. An extraction that cost nothing would have meant the sample was
+still too similar to itself.
+
+1. **`exitCode` is `0 | 1 | 2 | 3`.** `post.mjs` is the only gate in this
+   repository that emits 3, and 3 means something no other code here means:
+   the downstream store refused what this checker passed, so the defect is in
+   the checker. Four ledger and secret gates emit 0, 1 and 2 only, so the type
+   written for them was exactly as wide as its sample.
+2. **`quoted: string[]`, and the `QUOTED_IS_QUOTED` check that polices it.**
+   `COUNTS_DERIVED` reads every integer in a verdict line and demands the
+   findings support it. That is right for a count and wrong for a quotation.
+   `The board refused it with 422: {"error": ...}` and `Posted note to Ursa/pm,
+   id 01234567.` both carry integers that are facts about a response, so no
+   partition of the findings can produce them, and the honest line failed the
+   check. The exemption is deliberately narrow: the integer has to sit inside a
+   string the gate **declared**, the declared string has to actually appear in
+   the verdict, and a declaration that does not appear is a finding of its own.
+   Measured both directions — stripping the declarations turns five branches
+   red, and a synthetic gate that declares `'99 of the reader\'s files'` while
+   printing `99 problem(s) for the reader.` is caught.
+
+### 10.4 Behaviour this extraction did change, stated because "byte-identical" is a claim about output
+
+One thing is different and it is not an output string. The success path used to
+fall off the end of the module, so node exited 0 implicitly; it now ends in
+`process.exit(0)` through `say()`. The same change was made to
+`tools/ledger/check.mjs` in the first slice, for the same reason: a branch with
+no exit call cannot be found by any sweep of exit calls, and more importantly a
+reader cannot tell an intended success from a module that stopped early.
+
+The risk that buys is real and bounded. `process.exit` does not wait for an
+async write to drain, so a long line through a pipe can be truncated where the
+implicit exit would have flushed it. Measured rather than assumed: with stdout
+redirected to a file, the posted line arrives whole at 37 bytes and the
+`--dry-run` branch at 525 bytes, which is the largest thing this gate prints to
+stdout. The branch that prints the board's whole response body goes to stderr,
+which Node writes synchronously to a file or a pipe.
+
+### 10.5 Two defects found in `post.mjs` while extracting it, neither repaired here
+
+Both are recorded in `docs/ideas.md` rather than fixed, because fixing either
+one changes an output string and would have dissolved the differential evidence
+this slice rests on. Naming them here is the alternative to fixing them
+quietly.
+
+1. **A 2xx with an unreadable id is reported as a plain success.** `POSTED` and
+   `POSTED_ID_UNREADABLE` print `Posted note to Ursa/pm, id 01234567.` and
+   `Posted note to Ursa/pm.`, and the second says nothing about the id being
+   absent. A seat that wanted to quote the row in a follow-up cannot tell
+   whether the board gave no id or the line simply did not mention it. This is
+   the same shape as `check-closures.mjs`'s conditional owner clause, which is
+   how the branch was noticed.
+2. **`--dry-run` prints a request line that is not a request.** The url is
+   built from `BOARD_API_URL` before the live-target check runs, so a dry run
+   in a clone with no runtime prints `POST /api/messages`, then the payload,
+   then `Checked clean.` Verified by running it with both variables unset. The
+   verdict is about the message and is true; the line above it describes a post
+   to a path with no origin, which is the one thing a dry run exists to show.
+
+## 11. Terms used in this document
 
 No cell above is a bare noun; each term is defined here or in place.
 
@@ -511,4 +757,8 @@ No cell above is a bare noun; each term is defined here or in place.
 | **census** | The approximate list of files under `tools/` and `scripts/` that look like gates, and which of them are extracted. Approximate by design; §2 and the enumerator's header say why that asymmetry is sound. |
 | **latent defect** | A defect no committed input can currently reach, so it changes no output today and will change output the first time an input shape changes. |
 | **differential check** | Running the same command at two commits and diffing stdout, stderr and exit status, to prove a refactor changed no observable behaviour. |
+| **declared quotation** | A substring of a verdict line the gate lists in `Verdict.quoted` because it was observed rather than computed: an HTTP status the board answered with, a response body, a record id. Integers inside one are exempt from `COUNTS_DERIVED`; a declared quotation absent from the line is itself a finding. |
+| **exit 3** | This repository's code for "the downstream store refused what this checker passed", which is a defect in the checker rather than in the thing checked. Emitted by `tools/board/post.mjs` alone, and the reason `Verdict.exitCode` is no longer `0 | 1 | 2`. |
+| **stub board** | The `node:http` server in §8 that answers one fixed status and body on 127.0.0.1, standing in for the company board so the live branches can be driven without writing rows to a bus other seats read. |
+| **ground probe** | A `GateSpec.groundProbes` entry: a named call producing a ground verdict, declared separately from the findings probes so the exemption from the findings checks is visible in the spec rather than inferred from an empty array. |
 | **L-A33** | A lesson in `docs/standards/lessons.md`: a point-in-time inventory written into a document goes stale without announcing it. |
