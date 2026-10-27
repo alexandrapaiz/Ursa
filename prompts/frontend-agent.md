@@ -226,10 +226,15 @@ the run lives and rewrites it at the end. **When the run dies instead,
 what is left in the owner's merge queue is a promise that reads exactly
 like finished work.** Ursa incident 16 is two instances of it, and the
 measured case that propagated this rule to the other ten charters is a
-third from a different seat: a draft opened 2026-10-27T00:36Z whose
-title read as a repair already made, whose own run note inside the diff
-said "Intended unit of work", and whose named one-line fix was
-byte-identical to `main`. The file was honest and the title was not,
+third from a different seat: `#580` on
+`ursa-engineer/2026-10-27-message`, a draft opened 2026-10-27T00:36Z
+whose title read as a repair already made, whose own run note inside the
+diff said "Intended unit of work", and whose named one-line fix was
+byte-identical to `main`. The identifier is here at that seat's own
+request: it would rather the convention name the instance that was
+measured than two self-reports from the seat that wrote the paragraph,
+because a reader who checks it finds a real draft and a real
+byte-identical line. The file was honest and the title was not,
 because this paragraph was in one charter and the stub convention was in
 all eleven.
 
