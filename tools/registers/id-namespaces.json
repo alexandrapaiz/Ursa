@@ -25,7 +25,7 @@
       "register": "docs/decisions.md",
       "define": "^## (ADR-(\\d+)) \\u2014 (.+)$",
       "repair": "owner",
-      "why": "Architecture decisions, numbered in date order per the convention the file follows everywhere else. Cited by docs/agents/org-chart.md, docs/backlog.md, skills/running-an-outcome-record-trial/SKILL.md and three workflow files.",
+      "why": "Architecture decisions, numbered in date order per the convention the file follows everywhere else. Cited as a resolvable number by docs/agents/org-chart.md, docs/backlog.md, docs/decisions.md itself and skills/running-an-outcome-record-trial/SKILL.md. Eleven files under .github/workflows/ also cite ADR numbers and say they are in docs/decisions.md. Eleven distinct numbers appear there and ten of them resolve to nothing in this register (ADR-11, ADR-12, ADR-14, ADR-17, ADR-20, ADR-22, ADR-23, ADR-24, ADR-037, ADR-049, all of them HQ's numbering); only ADR-002 resolves. That is the security seat's PWC-9 and not this namespace's defect.",
       "burned": []
     },
     {
