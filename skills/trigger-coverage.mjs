@@ -64,7 +64,7 @@
 // states uniformly would be a second place for it to be wrong. If a skill ever
 // lands that genuinely has no boundary with another, that is the run that
 // should add the field, and this comment is the argument it has to beat.
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { unreadDirs, indexedRows } from './library-dirs.mjs'
 import { declaredRefs } from './citing-files.mjs'
@@ -630,6 +630,274 @@ export function specNeighbourDefects(specText, library) {
   return out
 }
 
+/**
+ * The `## <id>. <title>` sections of `prompts/skill-extract.md`, in file order,
+ * as `{ id, line, title, end, lines }`. `line` is 1-indexed and `lines` runs
+ * from the header to the line before the next header.
+ *
+ * File order and not identifier order, because this file is append-only prose:
+ * §5b sits before §6, and every section after §5c was appended in the order it
+ * was written. File order is therefore chronological, which is the order a
+ * reader of the amendments wants.
+ */
+export function specSections(specText) {
+  const lines = specText.split('\n')
+  const heads = []
+  lines.forEach((l, i) => {
+    const m = /^##\s+([0-9][0-9a-z]*)\.\s+(.+)$/.exec(l)
+    if (m) heads.push({ id: m[1], line: i + 1, title: m[2] })
+  })
+  return heads.map((h, k) => {
+    const end = k + 1 < heads.length ? heads[k + 1].line - 1 : lines.length
+    return { ...h, end, lines: lines.slice(h.line - 1, end) }
+  })
+}
+
+/** The non-blank runs of a section's lines, as `{ start, end }` indices into
+ *  it. Paragraph-wise and not line-wise, because the note a section opens with
+ *  wraps over four lines in §5aa and one in §5c, and a rule that only ever
+ *  looked at the first line of it would be right about §5c by luck. */
+function paragraphs(lines) {
+  const out = []
+  let i = 0
+  while (i < lines.length) {
+    if (lines[i].trim() === '') { i++; continue }
+    const start = i
+    while (i < lines.length && lines[i].trim() !== '') i++
+    out.push({ start, end: i - 1 })
+  }
+  return out
+}
+
+/** The section's own dated note, the `(Added …)` paragraph directly under its
+ *  header, or null. This is the only text an amendment claim is read out of. */
+function openingNote(sec) {
+  const paras = paragraphs(sec.lines)
+  const first = paras[1]
+  if (!first) return null
+  if (!/^\(Added\b/.test(sec.lines[first.start])) return null
+  return { ...first, text: sec.lines.slice(first.start, first.end + 1).join(' ') }
+}
+
+/** The generated back pointer, recognised by its opening words. A paragraph is
+ *  either this line or it is prose, and the two are never merged, which is what
+ *  makes the line safe to delete and rewrite. */
+const BACK_POINTER = /^\(Amended by /
+
+/**
+ * The clause a section's note uses to declare what it amends. One `amending`,
+ * then a list of `§<id>` optionally carrying `part <n>`, and it stops at the
+ * first thing that is not another reference.
+ *
+ * The stop matters. §5ad's note reads "amending §5aa part 4 and answering the
+ * remedy Ursa's exo seat proposed", and three lines later mentions §5aa again
+ * in a sentence that is not a claim about amendment. A pattern that ran to the
+ * end of the sentence read that second mention as a second edge and reported
+ * the same pair twice, which is how the first draft of this check behaved.
+ */
+const AMENDING = /\bamending\s+((?:§[0-9][0-9a-z]*(?:\s+part\s+\d+)?(?:\s*,\s*|\s+and\s+)?)+)/
+const ONE_REF = /§([0-9][0-9a-z]*)(?:\s+part\s+(\d+))?/g
+
+/**
+ * Every amendment this file declares, as `{ from, to, part, line }`, in file
+ * order of the amending section. `part` is the sub-part named in the clause or
+ * null, and it is carried through because §5aa amends part 3 of §5t and a
+ * reader of §5t needs to know which part is no longer current.
+ *
+ * WHY THIS EXISTS. §5ag measured that §5r's note said it amended §5e, that it
+ * did amend §5e 750 lines further down, and that §5e's worked example kept the
+ * counts the amendment superseded, for twenty-two days. A header that says it
+ * amends another section is a claim that the two agree, and until §5ah nothing
+ * checked it. The counts half of that defect was gradeable against a
+ * denominator and `specNeighbourDefects` grades it. This is the general case,
+ * which has no denominator: the claim is about two sections, so the only thing
+ * that can check it is the other section.
+ */
+export function amendmentEdges(specText) {
+  if (!specText) return []
+  const out = []
+  for (const sec of specSections(specText)) {
+    const note = openingNote(sec)
+    if (!note) continue
+    const m = AMENDING.exec(note.text)
+    if (!m) continue
+    const seen = new Set()
+    for (const r of m[1].matchAll(ONE_REF)) {
+      const to = r[1]
+      if (seen.has(to)) continue
+      seen.add(to)
+      out.push({ from: sec.id, to, part: r[2] ? `part ${r[2]}` : null, line: sec.line })
+    }
+  }
+  return out
+}
+
+/** The one sentence §N carries once some other section amends it. Short on
+ *  purpose: everything in it is derived, so there is nothing for a reader to
+ *  disagree with and nothing for a later run to have to preserve by hand. */
+export function backPointerLine(amenders) {
+  const refs = amenders.map((a) => `§${a.from}${a.part ? ` (${a.part})` : ''}`)
+  const list = refs.length === 1 ? refs[0]
+    : `${refs.slice(0, -1).join(', ')} and ${refs[refs.length - 1]}`
+  return `(Amended by ${list}. Generated line, per §5ah.)`
+}
+
+/** Wrapped to the width the rest of the file is written at, so the generated
+ *  paragraph reads as part of the document. Greedy and deterministic, because
+ *  the check compares normalized text and `--write` has to produce the same
+ *  bytes twice. */
+function wrap(text, width = 70) {
+  const out = []
+  let line = ''
+  for (const word of text.split(' ')) {
+    if (line && line.length + 1 + word.length > width) { out.push(line); line = word }
+    else line = line ? `${line} ${word}` : word
+  }
+  if (line) out.push(line)
+  return out
+}
+
+const normalize = (s) => s.replace(/\s+/g, ' ').trim()
+
+/** Where the back pointer belongs in a section: after its dated note when it
+ *  has one, and directly under the header when it does not. §5 has no note,
+ *  and §5 is the section §5c amends, so this is the live case and not a
+ *  hypothetical. */
+function anchorEnd(sec) {
+  const note = openingNote(sec)
+  return note ? note.end : 0
+}
+
+/**
+ * Every defect in the amendment graph, as `{ kind, from, to, line, detail }`.
+ *
+ * Five kinds, each a different piece of work:
+ *
+ * - `dangling` — the note names a section that is not in the file. Nothing can
+ *   be repaired in the amended section, because there is no amended section.
+ * - `self` — a section that declares it amends itself, which is a typo in the
+ *   identifier and would otherwise generate a back pointer to nowhere useful.
+ * - `missing` — §N is amended and carries no back pointer. Seven of the eight
+ *   edges were in this state when §5ah was written.
+ * - `stale` — §N carries a back pointer that disagrees with the graph, which is
+ *   what happens when a later section amends it and nobody reruns `--write`.
+ * - `misplaced` — the back pointer is in the section but not where a reader who
+ *   stops after the first paragraph will see it, which is the whole failure
+ *   this rule exists to stop.
+ * - `orphan` — a back pointer in a section no edge points at.
+ */
+export function amendmentDefects(specText) {
+  if (!specText) return []
+  const secs = specSections(specText)
+  const byId = new Map(secs.map((s) => [s.id, s]))
+  const edges = amendmentEdges(specText)
+  const amenders = new Map()
+  const out = []
+  for (const e of edges) {
+    if (e.to === e.from) { out.push({ kind: 'self', ...e, detail: `§${e.from} declares it amends itself` }); continue }
+    if (!byId.has(e.to)) { out.push({ kind: 'dangling', ...e, detail: `§${e.from} declares it amends §${e.to}, which is not a section of this file` }); continue }
+    if (!amenders.has(e.to)) amenders.set(e.to, [])
+    amenders.get(e.to).push(e)
+  }
+  for (const sec of secs) {
+    const mine = amenders.get(sec.id) ?? []
+    const paras = paragraphs(sec.lines)
+    const found = paras.filter((p) => BACK_POINTER.test(sec.lines[p.start]))
+    const want = mine.length ? backPointerLine(mine) : null
+    if (!want) {
+      for (const p of found)
+        out.push({ kind: 'orphan', from: null, to: sec.id, line: sec.line + p.start, part: null,
+          detail: `§${sec.id} carries a back pointer and no section declares it amends §${sec.id}` })
+      continue
+    }
+    if (!found.length) {
+      out.push({ kind: 'missing', from: mine.map((a) => a.from).join(', '), to: sec.id, line: sec.line, part: null,
+        detail: `§${sec.id} is amended by ${mine.map((a) => `§${a.from}`).join(' and ')} and says so nowhere` })
+      continue
+    }
+    if (found.length > 1) {
+      out.push({ kind: 'misplaced', from: null, to: sec.id, line: sec.line + found[1].start, part: null,
+        detail: `§${sec.id} carries ${found.length} back pointers, and only one of them can be the generated line` })
+      continue
+    }
+    const at = found[0]
+    const have = normalize(sec.lines.slice(at.start, at.end + 1).join(' '))
+    if (have !== normalize(want))
+      out.push({ kind: 'stale', from: mine.map((a) => a.from).join(', '), to: sec.id, line: sec.line + at.start, part: null,
+        detail: `§${sec.id} says "${have}", the graph says "${want}"` })
+    else if (at.start !== anchorEnd(sec) + 1)
+      out.push({ kind: 'misplaced', from: null, to: sec.id, line: sec.line + at.start, part: null,
+        detail: `§${sec.id}'s back pointer is its paragraph at line ${sec.line + at.start}, not the paragraph under its note` })
+  }
+  return out
+}
+
+/**
+ * `specText` with every back pointer regenerated from the graph, and the count
+ * of sections changed.
+ *
+ * Two passes rather than one, and each walks the sections backwards. Deleting
+ * first and recomputing the sections before inserting is what keeps the line
+ * numbers honest; doing both in one walk means every index after the first edit
+ * is off by the size of that edit. Backwards, because an edit low in the file
+ * cannot move a section above it.
+ */
+export function withBackPointers(specText) {
+  let lines = specText.split('\n')
+  for (const sec of [...specSections(lines.join('\n'))].reverse()) {
+    for (const p of paragraphs(sec.lines).filter((q) => BACK_POINTER.test(sec.lines[q.start])).reverse()) {
+      const from = sec.line - 1 + p.start
+      const to = sec.line - 1 + p.end
+      const blankBefore = from > sec.line - 1 && lines[from - 1].trim() === ''
+      lines.splice(blankBefore ? from - 1 : from, to - (blankBefore ? from - 1 : from) + 1)
+    }
+  }
+  const cleaned = lines.join('\n')
+  const edges = amendmentEdges(cleaned)
+  const secs = specSections(cleaned)
+  const byId = new Map(secs.map((s) => [s.id, s]))
+  const amenders = new Map()
+  for (const e of edges) {
+    if (e.to === e.from || !byId.has(e.to)) continue
+    if (!amenders.has(e.to)) amenders.set(e.to, [])
+    amenders.get(e.to).push(e)
+  }
+  lines = cleaned.split('\n')
+  let changed = 0
+  for (const sec of [...secs].reverse()) {
+    const mine = amenders.get(sec.id)
+    if (!mine) continue
+    const at = sec.line - 1 + anchorEnd(sec) + 1
+    lines.splice(at, 0, '', ...wrap(backPointerLine(mine)))
+    changed++
+  }
+  return { text: lines.join('\n'), changed }
+}
+
+/** Why an amendment back pointer is owed, and what to run. One condition, so
+ *  one explanation, per §5z. */
+export function explainAmendments(defects) {
+  if (!defects.length) return []
+  const lines = [
+    'A section note that says "amending §N" is a claim that this file and §N agree, and',
+    'it is the one cross-reference in this file that no reader can check cheaply,',
+    'because the amended section is hundreds of lines away and does not know it was',
+    'amended. §5e did not know for twenty-two days, and the worked example it kept was',
+    'read as current by every run in between. The repair is not prose in the amending',
+    'section. It is a generated line in the amended one, above the rule it supersedes,',
+    'so the section cannot be read without its amendments.',
+  ]
+  if (defects.some((d) => d.kind === 'missing' || d.kind === 'stale' || d.kind === 'misplaced'))
+    lines.push('Run `node skills/trigger-coverage.mjs --amendments --write` and commit the result.')
+  if (defects.some((d) => d.kind === 'dangling' || d.kind === 'self'))
+    lines.push('A dangling or self reference is a typo in the note and has to be fixed by hand;',
+      '`--write` leaves it alone rather than inventing a section to point at.')
+  if (defects.some((d) => d.kind === 'orphan'))
+    lines.push('An orphan is a back pointer left behind by a note that stopped claiming the',
+      'amendment. `--write` removes it.')
+  return lines
+}
+
 /** Why a spec neighbour count is wrong, and the one cause this guard knows.
  *  One condition, so one explanation, per §5z. */
 export function explainSpecNeighbours(defects) {
@@ -790,9 +1058,41 @@ export function explainShortfall({ gaps, missingTrigger }) {
   return lines
 }
 
+/** The amendment graph, printed, and optionally repaired. Its own mode because
+ *  it reads one file and needs no library at all, and because the ledger entry
+ *  that asked for it asked for the graph first: the number of unlinked
+ *  amendments is what decides whether the back pointer is generated or merely
+ *  required. It was zero of seven, so it is generated. */
+function amendmentsMode(write) {
+  let specText = null
+  try { specText = readFileSync(SPEC_PATH, 'utf8') } catch { specText = null }
+  if (specText === null) {
+    console.log(`${SPEC_REL} is not readable from this clone, so there is no graph to print`)
+    return 1
+  }
+  for (const e of amendmentEdges(specText))
+    console.log(`  §${e.from}:${e.line} amends §${e.to}${e.part ? ` ${e.part}` : ''}`)
+  if (write) {
+    const { text, changed } = withBackPointers(specText)
+    if (text !== specText) writeFileSync(SPEC_PATH, text)
+    console.log(`\n${changed} section${changed === 1 ? '' : 's'} carry a generated back pointer` +
+      `${text === specText ? ', unchanged' : ', written'}`)
+  }
+  const defects = amendmentDefects(specText)
+  for (const d of defects) console.log(`${SPEC_REL}:${d.line} ${d.kind}: ${d.detail}`)
+  if (!defects.length) {
+    console.log(`\nevery amended section names its amendments`)
+    return 0
+  }
+  console.log('')
+  for (const line of explainAmendments(defects)) console.log(line)
+  return 1
+}
+
 function main(argv) {
   const showPairs = argv.includes('--pairs')
   const check = argv.includes('--check')
+  if (argv.includes('--amendments')) return amendmentsMode(argv.includes('--write'))
   const library = readLibrary()
   const missingTrigger = library.filter((s) => s.trigger === null)
   // The other half of §2, which this tool reported for one file and dropped in
@@ -904,7 +1204,23 @@ function main(argv) {
   for (const d of specCounts)
     console.log(`${d.file}:${d.line} says "${d.quote}", the library says ${d.measured}`)
 
+  // The same file again, and the general case of the same defect. §5ag could
+  // grade a stale count because `neighbours` has a denominator. A note that
+  // claims it amends §N has none: the only thing that can check the claim is
+  // §N. So this is the one check in this guard whose subject is two sections of
+  // one prose file and not the library, and it is here rather than in a new
+  // script because nothing in this repository runs the guards for a seat, so a
+  // guard in a file no PR table lists is a guard nobody runs. See §5ah.
+  const amendments = amendmentDefects(specText)
+  for (const d of amendments) console.log(`${SPEC_REL}:${d.line} ${d.kind}: ${d.detail}`)
+
   const shape = missingSkill.length + mislabelled.length + indexedMissing.length + unlisted.length
+  if (amendments.length && !shape) {
+    console.log(`${amendments.length} amended section${amendments.length === 1 ? '' : 's'} in ` +
+      `${SPEC_REL} ${amendments.length === 1 ? 'does' : 'do'} not name ${amendments.length === 1 ? 'its' : 'their'} amendments, listed above.`)
+    for (const line of explainAmendments(amendments)) console.log(line)
+    return 1
+  }
   if (specCounts.length && !shape) {
     console.log(`${specCounts.length} neighbour count${specCounts.length === 1 ? '' : 's'} in ` +
       `${SPEC_REL} disagree${specCounts.length === 1 ? 's' : ''} with the library, listed above.`)
