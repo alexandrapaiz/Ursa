@@ -43,10 +43,20 @@ only covers the JSON will miss the others.
 4. Tuning derived from a record, because an axiom statement and its
    `firstEvidence.quote` are distilled from the session and can carry
    the session's words.
+5. A screenshot of any of the above. Added 2026-10-26 by the security
+   seat's twelfth run, which measured 1,175 committed image files in
+   this repository and no gate able to read any of them. A capture of
+   surface 2 is a capture of the prompt text surface 2 embeds, and the
+   pixels carry it exactly as the HTML did. Every capture committed so
+   far renders a fixture or the demo store, which was checked rather
+   than assumed, so this surface is named before it leaks and not
+   after.
 
 Redaction happens before a record enters any of these, not at the point
 of rendering. A viewer that redacts and a JSON file that does not has
-protected nothing, because both ship together.
+protected nothing, because both ship together. Surface 5 sharpens that
+sentence rather than adding to it: redacting at capture time is the same
+mistake, because the unredacted page had to exist to be photographed.
 
 ## 3. The classes
 
@@ -180,6 +190,18 @@ cannot write `.github/workflows/`. Class A has no automated check here
 and this file does not pretend to give it one. What it gives is the
 field list, so that a seat about to quote a record can see which fields
 are the dangerous ones without having to rediscover incident 2.
+
+A third weakness, found 2026-10-26 and queued as PWC-13: the gate runs
+`grep -rInE`, and `-I` means it skips every binary file, so none of the
+three patterns has ever been applied to surface 5. The metadata half of
+that is machine checkable and the fix is one flag, which is what PWC-13
+asks for. The rendered half is not checkable by anything, because a path
+or an identifier drawn into a screenshot is pixels. So the rule for
+surface 5 is a rule for people and not for a gate: **capture fixtures,
+never a real project's records.** If you need a capture of real data to
+make a point, the point can be made with the fixture, and if it genuinely
+cannot be, that is a decision for the owner rather than a judgement call
+at capture time.
 
 ## 8. Running the gate before you push, and confirming it ran
 

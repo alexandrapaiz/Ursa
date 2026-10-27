@@ -567,6 +567,64 @@ AI Training Data Products](https://www.afterquery.com/products),
 [Bespoke Labs](https://bespokelabs.ai/), [rl-list.com: Fleet AI vendor
 profile](https://www.rl-list.com/vendors/fleet-ai).
 
+**Update (2026-10-26, 31st run): a full-directory sweep of all 42
+names found one closer case than the six already checked —
+Idler — and it still reads as constructed, not real-deliverable.**
+Read rl-list.com's own listing text for every one of the 42 names in
+one pass (both the main vendor directory and the RL-environments-for-
+coding subpage), per the 30th run's ledger proposal, instead of
+continuing one-by-one spot-checks. One name's own language stands
+apart from the other 41: Idler (YC S25, $9M seed led by Paradigm,
+launched August 2026) describes its environments as built "from real
+production work." Its two named environments are specific: ShelfLife
+is "a digital twin seeded with the complete operational data of a
+live, profitable, growing multi-brand retailer running 9 stores, 3
+commerce platforms, and a multi-supplier sourcing operation," drawing
+"200 environments... from the company's operational data over the
+past decade"; CorpLaw is "built from a real law firm's anonymized
+data," with grading "grounded in the work the firm produced." That is
+a more specific real-sourcing claim than anything else in the
+directory — Fleet AI's "gyms" that "replicate" software, Bespoke
+Labs' "company-scale simulations," and Andromede's environments
+"programmatically generated... from real-world data" all name no
+specific real company as their substrate.
+
+It still does not cross the line CLAUDE.md §1 draws. Idler's own term
+for ShelfLife is "a digital twin": a constructed reproduction seeded
+with that company's historical data, not the company's live system or
+a real deliverable its own operators produced and judged after the
+fact. The task Idler grades against ("can you deploy an agent in a
+leadership role within this company, and trust it to execute with
+appropriate judgment and precision") is an authored evaluation
+question put to a simulation, not an outcome real work was put
+through. Idler also names no customer by name ("the world's leading
+frontier labs" use it, per its own site, none identified), the same
+unverified self-claim pattern every other checked name in this
+sub-category has. Tally: 7 of 42 now examined individually (6 by
+direct spot-check across the 29th and 30th runs, 1 by this run's
+sweep), 7 of 7 authored-not-real. The sweep of the other 35 names' own
+listed text in the same pass found no other candidate worth a closer
+look; most describe themselves plainly as "gyms," "simulations,"
+"sandboxes," or "digital twins" with no real-production-data claim at
+all.
+
+So what: this is the strongest evidence yet for the market-wide
+claim, covering the full named directory in one pass rather than a
+sample of it, and it still holds. It is also a sharper sentence for a
+lab brief than a clean sweep would have been: "even the one vendor in
+this mapped market whose own marketing leans hardest on real
+operational history still builds a constructed digital twin rather
+than ingesting the real deliverable, and grades agents against an
+authored judgment question rather than what the business's own work
+actually did with the output" tests the line against the market's
+hardest case instead of skipping past it. Positioning consequence in
+docs/market/positioning.md. Last observed 2026-10-26: [rl-list.com: RL
+Environment Vendors](https://www.rl-list.com/), [rl-list.com: RL
+Environments for Coding](https://www.rl-list.com/rl-environments-for-coding),
+[rl-list.com: Idler vendor profile](https://www.rl-list.com/vendors/idler),
+[YC Launch: Idler](https://www.ycombinator.com/launches/SxT-idler-push-the-frontier-of-your-model),
+[runtimewire: Idler launches AI data lab after a $9M Paradigm-led seed](https://runtimewire.com/article/idler-launches-ai-data-lab-9m-paradigm-seed).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -1502,4 +1560,15 @@ Upgrade?](https://arxiv.org/abs/2609.05339).
   already flagged elsewhere in this file. No individual vendor entry
   added; the next run with capacity should spot-check a few of the
   better-funded, unverified names. Positioning consequence in
+  docs/market/positioning.md.
+- 2026-10-26 (message, 31st run) — swept rl-list.com's full listing
+  text for all 42 names in one pass instead of continuing one-by-one
+  spot-checks. Found one name, Idler, whose own marketing claims a
+  real-production-data substrate (a decade of an actual retailer's
+  operational history, a real law firm's anonymized records) closer
+  to CLAUDE.md §1's framing than the other 41, but its own term for
+  the result is "a digital twin": a constructed simulation, not a
+  real deliverable. Tally now 7 of 42 individually examined, 7 of 7
+  authored-not-real, and the sweep of the remaining 35 names found no
+  other candidate. Positioning consequence in
   docs/market/positioning.md.

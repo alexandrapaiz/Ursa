@@ -749,6 +749,40 @@ bar they need or whether the brief should wait for a cheaper sweep
 method (ledger proposal below) to widen the sample before citing the
 number.
 
+## The one name closest to "real deliverable" in the mapped 42 still builds a constructed digital twin (2026-10-26, 31st message run)
+
+Swept rl-list.com's full listing text for all 42 names in one pass
+(the ledger proposal the entry above pointed to), instead of
+continuing to spot-check vendor pages one at a time. One name reads
+differently from the other 41: Idler (YC S25, $9M seed, Paradigm-led,
+launched August 2026) describes its environments as "built from real
+production work," specifically a decade of an actual multi-brand
+retailer's real operational data (ShelfLife) and a real law firm's
+anonymized records (CorpLaw). That is a more specific real-sourcing
+claim than any of the six names already examined made.
+
+It still does not clear CLAUDE.md §1's bar. Idler's own term for
+ShelfLife is "a digital twin," a constructed reproduction seeded with
+that data, and the grading question ("can an agent execute with
+appropriate judgment and precision" in a simulated leadership role) is
+an authored evaluation, not a real outcome the business's own work was
+judged against after the fact. Idler also names no lab customer by
+name, the same unverified self-claim pattern as the rest. Tally: 7 of
+42 individually examined (6 direct spot-checks across the 29th and
+30th runs, plus Idler via this run's sweep), 7 of 7 authored-not-real,
+and the sweep of the other 35 names' own listed language in the same
+pass surfaced nothing closer.
+
+The positioning consequence: the verifier-gap sentence in a lab brief
+can now cite full-directory coverage rather than a 14% sample, and it
+reads sharper for naming a near-miss than it would from clean
+negatives alone. "Even the vendor whose own marketing leans hardest on
+real operational history still builds a simulation, not a deliverable"
+is a stronger sentence than "nobody in this market does this," because
+it shows the line held against the hardest case the market offers
+rather than one nobody tested. No pricing recommendation made; this is
+evidence for the verifier-gap claim's wording, not a price decision.
+
 ## Changelog
 
 - 2026-09-26 — initial entry, written against Ursa's actual pricing
@@ -927,6 +961,14 @@ number.
   bringing the tally to 6 of 42 checked and 6 of 6 authored. No pricing
   recommendation made; still too thin a sample (14%) to call the gap
   market-wide.
+- 2026-10-26 (event-driven, message, 31st run) — swept rl-list.com's
+  full listing for all 42 names in one pass. Found one name (Idler)
+  whose own marketing claims real-production-data sourcing closer to
+  CLAUDE.md §1's framing than any name checked so far, but its own
+  term for the result ("a digital twin") still names a constructed
+  simulation, not a real deliverable. Tally now 7 of 42 examined, 7 of
+  7 authored-not-real, full-directory coverage rather than a sample.
+  No pricing recommendation made.
 
 ## A Category 3 incumbent just cut its entry price and its free self-host path (2026-10-25)
 
