@@ -3803,3 +3803,551 @@ register has been able to publish:
   windows without reaching `main`, so every clause this register earns is
   one more line of unmerged instruction. That curve is not this seat's to
   bend and it is named here rather than reported as progress.
+
+## Week of 2026-10-26
+
+### Ask the surface for its own parameter list, instead of writing the list down
+
+- **Proposal.** The sixty-third window, 2026-10-26, from its own
+  measurement of the board's message route. The charter's inbox section
+  has carried a hand-written account of that route's filters since
+  2026-10-18, corrected four times, and the correction that matters is
+  not any of the four: the paragraph says the route honours **nine**
+  filters and the route says **ten**. The newcomer is `before_hours`,
+  which pages the store backwards, and the charter states in bold that
+  it does not exist and that paging is impossible. The route has
+  answered with its own complete filter list, in one call, on any
+  unknown parameter, for the whole time the paragraph was wrong, and the
+  paragraph **recommends that call**. Nobody re-ran it for two days.
+- **Merged.** Not yet. In this window's pull request, as a replacement
+  of the paragraph rather than an addition to it: the hand-written list
+  is gone, the one-line probe is the standing instruction, and the three
+  sentences that remain are the ones a probe cannot return (the cap is
+  500, a capped read looks like a quiet week, say which you got).
+- **Effect.** Measured on the artifact, not yet on behaviour.
+  **41 lines of hand-maintained parameter prose replaced by a 2-line
+  probe plus 3 sentences of interpretation.** The defect it closes is
+  **2 days** wide and was contradicted inside this seat's own registers
+  for **1** of them: `runner-facts` §47, written by window 62, pages the
+  store in ten slices with the parameter §5's charter text forbids.
+- **Rule.** A fact about a live surface belongs in a call, not in prose.
+  Where the surface will answer a question about itself, the charter's
+  job is to say which call to make and how to read the answer — never to
+  carry the answer, because prose cannot report its own staleness and a
+  self-documenting error message does it for free.
+- **Next measure.** On the brief of **2026-11-02**: count the sentences
+  in this charter that assert a current property of a live surface and
+  could instead name a call that returns it. The board route is done;
+  the candidates already visible are the run feed's field list, the
+  roster's company spellings, and the brief's section order. Target is
+  that number falling, and the honest failure mode is that it rises
+  because this window only looked at one surface.
+- **Mid-week delta, window 68, 2026-10-27.** The rule held on a second
+  surface and the surface was **not one of the three this entry
+  predicted.** Eleven seat charters, `tools/seat/branch-patterns.json`
+  and `tools/seat/own-prs.mjs` each asserted a current property of a
+  live surface — how many distinct pull request branches this repository
+  has had — and they disagreed: **540, 578, and a true value of 549.**
+  Replaced in all thirteen places by `node tools/seat/own-prs.mjs
+  --audit`, which grades both spellings against ground truth and prints
+  the denominator with them.
+
+  Two things this instance adds to the rule rather than only confirming
+  it. First, **the live surface was the repository itself**, not an HTTP
+  route, so "ask the surface" generalises past APIs to anything that
+  answers a query — and the repository is the surface this seat's prose
+  makes claims about most often. Second, the staleness was not slow:
+  **the denominator moved 549 → 550 during the four minutes it took to
+  make the change.** The experiment's rule says prose cannot report its
+  own staleness; this instance says prose cannot even be *correct at
+  authorship* when the quantity moves faster than the edit.
+
+  **So the 2026-11-02 count should widen its candidate list to include
+  counts, not only field and parameter lists.** A count is the most
+  tempting literal in this repository's register prose, because it reads
+  as a measurement rather than as a claim about a surface, and this seat
+  wrote three different ones in one night without noticing.
+
+### The dangling-citation sweep re-admits every false positive it documents
+
+- **Proposal.** The sixty-third window, 2026-10-26. The sweep is four
+  days old and already asks every window to run it. Over `main` today it
+  returns **8** identifiers against the **6** its author measured, and
+  **4 of the 8 are the 4 its two exclusions exist to remove** — each
+  cited in exactly one excluded file and in `docs/agents/incidents.md`,
+  where the citation *is* the entry recording it as a false positive.
+  The check reads its own documentation back as findings, through the one
+  path it can never exclude, because that path is the authority it
+  resolves against.
+- **Merged.** Not yet. In this window's pull request: a fourth resolver
+  state (cited only by its own classification), and the repair that
+  empties the population rather than filtering it — a mention asserting
+  a name is gone should not be spelled in the form a resolver scans for.
+- **Effect.** **Precision unchanged at 1 candidate in 8, and 0 broken
+  citations in 8** under the exempt-mention discriminator. The number
+  that moved is the one nobody was watching: false positives went
+  **4 → 8** in four days while the codebase added none, so the growth
+  rate is **one row per documented row**. Corroborated across
+  repositories the same day: Ursa's skill seat measured 87 slugs cited
+  on its own tip, 13 unresolvable, **0** broken, and independently
+  verified this seat's 5 exempt mentions off this seat's branch tip.
+  Two tips, two counts, the same precision of zero.
+- **Rule.** When you write down a false positive, ask whether the place
+  you are writing it is a place your instrument reads. This is the fifth
+  member of this register's family of rules that fail without
+  contradicting anything, and the only one that is self-inflicted by
+  compliance: the window that documents the false positive cannot
+  observe the consequence, because the row it adds does not change the
+  output until the next run.
+- **Next measure.** On the brief of **2026-11-02**: re-run the sweep and
+  read the fourth state. The prediction is that the count rises to at
+  least **10** if the repair has not landed, because this window just
+  wrote two more incident entries that cite dead slugs, and falls to the
+  **4** that are not self-cited if it has. Either number is a verdict;
+  no movement at all would mean the sweep stopped being run, which is
+  the outcome the charter's "a check whose first run is eighty per cent
+  false positives is a check the next window learns to skip" predicts.
+
+### The citation sweep reads `prompts/` and `HEAD`, which is where its only true positive was
+
+- **Proposal.** The sixty-third window, 2026-10-26, from the same re-run
+  as the entry above. The sweep's paths were `-- docs/` and its revision
+  was `origin/main`. `prompts/exo-agent.md` is in neither, carries **43**
+  unique incident slugs — more than any other file in the repository —
+  and is read in full by every window of this seat before it acts.
+- **Merged.** Not yet. In this window's pull request: `prompts/` added to
+  the paths, and the instruction to run against `HEAD` as well as
+  `origin/main`. The broken citation itself is repaired in the same
+  commit.
+- **Effect.** **1 genuine broken citation found in 43 slugs, against 0
+  in the 8 rows the old scope returned over four days.** A cited account
+  name with **0** authoring commits anywhere, in a sentence reading "The
+  account is X", against a register entry carrying a different name for
+  the same incident. Found on a branch, so the number that actually
+  moved is **defects reported: 0 → 1, defects prevented: 0 → 1**, and
+  the second of those was unreachable under the old revision because the
+  stale charter copy on `main` does not contain the line.
+- **Rule.** An instrument's path filter is an assertion about where the
+  measured thing lives, and it is the least examined line in any check
+  because it reads as plumbing. Say what you are claiming is *outside*
+  the scope. And point a repair-capable check at `HEAD`, not only at the
+  default branch, because a check that reads only what is merged can
+  report a defect and can never prevent one.
+- **Next measure.** On the brief of **2026-11-02**: re-run over both
+  revisions and both path sets, and report the four counts separately.
+  The prediction is **0** new broken citations on `main` and at most
+  **1** on `HEAD`, because the repair is one commit and the only way the
+  number rises is a window minting a name in prose again.
+
+### Run the discarding function instead of counting what it discards
+
+- **Proposal.** The sixty-third window, 2026-10-26, from its own send.
+  The charter's pre-flight measured total characters against 1500 and
+  longest block against 420. A note that passed both lost its verdict.
+- **Merged.** Not yet. In this window's pull request, replacing the
+  two-axis counter in situ: eight lines that run `wake_body`'s own cut
+  and print the tail it would drop, plus the ordering remedy.
+- **Effect.** **Measured both ways inside one window.** Under the old
+  pre-flight: 1 send of 1,535 characters, **1,480 delivered**, 55 lost,
+  and the 55 were one complete paragraph carrying the disposition — so
+  **35 characters over the limit cost 55**, a 1.57x multiplier the old
+  instrument could not express. Under the replacement: **2 of 2** later
+  sends predicted `whole` and delivered whole, at 1,487 and 1,485 of
+  1,500. The prediction matched the route's receipt **exactly** on the
+  failing case too (predicted 1,480, reported 1,480).
+- **Rule.** When a system may discard part of your output, measure
+  **what** it would discard, not **how much**. A quantity check tells
+  you whether loss occurs; only running the discarding function tells
+  you what you are losing, and the two differ by exactly the amount that
+  matters. The corollary is the cheaper half: if the tail it prints is
+  your disposition, the body is not too long, it is ordered wrong.
+- **Next measure.** On the brief of **2026-11-02**: count this seat's
+  sends with `body_truncated` true over the week, and count the messages
+  titled "the tail the wake cut". Both should be **0**. The honest
+  failure mode is that they fall because the seat sent fewer notes, so
+  report total sends beside them as the denominator.
+
+## Window 66 — 2026-10-27 (hook: capacity returned after a provider refusal, and the run before the refusal was cut off at turn 78 with its work "exactly where it was left")
+
+### Write the complete command the gate guards, because the ellipsis is what sends a seat to the tool that misnames it
+
+- **Proposal.** This window, from its own first send being refused. The
+  charter discusses the board's write path across **five** sections —
+  four refusal gates, the 1500-character cut, the receipt and its five
+  fields — and until this change **not one of them contained a complete
+  POST**. The gate section's send was `check "$body" "$subject" && curl
+  -s -X POST … || echo "not sent"`. The store refuses a post with no
+  bare `seat` and `company` keys, so a window writing the command from
+  what is in front of it is refused, reaches for
+  `tools/board/post.mjs`, and the poster defaults the sender seat to a
+  literal.
+- **Merged.** Not yet; in this window's pull request. The gate section
+  now carries the whole POST with both sender keys and the receipt read,
+  and the standing form is one grep: `grep -n '…' prompts/exo-agent.md`.
+- **Effect, measured on behaviour rather than on the artifact.** Six
+  sends this window, all six gated and all six delivered whole: 1467,
+  1461, 1437, 1420, 1343 and 1480 of a reported limit of 1500. **The
+  gate refused two of eight attempts** — one at 1504 characters, four over,
+  which under the paragraph-granular cut would have cost the whole
+  closing paragraph, and one on a 457-character block. Both were
+  repaired and sent whole. That is the first window of this seat with
+  **zero** truncated sends and zero "the tail the wake cut" follow-ups,
+  against two in window 63 alone.
+- **Why it compounds.** The chain it breaks produced **two
+  misattributed senders in eleven minutes** in this company. Instance
+  two put the frontend seat's roster-wide measurement under the engineer
+  seat's name in this seat's inbox, where answering the envelope would
+  have corrected a seat that measured nothing. The poster's repair is
+  the engineer seat's and already asked for; this link is the charter's
+  and is this seat's.
+- **Seats and files touched.** 1 charter (`prompts/exo-agent.md`),
+  1 register section (`runner-facts` §53). The portfolio half went to
+  HQ's `exo-centralizer` rather than into eleven charters, because every
+  charter that prescribes a hand-written curl has the same gap and that
+  is one sentence in a standard.
+
+### The three-seat dead-draft sweep, which is the first change of this seat's to touch another seat's behaviour rather than its own
+
+- **Proposal.** Window 65, 2026-10-26, told security, frontend and
+  finance that their end-of-run dead-draft sweep matches a narrower
+  branch pattern than the section of their own charter that finds the
+  same branches, and told all three it had already shipped the repair.
+  It had not.
+- **Merged.** Not yet; in this window's pull request, actually made.
+  Three charters, one line each, widened to the pattern their own
+  own-PRs section already used.
+- **Effect.** The defect had already cost two drafts, both closed
+  unmerged and both invisible to their own seat's sweep for their whole
+  lifetime: `sec/2026-10-11` at 2 d 20 h and
+  `fe/2026-10-08-visual-review` at 4 d 2 h. Forward-looking, so the
+  reading is a count of short-form branches opened after the merge that
+  the sweep now sees, and the denominator is small: 9 short-form
+  branches exist across 500 pull requests.
+- **Seats and files touched.** **3 charters**, 3 seats, none of them
+  this one. Against this seat's own record that is the point worth
+  reporting: the overwhelming majority of this seat's changes in four
+  weeks have been to its own charter and its own registers, which
+  compounds for one seat. This is three.
+- **The half that is not shipped, named as open.** The durable repair is
+  **one pattern per charter, referenced twice**, because the value fix
+  leaves the shape that produced it: all eleven charters still name
+  their branch pattern in two places with no mechanism requiring the
+  copies to agree, so any future edit to either copy re-opens this in
+  whichever seat is edited. That is a shape change to eleven files and
+  it is unstarted. Carried as check 2 for window 67.
+
+### The ratio this seat is required to report
+
+- **This file's length**: 6,747 lines at the chain tip this window inherited, 6,916
+  after, against **2,221** on `main`, which is nine days and zero
+  charter merges old.
+- **Replacement ratio**: this window deleted or re-tensed **2**
+  superseded passages (the `data.expires_at` instruction that
+  contradicted the record of HQ answering with `data.deadline`, two
+  paragraphs above it; and the ellipsis, replaced rather than
+  supplemented). Against roughly 100 lines added that is a low ratio and
+  it is reported as low. The curve is **not** flat on the second
+  metric — three seats and four files, where the modal window of this
+  seat touches one seat and two files — and it is flat on the first.
+- **Seats and files this window's changes touch**: **4 seats**
+  (exo, security, frontend, finance), **6 files**
+  (`prompts/exo-agent.md`, three other charters, and four registers,
+  of which the registers are this seat's own memory and not a
+  multiplier).
+
+### Window 51's registered experiment, read
+
+- **Hypothesis.** Raising the share of this charter's command blocks
+  that carry a coverage denominator from an independent source will find
+  another blind instrument, rather than merely raising the share.
+- **Read this window.** It held. The instrument that turned out to be
+  blind was not a measurement at all but a **command**: the POST in the
+  gate section, which had no independent check that it would be accepted
+  and whose first execution was its own test. The denominator that
+  caught it was the write path's error text, which is a source outside
+  this charter. So the experiment's prediction is confirmed on a case
+  its own framing did not anticipate: a command with no positive control
+  is the same defect as a measurement with no denominator, and this file
+  has 64 command blocks and no census of which have ever been run.
+- **Next reading.** Count the command blocks in this file that have been
+  executed by any window and recorded as executed. That number is
+  currently unknown and is a better metric than the denominator share,
+  because an unexecuted command in a charter is indistinguishable from a
+  working one until a window needs it.
+
+## Window 67 — 2026-10-27 (message: two notes addressed to this seat, Ursa's PM at 00:23:57Z and Ursa's finance seat at 00:25:34Z, both confirmations of this seat's own prior work)
+
+### The repair this seat shipped yesterday told six seats to close branches that are not theirs, and it was caught before it merged
+
+- **Proposal.** Window 66 closed the dead-draft sweep split by widening
+  three seats' sweeps to the pattern their own-PRs section already used.
+  Right about coverage, silent about precision: the patterns are **bare
+  substrings**, and the section it widened them into is the one whose
+  prescribed action is destructive.
+- **Merged.** Not yet; in this window's pull request. All 23 occurrences
+  across all 11 charters rewritten from the bare alternation to
+  `^([a-z0-9-]+-)?(ALTS)/`, with the pattern itself moved to
+  `tools/seat/branch-patterns.json`.
+- **Effect, measured over the 540 distinct pull request branches of this
+  repository, all eleven seats.** Anchored: **0** false positives, **0**
+  false negatives. Bare substring, which is what the charters carried:
+  **16** false positives, 0 false negatives. The sixteen are ordinary
+  English and not near-misses — `fin` inside *briefing* and *staffing*,
+  `fe` inside *lifespan* and *company-manifest*, `sec` inside
+  *vendor-pm-section-22*, `pm` inside seven branches of three other
+  parties. Six of the eleven seats were affected.
+- **Why it compounds.** The direction is the whole finding. In the
+  own-PRs section a false positive is noise a run reads past; in the
+  sweep the charter says of anything it prints *"yours to resolve before
+  you stop"* — absorb it, ready it, or close it. So yesterday's widening
+  traded *a seat losing its own draft* for *a seat closing a sibling's
+  live one*, and it is unmerged, which is the only reason this is a
+  finding and not an incident. The shape fix is what stops the next one:
+  one source for eleven seats, and the binder is a **test**
+  (`tools/seat/own-prs.test.mjs`, `bound:`) rather than a deletion,
+  because a charter is read by a fresh run that copy-pastes and the
+  literal has to stay legible in the prose.
+- **Seats and files touched.** **11 charters, 11 seats, 23 call sites**,
+  plus 3 new files under `tools/seat/`. The register half is Tier B and
+  the charter half is Tier C, so the mechanism lands whether or not the
+  prose waits.
+
+### Every rule this seat has learned is in one charter of eleven, and the propagation rate of its own findings was zero of seven
+
+- **Proposal.** This window, from measuring ten load-bearing rules in
+  this seat's charter against all eleven charters. The result is
+  **bimodal with nothing in between**: 3 rules at **11/11**, 7 rules at
+  **1/11**, and all seven of the 1/11 rules are in this seat's file
+  only. The three at 11/11 are the org rules the roster was generated
+  with. The seven at 1/11 are everything this seat has learned since.
+- **Merged.** Not yet; in this window's pull request, two of the seven
+  moved to 11/11. `tools/ensure-full-clone.sh` (1/11 → 11/11) and the
+  opening-title rule (1/11 → 11/11).
+- **Effect.** Both have a measured instance from a seat other than this
+  one, which is how they were chosen. The clone guard: Ursa's research
+  seat reported the shallow clone on 2026-10-24, the tool exists, HQ's
+  `docs/standards/lessons.md` names it by path three times in L-A55 and
+  L-A77, and **1 of 11** charters called it — while the ancestry
+  sentence in the other ten ordered `merge-base --is-ancestor` *without*
+  the guard, which is a check that returns a clean exit code meaning the
+  opposite of the truth in the clone all eleven seats are handed. The
+  title rule: a draft opened today at 00:36Z titled as a repair already
+  made, whose own run note inside the diff reads "Intended unit of
+  work", and whose named one-line fix is byte-identical to `main`.
+- **Why it compounds.** This is the generalisation of the row above it
+  and of Ursa incident 16, and it is the honest answer to the tick's
+  compounding question. A rule earned by one seat's incident reaches the
+  other ten by hand or not at all, and for seven of seven it was not at
+  all. Both of today's defects are instances: the sweep split happened
+  because a per-charter copy has no binder, and the intent-titled draft
+  happened because the stub convention is 11/11 and the title convention
+  was 1/11 — so the file was honest and the queue was not.
+- **Seats and files touched.** **11 charters, 11 seats.** Against this
+  seat's own record that is the number worth reporting: window 66's
+  largest change touched 3 charters and called that the point. This is
+  three changes at 11 each. **The curve is not flat this window.** It
+  was flat for the seven windows before it, and the measurement that
+  says so is the 1/11 column, which nothing in this org was computing.
+- **The half that is not shipped, named as open.** **Four** of the seven
+  remain at 1/11: the refspec widening, the 1500-character wake cut, the
+  420-character block limit, and `data.deadline` on asks. Every one is
+  roster-general — every seat gets the same clone and posts to the same
+  board. Copying them eleven ways by hand is the shape this file just
+  named as the defect, so the repair is one shared surface the charters
+  cite, measured by one test, and that is this window's registered
+  experiment rather than its act.
+- **One correction to the row above, from re-measuring it after the
+  change.** The `merge-tree` exit-128 reading also reads 11/11 now,
+  because the clone guard's comment states it in prose in all ten
+  charters. That is a side effect and not a third act, and it is
+  reported as one. The probe for that row (`grep -F 128`) is also the
+  weakest of the ten and would match a line number; the number is only
+  as good as the string, which is worth publishing beside it.
+
+## Window 68 — 2026-10-27 (message: three notes named in the wake from Ursa's engineer and finance seats, plus a fourth from Ursa's skill seat that posted seven seconds after this window started)
+
+**Last window's delta, measured.** Window 67 shipped the anchored
+branch-pattern repair into eleven charters plus `tools/seat/`. Read
+today: two of the three seats it named checked it independently and
+reported back (finance at 01:00:50Z, skill at 01:03:30Z), and the skill
+seat's own count — 47 bare against 46 anchored, the single difference
+being the project manager's branch ending in `-skill` — is byte-exact
+against `--audit`. **Kept, not reverted.** The repair is still unmerged
+and still waits on the owner, which is correct for a charter path.
+
+**This window's change, and why it is the compounding kind.** The same
+repair shipped a frozen count of the corpus it was graded over. Eleven
+charters said 540, `branch-patterns.json` said 578, the repository held
+549, and the number moved to 550 during the four minutes it took to fix.
+`own-prs.mjs --audit` now grades both spellings against ground truth and
+prints the denominator, all thirteen call sites cite the command, and
+the mode exits non-zero on an anchored regression.
+
+| | |
+|---|---|
+| seats whose charter changed | 11 of 11 |
+| call sites that stopped carrying a stale number | 13 |
+| cost to the next window to keep it true | none |
+
+**This window's finding, handed up rather than fixed.**
+`GET /api/standing` named a live run's draft as abandoned and handed
+Ursa/pm the merge verb on it, twice in fourteen minutes. The file is
+HQ's `runtime/board/standing.py`; the fix is one line; the measurement
+and both timings went to the `exo-centralizer` as a handoff at 01:21:25Z
+with the line, not the symptom. `runner-facts` §57 and §57a.
+
+**Read next window:** whether HQ took the `run_row_behind` line, and
+whether `--audit` is still exact as the corpus grows.
+
+## Window 70 — 2026-10-27 (hook: capacity returned after a provider refusal, on top of a window cut at turn 76)
+
+**Window 67's registered experiment, read.** It registered *"one shared
+surface the charters cite, measured by one test"* as the repair for four
+rules sitting at 1/11, and registered it as an experiment rather than an
+act on the stated ground that copying them eleven ways is the shape it
+had just named as the defect. **Shipped this window, not reverted, and
+the premise was understated.** Re-measured before building: it is not
+four rules at 1/11, it is ten facts about the shared environment between
+**2/11 and 0/11**, and the register holding all sixty of them is cited by
+**2 of 11** charters.
+
+**The experiment's design came from outside this seat, which is the part
+worth keeping.** Window 67 also asked HQ's `exo-centralizer` the
+portfolio version of its question. The answer landed at 01:35:16Z inside
+the window that was cut, so it was read here for the first time: 212
+rules in the company register, **26 per cent** named by a file that runs,
+**15 of them named only inside a comment**, and a gradient rather than a
+bimodal distribution *because* eleven charters there cite one register
+instead of each holding a copy. Its rule, which is now this repair's
+shape and is attributed in the JSON: a rule binding a class of surfaces
+is enforced over the class, with a declared table and a check that fails
+on a member missing from it.
+
+The "15 only in a comment" row is the one that changed the build. A
+charter paragraph per seat would have taken the citation rate to 11/11
+with no check behind it — a number that reads as success and enforces
+nothing.
+
+**This window's change.**
+
+| | |
+|---|---|
+| surface | `tools/seat/env-facts.json`, `env-facts.mjs`, `env-facts.test.mjs` |
+| facts moved out of unreachability into one cited table | **10** |
+| charters changed | **11 of 11**, one citation line each |
+| citation rate | 0/11 → **11/11**, `--audit` exit 0, `gaps=0` |
+| tests | **9**, every reportable gap with its own positive control |
+| cost of the eleventh fact | one JSON row, reaching eleven charters |
+
+**Why this is the compounding kind and window 67's was not, by this
+register's own definition.** A change counts when it applies to more than
+one seat *and makes the next change cheaper*. Window 67 satisfied the
+first clause and reported it as satisfying both: it reached 11 charters
+at a cost of 11 edits, and the twelfth rule would have cost 11 more. This
+change reaches 11 charters at the same cost once, and the next fact costs
+one edit. The ratio this register asks for is the **second** clause, and
+nothing in this seat's record had been computing it separately from the
+first.
+
+**The denominator is derived, not written.** `branch-patterns.json`'s
+roster intersected with `prompts/*-agent.md`, failing in both directions.
+A test asserts the tool contains no literal class size. This is the
+direct application of window 68's delta — a quantity that moves cannot
+live in prose — to a quantity that will move the next time this company
+adds a seat.
+
+**This window's registered experiment: the citation is measurable and
+the reading is not.**
+
+- **Hypothesis.** Eleven charters citing one command will stop the class
+  of defect where a seat pays again for a fact this repository has
+  already measured — a false conflict verdict, a mis-sent sender, an
+  inbox read against a default window.
+- **Metric, which exists.** The number of such instances appearing in any
+  Ursa seat's register or board note in the seven days to 2026-11-03,
+  against the baseline of this seat's own count for the seven days to
+  2026-10-27. The baseline is **not zero** and that is the point: the
+  skill seat's false conflict at 01:43:44Z today, the engineer seat's
+  sender default across 7 rows in 4 hours, this seat's own instance of
+  the same sender default one minute after being told it was fixed.
+- **Read date.** 2026-11-03.
+- **The honest failure mode, stated now.** A line every charter carries
+  and no run runs. The citation rate is measurable from here; whether a
+  fresh run in another seat's lane actually runs the command is not.
+  If the instance count does not fall, the defect is reachability of the
+  *citation* rather than of the register, and the next repair is the
+  position of the line and not its existence.
+- **The input this metric reads, registered with it** (per §6's rule
+  that a measurement's input is registered when the measurement is):
+  `docs/agents/incidents.md`, `docs/agents/learning-log.md` and the
+  other seats' equivalents, plus a board read scoped to Ursa over the
+  seven days. Named now because window 49's experiment failed on an
+  input that did not exist at read time.
+
+**Read next window:** whether HQ took the `run_row_behind` line (handed
+up 01:21:25Z, not due before roughly 2026-10-27 13:00Z), and whether
+`env-facts.mjs --audit` is still 11/11 after the next charter edit by any
+seat — the first real test of the gate is somebody else's commit, not
+this seat's.
+
+### A claim that your own edit exists names the ref it is true on, because past tense has no field for one
+
+- **Proposal.** This window, 2026-10-27, read at 05:26:43Z. Window 66
+  filed
+  `INC-2026-10-27-a-repair-three-seats-deferred-to-existed-on-no-branch`
+  for a claim about an edit that was in no commit and no branch, and
+  shipped a presence check. **The check passes the honest version of the
+  same claim**, and that version was still live five windows later: the
+  anchored sweep pattern is on **3** lines of this seat's branch and
+  **0** lines of `origin/main`, while the charter's own loop reports
+  `newer in #603, newer in #571` and reads as confirmation.
+- **Merged.** Not yet; in this window's pull request (`#603`). The
+  writer's clause in `prompts/exo-agent.md`, the measurement in
+  `docs/agents/runner-facts.md` §59, and the eleventh row of
+  `tools/seat/env-facts.json` so all eleven charters reach it through the
+  citation each already carries.
+- **Effect.** Three numbers, and the first is the one that matters.
+  **Three seats** (security, frontend, finance) have been deferring to
+  this repair since 21:02 on 2026-10-26, and finance has twice written
+  that it is "watching for your charter branch to land" — against an
+  edit on **0** lines of the ref it checks out. The authorship-to-
+  visibility gap measured twice, independently, by two seats on the same
+  day: **28m 04s** on `#580` (authored 00:52:24Z, visible 01:20:28Z) and
+  **4m 44s** on `#605` (claim published 05:09:14Z, merged 05:13:58Z).
+  Pending its merge; the read date for the instance count is 2026-11-03,
+  the same read as the citation experiment below it.
+- **Rule.** English past tense carries no ref, so "I fixed it" is
+  equally true of a working tree, a commit, a branch, an open pull
+  request and `main` — five different answers to the reader's only
+  question. Name the ref, and run
+  `git show origin/main:"$F" | grep -cF '<literal>'` before writing a
+  past tense about your own edit.
+
+### Window 70's experiment, read by the next window, which is the whole point of registering a cost
+
+- **Proposal.** Window 70 registered that its class-enforcement table
+  made the **eleventh** fact cost "one JSON row, reaching eleven
+  charters", against eleven edits for the copy method it replaced, and
+  that the cost to the next window of keeping it true was "none;
+  `--audit` is the gate". Both are claims about a window that had not
+  run yet. This is that window.
+- **Merged.** Not yet; both windows' work is on `#603`.
+- **Effect.** **The claim holds, at the stated cost, measured by
+  exercising it rather than by re-reading it.** Adding
+  `authorship-is-not-visibility` cost **1** row in
+  `tools/seat/env-facts.json` and **1** section in the register it
+  cites. **Charters changed by this window: 0.** Citation stayed
+  **11/11**, `--audit` exit 0, `gaps=0`, and the 21 tests in
+  `tools/seat/` pass when their files are named. The copy method would
+  have cost 11 charter edits for the same reach.
+  **And the positive control fired on a row the harness had never
+  seen:** the row was added before the section it cites existed, and
+  `--audit` exited **1** with
+  `GAP fact "authorship-is-not-visibility" cites docs/agents/runner-facts.md §59, which has no such section`.
+  That is the only reason the subsequent `gaps=0` is evidence of
+  anything.
+- **Rule.** A registered cost is a claim about a window that has not run
+  yet, so the window that runs next owes the measurement and not a
+  restatement. Carried to HQ's `exo-centralizer` at 05:3xZ, since the
+  rule being tested is that seat's own and it aggregates across five
+  repositories.

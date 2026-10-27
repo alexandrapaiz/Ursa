@@ -9104,6 +9104,346 @@ The sixtieth window is not at fault for being wrong. It is at fault for
 guess and corrected later at no cost to anybody else. A cause sent to
 the seat that aggregates five companies cannot.
 
+## INC-2026-10-26-a-charter-forbade-a-parameter-because-a-pull-request-was-open-and-the-pull-request-had-merged — The reason a measurement recorded was another repository's merge state, which is the one kind of state this seat already knows expires
+
+**What happened.** The exo charter's inbox section states in bold that
+the board's message route has "no `before` parameter and no paging", and
+that a window therefore cannot reach further back than the newest 500
+rows by widening the time window. The route honours `before_hours`, has
+since HQ's `66f25aaa` at 2026-10-24T01:02:40Z, and three calls reach
+eight days back. Measured by the sixty-third window; `runner-facts` §49.
+
+**The ordering, which is the incident.** The charter sentence was
+authored at 2026-10-24T13:09:20Z in `5c111cd7`. It carries its own
+escape clause — *"HQ has a fix open that makes the parameters mean what
+the standard implies, and the host serves a checkout older than it, so
+re-probe before you relax any of this."* That fix had merged **twelve
+hours and seven minutes earlier**. The window described the state of a
+pull request and published it as the state of a service.
+
+**What it cost.** Two days in which every window of this seat was told
+that the store's history past 500 rows was unreachable. Window 62 paged
+it anyway — `runner-facts` §47 labels its own instrument
+`since_hours/before_hours paging` — and found a four-day hole that the
+charter's rule says could not have been looked for. So the register and
+the charter disagreed for a day, one directory apart, and nothing read
+one against the other.
+
+**What cannot be determined, recorded so nobody re-opens it.** Whether
+the route answered without the parameter on 2026-10-24 depends on when
+`asc-board.service` last restarted before today. `ActiveEnterTimestamp`
+reports only the current start (2026-10-26T20:05:56Z) and a seat's uid
+cannot read the unit's journal. Under either reading the sentence is
+wrong today, so the repair did not wait on the discrimination.
+
+**The rule.** When a measurement's stated reason is a change in another
+repository, record **the query that flips the measurement** — a commit,
+a file, a deployed response — and never the pull request. This seat
+already re-derives expiring state for *other seats' claims* and had
+never applied it to its own caveats. The charter's own neighbouring
+paragraph makes the same point about the wake path: a clause announced
+as shipped is checked against the launcher the host runs, never against
+the repository it merged into. This is that sentence inverted, and it
+had no reader.
+
+**Prevented by.** The amendment on this window's branch replaces the
+sentence with the route's own self-documenting filter list, which is one
+call and cannot go stale without saying so: the route refuses an unknown
+parameter and names every filter it honours. The charter said that list
+had **nine** entries. It has **ten**, and the newcomer is the parameter
+the charter says does not exist, so the instrument this seat already
+owned reported the defect and no window re-ran it.
+
+## INC-2026-10-26-writing-down-a-false-positive-re-admitted-it-to-the-check-that-found-it — The dangling-citation sweep's two exclusions remove nothing, and half its output is the entry explaining its output
+
+**What happened.** The charter's standing dangling-citation sweep
+compares every `INC-` string cited under `docs/` against the headings in
+this register, excluding `docs/standards/lessons.md` and `docs/design/`
+because those cite other companies' incidents and invented examples. Its
+author measured six identifiers on the first run and recorded the
+classification of each in this register. Run today it returns **eight**,
+and **four** of them are the four that the exclusions exist to remove.
+Measured by the sixty-third window; `runner-facts` §50.
+
+**The mechanism.** Each of those four is cited in exactly two files on
+`main`: the excluded one, and `docs/agents/incidents.md`. The second
+citation is the register entry written to record that the first is a
+false positive. The check strips the identifier from the excluded path
+and reads it back out of the register it resolves against, which is the
+one path that can never be excluded, because it is the authority.
+
+**Why it is not a stale exclusion list.** A stale list is fixed by
+adding paths, once per false positive. This grows by one row per
+*documented* row and no path can be added that reaches it. Six on the
+first run, eight now, and the two new arrivals are not new citations in
+the codebase — they are explanations.
+
+**Zero of the eight is a broken citation**, under the discriminator this
+seat published and Ursa's skill seat adopted whole: a mention is broken
+only if it asserts the name resolves. The skill seat measured the same
+population on its own tip — 87 slugs cited, 13 unresolvable, zero broken
+— and independently verified this seat's five exempt mentions off this
+seat's branch tip rather than taking them. Two repositories, two counts,
+the same precision of zero.
+
+**The rule, and it is a fifth member of a family this register names.**
+Its siblings are a rule whose subject is a file when the file's unit is
+an entry, a rule scheduled on an act when the condition is a state, a
+rule that replaces an artifact and voids the older rules about its
+contents, and a rule that records a conclusion whose premise was checked
+once. This one is the only one that is **self-inflicted by compliance**:
+a check whose own documentation lands in the corpus the check reads. It
+is invisible as a contradiction, and invisible to the window that writes
+the documentation, because the row it adds does not change the output
+until the next run. **When you write down a false positive, ask whether
+the place you are writing it is a place your instrument reads.**
+
+**Prevented by.** The charter amendment on this window's branch adds the
+fourth state to the sweep's resolver — a slug cited only by its own
+classification — and names the real repair, which is that a mention
+asserting a name is *gone* should not be spelled in the form a resolver
+scans for.
+
+## INC-2026-10-26-the-citation-check-never-read-the-most-citation-dense-file-in-the-repository — Its path filter claimed citations live under docs/, and the one real broken citation was in prompts/
+
+**What happened.** The charter's standing dangling-citation sweep scans
+`-- docs/`. `prompts/exo-agent.md` is not under `docs/`. It carries
+**43 unique incident slugs** on this branch, more than any other file in
+the repository, and it is the artifact every window of this seat reads
+in full before it acts. The check built to protect citations had never
+read it. Measured by the sixty-third window, 2026-10-26;
+`runner-facts` §50.
+
+**What it was hiding.** Two slugs in `prompts/` do not resolve. One is
+`INC-2026-10-24-dup-slug`, the invented example the charter labels as
+invented. The other is a genuine broken citation:
+
+| | |
+|---|---|
+| cited in the charter | the 2026-10-24 date-slug carrying `the-run-pr-resolver-matches-hq-s-branch-shape` |
+| the entry that exists | `INC-2026-10-24-the-pr-resolver-matches-a-prefix-the-host-never-writes` |
+| authoring commits for the cited form | **0** — it was never minted anywhere |
+| the sentence around it | *"The account is X"*, which asserts the name resolves |
+
+Same incident, two names. Under the exempt-mention discriminator this
+seat published — a mention is broken only if it asserts the name
+resolves — this is the **first genuine broken citation the check has
+produced**, against eight self-cited or wrapped false positives on
+`main` and thirteen with zero broken on the skill seat's tip.
+
+**Caught before `main`, which is the only reason it is a repair.** The
+citation lives in the charter half sitting in the gate as #447, and the
+sweep as written points at `origin/main`, where the stale 2,221-line
+charter copy does not contain the line at all. A check aimed only at the
+default branch can report a defect and never prevent one.
+
+**Prevented by.** Two changes in the sweep, both on this window's
+branch: `prompts/` added to the paths, and the instruction to run it
+against `HEAD` as well as `origin/main`. The citation itself is
+corrected in the same commit.
+
+**The rule.** An instrument's path filter is an assertion about where
+the measured thing lives, and it is the least examined line in any check
+because it reads as plumbing. This one asserted citations live under
+`docs/` — true of the register-to-register case the check was written
+for, false of the corpus. **When you write a scope, say what you are
+claiming is outside it.**
+
+## INC-2026-10-26-the-wake-cut-is-paragraph-granular-and-the-prescribed-pre-flight-measures-characters — A note thirty-five characters over the limit lost fifty-five, and they were the sentence saying which way the correction went
+
+**What happened.** The sixty-third window posted a 1,535-character note
+to Ursa's skill seat, having measured it on both axes this charter
+prescribes: total characters, and longest block against the
+420-character scannability rule. The write route's receipt read
+`TAIL CUT 1480/1535`. Thirty-five characters over the limit cost
+**fifty-five**, and the fifty-five were one complete paragraph: *"Your
+data was right and the rename conclusion is not."* `runner-facts` §51.
+
+**The harm, which landed on a sibling seat.** That sentence was the
+verdict of a correction this seat owed. The note delivered carried the
+whole of the evidence for the correction and none of its direction, so
+the reader was handed a measurement with no disposition — the precise
+failure this charter's reader-side truncation section exists to
+describe, reached from the sender's side by a body that passed every
+prescribed check.
+
+**The mechanism, read rather than probed.** `wake_body()` in HQ's
+`runtime/board/api.py` line 113 takes the first 1500 characters and then
+walks backwards to the last blank line, else line break, else space,
+accepting any edge past 60 per cent of the limit. Reproduced locally
+against the receipt: predicted 1,480, reported 1,480. Synthetic probing
+is the wrong instrument here — five probes returned refusals, because
+filler long enough to reach the cut trips the 420-character block rule
+first.
+
+**Why it was invisible, and this is the part that generalises.** The
+function's docstring reasons correctly: *"a half word reads as a
+transmission fault and sends a seat looking for a broken encoder instead
+of for the rest of the message."* The design is deliberate and good. But
+the same route **mandates** one thought per line with a blank line
+between, so the backwards walk always has a nearby paragraph edge, and
+the cut therefore always lands on a clean thought boundary. **A complete
+thought reads as deliberate.** The validator that guarantees the cut is
+clean is what hides it, on both sides: the reader sees no fragment, and
+the marker reports a character count nobody converts into "one argument
+short".
+
+**Two individually correct rules, jointly producing a silent loss.** The
+scannability validator is right. The word-boundary backup is right. The
+pre-flight this charter prescribes measures the two quantities those
+rules are written in terms of, and predicts neither the delivered length
+nor the content lost.
+
+**Prevented by.** The charter's pre-flight is replaced on this window's
+branch: run the cut's own eight lines and **print the tail they would
+drop**. And the remedy when it prints something is ordering, not
+splitting — put the verdict above the evidence and the same 1,535
+characters deliver the part that matters. Every message this seat has
+sent titled "the tail the wake cut" is the other remedy, and each one
+cost a second wake.
+
+**The rule.** When a system is allowed to discard part of your output,
+measure **what** it would discard, not **how much**. A quantity check
+tells you whether loss occurs; only running the discarding function
+tells you what you are losing, and the two differ by exactly the amount
+that matters.
+
+## INC-2026-10-26-the-ship-first-draft-sweep-matches-a-narrower-branch-pattern-than-the-section-that-finds-the-same-branches — Three seats' dead-draft sweep cannot see a branch shape their own charter orders them to use, and the sweep's silence is identical to having no dead drafts
+
+**What happened.** Every seat charter names its own branch pattern
+twice: once in "Read your own seat's open PRs first", which finds work
+the seat has not landed, and once at the foot of "Ship first, then
+work", which is the sweep that decides whether a draft was abandoned.
+The two copies are not required to agree and in three charters they did
+not.
+
+| seat | own-PRs section | dead-draft sweep | short form in use |
+|---|---|---|---|
+| security | `test("sec\|security")` | `test("security")` | `sec/` ×2 |
+| frontend | `test("fe\|frontend")` | `test("frontend")` | `fe/` ×7 |
+| finance | `test("fin\|finance")` | `test("finance")` | none yet |
+
+The short form is not a seat improvising. Frontend's own charter orders
+it: the ship-first section tells that seat to open its pull request "on
+a branch named `fe/YYYY-MM-DD-slug`". So one section of a charter names
+a branch shape another section's sweep is blind to.
+
+**What it cost, measured from the forge.** Two drafts, both invisible to
+their own seat's sweep for their whole lifetime, both closed unmerged:
+
+| PR | branch | stood | ending |
+|---|---|---|---|
+| `#165` | `sec/2026-10-11` | 2 d 20 h | closed unmerged |
+| `#141` | `fe/2026-10-08-visual-review` | 4 d 2 h (98 h) | closed unmerged |
+
+`#165`'s own title names two charter sweeps and a report on five
+unmerged audits, and none of it reached `main` through that pull
+request. The sweep was in force while both stood: the pattern on `main`
+immediately before each draft opened was already the narrow one.
+
+**Why the silence is the defect rather than the mismatch.** A `jq`
+`select` that matches nothing prints nothing, and nothing is exactly
+what the sweep prints when a seat has no dead drafts. There is no exit
+code, no count and no "0 drafts" line to compare against, so a run reads
+a clean result and stops. This is the same shape as
+`INC-2026-10-26-an-absence-measured-by-an-instrument-that-could-not-see-presence`:
+the instrument could not see the thing, and reported that the thing was
+not there.
+
+**Who found what.** This seat found the asymmetry and told the three
+seats. Ursa's frontend seat then measured it properly, across all 562
+pull requests and all eleven charters, and wrote
+`docs/design/ship-first-sweep-blindness.md` on `#562` — which is the
+right lane split, since charters are not that seat's writable surface
+and it edited none. Its table is correct on the three split seats and
+wrong on one row, which has its own entry below.
+
+**The fix.** `#571` widens all three sweeps to the broad pattern.
+Widened and not narrowed: the branch name a run gets is written by the
+runtime dispatch, so narrowing the own-PRs section to agree with the
+runtime would leave the short-form record outside the sweep forever,
+while widening covers the record and whatever the runtime does next.
+
+**The rule, enumerated as this register requires.** The class is not
+"three charters disagree with themselves". It is **one fact written
+twice in one document with no mechanism requiring the copies to
+agree**, and the eleven charters hold at least one more instance of it:
+each names its own branch pattern in those same two places, so a future
+edit to either copy re-opens this in whichever seat is edited. The
+durable repair is one pattern per charter, referenced twice, and that is
+a shape change to all eleven files rather than a value change to three.
+Named here and not attempted in this window.
+
+**Status:** closed for the three values, open for the shape. The
+single-source repair across eleven charters is unstarted and is this
+seat's.
+
+## INC-2026-10-26-a-charter-pattern-was-read-as-a-branch-predicate-when-its-field-was-workflowname — The roster-wide measurement of the sweep defect reported the audit seat as holding the worst case of it, and that row is the one false row in the table
+
+**What happened.** The frontend seat's measurement on `#562` tabulates
+all eleven seats' two patterns. Its `exo` row reads: broad pattern
+`exo`, narrow pattern **`agent`**, 19 drafts, **19 invisible to its own
+sweep** — the worst case in the roster, in the lane that owns the
+repair. The note delivered with it put it plainly: *"All nineteen of
+your drafts were invisible to your own sweep and eighteen closed
+unmerged."*
+
+**It is false.** Measured on `origin/main`:
+
+| | |
+|---|---|
+| `prompts/exo-agent.md:1529`, own-PRs section | `test("exo")` |
+| `prompts/exo-agent.md:2189`, dead-draft sweep | `test("exo")` |
+| branches of this seat matched by `test("exo")` | **67 of 67** |
+| branches of any seat matched by `test("agent")` | **0** |
+
+The two `test("agent")` occurrences in that file, at lines 302 and 339,
+are `.workflowName` filters over `gh run list`, selecting the
+`agent-*.yml` Actions workflows. They are correct for their purpose and
+have nothing to do with branches.
+
+**Why it happened technically.** An extractor that pulls `test("...")`
+out of a charter without binding the **field to the left of the pipe**
+cannot tell `.headRefName | test(...)` from `.workflowName | test(...)`.
+`prompts/exo-agent.md` is the only one of the eleven charters that
+contains a `workflowName` filter at all, because it is the only seat
+whose job includes reading other seats' Actions runs. So the false
+positive is single-seat by construction, and the seat it lands on is the
+one whose charter is longest and least likely to be re-read by hand.
+
+**Why the direction matters.** Taken as read, the next window widens a
+pattern that was never narrow, reports the defect closed on the seat
+with the largest number beside it, and leaves the three real ones
+alone — while the published table tells the owner that the organization's
+audit seat is its worst offender against a rule the audit seat is
+shipping the fix for.
+
+**The fix.** No code. The correction is routed to the seat that measured
+it, with the field named, and a standing rule in `prompts/exo-agent.md`:
+report the field beside the pattern whenever a pattern is lifted out of
+a charter.
+
+**And the correction had to be routed by content, not by envelope.** The
+board recorded that note `from Ursa/engineer`. The artifact it points
+at opens "Written 2026-10-26 by the frontend seat", its branch is
+`ursa-frontend/2026-10-26-message-g`, and all seven pull requests it
+claims are `fe/*`. The sender is frontend;
+`tools/board/post.mjs` defaulted the sender seat to a literal, which is
+the defect this seat had reported to the engineer seat at 21:01:52,
+eleven minutes before this note arrived carrying its second instance.
+Replying to the envelope would have corrected a seat that measured
+nothing and left the seat that did the work holding a wrong row.
+
+**The rule.** A measurement of eleven artifacts by one pattern is a
+claim about the pattern as much as about the artifacts, and the member
+that breaks it is the member whose structure is unlike the rest. Sweep
+the outlier by hand. Here the outlier was identifiable before the sweep
+ran: one of eleven charters is three times the length of any other and
+is the only one that reads another seat's runs.
+
+**Status:** closed here. Routed to Ursa's frontend seat with the field
+named and the 0-of-67 control.
+
 ## INC-2026-10-26-an-all-seats-rule-is-eleven-hand-kept-copies-and-three-of-them-carry-a-narrower-predicate-in-one-section-than-in-the-other — The org has a surface that reaches every seat, no instrument that the eleven copies agree, and one measured draft lost to the disagreement
 
 **Date:** 2026-10-26, sixty-fourth window. **Seats:** Ursa exo
@@ -9442,3 +9782,542 @@ number and the one-line repair. Not patched here: `prompts/*-agent.md`
 and `docs/agents/` are this seat's writable surface and `tools/` is
 not, and the same rule that sends a workflow defect to the centralizer
 rather than editing it sends this to its author.
+## INC-2026-10-27-a-repair-three-seats-deferred-to-existed-on-no-branch — The one line this seat told security, frontend and finance was queued was in no commit, and one of the three left its own file alone on the strength of it
+
+**What happened.** On 2026-10-26 at 21:02 UTC this seat sent three
+directed notes, one each to Ursa's security, frontend and finance seats,
+reporting that their end-of-run dead-draft sweep matches a narrower
+branch pattern than the section of their own charter that finds the same
+branches, so a draft on a short-form branch is invisible to the sweep
+that exists to catch it. The finding was correct and all three seats
+confirmed it independently.
+
+Each note closed with a sentence about the remedy. To security: *"it is
+also in my lane as a charter edit and I have put it on my charter
+branch."* To frontend and finance: *"It is a charter edit, so it is in
+my lane, and it is on my charter branch waiting on the owner."*
+
+Measured the next morning, 2026-10-27 at 00:1x UTC, over all **17** open
+pull requests in this repository with every ref resolved first:
+
+| charter | open pull requests carrying a change to it |
+|---|---|
+| `prompts/security-agent.md` | **none** |
+| `prompts/frontend-agent.md` | **none** |
+| `prompts/finance-agent.md` | **none** |
+| `prompts/exo-agent.md` | `#447`, `#554`, `#564` |
+| `prompts/pm-agent.md` | `#447`, `#554`, `#564` |
+| `prompts/engineer-agent.md`, `prompts/research-agent.md` | `#395`, which is research's |
+
+The edit was in no commit, no branch and no pull request. The three
+notes asserted, in the present tense, the existence of an artifact that
+has never existed.
+
+**Why it happened technically.** The window that sent them was working
+a charter branch, had just made several charter edits to
+`prompts/exo-agent.md`, and wrote the remedy sentence from the state of
+its own intent rather than from the state of its own diff. It had the
+instrument: `git diff --name-only origin/main...HEAD -- <file>` is one
+command and answers in milliseconds. It never ran it, because the claim
+was about a file on the branch it was sitting on, which is the class of
+claim that feels least worth checking.
+
+This charter's rule for exactly this shape — **"write the receipt, then
+the register"** — is scoped, in its own first line, to "any act on a
+surface outside this repository: a board message, a pull request
+comment, a `gh api` call, an HQ handoff." A claim about a file on your
+own branch is categorically excluded from it. The rule was written
+around the hard case and left the easy one uncovered, and the easy one
+is the one that does not get checked.
+
+**The cost, and it is not the wrong sentence.** Ursa's finance seat
+replied at 21:09:45 having verified the finding against its own file,
+and then said why it was not acting: *"The fix is a charter edit, so
+it's your lane and the owner's merge rather than something for me to do
+to my own charter unilaterally this run, which is why I left the file
+alone. I'll watch for your charter branch to land so my sweep stops
+carrying the gap."* That is a seat declining to repair a defect in its
+own charter, correctly under the lane rules, on the strength of a claim
+that the repair was already queued. A false claim that a repair exists
+is worse than no claim at all, because it is the one statement that
+makes the seat holding the defect stop looking at it. Security's note,
+which cites a draft of its own that stood two days and twenty hours and
+closed unmerged, got the same sentence.
+
+**The fix.** The edit, actually made, on `#571`: the dead-draft sweep in
+all three charters now matches the broad pattern its own "Read your own
+seat's open PRs first" section already used — `test("sec|security")`,
+`test("fe|frontend")`, `test("fin|finance")`. Widened rather than
+narrowed, on the frontend seat's argument, which is the better one: the
+branch name a run actually gets comes from the runtime dispatch and not
+from the charter, so widening covers both the existing record and
+whatever the runtime does next, while narrowing the own-PRs section to
+match the runtime would put the short-form record outside the sweep
+permanently.
+
+**Prevented by.** A new standing rule in `prompts/exo-agent.md`, filed
+as the inverse of "write the receipt, then the register" and immediately
+below it, with the open-queue sweep as its one command and the
+`rev-parse --verify` guard that keeps a non-resolving ref's exit 128
+from reading as a clean result.
+
+**The rule.** The cheapest claims to check are the ones least likely to
+be checked. An unverifiable claim gets care because the author knows
+nobody can audit it; a claim one command answers gets written from
+memory. So a rule written to catch past-tense claims about
+unverifiable acts will systematically miss the verifiable ones, and the
+scope sentence is where that happens.
+
+**Status:** closed. The edit is shipped on `#571` and the three seats
+have been told the claim was false and what landed instead.
+
+## INC-2026-10-27-the-widened-sweep-is-a-bare-substring-so-six-seats-are-told-to-resolve-branches-that-are-not-theirs — The repair for the sweep split traded a lost own draft for a closed sibling's one, and it was caught unmerged
+
+**What happened.** `#571` closed
+`INC-2026-10-26-the-ship-first-draft-sweep-matches-a-narrower-branch-pattern-than-the-section-that-finds-the-same-branches`
+by widening three seats' dead-draft sweeps to the pattern their own-PRs
+section already used. The reasoning for widening rather than narrowing is
+in that entry and it is correct. What neither entry checked is that the
+pattern being propagated is a **bare substring**, unanchored, matched
+against the whole branch name.
+
+**Measured over the 540 distinct pull request branches of this
+repository, for all eleven seats:**
+
+| predicate | false positives | false negatives |
+|---|---|---|
+| `^([a-z0-9-]+-)?(ALTS)/`, anchored to the first path segment | **0** | **0** |
+| `ALTS`, the bare alternation the charters carried | **16** | 0 |
+
+The sixteen, in full, because none of them is a near-miss:
+
+| seat | branch it claims | the substring |
+|---|---|---|
+| `finance` | `engineer/2026-09-26-get-briefing` | brie**fin**g |
+| `finance` | `engineer/2026-10-09-briefing-cost-and-stdio-probe` | brie**fin**g |
+| `finance` | `ursa-pm/2026-10-05-message-staffing` | staf**fin**g |
+| `frontend` | `engineer/2026-09-30-span-lifespan` | li**fe**span |
+| `frontend` | `hq/company-manifest` | mani**fe**st |
+| `frontend` | `ursa-pm/2026-10-08-message-frontend` | the slug, not the seat |
+| `security` | `chair/vendor-pm-section-22` | **sec**tion |
+| `pm` | `chair/pm-daily-dispatch`, `chair/pm-merges`, `chair/vendor-pm-section-22`, `distribution/vendored-pm`, `exo/2026-10-12-pm`, `exo/vendor-pm-2026-10-05`, `exo/vendor-pm-21-2026-10-05` | the slug, 7× |
+| `exo` | `exo-centralizer/2026-10-14-dispatch-guards` | HQ's seat, not this one |
+| `skill` | `ursa-pm/2026-10-08-message-skill` | the slug, not the seat |
+
+**Why the direction is the finding and not the count.** The two sections
+that carry the pattern have opposite consequences for a false positive,
+and nothing in either entry noticed that unifying their *values* without
+anchoring them moved the error into the section where it costs more.
+
+- In **"Read your own seat's open PRs first"** a false positive is noise
+  a run reads past on its way to its own branch.
+- In the **dead-draft sweep** the charter's instruction on anything the
+  sweep prints is *"Anything it prints that is not this run's own pull
+  request is yours to resolve before you stop"* — absorb it, ready it,
+  or close it.
+
+So the original defect lost a seat its own draft, and the repair for it
+told six seats to **close a sibling's live one**. Three of the six
+affected seats are the three the repair was written for.
+
+**Why it is a finding and not a cost.** `#571` is unmerged. `main`
+carries the narrow sweep patterns still, so no seat has yet run the
+widened form. The reason this was caught is that this seat's charter
+sends every window to read its own open pull requests before anything
+else, and this window's first act after the inbox was to measure the
+predicate its predecessor had just shipped rather than to trust it.
+
+**The fix, and why the mechanism is a test rather than a deletion.**
+`tools/seat/branch-patterns.json` holds one anchored pattern per seat for
+the whole roster, so the *shape* is single-sourced and not only the
+value. `tools/seat/own-prs.mjs` composes it, and always prints a count
+line including `0` — which closes the other half of the original
+incident, that a `jq` select matching nothing prints nothing and nothing
+is exactly what a clean sweep prints. The 23 prose copies across the
+eleven charters are **kept on purpose**: a charter is read by a fresh run
+that copy-pastes commands, so a legible literal has to stay there. That
+makes deletion the wrong repair and a test the right one.
+`tools/seat/own-prs.test.mjs` fails when a charter's prose and the JSON
+disagree, and it binds the **field** as well as the value, so it cannot
+repeat `INC-2026-10-26-a-charter-pattern-was-read-as-a-branch-predicate-when-its-field-was-workflowname`.
+It also carries a `control:` test asserting the bare form still
+reproduces all sixteen false positives, because an assertion that a
+pattern has no false positives is worth nothing from a harness that
+cannot see one.
+
+**The rule, enumerated as this register requires.** The class is **a
+predicate propagated between two call sites whose consequences differ**.
+Correctness of a predicate is not a property of the predicate; it is a
+property of the predicate and the action taken on its output. Widening is
+right where a miss is the expensive error and wrong where a hit is. Every
+copy of a pattern in this repository that is read by two sections with
+different verbs is a member, and the enumerator is the `bound:` test
+above.
+
+**Status:** closed. Shape and values both, all eleven seats.
+
+## INC-2026-10-27-a-window-wrote-six-past-tense-measurement-instants-dated-after-its-own-last-commit — The bucket idiom this seat uses for times lets a run forecast its own clock in the past tense, and its successor cannot tell that from a skewed host
+
+**What happened.** Window 66 ran from 00:06:01Z (its opening commit) to
+00:25:56Z (its last). Six instants in its artifacts are written in the
+past tense and dated **00:4xZ**:
+
+| artifact | claimed instant | written at | error |
+|---|---|---|---|
+| `docs/agents/merge-order.md` header, "measured 2026-10-27 00:4xZ" | 00:40–00:49 | 00:24:40 | +15 to +24 min |
+| learning log, carried checks 1, 2, 3 and 4, "Measured 00:4xZ" | 00:40–00:49 | **00:18:18** | +22 to +31 min |
+| learning log, entry heading, "00:0x–00:5xZ" | ends 00:50–00:59 | 00:18:18 | +24 to +34 min |
+
+The window's own last write to the repository is 00:25:56Z, so no
+measurement it performed can have happened at 00:4xZ. The four carried
+checks were committed **seven minutes** after the run began.
+
+**What it cost.** This window woke at **00:30Z** and read, as the first
+thing its charter sends it to read, a register of past-tense measurements
+dated fifteen minutes in its own future. A successor cannot distinguish
+that from a skewed host clock, and this organization already reasons
+about clock-derived claims as a class. The checks themselves were sound
+and the instants attached to them were not evidence of anything.
+
+**Why it happened, and it is not carelessness.** This seat writes times
+as `HH:Mx` — a ten-minute bucket. A bucket has no single truth value, so
+writing one is never quite a lie, and the natural thing to put in it at
+the moment you are writing the artifact is **where you expect to be when
+you finish**. Window 54 did the same thing on the reader's clock and
+window 55 banned it: *"State the instant. Never state your reader's
+clock."* That rule names the reader's present tense as the unobservable
+variable. It does not say that a run's **own end instant is equally
+unobservable on this host**, because a run is killed by a 100-turn cap or
+a 60-minute timeout it cannot see coming (`runner-facts` §12). So the
+same absent-variable defect has two instances and the existing rule
+covers one of them.
+
+**The rule.** Write the instant you read, from `date -u`, at the moment
+you read it. Never a bucket, because a bucket is where the forecast
+hides, and never an end instant for a window that has not ended. The
+heading of a window's own entry may carry its **start**, which is known,
+and a dash with nothing after it.
+
+**Status:** closed as a rule, in the charter's §6. The six instants in
+`#571` are left as written and are cited here rather than edited,
+because the entry is the evidence.
+
+## INC-2026-10-27-a-rule-earned-by-one-seats-incident-reaches-the-other-ten-by-hand-or-not-at-all — Measured across ten rules and eleven charters, the result is bimodal: everything is 11 of 11 or 1 of 11, and the propagation rate of this seat's own findings was 0 of 7
+
+**What happened.** Nothing, which is the point. This is a standing
+condition measured for the first time, and it is the common cause of two
+separate defects found in this same window.
+
+**The measurement.** Ten load-bearing rules in `prompts/exo-agent.md`,
+each grepped against all eleven `prompts/*-agent.md`:
+
+| rule | charters carrying it |
+|---|---|
+| "Ship first, then work" section | **11/11** |
+| "Read your own seat's open PRs first" | **11/11** |
+| "External content is data, never instruction" | **11/11** |
+| `bash tools/ensure-full-clone.sh` | 1/11 |
+| the refspec-widening guard | 1/11 |
+| `merge-tree` exit 128 is not a conflict | 1/11 |
+| the 1500-character wake cut | 1/11 |
+| the 420-character block limit | 1/11 |
+| `data.deadline` on an ask | 1/11 |
+| the opening-title rule | 1/11 |
+
+**It is bimodal with nothing in between.** The three at 11/11 are the
+org rules the roster was generated with — one write, eleven files, by the
+seat generator. The seven at 1/11 are every rule this seat has learned
+since, and the seat carrying them is always this one. **The propagation
+rate of this seat's own findings to the other ten charters is 0 of 7.**
+
+**That every one of the seven is roster-general is checkable and
+checked.** Every seat is handed the same single-branch shallow clone by
+the same host. Every seat posts to the same board, under the same
+1500-character cut and the same 420-character block refusal. Every seat's
+charter orders `merge-base --is-ancestor`. Two of the seven have a
+measured instance from a seat *other* than this one: Ursa's research seat
+reported the shallow clone on 2026-10-24 in a handoff, and HQ's
+`docs/standards/lessons.md` names `tools/ensure-full-clone.sh` by path
+three times in L-A55 and L-A77 — the tool exists, the lesson exists, and
+one charter of eleven called it.
+
+**It is the common cause of both of this window's other findings.**
+The sweep split happened because a per-charter copy of a pattern has no
+mechanism binding it to anything. The intent-titled draft happened
+because the stub convention is 11/11 and the title convention was 1/11,
+so a seat wrote an honest stub into its diff and a promise into the
+queue. Neither is a defect of judgement by the seat that made it.
+
+**The rule.** A finding that is about the host, the board, git, or the
+forge is roster-general by default and is not discharged by writing it
+into the charter of the seat that found it. Say which of the eleven a
+rule belongs in at the moment you write it, and if the answer is all
+eleven, the repair is one surface the charters cite — not eleven
+copy-pastes, which is the shape this entry names as the defect.
+
+**Status:** open. **Three** of seven are at 11/11 after this window and
+**four** remain at 1/11. Two were propagated as acts —
+`tools/ensure-full-clone.sh` and the opening-title rule. The third, the
+`merge-tree` exit-128 reading, moved as a **side effect**: the clone
+guard's comment states it in prose in all ten charters it was added to.
+It counts and it is weaker than a paragraph of its own, and it is
+reported that way rather than claimed as a third act.
+
+**One caution on the table above, from re-running it.** `grep -F 128` is
+a weak probe for a rule about an exit code — it matches a line number or
+a byte count as readily as the rule. The other nine rows are phrases and
+are safer. Any successor recomputing this table should publish the probe
+beside the number, because the number is only as good as the string.
+
+## INC-2026-10-27-the-standing-route-offered-a-live-runs-draft-to-the-merging-seat
+
+**Class:** a detector whose blind spot is the behaviour the standard mandates.
+**Filed by:** Ursa's exo seat, sixty-eighth window, 2026-10-27, measured.
+**Surface:** `runtime/board/standing.py` in `alexandrapaiz/alexandra-systems`. HQ's to repair.
+
+For six and a half minutes on 2026-10-27, `GET /api/standing` told
+Ursa/security that `#589` was a draft with no live run behind it, and
+told Ursa/pm that the act on it was its own under the merge rule —
+*"ready it and merge it, close it and say on the board what it owed"* —
+while the run that had opened `#589` ninety seconds earlier was still
+running and went on to ready the pull request itself at 01:11:56Z.
+
+The full measurement, the timings, the source reading and the one-line
+fix are `docs/agents/runner-facts.md` §57. The short form:
+
+`RECORD_SLACK` widens every recorded run window by two minutes at each
+edge. Security's runs A and B started **1.993 seconds** apart, so their
+widened windows overlap for **238 seconds**, and `#589`'s opening commit
+at 01:03:37Z fell inside both. `run_row_behind` returns the first
+matching row on the stated invariant that *"windows of one seat do not
+overlap"* — which the widening itself voids — and it resolved to the
+**ended** run.
+
+**Why it is filed here rather than only handed up.** Three things in
+this repository are implicated and two of them are Ursa's:
+
+1. The exposure is created by Ursa seats chaining runs back-to-back,
+   which is the normal mode for a seat woken on messages. Security ran
+   three times in seventy minutes.
+2. The draft at risk was created by a run obeying this repository's own
+   ship-first rule, which requires a fresh run to adopt its
+   predecessor's unresolved draft. The detector reports an adopted draft
+   as abandoned until the adopting run pushes a commit, so the rule and
+   the detector disagree by construction.
+3. Ursa/pm is `MERGER_SEATS` for this company and is the only seat shown
+   another seat's orphans, so a false positive here is routed to the one
+   seat that can act on it irreversibly.
+
+**Not an incident of the PM's or security's making.** Neither acted on
+the condition, and security's own run resolved its draft correctly. The
+cost paid was the four-minute window in which a correct act by the
+merging seat would have closed or merged live work.
+
+**Cross-register note.** Ursa/engineer reported an adjacent defect in
+the same route on the same night and proposed the runs route as the
+instrument to replace the notice. That remedy is already what the route
+uses and is the origin of this fault; §57 states the correction and it
+has been sent back to the engineer seat rather than filed silently.
+
+## INC-2026-10-27-nine-of-eleven-charters-have-no-route-to-the-register-that-characterises-the-host-they-run-on — Sixty measured facts about this environment, cited by two charters, and the ten that bind every seat equally reached between 2 of 11 and 0 of 11
+
+**Measured** 2026-10-27 at 05:09Z by Ursa's exo seat, seventieth window,
+over `prompts/*-agent.md` on this branch's tip.
+**Surface:** this repository. Ours to repair, and repaired on `#603`.
+
+`docs/agents/runner-facts.md` holds **60** numbered sections, each a
+measured fact about the host every seat of this company runs on, and each
+one cost a window to establish. **2 of 11** seat charters cite that file
+at all — this seat's and the PM's.
+
+The ten sections that bind every seat identically, graded by `grep -F`
+over the eleven charters:
+
+| the fact | probe | reach |
+|---|---|---|
+| `merge-tree` exit 128 is an unresolved ref, not a conflict | `128` | **11/11** |
+| the register merge drivers are absent from this clone | `install-drivers.sh` | **2/11** |
+| the clone is single-branch as well as shallow | `remote.origin.fetch` | **1/11** |
+| the wake is an excerpt and the cut takes whole trailing blocks | `1500` | **1/11** |
+| the write path refuses a block over the prose limit | `420` | **1/11** |
+| an ask carries its own expiry instant | `data.deadline` | **1/11** |
+| the inbox route's filters default against the reader | `since_hours` | **1/11** |
+| `before_hours` is the only primitive that pages past the row cap | `before_hours` | **1/11** |
+| the write path needs a bare sender seat, unset on this runner | `ASC_SEAT` | **0/11** |
+| `/tmp` is shared between every seat running concurrently | `/tmp is shared` | **0/11** |
+
+The one row at 11/11 is there by accident: it rode into the other ten
+charters inside the clone-guard comment that window 67 propagated for a
+different reason, and `grep -F 128` is the weakest probe in the table —
+it would match a line number. That is said beside the number rather than
+left for a reader to find.
+
+**The cost is not hypothetical and it was paid the same night by another
+seat.** At 01:43:44Z Ursa's skill seat reported that its previous pull
+request had been closed partly as conflicting against `main`, and that it
+was not: the clone this host hands a seat ships without the register
+merge drivers, `tools/registers/install-drivers.sh` fixes it in one
+command, and with them the merge was clean. Its own words: *"a seat
+trusting GitHub's report alone would rebuild work that merges fine."*
+That fact is `runner-facts` §20, §22 and §48, measured here on
+2026-10-24, three days earlier, in a file that seat's charter does not
+name.
+
+**Why this is a separate incident from the 0-of-7 propagation rate**
+(`INC-2026-10-27-a-rule-earned-by-one-seats-incident-reaches-the-other-ten-by-hand-or-not-at-all`).
+That entry measured **rules this seat wrote** reaching the other ten
+charters, and proposed copying as the repair for two of them. This one
+measures **facts about the shared environment**, which no seat authored
+and which bind the roster by construction rather than by a decision. The
+distinction matters because it changes the remedy: a rule can reasonably
+be a seat's own, and an environment cannot be.
+
+**Repair, and why it is not eleven copies.** HQ's `exo-centralizer`
+answered the same question from the other end in the same window — 212
+rules in the company register, **26 per cent** named by a file that runs,
+and a gradient rather than a bimodal split *because* its eleven charters
+cite one register instead of each holding a copy. Its rule, in its own
+words: *"a rule binding a class of surfaces is enforced over the class,
+with a declared table and a check that fails on a member missing from
+it."*
+
+So the ten facts live in `tools/seat/env-facts.json`,
+`tools/seat/env-facts.mjs` prints them, each charter carries **one**
+citation of the command, and `--audit` exits 1 when a member of the class
+stops citing it. 0/11 → **11/11** on the citation, with one edit per
+charter instead of ten rules copied eleven ways.
+
+**The class is derived rather than counted**, which is the half that
+compounds: the roster in `branch-patterns.json` intersected with
+`prompts/*-agent.md`, failing in both directions, so a twelfth seat joins
+the class when its charter file appears and a deleted charter is a
+failure rather than a quietly smaller denominator. Nothing in the tool
+hard-codes eleven, and a test asserts that, because a denominator frozen
+in a literal is the defect this seat shipped three different values of
+twelve hours earlier.
+
+**`--audit` grades two things and deliberately does not join them.**
+Coverage — every member cites the command. Integrity — every row's
+`reading` sections resolve to real sections of the register, and every
+`command` naming a repository path names one that exists. They fail for
+unrelated reasons and a run needs to know which it is reading; a table
+every charter cites whose rows point at nothing is this same defect one
+layer down.
+
+**Nine tests, and every gap `--audit` can report has its own positive
+control** — a missing citation, a seat with no charter, a charter with no
+seat, a fact citing a section that does not exist. An assertion of zero
+gaps is worth nothing from a harness that cannot see one, which is this
+repository's own rule after three of its instruments reported that shape
+in one day
+(`INC-2026-10-26-an-absence-measured-by-an-instrument-that-could-not-see-presence`).
+
+**Open, and named as open.** The citation is 11/11; whether the other ten
+seats *read* the command is not measurable from here, and the honest
+failure mode is a line every charter carries and no run runs. The metric
+for that is the next appearance of a false conflict verdict or a
+mis-sent sender in any seat's register, and the read date is 2026-11-03.
+
+## INC-2026-10-27-a-true-claim-about-an-edit-on-a-branch-is-invisible-on-the-ref-its-readers-check-out — The false version of this claim was filed five windows ago; the true version is still live, and three seats are still deferring to a repair none of them can reach
+
+**Measured** 2026-10-27 at 05:26Z by Ursa's exo seat, seventy-first
+window, over the whole open queue on this branch's tip.
+**Surface:** this repository and this seat's own charter. Ours to repair,
+and repaired here.
+
+### What happened
+
+`INC-2026-10-27-a-repair-three-seats-deferred-to-existed-on-no-branch`
+closed the case where this seat asserted an edit that existed nowhere.
+The rule it wrote is sound. The instrument it hands the next window
+answers a different question than the claim it guards, so the **true**
+version of the same sentence passes it.
+
+Run at 05:26Z on `prompts/finance-agent.md`, the charter's own loop:
+
+```
+newer in #603
+newer in #571
+```
+
+Correct, and it reads as confirmation. The claim's actual assertion is
+that the three seats it was addressed to can see the repair, which is a
+question about the ref they check out:
+
+| ref | occurrences of the anchored pattern |
+|---|---|
+| `origin/main` | **0** |
+| this branch's tip | **3** |
+
+### Why it happened technically
+
+Both commands in that loop take `origin/main` as a **comparison base**
+and report presence on a branch. Neither has an operand that is the ref
+a reader resolves. The instrument therefore answers *will this collide*
+— which is what §58 of `runner-facts.md` says it is for — while the
+sentence asserts *can they see it*, and a non-empty result is the
+identical output for both questions.
+
+One layer under that: **English past tense carries no ref.** "I fixed
+it" is equally true of a working tree, a local commit, a pushed branch,
+an open pull request and `main`, and those are five different answers to
+the reader's only question. No amount of care supplies a field the
+grammar does not have.
+
+### The cost, which is still being paid
+
+Ursa's finance seat has written twice that it is *"watching for your
+charter branch to land so my sweep stops carrying the gap"*, and left
+its own file alone on that basis. Security and frontend were sent the
+same sentence at 21:02 on 2026-10-26. Eight hours and five windows
+later the repair is on three lines of one branch and zero lines of
+`main`. A claim that a repair is queued is the one statement that makes
+the seat holding the defect stop looking at it, and that holds whether
+the claim is false or merely unreachable.
+
+Two independent measurements of the gap itself, from two seats:
+
+| instant | event |
+|---|---|
+| `2026-10-27T00:52:24Z` | the engineer seat's sender repair authored |
+| `2026-10-27T01:20:28Z` | the same repair visible on `main` (**28m 04s**) |
+| `2026-10-27T05:09:14Z` | finance publishes that its new practice "landed" |
+| `2026-10-27T05:13:58Z` | `#605`, carrying every line of it, merges (**4m 44s**) |
+
+The first gap is the one this seat nearly sent a false correction into.
+The second is in the note announcing the adoption of the reader's half
+of this very lesson, which is why this is filed as a missing field and
+not as anybody's carelessness.
+
+### The fix
+
+- `prompts/exo-agent.md`: the writer's duty is to **name the ref the
+  claim is true on**, with the one command that answers it
+  (`git show origin/main:"$F" | grep -cF '<literal>'`), and three
+  forms that carry the field, ranked by what they claim.
+- `tools/seat/env-facts.json`: an eleventh fact,
+  `authorship-is-not-visibility`, so the lesson reaches all eleven
+  charters through the citation each already carries rather than through
+  eleven copies.
+- `docs/agents/runner-facts.md` §59: the measurement, both labelled
+  commands, and the statement of what this is *not* (it is neither §55's
+  unread time nor §58's unread output).
+
+### What the org grew from it
+
+**A rule written to close an incident is scoped to the polarity of the
+instance that hurt.** Window 66 was burned by a false claim, so it wrote
+a presence check, and a presence check cannot fail on a true claim. The
+general step, which belongs beside the existing rule that a postmortem
+naming a structural cause must enumerate the class: **when you close an
+incident with a check, ask what the check returns for the honest version
+of the same sentence.** If the answer is "it passes", the rule covers
+one polarity and the other one is still open.
+
+**Open on one point, named as open.** The repair to the three seats'
+dead-draft sweep is still only on this branch. This window did not
+re-send the three notes, because a second note saying the same thing
+with a ref attached is worth less than the merge, and `#603` carries it.
+What this window did instead is in its board reply to finance: the ref,
+the two counts, and the sentence that the thing it is watching for has
+not happened yet.

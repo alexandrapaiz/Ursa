@@ -202,6 +202,36 @@ you expect at the top of your PR description: two open PRs that both
 append to the ledger conflict when the owner merges the second one, and
 she should not learn that from a failed merge.
 
+**That sentence stopped being true, and whether it is true today is a
+property of your clone (corrected 2026-10-24 by Ursa's exo seat, measured).**
+`docs/ideas.md` has an entry-aware merge driver, and
+`docs/agents/incidents.md` and `docs/decisions.md` have a second one.
+Two branches that both append no longer collide. But `.gitattributes`
+only *names* a driver, and the definition lives in git config, which is
+per clone and which the clone the host hands you every run does not
+have. So without two commands you will be shown conflicts that are not
+there, and you hold the merge gate, so a false one holds a clean pull
+request.
+
+Run these before you take or repeat any conflict verdict, including one
+another seat reported to you:
+
+```sh
+bash tools/ledger/install-driver.sh
+bash tools/registers/install-drivers.sh
+git config --get-regexp 'merge\.(ledger|register)\.'   # must print 6 lines
+```
+
+Measured on the open queue of 2026-10-24: **4 of 15** pull requests
+reported `CONFLICT docs/ideas.md` before, **0 of 15** after, same
+commits and same instrument, and all four confirmed clean by performing
+the merges in a scratch worktree. Still name the other open pull
+requests that touch `docs/ideas.md` and still name the order you expect,
+because ordering information is useful to the owner either way. Just do
+not call it a conflict until the six lines above print. The account is
+`docs/agents/runner-facts.md` §20 and the case is
+`INC-2026-10-24-a-merge-driver-that-is-not-installed-is-a-conflict`.
+
 Commit the closed sprint's retro, the ledger grooming, and the new sprint
 file on a branch named `pm/sprint-YYYY-MM-DD`, and open ONE pull request.
 The owner's merge is the sprint commitment. Never merge your own PR, never
@@ -228,8 +258,32 @@ Before you read anything else, find the work your own seat has already
 done and not yet landed:
 
 ```bash
+# First, because every check below lies in the clone this host hands you.
+# The checkout is one branch's tip, one commit deep: `merge-base
+# --is-ancestor` then returns a clean exit code meaning the opposite of the
+# truth, `merge-tree` exits 128 and reads as a conflict, and no
+# `origin/<branch>` but `origin/main` ever resolves however often you fetch
+# it by name. Git refuses none of those questions; it answers them wrongly.
+# HQ's docs/standards/lessons.md names this repair by this path in L-A55 and
+# L-A77. Added to this charter 2026-10-27 by Ursa's exo seat, which had been
+# the only one of the eleven carrying it while all eleven are handed the same
+# clone, and Ursa's research seat is the seat that reported the fault.
+bash tools/ensure-full-clone.sh
+# ONE TABLE, NOT ELEVEN COPIES (added 2026-10-27 by Ursa's exo seat, measured).
+# The clone repair above is one of ten facts about this host that bind every
+# seat here equally — the register merge drivers the clone also lacks, the wake
+# cut that drops whole trailing blocks, the board write path's per-block
+# refusal, `merge-tree`'s exit 128 for an unresolved ref, the shared /tmp.
+# Each was measured once at the cost of a window and written into
+# docs/agents/runner-facts.md, which 2 of 11 charters cited; the ten facts
+# individually reached between 2/11 and 0/11. Nine seats were handed a
+# characterised environment and no route to the characterisation. This command
+# is that route, and it is the only line any charter carries, because
+# `--audit` fails when a charter stops citing it. Run it; it is one read.
+node tools/seat/env-facts.mjs
+
 gh pr list --state open --limit 100 --json number,headRefName,title,updatedAt \
-  --jq '.[] | select(.headRefName | test("pm"))'
+  --jq '.[] | select(.headRefName | test("^([a-z0-9-]+-)?(pm)/"))'
 ```
 
 If your seat has an open PR that touches the files you are about to
@@ -237,7 +291,9 @@ touch, merge it into your branch and build on top of it. Do not start
 from `main` and write a second version. The newest one usually contains
 the older ones already, so check with
 `git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>` before you
-assume you have to combine them by hand. This is HQ's L-E10 in
+assume you have to combine them by hand — and run the repair above first,
+or that check will tell you two related branches are unrelated. This is
+HQ's L-E10 in
 docs/standards/lessons.md, "an open card is not evidence that nobody
 built it", stated for the whole roster instead of one seat.
 
@@ -316,6 +372,36 @@ few turns, before any substantial thinking: create your branch, make one
 small commit, push it, and open the PR with `gh pr create --draft`. Then
 commit as you go, and call `gh pr ready` when the run is finished.
 
+**Title it for what the branch contains, not for what you intend (added
+to this charter 2026-10-27 by Ursa's exo seat; it had been in one of the
+eleven since 2026-10-18).** The opening commit is a placeholder, so the
+opening title says so: `pm YYYY-MM-DD: opening, no work yet`. Rename
+it with `gh pr edit --title` as the work actually lands, and put the plan
+in the body under a heading that marks it as a plan.
+
+The title is written at the one moment in the run when nothing has been
+done, which is why intention is the natural thing to put there, and
+nothing in the loop ever goes back to check it. That is harmless while
+the run lives and rewrites it at the end. **When the run dies instead,
+what is left in the owner's merge queue is a promise that reads exactly
+like finished work.** Ursa incident 16 is two instances of it, and the
+measured case that propagated this rule to the other ten charters is a
+third from a different seat: `#580` on
+`ursa-engineer/2026-10-27-message`, a draft opened 2026-10-27T00:36Z
+whose title read as a repair already made, whose own run note inside the
+diff said "Intended unit of work", and whose named one-line fix was
+byte-identical to `main`. The identifier is here at that seat's own
+request: it would rather the convention name the instance that was
+measured than two self-reports from the seat that wrote the paragraph,
+because a reader who checks it finds a real draft and a real
+byte-identical line. The file was honest and the title was not,
+because this paragraph was in one charter and the stub convention was in
+all eleven.
+
+Writing the stub honestly is not a substitute. A reader who finds your
+run after it is gone reads the queue, and the queue shows titles.
+
+
 This is not bookkeeping. The rule reaches Ursa through
 docs/standards/pm.md §8, and it was written after two runs in
 alexandria's register worked for dozens of turns, reported success, and
@@ -355,8 +441,44 @@ The check, before you end your run:
 
 ```bash
 gh pr list --state open --limit 100 --json number,isDraft,headRefName,updatedAt \
-  --jq '.[] | select(.isDraft) | select(.headRefName | test("pm")) | [.number,.headRefName,.updatedAt] | @tsv'
+  --jq '.[] | select(.isDraft) | select(.headRefName | test("^([a-z0-9-]+-)?(pm)/")) | [.number,.headRefName,.updatedAt] | @tsv'
 ```
+
+**The pattern above is anchored, and it is not this charter's to edit
+(added 2026-10-27, Ursa's exo seat).** It lives once, for all eleven
+seats, in `tools/seat/branch-patterns.json`, and
+`tools/seat/own-prs.test.mjs` fails if this file's copy and that one ever
+disagree. Prefer the tool, which prints a count line even when the answer
+is none:
+
+```bash
+node tools/seat/own-prs.mjs pm --drafts     # add --require-empty to gate on it
+```
+
+Two reasons it is written `^([a-z0-9-]+-)?(pm)/`
+and not `pm`. First, a bare substring matches
+ordinary English inside another seat's branch name:
+graded against ground truth over every pull request branch this
+repository has had, the bare form claims branches that belong to another
+seat and the anchored form claims none, with neither losing one of its
+own. **Do not take that from this sentence; the numbers are not written
+here on purpose.** One command prints them with the denominator they
+were measured over, and exits non-zero if the anchored form has
+regressed:
+
+```bash
+node tools/seat/own-prs.mjs --audit
+```
+
+The count used to be a literal in this paragraph, and on 2026-10-27 the
+eleven charters said one number, `tools/seat/branch-patterns.json` said
+a second, and the repository was a third — because the denominator grows
+every time any seat opens a pull request, so it was stale in whichever
+file was edited last. A measurement whose value changes without anyone
+touching it cannot live in prose. Second,
+the sweep's instruction on anything it prints is *resolve it before you
+stop*, so here a false positive does not add noise — it tells this seat
+to close a sibling's live draft.
 
 Anything it prints that is not this run's own pull request is yours to
 resolve before you stop.

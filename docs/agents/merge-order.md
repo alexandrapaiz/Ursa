@@ -1,107 +1,102 @@
-# Merge order — the queue, measured and ordered
+# Merge order for the owner — measured 2026-10-27, window 71, queue read 05:32:29Z
 
-Replaced wholesale each run by Ursa's ExO seat under
-`prompts/exo-agent.md` §5b. Nothing in this file is carried forward: a
-line absent from the newest copy is the point of the file, not a loss.
+Replaced whole each window, by this charter's own instruction, which is
+why `tools/registers/registers.json` declares this file `enabled: false`
+and why it belongs on exactly one branch at a time.
 
-**Measured 2026-10-26, 20:3x UTC, sixty-second window**, against
-`origin/main` at `9e2f21b7`, in a clone that was unshallowed and had its
-refspec widened first (§0, verified: `--is-shallow-repository` prints
-`false`, `main` carries 1,616 commits), **and that had the repository's
-merge drivers registered before any merge was performed**. Every verdict
-was performed rather than asked of GitHub.
-
-**The driver registration is new this run and it is the difference
-between this copy and the last one.** `bash tools/registers/install-drivers.sh`,
-once in the checkout and once in every scratch worktree, because a
-worktree does not inherit it. Without it `git merge-tree` exits 128 with
-`fatal: custom merge driver ledger lacks command line.` on any pair that
-both touch `docs/ideas.md`, `docs/decisions.md` or
-`docs/agents/runner-facts.md`, and §5b's old wording reads that as a
-conflict. The measurement, the three failure modes and the exit-code
-table are `docs/agents/runner-facts.md` §48.
-
-## The headline: there is no conflict in this queue, and eight merges close all seventeen
-
-The previous copy of this file named a trunk conflict on one head and an
-order-independent collision on a pair, and told the engineer seat to
-rebase. **Both are withdrawn.** The trunk verdict was already withdrawn
-by window 61. The collision is real driverless and resolves to nothing
-with the driver registered, which is Ursa's engineer seat's measurement,
-reproduced independently here on the same pair.
-
-| order | merge | seat | closes with it | verdict vs `main` | tier | instrument |
-|---|---|---|---|---|---|---|
-| 1 | **549** | engineer | 520, 530, 540, 545 | CLEAN | B | `merge-tree` + sequenced `git merge`, drivers registered |
-| 2 | **550** | pm | 517, 546 | CLEAN | B | same |
-| 3 | **551** | security | 532 | CLEAN | B | same |
-| 4 | **548** | exo | 536 | CLEAN | B | same |
-| 5 | **552** | skill | 547 | CLEAN | B | same |
-| 6 | **509** | market | — | CLEAN | B | same |
-| 7 | **395** | research | — | CLEAN | **C** | same |
-| 8 | **447** | exo | — | CLEAN | **C** | same |
-
-Eight merges, seventeen pull requests closed. Nine of the seventeen are
-contained in another open head and close for free.
-
-**The order is verified by performing it**, in a detached scratch
-worktree with the drivers registered, against `origin/main` and never
-against `main`:
-
-```
-549 OK  550 OK  551 OK  548 OK  552 OK  395 OK  447 OK  509 OK
-all 17 open heads contained in the simulated result
-```
-
-The two Tier C rows are last deliberately, because they wait on the
-owner and nothing below them depends on them.
-
-## Containment, measured rather than assumed
-
-Instrument: `git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>`,
-exit 0 meaning contained, stated in the direction §"Read your own seat's
-open PRs first" requires.
-
-```
-517 is contained in 546, 550        532 is contained in 551
-520 is contained in 540, 549        536 is contained in 548
-530 is contained in 540, 549        540 is contained in 549
-545 is contained in 549             546 is contained in 550
-547 is contained in 552
-```
-
-The eight tips above are exactly the heads contained in nothing.
-
-## Pairwise, and the half this seat cannot measure
-
-Every ordered pair of the seventeen open heads, drivers registered:
-**zero** real conflicts. Driverless, fourteen pairs collide and all
-fourteen are on `docs/ideas.md`.
-
-**GitHub's green button honours no `.gitattributes` driver.** That is the
-engineer seat's measurement, written up in its own repository as Finding 1
-of `docs/design/server-side-merge-measurement.md`, and this seat has not
-independently reproduced it. So the second head of a colliding pair will
-show CONFLICTING at the button the moment the first lands, and the
-remedy is one command on the second head,
-`bash tools/ledger/requeue.sh --push <second>`, rather than a rebase.
-Either order works. Nothing in the table above needs reordering for it.
-
-## The two numbers for the owner
+## The three numbers
 
 | | |
 |---|---|
-| open pull requests | **17** |
-| merged in the last seven days | **87** |
-| oldest open | 395, created 2026-10-24 21:21 UTC, about 47 hours |
+| open pull requests | **12** (read 05:32:29Z) |
+| merged in the last 7 days | **116** (read 05:26:52Z) |
+| oldest open | #395, created 2026-10-24T21:21:40Z (2d8h) |
 
-Open is far below the week's merges, so **no depth warning**. The gate is
-absorbing faster than the seats produce.
+**Open does not outnumber the last seven days' merges** — 12 against
+116 — so the depth warning this charter requires in bold does not fire.
+The gate is absorbing faster than the roster produces, and has been
+since mid-October.
 
-**The queue moved four times while this file was being written**, from 14
-to 17 open heads between 20:0x and 20:3x UTC, and two of this window's
-own pairwise rows were pull requests that did not exist at its fetch. A
-row in this table is a claim about 20:3x UTC and no later instant. Fetch
-`refs/prs/*` immediately before acting on any row of it, because a
-missing ref exits 1 with an empty file list and reads as a conflict
-(runner-facts §48).
+**The queue is churning, not sitting, and the read instants above are
+load-bearing for that reason.** Four of the twelve were opened in the
+twenty-six minutes before this read, and the first pass of this
+measurement, taken at 05:32:01Z, held two pull requests whose
+`refs/prs/*` did not yet resolve. Twenty-eight seconds and one refetch
+later both were clean. A verdict on this queue has a shelf life in
+minutes, which is why every row below carries the instrument that
+produced it and the instant it was produced.
+
+## What actually conflicts, performed rather than asked
+
+Drivers installed first (`tools/ledger/install-driver.sh`,
+`tools/registers/install-drivers.sh`; `git config --get-regexp '^merge\.'`
+returns **6** lines here, and empty would be the defect). PR refs
+refetched with an explicit destination before any `merge-tree` call, so
+an exit of 128 cannot be read as a conflict.
+
+**GitHub's cached field is unusable on this queue and the number is
+worth stating.** `mergeable` read at 05:32:47Z returned `UNKNOWN` for
+**7 of 12**, including every pull request older than twenty-six minutes.
+It is not a conflict instrument here. The merge was performed instead.
+
+Two instruments, agreeing, and the split is the whole value:
+
+| class | count | whose act |
+|---|---|---|
+| clean both ways | **10** | **the owner's merge** |
+| conflicts only because the forge runs no custom merge driver | **1** | the authoring seat's — and it is this seat's own |
+| real conflict | **1** | the authoring seat's to rebase |
+
+- **Real conflict:** `#599` (PM), in `docs/sprints/dispatch-queue.md`
+  and `docs/sprints/pending.md`. Theirs to rebase under
+  `docs/standards/pm.md` §11.3, not a decision owed by the owner. The
+  PM has `#609` open and clean as of 05:32, and `#599` is **not**
+  contained in it (`git merge-base --is-ancestor refs/prs/599
+  refs/prs/609` exits non-zero), so the two are separate bodies of work
+  and landing `#609` does not resolve `#599`.
+- **Driverless conflict, and it is mine:** `#571` (this seat), in
+  `docs/agents/incidents.md` and `docs/agents/learning-log.md`. Every
+  conflicting path declares a `merge=register` driver and this
+  repository's drivers resolve all of them; GitHub's merge runs in a
+  clone that has none. **No action is being taken on it and that is
+  deliberate.** `#571` is contained in `#603`
+  (`git merge-base --is-ancestor refs/prs/571 refs/prs/603`, exit 0),
+  `#603` is clean both ways, and Ursa's PM placed `#571` with the owner
+  at 00:23:57Z for a charter path. Merging `main` into a superseded
+  branch would move an artifact a sibling seat has promised her would
+  not move, to clear a conflict on content that `#603` already carries.
+  **The owner's decision on `#603` closes `#571`'s content either way.**
+
+Instrument column, for every row above: `git merge-tree --write-tree
+--name-only origin/main refs/prs/<n>` with this repository's drivers
+registered, cross-checked against HQ's
+`tools/check-merge-queue.sh` run at 05:33Z from the resident host's
+checkout at `/srv/asc/repos/alexandra-systems/`. The two agree on all
+twelve. HQ's script additionally reports what the forge's driverless
+merge will do, which is the only source of the middle row.
+
+## The landing order
+
+Nine of the ten clean-both-ways pull requests are this morning's live
+window runs on nine different seats, touching nine different lanes, and
+`merge-tree` calls every pair of them clean against `main`. There is no
+ordering constraint to simulate between them: any sequence works.
+
+Two notes that are about order rather than about conflict:
+
+1. **`#603` before `#571`.** `#571` is contained in `#603`. Merging
+   `#603` first makes `#571` empty and closable with no decision owed;
+   merging `#571` first costs a second read of the same work.
+2. **`#395` (research, 731 commits behind) is the one row where "clean"
+   deserves a second look before the button.** It merges clean and it
+   predates 731 commits of movement on `main`, so its *content* may have
+   been overtaken even though its *merge* has not. That is a judgement
+   about the work and it is the owner's, not a tracking fact. Named here
+   so it is not mistaken for a conflict.
+
+## Drafts
+
+Three of the twelve are drafts — `#600` (engineer), `#604` (frontend),
+`#608` (skill) — and all three belong to runs that were live at this
+read. None is a dead draft and none is this seat's. **This seat has no
+open draft**, which is the check its charter requires before a run ends.
