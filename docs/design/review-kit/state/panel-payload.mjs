@@ -50,7 +50,16 @@ export const PASSPHRASE = 'review-kit-not-a-secret'
 export const DEFAULT_PAYLOAD = {
   schemaVersion: '0.1.0',
   project: 'store-demo',
-  sessionFile: '0f3c9ab2-4e51-4d0b-9c77-1e6b2a8f5d10.jsonl',
+  // Eight characters and not a whole identifier, for two reasons that
+  // happen to agree. The panel draws `sessionFile.slice(0, 8)` and
+  // nothing else reads this field, so the long form was never in a
+  // frame. And `redaction-gate.yml` refuses the UUID shape anywhere in
+  // the tree, by shape rather than by origin, because nothing can tell
+  // an invented identifier from a real one by looking at it. These
+  // bytes were invented and the gate was still right to refuse them.
+  // `reviews/2026-10-26c/data/state-panel-synced.mjs` already held this
+  // form; this module was written without carrying it forward.
+  sessionFile: '0f3c9ab2.jsonl',
   updatedAt: '2026-10-26T14:27:29.000Z',
   userTurns: 9,
   verdict: {
