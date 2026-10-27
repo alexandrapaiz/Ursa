@@ -3738,6 +3738,26 @@ dataset sold to a lab that difference is the whole product.
 - Cost: $0
 - Status: proposed
 
+**Dated note, 2026-10-27 (message, 4th run):** this axis now has a
+named policy actor pushing it toward regulation rather than leaving it
+as a reputational question for lab buyers alone. A report titled
+"American AI Advantage Is for Sale" (CASE, a free-market advocacy
+nonprofit, 2026-10-26) calls for Congress and the administration to
+restrict sales of proprietary AI-training products to CCP- or
+military-linked Chinese entities, with disclosure requirements for
+federal contractors serving those buyers, and names Surge AI
+specifically as holding US military contracts (Air Force, Army) while
+also supplying Tencent, which the Pentagon designated a "Chinese
+military company" in 2025. This is a policy ask, not an enacted rule —
+nothing in law has changed — but if a disclosure rule along these
+lines ever lands, Minor's structure has nothing to disclose under it,
+since it has never sold contractor labor to anyone. Raises the stakes
+of the owner's decision above; does not change it. Source: [Townhall:
+New report scrutinizes US AI data sales to
+China](https://townhall.com/news/tayte-christensen/2026/10/26/new-report-scrutinizes-us-ai-data-sales-to-china-n2685323).
+Full reasoning in docs/market/positioning.md's "The provenance-trust
+axis now has a policy actor trying to make it a legal one" section.
+
 ### 2026-10-07 (market) — No exploited-contractor exposure, as a trust claim distinct from "cheaper"
 - Trigger: this run's landscape watch (docs/market/landscape.md,
   Mercor update). A Gazetteer SF investigation (2026-05-05, by Cydney
@@ -15332,4 +15352,33 @@ the owner to accept or reject.
   this seat that edits `skills/README.md`. Named rather than left open because
   §5ag's own entry sat one run before it was built and said in its own text
   that naming an owner is what stops that.
+- Status: proposed
+
+### 2026-10-26 — The ledger gate is red on `main` over one scan heading the classifier does not know (skill run)
+- Trigger: merging `origin/main` into this seat's stack this run and
+  running the ledger's own tests on the merge result. Two of 69 fail,
+  `every real heading that announces a scan is classified as one` and
+  `the real ledger carries no violation a seat could repair`. Both
+  reproduce unchanged on `origin/main` itself at `5b7bcf6`, in a
+  worktree with nothing of this branch in it, so the merge did not
+  cause them and resolving the merge cannot clear them.
+- What: one heading is the whole cause. `### 2026-10-26 (engineer, hook
+  run) — Craft scan: tesh 0.3.2 and txm 8.2.0, where a documented
+  command is executed by the test suite instead of read by a reviewer`
+  is a scan note, but `SCAN_TITLE` in `tools/ledger/block-kinds.mjs`
+  does not recognise that spelling, so the classifier treats the block
+  as an ordinary idea and §4's five fields fall due on it. It has no
+  `- Cost:` line and no `- Status:` line, which is exactly what
+  `node tools/ledger/check.mjs docs/ideas.md` reports: two violations a
+  seat must repair, in 330 blocks. The failure is benign in itself and
+  corrosive in effect, because a gate that is red for a reason everyone
+  knows is a gate nobody reads, and the next real violation lands in
+  the same output.
+- First step: the engineer seat picks one of the two repairs the test's
+  own failure message names, either give the heading the standard scan
+  spelling or add the new one to `SCAN_TITLE`, and says which in the
+  pull request. Adding the spelling is the better one if hook runs will
+  keep producing it, because the alternative is a rule that depends on
+  a hook remembering a phrasing.
+- Cost: $0
 - Status: proposed
