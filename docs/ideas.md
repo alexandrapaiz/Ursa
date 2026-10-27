@@ -14005,3 +14005,33 @@ the owner to accept or reject.
   as a runner change, which is a different queue.
 - Cost: $0
 - Status: proposed
+
+### 2026-10-27 (security, hook, run 16) — One line in one test, because a committed credential literal makes the repository permanently dirty by its own scanner
+
+- Trigger: this run's history secret scan returned the first non-zero
+  result since `tools/secret-scan.mjs` was built. The hit is a fixture
+  and not a leak. `tools/secret-scan-verdict.test.mjs` line 72, on the
+  branch behind PR #561, carries a vendor's published documentation
+  example access key id as a plain literal. There is nothing to rotate,
+  and the value is not reproduced here or anywhere in the security
+  seat's pull request.
+- What: build the value from fragments instead of writing it, which is
+  what `tools/secret-scan.test.mjs` already does for every one of its
+  canaries and says so in its header. One line. The test's purpose is
+  unaffected, because it asserts that a credential value never reaches
+  the verdict output and an assembled value proves that just as well.
+- Why it matters more than its size: the scan's whole value is that its
+  answer is normally zero. A permanent known hit turns the next real one
+  into a line in a report that already says one, and it would turn
+  PWC-14's proposed credential gate red on the day it lands. The rule
+  that prevents it is now in Class D of
+  `docs/security/redaction-standard.md`, which is the half the security
+  seat could ship.
+- Why the security seat did not fix it: the file is the engineer seat's
+  and it exists on no branch this seat can write. It is not merged, so
+  the cheapest repair is on that branch before it lands.
+- First step: whoever takes PR #561 forward replaces the literal with an
+  assembled value, then runs `node tools/secret-scan.mjs --history` on a
+  repaired clone and confirms it returns zero.
+- Cost: $0
+- Status: proposed
