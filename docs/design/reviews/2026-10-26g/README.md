@@ -10,7 +10,7 @@ cut off at turn 68.
 |---|---|---|
 | `.panel-action`, one of three hover rules the overlay ships | in no frame, under no probe, unreachable by any instrument | driven, photographed, 317px of hover |
 | the dashboard's three unit sections | drawn by no store any review ever had | photographed at four widths |
-| `verify-hover.mjs` | 11 targets, every one on ursa-minor | 14, and the three it cannot reach say which flag would reach them |
+| `verify-hover.mjs` | 10 targets, every one on ursa-minor | 13, and the three it cannot reach say which flag would reach them |
 | the panel's label column at 320 | boxes of 34, 34, 41, 34 for four rows, glyphs overrunning into the 8px gap | 42, 42, 42, 42, gap 8 on every row |
 | the dashboard's statement left edge at 320 | 3 distinct edges | 1 |
 | the same at 640 and 1440 | 2 distinct edges, 0.6px apart | 1 |
@@ -168,7 +168,7 @@ noticed. Nobody can see 0.6px.
 
 ## 4. The hover instrument reaches the second product
 
-`verify-hover.mjs` carried eleven targets and every one was on
+`verify-hover.mjs` carried ten targets and every one was on
 ursa-minor. The overlay ships three hover rules, from
 `grep -n ':hover' app/globals.css app/dashboard/dashboard.css`, and none
 was in the list. So the hover the 2026-10-26d run put on the panel's two
@@ -185,8 +185,18 @@ disappear when you forget a flag has exactly the defect the list exists
 to prevent.
 
 Calibrated first, as the kit's README requires: run against ursa-minor
-alone, all eleven prior verdicts unchanged, and the three new ones
-reported unreached (`data/hover-calibrate/states.txt`). Then both
+alone, all ten prior verdicts unchanged, and the three new ones reported
+unreached (`data/hover-calibrate/states.txt`).
+
+**Ten, and the 2026-10-26e review said eleven.** Counted off the file:
+`cta-home`, `rec-action-home`, `quiet-link-404`, `mark-link-404`,
+`rec-action-index`, `rec-row-index`, `rec-action-record`, `sp-verbatim`,
+`sp-mutated`, `sp-ngp`. This run repeated the eleven from that review
+into three places before the frame count disagreed with it, which is how
+it was caught: thirteen targets produced thirteen pairs, and fourteen
+was the number in the prose. A count carried from one review's sentence
+into the next one's is not a measurement, and the correction is the point
+rather than the number. Then both
 products in one invocation (`data/hover-all/states.txt`).
 
 ```
@@ -204,13 +214,13 @@ can see. The pixels, from `diff-frames.py`:
   dash-action-overlay    247 px  10.8%
 ```
 
-None is below the hairline it draws. All fourteen targets are in
+None is below the hairline it draws. All thirteen targets are in
 `data/hover-all/`, and the full table is `data/hover-pixels.txt`.
 
 **The overlay's three reproduce within two pixels across two runs on one
-host; ursa-minor's eleven reproduce exactly.** This folder's frames were
+host; ursa-minor's ten reproduce exactly.** This folder's frames were
 shot twice, once before the compression pass of §7 and once after, and
-the eleven ursa-minor counts are identical between the two sets to the
+the ten ursa-minor counts are identical between the two sets to the
 pixel — 218, 10451, 10462, 4024, 114, 379 and the rest — while the three
 overlay ones moved by 0, 1 and 2. The numbers above are from the second
 set, which is the one committed. **No cause for the wobble is offered
