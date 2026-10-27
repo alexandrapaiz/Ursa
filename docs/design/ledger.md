@@ -1224,6 +1224,9 @@ they are reported as zero denominators and not as passes.
 
 **proposed, not decided**, 2026-10-26 (hook),
 `reviews/2026-10-26e/README.md` §6, `data/bar-contrast.txt`.
+**Closed by L43 on 2026-10-27**, by a third repair that costs neither of
+the two things the options below were weighing. The entry stands as
+written, because the reasoning in it is why the third one was looked for.
 
 The provenance bar is the one graphic on the overlay's dashboard that has
 to be read rather than looked at. Its four classes are the data artifact
@@ -1445,3 +1448,112 @@ measuring. Bind the field to the left of the pipe.
 
 This is L9's family — the unit a number is in — one level up: not the
 unit of the value, but the identity of the thing the value describes.
+
+## L43 — When both repairs trade the same thing, the trade is in the assumption and not in the surface
+
+**measured**, 2026-10-27 (hook), `reviews/2026-10-27d/README.md` §3,
+`data/swatches-before.txt`, `data/swatches-after.txt`. **This entry
+closes L36.**
+
+L36 measured the dashboard legend's fourth key at 1.20:1 and left it to
+the owner, because both repairs it could see were palette decisions.
+Painting the swatch in its label's colour makes it visible and stops it
+showing what the track looks like. Lifting `--line` itself fixes the
+legend and changes every bar on the page with it. One trades honesty for
+visibility, the other trades blast radius for both, and neither is this
+seat's to choose.
+
+**Both options assumed the mark has to be the whole swatch.** Drop that
+and a third appears: a 1px hairline drawn inside the box, in `--dim`,
+which is the colour the key's own label is already set in. The interior
+stays exactly `--line`, so the swatch is still a specimen of the mark it
+keys. The edge that locates it is a value already on that line of the
+stylesheet. The measurement, same instrument, same frozen frame:
+
+```
+                                    before   after
+  covered by no span, vs the night    1.20    5.13
+  the same, vs the pixel beside it    1.20    5.13
+  share of the swatch at >=3:1           0%     29%
+  the interior                   20,27,43   20,27,43
+```
+
+**What it did cost, because something always does.** The legend's third
+and fourth swatches fall from 3.28:1 to 1.31:1 against each other, so
+they are now told apart by shape rather than by lightness: a solid fill
+beside an outline. That is the device this same file already uses for its
+first two keys, `--polar` solid against `--polar` with a 2px foot, which
+is why it is a cost this surface has already decided it can pay. The bar
+itself did not move: the before and after frames differ by 42 pixels at
+desktop and 44 at phone, which is the swatch's perimeter and nothing else.
+
+**The transferable half.** Two repairs that trade different things tell
+you the decision is the owner's. Two repairs that trade *the same* thing
+tell you they share a premise, and the premise is usually the thing to
+drop. Both of L36's options changed the whole swatch because a swatch
+"is" a fill, and a swatch is a region with an edge.
+
+## L44 — The brightest pixel is not the mark; the mark is whatever the page is least like
+
+**measured**, 2026-10-27 (hook),
+`reviews/2026-10-27d/data/bench-github-legend.txt`,
+`review-kit/measure-swatches.mjs`.
+
+`probe-bar-contrast.mjs` ranked each swatch's pixels by brightness and
+scored the brightest as the mark. On a page whose ground is `--night`
+that is correct and invisible as an assumption. It is not a property of
+contrast, it is a property of dark mode, and the first foreign page the
+promoted tool was pointed at said so immediately.
+
+L17 names GitHub's repository language bar as the one real comparable
+this seat has. Its legend is the comparable for the key under ours, and
+on it the brightest pixel inside every 8px dot is the **white page**
+showing through the circle's antialiased corners. All seven dots came
+back at 1.00:1 against a page they are plainly visible on. Ranking by
+ratio against the ground instead reads both directions and needs no flag
+for which kind of page it is on.
+
+**With the instrument corrected, the benchmark itself.** 4 of GitHub's 7
+dots clear 3:1. The three that do not are Rust at 2.14, JavaScript at
+1.35, and **Other at 1.17** — the class that means the same thing as the
+one this run repaired, failing by the same margin, in the most-used
+developer product in the world. This house's four keys now read 11.99,
+11.99, 3.93 and 5.13. That is the shape L17 already found in the bar, one
+level down in the legend, and it is the second time a benchmark of this
+surface has come back saying the comparable ships the defect too.
+
+**The transferable half, which is not about colour.** An extremum is a
+stand-in for a distance, and it is only the right stand-in while the
+reference point holds still. Measure the distance.
+
+## L45 — The freeze pins the animation clock and the randomness, and this page prints the wall clock
+
+**measured**, 2026-10-27 (hook), `reviews/2026-10-27d/README.md` §5.
+
+`lib/freeze.mjs` closes L8 with a verified claim: with the rAF timestamp
+pinned and `Math.random` seeded, all fifteen frames are bit-identical
+across two shoots. That was true of the fifteen frames that existed when
+it was written. The overlay's dashboard was not one of them, and it
+prints `read at HH:MM:SS` in its header.
+
+So a before-and-after on this page carries a diff nobody introduced. This
+run's two frame sets differ by 134 pixels at desktop and 180 at phone.
+**42 and 44 of those are the repair.** The remaining 92 and 136 are the
+clock, which is 69% and 76% of the diff, and the repair is the smaller
+half of its own measurement.
+
+That is survivable here only because the repair's own footprint was known
+in advance, exactly 42 pixels being the perimeter of a 17x6 box, so the
+two clusters could be told apart by where they are. A fix with no
+predicted footprint would be indistinguishable from the clock.
+
+**Proposed, not built:** `--pin-now <iso>` on `shoot.mjs`, passed through
+to `freezeInit`, so a run comparing two shoots pins `Date` to one instant
+across both and a run that is only photographing gets the real page.
+Pinning it to `PINNED_MS` is not the fix, because this page computes days
+from record timestamps against now, and a 1970 clock would draw a page
+the product never draws.
+
+This is L6, L8 and L41's family, and the fourth distinct way into it: the
+frame differs from itself because the page is telling the truth about
+when it was read.
