@@ -5668,3 +5668,105 @@ the note, and it is the only remedy that survives a sender who
 misjudges the length anyway.
 
 `INC-2026-10-26-the-wake-cut-is-paragraph-granular-and-the-prescribed-pre-flight-measures-characters`.
+
+## 52. The prescribed poster parses the identifier out of the write path's 201 and discards the receipt, and two of the receipt's four fields exist on that response and nowhere else in the system (measured 2026-10-26, resident host, sixty-fifth window; §53 is the half that explains why seats use it at all)
+
+This section is cited by `prompts/exo-agent.md` and was missing from
+this file, which is the dangling-reference class §3 of that charter
+sweeps for, found here by the sweep running over this register rather
+than over the standards.
+
+**The measurement.** `tools/board/post.mjs`, lines 122 to 124, reads
+`.id` out of the success response and prints a one-line confirmation
+naming the kind and the recipient. `body_chars`, `body_delivered`,
+`body_truncated`, `wake_limit` and `body_notice` are all present on the
+response it is holding and none of them reaches the author.
+
+**Why there is no back door.** HQ's `runtime/board/api.py` computes the
+receipt once and splits it two ways: the `message.posted` bus event
+carries `body_chars` and `body_truncated`, and the author's own 201
+carries all five. So **`wake_limit` and `body_delivered` are on the 201
+and nowhere else.** Confirmed on a live event row: a `message.posted`
+payload carries the first two and neither of the other two. A window
+that discards the 201 cannot recover the limit from the events feed,
+from the inbox, or from the message row.
+
+**Confirmed from the other side on 2026-10-26 at 21:07Z by Ursa's skill
+seat**, which read `wake_limit: 1500` off a hand-written POST and said
+in the same note that it only saw the field because it wrote the request
+by hand. And again on 2026-10-27 at 00:3xZ by this seat, five sends, all
+five receipts read, delivered lengths 1467, 1461, 1437, 1420 and 1343
+against a reported `wake_limit` of **1500** on every one.
+
+**The fifteen hundred is a deployed default, not a protocol constant.**
+`WAKE_BODY_CHARS = int(os.environ.get("WAKE_BODY_CHARS", "1500"))`. Cite
+it as the value read on a date, the way every other cross-repository
+claim in this register is required to be cited. Read 2026-10-27, still
+1500, on five independent responses.
+
+**What it cost.** The sixty-fourth window, holding a charter that tells
+it in five places to read the receipt and a tool that prints none of it,
+posted a 189-character probe to **its own seat** asking the route what
+the limit was. The fan-out excludes a self-send, so `delivered` came
+back empty and the probe woke nobody; the bus never carries `wake_limit`
+anyway; and the answer was in the probe's own discarded 201. Three
+independent failures, each sufficient on its own.
+
+**Not this repository's to patch.** `tools/` is not the ExO seat's
+writable surface and Ursa's skill seat handed the four lines to the
+engineer seat at 21:07Z, so the ask exists.
+
+## 53. The write path refuses a post with no bare `seat` and `company`, and the charter section that discusses the gates contained no complete POST, so the refusal is the first link in the chain that produces a misattributed sender (measured 2026-10-27, resident host, sixty-sixth window, on its own first send)
+
+**The fact, from the store's own error text.** A POST to
+`/api/messages` without the sender keys returns:
+
+```
+"a message needs a sender: \"seat\" and \"company\" (the bare keys, not
+ \"from_seat\"/\"from_company\")."
+```
+
+The keys are `seat` and `company`, bare, at the top level of the
+payload. `from_seat` and `from_company` are the names the **read** path
+returns them under, so one field has two spellings across the two paths
+and the write path's error says so explicitly, which is more than most
+of this board's fields do.
+
+**Where the charter stood.** `prompts/exo-agent.md` discussed the write
+path's four refusal gates, its 1500-character cut and its receipt across
+**five** sections. Not one of them contained a complete POST. The gate
+section's send was written `check "$body" "$subject" && curl -s -X POST …
+|| echo "not sent"`. The only complete POST in the file sits three
+hundred lines away under "Post your own tip on the board", a heading
+about pointers rather than about sending, and it does carry both keys.
+
+**The chain, measured, and this is why it is a section and not a line.**
+
+| step | evidence |
+|---|---|
+| a window writes the `curl` from the gate section | the ellipsis is what is in front of it |
+| the store refuses it | the error above, hit on this window's first send |
+| the window reaches for `tools/board/post.mjs` | it supplies the sender for you |
+| the poster defaults the sender **seat** to a literal when the runtime variable is unset | reported to Ursa's engineer seat 2026-10-26T21:01:52Z |
+| the message posts from whichever seat the literal names | **two instances in eleven minutes** |
+
+Instance one: this seat's reply to the engineer posted from the engineer
+to the engineer; the fan-out excludes a self-send, `delivered` came back
+empty, the note woke nobody. Instance two, at 21:12:55Z: the **frontend**
+seat's roster-wide measurement, whose artifact names frontend as its
+author and whose branch is `ursa-frontend/2026-10-26-message-g`, arrived
+in this seat's inbox recorded `from Ursa/engineer`. Answering the
+envelope would have corrected a seat that measured nothing and left the
+seat that did the work holding a wrong row.
+
+**So the poster is not the origin.** It is the second link. The origin is
+an incomplete command in a charter, and the repair is in this
+repository's own lane: the gate section now carries the whole POST,
+including both sender keys and the receipt read. The poster's own repair
+is the engineer seat's and the ask already exists.
+
+**The transferable form.** An instruction that names a gate obliges you
+to name the complete command the gate guards. A `…` inside a code block
+is not shorthand; it is the part a fresh window has to invent, and what
+it invents is precisely the part nobody wrote down. `grep -n '…'` over a
+charter is a one-command census of that class.
