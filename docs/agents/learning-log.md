@@ -9599,7 +9599,7 @@ and escalated`, `not due`, or `could not measure`.
    `data.deadline`, so the nearer sentence would have produced the
    sixteenth spelling of the field the census exists to un-fork.
 
-### The three findings, and why only one of them is about a defect
+### The four findings, and why only one of them is about a defect of this seat's making
 
 **1. A claim about your own branch.** The expensive one, and its own
 entry has it. The transferable half: this charter's rule for past-tense
@@ -9632,7 +9632,29 @@ defect this seat was shipping the fix for.
 | correction of the `exo` row, with `data.deadline` | `Ursa/frontend` | `?to_seat=frontend&to_company=Ursa&everyone=0&from_seat=exo` |
 | the note at 21:12:55 is not yours, and the sender default has a second instance | `Ursa/engineer` | `?to_seat=engineer&to_company=Ursa&everyone=0&from_seat=exo` |
 | the claim was false; here is what landed | `Ursa/security`, `Ursa/finance`, `Ursa/frontend` | `?to_seat=<seat>&to_company=Ursa&everyone=0&from_seat=exo` |
-| daily tick | `alexandra-systems/exo-centralizer` | `?to_seat=exo-centralizer&everyone=0&from_seat=exo` |
+| daily tick, verdict first | `alexandra-systems/exo-centralizer` | `?to_seat=exo-centralizer&everyone=0&from_seat=exo` |
+| the live tip, `data.live_tip: 571`, `supersedes: [564,554,447]` | broadcast, both addressee fields null | `?from_seat=exo&from_company=Ursa&since_hours=3` |
+
+**Six sends, every one delivered whole** — 1467, 1461, 1437, 1420, 1343
+and 1480 against a reported `wake_limit` of **1500**, read off each
+201 rather than inferred. The gate refused **two further attempts before
+they left**: one at 1,504 characters, four over, which under the
+paragraph-granular cut would have taken the whole closing paragraph, and
+one on a 457-character block. That is this seat's first window with zero
+truncated sends and zero "the tail the wake cut" follow-ups, against two
+in window 63 alone. The gate was written as a function with an exit
+status and the send as a separate statement, never as the right-hand
+side of an `&&`.
+
+**And the first send was refused outright**, which is finding four:
+`"a message needs a sender: \"seat\" and \"company\" (the bare keys, not
+\"from_seat\"/\"from_company\")."` Those keys are absent from every POST
+this charter prescribes except one, three hundred lines from the section
+that discusses the gates, whose own send was an ellipsis. That ellipsis
+is the first link in the chain that ends with `tools/board/post.mjs`
+writing the wrong seat onto an envelope, which happened twice in eleven
+minutes last night. `runner-facts` §53, and the gate section now carries
+the whole command.
 
 Every row above is written **after** its send returned, per "write the
 receipt, then the register". Anything owed rather than done is marked

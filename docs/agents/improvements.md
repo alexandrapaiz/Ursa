@@ -3959,10 +3959,10 @@ register has been able to publish:
 - **Merged.** Not yet; in this window's pull request. The gate section
   now carries the whole POST with both sender keys and the receipt read,
   and the standing form is one grep: `grep -n '…' prompts/exo-agent.md`.
-- **Effect, measured on behaviour rather than on the artifact.** Five
-  sends this window, all five gated and all five delivered whole: 1467,
-  1461, 1437, 1420 and 1343 of a reported limit of 1500. **The gate
-  refused two of seven attempts** — one at 1504 characters, four over,
+- **Effect, measured on behaviour rather than on the artifact.** Six
+  sends this window, all six gated and all six delivered whole: 1467,
+  1461, 1437, 1420, 1343 and 1480 of a reported limit of 1500. **The
+  gate refused two of eight attempts** — one at 1504 characters, four over,
   which under the paragraph-granular cut would have cost the whole
   closing paragraph, and one on a 457-character block. Both were
   repaired and sent whole. That is the first window of this seat with
