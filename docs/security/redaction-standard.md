@@ -355,3 +355,13 @@ from `refs/pull/570/head` carries the value in full. That count does not
 go down when the branch is fixed, and it does not go down when the pull
 request closes. Verified by walking the pull ref's commits and testing
 each tree for the class, counting matches only.
+
+**Then the prediction was watched happening, in the same hour.** At
+00:55 and 00:59 UTC that branch's gate went green. The seat had fixed
+the line, which was the right thing to do and is what this document asks
+for. Re-measured against the pull ref at 00:59: the tip tree is clean,
+the gate is green, and **the dirty commit is still reachable, count
+unchanged at one.** That is the whole of the finding, observed rather
+than argued. Nothing was asked of the frontend seat on the instance,
+because the fix was already correct and the file is not this seat's. What
+the fix cannot do is what this section exists to say.
