@@ -1,5 +1,5 @@
 // Does the enumerator detect the defect it was built for, and does it stay
-// quiet on the four gates that are already right?
+// quiet on the five gates that are already right?
 //
 // THE ONE TEST THAT MATTERS IS `the historical defect`. Four gates passing
 // proves nothing on its own: a check that always returns "clean" passes four
@@ -28,6 +28,7 @@ import { GATE as CLOSURES, verdict as closures } from '../ledger/closures-verdic
 import { GATE as CONTRACT, verdict as contract } from '../ledger/contract-verdict.mjs'
 import { GATE as ATTRS, verdict as attributes } from '../ledger/attributes-verdict.mjs'
 import { GATE as SCAN, hitLine, unusable, verdict as scan } from '../secret-scan-verdict.mjs'
+import { GATE as POST } from '../board/post-verdict.mjs'
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const ENUMERATOR = 'tools/gates/enumerate-verdicts.mjs'
@@ -45,7 +46,7 @@ function run(args = []) {
   }
 }
 
-describe('the four extracted gates, end to end', () => {
+describe('the five extracted gates, end to end', () => {
   it('exits 0 and reports every branch holding its properties', () => {
     const { code, json } = run()
     assert.equal(code, 0)
@@ -53,11 +54,19 @@ describe('the four extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 13 distinct causes with 17 probes, which is the number the text sweep could not see', () => {
+  it('reaches 23 distinct causes with 28 probes, which is the number the text sweep could not see', () => {
     const { json } = run()
-    assert.equal(json.branches.length, 17)
+    assert.equal(json.branches.length, 28)
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
-    assert.equal(causes.size, 13)
+    assert.equal(causes.size, 23)
+  })
+
+  it('carries an exit 3, which no gate of the first four could have reached', () => {
+    const { json } = run()
+    const threes = json.branches.filter((b) => b.exit === 3)
+    assert.equal(threes.length, 1)
+    assert.equal(threes[0].gate, 'tools/board/post.mjs')
+    assert.equal(threes[0].cause, 'STORE_REFUSED_WHAT_CHECKER_PASSED')
   })
 
   it('names a cause on every branch, since an unnamed cause is the defect in miniature', () => {
@@ -217,6 +226,51 @@ describe('the historical defect, which is the only proof the checks can fail', (
     assert.deepEqual(driveForTest(TRAILING).findings, [])
   })
 
+  it('exempts a number inside a declared quotation, and only that number', () => {
+    // The exemption `tools/board/post.mjs` needed: 422 is the status the board
+    // answered with, so no partition of the findings can produce it. The 47 in
+    // the same line is a count of nothing, and it must still fire -- a gate
+    // that declares one quotation must not get a blanket pass on the rest of
+    // its arithmetic.
+    const QUOTING = describeGate({
+      id: 'synthetic/quotes-its-input.mjs',
+      verdict: (f) =>
+        verdictOf({
+          exitCode: 3,
+          cause: 'STORE_REFUSED',
+          cites: [LOCUS.COMMITTED],
+          quoted: ['422'],
+          line: `The store refused it with 422, and 47 rules were checked, over ${f.length} finding(s).`,
+        }),
+      loci: { [LOCUS.COMMITTED]: { noun: /store/ } },
+      probes: [{ name: 'one refusal', findings: [{ locus: LOCUS.COMMITTED }] }],
+    })
+    const findings = driveForTest(QUOTING).findings
+    const claimed = findings.filter((f) => f.rule === 'COUNTS_DERIVED').map((f) => f.message)
+    assert.equal(claimed.length, 1, JSON.stringify(findings.map((f) => f.rule)))
+    assert.match(claimed[0], /claims 47/)
+  })
+
+  it('fires QUOTED_IS_QUOTED when the declared quotation is not in the line', () => {
+    // An exemption with nothing behind it. Without this check, a gate could
+    // buy silence for any number by declaring a quotation it never prints.
+    const PRETENDING = describeGate({
+      id: 'synthetic/pretends-to-quote.mjs',
+      verdict: () =>
+        verdictOf({
+          exitCode: 1,
+          cause: 'PRETENDS',
+          cites: [LOCUS.READER],
+          quoted: ['99 of the reader\'s files'],
+          line: '99 problem(s) for the reader.',
+        }),
+      loci: { [LOCUS.READER]: { noun: /reader/ } },
+      probes: [{ name: 'one finding', findings: [{ locus: LOCUS.READER }] }],
+    })
+    const rules = driveForTest(PRETENDING).findings.map((f) => f.rule)
+    assert.ok(rules.includes('QUOTED_IS_QUOTED'), JSON.stringify(rules))
+  })
+
   it('exits 2, not 1, when a gate spec cannot be loaded, so a broken run is never clean', () => {
     const v = enumeratorVerdict([], { broken: [{ spec: './missing.mjs', why: 'not found' }] })
     assert.equal(v.exitCode, 2)
@@ -226,9 +280,9 @@ describe('the historical defect, which is the only proof the checks can fail', (
 
   it('derives its own verdict from its own findings, which it would be absurd to exempt', () => {
     const one = enumeratorVerdict([{ locus: LOCUS.COMMITTED, rule: 'X', message: 'y' }], {
-      gates: 4,
-      branches: 13,
-      probes: 17,
+      gates: 5,
+      branches: 23,
+      probes: 28,
     })
     assert.equal(one.exitCode, 1)
     assert.match(one.line, /1 branch\(es\)/)
@@ -236,9 +290,9 @@ describe('the historical defect, which is the only proof the checks can fail', (
   })
 })
 
-describe('the four committed gates, through the same functions', () => {
+describe('the five committed gates, through the same functions', () => {
   it('produce no findings when driven directly', () => {
-    for (const gate of [CLOSURES, CONTRACT, ATTRS, SCAN]) {
+    for (const gate of [CLOSURES, CONTRACT, ATTRS, SCAN, POST]) {
       assert.deepEqual(driveForTest(gate).findings, [], gate.id)
     }
   })

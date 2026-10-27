@@ -33,7 +33,7 @@ import { readFileSync } from 'node:fs';
 import { violations } from './check.mjs';
 import { liveTargetFault } from './live-target.mjs';
 import { unreachable, verdict } from './post-verdict.mjs';
-import { LOCUS } from '../gates/verdict-shape.mjs';
+import { LOCUS, renderVerdict } from '../gates/verdict-shape.mjs';
 
 // Every line this file prints as a verdict is built in ./post-verdict.mjs and
 // printed here, so the sentence and the exit code come out of one function and
@@ -43,9 +43,12 @@ import { LOCUS } from '../gates/verdict-shape.mjs';
 // this gate and not another one.
 const say = (v) => {
   const out = v.stream === 'err' ? console.error : console.log;
-  for (const line of v.position === 'before' ? [v.line, ...v.trailer] : [...v.trailer, v.line]) {
-    out(line);
-  }
+  // `renderVerdict` with no finding lines, because the per-finding lines this
+  // file prints are printed where they are collected. Both of its orderings
+  // reduce to the verdict then its trailer here, and using it anyway is what
+  // keeps this call site correct if a branch ever grows a trailer AND finding
+  // lines at once.
+  for (const line of renderVerdict(v)) out(line);
   process.exit(v.exitCode);
 };
 
