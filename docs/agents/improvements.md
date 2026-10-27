@@ -4123,11 +4123,18 @@ register has been able to publish:
   three changes at 11 each. **The curve is not flat this window.** It
   was flat for the seven windows before it, and the measurement that
   says so is the 1/11 column, which nothing in this org was computing.
-- **The half that is not shipped, named as open.** Five of the seven
-  remain at 1/11: the refspec widening, the `merge-tree` exit-128
-  reading, the 1500-character wake cut, the 420-character block limit,
-  and `data.deadline` on asks. Every one is roster-general — every seat
-  gets the same clone and posts to the same board. Copying them eleven
-  ways by hand is the shape this file just named as the defect, so the
-  repair is one shared surface the charters cite, measured by one test,
-  and that is this window's registered experiment rather than its act.
+- **The half that is not shipped, named as open.** **Four** of the seven
+  remain at 1/11: the refspec widening, the 1500-character wake cut, the
+  420-character block limit, and `data.deadline` on asks. Every one is
+  roster-general — every seat gets the same clone and posts to the same
+  board. Copying them eleven ways by hand is the shape this file just
+  named as the defect, so the repair is one shared surface the charters
+  cite, measured by one test, and that is this window's registered
+  experiment rather than its act.
+- **One correction to the row above, from re-measuring it after the
+  change.** The `merge-tree` exit-128 reading also reads 11/11 now,
+  because the clone guard's comment states it in prose in all ten
+  charters. That is a side effect and not a third act, and it is
+  reported as one. The probe for that row (`grep -F 128`) is also the
+  weakest of the ten and would match a line number; the number is only
+  as good as the string, which is worth publishing beside it.

@@ -9721,7 +9721,7 @@ place, and the envelope is correct.
 per the rule this window added to §6. That rule exists because of the
 list this window inherited.
 
-### Carried checks for window 68, written at 00:58:0xZ before the body below it
+### Carried checks for window 68, written 00:46:45Z–00:47:10Z before the body below it
 
 Each carries the **property**, the instant, and the ending verdict:
 `retired positive`, `retired negative`, `kept and escalated`, `not due`,
@@ -9730,7 +9730,7 @@ Each carries the **property**, the instant, and the ending verdict:
 1. **Did the three widened charters reach `main`?** Property:
    `git show origin/main:prompts/security-agent.md | grep -c
    'isDraft.*test("\^(\[a-z0-9-\]+-)?(sec|security)/")'` returns 1, and
-   the same for frontend and finance. Measured 00:36:0xZ: `main` still
+   the same for frontend and finance. Measured 00:47:08Z: `main` still
    carries the **narrow** sweep (`test("security")`), so neither
    yesterday's widening nor today's anchoring has landed. **`kept`** —
    this is the owner's merge. Seventeenth window carrying a charter
@@ -9756,7 +9756,7 @@ Each carries the **property**, the instant, and the ending verdict:
    seat?** **`taken` — a verdict this list did not have, and it is the
    reason to add it.** The property still fails: `seat: flag('--seat',
    process.env.ASC_SEAT || 'engineer')` is **byte-identical** on
-   `origin/main` and on `refs/prs/580`, measured 00:45:0xZ. But the seat
+   `origin/main` and on `refs/prs/580`, measured 00:47:08Z (1 occurrence each). But the seat
    that owns the ask opened `#580` at 00:36:15Z titled for exactly this
    repair. So the action is **neither chase nor re-measure**: record the
    artifact and read it when it merges. `kept and escalated` would have
@@ -9765,19 +9765,30 @@ Each carries the **property**, the instant, and the ending verdict:
    and the two existing verdicts are the only ones that fit.
 5. **Is `main`'s copy of this charter still 2,221 lines?** Property:
    `git show origin/main:prompts/exo-agent.md | wc -l`. Measured
-   00:36:0xZ: **2,221**, last touched 2026-10-18T18:50:50Z, against
-   **7,020** live on this branch. **`kept`**, seventeenth window. Nine
+   00:47:08Z: **2,221**, last touched 2026-10-18T18:50:50Z, against
+   **6,983** live on this branch. **`kept`**, seventeenth window. Nine
    days, zero `prompts/*-agent.md` commits to `main`, against 100 merges
    in seven days. The gate is working and one predicate inside it is
    stuck.
-6. **Are the five remaining 1/11 rules still 1/11?** Property: for each
-   of the refspec-widening guard, the `merge-tree` exit-128 reading, the
-   1500-character wake cut, the 420-character block limit and
-   `data.deadline` on an ask, count the eleven charters that carry it.
-   Measured 00:52:0xZ: **1/11 each, all five in this file only.** This is
-   this seat's own debt and the repair is explicitly **not** eleven
-   copy-pastes — see the experiment below. `kept`, and it is an act
-   rather than an escalation.
+6. **Are the remaining 1/11 rules still 1/11?** Property: for each of
+   the refspec-widening guard, the 1500-character wake cut, the
+   420-character block limit and `data.deadline` on an ask, count the
+   eleven charters that carry it. Measured 00:47:08Z: **1/11 each, all
+   four in this file only.** `kept`; this is this seat's own debt and the
+   repair is explicitly **not** eleven copy-pastes — see the experiment
+   below.
+
+   **Four and not five, and the correction is about the probe.** The
+   fifth was the `merge-tree` exit-128 reading, and it now greps 11/11 —
+   because the clone-guard comment this window inserted into ten
+   charters states it in prose. So it did propagate, as a side effect
+   rather than as an act, and a successor should read that row as
+   *carried by the guard's comment* rather than as its own paragraph.
+   The wider caution is that `grep -F 128` is a weak probe for a rule
+   about an exit code; it would match a line number or a byte count. The
+   four rows above are phrases and are safer, but none of these ten
+   probes is strong, and a successor recomputing the table should say so
+   in the same breath as the number.
 7. **Does any carried-check list of this seat contain a bucketed
    instant?** Property: `grep -cE '[0-2][0-9]:[0-5]x'` over the newest
    `### Carried checks` block returns 0. Measured on this one:

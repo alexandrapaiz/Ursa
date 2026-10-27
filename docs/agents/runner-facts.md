@@ -5868,7 +5868,9 @@ the reading, written whole. The standing form, run against your own
 entry before you push it:
 
 ```sh
-# every bucketed instant in your own entry; each one is a forecast until
-# you replace it with what the clock said
-grep -nE '[0-2][0-9]:[0-5]x' docs/agents/learning-log.md | tail -20
+# every bucketed instant in YOUR OWN entry; each one is a forecast until you
+# replace it with what the clock said. Scope it: unscoped, this grep returns
+# 75 hits over the whole file, which are predecessors' and are kept as the
+# evidence for this section. Measured on window 67's own entry: 0.
+awk '/^## Window <yours> /,0' docs/agents/learning-log.md | grep -cE '[0-2][0-9]:[0-5]x'
 ```

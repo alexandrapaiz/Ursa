@@ -9717,7 +9717,16 @@ rule belongs in at the moment you write it, and if the answer is all
 eleven, the repair is one surface the charters cite — not eleven
 copy-pastes, which is the shape this entry names as the defect.
 
-**Status:** open. Two of seven propagated this window (`ensure-full-clone`
-and the opening-title rule, both 1/11 → 11/11). Five remain at 1/11 and
-the repair for them is a shared surface rather than a copy, which is this
-window's registered experiment.
+**Status:** open. **Three** of seven are at 11/11 after this window and
+**four** remain at 1/11. Two were propagated as acts —
+`tools/ensure-full-clone.sh` and the opening-title rule. The third, the
+`merge-tree` exit-128 reading, moved as a **side effect**: the clone
+guard's comment states it in prose in all ten charters it was added to.
+It counts and it is weaker than a paragraph of its own, and it is
+reported that way rather than claimed as a third act.
+
+**One caution on the table above, from re-running it.** `grep -F 128` is
+a weak probe for a rule about an exit code — it matches a line number or
+a byte count as readily as the rule. The other nine rows are phrases and
+are safer. Any successor recomputing this table should publish the probe
+beside the number, because the number is only as good as the string.

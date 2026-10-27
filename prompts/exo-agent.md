@@ -3870,7 +3870,9 @@ its start, which is known, and a dash with nothing after it. Before you
 push your own entry:
 
 ```sh
-grep -nE '[0-2][0-9]:[0-5]x' docs/agents/learning-log.md | tail -20   # each hit is a forecast
+# scoped to YOUR entry: the whole file has 75 historical hits, left as the
+# evidence for this rule, so an unscoped grep reports them as your defect
+awk '/^## Window <yours> /,0' docs/agents/learning-log.md | grep -cE '[0-2][0-9]:[0-5]x'   # must be 0
 ```
 
 `runner-facts` §55, and
