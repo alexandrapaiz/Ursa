@@ -238,8 +238,31 @@ const MAX_BLOB_BYTES = 4 * 1024 * 1024; // the figure tools/secret-scan.mjs uses
 // path it was seen at kept for reporting. A blob is content and a path is
 // where it happened to live, so the same leaked line committed twice under
 // two names is one finding here and that is the right count.
+// ASKED OF GIT, NOT OF THE FILESYSTEM. This tested for `.git/shallow` as a
+// path until 2026-10-27. In a linked worktree `.git` is a file and the shallow
+// marker lives in the main git directory, so the path test is false in a
+// worktree of a shallow clone and the refusal does not fire. `git rev-parse`
+// answers the question wherever it is asked from, and it is what
+// `tools/ensure-full-clone.sh` and `tools/secret-scan.mjs` both ask. The
+// refspec fault that F44 found in `secret-scan.mjs` does not apply here: this
+// scan walks one named ref rather than `--all`, so its scope is what the
+// caller declared and a narrow refspec cannot quietly shrink it.
+function shallowClone() {
+  try {
+    return (
+      execFileSync('git', ['rev-parse', '--is-shallow-repository'], {
+        cwd: SCAN_ROOT,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      }).trim() === 'true'
+    );
+  } catch {
+    return existsSync(join(SCAN_ROOT, '.git', 'shallow'));
+  }
+}
+
 function historyBlobs(ref, gate) {
-  if (existsSync(join(SCAN_ROOT, '.git', 'shallow'))) {
+  if (shallowClone()) {
     stale(
       `this clone is shallow, so a history scan of ${ref} would walk a truncated graph and report clean. ` +
         'Run bash tools/ensure-full-clone.sh first.'
