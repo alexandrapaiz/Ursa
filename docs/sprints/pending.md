@@ -10,6 +10,60 @@ is routine to close on sight. Not a merge, not a judgment call, not
 something to leave for the owner to sort out eight at a time
 (docs/decisions.md, "seventy-eighth pass" and "hundredth pass").
 
+## Top three for the owner, 2026-10-27 ~00:4x UTC message run (pass 3 on this branch)
+
+1. **Three more Tier B merges landed this pass: #579 (market, docs-only),
+   #581 (finance, docs-only), and #573 (engineer, product code and
+   `docs/ideas.md`, no Tier C path).** All four conditions held fresh for
+   each: not draft, no `hold`, no owner comment, checks green or none,
+   `gh pr diff --name-only` clean of any `prompts/` path, and merged
+   clean (no false-conflict repair needed this time). #573 was merged
+   before its own stacked continuation #580 (engineer, still a draft)
+   per the "merge the base of a stack first" rule; #580 needs no action
+   from this seat.
+2. **#571 has a successor: #578 (exo, window 67) contains #571 (window
+   66) by `git merge-base --is-ancestor`, verified fresh.** Both are
+   still Tier C (`prompts/pm-agent.md`, `prompts/exo-agent.md`, and now
+   also `prompts/engineer-agent.md`, `prompts/finance-agent.md`,
+   `prompts/frontend-agent.md`, `prompts/market-agent.md`,
+   `prompts/okr-agent.md`, `prompts/research-agent.md`,
+   `prompts/sales-agent.md`, `prompts/security-agent.md`,
+   `prompts/skill-agent.md` in #578's wider diff), so neither is this
+   seat's to merge. **Unlike #571, #578's conflict is real**: a scratch
+   worktree merge against `origin/main` left genuine content conflicts
+   in `docs/agents/incidents.md` and `docs/agents/learning-log.md`, not
+   the false `CONFLICTING` reading #571 and #577 both showed. Left both
+   #571 and #578 open rather than closing the contained one, matching
+   the chain's own established practice (#447/#554/#564 were likewise
+   left open as confirmed ancestors of #571, "because the chain is one
+   owner decision") — closing a Tier C predecessor is not this seat's
+   call to make unilaterally.
+3. **Security's own three flagged drafts (#551, #558, #568) are
+   confirmed contained in #572 (security, draft, "four inherited PRs
+   absorbed"), which has itself diverged from a fourth, #582 (security,
+   draft, opened mid-run at 00:46 as "inherited draft resolution").**
+   Neither #572 nor #578 is live-mergeable-via-PM (both drafts), and
+   this is the security seat's own active churn today (five PRs on
+   that seat alone), so this pass left it to that seat's next run
+   rather than intervening in another seat's in-progress absorption.
+
+**Re-confirmed, unchanged from the prior pass on this branch:**
+
+- **#561 (engineer) is `CLOSED`**, confirmed directly with `gh pr view`
+  rather than assumed from the standing note, which still lists it as
+  an open stranded draft. The note's claim was already wrong before
+  this pass started.
+- **The repeating "five stranded drafts" standing note (`#558`, `#568`,
+  `#562`, `#561`, `#566`) is still false, now with one more seat's data
+  point.** `#558`/`#568` -> absorbed by `#572` (above). `#562` -> `#570`
+  (frontend, confirmed contained, re-verified this pass). `#566` ->
+  `#569` (skill, confirmed contained, re-verified this pass). `#561` ->
+  closed outright, not merely superseded. `tools/check-draft-prs.sh`,
+  the tool the note names as the way to check this, still does not
+  exist anywhere in this repository (`find . -iname 'check-draft-prs*'`
+  returns nothing) — this is the third pass on this branch to verify
+  that by running the check rather than trusting the note's prose.
+
 ## Top three for the owner, 2026-10-27 ~00:3x UTC message run
 
 1. **Three Tier B merges landed this pass: #575 (market), #577

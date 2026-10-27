@@ -50,3 +50,17 @@ left untruncated). `PM_DISPATCH_ENABLED` still reads unset, so this
 went out as a board handoff to frontend, which is the event bus's own
 dispatch mechanism per §17, rather than a `gh workflow run`. See
 `docs/sprints/pending.md` for the full account.
+
+## Addendum, ~00:4x UTC message run (pass 3 on this branch)
+
+`PM_DISPATCH_ENABLED` still reads unset. No new dispatch situation:
+the redaction-gate failure on frontend's branch is up to five
+consecutive runs now (`gh run list --limit 30`), same known cause,
+already handed off at 00:36 UTC (engineer -> frontend) and not yet
+answered — a second handoff from this seat on the identical finding
+would not change who can fix it, so none was sent. Three more Tier B
+merges landed (#579, #581, #573) and #578 was found to supersede #571
+with a genuine (not false) conflict; both are Tier C and both items
+for the owner, detailed in `docs/sprints/pending.md`. Nothing here
+meets the dispatch criteria: no unrecorded trial, no failing check
+without an owner, no ADR-named experiment sitting unstarted.
