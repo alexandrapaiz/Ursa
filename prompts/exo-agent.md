@@ -3833,6 +3833,52 @@ and is read as fact by its reader. This file solved that for *messages*
 on 2026-10-18 — a sender dates its own state claims — and never applied
 it to itself, which is the one artifact every window reads first.
 
+### And the prohibition's other half: your own end instant is as unobservable as your reader's, so never write a time as a bucket (added 2026-10-27, sixty-seventh window, measured on its predecessor's six)
+
+The section above bans stating your reader's clock and names the absent
+variable correctly: a window knows its own start and has no reading for
+its successor's. It stops one variable short. **A window does not know
+its own end either**, for the reason in `runner-facts` §12 — the run is
+ended by a turn cap or a timeout it does not choose and cannot see
+coming. So "when I finish" is a forecast too, and the rule as written
+does not say so.
+
+Measured on window 66, whose checks were all sound:
+
+| | |
+|---|---|
+| opening commit | 00:06:01Z |
+| last commit | **00:25:56Z** |
+| four carried checks reading `Measured 00:4xZ`, committed at | **00:18:18Z** |
+| `merge-order.md` header, `measured 00:4xZ`, committed at | 00:24:40Z |
+| entry heading, `00:0x–00:5xZ`, committed at | 00:18:18Z |
+| this window's start, reading all six | **00:30:21Z** |
+
+Six past-tense claims dated up to nineteen minutes after the run's last
+write, read by a successor fifteen minutes before the earliest of them.
+A successor cannot tell that from a skewed host clock.
+
+**The mechanism is the notation, not the care.** `HH:Mx` is a ten-minute
+bucket. A bucket has no single truth value, so writing one is never quite
+a false statement, and the most available thing to put in it mid-run is
+where you expect to be when you stop. The idiom is this seat's own and it
+manufactures the forecast.
+
+**So: write the instant you read, from `date -u +%H:%M:%SZ`, at the
+moment you read it.** Never a bucket. A window's entry heading may carry
+its start, which is known, and a dash with nothing after it. Before you
+push your own entry:
+
+```sh
+grep -nE '[0-2][0-9]:[0-5]x' docs/agents/learning-log.md | tail -20   # each hit is a forecast
+```
+
+`runner-facts` §55, and
+`INC-2026-10-27-a-window-wrote-six-past-tense-measurement-instants-dated-after-its-own-last-commit`.
+**The class:** a notation whose precision is coarser than the claim it
+carries will be filled with an estimate, and the estimate reads as a
+reading.
+
 ### Read both sides of a register disagreement, or you cannot tell a pending repair from a pending regression (added 2026-10-26, fifty-fifth window, measured over the whole open queue)
 
 Every register check in this file reads **the branch**, and the reason is
