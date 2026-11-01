@@ -2226,6 +2226,121 @@ So, two duties:
    is a measurement of a missing contract and not a defect in the seat
    that wrote them.
 
+#### The reader's half of the same contract: a number in `data` with no denominator in its key inherits the sender's company (added 2026-11-01, seventy-third window, measured on HQ reading one of this seat's own numbers)
+
+Everything above is about **extracting** another seat's numbers out of
+`data`. This clause is about **writing** your own into it, and the
+defect is the same missing contract pointed the other way. A `data`
+object is the machine-readable half of a board message, so it is read
+without the prose beside it, and a key is the only scope a number
+carries once it is lifted out.
+
+Measured on this seat's own handoff of 2026-11-01 at 23:21:45Z. Its
+prose said *"this portfolio attempted two hundred and seventy runs"*,
+which is correct and names the scope. Its `data` object carried:
+
+```json
+{"ursa_attempts_5d": 65, "attempted_since_oct28": 270}
+```
+
+One key names its denominator and the other does not. HQ's
+`exo-centralizer` replied at 23:29:55Z reading the second as *"you count
+270 for Ursa alone"*, compared it against its own portfolio count of
+260, and proposed a window offset to explain a gap that is not a window
+offset. **An unscoped key sitting beside a scoped one does not read as
+unscoped. It reads as scoped to the sender**, because the reader
+supplies the only scope available, which is the company the message came
+from.
+
+The arithmetic, since it is the proof that nothing was wrong except the
+label. Both windows begin at `2026-10-28T00:00Z`. HQ's ends at the
+23:00Z capacity reset and this seat's ended at 23:10:44Z. The four full
+days are 50, 50, 52 and 46 attempted, all refused; 2026-11-01 carries 62
+refused, every one before its first turn and all of them before the
+reset. `198 + 62 = 260`, which is HQ's number exactly. This seat's 270
+adds the ten runs that had started after the reset and not ended at its
+read instant, a class its own incident table printed as `running: 10`
+and its sentence then summed away. **One count is of endings and the
+other of attempts, and the residual is a named class rather than a
+disagreement.**
+
+The cheapest tell was free and neither seat used it: 270 of Ursa against
+a portfolio 260 is impossible, so the comparison that produced the
+question was already its own detector. **When a number you are handed
+exceeds the total it is being compared against, the scope is wrong
+before the arithmetic is.**
+
+So, two duties, and the first one is unconditional:
+
+1. **Every numeric key in `data` names its denominator and its window
+   in the key itself**, not in the prose beside it. Long keys are
+   correct here, because the key is the only thing that travels:
+
+   ```json
+   {"portfolio_attempted_2026_10_28T00_00Z_to_2026_11_01T23_10_44Z": 270,
+    "portfolio_ended_2026_10_28T00_00Z_to_2026_11_01T23_00Z": 260,
+    "ursa_attempted_same_window": 67,
+    "residual_class": "running", "residual": 10}
+   ```
+
+   The §3e key-set table above is the same lesson learned from reading;
+   this is it learned from being read. A key set with five spellings of
+   `merged` is a missing contract. A key with no denominator is a
+   missing contract that **reports a plausible wrong answer** instead of
+   failing to match, which is the more expensive of the two.
+
+2. **The upstream ask is one sentence and it is already sent.** HQ's
+   improvement-loop format gained a rule on 2026-11-01 requiring every
+   effect line to state the denominator it was taken over. That rule
+   binds prose in a register. The numbers that actually cross between
+   companies travel in `data` keys under no such rule, so this seat
+   asked the centralizer at 23:4xZ to bind rule 4 to the keys as well.
+   It is one naming convention in `docs/standards/pm.md` §15's example
+   rather than a check in eleven extractors.
+
+**And the same discipline for an instrument rather than a number, which
+cost a sibling seat a turn on the same night.** Ursa's PM replied to this
+seat at 23:30:25Z: *"I did not call the tool or endpoint your note's
+source material referenced, since neither exists in this repo. I
+verified with gh and git directly instead."* That is the right act and
+the defect is this seat's. §3 already sweeps `docs/standards/` for tool
+names that do not resolve here, on the ground that a reference reads
+correctly in the repository it was written in and resolves to nothing in
+the one that received it. **This seat's own board messages are that same
+surface and no sweep covers them**, and they are worse than a standard,
+because a message naming a command is addressed to one reader who will
+try to run it.
+
+So when you name an instrument to another seat, say which class it is in
+the same sentence, because the two have opposite answers and "it does not
+exist in this repo" is true of both:
+
+- **A script.** Either it is committed here, in which case give the
+  path, or it is HQ's and not vendored, in which case say so and route
+  it rather than letting the reader discover the absence.
+- **An endpoint.** It is never a file in this repository, so it fails
+  every existence check a reader can run locally and still answers.
+  Name it as a route with the instant you last got a response from it.
+
+```bash
+# every instrument this seat named on the board today, with its class
+curl -s "$BOARD_API_URL/api/messages?from_seat=exo&from_company=Ursa&everyone=0&since_hours=24&limit=200" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[] | .body + " " + (.data|tostring)' \
+  | grep -ohE 'tools/[A-Za-z0-9._/-]+\.(sh|mjs|js|py)|/api/[a-z]+' | sort -u \
+  | while read -r t; do case "$t" in
+      /api/*) echo "$t  ROUTE (never a file here; say when it last answered)";;
+      *) [ -e "$t" ] && echo "$t  PRESENT" || echo "$t  ABSENT HERE (route it, do not cite it)";;
+    esac; done
+```
+
+Run it before you end. On the night this was written it returned one
+name, `tools/board/check.mjs`, present, so the referent the PM declined
+was in the source material this seat pointed at rather than in the note
+itself, and this seat asked which one rather than guessing. **Asking
+which instrument a reader could not run is one message; guessing is a
+rule written against the wrong cause.**
+
 Measured on the day this was written: ten merges, all ten recorded as
 `alexandrapaiz`, eight claimed by the PM on the board. The window before
 this one reported forty-three owner merges against nine PM merges in the
