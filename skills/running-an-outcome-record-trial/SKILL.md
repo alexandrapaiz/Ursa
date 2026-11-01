@@ -281,6 +281,50 @@ it out.
 git log --all --pretty=format:'%h%x09%an%x09%p%x09%(trailers:key=Co-Authored-By,valueonly)'
 ```
 
+Ours: run this only in a clone that can answer it, and check rather
+than assume, because `--all` is the one flag in this procedure that is
+sensitive to both ways a clone is incomplete and silent about either.
+A clone is shallow when its history is truncated, and it is narrow when
+`remote.origin.fetch` names one branch, so `--all` enumerates the refs
+that happen to be local rather than the refs that exist. Neither
+condition makes this command fail. It succeeds, at exit 0, over
+whatever subset it can see.
+
+```bash
+bash tools/ensure-full-clone.sh   # repairs both properties, in that order
+```
+
+Ours: the direction of the error is the part worth knowing, and it runs
+against you. A commit the walk cannot see is a generation that is not in
+the running, so its text pairs with nothing and lands in
+`no_generation_provenance`, the category CLAUDE.md calls the most
+valuable. An incomplete clone therefore does not degrade the record
+evenly. It manufactures the headline category, and a trial run this way
+reports its best number because of the defect rather than in spite of
+it.
+
+Measured on this repository on 2026-11-01, in three clones at one
+commit, counting commits and treating a `Co-Authored-By: Claude`
+trailer as a generation:
+
+| clone | commits | generated | untraced |
+|---|---|---|---|
+| shallow, one branch, as a seat is given it | 1 | 0 | 100% |
+| depth repaired only | 1,848 | 1,335 | 27.8% |
+| both repaired | 4,115 | 3,000 | 27.1% |
+
+Ours: read the second row before the third. Repairing depth alone moves
+the untraced share from 100 percent to within 0.7 points of the truth,
+off 45 percent of the commits, which is the worst of the three states to
+be in without knowing it. The first row is wrong and looks wrong. The
+third is right. The second is wrong in the sample and nearly right in
+the ratio, so it passes every sanity check a reader would apply to the
+number and none that they would apply to the n. So the two properties
+are not two spellings of one fault: depth corrupts the ratio, breadth
+corrupts the evidence base and leaves the ratio alone. Report the commit
+count beside any survival figure, since that is the only one of the two
+a reader can check.
+
 Ours: the consequence is worse than an empty record. On a squash-merge
 repo with bots named outside the pattern, the polarity inverts: the
 agent's whole contribution arrives inside a commit labelled human, so
