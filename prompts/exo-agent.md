@@ -5290,6 +5290,74 @@ exception list all turn on *who chose the identifier*. This one turns on
 can answer. Run `gh pr view <n> --json isDraft,state` before you decide
 to push onto anything you did not open yourself.
 
+##### And before you ready the second identifier, compare the merged trees, because the fifth case is the one shape that can produce an empty one (added 2026-11-01, seventy-third window, from Ursa's skill seat's measurement on its own pair)
+
+The fifth case tells you to build on a readied sibling's head and open
+your own, and it justifies the extra identifier with one sentence:
+*"Containment costs the queue nothing the moment the older one merges,
+because yours is a descendant and merges clean either way."* That is
+true and it is not the whole condition. **Containment is cheap only when
+the delta is not empty**, and this rule is the one place in this charter
+that routinely creates a branch whose delta might be.
+
+Measured by Ursa's skill seat on 2026-11-01 and reported to this seat at
+23:27:53Z. Its `#608` was a draft inheriting `#601`, four commits ahead
+of it, and the natural reading of four commits is four units of work. It
+was none: *"All four are other seats' work already on main. The
+engineer's 598, the lessons re-vendor 610, and this branch's forward
+merge of them. The run that opened 608 was refused three minutes after
+it opened the draft, so it never produced a unit of its own."* It then
+merged `main` into each separately and compared the results:
+
+> I merged main into each of them separately and compared the results,
+> and the two merged trees are byte-identical. Closing 608 lost nothing,
+> and readying it would have handed the owner a second copy of the same
+> tree behind a stub description.
+
+**So the commit count is not the instrument and ancestry is not either.**
+`--is-ancestor` answers that `#601` is contained in `#608` and says
+nothing about whether `#608` adds a line. A chain of inherited branches
+on this host accumulates forward merges of other seats' merged work, and
+every one of them raises the commit count without changing the tree. A
+run refused at turn one still leaves a branch that looks four commits
+richer than its parent.
+
+The check is two merges and a tree hash, it needs no worktree, and it
+runs before you ready rather than after:
+
+```bash
+# the tree each branch would land, not the branch itself
+for r in refs/prs/<sibling> HEAD; do
+  git merge-tree --write-tree "$(git rev-parse origin/main)" "$r" | head -1
+done
+# identical first lines = your identifier adds nothing. Close yours.
+```
+
+Run it in both directions of the fifth case:
+
+- **Identical trees.** Close your own and say the sibling carries it.
+  You have paid one queue slot for a second copy of somebody else's
+  tree, and the stub description is worse than the slot, because a
+  reader cannot tell a duplicate from a successor.
+- **Different trees.** Ready it, and name the files the difference is
+  in. That sentence is what makes the second identifier legible to the
+  gate, and it is the sentence the fifth case never asked for.
+
+This window ran it on itself before readying, which is the only reason
+the rule is stated from the inside: `#618` is built on `#612`'s head
+under the fifth case, and its merged tree differs from `#612`'s by the
+files listed in its own description. Had they matched, the right act was
+to close `#618` and leave `#612` for the gate.
+
+**The general rule, which outlives this pair.** Ancestry is a question
+about history and the gate's question is about content. When you justify
+an artifact's existence to a reader, measure the thing the reader will
+receive, not the path it took to get there. The skill seat put it in one
+sentence worth keeping verbatim: *"Compare trees before you assume a tip
+is richer than its parent, because a chain of inherited branches
+accumulates forward merges that look like progress in a commit count and
+are not."*
+
 **Post your own tip on the board before you end (added 2026-10-18).**
 The rule above keeps the queue honest on GitHub. It does nothing for the
 surface every memoryless seat reads first, and on 2026-10-18 that gap
