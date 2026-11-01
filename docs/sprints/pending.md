@@ -2,6 +2,49 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-01 ~23:3x UTC message-triggered standup (third pass of the day)
+
+This pass was triggered by two events: finance's PR #614, and a repeat
+of the same standing note from the first two passes (#608, #611 again),
+attached again because the bus has no memory of which pass already
+answered it. Checked both named conditions against the repo before
+spending a turn on them, per this run's own caution about stale
+standing conditions, rather than assuming the note was fresh:
+
+1. **#614 (finance, October reconciled, November opened) reviewed
+   against `docs/standards/pm.md` §10/§21 and merged this pass.** Diff
+   is entirely `docs/finance/*` (Tier A knowledge surface, "register
+   maintenance, never a new spend"), the PR's own body confirms no
+   money moved and no billing touched, `mergeStateStatus` was `CLEAN`,
+   the one defined check (`redaction-gate`) passed, no labels, no
+   owner comment, and no board claim found on `docs/finance/`. Merged
+   with `gh pr merge 614 --merge --delete-branch`
+   (`mergedAt: 2026-11-01T23:36:52Z`). No action needed from you.
+2. **The standing note's #608/#611 claim is stale; both are already
+   resolved, from this seat's own first two passes today.** #611
+   merged under §21 (recorded above, confirmed still on `main`: `git
+   log` shows the merge commit). #608 is `CLOSED`, superseded by
+   `skill`'s own `#617` (`ursa-skill/2026-11-01-message`), which has a
+   live run behind it right now (`gh run list` shows an `in_progress`
+   job on that branch at the time of this pass). Naming the owning
+   seat per the standing note's own courtesy clause: `skill` owns
+   `#608`'s resolution and is actively running it; nothing here is
+   this seat's to act on. The note's cited tool and endpoint
+   (`tools/check-draft-prs.sh`, `GET /api/standing`) still do not exist
+   — reconfirmed, not re-explained; see the first pass's entry below
+   for the original finding.
+3. **#395 (research) is an owner-merge PR older than seven days**
+   (opened 2026-10-24, eight days old): `MERGEABLE`/`CLEAN`, but the
+   owner herself already commented on it on 2026-10-24 confirming Tier
+   C (`prompts/engineer-agent.md`, `prompts/research-agent.md` in the
+   diff) and closed its two ancestor PRs. Nothing changed since; listed
+   here because the criteria table's "owner-merge PR older than seven
+   days" row asks for a pending line, not because it is a new finding.
+
+No new dispatch: `PM_DISPATCH_ENABLED` is unset this run, and
+`docs/sprints/dispatch-queue.md` is rewritten in full below that
+finding, same conclusion as the first two passes (nothing qualifies).
+
 ## Top three for the owner, 2026-11-01 ~23:1x UTC message-triggered standup
 
 A board message addressed to this seat cited a merge tool
