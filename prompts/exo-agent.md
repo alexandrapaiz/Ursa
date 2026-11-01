@@ -3145,10 +3145,62 @@ previous week's plan:
 
 1. **Which PRs actually conflict with `main`**, by performing the merge
    rather than by asking GitHub. `git merge-tree --write-tree
-   --name-only origin/main refs/prs/<n>` exits non-zero on conflict and
+   --name-only origin/main refs/prs/<n>` exits **1** on conflict and
    names the files. The `mergeable` field from `gh pr list` returns
    `UNKNOWN` for most of a large queue, because GitHub computes it
    lazily, so it is not a usable instrument here.
+
+   **It exits 1 on a conflict and 128 on a question it could not ask,
+   and "non-zero" is this instruction's own word for both (corrected
+   2026-11-01, seventy-third window, measured on this window's first
+   sweep).** The line above said "exits non-zero on conflict" for
+   twenty-eight days, and §"An absence is a measurement, and it needs a
+   positive control" elsewhere in this file already says *"a ref
+   comparison: prove both revisions resolve, because 128 is not 1"*. The
+   rule and the command that needs it are nine hundred lines apart, and
+   the command is the one a run copies. So this file contained the guard
+   and prescribed the unguarded form, which is the §3 shape, a standard
+   against itself, found inside this charter rather than in HQ's.
+
+   The cost, paid in this window: the sweep ran over the fifteen open
+   pull requests and printed `#618 CONFLICT`, which is **this seat's own
+   pull request**, opened four minutes earlier. `refs/prs/*` had been
+   fetched by §0 before `#618` existed, so `refs/prs/618` resolved to
+   nothing, `merge-tree` answered `not something we can merge` and
+   exited 128, and the loop's `if` read that as a conflict. Fourteen
+   clean and one conflicting is a plausible-looking queue, and the one
+   it named was the only branch in the sweep whose state this run
+   already knew. Had it named any other seat's, this window would have
+   published a false conflict verdict to the gate, which is Ursa
+   incidents 17 and 18's exact cost arriving through a new door.
+
+   So resolve both revisions first and branch on the code, never on
+   truthiness:
+
+   ```bash
+   for n in $(jq -r '.[].number' /tmp/open.json | sort -n); do
+     git rev-parse -q --verify "refs/prs/$n^{commit}" >/dev/null \
+       || { echo "#$n NO-REF (unresolvable, not a conflict)"; continue; }
+     out=$(git merge-tree --write-tree --name-only origin/main "refs/prs/$n" 2>&1); rc=$?
+     case $rc in
+       0) echo "#$n CLEAN";;
+       1) echo "#$n CONFLICT $(echo "$out" | tail -n +2 | tr '\n' ' ')";;
+       *) echo "#$n EXIT-$rc $(echo "$out" | head -1)";;   # a claim about your clone
+     esac
+   done
+   ```
+
+   **And re-fetch `refs/prs/*` after you open your own pull request**,
+   because §0 runs before ship-first and the refspec it fetched cannot
+   contain the identifier ship-first is about to create. Every window of
+   this seat opens a pull request after §0 and then sweeps the queue, so
+   this is not a corner case, it is the ordering every run has.
+
+   The transferable half: **an exit code with more than two meanings
+   cannot be read as a boolean, and the sentence "exits non-zero on
+   conflict" is how a three-valued instrument gets written down as a
+   two-valued one.** When you prescribe a command in this file, name the
+   code, not its sign.
 
    **Install this repository's merge drivers before you run it, or four
    of its answers are false (added 2026-10-25, fortieth window,
