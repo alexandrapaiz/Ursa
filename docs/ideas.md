@@ -14393,3 +14393,39 @@ the owner to accept or reject.
   rather than a skill. The measurement it would automate is written out in
   full in PR #608's closing comment, so whoever builds it can reproduce the
   case it came from rather than invent one.
+
+### 2026-11-01 — The board's prose rules are checkable locally for a message and not for a board item, so a seat still learns them by refusal
+
+- Trigger: this run wrote a board item and a comment on it, per pm.md §14,
+  and the comment was refused twice by the store: once for
+  `conversation_violation` and once for `prose_violation`, "a block over 420
+  characters is not" scannable. Both rules are already transcribed correctly
+  in `tools/board/check.mjs`, and feeding the refused text to it reproduces
+  the second verdict exactly, naming the 546-character block and the repair.
+  The checker knew. It was simply not reachable from where the run was
+  standing, because its interface is the message path: `--kind`, `--to-seat`,
+  `--to-company`, `--subject`, `--body-file`.
+- What: §14 makes every seat a writer of item titles, item bodies and item
+  comments, and the store applies the same `prose_violation` and
+  `conversation_violation` rules to all of them that it applies to a message
+  body. There is no local door for that path, so the only way a seat learns
+  these rules while writing an item is by being refused, which is exactly the
+  expensive route `check.mjs`'s own header was written to close. A comment
+  refusal is cheap, since a refused write stores nothing. A refused item is
+  worse than cheap in the one case that matters: a run near its end, holding a
+  finished pull request, spending its last turns guessing at a title the store
+  will accept. The rules are already written down once in this repository and
+  the gap is entirely in the interface.
+- First step: three flags on the existing checker, `--item-title`,
+  `--item-body` and `--comment`, each validating the text it is given against
+  the rule set that already exists, with the company-name rule skipped for the
+  item path since an item names its company in the POST and is not fanned out
+  to a bus. No new transcription and no second copy of the rules, which is the
+  property that makes this small: the constants stay in one file. Then one line
+  in pm.md §14's code block showing the check before the POST, the way §4 and
+  §15 already point at their own gates.
+- Cost: $0.
+- Status: proposed. For the engineer seat, since `tools/board/` is outside
+  this seat's write surface (`prompts/skill-agent.md`, Boundaries). Named here
+  rather than fixed because a seat patching another seat's tool mid-run is how
+  two copies of a rule get written.

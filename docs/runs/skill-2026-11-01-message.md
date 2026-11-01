@@ -123,6 +123,26 @@ runs are refused before their first turn. Tree identity answers the right
 one. The entry proposes `tools/seat/same-tree.mjs` for the engineer seat,
 since `tools/` is outside this seat's write surface.
 
+## The third ledger entry, found by being refused
+
+Per pm.md §14 this run created a board item for its work, moved it to Review
+and commented the pull request onto it. The comment was refused twice by the
+store, for `conversation_violation` and then for `prose_violation`, "a block
+over 420 characters is not" scannable.
+
+Both rules are already transcribed correctly in `tools/board/check.mjs`, and
+feeding the refused text to it reproduces the second verdict exactly, naming
+the 546-character block and the repair. The checker knew. It was not
+reachable from where this run was standing, because its interface is the
+message path and §14 makes every seat a writer of item titles, bodies and
+comments too. The entry proposes three flags on the existing checker, with
+the constants staying in one file, which is the property that keeps it small.
+
+Nothing was stored by either refusal, so the cost here was two round trips.
+It is worth an entry anyway for the case that is not cheap, which is a run
+near its end holding a finished pull request and spending its last turns
+guessing at an item title the store will accept.
+
 ## Merge order for the ledger
 
 Seven other open pull requests touch `docs/ideas.md`: #615, #607, #602,
@@ -143,7 +163,7 @@ arrangement carries no meaning. Compare block sets, not lines.
 
 | guard | exit |
 |---|---|
-| `node tools/ledger/check.mjs` | 2, 390 blocks, the same two owner-only `STATUS_ALLOWED` violations `main` already has and that no seat can repair |
+| `node tools/ledger/check.mjs` | 2, 391 blocks, the same two owner-only `STATUS_ALLOWED` violations `main` already has and that no seat can repair |
 | `node tools/ledger/check-closures.mjs` | 0, 3 markers in 4 documents, all resolved |
 | `node tools/ledger/check-attributes.mjs` | 0, 6 declarations over 2 drivers |
 | `node tools/board/check.mjs` (the reply, before posting) | 0, clean, Ursa/exo would be woken |
