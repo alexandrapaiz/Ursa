@@ -14321,3 +14321,266 @@ the owner to accept or reject.
   misdescribes.
 - Cost: $0, plus three permanent self-addressed rows on the board.
 - Status: proposed
+
+### 2026-10-27 — Nothing in continuous integration runs the credential scanner, and the one gate that does run has no credential rule
+
+- Trigger: building the cited baseline for the history hit today and then asking
+  what would have caught `88bb0bf3` on its own. Nothing would have. Measured in
+  this clone: `grep -rn "secret-scan" .github/` returns nothing, and
+  `grep -rln "node --test\|npm test" .github/workflows/` returns nothing, so
+  neither `tools/secret-scan.mjs` nor the 352-case test suite runs on any push
+  or any pull request. The only non-agent workflow is `redaction-gate.yml`, and
+  its three rules are a home path, a Claude Code project slug, and a full UUID.
+  None of the scanner's 16 credential classes is among them. The hit was found
+  on 2026-10-27 by a seat running the scanner by hand, a day after the commit
+  landed and after it had already reached `main`.
+- What: the repository has a credential scanner good enough to find a real hit
+  in 6455 blobs, a suite that proves it can fail by planting canaries, and no
+  automation that runs either. So the scanner's quality is a property of
+  whichever seat remembers to invoke it, which on the evidence of this week is
+  one seat on one day. The gate that does run is the one written after
+  incident 4, and it covers exactly the class of that incident. That is the
+  shape of a repository that gates the last thing that went wrong rather than
+  the things it can already detect. Two jobs are missing and they are different
+  jobs: a tree scan plus the suite on every pull request, which is cheap and
+  bounded, and a full `--history` scan on a schedule, which is the only scope in
+  which a baseline entry can be judged stale and which takes minutes rather than
+  seconds.
+- First step: not this seat's to take, and that is the point worth recording
+  rather than a reason to drop it. The engineer charter's boundaries forbid
+  touching `.github/workflows/`, and the scanner belongs to the security seat.
+  So the first step is this entry plus a note to that seat, and the day-sized
+  unit of work after the owner accepts it is theirs: one job running
+  `node tools/secret-scan.mjs` and `node --test "tools/**/*.test.mjs"` on pull
+  requests, with the history scan on a separate schedule so a seven-minute walk
+  never sits in front of a review.
+- Cost: $0. Both jobs are GitHub-hosted minutes on a public repository.
+- Status: proposed
+
+### 2026-10-27 — The sentinel convention that repaired the credential fixture is written nowhere, so the next fixture author re-derives it
+
+- Trigger: reading why `88bb0bf3` happened before writing the baseline that
+  accepts it. The fixture is in a test whose entire subject is that a formatter
+  must never print a credential value, written by a seat being careful about
+  exactly this, and it was given a real-looking key id anyway because a test
+  about redaction wants something that looks like the thing being redacted. The
+  next commit, `a8a8c866`, replaced it with `deadbeefcafebabe0123456789`, which
+  matches no class in the table. That repair is correct and it is recorded in no
+  convention: nothing in the scanner, the suite or the standards says "a fixture
+  that must look credential-shaped uses a sentinel that is deliberately not",
+  and nothing checks it.
+- What: the cost of getting this wrong is not a failing test, it is a permanent
+  object in the default branch's history and a baseline entry forever. That
+  asymmetry is what makes it worth a convention rather than a habit. The
+  convention has two halves. The written half is a named sentinel shape per
+  class, in the scanner's header next to the class table, so a fixture author
+  reads it in the same file that defines what will flag them. The executable
+  half is narrower than it first looks and should not be a new gate: the tree
+  scan already fails on a credential-shaped fixture, so what is missing is not
+  detection but the sentence a failing author reads. The scanner's exit 1
+  trailer currently says to record and escalate, which is right for a real
+  credential and wrong for a fixture, and it is the only instruction the author
+  of the next fixture will see.
+- First step: add the sentinel table to the scanner's header and a second
+  sentence to the exit 1 trailer naming it, then pin both in
+  `secret-scan-verdict.test.mjs` the way the other five lines are pinned. One
+  session, and it touches no behaviour: the exit codes and the hit lines do not
+  move.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-27 — Two open branches of one seat can each be clean against the trunk and duplicate each other, and nothing either branch can read will say so
+
+- Trigger: the correction from alexandra-systems/exo-centralizer in this seat's
+  inbox today, read on the board. Their run eleven and run fourteen each closed
+  the same two findings of this seat's handoff, four hours apart, producing two
+  resolvers, two docstrings and two independent counts of the same sixty rows.
+  Both pull requests read mergeable and clean, because each was clean against
+  the trunk; they conflict only with each other, so no check on either branch
+  could have reported it and a reviewer of either one counts one resolver and is
+  right. This seat is one run away from the same shape today: #580 and #591 are
+  both open, both touch `docs/ideas.md`, and the only thing preventing a second
+  implementation of the same repair is that this run read its own open pull
+  requests first and stacked on it.
+- What: the guard HQ added is the right one for a single file, a test that
+  counts the implementations in a class and fails above one. It is still a
+  per-branch check, so it holds only where someone thought to write it, and it
+  cannot see the other branch. The missing instrument measures the pair: for
+  one seat's open heads, which are ancestors of which, and which pairs touch a
+  common path with no containment relation between them. The first is already
+  the charter's `git merge-base --is-ancestor` ceremony done by hand for one
+  pair; the second is what nobody runs. `tools/stack/integrate.sh` merges other
+  branches in and `tools/stack/repair-pending.mjs` asks whether a string on the
+  base is repaired on some head, and neither answers this question.
+- First step: a `--pairs` mode on a new `tools/stack/overlap.mjs` that takes the
+  seat's open head refs, fetches them, and prints one row per pair: contained,
+  disjoint, or overlapping-and-independent with the shared paths named. Exit 1
+  only on the third. Hermetic test over a local bare origin, the way
+  `integrate.test.mjs` already builds one, so it needs no network.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-27 — Craft scan: gitleaks, the one product whose suppression format answers today's question differently
+
+- Product: gitleaks, the credential scanner, read today at
+  `raw.githubusercontent.com/gitleaks/gitleaks/master/README.md`. Chosen because
+  this run built a suppression mechanism and the honest way to check a design is
+  against the product that has shipped one for years.
+- Worth stealing: the inline `#gitleaks:allow` comment. The acceptance lives on
+  the line it accepts, so a reader of the code sees it without opening a second
+  file, and deleting the line deletes the acceptance, which means that form can
+  never go stale. Ursa's baseline has the opposite property by design, and the
+  staleness check added today exists only because the acceptance is remote from
+  the thing accepted. The limit is real and worth stating with the idea: an
+  inline marker cannot accept anything in history, because a past blob cannot be
+  edited, so the two forms are complementary rather than alternatives. Inline
+  would be the right answer for the working tree, which the blob-pinned baseline
+  deliberately cannot touch at all.
+- What Ursa does better, and it is the same property twice: the unit. A
+  gitleaks fingerprint is
+  `cd5226711335c68be1e720b318b7bc3135a30eb2:cmd/generate/config/rules/sidekiq.go:sidekiq-secret:23`,
+  which is commit, path, rule and line, so it names a coordinate and not a
+  content. Nothing in it refers to what is at that coordinate, so it cannot
+  notice that the coordinate now holds a different secret, and a rebase or a
+  squash changes the commit and silently invalidates it. The allowlist's `paths`
+  and `regexes` options are broader still: both suppress a class of future
+  findings. `tools/secret-scan.baseline.json` keys on a blob id, which is the
+  content, so an entry accepts exactly one byte sequence, there is no wildcard
+  of any kind, and no edit to an accepted file can be hidden by it. Second, a
+  `.gitleaksignore` line is an identifier with no field for the reason, so the
+  record of why something was accepted lives wherever the person who accepted it
+  happened to put it. Every Ursa entry carries the sentence, the citation, the
+  date, and a `rotation_required` that must be false, and the run refuses rather
+  than scans if any of them is missing.
+- Status: not an idea, a scan note. The stealable half is written up above as
+  the sentinel entry's neighbour rather than as a fourth entry, because inline
+  acceptance for the tree and a sentinel convention for the tree are two answers
+  to one question and the owner should pick one rather than accept both.
+
+### 2026-10-27 — A burn needs a date before a citation checker can tell history from a dangling reference
+
+- Trigger: writing §9.2 of `docs/design/register-id-allocation.md` today. The
+  identifier gate shipped in the same pull request reads definitions only, and
+  the obvious next mode, sweeping every tracked file for a citation that
+  resolves to nothing, was measured before it was designed and refused:
+  `grep -rhoE "PWC-[0-9]+"` over the repository returns `PWC-1` through
+  `PWC-4`, which no register defines and which `docs/security/` legitimately
+  cites, because they were applied on 2026-09-24 and the queue file's own rule
+  is to delete an applied entry. A citation sweep today reports four permanent
+  findings nobody should repair.
+- What: give each entry in a namespace's `burned` array a `retiredOn` date, and
+  then a `--citations` mode can separate the two cases that look identical
+  today. A citation in a file whose last commit predates the retirement is
+  history and is correct as written. A citation added after it is a live
+  dangling reference and is a finding. The date is already known for every one
+  of the six burns this repository carries, because each one's `why` names the
+  event that burned it, so this is a transcription rather than an
+  investigation. The second half is the harder half and should be said plainly:
+  "the file's last commit" is the wrong clock for a file that is edited for
+  other reasons, so the honest measurement is the commit that introduced the
+  citing line, which is `git log -L` or a blame, and that is the cost of the
+  mode rather than the mode itself.
+- First step: add `retiredOn` to the six burn entries in
+  `tools/registers/id-namespaces.json` and to `manifestFault`'s validation, as
+  a required field with a date shape, in the same pull request that adds
+  nothing else. The mode comes after, once the field is populated and reviewed.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-27 — Two spellings of one identifier, and no register declares which one it is
+
+- Trigger: measuring the ADR citations in `.github/workflows/` while writing
+  today's namespace manifest. Eleven workflow files cite eleven distinct ADR
+  numbers and they are not spelled consistently: `ADR-11`, `ADR-12`, `ADR-14`,
+  `ADR-17`, `ADR-20`, `ADR-22`, `ADR-23` and `ADR-24` are two digits, while
+  `ADR-037` and `ADR-049` are three, and `docs/decisions.md`'s own headings are
+  three (`ADR-001` through `ADR-006`). So `ADR-7` and `ADR-007` are one number
+  and two strings, and every citation in this repository resolves by string
+  match.
+- What: the identifier gate shipped today carries a `pad` field per namespace
+  precisely so its allocator prints `ADR-007` rather than `ADR-7`, which fixes
+  the forward direction. It does not fix the backward one: a citation written
+  with the wrong width is invisible to any search for the right width, in both
+  directions, and a future `--citations` mode would silently miss it. The
+  repair has two independent halves and they belong to two different people.
+  The convention is one line under the file's title and is the owner's, and
+  `PWC-EXO-2` step 3 already asks for it in those words. The instrument is a
+  normalization on both sides of a comparison, strip leading zeros before
+  matching, and is a seat's.
+- First step: when the `--citations` mode of
+  `tools/registers/check-ids.mjs` is built, compare on the numeral rather than
+  on the string, and report a citation whose width disagrees with the
+  register's `pad` as its own rule, `CITATION_WIDTH`, rather than folding it
+  into a dangling-reference finding. The two have different repairs: one is a
+  typo in the citing file and the other is a missing decision.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-27 — The continuous-integration gap filed this morning is now five gates wide, and still one job
+
+- Trigger: this run adding `tools/registers/check-ids.mjs`, the fifth local
+  gate in this repository, hours after this seat's own entry of earlier today
+  recorded that nothing in continuous integration runs the credential scanner
+  or the Node test suite. Re-measured rather than assumed:
+  `grep -rn "secret-scan\|check-ids\|redaction-check\|dep-floor\|node --test" .github/`
+  returns nothing outside the agent workflow files' prompts.
+- What: this amends the earlier entry rather than replacing it, in the same
+  form the 2026-10-26 preflight entry amended its 2026-10-25 sibling. What
+  changes is not the proposal's cost but its shape. The set is now
+  `scripts/redaction-check.mjs`, `scripts/dep-floor.mjs`,
+  `tools/secret-scan.mjs`, `tools/registers/check-ids.mjs` and the two ledger
+  gates under `tools/ledger/`, and three of them are offline and finish in
+  under two seconds while two are not: the credential scan takes 31 seconds
+  over the full history, and the identifier gate's `--heads` mode needs the
+  forge to answer what is open. So the split the earlier entries left open now
+  has a measured basis. Every offline gate belongs on every push. The two that
+  reach outside the clone belong on a sweep, and the identifier gate's
+  single-ref mode is the one that belongs in both, because it is the mode that
+  catches the collision this repository has had on `main` for a month.
+- First step: unchanged and still not this seat's. A workflow job is the
+  security seat's lane and `prompts/engineer-agent.md` forbids this seat from
+  touching `.github/workflows/`, so this is a routed proposal. What this seat
+  can do and has not yet is the one manifest or shell script the earlier
+  entries asked for, which needs no workflow at all and would make the job a
+  one-line job when someone writes it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-27 — Craft scan: PEP 1, the register that cannot suffer a reissue because it never deletes anything
+
+- Product: the Python Enhancement Proposal process, read today at
+  `peps.python.org/pep-0001/`. Chosen because this run built an identifier
+  allocator and a burn list, and the oldest continuously running numbered
+  register in open source is the right thing to check that design against.
+- Worth stealing, and it is the half of today's design that is weakest: PEP 1
+  has no burn list and does not need one, because nothing in the register is
+  ever removed. "In general, PEPs are no longer substantially modified after
+  they have reached the Accepted, Final, Rejected or Superseded state. Once
+  resolution is reached, a PEP is considered a historical document rather than
+  a living specification." A rejected proposal keeps its number and its
+  document forever, and supersession is a header on the newer document, the
+  `Replaces` field, which "must" contain the number of the PEP it rendered
+  obsolete. Applied here, that is the opposite of
+  `docs/agents/pending-workflow-changes.md`'s own rule, which is "Delete an
+  entry once it is applied". Four of this repository's six burned identifiers
+  exist only because of that deletion, and the other two exist because entries
+  were renamed in place rather than left standing with a pointer. A register
+  that marked an entry applied instead of deleting it would have a burn list of
+  zero and a citation that still resolves to the thing the citing text meant.
+  That is a change to another seat's file and to the chair's habit, so it is
+  named here and nowhere else.
+- What Ursa does better, and it is one property measured twice: PEP 1 assigns
+  numbers by a human editor picking "almost always just the next available
+  number", and also allows that "developers with write access to the PEP
+  repository may claim PEP numbers directly by creating and committing a new
+  PEP". Two developers who both read the register and both commit are the exact
+  shape `docs/standards/lessons.md` L-A116 names and this repository already
+  paid for, when a `PWC-7` in pull request #74 and a different `PWC-7` in pull
+  request #46 were open at the same time. PEP 1's answer is an editor, which is
+  a person who has to be awake. `node tools/registers/check-ids.mjs --next ADR
+  --heads` is the same answer as a command, computed from every open head
+  rather than from one branch's tail, and it refuses to answer at all without
+  `--heads` rather than answering from the register alone. Second, PEP 1 says
+  nothing about reuse in either direction, so a number that disappeared could
+  in principle come back; a burn list with a mandatory reason per entry cannot
+  be read that way, which is the one place the heavier design earns its weight.
