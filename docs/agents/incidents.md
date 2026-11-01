@@ -10510,3 +10510,114 @@ might happen to make. That duty is now in §2 of this charter.
   `exo-centralizer` as a reading of the `lost` classifier rather than
   asserted here, because `runtime/` is HQ's lane and one observation is
   not a census.
+
+## INC-2026-11-01-the-send-audit-reports-the-owner-notes-the-standard-requires-three-of-every-week — A check and the rule it enforces disagreed about the rule's domain, so the audit was guaranteed to print three unresolvable rows a week
+
+**Status:** fixed in this entry's own pull request, in the charter and in
+the bold instruction above the audit. Nothing is owed to another seat.
+
+**Found 2026-11-01 at 23:24:1xZ**, by running this charter's own
+end-of-run send audit over this window's own seven messages.
+
+### What happened
+
+§"Address the company, not only the seat" says in bold: *"Name
+`to_company` on every directed message, **including to `owner`** and
+including to seats in this company."* The audit under it reports any of
+this seat's directed messages with a null `to_company` as `NO COMPANY`,
+and this charter's standing instruction on anything a sweep prints is
+*resolve it before you stop.*
+
+Run on this window's sends it printed three rows, all three of them the
+`Ideas` notes to the owner that `standards/pm.md` §24 requires three of
+every week. **`--to-company Ursa` was explicitly passed on all three.**
+
+### Why the field was absent, read from the mechanism rather than probed
+
+`resolve_recipient` in HQ's `runtime/board/store.py`, on `main`:
+
+```python
+if is_global_seat(seat):
+    # The owner and the chairs are one actor in the whole portfolio, so
+    # their mail is never scoped and a company beside it means nothing.
+    return seat, None
+```
+
+`is_global_seat` is `owner`, `chair`, and anything beginning `chair:`.
+The read path agrees by the same predicate — `scoped = bool(to_company)
+and not is_global_seat(to_seat)` — and the wake fan-out already excluded
+all three addressees. So for exactly those seats the field is inert on
+both paths, by design and with the reason in a comment.
+
+### The two controls, because an absence is a measurement
+
+**Positive control.** The same poster, in the same window, minutes apart,
+stored the field for every seat that is not global:
+
+```
+23:21:45  exo-centralizer  alexandra-systems
+23:22:06  skill            Ursa
+23:22:07  pm               Ursa
+23:22:49  owner            NULL     <- --to-company Ursa was passed
+23:23:09  owner            NULL     <- and here
+23:23:12  owner            NULL     <- and here
+```
+
+So the poster is not dropping it and the three nulls are not an omission.
+
+**The three-value probe on the read path**, a value that matches, a case
+variant, and a value that cannot match, which is the only form that
+separates a case-folding filter from an absent one:
+
+```
+to_seat=owner&to_company=Ursa -> 5
+to_seat=owner&to_company=uRsA -> 5
+to_seat=owner&to_company=Zzzz -> 5
+to_seat=owner (no company)   -> 5
+```
+
+`Zzzz` returning five is the answer: the filter is **inert** for a global
+seat, not case-folded. On a non-global seat the same probe is known to
+narrow, which is `runner-facts` §45.
+
+### Why this is worse than a noisy check
+
+Three rows a week, forever, that nothing can resolve, attached to an
+instruction that says resolve everything printed. A window then either
+spends turns on an unresolvable row or **learns to skip the audit**, and
+skipping it is exactly what lets a real missing company through — which
+is the defect the audit exists to catch, re-created by the audit's own
+false positive. A check that fires on its own charter's mandated output
+does not survive contact with a second window.
+
+### The correction owed to the parent incident
+
+`INC-2026-10-24-a-seat-addressed-with-no-company-is-every-company` counts
+*"the four `Ideas` notes to the owner"* among the five unscoped messages
+it was built from, and reports them as having been *"readable in four
+sibling companies' owner inboxes."* Whatever the deployed board did on
+2026-10-24, that is not true of it today and there are not four sibling
+owner inboxes; there is one owner. **The one message in that five that is
+a genuine instance is the note addressed to `engineer`**, which woke that
+seat in five companies and cost `alexandria/engineer` part of a run. The
+rule binds unchanged for every seat that is not global, and the parent
+incident's mechanism, finding and remedy all stand for that case. Only
+its count of instances moves, from five to one.
+
+### What the org grows from it
+
+**A rule and the check written to enforce it can disagree about the
+rule's *domain* rather than about its content.** §3's
+standards-against-standards sweep cannot find that, because the check
+does exactly what the rule says — over a set that includes members the
+mechanism exempts. So the question to ask of any check on a field is
+**which values of the key make that field inert**, and the answer is in
+the mechanism rather than in the count.
+
+That is the fourth member of the family this register names. Its
+siblings are a rule whose subject is a file when the file's unit is an
+entry, a rule scheduled on an act when the condition is a state, and a
+rule that replaces an artifact and voids the older rules about its
+contents. All four are invisible to a reading for contradictions,
+because in each one the rule is obeyed exactly and the mismatch is in
+the layer below the words.
