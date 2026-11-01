@@ -7,6 +7,7 @@
 //   node tools/registers/check-closure.mjs --write      # re-pin the baseline
 //   node tools/registers/check-closure.mjs --names zod shadcn undici
 //                                                      # does this package ship?
+//   node tools/registers/check-closure.mjs --root DIR   # against another checkout
 //
 // Exit 0 every member of every production closure is pinned. Exit 1 a closure
 // and the baseline disagree, which is a defect in a tracked file. Exit 2 the
@@ -34,6 +35,19 @@
 // only the second half is a property of a committed file. Neither replaces the
 // other and this file deliberately does not reach for the network.
 //
+// WHY `--root` EXISTS, since a gate that can be pointed elsewhere is a gate
+// that can be pointed at the wrong thing. Everything above the CLI lives in
+// ./closure-verdict.mjs and is driven directly by its test. The part that only
+// exists here -- enumerating tracked lockfiles, reading them off disk, writing
+// the baseline -- resolved its paths from `import.meta.url`, so the only
+// repository it could ever read was this one, and `--write` could only be
+// exercised by overwriting the committed baseline. That is untestable in the
+// precise sense that matters: the branches would ship unexercised.
+// `tools/registers/check-ids.test.mjs` solved the same problem for its gate by
+// building fixture repositories with `git init` and passing `--base main`, and
+// this is that flag for this gate. It defaults to this repository, so no
+// invocation anyone types changes.
+//
 // No dependencies. No network. Reads three committed lockfiles and one
 // committed baseline.
 
@@ -54,15 +68,30 @@ import {
   verdict,
 } from './closure-verdict.mjs'
 
-const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const BASELINE = join(REPO_ROOT, 'tools', 'registers', 'prod-closure.json')
+const DEFAULT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const BASELINE_REL = 'tools/registers/prod-closure.json'
 
 const argv = process.argv.slice(2)
 const JSON_OUT = argv.includes('--json')
 const WRITE = argv.includes('--write')
+const ROOT_AT = argv.indexOf('--root')
+const REPO_ROOT = ROOT_AT === -1 ? DEFAULT_ROOT : resolve(argv[ROOT_AT + 1] ?? '.')
+const BASELINE = join(REPO_ROOT, 'tools', 'registers', 'prod-closure.json')
 const NAMES_AT = argv.indexOf('--names')
-const NAMES = NAMES_AT === -1 ? [] : argv.slice(NAMES_AT + 1).filter((a) => !a.startsWith('--'))
+// STOP at the first flag, do not FILTER flags out. `--names` is variadic, so
+// the first draft collected every later argument that did not begin with `--`
+// and dropped the flags -- which silently swallowed the VALUE of any later
+// flag. `--names a --json --root /tmp/x` asked whether a package literally
+// called `/tmp/x` ships. Found by the test immediately below, which is the
+// only reason it is not in the committed gate.
+const NAMES = NAMES_AT === -1 ? [] : (() => {
+  const taken = []
+  for (const arg of argv.slice(NAMES_AT + 1)) {
+    if (arg.startsWith('--')) break
+    taken.push(arg)
+  }
+  return taken
+})()
 
 /**
  * Every lockfile this repository tracks, as repository-relative POSIX paths.
@@ -71,15 +100,15 @@ const NAMES = NAMES_AT === -1 ? [] : argv.slice(NAMES_AT + 1).filter((a) => !a.s
  *
  * @returns {{dirs: string[]} | {fault: {code: string, detail: string}}}
  */
-export function trackedLockfileDirs() {
+export function trackedLockfileDirs(root = DEFAULT_ROOT) {
   let listing
   try {
-    listing = execFileSync('git', ['-C', REPO_ROOT, 'ls-files', '-z', '*package-lock.json'], {
+    listing = execFileSync('git', ['-C', root, 'ls-files', '-z', '*package-lock.json'], {
       encoding: 'utf8',
       maxBuffer: 32 * 1024 * 1024,
     })
   } catch (error) {
-    return { fault: { code: 'NOT_A_GIT_CHECKOUT', detail: `git ls-files in ${relative(process.cwd(), REPO_ROOT) || '.'} failed: ${error.message}` } }
+    return { fault: { code: 'NOT_A_GIT_CHECKOUT', detail: `git ls-files in ${relative(process.cwd(), root) || '.'} failed: ${error.message}` } }
   }
   const dirs = listing
     .split('\u0000')
@@ -139,7 +168,7 @@ const invokedDirectly =
   process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href
 
 if (invokedDirectly) {
-  const located = trackedLockfileDirs()
+  const located = trackedLockfileDirs(REPO_ROOT)
   if ('fault' in located) {
     const v = scopeUnreadable(located.fault)
     console.error(v.line)

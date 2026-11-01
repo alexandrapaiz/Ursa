@@ -54,7 +54,7 @@ describe('the six extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 33 distinct causes with 39 probes, which is the number the text sweep could not see', () => {
+  it('reaches 36 distinct causes with 46 probes, which is the number the text sweep could not see', () => {
     const { json } = run()
     // 23 and 28 until 2026-10-27, then 27 and 32 earlier the same day. The
     // four added then were all post.mjs's: three sender branches, where a seat
@@ -82,9 +82,22 @@ describe('the six extracted gates, end to end', () => {
     // trust and a scope it cannot read, are not probed here; they are driven
     // directly in tools/registers/id-verdict.test.mjs, because the probe
     // space this file declares is a findings space.
-    assert.equal(json.branches.length, 39)
+    //
+    // The three added on 2026-11-01 are tools/registers/check-closure.mjs's,
+    // the production-closure gate, and they cost SEVEN probes for three
+    // causes, which is the widest probe-to-cause ratio of any gate here. That
+    // is deliberate and it is the first gate where the gap carries
+    // information: five of its seven probes exist to prove that five
+    // DIFFERENT finding rules collapse into only two non-clean verdicts, one
+    // for a surface that grew and one for a register that fell behind. A
+    // reader of the census would otherwise have no way to tell whether five
+    // rules meant five branches. Its three ground branches are not probed
+    // here for the same reason check-ids.mjs's two are not: the probe space
+    // this file declares is a findings space, and they are driven directly in
+    // tools/registers/closure-verdict.test.mjs.
+    assert.equal(json.branches.length, 46)
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
-    assert.equal(causes.size, 33)
+    assert.equal(causes.size, 36)
   })
 
   it('carries an exit 3, which no gate of the first four could have reached', () => {

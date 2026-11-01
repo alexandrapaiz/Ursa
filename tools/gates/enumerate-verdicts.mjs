@@ -67,6 +67,7 @@ const REGISTRY = [
   './../secret-scan-verdict.mjs',
   './../board/post-verdict.mjs',
   './../registers/id-verdict.mjs',
+  './../registers/closure-verdict.mjs',
 ]
 
 // ---------------------------------------------------------------------------
