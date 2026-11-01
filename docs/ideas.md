@@ -13487,6 +13487,42 @@ one existing command, `bash tools/ledger/requeue.sh --push <second>`.
   that never ship. Read `ursa-minor/package.json` and the build
   output, record the answer in this entry, and only then price the
   upgrades. Do not bump anything in the same run that measures it.
+- Answered 2026-11-01 (engineer, hook run), as this entry's first step
+  asks, and nothing was bumped. **Yes, and for all nine rather than
+  only those two.** Every package this entry names carries `"dev": true`
+  in the committed `ursa-minor/package-lock.json`, and
+  `npm audit --json --omit=dev` in `ursa-minor` returns zero advisories
+  at every severity over a production tree npm reports as 33 packages.
+  So no advisory of any severity reached the Ursa Minor site's deployed
+  dependency tree on that date. Three further facts the entry could not
+  have had, each measured and each changing what it means. **One**, the
+  decision this entry asks someone to take already existed and was
+  already enforced: `scripts/dep-floor.mjs` has required zero critical
+  anywhere and zero high in the production tree since 2026-09-27, and
+  its header states in four lines that development-only high and
+  moderate advisories are reported and do not fail. The entry is not a
+  careless one; it is a seat that could not reach a committed decision
+  from where it was standing, because dep-floor establishes the
+  production tree by calling `npm audit --omit=dev` and so needs the
+  registry to answer a question that is a property of a committed file.
+  **Two**, the same unchanged lockfile answers `9` on 2026-10-26 and
+  `31` on 2026-11-01 — seven high, twenty-three moderate, one low —
+  because the registry's knowledge of the installed ESLint and
+  `typescript-eslint` packages changed while this repository did not. An
+  advisory count is therefore not a fact about this repository and
+  pricing upgrades against one is pricing against a moving number.
+  **Three**, and this is the part that is not reassuring: ten of today's
+  31 advisory package names DO reach a production closure here, in
+  `ursa-major` and `ursa-major/overlay` rather than in `ursa-minor`, and
+  every one of them sits outside its advisory range by a margin that is
+  a single patch release in seven of the ten cases (`fast-uri@3.1.9`
+  against `3.0.0 - 3.1.8`, `qs@6.16.1` against `6.7.0 - 6.16.0`,
+  `zod@4.6.7` against `<4.6.6`). Nothing is vulnerable. The conclusion a
+  future reader would draw from this entry as written — that these names
+  are development-only — is true of the workspace it measured and false
+  of the repository. The measurements, the instrument now standing
+  behind them, and the parts deliberately not reconciled are in
+  `docs/design/production-closure.md`.
 - Cost: $0
 - Status: urgent
 
@@ -14584,3 +14620,154 @@ the owner to accept or reject.
   nothing about reuse in either direction, so a number that disappeared could
   in principle come back; a burn list with a mandatory reason per entry cannot
   be read that way, which is the one place the heavier design earns its weight.
+
+### 2026-11-01 (engineer, re-fired slot) — npm's own scope flags are this repository's only authority on what ships, and the first attempt at a second one disagreed with them
+
+- Trigger: this run's own prototype, written before the gate it replaced.
+  Walking `dependencies`, `optionalDependencies` and `peerDependencies` edges
+  from each lockfile's root entry, resolving each name by npm's
+  nearest-ancestor `node_modules` rule, and taking the reachable set reached
+  **70** packages in `ursa-minor` where the `dev` and `devOptional` fields
+  admit **67**, **161** against **158** in `ursa-major`, and **85** against
+  **85** in `ursa-major/overlay`, with six, one and four dependency edges
+  respectively that the traversal could not resolve to any entry at all.
+- What: `tools/registers/check-closure.mjs` shipped today reads npm's flags
+  and deliberately does not recompute them, which is the right call for a
+  gate that has to agree with the installer a deployment actually runs. The
+  cost of that call is that no instrument in this repository can disagree
+  with npm about what ships. Every disagreement above is explainable and the
+  explanation is the work: each unresolved edge is an optional peer
+  dependency that is not installed (`node_modules/next -> @playwright/test`,
+  `node_modules/next -> sass`, `node_modules/@base-ui/react -> date-fns`),
+  and each of the three extra packages per workspace is one reachable by a
+  peer edge from production and also declared a direct development
+  dependency (`@types/react`, `@types/node`, `csstype`, `undici-types`,
+  `detect-libc`). So the traversal is not wrong about the graph, it is wrong
+  about npm's rule for which edges confer production scope, and the three
+  classes above are exactly that rule's hard cases. A correct second
+  authority would turn a trusted field into a checked one, and would catch
+  the one failure mode the current design cannot see at all: an npm release
+  whose flagging changes.
+- First step: implement the three classes rather than the general rule.
+  Honour `peerDependenciesMeta[name].optional` and the absence of an
+  `optionalDependencies` target as "edge not present" rather than
+  "unresolved", which closes all eleven unresolved edges; then decide the one
+  real question, which is whether a peer edge from a production package
+  confers production scope on a package the root also declares as a
+  development dependency, and settle it by reading what `npm ci --omit=dev`
+  actually installs into a scratch directory rather than by reading
+  documentation. Three assertions in `tools/registers/closure-verdict.test.mjs`,
+  one per class, before any traversal code is kept.
+- Cost: $0. One `npm ci --omit=dev` into a temporary directory, which the
+  sandbox already has the network for.
+- Status: proposed
+
+### 2026-11-01 (engineer, re-fired slot) — `scripts/dep-floor.mjs` reads the field that says whether a repair is breaking, and throws it away
+
+- Trigger: today's craft scan, below, measured on this sandbox's own
+  `npm audit --json --package-lock-only` output for `ursa-minor`. Of its 31
+  vulnerability entries, `fixAvailable` is the boolean `true` on **18** and an
+  object `{name, version, isSemVerMajor}` on **13**, and `isSemVerMajor` is
+  `true` on all 13 of those. `grep -n fixAvailable scripts/dep-floor.mjs`
+  matches nothing: the gate parses the same report, keeps `severity` and the
+  GHSA ids out of `via`, and discards this field.
+- What: npm has already computed, for every advisory, whether the repair is
+  reachable inside the declared semver range or requires a breaking change to
+  a named package at a named version. Those are different repairs with
+  different owners in this organisation — an in-range bump is a seat's
+  afternoon, a major is a dependency decision a seat's charter does not let it
+  take — and `dep-floor.mjs` currently reports both as one noun. This is the
+  same defect class `docs/design/verdict-lines.md` §1 is about, arriving in a
+  gate that was built after that document: one sentence standing for findings
+  whose repairs belong to different people. It is cheaper to fix here than
+  anywhere else that class has appeared, because the distinguishing datum is
+  already in the JSON the gate parses.
+- First step: carry `fixAvailable` onto each violation and warning record in
+  `scripts/dep-floor.mjs`, then split `summaryLine()` in
+  `scripts/dep-floor-summary.mjs` on it, which already has the three-branch
+  shape and the test suite to extend. No new exit code: a breaking repair is
+  still a violation, it just stops being described as if someone could do it
+  today.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-01 (engineer, re-fired slot) — Seven of ten shipped packages clear their advisory by one patch release, and nothing measures that distance
+
+- Trigger: piping today's 31 advisory package names through
+  `node tools/registers/check-closure.mjs --names ... --json`, which is the
+  cross-workspace join the 2026-10-26 entry could not perform. Ten rows come
+  back shipping, and every one is outside its advisory range:
+  `@hono/node-server@2.1.4` against `1.19.10 - 2.1.2`, `fast-uri@3.1.9`
+  against `3.0.0 - 3.1.8`, `qs@6.16.1` against `6.7.0 - 6.16.0`,
+  `zod@4.6.7` against `<4.6.6`, `ip-address@10.7.5` against `<=10.7.3`,
+  `body-parser@2.4.0` against `2.0.0 - 2.3.0`, `hono@4.13.13` against
+  `4.12.4 - 4.13.10`, and `@modelcontextprotocol/sdk@1.32.1` against
+  `<=1.31.0`.
+- What: `scripts/dep-floor.mjs` has two states for a production package, above
+  the floor and below it, and both of this repository's gates agree today that
+  everything is below it. Neither can say that seven of those ten are below it
+  by one patch version. "Not vulnerable" and "not vulnerable until a lockfile
+  resolution moves one patch" are different risks, and the second one is
+  invisible in a repository whose lockfiles are regenerated by a tool rather
+  than written by hand. The reason this matters more here than it would
+  elsewhere is the reason the production closure got pinned at all: a revert, a
+  `npm install` on a host with a different cache, or a transitive constraint
+  from an unrelated new dependency can each move a version down without anyone
+  intending it, and today the first signal would be a later audit on a
+  networked host.
+- First step: measure before proposing any code, because the whole value turns
+  on whether the number is small. For each of the 308 members of
+  `tools/registers/prod-closure.json`, ask whether its version is within one
+  patch release of the upper bound of any advisory range the registry has for
+  it, and report the count. If it is the seven above, a warning line in
+  `dep-floor.mjs` is the whole repair. If it is eighty, there is nothing to
+  build, because a warning that fires eighty times is not a warning.
+- Cost: $0 to measure. A gate would need semver range parsing, which Node has
+  no builtin for, so it would be either `node_modules/semver` in a `tools/`
+  tree that currently has no dependencies at all, or a hand-written subset —
+  that trade-off is a decision for after the measurement, not before.
+- Status: proposed
+
+### 2026-11-01 — Craft scan: `npm audit --json`'s own output contract, where a type change in one field carries the thing this repository keeps getting wrong
+
+- Trigger: the daily craft scan, taken on the tool this run spent its day
+  beside, and measured in this sandbox rather than recalled. npm 10.9.8,
+  `npm audit --json --package-lock-only` in `ursa-minor`, 31 vulnerability
+  entries.
+- Worth stealing, and it is one field. `fixAvailable` is a union, not a
+  boolean: `true` on 18 of the 31 entries, and an object
+  `{name, version, isSemVerMajor}` on the other 13, every one of which has
+  `isSemVerMajor: true`. npm is not reporting whether a fix exists. It is
+  reporting **which kind of repair the fix is**, and it encodes the
+  distinction as a change in the field's type so that a caller who treats it
+  as a boolean still gets a truthy answer and a caller who looks gets the
+  named package and version. Two neighbouring fields do the same job for the
+  same reason: `isDirect` is true on only 3 of the 31, which separates "you
+  declared this" from "something you declared dragged it in", and `effects`
+  plus `nodes` give the path — `zod` has three `nodes` and two `effects`,
+  which is why one advisory shows up as three installed copies. Every gate in
+  `tools/` returns findings with a `message` and a `rule` and no
+  machine-readable repair at all, so each one re-describes its repair in
+  prose and `docs/design/verdict-lines.md` §1 exists because that prose keeps
+  addressing the wrong person. The ledger entry above is the narrow version of
+  stealing this; the general version is a `repair` field on `Finding`
+  alongside `locus`, where `locus` says who and `repair` says what kind.
+- What this repository does better, and today's run is the proof. `npm audit`
+  has no baseline and no concept of one. It cannot answer "what changed since
+  the last time anyone looked", which is why the same unchanged
+  `ursa-minor/package-lock.json` reported 9 advisories on 2026-10-26 and 31 on
+  2026-11-01 with nobody noticing for six days. `tools/secret-scan.baseline.json`
+  and `tools/registers/prod-closure.json` are both exactly that missing
+  concept: a committed, reviewed statement of what was true when a human last
+  read it, so the next run reports the delta instead of the total. The
+  asymmetry is not an accident of maturity either. npm's answer is about a
+  registry it does not control, so it has nothing stable to pin; this
+  repository's gates are about committed files, so they do.
+- **No `- First step:` line and no `- Status:` line**, which is the convention
+  `tools/ledger/block-kinds.mjs` reads: a scan note is an observation and not a
+  commitment, and the two earlier notes that wrote prose into a `- Status:`
+  field are each a standing `STATUS_ALLOWED` warning on
+  `node tools/ledger/check.mjs` that only the owner can clear. This run's first
+  draft made that mistake a third time and the gate caught it before the
+  commit. The stealable half of this scan is written up above as its own entry,
+  with the five fields, per the ledger contract.
