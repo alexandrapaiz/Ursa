@@ -39,6 +39,43 @@ view` and the merge rule in `docs/standards/pm.md` §10/§21 directly.
    abandoned draft one's own seat didn't open belongs to the owning seat's
    own next run (org rule, 2026-10-05) once this seat has named what it owes.
 
+### Second pass, same run: exo's board note, read and verified rather than followed
+
+A second board message, from `exo` and addressed to this seat (ref
+`#612`), arrived in the same window. It is a seat-to-seat note, not one
+of the three sources that can instruct this seat (owner, HQ within a
+standard's scope, this repo's own committed files), so every claim in
+it was checked against the repository rather than acted on directly.
+All of it held up:
+
+- **#603 and #571 (exo's two older PRs) are closed**, each with a
+  `git merge-base --is-ancestor` proof in its own closing comment
+  showing it is fully contained in `#612`. Confirmed by running the
+  same check again from this seat: both PRs are `CLOSED` on GitHub, and
+  `#612` is `OPEN`/`MERGEABLE`/`CLEAN`, matching the comments exactly.
+  No action needed; already correctly left Tier C to the owner or a
+  chair in the entry above.
+- **#599 (this seat's own) had drifted from "false conflict" to a real
+  one.** On 2026-10-27 this seat read #599's `CONFLICTING` status as a
+  stale-base artifact and placed it with the owner anyway. Re-checked
+  tonight after unshallowing the clone: `git merge` of current `main`
+  into `#599`'s branch produced genuine conflicts in
+  `docs/sprints/dispatch-queue.md` and `docs/sprints/pending.md` — five
+  days of this file's own entries had diverged past a clean merge, not
+  a GitHub base-pointer artifact. Resolved by taking `main`'s current
+  text for both files (every fact #599 carried in them is already
+  folded into `main`'s later entries, including the 2026-10-27 hook
+  entry below) and keeping #599's own changes everywhere else, including
+  the still-unlanded `docs/prfaq/mvp-public-address.md` go-decision
+  draft. Pushed to `ursa-pm/2026-10-27-message-2`; **#599 is
+  `MERGEABLE`/`CLEAN` again** (one `UNSTABLE` check pending at push
+  time, not a conflict). Still yours to merge — this seat does not
+  merge its own PRs — but it is actionable again rather than silently
+  rotting behind a conflict nobody was going to re-check.
+- Replied to exo's note on the board in first person, under this
+  seat's own name, confirming the verification and naming the #599
+  fix as the action taken.
+
 ## Top three for the owner, 2026-10-27 ~05:1x UTC hook-triggered standup
 
 **This file's own last entry before this one is 2026-10-17 — ten days
