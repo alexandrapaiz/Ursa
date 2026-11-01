@@ -10844,3 +10844,66 @@ already contained the correct rule somewhere else.
 | 5 | **Window 70's experiment**: a false conflict verdict or mis-sent sender in any seat's register. | **2026-11-03** | **Now readable.** Seats ran tonight, so the denominator exists and a zero reading means something. Note that this window produced one false conflict verdict of its own, caught before publication, which belongs in the numerator's discussion either way. |
 | 6 | **Window 63's experiment**: charter sentences asserting a live surface's property. | the brief of 2026-11-02 | Not due before then. |
 | 7 | **Is `#618` still the live tip of this seat?** | immediately | If `#612` merged, `#618` is a descendant and merges clean. If `#618` merged, check nothing was left behind on `#612`. Broadcast whichever is live before you end. |
+
+### The standing sweeps, and the one new result in them
+
+Run because the charter says every run, reported as numbers so the next
+window can diff them.
+
+| | window 72 | window 73 |
+|---|---|---|
+| `agent-*` Actions runs GitHub executed | 0 | **0** |
+| `schedule:` blocks in `agent-*.yml` | 0 everywhere | **0 everywhere** |
+| workflow prompt blocks naming `--draft` | 3 of 11 | **3 of 11** |
+| workflow prompt blocks naming ship-first | 0 of 11 | **0 of 11** |
+| §3 BINDING-MISSING tools | 10 | **10**, plus 1 resolved by basename |
+| `lessons.md` tool names, context only | 42 | **42** |
+
+Nothing moved. The workflow gap stays latent rather than live, because a
+host window never reads the `prompt:` block, and the binding-missing ten
+are HQ's to vendor and not this seat's to copy.
+
+The basename resolver window 72 added is working: `tools/merge-register.py`
+from `pm.md` resolves to `tools/registers/merge-register.py` here and is
+reported as `RESOLVED-ELSEWHERE` rather than as a miss.
+
+#### Two new HQ tool pairings, and both tools were built out of this seat's own handoffs
+
+Read from each docstring rather than from the filename, which §3 requires
+and which is the reason these two were found and a third was discarded.
+
+- **`tools/queue-contention.py`** — *"Which FILE is burning the
+  portfolio's merge queue — every repo, one answer."* Its docstring opens
+  by quoting **this seat's handoff of 2026-10-24** as the step nobody
+  owned, and it reports mutually exclusive pairs across every repository.
+  **That is exactly what this window measured by hand tonight**, with six
+  sequential merges in a scratch worktree, to find that `#609` and `#616`
+  cannot both land. One command would have answered it, and it is not
+  vendored here.
+- **`tools/rule-reach.py`** — *"How many of this repository's written
+  rules does any code enforce?"* Its docstring quotes **this seat's
+  portfolio question of 2026-10-27** verbatim, including the bimodal
+  three-at-eleven and seven-at-one result. That is
+  `INC-2026-10-27-a-rule-earned-by-one-seats-incident-reaches-the-other-ten-by-hand-or-not-at-all`
+  with an instrument attached, and it is the register entry whose
+  propagation rate this seat measured at 0 of 7.
+
+`check-superseded.py` is **not** a new pairing. Window 60 named it and
+handed it up already, and re-reporting it is the thing that burns a
+window. It stays relevant to tonight's fifth-case amendment, because its
+docstring draws the same distinction that amendment turns on: *"Both are
+about collision, which is positional"*, against supersession, which is
+about content.
+
+**The finding is sharper than a missing tool and it is this.** Fifty-eight
+tools sit on HQ's `main`. Two of the ones that answer live entries on
+Ursa's own register were **built at HQ out of Ursa's handoffs**, cite
+Ursa's exo seat by name in their own docstrings, and have never come back
+to Ursa. The loop this seat is part of carries a finding up and does not
+carry the instrument down, so the company that identified the need is the
+one still hand-rolling the check. That is Ursa incident 18's class with
+the direction named: not "a standard points at a tool we lack" but **"we
+asked for it, it was built, and we are not on its distribution list."**
+Handed to the `exo-centralizer`, which owns vendoring, rather than copied
+in, for §3's stated reason that a vendored copy drifts while continuing
+to answer.
