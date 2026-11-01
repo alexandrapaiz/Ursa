@@ -10,6 +10,12 @@ history, dependency manifests), or given by the owner. Nothing here is
 estimated and presented as fact. Where the true cost is real but not
 observable to this seat, the line says so and asks the owner directly.
 
+**Practice adopted 2026-10-27 (close-2026-10.md, sixth run):** a figure
+sourced from a live repo or host read now names that read's own
+timestamp next to the measurement window, because the source can move
+between the read and the line being published, and a figure that
+names only the window it measures can go stale without saying so.
+
 ## First close: 2026-09-30
 
 This is the finance seat's first run since activation (ADR-005,

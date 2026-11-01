@@ -13,6 +13,12 @@ no prior entries existed.
 from repo evidence or the host's own run record, named with its source
 and window. Nothing here is estimated and presented as a dollar figure.
 
+**Practice adopted 2026-10-27 (close-2026-10.md, sixth run):** a figure
+sourced from a live repo or host read now names that read's own
+timestamp next to the measurement window, because the source can move
+between the read and the line being published, and a figure that
+names only the window it measures can go stale without saying so.
+
 ## Line 1 — the 2026-10-26 turn-cap raise
 
 **What it is.** HQ's `alexandra-systems#525` (merged 2026-10-26T20:05:13Z)

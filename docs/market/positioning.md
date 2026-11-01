@@ -1446,3 +1446,45 @@ new proposal. No pricing recommendation made.
 
 Sources: [arXiv 2603.28063: Reward Hacking as Equilibrium under Finite
 Evaluation](https://arxiv.org/abs/2603.28063).
+
+## The provenance-trust axis now has a policy actor trying to make it a legal one, not just a reputational one (2026-10-27, message, 4th run)
+
+The 2026-10-07 entry above ("Trust has a provenance axis too, not
+just an equity one") argued from a Forbes investigation that Surge
+AI, Mercor, AfterQuery, and Turing sell training data to Chinese AI
+labs from the same contractor pools serving US frontier labs, and
+that this is a trust question a lab buyer could weigh independent of
+any equity stake. This run's landscape watch (docs/market/landscape.md,
+Surge AI update) found a named policy actor acting on that same fact
+set. A report titled "American AI Advantage Is for Sale," published
+2026-10-26 by Consumer Action for a Strong Economy (CASE), adds a
+sharper specific than Forbes carried: Surge AI holds US military
+contracts (Air Force, Army) while simultaneously supplying Tencent,
+which the Pentagon designated a "Chinese military company" in 2025.
+CASE calls for Congress and the administration to restrict sales of
+proprietary AI-training products to CCP- or military-linked Chinese
+entities, with disclosure and scrutiny requirements for federal
+contractors serving those buyers.
+
+Said plainly, because the source needs the caveat stated and not
+buried: CASE is a free-market, fiscal-policy advocacy nonprofit
+pushing a recommendation, not a neutral research body reporting a
+settled fact, and nothing in US law has changed yet. What the report
+adds to this file's record is not a new fact about Minor's own
+business (Minor has sold data to nobody, so it is not a comparison
+Minor can make about a live relationship) but a sharper statement of
+why the provenance-trust axis matters to whoever eventually writes
+Minor's lab brief: if a disclosure or restriction rule materializes,
+it would bind vendors that hold both a federal-contractor
+relationship and a Chinese-lab sales relationship from the same
+contractor pool. Minor's structure has nothing to disclose under such
+a rule, not because of a policy Minor adopted, but because it has
+never sold contractor labor to anyone, Chinese lab or otherwise, by
+construction. No pricing recommendation made; this sharpens the
+provenance-trust argument's urgency, not a price, and the rule it
+rides on does not exist yet.
+
+Sources: [Townhall: New report scrutinizes US AI data sales to
+China](https://townhall.com/news/tayte-christensen/2026/10/26/new-report-scrutinizes-us-ai-data-sales-to-china-n2685323)
+(summarizing the CASE report, "American AI Advantage Is for Sale,"
+2026-10-26).

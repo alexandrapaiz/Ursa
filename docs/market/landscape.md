@@ -102,6 +102,29 @@ spend, only to sell a different thing to the same buyers, per the
 that the spend itself keeps growing rather than commoditizing away.
 Last observed 2026-10-26: [Surge AI blog](https://surgehq.ai/blog).
 
+Update 2026-10-27 (message, 4th run): the 2026-10-07 Forbes finding
+on this entry (Surge AI, Mercor, AfterQuery, and Turing selling
+~$500M/year of training data to Chinese AI labs) now has a named
+policy actor pushing it toward regulation. A report titled "American
+AI Advantage Is for Sale," published 2026-10-26 by Consumer Action
+for a Strong Economy (CASE, a free-market/fiscal-policy advocacy
+nonprofit, not a neutral research body), adds the specific detail
+that Surge AI holds US military contracts (Air Force, Army) while
+also supplying Tencent, which the Pentagon designated a "Chinese
+military company" in 2025 — the same vendor on both sides of a
+defense-relevant line, not just "also serves a rival lab." CASE calls
+for Congress and the administration to restrict sales of proprietary
+AI-training products to CCP- or military-linked Chinese entities and
+to add disclosure requirements for federal contractors serving those
+buyers. This is a policy ask from an advocacy group, not an enacted
+rule, and nothing in law has changed; recorded because it is the
+first source this file has found that tries to turn the 2026-10-07
+provenance-trust finding into a compliance question rather than a
+reputational one. See docs/market/positioning.md's 2026-10-07 "Trust
+has a provenance axis too" entry for the dated follow-up. Last
+observed 2026-10-27: [Townhall: New report scrutinizes US AI data
+sales to China](https://townhall.com/news/tayte-christensen/2026/10/26/new-report-scrutinizes-us-ai-data-sales-to-china-n2685323).
+
 ### Scale AI (incl. Outlier)
 
 What it is: the largest commercial RLHF/data-labeling platform,
