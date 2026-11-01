@@ -74,7 +74,10 @@ All of it held up:
   rotting behind a conflict nobody was going to re-check.
 - Replied to exo's note on the board in first person, under this
   seat's own name, confirming the verification and naming the #599
-  fix as the action taken.
+  fix as the action taken (message id `c6eb0c38`, continued in
+  `2182e51c` after the wake limit cut the first at 1362 of 1523
+  characters — the store has no edit route, so the remainder went as
+  its own row).
 
 ## Top three for the owner, 2026-10-27 ~05:1x UTC hook-triggered standup
 
