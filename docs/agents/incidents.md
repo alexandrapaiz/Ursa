@@ -10321,3 +10321,192 @@ with a ref attached is worth less than the merge, and `#603` carries it.
 What this window did instead is in its board reply to finance: the ref,
 the two counts, and the sentence that the thing it is watching for has
 not happened yet.
+
+## INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout — A trailing-seven-day merge count keeps reading healthy for a week after the gate stops, and the run that notices is the first one the provider lets through
+
+**Status:** open. The refusal is the provider's and is not this
+repository's to fix; the instrument that failed to report it is this
+charter's, and the repair is in this entry's own pull request.
+
+**Measured 2026-11-01 between 23:07:19Z and 23:5xZ**, by the first run
+of any Ursa seat to complete since 2026-10-27T05:29Z. The window was
+opened by `hook` with the payload reason *"capacity returned: the
+provider limit that refused your last run has reset."*
+
+### What happened
+
+Four full days produced nothing, and the fifth produced this.
+
+| day | attempted | completed | refused | running | Ursa attempted | Ursa completed |
+|---|---|---|---|---|---|---|
+| 2026-10-27 | 206 | **77** | 120 | 0 | 74 | 34 |
+| 2026-10-28 | 50 | **0** | 50 | 0 | 13 | 0 |
+| 2026-10-29 | 50 | **0** | 50 | 0 | 15 | 0 |
+| 2026-10-30 | 52 | **0** | 52 | 0 | 13 | 0 |
+| 2026-10-31 | 46 | **0** | 46 | 0 | 11 | 0 |
+| 2026-11-01 | 72 | **0** | 62 | 10 | 16 | 1 (this run) |
+
+Read from `GET /api/capacity?day=<d>` at 23:1x–23:2xZ. The five classes
+sum to `attempted` on every row, which is the partition proof HQ's #408
+made available and is the one check that could not have passed before
+that split.
+
+**270 attempted runs portfolio-wide from 2026-10-28T00:00Z to now, and
+zero completions.** Today's own sentence from the host: *"72 runs today,
+0 of them finished, 10 still running; 62 refused by the model provider
+(86% of the day, 62 of them before their first turn); 21.3 h with
+nothing running."* `refused_turn_one` is **62 of 62**, and
+`seats_refused` is **20 of 20 seats**.
+
+### The independent denominators, because a capacity read alone is one source
+
+This charter's standing rule is that no feed is read alone. Both
+independent sources agree, and both of them are the kind that cannot
+over-report:
+
+- **`main` is frozen.** Its tip is `1425b810`, committed
+  2026-10-27T05:29:07Z. `git log origin/main --since='2026-10-27T06:00Z'`
+  returns nothing. 555 commits landed on `main` in the seven days to
+  today and **every one of them landed in the first 2.5 of those days.**
+- **GitHub saw four seat-days of silence.** Pull requests created, by
+  day: 42 on 2026-10-27, then **zero** on 10-28, 10-29, 10-30 and 10-31,
+  then two on 2026-11-01 — `#611` at 14:13Z from HQ's distribution seat
+  and `#612`, this run's, at 23:06Z. The newest Ursa seat pull request
+  before this one is `#609`, created 2026-10-27T05:27Z.
+- **The board is silent too.** The directed inbox for `Ursa/exo` over
+  240 hours returns 119 messages and the newest is
+  2026-10-27T05:34:06Z. Nothing was addressed to this seat in five days
+  and seventeen hours.
+
+This seat's own run feed shows the shape per run rather than per day,
+and it is the cleanest single column in the incident:
+
+```
+2026-10-27T12:01:09Z  refused   1 turns in 0 min
+2026-10-28T12:01:36Z  refused   1 turns in 0 min
+2026-10-29T12:01:56Z  refused   1 turns in 0 min
+2026-10-30T12:01:35Z  refused   1 turns in 0 min
+2026-10-31T12:00:15Z  refused   1 turns in 0 min
+2026-11-01T12:02:00Z  refused   1 turns in 0 min
+2026-11-01T12:02:10Z  refused   1 turns in 0 min
+```
+
+Seven consecutive refusals at turn one. On 2026-10-26 this seat ran
+**fourteen** windows; from 2026-10-27T12:01Z it ran **one attempt per
+day, at the same minute**, and each was refused before its first turn.
+The cadence did not degrade. It collapsed to the retry tool's own clock,
+which is the only thing still firing, and `tools/capacity-retry.py`
+wakes a seat whose last run was refused — so the sole mechanism this
+portfolio has for recovering from a refusal spent five days producing
+five more refusals at turn one.
+
+### Why this is filed here rather than only handed up
+
+The refusal is the provider's. What is this repository's is that **the
+instrument this charter mandates for exactly this question reported a
+healthy gate on every one of those five days, and it would have gone on
+doing so for two more.**
+
+§5b requires three numbers each run, and a bold warning when the open
+count exceeds the last seven days' merges. Measured now:
+
+| | |
+|---|---|
+| open pull requests | **14** (read 23:08:4xZ) |
+| merged in the last 7 days | **73** |
+| merged in the last 5 days | **0** |
+| newest merge of any kind | 2026-10-27T05:29:07Z, **4d 17h 38m** before this read |
+| oldest open | `#395`, created 2026-10-24T21:21:40Z, **8d 2h** |
+
+**14 against 73, so the depth warning does not fire**, and the sentence
+it does not fire for is "the org is producing faster than its only merge
+gate absorbs." That sentence is true in the strongest possible form: the
+gate has absorbed nothing at all since 2026-10-27, and the org has
+produced nothing either, so the number this charter asks for describes a
+company that was running five days ago.
+
+Window 71 wrote the predecessor of this row and wrote the right thing
+about it for its own instant: *"Open does not outnumber the last seven
+days' merges — 12 against 116 — so the depth warning this charter
+requires in bold does not fire. The gate is absorbing faster than the
+roster produces."* Nothing about that reading was careless. **It was
+taken at 05:32:29Z on the last day anything merged**, and a
+trailing-seven-day denominator carries that reading forward unchanged
+for a week.
+
+### The mechanism, stated as a property of the instrument
+
+A ratio of a **point-in-time** numerator to a **trailing-window**
+denominator cannot detect that the process stopped. The open count is
+read now; the merge count is read over seven days. When both the
+producer and the consumer halt, the numerator freezes and the
+denominator decays over a week, so the ratio drifts *toward* health
+before it ever reports a stall — and the only state it can report is the
+one state this instrument was built to catch.
+
+This is the family this register already names, arriving on an arithmetic
+rather than on a schedule or a granularity:
+
+- A blind instrument reads as good news (§2, Ursa incidents 10 and 14).
+- A trailing denominator reads as good news for the width of its own
+  window, which is the same failure with a built-in delay.
+
+And the direction is the expensive one. The number is published to the
+owner, in bold or not in bold, and "the depth warning does not fire" is
+the sentence that tells her nothing needs her attention — on the fifth
+day of a portfolio-wide stop.
+
+### The fix, which is in this pull request
+
+Three numbers become five, and one of the two additions is the gate's
+own liveness:
+
+1. open pull requests, read now.
+2. merged in the last seven days.
+3. the age of the oldest open pull request.
+4. **the instant of the newest merge of any kind, and its age.**
+5. **merges since the newest-but-one day on which anything merged**, or
+   plainly: merges in each of the last seven days, one row each.
+
+The predicate that fires in bold is now two, not one, and the second one
+is the one that would have fired on 2026-10-28:
+
+- open outnumbers the last seven days' merges — unchanged.
+- **the newest merge is more than 24 hours old.** A gate that has not
+  moved in a day is a finding whatever the trailing count says, and it
+  is one line.
+
+### What the org grows from it
+
+**When you report a ratio, say over what window each side was read, and
+ask what the ratio does if the process stops.** A rate whose numerator
+and denominator are read over different spans is not a rate; it is two
+measurements that happen to be divided, and the failure it cannot see is
+always the one where both go to zero.
+
+The second lesson is about who notices. Five days of silence is the
+loudest possible signal and **no instrument in this organization
+reported it**, because every instrument is read by a run and there were
+no runs. The only seat that can report an outage is the first one to
+come back, which makes "what happened while nothing was running" a
+standing first duty of a returning window rather than an observation it
+might happen to make. That duty is now in §2 of this charter.
+
+### Two inherited artifacts this outage produced, neither of them a seat's fault
+
+- **`#608`**, Ursa's skill seat, has been a **draft for 5 days and 17
+  hours** and contains its own readied `#601`
+  (`git merge-base --is-ancestor refs/prs/601 refs/prs/608` exits 0). A
+  draft is the one state GitHub refuses to merge at all, so that seat's
+  tip is unmergeable and the only mergeable copy of its work is the
+  older one. Reported to the skill seat; not closed, because it is not
+  this seat's draft and its own next run inherits it.
+- **`#611`**, HQ's distribution seat, opened 2026-11-01T14:13Z and still
+  a draft nine hours later, while `GET /api/capacity` reports
+  `lost: 0`, `lost_cohorts: []` and `lost_after_minutes: 90`. A run that
+  opened a pull request at 14:13Z and has written nothing since is
+  either still alive after nine hours or was lost eight and a half hours
+  ago, and the endpoint's own threshold says the second. Handed to HQ's
+  `exo-centralizer` as a reading of the `lost` classifier rather than
+  asserted here, because `runtime/` is HQ's lane and one observation is
+  not a census.

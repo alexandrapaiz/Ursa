@@ -411,6 +411,64 @@ it reports `It hit its timeout`, and its turn count comes back `?`,
 while a turn-cap kill keeps the count and reports `exited 1`. The full
 record, with the host named, is `docs/agents/runner-facts.md` §12.
 
+### Measure the gap behind you before you measure anything in front of you (added 2026-11-01, seventy-second window, measured on five days of zero completed runs)
+
+Every instrument in this charter is read by a run, so when there are no
+runs there are no readings, and an outage is the one event in this
+organization that **nothing reports**. It is reported by the first
+window that comes back or it is never reported at all, and that window
+will not notice it by accident: its inbox looks quiet, its queue looks
+shallow, and its charter's depth rule reads healthy for a week.
+
+Measured: the portfolio attempted **270** runs between 2026-10-28T00:00Z
+and 2026-11-01T23:0xZ and completed **zero**. Twenty of twenty seats
+were refused, every refusal before its first turn. `main` took no commit
+for four days and seventeen hours, no seat opened a pull request on four
+consecutive days, and nothing was addressed to this seat on the board in
+that whole span. `INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout`.
+
+So, first, before the readings below: **measure the distance from the
+last thing that happened to now**, on the three surfaces that cannot
+over-report, and say the number in your pull request even when it is
+small.
+
+```bash
+git log origin/main -1 --format='%cI %h %s'            # the gate's own last motion
+gh pr list --state all --limit 400 --json createdAt,headRefName \
+  --jq '[.[].createdAt[0:10]]|group_by(.)|map([.[0],(length|tostring)])[]|@tsv' \
+  | sort | tail -10                                    # a day with no row is a dark day
+for d in $(for i in $(seq 0 6); do date -u -d "-$i days" +%F; done); do
+  curl -s "$BOARD_API_URL/api/capacity?day=$d" -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+    | jq -r '[.day,(.attempted|tostring),(.completed|tostring),(.refused|tostring)]|@tsv'
+done                                                   # completed=0 is the headline
+```
+
+`?day=` is the parameter that makes the capacity endpoint historical,
+and nothing else in this file uses it; the bare call answers only today,
+which is the one day a returning window already knows about.
+
+Three things follow, and the third is the one a window gets wrong.
+
+- **A day with `attempted > 0` and `completed == 0` is an outage, not a
+  quiet day.** Say both numbers. `refused` with `refused_turn_one`
+  equal to it names the provider; a `failed` or `lost` majority names
+  the host, and those route to different seats.
+- **Everything with a clock in it expired while you were gone.** Every
+  carried check's read date, every `data.deadline`, every silence route
+  under §22, and every experiment's "read on" instant. Enumerate them
+  and mark each one, because a deadline that passed with no window alive
+  to read it is not a failed experiment, it is an **unread** one, and
+  those are different entries in `improvements.md`.
+- **Do not re-derive your predecessor's findings as though they were
+  stale.** Five days of no runs means five days of no changes either.
+  The register you inherit is exactly as current as the day it was
+  written, and the one thing that did move is the clock.
+
+**The general rule.** An organization whose every instrument is read by
+its own workers has no instrument for its own absence. The returning
+worker is the instrument, so the duty has to be written as the first
+thing it does rather than left to its judgement.
+
 ### The run feed is the replacement for a blind instrument and it was never itself checked, so bound it before you read it (added 2026-10-26, fifty-first window, measured)
 
 Everything above this line installs `GET /api/work/<Company>/<seat>`,
@@ -3022,6 +3080,59 @@ collide, which is Ursa incident 6.
 You do not fix this. You never loosen the owner's merge gate, you never
 enable auto-merge, and you never advise a seat to merge its own work.
 You measure the queue and hand the owner the number.
+
+#### Three numbers is five, because a trailing denominator reads as health for a week after the gate stops (added 2026-11-01, seventy-second window, measured on five days of zero completions)
+
+The rule above is a **point-in-time numerator over a trailing-window
+denominator**, and that shape cannot detect that the process stopped.
+The open count is read now and the merge count is read over seven days,
+so when the producer and the consumer both halt, the numerator freezes
+and the denominator decays, and the ratio drifts *toward* health before
+it ever reports a stall. The one state it cannot report is the state it
+exists to catch.
+
+Measured. Window 71 wrote `12 against 116, so the depth warning does not
+fire` at 2026-10-27T05:32:29Z, which was correct and was taken on the
+last day anything merged. The next window of this seat opened five days
+later and read **14 against 73**, which also does not fire, over a
+portfolio that had **attempted 270 runs and completed none** since. The
+denominator was still carrying the last two productive days.
+
+So report five numbers, and the two additions are both about the gate's
+own liveness rather than the queue's size:
+
+```bash
+gh pr list --state open --limit 200 --json number,createdAt > /tmp/open.json
+gh pr list --state merged --limit 400 --json number,mergedAt > /tmp/merged.json
+jq 'length' /tmp/open.json                                            # 1. open now
+jq --arg d "$(date -u -d '-7 days' +%FT%TZ)" \
+   '[.[]|select(.mergedAt>=$d)]|length' /tmp/merged.json              # 2. merged, 7d
+jq -r 'sort_by(.createdAt)|.[0]|[.number,.createdAt]|@tsv' /tmp/open.json  # 3. oldest open
+jq -r '[.[]|select(.mergedAt!=null)|.mergedAt]|sort|last' /tmp/merged.json # 4. newest merge
+jq -r '[.[]|select(.mergedAt!=null)|.mergedAt[0:10]]|group_by(.)|map([.[0],(length|tostring)])[]|@tsv' \
+   /tmp/merged.json | sort | tail -7                                  # 5. merges per day
+```
+
+Two predicates fire in bold now, not one:
+
+- **Open outnumbers the last seven days' merges.** Unchanged. The org is
+  producing faster than its only gate absorbs.
+- **The newest merge is more than twenty-four hours old.** A gate that
+  has not moved in a day is a finding whatever the trailing count says.
+  This is the one that would have fired on 2026-10-28, and on each of
+  the four days after it, while the first one stayed silent.
+
+Report row 5 as seven rows and never as a sum. A sum of a week is the
+instrument that failed; the per-day column shows a stop on the line it
+starts.
+
+**The general rule, and it is the transferable half.** A rate whose
+numerator and denominator are read over different spans is not a rate.
+It is two measurements that happen to be divided, and the failure it
+cannot see is always the one where both go to zero. When you write a
+ratio into this file, say over what window each side was read and ask
+what the ratio does if the process stops.
+`INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout`.
 
 ### Then hand her the order, not only the number (added 2026-10-04)
 
