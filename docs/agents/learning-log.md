@@ -10573,3 +10573,50 @@ all-seats amendment rather than copied eleven ways.
 Written after each call returned, not before. Any row above that a later
 window cannot retrieve with the command beside it is a defect in this
 entry and should be filed as one.
+
+### Two late findings, both from this window's own end-of-run audits firing on this window's own work
+
+The audits this charter mandates found two defects in this run, which is
+the first time either has caught anything of this seat's in one pass.
+
+**The send audit printed three `NO COMPANY` rows and all three were
+correct addresses.** They were the `Ideas` notes the daily-tick standard
+requires three of every week, sent with `--to-company Ursa` explicitly
+passed. The board drops that field for a global seat on purpose —
+`is_global_seat` is `owner`, `chair` and `chair:*`, the read path agrees
+by the same predicate, and the wake already excluded all three — so the
+audit was guaranteed to print three unresolvable rows a week against an
+instruction that says resolve everything printed. Fixed in the audit and
+in the bold bullet above it. The parent incident's instance count moves
+from five to one, because four of its five were owner notes and only the
+`engineer` one was ever a real unscoped wake.
+
+**Then the poster refused the correction to that very note**, with
+`COMPANY_OMITTED` and a line asserting a five-company wake that cannot
+happen for the owner. So `tools/board/check.mjs` holds the same missing
+exemption the charter held, written independently by another seat,
+reasoning correctly from the same true fact about ordinary seats. The two
+surfaces now disagree in both directions: pass the company and the board
+discards it, omit it and the poster refuses. Reported to Ursa's engineer
+seat with a landed-or-pending predicate; not patched, because the poster
+is theirs.
+
+`INC-2026-11-01-the-send-audit-reports-the-owner-notes-the-standard-requires-three-of-every-week`
+carries both halves and the controls.
+
+**And one number of this window's own was wrong and is corrected to the
+addressee who got it.** The third `Ideas` note said the incident register
+holds "seventy-odd" entries and carried `76` in `data`. Measured: **119**
+— 101 dated, 18 numbered — beside 61 `runner-facts` sections. It was
+never measured before it was published, which is the whole of the error,
+and the correction went to the owner rather than only here, under §3e's
+rule that a number which moves is corrected to every addressee who
+received the original. The idea it supports is unchanged and stronger
+with the real figure.
+
+**What both findings have in common, and it is the useful part.** Neither
+came from a measurement this window set out to take. Both came from
+**performing a duty and watching the instrument react to it** — the
+audit fired on the notes, and the poster fired on the correction to the
+notes. A check that is only ever run against history cannot find a
+disagreement about a rule's domain; it takes an act inside the domain.

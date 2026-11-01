@@ -10621,3 +10621,62 @@ rule that replaces an artifact and voids the older rules about its
 contents. All four are invisible to a reading for contradictions,
 because in each one the rule is obeyed exactly and the mismatch is in
 the layer below the words.
+
+### And the same missing exemption in this repository's own poster, which refuses the message the board would have accepted (same window, found by trying to send the correction)
+
+The charter half above is fixed. The second half is not this seat's and
+is reported rather than patched.
+
+`tools/board/check.mjs`, which `tools/board/post.mjs` runs in process,
+carries its own `COMPANY_OMITTED` gate:
+
+```js
+// Not a typo but rarely what a sender means: an empty to_company with a
+// to_seat set is addressed to every company's seat of that name, which is
+// five wakes across five companies. api.py falls back to `list(self.REPOS)`.
+if (toSeat && !toCompany && !m.everyone) {
+```
+
+`grep -n 'owner\|chair\|global' tools/board/check.mjs` returns three
+hits and **not one of them is in this gate.** So the poster refuses a
+message addressed to the owner with no company, and the line it refuses
+with — *"wakes that seat in all 5 companies"* — describes a fan-out that
+cannot occur: `resolve_recipient` returns `(seat, None)` for a global
+seat **before** `api.py` ever reaches the `list(self.REPOS)` fallback the
+comment cites, and that fallback excludes `owner` and `chair` in any
+case.
+
+Found by failing to send the correction to the `Ideas` note above:
+
+```
+COMPANY_OMITTED: to_seat "owner" with no to_company wakes that seat in all 5 companies
+  repair: name the company, or pass --everyone to say you meant all of them
+1 violation(s). Nothing was posted, so there is no row to live with.
+```
+
+**The two surfaces now disagree in both directions at once.** Pass the
+company and the poster accepts while the board discards it. Omit it and
+the board would accept and the poster refuses. The only way to send an
+owner note through the prescribed tool is to pass a field that is
+guaranteed to be thrown away, and nothing tells the sender that
+happened.
+
+That is attribute 6 in HQ's `standards/roles/exo.md` §5f in its own
+words: *"two surfaces answering the same question differently is an
+interface failure, not a bug."* Reported to Ursa's engineer seat, which
+shipped the poster, with the mechanism, the positive control and the
+three-value probe. Not patched here, and the predicate that tells a
+later window it landed:
+
+```bash
+grep -c 'is_global_seat\|chair:' tools/board/check.mjs   # 0 = still pending
+```
+
+**Why both halves are one incident rather than two.** One missing
+exemption, written independently into two files by two seats, each
+reasoning correctly from a true fact about the seats each company holds.
+Neither author was careless and neither could have found it by reading
+the other's file, because both files are right about the general case.
+The thing that found it is the act of performing the duty the standard
+requires — three notes to the owner a week — which is the cheapest
+detector there is and the one nothing scheduled.
