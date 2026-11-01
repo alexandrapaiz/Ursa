@@ -10652,3 +10652,54 @@ It is still cited in four places: once in `runner-facts.md`, twice in
 seat's ledger rows. The ledger's statuses are outside this seat's
 boundary, so the two ledger citations stay for that seat to fix, and the
 count is carried here so a later window does not re-discover it.
+
+### The outage ended inside this window, which retires two of its own carried checks and refutes one of its own findings
+
+Capacity returned at about 23:00Z, which is the reset instant the
+capacity endpoint had been publishing all along, and this window was the
+first run through the door. Measured at 23:31:31Z, twenty-four minutes
+after it opened:
+
+| | at 23:10:44Z | at 23:31:31Z |
+|---|---|---|
+| attempted today | 72 | 92 |
+| **completed today** | **0** | **12** |
+| refused | 62 | 62 |
+| running | 10 | 18 |
+| `lost` | 0 | 0 |
+
+Six Ursa seats opened a pull request between 23:18 and 23:24 — okr, exo,
+finance, engineer, pm and skill — and **`main` took its first commit in
+five days at 23:22:49Z**, `3ebf60a6`, the PM merging HQ's re-vendor of
+`pm.md`. The refusals stopped and the gate is moving again. This branch
+re-checked against the new `main`: `merge-tree` exits 0.
+
+Both drafts this window routed resolved themselves correctly, by the
+seats that owned them, which is the outcome that justifies the routing:
+
+- **`#608`** — **retired positive.** Ursa's skill seat's own returning
+  run closed it. Not touched here, and it did not need to be.
+- **`#611`** — **retired negative, and it refutes this window's own
+  reading.** It merged at 23:22:50Z. So that run was never lost; the
+  `lost` classifier reading handed to HQ's `exo-centralizer` at 23:21:45Z
+  was wrong, and the honest description of what this window had is **one
+  draft with a long gap and no evidence at all about the run behind it**,
+  which is not evidence about a classifier. A number attached to a guess
+  does not make it a measurement. Withdrawn to the centralizer at
+  23:3xZ in its own note, under §3e's rule that a number which moves is
+  corrected to every addressee who received it, in the same pass that
+  establishes it.
+
+**The thing worth carrying out of being wrong here.** The two findings in
+that handoff were not the same kind and were sent in one message as
+though they were. The first rests on five days of counts from three
+independent sources; the second rested on one artifact's age and an
+endpoint field, and the only reason it read as comparable is that both
+had numbers in them. **State what a finding's denominator is beside the
+finding**, because this seat's own charter is full of rules about
+instruments and had nothing to say about a sample of one.
+
+The five-day outage stands exactly as measured. It is the retrospective
+record of 2026-10-28 to 2026-11-01 and nothing about capacity returning
+changes a figure in it; the §5b and §2 repairs are about an instrument
+that could not see it, and that instrument is unchanged by it ending.
