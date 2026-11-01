@@ -2,6 +2,59 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-01 ~23:4x UTC message-triggered standup (fourth pass of the day)
+
+This pass branched from this seat's own third pass (`ursa-pm/2026-11-01-message`)
+rather than `main`, per the org rule on reading a seat's own open PRs
+first, and this PR supersedes it (contains its content by ancestry).
+Triggered by four events: okr's and exo's finished runs (two separate
+reports on the same two pull requests, the okr check-in and the exo
+depth-instrument fix), skill's finished run resolving its own inherited
+draft, and a board note from Ursa's own exo addressed to this seat by
+name.
+
+1. **The okr check-in and the skill run both reviewed against the
+   merge rule and merged this pass.** The okr check-in touches only
+   `docs/okrs/2026-q4.md` (two KRs moved to done, the drift audit
+   appended), green, clean, not a draft, no labels, no comment, no
+   board claim on that path — Tier B. The skill run touches only
+   `docs/ideas.md` and one new file under `docs/runs/`, green, clean,
+   same conditions — also Tier B. Both merged with branches deleted.
+   No action needed from you.
+2. **The exo depth-instrument fix is still Tier C by path**
+   (`prompts/exo-agent.md` among twenty-four changed files, mostly
+   `prompts/*` and `tools/seat/*`) **and stays with you or a chair**,
+   unchanged from the third pass's finding. Exo's own board note says
+   no file under `prompts/` has reached `main` in fourteen days while
+   one did six days ago, which is worth your eye as a pattern rather
+   than a single stuck PR.
+3. **A new finding this pass, not from either triggering report:**
+   the engineer's own two open pull requests from 2026-10-27 are a
+   real stack (the older is a strict ancestor of the newer, confirmed
+   with `git merge-base --is-ancestor`) and both now read `CONFLICTING`
+   against today's main, because this pass's own two merges touched
+   the same ledger file. A base conflict is not this seat's to resolve
+   in code, so it went back to the engineer on the board as a handoff
+   naming both PRs, the ancestry, and the recommendation to close the
+   older one and rebase the newer. The newer one also edits the
+   secret-scan baseline file, which its own text reserves to your
+   merge regardless of whether it rebases clean.
+
+**Answered the exo note addressed to this seat.** It asked which of
+two things the third pass's own sentence meant when it said neither a
+named tool nor a named endpoint exists. The tool is genuinely absent
+from `tools/`, so that stands; the endpoint is live and answers, so the
+third pass was wrong to call it absent rather than simply uncalled.
+Corrected on the board, in those words.
+
+**Unchanged from the prior passes today, so not repeated in full:**
+this seat's own two sibling pull requests from last week, the PR/FAQ
+go-decision with ten days of ledger history and a second pass of
+stale-draft cleanup, are both still open and both still wait on the
+owner — neither is this seat's to merge. Exo independently verified
+the PR/FAQ one clean against today's main this pass, which is new
+confirmation, not a new fact.
+
 ## Top three for the owner, 2026-11-01 ~23:3x UTC message-triggered standup (third pass of the day)
 
 This pass was triggered by two events: finance's PR #614, and a repeat

@@ -1,38 +1,40 @@
-# Dispatch queue — 2026-11-01, message-triggered standup (fourth pass of the day, in progress)
+# Dispatch queue — 2026-11-01, message-triggered standup (fourth pass of the day)
 
 `PM_DISPATCH_ENABLED` is unset in this run's environment
 (`echo "PM_DISPATCH_ENABLED=$PM_DISPATCH_ENABLED"` prints empty). The
 switch is off, so nothing below fires even if it qualified.
 
-## Checked against the criteria table (pm.md §11.3), nothing qualifies
+## Checked against the criteria table (pm.md §11.3), nothing qualifies for a workflow dispatch
 
-- **Failed runs in the last 24h:** `gh run list --status failure
-  --created ">=$(date -u -d '-24 hours' +%FT%TZ)"` returns none. Every
-  run in `gh run list --limit 10` is `redaction-gate`, green.
+- **Failed runs in the last 24h:** `gh run list --limit 10` is all
+  `scan`/`redaction-gate`, green. Nothing to triage, rerun, or hand off.
 - **A seat's open draft with failing CI or an unanswered review comment
-  >24h:** today's drafts (#618 exo, #615 engineer) were opened minutes
-  before this check and are each seat's own live run in progress, the
-  same shape this run's own draft has. Not stale.
-- **Two or more open PRs on one scope, none merged:** no seat shows two
-  or more open PRs converging on one scope right now; the five-day-old
-  cluster from 2026-10-27 (#609, #607, #604, #602, #601, #600, #599,
-  #591) is each seat's own single open PR, not a stack, and was already
-  surveyed by this seat's own earlier pass today (`ursa-pm/2026-11-01-message`,
-  first two passes).
+  >24h:** today's drafts (exo's second pass, skill's second pass,
+  engineer's hook pass) were all opened within the last half hour of
+  this pass starting — each seat's own live run in progress, not stale.
+- **Two or more open PRs on one scope, none merged:** yes, this is the
+  one row that fires, on the engineer's two 2026-10-27 pull requests
+  (the older a strict ancestor of the newer, both now `CONFLICTING`
+  against today's main). Not dispatched as a `gh workflow run` — the
+  switch is off regardless, and the right-sized response is a board
+  handoff, not a fresh run, since the ask is "land or close what you
+  have," not "build." Posted as a `handoff` to engineer this pass
+  rather than queued here as a command to run later.
 - **A ruling or ADR merged since the last run names a seat and no run
-  followed:** `git log --oneline -5 main` shows #614 (finance, this
-  pass's own merge) as the latest; no ADR in it.
+  followed:** the two merges this pass (okr, skill) are each that
+  seat's own finished run landing, not a ruling naming a different
+  seat. Nothing else merged.
 - **A milestone due within three days with open items:** `gh api
   repos/alexandrapaiz/Ursa/milestones` returns an empty list. None
   configured.
-- **An owner-merge PR older than seven days:** yes, #395 (research,
-  opened 2026-10-24, eight days old). The row's own dispatch column is
-  "nobody" — a pending line and the report, not a seat dispatch — so
-  recorded in `pending.md` under the owner's queue rather than fired
-  here.
+- **An owner-merge PR older than seven days:** yes, still #395
+  (research, now nine days old). Unchanged from the third pass;
+  recorded in `pending.md`, not fired here — the row's own dispatch
+  column is "nobody."
 
-## Nothing proposed this run
+## Nothing proposed as a workflow dispatch this run
 
-Every row came back empty or already covered by this seat's own
-earlier passes today. Saying so cheaply, per the table's own last row,
-rather than manufacturing a candidate to fill the section.
+The one qualifying row was answered by a board handoff instead, which
+is cheaper than a run and is the right tool for "land or close," not
+"build." Full text of that handoff is in `pending.md` and on the board
+itself, addressed from `pm`/Ursa to `engineer`/Ursa.
