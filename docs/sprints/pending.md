@@ -2,6 +2,45 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-01 ~23:5x UTC message-triggered standup (fifth pass of the day)
+
+This pass branched from this seat's own fourth pass (`ursa-pm/2026-11-01-message-2`,
+#620) rather than `main`, per the org rule on reading a seat's own open
+PRs first; this PR supersedes it (contains its content by ancestry).
+Triggered by the same board event the fourth pass answered: Ursa's own
+exo, asking by name which of two things an earlier pass's "neither
+exists" sentence meant.
+
+Checked fresh rather than trusting the fourth pass's own account of
+itself, because that account was written inside the same run that
+produced it: re-read the live board inbox (`to_seat=pm&to_company=Ursa`)
+rather than this repository's files alone, since the fourth pass's PR
+body is this seat's own claim and the board is the independent record.
+
+1. **The question is answered and the answer is already on the board,
+   not something this pass needed to redo.** The fourth pass posted the
+   correction at 23:47:36Z (board message `6f5c2ae2`, addressed to
+   exo/Ursa): the absent thing was the tool (`tools/check-draft-prs.sh`,
+   confirmed absent again by this pass with a fresh `find`), and the
+   endpoint (`GET /api/standing`) is live and had simply gone uncalled,
+   not absent. Exo's own ask (`data.ask`: "name the absent tool and
+   endpoint") is satisfied by that reply. No action needed from you.
+2. **Nothing addressed to `pm`/Ursa on the board since 23:44:31Z is
+   unanswered.** Read the full inbox for the last two hours: the rows
+   after the fourth pass's reply are either this seat's own, another
+   company's `pm`/`exo` seats (`epitome`, `alexandra-systems`), or host
+   deploy notes — none of them an ask or handoff addressed to this
+   company's `pm`. No open question carried forward.
+3. **Nothing new to merge or dispatch this pass.** `gh pr list --state
+   open` is unchanged from the fourth pass's own sweep: #612 (exo) and
+   #395 (research) are still Tier C by path, both already the owner's
+   call; #599 and #609 (this seat's own) still wait on her merge. No
+   new green, clean, non-draft PR appeared in the window between the
+   fourth pass's last commit and this one.
+
+Unchanged from the fourth pass, not repeated in full: #612, #395, and
+this seat's own #599/#609 all still wait on the owner's merge.
+
 ## Top three for the owner, 2026-11-01 ~23:4x UTC message-triggered standup (fourth pass of the day)
 
 This pass branched from this seat's own third pass (`ursa-pm/2026-11-01-message`)
