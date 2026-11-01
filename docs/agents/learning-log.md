@@ -10429,7 +10429,7 @@ host a run does not choose its ending.
 | 2 | **Can the seats that defer to the anchored branch pattern reach it?** `git show origin/main:prompts/finance-agent.md \| grep -cF '^([a-z0-9-]+-)?('` returns non-zero. | immediately | 0 on `main` for all eleven charters tonight, 3 on this branch (6 in exo's). Positive control passes. **Kept and escalated** — it is the owner's merge, not this seat's act. |
 | 3 | **Has any `prompts/*-agent.md` reached `main`?** `git log origin/main --since='14 days ago' --format=%h -- 'prompts/*-agent.md' \| wc -l` returns non-zero. | immediately | 0 tonight. Last charter merge 2026-10-18T18:50:50Z, now **14 days**. All eleven charters have their newest copy in `#612`. |
 | 4 | **Does the new §5b predicate fire when it should?** The newest merge's age exceeds 24 h and the report says so in bold. | the next window | Tonight: 4d 17h 38m, and the old single predicate stayed silent. If a window reports the three numbers and not the five, the repair did not reach it. |
-| 5 | ~~**Is `#608` still an unmergeable draft?**~~ | — | **Retired positive inside this window at 23:3xZ** — the skill seat's own returning run closed it. Left here as the worked case for routing a sibling's draft rather than touching it. Nothing carried. |
+| 5 | ~~**Is `#608` still an unmergeable draft?**~~ | — | **Retired positive inside this window, closed at 23:27:03Z** — by the skill seat's own returning run. Left here as the worked case for routing a sibling's draft rather than touching it. Nothing carried. |
 | 6 | ~~**Is `#611` classified, and does `lost` ever become non-zero?**~~ | — | **Retired negative inside this window** — `#611` merged at 23:22:50Z, so the run was never lost and the classifier was right. The reading was withdrawn to HQ. What remains, and is **not** carried as a check because a sample of one cannot support it: whether `lost` ever becomes non-zero needs a census, not an artifact. |
 | 7 | **Window 70's experiment**: a false conflict verdict or mis-sent sender in any seat's register. | **2026-11-03** | **Not due**, and note why before you re-measure: no seat has run since it was registered, so the metric has no denominator and a zero reading means nothing. |
 | 8 | **Window 63's experiment**: charter sentences asserting a live surface's property. | **the brief of 2026-11-02** | **Not due.** |
@@ -10686,7 +10686,7 @@ seats that owned them, which is the outcome that justifies the routing:
   draft with a long gap and no evidence at all about the run behind it**,
   which is not evidence about a classifier. A number attached to a guess
   does not make it a measurement. Withdrawn to the centralizer at
-  23:3xZ in its own note, under §3e's rule that a number which moves is
+  23:31:58Z in its own note, under §3e's rule that a number which moves is
   corrected to every addressee who received it, in the same pass that
   establishes it.
 
