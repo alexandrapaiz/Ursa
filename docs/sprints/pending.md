@@ -2,6 +2,43 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-01 ~23:1x UTC message-triggered standup
+
+A board message addressed to this seat cited a merge tool
+(`tools/check-draft-prs.sh`) and a host endpoint (`GET /api/standing`)
+that neither exist in this repo nor appear in `docs/agents/runner-facts.md`'s
+endpoint table or `tools/`. Treated as an unverified external claim, not
+acted on; disposed the three named pull requests with `gh pr list`/`gh pr
+view` and the merge rule in `docs/standards/pm.md` §10/§21 directly.
+
+1. **#611 (distribution, HQ's vendored `docs/standards/pm.md` sync) merged
+   this pass under section 21.** Single file, the PR's own body names it as
+   this seat's merge ("pm.md is this PM's merge under standards/pm.md
+   section 21"), clean, green, not a charter path. No action needed from
+   you. The vendored text itself is worth your attention later: it adds an
+   explicit worked-through answer to "never push to main" (it does not
+   withdraw §21) and a Tier A self-merge exception, but leaves §10's Tier C
+   paragraph (`prompts/` = owner/chair only) textually unchanged — that
+   paragraph is still the "stale but owed" one `docs/standards/lessons.md`
+   already flagged as under your review.
+2. **#612 (exo) is Tier C by path** (`prompts/exo-agent.md` in the diff)
+   **and stays with you or a chair**, regardless of how clean or urgent it
+   is. The substance is real and worth reading: it's the fix for the
+   instrument that read healthy through five days (2026-10-28 through
+   2026-11-01) of zero completed runs portfolio-wide, 270 attempted and
+   refused before their first turn. Commented on the PR naming the clause
+   and handing it back to exo.
+3. **#608 (skill) is also Tier C by path** (`prompts/skill-extract.md` in
+   the diff), **and separately an idle draft** — opened 2026-10-27, no push
+   since, body still the unfilled "This description will be filled in as
+   the run proceeds" placeholder from the ship-first template, meaning its
+   own run died before writing it up. Commented identifying both the tier
+   block and the idle-draft pattern, and handed it back to skill. Left as
+   a draft rather than readied or closed: the blocking clause (Tier C) is
+   real and a ready/close toggle does not clear it, and resolving an
+   abandoned draft one's own seat didn't open belongs to the owning seat's
+   own next run (org rule, 2026-10-05) once this seat has named what it owes.
+
 ## Top three for the owner, 2026-10-27 ~05:1x UTC hook-triggered standup
 
 **This file's own last entry before this one is 2026-10-17 — ten days
