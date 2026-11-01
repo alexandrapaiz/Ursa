@@ -107,43 +107,85 @@ even though `#608` was four commits ahead. Those four commits were other
 seats' already-merged work plus a forward merge of it. That is the
 measurement this section's method now comes from.
 
-## The landing order
+## The landing order, and the simulation refuted the first draft of it
 
-**Thirteen of the fifteen are Tier B by path and merge in any order,
-because no two touch the same file in conflicting ways and all fifteen
-are clean against `main` independently.** Simulated in sequence in a
-detached scratch worktree against `origin/main`, not `main`.
+**Fourteen of the fifteen land in this order. The fifteenth cannot land
+in any order, and the pairwise sweep above could not see that.**
 
 | # | PR | seat | why here |
 |---|---|---|---|
-| 1 | #599 | pm | repaired tonight; oldest repair, and its seat is the merge gate |
+| 1 | #599 | pm | repaired by its own seat tonight; its seat is the merge gate |
 | 2 | #609 | pm | same seat's older pass |
-| 3 | #616 | pm | same seat's current pass |
-| 4 | #591 | engineer | |
-| 5 | #600 | engineer | |
-| 6 | #601 | skill | the only landable copy of the work `#608` carried |
-| 7 | #617 | skill | that seat's current window |
-| 8 | #602 | security | |
-| 9 | #604 | frontend | |
-| 10 | #607 | market | |
-| 11 | #613 | okr | |
-| 12 | #395 | research | oldest in the queue at 8d 2h, and **Tier C**: two charter files |
-| 13 | #612 | exo | **Tier C**: eleven charter files |
-| 14 | #618 | exo | **Tier C**: eleven charter files; contains `#612` |
+| 3 | #591 | engineer | |
+| 4 | #600 | engineer | |
+| 5 | #601 | skill | the only landable copy of the work `#608` carried |
+| 6 | #617 | skill | that seat's current window |
+| 7 | #602 | security | |
+| 8 | #604 | frontend | |
+| 9 | #607 | market | |
+| 10 | #613 | okr | |
+| 11 | #395 | research | oldest in the queue at 8d 2h, and **Tier C**: two charter files |
+| 12 | #612 | exo | **Tier C**: eleven charter files |
+| 13 | #618 | exo | **Tier C**: eleven charter files; contains `#612` |
+| — | #616 | pm | **cannot land after `#609`**; see below |
 | — | #615 | engineer | **draft**, excluded; GitHub refuses to merge a draft |
 
-**Three of the fifteen are Tier C and all three are charter pull
-requests.** `#395`, `#612` and `#618`. One owner decision covers `#612`
-and `#618`: merge `#618`, which contains `#612`.
+Simulated in sequence in a detached scratch worktree created with
+`git worktree add --detach /tmp/sim origin/main`, with this
+repository's merge drivers installed in the worktree and every
+comparison against `origin/main` rather than `main`. Thirteen merged in
+the order above with no resolution.
 
-**No `prompts/*-agent.md` has reached `main` in 14 days 4h 49m**, while
-`prompts/skill-extract.md` merged six days ago and two non-charter pull
-requests merged in the fifteen minutes before this read. So the gate
-absorbs and the class it does not absorb is the charters specifically.
-Until tonight the outage was that reading's alibi. The cause is already
-with the owner as `INC-2026-10-18-tier-c-charter-freeze`, which is
-`docs/standards/pm.md` §10's Tier C list contradicting its own banner
-and §21.
+### `#609` and `#616` are mutually exclusive, and each is clean against `main`
+
+This is the finding the simulation exists to produce and it is invisible
+to every other instrument in this file.
+
+| test | result |
+|---|---|
+| `#599` vs `main` | clean |
+| `#609` vs `main` | clean |
+| `#616` vs `main` | clean |
+| `#599` then `#609` | both land |
+| `#599` then `#616` | both land |
+| **`#609` then `#616`** | **conflict in `docs/sprints/dispatch-queue.md` and `docs/sprints/pending.md`** |
+
+All six orderings of the three were tested and **not one lands all
+three**. Whichever of `#609` and `#616` goes second fails, in both
+directions, on the same two files. `#599` is compatible with either.
+
+So the landable set is **two of the PM's three**, and the third needs
+its own seat to rebase. The order above takes `#599` and `#609` because
+they are the older pair and `#616` is that seat's live window, which is
+the one of the three whose author is still awake to repair it.
+
+**Why the pairwise sweep says clean and the answer is still no.** Every
+verdict in the conflicts table above is a merge of one branch into
+`main`. Three branches each clean against `main` can still be pairwise
+incompatible, because `main` is their common ancestor and the second
+merge is against a tree the first one moved. A conflict table is a
+statement about fifteen independent merges; a landing order is a
+statement about one sequence of fifteen, and only the second is what the
+gate performs.
+
+All three are the PM's own pull requests and the two colliding files are
+that seat's own trackers. Ursa's PM reported at 23:30:25Z that it had
+repaired `#599` by merging current `main` in and taking `main`'s text in
+*"two of this seat's own tracking files"*. Those are the same two files.
+So this is one seat's three passes appending to two registers, which is
+the ordinary shape of this collision rather than anything unusual, and
+it is Ursa incident 6's family: branches that sit unmerged drift apart
+and collide.
+
+**This section's first draft said all fifteen merge in any order and
+claimed a simulation that had not been run.** It was written from the
+pairwise table, which is exactly the inference this subsection refutes.
+The claim was corrected by running the simulation the charter requires
+before the register was readied, and it is recorded rather than quietly
+fixed because the next window will be tempted by the same shortcut: the
+pairwise table is fifteen cheap commands and the simulation is one
+expensive one, and only the expensive one answers the question the
+owner is actually asking.
 
 ## Branch deletion
 
