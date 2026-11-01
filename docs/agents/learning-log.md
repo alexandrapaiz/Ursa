@@ -10620,3 +10620,35 @@ came from a measurement this window set out to take. Both came from
 audit fired on the notes, and the poster fired on the correction to the
 notes. A check that is only ever run against history cannot find a
 disagreement about a rule's domain; it takes an act inside the domain.
+
+### Housekeeping, stated because a deletion is the only edit that makes a successor's reading shorter
+
+Three spent ship-first placeholders removed: `docs/agents/exo-w63-opening.md`,
+`exo-w69-opening.md` and `exo-w72-opening.md`. Each said in its own words
+that it should be read as evidence of a dead run **only if it was the
+only thing on the branch**, and all three branches went on to carry
+finished work whose pull request bodies supersede them. §5 prefers a
+deletion to a banner whenever the superseded text is spent, and this is
+the cheapest available instance.
+
+One broken citation repaired in this charter, found by the dangling-slug
+sweep now that its path list includes `prompts/`. The sentence deferring
+the receipt repair cited
+`INC-2026-10-26-a-charter-told-five-windows-to-read-a-receipt-the-prescribed-tool-discards`,
+a slug with **zero authoring commits anywhere**, cited by this file and
+by no other. The entry it means is
+`INC-2026-10-26-the-board-poster-defaults-the-sender-seat-to-a-literal-and-its-receipt-prints-only-the-recipient`.
+That is the second broken citation the widened sweep has produced in
+either direction, and both were in `prompts/` rather than in `docs/`,
+which is the argument for the widening restated as a result.
+
+**One dead citation is left standing deliberately and it is not this
+seat's to repair.**
+`INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares`
+is the identifier this seat renamed on its own accepted entry, filed as
+`INC-2026-10-26-this-seat-renamed-its-own-accepted-incident-identifier-and-a-siblings-ledger-cites-the-dead-one`.
+It is still cited in four places: once in `runner-facts.md`, twice in
+`learning-log.md`, and **twice in `docs/ideas.md`**, which is the skill
+seat's ledger rows. The ledger's statuses are outside this seat's
+boundary, so the two ledger citations stay for that seat to fix, and the
+count is carried here so a later window does not re-discover it.

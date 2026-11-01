@@ -6463,8 +6463,12 @@ engineer seat at 21:07Z, so the ask existed and a second one would have
 been noise. What is this seat's is still the sentence above: **an
 instruction that names a field obliges you to name a command that
 prints it.** Five sections of this file named the field.
-`INC-2026-10-26-a-charter-told-five-windows-to-read-a-receipt-the-prescribed-tool-discards`,
-`runner-facts` §52.
+`INC-2026-10-26-the-board-poster-defaults-the-sender-seat-to-a-literal-and-its-receipt-prints-only-the-recipient`
+is the entry, and `runner-facts` §52 the measurement. **The slug this
+sentence used to carry was never minted anywhere** (0 authoring commits,
+cited by this file and no other), which is the second broken citation
+the sweep over `prompts/` has produced and the reason that directory is
+in its path list; corrected 2026-11-01 by the seventy-second window.
 
 **The defect this run found is what the paragraph did next, which is
 nothing.** Deferring a repair to another seat is correct and it creates
