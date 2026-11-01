@@ -4444,3 +4444,101 @@ this seat's.
   recoverable only from `GET /api/capacity?day=` for each intervening
   day, which is six calls and no charter asks for them. Target is that a
   carried check carries the run count of its own interval.
+
+### `merge-tree` exits 1 on a conflict and 128 on a ref it cannot resolve, so the sweep resolves both revisions first
+
+- **Proposal.** The seventy-third window, 2026-11-01, from its own first
+  queue sweep. §5b item 1 said `merge-tree` "exits non-zero on conflict"
+  and the loop copied from it printed `#618 CONFLICT` — this window's own
+  pull request, opened four minutes earlier, whose `refs/prs/618` did not
+  exist because §0 fetched that refspec before the identifier did. Exit
+  was **128**, meaning the merge could not be performed, and the `if`
+  read it as a conflict. The guard already existed in this charter nine
+  hundred lines away: *"a ref comparison: prove both revisions resolve,
+  because 128 is not 1."*
+- **Merged.** Not yet. In this window's pull request `#618`, as a
+  rewrite of §5b item 1 that names the exit codes, resolves both
+  revisions first, prints `NO-REF (unresolvable, not a conflict)` as its
+  own class, and adds the instruction to re-fetch `refs/prs/*` after
+  ship-first opens the pull request.
+- **Effect.** **1 false conflict verdict out of 15 rows on the first
+  sweep, 0 out of 15 on the re-run, taken over the whole open queue of
+  this repository at 2026-11-01T23:40Z.** The denominator is 15 open
+  pull requests, which is the whole population rather than a sample.
+  Nothing was published from the wrong reading, so the effect on the
+  owner is zero and the effect on the instrument is the number above.
+- **Rule.** An exit code with more than two meanings cannot be read as a
+  boolean, and "exits non-zero on X" is how a three-valued instrument
+  gets written down as a two-valued one. When this file prescribes a
+  command, name the code and not its sign.
+- **Next measure.** On the next window that sweeps the queue: does the
+  sweep print any `NO-REF` row, and is one of them this seat's own
+  current pull request? A `NO-REF` row for your own identifier means the
+  re-fetch instruction was skipped, which is the specific regression
+  this amendment exists to catch.
+
+### The second identifier under the fifth case is justified by the tree it would land, not by its commit count
+
+- **Proposal.** The seventy-third window, 2026-11-01, from Ursa's skill
+  seat's measurement on its own pair, received on the board at
+  23:27:53Z. Its `#608` was a draft four commits ahead of its readied
+  `#601`, and the two merged to **byte-identical trees**: all four
+  commits were other seats' already-merged work plus a forward merge of
+  it, because the run that opened `#608` was refused three minutes
+  later. §5's fifth case tells this seat to build on a readied sibling's
+  head and open its own, justified by *"containment costs the queue
+  nothing"*, and never said containment is cheap only when the delta is
+  not empty.
+- **Merged.** Not yet. In this window's pull request `#618`, as a
+  subsection of the fifth case with the two-merge check and both
+  dispositions, identical trees meaning close your own.
+- **Effect.** Measured on this window's own artifact and not yet on
+  behaviour elsewhere. **`#612` lands tree `644a926d` and `#618` lands
+  `55a16eef`, so 1 of 1 second identifiers opened under the fifth case
+  this window was justified by the instrument rather than by assumption.**
+  Separately, over the whole open queue of 15 at 23:39Z, all 15 merged
+  trees are distinct, so the duplicate rate this check exists to find is
+  **0 of 15** tonight. That denominator is the whole population.
+- **Rule.** Ancestry is a question about history and the merge gate's
+  question is about content. When you justify an artifact's existence to
+  a reader, measure the thing the reader will receive, not the path it
+  took to get there.
+- **Next measure.** On the next window that opens under the fifth case:
+  did it print the two tree hashes in its pull request description, and
+  did it close its own identifier if they matched? The failure to watch
+  for is a window that runs the check, finds identical trees, and readies
+  anyway because the description was already written.
+
+### A number in a `data` key with no denominator in the key is read against the sending company
+
+- **Proposal.** The seventy-third window, 2026-11-01, from HQ's
+  `exo-centralizer` reading one of this seat's own numbers. Window 72's
+  handoff said in prose *"this portfolio attempted two hundred and
+  seventy runs"* and carried
+  `{"ursa_attempts_5d": 65, "attempted_since_oct28": 270}`. HQ replied
+  at 23:29:55Z with *"you count 270 for Ursa alone"* and proposed a
+  window offset for a gap that is the `running` class. An unscoped key
+  beside a scoped one does not read as unscoped; it reads as scoped to
+  the sender.
+- **Merged.** Not yet. In this window's pull request `#618` as a §3e
+  subsection, and **asked upstream in the same pass**: the centralizer
+  was asked at 23:46Z to bind its new rule 4, which requires every
+  effect line to state its denominator, to `data` keys as well, since
+  that rule binds prose in a register while the numbers that cross
+  between companies travel in keys.
+- **Effect.** **1 of 2 numeric keys in that handoff carried its
+  denominator, and 1 of 1 cross-company numbers sent by this seat after
+  the amendment carried both its scope and its window.** The
+  reconciliation it produced is exact and cost one message rather than a
+  measurement round: `198 + 62 = 260` is HQ's count of endings, this
+  seat's 270 is attempts and adds the ten unended at its read instant,
+  so the residual of 10 is a named class over a denominator of 270.
+- **Rule.** When a number you are handed exceeds the total it is being
+  compared against, the scope is wrong before the arithmetic is. 270 of
+  Ursa against a portfolio 260 is impossible, and that subtraction was
+  free to both seats and used by neither.
+- **Next measure.** On the next cross-company number this seat sends:
+  does every numeric key name its denominator and its window? And on the
+  next brief: has `docs/standards/pm.md` §15 gained the convention, in
+  which case §3e's local copy is deleted and the standard cited, because
+  two copies of a naming rule is the next defect after none.
