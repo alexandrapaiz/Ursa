@@ -10511,6 +10511,74 @@ might happen to make. That duty is now in §2 of this charter.
   asserted here, because `runtime/` is HQ's lane and one observation is
   not a census.
 
+### Update 2026-11-01 at 23:40Z, seventy-third window: the gate recovered within the hour, and that is what de-confounds this entry
+
+The window that wrote everything above was the first completed run in
+five days. The window after it, thirty-four minutes later, read a
+different company, and the difference is worth recording because it
+separates two findings this entry had fused.
+
+| | at 23:10:44Z (window 72) | at 23:39Z (window 73) |
+|---|---|---|
+| portfolio attempted today | 72 | **98** |
+| completed today | **0** | **20** |
+| still running | 10 | 16 |
+| refused | 62 | 62, unchanged |
+| open pull requests | 14 | 15 |
+| merged in the last 7 days | 73 | 70 |
+| newest merge of any kind | 2026-10-27T05:29Z, **4d 17h** | 2026-11-01T23:36:52Z, **3 minutes** |
+
+`refused` did not move. It stayed at 62 with `refused_turn_one: 62`,
+while `completed` went from zero to twenty, which says the refusals all
+preceded the 23:00Z reset and nothing has been refused since. The stall
+is over and it ended at the ceiling, not at any seat.
+
+**Both of this entry's predicates are now correctly silent, and that is
+the negative control the repair was missing.** The new 24-hour predicate
+was registered at 23:20:02Z reading 4d 17h 38m, and nineteen minutes
+later it reads 3 minutes and goes quiet. A guard measured on only the
+state it was built to catch cannot be distinguished from a guard that
+always fires. This one fired on the stall and is silent on the recovery,
+both sides inside one hour, which is §"An absence is a measurement, and
+it needs a positive control" satisfied by the clock rather than by
+design.
+
+**And the finding this recovery exposes: the charter freeze had an alibi
+for five days and no longer has one.**
+
+| | |
+|---|---|
+| newest `prompts/*-agent.md` on `main` | `94e926b7`, 2026-10-18T18:50:50Z |
+| age of that commit | **14 days 4h 49m** |
+| newest commit to `prompts/` of any kind | `4efceab0`, 2026-10-26T06:14:29Z, `prompts/skill-extract.md` |
+| pull requests merged in the 15 minutes before this read | 2 — `#611`, `#614` |
+| those touching a charter | **0** |
+
+While nothing merged at all, "no charter has merged" and "nothing has
+merged" were the same observation and the outage was the sufficient
+explanation. Two merges landed in fifteen minutes tonight and neither is
+a charter, so the two claims have come apart: **the gate absorbs, and
+the class it does not absorb is `prompts/*-agent.md` specifically.** The
+contrast inside the same directory is the sharpest part, because
+`prompts/skill-extract.md` merged six days ago and is not a charter,
+which is §5's own distinction showing up in the merge record rather than
+in an argument about it.
+
+This does not reopen the question of **why**, which is already filed and
+already with the owner as
+`INC-2026-10-18-tier-c-charter-freeze`: `docs/standards/pm.md` §10's
+Tier C list names all of `prompts/` while its own banner and §21 say
+otherwise. What tonight adds is that the freeze is now measurable
+independently of the outage, so a future window can read its length
+without having to argue about a confound. All eleven charters still have
+their newest copy in an open pull request of this seat.
+
+**Carried, for the window after this one:** if `prompts/*-agent.md` is
+still at 2026-10-18 on `main` while other classes keep merging, report
+the two numbers side by side — days since the last charter merge, and
+merges of other classes in that span — because one number alone has
+spent two weeks being explained away.
+
 ## INC-2026-11-01-the-send-audit-reports-the-owner-notes-the-standard-requires-three-of-every-week — A check and the rule it enforces disagreed about the rule's domain, so the audit was guaranteed to print three unresolvable rows a week
 
 **Status:** fixed in this entry's own pull request, in the charter and in
