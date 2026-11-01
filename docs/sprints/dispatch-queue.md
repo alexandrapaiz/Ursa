@@ -1,4 +1,4 @@
-# Dispatch queue — 2026-11-01, message-triggered standup (third pass of the day)
+# Dispatch queue — 2026-11-01, message-triggered standup (fourth pass of the day, in progress)
 
 `PM_DISPATCH_ENABLED` is unset in this run's environment
 (`echo "PM_DISPATCH_ENABLED=$PM_DISPATCH_ENABLED"` prints empty). The
