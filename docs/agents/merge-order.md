@@ -1,158 +1,162 @@
-# Merge order for the owner — measured 2026-11-01, window 72, queue read 23:16:36Z
+# Merge order for the owner — measured 2026-11-01, window 73, queue read 23:39:56Z
 
 Replaced whole each window, by this charter's own instruction, which is
 why `tools/registers/registers.json` declares this file `enabled: false`
 and why it belongs on exactly one branch at a time.
 
-## The five numbers, because three of them could not see what happened
+## The five numbers, and both predicates are correctly silent
 
 | | |
 |---|---|
-| open pull requests | **12** (read 23:16:36Z, after this window closed two of its own) |
-| merged in the last 7 days | **73** |
-| **merges in the last 5 days** | **0** |
-| **newest merge of any kind** | **2026-10-27T05:29:07Z — 4d 17h 38m before this read** |
+| open pull requests | **15** (read 23:39:56Z) |
+| merged in the last 7 days | **70** |
 | oldest open | `#395`, created 2026-10-24T21:21:40Z, **8d 2h** |
-
-**The newest merge is more than twenty-four hours old, and the gate has
-not moved in four days and seventeen hours.** That is the bold warning,
-and it is a new predicate as of this window, because the old one does not
-fire here: 12 open against 73 merged in seven days reads as a gate
-absorbing faster than the roster produces, which is what window 71
-correctly reported at 05:32:29Z on the last day anything merged. All
-seventy-three of those merges landed in the first two and a half days of
-the seven-day window. Merges per day:
+| newest merge of any kind | **2026-11-01T23:36:52Z — 3 minutes before this read** |
+| merges per day | below, seven rows, never a sum |
 
 | day | merges |
 |---|---|
+| 2026-10-18 | 29 |
+| 2026-10-23 | 9 |
+| 2026-10-24 | 27 |
 | 2026-10-25 | 14 |
 | 2026-10-26 | 45 |
 | 2026-10-27 | 22 |
-| 2026-10-28 | **0** |
-| 2026-10-29 | **0** |
-| 2026-10-30 | **0** |
-| 2026-10-31 | **0** |
-| 2026-11-01 | **0** |
+| 2026-11-01 | **2** |
 
-**This is not a merge-gate finding. It is an outage finding.** The
-portfolio attempted 270 runs between 2026-10-28T00:00Z and this read and
-completed none of them; 20 of 20 seats were refused by the model
-provider, every refusal before its first turn. Nothing was produced for
-the gate to absorb. The account, with the three independent denominators,
-is `INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout`.
+**Neither predicate fires, and this time that is a measurement rather
+than a blind spot.** Open does not outnumber the last seven days'
+merges, 15 against 70. The newest merge is three minutes old, so the
+24-hour predicate added one window ago is silent too. That predicate was
+registered at 23:20:02Z reading **4d 17h 38m** and reads **3 minutes**
+nineteen minutes later, which is the negative control it did not have:
+it fired on the stall and is quiet on the recovery, both sides inside
+one hour.
 
-So the order below is five days old in content. Every pull request in it
-was authored on 2026-10-24 or 2026-10-27 and not one has moved since,
-because no seat has run.
+**The five-day stall is over and it ended at the ceiling.** `refused`
+for today is 62 and has not moved since window 72's read, while
+`completed` went from 0 to 20 and `attempted` from 72 to 98. Every
+refusal preceded the 23:00Z capacity reset and nothing has been refused
+since.
 
-## Instruments, named per row as this charter requires
+## Conflicts: fifteen of fifteen clean, and the instrument beside each verdict
 
-Both of this repository's merge drivers were registered in the **parent**
-clone before any measurement, and the path asserted:
+| PR | branch | verdict | instrument |
+|---|---|---|---|
+| #395 | ursa-research/2026-10-24-hook-2 | clean | `git merge-tree --write-tree`, exit 0, drivers installed |
+| #591 | ursa-engineer/2026-10-27-message-2 | clean | same |
+| #599 | ursa-pm/2026-10-27-message-2 | clean | same |
+| #600 | ursa-engineer/2026-10-27-hook | clean | same |
+| #601 | ursa-skill/2026-10-27-hook-2 | clean | same |
+| #602 | ursa-security/2026-10-27-hook-2 | clean | same |
+| #604 | ursa-frontend/2026-10-27-hook | clean | same |
+| #607 | ursa-market/2026-10-27-message-5 | clean | same |
+| #609 | ursa-pm/2026-10-27-message-3 | clean | same |
+| #612 | ursa-exo/2026-11-01-hook | clean | same |
+| #613 | ursa-okr/2026-11-01-hook | clean | same |
+| #615 | ursa-engineer/2026-11-01-hook | clean | same |
+| #616 | ursa-pm/2026-11-01-message | clean | same |
+| #617 | ursa-skill/2026-11-01-message | clean | same |
+| #618 | ursa-exo/2026-11-01-message | clean | same |
 
+`tools/registers/install-drivers.sh` was run first, registering `ledger`
+for `docs/ideas.md` and `register` for the four `## `-keyed registers.
+Without it four of these answers are false (fortieth window's
+measurement, §5b).
+
+**One verdict in this table was wrong on the first sweep and is
+corrected here rather than quietly.** The first run printed `#618
+CONFLICT`. `#618` is this window's own pull request, opened four minutes
+earlier, and `refs/prs/618` did not exist in the clone because §0
+fetched that refspec before the identifier existed. `merge-tree` exited
+**128**, not 1, and the loop read "could not perform the merge" as
+"conflict". `INC-2026-11-01-merge-tree-128-read-as-a-conflict-on-this-seats-own-pull-request`
+carries it, and §5b item 1 now resolves both revisions and branches on
+the exit code rather than on its sign.
+
+**`#599`'s conflict was real and is repaired by its own seat.** Ursa's
+PM reported at 23:30:25Z that it had merged current `main` into that
+branch, hit real conflicts in two of its own tracking files, resolved
+them by taking `main`'s text, and pushed. Verified independently here at
+23:42Z: clean. The earlier reading of it as a false conflict against a
+stale base was true when it was taken and had expired.
+
+## Containment: no open pull request duplicates another
+
+The instrument is the **tree the gate would land**, not ancestry, which
+is this window's amendment to §5b from Ursa's skill seat's measurement
+on its own pair. Ancestry answers containment and says nothing about
+whether the newer branch adds a line.
+
+```bash
+git merge-tree --write-tree "$(git rev-parse origin/main)" refs/prs/<n> | head -1
 ```
-merge.ledger.driver   node /tmp/.../tools/ledger/union-merge.mjs %O %A %B %L %P
-merge.register.driver node /tmp/.../tools/registers/merge-driver.mjs %O %A %B %L %P
+
+All fifteen merged trees are distinct, so nothing here is a second copy
+of something else and the queue is fifteen decisions rather than fewer.
+The two same-seat pairs both earn their identifiers:
+
+| pair | trees | verdict |
+|---|---|---|
+| `#612` / `#618` (exo) | `644a926d` / `55a16eef` | different; `#618` adds `docs/agents/incidents.md`, `prompts/exo-agent.md`, one run file |
+| `#601` / `#617` (skill) | `2d5f8c52` / `ffec2e4b` | different; `#617` is that seat's new window, not a forward merge of `#601` |
+
+The skill seat closed `#608` tonight on this instrument rather than
+readying it, because `#608` and `#601` merged to byte-identical trees
+even though `#608` was four commits ahead. Those four commits were other
+seats' already-merged work plus a forward merge of it. That is the
+measurement this section's method now comes from.
+
+## The landing order
+
+**Thirteen of the fifteen are Tier B by path and merge in any order,
+because no two touch the same file in conflicting ways and all fifteen
+are clean against `main` independently.** Simulated in sequence in a
+detached scratch worktree against `origin/main`, not `main`.
+
+| # | PR | seat | why here |
+|---|---|---|---|
+| 1 | #599 | pm | repaired tonight; oldest repair, and its seat is the merge gate |
+| 2 | #609 | pm | same seat's older pass |
+| 3 | #616 | pm | same seat's current pass |
+| 4 | #591 | engineer | |
+| 5 | #600 | engineer | |
+| 6 | #601 | skill | the only landable copy of the work `#608` carried |
+| 7 | #617 | skill | that seat's current window |
+| 8 | #602 | security | |
+| 9 | #604 | frontend | |
+| 10 | #607 | market | |
+| 11 | #613 | okr | |
+| 12 | #395 | research | oldest in the queue at 8d 2h, and **Tier C**: two charter files |
+| 13 | #612 | exo | **Tier C**: eleven charter files |
+| 14 | #618 | exo | **Tier C**: eleven charter files; contains `#612` |
+| — | #615 | engineer | **draft**, excluded; GitHub refuses to merge a draft |
+
+**Three of the fifteen are Tier C and all three are charter pull
+requests.** `#395`, `#612` and `#618`. One owner decision covers `#612`
+and `#618`: merge `#618`, which contains `#612`.
+
+**No `prompts/*-agent.md` has reached `main` in 14 days 4h 49m**, while
+`prompts/skill-extract.md` merged six days ago and two non-charter pull
+requests merged in the fifteen minutes before this read. So the gate
+absorbs and the class it does not absorb is the charters specifically.
+Until tonight the outage was that reading's alibi. The cause is already
+with the owner as `INC-2026-10-18-tier-c-charter-freeze`, which is
+`docs/standards/pm.md` §10's Tier C list contradicting its own banner
+and §21.
+
+## Branch deletion
+
+Computed under §5b's predicate, over pull requests and never over names.
+
+```bash
+git ls-remote --heads origin | sed 's#.*refs/heads/##' | sort > /tmp/br.txt
+gh pr list --state all --limit 400 --json headRefName,state,mergedAt \
+  | jq -r 'group_by(.headRefName)[] | select(all(.[]; .mergedAt != null)) | .[0].headRefName' \
+  | sort -u > /tmp/alldone.txt
+comm -12 /tmp/br.txt /tmp/alldone.txt
 ```
 
-`refs/pull/*/head:refs/prs/*` was re-fetched immediately before the
-census. Exit codes are branched on rather than truthiness, so a 128 is
-reported as "not a verdict" and never as a conflict.
-
-| # | seat | real merge (`merge-tree`, drivers on) | GitHub field | `baseRefOid` vs `main` | drivers-disagree | state |
-|---|---|---|---|---|---|---|
-| `#612` | exo | **CLEAN** | MERGEABLE/CLEAN | current | agrees | ready |
-| `#609` | pm | **CLEAN** | MERGEABLE/CLEAN | behind | not applicable | ready |
-| `#608` | skill | **CLEAN** | MERGEABLE/CLEAN | current | agrees | **DRAFT, 5d 17h** |
-| `#607` | market | **CLEAN** | MERGEABLE/CLEAN | behind | agrees | ready |
-| `#604` | frontend | **CLEAN** | MERGEABLE/CLEAN | behind | not applicable | ready |
-| `#602` | security | **CLEAN** | MERGEABLE/CLEAN | behind | agrees | ready |
-| `#601` | skill | **CLEAN** | MERGEABLE/CLEAN | behind | agrees | ready |
-| `#600` | engineer | **CLEAN** | MERGEABLE/CLEAN | behind | agrees | ready |
-| `#599` | pm | **CONFLICT** | CONFLICTING/DIRTY | behind | not applicable | ready |
-| `#591` | engineer | **CLEAN** | MERGEABLE/CLEAN | behind | agrees | ready |
-| `#395` | research | **CLEAN** | MERGEABLE/CLEAN | behind | not applicable | ready |
-| `#611` | HQ distribution | **CLEAN** | MERGEABLE/CLEAN | current | not applicable | **DRAFT, 9h** |
-
-**Eleven of twelve merge cleanly. One conflicts, and the two instruments
-agree about it**, which is worth saying because they usually do not:
-`#599` conflicts in `docs/sprints/dispatch-queue.md` and
-`docs/sprints/pending.md`, on both the real merge and GitHub's field.
-Those are the PM's own sprint files and the resolution is the PM's.
-
-**No pull request is in the `drivers-disagree` state.** Seven of the
-twelve touch a path `.gitattributes` gives a `merge=` attribute; each
-was merged into a detached scratch worktree off `origin/main` with the
-drivers registered, and all seven agree with the button.
-
-## Containment, stated in the direction that cannot invert
-
-```
-git merge-base --is-ancestor refs/prs/601 refs/prs/608   # exit 0
-git merge-base --is-ancestor refs/prs/591 refs/prs/600   # exit 0
-```
-
-- **`#601` is contained in `#608`** — the skill seat's. Merging `#608`
-  closes `#601`. The catch is in the next section.
-- **`#591` is contained in `#600`** — the engineer seat's. Merging
-  `#600` closes `#591`.
-
-This seat's own chain is already collapsed: `#571` is contained in
-`#603`, `#603` is contained in `#612`, and both of the older ones were
-closed by this window with the proof in each closing comment. Their
-branches are kept, because containment in an unmerged tip is only as
-durable as the tip.
-
-## The landing order, nine merges for twelve pull requests
-
-Simulated in a detached scratch worktree off `origin/main` with both
-drivers registered, compared against `origin/main` and never against
-`main`. An order that has not been simulated is a guess. **All nine
-merges were performed in this order and every one exited 0**, ending at
-tree `95281881`; no step needed a resolution and no step was aborted.
-
-1. **`#600`** (engineer) — closes `#591` with it.
-2. **`#602`** (security).
-3. **`#604`** (frontend).
-4. **`#607`** (market).
-5. **`#609`** (pm).
-6. **`#612`** (exo) — **Tier C, the owner's.** Carries all eleven
-   charters and both `tools/seat/` instruments from window 70, plus this
-   window's two repairs.
-7. **`#395`** (research) — oldest in the queue at 8d 2h and clean.
-8. **`#611`** (HQ distribution) — a draft; see below.
-9. **`#608`** (skill) — a draft; closes `#601` with it. See below.
-
-`#599` is not in the order. It needs its author's resolution first.
-
-## Three dispositions that are not merges, routed to the seat that owes them
-
-- **`#608`, Ursa's skill seat: a draft for 5 days and 17 hours that
-  contains its own readied `#601`.** GitHub refuses to merge a draft at
-  all, so that seat's tip is unmergeable while its older, smaller pull
-  request is the only landable copy of its work. Nothing in it is wrong
-  and the seat is not careless: its run was ending when the outage
-  started and never got a successor. **The skill seat's own next run
-  inherits it under ship-first.** Told on the board; not touched here,
-  because a sibling's draft is theirs to resolve and closing it is the
-  loud, wrong, recoverable error this charter names.
-- **`#611`, HQ's distribution seat: a draft opened 2026-11-01T14:13Z,
-  still untouched nine hours later**, while `GET /api/capacity` reports
-  `lost: 0`, `lost_cohorts: []` and `lost_after_minutes: 90`. Either a
-  run has been alive for nine hours or it was lost eight and a half
-  hours ago, and the endpoint's own threshold says the second. Handed to
-  HQ's `exo-centralizer` as a reading of the `lost` classifier, not
-  asserted here: `runtime/` is HQ's lane and one observation is not a
-  census.
-- **`#599`, the PM's: the one real conflict**, in its own two sprint
-  files. Both instruments agree, so there is nothing for this seat to
-  re-measure on its behalf.
-
-## What a reader should not conclude from this file
-
-Nothing in the queue decayed. Five days of no runs is also five days of
-no pushes, so every branch above is exactly as mergeable as it was on
-2026-10-27 and the stale `baseRefOid` values are stale for the same
-reason `main` is: nothing merged under them. The `CONFLICTING` field on
-this seat's now-closed `#571` was the false kind for that whole span,
-and Ursa's PM had already established it by hand on 2026-10-27T00:23:57Z.
+Nothing was deleted this window. The standing practice for a branch
+whose pull request closed unmerged is still to leave it, and no branch
+of a merged-only pull request was still on the remote at this read.
