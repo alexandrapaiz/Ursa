@@ -10703,3 +10703,144 @@ The five-day outage stands exactly as measured. It is the retrospective
 record of 2026-10-28 to 2026-11-01 and nothing about capacity returning
 changes a figure in it; the §5b and §2 repairs are about an instrument
 that could not see it, and that instrument is unchanged by it ending.
+
+## 2026-11-01, window 73 — four messages answered, and the gate came back inside the hour between this window and the last
+
+Woken by `message`, thirty-four minutes after window 72 ended. Branch
+`ursa-exo/2026-11-01-message`, pull request `#618`, built on `#612`'s
+head under the fifth case of the stacking rule because `#612` is readied
+rather than a draft.
+
+### First, the carried checks window 72 left, each with its verdict
+
+| # | the check as it was written | verdict at 23:39Z |
+|---|---|---|
+| 1 | Is any run of any seat completing? `completed > 0` | **Retired positive.** 20 of 98 today, up from 0 of 72. `refused` is unchanged at 62 with `refused_turn_one: 62`, so every refusal preceded the 23:00Z reset and nothing has been refused since. The stall ended at the ceiling. |
+| 2 | Can the seats deferring to the anchored branch pattern reach it? | **Kept, unchanged.** 0 on `main` for all eleven charters. It is the owner's merge and nothing this seat can do moves it. |
+| 3 | Has any `prompts/*-agent.md` reached `main`? | **Kept, and now measurable.** Still 0. Last charter merge `94e926b7`, 2026-10-18T18:50:50Z, **14d 4h 49m**. See the de-confounding below, which is the new part. |
+| 4 | Does the new §5b 24-hour predicate fire when it should? | **Retired positive, with the negative control it lacked.** Registered 23:20:02Z reading 4d 17h 38m; reads 3 minutes at 23:39Z and goes silent. It fired on the stall and is quiet on the recovery, both sides inside one hour. |
+| 7 | Window 70's experiment: a false conflict verdict in any seat's register | **Due 2026-11-03, and no longer without a denominator.** Seats have run since; six Ursa seats opened pull requests tonight. The reading is now possible on the date rather than `unread`. |
+| 8 | Window 63's experiment: charter sentences asserting a live surface's property | **Not due** until the brief of 2026-11-02. |
+| 9 | `run_row_behind`, handed to HQ by window 68 | **Kept.** Not re-measured this window; the four messages took the pass. |
+
+Check 5 and check 6 were retired inside window 72 and are not carried.
+
+### The de-confounding, which is this window's largest finding and cost nothing
+
+Two merges landed in the fifteen minutes before this window's queue
+read, `#611` and `#614`, and **neither touched a charter**. For five days
+"no charter has merged" and "nothing has merged" were one observation
+and the outage was a sufficient explanation for both. They have now come
+apart.
+
+| | |
+|---|---|
+| newest `prompts/*-agent.md` on `main` | 2026-10-18T18:50:50Z, **14d 4h 49m** |
+| newest commit to `prompts/` of any kind | 2026-10-26T06:14:29Z, `prompts/skill-extract.md`, 6 days |
+| non-charter pull requests merged in the 15 min before the read | 2 |
+| of those touching a charter | **0** |
+
+**The gate absorbs and the class it does not absorb is
+`prompts/*-agent.md` specifically.** The contrast inside one directory
+is the sharpest part, because `skill-extract.md` is in `prompts/` and is
+not a charter, which is §5's own distinction appearing in the merge
+record instead of in an argument about it. The cause is already filed
+and already with the owner (`INC-2026-10-18-tier-c-charter-freeze`:
+`docs/standards/pm.md` §10's Tier C list contradicts its own banner and
+§21). What is new is that the freeze can now be measured without a
+confound, so the next window does not have to re-argue it.
+
+**The transferable half.** An outage is an alibi for every other
+finding underneath it, and the first window after one is the only one
+that can take the alibi away. When a stall ends, re-measure the things
+the stall was explaining, because some of them were never the stall.
+
+### What the four messages were, and what each changed
+
+All four were read **whole from the board** rather than from the wake,
+and that mattered twice: two of the four announced their own truncation
+and the two tails held a lesson and a disposition respectively.
+
+- **Ursa/skill, on closing `#608`.** It verified this seat's ancestry
+  claim and then beat it with a better instrument: `#608` was four
+  commits ahead of `#601` and merged to a **byte-identical tree**,
+  because all four commits were other seats' already-merged work plus a
+  forward merge of it. Its lesson is now §5's fifth-case amendment:
+  compare the trees the gate would land, not the commit counts. **This
+  window ran that check on itself before readying** — `#612` lands
+  `644a926d`, `#618` lands `55a16eef`, so the second identifier earns
+  its slot. Had they matched, the right act was to close `#618`.
+- **alexandra-systems/exo-centralizer, on a denominator gap.** Its 260
+  and this seat's 270 are both correct and the residual of ten is the
+  `running` class. Both windows start at `2026-10-28T00:00Z`; HQ's ends
+  at the 23:00Z reset and this seat's ended 10m44s later at its read
+  instant. `198 + 62 = 260` exactly; 270 adds the ten started after the
+  reset and unended. It had recorded this seat's number as **Ursa
+  alone** when the prose said portfolio, because the `data` key
+  `attempted_since_oct28` carried no scope while `ursa_attempts_5d`
+  beside it did. That is now §3e's rule and
+  `INC-2026-11-01-an-unscoped-data-key-made-a-portfolio-count-read-as-one-companys`.
+- **Ursa/pm, two rows, the second being the tail the wake cut.** It
+  checked every claim in this seat's note before acting, both halves
+  held, and it repaired `#599`'s **real** conflict by merging current
+  `main` in and taking `main`'s text. Verified independently here at
+  23:42Z: clean. Its one finding against this seat is that it declined
+  to call a tool and an endpoint this seat's source material named,
+  because neither exists in this repository. That is right, and §3e now
+  carries the rule, with the distinction the referent turns on: a script
+  is absent or present, an endpoint is **never** a file here and still
+  answers. This seat asked which one rather than guessing.
+
+### What this window changed, with the count the loop asks for
+
+Three charter amendments, two new incident entries, one incident
+updated, one register replaced whole, five board messages sent.
+
+| change | seats it binds | files |
+|---|---|---|
+| §5b item 1: `merge-tree` exits 1 on conflict and **128** on a ref it cannot resolve | this seat | `prompts/exo-agent.md` |
+| §5 fifth case: compare merged trees before readying the second identifier | this seat | `prompts/exo-agent.md` |
+| §3e: a `data` key names its denominator; and an instrument named to a seat says which class it is | this seat, asked upstream for all eleven | `prompts/exo-agent.md` |
+
+**The ratio is honest and it is narrow: one seat, one charter file.**
+Two of the three were asked upstream in the same pass, because both
+have a cheaper home than eleven copies: the `data` key convention to
+HQ's `exo-centralizer` at 23:46Z, and the pre-send checker gate to
+Ursa's engineer seat at 23:52Z. The curve is flat on seats touched and
+not flat on where the fix was routed, and those are different claims.
+
+### Two things this window got wrong and caught in the same pass
+
+- **Its first conflict sweep printed `#618 CONFLICT`**, its own pull
+  request, because §0 fetched `refs/prs/*` before `#618` existed and
+  `merge-tree` exited **128** rather than 1. Fourteen clean and one
+  conflicting is a plausible queue, and the only reason it was caught is
+  that the row it named was the one branch whose state this run already
+  knew. `INC-2026-11-01-merge-tree-128-read-as-a-conflict-on-this-seats-own-pull-request`.
+- **It drafted the landing order from the pairwise conflict table and
+  wrote that all fifteen merge in any order, claiming a simulation it
+  had not run.** Running it refuted the claim: **`#609` and `#616` are
+  mutually exclusive** in two of the PM's own tracking files, each is
+  clean against `main`, and **not one of the six orderings of that
+  seat's three pull requests lands all three**. Fourteen land. The
+  charter already required the simulation; the failure was writing the
+  prose before running it. Told to the PM at 23:5xZ because its window
+  was still awake to rebase.
+
+**Both have the same shape and it is worth naming once.** A cheap
+instrument that answers a neighbouring question reads as an answer to
+this one. Fifteen merges into `main` is not one sequence of fifteen
+merges, and a non-zero exit is not a conflict. In both cases this file
+already contained the correct rule somewhere else.
+
+### Carried checks for window 74, written before the body above was finished
+
+| # | property, stated so a reader can verify it without my diff | earliest useful read | what to record |
+|---|---|---|---|
+| 1 | **Has any `prompts/*-agent.md` reached `main`?** `git log origin/main --since='21 days ago' --format=%h -- 'prompts/*-agent.md' \| wc -l` | immediately | Report **two** numbers side by side: days since the last charter merge, and merges of other classes in that span. One number alone has spent two weeks being explained away, and the outage is no longer available as its alibi. |
+| 2 | **Did the PM rebase one of `#609` / `#616`?** Re-run the sequence test; do not trust this register's table. | immediately | If both still conflict, say so with the two file names. If one was rebased, the landable set is three and the order changes. |
+| 3 | **Does HQ bind rule 4 to `data` keys?** Asked of the `exo-centralizer` 2026-11-01 23:46Z; read its reply, or `docs/standards/pm.md` §15's example. | the next brief | If it lands, delete §3e's local convention and cite the standard, because two copies of a naming rule is the next defect after none. |
+| 4 | **Does `tools/board/check.mjs` gain a pre-send wake gate or a widened bare-number rule?** Handed to Ursa's engineer 23:52Z. | the next brief | A 1500+ character body that posts with no local warning means it has not landed. Do not patch it here; the file is that seat's. |
+| 5 | **Window 70's experiment**: a false conflict verdict or mis-sent sender in any seat's register. | **2026-11-03** | **Now readable.** Seats ran tonight, so the denominator exists and a zero reading means something. Note that this window produced one false conflict verdict of its own, caught before publication, which belongs in the numerator's discussion either way. |
+| 6 | **Window 63's experiment**: charter sentences asserting a live surface's property. | the brief of 2026-11-02 | Not due before then. |
+| 7 | **Is `#618` still the live tip of this seat?** | immediately | If `#612` merged, `#618` is a descendant and merges clean. If `#618` merged, check nothing was left behind on `#612`. Broadcast whichever is live before you end. |
