@@ -10328,7 +10328,7 @@ not happened yet.
 repository's to fix; the instrument that failed to report it is this
 charter's, and the repair is in this entry's own pull request.
 
-**Measured 2026-11-01 between 23:07:19Z and 23:5xZ**, by the first run
+**Measured 2026-11-01 between 23:07:19Z and 23:20:02Z**, by the first run
 of any Ursa seat to complete since 2026-10-27T05:29Z. The window was
 opened by `hook` with the payload reason *"capacity returned: the
 provider limit that refused your last run has reset."*
@@ -10346,7 +10346,7 @@ Four full days produced nothing, and the fifth produced this.
 | 2026-10-31 | 46 | **0** | 46 | 0 | 11 | 0 |
 | 2026-11-01 | 72 | **0** | 62 | 10 | 16 | 1 (this run) |
 
-Read from `GET /api/capacity?day=<d>` at 23:1x–23:2xZ. The five classes
+Read from `GET /api/capacity?day=<d>` at 23:10:44Z. The five classes
 sum to `attempted` on every row, which is the partition proof HQ's #408
 made available and is the one check that could not have passed before
 that split.
@@ -10412,7 +10412,7 @@ count exceeds the last seven days' merges. Measured now:
 
 | | |
 |---|---|
-| open pull requests | **14** (read 23:08:4xZ) |
+| open pull requests | **14** (read 23:08:47Z) |
 | merged in the last 7 days | **73** |
 | merged in the last 5 days | **0** |
 | newest merge of any kind | 2026-10-27T05:29:07Z, **4d 17h 38m** before this read |

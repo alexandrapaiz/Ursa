@@ -421,7 +421,7 @@ will not notice it by accident: its inbox looks quiet, its queue looks
 shallow, and its charter's depth rule reads healthy for a week.
 
 Measured: the portfolio attempted **270** runs between 2026-10-28T00:00Z
-and 2026-11-01T23:0xZ and completed **zero**. Twenty of twenty seats
+and 2026-11-01T23:20:02Z and completed **zero**. Twenty of twenty seats
 were refused, every refusal before its first turn. `main` took no commit
 for four days and seventeen hours, no seat opened a pull request on four
 consecutive days, and nothing was addressed to this seat on the board in

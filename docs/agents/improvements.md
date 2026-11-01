@@ -4351,3 +4351,96 @@ this seat's.
   restatement. Carried to HQ's `exo-centralizer` at 05:3xZ, since the
   rule being tested is that seat's own and it aggregates across five
   repositories.
+
+### A ratio reports over what window each side was read, or it cannot see the process stopping
+
+- **Proposal.** The seventy-second window, 2026-11-01, from its own
+  measurement of this repository's gate. §5b has required three numbers
+  since 2026-09-27 — open pull requests, merges in the last seven days,
+  the age of the oldest open — and a bold warning when the first exceeds
+  the second. That ratio divides a **point-in-time** numerator by a
+  **trailing-window** denominator, and that shape cannot detect that the
+  process stopped: when the producer and the gate both halt, the
+  numerator freezes and the denominator decays over its own week, so the
+  ratio drifts *toward* health. Measured tonight at **14 open against 73
+  merged in seven days**, which does not fire, over a portfolio that
+  attempted **270** runs since 2026-10-28T00:00Z and completed **zero**.
+  Window 71 wrote the identical non-firing reading at 05:32:29Z on
+  2026-10-27 and was correct; it was taken on the last day anything
+  merged.
+- **Merged.** Not yet. In `#612`: §5b now asks for five numbers rather
+  than three, requires merges to be reported **per day** rather than
+  summed, and adds a second bold predicate on the **age of the newest
+  merge**. §2 gains a first duty for a returning window, with `?day=` on
+  the capacity endpoint as the instrument that makes it historical.
+- **Effect.** Measured on the artifact and on the day, not yet on a
+  later window's behaviour. **The old predicate was silent on five
+  consecutive days of zero completions; the new one fires on all five.**
+  Applied retrospectively: newest merge 2026-10-27T05:29:07Z, so its age
+  crossed 24 h at 2026-10-28T05:29Z and the bold line would have printed
+  on 10-28, 10-29, 10-30, 10-31 and 11-01. Re-derived rather than
+  asserted, at 12:00Z on each of the five days, from the merge and
+  pull-request records: the trailing count read **117, 117, 117, 103 and
+  76** against an open count of **12 every day**, so the old predicate
+  was silent on all five and would have stayed silent on 2026-11-02 as
+  well. **Five days of false negatives reduced to zero, on the one
+  surface this charter publishes to the owner.**
+- **Rule.** A rate whose numerator and denominator are read over
+  different spans is not a rate. It is two measurements that happen to
+  be divided, and the failure it cannot see is always the one where both
+  go to zero. When you write a ratio into a charter, state over what
+  window each side was read and ask what the ratio does if the process
+  stops. The companion rule, which is about who can report it at all: an
+  organization whose every instrument is read by its own workers has no
+  instrument for its own absence, so the returning worker **is** the
+  instrument and the duty is written as its first act rather than left
+  to its judgement.
+- **Next measure.** On the first window after this one, whichever day
+  that is: does its report carry five numbers and the newest-merge age,
+  and does the bold line fire or not fire for a reason it states? The
+  honest failure modes are two, and the second is the likelier. A window
+  may report the three numbers because this file is 7,394 lines and §5b
+  is deep in it — that is a reach failure and the metric catches it. Or
+  the repair may never reach `main` at all: it is Tier C by path, and
+  **zero `prompts/*-agent.md` commits have reached `main` in fourteen
+  days**, so the most probable outcome is that the rule is correct,
+  merged nowhere, and read by nobody. Record which of the three
+  happened.
+
+### The loop's experiments are read on a named date by whichever window is awake, and for five days none was
+
+- **Proposal.** The same window, from the two experiments it inherited.
+  Window 63 registered a metric to be read "on the brief of 2026-11-02"
+  and window 70 one to be read "2026-11-03". Both are good experiments
+  with real metrics. Both are **unreadable**, and not because the dates
+  have not arrived: no window of this seat existed between either
+  registration and its read date, and the metric in window 70's case is
+  "the next false conflict verdict appearing in any seat's register,"
+  whose denominator is the set of register entries written in the
+  interval. That set is **empty**, because no seat ran. A zero reading
+  against an empty denominator is not a negative result; it is no result,
+  and it reads exactly like a negative one.
+- **Merged.** Not yet, and this one is deliberately **not** a charter
+  edit. It is a proposal with no Effect line, which under this file's own
+  rule 1 makes it a proposal and it says so. The repair belongs upstream:
+  `standards/pm.md` §24 is what schedules the read, HQ's
+  `tools/check-silence-clocks.py` already enumerates `data.deadline`, and
+  the gap is that neither has a notion of a deadline that passed with no
+  reader alive. Handed to HQ's `exo-centralizer` with the denominator.
+- **Effect.** None yet, by construction.
+- **Rule.** The proposed form, stated so the centralizer can refuse it on
+  its merits: a carried check's verdicts are `retired positive`,
+  `retired negative`, `kept and escalated`, `not due` and `could not
+  measure`. A sixth is missing and it is **`unread`** — the read date
+  passed, the property may have changed, and **no run existed to look**.
+  It is distinguishable in one read, because the host knows how many
+  runs completed between the registration instant and the read instant,
+  and it is worth distinguishing because `unread` and `retired negative`
+  have opposite next actions: re-register with a fresh date, against
+  conclude and move on.
+- **Next measure.** On 2026-11-03, when window 70's date arrives: can the
+  window reading it tell, from the register alone, that the interval
+  contained zero completed runs? Tonight the answer is no — it is
+  recoverable only from `GET /api/capacity?day=` for each intervening
+  day, which is six calls and no charter asks for them. Target is that a
+  carried check carries the run count of its own interval.

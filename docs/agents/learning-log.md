@@ -10414,3 +10414,162 @@ every charter carries and no run runs. The citation rate is measurable
 from here and the read rate is not. The metric is the next false conflict
 verdict or mis-sent sender appearing in any seat's register, read
 2026-11-03.
+
+## Window 72 — 2026-11-01, resident host, started 23:07:19Z, woken by `hook` ("capacity returned: the provider limit that refused your last run has reset")
+
+### Carried checks for window 73, written 23:20:02Z before the body below it
+
+Written first, because an experiment whose input is produced at the end
+of a run has a single point of failure dressed as a method, and on this
+host a run does not choose its ending.
+
+| # | property, stated so a reader can verify it without my diff | earliest useful read | verdict to record |
+|---|---|---|---|
+| 1 | **Is any run of any seat completing?** `GET /api/capacity?day=<today>` returns `completed > 0`. | immediately | On 2026-11-01 it was 0 of 72 attempted. If it is still 0, say so with the day's number and do not spend the window on anything else first. |
+| 2 | **Can the seats that defer to the anchored branch pattern reach it?** `git show origin/main:prompts/finance-agent.md \| grep -cF '^([a-z0-9-]+-)?('` returns non-zero. | immediately | 0 on `main` for all eleven charters tonight, 3 on this branch (6 in exo's). Positive control passes. **Kept and escalated** — it is the owner's merge, not this seat's act. |
+| 3 | **Has any `prompts/*-agent.md` reached `main`?** `git log origin/main --since='14 days ago' --format=%h -- 'prompts/*-agent.md' \| wc -l` returns non-zero. | immediately | 0 tonight. Last charter merge 2026-10-18T18:50:50Z, now **14 days**. All eleven charters have their newest copy in `#612`. |
+| 4 | **Does the new §5b predicate fire when it should?** The newest merge's age exceeds 24 h and the report says so in bold. | the next window | Tonight: 4d 17h 38m, and the old single predicate stayed silent. If a window reports the three numbers and not the five, the repair did not reach it. |
+| 5 | **Is `#608` still an unmergeable draft?** `gh pr view 608 --json isDraft`. | from 2026-11-02 | A draft for 5d 17h containing its own readied `#601`. Ursa's skill seat was told on the board. **Not this seat's to close.** |
+| 6 | **Is `#611` classified, and does `lost` ever become non-zero?** `GET /api/capacity \| jq '[.running,.lost,.lost_after_minutes]'`. | from 2026-11-02 | `#611` opened 14:13Z and was still a 9-hour-old draft at 23:13:41Z with `lost: 0`, `lost_after_minutes: 90`. Handed to HQ. |
+| 7 | **Window 70's experiment**: a false conflict verdict or mis-sent sender in any seat's register. | **2026-11-03** | **Not due**, and note why before you re-measure: no seat has run since it was registered, so the metric has no denominator and a zero reading means nothing. |
+| 8 | **Window 63's experiment**: charter sentences asserting a live surface's property. | **the brief of 2026-11-02** | **Not due.** |
+| 9 | **`run_row_behind`, handed to HQ by window 68.** | from 2026-11-02 | **Kept.** The feed still has no row for the run that opened `#603`; its nearest rows are 2026-10-27T01:45Z and 05:35Z, both `refused` at 1 turn. |
+
+### What this window was, and the one number that explains it
+
+The first completed run of any Ursa seat since 2026-10-27T05:29Z.
+
+Between 2026-10-28T00:00Z and this window, the portfolio **attempted 270
+runs and completed none**. 20 of 20 seats refused by the model provider,
+every refusal before its first turn. `main` frozen at `1425b810`, four
+consecutive days with no pull request from any seat, nothing addressed to
+this seat on the board in five days and seventeen hours. Full account and
+the three independent denominators:
+`INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout`.
+
+This seat's own feed is the cleanest column in it: seven consecutive
+`refused` rows at **1 turn, 0 min**, one per day at ~12:01Z. On
+2026-10-26 this seat ran fourteen windows. The cadence did not degrade,
+it collapsed to `capacity-retry.py`'s clock, and that tool wakes a seat
+whose last run was refused — so the portfolio's only recovery mechanism
+spent five days generating five more turn-one refusals.
+
+### The finding that is this seat's rather than the provider's
+
+**The instrument this charter mandates for exactly this question read
+healthy on every one of those five days, and would have for two more.**
+
+§5b asks for three numbers and a bold warning when the open count
+exceeds the last seven days' merges. Tonight: **14 open against 73
+merged in seven days**, so the warning does not fire, over a company
+that produced nothing for five days. Window 71 wrote the identical
+non-firing reading — *"12 against 116 … the gate is absorbing faster
+than the roster produces"* — at 05:32:29Z on 2026-10-27, which was
+correct and was taken on the last day anything merged.
+
+The mechanism is arithmetic, not carelessness. It is a **point-in-time
+numerator over a trailing-window denominator**. When the producer and
+the consumer both halt, the numerator freezes and the denominator decays
+over a week, so the ratio drifts *toward* health, and the one state it
+can never report is the state it was built to catch.
+
+**That is the family this register keeps naming, arriving on an
+arithmetic rather than on a schedule or a granularity.** A blind
+instrument reads as good news (Ursa incidents 10 and 14); a trailing
+denominator reads as good news for the width of its own window, which is
+the same failure with a built-in delay. And the expensive direction
+again: the number goes to the owner, and "the depth warning does not
+fire" is the sentence that tells her nothing needs her, on day five of a
+portfolio-wide stop.
+
+Repaired in §5b: five numbers instead of three, merges reported **per
+day** rather than summed, and a second bold predicate — the newest merge
+is more than twenty-four hours old — which fires tonight and would have
+fired on 2026-10-28 and on each of the four days after it.
+
+### The second repair, which is about who can see an outage at all
+
+Every instrument in this charter is read by a run. When there are no
+runs there are no readings, so **an outage is the one event in this
+organization that nothing reports.** It is reported by the first window
+that comes back or not at all, and that window will not notice by
+accident: its inbox looks quiet, its queue looks shallow, its depth rule
+reads healthy, and its registers are exactly as current as the day they
+were written, because nothing moved.
+
+So §2 now opens with a duty rather than a judgement: measure the
+distance from the last thing that happened to now, on the three surfaces
+that cannot over-report, and say the number even when it is small. The
+one parameter that makes it possible is `?day=` on the capacity
+endpoint, which makes that endpoint historical and which nothing else in
+this charter used.
+
+Three clauses came with it and the third is the one a returning window
+gets wrong. A day with `attempted > 0` and `completed == 0` is an outage
+and not a quiet day, and the class names the owner of it. Everything
+with a clock in it expired while you were gone, and an expired clock
+nobody was alive to read is an **unread** experiment and not a failed
+one. And **do not re-derive your predecessor's findings as though they
+were stale** — five days of no runs is five days of no changes, so the
+only thing that moved is the clock.
+
+### Orient: the ten attributes, graded off the surfaces HQ's standard names
+
+Read against `standards/roles/exo.md` §5f, fetched from HQ's `main` this
+window rather than re-derived from the published model.
+
+| # | attribute | surface read | grade |
+|---|---|---|---|
+| 1 | **staff on demand** | `company.yaml` seats against runs that completed | **weakest.** 11 seats, **65 Ursa attempts in five days, 0 completions, 0 seats delivering** |
+| 2 | community and crowd | the products' public surface | zero, honestly, and unchanged |
+| 3 | algorithms | `tools/` | holding. `tools/seat/`, `tools/board/`, `tools/registers/`, `tools/ledger/`, `tools/stack/` all present and tested; none ran for five days because nothing ran |
+| 4 | leveraged assets | `company.yaml` services | holding. Cost is still $0 and the refusal is a rented capacity limit, which is the attribute working as designed and hurting |
+| 5 | engagement | Deliverables | not read this window; the last five days produced no deliverable to return to |
+| 6 | interfaces | board routes, `asc` CLI | `asc` is still absent from `PATH` on this host, which is the third consecutive window to measure that; the board's routes answered every read |
+| 7 | dashboards | capacity, the run feed, the brief | **improved, and it is the one attribute this window can say that about.** `?day=` answered five historical days completely and the five classes summed to `attempted` on every row. The blind instrument tonight was this charter's own depth ratio, and it is repaired in this pull request |
+| 8 | experimentation | this loop's own experiment | **structurally broken, not absent.** Two experiments are in flight with read dates of 2026-11-02 and 2026-11-03, and both are unreadable: no window existed between registration and the read date, so the metric has no denominator |
+| 9 | autonomy | the board, never `mergedBy` | **unmeasurable for the period that matters.** HQ's `tools/autonomy.py --repos Ursa --days 7` returns a **61.6% floor on 73 merges with 28 (38%) unresolved**, which is above the one-third ceiling, so the tool's own refusal fires and the number grades the instrument. All 73 landed in the first 2.5 days of the window; over the last five days it is 0 of 0 and undefined |
+| 10 | dashboards' sibling, the purpose stack | `docs/vision.md` §0, newest OKRs, ADRs | unchanged and not drifting; nothing has been authored to drift |
+
+**Attribute 1 is the weakest and the number is not an adjective: zero
+completions out of sixty-five attempts over five days.** Attribute 8 is
+the one worth a company finding, because its failure mode is new: the
+loop's experiments are registered with read dates measured in days and
+read by whichever window happens to be awake, and this portfolio just
+demonstrated that no window may be awake for five of them. Two companies
+naming that in one week would be a portfolio finding; it went to HQ's
+`exo-centralizer` tonight with the denominator.
+
+### Compounding ratio, said plainly
+
+| | |
+|---|---|
+| seats whose charter this window changed | **1 of 11** — its own |
+| files changed | 5 |
+| instruments repaired | 2 |
+| does it make the next change cheaper | **no** |
+
+Both repairs are standing checks in one charter. Neither reaches another
+seat and neither makes the next one cheaper, so the curve this window
+drew is **flat**, and that is said rather than dressed up. The one thing
+that could compound is the §2 returning-window duty, because every seat
+on this host was refused for five days and every seat has the same blind
+spot about its own absence — but it is written into one charter, which is
+exactly the distribution method window 70 measured as producing a
+bimodal 11-of-11-or-1-of-11. So it was handed to the centralizer as an
+all-seats amendment rather than copied eleven ways.
+
+### Off-repository acts, each with the query that retrieves it
+
+| act | addressee | the one command that returns it |
+|---|---|---|
+| live-tip broadcast, `data.live_tip: 612` | broadcast, no `to_seat` | `?limit=400`, then `select(.from_seat=="exo" and .to_seat==null)`; posted id `69ef2c36`, audited and passing |
+| the outage and both repairs, as Ursa's daily tick | `alexandra-systems/exo-centralizer` | `?from_seat=exo&from_company=Ursa&since_hours=24&limit=500` |
+| the unmergeable draft `#608` | `Ursa/skill` | the same read, filtered on `to_seat=="skill"` |
+| the decision moving to `#612` | `Ursa/pm` | the same read, filtered on `to_seat=="pm"` |
+| three `Ideas` notes | `Ursa/owner` | the same read, filtered on `to_seat=="owner"` |
+| `#603` and `#571` closed with ancestry proofs | GitHub | `gh pr view 603 --json state,comments` |
+
+Written after each call returned, not before. Any row above that a later
+window cannot retrieve with the command beside it is a defect in this
+entry and should be filed as one.
