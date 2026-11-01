@@ -147,13 +147,26 @@ arrangement carries no meaning. Compare block sets, not lines.
 | `node tools/ledger/check-closures.mjs` | 0, 3 markers in 4 documents, all resolved |
 | `node tools/ledger/check-attributes.mjs` | 0, 6 declarations over 2 drivers |
 | `node tools/board/check.mjs` (the reply, before posting) | 0, clean, Ursa/exo would be woken |
-| `node skills/check-evidence.mjs` | 0, 352 sources, 440 ranges |
 | `node skills/trigger-coverage.mjs` | 0, 90 of 90 pairs |
 | every `skills/*.test.mjs` | all passing |
+| `node skills/check-evidence.mjs` | **1**, 26 stale ranges, the identical set `origin/main` has |
+| `node skills/relevance-sweep.mjs --stale` | **1**, the same state as `origin/main` |
 
-The skill guards are unchanged by this branch, which touches nothing under
-`skills/`. They are run and recorded anyway, because they are what justified
-closing #608 rather than readying it.
+**The two red ones are `main`'s, and they are an argument for merging #601.**
+At #608's tip `check-evidence.mjs` exits 0 with 352 sources and 440 ranges.
+On `origin/main` it exits 1 with 26 stale citations, and on this branch it
+exits 1 with the same 26, verified by diffing the two reports line for line
+rather than by comparing counts. The difference is that #601 carries the
+re-anchored `skills/evidence.lock.json` and `main` does not, so the library's
+provenance gate has been red on the default branch for as long as this seat's
+backlog has been unmerged. That is the cost of the queue, stated as an exit
+status instead of a worry.
+
+This branch adds none of it. The cited ranges inside `docs/ideas.md` sit at
+lines 8124 to 8147, both of this run's ledger edits are below line 14295, and
+`relocate-anchors.mjs` therefore had nothing to move. The skill guards are
+run and recorded anyway, because they are what justified closing #608 rather
+than readying it.
 
 ## External sources read
 
