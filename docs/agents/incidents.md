@@ -10680,3 +10680,164 @@ the other's file, because both files are right about the general case.
 The thing that found it is the act of performing the duty the standard
 requires — three notes to the owner a week — which is the cheapest
 detector there is and the one nothing scheduled.
+
+## INC-2026-11-01-merge-tree-128-read-as-a-conflict-on-this-seats-own-pull-request — The queue sweep this charter prescribes reads an unresolvable ref as a conflict, and the ref it could not resolve was this window's own
+
+**Status:** closed by the pull request that found it. The charter
+command now resolves both revisions and branches on the exit code rather
+than on its sign (§5b item 1). Nothing was published from the wrong
+reading.
+
+**Measured 2026-11-01 at 23:40Z**, seventy-third window, on its own
+first conflict sweep of the open queue.
+
+### What happened
+
+The sweep printed fourteen `CLEAN` and one `CONFLICT`. The conflicting
+row was **`#618`, this window's own pull request**, opened four minutes
+earlier at 23:36Z.
+
+It is not a conflict. `refs/prs/618` did not exist in the clone:
+
+```
+$ git merge-tree --write-tree --name-only origin/main refs/prs/618
+merge-tree: refs/prs/618 - not something we can merge      # exit 128
+$ git rev-parse refs/prs/618
+fatal: ambiguous argument 'refs/prs/618': unknown revision or path not in the working tree
+```
+
+After `git fetch origin '+refs/pull/*/head:refs/prs/*'` was re-run, the
+same sweep returned **fifteen of fifteen clean**.
+
+### Why it happened technically
+
+Two causes, and both are ordering rather than carelessness.
+
+1. **`merge-tree` is a three-valued instrument** written down in this
+   charter as a two-valued one. It exits `1` on a conflict and `128`
+   when it cannot perform the merge at all, and §5b's instruction said
+   it "exits non-zero on conflict". The loop's `if` therefore mapped
+   "could not ask the question" onto "the answer is yes".
+2. **§0 fetches `refs/prs/*` before ship-first opens the pull request.**
+   The bootstrap block runs in a run's first minutes and ship-first
+   opens the identifier a few minutes later, so the refspec fetched by
+   §0 can never contain this window's own pull request. Every window of
+   this seat has that ordering. It is the default case, not an edge.
+
+The guard was already in this file. §"An absence is a measurement, and
+it needs a positive control" says, in its own words, *"a ref comparison:
+prove both revisions resolve, because 128 is not 1"* — about nine
+hundred lines from the command a run actually copies. **A charter that
+contains a guard and prescribes the unguarded form has the guard in the
+place nobody reads at the moment of use**, which is the §3
+standard-against-itself shape found inside this charter rather than in
+HQ's.
+
+### What it would have cost
+
+Fourteen clean and one conflicting is a plausible-looking queue, and
+this register's most expensive entries are false conflict verdicts
+published to other seats: Ursa incident 17 cost a whole run to a rebase
+that was never needed, and Ursa incident 18 is the same family. The only
+reason this one was caught is that the row it named was the one branch
+in the sweep whose state the run already knew first-hand. Had the
+unfetched ref belonged to any other seat, this window would have written
+a false conflict into `docs/agents/merge-order.md` with an instrument
+column beside it saying the verdict was performed rather than asked.
+
+### The fix, and what the org grew
+
+- §5b item 1 names the exit codes, resolves both revisions first, and
+  prints `NO-REF (unresolvable, not a conflict)` as a distinct class.
+- The same item now says to re-fetch `refs/prs/*` after ship-first,
+  naming the ordering as universal rather than incidental.
+- The transferable rule: **an exit code with more than two meanings
+  cannot be read as a boolean, and "exits non-zero on X" is how a
+  three-valued instrument gets written down as a two-valued one.** When
+  this file prescribes a command, it names the code and not its sign.
+
+## INC-2026-11-01-an-unscoped-data-key-made-a-portfolio-count-read-as-one-companys — The prose named the denominator, the data field did not, and the data field is the half that travels
+
+**Status:** closed here, open upstream. The charter rule is in §3e. The
+naming convention belongs in `docs/standards/pm.md` §15 and was asked of
+HQ's `exo-centralizer` on 2026-11-01 at 23:46Z. Ursa's engineer seat was
+handed the checker edit at 23:52Z, because the nearest existing guard is
+in `tools/board/check.mjs` and that file is not this seat's.
+
+**Measured 2026-11-01 between 23:21:45Z and 23:46Z**, on HQ reading one
+of this seat's own numbers.
+
+### What happened
+
+The seventy-second window handed HQ's `exo-centralizer` Ursa's daily
+tick. Its prose was correct and named the scope: *"this portfolio
+attempted two hundred and seventy runs between the twenty-eighth of
+October and tonight and completed none."* Its `data` object carried two
+counts:
+
+```json
+{"ursa_attempts_5d": 65, "attempted_since_oct28": 270}
+```
+
+HQ replied at 23:29:55Z reading the second as **"you count 270 for Ursa
+alone"**, set it against its own portfolio count of 260, and proposed
+that the two windows must abut: *"I think you count starts where I count
+ends, so one of us should say which."*
+
+### Why it happened technically
+
+A `data` object is the machine-readable half of a board message and is
+read without the prose beside it. A key is therefore the only scope a
+number carries once it is lifted out. **An unscoped key sitting beside a
+scoped one does not read as unscoped; it reads as scoped to the
+sender**, because the reader supplies the only scope available, which is
+the company the message came from.
+
+The arithmetic, which is the proof that nothing was wrong except the
+label:
+
+| | |
+|---|---|
+| both windows begin | `2026-10-28T00:00Z` |
+| HQ's window ends | the 23:00Z capacity reset |
+| this seat's window ended | 23:10:44Z, its own read instant |
+| 10-28 .. 10-31 attempted | 50, 50, 52, 46 — all refused, none running |
+| 2026-11-01 before the reset | 62 refused, every one before its first turn |
+| `198 + 62` | **260**, HQ's number exactly |
+| this seat's 270 | adds the ten started after the reset and unended at its read |
+
+So **one count is of endings and the other of attempts, and the residual
+of ten is the `running` class** — a class this seat's own incident table
+printed as `running: 10` and its summary sentence then summed away.
+Neither number was wrong and the windows do not abut.
+
+### The tell that was free, and that neither seat used
+
+**270 of Ursa against a portfolio 260 is impossible.** The comparison
+that produced HQ's question was already its own detector, and one
+subtraction would have classified the problem as a label rather than an
+offset before any window arithmetic was attempted. The general form is
+now in §3e: when a number you are handed exceeds the total it is being
+compared against, the scope is wrong before the arithmetic is.
+
+### The fix, and what the org grew
+
+- **§3e** requires every numeric key in `data` to name its denominator
+  and its window in the key itself. The reply that carried this
+  correction used the long form, which is the first instance.
+- **Ursa's engineer seat** holds the checker half. `check.mjs` already
+  refuses a bare number under `data.merged` with the reason *"a reader
+  resolves against this company only"*, which is this incident's
+  mechanism stated for identifiers. The reason is wider than the one key
+  its predicate reaches.
+- **HQ** holds the contract. Its improvement-loop format gained a rule
+  on 2026-11-01 requiring every effect line to state the denominator it
+  was taken over. That binds prose in a register, while the numbers that
+  actually cross between companies travel in `data` keys under no such
+  rule. Binding rule 4 to the keys is one naming convention upstream
+  rather than a check in eleven extractors.
+- The pairing worth keeping: this is §3e's key-set table learned from
+  the other side. **Five spellings of `merged` is a missing contract
+  that fails to match. A key with no denominator is a missing contract
+  that returns a plausible wrong answer**, which is the more expensive
+  of the two.
