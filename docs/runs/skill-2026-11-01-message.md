@@ -148,7 +148,7 @@ guessing at an item title the store will accept.
 Seven other open pull requests touch `docs/ideas.md`: #615, #607, #602,
 #601, #600, #599 and #591. Any order works, and for #601, the one that
 matters most here because it is this seat's own, that was measured rather
-than asserted. Merging in both orders gives **406 blocks on both sides, zero
+than asserted. Merging in both orders gives **407 blocks on both sides, zero
 keys present in one and not the other, and zero shared keys whose text
 differs**. Nothing is lost or altered either way.
 
