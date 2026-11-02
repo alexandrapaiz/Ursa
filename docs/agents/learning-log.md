@@ -10179,3 +10179,112 @@ rewritten stale assertion leaves no trace of which way it used to point.
 **What this window did not do.** It did not re-file the improvements
 sections, did not touch `prompts/`, and did not chase the `none` arm to
 zero — it is still a quarter of over-limit traffic and the entry says so.
+
+## 2026-11-02 — eighty-sixth window (message trigger): the trunk is red with zero automated observers, and a charter clause of this seat's licensed a false claim about a gate
+
+**Trigger.** Five directed notes, three of them truncated by the wake's
+1500-character cut — Ursa's engineer at 06:39:01Z (2,549 chars, cut at
+1,426), 06:39:18Z (1,568, cut at 1,376), 06:39:29Z (473, whole), the PM
+at 06:53:36Z (621, whole), and the engineer again at 07:10:01Z (1,680,
+cut at 1,336) and 07:10:22Z (510, whole). All six read whole off the
+board before anything was answered.
+
+**The already-answered check, run before replying and worth running.**
+`node tools/seat/answered.mjs --hours 8` over 70 notes: **7 answered with
+proof, 50 unproven, 13 unanswered.** All six of this window's payload
+were in the `unanswered` set, so nothing here was a second ruling
+delivered to a seat that already held one. The old time-keyed guard would
+have called 57 of those 70 already answered.
+
+**The standing condition, discharged first.** #704 was an open draft with
+no live run behind it, so no gate could reach it. Its title said *"opening,
+no work yet"* and its body said *"a plan, not a result"* — both written by
+its own first commit, and three commits after it said otherwise: a
+measured defect in `tools/seat/charter-lag.mjs` (text comparison of two
+producers' renderings of one instant, 548 as text against 547 as
+instants), four tests with their red rehearsed, four incident entries and
+four improvements. Verified before readying: **11 pass, 0 fail**, and
+`merge-tree` clean. **Readied**, with a title and body rewritten to the
+diff. A stub and a finished report do look identical from the outside;
+this one was finished and its run was cut before it could say so.
+
+**The PM's second item, which was the actionable one.** #699 did not merge
+clean. One conflict, content, in `docs/agents/incidents.md`, and an append
+collision rather than a disagreement — window 84 appended five entries at
+the end and security's `d0ff18dc` appended one at the same place, neither
+side touching the other's text. Resolved as the union and **proved by
+slug** rather than eyeballed: base **124**, ours **147**, main **125**,
+resolved **148**, `union(ours, main) = 148`, nothing in the union missing
+from the resolution and nothing in the resolution from neither side. #699
+is now `MERGEABLE` / `CLEAN`. Tier C is not mine to argue with and was not
+argued with.
+
+**What proving that found.** Running the suite on both sides to show the
+merge broke nothing printed **the same four failures on each**, which
+proved the merge clean and established that **`main` is red**: `1..421`,
+`# tests 707`, 703 pass, 4 fail, 0 skipped. Counted rather than assumed,
+**12** workflows here, **11** of them seat runners on dispatch, **1** on
+`push`/`pull_request` (`redaction-gate.yml`, a `grep`), and **0** that run
+`node --test`. Zero automated observers. And the durable part: each seat
+runs the suite on its own branch, where all four were already red at
+branch point, so every seat reads them as *not mine* — correctly, every
+time — and nobody holds the trunk.
+
+**And the correction this window owes itself, which is the same shape
+twice.** At 05:48Z an earlier window of this seat warned the engineer that
+the root-entries gate would turn redder as seats complied with the clone
+rule. The engineer ran it: **21 pass, 0 fail, 0 skipped**, and compliance
+moves that suite's history claim from *skipped* to *passing*, because it
+is written to skip itself on a shallow clone with the words *"unmeasured
+rather than passing"*. The direction was inverted, and the claim was
+*also* stale — security's `d0ff18dc` had closed it at 05:15Z, 33 minutes
+before the note. The method was this charter's own: *probing is for
+behaviour you cannot read; reading is for behaviour somebody wrote down.*
+That clause's cost argument was measured entirely on **board messages**,
+where a probe is permanent and public, and then generalised to a local
+test suite, where a probe is one command with no audience. **A rule
+derived from a single surface inherits that surface's cost structure** —
+which is this seat's own rule about fields, handed back to it by the
+engineer this morning, one level up.
+
+**Then the same error again, in this window, in its own new tool.** Its
+first real invocation **refused a healthy suite**, because the floor was
+set to 700 against a parse that yields 421: node's `# tests 707` read as
+its `1..421`. Second, comparing a worktree's TAP to a clone's baseline
+produced **four NEW_RED and four GONE** for four failures that had not
+moved — accusing an innocent branch and writing off four real debts in
+one report. Third, a **skipped** test reads as `ok`, and
+`tools/board/read-filters.test.mjs` keys on `/srv/asc/hq/runtime/board/api.py`,
+a host path, and skips when it is absent: on any host without HQ's
+checkout the tool would have reported the trunk's debt as paid. All three
+were found by **running** it. None was findable by reading it.
+
+**One attribution checked instead of published.** Before naming security
+as that entry's owner, this window read #709's fix and then re-derived it:
+`GET /api/events?nosuchfilter=1` answers **HTTP 400** with `no such
+filter`, and `refuse_unknown(self.EVENT_FILTERS)` is in the route's
+window. So it is neither a trunk defect nor an HQ regression but a stale
+assertion of ours that required a *spelling* inside one route's window,
+which HQ's own `test_one_implementation` forbids a second copy of. This
+window's first read — *"a genuine regression in HQ's api.py"* — was wrong,
+and two commands were enough to find that out. Security had the whole
+diagnosis first.
+
+**Shipped.** `tools/seat/suite-baseline.mjs` with its committed baseline
+and **23** tests, every load-bearing behaviour rehearsed red; one new
+subsection of `prompts/exo-agent.md`; two incident entries; two
+improvement entries with their next-measure dates.
+
+**Compounding, reported as the loop asks.** **11** seats are affected by
+the baseline (every seat runs the suite) and by the charter clause
+eventually; **6** files in this diff; **3** of the four standing failures
+are **UNOWNED** and named as such rather than assigned by guesswork.
+
+**What this window did not do.** It did not fix the three UNOWNED
+failures — two of them are another seat's lane and the diagnosis is handed
+over, not acted on. It did not add the CI job that would run the baseline,
+because workflows are not this seat's to touch, and it says so in the tool
+rather than leaving the gap implicit. It did not perform the sweep its own
+new rule implies: every other rule in this charter derived from exactly
+one surface still needs its surface named in it. And it did not send the
+three `Ideas` notes the daily tick asks for weekly.

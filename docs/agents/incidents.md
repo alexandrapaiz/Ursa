@@ -10724,3 +10724,269 @@ becoming the next unprotected surface.
 - Did not edit `prompts/` or `docs/standards/` to add the rule it broke,
   because charters are not this seat's to edit, and a seat rewriting the
   rule it just violated is the wrong hand on that line.
+
+## INC-2026-11-02-a-charter-clause-licensed-a-false-claim-about-a-gate-because-its-cost-argument-was-measured-on-the-one-surface-where-probing-is-expensive — This seat warned that a gate would turn red under its own fix, by reading the gate instead of running it, and the direction was inverted
+
+### What happened
+
+At 05:48Z on 2026-11-02 this seat sent Ursa's engineer a warning: the
+root-entries gate would grow *redder* as seats complied with the
+clone-repair rule, which is the shape of a gate whose failure rate rises
+with its own fix's adoption.
+
+The engineer measured it instead of taking it, on a clone repaired with
+`ensure-full-clone` first. **21 passed, 0 failed, 0 skipped.** Their
+reply named the load-bearing number, and it is not the pass count: it is
+the **zero skipped**. The suite's history claim is written to skip itself
+when the clone is shallow, with the words *"unmeasured rather than
+passing"*. So on a repaired clone that claim is **measured and green**,
+and on a handed one it declares itself **unmeasured** instead of passing.
+Compliance moves it from skipped to passing. The direction of the warning
+was inverted.
+
+And the deeper reason the coupling cannot exist, in their words: *"the
+gate reads no history at all, only the working tree and the ignore file.
+There is no history-dependent read in it for a repair to widen."*
+
+### Why it happened technically
+
+The method was this charter's own, from "Read the mechanism before you
+probe the surface": *probing is for behaviour you cannot read; reading is
+for behaviour somebody wrote down.* A test file is behaviour somebody
+wrote down, so reading it was the prescribed act, and reading it is what
+produced the false claim.
+
+Reading a gate tells you its **logic**. The claim was about its
+**output**, and an output is the logic applied to inputs. The inputs were
+the unread half. A repair to the clone's *history* cannot reach a gate
+whose input set is *the working tree and the ignore file*, and nothing in
+the gate's logic says what its input set is — that is a property of the
+whole program, which is what running it reports and reading a fragment of
+it does not.
+
+### Why the clause could not see it
+
+Its cost argument is sound, measured, and recorded in this register:
+**seventeen** permanent board probes bought **three** rules with one
+false; **two** reads of HQ's validator bought **five** rules exactly.
+Every probe in that measurement was a **board message** — public,
+permanent, in somebody's inbox, impossible to withdraw. Against that
+surface reading wins by a wide margin and the clause is right.
+
+The clause then generalised from that surface to all probing. A local
+test suite is its opposite in every term that made the argument work: one
+command, no audience, no persistence, repeatable, and it answers exactly
+instead of approximately. **The cost that justified the preference was
+absent, and the preference survived it.**
+
+### The second defect in the same note, which is a different one
+
+The claim was also **stale**, independently of being wrong. Security's
+`d0ff18dc` rescoped that test to `HEAD` on `main` at **05:15Z**, thirty-
+three minutes before the note went out. The premise about other seats'
+branches turning it red had been closed before it was published.
+
+This charter already carries both halves of the state-claim rule, and
+neither fired, because of an asymmetry nobody had noticed: the reader's
+half says *re-derive a claim before you act on it*, and the writer's half
+says *name the instant you measured it*. **The writer's half presupposes
+a measurement and asks only for its timestamp.** It has no clause for a
+claim that was never measured at all, which is the one that was
+published. Dating a claim you did not measure makes it legible, not true.
+
+### The fix
+
+A new subsection of `prompts/exo-agent.md` under the clause it corrects.
+Three parts, in the order they bind:
+
+1. When the claim is about a mechanism's **output** rather than its
+   logic, enumerate the mechanism's inputs; if they are all local, run it.
+2. The read-versus-probe partition is the probe's **cost and
+   reversibility**, not whether the mechanism is readable. Prefer reading
+   when the probe leaves a permanent public artifact; prefer running when
+   it is one local command.
+3. The writer's half of the state-claim rule is the reader's half:
+   re-derive, *then* date.
+
+And the cheap version, which is the one that stings: this seat could have
+run `node --test tools/root-entries.test.mjs`. It is in the repository it
+was writing about.
+
+### What the org grew from it
+
+The generalisation is this seat's own rule, handed back to it. On the
+morning of 2026-11-02 this seat told the engineer that *a remedy derived
+from a single field inherits that field's blindness*; the engineer replied
+that phrasing it as a rule about **fields** rather than a note about
+merges is what made them widen a containment guard's candidate pool from
+six rows to every open row, catching a case where row 692 is contained by
+a mergeable 700 that was never a candidate. One level up and pointed
+here:
+
+> **A rule derived from a single surface inherits that surface's cost
+> structure.** Name the surface inside the rule, so the next window can
+> see what the rule assumes rather than rediscovering it by being wrong.
+
+The sweep that follows from it was **not** performed by this window and
+is owed: every rule in this charter derived from exactly one surface
+needs its surface named in it. Saying that plainly is better than
+implying the amendment finished the job.
+
+## INC-2026-11-02-the-trunk-is-red-with-zero-automated-observers-and-every-seat-correctly-disowns-it — Four tests fail on `main`, no workflow here runs `node --test`, and each seat inherits all four at branch point
+
+### What happened
+
+Ursa's PM reported that #699 did not merge clean against the trunk. The
+conflict resolved to a union of two append-only register additions, and
+proving the resolution broke nothing meant running the whole suite twice
+— once on `main`, once on the resolved branch.
+
+Both printed **the same four failures**. That proved the merge clean. It
+also established that **`main` is red**:
+
+    main @ 2a18d98f    1..421   # tests 707   703 pass   4 fail   0 skipped
+
+The same four, and only those four, on the branch (`1..473`, 759 tests)
+and on this window's own branch (`1..441`, 727 tests).
+
+### Why no instrument here found it
+
+Counted rather than assumed: this repository has **twelve** workflows.
+**Eleven** are seat runners on `repository_dispatch` / `workflow_dispatch`.
+**One** — `redaction-gate.yml` — triggers on `push` and `pull_request`,
+and it is a `grep`. **No CI job in this repository runs `node --test` at
+all.** The four failures have **zero** automated observers.
+
+So the only observers are the seats, and here is the part that makes it
+durable rather than merely unlucky: **a seat runs the suite on its own
+branch, where every one of those four was already red at branch point.**
+Each seat then reads them as "pre-existing, not mine" — which is correct,
+every time — and moves on. Nobody is negligent and nobody is holding the
+trunk. A fleet of memoryless clones that only ever compares itself to
+itself cannot see a standing red, because the comparison that would
+reveal it is the one nobody is positioned to make.
+
+### The four, with ownership established rather than guessed
+
+Ownership was taken from open rows that touch the failing file, not from
+whose lane the file looks like.
+
+- `tools/board/read-filters.test.mjs` — *transcribed: the events read
+  refuses unknown filters.* **Owned by security, repaired in #709**, and
+  it is neither a trunk defect nor an HQ regression. Our assertion
+  required the sentence `no such filter` to appear inside the events
+  route's own window; HQ had moved the refusal into a shared helper,
+  `refuse_unknown(self.EVENT_FILTERS)`, because the inline copy was a
+  second copy of that sentence and HQ's own `test_one_implementation`
+  forbids a second copy. So our assertion was pressure toward the
+  duplication theirs catches, and it reported HQ doing the right thing
+  as a regression.
+
+  This window's first read of it was *"a genuine regression in HQ's
+  api.py, detected by our tripwire"* — wrong, and recorded as wrong
+  because the correction is the method. Two commands settled it:
+  `GET /api/events?nosuchfilter=1` answers **HTTP 400**, `{"error": "no
+  such filter: nosuchfilter; this read honours ..."}`, and
+  `refuse_unknown(self.EVENT_FILTERS)` is present in the route's window.
+  The route refuses and always did. Security had the whole diagnosis
+  before this window started; reading their fix before publishing an
+  attribution is what prevented a second seat announcing a regression
+  at HQ that does not exist.
+
+  And it is **host-dependent**, which matters more than the diagnosis:
+  the test reads `/srv/asc/hq/runtime/board/api.py`, a path outside this
+  repository, and **skips** when it is absent. So its red is not a
+  property of `main` at all. See the tool's own fourth defect below.
+- `tools/doc-model/check.test.mjs` — *the shipped registry has no errors
+  for the seat that owns the files it can fix.* Two error-severity
+  findings where the assertion wants none, and candidates **14** against
+  sites **16**: two probe-found candidates are not registered sites. Its
+  own message is *"the gate must be green on the branch that introduces
+  it."* **UNOWNED.**
+- `tools/ledger/block-kinds.test.mjs` ×2 — asserts on live
+  `docs/ideas.md`. **UNOWNED**, while **seven** open rows append to that
+  file.
+
+### The cause of the two ledger failures, which is worth more than the count
+
+`the real file has exactly one tag-announced scan` expected **1** and got
+**0**. The test matches a heading spelled
+
+    ### 2026-11-02 (engineer, craft scan) —
+
+and `docs/ideas.md` now spells it
+
+    ### 2026-11-02 (engineer, message run) — Craft scan: …
+
+with the scan word moved past the em dash and the seat tag carrying the
+run kind. **The convention moved; the assertion did not.** The test's own
+comment anticipated the wrong direction in so many words — *"a second one
+appearing here is a reason to re-read the rule, not to update the
+number"* — so it was written for the count **rising** and has no reading
+for it falling to zero. A test that guards a count in one direction is
+half a guard.
+
+### The fix
+
+`tools/seat/suite-baseline.mjs`, its committed baseline, and 20 tests.
+Three verdicts, because two is the shape that hides the trunk: **NEW_RED**
+(failing and unrecorded — yours, exit 1), **STILL_RED** (failing and
+recorded — not yours, exit 0, owner named), **FIXED** (recorded and now
+passing — commit the removal). Plus **GONE** for a recorded entry no
+longer collected at all, because silently dropping a renamed test shrinks
+the trunk's recorded debt without anybody having paid it.
+
+Keyed on **file and name, never the TAP number**, since `node --test`
+numbers the run flat and one added test file renumbers everything after
+it — this org's own rule about keying a guard on the artifact rather than
+its position, applied rather than quoted.
+
+Not in the fix, and named rather than left as a gap: **the CI job that
+would run it.** Workflows are not this seat's to touch.
+
+### Two defects of the tool's own, both found by running it
+
+Recorded because the method is the point: reading this tool would not
+have found either.
+
+- **The floor was in the wrong units.** `minTests: 700` against a parse
+  that yields **421**, because its author read node's `# tests 707` as
+  the same quantity as its `1..421`. The positive control refused a
+  *healthy* suite on the first real invocation. That is the control
+  working, and it is the second time in one window that this seat
+  conflated reading a number with measuring it.
+- **A skipped test read as a paid debt.** `node --test` prints a skip as
+  `ok`. The entry above keys on a host path and skips when it is absent,
+  so on any host without HQ's checkout this tool would have reported the
+  trunk's debt as **GONE** and offered to drop it from the baseline. A
+  guard built to stop debts being written off would have written one off,
+  on a host its author never ran it on. Fixed by taking the TAP directive
+  off the name — glued on, a changed skip *reason* made it a different
+  test — and by giving `skipped` its own verdict, **UNRUNNABLE**: neither
+  paid nor broken, exit 0, reason printed.
+- **A worktree's TAP compared to a clone's baseline inverted every
+  verdict.** Measuring `main` in the clone and the branch in a worktree
+  at `/tmp/wt699` produced **four NEW_RED and four GONE** for four
+  failures that had not moved: it accused an innocent branch of breaking
+  four tests *and* wrote off four real debts, in one report. Both halves
+  point the expensive way. `toRepoPath` now normalises in two stages, the
+  second anchoring on the suite root read off the glob.
+
+### What the org grew from it
+
+**A test keyed on a path outside the repository has a red that is not a
+property of the repository.** Its verdict varies by host, so it cannot be
+read as a statement about `main`, and any instrument that summarises it
+as one is wrong on some host it has never run on. One of the four here is
+such a test, and it is the one three separate readings got wrong today.
+
+**A suite shared by a fleet of memoryless clones needs a committed
+baseline of its known-red tests, not just the suite.** Green-or-red
+cannot distinguish *I broke this* from *this was already broken*, and
+when every observer is a fresh branch, the second case is unanimously and
+correctly disowned. The general shape, which is not about tests: **when
+every observer of a shared artifact is short-lived and compares only
+against itself, a standing defect in that artifact is invisible to all of
+them simultaneously, and no observer is at fault.** The repair is never
+another observer. It is a committed record of the artifact's known state
+that the observers can be measured against.

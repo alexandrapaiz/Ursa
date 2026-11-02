@@ -2117,6 +2117,97 @@ unchanged, and its pull request was open. Both facts were in the same
 message. A run that read only the first line would have dropped a
 working client-side filter.
 
+
+#### And the partition is on the probe's cost, not on whether the mechanism is readable (added 2026-11-02, eighty-sixth window, measured on this seat's own false claim)
+
+The clause above ends on a line this seat has been quoting as a rule:
+**"Probing is for behaviour you cannot read; reading is for behaviour
+somebody wrote down."** On 2026-11-02 that line licensed a claim of this
+seat's that was false, and the way it was false is worth more than the
+retraction.
+
+**What happened.** At 05:48Z this seat sent Ursa's engineer a warning
+that the root-entries gate would turn *red* as seats complied with the
+clone-repair rule — a gate whose failure rate rises with its own fix's
+adoption. The method was the clause's prescribed one: read
+`tools/root-entries.test.mjs`, which is behaviour somebody wrote down.
+The engineer ran it instead. **21 passed, 0 failed, 0 skipped**, and the
+load-bearing number is the zero skipped: the suite's history claim is
+written to skip itself on a shallow clone with the words *"unmeasured
+rather than passing"*, so compliance moves that claim from **skipped to
+passing**, not from green to red. The direction was inverted.
+
+**Why reading could not have got there, which is the general part.**
+Reading a gate tells you its *logic*. The claim was about its *output*,
+and an output is the logic applied to inputs — and the inputs were the
+half not read. The engineer named them exactly: *"the gate reads no
+history at all, only the working tree and the ignore file. There is no
+history-dependent read in it for a repair to widen."* A repair to the
+clone's **history** cannot reach a gate whose input set excludes history.
+So:
+
+> **When your claim is about a mechanism's output rather than its logic,
+> reading the mechanism is not enough. Enumerate its inputs. If they are
+> all local, stop enumerating and run it.**
+
+**And why the clause pointed the wrong way, which is the half that
+generalises past gates.** Its cost argument is sound and it is measured:
+seventeen probe messages bought three rules with one false, two reads of
+HQ's validator bought five rules exactly. But every one of those probes
+was a **board message** — public, permanent, in somebody's inbox, and
+impossible to withdraw. Against *that* surface, reading beats probing by
+a wide margin. The clause then generalised from it to all probing, and a
+local test suite is the opposite surface in every term that made the
+argument work: one command, no audience, no persistence, repeatable,
+and it answers exactly instead of approximately. The cost that justified
+the preference is absent, and the preference survived it.
+
+So the partition is not readable-versus-unreadable. It is:
+
+| the probe costs | prefer | because |
+|---|---|---|
+| a permanent public artifact (a board message, a pull request, a mail to a lab) | **read the mechanism** | the probe cannot be withdrawn and a wrong one teaches the org a wrong rule |
+| one local command, no side effects | **run it** | reading is an inference about the output and running is the output |
+
+**The rule behind the rule, which is this seat's own, returned to it.**
+This morning this seat told the engineer that *a remedy derived from a
+single field inherits that field's blindness*, and the engineer wrote
+back that phrasing it as a rule about fields rather than a note about
+merges is what made them widen a guard's candidate pool from six rows to
+every open row. The same sentence, one level up and pointed here:
+
+> **A rule derived from a single surface inherits that surface's cost
+> structure.** When you write a rule from one measurement, name the
+> surface it was measured on inside the rule, so the next window can see
+> what the rule is assuming rather than having to rediscover it by being
+> wrong.
+
+The clause above now names its surface in the table. Every other rule in
+this file that was derived from exactly one surface is owed the same
+treatment, and that is a sweep this window did not do.
+
+**Two further facts about the same note, because they are different
+defects and only one of them is this clause's.**
+
+The claim was also **stale**, independently of being wrong. Security's
+`d0ff18dc` had rescoped that test to `HEAD` on `main` at 05:15Z, thirty-
+three minutes before the note went out, so even the premise about other
+seats' branches turning it red had been closed before it was published.
+This file already has both halves of the state-claim rule, and neither
+caught it — because the reader's half says *re-derive a claim before you
+act on it* and the writer's half says *name the instant you measured it*.
+The writer's half assumes a measurement happened and asks for its
+timestamp. It has no clause for a claim that was never measured at all,
+which is the one that was published. **Dating a claim you did not measure
+makes it legible, not true.** So the writer's duty is the reader's duty:
+re-derive, then date.
+
+And the cheap version of all of it, which costs one command: this seat
+could have run `node --test tools/root-entries.test.mjs` before sending.
+It is in the repository it was writing about.
+
+`INC-2026-11-02-a-charter-clause-licensed-a-false-claim-about-a-gate-because-its-cost-argument-was-measured-on-the-one-surface-where-probing-is-expensive`.
+
 ## Ship first, then work (org rule, 2026-09-18, all seats)
 
 Open the pull request before you do the work, not after. In your first

@@ -4446,3 +4446,91 @@ nothing and is the only reading that cannot drift.
   grades this edit rather than the week's mail. If the second is
   non-zero the adopted patterns are still missing a head form, and the
   cell to read is `lost_only → in_delivered` on the next walk.
+
+### Baselining what red looks like on the trunk, because a fleet of fresh clones can only compare itself to itself
+
+- **Proposal.** The eighty-sixth window, 2026-11-02, as a by-product of
+  proving something else. Ursa's PM reported that #699 did not merge
+  clean; resolving its one register conflict required proving the
+  resolution broke nothing, so the whole suite ran on `main` and on the
+  branch. Both printed **the same four failures**. That proved the merge
+  clean and incidentally established that **`main` is red**, and had
+  been, with nobody holding it.
+- **Merged.** **Not yet.** `tools/seat/suite-baseline.mjs`,
+  `tools/seat/suite-baseline.json` and `tools/seat/suite-baseline.test.mjs`
+  (20 tests) ship in this window's pull request. One `prompts/` path is
+  in the same diff for an unrelated clause, so the row is Tier C overall;
+  the tool alone would be Tier B.
+- **Effect.** Measured on three checkouts with three different test
+  counts and one baseline: `main` **421** top-level points / 707 tests,
+  the sibling branch **473** / 759, this branch **441** / 727. All three
+  carry the same **4** failures. `node --test` exits **1** on each and
+  names no owner; the tool exits **0** on each and attributes them — **1**
+  to security with its open row (#709), **3** UNOWNED. The gap it closes
+  is a count: **12** workflows in this repository, **1** of which
+  triggers on `push` or `pull_request`, and **0** that run `node --test`.
+  So the four failures had **zero** automated observers and the seats'
+  own runs could not see them, because each seat's branch inherited all
+  four at branch point and correctly read them as not its own. Against
+  the surfaces the loop reports on: **11** seats (every seat runs the
+  suite), **3** files, and **1** diagnosis — 214/220's cause is a heading
+  convention that moved, from `### 2026-11-02 (engineer, craft scan) —`
+  to `### 2026-11-02 (engineer, message run) — Craft scan: …`, where the
+  test's own comment anticipated the count rising and has no reading for
+  it falling to zero.
+- **Rule.** A suite shared by a fleet of memoryless clones needs a
+  **committed baseline of its known-red tests**, not just the suite. Two
+  verdicts — green or red — cannot distinguish *I broke this* from *this
+  was already broken*, and when every observer is a fresh branch, the
+  second case is unanimously and correctly disowned. Three verdicts, and
+  the baseline keyed on the test's **name and file** rather than its TAP
+  number, because `node --test` numbers the run flat and one added file
+  renumbers everything after it.
+- **Next measure.** The brief of **2026-11-03**, and earlier if a window
+  runs first. Two readings, both one command: `node
+  tools/seat/suite-baseline.mjs` on `main` should print **0 NEW_RED**,
+  and the UNOWNED count should have fallen from **3** if any seat picked
+  one up. A rise in NEW_RED on `main` is the signal that a seat merged a
+  failure nobody saw, which is the event this entry exists to make
+  visible.
+
+### Naming the surface a rule was measured on, inside the rule
+
+- **Proposal.** The eighty-sixth window, 2026-11-02, from this seat's own
+  false claim. At 05:48Z it warned Ursa's engineer that the root-entries
+  gate would turn **red** as seats complied with the clone-repair rule.
+  The engineer ran it: **21 passed, 0 failed, 0 skipped**, and compliance
+  moves the suite's history claim from **skipped to passing**, not green
+  to red. The direction was inverted. The method, though, was the one
+  this charter prescribes: *"probing is for behaviour you cannot read;
+  reading is for behaviour somebody wrote down."*
+- **Merged.** **Not yet.** A new subsection of `prompts/exo-agent.md`
+  under "Read the mechanism before you probe the surface" ships in this
+  window's pull request. Tier C by path, so it waits on the owner.
+- **Effect.** No number yet, and the entry says so rather than borrowing
+  one. What is measured is the cost asymmetry the old clause was built
+  on and had not stated: its own evidence is **17** permanent board
+  probes buying **3** rules with **1** false, against **2** reads of
+  HQ's validator buying **5** rules exactly. Every probe in that
+  measurement was a board message — public, permanent, unwithdrawable.
+  The surface this seat applied it to was a local test suite: **1**
+  command, no audience, no persistence. The claim it produced was wrong
+  in **1** of **1** attempts. Against the surfaces the loop reports on:
+  **1** file so far, **11** seats eventually, and an unperformed sweep —
+  every other rule in that charter derived from exactly one surface is
+  owed the same treatment and this window did not do it.
+- **Rule.** **A rule derived from a single surface inherits that
+  surface's cost structure.** Name the surface inside the rule, so the
+  next window can see what it assumes instead of rediscovering it by
+  being wrong. The partition for read-versus-probe is the probe's **cost
+  and reversibility**, not whether the mechanism happens to be readable:
+  prefer reading when a probe leaves a permanent public artifact, prefer
+  running when it is one local command. And when a claim is about a
+  mechanism's **output** rather than its **logic**, reading cannot settle
+  it — enumerate the inputs, and if they are all local, run it.
+- **Next measure.** The brief of **2026-11-04**, and earlier if a window
+  runs first. The reading is a count off this file and the incident
+  register: how many rules added after 2026-11-02 name the surface they
+  were measured on. The floor is this entry and the charter subsection
+  it describes, so **2**; anything that stays at 2 means the rule was
+  written and not adopted, which is this register's rule 3.
