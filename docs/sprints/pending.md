@@ -2,6 +2,61 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (twenty-fourth pass): #716 needs a rebase, five rows closed under it, #721/#722 merged
+
+Triggered by the security seat's finished run (`#719`, reviewed and
+merged last pass), the engineer's `done` naming `#716` as consolidating
+five open rows, two notes from exo about `#699`/`#721`, and this run's
+own open PR from an earlier pass (`#723`, already readied).
+
+1. **Nothing needs you this pass either.** `#723` (this seat's own
+   pass 23) self-merged under Tier A, subsuming `#718` (pass 22) for
+   free. `#721` and `#722` merged under Tier B after independent
+   review — both had gone stale as drafts and were readied by their
+   own seats before this run reached them.
+2. **`#716` (engineer) is not merged. It needs a rebase, and the
+   engineer has been told.** The PR's own report says only
+   `docs/ideas.md` conflicts with `main`. That was true when the
+   report was written; it is not true now. `git merge-tree
+   --write-tree --name-only origin/main pr716` reads five conflicts:
+   the ledger as described, plus `tools/board/read-filters.test.mjs`,
+   `tools/doc-model/check.test.mjs`, `tools/seat/charter-lag.mjs` and
+   `tools/seat/charter-lag.test.mjs`. Cause: security's `#719`, merged
+   minutes before `#716`'s last push, fixed the same three reds
+   `#716` also fixed, independently. Not the PM's to hand-resolve —
+   four of the five conflicting files are code, not docs, and §10
+   Tier B rule 5 reserves a code conflict to the seat that wrote it.
+   Handed back to engineer on the board with the exact file list, so
+   the next run rebases onto today's `main` rather than reusing this
+   report's stale reading.
+3. **The five rows `#716` supersedes are closed.** `#665`, `#679`,
+   `#685`, `#694`, `#708` — each verified an ancestor of `#716`'s
+   branch by `git merge-base --is-ancestor` before closing, so the
+   work is preserved regardless of `#716`'s pending rebase. Engineer
+   asked that whichever row landed first make this call; done here.
+4. **`#699` and `#714` (exo) are untouched, same reading as the last
+   two passes.** Both rewrite most of the charter set across every
+   seat. `check-tier.sh` reads an ordinary charter edit as Tier B
+   under §21, but exo's own note this pass says merging `#699` is the
+   owner's call, and the twenty-second pass found `#699`'s conflict in
+   `docs/agents/incidents.md` "Tier C conceded without argument" on
+   exo's side too. Kept at that reading rather than re-opened mid-pass
+   on one tool's say-so. New fact since last pass: `#699`'s conflict
+   with `main` is real again — `#721` merged the section of
+   `prompts/exo-agent.md` that exo's note predicted it would collide
+   with, so `#699` now reads `CONFLICTING` where it read `CLEAN` an
+   hour ago. `#714` is the newer of the two (`#699` is an ancestor of
+   `#714`'s branch) and carries substantially more: a charter
+   amendment, a new test-baseline tool, and three defects in that tool
+   found by running it. Neither touched this pass.
+5. **This seat's own queue is clear.** `#701` (pass 17) is unchanged,
+   still waiting on a code conflict in `tools/root-entries.test.mjs`
+   that is not this seat's to resolve by hand.
+6. **Board:** one `handoff` to engineer naming `#716`'s rebase and the
+   five closes; no reply needed to exo's two notes, both of which
+   explicitly asked nothing (`"Nothing else asked"` / `"I am not
+   asking you to"`).
+
 ## Top three for the owner, 2026-11-02 message-triggered (twenty-third pass): #719's CI-gate finding merged as a stack, three more Tier B merges, one stale PR closed
 
 Triggered by security's `#719` ("the CI job we kept queueing would have
