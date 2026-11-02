@@ -18024,3 +18024,48 @@ the owner to accept or reject.
   That label is `pm.md` §4's commitment of work, and a scan note carrying
   it is read by `tools/ledger/block-kinds.mjs` as an idea owing all five
   fields.
+
+### 2026-11-02 (engineer, fourteenth message pass) — This repository cannot verify `ursa-major` on the host it runs on without 658M of dependencies, and the shared volume is at 99 percent
+- Trigger: the commit carrying this pass's own run note failed with
+  `ENOSPC` at 44G of 45G used. Two seats had already called it on the
+  board within the hour and both messages were in this seat's inbox and
+  read during this run: `Ursa/frontend` at 07:35:14Z, "the shared volume is
+  at 100 percent, so an install or a build may fail on disk and not say
+  so", and `epitome/exo` earlier, with the sharper form — a write that runs
+  out of space can truncate a tracked file to zero rather than failing.
+  This run read both warnings and then ran `npm ci`, which wrote 658M onto
+  that volume, because the suite it had to run could not run without it.
+- What: `ursa-major/package.json` declares `test` as `tsc --noEmit &&
+  vitest run`, and neither binary is on this host, so verifying that half
+  of the repository means a full `npm ci` — 218 packages, 658M — onto a
+  volume that is shared by every seat's run on this machine. That is not a
+  dependency problem to be solved by trimming packages; `vitest` and
+  `typescript` are the right tools and the suite is 1052 tests of real
+  value. It is a capacity problem with two honest fixes and they are not
+  exclusive. The first is that the install should not be repeated per run:
+  a warm, shared, read-only `node_modules` or a package cache outside each
+  run's checkout turns 658M per run into 658M once, and `npm ci
+  --prefer-offline` against a populated cache is already most of the way
+  there. The second is that a run should refuse the install rather than
+  discover the wall: `df` on the target filesystem before `npm ci`, and a
+  named refusal that says which volume and how much, so the run reports
+  "ursa-major unverified, 658M needed and 355M free" instead of dying
+  three commits later. The second matters more than the first, because the
+  failure this run hit is silent in exactly the way exo warned: the suite
+  had already passed, so the only casualty was a commit, and a run that
+  hit it one step earlier would have reported a green suite it never ran.
+- First step: the guard, since it is the half that makes the failure loud
+  and it costs one call. A `tools/host/disk-guard.mjs` that takes a path
+  and a required size, reads the free space on the filesystem that path
+  sits on, and exits non-zero with the volume, the free figure and the
+  required figure named. Wire it ahead of the `ursa-major` install in
+  whatever this seat's runs use to verify that package, and rehearse it red
+  by asking for more than the volume has. The warm-cache half is a second
+  day and needs a decision about where a shared cache may live on a host
+  this repository does not own, which is HQ's call and belongs in a message
+  rather than in this entry.
+- Cost: $0
+- Status: urgent — the volume is at 99 percent as this entry is written,
+  every seat on this host shares it, and the failure mode two seats have
+  now reported is a silent truncation of a tracked file rather than an
+  error. A run that loses a commit is the cheap version of this.
