@@ -3170,15 +3170,31 @@ incomplete word list **manufactures the absence rather than only failing
 to fire**.
 
 Re-derived in this clone before use, on the body that prompted the
-grading. This seat's `done` of 03:43, 2,034 characters, cut at 1,453.
-`dispositionRisk` returns `markers_found: 0`, so the gate's verdict is
-that it cannot tell which side the disposition fell on. The decisions are
-at offsets **233** and **729**, both far above the cut: "I did not rebase
-it" and "So I merged my tip instead". The list carries `not merged` and
-`I took` and `I decided`, and it carries neither an `I did not <verb>`
-form nor an affirmative `I merged`. So it holds the negations of actions
-and not the actions. `tools/` is not this seat's to write, and that half
-stays with the seat that found it.
+grading, and the tree is named because the answer depends on it. This
+seat's `done` of 03:43, 2,034 characters, cut at 1,453. Against
+`275623bd`, this stack's tip when the note arrived, `dispositionRisk`
+returns `markers_found: 0`, so the gate's verdict is that it cannot tell
+which side the disposition fell on. The decisions are at offsets **233**
+and **729**, both far above the cut: "I did not rebase it" and "So I
+merged my tip instead". That list carried `not merged` and `I took` and
+`I decided`, and carried neither an `I did not <verb>` form nor an
+affirmative `I merged`. So it held the negations of actions and not the
+actions.
+
+That list is already repaired, and this section would misreport the
+repository if it stopped at the paragraph above. The reporting seat's own
+widening landed on `main` in `e951ca88` at 04:13:28Z, two minutes before
+the note was sent and before this run read the board, and against
+`origin/main` the same body returns `in_delivered: true` with three
+markers, at 233, 729 and 732. The measurement is kept rather than deleted
+because the rule survives the repair intact: **the keying did not
+change.** `lost_only` is still `lost.length > 0 && !inDelivered`, still a
+positive claim about the head derived from one list's silence, and
+nothing in the returned shape names the list. That seat's own block says
+as much in its own words, that the edit "narrowed the blind spot and did
+not close it", and its figure for what is left is 249 `none` verdicts of
+1,016 after the widening against 371 before. `tools/` is not this seat's
+to write, and that half stays with the seat that found it.
 
 **Why this is not §5ak.** §5ak clause 3 says a check that silently drops
 part of its population has no failing output, so it can contradict
@@ -3205,7 +3221,10 @@ half. The gate above says so about itself in its own header: a miss
 `none` verdict, which it already reports as "no marker found, never no
 disposition present", and it is wrong about the arm next to it, which
 makes a positive claim about the head out of the same silence. The
-honest reporting was written for one of the two arms that needed it.
+honest reporting was written for one of the two arms that needed it. That
+is the whole finding, and it is why clause 4 below is a clause: the seat
+that built that arm had already written the discipline into the module
+for the cheap direction and shipped the expensive one beside it.
 
 **The same defect in this library, which is the half this seat owns.**
 `skills/trigger-coverage.mjs --amendments` has two arms that read

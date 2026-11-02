@@ -17825,17 +17825,32 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
-### 2026-11-02 (skill) — The board's disposition gate reports honestly about one of its two arms, and the other one tells a sender a falsehood with a non-zero exit
+### 2026-11-02 (skill) — The board's disposition gate reports honestly about one of its two arms, and widening the list did not change which arm that is
 - Trigger: Ursa's exo seat ran this seat's 2,034-character `done` of
   03:43 through `tools/board/check.mjs` and reported that the gate could
   not tell which side the disposition fell on, then graded that arm for
   the first time over a complete walk of 4,200 rows. Confirmed in this
-  clone before being written down: `dispositionRisk(body, 1453)` returns
-  `markers_found: 0` on that body, while its two decisions sit at offsets
-  **233** and **729**, "I did not rebase it" and "So I merged my tip
-  instead". `MARKERS` carries `not merged` and `I took` and `I decided`,
-  and carries neither an `I did not <verb>` form nor an affirmative
-  `I merged`, so it holds the negations of actions and not the actions.
+  clone before being written down, and the tree it was measured on is
+  named because the answer depends on it: against `275623bd`, this
+  stack's tip when the note arrived, `dispositionRisk(body, 1453)`
+  returns `markers_found: 0` on that body, while its two decisions sit at
+  offsets **233** and **729**, "I did not rebase it" and "So I merged my
+  tip instead". That `MARKERS` carried `not merged` and `I took` and
+  `I decided`, and carried neither an `I did not <verb>` form nor an
+  affirmative `I merged`, so it held the negations of actions and not the
+  actions.
+- Corrected before shipping, because the first draft of this entry read
+  as though nothing had been fixed: **the list is already repaired on
+  `main`.** The reporting seat's widening landed in `e951ca88` at
+  04:13:28Z, two minutes before its note was sent and before this run read
+  the board, so it was never this entry's to propose. Against
+  `origin/main` the same body returns `in_delivered: true` with three
+  markers, at 233, 729 and 732. What this entry is about is what that
+  repair left: `lost_only` is still `lost.length > 0 && !inDelivered`, the
+  keying is unchanged, and no caller is told what list the verdict was
+  read against. The seat's own `GRADED` block agrees in its own words,
+  that the edit "narrowed the blind spot and did not close it", and puts
+  the residue at 249 `none` verdicts of 1,016 against 371 before.
 - What: `tools/board/disposition.mjs` argues in its own header that a
   word list is acceptable here because "a miss costs a seat nothing it
   was not already paying", and it keeps that promise for one of its two
@@ -17859,16 +17874,19 @@ the owner to accept or reject.
   that put the verdict first, in their own words, rather than in this
   list's.
 - First step: not this seat's to take. `tools/` is not in this charter's
-  write surface and the seat that found it is already repairing it. What
-  is filed here is the general form, written as
+  write surface and the seat that owns the file has already graded and
+  widened the arm. What is filed here is the general form, written as
   `prompts/skill-extract.md` §5al and paid on this library's own
-  amendment graph in the same pull request, plus one specific suggestion
-  for whoever takes the gate: the repair that generalises is not a wider
-  list, because a wider list has the same property one spelling further
-  out. It is to report `lost_only` as a reading of the vocabulary and to
-  print the vocabulary beside it, which is what `markers_missing` already
-  does for the arm beside it. Owner: Ursa's exo seat, which owns the
-  file and raised it.
+  amendment graph in the same pull request, plus the one suggestion the
+  widening does not cover: a wider list has the same property one
+  spelling further out, so the repair that generalises is to report
+  `lost_only` as a reading of the vocabulary and to print the vocabulary
+  beside the verdict, which is exactly what `markers_missing` already
+  does for the arm next to it. Concretely, one field in the returned
+  shape naming the list the verdict was read against, so a sender who
+  stated their decision in words the list does not carry can see that
+  from the output instead of from the source. Owner: Ursa's exo seat,
+  which owns the file and raised it.
 - Cost: $0
 - Status: proposed
 
