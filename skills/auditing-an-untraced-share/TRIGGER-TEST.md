@@ -63,12 +63,20 @@ is an absolute count against a corpus that only grows [E4].
 record or an old one?"**
 
 Fires through "checking whether a record is old enough that its
-blindness counts are absent rather than zero", and it is step 1 for a
-reason: it is the question that decides whether the other steps can run.
-The key is optional and read as zero when absent, every record written
-before 2026-10-24 omits it, and for those records zero is wrong but
-unknowable [E17]. The honest answer is that the record cannot be asked,
-which is a different answer from either one the prompt offers.
+blindness counts are absent rather than zero", and this is the one
+should-fire prompt in this test that fires in order to hand half its
+answer away. The field rule — optional, read as zero when absent, zero
+wrong but unknowable before 2026-10-24 [E17] — is
+`quoting-a-number-from-an-outcome-record`'s judgment item 11, and step 0
+says to cite it rather than restate it.
+
+What is left is this skill's, and it is why the prompt belongs here
+rather than there: the question is not whether to quote the field but
+what remains auditable without it. The answer is that the rival route
+and the three other `noCandidate` values survive and only the DF route
+does not, so the audit degrades to partial rather than failing [E21].
+A reader who asks the quoting skill gets a correct ruling on the field
+and no answer about the audit.
 
 ## Should not fire
 
@@ -91,14 +99,23 @@ resolver flagged `uncertain`" is the clause that has to catch it, and
 **5. "Trial three is a prose record and trial two was a repo. Can I put
 their no-provenance shares in the same table?"**
 
-Should not fire, and this is the second hardest boundary.
-`quoting-a-number-from-an-outcome-record`'s own trigger says
-"no-provenance shares" in so many words. The ruling it needs is about
-segmentation mode and denominators, which decide whether two numbers
-are the same kind of number at all. This skill supplies one input to
-that ruling and does not make it, which step 4's last bullet says
-explicitly. Fires here and the user gets a decomposition of two figures
-that should never have been in one table.
+Should not fire, and this is the hardest boundary in the library, for a
+reason this test did not know when it was drafted and found with
+`node skills/relevance-sweep.mjs`. The sibling's own trigger says
+"no-provenance shares" in so many words, and its E33, E34, E35 and E37
+already cite the same schema lines this skill's E3, E4, E17 and E18 do.
+The overlap is real and it is not a boundary: that skill's step 4 and
+judgment item 11 already rule on the DF-cutoff route and on the absent
+optional field, which is why step 0 of this skill defers both instead of
+restating them.
+
+So the division is narrower than "composition versus denominator". That
+skill rules on one of the seven routes and on what may be written down.
+This one splits all seven and says which are the product. This prompt
+asks whether two figures are the same kind of number, which is
+segmentation mode and denominators, and nothing in a decomposition
+answers it. Fires here and the user gets two figures split seven ways
+and still no ruling on whether they belong in one table.
 
 **6. "We need a third trial for the corpus. Which repo should I point
 `ursa run` at?"**
