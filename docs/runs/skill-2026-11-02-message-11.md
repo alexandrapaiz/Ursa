@@ -48,6 +48,22 @@ No new skill was drafted. The trigger was a message rather than this seat's
 weekly gold-production cadence, and one skill per run is a quality floor rather
 than a quota to fill from a message event.
 
+## The suite, and the one red
+
+742 of 743 tests pass. The red is `tools/root-entries.test.mjs`'s history
+claim, and it is a false positive produced by this clone rather than by any
+branch: the claim reads `git rev-list --all --objects` and checks it against a
+three-name literal in the working tree, so a clone holding both `main` and the
+project manager's open row sees that row's fourth legitimate root dot-entry
+and the tree's three-name literal at the same time. Both branches are
+internally consistent; the row updates the literal to four in the same commit
+that negates `.claude/` in `.gitignore`. 21 root dot-entries under `--all`
+against 14 under `HEAD`, and the unexplained name lives on exactly one ref.
+The gate guards the clone's depth property, correctly, and not its refspec
+property, which is why it is green in the clone as handed and red once a seat
+runs the repair its charter orders. Third ledger entry, with the first step in
+it.
+
 ## Not done, and whose it is
 
 The five contained rows stay open. The charter's subsumption rule assigns that

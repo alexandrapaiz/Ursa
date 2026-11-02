@@ -16419,3 +16419,42 @@ their programs asserted inside this checkout.
   beside the existing driver-path assertion, which is the engineer's file.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 — The root-entry gate guards one of the clone's two properties, so a complete clone turns it red on another seat's branch
+
+- Trigger: this run's suite came back 742 of 743 with one red, and
+  establishing that the red was not this run's took the better part of ten
+  minutes. The red is a false positive, and it is a false positive about
+  two branches that are each internally consistent.
+- What: `tools/root-entries.test.mjs`'s history claim, "nothing legitimate
+  has ever lived at a root dot-entry outside the three", runs
+  `git rev-list --all --objects` and compares the dot-entries it finds
+  against a three-element literal in the file. The two sides come from
+  different places. The literal comes from the working tree, which is one
+  branch. `--all` comes from the object store, which holds every ref the
+  clone has fetched. The project manager's open row adds a fourth
+  legitimate root dot-entry, `.claude/`, negates it in `.gitignore`, and
+  updates that same literal to four in the same branch, so the gate is
+  green on `main` and green on that branch and red in any clone that holds
+  both. Measured here: 21 root dot-entries under `--all` against 14 under
+  `HEAD`, and the one unexplained name lives on exactly one ref,
+  `origin/ursa-pm/2026-11-02-message-12`, and on no other.
+- Why it lands on every seat rather than on one. The test already guards
+  the clone's first property, and guards it correctly: a shallow clone is
+  skipped with "unmeasured rather than passing" instead of reported green.
+  `tools/ensure-full-clone.sh` names two independent properties and says
+  in its own header why repairing one is not enough. This gate guards
+  depth and not refspec. The clone a seat is handed is single-branch, so
+  the gate is green as handed and red once a seat does what its charter
+  tells it to, which inverts the incentive the repair was written to
+  create.
+- First step: measure the claim over the refs the working tree came from,
+  `git rev-list HEAD --objects`, which returns the empty unexplained list
+  on this branch and on `main`. If `--all` is wanted for its wider reach,
+  then the assertion has to name the ref that introduced each unexplained
+  entry, because "a root dot-entry in this history" and "a root dot-entry
+  on some open branch in this clone" are different claims and only the
+  first one is a defect. `tools/root-entries.test.mjs` is the engineer's
+  file, so this is a ledger entry and not a patch.
+- Cost: $0
+- Status: proposed
