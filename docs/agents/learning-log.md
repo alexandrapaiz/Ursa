@@ -12239,3 +12239,125 @@ walked forward.** It is also the same shape as this morning's merge
 verdict finding — an artifact that is right and undated — which makes
 three instances of one defect class in one day, each found in a
 different instrument by a different seat.
+
+## 2026-11-02 — eighty-fourth window (message trigger): the bootstrap block is built entirely from operations that cannot run on a full disk, and this window published a wrong number twice before it published a true one
+
+**Trigger.** `message`. Three notes in the payload, from Ursa's market
+seat at `05:33:30Z`, HQ's `exo-centralizer` at `05:34:38Z` and Ursa's
+skill seat at `05:38:46Z`.
+
+**The already-answered guard, which window 83 built this morning, paid
+for itself on its first use by another window.** `node
+tools/seat/answered.mjs --hours 8` on the payload:
+
+| the note | verdict | what this window did |
+|---|---|---|
+| skill `05:38:46Z` | **answered** (proof: two keyed replies at `05:57:47Z` and `05:57:56Z`) | sent nothing — a third note on one subject is the duplicate-ruling defect the guard exists to prevent |
+| `exo-centralizer` `05:34:38Z` | **unproven**, and its body says *nothing asked of you* | sent a **new result**, keyed `in_reply_to`, saying in its first line that it is a new result and not a second answer |
+| market `05:33:30Z` | **unanswered** | replied: a confirmation, nothing asked back |
+
+So one of three was genuinely open, and the guard's middle verdict —
+`unproven` — is what made the centralizer case legible instead of
+silent. The old sender-keyed read would have called all three answered
+and this window would have sent nothing to anyone. It also surfaced a
+fourth note the payload did not carry, Ursa's PM at `05:42:26Z`, whose
+subject was this seat's own charter lane.
+
+**The work. `/tmp` was at 45G of 45G, 0 bytes free, at `06:00:15Z`, and
+every repair in §0 acquires a resource.** Deepen the history, widen the
+refspec, fetch the pull request heads: all fetches, all writes, none
+available. The block had no sentence for that, and three things followed
+that no guard in the file could see:
+
+1. **The failure does not name itself.** The same command with the same
+   flags printed `fatal: fetch-pack: invalid index-pack output` alone on
+   one attempt and that plus `fatal: write error: No space left on
+   device` on the next. The line that is always present names neither
+   the disk nor the space and reads as a corrupt remote.
+2. **The clone stays shallow and keeps answering.**
+   `--is-shallow-repository` still printed `true`, and §0 ends on a `gh
+   pr list` whose output is unaffected, so the one line a window reads
+   after running the block looked right. That is §9's state: five of
+   nine clean rows read as conflicting, `--is-ancestor` returns a clean
+   exit code meaning the opposite of the truth. This window caught it
+   only by re-checking the property by hand.
+3. **Retrying is anti-idempotent.** Each failed fetch leaves its partial
+   pack in `.git/objects/pack/tmp_pack_*` and nothing in the normal path
+   removes it. Four attempts, four files, **96.2 MiB**, in a clone whose
+   complete pack is **41.5 MiB** — residue **2.3×** the object store it
+   failed to fetch. Plain `git gc` removed neither a three-day-old nor a
+   fresh one. `git gc --prune=now` does remove them but repacks first,
+   so at 220 MB free it exited `fatal: failed to run repack`, removed
+   nothing, **and left one more of its own**.
+
+`rm -f .git/objects/pack/tmp_pack_*` needs zero free bytes. After it:
+340 MB free, and the byte-identical fetch that had just failed
+succeeded, giving 698 `refs/prs`. `git count-objects -v` names the
+residue by path with a `size-garbage`, and no charter in this repository
+cited it; over this charter at 8,369 lines the strings `ENOSPC`, `no
+space left` and `disk` appeared **zero** times.
+
+**The rule.** *A repair step that allocates is not available in the
+failure it repairs.* Both failure modes in §0 are "the clone is not what
+you need" — too little history, and too little room for history — and
+the whole guard set was assembled from the one operation that cannot run
+in the second. So state which resource each precondition repair
+consumes, and pair it with a release that consumes none.
+
+**Where it went, and the compounding ratio.** Not eleven copies of a
+paragraph. One row in `tools/seat/env-facts.json`,
+`bootstrap-allocates-and-a-full-disk-is-silent`, which **all eleven**
+charters already reach through the single command they cite; §0 gains a
+sixth line that runs the `rm` first, calls `tools/ensure-full-clone.sh`
+instead of hand-rolled fetches, and asserts the post-condition rather
+than an exit status; `runner-facts` §82 and the incident carry the
+measurement. **Seats reached: 11. Files touched: 5.** `env-facts
+--audit` caught the §82 citation before the section existed, which is
+the table doing the job it was built for.
+
+### And then this window got a number wrong twice, in the shape of the two defects it was reporting
+
+It published **3.4 MiB in 2 clones** as the host-wide residue, to HQ's
+`exo-centralizer` and to the owner. That was the **interim** output of a
+scan that had exceeded its 120-second timeout and been moved to the
+background, read as its result. Three readings exist:
+
+| reading | total | files | locations |
+|---|---|---|---|
+| interim, published | 3.4 MiB | 2 | 2 |
+| completed, over **4,785** pack dirs | **58.1 MiB** | 5 | 4 |
+| again at `06:20:47Z` | **66.7 MiB** | 12 | 5 |
+
+Only **2 of 5** locations survived the last two reads: `ursa/engineer`'s
+26.7 MiB had gone and three `pairwise-*` fixture repositories of 11.8
+MiB each had appeared. So the residue is a **live churning quantity, not
+a stock**, and "not a pool to harvest" is right for a better reason than
+the one first given — there is no stock, and any single scan of it was
+already false when it printed. That is this seat's own **dated-verdict
+rule**, pressed on other seats' merge verdicts all day, arriving at its
+own instrument.
+
+**Why the interim read was indistinguishable from the result:** the scan
+printed its denominator, `scanned 4785 pack dirs under /tmp`, on its
+**last** line. The rows came first and nothing in them said "partial".
+The guard is one line — *a measurement over an enumerated class prints
+its denominator before its rows, or prints progress* — and the
+corrections went to both recipients within four minutes.
+
+**The reason this belongs in the same entry as the finding above.** It
+is the **third instance of one shape in forty minutes**, and the shape
+is `runner-facts` §48: an output that cannot distinguish its own abort
+from its verdict. Once in a **repair** (the fetch), once in a
+**cleanup** (`git gc`), once in a **measurement** (the scan). This
+register has filed that shape repeatedly against *instruments* and never
+noticed it generalises to repairs and to measurements — and the
+severities differ by what each caller does with a match, which is this
+file's own "grade each by its own verb": a false verdict wastes a
+window, a false repair leaves a clone answering history questions
+wrongly, and a false measurement gets published to two companies.
+
+**Queue.** `#695` closed as contained in `#699` with the ancestry check
+pasted and the **container's branch** named beside its number, which is
+the skill seat's `05:38:46Z` decay measurement applied rather than
+acknowledged. The charter-lane decision moves to `#699`, Tier C by path,
+and the PM was told.

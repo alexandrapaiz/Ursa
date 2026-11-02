@@ -4756,6 +4756,132 @@ nothing and is the only reading that cannot drift.
   honest entry is that a charter clause did not change a behaviour.
 
 
+### CARRIED, and graded NOT KEPT: "count this seat's sends with `body_truncated` true, and the messages titled 'the tail the wake cut'. Both should be 0."
+
+- **Proposal.** Carried from the Week of 2026-10-26 entry on the wake
+  cut, whose **Next measure** line named the brief of **2026-11-02** —
+  today — as the read date. Weeks carried: **1**.
+- **Merged.** The instrument did merge into this seat's lane: `node
+  tools/board/check.mjs` runs `wake_body`'s own cut and prints the tail
+  it would drop. It is still unmerged on `main`, like every charter-lane
+  change here.
+- **Effect.** **Both halves fail, and for different reasons.** First
+  half: **unmeasurable.** `GET /api/messages` returns `id, ts,
+  from_seat, from_company, to_seat, to_company, kind, surface, subject,
+  body, ref, reasoning, data, expires_at, withdrawn_by` and there is
+  **no `body_truncated` field**. The metric named an input that does not
+  exist on the surface it would be read from — which is this seat's own
+  §6 rule, *register the input a measurement reads at the moment you
+  register the measurement*, broken by the window that wrote the rule's
+  neighbour. Second half, measured over 208 of this seat's sends in the
+  seven days to `2026-11-02T06:23Z` (not saturated; the cap is 500):
+  **13 titled as a cut tail, not 0.** By day: 2 on 10-26, 0 on 10-27, 0
+  on 11-01, **11 on 11-02**. Against the denominator the entry itself
+  demanded — 60, 33, 15, 100 sends on those days — the **rate** rose
+  from 3.3 per cent to 11 per cent. And 28 of the 208 bodies exceed the
+  1,500-character wake limit.
+- **Rule.** **The target was wrong, not just missed.** "Zero messages
+  titled as a cut tail" counts the **remedy**, not the defect. A
+  deliberate split-send with the disposition above the line is what the
+  rule's own corollary prescribes — *if the tail it prints is your
+  disposition, the body is not too long, it is ordered wrong* — so every
+  correct application of the rule increments the metric that was
+  supposed to prove the rule worked. A metric that rises when a rule is
+  obeyed cannot grade that rule. The measurable quantity is the one the
+  instrument now predicts: **sends whose cut tail carried the
+  disposition.**
+- **Next measure.** On the next brief, and it can come back early
+  because the instrument is local: count this seat's sends where
+  `check.mjs` reported `WAKE_DISPOSITION_IN_TAIL` (or the operator
+  overrode it) over total sends. Target **0**, denominator reported
+  beside it. Baseline from this window, verified by running `check.mjs`
+  before every send: **9 sends, 3 deliberate split tails, 0 cut with the
+  disposition below the line** — three were reordered when the checker
+  named the tail, and one 460-character block and one missing reason
+  word were refused outright and repaired before sending.
+
+### Charter preconditions declare which resource they consume, and every one that allocates is paired with a release that does not
+
+- **Proposal.** The eighty-fourth window, 2026-11-02, on its own first
+  five minutes. `/tmp` was at 45G of 45G with **0 bytes free** at
+  `06:00:15Z`. Every repair in §0 acquires a resource — deepen the
+  history, widen the refspec, fetch the pull request heads — so all of
+  them failed; the only error line guaranteed to appear named neither
+  the disk nor the space; the clone stayed shallow with
+  `--is-shallow-repository` still printing `true`; and each failed fetch
+  left its partial pack behind, so retrying made the next attempt less
+  likely to succeed.
+- **Merged.** Not yet, and not on `main`. In this window's pull request:
+  `prompts/exo-agent.md` §0 gains a sixth line that releases before it
+  acquires and asserts its post-condition instead of an exit status;
+  `tools/seat/env-facts.json` gains the row
+  `bootstrap-allocates-and-a-full-disk-is-silent`;
+  `docs/agents/runner-facts.md` §82 and an incident entry carry the
+  measurement.
+- **Effect.** **96.2 MiB** of `tmp_pack_*` from 4 fetch attempts in a
+  clone whose complete pack is **41.5 MiB** — residue **2.3×** the
+  object store it failed to fetch. `rm -f
+  .git/objects/pack/tmp_pack_*`, which needs **zero** free bytes, took
+  the clone from 0 bytes free to **340 MB** and the byte-identical fetch
+  that had just failed then succeeded, giving **698** `refs/prs`. Plain
+  `git gc` removed **0 of 2** temp packs (one three days old, one
+  fresh); `git gc --prune=now` exited `fatal: failed to run repack` at
+  220 MB free, removed **0**, and left **1 more**. Reach: **11 of 11**
+  charters, via the one `env-facts` command they all already cite, from
+  **1** new row rather than 11 copied paragraphs. Files touched: **5**.
+- **Rule.** **A repair step that allocates is not available in the
+  failure it repairs.** State which resource each precondition repair
+  consumes, and pair it with a release that consumes none. Both failure
+  modes in §0 are "the clone is not what you need" — too little
+  history, too little room for history — and the entire guard set was
+  built from the one operation that cannot run in the second.
+- **Next measure.** On the next brief, and early if any window meets a
+  full host first: of this seat's windows that ran §0 while `df` showed
+  under 100 MB free on `/tmp`, how many reported a **complete** clone
+  (`is-shallow-repository = false` and non-empty `refs/prs`) rather than
+  proceeding on a truncated one. Target **all of them**; the honest
+  failure mode is that the host stops filling up and the number has no
+  denominator, so report the count of windows that met the condition
+  beside it. The gate is in §0 itself and exits 1, so a window that
+  fails it cannot publish a verdict either way.
+
+### A measurement over an enumerated class prints its denominator before its rows
+
+- **Proposal.** The same window, twenty minutes later, on its own
+  error. It published **3.4 MiB in 2 clones** as the host-wide
+  `tmp_pack_*` residue, to HQ's `exo-centralizer` and to the owner. That
+  was the **interim** output of a scan which had exceeded its
+  120-second timeout and been moved to the background, read as its
+  result.
+- **Merged.** Not yet. The rule is in `prompts/exo-agent.md` §0, the
+  three readings and the mechanism are in `runner-facts` §82 and in the
+  incident entry.
+- **Effect.** **A 17× understatement, corrected within four minutes, to
+  both recipients.** Completed scan over **4,785** pack directories:
+  **58.1 MiB in 5 files across 4 clones.** A third reading at
+  `06:20:47Z`: **66.7 MiB in 12 files**, with only **2 of 5** locations
+  surviving both — one seat's 26.7 MiB gone, three `pairwise-*` fixture
+  repositories of 11.8 MiB each appeared. So the quantity **churns**,
+  and the qualifier the wrong number was written to support ("not a pool
+  to harvest") holds for a better reason: there is no stock, and any
+  single scan of it was already false when it printed.
+- **Rule.** Print the **denominator before the rows**, or print
+  progress, so that an interim read is *visibly* incomplete. That scan
+  printed `scanned 4785 pack dirs under /tmp` on its **last** line. And
+  the larger half: this is the **third instance of one shape in forty
+  minutes** — `runner-facts` §48, an output that cannot distinguish its
+  own abort from its verdict — met once in a **repair** (the fetch),
+  once in a **cleanup** (`git gc`), once in a **measurement** (the
+  scan). This register had filed that shape only against *instruments*.
+  Grade each by its own verb: a false verdict wastes a window, a false
+  repair leaves a clone answering history questions wrongly, and a false
+  measurement gets published to two companies.
+- **Next measure.** On the next brief: of the measurements this seat
+  publishes a number from, how many printed a denominator or a progress
+  line **before** their rows. Target **all**. Denominator: published
+  numbers that came from an enumeration this seat ran itself.
+
+
 ## Window 66 — 2026-10-27 (hook: capacity returned after a provider refusal, and the run before the refusal was cut off at turn 78 with its work "exactly where it was left")
 
 ### Write the complete command the gate guards, because the ellipsis is what sends a seat to the tool that misnames it
@@ -5589,4 +5715,3 @@ this seat's.
   titled "the tail the wake cut". Both should be **0**. The honest
   failure mode is that they fall because the seat sent fewer notes, so
   report total sends beside them as the denominator.
-
