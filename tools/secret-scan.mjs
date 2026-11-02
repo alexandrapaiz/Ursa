@@ -24,12 +24,15 @@
 // log, so catching a leak publishes it. A scanner is a disclosure surface
 // and this one is built not to be.
 //
-// SHALLOW CLONES ARE AN EXIT 2, NOT A ZERO. A history scan in a depth-1
-// clone walks one commit, finds nothing, and exits 0. That zero is
+// AN INCOMPLETE CLONE IS AN EXIT 2, NOT A ZERO. A history scan in a
+// depth-1 clone walks one commit, finds nothing, and exits 0. That zero is
 // indistinguishable from a real clean result and it is what this seat was
-// handed on 2026-10-25. So --history refuses to run on a shallow clone
-// and names tools/ensure-full-clone.sh. L-A55 and L-A77 are the same
-// lesson for other commands.
+// handed on 2026-10-25. A clone made with --single-branch at full depth
+// produces the same zero for a different reason: the other branches'
+// objects were never fetched. So --history refuses on either fault, names
+// every one it found, and points at tools/ensure-full-clone.sh, which
+// repairs both. L-A55 and L-A77 are the same lesson for other commands,
+// and `incompleteClone` below carries the measurement.
 //
 // Usage:
 //   node tools/secret-scan.mjs                 # tracked working tree
@@ -216,10 +219,64 @@ function readBlobs(shas) {
   return blobs;
 }
 
+// TWO WAYS A CLONE IS INCOMPLETE, AND THE GUARD USED TO CHECK ONE.
+// `tools/ensure-full-clone.sh` treats depth and refspec as two independent
+// properties and repairs both, and `docs/standards/lessons.md` names it that
+// way in L-A55 and L-A77. This guard tested `.git/shallow` only, so a clone
+// made with `--single-branch` at full depth walked `rev-list --all` over one
+// branch's objects and printed `history: ... 0 hit(s)` at exit 0. That zero is
+// the same indistinguishable zero the header refuses for depth, arriving by
+// the other door.
+//
+// MEASURED BOTH WAYS, 2026-10-27, not read off the code. In a throwaway
+// repository with a canary on a branch other than the default: cloned
+// `--single-branch` at full depth, `.git/shallow` absent, this tool reported
+// `1 blobs, 0 hit(s)` and exit 0. Refspec widened, nothing else changed, same
+// clone, same command: `2 blobs, 1 hit(s)` and exit 1. The probe was built
+// outside this repository and destroyed, and its value appears nowhere.
+//
+// AND ON THIS REPOSITORY, which is the number that says what the hole was
+// worth: the clone a seat is handed is `--single-branch`, and a history scan in
+// it walked 5,304 blobs. After the refspec repair alone the same scan walked
+// 6,532. So 1,228 blobs, 19% of this repository's history, were outside every
+// `--history` result this seat has reported since 2026-10-25, and none of those
+// results said so.
+//
+// WHY `rev-parse --is-shallow-repository` AND NOT `.git/shallow`. In a linked
+// worktree `.git` is a file and the shallow marker lives in the main git
+// directory, so the path test is false in a worktree of a shallow clone. git
+// answers the question directly, and it is what ensure-full-clone.sh asks.
+//
+// WHY A MISSING `origin` IS NOT A FAULT. A repository with no remote is not a
+// truncated copy of anything; its own refs are the whole graph. That is also
+// what keeps the canary repository in the test suite scannable.
+function incompleteClone() {
+  const faults = [];
+  const ask = (args) => {
+    try {
+      return git(args).trim();
+    } catch {
+      return null;
+    }
+  };
+  if (ask(['rev-parse', '--is-shallow-repository']) === 'true') {
+    faults.push('this clone is shallow');
+  }
+  const hasOrigin = ask(['config', '--get', 'remote.origin.url']) !== null;
+  if (hasOrigin) {
+    const refspecs = (ask(['config', '--get-all', 'remote.origin.fetch']) ?? '').split('\n');
+    if (!refspecs.includes('+refs/heads/*:refs/remotes/origin/*')) {
+      faults.push("this clone's fetch refspec covers one branch, so the other branches' objects are not here");
+    }
+  }
+  return faults;
+}
+
 function scanHistory(since) {
-  if (existsSync(join(REPO, '.git', 'shallow'))) {
+  const faults = incompleteClone();
+  if (faults.length > 0) {
     fail(
-      'this clone is shallow, so a history scan would walk a truncated graph and report clean',
+      `${faults.join(', and ')}, so a history scan would walk a truncated graph and report clean`,
       'run bash tools/ensure-full-clone.sh first, then scan again'
     );
   }

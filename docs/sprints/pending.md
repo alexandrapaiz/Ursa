@@ -2,6 +2,81 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 ~00:2x UTC message-triggered (seventh pass): four Tier B merges, two charter pull requests confirmed Tier C
+
+Triggered by the event bus naming three things: review #619 (skill) and
+#618 (exo) against the merge rule, and absorb the news that #609 and
+#621 (this seat's own) had already merged. The third was already
+closed out by the sixth pass's own PR (#622); nothing further needed
+there. The first two were real work.
+
+This run also found its own checkout shallow and single-branch (the
+same defect #619 documents) and repaired it with
+`tools/ensure-full-clone.sh` before trusting any ancestry check below.
+
+1. **Four pull requests merged under Tier B, none of them needing
+   you.** #619 (skill, clone-integrity finding), #607 (market brief),
+   #604 (frontend legend fix) and #602 (security redaction sweep) were
+   each green, scoped to non-charter paths, and clean or resolvable.
+   #604's and #602's `docs/ideas.md` conflicts were real but docs-only,
+   which this seat may resolve per pm.md §10 Tier B rule 5: installed
+   this checkout's ledger merge driver (`tools/ledger/install-driver.sh`,
+   not registered by default in a fresh clone), re-merged each branch
+   against current `main` in a throwaway worktree, and pushed the
+   resolution so the gate itself saw it clean before merging.
+2. **#618 and #612 (exo) are Tier C and wait on you, as #618 itself
+   already said.** Both touch `prompts/*-agent.md` directly. Verified
+   exo's containment claim independently, in the now-unshallowed clone:
+   #612 is a strict git ancestor of #618, so one decision on #618
+   covers both. Nothing for this seat to do beyond saying so; posted to
+   exo on the board (`note`, id `100540cd`).
+3. **#395 (research) is now ten days old and still waits on you.**
+   Unchanged from every prior pass.
+
+Two pull requests this seat had flagged for Tier B merge, #600 and
+#591 (both engineer), were closed by the engineer seat's own
+concurrent run (#624, still open as a draft, visibly mid-flight on
+"the baseline stack's disposition") while this pass was mid-resolution
+on them. No action taken on either after noticing; the engineer seat is
+better positioned to say what replaces them. A third engineer PR,
+#615, is Tier B eligible and clean, but left alone this pass for the
+same reason: #624 is live and working that exact stack, and merging
+under a live run is the hazard pm.md's own ship-first section warns
+about.
+
+Board summary posted (`done`, id `0dd17e62`), referenced to this
+seat's own PR #626.
+
+Triggered by a board note from Ursa's own exo: this seat's own #599,
+#609 and #621 were each clean against `main` alone, but #609 and #621
+conflicted with each other on `docs/sprints/pending.md` and
+`docs/sprints/dispatch-queue.md` (both full-rewrite-per-run trackers,
+no union merge driver), so whichever of them merged second would fail.
+Verified independently in a detached worktree with this repository's
+merge drivers installed, testing all six orderings: exo's account held
+exactly as reported.
+
+1. **#621 and #609 are both merged.** Both were Tier A (knowledge-
+   surface-only diffs). #621, this seat's own freshest full rewrite of
+   the two trackers, merged first. #609 was rebased onto the result —
+   its only content not already superseded was one run-log file
+   (`docs/agents/pm-2026-10-27-message-3-run.md`), carried forward; its
+   own five-day-old rewrite of the two trackers was dropped rather than
+   let it regress today's. Then merged. Nothing here needed the owner.
+2. **#599 closed itself, unmerged, in the same minute, not by this
+   seat's action.** It is Tier C (touches `docs/decisions.md` and the
+   `docs/prfaq/mvp-public-address.md` go-decision), so it was never
+   part of this pass's own merge decision either way. Flagging rather
+   than guessing why: if you closed it, nothing further is needed; if
+   you did not, it is worth a look, since its go-decision and ledger
+   content have not otherwise been acted on anywhere this seat can see.
+3. **#395 (research) is now nine days old and still waits on you.**
+   Unchanged from every prior pass. No dispatch fired (criteria
+   unchanged, switch off regardless).
+
+Board reply posted to exo (`note`, id `6421258c`) with the same
+reasoning, referenced to this seat's own PR #622.
+
 ## Top three for the owner, 2026-11-01 ~23:5x UTC message-triggered standup (fifth pass of the day)
 
 This pass branched from this seat's own fourth pass (`ursa-pm/2026-11-01-message-2`,
