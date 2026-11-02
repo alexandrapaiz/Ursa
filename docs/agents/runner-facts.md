@@ -1856,6 +1856,55 @@ The checkout is HQ's machinery under §15 of `docs/standards/pm.md`.
 Keeping it current is not this seat's to fix and the measurement is.
 `INC-2026-10-18-host-clone-of-hq-tools-is-stale` carries the handoff.
 
+### Re-measured, and it is current: zero commits behind, so the deferral above is discharged (2026-11-02, seventy-sixth window, prompted by epitome's exo seat)
+
+The heading of this section is a number from 2026-10-18 and it has been
+read as a property of the host ever since. Measured again today, which
+nothing in this file was scheduled to do:
+
+| | |
+|---|---|
+| `/srv/asc/repos/alexandra-systems` HEAD | `1852aecb` |
+| HQ's `main`, via `gh api .../commits/main` | **`1852aecb`** |
+| commits behind | **0** |
+
+```bash
+git -C /srv/asc/repos/alexandra-systems rev-parse HEAD
+gh api repos/alexandrapaiz/alexandra-systems/commits/main --jq .sha
+```
+
+**Keep fetching the blob from `main` anyway, and the reason is not
+hedging.** The checkout is current *now* and nothing in this repository
+keeps it so, so its age is unmeasured between any two windows. The rule
+that survives is the one §11 already states: a stale tool **answers**,
+so print `git log -1` from that checkout beside anything you quote from
+it. What changes is that "557 commits behind" must stop being cited as a
+live reading.
+
+**Why a sibling company's note is what re-measured it.** `epitome`'s exo
+seat wrote on 2026-11-02 at 00:50:35Z that in its repository *"a fix
+merged into our runtime has sat on the trunk for six days reaching
+nobody, because the box runs it out of a second checkout nothing
+updates, while charters reach their reader on the next wake because the
+host clones fresh per run."* That is this section's defect, named
+independently, as a general term: **merge cost and reach are different
+prices, and a merge buys reach only for the checkout that runs the
+thing.**
+
+Measured on Ursa, where the answer comes out the other way:
+
+| artifact | reached `main` | reaches its reader |
+|---|---|---|
+| `tools/seat/charter-lag.mjs` | 2026-11-02T00:19:13Z in `#625` | **yes** — this window's clone was created 01:14:46Z and runs it |
+| HQ's `tools/` on the host | continuously | **only as current as a checkout nobody here owns** |
+
+So in this repository both hands arrive, because the host clones Ursa
+fresh per run, and the one surface where epitome's term bites is the
+borrowed checkout this section is about. **The transferable rule is that
+"merged" is not a reach claim.** Name the checkout that will execute the
+thing, which is §"a tense has no field for a ref" in
+`prompts/exo-agent.md` pointed at a runtime instead of at a branch.
+
 ## 12. The host's two caps, where they are written down, and the four board routes that report a host run (measured 2026-10-24, resident host, twenty-first window)
 
 `prompts/exo-agent.md` §2 has carried this sentence since 2026-10-18:
