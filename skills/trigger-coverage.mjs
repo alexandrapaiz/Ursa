@@ -78,6 +78,18 @@ const SKILLS_DIR = new URL('.', import.meta.url).pathname.replace(/\/$/, '')
 const SPEC_REL = 'prompts/skill-extract.md'
 const SPEC_PATH = join(SKILLS_DIR, '..', SPEC_REL)
 
+/** The library's index, named relatively so a finding prints the path a reader
+ *  can open from the repository root rather than this sandbox's absolute one. */
+const INDEX_REL = 'skills/README.md'
+
+/** The index's area heading and the area labels under it. The ordinal is
+ *  captured as a bare token, digit or word, and graded in
+ *  `areaHeadingDefects`; the label is the paragraph opener a reader counts.
+ *  `areas\b` rather than `areas,` because the trailing clause is prose and has
+ *  already been rewritten twice. */
+const AREA_HEADING = /^##\s+(\S+)\s+areas\b/m
+const AREA_LABEL = /^\*\*The\s+([a-z][a-z-]*)\s+area\.\*\*/gm
+
 /**
  * The floor above which one prompt is "the sibling's own trigger prompt".
  *
@@ -420,6 +432,117 @@ export function countDefects(library, indexRows, indexText = null) {
     else if (row.refs !== measured) out.push({ slug: row.dir, file: 'skills/README.md', key: 'refs', said: row.refs, measured })
   }
   return out
+}
+
+/**
+ * The areas this library's index says it is cut into, read three ways, and
+ * whether the three agree, as `{ file, line, kind, said, measured, quote }`.
+ *
+ * WHY THERE IS A FOURTH CONSTRUCT HERE AND NOT A WIDER PATTERN. The 2026-10-27
+ * ledger entry that proposed this ran the obvious repair first, which is to
+ * point `libraryCountsInBody` at `skills/README.md`, and measured what it
+ * returns: nine hits, none of them the live defect. The index is a different
+ * kind of document from a skill body. Its job includes recording and quoting
+ * counts, so the discriminator that works on a body, that any present-tense
+ * count of the library is wrong there, is false here. What was wanted instead
+ * was the §5ag shape: one gradeable construct with a computable denominator.
+ * This is it.
+ *
+ * THE DENOMINATOR IS THE LIST, NOT A JUDGEMENT. How many areas this library has
+ * is a §5e judgement no tool makes, and the block beside the heading says so in
+ * its own prose. How many areas are **labelled** is a count of `**The ... area.**`
+ * paragraph openers, which is a grep. The judgement is still the author's, and
+ * it is expressed by which labels exist rather than by a number written beside
+ * them; so an area the author means and never labels is reported here, which is
+ * the right answer, because a reader counting the list cannot see it either.
+ *
+ * THREE STATEMENTS AND TWO ARE GRADED. The labels are the denominator. The
+ * heading ordinal and the `areas` key are both claims about it, in one file,
+ * and they go stale by the same mechanism: a run that adds an area edits the
+ * list it is writing and not the two sentences counting it.
+ *
+ *   * **The heading.** `## Eight areas, and the edges between them`. This is
+ *     the one the ledger entry named, and the construct it is an instance of
+ *     had already failed once: §5u's pair-count sentence, repaired by hand with
+ *     a note saying that one instance is a hand repair and two is a check.
+ *   * **The `areas` key**, which the proposal as written left ungraded, and
+ *     this is the one place the implementation is wider than the entry. The
+ *     reason is measured rather than argued: on `main` at the time of writing
+ *     the heading says seven over six labels, and there is no `counts` block at
+ *     all, so the proposal as written catches `main`'s live defect and would
+ *     have said nothing about the key. Grading the heading alone leaves the key
+ *     free to contradict a heading this guard has just certified, which is the
+ *     same hole one argument to the left.
+ *
+ * A DIGIT IS A COUNT TOO. The 2026-10-27 entry's sharpest finding was that the
+ * detector it tried matches spelled number words and the live defect was
+ * written as a digit. So the ordinal is read as either, and a word this guard
+ * does not know is reported as unreadable rather than skipped, because silence
+ * about a claim is the failure mode this whole file exists to remove.
+ *
+ * NOTHING IS REQUIRED TO BE SAID. A README with no such heading and no `areas`
+ * key gets no finding. That is deliberate and it is the opposite of the rule
+ * one function up, where a trigger test with no `counts` block is itself a
+ * defect, because §5ae requires that block and no rule requires this heading.
+ * A guard that invented the requirement would be writing a §5 section in an
+ * exit status instead of in the file where the conventions live.
+ *
+ * It sits beside `countDefects` rather than beside `proseOnly` and `SPELLED`,
+ * which it borrows and which are declared below it, because the two functions
+ * read one file about one fact and a reader opening this one wants the other
+ * in view.
+ */
+export function areaHeadingDefects(indexText) {
+  if (!indexText) return []
+  // The heading and the labels are prose, so a fenced sample of either cannot
+  // stand in for one; the `areas` key is read from the raw text because it
+  // lives inside the fence on purpose. `proseOnly` blanks fences line for line,
+  // so the reported line still points where a reader will look.
+  const prose = proseOnly(indexText)
+  const labels = [...prose.matchAll(AREA_LABEL)].map((m) => m[1])
+  if (!labels.length) return []
+  const measured = labels.length
+  const out = []
+  const file = INDEX_REL
+  const h = AREA_HEADING.exec(prose)
+  if (h) {
+    const line = prose.slice(0, h.index).split('\n').length
+    const quote = h[0].trim()
+    const said = /^\d+$/.test(h[1]) ? Number(h[1]) : SPELLED[h[1].toLowerCase()]
+    if (said === undefined) out.push({ file, line, kind: 'unreadable', said: null, measured, quote })
+    else if (said !== measured) out.push({ file, line, kind: 'heading', said, measured, quote })
+  }
+  const block = declaredCounts(indexText)
+  if (block && 'areas' in block && block.areas !== measured) {
+    const lines = indexText.split('\n')
+    const line = lines.findIndex((l) => /^\s*areas\s*:\s*\d+\s*$/.test(l)) + 1
+    out.push({ file, line, kind: 'block', said: block.areas, measured, quote: `areas: ${block.areas}` })
+  }
+  return out
+}
+
+/** Why an area count is wrong, and the two causes this guard separates. One
+ *  explanation per condition, per §5z. */
+export function explainAreas(defects) {
+  const lines = []
+  if (defects.some((d) => d.kind === 'heading' || d.kind === 'block')) {
+    lines.push('The number of labelled areas is a grep over `**The ... area.**` openers, and the')
+    lines.push('heading and the `areas` key are two restatements of it written by hand. A run')
+    lines.push('that adds an area edits the list and not the two sentences counting the list.')
+    lines.push('Swept over every commit touching the index, that is clean through 2026-10-26')
+    lines.push('and red from the commit that landed the ninth skill: `## Seven areas` over six')
+    lines.push('labels, in the same breath as the skill the heading was moved for.')
+    lines.push('The repair is to copy the measured number into whichever of the two is wrong, in')
+    lines.push('this pull request, and to move the area label if the list is what is wrong:')
+    lines.push('the labels are the denominator here, so deciding the list is deciding the count.')
+  }
+  if (defects.some((d) => d.kind === 'unreadable')) {
+    lines.push('An ordinal this guard cannot read is a claim it cannot grade, reported rather')
+    lines.push('than skipped. Write the heading with a digit or with a spelled number up to')
+    lines.push('twelve, or widen `SPELLED` in skills/trigger-coverage.mjs if this library has')
+    lines.push('genuinely outgrown it.')
+  }
+  return lines
 }
 
 /** The library named as a bare noun, which is the only thing a skill body ever
@@ -1207,6 +1330,18 @@ function main(argv) {
       : `${where} says ${d.key} ${d.said === null ? 'nowhere' : d.said}, the library says ${d.measured}`)
   }
 
+  // The index's area count, which is the same file as the two rows above and a
+  // different construct. `counts` reads a fenced block and compares it to the
+  // directory listing; this reads two sentences and compares them to a list in
+  // the same file. See `areaHeadingDefects` for why the list is the
+  // denominator and why the key is graded when the proposal left it alone.
+  const areas = areaHeadingDefects(indexText)
+  for (const d of areas)
+    console.log(d.kind === 'unreadable'
+      ? `${d.file}:${d.line} says "${d.quote}" and this guard cannot read that ordinal,` +
+        ` so the ${d.measured} labelled areas below it are unchecked`
+      : `${d.file}:${d.line} says "${d.quote}", the labelled areas number ${d.measured}`)
+
   // A body that counts the library is the same fact as a stale `counts` block,
   // read in the file next door, so it prints with them and exits the same way.
   // §5ae declared this residue safe and it was not; see `bodyCountDefects`.
@@ -1251,6 +1386,13 @@ function main(argv) {
     console.log(`${bodyCounts.length} skill body paragraph${bodyCounts.length === 1 ? '' : 's'} ` +
       `count${bodyCounts.length === 1 ? 's' : ''} the library, listed above.`)
     for (const line of explainBodyCounts(bodyCounts)) console.log(line)
+    for (const line of explainCounts(counts)) console.log(line)
+    return 1
+  }
+  if (areas.length && !shape) {
+    console.log(`${areas.length} area count${areas.length === 1 ? '' : 's'} in ${INDEX_REL} ` +
+      `${areas.length === 1 ? 'disagrees' : 'disagree'} with the areas it labels, listed above.`)
+    for (const line of explainAreas(areas)) console.log(line)
     for (const line of explainCounts(counts)) console.log(line)
     return 1
   }

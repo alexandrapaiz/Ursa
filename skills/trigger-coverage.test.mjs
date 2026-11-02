@@ -11,8 +11,10 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   BIGRAM_DICE_FLOOR,
+  areaHeadingDefects,
   bodyCountDefects,
   countDefects,
+  explainAreas,
   coverage,
   declaredCounts,
   explainBodyCounts,
@@ -536,8 +538,11 @@ test("the index's own counts block carries the library size and only that is mea
   const lib = [entry('a', counted(12, 3, 9, 1), 3, 9), entry('b', counted(12, 3, 9, 1), 3, 9)]
   const index = '# The library\n\n```counts\nskills: 2\nareas: 1\n```\n'
   assert.equal(countDefects(lib, [], index).length, 0)
-  // An area count that disagrees with nothing is not a defect: no tool can
-  // derive where an edge falls, which is why the block says so in its prose.
+  // An area count is not graded here, and the reason moved: this check reads
+  // the block against the directory listing, and the directory listing says
+  // nothing about where an edge falls. `areaHeadingDefects` below grades the
+  // same key against the areas the index labels, which is a different
+  // denominator in the same file, so this assertion stays as written.
   assert.equal(countDefects(lib, [], '# L\n\n```counts\nskills: 2\nareas: 9\n```\n').length, 0)
   assert.deepEqual(countDefects(lib, [], '# L\n\n```counts\nskills: 3\nareas: 1\n```\n')
     .map((d) => [d.file, d.key, d.said, d.measured]), [['skills/README.md', 'skills', 3, 2]])
@@ -550,6 +555,89 @@ test('an index with no counts block is reported as the absence, like a trigger t
   // And omitted entirely, which is what every caller before this run passed,
   // asks nothing about the index at all.
   assert.equal(countDefects(lib, []).length, 0)
+})
+
+// The index's area count. Every fixture below is a shape `skills/README.md`
+// has actually held: the live defect is `origin/main`'s, measured at
+// 2026-11-02, and the clean case is the tree this run ships. The 2026-10-27
+// ledger entry asked whether the construct repeats twice before building a
+// check for it, and these are the two instances.
+const areaIndex = (heading, labels, block = null) =>
+  `# skills/\n\n## ${heading} areas, and the edges between them\n\n` +
+  (block === null ? '' : '```counts\nskills: 9\nareas: ' + block + '\n```\n\n') +
+  labels.map((l) => `**The ${l} area.** One sentence about it.\n`).join('\n')
+
+test("a heading ordinal over a list of a different length is the defect, and main's is the fixture", () => {
+  const text = areaIndex('Seven', ['record', 'tuning', 'gate', 'release', 'signals', 'durability'])
+  assert.deepEqual(areaHeadingDefects(text).map((d) => [d.kind, d.said, d.measured, d.quote]),
+    [['heading', 7, 6, '## Seven areas']])
+  // The reported line is the heading itself, which is the line to edit.
+  assert.equal(areaHeadingDefects(text)[0].line, 3)
+})
+
+test('the heading agreeing with the list is not a defect, which is the tree this run ships', () => {
+  const text = areaIndex('Eight', ['record', 'tuning', 'gate', 'release', 'signals',
+    'durability', 'deletion-cause', 'exclusion'], '8')
+  assert.deepEqual(areaHeadingDefects(text), [])
+})
+
+test('a hyphenated label is a label, because two of the eight live ones are', () => {
+  const text = areaIndex('Two', ['deletion-cause', 'exclusion'])
+  assert.deepEqual(areaHeadingDefects(text), [])
+})
+
+test('a digit is a count too, which is what the first detector missed', () => {
+  // The 2026-10-27 entry ran `libraryCountsInBody` at the index and got nine
+  // hits and not the live defect, because that detector matches spelled words
+  // and the sentence it was looking for used a digit.
+  assert.deepEqual(areaHeadingDefects(areaIndex('7', ['a', 'b'])).map((d) => [d.kind, d.said, d.measured]),
+    [['heading', 7, 2]])
+  assert.deepEqual(areaHeadingDefects(areaIndex('2', ['a', 'b'])), [])
+})
+
+test('the areas key is graded against the same list, which is where this is wider than the proposal', () => {
+  const text = areaIndex('Two', ['a', 'b'], '9')
+  assert.deepEqual(areaHeadingDefects(text).map((d) => [d.kind, d.said, d.measured]), [['block', 9, 2]])
+  // Both wrong is two findings and not one, because they are two edits.
+  assert.deepEqual(areaHeadingDefects(areaIndex('Five', ['a', 'b'], '9')).map((d) => d.kind),
+    ['heading', 'block'])
+})
+
+test('an ordinal this guard cannot read is reported, not skipped', () => {
+  const text = areaIndex('Thirteen', ['a', 'b'])
+  assert.deepEqual(areaHeadingDefects(text).map((d) => [d.kind, d.said, d.measured]),
+    [['unreadable', null, 2]])
+})
+
+test('an index that states nothing has nothing to grade, unlike a trigger test with no block', () => {
+  // §5ae requires the `counts` block, so its absence is a defect one function
+  // up. No rule requires this heading, so inventing the requirement here would
+  // be writing a convention in an exit status.
+  const text = '# skills/\n\n**The record area.** One sentence.\n\n**The gate area.** Another.\n'
+  assert.deepEqual(areaHeadingDefects(text), [])
+})
+
+test('an index with no labels is this check with nothing to read, not a clean index', () => {
+  assert.deepEqual(areaHeadingDefects(areaIndex('Seven', [])), [])
+  assert.deepEqual(areaHeadingDefects(''), [])
+  assert.deepEqual(areaHeadingDefects(null), [])
+})
+
+test('a fenced sample of a heading or a label is not one', () => {
+  const text = '# skills/\n\n```md\n## Nine areas, and the edges\n**The fake area.** no\n```\n\n' +
+    '## Two areas, and the edges between them\n\n**The record area.** One.\n\n**The gate area.** Two.\n'
+  assert.deepEqual(areaHeadingDefects(text), [])
+})
+
+test('the area explanation names the list as the denominator and separates the unreadable case', () => {
+  const stale = explainAreas([{ kind: 'heading', said: 7, measured: 6 }]).join(' ')
+  assert.match(stale, /labelled areas is a grep/)
+  assert.match(stale, /labels are the denominator/)
+  assert.doesNotMatch(stale, /cannot read that ordinal|widen `SPELLED`/)
+  const unreadable = explainAreas([{ kind: 'unreadable', said: null, measured: 2 }]).join(' ')
+  assert.match(unreadable, /cannot grade/)
+  assert.doesNotMatch(unreadable, /denominator/)
+  assert.deepEqual(explainAreas([]), [])
 })
 
 // §5ag: the spec file is the third surface for one fact, and every case below
