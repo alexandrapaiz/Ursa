@@ -278,13 +278,40 @@ test('the real queue: measured on a complete clone, or skipped with the reason n
   // version of this test swept every `refs/prs/*` in the clone, 526 of them,
   // which took 92 seconds and measured hundreds of long-merged pull requests
   // that the gate never asks about.
-  let heads;
+  let all;
   try {
-    heads = openHeads().filter((h) => h.readable);
+    all = openHeads();
   } catch {
     return t.skip('gh is not available in this environment');
   }
-  if (heads.length < 2) return t.skip('bootstrap refspec not fetched; nothing to measure');
+  const heads = all.filter((h) => h.readable);
+  // ONE SKIP MESSAGE FOR THREE CAUSES, and for the cause that actually fires
+  // here the old message was false. It read "bootstrap refspec not fetched;
+  // nothing to measure", which names the fault `tools/ensure-full-clone.sh`
+  // repairs. Measured in this clone on 2026-11-02 AFTER running that script:
+  // `cloneState()` reports `shallow: false`, `singleBranch: false` and
+  // `remote.origin.fetch` = `+refs/heads/*:refs/remotes/origin/*`, `gh`
+  // returns 28 open pull requests, and 0 of their `refs/prs/<n>` resolve
+  // because `git for-each-ref refs/prs` is empty. The refspec IS fetched.
+  // `refs/prs/*` is a different namespace, and `ensure-full-clone.sh`
+  // declines to fetch it on purpose, in the paragraph of its own header
+  // headed "WHAT IT DOES NOT DO". So a seat that read the old message went
+  // and re-ran a script it had already run, which is the shape
+  // `tools/board/live-target.mjs` was split out of a one-line guard to stop:
+  // one named cause for a condition reachable three ways, false for one of
+  // the three. The three do not share a repair, so they are three messages.
+  if (all.length === 0) {
+    return t.skip('gh reports no open pull requests, so there is no queue to measure');
+  }
+  if (heads.length === 0) {
+    return t.skip(
+      `none of the ${all.length} open heads has a refs/prs/<n> in this clone, and the refspec is not the cause ` +
+        '(tools/ensure-full-clone.sh declines that namespace on purpose); fetch refs/prs/* to measure',
+    );
+  }
+  if (heads.length < 2) {
+    return t.skip(`only ${heads.length} of ${all.length} open heads is readable here; two are needed to measure`);
+  }
   const got = assess({
     base: 'origin/main', paths: ['docs/ideas.md'], text: REAL,
     heads,

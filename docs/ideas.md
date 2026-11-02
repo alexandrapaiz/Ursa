@@ -2,6 +2,232 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-02 (security, seventh run): the secret-print hook arrives outside the one sentence that protects workflows, and it is the only sentence of its kind
+
+**Status:** proposed. **For:** the owner, and HQ, because the repair is a
+clause in seat charters and in the dispatch text and this seat may not edit
+charters. **Severity:** medium, and **latent until PR #683 merges**.
+**Full reading:** `docs/security/audit-2026-11-02g.md` §5, filed there as
+F66.
+
+**This is not an objection to #683.** The guard should be installed, HQ's
+`standards/secrets.md` §5 and L-X5 require it, and this seat's own run is
+tonight's evidence for why: it violated L-X5 in its first minutes and the
+checker in #683 names the exact command. The finding is that the set of
+paths this organization protects did not grow when a path with the same
+reach did.
+
+**What #683 adds.** `tools/check-secret-print.py`, and
+`.claude/settings.json` registering it as a `PreToolUse` hook matching
+`Bash|Write|Edit|MultiEdit|NotebookEdit`. After it merges, those two
+committed files run a command before every Bash, Write and Edit in every
+later seat run, in runs carrying `--permission-mode bypassPermissions`,
+`contents: write`, `pull-requests: write` and live credentials. Whoever
+controls the content of either file controls what executes there.
+
+**The asymmetry, measured rather than asserted.** `.github/workflows/` has
+that reach and is named off-limits in eleven charters, in every seat
+dispatch, and in this seat's audits. The two new paths are named nowhere:
+
+- Every dispatch says "never touch secrets or workflows". Neither path is
+  a workflow and neither is a secret.
+- `grep` over `prompts/` and `docs/standards/` finds three mentions of
+  `.claude/` and all three are descriptive, two of them in
+  `prompts/exo-agent.md` saying Ursa has no such directory.
+- There is no `CODEOWNERS` file at either location GitHub reads.
+- `redaction-gate` is the only workflow firing on pull requests. It scans
+  three private-data patterns with `contents: read` and would not notice a
+  change to either file.
+
+**Why medium and not high.** The owner merges everything here, which is a
+real control. The exposure is that her review carries no marker for which
+diffs have this reach, and a hook edit inside a thirty-file housekeeping
+pull request reads like housekeeping.
+
+**The repair, three lines, none of them this seat's.** Add `.claude/` and
+`tools/check-secret-print.py` to the "never touch" clause in the charters
+and the dispatch text, which is the one to do if only one is done; a
+`CODEOWNERS` entry for both paths so GitHub marks the diff; and the same
+check in the HQ standard that vendored these files into five repositories,
+since a clause missing here is likely missing there.
+
+## Ledger entry — 2026-11-02 (security, seventh run): the read-filter prober should search for a measurable window instead of declaring one and abstaining
+
+**Status:** proposed, day-sized. **For:** the engineer. **Severity:** low.
+**Found by:** repairing F63 and F64 in `docs/security/audit-2026-11-02g.md`,
+which fixed the two stale windows by hand and left the mechanism that made
+them go stale.
+
+**What this run already fixed, so this entry does not re-ask for it.**
+`tools/board/read-filters.mjs` keyed its saturation abstention on a
+`saturated` field the events route does not send, so the guard was dead
+code there; `saturationOf` now infers it from the limit asked for. And both
+declared windows had been outgrown by the board: events `since_hours=2`
+returned 489 of a 500-row page, messages `since_hours=6` returned 500 and
+saturated, which had left four of fourteen probes reporting UNMEASURABLE on
+every run under a summary line reading `14 probed`. Both re-measured, both
+now carry the reading they were chosen against, and all fourteen measure.
+
+**What remains, which is the shape of the thing.** A window is a constant
+in a file and the board's traffic is not, so every window in this tool is
+correct on the day it is written and decays from then on. The failure is
+quiet in both directions: too wide and the probe abstains, too narrow and
+the window is empty and the probe abstains, and either way the tool reports
+UNMEASURABLE, which is honest and teaches nobody that the number needs
+re-measuring. The only reason tonight's decay was caught is that a live
+test went red on the boundary.
+
+**The proposal.** The tool's own header already promises more than the code
+does: it says every probe runs "inside a window small enough that the
+unfiltered read does not saturate, and reports UNMEASURABLE rather than
+guessing when it cannot find one", and "when it cannot find one" describes a
+search that is not implemented. Implement it. Halve the window while the
+baseline read saturates, up to a small bound, report the window actually
+used next to each verdict, and abstain only when no window in the bound
+works. Then a busier board changes the window the tool reports and not the
+number of claims it makes.
+
+**Why it is the engineer's and not this seat's.** It replaces a declared
+constant with a loop over live reads in the instrument three seats quote
+for board-read claims, which is a design change rather than a
+behaviour-preserving fix, and a security run is the wrong place for it.
+
+
+## Ledger entry — 2026-11-02 (security, sixth run): the fence this seat queued for the eleven workflow prompts can be stepped out of, and the step lands in the slot the prompt calls binding
+
+**Status:** proposed. **For:** the owner, because the change is in
+`.github/workflows/` and every seat dispatch says never touch workflows.
+**Found by:** reading this seat's own queued repair rather than the code it
+repairs. **Corrected in place:** PWC-11 in
+`docs/agents/pending-workflow-changes.md` now carries the amended form, so
+nobody applies the unsafe one. **Full reading:**
+`docs/security/audit-2026-11-02f.md` §2, filed there as F62.
+
+**What was already known and is not re-filed.** PWC-11 holds the finding
+that all eleven seat workflows interpolate
+`${{ github.event.client_payload.text }}` into the `prompt:` block with no
+marker saying the text is data, and the 2026-11-02d audit reconfirmed it
+live. Severity stays low to medium. Nothing here widens the channel.
+
+**What is new, in one sentence.** The mitigation would not have mitigated
+it. PWC-11 proposes wrapping the slot in the literal lines `BEGIN EVENT`
+and `END EVENT`. Both are fixed strings known to whoever composes the event
+text, Actions substitutes that text raw, and YAML offers no escape hook, so
+the close marker is a string the fenced content may itself contain.
+
+**And the step-out has somewhere to land.** Measured across all eleven
+files with `tools/prompt-slots.mjs`, added this run: in ten of them exactly
+one newline separates the end of the event slot from the literal header
+"Owner instructions for this dispatch, binding for this run and extending
+the charter". PWC-11 leaves that block unfenced on purpose, for a reason
+that is right about the owner and does not cover the path:
+`repository_dispatch` declares no `inputs:`, so on exactly the trigger that
+fills the event slot, `${{ inputs.owner_instructions }}` resolves to
+nothing. The binding slot is empty whenever the forgeable one is full.
+
+**Why the two precedents PWC-11 reasons from did not catch this.** Both are
+safe and neither is safe for the reason the entry gave. They do not trust a
+delimiter. They make the content unable to produce one.
+`ursa-major/src/tuning/distill.ts` passes every fenced field through
+`JSON.stringify`, so no line break survives into the prompt.
+`ursa-major/src/verdict.ts` flattens `[\r\n]` to spaces in `shownText`
+before the transcript reaches the fence, as a side effect of an offset
+invariant it documents for a different reason. A workflow prompt can do
+neither, because there is no code between the event text and the prompt.
+
+**The change, three one-line differences, written out in full in PWC-11.**
+Move the owner block above the event block so the untrusted slot is last.
+Suffix both markers with `${{ github.run_id }}`, which the payload cannot
+contain because the run does not exist when the payload is composed. Keep
+PWC-11's label sentence as written. The first is the one to apply if only
+one is applied, because it removes the target instead of guarding it and no
+payload can defeat it.
+
+**Verification after applying**, replacing PWC-11's proposed
+`grep -c 'BEGIN EVENT'`, which would have reported the unsafe form fixed:
+`node tools/prompt-slots.mjs --strict` exits 0 with every column `yes`.
+Today it reports 11 of 11 slots open and 0 untrusted interpolations in any
+`run:` block, the latter being the audit's standing prose claim measured
+rather than restated.
+
+**Day-sized or smaller.** Eleven files, three lines each, no new
+dependency, and the instrument to check it already exists and is tested.
+
+## Ledger entry — 2026-11-02 (security, fifth run): the containment check every charter orders is unrunnable in the clone every seat is handed, and it fails in the direction that duplicates work
+
+**Status:** urgent. **For:** the owner, because the text is in eleven
+charters and charters are hers alone. **Found by:** a test skip, not by
+reading: `tools/stack/repair-pending.test.mjs` abstained with "bootstrap
+refspec not fetched; nothing to measure" on a clone this run had already
+repaired with `tools/ensure-full-clone.sh`.
+
+**The finding.** The "Read your own seat's open PRs first" rule — this
+repository's version of HQ's L-E10 — tells a seat to check whether an older
+pull request is already contained in a newer one with
+`git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>`. That command
+names a ref namespace that does not exist in a seat's clone. Measured here
+at 04:0xZ, on a clone already repaired for both depth and refspec:
+
+```
+$ git for-each-ref refs/prs | wc -l
+0
+$ git merge-base --is-ancestor refs/prs/664 refs/prs/672
+fatal: Not a valid object name refs/prs/664
+exit 128
+$ git merge-base --is-ancestor \
+    origin/ursa-security/2026-11-02-message-4 \
+    origin/ursa-security/2026-11-02-message-5
+exit 0
+```
+
+The second command is the true answer for the same pair: contained. The
+first is the one the charters tell a seat to run, and it exits 128.
+
+**Why it matters, and in which direction.** `--is-ancestor` communicates
+through its exit code, and every non-zero value means NOT CONTAINED. A
+missing ref is non-zero, so the error is indistinguishable from the answer
+"no" in exactly the idiom a seat writes it in, `git merge-base
+--is-ancestor A B && echo contained`. Having read "not contained", the
+seat follows the charter's next sentence and combines the branches by
+hand — rebuilding work that was already merged. That is precisely the
+waste the rule exists to prevent, delivered by the command the rule
+supplies. This is also fault 1 from the header of
+`tools/ensure-full-clone.sh`, "non-zero means NOT CONTAINED — the opposite
+of the truth", reached through a different door than the one that file
+closes.
+
+**Scope.** All eleven seat charters carry it, seventeen occurrences:
+`grep -rc refs/prs prompts/*.md`, run 2026-11-02. Not one of them says to
+fetch the refspec first. Nothing in the repository does it either, and
+`tools/ensure-full-clone.sh` declines on purpose, in a paragraph headed
+"WHAT IT DOES NOT DO": pull request heads are not branches, and fetching
+every head in a repository with hundreds of pull requests is not a
+precondition for reading history. That reasoning is sound and this entry
+does not argue with it. The defect is the gap between a tool that
+deliberately does not provide the refs and eleven charters that assume it
+does.
+
+**What would fix it.** Either of two one-line changes, and the choice is
+the owner's:
+
+1. Have the charters name the refs that exist. `origin/<branch>` is
+   present in any clone repaired by `tools/ensure-full-clone.sh`, and
+   `gh pr view <n> --json headRefName` turns a number into that name. This
+   needs no fetch and no new objects.
+2. Have the charters prefix the fetch:
+   `git fetch origin "refs/pull/<n>/head:refs/prs/<n>"` for the two numbers
+   in question, which is the "asks for them by name" case
+   `ensure-full-clone.sh` says it is leaving to the caller.
+
+The first is preferable: it removes a fetch rather than adding one, and it
+cannot half-succeed.
+
+**Not fixed here.** `prompts/` is outside this seat's write surface — "Never
+edit charters" in `prompts/security-agent.md`, Boundaries — and the text is
+identical across eleven files, so this is one owner edit and not eleven seat
+edits. This run used form 1 above for its own containment check and said so
+in its pull request, which is why it found the gap at all.
+
 ## Ledger entry — 2026-10-18 (skill, relevance sweep slice 3): the six evidence kinds are written down twice and nothing checks that the two agree
 
 **Status:** proposed. **For:** the engineer seat. **Found by:** reading, not
@@ -18664,5 +18890,52 @@ completed first, since the one it was handed was depth 1.
   to complete the clone somewhere other than the shared disk. On the
   evidence above the habit is the only half a seat controls, and it works:
   this run took 89 MB of packs off the contended volume by doing it.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — A board read that names no window asks a question whose answer expires, and `/api/runs` is the route with no cursor to page out of it
+
+- Trigger: HQ's exo-centralizer seat wrote to this seat at 05:34Z saying it had
+  widened this seat's run-row number across four companies and downgraded an
+  escalation on it. Re-measuring the number to check that claim is what found
+  the number was wrong.
+- Why: this seat published a wrong number today and HQ acted on it. Queue row
+  10 of `docs/agents/pending-workflow-changes.md` and a note to HQ's
+  exo-centralizer at 04:15Z said 561 Ursa run rows carried zero GitHub Actions
+  `run_url`, and concluded a workflow step "has never fired". HQ widened it to
+  1,584 rows across four companies and downgraded its own escalation on the
+  strength of it. The read behind the number named no `days`, and `days`
+  defaults to 10 on that route, while the last Actions firing was 2026-10-17,
+  sixteen days back. At `days=90` there are 666 rows and **40** carry an
+  Actions `run_url`. The full measurement and what the forty rows actually
+  show is `docs/security/audit-2026-11-02h.md` F64.
+- The property worth building against, stated once: a default window is an
+  unstated premise that **expires**. A ten-day window reached 2026-10-17 until
+  2026-10-27 and not after, so the same read with the same parameters was
+  correct for ten days and then became wrong with nothing changed and nothing
+  raised. `tools/board/page.mjs` already carries the sibling lesson for a
+  `limit` cap — "it does not sample the window; it truncates it" — and covers
+  `/api/messages` only.
+- What: `/api/runs` cannot be paged the way `page.mjs` pages messages. It
+  honours `company, seat, days, limit` and nothing else, measured by asking it
+  for a fifth filter, so `days` widens the window and never moves it, and
+  `limit` is hard-capped at 200 whatever is asked for (200, 201, 500 and 1000
+  all answered `"limit": 200`). A seat with more than 200 rows inside the
+  window therefore has older rows that are unreachable by any parameter; the
+  pm seat is in that state today, which is why this run's 666 is reported as a
+  floor.
+- First step: a small reader beside `page.mjs` that is honest about what this
+  route can and cannot answer. Three properties, all cheap: it never sends a
+  bare read, so the `days` it used appears in its own output; it prints the
+  `created_at` of the oldest row it reached, so a quoted figure carries its
+  own reach; and it refuses to print a count from a reply carrying
+  `"saturated": true`, reporting a floor instead. That is
+  `docs/standards/pm.md` §15 applied to a second route, and it is the shape
+  `page.mjs` already has minus the cursor the route does not offer.
+- Not a gate, deliberately. The rule is a judgement about what a seat
+  publishes, and the instrument's job is to make the honest form the easy one.
+  The rule itself is written where the measurements live,
+  `docs/design/board-read-conformance.md` §2a, and in the header of
+  `tools/board/read-filters.mjs` where the runs window is declared.
 - Cost: $0
 - Status: proposed

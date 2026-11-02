@@ -148,6 +148,38 @@ export async function fetchMessagePage({ sinceHours, beforeHours, limit = PAGE_C
 }
 
 /**
+ * Did this page fill? Decided from the row count against the page's own
+ * limit, and never from the server's flag alone.
+ *
+ * WHY THIS IS NOT JUST `page.saturated`. The whole walk stops on one
+ * boolean: `if (!page.saturated) break`, after which `complete` is reported
+ * `true` and `ratioFault` returns null, so a ratio may be published. Until
+ * 2026-11-02 that boolean came only from the route, and `fetchMessagePage`
+ * turned an absent `saturated` into `false` through `Boolean(undefined)`,
+ * which is the unsafe direction: a route that stops sending the field, or
+ * renames it, makes this pager stop after page one and call the result
+ * complete. That is the exact defect this file was written to prevent,
+ * reintroduced through the one input it did not check. The row count was
+ * already in hand — `limit` was captured in the fetch result and read by
+ * nothing — so the cross-check costs nothing.
+ *
+ * A disagreement is reported rather than smoothed over. If the route says a
+ * page did not fill and the page holds its whole limit, the flag is wrong
+ * and a reader needs to know that, because every other claim the route
+ * makes about its own scope is then suspect too.
+ *
+ * @param {{ rows?: object[], limit?: number|null, saturated?: boolean }} page
+ * @returns {{ filled: boolean, byCount: boolean, byFlag: boolean, disagreed: boolean }}
+ */
+export function pageFilled(page) {
+  const rows = Array.isArray(page?.rows) ? page.rows.length : 0;
+  const limit = Number.isFinite(page?.limit) && page.limit > 0 ? page.limit : PAGE_CEILING;
+  const byCount = rows >= limit;
+  const byFlag = Boolean(page?.saturated);
+  return { filled: byCount || byFlag, byCount, byFlag, disagreed: byCount !== byFlag };
+}
+
+/**
  * Every row in the last `hours`, deduplicated by id, with a receipt saying
  * whether that is actually every row.
  *
@@ -185,13 +217,17 @@ export async function pageMessages({
     for (const r of page.rows) if (r && r.id !== undefined) byId.set(r.id, r);
     const fresh = byId.size - sizeBefore;
     const oldest = oldestTs(page.rows);
-    const rec = { before_hours: +before.toFixed(4), status: page.status, rows: page.rows.length, saturated: page.saturated, new_rows: fresh, oldest_ts: oldest };
+    const fill = pageFilled(page);
+    const rec = { before_hours: +before.toFixed(4), status: page.status, rows: page.rows.length, saturated: fill.filled, new_rows: fresh, oldest_ts: oldest };
+    // Only carried when the route and the row count disagree, so the common
+    // page stays the shape every existing reader of page_log expects.
+    if (fill.disagreed) { rec.saturated_by_count = fill.byCount; rec.saturated_by_flag = fill.byFlag; }
     pages.push(rec);
     if (onPage) onPage(rec);
 
     // A page that did not fill reached the old end of what the board holds
     // below its cutoff, so there is nothing further back to ask for.
-    if (!page.saturated) break;
+    if (!fill.filled) break;
 
     // ORDER MATTERS BELOW, and getting it wrong is how a pager reports the
     // wrong reason for the right refusal. These four checks are in order of
@@ -254,6 +290,10 @@ export async function pageMessages({
       rows: rows.length,
       rows_fetched: pages.reduce((a, p) => a + p.rows, 0),
       saturated_pages: pages.filter((p) => p.saturated).length,
+      // Pages where the route's own `saturated` flag contradicted the row
+      // count. Nonzero means the route is misreporting its own scope, so
+      // read `page_log` rather than this receipt's summary.
+      saturation_disagreements: pages.filter((p) => p.saturated_by_count !== undefined).length,
       oldest_ts: oldest,
       newest_ts: newest,
       covered_hours: oldest ? +((now() - Date.parse(oldest)) / 3_600_000).toFixed(2) : 0,
