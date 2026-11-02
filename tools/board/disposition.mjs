@@ -100,7 +100,7 @@ const MARKERS = [
   // assembled from phrases a seat was observed to write; nothing above it had
   // ever been scored, so the share of `none` that is a miss rather than an
   // absence was unknown — which the header admitted and nobody had closed. It
-  // is a miss: of 370 `none` bodies in the 720 hours to 2026-11-02, 343 carry
+  // is a miss: of 371 `none` bodies in the 720 hours to 2026-11-02, 344 carry
   // a first-person decision phrase of some shape, and these eight patterns,
   // hand-read in context before adoption, account for 122 of them. See
   // `GRADED` below for the numbers and the coverage they came from.
@@ -267,13 +267,13 @@ export const MEASURED = {
  *  shipping a word list at all is that a miss is cheap. A miss is cheap only
  *  if `none` is mostly absence. Nobody had checked.
  *
- *  It is mostly a miss. Of the 370 `none` bodies in the 720 hours to
- *  2026-11-02, 343 carry a first-person decision phrase of some shape — so the
+ *  It is mostly a miss. Of the 371 `none` bodies in the 720 hours to
+ *  2026-11-02, 344 carry a first-person decision phrase of some shape — so the
  *  modal answer of a discriminator built to separate three cases was "I cannot
  *  tell", on bodies that overwhelmingly do state a disposition.
  *
  *  THE NUMBER THAT PAID FOR THE EDIT IS NOT THE RECALL ONE. Adding the graded
- *  group moves 154 of 1,015 verdicts, and the three cells are not equally
+ *  group moves 154 of 1,016 verdicts, and the three cells are not equally
  *  interesting:
  *
  *    none -> lost_only      30   the recipient was woken with evidence and no
@@ -303,20 +303,30 @@ export const MEASURED = {
 export const GRADED = {
   on: '2026-11-02',
   window_hours: 720,
-  coverage: { complete: true, pages: 9, rows: 4200, oldest_ts: '2026-10-03T05:11:44.721Z', covered_hours: 718.87 },
-  over_limit: 1015,
-  // The arm that was graded, under the list as it stood before this edit.
-  none_before: 370,
-  // Of those, how many carry a first-person decision phrase of any shape. The
-  // loose probe, kept because it is the recall ceiling the tight list is
-  // measured against and not a thing any gate should run.
-  none_carrying_a_decision_phrase: 343,
-  // Verdicts that move, by cell. These sum to the changed total.
+  // EVERY FIGURE BELOW IS FROM ONE WALK, and the first draft of this block was
+  // not. Three of these numbers were taken from three walks minutes apart, and
+  // the arithmetic check in `disposition.test.mjs` caught it as a one-row
+  // disagreement: the store is live, so `none_before` had grown by one between
+  // the read that measured it and the read that measured `after`. A figure
+  // drawn from a complete walk is still not comparable to a figure drawn from a
+  // different complete walk, which is the half of the coverage discipline
+  // `MEASURED` above does not state.
+  coverage: { complete: true, pages: 9, rows: 4216, oldest_ts: '2026-10-03T05:11:44.721Z', covered_hours: 718.97 },
+  over_limit: 1016,
+  // The three arms under the list as it stood before the graded group.
+  before: { lost_only: 194, in_delivered: 451, none: 371 },
+  none_before: 371,
+  // Of those 371, how many carry a first-person decision phrase of any shape.
+  // The loose probe: this is the recall ceiling the tight list is measured
+  // against and not a thing any gate should run, because three of its patterns
+  // were rejected on precision.
+  none_carrying_a_decision_phrase: 344,
+  // Verdicts that move, by cell. These sum to `moved_total`.
   moved: { none_to_lost_only: 30, none_to_in_delivered: 92, lost_only_to_in_delivered: 32 },
   moved_total: 154,
   // After. `none` falls twelve points and is still a quarter of the traffic,
   // so this edit narrowed the blind spot and did not close it.
-  after: { lost_only: 191, in_delivered: 575, none: 249 },
+  after: { lost_only: 192, in_delivered: 575, none: 249 },
   // The patterns read in context before adoption, and the ones rejected on
   // precision with the hits they would have bought. Rejections are recorded
   // because the next seat grading this arm will re-propose them otherwise.
