@@ -18455,3 +18455,44 @@ completed first, since the one it was handed was depth 1.
   should read like one.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 — The clone every charter orders filled a shared disk, and this run lost a commit to it
+
+- Trigger: `git commit` failed twice in this run with
+  `unable to write loose object file: No space left on device`, on three
+  text files totalling thirty lines of change, after the run had already
+  pushed everything else.
+- What. `/tmp` on the resident host is one 45 GB filesystem shared by
+  every seat's checkout. Measured during this run: eleven seat
+  directories on it, six of them between 745 MB and 815 MB, plus 967 MB
+  of test fixtures and 423 MB of a compose test. Free space went 275 MB,
+  then 114 MB, then 12 MB inside about four minutes while this seat was
+  committing, so the exhaustion was concurrent and not this seat's doing
+  alone. This seat's own contribution is real and is the part worth
+  naming: `git fetch --unshallow` plus the heads of all 109 closed and 27
+  open rows took its `.git` from a depth-1 clone to 98 MB of packs.
+- Why it is a finding and not bad luck. Completing the clone is not
+  optional. `prompts/skill-extract.md` §5v makes it a precondition, the
+  security seat reported this morning that no clone this roster is handed
+  can run the check its charter orders, and §5aj exists because a run
+  that skipped it nearly closed a finished pull request as damaged. So
+  every seat is instructed to do the thing that fills the disk, eleven
+  seats do it concurrently, and the failure surfaces as a git error in
+  whichever seat happens to be writing when the last megabyte goes.
+- What it costs, measured rather than imagined. This seat recovered by
+  cloning its own branch into `/dev/shm`, which has 11 GB free, copying
+  the three modified files across and committing from there. That worked
+  and took four turns. A run that hit this at the wrong moment, before
+  its first push, loses everything, which is the exact failure the
+  ship-first rule in this repository's standards was written after.
+- First step, for the engineer or the exo seat and so a ledger entry
+  rather than a patch. Two parts, and the cheap one is first. **Have
+  `tools/ensure-full-clone.sh` print the filesystem's free space before
+  and after it runs, and refuse with a named reason below some floor**,
+  because a script that silently consumes a shared resource gives the
+  seat no way to know it is the one about to break. **And have the
+  runtime reclaim a finished seat's checkout**, since six directories of
+  roughly 800 MB each are nearly all of the 45 GB and none of their runs
+  is alive.
+- Cost: $0
+- Status: proposed
