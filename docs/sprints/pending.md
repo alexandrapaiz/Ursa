@@ -2,6 +2,52 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (twenty-second pass): a failed exo run that had already repaired itself, two Tier B merges, one tool defect now tracked
+
+Triggered by four things: the engineer's note on `tools/stack/lag-or-rewrite.mjs`
+and its own retracted finding, a standing note naming `#709`/`#705`/`#704` as
+drafts with no live run behind them, the exo seat's failed host-window run
+on `#704`, and this seat's own prior pass's open pull request (`#717`).
+
+1. **Nothing needs you.** `#717` (this seat's own twenty-first pass, pure
+   `docs/agents`/`docs/sprints`) self-merged under Tier A. `#704` (exo) and
+   `#715` (market) merged under Tier B after independent review.
+2. **The standing note handed to this run was already stale by the time it
+   was read.** `GET /api/standing`, checked fresh rather than trusted from
+   the wake, named a different pair (`#716` engineer, `#715` market) by
+   07:26Z. `#716` is still a live draft (its own run has no `run.end`
+   logged); `#715` had finished cleanly and was eligible, so it is the one
+   that got merged. `#709` and `#705` both still have a live run behind
+   them by the host audit log and were left alone, unchanged from the
+   twenty-first pass.
+3. **The exo failure was already fixed before this pass started.** The
+   window that opened `#704` was cut by the host mid-act, 42 minutes and
+   151 turns in, before it could leave draft. The seat's own very next
+   window read the pushed diff, ran its tests, and readied it. Verified
+   against the host audit log (`run.start`/`run.end` pairs) rather than
+   taken on the PR's own word, then reviewed and merged under Tier B.
+   Nothing to escalate to HQ: a false alarm, not a defect.
+4. **One tool defect logged, not fixed.** `tools/seat/charter-lag.mjs:165`
+   computes a pull request's base with `allowFail` and skips that pull
+   request on `if (!base) continue`. On a shallow ("handed") clone, `git
+   merge-base` prints nothing, so this instrument silently reports that no
+   open row touches a charter when one might. The engineer named it and is
+   not fixing it today, since the line sits inside its own open `#694`.
+   Logged here and in `dispatch-queue.md` for the next pass or a dispatch
+   to pick up; not fixed by this seat, since `tools/` is outside this
+   seat's writable surface. Not the same defect as the `runsHandedStale`
+   date-string bug in the same file, which merged to main this pass
+   under `#704`.
+5. **One fewer check before engineer's four stuck rows can merge.** The
+   engineer ran its new `tools/stack/lag-or-rewrite.mjs` over `#665`,
+   `#679`, `#685`, `#694` and `#703`: 433 differing files, zero
+   `RESURRECTS`. None of the five moves trunk text backwards. `#703`
+   already merged; `#665`/`#679`/`#685`/`#694` are still `CONFLICTING`
+   against `main` and remain the engineer's own handoff from the
+   twentieth pass to rebase, not re-fired here.
+
+Full account: `docs/agents/pm-2026-11-02-message-22-run.md`.
+
 ## Top three for the owner, 2026-11-02 message-triggered (twenty-first pass): market's pull request and the twentieth pass's own both merged, the standing note on three drafts checked out true for exactly one of them
 
 Triggered by three things: market's pull request to review against the
