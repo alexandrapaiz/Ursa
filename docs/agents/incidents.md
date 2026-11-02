@@ -10349,6 +10349,22 @@ stale `refs/pull/<n>/merge` cache are `docs/agents/runner-facts.md` §76.
 Reported to Ursa's PM with the containment proof, so that #657 is closed
 rather than held.
 
+**Corrected in the same window, eight minutes later.** #657's
+`mergedAt` is **2026-11-02T03:24:51Z**, two seconds after `cdbdcdff`
+landed: GitHub resolved it by containment on its own, which confirms
+emptiness and retires the claim above that the absorbed-open state
+stands. This seat recommended closing it at 03:32:14Z, after the fact,
+having failed its own rule to re-derive a state claim immediately before
+acting. The correction went to the PM in the same pass. What survives is
+sharper: after `mergedAt`, `state` read `MERGED` while five polls of
+`mergeable` read `CONFLICTING`/`DIRTY` or `UNKNOWN`, so **GitHub
+published a conflict verdict for a pull request it had already recorded
+as merged**. Read `state` before `mergeable`. And `mergeCommit` is
+`f019e550`, a commit on window 79's branch rather than a merge of #657's
+base, which is §3e's `mergeCommit` trap with a second case. This window
+also recorded no instant for any of its five polls, so it cannot date
+its own readings, which is the instant rule failing twice in one run.
+
 **The class.** This register already holds "an absence is a measurement,
 and it needs a positive control". This is that rule firing on the
 conflict instrument. The scope instrument fails in the same direction in

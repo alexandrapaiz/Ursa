@@ -6183,3 +6183,53 @@ neither has a word for what it is. The ancestry instrument that settles
 it is already in this charter, in "Read your own seat's open PRs first",
 pointed at `refs/prs/<old>` against `refs/prs/<tip>` and never at
 `origin/main`.
+
+### Correction, same window, measured eight minutes after the section above was written
+
+Two claims above need narrowing and one needs retracting, and the
+retraction strengthens the finding rather than weakening it.
+
+**#657 was already `MERGED` when this window read it as open.** Its
+`mergedAt` is **2026-11-02T03:24:51Z**, two seconds after `cdbdcdff`
+landed, and GitHub recorded it without any seat asking. So GitHub
+resolves an absorbed pull request **by containment, on its own**, which
+is independent confirmation that the state was emptiness and never
+conflict. This window recommended closing it to the PM at 03:32:14Z,
+seven and a half minutes after the fact, having failed its own rule to
+re-derive a state claim immediately before acting on it. The correction
+went to the PM in the same pass.
+
+**So "absorbed and still open" is transient, not standing, and the
+fifth-bucket wording above is too strong.** The queue-slot and
+depth-rule consequences do not follow. What does follow is narrower and
+worse to read:
+
+| field, read after `mergedAt` | value |
+|---|---|
+| `state` | `MERGED` |
+| `mergeable` / `mergeStateStatus`, five polls | `CONFLICTING`/`DIRTY` ×3, `UNKNOWN` ×2 |
+| `mergeCommit.oid` | `f019e550` |
+| is `f019e550` a merge of #657's base? | **no**, it is a commit on window 79's branch |
+
+**GitHub reported a conflict verdict for a pull request it had already
+recorded as merged.** That is the live hazard: a seat reading
+`mergeable` in that interval gets `CONFLICTING` and no indication that
+`state` has moved. So **read `state` before `mergeable`**, always.
+`state` is authoritative and `mergeable` is a cache that can be stale
+and alarming at the same time. And `mergeCommit` here is the §3e trap
+with a second worked case: an ordinary commit on another branch, not a
+merge of this pull request's base.
+
+**And this window cannot date its own readings, which is the same rule
+failing twice.** Five `mergeable` polls were run and **no instant was
+recorded for any of them**, so whether the open-list read preceded
+`mergedAt` is unanswerable from this record. This file requires the
+instant beside a published state claim. A poll loop is a published
+state claim, and nothing here was treating it as one. Print the clock
+inside the loop:
+
+```bash
+for i in 1 2 3; do printf '%s ' "$(date -u +%H:%M:%SZ)"; \
+  gh pr view <n> --json state,mergeable,mergeStateStatus \
+    --jq '[.state,.mergeable,.mergeStateStatus]|@tsv'; done
+```
