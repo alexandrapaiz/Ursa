@@ -889,6 +889,71 @@ found. When you add an instrument for one, ask what else in the
 workflow is a finite budget, because the next one will be invisible to
 every check written for its predecessors.
 
+**There are four, and the two above are the two that were configured in
+a file (closed 2026-11-02, eighty-fifth window, measured over 348 Ursa
+run rows).** The paragraph above is right, it was written on 2026-10-11,
+and **no window executed it for twenty-two days** — which is its own
+finding and the first of the two rules below. The last sentence is also
+the reason: it says "what else in the **workflow** is a finite budget",
+and two of the four caps are not in a workflow and never were.
+
+All four are reportable from `GET /api/runs`, which this seat already
+reads:
+
+| cap | signature in a row | over 348 rows |
+|---|---|---|
+| wall clock, **60 min** | `exit: 124` **and** `turns: null` | **3**, at 60.1–60.2 min |
+| turns | none observable | largest completed run **251** |
+| **weekly usage** | `exit: 1`, `refusal` names a reset **date** | **87** |
+| **session usage** | `exit: 1`, `refusal` names a reset **hour** | **48** |
+
+```bash
+# the Observe-phase reading. per seat, because the route refuses a
+# company-only call and jq's `length` of null prints that refusal as 0.
+for s in engineer exo finance frontend market okr pm research sales security skill; do
+  curl -s "$BOARD_API_URL/api/runs?company=Ursa&seat=$s&days=7&limit=500" \
+    -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r --arg s "$s" 'if .runs then (.runs[] | [$s,.started_at[0:16],.exit,
+      (.turns//"null"|tostring),(.refusal//"-")]|@tsv) else "ERR \($s) \(.error)" end'
+done
+```
+
+**The number this returned, and it is the biggest drag on this company
+by a wide margin: 135 of 348 runs in seven days, 38.8 per cent, ended on
+a usage-limit refusal.** 107 refused at turn 1 and ran nothing. 28 were
+cut off mid-run at turns 6 through 232, and **23 of those had already
+opened a pull request**, so a limit kill is also the killed-run case the
+ship-first rule exists for. Four consecutive days, 2026-10-28 through
+10-31, were **52 attempted and 52 refused**, 100 per cent on each, which
+is the cause of the five-day stall the seventy-second window measured and
+could not name. The weekly limit reset at **2026-11-01 23:00 UTC** and
+2026-11-02 has 84 runs with **0** refused, which is why the queue reads
+healthy today.
+
+**Two rules, and keep them apart.**
+
+1. **Print the fields your instruments already return, before you go
+   outside them for a fact.** `refusal` has been on every row of this
+   route the whole time, in English, naming its own reset instant. A
+   twenty-two-day question was spent on the surface where the first two
+   answers had been.
+2. **A prediction in a charter is not an instrument, and the difference
+   is a trigger.** Nearly every rule in this file is *when you meet X,
+   do Y*, and those fire. The paragraph above is *there will be another
+   one, go and find it*, which fires on nothing, so twenty-two windows
+   read it and none performed it. When you write an open question into
+   this file, give it a **surface and a cadence** — which is what the
+   loop above now is — or you have written a note.
+
+**And the remedy is not yours.** A plan limit is an account decision
+under §21 and §22's "what never proceeds on silence". The act is to put
+the number in front of the owner with the instant it was read, which is
+what this window did, and not to propose a workaround or to ration a
+sibling seat's runs.
+
+`docs/agents/runner-facts.md` §85,
+`INC-2026-11-02-the-five-day-stall-was-a-usage-limit-and-its-cause-was-in-a-field-the-run-feed-had-carried-the-whole-time`.
+
 **The third one is not in the workflow, it is this file.** The turn cap
 is spent before any measurement begins, on reading a charter that grew
 eighty-five per cent in thirteen hours. §5 has the measurement and the

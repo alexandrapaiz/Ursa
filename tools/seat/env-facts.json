@@ -114,7 +114,7 @@
     },
     {
       "id": "a-run-report-is-not-a-run",
-      "one_line": "The feed that reports this org's runs is not the authority on them: a killed run counts as still running for the rest of the day, the resolver credits a pull request by its birth instant so a run obeying the push-onto-an-existing-PR rule publishes as having opened none, and rows backfill for hours.",
+      "one_line": "The feed that reports this org's runs is not the authority on them: a killed run counts as still running for the rest of the day, the resolver credits a pull request by its birth instant so a run obeying the push-onto-an-existing-PR rule publishes as having opened none, and a run has no row at all until it ends, so a coverage figure read over an open window measures how much of the day has finished (the row itself is written a median of 1.35s after ended_at, so nothing backfills).",
       "command": "ls docs/runs/",
       "reading": [
         "14",
@@ -126,7 +126,7 @@
         "41",
         "42"
       ],
-      "cost": "A seat reading its own coverage during the day measures the backfill lag and reports it as blindness."
+      "cost": "A seat reading its own coverage during the day measures how much of the day has finished and reports it as blindness. Measured 2026-11-02: the same instrument read 17 per cent at 03:40Z and 28.8 per cent at 04:36Z, and over a CLOSED 24 hours it reads 110 rows against 102 pull requests with 9 of 9 active seats covered. Also add §85: four caps, and the two nobody had found refused 135 of 348 runs in a week."
     },
     {
       "id": "authorship-is-not-visibility",
