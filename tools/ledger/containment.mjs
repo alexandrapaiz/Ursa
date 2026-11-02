@@ -47,14 +47,32 @@
 //
 //   1. `bash tools/ensure-full-clone.sh --check`, which is this repository's
 //      own name for the repair and exits 1 when the clone needs it.
-//   2. A self-test whose answer is known before it is asked. `HEAD~1` is an
-//      ancestor of `HEAD` in every repository with two commits, and `HEAD` is
-//      not an ancestor of `HEAD~1` in any. The probe is asked both, and if it
-//      does not answer true and then false, it is not answering about history
-//      and the run is over at exit 2. In a `--depth 1` clone `HEAD~1` does not
-//      resolve and this fails, which is the point: defence 1 can be satisfied
-//      by a clone that was repaired and then re-shallowed, and defence 2
-//      cannot be satisfied by anything except a probe that works.
+//   2. A self-test in two parts, neither part sufficient alone. First,
+//      `git rev-parse --is-shallow-repository`: a shallow graph answers
+//      ancestry questions wrongly rather than refusing them, so any `true`
+//      here is a refusal. Second, a question whose answer is known before it
+//      is asked -- `HEAD~1` is an ancestor of `HEAD` in every repository with
+//      two commits and `HEAD` is not an ancestor of `HEAD~1` in any -- which
+//      catches a history truncated by something that leaves no `.git/shallow`
+//      behind, such as a graft or a replace ref.
+//
+//      WHY BOTH, measured on git 2.43.0 while writing this file and the reason
+//      this paragraph is not the one it replaced. The HEAD pair alone is NOT
+//      enough, and the shape that defeats it is one a seat reaches without
+//      asking for it: a clone that already has `main`'s history and then
+//      shallow-fetches the rest, which is what `git fetch --depth 1 origin`
+//      does once the refspec is widened, and which `git clone --depth 1` of a
+//      LOCAL path arrives at by itself because `--depth` is silently ignored
+//      there (`warning: --depth is ignored in local clones; use file://
+//      instead`). In that clone `HEAD~1` resolves and the HEAD pair answers
+//      true and then false exactly as a healthy clone does, while every other
+//      branch has its parent link cut, so
+//      `git merge-base --is-ancestor origin/main origin/<branch>` exits 1 for
+//      a pair whose containment is a fact. The self-test passes and the
+//      verdict is wrong: the fail-open hazard wearing the costume of its own
+//      defence. `--is-shallow-repository` is `true` throughout, and is the
+//      part that refuses. This was found by this module's own test suite
+//      against a first version of this file that had only the HEAD pair.
 //
 // WHY THERE IS NO REVERSE ANCESTRY CALL. Strict containment is wanted, not
 // containment: a row is not a duplicate of itself. The ancestor relation on
@@ -176,6 +194,9 @@ export function makeAncestryProbe(repo) {
  * answer nobody knows. Returns null when it holds, or the reason it did not.
  */
 export function probeSelfTest(repo, isAncestor) {
+  if (git(repo, ['rev-parse', '--is-shallow-repository']).stdout?.trim() === 'true') {
+    return 'this clone is shallow (`git rev-parse --is-shallow-repository` is true), so every ancestry question crossing its boundary is answered NOT CONTAINED at exit 1 rather than refused'
+  }
   const head = git(repo, ['rev-parse', 'HEAD^{commit}']).stdout?.trim()
   const parent = git(repo, ['rev-parse', 'HEAD~1^{commit}']).stdout?.trim()
   if (!head) return 'HEAD does not resolve to a commit in this checkout'
