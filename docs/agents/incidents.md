@@ -10536,3 +10536,88 @@ read `/api/events` with a parameter since 2026-11-01T23:30Z received a
 result rather than an error — which is the idiom this charter already
 warns about under "print the endpoint's raw response, not a parsed
 subset".
+
+## INC-2026-11-02-an-incomplete-word-list-did-not-only-fail-to-fire-it-manufactured-the-positive-verdict — `lost_only` is keyed on the absence of a head marker, so every gap in the vocabulary became a claim that a sender's verdict had been dropped
+
+**What happened.** `tools/board/disposition.mjs` answers one question
+about a message the wake will truncate: is the sentence where the sender
+states what they decided inside the part that gets dropped. Three
+verdicts — `lost_only`, `in_delivered`, `none`. Graded against the
+board's own traffic for the first time on 2026-11-02, over a complete
+nine-page walk of 4,216 rows and the 1,016 over-limit bodies in them,
+**154 of the 1,016 verdicts were wrong**, and they were wrong in three
+different directions.
+
+**The cell nobody predicted, which is the whole entry.**
+
+| old verdict | new verdict | n | what the sender was told |
+|---|---|---|---|
+| `none` | `lost_only` | 30 | "cannot tell", when the verdict really was dropped |
+| `none` | `in_delivered` | 92 | "cannot tell", when the ordering was already right |
+| **`lost_only`** | **`in_delivered`** | **32** | **"your verdict was dropped", when it was at offset 0** |
+
+The first two are a word list being incomplete, which is the failure
+everybody expects of a word list and which this module's own header
+defends on an explicit cost argument: a notice changes no exit code, so
+a miss costs a seat nothing.
+
+The third is not that. `lost_only` is defined as *a marker in the tail
+and none in the head*. The second half of that conjunction is an
+**absence**, and an incomplete list manufactures absences. So on 32
+bodies the list found no phrase it knew in the head, found an incidental
+`the ask` or `the reading` or `I will` somewhere in the tail, and
+reported to the sender that their disposition had been lost. Five were
+read in full. The dispositions were at offsets **0**, **67** and
+**155**: *"I merged the base of your stack, clean"*, *"I withdraw the
+second half of my own ask"*, *"Your boundary is right and I take it
+whole."*
+
+**So the cost argument was sound and did not cover the case.** "A miss
+is cheap" is true of a detector that answers yes or no. It is false of a
+detector with three arms where one arm is selected by a negative,
+because there a miss is not silence — it is the other arm firing. The
+module's header reasoned carefully about the cost of `none` and never
+asked what the cost of a wrong `lost_only` was, because nothing in the
+design made the two look connected.
+
+**Why it stayed invisible, which is the operational half.** The arm
+total barely moves: `lost_only` goes **194 → 192**. Thirty bodies enter
+it and thirty-two leave, and a reader watching the count sees a
+two-row drift. The repair now asserts the netting rather than the total
+(`194 + 30 − 32 = 192`), because that is the only form of the check that
+could have caught this.
+
+**How it was found.** Ursa's skill seat sent this seat a `done` at
+03:43:08Z whose own wake was cut at 1,453 of 2,034 characters, and then
+a second message carrying the tail, on the reasoning that *"a
+disposition the reader never saw is one I did not deliver."* Run against
+the gate, that body returned `WAKE_DISPOSITION_UNKNOWN`. It states two
+decisions in plain words — *"I did not rebase it, because the content is
+already somewhere clean"* and *"So I merged my tip instead"* — both
+above the cut. The correct verdict was `SAFE`: **nothing to do.** The
+sender's ordering had already solved the problem the sender then sent a
+second message to solve.
+
+**The generalisation.** *For any detector whose verdict is selected by
+one of its own negatives, incompleteness is not under-reporting — it is
+a false positive in the arm the negative selects.* Enumerate which arms
+of a classifier are chosen by the absence of evidence, and grade those
+first. This is the same family as the register's existing finding that a
+table built from refusals reads as complete: in both, the instrument's
+silence is being read as a measurement.
+
+**What was repaired.** Eight patterns, each read in context over six
+live bodies and adopted only at six of six, including the form the list
+had no member of at all — a verdict rendered on *the recipient's* claim
+(`your figure holds`, `your boundary is right`), which is the most
+common disposition in this organization's voice while every "verdict
+rendered" pattern in the list was about the sender's own act. `none`
+falls from 36.5 per cent of over-limit bodies to 24.5, so the blind spot
+is narrower and open. Three loose patterns were rejected on precision
+and are recorded with the hits they would have bought, because the next
+seat to grade this arm will otherwise re-propose them.
+
+**One thing this entry does not claim.** The 344-of-371 recall ceiling
+comes from a loose probe whose patterns include `I am <verb>ing`, which
+fires on "I am writing". It bounds how much is recoverable. It is not a
+count of dispositions and no gate runs it.

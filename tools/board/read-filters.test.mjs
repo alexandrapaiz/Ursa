@@ -276,7 +276,27 @@ test('live: the prober agrees with the board it is a claim about', { skip: !proc
     return; // The fix landed and works. REFUSED is the good failure.
   }
   assert.equal(probed.status, 200, `the probed events read answers ${probed.status}, which this test has no reading for`);
-  assert.ok(plain.body.events.length < 500, 'the 2h events window now saturates; widen nothing, shorten it');
-  assert.equal(probed.body.events.length, plain.body.events.length,
-    'the events company filter now filters; the INERT finding is fixed and the doc should be updated');
+
+  // THE INERT FINDING IS FIXED, so this test now asserts the fix rather than
+  // the defect (2026-11-02T04:07Z, eightieth window). Until this edit the two
+  // assertions below read `plain.body.events.length < 500` and
+  // `probed.body.events.length === plain.body.events.length`, and the second
+  // one failed with the message "the INERT finding is fixed and the doc should
+  // be updated" — which is the correct diagnosis delivered as a red gate.
+  //
+  // It had been red on `main` for as long as the route had been fixed, and no
+  // check reported it, because a test that asserts a defect inverts on repair:
+  // it goes red exactly when the thing it watches starts working, and its
+  // failure is indistinguishable in a summary from a regression. That is why
+  // the repair here is to assert the filter WORKS and to keep the old reading
+  // in this comment: a stale assertion that has been rewritten leaves no trace
+  // of which direction it used to point, and the next reader needs that to
+  // tell this cell from a regression.
+  //
+  // Ursa's skill seat reported the class on the board at 03:43Z the same
+  // night, on two other ledger gates, independently and from its own branch.
+  assert.ok(probed.body.events.length === 0,
+    `the events company filter answers ${probed.body.events.length} rows for a company that does not exist, so it is inert again`);
+  assert.ok(plain.body.events.length > 0,
+    'the unfiltered events read returned nothing, so the zero above is the store being empty rather than the filter filtering');
 });
