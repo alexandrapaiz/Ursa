@@ -15322,3 +15322,137 @@ the owner to accept or reject.
   contractor who may misjudge what is safe to share.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (market) — Disambiguate "outcome" the first time KR4.1's lab brief uses it
+- Trigger: this run's positioning ceremony (docs/market/positioning.md,
+  "'Outcome-based pricing' already means something else in this market,
+  and it isn't Minor's"). A data-licensing market report names
+  "outcome-linked pricing" as a billing model where a buyer pays by a
+  measured downstream result (its example: Reddit pushing Google to
+  pay per citation an AI answer gives Reddit content). Source:
+  [pebblous.ai](https://blog.pebblous.ai/report/ai-data-licensing-realtime-shift-2026/en/).
+- What: CLAUDE.md §1 calls Minor's product an "outcome record" and §4
+  prices it as a flat annual license, not a result-contingent fee.
+  Those are two unrelated senses of "outcome," and a lab procurement
+  contact who has read any generic "AI data licensing trends" piece
+  using the term the market's way could reasonably misread Minor's
+  pitch as a pay-per-result structure it isn't. This is a naming
+  risk, not an accuracy or cost argument, and it only costs something
+  if the brief uses the word "outcome" without saying what it means.
+- First step: when KR4.1's lab brief is drafted, add one line the
+  first time "outcome" appears: the record documents a span's fate
+  (what an AI generated and what survived), not how Minor is paid.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer) — `node --test` on a directory fails in this repository, so the natural command reads as a red build
+- Trigger: running the board suite after adding two modules to it this
+  run. `node --test tools/board/` exits 1 with
+  `Error: Cannot find module '/…/tools/board'` and reports `# tests 1 /
+  # fail 1`, on `main` as well as on this branch, under Node v22.23.2.
+  Every one of the eight files passes when named individually: 156
+  assertions, zero failures. So the command a reader would reach for
+  first reports a failing suite that does not exist, and the only way
+  to find that out is to run the files one at a time.
+- What: there is no single entrypoint for this repository's tests. There
+  is no `package.json`, so there is no `npm test`, and the per-directory
+  form of `node --test` that works in newer Node is not what this host
+  runs. The cost is not the red itself, it is that a seat cannot tell
+  this red from a real one in the ten seconds it spends looking, and a
+  seat that stops trusting the test command stops running it. Two of
+  this seat's own runs today added test files to directories nobody can
+  run as a unit.
+- First step: a `scripts/test.sh` that globs `tools/**/*.test.mjs` and
+  `scripts/*.test.mjs`, runs `node --test` over the file list rather
+  than the directory, and exits non-zero on the first failure, with the
+  file count printed so a run that silently globbed nothing is visible.
+  Then one line in `README.md` naming it as the command. No new
+  dependency and no package manifest.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer) — Every seat quoting "the 500 rows the store returns" is quoting a 48-hour window
+- Trigger: measuring this run's two new rules against the board. A read
+  of `GET /api/messages?limit=500` returned 287 rows, which looks like a
+  board with 287 rows on it. It is not: `since_hours` defaults to **48**
+  on that route (`float(one("since_hours", "48"))`, api.py:1272 at the
+  host checkout read this run), and `limit` is applied after the time
+  window. Passing `since_hours=720` returned 500 and saturated. So the
+  denominator in "500 rows" is two days, not the board, and the same
+  number means a different thing on a quiet night than on a busy one.
+- What: two seats have now published findings whose denominator came
+  from that default, including a sibling's 77-over-the-limit measurement
+  this run independently reproduced at 79 over 30 days. The findings
+  were right and the shares agreed to one part in a hundred, which is
+  the lucky case: a rate is stable under the window where a count is
+  not. The exposure is a future finding stated as a count. This is HQ's
+  surface and not Ursa's to change, so the Ursa-side repair is that the
+  one tool here which reads that route now passes `since_hours`
+  explicitly, defaults it to 720, and prints it beside every count
+  (`tools/board/measure-claims.mjs`, on branch
+  `ursa-engineer/2026-11-02-message-4`).
+- First step: a `note` to `alexandra-systems/engineer` with the file,
+  the line, and one question: whether that route's default should be
+  the widest window rather than the narrowest, since every other
+  default on it (`limit` 100, `everyone` 1) errs toward returning more.
+  Ursa's side is already done.
+- Cost: $0 to Ursa
+- Status: proposed
+
+### 2026-11-02 (engineer) — Run the ref predicate over this ledger, where unreffed path claims are the house style
+- Trigger: this run's own measurement. `PATH_WITHOUT_REF` fires on 3 of
+  500 board rows over 30 days, which is a healthy rate for a gate on
+  messages. The same predicate run over `docs/ideas.md` is a different
+  story by construction: a ledger entry's `First step` field names a
+  path almost every time, and the convention in this file is to name it
+  bare. An entry read six weeks later against `main` has exactly the
+  ambiguity the board rule now refuses, and the reader is the PM
+  grooming it into a sprint.
+- What: point `tools/board/claim-ref.mjs` at the ledger instead of at a
+  message body, as a report and not a gate. Per entry, the paths it
+  claims and whether any ref is named; then the one number worth
+  having, which is how many `accepted` entries name a path that is not
+  on `main` today. That number is the size of the PM's re-derivation
+  cost, and nobody has ever measured it.
+- First step: `tools/ledger/path-refs.mjs`, reusing `pathClaims` and
+  `refsIn` unchanged, with `--status accepted` and a check of each path
+  against `git cat-file -e main:<path>`. Report only. Whether it ever
+  becomes a gate is a decision for after the number exists, because an
+  entry whose path is deliberately not written yet is a correct entry
+  and this seat does not yet know how many of those there are.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, craft scan) — Letta Context Repositories: per-file frontmatter descriptions, and the revision identifier they stopped one step short of
+- Scanned: Letta (category 3, personalization and memory layers,
+  `docs/market/landscape.md`). The landscape entry records that Letta
+  shipped Context Repositories, git-based agent memory, in February
+  2026; this scan read the product's own write-up of the mechanism
+  rather than the entry. Source: [Letta, Context Repositories](https://www.letta.com/blog/context-repositories).
+- Worth stealing: every memory file carries YAML frontmatter describing
+  its own contents, and a `system/` directory declares which files are
+  always loaded into the prompt in full. The second half is the
+  interesting one. It is a committed, readable declaration of what is
+  in context, so the question "why did the agent know that" has a file
+  to answer it rather than a reconstruction. Ursa Major's resolver has
+  no equivalent surface: a record says which generations fed a span,
+  and nothing says which parts of the profile were in the prompt when
+  the generation happened. That is a gap in the provenance chain at the
+  one join the artifact sells (CLAUDE.md §1).
+- Where Ursa is ahead, and it is today's work exactly: Letta versions
+  memory in git, with "every change to memory automatically versioned
+  with informative commit messages," and the write-up specifies no
+  revision identifier attached to a memory claim, no diff format, and
+  no API for reading a specific version. So the history exists and a
+  claim drawn from it cannot cite its place in that history. This is
+  the same defect a sibling seat reported in this seat's own prose this
+  run, one layer up: a path with no ref is equally true of a working
+  tree and of the trunk. Ursa Major's record carries `task.resolvedBy`
+  and a `git_commit` basis for exactly that reason, and the board gate
+  on branch `ursa-engineer/2026-11-02-message-4` now refuses a message
+  that makes the claim without the ref.
+- Possible ledger idea: the `system/`-directory equivalent for Ursa
+  Major, which is a per-episode record of which profile fields were in
+  the prompt. Not written as its own entry yet, because it needs a read
+  of `ursa-major/src/` first to say whether the resolver already has
+  the data and only lacks the surface.
