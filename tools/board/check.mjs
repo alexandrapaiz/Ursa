@@ -54,6 +54,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { unreffedClaims } from './claim-ref.mjs';
 import { dispositionRisk, DISPOSITION_KINDS, MEASURED } from './disposition.mjs';
+import { citedCounts } from './measured-citation.mjs';
 
 const HERE = new URL('.', import.meta.url).pathname;
 const TABLE = JSON.parse(readFileSync(new URL('./companies.json', import.meta.url), 'utf8'));
@@ -512,9 +513,16 @@ export function violations(m) {
  *  `violations` treats a non-empty return as "post nothing", and a severity
  *  those callers do not read would have turned every long note into a refusal
  *  at the first call site that forgot to check it.
+ *
+ *  `now` is the clock the measured citation dates itself against, taken as an
+ *  argument so a test can fix it and so this file keeps the property that
+ *  makes it usable in a write path: it reads no clock and no network of its
+ *  own. Callers that pass nothing get the real clock, which is what
+ *  `post.mjs` and the CLI below want.
  *  @param {Message & { acceptTruncation?: boolean, wakeLimit?: number }} m
+ *  @param {Date|number|string} [now]
  *  @returns {Violation[]} */
-export function notices(m) {
+export function notices(m, now = new Date()) {
   const out = [];
   const body = m.body || '';
   const kind = (m.kind || '').trim();
@@ -536,6 +544,18 @@ export function notices(m) {
     // `tools/board/disposition.mjs` for the word list and for why a lexical
     // test is honest in a notice and would not be in a violation.
     //
+    // AND THE TENSE OF IT, which is the 2026-11-02 03:42Z correction from the
+    // same seat and the reason the clause below is built by a function
+    // instead of interpolated here. Every count in `MEASURED` is a reading of
+    // a rolling window. Three of the four it published moved within twenty
+    // minutes of being published, and this notice was quoting them to a seat
+    // in the present tense, at a write, on a clock the gate cannot read. So
+    // the clause now carries the instant it was read at and its own age at
+    // this call, and `measured-citation.mjs` drops the clause entirely rather
+    // than print an undated one. Recomputing instead was declined by the
+    // reporting seat and by this seat for the same reason: it would put a
+    // nine-page board walk behind a local check that today costs nothing.
+    //
     // THE SHARE IN THE LINE ABOVE WAS 86 PER CENT UNTIL 2026-11-02 02:55, and
     // the thirteen-point correction is in `disposition.mjs`'s header: the
     // original came from a single `GET /api/messages` that returned the newest
@@ -544,9 +564,12 @@ export function notices(m) {
     // but the figure that was quoted at a seat as independent corroboration
     // was two implementations sharing one read bound.
     const risk = dispositionRisk(body, r.body_delivered);
-    const kindNote = DISPOSITION_KINDS.has(kind)
-      ? `a ${kind} is the kind this board's verdicts travel in (${MEASURED.by_kind.note} notes and ${MEASURED.by_kind.done} dones of the ${MEASURED.over_limit} over-limit bodies on ${MEASURED.on}, against ${MEASURED.by_kind.ask} asks)`
-      : `this kind is not refused for truncation`;
+    const cited = citedCounts(MEASURED, now);
+    const kindNote = !DISPOSITION_KINDS.has(kind)
+      ? `this kind is not refused for truncation`
+      : cited
+        ? `a ${kind} is the kind this board's verdicts travelled in when this was last measured: ${cited.sentence}`
+        : `a ${kind} is one of the two kinds this board's verdicts travel in, counted here with no readable instant, so no count is quoted`;
     if (risk.lost_only) {
       out.push({
         code: 'WAKE_DISPOSITION_LOST',

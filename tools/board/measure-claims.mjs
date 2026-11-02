@@ -57,8 +57,20 @@
 // implementations, one shared read bound, and the agreement between them was
 // not a control for anything. The same read reported **no** over-limit `ask`
 // bodies, which is the kind `tools/board/check.mjs` refuses, so the domain
-// finding understated the traffic its own gate acts on; there are 49
+// finding understated the traffic its own gate acts on; that walk found 49
 // portfolio-wide and 5 for Ursa.
+//
+// EVERY FIGURE IN THE PARAGRAPH ABOVE IS A READING AND NOT A STANDING FACT,
+// and this comment is the second time that cost something on one night. Those
+// counts came from a paged walk earlier on 2026-11-02 whose clock instant
+// nothing recorded, so "49" cannot be reconciled with the 51 in
+// `disposition.mjs` by reading either file: the two are different reads of a
+// rolling window, and only one direction of that difference is distinguishable
+// from an error. Four later walks, dated, agree on 51. The dated series is
+// `MEASURED.drift` in `tools/board/disposition.mjs`, and
+// `tools/board/measured-citation.mjs` is why a count cannot reach a seat's
+// output undated any more. A count in a comment still can, which is the
+// unguarded surface this run named rather than closed.
 //
 // AND THE OTHER THING IT SAID, which was wrong in a different way: that five
 // hundred rows is two days of them, "which a share survives and a count does
