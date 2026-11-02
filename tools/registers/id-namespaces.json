@@ -1,0 +1,84 @@
+{
+  "comment": [
+    "Every numeric identifier namespace this repository allocates for itself.",
+    "Read by tools/registers/check-ids.mjs. Each namespace names the register",
+    "that defines its identifiers, the anchored pattern that constitutes a",
+    "definition, who repairs a collision, and every identifier that is burned.",
+    "A namespace with no `why` is a fault, not a default: a reader who cannot",
+    "tell why an identifier is burned cannot tell whether reissuing it is safe.",
+    "",
+    "NOT IN HERE, deliberately. docs/standards/lessons.md allocates L-A and L-E",
+    "and is a vendored copy of an HQ standard, so neither a collision nor a",
+    "burn in it is repairable in this repository at all; HQ allocates those",
+    "with its own tools/check-queue-ids.sh. docs/agents/incidents.md keys on",
+    "INC-<date>-<slug>, which is content-derived rather than allocated, so two",
+    "runs cannot race for the same one.",
+    "",
+    "`repair` is a locus from tools/gates/verdict-shape.mjs. `owner` means a",
+    "seat must not touch it: an accepted ADR is the owner's decision record and",
+    "renumbering one rewrites what other files already cite."
+  ],
+  "namespaces": [
+    {
+      "name": "ADR",
+      "pad": 3,
+      "register": "docs/decisions.md",
+      "define": "^## (ADR-(\\d+)) \\u2014 (.+)$",
+      "repair": "owner",
+      "why": "Architecture decisions, numbered in date order per the convention the file follows everywhere else. Cited as a resolvable number by docs/agents/org-chart.md, docs/backlog.md, docs/decisions.md itself and skills/running-an-outcome-record-trial/SKILL.md. Eleven files under .github/workflows/ also cite ADR numbers and say they are in docs/decisions.md. Eleven distinct numbers appear there and ten of them resolve to nothing in this register (ADR-11, ADR-12, ADR-14, ADR-17, ADR-20, ADR-22, ADR-23, ADR-24, ADR-037, ADR-049, all of them HQ's numbering); only ADR-002 resolves. That is the security seat's PWC-9 and not this namespace's defect.",
+      "burned": []
+    },
+    {
+      "name": "PWC",
+      "pad": 1,
+      "register": "docs/agents/pending-workflow-changes.md",
+      "define": "^## (PWC-(\\d+)) \\u2014 (.+)$",
+      "repair": "seat",
+      "why": "Changes a seat designed and cannot apply, queued for the chair or the owner. The unscoped namespace is the security seat's since the 2026-10-04 split; the other seats took their own prefixes.",
+      "burned": [
+        {
+          "id": "PWC-1",
+          "why": "Redaction gate. Applied by the chair 2026-09-24 and the entry deleted per the file's own rule, so the identifier resolves to nothing while docs/security/ still cites it."
+        },
+        {
+          "id": "PWC-2",
+          "why": "Product-plan redaction. Applied 2026-09-24, entry deleted, same as PWC-1."
+        },
+        {
+          "id": "PWC-3",
+          "why": "Trial README redaction. Applied 2026-09-24, entry deleted, same as PWC-1."
+        },
+        {
+          "id": "PWC-4",
+          "why": "Repository description and topics. Applied 2026-09-24, entry deleted, same as PWC-1."
+        },
+        {
+          "id": "PWC-7",
+          "why": "Meant two different changes in two unmerged pull requests at once (#46 and #74), which is the collision this gate exists for; the engineer seat's copy became PWC-ENG-1 on 2026-10-05 and docs/security/audit-2026-10-04.md still cites the bare number twice."
+        },
+        {
+          "id": "PWC-10",
+          "why": "Renamed in place to PWC-EXO-4 when the identifiers became seat-scoped on 2026-10-04. docs/agents/learning-log.md cites the old number twice."
+        }
+      ]
+    },
+    {
+      "name": "PWC-ENG",
+      "pad": 1,
+      "register": "docs/agents/pending-workflow-changes-engineer.md",
+      "define": "^## (PWC-ENG-(\\d+)) \\u2014 (.+)$",
+      "repair": "seat",
+      "why": "The engineer seat's own queue, split out of the unscoped namespace on 2026-10-05 after PWC-7 collided.",
+      "burned": []
+    },
+    {
+      "name": "PWC-EXO",
+      "pad": 1,
+      "register": "docs/agents/pending-workflow-changes-exo.md",
+      "define": "^## (PWC-EXO-(\\d+)) \\u2014 (.+)$",
+      "repair": "seat",
+      "why": "The ExO seat's own queue, split out of the unscoped namespace on 2026-10-04. PWC-EXO-1 through 4 were renamed in place from PWC-7 through PWC-10.",
+      "burned": []
+    }
+  ]
+}
