@@ -162,8 +162,11 @@ export function isBefore (a, b) {
  * and disagrees with it on 143 of this repository's 2,134 commits.
  */
 export function utcDay (value) {
-  const iso = toUtcInstant(value)
-  return iso === null ? null : iso.slice(0, 10)
+  // One expression on purpose. Split across two lines the slice sits on a
+  // line with no normalising call on it, and this module's own lint reports
+  // it — correctly, since a reader of that line alone cannot tell the
+  // receiver is already UTC. The lint found it in the first sweep.
+  return toUtcInstant(value)?.slice(0, 10) ?? null
 }
 
 /**
@@ -189,9 +192,25 @@ export function sortByInstant (rows, key) {
  * Identifier names that this repository actually uses for timestamps. A
  * name-shape lint and not a type checker: it is the only thing available in
  * plain `.mjs`, and the corpus below is why it is worth having anyway.
+ *
+ * WHY `Date` TAKES A CAPITAL D HERE. The first version of this pattern
+ * accepted a lowercase `date` anywhere inside a longer identifier, and the
+ * first sweep over this repository's 419 tracked source files reported
+ * `createHash('sha256').update(png).digest('hex').slice(0, 10)` as a
+ * timestamp defect, twice. `update` ends in `date`. So does `validate`,
+ * `candidate`, `consolidate`, `invalidate` and `mandate`, all of which this
+ * repository uses. The suffix is therefore `Date` with a capital, or the
+ * whole identifier being `date`, or a `_date` tail — which keeps `mainDate`,
+ * `authoredAt`, `created_at` and `firstTs` and drops every English word that
+ * merely rhymes with one.
+ *
+ * This is the lint's accuracy, not its correctness: a missed name is a
+ * finding this tool does not report, and a wrong name is a line somebody has
+ * to hand-clear. Of the two, the false positive is the one that gets a lint
+ * switched off, so it is the one that was worth a corpus.
  */
 const TIMESTAMP_NAME =
-  /\b[A-Za-z_$][A-Za-z0-9_$]*(?:[Dd]ate|At|_at|[Tt]ime|[Tt]imestamp|[Ii]so|ISO|[Tt]s)\b/
+  /(?:^|[^A-Za-z0-9_$])(?:[A-Za-z_$][A-Za-z0-9_$]*)?(?:Date|\bdate|_date|At|_at|[Tt]ime|[Tt]imestamp|[Ii]so|ISO|[Tt]s)(?![A-Za-z0-9_$])/
 
 /**
  * Source lines that compare, sort or slice something whose name says it is a
@@ -215,6 +234,10 @@ export function textualTimestampComparisons (source) {
     const line = i + 1
     const bare = text.replace(/\/\/.*$/, '')
     if (/\b(?:parseInstant|compareInstants|isAfter|isBefore|utcDay|sortByInstant|parseEpochSeconds|toUtcInstant)\s*\(/.test(bare)) return
+    // `new Date().toISOString()` is UTC by construction, so a day sliced off
+    // the end of one is the UTC day and is not defect 2. This is the only
+    // exemption in the lint and it is a producer exemption, not a name one.
+    if (/toISOString\(\)\s*\.\s*(?:slice|substring)\(\s*0\s*,\s*10\s*\)/.test(bare)) return
     if (/\.slice\(\s*0\s*,\s*19\s*\)\s*(?:\+|\.concat)/.test(bare)) {
       out.push({
         code: 'TEXTUAL_DROP',
@@ -224,7 +247,11 @@ export function textualTimestampComparisons (source) {
       })
       return
     }
-    if (TIMESTAMP_NAME.test(bare) && /\.(?:slice|substring)\(\s*0\s*,\s*10\s*\)/.test(bare)) {
+    // The receiver of the slice and not the whole line: a line may name a
+    // timestamp and slice something else, which is how a hex digest came to
+    // be reported as a date.
+    const sliced = /([A-Za-z_$][A-Za-z0-9_$.?!\[\]'"()]*?)\s*\??\.\s*(?:slice|substring)\(\s*0\s*,\s*10\s*\)/.exec(bare)
+    if (sliced && TIMESTAMP_NAME.test(sliced[1])) {
       out.push({
         code: 'TEXTUAL_DAY',
         line,

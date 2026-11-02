@@ -1,6 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { partition } from './instant-sweep.mjs'
 import {
   timestampShape, parseInstant, parseEpochSeconds, toUtcInstant,
   compareInstants, isAfter, isBefore, utcDay, sortByInstant,
@@ -151,4 +153,51 @@ test('the repaired instruments carry none of the three defects', () => {
     const found = textualTimestampComparisons(readFileSync(path, 'utf8'))
     assert.deepEqual(found, [], `${path}: ${JSON.stringify(found)}`)
   }
+})
+
+test('the lint does not fire on English words that merely end in "date"', () => {
+  // The first sweep over this repository reported
+  // `createHash('sha256').update(png).digest('hex').slice(0, 10)` as a
+  // timestamp defect, twice, because `update` ends in `date`. This corpus is
+  // the words this repository actually uses.
+  for (const word of ['update', 'validate', 'candidate', 'invalidate', 'consolidate', 'mandate']) {
+    assert.deepEqual(
+      textualTimestampComparisons(`const x = thing.${word}(png).digest('hex').slice(0, 10)`),
+      [], word
+    )
+  }
+  // And it still fires on the camelCase form, which is what the suffix is for.
+  assert.equal(textualTimestampComparisons('const d = r.mainDate.slice(0, 10)').length, 1)
+  assert.equal(textualTimestampComparisons('const d = r.created_at.slice(0, 10)').length, 1)
+  assert.equal(textualTimestampComparisons('const d = firstTs.slice(0, 10)').length, 1)
+})
+
+test('a day sliced off toISOString is the UTC day and is not a finding', () => {
+  assert.deepEqual(textualTimestampComparisons("recordedAt: new Date().toISOString().slice(0, 10),"), [])
+  // The exemption is the producer and not the name: the same slice on a
+  // field is still a finding.
+  assert.equal(textualTimestampComparisons('recordedAt: other.generatedAt.slice(0, 10),').length, 1)
+})
+
+test('no source file outside a test orders timestamps as text', () => {
+  // The gate, and the reason this file imports git. TEXTUAL_ORDER is wrong
+  // wherever it appears; the remaining instances in this repository are all
+  // inside test files that demonstrate the inversion on purpose, and each one
+  // sits next to the instant-aware assertion that contradicts it.
+  const files = execFileSync('git', ['ls-files', '-z', '*.mjs', '*.js', '*.cjs', '*.ts', '*.tsx'], { encoding: 'utf8' })
+    .split('\0').filter(Boolean)
+  const { scanned } = partition(files)
+  const offenders = []
+  for (const file of scanned) {
+    if (/\.test\.(mjs|js|ts|tsx)$/.test(file)) continue
+    let source
+    try { source = readFileSync(file, 'utf8') } catch { continue }
+    for (const f of textualTimestampComparisons(source)) {
+      if (f.code === 'TEXTUAL_ORDER' || f.code === 'TEXTUAL_DROP') offenders.push(`${file}:${f.line} ${f.code} ${f.text}`)
+    }
+  }
+  assert.deepEqual(offenders, [])
+  // A positive control, so a sweep that silently read nothing cannot pass
+  // this test: the tree is not empty and the lint is reachable.
+  assert.ok(scanned.length > 300, `only ${scanned.length} files scanned`)
 })
