@@ -1658,3 +1658,37 @@ between a 43-pixel repair being legible and not.
 The rule, stated once for the family: **a determinism claim needs
 repeats, not a pair.** Two frames agreeing is the weakest evidence that a
 page is reproducible, because the pair is the sample you stopped at.
+
+## L49 — An unrelated `npm install` uninstalls the review kit
+
+**measured**, 2026-11-02. `reviews/2026-11-02/README.md` §5.
+
+The kit installs playwright with `npm i -D --no-save`, deliberately,
+because it is a review tool and not a shipped one and neither site should
+carry it as a dependency. The consequence was not written down anywhere:
+**it is in no `package.json`, so the next plain `npm install` in that
+package removes it.**
+
+This run started a build of `ursa-minor` for an unrelated check, and some
+minutes later every kit tool began failing with `ERR_MODULE_NOT_FOUND` at
+`lib/browser.mjs`. The two events do not look connected. The install
+prints nothing about a package it is removing that nobody declared, and
+the failure surfaces in a different directory against a different tool.
+
+`lib/browser.mjs` already searches `ursa-minor/node_modules`,
+`ursa-major/node_modules` and the repository root in that order, so the
+cheap repair is to install it into the package you are **not** about to
+build. This run put it back into `ursa-major` and carried on.
+
+The transferable half is the one `--no-save` always carries and this
+repository had only ever stated the upside of: **a dependency nothing
+declares is a dependency nothing protects.** It is the right call here,
+and the cost belongs next to the reason.
+
+It also made the better instrument obvious. The check that needed the
+site was "does the freeze still pin the clock", and the site was only
+ever a page to observe it on. Asking the browser what a `requestAnimationFrame`
+callback receives answers it in two seconds with no build at all, and
+that is now the last two lines of `selftest/check-pin-now.mjs`, where
+the claim in `freeze.mjs`'s header has an executable assertion behind it
+for the first time.

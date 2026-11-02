@@ -26,6 +26,13 @@
 //   4. An unparseable instant exits 2 and writes nothing.
 //   5. `--pin-now` with `--live` exits 2, because `--live` applies no init
 //      script and the pin would be accepted and then be inert.
+//   6. The two halves that were already there still work. Adding `now` to
+//      `freezeInit` meant touching the branch that pins `requestAnimationFrame`
+//      (`window.` became `globalThis.`, which is the same object in a page but
+//      is not the same line), and nothing in this repository asserted what
+//      that branch promises. The starfield those two halves exist for is in
+//      `ursa-minor`, and building that site to check them costs a great deal
+//      more than asking the browser directly what a rAF callback receives.
 
 import { createServer } from 'node:http'
 import { mkdtempSync, readFileSync, existsSync, writeFileSync } from 'node:fs'
@@ -105,7 +112,7 @@ check(pinA.equals(pinB), 'pinned, two shoots are byte-identical', `${pinA.length
 //    with the pin applied and the DOM is asked directly. This is the claim
 //    the header of a frame set makes, so it is the one worth checking twice.
 const { launch } = await import(join(KIT, 'lib/browser.mjs'))
-const { freezeContext } = await import(join(KIT, 'lib/freeze.mjs'))
+const { freezeContext, PINNED_MS } = await import(join(KIT, 'lib/freeze.mjs'))
 const browser = await launch()
 const ctx = await freezeContext(await browser.newContext(), { now: Date.parse(PIN) })
 const page = await ctx.newPage()
@@ -124,6 +131,21 @@ check(!existsSync(join(bad.out, 'home-phone.png')), 'the refused call wrote no f
 const both = await refuse('both', ['--pin-now', PIN, '--live'])
 check(both.code === 2, '--pin-now with --live exits 2', `exit ${both.code}`)
 check(/no init script/.test(both.err), 'the refusal says why the pin could not apply')
+
+// 6. the two older halves of the freeze, unchanged by this run and now
+//    asserted for the first time. Defaults, no `now` at all.
+const ctx2 = await freezeContext(await (await launch()).newContext())
+const page2 = await ctx2.newPage()
+await page2.goto(base, { waitUntil: 'networkidle' })
+const old = await page2.evaluate(
+  () =>
+    new Promise((res) => {
+      requestAnimationFrame((t) => res({ t, r: [Math.random(), Math.random()] }))
+    }),
+)
+await page2.context().browser().close()
+check(old.t === PINNED_MS, 'the default freeze still pins the rAF timestamp', `callback got ${old.t}`)
+check(old.r[0] !== old.r[1] && old.r[0] >= 0 && old.r[0] < 1, 'seeded Math.random still returns distinct values in range', `${old.r[0].toFixed(6)}, ${old.r[1].toFixed(6)}`)
 
 server.close()
 writeFileSync(join(WORK, 'base.txt'), base)

@@ -167,12 +167,32 @@ ok    the refusal names the value it was given
 ok    the refused call wrote no frame
 ok    --pin-now with --live exits 2  exit 2
 ok    the refusal says why the pin could not apply
+ok    the default freeze still pins the rAF timestamp  callback got 2000
+ok    seeded Math.random still returns distinct values in range  0.316594, 0.875707
 ```
 
-The first line is the one that earns the other seven. Without a control
+The first line is the one that earns the next seven. Without a control
 showing the fixture differs from itself unpinned, every assertion below
 it would pass just as well on a page that was already deterministic,
 which is L19's trap: a check that cannot fail is not a check.
+
+**The last two are a regression guard on work this run did not do.**
+Adding `now` to `freezeInit` meant touching the branch that pins
+`requestAnimationFrame`: `window.` became `globalThis.`, which is the
+same object inside a page and is not the same line. Nothing in this
+repository asserted what that branch promises, so the claim in
+`freeze.mjs`'s header, that all fifteen frames are bit-identical, rested
+on a review from 2026-10-24f and on nothing executable since.
+
+The starfield those two halves exist for lives in `ursa-minor`, and this
+run tried to build that site to check them. **Do not do that**: `npm
+install` there removes the `playwright` the review kit depends on,
+because the kit installs it with `--no-save` and it is therefore not in
+any `package.json`. The symptom is every kit tool failing with
+`ERR_MODULE_NOT_FOUND` at `lib/browser.mjs` some minutes after an
+unrelated install was started. Asking the browser directly what a rAF
+callback receives answers the same question in two seconds and does not
+need the site at all. L49.
 
 The first version of this file deadlocked, because it drove `shoot.mjs`
 with `execFileSync` while serving the fixture from the same process, so

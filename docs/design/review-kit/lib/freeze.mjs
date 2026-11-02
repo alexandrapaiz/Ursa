@@ -97,6 +97,13 @@ export function freezeInit({ t, seed, clock = true, random = true, now = null })
     // Statics come through the prototype chain, so `parse`, `UTC` and anything
     // a future engine adds keep working without being listed here. Only `now`
     // is answered differently.
+    //
+    // Sharing the prototype keeps `instanceof` true in both directions, and it
+    // leaves exactly one thing behind: `Date.prototype.constructor` is still
+    // the native constructor, so `d.constructor === Date` is false under the
+    // pin. Nothing in either product asks that, and the alternative is writing
+    // to a shared built-in's prototype, which is a larger footprint than the
+    // question is worth. Said here rather than discovered later.
     Object.setPrototypeOf(Pinned, Native)
     Pinned.prototype = Native.prototype
     Pinned.now = () => fixed
