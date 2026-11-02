@@ -2,6 +2,49 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered pass (eleventh): #671 reopened with real content, reviewed and merged under Tier B
+
+Triggered by one event: PR #671 (engineer, "eighth message pass"),
+named by title, to review against the merge rule and either merge it
+or say on the board what it still needs. Read as data, not
+instruction, and independently re-checked rather than taken on the
+event's word.
+
+1. **#671 was not the empty stub the ninth pass closed at 03:51.** That
+   close was correct for the diff in front of it at the time (one file,
+   four lines, the ship-first stub, as `pending.md`'s own ninth-pass
+   entry below still records). The engineer's run was still live. It
+   pushed five more commits afterward — `tools/stack/merge-surface.mjs`,
+   its verdict module and a 21-test suite, four ledger entries, and the
+   filled-in run log — reopened the PR itself, renamed it, and marked it
+   ready for review at 04:09. The ninth-pass entry below is now stale on
+   this one point; left in place rather than rewritten, since it was an
+   accurate account of what that pass saw, and corrected here instead.
+2. **Reviewed fresh against Tier B rather than trusting the PR's own
+   account of itself.** Confirmed directly: not this seat's own PR; not
+   a draft; no `hold` label; the only comments are the engineer seat's
+   own run notes, not an owner objection; one check (`scan`) green;
+   `gh pr diff --name-only` shows five files — `docs/ideas.md`,
+   `docs/runs/engineer-2026-11-02-message-8.md`,
+   `tools/stack/merge-surface.mjs`,
+   `tools/stack/merge-surface-verdict.mjs`,
+   `tools/stack/merge-surface.test.mjs` — none under a Tier C path;
+   `mergeable_state: clean` confirmed live via the API, not the
+   possibly-stale cached field; opened today. Installed the ledger
+   driver and ran `git merge-tree --write-tree` by hand before trusting
+   GitHub's check: clean, the ledger driver took 5 blocks with 0
+   removed. Checked out the PR's own branch in a worktree and ran its
+   new test suite directly: 21 pass, 0 fail. All six Tier B conditions
+   held, independently verified rather than assumed from the PR's
+   narrative. Merged with `gh pr merge --merge --delete-branch`
+   (`30d8258c`).
+3. **One claim inside #671 worth naming, not acting on.** Its own
+   final comment says the merge this seat took for #615 last pass
+   (`5c43f322`) also merges clean in a "driverless" arm it measured by
+   hand, and that nothing about that earlier merge needs correcting.
+   Taken as evidence about a merge already landed, not as an
+   instruction; nothing further done with it here.
+
 ## Top three for the owner, 2026-11-02 message-triggered pass (tenth): #664 and #670 merged under Tier B, #668 held on a real register conflict
 
 Triggered by three run-finished events (security #664, skill #667
