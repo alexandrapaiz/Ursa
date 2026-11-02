@@ -17,7 +17,7 @@
 // and not a verdict on any draft.
 //
 // WHY THIS EXISTS, with the measurement that produced it (2026-11-02, this
-// seat's seventh message pass, over 66 of this repository's pull requests).
+// seat's seventh message pass, over 120 of this repository's pull requests).
 //
 // Two org rules meet on a draft pull request and neither one carries the fact
 // the other needs. `docs/standards/pm.md` §8 says open the draft before the
@@ -31,64 +31,72 @@
 // Ursa's PM read this seat's draft 661 and commented that "the run behind it
 // ended 8 minutes before the claim reached me." The silence it measured was
 // real: 6 minutes 48 seconds, from that draft's third commit at 02:56:20 to
-// the comment at 03:03:08. The inference from it was wrong by every margin
-// available. That run pushed its fourth commit at 03:03:46, 38 seconds after
-// the death call, and readied the pull request itself at 03:08:11, five
+// the comment at 03:03:08. The inference drawn from it was wrong by every
+// margin available. That run pushed its fourth commit at 03:03:46, 38 seconds
+// after the death call, and readied the pull request itself at 03:08:11, five
 // minutes after it. Worse, the threshold was already contradicted by the
-// draft it was applied to: the same run had shown silences of 6m26s and 6m00s
+// draft it was applied to: the same run had shown silences of 6m12s and 6m00s
 // earlier in the same window, so 6m48s was not an outlier in that pull
 // request, it was that pull request's own normal pace.
 //
 // THE DISTRIBUTION, which is why no silence threshold in minutes can work
-// here. Of 66 pull requests read, 47 were drafts readied within six hours of
-// being opened, which is this organization's one-run window. Inside those 47
-// windows there are 192 silences bounded on both sides by action from the same
-// run, so every one of them is a silence a live run demonstrably produced:
+// here. Of 120 pull requests read, 34 are windows that one run demonstrably
+// owns end to end, across 9 different seats; `oneRunWindowFault` below is the
+// four exclusions that get there and `tools/seat/draft-fault-measure.mjs`
+// prints what each one removed, which is the part a reviewer can argue with.
+// Inside those 34 windows there are 116 silences bounded on both sides by
+// action from that same run, so every one of them is a silence a live run
+// produced:
 //
-//     median 1.74 min, p90 8.43 min, p99 16.75 min, max 57.05 min
+//     median 2.17 min, p90 9.3 min, p99 17.17 min, max 57.57 min
 //
-// 15.6 per cent of them are longer than the 6m48s that was read as death. The
-// longest, 57 minutes, is `#642`: the frontend seat opened a draft at
-// 01:05:02, pushed nothing until 02:02:36, and readied it at 02:12:35. A
+// 21 of the 116, which is 18.1 per cent, are longer than the 6m48s that was
+// read as death. The longest, 57.57 minutes, is `#642`: the frontend seat
+// opened a draft at 01:05:33, pushed nothing until 02:02:36, and readied it at
+// 02:12:35, and the next frontend run opened its own pull request 78 seconds
+// after that ready, which is what pins the whole 67 minutes to one run. A
 // reader applying any threshold under an hour calls that run dead while it is
-// working. And the draft lifetimes themselves run to 67 minutes, median 12.4,
-// with 13 of 47 longer than the 19 minutes of age at which 661 was called
-// ended, so draft age fails for the same reason.
+// working. Draft lifetimes fail the same way: median 10.27 min, p90 27.07,
+// max 67.55, with 10 of 34 longer than the 19 minutes of age at which 661 was
+// called ended.
 //
 // WHAT WORKS INSTEAD, and it is evidence rather than a better threshold. A run
 // in this organization works one branch: the harness hands it a branch name
-// and its charter forbids a second pull request in the same run. So the
-// question "is the run behind this draft still working" has a positive answer
-// available, and it is not on the draft. It is on the seat's other branches.
-// If the seat that owns this draft has pushed to a *different* branch more
-// recently than to this one, the run behind this draft is not the run now
-// working, and a reader may resolve the draft without racing anybody. If the
-// newest thing that seat has pushed anywhere is this draft's own tip, then
-// nothing distinguishes "ended" from "mid-turn" and the honest answer is a
-// refusal.
+// and its charter allows one pull request per run. So the question "is the run
+// behind this draft still working" has a positive answer available, and it is
+// not on the draft. It is on the seat's other branches. If the seat that owns
+// this draft has pushed to a *different* branch more recently than to this
+// one, the run behind this draft is not the run now working, and a reader may
+// resolve the draft without racing anybody. If the newest thing that seat has
+// pushed anywhere is this draft's own tip, then nothing distinguishes "ended"
+// from "mid-turn" and the honest answer is a refusal.
 //
 // Checked against the night it came from: at 03:03:08 the newest `engineer`
 // push anywhere was 661's own tip, so this tool refuses, which is the right
-// answer five minutes before the run proved it.
+// answer five minutes before the run proved it. At 03:12:57, when this seat's
+// seventh run pushed to `-message-7`, the same call returns `null` and 661
+// becomes a thing a reader may act on, which is also correct, and arrives
+// without anyone having to guess a number.
 //
 // THE ONE THRESHOLD THAT SURVIVES, and why it is a day and not an hour.
 // `--stale-minutes` exists because a draft from last week is obviously
 // resolvable and should not need a sibling branch to say so. Its default is
 // 1440, one day, which is 25 times the longest proven-live silence above. A
-// run on this host is capped at 45 minutes of wall clock by its workflow, so a
-// day of silence is not a pause. `thresholdFault` refuses any value at or
-// below 57.05 and says why, so the next seat cannot quietly tune this down to
-// the number that failed tonight.
+// GitHub-runner run is capped at 45 minutes of wall clock by its workflow and
+// a resident run has not been observed past 68, so a day of silence is not a
+// pause. `thresholdFault` refuses any value at or below 57.57 and says why, so
+// the next seat cannot quietly tune this down to the number that failed
+// tonight.
 //
-// WHAT THIS DOES NOT SEE, named because the refusal is only honest if its
-// blind spot is. The activity set is built from open pull requests, so a run
-// that has not opened one yet is invisible to it, and a run whose only pull
-// request was merged mid-run reads as absent. Both failures point the same
-// way: the tool refuses more often than it must, never less. Second, the
-// activity timestamp is a commit's committer date and not a push time, which
-// is the only per-branch time GitHub will hand back in one request; a rebase
-// rewrites it. Both are reasons to treat `licensed` as permission to act and
-// `not licensed` as a fact, rather than the reverse.
+// WHAT THIS DOES NOT SEE, named because a refusal is only honest if its blind
+// spot is. The activity set is built from open pull requests, so a run that
+// has not opened one yet is invisible to it, and a run whose only pull request
+// was merged mid-run reads as absent. Both failures point the same way: the
+// tool refuses more often than it must, never less. Second, the activity
+// timestamp is a commit's committer date and not a push time, which is the
+// only per-branch time GitHub will hand back in one request; a rebase rewrites
+// it. Both are reasons to treat `licensed` as permission to act and `not
+// licensed` as a fact, rather than the reverse.
 import { seatOfBranch } from './charter-lag.mjs'
 
 // --- pure core ----------------------------------------------------------
@@ -99,21 +107,67 @@ const MS_PER_MIN = 60_000
 // read, so a number quoted in prose and a number used in code cannot drift.
 export const MEASURED = {
   on: '2026-11-02',
-  source: 'gh api repos/alexandrapaiz/Ursa/pulls/<n>/commits and /issues/<n>/timeline, over the 120 newest pull requests; 66 answered with both',
-  prsRead: 66,
-  oneRunWindows: 47,
-  silences: 192,
-  silenceMedianMin: 1.74,
-  silenceP90Min: 8.43,
-  silenceP99Min: 16.75,
-  silenceMaxMin: 57.05,
+  reproduce: 'node tools/seat/draft-fault-measure.mjs --prs 120',
+  prsRead: 120,
+  oneRunWindows: 34,
+  seatsRepresented: 9,
+  silences: 116,
+  silenceMedianMin: 2.17,
+  silenceP90Min: 9.3,
+  silenceP99Min: 17.17,
+  silenceMaxMin: 57.57,
   silenceMaxPr: 642,
-  lifetimeMedianMin: 12.4,
-  lifetimeMaxMin: 67.0,
+  lifetimeMedianMin: 10.27,
+  lifetimeP90Min: 27.07,
+  lifetimeMaxMin: 67.55,
   // The call this tool exists to refuse, kept as data so the test can replay it.
   misreadSilenceMin: 6.8,
-  misreadSharePercent: 15.6
+  misreadAgeMin: 19,
+  silencesLongerThanMisread: 21,
+  lifetimesLongerThanMisreadAge: 10
 }
+
+// Is a readied draft's [first commit, ready] span the work of ONE run, so that
+// every silence inside it is a silence a live run demonstrably produced?
+// Returns null when it qualifies, else the reason it does not, because a
+// measurement whose exclusions are not printed is a measurement nobody can
+// check. Each test below matches a practice this organization states
+// somewhere, and the counts each one removed are in the measure script's
+// output.
+//
+//   window        { number, branch, createdAt, readyAt, commitDates[] }
+//   seatActivity  [{ branch, at }] for every seat, filtered here
+export function oneRunWindowFault (window, seatActivity) {
+  const ready = Date.parse(window.readyAt ?? '')
+  if (Number.isNaN(ready)) return 'never a readied draft, so there is no window'
+  const own = window.commitDates.map(Date.parse).filter((t) => !Number.isNaN(t) && t <= ready).sort((a, b) => a - b)
+  if (!own.length) return 'no commit before the ready'
+  const start = own[0]
+
+  // A per-run branch carries the run's date (`<seat>/YYYY-MM-DD-<trigger>`).
+  // A branch without one is a long-lived lane, not a run.
+  if (!/\/\d{4}-\d{2}-\d{2}-/.test(window.branch)) return 'branch name carries no run date'
+
+  // Ship-first (§8) puts the first commit seconds before the pull request. A
+  // first commit much older than the pull request is a stacked or rebased
+  // branch carrying another run's history, which is what put a 5.8-day
+  // "live silence" in the first pass of this measurement.
+  const created = Date.parse(window.createdAt ?? '')
+  if (!Number.isNaN(created) && created - start > 10 * 60_000) {
+    return 'first commit predates the pull request by over 10 min, so the branch carries another run history'
+  }
+
+  // A run works one branch, which is the same premise `draftFault` rests on.
+  const seat = seatOfBranch(window.branch)
+  const elsewhere = seatActivity.some((a) => {
+    const t = Date.parse(a.at)
+    return seatOfBranch(a.branch) === seat && a.branch !== window.branch && t > start && t < ready
+  })
+  if (elsewhere) return 'the same seat committed to another branch inside the window'
+
+  return null
+}
+
 
 // Minutes between consecutive timestamps that fall inside [from, to].
 // `from` and `to` are themselves actions, so every gap returned is bounded on
