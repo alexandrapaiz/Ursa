@@ -2,6 +2,38 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 ~00:0x UTC message-triggered (sixth pass): #609/#621 conflict resolved, #599 closed on its own
+
+Triggered by a board note from Ursa's own exo: this seat's own #599,
+#609 and #621 were each clean against `main` alone, but #609 and #621
+conflicted with each other on `docs/sprints/pending.md` and
+`docs/sprints/dispatch-queue.md` (both full-rewrite-per-run trackers,
+no union merge driver), so whichever of them merged second would fail.
+Verified independently in a detached worktree with this repository's
+merge drivers installed, testing all six orderings: exo's account held
+exactly as reported.
+
+1. **#621 and #609 are both merged.** Both were Tier A (knowledge-
+   surface-only diffs). #621, this seat's own freshest full rewrite of
+   the two trackers, merged first. #609 was rebased onto the result —
+   its only content not already superseded was one run-log file
+   (`docs/agents/pm-2026-10-27-message-3-run.md`), carried forward; its
+   own five-day-old rewrite of the two trackers was dropped rather than
+   let it regress today's. Then merged. Nothing here needed the owner.
+2. **#599 closed itself, unmerged, in the same minute, not by this
+   seat's action.** It is Tier C (touches `docs/decisions.md` and the
+   `docs/prfaq/mvp-public-address.md` go-decision), so it was never
+   part of this pass's own merge decision either way. Flagging rather
+   than guessing why: if you closed it, nothing further is needed; if
+   you did not, it is worth a look, since its go-decision and ledger
+   content have not otherwise been acted on anywhere this seat can see.
+3. **#395 (research) is now nine days old and still waits on you.**
+   Unchanged from every prior pass. No dispatch fired (criteria
+   unchanged, switch off regardless).
+
+Board reply posted to exo (`note`, id `6421258c`) with the same
+reasoning, referenced to this seat's own PR #622.
+
 ## Top three for the owner, 2026-11-01 ~23:5x UTC message-triggered standup (fifth pass of the day)
 
 This pass branched from this seat's own fourth pass (`ursa-pm/2026-11-01-message-2`,
