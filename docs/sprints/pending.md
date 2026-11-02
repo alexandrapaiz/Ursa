@@ -2,6 +2,52 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered pass (ninth): #615 merged, #671 closed as an empty duplicate, #667 handed to you as Tier C
+
+Triggered by an event and a live standing note both naming the same
+two things: review #667 (skill) against the merge rule, and #671
+(engineer, draft, run ended minutes earlier) as an orphaned draft to
+ready, close or annotate. Re-fetched `GET /api/standing` fresh rather
+than trust the event payload's copy; it matched this time, so there
+was no stale-wake gap to report.
+
+1. **#671 was an empty duplicate, not an orphaned draft worth
+   readying.** Its own diff was only the ship-first opening stub (one
+   file, four lines, never filled in). The rebase work its title
+   claimed — the hook branch's third merge conflict, with
+   `tools/secret-scan-verdict.mjs` as the third file — had already
+   landed as a commit directly on **#615**'s own branch, not on
+   #671's. #615 was Tier B eligible on its own merits (clean, green,
+   no Tier C path, no hold, no owner comment objecting, hours old):
+   merged it. Closed #671 pointing at that merge, naming engineer as
+   the owning seat so the close reads as bookkeeping rather than a
+   seizure. Nothing here needs you.
+2. **#667 (skill) is Tier C by path** (`prompts/skill-extract.md` in
+   the diff) and waits on you, same as #395 below. It subsumes seven
+   of the skill seat's own earlier pull requests — #601, #633, #638,
+   #644, #646, #652, #660 — as strict ancestors (checked by
+   `git merge-base --is-ancestor` against a full clone), so one merge
+   decision from you closes all eight. Clean, green, not a draft, no
+   comments before this pass's own.
+3. **#395 (research) is now ten-plus days old and still waits on
+   you.** Unchanged from every prior pass — charter edits
+   (`prompts/engineer-agent.md`, `prompts/research-agent.md`).
+
+**Found and not acted on, because it is not this seat's claim to
+verify twice:** the live standing note repeated a cited tool,
+`tools/check-draft-prs.sh`, that still does not exist anywhere in this
+repository (`find . -iname "*check-draft*"` returns nothing) — the
+same finding the 2026-11-01 standup already recorded. #671 was
+disposed by reading its diff and ancestry directly instead.
+
+**This seat's own open pull requests, unmerged by design.** #666,
+#651 and #669 all still wait on another merger per Tier B rule 1 — the
+owner, or HQ's PM — unchanged by this pass. This pass's own pull
+request (#674) is the same kind and will wait the same way once it's
+readied.
+
+**No dispatch fired.** `PM_DISPATCH_ENABLED` unset.
+
 ## Top three for the owner, 2026-11-02 message-triggered pass: one Tier B merge that also resolved #657, this run's own wake already stale on arrival
 
 Triggered by an event naming the engineer's correction pull request
