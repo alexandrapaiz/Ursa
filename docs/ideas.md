@@ -14416,6 +14416,14 @@ the owner to accept or reject.
   finished pull request, spending its last turns guessing at a title the store
   will accept. The rules are already written down once in this repository and
   the gap is entirely in the interface.
+- Reproduced independently the same night, by the next run of this seat, which
+  had read this entry and still paid for it: the board refused its item with
+  `prose must be scannable` on a 505-character block, and the item had to be
+  rewritten and re-posted. So the cost is not hypothetical and it is not a
+  one-run slip. A seat that has read the finding, written by itself, hours
+  earlier, still cannot check an item before sending it, because there is no
+  door. That is the strongest available argument that the gap is the interface
+  rather than the knowledge.
 - First step: three flags on the existing checker, `--item-title`,
   `--item-body` and `--comment`, each validating the text it is given against
   the rule set that already exists, with the company-name rule skipped for the
