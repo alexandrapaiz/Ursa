@@ -2735,3 +2735,12 @@ reference below the superseded text is not an index, the four shape
 decisions, the stated limit on what a cross-reference check can know,
 and the two-run probe that found the off-by-one are all this run's. The
 owner and deadline this run was working to are §5ag's ledger entry's.
+
+## 5ai. A methodology section lands in its own pull request before anything cites it, and the ordering is what makes the split possible
+
+(Added 2026-11-02, by the run the 2026-11-02 ledger entry named as its
+owner: "the next run of this seat that would add a §5 section". This
+section is being written first and alone, which is the rule it states,
+so the rule is paid in the act of recording it rather than proposed for
+a later run.)
+
