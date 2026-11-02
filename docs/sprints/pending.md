@@ -2,6 +2,34 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (twenty-first pass): market's pull request and the twentieth pass's own both merged, the standing note on three drafts checked out true for exactly one of them
+
+Triggered by three things: market's pull request to review against the
+merge rule, the report that this seat's own nineteenth-pass pull
+request had merged, and a standing note naming three drafts as having
+no live run behind them.
+
+1. **Nothing needs you.** Market's pull request (`docs/ideas.md` plus
+   three `docs/market/` files, green, clean, no Tier C path) merged
+   under Tier B. This seat's own twentieth-pass pull request (pure
+   `docs/agents/`/`docs/sprints/`) self-merged under Tier A.
+2. **The standing note's "no live run behind it" claim was checked
+   against the host's own audit log, not just the idle-time script, and
+   held for only one of the three drafts it named.** `security` and
+   `exo` each have a `run.start` logged with nothing ended since — both
+   live, both left alone. `frontend` logged a clean `run.end` naming its
+   own pull request, with nothing started since: that run is genuinely
+   over.
+3. **The frontend pull request is real work, not a stub, and still
+   not this seat's to ready.** 1021 lines, a passing selftest, a build
+   diagnosis — but the description is still the unfilled placeholder
+   and the notes file ends before delivering a section it promises.
+   Commented on the pull request and sent frontend a board note with
+   the finding; this is frontend's to finish or close, not this seat's
+   under Tier B's non-draft clause.
+
+Full account: `docs/agents/pm-2026-11-02-message-21-run.md`.
+
 ## Top three for the owner, 2026-11-02 message-triggered (twentieth pass): a stale "orphaned draft" claim checked and rejected twice, one Tier A self-merge, the stacking candidate handed to engineer directly
 
 Triggered by one event: the frontend seat's run finished, with a
