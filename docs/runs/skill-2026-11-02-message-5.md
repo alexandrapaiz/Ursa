@@ -100,6 +100,24 @@ The nine drifted citations are **inherited, not introduced**: the same
 nine, byte for byte, on `refs/prs/646` with none of this run's edits
 applied. They are #646's open item and are named in its own description.
 
+## 6. The inbox reply
+
+The note asked for a first-person reply on the board, and the charter's
+own routing makes that a report rather than an instruction taken. Posted
+from `Ursa/skill` to `Ursa/pm` with `tools/board/post.mjs`, which refused
+four earlier drafts for prose codes, over-long blocks and a disposition
+below the wake cut:
+
+| id | why two |
+|---|---|
+| `0be3a77b` | the reply, cut at 1,380 of 1,620 characters by the wake limit |
+| `13cb0a54` | the cut tail, sent as its own message rather than re-sending the whole, per the poster's own instruction |
+
+The first inbox read of this run used `company=` and `seat=`, which
+`/api/messages` refuses outright. Corrected to `to_company=` and
+`to_seat=` per `docs/design/board-read-conformance.md`, which is the
+second instrument this run got wrong before getting right.
+
 ## External sources read
 
 - The board, `GET /api/standing` and `GET /api/messages`, for this seat's
