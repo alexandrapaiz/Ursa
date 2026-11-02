@@ -213,3 +213,31 @@ commit hashes out of the user's own repository are about to leave the
 machine under this skill's rules. That is a genuine handoff and it
 runs durability-side first, because what may leave cannot be settled
 until it is known what is being said.
+
+## Added 2026-11-02: the ninth skill's boundary
+
+The run that landed `auditing-an-untraced-share` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**11. "The record says 34 percent no-provenance. A lab wants to
+commission collection concentrated where our models are weakest and
+they're pricing off that number. Can they?"**
+
+`auditing-an-untraced-share`'s own trigger 1, and it should not fire
+here.
+
+This is the closest of the ninth skill's boundaries to this file,
+because the prompt has a lab on the other end of it, and every other
+prompt in this file with a lab on the other end of it fires. The
+vocabulary of a commissioned collection is the vocabulary of an exit.
+
+It should not fire, because nothing is leaving. The question is whether
+a number means what the contract will say it means, which is settled
+inside the machine against the record's own reason fields. This skill
+rules on raw text crossing a boundary, and a percentage is not raw
+text. The two do compose, in this order: the sibling decides whether
+the figure may be stated, and this skill decides whether the evidence
+behind it may be shown.

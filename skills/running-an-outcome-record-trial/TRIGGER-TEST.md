@@ -297,3 +297,33 @@ remedy is a trial choice and this skill owns it.
 So the routing is: the durability skill answers whether the two
 numbers measured comparable things, and hands back here only if the
 answer is that one of the projects was never a viable trial.
+
+## Added 2026-11-02: the ninth skill's boundary
+
+The run that landed `auditing-an-untraced-share` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**12. "Our no-provenance share went from 27 to 41 percent across two
+records of the same repo and nothing about the project changed. Is that
+signal or is the matcher going blind?"**
+
+`auditing-an-untraced-share`'s own trigger 2, and it should not fire
+here.
+
+This is the closest of the ninth skill's boundaries to this file, and
+it is the same collision this file's own section above records for
+fire-prompt 3: two records of one project reporting different numbers,
+asked without saying which number. Here the answer is about capture and
+comparability, and the sibling's is about composition.
+
+It should not fire, because the prompt says nothing about the project
+changing and everything about a share moving, which routes it to
+composition. The two skills meet at one precondition and the direction
+is one-way: this skill owns capture completeness, including the clone's,
+and the sibling cites it as a precondition before reading any reason
+field, because a generation the run never loaded lands every span over
+its text in the one value that means the model was never in the
+running.
