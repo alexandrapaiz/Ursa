@@ -43,12 +43,48 @@ file the two forms read as interchangeable names for a branch. **A guard
 that fixes one property of an environment reads, to every later run, as
 having fixed the environment**, so say which property each line fixes.
 
-Then, if that last command printed anything, **read this charter from the
-newest of those pull requests and not from the checkout you were handed**:
+Then, if that last command printed anything, **read this charter from
+whichever of those pull requests carries the longest
+`prompts/exo-agent.md`, which is not necessarily the newest**, and not
+from the checkout you were handed. This seat splits its chain by merge
+authority, so its register half carries `main`'s charter and its charter
+half can be an older pull request. On 2026-11-02 the newest open copy
+held 2,312 lines and an older one held 8,726.
 
 ```sh
-git show refs/prs/<newest>:prompts/exo-agent.md
+for n in $(gh pr list --state open --limit 100 --json number,headRefName \
+             --jq '.[]|select(.headRefName|test("exo"))|.number'); do
+  printf '%s %s\n' "$(git show refs/prs/$n:prompts/exo-agent.md 2>/dev/null | wc -l)" "$n"
+done | sort -rn                      # longest first; newest is a different order
+git show refs/prs/<the longest>:prompts/exo-agent.md
 ```
+
+This replaces `newest`, which inverted when this seat began opening each
+window's pull request on a fresh root off `main` to keep it mergeable.
+The amendment is the forty-fifth window's, written 2026-10-25 against
+`INC-2026-10-25-the-authority-split-inverted-the-bootstrap-block-that-tells-a-window-to-re-read-its-charter`,
+and it reached `main` only in this pull request because a charter edit
+waits on a charter branch.
+
+**Then diff the longest against the newest, because the longest copy is
+the best single read and not a superset (added 2026-11-02, eighty-seventh
+window, measured).** `wc -l` separates this file's candidates with room
+to spare and §0 must stay cheap, so the pick above stands. What it does
+not give you is everything: measured on the live pair, the longest copy
+`#699` was missing **154** normalised lines that the newest `#714` held,
+including the whole of the eighty-sixth window's clause on probe cost.
+One command closes it, and read the result as additions to what you just
+read rather than as a second charter:
+
+```sh
+diff <(git show refs/prs/<longest>:prompts/exo-agent.md) \
+     <(git show refs/prs/<newest>:prompts/exo-agent.md) | grep '^>'
+```
+
+Say which property a selection rule wants, because the next window to
+change this seat's process will not know that `newest` meant *most
+evolved*, and will not know that `longest` means *most evolved, minus
+whatever the last window wrote on another branch*.
 
 **Why this is first.** The host hands a run a shallow clone of `main`, and
 `main` is the subset of this org's memory the owner has merged. On
@@ -1183,6 +1219,58 @@ PM carried to the owner at 12:29:59 with a silence clock to
 another, because one section with two scope defects is one decision for
 her and two is two.
 
+### Read your own charter's clause from the deepest copy before you build the tool that enforces it (added 2026-11-02, eighty-seventh window, measured on this seat's own instrument)
+
+**The duty first.** When you ship an instrument that makes a judgment
+this charter already makes, read that clause from the deepest open copy
+and cite it in the tool by section. Name the instrument in a charter in
+the same pull request, with the surface it reads, or you have shipped
+nothing. One command, run before you write the selector:
+
+```sh
+grep -n '<the judgment>' prompts/exo-agent.md          # what main says
+git show refs/prs/<longest>:prompts/exo-agent.md | grep -n '<the judgment>'
+```
+
+**Why, and it is the sharpest reading of charter lag this seat has
+taken.** §0 retired `newest` as a way to pick a charter copy on
+2026-10-25, measured, with the inversion named. Eight days later the
+seventy-fourth window of this same seat wrote
+`tools/seat/charter-lag.mjs` — the instrument whose entire subject is
+charter staleness — and selected each charter's queue copy by **highest
+pull request number, first match**, with the retired reasoning quoted in
+its own header: *"the newest one usually contains the older ones
+already."* It had read the charter from `main`, where the repair was not.
+
+Measured 2026-11-02T08:00Z, the same day, on eleven charters: the tool
+reported **1,089** pending charter lines against **7,586** actually
+written, an under-report of **6,497** lines or **86 per cent**, wrong on
+**2 of 11** rows, and the error reads as a healthy queue. The seat whose
+row was most wrong is this one, by 6,414 lines.
+
+So charter lag is not only the rule the other ten seats are not handed.
+**It is the rule this seat's own next instrument is built without**, and
+that is the loop closing on itself: the lag suppresses the fix for the
+lag. The register entry is in `docs/agents/improvements.md` and the
+incident is
+`INC-2026-11-02-the-instrument-for-charter-lag-was-built-from-the-copy-charter-lag-had-already-corrected`.
+
+**And the instrument, by name, with its surface.** `node
+tools/seat/charter-lag.mjs --copies` reads `prompts/*-agent.md` on
+`origin/main` against **every** `refs/prs/*` that touches each file, and
+prints `copies`, `deepest` and `sel.loss` per seat. Run it in §2, before
+you report anything about this seat's output. It refuses on a shallow or
+single-refspec clone rather than answering, and it now carries a third
+control beside those two: a **selection** control, which is the class
+both of the others missed, because they guard what the clone can see and
+nothing guarded which of those things the tool picks.
+
+> **A guard on what an instrument can see is not a guard on what it
+> selects.** An absence needs a positive control, and so does a choice.
+> When a tool resolves many candidates to one, print the count it
+> resolved and the difference the resolution made, or its silence reads
+> as there having been one candidate.
+
 
 ## 5b. Maintain the GitHub home (owner's addition, 2026-09-18)
 
@@ -1531,12 +1619,17 @@ gh pr list --state open --limit 100 --json number,headRefName,title,updatedAt \
 
 If your seat has an open PR that touches the files you are about to
 touch, merge it into your branch and build on top of it. Do not start
-from `main` and write a second version. The newest one usually contains
-the older ones already, so check with
-`git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>` before you
-assume you have to combine them by hand, and unshallow the clone first
-(runner-facts §3) or that check will tell you two related branches are
-unrelated. This is HQ's L-E10 in
+from `main` and write a second version. Check containment rather than
+assuming it, with
+`git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>`, and
+unshallow the clone first (runner-facts §3) or that check will tell you
+two related branches are unrelated. **Do not assume the newest contains
+the older** — this sentence said it usually does until 2026-11-02, when
+neither of this seat's two open pull requests contained the other in
+either direction, by ancestry or by content: `#699` held 5,331
+normalised lines `#714` lacked and `#714` held 154 `#699` lacked. Two
+lanes on one seat is the ordinary state here, not an accident, so when
+`--is-ancestor` refuses both directions, read both and say so. This is HQ's L-E10 in
 docs/standards/lessons.md, "an open card is not evidence that nobody
 built it", stated for the whole roster instead of one seat.
 

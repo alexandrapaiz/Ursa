@@ -46,6 +46,35 @@
 // Both failures are silent and both are quiet in the direction that says
 // everything is fine, so this tool refuses to print a table until it has
 // proved it can see both sides. `tools/ensure-full-clone.sh` is the repair.
+//
+//   selection  THE THIRD ONE, and it is this file's own (added 2026-11-02,
+//            eighty-seventh window, measured on the row for the seat that
+//            wrote this tool). The two controls above guard what the clone
+//            can SEE. Nothing guarded which of the things it can see this
+//            tool PICKS. `newestQueueCopy` took the highest open pull
+//            request number that touches a charter and returned the first
+//            match, on the stated reasoning that "the newest one usually
+//            contains the older ones already" -- which is also the charter's
+//            own §0 and its all-seats rule. On the day this file was written
+//            that was true, and its header above recorded the newest copy at
+//            7,732 lines. By 2026-11-02T08:00Z the same read returned
+//            #714 at 2,312 lines while #699 held 8,726, because this seat
+//            had adopted the practice of opening each window's pull request
+//            on a fresh root off `main` to keep it mergeable. That practice
+//            is right and it decoupled recency from depth, so the selector
+//            inverted without changing. It reported +91 pending exo lines
+//            against +6,505 actually written, and 1,089 for the company
+//            against 7,586: it lost 6,497 lines, 86 per cent of the total,
+//            on 2 of 11 rows, and the loss reads as a healthy queue.
+//
+// So this tool now reads EVERY open copy of every charter and never picks
+// one. `pending` is computed from the deepest copy and is a FLOOR, not the
+// answer: depth is not containment either. Measured the same day, the exo
+// pair diverges in both directions (#699 holds 5,331 normalised lines #714
+// lacks, #714 holds 154 #699 lacks), and research's longest copy #395 is
+// 83 lines longer than #699 while lacking 97 of its lines. There is no
+// single copy to read. The `copies` column exists so the reader stops
+// looking for one.
 import { execFileSync } from 'node:child_process'
 import { readdirSync } from 'node:fs'
 
@@ -120,7 +149,29 @@ export function utcDay (iso) {
   return ms === null ? '?' : new Date(ms).toISOString().slice(0, 10)
 }
 
-// One row per charter. `queue` is null when no open pull request touches the
+// Every open copy of one charter, newest first, normalised from either shape
+// the caller may hold: `copies: [{number, lines}]` or the single-pick
+// `queue: {number, lines}` this file used until 2026-11-02. The old shape is
+// kept as the degenerate one-copy case rather than deleted, because a caller
+// holding one copy is a real state (one open pull request touches the file)
+// and is not the same state as the selector having discarded the rest.
+export function copiesOf (charter) {
+  if (Array.isArray(charter.copies)) return charter.copies.filter(Boolean)
+  return charter.queue ? [charter.queue] : []
+}
+
+// What the two selectors return for one charter, side by side, so the row can
+// carry the difference instead of the tool resolving it. `deepest` is the copy
+// with the most lines and `newest` is the highest pull request number, which
+// are the same copy only while this seat ships one chain at a time.
+export function selectCopies (copies) {
+  if (copies.length === 0) return { newest: null, deepest: null, count: 0 }
+  const byNumber = [...copies].sort((a, b) => b.number - a.number)
+  const byLines = [...copies].sort((a, b) => (b.lines ?? 0) - (a.lines ?? 0))
+  return { newest: byNumber[0], deepest: byLines[0], count: copies.length }
+}
+
+// One row per charter. `queuePr` is null when no open pull request touches the
 // file, which is a different row from a queue this clone cannot see; the
 // caller proves it can see the queue before it calls this.
 export function buildRows ({ charters, branches, nowIso }) {
@@ -132,30 +183,65 @@ export function buildRows ({ charters, branches, nowIso }) {
         frozenAt !== null && instant(b.createdAt) !== null &&
         instant(b.createdAt) > frozenAt
     )
+    const copies = copiesOf(c)
+    const { newest, deepest, count } = selectCopies(copies)
+    // `pending` is read off the deepest copy and is a floor: the union of
+    // distinct lines across copies can exceed any single one of them, which
+    // is measured for two of this repository's charters in the header.
+    const pendingLines = deepest ? deepest.lines - c.mainLines : 0
+    const recencyPendingLines = newest ? newest.lines - c.mainLines : 0
     return {
       seat: c.seat,
       path: c.path,
       mainDate: c.mainDate,
       mainLines: c.mainLines,
       lagDays: lag === null ? null : Math.round(lag * 10) / 10,
-      queuePr: c.queue ? c.queue.number : null,
-      queueLines: c.queue ? c.queue.lines : null,
-      pendingLines: c.queue ? c.queue.lines - c.mainLines : 0,
+      queueCopies: count,
+      queuePr: deepest ? deepest.number : null,
+      queueLines: deepest ? deepest.lines : null,
+      newestPr: newest ? newest.number : null,
+      newestLines: newest ? newest.lines : null,
+      pendingLines,
+      recencyPendingLines,
+      // What the selector this file shipped until 2026-11-02 would have
+      // dropped from this row. Zero on every row where recency and depth
+      // still agree, which is what makes its non-zero rows worth printing.
+      selectionLoss: Math.max(0, pendingLines - recencyPendingLines),
       runsHandedStale: since.length
     }
   })
 }
 
+// The selection fault, stated in the same shape as the clone's two: what was
+// silently discarded, named by the property it is a fault in. Empty is the
+// honest reading when every charter has at most one open copy, and that is a
+// fact about the queue on the day rather than about this tool being right.
+export function selectionFaults (rows) {
+  const multi = rows.filter((r) => r.queueCopies > 1)
+  const split = multi.filter((r) => r.newestPr !== r.queuePr)
+  if (split.length === 0) return []
+  const lost = split.reduce((n, r) => n + r.selectionLoss, 0)
+  return [
+    `selection: ${multi.length} of ${rows.length} charters hold more than one open copy, ` +
+    `and on ${split.length} of them the newest copy is not the deepest ` +
+    `(${split.map((r) => `${r.seat} #${r.newestPr}->#${r.queuePr}`).join(', ')}). ` +
+    `Reading the newest alone would report ${lost} fewer pending lines. ` +
+    'Read every copy; depth is not containment either.'
+  ]
+}
+
 export function formatTable (rows) {
-  const head = ['seat', 'charter on main', 'lag', 'lines', 'queue', 'q.lines', 'pending', 'stale runs']
+  const head = ['seat', 'charter on main', 'lag', 'lines', 'copies', 'deepest', 'q.lines', 'pending', 'sel.loss', 'stale runs']
   const body = rows.map((r) => [
     r.seat,
     utcDay(r.mainDate),
     r.lagDays === null ? '?' : `${r.lagDays}d`,
     String(r.mainLines),
+    String(r.queueCopies ?? 0),
     r.queuePr === null ? '-' : `#${r.queuePr}`,
     r.queueLines === null ? '-' : String(r.queueLines),
     r.pendingLines > 0 ? `+${r.pendingLines}` : '0',
+    r.selectionLoss > 0 ? `-${r.selectionLoss}` : '0',
     String(r.runsHandedStale)
   ])
   const w = head.map((h, i) => Math.max(h.length, ...body.map((b) => b[i].length)))
@@ -200,19 +286,23 @@ function lineCount (rev, path) {
   return blob === null ? null : blob.split('\n').length
 }
 
-// The newest open pull request that changes this charter, newest by pull
-// request number, which on this host is creation order. Read from the local
-// refs/prs/* mirror so the measurement does not depend on the API being up.
-function newestQueueCopy (path, openPrs, mainRev) {
+// EVERY open pull request that changes this charter, newest first. This used
+// to return the first match and was called `newestQueueCopy`; the loop body
+// is unchanged and the `return` became a `push`, which is the whole repair
+// and is why it is worth naming what the one-line version cost: 6,497 of
+// 7,586 pending charter lines, reported as a healthy queue. Read from the
+// local refs/prs/* mirror so the measurement does not depend on the API.
+function queueCopies (path, openPrs, mainRev) {
+  const copies = []
   for (const pr of openPrs) {
     const ref = `refs/prs/${pr}`
     if (!git(['rev-parse', '--verify', '--quiet', ref], { allowFail: true })) continue
     const base = git(['merge-base', mainRev, ref], { allowFail: true })
     if (!base) continue
     const changed = git(['diff', '--name-only', `${base}..${ref}`, '--', path], { allowFail: true })
-    if (changed) return { number: pr, lines: lineCount(ref, path) }
+    if (changed) copies.push({ number: pr, lines: lineCount(ref, path) })
   }
-  return null
+  return copies
 }
 
 function openPrNumbers () {
@@ -264,7 +354,7 @@ function main (argv) {
       ...c,
       mainDate: git(['log', '-1', '--format=%cI', mainRev, '--', c.path]),
       mainLines: lineCount(mainRev, c.path),
-      queue: newestQueueCopy(c.path, openPrs, mainRev)
+      copies: queueCopies(c.path, openPrs, mainRev)
     }))
 
   const rows = buildRows({ charters, branches, nowIso })
@@ -274,10 +364,24 @@ function main (argv) {
     console.log(formatTable(rows))
     const stale = rows.reduce((n, r) => n + r.runsHandedStale, 0)
     const pending = rows.reduce((n, r) => n + Math.max(0, r.pendingLines), 0)
+    const recency = rows.reduce((n, r) => n + Math.max(0, r.recencyPendingLines), 0)
     const worst = rows.reduce((a, r) => (r.lagDays > (a?.lagDays ?? -1) ? r : a), null)
     console.log('')
     console.log(`${rows.length} charters; oldest on main is ${worst.seat} at ${worst.lagDays}d`)
-    console.log(`${pending} charter lines written and unmerged; ${stale} branches opened since their own seat's charter froze`)
+    console.log(`${pending} charter lines written and unmerged (a floor, read off each charter's deepest open copy); ${stale} branches opened since their own seat's charter froze`)
+    for (const f of selectionFaults(rows)) console.log(f)
+    if (pending !== recency) {
+      console.log(`the single-newest-copy read this tool shipped until 2026-11-02 would say ${recency}`)
+    }
+  }
+  if (argv.includes('--copies')) {
+    console.log('')
+    for (const r of rows.filter((x) => x.queueCopies > 1)) {
+      const list = copiesOf(charters.find((c) => c.seat === r.seat))
+        .sort((a, b) => b.number - a.number)
+        .map((c) => `#${c.number} (${c.lines})`).join('  ')
+      console.log(`${r.seat}: ${list}`)
+    }
   }
 
   if (bound !== null) {
