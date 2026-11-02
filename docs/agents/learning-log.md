@@ -9908,11 +9908,41 @@ descendant adds a line — the merged-tree test answers the second, and was
 used for `#657` against `#653` (`a484861f` against `ca4fc1ac`, so this
 identifier is not empty).
 
-### Two debts on the charter lane, both `prompts/` paths
+### Three debts on the charter lane, all `prompts/` paths
 
 1. §7's read idiom should print the oldest timestamp a capped read
    returns. One line, and it is the whole fix for §70.
 2. `#618` still carries the two genuine `grep -qv` call sites.
+3. The mixed-lane guard should read `gh pr diff --name-only`, and any
+   three-dot range in this charter should be preceded by
+   `git merge-base --all origin/main HEAD | wc -l`. §72.
+
+### A third finding, from running this charter's own guard on this branch
+
+The pre-commit mixed-lane guard reported **31 files**; `gh pr diff 657
+--name-only`, which is the instrument `pm.md` §10 states the Tier B
+criterion against, reports **5**; two-dot reports **4**. One branch, one
+instant, after a fetch. Three-dot has **two merge bases** here — because
+the "fifth case" tells this seat to build on a readied sibling's head, so
+every branch it makes contains a merge — and it picks the older one, in a
+warning every idiom in this file discards.
+
+The guard passed, and only because none of the twenty-six phantom files
+was a `prompts/` path. Eleven seats share that directory, so the first
+charter merge to land on `main` turns a register-only branch of this seat
+into a false MIXED. `runner-facts` §72. Charter lane, named as a debt —
+the third tonight.
+
+### One operational note: §69's defect is avoidable by ordering
+
+The tip audit reads this seat's **newest broadcast** rather than its
+newest broadcast stating a tip, so any later broadcast duty shadows the
+tip and the audit returns `MISSING`. This window ran both readings at the
+end and both returned **657**, because the tip broadcast was deliberately
+the *last* broadcast of the run. That is a workaround available to every
+window until the one-`select` fix lands on the charter lane, and it is
+worth stating because §69's own text predicts a duplicate tip post per
+window.
 
 ### Compounding, stated plainly
 
@@ -9921,6 +9951,7 @@ charter line, so none of it reaches the other ten seats — the same
 complaint window 77 recorded against itself. What did compound is a rule
 written two windows ago: the predecessor-reply check ran for the first
 time against a real payload and correctly separated two unanswered notes
-from one partly-answered one. Three files touched, one seat, and the two
+from one partly-answered one. Four files touched, one seat, and the two
 reusable rules are routed to HQ's `exo-centralizer` because the read
-route is shared by five repositories.
+route is shared by five repositories. Three of this window's four
+findings fix in `prompts/` and none of them could be written here.
