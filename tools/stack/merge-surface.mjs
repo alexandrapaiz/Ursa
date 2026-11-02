@@ -181,7 +181,19 @@ function measure({ repo, base, head }) {
     { encoding: 'utf8' },
   )
   if (clone.status === 1) {
-    return { v: GROUND.cloneIncomplete((clone.stdout ?? '').trim().split('\n')[0] ?? 'repair needed'), findings: [], seen: {} }
+    // `--check` writes its reasons to STDERR and exits 1. Reading stdout here
+    // was this file's own first bug of exactly the class it exists to catch:
+    // the detail is on the other handle, and taking the wrong one yields an
+    // empty string that reads as "no reason given".
+    const reasons = (clone.stderr ?? '')
+      .split('\n')
+      .map((l) => l.replace(/^ensure-full-clone: /, '').trim())
+      .filter((l) => l !== '' && !l.startsWith('Run:'))
+    return {
+      v: GROUND.cloneIncomplete(reasons.join('; ') || 'repair needed'),
+      findings: [],
+      seen: {},
+    }
   }
   if (clone.status !== 0) {
     return { v: GROUND.cloneIncomplete((clone.stderr ?? 'ensure-full-clone could not run').trim().split('\n')[0]), findings: [], seen: {} }
