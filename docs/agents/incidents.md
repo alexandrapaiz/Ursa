@@ -10907,3 +10907,145 @@ exactly what a hand-written fixture looks like, because a human writes
 the rendering they read in an API response. **A fixture for a joined
 measurement carries one row from each producer, in each producer's own
 rendering.**
+
+## INC-2026-11-02-hq-ships-an-instrument-for-section-10-that-calls-every-ordinary-charter-edit-tier-b-and-no-seat-here-has-ever-run-it — Four authorities say a charter is the PM's merge, one older list says otherwise, and the tie-breaker has been executable on this host the whole time
+
+### What happened
+
+This seat has reported the §10 banner-versus-list contradiction since
+2026-10-18, escalated it, and told every window of itself to **expect
+the hold**. On 2026-11-02 the eighty-fifth window ran HQ's own
+instrument for §10 against an Ursa pull request, which no window of this
+seat had done:
+
+```
+$ bash /srv/asc/hq/tools/check-tier.sh --pr 699 --repo alexandrapaiz/Ursa --seat exo
+  tier B  prompts/exo-agent.md       a charter (§10 Tier B)
+  tier B  prompts/pm-agent.md        a charter (§10 Tier B)
+  ... all eleven ...
+  note    prompts/pm-agent.md        the PM charter changed, and no hunk of it
+                                     names the grant §21 reserves
+VERDICT: Tier B - its PM seat or a chair merges it, not this seat (§21)
+```
+
+The host's copy is **byte-identical to HQ's `main`**, sha256
+`41e2902333f21303`, verified against the API rather than against the
+clone. The tool states its own reasoning in a comment:
+
+> §10 Tier C says "Charters (`prompts/`)" and §21 says the opposite in
+> its own words [...] §10's header says §21 amends it, and
+> `test_tier.py` has pinned every charter to Tier B since §21 landed, so
+> the later paragraph governs: **an ordinary charter edit stays Tier B.**
+> What §21 keeps is the grant itself, which is the PM charter saying
+> what a PM may merge.
+
+### The four authorities, and the one that disagrees
+
+Every one of these is readable from an Ursa checkout today.
+
+| source | reading |
+|---|---|
+| §21, owner directive 2026-10-05 | "Standards, **charters**, workflows and decisions included. The owner merges nothing in the ordinary course." What stays hers: "only a change to a seat's own authority (this section, section 10, section 19, **the PM charter's grant**)" |
+| §10's own amendment banner | "no tier waits for the owner any more except a change to a seat's own authority" |
+| §22, owner directive 2026-10-16 | silence is consent after 48 hours, and it "covers [...] **editing a charter**" |
+| HQ's `tools/check-tier.sh`, pinned by `test_tier.py` | **Tier B**, on this repository's live pull request |
+| §10's Tier C list, eleven lines under its own banner | "Charters (`prompts/`)" |
+
+Four to one, and the one is the older text inside the section its own
+banner amends. **The contradiction is live on HQ's `main`**, line 380 of
+`standards/pm.md`, not only in the vendored copies.
+
+### The clock, which is the part that has already been paid for
+
+Ursa's PM put this exact question to the owner on 2026-10-18 at
+12:29:59Z with its own recommendation under §22's silence route, naming
+the release instant **2026-10-20 12:30 UTC**. Measured at
+2026-11-02T06:55Z, that is **306 hours past expiry, 12.8 days**. §22
+says silence is consent and names the applier as §21's ordinary merger.
+The release was never applied. The PM's pass of 05:42:26Z today reads,
+correctly against the text it is reading: *"It is Tier C by path:
+eleven files under prompts [...] so it waits on the owner's merge
+regardless of how clean it reads."*
+
+§22 predicted this failure in its own words, about clocks in general:
+
+> a clock that transfers authority does not miss noisily at its
+> deadline; it never fires at all, and the owner's non-response — which
+> this section exists to convert into consent — becomes a permanent hold
+> instead, silently, in every report, with both seats describing their
+> own state accurately the whole way through.
+
+That is this case exactly, and §22 already names Ursa's as the worked
+example at 137 hours. It is now 306.
+
+### The measured cost, at 2026-11-02T06:5xZ
+
+| | |
+|---|---|
+| commits that reached `main` in seven days | **705** |
+| of those touching any `prompts/*-agent.md` | **0** |
+| last charter to reach `main` | 2026-10-18, **14.5 days** |
+| charter lines written and unmerged across eleven files | **7,258** |
+| branches opened since their own seat's charter froze | **501** |
+| open pull requests holding all eleven pending charters | **one**, `#699` |
+
+Seven of the ten sibling charters last reached `main` on 2026-10-05,
+**28.1 days** ago. Two of them — engineer's and research's — have a
+newer copy in `#395`, a pull request those seats do not own, open nine
+days; engineer's eleven lines there are a live operational correction
+saying the redaction gate refuses full UUIDs so only the truncated form
+is writable.
+
+### Why it happened technically
+
+Nobody was wrong at any step, which is why it needed an instrument.
+
+- The PM reads §10's list. It is in the standard, it names `prompts/`,
+  and the stricter reading of an authority clause never looks wrong from
+  inside. It also asked the owner rather than deciding for itself, which
+  is what §22 tells it to do.
+- This seat read the same list, concluded the hold was real, and wrote
+  **"expect the hold when it is the first"** into its own charter along
+  with **"do not treat the hold as a defect to re-file."** That second
+  sentence is the one that cost twelve days: it is correct about
+  re-reporting a known clock and it also suppressed the one act that
+  would have ended it.
+- The tie-breaker was never read because it is not text. It is a script,
+  in a directory `INC-2026-11-02-the-tool-reach-sweep-resolved-against-one-of-three-roots-for-fifteen-days`
+  established this morning is reachable from every Ursa sandbox. That
+  entry fixed the sweep's *precision* and nobody then ran the thirteen
+  tools it had just proved runnable. **Proving an instrument reachable
+  is not running it.**
+
+### The fix
+
+1. **Reported to Ursa's PM with the verdict line and the four
+   authorities.** The decision stays the PM's and so do §10 Tier B's
+   other five conditions. This seat merges nothing and asks for no
+   gate to be loosened.
+2. **Handed to HQ's `exo-centralizer`**, because the one-line fix is in
+   §10's Tier C list and §10 is HQ's. A tool that contradicts the
+   standard it implements is the standard's defect, not the tool's, and
+   five repositories carry the vendored contradiction.
+3. **The charter clause changes from a prediction to a command.** §5's
+   "expect the hold" becomes "run HQ's instrument and quote its verdict
+   line", on the charter lane.
+
+### What the org grew from it
+
+**When a standard contradicts itself, look for the instrument before
+you look for an owner.** This org escalates a textual contradiction to
+the only party who can amend the text, which is right and which takes
+as long as that party takes. It has no step that asks whether the
+contradiction has already been resolved **in code** by whoever ships the
+machinery — and in a portfolio where HQ owns both the standard and the
+tools, that is where a resolution lands first, because a tool cannot
+hold two readings and must pick one to exit with.
+
+So: for every standards contradiction on the register, check whether any
+tool under `tools/` decides it, and read that tool's comment. It is
+cheaper than an escalation and it is evidence rather than argument. The
+general form, which is this register's own rule about reading a
+mechanism instead of probing a surface, pointed at a **standard** rather
+than at a service: a rule that has an implementation has a tie-breaker,
+and the implementation is the party that already had to choose.

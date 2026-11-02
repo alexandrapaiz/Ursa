@@ -4517,3 +4517,46 @@ nothing and is the only reading that cannot drift.
   Second, the count of fixtures in `tools/` carrying a non-`Z` offset,
   which was **0** before this change and is **4** after. A new joined
   measurement whose fixtures are all `Z` is the defect returning.
+
+### For every standards contradiction on the register, check whether a tool already decides it
+
+- **Trigger.** The §10 banner-versus-list contradiction has been on this
+  register since 2026-10-18, escalated to the owner through §22 with a
+  release instant of **2026-10-20 12:30 UTC**. At 2026-11-02T06:55Z that
+  clock is **306 hours** past expiry and unapplied. This window ran HQ's
+  `tools/check-tier.sh` against an Ursa pull request for the first time:
+  **`VERDICT: Tier B`**, every charter classified `a charter (§10 Tier
+  B)`, with the tool's own comment citing `test_tier.py` as having
+  pinned that reading since §21 landed. Host copy byte-identical to HQ's
+  `main`, sha256 `41e2902333f21303`.
+- **Merged.** Not yet. The report is the act; §10's text is HQ's to fix
+  and the merge decision is the PM's.
+- **Effect.** The number this is read against is charter throughput, and
+  it is currently zero in a way nothing else here reports: **705**
+  commits reached `main` in the seven days to 2026-11-02 and **0** of
+  them touched any `prompts/*-agent.md`. Last charter merge 2026-10-18,
+  **14.5 days**. **7,258** charter lines written and unmerged across
+  eleven files; **501** branches opened since their own seat's charter
+  froze; **one** open pull request holds all eleven.
+- **Rule.** **Before escalating a standards contradiction, check whether
+  any tool under `tools/` decides it, and read that tool's comment.** In
+  a portfolio where HQ owns both the standards and the machinery, a
+  contradiction is resolved in code first, because a tool cannot hold
+  two readings and has to exit with one. The tool's choice is evidence
+  and it is cheaper than an escalation. Corollary, paid for this
+  morning: `INC-2026-11-02-the-tool-reach-sweep-resolved-against-one-of-three-roots-for-fifteen-days`
+  proved thirteen HQ tools runnable from this sandbox and no window then
+  ran one of them. **Proving an instrument reachable is not running it**,
+  and the sweep that establishes reach should name, per tool, the
+  question here it would answer.
+- **Next measure.** The brief of **2026-11-03**, and earlier if a window
+  runs first. Two readings. First, `git log --since=...  --oneline
+  origin/main -- 'prompts/*-agent.md' | wc -l`, which is **0** over the
+  last seven days and would be the first non-zero in fifteen days if
+  this report moves anything. Second,
+  `node tools/seat/charter-lag.mjs | tail -2`, whose second line reads
+  **7,258 unmerged / 501 stale-charter branches** today; the lag column
+  is the honest one because it falls only on a merge and cannot be moved
+  by anything this seat writes. If both are unchanged on 2026-11-03,
+  the finding was read and not acted on, and the next escalation is to
+  the owner with the verdict line rather than to the PM again.
