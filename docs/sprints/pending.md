@@ -2,9 +2,93 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Top three for the owner, 2026-11-02 message-triggered (eighth pass): in progress
+## Top three for the owner, 2026-11-02 message-triggered (eighth pass): three Tier B merges, one red-check finding handed to market, nothing new for you
 
-Full findings coming as commits land this pass.
+Triggered by a message asking for the full routine at once: inbox and
+Messages hub, the last six hours' failed runs, a Tier B merge sweep,
+the sprint's movement, and one first-person board note. This run also
+found its own checkout shallow and single-branch (the same recurring
+defect) and repaired it with `tools/ensure-full-clone.sh` before
+trusting any ancestry check below.
+
+**Inbox: nothing addressed to this seat as an `ask` or a `handoff` in
+the last 48 hours.** Several `note`-kind messages from exo and the
+engineer arrived about #625, #615 and a prior pass's rebase, all
+already resolved by the actions below or already answered in an
+earlier pass; none required a reply of their own. No owner message in
+the last 48 hours either.
+
+1. **Three pull requests merged under Tier B, none of them needing
+   you.** #625 (exo, the charter-lag instrument) and #624 (engineer,
+   the board checker fixes) were both green, clean, scoped to
+   non-charter paths. #623 (skill) opened `DIRTY` against the ledger
+   file the first two also touched; recomputed clean on its own once
+   #624 and #625 landed and merged without further action. All three
+   deleted their branches on merge.
+2. **#627 (market) is NOT merged — resolved the docs-only ledger
+   conflict, then hit a real red check, and handed that back rather
+   than overriding it.** Installed this checkout's ledger merge driver
+   (`tools/ledger/install-driver.sh`, still not registered by default
+   in a fresh clone) and re-merged the branch against current `main`
+   in a throwaway worktree, which cleared the `docs/ideas.md` conflict
+   — but the branch's own `redaction-gate` check then failed for real:
+   a UUID-shaped substring inside a public news-article URL cited
+   twice in the market seat's own files, not a secret. A red check is
+   a hard stop under Tier B criterion 3 regardless of why it is red,
+   and this seat's writable surface is `docs/sprints/` and ledger
+   grooming, not `docs/market/`, so the fix (reword the citation, or
+   narrow the gate's pattern) is commented on the PR and left to
+   market. Nothing for you here unless market's next pass doesn't pick
+   it up.
+3. **#395 (research) is now nine days old and still waits on you.**
+   Unchanged from every prior pass — charter edits
+   (`prompts/engineer-agent.md`, `prompts/research-agent.md`).
+
+**The rest of the open queue, unchanged and not re-explained in full:**
+#618 and #612 (exo) are Tier C by path and #612's own comment and
+exo's board notes agree the decision belongs on #618, which contains
+it strictly; #615 (engineer) is the lone survivor of a now-resolved
+three-branch stack and waits on you alone, because it edits
+`tools/secret-scan.baseline.json`, which that file's own text reserves
+to your merge; #601 (skill) is `CONFLICTING` and also Tier C by path
+(`prompts/skill-extract.md`), confirmed not contained in today's #623,
+so it is a real, separate conflict for the skill seat to rebase before
+your charter decision is even reachable.
+
+**Failures, last six hours: one run, classified, no rerun.**
+`ursa-exo`'s run ending 2026-11-02T00:09:27Z exited non-zero after 35
+minutes, but its own pull request (#618) was pushed eight seconds
+earlier — the tripwire fired at teardown after the real work had
+already shipped. Classified as a tripwire false alarm per pm.md
+§11.7 (the run's PR exists): no rerun, nothing further to triage. Zero
+refused runs and zero never-started runs for this company in the same
+window, stated before triaging the one above. No Actions-side failures
+either (`gh run list --status failure` over the last 24h: empty).
+
+**Sprint.** `sprint-2026-10-12.md` is still the current sprint file,
+now three weeks old with no retrospective — the last Monday ceremony
+this seat can find any record of is `pm/sprint-2026-10-12` (#176,
+merged 2026-10-12); 2026-10-19, 2026-10-26 and today, 2026-11-02, each
+passed with only message- and hook-triggered six-hour passes and no
+ceremony PR at all. Naming this as the process finding this pass: the
+org has been running the standup half of the daily cadence continuously
+and well, but the Monday ceremony half (retro, grooming, sprint
+planning) has not run in three cycles, so there is no current sprint
+goal to report movement against and no closed retrospective for the
+work that has, in fact, shipped in that window. **Move this pass**
+(outside any numbered sprint item, since none is open): the three Tier
+B merges above. **Handoff:** market owns #627's redaction-gate fix; the
+owner or a chair owns the Tier C queue (#395, #601, #612/#618, #615).
+Not running the ceremony myself this pass — the message that triggered
+it asked for the six-hour routine specifically, and three ceremonies'
+worth of retro and grooming is a larger, different piece of work than
+that — but flagging it here so it is not silently absorbed into the
+standup cadence indefinitely. If a ceremony run should fire, that is a
+decision for you or for whatever triggers Monday's cron.
+
+Board note posted this pass naming the three merges, the one failure
+and its classification, and the sprint-ceremony gap, referenced to
+this seat's own PR #630.
 
 ## Top three for the owner, 2026-11-02 ~00:2x UTC message-triggered (seventh pass): four Tier B merges, two charter pull requests confirmed Tier C
 
