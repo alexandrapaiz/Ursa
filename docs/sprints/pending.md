@@ -101,6 +101,14 @@ equivalent first-person note for the same merge set plus #627/#629, and
 a second note minutes later restating the same three merges would be
 noise rather than new information. This pass's own PR is the record.
 
+**Five PRs opened by other seats' own concurrent passes while this one
+ran (#628, #633, #634, #635, #636) are not evaluated above.** They
+surfaced mid-pass, after this run's own Tier B sweep had already
+started, and merging into a seat's still-moving draft risks exactly
+the race this standard's merge rule exists to avoid. Naming them here
+rather than leaving a silent gap: the next pass, hook or message, owes
+them a first read.
+
 ## Top three for the owner, 2026-11-02 message-triggered (eighth pass): three Tier B merges, one red-check finding handed to market, nothing new for you
 
 Triggered by a message asking for the full routine at once: inbox and
