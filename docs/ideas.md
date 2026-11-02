@@ -16543,3 +16543,70 @@ the owner to accept or reject.
   (what an AI generated and what survived), not how Minor is paid.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (skill) — An absence receipt that searches tests is falsifiable by a test, and no guard in this library can see it go false
+- Trigger: this run re-ran one receipt from `skills/relevance-audit.md`
+  in order to compare two grep dialects, and found the receipt had gone
+  false by an unrelated route. `distilling-a-tuning-record` said the
+  distillation watermark "is never set to true by anything", with
+  `grep -rn 'distilled: true\|\.distilled = true' ursa-major/src
+  --include=*.ts` recorded as returning nothing on 2026-10-18. It
+  returns one line today, a `serve` test's fixture. The writing paths
+  still only write `false`, so the claim survived and its wording did
+  not.
+- What: this is a hole in the library's guard set rather than one stale
+  sentence. `check-evidence.mjs` hashes the cited range and `E25`'s
+  range is byte-for-byte unchanged, so it was green throughout.
+  `relevance-sweep.mjs` hashes the `what`, the passages and the lines,
+  all three unchanged. The claim that went false is an **absence**, and
+  §5l already says an absence is carried by a search rather than by a
+  range, which is exactly why nothing in the library watches it: the
+  search is written in prose in the audit row and is never executed
+  again. Measured on this branch: of 376 audit rows, 9 quote a search
+  command and 5 distinct refs use one to carry an absence. This run
+  re-ran the other four by hand and all four still hold exactly as
+  recorded, so one of five had rotted in two weeks and nothing reported
+  it. Two properties made that one rot and both are cheap to test for:
+  the search's scope included files the claim was never about (here,
+  tests), and nothing re-ran it.
+- First step: one `§5` section of `prompts/skill-extract.md`, written in
+  its own pull request carrying nothing that cites it, per §5ai. It
+  should say that an absence receipt is written as a command with its
+  scope narrowed to the files the claim is about, excluded paths stated
+  rather than implied, and that the command belongs in a block a tool
+  can execute rather than in prose a reader must retype. The run that
+  writes it owns the first version; the tool that re-runs the blocks is
+  a later item and should not be bundled with it, because the section is
+  Tier C and the tool is not.
+- Owner: the next run of this seat that would add a `§5` section.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — The divergent grep dialect on this host lives in one shell frame and reaches nothing below it
+- Trigger: Ursa's exo seat corrected a precision figure on the board and
+  asked this seat for one version check in its own lane, because an arm
+  of its own command had never fired and half the reason was that the
+  `grep` it was calling is not GNU.
+- What: the check ran and the claim needs narrowing in a way that
+  changes who is exposed. Both engines are on this host. `/usr/bin/grep`
+  is GNU 3.11; the `grep` an agent types resolves to a shell function
+  the harness installs, which execs ugrep 7.8.4. The function is not
+  exported, measured three ways, so a script, a guard, CI and even a
+  bash the seat's own shell launches all get GNU. The divergent dialect
+  therefore lives in exactly one frame, the top one a person or an agent
+  types into. Two things diverge there: the exit status of
+  quiet-plus-invert, which is inverted, and the file population, because
+  the harness form honours `.gitignore` and skips binaries and drops the
+  `./` prefix. Measured on a throwaway tree with one needle in each of
+  five files, the same `grep -rl` returned two files in one frame and
+  five in the other. For this lane the consequence is specific: the
+  committed tooling is safe and the hand-run receipt is not, which is
+  the opposite of where this seat would have looked.
+- First step: `skills/grep-dialect.mjs` exists as of this run and
+  reports both halves. What it does not do is run anywhere by itself.
+  Wiring it into whatever becomes the library's standing check is a
+  later item, and deliberately not this one, because a scanner that
+  reports its own probe and its own fixtures needs the exemption written
+  somewhere a reader sees it, which today is its test file.
+- Cost: $0
+- Status: proposed
