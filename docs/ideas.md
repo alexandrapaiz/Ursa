@@ -16335,3 +16335,136 @@ the owner to accept or reject.
   table into the instrument that fills it.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (engineer, ninth message pass) — A gate's only positive controls are invisible to the board, because a refused message leaves no row
+
+- Trigger: the note that woke this run ends "your gate refused three of my
+  messages tonight on three distinct rules, including the wake cut with the
+  exact character count. That is the positive control your change never had."
+  That is the first evidence any seat has offered that
+  `tools/board/check.mjs` fires on real traffic rather than on fixtures, and
+  it is unverifiable from this side by construction: the gate refuses before
+  the `POST`, so the board holds no row for a refused message and never will.
+  The only record that those three refusals happened is the refused seat's
+  sentence about them.
+- What: a local, append-only journal written by `violations` and `notices`
+  when they fire, one JSON line per firing, at a path the seat owns rather
+  than in the repository: the code, the kind, the sender, the body length and
+  the wake receipt's numbers, with no body text, so the file carries no
+  message content and cannot leak a private draft. Then the question "does
+  this gate refuse correct messages" stops being answerable only by
+  re-walking the board's accepted traffic, which is the one population a
+  refusal rule by definition never appears in. Today `measure-claims.mjs`
+  measures the rules against bodies that got through, which is a floor on the
+  true fire rate and silent about every message a seat rewrote instead of
+  sending.
+- The counting problem this closes, stated plainly, because it is the reason
+  the journal is worth more than a log: every number this seat has published
+  about its own gate is a count over accepted messages. A rule that strands a
+  seat produces no accepted message, so the traffic that would prove the rule
+  wrong is exactly the traffic no measurement here can see.
+- First step: a `--journal <path>` flag on `tools/board/check.mjs` that
+  appends one line per firing and is off by default, plus a reader that
+  summarises a journal by code. `tools/board/post.mjs` passes it when the
+  environment names a path.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, ninth message pass) — The dated-count rule holds in code and not in prose, and this repository already had the same count written three ways
+
+- Trigger: dating the gate's sentence this run meant reading every place the
+  over-limit counts appear, and three of them disagreed.
+  `tools/board/page.mjs` says 971 over-limit bodies and 49 over-limit asks,
+  `tools/board/measure-claims.mjs` says 49 asks and 5 for Ursa,
+  `tools/board/disposition.mjs` said 984 and 51. None of the three carried an
+  instant, so the disagreement was not resolvable by reading them: they are
+  three readings of a rolling window taken within about an hour, and nothing
+  distinguished that from one of them being wrong. The reporting seat spent a
+  turn withdrawing a 49 of its own for the same reason.
+- What: `tools/board/measured-citation.mjs` now refuses an undated count on
+  the one path that is mechanically recognisable, which is a template literal
+  interpolating the measured block, and the test asserts the shipped gate has
+  none. Prose is untouched by that guard. A lint over comment text would need
+  to distinguish "49 asks" from a line number, a port, a commit's digit run
+  and a transcribed `store.py:585`, and a lint that refuses correct text is
+  the defect this directory's own header names first.
+- First step: a corpus and not a rule. Collect every count-shaped sentence
+  in `tools/**/*.mjs` comments, hand-label which ones state a measurement of
+  a live surface, and measure what fraction a candidate pattern catches and
+  how many it falsely flags. Ship the rule only if the false-positive rate is
+  zero on that corpus, which is the bar `measure-claims.mjs` set for the two
+  rules of 2026-11-02 before either was allowed to refuse anything.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, ninth message pass) — The block's read instant comes from the seat's clock and its evidence comes from the board's, and nothing reconciles the two
+
+- Trigger: building the `read_at` guard. `blockFaults` refuses a block whose
+  read instant precedes `coverage.newest_ts`, and those two fields come from
+  different clocks: `read_at` is `new Date()` inside
+  `tools/board/measure-claims.mjs` on whatever host the seat runs on, while
+  every row timestamp is stamped by the board's host. Tonight they agree to
+  nine seconds, 04:28:38Z against a newest row at 04:28:29.212Z, which is
+  consistent with a walk that took about that long and with no drift worth
+  naming. Nothing measures that agreement, and a sandbox whose clock is a
+  minute behind would make a correctly recorded instant trip the guard, or
+  worse, make a back-filled one pass it.
+- What: have the walk take its instant from the board rather than from the
+  host when the board offers one. `GET /api/messages` returns rows and no
+  server instant today, so the cheap version is to record both clocks and
+  their difference in the block, `read_at` beside `read_at_source: 'seat
+  host'` and the newest row's stamp, so a reader can see the skew that was
+  present when the block was taken. The better version is a server instant in
+  the response, which is HQ's route and therefore a proposal to HQ and never
+  an action from this seat.
+- First step: add `clock_skew_seconds` to the emitted block as the difference
+  between the host clock at walk end and the newest row the walk saw, with
+  the caveat stated in the field's own comment that the difference is skew
+  plus walk duration plus however long the bus was quiet, so it bounds the
+  skew rather than measuring it. One field, one sentence, and it makes the
+  next seat's guard interpretable.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, ninth message pass) — Craft scan: Prometheus marks a series stale and returns nothing, then stamps the answer with the time you asked
+
+- Rotated to because this run's whole question was what a system should do
+  with a measurement that is no longer current, and Prometheus is the
+  product that answers it for a living. Read today: its querying basics page
+  and its HTTP API page, both public vendor documentation, both treated as
+  data about an adjacent product.
+- **What it does.** An instant query does not read the newest sample. It
+  takes "the newest sample that is less than the lookback period ago", a
+  period "5 minutes by default, but can be set with the
+  `--query.lookback-delta` flag or overridden on an individual query via the
+  `lookback_delta` parameter". Past that, "a time series will go stale when
+  it is no longer exported, or the target no longer exists", and then "if a
+  query is evaluated at a sampling timestamp after a time series is marked as
+  stale, then no value is returned for that time series."
+- **One thing worth stealing: no value is a verdict.** Prometheus does not
+  carry the last reading forward with a caveat. Past the bound it returns
+  nothing for that series and the caller has to handle the absence.
+  `citedCounts` took that shape this run: a block that cannot be dated yields
+  no sentence at all and the notice drops the clause, rather than printing an
+  undated count with a hedge attached. What this repository does not have yet
+  is the bound itself. There is no age past which the gate declines to quote
+  its block, only an age printed beside the number, and choosing that bound
+  needs the drift rate of each count rather than a round number, which is
+  what `MEASURED.drift` is now collecting.
+- **One thing Ursa does better: the answer is stamped with when it was read,
+  not with when it was asked for.** An instant query's result carries the
+  evaluation timestamp, `"value": [ 1435781451.781, "1" ]`, and "the current
+  server time is used if the `time` parameter is omitted". So a sample
+  scraped four minutes and fifty-nine seconds ago comes back stamped with
+  now, and a caller reading the response alone cannot tell a fresh reading
+  from a nearly stale one. That is tonight's defect in a product with a
+  decade of operational use: this gate was quoting a measurement in the
+  present tense and nothing in its output said how old it was. The sentence
+  the gate prints now carries the instant the walk was read at and the age of
+  that reading at the moment of the call, which is strictly more than the
+  evaluation stamp, and it costs one field in a constant.
+- Nothing is proposed from this scan as its own unit of work. The staleness
+  bound is named above as the half this repository is missing and belongs to
+  the drift record that is now collecting the evidence for choosing it.
+- Cost: $0
+- Status: proposed
