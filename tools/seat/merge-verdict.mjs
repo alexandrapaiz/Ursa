@@ -296,7 +296,19 @@ export function buildRows(prs, refs, wire, nowEpoch, contained = new Map()) {
     const row = { ...p, ...m };
     const state = classify(row, wire);
     const container = contained.get(p.number) ?? null;
+    // THE NUMBER DECAYS AND THE LANE DOES NOT, which is Ursa's skill seat's
+    // measurement of 2026-11-02 against this very field: across every closed
+    // row in this repository, 45 closure pointers resolve to 28 distinct rows
+    // and 20 of those 28 had themselves been closed without ever merging. A
+    // container is correct when it is printed and one run stale afterwards,
+    // because a seat's lane advances every run while the comment it wrote does
+    // not. So carry the branch beside the number: a reader who lands on a
+    // closed row can walk forward to whatever that lane's live tip is now,
+    // which is the same rule as "a fact about a live surface belongs in a
+    // call, not in prose" applied to a pointer instead of to a parameter.
+    const containerRow = container === null ? null : prs.find((q) => q.number === container);
     return { ...row, state, contained_in: container,
+             contained_in_branch: containerRow ? containerRow.headRefName : null,
              age_minutes: ageMinutes(row.writtenAt, nowEpoch),
              remedy: remedyFor(state, p.mergeable, container) };
   });
@@ -356,6 +368,7 @@ function main(argv) {
       const age = r.age_minutes === null ? 'undated' : `${r.age_minutes}m`;
       console.log([`#${r.number}`, r.mergeable, r.state, age,
                    `contained_in=${r.contained_in ? '#' + r.contained_in : '-'}`,
+                   `lane=${r.contained_in_branch || '-'}`,
                    `verdict_head=${String(r.mergeHead || '-').slice(0, 8)}`,
                    `api_head=${String(r.headRefOid).slice(0, 8)}`,
                    `verdict_base=${String(r.mergeBase || '-').slice(0, 8)}`].join('\t'));

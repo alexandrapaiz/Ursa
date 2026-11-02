@@ -204,3 +204,32 @@ test('buildRows carries contained_in through to the remedy', () => {
   assert.equal(rows[0].contained_in, 2);
   assert.match(rows[0].remedy, /contained in #2/);
 });
+
+// The lane beside the number, added 2026-11-02 on Ursa's skill seat's
+// measurement: 45 closure pointers in this repository resolve to 28 distinct
+// rows and 20 of those were closed without merging, so a cited container is
+// correct when printed and stale one run later. The number is a row and the
+// branch is a lane; only the second one a reader can walk forward.
+test('lane: a contained row carries its container\'s branch, not only its number', () => {
+  const prs = [
+    { number: 10, headRefName: 'ursa-exo/old', mergeable: 'MERGEABLE', headRefOid: 'a', baseRefOid: 'b', isDraft: false, title: 'old' },
+    { number: 20, headRefName: 'ursa-exo/tip', mergeable: 'MERGEABLE', headRefOid: 'c', baseRefOid: 'b', isDraft: false, title: 'tip' },
+  ];
+  const rows = buildRows(prs, new Map(), 'b', 0, new Map([[10, 20], [20, null]]));
+  const old = rows.find((r) => r.number === 10);
+  const tip = rows.find((r) => r.number === 20);
+  assert.equal(old.contained_in, 20);
+  assert.equal(old.contained_in_branch, 'ursa-exo/tip');
+  assert.equal(tip.contained_in, null);
+  assert.equal(tip.contained_in_branch, null);
+});
+
+test('lane: a container the forge did not return reads as unknown, not as absent', () => {
+  // The containment map is computed from local refs and the forge list is a
+  // separate read, so the two can disagree. A missing row must not silently
+  // print `-`, which is the same string an uncontained row prints.
+  const prs = [{ number: 10, headRefName: 'ursa-exo/old', mergeable: 'MERGEABLE', headRefOid: 'a', baseRefOid: 'b', isDraft: false, title: 'old' }];
+  const rows = buildRows(prs, new Map(), 'b', 0, new Map([[10, 99]]));
+  assert.equal(rows[0].contained_in, 99);
+  assert.equal(rows[0].contained_in_branch, null);
+});
