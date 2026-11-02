@@ -45,6 +45,12 @@ reading a `Co-Authored-By: Claude` trailer as a generation:
 | depth repaired only | 1,848 | 1,335 | 27.8% |
 | both repaired | 4,115 | 3,000 | 27.1% |
 
+The counts are `git rev-list --all --count` at the moment of the
+measurement, so the 4,115 is two commits behind what `--check` prints in
+the guard table below: this run's own commits are in the graph it is
+counting. The `--all` row is 1,848 on `origin/main` alone, which is the
+number the middle row is taken over.
+
 The middle row is the one worth the table. Repairing depth alone lands
 the ratio within 0.7 points of the truth off 45 percent of the
 commits, so it passes every sanity check a reader applies to the number
@@ -167,7 +173,7 @@ verdict. Re-run against the branch by name, it gave the result above.
 
 | guard | exit |
 |---|---|
-| `bash tools/ensure-full-clone.sh --check` | 0, complete, 4,113 commits and 284 refs |
+| `bash tools/ensure-full-clone.sh --check` | 0, complete, 4,117 commits and 284 refs |
 | `node tools/ensure-full-clone.test.mjs` | 0, 19 passing |
 | every `skills/*.test.mjs` | all passing, 70 tests, including 2 new |
 | `node skills/trigger-coverage.mjs` | 0, every skill meets §5c |
