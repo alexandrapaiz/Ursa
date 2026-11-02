@@ -54,7 +54,7 @@ describe('the seven extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 36 distinct causes with 46 probes, which is the number the text sweep could not see', () => {
+  it('reaches 36 distinct causes with 47 probes, which is the number the text sweep could not see', () => {
     const { json } = run()
     // 28 and 23 until 2026-10-27. The four added then were all post.mjs's:
     // three sender branches, where a seat named by neither flag nor variable,
@@ -79,7 +79,13 @@ describe('the seven extracted gates, end to end', () => {
     // git repository to list a tracked set from. Its eight probes are those
     // six plus a tree with no images at all, which is clean rather than
     // unmeasured, and both failing shapes at once.
-    assert.equal(json.branches.length, 46)
+    //
+    // 46 in the same run, before `tools/secret-scan.mjs` grew a second ground
+    // branch: an argument it does not know is now exit 2 rather than a tree
+    // scan at exit 0. Same cause as its shallow-clone refusal and a different
+    // line, which is why the count of branches moved and the count of causes
+    // did not.
+    assert.equal(json.branches.length, 47)
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
     assert.equal(causes.size, 36)
   })
