@@ -224,3 +224,66 @@ test('no scan note in the real file commits a day of work it has not filed as an
     .filter(({ block }) => /^-\s+First step:/m.test(block.text));
   assert.deepEqual(offenders, [], 'COMMITS_WORK should have reclassified these as ideas');
 });
+
+// The seat-tag position, added 2026-11-02 by the security seat's debug sweep.
+// `main` was red on one real block because `announcesScan` read the title and
+// never the seat tag, and the fixtures below are that block's heading and the
+// three ways the rule could have been written too loosely.
+
+test('a seat tag announces a scan, because the grammar captures a tag and seats use it', () => {
+  // Verbatim from docs/ideas.md on 2026-11-02. It owes no §4 fields and was
+  // being held to all five.
+  const c = classifyBlock(
+    entry(
+      [
+        '### 2026-11-02 (engineer, craft scan) — Letta Context Repositories: per-file' +
+          ' frontmatter descriptions, and the revision identifier they stopped one step short of',
+        '- Scanned: Letta, category 3 of the landscape.',
+        '- Worth stealing: every memory file carries frontmatter describing its contents.',
+      ].join('\n'),
+    ),
+  );
+  assert.equal(c.seatTag, '(engineer, craft scan)');
+  assert.equal(c.announcesScan, true);
+  assert.equal(c.kind, 'scan');
+});
+
+test('a tag-announced scan still loses the exemption when it commits a day of work', () => {
+  // COMMITS_WORK is upstream of the position, not of the title, so moving the
+  // announcement into the tag must not buy an escape from the escape hatch.
+  const c = classifyBlock(
+    entry(
+      [
+        '### 2026-11-02 (engineer, craft scan) — A competitor worth copying',
+        '- Scanned: something.',
+        '- First step: build the thing, one day.',
+      ].join('\n'),
+    ),
+  );
+  assert.equal(c.announcesScan, true);
+  assert.equal(c.kind, 'idea');
+});
+
+test('a tag that merely mentions scanning announces nothing', () => {
+  // The tag counterpart of `a heading that merely mentions scanning is not a
+  // scan note`. An element must be the whole phrase, so a tag naming scan
+  // tooling as its subject does not exempt the block.
+  const tags = ['(engineer, redaction scan tooling)', '(security, scanning)', '(engineer)'];
+  for (const tag of tags) {
+    const c = classifyBlock(entry(`### 2026-11-02 ${tag} — An idea\n- Trigger: x`));
+    assert.equal(c.announcesScan, false, `expected no announcement for ${tag}`);
+    assert.equal(c.kind, 'idea', `expected an idea for ${tag}`);
+  }
+});
+
+test('the real file has exactly one tag-announced scan, and it is the one measured', () => {
+  // The blast radius, measured rather than asserted from the diff: this rule
+  // reclassifies one block in docs/ideas.md. A second one appearing here is a
+  // reason to re-read the rule, not to update the number.
+  const tagAnnounced = classified
+    .filter(({ c }) => c.seatTag !== null && !/^(craft|competitive)\s+scan\b/i.test(c.title ?? ''))
+    .filter(({ c }) => c.announcesScan)
+    .map(({ c }) => c.heading);
+  assert.equal(tagAnnounced.length, 1, `tag-announced scans: ${JSON.stringify(tagAnnounced)}`);
+  assert.match(tagAnnounced[0], /^### 2026-11-02 \(engineer, craft scan\) —/);
+});
