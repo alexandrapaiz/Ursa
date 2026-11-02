@@ -12005,6 +12005,79 @@ result rather than an error — which is the idiom this charter already
 warns about under "print the endpoint's raw response, not a parsed
 subset".
 
+## INC-2026-11-02-an-absorbed-pull-request-stays-open-and-every-conflict-instrument-reads-its-empty-merge-as-clean — Twelve local reads across two seats called #657 clean, GitHub refused it, and both were right about different questions
+
+**What happened.** Ursa's PM re-derived this seat's five tests on #657
+independently, added two of its own, attempted a live `gh pr merge 657
+--merge`, was refused with "the merge commit cannot be cleanly created",
+and routed the pull request to this seat as a platform-level question no
+seat could resolve from a clone. Its measurement was sound and its
+disposition was wrong.
+
+**The cause.** #657's head is an ancestor of `origin/main`. Its
+three-dot diff is zero files and the tree `merge-tree --write-tree`
+writes is byte-identical to `main`'s own tree. The merge is **empty**,
+and `merge-tree` exits 0 on an empty merge exactly as it does on a clean
+one, so twelve correct readings of "no conflict" were read as "a
+mergeable change with no conflict". GitHub will not write a merge commit
+for a head its base already contains.
+
+**How it got there, and nobody deviated.** Window 79 obeyed the
+all-seats rule to build on its own seat's open pull request, merged
+#657's branch into its own at `f019e550`, and #662 merged into `main` at
+`cdbdcdff`, 2026-11-02T03:24:49Z. `main` carries no commit naming #657,
+so this is §3e's fourth bucket, absorbed by a descendant landing, and
+GitHub left the pull request open. The fourth bucket was written
+assuming GitHub marks an absorbed pull request `MERGED`. Absorbed and
+still open is a fifth state with no row.
+
+**The ordering, which is the part that must not be smoothed over.**
+Containment became true at 03:24:49Z. The PM's refusal was at roughly
+03:0xZ and its restating `done` at 03:16:52Z, both earlier. So the
+emptiness explains the state a run acts on today and does **not**
+explain what the PM saw. Against each historical `main` tip to
+03:15:33Z, #657 was not contained, was driverless-clean, and would have
+landed four files. Those four files are exactly and only the four paths
+`.gitattributes` routes to `merge=register`. The disagreement has not
+yet been observed on a merge touching a path outside the declared driver
+set, which is a falsifiable narrowing rather than a cause.
+
+**Fix.** Shipped as a charter clause on the charter lane, #618: before
+reporting or routing any conflict verdict, run `git merge-base
+--is-ancestor refs/prs/<n> origin/main`, and treat exit 0 as *the merge
+is empty, close the pull request* rather than as a conflict to resolve.
+The measurement, both facts in order, the `mergeable` flicker and the
+stale `refs/pull/<n>/merge` cache are `docs/agents/runner-facts.md` §76.
+Reported to Ursa's PM with the containment proof, so that #657 is closed
+rather than held.
+
+**Corrected in the same window, eight minutes later.** #657's
+`mergedAt` is **2026-11-02T03:24:51Z**, two seconds after `cdbdcdff`
+landed: GitHub resolved it by containment on its own, which confirms
+emptiness and retires the claim above that the absorbed-open state
+stands. This seat recommended closing it at 03:32:14Z, after the fact,
+having failed its own rule to re-derive a state claim immediately before
+acting. The correction went to the PM in the same pass. What survives is
+sharper: after `mergedAt`, `state` read `MERGED` while five polls of
+`mergeable` read `CONFLICTING`/`DIRTY` or `UNKNOWN`, so **GitHub
+published a conflict verdict for a pull request it had already recorded
+as merged**. Read `state` before `mergeable`. And `mergeCommit` is
+`f019e550`, a commit on window 79's branch rather than a merge of #657's
+base, which is §3e's `mergeCommit` trap with a second case. This window
+also recorded no instant for any of its five polls, so it cannot date
+its own readings, which is the instant rule failing twice in one run.
+
+**The class.** This register already holds "an absence is a measurement,
+and it needs a positive control". This is that rule firing on the
+conflict instrument. The scope instrument fails in the same direction in
+the same breath: `git diff --name-only origin/main "$t"` returns zero
+files for an absorbed branch, and zero files is the healthiest answer
+that check can give. The ancestry instrument that settles it has been in
+this seat's charter since 2026-10-04, pointed at two of this seat's own
+pull requests and never at `main`. An instrument this organization
+already owned answered in one line a question two seats spent twelve
+tests and three windows failing to answer, because it was filed under
+the wrong question.
 ## INC-2026-11-02-an-incomplete-word-list-did-not-only-fail-to-fire-it-manufactured-the-positive-verdict — `lost_only` is keyed on the absence of a head marker, so every gap in the vocabulary became a claim that a sender's verdict had been dropped
 
 **What happened.** `tools/board/disposition.mjs` answers one question
@@ -12089,6 +12162,7 @@ seat to grade this arm will otherwise re-propose them.
 comes from a loose probe whose patterns include `I am <verb>ing`, which
 fires on "I am writing". It bounds how much is recoverable. It is not a
 count of dispositions and no gate runs it.
+
 ## INC-2026-11-02-the-charter-freeze-has-a-measured-price-and-another-seat-paid-it — Eleven charters carry the clone repair in an unmerged pull request, zero carry it on `main`, and the seat that needed it recorded a repairable environment as a property of its tool
 
 **Status:** open, and not this seat's to close. The fix is written and
@@ -12232,7 +12306,7 @@ later window re-derives the comparison in the charter by hand.
 ### What the fix measured on the way in, which is larger than the guard
 
 Over the whole open queue, twice, fifteen minutes apart (runner-facts
-§76 carries the tables):
+§80 carries the tables):
 
 - **`baseRefOid` is a cache, not the trunk.** It named a commit that was
   no longer `main` for **22 of 33** open pull requests. The guard's
@@ -12268,3 +12342,182 @@ carried only a day, landing 30 minutes off the walk it described, and
 its remedy was a refusal rather than a repair. Two seats, two
 instruments, one night, no coordination — which is what makes this a
 rule here rather than a trick.
+
+### The eighty-first window's own account of this incident, carried whole (folded in by the eighty-third window)
+
+The two windows wrote this slug independently, on branches neither of
+which contained the other, so the register briefly held two entries
+under one identifier and the `register` driver refused the merge rather
+than guessing. The entry above is the discharge; everything below it is
+the eighty-first window's account and measurement, which the discharge
+summarises and does not contain. Its `Status` paragraph is dropped,
+because the debt it recorded is the one the section above pays.
+
+**What happened.** The eighty-first window spent four reads of GitHub's
+`mergeable` field concluding that GitHub was wrong about a merge it was
+right about. Measured at 04:39:02–04:39:07Z on this seat's own `#682`,
+five polls two seconds apart:
+
+| | |
+|---|---|
+| `mergeable` / `mergeStateStatus` | `CONFLICTING` / `DIRTY`, all five polls |
+| `baseRefOid` | `30d8258c` |
+| `git rev-parse origin/main` in this clone | `30d8258c` — **the guard agreed** |
+| `headRefOid` | `79851707`, matching `git rev-parse HEAD` exactly |
+| `git merge-base --is-ancestor origin/main HEAD` | exit 0 — the merge was a fast-forward |
+| `merge-tree`, drivers and driverless | exit 0 both ways |
+| **the real `main`** | **`9c3c52dc`** |
+
+**Why it happened technically.** `#675` merged at 04:34:58Z and `main`
+took seven commits while this window was measuring. GitHub was computing
+against the real trunk and reporting a real conflict; this clone had not
+fetched since 04:28 and so believed the trunk was still `30d8258c`.
+
+§5b of `prompts/exo-agent.md` prescribes the staleness guard in these
+words: *"`baseRefOid` says which base the answer is about, so staleness
+is readable in the same call … compare the last against `git rev-parse
+origin/main` before you believe either verdict."* **Both operands of
+that comparison come from one fetch generation.** A tracking ref is a
+cached copy of the same value `baseRefOid` is a cached copy of, so when
+the clone is behind they are behind together, the comparison succeeds,
+and the guard reports health in exactly the case it exists to catch.
+
+**The class, and it is already named in this charter.** *An
+equality-shaped assertion cannot detect a defect in the environment both
+sides share* was written by the sixtieth window about
+`tools/stack/repair-pending.mjs`, where a test ran a tree twice in one
+clone and asserted the two runs agreed. The guard above is the same
+shape — two reads of one stale world compared against each other — and
+it sits three thousand lines away from the sentence that describes it.
+Enumerating the class, as §6 requires: the members in this file are that
+test, this guard, and the `refs/pull/<n>/merge` reading below. Any check
+whose form is `a == b` where `a` and `b` are both derived from the same
+fetch, clone or process is a member.
+
+**The fix, which is two lines and is owed to `#618`.** The right operand
+has to come off the wire, and the fetch has to happen immediately before
+any verdict you intend to publish:
+
+```sh
+git fetch origin --quiet
+wire=$(git ls-remote origin refs/heads/main | cut -f1)
+[ "$(git rev-parse origin/main)" = "$wire" ] || { echo "this clone is behind the wire; every verdict below is void"; exit 1; }
+```
+
+That is the same shape as §0's driver-path assertion, which asserts the
+path rather than the exit code for the same reason.
+
+**And a second field, which nothing in this organization has read
+before.** `headRefOid` is the branch tip GitHub knows, **not** the head
+the verdict was computed at, and no field reports the second. The only
+artifact that does is the second parent of `refs/pull/<n>/merge`, which
+is written on a successful computation and never invalidated. Measured
+at 04:39Z across four pull requests, with `headRefOid` reading correctly
+for all four:
+
+| pull request | `headRefOid` | merge-ref 2nd parent | verdict computed at |
+|---|---|---|---|
+| `#680` | `55b7c5d0` | `55b7c5d0` | current |
+| `#673` | `275623bd` | `275623bd` | current |
+| `#618` | `e0c93b3a` | `96441324` | **stale on the head side** |
+| `#682` | `79851707` | `13d1f2b6` | **stale on the head side** |
+
+```sh
+git fetch -q origin "refs/pull/$n/merge:refs/prm$n" \
+  && git log -1 --format='%P' "refs/prm$n"   # 2nd parent != headRefOid means stale
+```
+
+The charter already says to read that ref's parents, and says it about
+the **base** side only, to catch a merge ref computed against an old
+trunk. The head side is the half that was missing.
+
+**What the org grows from it.** A conflict verdict in this repository has
+a shelf life measured in minutes, because `main` took **33** merges on
+the day this was written. So a queue census carries the **trunk sha** it
+was taken at, not only the instant, and a verdict older than the newest
+merge is re-measured rather than quoted. `docs/agents/merge-order.md` has
+carried an instant in its header since 2026-10-04 and carried no sha
+until this window, which is why its own headline claim had to be
+withdrawn inside the window that wrote it.
+
+
+## INC-2026-11-02-an-identifier-minted-in-a-parked-charter-is-cited-onto-main-by-the-windows-that-read-the-parked-charter
+
+**Status: open. The repair is a citation discipline and it is applied
+here; the only thing that closes it is the owner merging `#618`.**
+
+**What happened.** Two incident identifiers are cited on `origin/main`
+and defined nowhere on `origin/main`:
+
+| identifier | cited on `main` in | authoring commit | reachable from |
+|---|---|---|---|
+| `INC-2026-10-26-a-charter-forbade-a-parameter-because-a-pull-request-was-open-and-the-pull-request-had-merged` | `improvements.md`, `incidents.md`, `learning-log.md` | `0aa4376e` | **`#618` only** |
+| `INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout` | `runner-facts.md`, and `merge-order.md` as of this window | `d8a59d3f` | **`#618` only** |
+
+Measured 2026-11-02: the sweep ran against `HEAD` and against `origin/main`, both scoped
+`docs/ docs ':!docs/standards/lessons.md' ':!docs/design/'` plus
+`prompts/`. 122 slugs cited on `HEAD`, 107 headings, 15 raw
+unresolvable; on `main`, 120 cited, 105 headings, 15 raw. After the
+four-state classification — prefix of a live heading, foreign or
+invented, self-classified by its own row, report — **five** rows
+survived to `REPORT` and **two** of those are the rows above. The other
+three are one known rename and two prefix forms of these same two.
+
+**Why it happens, and it is structural rather than careless.** §0 tells a
+window to read this charter from whichever open pull request carries the
+longest copy, while the working tree is a `main` checkout. So the
+instruction set and the artifact are split by design, and **every
+identifier the parked charter mints and cites is unresolvable from the
+tree the window is writing into.** A window that copies such a citation
+into a register — which is the ordinary, correct thing to do, because
+the charter is the authority and the citation is how a memoryless
+successor learns why a rule exists — lands a broken citation on `main`
+the moment that register merges.
+
+**This window reproduced it on itself, which is the proof.** It read the
+charter from `#618`, took the five-day-outage identifier out of §5b, and
+wrote it into `docs/agents/merge-order.md`, a file that merges under
+Tier B within the hour. The citation was correct in the document it was
+copied from and dangling in the document it was copied into, and nothing
+in the act felt like an error.
+
+**The class, stated once.** This is §3's **fourth tool state** — *parked
+in the pull request that names it* — arriving on **identifiers** instead
+of on tool paths. The two share a mechanism and a blind spot: the only
+windows that can see the clause are the windows that cannot see the
+referent, and only this seat reads the parked charter at all.
+
+**The repair, which is a sentence and not a rename.** Do **not** re-spell
+a parked identifier. Ursa's skill seat established the discriminator on
+2026-10-26: a record's slug is how the record is found, so it stays
+greppable. Instead, **say in the same sentence that it is parked and
+where**, exactly as this charter already requires for a tool it names
+before the tool lands:
+
+> `INC-…` — parked in `#618` and not defined on `main` —
+
+Applied to this window's own instance in `docs/agents/merge-order.md`.
+The two older ones are left as they stand, because editing another
+window's register prose to annotate an identifier the owner is about to
+merge would churn three files for a condition one merge removes.
+
+**The standing check, and it is a widening of one that already runs.**
+The dangling-citation sweep is already run against `HEAD` and against
+`origin/main`. Add the fifth state to its classifier, because a row in
+it is a finding with a different owner from every other row:
+
+```sh
+# a row with authoring commits that are on no merged ref is parked, not broken
+ac=$(git log --all --format='%H' -S"## $slug" -- docs/agents/incidents.md | tail -1)
+git merge-base --is-ancestor "$ac" origin/main \
+  && echo "defined on main" \
+  || echo "PARKED: defined only on an unmerged ref; annotate the citation, do not rename it"
+```
+
+**What the org grows from it.** The sweep's measured precision on `main`
+was **zero** across four independent reads before this one, and this
+window's two rows are the first `REPORT` survivors that are neither a
+rename nor a prefix. The check earned its place by being pointed at
+`HEAD` as well as at the trunk, which is the clause the sixty-fifth
+window added for exactly this reason. `runner-facts.md` §78 and §79 are
+this window's other two measurements.
