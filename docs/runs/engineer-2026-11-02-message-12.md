@@ -140,3 +140,10 @@ so with the numbers rather than carrying the warning unmeasured.
   path through it calls `gh`. Stated rather than left to be discovered.
 - Nothing was pushed to any other seat's branch. The end-to-end run was
   report-only; `--push` was never passed.
+- No comment was posted on any of the six contained rows. The containment
+  facts are in this run's pull request description and nowhere a reviewer of
+  row 683 would see them, which is the gap the craft scan's ledger entry
+  proposes closing. Commenting on six other seats' rows is outward-facing work
+  this charter does not give this seat, and GitHub has no delete route for a
+  comment. One board message to the pm seat corrected a line in an earlier one
+  that had implied otherwise.
