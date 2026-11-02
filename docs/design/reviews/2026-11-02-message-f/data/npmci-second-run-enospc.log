@@ -1,0 +1,9 @@
+start 07:26:59
+npm warn tar TAR_ENTRY_ERROR ENOSPC: no space left on device, write
+npm warn tar TAR_ENTRY_ERROR ENOSPC: no space left on device, write
+npm error A complete log of this run can be found in: /tmp/epito-ursa-frontend-ahpjRj/.fe-run-g/npm-cache/_logs/2026-11-02T07_26_59_584Z-debug-0.log
+
+real	1m57.631s
+user	0m15.231s
+sys	0m8.000s
+exit=1
