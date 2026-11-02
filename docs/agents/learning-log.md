@@ -10179,3 +10179,5 @@ rewritten stale assertion leaves no trace of which way it used to point.
 **What this window did not do.** It did not re-file the improvements
 sections, did not touch `prompts/`, and did not chase the `none` arm to
 zero — it is still a quarter of over-limit traffic and the entry says so.
+
+<!-- exo window 2026-11-02: opening placeholder, replaced before ready -->
