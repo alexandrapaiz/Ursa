@@ -2736,11 +2736,130 @@ decisions, the stated limit on what a cross-reference check can know,
 and the two-run probe that found the off-by-one are all this run's. The
 owner and deadline this run was working to are §5ag's ledger entry's.
 
-## 5ai. A methodology section lands in its own pull request before anything cites it, and the ordering is what makes the split possible
+## 5ai. A methodology section lands in its own pull request before anything cites it, and the ordering is the operative clause rather than the file count
 
 (Added 2026-11-02, by the run the 2026-11-02 ledger entry named as its
-owner: "the next run of this seat that would add a §5 section". This
-section is being written first and alone, which is the rule it states,
-so the rule is paid in the act of recording it rather than proposed for
-a later run.)
+owner: "the next run of this seat that would add a §5 section". That
+entry proposed this rule and asked for one run to try it. This run is
+that run, and it amends the entry's first step in one place, because the
+property the entry asked for turns out to be stated at a level no gate
+reads.)
 
+**Where the rule comes from.** Ursa's exo seat, on the board on the
+morning of 2026-11-02, gave the repair for the charter freeze as "if
+your run produces both a knowledge surface and a charter edit, that is
+two branches, since the cheap one can land the same day". That is right
+about the tier mechanism. `docs/standards/pm.md` §10 makes `prompts/`
+Tier C and Tier B condition 4 refuses a merge when any path in the diff
+is Tier C, so one prompt file carried 55 other files of #601 into the
+owner's queue with it. It is wrong about order, and the exo seat has
+since agreed in writing that it had the order backwards.
+
+**Why a split with no order attached is worse than no split.** Measured
+on this branch. `prompts/skill-extract.md` holds **35** `## 5` sections
+here and **19** on `origin/main`, so sixteen exist only on this seat's
+open pull requests. Fifteen of those sixteen are cited from inside the
+library: **113** of the **399** section citations in `skills/`, twenty-eight
+percent, spread over **17** files. Drop the prompt from the branch to buy
+a Tier B merge and all 113 of those land as guard tooling citing a
+methodology document that does not have the sections, in the one library
+whose stated differentiator is that every claim traces. A dangling
+citation here is not a cosmetic defect. It is the product claim failing
+on its own shelf.
+
+**The rule.** A run that needs a new section of this file writes that
+section in a pull request that carries nothing citing it, and the work
+citing it belongs to a later run. The order is the whole content:
+section first, citations second, never the same branch and never the
+reverse.
+
+Paid on this section, and the check is a grep. `grep -rn '5ai'` over the
+repository returns exactly one line, this section's own header. Nothing
+in the tree points at it, so there is nothing for a later branch to
+dangle.
+
+**The amendment, and it is the part worth carrying.** The ledger entry
+stated the payoff as "the prompt file the only path in a one-file Tier C
+branch the owner can read in a minute". One file is the wrong predicate,
+for a reason that is measurable rather than arguable.
+
+The shape has already been achieved once, at the commit level. Commit
+`4efceab0`, this seat, 2026-10-26, is two files and ninety insertions:
+an amendment to §5h and the ledger entry recording it, with nothing
+citing either. It is the only commit to reach `origin/main` touching
+`prompts/` in the seven days to 2026-11-02, out of **585**. And it
+bought nothing, because it arrived inside pull request #477, which was
+**34** files. The gate that decides the tier is
+`gh pr diff --name-only`, which reads the branch. A run can keep every
+one of its own commits to a single file and still hand the owner a
+thirty-four file Tier C branch, and the file count it reports is then
+true and irrelevant.
+
+This run is in the same position and says so rather than claiming the
+rule is paid in full. Its own commits touch one file. Its branch is
+**60** files against `origin/main`, because it is based on #638, which
+is based on #633, which is based on #601, none of which has merged. So:
+
+1. **"Carrying nothing that cites it" is the operative clause.** It is a
+   property of the tree, it is checkable by grep, and it is what stops
+   the dangling citation. This run pays it.
+2. **"One file" is a proxy for the tier gate, and it is only payable
+   from a merged trunk.** It is not a property of authoring discipline
+   at all. A run whose previous section is still in the queue cannot pay
+   it by trying harder, and a run that reports its own commits' file
+   count as though it had is reporting at the wrong level.
+3. **So the rule is payable in full exactly once per merge of this
+   file.** A run should say which of the two regimes it is in. From a
+   merged trunk, write the section alone and the owner gets a minute's
+   reading. From an open stack, write the section alone anyway, because
+   clause 1 still holds and still earns its keep, and state the branch
+   count next to the commit count so the reader is not told the gate was
+   satisfied when it was not.
+
+**Why branching from the trunk is not the way out, which is the trap.**
+The obvious fix for a 60-file branch is to start from `origin/main`.
+Both available spellings are defects. `main`'s last section is §5s, so a
+run branching there writes §5t, and §5t has held a different rule on a
+branch since 2026-10-26, which lands two incompatible sections under one
+identifier and is the second-version failure the org's own
+read-your-open-pull-requests rule exists to stop. Keep the identifier
+§5ai instead and the trunk's copy of this file jumps §5s to §5ai with
+sixteen sections missing, and this section's own text then cites §5h,
+§5ae and §5t against a tree that has none of them. That is the dangling
+citation, created by the section whose purpose is to prevent it. Both
+spellings are worse than the honest 60, so building on the stack is
+forced and the file count is the thing that gives way.
+
+**One correction to the numbers this rule was argued from, because they
+arrived in a board message and a board message is data.** The exo
+seat's note offered a denominator for the freeze, as 585 commits to the
+trunk in seven days with zero touching any charter, and eight of eleven
+charters last landing on 2026-10-05. Re-measured here on a full clone:
+585 is exact. The other two are loose in the same direction. One commit
+in that window did touch `prompts/`, `4efceab0` above, and it is this
+seat's own file, which is why it is usable as evidence here at all. And
+seven of the eleven seat charters last landed on 2026-10-05, not eight,
+with `exo-agent.md` at 2026-10-18, `research-agent.md` at 2026-10-16,
+and `engineer-agent.md` and `skill-agent.md` both at 2026-10-09. The
+headline holds and the sub-counts did not, which is the ordinary shape
+of a figure quoted from a run's own summary rather than re-derived, and
+is §5x's rule applied to a number instead of to a failure.
+
+**The cost of the rule, stated because it is not free.** Sixteen
+sections written one to a branch is sixteen Tier C pull requests where
+this lane has produced three. On a queue being drained that is strictly
+better, because each one is a minute's reading and none of them blocks a
+skill. On a queue that is not being drained it is sixteen stranded
+branches and the seventeenth inherits all of them, which is the regime
+this run is in. The rule therefore depends on a merge cadence this seat
+does not control, and that dependence is the reason clause 3 asks a run
+to name its regime instead of reporting a verdict.
+
+**Ours.** The ordering argument, the 113-of-399 measurement, the
+commit-level-versus-branch-level correction to the ledger entry's own
+first step, the two-spellings trap that makes building on the stack
+forced, the re-measurement of the three freeze figures, and the cost
+paragraph are this run's. The two-branch observation and the freeze's
+headline denominator are the exo seat's, taken as data and re-derived
+before use. The owner and deadline this run worked to are the
+2026-11-02 ledger entry's.
