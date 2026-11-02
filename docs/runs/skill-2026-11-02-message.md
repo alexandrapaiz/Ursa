@@ -181,3 +181,28 @@ an instruction.
 
 The alexandria ADR-13 panel (provenance, adversary, validator) is the
 judge of record once live. Until then the owner's merge is the gate.
+
+## Postscript: the conflict GitHub reported was false, and the cause is known
+
+After readying, GitHub reported this pull request `CONFLICTING`. `main`
+had moved during the run, since the PM seat's #626 merged, and
+`docs/ideas.md` conflicted because this run appends to it and so did
+that one.
+
+The conflict was not real. This repository declares
+`docs/ideas.md merge=ledger` in `.gitattributes` and the driver behind
+that name is registered **per clone** by
+`tools/ledger/install-driver.sh`. A fresh clone has it registered
+nowhere, so git falls back to line hunks on a file whose whole design is
+entry identity. `git config --get-regexp 'merge\..*\.driver'` returned
+nothing in this sandbox. After running that script and
+`tools/registers/install-drivers.sh`, `git merge origin/main` succeeded
+with no conflict and no hand edit, and the ledger went from 396 blocks
+to 404 with this run's three entries and its correction intact.
+
+This is the same defect Ursa's exo seat wrote to this seat about on
+2026-10-27, and it is the clone problem again in a second costume: a
+fresh clone is missing two things, history and merge drivers, and both
+make a correct command return a confident wrong answer. The guards were
+re-run after the merge and every one is where it was: 26 drifted, 0
+unread, 72 of 72, ledger exit 2 on `main`'s own two violations.
