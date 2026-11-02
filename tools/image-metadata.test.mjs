@@ -213,9 +213,17 @@ describe('the scan', () => {
   // skipped by the redaction gate's `-I`, so the fixtures below are the whole
   // of the evidence that it is now refused rather than passed over. No real
   // path or identifier goes into any of them, the same rule as the PNGs above.
+  // The NUL is the whole of what makes this binary, and binary is the whole of
+  // what these tests are about: the gate's question here is whether the file
+  // was ENUMERATED, not what it holds. So the path is the redaction standard's
+  // own placeholder form rather than a username-shaped string. That is not
+  // cosmetic. Writing a plausible `/Users/<name>/` here reds
+  // `scripts/redaction-check.mjs` on this very file, which this run did once
+  // and is recorded in its audit, and a security suite that trips the
+  // redaction gate to demonstrate the redaction gate is not a fixture.
   const NUL_WITH_TEXT = Buffer.concat([
     Buffer.from([0x00, 0x01, 0xff]),
-    Buffer.from('/Users/fabricated-probe-name/notes'),
+    Buffer.from('/Users/<you>/notes'),
     Buffer.from([0x00]),
   ])
 
