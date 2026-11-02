@@ -15228,3 +15228,33 @@ the owner to accept or reject.
   contract and every pinned literal in `secret-scan-verdict.test.mjs`.
 - Cost: $0, half a day, in `tools/secret-scan.mjs` and its verdict module
 - Status: proposed
+
+### 2026-11-02 (market) — Cite the confidentiality/IP-liability gap against the market's own closest attempt at real-work data
+- Trigger: this run's demand-signals ceremony and landscape watch
+  (docs/market/landscape.md, Handshake AI update; docs/market/positioning.md,
+  "A venture investor just drew this file's own line"). TechCrunch
+  (2026-01-10) reports OpenAI and Handshake AI asking third-party
+  contractors to upload actual deliverable files from their past and
+  current jobs. An IP lawyer quoted in the same piece warns this
+  approach puts the AI lab taking it "at great risk," since it
+  depends on each contractor correctly judging what from a former
+  employer's own work is safe to upload. Source: [TechCrunch](https://techcrunch.com/2026/01/10/openai-is-reportedly-asking-contractors-to-upload-real-work-from-past-jobs/).
+- What: this is the market's own closest attempt yet at sourcing real
+  (not constructed) work for training, and it is reportedly carrying a
+  confidentiality/ownership liability that Minor's design does not
+  carry by construction. Minor's signal comes from a user's own real
+  work, processed with that user's own consent (CLAUDE.md §0); nobody
+  is asked to judge, on a stranger's behalf, whether a former
+  employer's file is safe to hand to a third party that employer never
+  agreed to share anything with. This is a distinct argument from the
+  existing verifier-gap proposals already on this ledger (2026-10-07,
+  2026-10-14, and others): it is a liability contrast, not an accuracy
+  or cost one, and it only exists because a named competitor's own
+  reported practice created the comparison.
+- First step: when KR4.1's lab brief is drafted, add this as its own
+  short point alongside the verifier-gap argument: Minor's provenance
+  comes from consented, already-authorized real work, not from
+  re-sourcing a third party's confidential material through a
+  contractor who may misjudge what is safe to share.
+- Cost: $0
+- Status: proposed
