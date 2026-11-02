@@ -545,11 +545,15 @@ node --test skills/source-line.test.mjs
 node --test skills/relevance-sweep.test.mjs
 node --test skills/trigger-coverage.test.mjs
 node --test skills/library-dirs.test.mjs
+node --test skills/grep-dialect.test.mjs
 ```
 
-131 tests as of 2026-10-27, which is a dated measurement rather than a
+157 tests as of 2026-11-02, which is a dated measurement rather than a
 claim about the suite, for the reason `prompts/skill-extract.md` §5ag
-gives about a count with no date on it.
+gives about a count with no date on it. The 131 it said on 2026-10-27
+was exact for that date, re-derived here rather than taken on trust, and
+the 26 since are `grep-dialect`'s fourteen, ten added to
+`trigger-coverage` and two to `relocate-anchors`.
 
 ## Whether a receipt supports its sentence
 
@@ -703,3 +707,55 @@ Nothing renders this library on a web surface yet. `ursa-minor/` has no
 skills route, so the receipts are readable only with the repo checked
 out. That gap is a ledger entry for the engineer or frontend seat, not
 work this seat does (`prompts/skill-extract.md` §6).
+
+## Whether a receipt means the same thing to everyone who runs it
+
+```
+node skills/grep-dialect.mjs --engine     which grep each call path gets, measured
+node skills/grep-dialect.mjs <path>...    commands whose result moves with the caller
+```
+
+A receipt is a command a stranger re-runs. On this host the same command
+does not mean the same thing to everyone who runs it, which this library
+found out on 2026-11-02 by being told so by the ExO seat and then
+checking.
+
+Both engines are installed. `/usr/bin/grep` is GNU 3.11. The `grep` a
+seat gets when it types the word is a shell function the harness
+installs, which execs ugrep 7.8.4. The function is not exported, so a
+script, a guard, continuous integration and even a `bash` that same
+shell launches all get GNU. **The divergence lives in exactly one
+frame, the top one a person types into, and that is the frame a receipt
+is re-run in.**
+
+Two things differ there and the second is the one that costs this
+library more.
+
+The exit status of quiet-plus-invert is inverted: on an input where one
+line of two matches, GNU exits 0 because a line did not match and ugrep
+exits 1 because the pattern did. They agree when every line matches and
+when none does, and the form without `-q` prints identically on both,
+which is why nothing warns.
+
+The file population differs too. The harness form honours `.gitignore`,
+skips binaries and prints paths without the `./` prefix. One needle in
+each of five files, listed by one recursive command: two files in the
+seat's frame, five in a tool's. So a count is a different number and a
+downstream filter anchored on a path means something else.
+
+`--engine` reports what it can reach and says plainly that it cannot
+reach the typed frame, naming the one-liner to run there instead,
+because a measurement that reports agreement it did not take is worse
+than one that reports a gap. The scan reports two shapes: the inverted
+exit status, and a path-anchored filter downstream of a recursive
+search. It has no exemption list, so pointed at this directory it
+reports its own probe and its own fixtures; the narrowing lives in
+`grep-dialect.test.mjs`, in the open, rather than in a flag.
+
+Nothing in this library used either shape when the tool was written.
+What the check found instead was a receipt that had gone false for an
+unrelated reason, which is in `relevance-audit.md` under
+`distilling-a-tuning-record/E25`, and the rule that follows from it is
+proposed in `docs/ideas.md` rather than written here, because
+`prompts/skill-extract.md` §5ai puts a new section in its own pull
+request before anything cites it.
