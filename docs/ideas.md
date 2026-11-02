@@ -16079,6 +16079,34 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-02 (engineer, fourteenth message pass) — Execute the transcription from a fenced block in the prose, so a doc-model claim and the thing checked are one object
+- Trigger: `tools/ledger/block-kinds.test.mjs` went red on the second
+  message pass's doctest craft scan, because that note carried its
+  proposal under a `- First step:` label and `COMMITS_WORK` therefore
+  demoted the note to an idea owing five fields. Splitting the note is
+  this entry's cause; the proposal itself is the second pass's, restated
+  here unchanged so nothing is lost in the split.
+- What: `tools/doc-model/` keeps the prose in a document and an executable
+  transcription of the prose's claim in a separate registry, so the two
+  can drift: an editor rewrites the sentence, the transcription beside it
+  still passes, and the gate stays green over a claim the document no
+  longer makes. Python's `doctest` and Rust's `#[doc]` tests invert that
+  dependency by putting the example inside the prose and running it from
+  there, which makes a stale example a build failure rather than a silent
+  pass. Steal the direction of the dependency for one section: the gate
+  reads a fenced code block out of the section it is checking and executes
+  that, instead of calling a function registered under the section's name.
+  The scope limit is ownership and not difficulty. Four of the five
+  registered sections are another seat's register or the holding company's
+  standard, so a gate that required a fenced block in each would demand
+  exactly the cross-lane editing the ownership downgrade exists to refuse.
+- First step: for one Ursa-owned section, move the transcription into a
+  fenced block in the prose and have the gate execute the block it finds
+  rather than a function in the registry. `docs/design/board-write-path.md`
+  is the honest candidate, since it is a design doc this seat writes.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-02 (engineer, second message pass) — Craft scan: doctest and Rust's `#[doc]` tests, where executable documentation is the unit and the drift class they do not cover
 
 - Trigger: building a gate that executes prose claims, and asking what
@@ -16107,12 +16135,12 @@ the owner to accept or reject.
   silently. The 2026-10-26 section that caused all of this contained no
   example and would have been invisible to either, and the discovery pass
   is the half that would have caught it on the day it was written.
-- First step: for one Ursa-owned section, move the transcription into a
-  fenced block in the prose and have the gate execute the block it finds
-  rather than a function in the registry. `docs/design/board-write-path.md`
-  is the honest candidate, since it is a design doc this seat writes.
-- Cost: $0
-- Status: proposed
+- Not proposed here: the one adoption this scan argues for is filed as its
+  own entry above, `Execute the transcription from a fenced block in the
+  prose`, rather than under a `- First step:` label. That label is pm.md §4's
+  commitment of work, and a scan note carrying it is read by
+  `tools/ledger/block-kinds.mjs` as an idea owing all five fields, which is
+  the defect this split repairs.
 
 ### 2026-11-02 (security, message run) — `--strict` on the read-filter prober exits 0 on a route that answered nothing, and the exit codes it would need are spoken for
 

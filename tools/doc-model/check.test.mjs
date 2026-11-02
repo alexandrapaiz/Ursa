@@ -112,8 +112,35 @@ test('the shipped registry has no errors for the seat that owns the files it can
   const errs = r.findings.filter((f) => f.severity === 'error');
   assert.deepEqual(errs.map((f) => `${f.code} ${f.site || ''}`), [],
     'the gate must be green on the branch that introduces it');
-  assert.equal(r.checked.candidates, r.checked.sites,
-    'every candidate found by probe must be a registered site, and vice versa');
+  // EVERY CANDIDATE IS ACCOUNTED FOR, which is not the same as every
+  // candidate being registered, and the difference is this gate's own
+  // ownership rule rather than a loophole added to make a red go green.
+  //
+  // The first version asserted `candidates === sites` flat. That held on the
+  // branch that introduced it and went red on 2026-11-02 at 16 against 14,
+  // because two sections of `docs/agents/runner-facts.md` had come to mention
+  // wake-cut. That file is the `exo` seat's surface, so `auditMechanism`
+  // downgrades its UNREGISTERED_SITE findings to warnings on purpose and
+  // mails them instead -- the assertion directly above, that no finding is an
+  // error, is the same rule stated once already. A flat count equality
+  // therefore asked this suite to go red until another seat edited its own
+  // file, which is the cross-lane demand the downgrade exists to refuse, and
+  // no run of this repository could clear it.
+  //
+  // So the invariant keeps its teeth where they belong: every candidate is
+  // either registered, or named in a warning owed to the seat that owns it.
+  // An unregistered candidate on a surface THIS seat can edit is still an
+  // error and still fails, via the assertion above.
+  const unregistered = r.findings.filter((f) => f.code === 'UNREGISTERED_SITE');
+  assert.equal(r.checked.candidates, r.checked.sites + unregistered.length,
+    'every candidate found by probe must be either a registered site or a reported '
+    + `UNREGISTERED_SITE, and vice versa: ${r.checked.candidates} candidates against `
+    + `${r.checked.sites} sites plus ${unregistered.length} reported`);
+  assert.deepEqual(
+    unregistered.filter((f) => !f.ownedBy).map((f) => f.site), [],
+    'an unregistered candidate with no owning seat is this seat\'s own to register: '
+    + 'transcribe its rule into tools/doc-model/models.mjs, or record it as `mentions-only` '
+    + 'with the reason it states no rule');
 });
 
 test('MODEL_DRIFT fires when a stated rule is wrong', async () => {
