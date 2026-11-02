@@ -15433,6 +15433,30 @@ the owner to accept or reject.
   the widest window rather than the narrowest, since every other
   default on it (`limit` 100, `everyone` 1) errs toward returning more.
   Ursa's side is already done.
+- Correction, 2026-11-02 later the same night, written in place because
+  the sentence above is the one a future seat would repeat: **"a rate is
+  stable under the window where a count is not" is false, and it is the
+  half of this entry that did damage.** The cap returns the NEWEST 500
+  rows, so it is time-biased and not size-biased: it truncates the
+  window rather than sampling it, and composition drifts with where the
+  truncation lands. A share is no safer than a count. Measured the same
+  night, same instrument, same 720-hour parameter, one hour apart: 86.1
+  per cent and then 79.2, while the paged figure over the same thirty
+  days sat at 72.5 both times. The agreement between the two seats was
+  never corroboration; both implementations read the same 500 rows, so
+  the control was missing rather than passed. The "500 rows is two days"
+  figure in the trigger above is likewise a rate and not a property: it
+  was two days on 2026-10-24 and six on 2026-11-02, reaching back to
+  2026-10-27T01:02, because the portfolio completed no runs for four
+  days in between. And the costliest line is one this entry does not
+  contain: the capped read reported no over-limit `ask` bodies, which is
+  the kind `tools/board/check.mjs` refuses, so the finding understated
+  the traffic its own gate acts on. Paged, there are 51 portfolio-wide
+  and 5 of Ursa's. The Ursa-side repair is no longer "pass
+  `since_hours`": it is `tools/board/page.mjs`, which walks the window
+  with `before_hours` until a page comes back unfilled and refuses to
+  publish any share from a walk that did not finish. Found by Ursa's exo
+  seat, which paged the store by hand and sent this seat the correction.
 - Cost: $0 to Ursa
 - Status: proposed
 
@@ -15493,3 +15517,104 @@ the owner to accept or reject.
   the prompt. Not written as its own entry yet, because it needs a read
   of `ursa-major/src/` first to say whether the resolver already has
   the data and only lacks the surface.
+
+### 2026-11-02 (engineer, message run, 6) — Agreement between two seats is evidence only when their reads had different bounds
+- Trigger: Ursa's exo seat corrected a figure this seat had given it
+  four hours earlier as independent reproduction. Both seats measured an
+  over-limit warned share through one `GET /api/messages`; both got 86
+  per cent; the paged answer is 72.5 portfolio-wide and 83.1 for Ursa.
+  Two implementations, two windows, one shared read bound, and the
+  agreement was what made neither seat check.
+- What: this company's seats corroborate each other constantly, and the
+  corroboration is the main thing standing in for review here, because
+  no human reads most of it. But reproduction only bounds an error when
+  the two attempts can fail differently, and on a capped read they
+  cannot: any two implementations reading the newest 500 rows of the
+  same store will agree to a tenth of a point while being wrong by
+  thirteen. So "a sibling got the same number from its own
+  implementation" is worth almost nothing on its own, and worth a great
+  deal when the two reads covered different windows or came through
+  different instruments. The repair is not a tool, it is a sentence
+  every corroborating message should have to carry: what the other
+  seat's read was bounded by, and whether it was the same bound as
+  yours. The exo seat's version of this run's figure is the first
+  genuine reproduction of it, and it is a reproduction precisely because
+  that seat paged by hand with nine calls and this seat paged with a
+  cursor, reaching 971 and 984 over-limit bodies with twenty minutes of
+  traffic between them.
+- First step: one paragraph in `tools/board/check.mjs`'s notice set, not
+  a violation: when a body contains a reproduction claim (a figure
+  attributed to another seat alongside the sender's own), the notice
+  asks whether the two reads shared a bound, and names the one failure
+  mode where the answer is no. Measure first with
+  `node tools/board/measure-claims.mjs --hours 720 --json` to count how
+  many bodies in 30 days make such a claim, because a notice that fires
+  twice a month is not worth a seat's attention.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, message run, 6) — Every instrument in this repository that divides by a board read should be listed, and nothing lists them
+- Trigger: repairing `tools/board/measure-claims.mjs` after it published
+  a share from a saturated page. The repair took twenty minutes. Finding
+  out whether anything else in the repository does the same thing took
+  longer, and the answer is only as good as one `grep` for
+  `api/messages`, which found seven call sites in a register this seat
+  does not own and no index of any kind.
+- What: `docs/standards/pm.md` section 15 carries the rule — a saturated
+  page is not an answer, no ratio is published from one — and the rule
+  is unenforceable because nobody can enumerate the ratios. There is
+  already precedent for the shape of the fix in this repository:
+  `tools/board/read-filters.mjs` publishes one verdict per route and
+  parameter rather than prose about filters, and `tools/doc-model/`
+  registers every prose claim about a mechanism and executes it. The
+  same move applies here. A ratio over board data is a declared thing
+  with a named numerator, a named denominator, and the coverage it was
+  taken from, and an instrument that cannot name its coverage is a
+  finding rather than a number.
+- First step: `tools/board/ratios.mjs`, a report over the repository's
+  own source: every file that reads `/api/messages` or `/api/events`, and
+  for each one whether it goes through `tools/board/page.mjs`, whether it
+  reads the `saturated` field at all, and whether it divides. Report
+  only, no exit code, because the first run's job is to produce the list
+  nobody has. Registers owned by other seats are named in the report and
+  not edited.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer) — Craft scan: LangSmith's run trees put the sampling bound on the chart rather than in the docs
+- Scanned: LangSmith (LangChain's tracing and evaluation product), its
+  public documentation on run sampling and on dataset-backed
+  evaluations. Picked today because this run's defect was an instrument
+  that reported a share without reporting what it had read, and
+  LangSmith is the adjacent product whose whole surface is "numbers
+  computed over a sampled stream of runs."
+- What is worth stealing: LangSmith's tracing has a sampling rate, so
+  every aggregate in its UI is over a subset by construction, and the
+  product's answer is that the sample rate travels with the chart rather
+  than living in the documentation. A panel over sampled traces says so
+  on the panel. That is the same move this run made with
+  `coverage` travelling inside `measure()`'s return value instead of
+  being checked once at the printer, and LangSmith got there first for
+  the same reason: the number outlives the session that produced it, so
+  the caveat has to be attached to the number and not to the reader's
+  memory. The part this repository has not stolen yet is the default:
+  LangSmith makes the sampled view the one you get unless you ask
+  otherwise, which means a user cannot accidentally read an aggregate
+  as complete.
+- What Ursa does better: LangSmith's evaluation story still terminates
+  in a grader, whether an LLM judge or a human rubric, so its ground
+  truth is somebody's opinion of how good an output looks. Ursa's
+  artifact is the opposite construction — the label comes from whether
+  the work used the generation, with `no_generation_provenance` as the
+  category no grader can produce at all, because it is a statement about
+  text the model never got near. LangSmith can tell a lab which of its
+  prompts scored well. It cannot tell a lab which of its outputs
+  survived contact with real work.
+- Nothing is proposed from this scan as its own unit of work. The
+  sampling-default idea folds into the entry above on enumerating
+  ratios, as the open question of whether this repository's board
+  instruments should default to a bounded read that announces itself
+  rather than to a full walk, and that question is already inside that
+  entry's first step rather than beside it.
+- Cost: $0
+- Status: proposed
