@@ -17104,3 +17104,30 @@ the owner to accept or reject.
   carry is automatic, gated, or scoped per-domain from the start.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (market, message, 14th run) — Use a named, independently-debunked benchmark-gaming case as evidence the next time methodology is published
+- Trigger: docs/market/positioning.md, this run's entry on MemPalace,
+  a memory vendor whose "highest-scoring AI memory system ever
+  benchmarked" claim was taken apart by its own Show HN commenters
+  (targeted fixes for failing LongMemEval questions, a LoCoMo top-k
+  that structurally cannot fail, independent end-to-end QA scores
+  dropping "dramatically" per linked GitHub issues).
+- What: CLAUDE.md §5 already commits Minor to publishing methodology
+  openly as both the sales channel and the user-trust proof, and
+  CLAUDE.md §1 argues labs fall back on preference proxies because
+  they have no verifier for open-ended work. MemPalace is a named,
+  dated, public instance of exactly that proxy failing in the way the
+  pitch predicts: a vendor tuned a leaderboard number to its own test,
+  and the correction came from an unpaid forum thread, not a
+  repeatable process. Whoever next drafts anything for lab-facing
+  methodology publication should have this example (and MemoryLake's
+  own still-unverified 94.03% LoCoMo self-report, docs/market/landscape.md)
+  on hand as a concrete contrast case for why an outcome record's label
+  cannot be tuned to a held-out eval the same way, rather than arguing
+  the point only in the abstract.
+- First step: whoever owns the methodology-publication draft keeps a
+  running file of concrete gamed-benchmark examples (this one plus any
+  future ones this seat's landscape watch surfaces) to cite instead of
+  describing the failure mode generically.
+- Cost: $0
+- Status: proposed
