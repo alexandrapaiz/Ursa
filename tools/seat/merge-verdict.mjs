@@ -4,7 +4,7 @@
 //
 //     node tools/seat/merge-verdict.mjs [<n>...] [--json] [--only-stale]
 //                                       [--max-age-minutes N] [--require-current]
-//                                       [--probe] [--from <file>]
+//                                       [--probe] [--no-containment] [--from <file>]
 //
 // Exit 0 when the read succeeded and any gate passed, 1 when a gate failed,
 // 2 on usage, 3 when the forge or the wire could not be read.
@@ -101,14 +101,34 @@ export function classify(row, wire) {
  * verdict is simply dated against an older trunk and says nothing is wrong.
  * `trunk-moved` is only an instruction when the verdict is CONFLICTING.
  */
-export function remedyFor(state, mergeable) {
+export function remedyFor(state, mergeable, containedIn = null) {
+  // Ursa's skill seat's correction, measured in a throwaway worktree rather
+  // than argued, 2026-11-02T05:20:08Z. A CONFLICTING row that a clean open
+  // sibling already CONTAINS must not be forward-merged. The merge clears the
+  // field the gate reads and leaves the row open, so ten refused rows stay ten
+  // decisions; worse, it takes the containment check from passing to FAILING
+  // and so spends the one proof that lets the owner close the duplicates as a
+  // single decision. On its own measurement the merge "adds nothing, since
+  // merging the result into my tip yields my tip's own tree unchanged."
+  // Census that night: of ten refused rows, SEVEN were contained and only
+  // three genuinely needed the merge. A remedy prescribed to all ten was
+  // therefore wrong for seven of them, and this seat prescribed it.
+  if (containedIn) {
+    return `contained in #${containedIn}: this row owes a CLOSURE, not a forward merge. ` +
+           'Merging would clear the gate\'s field, leave the row open, and destroy the ' +
+           'containment proof that makes the duplicates one decision';
+  }
+  // Only now does datability matter. Containment decides the DISPOSITION and
+  // the date decides what may be QUOTED, so a contained row is closed whether
+  // or not its verdict can be dated. Written in this order because the first
+  // draft had it the other way and a test said so.
   if (state === 'undated') return 'nothing to quote. Say you could not measure';
   if (state === 'head-moved') {
     return 'the verdict predates your own last push; no API field says so. Re-read after the forge recomputes';
   }
   if (state === 'trunk-moved') {
     return mergeable === 'CONFLICTING'
-      ? "not necessarily a conflict in your work: the trunk moved under a merge that succeeded. Install the drivers, `git merge --no-edit origin/main`, push, and re-read. Yours to run, not the owner's to judge"
+      ? "not contained and not necessarily a conflict in your work: the trunk moved under a merge that succeeded. Install the drivers, `git merge --no-edit origin/main`, push, and re-read. Yours to run, not the owner's to judge"
       : 'nothing to do, but do not quote it as current: it was computed against an older trunk';
   }
   return mergeable === 'CONFLICTING'
@@ -224,6 +244,39 @@ export function probe(n) {
   return out;
 }
 
+/**
+ * Is this pull request's head an ancestor of ANOTHER open pull request's head?
+ *
+ * The guard the remedy above needs, and the reason it is here rather than in
+ * prose: `tools/ledger/requeue.sh` selects rows on `mergeable == "CONFLICTING"`
+ * alone and then merges and pushes, so run with its push flag on 2026-11-02 it
+ * would have destroyed five containment proofs in one pass. That tool is the
+ * engineer seat's and the skill seat has filed the finding there; this is the
+ * reference implementation, so the guard is a call and not a re-derivation.
+ *
+ * Needs the pull heads in `refs/prs/*`, fetched with an explicit destination.
+ * Returns `undefined` for a row whose own ref is missing, which is NOT the
+ * same answer as "not contained" and is reported differently.
+ */
+export function containment(numbers) {
+  const out = new Map();
+  for (const n of numbers) {
+    if (!oidOf(`refs/prs/${n}`)) { out.set(n, undefined); continue; }
+    let container = null;
+    for (const m of numbers) {
+      if (m === n || !oidOf(`refs/prs/${m}`)) continue;
+      const a = spawnSync('git', ['merge-base', '--is-ancestor', `refs/prs/${n}`, `refs/prs/${m}`]);
+      // Equal heads are each other's ancestor; prefer the larger number as the
+      // container so a pair does not report both sides as contained.
+      if (a.status === 0 && !(oidOf(`refs/prs/${n}`) === oidOf(`refs/prs/${m}`) && m < n)) {
+        container = m; break;
+      }
+    }
+    out.set(n, container);
+  }
+  return out;
+}
+
 function readForge() {
   const r = spawnSync(
     'gh',
@@ -237,13 +290,15 @@ function readForge() {
 }
 
 /** Join the forge rows to the merge refs and classify. Pure given both. */
-export function buildRows(prs, refs, wire, nowEpoch) {
+export function buildRows(prs, refs, wire, nowEpoch, contained = new Map()) {
   return prs.map((p) => {
     const m = refs.get(p.number) || { mergeHead: null, mergeBase: null, writtenAt: null };
     const row = { ...p, ...m };
     const state = classify(row, wire);
-    return { ...row, state, age_minutes: ageMinutes(row.writtenAt, nowEpoch),
-             remedy: remedyFor(state, p.mergeable) };
+    const container = contained.get(p.number) ?? null;
+    return { ...row, state, contained_in: container,
+             age_minutes: ageMinutes(row.writtenAt, nowEpoch),
+             remedy: remedyFor(state, p.mergeable, container) };
   });
 }
 
@@ -264,7 +319,8 @@ function main(argv) {
     const fx = JSON.parse(readFileSync(argv[fromIdx + 1], 'utf8'));
     wireInfo = { wire: fx.wire, localOid: fx.wire, behind: false };
     const refs = new Map(fx.prs.map((p) => [p.number, p]));
-    rows = buildRows(fx.prs, refs, fx.wire, fx.now);
+    const contained = new Map(fx.prs.map((p) => [p.number, p.contained_in ?? null]));
+    rows = buildRows(fx.prs, refs, fx.wire, fx.now, contained);
   } else {
     wireInfo = readWire();
     if (wireInfo.error) { console.error(`could not read the wire: ${wireInfo.error}`);
@@ -276,7 +332,10 @@ function main(argv) {
     const mr = readMergeRefs(prs.map((p) => p.number));
     if (mr.error) { console.error(`could not read the merge refs: ${mr.error}`);
                     console.log('COULD NOT MEASURE'); return 3; }
-    rows = buildRows(prs, mr.refs, wireInfo.wire, Math.floor(Date.now() / 1000));
+    const contained = flags.has('--no-containment')
+      ? new Map()
+      : containment(prs.map((p) => p.number));
+    rows = buildRows(prs, mr.refs, wireInfo.wire, Math.floor(Date.now() / 1000), contained);
     if (flags.has('--probe')) rows = rows.map((r) => ({ ...r, ...probe(r.number) }));
   }
 
@@ -296,6 +355,7 @@ function main(argv) {
     for (const r of shown) {
       const age = r.age_minutes === null ? 'undated' : `${r.age_minutes}m`;
       console.log([`#${r.number}`, r.mergeable, r.state, age,
+                   `contained_in=${r.contained_in ? '#' + r.contained_in : '-'}`,
                    `verdict_head=${String(r.mergeHead || '-').slice(0, 8)}`,
                    `api_head=${String(r.headRefOid).slice(0, 8)}`,
                    `verdict_base=${String(r.mergeBase || '-').slice(0, 8)}`].join('\t'));

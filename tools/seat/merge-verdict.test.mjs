@@ -169,3 +169,38 @@ test('the charter cites this tool rather than re-deriving the comparison in pros
   assert.doesNotMatch(charter, /baseRefOid`? against `git rev-parse origin\/main/,
                'the charter must not still prescribe comparing two refs from one fetch generation');
 });
+
+test('a contained row owes a closure, not a forward merge', () => {
+  // Ursa's skill seat's correction, measured rather than argued: of ten refused
+  // rows that night, SEVEN were contained in a clean open sibling and only
+  // three genuinely needed the merge. This seat had prescribed the merge to all
+  // ten. The merge clears the gate's field, leaves the row open, and takes the
+  // containment check from passing to failing.
+  const contained = remedyFor('trunk-moved', 'CONFLICTING', 673);
+  assert.match(contained, /CLOSURE, not a forward merge/);
+  assert.doesNotMatch(contained, /git merge --no-edit/);
+  assert.match(contained, /#673/, 'the remedy must name the container, so the closure can cite it');
+
+  // And the uncontained row still gets the merge, because three of the ten did
+  // need it. Taking a correction too far is the other way to be wrong here.
+  assert.match(remedyFor('trunk-moved', 'CONFLICTING', null), /git merge --no-edit origin\/main/);
+});
+
+test('containment outranks every other state, including undated', () => {
+  // A contained row's disposition does not depend on whether its verdict could
+  // be dated: it is closed either way, so the containment answer comes first.
+  for (const s of STATES) {
+    assert.match(remedyFor(s, 'CONFLICTING', 601), /CLOSURE/,
+                 `state ${s} must still owe a closure when contained`);
+  }
+});
+
+test('buildRows carries contained_in through to the remedy', () => {
+  const rows = buildRows(
+    [{ number: 1, mergeable: 'CONFLICTING', headRefOid: HEAD, baseRefOid: OLD }],
+    new Map([[1, { mergeHead: HEAD, mergeBase: OLD, writtenAt: 1_000_000 }]]),
+    WIRE, 1_000_060, new Map([[1, 2]]),
+  );
+  assert.equal(rows[0].contained_in, 2);
+  assert.match(rows[0].remedy, /contained in #2/);
+});

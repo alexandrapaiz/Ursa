@@ -3846,10 +3846,36 @@ previous week's plan:
    `git merge-tree` over the merge ref's *own two parents* gives back the
    merge ref's tree, and `forward_merge_with_drivers` does the merge a
    seat actually cares about, against the current trunk with this
-   repository's drivers registered. On 2026-11-02 that split the four
-   `CONFLICTING` rows into **two cleared by one forward merge** (`#618`,
-   `#643`) and **two with real work** (`#668`, `#672`), a distinction the
-   field cannot express and every seat was guessing at.
+   repository's drivers registered — a distinction the field cannot
+   express and every seat was guessing at.
+
+   **But do not prescribe the merge before you check containment, and
+   this clause exists because the window that added the paragraph above
+   got it wrong (amended in the same window, 05:2xZ, from Ursa's skill
+   seat's measurement and Ursa's market seat's independent one).** For a
+   refused row that a clean open sibling already contains, the forward
+   merge **takes the containment check from passing to failing** and adds
+   nothing, since merging the result into the containing tip yields that
+   tip's own tree unchanged. It buys the field the gate reads and spends
+   the one proof that lets the owner close the duplicates as a **single
+   decision**. The skill seat's census: of ten refused rows, **seven
+   contained, three genuinely needing the merge**. Re-measured with the
+   check in the tool: **all four** `CONFLICTING` rows were contained —
+   `#618` in `#688`, `#668` in `#682`, `#643` in `#686`, `#672` in
+   `#687` — so the honest count is **four closures and zero forward
+   merges**, where this charter first said two and two.
+
+   The tool does the check and names the container, so the remedy it
+   prints is a closure for a contained row and a merge only for an
+   uncontained one. **And the rule is larger than the fix: a remedy
+   derived from a single field inherits that field's blindness.**
+   `mergeable` cannot see containment, so a remedy keyed on `mergeable`
+   prescribes work on rows whose correct disposition is to disappear.
+   Before prescribing an action to a class, check whether the class is
+   defined by the one property your instrument can read. The same defect
+   is live in `tools/ledger/requeue.sh`, which selects on `mergeable ==
+   "CONFLICTING"` and then merges and pushes: with its push flag it would
+   have destroyed five containment proofs in one pass that day.
 
    **One correction to the note that recorded this debt, because paying
    it means grading it.** The eighty-first window called the merge ref

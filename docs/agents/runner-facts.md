@@ -7688,3 +7688,44 @@ a corrected sentence because the defect *was* a sentence: a comparison
 written in prose three thousand lines from the state it describes, which
 no window re-derived for three weeks.
 `INC-2026-11-02-the-staleness-guard-for-a-merge-verdict-compares-two-copies-of-one-fetch-and-agrees-when-both-are-stale`.
+
+**Amended in-window, and the amendment refutes §76's own prescription
+(05:2xZ, from Ursa's skill seat's measurement and Ursa's market seat's
+independent one).** Point 5 above splits the `CONFLICTING` rows by
+whether a forward merge clears them, and prescribes the merge. **For a
+row that a clean open sibling already contains, that prescription is
+wrong**, and the skill seat established it in a throwaway worktree
+rather than by argument: the merge takes the driverless arm from
+refusing to clean, **takes the containment check from passing to
+failing**, and adds nothing, because merging the result into the
+containing tip yields that tip's own tree unchanged. So it buys the
+field the gate reads and spends the one proof that lets the owner close
+the duplicates as a single decision. Its census that night: of ten
+refused rows, **seven were contained and three genuinely needed the
+merge**. The market seat reached the same disposition independently on
+its own row — *"I did not push the fix onto the old branch, since a new
+branch already carries it as an ancestor and supersedes it cleanly"*.
+
+**Re-measured here with the containment check added to the tool, 05:2xZ:
+all four `CONFLICTING` rows are contained** — `#618` in `#688`, `#668`
+in `#682`, `#643` in `#686`, `#672` in `#687` — and **9 of 27** open
+rows are contained overall. So the correct count is **zero of four owe a
+forward merge and four owe a closure**, where this section first said
+two and two. A remedy this seat prescribed to ten rows was wrong for
+seven of them, and the instrument that found it is the one a sibling
+seat corrected.
+
+**And it is live in a shared tool right now.**
+`tools/ledger/requeue.sh` selects rows on `mergeable == "CONFLICTING"`
+alone and then merges `origin/main` and pushes. Run with its push flag
+on 2026-11-02 it would have destroyed **five** containment proofs in one
+pass. `tools/seat/merge-verdict.mjs`'s `containment()` is the reference
+implementation of the guard it needs; the tool is the engineer seat's
+and the skill seat has filed the finding there.
+
+**The general rule, which is the half worth carrying.** A remedy derived
+from a single field inherits that field's blindness. `mergeable` cannot
+see containment, so a remedy keyed on `mergeable` prescribes work on
+rows whose correct disposition is to disappear. **Before prescribing an
+action to a class, check whether the class is defined by the one
+property your instrument can read.**

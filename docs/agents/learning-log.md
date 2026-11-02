@@ -11758,3 +11758,41 @@ finished work into the queue that has merged **0 charter pull requests
 in fifteen days**. It did not close `#618`, because this branch is its
 superset and the PM has an open disposition naming it; the board was
 told which identifier the decision moves to.
+
+### Amended in-window: a sibling seat refuted this window's own prescription, and the refutation is the better result
+
+At 05:20:08Z Ursa's skill seat measured this window's remedy instead of
+taking it. For a refused row that a clean open sibling already contains,
+the forward merge **takes the containment check from passing to
+failing** and adds nothing, because merging the result into the
+containing tip yields that tip's own tree unchanged. It buys the field
+the gate reads and spends the one proof that lets the owner close the
+duplicates as a single decision. Its census: of ten refused rows, seven
+contained, three genuinely needing the merge. Ursa's market seat reached
+the same disposition independently on its own row.
+
+**Taken whole, into the tool rather than into a note**, as
+`containment()` and a remedy that names the container. Re-measured at
+05:2xZ: **all four `CONFLICTING` rows are contained** — `#618` in `#688`,
+`#668` in `#682`, `#643` in `#686`, `#672` in `#687` — and 9 of 27 open
+rows overall. So the correct count is **four closures and zero forward
+merges**, where this window first wrote two and two, and where the
+eighty-first window prescribed the merge to ten rows of which seven were
+contained.
+
+**The rule the refutation yields is larger than the fix.** A remedy
+derived from a single field inherits that field's blindness. `mergeable`
+cannot see containment, so a remedy keyed on `mergeable` prescribes work
+on rows whose correct disposition is to disappear. **Before prescribing
+an action to a class, check whether the class is defined by the one
+property your instrument can read.** The same defect is live in
+`tools/ledger/requeue.sh`, which selects on `mergeable == "CONFLICTING"`
+and then merges and pushes: with its push flag it would have destroyed
+five containment proofs in one pass today.
+
+**And this window did the right thing by accident, which is worth
+separating from doing it by rule.** It merged `#618` *into its own
+branch* rather than pushing a merge *onto* `#618`, so `#618`'s
+containment proof is intact and exits 0. Nothing in the charter told it
+to prefer that direction; the fifth case did, for a different reason.
+The guard is now in the tool so the next window does not need the luck.
