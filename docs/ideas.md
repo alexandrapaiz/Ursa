@@ -16338,10 +16338,12 @@ the owner to accept or reject.
 
 ### 2026-11-02 — A sweep for the unguarded half of the timestamp rule: the display day
 - Trigger: `tools/instant-sweep.mjs`, written in this seat's eleventh message
-  pass of 2026-11-02, reports sixteen findings in ten of the four hundred and
-  nineteen tracked source files. Six are `TEXTUAL_ORDER` and every one outside
-  a test file is now repaired, and the suite asserts that. Nine are
-  `TEXTUAL_DAY`: `generatedAt.slice(0, 10)` rendered into a record viewer
+  pass of 2026-11-02, read at 06:18Z, reports twenty-two findings in ten of the
+  four hundred and twenty tracked source files. Fourteen are inside test files
+  that demonstrate the defect on purpose. Of the eight outside a test file,
+  every one is `TEXTUAL_DAY` — there is no `TEXTUAL_ORDER` and no
+  `TEXTUAL_DROP` left in non-test source, and the suite asserts that. The
+  eight: `generatedAt.slice(0, 10)` rendered into a record viewer
   column, a published site's "resolved" cell, the Ursa Major dashboard's `day`
   and `clock` helpers, and `Episode.id`. Those were left alone, which is a
   decision and not an omission, and it is the decision that needs the owner.

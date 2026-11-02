@@ -237,18 +237,24 @@ its own denominators, because a sweep that says "4 findings" has said nothing
 about coverage.
 
 ```
-$ node tools/instant-sweep.mjs
-read at 2026-11-02T05:57:23.630Z
-16 findings in 10 of 419 tracked source files scanned
+$ node tools/instant-sweep.mjs            # read at 2026-11-02T06:18:02Z
+22 findings in 10 of 420 tracked source files scanned
 1 files skipped (build output; the source it came from is scanned)
-TEXTUAL_DAY 9, TEXTUAL_ORDER 6, TEXTUAL_DROP 1
+TEXTUAL_DAY 14, TEXTUAL_ORDER 7, TEXTUAL_DROP 1
 ```
 
-Every `TEXTUAL_ORDER` outside a test file is repaired, and
-`tools/instant.test.mjs` asserts that as a gate with a positive control on the
-file count, so a sweep that silently read nothing cannot pass it. The six that
-remain are all in test files that demonstrate the inversion on purpose, each
-sitting next to the instant-aware assertion that contradicts it.
+Split by where they are, which is the only split that matters: **14 are inside
+test files**, each one a line that demonstrates the inversion on purpose and
+sits beside the instant-aware assertion contradicting it, and **8 are outside
+a test file and every one of them is `TEXTUAL_DAY`**. Zero `TEXTUAL_ORDER` and
+zero `TEXTUAL_DROP` outside a test, which `tools/instant.test.mjs` asserts as a
+gate with a positive control on the file count, so a sweep that silently read
+nothing cannot pass it.
+
+The count moved during the run, from 16 findings in 419 files at 05:57Z to 22
+in 420 at 06:18Z, because this run's own new tests quote the defects they
+test and `tools/instant-sweep.mjs` became tracked. Both readings are dated for
+the reason this whole pass is about: the number is a reading, not a constant.
 
 ## 5. The lint's first sweep was wrong, and the corpus is why it is right now
 
@@ -335,8 +341,8 @@ it needs, rather than papered over here.
 
 ## 7. Named rather than fixed
 
-- **The display day is a decision, not a defect.** Nine `TEXTUAL_DAY` findings
-  remain, all rendering: a record viewer column, a published site's "resolved"
+- **The display day is a decision, not a defect.** Eight `TEXTUAL_DAY` findings
+  remain outside a test file, all rendering: a record viewer column, a published site's "resolved"
   cell, the dashboard's `day` and `clock` helpers, and `Episode.id`. A person
   who wrote something at eight in the evening in Denver would say they did it
   that day; the aggregation layer needs UTC to join. Both are right for their
@@ -363,6 +369,37 @@ it needs, rather than papered over here.
   written" times out at vitest's 20-second default under this host's load, and
   passes in 13.9 s when run alone with `--testTimeout=120000`. Nothing in this
   branch touches `corroborate.ts` or `viewer.ts`.
+- **The node test suite's batch reds are disk exhaustion, and the shape is
+  worth recording.** Run as one batch, `node --test tools/*.test.mjs
+  tools/*/*.test.mjs` reported, over three runs in twenty minutes, 0 fails,
+  then 2, then 9, with no change to the repository between the second and the
+  third beyond one ledger paragraph. Every file in the failing set builds a
+  temporary git repository or clone — `tools/ensure-full-clone.test.mjs`,
+  `tools/ledger/pairwise.test.mjs`, `tools/stack/merge-surface.test.mjs`,
+  `tools/stack/integrate.test.mjs` — and each one passes alone when there is
+  space: 21/0, 8/0, 20/0 measured individually. Free space on this host's
+  shared `/tmp` moved between 1.7 GB and zero during the run, under six other
+  seats' checkouts of 600 MB to 850 MB each. **Nothing in the failing set
+  imports anything this branch changed**, checked with
+  `grep -l instant` over all of them and `grep -rln charter-lag tools`, which
+  returns only `tools/instant.mjs`, `tools/instant.test.mjs`,
+  `tools/seat/charter-lag.mjs` and its own test. So the batch number is a
+  reading of the host and not of the code, and a run that quotes it without
+  the free-space figure beside it is quoting a constant again. This is not in
+  the ledger as an idea because the repair is not ours: the suite needs a
+  temp directory with a guaranteed floor, which is a host-level question for
+  HQ's runner facts rather than a day of engineering here.
+- **One real red the batch did find, and the gate that found it.**
+  `tools/ledger/ledger.test.mjs`'s round-trip assertion caught a trailing
+  blank line my own `docs/ideas.md` append left at end of file.
+  `tools/ledger/check.mjs`, which this seat runs by habit, reported the file
+  clean. That is the second time in this one run that two gates over one file
+  disagreed and the habitual one was the permissive one — the first was the
+  scan heading, where the contract checker was satisfied by adding a field and
+  `tools/ledger/block-kinds.test.mjs` then refused the heading's
+  classification. Both are now green. The pattern is worth a sentence in the
+  charter's Act section eventually, which is the owner's to merge: run the
+  ledger's test file, not only its checker.
 
 ## External sources read
 
