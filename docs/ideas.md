@@ -17513,3 +17513,188 @@ the owner to accept or reject.
   to the entry above as a second step, not to a new instrument.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 — A sweep for the unguarded half of the timestamp rule: the display day
+- Trigger: `tools/instant-sweep.mjs`, written in this seat's eleventh message
+  pass of 2026-11-02, read at 06:18Z, reports twenty-two findings in ten of the
+  four hundred and twenty tracked source files. Fourteen are inside test files
+  that demonstrate the defect on purpose. Of the eight outside a test file,
+  every one is `TEXTUAL_DAY` — there is no `TEXTUAL_ORDER` and no
+  `TEXTUAL_DROP` left in non-test source, and the suite asserts that. The
+  eight: `generatedAt.slice(0, 10)` rendered into a record viewer
+  column, a published site's "resolved" cell, the Ursa Major dashboard's `day`
+  and `clock` helpers, and `Episode.id`. Those were left alone, which is a
+  decision and not an omission, and it is the decision that needs the owner.
+- What: `slice(0, 10)` on a timestamp returns the committer's local calendar
+  day. Measured across all 2,134 commits reachable from `origin/main` on
+  2026-11-02: 330 carry a non-zero offset, and in 143 of them the day the
+  string begins with is not the UTC day of the instant it names. So one record
+  in fifteen, at this repository's own offset distribution, would render a day
+  that disagrees with the UTC instant stored beside it. The question is which
+  day is the right one to show, and it is genuinely open. A person who wrote
+  something at eight in the evening in Denver would say they did it on that
+  day, not on the next one that UTC was already in. The viewer's job is to be
+  recognisable to that person. The aggregation layer's job is to be joinable,
+  which needs UTC. Both are right for their own surface and the code currently
+  picks by accident.
+- The one that is not a rendering choice: `src/episodes.ts:63` builds
+  `Episode.id` as `${slug}-${generatedAt.slice(0, 10)}-${sha.slice(0, 7)}`.
+  That is an identifier, already written into the trial artifacts in this
+  repository, and two episodes of the same slug could take the same id or
+  different ids depending on the committer's offset. Changing the formula
+  renames existing records; leaving it means the id's day is not the record's
+  UTC day. Neither is free, which is why this is a proposal.
+- First step: decide the rule per surface, in one sentence each, and write it
+  into `docs/design/record-exclusions.md` beside the §10.5 string-versus-
+  instant note that already states the parsing half. Then either exempt the
+  display sites in `tools/instant.mjs`'s lint by name, with the decision
+  quoted, or repair them. An exemption with the reason in it is worth more
+  than a clean sweep that was cleaned by widening the pattern.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — A fixture corpus of timestamp spellings, because the one we have is single-timezone
+- Trigger: the defect repaired in this pass was invisible to its own test
+  suite for a structural reason worth naming separately from the defect.
+  `tools/seat/charter-lag.test.mjs` had three branch fixtures and two charter
+  fixtures and every timestamp in all five was a `Z` string. The comparison it
+  was exercising only breaks between two spellings, so a single-spelling corpus
+  cannot reach it, and the suite was green for three weeks over a live
+  miscount. The same shape appears in `ursa-major/src/adapters/github-pr.test.ts`,
+  where every snapshot fixture is `Z` because the GitHub REST API normalises,
+  while the integration test at the bottom of that file builds its dates with
+  `git show -s --format=%aI` in a temp repository and therefore carries
+  whatever offset the runner's `TZ` happens to be.
+- What: one small shared fixture module holding the same handful of instants in
+  every spelling this repository's producers emit — `Z`, `+00:00`, and the
+  three negative offsets that appear in its own history — so a test that
+  exercises an ordering can be written over all of them at once rather than
+  over whichever one its author typed. Today's repairs each carry a hand-built
+  mixed pair, which is the right size for one pass and the wrong thing to
+  repeat eleven times. The second half is a runner fact rather than a fixture:
+  the integration tests' dates depend on the host's `TZ`, so the suite's
+  coverage of offset handling is currently a property of the machine. Pinning
+  `TZ` in `vitest.config.ts` makes it reproducible; running the offset-
+  sensitive files twice, once under `TZ=UTC` and once under something east of
+  it, makes it tested.
+- First step: `ursa-major/src/adapters/instants.fixture.ts` with the spelling
+  table and one `describe.each` over it in `github-pr.test.ts`, then the same
+  table as a plain export from `tools/instant.mjs` for the node-side suites.
+  Measure first: run the existing suite under `TZ=Asia/Tokyo` and report what
+  goes red, because that number is the honest size of the gap and this entry
+  should not claim it before it is known.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — The bundle digest index's ordering claim has no test, only a corpus
+- Trigger: the red-arm rehearsal for this pass. Reverting
+  `ursa-major/tools/bundle-digest-index.ts` to its text sort and running
+  `npm run provenance:bundles:check` exits 0 and reports all fifty-two versions
+  matching. The guard is green because every `date` in the committed
+  `docs/provenance/bundle-digests.json` is `.000Z`, not because anything
+  asserts the ordering rule. That file's own comment says its row order "is a
+  function of history alone and not of Map insertion order", which is the
+  claim a text sort makes false the first time a committer is not in UTC, and
+  there is nothing in the repository that would notice.
+- What: this is the mirror of the positive-control problem this seat already
+  has an entry for. There the gate's numbers count only the messages that got
+  through; here the regeneration check compares against a corpus that happens
+  to contain only the easy case, so it cannot distinguish a correct sort from
+  an incorrect one. A `--check` that passes under both arms of a mutation is
+  reporting the corpus, not the code.
+- First step: a unit test over `buildIndex`'s sort with a synthetic
+  `introducedBy` list carrying two introductions that straddle an offset
+  boundary — the same shape as the two tests added to
+  `github-pr.test.ts` in this pass, which is roughly fifteen lines and needs
+  no git history at all. Then the `--check` keeps its job, which is detecting
+  drift in the artifact, and the ordering rule gets the test it never had.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — A measured block should carry the age of its method, not only the age of its reading
+- Trigger: the ExO seat's note of 2026-11-02 05:26Z reports a merge gate whose
+  staleness guard "stood three weeks" and was wrong for all of them. This
+  seat's `MEASURED` blocks, from the ninth pass, already carry a `read_at` and
+  a `coverage.newest_ts`, and the gate computes an age at the call, so a stale
+  count reads as history rather than as a reading. What none of that
+  distinguishes is a number measured at 04:28Z by a method written at 04:28Z
+  from a number measured at 04:28Z by a method written three weeks ago whose
+  assumptions have since moved. The craft-scan note below is where the shape
+  came from.
+- What: add a `rule_written_at` to the measured-block shape in
+  `tools/board/measured-citation.mjs`, sourced from `git log -1 --format=%ct`
+  over the file that computes the number, and have `citedCounts` print the
+  older of the two ages rather than the read age alone. `%ct` and not `%cI`,
+  for the reason measured in this pass: epoch seconds have no offset to drop.
+  One field and one `git` call, and it turns "this count is two minutes old"
+  into "this count is two minutes old and the method that produced it is
+  twenty-four days old", which is the sentence the ExO seat needed three weeks
+  ago. The second half is that a `rule_written_at` read from a shallow clone
+  reports the graft commit for every file, so the field needs the same clone
+  check `tools/seat/charter-lag.mjs` runs before it prints anything, or it
+  will report every rule as written today.
+- First step: the field and the clone guard in `measured-citation.mjs`, with
+  the two-age sentence asserted in its test at a fixed `now`, which that
+  module is already pure enough to allow. It depends on `#679` landing first,
+  since that is where the module lives.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — Craft scan: Prometheus's `@` modifier
+- Read: `https://prometheus.io/docs/prometheus/latest/querying/basics/`, the
+  competitive scan for this pass, continuing the previous one's read of the
+  same product. Read as data about an adjacent product; it asked nothing of
+  this run.
+- Worth stealing: Prometheus separates the instant a query is *evaluated* at
+  from the instant each sample was *scraped* at, and its `@` modifier pins a
+  sub-expression to an absolute timestamp so one part of an expression is
+  evaluated at a fixed moment while the rest moves with the query. The
+  property that matters is not the syntax. It is that the two instants are
+  different fields with different names and the language refuses to let a
+  query confuse them. The entry above is that idea applied to a third instant
+  Prometheus also names and our blocks do not.
+- What Ursa does better: Prometheus's instants are all machine clocks over one
+  host's own samples, and nothing in it reconciles two producers that spell the
+  same instant differently, because it never has two. This repository has four,
+  measured in this pass: `git --format=%cI`, `git --format=%ct`, GitHub's REST
+  API, and the company board's row stamps. `tools/instant.mjs` is the piece
+  Prometheus does not need and we do, and the 330 offset-bearing commits on
+  `origin/main` are why.
+- No adoption is proposed here beyond the entry above, which carries its own
+  first step.
+
+### 2026-11-02 — The record invariants accept a bare calendar day as a readable date
+- Trigger: reading `ursa-major/src/invariants.ts` while checking whether this
+  pass's timestamp repair reached the gates. `RIVAL_NOT_AFTER_FINAL` and
+  `EXCLUSION_NOT_CLASSIFIED` both state their readability clause as "a date
+  `Date.parse` can read", and both implement it as `Date.parse(date)` against
+  `NaN`. That is correct about offsets, which is the half this pass was
+  repairing elsewhere, and lax about the other half: `Date.parse('2026-10-09')`
+  returns a number. So a rival verdict whose date is a bare calendar day
+  passes the readability clause and is then ordered against
+  `task.generatedAt` as if it were UTC midnight on that day.
+- What: the ordering those two bounds perform is the one in the product that
+  decides whether a span is dropped from a record. `EXCLUSION_NOT_CLASSIFIED`'s
+  own text says an exclusion "drops a whole file out of every figure in the
+  record, and on this repository's own history one exclusion removed 60,616
+  characters, 84.7% of that run's headline survival figure". A sibling copy
+  dated `2026-10-09` is being compared at `00:00:00Z`, which is up to
+  twenty-four hours earlier than the instant it stands for, and the comparison
+  it feeds is `is this copy from the record's own future`. Reading the day as
+  its earliest instant biases that answer toward "no", which is the direction
+  that keeps the exclusion and drops the file. No record in this repository
+  carries such a date today, so this is latent; it is filed rather than fixed
+  because tightening an invariant changes which already-written records pass
+  it, and that acceptance set is the owner's to move, not a seat's. The same
+  module's second rule — an invariant is a bound, a measurement is not — is the
+  reason the choice matters.
+- First step: measure before changing anything. Walk every record under
+  `ursa-major/trial/` and `fixtures/` and count the descent and exclusion
+  dates by `timestampShape` from `tools/instant.mjs` — `utc-z`, `utc-offset`,
+  `offset`, `naive`, `invalid`, and absent, which is legal and unchecked by
+  design. If the count of day-only and zoneless dates is zero, the bound can
+  be tightened with no record changing verdict and the entry closes in one
+  commit. If it is not zero, the number is the decision the owner needs and
+  the entry is about records already sold rather than about a regex.
+- Cost: $0
+- Status: proposed
