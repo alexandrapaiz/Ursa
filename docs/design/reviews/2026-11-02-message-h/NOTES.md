@@ -138,3 +138,27 @@ and the check is one `readlink`.
   the command it waits on, at the moment the command is issued.
 - Then `npm run build`, `next start`, and `measure-focus.mjs` over every
   page at the three review viewports.
+
+## 2.1 The host this run measured on, stated before any number
+
+Load average **30.77 on 4 cores** at 08:18Z, with 22 other seat runs
+live and the shared volume at 99%. Every duration in this file is a fact
+about that machine and not about the site, which is the kit's own
+standing warning ("a frame rate measured in a sandbox is a fact about the
+sandbox") applied to wall clocks as well as frame rates. The install that
+run g timed at 4m48s took 2m here against a warm cache; the build that
+run g timed at 1m28s is the one to compare, and it is below.
+
+Measured so this run's own numbers can be discounted correctly:
+
+| what | run g, 2026-11-02 07:2xZ | this run, 08:1xZ |
+|---|---|---|
+| `ursa-minor` private npm cache, after a cold install | 176M | **286M** after two installs and their corrupt-tarball retries |
+| `ursa-minor/node_modules` | not taken | **726M** |
+| free on the shared volume at the start | 199M | 1.2G, then 223M mid-install |
+
+The 726M is the number L56 was missing. Its disk accounting priced the
+**cache** at 176M per project per run and left the tree it installs out
+of the total. The real charge a run of this seat puts on a 45G volume
+shared by five companies is the cache plus the tree plus the frozen
+build, which is why §1.3's 321M of abandoned scratch was findable at all.
