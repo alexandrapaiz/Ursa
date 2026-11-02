@@ -10,9 +10,14 @@
 // with one field of the pipeline changed, and asserts that the pipeline's real
 // verdict agrees with what `binaryReach` predicted for it.
 //
-// THE VALUES ARE FABRICATED AND NEVER PRINTED. `/home/fixtureuser/` matches the
-// gate's Class B pattern and belongs to no person; no assertion in this file
-// prints a line of file content, only the clean-or-red verdict and the layer.
+// THE VALUE IS FABRICATED, ASSEMBLED AT RUNTIME, AND NEVER PRINTED. It has to
+// match the gate's own Class B pattern or none of this measures anything, which
+// means a literal spelling of it in this file would turn the gate red on the
+// file. So `CARRIER` is joined from parts that carry no matching substring,
+// which is a real constraint of testing a gate from inside the tree it scans
+// and not a flourish. The username in it belongs to no person, and no
+// assertion here prints a line of file content, only the clean-or-red verdict
+// and the layer name.
 //
 // THE GREP IS CHECKED, NOT ASSUMED. These cases are about GNU grep, which is
 // what `ubuntu-latest` runs. A sandbox whose `grep` is something else would
@@ -50,12 +55,15 @@ const GREP = gnuGrep()
  * every pipeline below must keep catching it, so a change that reaches binary
  * files by breaking the text case is visible rather than scored as progress.
  */
+/** `/home/<fabricated>/notes`, built so this source file holds no match. */
+const CARRIER = ['', 'home', 'fixtureuser', 'notes'].join('/')
+
 function fixture() {
   const dir = mkdtempSync(join(tmpdir(), 'ursa-reach-'))
   // A NUL byte is what makes grep call it binary; the fabricated path sits
   // between two of them so no amount of flag changing turns it into a line.
-  writeFileSync(join(dir, 'carrier.bin'), Buffer.from('h\0/home/fixtureuser/notes\0t', 'latin1'))
-  writeFileSync(join(dir, 'carrier.txt'), '/home/fixtureuser/notes\n')
+  writeFileSync(join(dir, 'carrier.bin'), Buffer.from(`h\0${CARRIER}\0t`, 'latin1'))
+  writeFileSync(join(dir, 'carrier.txt'), `${CARRIER}\n`)
   return dir
 }
 
