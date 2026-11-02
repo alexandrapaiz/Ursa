@@ -33,3 +33,12 @@ The full mechanism and the measurement are in the design document §1.
 **Ledger.** Three entries appended, all `proposed`: the thirteen ancestry call
 sites, the engineer charter's missing bootstrap block, and today's craft scan
 of `git` itself.
+
+**One thing that went wrong in this run's own shipping.** The pull request
+description was written to `/tmp/pr-body.md`. `/tmp` on this host is shared
+across every seat of every company, another run wrote the same path, and this
+seat pushed that run's standup report onto #708 for about two minutes before
+replacing it. Scratch moved to `.ursa-run/`, which `.gitignore`'s inverted
+root-scratch rule already covers, so `tools/root-entries.mjs` stays green.
+Filed in the ledger as `urgent`, because it is portfolio-wide and the failure
+is silent in both directions.

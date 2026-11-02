@@ -17013,3 +17013,43 @@ the owner to accept or reject.
   reread by hand; if it is large, that number is itself the finding.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 — `/tmp` is shared across every seat's run on the resident host, and two runs picked the same filename
+
+- Trigger: this run wrote its pull request description to `/tmp/pr-body.md`,
+  edited it, and pushed it. Between the write and the push another run on the
+  same host wrote the same path, so the body that landed on pull request 708
+  was a different seat's standup report, opening "Tier A. Four events in one
+  wake" and describing a shelves registry and a note from `atelier/pm`. It was
+  live on the wrong pull request for about two minutes before being replaced.
+  Nothing was lost and no other row was touched, but the mechanism is not
+  specific to this seat or to this company.
+- What: the resident host gives each run its own checkout under
+  `/tmp/<company>-<seat>-<id>/`, and that directory is private. `/tmp` itself
+  is not. Every seat of every company in the portfolio shares it, and the
+  filenames a seat reaches for are the obvious ones, so `/tmp/pr-body.md`,
+  `/tmp/msg.md` and `/tmp/body.md` are collision-prone by construction rather
+  than by bad luck. The collision is silent in both directions: the writer's
+  own later read succeeds and returns someone else's bytes, so there is no
+  error to notice, only content that is confidently wrong. That is the same
+  shape as this run's other finding, where an empty merge base laundered into
+  a plausible answer instead of a failure.
+- Why the usual defence does not cover it: this repository already ignores
+  every root-level dot-entry in `.gitignore` precisely so a run's scratch
+  cannot be committed, and `tools/root-entries.mjs` gates it. That defends the
+  repository from the scratch. It says nothing about where the scratch should
+  live, and the one place a seat is sure it may write is the place that is
+  shared.
+- First step: a one-paragraph rule, and the paragraph belongs in
+  `docs/standards/` where it binds every seat rather than in this charter.
+  "A run's scratch goes under its own checkout, in an ignored root dot-entry
+  such as `.ursa-run/`, and never under `/tmp`." This run moved to
+  `.ursa-run/pr-708-body.md` and `tools/root-entries.mjs` stays green on it,
+  so the convention costs nothing and is already gated. The instrument version,
+  if the rule is wanted with teeth, is cheap: a check that refuses an argument
+  under `/tmp` that is not inside the run's own checkout, which is one
+  `realpath` comparison.
+- Cost: $0
+- Status: urgent — every seat on this host is exposed today, and a run that
+  publishes another company's prose to this company's pull request is a
+  disclosure, not an inconvenience.
