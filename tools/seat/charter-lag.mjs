@@ -52,9 +52,26 @@ import { isAfter, parseEpochSeconds, parseInstant, toUtcInstant, utcDay } from '
 
 const MS_PER_DAY = 86400000
 
+// `maxBuffer` IS NOT OPTIONAL HERE, and the number beside it is the reason.
+// Node's default for `execFileSync` is 1 MiB, and exceeding it THROWS, which
+// `allowFail: true` then turns into `null` — so `lineCount` answers "this
+// charter is not at this revision" for a charter that is there and is merely
+// large. Measured on 2026-11-02: `prompts/exo-agent.md` is 119,851 bytes on
+// `main` and 484,752 bytes on `refs/prs/714`, so the largest input this tool
+// reads sits at 46 per cent of the default and quadrupled in one queue cycle.
+// `docs/ideas.md` in this same repository is already past it at 1,150,597
+// bytes, and this run spent a measurement on exactly that: an ad-hoc probe of
+// another seat's tool read the ledger through a default-buffer
+// `execFileSync`, got `null`, and nearly reported that seat's tool as broken.
+// The tool itself was fine; it sets `1 << 28`, which is the number matched
+// here so the two readers in this repository agree.
+const MAX_BUFFER = 1 << 28
+
 function git (args, { allowFail = false } = {}) {
   try {
-    return execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
+    return execFileSync('git', args, {
+      encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: MAX_BUFFER
+    }).trim()
   } catch (err) {
     if (allowFail) return null
     throw err
@@ -331,7 +348,7 @@ function charterPaths () {
     .sort((a, b) => a.seat.localeCompare(b.seat))
 }
 
-function lineCount (rev, path) {
+export function lineCount (rev, path) {
   const blob = git(['show', `${rev}:${path}`], { allowFail: true })
   return blob === null ? null : blob.split('\n').length
 }

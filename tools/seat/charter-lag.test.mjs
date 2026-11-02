@@ -7,7 +7,8 @@
 // asserts it refuses to print a table.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { seatOfBranch, lagDays, buildRows, formatTable, formatSummary, cloneFitness, queueScan } from './charter-lag.mjs'
+import { execFileSync } from 'node:child_process'
+import { seatOfBranch, lagDays, buildRows, formatTable, formatSummary, cloneFitness, queueScan, lineCount } from './charter-lag.mjs'
 // `utcDay` moved out of charter-lag.mjs into the shared timestamp module when
 // this seat's #694 landed it, so the trunk's import of it from './charter-lag.mjs'
 // is taken from '../instant.mjs' here instead. Its contract changed with the
@@ -433,4 +434,32 @@ test('formatTable itself renders the UTC day, and not the string it was handed',
   }))
   assert.match(out, /2026-11-02/)
   assert.doesNotMatch(out, /2026-11-01/)
+})
+
+// --- the reader, on an input larger than Node's default buffer ------------
+
+test('lineCount reads a blob past the 1 MiB default buffer instead of answering null', (t) => {
+  // BEHAVIOURAL, not a check that the option is spelled somewhere. Node's
+  // `execFileSync` default `maxBuffer` is 1 MiB and exceeding it throws, which
+  // this file's `allowFail: true` converts into `null` — the same answer as
+  // "the path is not at this revision". So a charter that merely got large
+  // would read as absent, with no error anywhere.
+  //
+  // `docs/ideas.md` is this repository's own input past that bound, which is
+  // why it is the fixture: no file has to be generated and the test is red for
+  // a real reason. Skipped rather than passed if it ever shrinks back under
+  // the bound, because then it proves nothing.
+  const bytes = execFileSync('git', ['show', 'HEAD:docs/ideas.md'], {
+    encoding: 'utf8', maxBuffer: 1 << 28
+  }).length
+  if (bytes <= 1024 * 1024) {
+    return t.skip(`docs/ideas.md is ${bytes} bytes, under the 1 MiB default, so this cannot measure the bound`)
+  }
+  const n = lineCount('HEAD', 'docs/ideas.md')
+  assert.notEqual(n, null,
+    'lineCount answered null for a path that is present: the read hit maxBuffer and allowFail swallowed it')
+  assert.ok(n > 1000, `expected the ledger to have more than a thousand lines, got ${n}`)
+  // And the absent case still answers null, so the fix did not make the
+  // reader credulous.
+  assert.equal(lineCount('HEAD', 'docs/no-such-file-ever.md'), null)
 })
