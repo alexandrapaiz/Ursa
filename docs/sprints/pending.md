@@ -2,6 +2,293 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 ~00:2x UTC message-triggered (seventh pass): four Tier B merges, two charter pull requests confirmed Tier C
+
+Triggered by the event bus naming three things: review #619 (skill) and
+#618 (exo) against the merge rule, and absorb the news that #609 and
+#621 (this seat's own) had already merged. The third was already
+closed out by the sixth pass's own PR (#622); nothing further needed
+there. The first two were real work.
+
+This run also found its own checkout shallow and single-branch (the
+same defect #619 documents) and repaired it with
+`tools/ensure-full-clone.sh` before trusting any ancestry check below.
+
+1. **Four pull requests merged under Tier B, none of them needing
+   you.** #619 (skill, clone-integrity finding), #607 (market brief),
+   #604 (frontend legend fix) and #602 (security redaction sweep) were
+   each green, scoped to non-charter paths, and clean or resolvable.
+   #604's and #602's `docs/ideas.md` conflicts were real but docs-only,
+   which this seat may resolve per pm.md §10 Tier B rule 5: installed
+   this checkout's ledger merge driver (`tools/ledger/install-driver.sh`,
+   not registered by default in a fresh clone), re-merged each branch
+   against current `main` in a throwaway worktree, and pushed the
+   resolution so the gate itself saw it clean before merging.
+2. **#618 and #612 (exo) are Tier C and wait on you, as #618 itself
+   already said.** Both touch `prompts/*-agent.md` directly. Verified
+   exo's containment claim independently, in the now-unshallowed clone:
+   #612 is a strict git ancestor of #618, so one decision on #618
+   covers both. Nothing for this seat to do beyond saying so; posted to
+   exo on the board (`note`, id `100540cd`).
+3. **#395 (research) is now ten days old and still waits on you.**
+   Unchanged from every prior pass.
+
+Two pull requests this seat had flagged for Tier B merge, #600 and
+#591 (both engineer), were closed by the engineer seat's own
+concurrent run (#624, still open as a draft, visibly mid-flight on
+"the baseline stack's disposition") while this pass was mid-resolution
+on them. No action taken on either after noticing; the engineer seat is
+better positioned to say what replaces them. A third engineer PR,
+#615, is Tier B eligible and clean, but left alone this pass for the
+same reason: #624 is live and working that exact stack, and merging
+under a live run is the hazard pm.md's own ship-first section warns
+about.
+
+Board summary posted (`done`, id `0dd17e62`), referenced to this
+seat's own PR #626.
+
+Triggered by a board note from Ursa's own exo: this seat's own #599,
+#609 and #621 were each clean against `main` alone, but #609 and #621
+conflicted with each other on `docs/sprints/pending.md` and
+`docs/sprints/dispatch-queue.md` (both full-rewrite-per-run trackers,
+no union merge driver), so whichever of them merged second would fail.
+Verified independently in a detached worktree with this repository's
+merge drivers installed, testing all six orderings: exo's account held
+exactly as reported.
+
+1. **#621 and #609 are both merged.** Both were Tier A (knowledge-
+   surface-only diffs). #621, this seat's own freshest full rewrite of
+   the two trackers, merged first. #609 was rebased onto the result —
+   its only content not already superseded was one run-log file
+   (`docs/agents/pm-2026-10-27-message-3-run.md`), carried forward; its
+   own five-day-old rewrite of the two trackers was dropped rather than
+   let it regress today's. Then merged. Nothing here needed the owner.
+2. **#599 closed itself, unmerged, in the same minute, not by this
+   seat's action.** It is Tier C (touches `docs/decisions.md` and the
+   `docs/prfaq/mvp-public-address.md` go-decision), so it was never
+   part of this pass's own merge decision either way. Flagging rather
+   than guessing why: if you closed it, nothing further is needed; if
+   you did not, it is worth a look, since its go-decision and ledger
+   content have not otherwise been acted on anywhere this seat can see.
+3. **#395 (research) is now nine days old and still waits on you.**
+   Unchanged from every prior pass. No dispatch fired (criteria
+   unchanged, switch off regardless).
+
+Board reply posted to exo (`note`, id `6421258c`) with the same
+reasoning, referenced to this seat's own PR #622.
+
+## Top three for the owner, 2026-11-01 ~23:5x UTC message-triggered standup (fifth pass of the day)
+
+This pass branched from this seat's own fourth pass (`ursa-pm/2026-11-01-message-2`,
+#620) rather than `main`, per the org rule on reading a seat's own open
+PRs first; this PR supersedes it (contains its content by ancestry).
+Triggered by the same board event the fourth pass answered: Ursa's own
+exo, asking by name which of two things an earlier pass's "neither
+exists" sentence meant.
+
+Checked fresh rather than trusting the fourth pass's own account of
+itself, because that account was written inside the same run that
+produced it: re-read the live board inbox (`to_seat=pm&to_company=Ursa`)
+rather than this repository's files alone, since the fourth pass's PR
+body is this seat's own claim and the board is the independent record.
+
+1. **The question is answered and the answer is already on the board,
+   not something this pass needed to redo.** The fourth pass posted the
+   correction at 23:47:36Z (board message `6f5c2ae2`, addressed to
+   exo/Ursa): the absent thing was the tool (`tools/check-draft-prs.sh`,
+   confirmed absent again by this pass with a fresh `find`), and the
+   endpoint (`GET /api/standing`) is live and had simply gone uncalled,
+   not absent. Exo's own ask (`data.ask`: "name the absent tool and
+   endpoint") is satisfied by that reply. No action needed from you.
+2. **Nothing addressed to `pm`/Ursa on the board since 23:44:31Z is
+   unanswered.** Read the full inbox for the last two hours: the rows
+   after the fourth pass's reply are either this seat's own, another
+   company's `pm`/`exo` seats (`epitome`, `alexandra-systems`), or host
+   deploy notes — none of them an ask or handoff addressed to this
+   company's `pm`. No open question carried forward.
+3. **Nothing new to merge or dispatch this pass.** `gh pr list --state
+   open` is unchanged from the fourth pass's own sweep: #612 (exo) and
+   #395 (research) are still Tier C by path, both already the owner's
+   call; #599 and #609 (this seat's own) still wait on her merge. No
+   new green, clean, non-draft PR appeared in the window between the
+   fourth pass's last commit and this one.
+
+Unchanged from the fourth pass, not repeated in full: #612, #395, and
+this seat's own #599/#609 all still wait on the owner's merge.
+
+## Top three for the owner, 2026-11-01 ~23:4x UTC message-triggered standup (fourth pass of the day)
+
+This pass branched from this seat's own third pass (`ursa-pm/2026-11-01-message`)
+rather than `main`, per the org rule on reading a seat's own open PRs
+first, and this PR supersedes it (contains its content by ancestry).
+Triggered by four events: okr's and exo's finished runs (two separate
+reports on the same two pull requests, the okr check-in and the exo
+depth-instrument fix), skill's finished run resolving its own inherited
+draft, and a board note from Ursa's own exo addressed to this seat by
+name.
+
+1. **The okr check-in and the skill run both reviewed against the
+   merge rule and merged this pass.** The okr check-in touches only
+   `docs/okrs/2026-q4.md` (two KRs moved to done, the drift audit
+   appended), green, clean, not a draft, no labels, no comment, no
+   board claim on that path — Tier B. The skill run touches only
+   `docs/ideas.md` and one new file under `docs/runs/`, green, clean,
+   same conditions — also Tier B. Both merged with branches deleted.
+   No action needed from you.
+2. **The exo depth-instrument fix is still Tier C by path**
+   (`prompts/exo-agent.md` among twenty-four changed files, mostly
+   `prompts/*` and `tools/seat/*`) **and stays with you or a chair**,
+   unchanged from the third pass's finding. Exo's own board note says
+   no file under `prompts/` has reached `main` in fourteen days while
+   one did six days ago, which is worth your eye as a pattern rather
+   than a single stuck PR.
+3. **A new finding this pass, not from either triggering report:**
+   the engineer's own two open pull requests from 2026-10-27 are a
+   real stack (the older is a strict ancestor of the newer, confirmed
+   with `git merge-base --is-ancestor`) and both now read `CONFLICTING`
+   against today's main, because this pass's own two merges touched
+   the same ledger file. A base conflict is not this seat's to resolve
+   in code, so it went back to the engineer on the board as a handoff
+   naming both PRs, the ancestry, and the recommendation to close the
+   older one and rebase the newer. The newer one also edits the
+   secret-scan baseline file, which its own text reserves to your
+   merge regardless of whether it rebases clean.
+
+**Answered the exo note addressed to this seat.** It asked which of
+two things the third pass's own sentence meant when it said neither a
+named tool nor a named endpoint exists. The tool is genuinely absent
+from `tools/`, so that stands; the endpoint is live and answers, so the
+third pass was wrong to call it absent rather than simply uncalled.
+Corrected on the board, in those words.
+
+**Unchanged from the prior passes today, so not repeated in full:**
+this seat's own two sibling pull requests from last week, the PR/FAQ
+go-decision with ten days of ledger history and a second pass of
+stale-draft cleanup, are both still open and both still wait on the
+owner — neither is this seat's to merge. Exo independently verified
+the PR/FAQ one clean against today's main this pass, which is new
+confirmation, not a new fact.
+
+## Top three for the owner, 2026-11-01 ~23:3x UTC message-triggered standup (third pass of the day)
+
+This pass was triggered by two events: finance's PR #614, and a repeat
+of the same standing note from the first two passes (#608, #611 again),
+attached again because the bus has no memory of which pass already
+answered it. Checked both named conditions against the repo before
+spending a turn on them, per this run's own caution about stale
+standing conditions, rather than assuming the note was fresh:
+
+1. **#614 (finance, October reconciled, November opened) reviewed
+   against `docs/standards/pm.md` §10/§21 and merged this pass.** Diff
+   is entirely `docs/finance/*` (Tier A knowledge surface, "register
+   maintenance, never a new spend"), the PR's own body confirms no
+   money moved and no billing touched, `mergeStateStatus` was `CLEAN`,
+   the one defined check (`redaction-gate`) passed, no labels, no
+   owner comment, and no board claim found on `docs/finance/`. Merged
+   with `gh pr merge 614 --merge --delete-branch`
+   (`mergedAt: 2026-11-01T23:36:52Z`). No action needed from you.
+2. **The standing note's #608/#611 claim is stale; both are already
+   resolved, from this seat's own first two passes today.** #611
+   merged under §21 (recorded above, confirmed still on `main`: `git
+   log` shows the merge commit). #608 is `CLOSED`, superseded by
+   `skill`'s own `#617` (`ursa-skill/2026-11-01-message`), which has a
+   live run behind it right now (`gh run list` shows an `in_progress`
+   job on that branch at the time of this pass). Naming the owning
+   seat per the standing note's own courtesy clause: `skill` owns
+   `#608`'s resolution and is actively running it; nothing here is
+   this seat's to act on. The note's cited tool and endpoint
+   (`tools/check-draft-prs.sh`, `GET /api/standing`) still do not exist
+   — reconfirmed, not re-explained; see the first pass's entry below
+   for the original finding.
+3. **#395 (research) is an owner-merge PR older than seven days**
+   (opened 2026-10-24, eight days old): `MERGEABLE`/`CLEAN`, but the
+   owner herself already commented on it on 2026-10-24 confirming Tier
+   C (`prompts/engineer-agent.md`, `prompts/research-agent.md` in the
+   diff) and closed its two ancestor PRs. Nothing changed since; listed
+   here because the criteria table's "owner-merge PR older than seven
+   days" row asks for a pending line, not because it is a new finding.
+
+No new dispatch: `PM_DISPATCH_ENABLED` is unset this run, and
+`docs/sprints/dispatch-queue.md` is rewritten in full below that
+finding, same conclusion as the first two passes (nothing qualifies).
+
+## Top three for the owner, 2026-11-01 ~23:1x UTC message-triggered standup
+
+A board message addressed to this seat cited a merge tool
+(`tools/check-draft-prs.sh`) and a host endpoint (`GET /api/standing`)
+that neither exist in this repo nor appear in `docs/agents/runner-facts.md`'s
+endpoint table or `tools/`. Treated as an unverified external claim, not
+acted on; disposed the three named pull requests with `gh pr list`/`gh pr
+view` and the merge rule in `docs/standards/pm.md` §10/§21 directly.
+
+1. **#611 (distribution, HQ's vendored `docs/standards/pm.md` sync) merged
+   this pass under section 21.** Single file, the PR's own body names it as
+   this seat's merge ("pm.md is this PM's merge under standards/pm.md
+   section 21"), clean, green, not a charter path. No action needed from
+   you. The vendored text itself is worth your attention later: it adds an
+   explicit worked-through answer to "never push to main" (it does not
+   withdraw §21) and a Tier A self-merge exception, but leaves §10's Tier C
+   paragraph (`prompts/` = owner/chair only) textually unchanged — that
+   paragraph is still the "stale but owed" one `docs/standards/lessons.md`
+   already flagged as under your review.
+2. **#612 (exo) is Tier C by path** (`prompts/exo-agent.md` in the diff)
+   **and stays with you or a chair**, regardless of how clean or urgent it
+   is. The substance is real and worth reading: it's the fix for the
+   instrument that read healthy through five days (2026-10-28 through
+   2026-11-01) of zero completed runs portfolio-wide, 270 attempted and
+   refused before their first turn. Commented on the PR naming the clause
+   and handing it back to exo.
+3. **#608 (skill) is also Tier C by path** (`prompts/skill-extract.md` in
+   the diff), **and separately an idle draft** — opened 2026-10-27, no push
+   since, body still the unfilled "This description will be filled in as
+   the run proceeds" placeholder from the ship-first template, meaning its
+   own run died before writing it up. Commented identifying both the tier
+   block and the idle-draft pattern, and handed it back to skill. Left as
+   a draft rather than readied or closed: the blocking clause (Tier C) is
+   real and a ready/close toggle does not clear it, and resolving an
+   abandoned draft one's own seat didn't open belongs to the owning seat's
+   own next run (org rule, 2026-10-05) once this seat has named what it owes.
+
+### Second pass, same run: exo's board note, read and verified rather than followed
+
+A second board message, from `exo` and addressed to this seat (ref
+`#612`), arrived in the same window. It is a seat-to-seat note, not one
+of the three sources that can instruct this seat (owner, HQ within a
+standard's scope, this repo's own committed files), so every claim in
+it was checked against the repository rather than acted on directly.
+All of it held up:
+
+- **#603 and #571 (exo's two older PRs) are closed**, each with a
+  `git merge-base --is-ancestor` proof in its own closing comment
+  showing it is fully contained in `#612`. Confirmed by running the
+  same check again from this seat: both PRs are `CLOSED` on GitHub, and
+  `#612` is `OPEN`/`MERGEABLE`/`CLEAN`, matching the comments exactly.
+  No action needed; already correctly left Tier C to the owner or a
+  chair in the entry above.
+- **#599 (this seat's own) had drifted from "false conflict" to a real
+  one.** On 2026-10-27 this seat read #599's `CONFLICTING` status as a
+  stale-base artifact and placed it with the owner anyway. Re-checked
+  tonight after unshallowing the clone: `git merge` of current `main`
+  into `#599`'s branch produced genuine conflicts in
+  `docs/sprints/dispatch-queue.md` and `docs/sprints/pending.md` — five
+  days of this file's own entries had diverged past a clean merge, not
+  a GitHub base-pointer artifact. Resolved by taking `main`'s current
+  text for both files (every fact #599 carried in them is already
+  folded into `main`'s later entries, including the 2026-10-27 hook
+  entry below) and keeping #599's own changes everywhere else, including
+  the still-unlanded `docs/prfaq/mvp-public-address.md` go-decision
+  draft. Pushed to `ursa-pm/2026-10-27-message-2`; **#599 is
+  `MERGEABLE`/`CLEAN` again** (one `UNSTABLE` check pending at push
+  time, not a conflict). Still yours to merge — this seat does not
+  merge its own PRs — but it is actionable again rather than silently
+  rotting behind a conflict nobody was going to re-check.
+- Replied to exo's note on the board in first person, under this
+  seat's own name, confirming the verification and naming the #599
+  fix as the action taken (message id `c6eb0c38`, continued in
+  `2182e51c` after the wake limit cut the first at 1362 of 1523
+  characters — the store has no edit route, so the remainder went as
+  its own row).
+
 ## Top three for the owner, 2026-10-27 ~05:1x UTC hook-triggered standup
 
 **This file's own last entry before this one is 2026-10-17 — ten days

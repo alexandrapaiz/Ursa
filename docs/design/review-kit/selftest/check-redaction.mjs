@@ -21,6 +21,7 @@
 import { spawnSync } from 'node:child_process'
 import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
+import { deflateSync, crc32 } from 'node:zlib'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -35,6 +36,31 @@ const homePath = ['', 'home', 'someuser', 'notes'].join('/')
 const slug = '.claude' + '/projects/' + '-Users-someone-Desktop'
 const allowedRunner = ['', 'home', 'runner', 'work', 'x'].join('/')
 const allowedPlaceholder = '/Users/' + '<you>' + '/x'
+
+// A one pixel PNG carrying the home-path fixture in an uncompressed
+// `tEXt` chunk. Built here for the same reason as every string above:
+// committing an image that trips the gate would make the gate red on
+// the repository that holds the tool for making it green. This is the
+// only fixture in this file whose surface a `grep` of the tree cannot
+// read, which is the whole point of expectations 6 and 7.
+const pngChunk = (type, data) => {
+  const t = Buffer.from(type, 'ascii')
+  const len = Buffer.alloc(4); len.writeUInt32BE(data.length)
+  const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(Buffer.concat([t, data])) >>> 0)
+  return Buffer.concat([len, t, data, crc])
+}
+const pngCarrying = (text) => {
+  const ihdr = Buffer.alloc(13)
+  ihdr.writeUInt32BE(1, 0); ihdr.writeUInt32BE(1, 4)
+  ihdr[8] = 8; ihdr[9] = 2
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    pngChunk('IHDR', ihdr),
+    pngChunk('tEXt', Buffer.concat([Buffer.from('Comment\0', 'ascii'), Buffer.from(text, 'ascii')])),
+    pngChunk('IDAT', deflateSync(Buffer.from([0x00, 0xff, 0x00, 0x00]))),
+    pngChunk('IEND', Buffer.alloc(0)),
+  ])
+}
 
 const root = mkdtempSync(join(tmpdir(), 'redaction-selftest-'))
 const run = (r) => {
@@ -87,6 +113,50 @@ try {
   writeFileSync(join(nogate, 'f.txt'), 'x ' + uuid + '\n')
   r = run(nogate)
   check('a missing gate exits 2, not 0', r.code === 2, r.out.trim().split('\n').pop())
+
+  // 6. The tool follows the gate's grep flags rather than holding its
+  //    own copy of them. Until 2026-10-27 the cluster was the literal
+  //    `-rInE` in this tool while the patterns came from the gate, so
+  //    these two expectations are the same expectation pointed in
+  //    opposite directions: with `-I` in the gate the image is skipped,
+  //    and with `-I` gone it is caught. A tool with a fixed opinion
+  //    about binary files fails exactly one of them.
+  const imgDir = (name, dropI) => {
+    const d = join(root, name); mkdirSync(d); gateInto(d)
+    if (dropI) {
+      const f = join(d, '.github/workflows/redaction-gate.yml')
+      writeFileSync(f, readFileSync(f, 'utf8').replace('grep -rInE "$pattern"', 'grep -rnE "$pattern"'))
+    }
+    writeFileSync(join(d, 'shot.png'), pngCarrying(homePath + '/'))
+    return run(d)
+  }
+
+  r = imgDir('image-with-I', false)
+  check('an image is skipped while the gate passes -I', r.code === 0, r.out.trim().split('\n').pop())
+
+  r = imgDir('image-without-I', true)
+  check('an image is caught once the gate drops -I', r.code === 1 && /shot\.png/.test(r.out), r.out.trim().split('\n').pop())
+
+  // 7. The flags are read from a real call, so a gate whose grep
+  //    invocation this tool cannot find is a refusal and not a pass.
+  //    Without this, the flag read could fail open to `undefined` and
+  //    grep would be handed a pattern as its first argument.
+  const noflags = join(root, 'noflags'); mkdirSync(noflags); gateInto(noflags)
+  const nf = join(noflags, '.github/workflows/redaction-gate.yml')
+  writeFileSync(nf, readFileSync(nf, 'utf8').replace('grep -rInE "$pattern"', 'grep "$pattern"'))
+  writeFileSync(join(noflags, 'f.txt'), 'x ' + uuid + '\n')
+  r = run(noflags)
+  check('a gate with no readable flag cluster exits 2, not 0', r.code === 2, r.out.trim().split('\n').pop())
+
+  // 8. And a flag cluster that lost a flag the tool depends on is also
+  //    a refusal. `-n` going missing would silently change every hit's
+  //    shape, which is the allowlist's input.
+  const lostn = join(root, 'lostn'); mkdirSync(lostn); gateInto(lostn)
+  const ln = join(lostn, '.github/workflows/redaction-gate.yml')
+  writeFileSync(ln, readFileSync(ln, 'utf8').replace('grep -rInE "$pattern"', 'grep -rIE "$pattern"'))
+  writeFileSync(join(lostn, 'f.txt'), 'x ' + uuid + '\n')
+  r = run(lostn)
+  check('a flag cluster missing -n exits 2, not 0', r.code === 2, r.out.trim().split('\n').pop())
 
   console.log(bad ? `\n${bad} of ${want.length} expectations failed` : `\nall ${want.length} expectations hold`)
 } finally {
