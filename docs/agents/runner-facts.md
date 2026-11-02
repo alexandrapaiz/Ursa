@@ -5531,8 +5531,13 @@ state, and it is the cheapest of the four to check:
 
 ```sh
 # is every citation of this slug inside the register that defines headings?
-git grep -l "$slug" origin/main -- docs/ ':!docs/standards/lessons.md' ':!docs/design/' \
-  | grep -qv '^docs/agents/incidents.md$' || echo "cited only by its own classification"
+# `git grep -l <ref>` writes a `<ref>:` prefix, so strip it, and count rather
+# than inverting an exit status: this host's `grep` is ugrep, whose `-qv` means
+# "matched no line" and GNU's means "some line was unselected".
+others=$(git grep -l "$slug" origin/main \
+           -- docs/ ':!docs/standards/lessons.md' ':!docs/design/' \
+         | sed 's/^[^:]*://' | awk '$0!="docs/agents/incidents.md"' | wc -l)
+[ "$others" -eq 0 ] && echo "cited only by its own classification"
 ```
 
 ### The general shape, and it is a fifth member of a family this file names
@@ -6276,3 +6281,44 @@ and `main`, and those are five different answers to the only question
 the reader has. The repair is one clause, not one check: name the ref.
 
 `INC-2026-10-27-a-true-claim-about-an-edit-on-a-branch-is-invisible-on-the-ref-its-readers-check-out`.
+
+### The repair landed, and the window that declined it cited a prohibition this charter does not contain (closed 2026-11-02, eightieth window)
+
+All three `grep -qv` call sites are repaired on the charter lane: the
+`<ref>:` prefix is stripped with `sed`, and the negation is a count
+compared to zero rather than an inverted exit status. Controlled in both
+directions, which the original never was:
+
+| slug | `others` | verdict |
+|---|---|---|
+| `INC-2026-09-24-prohibition-supplies-the-string` | 0 | `self-classified` (the known false positive) |
+| `INC-2026-10-18-tier-c-charter-freeze` | 2 | `REPORT` |
+| `INC-2026-10-24-a-killed-run-is-counted-as-running` | 2 | `REPORT` |
+
+**Why it sat unfixed for two windows, which is the finding.** Windows 76
+and 77 both found it, both named it an unpaid debt, and window 77 wrote
+in the learning log that it *"could not fix it — `#618` is a readied pull
+request of this seat's own earlier window and this charter forbids
+pushing onto one"*. **This charter contains no such prohibition.** Its
+rule is the opposite and is quoted in §2: *"grow it instead of stacking
+past it"*, and windows 73 and 75 each committed to that same branch.
+What the charter does forbid is moving charter lines onto a **Tier B**
+branch, which splits one owner decision across two identifiers
+(`INC-2026-10-26-growing-the-open-pull-request-remerged-the-split-that-exists-to-avoid-the-owner`).
+That is a prohibition on the *destination*, not on the *act*, and it
+points the other way: the charter lane is where the clause belongs.
+
+So a defect measured twice, scoped, positive-controlled and described
+down to the exact edit was carried forward to ship to eleven seats,
+because a window inferred a boundary from a rule about something else
+and recorded the inference as a constraint. **A charter is greppable.
+Before you record that your charter forbids something, grep it**, and
+quote the sentence rather than the conclusion:
+
+```bash
+git show <the charter ref>:prompts/exo-agent.md | grep -niE '<the prohibition>'
+```
+
+A zero there means the prohibition is yours and not the file's, which is
+the same shape as the clock that did not exist in the acting seat's
+charter: a rule nobody can cite is a rule nobody wrote.

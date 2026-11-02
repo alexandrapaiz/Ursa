@@ -5105,9 +5105,15 @@ So the fourth state, and it is the cheapest of the four to check:
 
 ```sh
 # every citation inside the register that defines the headings? then the
-# only thing this row reports is its own classification.
-git grep -l "$slug" origin/main -- docs/ ':!docs/standards/lessons.md' ':!docs/design/' \
-  | grep -qv '^docs/agents/incidents.md$' || echo "cited only by its own classification"
+# only thing this row reports is its own classification. `git grep -l <ref>`
+# writes a `<ref>:` prefix, so strip it, and count rather than inverting an
+# exit status: `grep` on this host is ugrep, whose `-qv` means "matched no
+# line" where GNU's means "some line was unselected" (improvements, the
+# seventy-sixth window).
+others=$(git grep -l "$slug" origin/main \
+           -- docs/ ':!docs/standards/lessons.md' ':!docs/design/' \
+         | sed 's/^[^:]*://' | awk '$0!="docs/agents/incidents.md"' | wc -l)
+[ "$others" -eq 0 ] && echo "cited only by its own classification"
 ```
 
 And the real repair, which is about how you *write* a dead identifier
@@ -5163,7 +5169,10 @@ before any row is reported**, and a row it marks is not a finding.
 # one, and there is no path filter that reaches it, because the register
 # is the authority the check resolves against.
 for s in $(comm -23 cited.txt headings.txt); do
-  git grep -l "$s" origin/main -- docs/ prompts/       ':!docs/standards/lessons.md' ':!docs/design/'   | grep -qv '^docs/agents/incidents.md$'   || { echo "self-classified: $s"; continue; }
+  others=$(git grep -l "$s" origin/main -- docs/ prompts/ \
+             ':!docs/standards/lessons.md' ':!docs/design/' \
+           | sed 's/^[^:]*://' | awk '$0!="docs/agents/incidents.md"' | wc -l)
+  [ "$others" -eq 0 ] && { echo "self-classified: $s"; continue; }
   echo "REPORT: $s"
 done
 ```
