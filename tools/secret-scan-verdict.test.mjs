@@ -10,7 +10,7 @@
 import { strict as assert } from 'node:assert'
 import { describe, it } from 'node:test'
 import { renderVerdict } from './gates/verdict-shape.mjs'
-import { GATE, hitLine, unusable, verdict } from './secret-scan-verdict.mjs'
+import { GATE, acceptedLine, baselineUnusable, hitLine, unusable, verdict } from './secret-scan-verdict.mjs'
 
 const TREE = { mode: 'tree', scanned: 2226, unit: 'tracked files', classes: 16 }
 const hit = () => ({ class: 'aws-access-key-id', where: 'conf.txt', line: 1 })
@@ -53,6 +53,66 @@ describe('secret-scan verdict', () => {
       classes: 16,
     })
     assert.equal(v.line, 'secret-scan history-since origin/main..: 9001 blobs, 16 classes, 0 hit(s).')
+  })
+
+  it('a run that is clean only because of the baseline says a different sentence', () => {
+    // The point of the baseline was that a permanent known hit makes the next
+    // real hit a second line in a report that already says one. A suppression
+    // that printed `0 hit(s).` would fix that by making the known object
+    // invisible instead, so this branch has its own cause and its own line.
+    const v = verdict([], { mode: 'history', scanned: 6455, unit: 'blobs', classes: 16, baselined: 1 })
+    assert.equal(v.exitCode, 0)
+    assert.equal(v.cause, 'ALL_HITS_BASELINED')
+    assert.equal(v.line, 'secret-scan history: 6455 blobs, 16 classes, 0 hit(s), 1 accepted by baseline.')
+    assert.deepEqual(v.trailer, [
+      '',
+      'Every hit is accounted for by a cited entry in tools/secret-scan.baseline.json,',
+      'each pinned to one blob id, so any other byte sequence in the same file is a',
+      'new hit and not an accepted one. Re-run with --no-baseline to see the raw set.',
+    ])
+  })
+
+  it('still exits 1 when one hit is accepted and one is not', () => {
+    // An accepted hit must never hide an unaccepted one. The count in the
+    // sentence is the unaccounted set, which is what a reader acts on.
+    const v = verdict([hit()], { mode: 'history', scanned: 6455, unit: 'blobs', classes: 16, baselined: 1 })
+    assert.equal(v.exitCode, 1)
+    assert.equal(v.cause, 'CREDENTIAL_SHAPED_HIT')
+    assert.equal(v.line, 'secret-scan history: 6455 blobs, 16 classes, 1 hit(s), 1 accepted by baseline.')
+  })
+
+  it('is byte-identical to the old line when nothing is accepted', () => {
+    // The clause appears only when it has something to report, so every
+    // existing run and every log a reader has seen before is unchanged.
+    assert.equal(verdict([], { ...TREE, baselined: 0 }).line, verdict([], TREE).line)
+    assert.equal(verdict([], TREE).cause, 'NOTHING_FOUND')
+  })
+
+  it('names the accepted hit with its reason, and still never a value', () => {
+    const pair = {
+      entry: { why_not_a_credential: "the vendor's published documentation example" },
+      hit: { class: 'aws-access-key-id', where: 'tools/x.test.mjs', line: 72, blob: 'ef90504da7db771e9ca7' },
+    }
+    assert.equal(
+      acceptedLine(pair),
+      "  accepted: aws-access-key-id  tools/x.test.mjs:72  blob ef90504da7db  the vendor's published documentation example",
+    )
+  })
+
+  it('a baseline it cannot trust is ground, and the cause is the fault', () => {
+    // One cause name over nine distinct repairs would tell a reader only the
+    // exit code they already have, so the fault's own code is the cause.
+    const v = baselineUnusable({
+      code: 'BASELINE_ENTRY_STALE',
+      message: 'a baseline entry accepts aws-access-key-id in tools/x.test.mjs, and a full history scan found nothing for it to account for',
+      detail: 'both want the entry deleted rather than kept',
+    })
+    assert.equal(v.exitCode, 2)
+    assert.equal(v.stream, 'err')
+    assert.equal(v.derivedFrom, 'ground')
+    assert.equal(v.cause, 'BASELINE_ENTRY_STALE')
+    assert.match(v.line, /^secret-scan: cannot do its job: a baseline entry accepts/)
+    assert.deepEqual(v.trailer, ['  both want the entry deleted rather than kept'])
   })
 
   it('exit 2 is a ground verdict with no findings behind it', () => {

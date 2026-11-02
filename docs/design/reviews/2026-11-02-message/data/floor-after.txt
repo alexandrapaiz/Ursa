@@ -1,0 +1,24 @@
+# 6 independent shoots, 15 pairs per frame, 15 frames in all sets.
+# sets: docs/design/reviews/2026-11-02-message/after/shoot1, docs/design/reviews/2026-11-02-message/after/shoot2, docs/design/reviews/2026-11-02-message/after/shoot3, docs/design/reviews/2026-11-02-message/after/shoot4, docs/design/reviews/2026-11-02-message/after/shoot5, docs/design/reviews/2026-11-02-message/after/shoot6
+
+home-desktop.png                    1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+home-phone.png                      1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+home-tablet.png                     1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+record-at-desktop.png               1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+record-at-phone.png                 1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+record-at-tablet.png                1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+record-desktop.png                  1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+record-mini-fixture-desktop.png     1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+record-mini-fixture-phone.png       1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+record-mini-fixture-tablet.png      1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+record-phone.png                    1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+record-tablet.png                   1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+this-page-does-not-exist-desktop.png  1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+this-page-does-not-exist-phone.png  1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+this-page-does-not-exist-tablet.png  1 states 6            worst       0 px  blind pairs 15/15  identical in all 6
+
+15 of 15 frames are bit-identical across all 6 shoots.
+0 have a floor.
+No frame has a floor, so no pair could have been blind to one.
+
+These 6 shoots bound each floor from below and none of them from above. A frame reporting 1 state is a frame no sample this size could separate, which is not the same claim as a deterministic frame.
