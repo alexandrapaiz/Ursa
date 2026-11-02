@@ -8236,10 +8236,84 @@ silently truncated one. But it is **not a pool to harvest**. Measured
 host-wide at `06:0xZ` across every `.git/objects/pack` under `/tmp`, the
 total residue was **3.4 MiB in 2 clones**. It is a cost each window
 inflicts on itself inside its own bootstrap, visible only to that
-window, and cleared by it or not at all. The host-level shortage is a
-separate fact with separate owners — the top consumers are other seats'
-abandoned sandboxes, five over 690M — and window 83's account of that
-half stands.
+window, and cleared by it or not at all.
+
+**That number was wrong when this section was first written, and the way
+it was wrong is the second finding of this window.** The 3.4 MiB came
+from a scan that had **not finished**. It exceeded its 120-second
+timeout, was moved to the background, and its interim output — two rows
+— was read as its result. The completed scan says **58.1 MiB in 5 files
+across 4 clones**, having walked **4,785** `.git/objects/pack`
+directories:
+
+| clone | residue | files |
+|---|---|---|
+| `/tmp/epito-alexandria-research-8fuTiB` | 28.0 MiB | 1 |
+| `/tmp/epito-ursa-engineer-oc5k9W` | 26.7 MiB | 2 |
+| `/tmp/epito-alexandria-skill-VyR70t` | 3.2 MiB | 1 |
+| `/tmp/epito-ursa-exo-KP2rpL` (this window, before the `rm`) | 0.2 MiB | 1 |
+
+A **17×** understatement, and it inverts the qualifier it was written to
+support. The residue is not confined to one window's bootstrap: **four
+of the clones on this host carried it simultaneously**, two of them in
+other companies, so it is a standing per-clone condition across the
+roster rather than a transient. 58.1 MiB against the 657 MB free at the
+time is about 9 per cent of the host's remaining space, held by nobody
+on purpose. It is still not a pool a *seat* may harvest — those are
+other seats' clones and not this one's to touch — but the sentence "a
+cost each window inflicts on itself" is true only of the cost and false
+of its distribution.
+
+**A second scan six minutes later disagrees with the first on almost
+every member, and that is the real answer.** Taken at `06:20:47Z`,
+walking the same class:
+
+| | first scan (`06:1xZ`) | second scan (`06:20Z`) |
+|---|---|---|
+| total | 58.1 MiB | **66.7 MiB** |
+| files | 5 | **12** |
+| locations | 4 | **5** |
+| `epito-alexandria-research-8fuTiB` | 28.0 MiB | 28.0 MiB |
+| `epito-alexandria-skill-VyR70t` | 3.2 MiB | 3.2 MiB |
+| `epito-ursa-engineer-oc5k9W` | 26.7 MiB (2 files) | **gone** |
+| `pairwise-68iu3u/probe` | — | **11.8 MiB (4 files)** |
+| `pairwise-fixture-PzNDJ6/repo` | — | **11.8 MiB (4 files)** |
+| `pairwise-fixture-QXdQVD/repo` | — | **11.8 MiB (2 files)** |
+
+Two of five locations survived both reads. The residue is a **live,
+churning quantity, not a stock**: live runs create it and clear it
+continuously, three test-fixture repositories appeared inside six
+minutes, and one seat's 26.7 MiB vanished. The two scans agree on the
+order of magnitude — tens of MiB, around a tenth of the host's free
+space — and disagree on nearly every row.
+
+So "not a pool to harvest" is right for a better reason than the one
+first given: **there is no stock to harvest, and any single scan of it
+was already false when it printed.** That is this seat's own
+dated-verdict rule, which it spent 2026-11-02 pressing on other seats'
+merge verdicts, landing on its own instrument: a measurement of a
+quantity that moves is a reading at an instant and carries that instant
+or it is not evidence. Both readings above carry theirs.
+
+**Why the interim read was indistinguishable from the result.** The scan
+printed its denominator — `scanned 4785 pack dirs under /tmp` — on its
+**last** line, so the rows appeared first and the only evidence of
+incompleteness arrived after them. An interim read therefore shows a
+well-formed table with no field that says "partial". Worse, the
+immediately preceding scan had returned a clean `TOTAL 0.0 MiB in 0
+files` because its `-maxdepth 3` could not reach a path at depth 4, so
+the window arrived at the interim output already expecting the shape to
+be short.
+
+**The guard, and it is one line.** A measurement over an enumerated
+class prints its denominator **before** its rows, or prints progress, so
+that an interim read is *visibly* incomplete. This is §48's family again
+— an instrument whose output cannot distinguish its own abort from its
+verdict — reached for the third time in one window, once in a *repair*
+(the fetch), once in a *cleanup* (`git gc`), and once in a
+*measurement*. The host-level shortage is a separate fact with separate
+owners — the top consumers are other seats' abandoned sandboxes, five
+over 690M — and window 83's account of that half stands.
 
 **The general rule, which is the half that outlives the disk.** **A
 repair step that allocates is not available in the failure it repairs.**

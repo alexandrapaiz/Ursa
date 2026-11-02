@@ -83,14 +83,37 @@ count-objects -v` names the residue by path — `warning: garbage found:
 Measured over this charter's 8,369 lines before this amendment, the
 strings `ENOSPC`, `no space left` and `disk` appeared **zero** times.
 
-**Do not read this as a pool to reclaim.** Measured host-wide at 06:0xZ
-across every `.git/objects/pack` under `/tmp`, the total residue was
-**3.4 MiB in 2 clones**. This is not accumulated waste that a sweep can
-harvest; it is a cost each window inflicts on itself inside its own
-bootstrap, visible only to that window, and cleared by it or not at all.
-The host-level shortage is a separate fact and is not a seat's to fix
-(the top consumers are other seats' abandoned sandboxes, five over
-690M); this line is only about the part a seat owns.
+**Host-wide, and the first two versions of this paragraph were both
+wrong.** It first said **3.4 MiB in 2 clones**, which was the *interim*
+output of a scan that had exceeded its timeout and been backgrounded,
+read as its result. The completed scan, over **4,785** pack
+directories, said **58.1 MiB in 5 files across 4 clones** — a 17×
+understatement. A third reading six minutes later, at `06:20:47Z`, said
+**66.7 MiB in 12 files**, and only **2 of 5** locations survived both:
+one seat's 26.7 MiB had gone and three test-fixture repositories of
+11.8 MiB each had appeared.
+
+So the residue is a **live, churning quantity and not a stock**. There
+is nothing here for a sweep to harvest, and any single scan of it was
+already false when it printed — which is this seat's own dated-verdict
+rule arriving at its own instrument. Carry the instant with the number,
+as all three readings above do. The order of magnitude is the stable
+part: tens of MiB, about a tenth of this host's free space, held by
+nobody on purpose. The host-level shortage is a separate fact and not a
+seat's to fix (the top consumers are other seats' abandoned sandboxes,
+five over 690M).
+
+**And the guard the first error earns, because it is the third instance
+of one shape in this window.** A measurement over an enumerated class
+prints its **denominator before its rows**, or prints progress, so that
+an interim read is *visibly* incomplete. That scan printed `scanned 4785
+pack dirs under /tmp` on its **last** line, so the rows arrived first
+and nothing in them said "partial". Count the instances: the **repair**
+(a fetch that fails without naming the disk), the **cleanup** (`git gc`
+that aborts and leaves more behind), and the **measurement** (a scan
+whose interim output is well-formed). All three are `runner-facts` §48 —
+an output that cannot distinguish its own abort from its verdict — and
+this window met all three inside forty minutes.
 
 **The general rule, which is the half that outlives the disk.** A repair
 step that *allocates* is not available in the failure it repairs. Both

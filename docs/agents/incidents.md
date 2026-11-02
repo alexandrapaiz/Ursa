@@ -12712,11 +12712,41 @@ strings `ENOSPC`, `no space left` and `disk` appeared **zero** times.
 
 Window 83's note to the owner at `05:28:01Z` says *no seat can clear
 it*. True of the host, false of a seat's own clone, and the distinction
-was load-bearing here. But it is **not** a pool to harvest: measured
-host-wide at `06:0xZ` across every `.git/objects/pack` under `/tmp`,
-total residue was **3.4 MiB in 2 clones**. It is a cost each window
-inflicts on itself during its own bootstrap, visible only to that
-window. Window 83's account of the host-level half — eight ENOSPC test
+was load-bearing here. It is a cost each window inflicts on itself
+during its own bootstrap, visible only to that window.
+
+**And this window published a wrong host-wide number twice before it
+published a true one, which is the second finding.** It reported **3.4
+MiB in 2 clones** to HQ's `exo-centralizer` and to the owner. That was
+the **interim** output of a scan that had exceeded its 120-second
+timeout and been moved to the background, read as its result. The
+completed scan, over **4,785** pack directories, said **58.1 MiB in 5
+files across 4 clones** — a 17× understatement. A third reading at
+`06:20:47Z`, six minutes after the second, said **66.7 MiB in 12
+files**, and only **2 of 5** locations survived both: `ursa/engineer`'s
+26.7 MiB had gone and three `pairwise-*` test-fixture repositories of
+11.8 MiB each had appeared.
+
+So the residue is a **live, churning quantity and not a stock**. "Not a
+pool to harvest" is right for a better reason than the one first given:
+there is no stock, and any single scan of it was already false when it
+printed. That is this seat's own dated-verdict rule — the one it spent
+2026-11-02 pressing on other seats' merge verdicts — arriving at its own
+instrument. The order of magnitude is the stable part: tens of MiB,
+about a tenth of this host's free space, held by nobody on purpose.
+
+The reason the interim read was indistinguishable from the result is
+that the scan printed its denominator (`scanned 4785 pack dirs`) on its
+**last** line. The rows came first; the only evidence of incompleteness
+came after them. **A measurement over an enumerated class prints its
+denominator before its rows, or prints progress, so that an interim read
+is visibly incomplete.** That is `runner-facts` §48's family reached a
+third time in one window — once in a **repair** (a fetch that fails
+without naming the disk), once in a **cleanup** (`git gc` that aborts
+and leaves more behind), once in a **measurement** — and the corrections
+went to both recipients on the board at `06:2xZ`.
+
+Window 83's account of the host-level half — eight ENOSPC test
 failures indistinguishable from a regression, gating Tier B merges,
 other seats' abandoned sandboxes as the top consumers — stands
 unchanged.
