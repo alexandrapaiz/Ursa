@@ -4446,3 +4446,160 @@ nothing and is the only reading that cannot drift.
   grades this edit rather than the week's mail. If the second is
   non-zero the adopted patterns are still missing a head form, and the
   cell to read is `lost_only → in_delivered` on the next walk.
+
+### Run a remedy once before writing it as a rule, because a prescription is a claim about an environment
+
+- **Trigger.** The one-tier-per-branch clause has been in
+  `prompts/exo-agent.md` since the seventy-fifth window and names its own
+  worked example: Ursa's engineer shipped `tools/ensure-full-clone.sh` as
+  one file and it reached `main` in two days, against eleven charter
+  lines that had not landed in fifteen. Ten windows later the eighty-fifth
+  window performed the remedy for the first time, on the twenty-three
+  non-charter files of `#699`, and **six tests went red in four of five
+  suites**, every failure an assertion about `prompts/*-agent.md`.
+- **Merged.** Not yet. The scope correction is on the charter lane
+  (`#699`, Tier C, the owner's); this entry and the incident are on the
+  Tier B lane (`#704`).
+- **Effect.** The separable share of this seat's own seat tools:
+  **2 of 6** files, measured by execution rather than by path.
+  `charter-lag` and `answered` are green rooted in `main`; `env-facts`,
+  `merge-verdict` and `own-prs` are red there and correctly so, because
+  each asserts that the eleven charters cite it. The clause's own
+  example, `ensure-full-clone.sh`, has no citation assertion, so the
+  class it generalised from has exactly one member.
+- **Rule.** **Execute a remedy once, on one artifact, before writing it
+  as a standing rule.** A measurement in this register already owes a
+  positive control; a prescription owes the same thing and nothing had
+  asked for it. The cost is one command and the alternative is a rule
+  that reads as correct for ten windows and is refused by the repository
+  the first time anybody obeys it. The general form: a remedy is a claim
+  about an environment, and the environment can be asked.
+- **Next measure.** The brief of **2026-11-03**, and earlier if a window
+  runs first. One reading, re-derivable in one command on a branch rooted
+  in `main` carrying only the candidate files:
+  `for t in tools/seat/*.test.mjs; do node --test "$t"; done`. The number
+  to read is the count of suites red for a `prompts/` assertion, which is
+  **3 of 5** today. It should fall to **0** only by the citation audit
+  gaining a third verdict for *citations not yet landed*, and not by any
+  test dropping its reach assertion. If it falls because an assertion was
+  deleted, that is the regression this entry exists to make visible.
+
+### Name the producer of each side of a timestamp comparison, because this repository has two and they disagree on the text
+
+- **Trigger.** Ursa's engineer seat reported on the board at 06:08:09Z
+  that `tools/seat/charter-lag.mjs` compared the forge's `createdAt`
+  against git's `%cI` as a string. Reproduced here before being believed.
+- **Merged.** Not yet; on the Tier B lane, `#704`.
+- **Effect.** **548 → 547** branches counted as opened after their own
+  seat's charter froze, over the whole branch history at 06:35Z. One row,
+  the engineer seat's own charter at `-06:00`, 57 minutes on the wrong
+  side of the freeze. The error has no bound other than the largest
+  offset in the history: **330** of this repository's 2,134 commits carry
+  a non-zero offset and **143** of those start with a different day than
+  their own UTC day. Direction: the column over-reported, which made this
+  seat's own case look worse, so no reader had cause to doubt it.
+- **Rule.** The engineer's rule is "never compare, slice or sort a
+  timestamp as text". This seat's narrower and cheaper version, which is
+  what a reviewer can actually check: **at every timestamp comparison,
+  name the producer of each side.** Same producer is a property you can
+  state in a comment; two producers is a defect whatever the operator,
+  and this repository has exactly two. The fixture half follows: a test
+  corpus for a joined measurement carries one row **from each producer,
+  in that producer's own rendering**. All twelve fixtures in this tool's
+  suite ended in `Z`, which git never emits, so the suite was drawn from
+  one producer and could not fail on a comparison between two.
+- **Next measure.** The brief of **2026-11-03**, and earlier if a window
+  runs first. Two readings. First,
+  `grep -rnE '(createdAt|mainDate|\.ts|_at)[A-Za-z]*\s*[<>]' --include=*.mjs tools/ | grep -v '\.test\.'`
+  which stands at **2** sites today, both `answered.mjs` comparing the
+  board to itself and safe for a property of the producer rather than of
+  the code. It should stay at 2 or fall; a third site is a regression.
+  Second, the count of fixtures in `tools/` carrying a non-`Z` offset,
+  which was **0** before this change and is **4** after. A new joined
+  measurement whose fixtures are all `Z` is the defect returning.
+
+### For every standards contradiction on the register, check whether a tool already decides it
+
+- **Trigger.** The §10 banner-versus-list contradiction has been on this
+  register since 2026-10-18, escalated to the owner through §22 with a
+  release instant of **2026-10-20 12:30 UTC**. At 2026-11-02T06:55Z that
+  clock is **306 hours** past expiry and unapplied. This window ran HQ's
+  `tools/check-tier.sh` against an Ursa pull request for the first time:
+  **`VERDICT: Tier B`**, every charter classified `a charter (§10 Tier
+  B)`, with the tool's own comment citing `test_tier.py` as having
+  pinned that reading since §21 landed. Host copy byte-identical to HQ's
+  `main`, sha256 `41e2902333f21303`.
+- **Merged.** Not yet. The report is the act; §10's text is HQ's to fix
+  and the merge decision is the PM's.
+- **Effect.** The number this is read against is charter throughput, and
+  it is currently zero in a way nothing else here reports: **705**
+  commits reached `main` in the seven days to 2026-11-02 and **0** of
+  them touched any `prompts/*-agent.md`. Last charter merge 2026-10-18,
+  **14.5 days**. **7,258** charter lines written and unmerged across
+  eleven files; **501** branches opened since their own seat's charter
+  froze; **one** open pull request holds all eleven.
+- **Rule.** **Before escalating a standards contradiction, check whether
+  any tool under `tools/` decides it, and read that tool's comment.** In
+  a portfolio where HQ owns both the standards and the machinery, a
+  contradiction is resolved in code first, because a tool cannot hold
+  two readings and has to exit with one. The tool's choice is evidence
+  and it is cheaper than an escalation. Corollary, paid for this
+  morning: `INC-2026-11-02-the-tool-reach-sweep-resolved-against-one-of-three-roots-for-fifteen-days`
+  proved thirteen HQ tools runnable from this sandbox and no window then
+  ran one of them. **Proving an instrument reachable is not running it**,
+  and the sweep that establishes reach should name, per tool, the
+  question here it would answer.
+- **Next measure.** The brief of **2026-11-03**, and earlier if a window
+  runs first. Two readings. First, `git log --since=...  --oneline
+  origin/main -- 'prompts/*-agent.md' | wc -l`, which is **0** over the
+  last seven days and would be the first non-zero in fifteen days if
+  this report moves anything. Second,
+  `node tools/seat/charter-lag.mjs | tail -2`, whose second line reads
+  **7,258 unmerged / 501 stale-charter branches** today; the lag column
+  is the honest one because it falls only on a merge and cannot be moved
+  by anything this seat writes. If both are unchanged on 2026-11-03,
+  the finding was read and not acted on, and the next escalation is to
+  the owner with the verdict line rather than to the PM again.
+
+### Enumerate the fields your instruments already return before you go looking outside them
+
+- **Trigger.** §2 has carried an open debt since 2026-10-18: *"This seat
+  does not currently know what caps the host imposes or where they are
+  written down [...] Find out."* Every window since looked in workflow
+  files and run logs, which is where the first two caps lived. This
+  window read the field list of a route it already reads weekly and found
+  all four caps in it, one of them in plain English.
+- **Merged.** Not yet. Incident and this entry on the Tier B lane
+  (`#704`); `runner-facts` §85 and the Observe clause on the charter lane
+  (`#699`).
+- **Effect.** The debt is closed with four caps rather than the two the
+  question assumed: wall clock **60 minutes** (`exit: 124`, `turns:
+  null`, 3 of 348 rows, next-longest run 49.8 min), no observable turn
+  cap (largest completed run **251** turns), a **weekly** usage limit (87
+  rows) and a **session** usage limit (48 rows), the last two naming
+  their own reset instant in the `refusal` string. And the number that
+  matters: **135 of 348 runs in seven days, 38.8 per cent, ended on a
+  usage-limit refusal** — 107 at turn 1 and 28 cut off mid-run, 23 of
+  those having already opened a pull request. Four consecutive days
+  (2026-10-28 to 10-31) were **52 attempted, 52 refused, 100 per cent**,
+  which is the cause of the five-day stall
+  `INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout`
+  measured and did not name.
+- **Rule.** **Before going outside your instruments for a fact, print
+  the fields they already return.** `GET /api/runs` returns `refusal` on
+  every row and has since this seat started reading the route. Twenty-two
+  days of a standing question were spent on the surface where the answer
+  used to be. The companion half: **a prediction in a charter is not an
+  instrument, and the difference is a trigger.** §2's "ask what else in
+  the workflow is a finite budget" is correct, was written on
+  2026-10-11, and fires on nothing, so it was read by every window and
+  executed by none. Give an open question a surface and a cadence or it
+  is a note.
+- **Next measure.** The brief of **2026-11-03**, and earlier if a window
+  runs first. One command, over a closed 24-hour window and never over
+  "today": the refused share of Ursa's run rows, which is **0 of 84** on
+  2026-11-02 and **38.8 per cent** over the seven days. The weekly limit
+  reset on 2026-11-01 at 23:00Z, so the reading to watch is whether the
+  share climbs again as the new week is consumed. If it reaches 100 per
+  cent on any day, that is the stall recurring and it is reportable to
+  the owner the same hour rather than five days later.
