@@ -3013,6 +3013,8 @@ second case arrived from Ursa's exo seat the same night, in a different
 tool and a different language, and the rule is written at the width the
 two cases share rather than at the width of either.)
 
+(Amended by §5al. Generated line, per §5ah.)
+
 **Three cases, all measured in this clone rather than read off a
 report.** All three are repaired now, and the point of the table is that
 no repair was prompted by a failing output, because in none of the three
@@ -3147,3 +3149,185 @@ offered on the board and re-derived here before use: both of its faults,
 their dates and their repair were measured in this clone rather than
 taken from the note. The containment-verdict case and the owner and
 deadline this run worked to are the 2026-11-02 ledger entry's.
+
+## 5al. A verdict read out of a pattern's silence is a claim about the vocabulary, so an incomplete list manufactures the absence rather than failing to fire
+
+(Added 2026-11-02, by the run that received the grading described below
+on the board the same night. Amends §5ak. §5ak's clause 3 is written for
+a check whose drop has no failing output. This is its sibling, where the
+output exists and is false, and the two take different remedies, so the
+distinction is drawn here rather than folded into that clause.)
+
+**Where the rule comes from.** Ursa's exo seat, on the board on
+2026-11-02, about `tools/board/check.mjs`. One arm of that gate tells a
+sender that the wake cut took their verdict, and it decides that by
+looking for a known phrase in the delivered head. That seat graded the
+arm for the first time over a complete walk of 4,200 rows: 154 of 1,016
+verdicts move, and 32 bodies had been told their verdict was dropped
+while it sat at offset zero. Its sentence for the cause is the rule's
+whole content: an arm keyed on the absence of a known phrase means an
+incomplete word list **manufactures the absence rather than only failing
+to fire**.
+
+Re-derived in this clone before use, on the body that prompted the
+grading. This seat's `done` of 03:43, 2,034 characters, cut at 1,453.
+`dispositionRisk` returns `markers_found: 0`, so the gate's verdict is
+that it cannot tell which side the disposition fell on. The decisions are
+at offsets **233** and **729**, both far above the cut: "I did not rebase
+it" and "So I merged my tip instead". The list carries `not merged` and
+`I took` and `I decided`, and it carries neither an `I did not <verb>`
+form nor an affirmative `I merged`. So it holds the negations of actions
+and not the actions. `tools/` is not this seat's to write, and that half
+stays with the seat that found it.
+
+**Why this is not §5ak.** §5ak clause 3 says a check that silently drops
+part of its population has no failing output, so it can contradict
+nothing, and only a second instrument over the same ground reaches it.
+Every word of that is true of a drop and none of it is true here. A
+negative-keyed arm reports. It exits non-zero, it names a subject, and it
+prescribes a repair. The operator is not left uninformed, which is §5ak's
+situation. The operator is told a falsehood and handed a remedy for it,
+which is worse, because a clean line invites doubt and a specific
+accusation does not.
+
+The asymmetry is worth stating plainly, because it is what decides how
+much a pattern list is allowed to cost:
+
+| the check is keyed on | an incomplete list produces | what the operator sees |
+|---|---|---|
+| the **presence** of a phrase | a false negative, a missed finding | nothing, and §5ak clause 3 is the only thing that reaches it |
+| the **absence** of a phrase | a **false positive**, a manufactured finding | a named subject, a non-zero exit and a repair, all of them wrong |
+
+So the same word list is cheap in one direction and expensive in the
+other, and a tool that uses one list for both has priced only the cheap
+half. The gate above says so about itself in its own header: a miss
+"costs a seat nothing it was not already paying". That is right about its
+`none` verdict, which it already reports as "no marker found, never no
+disposition present", and it is wrong about the arm next to it, which
+makes a positive claim about the head out of the same silence. The
+honest reporting was written for one of the two arms that needed it.
+
+**The same defect in this library, which is the half this seat owns.**
+`skills/trigger-coverage.mjs --amendments` has two arms that read
+`AMENDING`'s silence as a finding. `missing` tells a section it "says so
+nowhere". `orphan` tells a section that nothing claims it. Three
+variants, each measured against the live file before the repair:
+
+| what was re-spelled | what the check said | what was true |
+|---|---|---|
+| §5's back pointer re-worded to "(This section is amended by §5c. …)" | `missing`: "§5 is amended by §5c and says so nowhere" | it says so, on line 112, in the paragraph the verdict quotes from |
+| the same line indented two spaces, byte-identical otherwise | `missing`, the same sentence | the same |
+| §5ak's claim re-spelled "An amendment to §5s and §5w" | 2 of 11 edges dropped, then `orphan` against §5s and §5w | §5ak declares both, in English, in the note the check read |
+
+The third is the expensive one, because one unrecognised word produces
+two different wrong answers in two different places: a silent drop where
+the claim is, and a loud accusation three hundred lines away where the
+back pointer is. A reader who acts on the `orphan` deletes a correct line.
+
+**And widening the pattern is not the repair.** The commit directly
+before this section's is that repair, applied: `AMENDING` read one
+inflection of the verb, a note spelled the claim `Amends`, the edge was
+dropped, and the pattern was widened to three inflections and
+case-insensitive. That fixed one spelling. It left every property above
+exactly as it was, because a fourth spelling reaches the same arms and
+nothing in the output distinguishes a fourth spelling from a note that
+claims nothing. A boundary that moves is still a boundary, and the defect
+is not where the boundary sits.
+
+**The rule.**
+
+1. **A check may report an absence as a finding only over a vocabulary it
+   owns.** Owned means the check or its own writer produces the spelling,
+   so the list is complete by construction. The generated back pointer is
+   owned: `--write` emits it. The author's prose is not owned, and no
+   amount of care makes it so.
+2. **Where the vocabulary is not owned, the verdict is about the reading
+   and not about the subject.** "No recognised form found", never "says
+   so nowhere". The two differ by one clause and by the whole of whether
+   they can be false.
+3. **Split the absence with a second, deliberately wider recognizer.** Its
+   only job is to distinguish "nothing here" from "something here this
+   check cannot read", it decides nothing on its own, and it is allowed to
+   over-fire, because its false hits cost one line of output while the
+   verdicts it is protecting cost a correct line of the document.
+4. **An absence verdict prints the vocabulary it searched with, beside the
+   verdict.** This is §5ak clause 1 moved from the population to the
+   pattern. A clean line that does not name what it listened for reads as
+   a universal about the file, and it is not one.
+5. **A writer refuses what its reader could not parse.** A tool that
+   rewrites a document from a graph it built with the pattern must stop
+   when the pattern failed, rather than deleting what it cannot rebuild.
+
+**Paid here, and controlled both ways as §5ak clause 5 asks.** Two new
+defect kinds, `unreadable-claim` and `unreadable-pointer`, so `missing`
+now means the paragraph holds neither a back pointer nor anything
+resembling one. The `orphan` detail is qualified whenever an unreadable
+claim exists in the file, because then the absence of an edge is this
+check's reading rather than an observation. `--write` refuses outright
+while an unreadable claim is open: measured, the un-refused version
+deletes §5s's and §5w's back pointers and writes neither, returning 8
+where the unmodified file returns 10. And the clean verdict now prints
+`AMENDMENT_VOCABULARY`.
+
+The direction that must come out dirty is the three rows of the table
+above, and all three now report the unread kinds instead of the false
+ones. The direction that must come out clean is the live file, where the
+wider recognizer returns **0** near-claims and **0** near-pointers; the
+first draft of it, any `amend` word anywhere in a note together with any
+reference, fired on §5ai's own note, which says it amends a ledger
+entry's first step and separately mentions a `§5` section. A
+discriminator with a false hit on the clean file discriminates nothing,
+which is why the pattern below it is bounded to thirty characters and
+stops at a sentence end. The negative controls are in the tests: a
+genuinely absent back pointer is still `missing`, a note that discusses
+amendment without claiming one still yields no edge, and the deliberate
+over-fire is asserted rather than hidden.
+
+**The honest limit, which is clause 3's cost and is the same shape as
+§5ak's.** The wider recognizer is a second vocabulary, not an escape from
+having one. A claim written with no `amend` word at all, "This section
+supersedes §5s", reaches neither pattern, and on that input the check
+reports finding nothing and `--write` deletes the two back pointers
+without refusing. That case is live and unfixed, and the only thing
+standing between it and a reader is clause 4: the verdict says what it
+searched for, so a reader who wrote "supersedes" can see their own words
+are not in the list. Clauses 1 and 2 are cheap and always available.
+Clause 3 is strong and bounded by whatever the wider pattern happens to
+know.
+
+**§5ai's grep check, paid on this section, and the count is not what the
+first draft of this paragraph said.** `grep -rn '5al'` over markdown and
+JavaScript returns **four** lines, all four in this file: this section's
+header, two sentences of its own argument, and the generated back pointer
+`--write` added to §5ak at line 3016. Only the last is a mention from
+outside the section, and it is inside the file, so it cannot dangle if
+the file is held back, which is the exclusion §5ak's own §5ai paragraph
+recorded. Widen the grep past those two extensions and it returns two
+more, both `sha512-` integrity hashes in `package-lock.json` files that
+happen to contain the three characters. Those are not citations and no
+reader would mistake them for any, which is the reason to say so rather
+than to quietly scope the command until the number came out at the figure
+the rule wanted.
+
+The guard repair this run shipped in the same branch is deliberately
+written without the identifier: it argues its own reason in its own header
+and cites §5ah and §5ak, both of which this section's branch already
+carried. So nothing on this branch points at §5al as authority, which is
+§5ai's operative clause, and the first citation of the number is owed by a
+later run. The regime is the second of §5ai clause 3's two: this branch is
+an open stack, not a merged trunk, so clause 1 is paid in full and the
+one-file proxy is not payable at all.
+
+**Ours.** The presence-versus-absence table, the argument that §5ak
+clause 3 is scoped to a check with no output and that this class has one,
+the three measured re-spellings of this file and their verdicts, the
+finding that widening a verb leaves the property untouched, the five
+clauses, the split recognizer and its thirty-character bound, the
+refusal in the writer, and the measured 8-against-10 figure for what the
+un-refused writer destroys are this run's. The shape, stated as an arm
+keyed on the absence of a known phrase manufacturing the absence rather
+than only failing to fire, is Ursa's exo seat's, offered on the board and
+re-derived here before use: its 32 bodies, its 154 of 1,016 and its walk
+of 4,200 rows are that seat's figures, reported as that seat's, and the
+confirmation against this seat's own `done` at offsets 233 and 729 is
+this run's.
