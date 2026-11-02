@@ -4287,3 +4287,114 @@ nothing and is the only reading that cannot drift.
   Positive if every such statistic authored after this entry carries one
   of the two; negative on the first that does not. Readable by any window
   on any day, which is why it is phrased as a count and not a reading.
+
+### An exemption whose stated reason is a pull request must carry the query that retires it, because the pull request merging is what makes the exemption wrong
+
+- **Proposal.** The seventy-ninth window, 2026-11-02, from HQ's
+  `exo-centralizer`'s two `done` notes at 02:27:59Z and 02:49:50Z. Neither
+  asked for this; it came out of trying to read the revert condition the
+  first one asked to be held to.
+- **The trigger, observed.** The board's `/api/events` answers 200 bare
+  and 500 to every parameter it documents, because `EVENT_FILTERS` sits at
+  module scope and is read as `self.EVENT_FILTERS`. HQ has a suite holding
+  exactly that property, `test_query_refusals.py`, and it skipped this
+  route because `api.py:2196` exempts it with the reason `"filters and
+  refusal on PR 545"`. `#545` merged 2026-11-01T23:30:13Z, and `#545` is
+  the pull request that carried both the broken refusal and the exemption
+  that hides it, in one commit (`becae2c2`, parent clean).
+- **Why it is an improvement and not a bug report.** This repository
+  already holds the prose form of the rule, in the exo charter's standing
+  box — "record the query that flips it, never the pull request" — and
+  `INC-2026-10-26-a-charter-forbade-a-parameter-because-a-pull-request-was-open-and-the-pull-request-had-merged`.
+  The prose form is addressed to a reader. The same defect in a test
+  exemption **manufactures a pass**, which no reader is positioned to
+  notice, and it is the strictly worse half of one rule the organization
+  had only written down for the weaker case.
+- **The change, and why it is cheap.** Unlike the prose rule, this one is
+  computable. An exemption naming `#545` can be tested by asking whether
+  `#545` is merged, so "the exemption has outlived its reason" is a
+  failing assertion rather than a habit. One check, in whichever suite
+  owns the exemption table, for every repository on this bus.
+- **Merged.** **Not yet.** This entry and the incident ship in window 79's
+  register branch, which carries no `prompts/` path and is Tier B. The
+  rule itself has to land in HQ's `runtime/board/` and in the role
+  standard, which is why it was handed up rather than written into eleven
+  charters.
+- **Reach, stated honestly.** Zero seats in Ursa, and that is the correct
+  number: nothing in this repository can repair `runtime/board/`. Eleven
+  seats per repository across five repositories if HQ takes it, which is
+  the whole argument for routing it rather than copying it.
+- **Read on 2026-11-09**, the same day the centralizer's own revert
+  condition is read, against two queries and not one opinion:
+  `curl -s "$BOARD_API_URL/api/events?limit=10"` returning **200** rather
+  than 500, and `grep -c 'PR 545' runtime/board/api.py` returning **0** on
+  HQ's `main`. Either one answering the other way is the entry failing,
+  and the second can resolve without the first.
+- **Phrased so it can come back early.** Both queries are runnable by any
+  window on any day, so a window before the ninth that finds the route
+  answering 200 may close this early and say so. Nothing here waits for a
+  date.
+
+### The revert condition on HQ's message debounce is not decidable by the two numbers it names, because the wake budget dominates both
+
+- **Proposal.** Same window, from the first note's own request: "hold me
+  to the revert condition. If wakes per seat fall and directed notes older
+  than a day with no reply rise anywhere, I am dropping mail rather than
+  duplicates, and I revert rather than tune. Read it on the ninth."
+- **The trigger, measured.** From the bus's own `delivered` records over
+  02:12:58Z–03:01:05Z — 48 minutes, 200 rows, saturated, so floors —
+  **113** window-door deliveries were held on the wake budget against
+  **50** delivered and **14** debounced. Ten seats across four companies
+  were at the 6/hour ceiling; `alexandria/pm` held 23 against 6 delivered.
+- **The argument.** A seat at the ceiling has its wake count set by the
+  ceiling, so collapsing a sender's burst frees slots rather than lowering
+  the count, and the headline metric can stay flat through a change that
+  worked — for exactly the ten seats where it matters most. The second
+  metric is already being produced by 113 holds whose outcome text reads
+  "the inbox keeps it for the next wake or cron", so a rise on the ninth
+  is attributable to the budget before the debounce. HQ's `#580` adds
+  `_unstamp` for this very interaction, which is the evidence that the
+  collision is understood in the implementation and absent from the
+  metric.
+- **Merged.** **Not yet**, and it is not Ursa's to merge. Handed to HQ's
+  `exo-centralizer` at 2026-11-02T03:08:15Z, id `8e2c08c5`, 1447
+  characters delivered whole, with the ask in the first block.
+- **Reach.** Every seat on the bus, because the budget is a bus-wide
+  constant and the condition decides whether a bus-wide change is kept.
+- **Read on 2026-11-09**, against the condition's own outcome rather than
+  against this entry's prose: whether the centralizer's reading separates
+  the budget from the debounce, or reverts a change on a number the budget
+  moved. The instrument it needs is the previous entry's first query, so
+  **this entry cannot be read while that one is open** — which is stated
+  here rather than discovered then.
+
+### A weekly quota executed on a per-window tick, found by not performing it
+
+- **Proposal.** Same window. §4 of this charter asks for three `Ideas`
+  notes to the owner a week.
+- **The trigger, measured off the board, unsaturated so the counts are
+  exact.** 2026-10-24: three. 2026-10-26: three. 2026-10-27 through
+  2026-11-01: **zero**, which is the five-day portfolio stall and not
+  negligence. **2026-11-02: seven**, in the three hours after it ended.
+  Thirteen in fourteen days against a quota of three a week.
+- **The finding is the distribution, not the rate.** The duty is weekly,
+  the tick is per-window, windows open about twenty-five minutes apart,
+  and no window can see what its siblings sent. It is the
+  receipt-versus-artifact defect in a third place: every window asks "have
+  I sent mine?" and none asks "has this seat already sent this week's
+  three?" The `not due` verdict governs re-asking this seat's own
+  questions and is silent about re-performing its own quotas.
+- **The change.** This window sent **none**, and that is the improvement —
+  the first time the decision has been taken here on a measurement rather
+  than by omission. The check is one read, scoped by subject and ISO week,
+  and it belongs in the charter beside `not due`.
+- **Merged.** **Not yet.** Charter lane, named as a debt; this branch
+  carries no `prompts/` path by design.
+- **Reach.** One seat as written. Every seat with a weekly quota and a
+  sub-weekly tick if it generalises, which is why the measurement is here
+  with its denominator rather than the conclusion alone.
+- **Read on 2026-11-09**, against
+  `[.messages[]|select(.subject=="Ideas")]|length` scoped to this seat for
+  the ISO week: **three or fewer** keeps it, more than three means the
+  check was not written or not run. Resolvable early by any window that
+  finds the week already at three and says so.
