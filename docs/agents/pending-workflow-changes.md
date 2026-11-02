@@ -78,7 +78,7 @@ live; nothing below is stale.
 | 2 | **PWC-14** | No gate in this repository has ever looked for a credential. The scanner exists and runs only when a seat remembers. | One job, or three steps inside PWC-15's. |
 | 3 | **PWC-12** | The gate does not run at all on a push made while a branch conflicts, so it is off on exactly the branches that sit public longest. Re-measured tonight: three open pull requests have tips that no gate has ever read, public for 22, 66 and 140 minutes at 03:13Z. | Two workflow lines, plus one branch-protection setting that needs the owner in repository settings. |
 | 4 | **PWC-11** | The event text that wakes a seat lands in its prompt in the instruction position, unfenced, in all eleven seat workflows. The resident host already fences it; GitHub Actions does not. | Six lines per file, wording given verbatim. |
-| 5 | **PWC-13** | The gate's `-I` flag makes every binary file an unscanned surface. Still live: the gate ran `grep -rInE` tonight. | One character, deleted from one line. |
+| 5 | **PWC-13** | The gate's `-I` flag makes every binary file an unscanned surface. Still live: the gate ran `grep -rInE` tonight. **This row's remedy was wrong until 2026-11-02: see the entry's own correction.** | **Not one character.** Two edits at a minimum, and the entry's own `Change` paragraph always said so while this column said otherwise. The flag alone produces a gate that looks changed and catches nothing, measured. The shape that costs least afterwards is `-rlaE`, which names a carrying file and quotes none of it, plus classifying standard error rather than merging it. |
 | 6 | **PWC-8** | The gate reads only the working tree, so a value it catches and a seat then truncates stays readable at the commit before it, in a public repository, forever. | A history mode in the gate. The local half is already built and ran tonight. |
 | 7 | **PWC-5** | Twenty-eight `uses:` lines across twelve workflows, not one pinned to a commit SHA. A tag is mutable by the publisher. | Mechanical, twenty-eight lines. |
 | 8 | **PWC-6** | `PROJECTS_TOKEN` is injected into eleven seat jobs and read by no code in the repository; `id-token: write` is granted by eleven and consumed by nothing. Both sit beside an agent running under `bypassPermissions`. Re-measured tonight: still 11 and 11, still zero readers. | Two lines deleted per file. |
@@ -810,6 +810,73 @@ That is the same shape as the scratch directory finding of run 11: a
 convention a run has to remember is not a control. Naming it is this
 entry's main purpose, and the standard was amended in the same pull
 request to list rendered images as a governed surface.
+
+**Corrected 2026-11-02, and the correction is about this entry's own
+summary rather than about the gate.** Two things, and the first is smaller
+than it looks while the second is new.
+
+First, what was wrong. The ranked table at the top of this file gave this
+entry's remedy as "One character, deleted from one line." The `Change`
+paragraph above has said since the day it was written that the capture also
+has to take `2>&1` or the gate "looks changed and catches nothing", so the
+table contradicted the entry it summarises, and the table is the artifact a
+reader decides from. The summary is corrected. The request routed to HQ did
+carry the stderr trap, so nothing was ever handed up missing it, and a first
+reading on this run that said otherwise is withdrawn here rather than left
+in a report.
+
+Second, what is new, and it is a defect in the prescribed repair rather than
+in the diagnosis. `2>&1` does reach a binary carrier, measured on GNU grep
+3.11 by running the gate's own `scan()` body against a file holding a
+fabricated Class B path. It also merges everything else grep says on that
+stream into `hits`, and `[ -n "$hits" ]` is the whole of the gate's test. So
+a directory the runner cannot read turns the gate red under the label
+`Absolute home path with a real username. Write /Users/<you>/ or ~/
+instead.` That was measured on a tree carrying no private value anywhere.
+
+The label names a cause that is false and prescribes a repair that does
+nothing, which is the defect class `tools/gates/verdict-shape.mjs` exists
+for: one sentence standing over conditions with different repairs and
+different owners.
+
+And the gate has no good state between the two. As it ships, `2>/dev/null`
+discards the same condition, so a scan that could not read part of the tree
+is reported clean. With `2>&1`, it is reported as a leak. Neither is "the
+scan did not finish", which is a ground fault and has to be its own exit.
+
+**So the change this entry now asks for, in three parts, each with its own
+reason.** Whoever writes the workflow decides the shape; these are the
+properties the result needs.
+
+1. **Reach.** Drop `-I`. Necessary, and on its own not sufficient.
+2. **Do not echo the bytes.** Scan with `-l` so a finding is a path and the
+   matched content is never printed. The gate prints `head -20` of its hits
+   into the Actions log of a public repository, so the repair that merely
+   forces the bytes through (`-a`) would make the redaction gate a
+   disclosure channel for the values it exists to catch. This is the
+   charter's own rule and the discipline `tools/image-metadata.mjs` already
+   keeps by reading chunk types and never chunk contents.
+3. **Classify standard error, do not merge it.** A `binary file matches`
+   notice is a finding. Anything else grep writes there means part of the
+   tree went unread, which is neither clean nor a leak and needs its own
+   exit code. `scripts/redaction-check.mjs` already does exactly this split
+   and can be read as the reference implementation.
+
+Two consequences of part 2, named here so they are decided rather than
+discovered. `-l` output has no line, so the gate's line-scoped allowance
+(`grep -vE`) has nothing to match on and moves either to a path-scoped form
+or to a second pass over text files alone. And `-l` with `-a` reports a
+binary file by path for any of the three patterns, which is the
+location-only shape PWC-8 (3) asks for, so the two entries still agree.
+
+**How to check it landed, rather than reading the flags.** The predicate is
+`scripts/gate-binary-reach.mjs`, which reads this gate's pipeline out of the
+workflow and names the first of five things in the way.
+`scripts/gate-binary-reach.test.mjs` builds a fixture carrying fabricated
+values, runs each candidate pipeline with the real grep, and checks the
+prediction against what actually happens, so a grep that changes its binary
+reporting turns that suite red instead of turning this entry quietly wrong.
+Both were written on 2026-11-02 and neither touches a workflow.
 
 **Routed, not applied, 2026-10-26 at 20:12 UTC.** HQ's centralizer
 answered this entry on the board and did not apply it. Its stated reason
