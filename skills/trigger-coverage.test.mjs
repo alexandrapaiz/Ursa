@@ -24,6 +24,7 @@ import {
   explainShortfall,
   explainSpecNeighbours,
   amendmentEdges,
+  amendmentPopulation,
   amendmentDefects,
   backPointerLine,
   explainAmendments,
@@ -723,6 +724,39 @@ test('a note that declares an amendment is an edge, and prose that says the same
   // declaration by §5ag about §5ag.
   assert.deepEqual(amendmentEdges(
     '## 5. A\n\nThe body discusses amending §5c at length.\n\n## 5c. B\n\n(Added 2026-10-01.)\n\nIts body.\n'), [])
+})
+
+test('three inflections of the verb declare an edge, and the drop was 1 of 32 with no output to move', () => {
+  // The pattern read only the gerund until 2026-11-02, and §5ah's rule is
+  // stated as a note that "says it amends §N". A note writing it as "Amends"
+  // therefore declared an edge nothing could see, and the mode printed its
+  // clean line over a population that note had been dropped from. Both
+  // directions in one test, which is what a repair of a silent drop owes:
+  // three spellings that must be read, and one sentence about amendment that
+  // must not become an edge.
+  for (const verb of ['amending', 'amends', 'Amends', 'amended']) {
+    const text = `## 5. The trigger test\n\nIts body.\n\n## 5c. A later rule\n\n(Added 2026-10-01, third run, ${verb} §5.)\n\nIts body.\n`
+    assert.deepEqual(amendmentEdges(text).map((e) => `${e.from}->${e.to}`), ['5c->5'],
+      `the note spelled the claim "${verb}" and the edge has to be read out of it`)
+  }
+  // The negative control, and it is the one that stops a widened verb from
+  // inventing edges: a dated note may discuss amendment without claiming one,
+  // and the clause has to be a verb followed by a reference.
+  assert.deepEqual(amendmentEdges(
+    '## 5. A\n\nIts body.\n\n## 5c. B\n\n(Added 2026-10-01, by the run that read every amendment in this file and\nclaimed none of them.)\n\nIts body.\n'), [])
+})
+
+test('the amendment verdict names the population it was read over, in three parts', () => {
+  // Clause 1 of the rule this check now pays: the gap between sections and
+  // dated notes is what the graph cannot speak for, the gap between notes and
+  // claims is what it read and found nothing in, and "every amended section
+  // names its amendments" stated neither.
+  const text = '## 5. A\n\nIts body.\n\n## 5c. B\n\n(Added 2026-10-01, amending §5.)\n\nIts body.\n' +
+    '## 5d. C\n\n(Added 2026-10-02, from a trial.)\n\nIts body.\n'
+  assert.deepEqual(amendmentPopulation(text), { sections: 3, notes: 2, claiming: 1 })
+  // An unreadable file is three zeros and not a universal claim about nothing.
+  assert.deepEqual(amendmentPopulation(null), { sections: 0, notes: 0, claiming: 0 })
+  assert.deepEqual(amendmentPopulation(''), { sections: 0, notes: 0, claiming: 0 })
 })
 
 test('the clause stops at the first thing that is not a reference, which is §5ad\'s live shape', () => {

@@ -808,17 +808,36 @@ function openingNote(sec) {
 const BACK_POINTER = /^\(Amended by /
 
 /**
- * The clause a section's note uses to declare what it amends. One `amending`,
- * then a list of `§<id>` optionally carrying `part <n>`, and it stops at the
- * first thing that is not another reference.
+ * The clause a section's note uses to declare what it amends. One inflection
+ * of `amend`, then a list of `§<id>` optionally carrying `part <n>`, and it
+ * stops at the first thing that is not another reference.
  *
  * The stop matters. §5ad's note reads "amending §5aa part 4 and answering the
  * remedy Ursa's exo seat proposed", and three lines later mentions §5aa again
  * in a sentence that is not a claim about amendment. A pattern that ran to the
  * end of the sentence read that second mention as a second edge and reported
  * the same pair twice, which is how the first draft of this check behaved.
+ *
+ * THREE INFLECTIONS AND NOT ONE, and the widening is the repair of a silent
+ * drop rather than a convenience. The rule this pattern enforces is stated in
+ * §5ah as "a section whose dated note **says it amends** §N", and until
+ * 2026-11-02 the pattern read only the gerund. A note writing the claim as
+ * "Amends §5s and §5w" therefore declared an amendment that this check could
+ * not see, and the mode printed "every amended section names its amendments"
+ * over a population it had dropped that note from. Measured on the file the
+ * day it was found: **32** sections carry a dated note, **31** spell the claim
+ * `amending`, and the one that spelled it `Amends` was the section being
+ * added, so the drop was 1 of 32 and the clean line was the only output.
+ * Case-insensitive for the same reason: the claim opens a sentence as often as
+ * it sits inside one.
+ *
+ * Widening a verb cannot invent an edge from this file's commentary about
+ * itself, because the only text any of this reads is the dated note
+ * (`openingNote`), and a note is one paragraph a section writes about its own
+ * provenance. The negative control is in the tests: a note that discusses
+ * amendment without claiming one yields no edge.
  */
-const AMENDING = /\bamending\s+((?:§[0-9][0-9a-z]*(?:\s+part\s+\d+)?(?:\s*,\s*|\s+and\s+)?)+)/
+const AMENDING = /\bamend(?:s|ing|ed)\s+((?:§[0-9][0-9a-z]*(?:\s+part\s+\d+)?(?:\s*,\s*|\s+and\s+)?)+)/i
 const ONE_REF = /§([0-9][0-9a-z]*)(?:\s+part\s+(\d+))?/g
 
 /**
@@ -836,6 +855,30 @@ const ONE_REF = /§([0-9][0-9a-z]*)(?:\s+part\s+(\d+))?/g
  * which has no denominator: the claim is about two sections, so the only thing
  * that can check it is the other section.
  */
+/**
+ * What the amendment graph was read over, so that its verdict can name a
+ * denominator instead of asserting a universal.
+ *
+ * `sections` is every `## 5*` section in the file, `notes` the subset carrying
+ * a dated `(Added …)` note, which is the only text an amendment claim is read
+ * out of, and `claiming` the subset of those whose note declares at least one
+ * edge. The gap between `sections` and `notes` is the population this check
+ * cannot speak for at all, and the gap between `notes` and `claiming` is the
+ * population it read and found nothing in. Those are different facts and
+ * "every amended section names its amendments" stated neither.
+ *
+ * This exists because the pattern above dropped one note for a month without
+ * any output changing: there was no number for the drop to move. A verdict
+ * over an unstated population cannot disagree with anything.
+ */
+export function amendmentPopulation(specText) {
+  if (!specText) return { sections: 0, notes: 0, claiming: 0 }
+  const secs = specSections(specText)
+  const withNote = secs.filter((sec) => openingNote(sec) !== null)
+  const claiming = withNote.filter((sec) => AMENDING.test(openingNote(sec).text))
+  return { sections: secs.length, notes: withNote.length, claiming: claiming.length }
+}
+
 export function amendmentEdges(specText) {
   if (!specText) return []
   const out = []
@@ -1017,13 +1060,13 @@ export function withBackPointers(specText) {
 export function explainAmendments(defects) {
   if (!defects.length) return []
   const lines = [
-    'A section note that says "amending §N" is a claim that this file and §N agree, and',
-    'it is the one cross-reference in this file that no reader can check cheaply,',
-    'because the amended section is hundreds of lines away and does not know it was',
-    'amended. §5e did not know for twenty-two days, and the worked example it kept was',
-    'read as current by every run in between. The repair is not prose in the amending',
-    'section. It is a generated line in the amended one, above the rule it supersedes,',
-    'so the section cannot be read without its amendments.',
+    'A section note that says it amends §N, in any inflection of the verb, is a claim',
+    'that this file and §N agree, and it is the one cross-reference here no reader can',
+    'check cheaply, because the amended section is hundreds of lines away and does not',
+    'know it was amended. §5e did not know for twenty-two days, and the worked example',
+    'it kept was read as current by every run in between. The repair is not prose in',
+    'the amending section. It is a generated line in the amended one, above the rule',
+    'it supersedes, so the section cannot be read without its amendments.',
   ]
   if (defects.some((d) => d.kind === 'missing' || d.kind === 'stale' || d.kind === 'misplaced'))
     lines.push('Run `node skills/trigger-coverage.mjs --amendments --write` and commit the result.')
@@ -1208,7 +1251,11 @@ function amendmentsMode(write) {
     console.log(`${SPEC_REL} is not readable from this clone, so there is no graph to print`)
     return 1
   }
-  for (const e of amendmentEdges(specText))
+  const pop = amendmentPopulation(specText)
+  const edges = amendmentEdges(specText)
+  console.log(`amendment graph over ${pop.sections} sections, ${pop.notes} of them carrying a dated note, ` +
+    `${pop.claiming} of those declaring an amendment, ${edges.length} edge${edges.length === 1 ? '' : 's'}:`)
+  for (const e of edges)
     console.log(`  §${e.from}:${e.line} amends §${e.to}${e.part ? ` ${e.part}` : ''}`)
   if (write) {
     const { text, changed } = withBackPointers(specText)
@@ -1224,7 +1271,10 @@ function amendmentsMode(write) {
   const defects = amendmentDefects(specText)
   for (const d of defects) console.log(`${SPEC_REL}:${d.line} ${d.kind}: ${d.detail}`)
   if (!defects.length) {
-    console.log(`\nevery amended section names its amendments`)
+    console.log(`\nevery amended section names its amendments, across the ${pop.claiming} note` +
+      `${pop.claiming === 1 ? '' : 's'} that declare one; ${pop.notes - pop.claiming} dated note` +
+      `${pop.notes - pop.claiming === 1 ? '' : 's'} declare none and ${pop.sections - pop.notes} section` +
+      `${pop.sections - pop.notes === 1 ? '' : 's'} carry no dated note, so this verdict says nothing about them`)
     return 0
   }
   console.log('')

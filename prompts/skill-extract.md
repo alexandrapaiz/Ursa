@@ -1006,6 +1006,8 @@ against this description answers the second.
 three times in one day, in three different tools, two of which are not
 this library's.)
 
+(Amended by §5ak. Generated line, per §5ah.)
+
 §5k says the mechanical pass is a tool whose one failure mode is the ref
 you give it. There is a second failure mode and it sits upstream of the
 ref: **the set the pass enumerated.** A guard reports a verdict about
@@ -1319,6 +1321,8 @@ this run learned that by getting four of fifteen readings wrong before
 noticing.
 
 ## 5w. A ratio with nothing to divide is not a ratio of zero, and on a scale where zero is good it is the most dangerous number a tool can print
+
+(Amended by §5ak. Generated line, per §5ah.)
 
 **Where this comes from.** Ursa's exo seat, on 2026-10-26, having
 accepted two corrections from this seat, returned one of its own in the
@@ -2998,3 +3002,148 @@ rests on, `tools/ensure-full-clone.sh` and
 `docs/design/clone-completeness.md` are the engineer seat's prior work
 from 2026-10-24 and 2026-10-26, read before this section was written and
 not re-derived. The frame-versus-host argument is the preceding run's.
+
+## 5ak. A check prints the size of the population it examined, because a check that read none of it and a check that found nothing in it print the same thing
+
+(Added 2026-11-02, by the run the 2026-11-02 ledger entry named as its
+owner, "the next run of this seat that would add a §5 section, which is
+the same owner §5ai itself was filed with". Amends §5s and §5w. That
+entry asked for the rule as it applies to a containment verdict. A
+second case arrived from Ursa's exo seat the same night, in a different
+tool and a different language, and the rule is written at the width the
+two cases share rather than at the width of either.)
+
+**Three cases, all measured in this clone rather than read off a
+report.** All three are repaired now, and the point of the table is that
+no repair was prompted by a failing output, because in none of the three
+was there one.
+
+| what dropped its population | how it reported that | what found it |
+|---|---|---|
+| `tools/stack/absent-text.py`, the containment gate: `base` defaults to `git merge-base OLD TIP`, which is `OLD` whenever `OLD` is an ancestor, so `git diff --name-only base old` is empty and the per-file loop never runs | exit **0**, **zero lines of output** | asking the same question twice, once with the base the question needs |
+| `grep-dialect.mjs`'s first draft, which skipped `//` comments in `.mjs` outright | a clean scan that could not mention them | the exo seat's unclassified sweep of this lane, which returned hits in this tool's own header that the tool itself would not report |
+| the exo seat's self-classification sweep, two call sites in `prompts/exo-agent.md` and one in `docs/agents/runner-facts.md`, piping `git grep -l <ref>` into an exclusion anchored on `^docs/` | the exclusion arm matched nothing and the rows all reported, which reads as a thorough sweep | this lane's version check over the same ground, run on that seat's own request |
+
+The first reproduces here. `absent-text.py refs/prs/601 refs/prs/667`
+exits 0 printing **0 lines**; the same pair with
+`--base $(git merge-base refs/prs/601 origin/main)` examines **56 files**
+and **33,226 lines**. The second is **4** of this scan's **56** current
+findings, all four on lines 56, 57, 89 and 109 of
+`skills/grep-dialect.mjs`, and the first two of those are the
+measurement of the defect itself. The third is two independent faults in
+one command, written on 2026-10-26 in commit `d03a45fd` and repaired on
+2026-11-02 in `f334c26c`: `git grep -l <ref>` writes a `<ref>:` prefix
+before every path, which this clone confirms, so the anchor never
+matched; and `grep` in the frame that typed it was ugrep, whose
+quiet-plus-invert exit status is the inverse of GNU's. Repairing either
+one alone flips the classifier from reporting every row to reporting
+none, which is why neither was visible as a wrong answer.
+
+**Why §5s's remedy does not reach these.** §5s says a guard names what
+it declined to read before it reports its counts, and that is right
+wherever the guard knows it declined. None of these three knew. The
+containment gate computed its file list correctly from a base that was
+wrong, so it had no excluded set to name. The exclusion arm believed it
+had excluded nothing, because nothing matched it. Only the
+`//`-comment skip was deliberate, and a deliberate skip with no report
+is §5s's own case, which is how §5s's warning was already on the record
+and the drop still shipped. §5s asks you to probe a guard with the input
+it cannot read. That requires knowing which input that is, and the whole
+difficulty of this class is that nobody does until something disagrees.
+
+**Why §5w's rule does not reach them either.** §5w says an empty
+denominator returns `null`, never a number, and it is scoped to anything
+under `skills/` that divides. These three divide nothing. There is no
+ratio to protect, no `null` to return, and the output is a count of
+findings that is arithmetically correct. §5w rule 3 is the germ of what
+follows, in one clause: say in one line how many were counted out, and
+"none" is the answer a reader wants while a missing line is not it. This
+section is that clause lifted off division and made the general form.
+
+**The rule.**
+
+1. **A check states the size of the population it examined, in the same
+   line as its verdict.** Not in a flag, not in `--verbose`, not in the
+   JSON. The verdict line itself, because the verdict line is the only
+   thing a caller reads.
+2. **An empty population is not a pass.** A check whose scope computes
+   to nothing says so and returns something other than its clean exit
+   code. Zero findings over zero members is the one reading that must
+   never share an exit status with zero findings over all of them.
+3. **A drop is found by a second instrument over the same ground, not by
+   reading the check.** A check that silently drops part of its
+   population has no failing output, so it can contradict nothing. The
+   only thing that reaches it is a different instrument asked the same
+   question, returning a different number.
+4. **An instrument agreeing with its own earlier run is not evidence.**
+   It is the same code over the same blind spot. The exo seat's figure
+   had been published four times before the arm that produced it was
+   found never to have fired.
+5. **A repair of one of these is controlled both ways.** One input that
+   must be reported and one that must not, in the same run. Fixing a
+   silent drop can produce a silent over-report, and both of the exo
+   seat's two faults pointed that way: either repair alone inverts the
+   classifier rather than correcting it.
+
+**Paid here, in both directions, because clause 5 applies to this
+section too.** The direction that must come out clean: of the five
+checks in this library with a command line, all five state their
+examined population in their verdict line, measured by running each one
+on this branch. `check-evidence` says 377 sources and 465 ranges,
+`relevance-sweep` 318 of 318 verdicts, `trigger-coverage` 11 skills and
+110 ordered pairs, `relocate-anchors` 465 cited ranges, and
+`grep-dialect --scan` 0 call sites with 56 findings classified out under
+four headings. So does `tools/ledger/check-closures.mjs`, at 5 markers
+in 5 documents. The direction that must come out dirty is the first row
+of the table above, which is `tools/stack/absent-text.py`, and it is not
+repaired here because `tools/` is not this seat's to write. It is filed
+with an owner.
+
+**And the second instrument, run rather than described, over the one
+tool in this lane that has already carried this defect.** The question
+is whether `grep-dialect.mjs` still drops anything. Instrument one is
+the tool's own `--json` over `skills prompts`. Instrument two is
+`/usr/bin/grep -rnE` over the same two roots with the same six
+spellings of the flag pair and no classification at all. Both return
+**56**, and the per-file split is identical in all three files that
+carry any: 43 in `grep-dialect.test.mjs`, 12 in `grep-dialect.mjs`, 1 in
+`skills/README.md`. That agreement is worth something only because the
+two instruments share no code, which is the whole of clause 3.
+
+**The honest limit, which is clause 3's cost.** A second instrument
+exists only where the question can be asked twice by different means. It
+was available in all three cases here and it will not always be. Where
+it is not, the fallback is clauses 1 and 2 and nothing stronger: print
+the denominator, and refuse to spell an empty one as a pass. Those are
+cheap and they do not detect a drop, they only make one legible to the
+next reader who has a reason to doubt.
+
+**§5ai's grep check, paid on this section, and it does not come out at
+zero.** The rule is that the branch introducing a section carries
+nothing that cites it, and the check is `grep -rn '5ak'`. It returns
+**four** lines here. One is this section's own header. Two are the
+generated back pointers in §5s and §5w, which are in this file and
+therefore cannot dangle if the file is held back. The fourth is
+`docs/runs/skill-2026-11-02-message-7.md:151`, where this seat's
+previous run recorded this section as owed and named it by identifier,
+and that one is a real mention from outside the file, written before
+this run existed. So nothing on this branch cites the rule as authority,
+which is the property that matters, and the count is not zero, which the
+first draft of this paragraph asserted before running the command. Every
+new citation this run could control was withheld: the ledger entry this
+section closes names the rule in words rather than by number, and so
+does this run's report. Why that withholding is not fussiness is
+measured in a ledger entry under this date, because it is a finding
+about §5ai's check and not about denominators.
+
+**Ours.** The three-case table and every figure in it, the argument that
+§5s's remedy presupposes a guard that knows it declined, the lift of
+§5w rule 3 off division, the five clauses, the five-of-five census, the
+two-instrument control on this lane's own tool and the 4-of-56 figure
+for what the old skip reached are this run's. The shared shape, stated
+as a check that silently drops part of its population being reachable
+only by a second instrument over the same ground, is Ursa's exo seat's,
+offered on the board and re-derived here before use: both of its faults,
+their dates and their repair were measured in this clone rather than
+taken from the note. The containment-verdict case and the owner and
+deadline this run worked to are the 2026-11-02 ledger entry's.
