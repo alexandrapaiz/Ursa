@@ -1,0 +1,231 @@
+// The registry this gate reads: for each mechanism, the one executable form,
+// and every place in this repository's prose that states a rule about it.
+//
+// WHAT THIS EXISTS TO CATCH, stated as the event rather than as a principle.
+// On 2026-10-24 `docs/agents/runner-facts.md` recorded the board's wake cut
+// correctly, from the host's source, including the 60% floor. On 2026-10-26
+// the same file, same seat, 3,484 lines further down, recorded it again from
+// three samples as "drop whole trailing blocks until the body fits" and said
+// that subsumed the earlier reading. It did not. It described the one arm that
+// had fired three times. Both statements sat on `main` for six days; the later
+// one is the one later windows cited, and two seats then spent a round of
+// messages each rediscovering the floor. Nothing in this repository compared
+// the two, because nothing could: neither was executable.
+//
+// So the unit of trust here is not a document. It is a mechanism with exactly
+// one executable form, plus a transcription of every prose claim about it,
+// each of which is *run* against that form over a shared corpus. A prose
+// statement that cannot be transcribed into eight lines of JavaScript is a
+// statement too vague to have been worth writing, and saying so is part of
+// the gate's job.
+//
+// WHY TRANSCRIPTIONS AND NOT STRING MATCHING. A gate that greps for stale
+// sentences has to be told every wrong sentence in advance, which means it
+// only ever catches the mistake somebody already found. Running the model the
+// prose describes catches a wrong rule on the day it is written, against
+// bodies nobody chose for it.
+//
+// WHY DATED RECORDS ARE EXEMPT. A learning log entry, an incident, a run doc
+// and a security audit all say "this is what I observed on this date". That is
+// true forever and correcting it would destroy the record. Only surfaces a
+// reader consults to learn *current* behaviour are held to current behaviour.
+// The split is declared per surface below, with the reason, because getting it
+// wrong in either direction is the whole ballgame: hold the records and the
+// gate is unpassable, exempt the registers and the gate is decorative.
+
+/** Normative surfaces: consulted to learn how the system behaves now, so a
+ *  rule stated here is a claim about the present and is held to it.
+ *
+ *  `seat` is who edits the surface, and it is load-bearing rather than
+ *  documentation. A gate that fails a run for prose in another seat's register
+ *  leaves that run two bad options: edit a file its own charter routes
+ *  elsewhere, or go red for something it cannot fix. So a finding on a surface
+ *  this run does not own is a warning and is named in a roll-up line, which
+ *  keeps the downgrade visible instead of silent. The seat that owns the
+ *  surface still gets the finding, by mail rather than by exit code.
+ *  `ASC_SEAT` decides which of these is "mine"; absent, nothing is. */
+export const NORMATIVE_SURFACES = [
+  { prefix: 'docs/agents/runner-facts.md', seat: 'exo',
+    why: 'the environment register: what a seat reads to learn the host it runs on' },
+  { prefix: 'docs/standards/', seat: 'hq',
+    why: 'company standards: binding on every seat in the portfolio, and HQ\'s to edit' },
+  { prefix: 'docs/design/', seat: 'any',
+    why: 'design docs: the specification a later implementation is built from' },
+  { prefix: 'prompts/', seat: 'owner',
+    why: 'charters: instructions a seat executes without checking them first, and only the owner\'s merge changes them' },
+  { prefix: 'docs/ideas.md', seat: 'any',
+    why: 'the ledger: entries are groomed into sprints and built from. Any seat appends; only the owner moves a status' },
+  { prefix: 'README.md', seat: 'any',
+    why: 'the status surface an outside reader starts at' },
+];
+
+/** Dated-record surfaces: each entry is an observation attached to a date and
+ *  a window, true as of that date, and is never rewritten. */
+export const RECORD_SURFACES = [
+  { prefix: 'docs/agents/learning-log.md',
+    why: 'per-window observations, append-only; a window cannot learn later facts' },
+  { prefix: 'docs/agents/incidents.md',
+    why: 'incident records state what was believed at the time, which is the record' },
+  { prefix: 'docs/agents/improvements.md',
+    why: 'dated proposals with a merged-state field; the proposal is the record' },
+  { prefix: 'docs/runs/',
+    why: 'one run report per file, never revised after the run ends' },
+  { prefix: 'docs/security/',
+    why: 'audits are dated findings; a reopened finding is a new audit' },
+  { prefix: 'docs/decisions.md',
+    why: 'ADRs record a decision and its date; superseding is a new ADR' },
+];
+
+/** The block-sum model: `docs/agents/runner-facts.md` §44, 2026-10-26.
+ *  "The delivered figure is the largest cumulative paragraph sum that stays
+ *  under the limit", with an explicit fall-through only for the case where
+ *  the first block alone exceeds the limit.
+ *  @param {string} body @param {number} limit @returns {number} delivered */
+function blockSum(body, limit) {
+  if (body.length <= limit) return body.length;
+  const blocks = body.split('\n\n');
+  if (blocks[0].length > limit) return limit;   // the stated mid-word case
+  let best = 0;
+  let cum = 0;
+  for (let i = 0; i < blocks.length; i++) {
+    cum += blocks[i].length + (i > 0 ? 2 : 0);
+    if (cum > limit) break;
+    best = cum;
+  }
+  return best;
+}
+
+/** The block-boundary model: the cut always lands on the last blank line at
+ *  or before the limit. Stated by `docs/ideas.md`'s 2026-10-27 entry as its
+ *  answer ("the cut lands on the last paragraph break at or before the
+ *  limit") and by `runner-facts.md` §25's heading ("the cut respects a block
+ *  boundary rather than landing at 1500 mid-word"). No floor.
+ *  @param {string} body @param {number} limit @returns {number} delivered */
+function lastBlockBoundary(body, limit) {
+  if (body.length <= limit) return body.length;
+  const edge = body.slice(0, limit).lastIndexOf('\n\n');
+  return edge === -1 ? limit : body.slice(0, edge).replace(/\s+$/, '').length;
+}
+
+/** The hard-count model: `runner-facts.md` §8, 2026-10-18. "Truncated at 1500
+ *  characters, mid-word." Kept because §8 is still on the surface, under a
+ *  banner naming its replacement, and the banner is what this gate checks.
+ *  @param {string} body @param {number} limit @returns {number} delivered */
+function hardCount(body, limit) {
+  return Math.min(body.length, limit);
+}
+
+/** The chain with a floor, written here from the prose of `runner-facts.md`'s
+ *  "The cut, read from the code that performs it" rather than copied from the
+ *  reference, so that this is a differential test of that section and not a
+ *  restatement of the answer. If the two implementations are ever edited into
+ *  agreement by copying, the test stops meaning anything, which is why the
+ *  prose it transcribes is quoted in `states` below.
+ *  @param {string} body @param {number} limit @returns {number} delivered */
+function chainWithFloor(body, limit) {
+  if (body.length <= limit) return body.length;
+  const head = body.slice(0, limit);
+  for (const edge of [head.lastIndexOf('\n\n'), head.lastIndexOf('\n'), head.lastIndexOf(' ')]) {
+    if (edge > limit * 0.6) return head.slice(0, edge).replace(/\s+$/, '').length;
+  }
+  return head.replace(/\s+$/, '').length;
+}
+
+export const MECHANISMS = [
+  {
+    id: 'wake-cut',
+    what: 'how many characters of a board message body reach a woken seat',
+    // The single executable form. `wakeCut` is a line-for-line transcription
+    // of `wake_body` in HQ's `runtime/board/api.py`, and `tools/board/
+    // check.test.mjs` runs the host's own Python over the same bodies and
+    // compares character for character when that runtime is present.
+    reference: {
+      module: '../board/check.mjs',
+      path: 'tools/board/check.mjs',
+      export: 'wakeCut',
+      // The reference returns text; the models return a length.
+      delivered: (fn, body, limit) => fn(body, limit).length,
+      transcribedFrom: 'wake_body in runtime/board/api.py @ 2e0f960',
+    },
+    limit: 1500,
+    // A site is a candidate if any of these appears in its section. Deliberately
+    // wider than the set of sites that state a rule, because the gate's job is
+    // to notice a *new* section about this mechanism, and a new section will not
+    // use the vocabulary an old one did.
+    probes: [
+      /wake_body/, /wake_limit/, /body_delivered/, /WAKE_BODY_CHARS/,
+      /cumulative paragraph/i, /trailing blocks/i, /1500-character/i,
+      /wake payload/i,
+    ],
+    sites: [
+      {
+        file: 'docs/agents/runner-facts.md',
+        heading: '### The cut, read from the code that performs it (2026-10-24, twenty-first window, no probe messages)',
+        verdict: 'states',
+        quote: 'retreats to the last `\\n\\n`, else the last `\\n`, else the last space — but only if that edge is past 60% of the limit',
+        model: chainWithFloor,
+      },
+      {
+        file: 'docs/agents/runner-facts.md',
+        heading: '## 44. The bus cuts whole trailing blocks rather than cutting at 1500 characters, so `wake_limit` is not a budget and a 75-character overrun cost 272 (measured 2026-10-26, resident host, sixtieth window, on its own send)',
+        verdict: 'refuted',
+        quote: 'the delivered figure is the largest cumulative paragraph sum that stays under the limit',
+        model: blockSum,
+        // Ursa/exo's correction subsection, written 2026-11-02 after this
+        // seat's measurement. It was on an unmerged branch when this gate was
+        // written, and the gate reported it as pending there rather than
+        // missing; it merged mid-run and the pointer went with it.
+        correctionMarks: [/block-sum model is a special case/i],
+      },
+      {
+        file: 'docs/agents/runner-facts.md',
+        heading: '## 8. The wake payload is a 1500-character excerpt of the message (measured 2026-10-18, resident host)',
+        verdict: 'refuted',
+        quote: 'truncated at 1500 characters, mid-word, with no ellipsis, no marker',
+        model: hardCount,
+        correctionMarks: [/Three claims in the paragraph below are now false/],
+      },
+      {
+        file: 'docs/agents/runner-facts.md',
+        heading: '## 25. The board\'s write path now answers the truncation question in its own response, and the cut respects a block boundary rather than landing at 1500 mid-word (measured 2026-10-25, resident host, forty-fifth window, on five live sends)',
+        verdict: 'refuted',
+        quote: 'the cut respects a block boundary rather than landing at 1500 mid-word',
+        model: lastBlockBoundary,
+        // No correction anywhere. §44's, 1,343 lines down, is scoped to §44 and
+        // does not reach this section's unqualified "no longer mid-word".
+        // Reported to the `exo` seat on the board 2026-11-02 rather than edited
+        // here, and this gate keeps saying so until that register answers.
+        correctionMarks: [/block-sum model is a special case/i],
+      },
+      {
+        file: 'docs/ideas.md',
+        heading: '### 2026-10-27 — The wake limit is not the length a message is cut at, measured 214 characters apart',
+        verdict: 'refuted',
+        quote: 'the cut lands on the last paragraph break at or before the limit',
+        model: lastBlockBoundary,
+        correctionMarks: [/Answered again 2026-11-02 \(engineer, message run\)/],
+      },
+      // Candidates that mention the mechanism and state no rule about where
+      // the cut lands. Listed so the discovery pass has nothing left over: an
+      // unlisted candidate is a finding, so every candidate must be dismissed
+      // on the record or transcribed.
+      { file: 'docs/agents/runner-facts.md', heading: '### 15a. A blob you fetched from `main` can be superseded inside your own run', verdict: 'mentions-only', why: 'about the shelf life of a blob read from main; names no cut rule' },
+      { file: 'docs/agents/runner-facts.md', heading: '### 15d. The board pre-flight, as one function, and the sender\'s real wake budget (measured 2026-10-24, twenty-seventh window)', verdict: 'mentions-only', why: 'the pre-flight gate for the refusal rules (420-character blocks, CODE_RE); it reports the budget rather than deriving the cut' },
+      { file: 'docs/agents/runner-facts.md', heading: '### The census, and the half of the mechanism nobody is told about (2026-10-24, twenty-third window, no probe messages)', verdict: 'mentions-only', why: 'a census of how much traffic exceeds the limit, plus the sender-side reporting gap; states no cut location' },
+      { file: 'docs/agents/runner-facts.md', heading: '#### Closed, on a live receipt, by the reply this window owed anyway (2026-10-24 17:25:57 UTC, thirty-third window)', verdict: 'mentions-only', why: 'records that the receipt fields shipped; quotes field values, asserts no rule' },
+      { file: 'docs/agents/runner-facts.md', heading: '## 28. The board\'s prose validator is one regex and one length, both readable from HQ\'s source (read 2026-10-26, forty-sixth window, from `runtime/board/store.py` on HQ\'s `main`)', verdict: 'mentions-only', why: 'the refusal rules, a different mechanism: these reject the post rather than shorten the wake' },
+      { file: 'docs/agents/runner-facts.md', heading: '## 40. A refused board write prints an `error` object with no `id`, and this seat\'s own posting idiom turns that into a printed `?` and carries on (measured 2026-10-26, resident host, fifty-fifth window, on its own refused broadcast)', verdict: 'mentions-only', why: 'about a jq default masking an HTTP 400; the limit appears only in a quoted field list' },
+      { file: 'docs/design/board-write-path.md', heading: '### 8.5 Interfaces at every component boundary', verdict: 'mentions-only', why: 'TypeScript signatures for sender resolution; `wakeCut` appears as a type, and its behaviour is specified by the reference rather than by this doc' },
+      // Caught by the gate itself, minutes after being written, which is the
+      // first thing it ever found that nobody had found by hand. A section
+      // *about* this registry quotes the probe strings as examples of probe
+      // strings, so the discovery pass is right that it mentions the mechanism
+      // and wrong that it claims anything about it. The cost of the false
+      // positive is one classification; the alternative, probes that exclude
+      // the registry's own vocabulary, would blind the gate to a section that
+      // genuinely discusses both.
+      { file: 'docs/ideas.md', heading: '### 2026-11-02 (engineer, second message pass) — A `mentions-only` dismissal is an unexecutable claim with a free pass, and this pass wrote eight of them', verdict: 'mentions-only', why: 'a ledger entry criticising this registry; it quotes `cumulative paragraph` and `trailing blocks` as examples of probe strings, and asserts nothing about where the cut lands' },
+      { file: 'docs/standards/lessons.md', heading: '## any (all seats, all products)', verdict: 'mentions-only', why: 'L-A61 states a consequence of truncation (a tail cut removes the disposition) and two duties that follow; it asserts no cut location. HQ\'s file, and not Ursa\'s to edit' },
+    ],
+  },
+];

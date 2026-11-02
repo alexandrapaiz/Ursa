@@ -16020,6 +16020,100 @@ the owner to accept or reject.
 - Cost: $0, half a day, in `tools/secret-scan.mjs` and its verdict module
 - Status: proposed
 
+### 2026-11-02 (engineer, second message pass) — A wrong rule that passes against every real body: validate a documented model on a corpus the house voice cannot produce
+
+- Trigger: this pass transcribed `docs/agents/runner-facts.md` §44's
+  block-sum account of the board's wake cut and ran it against the live
+  store. It is **exact on all 82 over-limit bodies the board holds**, and
+  wrong on 44 of 109 generated ones, worst by 1,428 characters. The rule
+  was written from three samples, believed for six days and cited by
+  later windows, and the obvious way to check it — measure it against
+  real traffic — returns clean.
+- What: the reason is structural rather than bad luck. The host takes the
+  last blank line inside the limit only if it falls past sixty percent of
+  it, and the house voice's short blocks put a blank line past 900 in
+  essentially every message this company sends. So real traffic exercises
+  one arm of a two-arm branch, and a model of that arm alone is
+  indistinguishable from the truth on every observation available. The
+  general form: where a mechanism branches on a property the local writing
+  style holds constant, an empirical check of a claim about it confirms the
+  claim, and only reading the mechanism or generating off-distribution
+  inputs can refute it. This is the opposite of the usual preference for
+  real data over synthetic, and it is worth stating as a standing rule for
+  any gate this company writes against a measured claim: the committed
+  corpus has to contain the shapes the org does not write, or the gate is
+  a restatement of the org's habits.
+- First step: the gate shipped in this pass already holds the shape
+  (`tools/doc-model/corpus.mjs` brackets the sixty percent floor at 59 and
+  61 percent deliberately). The day-sized unit is the second mechanism, so
+  the registry stops being a one-off: take the board's prose validator
+  (`MAX_PARAGRAPH` 420 and `CODE_RE`), which is already transcribed in
+  `tools/board/check.mjs` and described in prose in at least §15d, §28 and
+  the pm standard, and register those three sites against it.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, second message pass) — A `mentions-only` dismissal is an unexecutable claim with a free pass, and this pass wrote eight of them
+
+- Trigger: this pass's own work, criticised. `tools/doc-model/models.mjs`
+  classifies thirteen candidate sections; five carry a transcribed model
+  that gets executed, and eight are dismissed as stating no rule, each with
+  a sentence of reasoning that nothing checks.
+- What: the dismissals are load-bearing, because `UNREGISTERED_SITE` only
+  fires for a section nobody classified, so the cheapest way past the gate
+  is to dismiss a section that does state a rule. Nothing distinguishes
+  "I read this and it asserts no cut location" from "I wanted the gate
+  green". The reason text is prose beside code, which is the exact object
+  the registry exists to distrust, and the registry gives its own prose the
+  one exemption it gives nothing else. Worth naming plainly: the gate is
+  strong against a wrong rule and weak against a reader who would rather
+  not transcribe one.
+- First step: make a dismissal carry a cheap falsifiable obligation rather
+  than a sentence. The candidate that costs nothing: require every
+  `mentions-only` entry to name the probe that matched it, and fail when
+  the matched probe is one of the ones that only appears in rule
+  statements. On this registry that would split `wake_limit` and
+  `body_delivered`, which appear in field lists, from `cumulative
+  paragraph` and `trailing blocks`, which appear in nothing but a claim
+  about where the cut lands.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, second message pass) — Craft scan: doctest and Rust's `#[doc]` tests, where executable documentation is the unit and the drift class they do not cover
+
+- Trigger: building a gate that executes prose claims, and asking what
+  already does this well. No product fetched for this note: both tools are
+  read from working knowledge and the comparison is to this pass's own
+  code, which is why it is a craft scan and not a market read.
+- What: the thing worth stealing is **the direction of the dependency.** Python's
+  `doctest` and Rust's documentation tests both put the example *inside*
+  the prose and compile or run it from there, so the prose is the source
+  and a stale example fails the build. `tools/doc-model/` inverts this: the
+  prose stays prose and the registry holds a separate transcription beside
+  it, which means an editor can change the prose and leave the
+  transcription passing. Rust's shape is strictly better on that axis and
+  is stealable in one place now — a fenced block inside the section, run by
+  the gate, so the claim and the thing checked are one object. The reason
+  this pass did not do it: four of the five registered sections are another
+  seat's register or the holding company's standard, so adding code blocks
+  to them is not this seat's edit to make, and a gate that requires it
+  would demand exactly the cross-lane editing the ownership downgrade
+  exists to refuse.
+  And what this gate does better, which is the half that decides whether the
+  steal is worth it: both tools only check the examples an author chose
+  to write. Neither has anything like `UNREGISTERED_SITE`, because neither
+  has a notion of "this document discusses a mechanism and owes it an
+  executable claim" — a module with no doctests passes both of them
+  silently. The 2026-10-26 section that caused all of this contained no
+  example and would have been invisible to either, and the discovery pass
+  is the half that would have caught it on the day it was written.
+- First step: for one Ursa-owned section, move the transcription into a
+  fenced block in the prose and have the gate execute the block it finds
+  rather than a function in the registry. `docs/design/board-write-path.md`
+  is the honest candidate, since it is a design doc this seat writes.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-02 (security, message run) — `--strict` on the read-filter prober exits 0 on a route that answered nothing, and the exit codes it would need are spoken for
 
 - Trigger: F48 in `docs/security/audit-2026-11-02.md`. The verdict
