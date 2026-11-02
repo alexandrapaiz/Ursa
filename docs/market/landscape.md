@@ -613,6 +613,10 @@ AI Training Data Products](https://www.afterquery.com/products),
 [Bespoke Labs](https://bespokelabs.ai/), [rl-list.com: Fleet AI vendor
 profile](https://www.rl-list.com/vendors/fleet-ai).
 
+(AfterQuery's own entry has since outgrown this footnote — $3.2B
+valuation and named clients including Nvidia, see its own ### entry
+above — promoted there 2026-11-02, message 13th run.)
+
 **Update (2026-10-26, 31st run): a full-directory sweep of all 42
 names found one closer case than the six already checked —
 Idler — and it still reads as constructed, not real-deliverable.**
@@ -987,6 +991,80 @@ price ladder should carry; added there this run. Weakness against
 Ursa unchanged: still infrastructure the developer's product owns, not
 a profile the end user owns and carries. Last observed 2026-10-25:
 [Vectorize: Mem0 vs Zep (Graphiti)](https://vectorize.io/articles/mem0-vs-zep).
+
+Update 2026-11-02 (message, 13th run): found, not newly published, a
+direct argument against Major's whole premise from this entry's own
+founder. Zep CEO Daniel Chalef's "The Private Agent Memory Fallacy"
+(published 2025-06-19, so this is old ground newly surfaced to this
+file, not a this-week event) names four reasons portable, user-owned
+AI memory "wallets" are structurally unworkable: (1) user context is
+the vendor's own competitive advantage, so asking vendors to support
+portability asks them to "voluntarily surrender" it; (2) a stated
+"privacy paradox" — users say they want control but act otherwise
+(cites Facebook usage rising through #DeleteFacebook); (3) context is
+"domain-specific and often non-transferable," with cross-domain
+semantic collisions as the sharp example ("shooting" meaning different
+things to a photography assistant and a mental-health one); (4)
+memory-poisoning/injection risk compounds under a shared or portable
+store, with liability diffusing across vendor, platform, and the
+portability layer itself. His proposed fix is automated,
+platform-local privacy controls instead of portability.
+
+Read against CLAUDE.md rather than dismissed: (1) is answered by
+design for Major specifically (zero user monetization, revenue sits at
+Minor selling to labs, not at Major locking in context) but not for
+the labs Major needs cooperation from, which is exactly §5's "central
+strategic problem" already on file, so this is corroboration of an
+existing named risk, not a new one. (2) is a real, untested claim
+against Major's own two trials (n=1, n=2, owner-declared unsatisfied);
+on-device automatic inference removes the "continuous decisions"
+burden Chalef describes, but no user-base evidence exists yet either
+way. (3) is the sharpest point and the least answered anywhere in this
+file: no entry in the no-neutral-standard cross-cutting note below
+addresses semantic collision across domains, only format/schema
+interoperability. (4) is partly structural for Major (on-device
+processing, CLAUDE.md §0 constraint 3, means no shared tenant store to
+poison the way Mem0's CVE-2026-116575 did) but the aggregation layer
+itself is a new pooling point this argument doesn't yet have evidence
+against either way. Positioning consequence (points 1 and 3,
+specifically) in docs/market/positioning.md. Last observed 2026-11-02:
+[Zep: The Private Agent Memory Fallacy](https://www.getzep.com/blog/the-ai-memory-wallet-fallacy).
+
+### AfterQuery
+
+What it is: a solicited-expert-feedback vendor training models on how
+knowledge professionals (doctors, lawyers, other specialists) work,
+"encoding the patterns, decisions, and reasoning of the world's best
+practitioners" rather than grading answer accuracy. Already referenced
+in this file's Forbes-sourced China-sales note (Surge AI entry) and
+the rl-list.com cross-cutting note below, which rated it the one
+"build the task and verifier" name worth a caveat rather than a clean
+"authored" tag, on the strength of 300,000+ "verified practitioners"
+producing "expert-demonstrated trajectories." Promoted to its own
+entry this run because the scale has outgrown a footnote: a $30
+million Series A at a $300 million valuation (announced 2026-04-09)
+was followed, by 2026-09-01, by a reported $3.2 billion valuation —
+"more than a 10x increase in less than half a year" — which Y
+Combinator's own partner called the fastest launch-to-unicorn run in
+the accelerator's history, 18 months out of its Winter 2025 cohort.
+Who it serves: named clients include Nvidia, Legora, and Motif
+Technologies (a Korean AI lab) — the first name in this entire
+Category 1 list that is a major AI infrastructure company rather than
+a frontier model lab or an enterprise buyer. Pricing: not public.
+Revenue: an annualized run rate of $100M reported at the April Series
+A. Founders are 22 and 23 years old. Strengths: the practitioner-
+demonstration model is the closest any Category 1 vendor gets to
+"tacit knowledge, the kind that shows up only in action" (vision.md
+§0b, principle 3), ahead of pure solicited grading. Weakness against
+Ursa unchanged from the cross-cutting note: a practitioner
+demonstrating a task on request to generate training data is still
+not a deliverable that existed because real work needed it done — it
+is demonstration data collected to train on, not a record joined
+backward to its own generation history after the fact. Last observed
+2026-11-02: [TechCrunch: AfterQuery reportedly becomes Y Combinator's
+fastest-ever unicorn, now valued at $3.2B](https://techcrunch.com/2026/09/01/afterquery-reportedly-becomes-y-combinators-fastest-ever-unicorn-now-valued-at-3-2b/),
+[BusinessWire: AfterQuery Raises $30 Million Series A Round at $300
+Million Valuation](https://www.businesswire.com/news/home/20260409469482/en/AfterQuery-Raises-$30-Million-Series-A-Round-at-$300-Million-Valuation).
 
 ### ChatGPT Memory (OpenAI)
 
@@ -1874,3 +1952,14 @@ Upgrade?](https://arxiv.org/abs/2609.05339).
   agent-memory plugins independently names "unauditable" storage as
   the defect, corroboration for Major's own inspectability promise
   from outside Category 3 entirely. Both in docs/market/positioning.md.
+- 2026-11-02 (message, 13th run) — promoted AfterQuery from a
+  cross-cutting-note footnote to its own Category 1 entry (now 20
+  total): a reported $3.2B valuation by 2026-09-01, a 10x jump from
+  its April Series A, called Y Combinator's fastest launch-to-unicorn
+  run, plus the category's first named AI-infrastructure client
+  (Nvidia) rather than a frontier lab or enterprise buyer. Dated
+  update to Zep (Category 3): surfaced its own CEO's 2025 "memory
+  wallet fallacy" post, the sharpest direct argument against Major's
+  premise found in this file from a named, tracked competitor, run
+  point-by-point against CLAUDE.md's own constraints rather than
+  dismissed. Positioning consequence in docs/market/positioning.md.
