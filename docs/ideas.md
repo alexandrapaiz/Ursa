@@ -2,6 +2,55 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-02 (security, thirteenth run): the real-queue test cannot measure in continuous integration, because `refs/prs/*` is a namespace nothing in the specified job fetches
+
+**Status:** proposed, hour-sized. **For:** whoever writes `checks.yml` under
+PWC-15, and the engineer. **Severity:** low. **Found by:** repairing finding
+F82, then asking whether the repaired test would ever run where the repair
+matters. **Full reading:** `docs/security/audit-2026-11-02n.md` §5.
+
+**The state after F82.** `tools/stack/repair-pending.test.mjs`'s real-queue
+test now asserts only what a complete clone guarantees and reports the queue
+census as diagnostics. It measures on a clone that is both unshallowed and
+has `refs/prs/*` populated, and it abstains with a named cause otherwise.
+
+**Why it will abstain in the job as specified.** PWC-15 requires
+`fetch-depth: 0` on the checkout and is right to, and that repairs two
+things: `.git/shallow`, and the single-branch refspec. It does not populate
+`refs/prs/*`. That is a third namespace, and `tools/ensure-full-clone.sh`
+declines it deliberately, in the paragraph of its own header headed "WHAT IT
+DOES NOT DO". `openHeads()` also shells out to `gh pr list`, which needs a
+token in the job environment.
+
+So the test skips for two independent reasons and the censuses in that
+audit's §2 appear in no job log. Both skips name their cause, which is this
+seat's own earlier repair to those messages, so nothing is silent. An honest
+permanent abstention is still an abstention.
+
+**Two shapes, and this entry does not choose between them.**
+
+1. One step before the suites: `git fetch origin '+refs/pull/*/head:refs/prs/*'`,
+   plus `GH_TOKEN` in the environment for that job. Cost: one fetch of 729
+   refs, measured at under a minute in this sandbox, on every pull request.
+   This is the shape that makes the test measure.
+2. Accept the permanent skip and say so in the entry, on the grounds that
+   the tool's logic is covered by nineteen fixture tests and the real-queue
+   case is a smoke test a seat can run by hand. Cost: zero runner time, and
+   the real `main` is never read by anything automated.
+
+**Why it is filed and not done.** This seat may not touch workflows, and
+shape 1 spends runner time on every pull request in the repository on a
+decision nobody has made. The same reasoning as the eleventh run's entry
+below: the lines are named rather than smuggled in under a security fix.
+
+**First step.** Decide shape 1 or shape 2 when `checks.yml` is written, and
+write the choice into PWC-15 so the next reader of that skip message knows
+it is intended rather than an oversight.
+
+**Cost:** $0 in services. Shape 1 adds one fetch per job.
+
+**Status:** proposed
+
 ## Ledger entry — 2026-11-02 (security, eleventh run): the site's build and lint are the last two instruments nothing runs, and the cost is a second dependency tree
 
 **Status:** proposed, day-sized. **For:** the engineer, and whoever prices
