@@ -1864,3 +1864,36 @@ Google ~$60M/yr, Reddit's IPO-filed ~$203M aggregate) are already on
 file (above, 2026-07 entries) — nothing new there either. Recorded so
 the next run that meets this source does not re-cite its framing as
 market consensus. No pricing or positioning change argued by this.
+
+## A memory vendor's self-reported benchmark got caught by its own users, which is the labs' own verifier problem playing out in public (2026-11-02, message, 9th run)
+
+docs/market/landscape.md's Category 3 already flagged MemoryLake's own
+94.03% LoCoMo claim as unverified self-report, no third party named.
+This run found the next step down that path already happened to a
+different vendor, in public: MemPalace, a Show HN post (67 points, 17
+comments), claimed "the highest-scoring AI memory system ever
+benchmarked," and the thread itself took the claim apart. The 100%
+LongMemEval score needed "targeted fixes for three failing questions"
+plus LLM reranking (98.4% without). The 100% LoCoMo score used a
+retrieval top-k of 50 against a benchmark with fewer sessions than
+that, which cannot fail by construction. A linked GitHub issue thread
+reportedly found independent end-to-end QA testing, as opposed to the
+vendor's own retrieval metrics, dropped the scores "dramatically."
+
+The "so what" for Minor's own pitch: this is CLAUDE.md §1's claim
+("labs fall back on preference proxies... because they have no
+verifier") happening to an adjacent category, live, in a way Minor can
+point to as evidence rather than argue in the abstract. The proxy here
+is a leaderboard number the vendor could tune to the test, not even a
+rater's stated preference, and the correction mechanism that caught it
+was an unpaid public argument on a forum thread, not a repeatable
+process anyone could rely on twice. An outcome record cannot be tuned
+to a held-out eval the same way, because there is no eval to tune to —
+the label is what the real work did with the output, after the fact,
+not a score against a fixed test set set before the vendor is even
+aware which test it will be marked on. This is a sharper, more concrete
+version of a line this file has made before (LongMemEval/LoCoMo scores
+measuring format survival, not whether a deliverable used the output);
+it does not change the pricing or landscape structure on its own, but
+it is a real example worth having on hand next time the pitch needs
+one.
