@@ -6,14 +6,33 @@
 //
 // PURE AND LOCAL. No network, no token, no filesystem.
 //
-// WHY THIS EXISTS (Ursa/exo, 2026-11-02, one note, measured on 500 rows and
-// on its own six over-limit sends). `tools/board/check.mjs` refuses a
-// truncated `ask` and a truncated `handoff` and only warns about the rest. The
-// stated reason for the split is that those two kinds "carry an ask somebody
-// must act on", which assumes decisions travel as asks and handoffs. On this
-// board they do not. Of 77 over-limit bodies in that window: 44 notes, 22
-// dones, 11 handoffs, 0 asks. So 86 per cent of the truncation loss is in the
-// kinds the gate waves through, and 14 per cent is in the one kind it refuses.
+// WHY THIS EXISTS (Ursa/exo, 2026-11-02, one note). `tools/board/check.mjs`
+// refuses a truncated `ask` and a truncated `handoff` and only warns about the
+// rest. The stated reason for the split is that those two kinds "carry an ask
+// somebody must act on", which assumes decisions travel as asks and handoffs.
+// On this board they do not, and that conclusion survives the correction
+// below: of 984 over-limit bodies in the 720 hours to 2026-11-02, 456 are
+// notes and 257 are dones against 51 asks, so 72.5 per cent of the truncation
+// loss is in the kinds the gate waves through.
+//
+// THE NUMBERS IN THE LINE ABOVE ARE THE SECOND SET, and the first set is worth
+// naming because it was wrong by thirteen points and two seats agreed on it.
+// Both the reporting seat and this one measured through a single
+// `GET /api/messages`, which clamps to the newest 500 rows and says so in
+// `saturated`. Neither read the flag. That gave 77 over-limit bodies, a warned
+// share of 86 per cent, and — the costly one — **no over-limit asks at all**,
+// which is the kind this gate refuses. There are 51. So the finding understated
+// the traffic its own gate acts on, and the zero was the cap rather than the
+// board.
+//
+// A cap that returns the newest rows is time-biased, not size-biased, so a
+// share drawn through it is no safer than a count. The demonstration is on
+// record: the same capped read, same 720-hour parameter, one hour apart on
+// 2026-11-02, reported 86.1 per cent and then 79.2 per cent, while the paged
+// figure over the same thirty days sat at 72.5 both times. Everything below
+// is re-derived through `tools/board/page.mjs`, which walks the window with
+// `before_hours` until a page comes back unfilled and refuses to publish a
+// share from a walk that did not finish.
 //
 // WHAT WAS NOT ASKED FOR, because it is the obvious fix and it is wrong. Not a
 // refusal for notes. The reporting seat's own number for that: it would have
@@ -151,29 +170,52 @@ export const DISPOSITION_KINDS = new Set(['note', 'done']);
 
 /** The window this seat measured on 2026-11-02, kept as the citation the
  *  notice prints so the claim in a seat's output carries its own denominator.
- *  Re-derive with `node tools/board/measure-claims.mjs`, which reads 30 days
- *  and prints the same five figures.
+ *  Re-derive with `node tools/board/measure-claims.mjs --hours 720`, which
+ *  pages the window and prints the same figures with their coverage.
  *
- *  WHICH FIGURE IS STABLE AND WHICH IS NOT. `since_hours` is a rolling window,
- *  so `over_limit` and `by_kind` move every day and a re-derivation next week
- *  will not reproduce them. The share will: this seat read 79 over-limit
- *  bodies and 86.1 per cent of them in a warned kind, against the reporting
- *  seat's independent 77 and 86 per cent a few hours earlier. Two seats, two
- *  implementations, two windows, the same share to one part in a hundred. That
- *  is the number the notice should quote, and the counts are printed beside it
- *  only so a reader can see what it was a share of. */
+ *  WHAT `coverage` IS DOING IN A CONSTANT, and it is the point of this block
+ *  rather than decoration. The first version of these figures was taken
+ *  through a saturated page and carried no record of that, so the only way to
+ *  find out was to re-measure — which two seats did, agreeing with each other
+ *  and with nothing else. A measured figure that cannot state the coverage it
+ *  came from is not re-checkable, so `disposition.test.mjs` asserts that this
+ *  block declares a completed walk, and a future seat that pastes in numbers
+ *  from one capped read fails that test instead of shipping them into a gate's
+ *  refusal text.
+ *
+ *  WHICH FIGURE IS STABLE AND WHICH IS NOT, corrected. `since_hours` is a
+ *  rolling window, so every count here moves with the traffic and a
+ *  re-derivation next week will not reproduce one of them. **The share is not
+ *  safer.** This file used to claim it was, on the evidence that two seats got
+ *  86 per cent independently; they had read the same 500 rows. Paged, the
+ *  portfolio share is 72.5 per cent and Ursa's own is 83.1, and the two agree
+ *  with the reporting seat's independent paged figures to a tenth of a point —
+ *  which is the first reproduction of this number that was not also a shared
+ *  read bound. Quote the share with the coverage beside it, or do not quote
+ *  it. */
 export const MEASURED = {
   on: '2026-11-02',
   window_hours: 720,
-  rows: 500,
-  over_limit: 79,
-  by_kind: { note: 48, done: 20, handoff: 11, ask: 0 },
-  warned_share: 0.861,
+  // The walk, not the page. Nine calls, every page but the last one full, the
+  // last one short, which is what says the window ended rather than the page.
+  coverage: { complete: true, pages: 9, rows: 4069, oldest_ts: '2026-10-03T05:11:44.721Z', covered_hours: 717.67 },
+  rows: 4069,
+  over_limit: 984,
+  by_kind: { note: 456, done: 257, handoff: 220, ask: 51 },
+  warned_share: 0.725,
   // Of the over-limit bodies, how the disposition fell relative to the cut.
   // The reporting seat's own sends were all in the second group, which is why
   // its note said "every cut tonight took evidence and left the verdict"; over
-  // the whole board that holds for 40 of 79 and fails for 13.
-  disposition_lost_only: 13,
-  disposition_survived: 40,
-  no_marker_found: 26,
+  // the whole board that holds for 437 and fails for 189.
+  disposition_lost_only: 189,
+  disposition_survived: 437,
+  no_marker_found: 358,
+  // Ursa's own rows, kept beside the portfolio because this is Ursa's gate and
+  // a seat here is more likely to recognise its own company's traffic. 1,063
+  // rows of the 4,069, of which 255 are over the limit.
+  ursa: { rows: 1063, over_limit: 255, warned_share: 0.831, by_kind: { note: 160, done: 52, handoff: 38, ask: 5 }, disposition_lost_only: 39, disposition_survived: 93 },
+  // What one capped read said instead, kept so the size of the error is
+  // legible without re-running anything, and because the two capped readings
+  // an hour apart are the cheapest proof that a capped share is not a share.
+  capped_read_said: { rows: 500, over_limit: 77, by_kind: { note: 43, done: 18, handoff: 12, ask: 4 }, warned_share_at_0148: 0.861, warned_share_at_0255: 0.792, oldest_ts: '2026-10-27T01:35:16.509Z' },
 };

@@ -67,6 +67,7 @@ const REGISTRY = [
   './../secret-scan-verdict.mjs',
   './../board/post-verdict.mjs',
   './../root-entries-verdict.mjs',
+  './../image-metadata-verdict.mjs',
 ]
 
 // ---------------------------------------------------------------------------
