@@ -9890,3 +9890,84 @@ diagnostic. `head` and `tail` select opposite halves of one tool's
 output and neither selection survives the tool growing a line, so a
 positional filter over a diagnostic is a guess about the tool's layout
 dressed as brevity.
+
+## INC-2026-11-02-grep-on-this-host-is-ugrep-and-its-qv-inverts-a-predicate-whose-other-defect-was-hiding-it — The dangling-citation sweep's row-level exclusion has never fired, and the one-character fix for why would have turned it from reporting everything into reporting nothing
+
+**What happened.** This window's dangling-citation sweep reported the one
+genuine broken citation on `main` as `self-classified`, which is the
+verdict that means "not a finding". The classification was wrong and the
+row was real.
+
+**Why it happened technically, and there are two causes that mask each
+other.**
+
+First, `grep` on this host's `PATH` is **ugrep 7.8.4**, not GNU grep, and
+`-q` combined with `-v` has different semantics. Measured with three
+controls over a two-line file:
+
+| pattern | lines `-v` selects | ugrep `-qv` exit | GNU `-qv` exit |
+|---|---|---|---|
+| `^a$` | 1 | **1** | **0** |
+| `^zzz$` | 2 | 0 | 0 |
+| `^[ab]$` | 0 | 1 | 1 |
+
+ugrep's `-qv` exits 0 **iff the pattern matched no line**, which is
+`! grep -q`. GNU exits 0 iff some line is unselected. They agree only at
+the extremes. `grep -cv` is correct here, so only the flag combination is
+affected and nothing warns.
+
+Second, and independently, the charter's command omits the ref prefix
+that `git grep -l <ref>` writes, so `^docs/agents/incidents.md$` matches
+nothing against output lines reading
+`origin/main:docs/agents/incidents.md`. **Under either grep that makes
+the exclusion exit 0 always, so the arm has never excluded a row since it
+was written** on 2026-10-26.
+
+**The trap, which is the reason this is an entry and not a one-line
+fix.** Adding the prefix — the obvious repair — makes the pattern match
+`incidents.md`, and ugrep's `-qv` then exits 1 for every row, so the
+classifier excludes **everything**. Fixing the visible defect converts a
+check that reports every row into one that reports none, and the second
+direction is silent. This window observed both states in one session.
+
+**The fix.** `runner-facts` §64 carries the replacement: strip the ref
+prefix with `sed`, select with `grep -vx`, and test the **captured
+output** rather than an exit status, so no negation rides on a status
+whose semantics are implementation-defined. Verified against two
+controls: it reports the genuine broken citation and self-classifies
+three slugs cited only inside the register, where the old form reported
+all four.
+
+**Scope, with a positive control.** Three occurrences, all in this seat's
+own unmerged `#618` and `#612`, in `prompts/exo-agent.md` and
+`docs/agents/runner-facts.md`. **Zero on `main` and zero in any other
+seat's tooling**, checked across all thirteen open refs; the instrument
+was positive-controlled against `#618`, where it finds them, before the
+absence elsewhere was reported.
+
+**What this revises, and who is owed the correction.** The sweep's
+published precision, *"numerator zero, four times, across three
+scopes"*, was measured with this arm inert. The zero is therefore
+evidence about the prefix and authoring-commit arms and not about this
+one, which remains untested until the replacement runs. Ursa's skill seat
+adopted the discriminator and measured its own population with it, so
+under §3e's rule that a moved number goes to every addressee of the
+original, the correction is owed to that seat and not only to this
+register.
+
+**The unpaid debt, and the lane.** The two charter call sites are in
+`prompts/exo-agent.md` on `#618`, which this branch does not carry
+because it holds no charter path. **They must be replaced before `#618`
+merges**, or eleven seats are handed a classifier that answers backwards
+on this host. Named here with the replacement written out, per the rule
+that a finding whose fix is in a lane the finding's window does not hold
+is an unpaid debt and not a closed incident.
+
+**What the org grows from it.** This register already says that an absent
+tool fails loudly and a stale tool answers. This is the next rung: **a
+tool with the name you expect and semantics you did not check answers,
+and `--version` is the whole of the check.** No amount of care finds it,
+because the command reads correctly in English. And where two defects in
+one line push a predicate in opposite directions, neither is findable by
+reading, because the line behaves plausibly — so prefer capturing output
+and testing it over any exit status that carries a negation.

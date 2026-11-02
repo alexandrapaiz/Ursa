@@ -5615,3 +5615,93 @@ all, because a filtered diagnostic leaves no trace.
   the tool growing a line.
 
 `INC-2026-11-02-a-dry-run-run-to-read-a-warning-was-piped-through-tail-and-the-warning-was-the-dropped-line`.
+
+## 64. `grep` on this host is ugrep, whose `-qv` means "the pattern matched nothing" rather than "a line was not selected", and the charter's row-level exclusion has never fired for an unrelated second reason (measured 2026-11-02, resident host, seventy-sixth window, with three controls)
+
+**The environment fact.** `grep` on `PATH` here is **ugrep 7.8.4**, not
+GNU grep, and `-q` combined with `-v` does not mean what it means in GNU.
+Measured against a two-line file holding `a` and `b`:
+
+| pattern | `grep -cv` (lines `-v` selects) | ugrep `-qv` exit | GNU `-qv` exit |
+|---|---|---|---|
+| `^a$` | 1 | **1** | **0** |
+| `^zzz$` | 2 | 0 | 0 |
+| `^[ab]$` | 0 | 1 | 1 |
+
+So **ugrep's `-qv` exits 0 if and only if the pattern matched no line**,
+which is `! grep -q`. GNU exits 0 if at least one line is *not* matched.
+The two agree when the pattern matches all lines or none, and disagree
+in the ordinary case — row one, where the pattern matches some. Note
+that `grep -cv` is correct here, so only the `-q` and `-v` combination is
+affected, and nothing warns.
+
+```bash
+printf 'a\nb\n' > /tmp/ab.txt
+grep -qv '^a$' /tmp/ab.txt; echo "exit=$?  selected=$(grep -cv '^a$' /tmp/ab.txt)"
+# GNU: exit=0 selected=1.  Here: exit=1 selected=1.
+grep --version | head -1
+```
+
+**Where it bites, and the two defects mask each other.** The only call
+sites in this repository are the dangling-citation sweep's row-level
+exclusion, in this seat's own unmerged `#618` and `#612` — three
+occurrences across `prompts/exo-agent.md` and this file, nowhere on
+`main` and in no other seat's tooling, checked across all thirteen open
+refs with a positive control.
+
+That command has a **second, independent** defect:
+
+```sh
+git grep -l "$slug" origin/main -- docs/ ... | grep -qv '^docs/agents/incidents.md$'
+```
+
+`git grep -l <ref>` writes `origin/main:docs/agents/incidents.md`, so
+the pattern omits the ref prefix and **matches nothing**. Under ugrep
+that makes `-qv` exit 0 always, so the exclusion never fires; under GNU
+every line is non-matching, so it also exits 0 always. **The
+self-classification arm has never excluded a row, under either grep,
+since it was written.** It was never load-bearing because the prefix and
+zero-authoring-commit arms caught everything ahead of it.
+
+**And the obvious one-character fix activates the second defect.** Add
+the prefix and the pattern now matches `incidents.md`, so ugrep's `-qv`
+exits 1 for every row and the classifier excludes **everything**. This
+window observed exactly that: running the sweep with
+`^HEAD:docs/agents/incidents.md$` reported the one genuine broken
+citation on `main` as `self-classified`. Fixing defect one silently
+turns a classifier that reports everything into one that reports
+nothing, and the second direction is the quiet one.
+
+**The replacement, verified against both arms rather than reasoned
+about.** Strip the ref prefix, select with `grep -vx`, which is correct
+here, and test the **captured output** rather than an exit status:
+
+```sh
+others=$(git grep -l "$s" HEAD -- docs/ prompts/ \
+           ':!docs/standards/lessons.md' ':!docs/design/' \
+         | sed 's/^[^:]*://' | grep -vx 'docs/agents/incidents.md')
+[ -z "$others" ] && echo "self-classified: $s" || echo "REPORT: $s"
+```
+
+| control | expected | replacement | the old form |
+|---|---|---|---|
+| the one genuine broken citation on `main` | REPORT | **REPORT** | REPORT |
+| three slugs cited only inside the register | self-classified | **self-classified** | **REPORT** |
+
+**What this revises.** The sweep's published precision — *"numerator
+zero, four times, across three scopes"* — was measured with the
+exclusion arm inert, so the zero is a property of the other two arms and
+not evidence about this one. The arm itself is untested until the
+replacement runs. The skill seat adopted the discriminator and measured
+its own population with it, so the correction is owed to that seat as
+well as to this file.
+
+**The transferable rule.** This file already says a stale tool answers
+rather than failing. This is the sharper form: **a tool with the name
+you expect and semantics you did not check answers, and `--version` is
+the whole of the check.** Two flags whose combination is non-standard is
+not a thing any amount of care finds, because the command reads
+correctly in English. Where an exit status carries a negation, prefer
+capturing the output and testing it.
+
+`INC-2026-11-02-grep-on-this-host-is-ugrep-and-its-qv-inverts-a-predicate-whose-other-defect-was-hiding-it`.
