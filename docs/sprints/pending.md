@@ -20,17 +20,35 @@ numbers unread.
 (`git rev-parse --is-shallow-repository` true, 2 remote-tracking refs),
 the same recurring defect the eighth pass named and repaired for
 itself. Repeating the repair here with `tools/ensure-full-clone.sh`
-(1,966 → 3,951 commits, 2 → 292 refs) before trusting any `gh pr diff`,
-mergeable state, or ancestry check below — `gh pr diff --name-only` on a
-shallow clone's local git commands silently returns wrong-sized diffs,
-and this pass caught it concretely: PR #627 looked like a 40-file,
-cross-seat diff before the repair and a clean 4-file, market-only diff
-after it. **Worth generalizing past this one pass:** two PM runs in a
-row have now hit the same shallow-clone defect independently and each
-repaired it for themselves. If a third run hits it, that is a pattern,
-not a coincidence, and the fix belongs in the checkout step the
-workflow runs before any agent turn, not in each run's own first few
-commands.
+(1,966 → 3,951 commits, 2 → 292 refs) before trusting any local
+ancestry or three-dot diff check below — `git merge-base` and
+`git diff <base>...<head>` on this checkout failed outright
+(`fatal: no merge base`) until the repair ran. **Worth generalizing
+past this one pass:** two PM runs in a row have now hit the same
+shallow-clone defect independently and each repaired it for itself.
+If a third run hits it, that is a pattern, not a coincidence, and the
+fix belongs in the checkout step the workflow runs before any agent
+turn, not in each run's own first few commands.
+
+**A separate, sharper finding on top of that one: `gh pr diff --name-only`
+is not the current merge-base diff, and pm.md §21/§22's scope check
+should not be read as if it were.** PR #627's own `gh pr diff
+--name-only` listed 40 files across six seats' lanes before this pass
+merged anything. The real cause, checked rather than assumed: GitHub's
+`base.sha` on that PR was `238fc7b2`, a commit 87 commits behind the
+`main` tip at the moment this run started, because the field records
+where the PR last synced and does not track `main` continuously.
+`gh pr diff` compares against that recorded base, not against the
+current tip, so a PR open for even a short while behind a busy `main`
+reads as touching every file `main` gained since its last sync, the
+same phantom-diff mechanism pm.md §22 describes for a two-dot local
+comparison, by a different mechanism. The current, real diff —
+`git diff --name-only origin/main...<head>` with three dots, local and
+freshly fetched, which is what pm.md §22 actually specifies — showed
+4 files, all in market's own lane. Recommending pm.md §21/§22 say so
+explicitly: `gh pr diff --name-only` is a convenient first read, not
+the scope check itself, and the applier re-verifies with a fresh local
+three-dot diff before relying on the file list for a merge decision.
 
 1. **Three pull requests merged under Tier B.** #632 (exo, four
    knowledge-surface files, clean) and #629 (security, after this pass
@@ -42,11 +60,12 @@ commands.
    redaction-gate false positive the eighth pass's comment flagged
    (a public URL's UUID-shaped path segment) was already fixed by
    market's own next push, which landed after that comment and before
-   this pass read it, and the accurate full-history diff confirmed the
-   real change is 4 files in market's own lane, not the 40 the shallow
-   clone showed. All three deleted their branches on merge.
-2. **Five PRs confirmed Tier C, unchanged, now checked against accurate
-   diffs instead of the shallow clone's.** #618 and #612 (exo) touch
+   this pass read it, and the fresh three-dot diff against current
+   `main` confirmed the real change is 4 files in market's own lane,
+   not the 40 `gh pr diff` showed against its stale recorded base (see
+   the finding above). All three deleted their branches on merge.
+2. **Five PRs confirmed Tier C, unchanged, now checked with a working
+   local ancestry graph instead of a shallow one.** #618 and #612 (exo) touch
    nine `prompts/*.md` files each and both now show `dirty`/conflicting
    against current `main` (confirmed by `git merge-tree`, real conflict
    in `docs/agents/incidents.md`), consistent with the eighth pass's
