@@ -1584,10 +1584,12 @@ the confidentiality exposure the market's own closest attempt at
 sourcing real data is now visibly carrying." Ledger proposal opened
 below. No pricing recommendation made.
 
-Sources: [BigGo Finance: Revenue Surges 100-Fold in a Year — The AI
-Training Data Sector Spawns a Near-$100 Billion Valuation
-Business](https://finance.biggo.com/news/99fca087-237a-48f3-ab02-30289cb7d364)
-(summarizing Deedy Das / Menlo Ventures' landscape map; no primary
-source link found this run), [TechCrunch: OpenAI is reportedly asking
+Sources: BigGo Finance, "Revenue Surges 100-Fold in a Year — The AI
+Training Data Sector Spawns a Near-$100 Billion Valuation Business"
+(finance.biggo.com, found by headline search; the URL is not quoted
+here because its article-id path is UUID shaped and trips the
+redaction gate's Class C pattern, though it names a public news
+article and not a session; summarizing Deedy Das / Menlo Ventures'
+landscape map; no primary source link found this run), [TechCrunch: OpenAI is reportedly asking
 contractors to upload real work from past
 jobs](https://techcrunch.com/2026/01/10/openai-is-reportedly-asking-contractors-to-upload-real-work-from-past-jobs/).
