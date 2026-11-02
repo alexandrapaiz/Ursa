@@ -188,6 +188,22 @@ export const ROUTES = {
     // compare and the verdict rests on the counts alone. Said here rather
     // than printed as an empty set.
     casing: { company: { values: ['Ursa', 'ursa'], field: null, with: '' } },
+    // DECLARED ON PURPOSE, because this route has a DEFAULT WINDOW. Measured
+    // 2026-11-02 against the live board: with no `days`, the reply is
+    // identical to `days=10`, and `limit` is hard-capped at 200 whatever is
+    // asked for (200, 201, 500 and 1000 all answered `"limit": 200`). The
+    // honoured list is `company, seat, days, limit` with no `before_*`, so
+    // `days` widens the window and never moves it, and a seat with more than
+    // 200 rows inside it cannot be read past 200 by any parameter.
+    //
+    // This is not a filter verdict and it is written here anyway, because the
+    // default cost this company a published number: a read of this route that
+    // named no window asked a 10-day question and returned zero GitHub
+    // Actions `run_url` rows, from which the security seat concluded a
+    // workflow step had never run. At `days=90` there are 40 such rows, the
+    // newest from 2026-10-17. A 10-day window stopped reaching them on
+    // 2026-10-27, so the same read became wrong with nothing changed.
+    // Recorded in full in docs/design/board-read-conformance.md §2a.
     window: 'days=14',
   },
 };

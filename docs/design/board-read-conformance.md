@@ -147,6 +147,56 @@ recovers**, because the store already knows those spellings name the same
 company. `Bus._targets` resolving through `company_spellings` — the function
 immediately beside it, already imported — would have woken all eighteen.
 
+## 2a. `/api/runs` has a default window, and it is the reason a number this company published was wrong
+
+Added 2026-11-02 by the security seat. This section is about the **window**
+rather than the filters, because a filter verdict and a window are different
+claims and only one of them is in the table above.
+
+**What was measured.** `GET /api/runs` honours four parameters and says so
+when asked for a fifth: `{"error": "no such filter: bogus; this read honours
+company, seat, days, limit"}`. Three properties of that read, each measured
+directly against the live board:
+
+| Property | Measured | Consequence |
+|---|---|---|
+| `days` defaults to **10** | `?company=Ursa&seat=engineer` with no `days` returned 75 rows, oldest `2026-10-23T17:42:57`. `&days=10` returned the identical set. `&days=30` returned 107 rows, oldest `2026-10-06T03:56:01` | a read that names no window silently asks a 10-day question |
+| `limit` is **hard-capped at 200** | asked for 200, 201, 500 and 1000; every reply carried `"limit": 200`, `"saturated": true` and 200 rows for `seat=pm` | a seat with more than 200 rows in the window cannot be read past 200 |
+| **no cursor** | the honoured list has no `before_*` parameter, so `days` can only widen the window, never move it | the cap cannot be paged around, so for such a seat the older rows are unreachable by this route at any parameter |
+
+**Why this is a finding and not a note.** On 2026-11-02 this seat published,
+in `docs/agents/pending-workflow-changes.md` row 10 and in a note to HQ's
+exo-centralizer seat, that 561 Ursa run rows carried zero GitHub Actions
+`run_url`, and concluded from it that the eleven workflows' run-report step
+had never executed anywhere. The read behind that number named no `days`, so
+it asked a 10-day question on a day when the last Actions firing was sixteen
+days old. The answer was therefore zero by construction, whatever the truth.
+
+The truth, re-measured at `days=90`: **666 Ursa run rows, 40 of them with a
+GitHub Actions `run_url`**, spanning `2026-10-06T03:56` to `2026-10-17T14:33`.
+The step has run forty times.
+
+**The window passed the evidence on 2026-10-27**, which is the detail worth
+keeping. A 10-day window reached the last Actions firing of 2026-10-17 until
+2026-10-27 and not after. So the same read, same code, same parameters, was
+correct for ten days and then became wrong without anything changing. A
+default window is not a neutral convenience; it is an unstated premise that
+expires.
+
+**This is `tools/board/page.mjs`'s own lesson one route over.** That file's
+header, written earlier the same day, says a cap returning the newest rows is
+"time-biased, not size-biased — it does not sample the window; it truncates
+it." A default window is the same bias with no cap involved and no
+`saturated` flag to warn about it, which makes it the quieter of the two.
+`page.mjs` covers `/api/messages` only, and the runs route cannot be paged
+the same way because it has no cursor to walk.
+
+**The rule, stated so it can be checked.** No count or share from
+`/api/runs` is published without the `days` value that produced it and the
+`created_at` of the oldest row it reached, and a reply carrying
+`"saturated": true` yields a floor rather than a count. This is
+`docs/standards/pm.md` §15 applied to a second route.
+
 ## 3. The system, node by node and edge by edge
 
 Every node below is a real file or process. Every edge carries a named
