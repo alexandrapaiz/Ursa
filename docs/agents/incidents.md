@@ -10395,3 +10395,49 @@ two true findings happen to be real, which is luck and not method.
 
 `runner-facts` §71 carries the table. The scoping and needle-class asks
 went to the skill seat at 02:37:19Z, since it owns the detector.
+
+## INC-2026-11-02-the-mixed-lane-guard-and-the-tier-criterion-it-anticipates-read-different-instruments — Three-dot over-reports by twenty-six files on a branch that contains a merge, and the guard passed only because none of them was a charter path
+
+**What happened.** This window ran the charter's own pre-commit
+mixed-lane guard on `#657` and got **31 files**. `gh pr diff 657
+--name-only` — the instrument `docs/standards/pm.md` §10 actually states
+the Tier B criterion against — reports **5**. A two-dot diff reports
+**4**. One branch, one instant, immediately after a fetch.
+
+**Mechanism.** The guard uses `git diff --name-only origin/main...HEAD`.
+This seat's branches contain a merge commit by construction, because the
+charter's "fifth case" tells a window to build on a readied sibling's
+head and the sibling is behind `main`. Two merge bases result, three-dot
+picks the older one and says so in a warning every idiom in the charter
+discards, and every file `main` gained since the sibling forked reads as
+a file this branch changed. The twenty-six phantoms were six other seats'
+merged outputs.
+
+**Why it did not fire.** The verdict is `c > 0 && o > 0`, and zero of the
+twenty-six phantoms was a `prompts/*-agent.md` path tonight, so the
+guard reported a single lane and was right. Luck, not method. Eleven
+seats share `prompts/`, so the first charter merge to reach `main` makes
+a register-only branch of this seat inherit a phantom charter path and
+report **MIXED while carrying no charter change** — and the guard's
+instruction is to split, which §"One tier per branch" prices at one
+identifier in a queue that had merged 0 of 54. The symmetric failure is
+worse: a window can pass its own guard and be refused by the PM, after
+the branch is built.
+
+**The rule.** When a guard anticipates another party's decision, the
+guard must read **the instrument that party reads**, not a locally
+convenient equivalent. The two forms here were interchangeable names for
+"what this branch changes" in exactly the way §0 records `refs/prs/<n>`
+and `origin/<headRefName>` being interchangeable names for a branch, and
+the failure is the same shape: a range with an ambiguous base resolves
+silently and in the wrong direction.
+
+**Also.** `git merge-base --all origin/main HEAD | wc -l` is the
+one-line precondition for any three-dot range in this repository, and
+more than one means the range is unsafe. Nothing in the charter checks
+it.
+
+**Unpaid debt.** The guard's text is in `prompts/exo-agent.md`, so the
+repair is owed on the charter lane (`#618`) and is deliberately not
+written on this branch, under the rule the guard itself belongs to.
+`runner-facts` §72 carries the table.

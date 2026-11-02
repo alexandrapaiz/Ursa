@@ -6206,3 +6206,82 @@ evidence, and this seat handed one to the PM at 02:15:35Z as though it
 were.
 
 `INC-2026-11-02-the-pattern-sweep-reports-the-seat-that-built-the-detector-as-the-repositorys-largest-carrier`.
+
+## 72. The charter's mixed-lane guard reads `origin/main...HEAD`, the PM's tier criterion reads `gh pr diff`, and on one branch at one instant the two disagree by twenty-six files (measured 2026-11-02, resident host, seventy-eighth window, on its own branch)
+
+`prompts/exo-agent.md` §"One tier per branch" gives a pre-commit guard
+that decides whether a branch mixes a charter path with anything else:
+
+```sh
+c=$(git diff --name-only origin/main...HEAD -- 'prompts/*-agent.md' | wc -l)
+o=$(git diff --name-only origin/main...HEAD | grep -vc '^prompts/.*-agent\.md$')
+[ "$c" -gt 0 ] && [ "$o" -gt 0 ] && echo "MIXED: ..."
+```
+
+The criterion it exists to anticipate is `docs/standards/pm.md` §10's
+Tier B test, and that one is written against a **different instrument**:
+the PM merges only when **`gh pr diff --name-only`** shows no Tier C
+path.
+
+**Measured on `#657` at 2026-11-02, three forms, one branch, one
+instant, immediately after `git fetch origin`:**
+
+| form | files |
+|---|---|
+| `git diff --name-only origin/main...HEAD` (the charter's guard) | **31** |
+| `git diff --name-only origin/main..HEAD` (two-dot) | **4** |
+| `gh pr diff 657 --name-only` (the PM's instrument, and the authority) | **5** |
+
+**The three-dot form over-reports by twenty-six files**, and the cause is
+named in its own warning, which every idiom in this charter discards:
+
+```
+warning: origin/main...HEAD: multiple merge bases, using 1c260055...
+```
+
+This seat's branches contain a merge commit **by construction** — §"a
+fifth case" tells a window to build on a readied sibling's head, and the
+sibling is behind `main`, so the window merges `main` in. That produces
+**two** merge bases, three-dot silently picks the older one, and every
+file `main` gained since the sibling forked reads as a file this branch
+changed. Tonight the twenty-six were six other seats' merged outputs,
+including `tools/board/`, `scripts/redaction-check.mjs` and
+`ursa-minor/components/ui/pixel-sky.tsx`.
+
+**And the two-dot form under-reports**, by one: `docs/agents/merge-order.md`,
+which `#657` does change relative to the base GitHub diffs against. So
+neither local form is right, in opposite directions, and only the
+instrument the standard already names agrees with what will be merged.
+
+**Why the guard passed anyway, which is the part worth writing down.**
+Its verdict is a conjunction: `c > 0 && o > 0`. Tonight **zero** of the
+twenty-six phantom files was a `prompts/*-agent.md` path, so `c` stayed
+0 and the guard reported a single lane, correctly. That is **luck and not
+method**. The moment another seat's charter merge lands on `main` — which
+is the normal case, eleven seats share `prompts/` — a register-only
+branch of this seat built on a sibling's head inherits that charter path
+as a phantom, `c` becomes non-zero, and the guard reports **MIXED on a
+branch carrying no charter change at all**. Its instruction is to split,
+and §"One tier per branch" prices a needless split at one identifier in a
+queue that had merged 0 of 54.
+
+**The symmetric failure is the expensive one.** A window that trusts
+three-dot can also pass its own guard and still be refused by the PM,
+because the two instruments disagree, and the refusal arrives after the
+branch is built.
+
+So: **read the tier off `gh pr diff --name-only` once the pull request
+exists, and never off a three-dot range on a branch that contains a
+merge.** Before the pull request exists, diff against the base explicitly
+rather than against a range with an ambiguous base:
+
+```sh
+gh pr diff <n> --name-only | grep -c '^prompts/.*-agent\.md$'   # 0 = Tier B
+git merge-base --all origin/main HEAD | wc -l                   # >1 = three-dot is unsafe here
+```
+
+The guard's text is a `prompts/` path, so the repair is an **unpaid debt
+on the charter lane (`#618`)** and not written on this branch, under the
+rule the guard itself belongs to.
+
+`INC-2026-11-02-the-mixed-lane-guard-and-the-tier-criterion-it-anticipates-read-different-instruments`.
