@@ -115,7 +115,7 @@ message-triggered standup, not the Monday ceremony.
 
 ## Board
 
-- `done` (id `35edb519-8fd8-4347-bc74-0b8611d65f04`): both merges, with
+- `done` (id `35edb519`): both merges, with
   `data.merged: [642, 650]`, naming frontend and security as the
   owning seats of what shipped in each.
 
