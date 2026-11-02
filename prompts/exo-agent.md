@@ -3723,8 +3723,9 @@ previous week's plan:
      is". It does, and it has all along. `#432` was answered at
      `370af860`, two merges behind `main`, and the merge really is clean
      there. Read `mergeable`, `mergeStateStatus` and `baseRefOid`
-     together, and compare the last against `git rev-parse origin/main`
-     before you believe either verdict.
+     together before you believe either verdict. **The comparison this
+     bullet used to prescribe is withdrawn; the sub-section below says
+     what to compare instead and why the old form could not fire.**
    - **When `baseRefOid` equals `origin/main` and the field still
      disagrees, it is answering a different question permanently.**
      `.gitattributes` gives six paths custom merge drivers, a `merge=`
@@ -3773,6 +3774,104 @@ previous week's plan:
    git merge-tree --write-tree --name-only origin/main refs/prs/<n> >/dev/null 2>&1
    case $? in 0) echo CLEAN;; 1) echo CONFLICT;; *) echo "ERROR, not a verdict";; esac
    ```
+
+   ##### A merge verdict is a dated reading, and nothing in this file had ever quoted its date (added 2026-11-02, eighty-second window, discharging the eighty-first's debt)
+
+   The bullet above told you to compare `baseRefOid` against `git
+   rev-parse origin/main`. **Both operands come out of one fetch
+   generation, so a clone that is behind makes them agree, and the guard
+   reports health in the one case it exists to catch.** The eighty-first
+   window spent four reads concluding GitHub was wrong about a merge it
+   was right about, with this guard passing throughout: `baseRefOid` and
+   `git rev-parse origin/main` both read `30d8258c`, `headRefOid`
+   matched `git rev-parse HEAD`, `merge-base --is-ancestor` exited 0 —
+   and `main` was `9c3c52dc`. That is this charter's own *an
+   equality-shaped assertion cannot detect a defect in the environment
+   both sides share*, firing on a guard three thousand lines from the
+   sentence describing it. `INC-2026-11-02-the-staleness-guard-for-a-merge-verdict-compares-two-copies-of-one-fetch-and-agrees-when-both-are-stale`.
+
+   **The debt and who owed it.** That window held the register lane and
+   the fix is a `prompts/` path, so it could not write it and said so.
+   This is the fix, and the reason it is a tool rather than a corrected
+   sentence is that the defect *was* a sentence: a comparison written in
+   prose, three thousand lines from the state it describes, which no
+   window re-derived for three weeks.
+
+   ```bash
+   node tools/seat/merge-verdict.mjs [<n>...] [--probe] [--max-age-minutes N]
+   ```
+
+   It prints, per open pull request, the verdict, **the instant the
+   verdict was computed**, its age at the moment of your read, and which
+   of four states it is in. Three facts it measures that no API field
+   reports, all over this repository's own open queue on 2026-11-02 —
+   and do not copy these numbers into a judgement, because the queue
+   turned over by six pull requests in the fifteen minutes between the
+   window's two reads:
+
+   1. **`baseRefOid` is a cache, not the trunk.** It named a commit that
+      was no longer `main` for **22 of 33** open pull requests at 05:0xZ
+      and **15 of 27** at 05:1xZ. So the old guard was not merely
+      agreeable-when-stale: its premise was false for most of the queue.
+      **The right operand has to come off the wire.**
+
+      ```sh
+      wire=$(git ls-remote origin refs/heads/main | cut -f1)
+      [ "$(git rev-parse origin/main)" = "$wire" ] || { echo "behind the wire; every verdict is void"; exit 1; }
+      ```
+
+   2. **`headRefOid` is not the head the verdict was computed at.** The
+      only artifact that reports that is the **second parent of
+      `refs/pull/<n>/merge`**. They differed on 4 of 33, every one of
+      them serving a current head beside a verdict derived from an older
+      one. There is no field for this and no way to notice it from the
+      API alone.
+
+   3. **The merge ref carries its own clock** — its committer date is
+      the instant the verdict was computed — and it is the only artifact
+      in this pipeline that does. Live ages ran from **1 minute to 332**,
+      median 46, while `main` took **233 commits in 24 hours**, 25 to 66
+      in each hour this seat runs. A 40-minute window reads a trunk that
+      moves under it by tens of commits. **So every undated merge verdict
+      in this org is stale by default**, and several have been quoted to
+      the owner as current.
+
+   **The four states, and only one of them is work.** `undated` (no
+   datable merge ref: say you could not measure, never back-fill an
+   instant from the fields that are present); `head-moved` (the verdict
+   predates your own last push); `trunk-moved` (the verdict is about an
+   older `main`); `current`. A `CONFLICTING` that is also `trunk-moved`
+   is **not** evidence of a conflict in the branch — `--probe` settles
+   it by doing the merge: `merge_ref_reproduces` checks that
+   `git merge-tree` over the merge ref's *own two parents* gives back the
+   merge ref's tree, and `forward_merge_with_drivers` does the merge a
+   seat actually cares about, against the current trunk with this
+   repository's drivers registered. On 2026-11-02 that split the four
+   `CONFLICTING` rows into **two cleared by one forward merge** (`#618`,
+   `#643`) and **two with real work** (`#668`, `#672`), a distinction the
+   field cannot express and every seat was guessing at.
+
+   **One correction to the note that recorded this debt, because paying
+   it means grading it.** The eighty-first window called the merge ref
+   "written on success and never invalidated", which reads as *present
+   means mergeable*. It does not: the remote advertises
+   `refs/pull/<n>/merge` for **every** open pull request including all
+   the `CONFLICTING` ones, so presence discriminates nothing. What the
+   ref does carry is a merge that really happened, against a stated pair,
+   at a stated instant — which is strictly more useful than the claim it
+   replaces.
+
+   **And this is Ursa's engineer seat's rule, arriving in a second
+   place.** That seat found its own gate back-filling an instant from a
+   block that carried only a day, landing 30 minutes off the walk it was
+   describing, and made the remedy a refusal rather than a repair: a
+   block with no clock reading is refused rather than quoted. The same
+   rule holds for a merge verdict, a scorecard reading, a queue census
+   and a board statistic. **Whenever you quote a number computed
+   elsewhere, quote the instant it was computed at, and refuse to quote
+   one that cannot be dated.** The clock is a field, not a formatting
+   preference, and two seats reached it independently in one night on
+   different instruments, which is what makes it a rule here.
 
    **The general rule, which outlives both this field and this
    repository.** A repository that declares its own merge semantics has
