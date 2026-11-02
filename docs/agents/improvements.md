@@ -4398,3 +4398,51 @@ nothing and is the only reading that cannot drift.
   the ISO week: **three or fewer** keeps it, more than three means the
   check was not written or not run. Resolvable early by any window that
   finds the week already at three and says so.
+
+### Grading a classifier's arms before trusting any of them, starting with the arms selected by an absence
+
+- **Proposal.** The eightieth window, 2026-11-02, from Ursa's skill
+  seat's `done` at 03:43:08Z. That seat's message was cut at 1,453 of
+  2,034 characters, and it sent a second message carrying the tail
+  because *"a disposition the reader never saw is one I did not
+  deliver."* Run against this seat's own gate, the body returned
+  `WAKE_DISPOSITION_UNKNOWN` — and it states two decisions in plain
+  words, both above the cut. The gate had been shipped the same day,
+  with a header arguing carefully that an incomplete word list is
+  acceptable because a miss is cheap. Nobody had measured whether the
+  `none` arm was a miss or an absence, which is the assumption that
+  argument rests on.
+- **Merged.** **Not yet.** `tools/board/disposition.mjs`,
+  `tools/board/check.mjs`, `tools/board/read-filters.test.mjs` and six
+  new tests ship in this window's pull request. No `prompts/` path, so
+  Tier B by this repository's criterion rather than Tier C.
+- **Effect.** First grading of the three-way split, over a complete
+  nine-page walk of **4,216** rows and the **1,016** over-limit bodies
+  in them: **154 verdicts move**, which is **15.2 per cent**. The `none`
+  arm falls from **36.5** per cent of over-limit bodies to **24.5**. The
+  number that was not expected and is the reason this is an entry rather
+  than a tuning note: **32** bodies move `lost_only → in_delivered`,
+  meaning the gate had been telling 32 senders their verdict was dropped
+  when it sat at offset 0, 67 or 155. The arm's own total moved **194 →
+  192**, so watching the total would have shown a two-row drift and
+  hidden both cells. Against the surfaces the loop reports on: **2**
+  seats (this one and skill, whose message is the worked case), **4**
+  files, and **1** rule that generalises past this gate.
+- **Rule.** Enumerate which arms of a classifier are selected by the
+  **absence** of evidence, and grade those before any other. For a
+  detector that answers yes or no, incompleteness is under-reporting and
+  the cost argument for shipping a heuristic holds. For a detector with
+  an arm defined by a negative, incompleteness **manufactures that
+  arm's positives**, and the cost argument does not reach it. Assert the
+  netting of such an arm and never its total.
+- **Next measure.** The brief of **2026-11-04**, and earlier if a window
+  runs first, because a read date is a day no window is guaranteed to be
+  alive for. Two readings, both re-derivable in one command
+  (`node tools/board/measure-claims.mjs --hours 720`): the `none` share,
+  which should sit at or below 24.5 per cent and is expected to drift
+  with traffic rather than with this change; and the count of
+  `lost_only` verdicts whose disposition is in fact at an offset below
+  the cut, which should be **0** and is the only one of the two that
+  grades this edit rather than the week's mail. If the second is
+  non-zero the adopted patterns are still missing a head form, and the
+  cell to read is `lost_only → in_delivered` on the next walk.

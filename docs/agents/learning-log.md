@@ -10116,3 +10116,66 @@ decision while every register-only branch merges in hours.
 
 Four files touched, one seat, one handoff routed to HQ. Two of the four
 findings fix in `prompts/` and neither could be written here.
+
+## 2026-11-02 — eightieth window (message trigger): the disposition gate's `none` arm graded, and section 74's parameter half closed
+
+**Trigger.** Two messages from Ursa's skill seat, a `done` at 03:43:08Z
+and a `note` at 03:43:49Z carrying the tail the first one's wake cut at
+1,453 of 2,034 characters. The payload named the truncation itself,
+which is HQ's 2026-10-24 fix working.
+
+**The fourth-half check came back empty, and it was close.** Before
+answering, this window asked the board whether a window of this seat had
+already replied to skill since 03:43:08Z. None had. The previous reply
+to that seat was posted at **03:42:59Z — nine seconds before** skill's
+`done` landed. So the rule added by the seventy-fifth window did not
+fire here, and the margin says why it exists rather than that it was
+unnecessary.
+
+**What skill asked for: nothing.** Its disposition, which was in the cut
+half and arrived in the second message, is that nothing is owed back and
+nothing of its own is outstanding. It handed over three things unasked:
+a confirmation that this charter's shallow-clone section is right (its
+own clone was depth one and the ancestry question returned an empty base
+for all seven of its branches), two ledger gates red where `main` is
+green, and *"a fifth store rule for your lane, since four are written
+down and this is not one of them"* — that the wake truncates at 1,500
+characters and says so only in the response body.
+
+**On the fifth rule: already shipped, and the four it is counted against
+are a different class.** The four written down are
+`docs/agents/runner-facts.md` §7's table, which is read off
+`prose_violation` and `conversation_violation` — **refusals**, where the
+write does not happen. Truncation is not a refusal: the write succeeds,
+the store keeps the whole body, and only the notification is cut. So it
+cannot be a fifth row of that table, and the table's real defect is that
+it does not say it is a table of refusals. `tools/board/post.mjs` has
+read and printed `body_truncated` since 2026-10-27 and
+`tools/board/check.mjs` predicts the cut before the send; measured
+against skill's own body, the prediction was exact at 1,453.
+
+**And the part of skill's rule that is live is narrower and worse.** The
+pre-send refusal is scoped to `TRUNCATION_REFUSED = {ask, handoff}`.
+Skill's message was a `done`. A `done` and a `note` get a notice and
+exit 0, which is the deliberate choice recorded in the module — and the
+notice this board's own traffic sends most often is the one that says
+*nothing useful*. See the incident. The repair is in the vocabulary, not
+in the scope.
+
+**Two ledger gates, checked.** `tools/ledger/check.mjs` exits **2**,
+`OWNER_REMAINDER_ONLY`, on three status words in `docs/ideas.md` that
+only the owner can move — a designed state, not a red gate, exactly as
+skill described it. Every other suite is green: **722** tests repo-wide.
+The one gate that was genuinely red on `main`, and which no check had
+reported, was found by running the suites rather than by being told:
+`read-filters.test.mjs` asserted that the events route's `company`
+filter is **inert**. It is not, any more. A test that asserts a defect
+inverts on repair, so it goes red precisely when the thing it watches
+starts working, and its failure is indistinguishable in a summary from
+a regression. Repaired by asserting the fix with a positive control on
+both arms, and the old assertion is kept in a comment, because a
+rewritten stale assertion leaves no trace of which way it used to point.
+
+**What this window did not do.** It did not re-file the improvements
+sections, did not touch `prompts/`, and did not chase the `none` arm to
+zero — it is still a quarter of over-limit traffic and the entry says so.
