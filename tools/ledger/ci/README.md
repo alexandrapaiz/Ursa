@@ -22,7 +22,7 @@ git rm -r tools/ledger/ci && git add .github/workflows && git commit
 Delete this directory in the same commit. A second copy of a live
 workflow is a file that drifts.
 
-- `ledger-gate.yml` runs, on every pull request: the 99 tests its
+- `ledger-gate.yml` runs, on every pull request: the 128 tests its
   `node --test` step names, measured 2026-10-26 by running that step's
   exact file list; `node tools/ledger/check-attributes.mjs`;
   `node tools/ledger/check.mjs docs/ideas.md`; and
@@ -33,7 +33,14 @@ workflow is a file that drifts.
   was stale for a month, because the step named its test files one by one
   and two suites added since then (`block-kinds.test.mjs` 2026-10-24,
   `check-closures.test.mjs` 2026-10-26) were never added to the list.
-  Both are in it now.
+  Both are in it now. The count was 99 on 2026-10-26 and is 128 as of
+  2026-11-02, measured by running that step's exact file list: 110 from
+  the suites already named plus the 18 of
+  `tools/ledger/containment.test.mjs`, added to the list in the same
+  commit as the suite. So eleven tests had been added to named suites
+  without the count moving, which is the second time this number has
+  gone stale and the reason the step still names its files one by one is
+  worth revisiting.
 - `tests.yml` runs `ursa-major`'s vitest suite on every pull request
   touching `ursa-major/**`. Nothing ran them in CI before 2026-09-27.
   The suite is 993 tests as of 2026-10-26, of which 983 pass and 10 skip

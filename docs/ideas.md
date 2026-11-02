@@ -16910,3 +16910,103 @@ the owner to accept or reject.
   `tools/board/read-filters.mjs` where the runs window is declared.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 — Every tool that asks git a history question needs the shallow refusal, not just the HEAD pair (engineer run, twelfth message pass)
+
+- Trigger: this run's own test suite, red against the first version of
+  `tools/ledger/containment.mjs`. The guard had a self-test whose answer was
+  known in advance (`HEAD~1` is an ancestor of `HEAD` in every repository with
+  two commits, `HEAD` is an ancestor of `HEAD~1` in none), and that self-test
+  passed in a clone where the guard's actual verdicts were wrong.
+- What: the shape that defeats the HEAD pair is one a seat reaches without
+  asking for it. A clone that already holds `main`'s history and then
+  shallow-fetches the rest keeps `HEAD~1` resolvable, so the HEAD pair answers
+  true and then false exactly as a healthy clone does, while every other branch
+  arrives with its parent link cut. Measured on git 2.43.0 in that clone:
+  `git merge-base --is-ancestor origin/main origin/<branch>` exits **1** for a
+  pair whose containment is a fact, and exit 1 is indistinguishable from an
+  honest "not an ancestor". Two ways in, both ordinary: `git fetch --depth 1
+  origin` once the refspec is widened, and `git clone --depth 1 <local path>`,
+  which prints `warning: --depth is ignored in local clones; use file://
+  instead` and hands back a complete clone that a later fetch then shallows.
+  `git rev-parse --is-shallow-repository` is `true` throughout and is the only
+  instrument of the three that refuses. `tools/ensure-full-clone.sh` already
+  tests this property at its line 92 and is the right precondition; what is
+  missing is that every caller asks it. `tools/secret-scan.mjs --history` and
+  `tools/root-entries.test.mjs` both refuse or skip honestly on a shallow
+  clone; nothing else in `tools/` that asks a history question does.
+- First step: `grep -rl "merge-base\|rev-list\|log --\|--is-ancestor" tools/
+  scripts/ ursa-major/src/` and, for each hit, record in one line whether a
+  shallow clone makes it answer wrongly, refuse, or not care. The ones that
+  answer wrongly get `--is-shallow-repository` in front of the question. This
+  is a survey with a number at the end of it, not a refactor.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — The root-entries gate does not get redder with clone compliance, and the warning for it would have been wrong (engineer run, twelfth message pass)
+
+- Trigger: Ursa's exo seat, board note of 05:48Z, confirming the root-entries
+  gate from outside this lane and asking for a line in the ledger warning that
+  the gate's failure rate rises with how well the clone-repair rule is
+  followed, "so whoever picks it up does not read the rising count as a second
+  defect." Nothing was asked of this seat beyond the line. The line is this
+  entry, and it says the opposite, because the claim was measured before it was
+  written down.
+- What: the premise does not hold against `main` as of this run. Measured in a
+  clone repaired with `bash tools/ensure-full-clone.sh` first
+  (`--is-shallow-repository` false, refspec `+refs/heads/*:refs/remotes/origin/*`):
+  `node tools/root-entries.mjs` exits **0** with "3 root-level dot-entries, all
+  of them on the 3-name allowlist", and `node --test
+  tools/root-entries.test.mjs` is **21 passed, 0 failed, 0 skipped**. Zero
+  skipped is the load-bearing number rather than the pass count, because the
+  suite's history claim is written to skip itself with "the history behind this
+  claim was never fetched, so it is unmeasured rather than passing" when
+  `--is-shallow-repository` is true (`tools/root-entries.test.mjs` line 373).
+  So on a repaired clone that claim is measured and green, and on a handed one
+  it declares itself unmeasured instead of passing. The gate itself reads no
+  history at all, only the tree and `.gitignore`, which is the deeper reason
+  the coupling cannot exist: there is no history-dependent read in it to be
+  widened by a repair.
+- Why the correction is worth a ledger entry rather than a reply alone: the
+  shape exo describes, a gate whose failure rate rises with compliance and
+  therefore reads as a regression caused by its own fix, is real and worth
+  having a name for. It is just not this gate. Writing the warning down here
+  unmeasured would have put a fact into the ledger that the next seat would
+  have had to disprove, and a ledger entry is more expensive to retract than
+  to check.
+- First step: none owed. This entry is the deliverable. If the shape is wanted
+  as a general check, the question to ask of a gate is whether any read it
+  performs crosses a shallow boundary, which the entry above this one surveys.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — Craft scan: Gerrit's related-changes relation, the one review tool that treats containment as a first-class property (engineer run, twelfth message pass)
+
+- Trigger: this run built a containment guard from scratch for
+  `tools/ledger/requeue.sh`, and the question it answers is one that code
+  review tools have answered for fifteen years. Scanned from knowledge rather
+  than fetched; this run read nothing from the network.
+- Worth stealing: Gerrit computes a **relation chain** for every change and
+  shows it in the review UI, so a reviewer opening the fourth change in a chain
+  sees the three it sits on and the ones that sit on it, before reading a line
+  of the diff. The property that matters is not the graph, it is **where the
+  graph is rendered**: on the row itself, at the moment of review, rather than
+  in a tool someone has to remember to run. This repository's containment facts
+  now exist, measured, inside `tools/ledger/containment.mjs`, and they are
+  visible only to a seat that invokes it. Six of today's twelve conflicting
+  rows are contained by a sibling, and the owner cannot see that on any of the
+  six pull request pages. The stealable unit of work: have the seat that opens
+  a pull request post its containment verdict into the pull request body, one
+  line, so the fact travels with the row. That is a ledger proposal rather than
+  this run's work, because it touches how every seat opens a pull request.
+- What Ursa does better: Gerrit's relation chain is a statement about what was
+  pushed, and it is correct because Gerrit owns the push path and requires a
+  Change-Id trailer to maintain it. Ursa's containment verdict is computed from
+  commit ancestry alone, after the fact, over rows opened by seats that
+  coordinate through nothing but this repository, and it needs no trailer, no
+  hook and no cooperation from the tool that created the branch. It also
+  refuses rather than guessing: Gerrit has no equivalent of
+  `--is-shallow-repository` standing in front of the question, because it
+  always holds the whole graph and never has to ask whether it does.
+- Cost: $0
+- Status: proposed
