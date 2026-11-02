@@ -8143,3 +8143,120 @@ The positive control is in `tools/seat/answered.test.mjs` under
 three answered, so if the fixture ever drifts the `exact:` cases stop
 measuring anything.
 `INC-2026-11-02-the-already-answered-guard-is-keyed-on-the-sender-and-calls-nine-notes-in-ten-answered`.
+
+## 82. The bootstrap block is built entirely from operations that allocate, so a full disk fails all of them silently, and each retry takes more room than the last (measured 2026-11-02, resident host, eighty-fourth window, on its own first five minutes)
+
+**The reading.** `/tmp` on this host was at **45G of 45G, 0 bytes
+available**, at `06:00:15Z`. Both of this charter's §0 repairs — widen
+the refspec, deepen the history — are fetches, and a fetch writes. So
+the whole of §0 was unavailable, and the section had no way to say so.
+
+**It does not name itself.** `git fetch --unshallow --quiet` was run
+twice, with identical flags. The first invocation printed exactly one
+line:
+
+```
+fatal: fetch-pack: invalid index-pack output
+```
+
+which names neither the disk nor the space. The second printed two:
+
+```
+fatal: write error: No space left on device
+fatal: fetch-pack: invalid index-pack output
+```
+
+The line that names the cause is **not guaranteed to appear**, so no
+diagnosis may be keyed on it. The line that *is* always there describes
+a malformed sub-process, which reads as a corrupt remote or a broken git.
+
+**The clone stays shallow and keeps answering.** After both failures
+`git rev-parse --is-shallow-repository` still printed `true`. §0 as it
+stood chained four commands and ended on a `gh pr list`, whose output is
+unaffected, so the one line a window reads after running the block looks
+correct in the failure. That leaves the window in §9's state: five of
+nine clean pull requests read as conflicting, `merge-tree` exits 128 and
+reads as a conflict, and `merge-base --is-ancestor` returns a clean exit
+code meaning the opposite of the truth. **A failed acquisition leaves a
+clone that refuses nothing.**
+
+**Each retry takes more room than the last.** Every failed fetch leaves
+its partial pack in `.git/objects/pack/tmp_pack_*`, and nothing in the
+normal path removes it. Measured in this clone:
+
+| | |
+|---|---|
+| fetch invocations attempted | 4 |
+| `tmp_pack_*` files left behind | 4 (1:1) |
+| their sizes | 32,227,328 · 8,056,832 · 34,140,160 · 26,492,928 B |
+| total residue | **96.2 MiB** |
+| the complete pack, once the fetch succeeded | **41.5 MiB** |
+| residue ÷ object store it failed to fetch | **2.3×** |
+
+So the retry §0 implicitly invites is *anti*-idempotent: each attempt
+lowers the chance the next one succeeds. On git 2.43.0, plain `git gc`
+removed **neither** a three-day-old `tmp_pack_` nor a fresh one — both
+survived, verified by `ls` either side.
+
+**And the documented cleanup allocates too, so it is unavailable in the
+condition it exists for.** `git gc --prune=now` does remove them, but it
+repacks first. At 220 MB free against a 78.9 MiB pack:
+
+```
+$ git gc --prune=now --quiet
+fatal: failed to run repack
+```
+
+It removed nothing **and left a further 262,144-byte `tmp_pack_` of its
+own**. The cleanup is anti-idempotent under the same condition as the
+thing it cleans. `rm -f .git/objects/pack/tmp_pack_*` needs zero free
+bytes and is therefore the only member of this family that works at the
+moment it is needed. After it: **340 MB** free, and the byte-identical
+`git fetch --unshallow --quiet` succeeded, giving 698 `refs/prs`.
+
+**The instrument exists and no charter cited it.** `git count-objects
+-v` names the residue by path and sizes it:
+
+```
+warning: garbage found: .git/objects/pack/tmp_pack_T1
+garbage: 1
+size-garbage: 2.00 MiB
+```
+
+Measured over this seat's charter at 8,369 lines, immediately before the
+amendment: the strings `ENOSPC`, `no space left` and `disk` appeared
+**zero** times.
+
+**What this is not, and the correction is to this seat's own note.**
+Window 83 told the owner at `05:28:01Z` that *no seat can clear it*.
+That is true of the host and false of a seat's own clone, and the
+difference mattered: this window recovered 340 MB from its own `.git`
+alone and that was the difference between a complete clone and a
+silently truncated one. But it is **not a pool to harvest**. Measured
+host-wide at `06:0xZ` across every `.git/objects/pack` under `/tmp`, the
+total residue was **3.4 MiB in 2 clones**. It is a cost each window
+inflicts on itself inside its own bootstrap, visible only to that
+window, and cleared by it or not at all. The host-level shortage is a
+separate fact with separate owners — the top consumers are other seats'
+abandoned sandboxes, five over 690M — and window 83's account of that
+half stands.
+
+**The general rule, which is the half that outlives the disk.** **A
+repair step that allocates is not available in the failure it repairs.**
+Both failure modes here are "the clone is not what you need": §0's
+original one is *too little history*, this one is *too little room for
+history*, and the entire guard set was assembled from the one operation
+that cannot run in the second. This is §48's shape — an instrument whose
+exit status cannot distinguish its own abort from a verdict — moved one
+level out, from the instrument to the *repair*. So for any precondition
+repair, state which resource it consumes, and pair it with a release
+that consumes none.
+
+`tools/ensure-full-clone.sh` is already right on its own terms: it
+checks its post-condition and exits 2 rather than reporting success, and
+under ENOSPC it would have refused correctly. What it cannot do is give
+itself room, and nothing above it did. §0 now runs the `rm` first and
+asserts `is-shallow-repository = false` **and** a non-empty `refs/prs`
+rather than reading an exit status.
+`INC-2026-11-02-the-bootstrap-block-is-built-entirely-from-operations-that-fail-on-a-full-disk-and-each-retry-takes-more-room-than-the-last`,
+env-facts row `bootstrap-allocates-and-a-full-disk-is-silent`.

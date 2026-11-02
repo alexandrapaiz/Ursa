@@ -12641,3 +12641,110 @@ already in this file are that window's entry
 (`INC-2026-11-02-three-of-three-messages-in-this-windows-wake-had-already-been-answered-by-its-predecessor`)
 and this one, which is its remedy's defect. The measurement is
 `docs/agents/runner-facts.md` §81.
+
+## INC-2026-11-02-the-bootstrap-block-is-built-entirely-from-operations-that-fail-on-a-full-disk-and-each-retry-takes-more-room-than-the-last — Every guard in §0 acquires a resource, so none of them is available in the failure this window actually met, and the retry they invite is anti-idempotent
+
+**Status:** closed by the eighty-fourth window, in the lane that owed
+it. The charter block, the env-facts row and the runner-facts section
+are all `prompts/`, `tools/` and `docs/agents/` paths and this window
+held all three, so there is no cross-lane debt. One half is **not**
+this seat's and is recorded as open against the host: `/tmp` is a
+shared resource no seat can clear, and that half was already reported
+to the owner and to HQ's `exo-centralizer` by the eighty-third window
+at `05:27:35Z`–`05:28:01Z`.
+
+### What happened
+
+The eighty-fourth window of this seat opened at about `05:59Z` and ran
+§0's bootstrap block as its first act, which is what the block asks
+for. `/tmp` was at **45G of 45G, 0 bytes available**. Every line in the
+block is a fetch or a config write, so the block could not run, and the
+block had no sentence for that.
+
+The first invocation of `git fetch --unshallow --quiet` printed exactly
+`fatal: fetch-pack: invalid index-pack output` — a line that names
+neither the disk nor the space, and that reads as a corrupt remote or a
+broken git. A second invocation with identical flags also printed
+`fatal: write error: No space left on device`. So the only line
+guaranteed to appear is the one that misdirects.
+
+The clone stayed shallow. `git rev-parse --is-shallow-repository` kept
+printing `true`, and §0's block ends on a `gh pr list` whose output is
+unaffected by any of it, so the one line a window reads after running
+the block looked right. Had this window not re-checked the property by
+hand it would have proceeded in the state `runner-facts` §9 describes,
+where five of nine clean pull requests read as conflicting and
+`--is-ancestor` returns a clean exit code meaning the opposite of the
+truth. That is the 2026-10-18 incident reached by a different road:
+then the guard was missing from the file, here the guard was in the file
+and could not run.
+
+### What it cost, measured
+
+| | |
+|---|---|
+| fetch invocations attempted before the cause was found | 4 |
+| `tmp_pack_*` files they left in `.git/objects/pack` | 4 (1:1) |
+| total residue | **96.2 MiB** |
+| the complete pack, once the fetch finally succeeded | **41.5 MiB** |
+| residue ÷ the object store it failed to fetch | **2.3×** |
+| free space after `rm -f .git/objects/pack/tmp_pack_*` | **340 MB** |
+| result of re-running the byte-identical failed command | success, 698 `refs/prs` |
+
+Two further readings, both taken rather than reasoned:
+
+- Plain `git gc` on git 2.43.0 removed **neither** a three-day-old
+  `tmp_pack_` nor a fresh one.
+- `git gc --prune=now` does remove them, but it repacks first. At
+  220 MB free against a 78.9 MiB pack it exited `fatal: failed to run
+  repack`, removed nothing, **and left a further 262,144-byte
+  `tmp_pack_` of its own.** The cleanup fails the same way as the thing
+  it cleans.
+
+So the one remedy available at zero free bytes is the one no charter
+named, and the instrument that names the residue — `git count-objects
+-v`, which prints `warning: garbage found: <path>` with a
+`size-garbage` — was cited by no charter in this repository. Over this
+seat's charter at 8,369 lines immediately before the amendment, the
+strings `ENOSPC`, `no space left` and `disk` appeared **zero** times.
+
+### The correction this window owes its own predecessor
+
+Window 83's note to the owner at `05:28:01Z` says *no seat can clear
+it*. True of the host, false of a seat's own clone, and the distinction
+was load-bearing here. But it is **not** a pool to harvest: measured
+host-wide at `06:0xZ` across every `.git/objects/pack` under `/tmp`,
+total residue was **3.4 MiB in 2 clones**. It is a cost each window
+inflicts on itself during its own bootstrap, visible only to that
+window. Window 83's account of the host-level half — eight ENOSPC test
+failures indistinguishable from a regression, gating Tier B merges,
+other seats' abandoned sandboxes as the top consumers — stands
+unchanged.
+
+### The rule
+
+**A repair step that allocates is not available in the failure it
+repairs.** Both failure modes in §0 are "the clone is not what you
+need" — too little history, and too little room for history — and the
+entire guard set was assembled from the one operation that cannot run
+in the second. This is `runner-facts` §48's shape (an instrument whose
+exit status cannot distinguish its own abort from a verdict) lifted one
+level out, from the instrument to the repair.
+
+So: for any precondition repair, state which resource it consumes, and
+pair it with a release that consumes none. `tools/ensure-full-clone.sh`
+is already correct on its own terms — it asserts its post-condition and
+exits 2 rather than claiming success — and under ENOSPC it would have
+refused honestly. What it cannot do is give itself room.
+
+### What changed
+
+- `prompts/exo-agent.md` §0 gains a sixth line that runs the `rm`
+  **first**, prints `df`, calls `tools/ensure-full-clone.sh` instead of
+  hand-rolled fetches, and asserts `is-shallow-repository = false` plus
+  a non-empty `refs/prs` rather than reading an exit status.
+- `tools/seat/env-facts.json` gains row
+  `bootstrap-allocates-and-a-full-disk-is-silent`, which is how this
+  reaches the other ten seats rather than this charter alone — all
+  eleven cite `node tools/seat/env-facts.mjs` already.
+- `docs/agents/runner-facts.md` §82 carries the full measurement.

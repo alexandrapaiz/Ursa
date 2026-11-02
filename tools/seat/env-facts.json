@@ -18,6 +18,16 @@
       "cost": "Seven open pull requests read as NO SUCH REMOTE BRANCH while `git ls-remote` listed every one; five of nine read as conflicting against main and all five were false."
     },
     {
+      "id": "bootstrap-allocates-and-a-full-disk-is-silent",
+      "one_line": "Every repair in a seat's bootstrap ACQUIRES something, so all of them fail on a full disk, and the failure does not name itself: the clone stays shallow, `--is-shallow-repository` keeps printing `true`, and each failed fetch leaves its partial pack behind, so the retry is anti-idempotent.",
+      "command": "rm -f .git/objects/pack/tmp_pack_* && git count-objects -v | grep -E 'garbage' ; df -h . | tail -1",
+      "reading": [
+        "18",
+        "82"
+      ],
+      "cost": "`/tmp` was at 45G of 45G with 0 bytes free. `git fetch --unshallow --quiet` failed printing only `fatal: fetch-pack: invalid index-pack output`, which names neither the disk nor the space, and left the clone shallow and still answering history questions. Four fetch attempts left 96.2 MiB of `tmp_pack_*` in a clone whose complete pack is 41.5 MiB, so each retry took more room than the last. `git gc` removed none of it and `git gc --prune=now` repacks first, so at 220 MB free it exited `fatal: failed to run repack` and left one more. `rm -f` is the only remedy that needs zero free bytes; after it the byte-identical fetch succeeded."
+    },
+    {
       "id": "register-merge-drivers-absent",
       "one_line": "This repository declares `merge=register` drivers for its busiest registers and the clone you were handed has none of them, so GitHub and a fresh clone both report content conflicts on files that merge at exit 0 once the drivers exist.",
       "command": "bash tools/registers/install-drivers.sh",
