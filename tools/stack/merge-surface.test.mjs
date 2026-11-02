@@ -31,7 +31,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { LOCUS } from '../gates/verdict-shape.mjs'
-import { auditDrivers, parseSurface } from './merge-surface.mjs'
+import { auditDrivers, disagrees, parseSurface } from './merge-surface.mjs'
 import { GATE, GROUND, pathLine, verdict } from './merge-surface-verdict.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -201,6 +201,29 @@ describe('the stream guard, which is the only proof this gate beats the command 
     const stdout = [TREE, 'a.md', 'b.md', '', 'Auto-merging a.md', 'CONFLICT (content): a.md', ''].join('\n')
     const got = parseSurface(stdout, () => true)
     assert.deepEqual(got, { tree: TREE, paths: ['a.md', 'b.md'] })
+  })
+})
+
+describe('the two refusal shapes, of which only one is loud', () => {
+  it('treats exit 1 with no paths as a refusal, because that is what an absent revision returns', () => {
+    // Measured on git 2.43.0 while writing this suite, in a throwaway
+    // repository: `git merge-tree --write-tree --name-only <main> <absent>`
+    // prints `merge-tree: <rev> - not something we can merge` to stderr,
+    // writes NOTHING to stdout, and exits 1. Unrelated histories, by contrast,
+    // is `fatal: refusing to merge unrelated histories` at exit 128. So one of
+    // the two refusals shares its exit code with a genuine conflict and the
+    // other does not, and the one that does is the shape behind L-A55.
+    assert.equal(disagrees(1, 0), true)
+    assert.equal(disagrees(0, 2), true)
+    assert.equal(disagrees(1, 3), false)
+    assert.equal(disagrees(0, 0), false)
+  })
+
+  it('reports the loud refusal as ground too, so neither shape reaches a conflict count', () => {
+    const v = GROUND.mergeRefused('refusing to merge unrelated histories')
+    assert.equal(v.exitCode, 2)
+    assert.equal(v.derivedFrom, 'ground')
+    assert.equal(v.cause, 'MERGE_REFUSED')
   })
 })
 

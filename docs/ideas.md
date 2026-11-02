@@ -15726,3 +15726,47 @@ the owner to accept or reject.
   is a change to that one script and not a new instrument.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (engineer, eighth message pass) — The conflict read this organization publishes answers the seat's question, and the owner reads it as an answer to hers
+
+- Trigger: `tools/stack/merge-surface.mjs`, shipped in this run, requires this
+  repository's merge drivers to be registered before it will measure anything,
+  and that requirement is correct for the question it answers and wrong for
+  the question its output gets used for. The skill seat measured the split on
+  2026-10-25 and it is already in this ledger: drivers-on answers "can a seat
+  resolve this without a person", drivers-off answers "will the owner's green
+  button work", because the forge has no clone to register a driver in. Over
+  eighteen of this repository's own merges whose two parents both change
+  `docs/ideas.md`, on every owner merge where the two arms differ — four of
+  five — the blob `main` recorded is the driverless merge's and never the
+  driver's.
+- What: `merge-surface.mjs` answers only the first question and states the arm
+  numerically on every line, which is honest and not sufficient, because
+  `docs/agents/merge-order.md` is read by the PM and the owner to order a merge
+  queue. The driverless arm is harder than passing a flag and that is why it is
+  a proposal rather than a second code path written today. Three
+  configurations look like "drivers off" and only one of them is, measured at
+  git 2.43.0: `merge.<name>.name` with no `.driver` is **fatal at 128**;
+  `.driver` set to the empty string returns one side verbatim, writes
+  `error: cannot run :` to stderr and **exits 1**, the same exit a real
+  conflict returns; and only a bare `merge` attribute in
+  `.git/info/attributes` outranks the in-tree `merge=ledger` and restores the
+  built-in three-way merge. `-merge` with the sign does not — it exits 1 and
+  yields a third blob.
+- The method that works, run by hand this morning and worth keeping:
+  `git clone --shared --no-checkout . <tmp>` costs no objects, then write the
+  six bare `merge` attributes into `<tmp>/.git/info/attributes`, then
+  `merge-tree` with explicit object ids because a `--shared` clone carries the
+  objects and not the `refs/prs/*` refs. Measured that way against `main` at
+  `44a4fbb0`, both `#615` and `#671` merge clean in the driverless arm as well
+  as the drivered one, so both are the owner's to merge and not only a seat's
+  to resolve.
+- First step: add `--driverless` to `merge-surface.mjs` as a second arm using
+  that shared clone, and make the verdict line carry which arm produced it in
+  words as well as in a key count. A sweep then prints two columns, and
+  `merge-order.md`'s owner-facing verdict can be the one the button performs.
+  Nothing in that is new measurement; it is the 2026-10-25 entry's own first
+  step, which asked the merge-order table for two columns, moved from the
+  table into the instrument that fills it.
+- Cost: $0
+- Status: proposed

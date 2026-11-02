@@ -50,6 +50,40 @@
 // get a conflict surface out of this program without the tree that produced
 // it.
 //
+// WHICH QUESTION THE ANSWER IS TO, because there are two and they have
+// different answers. With this repository's drivers registered, "does this
+// conflict" means **can a seat resolve this without a person**. With them
+// absent it means **will the owner's green button work**, because the forge
+// has no clone to register a driver in. A skill-seat measurement of
+// 2026-10-25, recorded in `docs/ideas.md`, reproduced here: over eighteen of
+// this repository's own merges whose two parents both change `docs/ideas.md`,
+// on every owner merge where the two arms differ -- four of five -- the blob
+// `main` recorded is the driverless merge's and never the driver's.
+//
+// This gate answers the FIRST question, and it says so numerically on every
+// line: `measured with N merge driver key(s) registered` is the arm as a
+// property of the clone rather than as a flag the caller believes it passed,
+// which is what that ledger entry's first step asked for. It REFUSES to run
+// in the second arm rather than answering it badly, because the three
+// configurations that look like "drivers off" are three different things and
+// only one of them is: `merge.<n>.name` with no `.driver` is fatal at 128,
+// `.driver` set empty returns one side verbatim and exits 1, and only a bare
+// `merge` attribute in `.git/info/attributes` restores the built-in three-way
+// merge. The driverless arm is in `docs/ideas.md` as its own proposal with
+// the method that works.
+//
+// THE REFUSAL SHAPES ARE TWO, AND ONLY ONE OF THEM IS LOUD. Measured on git
+// 2.43.0 while writing this file: unrelated histories is
+// `fatal: refusing to merge unrelated histories` at exit **128**, which no
+// caller can mistake for a verdict. A revision that is not present is
+// `merge-tree: <rev> - not something we can merge` at exit **1**, with empty
+// stdout -- the same exit a genuine conflict returns. That is the shape behind
+// L-A55, where a narrowed refspec turned every refused merge into "a conflict
+// in no files". Two guards here, because one is not enough: both revisions are
+// resolved with `rev-parse --verify` before the merge, and the exit code and
+// the path count are then required to agree, so an exit 1 with no paths is
+// MERGE_REFUSED and never a clean-looking zero-length surface.
+//
 // THE EXIT CODE IS READ THREE-VALUED, never two. 0 is clean, 1 is a content
 // conflict, and anything else -- 128 in practice -- is git refusing to attempt
 // the merge, which is reported as ground. `tools/stack/integrate.sh` learned
@@ -120,6 +154,31 @@ export function parseSurface(stdout, objectExists) {
     paths.push(line)
   }
   return { tree: first, paths }
+}
+
+/**
+ * Do `merge-tree`'s exit code and its path list agree about what happened?
+ *
+ * They have to, and when they do not the output is not a verdict about the
+ * branch. The case that is not hypothetical: a revision that is absent from
+ * the clone produces `merge-tree: <rev> - not something we can merge` on
+ * stderr, EMPTY stdout, and exit **1** -- the same exit a genuine conflict
+ * returns. Measured on git 2.43.0. That is the shape behind lesson L-A55,
+ * where a narrowed refspec made `tools/stack/integrate.sh` report three live
+ * branches as conflicting in no files at all.
+ *
+ * Exported and pure so the case can be driven directly. The absent-revision
+ * path is already closed upstream by `rev-parse --verify`, which means this
+ * check can only fire if that one is wrong or if `merge-tree`'s contract
+ * changes -- and a guard whose only trigger is someone else's future mistake
+ * is exactly the kind that is never rehearsed unless it is callable.
+ *
+ * @param {number} status the process exit code, as git returned it.
+ * @param {number} pathCount how many conflicted paths were parsed out.
+ * @returns {boolean} true when the two cannot both be true.
+ */
+export function disagrees(status, pathCount) {
+  return (status === 1) !== (pathCount > 0)
 }
 
 /**
@@ -252,10 +311,7 @@ function measure({ repo, base, head }) {
     drivers: d.keys,
     diagnostics,
   }
-  // The two answers have to agree. An exit 1 with no paths, or an exit 0 with
-  // paths, means this program's reading of the output is wrong, and that is a
-  // reader fault rather than a verdict about the branch.
-  if ((status === 1) !== (findings.length > 0)) {
+  if (disagrees(status, findings.length)) {
     return {
       v: GROUND.mergeRefused(
         `git merge-tree exited ${status} and named ${findings.length} conflicted path(s), which cannot both be true`,
