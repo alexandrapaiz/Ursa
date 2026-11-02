@@ -2,6 +2,88 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered pass (tenth): #664 and #670 merged under Tier B, #668 held on a real register conflict
+
+Triggered by three run-finished events (security #664, skill #667
+again, exo #668) and two standing notes: one repeating #671 as an
+orphaned draft (already closed by the ninth pass, before this one
+started) and one from exo about a measured gap between the driverless
+merge-conflict gate and the driver-installed one. Built this pass on
+top of this seat's own ninth pass (#674) rather than `main`, per the
+org rule on reading a seat's own open PRs first; this pull request
+subsumes it by ancestry.
+
+1. **#664 (security) and #670 (frontend) merged under Tier B, neither
+   needing you.** Installed both merge drivers in this clone first
+   (`tools/registers/install-drivers.sh`), then confirmed each branch
+   merges clean against current `main` with `git merge-tree
+   --write-tree` before merging for real, not only trusting GitHub's
+   cached `mergeable` field. #664 touches `docs/security/`,
+   `docs/agents/pending-workflow-changes.md` (a proposal document, not
+   a workflow file itself) and `docs/ideas.md`; #670 touches
+   `docs/design/` and one `ursa-minor/` component. Both green, not
+   draft, no labels, no comments, scoped to product and docs surfaces,
+   no Tier C path. Both merged with `gh pr merge --merge
+   --delete-branch`.
+2. **#668 (exo) is held on a real conflict, not a driver gap, and
+   exo's own note about the eight driver-only conflicts checks out.**
+   After installing the drivers, `docs/ideas.md`, `incidents.md`,
+   `learning-log.md` and `runner-facts.md` all merge clean on this
+   branch. `docs/agents/merge-order.md` still conflicts, because that
+   file is declared `enabled: false` in `tools/registers/registers.json`
+   on purpose: it is replaced wholesale by whichever merge-order
+   proposal lands, so two open proposals collide on real content, not
+   on a missing driver. This matches what exo's own note said about
+   itself ("one of the eight is mine"). Sent exo a board handoff
+   naming the file and asking it to rebase or say which order should
+   win (message id `3bd8917c`); not merged.
+3. **#667 (skill) is still Tier C by path and still waits on you,
+   unchanged from the ninth pass.** No new push since then. It still
+   subsumes #601, #633, #638, #644, #646, #652 and #660 by ancestry.
+
+**A standing-note claim checked and found still stale.** The note
+repeated #671 (engineer, draft) as this seat's to ready, close or
+annotate. #671 was already closed by the ninth pass minutes before
+this one started, with its content traced to a commit on #615. Nothing
+further to do; naming it so a third repeat of the same stale claim
+does not cost a fourth pass the same check.
+
+**Two drafts the same standing note's broader pattern might read as
+orphaned, checked and left alone.** #672 (security) and #673 (skill)
+are both open drafts, but both were pushed to within the last few
+minutes of this pass starting (03:49-03:50Z, this pass started
+~03:56Z) and the architecture here has no run that stays "live"
+between wakes — every seat's run is a single launch, so "no live run
+behind it" is true of every draft at every snapshot and is not, by
+itself, evidence of abandonment. Treated recency as the signal
+instead: neither is stale enough to call orphaned yet. Left for each
+seat's own next wake.
+
+**The §10/§21 question that earlier passes have already flagged as
+open and unresolved, carried forward rather than re-decided here.**
+`docs/standards/pm.md` §21 (2026-10-05) says the PM merges every tier
+in its own company, "standards, charters, workflows and decisions
+included," except a change to a seat's own authority or anything
+touching money, accounts or secrets. §10's Tier C paragraph still
+lists "Charters (`prompts/`)" as owner-only, unrevised since §21
+landed. Every pass this seat can find back to 2026-10-16 has read the
+two together as Tier C still winning for `prompts/`, and
+`docs/standards/lessons.md` already carries this as a flagged, unfixed
+gap. Not resolving it unilaterally this pass: a reading that changes
+who may merge charter files is consequential enough that reversing
+weeks of consistent practice belongs in the ledger with your eyes on
+it, not in one pass's own judgment call. Treated #667 under the
+existing practice (Tier C, waits on you) and named the gap again so it
+does not keep aging silently.
+
+**This seat's own open pull requests, unmerged by design.** #666 and
+#651 both still wait on another merger per Tier B rule 1 — the owner,
+or HQ's PM — unchanged by this pass and not ancestors of this branch.
+This pass's own pull request (#676) will wait the same way once it's
+readied, and subsumes #674 by ancestry.
+
+**No dispatch fired.** `PM_DISPATCH_ENABLED` unset.
+
 ## Top three for the owner, 2026-11-02 message-triggered pass (ninth): #615 merged, #671 closed as an empty duplicate, #667 handed to you as Tier C
 
 Triggered by an event and a live standing note both naming the same
