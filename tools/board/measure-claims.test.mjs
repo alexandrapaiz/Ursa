@@ -7,7 +7,8 @@
 // different number every day.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { measure } from './measure-claims.mjs';
+import { measure, measuredBlock } from './measure-claims.mjs';
+import { blockFaults, citedCounts } from './measured-citation.mjs';
 
 const row = (over) => ({
   kind: over.kind || 'note',
@@ -92,4 +93,66 @@ test('a share is withheld when the walk that produced the rows did not finish', 
   assert.equal(measure(rows, 720).over_limit_warned_share, 0.75);
   assert.equal(measure(rows, 720, null).over_limit_warned_share, null);
   assert.equal(measure(rows, 720, null).shares_withheld, 'NO_COVERAGE');
+});
+
+test('the emitted block is citable by construction, which is the point of emitting it', () => {
+  // The defect this closes, concretely: the `MEASURED` constant in
+  // `tools/board/disposition.mjs` is quoted to seats by
+  // `tools/board/check.mjs`, and the version of it committed on 2026-11-02 at
+  // 04:17Z was nine fields retyped out of a `--json` receipt. The field a
+  // receipt cannot supply is the clock, so the block carried a calendar day,
+  // and a day could not hold a count that moved in twenty minutes. An emitter
+  // that is handed the clock cannot produce that block.
+  const long = (kind) => row({ kind, body: 'x'.repeat(1600) });
+  const rows = [long('note'), long('note'), long('done'), long('handoff'), long('ask')];
+  const coverage = {
+    complete: true, pages: 9, rows: rows.length, requested_hours: 720,
+    oldest_ts: '2026-10-03T05:11:44.721Z', newest_ts: '2026-11-02T04:28:29.212Z', covered_hours: 719.28,
+  };
+  const { block, faults } = measuredBlock(measure(rows, 720, coverage), '2026-11-02T04:28:38Z');
+  assert.deepEqual(faults, []);
+  assert.deepEqual(blockFaults(block), [], 'the gate will quote it');
+  assert.ok(citedCounts(block, '2026-11-02T04:48:38Z').sentence.includes('20 minutes before this check'));
+  assert.equal(block.on, '2026-11-02', 'the day is kept, as a convenience, never as the instant');
+  assert.deepEqual(block.by_kind, { note: 2, done: 1, handoff: 1, ask: 1 });
+  assert.equal(block.no_marker_found,
+    block.over_limit - block.disposition_lost_only - block.disposition_survived,
+    'the third bucket is stated so the three partition the over-limit set');
+});
+
+test('a clock earlier than the walk it dates is refused rather than emitted', () => {
+  const coverage = {
+    complete: true, pages: 9, rows: 1, requested_hours: 720,
+    oldest_ts: '2026-10-03T05:11:44.721Z', newest_ts: '2026-11-02T04:28:29.212Z', covered_hours: 719.28,
+  };
+  // 02:51:56Z is what back-filling the instant from `covered_hours` produced
+  // on the real block: the newest row, not the clock, 29 minutes early.
+  const { faults } = measuredBlock(measure([], 720, coverage), '2026-11-02T02:51:56Z');
+  assert.deepEqual(faults.map((f) => f.code), ['READ_AT_BEFORE_NEWEST_ROW']);
+});
+
+test('an incomplete walk emits with its fault named, so no share of it is pasted into a gate', () => {
+  const coverage = {
+    complete: false, pages: 1, rows: 500, requested_hours: 720,
+    oldest_ts: '2026-10-27T01:35:16.509Z', newest_ts: '2026-11-02T04:28:29.212Z', covered_hours: 147.9,
+  };
+  const { block, faults } = measuredBlock(measure([row({ kind: 'note' })], 720, coverage), '2026-11-02T04:28:38Z');
+  assert.deepEqual(faults.map((f) => f.code), ['WALK_INCOMPLETE']);
+  assert.equal(block.warned_share, null, 'the share is withheld by `measure`, not by the emitter');
+  assert.ok(faults[0].line.includes('147.9h of the 720h'));
+});
+
+test('the nested company slice is a subset of the block it sits in, off one walk', () => {
+  const long = (kind, from) => row({ kind, body: 'x'.repeat(1600), from_company: from });
+  const rows = [long('note', 'Ursa'), long('note', 'alexandria'), long('done', 'ursa')];
+  const coverage = {
+    complete: true, pages: 9, rows: 3, requested_hours: 720,
+    oldest_ts: '2026-10-03T05:11:44.721Z', newest_ts: '2026-11-02T04:28:29.212Z', covered_hours: 719.28,
+  };
+  const ursa = measure(rows.filter((m) => m.from_company.toLowerCase() === 'ursa'), 720, coverage);
+  const { block } = measuredBlock(measure(rows, 720, coverage), '2026-11-02T04:28:38Z', { company: 'Ursa', out: ursa });
+  assert.equal(block.over_limit, 3);
+  assert.equal(block.ursa.over_limit, 2, 'the lowercase spelling is this company too, which is worth 17 rows live');
+  assert.ok(block.ursa.over_limit < block.over_limit);
+  assert.deepEqual(block.ursa.by_kind, { note: 1, done: 1 });
 });

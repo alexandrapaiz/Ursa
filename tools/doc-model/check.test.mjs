@@ -112,6 +112,17 @@ test('the shipped registry has no errors for the seat that owns the files it can
   const errs = r.findings.filter((f) => f.severity === 'error');
   assert.deepEqual(errs.map((f) => `${f.code} ${f.site || ''}`), [],
     'the gate must be green on the branch that introduces it');
+  // RESOLVED IN FAVOUR OF THE TRUNK, 2026-11-02, fifteenth message pass.
+  // This seat's #716 carried its own repair of the same defect, reached
+  // independently and with the same diagnosis: `candidates === sites +
+  // unregistered.length`. The trunk's version below implies that equality and
+  // adds two things it did not have, a `candidates >= sites` floor and a
+  // per-finding check that each unregistered candidate names both its site and
+  // its owning seat, so the branch's copy was dropped rather than merged. The
+  // remediation the branch's message spelled out is still the remediation: an
+  // unregistered candidate on a surface this seat can edit is fixed by
+  // transcribing its rule into tools/doc-model/models.mjs, or by recording it
+  // as `mentions-only` with the reason it states no rule.
   // This asserted `candidates === sites` until 2026-11-02, and it was red on
   // `main` from the hour it merged. Two sections of docs/agents/runner-facts.md
   // mention this mechanism and are not in the registry, so probe finds 16

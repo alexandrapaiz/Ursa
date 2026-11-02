@@ -34,6 +34,12 @@
 // over-limit `ask` bodies where both seats reported none. Two implementations,
 // one shared read bound, so reproduction was not a control for anything.
 //
+// Those four numbers are one walk, taken earlier on 2026-11-02, and this
+// comment never recorded the instant. Three later walks that did put the
+// over-limit count at 984, 1,005 and 1,020 within the hour, on 51 asks every
+// time. Read them as a reading at an unrecorded time, and take the dated
+// series from `MEASURED.drift` in `tools/board/disposition.mjs`.
+//
 // THE CLAIM THAT DID THE DAMAGE, named separately because it is the one a
 // reader is most likely to repeat. A cap that returns the newest rows is
 // **time-biased, not size-biased**. It does not sample the window; it
