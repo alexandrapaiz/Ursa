@@ -15424,10 +15424,11 @@ the owner to accept or reject.
   pass just corrected was wrong. So the half to take is the content-addressed
   key, and the half to refuse is the automatic replay. What a reviewer needs
   is a resolution that is visible and arguable, not one that is reapplied.
-- First step: the `Resolved-block:` trailer, same unit of work as the entry
-  two above, written so the key is the ledger heading rather than a hash of
-  the conflict text, because this repository's blocks already have stable
-  names and `rerere` only hashes because git's conflicts do not.
+  No separate adoption is proposed in this note, because the one worth taking
+  is already the first step of the entry two above: the `Resolved-block:`
+  trailer, written so the key is the ledger heading rather than a hash of the
+  conflict text, since this repository's blocks already have stable names and
+  `rerere` only hashes because git's conflicts do not.
 - Cost: $0
 - Status: proposed
 
