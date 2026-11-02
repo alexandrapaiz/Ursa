@@ -95,6 +95,27 @@ const PAGES = arg('pages', '/,/record,/record/mini-fixture,/record/at,/this-page
 
 mkdirSync(OUT, { recursive: true })
 
+// WHY THIS TOOL NARRATES, added 2026-11-02e out of its own defect. The
+// 2026-11-02 review ran this over five pages, watched it for eight minutes,
+// got nothing but the empty directory `mkdirSync` above had just made, and
+// killed it. That run could not say whether it had killed a wedged tool or a
+// slow one, so it shipped with no contrast number and wrote the ambiguity
+// down instead. The ambiguity was the instrument's fault: every line of
+// output below is written after `browser.close()`, so for the whole of a run
+// there is nothing on disk and nothing on either stream, and a run making
+// steady progress is byte-for-byte indistinguishable from a hung one.
+//
+// So the progress goes to **stderr**, which leaves stdout the report a caller
+// pipes, and it carries the per-stage milliseconds rather than a spinner.
+// That is the difference that matters: contention on a shared host and a
+// defect in this file do not look alike once you can see which stage the
+// seconds are in. Ledger L15's posture again, one step earlier than drift:
+// an instrument should let you see it looking.
+const t0 = Date.now()
+const since = () => `${String(((Date.now() - t0) / 1000).toFixed(1)).padStart(6)}s`
+const say = (s) => process.stderr.write(`[${since()}] ${s}\n`)
+say(`writing to ${OUT}/contrast.txt, ${PAGES.length} page(s) against ${BASE}`)
+
 // Collect one entry per run of text, with the line boxes the glyphs
 // actually occupy rather than the element's box, because a paragraph's box
 // is mostly not text and the trailing space of its last line is not either.
@@ -283,6 +304,7 @@ const SCORE = async (page, shotA, shotB, items) => page.evaluate(
 
 const threshold = (it) => (it.fontSize >= 24 || (it.fontSize >= 18.66 && it.weight >= 700) ? 3 : 4.5)
 
+say('launching chromium')
 const browser = await launch()
 const rows = []
 const drifts = []
@@ -310,25 +332,43 @@ for (const [vname, w, h] of VIEWPORTS) {
   await scorer.goto('about:blank')
   const opts = { fullPage: true, scale: 'css', ...(LIVE ? {} : { animations: 'disabled' }) }
   for (const [name, path] of PAGES) {
-    await page.goto(BASE + path, { waitUntil: 'networkidle' })
-    if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
-    await page.waitForTimeout(WAIT)
-    const items = await page.evaluate(COLLECT)
-    const shotA = `data:image/png;base64,${(await page.screenshot(opts)).toString('base64')}`
-    await back.goto(BASE + path, { waitUntil: 'networkidle' })
-    if (UNTIL) await back.waitForSelector(UNTIL, { timeout: 30000 })
-    await back.waitForTimeout(WAIT)
-    // Belt and braces: the init script runs before the page's own scripts,
-    // and this covers a page that replaces <head> wholesale after it.
-    await back.addStyleTag({ content: HIDE_CSS })
-    const shotB = `data:image/png;base64,${(await back.screenshot(opts)).toString('base64')}`
-    const scored = await SCORE(scorer, shotA, shotB, items)
+    // Five stages, each timed, because "this is slow" and "this is stuck"
+    // are the same sentence until you know which stage owns the seconds.
+    // A `networkidle` goto is the one that can sit for its full 30s timeout,
+    // a screenshot of a 3,800px page is the one that grows with the page,
+    // and `score` is the only one that is this file's own arithmetic.
+    const lap = []
+    const mark = async (stage, fn) => {
+      const at = Date.now()
+      const out = await fn()
+      lap.push(`${stage} ${Date.now() - at}ms`)
+      return out
+    }
+    await mark('goto', async () => {
+      await page.goto(BASE + path, { waitUntil: 'networkidle' })
+      if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
+      await page.waitForTimeout(WAIT)
+    })
+    const items = await mark('collect', () => page.evaluate(COLLECT))
+    const shotA = await mark('shotA', async () =>
+      `data:image/png;base64,${(await page.screenshot(opts)).toString('base64')}`)
+    const shotB = await mark('backdrop', async () => {
+      await back.goto(BASE + path, { waitUntil: 'networkidle' })
+      if (UNTIL) await back.waitForSelector(UNTIL, { timeout: 30000 })
+      await back.waitForTimeout(WAIT)
+      // Belt and braces: the init script runs before the page's own scripts,
+      // and this covers a page that replaces <head> wholesale after it.
+      await back.addStyleTag({ content: HIDE_CSS })
+      return `data:image/png;base64,${(await back.screenshot(opts)).toString('base64')}`
+    })
+    const scored = await mark('score', () => SCORE(scorer, shotA, shotB, items))
     const byId = new Map(scored.map((s) => [s.id, s]))
     drifts.push({ page: name, viewport: vname, drift: scored[0]?.drift ?? 0 })
     for (const it of items) {
       const s = byId.get(it.id) || { unmeasured: true, pixels: 0 }
       rows.push({ page: name, viewport: vname, ...it, ...s, threshold: threshold(it) })
     }
+    say(`${vname}/${name}  ${String(items.length).padStart(3)} runs  ${lap.join('  ')}`)
   }
   await ctx.close()
   await hidden.close()

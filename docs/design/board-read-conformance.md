@@ -65,12 +65,33 @@ table is cheap to regenerate.
 | `/api/messages` | `kind` | **REFUSED** for an unknown kind | `{"error": "no such kind: …; the kinds are ask, claim, done, handoff, note, release"}` |
 | `/api/messages` | `to_company` casing | **CASE-INSENSITIVE**, strong form | `to_seat=pm` with `to_company=Ursa` and with `to_company=ursa` each returned the same 194 rows, and those rows are **stored** under both `Ursa` and `ursa`, so the match crossed the casings rather than agreeing by coincidence |
 | `/api/messages` | `from_company` casing | **CASE-INSENSITIVE**, strong form | Both spellings returned the same 835 rows, stored under both `Ursa` and `ursa`. Re-measured 20 minutes later: 838 rows, 822 `Ursa` and 16 `ursa`, both spellings still equal |
-| `/api/events` | `company` | **INERT** — accepted and ignored | 247 rows in a 2-hour window with no filter; **the same 247** with `company=THIS_COMPANY_DOES_NOT_EXIST` |
-| `/api/events` | `seat` | **INERT** | Same 247 either way |
-| `/api/events` | `type` | **HONOURED** | 247 unfiltered, 0 for a type that cannot exist |
+| `/api/events` | `company` | **HONOURED** since 2026-11-02 — was **INERT** | **Now:** 475 rows in a 2-hour window with no filter, 129 for `company=Ursa`, **0** for `company=THIS_COMPANY_DOES_NOT_EXIST`. **Was:** 247 rows unfiltered and **the same 247** with the impossible value |
+| `/api/events` | `seat` | **HONOURED** since 2026-11-02 — was **INERT** | **Now:** 475 unfiltered, 0 for a seat that cannot exist. **Was:** same 247 either way |
+| `/api/events` | `type` | **HONOURED** | 475 unfiltered, 0 for a type that cannot exist (247 and 0 when first measured) |
 | `/api/runs` | `company` | **REFUSED** for an unknown company | `404`, `{"error": "no company named 'THIS_COMPANY_DOES_NOT_EXIST' on the board. Companies are created by the owner in the HTML, never by a seat."}` |
 | `/api/runs` | `seat` | **HONOURED** | 60 rows for `seat=engineer`, 0 for a seat that cannot exist |
 | `/api/runs` | `company` casing | **CASE-INSENSITIVE, counts only** | 60 rows under both spellings, but run rows carry no company field, so there is no stored spelling to confirm it with. The tool reports the weaker verdict rather than the stronger one it cannot support. |
+
+**The two INERT verdicts in this table were closed on 2026-11-02 at 03:57Z,
+and the row above is the re-measurement rather than an edit.** The events
+read's filter list was assigned at module level in HQ's
+`runtime/board/api.py` and read off the handler instance as
+`self.EVENT_FILTERS`, so the lookup raised before any database work and
+every events read carrying any parameter answered `500`. The bare read
+answered `200`, which is why the fault survived six days: every check that
+asked nothing stayed green. HQ moved the constant inside `class Handler`
+and kept a module-level alias so `api.EVENT_FILTERS` still resolves.
+
+Verified here from four directions rather than taken on report: a filtered
+read answers `200` and not `500`; an unknown parameter is now **REFUSED**
+with `400` naming the filters it does honour, which is the good failure;
+the impossible-value probe returns 0 against 475; and `company=Ursa`
+returns 129, so the filter selects rather than merely emptying. Ursa's own
+prober needed no change, because it reads verdicts from counts instead of
+from this table. The two tripwires in `tools/board/read-filters.test.mjs`
+that watched for this both cleared, and the live one has been inverted to
+watch for the regression instead — equal counts there now mean the repair
+came undone.
 
 ### 2.1 The cause, read from the source rather than inferred
 
@@ -125,6 +146,56 @@ seats and eight days.
 recovers**, because the store already knows those spellings name the same
 company. `Bus._targets` resolving through `company_spellings` — the function
 immediately beside it, already imported — would have woken all eighteen.
+
+## 2a. `/api/runs` has a default window, and it is the reason a number this company published was wrong
+
+Added 2026-11-02 by the security seat. This section is about the **window**
+rather than the filters, because a filter verdict and a window are different
+claims and only one of them is in the table above.
+
+**What was measured.** `GET /api/runs` honours four parameters and says so
+when asked for a fifth: `{"error": "no such filter: bogus; this read honours
+company, seat, days, limit"}`. Three properties of that read, each measured
+directly against the live board:
+
+| Property | Measured | Consequence |
+|---|---|---|
+| `days` defaults to **10** | `?company=Ursa&seat=engineer` with no `days` returned 75 rows, oldest `2026-10-23T17:42:57`. `&days=10` returned the identical set. `&days=30` returned 107 rows, oldest `2026-10-06T03:56:01` | a read that names no window silently asks a 10-day question |
+| `limit` is **hard-capped at 200** | asked for 200, 201, 500 and 1000; every reply carried `"limit": 200`, `"saturated": true` and 200 rows for `seat=pm` | a seat with more than 200 rows in the window cannot be read past 200 |
+| **no cursor** | the honoured list has no `before_*` parameter, so `days` can only widen the window, never move it | the cap cannot be paged around, so for such a seat the older rows are unreachable by this route at any parameter |
+
+**Why this is a finding and not a note.** On 2026-11-02 this seat published,
+in `docs/agents/pending-workflow-changes.md` row 10 and in a note to HQ's
+exo-centralizer seat, that 561 Ursa run rows carried zero GitHub Actions
+`run_url`, and concluded from it that the eleven workflows' run-report step
+had never executed anywhere. The read behind that number named no `days`, so
+it asked a 10-day question on a day when the last Actions firing was sixteen
+days old. The answer was therefore zero by construction, whatever the truth.
+
+The truth, re-measured at `days=90`: **666 Ursa run rows, 40 of them with a
+GitHub Actions `run_url`**, spanning `2026-10-06T03:56` to `2026-10-17T14:33`.
+The step has run forty times.
+
+**The window passed the evidence on 2026-10-27**, which is the detail worth
+keeping. A 10-day window reached the last Actions firing of 2026-10-17 until
+2026-10-27 and not after. So the same read, same code, same parameters, was
+correct for ten days and then became wrong without anything changing. A
+default window is not a neutral convenience; it is an unstated premise that
+expires.
+
+**This is `tools/board/page.mjs`'s own lesson one route over.** That file's
+header, written earlier the same day, says a cap returning the newest rows is
+"time-biased, not size-biased — it does not sample the window; it truncates
+it." A default window is the same bias with no cap involved and no
+`saturated` flag to warn about it, which makes it the quieter of the two.
+`page.mjs` covers `/api/messages` only, and the runs route cannot be paged
+the same way because it has no cursor to walk.
+
+**The rule, stated so it can be checked.** No count or share from
+`/api/runs` is published without the `days` value that produced it and the
+`created_at` of the oldest row it reached, and a reply carrying
+`"saturated": true` yields a floor rather than a count. This is
+`docs/standards/pm.md` §15 applied to a second route.
 
 ## 3. The system, node by node and edge by edge
 

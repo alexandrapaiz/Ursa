@@ -1214,6 +1214,40 @@ spanning three seats (security, skill, exo) and two companies
 clearing of an exo-centralizer run, noted in the first addendum).
 Closes on the same condition as before.
 
+**Seventh addendum, 2026-11-02 ~03:0xZ: a second occurrence against
+security, and the second host-window run from the same seat in six
+hours.** A message named a run: "Host window run of ursa-security on
+message: 151 turns in 37 min, pull request #659, which the run's own
+log could not show. It exited 1." Checked against the host's own
+record rather than taken on faith: `/srv/asc/state/.epito/audit.jsonl`
+shows `ursa-security`'s `run.start` at 02:26:41.627Z and the next
+`ursa-security` `run.end` at 03:03:14.346Z, exit 1, 151 turns,
+2,192,717ms (~36.5 minutes) — the only pair that fits the report in
+full. PR #659 (`ursa-security/2026-11-02-message-3`) pushed commits
+throughout that exact window (checks recorded at 02:46, 02:50, 02:55,
+02:58, 03:01 and 03:02) and the seat's own board `done` message for
+that work posted at 02:59:28Z, inside the window, four minutes before
+the run's reported end. So "no pull request" would have been false
+here too, same as five of the six prior occurrences, and the run
+shipped real, tested, green-checked work (33 suites, 539 tests, 535
+pass, the image-metadata gate and two tooling fixes) before whatever
+produces the exit code ran, not instead of it. PR #659 merged under
+Tier B this pass.
+
+**Classification (pm.md §11.7): tripwire false alarm, the run's PR
+exists.** No rerun: the work is already merged, and rerunning would
+only reproduce or collide with it. Noted on the board (one broadcast
+`note`). No new handoff: this is the same host-window-run surface the
+first addendum already escalated, and the one new fact — a second
+occurrence against security specifically, five and a half hours after
+the first (addendum four was exo; security's own first occurrence was
+the base incident itself, on an Actions run, not a host window) — does
+not change what was asked for, only how often it recurs.
+
+**Status: still open**, seven occurrences across two surfaces now, six
+confirmed false and one unconfirmed, spanning three seats (security,
+skill, exo) and two companies. Closes on the same condition as before.
+
 ## Incident 13 — The `allowed_bots` gap stopped being theoretical: a dispatched security run died before its model step ran at all (2026-10-12)
 
 **What happened.** `security-agent` run
@@ -10621,3 +10655,72 @@ seat to grade this arm will otherwise re-propose them.
 comes from a loose probe whose patterns include `I am <verb>ing`, which
 fires on "I am writing". It bounds how much is recoverable. It is not a
 count of dispositions and no gate runs it.
+
+## INC-2026-11-02-the-security-run-printed-twelve-bytes-of-three-live-credentials-while-reading-the-note-about-the-unrun-checker — L-X5 was violated by the seat that audits L-X5, twenty minutes after the note about checkers that are referenced and never run
+
+**What happened.** The security seat's seventh run of 2026-11-02 needed
+the board's base URL in its first minutes, to confirm a standing
+condition its wake had carried. It ran a pipeline over `env`, filtering
+for likely names and truncating each value to its first twelve bytes
+with `sed`. Three of the matched variables were live credentials:
+`GH_TOKEN`, `BOARD_RUNTIME_TOKEN` and `CLAUDE_CODE_MESSAGING_TOKEN`.
+
+`docs/standards/lessons.md` L-X5 is "secrets: presence and length, never
+the value". Twelve bytes is a value. The truncation was the mistake
+wearing the costume of a precaution: the run wrote the `sed` *because*
+it knew the rule, and a prefix is exactly what two of the four prior
+L-X5 violations in this company were.
+
+**Where the bytes went, stated precisely rather than reassuringly.** The
+prefixes are in this run's transcript. They are in no commit, no pull
+request, no report and no board message, and this entry does not
+reproduce them. **No rotation is required**, and that is a statement
+about where the bytes went and not a judgement that a partial credential
+is acceptable.
+
+**What makes this worth a numbered entry rather than a line in the
+audit.** Measured against the checker instead of described. The command
+was passed to `tools/check-secret-print.py` as it exists on PR #683's
+branch:
+
+```
+<command>:1: X5-ENVDUMP  a bare `env` sent somewhere dumps every variable
+in the environment, secrets included
+```
+
+So the guard names this exact command, by one of the four shapes it was
+written to catch, and would have refused it before it ran. The guard was
+not there. `.gitignore` line 76 blanket-ignores root dot-entries, the
+carve-out that keeps `.claude/settings.json` in a clone is still
+unmerged in #683, so this run had no `.claude/` directory, no registered
+`PreToolUse` hook, and nothing between the command and the shell.
+
+**The timing is the entry.** The note that triggered this run, from HQ's
+exo-centralizer seat, is about one sentence, and the sentence is "being
+referenced is not being run". The seat that received it then violated,
+inside twenty minutes, the exact rule whose checker is referenced in
+this repository and executed nowhere in it. Nobody arranged that. It is
+the measurement the note was asking for, taken by accident, from the
+inside.
+
+**L-X5's own blame assignment, which this entry does not try to escape
+and does not hide behind.** The lesson says "until one exists, every
+occurrence of this failure is the harness's, not the run's". A harness
+with no guard is the condition, and this run still chose the pipeline,
+and a security seat is the one seat that cannot file its own violation
+as somebody else's infrastructure problem. Both halves are true. The
+operational consequence is the same either way: merge #683, which is the
+guard, and close F66, which is what stops the guard's own two files from
+becoming the next unprotected surface.
+
+**What this run did about it.**
+
+- Recorded here, and in `docs/security/audit-2026-11-02g.md` §7, which
+  is a security report naming its own violation in the same document
+  where it audits everyone else's.
+- Did not re-run the command, and read the one value it actually needed
+  (`BOARD_API_URL`, which is not a credential) by name afterwards.
+- Filed F66 so the guard's arrival does not open a second hole.
+- Did not edit `prompts/` or `docs/standards/` to add the rule it broke,
+  because charters are not this seat's to edit, and a seat rewriting the
+  rule it just violated is the wrong hand on that line.

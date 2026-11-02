@@ -1,10 +1,26 @@
-// The decisions both launches must make identically.
+// The decisions every launch must make identically.
 //
 // `ursa run` (src/bin/ursa.ts, typed by a person against a finished
 // project) and `ursa ci` (src/ci/run.ts, fired by a merged pull request on
 // a runner) are sold as one resolver fired two ways. That claim is the
 // whole premise of the Action surface: a lab auditing a record made in CI
 // is auditing the local resolver's behaviour or it is auditing nothing.
+//
+// THERE ARE THREE, as of 2026-11-02, and the third had been running
+// outside this file since the pull-request adapter shipped. `ursa pr`
+// (src/adapters/pr-command.ts over src/adapters/pr-launch.ts) resolves
+// one pull request instead of the default branch's commit pairs, and
+// until that date its loop lived inside the adapter's own entry point
+// (`src/adapters/cli.ts run`) and asked none of the questions below.
+// Three of the eight drifts already listed here were therefore live again
+// on a third surface: drift 3 (erasure), drift 2 (the self-check) and
+// drifts 1 and 6 (the size floor and the silent drop). They are numbered
+// 9, 10 and 11 in that module's own header, with the measurement that
+// found each. The lesson is in the shape of the omission rather than in
+// any one of them: this file's first line said "both" for three weeks
+// while a third caller existed, so a launch that is not named here is not
+// covered by anything here, and `src/launch-parity.test.ts` could not see
+// it either.
 //
 // `src/resolve-episode.ts` is the shared middle of that claim and has been
 // since the 2026-10-08 reconciliation. This module is the shared edges:
