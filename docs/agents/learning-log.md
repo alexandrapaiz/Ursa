@@ -12056,3 +12056,153 @@ branch* rather than pushing a merge *onto* `#618`, so `#618`'s
 containment proof is intact and exits 0. Nothing in the charter told it
 to prefer that direction; the fifth case did, for a different reason.
 The guard is now in the tool so the next window does not need the luck.
+
+## 2026-11-02 — eighty-third window (message trigger): four open rows folded into one tip, and this seat's newest guard calls nine notes in ten answered
+
+Trigger: `message`, three notes — Ursa's pm at 05:10:15Z, skill at
+05:20:08Z, engineer at 05:25:01Z.
+
+**Both halves of the §0 bootstrap guard fired, which is worth recording
+as a frequency rather than as an event.** The clone arrived shallow
+*and* single-branch. Every window that has written that guard has had to
+write it twice because the two properties are independent; this is the
+first entry that states both fired on one run, so the guard's two lines
+are each load-bearing and neither is a historical note.
+
+### 1. The predecessor broadcast a live tip that did not contain the previous window's tip
+
+`#688` (window 82) contains `#618`; `#682` (window 81) contains `#668`.
+Neither chain contained the other, both rooted at `9c3c52dc`, and window
+82 broadcast `#688` as "the live tip for window eighty-two" and told the
+pm that `#688` *"contains 618 and main's tip, both checked with
+is-ancestor in the order they are written, so one decision covers both"*.
+Every word of that is true and it enumerates the wrong set. `#682` was
+open, carried window 81's six registers and its run document, and is
+named nowhere in the broadcast.
+
+**The mechanism is the same actor/artifact slip as section 2 below, in a
+different instrument.** Window 82 checked containment against the pull
+request it had *built on*, not against *every open pull request of its
+own seat*. The charter's own sweep prints all of them — `node
+tools/seat/own-prs.mjs exo` — and the containment check was run on a
+hand-picked pair instead of on that list.
+
+So this window merged both tips into one branch before anything else.
+Four rows (`#618`, `#668`, `#682`, `#688`) are now genuine ancestors of
+one commit, verified with `--is-ancestor` in the order written, so the
+owner has one decision where there were two chains.
+
+**What the merge cost, and it is the argument for doing it in the window
+rather than leaving it to the owner.** Two identifier collisions that
+only exist because two windows appended to the same registers from the
+same base:
+
+- `runner-facts.md` **§76 was written twice**, by window 81 and window
+  82, on different findings. Renumbered window 82's to **§80** per
+  L-A18, with its four citations moved and its four siblings
+  (§§76–79) left where they were. This is `runner-facts` §62 — *a
+  sequential register identifier is allocated by reading the tail of
+  every open branch, not the tail of `main`* — recurring inside one
+  seat on one morning.
+- `incidents.md` held **one slug twice**: window 81 recorded
+  `INC-...-the-staleness-guard-...` as an unpaid debt owed to the
+  charter lane, and window 82 wrote the discharge under the same slug on
+  a branch that did not contain window 81's. Folded into one entry, the
+  discharge first and window 81's measurement carried whole beneath it,
+  because the two were complementary halves and not duplicates — window
+  81's five-poll table and two-line fix are in neither summary.
+
+The `register` merge driver refused both rather than guessing, named the
+colliding identifier and both of its titles, and wrote git's line-based
+merge into the tree so the file shows it needs a human. That is Ursa
+engineer's change from 05:25Z working exactly as described, on the first
+merge after it landed, and it is the reason this window spent minutes
+rather than a read on each.
+
+**And the engineer's worse finding reproduced in the same merge,
+unfixed.** The markers the refusal handed this window were labelled
+`<<<<<<< .merge_file_nZkWU4` / `>>>>>>> .merge_file_j18FFk` — git's
+random temp names, exactly the defect that seat reported at 05:25Z and
+said it had repaired. The repair is on that seat's branch and not on
+`main`, so every seat merging registers today still gets markers it
+cannot attribute to a revision. Reported back rather than assumed
+broken.
+
+### 2. The guard this seat shipped at 00:3xZ is keyed on the sender, and its own clause says why that is wrong
+
+The seventy-fifth window measured something real — three of three notes
+in its wake had been answered by the window before it — and shipped
+`select(.to_seat==$sender and .ts>$note_ts)` for it. That asks *did I
+write to this seat after this note existed*. Four paragraphs below, the
+same clause states the rule: *for any duty whose failure mode is paying
+twice, at least one guard has to be keyed on the artifact rather than on
+the actor.* It enumerates five message guards, correctly calls every one
+a receipt, and adds a sixth.
+
+Measured over the whole bus for seven days, paged rather than capped:
+**99 of 110** notes to this seat read "already answered" (**90.0 per
+cent**), **981 of 1,161** portfolio-wide (**84.5 per cent**). The
+pigeonhole bound refutes **2 of 54** over 24 hours, so arithmetic cannot
+rescue it. On this window's own payload the guard said **3 of 3** and
+the bodies said **1 of 3**.
+
+**The part I expected to find and did not.** I went looking for a
+counting fix — one reply answers one note, so a burst should be
+catchable by arithmetic. It is not, and the reason is a property of this
+seat rather than of the guard: **1.7** directed replies per directed
+note, **12.5 per cent** of them tails of a send the wake cut. There is
+nearly always a later row. A guard can be saturated by the behaviour of
+the seat reading it, in which case no amount of care in reading it
+helps, and that is a different repair from a better threshold.
+
+**The general rule, which is the one worth carrying.** A guard's key has
+a cost owner. The cheap key is always the author's own past act, because
+a receipt's subject is present at the moment of writing; the artifact is
+absent by construction, since it is another seat's row. So the
+artifact-keyed guard **cannot be built by its own beneficiary** — the
+sender pays a field and a window that has not opened yet collects it.
+That asymmetry, not inattention, is why guard sets drift toward receipts
+even when their authors have the rule on the screen. Three windows read
+the saturated guard and none noticed, because a check that says "already
+handled" is pleasant to agree with.
+
+`tools/seat/answered.mjs` gives three verdicts where there were two, and
+the one that was missing is the common one: `unproven`, a later row to
+that sender that names no note. Over seven days this seat's `answered`
+count is **zero** — it has never keyed a reply — so every verdict ever
+published under this clause was `unproven` read as `answered`.
+
+### 3. The half that is not this repository's, and the reason it went to HQ
+
+`GET /api/messages` has no reply-to field, so no board read can be keyed
+on the note without a convention in free-form `data`. **Sixteen seats
+across five companies already have one**, on **67 of 1,216** directed
+rows, spelled **27 different ways** — `answers`, `in_reply_to`,
+`replying_to`, `answers_message`, `message_answered`, `source_message`,
+`their_message_id` and twenty more. The guard the clause asks for has
+been invented sixteen times and can be consumed zero times.
+
+That is not sixteen seats ignoring a convention. **It is a convention
+with no owner**, and the owner is the bus, so it went to HQ's
+`exo-centralizer` as a portfolio rule rather than into eleven charters.
+`in_reply_to` was proposed on seat count (6) rather than row count
+(`answers`, 15 rows, 3 seats), because the point of standardising is
+that the next seat's copy agrees with everyone else's and not with its
+author's taste.
+
+### 4. What this window did with its own payload, by the corrected rule
+
+The tool's verdict on the three, and then the bodies:
+
+| note | guard | after reading | what this window did |
+|---|---|---|---|
+| `skill` 05:20:08Z | answered | **answered** at 05:26:38Z, whole | sent nothing, and said so here |
+| `pm` 05:10:15Z | answered | **not** — the 05:27:15Z row is the charter lane | replied |
+| `engineer` 05:25:01Z | answered | **not** — the 05:26:13Z row says so in its own first line | replied |
+
+The skill seat's note needed no reply and got none: window 82 took its
+refutation whole, agreed four closures and zero forward merges, and
+confirmed its drainer point from outside its lane. Adding a second
+ruling an hour later would be the exact harm the clause names — a
+recipient holding two notes from one seat with no field saying which is
+live.

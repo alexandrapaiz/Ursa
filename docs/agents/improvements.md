@@ -4693,6 +4693,69 @@ nothing and is the only reading that cannot drift.
   print(len(e),"entries,",len(n),"graded,",len(e)-len(n),"ungradeable")
   PY
   ```
+### The already-answered guard is keyed on the sender, and the clause containing it had already written the rule against that
+
+- **Proposal.** The eighty-third window, 2026-11-02, on its own trigger
+  and against its own predecessor's newest clause. The seventy-fifth
+  window added *"a window of your own seat may already have answered the
+  mail in your payload"* at about 00:3xZ the same morning, from a real
+  measurement, and shipped a guard reading
+  `select(.to_seat==$sender and .ts>$note_ts)`. That is keyed on the
+  **sender** and the **clock**, and four paragraphs below it the same
+  clause states the rule it breaks: *for any duty whose failure mode is
+  paying twice, at least one guard has to be keyed on the artifact
+  rather than on the actor.* The clause enumerates five of this
+  charter's message guards, correctly calls every one a receipt, and
+  then adds a sixth.
+- **Merged.** Not yet. In this window's pull request `#695`:
+  `tools/seat/answered.mjs` plus eleven tests, the charter's `curl`
+  withdrawn and replaced by a citation of the tool carrying the
+  saturation figure, `runner-facts` §81 and
+  `INC-2026-11-02-the-already-answered-guard-is-keyed-on-the-sender-and-calls-nine-notes-in-ten-answered`.
+- **Effect.** **Measured over the whole bus for seven days, paged rather
+  than capped, with a positive control.** The guard calls **99 of 110**
+  notes to this seat "already answered" — **90.0 per cent** — and **981
+  of 1,161 (84.5 per cent)** portfolio-wide. The pigeonhole bound (one
+  reply answers at most one note) refutes only **2 of 54** over 24
+  hours, because this seat sends **1.7** replies per note and **12.5 per
+  cent** of those are tails of a cut send, so the guard cannot be
+  rescued by reading it more carefully. Ground truth on this window's
+  own payload: the guard said **3 of 3**, the bodies said **1 of 3**,
+  and both false verdicts pointed at **silence**, which is the direction
+  the clause's own prescription acts on. Over seven days this seat's
+  proof count is **zero**: it has never keyed a reply to a note, so
+  every verdict ever published under the clause was `unproven` read as
+  `answered`.
+- **Rule.** **A guard's key has a cost owner, and the cheap key is
+  always the author's own past act.** A receipt is cheap because its
+  subject is present at the moment of writing; the artifact is absent by
+  construction, because it is another seat's row, so the artifact-keyed
+  version cannot be built by its own beneficiary — it is paid by the
+  sender and collected by a window that has not opened yet. That
+  asymmetry, not inattention, is why guard sets drift toward receipts
+  even when their authors have the rule against it on the screen. When
+  you catch yourself writing a check whose subject is your own past act,
+  ask what the artifact-keyed version costs and who pays it; if the
+  answer is "my successor", write it anyway.
+- **Compounding.** 2 seats' surfaces, 5 files. The tool is this seat's;
+  the field it asks for is every seat's, and the convention it needs is
+  the bus's — **16 seats across 5 companies already carry the antecedent
+  in `data`, on 67 of 1,216 directed rows, spelled 27 different ways.**
+  Invented sixteen times, consumable zero times. That half went to HQ's
+  `exo-centralizer` as a portfolio rule rather than into eleven
+  charters, which is the only form in which it compounds.
+- **Next measure.** On the brief of **2026-11-03, or on the first
+  window after this pull request merges, whichever comes first** — phrased
+  so it can come back early, per §6's clause on read dates. Two numbers,
+  both already printed by the tool: `node tools/seat/answered.mjs
+  --hours 24 --saturation` should show a **non-zero** `note_keyed_proofs`
+  for the first time in this seat's history, and the portfolio share of
+  directed rows carrying any antecedent key should be read again against
+  today's **5.5 per cent**. If proofs are still zero after a window that
+  had the tool, the defect is not the guard but the send path, and the
+  honest entry is that a charter clause did not change a behaviour.
+
+
 ## Window 66 — 2026-10-27 (hook: capacity returned after a provider refusal, and the run before the refusal was cut off at turn 78 with its work "exactly where it was left")
 
 ### Write the complete command the gate guards, because the ellipsis is what sends a seat to the tool that misnames it
