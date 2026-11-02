@@ -53,8 +53,8 @@ evidence:
     what: validation is shape only, a statement, a legal polarity and basis, a non-empty evidence array, a known kind, and steps being an array
     source: ursa-major/src/tuning/distill.ts:11-18,136-146
   - ref: E11
-    what: the default runner is the local Claude Code CLI in print mode with the prompt on stdin
-    source: ursa-major/src/tuning/distill.ts:154-166,172
+    what: the default runner is the local Claude Code CLI in print mode with the prompt on stdin, and since 2026-10-26 the call itself lives in one helper this module shares with the verdict reader, which passes its own timeout
+    source: ursa-major/src/tuning/distill.ts:149-164; ursa-major/src/claude-cli.ts:159-167
   - ref: E12
     what: merge sets evidenceCount to the length of the axiom's evidence array, both when it creates and when it reinforces
     source: ursa-major/src/tuning/merge.ts:57-64,76-83
@@ -132,7 +132,7 @@ evidence:
     source: docs/vision.md:53-56 (section 1)
   - ref: E37
     what: the tuning test's only fixture declares the episode accepted with an acceptance basis of retention
-    source: ursa-major/src/tuning/tuning.test.ts:18-26
+    source: ursa-major/src/tuning/tuning.test.ts:19-27
   - ref: E38
     what: both sides of a one-shot correction are read from the extents the record already stores rather than rebuilt from the diff, because a rebuild had been shipping reconstructed text as a verbatim quote
     source: ursa-major/src/signals.ts:65-81
@@ -161,8 +161,10 @@ confidence is the one field in the whole artifact that a reader is told
 to act on from the first message [E17].
 
 It does not fire for producing a record, for settling a span label, or
-for quoting a record statistic. Those are the three skills in the
-record area, and all three end where this one begins: they work on
+for quoting a record statistic. Those are
+`running-an-outcome-record-trial`, `adjudicating-uncertain-spans` and
+`quoting-a-number-from-an-outcome-record`, which are the record area,
+and each of them ends where this one begins: they work on
 `outcome_record.json`, and this one works on `tuning.json`.
 
 What this serves is the Ursa Major half of the mission, importing your
@@ -369,11 +371,19 @@ that history, with a rebase, an amend or a squash, produces new shas,
 new episode ids, and a record of the same work that the guard does not
 recognise, so every axiom it touches gains evidence a second time. The
 watermark the design intended for this, a `distilled` flag on each
-episode with an `isDistilled` lookup against it, exists in the code and
-is never set to true by anything [E25]. Ours: before distilling, check
-`sources` for a record covering the same commits rather than the same
-id, and if the project's history has been rewritten since the last
-distill, start a new store rather than reconciling the old one.
+episode with an `isDistilled` lookup against it, exists in the code
+and is written `false` by every path that writes it [E25]. Ours,
+measured 2026-11-02: the only `true` in the tree is one `serve` test's
+fixture, which exists to exercise the reporting side, so no real run
+ever raises the watermark and the lookup answers false for every
+episode a user has. This sentence read "never set to true by anything"
+until today, which was true the day it was written and stopped being
+true when that fixture landed, and the claim it was making was always
+about the writing paths rather than about an absence a test can
+falsify. Ours: before distilling, check `sources` for a record
+covering the same commits rather than the same id, and if the
+project's history has been rewritten since the last distill, start a
+new store rather than reconciling the old one.
 
 **An axiom is a claim about a person, and the record is a claim about
 text.** The prompt asks the model for the general why rather than the
