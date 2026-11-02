@@ -16146,3 +16146,192 @@ the owner to accept or reject.
   entry's first step rather than beside it.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (engineer, eighth message pass) — The enumerator's REGISTRY is a single hand-maintained append-point, so two seats extracting gates on the same day always conflict there
+
+- Trigger: this run's own rebase. Three files conflicted between `#615`
+  and `main`, and two of the three were
+  `tools/gates/enumerate-verdicts.mjs` and its test, for one reason:
+  both sides appended to `const REGISTRY = [...]`. The third,
+  `tools/secret-scan-verdict.mjs`, conflicted for the same reason one
+  level down, on `GATE.groundProbes`. All three resolutions were "keep
+  both", so no judgement was required and none of the three conflicts
+  carried information. Then this run wrote an eighth gate and could not
+  register it, because adding a tenth line to the list `#615` had just
+  taken from seven to nine re-creates the identical conflict in the
+  identical file while `#615` is still unmerged.
+- What: the registry is a list of module paths maintained by hand, and
+  every gate extraction in this repository has to touch it. Gate
+  extraction is the one activity the ledger explicitly invites every seat
+  to do ("Every gate exports its verdict as data"), so the list is a
+  guaranteed collision point whose collisions are always resolved the same
+  way. Replace it with a glob: discover `*-verdict.mjs` under `tools/` and
+  `scripts/`, import each, and take the ones exporting a `GATE`. The
+  census the enumerator already prints over `tools/` and `scripts/` proves
+  the walk exists and works, so this is reusing a walk rather than writing
+  one. The counts asserted in `enumerate-verdicts.test.mjs` stay exact,
+  because they are read off the run rather than written in.
+- The arithmetic this run had to do by hand, which is the cost stated
+  concretely: the test asserts a probe count and a cause count, the hook
+  branch said 46 and 36, `main` said 47 and 36, and neither is the union.
+  Settling it meant running the enumerator at three commits — the merge
+  base, both tips — to establish 32/27, 47/36, 46/36 and therefore 61/45.
+  The two identical 36s are the part worth naming: a reviewer comparing
+  the two halves sees the same number on both sides and gets no signal
+  that either is wrong.
+- First step: make `REGISTRY` a discovery rather than a literal, in a
+  branch that touches no other file, so it merges into whatever is open.
+  Until it lands, a seat extracting a gate while another seat's extraction
+  is open registers nothing and says so, which is what this run did.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, eighth message pass) — A test that asserts against a live external surface reports "the finding is fixed" when the surface is merely down
+
+- Trigger: `node --test` over all of `tools/` on this branch came back one
+  red, `tools/board/read-filters.test.mjs:245`, "live: the prober agrees
+  with the board it is a claim about". Its failure message reads "the
+  events company filter now filters; the INERT finding is fixed and the
+  doc should be updated", and the assertion is `0 !== 470`. Reproduced on
+  `main` at `cdbdcdff` in a separate worktree with no change of this
+  run's in it, so it is not this branch's. The actual cause is in the
+  `Ursa/exo` seat's board note of the same morning: `/api/events` answers
+  500 to every parameter it documents, and that defect is already routed
+  to HQ's exo-centralizer seat. So the route is broken, the probe reads
+  zero rows, and the test concludes the filter started working.
+- What: the test has two hypotheses for a zero and picks the flattering
+  one. A live probe that returns nothing is either "the filter now
+  filters" or "the surface could not be read at all", and those have
+  opposite meanings — the first says a finding is fixed and a document
+  should be updated, the second says nothing is known. This is the same
+  class as `tools/secret-scan.mjs` refusing a shallow clone and
+  `tools/root-entries.mjs` refusing a missing ignore rule: a run that
+  could not establish the facts must not be indistinguishable from a run
+  that found none. Here it is worse than indistinguishable, because the
+  message actively instructs the reader to go and weaken a document.
+- First step: give the live probes a reachability precondition that runs
+  before the comparison — one request whose only job is to establish that
+  the route answers at all — and make an unreachable surface UNMEASURABLE
+  with its own cause, which is the verdict vocabulary
+  `tools/board/read-filters.mjs` already has and does not reach here.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, eighth message pass) — The ledger gate tells a seat that only the owner can repair a status line no owner ever wrote
+
+- Trigger: `node tools/ledger/check.mjs` on the merge this run pushed to
+  `#615` exits 2 on three `STATUS_ALLOWED` warnings where `main` has two.
+  The third is this seat's own: an entry of 2026-10-27 whose status line
+  reads `Status: not an idea, a scan note. The stealable half is written
+  up above as...`. The gate's repair text is "Only the owner moves a
+  status (pm.md §4), so no seat can repair this line." That is true of the
+  other two, which carry `done` and `decided` — real statuses the owner
+  set outside the allowed five. It is false of this one, which was never a
+  status at all: a seat wrote prose where the grammar wanted one of five
+  words, and the seat that wrote it may fix it without asking anyone.
+- What: the gate has one finding for two different conditions. "The
+  status is a word the owner chose that this list does not allow" is an
+  owner decision and a seat must not touch it. "The status field does not
+  contain a status" is a malformed line, and `verdict-shape.mjs`'s own
+  header calls two disjoint conditions behind one sentence the defect the
+  whole extraction exists to remove. The practical cost is that the only
+  repair a seat is allowed to make is the one the gate tells it it cannot
+  make, so the warning is permanent, and three permanent warnings are how
+  an exit code stops being read.
+- First step: split the finding by whether the status value is a bare
+  single word. A bare unrecognised word is the owner's, locus OWNER,
+  unchanged. Anything with whitespace or punctuation in it is malformed,
+  locus SEAT, and the repair names the authoring seat and the line number.
+  `tools/ledger/contract-verdict.mjs` is where the finding is built, and
+  it is already in the extracted shape, so this is one locus and one
+  cause rather than a new gate.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, eighth message pass) — Craft scan: Mergify's merge queue, where a failing batch is bisected until it names one pull request
+
+- Rotated to because this run spent itself on one question — which
+  branches in a twenty-five-deep queue conflict, and in which files — and
+  Mergify is the product whose entire job is that question at a scale
+  where no human reads the answer.
+- **What it does.** Mergify's merge queue does not ask whether each pull
+  request merges with the default branch. It builds temporary *batch*
+  pull requests representing cumulative merges — `#1`, then `#1 + #2`,
+  then `#1 + #2 + #3` — and runs CI on all of them in parallel. So the
+  unit it validates is the union in a stated order, which is exactly the
+  question `tools/stack/integrate.sh` was written for and which the
+  forge's own `mergeable` field cannot answer for more than one branch at
+  a time.
+- **One thing worth stealing: batch splitting.** When a batch fails,
+  Mergify does not report "the union is red". It splits the batch to
+  isolate the culprit, drops that one pull request, and continues with
+  the rest. `integrate.sh` merges every open branch in order and reports
+  one pass-or-fail on the union plus per-branch merge results, so a suite
+  that goes red on the union of twenty-five branches tells this
+  organization that the union is broken and not which branch broke it,
+  and the owner's queue is unordered by that answer. Bisection over an
+  ordered list is a known shape and the script already has the worktree
+  and the order it needs; the first step is to run the suites once per
+  prefix rather than once at the end, which is the same information for
+  the same number of merges and N suite runs instead of one.
+- **One thing Ursa does better: the refusal is typed and the repair has
+  an owner.** Mergify's own documentation, read today, describes which
+  problems the queue solves and does not say what it reports when a
+  speculative merge cannot be created at all as against when CI fails on
+  one it could. This repository has paid four separate times for that
+  exact conflation — a shallow clone, a narrowed refspec, an unregistered
+  merge driver and a collapsed stderr stream, each of which made a
+  working branch read as conflicting — so every ground in
+  `tools/stack/merge-surface-verdict.mjs` carries its own cause, its own
+  repair command, and which of three people holds it, and a merge git
+  refused outright can never be counted as a conflict in zero files.
+- Nothing is proposed from this scan as its own unit of work. The
+  bisection idea belongs to `integrate.sh` and is written above as the
+  stealable half rather than as a separate entry, because the first step
+  is a change to that one script and not a new instrument.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, eighth message pass) — The conflict read this organization publishes answers the seat's question, and the owner reads it as an answer to hers
+
+- Trigger: `tools/stack/merge-surface.mjs`, shipped in this run, requires this
+  repository's merge drivers to be registered before it will measure anything,
+  and that requirement is correct for the question it answers and wrong for
+  the question its output gets used for. The skill seat measured the split on
+  2026-10-25 and it is already in this ledger: drivers-on answers "can a seat
+  resolve this without a person", drivers-off answers "will the owner's green
+  button work", because the forge has no clone to register a driver in. Over
+  eighteen of this repository's own merges whose two parents both change
+  `docs/ideas.md`, on every owner merge where the two arms differ — four of
+  five — the blob `main` recorded is the driverless merge's and never the
+  driver's.
+- What: `merge-surface.mjs` answers only the first question and states the arm
+  numerically on every line, which is honest and not sufficient, because
+  `docs/agents/merge-order.md` is read by the PM and the owner to order a merge
+  queue. The driverless arm is harder than passing a flag and that is why it is
+  a proposal rather than a second code path written today. Three
+  configurations look like "drivers off" and only one of them is, measured at
+  git 2.43.0: `merge.<name>.name` with no `.driver` is **fatal at 128**;
+  `.driver` set to the empty string returns one side verbatim, writes
+  `error: cannot run :` to stderr and **exits 1**, the same exit a real
+  conflict returns; and only a bare `merge` attribute in
+  `.git/info/attributes` outranks the in-tree `merge=ledger` and restores the
+  built-in three-way merge. `-merge` with the sign does not — it exits 1 and
+  yields a third blob.
+- The method that works, run by hand this morning and worth keeping:
+  `git clone --shared --no-checkout . <tmp>` costs no objects, then write the
+  six bare `merge` attributes into `<tmp>/.git/info/attributes`, then
+  `merge-tree` with explicit object ids because a `--shared` clone carries the
+  objects and not the `refs/prs/*` refs. Measured that way against `main` at
+  `44a4fbb0`, both `#615` and `#671` merge clean in the driverless arm as well
+  as the drivered one, so both are the owner's to merge and not only a seat's
+  to resolve.
+- First step: add `--driverless` to `merge-surface.mjs` as a second arm using
+  that shared clone, and make the verdict line carry which arm produced it in
+  words as well as in a key count. A sweep then prints two columns, and
+  `merge-order.md`'s owner-facing verdict can be the one the button performs.
+  Nothing in that is new measurement; it is the 2026-10-25 entry's own first
+  step, which asked the merge-order table for two columns, moved from the
+  table into the instrument that fills it.
+- Cost: $0
+- Status: proposed
