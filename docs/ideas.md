@@ -18321,3 +18321,129 @@ their programs asserted inside this checkout.
   does not work, and the charter line already filed is still the repair.
 - Cost: $0
 - Status: proposed
+
+## Skill run 2026-11-02 (message, twelfth) — a closure pointer is a dated claim, and thirty-three rows were closed without one
+
+Run opened. Trigger: Ursa/pm's board note of 2026-11-02 05:09Z to this
+seat, giving a Tier C verdict on this seat's rebase and reporting eight
+of this seat's rows closed as superseded, with "nothing else is owed from
+this seat on this row". Nothing below was asked for. It is what the
+closure sweep did to this seat's own file and then, measured outward, to
+the queue. The database credential is absent from this environment, so
+there is no claim extraction and no new skill this run, per the charter's
+data-access clause. Measured at `main` `9c3c52dc` on a clone this run
+completed first, since the one it was handed was depth 1.
+
+### 2026-11-02 — The lock this seat's new section asks for, and why it is not in the same pull request
+
+- Trigger: the section this run added to the end of
+  `prompts/skill-extract.md`, whose identifier is deliberately not
+  written here, per §5t part 2 and §5ai clause 1. It states that a pull request citation carries its disposition and the
+  date that disposition was read. §5ai forbids the branch that adds a
+  section from carrying anything that cites it, so the check belongs to a
+  later run and this entry is the handover.
+- What: six of the twelve pull request citation lines in this library
+  point at rows closed without ever merging, and all four of those rows
+  were closed in the thirty-two minutes before this run started. Nothing
+  noticed, because no guard under `skills/` reads a pull request number
+  and none can: the referent is a row on the forge, not a range in this
+  tree, so §5t's one-line `grep` resolve does not apply and §5g through
+  §5k have nothing to fingerprint.
+- First step, and it is this seat's own file rather than another seat's:
+  `skills/forge-citations.lock.json` in the shape
+  `evidence.lock.json` and `relevance.lock.json` already have. One row
+  per cited number, carrying the disposition, the date read and the
+  merge commit where there is one. Then a check that every number the
+  library mentions appears in the lock, net of the §5ad fixture
+  mentions, which today are the three `#618` mentions in
+  `grep-dialect.mjs` and `grep-dialect.test.mjs`. Then a documented
+  refresh that re-reads the forge, run by the seat and not by the gate,
+  because a guard that needs the network fails closed on every clone
+  that has none and §5v is already the section about a guard answering
+  from the wrong frame.
+- The open question the next run owes an answer to before writing any of
+  it: whether a ninth guard earns its keep for twelve lines. §5t
+  declined an eighth guard for exactly this reason and was right to. The
+  honest alternative is that section's second clause on its own, which is
+  to cite the
+  merge commit once a row merges and let the number disappear, since a
+  sha needs no lock and no refresh. The next run should price both and
+  say which it chose.
+- Owner: the next run of this seat that touches this library.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — A closure comment names a number, and the number is one run stale
+
+- Trigger: the eight closure comments this seat was notified of. Each
+  reads "Superseded by #684", with an independent ancestor proof, which
+  is the right receipt. By 05:24, sixteen minutes later, this seat's next
+  run had opened a row that contains #684, and this run's row contains
+  that one. So the owner following any of the eight lands two hops short
+  of the row she is being asked to decide.
+- What, measured across the queue rather than from this one case. 109 of
+  the repository's closed rows were closed without merging. **45** carry a
+  comment naming a superseding row. Those 45 pointers resolve to **28**
+  distinct rows, of which **20** are themselves closed and unmerged, 5
+  merged and 3 open. So a reader following a closure pointer lands on
+  another closed row about five times in seven. The content is almost
+  never the problem. The pointer is, because a lane advances every run
+  and a comment is written once.
+- First step, in the lanes that write these comments and so not this
+  seat's to patch: name the branch beside the number. A branch prefix
+  identifies the lane, the lane outlives any one row, and a reader who
+  finds the row closed can walk forward to that lane's current tip. For
+  Ursa/exo's merge-verdict tool, which now prints the container's number
+  so that a closure can cite it, the same one-line change applies and
+  that seat has been told directly. For the project manager's sweep it is
+  one field in the comment template.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — Thirty-three closed rows are reachable from neither the trunk nor any open row, and three dropped run records prove it is not only ancestry
+
+- Trigger: measuring how often a closure pointer resolves, above, left
+  the prior question open: whether the closed rows' work is anywhere.
+- What. Every one of the 109 closed and unmerged rows was tested for
+  reachability on a completed clone. **30 landed**, their heads being
+  ancestors of `origin/main`. **43 are live**, contained by some open
+  row. **36 are reachable from neither.** Of those 36, **33 are the
+  project manager's own lane**, one is the frontend's, one the
+  engineer's, and one this seat's.
+- The two bounds this figure needs, because a count like it is read as a
+  loss figure and it is not one. **It understates representation.** The
+  ancestry test cannot see a closure proved another way, and the
+  counter-example is this seat's own row in the 36: it was closed with a
+  byte-identical-tree proof against the row that replaced it, which is a
+  stronger receipt than ancestry and invisible to the test that counted
+  it lost. **And it is not a claim about content until the content is
+  read.** So the content was read.
+- What reading it found, on the newest of the project manager's 33. Of
+  its 2,228 added lines, **50** are present on `origin/main` and **50**
+  are present in that lane's newest open row. Three of its files are its
+  own run records, 65, 68 and 120 lines, and
+  `git ls-tree -r --name-only` finds no file of those names on `main` or
+  in that lane's open row, under any path. Across all 36 rows the figure
+  is **2,219 of 287,937** added lines present on `main`, 0.8 percent,
+  with no row above 50 percent and three at exactly zero. The aggregate
+  denominator double counts one lane's files across 29 of its rows and
+  the test is exact line matching, so neither direction of that number is
+  tight. The three named run records are tight, and they are the claim:
+  work was written, its row was closed, and the files are in the
+  repository's tree nowhere.
+- What is not true, and it changes the repair. The work is not destroyed.
+  `refs/pull/<n>/head` survives closure, measured here by fetching the
+  heads of all 109 closed rows in one command and getting 140 of 140
+  refs. Every dropped line is one fetch away. What is missing is any
+  record in the tree that says so, which is why nobody has noticed in
+  six days.
+- First step, for the seat that closes rows and so a ledger entry rather
+  than a patch: before closing, assert containment, and when there is
+  none, say in the comment which files are being left outside the tree.
+  That is the same `merge-base --is-ancestor` the sweep already runs,
+  used as a precondition instead of as a decoration, plus
+  `git diff --name-only` when it fails. A closure with no containment
+  proof is a decision to drop work, which is sometimes right, and it
+  should read like one.
+- Cost: $0
+- Status: proposed

@@ -3350,3 +3350,128 @@ re-derived here before use: its 32 bodies, its 154 of 1,016 and its walk
 of 4,200 rows are that seat's figures, reported as that seat's, and the
 confirmation against this seat's own `done` at offsets 233 and 729 is
 this run's.
+
+## 5am. A pull request number resolves against a surface outside this tree, so a citation of one carries its disposition and the date that disposition was read
+
+(Added 2026-11-02, by the run woken to answer a project manager's note
+closing eight of this seat's rows. Nothing in the note asked for this.
+The defect is what the closure sweep did to this file four hours before
+the run read it.)
+
+**Where the rule comes from.** §5t part 2 already settled identifiers in
+prose: a pointer is resolved when it is written, and the resolve is one
+line of `grep` against a file in this tree. A pull request number looks
+like that case and is not. Its referent is a row on the forge, so the
+answer to "does this resolve" is a network read, and worse, the answer
+changes without the tree changing. Nothing edits this file when a row is
+closed.
+
+**The measurement, taken the morning one was.** `grep -roE '#[0-9]{3,4}'`
+over `skills/` and this file returns **15** lines over **9** distinct
+numbers. Three of the fifteen are not citations: `#618` in
+`grep-dialect.mjs` and twice in `grep-dialect.test.mjs` is a fixture
+string, chosen because an apostrophe after a code span is the case that
+parser gets wrong, which is §5ad's discriminator applied correctly and is
+why the count has to be stated net of it. That leaves **12** citation
+lines over **8** rows.
+
+Resolved against the forge on 2026-11-02:
+
+| row | disposition | cited at |
+|---|---|---|
+| 281 | merged 2026-10-23 | §5q, twice, and `relevance-sweep.test.mjs` |
+| 413 | merged | `relevance-audit.md` |
+| 477 | merged | §5ai |
+| 540 | merged | §5z |
+| 601 | **closed unmerged 04:36Z** | §5ai, twice |
+| 633 | **closed unmerged 05:08Z** | §5ai |
+| 638 | **closed unmerged 05:08Z** | §5ai |
+| 646 | **closed unmerged 05:08Z** | §5aj, twice |
+
+So **6** of the 12 citation lines, over **4** of the 8 rows, point at
+rows closed without ever merging, and all four were closed in the
+thirty-two minutes before this run started. The four sit in §5ai and
+§5aj, the two newest sections of this file, and §5ai is the section that
+makes naming the pull request part of the discipline. The rule that
+mandates the citation is the rule the sweep broke.
+
+**What did not happen, which is the part that decides the remedy.** No
+content was lost and no pointer became unresolvable. All four rows are
+strict ancestors of this branch's head, by
+`git merge-base --is-ancestor`, so every line they argued from is in the
+tree a reader of this section is holding. And `refs/pull/<n>/head`
+survives closure: this run fetched the heads of all **109** closed and
+unmerged rows in this repository in one command and got **140** of 140
+refs, closed rows included. A closed row is readable forever.
+
+What decayed is only the row's **standing**. A number carries three
+different claims and the citation does not say which: *this is on `main`*,
+*this is in the owner's queue*, or *this was set aside in favour of
+another row*. The first is a receipt. The third is an argument from a
+document the reader will find marked closed, and a reader who takes
+"closed" for "withdrawn" discards a correct argument.
+
+**How general it is, measured across the whole queue.** Of the 109 closed
+and unmerged rows, **45** carry a comment naming a superseding row. Those
+45 pointers resolve to **28** distinct rows, of which **20** are
+themselves closed and unmerged, 5 merged and 3 open. A reader following a
+closure pointer therefore lands on another closed row about five times in
+seven. The live instance is this seat's own and is sixteen minutes wide:
+the eight comments posted at 05:08 name a survivor that a newer row of
+the same lane already contained by 05:24. The content was never in
+danger. The pointer was stale before the ink dried, because a lane
+advances every run and a comment is written once.
+
+**The rule.** Four parts.
+
+1. **A pull request citation states the disposition and the date it was
+   read.** "Merged 2026-10-23", "open in the owner's queue as of
+   2026-11-02", "closed 2026-11-02 in favour of this seat's then current
+   tip". The date is what makes the sentence survive being wrong later,
+   which is §5o's rule about verdicts applied to a pointer.
+2. **Once a row is merged, cite the merge commit instead.** A sha is
+   resolvable in this clone with no network, it never changes its answer,
+   and it is the only form of this citation that cannot decay.
+3. **Before a row is merged, name its branch beside its number.** A
+   branch prefix names the lane, the lane outlives any one row, and a
+   reader who finds the row closed can walk forward to that lane's
+   current tip. A bare number cannot be walked forward from.
+4. **Do not treat a closed row as a lost one.** The repair for a stale
+   citation is to re-date it, never to delete the argument it carries.
+   This is §5t part 3 inverted: there the dead name had to stop being
+   reproduced, because reproducing it re-armed a real check. Here the
+   name is not dead at all and deleting it would destroy a live receipt,
+   so the two rules look alike and prescribe opposites.
+
+**What this is not, this run.** It is not a guard. The check this rule
+wants is a lock, in the shape `evidence.lock.json` and
+`relevance.lock.json` already have: one row per cited number, with its
+disposition and the date read, plus a check that every number the library
+mentions appears in the lock net of §5ad fixtures, plus a documented
+refresh that re-reads the forge. That is code, it is a ninth guard where
+§5t declined an eighth, and the question of whether it earns its keep
+deserves its own run. It is filed as a ledger entry owned by this seat's
+next run, which is §5ai working rather than an exception to it.
+
+**The regime, per §5ai clause 3.** The second one. This run's own commits
+touch three files, this one, the ledger and its run record, and nothing
+on the branch cites this section. `grep -rn '5am'` over the repository
+returns **2** lines, its header and the sentence you are reading, and
+**zero** from outside the section, so clause 1 is paid in full. The
+ledger entry that hands the guard to the next run deliberately refers to
+this section by description rather than by number, which is §5t part 2's
+technique used for the reason §5ai gives: the entry and the section are
+in one commit and so could not dangle, but the number is also the first
+thing a later branch would copy. The branch is **70** files against `origin/main`, because
+it is based on the row this seat opened at 05:24, which is based on the
+four rows the table above lists as closed. The one-file proxy is not
+payable from here and this run does not claim it.
+
+**Ours.** The whole of it. The fifteen-line count and its net of three,
+the eight-row disposition table, the ancestor check that shows nothing
+was lost, the measurement that `refs/pull/<n>/head` outlives closure at
+140 of 140, the 45-to-28-to-20 census of the queue's own closure
+pointers, the sixteen-minute live instance, the three-claims argument,
+the four clauses, and the inversion against §5t part 3. The project
+manager's note supplied the occasion and the ancestor test it used on
+this seat's rows, both taken as data and re-derived here before use.
