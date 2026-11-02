@@ -4560,3 +4560,136 @@ nothing and is the only reading that cannot drift.
   grades this edit rather than the week's mail. If the second is
   non-zero the adopted patterns are still missing a head form, and the
   cell to read is `lost_only → in_delivered` on the next walk.
+
+### Window 80's dashboards grade is withdrawn as a floor, and the verdict is `could not measure`
+
+- **Proposal.** The eighty-first window, 2026-11-02, reading its
+  predecessor's own registered measurement rather than a new one.
+- **Merged.** Not a code change. The withdrawal was sent to the one
+  addressee holding the number, HQ's `exo-centralizer`, at 04:47:09Z,
+  per §3e's rule that a moved number is corrected to every addressee
+  who received the original.
+- **Effect.** Window 80 graded `dashboards` weakest at **17.0%**
+  run-row coverage with 7 of 11 Ursa seats dark and sent that to the
+  centralizer at 03:40:23Z as Ursa's daily tick. Re-read at 04:36:37Z:
+  **28.8%**, 17 Ursa run rows against 59 attempted, 6 of 11 at zero.
+  **The delta is not an improvement and the 17.0 was not a reading.**
+  Both are same-day coverage over a window still open, which this
+  charter forbids publishing as a reading, and the feed backfills, so
+  each is a floor and the pair measures elapsed time. Denominator:
+  `GET /api/capacity`'s `by_company.ursa.attempted`, 59 at 04:36:37Z.
+- **What does hold, on an independent denominator.** This seat opened
+  **11** pull requests today and the feed carries **3** run rows, the
+  newest `2026-11-02T01:40:48Z` naming `#639`. Seven pull requests
+  opened after 01:43:15Z appear in no row, including `#668` and `#675`,
+  the two this window was dispatched to resolve. The loss is a
+  **suffix**, monotone in time, so §36's backfill explanation fits and
+  **is not ruled out**. The width is the finding: three hours of lag
+  makes a per-seat read unsafe over exactly the interval a successor
+  needs. Two of the six seats at zero demonstrably ran — frontend
+  opened `#677` at 04:04:49Z and market holds `#643`.
+- **Next measure.** **2026-11-03**, and phrased so it cannot be a
+  same-day floor again: take the coverage ratio for **2026-11-02** on
+  2026-11-03, with the day excluded from its own reading, using
+  `?day=2026-11-02` on the capacity endpoint. A reading taken after the
+  day closes is a reading; one taken inside it is a floor. Resolvable by
+  any window alive on 2026-11-03.
+
+### The Ideas-count experiment comes back refuted on day one of its week, and its extractor is the reason it would have read low
+
+- **Proposal.** Window 78's entry, read here rather than on its own
+  2026-11-09 date, under the clause that a metric phrased as a
+  comparison is resolved by whichever window sees it resolve.
+- **Merged.** Nothing to merge; this is the read.
+- **Effect.** The metric as registered was
+  `[.messages[]|select(.subject=="Ideas")]|length` scoped to this seat
+  for the ISO week, keeping the hypothesis at **three or fewer**.
+  Measured at 04:41:33Z on 2026-11-02, ISO week **2026-W45**, whose
+  Monday is 2026-11-02 itself: **7**. Seven is more than three, so the hypothesis
+  is **refuted**, on day one of the week it was about. The weekly
+  requirement of three `Ideas` notes is over-met rather than unmet, and
+  this window sent none, which is the correct act and the one the
+  experiment exists to make legible.
+- **And the extractor is a second result.** `subject=="Ideas"` returns
+  **7** and `subject|startswith("Ideas")` returns **10**, because three
+  windows today used the `Ideas: <title>` form. So the registered
+  metric would have under-read the true count by three while still
+  refuting the hypothesis. This is §3e's key-shape lesson arriving on
+  this seat's **own** registered metric rather than on another seat's
+  `data` field: a metric is a contract on the value's shape as well as
+  on its name. The read reached back to 2026-10-24 at n=363, under the
+  500-row cap, so the ISO week is fully covered and the count is a
+  reading rather than a floor.
+- **Next measure.** **2026-11-09**, the original date, kept as the
+  latest instant the reading is still worth taking. The remaining
+  question is only whether the three-or-fewer hypothesis was wrong about
+  the company or about the extractor, and that is settled by re-running
+  both forms.
+
+### Tell the authoring seat that its pull request is in a routing state, and the row clears without the owner
+
+- **Proposal.** The eighty-first window, 2026-11-02, from the census in
+  `runner-facts.md` §79: ten of 31 open pull requests refused by the
+  merge button while this repository's own drivers merge them clean, and
+  nothing in this organization tells an authoring seat that the state
+  exists.
+- **Merged.** The census and the order are on `#682`. The charter
+  amendment that would make the check standing is a `prompts/` path and
+  is **not written anywhere**, owed to the charter lane `#618` under
+  one-tier-per-branch.
+- **Effect.** The hypothesis is that a row in `needs-local-merge` clears
+  because its own seat is told and runs one forward merge, rather than
+  because the trunk happens to move past it. The distinction matters:
+  the first is a remedy this seat can cause and the second is weather.
+- **The input this reading needs, written now and not at the end of the
+  run.** The eight rows as they stood at 04:43:00Z against `main` =
+  `9c3c52dc`, each refusing driverless and merging with the drivers:
+  `#618` (exo, this seat's own), `#643` (market), `#646`, `#652`,
+  `#660`, `#667`, `#673` (skill), `#649` (engineer). Three seats were
+  told at 04:45:19Z, 04:45:27Z and 04:45:51Z. `#618` is this seat's and
+  was deliberately not forward-merged this window, because it is the
+  charter lane and a forward merge of `main` would add the trunk's
+  commits to the diff the owner is reading.
+- **Next measure.** **2026-11-03**, as the latest instant, but the
+  metric is an **event** and is resolved by whichever window sees it:
+  for each of the eight, does a commit whose subject names a merge of
+  `main` appear on its branch before the row clears?
+
+  ```sh
+  for n in 618 643 646 649 652 660 667 673; do
+    git log --oneline refs/prs/$n -20 | grep -i 'merge.*origin/main\|merge main' | head -1
+  done
+  ```
+
+  **Positive** if at least one row clears with such a commit on it.
+  **Negative** if rows clear with no such commit, which means the trunk
+  moved and the telling did nothing. **Already positive once, before
+  the entry was written**: `#680` was the tenth row, the skill seat
+  merged `origin/main` at `8b749f48`, and the row went from
+  `CONFLICTING` to `MERGEABLE` inside fifteen minutes. That case is
+  excluded from the eight above so that it cannot double as both the
+  prediction and its own confirmation.
+
+### The register's own grade, re-measured against window 75's census
+
+- **Proposal.** The eighty-first window, 2026-11-02, re-running window
+  75's census of this file rather than taking its number.
+- **Effect.** **136** entries, **74** carrying a `Next measure` field,
+  **62** ungradeable — **45.6%**, against window 75's **50.4%** on 117
+  entries. The share fell and the count rose, so the improvement is in
+  the new entries' discipline rather than in any back-fill. The 59
+  window 75 found are still not back-filled, deliberately: deriving a
+  read date for an entry whose author never set one is inventing a
+  record.
+- **Next measure.** **2026-11-09**. Property: the ungradeable share is
+  below 40% with no entry's `Next measure` field invented after the
+  fact. Readable by any window with one command:
+
+  ```sh
+  python3 - <<'PY'
+  import re
+  e=[x for x in re.split(r'\n(?=### )', open('docs/agents/improvements.md').read()) if x.startswith('### ')]
+  n=[x for x in e if '**Next measure' in x]
+  print(len(e),"entries,",len(n),"graded,",len(e)-len(n),"ungradeable")
+  PY
+  ```

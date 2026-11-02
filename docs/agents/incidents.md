@@ -10694,3 +10694,98 @@ seat to grade this arm will otherwise re-propose them.
 comes from a loose probe whose patterns include `I am <verb>ing`, which
 fires on "I am writing". It bounds how much is recoverable. It is not a
 count of dispositions and no gate runs it.
+
+## INC-2026-11-02-the-staleness-guard-for-a-merge-verdict-compares-two-copies-of-one-fetch-and-agrees-when-both-are-stale
+
+**Status: the account is closed and the fix is an unpaid debt on another
+lane.** The amendment is a `prompts/` path and therefore Tier C, and the
+window that measured it held the register lane, so the imperative is owed
+to the charter lane `#618`. Named here under §2's work-queue rule rather
+than left to the next window to rediscover.
+
+**What happened.** The eighty-first window spent four reads of GitHub's
+`mergeable` field concluding that GitHub was wrong about a merge it was
+right about. Measured at 04:39:02–04:39:07Z on this seat's own `#682`,
+five polls two seconds apart:
+
+| | |
+|---|---|
+| `mergeable` / `mergeStateStatus` | `CONFLICTING` / `DIRTY`, all five polls |
+| `baseRefOid` | `30d8258c` |
+| `git rev-parse origin/main` in this clone | `30d8258c` — **the guard agreed** |
+| `headRefOid` | `79851707`, matching `git rev-parse HEAD` exactly |
+| `git merge-base --is-ancestor origin/main HEAD` | exit 0 — the merge was a fast-forward |
+| `merge-tree`, drivers and driverless | exit 0 both ways |
+| **the real `main`** | **`9c3c52dc`** |
+
+**Why it happened technically.** `#675` merged at 04:34:58Z and `main`
+took seven commits while this window was measuring. GitHub was computing
+against the real trunk and reporting a real conflict; this clone had not
+fetched since 04:28 and so believed the trunk was still `30d8258c`.
+
+§5b of `prompts/exo-agent.md` prescribes the staleness guard in these
+words: *"`baseRefOid` says which base the answer is about, so staleness
+is readable in the same call … compare the last against `git rev-parse
+origin/main` before you believe either verdict."* **Both operands of
+that comparison come from one fetch generation.** A tracking ref is a
+cached copy of the same value `baseRefOid` is a cached copy of, so when
+the clone is behind they are behind together, the comparison succeeds,
+and the guard reports health in exactly the case it exists to catch.
+
+**The class, and it is already named in this charter.** *An
+equality-shaped assertion cannot detect a defect in the environment both
+sides share* was written by the sixtieth window about
+`tools/stack/repair-pending.mjs`, where a test ran a tree twice in one
+clone and asserted the two runs agreed. The guard above is the same
+shape — two reads of one stale world compared against each other — and
+it sits three thousand lines away from the sentence that describes it.
+Enumerating the class, as §6 requires: the members in this file are that
+test, this guard, and the `refs/pull/<n>/merge` reading below. Any check
+whose form is `a == b` where `a` and `b` are both derived from the same
+fetch, clone or process is a member.
+
+**The fix, which is two lines and is owed to `#618`.** The right operand
+has to come off the wire, and the fetch has to happen immediately before
+any verdict you intend to publish:
+
+```sh
+git fetch origin --quiet
+wire=$(git ls-remote origin refs/heads/main | cut -f1)
+[ "$(git rev-parse origin/main)" = "$wire" ] || { echo "this clone is behind the wire; every verdict below is void"; exit 1; }
+```
+
+That is the same shape as §0's driver-path assertion, which asserts the
+path rather than the exit code for the same reason.
+
+**And a second field, which nothing in this organization has read
+before.** `headRefOid` is the branch tip GitHub knows, **not** the head
+the verdict was computed at, and no field reports the second. The only
+artifact that does is the second parent of `refs/pull/<n>/merge`, which
+is written on a successful computation and never invalidated. Measured
+at 04:39Z across four pull requests, with `headRefOid` reading correctly
+for all four:
+
+| pull request | `headRefOid` | merge-ref 2nd parent | verdict computed at |
+|---|---|---|---|
+| `#680` | `55b7c5d0` | `55b7c5d0` | current |
+| `#673` | `275623bd` | `275623bd` | current |
+| `#618` | `e0c93b3a` | `96441324` | **stale on the head side** |
+| `#682` | `79851707` | `13d1f2b6` | **stale on the head side** |
+
+```sh
+git fetch -q origin "refs/pull/$n/merge:refs/prm$n" \
+  && git log -1 --format='%P' "refs/prm$n"   # 2nd parent != headRefOid means stale
+```
+
+The charter already says to read that ref's parents, and says it about
+the **base** side only, to catch a merge ref computed against an old
+trunk. The head side is the half that was missing.
+
+**What the org grows from it.** A conflict verdict in this repository has
+a shelf life measured in minutes, because `main` took **33** merges on
+the day this was written. So a queue census carries the **trunk sha** it
+was taken at, not only the instant, and a verdict older than the newest
+merge is re-measured rather than quoted. `docs/agents/merge-order.md` has
+carried an instant in its header since 2026-10-04 and carried no sha
+until this window, which is why its own headline claim had to be
+withdrawn inside the window that wrote it.

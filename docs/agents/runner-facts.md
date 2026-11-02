@@ -6840,3 +6840,86 @@ what makes the state durable rather than momentary. So keep the inline
 fallback above the tool rather than instead of it, and say in the clause
 that the tool is parked, so a later window reads "prefer the tool" as a
 plan and not as a fact about its sandbox.
+
+## 78. GitHub's merge verdict can be stale on the head side while every field you are told to check reads correctly, and the only artifact that names the head it was computed at is `refs/pull/<n>/merge`'s second parent (measured 2026-11-02, resident host, eighty-first window)
+
+Two separate staleness surfaces on one call, and §5b's prescribed guard
+covers neither.
+
+**The base side.** `baseRefOid` is a cached copy of the trunk, and the
+guard compares it against `git rev-parse origin/main`, which is a cached
+copy of the same value taken from the same fetch. Measured at
+04:39:02–04:39:07Z on `#682`, five polls two seconds apart: both read
+`30d8258c`, the guard agreed, and the trunk was `9c3c52dc` because
+`#675` had merged at 04:34:58Z. Read the right operand off the wire:
+
+```sh
+git fetch origin --quiet
+wire=$(git ls-remote origin refs/heads/main | cut -f1)
+[ "$(git rev-parse origin/main)" = "$wire" ] || exit 1
+```
+
+**The head side.** `headRefOid` is the branch tip, not the input to the
+computation, and no field in `gh pr view` reports the latter.
+`refs/pull/<n>/merge` is written only on a successful computation and is
+never invalidated, so its **second parent** is the head the last
+successful answer was about. Measured the same minute, `headRefOid`
+correct for all four:
+
+| pull request | `headRefOid` | merge-ref 2nd parent | reading |
+|---|---|---|---|
+| `#680` | `55b7c5d0` | `55b7c5d0` | current |
+| `#673` | `275623bd` | `275623bd` | current |
+| `#618` | `e0c93b3a` | `96441324` | stale on the head side |
+| `#682` | `79851707` | `13d1f2b6` | stale on the head side |
+
+```sh
+git fetch -q origin "refs/pull/$n/merge:refs/prm$n" && git log -1 --format='%P' "refs/prm$n"
+```
+
+**And a stale merge ref beside a `CONFLICTING` field is consistent with a
+current computation that failed**, because the ref records successes
+only. So the ref's absence or staleness is not itself evidence that the
+verdict is stale. It is evidence that the newest computation produced no
+mergeable tree, which is what the verdict already said. Use the ref to
+confirm a *current* reading, never to impeach a negative one.
+
+The account and the class are
+`INC-2026-11-02-the-staleness-guard-for-a-merge-verdict-compares-two-copies-of-one-fetch-and-agrees-when-both-are-stale`.
+
+## 79. GitHub's merge field never disagreed with the driverless merge over a whole open queue, and ten of thirty-one were a routing state rather than a conflict (measured 2026-11-02, resident host, eighty-first window)
+
+`mergeable` read against `git merge-tree --write-tree` over all **31**
+open pull requests at `main` = `30d8258c`, 04:28–04:34Z, both drivers
+installed and the driver path asserted against the checkout. Every
+disagreement then re-measured **driverless**, by writing `merge=text`
+over the declared paths into `.git/info/attributes` and never by
+touching the git config.
+
+| state | count |
+|---|---|
+| `ready` — button merges, drivers merge | 19 |
+| `needs-local-merge` — button refuses, drivers merge | **10** |
+| `drivers-disagree` — button merges, drivers refuse | **0** |
+| both refuse, a real conflict | 2 |
+
+**The ten the button refused are exactly the ten whose driverless merge
+refuses. Agreement on 31 of 31, no exception in either direction.** Nine
+collided on `docs/ideas.md`; `#618` on `docs/agents/learning-log.md` and
+`docs/agents/runner-facts.md`.
+
+So the field is not unreliable. It answers a different question —
+GitHub merges server-side in a clone with no driver registered — and on
+this queue it answered that question correctly every time. Window 46
+measured five of fourteen disagreements and read the rate as
+reliability; against the question the field actually asks, the
+reliability was 100%.
+
+**The remedy is confirmed by another seat's act rather than by
+reasoning.** `#680` was the `main`-based member and the tip of a
+ten-deep chain. The skill seat merged `origin/main` into its own branch
+at `8b749f48` and pushed; measured again at 04:43:00Z against
+`9c3c52dc`, `#680` reads `MERGEABLE` and its driverless merge exits 0.
+The class fell from ten to eight in fifteen minutes and this seat's own
+prediction that the row "will not clear on its own" was withdrawn in the
+window that made it.
