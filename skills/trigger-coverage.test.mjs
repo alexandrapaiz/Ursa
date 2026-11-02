@@ -26,6 +26,8 @@ import {
   amendmentEdges,
   amendmentPopulation,
   amendmentDefects,
+  unreadableAmendmentClaims,
+  AMENDMENT_VOCABULARY,
   backPointerLine,
   explainAmendments,
   specSections,
@@ -836,6 +838,94 @@ test('an unreadable spec is this check with nothing to read, not a clean graph',
   assert.deepEqual(amendmentDefects(null), [])
 })
 
+test('an unrecognised spelling is reported as unread, not as absent, and both directions are here', () => {
+  // The defect this pays. Both arms below decide from `AMENDING`'s silence and
+  // both turn that silence into an accusation with a non-zero exit, so an
+  // unrecognised word does not fail to fire here: it manufactures the thing it
+  // reports. Widening the verb, which is the commit above this one, moves the
+  // boundary and leaves that property untouched.
+
+  // Direction one, which must be reported: the claim is in a spelling the
+  // pattern does not carry, so its edges are not in the graph and the amended
+  // section must not be told that nothing claims it.
+  const fourth = '## 5. A\n\n(Amended by §5c. Generated line, per §5ah.)\n\nIts body.\n\n' +
+    '## 5c. B\n\n(Added 2026-10-01, third run, an amendment to §5.)\n\nIts body.\n'
+  assert.deepEqual(amendmentEdges(fourth), [], 'the fourth spelling is outside AMENDING, which is the premise')
+  assert.deepEqual(kinds(fourth), ['unreadable-claim', 'orphan'])
+  const [claim, orphan] = amendmentDefects(fourth)
+  assert.match(claim.detail, /a spelling this check does not read/)
+  assert.match(orphan.detail, /may be its dropped edge/,
+    'the orphan verdict is derived from the same silence, so it says so')
+
+  // Direction two: the back pointer is there and readable by a person, in a
+  // spelling the exact opening does not match. Two inputs, because one of them
+  // is the same bytes two spaces to the right.
+  for (const pointer of ['(This section is amended by §5c. Generated line, per §5ah.)',
+                         `  ${AMENDED}`]) {
+    const d = amendmentDefects(two(pointer))
+    assert.deepEqual(d.map((x) => x.kind), ['unreadable-pointer'], `pointer: ${pointer}`)
+    assert.match(d[0].detail, /in a form this check does not read/)
+    assert.doesNotMatch(d[0].detail, /nowhere/,
+      'the old verdict said "says so nowhere" about a file that says so on the line it quotes')
+  }
+
+  // The negative control, and it is the direction a widened pattern breaks. A
+  // section genuinely amended with nothing resembling a back pointer is still
+  // `missing`, and prose about this file that happens to carry both words is
+  // not a claim.
+  assert.deepEqual(kinds(two('Its body.')), ['missing'])
+  assert.deepEqual(kinds(two('Its body discusses amendment at some length before it ever cites §5c.')),
+    ['missing'], 'the words are more than thirty characters apart, so this is not a near pointer')
+  // And the over-fire, asserted rather than hidden, because the pattern is
+  // deliberately wide and this is what wide costs. Prose that mentions
+  // amendment close to a reference, in the paragraph a back pointer belongs
+  // in, is read as an unrecognised one. That direction is cheap: the operator
+  // is told to look at a line that does discuss the amendment, and the repair
+  // named is the one the section needed anyway. The direction this replaced
+  // was not cheap, because it asserted a falsehood about the file.
+  assert.deepEqual(kinds(two('Its body would amend §5c if anyone let it.')),
+    ['unreadable-pointer'], 'wide on purpose, and the cost is one line of output')
+  assert.deepEqual(unreadableAmendmentClaims(
+    '## 5. A\n\nIts body.\n\n## 5c. B\n\n(Added 2026-11-02, amending the entry\'s first step, as the §5 rule asks.)\n\nIts body.\n'),
+    [], "§5ai's live note says it amends a ledger entry and separately names a §5 section; that is not a claim")
+  assert.deepEqual(unreadableAmendmentClaims(null), [])
+  assert.deepEqual(unreadableAmendmentClaims(two('Its body.')), [])
+})
+
+test('--write refuses an unreadable claim rather than deleting a back pointer it cannot rebuild', () => {
+  // `withBackPointers` removes every recognised back pointer and regenerates
+  // from the edges it could read, so one unrecognised spelling makes it delete
+  // a correct line and write nothing in its place. Measured on the live file:
+  // re-spelling §5ak's claim takes §5s's and §5w's back pointers out and
+  // returns 8 where the unmodified file returns 10.
+  const fourth = '## 5. A\n\n(Amended by §5c. Generated line, per §5ah.)\n\nIts body.\n\n' +
+    '## 5c. B\n\n(Added 2026-10-01, third run, an amendment to §5.)\n\nIts body.\n'
+  const refused = withBackPointers(fourth)
+  assert.deepEqual(refused.refused, ['5c'])
+  assert.equal(refused.changed, 0)
+  assert.equal(refused.text, fourth, 'the file is returned untouched, so the correct line survives')
+  // And the readable case is unchanged by the refusal: it still writes.
+  const ok = withBackPointers(two('Its body.'))
+  assert.deepEqual(ok.refused, [])
+  assert.equal(ok.changed, 1)
+})
+
+test('the clean verdict names the vocabulary it searched with, because an absence is about the words', () => {
+  // Clause 1 of the denominator rule reaches the population. This reaches the
+  // pattern: a check that concludes from silence has to say what it listened
+  // for, or its clean line reads as a universal about the file.
+  assert.match(AMENDMENT_VOCABULARY, /3 inflections of "amend"/)
+  assert.match(AMENDMENT_VOCABULARY, /\(Amended by /)
+  assert.match(AMENDMENT_VOCABULARY, /30 characters/)
+  // The wider pattern is a second vocabulary and not an escape from having
+  // one, which is why it is printed too. A claim written without any `amend`
+  // word is invisible to both.
+  assert.deepEqual(unreadableAmendmentClaims(
+    '## 5. A\n\n(Amended by §5c. Generated line, per §5ah.)\n\nIts body.\n\n' +
+    '## 5c. B\n\n(Added 2026-10-01, superseding §5.)\n\nIts body.\n'), [],
+    'the honest limit: "supersedes" reaches neither pattern, and the check reports finding nothing')
+})
+
 test('the amendment explanation names the repair and distinguishes the ones --write cannot make', () => {
   const generated = explainAmendments([{ kind: 'missing' }]).join(' ')
   assert.match(generated, /--amendments --write/)
@@ -843,5 +933,15 @@ test('the amendment explanation names the repair and distinguishes the ones --wr
   const byHand = explainAmendments([{ kind: 'dangling' }]).join(' ')
   assert.doesNotMatch(byHand, /--amendments --write` and commit/)
   assert.match(byHand, /fixed by hand/)
+  // One condition, one explanation, per §5z. The two vocabulary kinds take
+  // different repairs: a claim is re-spelled by hand and a back pointer is
+  // handed back to `--write`, so neither sentence may stand in for the other.
+  const unread = explainAmendments([{ kind: 'unreadable-claim' }]).join(' ')
+  assert.match(unread, /edge of its own vocabulary/)
+  assert.match(unread, /`--write` refuses while this is open/)
+  assert.doesNotMatch(unread, /a later `--write` will not maintain/)
+  const unreadPointer = explainAmendments([{ kind: 'unreadable-pointer' }]).join(' ')
+  assert.match(unreadPointer, /different finding from saying it nowhere/)
+  assert.doesNotMatch(unreadPointer, /edge of its own vocabulary/)
   assert.deepEqual(explainAmendments([]), [])
 })

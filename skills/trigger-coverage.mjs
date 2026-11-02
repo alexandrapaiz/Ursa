@@ -841,6 +841,100 @@ const AMENDING = /\bamend(?:s|ing|ed)\s+((?:§[0-9][0-9a-z]*(?:\s+part\s+\d+)?(?
 const ONE_REF = /§([0-9][0-9a-z]*)(?:\s+part\s+(\d+))?/g
 
 /**
+ * The wider pattern, whose only job is to split an absence into "nothing here"
+ * and "something here this check cannot read". It decides nothing on its own
+ * and it is never the source of an edge.
+ *
+ * WHY WIDENING `AMENDING` WAS THE WRONG REPAIR ON ITS OWN, which is a fact
+ * about the commit directly above this one. On 2026-11-02 the pattern read one
+ * inflection, a note spelled the claim `Amends`, and the edge was dropped in
+ * silence. The repair was three inflections. That moved the boundary and left
+ * every arm that reasons from this pattern's silence exactly as it was: a
+ * fourth spelling still produces the same outcome, and nothing in the output
+ * distinguishes the fourth spelling from a note that claims nothing.
+ *
+ * AND THE DROP IS NOT THE EXPENSIVE HALF. `amendmentDefects` has two arms that
+ * read this pattern's silence as a positive finding. `missing` tells a section
+ * it "says so nowhere"; `orphan` tells a section that no note claims it. Both
+ * exit 1 and both name a repair. So an unrecognised spelling does not merely
+ * fail to fire here: it manufactures the absence it reports, and the operator
+ * is told a falsehood with a non-zero exit status rather than told nothing.
+ * Measured on this file: re-spelling §5ak's claim as "An amendment to §5s and
+ * §5w" drops 2 of the 11 edges and accuses §5s and §5w of carrying back
+ * pointers that nothing earned. Re-wording §5's back pointer, or merely
+ * indenting it two spaces, reports "§5 is amended by §5c and says so nowhere"
+ * about a file that says so on line 112.
+ *
+ * THE SHAPE IS URSA'S EXO SEAT'S, offered on the board on 2026-11-02 and
+ * re-derived here before use: an arm keyed on the absence of a known phrase
+ * manufactures the absence rather than only failing to fire. That seat graded
+ * it on `tools/board/check.mjs`, where 32 bodies were told their verdict had
+ * been cut while it sat at offset zero. Confirmed in this clone against this
+ * seat's own 2,034-character `done` of 03:43: two decisions at offsets 233 and
+ * 729, a cut at 1,453, and `dispositionRisk` returns `markers_found: 0`,
+ * because the list carries `not merged` and `I took` and neither `I did not
+ * <verb>` nor an affirmative `I merged`. `tools/` is not this seat's to write,
+ * so that half stays with that seat; this is the same defect in the one place
+ * this seat owns.
+ *
+ * WHY THIS PATTERN AND NOT A LOOSER ONE. An `amend` word within thirty
+ * characters of a `§` reference, stopping at a sentence end. The obvious looser
+ * form, any `amend` word anywhere in the text together with any reference, was
+ * tried first and fires on §5ai's live note, which says it "amends the entry's
+ * first step" and separately mentions a `§5` section: a discriminator that
+ * reports a false near-hit on the clean file cannot discriminate. Measured
+ * across five variants of this file, the pattern below returns 0 near-claims
+ * and 0 near-pointers on the live text and finds each of the three re-spellings
+ * above.
+ *
+ * AND THE LIMIT, STATED BECAUSE IT IS THE RULE'S OWN COST. This is a second
+ * vocabulary, not an escape from having one. A claim written without any
+ * `amend` word — "This section supersedes §5s" — is invisible to it, and on
+ * that variant this check correctly reports finding nothing, which is not the
+ * same as there being nothing. That is why the verdict line prints the
+ * vocabulary it searched with: the honest form of this check's clean line is a
+ * statement about what it read for, never a universal about the file.
+ */
+const NEAR_AMENDMENT = /\bamend\w*\b[^.§]{0,30}§[0-9]/i
+
+/** One line's worth of a quoted paragraph, collapsed and ellipsised. The same
+ *  shape `specNeighbourDefects` uses at line 611, kept as a function because
+ *  two call sites below quote and the defect detail has to be one line. */
+const clip = (text, n) => {
+  const flat = String(text || '').replace(/\s+/g, ' ').trim()
+  return flat.length <= n ? flat : `${flat.slice(0, n).trimEnd()}…`
+}
+
+/** The vocabulary, printed in the verdict so the clean line is a claim about
+ *  what was searched for and not about the file. */
+export const AMENDMENT_VOCABULARY =
+  '3 inflections of "amend" followed by a reference for a claim, the exact opening' +
+  ' "(Amended by " for a back pointer, and an "amend" word within 30 characters of a' +
+  ' reference for either in a form this check cannot read'
+
+/**
+ * Every dated note that resembles an amendment claim and is not one, as
+ * `{ id, line, text }`. This is the population `amendmentEdges` dropped and
+ * the population the `orphan` arm would otherwise accuse a section over.
+ *
+ * Exported because a caller that prints an absence needs to be able to say
+ * whether the absence was observed or assumed, and because the alternative to
+ * exporting it is a second copy of the pattern at the call site.
+ */
+export function unreadableAmendmentClaims(specText) {
+  if (!specText) return []
+  const out = []
+  for (const sec of specSections(specText)) {
+    const note = openingNote(sec)
+    if (!note) continue
+    if (AMENDING.test(note.text)) continue
+    if (!NEAR_AMENDMENT.test(note.text)) continue
+    out.push({ id: sec.id, line: sec.line + note.start, text: note.text })
+  }
+  return out
+}
+
+/**
  * Every amendment this file declares, as `{ from, to, part, line }`, in file
  * order of the amending section. `part` is the sub-part named in the clause or
  * null, and it is carried through because §5aa amends part 3 of §5t and a
@@ -964,6 +1058,16 @@ function wantParagraph(sec) {
  *   stops after the first paragraph will see it, which is the whole failure
  *   this rule exists to stop.
  * - `orphan` — a back pointer in a section no edge points at.
+ * - `unreadable-claim` — a dated note that resembles an amendment claim in a
+ *   spelling `AMENDING` does not carry. Reported in its own right, because the
+ *   alternative is a dropped edge plus a false `orphan` somewhere else in the
+ *   file, which is two wrong answers from one unrecognised word.
+ * - `unreadable-pointer` — the paragraph where the back pointer belongs holds
+ *   something that resembles one. This is what `missing` used to be reported
+ *   as, and `missing` now means the paragraph holds neither.
+ *
+ * The last two exist because the five above are decided by a pattern's silence
+ * and two of them turn that silence into an accusation. See `NEAR_AMENDMENT`.
  */
 export function amendmentDefects(specText) {
   if (!specText) return []
@@ -972,6 +1076,13 @@ export function amendmentDefects(specText) {
   const edges = amendmentEdges(specText)
   const amenders = new Map()
   const out = []
+  // First, because every verdict below is read out of `AMENDING`'s silence and
+  // these are the notes whose silence is not evidence.
+  const unreadable = unreadableAmendmentClaims(specText)
+  for (const u of unreadable)
+    out.push({ kind: 'unreadable-claim', from: u.id, to: null, line: u.line, part: null,
+      detail: `§${u.id}'s note names a section next to an amendment word in a spelling this` +
+        ` check does not read, so its edges are not in the graph: "${clip(u.text, 90)}"` })
   for (const e of edges) {
     if (e.to === e.from) { out.push({ kind: 'self', ...e, detail: `§${e.from} declares it amends itself` }); continue }
     if (!byId.has(e.to)) { out.push({ kind: 'dangling', ...e, detail: `§${e.from} declares it amends §${e.to}, which is not a section of this file` }); continue }
@@ -986,12 +1097,34 @@ export function amendmentDefects(specText) {
     if (!want) {
       for (const p of found)
         out.push({ kind: 'orphan', from: null, to: sec.id, line: sec.line + p.start, part: null,
-          detail: `§${sec.id} carries a back pointer and no section declares it amends §${sec.id}` })
+          // Qualified when there is an unreadable claim in the file, because
+          // then the absence of an edge is this check's reading and not an
+          // observation, and the orphan may be that note's dropped edge.
+          detail: `§${sec.id} carries a back pointer and no section declares it amends §${sec.id}` +
+            (unreadable.length
+              ? ` in a form this check reads; ${unreadable.length} note${unreadable.length === 1 ? '' : 's'} above` +
+                ` ${unreadable.length === 1 ? 'is an unreadable claim' : 'are unreadable claims'},` +
+                ` so this may be ${unreadable.length === 1 ? 'its' : 'one of their'} dropped edge`
+              : '') })
       continue
     }
     if (!found.length) {
-      out.push({ kind: 'missing', from: mine.map((a) => a.from).join(', '), to: sec.id, line: sec.line, part: null,
-        detail: `§${sec.id} is amended by ${mine.map((a) => `§${a.from}`).join(' and ')} and says so nowhere` })
+      // Split, because "says so nowhere" is a claim about the file and the
+      // only thing observed is that one exact opening did not match. The
+      // paragraph the generated line is required to occupy is the whole scope
+      // of the question, so it is the whole scope of this read.
+      const at = paras[wantParagraph(sec)]
+      const near = at ? sec.lines[at.start] : null
+      if (near !== null && NEAR_AMENDMENT.test(near))
+        out.push({ kind: 'unreadable-pointer', from: mine.map((a) => a.from).join(', '), to: sec.id,
+          line: sec.line + at.start, part: null,
+          detail: `§${sec.id} is amended by ${mine.map((a) => `§${a.from}`).join(' and ')} and the` +
+            ` paragraph its back pointer belongs in says so in a form this check does not read:` +
+            ` "${clip(near, 80)}"` })
+      else
+        out.push({ kind: 'missing', from: mine.map((a) => a.from).join(', '), to: sec.id, line: sec.line, part: null,
+          detail: `§${sec.id} is amended by ${mine.map((a) => `§${a.from}`).join(' and ')} and` +
+            ` carries nothing resembling a back pointer where one belongs` })
       continue
     }
     if (found.length > 1) {
@@ -1024,6 +1157,16 @@ export function amendmentDefects(specText) {
  * cannot move a section above it.
  */
 export function withBackPointers(specText) {
+  // Refused, not attempted, when any note's claim is unreadable. This function
+  // deletes every recognised back pointer and rebuilds from the edges it could
+  // read, so one unrecognised spelling makes it delete a correct line and not
+  // put it back. Measured: against §5ak's claim re-spelled as "An amendment
+  // to", a `--write` removes §5s's and §5w's back pointers and writes neither.
+  // A tool that destroys the record it cannot parse is worse than one that
+  // stops, which is why this is the only refusal in this file's writers.
+  const unreadable = unreadableAmendmentClaims(specText)
+  if (unreadable.length)
+    return { text: specText, changed: 0, refused: unreadable.map((u) => u.id) }
   let lines = specText.split('\n')
   for (const sec of [...specSections(lines.join('\n'))].reverse()) {
     for (const p of paragraphs(sec.lines).filter((q) => BACK_POINTER.test(sec.lines[q.start])).reverse()) {
@@ -1052,7 +1195,7 @@ export function withBackPointers(specText) {
     lines.splice(at, 0, '', ...wrap(backPointerLine(mine)))
     changed++
   }
-  return { text: lines.join('\n'), changed }
+  return { text: lines.join('\n'), changed, refused: [] }
 }
 
 /** Why an amendment back pointer is owed, and what to run. One condition, so
@@ -1076,6 +1219,22 @@ export function explainAmendments(defects) {
   if (defects.some((d) => d.kind === 'orphan'))
     lines.push('An orphan is a back pointer left behind by a note that stopped claiming the',
       'amendment. `--write` removes it.')
+  if (defects.some((d) => d.kind === 'unreadable-claim'))
+    lines.push('An unreadable claim is this check reaching the edge of its own vocabulary, and it',
+      'is reported rather than passed over because the two arms above reason from this',
+      'pattern\'s silence: a spelling it misses drops the edge and then accuses the amended',
+      'section of carrying a back pointer nothing earned. Re-spell the note\'s clause as a',
+      'verb followed by its references, `amends §N`, which is the form §5ah states the rule',
+      'in. `--write` refuses while this is open, because rebuilding from a graph missing the',
+      'edge deletes a correct back pointer and does not put it back.')
+  if (defects.some((d) => d.kind === 'unreadable-pointer'))
+    lines.push('An unreadable back pointer is a section that says it was amended in words this',
+      'check does not read, which is a different finding from saying it nowhere and used to',
+      'be reported as that one. The line is generated, so the hand-written sentence has to',
+      'go and `--write` has to put the generated one in. Deleting it first is the whole of',
+      'the repair: `--write` only removes paragraphs it recognises, so run on its own it',
+      'adds the generated line beside the sentence and leaves a duplicate standing, and the',
+      'verdict goes clean over a section that now says the same thing twice.')
   return lines
 }
 
@@ -1252,13 +1411,20 @@ function amendmentsMode(write) {
     return 1
   }
   const pop = amendmentPopulation(specText)
+  const unreadable = unreadableAmendmentClaims(specText)
   const edges = amendmentEdges(specText)
   console.log(`amendment graph over ${pop.sections} sections, ${pop.notes} of them carrying a dated note, ` +
     `${pop.claiming} of those declaring an amendment, ${edges.length} edge${edges.length === 1 ? '' : 's'}:`)
   for (const e of edges)
     console.log(`  §${e.from}:${e.line} amends §${e.to}${e.part ? ` ${e.part}` : ''}`)
   if (write) {
-    const { text, changed } = withBackPointers(specText)
+    const { text, changed, refused } = withBackPointers(specText)
+    if (refused.length) {
+      console.log(`\nnothing written: ${refused.length} note${refused.length === 1 ? '' : 's'}` +
+        ` (${refused.map((id) => `§${id}`).join(', ')}) claim an amendment in a spelling this check` +
+        ` does not read, and rewriting from a graph missing their edges would delete back pointers` +
+        ` it cannot put back`)
+    } else {
     if (text !== specText) writeFileSync(SPEC_PATH, text)
     console.log(`\n${changed} section${changed === 1 ? '' : 's'} carry a generated back pointer` +
       `${text === specText ? ', unchanged' : ', written'}`)
@@ -1267,14 +1433,23 @@ function amendmentsMode(write) {
     // `--write` printed seven failures and told the caller to run the command
     // it had just run.
     specText = text
+    }
   }
   const defects = amendmentDefects(specText)
+  // Re-read against the text that was graded rather than the text that was
+  // loaded, for the same reason the defects are: under `--write` they differ.
+  const unreadableNow = unreadableAmendmentClaims(specText)
   for (const d of defects) console.log(`${SPEC_REL}:${d.line} ${d.kind}: ${d.detail}`)
   if (!defects.length) {
     console.log(`\nevery amended section names its amendments, across the ${pop.claiming} note` +
       `${pop.claiming === 1 ? '' : 's'} that declare one; ${pop.notes - pop.claiming} dated note` +
       `${pop.notes - pop.claiming === 1 ? '' : 's'} declare none and ${pop.sections - pop.notes} section` +
       `${pop.sections - pop.notes === 1 ? '' : 's'} carry no dated note, so this verdict says nothing about them`)
+    // Every line above is read out of a pattern's silence, so the clean verdict
+    // names the words it searched with. An absence is a fact about a
+    // vocabulary until the vocabulary is printed beside it.
+    console.log(`read with ${AMENDMENT_VOCABULARY}; ${unreadableNow.length} note` +
+      `${unreadableNow.length === 1 ? '' : 's'} resemble a claim in a form it cannot read`)
     return 0
   }
   console.log('')
