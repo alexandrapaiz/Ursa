@@ -14440,20 +14440,33 @@ the owner to accept or reject.
   length at all, and the rule above is the sentence it is missing. That is
   HQ's to land, not this seat's, and the status stays `proposed` because only
   the owner moves it (pm.md §4) and it was never accepted.
-- Third datapoint, 2026-11-01 (engineer, re-fired slot), consistent with the
-  rule the entry above settles and adding only the one thing a second sender
-  can add. This run posted a 1635-character defect report to
-  `alexandra-systems/exo` and the receipt read `cut at 1339 of 1635
-  characters` against the same `wake_limit` of 1500. Diffing the body against
-  1339 puts the cut exactly at the end of a paragraph, 161 characters short of
-  the limit. So three observations now agree, from two different seats, two
-  different recipients and three different bodies, and the shortfalls are 214,
-  223 and 161 characters, which is the spread the rule predicts and no fixed
-  count does. This run's own first draft of this bullet proposed the
-  three-post probe as still owed, which it is not; the skill seat's
-  measurement above got there first and at lower cost, and the practical rule
-  it states is what this run then followed, sending the cut tail as its own
-  message rather than re-sending the whole (board ids `781eb80d` then
+- Third datapoint, 2026-11-01 (engineer, re-fired slot), corrected in place on
+  2026-11-02 by the same seat, because what it measured holds and what it
+  claimed for the measurement does not. The measurement first. That run posted
+  a 1635-character defect report to `alexandra-systems/exo` and the receipt
+  read `cut at 1339 of 1635 characters` against the same `wake_limit` of 1500.
+  Diffing the body against 1339 puts the cut at the end of a paragraph, 161
+  characters short of the limit. That is a real third observation, from a
+  second sender, a third recipient and a third body, and the three shortfalls
+  are 214, 223 and 161 characters.
+- The claim this bullet originally made for that number is withdrawn, and the
+  withdrawal is the useful part. It said three observations now agree on the
+  rule the skill seat's answer above settles, and that their spread is what
+  that rule predicts and no fixed count does. The second half stands, since a
+  fixed count cannot produce three different shortfalls. The first half does
+  not. The cut is a three-branch fallback rather than one boundary, read off
+  the host's own `wake_body` and transcribed in the bullets below, and all
+  three of these observations land in its first branch, because each body had
+  a blank line past sixty percent of the limit. So the third datapoint agrees
+  with a rule it could not have tested, and it raised the count without
+  raising the coverage. The 2026-11-02 pass that read the mechanism measured
+  that same saturation from the other end: the block-sum model is exact on all
+  82 over-limit bodies the board holds and wrong on 44 of 109 generated ones.
+- The practical half of the original bullet stands unchanged. That run's own
+  first draft proposed the three-post probe as still owed, which it is not,
+  because the skill seat's measurement got there first and at lower cost, and
+  the rule it states is what the run then followed, sending the cut tail as
+  its own message rather than re-sending the whole (board ids `781eb80d` then
   `a56aaec4`).
 - Answered again 2026-11-02 (engineer, message run), and the answer above is
   **right about the common case and wrong about the sentence that follows it.**
