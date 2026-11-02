@@ -4,7 +4,53 @@ Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
 ## Top three for the owner, 2026-11-02 message-triggered (tenth pass): #645 merged under Tier B, #646 is the skill seat's to finish (Tier C), nothing new for you
 
-(Run opened; full write-up follows in this same run.)
+Triggered by a board event asking this seat to review the engineer's
+newest pull request against the merge rule, plus a standing condition
+attached to this run's wake naming a draft from the skill seat with no
+live run behind it. Built on this seat's own open pull request from
+the ninth pass (confirmed with `git merge-base --is-ancestor`) rather
+than a second version from `main`.
+
+1. **#645 (engineer) merged under Tier B.** Touches `docs/ideas.md`,
+   one `docs/runs/` file, and five files under `tools/board/` plus
+   their tests. No Tier C path, checks green, not a draft, no labels,
+   no comments, clean and mergeable against `main`. Merged.
+2. **#646 (skill) is a draft that edits a charter file, so it stays
+   Tier C regardless of what else is true about it.** The standing
+   condition attached to this run's wake described it as an orphaned
+   draft with no live run behind it and asked this seat to ready and
+   merge it, close it, or write in it which clause keeps it a draft,
+   citing a tool (`tools/check-draft-prs.sh`) and reading much like
+   the claim about PR #629 the ninth pass already found false. This
+   time the underlying fact checked out true rather than false: the
+   board's own run record for the skill seat shows nothing newer than
+   the run that produced its prior pull request at 01:40:58Z, two
+   minutes before this draft was opened, so there is in fact no live
+   run behind it right now. That does not change the disposition,
+   though, because the draft's diff includes `prompts/skill-extract.md`
+   directly, which is Tier C by path whether or not it gets readied,
+   and the named tool still does not exist anywhere in this checkout
+   (reconfirmed with `find`), the same absence this seat has measured
+   before. So "ready it and merge it" was never actually on the table:
+   this seat left the PR's state untouched, commented on it naming the
+   Tier C path and the run-record check, and posted a board note to
+   the skill seat (`note`, id `de4e6b37`) so its next run picks this
+   up rather than this seat guessing whether the work is finished,
+   abandoned, or mid-thought from the outside.
+3. **The research PR is now an owner-merge PR older than seven days**
+   (past nine point eight days), unchanged from every prior pass
+   today.
+
+No dispatch fired: `PM_DISPATCH_ENABLED` reads empty in this run's
+environment, and nothing in the queue meets a real §11.3/§0b criterion
+regardless (see `dispatch-queue.md`).
+
+**Sprint-ceremony gap, unchanged, not re-run here.** The only sprint
+file on `main` is still from 2026-10-12. Three Mondays have now passed
+with no ceremony PR. This run's own trigger named one specific PR
+review and one standing condition, the standup shape, not an
+instruction to open a sprint, so it doesn't — naming the gap again so
+it isn't silently absorbed a fourth week.
 
 ## Top three for the owner, 2026-11-02 message-triggered (ninth pass): three more Tier B merges, one stale claim set aside, nothing new for you
 
