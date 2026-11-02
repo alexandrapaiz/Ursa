@@ -395,6 +395,148 @@ describe('redaction-check', () => {
     }
   });
 
+  // --history=all, added 2026-11-02 for F50. Until then the mode walked one
+  // named ref, and on this repository that read 13 hits while 92 were
+  // reachable from some ref. The four tests below are the whole argument for
+  // the flag: a value on an undeleted branch is reachable in a public
+  // repository, one ref's ancestry cannot see it, every ref can, and the
+  // refspec fault that does not matter for a named ref is exactly what
+  // shrinks --all.
+  test('--history=all sees a branch that no named ref in the sweep reaches', () => {
+    const dir = gitRepo([{ 'a.md': 'clean\n' }]);
+    try {
+      const git = (...args) =>
+        execFileSync('git', ['-C', dir, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+      git('checkout', '-q', '-b', 'abandoned');
+      writeFileSync(join(dir, 'leak.md'), `id: ${fakeSessionId}\n`);
+      git('add', '-A');
+      git('commit', '-q', '-m', 'the branch nobody deleted');
+      git('checkout', '-q', 'main');
+
+      assert.equal(runCheck(dir, ['--history']).code, 0, 'HEAD never saw it, which is the old answer');
+      const all = runCheck(dir, ['--history=all']);
+      assert.equal(all.code, 1, 'every ref did, which is the new one');
+      assert.match(all.stderr, /leak\.md:1/);
+      assert.ok(!all.stderr.includes(fakeSessionId), 'must not reprint the value it caught');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('--history=all names its scope, so a log says which question was asked', () => {
+    const dir = gitRepo([{ 'a.md': 'clean\n' }, { 'b.md': 'also clean\n' }]);
+    try {
+      const { code, stdout } = runCheck(dir, ['--history=all']);
+      assert.equal(code, 0);
+      assert.match(stdout, /reachable from any ref in this clone/);
+      assert.doesNotMatch(stdout, /reachable from HEAD/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // The batch boundary, added 2026-11-02 after `--history=all` on a complete
+  // clone of this repository threw `RangeError: Invalid string length` out of
+  // `Array.join` and died at exit 1, which on this tool means a dirty tree. A
+  // byte budget fixed it, and the one thing a byte budget can get wrong is the
+  // mapping from a line number back to the blob it came from: `grep -n`
+  // numbers each batch's stream from 1, so a frame list that does not reset
+  // with the stream attributes a hit to whatever line sat at that index in an
+  // earlier batch. Both tests below drive a one byte budget, which flushes
+  // after every blob, so every hit crosses a boundary.
+  test('a hit keeps its own file and line across a batch boundary', () => {
+    const dir = gitRepo([
+      { 'first.md': 'one\ntwo\nthree\nfour\nfive\n' },
+      { 'second.md': 'a\nb\nc\n' },
+      { 'third.md': `x\ny\nid: ${fakeSessionId}\n` },
+    ]);
+    try {
+      const batched = runCheck(dir, ['--history', '--stream-budget=1']);
+      assert.equal(batched.code, 1);
+      assert.match(batched.stderr, /third\.md:3/, 'the third line of the third file, not an index into an earlier batch');
+      assert.ok(!batched.stderr.includes(fakeSessionId));
+      // And the unbatched scan of the same repository agrees, which is what
+      // says the budget changed the batching and nothing else.
+      const whole = runCheck(dir, ['--history']);
+      assert.equal(whole.code, 1);
+      assert.equal(batched.stderr, whole.stderr);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('a clean repository is still clean when every blob is its own batch', () => {
+    const dir = gitRepo([{ 'a.md': 'clean\n' }, { 'b.md': 'also clean\n' }, { 'c.md': 'and c\n' }]);
+    try {
+      const { code, stdout } = runCheck(dir, ['--history=all', '--stream-budget=1']);
+      assert.equal(code, 0);
+      assert.match(stdout, /Redaction history clean/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('a one-ref sweep says so, because its answer is the smaller one', () => {
+    const dir = gitRepo([{ 'a.md': `id: ${fakeSessionId}\n` }, { 'a.md': 'clean now\n' }]);
+    try {
+      const { code, stderr } = runCheck(dir, ['--history']);
+      assert.equal(code, 1);
+      assert.match(stderr, /This walked one ref\. Run --history=all/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('--history=all says a closed pull request keeps the ref alive, which deleting the branch does not', () => {
+    const dir = gitRepo([{ 'a.md': `id: ${fakeSessionId}\n` }, { 'a.md': 'clean now\n' }]);
+    try {
+      const { code, stderr } = runCheck(dir, ['--history=all']);
+      assert.equal(code, 1);
+      assert.match(stderr, /refs\/pull\/<n>\/head/);
+      assert.doesNotMatch(stderr, /Run --history=all/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // The asymmetry is the point and it is deliberate, so it is pinned in both
+  // directions. A narrow refspec cannot shrink the ancestry of a ref the
+  // caller named, and it is exactly what shrinks --all, so the named-ref
+  // sweep must NOT refuse on it and the all-refs sweep must.
+  test('--history=all refuses a single-branch clone; a named ref does not', () => {
+    const origin = gitRepo([{ 'a.md': 'clean\n' }]);
+    const narrow = mkdtempSync(join(tmpdir(), 'redaction-narrow-'));
+    try {
+      const ogit = (...args) =>
+        execFileSync('git', ['-C', origin, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+      ogit('checkout', '-q', '-b', 'side');
+      writeFileSync(join(origin, 'leak.md'), `id: ${fakeSessionId}\n`);
+      ogit('add', '-A');
+      ogit('commit', '-q', '-m', 'side');
+      ogit('checkout', '-q', 'main');
+
+      execFileSync('git', ['clone', '-q', '--single-branch', '--branch', 'main', `file://${origin}`, narrow], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+      // Full depth, so the shallow refusal cannot be what fires here.
+      assert.equal(
+        execFileSync('git', ['-C', narrow, 'rev-parse', '--is-shallow-repository'], { encoding: 'utf8' }).trim(),
+        'false',
+      );
+
+      const all = runCheck(narrow, ['--history=all']);
+      assert.equal(all.code, 2, 'exit 2 is "this checker could not do its job"');
+      assert.match(all.stderr, /fetch refspec covers one branch/);
+      assert.match(all.stderr, /ensure-full-clone/);
+
+      const named = runCheck(narrow, ['--history=main']);
+      assert.equal(named.code, 0, 'a named ref is complete in a narrow clone, so it is not refused');
+    } finally {
+      rmSync(origin, { recursive: true, force: true });
+      rmSync(narrow, { recursive: true, force: true });
+    }
+  });
+
   // A truncated graph that reports clean is the worst answer this mode can
   // give, because it is indistinguishable from the good one. Same refusal
   // tools/secret-scan.mjs makes, for the same reason.

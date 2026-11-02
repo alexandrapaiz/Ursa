@@ -1,0 +1,10 @@
+# The six raw shoot sets the floor numbers were read off are 11MB of
+# full-page PNGs and they are not committed, because the charter asks for
+# a light repository. L41's rule is why they are not compressed and
+# committed instead: any frame set a tool reads a number off is committed
+# uncompressed or not at all, since quantisation moves exactly the counts
+# a subtle frame is evidence for. `frames/` is one set, quantised, for the
+# eye. `data/floor-after.txt` is the number, read off the raw sets in the
+# sandbox before any of this ran.
+after/
+before/

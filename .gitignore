@@ -48,3 +48,32 @@ ursa-major/trial/*/
 *.scratch
 .scratch-*
 scratch/
+#
+# The third spelling, and this one is not a spelling at all, because the two
+# above are a list of names and the list keeps losing. Measured on
+# 2026-11-02 over every object in every ref: seventeen root-level
+# dot-entries have been committed to this repository as run scratch, and the
+# five patterns above cover five of them. The twelve they miss are
+# `.engineer-run-2026-09-28`, `.engineer-run-scratch.md`,
+# `.exo-run-2026-10-26.md`, `.exo-run-2026-10-26-w57.md`,
+# `.exo-window-40-opening`, `.exo-window-75-opening`,
+# `.exo-window-scratch.md`, `.pm-run-scratch.md`, `.run`,
+# `.skill-run-15.md`, `.skill-run-16.md` and `.ursa-run/`, and the last of
+# those was still tracked on `main` six days after the comment above was
+# written. Every one of them was a run writing a ship-first placeholder at
+# its own opening, which is the moment the run is holding its wake payload.
+#
+# So the rule is inverted. Every root-level dot-entry is ignored and the
+# three this repository actually commits are named back in. That needs no
+# prediction about the next name a run invents, and it costs nothing: in
+# the whole history of this repository the only root-level entries that are
+# not dot-entries are the twelve real ones, so the inversion has never had
+# a false positive to have.
+#
+# Adding a legitimate root dot-entry means adding a negation here. That is
+# the intended friction, and `tools/root-entries.mjs` is the gate that
+# fails when the tree and this list disagree.
+/.*
+!/.gitignore
+!/.gitattributes
+!/.github/

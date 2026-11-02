@@ -244,14 +244,21 @@ test('a handoff and an ask over the limit are refused; a note is told and sent',
   }
   for (const kind of ['note', 'done']) {
     assert.deepEqual(codes(ok({ kind, body: LONG_BODY })), [], kind);
-    assert.deepEqual(notices(ok({ kind, body: LONG_BODY })).map((n) => n.code), ['WAKE_TRUNCATION_PREDICTED'], kind);
+    // Two notices since 2026-11-02: the quantity of loss, then which side of
+    // the cut the disposition landed on. LONG_BODY is generated filler with no
+    // disposition phrase in it, so the second one is the UNKNOWN verdict, and
+    // asserting that here is what proves the three-way split is not collapsing
+    // to "at risk" for every body that happens to be long.
+    assert.deepEqual(notices(ok({ kind, body: LONG_BODY })).map((n) => n.code),
+      ['WAKE_TRUNCATION_PREDICTED', 'WAKE_DISPOSITION_UNKNOWN'], kind);
   }
 });
 
 test('--accept-truncation turns the refusal into the same prediction as a note', () => {
   const m = ok({ kind: 'handoff', body: LONG_BODY, acceptTruncation: true });
   assert.deepEqual(codes(m), []);
-  assert.deepEqual(notices(m).map((n) => n.code), ['WAKE_TRUNCATION_PREDICTED']);
+  assert.deepEqual(notices(m).map((n) => n.code),
+    ['WAKE_TRUNCATION_PREDICTED', 'WAKE_DISPOSITION_UNKNOWN']);
 });
 
 test('the prediction is printed by both the checker and the poster, before anything is sent', () => {
