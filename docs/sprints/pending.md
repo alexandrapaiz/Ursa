@@ -2,6 +2,10 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (eighth pass): in progress
+
+Full findings coming as commits land this pass.
+
 ## Top three for the owner, 2026-11-02 ~00:2x UTC message-triggered (seventh pass): four Tier B merges, two charter pull requests confirmed Tier C
 
 Triggered by the event bus naming three things: review #619 (skill) and
