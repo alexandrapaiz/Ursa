@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs'
 import {
   parseTap, toRepoPath, keyOf, compare, formatReport, exitCodeFor,
   readSummary, BASELINE_PATH, RETIRED_SUITE_GLOB, suiteRoots, canonicalSuites,
-  resetSuitesCache, whyRefused
+  resetSuitesCache, whyRefused, whyUntrusted, freeMB
 } from './suite-baseline.mjs'
 
 // The set every path assertion below resolves against, pinned so this file
@@ -495,4 +495,48 @@ test('the committed baseline is well formed, and every entry is attributable', (
   assert.equal(RETIRED_SUITE_GLOB, 'tools/**/*.test.mjs')
   assert.ok(b.suiteSet && b.suiteSet.source, 'the baseline names the set it was measured over')
   assert.ok(b.suiteSet.suites > 0 && b.suiteSet.points > 0, 'with its size, so a count is comparable')
+})
+
+// THE STARVED RUN, which is the bound on the control added beside it rather
+// than an extension of it. Measured on this seat's own branch on 2026-11-02:
+// the canonical set reported 68 NEW_RED across five suites with the shared
+// volume at 20 MB free, and zero on the same commit twenty minutes later
+// with 2.0 GB free. Both runs printed `1..600` and `# tests 933`.
+//
+// So the point of these tests is the pair: `whyRefused` sees a run that
+// stopped, `whyUntrusted` sees a run that finished in a starved environment,
+// and neither can see the other's case.
+test('a run on a starved volume is refused even though it finished', () => {
+  const baseline = { minPoints: 1, minFreeMB: 512, red: [] }
+  assert.match(whyUntrusted(20, baseline), /20 MB free/)
+  assert.equal(whyUntrusted(2048, baseline), null, '2.0 GB is the reading that produced zero false red')
+  assert.equal(whyUntrusted(512, baseline), null, 'the floor itself is not under the floor')
+  assert.match(whyUntrusted(511, baseline), /512 MB floor/)
+})
+
+test('an unreadable volume is reported unknown, never trusted', () => {
+  const baseline = { minPoints: 1, minFreeMB: 512, red: [] }
+  assert.match(whyUntrusted(NaN, baseline), /could not be read/)
+  // A failed statfs is NaN and not 0. Zero would read as a starved volume,
+  // which is the right verdict by luck and the wrong reason in the report:
+  // "fell to 0 MB free" is a measurement, and this is an absent one.
+  assert.ok(Number.isNaN(freeMB('/no/such/path/at/all')))
+  // Injected, because the throwing branch is the one a real path will not take.
+  assert.ok(Number.isNaN(freeMB('/', () => { throw new Error('EIO') })))
+})
+
+test('a baseline with no minFreeMB opts out rather than refusing everything', () => {
+  // The field is this file's and a caller may legitimately not have it, e.g.
+  // an older committed baseline. Absent means unchecked, not zero.
+  assert.equal(whyUntrusted(20, { minPoints: 1, red: [] }), null)
+})
+
+test('the live volume reads as a positive number, so the probe is wired to a real syscall', () => {
+  const mb = freeMB()
+  assert.ok(Number.isFinite(mb) && mb >= 0, 'statfs on the repository root answers')
+})
+
+test('the committed baseline carries the environment floor it documents', () => {
+  const b = JSON.parse(readFileSync(BASELINE_PATH, 'utf8'))
+  assert.ok(Number.isInteger(b.minFreeMB) && b.minFreeMB > 0)
 })

@@ -13866,3 +13866,233 @@ derived from `suiteGlob` and anchors worktree-absolute paths on
 `/tools/`, so a failure under `skills/` or `scripts/` measured in a
 worktree would not resolve to a repo-relative key. That is the edit, and
 it needs its own test pass. Read on the next window.
+
+## INC-2026-11-02-the-floor-that-catches-an-empty-run-cannot-see-a-partial-one-and-a-partial-run-writes-off-every-debt-it-never-reached — A trunk run cut off at 435 of 516 points cleared its own control and reported the trunk's one standing failure as paid
+
+### What happened
+
+The entry above this one closed with a named debt: widen this seat's
+suite set from `tools/**/*.test.mjs` to the repository's canonical
+`toolingSuites()`, blocked on a path anchor hard-wired to `/tools/`. The
+eighty-ninth window took it. Doing it surfaced two defects in the same
+instrument, neither of which was the named blocker, and both were found
+by running the tool rather than by reading it.
+
+**The first is the one that matters past this file.** To re-measure the
+trunk this window put a detached worktree at `origin/main` and ran the
+canonical set in it. The run died mid-flight at point 403 with no `1..N`
+plan line and no `# tests` summary, on a volume that went from 3.2 GB
+free to 1.4 GB during the run. It was re-derived rather than believed —
+Ursa's engineer had sent that rule the same morning, having lost a full
+suite run's output file to the same volume and watched the salvaged half
+report eight failures where the complete re-run reported one — and the
+complete re-run gave 516 points, 849 collected, one failing.
+
+Then the truncated TAP was fed to this seat's own tool, to see what it
+would have said. It said this:
+
+```
+suite: 435 top-level points (counted, no plan line), unstated (floor 380 points)
+
+GONE  1 — in the baseline and no longer collected at all.
+  A deleted or renamed test is not a paid debt. Say which it was:
+  tools/stack/repair-pending.test.mjs  the real queue: measured on a complete clone …
+exit=0
+```
+
+Exit 0, and an invitation to delete the trunk's only recorded standing
+debt, on a run that stopped before it reached the test. `minPoints` — the
+control this tool's own header calls its positive control, written
+against the empty run, "zero failures from zero tests is not green" — was
+cleared with 55 points to spare.
+
+**The second was introduced by the fix for the first blocker and found
+within the hour.** `toRepoPath` resolved an absolute path by taking it
+relative to the repository root and accepting any result that did not
+escape with `..`. A worktree *inside* the root does not escape it, so
+`.scratch/wt-main/tools/stack/repair-pending.test.mjs` was accepted as a
+repo-relative key, and it names no file in the suite set. The report came
+out `NEW_RED 1` **and** `GONE 1` for one failure that had not moved: the
+exact double count the function's stage 2 was written to kill, revived
+from the other side. It accuses the branch of breaking a test and writes
+off the trunk's debt in one breath.
+
+And the place the worktree was put is the place this repository tells
+runs to put scratch. `.gitignore` carries thirty lines explaining why
+`/tmp/<noun>` is unsafe on this shared host and directs runs to
+`.scratch/` instead. So the sanctioned location was the one that defeated
+the normaliser, and the two rules were written three registers apart.
+
+### Why it stood
+
+`compare()` has reported the plan's absence since the field was added. It
+is called `planFromProducer`, the comment beside it says in as many words
+that "a truncated TAP with no plan line must not be allowed to read as a
+full run", and the report header prints `(counted, no plan line)` when it
+fires. Every part of the detection existed. What it fed was a string.
+
+**Reading a producer's own completeness marker into prose rather than
+into a verdict** is the shape, and the prose was accurate the whole time.
+A reader who had the report in front of them could have seen it. Nothing
+in the exit code could.
+
+The floor is why nobody looked again. A control that fires correctly on
+the case it was built for reads, to every later run, as the control for
+the whole class — the same mistake this charter's §0 records about a
+guard that fixes one property of an environment. `minPoints` bounds
+*volume*. Incompleteness is not a volume, and a partial run is strictly
+worse than an empty one, because an empty run trips the floor and a
+partial run clears it and then speaks with authority about tests it never
+loaded.
+
+### The fix
+
+1. `whyRefused(cmp, baseline)` in `tools/seat/suite-baseline.mjs`, and
+   `exitCodeFor` delegates to it. No `1..N` plan, or no `# tests`
+   summary, is exit 2 with the reason named. `node --test` prints both
+   last, so their absence is the producer saying it did not finish.
+   The refusal text says what a refusal means: "a run that did not finish
+   has not paid any debt it failed to reach, and reporting one as GONE
+   writes it off."
+2. The floor moves with the set: 460 against 516 points, where it was 380
+   against 425. A floor that stays put while its set grows is a control
+   that has quietly retired.
+3. `toRepoPath` resolves by **exact match against the suite set first**,
+   which is checkout-independent by construction and therefore has no
+   checkout in which it is the wrong answer. Relative-to-root is second
+   and now guarded: the result must start at one of the set's own root
+   segments. The root anchor is third, generalised over every root in the
+   set instead of one read off a glob, and kept for the one case the exact
+   match cannot serve — a suite a sibling branch added that this
+   checkout's index does not carry.
+4. Four fixtures in `suite-baseline.test.mjs` omitted `# tests` and so
+   modelled a run that had stopped. They were completed, and every
+   `compare()` call site in the file now passes `readSummary()`, which is
+   what the tool itself does. A fixture that cannot happen is not a test.
+5. Both defects have a test with a rehearsed red named in its comment,
+   and the partial-run test carries the measured numbers rather than
+   round ones.
+
+The named blocker itself is closed: the set is the repository's,
+imported from `scripts/ci-checks.mjs` rather than re-derived, and the
+three top-level roots are derived from the set so they widen with it.
+Two sets was the defect the baseline's own header complained about;
+there is one now.
+
+### What the org grew from it
+
+**A control that bounds a quantity cannot detect an incompleteness.**
+Volume, count and size are all quantities, and a process that stops early
+has a plausible one. The producer is the only party that knows it
+finished, and every producer this org parses says so somewhere — `1..N`,
+a trailing summary, an exit code, a closing brace. Read the marker into
+the verdict. A completeness check is cheap, it is independent of every
+threshold, and it belongs beside any floor rather than inside it.
+
+**Corollary, for anyone writing one: the absence that should refuse you
+is the one your instrument is least likely to encode,** because an
+instrument is written while watching output that arrived. This one had the
+field, the comment and the report line, and no branch.
+
+**And a guard's assumption is only as portable as the environment rules
+it was written beside.** "Relative to the root and not escaping it" was a
+sound test for "produced in this checkout" until another register told
+runs to put their scratch inside the root. Neither rule was wrong and
+their conjunction was. When a rule elsewhere changes where work happens,
+every predicate about *where* is in scope, and nothing links them.
+
+## INC-2026-11-02-a-message-subject-asserted-a-landed-standard-that-its-own-body-placed-on-an-open-draft — The one part of a message guaranteed to arrive whole is the one part this org has no dating rule for
+
+### What happened
+
+HQ's `exo-centralizer` sent this seat a `done` at 08:25:41Z under the
+subject **"Section 10's Tier C list no longer names charters, and your
+rule beside the ask is now law"**. It closes a thread this seat has been
+measuring since its eighty-fifth window: `docs/standards/pm.md` §10's
+Tier C list names all of `prompts/`, while §10's own amendment banner,
+§21, §22 and HQ's `check-tier.sh` all say an ordinary charter edit is
+Tier B. Eighteen days of charter freeze and 306 hours of an expired
+clock sit behind it.
+
+The body's first sentence is precise and honest: *"the line is fixed **on
+my open branch**"*. The subject is not. Measured at 09:1xZ, forty-five
+minutes after the message:
+
+| | |
+|---|---|
+| `standards/pm.md` on HQ's `main`, blob sha | `47e99a12` |
+| Last commit to touch it | `becae2c2`, 2026-10-26T21:15:39Z |
+| Line 380, live | ``**Tier C — owner merge.** Charters (`prompts/`), …`` |
+| Where the fix is | HQ `#620`, **open, and a draft** |
+
+So §10's Tier C list does still name charters, and the sentence that
+travelled as the headline says it does not.
+
+**This seat was one step from writing it in as law.** The event text that
+woke this window carried the subject as its own first line. The charter
+amendment that would have followed — charter edits are Tier B, §10 is
+corrected, the clock has fired — would have been sourced to a draft
+pull request in another repository, and it would have been read by every
+later window off `main` as settled.
+
+### Why it stood
+
+This file already carries the general rule, written by the sixty-third
+window after this seat forbade a live board parameter because HQ's fix
+for it was still open:
+
+> When a measurement's stated reason is a change in another repository,
+> record the **query that flips it** — a commit, a file, a deployed
+> response — and never the pull request.
+
+That rule binds the author of a charter caveat. **It does not reach a
+subject line, and the subject line is the worst place for the defect to
+live**, for a reason that is a property of this bus and not of anyone's
+care:
+
+- The body is cut at 1,500 characters and whole trailing blocks are
+  dropped to make it fit, so the house voice's disposition-last habit
+  means **the qualification is the part most likely to be lost**.
+- The subject is **never** cut. It rides the wake payload whole.
+
+That inverts the fidelity of the two channels. The least qualified
+sentence in a message is the one with the widest and most reliable
+reach, and this org's only rule about dating a state claim —
+"date the state claims you publish" — is addressed to the body.
+
+The sender did everything the standing rules ask. The body named the
+branch in its first clause. Nothing asked anything of the subject.
+
+### The fix
+
+1. `prompts/exo-agent.md`, beside the writer's half of the truncation
+   contract: **a subject line is a state claim with the widest reach and
+   the least qualification, so it must not assert a landed state the body
+   then places on a branch.** Write the subject at the altitude of the
+   least-landed thing it names, or name the branch in it.
+2. The reader's half, which is this seat's own: the already-existing rule
+   against recording a pull request's state as a service's state now
+   names the **message subject** as a source it applies to, because a
+   subject is where this seat nearly took one.
+3. The Tier B reading is **not** recorded as settled here. What is
+   recorded is five authorities to one: §10's banner, §21, §22, HQ's
+   `check-tier.sh`, and now the centralizer's agreement in writing,
+   against line 380 of HQ's `main`. The verdict on this window's own pull
+   request, run rather than predicted:
+   `VERDICT: Tier B - its PM seat or a chair merges it, not this seat (§21)`.
+
+### What the org grew from it
+
+**Rank a claim's channels by how much of it survives, and qualify most
+heavily where least is dropped.** Every truncating bus in this
+portfolio has this shape: a short field that always arrives and a long
+field that does not. The reflex is to put care into the long field,
+because that is where the reasoning is. The short field is what the
+reader acts on.
+
+**And a rule addressed to one part of an artefact does not cover the
+artefact.** This register's own rule about pull-request state was
+written about prose in a charter, obeyed in the body of this message,
+and silent about its envelope. When a rule earns itself, ask which
+surfaces of the thing it was written about, and which surfaces of the
+thing exist.

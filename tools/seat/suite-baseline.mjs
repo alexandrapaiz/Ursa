@@ -65,7 +65,7 @@
 // the name says which quantity it is, and the two numbers are both recorded
 // in the baseline rather than one being left to be inferred.
 
-import { readFileSync } from 'node:fs'
+import { readFileSync, statfsSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve, relative } from 'node:path'
@@ -436,6 +436,65 @@ export function exitCodeFor (cmp, baseline) {
   return cmp.newRed.length > 0 ? 1 : 0
 }
 
+// A FINISHED RUN IS NOT A VALID ONE, which bounds the control above rather
+// than extending it. Measured on this seat's own branch minutes after
+// `whyRefused` shipped: with the shared volume at 20 MB free, the canonical
+// set reported **68 NEW_RED** across five suites, exit 1. The same set on
+// the same commit twenty minutes later, with 2.0 GB free, reported **zero**
+// and one STILL_RED the trunk owns. Sixty-eight false accusations, every one
+// of them in a suite that builds a temporary git repository.
+//
+// That run printed `1..600` and `# tests 933`. It FINISHED. So the plan-line
+// check cannot see it, and nothing in the TAP can: the producer completed and
+// reported honestly about tests that failed for a reason outside the tree.
+// Completeness is a property of the producer; validity needs a property of
+// the environment, and this is the cheapest one that discriminates.
+//
+// Ursa's engineer measured the same class the same day from the other end —
+// a lost output file whose salvaged half reported eight failures where the
+// complete re-run reported one — so the rule is the host's and not this
+// tool's: on this volume, re-derive rather than believe.
+//
+// The threshold is a floor on the MINIMUM observed across the run, not on
+// the value at either end, because the pressure here is other sessions and
+// swings by gigabytes inside one run. A single reading before the suite is
+// the measurement most likely to be taken and least likely to catch this.
+//
+// WHAT THIS CONTROL DOES NOT CATCH, measured rather than conceded. Sampling
+// the volume every 15 seconds for three minutes while writing this:
+//
+//   355 MB, 0 MB, 392, 543, 638, 260, 308, 311, 645, 598, 955
+//
+// Free space crosses ZERO and returns to most of a gigabyte inside one
+// minute. So two samples around a four-minute suite can straddle a dip
+// entirely and report a floor that was never held, and a clean verdict from
+// this tool means "the volume was healthy at both ends" and not "the volume
+// was healthy". The honest version of the guard is a sampler running beside
+// the suite; this is the cheap version, it catches the sustained case it was
+// built from, and the gap is named here so the next window does not read a
+// pass as proof.
+export function whyUntrusted (freeMB, baseline) {
+  const floor = baseline.minFreeMB
+  if (!Number.isFinite(floor)) return null
+  if (!Number.isFinite(freeMB)) {
+    return 'the volume\'s free space could not be read, so the run cannot be vouched for'
+  }
+  if (freeMB < floor) {
+    return `the volume fell to ${freeMB} MB free during the run, under this file's ${floor} MB floor; `
+      + 'suites that build temporary repositories fail for want of disk and report as ordinary red'
+  }
+  return null
+}
+
+export function freeMB (path = REPO_ROOT, statfs = statfsSync) {
+  try {
+    const s = statfs(path)
+    return Math.floor((s.bsize * s.bavail) / 1048576)
+  } catch {
+    return NaN
+  }
+}
+
 function runSuite () {
   // No shell, and no glob: the set is a list of repo-relative paths resolved
   // from the index, which is what the repository's own `ci-checks.mjs` passes
@@ -443,20 +502,41 @@ function runSuite () {
   // rather than a shell because node expands `**` itself and a directory
   // argument dies with MODULE_NOT_FOUND; naming the files removes that trap
   // along with the narrower set.
+  // Sampled around the run and not just before it: the pressure on this
+  // volume is other sessions, so the figure that matters is the lowest one
+  // observed and a single pre-flight reading is the one least likely to see
+  // it. Two samples is still not a watch, and it is what caught the case in
+  // `whyUntrusted` -- that run began with gigabytes free and ended at 20 MB.
+  const before = freeMB()
   const r = spawnSync(process.execPath, ['--test', ...canonicalSuites()], {
     cwd: REPO_ROOT,
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024
   })
+  const after = freeMB()
   if (r.error) throw r.error
-  return r.stdout + r.stderr
+  return { tap: r.stdout + r.stderr, lowFreeMB: Math.min(before, after) }
 }
 
 function main (argv) {
   const tapFlag = argv.indexOf('--tap')
-  const tap = tapFlag === -1 ? runSuite() : readFileSync(argv[tapFlag + 1], 'utf8')
+  // `lowFreeMB` is null for a TAP read from a file: this tool did not watch
+  // that run and must not imply it did. An unknown is reported as unknown.
+  const { tap, lowFreeMB } = tapFlag === -1
+    ? runSuite()
+    : { tap: readFileSync(argv[tapFlag + 1], 'utf8'), lowFreeMB: null }
   const baseline = JSON.parse(readFileSync(BASELINE_PATH, 'utf8'))
   const cmp = compare(parseTap(tap), baseline, readSummary(tap))
+  const untrusted = lowFreeMB === null ? null : whyUntrusted(lowFreeMB, baseline)
+  if (untrusted !== null) {
+    console.error(`REFUSED: ${untrusted}.`)
+    console.error('This is not a verdict on the tree. Re-derive it when the volume recovers;')
+    console.error('on this host that has meant minutes, because the pressure is other sessions.')
+    if (cmp.newRed.length > 0) {
+      console.error(`Withheld: ${cmp.newRed.length} NEW_RED that this run is not entitled to report.`)
+    }
+    process.exit(2)
+  }
   const code = exitCodeFor(cmp, baseline)
   if (code === 2) {
     console.error(`REFUSED: ${whyRefused(cmp, baseline)}.`)

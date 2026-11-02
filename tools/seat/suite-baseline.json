@@ -55,7 +55,24 @@
     "involved at all. For any row that is not `tree`, a green reading is NOT",
     "evidence of a repair and must never be actioned as one -- see the",
     "`repaired` block's `tools/doc-model/check.test.mjs` entry, which is the",
-    "measured case."
+    "measured case.",
+    "`minFreeMB` IS AN ENVIRONMENT CONTROL AND NOT A SUITE ONE, and it exists",
+    "because a COMPLETE run can still be invalid. Measured on this seat's own",
+    "branch on 2026-11-02, minutes apart, same commit and same set:",
+    "",
+    "  volume at 20 MB free    600 points, 933 collected, 68 NEW_RED, exit 1",
+    "  volume at 2.0 GB free   600 points, 933 collected,  0 NEW_RED, exit 0",
+    "",
+    "Every one of the 68 was in a suite that builds a temporary git repository.",
+    "Both runs printed `1..600` and `# tests 933`, so both FINISHED and the",
+    "plan-line refusal above cannot tell them apart. Completeness is a property",
+    "of the producer; validity needs a property of the environment. 512 MB is",
+    "the floor: two orders over the figure that produced the false reds and",
+    "comfortably under the 2.0 GB that produced none. It is sampled before and",
+    "after the run and the MINIMUM is what is tested, because the pressure here",
+    "is other sessions on a shared volume and it swings by gigabytes inside one",
+    "run. Two samples is not a watch, and a run can still dip between them.",
+    ""
   ],
   "measuredAt": "2026-11-02T09:06:00Z",
   "measuredOn": "b16cbd2a",
@@ -71,6 +88,7 @@
   "mainPoints": 516,
   "mainCollected": 849,
   "minPoints": 460,
+  "minFreeMB": 512,
   "red": [
     {
       "file": "tools/stack/repair-pending.test.mjs",
