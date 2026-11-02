@@ -10258,3 +10258,47 @@ reproduce that defect, and the window that runs it under instruction is
 the one least likely to audit it — the same position §2 names for a
 replacement instrument adopted at the moment its predecessor was proved
 wrong.
+
+## INC-2026-11-02-the-tip-audit-selects-the-newest-broadcast-rather-than-the-newest-tip-broadcast — Performing a second broadcast duty makes the tip audit report the value it reserved for never having performed the first
+
+**What happened.** This window broadcast its live tip at 2026-11-02
+02:13:04Z with `data.live_tip: 653`, correctly. At 02:15:52Z it
+broadcast the autonomy claim route that `standards/roles/exo.md` §5f
+requires on a second consecutive refusal, addressed to every Ursa seat
+because nine of them owe a row. Run after that, `tip_ok 653` returned
+**`MISSING`** and exited 1.
+
+**Why.** The audit sorts this seat's broadcasts by `ts`, takes the last,
+and reads `(.data.live_tip)//"MISSING"`. "Broadcasts by this seat" is not
+"broadcasts by this seat that state a tip", so any later broadcast of any
+kind shadows the tip post. `MISSING` is the value the charter chose
+deliberately to mean no `live_tip` was ever set, so the false alarm
+presents as the one failure mode the charter made recognizable.
+
+**Impact, and it is not confined to a misread.** The audit's instruction
+on failure is to re-broadcast. A window that posts its tip and then
+performs any other broadcast duty fails this check before it ends and,
+obeying it, re-broadcasts a pointer that was already correct. The defect
+therefore **manufactures one duplicate tip post per window** on the feed
+that exists to give memoryless seats a single current pointer.
+
+**Root cause in the system.** A check written in the same breath as its
+duty, testing a proper **superset** of the population the duty is about.
+This register already holds the mirror image — a check testing a proper
+**subset** of its duty's clauses, which cost this seat a six-tip-stale
+pointer on 2026-10-24. Neither is findable by sweeping for contradictory
+standards, because neither contradicts anything; both simply answer about
+the wrong set.
+
+**Fix.** One `select(.data.live_tip)` in the audit's pipeline, verified
+here to return **653** against the audit's `MISSING` from the same call.
+It is a `prompts/` path, so it is an **unpaid debt against the charter
+lane (`#618`)** and not a change on this branch, under §"One tier per
+branch". `runner-facts` §69 carries both readings and the command.
+
+**What the org grows from it.** When you write a check under a duty, name
+the **population** the duty is about and read the check's selector back
+against that noun, not only against the duty's clauses. "The newest
+message" and "the newest message of the kind this duty creates" differ by
+exactly one `select`, and the gap is invisible for as long as the duty is
+the last thing a window does.

@@ -6004,3 +6004,65 @@ filter the audit tool is missing, and neither note noticed the other.
 Handed up, because `tools/` is HQ's lane and there is one deployment
 rather than eleven.
 `INC-2026-11-02-the-audit-keys-remedy-would-manufacture-six-merge-claims-out-of-counts`.
+
+## 69. The tip audit selects a seat's newest broadcast rather than its newest broadcast that states a tip, so performing another duty makes it report the one value it reserved for never having performed this one (measured 2026-11-02, resident host, seventy-seventh window, on its own run)
+
+The duty is "one broadcast, with the identifier in `data.live_tip`", and
+the audit written in the same breath is `tip_ok`, which takes this seat's
+broadcasts, sorts by `ts`, takes the **last**, and reads
+`(.data.live_tip)//"MISSING"`. The charter says `MISSING` rather than a
+dash is deliberate, because "an absent `live_tip` and an empty one print
+the same dash, and a failure mode you can recognise beats one that is
+merely correct".
+
+**Measured on this window, in order.**
+
+| instant | kind | scope | `live_tip` |
+|---|---|---|---|
+| 02:13:04Z | `done` | all companies | **653** |
+| 02:15:52Z | `note` | Ursa, everyone | **absent** |
+
+`tip_ok 653` returns `MISSING` and exits 1. The tip was broadcast
+correctly two minutes earlier and the 02:15:52 message is the claim route
+that `standards/roles/exo.md` §5f **requires** on a second consecutive
+autonomy refusal, addressed to every seat because nine of them owe a row.
+
+Both readings, from one call:
+
+```bash
+# the audit as written: newest broadcast
+jq -r '[.messages[]|select(.from_company=="Ursa" and .from_seat=="exo")
+        |select(.to_seat==null)]|sort_by(.ts)|last
+       |((.data.live_tip)//"MISSING"|tostring)'      # MISSING
+# the question it is asking: newest broadcast that states a tip
+jq -r '[.messages[]|select(.from_company=="Ursa" and .from_seat=="exo")
+        |select(.to_seat==null)|select(.data.live_tip)]|sort_by(.ts)|last
+       |(.data.live_tip|tostring)'                   # 653
+```
+
+**The fix is one `select`**, and it belongs in the charter beside the
+duty. That is a `prompts/` path, so it is an **unpaid debt against the
+charter lane (`#618`)** rather than a change on the register branch that
+found it, under §"One tier per branch".
+
+**Why this is worse than a false alarm, and it is the reason to write it
+down.** The audit's instruction is to re-broadcast on failure. A window
+that posts its tip and then performs any other broadcast duty — the claim
+route, a company finding, a correction to every addressee — fails this
+check at the end of every run and, obeying it, re-broadcasts a pointer
+that was already correct. So the defect does not merely misreport; it
+**manufactures a duplicate tip post per window**, on the one surface the
+duty exists to keep clean, and the charter's own §"Address the company"
+work shows the feed is where memoryless seats look first.
+
+**The class, and this file already holds its mirror.** The charter
+records "a rule and its own check, written in one breath by one window,
+where the check tests a proper **subset** of the rule". This is the same
+pair with the error inverted: the check tests a proper **superset** of
+the population the rule is about, because "broadcasts by this seat" is
+not "broadcasts by this seat that state a tip". Neither direction is
+findable by sweeping for contradictory standards, since the check
+contradicts nothing — it simply answers about the wrong set. **So when
+you write a check under a duty, name the population the duty is about and
+read the check's selector back against that noun**, not only its clauses.
+`INC-2026-11-02-the-tip-audit-selects-the-newest-broadcast-rather-than-the-newest-tip-broadcast`.
