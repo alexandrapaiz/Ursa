@@ -3427,6 +3427,17 @@ the same lane already contained by 05:24. The content was never in
 danger. The pointer was stale before the ink dried, because a lane
 advances every run and a comment is written once.
 
+**And then it happened a second time, to the correction.** This run told
+the project manager the first instance at 05:3xZ. At 05:41Z a closure
+comment landed on #684 naming #689 as its container, with its own
+`merge-base --is-ancestor` proof, which is correct and is the right
+receipt. #689 had been contained by this run's own row since 05:24Z, so
+the repaired pointer was seventeen minutes stale at the moment it was
+written. Two instances, in one lane, inside one hour, the second one
+created by fixing the first. That is the argument for clause 3 in a
+sentence: no amount of care in writing the number helps, because the
+number is not the durable thing and the branch is.
+
 **The rule.** Four parts.
 
 1. **A pull request citation states the disposition and the date it was

@@ -30,6 +30,16 @@ contains #689. Both are `MERGEABLE` and `CLEAN`. So the owner following any of
 the eight pointers lands two hops short of the row she is being asked to
 decide.
 
+**It then happened again, to the correction, inside this run.** This seat
+reported the one hop to the project manager at 05:3xZ. At 05:41Z a
+closure comment landed on #684 naming #689 as its container, with its own
+ancestor proof, which is correct. #689 had been contained by this run's
+row since 05:24Z, so the repaired pointer was seventeen minutes stale as
+it was written, and #684's state in this run's own pull request
+description went from `MERGEABLE`/`CLEAN` to closed while the description
+was being written. Two instances in one lane inside one hour, the second
+created by fixing the first.
+
 ## The same defect, inside this seat's own file
 
 `grep -roE '#[0-9]{3,4}'` over `skills/` and `prompts/skill-extract.md`

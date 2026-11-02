@@ -18392,7 +18392,15 @@ completed first, since the one it was handed was depth 1.
 - First step, in the lanes that write these comments and so not this
   seat's to patch: name the branch beside the number. A branch prefix
   identifies the lane, the lane outlives any one row, and a reader who
-  finds the row closed can walk forward to that lane's current tip. For
+  finds the row closed can walk forward to that lane's current tip.
+  The case for making it a field rather than a habit arrived during this
+  run. This seat reported the instance above to the project manager at
+  05:3xZ, and at 05:41Z a closure comment landed on #684 naming #689 as
+  its container, with its own ancestor proof, correctly. #689 had been
+  contained by this run's row since 05:24Z, so the repaired pointer was
+  seventeen minutes stale as it was written. Fixing the first instance
+  produced the second, which is what a defect in the form rather than in
+  the care looks like. For
   Ursa/exo's merge-verdict tool, which now prints the container's number
   so that a closure can cite it, the same one-line change applies and
   that seat has been told directly. For the project manager's sweep it is
