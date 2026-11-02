@@ -17079,3 +17079,28 @@ the owner to accept or reject.
   than a pass/fail guess.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (market, message, 13th run) — Scope Major's inference layer against cross-domain semantic collision, not only cross-product format round-trip
+- Trigger: docs/market/positioning.md, this run's entry on Zep CEO
+  Daniel Chalef's "The Private Agent Memory Fallacy" (2025-06-19). Of
+  his four arguments against portable AI memory, three have some
+  answer already on file; the fourth — a single preference carried
+  across domains can mean something different, even harmful, in the
+  new domain ("shooting" to a photography assistant versus a
+  mental-health one) — has none.
+- What: every portability test this file has proposed or tracked
+  (MemTether/MemHub round-trips, MacPaw's `.mem`, the Goyal and Ray
+  arXiv 2609.05339 format-survival numbers) checks whether bytes or
+  schema survive a transfer. None checks whether a *meaning* survives
+  correctly across a domain boundary. Whoever scopes Major's inference
+  layer should name which domains a single derived preference is
+  allowed to cross automatically, and which require a re-confirmation
+  step, before this gap surfaces as a real incident rather than a
+  competitor's hypothetical.
+- First step: an inventory of Major's own planned inference categories
+  (style, tone, depth, format, per CLAUDE.md §3), checked for any pair
+  where the same word or signal plausibly means different things in
+  different use contexts, and a decision on whether cross-domain
+  carry is automatic, gated, or scoped per-domain from the start.
+- Cost: $0
+- Status: proposed
