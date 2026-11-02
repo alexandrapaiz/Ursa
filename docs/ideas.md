@@ -16427,3 +16427,119 @@ the owner to accept or reject.
   have caught it" from a claim into a date.
 - Cost: $0, one command per guard built
 - Status: proposed
+
+### 2026-11-02 (security, message run) — `--strict` on the read-filter prober exits 0 on a route that answered nothing, and the exit codes it would need are spoken for
+
+- Trigger: F48 in `docs/security/audit-2026-11-02.md`. The verdict
+  misclassification is fixed, so a crashed read now reports `UNMEASURABLE`
+  instead of `REFUSED`. What the fix does not touch is the exit code, and
+  that is deliberate rather than overlooked.
+- What: `tools/board/read-filters.mjs --strict` is documented in its own
+  header as "exit 1 under `--strict` with at least one INERT filter", and
+  that is exactly what it does. An unmeasurable filter is not an inert one,
+  so a route answering 500 on every read still exits 0 under the flag whose
+  job is to fail on a bad read filter. Measured on 2026-11-02 against the
+  live board, after the F48 fix: three unmeasurable rows, exit 0. The output
+  is now honest, because the summary prints `0 measured` and lists every
+  unmeasurable row in its own block, so a person reading it cannot miss the
+  outage. A gate reading only the exit code still can.
+  This is filed rather than fixed because the repair is a contract choice
+  and the codes are already allocated. `0` means the table printed, `1`
+  means strict found an inert filter, and `2` means there was no live board
+  to measure, which is itself the "nothing was measured" code for the case
+  where the absence is the caller's environment rather than the board's
+  fault. Mapping a crashed route onto `2` would merge "you have no token"
+  with "the board is down", which are different actions for different
+  people. Mapping it onto `1` would make a caller that handles strict's
+  failure treat an outage as an inert filter, which is the confusion F48
+  just removed from the verdict column. A fourth code is probably right, and
+  picking it is a decision about this tool's interface rather than a defect
+  in it, so this seat named the options instead of choosing one.
+- First step: decide whether `--strict`'s contract is "no inert filter" or
+  "every filter was measured and none is inert", because the two differ only
+  on this case and the header currently states the first. If the second,
+  exit 3 for unmeasurable, documented in the header beside the others, and
+  one expectation per code in `read-filters.test.mjs`.
+- Cost: $0, under half a day, in `tools/board/read-filters.mjs` and its tests
+- Status: proposed
+
+### 2026-11-02 (security, message run) — The board's events route has been dead for every filtered read for six days, and it is HQ's file to repair
+
+- Trigger: Ursa's own test suite. Two transcription tripwires in
+  `tools/board/read-filters.test.mjs` fired, and following them to the live
+  board found every filtered read of `/api/events` answering 500.
+- What: recorded here so Ursa has its own copy of a dependency outage it
+  reported upward, not because a seat here can fix it.
+  `/srv/asc/hq/runtime/board/api.py` assigns `EVENT_FILTERS` at module level
+  above `class Handler` and reads it inside that class as
+  `self.EVENT_FILTERS`, which raises `AttributeError`. The name is read in a
+  comprehension over the parsed query string, so it is never evaluated when
+  there is no query string: the bare read returns 200 and every read with a
+  parameter returns 500, including on `limit` and `since_hours`, which are
+  both honoured. So a health check that hits the route without parameters
+  sees a working route, which is why six days passed. Introduced in HQ
+  commit `becae2c` on 2026-10-26, in the commit whose subject names "the
+  inert filter", which is the fix for the finding Ursa's own prober produced
+  and handed up. The handoff landed and the fix shipped broken. Full detail,
+  including the measured status table and the reproduction, is in
+  `docs/security/audit-2026-11-02.md` under F47.
+- First step: none here, and that is the entry's point. A `handoff` to
+  `alexandra-systems/pm` is posted on the board with the file, both line
+  numbers and the commit. Ursa's side is already done: the prober no longer
+  misreports it and a tripwire in `read-filters.test.mjs` turns green the day
+  it is repaired, so the next run of this seat learns about the repair
+  without re-deriving it. This entry closes when that tripwire goes green.
+- Cost: $0 to Ursa
+- Status: proposed
+
+### 2026-11-02 (market) — Cite the confidentiality/IP-liability gap against the market's own closest attempt at real-work data
+- Trigger: this run's demand-signals ceremony and landscape watch
+  (docs/market/landscape.md, Handshake AI update; docs/market/positioning.md,
+  "A venture investor just drew this file's own line"). TechCrunch
+  (2026-01-10) reports OpenAI and Handshake AI asking third-party
+  contractors to upload actual deliverable files from their past and
+  current jobs. An IP lawyer quoted in the same piece warns this
+  approach puts the AI lab taking it "at great risk," since it
+  depends on each contractor correctly judging what from a former
+  employer's own work is safe to upload. Source: [TechCrunch](https://techcrunch.com/2026/01/10/openai-is-reportedly-asking-contractors-to-upload-real-work-from-past-jobs/).
+- What: this is the market's own closest attempt yet at sourcing real
+  (not constructed) work for training, and it is reportedly carrying a
+  confidentiality/ownership liability that Minor's design does not
+  carry by construction. Minor's signal comes from a user's own real
+  work, processed with that user's own consent (CLAUDE.md §0); nobody
+  is asked to judge, on a stranger's behalf, whether a former
+  employer's file is safe to hand to a third party that employer never
+  agreed to share anything with. This is a distinct argument from the
+  existing verifier-gap proposals already on this ledger (2026-10-07,
+  2026-10-14, and others): it is a liability contrast, not an accuracy
+  or cost one, and it only exists because a named competitor's own
+  reported practice created the comparison.
+- First step: when KR4.1's lab brief is drafted, add this as its own
+  short point alongside the verifier-gap argument: Minor's provenance
+  comes from consented, already-authorized real work, not from
+  re-sourcing a third party's confidential material through a
+  contractor who may misjudge what is safe to share.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (market) — Disambiguate "outcome" the first time KR4.1's lab brief uses it
+- Trigger: this run's positioning ceremony (docs/market/positioning.md,
+  "'Outcome-based pricing' already means something else in this market,
+  and it isn't Minor's"). A data-licensing market report names
+  "outcome-linked pricing" as a billing model where a buyer pays by a
+  measured downstream result (its example: Reddit pushing Google to
+  pay per citation an AI answer gives Reddit content). Source:
+  [pebblous.ai](https://blog.pebblous.ai/report/ai-data-licensing-realtime-shift-2026/en/).
+- What: CLAUDE.md §1 calls Minor's product an "outcome record" and §4
+  prices it as a flat annual license, not a result-contingent fee.
+  Those are two unrelated senses of "outcome," and a lab procurement
+  contact who has read any generic "AI data licensing trends" piece
+  using the term the market's way could reasonably misread Minor's
+  pitch as a pay-per-result structure it isn't. This is a naming
+  risk, not an accuracy or cost argument, and it only costs something
+  if the brief uses the word "outcome" without saying what it means.
+- First step: when KR4.1's lab brief is drafted, add one line the
+  first time "outcome" appears: the record documents a span's fate
+  (what an AI generated and what survived), not how Minor is paid.
+- Cost: $0
+- Status: proposed

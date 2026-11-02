@@ -34,8 +34,20 @@
 //   INERT     the route answers 200 and returns the UNFILTERED set. The
 //             caller believes it scoped a read that it did not scope.
 //   REQUIRED  the route refuses to answer without the parameter at all.
-//   UNMEASURABLE  the page saturated, so a count cannot distinguish a
-//             filter that matched everything from one that did nothing.
+//   UNMEASURABLE  nothing about the filter was measured, so there is no
+//             verdict to report. Three ways to get here: the page saturated,
+//             so a count cannot distinguish a filter that matched everything
+//             from one that did nothing; a read answered 5xx, so the route
+//             did not run; or a read returned no row list, so there is no
+//             count. The first is a property of the window, the other two
+//             are the route being broken, and none of them is a finding
+//             about the filter.
+//
+// A 5XX IS NOT A REFUSAL, which is the distinction this tool got wrong until
+// 2026-11-02. REFUSED means the route ran and rejected the parameter by name;
+// a seat reads it and stops passing that parameter. A 500 means the route is
+// down, and a seat that reads it as REFUSED concludes the opposite of the
+// truth. See `verdict()`.
 //
 // INERT is the whole point. `runtime/board/api.py` says it in its own words
 // at `MESSAGE_FILTERS`: "A silent parameter is worse than a missing one,
@@ -143,11 +155,43 @@ export function verdict(base, probed) {
   if (base.status === 400 && /required/.test(base.error || '')) {
     return { verdict: 'REQUIRED', why: `the route refuses to answer without it: ${base.error}` };
   }
+  // A 5xx IS NOT A REFUSAL, and the line above is why this is checked before
+  // the generic 4xx branch rather than after it. A refusal is the route
+  // working: it read the parameter, did not recognise it, and said so, which
+  // is why this file calls it the good failure. A 500 is the route not
+  // running at all, and it says nothing whatever about the filter. Measured
+  // against the live board on 2026-11-02, before this branch existed: every
+  // filtered read of `/api/events` answered 500 from an AttributeError in the
+  // board's own code, this function returned REFUSED three times, the summary
+  // printed `0 inert`, and `--strict` exited 0. The route was dead and the
+  // tool reported the good failure, which is the one reading a seat acts on
+  // by closing the finding. The baseline branch below already treated a
+  // failed read as unmeasurable, so the fault was the asymmetry: a crash on
+  // the baseline was no answer, a crash on the probe was a verdict.
+  for (const [which, r] of [['probe', probed], ['baseline', base]]) {
+    if (r.status >= 500) {
+      return {
+        verdict: 'UNMEASURABLE',
+        why: `the ${which} read failed with ${r.status}, so the route did not run and nothing about this filter was measured: ${(r.error || '').slice(0, 90)}`,
+      };
+    }
+  }
   if (probed.status >= 400) {
     return { verdict: 'REFUSED', why: `${probed.status}: ${(probed.error || '').slice(0, 90)}` };
   }
   if (base.status >= 400) {
     return { verdict: 'UNMEASURABLE', why: `the baseline read itself failed with ${base.status}` };
+  }
+  // A read that returned no row array has no count, so the comparisons below
+  // would run on null. `null === null` is true, which would report a pair of
+  // answerless reads as INERT.
+  for (const [which, r] of [['probe', probed], ['baseline', base]]) {
+    if (r.count === null) {
+      return {
+        verdict: 'UNMEASURABLE',
+        why: `the ${which} read returned ${r.status} with no row list, so there is no count to compare`,
+      };
+    }
   }
   if (base.saturated) {
     return { verdict: 'UNMEASURABLE', why: `the baseline page filled at ${base.count}, so an equal count proves nothing` };
@@ -167,6 +211,20 @@ export function verdict(base, probed) {
  * @param {{count:number, spellings:string[]}} lower the read with it lowercased
  */
 export function casingVerdict(upper, lower) {
+  // Neither count exists when the read behind it failed, and `null !== null`
+  // is false, so without this the next line falls through to the equal-count
+  // branches and a pair of crashed reads is reported as a positive casing
+  // finding. Measured on 2026-11-02: two failed paged reads returned
+  // `CASE-INSENSITIVE (counts only)`, whose own `why` read "both spellings
+  // returned the same null rows".
+  for (const [which, r] of [['canonical', upper], ['lowercase', lower]]) {
+    if (typeof r.count !== 'number') {
+      return {
+        verdict: 'UNMEASURABLE',
+        why: `the ${which} read returned no count, so the two spellings cannot be compared`,
+      };
+    }
+  }
   if (upper.count !== lower.count) {
     return { verdict: 'CASE-EXACT', why: `${upper.count} rows for the canonical spelling, ${lower.count} for the lowercase one` };
   }
@@ -311,10 +369,18 @@ async function main() {
       console.log(`${r.route.padEnd(9)} ${r.param.padEnd(w)} ${r.verdict.padEnd(17)} ${r.why}`);
     }
     const inert = out.filter((r) => r.verdict === 'INERT');
-    console.log(`\n${out.length} measured, ${inert.length} inert.`);
+    const unmeasured = out.filter((r) => r.verdict === 'UNMEASURABLE');
+    // `N measured` counted every row, including the ones that measured
+    // nothing, so a route answering 500 on every read printed the same
+    // reassuring `0 inert` as a route whose filters all work.
+    console.log(`\n${out.length} probed, ${out.length - unmeasured.length} measured, ${inert.length} inert, ${unmeasured.length} unmeasurable.`);
     if (inert.length) {
       console.log('An inert filter is accepted and ignored, so a caller that scoped a read did not scope it.');
       for (const r of inert) console.log(`  GET ${r.path} ignores ${r.param}`);
+    }
+    if (unmeasured.length) {
+      console.log('An unmeasurable filter is not a passing one. Nothing was learned about it on this run.');
+      for (const r of unmeasured) console.log(`  GET ${r.path} ${r.param}: ${r.why}`);
     }
   }
   process.exit(has('--strict') && out.some((r) => r.verdict === 'INERT') ? 1 : 0);
