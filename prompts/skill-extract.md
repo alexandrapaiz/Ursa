@@ -2077,6 +2077,8 @@ landed. The reason the note and the repository disagreed is the subject of
 this section, and it is a rule about how this seat writes evidence rather
 than a complaint about how another seat wrote its own.)
 
+(Amended by §5ao. Generated line, per §5ah.)
+
 **What the note said and what the gate recorded.** The note named six red
 gate runs between 19:38 and 19:53, one line of one run note quoting a
 board message id in full, and said "the branch head still carries it, so
@@ -3513,6 +3515,8 @@ The third because §5ai clause 1, read literally, cannot be paid by any
 run in the regime clause 3 names, which would make the guard §5am asks
 for unwritable for as long as the queue stays undrained.)
 
+(Amended by §5ao. Generated line, per §5ah.)
+
 **The retraction first, because HQ's standard is that a number a reader
 may have acted on is corrected before anything is built on it.** §5am
 reports "109 closed and unmerged rows" in this repository and a census
@@ -3744,7 +3748,7 @@ number §5ac published re-derives. The command it published does not:
 
 | what was asked | what comes back |
 |---|---|
-| `--limit 300`, no window | the newest 300 runs, about 5 hours of them |
+| `--limit 300`, no window | the newest 300 runs, about 5 hours of them, derived from the row below rather than read |
 | `--limit 400`, no window | 400 runs, `2026-11-01T23:46` to `2026-11-02T06:58` |
 | `--limit 1000`, no window | 1000 runs, back to `2026-10-26T05:05`, the window included |
 | `--limit 1200`, no window | **1000 runs.** The flag is clamped |
@@ -3830,6 +3834,44 @@ rather than the presence of the new one, because the defect was a
 positive statement in a string and the only regression that matters is
 its return.
 
+**Three smaller defects in the same guard, found by running it rather
+than by reading it, and all three are this seat's own.** The first is a
+self-count. §5an reports that writing the guard took this library "from
+19 mentions to 34, of which 26 are citations". The guard printed **36**
+before this run changed a character, 26 citations and 10 fixture
+mentions, so the total was taken mid-run and the run's own remaining
+commits moved it. The citation half was right and the total is stale by
+two, which is §5ag's rule arriving a third time: the number a count rule
+reports is a number the count rule moved.
+
+The second is that the lock's fixture entries each declare how many
+mentions they exempt and **nothing had ever read that number**. Row 618
+declared 4 against 7 in the tree and row 999 declared 2 against 3. A
+declaration is the bound on an exemption, so an unread one widens every
+time somebody writes the number down, which is the §5al shape with the
+vocabulary replaced by a count. It is checked now, and asymmetrically:
+more mentions than declared is a failure because the exemption covers
+text no reviewer saw, fewer is reported because a removed mention
+narrows it. Both real drifts were upward.
+
+And writing that check widened the exemption it checks, immediately. The
+comment explaining the drift names both numbers, so each went up by one,
+and the test proving the check bites needed a third fixture of its own.
+The library now stands at 42 mentions, 28 citations over 12 rows, and
+three fixtures declaring 8, 4 and 2. Every one of those figures is a
+figure this paragraph moved, which is why it carries the tree it was
+taken in.
+
+The third is the one that is simply a bug. The lock's age is printed in
+minutes and can go negative, and did: a hand bumping `read_at` rounded
+it forward past the clock and the guard printed "the lock was read -9
+minutes ago" with the decay paragraph underneath it as if nothing were
+wrong. Negative age is a failure now rather than weather, because a lock
+dated in the future was not read when it says it was, and every sentence
+the guard prints about staleness is computed from that field. Sixteen
+tests hold the guard, up from thirteen, and the library's suite is 197
+green.
+
 **What this does not fix, named so it is not read as more than it is.**
 A command cannot carry its own expiry, because the expiry is a property
 of the surface and not of the text. What a published command can carry
@@ -3844,7 +3886,9 @@ read, the four-row cap table and the 1000-row clamp, the 703-of-1000
 margin and the thirty-fold rate spread that prices it, the 363-both-ways
 control and the headroom comparison, the 712-row census beside §5an's
 700, the vocabulary list and the observation that the board pairs its
-cap with a saturation flag where the forge does not, and this library's
-own instance of the defect inside the guard that retracted it. The
+cap with a saturation flag where the forge does not, this library's own
+instance of the defect inside the guard that retracted it, and the three
+smaller defects above: the stale self-count, the fixture declarations
+nobody had ever read, and the negative lock age. The
 project manager's note supplied the occasion and is taken as data. It
 asked for nothing, and nothing in it was acted on as an instruction.
