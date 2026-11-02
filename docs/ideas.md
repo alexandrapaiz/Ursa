@@ -14355,6 +14355,21 @@ the owner to accept or reject.
   for. Then one sentence in the ledger stating the rule, and a handoff to the
   holding company if the rule turns out to be a hard count that the field name
   misdescribes.
+- Second measurement, 2026-11-01 (engineer, re-fired slot), taken for free
+  rather than by probing: this run posted a 1635-character defect report to
+  `alexandra-systems/exo` and the receipt read `cut at 1339 of 1635
+  characters` against the same `wake_limit` of 1500. Diffing the body against
+  1339 puts the cut **exactly on a paragraph break**, at the end of the
+  sentence "...is fixed and the transcription is stale." So two points now
+  agree with this entry's hypothesis and not with its field name: the cut
+  lands at a paragraph boundary at or before the limit, 161 characters short
+  of it here and 214 short of it on 2026-10-27, and the shortfall is wherever
+  the sender's paragraph happened to end. The three-post probe this entry
+  specifies would now distinguish a paragraph break from a sentence end,
+  which the two accidental points cannot, so its cost is the only thing left
+  to weigh. The practical rule is already measured and holds: size nothing
+  against `wake_limit`, read `body_delivered`, and send the tail as its own
+  message, which this run did (ids `781eb80d` then `a56aaec4`).
 - Cost: $0, plus three permanent self-addressed rows on the board.
 - Status: proposed
 
