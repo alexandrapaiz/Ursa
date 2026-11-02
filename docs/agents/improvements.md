@@ -4034,6 +4034,17 @@ nothing and is the only reading that cannot drift.
   model fails on **44**, worst by **1,428** characters. The denominator
   that matters is the second zero: coverage of the discriminating branch
   was nil, over the whole corpus, for six days.
+- **Correction, 2026-11-02, seventy-eighth window.** "Over the whole
+  corpus" is wrong and the error is this entry's own stated bound read
+  too narrowly. Paging the store with `before_hours` — nine calls, 4,147
+  rows — the over-limit population in that window is **971**, not 77, so
+  the two zeroes above were measured over **8.5%** of the corpus. The
+  conclusion survives for a different reason than the one written here:
+  the write path refuses any block over 420 characters, so the
+  discriminating branch is unreachable by construction and not merely
+  uncovered in a sample. The rule below stands; the number supporting it
+  was a floor and said so about the count only. `runner-facts` §70 and
+  `INC-2026-11-02-a-share-published-four-times-and-reproduced-independently-was-the-newest-five-hundred-rows`.
 - **Rule.** A pass against production traffic is evidence about the
   traffic and never about the model. Report **per-branch coverage** and
   not a pass rate, and a branch with zero coverage was not tested
@@ -4230,3 +4241,49 @@ nothing and is the only reading that cannot drift.
   a window runs it on three distinct sweep findings and all three come
   back empty. Either resolves it; neither needs a window alive on
   2026-11-09.
+
+### Page the store before publishing a statistic over it, because the cap bounds a ratio as well as a count
+
+- **Proposal.** The seventy-eighth window, 2026-11-02, from Ursa's
+  engineer seat's note at 01:48:07Z. That seat corrected its own figure
+  and gave this seat the bound for free: *"since_hours defaults to
+  forty-eight, and limit applies after. So five hundred rows is two days
+  of them, which a share survives and a count does not."* The half it
+  offered as settled is the half that is wrong, and this seat had
+  published the affected share four times.
+- **Merged.** **Not yet.** `runner-facts` §70 and
+  `INC-2026-11-02-a-share-published-four-times-and-reproduced-independently-was-the-newest-five-hundred-rows`
+  ship in `#657`, which carries no `prompts/` path and is therefore
+  Tier B. The one-line idiom owed to the charter's §7 read — print the
+  oldest timestamp a capped read returns — is **named as an unpaid debt
+  on the charter lane (`#618`)** and deliberately not written here,
+  because writing it would move this file into the owner's queue behind
+  eleven charters.
+- **Effect.** Measured, by paging with `before_hours`: **nine calls,
+  4,147 unique rows**, against the 500 every prior read of this question
+  used. Over the 720 hours both seats named, the over-limit population is
+  **971 and not 83** (11.7×), the warned-kind share is **72.6% and not
+  85.5%** (−12.9 points), and over-limit `ask`s are **49 and not the
+  zero this seat published and the engineer independently confirmed**.
+  Ursa-scoped: **249 and not 31**, share **83.1% and not 93.5%**. One
+  prior Effect line in this file is corrected above as a consequence.
+- **Rule.** A capped read bounds a **ratio** as well as a count, because
+  `limit` returns the newest rows rather than a sample and composition
+  drifts with the window. Two further clauses, both measured: the cap's
+  width *in time* is a function of traffic, not a property — 500 rows
+  spanned two days on 2026-10-24 and six on 2026-11-02, because the
+  portfolio completed zero runs for four days, so an **outage widens
+  every capped read that crosses it** in the direction that looks like
+  better coverage. And a sibling's independent reproduction bounds
+  implementation error only; when two readers share a read bound, their
+  agreement to one decimal place is not a control. Say which error an
+  agreement bounds.
+- **Next measure.** **2026-11-09** as the latest instant, and the metric
+  is a **count in this repository**, not a date-bound event: the number
+  of statistics quoted from `/api/messages` in `docs/agents/*.md`
+  authored after 2026-11-02 that state either the oldest timestamp their
+  read returned or the paging call count. Today that is **1** — §70's
+  own table — against **4** published without it earlier the same day.
+  Positive if every such statistic authored after this entry carries one
+  of the two; negative on the first that does not. Readable by any window
+  on any day, which is why it is phrased as a count and not a reading.

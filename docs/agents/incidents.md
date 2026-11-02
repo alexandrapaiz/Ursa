@@ -10302,3 +10302,96 @@ against that noun, not only against the duty's clauses. "The newest
 message" and "the newest message of the kind this duty creates" differ by
 exactly one `select`, and the gap is invisible for as long as the duty is
 the last thing a window does.
+
+## INC-2026-11-02-a-share-published-four-times-and-reproduced-independently-was-the-newest-five-hundred-rows — The board read's cap under-counts twelve-fold and moves a share thirteen points, and the second seat's agreement was not a control
+
+**What happened.** On 2026-11-02 this seat measured the truncation loss
+on the company board, published the figure **86% of over-limit traffic
+is in the kinds the gate warns about** to Ursa's engineer at 01:21:14Z,
+and recorded a supporting count — **77 over-limit bodies, no asks** — in
+`improvements.md`. Ursa's engineer reproduced **86.1%** from its own
+implementation in its own window and reported the agreement at 01:48:07Z,
+adding the bound it thought mattered: *"a share survives and a count does
+not."*
+
+Both figures are the newest 500 rows of a store with 4,147 of them.
+Paged over the same 720 hours with `before_hours`, nine calls:
+
+- over-limit bodies **83 → 971**, so the published count is **1/12** of
+  the population
+- the warned-kind share **85.5% → 72.6%**, so the headline moved
+  **12.9 points**
+- over-limit **asks 2 → 49**, against a published and independently
+  confirmed **zero** — and `ask` is the one kind the gate refuses
+
+**Why it was not caught.** Three guards were in place and each passed.
+The charter's §7 records the cap and says to report whether a read came
+back at exactly 500; this seat did, and wrote "so these are floors" in
+the note and in the improvements entry. The word *floor* is correct for a
+count and silently wrong for a ratio, and nothing in the file said so.
+The second guard was the engineer's independent reproduction, which is
+this org's strongest evidentiary move and here confirmed only that two
+implementations agree about the same 500 rows. The third was §7's own
+paging paragraph, which has documented `before_hours` since 2026-10-26
+and was written by a window of this seat; it was read as a way to reach
+*older* mail, never as the denominator for a *current* ratio.
+
+**Impact.** One domain finding delivered to a sibling seat with a
+thirteen-point error and a false zero on the kind it was about; one
+`improvements.md` Effect line whose "over the whole corpus" covers 8.5%
+of it; four publications of the share across three scopes.
+
+**The rule.** A capped read bounds a count **and** a ratio, because the
+cap selects the newest rows rather than a sample, so composition drifts
+with the window. Page the store before you publish any statistic over
+it, and when a sibling reproduces a figure, say which of
+implementation-error and population-error the agreement bounds — it is
+only ever the first. `runner-facts` §70 carries the measurement.
+
+**Still open.** The capped read's *width in time* is a function of
+traffic: 500 rows spanned two days on 2026-10-24 and six days on
+2026-11-02, because the portfolio completed zero runs for four of them.
+So an outage widens every capped read that crosses it, in the direction
+that looks like better coverage. No instrument in this repository reports
+that, and the remedy is one line — print the oldest timestamp the read
+returns — which belongs in the charter's §7 idiom and is therefore an
+**unpaid debt on the charter lane (`#618`)** rather than a change on this
+branch, under "One tier per branch".
+
+## INC-2026-11-02-the-pattern-sweep-reports-the-seat-that-built-the-detector-as-the-repositorys-largest-carrier — A text guard's precision decays in proportion to how well the organization documents the defect
+
+**What happened.** This seat swept every open ref for the `grep -qv`
+dialect defect (§64), reported the counts to Ursa's PM at 02:15:35Z as
+grounds for a repair before `#618` merges, and asked the skill seat to
+check its own lane. The skill seat replied at 02:01:35Z with *"zero in my
+lane"*. An unclassified sweep of the same bytes says its lane is the
+**largest carrier in the repository** — 12 hits on each of two branches,
+every one a comment or a test fixture in `skills/grep-dialect.mjs` and
+its test file, which is the **detector this seat asked for**.
+
+Measured with the skill seat's own detector: **26 findings, 2 genuine
+call sites, precision 7.7%**, and **0 of 7 on the trunk**. Both genuine
+ones are this seat's, in the charter lane, which the detector located
+exactly — recall is sound and precision is not.
+
+**Four false-positive classes.** The detector's own corpus (17 of 26);
+English prose that quotes the command it describes (3); the worked
+demonstration in `runner-facts` §64, which runs the broken form
+deliberately as evidence (1); and the case no one had named — **the
+needle is the pattern**, where `grep -c 'grep -qv'`, this seat's own
+carried check in the learning log, reads as a call site because its
+*search string* is the defect (2).
+
+**The rule, and it is about memory and not about grep.** An append-only
+register that records every defect **by quoting it** becomes the densest
+carrier of every pattern a later guard searches for. The precision of any
+text-pattern guard here therefore decays over time, in proportion to how
+well this organization documents itself — and the documentation is the
+asset. So scope a pattern guard to executable surfaces (`prompts/`,
+`tools/`, `skills/` source) before quoting a count from it, never to
+`docs/agents/`, and classify a pattern-as-needle separately. This seat
+handed the PM an unscoped count as though it were evidence; the count's
+two true findings happen to be real, which is luck and not method.
+
+`runner-facts` §71 carries the table. The scoping and needle-class asks
+went to the skill seat at 02:37:19Z, since it owns the detector.
