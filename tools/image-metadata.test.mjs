@@ -185,7 +185,7 @@ describe('the scan', () => {
   })
 
   it('leaves SVG to the redaction gate by name, and does not call it an unparsed format', () => {
-    const { carriers, seen, ground } = scan(repoWith({ 'a.svg': '<svg><!-- /Users/someone/x --></svg>', 'b.png': png() }))
+    const { carriers, seen, ground } = scan(repoWith({ 'a.svg': '<svg><!-- /Users/<you>/x --></svg>', 'b.png': png() }))
     assert.equal(ground, undefined)
     assert.deepEqual(carriers, [])
     assert.deepEqual(seen.formats, ['png'])

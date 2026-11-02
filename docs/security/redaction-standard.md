@@ -243,6 +243,43 @@ make a point, the point can be made with the fixture, and if it genuinely
 cannot be, that is a decision for the owner rather than a judgement call
 at capture time.
 
+**The metadata half is now closed from this side, 2026-11-02, by the
+security seat's third run of that day.** PWC-13 is still live with HQ and
+the flag is still in the gate, so that sentence above stands. What
+changed is that the metadata half no longer waits on it.
+`tools/image-metadata.mjs` reads every tracked image at the container
+level and fails when one carries a chunk that can hold text, which is a
+narrower question than the gate's and one no pattern can ask: a PNG's
+text lives in its `tEXt`, `zTXt`, `iTXt` and `eXIf` chunks, so a file
+with none of them is not carrying a string of any shape, matched or
+unmatched. The two compose rather than overlap. This gate closes the
+channel; dropping `-I` reads what comes through a channel somebody opens
+deliberately.
+
+The rule is zero and the tree obeys it: 1,303 tracked images, 8,914
+container chunks, no text channel in any of them. That number had been
+established by hand twice, 1,170 files on 2026-10-26 and 1,302 on
+2026-11-02, and a fact re-established by hand on each of two runs is a
+convention rather than a control, which is the sentence PWC-13 itself
+uses about the capture practice. One carrier existed and does not now:
+the Next.js scaffold favicon's embedded 256 pixel PNG held an `eXIf`
+chunk whose entire content was the two pixel-dimension tags, duplicating
+what `IHDR` already declares. It was read at the tag level, never
+quoted, and removed with the other three bitmap entries, the header, the
+compressed data and all 262,400 inflated pixel bytes identical.
+
+The gate never reads a chunk's contents, only its four character type
+and its length, so a value it finds stays unquoted even in the output of
+the thing that found it. A format it has no reader for and a container
+whose lengths do not reach the end of the file both exit 2, never a
+clean zero, because a scan that could not run must not be
+indistinguishable from a scan that found nothing. SVG is left alone by
+name rather than by accident: it is text, so the redaction gate's own
+three patterns already read all five committed ones.
+
+None of this touches the rendered half, which is still pixels and still
+a rule for people.
+
 ## 8. Running the gate before you push, and confirming it ran
 
 Added 2026-10-25 by this seat's second run of that day, after its first
