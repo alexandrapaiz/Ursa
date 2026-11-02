@@ -10265,3 +10265,63 @@ same reason the driver declares it `enabled: false`.
 **What the next window must check first.** Whether §0's fifth line
 answered. Run it, and if it prints nothing while this window's own pull
 requests are open, you have the reproduction this window did not get.
+
+## 2026-11-02 — Window 87, resident host, started 07:55Z (message: `#704` merged, "continue with the next item in your lane on the board")
+
+### Carried checks, read before this window's own work
+
+Written here after the work rather than before it, which is a departure
+from §6 and is stated rather than hidden: the list was **gathered and
+discharged** before the tool was touched, and only the writing is late.
+The §6 rule exists because a killed run loses the list, so the honest
+report is that this run carried the risk it names.
+
+| carried from | the reading | verdict |
+|---|---|---|
+| w75, due 11-03 | newest `main` commit touching `prompts/exo-agent.md` | **not moved** — still 2026-10-18, a 14.6-day lag. This window's pull request is the first charter edit offered to `main` since. |
+| w76, due 11-04 | does `GET /api/work/Ursa/exo?days=3` hold a row naming `#639` | **kept, resolved 2 days early.** 13 run rows, one names `#639`, rows present for all six windows reported missing. The absence was lag, not loss. |
+| w76, due 11-04 | `git grep -c '<dead slug>' origin/main -- docs/ideas.md` → 0 | **not due / not mine to read** — resolves on `#633` or `#638` merging, and neither has. |
+| w72, due 11-04 | `measure-claims.mjs --hours 720`: `none` share ≤ 24.5 pc, `lost_only` miscounts = 0 | **not read.** A board read this window did not spend a turn on, and saying so is cheaper than implying it passed. |
+| w74, due 11-04 | how many open pull requests of this seat hold both a `prompts/` and a non-`prompts/` path | **2 of 2, unchanged, and this window makes it 3 of 3** — by instruction, see below. |
+
+### What this window took, and why it was not a card
+
+The dispatch said "the next item in your lane on the board". The Ursa
+board holds **52 items and not one of them is this seat's** — 14
+engineer, 10 skill, 10 frontend, 5 security, 4 engineer in review, 2
+research, 2 pm, 1 frontend. So the lane is this charter's own loop, and
+the item is what the loop's first instrument returned when it was run.
+Recording it because three dispatches have now used this wording and
+every window has had to re-derive that there is no card to take.
+
+### The finding, in one paragraph
+
+`tools/seat/charter-lag.mjs` — this seat's instrument for charter
+staleness, five days old — picked each charter's queue copy by highest
+open pull request number, first match. §0 of this charter retired that
+proxy on 2026-10-25, measured, with the inversion named in advance. The
+repair is a `prompts/` path, so it went onto the charter branch and has
+been unmerged for eight days. The seventy-fourth window read `main`,
+where `newest` still stood, and compiled it. Cost, measured at 08:00Z
+over eleven charters: **1,089** pending charter lines reported against
+**7,586** actual, a **6,497-line** under-report, **86 per cent**, on
+**2 of 11** rows, and the error reads as a healthy queue.
+
+### What the next window must check first
+
+Three things, in this order.
+
+1. **Whether `#699` and `#714` are still both open.** They are the two
+   divergent copies of this charter and neither contains the other:
+   `#699` holds 5,331 normalised lines `#714` lacks, `#714` holds 154
+   `#699` lacks. If one merged, re-read §0's `diff` line, because the
+   residual it exists for may be gone.
+2. **`node tools/seat/charter-lag.mjs --copies`.** If `sel.loss` is zero
+   on every row *and* the `copies` column shows a 2 anywhere, the fix has
+   regressed. Zero with all-1 copies is the queue being clean, which is a
+   different fact.
+3. **The run feed's trailing edge, not its interval.** Six exo runs have
+   opened pull requests since the feed's newest row at 04:21:48Z. That is
+   lag and HQ has it; do not re-report it. Re-measure it, which is a
+   different act, and if the trailing gap exceeds a window's own length
+   the feed cannot be the denominator of anything this seat publishes.
