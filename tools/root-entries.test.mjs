@@ -76,7 +76,7 @@ const COMMITTED_SCRATCH = [
  *  not asserted. */
 const OLD_PATTERNS = ['.scratch/', '*-scratch', '*.scratch', '.scratch-*', 'scratch/']
 
-const ALLOWLIST = ['.gitignore', '.gitattributes', '.github']
+const ALLOWLIST = ['.gitignore', '.gitattributes', '.github', '.claude']
 
 /** `git check-ignore -q` exits 1 for a path that is not ignored, and
  *  `execFileSync` throws on a non-zero exit, so the question has to be asked
@@ -148,7 +148,7 @@ describe('allowlistFrom reads .gitignore and refuses to invent an allowlist', ()
   })
 
   test('the rule plus its negations is the allowlist', () => {
-    assert.deepEqual(allowlistFrom('/.*\n!/.gitignore\n!/.gitattributes\n!/.github/\n'), ALLOWLIST)
+    assert.deepEqual(allowlistFrom('/.*\n!/.gitignore\n!/.gitattributes\n!/.github/\n!/.claude/\n'), ALLOWLIST)
   })
 
   test('a trailing slash on a negated directory is not part of the name', () => {
@@ -167,7 +167,7 @@ describe('the gate fails on planted scratch, in both shapes', () => {
     assert.equal(r.code, 0)
     assert.equal(
       r.stdout.trim(),
-      'root-entries: 3 root-level dot-entries, all of them on the 3-name allowlist in .gitignore.',
+      'root-entries: 3 root-level dot-entries, all of them on the 4-name allowlist in .gitignore.',
     )
   })
 
@@ -252,9 +252,9 @@ describe('a gate that cannot establish its rule never reports clean', () => {
 
 describe('the verdict renders to the lines the gate prints', () => {
   test('clean, pinned against a literal', () => {
-    const v = verdict([], { scanned: 3, allowlist: ALLOWLIST })
+    const v = verdict([], { scanned: 4, allowlist: ALLOWLIST })
     assert.deepEqual(renderable(v, []), [
-      'root-entries: 3 root-level dot-entries, all of them on the 3-name allowlist in .gitignore.',
+      'root-entries: 4 root-level dot-entries, all of them on the 4-name allowlist in .gitignore.',
     ])
   })
 
@@ -301,7 +301,7 @@ describe('the measurement behind the inverted rule, re-runnable', () => {
     )
   })
 
-  test('the three on the allowlist are not ignored, so the inversion did not take the repository with it', () => {
+  test('the four on the allowlist are not ignored, so the inversion did not take the repository with it', () => {
     for (const name of ALLOWLIST) {
       assert.equal(ignores(REPO, name), false, `${name} is ignored, so a change to it could not be staged`)
     }
@@ -345,7 +345,7 @@ describe('the measurement behind the inverted rule, re-runnable', () => {
   // because the information is worth having, but they are a diagnostic
   // addressed to whoever owns that branch rather than a red in a suite that
   // cannot fix them.
-  test('nothing legitimate has ever lived at a root dot-entry outside the three', (t) => {
+  test('nothing legitimate has ever lived at a root dot-entry outside the four', (t) => {
     const dotRoots = (args) => {
       const objects = execFileSync('git', ['-C', REPO, 'rev-list', ...args, '--objects'], {
         encoding: 'utf8',
@@ -398,6 +398,6 @@ describe('this repository, live', () => {
   test('the real checkout passes its own gate', () => {
     const r = run(REPO)
     assert.equal(r.code, 0, `${r.stdout}${r.stderr}`)
-    assert.match(r.stdout, /all of them on the 3-name allowlist/)
+    assert.match(r.stdout, /all of them on the 4-name allowlist/)
   })
 })
