@@ -1,118 +1,90 @@
 # Merge order for the owner — replaced each window by Ursa's exo seat
 
-**Measured 2026-11-02T02:09:16Z by window 77**, on `origin/main` at
-`383afa21`. Replaces the previous week's plan, per §5b of
+**Measured 2026-11-02T03:47:39Z by window 80**, on `origin/main` at
+`cdbdcdff`. Replaces the previous window's plan, per §5b of
 `prompts/exo-agent.md`. Every verdict below names the instrument that
-produced it.
+produced it, and this window's headline is that **the instrument is the
+finding**: the same twenty-three branches read two conflicts or ten,
+depending on whether this repository's declared merge drivers are
+installed, and GitHub's gate can never install them.
 
 ## The five queue numbers (§5b)
 
 | | |
 |---|---|
-| open now | **15** (3 drafts, all with live runs behind them) |
-| merged, last 7 days | **81** |
-| oldest open | `#395`, 2026-10-24T21:21Z, **8.2 days** |
-| newest merge | 2026-11-02T02:00:10Z, **9 minutes** before this read |
-| merges per day | 10-23: 9, 10-24: 27, 10-25: 14, 10-26: 45, 10-27: 22, 11-01: 4, 11-02: 20 |
+| open now | **23** (1 draft, `#671`, with a live run behind it) |
+| merged, last 7 days | **92** |
+| oldest open | `#395`, 2026-10-24T21:21Z, **8.3 days** |
+| newest merge | 2026-11-02T03:24:51Z, **23 minutes** before this read |
+| merges per day | 10-23: 9, 10-24: 27, 10-25: 14, 10-26: 45, 10-27: 22, 11-01: 4, 11-02: 29 |
 
 **Neither depth predicate fires.** Open does not outnumber the week's
-merges (15 against 81) and the gate moved inside the last ten minutes.
-This is the first window since 2026-10-27 able to say the second half of
-that, and it is worth saying plainly: the five-day outage window 72
-recorded is over. 2026-10-28 through 10-31 attempted **198** runs and
-completed **0**; 2026-11-01 completed 45; 2026-11-02 has completed 57 of
-74 attempted.
+merges, 23 against 92, and the gate moved inside the last half hour. The
+five-day outage window 72 recorded is over: 2026-10-31 still attempted
+46 runs and completed **0**, 2026-11-01 completed 45 of 114, and
+2026-11-02 has completed 116 of 146.
 
-## Conflicts, by performing the merge rather than asking GitHub
+## Conflicts, measured twice, because the two readings disagree by eight pull requests
 
-Instrument: `git merge-tree --write-tree --name-only origin/main
-refs/prs/<n>`, with **this repository's merge drivers installed**
-(`tools/ledger/install-driver.sh`, `tools/registers/install-drivers.sh`;
-`git config --get-regexp '^merge\.'` non-empty), exit code branched on
-`0` / `1` / other rather than on truthiness, and `2>&1` **not** used so
-that a driver's diagnostic on stderr does not displace the tree object.
+Instrument: `git merge-tree --write-tree origin/main refs/prs/<n>`,
+exit code branched on `0` versus non-zero rather than on truthiness, and
+`2>&1` **not** used on the tree-capturing call so that a driver's
+diagnostic on stderr cannot displace the tree object. Containment is
+checked **first**, because an absorbed branch exits 0 with an empty
+merge and reads as clean (§76 of `runner-facts.md`, this window).
 
-**14 of 15 clean. One conflicts.**
+| reading | conflicting | clean |
+|---|---|---|
+| **with this repository's drivers installed** (`tools/registers/install-drivers.sh`, `tools/ledger/install-driver.sh`) | **2** | 21 |
+| **driverless, which is what GitHub's merge button computes** | **10** | 13 |
+
+**Eight of twenty-three open pull requests, thirty-five per cent,
+conflict only because of files this repository declares a driver for.**
+They are `#618`, `#633`, `#643`, `#646`, `#649`, `#652`, `#660` and
+`#668`, and every one of their conflicting paths is in
+`.gitattributes`: `docs/ideas.md` for six of them,
+`docs/agents/learning-log.md`, `docs/agents/runner-facts.md` and
+`docs/agents/incidents.md` for the other two. This is the first reading
+of `INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`
+with a denominator.
+
+## The two real conflicts, which no driver resolves
 
 | | |
 |---|---|
-| `#601` | **CONFLICT**, real, in **11 files under `skills/`** plus `skills/README.md`. `docs/ideas.md` is *not* among them — the ledger driver merged it by block identity, 13 blocks taken. |
-| every other open pull request | `CLEAN` |
-
-**`#601` is the authoring seat's to resolve, not the owner's.**
-`docs/standards/pm.md` §11.3 dispatches that seat with the number and
-"build on the open branch". It is Ursa's skill seat, the branch is
-`ursa-skill/2026-10-27-hook-2`, it is **164 commits behind `main`**, and
-the conflicts are content disagreements in its own lane rather than
-driverless artifacts.
-
-**Two readings disagreed and the difference is the drivers, which is the
-standing point of this section.** HQ's `check-merge-queue.sh`, run from
-`/srv/asc/hq/tools/` in this same window, reported **2 of 18**
-conflicting: `#601` and `#612`. That tool pins the **driverless** merge
-deliberately, because the merge button has no drivers and that is its
-verdict permanently. Both readings are correct about different merges.
-`#612` has since been closed, so the live disagreement is zero.
+| `#601` | skill's `2026-10-27-hook-2`, the queue's oldest real conflict. **Twelve files**, all under `skills/`, plus `skills/README.md`. `docs/ideas.md` conflicts driverlessly and the ledger driver resolves it, so the driver-installed verdict is the honest one and it is still a conflict. Routed to the skill seat 2026-11-02T03:18:58Z. |
+| `#615` | engineer's `2026-11-01-hook`. **Three files**, `tools/gates/enumerate-verdicts.mjs`, its test, and `tools/secret-scan-verdict.mjs`, all inside that seat's own surface. Routed to the engineer 2026-11-02T03:18:44Z. |
 
 ## The order
 
-Three decisions are the owner's. Everything else can clear without her.
+1. **The eighteen driver-resolvable and clean ones, in creation order**,
+   with the drivers installed first. `#395`, `#631`, `#633`, `#638`,
+   `#640`, `#643`, `#644`, `#646`, `#649`, `#651`, `#652`, `#660`,
+   `#664`, `#665`, `#666`, `#667`, `#669`, `#670`. Nothing in this group
+   needs a judgement; it needs one `install-drivers.sh` before the
+   first merge.
+2. **`#668`**, this window's register half. Driver-resolvable.
+   Tier B: it declares in bold that it moves no authority and touches no
+   other seat's charter.
+3. **`#618`**, the charter lane, and it is **one owner decision and not
+   eight**. Twenty-four files, eleven of them `prompts/*-agent.md`,
+   carrying every charter amendment this seat has written since
+   2026-10-27. It is driver-resolvable and GitHub will keep calling it
+   conflicting until it merges. Do not split it: splitting is
+   `INC-2026-10-26-growing-the-open-pull-request-remerged-the-split-that-exists-to-avoid-the-owner`.
+4. **`#601` and `#615`** after their own seats resolve them. Both were
+   routed 2026-11-02T03:1xZ and neither is waiting on the owner.
 
-1. **`#618` — the charter lane.** The one that matters. It holds the
-   unmerged charter work for **eleven seats** plus four tested tools, it
-   is `CLEAN`, 28 commits behind `main`. `#612` was a strict ancestor of
-   it and is now closed, so one decision covers the lane. Ursa's PM
-   reviewed it on 2026-11-02 at 00:25:24Z and ruled it Tier C by path,
-   not its to merge, and logged it in `pending.md`'s top three.
-   **One repair is owed on it before it merges, and this window does not
-   hold that lane.** `#618` still carries **two** `grep -qv` call sites
-   in `prompts/exo-agent.md` and one in its `runner-facts`, measured
-   02:1xZ. `runner-facts` §64 established in window 76 that `grep` on
-   this host is **ugrep**, whose `-qv` means "the pattern matched
-   nothing" rather than "a line was not selected", so the row-level
-   exclusion built on it has never fired and the one-character fix
-   inverts it from reporting everything to reporting nothing. `main`'s
-   copy of this charter has **0** such call sites, because the sweep text
-   is not on `main` — so the defect ships *with* the merge rather than
-   being fixed by it, and it ships to **eleven seats at once**, since
-   `#618` is the all-seats charter lane. The lane is the charter lane,
-   which this window does not hold and may not push onto, because `#618`
-   is a readied pull request of this seat's own earlier window. Window
-   76 left this as a carried check and it is still open. **Merging
-   `#618` is still the right call** — fifteen days of eleven seats'
-   rules are behind it — but the repair is owed either on that branch by
-   its own lane or in the first charter pull request after it.
+## The charter freeze, measured again
 
-   **Why it is urgent rather than merely old, measured with the
-   instrument rather than by hand.** `node tools/seat/charter-lag.mjs`,
-   which is on `main`, at 02:2xZ:
+| | |
+|---|---|
+| commits to `main` in 7 days | **660** |
+| of those touching any `prompts/*-agent.md` | **0** |
+| last charter merge to `main` | **2026-10-18T18:50:50Z**, fifteen days ago |
+| charters with a newer copy in an open pull request | **11 of 11** |
+| in a pull request the seat does not own | **2** — `prompts/engineer-agent.md` and `prompts/research-agent.md`, both in research's `#395` |
 
-   | | |
-   |---|---|
-   | charter lines written and unmerged | **6,798**, all on `#618` |
-   | branches opened since their own seat's charter froze | **460** |
-   | oldest charter on `main` | **finance, 28 days** (2026-10-05) |
-   | seats frozen at 2026-10-05 | **7 of 11** |
-   | this seat | 2,221 lines on `main` against 8,021 queued, **+5,800** |
-
-   So every all-seats rule written in the last four weeks binds nobody,
-   and 460 runs have opened since. This window also measured **0 of 11**
-   charters carrying the host tool root that would have spared this seat
-   fifteen days of a false sweep finding (§67).
-2. **`#395` — research and engineer charters**, 8.2 days old, the oldest
-   thing in the queue, `CLEAN`. Tier C by path.
-3. **`#601` — the skill seat's extraction branch.** Not a decision yet.
-   It is the one conflicting pull request and it goes back to its
-   authoring seat first.
-
-**The rest is the PM's.** Of the 15 open, the ones carrying no
-`prompts/*-agent.md` path can be merged in a pass under Tier B without
-the owner, which is where 81 of the last 7 days' merges came from.
-
-## What this window did not measure
-
-`#642`, `#649` and `#650` are drafts with live runs behind them, so
-`check-draft-prs.sh` reports **no orphaned drafts** and they are
-correctly left alone. The count of orphaned drafts, which §"Ship first"
-has asked for by hand since 2026-10-05, is now one command:
-`bash /srv/asc/hq/tools/check-draft-prs.sh`.
+A parked charter edit still has no observed exit. The gate is absorbing
+work faster than the org produces it, 92 against 23, and exactly one
+class of file never passes it.
