@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   isInstant, blockFaults, ageHours, agePhrase, citedCounts, undatedQuotations,
+  instantClause, boundOf,
 } from './measured-citation.mjs';
-import { MEASURED } from './disposition.mjs';
+import { MEASURED, GRADED } from './disposition.mjs';
 import { notices } from './check.mjs';
 
 const HERE = new URL('.', import.meta.url).pathname;
@@ -93,7 +94,12 @@ test('ageHours is the difference between two instants and takes any of three clo
 
 test('the cited sentence is past tense, carries its instant, and says how to re-derive it', () => {
   const c = citedCounts(MEASURED, A_WEEK_ON);
-  assert.ok(c.sentence.includes(MEASURED.read_at), 'the instant is inside the clause the counts are in');
+  // `measured on <instant>` and not merely the instant somewhere in the
+  // sentence. The first version of this assertion was satisfied by the window
+  // clause, `in the 720 hours to <instant>`, so deleting the dating clause
+  // entirely left the suite green: a mutation rehearsal found it.
+  assert.ok(c.sentence.includes(`measured on ${MEASURED.read_at}`),
+    `the dating clause itself is missing from: ${c.sentence}`);
   assert.ok(c.sentence.includes('7 days before this check'));
   assert.ok(c.sentence.includes('node tools/board/measure-claims.mjs --hours 720'));
   assert.match(c.sentence, /\bwere\b/, 'past tense');
@@ -198,4 +204,53 @@ test('the edge measurement that makes a dated count a floor is stated with both 
   assert.ok(e.arriving_rows_per_min > e.leaving_rows_per_min * 10,
     'the claim is a ratio, so both halves are measured or neither is quoted');
   assert.equal(e.trailing_5h_over_limit, 0, 'measured with --hours 715 against --hours 720 in the same minute');
+});
+
+test('a block whose clock reading was never taken is cited by its bound, not by a chosen number', () => {
+  // `GRADED` is the real case: it landed on `main` at 9c3c52dc dated to the
+  // calendar day, forty minutes after this module made the block beside it
+  // carry a clock reading, and by then its walk was over. An interval two
+  // other blocks can be checked against is the most that is true about it.
+  assert.deepEqual(blockFaults(GRADED), []);
+  assert.equal(GRADED.read_at, null, 'not back-filled');
+  const [lo, hi] = boundOf(GRADED);
+  const derived = new Date(Date.parse(GRADED.coverage.oldest_ts) + GRADED.coverage.covered_hours * 3_600_000);
+  assert.equal(lo.slice(0, 16), derived.toISOString().slice(0, 16),
+    'the low end is the newest row the walk saw, because a read cannot precede its own evidence');
+  assert.equal(hi, MEASURED.read_at,
+    'the high end is a later walk that counted more rows, which this one therefore preceded');
+  assert.ok(GRADED.coverage.rows < MEASURED.coverage.rows, 'that ordering is checkable, not asserted');
+  const clause = instantClause(GRADED, A_WEEK_ON);
+  assert.equal(clause.exact, false);
+  assert.ok(clause.text.includes('never recorded'));
+  assert.doesNotMatch(clause.text, /before this check/, 'no age is computed off an interval');
+});
+
+test('a malformed or reversed bound is a fault, not a clause', () => {
+  // Both codes, and that is the intended reading rather than noise: a block
+  // with a broken bound and no `read_at` is uncitable for two independent
+  // reasons, and a seat repairing it needs to be told both. The bound fault
+  // comes first because it is the one whose repair is a one-line edit.
+  const codes = (v) => blockFaults({ read_at_bounded_between: v }).map((f) => f.code);
+  const both = ['BOUND_NOT_TWO_ORDERED_INSTANTS', 'READ_AT_ABSENT'];
+  assert.deepEqual(codes(['2026-11-02T04:28:38Z', '2026-11-02T04:09:56Z']), both, 'high before low');
+  assert.deepEqual(codes(['2026-11-02', '2026-11-02']), both, 'two days');
+  assert.deepEqual(codes(['2026-11-02T04:09:56Z']), both, 'one end');
+  assert.deepEqual(blockFaults({ read_at: '2026-11-02T04:28:38Z', read_at_bounded_between: ['x'] })
+    .map((f) => f.code), ['BOUND_NOT_TWO_ORDERED_INSTANTS'],
+  'a real instant beside a broken bound leaves only the bound to repair');
+  assert.equal(boundOf({}), null);
+  assert.equal(instantClause({ on: '2026-11-02' }, A_WEEK_ON), null, 'a day alone yields no clause at all');
+});
+
+test('the lint covers every measured block the gate imports, not only the first one', () => {
+  // The regression this is for: `check.mjs` on `main` at 9c3c52dc
+  // interpolated `${GRADED.on}` into a notice. A lint that only knew the name
+  // `MEASURED` read that file as clean.
+  for (const name of ['MEASURED', 'GRADED']) {
+    assert.deepEqual(undatedQuotations(src('check.mjs'), name), [],
+      `check.mjs interpolates ${name} with no instant`);
+    assert.deepEqual(undatedQuotations(src('disposition.mjs'), name), []);
+  }
+  assert.equal(undatedQuotations('`${GRADED.on}`', 'GRADED').length, 1, 'and it still fires when it should');
 });

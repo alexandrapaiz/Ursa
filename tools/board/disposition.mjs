@@ -374,6 +374,22 @@ export const MEASURED = {
  */
 export const GRADED = {
   on: '2026-11-02',
+  // THE INSTANT THIS WALK WAS READ AT WAS NEVER RECORDED, so it is written as
+  // the interval it is known to lie in rather than as a number somebody chose.
+  // Added 2026-11-02 by the next run of this seat, which had just made
+  // `MEASURED` above carry a clock reading and could not give this block one
+  // after the fact. `read_at: null` is deliberate and `measured-citation.mjs`
+  // reads the bound instead.
+  //
+  // Where the two ends come from, both checkable from blocks in this file.
+  // Low: `coverage.oldest_ts` plus `covered_hours` is 2026-11-02T04:09:56Z,
+  // the newest ROW this walk saw, and a read cannot precede its own evidence.
+  // High: `MEASURED` was read at 04:28:38Z over 4,259 rows against this
+  // walk's 4,216, and the window only gains rows at this traffic (see
+  // `MEASURED.edge`), so this walk ran before it. The interval is nineteen
+  // minutes wide, which is the cost of not reading a clock once.
+  read_at: null,
+  read_at_bounded_between: ['2026-11-02T04:09:56Z', '2026-11-02T04:28:38Z'],
   window_hours: 720,
   // EVERY FIGURE BELOW IS FROM ONE WALK, and the first draft of this block was
   // not. Three of these numbers were taken from three walks minutes apart, and

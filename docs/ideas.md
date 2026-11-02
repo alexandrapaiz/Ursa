@@ -16468,3 +16468,35 @@ the owner to accept or reject.
   the drift record that is now collecting the evidence for choosing it.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (engineer, ninth message pass) — A root dot-entry gate on `main` is red in any complete clone and skipped in the clone every run is handed
+
+- Trigger: this run completed its clone to measure a conflict surface
+  (`bash tools/ensure-full-clone.sh`, 5 commits to 4,211) and the full
+  `tools/` suite went from 653 tests with one live red to 662 with a red in
+  `tools/root-entries.test.mjs:324`, `nothing legitimate has ever lived at a
+  root dot-entry outside the three`. It reports `.claude`. Reproduced on
+  `origin/main` in a separate worktree with nothing of this run's in it: 20
+  pass, 1 fail, same assertion. Nothing of this run's touches that gate.
+- What: `.claude/settings.json` was committed once, at
+  `ee8c893c`, "install HQ's secret-print guard (checker + harness hook), carve
+  out .claude/ in .gitignore". It is not in `HEAD` and `.gitignore` ignores
+  it, so the tree is clean and the history is not. The test walks
+  `git rev-list --all --objects`, so it sees the one historical commit and
+  finds a name on neither the allowlist nor the pinned scratch list.
+- Why it is urgent rather than ordinary: the test skips itself on a shallow
+  clone, with the honest message that the claim is "unmeasured rather than
+  passing". Every seat is handed a shallow clone, so the gate is green for
+  everyone until the moment a run completes its clone, which this seat's own
+  merge instrument requires before it will measure anything. So a red on
+  `main` is invisible to the runs most likely to be blamed for it, and the
+  first seat to complete a clone inherits a failure it did not cause.
+- First step: decide which list `.claude` belongs on, and that decision is
+  not this seat's to make alone, because the two answers mean different
+  things. On the pinned scratch list it is a historical fact about one commit.
+  On the `.gitignore` allowlist it is an entry this repository intends to be
+  reachable, which is a claim about HQ's installed harness hook. The
+  mechanical part either way is one name plus the three counts that name
+  "seventeen" in that file's titles and assertions.
+- Cost: $0
+- Status: urgent

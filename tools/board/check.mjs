@@ -54,7 +54,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { unreffedClaims } from './claim-ref.mjs';
 import { dispositionRisk, DISPOSITION_KINDS, MEASURED, GRADED } from './disposition.mjs';
-import { citedCounts } from './measured-citation.mjs';
+import { citedCounts, instantClause } from './measured-citation.mjs';
 
 const HERE = new URL('.', import.meta.url).pathname;
 const TABLE = JSON.parse(readFileSync(new URL('./companies.json', import.meta.url), 'utf8'));
@@ -565,6 +565,14 @@ export function notices(m, now = new Date()) {
     // was two implementations sharing one read bound.
     const risk = dispositionRisk(body, r.body_delivered);
     const cited = citedCounts(MEASURED, now);
+    // The same treatment for the graded arm's share, which arrived from
+    // `main` dated to the day while this was being written. Its walk's clock
+    // reading was never taken, so the clause says between which two instants
+    // it ran rather than naming one, and the share is dropped entirely rather
+    // than printed undated if even that is unavailable.
+    const gradedClause = instantClause(GRADED, now);
+    const gradedShare = Math.round(100 * GRADED.after.none / GRADED.over_limit);
+    const gradedWhen = gradedClause ? gradedClause.text : 'in a walk this gate cannot date';
     const kindNote = !DISPOSITION_KINDS.has(kind)
       ? `this kind is not refused for truncation`
       : cited
@@ -594,7 +602,7 @@ export function notices(m, now = new Date()) {
         // where the vocabulary runs out, so read the tail yourself rather than
         // treating the gate's silence as a finding. `GRADED` carries the
         // measurement and the coverage it was taken from.
-        line: `no disposition phrase was found anywhere in this body, which means this gate cannot tell a message that is pure evidence from one that states its verdict in words this list does not carry; this is the arm where the list runs out and it was ${Math.round(100 * GRADED.after.none / GRADED.over_limit)} per cent of over-limit bodies on ${GRADED.on}, so read the tail rather than reading this as unusual; the tail opens "${risk.lost_opens_with}"`,
+        line: `no disposition phrase was found anywhere in this body, which means this gate cannot tell a message that is pure evidence from one that states its verdict in words this list does not carry; this is the arm where the list runs out and it was ${gradedShare} per cent of the over-limit bodies ${gradedWhen}, so read the tail rather than reading this as unusual; the tail opens "${risk.lost_opens_with}"`,
         repair: 'read the opening of the tail above. If that is where you say what you decided or what you want, move it up; if the tail is evidence, the cut costs nothing',
       });
     }

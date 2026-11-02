@@ -75,6 +75,52 @@ export function isInstant(s) {
   return Number.isFinite(Date.parse(s));
 }
 
+/** The clause that dates a block, in one of the two forms a real block comes
+ *  in, or null when it cannot be dated at all.
+ *
+ *  WHY THERE IS A SECOND FORM, and it arrived forty minutes after the first
+ *  (`GRADED` in ./disposition.mjs, from `main` at 9c3c52dc). A block whose
+ *  walk has already happened cannot be given a clock reading after the fact.
+ *  What it can be given is a bound, and a bound is checkable: the low end is
+ *  `oldest_ts` plus `covered_hours`, which is the newest ROW the walk saw and
+ *  therefore the earliest the read can have been, and the high end is any
+ *  later walk that counted more rows. Written as `read_at_bounded_between`,
+ *  that is an interval a reader can verify from the two blocks, and it is
+ *  honest in the one way a back-filled `read_at` is not: it says the clock
+ *  reading was never taken.
+ *
+ *  A bounded block is cited "measured between A and B", with no age, because
+ *  an age computed off an interval would be the thing this module exists to
+ *  refuse, wearing a number.
+ *  @param {object} block
+ *  @param {Date|number|string} now
+ *  @returns {{text: string, exact: boolean}|null} */
+export function instantClause(block, now) {
+  const b = block || {};
+  if (isInstant(b.read_at)) {
+    return { text: `measured on ${b.read_at}, ${agePhrase(ageHours(b, now))} before this check`, exact: true };
+  }
+  const bound = boundOf(b);
+  if (bound) {
+    return {
+      text: `measured between ${bound[0]} and ${bound[1]}, by a walk whose clock reading was never recorded`,
+      exact: false,
+    };
+  }
+  return null;
+}
+
+/** The ordered pair of instants in `read_at_bounded_between`, or null if the
+ *  field is absent, malformed or out of order.
+ *  @param {object} block
+ *  @returns {[string, string]|null} */
+export function boundOf(block) {
+  const v = (block || {}).read_at_bounded_between;
+  if (!Array.isArray(v) || v.length !== 2) return null;
+  if (!v.every(isInstant)) return null;
+  return Date.parse(v[0]) <= Date.parse(v[1]) ? [v[0], v[1]] : null;
+}
+
 /** Everything wrong with a measured block, as the same `{code, line, repair}`
  *  shape `check.mjs` uses for a violation, so a caller can print one with the
  *  machinery it already has. Empty array means the block can be cited.
@@ -94,6 +140,15 @@ export function isInstant(s) {
 export function blockFaults(block) {
   const out = [];
   const b = block || {};
+  const bounded = boundOf(b);
+  if (b.read_at_bounded_between !== undefined && !bounded) {
+    out.push({
+      code: 'BOUND_NOT_TWO_ORDERED_INSTANTS',
+      line: `a block's read instant is bounded by ${JSON.stringify(b.read_at_bounded_between)}, which is not two UTC instants in order`,
+      repair: 'write `read_at_bounded_between: [low, high]`, low first. The low end is `oldest_ts` plus `covered_hours`, the newest row the walk saw; the high end is the earliest later walk known to have counted more rows',
+    });
+  }
+  if (bounded) return out;
   if (!isInstant(b.read_at)) {
     out.push({
       code: b.read_at === undefined ? 'READ_AT_ABSENT' : 'READ_AT_NOT_AN_INSTANT',
@@ -161,11 +216,14 @@ export function agePhrase(hours) {
  *  @returns {{sentence: string, instant: string, age_hours: number, age: string}|null} */
 export function citedCounts(block, now) {
   if (blockFaults(block).length) return null;
+  const clause = instantClause(block, now);
+  if (!clause) return null;
   const k = block.by_kind || {};
   const age = ageHours(block, now);
-  const sentence = `of the ${block.over_limit} over-limit bodies in the ${block.window_hours} hours to ${block.read_at}, ${k.note} were notes and ${k.done} dones against ${k.ask} asks`
-    + ` (measured ${agePhrase(age)} before this check; re-derive with \`node tools/board/measure-claims.mjs --hours ${block.window_hours}\`)`;
-  return { sentence, instant: block.read_at, age_hours: age, age: agePhrase(age) };
+  const to = clause.exact ? block.read_at : boundOf(block)[1];
+  const sentence = `of the ${block.over_limit} over-limit bodies in the ${block.window_hours} hours to ${to}, ${k.note} were notes and ${k.done} dones against ${k.ask} asks`
+    + ` (${clause.text}; re-derive with \`node tools/board/measure-claims.mjs --hours ${block.window_hours}\`)`;
+  return { sentence, instant: clause.exact ? block.read_at : null, age_hours: clause.exact ? age : null, age: clause.exact ? agePhrase(age) : null, exact: clause.exact };
 }
 
 /** Where a count reaches a seat without its instant.

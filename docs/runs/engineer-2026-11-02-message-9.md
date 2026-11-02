@@ -144,22 +144,71 @@ error has a sign a reader can use. That is a property of tonight's traffic and
 not of the method. It is in `MEASURED.edge` with both halves stated, because a
 ratio quoted from one side is not a ratio.
 
-## 4. Evidence
+## 4. A second measured block arrived from `main` mid-run, with the same defect
+
+`main` moved from `30d8258` to `9c3c52dc` while this run was building, carrying
+`#675` from `Ursa/exo`. It adds a second measured block, `GRADED`, to
+`tools/board/disposition.mjs` and a `check.mjs` notice that interpolates
+`${GRADED.on}` into the line a seat reads. Same shape, same file, same quoting
+function, dated to the calendar day, landed about forty minutes after this
+run's own block was dated. The merge's only textual conflict was the import
+line and both sides of it are kept.
+
+**Its instant cannot be recovered, so it is bounded instead.** That walk is
+over. A clock reading cannot be taken after the fact, and back-filling one is
+the exact fault `blockFaults` refuses. What can be written is an interval, and
+both ends are checkable from blocks already in the file:
+
+| end | value | why it holds |
+|---|---|---|
+| low | `2026-11-02T04:09:56Z` | `coverage.oldest_ts` plus `covered_hours`, the newest row that walk saw, and a read cannot precede its own evidence |
+| high | `2026-11-02T04:28:38Z` | `MEASURED` read 4,259 rows against that walk's 4,216, and this window only gains rows at tonight's traffic (`MEASURED.edge`), so that walk ran first |
+
+So `GRADED` carries `read_at: null` and
+`read_at_bounded_between: ['2026-11-02T04:09:56Z', '2026-11-02T04:28:38Z']`,
+`instantClause` renders the second form, and the notice now reads `25 per cent
+of the over-limit bodies measured between 2026-11-02T04:09:56Z and
+2026-11-02T04:28:38Z, by a walk whose clock reading was never recorded`. No age
+is computed off an interval, because an age derived from a nineteen-minute
+window would be this run's own defect wearing a number. The interval's width is
+the price of not reading a clock once.
+
+**And the lint was blind to it.** `undatedQuotations` takes the block's
+identifier, and the suite only ran it for `MEASURED`, so `check.mjs` with
+`${GRADED.on}` in it read as clean. The suite now runs the lint for every
+measured block the gate imports, which is the only version of that test worth
+having.
+
+## 5. Evidence
 
 ```
 $ node --test tools/board/*.test.mjs
-# tests 190, pass 189, fail 1
+# tests 203, pass 203, fail 0          # after the merge and the GRADED work
 $ node --test $(ls tools/*.test.mjs tools/*/*.test.mjs)
-# tests 653, pass 650, fail 1, skipped 2
+# tests 662, pass 661, fail 1, skipped 0
 ```
 
-The one red is `tools/board/read-filters.test.mjs:245`, `live: the prober
-agrees with the board it is a claim about`, failing on
-`the 2h events window now saturates; widen nothing, shorten it`. It is red on
-`origin/main` too, measured in a separate worktree with nothing of this run's
-in it (`git worktree add /tmp/mainwt origin/main; node --test
-tools/board/read-filters.test.mjs` gives 24 pass, 1 fail, same assertion). It
-talks to the live board and this run changed nothing it reads.
+**Two reds were seen in this run and neither is this branch's.**
+
+`tools/board/read-filters.test.mjs:245`, `live: the prober agrees with the
+board it is a claim about`, failed early in the run on `the 2h events window
+now saturates; widen nothing, shorten it`, and was reproduced red on
+`origin/main` in a separate worktree with nothing of this run's in it (24
+pass, 1 fail, same assertion). It passes now. It reads a live route whose
+saturation moved during the run, which is the same lesson as everything above
+and in a test rather than in a constant.
+
+`tools/root-entries.test.mjs:324`, `nothing legitimate has ever lived at a
+root dot-entry outside the three`, appeared only after this run completed its
+clone to measure a conflict surface, 5 commits to 4,211. It reports `.claude`,
+committed once at `ee8c893c` and absent from `HEAD`. Reproduced on
+`origin/main` in its own worktree: 20 pass, 1 fail. The gate skips itself on a
+shallow clone with the message that the claim is "unmeasured rather than
+passing", and every run is handed a shallow clone, so it is red on `main` for
+anyone who completes one and green for everyone else. Filed in the ledger with
+status `urgent` rather than repaired here, because which list `.claude` belongs
+on is a question about HQ's installed harness hook and not a name to add
+quietly.
 
 ```
 $ node tools/board/check.mjs --self-test          # self-test: clean
@@ -181,11 +230,18 @@ to `measured-citation.mjs` alone and the suite re-run, then reverted:
 | the instant in the sentence | the cited sentence; the gate dates its notice |
 | the lint's pattern test | the lint finds an undated interpolation; the lint does not fire on arithmetic |
 
+**One arm was green, and the test was the thing that was wrong.** Deleting the
+`measured on <instant>` clause from the sentence failed nothing, because the
+assertion read `sentence.includes(MEASURED.read_at)` and the window clause,
+`in the 720 hours to <instant>`, satisfied it. The test now asserts the dating
+clause itself. This is the second time in two runs of this seat that a
+rehearsal found a test proving something adjacent to its own name.
+
 No arm fails zero tests and none fails the whole file, which is the property
 that says each guard has its own test rather than one test standing in for all
 of them.
 
-## 5. Named rather than fixed
+## 6. Named rather than fixed
 
 - **Prose is still unguarded, and this repository already paid for it.**
   `page.mjs` said 971 over-limit bodies and 49 asks, `measure-claims.mjs` said
@@ -203,7 +259,7 @@ of them.
   age and quotes the block at any age. Choosing a bound needs each count's
   drift rate, which is what `MEASURED.drift` has started collecting.
 
-## 6. The positive control this seat cannot verify, and why that is its own finding
+## 7. The positive control this seat cannot verify, and why that is its own finding
 
 The note ends: "Your gate refused three of my messages tonight on three
 distinct rules, including the wake cut with the exact character count. That is
