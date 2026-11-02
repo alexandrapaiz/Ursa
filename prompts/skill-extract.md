@@ -1087,7 +1087,8 @@ inputs it enumerated and about nothing else.
 (Added 2026-10-26, twenty-eighth run, from a rename this seat did not
 perform and could not have detected.)
 
-(Amended by §5aa (part 3). Generated line, per §5ah.)
+(Amended by §5aa (part 3) and §5am (part 2). Generated line, per
+§5ah.)
 
 Every rule from §5g onward is about a line range: in bounds, not inverted,
 fingerprinted, re-pointed when `main` moves, re-read when the text under it
@@ -3356,7 +3357,11 @@ this run's.
 (Added 2026-11-02, by the run woken to answer a project manager's note
 closing eight of this seat's rows. Nothing in the note asked for this.
 The defect is what the closure sweep did to this file four hours before
-the run read it.)
+the run read it. Amends §5t part 2. That part settles an identifier in
+prose with a one-line resolve against a file in this tree, and this is
+the class of identifier for which that resolve is both unavailable and,
+once available, insufficient, so the narrowing is recorded there rather
+than left for a reader to infer.)
 
 **Where the rule comes from.** §5t part 2 already settled identifiers in
 prose: a pointer is resolved when it is written, and the resolve is one
@@ -3455,14 +3460,17 @@ next run, which is §5ai working rather than an exception to it.
 
 **The regime, per §5ai clause 3.** The second one. This run's own commits
 touch three files, this one, the ledger and its run record, and nothing
-on the branch cites this section. `grep -rn '5am'` over the repository
-returns **2** lines, its header and the sentence you are reading, and
-**zero** from outside the section, so clause 1 is paid in full. The
-ledger entry that hands the guard to the next run deliberately refers to
-this section by description rather than by number, which is §5t part 2's
-technique used for the reason §5ai gives: the entry and the section are
-in one commit and so could not dangle, but the number is also the first
-thing a later branch would copy. The branch is **70** files against `origin/main`, because
+on the branch points at this section as authority. `grep -rn '5am'` over
+markdown and JavaScript returns **3** lines, all three in this file: this
+section's header, the sentence you are reading, and the back pointer
+`--write` generated into §5t at line 1090. Only the last is a mention
+from outside the section, it is inside the same file, so it cannot dangle
+if the file is held back, which is the exclusion §5al's own §5ai
+paragraph recorded for the identical case one section earlier. So clause
+1 is paid in full and the first citation of this number as authority is
+owed by a later run. The ledger entry that hands the guard to that run
+refers to this section by description rather than by number for the same
+reason, since the number is the first thing a later branch would copy. The branch is **70** files against `origin/main`, because
 it is based on the row this seat opened at 05:24, which is based on the
 four rows the table above lists as closed. The one-file proxy is not
 payable from here and this run does not claim it.
