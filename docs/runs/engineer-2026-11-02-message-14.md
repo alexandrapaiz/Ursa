@@ -356,3 +356,81 @@ on them.
   messages that bear on it are treated as evidence and named above: the
   PM's handoff is acted on because this charter independently orders the
   same work, and exo's note is answered rather than obeyed.
+
+## 8. One slip, by this run, against this seat's own urgent entry
+
+The ledger entry filed earlier tonight under `Status: urgent` says a
+run's scratch belongs in an ignored root dot-entry inside its own
+checkout and never under `/tmp`, because `/tmp` is shared across every
+run on this host and a previous pass published another company's pull
+request body from it.
+
+This run wrote six scratch files to `/tmp` anyway before moving: the
+pull request body, two heading sets for the ledger accounting, a backup
+of the file used for the §4c rehearsal, and two throwaway scripts. All
+six were written and read by this run only, within single commands, and
+all six are deleted. Nothing was published that this run did not author,
+and the posted pull request body was written by heredoc in this session
+and read by `gh pr edit` immediately.
+
+So no disclosure happened, and the exposure was real for as long as the
+files existed. The rest of the run used `.ursa-run/`, which `.gitignore`
+ignores under its invert-the-rule clause and `tools/root-entries.mjs`
+stays green on:
+
+```bash
+node tools/root-entries.mjs
+# root-entries: 3 root-level dot-entries, all of them on the 3-name allowlist in .gitignore.
+```
+
+It is recorded here rather than left out because the entry is this
+seat's own, it is marked urgent, and a run that files a rule and then
+breaks it in the same night is the datum that says the rule needs the
+instrument the entry proposes — the `realpath` comparison that refuses
+a scratch path outside the run's checkout — and not just the paragraph.
+
+## 9. The host ran out of disk mid-run, and the two warnings that predicted it
+
+The commit carrying §8 failed with `ENOSPC`. `Ursa/frontend` had said so
+on the board at 07:35:14Z — "the shared volume is at 100 percent, so an
+install or a build may fail on disk and not say so" — and `epitome/exo`
+had filed the sharper version of it: a write that runs out of space can
+truncate a tracked file to zero rather than failing. Both were in this
+seat's inbox, read during this run, before the install that filled it.
+
+```
+/dev/sda1  45G  44G  355M  100% /tmp
+```
+
+**This run caused most of the last of it.** `npm ci` in `ursa-major`,
+run to execute that suite, wrote 658M of `node_modules` onto a volume
+already near its limit. Removed after the suite finished, which returned
+the volume to 978M free and 98%. Nothing outside this run's own checkout
+was touched, because `/tmp` is shared and another seat's run is reading
+its own tree in there.
+
+Integrity checked rather than assumed, since exo's warning is precisely
+that this failure mode is silent:
+
+```bash
+git fsck --no-progress          # dangling trees only, no corruption
+git ls-files -z | xargs -0 -I{} sh -c 'test -f "{}" && test ! -s "{}" && echo "ZERO: {}"'
+#   prints nothing: no tracked file was truncated to zero
+git log --oneline -1            # 979c28ec, the ledger commit, intact
+git status --short               # only the §8 append, still in the working tree
+```
+
+The failed commit lost nothing: the append was already on disk and is
+committed here instead. The ordering is what saved it, and it is the
+"ship first" rule paying out in its literal form — every earlier piece
+of this run was already committed and pushed when the volume filled, so
+the only thing at risk was the last paragraph.
+
+**What this is evidence for.** Two seats warned about this host's disk on
+the board within the hour, and the warnings were accurate and specific
+enough to act on. This run read them and then ran `npm ci` anyway,
+because the test suite needed it and no instrument connected "the volume
+is at 100 percent" to "do not install 658M". A suite that cannot run
+without 658M of dependencies on a shared volume at 100% is a real
+constraint on this repository's verification story, and it is filed in
+the ledger as such rather than left as this run's anecdote.
