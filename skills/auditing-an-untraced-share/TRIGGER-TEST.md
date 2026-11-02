@@ -1,12 +1,25 @@
 # Trigger test — auditing-an-untraced-share
 
-Eleven prompts, written against the `description` field in `SKILL.md`.
-Three should activate the skill. Eight are near misses that should not.
-Per `prompts/skill-extract.md` §5, when the test fails the description
-is what changes and not the test.
+```counts
+prompts: 13
+should-fire: 3
+near-misses: 10
+neighbours: 10
+```
 
-The budget is eight near misses because §5c sets one per adjacent skill
-and this skill's neighbours are every other skill in the library. §5e
+The counts above are checked by `node skills/trigger-coverage.mjs`,
+which goes red when they drift, per `prompts/skill-extract.md` §5ae, so
+they are the only place this file states them. This file stated all four
+in prose until 2026-11-02, which is the defect §5ae exists to stop: the
+skill was written in the one window where the ninth skill existed and
+the counts convention did not, so it was the only file in the library
+the new guard could not check. The prompts below are written against the
+`description` field in `SKILL.md`. Per §5, when the test fails the
+description is what changes and not the test.
+
+The budget is one near miss per adjacent skill, because §5c sets it
+there and this skill's neighbours are every other skill in the library.
+§5e
 asks whether this skill's inputs name the same file as its neighbours',
 and for three of them they do: `adjudicating-uncertain-spans`,
 `quoting-a-number-from-an-outcome-record` and this skill all read
@@ -23,9 +36,11 @@ Near miss 4 is `adjudicating-uncertain-spans`' own trigger, 5 is
 `adding-a-bound-to-the-record-gate`'s, 9 is
 `clearing-a-record-for-release`'s, 10 is
 `auditing-a-detected-correction-loop`'s and 11 is
-`auditing-a-durability-walk`'s. Each is copied rather than paraphrased,
-per §5r: the sibling's own words test this description, and the
-author's words would only test the author.
+`auditing-a-durability-walk`'s, 12 is
+`attributing-a-deleted-span`'s and 13 is
+`excluding-a-file-from-an-outcome-record`'s. Each is copied rather than
+paraphrased, per §5r: the sibling's own words test this description, and
+the author's words would only test the author.
 
 ## Should fire
 
@@ -205,3 +220,65 @@ The test that this is a piece of work and not a topic: the procedure has
 an output a person can be wrong about. It ends in a ruling on what may
 be written down, and step 4 lists three of them. A topic would end in a
 tour of the fields.
+
+## Added 2026-11-02: the tenth and eleventh skills' boundaries, paid on merge
+
+Both arrived in one merge, from a pull request written before this skill
+existed, so neither file carried the other's boundary and §5r's debt
+fell due in both directions at once. These two sections are this file's
+half.
+
+**12. "This record's `humanDeletedChars` is 92 of 307 generated
+characters. Before I call that a discard rate, did anything actually
+check whether a merge took them?"**
+
+`attributing-a-deleted-span`'s own trigger 1, and it should not fire
+here.
+
+The pull is this skill's own step 1. "Did anything actually check" is
+what step 1 asks of every record before any share is believed, so the
+prompt arrives in this file's idiom exactly. It is also a figure about
+text with no model behind it, which is this file's subject stated
+loosely enough to include it.
+
+It should not fire, because the object is the other class. 92 of 307
+generated characters is a ratio over characters the model produced and
+the work discarded. This skill's share is a ratio over the finished
+work, over characters the work kept and no generation explains. The two
+never read the same span, and no route in step 2's decomposition touches
+`deletion` at all.
+
+The near miss earns its length because the generalisation that would
+make it fire is tempting and wrong: that this skill owns every "is the
+apparatus or the work talking" question in the record. It owns that
+question for one class. The sibling owns it for `deletion`, the
+durability skill owns it for the forward walk, and the gate skill owns
+it for a rule. Step 0 already refuses to restate a sibling's ruling, and
+this is that refusal pointed at a sibling which did not exist when step
+0 was written.
+
+**13. "Survival came out at 84.7 percent on the lessons sync run, which
+is our best number yet. Putting it in the lab deck."**
+
+`excluding-a-file-from-an-outcome-record`'s own trigger 3, and it should
+not fire here.
+
+The hardest near miss in this file. A figure on its way to a lab deck is
+this skill's trigger 1 almost word for word, and step 4 exists to rule
+on exactly that, so a reader will fire this skill on the deck and the
+number alone.
+
+It should not fire, for a reason about which figure is in the prompt.
+Survival is the complement class and this skill rules on
+`no_generation_provenance`. The two are not interchangeable even though
+both are shares of the same finished work, because the characters an
+exclusion removes leave both numerators and the denominator at once, so
+a correction to one is not a correction to the other. The sibling's
+claim is that one imported file may dominate the figure in the prompt,
+which is a claim about a path rather than about a route into a class.
+
+The handoff is the one case in this file where this skill goes second.
+An exclusion changes `coveredChars`, and every share this skill
+decomposes is a ratio over `coveredChars`, so a pending exclusion
+question has to be settled before a route split means anything. A prompt
+carrying both goes exclusion-side first.
