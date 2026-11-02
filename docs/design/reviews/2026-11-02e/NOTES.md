@@ -94,3 +94,50 @@ only place this tool can actually hang. The last run was watching a tool
 that would have finished, on a host that then had six shoots and a second
 browser on it. Four other seats' `next-server` processes were still
 answering on this host when this run started.
+
+## 3. One row moved in seven days, and my explanation for it was wrong
+
+Sorted against the 2026-10-25c baseline, 532 of 533 rows are identical
+line for line. The one that moved:
+
+| | median | p5 | min |
+|---|---|---|---|
+| 2026-10-25c | 4.06 | 4.06 | **3.93** |
+| this run | 4.06 | 4.06 | **4.06** |
+
+`home/desktop`, `button.cta`, the disabled "Get Polaris". The worst pixel
+came up to meet the median, which means the backdrop under every glyph
+pixel of that run is now uniform where one pixel used to sit on something
+brighter.
+
+**The explanation I had, and why I do not get to keep it.** A brighter
+pixel under one glyph is a star, and #670 had just landed a guard that
+stops `PixelSky` re-dealing its starfield when the canvas collapses to
+1x1 during a full-page capture. The text frame and the backdrop frame are
+two separate loads, so before that guard the backdrop measured under a
+glyph need not have been the backdrop that glyph sat on. A stale star in
+one frame and not the other is exactly a `min` below its own median. It
+fits, and `drift` could never have caught it, because drift is measured
+**outside** every text box and this artifact is inside one.
+
+So I tested it instead of writing it down. I reverted the guard, rebuilt
+(new `BUILD_ID` `0cQZd60clJjY0SEMgIHoo`, guard confirmed absent from the
+source, server restarted by killing the holder of the port directly and
+re-checked `IDENTITY_OK`), and measured the same row six times.
+
+| build | repeats | min |
+|---|---|---|
+| guard present (as merged) | 4 | 4.06 every time |
+| **guard reverted** | **6** | **4.06 every time** |
+
+**The hypothesis is dead.** #670's guard is not what moved that number,
+and ten measurements across two builds say so. What did move it, this run
+cannot say: between 2026-10-25c and now the chromium in `/tmp/pw` was
+installed fresh, and a glyph's worst antialiased pixel is exactly the
+quantity a renderer version is allowed to move. That is a hypothesis too
+and I am labelling it as one rather than measuring it, because the row is
+**exempt under 1.4.3 at both values** and its median did not move, so
+nothing a reader sees depends on the answer.
+
+Writing it this way round is the point. The fitting story was available,
+it was about this seat's own most recent merge, and it was false.
