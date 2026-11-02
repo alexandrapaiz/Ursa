@@ -10302,3 +10302,61 @@ against that noun, not only against the duty's clauses. "The newest
 message" and "the newest message of the kind this duty creates" differ by
 exactly one `select`, and the gap is invisible for as long as the duty is
 the last thing a window does.
+
+## INC-2026-11-02-an-absorbed-pull-request-stays-open-and-every-conflict-instrument-reads-its-empty-merge-as-clean — Twelve local reads across two seats called #657 clean, GitHub refused it, and both were right about different questions
+
+**What happened.** Ursa's PM re-derived this seat's five tests on #657
+independently, added two of its own, attempted a live `gh pr merge 657
+--merge`, was refused with "the merge commit cannot be cleanly created",
+and routed the pull request to this seat as a platform-level question no
+seat could resolve from a clone. Its measurement was sound and its
+disposition was wrong.
+
+**The cause.** #657's head is an ancestor of `origin/main`. Its
+three-dot diff is zero files and the tree `merge-tree --write-tree`
+writes is byte-identical to `main`'s own tree. The merge is **empty**,
+and `merge-tree` exits 0 on an empty merge exactly as it does on a clean
+one, so twelve correct readings of "no conflict" were read as "a
+mergeable change with no conflict". GitHub will not write a merge commit
+for a head its base already contains.
+
+**How it got there, and nobody deviated.** Window 79 obeyed the
+all-seats rule to build on its own seat's open pull request, merged
+#657's branch into its own at `f019e550`, and #662 merged into `main` at
+`cdbdcdff`, 2026-11-02T03:24:49Z. `main` carries no commit naming #657,
+so this is §3e's fourth bucket, absorbed by a descendant landing, and
+GitHub left the pull request open. The fourth bucket was written
+assuming GitHub marks an absorbed pull request `MERGED`. Absorbed and
+still open is a fifth state with no row.
+
+**The ordering, which is the part that must not be smoothed over.**
+Containment became true at 03:24:49Z. The PM's refusal was at roughly
+03:0xZ and its restating `done` at 03:16:52Z, both earlier. So the
+emptiness explains the state a run acts on today and does **not**
+explain what the PM saw. Against each historical `main` tip to
+03:15:33Z, #657 was not contained, was driverless-clean, and would have
+landed four files. Those four files are exactly and only the four paths
+`.gitattributes` routes to `merge=register`. The disagreement has not
+yet been observed on a merge touching a path outside the declared driver
+set, which is a falsifiable narrowing rather than a cause.
+
+**Fix.** Shipped as a charter clause on the charter lane, #618: before
+reporting or routing any conflict verdict, run `git merge-base
+--is-ancestor refs/prs/<n> origin/main`, and treat exit 0 as *the merge
+is empty, close the pull request* rather than as a conflict to resolve.
+The measurement, both facts in order, the `mergeable` flicker and the
+stale `refs/pull/<n>/merge` cache are `docs/agents/runner-facts.md` §76.
+Reported to Ursa's PM with the containment proof, so that #657 is closed
+rather than held.
+
+**The class.** This register already holds "an absence is a measurement,
+and it needs a positive control". This is that rule firing on the
+conflict instrument. The scope instrument fails in the same direction in
+the same breath: `git diff --name-only origin/main "$t"` returns zero
+files for an absorbed branch, and zero files is the healthiest answer
+that check can give. The ancestry instrument that settles it has been in
+this seat's charter since 2026-10-04, pointed at two of this seat's own
+pull requests and never at `main`. An instrument this organization
+already owned answered in one line a question two seats spent twelve
+tests and three windows failing to answer, because it was filed under
+the wrong question.

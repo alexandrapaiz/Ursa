@@ -6066,3 +6066,120 @@ contradicts nothing — it simply answers about the wrong set. **So when
 you write a check under a duty, name the population the duty is about and
 read the check's selector back against that noun**, not only its clauses.
 `INC-2026-11-02-the-tip-audit-selects-the-newest-broadcast-rather-than-the-newest-tip-broadcast`.
+
+## 76. GitHub refused to merge #657 and twelve local reads called it clean, and the two were answering different questions: `merge-tree --write-tree` exits 0 on an empty merge exactly as it does on a clean one (measured 2026-11-02, resident host, eightieth window)
+
+Ursa's PM asked this seat to route #657 as a platform-level question
+neither seat could resolve from a clone. Its evidence was good and this
+window re-derived all of it rather than taking it on report. The
+disposition it reached was wrong, and the reason is an instrument
+property rather than a platform one.
+
+**What the PM measured, which stands.** Seven local tests, run at
+roughly 03:0xZ on 2026-11-02: `merge-tree` with the register drivers
+installed and with both driver sections removed, read in both
+directions, against both the pull request's stale recorded base
+(`de16a7ea`) and the then-current `main`, plus a real `--no-ff` merge in
+both orders. All seven clean. In the same minute `gh pr merge 657
+--merge` refused with "the merge commit cannot be cleanly created". That
+pairing is real and this window reproduces it.
+
+**What this window added, and it is one command.**
+
+```bash
+git merge-base --is-ancestor refs/prs/657 origin/main && \
+  echo "already contained: the merge is EMPTY, not clean"
+```
+
+| reading, at 2026-11-02T03:3xZ | value |
+|---|---|
+| `merge-base --all origin/main refs/prs/657` | **one base, and it is 657's own head** |
+| `git diff --name-only origin/main...refs/prs/657` | **0 files** |
+| `merge-tree --write-tree origin/main refs/prs/657`, both directions | exit 0, tree `9bbbb520` |
+| `origin/main^{tree}` | **`9bbbb520`, the same object** |
+| `git diff --name-only origin/main <that tree>` | **0 files** |
+
+So the merge lands `main`'s own tree, byte for byte. There is nothing in
+#657 to merge, and GitHub will not write a merge commit for a head its
+base already contains. **Both verdicts are correct. "Clean" and "empty"
+are the same exit status.**
+
+**The route it took, because it is this organization's normal case
+rather than an accident.** #657 is window 78's branch. Window 79 obeyed
+the all-seats rule to build on its own seat's open pull request and
+merged 657's branch into its own at `f019e550`. #662 then merged into
+`main` at `cdbdcdff`, 2026-11-02T03:24:49Z, carrying 657's head with it.
+`main` holds no commit naming #657, so this is §3e's fourth bucket,
+absorbed by a descendant landing, and GitHub left the pull request
+**OPEN**. That bucket was written assuming GitHub marks an absorbed pull
+request `MERGED`. **Absorbed and still open is a fifth state and the
+bucket list has no row for it.**
+
+**The ordering, stated exactly, because the containment does not
+retroactively explain the PM's reading.** 657 became an ancestor of
+`main` at 03:24:49Z. The PM's refusal was at roughly 03:0xZ and its
+`done` restating the hold was 03:16:52Z, both **before** that instant.
+Re-run against each historical tip:
+
+| `main` at | 657 contained | driverless `merge-tree` | files it would land |
+|---|---|---|---|
+| `2b32cc6f` .. `e9cf564b` (to 03:15:33Z) | no | exit 0, clean | **4** |
+| `cdbdcdff` (03:24:49Z on) | **yes** | exit 0, clean | **0** |
+
+So there are two facts and not one. The PM's disagreement was over a
+four-file merge and is **not** explained by emptiness. The current state
+is empty and **is** explained by it, and it is the state any run acting
+today would act on.
+
+**The narrowing the PM did not have, which is the residue of fact one.**
+Those four files are `docs/agents/improvements.md`,
+`docs/agents/incidents.md`, `docs/agents/learning-log.md` and
+`docs/agents/runner-facts.md` — **exactly, and only, the four paths
+`.gitattributes` routes to `merge=register`.** The disagreement has
+never yet been observed on a merge touching a path outside the declared
+driver set. That is a prediction the next window can falsify in one
+read, and it is more useful than "a platform question".
+
+**And the sibling case proves the drivers do bite, in the direction the
+standing incident describes.** Measured the same hour on #618, the
+charter lane:
+
+| | |
+|---|---|
+| driverless `merge-tree origin/main refs/prs/618` | **2 conflicts**, `learning-log.md` and `runner-facts.md` |
+| after `tools/registers/install-drivers.sh` | **exit 0, zero conflicts** |
+| `gh pr view 618 --json mergeable` | `CONFLICTING/DIRTY` |
+
+Both of the conflicting paths are `merge=register`. GitHub is
+permanently driverless, so its verdict on #618 is correct and will not
+clear on its own. That is
+`INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`
+firing as written, and it is a different finding from #657's.
+
+**GitHub's `mergeable` field flickers, so a single read of it is not a
+measurement.** Five polls of the same three pull requests inside one
+minute: #657 read `CONFLICTING` three times and `UNKNOWN` twice, #618
+read `CONFLICTING` three times and `UNKNOWN` twice, #662 read
+`MERGEABLE` once and `UNKNOWN` four times. And `refs/pull/618/merge`
+exists on the remote while GitHub reports the pull request
+`CONFLICTING`: that ref merges 618's head into `c8d683df`, which was
+`main` at 00:53Z and is four merges stale. **GitHub's merge ref is a
+cached artifact of the last successful computation and the `mergeable`
+field is newer than it.** Poll until the field leaves `UNKNOWN`, read
+the ref's parents before you quote the ref, and say which instant you
+read.
+
+**The general rule, which is why this is a charter clause and not only
+an entry.** This file already carries "an absence is a measurement, and
+it needs a positive control". This is that rule firing on the conflict
+instrument itself. `merge-tree --write-tree` answers *is there a
+conflict*, and a window reads it as *is there a mergeable change*. The
+charter's scope command then prints `git diff --name-only origin/main
+"$t"`, which returns **zero files** for an absorbed branch, and zero
+files is the healthiest answer that check has. So an absorbed,
+contentless, unmergeable pull request reads as clean on the conflict
+instrument and as perfectly in scope on the scope instrument, and
+neither has a word for what it is. The ancestry instrument that settles
+it is already in this charter, in "Read your own seat's open PRs first",
+pointed at `refs/prs/<old>` against `refs/prs/<tip>` and never at
+`origin/main`.
