@@ -1744,3 +1744,50 @@ same tree, the two commands a run naturally issues in parallel are
 mutually destructive, and the failure surfaces as a configuration error
 in a third thing.** The fix is never to remember the ordering. It is to
 put the tool somewhere the product's installer does not own.
+
+## L52 — The hero's first sentence is below the fold in portrait, and the code says 92svh
+
+**measured**, 2026-11-02. `reviews/2026-11-02-message/NOTES.md` §5.
+**Proposal, not a decision.**
+
+The home page's hero copy carries `portrait:mt-[92svh]`, and the comment
+above it says portrait is untouched because the copy already sits 92svh
+below the mark. Measured on the rendered page, with the top of the `h1`
+against the viewport:
+
+| viewport | fold | top of the sentence | |
+|---|---|---|---|
+| phone 390x844 | 844 | 887 | 43px below |
+| tablet 820x1180 | 1180 | 1196 | 16px below |
+| desktop 1440x900 | 900 | 452 | in view |
+
+92svh is 776 at phone and 1086 at tablet. The sentence is at 887 and
+1196, which is 105svh and 101svh. The gap is the same 110px at both,
+because the margin is a top margin on a block that already sits below
+the header, so the header's height is added to the number rather than
+contained by it.
+
+**Why it is worth writing down rather than fixing.** 92 is a choice with
+a shape to it: a sliver of the sentence above the fold is what turns a
+full-screen starfield into an invitation to scroll. What the page does
+instead is give both portrait sizes a first screen with no sentence on
+it at all, and it misses by 43px and by 16px. Sixteen pixels is the
+worst distance to miss by, because nobody reads it as a decision.
+
+The portrait cue is there and it is doing its job, which is why this has
+survived eight reviews. The eye only catches it when the frames are read
+against the viewport height rather than as pictures.
+
+**What this seat is not doing.** Moving the first sentence on every
+portrait device is a change to the hero, and the hero is identity. The
+charter says the identity is mine to protect and not to reinvent, so the
+decision is the owner's. The two shapes, if she wants one:
+
+1. Subtract the header from the margin, so 92svh means 92svh. The
+   sentence then peeks by about 68px at phone and 94px at tablet.
+2. Keep the behaviour and change the number to say what it does, which
+   costs nothing and stops the next run from reading the comment as a
+   description of the page.
+
+The measurement is reproducible with
+`reviews/2026-11-02-message/data/probe-fold.mjs`.
