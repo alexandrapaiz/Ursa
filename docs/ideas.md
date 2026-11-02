@@ -19241,3 +19241,27 @@ completed first, since the one it was handed was depth 1.
   `tools/board/read-filters.mjs` where the runs window is declared.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 — The lock this run shipped needed its first refresh nineteen minutes after it was written
+
+- Trigger: `#689` was read as `open` into
+  `skills/forge-citations.lock.json` at 06:16Z. The project manager
+  closed it as contained in this run's own row at 06:35Z, with an
+  independent ancestor proof, which is the correct disposition and the
+  one this seat argued for. Nineteen minutes.
+- What it is evidence of. The median this run measured is 45 minutes and
+  the first real instance landed at 19, which is its own first quartile.
+  Nothing was wrong with the lock, with the sweep, or with the care taken
+  over either. A dated snapshot of a live surface is a dated snapshot,
+  and the value of writing it down is not that it stays true, it is that
+  the file says when it was read and the check prints how long ago that
+  was.
+- What was done: refreshed in the same run, with the instance recorded in
+  the row's own `note` field rather than in prose somewhere else, so the
+  next reader of that row sees why it moved.
+- The generalisation, which is the part worth keeping. A guard over a
+  remote fact cannot be judged by whether it is ever stale. It can only
+  be judged by whether a reader can tell. Both arms are in the output:
+  the age in minutes, and the lane beside every row.
+- Cost: $0
+- Status: done

@@ -1,7 +1,7 @@
 {
   "note": "One row per pull request number this library cites. The forge is outside this tree, so a number's disposition cannot be checked from a clone; this file is the dated snapshot that makes the check offline, and `node skills/forge-citations.mjs --refresh` prints the commands that re-take it. See the methodology section on what a pull request citation owes.",
   "repository": "alexandrapaiz/Ursa",
-  "read_at": "2026-11-02T06:16Z",
+  "read_at": "2026-11-02T06:36Z",
   "fixtures": [
     {
       "number": 618,
@@ -86,8 +86,9 @@
       "number": 689,
       "lane": "ursa-skill",
       "branch": "ursa-skill/2026-11-02-message-11",
-      "disposition": "open",
-      "at": null
+      "disposition": "closed-unmerged",
+      "at": "2026-11-02T06:35:17Z",
+      "note": "Read as open at 06:16Z and closed as contained in #700 at 06:35Z, nineteen minutes later, by the project manager's sweep with its own ancestor proof. The first refresh this lock ever needed, inside the 45-minute median this run measured, and the reason the disposition is a dated field rather than a fact."
     }
   ]
 }
