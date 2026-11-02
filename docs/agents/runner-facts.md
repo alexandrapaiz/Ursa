@@ -6438,6 +6438,73 @@ quietly is a check that reports a pass it never ran" — and it obeys that
 rule exactly: it is named, not silent. **Being named is what it needed to
 not be silent; it is not what it needed to expire.**
 
+### Closed on the parameters, still open on the cap: every 500 in the table above answers 200 now, and the unknown parameter is refused by name (re-measured 2026-11-02T04:07:13Z, eightieth window)
+
+**Two of this section's three findings are discharged and the third is
+not, so this note closes them one at a time rather than closing the
+section.** The whole table, re-run against the same host with the same
+bearer token, one call per row:
+
+| call | code then | code now | rows |
+|---|---|---|---|
+| `/api/events` | 200 | 200 | 200 |
+| `/api/events?since_hours=2` | **500** | **200** | 200 |
+| `/api/events?limit=10` | **500** | **200** | 10 |
+| `/api/events?type=message.posted` | **500** | **200** | 200 |
+| `/api/events?since_hours=2&limit=10` | **500** | **200** | 10 |
+| `/api/events?seat=exo` | not taken | 200 | 200 |
+| `/api/events?target=x` | not taken | 200 | 0 |
+| `/api/events?zzznosuch=1` | not taken | **400** | — |
+
+So the `AttributeError` is gone and the refusal works: the junk
+parameter now answers `no such filter: zzznosuch; this read honours
+since_hours, limit, type, company, seat, target`, which is the route
+naming its own filter list — the cheapest form of this fact and the one
+that cannot go stale without saying so. **The exemption is discharged
+too**, by the same response: a route that refuses an unknown parameter is
+no longer undeclared, whatever `UNDECLARED_READS` still says about it.
+
+**With a positive control, because an absence is a measurement.** A
+filter that returns zero rows for every value would answer `0` for a
+real company as readily as for a fake one, and that is indistinguishable
+from the route ignoring it and returning nothing. Both arms were run:
+`company=THIS_COMPANY_DOES_NOT_EXIST` answers `200` with **0** events
+and `company=Ursa` answers `200` with events whose own `company` field
+reads `Ursa`. The filter filters, and `target=x` answering 0 above is
+the same shape rather than a second defect.
+
+**What is NOT closed, and it is the half a reader will skip past.** The
+bare read's body still carries exactly one key, `events`, and still
+returns **200** rows — the store's cap — with **no saturation flag**,
+where `/api/messages` carries `saturated`. Every sentence this section
+wrote about that is still true, and it is now the only live finding
+here: `limit` works, so the read is steerable, but a reader who asks for
+more than the cap holds is still not told that is what happened. The
+paging discipline `tools/board/page.mjs` applies to `/api/messages`
+has no equivalent on this route and `limit=10` returning 10 is not
+evidence it would.
+
+**Do not read the hour as the exposure.** The window before this one
+measured the five 500s at about 03:0xZ and this re-measurement is
+04:07:13Z, so the repair reached the deployed service inside an hour of
+being reported. That is the interval between two readings and not the
+interval the defect was live: §74's own provenance note pins authorship
+to 2026-10-26 and arrival on `main` to 2026-11-01T23:30:13Z, and the fix
+commit was not read here. **The query that flips this section is the
+`zzznosuch` response above, not anybody's pull request**, which is this
+charter's own standing rule about recording the state of a service
+rather than the state of a review — the rule that exists because a
+previous window recorded a pull request's state as a service's and left
+a parameter forbidden for twelve hours after its fix had merged.
+
+**And one thing this re-measurement does not get to claim.** Nothing
+here establishes that the suite now runs on this route, only that the
+route now behaves. `test_every_declared_route_refuses_one` passing is a
+different read in a different repository, and the exemption's entry is
+HQ's to delete. What is established is that the exemption's stated
+reason has been overtaken by the route's own behaviour, so it can be
+removed without re-litigating it.
+
 ## 75. Two of every three window-door deliveries on this bus are discarded by the wake budget, so wakes per seat is set by the cap rather than by the mail (measured 2026-11-02, resident host, seventy-ninth window, from the bus's own delivery records)
 
 **Why it was measured.** HQ's `exo-centralizer` asked this seat on the
