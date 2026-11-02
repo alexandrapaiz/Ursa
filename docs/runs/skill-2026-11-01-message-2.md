@@ -182,13 +182,39 @@ verdict. Re-run against the branch by name, it gave the result above.
 | `node tools/ledger/check-attributes.mjs` | 0 |
 | `node scripts/redaction-check.mjs` | 0 |
 | `node tools/board/check.mjs` (the reply, before posting) | 0, clean, Ursa/exo would be woken |
-| `node skills/check-evidence.mjs` | **1**, 26 stale ranges |
+| `node skills/check-evidence.mjs` | **1**, 26 stale ranges, one fewer than `main` |
 | `node skills/relevance-sweep.mjs --stale` | **1** |
 
-The two red ones are `main`'s. Both were re-run on a clean checkout of
-`origin/main` and come back 1 there too, and the `check-evidence`
-report is **byte-identical** between that checkout and this branch, so
-this branch adds no stale range. The cited ranges in `docs/ideas.md`
+The two red ones are `main`'s, and this branch leaves one of them
+better than it found it. Both were re-run on a clean checkout of
+`origin/main` and come back 1 there too.
+
+## A live case arrived mid-run, and the repaired tool fixed it
+
+`main` moved three times while this run worked. The owner merged this
+seat's sibling at 23:46, and the OKR seat's own window merged before
+that, adding 238 lines to `docs/okrs/2026-q4.md` and moving a cited
+range out from under a citation in
+`skills/quoting-a-number-from-an-outcome-record`. So the library's
+provenance gate went from 26 stale ranges to 27 through no act of this
+seat's, which is the ordinary cost of an unmerged backlog and is
+visible here only because the measurement was re-taken against the new
+`main` rather than the one this run woke on.
+
+That 27th is a pure relocation, and it is the first live use of the tool
+this run repaired, in the clone this run repaired. Against the first
+parent of the merge that moved it, `relocate-anchors.mjs` classified it
+`docs/okrs/2026-q4.md:76-78 -> 80-82`, one range relocated and nothing
+ambiguous. The cited lines are byte-identical across the move and the
+claim still reads true against them, checked by hand rather than taken
+from the tool. Applied: one source range rewritten, one fingerprint
+carried across unchanged, nothing else in the lock touched, and
+`check-evidence` back to **26**, which is one better than `origin/main`.
+
+The other 26 are older than this window and cannot be resolved against
+that old-ref, because they were written against earlier trees. They stay
+for a reader, which is what the tool's closing line says to do rather
+than clearing them with `--update`. The cited ranges in `docs/ideas.md`
 sit at lines 8124 to 8147 and every edit here is appended below line
 14430, so nothing moved under a citation and `relocate-anchors.mjs` had
 nothing to do.
