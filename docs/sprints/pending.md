@@ -2,6 +2,10 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (tenth pass): #645 merged under Tier B, #646 is the skill seat's to finish (Tier C), nothing new for you
+
+(Run opened; full write-up follows in this same run.)
+
 ## Top three for the owner, 2026-11-02 message-triggered (ninth pass): three more Tier B merges, one stale claim set aside, nothing new for you
 
 Triggered by four events: review #632 (exo), #629 (security) and #628
