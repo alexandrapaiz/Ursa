@@ -481,13 +481,21 @@ export async function main(argv: string[]): Promise<number> {
       record: { type: 'string' },
       pages: { type: 'string' },
       check: { type: 'boolean' },
+      // `ursa pr`. `--pr` is the number; `--snapshot` names a captured
+      // snapshot on disk so the launch runs with no `gh` and no network,
+      // which is also how `src/adapters/pr-launch.test.ts` drives it.
+      pr: { type: 'string' },
+      snapshot: { type: 'string' },
     },
   })
   const [cmd, project] = positionals
-  if ((cmd !== 'run' && cmd !== 'bridge' && cmd !== 'serve' && cmd !== 'ci' && cmd !== 'publish' && cmd !== 'address') || !project) {
+  if ((cmd !== 'run' && cmd !== 'pr' && cmd !== 'bridge' && cmd !== 'serve' && cmd !== 'ci' && cmd !== 'publish' && cmd !== 'address') || !project) {
     console.error('Usage: ursa run <projectPath> [--limit N] [--min-chars N]')
     console.error('         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]')
     console.error('         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)')
+    console.error('       ursa pr <projectPath> --pr N [--repo owner/name] [--snapshot f.json] [--min-chars N]')
+    console.error("         resolves ONE pull request instead of the default branch's commit pairs, which is the")
+    console.error('         only path that finds anything on a repository whose every commit is an agent\'s')
     console.error('       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]')
     console.error('       ursa serve <projectPath> [--port N]')
     console.error("         serves this project's .ursa/ store read-only on loopback for a local page; no passphrase, no sync, no model")
@@ -510,6 +518,23 @@ export async function main(argv: string[]): Promise<number> {
       // that is always present and always right.
       pages: values.pages ?? process.env.GITHUB_REPOSITORY ?? null,
       check: values.check === true,
+    })
+  }
+  if (cmd === 'pr') {
+    // The third launch. It is here and not only in
+    // `src/adapters/cli.ts` because the loop behind it asked none of the
+    // three questions `src/launch.ts` exists to answer until 2026-11-02,
+    // and the reason it asked none is that it was never on the surface a
+    // person types: it sat in an adapter's own entry point, where no
+    // parity test and no reader of this file ever met it. See the drift
+    // list at the top of `src/adapters/pr-launch.ts`.
+    const { runPullRequestCommand } = await import('../adapters/pr-command')
+    return runPullRequestCommand({
+      projectPath: absPath(project),
+      pr: values.pr ?? null,
+      repo: values.repo ?? process.env.GITHUB_REPOSITORY ?? null,
+      snapshotPath: values.snapshot ?? null,
+      minChars: values['min-chars'] ? Number(values['min-chars']) : undefined,
     })
   }
   if (cmd === 'publish') {
