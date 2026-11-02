@@ -185,7 +185,7 @@ $ node tools/stack/merge-surface.mjs --prs 674,673,672,671,670,669,668,667,666,6
   refs/prs/668  PATHS_CONFLICT  docs/agents/improvements.md, docs/agents/merge-order.md
   refs/prs/601  PATHS_CONFLICT  12 paths under skills/
 
-$ node --test tools/stack/merge-surface.test.mjs     # 19 pass, 0 fail
+$ node --test tools/stack/merge-surface.test.mjs     # 21 pass, 0 fail
 $ node --test tools/gates/*.test.mjs                 # 18 pass, 0 fail (merged tree)
 $ node tools/ledger/check.mjs                        # exit 2, the 2 owner-only warnings main has
 ```
@@ -198,9 +198,10 @@ in a separate worktree with nothing of this run's in it. Its cause is the
 its own failure message misreads the zero as "the INERT finding is fixed", and
 that misreading is in the ledger as its own entry.
 
-**All four guards rehearsed red, each arm separately.** Removing the object-id
-shape check, the object-existence check, the three-valued exit reading, or the
-clone precondition each fails exactly one test and no others.
+**All five guards rehearsed red, each arm separately.** Removing the object-id
+shape check, the object-existence check, the three-valued exit reading, the
+exit-code/path-count agreement check, or the clone precondition each fails
+exactly one test and no others.
 
 **One arm was green at first, and the fix was in the test.** Deleting only the
 `--check` exit-1 branch of the clone precondition left the suite green, because
@@ -211,7 +212,50 @@ to clone over `file://`: `git clone --depth 1 /some/dir` prints "--depth is
 ignored in local clones" and hands back a complete history, so the clone was
 narrow only and the test was proving half of what it claimed.
 
-## 5. Named rather than fixed
+## 5. Two things this run found about its own instrument, after shipping it
+
+**It answers the seat's question and the owner reads it as an answer to
+hers.** The gate requires the drivers registered. That is right for "can a
+seat resolve this without a person" and wrong for "will the owner's green
+button work", because the forge has no clone to register a driver in, and
+`docs/agents/merge-order.md` — which the PM and the owner read to order a
+queue — is the second question. The split was measured by the skill seat on
+2026-10-25 and is already in this ledger: on every owner merge where the two
+arms differ, four of five, `main` recorded the **driverless** blob.
+
+The gate now states the arm numerically on every line (`measured with N merge
+driver key(s) registered`) and refuses the other arm rather than answering it
+badly, because three configurations look like "drivers off" and only one of
+them is. The driverless arm is a ledger proposal with the method that works,
+run by hand this morning: `git clone --shared --no-checkout`, six bare `merge`
+attributes written into `<tmp>/.git/info/attributes`, explicit object ids
+because a shared clone carries objects and not `refs/prs/*`. Measured that
+way against `main` at `44a4fbb0`, **both `#615` and `#671` merge clean in the
+driverless arm as well as the drivered one**, so both are the owner's to merge
+and not only a seat's to resolve.
+
+**There are two refusal shapes and only one is loud.** Measured at git 2.43.0
+while writing the suite:
+
+| what it is | stderr | exit |
+|---|---|---|
+| unrelated histories | `fatal: refusing to merge unrelated histories` | **128** |
+| a revision not present in the clone | `merge-tree: <rev> - not something we can merge` | **1**, stdout empty |
+
+The second shares its exit code with a genuine conflict, which is the shape
+behind L-A55: a narrowed refspec turned every refused merge into "a conflict
+in no files". So there are two guards and not one — both revisions resolved
+with `rev-parse --verify` before the merge, and then the exit code and the
+path count required to agree. The agreement check is exported as `disagrees`
+so it can be driven directly, because a guard whose only trigger is a future
+mistake upstream of it is never rehearsed unless it is callable. Removing it
+fails exactly one of the suite's 21 tests.
+
+**`main` moved twice during this run**, `cdbdcdff` to `5c43f322` to
+`44a4fbb0`. Every verdict above names the pair of commits it was measured on
+for that reason.
+
+## 6. Named rather than fixed
 
 - `tools/gates/enumerate-verdicts.test.mjs` line 391 reads
   `describe('the six committed gates, through the same functions')` and
@@ -221,8 +265,8 @@ narrow only and the test was proving half of what it claimed.
   reviewable. The adjacent `describe` title and the file header, which were
   wrong at 6 and 7 respectively and are load-bearing on the count this run
   re-derived, were corrected as part of the resolution.
-- Three ledger entries this run opened are all defects in this seat's own
-  shipped tools: the registry append-point, the live probe that reads a dead
+- Four ledger entries this run opened, and three of the four are defects in
+  this seat's own shipped tools: the registry append-point, the live probe that reads a dead
   route as a fixed finding, and `tools/ledger/check.mjs` telling a seat the
   owner must repair a status line no owner wrote.
 
