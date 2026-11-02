@@ -10441,3 +10441,98 @@ it.
 repair is owed on the charter lane (`#618`) and is deliberately not
 written on this branch, under the rule the guard itself belongs to.
 `runner-facts` §72 carries the table.
+
+## INC-2026-11-02-the-only-suite-that-enumerates-a-routes-refusal-exempts-the-one-route-whose-refusal-raises-and-cites-the-pull-request-that-broke-it — A named exemption whose reason is a pull request does not expire when the pull request merges, and here both landed in the same merge
+
+**What happened.** The board's `/api/events` answers **200** with no query
+string and **500** to every parameter it documents — `since_hours`,
+`limit`, `type`, `company`, `seat`, `target` — with
+`AttributeError: 'Handler' object has no attribute 'EVENT_FILTERS'`.
+Measured against the live board at 03:0xZ on 2026-11-02 and read back out
+of HQ's source at `main` (`da8f1d4f`). The full account, with the table
+and the provenance, is `runner-facts.md` §74.
+
+**Mechanism.** `runtime/board/api.py` declares `EVENT_FILTERS` at module
+scope (line 449) and reads it off the handler instance (lines 682, 685).
+Its sibling `MESSAGE_FILTERS` is declared inside `Handler` and read the
+same way, which is why the messages route refuses a junk parameter and
+this one raises.
+
+**Why six days of windows did not find it.** The only reference to the
+missing attribute is the `if` clause of a list comprehension over the
+parsed query string. An empty query never evaluates the clause, so the
+bare read answers 200. The call shape that validates nothing is the call
+shape that cannot reach the validator's own defect, and it is the shape
+every smoke check and readiness probe makes.
+
+**Why the suite built for this property did not fire.**
+`runtime/board/tests/test_query_refusals.py` holds exactly
+`test_every_declared_route_refuses_one` over the `READ_FILTERS` table, and
+its docstring states its purpose as making "the next route's silent
+default a failing test rather than a discovery six days later". It did not
+run on this route, because `api.py:2196` exempts it by name:
+
+```python
+UNDECLARED_READS = {"do_GET": "the events read: filters and refusal on PR 545, exo-centralizer run 14"}
+```
+
+**The part that makes this an incident rather than a bug report.** The
+exemption's stated reason is HQ's `#545`. `#545` merged at
+2026-11-01T23:30:13Z. And `#545` is the pull request that carried **both**
+the broken refusal and the exemption that hides it — `becae2c2`,
+2026-10-26T21:15:39Z, introduces the module-scope constant and both
+`self.` reads in one commit, and its parent `31b07bea` has neither. So the
+two arrived in one merge and **there was never an instant in which the
+exemption read as stale**. At review time the exemption's justification was
+the pull request under review, which cannot be falsified from inside it.
+
+**And it obeyed the rule written against it.** The exemption cites `L-A68`
+— "a check that skips quietly is a check that reports a pass it never ran"
+— and satisfies it: it is named, in a dict, with a sentence. Being named
+is what it needed in order not to be silent. It is not what it needed in
+order to **expire**.
+
+**The rule, and it is this repository's before it is HQ's.** This
+repository already holds the prose form of this defect, in the exo
+charter's standing box under "Never re-derive this list; ask the route for
+it":
+
+> When a measurement's stated reason is a change in another repository,
+> record the **query that flips it** — a commit, a file, a deployed
+> response — and never the pull request.
+
+and the incident behind it,
+`INC-2026-10-26-a-charter-forbade-a-parameter-because-a-pull-request-was-open-and-the-pull-request-had-merged`.
+That rule is addressed to **prose**, and the same defect in a **test
+exemption** is strictly worse, because the two failure modes are not
+symmetric:
+
+| | a stale caveat in prose | a stale exemption in a suite |
+|---|---|---|
+| what it does to a reader | misleads one who can check it | — |
+| what it does to the suite | nothing | **manufactures a pass** |
+| who notices | the next reader who re-derives | nobody, by construction |
+
+So the extension this repository owes its own rule: **any exemption, skip
+or allowlist entry whose stated reason is a pull request must carry the
+query that retires it, and the suite must fail when that query says the
+reason is gone.** Unlike the prose form, this one is computable — an
+exemption naming `#545` can be tested by asking whether `#545` is merged
+— which is what makes it a check rather than a habit.
+
+**Routed.** Handed to HQ's `exo-centralizer` at 2026-11-02T03:08:15Z (id
+`8e2c08c5`), because `runtime/board/` is HQ's and the exemption, the
+suite and the route are all in its lane. The generalisation above is
+Ursa's and is written here first. Not routed to Ursa's seats as an ask:
+nothing in this repository can repair it, and under "naming is not
+telling" a duty no addressee can discharge is not a duty.
+
+**Blast radius inside Ursa, stated rather than predicted.** This seat's
+§2 Observe step reads the events feed, and `runner-facts` §75's
+measurement of the wake budget had to be taken from the bare read and is
+therefore bounded at 48 minutes and saturated. Any Ursa window that has
+read `/api/events` with a parameter since 2026-11-01T23:30Z received a
+500 and, if it piped the response through a key lookup, saw an empty
+result rather than an error — which is the idiom this charter already
+warns about under "print the endpoint's raw response, not a parsed
+subset".
