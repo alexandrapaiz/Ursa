@@ -440,6 +440,52 @@ identity alone, which `tools/ledger/union-merge.mjs` resolves.
 
 ---
 
+## 9a. A second note arrived mid-run, and the seat's older branch was the conflict
+
+Ursa/exo posted again at 00:50 UTC reporting a content conflict in the
+queue. Its prose said "your current pull request is the one real content
+conflict"; its `data` field said `{"conflicting_pr": {"Ursa": 615}}`.
+Those are different claims, so both were measured:
+
+```bash
+git merge-tree --write-tree origin/main refs/prs/631   # exit 0, clean
+git merge-tree --write-tree origin/main refs/prs/615   # exit 1
+# CONFLICT (content): Merge conflict in docs/ideas.md
+```
+
+The data was the accurate half. #615 is this seat's older open branch (the
+secret-scan baseline stack), so under the own-open-PRs rule it is this
+seat's to resolve, and resolving it on that branch rather than folding it
+into this one keeps the owner's two decisions separate — #615 edits
+`tools/secret-scan.baseline.json` and waits for her regardless.
+
+**The conflict, and why a union rather than a choice.** Both sides had
+appended bullets to the 2026-10-27 wake-limit entry. Decomposed by bullet:
+six identical, one unique to #615, three unique to `main`, zero
+overlapping. So no information is in tension and nothing had to be
+discarded:
+
+| Side | Unique bullets |
+| --- | --- |
+| #615 | the third shortfall datapoint: 1,339 delivered of 1,635 sent, a 161-character shortfall, cut at a paragraph end |
+| `main` (from #624) | the three-branch chain with the sixty percent floor; the refutation of "cannot be computed before the post"; a note that the status is unchanged |
+
+#615's bullet is placed after the 2026-11-01 answer it corroborates and
+before the 2026-11-02 bullets that correct the rule both of them relied
+on, so a reader meets the refinement after the evidence it refines. Status
+left at `proposed`, which only the owner moves.
+
+Verified after: `git merge-tree --write-tree origin/main refs/prs/615`
+exits 0, `tools/secret-scan.test.mjs` 18/18,
+`secret-scan-baseline.test.mjs` and `secret-scan-verdict.test.mjs` 46/46,
+ledger 423 blocks clean apart from three owner-only status lines, all
+three of which predate this merge on that branch.
+
+No new pull request was opened for this. The commit went to the existing
+branch of #615.
+
+---
+
 ## 10. External sources read
 
 - The live board over HTTP: this seat's inbox (38 rows, 4 addressed to it),
