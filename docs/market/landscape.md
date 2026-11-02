@@ -743,6 +743,59 @@ deliverable survived contact with the work. Last observed 2026-10-27:
 [Latitud: The Taste Layer for the AI Ecosystem](https://latitudlatam.substack.com/p/the-taste-layer-for-the-ai-ecosystem),
 [hyper.ai: Taste Labs Trains AI on Curated Quality to Combat Creative Slop](https://hyper.ai/en/stories/df1a0e0d52c2bb0d561782479941f19a).
 
+### AfterQuery
+
+What it is: a solicited-expert-feedback vendor training models on how
+knowledge professionals (doctors, lawyers, other specialists) work,
+"encoding the patterns, decisions, and reasoning of the world's best
+practitioners" rather than grading answer accuracy. Already referenced
+in this file's Forbes-sourced China-sales note (Surge AI entry) and
+the rl-list.com cross-cutting note above, which rated it the one
+"build the task and verifier" name worth a caveat rather than a clean
+"authored" tag, on the strength of 300,000+ "verified practitioners"
+producing "expert-demonstrated trajectories." Promoted to its own
+entry in the 2026-11-02 13th run because the scale has outgrown a
+footnote: a $30 million Series A at a $300 million valuation
+(announced 2026-04-09) was followed, by 2026-09-01, by a reported
+$3.2 billion valuation — "more than a 10x increase in less than half
+a year" — which Y Combinator's own partner called the fastest
+launch-to-unicorn run in the accelerator's history, 18 months out of
+its Winter 2025 cohort. Who it serves: named clients include Nvidia,
+Legora, and Motif Technologies (a Korean AI lab) — the first name in
+this entire Category 1 list that is a major AI infrastructure company
+rather than a frontier model lab or an enterprise buyer. Pricing: not
+public. Revenue: an annualized run rate of $100M reported at the
+April Series A. Founders are 22 and 23 years old. Strengths: the
+practitioner-demonstration model is the closest any Category 1 vendor
+gets to "tacit knowledge, the kind that shows up only in action"
+(vision.md §0b, principle 3), ahead of pure solicited grading.
+Weakness against Ursa unchanged from the cross-cutting note: a
+practitioner demonstrating a task on request to generate training
+data is still not a deliverable that existed because real work needed
+it done — it is demonstration data collected to train on, not a
+record joined backward to its own generation history after the fact.
+Last observed 2026-11-02: [TechCrunch: AfterQuery reportedly becomes
+Y Combinator's fastest-ever unicorn, now valued at $3.2B](https://techcrunch.com/2026/09/01/afterquery-reportedly-becomes-y-combinators-fastest-ever-unicorn-now-valued-at-3-2b/),
+[BusinessWire: AfterQuery Raises $30 Million Series A Round at $300
+Million Valuation](https://www.businesswire.com/news/home/20260409469482/en/AfterQuery-Raises-$30-Million-Series-A-Round-at-$300-Million-Valuation).
+
+**Correction (2026-11-02, message, 9th run):** the 13th run's commit
+text described this as promoted to Category 1 and counted the
+category at 20 total, but the entry itself landed physically inside
+the Category 3 heading block (after Zep, before ChatGPT Memory),
+where it sat describing itself as "this entire Category 1 list."
+Moved here, into the section its own text already claimed to be in.
+Recounting with the move applied: Category 1 holds 13 named vendor
+entries (Surge AI, Scale AI, Mercor, Prolific, Invisible Technologies,
+Handshake AI, Protege, Halluminate, TELUS Digital, micro1, Plato,
+Taste Labs, AfterQuery) plus the one cross-cutting note, not 20. No
+claim found for where "20" came from; likely conflated with the
+cross-cutting note's count of 42 mapped adjacent-market names, 7 of
+them individually examined elsewhere in this file. No pricing or
+positioning consequence; this is a structural fix to the living map,
+recorded here rather than silently, per this charter's "add and
+retire entries with dated notes; never silently delete."
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -1029,42 +1082,6 @@ itself is a new pooling point this argument doesn't yet have evidence
 against either way. Positioning consequence (points 1 and 3,
 specifically) in docs/market/positioning.md. Last observed 2026-11-02:
 [Zep: The Private Agent Memory Fallacy](https://www.getzep.com/blog/the-ai-memory-wallet-fallacy).
-
-### AfterQuery
-
-What it is: a solicited-expert-feedback vendor training models on how
-knowledge professionals (doctors, lawyers, other specialists) work,
-"encoding the patterns, decisions, and reasoning of the world's best
-practitioners" rather than grading answer accuracy. Already referenced
-in this file's Forbes-sourced China-sales note (Surge AI entry) and
-the rl-list.com cross-cutting note below, which rated it the one
-"build the task and verifier" name worth a caveat rather than a clean
-"authored" tag, on the strength of 300,000+ "verified practitioners"
-producing "expert-demonstrated trajectories." Promoted to its own
-entry this run because the scale has outgrown a footnote: a $30
-million Series A at a $300 million valuation (announced 2026-04-09)
-was followed, by 2026-09-01, by a reported $3.2 billion valuation —
-"more than a 10x increase in less than half a year" — which Y
-Combinator's own partner called the fastest launch-to-unicorn run in
-the accelerator's history, 18 months out of its Winter 2025 cohort.
-Who it serves: named clients include Nvidia, Legora, and Motif
-Technologies (a Korean AI lab) — the first name in this entire
-Category 1 list that is a major AI infrastructure company rather than
-a frontier model lab or an enterprise buyer. Pricing: not public.
-Revenue: an annualized run rate of $100M reported at the April Series
-A. Founders are 22 and 23 years old. Strengths: the practitioner-
-demonstration model is the closest any Category 1 vendor gets to
-"tacit knowledge, the kind that shows up only in action" (vision.md
-§0b, principle 3), ahead of pure solicited grading. Weakness against
-Ursa unchanged from the cross-cutting note: a practitioner
-demonstrating a task on request to generate training data is still
-not a deliverable that existed because real work needed it done — it
-is demonstration data collected to train on, not a record joined
-backward to its own generation history after the fact. Last observed
-2026-11-02: [TechCrunch: AfterQuery reportedly becomes Y Combinator's
-fastest-ever unicorn, now valued at $3.2B](https://techcrunch.com/2026/09/01/afterquery-reportedly-becomes-y-combinators-fastest-ever-unicorn-now-valued-at-3-2b/),
-[BusinessWire: AfterQuery Raises $30 Million Series A Round at $300
-Million Valuation](https://www.businesswire.com/news/home/20260409469482/en/AfterQuery-Raises-$30-Million-Series-A-Round-at-$300-Million-Valuation).
 
 ### ChatGPT Memory (OpenAI)
 
@@ -1577,6 +1594,44 @@ tally from the cross-cutting note's own count of protocol/format
 [MemoryLake: Is AI Memory a Feature or a Lock-In?](https://www.memorylake.ai/en/blogs/is-ai-memory-a-feature-or-lock-in),
 [MemoryLake](https://www.memorylake.ai/), [MemoryLake pricing](https://www.memorylake.ai/en/pricing),
 [Tracxn: MemoryLake company profile](https://tracxn.com/d/companies/memorylake/___0NgAT2k9L33aWunlgxgnpw3otgpFY9Q6kIe_kmuA8o).
+
+### MemPalace
+
+What it is: a local-first AI memory system (language-based compression
+over conversation history, one-command ChromaDB ingest, MIT-licensed),
+with imports from Claude Code, ChatGPT, and Slack, marketed as "the
+highest-scoring AI memory system ever benchmarked." New entry, found
+this run via the demand-signals ceremony: a Show HN post (67 points,
+17 comments, well above this file's usual signal-to-noise bar for a
+Show HN) that turned into the clearest public case this map has yet
+tracked of a memory vendor's own benchmark numbers being independently
+debunked rather than merely unverified. Who it serves: individual
+developers wanting a local, portable memory store; notable only for
+the demand signal, not as a frontier-lab or enterprise comp. Pricing:
+free, open-source. Strengths: none claimed against Ursa; the local-
+first, MIT-licensed architecture is closer to user-owned than the
+centralized stores (Mem0, Wire, MemoryLake) this file already tracks.
+Weakness against Ursa, and the finding worth carrying into
+positioning.md: HN commenters found the claimed 100% LongMemEval score
+depended on "targeted fixes for three failing questions" plus LLM
+reranking, dropping to 98.4% with reranking removed, and the claimed
+100% LoCoMo score used a retrieval top-k of 50 against a benchmark with
+fewer sessions than that, meaning the metric could not fail by
+construction. A separate commenter cited GitHub issues documenting that
+independent testers running actual end-to-end QA, rather than the
+vendor's own retrieval metrics, saw scores "dropped dramatically."
+MemoryLake's entry above already flagged a self-reported 94.03% LoCoMo
+score as unverified by any third party; this is the same shape of claim
+one step further down the pipeline, with the verification actually
+done, in public, by the market itself. One contributor's identity
+(the actress Milla Jovovich, reported as behind the project) drove
+some of the HN attention but is not load-bearing for the benchmark
+finding. Direct read for CLAUDE.md §1: this is a concrete instance of
+"labs fall back on preference proxies... because they have no
+verifier," except here the proxy is a leaderboard number a vendor
+tuned to the test rather than a stated preference, and the market's
+own correction mechanism is a GitHub issue thread, not a repeatable
+process. Last observed 2026-11-02: [Show HN: MemPalace](https://news.ycombinator.com/item?id=47672792).
 
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
