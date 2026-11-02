@@ -1238,6 +1238,8 @@ it, or have the tool check it. Never have the author remember it.
 tool spent a measurement reporting that files had left the repository
 when what had left was the history it was given.)
 
+(Amended by §5aj. Generated line, per §5ah.)
+
 Every rule from §5g onward rests on the same move: record a derived fact
 beside the thing it is derived from, then have a tool re-derive it and
 compare. §5u closed that loop for counts. This section closes it for the
@@ -2893,3 +2895,106 @@ denominator are this run's. The two-branch observation and the freeze's
 headline denominator are the exo seat's, taken as data and re-derived
 before use. The owner and deadline this run worked to are the
 2026-11-02 ledger entry's.
+
+## 5aj. §5v's precondition is addressed to the one frame this library has no exit status for, so no guard under skills/ can carry it
+
+(Added 2026-11-02, by the run that broke §5v's own rule inside its first
+ten turns and found out by nearly closing a readied pull request as
+damaged. It is amending §5v, which stated the rule correctly and put it
+where a run reads it too late.)
+
+§5v says the clone a seat is handed is not a copy of the repository, and
+its operative line is that **the first act of any run that will compare
+branches is `bash tools/ensure-full-clone.sh`**. That rule is right. This
+run did not follow it, and the reason is not carelessness, so it is worth
+a section rather than an incident line.
+
+**What happened, in order.** This run's charter opens with "Read your own
+seat's open PRs first" and prints the command for it,
+`git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>`. So the
+run's first git question arrived before it had any reason to open this
+file, and §5v lives in this file. The answer it got was that pull request
+#646 had **no common ancestor with `main` at all**, and the diff that
+followed reported **81 files changed, 3,017 insertions and 11,510
+deletions**, including whole `SKILL.md` files apparently removed. The
+truth, after `git fetch --unshallow`, is **63 files, 11,387 insertions
+and 260 deletions**. A finished pull request read as a mass deletion, and
+the next decision in front of the run was whether to close it.
+
+**Three states, each measured in a clone made from scratch on
+2026-11-02 against `github.com/alexandrapaiz/Ursa`.** §5v and
+`docs/design/clone-completeness.md` describe the first. The second is the
+one a seat is actually in, and it is the trap.
+
+| reached by | `main` visible | PR ref visible | `is-ancestor` PR to PR |
+|---|---|---|---|
+| `clone --depth 1`, then `fetch --depth 1 refs/pull/N/head` | 1 | 1 | exit 1, **wrong** |
+| `clone --depth 1`, then `fetch refs/pull/N/head` with no depth flag | 1 | 2,126 | exit 0, **right** |
+| after `git fetch --unshallow origin` | 2,021 | full | exit 0, right |
+
+The middle row is what the charter's own fetch produces, because a plain
+fetch of a pull request head into a shallow clone deepens that ref and
+leaves `main` at one commit. In it the PR-to-PR form the charter prints
+is **correct**, and every comparison against `main` is still wrong. So
+the printed command returns a true answer and gives the run no signal
+whatever that its next question is unanswerable. The instrument is not
+broken for the question the rule spells out. It is broken for the
+questions the rule leaves to the reader.
+
+**Four spellings of one question, in the middle state, on #646.** Only
+one is quiet, and it is the one this run reached for.
+
+| form | status | what it reported |
+|---|---|---|
+| `git diff --name-only main...head` | 128 | `fatal: no merge base` |
+| `git merge-tree --write-tree main head` | 128 | `fatal: refusing to merge unrelated histories` |
+| `git diff --stat "$(git merge-base main head)" head` | 128 | `fatal: ambiguous argument ''` |
+| `git diff --stat $(git merge-base main head) head` | **0** | 81 files, +3,017, −11,510 |
+
+The quiet one is also the one `docs/standards/lessons.md` prints at
+L-A77 and the one this file cites, which is L-A77's own mechanism 3
+turned on the document that records it. Quoting the substitution is the
+whole repair, because an empty base then fails with 128 like the other
+three instead of being dropped, and no judgement is required of the
+reader.
+
+**Why this cannot become a guard under `skills/`, which is the part that
+belongs in this file.** The library already does the downstream half
+correctly. `skills/relocate-anchors.mjs` reads git history, detects
+`--is-shallow-repository`, and names `tools/ensure-full-clone.sh` in its
+own error text at three separate call sites. There is nothing to add
+there. The failure happened in the **top shell frame of the run**, before
+any committed guard executed, and that frame is the one place this
+library has no exit status to offer. §5ai's predecessor reached the
+identical conclusion one run earlier about a different instrument: the
+grep dialect that diverges does so only in the frame a seat types into,
+so "the committed tooling is safe and the hand-typed receipt is not."
+Two consecutive runs of this seat, two unrelated instruments, one
+structural fact. The second time, this seat was the victim rather than
+the auditor, which is the stronger evidence of the two.
+
+**The rule, scoped to what this file can enforce.** A receipt in this
+library that compares two refs names the clone state it was measured in,
+and writes the comparison in a form that fails loudly: the three-dot
+form, or the substitution **quoted**, never the bare substitution. A
+receipt that cannot say which state it was measured in is not a receipt,
+because every number in the table above is reproducible and three of the
+four are wrong.
+
+**The residue, with an owner, because the rest is not this seat's to
+write.** Of the eleven files under `prompts/` that print the
+`merge-base --is-ancestor` paragraph, **one** carries a shallow-clone
+warning beside it, which is `prompts/exo-agent.md`, and **none** names
+`tools/ensure-full-clone.sh` by path. Charters are outside this seat's
+boundary, so the fix is a ledger entry addressed to the owner rather than
+an edit here, and it is filed under this date in `docs/ideas.md`.
+
+**Ours.** The three-state table and the middle state's selective
+correctness, the four-spelling status table, the measurement that the
+quiet form is the one this organization's own lesson prints, the argument
+that no `skills/` guard can carry §5v's precondition, and the
+eleven-charters count are this run's. §5v's rule, the four mechanisms it
+rests on, `tools/ensure-full-clone.sh` and
+`docs/design/clone-completeness.md` are the engineer seat's prior work
+from 2026-10-24 and 2026-10-26, read before this section was written and
+not re-derived. The frame-versus-host argument is the preceding run's.

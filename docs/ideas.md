@@ -16655,8 +16655,8 @@ the owner to accept or reject.
   the prompt. Not written as its own entry yet, because it needs a read
   of `ursa-major/src/` first to say whether the resolver already has
   the data and only lacks the surface.
-### 2026-11-02 (skill) — An absence receipt that searches tests is falsifiable by a test, and no guard in this library can see it go false
 
+### 2026-11-02 (skill) — An absence receipt that searches tests is falsifiable by a test, and no guard in this library can see it go false
 - Trigger: this run re-ran one receipt from `skills/relevance-audit.md`
   in order to compare two grep dialects, and found the receipt had gone
   false by an unrelated route. `distilling-a-tuning-record` said the
@@ -16720,5 +16720,60 @@ the owner to accept or reject.
   later item, and deliberately not this one, because a scanner that
   reports its own probe and its own fixtures needs the exemption written
   somewhere a reader sees it, which today is its test file.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — Eleven charters prescribe an ancestry check that lies in the clone every seat is handed, and the repair is named in none of them
+- Trigger: this run's first git question, asked under its charter's own
+  opening rule, reported that pull request #646 has no common ancestor
+  with `main` and that its diff is 81 files with 11,510 deletions,
+  including whole `SKILL.md` files removed. The truth, after
+  `git fetch --unshallow`, is 63 files with 11,387 insertions and 260
+  deletions. The next decision in front of the run was whether to close
+  #646 as damaged, and the wrong answer carried exit status 0.
+- What: the defect is not the clone and not the instrument, both of
+  which are already written down. `tools/ensure-full-clone.sh` exists,
+  `docs/design/clone-completeness.md` specifies it, L-A55 and L-A77 in
+  `docs/standards/lessons.md` name it by path, and
+  `prompts/skill-extract.md` §5v says plainly that the first act of any
+  run that will compare branches is to run it. Sixty-five files in this
+  repository name that path, counted 2026-11-02 and drifting upward
+  with every run that cites it. The defect is **where the rule is not**.
+  Measured on this branch: of the eleven files under `prompts/` that
+  print the `git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>`
+  paragraph, **one** carries a shallow-clone warning beside it, which is
+  `prompts/exo-agent.md`, and **zero** name
+  `tools/ensure-full-clone.sh`. So every seat is told to ask the
+  question at step 0 and told how to ask it safely in a file it opens
+  later, or never.
+- The reason it survives, which is the part worth a charter edit rather
+  than a lesson: a plain `git fetch origin 'refs/pull/N/head:refs/prs/N'`
+  into a depth-1 clone deepens that ref and leaves `main` at one commit.
+  In that state the PR-to-PR form the charters literally print is
+  **correct**, and every comparison against `main` is wrong. The printed
+  command returns a true answer and signals nothing. Three clones made
+  from scratch on 2026-11-02 and the four spellings of the comparison,
+  three of which fail loudly at 128 and one of which exits 0 with a
+  plausible wrong number, are tabulated in `prompts/skill-extract.md`
+  §5aj.
+- Why no tool closes it: this seat built a scanner for it this run and
+  then deleted it, because `skills/relocate-anchors.mjs` already detects
+  the shallow clone and names the repair at three call sites, and the
+  failure happens in the top shell frame of a run, before any committed
+  guard executes. The preceding run reached the same conclusion about
+  `grep` dialects from the other direction. Two instruments, one frame,
+  no exit status available there.
+- First step, and it is not this seat's to take: add to the all-seats
+  "Read your own seat's open PRs first" paragraph, in each of the eleven
+  `prompts/*-agent.md` files that carry it, one line placing
+  `bash tools/ensure-full-clone.sh` before the first `merge-base` call,
+  and quote the substitution in L-A77's worked example so the lesson
+  stops printing the one form that fails quietly. Charters are outside
+  every seat's own boundary, so this is addressed to the owner. Owner:
+  the owner, as the only merger of Tier C paths. Cheapest honest
+  alternative if the charter edit waits: `tools/seat/charter-lag.mjs`
+  already reads charters, so a check that fails when a charter prints
+  `merge-base` without naming the repair would put the rule under an
+  exit status without editing eleven files.
 - Cost: $0
 - Status: proposed
