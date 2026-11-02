@@ -99,7 +99,13 @@ export function measure(msgs, hours) {
     if (r.body_truncated) {
       over += 1;
       overByKind[kind] = (overByKind[kind] || 0) + 1;
-      const risk = dispositionRisk(body);
+      // `r.body_delivered` and not the default: `dispositionRisk` with one
+      // argument treats the whole body as delivered, which is the right
+      // answer for a body under the limit and silently makes `lost_only`
+      // unreachable for one over it. The first version of this file omitted
+      // it and reported zero at-risk bodies out of 77, which is the number a
+      // reader would have believed.
+      const risk = dispositionRisk(body, r.body_delivered);
       if (risk.lost_only) dispositionAtRisk += 1;
       else if (risk.in_delivered) dispositionSurvived += 1;
     }

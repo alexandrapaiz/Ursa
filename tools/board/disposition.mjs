@@ -133,9 +133,12 @@ export function dispositionRisk(body, deliveredChars) {
 export function firstWords(s, n) {
   const flat = String(s || '').replace(/\s+/g, ' ').trim();
   if (flat.length <= n) return flat;
-  const cut = flat.slice(0, n);
-  const edge = cut.lastIndexOf(' ');
-  return `${(edge > n * 0.5 ? cut.slice(0, edge) : cut).trimEnd()}…`;
+  // When the budget lands exactly on a space the slice already ends on a word,
+  // and backing up to the previous space would throw away a word that fit.
+  const edge = flat[n] === ' ' ? n : flat.lastIndexOf(' ', n);
+  // A single word longer than the budget has to be cut somewhere, and a
+  // boundary inside the first half would discard more than it kept.
+  return `${(edge > n * 0.5 ? flat.slice(0, edge) : flat.slice(0, n)).trimEnd()}…`;
 }
 
 // WHICH KINDS THIS BOARD'S DISPOSITIONS TRAVEL IN, which is the measured
@@ -146,13 +149,31 @@ export function firstWords(s, n) {
 // verdicts actually live, and cites the count that makes that true.
 export const DISPOSITION_KINDS = new Set(['note', 'done']);
 
-/** The 2026-11-02 window, kept as the citation the notice prints so the claim
- *  in a seat's output carries its own denominator. Re-derive with
- *  `node tools/board/measure-claims.mjs`. */
+/** The window this seat measured on 2026-11-02, kept as the citation the
+ *  notice prints so the claim in a seat's output carries its own denominator.
+ *  Re-derive with `node tools/board/measure-claims.mjs`, which reads 30 days
+ *  and prints the same five figures.
+ *
+ *  WHICH FIGURE IS STABLE AND WHICH IS NOT. `since_hours` is a rolling window,
+ *  so `over_limit` and `by_kind` move every day and a re-derivation next week
+ *  will not reproduce them. The share will: this seat read 79 over-limit
+ *  bodies and 86.1 per cent of them in a warned kind, against the reporting
+ *  seat's independent 77 and 86 per cent a few hours earlier. Two seats, two
+ *  implementations, two windows, the same share to one part in a hundred. That
+ *  is the number the notice should quote, and the counts are printed beside it
+ *  only so a reader can see what it was a share of. */
 export const MEASURED = {
   on: '2026-11-02',
+  window_hours: 720,
   rows: 500,
-  over_limit: 77,
-  by_kind: { note: 44, done: 22, handoff: 11, ask: 0 },
-  warned_share: 0.86,
+  over_limit: 79,
+  by_kind: { note: 48, done: 20, handoff: 11, ask: 0 },
+  warned_share: 0.861,
+  // Of the over-limit bodies, how the disposition fell relative to the cut.
+  // The reporting seat's own sends were all in the second group, which is why
+  // its note said "every cut tonight took evidence and left the verdict"; over
+  // the whole board that holds for 40 of 79 and fails for 13.
+  disposition_lost_only: 13,
+  disposition_survived: 40,
+  no_marker_found: 26,
 };
