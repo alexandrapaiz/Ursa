@@ -2,6 +2,57 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (eleventh pass): #647 merged under Tier B, #612 closed as superseded by #618, nothing new for you
+
+Triggered by three board events landing together: the engineer run that
+produced #645 (already merged by the tenth pass, confirmed on `main`
+before this pass started), exo's #647 against the merge rule, and the
+same standing condition about #646 (skill) the tenth pass already
+resolved. Built on this seat's own #648 (tenth pass), confirmed its
+tip is an ancestor of this branch before adding anything.
+
+1. **#647 (exo, window 77) merged under Tier B.** Diff is
+   `docs/agents/{improvements,incidents,learning-log,merge-order,runner-facts}.md`
+   and two `docs/runs/` files — no `prompts/`, no secrets, no workflow,
+   no `company.yaml`. Checks green (`scan` passed), not a draft, no
+   labels, no comments since push, `CLEAN`/`MERGEABLE`, opened today.
+   Verified with `git merge-base --is-ancestor` that it contains #639
+   (window 76's tip, already open) before merging, so nothing from
+   #639 is lost. Merged; GitHub then marked #639 `MERGED` on its own.
+2. **#612 (exo, window 72) closed as superseded, not merged.** exo's
+   own #647 and #618 both say #612 is contained in #618. Checked
+   independently rather than taken on their word: `git merge-base
+   --is-ancestor pr612 pr618` exits 0, so #612's tip really is an
+   ancestor of #618's. #618 is Tier C by path (`prompts/` charter
+   edits) and still open, unreadied by this seat, waiting on the
+   owner. Closed #612 with a comment naming #618 as where the work
+   lives and naming exo as the owning seat, and posted a board note to
+   exo saying the same, so the close reads as a courtesy rather than a
+   seizure of another seat's PR.
+3. **#646 (skill) is unchanged since the tenth pass's own account.**
+   Still a draft, still touches `prompts/skill-extract.md` directly,
+   still Tier C regardless of draft state or whether a live run stands
+   behind it. The tenth pass's comment and board note to the skill
+   seat stand; nothing new to add this pass.
+4. **#395 (research) is now 8.2 days old as an owner-merge PR**
+   (`createdAt` 2026-10-24T21:21:40Z against now, 2026-11-02T02:02Z),
+   unchanged. The prior pass's note said "nine point eight days,"
+   which this pass's own arithmetic does not reproduce — recorded here
+   as the corrected number, not the alarm.
+5. **Sprint-ceremony gap, named again.** Today is Monday. The only
+   sprint file on `main` is still `sprint-2026-10-12.md`. Three Mondays
+   have now passed with no ceremony PR. This run's trigger was a
+   specific PR review plus a standing condition, the same standup
+   shape every pass today has run under, not an instruction to open a
+   sprint, so this pass does not open one either. A fourth unnamed
+   Monday would be worse than a repeated note.
+
+No dispatch fired: `PM_DISPATCH_ENABLED` reads empty in this run's
+environment, and nothing in the queue meets a real §11.3/§0b criterion
+regardless (see `dispatch-queue.md`).
+
+**Earlier passes today, kept below for the record.**
+
 ## Top three for the owner, 2026-11-02 message-triggered (tenth pass): #645 merged under Tier B, #646 is the skill seat's to finish (Tier C), nothing new for you
 
 Triggered by a board event asking this seat to review the engineer's
