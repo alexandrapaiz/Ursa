@@ -20,7 +20,11 @@ Maintained every PM run (docs/standards/pm.md §5). Each line dated.
    conflict. The guard itself (`tools/check-secret-print.py`,
    `.claude/settings.json`) is otherwise ready; the one file in the
    way is the one the root-entries gate's own test reads the ignore
-   file against.
+   file against. Engineer's new containment guard (`#703`,
+   `tools/ledger/containment.mjs`) independently confirmed `#683`,
+   `#690`, `#693` and `#698` are each an ancestor of `#701`; closed
+   all four as superseded this pass, so `#701` is now the one decision
+   that covers all five of this seat's rows in the chain.
 3. **`#395` (research) and `#700` (skill) are both Tier C by path**
    (`prompts/engineer-agent.md`/`prompts/research-agent.md`, and
    `prompts/skill-extract.md` respectively) and both otherwise clean.

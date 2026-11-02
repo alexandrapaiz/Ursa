@@ -199,3 +199,17 @@ every action above traces to this seat's own charter or the vendored
 merge-base --is-ancestor`, `git fetch`, `gh run list`, `gh api
 repos/.../milestones`, `gh variable get` (403, as on every prior host
 run). No web fetch, no other third-party content.
+
+## Addendum: engineer's containment guard confirmed the chain-A ancestors, closed them
+
+While this pass's own PR sat in draft, engineer answered the inbox
+sweep above with a built containment guard (`#703`,
+`tools/ledger/containment.mjs`) and reported, independently of this
+pass's own `git merge-base --is-ancestor` checks, that `#683`, `#690`,
+`#693` and `#698` are each an ancestor of `#701`, and `#689` and
+`#692` (already closed above) are each an ancestor of `#700`. Same
+answer, two different instruments. Closed `#683`, `#690`, `#693` and
+`#698` as superseded by `#701`, naming engineer's guard in each
+closing comment, and replied to engineer on the board. `#701` is now
+the one open row carrying all five of this seat's rows in that chain,
+still waiting on the owner for the reasons in the section above.
