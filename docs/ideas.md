@@ -2,6 +2,56 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-02 (security, thirteenth run): a full disk makes `ci-checks.mjs` report exit 1, which means the branch failed a gate, for a condition that is not about the branch
+
+**Status:** proposed, hour-sized. **For:** the engineer. **Severity:** low
+now, medium once PWC-15 makes the exit code a required check. **Found by**
+hitting it: a re-run of `tooling-suites` on an unchanged branch reported
+`# fail 4`, `# cancelled 29` and exit 1, because `/tmp` on the sandbox host
+was at 100% and node's test harness threw `ENOSPC`. The same command
+reported exit 0 and 0 failing after space was reclaimed. **Full reading:**
+`docs/security/audit-2026-11-02n.md` §4, filed there as F84.
+
+**The property at stake, in the file's own words.** `exitCodeFor`'s comment
+says exit 2 beats exit 1 because "an unrunnable check means the run is not a
+verdict on the branch at all, which the caller needs to be able to tell
+apart from a branch that genuinely failed a gate". A full disk is the
+second kind and was reported as the first. `classify` already covers three
+preconditions and the runner covers two post-run conditions; a child that
+exits 1 because its own harness threw is in none of them.
+
+**Two shapes, which catch different things, and this entry does not choose.**
+
+1. **Pre-flight free space**, plumbed into `classify` exactly as `shallow`
+   is, so it stays a pure function and the existing test style covers it.
+   Cheap, honest, testable. It would NOT have caught the measured event,
+   because that disk filled during the run rather than before it. It also
+   needs a threshold, which is a number nobody has chosen.
+2. **Detect the harness throw** in the child's output and reclassify as
+   unrunnable. This was this entry's first recommendation and it is wrong.
+   The condition reproduced a second time at 1.2 GB free, and that time the
+   child's error was `fatal: failed to write commit object` from `git`
+   inside the fixture-building suites, which does not contain the string
+   `ENOSPC`. A matcher keyed to node's throw catches one of the two
+   measured events. It also needs the output, which the runner does not
+   capture, since it spawns with `stdio: 'inherit'`.
+3. **Re-read free space after a check reports failure**, and reclassify
+   below a floor whatever the child printed. This is the recommendation.
+   It covers both measured events, including the disk the run itself fills,
+   needs no output capture, and leaves `stdio: 'inherit'` and the live
+   progress of the slowest check in the repository intact.
+
+**First step: pick the floor, then build shape 3.** Shape 1 is worth having
+beside it as a pre-flight line in the job log, but on its own it would have
+caught neither of the two events measured here, because both disks filled
+during the run rather than before it. The only genuinely open question is
+the floor, which is a number this seat will not pick for the engineer.
+
+**Cost:** $0 in services. Shape 1 is a few lines plus a test; shape 2 is a
+tee and a classifier.
+
+**Status:** proposed
+
 ## Ledger entry — 2026-11-02 (security, thirteenth run): the real-queue test cannot measure in continuous integration, because `refs/prs/*` is a namespace nothing in the specified job fetches
 
 **Status:** proposed, hour-sized. **For:** whoever writes `checks.yml` under
