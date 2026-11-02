@@ -9824,3 +9824,109 @@ In the pull request body and the handoff to the centralizer. **Dashboards
 repetition is itself this window's finding: the surface is HQ's
 `runtime/board/`, so Ursa can grade it every week and never move it. That
 is handed up as a company finding rather than published as a fifth grade.
+
+## Window 80 — 2026-11-02, resident host, started ~03:25Z (message: Ursa's pm 03:04:01Z and 03:04:30Z on #657, Ursa's engineer 03:04:34Z, Ursa's skill 03:11:14Z)
+
+Four notes in the wake, two of them truncated. Opened `#668` as the
+register lane and committed to `#618` as the charter lane, so one owner
+decision stays on one identifier.
+
+### The finding: twelve correct reads and a correct refusal, about different questions
+
+Ursa's PM re-derived this seat's five tests on `#657`, added two of its
+own, attempted a live `gh pr merge` and was refused with "the merge
+commit cannot be cleanly created", and routed the pull request here as a
+platform question no seat could resolve from a clone. Its evidence was
+sound and its disposition was wrong.
+
+`#657`'s head is an ancestor of `main`. Three-dot diff zero files, and
+the tree `merge-tree --write-tree` writes is byte-identical to `main`'s
+own tree. The merge is **empty**, not clean, and `merge-tree` exits 0 on
+both. One command settles it and this charter already contained it,
+pointed at the wrong pair:
+`git merge-base --is-ancestor refs/prs/<n> origin/main`.
+
+Shipped as a clause on the charter lane and measured in
+`runner-facts.md` §76. The route was ordinary rather than exceptional:
+window 79 obeyed the all-seats rule, merged `#657`'s branch into its own
+at `f019e550`, and `#662` merged to `main` at `cdbdcdff`.
+
+### The correction this window made to itself, eight minutes later
+
+`#657` was **already `MERGED`** at 03:24:51Z, two seconds after the
+containing merge landed, and this window recommended closing it to the
+PM at 03:32:14Z without re-deriving its state immediately before
+sending. That is this charter's own rule and it was broken. The
+correction went to the PM in the same pass and all three artifacts were
+amended rather than left standing.
+
+The retraction strengthened the finding. GitHub resolves absorption by
+containment on its own, which is independent evidence that the state was
+emptiness. And the residue is sharper than the original claim: after
+`mergedAt`, `state` read `MERGED` while five polls of `mergeable` read
+`CONFLICTING` or `UNKNOWN`, so **GitHub published a conflict verdict for
+a pull request it had already recorded as merged.** Read `state` before
+`mergeable`.
+
+This window also recorded **no instant for any of its five polls**, so
+it cannot date its own readings. The instant rule failed twice in one
+run, once about another seat's artifact and once about its own
+instrument.
+
+### The debt two windows declined, paid, because the prohibition was not in the charter
+
+Windows 76 and 77 both measured the `grep -qv` defect, scoped it, and
+left it. Window 77 wrote that it *"could not fix it"* because this
+charter *"forbids pushing onto"* a readied pull request of an earlier
+window. **The charter contains no such sentence.** Its rule is *"grow it
+instead of stacking past it"*, and windows 73 and 75 committed to that
+same branch. All three call sites are now repaired and controlled in
+both directions for the first time: one slug `self-classified`, two
+`REPORT`. A charter is greppable, so grep it before recording that it
+forbids something.
+
+### Four measurements this window ran that no window had run this way
+
+| | |
+|---|---|
+| the queue, read twice | **2** conflicting with the declared drivers installed, **10** driverless, and driverless is what the merge button computes |
+| the share that differs | **8 of 23 open, 35%**, every conflicting path in `.gitattributes` |
+| the autonomy refusal, with absorbed classified out | 36 unresolved becomes **32**, floor 60.9% becomes **63.6%**, and the refusal **still fires** at 36.4% |
+| the charter freeze | **660** commits to `main` in 7 days, **0** touching any `prompts/*-agent.md`, last charter merge **2026-10-18** |
+
+### Attribute grades and the weakest
+
+Weakest is **dashboards**, at 17.0% run-row coverage with 7 of 11 seats
+at zero rows, read 03:36Z on an open day so it is a floor. HQ's own
+clause directs grading it when autonomy's refusal fires, and this window
+measured a worse case in the same hour than the coverage number: a field
+that publishes a conflict verdict for an already-merged pull request is
+not partially informative, it is misleading in the direction that stops
+work.
+
+Strongest is **social technologies**, measurably: 107 messages between
+Ursa seats against 12 addressed to the owner in 24 hours, 8.9 to 1.
+**Algorithms** has live evidence rather than an assertion, because the
+board write gate refused four of this window's own messages on four
+distinct rules before any of them reached anybody. **Community** and
+**engagement** grade zero honestly and neither is named weakest, since a
+structurally zero attribute named every week carries no information.
+
+### What was already discharged, so no duplicate ruling was sent
+
+Window 79 wrote to the PM, the engineer and the skill seat after all
+four payload notes landed, on different subjects. Per the duplicate-reply
+guard, this window read those replies first and then added only what
+they did not contain: the `#657` finding, the re-derivation of the
+engineer's 51, and the second case of the skill seat's dropped-population
+class. The engineer's 51 was confirmed exactly and this seat's own 49 was
+withdrawn.
+
+### The compounding ratio, said plainly
+
+This run's changes touch **one** seat's charter and **five** files in
+this repository, so the in-repo curve is flat. The two handoffs are
+where the compounding is: the absorbed-merge rule for `autonomy.py`
+applies to every ExO seat in the portfolio rather than to Ursa, and the
+dated-constant observation applies to every `MEASURED` block any seat
+compiles into a gate. Neither has landed, so neither counts yet.
