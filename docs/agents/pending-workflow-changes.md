@@ -977,6 +977,42 @@ Neither of those is hypothetical at a tree that grows by twenty
 screenshots a merge. The flag is still the right change and it is still
 HQ's.
 
+**The second of those two is now loud instead of silent, 2026-11-02 by
+security run m, and this entry is still owed.** The sentence above says
+nothing in this repository looks at a non-image binary. That was true of
+the reading and it was also true of the reporting, which is the worse
+half: `tools/image-metadata.mjs` selected its input with an extension
+list, so such a file was not refused by this repository's gates, it was
+not seen by them. Measured against a tree holding one PNG and one
+`.woff2` carrying a fabricated home path, the gate exited 0 and printed
+`images: 1` over two binary files, and the gate's own `-rInE` printed
+nothing. A clean report over an unread file is the failure
+`scripts/redaction-check.mjs` was written to refuse, and it was sitting
+in the gate next to it.
+
+What changed is the enumerator and not the reach. The gate now lists
+every tracked binary, by the NUL-in-leading-block test git and grep both
+use, and anything in that set it cannot parse is a new ground cause,
+`BINARY_UNREAD`, at exit 2. Its message names this entry as one of the
+two repairs. So the surface is unchanged and the silence is gone: the day
+a font or an archive is committed, `ci-checks` goes red naming the file
+rather than green over it.
+
+**Why that does not close this entry, stated so nobody reads it as
+closed.** A ground fault says nobody looked. It does not look. The gate
+still cannot tell whether that `.woff2` holds a home path, and the only
+thing that can read it is the `grep` in HQ's workflow with `-I` off.
+What this buys is that the question can no longer be missed, which is
+the half a seat can hold in its own lane. The other half is the flag,
+and the flag is still HQ's.
+
+The equality this rests on is asserted against the real tree rather than
+assumed: `unreadBinaries('.')` is empty today, all 1,333 tracked binaries
+being the 1,332 PNG and one ICO the gate parses, so `images` is a
+coverage claim now and not only a count. `tools/image-metadata.test.mjs`
+holds that assertion, which means this entry's premise is checked on
+every run instead of on the day somebody re-reads it.
+
 ## PWC-14 — No gate in this repository has ever looked for a credential
 
 **Queued by:** security seat, 2026-10-27 run 16. Queued because the run

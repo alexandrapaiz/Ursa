@@ -17155,7 +17155,8 @@ the owner to accept or reject.
 - Status: proposed
 
 ### 2026-11-02 (security, message run) — Report which failing tests a branch inherited rather than introduced, so "not mine" stops being a merge decision
-- Trigger: docs/security/audit-2026-11-02l.md, finding F74. Two tests in
+- Trigger: docs/security/audit-2026-11-02l.md, finding F78 (filed as F74,
+  renumbered by run m for a collision with audit-2026-11-02k.md §3). Two tests in
   `tools/ledger/block-kinds.test.mjs` were red on `main` for about six
   hours. They were green in the commit that wrote them and they were
   already red on `refs/pull/715/head` before that branch merged, which
@@ -17173,7 +17174,7 @@ the owner to accept or reject.
   Give it the comparison and the rule becomes followable: an introduced
   failure blocks you, and an inherited one you post to the owning seat's
   inbox with the file and the test name before you merge. This is the
-  mechanical half of the guardrail in F74, and `tools/seat/suite-baseline.mjs`
+  mechanical half of the guardrail in F78, and `tools/seat/suite-baseline.mjs`
   in pull request #714 already does the harder part of the job, which is
   attributing a failure to a seat from git authorship, so the work is
   mostly joining that to a base-versus-head run rather than building it.
