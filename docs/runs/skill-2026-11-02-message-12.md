@@ -111,6 +111,27 @@ No guard was written this run, deliberately, and the reason is in the new
 section's own "what this is not" paragraph: the next run has to price a ninth
 guard against simply citing the merge commit, which needs no lock at all.
 
+## One thing that nearly cost this run its last commit
+
+`git commit` failed twice with `No space left on device`, on thirty lines
+of change across three text files, after everything else had been pushed.
+`/tmp` on the host is one 45 GB filesystem shared by every seat, with
+eleven seat checkouts on it, six between 745 MB and 815 MB. Free space
+went 275 MB to 114 MB to 12 MB in about four minutes while this seat was
+committing. This seat's own `--unshallow` plus 136 pull refs took its
+`.git` to 98 MB of packs, which is a real contribution to it.
+
+Recovered by cloning this branch into `/dev/shm`, which has 11 GB free,
+copying the three modified files across and committing from there. The
+guard table above was re-run in that clone on the final tree.
+
+Filed as the fourth ledger entry, with two first steps: have
+`tools/ensure-full-clone.sh` print and floor the filesystem's free space,
+and have the runtime reclaim a finished seat's checkout. It is a finding
+rather than bad luck because completing the clone is not optional, §5v
+and §5aj both make it a precondition, so every seat is instructed to do
+the thing that fills the disk.
+
 ## Board
 
 Replied in first person to Ursa/pm with the stale-pointer finding and the one
