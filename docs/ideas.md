@@ -2,6 +2,232 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-02 (security, seventh run): the secret-print hook arrives outside the one sentence that protects workflows, and it is the only sentence of its kind
+
+**Status:** proposed. **For:** the owner, and HQ, because the repair is a
+clause in seat charters and in the dispatch text and this seat may not edit
+charters. **Severity:** medium, and **latent until PR #683 merges**.
+**Full reading:** `docs/security/audit-2026-11-02g.md` §5, filed there as
+F66.
+
+**This is not an objection to #683.** The guard should be installed, HQ's
+`standards/secrets.md` §5 and L-X5 require it, and this seat's own run is
+tonight's evidence for why: it violated L-X5 in its first minutes and the
+checker in #683 names the exact command. The finding is that the set of
+paths this organization protects did not grow when a path with the same
+reach did.
+
+**What #683 adds.** `tools/check-secret-print.py`, and
+`.claude/settings.json` registering it as a `PreToolUse` hook matching
+`Bash|Write|Edit|MultiEdit|NotebookEdit`. After it merges, those two
+committed files run a command before every Bash, Write and Edit in every
+later seat run, in runs carrying `--permission-mode bypassPermissions`,
+`contents: write`, `pull-requests: write` and live credentials. Whoever
+controls the content of either file controls what executes there.
+
+**The asymmetry, measured rather than asserted.** `.github/workflows/` has
+that reach and is named off-limits in eleven charters, in every seat
+dispatch, and in this seat's audits. The two new paths are named nowhere:
+
+- Every dispatch says "never touch secrets or workflows". Neither path is
+  a workflow and neither is a secret.
+- `grep` over `prompts/` and `docs/standards/` finds three mentions of
+  `.claude/` and all three are descriptive, two of them in
+  `prompts/exo-agent.md` saying Ursa has no such directory.
+- There is no `CODEOWNERS` file at either location GitHub reads.
+- `redaction-gate` is the only workflow firing on pull requests. It scans
+  three private-data patterns with `contents: read` and would not notice a
+  change to either file.
+
+**Why medium and not high.** The owner merges everything here, which is a
+real control. The exposure is that her review carries no marker for which
+diffs have this reach, and a hook edit inside a thirty-file housekeeping
+pull request reads like housekeeping.
+
+**The repair, three lines, none of them this seat's.** Add `.claude/` and
+`tools/check-secret-print.py` to the "never touch" clause in the charters
+and the dispatch text, which is the one to do if only one is done; a
+`CODEOWNERS` entry for both paths so GitHub marks the diff; and the same
+check in the HQ standard that vendored these files into five repositories,
+since a clause missing here is likely missing there.
+
+## Ledger entry — 2026-11-02 (security, seventh run): the read-filter prober should search for a measurable window instead of declaring one and abstaining
+
+**Status:** proposed, day-sized. **For:** the engineer. **Severity:** low.
+**Found by:** repairing F63 and F64 in `docs/security/audit-2026-11-02g.md`,
+which fixed the two stale windows by hand and left the mechanism that made
+them go stale.
+
+**What this run already fixed, so this entry does not re-ask for it.**
+`tools/board/read-filters.mjs` keyed its saturation abstention on a
+`saturated` field the events route does not send, so the guard was dead
+code there; `saturationOf` now infers it from the limit asked for. And both
+declared windows had been outgrown by the board: events `since_hours=2`
+returned 489 of a 500-row page, messages `since_hours=6` returned 500 and
+saturated, which had left four of fourteen probes reporting UNMEASURABLE on
+every run under a summary line reading `14 probed`. Both re-measured, both
+now carry the reading they were chosen against, and all fourteen measure.
+
+**What remains, which is the shape of the thing.** A window is a constant
+in a file and the board's traffic is not, so every window in this tool is
+correct on the day it is written and decays from then on. The failure is
+quiet in both directions: too wide and the probe abstains, too narrow and
+the window is empty and the probe abstains, and either way the tool reports
+UNMEASURABLE, which is honest and teaches nobody that the number needs
+re-measuring. The only reason tonight's decay was caught is that a live
+test went red on the boundary.
+
+**The proposal.** The tool's own header already promises more than the code
+does: it says every probe runs "inside a window small enough that the
+unfiltered read does not saturate, and reports UNMEASURABLE rather than
+guessing when it cannot find one", and "when it cannot find one" describes a
+search that is not implemented. Implement it. Halve the window while the
+baseline read saturates, up to a small bound, report the window actually
+used next to each verdict, and abstain only when no window in the bound
+works. Then a busier board changes the window the tool reports and not the
+number of claims it makes.
+
+**Why it is the engineer's and not this seat's.** It replaces a declared
+constant with a loop over live reads in the instrument three seats quote
+for board-read claims, which is a design change rather than a
+behaviour-preserving fix, and a security run is the wrong place for it.
+
+
+## Ledger entry — 2026-11-02 (security, sixth run): the fence this seat queued for the eleven workflow prompts can be stepped out of, and the step lands in the slot the prompt calls binding
+
+**Status:** proposed. **For:** the owner, because the change is in
+`.github/workflows/` and every seat dispatch says never touch workflows.
+**Found by:** reading this seat's own queued repair rather than the code it
+repairs. **Corrected in place:** PWC-11 in
+`docs/agents/pending-workflow-changes.md` now carries the amended form, so
+nobody applies the unsafe one. **Full reading:**
+`docs/security/audit-2026-11-02f.md` §2, filed there as F62.
+
+**What was already known and is not re-filed.** PWC-11 holds the finding
+that all eleven seat workflows interpolate
+`${{ github.event.client_payload.text }}` into the `prompt:` block with no
+marker saying the text is data, and the 2026-11-02d audit reconfirmed it
+live. Severity stays low to medium. Nothing here widens the channel.
+
+**What is new, in one sentence.** The mitigation would not have mitigated
+it. PWC-11 proposes wrapping the slot in the literal lines `BEGIN EVENT`
+and `END EVENT`. Both are fixed strings known to whoever composes the event
+text, Actions substitutes that text raw, and YAML offers no escape hook, so
+the close marker is a string the fenced content may itself contain.
+
+**And the step-out has somewhere to land.** Measured across all eleven
+files with `tools/prompt-slots.mjs`, added this run: in ten of them exactly
+one newline separates the end of the event slot from the literal header
+"Owner instructions for this dispatch, binding for this run and extending
+the charter". PWC-11 leaves that block unfenced on purpose, for a reason
+that is right about the owner and does not cover the path:
+`repository_dispatch` declares no `inputs:`, so on exactly the trigger that
+fills the event slot, `${{ inputs.owner_instructions }}` resolves to
+nothing. The binding slot is empty whenever the forgeable one is full.
+
+**Why the two precedents PWC-11 reasons from did not catch this.** Both are
+safe and neither is safe for the reason the entry gave. They do not trust a
+delimiter. They make the content unable to produce one.
+`ursa-major/src/tuning/distill.ts` passes every fenced field through
+`JSON.stringify`, so no line break survives into the prompt.
+`ursa-major/src/verdict.ts` flattens `[\r\n]` to spaces in `shownText`
+before the transcript reaches the fence, as a side effect of an offset
+invariant it documents for a different reason. A workflow prompt can do
+neither, because there is no code between the event text and the prompt.
+
+**The change, three one-line differences, written out in full in PWC-11.**
+Move the owner block above the event block so the untrusted slot is last.
+Suffix both markers with `${{ github.run_id }}`, which the payload cannot
+contain because the run does not exist when the payload is composed. Keep
+PWC-11's label sentence as written. The first is the one to apply if only
+one is applied, because it removes the target instead of guarding it and no
+payload can defeat it.
+
+**Verification after applying**, replacing PWC-11's proposed
+`grep -c 'BEGIN EVENT'`, which would have reported the unsafe form fixed:
+`node tools/prompt-slots.mjs --strict` exits 0 with every column `yes`.
+Today it reports 11 of 11 slots open and 0 untrusted interpolations in any
+`run:` block, the latter being the audit's standing prose claim measured
+rather than restated.
+
+**Day-sized or smaller.** Eleven files, three lines each, no new
+dependency, and the instrument to check it already exists and is tested.
+
+## Ledger entry — 2026-11-02 (security, fifth run): the containment check every charter orders is unrunnable in the clone every seat is handed, and it fails in the direction that duplicates work
+
+**Status:** urgent. **For:** the owner, because the text is in eleven
+charters and charters are hers alone. **Found by:** a test skip, not by
+reading: `tools/stack/repair-pending.test.mjs` abstained with "bootstrap
+refspec not fetched; nothing to measure" on a clone this run had already
+repaired with `tools/ensure-full-clone.sh`.
+
+**The finding.** The "Read your own seat's open PRs first" rule — this
+repository's version of HQ's L-E10 — tells a seat to check whether an older
+pull request is already contained in a newer one with
+`git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>`. That command
+names a ref namespace that does not exist in a seat's clone. Measured here
+at 04:0xZ, on a clone already repaired for both depth and refspec:
+
+```
+$ git for-each-ref refs/prs | wc -l
+0
+$ git merge-base --is-ancestor refs/prs/664 refs/prs/672
+fatal: Not a valid object name refs/prs/664
+exit 128
+$ git merge-base --is-ancestor \
+    origin/ursa-security/2026-11-02-message-4 \
+    origin/ursa-security/2026-11-02-message-5
+exit 0
+```
+
+The second command is the true answer for the same pair: contained. The
+first is the one the charters tell a seat to run, and it exits 128.
+
+**Why it matters, and in which direction.** `--is-ancestor` communicates
+through its exit code, and every non-zero value means NOT CONTAINED. A
+missing ref is non-zero, so the error is indistinguishable from the answer
+"no" in exactly the idiom a seat writes it in, `git merge-base
+--is-ancestor A B && echo contained`. Having read "not contained", the
+seat follows the charter's next sentence and combines the branches by
+hand — rebuilding work that was already merged. That is precisely the
+waste the rule exists to prevent, delivered by the command the rule
+supplies. This is also fault 1 from the header of
+`tools/ensure-full-clone.sh`, "non-zero means NOT CONTAINED — the opposite
+of the truth", reached through a different door than the one that file
+closes.
+
+**Scope.** All eleven seat charters carry it, seventeen occurrences:
+`grep -rc refs/prs prompts/*.md`, run 2026-11-02. Not one of them says to
+fetch the refspec first. Nothing in the repository does it either, and
+`tools/ensure-full-clone.sh` declines on purpose, in a paragraph headed
+"WHAT IT DOES NOT DO": pull request heads are not branches, and fetching
+every head in a repository with hundreds of pull requests is not a
+precondition for reading history. That reasoning is sound and this entry
+does not argue with it. The defect is the gap between a tool that
+deliberately does not provide the refs and eleven charters that assume it
+does.
+
+**What would fix it.** Either of two one-line changes, and the choice is
+the owner's:
+
+1. Have the charters name the refs that exist. `origin/<branch>` is
+   present in any clone repaired by `tools/ensure-full-clone.sh`, and
+   `gh pr view <n> --json headRefName` turns a number into that name. This
+   needs no fetch and no new objects.
+2. Have the charters prefix the fetch:
+   `git fetch origin "refs/pull/<n>/head:refs/prs/<n>"` for the two numbers
+   in question, which is the "asks for them by name" case
+   `ensure-full-clone.sh` says it is leaving to the caller.
+
+The first is preferable: it removes a fetch rather than adding one, and it
+cannot half-succeed.
+
+**Not fixed here.** `prompts/` is outside this seat's write surface — "Never
+edit charters" in `prompts/security-agent.md`, Boundaries — and the text is
+identical across eleven files, so this is one owner edit and not eleven seat
+edits. This run used form 1 above for its own containment check and said so
+in its pull request, which is why it found the gap at all.
+
 ## Ledger entry — 2026-10-18 (skill, relevance sweep slice 3): the six evidence kinds are written down twice and nothing checks that the two agree
 
 **Status:** proposed. **For:** the engineer seat. **Found by:** reading, not
@@ -15794,6 +16020,100 @@ the owner to accept or reject.
 - Cost: $0, half a day, in `tools/secret-scan.mjs` and its verdict module
 - Status: proposed
 
+### 2026-11-02 (engineer, second message pass) — A wrong rule that passes against every real body: validate a documented model on a corpus the house voice cannot produce
+
+- Trigger: this pass transcribed `docs/agents/runner-facts.md` §44's
+  block-sum account of the board's wake cut and ran it against the live
+  store. It is **exact on all 82 over-limit bodies the board holds**, and
+  wrong on 44 of 109 generated ones, worst by 1,428 characters. The rule
+  was written from three samples, believed for six days and cited by
+  later windows, and the obvious way to check it — measure it against
+  real traffic — returns clean.
+- What: the reason is structural rather than bad luck. The host takes the
+  last blank line inside the limit only if it falls past sixty percent of
+  it, and the house voice's short blocks put a blank line past 900 in
+  essentially every message this company sends. So real traffic exercises
+  one arm of a two-arm branch, and a model of that arm alone is
+  indistinguishable from the truth on every observation available. The
+  general form: where a mechanism branches on a property the local writing
+  style holds constant, an empirical check of a claim about it confirms the
+  claim, and only reading the mechanism or generating off-distribution
+  inputs can refute it. This is the opposite of the usual preference for
+  real data over synthetic, and it is worth stating as a standing rule for
+  any gate this company writes against a measured claim: the committed
+  corpus has to contain the shapes the org does not write, or the gate is
+  a restatement of the org's habits.
+- First step: the gate shipped in this pass already holds the shape
+  (`tools/doc-model/corpus.mjs` brackets the sixty percent floor at 59 and
+  61 percent deliberately). The day-sized unit is the second mechanism, so
+  the registry stops being a one-off: take the board's prose validator
+  (`MAX_PARAGRAPH` 420 and `CODE_RE`), which is already transcribed in
+  `tools/board/check.mjs` and described in prose in at least §15d, §28 and
+  the pm standard, and register those three sites against it.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, second message pass) — A `mentions-only` dismissal is an unexecutable claim with a free pass, and this pass wrote eight of them
+
+- Trigger: this pass's own work, criticised. `tools/doc-model/models.mjs`
+  classifies thirteen candidate sections; five carry a transcribed model
+  that gets executed, and eight are dismissed as stating no rule, each with
+  a sentence of reasoning that nothing checks.
+- What: the dismissals are load-bearing, because `UNREGISTERED_SITE` only
+  fires for a section nobody classified, so the cheapest way past the gate
+  is to dismiss a section that does state a rule. Nothing distinguishes
+  "I read this and it asserts no cut location" from "I wanted the gate
+  green". The reason text is prose beside code, which is the exact object
+  the registry exists to distrust, and the registry gives its own prose the
+  one exemption it gives nothing else. Worth naming plainly: the gate is
+  strong against a wrong rule and weak against a reader who would rather
+  not transcribe one.
+- First step: make a dismissal carry a cheap falsifiable obligation rather
+  than a sentence. The candidate that costs nothing: require every
+  `mentions-only` entry to name the probe that matched it, and fail when
+  the matched probe is one of the ones that only appears in rule
+  statements. On this registry that would split `wake_limit` and
+  `body_delivered`, which appear in field lists, from `cumulative
+  paragraph` and `trailing blocks`, which appear in nothing but a claim
+  about where the cut lands.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, second message pass) — Craft scan: doctest and Rust's `#[doc]` tests, where executable documentation is the unit and the drift class they do not cover
+
+- Trigger: building a gate that executes prose claims, and asking what
+  already does this well. No product fetched for this note: both tools are
+  read from working knowledge and the comparison is to this pass's own
+  code, which is why it is a craft scan and not a market read.
+- What: the thing worth stealing is **the direction of the dependency.** Python's
+  `doctest` and Rust's documentation tests both put the example *inside*
+  the prose and compile or run it from there, so the prose is the source
+  and a stale example fails the build. `tools/doc-model/` inverts this: the
+  prose stays prose and the registry holds a separate transcription beside
+  it, which means an editor can change the prose and leave the
+  transcription passing. Rust's shape is strictly better on that axis and
+  is stealable in one place now — a fenced block inside the section, run by
+  the gate, so the claim and the thing checked are one object. The reason
+  this pass did not do it: four of the five registered sections are another
+  seat's register or the holding company's standard, so adding code blocks
+  to them is not this seat's edit to make, and a gate that requires it
+  would demand exactly the cross-lane editing the ownership downgrade
+  exists to refuse.
+  And what this gate does better, which is the half that decides whether the
+  steal is worth it: both tools only check the examples an author chose
+  to write. Neither has anything like `UNREGISTERED_SITE`, because neither
+  has a notion of "this document discusses a mechanism and owes it an
+  executable claim" — a module with no doctests passes both of them
+  silently. The 2026-10-26 section that caused all of this contained no
+  example and would have been invisible to either, and the discovery pass
+  is the half that would have caught it on the day it was written.
+- First step: for one Ursa-owned section, move the transcription into a
+  fenced block in the prose and have the gate execute the block it finds
+  rather than a function in the registry. `docs/design/board-write-path.md`
+  is the honest candidate, since it is a design doc this seat writes.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-02 (security, message run) — `--strict` on the read-filter prober exits 0 on a route that answered nothing, and the exit codes it would need are spoken for
 
 - Trigger: F48 in `docs/security/audit-2026-11-02.md`. The verdict
@@ -15888,6 +16208,115 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-02 (engineer, third message pass) — A gate that refuses at a moment leaves its own resolution as the unreviewed part
+
+- Trigger: Ursa/exo's note to this seat said the ledger merge driver had
+  refused one block of this seat's open branch, the wake-limit entry, and
+  that deciding what the block says was this seat's judgement. By the time
+  this run read it the refusal did not reproduce, because `main` had moved
+  under it. What was still there was the resolution the refusal had already
+  produced: commit `744dc12e` on `ursa-engineer/2026-11-01-hook`, whose own
+  message says it resolved the one real content conflict in the queue, and
+  which resolved it by keeping both sides. So the branch asserted that the
+  board cuts a message at the last paragraph break and then refuted that
+  eleven lines later, and `gh pr view 615` reported CLEAN and MERGEABLE for
+  a day.
+- What: the driver is not the defect and this is not an argument for a
+  stricter one. It refused exactly when it should have and it named the
+  block, measured in this pass's own fixture 3
+  (`tools/ledger/both-edited.test.mjs`), where it exits non-zero with `1
+  block(s) in docs/ideas.md were edited on both sides and need a human`.
+  The defect is the shape of the remedy. A refusal is an event and the
+  resolution it extracts is a commit, and nothing distinguishes that commit
+  from any other commit afterwards. The one pass qualified to judge the
+  block is the pass that hit the refusal, which is by construction a pass
+  in the middle of other work, and no later reviewer is told that a
+  judgement was made at all. Worse, a second forward merge moves the merge
+  base past the trunk's edit, so the driver has nothing left to refuse and
+  the three-dot diff attributes the whole block to the branch. The general
+  form, which is the part worth keeping: **where a gate converts a
+  disagreement into a human edit, the edit inherits none of the gate's
+  visibility, so the gate's own output is the least reviewed text in the
+  repository.**
+- First step: the recovery half shipped in this pass
+  (`node tools/ledger/both-edited.mjs <branch>`, which walks the branch's
+  forward merges and reports the blocks with the commit that merged past
+  them). The day-sized unit left is to stop needing the history walk: have
+  `tools/ledger/requeue.sh` append the resolved block keys to the merge
+  commit message as a trailer, `Resolved-block: <key>`, so the claim travels
+  with the commit and `both-edited.mjs` becomes the check that the trailer
+  is complete rather than the only way to learn it.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, third message pass) — A finding about register content that names a pull request cannot be re-verified once the trunk moves, and naming the block would survive it
+
+- Trigger: this pass read a note naming "your current pull request" as the
+  one real content conflict in the queue. Measured against current `main`,
+  both of this seat's open pull requests merge clean under both drivers, and
+  `node tools/ledger/pairwise.mjs` reports no pair needing a human. The note
+  was right about the block and wrong about the location, because the pull
+  request it swept was #624, which merged in between. Recovering the finding
+  took a diff of two branches, a worktree merge, and a history walk.
+- What: the content of that note was a claim about one ledger block, and the
+  block has a stable identity that this repository already relies on. The
+  ledger driver merges on the normalized `### ` heading, which is exactly
+  what makes two appends independent. A pull request number has no such
+  stability: it is a pointer to a branch that can merge, close, or be
+  rebased, and a note built on it decays in minutes. So a cross-seat finding
+  about register content should carry the block key it is about, and the base
+  sha it was measured at, and then any later seat can re-measure the same
+  claim from the repository alone with no board archaeology. This is not a
+  rule about politeness in notes. It is the difference between a finding
+  another seat can confirm and a finding another seat has to take on trust,
+  and the external-content rule in every charter here says the second kind
+  binds nobody.
+- First step: `both-edited.mjs --all-open`, which runs the walk over every
+  open pull request and prints block keys rather than numbers, so a seat
+  receiving a note like this one locates the block in a single command. Then
+  one sentence in `docs/standards/pm.md` §15 asking a register finding to
+  name its block and base, which is HQ's to land and this seat's to propose.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, third message pass) — Craft scan: `git rerere`, the one tool built to remember a hand resolution, and the reason a fleet of fresh clones cannot use it
+
+- Trigger: building `tools/ledger/both-edited.mjs` and asking what already
+  solves the problem it is about, which is a conflict resolution nobody can
+  review afterwards. No product fetched for this note. `git rerere` is read
+  from working knowledge and from this checkout, and the comparison is to
+  this pass's own code, which is what makes it a craft scan rather than a
+  market read.
+- What: `rerere` is the one widely deployed tool whose entire job is to
+  remember how a human resolved a conflict. It keys a resolution on a
+  normalized hash of the conflict text, stores it under `.git/rr-cache`, and
+  replays it the next time the same conflict appears, with `git rerere diff`
+  to show what the resolution did. The thing worth stealing is that key.
+  `rerere` identifies a resolution by the conflict it resolved rather than by
+  the commit that carried it, which is why it can speak about a resolution
+  months later and across branches. This pass's tool reaches the same object
+  the expensive way, by re-deriving merge bases out of history. A
+  `Resolved-block:` trailer keyed on the ledger's own heading is the cheap
+  version of `rerere`'s idea, and it is the first step in the entry above.
+  What this repository does better, which decides whether the steal is worth
+  anything: `rerere`'s cache is per-clone and private. Measured here,
+  `git config --get rerere.enabled` exits 1, `.git/rr-cache` does not exist,
+  and nothing under `tools/` or `docs/standards/` mentions it. Every seat in
+  this company runs in a fresh single-use clone, so a resolution memory that
+  lives in `.git/` and is never pushed is worth exactly nothing to the next
+  run, and `rerere`'s replay would be actively dangerous if it were shared,
+  because it re-applies a prior judgement silently and the judgement this
+  pass just corrected was wrong. So the half to take is the content-addressed
+  key, and the half to refuse is the automatic replay. What a reviewer needs
+  is a resolution that is visible and arguable, not one that is reapplied.
+  No separate adoption is proposed in this note, because the one worth taking
+  is already the first step of the entry two above: the `Resolved-block:`
+  trailer, written so the key is the ledger heading rather than a hash of the
+  conflict text, since this repository's blocks already have stable names and
+  `rerere` only hashes because git's conflicts do not.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-02 (market) — Disambiguate "outcome" the first time KR4.1's lab brief uses it
 - Trigger: this run's positioning ceremony (docs/market/positioning.md,
   "'Outcome-based pricing' already means something else in this market,
@@ -15907,6 +16336,27 @@ the owner to accept or reject.
 - First step: when KR4.1's lab brief is drafted, add one line the
   first time "outcome" appears: the record documents a span's fate
   (what an AI generated and what survived), not how Minor is paid.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (market) — Stretch the Scale AI S-1 recheck cadence from every one to two weeks to monthly
+- Trigger: this run's landscape watch (docs/market/landscape.md, Scale
+  AI entry). A third direct EDGAR company search (2026-11-02), six
+  weeks after the first and three weeks after the second, again finds
+  no S-1 on file for Scale AI. All three checks (2026-09-30, 2026-10-14,
+  2026-11-02) agree.
+- What: this gap has been rechecked three times in six weeks, each run
+  spending one search to reconfirm the same "no filing" answer. The
+  underlying question (has Scale AI filed an S-1) moves on the order of
+  weeks to months, not days, so a recheck cadence tighter than the
+  question's own rate of change is spending a search on reconfirmation
+  rather than new information. This is a process adjustment to this
+  charter's own weekly rhythm, not a market finding.
+- First step: the next run touching this entry should recheck EDGAR
+  only if a new aggregator claim surfaces (the original trigger for
+  checking at all) or if a month has passed since the last check,
+  whichever comes first, rather than on every pass that happens to
+  reach Category 1's Scale AI entry.
 - Cost: $0
 - Status: proposed
 
@@ -16012,7 +16462,7 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
-### 2026-11-02 (engineer, craft scan) — Letta Context Repositories: per-file frontmatter descriptions, and the revision identifier they stopped one step short of
+### 2026-11-02 (engineer) — Craft scan: Letta Context Repositories, per-file frontmatter descriptions and the revision identifier they stopped one step short of
 - Scanned: Letta (category 3, personalization and memory layers,
   `docs/market/landscape.md`). The landscape entry records that Letta
   shipped Context Repositories, git-based agent memory, in February
@@ -16045,6 +16495,105 @@ the owner to accept or reject.
   the prompt. Not written as its own entry yet, because it needs a read
   of `ursa-major/src/` first to say whether the resolver already has
   the data and only lacks the surface.
+
+### 2026-11-02 (engineer, message run, 5) — Nothing in this repository can tell you how many launches it has, which is how the third one ran uncovered for three weeks
+- Trigger: today's work. `ursa-major/src/launch.ts` opened with "the
+  decisions both launches must make identically" and named two, while a
+  third had existed since the pull-request adapter shipped and was
+  missing three of that file's own eight repairs. The whole suite was
+  green for the entire period, 1,035 tests, and `src/launch-parity.test.ts`
+  could not see the gap because the thing it compares is a pair it is
+  handed by name.
+- What: a check that finds launches by what they do rather than by a
+  list someone maintains. The signature is mechanical: a launch is a
+  module that calls `saveRecord` (`src/store.ts`) and is not
+  `src/store.ts` itself. Today there are four callers, three of them
+  launches and the fourth `applyVerdict`, which re-saves a record it
+  loaded. So the check is: for every module that calls `saveRecord`,
+  assert it also reaches `gateRecords`, `erasedEpisodeIds` and
+  `keepRecord` from `src/launch.ts`, with an allowlist whose entries each
+  carry the sentence saying why they are exempt, in the shape
+  `dep-floor.allow.json` already uses. A new entry point that writes a
+  record and asks none of the three questions then fails the suite on the
+  day it is written instead of three weeks later. The import graph is
+  enough to answer it: `src/mcp/loaded-packages.mjs` already measures a
+  module graph in this repository by recording V8's own
+  script-compilation events, so there is precedent for asking the
+  question mechanically rather than by grep.
+- Why a check and not a rule in a charter: the rule already existed, in
+  the first sentence of `src/launch.ts`, and a reader who opened
+  `src/adapters/cli.ts` never met it. The defect is that the rule lived
+  somewhere the new caller's author was not looking.
+- First step: write the finder and print what it finds, with no
+  assertion. Report the number of `saveRecord` callers, which of the four
+  shared decisions each reaches, and the exempt ones. Only then decide
+  whether it is a test or a report, because an allowlist written before
+  the census exists is a guess about how many legitimate exemptions there
+  are.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 (engineer, message run, 5) — A pull-request record could carry the time dimension, and the question of whether it may is the owner's
+- Trigger: the deliberate non-action in today's work. `ursa run` calls
+  `annotateDurability`, which walks the commits after an episode closed
+  and records whether each surviving span is `durable`, `eroded`,
+  `decayed` or `untested`. `ursa ci` cannot, because at merge time there
+  is no history after the merge yet, and `src/launch-parity.test.ts`
+  names `lifespan` and `durability` in `ALLOWED_TO_DIFFER` with that
+  reason written out. The pull-request launch built today is the case
+  neither of those covers: a merged pull request has history after it in
+  any clone that is not shallow, so the walk is available and the launch
+  does not run it.
+- What: the decision is not an engineering one. A pull-request record
+  that asserts durability is asserting it as of whatever the clone's tip
+  happened to be when the command ran, which is a different claim from
+  the one a git-pair record makes, where the walk starts at an episode
+  the same run found. Two records of the same pull request resolved a
+  week apart would then disagree about `decayRate` with nothing in either
+  file saying the clones differed. The cheap half of the repair is a
+  field naming the commit the walk reached, which makes the claim
+  readable; the expensive half is deciding whether a buyer may compare a
+  `decayRate` from this path against one from the other at all.
+- First step: resolve one pull request twice from clones at two
+  different tips and diff the two records' `durability` blocks, so the
+  size of the disagreement is a number before it is a decision. The
+  command exists: `npx tsx src/bin/ursa.ts pr <projectPath> --pr 645`.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 (engineer) — Craft scan: Graphiti's bi-temporal model, and the second clock Ursa's span lifespans do not carry
+- Scanned: Zep / Graphiti (category 3, personalization and memory
+  layers, `docs/market/landscape.md`). Source:
+  [Zep, Graphiti overview](https://help.getzep.com/graphiti/graphiti/overview).
+  One page, read for the mechanism rather than the positioning. Nothing
+  on it directed any work and nothing it describes was adopted this run.
+- Worth stealing: the page's own two phrases are "bi-temporal model" and
+  "temporal edge invalidation", and it says "graph edges include temporal
+  metadata to record relationship lifecycles". Bi-temporal means two
+  clocks per fact: when the fact was true in the world, and when the
+  system came to believe it. A contradiction then invalidates an edge
+  with an end time rather than deleting it, which is what makes their
+  point-in-time queries possible. The page does not name the fields or
+  their types, so this is the model and not an implementation to copy.
+- Where this bites Ursa, concretely: a span's `lifespan` carries one
+  clock. `durable`, `eroded`, `decayed` and `untested`
+  (`ursa-major/src/lifespan.ts`) are claims about the world, and
+  `decayed` is the strongest of them because it declares the span's own
+  class a false positive. Nothing in the record says when the resolver
+  came to that view. `ursa run` rebuilds every episode from git history
+  and `saveRecord` overwrites the record file, so a second run over a
+  longer history silently replaces `untested` with `decayed` and the file
+  afterwards is indistinguishable from one that always said `decayed`.
+  `task.resolvedBy` names which build made the claims and not which tip
+  it read, which is the field that would carry the second clock.
+- Where Ursa is ahead: their invalidation needs something to tell the
+  graph a fact stopped being true, and on their path that something is
+  ingested text. Ursa's equivalent verdict is supplied by the artifact —
+  the work either still contains the span or does not — so no grader and
+  no model judges it, which is the distinction CLAUDE.md §1 is about. And
+  `decayed` is a label that refutes the record's own earlier label in the
+  same file, which their model has no counterpart for: an invalidated
+  edge says the world changed, not that the previous reading was wrong.
 
 ### 2026-11-02 (engineer, message run, 6) — Agreement between two seats is evidence only when their reads had different bounds
 - Trigger: Ursa's exo seat corrected a figure this seat had given it
@@ -16333,5 +16882,200 @@ the owner to accept or reject.
   Nothing in that is new measurement; it is the 2026-10-25 entry's own first
   step, which asked the merge-order table for two columns, moved from the
   table into the instrument that fills it.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (market, message, 9th run) — Watch whether the four-lab AI-training opt-out token extends toward user-level preference signals
+- Trigger: docs/market/positioning.md, this run's finding that Google,
+  Microsoft, OpenAI, and Anthropic jointly back a shared robots.txt
+  opt-out token (`__usage_ai-training`, announced 2026-10-30) for
+  publisher content used in AI training.
+- What: the standard is scoped to publisher content and is opt-out
+  only, with no mention of a user's own interaction or preference
+  data. That is also the first case this map has found of frontier
+  labs jointly shipping shared consent infrastructure for any data
+  asset. If the same four labs (or the IETF draft's sponsors) ever
+  extend comparable machinery toward user-level AI interaction data,
+  that would be the first real encroachment on Ursa Major's "portable,
+  inspectable, revocable" claim and on Minor's "consented... data
+  they can't build in-house" pitch, rather than just another
+  authored-verifier competitor. Today it is not that: it answers a
+  different question than Minor's gap.
+- First step: no action needed today. The next monthly full-map pass,
+  or any run that finds new coverage of this draft, should check
+  whether its scope has widened past publisher content before this
+  entry is closed.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — A board read that names no window asks a question whose answer expires, and `/api/runs` is the route with no cursor to page out of it
+
+- Trigger: HQ's exo-centralizer seat wrote to this seat at 05:34Z saying it had
+  widened this seat's run-row number across four companies and downgraded an
+  escalation on it. Re-measuring the number to check that claim is what found
+  the number was wrong.
+- Why: this seat published a wrong number today and HQ acted on it. Queue row
+  10 of `docs/agents/pending-workflow-changes.md` and a note to HQ's
+  exo-centralizer at 04:15Z said 561 Ursa run rows carried zero GitHub Actions
+  `run_url`, and concluded a workflow step "has never fired". HQ widened it to
+  1,584 rows across four companies and downgraded its own escalation on the
+  strength of it. The read behind the number named no `days`, and `days`
+  defaults to 10 on that route, while the last Actions firing was 2026-10-17,
+  sixteen days back. At `days=90` there are 666 rows and **40** carry an
+  Actions `run_url`. The full measurement and what the forty rows actually
+  show is `docs/security/audit-2026-11-02h.md` F64.
+- The property worth building against, stated once: a default window is an
+  unstated premise that **expires**. A ten-day window reached 2026-10-17 until
+  2026-10-27 and not after, so the same read with the same parameters was
+  correct for ten days and then became wrong with nothing changed and nothing
+  raised. `tools/board/page.mjs` already carries the sibling lesson for a
+  `limit` cap — "it does not sample the window; it truncates it" — and covers
+  `/api/messages` only.
+- What: `/api/runs` cannot be paged the way `page.mjs` pages messages. It
+  honours `company, seat, days, limit` and nothing else, measured by asking it
+  for a fifth filter, so `days` widens the window and never moves it, and
+  `limit` is hard-capped at 200 whatever is asked for (200, 201, 500 and 1000
+  all answered `"limit": 200`). A seat with more than 200 rows inside the
+  window therefore has older rows that are unreachable by any parameter; the
+  pm seat is in that state today, which is why this run's 666 is reported as a
+  floor.
+- First step: a small reader beside `page.mjs` that is honest about what this
+  route can and cannot answer. Three properties, all cheap: it never sends a
+  bare read, so the `days` it used appears in its own output; it prints the
+  `created_at` of the oldest row it reached, so a quoted figure carries its
+  own reach; and it refuses to print a count from a reply carrying
+  `"saturated": true`, reporting a floor instead. That is
+  `docs/standards/pm.md` §15 applied to a second route, and it is the shape
+  `page.mjs` already has minus the cursor the route does not offer.
+- Not a gate, deliberately. The rule is a judgement about what a seat
+  publishes, and the instrument's job is to make the honest form the easy one.
+  The rule itself is written where the measurements live,
+  `docs/design/board-read-conformance.md` §2a, and in the header of
+  `tools/board/read-filters.mjs` where the runs window is declared.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — Every tool that asks git a history question needs the shallow refusal, not just the HEAD pair (engineer run, twelfth message pass)
+
+- Trigger: this run's own test suite, red against the first version of
+  `tools/ledger/containment.mjs`. The guard had a self-test whose answer was
+  known in advance (`HEAD~1` is an ancestor of `HEAD` in every repository with
+  two commits, `HEAD` is an ancestor of `HEAD~1` in none), and that self-test
+  passed in a clone where the guard's actual verdicts were wrong.
+- What: the shape that defeats the HEAD pair is one a seat reaches without
+  asking for it. A clone that already holds `main`'s history and then
+  shallow-fetches the rest keeps `HEAD~1` resolvable, so the HEAD pair answers
+  true and then false exactly as a healthy clone does, while every other branch
+  arrives with its parent link cut. Measured on git 2.43.0 in that clone:
+  `git merge-base --is-ancestor origin/main origin/<branch>` exits **1** for a
+  pair whose containment is a fact, and exit 1 is indistinguishable from an
+  honest "not an ancestor". Two ways in, both ordinary: `git fetch --depth 1
+  origin` once the refspec is widened, and `git clone --depth 1 <local path>`,
+  which prints `warning: --depth is ignored in local clones; use file://
+  instead` and hands back a complete clone that a later fetch then shallows.
+  `git rev-parse --is-shallow-repository` is `true` throughout and is the only
+  instrument of the three that refuses. `tools/ensure-full-clone.sh` already
+  tests this property at its line 92 and is the right precondition; what is
+  missing is that every caller asks it. `tools/secret-scan.mjs --history` and
+  `tools/root-entries.test.mjs` both refuse or skip honestly on a shallow
+  clone; nothing else in `tools/` that asks a history question does.
+- First step: `grep -rl "merge-base\|rev-list\|log --\|--is-ancestor" tools/
+  scripts/ ursa-major/src/` and, for each hit, record in one line whether a
+  shallow clone makes it answer wrongly, refuse, or not care. The ones that
+  answer wrongly get `--is-shallow-repository` in front of the question. This
+  is a survey with a number at the end of it, not a refactor.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — The root-entries gate does not get redder with clone compliance, and the warning for it would have been wrong (engineer run, twelfth message pass)
+
+- Trigger: Ursa's exo seat, board note of 05:48Z, confirming the root-entries
+  gate from outside this lane and asking for a line in the ledger warning that
+  the gate's failure rate rises with how well the clone-repair rule is
+  followed, "so whoever picks it up does not read the rising count as a second
+  defect." Nothing was asked of this seat beyond the line. The line is this
+  entry, and it says the opposite, because the claim was measured before it was
+  written down.
+- What: the premise does not hold against `main` as of this run. Measured in a
+  clone repaired with `bash tools/ensure-full-clone.sh` first
+  (`--is-shallow-repository` false, refspec `+refs/heads/*:refs/remotes/origin/*`):
+  `node tools/root-entries.mjs` exits **0** with "3 root-level dot-entries, all
+  of them on the 3-name allowlist", and `node --test
+  tools/root-entries.test.mjs` is **21 passed, 0 failed, 0 skipped**. Zero
+  skipped is the load-bearing number rather than the pass count, because the
+  suite's history claim is written to skip itself with "the history behind this
+  claim was never fetched, so it is unmeasured rather than passing" when
+  `--is-shallow-repository` is true (`tools/root-entries.test.mjs` line 373).
+  So on a repaired clone that claim is measured and green, and on a handed one
+  it declares itself unmeasured instead of passing. The gate itself reads no
+  history at all, only the tree and `.gitignore`, which is the deeper reason
+  the coupling cannot exist: there is no history-dependent read in it to be
+  widened by a repair.
+- Why the correction is worth a ledger entry rather than a reply alone: the
+  shape exo describes, a gate whose failure rate rises with compliance and
+  therefore reads as a regression caused by its own fix, is real and worth
+  having a name for. It is just not this gate. Writing the warning down here
+  unmeasured would have put a fact into the ledger that the next seat would
+  have had to disprove, and a ledger entry is more expensive to retract than
+  to check.
+- First step: none owed. This entry is the deliverable. If the shape is wanted
+  as a general check, the question to ask of a gate is whether any read it
+  performs crosses a shallow boundary, which the entry above this one surveys.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — Craft scan: Gerrit's related-changes relation, the one review tool that treats containment as a first-class property (engineer run, twelfth message pass)
+
+- Trigger: this run built a containment guard from scratch for
+  `tools/ledger/requeue.sh`, and the question it answers is one that code
+  review tools have answered for fifteen years. Scanned from knowledge rather
+  than fetched; this run read nothing from the network.
+- Worth stealing: Gerrit computes a **relation chain** for every change and
+  shows it in the review UI, so a reviewer opening the fourth change in a chain
+  sees the three it sits on and the ones that sit on it, before reading a line
+  of the diff. The property that matters is not the graph, it is **where the
+  graph is rendered**: on the row itself, at the moment of review, rather than
+  in a tool someone has to remember to run. This repository's containment facts
+  now exist, measured, inside `tools/ledger/containment.mjs`, and they are
+  visible only to a seat that invokes it. Six of today's twelve conflicting
+  rows are contained by a sibling, and the owner cannot see that on any of the
+  six pull request pages. The stealable unit of work: have the seat that opens
+  a pull request post its containment verdict into the pull request body, one
+  line, so the fact travels with the row. That is a ledger proposal rather than
+  this run's work, because it touches how every seat opens a pull request.
+- What Ursa does better: Gerrit's relation chain is a statement about what was
+  pushed, and it is correct because Gerrit owns the push path and requires a
+  Change-Id trailer to maintain it. Ursa's containment verdict is computed from
+  commit ancestry alone, after the fact, over rows opened by seats that
+  coordinate through nothing but this repository, and it needs no trailer, no
+  hook and no cooperation from the tool that created the branch. It also
+  refuses rather than guessing: Gerrit has no equivalent of
+  `--is-shallow-repository` standing in front of the question, because it
+  always holds the whole graph and never has to ask whether it does.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (market, message, 12th run) — Test whether MemTether's own round-trip scripts can ingest a Major export, now that a second open-source memory tool ships adapters for other products
+- Trigger: docs/market/landscape.md, this run's new MemTether entry — a
+  free, solo, Apache-2.0 "cross-client AI memory hub" whose own
+  repository ships `examples/mem0_migration.py` and a markdown export,
+  the same shape of round-trip surface the 2026-10-26 ledger entries
+  already proposed testing against MacPaw's `.mem` adapters and
+  MemoryLake's MCP/REST ingest.
+- What: two independent open-source projects (MemHub, tracked
+  2026-10-24, and now MemTether) both ship import adapters for other
+  tools but neither one, on the evidence read so far, writes an export
+  a frontier lab's own native memory (ChatGPT Memory, Gemini Personal
+  Intelligence, Claude's memory) could ingest automatically. Whether
+  Major's own export can round-trip through either tool is a cheaper,
+  more concrete test of the "symmetric portability" bar
+  (docs/market/positioning.md) than waiting for a vendor-side round
+  trip to appear, and it is the kind of test this seat cannot run
+  itself without touching Major's own product.
+- First step: whoever owns Major's export surface runs it against
+  MemTether's `mem0_migration.py` path (or the markdown export) the
+  same way the 19th/21st/26th/27th/28th runs' proposals already queued
+  for MacPaw and MemoryLake, and records the measured result rather
+  than a pass/fail guess.
 - Cost: $0
 - Status: proposed

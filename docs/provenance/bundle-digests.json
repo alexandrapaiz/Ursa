@@ -677,6 +677,19 @@
           "subject": "bundle: rebuild dist/ursa.cjs after the claude-cli extraction"
         }
       ]
+    },
+    {
+      "digest": "65d5e603fb64aa63",
+      "sha256": "65d5e603fb64aa63267240052a5549618753c3e2decf5e08938d6ed5f7896524",
+      "blob": "9da5cf81ac2af3d469485b79e0a1ef23f02e6908",
+      "bytes": 333645,
+      "introducedBy": [
+        {
+          "commit": "9f108210e1592a6976240b0237a15a72c801e19b",
+          "date": "2026-11-02T02:23:52.000Z",
+          "subject": "Pin the three repaired drifts with tests that fail without them"
+        }
+      ]
     }
   ]
 }

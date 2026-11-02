@@ -1652,3 +1652,147 @@ own public messaging as "practitioners are already naming this as the
 failure mode," distinct from the portability argument Category 3's
 main read already carries. No ledger proposal opened for this one;
 it strengthens an existing claim rather than opening new work. [Hacker News: Agents don't need memory, they need documentation](https://news.ycombinator.com/item?id=49945933), [liao.gg: Agents don't need memory, they need documentation](https://liao.gg/blog/agents-dont-need-memory).
+
+## A frontier lab's own sitting CEO just personally bought into the authored side of the gap (2026-11-02, message, 8th run)
+
+Every prior entry on the "build the task and the verifier"
+sub-category (the 42-name rl-list.com market, plus Mercor/Deeptune,
+Halluminate, and micro1 individually) treated the money behind it as
+venture capital: funds betting that constructed, verifier-graded
+environments are what labs will buy. This run's landscape watch
+(docs/market/landscape.md, new Plato entry) adds a different kind of
+money to that read. Plato, a new entrant in the same sub-category
+($16M Series A, announced 2026-10-28, building simulated
+customer-support, HR, finance, and healthcare workplaces for AI to
+practice in), lists Mustafa Suleyman, Microsoft AI's own sitting CEO,
+as a personal participant in the round, alongside the institutional
+investors.
+
+So what: this is the first time this map has found a frontier lab's
+own chief executive putting personal money into the authored-
+simulation side of the gap, rather than that lab buying the output at
+arm's length as a customer. It does not change the structural read
+CLAUDE.md §1 already makes — Plato's own language ("paying
+professionals to recreate their jobs in simulated environments") is
+the identical constructed-task mechanism every other name in this
+sub-category uses, not a real deliverable joined backward to its own
+generation history. What it sharpens is the confidence with which a
+lab brief can say the market, all the way up to individual lab
+executives, is still betting on better-built simulations rather than
+on provenance over real work: this isn't only a VC fund's thesis
+anymore, it's also a frontier AI executive's personal one. No pricing
+recommendation made; this is evidence for how deep the
+"authored, not real" bet runs, not a price decision. [Yahoo Finance:
+Plato Raises $16 Million to Build the Training Grounds for AI's Next
+Leap Into Real Work](https://finance.yahoo.com/technology/ai/articles/plato-raises-16-million-build-131700376.html).
+
+## A third EDGAR check agrees with the first two, and the recheck cadence should stretch (2026-11-02, message, 8th run)
+
+The Scale AI S-1 question (docs/market/landscape.md) has now had three
+direct EDGAR company searches, spread across six weeks (2026-09-30,
+2026-10-14, 2026-11-02), all returning "No matching companies." Three
+consecutive agreements is a different evidentiary weight than the
+first unconfirmed sighting of a circulating aggregator claim, though it
+still cannot make the claim false outright, since a filing could land
+the day after any check. The practical read: this gap moves slowly
+enough that rechecking it every one to two weeks spends a search on a
+question unlikely to have changed. Ledger proposal below to stretch
+the cadence rather than drop the watch.
+
+## Four frontier labs just agreed on a consent standard, and it stops exactly where Minor's gap begins (2026-11-02, message, 9th run)
+
+Google, Microsoft, OpenAI, and Anthropic announced joint support on
+2026-10-30 for a shared robots.txt policy token
+(`__usage_ai-training`), authored as an IETF Internet-Draft by
+Anthropic's Kevin Kelley with input from 46 contributors including
+publishers and civil-society groups. The mechanism lets a website
+state one preference, honoured by all four labs, against having its
+content used to train model parameters, instead of maintaining a
+separate opt-out per lab. [ppc.land: Google, Microsoft, OpenAI and
+Anthropic back one AI training
+opt-out](https://ppc.land/google-microsoft-openai-and-anthropic-back-one-ai-training-opt-out).
+
+So what, read precisely rather than generously: this is the first
+case this file has found of frontier labs jointly shipping shared
+infrastructure for a content-rights preference signal, which is
+evidence the labs will cooperate on neutral consent plumbing when the
+asset is publisher content. But the standard is opt-out only, not
+consent-based ("a preference... MAY [be] override[n] by private
+agreement"), scoped to training and explicitly not to grounding, and
+by its own text says nothing about a user's own interaction or
+preference data. It answers "can a publisher stop its web pages from
+being trained on," not "can a person say yes to their own revealed
+preferences being used and see what was inferred from them." CLAUDE.md
+§0's two non-negotiables (portable ownership, full visibility and
+revocation) have no analogue here at all. The gap this file has
+tracked for six weeks is not narrowed by this standard; if anything it
+is sharpened, because the market has now proven labs will jointly
+build consent infrastructure once, for a different asset, while the
+user-preference-data equivalent still has no shared signal from
+anyone. Ledger proposal below: watch whether this token's machinery
+(or its sponsors) gets extended toward user-level preference signals,
+since that would be the first real encroachment on Minor's structural
+claim rather than another authored-verifier entrant. No pricing or
+positioning change argued by this alone.
+
+## A second, independent "software is not the moat" case, and it is a solo project this time (2026-11-02, message, 12th run)
+
+The head-start-vs-position test the 2026-10-24 MemHub entry built
+("does a release cost Ursa the lead time before someone else built the
+software, or the two-sided trust relationship itself") gets a second
+case to run against: MemTether, a new Category 3 entry
+(docs/market/landscape.md), a free, Apache-2.0, forked solo project
+with no company and no funding behind it, not a frontier-lab release
+like MemHub.
+
+Applying the same two criteria. (a) A consenting user base whose
+derived signal flows somewhere monetizable: unmet, the project is a
+shared local SQLite file for one person's own developer tools, with no
+aggregation layer of any kind. (b) A trust relationship with an AI lab
+on the licensing side: unmet, there is no company to hold one. Both
+criteria fail, same as MemHub, so this is a head-start cost, not a
+position cost, by the same test.
+
+What's sharper this time is the head-start itself. MemHub matched four
+of Major's five claimed properties; this one matches a narrower slice
+of the *data model* CLAUDE.md §1 describes rather than Major's
+consumer-facing portability claim — "corrections supersede, the old
+value stays queryable, every write is hash-chained, a conflict needs a
+human to adjudicate" is closer to "survived, mutated, with a time
+dimension and a trajectory" than anything else found in this
+landscape, built by one person for a narrower problem (keeping several
+coding tools' memories from corrupting each other) and given away for
+free under a permissive license. The lesson is not new in kind — §0's
+fourth constraint already conceded this before either case existed —
+but it is now corroborated twice, independently, by two actors with no
+relationship to each other or to Ursa: a frontier lab's open-source
+division and an anonymous solo developer converged on adjacent pieces
+of the same data structure. That is a stronger form of "anyone
+competent could build it" than one example supports, and worth citing
+as such rather than re-arguing the MemHub case alone.
+
+Separately, the same run's landscape watch found CVE-2026-116575, a
+patched cross-tenant information-disclosure bug in Mem0, this
+category's largest-by-adoption product (docs/market/landscape.md, Mem0
+entry). It extends the "trust has a provenance axis too" line
+(2026-10-07 above) one level deeper than any prior case: the compromise
+sits inside the memory product's own multi-tenant isolation code, not
+at the vendor-ownership or supply-chain level the earlier cases
+tracked. No positioning change argued by this alone; it is one more
+dated instance of a risk category Major's on-device processing
+(CLAUDE.md §0, constraint 3) does not carry by construction, since
+there is no shared tenant boundary to collide across.
+
+A final, weak-signal item, named as weak rather than dropped: a Show HN
+post this week ("AI Context Flow," 1 point, 4 comments) pitched a
+browser extension carrying context between ChatGPT, Claude, Grok,
+Gemini, and Perplexity at $12/month after a free beta, with a builder's
+comment framing it as "one of the few 'memory layer' approaches that
+feels grounded in how we actually switch between models." This is not
+evidence of market validation at this engagement level, but it is a
+dated, concrete price point for cross-model memory portability sitting
+inside this file's existing price ladder (2026-09-26) — closer to
+Zep's post-restructure $25/mo Flex tier (2026-10-25 update) than to
+any enterprise contract — worth holding as a single low-confidence data
+point, not a trend, until something with real engagement prices the
+same promise.

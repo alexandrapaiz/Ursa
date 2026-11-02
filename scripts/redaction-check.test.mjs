@@ -17,6 +17,7 @@ import { mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { argumentFault } from './redaction-args.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SCRIPT = join(HERE, 'redaction-check.mjs');
@@ -633,5 +634,71 @@ describe('redaction-check', () => {
       !self.includes(`'${flags[1]}'`),
       `the gate's flag cluster ${flags[1]} is duplicated into the script`
     );
+  });
+
+  // An argument this script cannot honour is exit 2 and never a narrower
+  // scan. The case that motivates every assertion below is a typo in
+  // `--history`: it used to fall through the mode test in `run()`, run a
+  // WORKING-TREE scan, and print the clean line to a caller who asked about
+  // history. `tools/secret-scan.mjs` closed its half of this on 2026-11-02
+  // and its comment named this file; this is the other half.
+  describe('arguments it cannot honour', () => {
+    test('a typo in --history is exit 2, not a tree scan reported as clean', () => {
+      const dir = mkdtempSync(join(tmpdir(), 'redaction-args-'));
+      try {
+        const { code, stdout, stderr } = runCheck(dir, ['--histroy=all']);
+        assert.equal(code, 2, 'must refuse rather than answer a different question');
+        assert.ok(!stdout.includes('clean'), 'must not print the clean line');
+        assert.match(stderr, /--histroy=all/, 'must name the argument it rejected');
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    // The pure function, so the whole class is covered without 2 spawns each.
+    test('argumentFault classifies the flag surface', () => {
+      assert.equal(argumentFault([]), null);
+      assert.equal(argumentFault(['--history']), null);
+      assert.equal(argumentFault(['--history=all', '--json']), null);
+      assert.equal(argumentFault(['--root=/tmp/x', '--workflow=/tmp/y']), null);
+      assert.equal(argumentFault(['--stream-budget=1']), null);
+
+      for (const args of [['--histroy=all'], ['--history', '-v'], ['extra'], ['--since=3']]) {
+        assert.notEqual(argumentFault(args), null, `should reject ${args.join(' ')}`);
+      }
+    });
+
+    // A budget that cannot trip is the crash commit 8381f533 fixed, back
+    // again and silent: `bytes >= NaN` is always false, so the batch never
+    // flushes and `scanHistory` rebuilds the one string that threw RangeError.
+    test('a --stream-budget that cannot trip is refused, not defaulted', () => {
+      for (const value of ['abc', '0', '-1', '']) {
+        const fault = argumentFault([`--stream-budget=${value}`]);
+        assert.notEqual(fault, null, `--stream-budget=${value} should be a fault`);
+        assert.equal(fault.bad.length, 1);
+      }
+      // And a usable one is not swept up with them.
+      assert.equal(argumentFault(['--stream-budget=1']), null);
+      assert.equal(argumentFault(['--stream-budget=67108864']), null);
+    });
+
+    // The asymmetry that produced this fix, asserted so it cannot come back
+    // on either side. Both tools are run in one sweep and spell history
+    // differently, so each must refuse the other's spelling out loud.
+    test('both tools in the sweep refuse an argument they do not know', () => {
+      const scan = resolve(HERE, '..', 'tools', 'secret-scan.mjs');
+      for (const script of [SCRIPT, scan]) {
+        let code = 0;
+        try {
+          execFileSync('node', [script, '--histroy=all'], {
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'pipe'],
+          });
+        } catch (err) {
+          code = err.status;
+        }
+        assert.equal(code, 2, `${script} must refuse an argument it does not know`);
+      }
+    });
   });
 });

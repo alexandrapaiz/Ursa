@@ -96,12 +96,28 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { argumentFault } from './redaction-args.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 function flag(name) {
   const hit = process.argv.find((a) => a.startsWith(`--${name}=`));
   return hit ? hit.slice(name.length + 3) : null;
+}
+
+// EVERY ARGUMENT IS CHECKED, because the one that is not is the one that
+// downgrades the scan. A typo in `--history` used to fall through the mode
+// test in `run()`, run a WORKING-TREE scan, and print the clean line to a
+// caller who asked about history. The whole argument, the measurement and the
+// classifier live in `scripts/redaction-args.mjs`, which is a separate file
+// because importing THIS one runs a scan and exits.
+{
+  const fault = argumentFault(process.argv.slice(2));
+  if (fault !== null) {
+    console.error(`redaction-check: cannot do its job: ${fault.why}`);
+    console.error(`  ${fault.detail}`);
+    process.exit(2);
+  }
 }
 
 const SCAN_ROOT = resolve(flag('root') ?? REPO_ROOT);

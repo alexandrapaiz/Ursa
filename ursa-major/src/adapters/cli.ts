@@ -1,29 +1,38 @@
-// The PR adapter's command line. Folding these into `ursa pr <N>` in
-// src/bin/ursa.ts is owed once PR #16 lands, since that PR is editing
-// the same file; until then the adapter ships its own entry point rather
-// than conflict with work already in the merge queue.
+// The PR adapter's command line: the capture and measurement commands
+// that have no place in `ursa`.
 //
 //   npx tsx src/adapters/cli.ts snapshot --pr 11 [--repo owner/name] [--out f.json] [--no-patches]
-//   npx tsx src/adapters/cli.ts pairs    --pr 11 [--repo owner/name] [--project .]
-//   npx tsx src/adapters/cli.ts run      --pr 11 [--project .] [--min-chars 200]
+//   npx tsx src/adapters/cli.ts pairs    --pr 11 [--repo owner/name] [--project .] [--snapshot f.json]
+//   npx tsx src/adapters/cli.ts run      --pr 11 [--project .] [--min-chars 200] [--snapshot f.json]
 //   npx tsx src/adapters/cli.ts survey   [--repo owner/name] [--state merged] [--limit 30]
 //   npx tsx src/adapters/cli.ts fixture  --pr 11 --out fixtures/pr/ursa-pr-11.json
 //
 // `survey` is the one that answers the question this adapter was built
 // for: of the pull requests in a repo, how many yield a correction, and
 // through which closure.
+//
+// WHAT `run` IS NOW, AND WHY IT IS STILL HERE. `run` was the whole of the
+// pull-request launch from the day the adapter shipped until 2026-11-02:
+// it held its own resolve-and-write loop, which asked none of the three
+// questions `src/launch.ts` exists to answer, and the header this comment
+// replaced said why — folding it into `ursa pr` was "owed once PR #16
+// lands", and PR #16 landed long ago. The loop now lives in
+// `src/adapters/pr-launch.ts` and the user-facing surface is `ursa pr
+// <projectPath> --pr N` (src/bin/ursa.ts). This subcommand is kept as a
+// thin caller of the same function, because the other four commands here
+// are an adapter's measurement tools and a reader who found `run` beside
+// them should not be sent to a second binary to re-run the one thing it
+// did. It cannot drift from `ursa pr`, because there is one function
+// under both.
 
 import { parseArgs } from 'node:util'
 import { writeFileSync, readFileSync } from 'node:fs'
 import { resolve as absPath } from 'node:path'
 import { capturePullRequest, currentRepo, listPullRequests } from './gh'
 import { fetchPullRequestRef, gitRepoReader } from './git-reader'
-import { episodesFromPullRequest, pairsFromPullRequest, type PullRequestPair, type PullRequestSnapshot } from './github-pr'
+import { pairsFromPullRequest, type PullRequestPair, type PullRequestSnapshot } from './github-pr'
+import { runPullRequestCommand } from './pr-command'
 import { recordingReader } from './replay'
-import { resolveEpisode } from '../bin/ursa'
-import { deriveSignals } from '../signals'
-import { saveEpisodes, saveRecord } from '../store'
-import type { OutcomeRecord } from '../types'
 
 function loadSnapshot(path: string): PullRequestSnapshot {
   return JSON.parse(readFileSync(path, 'utf8')) as PullRequestSnapshot
@@ -52,10 +61,6 @@ function pairsFor(projectPath: string, snap: PullRequestSnapshot): PullRequestPa
     // object shows up as a skipped closure rather than as a crash.
   }
   return pairsFromPullRequest(snap, gitRepoReader(projectPath), {})
-}
-
-function plural2(n: number, word: string): string {
-  return `${n} ${word}${n === 1 ? '' : 's'}`
 }
 
 function closureCounts(pairs: PullRequestPair[]): Record<string, number> {
@@ -130,47 +135,18 @@ export async function main(argv: string[]): Promise<number> {
   }
 
   if (cmd === 'run') {
-    if (!values.pr) { console.error('--pr is required'); return 2 }
-    const snap = capturePullRequest(repo, Number(values.pr), { noPatches: values['no-patches'] === true, repoPath: projectPath })
-    for (const w of checkLocalObjects(projectPath, snap)) console.error(`warning: ${w}`)
-    const pairs = pairsFor(projectPath, snap)
-    const episodes = episodesFromPullRequest(pairs, projectPath)
-    const minChars = Number(values['min-chars'] ?? 200)
-    const records: OutcomeRecord[] = []
-    for (const ep of episodes) {
-      const record = resolveEpisode(projectPath, ep)
-      if (!record || record.stats.generated.totalChars < minChars) continue
-      record.signals = deriveSignals(record, ep.pullRequest.acceptance)
-      saveRecord(projectPath, record)
-      records.push(record)
-    }
-    saveEpisodes(projectPath, episodes)
-    const mutated = records.reduce((n, r) => n + r.stats.byClass.survived_mutated.chars, 0)
-    const verbatim = records.reduce((n, r) => n + r.stats.byClass.survived_verbatim.chars, 0)
-    const humanDeleted = records.reduce((n, r) => n + r.stats.generated.humanDeletedChars, 0)
-    const mergeDeleted = records.reduce((n, r) => n + r.stats.generated.mergeDeletedChars, 0)
-    const unknownDeleted = records.reduce((n, r) => n + r.stats.generated.unknownDeletedChars, 0)
-    const unreadable = [...new Set(episodes.flatMap((ep) => ep.pullRequest.unreadableMerges ?? []))]
-    console.log(
-      `${snap.repo}#${snap.number}: ${episodes.length} work unit${episodes.length === 1 ? '' : 's'}, ` +
-      `${records.length} record${records.length === 1 ? '' : 's'}.`,
-    )
-    console.log(`${verbatim.toLocaleString()} chars survived verbatim, ${mutated.toLocaleString()} survived edited.`)
-    console.log(
-      `${humanDeleted.toLocaleString()} chars the person dropped, ` +
-      `${mergeDeleted.toLocaleString()} destroyed by a merge inside the pull request, ` +
-      `${unknownDeleted.toLocaleString()} with no readable cause.`,
-    )
-    if (unreadable.length > 0) {
-      console.log(
-        `warning: ${plural2(unreadable.length, 'intervening merge')} could not be read ` +
-        `(${unreadable.map((x) => x.slice(0, 9)).join(', ')}), so a deletion at those boundaries ` +
-        `is reported as unknown rather than as the person's discard. ` +
-        `Fix: git -C ${projectPath} fetch --no-tags origin ${snap.baseRef}.`,
-      )
-    }
-    console.log(`Records: ${projectPath}/.ursa/records/`)
-    return 0
+    // One implementation, in `src/adapters/pr-command.ts`, shared with
+    // `ursa pr`. This subcommand is the same command under an older
+    // name; it cannot report a different number from `ursa pr` because
+    // there is nothing here to report one with.
+    return runPullRequestCommand({
+      projectPath,
+      pr: values.pr ?? null,
+      repo,
+      snapshotPath: values.snapshot ?? null,
+      minChars: values['min-chars'] ? Number(values['min-chars']) : undefined,
+      noPatches: values['no-patches'] === true,
+    })
   }
 
   if (cmd === 'fixture') {
@@ -212,7 +188,8 @@ export async function main(argv: string[]): Promise<number> {
     return 0
   }
 
-  console.error('Usage: cli.ts snapshot|pairs|run|survey|fixture --pr N [--repo owner/name] [--project .]')
+  console.error('Usage: cli.ts snapshot|pairs|run|survey|fixture --pr N [--repo owner/name] [--project .] [--snapshot f.json]')
+  console.error('  `run` is also `ursa pr <projectPath> --pr N`, which is the same function (src/adapters/pr-launch.ts).')
   return 2
 }
 

@@ -40,6 +40,7 @@ jobs:
           tools/ledger/check-attributes.test.mjs
           tools/ledger/block-kinds.test.mjs
           tools/ledger/check-closures.test.mjs
+          tools/ledger/containment.test.mjs
           tools/registers/merge-driver.test.mjs
       # Without --clone, so this passes on a fresh checkout: it asks only
       # whether the committed declarations are ones some committed script
