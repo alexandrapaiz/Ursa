@@ -1,0 +1,14 @@
+# Eight shoots of the dashboard off the pinned server, phone, each diffed against the first.
+# Nothing else changed between them: same build, same store snapshot, same pinned instant.
+phone  c1 vs c2:   0 px differ   at []   pixel(19,110) = (2, 6, 31)
+phone  c1 vs c3:   0 px differ   at []   pixel(19,110) = (2, 6, 31)
+phone  c1 vs c4:   1 px differ   at [(19, 110)]   pixel(19,110) = (2, 3, 8)
+phone  c1 vs c5:   1 px differ   at [(19, 110)]   pixel(19,110) = (2, 3, 8)
+phone  c1 vs c6:   0 px differ   at []   pixel(19,110) = (2, 6, 31)
+phone  c1 vs c7:   0 px differ   at []   pixel(19,110) = (2, 6, 31)
+phone  c1 vs c8:   1 px differ   at [(19, 110)]   pixel(19,110) = (2, 3, 8)
+
+desktop  d1 vs d2:   0 px differ
+desktop  d1 vs d3:   0 px differ
+desktop  d1 vs d4:   0 px differ
+desktop  d1 vs d5:   0 px differ

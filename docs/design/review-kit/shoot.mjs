@@ -4,6 +4,7 @@
 //   node shoot.mjs --out ../reviews/YYYY-MM-DD/after
 //   node shoot.mjs --out /tmp/x --only phone --pages /,/record
 //   node shoot.mjs --out /tmp/x --live        # let the sky animate
+//   node shoot.mjs --out /tmp/x --pin-now 2026-11-02T00:00:00.000Z
 //
 // Each frame is a full-page PNG at 1x, and each one is measured for
 // horizontal overflow at the same time, because "no page overflows" is a
@@ -45,6 +46,32 @@ const MATRIX = VIEWPORT_ARG
   : VIEWPORTS
 const PAGES = arg('pages', '/,/record,/record/mini-fixture,/record/at,/this-page-does-not-exist').split(',')
 const LIVE = process.argv.includes('--live')
+// `--pin-now <iso>` pins the page's `Date` to one instant, so two shoots of a
+// surface that reads the clock can be compared. Opt-in, because a run that is
+// only photographing should get the real page, and the instant cannot be
+// defaulted: `PINNED_MS` is 1970 and a 1970 clock draws a page the product
+// never draws. L45.
+//
+// **It pins the page's clock and nothing else's.** The one surface this was
+// written for, the overlay dashboard, prints a timestamp the *server* stamped,
+// so this flag alone does not make that frame comparable. See
+// `lib/pin-clock.mjs` and reviews/2026-11-02 §3. The header below says which
+// clock was pinned, so a frame set cannot claim a guarantee it does not carry.
+const PIN_NOW_ARG = arg('pin-now', null)
+const PIN_NOW = PIN_NOW_ARG === null ? null : Date.parse(PIN_NOW_ARG)
+if (PIN_NOW_ARG !== null && Number.isNaN(PIN_NOW)) {
+  // The value is named rather than only its badness, so a run that passed a
+  // date in the wrong shape does not go looking at the browser.
+  console.error(`--pin-now was given "${PIN_NOW_ARG}", which Date.parse cannot read. Use an ISO instant, for example 2026-11-02T00:00:00.000Z`)
+  process.exit(2)
+}
+if (PIN_NOW_ARG !== null && LIVE) {
+  // `--live` applies no init script at all, so the pin would be accepted and
+  // then do nothing, and the header would be the only place the contradiction
+  // showed. A flag that is silently inert is the defect L45 is about.
+  console.error('--pin-now and --live contradict each other: --live applies no init script, so there is nothing to pin the clock in. Pass one or the other.')
+  process.exit(2)
+}
 // How long to let the page settle after `networkidle` before the shutter.
 // 400ms is right for a static page. A surface that fetches its own data
 // after hydration needs longer, and the dashboard in overlay/ is one: at
@@ -90,13 +117,23 @@ const rows = []
 for (const [vname, w, h] of MATRIX) {
   if (ONLY && ONLY !== vname) continue
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1 })
-  if (!LIVE) await freezeContext(ctx)
+  if (!LIVE) await freezeContext(ctx, PIN_NOW === null ? {} : { now: PIN_NOW })
   const page = await ctx.newPage()
   for (const path of PAGES) {
     const name = `${slug(path)}-${vname}`
     const status = (await page.goto(BASE + path, { waitUntil: 'networkidle' }))?.status()
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
     if (enterState) await enterState(page, name)
+    // Ask the page what time it thinks it is, rather than trusting that the
+    // init script ran. L37: a flag accepted is not a flag applied, and the
+    // whole point of the pin is that a frame set can be believed later.
+    if (PIN_NOW !== null) {
+      const seen = await page.evaluate(() => Date.now())
+      if (seen !== PIN_NOW) {
+        console.error(`--pin-now did not take on ${name}: the page reports ${seen}, not ${PIN_NOW}. Nothing was written.`)
+        process.exit(2)
+      }
+    }
     await page.waitForTimeout(WAIT)
     // `animations: 'disabled'` is the other half of the freeze: lib/freeze.mjs
     // pins the two canvases, which are driven by requestAnimationFrame, and
@@ -132,7 +169,16 @@ await browser.close()
 const line = (r) => `${r.name.padEnd(32)} ${String(r.status).padStart(3)}  ${String(r.scrollWidth).padStart(5)}/${String(r.clientWidth).padEnd(5)} overflow ${String(r.scrollWidth - r.clientWidth).padStart(4)}px  height ${String(r.height).padStart(5)}px${r.worst ? `  <- ${r.worst.tag}.${r.worst.cls} to ${r.worst.right}px` : ''}`
 const header = LIVE
   ? '# --live: the sky is animating in these frames. Do not pixel-diff them.'
-  : `# frozen at t=${PINNED_MS}ms, seeded Math.random, CSS animations rewound.`
+  : `# frozen at t=${PINNED_MS}ms, seeded Math.random, CSS animations rewound.` +
+    (PIN_NOW === null
+      ? '\n# the page clock is NOT pinned: a surface that reads it differs from itself.'
+      : `\n# the page's Date is pinned to ${new Date(PIN_NOW).toISOString()}, verified in the page.`) +
+    // Said on both branches, because the gap is the same either way and a set
+    // whose header reports a pin is the set most likely to be trusted past
+    // what the pin covers. This tool runs the browser and cannot see whether
+    // the server behind it was preloaded, so it states the limit rather than
+    // a guarantee it is not in a position to give.
+    '\n# this covers the clock inside the page only. A timestamp a server stamps into a payload is pinned by lib/pin-clock.mjs, in the serving process, or not at all.'
 const settle = `# settled ${WAIT}ms after networkidle${UNTIL ? ` and after \`${UNTIL}\` appeared` : ''}${STATE ? `, with \`${STATE}\` run to enter the state` : ''} before each shutter.`
 // A frame set shot at a width nobody expects has to say so in its own
 // manifest, or the next run compares it against the charter's three and

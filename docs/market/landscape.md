@@ -1741,3 +1741,13 @@ Upgrade?](https://arxiv.org/abs/2609.05339).
   failed companies' real operational records into the same
   constructed-RL-environment pipeline, a new real-data supply channel
   for an already-mapped gap, not a new instance of closing it.
+- 2026-11-02 (message, 7th run) — no new vendor entries; this run's
+  evidence landed as two positioning.md updates instead. A bulk-content
+  data-licensing market report names "outcome-linked pricing" (paying
+  by downstream result, e.g. per-citation) as a fourth billing
+  generation, a term collision with Minor's own "outcome record" that
+  is worth disambiguating before it reaches a lab's procurement team.
+  Separately, a well-trafficked (392-point) Hacker News critique of
+  agent-memory plugins independently names "unauditable" storage as
+  the defect, corroboration for Major's own inspectability promise
+  from outside Category 3 entirely. Both in docs/market/positioning.md.
