@@ -2,6 +2,97 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-02 (security, seventh run): the secret-print hook arrives outside the one sentence that protects workflows, and it is the only sentence of its kind
+
+**Status:** proposed. **For:** the owner, and HQ, because the repair is a
+clause in seat charters and in the dispatch text and this seat may not edit
+charters. **Severity:** medium, and **latent until PR #683 merges**.
+**Full reading:** `docs/security/audit-2026-11-02g.md` §5, filed there as
+F66.
+
+**This is not an objection to #683.** The guard should be installed, HQ's
+`standards/secrets.md` §5 and L-X5 require it, and this seat's own run is
+tonight's evidence for why: it violated L-X5 in its first minutes and the
+checker in #683 names the exact command. The finding is that the set of
+paths this organization protects did not grow when a path with the same
+reach did.
+
+**What #683 adds.** `tools/check-secret-print.py`, and
+`.claude/settings.json` registering it as a `PreToolUse` hook matching
+`Bash|Write|Edit|MultiEdit|NotebookEdit`. After it merges, those two
+committed files run a command before every Bash, Write and Edit in every
+later seat run, in runs carrying `--permission-mode bypassPermissions`,
+`contents: write`, `pull-requests: write` and live credentials. Whoever
+controls the content of either file controls what executes there.
+
+**The asymmetry, measured rather than asserted.** `.github/workflows/` has
+that reach and is named off-limits in eleven charters, in every seat
+dispatch, and in this seat's audits. The two new paths are named nowhere:
+
+- Every dispatch says "never touch secrets or workflows". Neither path is
+  a workflow and neither is a secret.
+- `grep` over `prompts/` and `docs/standards/` finds three mentions of
+  `.claude/` and all three are descriptive, two of them in
+  `prompts/exo-agent.md` saying Ursa has no such directory.
+- There is no `CODEOWNERS` file at either location GitHub reads.
+- `redaction-gate` is the only workflow firing on pull requests. It scans
+  three private-data patterns with `contents: read` and would not notice a
+  change to either file.
+
+**Why medium and not high.** The owner merges everything here, which is a
+real control. The exposure is that her review carries no marker for which
+diffs have this reach, and a hook edit inside a thirty-file housekeeping
+pull request reads like housekeeping.
+
+**The repair, three lines, none of them this seat's.** Add `.claude/` and
+`tools/check-secret-print.py` to the "never touch" clause in the charters
+and the dispatch text, which is the one to do if only one is done; a
+`CODEOWNERS` entry for both paths so GitHub marks the diff; and the same
+check in the HQ standard that vendored these files into five repositories,
+since a clause missing here is likely missing there.
+
+## Ledger entry — 2026-11-02 (security, seventh run): the read-filter prober should search for a measurable window instead of declaring one and abstaining
+
+**Status:** proposed, day-sized. **For:** the engineer. **Severity:** low.
+**Found by:** repairing F63 and F64 in `docs/security/audit-2026-11-02g.md`,
+which fixed the two stale windows by hand and left the mechanism that made
+them go stale.
+
+**What this run already fixed, so this entry does not re-ask for it.**
+`tools/board/read-filters.mjs` keyed its saturation abstention on a
+`saturated` field the events route does not send, so the guard was dead
+code there; `saturationOf` now infers it from the limit asked for. And both
+declared windows had been outgrown by the board: events `since_hours=2`
+returned 489 of a 500-row page, messages `since_hours=6` returned 500 and
+saturated, which had left four of fourteen probes reporting UNMEASURABLE on
+every run under a summary line reading `14 probed`. Both re-measured, both
+now carry the reading they were chosen against, and all fourteen measure.
+
+**What remains, which is the shape of the thing.** A window is a constant
+in a file and the board's traffic is not, so every window in this tool is
+correct on the day it is written and decays from then on. The failure is
+quiet in both directions: too wide and the probe abstains, too narrow and
+the window is empty and the probe abstains, and either way the tool reports
+UNMEASURABLE, which is honest and teaches nobody that the number needs
+re-measuring. The only reason tonight's decay was caught is that a live
+test went red on the boundary.
+
+**The proposal.** The tool's own header already promises more than the code
+does: it says every probe runs "inside a window small enough that the
+unfiltered read does not saturate, and reports UNMEASURABLE rather than
+guessing when it cannot find one", and "when it cannot find one" describes a
+search that is not implemented. Implement it. Halve the window while the
+baseline read saturates, up to a small bound, report the window actually
+used next to each verdict, and abstain only when no window in the bound
+works. Then a busier board changes the window the tool reports and not the
+number of claims it makes.
+
+**Why it is the engineer's and not this seat's.** It replaces a declared
+constant with a loop over live reads in the instrument three seats quote
+for board-read claims, which is a design change rather than a
+behaviour-preserving fix, and a security run is the wrong place for it.
+
+
 ## Ledger entry — 2026-11-02 (security, sixth run): the fence this seat queued for the eleven workflow prompts can be stepped out of, and the step lands in the slot the prompt calls binding
 
 **Status:** proposed. **For:** the owner, because the change is in

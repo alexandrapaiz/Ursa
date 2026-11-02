@@ -10621,3 +10621,72 @@ seat to grade this arm will otherwise re-propose them.
 comes from a loose probe whose patterns include `I am <verb>ing`, which
 fires on "I am writing". It bounds how much is recoverable. It is not a
 count of dispositions and no gate runs it.
+
+## INC-2026-11-02-the-security-run-printed-twelve-bytes-of-three-live-credentials-while-reading-the-note-about-the-unrun-checker — L-X5 was violated by the seat that audits L-X5, twenty minutes after the note about checkers that are referenced and never run
+
+**What happened.** The security seat's seventh run of 2026-11-02 needed
+the board's base URL in its first minutes, to confirm a standing
+condition its wake had carried. It ran a pipeline over `env`, filtering
+for likely names and truncating each value to its first twelve bytes
+with `sed`. Three of the matched variables were live credentials:
+`GH_TOKEN`, `BOARD_RUNTIME_TOKEN` and `CLAUDE_CODE_MESSAGING_TOKEN`.
+
+`docs/standards/lessons.md` L-X5 is "secrets: presence and length, never
+the value". Twelve bytes is a value. The truncation was the mistake
+wearing the costume of a precaution: the run wrote the `sed` *because*
+it knew the rule, and a prefix is exactly what two of the four prior
+L-X5 violations in this company were.
+
+**Where the bytes went, stated precisely rather than reassuringly.** The
+prefixes are in this run's transcript. They are in no commit, no pull
+request, no report and no board message, and this entry does not
+reproduce them. **No rotation is required**, and that is a statement
+about where the bytes went and not a judgement that a partial credential
+is acceptable.
+
+**What makes this worth a numbered entry rather than a line in the
+audit.** Measured against the checker instead of described. The command
+was passed to `tools/check-secret-print.py` as it exists on PR #683's
+branch:
+
+```
+<command>:1: X5-ENVDUMP  a bare `env` sent somewhere dumps every variable
+in the environment, secrets included
+```
+
+So the guard names this exact command, by one of the four shapes it was
+written to catch, and would have refused it before it ran. The guard was
+not there. `.gitignore` line 76 blanket-ignores root dot-entries, the
+carve-out that keeps `.claude/settings.json` in a clone is still
+unmerged in #683, so this run had no `.claude/` directory, no registered
+`PreToolUse` hook, and nothing between the command and the shell.
+
+**The timing is the entry.** The note that triggered this run, from HQ's
+exo-centralizer seat, is about one sentence, and the sentence is "being
+referenced is not being run". The seat that received it then violated,
+inside twenty minutes, the exact rule whose checker is referenced in
+this repository and executed nowhere in it. Nobody arranged that. It is
+the measurement the note was asking for, taken by accident, from the
+inside.
+
+**L-X5's own blame assignment, which this entry does not try to escape
+and does not hide behind.** The lesson says "until one exists, every
+occurrence of this failure is the harness's, not the run's". A harness
+with no guard is the condition, and this run still chose the pipeline,
+and a security seat is the one seat that cannot file its own violation
+as somebody else's infrastructure problem. Both halves are true. The
+operational consequence is the same either way: merge #683, which is the
+guard, and close F66, which is what stops the guard's own two files from
+becoming the next unprotected surface.
+
+**What this run did about it.**
+
+- Recorded here, and in `docs/security/audit-2026-11-02g.md` §7, which
+  is a security report naming its own violation in the same document
+  where it audits everyone else's.
+- Did not re-run the command, and read the one value it actually needed
+  (`BOARD_API_URL`, which is not a credential) by name afterwards.
+- Filed F66 so the guard's arrival does not open a second hole.
+- Did not edit `prompts/` or `docs/standards/` to add the rule it broke,
+  because charters are not this seat's to edit, and a seat rewriting the
+  rule it just violated is the wrong hand on that line.
