@@ -99,13 +99,25 @@ export function cloneGaps(root) {
   if (git(root, ['rev-parse', '--is-shallow-repository']).stdout.trim() === 'true') {
     gaps.push('depth: .git/shallow is present, so the commit graph is truncated');
   }
-  const fetch = git(root, ['config', '--get-all', 'remote.origin.fetch']).stdout;
-  const wide = fetch.split('\n').some((l) => l.trim() === '+refs/heads/*:refs/remotes/origin/*');
-  if (!wide) {
-    gaps.push(
-      `refspec: remote.origin.fetch is ${fetch.trim().split('\n').join(',') || '(unset)'}`
-      + ', so origin/<branch> exists for that branch only',
-    );
+  // THE REFSPEC GAP IS ONLY A GAP WHEN THERE IS AN `origin` TO WIDEN, and the
+  // first draft of this function did not check that. A repository with no
+  // remote has `remote.origin.fetch` unset, which is not the narrow refspec;
+  // it is the absence of the question. That draft called such a repository
+  // incomplete and handed back `bash tools/ensure-full-clone.sh` as the
+  // repair, which that script itself refuses with "a clone with no origin
+  // cannot be completed". So the one cause it named was false and the repair
+  // it named could not run -- the exact defect this file was written to stop,
+  // reproduced inside it, and caught by the suite's own fixture on the first
+  // run because that fixture is a local repository with two unrelated roots.
+  if (git(root, ['config', '--get', 'remote.origin.url']).status === 0) {
+    const fetch = git(root, ['config', '--get-all', 'remote.origin.fetch']).stdout;
+    const wide = fetch.split('\n').some((l) => l.trim() === '+refs/heads/*:refs/remotes/origin/*');
+    if (!wide) {
+      gaps.push(
+        `refspec: remote.origin.fetch is ${fetch.trim().split('\n').join(',') || '(unset)'}`
+        + ', so origin/<branch> exists for that branch only',
+      );
+    }
   }
   return gaps;
 }
