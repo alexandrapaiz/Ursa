@@ -10,10 +10,12 @@ open rows of this seat inside #716, and #716 inside this one:
 
     665 -> 679 -> 685 -> 694 -> 708 -> 716 -> this row
 
-So **this row subsumes #716, #708, #694, #685, #679 and #665**, and the
-owner can close six rows on one decision. That ancestry was re-checked
-after `tools/ensure-full-clone.sh`, not before: the handed clone answers
-containment questions wrongly, which is the subject of half this run.
+So **this row subsumes #716, #708, #694, #685, #679 and #665**. That
+ancestry was re-checked after `tools/ensure-full-clone.sh`, not before: the
+handed clone answers containment questions wrongly, which is the subject of
+half this run. The PM's twenty-fourth pass closed the five older rows under
+#716 while this run was in progress, so by the end of it this seat has two
+open rows and one contains the other.
 
 ## The clone, first, because every reading below depends on it
 
@@ -57,7 +59,8 @@ until the repair had run.
 
 Four commits.
 
-1. **The merge, with four conflicts resolved and one silent defect found.**
+1. **The first merge, with four conflicts resolved and one silent defect
+   found.**
    `docs/ideas.md` merged by `tools/ledger/union-merge.mjs` after
    `tools/registers/install-drivers.sh`: 2 blocks taken, 0 removed, no
    conflict. `tools/doc-model/check.test.mjs` resolved TOWARD THE TRUNK,
@@ -82,14 +85,27 @@ Four commits.
    from 119,851 bytes on main to 484,752 on `refs/prs/714` in one queue
    cycle, and `docs/ideas.md` at 1,150,597 bytes is already past the bound.
 4. **The ledger:** three ideas and the Letta craft scan.
+5. **A second merge of `main`, 20 commits later,** in which the ExO seat's
+   window 87 had rewritten this same file on the trunk within the hour.
+   Neither side won wholesale, because each held something the other had
+   dropped. The trunk's multi-copy selector is kept in full, and four
+   things its rewrite lost because it was written against an older base are
+   restored on top of it: the `stale runs` denominator, the capped-read
+   report, `formatSummary` as an exported pure function, and the `read at
+   <instant>` line. Then this row's three repairs were re-applied to the
+   combined file. The timestamp-helper migration to `../instant.mjs` was
+   deliberately NOT re-applied, because a refactor inside a merge is what
+   produced the unloadable module the first time.
 
 ## Numbers
 
 | Reading | Value |
 |---|---|
-| `node --test` over every `*.test.mjs`, this branch | 961 tests, 960 pass, 1 fail |
+| `node --test` over every `*.test.mjs`, after the first merge | 961 tests, 960 pass, 1 fail |
 | The one failure | `tools/stack/repair-pending.test.mjs` test 20, byte-identical to main's copy, security's file |
-| `tools/seat/charter-lag.test.mjs` | 19 tests before, 28 after, 0 fail |
+| `tools/seat/charter-lag.test.mjs`, after both merges | 25 pass, 0 fail, 0 skipped |
+| `tools/seat/charter-lag.mjs` end to end | exit 0, 11 rows, `9 open pull requests scanned for charter edits, none skipped` |
+| Pull request mergeability | `CONFLICTING` at the start of the run, `MERGEABLE`/`CLEAN` at the end |
 | `tools/doc-model/check.test.mjs` | 19 pass, 0 fail |
 | `tools/board/read-filters.test.mjs` | 29 pass, 0 fail |
 | `tools/ledger/check.mjs docs/ideas.md` | 489 blocks, exit 2 on three pre-existing owner-only `Status:` lines |
