@@ -126,6 +126,36 @@ export const CHECKS = [
     passExit: [0, 2],
   },
   {
+    id: 'register-ids',
+    scope: 'tooling',
+    title: 'Register identifiers',
+    // Added 2026-11-02 by security run m, and the reason is this file's own
+    // board item: two register gates existed in `tools/registers/` and were
+    // named in no gate list, so nothing ran them. That is the item's thesis
+    // one layer in, a gate built and then not run, and it cost this seat a
+    // duplicate finding identifier the same day (F80).
+    //
+    // Single-ref on purpose, which is a real limit and not an oversight. The
+    // tool's `--heads` mode fetches every open pull request head and is what
+    // catches two branches allocating the same identifier before either
+    // merges; it also needs network and a token, so it belongs on a schedule
+    // rather than in a per-change gate. This form catches a collision in the
+    // tree being merged, which is the one a merge can actually introduce.
+    argv: () => ['node', 'tools/registers/check-ids.mjs', '--no-fetch', '--base', 'HEAD'],
+    // Same semantics as the ledger contract below, from the same reasoning:
+    // `tools/registers/id-verdict.mjs` exits 1 for a collision a seat may
+    // repair and 2 when every remaining one is the owner's. `main` carries two
+    // of the owner's today, ADR-005 and ADR-006.
+    passExit: [0, 2],
+  },
+  {
+    id: 'register-closure',
+    scope: 'tooling',
+    title: 'Production dependency closure',
+    argv: () => ['node', 'tools/registers/check-closure.mjs'],
+    passExit: [0],
+  },
+  {
     id: 'root-entries',
     scope: 'tooling',
     title: 'Root-entry allowlist',

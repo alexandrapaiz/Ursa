@@ -2,6 +2,105 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-02 (security, thirteenth run): a full disk makes `ci-checks.mjs` report exit 1, which means the branch failed a gate, for a condition that is not about the branch
+
+**Status:** proposed, hour-sized. **For:** the engineer. **Severity:** low
+now, medium once PWC-15 makes the exit code a required check. **Found by**
+hitting it: a re-run of `tooling-suites` on an unchanged branch reported
+`# fail 4`, `# cancelled 29` and exit 1, because `/tmp` on the sandbox host
+was at 100% and node's test harness threw `ENOSPC`. The same command
+reported exit 0 and 0 failing after space was reclaimed. **Full reading:**
+`docs/security/audit-2026-11-02n.md` §4, filed there as F84.
+
+**The property at stake, in the file's own words.** `exitCodeFor`'s comment
+says exit 2 beats exit 1 because "an unrunnable check means the run is not a
+verdict on the branch at all, which the caller needs to be able to tell
+apart from a branch that genuinely failed a gate". A full disk is the
+second kind and was reported as the first. `classify` already covers three
+preconditions and the runner covers two post-run conditions; a child that
+exits 1 because its own harness threw is in none of them.
+
+**Two shapes, which catch different things, and this entry does not choose.**
+
+1. **Pre-flight free space**, plumbed into `classify` exactly as `shallow`
+   is, so it stays a pure function and the existing test style covers it.
+   Cheap, honest, testable. It would NOT have caught the measured event,
+   because that disk filled during the run rather than before it. It also
+   needs a threshold, which is a number nobody has chosen.
+2. **Detect the harness throw** in the child's output and reclassify as
+   unrunnable. This was this entry's first recommendation and it is wrong.
+   The condition reproduced a second time at 1.2 GB free, and that time the
+   child's error was `fatal: failed to write commit object` from `git`
+   inside the fixture-building suites, which does not contain the string
+   `ENOSPC`. A matcher keyed to node's throw catches one of the two
+   measured events. It also needs the output, which the runner does not
+   capture, since it spawns with `stdio: 'inherit'`.
+3. **Re-read free space after a check reports failure**, and reclassify
+   below a floor whatever the child printed. This is the recommendation.
+   It covers both measured events, including the disk the run itself fills,
+   needs no output capture, and leaves `stdio: 'inherit'` and the live
+   progress of the slowest check in the repository intact.
+
+**First step: pick the floor, then build shape 3.** Shape 1 is worth having
+beside it as a pre-flight line in the job log, but on its own it would have
+caught neither of the two events measured here, because both disks filled
+during the run rather than before it. The only genuinely open question is
+the floor, which is a number this seat will not pick for the engineer.
+
+**Cost:** $0 in services. Shape 1 is a few lines plus a test; shape 2 is a
+tee and a classifier.
+
+**Status:** proposed
+
+## Ledger entry — 2026-11-02 (security, thirteenth run): the real-queue test cannot measure in continuous integration, because `refs/prs/*` is a namespace nothing in the specified job fetches
+
+**Status:** proposed, hour-sized. **For:** whoever writes `checks.yml` under
+PWC-15, and the engineer. **Severity:** low. **Found by:** repairing finding
+F82, then asking whether the repaired test would ever run where the repair
+matters. **Full reading:** `docs/security/audit-2026-11-02n.md` §5.
+
+**The state after F82.** `tools/stack/repair-pending.test.mjs`'s real-queue
+test now asserts only what a complete clone guarantees and reports the queue
+census as diagnostics. It measures on a clone that is both unshallowed and
+has `refs/prs/*` populated, and it abstains with a named cause otherwise.
+
+**Why it will abstain in the job as specified.** PWC-15 requires
+`fetch-depth: 0` on the checkout and is right to, and that repairs two
+things: `.git/shallow`, and the single-branch refspec. It does not populate
+`refs/prs/*`. That is a third namespace, and `tools/ensure-full-clone.sh`
+declines it deliberately, in the paragraph of its own header headed "WHAT IT
+DOES NOT DO". `openHeads()` also shells out to `gh pr list`, which needs a
+token in the job environment.
+
+So the test skips for two independent reasons and the censuses in that
+audit's §2 appear in no job log. Both skips name their cause, which is this
+seat's own earlier repair to those messages, so nothing is silent. An honest
+permanent abstention is still an abstention.
+
+**Two shapes, and this entry does not choose between them.**
+
+1. One step before the suites: `git fetch origin '+refs/pull/*/head:refs/prs/*'`,
+   plus `GH_TOKEN` in the environment for that job. Cost: one fetch of 729
+   refs, measured at under a minute in this sandbox, on every pull request.
+   This is the shape that makes the test measure.
+2. Accept the permanent skip and say so in the entry, on the grounds that
+   the tool's logic is covered by nineteen fixture tests and the real-queue
+   case is a smoke test a seat can run by hand. Cost: zero runner time, and
+   the real `main` is never read by anything automated.
+
+**Why it is filed and not done.** This seat may not touch workflows, and
+shape 1 spends runner time on every pull request in the repository on a
+decision nobody has made. The same reasoning as the eleventh run's entry
+below: the lines are named rather than smuggled in under a security fix.
+
+**First step.** Decide shape 1 or shape 2 when `checks.yml` is written, and
+write the choice into PWC-15 so the next reader of that skip message knows
+it is intended rather than an oversight.
+
+**Cost:** $0 in services. Shape 1 adds one fetch per job.
+
+**Status:** proposed
+
 ## Ledger entry — 2026-11-02 (security, eleventh run): the site's build and lint are the last two instruments nothing runs, and the cost is a second dependency tree
 
 **Status:** proposed, day-sized. **For:** the engineer, and whoever prices
@@ -18145,7 +18244,8 @@ the owner to accept or reject.
 - Status: proposed
 
 ### 2026-11-02 (security, message run) — Report which failing tests a branch inherited rather than introduced, so "not mine" stops being a merge decision
-- Trigger: docs/security/audit-2026-11-02l.md, finding F74. Two tests in
+- Trigger: docs/security/audit-2026-11-02l.md, finding F78 (filed as F74,
+  renumbered by run m for a collision with audit-2026-11-02k.md §3). Two tests in
   `tools/ledger/block-kinds.test.mjs` were red on `main` for about six
   hours. They were green in the commit that wrote them and they were
   already red on `refs/pull/715/head` before that branch merged, which
@@ -18163,7 +18263,7 @@ the owner to accept or reject.
   Give it the comparison and the rule becomes followable: an introduced
   failure blocks you, and an inherited one you post to the owning seat's
   inbox with the file and the test name before you merge. This is the
-  mechanical half of the guardrail in F74, and `tools/seat/suite-baseline.mjs`
+  mechanical half of the guardrail in F78, and `tools/seat/suite-baseline.mjs`
   in pull request #714 already does the harder part of the job, which is
   attributing a failure to a seat from git authorship, so the work is
   mostly joining that to a base-versus-head run rather than building it.
@@ -18172,6 +18272,55 @@ the owner to accept or reject.
   inherited set under a heading that says it is not this branch's
   defect. Wire it into `scripts/ci-checks.mjs`, which already owns the
   gate list, so the output lands wherever that command runs.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (security, message run m) — Register the finding-identifier namespace in the collision gate this seat already built, and give it one heading form
+- Trigger: docs/security/audit-2026-11-02m.md, finding F80.
+  `tools/registers/id-namespaces.json` declares four namespaces and reasons
+  explicitly about the ones it excludes, stating that "a namespace with no
+  `why` is a fault, not a default". `F`, the identifier space this seat
+  allocates for itself in every audit it writes, is in neither list. Measured
+  across `docs/security/audit-*.md`: 70 distinct `F` identifiers defined, 14 of
+  them defined more than once. Eleven of those fourteen are a second,
+  undocumented numbering scheme, since four early audits numbered their
+  findings locally from 1 before the convention became global and monotonic at
+  F12. The other three, F64, F65 and F66, are genuine collisions between
+  audit-2026-11-02g.md and audit-2026-11-02h.md, six findings under three
+  names, both files merged. A fourth, F74 between audit-2026-11-02k.md and
+  audit-2026-11-02l.md, was repaired in the run that filed this.
+- What: register `F` in `id-namespaces.json`, which is where the gate reads its
+  namespaces from, so that `node tools/registers/check-ids.mjs --heads` covers
+  it the way it already covers `PWC`. The tool needs no new code: it is
+  data-driven, it already fetches every open pull request head, and it already
+  has an allocator in `--next <NS> --heads`. That allocator is the half that
+  matters, because it is what a run would call to pick its next number instead
+  of reading the highest one it can see, and reading the highest one it can see
+  is the mechanism that produced all four collisions.
+  Registration needs one decision first, and it is the reason this cannot be a
+  one-line addition. A `define` pattern must be anchored and unambiguous, and
+  the headings are not: seven shapes appear across the audits, among them
+  `## F<n> — <title>`, `## <k>. F<n> — <title>`, `### F<n>. <title>`,
+  `## <k>. Finding F<n>: <title>` and `### F<n>(b) — <title>`. Pick one, state
+  it in the charter's audit section or in the namespace's own `why`, and
+  normalise the existing headings to it in one pass.
+  The three merged collisions and the eleven scheme overlaps should land as
+  `burned` entries with their reasons, not as repairs. Renumbering a merged and
+  cited finding rewrites what other files already say, which is why that file
+  marks `ADR` as `repair: owner`; `F` belongs in the same class for anything
+  already merged. Recording them as burned is what keeps the registration from
+  turning the gate red on `main` the day it lands, so this is one decision with
+  a known cost rather than an immediate trunk-wide red.
+- First step: choose the heading form and add the `F` namespace with that
+  `define` pattern, `repair: owner` for merged audits, and a `burned` list
+  holding F1 through F11 for the local-numbering era and F64 through F66 for
+  the g-versus-h collision, each with its `why`. Then run
+  `node tools/registers/check-ids.mjs --heads` and confirm it reports clean.
+  Nothing further is needed to make it run on a change: `register-ids` is a
+  declared check in `scripts/ci-checks.mjs` as of this run, so a new namespace
+  in the JSON is covered the moment it lands. The `--heads` form is the part
+  still unwired, and deliberately, since it needs network and a token and so
+  belongs on a schedule rather than in a per-change gate.
 - Cost: $0
 - Status: proposed
 

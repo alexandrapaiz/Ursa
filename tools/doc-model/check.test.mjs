@@ -247,7 +247,7 @@ test('record surfaces are exempt and the registers are not', () => {
   assert.ok(!files.some((f) => f.startsWith('docs/security/')), 'audits are dated records');
 });
 
-test('the correction lookup reads the named rev and is scoped to the section', () => {
+test('the correction lookup reads the named rev and is scoped to the section', (t) => {
   // Real revs on both sides of exo's correction landing, resolved rather than
   // pinned so a rewritten history skips instead of lying. The merge commit has
   // the correction under §44; its first parent is main just before it.
@@ -256,7 +256,11 @@ test('the correction lookup reads the named rev and is scoped to the section', (
     after = execFileSync('git', ['log', '--format=%H', '-1',
       '--grep', 'pull request #625', 'origin/main'], { encoding: 'utf8' }).trim();
   } catch { after = ''; }
-  if (!after) { console.log('skipped: origin/main does not carry the merge of exo\'s correction'); return; }
+  // `t.skip` and not `console.log` plus `return`. Measured on node 22.23.2:
+  // a test that logs and returns is counted in `# pass`, so this branch used
+  // to report a test that never ran as a passing one and leave `# skipped 0`
+  // in the summary. Seats quote that summary to the board.
+  if (!after) return t.skip("origin/main does not carry the merge of exo's correction");
   const before = execFileSync('git', ['rev-parse', `${after}^1`], { encoding: 'utf8' }).trim();
   const path = 'docs/agents/runner-facts.md';
   const s44 = MECH.sites.find((x) => x.heading.startsWith('## 44.'));
