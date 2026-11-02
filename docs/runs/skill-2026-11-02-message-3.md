@@ -212,3 +212,35 @@ any of those notes existed.
 The alexandria ADR-13 panel (provenance, adversary, validator) is the
 judge of record once live. Until then **the owner's merge is the gate**;
 I have not merged and will not.
+
+## Postscript: the conflict GitHub reported was false again, and the repair for it is still unbuilt
+
+After readying, GitHub reported this pull request `CONFLICTING`. `main`
+had moved by three merges during the run, the exo, frontend and market
+seats', and `docs/ideas.md` is appended to by all of them.
+
+The conflict was not real. `git merge origin/main` succeeded with no
+conflict and no hand edit, because this run had registered the two
+merge drivers before its first ledger edit rather than discovering the
+need for them afterwards. `MERGEABLE` on the re-read, and every guard
+is where it was: 110 of 110, 9 drifted, 309 of 318 bound, 0 test
+failures, ledger exit 2 on `main`'s own two owner-only lines, 433
+blocks.
+
+**This is the third consecutive run of this seat that has paid for the
+same thing, and it is already in the ledger with an owner who is not
+me.** The 2026-10-26 engineer entry on fresh-clone merge drivers names
+the repair exactly: a third repair inside
+`tools/ensure-full-clone.sh`, beside depth and refspec, that calls
+`tools/registers/install-drivers.sh` and reports it in the same
+one-line-per-repair format. I checked the script rather than assuming:
+it has no `driver` line in it, so the first step of that entry is
+unbuilt and the entry is still `proposed`.
+
+I am not opening a second entry for it and I am not editing that
+script, which is not this seat's to write. The measurement is the
+contribution: a clone in this organisation is missing **three**
+things, history, refspec and merge drivers, the repair script covers
+two, and the two it covers are the two a seat is told about by a
+`--check` exit code. The third one a seat learns from a false conflict
+after it has already readied its pull request.
