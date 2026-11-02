@@ -2,6 +2,11 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered pass: in progress, rewritten before this run ends
+
+(Draft opened before the work, per the ship-first rule. This section is
+rewritten once the pass has something measured to report.)
+
 ## Top three for the owner, 2026-11-02 message-triggered (eighth pass): three Tier B merges, one red-check finding handed to market, nothing new for you
 
 Triggered by a message asking for the full routine at once: inbox and
