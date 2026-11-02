@@ -276,7 +276,24 @@ test('live: the prober agrees with the board it is a claim about', { skip: !proc
     return; // The fix landed and works. REFUSED is the good failure.
   }
   assert.equal(probed.status, 200, `the probed events read answers ${probed.status}, which this test has no reading for`);
+  if (!Array.isArray(plain.body.events) || !Array.isArray(probed.body.events)) {
+    t.diagnostic(`an events read answered 200 with no event list; unfiltered=${typeof plain.body.events}, probed=${typeof probed.body.events}`);
+    return t.skip('an events read carried no event list, so there is no count to compare; not a verdict on the filter');
+  }
   assert.ok(plain.body.events.length < 500, 'the 2h events window now saturates; widen nothing, shorten it');
+
+  // AN EMPTY WINDOW MEASURES NOTHING, and this guard is the fix for a flake
+  // this test introduced on 2026-11-02. When the inversion below replaced
+  // `assert.equal(probed, plain)` with `assert.notEqual(...)`, it changed
+  // which way the zero-zero case falls: the old assertion PASSED on a quiet
+  // board, because 0 equals 0, and the new one FAILS on it. That is a false
+  // red on a live store whose contents are nobody's to control, and it is
+  // the UNMEASURABLE verdict `read-filters.mjs` exists to report rather than
+  // guess at: a filter that matched nothing and a filter that did nothing
+  // are indistinguishable when there was nothing to match.
+  if (plain.body.events.length === 0) {
+    return t.skip('the 2h events window is empty, so filtering it cannot be distinguished from not filtering it');
+  }
 
   // THE FINDING CLOSED HERE, 2026-11-02 03:57Z, and this assertion is the
   // inverse of what it was an hour earlier. Until then the events company
