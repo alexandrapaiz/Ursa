@@ -15423,7 +15423,7 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
-### 2026-11-02 (engineer, craft scan) — Letta Context Repositories: per-file frontmatter descriptions, and the revision identifier they stopped one step short of
+### 2026-11-02 (engineer) — Craft scan: Letta Context Repositories, per-file frontmatter descriptions and the revision identifier they stopped one step short of
 - Scanned: Letta (category 3, personalization and memory layers,
   `docs/market/landscape.md`). The landscape entry records that Letta
   shipped Context Repositories, git-based agent memory, in February
@@ -15456,3 +15456,102 @@ the owner to accept or reject.
   the prompt. Not written as its own entry yet, because it needs a read
   of `ursa-major/src/` first to say whether the resolver already has
   the data and only lacks the surface.
+
+### 2026-11-02 (engineer, message run, 5) — Nothing in this repository can tell you how many launches it has, which is how the third one ran uncovered for three weeks
+- Trigger: today's work. `ursa-major/src/launch.ts` opened with "the
+  decisions both launches must make identically" and named two, while a
+  third had existed since the pull-request adapter shipped and was
+  missing three of that file's own eight repairs. The whole suite was
+  green for the entire period, 1,035 tests, and `src/launch-parity.test.ts`
+  could not see the gap because the thing it compares is a pair it is
+  handed by name.
+- What: a check that finds launches by what they do rather than by a
+  list someone maintains. The signature is mechanical: a launch is a
+  module that calls `saveRecord` (`src/store.ts`) and is not
+  `src/store.ts` itself. Today there are four callers, three of them
+  launches and the fourth `applyVerdict`, which re-saves a record it
+  loaded. So the check is: for every module that calls `saveRecord`,
+  assert it also reaches `gateRecords`, `erasedEpisodeIds` and
+  `keepRecord` from `src/launch.ts`, with an allowlist whose entries each
+  carry the sentence saying why they are exempt, in the shape
+  `dep-floor.allow.json` already uses. A new entry point that writes a
+  record and asks none of the three questions then fails the suite on the
+  day it is written instead of three weeks later. The import graph is
+  enough to answer it: `src/mcp/loaded-packages.mjs` already measures a
+  module graph in this repository by recording V8's own
+  script-compilation events, so there is precedent for asking the
+  question mechanically rather than by grep.
+- Why a check and not a rule in a charter: the rule already existed, in
+  the first sentence of `src/launch.ts`, and a reader who opened
+  `src/adapters/cli.ts` never met it. The defect is that the rule lived
+  somewhere the new caller's author was not looking.
+- First step: write the finder and print what it finds, with no
+  assertion. Report the number of `saveRecord` callers, which of the four
+  shared decisions each reaches, and the exempt ones. Only then decide
+  whether it is a test or a report, because an allowlist written before
+  the census exists is a guess about how many legitimate exemptions there
+  are.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 (engineer, message run, 5) — A pull-request record could carry the time dimension, and the question of whether it may is the owner's
+- Trigger: the deliberate non-action in today's work. `ursa run` calls
+  `annotateDurability`, which walks the commits after an episode closed
+  and records whether each surviving span is `durable`, `eroded`,
+  `decayed` or `untested`. `ursa ci` cannot, because at merge time there
+  is no history after the merge yet, and `src/launch-parity.test.ts`
+  names `lifespan` and `durability` in `ALLOWED_TO_DIFFER` with that
+  reason written out. The pull-request launch built today is the case
+  neither of those covers: a merged pull request has history after it in
+  any clone that is not shallow, so the walk is available and the launch
+  does not run it.
+- What: the decision is not an engineering one. A pull-request record
+  that asserts durability is asserting it as of whatever the clone's tip
+  happened to be when the command ran, which is a different claim from
+  the one a git-pair record makes, where the walk starts at an episode
+  the same run found. Two records of the same pull request resolved a
+  week apart would then disagree about `decayRate` with nothing in either
+  file saying the clones differed. The cheap half of the repair is a
+  field naming the commit the walk reached, which makes the claim
+  readable; the expensive half is deciding whether a buyer may compare a
+  `decayRate` from this path against one from the other at all.
+- First step: resolve one pull request twice from clones at two
+  different tips and diff the two records' `durability` blocks, so the
+  size of the disagreement is a number before it is a decision. The
+  command exists: `npx tsx src/bin/ursa.ts pr <projectPath> --pr 645`.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 (engineer) — Craft scan: Graphiti's bi-temporal model, and the second clock Ursa's span lifespans do not carry
+- Scanned: Zep / Graphiti (category 3, personalization and memory
+  layers, `docs/market/landscape.md`). Source:
+  [Zep, Graphiti overview](https://help.getzep.com/graphiti/graphiti/overview).
+  One page, read for the mechanism rather than the positioning. Nothing
+  on it directed any work and nothing it describes was adopted this run.
+- Worth stealing: the page's own two phrases are "bi-temporal model" and
+  "temporal edge invalidation", and it says "graph edges include temporal
+  metadata to record relationship lifecycles". Bi-temporal means two
+  clocks per fact: when the fact was true in the world, and when the
+  system came to believe it. A contradiction then invalidates an edge
+  with an end time rather than deleting it, which is what makes their
+  point-in-time queries possible. The page does not name the fields or
+  their types, so this is the model and not an implementation to copy.
+- Where this bites Ursa, concretely: a span's `lifespan` carries one
+  clock. `durable`, `eroded`, `decayed` and `untested`
+  (`ursa-major/src/lifespan.ts`) are claims about the world, and
+  `decayed` is the strongest of them because it declares the span's own
+  class a false positive. Nothing in the record says when the resolver
+  came to that view. `ursa run` rebuilds every episode from git history
+  and `saveRecord` overwrites the record file, so a second run over a
+  longer history silently replaces `untested` with `decayed` and the file
+  afterwards is indistinguishable from one that always said `decayed`.
+  `task.resolvedBy` names which build made the claims and not which tip
+  it read, which is the field that would carry the second clock.
+- Where Ursa is ahead: their invalidation needs something to tell the
+  graph a fact stopped being true, and on their path that something is
+  ingested text. Ursa's equivalent verdict is supplied by the artifact —
+  the work either still contains the span or does not — so no grader and
+  no model judges it, which is the distinction CLAUDE.md §1 is about. And
+  `decayed` is a label that refutes the record's own earlier label in the
+  same file, which their model has no counterpart for: an invalidated
+  edge says the world changed, not that the previous reading was wrong.
