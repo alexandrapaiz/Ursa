@@ -10,9 +10,22 @@ without saving and the kit finds it in whichever sibling package has it.
 will ever touch, and point `PW_ROOT` at it:
 
 ```bash
-mkdir -p /tmp/pw && cd /tmp/pw && npm i --no-save playwright && npx playwright install chromium
+# from your checkout root, with <id> this run's own suffix
+export FE_CACHE="$PWD/.fe-run-<id>/npm-cache"
+
+mkdir -p /tmp/pw && cd /tmp/pw \
+  && npm i --no-save playwright --cache "$FE_CACHE" \
+  && npx playwright install chromium
 export PW_ROOT=/tmp/pw/node_modules
+
+# and at the end of the run
+rm -rf "$FE_CACHE"
 ```
+
+`--cache` is not optional and `PW_ROOT` does not cover it: `PW_ROOT`
+isolates `node_modules` and the cache is a separate shared resource one
+directory up, which is L55 and L56 and the scratch-path rule near the
+bottom of this file. Delete that cache when the run ends.
 
 `PW_ROOT` is the first entry in `lib/browser.mjs`'s search order and has
 been since that file was written, and until 2026-11-02 it appeared in no
@@ -164,8 +177,29 @@ a pull request body to `/tmp/prbody.md`, another seat on the same host
 wrote its own body to the same path, and for about ninety seconds this
 seat's pull request published another seat's prose. Twenty or so seats
 share one unix user and one `/tmp` here. A parse that succeeds is no
-evidence of authorship, so nothing at the read can catch it. Write to
-`/tmp/<seat>-<date>-<trigger>/` and nothing else, and that includes
-scratch files, server logs and anything handed to `--body-file`.
+evidence of authorship, so nothing at the read can catch it.
 
-The run that built this is `docs/design/reviews/2026-10-24/`.
+**Write scratch inside your own checkout**, in a root-level dot-entry
+such as `.fe-run-<id>/`, and nothing outside it. That covers scratch
+files, server logs and anything handed to `--body-file`. The checkout is
+the one directory the host hands a single run, and `.gitignore` ignores
+every root-level dot-entry, so the path is private by construction and
+cannot be committed by accident. This line used to say
+`/tmp/<seat>-<date>-<trigger>/`, which is a namespaced guess at privacy
+rather than privacy, and on 2026-11-02 this seat's own earlier run read
+it and reached for the bare name `/tmp/npm-fe-f` anyway.
+
+**That includes the path npm chooses for you.** Every `npm` this seat
+runs passes `--cache <checkout>/.fe-run-<id>/npm-cache`, because npm's
+content-addressed cache defaults into a home directory twenty seats
+share and a collision there empties `node_modules` before it fails, so
+the tree ends up worse than before the command ran. L55 found that and
+L56 measured the remedy: install 611 packages in 4m48s and a clean
+build behind it, at a cost of **176M of disk per project per run** on a
+45G volume that `/tmp` and `/srv/asc` share and that runs at 100%. So
+**delete the cache before the run ends.** Nothing on this host collects
+run scratch, and a cache left behind is 176M nobody will recognise as
+garbage.
+
+The run that built this is `docs/design/reviews/2026-10-24/`, and the
+cache paragraph is `docs/design/reviews/2026-11-02-message-f/` §2.1.

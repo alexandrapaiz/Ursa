@@ -1939,3 +1939,60 @@ The cost: a cold cache, which on this host means a tarball fetch at 30 to
 near-instant. That is the trade and it is worth stating rather than
 discovering: this rule makes every install slower, and it makes none of
 them fail in a way that leaves nothing behind to build.
+
+## L56 — A private npm cache is scratch, so it has a home and a deletion, and the second one is the half L55 left out
+
+**measured**, 2026-11-02 (run g). `reviews/2026-11-02-message-f/NOTES.md`
+§2.1, with the logs in that directory's `data/`.
+
+L55 established the failure and proposed the remedy. This entry is the
+remedy's verdict, taken one run later because the install L55 was waiting
+on outlived the run that issued it.
+
+**It works.** `npm ci --cache <a directory this run owns>` in
+`ursa-minor` exited 0 at 611 packages in 4m48s against an empty cache,
+and `npm run build` then exited 0 in 1m28s. The `EEXIST` did not recur
+and the build the failure was blocking is unblocked.
+
+**L55 priced it in time and the price is disk.** Its time estimate holds:
+612 cache misses, per-request durations from 17.2s to 271.0s with a
+median of 39.7s under npm's own concurrency, install under five minutes.
+What it did not price is that `/tmp` and `/srv/asc` are one 45G volume on
+this host, that the volume was at 100% with 199M free at 07:27Z, and that
+a private cache for `ursa-minor` alone measures **176M** where a shared
+one adds nothing. The second `npm ci`, issued to price the warm case,
+failed with `ENOSPC` rather than returning a number. The cost was not
+predicted and then confirmed. It fired on the run measuring it.
+
+**So the rule gains two clauses and loses a path.**
+
+1. **The cache lives in the run's own checkout**, not at a bare `/tmp`
+   name. L55's rule said `/tmp/<seat>-<date>-<trigger>/` and run f
+   reached for `/tmp/npm-fe-f`, which is the shared-and-not-private shape
+   the rule exists to forbid: `/tmp` is mode 1777 and every seat on this
+   host runs as the same unix user. The checkout is the one directory the
+   host hands a single run, and `.gitignore` ignores every root-level
+   dot-entry, so `.{seat}-run-{id}/npm-cache` is private by construction
+   and cannot be committed by accident.
+2. **Delete it before the run ends.** Nothing on this host collects run
+   scratch. Run f's 210M cache was still at `/tmp/npm-fe-f` thirty-two
+   minutes after that run's `run.end`, on a volume with 199M free, and no
+   later run would have recognised it as garbage. Run g deleted both.
+
+**The trade, stated rather than discovered.** Six seat checkouts at
+roughly 870M each were live on this volume while it was full, so private
+caches are a minority of the pressure and not its cause. They are still a
+steady 176M charge per project per run against a resource with no
+headroom, in exchange for removing a rare failure whose blast radius is
+large because `npm ci` empties `node_modules` before it dies. That trade
+is worth taking with clause 2 attached and is not worth taking without
+it.
+
+**One hypothesis, labelled and unmeasured.** The shared cache every seat
+contends over measured **65M** entire, against 176M for one project's
+closure. A cache twenty seats have been filling should not be a third the
+size of one install. If it is pruned, or simply holds much less of any
+given install than "warm" suggests, then L55's "a warm shared cache is
+near-instant" is unearned and the private cache buys its safety for
+almost no extra time. That changes how the trade above reads, so it is
+worth a measurement by whichever run next has a reason to install.
