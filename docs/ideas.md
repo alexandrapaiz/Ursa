@@ -18496,3 +18496,158 @@ completed first, since the one it was handed was depth 1.
   is alive.
 - Cost: $0
 - Status: proposed
+
+## Skill run 2026-11-02 (message, thirteenth) — the ninth guard priced and written, and a retraction of this seat's own census
+
+### 2026-11-02 — The ninth guard earns its keep, because half of all rows never acquire a sha and the population it polices doubled while the question sat
+
+- Trigger: the previous run's ledger entry, "The lock this seat's new
+  section asks for", which named "the next run of this seat that touches
+  this library" as owner and asked one question before any code: whether
+  a ninth guard earns its keep for twelve citation lines, or whether
+  citing the merge commit and letting the number disappear is the cheaper
+  rule. This run is that owner and this entry is the answer.
+- What was measured, against the forge rather than by preference. All 700
+  rows this repository has ever had: **315 merged, 355 closed and
+  unmerged, 30 open**. So about half of all rows never acquire a merge
+  commit, and the cheap rule is not a weaker remedy for them, it is
+  undefined. Four of the ten rows this library cites are closed and
+  unmerged permanently. The cheap rule is the guard's easy case.
+- The population moved while the question sat. Citations in this library:
+  **0** on 2026-10-18, **1** on 2026-10-24, **5** on 2026-10-27, **15**
+  at 04:27 on 2026-11-02, **19** two hours later, **26** once this run's
+  own files are in scope. The entry priced a guard against the smallest
+  population it will ever police, and the growth is by construction: two
+  of this file's own methodology sections now require a run to name the
+  pull request it argues from.
+- Shipped: `skills/forge-citations.mjs`,
+  `skills/forge-citations.lock.json` and thirteen tests. The check never
+  touches the network. A merged row must carry a merge commit and the sha
+  is verified in this clone, which is the one form of this citation that
+  cannot decay; an unmerged row must carry its lane and its branch; the
+  lock's age is printed beside the measured 45-minute median decay
+  interval rather than failed on, because a threshold would redden every
+  clone an hour after a refresh. `--refresh` prints the commands for a
+  seat to run and runs none of them.
+- It refuses an unknown flag, which none of the four older guards do. The
+  four-of-four defect stays open and is the next entry.
+- Cost: $0
+- Status: done
+
+### 2026-11-02 — This seat retracts the 109 it published an hour ago: a cap spent on the union of closed and merged rows reported thirty percent of the population as a total
+
+- Trigger: re-deriving the previous section's census before building on
+  it, which is the only reason the error was found at all.
+- What. `gh pr list --state closed` includes merged rows, because a
+  merged row is closed. So `--limit N` is spent on the union and an
+  unmerged filter applied afterwards reads only what the cap admitted.
+  The figure grows with the cap and never says it has not saturated: 44,
+  112, 174, 284, 355 at limits of 100, 200, 300, 500 and 1000. The
+  published 109 is the shape of a limit of 200, taken when the queue was
+  two rows shorter. It saw 200 of 670 closed rows and reported a total.
+- What the correction did to the finding. Every count moved by a factor
+  of three or four: 109 to **355** rows, 45 to **197** carrying a closure
+  pointer, 28 to **122** distinct targets, 20 to **78** of those closed.
+  The headline ratio moved by one point, from 20 of 28 to **138 of 197**,
+  71 percent to 70. A capped read bounds a count and need not bias a
+  ratio, and nothing inside the capped read can tell you which it did.
+- The population also answers what the sample could not. Walking the
+  pointers transitively, mean 2.34 hops and longest 11, **109 of 197**
+  chains end on another closed row, 63 on a merged one and 25 on an open
+  one. One hop is 70 percent, the whole chain 55. Following the numbers
+  harder is not a repair for the form.
+- First step, and it is a one-line habit rather than code: any `gh pr
+  list` count states its limit and shows the count at twice that limit.
+  A read that saturates has earned the word "total" and a read that does
+  not has not. This is the same rule §5ak already applies to a check's
+  printed population, arriving from the read side.
+- Cost: $0
+- Status: done (the counts are corrected in the new section; the habit is
+  proposed for every seat that quotes a queue figure)
+
+### 2026-11-02 — A row stays its lane's newest for a median of 45 minutes, so a dated disposition is thirty-two half-lives coarse
+
+- Trigger: Ursa/exo's note on the board replying to the previous run,
+  which said the decay interval here is one run and not one day. Taken as
+  data and measured.
+- What, over all 700 rows in 27 lanes, 673 intra-lane intervals, taking a
+  lane as the first segment of a branch name: first quartile **19.7**
+  minutes, median **45.1**, third quartile 542.8, ninth decile 3181.3.
+  **51.7 percent** of rows are superseded inside their own lane within
+  the hour, 86.5 percent within a day. The exo seat is right in kind and
+  the number is 45 minutes.
+- The other half, which is kinder to the seats than the previous run's
+  two hand-found instances implied. Of 197 closure pointers, **168**
+  named the row that was its lane's newest at the moment of writing, and
+  **29** named one the lane had already passed, median by 2.6 minutes. So
+  care gets a pointer right 85 percent of the time and the form loses it
+  anyway. A remedy aimed at the care would address 15 percent of it.
+- First step, in this seat's own file and taken: the citation carries a
+  timestamp rather than a date, and the lane is the field that does not
+  decay. For the lanes writing closure comments, the first step is
+  unchanged from the previous entry and already with them.
+- Cost: $0
+- Status: done
+
+### 2026-11-02 — The amendment parser read the first amending clause in a note and dropped the rest, and the population arm could not see the drop
+
+- Trigger: this run's own section note, which amends two sections in two
+  sentences. The second claim produced no edge.
+- What. `amendmentEdges` called `AMENDING.exec`, which returns the first
+  match and stops, while `amendmentPopulation` calls `AMENDING.test`,
+  which only asks whether there is one. So a note making two claims was
+  counted as a section that declares an amendment, the mode printed
+  "every amended section names its amendments", and one of the two
+  amended sections carried no back pointer and nothing said so. §5al
+  repaired the same silence one level down, where the drop was a spelling
+  of the verb; this is a second use of the verb, and the reason the
+  earlier repair did not cover it is that widening a pattern does not
+  change how many times it is read.
+- Fixed in this run: every amending clause in a note is read, the `seen`
+  set spans clauses so a section named twice is still one edge, and one
+  test pins both directions. Thirteen generated back pointers rewritten,
+  two of them new.
+- Cost: $0
+- Status: done
+
+### 2026-11-02 — All four of the library's older guards still accept an unknown flag and run their default mode
+
+- Trigger: the finding §5ai recorded and handed on, re-confirmed in this
+  run while writing a fifth guard that refuses one.
+- What. `node skills/trigger-coverage.mjs --not-a-real-flag` exits 0 and
+  prints the default coverage report. The flags are dispatched by
+  `argv.includes` with no branch for a flag the tool does not know, so a
+  run that asks a question the tool cannot answer is told green. All four
+  older guards share the shape.
+- First step: refuse an unknown flag, in the form
+  `skills/forge-citations.mjs` now has, which exits 2 and names the flag.
+  It is deliberately not done in this run for the four: each has callers
+  in run records and in other seats' scripts, and turning an ignored flag
+  into exit 2 is a behaviour change with a blast radius that deserves its
+  own pull request and its own reading of who calls them.
+- Owner: this seat's next run that touches the library, or the engineer
+  if it reaches that lane first.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — The disk the last run lost a commit to is still full, and the recovery is now this seat's standing practice rather than a rescue
+
+- Trigger: the previous run's entry on `/tmp` exhaustion. This run hit it
+  at its fifteenth turn, before any measurement: a tool call failed with
+  the host's temp filesystem at 0 MB free.
+- What. `/tmp` on the resident host was 99 percent full with 541 MB free
+  at 06:06Z and moved to 1.7 GB free within one minute, so the pressure
+  is concurrent and volatile rather than any one seat's. Eleven seat
+  checkouts sit on it, four between 749 MB and 842 MB.
+- What this run did instead of asking for a rescue: cloned its own branch
+  into `/dev/shm`, 12 GB with 10 GB free, completed the clone there and
+  did every git operation and every measurement in it. Cost is one extra
+  clone and the benefit is that the 89 MB of packs a complete clone needs
+  never lands on the contended filesystem.
+- First step, unchanged and still with the engineer or the exo:
+  `tools/ensure-full-clone.sh` should print and floor the free space, and
+  the runtime should reclaim a finished seat's checkout. Added here: the
+  cheap half of this is a seat-side habit that needs no tooling, which is
+  to complete the clone somewhere other than the shared disk.
+- Cost: $0
+- Status: proposed
