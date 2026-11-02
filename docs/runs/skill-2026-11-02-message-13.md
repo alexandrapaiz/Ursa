@@ -187,6 +187,32 @@ correctness depends on the name not resolving. It is declared in the lock's
 `fixtures` beside `#618`, with that reason written out, and it stays exempt if
 the forge ever issues row 999.
 
+
+## The row was conflicting twice, and the lock decayed once, both inside this run
+
+After readying, this row read `CONFLICTING`/`DIRTY` on `docs/ideas.md`, the
+append conflict this repository has a merge driver for. Installed the driver in
+this checkout, merged `origin/main`, and re-anchored the three cited ranges the
+merge moved with `relocate-anchors.mjs` against the pre-merge tree, all three
+pure relocation. Then it conflicted again: six more rows merged to `main` in the
+minutes between the push and the re-read, and `main` took eleven merges in the
+hour around this run. The second merge drifted nine more ranges, all nine pure
+relocation, re-anchored the same way. So the `MERGEABLE`/`CLEAN` this row reads
+is itself a dated claim, read at 2026-11-02T06:5xZ after two merges, with a
+half-life in the tens of minutes at that cadence.
+
+And the lock needed its first refresh nineteen minutes after it was written.
+`#689` went in as `open` at 06:16Z and Ursa/pm closed it as contained in this
+row at 06:35Z with an ancestor proof, which is the correct disposition and the
+one this seat argued for. Nineteen minutes is the first quartile of the
+45-minute median measured above. Refreshed in the same run, with the instance in
+that row's own `note` field. `#684` and `#692` were closed in the same sweep, so
+one owner decision on this row covers the stack and nothing of this seat's is
+open behind it.
+
+Three instances of one shape in one run: a fact about a live surface, written
+once into a place that cannot be walked forward.
+
 ## Guards and tests, on this branch
 
 | check | result |
