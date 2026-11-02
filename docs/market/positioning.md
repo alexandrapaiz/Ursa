@@ -1698,3 +1698,39 @@ the day after any check. The practical read: this gap moves slowly
 enough that rechecking it every one to two weeks spends a search on a
 question unlikely to have changed. Ledger proposal below to stretch
 the cadence rather than drop the watch.
+
+## Four frontier labs just agreed on a consent standard, and it stops exactly where Minor's gap begins (2026-11-02, message, 9th run)
+
+Google, Microsoft, OpenAI, and Anthropic announced joint support on
+2026-10-30 for a shared robots.txt policy token
+(`__usage_ai-training`), authored as an IETF Internet-Draft by
+Anthropic's Kevin Kelley with input from 46 contributors including
+publishers and civil-society groups. The mechanism lets a website
+state one preference, honoured by all four labs, against having its
+content used to train model parameters, instead of maintaining a
+separate opt-out per lab. [ppc.land: Google, Microsoft, OpenAI and
+Anthropic back one AI training
+opt-out](https://ppc.land/google-microsoft-openai-and-anthropic-back-one-ai-training-opt-out).
+
+So what, read precisely rather than generously: this is the first
+case this file has found of frontier labs jointly shipping shared
+infrastructure for a content-rights preference signal, which is
+evidence the labs will cooperate on neutral consent plumbing when the
+asset is publisher content. But the standard is opt-out only, not
+consent-based ("a preference... MAY [be] override[n] by private
+agreement"), scoped to training and explicitly not to grounding, and
+by its own text says nothing about a user's own interaction or
+preference data. It answers "can a publisher stop its web pages from
+being trained on," not "can a person say yes to their own revealed
+preferences being used and see what was inferred from them." CLAUDE.md
+§0's two non-negotiables (portable ownership, full visibility and
+revocation) have no analogue here at all. The gap this file has
+tracked for six weeks is not narrowed by this standard; if anything it
+is sharpened, because the market has now proven labs will jointly
+build consent infrastructure once, for a different asset, while the
+user-preference-data equivalent still has no shared signal from
+anyone. Ledger proposal below: watch whether this token's machinery
+(or its sponsors) gets extended toward user-level preference signals,
+since that would be the first real encroachment on Minor's structural
+claim rather than another authored-verifier entrant. No pricing or
+positioning change argued by this alone.

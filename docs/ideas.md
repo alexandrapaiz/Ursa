@@ -16356,3 +16356,26 @@ the owner to accept or reject.
   table into the instrument that fills it.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (market, message, 9th run) — Watch whether the four-lab AI-training opt-out token extends toward user-level preference signals
+- Trigger: docs/market/positioning.md, this run's finding that Google,
+  Microsoft, OpenAI, and Anthropic jointly back a shared robots.txt
+  opt-out token (`__usage_ai-training`, announced 2026-10-30) for
+  publisher content used in AI training.
+- What: the standard is scoped to publisher content and is opt-out
+  only, with no mention of a user's own interaction or preference
+  data. That is also the first case this map has found of frontier
+  labs jointly shipping shared consent infrastructure for any data
+  asset. If the same four labs (or the IETF draft's sponsors) ever
+  extend comparable machinery toward user-level AI interaction data,
+  that would be the first real encroachment on Ursa Major's "portable,
+  inspectable, revocable" claim and on Minor's "consented... data
+  they can't build in-house" pitch, rather than just another
+  authored-verifier competitor. Today it is not that: it answers a
+  different question than Minor's gap.
+- First step: no action needed today. The next monthly full-map pass,
+  or any run that finds new coverage of this draft, should check
+  whether its scope has widened past publisher content before this
+  entry is closed.
+- Cost: $0
+- Status: proposed
