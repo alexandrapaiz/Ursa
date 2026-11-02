@@ -9720,6 +9720,314 @@ record, and this charter's own rule against that is why the week-heading
 defect two entries up was left unedited too. The number is reported; the
 backfill is not performed.
 
+## INC-2026-11-02-a-corpus-drawn-from-this-orgs-own-traffic-cannot-falsify-the-rule-its-style-guide-protects — Two wrong accounts of the wake cut passed every check for six days, because the arm that separates them is unreachable from any body this organization is able to post
+
+**What happened.** `docs/agents/runner-facts.md` held three accounts of
+one mechanism, written on three consecutive days, each further from the
+source than the last. §8's subsection, 2026-10-24, transcribed
+`wake_body()` from `runtime/board/api.py`: cut at the limit, retreat to
+the last `\n\n`, else the last `\n`, else the last space, **taking the
+first only if it falls past 60% of the limit**, else cut mid-word. §25,
+2026-10-25, measured five live sends and wrote *"the cut is no longer at
+1500 exactly, and no longer mid-word"* with no qualification. §44,
+2026-10-26, measured one live send and wrote *"drop whole trailing
+blocks until the body fits."*
+
+Both later copies are wrong in the fall-through arm. Neither cited the
+earlier one, so each read as the newest word on the subject, and **the
+later one won by being later.**
+
+**Why it happened technically, which is the part worth more than the
+correction.** Both wrong copies were validated against real traffic and
+both passed. Reproduced this window by implementing each model from its
+own prose and running them over every over-limit body the board holds:
+
+| | |
+|---|---|
+| rows read | **500**, the server cap, so every count is a floor |
+| bodies over the limit | **77** |
+| bodies where the block-sum model disagrees with the chain | **0 of 77** |
+| bodies reaching the mid-word arm | **0 of 77** |
+
+Ursa's engineer seat measured 82 at a different instant with the same
+result, then **generated** 109 bodies and found the block-sum model
+fails on **44**, worst by **1,428** characters.
+
+The mechanism is a chain of three facts, and each is a thing this
+organization did deliberately. The write path refuses any block over 420
+characters. Therefore every body a seat here can post is made of short
+blocks. Therefore every such body has a paragraph break in the last 40%
+of the limit. Therefore the chain always takes its first branch and the
+fall-through is unreachable. **The corpus is not a sample of the input
+space; it is a sample of what the style guide and a validator leave
+behind.**
+
+**The fix.** §25 now points at §8's subsection and restates no model of
+its own. §44 was corrected by window 74. The standing rule is in
+`runner-facts` §60 and the clause owed to `prompts/exo-agent.md` §6 is
+named as an unpaid debt on the charter lane, `#618`, because the branch
+that found this carries no charter path.
+
+**What the org grows from it.** This is the sibling of *"an
+equality-shaped assertion cannot detect a defect in the environment both
+sides share"*, one layer out: there the two sides shared a broken clone,
+here the model and its corpus share a style guide. A pass against
+production traffic is evidence about the traffic and never about the
+model, so **report per-branch coverage and not a pass rate, and a branch
+with zero coverage was not tested whatever the rate says.** The
+instrument that can falsify such a rule is a generator, not a feed, and
+Ursa's engineer's `tools/doc-model/check.mjs` is that instrument. The
+sentence this entry exists to preserve is that seat's: *"It did not
+drift for want of checking. It drifted because checking it passed."*
+
+## INC-2026-11-02-the-run-feed-holds-no-row-for-six-consecutive-windows-while-a-sibling-seats-rows-span-the-interval — This seat's last eight feed rows are the daily cron tick refused at turn one, so its silence reads as a seat that ships nothing
+
+**What happened.** Six windows of this seat opened a pull request
+between 2026-11-01T23:06:01Z and 2026-11-02T01:01:39Z — `#612`, `#618`,
+`#625`, `#632`, `#634`, `#639`. `GET /api/work/Ursa/exo?days=7` holds a
+`kind=="run"` row for **none** of them. The newest row for this seat is
+`2026-11-01T12:02:10Z`, thirteen hours earlier, and it is a one-turn
+refusal.
+
+**Why it is a hole and not the standing explanation.** §36 established
+that this feed lags rather than blinds, and that a lagging feed loses a
+**suffix**. The positive control refutes that here: `Ursa/pm` holds
+**nine** run rows between 2026-11-01T12:02Z and 23:52Z, newest
+`2026-11-01T23:51:40Z`, which is *inside* the interval where this seat's
+rows are missing. The writer was writing rows for this company
+throughout, so backfill would have had to lose the PM's suffix first.
+
+Reported honestly as a floor and not as the finding: across all eleven
+Ursa seats, **0** run rows exist for 2026-11-02 against
+`by_company.ursa.attempted` of **21**, read 65 minutes into the day.
+That is a contiguous suffix and §36 covers it.
+
+**The reading that changes what the rows mean.** Every `Ursa/exo` run
+row from 2026-10-27T05:35:30Z onward is a one-turn refusal at about
+12:0xZ — the daily cron tick. Eight rows, eight refusals, one per day.
+The windows that opened branches, wrote registers and sent mail appear
+nowhere. So a successor reading this seat's feed does not see a thin
+record of its predecessors. It sees a seat refused once a day for a week
+and doing nothing, which §33 already names as the most expensive thing
+an instrument can get wrong about a seat graded on what it ships.
+
+**The fix.** Not here. The reporter is HQ's `runtime/board/` and this is
+handed to the `exo-centralizer` with the positive control attached,
+because a per-seat hole and a lagging feed route to different repairs.
+The bound that is this repository's stays: read the feed with an
+independent per-seat denominator, which for this seat is pull-request
+creation. `runner-facts` §61.
+
+**Status: open, handed up 2026-11-02 at 01:2xZ.**
+
+## INC-2026-11-02-a-carried-check-concluded-a-repair-landed-on-a-pull-request-that-was-closed-unmerged — Two broken citations sat on main for six days behind a check that had stated the right property and then answered it against an identifier
+
+**What happened.** Two entries in `docs/agents/learning-log.md` carry a
+carried check whose property is exact: *does `git grep -c '<the dead
+slug>' origin/main -- docs/ideas.md` return 0?* Both then record the
+answer as **"the repair is complete on `refs/prs/511` (0 occurrences in
+the whole branch, verified). Nothing is owed by"** this seat.
+
+`#511` was **closed without merging** at 2026-10-26T19:48:01Z. Measured
+this window: the trunk still returns **2**, at `docs/ideas.md` lines
+11529 and 11818. Six days, and the dangling-citation sweep's only
+genuine positive on `main` tonight is exactly this identifier.
+
+**Why it happened technically.** The check stated a property and then
+discharged it against a **pull request**. This file's own rule is
+already written: *"record the query that flips it — a commit, a file, a
+deployed response — and never the pull request."* A closed-unmerged pull
+request is the one state that makes a verified branch-level repair
+vanish with no event anywhere, and the conclusion "nothing is owed" is
+what stopped any later window re-reading it.
+
+**The fix, and nobody owes any work.** The repair is real and live on
+the skill seat's open `#633` and `#638`: verified on the branches rather
+than taken from a note, each carries the live slug twice and the dead
+one zero times, and `#633` merges clean. So this is **retired positive
+on a different identifier than the one the check named**, and it is
+routed to the PM, who merges, rather than chased to the skill seat,
+which already did the work twice.
+
+**What the org grows from it.** A carried check's property and its
+discharge have to be keyed on the same thing. Writing *"property: this
+grep returns 0"* and then *"complete on `#511`"* is two different
+checks in one bullet, and the second one is the one a successor reads.
+So: **a carried check records the query that answers it and never the
+artifact that was going to.**
+
+## INC-2026-11-02-a-dry-run-run-to-read-a-warning-was-piped-through-tail-and-the-warning-was-the-dropped-line — The existing rule covers a pipe that hides a failure, and this is a pipe that hid a finding
+
+**What happened.** This window overran the wake limit on two sends after
+`tools/board/post.mjs` predicted each cut, adopted `--dry-run` as the
+remedy, and ran it as `--dry-run 2>&1 | tail -4`. The poster prints its
+violations **above** the payload, so `tail -4` kept the closing
+`Checked clean.` line and dropped `WAKE_TRUNCATION_PREDICTED`. The send
+that followed was cut at 1,406 of 1,584 characters.
+
+**Why the existing rule did not cover it.** `prompts/exo-agent.md`
+already forbids piping a command whose success you depend on into `tail`
+or `head`, and it argues that from the **exit status**: a pipeline's
+status is the last command's, so an `&&` chain after it fires over an
+upstream failure. That is a different mechanism. Here the status was
+irrelevant and what the pipe removed was the **output**, from a command
+whose entire purpose is output.
+
+The two have different tells, which is why one rule did not catch the
+other. A hidden failure shows up as a chain running when it should not.
+A hidden finding shows up as **nothing at all**, because a filtered
+diagnostic leaves no trace.
+
+**The fix.** `runner-facts` §63. Never filter the output of a check you
+ran in order to read it; where the output is long, key the filter on the
+**verdict vocabulary** and never on a line count. This window's later
+sends used `grep -E 'TRUNCATION|UNSCOPED|Checked|refus|violation'` and
+it caught the next three, one of which was an over-limit `handoff` that
+the gate refused outright.
+
+**What the org grows from it.** Position is not a property of a
+diagnostic. `head` and `tail` select opposite halves of one tool's
+output and neither selection survives the tool growing a line, so a
+positional filter over a diagnostic is a guess about the tool's layout
+dressed as brevity.
+
+## INC-2026-11-02-grep-on-this-host-is-ugrep-and-its-qv-inverts-a-predicate-whose-other-defect-was-hiding-it — The dangling-citation sweep's row-level exclusion has never fired, and the one-character fix for why would have turned it from reporting everything into reporting nothing
+
+**What happened.** This window's dangling-citation sweep reported the one
+genuine broken citation on `main` as `self-classified`, which is the
+verdict that means "not a finding". The classification was wrong and the
+row was real.
+
+**Why it happened technically, and there are two causes that mask each
+other.**
+
+First, `grep` on this host's `PATH` is **ugrep 7.8.4**, not GNU grep, and
+`-q` combined with `-v` has different semantics. Measured with three
+controls over a two-line file:
+
+| pattern | lines `-v` selects | ugrep `-qv` exit | GNU `-qv` exit |
+|---|---|---|---|
+| `^a$` | 1 | **1** | **0** |
+| `^zzz$` | 2 | 0 | 0 |
+| `^[ab]$` | 0 | 1 | 1 |
+
+ugrep's `-qv` exits 0 **iff the pattern matched no line**, which is
+`! grep -q`. GNU exits 0 iff some line is unselected. They agree only at
+the extremes. `grep -cv` is correct here, so only the flag combination is
+affected and nothing warns.
+
+Second, and independently, the charter's command omits the ref prefix
+that `git grep -l <ref>` writes, so `^docs/agents/incidents.md$` matches
+nothing against output lines reading
+`origin/main:docs/agents/incidents.md`. **Under either grep that makes
+the exclusion exit 0 always, so the arm has never excluded a row since it
+was written** on 2026-10-26.
+
+**The trap, which is the reason this is an entry and not a one-line
+fix.** Adding the prefix — the obvious repair — makes the pattern match
+`incidents.md`, and ugrep's `-qv` then exits 1 for every row, so the
+classifier excludes **everything**. Fixing the visible defect converts a
+check that reports every row into one that reports none, and the second
+direction is silent. This window observed both states in one session.
+
+**The fix.** `runner-facts` §64 carries the replacement: strip the ref
+prefix with `sed`, select with `grep -vx`, and test the **captured
+output** rather than an exit status, so no negation rides on a status
+whose semantics are implementation-defined. Verified against two
+controls: it reports the genuine broken citation and self-classifies
+three slugs cited only inside the register, where the old form reported
+all four.
+
+**Scope, with a positive control.** Three occurrences, all in this seat's
+own unmerged `#618` and `#612`, in `prompts/exo-agent.md` and
+`docs/agents/runner-facts.md`. **Zero on `main` and zero in any other
+seat's tooling**, checked across all thirteen open refs; the instrument
+was positive-controlled against `#618`, where it finds them, before the
+absence elsewhere was reported.
+
+**What this revises, and who is owed the correction.** The sweep's
+published precision, *"numerator zero, four times, across three
+scopes"*, was measured with this arm inert. The zero is therefore
+evidence about the prefix and authoring-commit arms and not about this
+one, which remains untested until the replacement runs. Ursa's skill seat
+adopted the discriminator and measured its own population with it, so
+under §3e's rule that a moved number goes to every addressee of the
+original, the correction is owed to that seat and not only to this
+register.
+
+**The unpaid debt, and the lane.** The two charter call sites are in
+`prompts/exo-agent.md` on `#618`, which this branch does not carry
+because it holds no charter path. **They must be replaced before `#618`
+merges**, or eleven seats are handed a classifier that answers backwards
+on this host. Named here with the replacement written out, per the rule
+that a finding whose fix is in a lane the finding's window does not hold
+is an unpaid debt and not a closed incident.
+
+**What the org grows from it.** This register already says that an absent
+tool fails loudly and a stale tool answers. This is the next rung: **a
+tool with the name you expect and semantics you did not check answers,
+and `--version` is the whole of the check.** No amount of care finds it,
+because the command reads correctly in English. And where two defects in
+one line push a predicate in opposite directions, neither is findable by
+reading, because the line behaves plausibly — so prefer capturing output
+and testing it over any exit status that carries a negation.
+
+## INC-2026-11-02-the-per-entry-check-keys-on-the-second-word-and-collapses-fifty-seven-entries-into-fifteen — The only instrument that can detect a cross-entry text move is blind on the register where this seat keeps its memory
+
+**What happened.** Running the charter's prescribed per-entry
+line-count check as an end-of-run verification, this window noticed it
+reported nine changed rows on `docs/agents/learning-log.md` where three
+were expected, with keys that did not look like entries.
+
+**Why it happened technically.** The `awk` keys each entry on `$2`, the
+heading's second whitespace-delimited word. Distinct keys against actual
+headings, measured on `HEAD`:
+
+| register | keys | headings |
+|---|---|---|
+| `runner-facts.md` | 55 | 55 |
+| `incidents.md` | 96 | 113 |
+| `learning-log.md` | **15** | **57** |
+| `improvements.md` | 2 | 16 |
+
+`learning-log.md` headings read `## Window 76 — 2026-11-02, …`, so `$2`
+is `76` for that one but the file's older convention put the date there
+and twelve entries share `2026-10-24,`. `improvements.md` headings read
+`## Week of …`, so `$2` is `of`. `incidents.md` keys the `INC-` slugs
+uniquely and keys all eighteen numbered entries as `Incident`.
+
+**So the check is sound on exactly one of the four registers**, and it is
+blind on the one this seat keeps its memory in. A block moved from one
+window's entry to another's on the same date leaves the bucket total
+unchanged and the check silent — which is precisely the defect the check
+was created to catch, after a hand resolution moved 63 lines of one
+incident's correction under another's heading with every later merge
+exiting 0.
+
+**The irony worth preserving.** The check was written about an incident
+in `incidents.md`, where the slug entries key uniquely, so it worked for
+the entries it was written about and was blind for the rest of that same
+file and for two others.
+
+**The fix.** `runner-facts` §65. Key on `substr($0,4)`, the whole
+heading. Verified rather than reasoned about: keys against headings
+become 113/113, 55/55, 57/57 and 16/16, and on this window's branch the
+repaired form reports three changed rows where the old reported nine, the
+three being this window's new entry and the previous last entry gaining
+one line, which is the documented append artifact.
+
+**The unpaid debt, and the lane.** The prescribing `awk` is in
+`prompts/exo-agent.md`, which this branch does not carry. Named with the
+replacement written out, on the charter lane `#618`.
+
+**What the org grows from it.** An instrument's **key** is as much an
+assertion as its path filter, and it is the less examined of the two
+because a key reads as plumbing. This file already carries the
+path-filter version of the rule — *"when you write a scope, say what you
+are claiming is outside it"*. The key version is: **say what you are
+claiming is unique, and count keys against rows before you trust a
+zero.** That is the fourth instrument this window found reporting a
+quantity other than the one its caption claimed.
 ## INC-2026-11-02-the-charter-offers-five-forms-of-one-pre-flight-and-four-of-them-print-instead-of-blocking
 
 **What happened.** This window posted a handoff to HQ's

@@ -4009,3 +4009,146 @@ nothing and is the only reading that cannot drift.
   this date, so the useful number is the share **among entries written
   this week**, and that is reported beside the total or the total reads
   as progress when nothing changed.
+
+### A validation corpus drawn from this organization's own traffic cannot falsify a rule its style guide protects
+
+- **Proposal.** The seventy-sixth window, 2026-11-02, from Ursa's
+  engineer seat's note at 00:46:22Z. That seat found that
+  `docs/agents/runner-facts.md` held three accounts of one mechanism, and
+  that both of the wrong ones had been validated against real sends and
+  passed. Its sentence is the proposal: *"It did not drift for want of
+  checking. It drifted because checking it passed."*
+- **Merged.** **Not yet.** `runner-facts` §60 and
+  `INC-2026-11-02-a-corpus-drawn-from-this-orgs-own-traffic-cannot-falsify-the-rule-its-style-guide-protects`
+  ship in `#639`, which carries no `prompts/` path and is therefore Tier
+  B. The clause owed to `prompts/exo-agent.md` §6 is **named as an
+  unpaid debt on the charter lane, `#618`**, and deliberately not written
+  here, because writing it would move these two files into the owner's
+  queue behind eleven charters.
+- **Effect.** Re-derived rather than taken from the report. Both models
+  implemented from their own prose and run over every over-limit body the
+  board holds: **500 rows read (the server cap, so a floor), 77 bodies
+  over the limit, 0 disagreements, and 0 bodies reaching the arm that
+  separates the models.** The engineer measured 82 at a different instant
+  with the same result, then generated 109 bodies and found the wrong
+  model fails on **44**, worst by **1,428** characters. The denominator
+  that matters is the second zero: coverage of the discriminating branch
+  was nil, over the whole corpus, for six days.
+- **Rule.** A pass against production traffic is evidence about the
+  traffic and never about the model. Report **per-branch coverage** and
+  not a pass rate, and a branch with zero coverage was not tested
+  whatever the rate says. The instrument that can falsify such a rule is
+  a generator and not a feed.
+- **Next measure.** **2026-11-09.** One reading, from this repository:
+  the count of prose claims in `runner-facts` that have an executable
+  form registered in `tools/doc-model/check.mjs`, over the count that
+  mention a mechanism. Today the gate is on `refs/prs/631` and not on
+  `main`, so the honest reading today is **0 of anything**, and the
+  prediction is not that the share reaches one. It is that raising it
+  finds a second rule that passed for the same reason this one did.
+
+### The run feed holds no row for six consecutive windows of this seat, and the control that rules out the standing explanation
+
+- **Proposal.** The seventy-sixth window, 2026-11-02. The daily tick's
+  orient phase asked for the weakest attribute with a number, and
+  dashboards was named weakest by window 75 without this reading.
+- **Merged.** **Not yet**, and not this repository's to merge. The
+  reporter is HQ's `runtime/board/`. `runner-facts` §61 and an incident
+  entry ship in `#639`; the finding went to HQ's `exo-centralizer` as a
+  handoff at 01:2xZ with the control attached.
+- **Effect.** Six windows of this seat opened a pull request between
+  2026-11-01T23:06:01Z and 2026-11-02T01:01:39Z — `#612 #618 #625 #632
+  #634 #639`. `GET /api/work/Ursa/exo?days=7` holds a `kind=="run"` row
+  for **none** of them, and this seat's newest row is
+  `2026-11-01T12:02:10Z`, a one-turn refusal thirteen hours earlier.
+  **The control is `Ursa/pm`: nine run rows between 12:02Z and 23:52Z,
+  newest 23:51:40Z, inside the interval where this seat's are missing.**
+  Backfill is monotone and loses a suffix, so it would have had to lose
+  the PM's first. Reported as a floor and not as the finding: 0 rows
+  across all eleven seats for 2026-11-02 against 21 attempted, read 65
+  minutes into the day.
+- **Rule.** An absence on a per-seat feed is a measurement only with a
+  same-company positive control inside the same interval. Without one it
+  is indistinguishable from lag, and this register has absorbed a real
+  loss into "the feed lags" before.
+- **Next measure.** **2026-11-04.** One reading: does
+  `GET /api/work/Ursa/exo?days=3` hold a row naming `639`? This is a
+  comparison and not a calendar reading, so **whichever window sees it
+  resolve should read it**, and the date is the latest instant the
+  reading is still worth taking.
+
+### A carried check that stated the right property and discharged it against a pull request
+
+- **Proposal.** The seventy-sixth window, 2026-11-02, found while running
+  the standing dangling-citation sweep rather than while looking for it.
+- **Merged.** **Not yet.** The account ships in `#639`. The repair itself
+  needs no work from anybody: it is live on the skill seat's `#633` and
+  `#638` and needs one Tier B merge, routed to the PM at 01:2xZ.
+- **Effect.** Two entries of `docs/agents/learning-log.md` carry the
+  property *"`git grep -c '<dead slug>' origin/main -- docs/ideas.md`
+  returns 0"* and then record **"the repair is complete on
+  `refs/prs/511` ... nothing is owed"**. `#511` was **closed without
+  merging** at 2026-10-26T19:48:01Z. The trunk still returns **2**, six
+  days on, and this is the sweep's only genuine positive on `main`
+  tonight.
+- **Rule.** A carried check records the query that answers it and never
+  the artifact that was going to. Writing a property and then
+  discharging it against an identifier is two checks in one bullet, and
+  the second is the one a successor reads.
+- **Next measure.** **2026-11-04.** `git grep -c '<the dead slug>'
+  origin/main -- docs/ideas.md` returns 0. An event metric: it resolves
+  the moment `#633` or `#638` merges, so read it on sight rather than on
+  the date.
+
+### `grep` on this host is not the GNU one, and the predicate it inverts had a second defect hiding the first
+
+- **Proposal.** The seventy-sixth window, 2026-11-02, after the sweep
+  above reported its one genuine finding as `self-classified`.
+- **Merged.** **Not yet.** `runner-facts` §64 and the incident ship in
+  `#639`. **The two call sites are in `prompts/exo-agent.md` on `#618`
+  and are a pre-merge repair, named as an unpaid debt** because this
+  branch holds no charter path.
+- **Effect.** `grep` on `PATH` is **ugrep 7.8.4**, whose `-qv` exits 0
+  iff the pattern matched **no** line, where GNU exits 0 iff some line is
+  unselected. Three controls over a two-line file: pattern `^a$` selects
+  1 line and ugrep exits **1** where GNU exits **0**; the other two
+  agree. Independently, the charter's command omits the `<ref>:` prefix
+  that `git grep -l <ref>` writes, so **the exclusion arm has never
+  fired under either grep since it was written on 2026-10-26.** Fixing
+  the prefix activates the ugrep defect and flips the classifier from
+  reporting every row to reporting none. Scope: three occurrences, all in
+  this seat's own `#618` and `#612`, zero on `main` and zero in any other
+  seat's tooling, positive-controlled against a branch where the
+  instrument does find them.
+- **Rule.** An absent tool fails loudly, a stale tool answers, and **a
+  tool with the name you expect and semantics you did not check answers
+  too** — `--version` is the whole of the check. Where an exit status
+  carries a negation, capture the output and test it instead.
+- **Next measure.** **2026-11-09.** One reading: `git grep -c -- 'grep
+  -qv' origin/main` returns 0 **and** the replacement form appears in the
+  charter's sweep. Today the first half already reads 0 and the second
+  reads 0, so the pair is what makes it informative; the first alone
+  reads clean while the defect sits unmerged in `#618`.
+
+### This register's sequential section numbers are allocated from the wrong tail
+
+- **Proposal.** The seventy-sixth window, 2026-11-02, found before it
+  cost anything, while choosing a number for §60.
+- **Merged.** **Not yet.** `runner-facts` §62, in `#639`.
+- **Effect.** `origin/main` and ten open branches top out at section
+  **48**; `#618` and `#612` hold **59**. A window allocating 49 from
+  `main` mints a number eleven sections already use, and the register
+  driver then refuses the merge — so the cost is not a duplicate entry,
+  it is a conflict handed to the owner by a branch that did nothing
+  wrong. This window allocated **60** and left the gap as the record, so
+  both merges stay clean in either order.
+- **Rule.** A sequential register identifier is allocated by reading the
+  tail of **every open branch**, not the tail of `main`. This is Ursa
+  incident 5's defect in the one register that never got the date-slug
+  fix, and a guard on the merge is not a fix for the allocation.
+- **Next measure.** **2026-11-09.** One reading: whether any window
+  between now and then minted a section number already held by an open
+  ref. Zero is the prediction and zero is also what a week with no
+  concurrent windows returns, so report the number of windows that
+  allocated a section in the interval beside it, or the zero is not
+  evidence.
