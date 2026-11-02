@@ -72,10 +72,52 @@ export function seatOfBranch (branch) {
 }
 
 export function lagDays (frozenAtIso, nowIso) {
-  const a = Date.parse(frozenAtIso)
-  const b = Date.parse(nowIso)
-  if (Number.isNaN(a) || Number.isNaN(b)) return null
+  const a = instant(frozenAtIso)
+  const b = instant(nowIso)
+  if (a === null || b === null) return null
   return (b - a) / MS_PER_DAY
+}
+
+// TWO PRODUCERS, ONE INSTANT, TWO RENDERINGS. Every timestamp in this tool
+// comes from one of exactly two places, and they do not agree on the text
+// for the same moment:
+//
+//   git     `--format=%cI` prints the committer's own offset and NEVER `Z`,
+//           so a UTC commit reads `2026-10-18T18:50:50+00:00`.
+//   the API `createdAt` is always normalised to `Z`.
+//
+// So `b.createdAt > c.mainDate` as text is wrong in two independent ways.
+// At a non-zero offset the wall-clock digits are the wrong instant: this
+// repository's engineer charter froze at `2026-10-09T12:28:03-06:00`, which
+// is `18:28:03Z`, and a branch opened at `17:31:08Z` sorts after `12:28:03`
+// as text while preceding the freeze by 57 minutes. At zero offset the
+// digits agree and the suffix decides, and `+` (0x2B) sorts below `Z`
+// (0x5A), so git's rendering of an instant always compares as EARLIER than
+// the API's rendering of the same instant. Both errors push the same way:
+// a branch reads as opened after a freeze it did not follow, so the column
+// over-reports. Measured over the whole branch history on 2026-11-02:
+// 548 as text, 547 as instants, the one row being the engineer seat's.
+//
+// `Date.parse` places both renderings correctly, which is why this exists
+// and why nothing below is allowed to compare, slice or sort the strings.
+// `tools/seat/answered.mjs` compares board timestamps to board timestamps
+// and is safe for a reason that is a property of its producer rather than
+// of its code: all 500 rows the route returns carry `+00:00`.
+export function instant (iso) {
+  if (typeof iso !== 'string') return null
+  const ms = Date.parse(iso)
+  return Number.isNaN(ms) ? null : ms
+}
+
+// The UTC day of an instant, which is not the first ten characters of its
+// rendering. `2026-10-09T12:28:03-06:00` is the 9th in the committer's
+// timezone and the 9th in UTC; `2026-11-01T23:34:57-05:00` is the 1st as
+// text and the 2nd in UTC. 330 of this repository's 2,134 commits carry a
+// non-zero offset and 143 of them land on a different UTC day than their
+// own leading ten characters, so slicing is right by luck per row.
+export function utcDay (iso) {
+  const ms = instant(iso)
+  return ms === null ? '?' : new Date(ms).toISOString().slice(0, 10)
 }
 
 // One row per charter. `queue` is null when no open pull request touches the
@@ -84,8 +126,11 @@ export function lagDays (frozenAtIso, nowIso) {
 export function buildRows ({ charters, branches, nowIso }) {
   return charters.map((c) => {
     const lag = lagDays(c.mainDate, nowIso)
+    const frozenAt = instant(c.mainDate)
     const since = branches.filter(
-      (b) => seatOfBranch(b.branch) === c.seat && b.createdAt > c.mainDate
+      (b) => seatOfBranch(b.branch) === c.seat &&
+        frozenAt !== null && instant(b.createdAt) !== null &&
+        instant(b.createdAt) > frozenAt
     )
     return {
       seat: c.seat,
@@ -105,7 +150,7 @@ export function formatTable (rows) {
   const head = ['seat', 'charter on main', 'lag', 'lines', 'queue', 'q.lines', 'pending', 'stale runs']
   const body = rows.map((r) => [
     r.seat,
-    r.mainDate.slice(0, 10),
+    utcDay(r.mainDate),
     r.lagDays === null ? '?' : `${r.lagDays}d`,
     String(r.mainLines),
     r.queuePr === null ? '-' : `#${r.queuePr}`,

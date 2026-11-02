@@ -4446,3 +4446,74 @@ nothing and is the only reading that cannot drift.
   grades this edit rather than the week's mail. If the second is
   non-zero the adopted patterns are still missing a head form, and the
   cell to read is `lost_only → in_delivered` on the next walk.
+
+### Run a remedy once before writing it as a rule, because a prescription is a claim about an environment
+
+- **Trigger.** The one-tier-per-branch clause has been in
+  `prompts/exo-agent.md` since the seventy-fifth window and names its own
+  worked example: Ursa's engineer shipped `tools/ensure-full-clone.sh` as
+  one file and it reached `main` in two days, against eleven charter
+  lines that had not landed in fifteen. Ten windows later the eighty-fifth
+  window performed the remedy for the first time, on the twenty-three
+  non-charter files of `#699`, and **six tests went red in four of five
+  suites**, every failure an assertion about `prompts/*-agent.md`.
+- **Merged.** Not yet. The scope correction is on the charter lane
+  (`#699`, Tier C, the owner's); this entry and the incident are on the
+  Tier B lane (`#704`).
+- **Effect.** The separable share of this seat's own seat tools:
+  **2 of 6** files, measured by execution rather than by path.
+  `charter-lag` and `answered` are green rooted in `main`; `env-facts`,
+  `merge-verdict` and `own-prs` are red there and correctly so, because
+  each asserts that the eleven charters cite it. The clause's own
+  example, `ensure-full-clone.sh`, has no citation assertion, so the
+  class it generalised from has exactly one member.
+- **Rule.** **Execute a remedy once, on one artifact, before writing it
+  as a standing rule.** A measurement in this register already owes a
+  positive control; a prescription owes the same thing and nothing had
+  asked for it. The cost is one command and the alternative is a rule
+  that reads as correct for ten windows and is refused by the repository
+  the first time anybody obeys it. The general form: a remedy is a claim
+  about an environment, and the environment can be asked.
+- **Next measure.** The brief of **2026-11-03**, and earlier if a window
+  runs first. One reading, re-derivable in one command on a branch rooted
+  in `main` carrying only the candidate files:
+  `for t in tools/seat/*.test.mjs; do node --test "$t"; done`. The number
+  to read is the count of suites red for a `prompts/` assertion, which is
+  **3 of 5** today. It should fall to **0** only by the citation audit
+  gaining a third verdict for *citations not yet landed*, and not by any
+  test dropping its reach assertion. If it falls because an assertion was
+  deleted, that is the regression this entry exists to make visible.
+
+### Name the producer of each side of a timestamp comparison, because this repository has two and they disagree on the text
+
+- **Trigger.** Ursa's engineer seat reported on the board at 06:08:09Z
+  that `tools/seat/charter-lag.mjs` compared the forge's `createdAt`
+  against git's `%cI` as a string. Reproduced here before being believed.
+- **Merged.** Not yet; on the Tier B lane, `#704`.
+- **Effect.** **548 → 547** branches counted as opened after their own
+  seat's charter froze, over the whole branch history at 06:35Z. One row,
+  the engineer seat's own charter at `-06:00`, 57 minutes on the wrong
+  side of the freeze. The error has no bound other than the largest
+  offset in the history: **330** of this repository's 2,134 commits carry
+  a non-zero offset and **143** of those start with a different day than
+  their own UTC day. Direction: the column over-reported, which made this
+  seat's own case look worse, so no reader had cause to doubt it.
+- **Rule.** The engineer's rule is "never compare, slice or sort a
+  timestamp as text". This seat's narrower and cheaper version, which is
+  what a reviewer can actually check: **at every timestamp comparison,
+  name the producer of each side.** Same producer is a property you can
+  state in a comment; two producers is a defect whatever the operator,
+  and this repository has exactly two. The fixture half follows: a test
+  corpus for a joined measurement carries one row **from each producer,
+  in that producer's own rendering**. All twelve fixtures in this tool's
+  suite ended in `Z`, which git never emits, so the suite was drawn from
+  one producer and could not fail on a comparison between two.
+- **Next measure.** The brief of **2026-11-03**, and earlier if a window
+  runs first. Two readings. First,
+  `grep -rnE '(createdAt|mainDate|\.ts|_at)[A-Za-z]*\s*[<>]' --include=*.mjs tools/ | grep -v '\.test\.'`
+  which stands at **2** sites today, both `answered.mjs` comparing the
+  board to itself and safe for a property of the producer rather than of
+  the code. It should stay at 2 or fall; a third site is a regression.
+  Second, the count of fixtures in `tools/` carrying a non-`Z` offset,
+  which was **0** before this change and is **4** after. A new joined
+  measurement whose fixtures are all `Z` is the defect returning.

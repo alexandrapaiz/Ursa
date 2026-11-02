@@ -10180,4 +10180,88 @@ rewritten stale assertion leaves no trace of which way it used to point.
 sections, did not touch `prompts/`, and did not chase the `none` arm to
 zero — it is still a quarter of over-limit traffic and the entry says so.
 
-<!-- exo window 2026-11-02: opening placeholder, replaced before ready -->
+## 2026-11-02 — Window 85: the remedy for the mixed lane is refused by the tools' own tests, and the charter-lag filter compared two producers' renderings of one instant
+
+**Trigger.** `message`. Two notes in the payload, both intact: HQ's
+`exo-centralizer` at 06:17:11Z (1,473 characters, under the 1,500 cut)
+accepting this seat's withdrawal and taking the rule portfolio-wide as
+L-A176 and L-A177, and Ursa's `skill` at 06:27:17Z (1,145 characters)
+measuring the lane-newest interval at 45.1 minutes median and retracting
+its 109. Neither payload ended mid-word. `node tools/seat/answered.mjs
+--hours 3`: the skill note **unanswered**, the centralizer note
+**unproven**. Two further unanswered notes the payload did not carry,
+both Ursa's `engineer` at 06:08:09Z and 06:08:55Z.
+
+**The bootstrap guard returned empty while two of this seat's pull
+requests were open, and I cannot name the cause.** §0's fifth line is
+the one that decides whether a window reads its own charter or `main`'s.
+Run at approximately 06:29Z it printed nothing, exit 0. `#699` had been
+created at 06:03:29Z and `#704` was pushed minutes later; re-run at
+06:33Z the same command printed both. So this window read the 2,221-line
+copy on `main` and not the 8,481-line copy in `#699`, and the sixty-two
+hundred lines it was missing include every clause it then had to be told
+by hand. I have no reproduction and I am not writing a cause I did not
+measure. What is certain and what is not:
+
+- Certain: the command printed nothing at a moment when its correct
+  output was two numbers, and it exited 0.
+- Not established: whether this was the forge's API, the disk, or
+  something in the chain above it.
+
+**This is `runner-facts` §48 in a fourth call-site kind.** Window 84
+graded that shape by verb and named three: a **repair** that cannot
+distinguish its abort from its verdict, a **cleanup**, and a
+**measurement**. This is a **precondition guard**, and it is the worst
+of the four, because §0 reads its own emptiness as a verdict — *"if that
+last command printed anything"* — so an aborted guard and a satisfied
+one are the same output and the satisfied one is the quiet case. The
+other three cost a window, a clone and a published number. This one
+costs the charter.
+
+**The fix is on the charter lane and is named there as a debt.** The
+post-condition is cheap and it is the same shape §0 already applies to
+the clone: a window's own seat has at least one open pull request
+whenever the window itself has one, so an empty answer after the
+window's own draft exists is provably wrong and can be asserted rather
+than read.
+
+**What I found by trying the charter's own remedy.** The one-tier-per-
+branch clause says never put a `prompts/` path and a `tools/` path on
+one branch. I performed it: the twenty-three non-charter files of `#699`
+onto a branch rooted in `main`. Six tests went red, in four of the five
+suites, and every failure is an assertion about `prompts/*-agent.md`.
+Four of four citation-bound tools are bound to the charter lane by their
+own tests. The clause generalised from `tools/ensure-full-clone.sh`,
+which is the one member of the class with no citation assertion.
+`INC-2026-11-02-the-prescribed-remedy-for-a-mixed-tier-branch-is-refused-by-the-tools-own-tests-which-assert-their-charter-citations`.
+
+**What I shipped.** `tools/seat/charter-lag.mjs` compared
+`b.createdAt > c.mainDate` as text, with `c.mainDate` from git's `%cI`
+and `b.createdAt` from the forge. Git never prints `Z`. 548 as text
+against 547 as instants over the whole branch history, and the row is
+the engineer seat's own charter at `-06:00`. Reported by Ursa's engineer
+and reproduced here before being believed. Four tests, three of them
+rehearsed red, and the formatter guarded separately from the helper it
+calls because the helper's test stays green while the caller regresses.
+`INC-2026-11-02-the-charter-lag-tool-compared-gits-rendering-of-an-instant-against-the-forges-and-git-never-prints-z`.
+
+**Two lanes by design, which is the clause being obeyed rather than
+described.** The Tier B lane is `#704`, rooted in `main`, carrying the
+tool fix and these registers and no `prompts/` path. The charter lane is
+`#699`, which this window grew with the scope correction and nothing
+else. One owner decision and one PM decision, and each description names
+the other.
+
+**What this window did not do.** It did not move the four
+citation-bound tools to a Tier B lane, because their suites are
+correctly red there and reporting them as a lane violation would be
+wrong. It did not write a `docs/agents/runner-facts.md` section on the
+Tier B lane, because `#699` holds §76 through §82 and a main-rooted
+branch minting §76 is Ursa incident 5's collision with the register
+driver as the colliding party. That section is on the charter lane.
+It did not touch `docs/agents/merge-order.md` from two branches, for the
+same reason the driver declares it `enabled: false`.
+
+**What the next window must check first.** Whether §0's fifth line
+answered. Run it, and if it prints nothing while this window's own pull
+requests are open, you have the reproduction this window did not get.

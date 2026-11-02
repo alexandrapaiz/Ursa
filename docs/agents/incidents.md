@@ -10690,3 +10690,220 @@ becoming the next unprotected surface.
 - Did not edit `prompts/` or `docs/standards/` to add the rule it broke,
   because charters are not this seat's to edit, and a seat rewriting the
   rule it just violated is the wrong hand on that line.
+
+## INC-2026-11-02-the-prescribed-remedy-for-a-mixed-tier-branch-is-refused-by-the-tools-own-tests-which-assert-their-charter-citations — Splitting the tools off the charter lane turns six of their tests red, and nothing says so until you run them
+
+### What happened
+
+`INC-2026-11-02-one-charter-path-in-a-branch-moves-every-file-in-it-to-the-owner-and-this-seat-put-them-all-there`
+measured the cost of this seat's mixed branches and the charter wrote the
+remedy into `prompts/exo-agent.md` under "One tier per branch": *"never
+put a `prompts/` path and a `tools/` or register path on one branch."*
+
+The eighty-fifth window, 2026-11-02, tried to perform it. It took the
+twenty-three non-charter files out of `#699` onto a branch rooted in
+`main`, which is what the clause asks for, and ran their suites:
+
+| suite | on the charter lane | rooted in `main`, charters absent |
+|---|---|---|
+| `tools/seat/charter-lag.test.mjs` | 11 pass | **11 pass** |
+| `tools/seat/answered.test.mjs` | 11 pass | **11 pass** |
+| `tools/seat/env-facts.test.mjs` | 9 pass | **5 pass, 4 fail** |
+| `tools/seat/merge-verdict.test.mjs` | 20 pass | **19 pass, 1 fail** |
+| `tools/seat/own-prs.test.mjs` | 12 pass | **11 pass, 1 fail** |
+
+Six failures, and every one of them is an assertion about
+`prompts/*-agent.md`:
+
+- `bound: every member of the derived class cites the one command`
+- `control: a charter that stops citing the command is reported`
+- `absence is printed, not implied, and --audit is a gate`
+- `integrity: every fact resolves to a real section and a real path`
+- `the charter cites this tool rather than re-deriving the comparison in prose`
+- `bound: each charter's prose pattern equals the single source`
+
+### Why it happened technically
+
+This seat's test convention for a seat tool is that the tool asserts its
+own reach: `env-facts --audit` exits 1 if a charter stopped citing the
+command, and the suite asserts that gate fires. That convention is good
+and it is the reason `env-facts` reports `class=11 cites=11 gaps=0`
+rather than being cited by two charters and believed by eleven.
+
+It also makes the tool and the eleven citations **one deliverable**. A
+branch carrying the tool without the citations is a branch on which the
+tool's own gate correctly reports a gap, so the suite is correctly red.
+The tier rule says split; the test convention says the two halves are
+one thing. Both are right.
+
+Four of four of this seat's citation-bound tools behave this way. The
+only two that split cleanly are the two whose tests assert nothing about
+`prompts/`.
+
+### Why the clause could not see it
+
+The clause was argued from a comparison inside this repository and the
+comparison does not transfer. Its evidence is that Ursa's engineer
+shipped `tools/ensure-full-clone.sh` in a pull request containing that
+one file and it reached `main` in two days, against eleven charter lines
+telling eleven seats to run it that had not landed in fifteen. That is
+sound, and `ensure-full-clone.sh` **has no citation assertion**. It is a
+tool that works whether or not anybody cites it, so its two halves are
+genuinely two decisions.
+
+So the clause generalised from the one member of the class that is
+separable to the whole class, and the failure is invisible until the
+split is executed. A path predicate over a diff cannot find it. The only
+instrument that reports it is the suite, run on the split branch, which
+is a thing no window had done because the split had never been performed.
+
+### The fix
+
+Three parts, and only the first is this window's to ship on a Tier B
+lane.
+
+1. **Split on the measurement, not on the path.** The separable set is
+   the one whose suite is green with `prompts/` at `main`'s copy, and it
+   is computed rather than guessed:
+
+   ```bash
+   # on a branch rooted in main carrying only the candidate files
+   for t in tools/seat/*.test.mjs; do
+     printf '%-44s ' "$t"
+     node --test "$t" 2>&1 | grep -E '^# (pass|fail)' | tr '\n' ' '; echo
+   done
+   ```
+
+   Anything red is on the charter lane by its own test and reporting it
+   as a lane violation is wrong.
+
+2. **The clause's scope is corrected on the charter lane**, because the
+   clause is a `prompts/` path and amending it from a register branch
+   would reproduce the very defect inside the entry. Named here as the
+   debt and the lane, per the charter's own rule that a finding whose fix
+   is in a lane the window does not hold is an unpaid debt.
+
+3. **The citation audit wants a third verdict and already has the idiom
+   for the other half.** `env-facts --audit` prints `no repository path
+   to check (stated, not skipped)` for six of its twelve facts, which is
+   exactly the right shape: an absence that is stated rather than passed
+   or failed. It has no equivalent for *citations not yet landed*, so
+   the one case where the tool is ahead of `main` is the case it grades
+   as a gap. A third verdict there is what would make these tools
+   separable, and it is a change to the tools and not to the rule.
+
+### What the org grew from it
+
+**A remedy is a claim about an environment, and it is testable in the
+same pass as the defect.** Both of this entry's parents are measurement
+incidents: a number read off the wrong instrument, a count read off the
+wrong window. This one is a **prescription** read off the wrong class,
+and it had been in the charter for ten windows carrying a worked example
+that happened to be the one separable member. The cheap guard is to run
+the remedy once, on one file, before writing it as a rule — which costs
+one command and is the same discipline this register already demands of
+a measurement's positive control, pointed at the fix instead of at the
+finding.
+
+## INC-2026-11-02-the-charter-lag-tool-compared-gits-rendering-of-an-instant-against-the-forges-and-git-never-prints-z — Two producers, one instant, two texts, and the comparison was a string comparison
+
+### What happened
+
+`tools/seat/charter-lag.mjs` reports, per seat, how many branches opened
+after that seat's charter last reached `main`. The filter was:
+
+```js
+b.createdAt > c.mainDate
+```
+
+`c.mainDate` is `git log -1 --format=%cI`. `b.createdAt` is the forge's.
+Ursa's engineer seat reported the defect on the board at 06:08:09Z,
+having hit the same shape in two of its own instruments, and this window
+reproduced it here rather than taking it on trust. Over the whole branch
+history at 06:35Z: **548** as text, **547** as instants. One row, and it
+is the engineer seat's own charter.
+
+### Why it happened technically
+
+Two independent errors, both pushing the same way.
+
+- **At a non-zero offset the digits are the wrong instant.**
+  `prompts/engineer-agent.md` froze at `2026-10-09T12:28:03-06:00`,
+  which is `18:28:03Z`. A branch created at `2026-10-09T17:31:08Z` is 57
+  minutes *before* the freeze and sorts *after* `12:28:03` as text.
+- **At zero offset the suffix decides.** Git never prints `Z`; a UTC
+  commit renders `+00:00`. `+` is 0x2B and `Z` is 0x5A, so git's
+  rendering of an instant always compares as **earlier** than the
+  forge's rendering of the same instant, and a branch created in the
+  same second as the freeze reads as after it.
+
+Both make a branch look like it opened after a freeze it did not follow,
+so the column over-reported — in the direction that makes this seat's
+own case look worse, which is why no reader had cause to doubt it.
+
+The display path carried the same shape latently. `mainDate.slice(0, 10)`
+is the first ten characters of a rendering and not the UTC day of an
+instant. **330** of this repository's 2,134 commits carry a non-zero
+offset and **143** of those land on a different UTC day than their own
+leading ten characters. No charter's freeze commit is currently one of
+them, so the column was right by luck per row.
+
+### Why the test could not fail
+
+Every `mainDate` and every `createdAt` in `charter-lag.test.mjs` ended
+in `Z`. Git never emits `Z`, so the whole fixture set was drawn from one
+producer and no assertion in it could exercise a comparison between two.
+That is the engineer seat's own rule arriving here: **a guard that cannot
+fail on the data it is given is not a guard**, and the data it was given
+was not the data the tool reads.
+
+### The fix
+
+`instant()` and `utcDay()`, both exported; the filter compares epoch
+milliseconds; the day column renders from the parsed instant. Three new
+tests carrying non-zero offsets and a `+00:00` rendering, each rehearsed
+red against the restored defect:
+
+| test | with the defect restored |
+|---|---|
+| a branch inside the offset window is before the freeze | **fails** |
+| at zero offset the suffix decides, and `+` sorts below `Z` | **fails** |
+| `utcDay` of an offset instant | passes — it asserts the helper |
+| `formatTable` renders the UTC day | **fails** |
+
+The third row is the honest residue and it is why there is a fourth.
+A test on an exported helper stays green while the caller regresses, so
+the formatter is guarded separately from the function it calls.
+
+### The sweep, because one producer pair implicates every instrument fed by it
+
+Three sites in `tools/` compare or order a timestamp as text:
+
+| site | producers | verdict |
+|---|---|---|
+| `charter-lag.mjs:88` | git `%cI` and the forge | **live defect, fixed** |
+| `answered.mjs:157` | the board and the board | safe today |
+| `answered.mjs:177` | the board and the board | safe today |
+
+The two safe ones are safe for a reason that is a property of their
+**producer** and not of their code: all 500 rows `GET /api/messages`
+returns carry `+00:00`, measured this window. One board row rendered any
+other way breaks both, and nothing in either call site would say so.
+
+### What the org grew from it
+
+**The question is not whether a comparison is textual. It is whether
+both sides came from the same producer.** This repository has exactly
+two timestamp producers and they disagree on the text for the same
+instant, in a way that is invisible at a glance and wrong by up to the
+largest offset in the history. So the rule is narrower and cheaper than
+"never compare timestamps as text", and it is checkable: at every
+comparison, name the producer of each side. Same producer is a property
+you can state; different producers is a defect whatever the operator.
+
+The second half is the fixture rule. A test corpus drawn from one
+producer cannot exercise a two-producer defect, and `Z` everywhere is
+exactly what a hand-written fixture looks like, because a human writes
+the rendering they read in an API response. **A fixture for a joined
+measurement carries one row from each producer, in each producer's own
+rendering.**
