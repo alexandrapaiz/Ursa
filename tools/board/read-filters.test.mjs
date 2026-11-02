@@ -14,13 +14,58 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
-import { verdict, casingVerdict, ROUTES } from './read-filters.mjs';
+import { verdict, casingVerdict, saturationOf, ROUTES } from './read-filters.mjs';
 
 const API = '/srv/asc/hq/runtime/board/api.py';
 const STORE = '/srv/asc/hq/runtime/board/store.py';
 
 /** A 200 with a row count and no saturation, which is the measurable case. */
 const ok = (count, over = {}) => ({ status: 200, count, saturated: false, error: '', ...over });
+
+// SATURATION ON A ROUTE THAT DOES NOT REPORT IT. These pin the repair for
+// the defect found on 2026-11-02: `verdict()` abstains when `base.saturated`
+// is set, and the events read never sets it, so the abstention was dead code
+// on that route and the tool reported a filled page as a count. The board is
+// HQ's, so the inference lives here.
+test('a route that reports saturation is believed, in both directions', () => {
+  assert.equal(saturationOf({ messages: [1, 2], saturated: true, limit: 2 }, 'messages', 2), true);
+  // The field wins over the count when it is present, because the board
+  // applied a bound this caller may not know: it clamps `limit` to [1, 2000].
+  assert.equal(saturationOf({ messages: [1, 2], saturated: false }, 'messages', 2), false);
+});
+
+test('a route that omits the field has it inferred from the limit asked for', () => {
+  // The events shape, verbatim: a row list and nothing else.
+  assert.equal(saturationOf({ events: new Array(500).fill(0) }, 'events', 500), true);
+  assert.equal(saturationOf({ events: new Array(489).fill(0) }, 'events', 500), false);
+  // `>=` and not `===`, matching the board's own `len(rows) >= applied`, so
+  // a page that somehow overshoots still reads as filled rather than as an
+  // answer.
+  assert.equal(saturationOf({ events: new Array(501).fill(0) }, 'events', 500), true);
+});
+
+test('an unknowable limit does not become a claim that the page was fine', () => {
+  // The honest reading when there is nothing to compare against is "not
+  // measured as saturated", which is what the callers already do with a
+  // missing row list. This asserts it does not throw and does not invent.
+  assert.equal(saturationOf({ events: [1, 2, 3] }, 'events', null), false);
+  assert.equal(saturationOf({ events: [1, 2, 3] }, 'events', Number.NaN), false);
+  assert.equal(saturationOf({ error: 'no such filter: company' }, 'events', 500), false);
+  assert.equal(saturationOf(undefined, 'events', 500), false);
+});
+
+test('the declared windows carry the reading they were chosen against', () => {
+  // Not a style check. The events window was two hours from the day it was
+  // written until the board outgrew it, and nothing in the file recorded
+  // what traffic that was measured against, so there was no way to tell a
+  // stale number from a deliberate one. This asserts the window is small
+  // enough to have been revisited, without asserting an exact value, since
+  // the next seat to re-measure should be free to change it.
+  const events = ROUTES.events.window;
+  assert.match(events, /^since_hours=/);
+  assert.ok(Number(events.split('=')[1]) <= 1,
+    `the events probe window is ${events}, and a window this wide saturates a 500-row page on this board`);
+});
 
 test('a filter whose impossible value returns fewer rows is honoured', () => {
   assert.equal(verdict(ok(210), ok(35)).verdict, 'HONOURED');
@@ -255,8 +300,17 @@ test('live: the prober agrees with the board it is a claim about', { skip: !proc
 
   // The inert one, on a window chosen so the unfiltered read does not fill
   // the page. An equal count here is only evidence because of that.
-  const plain = await get('/api/events?since_hours=2&limit=500');
-  const probed = await get('/api/events?since_hours=2&limit=500&company=THIS_COMPANY_DOES_NOT_EXIST');
+  //
+  // THE WINDOW COMES FROM THE TOOL AND IS NOT WRITTEN TWICE. Until
+  // 2026-11-02 this test hardcoded `since_hours=2` and so did `ROUTES`, and
+  // they drifted the moment one was re-measured: the tool's window was
+  // shortened to half an hour because 2h had started filling a 500-row
+  // page, and this copy would have gone on asserting against the window
+  // that broke. A test that measures a different window than the tool it is
+  // a claim about is not checking the tool.
+  const WINDOW = ROUTES.events.window;
+  const plain = await get(`/api/events?${WINDOW}&limit=500`);
+  const probed = await get(`/api/events?${WINDOW}&limit=500&company=THIS_COMPANY_DOES_NOT_EXIST`);
 
   // A 5XX IS NOT THE FIX, and this assertion said it was. Until 2026-11-02 it
   // read `assert.equal(probed.status, 200, 'the events read now refuses an
@@ -276,27 +330,79 @@ test('live: the prober agrees with the board it is a claim about', { skip: !proc
     return; // The fix landed and works. REFUSED is the good failure.
   }
   assert.equal(probed.status, 200, `the probed events read answers ${probed.status}, which this test has no reading for`);
+  // RESOLVED AGAINST THE EXO SEAT'S INDEPENDENT FIX OF THE SAME CELL
+  // (2026-11-02, run f). The eightieth window repaired this assertion on
+  // `main` at 04:07Z while this seat repaired it on its own branch at
+  // 03:57Z, and the two repairs agree on the direction: assert the filter
+  // WORKS and keep the old reading in the comment, because a test that
+  // asserts a defect inverts on repair and its red is indistinguishable in a
+  // summary from a regression. That version is kept here because it also
+  // carries the empty-window skip below, which the other does not: it
+  // asserted `plain.body.events.length > 0`, which FAILS on a quiet board
+  // where this one abstains. Two further notes from that branch, kept so the
+  // merge does not lose them: the assertion had been red on `main` for as
+  // long as the route had been fixed and no check reported it, and Ursa's
+  // skill seat reported the same class on the board at 03:43Z the same night,
+  // on two other ledger gates, independently and from its own branch.
+  if (!Array.isArray(plain.body.events) || !Array.isArray(probed.body.events)) {
+    t.diagnostic(`an events read answered 200 with no event list; unfiltered=${typeof plain.body.events}, probed=${typeof probed.body.events}`);
+    return t.skip('an events read carried no event list, so there is no count to compare; not a verdict on the filter');
+  }
+  // A FILLED PAGE IS AN ABSTENTION AND NOT A FAILURE, which is the one line
+  // this file got wrong. Until 2026-11-02 this read
+  // `assert.ok(plain.body.events.length < 500, 'the 2h events window now
+  // saturates; widen nothing, shorten it')`, and it went red on this seat's
+  // own 2026-11-02 run when the window returned 500. The instruction in that
+  // message was right and the assertion around it was the wrong mechanism
+  // for it, for two reasons.
+  //
+  // It fails on a property of the board's traffic rather than of the code
+  // under test, so every seat's suite goes red together on a busy night for
+  // a defect none of them introduced, and the fix is to edit a number by
+  // hand. And it is the one condition this whole file exists to call
+  // UNMEASURABLE: `read-filters.mjs` reports exactly that when the baseline
+  // page fills, because a filter that matched everything and a filter that
+  // did nothing are indistinguishable once rows are being dropped. The test
+  // should not be stricter than the tool's own reading of the same state.
+  //
+  // So it abstains, and names the number, so a window that has gone stale is
+  // still visible in the run's output rather than silently tolerated.
+  if (plain.body.events.length >= 500) {
+    t.diagnostic(`the ${WINDOW} events window returned ${plain.body.events.length} of 500, so the page filled`);
+    return t.skip('the events window saturates, so filtering it cannot be distinguished from not filtering it; shorten ROUTES.events.window');
+  }
 
-  // THE INERT FINDING IS FIXED, so this test now asserts the fix rather than
-  // the defect (2026-11-02T04:07Z, eightieth window). Until this edit the two
-  // assertions below read `plain.body.events.length < 500` and
-  // `probed.body.events.length === plain.body.events.length`, and the second
-  // one failed with the message "the INERT finding is fixed and the doc should
-  // be updated" — which is the correct diagnosis delivered as a red gate.
+  // AN EMPTY WINDOW MEASURES NOTHING, and this guard is the fix for a flake
+  // this test introduced on 2026-11-02. When the inversion below replaced
+  // `assert.equal(probed, plain)` with `assert.notEqual(...)`, it changed
+  // which way the zero-zero case falls: the old assertion PASSED on a quiet
+  // board, because 0 equals 0, and the new one FAILS on it. That is a false
+  // red on a live store whose contents are nobody's to control, and it is
+  // the UNMEASURABLE verdict `read-filters.mjs` exists to report rather than
+  // guess at: a filter that matched nothing and a filter that did nothing
+  // are indistinguishable when there was nothing to match.
+  if (plain.body.events.length === 0) {
+    return t.skip('the 2h events window is empty, so filtering it cannot be distinguished from not filtering it');
+  }
+
+  // THE FINDING CLOSED HERE, 2026-11-02 03:57Z, and this assertion is the
+  // inverse of what it was an hour earlier. Until then the events company
+  // filter was INERT: an impossible value returned the unfiltered set, so
+  // the test asserted the two counts were EQUAL and carried the message
+  // "the INERT finding is fixed and the doc should be updated". HQ landed
+  // the repair mid-run -- `EVENT_FILTERS` moved inside `class Handler` with
+  // a module-level alias kept for `api.EVENT_FILTERS` -- and this test did
+  // exactly its job: it went red and said which direction to read it in.
   //
-  // It had been red on `main` for as long as the route had been fixed, and no
-  // check reported it, because a test that asserts a defect inverts on repair:
-  // it goes red exactly when the thing it watches starts working, and its
-  // failure is indistinguishable in a summary from a regression. That is why
-  // the repair here is to assert the filter WORKS and to keep the old reading
-  // in this comment: a stale assertion that has been rewritten leaves no trace
-  // of which direction it used to point, and the next reader needs that to
-  // tell this cell from a regression.
-  //
-  // Ursa's skill seat reported the class on the board at 03:43Z the same
-  // night, on two other ledger gates, independently and from its own branch.
-  assert.ok(probed.body.events.length === 0,
-    `the events company filter answers ${probed.body.events.length} rows for a company that does not exist, so it is inert again`);
-  assert.ok(plain.body.events.length > 0,
-    'the unfiltered events read returned nothing, so the zero above is the store being empty rather than the filter filtering');
+  // So the gate now watches for the REGRESSION rather than for the fix.
+  // Equal counts no longer mean "still broken, as documented"; they mean a
+  // filter that was repaired has come undone, which is worth failing over.
+  // Measured at the turn: 475 rows unfiltered, 129 for Ursa, 0 for a company
+  // that cannot exist.
+  assert.notEqual(probed.body.events.length, plain.body.events.length,
+    'the events company filter is INERT again: an impossible company returned the unfiltered set. '
+    + 'This regressed HQ\'s 2026-11-02 repair. Re-run tools/board/read-filters.mjs --route events.');
+  assert.equal(probed.body.events.length, 0,
+    `an impossible company matched ${probed.body.events.length} events, so the filter runs but does not `
+    + 'mean what the prober reads it as; neither HONOURED nor INERT explains this and it needs a human');
 });
