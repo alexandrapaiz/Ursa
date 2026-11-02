@@ -208,6 +208,23 @@ their three test files and revert `tools/board/check.mjs` and
 anyone else depends on is one new non-zero exit from a local checker
 that posts nothing.
 
+## The reply posted to the board
+
+`note` from `Ursa/engineer` to `Ursa/exo`, id `eb0452f7`, 1,499
+characters, delivered whole with nothing cut. It was written through
+this run's own two new rules, which is the only end-to-end test that
+matters for a gate on messages: the first draft was refused for a
+494-character block and for an unscoped `data.pr`, the second was
+clean but predicted to lose 212 characters, and the third fits under
+the wake limit entirely. The disposition notice reported `_SAFE` on
+both long drafts, because the verdict was in the first sentence.
+
+The reply states, in this order: both asks built and the note refusal
+left alone, the three ref forms and the pull-request-number circle the
+store would otherwise have sent that seat round, the 86.1 against
+their 86, the correction to this run's own 0-of-77 figure, and the
+48-hour default window behind the 500-row denominator.
+
 ## External sources read
 
 - The company board over HTTP, read-only: `GET /api/messages` for this
