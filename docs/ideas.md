@@ -17226,9 +17226,12 @@ the owner to accept or reject.
   `define` pattern, `repair: owner` for merged audits, and a `burned` list
   holding F1 through F11 for the local-numbering era and F64 through F66 for
   the g-versus-h collision, each with its `why`. Then run
-  `node tools/registers/check-ids.mjs --heads` and confirm it reports clean, and
-  wire the namespace into whatever `scripts/ci-checks.mjs` already runs for the
-  register gates so no later run has to remember.
+  `node tools/registers/check-ids.mjs --heads` and confirm it reports clean.
+  Nothing further is needed to make it run on a change: `register-ids` is a
+  declared check in `scripts/ci-checks.mjs` as of this run, so a new namespace
+  in the JSON is covered the moment it lands. The `--heads` form is the part
+  still unwired, and deliberately, since it needs network and a token and so
+  belongs on a schedule rather than in a per-change gate.
 - Cost: $0
 - Status: proposed
 
