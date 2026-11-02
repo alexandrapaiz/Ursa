@@ -150,6 +150,33 @@ describe('a scanner that cannot do its job never reports clean', () => {
     }
   });
 
+  test('refuses an argument it does not know rather than running a narrower scan', () => {
+    const r = run(ROOT, '--nonsense-flag');
+    assert.equal(r.code, 2);
+    assert.match(r.stderr, /does not know/);
+    assert.match(r.stderr, /--history, --since, --json, --patterns, --repo/);
+    const j = run(ROOT, '--nonsense-flag', '--json');
+    assert.equal(JSON.parse(j.stdout).usable, false);
+  });
+
+  test("refuses the sibling tool's --history=all, which used to be a silent tree scan", () => {
+    // The whole point. Until 2026-11-02 this exact argument ran a TREE scan at
+    // exit 0, and it is the correct spelling on scripts/redaction-check.mjs,
+    // which this seat runs in the same sweep. On the shallow clone below the
+    // bare --history REFUSES, so one equals sign turned a refusal into a clean.
+    const shallow = mkdtempSync(join(tmpdir(), 'secret-scan-eqall-'));
+    rmSync(shallow, { recursive: true, force: true });
+    execFileSync('git', ['clone', '-q', '--depth', '1', '--single-branch', `file://${ROOT}`, shallow]);
+    try {
+      assert.equal(run(shallow, '--history').code, 2, 'the bare flag refuses here');
+      const r = run(shallow, '--history=all');
+      assert.equal(r.code, 2, 'and so must the spelling that used to fall through to a tree scan');
+      assert.match(r.stderr, /redaction-check\.mjs's spelling/);
+    } finally {
+      rmSync(shallow, { recursive: true, force: true });
+    }
+  });
+
   test('measured: this is not a hypothetical, a shallow clone hides the plant', () => {
     const shallow = mkdtempSync(join(tmpdir(), 'secret-scan-shallow2-'));
     rmSync(shallow, { recursive: true, force: true });

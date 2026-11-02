@@ -46,7 +46,7 @@ function run(args = []) {
   }
 }
 
-describe('the six extracted gates, end to end', () => {
+describe('the seven extracted gates, end to end', () => {
   it('exits 0 and reports every branch holding its properties', () => {
     const { code, json } = run()
     assert.equal(code, 0)
@@ -54,7 +54,7 @@ describe('the six extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 30 distinct causes with 38 probes, which is the number the text sweep could not see', () => {
+  it('reaches 36 distinct causes with 47 probes, which is the number the text sweep could not see', () => {
     const { json } = run()
     // 28 and 23 until 2026-10-27. The four added then were all post.mjs's:
     // three sender branches, where a seat named by neither flag nor variable,
@@ -70,9 +70,24 @@ describe('the six extracted gates, end to end', () => {
     // there is no allowlist to compare against; its six probes are those
     // three plus the two shapes separately, both together, and a second
     // ground branch for a directory that is not a git repository.
-    assert.equal(json.branches.length, 38)
+    //
+    // 30 and 38 until later on 2026-11-02, when `image-metadata-verdict.mjs`
+    // became the seventh extraction. Its six causes are no text channel, a
+    // named metadata chunk present, a chunk type its table cannot classify,
+    // and three grounds: a tracked image in a format it has no reader for, a
+    // container whose chunk lengths do not reach the end of the file, and no
+    // git repository to list a tracked set from. Its eight probes are those
+    // six plus a tree with no images at all, which is clean rather than
+    // unmeasured, and both failing shapes at once.
+    //
+    // 46 in the same run, before `tools/secret-scan.mjs` grew a second ground
+    // branch: an argument it does not know is now exit 2 rather than a tree
+    // scan at exit 0. Same cause as its shallow-clone refusal and a different
+    // line, which is why the count of branches moved and the count of causes
+    // did not.
+    assert.equal(json.branches.length, 47)
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
-    assert.equal(causes.size, 30)
+    assert.equal(causes.size, 36)
   })
 
   it('carries an exit 3, which no gate of the first four could have reached', () => {

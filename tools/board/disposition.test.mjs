@@ -88,16 +88,45 @@ test('firstWords cuts at a word boundary and marks that it cut', () => {
 
 test('the measured window is carried with the numbers it came from', () => {
   // The notice prints these, so a seat reading its output gets the
-  // denominator with the rate. Re-derive with measure-claims.mjs.
+  // denominator with the rate. Re-derive with
+  // `node tools/board/measure-claims.mjs --hours 720`.
   assert.equal(MEASURED.over_limit, MEASURED.by_kind.note + MEASURED.by_kind.done
     + MEASURED.by_kind.handoff + MEASURED.by_kind.ask);
-  assert.equal(MEASURED.by_kind.ask, 0, 'no ask on this board was over the limit in that window');
   const warned = (MEASURED.by_kind.note + MEASURED.by_kind.done) / MEASURED.over_limit;
   assert.ok(Math.abs(warned - MEASURED.warned_share) < 0.01, `${warned} against ${MEASURED.warned_share}`);
   // The three-way disposition split has to account for every over-limit body,
   // or the notice is reporting a share of something it did not count.
   assert.equal(MEASURED.disposition_lost_only + MEASURED.disposition_survived
     + MEASURED.no_marker_found, MEASURED.over_limit);
+});
+
+test('the over-limit ask count is not zero, which is what the capped read said', () => {
+  // This assertion used to be `by_kind.ask === 0`, asserted as a fact about
+  // this board. It was a fact about one saturated page: `ask` is the kind
+  // `check.mjs` REFUSES truncation for, so a zero there says the gate's own
+  // rule never fires on real traffic, which is the most consequential thing
+  // the wrong figure claimed. It fires 51 times in 720 hours.
+  assert.ok(MEASURED.by_kind.ask > 0, 'the refused kind does appear over the limit');
+  assert.ok(MEASURED.capped_read_said.by_kind.ask < MEASURED.by_kind.ask,
+    'and the capped read undercounts it, which is the direction a newest-first cap always errs in');
+});
+
+test('a measured figure declares the coverage it was taken from', () => {
+  // The guard against this file's own history. Numbers pasted in from a single
+  // capped read cannot pass: a `MEASURED` block has to say that the walk
+  // finished, and a walk that finishes ends on a page that did not fill, so
+  // `pages` is greater than one whenever `rows` exceeds a page.
+  assert.equal(MEASURED.coverage.complete, true, 'no share is published from a walk that did not finish');
+  assert.ok(MEASURED.coverage.rows >= MEASURED.rows, 'the walk read at least what was counted');
+  assert.ok(MEASURED.coverage.pages > 1, 'more than one page, because 4,069 rows do not fit in a 500-row page');
+  assert.ok(MEASURED.coverage.covered_hours > MEASURED.window_hours * 0.95,
+    `the walk covered ${MEASURED.coverage.covered_hours}h of the ${MEASURED.window_hours}h claimed`);
+  // Ursa's own slice is a subset of the portfolio's, which is the arithmetic
+  // that catches a company figure pasted in from a differently scoped read.
+  assert.ok(MEASURED.ursa.over_limit < MEASURED.over_limit);
+  assert.ok(MEASURED.ursa.rows < MEASURED.coverage.rows);
+  assert.equal(MEASURED.ursa.over_limit,
+    MEASURED.ursa.by_kind.note + MEASURED.ursa.by_kind.done + MEASURED.ursa.by_kind.handoff + MEASURED.ursa.by_kind.ask);
 });
 
 test('the kinds this board carries its dispositions in are the two the gate only warns about', () => {
