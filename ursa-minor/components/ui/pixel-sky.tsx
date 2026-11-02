@@ -206,7 +206,37 @@ export function PixelSky() {
     // width it started at. Measured 2026-11-02 on the desktop viewport,
     // dragged away and back: 17,718 pixels of sky, on a page that is
     // otherwise bit-identical between two shots at rest.
+    //
+    // A canvas laid out smaller than one shader pixel has to leave it alone
+    // for the same reason, and the guard above cannot be the one that does
+    // it, because collapsing to 1x1 is a real change of size. The
+    // `Math.max(1, …)` below is what makes it look like a legitimate one:
+    // it turns a layout too small to measure into a 1x1 raster, which costs
+    // a full refill to deal and another one to deal again on the way back,
+    // so one collapse and one recovery are two whole new fields and neither
+    // is ever on screen.
+    //
+    // Measured 2026-11-02 at desktop. Chromium lays both canvases on this
+    // page out at 1x1 partway through a full-page capture, so the sky's
+    // raster goes 720 to 1 to 720 and the page draws one of two different
+    // skies depending on where the shutter falls in that sequence: 4 loads
+    // of 12 took the second one, an 18,024 pixel difference on a frame that
+    // is otherwise bit-identical. The product reaches the same state
+    // whenever an ancestor goes display:none and back, which is a tab, a
+    // drawer and a print preview.
+    //
+    // The threshold is a texel rather than zero because zero is not what
+    // was measured. `clientWidth === 0` was the first repair written here
+    // and it never fired once.
+    //
+    // It is `sized &&` rather than a bare check so that the first call can
+    // never be the one skipped. A canvas that mounted collapsed and was
+    // skipped here would be left with no raster and no second caller, since
+    // the animation loop never resizes. Gated this way, first mount keeps
+    // exactly the behaviour it has today and only a later collapse is
+    // ignored.
     const resize = () => {
+      if (sized && (canvas.clientWidth < PIX || canvas.clientHeight < PIX)) return;
       const nw = Math.max(1, Math.ceil(canvas.clientWidth / PIX));
       const nh = Math.max(1, Math.ceil(canvas.clientHeight / PIX));
       if (sized && nw === w && nh === h) return;

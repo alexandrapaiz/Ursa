@@ -321,33 +321,75 @@ describe('the measurement behind the inverted rule, re-runnable', () => {
     ])
   })
 
+  // SCOPED TO THIS BRANCH'S OWN HISTORY, and that is the repair for a false
+  // red this test produced on 2026-11-02. It read `rev-list --all`, which
+  // walks every ref the local clone happens to hold, and a seat run's clone
+  // holds every other seat's unmerged branch. So the verdict depended on
+  // which branches existed on the remote at clone time, which is a fact
+  // about other seats' in-flight work and not about the code under test.
+  //
+  // What that cost, measured: Ursa's PM committed `.claude/settings.json` at
+  // 04:35Z to install HQ's secret-print hook, and correctly extended the
+  // allowlist to four on its own branch. Twenty-three minutes later this
+  // seat's clone, which does not contain that branch's allowlist change but
+  // does contain its commits, went red with "a root dot-entry in this
+  // history is neither on the allowlist nor in the pinned scratch list, so
+  // the inversion may have a false positive after all". Nothing was wrong.
+  // Both seats were correct and the test was asking a question neither of
+  // them could answer from their own branch: the entry and its allowlist
+  // entry arrive together, and only on the branch that holds both.
+  //
+  // So the assertion is scoped to `HEAD`, which is the history this branch
+  // is actually a claim about and the history that will be on `main` if it
+  // merges. Entries that exist only on other refs are still reported,
+  // because the information is worth having, but they are a diagnostic
+  // addressed to whoever owns that branch rather than a red in a suite that
+  // cannot fix them.
   test('nothing legitimate has ever lived at a root dot-entry outside the three', (t) => {
-    let objects
-    try {
-      objects = execFileSync('git', ['-C', REPO, 'rev-list', '--all', '--objects'], {
+    const dotRoots = (args) => {
+      const objects = execFileSync('git', ['-C', REPO, 'rev-list', ...args, '--objects'], {
         encoding: 'utf8',
         maxBuffer: 256 * 1024 * 1024,
       })
+      const roots = new Set()
+      for (const row of objects.split('\n')) {
+        const path = row.slice(41)
+        if (path.startsWith('.')) roots.add(path.split('/')[0])
+      }
+      return roots
+    }
+    const unexplainedIn = (roots) =>
+      [...roots].filter((n) => !ALLOWLIST.includes(n) && !COMMITTED_SCRATCH.includes(n)).sort()
+
+    let mine
+    let everywhere
+    try {
+      mine = dotRoots(['HEAD'])
+      everywhere = dotRoots(['--all'])
     } catch {
-      t.skip('git rev-list --all would not answer here, so this claim is unmeasured rather than passing')
+      t.skip('git rev-list would not answer here, so this claim is unmeasured rather than passing')
       return
     }
     if (execFileSync('git', ['-C', REPO, 'rev-parse', '--is-shallow-repository'], { encoding: 'utf8' }).trim() === 'true') {
       t.skip('shallow clone: the history behind this claim was never fetched, so it is unmeasured rather than passing')
       return
     }
-    const roots = new Set()
-    for (const row of objects.split('\n')) {
-      const path = row.slice(41)
-      if (path.startsWith('.')) roots.add(path.split('/')[0])
+
+    // Reported and not asserted on: another branch's entry, which this
+    // branch cannot explain and must not fail over.
+    const mineSet = new Set(mine)
+    const elsewhereOnly = unexplainedIn(everywhere).filter((n) => !mineSet.has(n))
+    if (elsewhereOnly.length) {
+      t.diagnostic(
+        `root dot-entries on other refs but not in this branch's history: ${elsewhereOnly.join(' ')}`
+        + ' -- if one of those branches merges, the allowlist here has to name it, and that branch is where it belongs',
+      )
     }
-    const unexplained = [...roots].filter(
-      (n) => !ALLOWLIST.includes(n) && !COMMITTED_SCRATCH.includes(n),
-    )
+
     assert.deepEqual(
-      unexplained.sort(),
+      unexplainedIn(mine),
       [],
-      'a root dot-entry in this history is neither on the allowlist nor in the pinned scratch list, so the inversion may have a false positive after all',
+      "a root dot-entry in THIS BRANCH's history is neither on the allowlist nor in the pinned scratch list, so the inversion may have a false positive after all",
     )
   })
 })

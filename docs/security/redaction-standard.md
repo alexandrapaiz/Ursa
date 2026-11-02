@@ -393,6 +393,68 @@ go down when the branch is fixed, and it does not go down when the pull
 request closes. Verified by walking the pull ref's commits and testing
 each tree for the class, counting matches only.
 
+## 7a. The public UUID, which is a false positive with a real cost
+
+Added 2026-11-02 by the security seat's fourth run, after measuring what
+the UUID pattern has actually been catching.
+
+Over the last 300 workflow runs in this repository, spanning 2026-10-27
+01:44Z to 2026-11-02 03:32Z, **every single failure was this gate** —
+four of them, no other workflow failed once. Three were real: a seat
+quoting a board message identifier or a machine path into a document.
+The fourth, run 41368025608 at 00:36Z on `ursa-market/2026-11-02-message`,
+was not a leak at all. It was a published news article's URL whose path
+segment happens to be a UUID:
+
+    https://finance.biggo.com/news/<uuid>
+
+Nothing private is in that string. A URL is a public locator by
+construction, and that one points at a third-party publisher's article.
+The gate cannot tell the difference, and this standard says so in §1: a
+pattern decides shape, never meaning.
+
+**What it cost, which is the part worth recording.** The seat's only
+green options were to break the citation or drop it, and it dropped it.
+`docs/market/positioning.md:1589` and
+`docs/market/briefs/2026-11-02-message.md:145` now cite that source as
+"finance.biggo.com, found by headline search; the URL is not quoted".
+A reader cannot follow it. Measured after the fact: there are now **zero**
+third-party URLs containing a UUID anywhere under `docs/`, so the gate
+has driven the shape out of the repository entirely. That is a loss
+against the evidence requirement in `prompts/engineer-agent.md`'s
+artifact standard, which asks a claim to carry a source a reader can
+check, and it will recur every time a seat cites a modern content system.
+
+**The disposition, which ratifies what that seat chose.** Do this, in
+order, and do not spend a red run re-deriving it:
+
+1. **Prefer a locator without a UUID.** A publisher's search URL, a
+   canonical slug, a DOI, or the outlet's own permalink where one exists.
+   This keeps the citation resolvable and costs nothing.
+2. **If no such locator exists, cite the host and the headline and say
+   the URL is withheld and why**, exactly as the market seat did. That
+   is the correct call and this paragraph exists so the next seat makes
+   it in one move instead of two pushes.
+3. **Do not add the value to an allowance.** §3 gives the reason for
+   credential fixtures and it holds here for a different one: an
+   allowance for this URL makes the gate quieter about this URL and
+   teaches nothing, while an allowance for the *shape* would open the
+   one case that matters, which is a link to a private surface carrying
+   a session identifier in its path. The discriminator a reader needs is
+   whether the host is public, and a `grep` pattern cannot hold that
+   question.
+
+**What is not being proposed.** A gate change. The narrow version — allow
+a UUID whose preceding characters are a scheme and a host not on a short
+private-host list — is defensible and it is still gate surgery on a path
+this seat cannot write, and it trades a certainty for a judgement. It is
+recorded here as the option, not queued as a tenth entry in
+`docs/agents/pending-workflow-changes.md`, for the reason the 2026-11-02d
+audit gives as F57: that queue has no live applier, and adding to it is
+not the same as routing something. If the interim rule above turns out to
+cost more than it saves, the gate change is the owner's call and this
+paragraph is the evidence for it.
+
 **Then the prediction was watched happening, in the same hour.** At
 00:55 and 00:59 UTC that branch's gate went green. The seat had fixed
 the line, which was the right thing to do and is what this document asks

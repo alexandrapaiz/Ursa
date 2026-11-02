@@ -10,7 +10,7 @@
 // provoked on demand against a live store.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pageMessages, nextBeforeHours, oldestTs, ratioFault, PAGE_CEILING, OVERLAP_SECONDS } from './page.mjs';
+import { pageMessages, pageFilled, nextBeforeHours, oldestTs, ratioFault, PAGE_CEILING, OVERLAP_SECONDS } from './page.mjs';
 
 const NOW = Date.parse('2026-11-02T03:00:00.000Z');
 const clock = () => NOW;
@@ -150,4 +150,70 @@ test('oldestTs does not assume the route returned rows newest first', () => {
 
 test('ratioFault with no coverage at all refuses rather than passing null through', () => {
   assert.equal(ratioFault(undefined).code, 'NO_COVERAGE');
+});
+
+// ---------------------------------------------------------------------------
+// The route's own scope flag, which until 2026-11-02 was the only thing that
+// stopped this walk. Every fake above computes `saturated` honestly from
+// `page.length >= ceiling`, so the case where the route is wrong about its
+// own page was covered by no test and no line of code: `limit` was captured
+// in the fetch result and read by nothing. These are that case.
+
+test('a full page whose saturated flag is false is still treated as full', async () => {
+  // The route's flag says the walk is over; the row count says the page held
+  // its entire limit. Trusting the flag would stop after one page and report
+  // `complete`, which is a published ratio over a truncated read.
+  const store = spread(900, 1000, 60_000);
+  const sorted = [...store].sort((a, b) => Date.parse(b.ts) - Date.parse(a.ts));
+  const fetchPage = async ({ sinceHours, beforeHours }) => {
+    const upper = NOW - beforeHours * 3_600_000;
+    const lower = NOW - sinceHours * 3_600_000;
+    const page = sorted.filter((r) => Date.parse(r.ts) < upper && Date.parse(r.ts) >= lower).slice(0, PAGE_CEILING);
+    return { status: 200, rows: page, limit: PAGE_CEILING, saturated: false, error: '' };
+  };
+  const { rows, coverage } = await pageMessages({ hours: 720, fetchPage, now: clock });
+  assert.equal(rows.length, 900, 'every row is read despite the flag saying page one was the end');
+  assert.equal(coverage.complete, true);
+  // Page one fills at 500 and contradicts the flag; page two holds the
+  // remaining 400 and honestly does not fill, so there is one disagreement.
+  assert.equal(coverage.saturation_disagreements, 1, 'the full page contradicted the flag');
+  assert.equal(coverage.page_log[0].saturated_by_count, true);
+  assert.equal(coverage.page_log[0].saturated_by_flag, false);
+});
+
+test('a page with no saturated field at all is read from its row count', async () => {
+  // `fetchMessagePage` used `Boolean(body.saturated)`, so a route that drops
+  // the field degrades to `false`: the unsafe direction. The derivation has
+  // to survive the field being absent rather than merely wrong.
+  let calls = 0;
+  const fetchPage = async () => {
+    calls += 1;
+    if (calls === 1) return { status: 200, rows: spread(PAGE_CEILING, 1000, 60_000), limit: PAGE_CEILING };
+    return { status: 200, rows: [], limit: PAGE_CEILING };
+  };
+  const { coverage } = await pageMessages({ hours: 720, fetchPage, now: clock });
+  assert.equal(calls, 2, 'the walk continued past a page that named no flag');
+  assert.equal(coverage.saturated_pages, 1);
+});
+
+test('an honest route produces no disagreement and the same receipt as before', async () => {
+  const s = storeServer(spread(900, 1000, 60_000));
+  const { coverage } = await pageMessages({ hours: 720, fetchPage: s.fetchPage, now: clock });
+  assert.equal(coverage.saturation_disagreements, 0);
+  assert.equal(coverage.page_log[0].saturated_by_count, undefined, 'no extra keys on the common page');
+  assert.equal(coverage.complete, true);
+});
+
+test('pageFilled: the four combinations, and which of them is a disagreement', () => {
+  const full = { rows: new Array(PAGE_CEILING).fill({}), limit: PAGE_CEILING };
+  const part = { rows: new Array(3).fill({}), limit: PAGE_CEILING };
+  assert.deepEqual(pageFilled({ ...full, saturated: true }), { filled: true, byCount: true, byFlag: true, disagreed: false });
+  assert.deepEqual(pageFilled({ ...full, saturated: false }), { filled: true, byCount: true, byFlag: false, disagreed: true });
+  assert.deepEqual(pageFilled({ ...part, saturated: true }), { filled: true, byCount: false, byFlag: true, disagreed: true });
+  assert.deepEqual(pageFilled({ ...part, saturated: false }), { filled: false, byCount: false, byFlag: false, disagreed: false });
+  // A missing or nonsense limit falls back to the ceiling rather than making
+  // every page look full, which `limit: 0` would do under a bare `>=`.
+  assert.equal(pageFilled({ rows: new Array(3).fill({}), limit: 0 }).byCount, false);
+  assert.equal(pageFilled({ rows: new Array(PAGE_CEILING).fill({}), limit: null }).byCount, true);
+  assert.equal(pageFilled(undefined).filled, false);
 });

@@ -1,0 +1,223 @@
+{
+  "shoots": [
+    "docs/design/reviews/2026-11-02-message/after/shoot1",
+    "docs/design/reviews/2026-11-02-message/after/shoot2",
+    "docs/design/reviews/2026-11-02-message/after/shoot3",
+    "docs/design/reviews/2026-11-02-message/after/shoot4",
+    "docs/design/reviews/2026-11-02-message/after/shoot5",
+    "docs/design/reviews/2026-11-02-message/after/shoot6"
+  ],
+  "pairsPerFrame": 15,
+  "frames": [
+    {
+      "frame": "home-desktop.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "1440x2900"
+      ]
+    },
+    {
+      "frame": "home-phone.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "390x3818"
+      ]
+    },
+    {
+      "frame": "home-tablet.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "820x3478"
+      ]
+    },
+    {
+      "frame": "record-at-desktop.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "1440x1474"
+      ]
+    },
+    {
+      "frame": "record-at-phone.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "390x2014"
+      ]
+    },
+    {
+      "frame": "record-at-tablet.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "820x1537"
+      ]
+    },
+    {
+      "frame": "record-desktop.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "1440x1943"
+      ]
+    },
+    {
+      "frame": "record-mini-fixture-desktop.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "1440x1927"
+      ]
+    },
+    {
+      "frame": "record-mini-fixture-phone.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "390x2637"
+      ]
+    },
+    {
+      "frame": "record-mini-fixture-tablet.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "820x2071"
+      ]
+    },
+    {
+      "frame": "record-phone.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "390x2638"
+      ]
+    },
+    {
+      "frame": "record-tablet.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "820x1960"
+      ]
+    },
+    {
+      "frame": "this-page-does-not-exist-desktop.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "1440x900"
+      ]
+    },
+    {
+      "frame": "this-page-does-not-exist-phone.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "390x844"
+      ]
+    },
+    {
+      "frame": "this-page-does-not-exist-tablet.png",
+      "shoots": 6,
+      "states": 1,
+      "stateShape": "6",
+      "worstPx": 0,
+      "worstPair": null,
+      "blindPairs": 15,
+      "totalPairs": 15,
+      "where": "identical in all 6",
+      "sizes": [
+        "820x1180"
+      ]
+    }
+  ]
+}

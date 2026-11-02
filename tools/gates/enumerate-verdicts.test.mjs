@@ -1,5 +1,5 @@
 // Does the enumerator detect the defect it was built for, and does it stay
-// quiet on the six gates that are already right?
+// quiet on the nine gates that are already right?
 //
 // THE ONE TEST THAT MATTERS IS `the historical defect`. Four gates passing
 // proves nothing on its own: a check that always returns "clean" passes four
@@ -46,7 +46,7 @@ function run(args = []) {
   }
 }
 
-describe('the seven extracted gates, end to end', () => {
+describe('the nine extracted gates, end to end', () => {
   it('exits 0 and reports every branch holding its properties', () => {
     const { code, json } = run()
     assert.equal(code, 0)
@@ -54,8 +54,77 @@ describe('the seven extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 36 distinct causes with 47 probes, which is the number the text sweep could not see', () => {
+  it('reaches 45 distinct causes with 61 probes, which is the number the text sweep could not see', () => {
     const { json } = run()
+    // RESOLVED 2026-11-02 BY MEASUREMENT, NOT BY CHOICE. This line conflicted:
+    // the hook branch claimed 36 causes over 46 probes and `main` claimed 36
+    // over 47, and neither is the union. Both sides were run at their own
+    // commits and so was their merge base, because a count asserted here is a
+    // census of the registry above and the registry is what the merge changed:
+    //
+    //   base  aaa98509   32 probes   27 causes   5 gates
+    //   main  cdbdcdff   47 probes   36 causes   7 gates   (+15, +9)
+    //   hook  886baf9b   46 probes   36 causes   7 gates   (+14, +9)
+    //   this merge        61 probes   45 causes   9 gates
+    //
+    // 32 + 15 + 14 = 61 and 27 + 9 + 9 = 45, so the two sides added disjoint
+    // branches and disjoint causes, and the union is exact rather than
+    // approximately right. The two identical 36s are the reason this needed
+    // measuring: a reviewer comparing the two sides sees the same number on
+    // both and has no signal that either is wrong, and taking either one would
+    // have left this assertion fifteen or fourteen probes short of a registry
+    // it is supposed to be a census of.
+    //
+    // One gate's own probe count moved, and it is the only place the two
+    // sides met: `tools/secret-scan.mjs` went from 5 probes at the base to 6
+    // on `main` and 8 on the hook branch and 9 here, because `groundProbes`
+    // is the one array both sides appended to and both entries are kept. The
+    // other four gates are whole-file additions from one side or the other
+    // and merged without arithmetic.
+    //
+    // The history of this number, preserved from both sides because neither
+    // half is recoverable from the other. From the hook branch:
+    // 23 and 28 until 2026-10-27, then 27 and 32 earlier the same day. The
+    // four added then were all post.mjs's: three sender branches, where a seat
+    // named by neither flag nor variable, a seat differing from a roster seat
+    // only in case, and a company with no declaration used to be two literal
+    // defaults between them; and the board answering that it cut the body at
+    // its wake limit, which this file's caller used to discard along with
+    // three other response fields.
+    //
+    // The two added after that are secret-scan's cited baseline, and they are
+    // worth distinguishing because they land on opposite sides of the
+    // findings/ground line. ALL_HITS_BASELINED is a findings branch: exit 0
+    // reached with an empty findings array for a reason that is NOT "nothing
+    // was found", which is why it cannot share NOTHING_FOUND's cause or its
+    // sentence. BASELINE_UNPARSEABLE is ground: the scanner cannot establish
+    // what is accepted, the same class of answer as a shallow clone, and it
+    // takes its cause from the fault's own code so that nine distinct repairs
+    // are not one name.
+    //
+    // The four added after those are tools/registers/check-ids.mjs's, the
+    // register identifier gate. All four are findings branches and the shape
+    // is deliberately the same as check-closures.mjs's, because the question
+    // is the same one: some collisions a seat may repair and some are an
+    // owner's decision record. Its two ground branches, a manifest it cannot
+    // trust and a scope it cannot read, are not probed here; they are driven
+    // directly in tools/registers/id-verdict.test.mjs, because the probe
+    // space this file declares is a findings space.
+    //
+    // The three added on 2026-11-01 are tools/registers/check-closure.mjs's,
+    // the production-closure gate, and they cost SEVEN probes for three
+    // causes, which is the widest probe-to-cause ratio of any gate here. That
+    // is deliberate and it is the first gate where the gap carries
+    // information: five of its seven probes exist to prove that five
+    // DIFFERENT finding rules collapse into only two non-clean verdicts, one
+    // for a surface that grew and one for a register that fell behind. A
+    // reader of the census would otherwise have no way to tell whether five
+    // rules meant five branches. Its three ground branches are not probed
+    // here for the same reason check-ids.mjs's two are not: the probe space
+    // this file declares is a findings space, and they are driven directly in
+    // tools/registers/closure-verdict.test.mjs.
+    //
+    // And from `main`:
     // 28 and 23 until 2026-10-27. The four added then were all post.mjs's:
     // three sender branches, where a seat named by neither flag nor variable,
     // a seat differing from a roster seat only in case, and a company with no
@@ -85,9 +154,9 @@ describe('the seven extracted gates, end to end', () => {
     // scan at exit 0. Same cause as its shallow-clone refusal and a different
     // line, which is why the count of branches moved and the count of causes
     // did not.
-    assert.equal(json.branches.length, 47)
+    assert.equal(json.branches.length, 61)
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
-    assert.equal(causes.size, 36)
+    assert.equal(causes.size, 45)
   })
 
   it('carries an exit 3, which no gate of the first four could have reached', () => {
@@ -319,7 +388,7 @@ describe('the historical defect, which is the only proof the checks can fail', (
   })
 })
 
-describe('the five committed gates, through the same functions', () => {
+describe('the six committed gates, through the same functions', () => {
   it('produce no findings when driven directly', () => {
     for (const gate of [CLOSURES, CONTRACT, ATTRS, SCAN, POST]) {
       assert.deepEqual(driveForTest(gate).findings, [], gate.id)

@@ -5,11 +5,25 @@ directory, because three of the four runs before 2026-10-24 rewrote the
 same scripts from scratch.
 
 Nothing in here is a dependency of either site. `playwright` is installed
-without saving and the kit finds it in whichever sibling package has it:
+without saving and the kit finds it in whichever sibling package has it.
+**Install it outside both sites**, in a directory neither `npm install`
+will ever touch, and point `PW_ROOT` at it:
 
 ```bash
-cd ursa-minor && npm i -D --no-save playwright && npx playwright install chromium
+mkdir -p /tmp/pw && cd /tmp/pw && npm i --no-save playwright && npx playwright install chromium
+export PW_ROOT=/tmp/pw/node_modules
 ```
+
+`PW_ROOT` is the first entry in `lib/browser.mjs`'s search order and has
+been since that file was written, and until 2026-11-02 it appeared in no
+document and in one error string. The line this block used to carry told
+you to install into `ursa-minor`, which is the one package a run that is
+about to build `ursa-minor` must not install into. L49 found the half of
+that where a plain `npm install` silently removes the kit. L51 found the
+other half: the kit's install and the site's install are two commands a
+run issues minutes apart in the same tree, and run together they leave a
+package half-unpacked, after which the build blames the workspace root
+rather than the install. A prefix nothing else owns is immune to both.
 
 | file | what it does |
 |---|---|
