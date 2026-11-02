@@ -241,8 +241,35 @@ test('transcribed: the events read refuses unknown filters, so the INERT finding
   // of the file, which contains the message route's own refusal and would
   // make this assertion pass on text from a different handler.
   assert.notEqual(end, -1, 'store.events( no longer follows the events route; this slice would read the rest of the file');
-  assert.equal(/no such filter/.test(block.slice(0, end)), true,
-    'the events read no longer refuses unknown filters; the INERT finding has regressed and the prober should be re-run');
+  // ASSERT THE PROPERTY, NOT THE SPELLING, and this line is here because the
+  // spelling version fired on 2026-11-02 and was wrong.
+  //
+  // It tested `/no such filter/` against this window. HQ had just moved the
+  // refusal into a shared helper, `self.refuse_unknown(self.EVENT_FILTERS)`,
+  // and the host source says in its own comment why: this route had restated
+  // the refusal in its own words, so two copies of the sentence existed and
+  // HQ's `test_one_implementation` -- the assertion that keeps a third from
+  // appearing -- was red on their `main` that same day.
+  //
+  // So the two assertions were in direct conflict. Ours required the sentence
+  // to be inside this route's window, which can only be satisfied by a copy
+  // local to the route; theirs forbids a second copy. Ours was therefore
+  // pressure toward the duplication theirs catches, and it reported HQ doing
+  // the right thing as a regression of a fix HQ had made.
+  //
+  // The behaviour was checked rather than inferred, which is this file's own
+  // method: `GET /api/events?nosuchfilter=1` against the live board answers
+  // 400 with `no such filter: nosuchfilter` and a `honours` array, while an
+  // impossible `company` returns 0 rows against 5 unfiltered. The route
+  // refuses, and it always did.
+  //
+  // Either shape satisfies the property, so either passes.
+  const refuses = /no such filter/.test(block.slice(0, end)) ||
+    /refuse_unknown\(\s*self\.EVENT_FILTERS\s*\)/.test(block.slice(0, end));
+  assert.equal(refuses, true,
+    'the events route neither refuses unknown filters inline nor calls the shared refusal helper; ' +
+    'probe GET /api/events?nosuchfilter=1 before believing this, because a refactor of the helper ' +
+    'name reads identically to a regression here');
 });
 
 test('transcribed: store.events takes a company, so the events company filter is real', { skip: !existsSync(STORE) && 'no board source on this host' }, () => {
