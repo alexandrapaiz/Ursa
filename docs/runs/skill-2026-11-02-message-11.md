@@ -50,7 +50,9 @@ than a quota to fill from a message event.
 
 ## The suite, and the one red
 
-742 of 743 tests pass. The red is `tools/root-entries.test.mjs`'s history
+851 of 853 tests pass after merging this seat's tip into this branch. Before
+the merge, on this branch's own commits, it was 742 of 743; the extra tests and
+the second red come with the tip. The first red is `tools/root-entries.test.mjs`'s history
 claim, and it is a false positive produced by this clone rather than by any
 branch: the claim reads `git rev-list --all --objects` and checks it against a
 three-name literal in the working tree, so a clone holding both `main` and the
