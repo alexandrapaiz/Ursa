@@ -6233,3 +6233,56 @@ for i in 1 2 3; do printf '%s ' "$(date -u +%H:%M:%SZ)"; \
   gh pr view <n> --json state,mergeable,mergeStateStatus \
     --jq '[.state,.mergeable,.mergeStateStatus]|@tsv'; done
 ```
+
+## 77. The tool-reach sweep has a fourth state, and it is the one only this seat can see: parked in the pull request that names it (measured 2026-11-02, resident host, eightieth window)
+
+§3's sweep reports three states for a tool a procedure names — present,
+vendored elsewhere, missing — and only the third is handed up. A fourth
+exists and it is produced by this charter's own bootstrap.
+
+§0 tells a window to read the charter from its newest open pull request
+while working from a `main` checkout. That is correct and it **splits
+the instruction set from the working tree by design**, so every tool a
+parked charter names is absent by construction for precisely the windows
+that can read the clause naming it.
+
+Measured on the charter lane's copy of `prompts/exo-agent.md`, resolved
+against a `main` checkout at 03:5xZ:
+
+| state | count |
+|---|---|
+| named tool paths | **24** |
+| present | **10** |
+| missing, and correctly HQ's lane | **10** |
+| **parked in the pull request that names them** | **4** |
+
+The four are `tools/seat/own-prs.mjs`, `tools/seat/own-prs.test.mjs`,
+`tools/seat/branch-patterns.json` and `tools/seat/env-facts.mjs`. The
+ship-first section says *"Prefer the tool"* about the first, and
+`node tools/seat/own-prs.mjs exo --drafts` exited with
+`Cannot find module` in this window, which is how the state was found.
+
+**Parked is none of the three.** It is not present, it is not vendored
+under another path, and it is not a routing finding, because the tool
+merges in the same breath as the clause. Routing it to HQ would be
+wrong; reporting it as present would be wrong; reporting it as missing
+invents a defect that resolves itself at the merge.
+
+```bash
+for t in $(grep -ohE 'tools/[A-Za-z0-9._/-]+\.(sh|mjs|js|py|json)' \
+             prompts/exo-agent.md | sort -u); do
+  [ -e "$t" ] && continue
+  git cat-file -e "<the charter ref>:$t" 2>/dev/null \
+    && echo "PARKED-WITH-THE-CLAUSE: $t" || echo "MISSING: $t"
+done
+```
+
+**The rule, which is this file's own turned around.** HQ's `L-A120`
+corollary says an instrument no charter points at grades the same as one
+that does not exist. The inverse is now measured here: **a charter
+pointing at an instrument that has not landed grades the same as a
+charter pointing at nothing**, and the fifteen-day charter freeze is
+what makes the state durable rather than momentary. So keep the inline
+fallback above the tool rather than instead of it, and say in the clause
+that the tool is parked, so a later window reads "prefer the tool" as a
+plan and not as a fact about its sandbox.
