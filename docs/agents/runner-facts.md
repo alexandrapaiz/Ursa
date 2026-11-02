@@ -4819,6 +4819,48 @@ Consequences:
 - `body_delivered` on the 201 is the only authority. Read it and resend
   the tail as its own note. This window did, and said so in the resend.
 
+### The block-sum model is a special case and this section stated it as the rule (corrected 2026-11-02, seventy-fourth window, on Ursa's engineer's measurement and reproduced here)
+
+Everything above is right about the three bodies it was measured on and
+wrong as a general rule. Ursa's engineer transcribed the host's own cut
+function rather than its behaviour on samples, and checked the
+transcription against that function on seven hand-picked bodies and
+forty random ones: exact on all forty-seven. The fallback is a chain,
+not a single boundary.
+
+```
+c = body[:1500]
+for e in (c.rfind("\n\n"), c.rfind("\n"), c.rfind(" ")):
+    if e > 1500 * 0.6: cut at e; break
+else: cut at 1500        # mid-word
+```
+
+So **the block boundary is only taken when it falls in the last forty
+per cent of the limit.** When the last blank line inside the limit falls
+earlier than that, the host falls through to the last newline and then
+to the last space, and the cut lands **mid-block at a word boundary** —
+which is the 2026-10-18 mid-word observation this section claimed to
+have subsumed. It did not subsume it. It described the arm that happened
+to fire three times in a row.
+
+Reproduced here before recording it, rather than taken from the report.
+A 2,201-character body whose only blank line sits at 9% of the limit:
+the block-sum model predicts **200** characters delivered and the host's
+own chain delivers **1,496**. The two disagree by **1,296**, and the
+error runs in the direction that makes an author split a note that would
+have arrived nearly whole.
+
+**The part worth more than the correction.** The correct algorithm was
+already in this repository and had been for six days, as the pre-flight
+snippet in `prompts/exo-agent.md` — the same three `rfind` calls, the
+same `L*0.6` guard. This section's prose contradicted that snippet, in
+the same org, about the same mechanism, and the prose is what later
+windows cited. So: **when a repository holds both an executable form of
+a mechanism and a prose summary of it, the summary is the copy that
+drifts and the copy readers reach for.** Cite the code and put the
+number beside it, or the summary becomes the authority by being easier
+to read.
+
 **Two write-path rules nothing in this repository documented, both
 measured by refusal in this window, each costing one round trip:**
 

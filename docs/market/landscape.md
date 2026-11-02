@@ -102,6 +102,29 @@ spend, only to sell a different thing to the same buyers, per the
 that the spend itself keeps growing rather than commoditizing away.
 Last observed 2026-10-26: [Surge AI blog](https://surgehq.ai/blog).
 
+Update 2026-10-27 (message, 4th run): the 2026-10-07 Forbes finding
+on this entry (Surge AI, Mercor, AfterQuery, and Turing selling
+~$500M/year of training data to Chinese AI labs) now has a named
+policy actor pushing it toward regulation. A report titled "American
+AI Advantage Is for Sale," published 2026-10-26 by Consumer Action
+for a Strong Economy (CASE, a free-market/fiscal-policy advocacy
+nonprofit, not a neutral research body), adds the specific detail
+that Surge AI holds US military contracts (Air Force, Army) while
+also supplying Tencent, which the Pentagon designated a "Chinese
+military company" in 2025 — the same vendor on both sides of a
+defense-relevant line, not just "also serves a rival lab." CASE calls
+for Congress and the administration to restrict sales of proprietary
+AI-training products to CCP- or military-linked Chinese entities and
+to add disclosure requirements for federal contractors serving those
+buyers. This is a policy ask from an advocacy group, not an enacted
+rule, and nothing in law has changed; recorded because it is the
+first source this file has found that tries to turn the 2026-10-07
+provenance-trust finding into a compliance question rather than a
+reputational one. See docs/market/positioning.md's 2026-10-07 "Trust
+has a provenance axis too" entry for the dated follow-up. Last
+observed 2026-10-27: [Townhall: New report scrutinizes US AI data
+sales to China](https://townhall.com/news/tayte-christensen/2026/10/26/new-report-scrutinizes-us-ai-data-sales-to-china-n2685323).
+
 ### Scale AI (incl. Outlier)
 
 What it is: the largest commercial RLHF/data-labeling platform,
@@ -391,6 +414,16 @@ experts doing the work, where Minor's labor is the unpaid byproduct of
 someone doing their own real job anyway. Weakness against Ursa
 otherwise unchanged. Last observed 2026-10-25: [The Information on X](https://x.com/theinformation/status/2044105942749315090), [Dealroom: Handshake's ARR crosses $1B](https://app.dealroom.co/news/note/handshake-s-arr-crosses-1b-as-ai-training-revenue-surges).
 
+Update 2026-11-02 (message, 6th run): found this run, two reports about a Handshake-run OpenAI program that between them give the closest and the most ambiguous read yet on whether this category is finally touching a real deliverable rather than a constructed one, plus a labor dispute in the same program. TechCrunch (2026-01-10) reports OpenAI and Handshake AI asking third-party contractors to "upload real work that they did in past and current jobs" — a specific, concrete output, "not a summary of the file, but the actual file, e.g. Word doc, PDF, Powerpoint, Excel, image, repo." That is, on its face, a real deliverable, the exact object this file has spent two months arguing the rest of the market does not ingest. A separate, later report (bespacific.com, syndicating a longer piece, read directly this run) names the same OpenAI/Handshake effort "Project Stagecraft" internally and describes a different deliverable: 3,000-4,000 contractors, paid $50-500/hr across 400+ niche occupations (farming, commercial flying, animal husbandry, music composition named), "directed to develop a persona and create tasks that reflect real work" — original, newly-written task simulations and workflow documentation, not an uploaded real file. The two accounts describe what reads as the same underlying OpenAI-Handshake relationship with incompatible deliverables, and this run could not resolve which is accurate, or whether both exist as separate workstreams under one vendor relationship; recording the conflict rather than picking the more flattering (or less flattering) of the two per this charter's sourcing bar.
+
+So what, under either reading: if the TechCrunch account is right, this is a real deliverable with zero generation-provenance collected against it — useful as a training-corpus seed, but not an outcome record, since nobody traced what an AI generated and what of that generation survived into the file. If the bespacific account is right, "develop a persona and create tasks" is the identical constructed-task-and-rubric structure this entry and the Mercor/APEX, Surge/Tuesday-Work-Index entries already carry, just with a public internal project name attached. Neither reading closes Minor's gap; the ambiguity itself is worth a lab-brief footnote, since the market is now visibly unsure which of its own programs are real-data and which are constructed, from the outside.
+
+A third, separately-confirmed fact regardless of which deliverable account is accurate: multiple contractors on these same OpenAI projects report Handshake withholding "thousands of dollars" in pay (Business Insider via AOL, 2026-03-04), citing alleged rule violations ("completion times 3-4x higher than benchmarks," "working from non-US locations") with "no appeal process" per Handshake's own support message, and at least two prior wage-dispute settlements/lawsuits ($6,475 October 2025, $9,600 filed November 2025). This is the same labor-conditions pattern this entry already carries from the Gazetteer SF piece (2026-10-07 update) and the same structural contrast with Minor's own model: whichever deliverable account is true, a human was paid, graded against a benchmark, and had pay withheld over a dispute about the grading, a cost category Minor's unpaid-real-work-byproduct model does not carry by construction. Separately, an IP lawyer quoted by TechCrunch warns this approach puts the AI lab taking it "at great risk," since it depends on contractors correctly judging what from a past employer's work is safe to upload — a confidentiality/ownership liability this file has not named before. Positioning consequence in docs/market/positioning.md. Last observed 2026-11-02: [TechCrunch: OpenAI is reportedly asking contractors to upload real work from past jobs](https://techcrunch.com/2026/01/10/openai-is-reportedly-asking-contractors-to-upload-real-work-from-past-jobs/), [bespacific.com: Inside the OpenAI project where freelancers train ChatGPT on everything from farming to commercial flying](https://www.bespacific.com/chatgpt-openai-training-niche-occupations-specialized-llm-handshake-data-labeling/), [AOL/Business Insider: Some contractors who worked on OpenAI projects say Handshake AI is withholding thousands of dollars in pay](https://www.aol.com/articles/contractors-worked-openai-projects-handshake-050101409.html).
+
+### Protege
+
+What it is: a real-world-data licensing platform (founded 2024 by Bobby Samuels and Travis May) that sources, licenses, and curates proprietary datasets directly from the businesses that generated them — healthcare records via its Protege Health division (close to 20 data partners, 3B+ clinical notes, 100M+ medical images per its own disclosure), plus media and motion-capture data — for AI pre-training, post-training, fine-tuning, and evaluation. New entry, found this run via the demand-signals ceremony while checking a venture investor's "Type 1 vs Type 2" data taxonomy (see docs/market/positioning.md), which names Protege as one of a handful of companies moving the market toward "Type 1" (real operational data) and away from "Type 2" (tasks designed by humans and completed by experts, this file's Category 1 as a whole). Who it serves: AI developers needing regulated-domain real-world data, HIPAA compliance named specifically for the healthcare line. Pricing: not public; raised a $10M seed (2025) and a $25-30M Series A (reported January 2026, sources disagree on the exact figure), investors including a16z, Footwork, Bloomberg Beta, and CRV. Strengths: this is actual real operational data (clinical notes, medical images) rather than a constructed task or a solicited opinion, structurally the closest thing in Category 1 to "real" rather than "authored." Weakness against Ursa, stated precisely: Protege licenses bulk real-world records in the aggregate, the data equivalent of buying a library rather than reading what happened to one piece of work — there is no generation to join any of it backward to, no span classification, no sense of whether an AI touched any given clinical note or what survived if it did. It is real data without provenance, where Minor's object is provenance without which "real" would mean nothing. Last observed 2026-11-02: [AlleyWatch: Protege Raises $30M to Solve AI Development's Biggest Bottleneck Through Licensed Real-World Data](https://www.alleywatch.com/2026/01/protege-ai-training-data-licensing-real-world-data-bobby-samuels/), [PR Newswire: Protege Announces $25 Million Series A](https://www.prnewswire.com/news-releases/protege-announces-25-million-series-a-to-expand-ai-training-data-platform-302529087.html).
+
 ### Halluminate
 
 What it is: a data research lab (fewer than 10 people, YC S25) building
@@ -624,6 +657,43 @@ Environments for Coding](https://www.rl-list.com/rl-environments-for-coding),
 [rl-list.com: Idler vendor profile](https://www.rl-list.com/vendors/idler),
 [YC Launch: Idler](https://www.ycombinator.com/launches/SxT-idler-push-the-frontier-of-your-model),
 [runtimewire: Idler launches AI data lab after a $9M Paradigm-led seed](https://runtimewire.com/article/idler-launches-ai-data-lab-9m-paradigm-seed).
+
+Update 2026-11-02 (message, 6th run): a new supply channel feeding this same mapped sub-category, found via the demand-signals ceremony. MIT Technology Review (2026-10-13) and corroborating coverage report AI labs buying the operational records of shut-down startups — Sunset (Brooklyn, founded 2023) runs startup wind-downs and, as part of the service, buys the dying company's data outright and licenses it onward, describing the material (per founder Brendan Mahory) as fuel for "reinforcement-learning environments, where AI agents practice tasks inside simulated companies." This is a new real-data source, not a new vendor type: the "operational exhaust" Sunset sells is genuinely real (an actual company's actual records), closer to CLAUDE.md §1's raw material than anything authored, but per Sunset's own description it still becomes an input to a constructed simulated-company environment rather than an outcome record joined backward to a real deliverable's own fate. It sharpens rather than closes this note's standing gap: the market is now sourcing real data specifically to build better-constructed gyms, not to stop constructing them. Last observed 2026-11-02: [MIT Technology Review: AI labs are buying data from dead startups to train their models](https://www.technologyreview.com/2026/10/13/1145755/ai-labs-buying-data-from-dead-startups-to-train-models/).
+
+### Taste Labs
+
+What it is: a San Francisco vendor selling preference datasets,
+reasoning data, rubrics, and evaluation environments to frontier AI
+labs, targeting subjective creative quality specifically — starting
+with design, with copywriting named as a second domain. New entry,
+found this run via the demand-signals ceremony (a search-result
+summary naming it among October 2026 RLHF vendor news) rather than a
+landscape sweep. Who it serves: unnamed "top frontier labs" for
+model evaluation/improvement, plus app-layer companies via a Brand API
+product that codifies a company's visual identity into executable
+design rules. Pricing: not public; a $18.5M seed (announced
+2026-06-16, co-led by CRV and Amplify Partners, Latitud writing the
+first check at inception) and reported revenue in the "tens of
+millions" annualized range, with a team of roughly 20 as of the
+announcement. Founder: Thais Castello Branco, formerly at Exa.
+Mechanism: roughly 1,000 contracted "Tastemakers," professional
+designers and copywriters, who evaluate AI-generated outputs and
+decompose subjective qualities (typography, layout, tone) into
+measurable components, producing the preference data the company
+sells onward. Strengths: a founding thesis that states the gap this
+whole map is built around almost word for word — coding and math are
+verifiable, subjective domains aren't, and models "collapse to the
+mean" without a quality signal for them — making this the clearest
+articulation yet, from a funded competitor's own marketing, of why
+CLAUDE.md §1's target domains have no verifier today. Weakness
+against Ursa: the mechanism is still solicited judgment, 1,000
+professionals paid to grade AI output on request, the identical
+structural gap this category's every other entry carries. A
+Tastemaker scoring a generated layout against a rubric is a grader's
+opinion, not a record of whether a real client's actual brand
+deliverable survived contact with the work. Last observed 2026-10-27:
+[Latitud: The Taste Layer for the AI Ecosystem](https://latitudlatam.substack.com/p/the-taste-layer-for-the-ai-ecosystem),
+[hyper.ai: Taste Labs Trains AI on Curated Quality to Combat Creative Slop](https://hyper.ai/en/stories/df1a0e0d52c2bb0d561782479941f19a).
 
 ## Category 2 — Evaluation and arena products
 
@@ -1643,3 +1713,31 @@ Upgrade?](https://arxiv.org/abs/2609.05339).
   that is also an ad-targeting gate, directly extending the prior
   run's "consent is a distinct axis from transparency" finding.
   Positioning consequence in docs/market/positioning.md.
+- 2026-10-27 (message, 5th run) — added Taste Labs (Category 1, new
+  entry), a $18.5M-seeded vendor selling solicited preference data for
+  subjective creative quality (design, copywriting) via ~1,000
+  contracted "Tastemakers." Found via the demand-signals ceremony. The
+  same structural gap as every other Category 1 entry, but notable
+  for stating CLAUDE.md §1's own "no verifier for subjective domains"
+  claim almost word for word in its own funded marketing. Positioning
+  consequence (a second pitch-collision risk, in a domain even closer
+  to Minor's own "writing" language than Surge's or Mercor's) in
+  docs/market/positioning.md and a dated note on the existing
+  2026-10-07 ledger proposal.
+- 2026-11-02 (message, 6th run) — added Protege (Category 1, new
+  entry), a real-world-data licensing vendor ($35-40M raised) found
+  while checking a venture investor's "Type 1 vs Type 2" data
+  taxonomy (new positioning.md entry). Dated update to Handshake AI:
+  two reports on a Handshake-run OpenAI contractor program give
+  incompatible accounts of the deliverable (an uploaded real past-job
+  file per TechCrunch vs. an authored persona/task simulation per
+  bespacific.com, both reporting on what appears to be the same
+  "Project Stagecraft" relationship) — recorded as an unresolved
+  sourcing conflict rather than resolved either way, alongside a
+  separately-confirmed contractor pay-withholding dispute and a named
+  IP/confidentiality liability risk, the first of its kind in this
+  file. Dated update to the Category 1 "build the task and verifier"
+  cross-cutting note: Sunset, a startup-wind-down service, now sells
+  failed companies' real operational records into the same
+  constructed-RL-environment pipeline, a new real-data supply channel
+  for an already-mapped gap, not a new instance of closing it.

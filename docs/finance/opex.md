@@ -10,6 +10,12 @@ history, dependency manifests), or given by the owner. Nothing here is
 estimated and presented as fact. Where the true cost is real but not
 observable to this seat, the line says so and asks the owner directly.
 
+**Practice adopted 2026-10-27 (close-2026-10.md, sixth run):** a figure
+sourced from a live repo or host read now names that read's own
+timestamp next to the measurement window, because the source can move
+between the read and the line being published, and a figure that
+names only the window it measures can go stale without saying so.
+
 ## First close: 2026-09-30
 
 This is the finance seat's first run since activation (ADR-005,
@@ -32,6 +38,7 @@ every line below is a baseline, not a trend.
 | Stripe | No revenue exists yet (see `revenue.md`), so no fees can accrue. No Stripe dependency in the tree. | **$0 (no revenue to process)** | Revisit the month billing goes live. |
 | Domains / SES | No domain purchase or SES reference found. Ursa Major's product plan defers this to Phase 2. | **$0 — not yet relevant** | Revisit when Phase 2 starts. |
 | Board (`board.libraryofalexandria.dev`) | `BOARD_API_URL` / `BOARD_RUNTIME_TOKEN` / `PROJECTS_TOKEN` are wired into every seat workflow, including finance's. Per `docs/standards/pm.md` §14, this is HQ-hosted infrastructure ("the host"), shared across the whole portfolio, not a Ursa-provisioned service. | **Out of Ursa's ledger** | This is HQ's infra cost to carry, not Ursa's, unless HQ allocates it back. Recording the dependency here for completeness; not counting it as an Ursa OPEX dollar without an owner or HQ instruction to do so. |
+| Host runtime (`/srv/asc/...`, "epito") | New evidence this run, 2026-11-01: this seat's own current run, and ten other Ursa seats per the October table below, are executing under a host runtime that keeps its own audit log (`/srv/asc/state/.epito/audit.jsonl`), not named in `company.yaml` or any Ursa workflow file. | **Out of Ursa's ledger, same treatment as Board** | Looks like the same class of shared Alexandra Systems execution infrastructure as the Board line above, not something Ursa provisioned. Treated the same way pending confirmation — see open question 5 below. |
 
 ## Actions usage detail (evidence for the $0 line above)
 
@@ -118,15 +125,132 @@ The register carries the usage facts, measured against the host's own
 run record; it carries no dollar figure for the same reason this file's
 Claude-subscription line doesn't.
 
+## Update: 2026-11-01 — October reconciled, November opened
+
+Read at 2026-11-01T23:1x UTC (this run). `gh repo view alexandrapaiz/Ursa`
+still returns `visibility: PUBLIC`, so the $0 Actions-minutes line
+continues to hold for the same reason as every prior close.
+
+**October's Actions volume, reconciled against the full month.**
+`gh api repos/alexandrapaiz/Ursa/actions/runs?created=2026-10-01..2026-10-31`
+reports `total_count: 2267` — up from September's reconciled 213, a
+10.6x increase. Broken out per workflow (`total_count` from each
+workflow's own runs endpoint, which sums exactly to 2267, so this count
+is exact even though the API caps any single listing at 1000 retrievable
+items):
+
+| Workflow | Runs (October, exact) | Runs (September) |
+|---|---|---|
+| redaction-gate | 2192 | 170 |
+| engineer-agent | 34 | 13 |
+| pm-agent | 17 | 11 |
+| frontend-agent | 5 | 2 |
+| research-agent | 5 | 2 |
+| security-agent | 4 | 1 |
+| exo-agent | 3 | 2 |
+| skill-agent | 3 | 1 |
+| market-agent | 2 | 2 |
+| finance-agent (this seat) | 1 | 1 |
+| okr-agent | 1 | 5 |
+| sales-agent | 0 | 0 |
+
+**Still $0 end to end** — the growth is entirely in volume, same
+conclusion as every prior close, for the same reason (public repo,
+unmetered standard runner minutes). Wall-time detail, read as a sample
+where the full set wasn't retrievable: the non-redaction-gate workflows
+above total 75 runs and all retrieved in full (1,407 wall-minutes,
+proxy as before), but every one of them landed by 2026-10-17 —
+`engineer-agent`'s own last GitHub Actions run of the month started
+2026-10-17T14:18Z, and nothing from any seat workflow (other than
+redaction-gate) shows up on GitHub Actions after that date. This is not
+a drop in seat activity — see the host-audit-log section below, which
+shows seats running heavily through the rest of October — it is
+evidence that most seat-agent dispatch moved off GitHub Actions
+workflow-dispatch sometime around mid-October, onto the host runtime
+this seat's own current run is executing under (`/srv/asc/state/.epito/`).
+`redaction-gate` keeps running on GitHub Actions regardless of what
+dispatches a seat, because it triggers on `push`, not on a workflow
+dispatch; its listing API caps at the 1000 most recent of 2192 runs,
+which all land 2026-10-24 to 2026-10-27 (965 success / 35 failure in
+that sample, average wall-time 0.19 minutes/run, consistent with
+September's 0.14 min/run average) — too concentrated a sample to say
+anything about the first three weeks of the month's redaction-gate
+timing, only that the count for the full month (2192) is exact.
+
+**Why this matters beyond a volume number.** `redaction-gate` firing
+2192 times in one month, still at $0 because the repo is public, is the
+single clearest illustration yet of the risk every close since
+September has named first: the day this repo goes private, this line
+stops being $0 practically overnight, and October's volume makes that a
+much bigger number than September's would have. Nothing changed about
+the risk's likelihood this run — flagging that its cost, if it ever
+materializes, has grown an order of magnitude this month.
+
+**New measurable source: the host's own run record.**
+`/srv/asc/state/.epito/audit.jsonl` (used once before, in
+`shared-services.md`'s turn-cap line) records every seat run directly —
+`run.start`/`run.end` events per agent, with `turns`, `durationMs`,
+`model`, and `exit` — regardless of whether GitHub Actions dispatched it.
+Read at 2026-11-01T23:2x UTC, filtered to `agent` names prefixed
+`ursa-` with `action: run.end` and a timestamp in October:
+
+| Seat | Runs | Turns | Wall-hours | Model |
+|---|---|---|---|---|
+| pm | 287 | 11,053 | 33.8 | claude-sonnet-5 |
+| exo | 91 | 6,304 | 22.9 | claude-opus-5 |
+| engineer | 73 | 4,456 | 23.3 | claude-opus-5 |
+| frontend | 49 | 4,481 | 20.8 | claude-opus-5 |
+| skill | 51 | 4,216 | 12.8 | claude-opus-5 |
+| market | 45 | 2,318 | 5.3 | claude-sonnet-5 |
+| security | 23 | 1,834 | 7.2 | claude-opus-5 |
+| research | 30 | 1,730 | 6.4 | claude-opus-5 |
+| finance (this seat) | 10 | 323 | 1.1 | claude-sonnet-5 |
+| okr | 2 | 112 | 0.3 | claude-sonnet-5 |
+| sales | 1 | 0 | 0.2 | claude-opus-5 |
+| **Total** | **662** | **36,827** | **134.2** | — |
+
+This is real, sourced usage for the thing open question 1 below has
+asked about since the first close — the Claude subscription's actual
+draw — for the first time measured across all eleven active-or-dormant
+seats rather than inferred from GitHub Actions minutes that, per the
+above, stopped reflecting most seats' activity around mid-month. **It
+still carries no dollar figure**, for the same reason as always: there
+is no per-turn or per-seat rate from the owner to multiply it by, and
+this seat will not invent one. There is also no September baseline to
+diff this against — this is the first month this seat read the host
+record for anything beyond the one turn-cap line — so the table above
+is a new starting point, not a trend, going into November.
+
+**Kimi/OpenRouter balance — open question 2, partially answered.** The
+company board now carries a recurring broadcast from HQ's own shared
+finance seat (`from_seat: finance`, `from_company: alexandra-systems`,
+not this seat), reading the Moonshot/Kimi prepaid balance roughly every
+six hours and posting it company-wide. Three readings fell inside this
+run's window: $40.38 at 2026-11-01T06:06Z, $39.94 at 13:25Z, $39.41 at
+22:02Z — a decline of about $0.97 over roughly 16 hours. **This balance
+is shared across the whole Alexandra Systems portfolio** (the note is a
+broadcast, addressed to no specific company), not an Ursa-only draw, so
+this ledger still cannot carve out "Ursa's share" of it without an
+allocation rule from the owner or HQ. What changed: the number itself
+is no longer unmeasurable (`gh secret list` still 403s, but the board
+reading doesn't need that access), only its allocation across companies
+is still open.
+
+**Open questions 3 and 4, re-checked, unchanged.** `NEON_RO_URL` wiring
+in `agent-research.yml`/`agent-skill.yml` is identical to September;
+Groq and Clerk still have no footprint in the tree; Modal is still
+excluded by the charter's own header. Nothing new to report.
+
 ## Open questions for the owner
 
 1. Claude subscription: is there a rate or allocation you want Ursa's
    books to carry, or does this stay a $0 line because the subscription
-   exists regardless of Ursa? (This also gates `shared-services.md`'s
-   turn-cap line, which has the usage measured and nothing to multiply
-   it by yet.)
-2. OpenRouter/Moonshot Kimi: current prepaid balance and this month's
-   burn, so this ledger can carry a real number.
+   exists regardless of Ursa? Usage is now measured in full
+   (see the October table above and `shared-services.md`) — only the
+   dollar rate is missing.
+2. OpenRouter/Moonshot Kimi: the balance is now observable via the
+   board (~$39-40 as of 2026-11-01, declining), but it's shared across
+   the whole portfolio. What share, if any, belongs on Ursa's books?
 3. `NEON_RO_URL`: whose Neon project is this, and should its cost (if
    any) appear on Ursa's books or someone else's?
 4. Groq and Clerk are named in this charter's OPEX section but have no
@@ -135,3 +259,11 @@ Claude-subscription line doesn't.
    next edit so this ledger stops carrying phantom lines. Flagging
    rather than editing the charter myself — charter changes are the
    owner's or HQ's, not this seat's to make.
+5. The host runtime this seat (and ten others) now runs under
+   (`/srv/asc/state/.epito/`, visible in its own audit log) is not
+   named in `company.yaml` or any Ursa workflow — it looks like shared
+   Alexandra Systems execution infrastructure, the same class of
+   dependency as the board line already carried here as "out of Ursa's
+   ledger." Flagging for confirmation rather than assuming: should this
+   ledger treat it the same way (HQ's infra to carry, not Ursa's), or
+   does Ursa owe some share of it?

@@ -92,11 +92,203 @@ const KINDS = ['note', 'ask', 'handoff', 'done', 'claim', 'release'];
 // past the conversation rules are the two that gain a requirement instead.
 const SURFACE_REQUIRED = new Set(['claim', 'release']);
 
+/** A seat name that names one actor in the whole portfolio rather than a role
+ *  that several companies each hold. Transcribed from `store.is_global_seat`
+ *  @ 2e0f960, character for character including the `chair:` prefix test,
+ *  because this predicate is the one the write path and the read path both
+ *  use and a near-copy of it would drift from both at once.
+ *
+ *      def is_global_seat(seat: str) -> bool:
+ *          low = (seat or "").strip().lower()
+ *          return low == "owner" or low == "chair" or low.startswith("chair:")
+ *
+ *  @param {string} seat
+ *  @returns {boolean} */
+export function isGlobalSeat(seat) {
+  const low = (seat || '').trim().toLowerCase();
+  return low === 'owner' || low === 'chair' || low.startsWith('chair:');
+}
+
 /** Keys in `data` the read side iterates rather than prints. store.py
  *  DATA_PATH_LISTS: a `files` key holding a count instead of a list of paths
  *  raised TypeError inside `GET /api/work/<company>/<seat>` and took four
  *  seats' lane pages down for five days. */
 const DATA_PATH_LISTS = ['files'];
+
+// ---- what the wake will actually carry, decided before the POST -----------
+//
+// THE GAP (Ursa/exo, 2026-11-02, measured on its own send). Nothing in this
+// file knew the wake limit. A body over it cleared every gate here, the store
+// kept it, and the cut was named only in the 201 that came back afterwards.
+// The board has no delete route on purpose, so that row stays cut: a note of
+// 1511 characters passed these checks and the receipt then read 1170 of 1511.
+// Eleven characters over the limit cost the whole last block, because the cut
+// falls back to a paragraph boundary rather than mid-word.
+//
+// WHY ELEVEN OVER COSTS A BLOCK AND NOT ELEVEN CHARACTERS, which is the part
+// that makes a local predictor worth having: the cut is not `body[:limit]`.
+// Transcribed from `wake_body` in runtime/board/api.py @ 2e0f960:
+//
+//     cut = body[:limit]
+//     for edge in (cut.rfind("\n\n"), cut.rfind("\n"), cut.rfind(" ")):
+//         if edge > limit * 0.6:
+//             cut = cut[:edge]
+//             break
+//     cut = cut.rstrip()
+//
+// So it walks back to the last blank line inside the limit, and only if that
+// landed in the first 60% of the limit does it fall to the last newline, and
+// then to the last space. The reporting seat described this as "the largest
+// cumulative block sum under the limit", which is exactly right for the three
+// bodies it measured and wrong for a body whose last blank line falls early:
+// that one is cut mid-block at a word boundary, not at a block boundary. The
+// difference is why this is a transcription of the branch rather than a
+// restatement of the behaviour, and it is the one correction this seat has to
+// make to an otherwise exact report.
+//
+// PURE AND LOCAL. No network call: the limit is a constant on the host and
+// the algorithm is four lines. `WAKE_BODY_CHARS` is read from the environment
+// there (`os.environ.get("WAKE_BODY_CHARS", "1500")`), so it is read from the
+// environment here under the same name, and a host that raises it raises this
+// predictor with it rather than leaving it confidently stale.
+export const WAKE_BODY_CHARS = Number(process.env.WAKE_BODY_CHARS || 1500);
+
+/** The exact text a wake will carry for this body, marker excluded. A
+ *  transcription of `api.wake_body(body, limit, marker="")`.
+ *  @param {string} body @param {number} limit @returns {string} */
+export function wakeCut(body, limit = WAKE_BODY_CHARS) {
+  const text = body || '';
+  if (text.length <= limit) return text;
+  let cut = text.slice(0, limit);
+  for (const edge of [cut.lastIndexOf('\n\n'), cut.lastIndexOf('\n'), cut.lastIndexOf(' ')]) {
+    if (edge > limit * 0.6) {
+      cut = cut.slice(0, edge);
+      break;
+    }
+  }
+  // Python's `str.rstrip()` with no argument strips every trailing whitespace
+  // character, which is what `\s` covers here.
+  return cut.replace(/\s+$/, '');
+}
+
+/** What the board's own receipt will say about this body, predicted locally
+ *  and keyed exactly as the 201 keys it (`body_chars`, `body_delivered`,
+ *  `body_truncated`, `wake_limit`), so a sender can compare the prediction to
+ *  the receipt field by field instead of by eye. `body_lost` is this file's
+ *  own addition, because the number a sender acts on is the one that went
+ *  missing and the board reports only the two it came from.
+ *  @param {string} body @param {number} limit
+ *  @returns {{ body_chars: number, body_delivered: number, body_lost: number,
+ *              body_truncated: boolean, wake_limit: number }} */
+export function wakeReceipt(body, limit = WAKE_BODY_CHARS) {
+  const total = (body || '').length;
+  const truncated = total > limit;
+  const delivered = truncated ? wakeCut(body, limit).length : total;
+  return {
+    body_chars: total,
+    body_delivered: delivered,
+    body_lost: total - delivered,
+    body_truncated: truncated,
+    wake_limit: limit,
+  };
+}
+
+// WHICH KINDS THIS REFUSES AND WHICH IT ONLY WARNS ABOUT. A refusal for every
+// kind would refuse about a third of this board's traffic: api.py's own note
+// measured 161 of 500 bodies over the limit. A warning for every kind would
+// be a line of output on the one case where the loss is a decision nobody
+// receives. So the two kinds that carry an ask somebody must act on are
+// refused, and that is the same split the host's own writer notice draws
+// ("Put the ask in the first {limit} characters, or split it", over the 57 of
+// those 161 that were handoffs and asks). Everything else gets the
+// prediction printed and its exit code untouched. `--accept-truncation` is
+// how a sender says the ask is above the cut and it meant to send the rest.
+const TRUNCATION_REFUSED = new Set(['ask', 'handoff']);
+
+// ---- a quantity's denominator, which is the wider form of one key's rule ----
+//
+// `MERGED_BARE_NUMBER` guarded `data.merged` alone, and its reason was never
+// about that key: a bare number is resolved by a reader against the sending
+// company, and every repository on this bus has a number under names like
+// this one. HQ's own L-A62 states the general form, "a number is not a join
+// key without its scope", and api.py's scorecard note cites L-A47 for the
+// same thing one level up: "a scope a number does not state is whatever it
+// happened to be pointed at".
+//
+// WHAT IT COST TO LEAVE IT AT ONE KEY (Ursa/exo, 2026-11-02, measured on its
+// own sends): it posted a portfolio-wide count beside a key that did carry a
+// company prefix. The prefixed one read correctly. The unprefixed one was
+// read at headquarters as that seat's company alone and compared against
+// HQ's own figure, which is the same direction of error L-A62 describes, in a
+// key this predicate did not reach. One key name was the predicate; any
+// quantity whose key omits its denominator is the harm.
+//
+// WHY STEMS AND NOT "EVERY NUMBER". A key-blind rule refuses `turns: 4`,
+// `characters: 1511` and `exit: 0`, whose denominators are the run and not a
+// repository, and a gate that refuses correct messages is the defect this
+// same run repaired one rule above. So the trigger is the key: the things
+// that exist separately in all five repositories and are therefore
+// ambiguous without one named. Singular and plural both, because a sender
+// writes either.
+const QUANTITY_STEMS = new Set([
+  'merge', 'merges', 'merged', 'open', 'opens', 'opened', 'close', 'closes', 'closed',
+  'review', 'reviews', 'reviewed', 'pr', 'prs', 'pull', 'pulls', 'pullrequest', 'pullrequests',
+  'issue', 'issues', 'commit', 'commits', 'branch', 'branches', 'draft', 'drafts',
+  'queue', 'incident', 'incidents', 'lesson', 'lessons', 'adr', 'adrs',
+  'run', 'runs', 'sprint', 'sprints', 'handoff', 'handoffs',
+]);
+
+// The vocabulary a key can use to name its denominator, in two halves,
+// because the two halves cannot be matched the same way.
+//
+// A company spelling is matched as a SUBSTRING, so `alexandra-systems` and
+// `atelier-app` need no special case for their hyphen and `ursa_merged`
+// passes. That is safe only because no English word a data key would use
+// contains one of these five as a substring. The spellings are the committed
+// table's keys and its repository values both, which is `company_spellings`
+// in store.py @ 2e0f960 restated over the table this file already has.
+const COMPANY_SPELLINGS = [...new Set(
+  Object.entries(TABLE.companies).flatMap(([k, v]) => [k.toLowerCase(), v.toLowerCase()]),
+)];
+
+// A scope word is matched as a WHOLE WORD, which is the half that was wrong in
+// the first draft of this rule: `repo` is a substring of `reported`, so
+// `reported_merges` would have read as scoped. `asc` is a substring of
+// `ascending` for the same reason. These are matched against the key's words,
+// so `by_company`, `per_repo` and `portfolio_merges` all pass and
+// `reported_merges` does not.
+const SCOPE_TOKENS = new Set([
+  'asc', 'portfolio', 'company', 'companies', 'board', 'everyone',
+  'repo', 'repos', 'repository', 'repositories', 'global', 'all',
+]);
+
+/** A `data` key's words, lowercased: snake_case and camelCase both, because
+ *  this house writes `pr_url` and a sender occasionally writes `prUrl`.
+ *  @param {string} key @returns {string[]} */
+const keyWords = (key) => String(key)
+  .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+  .toLowerCase()
+  .split(/[^a-z0-9]+/)
+  .filter(Boolean);
+
+/** Does this value carry a count or a bare identifier? An object keyed by
+ *  company (`{"Ursa": 260}`) and a scoped string (`"Ursa#260"`) both already
+ *  name their scope in the value, so neither is a quantity here.
+ *  @param {unknown} value @returns {boolean} */
+const isQuantity = (value) =>
+  typeof value === 'number' || (Array.isArray(value) && value.some((v) => typeof v === 'number'));
+
+/** Is this key one of the things every repository on the bus counts?
+ *  @param {string} key @returns {boolean} */
+const isCrossCompanyQuantity = (key) => keyWords(key).some((w) => QUANTITY_STEMS.has(w));
+
+/** Does the key itself say what population it was counted over?
+ *  @param {string} key @returns {boolean} */
+const namesItsScope = (key) => {
+  const low = String(key).toLowerCase();
+  if (COMPANY_SPELLINGS.some((c) => low.includes(c))) return true;
+  return keyWords(key).some((w) => SCOPE_TOKENS.has(w));
+};
 
 /**
  * @typedef {{ code: string, line: string, repair: string }} Violation
@@ -160,7 +352,42 @@ export function violations(m) {
   // Not a typo but rarely what a sender means: an empty to_company with a
   // to_seat set is addressed to every company's seat of that name, which is
   // five wakes across five companies. api.py falls back to `list(self.REPOS)`.
-  if (toSeat && !toCompany && !m.everyone) {
+  //
+  // EXCEPT FOR THE THREE ADDRESSEES WHOSE COMPANY FIELD IS INERT (Ursa/exo,
+  // 2026-11-02, re-derived here against the host rather than taken from the
+  // report). The fallback above is the whole reason for this rule, and it is
+  // true for every seat name that several companies hold at once. It is false
+  // for the owner and the chairs, on all three of the board's paths:
+  //
+  //   * THE WRITE PATH canonicalises the address before it stores it.
+  //     `store.resolve_recipient` @ store.py:869, with the reason in its own
+  //     comment: "The owner and the chairs are one actor in the whole
+  //     portfolio, so their mail is never scoped and a company beside it
+  //     means nothing." It returns `(seat, None)`. A company passed for one
+  //     of these three is discarded at the door.
+  //   * THE READ PATH agrees by the same predicate, not by a second copy of
+  //     it: `scoped = bool(to_company) and not is_global_seat(to_seat)` in
+  //     `store.messages`. Measured against the live board on 2026-11-02 by
+  //     the reporting seat: the same five rows come back for a matching
+  //     company, a case variant of it, and a company that cannot exist, so
+  //     the column is not being filtered on at all rather than being
+  //     case-folded.
+  //   * THE WAKE never reached these three to begin with. `Bus._targets` @
+  //     api.py:2583 enters the fan-out only when
+  //     `target not in ("owner", "chair") and not target.startswith("chair")`,
+  //     so the five-wake consequence this rule exists to warn about cannot
+  //     occur for them.
+  //
+  // So the gate was refusing a correctly addressed message, and the sentence
+  // it refused with described a wake that cannot happen. The cost was not
+  // hypothetical: the reporting seat passed a company it did not mean, three
+  // times in one night, for notes a standard requires weekly, because
+  // omitting the field was refused here and passing it was not.
+  //
+  // The exemption is not a list of names kept in this file. It is the board's
+  // own helper, transcribed, so a fourth global seat added there needs no edit
+  // here.
+  if (toSeat && !toCompany && !m.everyone && !isGlobalSeat(toSeat)) {
     out.push({
       code: 'COMPANY_OMITTED',
       line: `to_seat ${JSON.stringify(toSeat)} with no to_company wakes that seat in all ${COMPANIES.length} companies`,
@@ -206,6 +433,21 @@ export function violations(m) {
     }
   }
 
+  // Last of the message rules, because it is the only one that is about
+  // delivery rather than about the message being well formed: everything
+  // above decides whether the board accepts it, and this decides how much of
+  // it the recipient is woken with.
+  if (TRUNCATION_REFUSED.has(kind) && !m.acceptTruncation) {
+    const r = wakeReceipt(body, m.wakeLimit || WAKE_BODY_CHARS);
+    if (r.body_truncated) {
+      out.push({
+        code: 'WAKE_TRUNCATION',
+        line: `the wake will carry ${r.body_delivered} of ${r.body_chars} characters and drop the last ${r.body_lost}, and a ${kind} is a decision the recipient has to act on`,
+        repair: `cut ${r.body_chars - r.wake_limit} characters, or move the ask above the cut and pass --accept-truncation, because the store has no delete route and a half-sent ${kind} stays half-sent`,
+      });
+    }
+  }
+
   if (m.data && typeof m.data === 'object') {
     for (const key of DATA_PATH_LISTS) {
       if (key in m.data && !Array.isArray(m.data[key])) {
@@ -217,16 +459,46 @@ export function violations(m) {
       }
     }
     // standards/pm.md §15: a merge claimed in another repository names it.
-    const merged = m.data.merged;
-    if (Array.isArray(merged) && merged.some((v) => typeof v === 'number')) {
+    // Widened on 2026-11-02 from the single key `data.merged` to every key
+    // that carries a cross-company quantity; see QUANTITY_STEMS above for
+    // what that means and what it measured.
+    for (const [key, value] of Object.entries(m.data)) {
+      if (!isQuantity(value) || !isCrossCompanyQuantity(key) || namesItsScope(key)) continue;
       out.push({
-        code: 'MERGED_BARE_NUMBER',
-        line: 'data.merged holds a bare number, which a reader resolves against this company only',
-        repair: 'name the repository: {"Ursa": 260} or "Ursa#260", because numbers repeat across the five repositories',
+        code: 'QUANTITY_UNSCOPED',
+        line: `data.${key} is a quantity whose key does not name what it was counted over, and a reader resolves it against the sending company`,
+        repair: `name the scope in the key (portfolio_${key}, ursa_${key}) or in the value ({"Ursa": 3}, ["Ursa#260"]), because all ${COMPANIES.length} repositories on this bus have a number under a name like this one`,
       });
     }
   }
 
+  return out;
+}
+
+/** What a sender should know before posting but is not refused for, in the
+ *  same `{code, line, repair}` shape as a violation so one printer handles
+ *  both. These never change an exit code.
+ *
+ *  There is exactly one of these today and it is the truncation prediction
+ *  for the kinds `violations` does not refuse. It is a separate channel
+ *  rather than a violation with a severity field, because every caller of
+ *  `violations` treats a non-empty return as "post nothing", and a severity
+ *  those callers do not read would have turned every long note into a refusal
+ *  at the first call site that forgot to check it.
+ *  @param {Message & { acceptTruncation?: boolean, wakeLimit?: number }} m
+ *  @returns {Violation[]} */
+export function notices(m) {
+  const out = [];
+  const body = m.body || '';
+  const kind = (m.kind || '').trim();
+  const r = wakeReceipt(body, m.wakeLimit || WAKE_BODY_CHARS);
+  if (r.body_truncated && (m.acceptTruncation || !TRUNCATION_REFUSED.has(kind))) {
+    out.push({
+      code: 'WAKE_TRUNCATION_PREDICTED',
+      line: `the wake will carry ${r.body_delivered} of ${r.body_chars} characters and drop the last ${r.body_lost}; the board stores the whole body and cuts only the notification`,
+      repair: `nothing is refused for this. If the end of the body is where this message says what it decided or what it wants, cut ${r.body_chars - r.wake_limit} characters so the recipient is woken with it, because the only other way they read it is by fetching the row`,
+    });
+  }
   return out;
 }
 
@@ -252,7 +524,8 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
   const has = (name) => argv.includes(name);
 
   if (has('--help') || has('-h')) {
-    console.log('usage: check.mjs --kind K --subject S (--body B | --body-file F) [--to-seat S] [--to-company C] [--surface S] [--data JSON] [--everyone] [--host]');
+    console.log('usage: check.mjs --kind K --subject S (--body B | --body-file F) [--to-seat S] [--to-company C] [--surface S] [--data JSON] [--everyone] [--accept-truncation] [--wake-limit N] [--host]');
+    console.log('       --to-seat owner, chair or chair:<label> needs no company: the board discards it for those three.');
     process.exit(0);
   }
 
@@ -260,6 +533,12 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
     const cases = [
       ['ursa is refused', { kind: 'note', toSeat: 'pm', toCompany: 'ursa', subject: 'x', body: 'a'.repeat(50) + ' because' }, 'COMPANY_SPELLING'],
       ['Ursa is accepted', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because' }, null],
+      ['the owner needs no company', { kind: 'note', toSeat: 'owner', toCompany: '', subject: 'x', body: 'a'.repeat(50) + ' because' }, null],
+      ['a chair needs no company', { kind: 'note', toSeat: 'chair:ursa', toCompany: '', subject: 'x', body: 'a'.repeat(50) + ' because' }, null],
+      ['a role seat still does', { kind: 'note', toSeat: 'pm', toCompany: '', subject: 'x', body: 'a'.repeat(50) + ' because' }, 'COMPANY_OMITTED'],
+      ['an unscoped count is refused', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { merged_total: 40 } }, 'QUANTITY_UNSCOPED'],
+      ['a scoped count is not', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { portfolio_merged: 40 } }, null],
+      ['an over-limit handoff is refused', { kind: 'handoff', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'because ' + ('word '.repeat(60) + '\n\n').repeat(6) }, 'WAKE_TRUNCATION'],
     ];
     let bad = 0;
     for (const [name, msg, want] of cases) {
@@ -296,11 +575,23 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
     data: flag('--data') ? JSON.parse(flag('--data')) : null,
     surface: flag('--surface'),
     everyone: has('--everyone'),
+    acceptTruncation: has('--accept-truncation'),
+    wakeLimit: Number(flag('--wake-limit')) || 0,
   };
 
   const found = violations(msg);
+  // Printed on both paths and before the verdict, because a notice on a
+  // message that is about to be refused is still the sender's to read: the
+  // edit that repairs the violation is the same edit that shortens the body.
+  for (const n of notices(msg)) {
+    console.error(`${n.code}: ${n.line}`);
+    console.error(`  note: ${n.repair}`);
+  }
   if (found.length === 0) {
-    console.log(`Board message: clean. ${msg.toCompany || '(all companies)'}/${msg.toSeat || '(everyone)'} would be woken.`);
+    const where = isGlobalSeat(msg.toSeat)
+      ? `${msg.toSeat} (one actor in the portfolio, so the company field is discarded)`
+      : `${msg.toCompany || '(all companies)'}/${msg.toSeat || '(everyone)'}`;
+    console.log(`Board message: clean. ${where} would be woken.`);
     process.exit(0);
   }
   for (const v of found) {

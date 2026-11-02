@@ -13,6 +13,12 @@ no prior entries existed.
 from repo evidence or the host's own run record, named with its source
 and window. Nothing here is estimated and presented as a dollar figure.
 
+**Practice adopted 2026-10-27 (close-2026-10.md, sixth run):** a figure
+sourced from a live repo or host read now names that read's own
+timestamp next to the measurement window, because the source can move
+between the read and the line being published, and a figure that
+names only the window it measures can go stale without saying so.
+
 ## Line 1 — the 2026-10-26 turn-cap raise
 
 **What it is.** HQ's `alexandra-systems#525` (merged 2026-10-26T20:05:13Z)
@@ -91,6 +97,32 @@ column above climbing toward the *new* cap (180 / 150 / 150 / 150) rather
 than holding near where it sits today — that would be a cost growing
 because the ceiling let it, which is exactly what the charter's close
 section asks this seat to flag.
+
+## Update, 2026-11-01 — the watch above, answered for its first month
+
+Read from `/srv/asc/state/.epito/audit.jsonl` at 2026-11-01T23:2x UTC,
+split at the raise's own merge timestamp (2026-10-26T20:05:13Z) so each
+side of October is measured against the cap that actually governed it,
+not against whichever cap happens to be current now:
+
+| Ursa seat | pre-raise runs | hit old cap (120/100/100/100) | post-raise runs | hit new cap (180/150/150/150) |
+|---|---|---|---|---|
+| engineer | 49 | 8 (16%) | 24 | 0 (0%) |
+| exo | 73 | 15 (21%) | 18 | 2 (11%) |
+| security | 14 | 8 (57%) | 9 | 1 (11%) |
+| skill | 38 | 15 (39%) | 13 | 1 (8%) |
+
+"Hit the cap" here means the run's own `turns` field reached or passed
+the cap that applied to it at the time, read directly from each
+`run.end` record — not inferred from the `exit` code, which can be
+non-zero for reasons other than the cap. Every one of the four raised
+seats shows a lower cap-out rate after the raise than before it, most
+sharply security (57% to 11%) and skill (39% to 8%). This is a five-day
+post-raise window (2026-10-26 to 2026-10-31), not a full month under
+the new cap, so this is a first read, not a settled trend — worth
+re-checking once a full month sits entirely on the new side of the
+line. No dollar figure follows from this either way, same reason as
+always: usage moved, the rate to price it didn't.
 
 ## Open questions for the owner
 

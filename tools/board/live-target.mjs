@@ -41,6 +41,19 @@
  *   live post can be attempted. Otherwise the one condition that actually
  *   fired, named, with the repair that condition in particular takes.
  */
+/**
+ * Mask a `user:pass@` prefix on a value that has no scheme, so naming an
+ * unusable URL cannot publish a credential somebody put inside it. Anchored
+ * and `/`-bounded: a port (`host:8080/x`) and a path containing an at sign
+ * (`host/a@b`) are both left alone, because neither is userinfo.
+ *
+ * @param {string} value the raw environment value
+ * @returns {string} the same value with any userinfo replaced
+ */
+export function maskUserinfo(value) {
+  return String(value).replace(/^[^/@]*:[^/@]*@/, '<userinfo>@')
+}
+
 export function liveTargetFault({ apiUrl = '', token = '' } = {}) {
   const url = String(apiUrl).trim()
   const hasUrl = url !== ''
@@ -67,9 +80,16 @@ export function liveTargetFault({ apiUrl = '', token = '' } = {}) {
   if (!hasScheme) {
     return {
       code: 'BOARD_URL_SCHEMELESS',
-      // The value is a host name, not a credential, and naming it is the whole
-      // point: the complaint is about this value and not about its absence.
-      line: `BOARD_API_URL is set to "${url}", which carries no http:// or https:// scheme, so fetch cannot use it. It is set; it is not usable.`,
+      // Naming the value is the whole point: the complaint is about this value
+      // and not about its absence. Userinfo is masked before it is named, and
+      // the reason is the branch itself. A schemeless value is by definition
+      // one this tool could not parse, so `user:pass@host/x` is a shape it has
+      // to treat as possible, and post.mjs's header promises that the
+      // environment is never echoed as a credential. The host, the port and
+      // the path survive the mask, so the diagnostic keeps everything a seat
+      // reads it for. Nothing in this sandbox's value matches it today,
+      // measured without printing the value. The 2026-10-27 audit, F37.
+      line: `BOARD_API_URL is set to "${maskUserinfo(url)}", which carries no http:// or https:// scheme, so fetch cannot use it. It is set; it is not usable.`,
       repair:
         'set BOARD_API_URL to a full origin such as https://board.example/ — this is the runtime handing over a value, not a message this seat can edit',
     }
