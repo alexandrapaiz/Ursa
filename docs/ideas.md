@@ -16289,3 +16289,64 @@ the owner to accept or reject.
   §5ag's own entry sat one run before it was built and said in its own text
   that naming an owner is what stops that.
 - Status: proposed
+
+### 2026-11-02 (skill) — A knowledge surface that cites a charter edit cannot be split from it, so the methodology has to land in an earlier pull request than the work citing it
+
+- Trigger: measured while landing #601, not recalled. The exo seat's note of
+  this morning gives the repair for the charter freeze as "if your run produces
+  both a knowledge surface and a charter edit, that is two branches, since the
+  cheap one can land the same day". That is right about the tier mechanism:
+  `docs/standards/pm.md` §10 makes Tier C `prompts/`, and Tier B condition 4
+  refuses a merge when any path in the diff is Tier C, so one prompt file moved
+  55 other files of #601 into the owner's queue with it for six days.
+- What: the split was not available here, and the reason generalises. #601's
+  two skills, `skills/trigger-coverage.mjs` and `skills/check-evidence.mjs`
+  cite `prompts/skill-extract.md` §5y, §5ae, §5af, §5ag and §5ah 29 times, and
+  the rewritten `trigger-coverage.mjs` *implements* those sections. Dropping
+  the prompt from the branch would land guard tooling citing five sections of a
+  methodology document that does not have them, which is a dangling citation in
+  the one library whose stated differentiator is that every claim traces. So
+  the two halves of #601 are not separable after the fact, and the branch stays
+  Tier C.
+- The measured cost of not splitting earlier: `auditing-an-untraced-share`
+  landed on main in the one window where the ninth skill existed and §5ae's
+  counts convention did not, so it shipped stating all four of its counts in
+  prose and was the only file in the library the new guard could not check.
+  Four sibling boundaries were untested in both directions for the same reason.
+  Both were repaired in this run, and neither was a defect of authorship.
+- First step: the rule is ordering, not splitting. A run that needs a new
+  methodology section writes that section in its own pull request first,
+  carrying nothing that cites it, and the work citing it goes in the next run.
+  That makes the prompt file the only path in a one-file Tier C branch the
+  owner can read in a minute, and leaves every later branch Tier B. Cheap to
+  state in §5 and worth one run to try.
+- Cost: $0, and the next run of this seat that would add a §5 section
+- Status: proposed
+
+### 2026-11-02 (skill) — The README construct repeats, so the count claim 2026-10-27 left as a hand repair is a check after all
+
+- Trigger: this entry answers the 2026-10-27 entry above, which named "this
+  seat, and the next run of this seat that edits `skills/README.md`" as its
+  owner and deadline, and left one question open: whether the construct
+  repeats twice, which it said would make it a check rather than a hand repair.
+- What: it repeats. The first instance is the one that entry found, the prose
+  sentence stating the ordered-pair count, which this run replaced with a
+  sentence that states no number and defers to the tool. The second is the
+  section heading. `skills/README.md` carried `## Seven areas` over six
+  `**The ... area.**` labels, because the run that added the ninth skill moved
+  the heading and placed that skill inside an existing area in the same breath.
+  Both of that run's own sentences about the skill put it inside the span area,
+  so the heading was the outlier rather than the list, and this run set the
+  heading to eight over the eight labels the merge lands.
+- Why it is the §5ag shape and not the §5af shape: the number of *areas* is a
+  judgement no tool can derive, which is why it sits in the `counts` block by
+  hand. The number of **labelled** areas is a count of `**The ... area.**`
+  headings, so "heading ordinal equals label count" is one gradeable construct
+  with a computable denominator, which is what the 2026-10-27 entry asked for
+  and did not find.
+- First step: assert it where the counts block is already read, in
+  `skills/trigger-coverage.mjs --check`, as one more stated-count row beside
+  the existing three. The ordinal is a spelled word in the heading and the
+  denominator is a grep, so it is an hour, not a day.
+- Cost: $0, in `skills/trigger-coverage.mjs`
+- Status: proposed
