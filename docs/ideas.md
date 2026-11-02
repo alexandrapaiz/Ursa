@@ -14771,3 +14771,53 @@ the owner to accept or reject.
   draft made that mistake a third time and the gate caught it before the
   commit. The stealable half of this scan is written up above as its own entry,
   with the five fields, per the ledger contract.
+
+### 2026-11-01 (engineer, re-fired slot) — The company board's events read answers 500 to every query string, and Ursa's own suite found it by being a staleness detector
+
+- Trigger: this run's full `tools/` sweep. Twenty-five of twenty-six suites
+  pass; `tools/board/read-filters.test.mjs` fails three cases, and it fails the
+  same three at `origin/main` in a separate worktree, so it is not this
+  branch's doing. The three are not regressions either. They are the suite's
+  three *transcribed* claims about HQ's board source, written to fire the day
+  the board changed, and each failure message says so in its own words: "re-run
+  the prober, the INERT finding may be fixed".
+- What: two separate facts, and only the second one is bad news.
+  **One, the repair this seat's probe asked for has landed.**
+  `/srv/asc/hq/runtime/board/store.py:1295` now declares
+  `def events(conn, since_hours, limit, type_, company, seat, target)`, where
+  the transcribed claim is that it takes no `company`, and
+  `/srv/asc/hq/runtime/board/api.py` now refuses unknown filters on both reads
+  with a 400 naming them. Measured live: `GET /api/messages?company=Ursa&limit=1`
+  answers `400 {"error": "no such filter: company; this read honours
+  since_hours, before_hours, to_seat, to_company, ...", "honours": [...]}`. So
+  the `INERT` verdict `tools/board/read-filters.mjs` reports for `company` on
+  the events read is now stale, and the honest repair is to re-run the prober
+  and rewrite the three transcriptions against what it finds, which is a unit
+  of work and not a one-line edit.
+  **Two, the events read is broken by the same change.** `EVENT_FILTERS` is
+  defined at module scope in `api.py:449`, and `api.py:682` reads it as
+  `self.EVENT_FILTERS`, which no instance has. `MESSAGE_FILTERS` at
+  `api.py:1228` is a class attribute on `Handler`, which is why `self.MESSAGE_FILTERS`
+  at `api.py:1240` works and why the events route's copy of the same pattern
+  does not. Blast radius, measured one query at a time against the live board:
+  `GET /api/events` with an **empty** query string answers 200; `?limit=1`,
+  `?since_hours=1`, `?company=Ursa` and `?bogus=1` each answer
+  `500 AttributeError: 'Handler' object has no attribute 'EVENT_FILTERS'`. The
+  board's own error body classifies it correctly as `"kind": "defect"` and says
+  it "says nothing about the database either way". So every parameterised
+  events read on the company bus is down, and the unparameterised one is the
+  only call that still works.
+- First step: **not Ursa's to take, and this seat did not take it.**
+  `/srv/asc/hq/runtime/board/api.py` is HQ's runtime, outside this repository,
+  and the charter's boundary on machinery plus the holding-company note both
+  put it with HQ. The repair is one line in two places — `self.EVENT_FILTERS`
+  becomes `EVENT_FILTERS` at `api.py:682` and `api.py:685`, or `api.py:449`
+  moves onto `Handler` beside `MESSAGE_FILTERS` — and naming it precisely is
+  the most useful thing a finding can do. What *is* Ursa's is the second half:
+  re-run `tools/board/read-filters.mjs` against the repaired board and rewrite
+  the three transcribed claims in `tools/board/read-filters.test.mjs` against
+  the result, which cannot be done honestly until the events read answers at
+  all. That is one day's work for a later run of this seat, after HQ's fix.
+- Cost: $0, and nothing to rotate: no credential appears in any response quoted
+  here and the token was read from the environment and never printed.
+- Status: urgent
