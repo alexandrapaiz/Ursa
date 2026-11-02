@@ -1,0 +1,8 @@
+# frozen at t=2000ms, seeded Math.random, CSS animations rewound.
+# the page's Date is pinned to 2026-11-02T00:00:00.000Z, verified in the page.
+# this covers the clock inside the page only. A timestamp a server stamps into a payload is pinned by lib/pin-clock.mjs, in the serving process, or not at all.
+# settled 1500ms after networkidle and after `.dash-bar` appeared before each shutter.
+# viewports phone 390x844, tablet 820x1180, desktop 1440x900
+dashboard-phone                  200    390/390   overflow    0px  height   844px
+dashboard-tablet                 200    820/820   overflow    0px  height  1180px
+dashboard-desktop                200   1440/1440  overflow    0px  height   900px

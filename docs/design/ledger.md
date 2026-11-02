@@ -1582,3 +1582,113 @@ review folder knows inside one second.
 
 This is L33's family — a tool that quietly undoes work on its next run —
 with the quiet part being the whole defect rather than a side effect.
+
+## L47 — The clock that moves the frame was never in the browser
+
+**measured**, 2026-11-02. `reviews/2026-11-02/README.md` §3 and §4.
+
+L45 proposed `--pin-now <iso>` on `shoot.mjs`, passed through to
+`freezeInit`, to stop the overlay dashboard's `read at HH:MM:SS` from
+putting a diff into every before-and-after on that page. It is built and
+it works, verified on a fixture in `selftest/check-pin-now.mjs`. It does
+not close the defect L45 named.
+
+| condition | page clock | server clock | desktop | tablet | phone |
+|---|---|---|---|---|---|
+| as reviewed today | running | running | 146 px | 145 px | 157 px |
+| **exactly what L45 proposed** | **pinned** | running | 100 px | 95 px | 96 px |
+| the preload | running | **pinned** | 0 px | 0 px | 0 px |
+
+`ursa-major/src/serve.ts:298` builds the payload with `readAt: new
+Date().toISOString()` in the process holding the store. The browser
+renders a string it was handed. By the time any init script runs, the
+timestamp has been written in another process and sent over loopback, so
+no init script can reach it.
+
+**The scope, counted and not assumed: neither product reads the wall
+clock client-side at all.** One `new Date(…)` in `overlay/app/page.tsx`
+parses a payload field; `ursa-minor` has none. So the page-side pin moves
+no pixel on any of the fifteen frames this seat photographs, and the
+repair is `lib/pin-clock.mjs`, a `node --import` preload that pins `Date`
+in whatever process is serving. The product ships unchanged, because a
+review instrument should not need a product change to take a
+measurement.
+
+**The transferable half.** L45 reasoned correctly from a correct symptom
+to the wrong process. The page was the only process it was holding an
+instrument on, so the clock was assumed to be in the page. The question
+that would have caught it costs one `grep` and is worth asking of any
+value a frame is being diffed over: **which process computes this
+string.** This is L42's family, a thing read out of one place and assumed
+to behave the way that place would, with the gap here being a process
+boundary rather than a document.
+
+A second rule falls out of it. `shoot.mjs` runs the browser and cannot
+see whether the server behind it was preloaded, so its `measurements.txt`
+now states that limit on both branches, pinned and unpinned. A frame set
+whose header reports a pin is the set most likely to be trusted past what
+the pin covers.
+
+## L48 — A one-pixel floor on the phone dashboard, which is not the clock
+
+**measured**, 2026-11-02. `reviews/2026-11-02/README.md` §6.
+
+With both clocks pinned, the two shoots compared above came back at 0 px
+on all three viewports. **That is a fact about the pair and not about the
+condition.** Eight shoots of the phone frame off the pinned server differ
+in exactly one pixel, at (19, 110), which takes one of two values: five
+give `(2, 6, 31)` and three give `(2, 3, 8)`, the page's own background.
+It is bistable rather than drifting. Five shoots at desktop are
+bit-identical, so the floor is phone-only.
+
+`.dash-head`'s `border-bottom: 1px solid var(--line)` draws at row 107
+from x=20 rightwards. The stray sits three rows below that rule and one
+pixel to the left of where it starts, detached, on an element that
+`elementsFromPoint` and a sweep of every box within 6px both fail to
+place. Not chased further: it is one pixel and it is invisible at 1x.
+
+**Why it is written down anyway.** "0 px" was about to be a sentence in a
+review, and the next run comparing a repair on this page at phone width
+would have found an unexplained pixel in its diff with no record saying
+it was already there. That is this ledger's recurring failure, L6, L8,
+L41 and L45, arriving a fifth time: a frame that differs from itself. The
+difference between a known floor and an unknown one is the difference
+between a 43-pixel repair being legible and not.
+
+The rule, stated once for the family: **a determinism claim needs
+repeats, not a pair.** Two frames agreeing is the weakest evidence that a
+page is reproducible, because the pair is the sample you stopped at.
+
+## L49 — An unrelated `npm install` uninstalls the review kit
+
+**measured**, 2026-11-02. `reviews/2026-11-02/README.md` §5.
+
+The kit installs playwright with `npm i -D --no-save`, deliberately,
+because it is a review tool and not a shipped one and neither site should
+carry it as a dependency. The consequence was not written down anywhere:
+**it is in no `package.json`, so the next plain `npm install` in that
+package removes it.**
+
+This run started a build of `ursa-minor` for an unrelated check, and some
+minutes later every kit tool began failing with `ERR_MODULE_NOT_FOUND` at
+`lib/browser.mjs`. The two events do not look connected. The install
+prints nothing about a package it is removing that nobody declared, and
+the failure surfaces in a different directory against a different tool.
+
+`lib/browser.mjs` already searches `ursa-minor/node_modules`,
+`ursa-major/node_modules` and the repository root in that order, so the
+cheap repair is to install it into the package you are **not** about to
+build. This run put it back into `ursa-major` and carried on.
+
+The transferable half is the one `--no-save` always carries and this
+repository had only ever stated the upside of: **a dependency nothing
+declares is a dependency nothing protects.** It is the right call here,
+and the cost belongs next to the reason.
+
+It also made the better instrument obvious. The check that needed the
+site was "does the freeze still pin the clock", and the site was only
+ever a page to observe it on. Asking the browser what a `requestAnimationFrame`
+callback receives answers it in two seconds with no build at all, and
+that is now the last two lines of `selftest/check-pin-now.mjs`, where
+the claim in `freeze.mjs`'s header has an executable assertion behind it
+for the first time.
