@@ -728,6 +728,24 @@ test('a note that declares an amendment is an edge, and prose that says the same
     '## 5. A\n\nThe body discusses amending §5c at length.\n\n## 5c. B\n\n(Added 2026-10-01.)\n\nIts body.\n'), [])
 })
 
+test('a note that amends two sections in two sentences declares both edges, because `exec` read one', () => {
+  // Measured on this file's own newest section on 2026-11-02. The note said
+  // "Amends §5am part 1 and part 3. Amends §5ai clauses 1 and 3." and the
+  // second sentence produced nothing: `amendmentEdges` called `AMENDING.exec`,
+  // which returns the first match and stops. Nothing in any output moved,
+  // because `amendmentPopulation` tests the pattern rather than capturing from
+  // it, so the section was counted as claiming an amendment while one of its
+  // two claims was invisible. That is §5al's shape with the verb spelled
+  // correctly: widening a pattern does not change how many times it is read.
+  const text = '## 5. The trigger test\n\nIts body.\n\n## 5c. A middle rule\n\n(Added 2026-10-02.)\n\nIts body.\n\n## 5d. A later rule\n\n(Added 2026-10-03, amends §5 part 1. Amends §5c.)\n\nIts body.\n'
+  assert.deepEqual(amendmentEdges(text).map((e) => `${e.from}->${e.to}`), ['5d->5', '5d->5c'])
+  assert.deepEqual(amendmentEdges(text).map((e) => e.part), ['part 1', null])
+  // A section named twice across two clauses is still one edge, which is the
+  // `seen` set doing its job across clauses and not only inside one.
+  const twice = '## 5. The trigger test\n\nIts body.\n\n## 5d. A later rule\n\n(Added 2026-10-03, amends §5 part 1. Amends §5 part 2.)\n\nIts body.\n'
+  assert.deepEqual(amendmentEdges(twice).map((e) => `${e.from}->${e.to}`), ['5d->5'])
+})
+
 test('three inflections of the verb declare an edge, and the drop was 1 of 32 with no output to move', () => {
   // The pattern read only the gerund until 2026-11-02, and §5ah's rule is
   // stated as a note that "says it amends §N". A note writing it as "Amends"

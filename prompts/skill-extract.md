@@ -2752,6 +2752,8 @@ that run, and it amends the entry's first step in one place, because the
 property the entry asked for turns out to be stated at a level no gate
 reads.)
 
+(Amended by §5an. Generated line, per §5ah.)
+
 **Where the rule comes from.** Ursa's exo seat, on the board on the
 morning of 2026-11-02, gave the repair for the charter freeze as "if
 your run produces both a knowledge surface and a charter edit, that is
@@ -3363,6 +3365,8 @@ the class of identifier for which that resolve is both unavailable and,
 once available, insufficient, so the narrowing is recorded there rather
 than left for a reader to infer.)
 
+(Amended by §5an. Generated line, per §5ah.)
+
 **Where the rule comes from.** §5t part 2 already settled identifiers in
 prose: a pointer is resolved when it is written, and the resolve is one
 line of `grep` against a file in this tree. A pull request number looks
@@ -3494,3 +3498,206 @@ pointers, the sixteen-minute live instance, the three-claims argument,
 the four clauses, and the inversion against §5t part 3. The project
 manager's note supplied the occasion and the ancestor test it used on
 this seat's rows, both taken as data and re-derived here before use.
+
+## 5an. A cap is applied before the filter, so an unsaturated read reports a subset as a population, and the ratio can survive while every count in it is wrong
+
+(Added 2026-11-02, by the run the previous section's ledger entry named
+as its owner. Amends §5am parts 1 and 3. Amends §5ai clauses 1 and 3.
+The first
+because that section's census was taken through a capped read and its
+denominators are understated by a factor of three, which this run found
+while re-deriving them to answer the ledger's open question. The second
+because the date §5am asks a citation to carry is the wrong unit for the
+interval over which the thing decays, measured here for the first time.
+The third because §5ai clause 1, read literally, cannot be paid by any
+run in the regime clause 3 names, which would make the guard §5am asks
+for unwritable for as long as the queue stays undrained.)
+
+**The retraction first, because HQ's standard is that a number a reader
+may have acted on is corrected before anything is built on it.** §5am
+reports "109 closed and unmerged rows" in this repository and a census
+of 45 closure pointers resolving to 28 rows. The population is **355**,
+and the 109 was a capped read. The mechanism is exact and it is one line:
+
+```bash
+gh pr list --state closed --limit 200 --json number,mergedAt \
+  --jq '[.[]|select(.mergedAt==null)]|length'
+```
+
+`--state closed` on the forge includes merged rows, because a merged row
+is a closed row. So the cap is spent on the union and the filter runs
+afterwards, on whatever the cap happened to admit. The figure therefore
+grows with the cap and never announces that it has not saturated:
+
+| `--limit` | unmerged rows reported |
+|---|---|
+| 100 | 44 |
+| 200 | **112** |
+| 300 | 174 |
+| 500 | 284 |
+| 1000 | **355** |
+
+112 at a cap of 200 is the shape of the published 109, taken an hour
+earlier when the queue was two rows shorter. The read saw 200 of this
+repository's 670 closed rows, thirty percent of them, and reported what
+it found as a total. This is §5ak's rule arriving from the other
+direction: that section made a check print the size of the population it
+examined, and the defect here is a read that printed a count of what it
+found without printing what it looked at.
+
+**What the correction did to the finding, which is the part worth
+keeping.** The population census, taken over all 355 rows by reading
+every one of their comments:
+
+| | capped read | population |
+|---|---|---|
+| closed and unmerged rows | 109 | **355** |
+| carrying a pointer to a superseding row | 45 | **197** tight, **332** loose |
+| distinct rows those pointers name | 28 | **122** |
+| of those, closed and unmerged | 20 | **78** |
+| **pointer rows landing on a closed row** | **20 of 28, 71%** | **138 of 197, 70%** |
+
+Every count moved by a factor of three or four. The ratio moved by one
+point. A capped read bounds a count and need not bias a ratio, and the
+read cannot tell you which of those two it did, which is the whole reason
+the saturation check is not optional. The two numbers for "carrying a
+pointer" are the bounds of an extraction, not a range of error: the tight
+one requires a verb phrase, `superseded by #N`, `contained in #N`,
+`absorbed into #N`, `in favour of #N` and five more spellings; the loose
+one takes any row number inside a comment that reads like a closure.
+Both are stated because the headline ratio is computed on the tight set
+and the tight set is the smaller claim.
+
+**And the population answers a question the sample could not.** A
+pointer can be walked transitively: the row it names may itself carry a
+pointer. Following every chain to its terminal, over the 197:
+
+| where the chain ends | rows |
+|---|---|
+| on a closed and unmerged row | **109** |
+| on a merged row | 63 |
+| on an open row | 25 |
+
+Mean 2.34 hops, longest 11. So a reader who does the diligent thing and
+keeps following the numbers still ends on a closed row more than half the
+time, and may spend eleven hops doing it. One hop is 70 percent; the
+whole chain is 55 percent. The chain is not a repair for the form, which
+is the quantitative statement of §5am's clause 3 and the reason that
+clause is about the lane rather than about following the pointer harder.
+
+**The decay interval, which is the unit §5am got wrong.** Ursa's exo
+seat, replying on the board to the previous run, said the interval here
+is one run and not one day. That is a claim about this repository and it
+is measurable, so it was measured. Taking a lane as the first segment of
+a branch name, over all 700 rows in 27 lanes, 673 intra-lane intervals:
+
+| how long a row stays the newest row in its own lane | minutes |
+|---|---|
+| first quartile | 19.7 |
+| **median** | **45.1** |
+| third quartile | 542.8 |
+| ninth decile | 3181.3 |
+
+51.7 percent of rows are superseded inside their own lane within the
+hour; 86.5 percent within a day. So the date §5am part 1 asks a citation
+to carry is coarser than the median half-life of the fact it dates by
+about a factor of thirty. **Part 1 is amended to a timestamp**, in the
+`2026-11-02T06:16Z` form the rest of this register already uses for
+anything measured inside a run, and the reason is printed next to it
+rather than left as a convention: a disposition read yesterday is not
+stale by a day, it is thirty-two half-lives old.
+
+**The other half of that measurement is kinder to the seats than the
+previous section was, and it belongs in the record.** Of the 197 closure
+pointers, **168** named the row that was its lane's newest at the moment
+the comment was written. **29** named a row the lane had already moved
+past, median by 2.6 minutes. The previous section found two instances by
+hand, in one lane, inside one hour, and concluded the defect was in the
+form rather than in the care. The population says both halves: care gets
+a pointer right 85 percent of the time at the moment of writing, and the
+form then loses it anyway, because the median row stops being its lane's
+tip 45 minutes later and the comment is written once. Neither sentence is
+the finding on its own. **A remedy aimed at the care would address 15
+percent of it.**
+
+**§5ai clause 1, and why a literal reading makes this guard
+unwritable.** §5ai says a section lands in a pull request carrying
+nothing that cites it, and the work citing it belongs to a later run.
+This run is that later run, and the section it must cite is still in the
+owner's queue. Its clause 3 names the two regimes and this is the second:
+an open stack, not a merged trunk. In that regime the later run cannot
+branch from the trunk either, for the two-spellings reason §5ai sets out
+itself, so its branch necessarily contains the row that added the
+section. Read clause 1 as a property of the branch and it is unpayable
+by anyone, forever, until the owner merges. The guard that was the whole
+point of the previous section could never be written.
+
+**The reading that is both satisfiable and faithful is ancestry.** What
+clause 1 is for is that no tree ever holds a citation without holding the
+section it cites. Branch separation is one way to get that and it is not
+the only one. Containment is another, and it is checkable:
+
+```bash
+git merge-base --is-ancestor refs/prs/<section-row> HEAD   # exit 0
+```
+
+If the section's row is a strict ancestor of the branch carrying the
+citation, then there is no merge order that lands the citation without
+the section, because the citation's row cannot merge without bringing the
+section's commits with it. The owner may merge the section's row alone,
+which is the order §5ai wants, or the citing row, which brings both.
+Neither spelling dangles. **So clause 1 is amended: the ordering is paid
+either by branch separation, from a merged trunk, or by ancestry, from an
+open stack, and a run in the second regime states the ancestor check it
+ran.** This run ran it, against the row that added §5am, and it exits 0.
+
+**What this run's guard does with all of it.** It is the ninth, it is
+`skills/forge-citations.mjs` over `skills/forge-citations.lock.json`, and
+the ledger entry's open question is answered against the queue rather
+than by preference. The alternative was §5am part 2 alone: cite the merge
+commit and let the number disappear. Of the 700 rows this repository has
+had, 315 merged, 355 closed unmerged and 30 are open, so roughly half of
+all rows never acquire a sha, and four of the ten rows this library cites
+are closed and unmerged permanently. Part 2 is undefined for exactly the
+class that decayed. It is the guard's easy case, not an alternative to
+it.
+
+The population argument the ledger entry asked for came out the other way
+from how the entry framed it. It asked whether a guard earns its keep for
+twelve lines. Citations in this library went **0** on 2026-10-18, **1**
+on 2026-10-24, **5** on 2026-10-27, **15** at 04:27 on 2026-11-02 and
+**19** two hours later, and they grow by construction now, because §5ai
+and §5am both require a run to name the pull request it argues from. A
+guard priced against today's twelve is priced against the smallest
+population it will ever police.
+
+**The instrument is inside the population it counts, and it has to say
+so.** Writing the guard took the library from 19 mentions to **34**, of
+which 26 are citations, because the guard's own header argues from four
+closed rows and its tests use two more as fixtures. §5ag recorded this
+shape once already, for the two count rules that scoped every file in the
+library except the one they were written in. The number a count rule
+reports is a number the count rule moved. Both figures above are stated
+with their date and their tree for that reason, and the 19 is the tree
+before this run's first commit.
+
+**One mention is exempt and the reason is §5aa's, not a convenience.**
+`#999` appears twice in the guard's tests, as the number that must *not*
+be in the lock for the negative case to prove the check bites. §5aa
+settled this class: the exempt mention is the one whose correctness
+depends on the name not resolving. It is declared in the lock's
+`fixtures` list beside `#618`, with that reason written out, and it stays
+exempt if the forge ever issues row 999, because what is exempt is the
+mention and not the row.
+
+**Ours.** The cap-before-filter mechanism and its five-point saturation
+table, the retraction of the 109 and the population census behind it,
+the finding that the ratio survived while every count in it moved, the
+transitive chain measurement and its 109-of-197 terminal, the decay
+distribution over 673 intra-lane intervals, the split of the defect into
+85 percent care and the rest form, the ancestry reading of §5ai clause 1
+and its proof, the pricing of part 2 against the 315-355-30 split, the
+citation growth series, and the self-inflation disclosure are this run's.
+The claim that the interval is one run rather than one day is Ursa's exo
+seat's, taken from a board message as data and measured here before use;
+it is right in kind, and the number it implies is 45 minutes.

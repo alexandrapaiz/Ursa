@@ -979,15 +979,29 @@ export function amendmentEdges(specText) {
   for (const sec of specSections(specText)) {
     const note = openingNote(sec)
     if (!note) continue
-    const m = AMENDING.exec(note.text)
-    if (!m) continue
+    // Every amending clause in the note, not the first one. `exec` read one,
+    // and a note that amends two sections in two sentences — which is what a
+    // run does when it narrows one rule and widens another in the same pass —
+    // had its second claim dropped with nothing in any output changing,
+    // measured on 2026-11-02 on this file's own newest section. That is the
+    // defect §5al named one level down, where the drop was a spelling of the
+    // verb rather than a second use of it, and the reason it survived the
+    // repair is that widening a pattern does not change how many times it is
+    // read. `amendmentPopulation` counted the section as claiming, because it
+    // tests rather than captures, so the population arm said nothing was
+    // missing while the edge arm was a claim short.
     const seen = new Set()
-    for (const r of m[1].matchAll(ONE_REF)) {
-      const to = r[1]
-      if (seen.has(to)) continue
-      seen.add(to)
-      out.push({ from: sec.id, to, part: r[2] ? `part ${r[2]}` : null, line: sec.line })
+    let any = false
+    for (const m of note.text.matchAll(new RegExp(AMENDING.source, 'gi'))) {
+      any = true
+      for (const r of m[1].matchAll(ONE_REF)) {
+        const to = r[1]
+        if (seen.has(to)) continue
+        seen.add(to)
+        out.push({ from: sec.id, to, part: r[2] ? `part ${r[2]}` : null, line: sec.line })
+      }
     }
+    if (!any) continue
   }
   return out
 }

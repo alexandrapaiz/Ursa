@@ -75,7 +75,7 @@ export const LOCK = join(HERE, 'forge-citations.lock.json')
 /** The files whose pull request citations this guard polices. */
 export const SCOPE = ['skills', join('prompts', 'skill-extract.md')]
 
-/** Three or four digits, so a section number like §5am and an issue reference
+/** Three or four digits, so a section number in this file and an issue reference
  *  in prose cannot be confused for a row. Two-digit rows exist in this
  *  repository's history and none is cited here; widening this is a lock change
  *  and a re-measure, not a regex change. */
