@@ -308,3 +308,32 @@ durability denominator and quietly moves a number sold to a lab. That
 makes the new sibling a downstream consumer of this skill's verdicts,
 and it is a reason to be careful here rather than a reason to answer
 its prompts.
+
+## Added 2026-11-02: the ninth skill's boundary
+
+The run that landed `auditing-an-untraced-share` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**13. "The record says 34 percent no-provenance. A lab wants to
+commission collection concentrated where our models are weakest and
+they're pricing off that number. Can they?"**
+
+`auditing-an-untraced-share`'s own trigger 1, and it should not fire
+here.
+
+The boundary is the tightest pair in the library, and it runs both ways:
+this file's own trigger 3 is the near miss in the sibling's test, for
+the same reason. Both skills read `files[].spans`, both are about
+`no_generation_provenance`, and both are about whether a label deserves
+to be believed.
+
+It should not fire because nothing here is one span. The prompt names a
+class total and a price, and no adjudication of any individual span
+changes a percentage enough to answer it. The division is that this
+skill settles a span and the sibling rules on what a figure is made of.
+The practical tell: if the answer would be a verdict committed next to
+the record, it is this skill; if it would be a sentence about what may
+be written down, it is the sibling.

@@ -1,0 +1,190 @@
+# Trigger test — auditing-an-untraced-share
+
+Eleven prompts, written against the `description` field in `SKILL.md`.
+Three should activate the skill. Eight are near misses that should not.
+Per `prompts/skill-extract.md` §5, when the test fails the description
+is what changes and not the test.
+
+The budget is eight near misses because §5c sets one per adjacent skill
+and this skill's neighbours are every other skill in the library. §5e
+asks whether this skill's inputs name the same file as its neighbours',
+and for three of them they do: `adjudicating-uncertain-spans`,
+`quoting-a-number-from-an-outcome-record` and this skill all read
+`files[].spans` inside `outcome_record.json`. So §5c's warning applies
+and is answered in prose rather than waved away, in the last paragraph
+of this file's **Why the cut is where it is** section, because an
+artifact test that says three boundaries are real does not say they are
+written down. §5r is what says they have to be.
+
+Near miss 4 is `adjudicating-uncertain-spans`' own trigger, 5 is
+`quoting-a-number-from-an-outcome-record`'s, 6 is
+`running-an-outcome-record-trial`'s, 7 is
+`distilling-a-tuning-record`'s, 8 is
+`adding-a-bound-to-the-record-gate`'s, 9 is
+`clearing-a-record-for-release`'s, 10 is
+`auditing-a-detected-correction-loop`'s and 11 is
+`auditing-a-durability-walk`'s. Each is copied rather than paraphrased,
+per §5r: the sibling's own words test this description, and the
+author's words would only test the author.
+
+## Should fire
+
+**1. "The record says 34 percent no-provenance. A lab wants to
+commission collection concentrated where our models are weakest and
+they're pricing off that number. Can they?"**
+
+Fires, and it is the prompt this skill exists for, because money is
+about to be taken against a figure nobody has decomposed. It reaches
+the description through "deciding whether a commissioned collection can
+be priced off a no-provenance figure". The answer is step 4: the buyer
+is paying for the absent-vocabulary route and the quoted figure
+includes six others [E3]. Run on this repository's own committed
+fixture the whole 34.1 per cent resolves to `scored_below_floor` [E7],
+meaning none of it is the route being sold, which is the worked example
+in step 2.
+
+A reader without this skill reaches for
+`quoting-a-number-from-an-outcome-record`, gets a correct answer about
+denominators, and still signs the contract.
+
+**2. "Our no-provenance share went from 27 to 41 percent across two
+records of the same repo and nothing about the project changed. Is that
+signal or is the matcher going blind?"**
+
+Fires through "working out why the no-provenance share rose between two
+records of the same project". The prompt has already guessed the right
+shape of answer, which is why it fires rather than being handed to the
+quoting skill: the question is composition over time, not comparability
+of denominators. Step 3 is the ruling, and it is the one figure in the
+record whose level means less than its direction, because `MAX_TOKEN_DF`
+is an absolute count against a corpus that only grows [E4].
+
+**3. "This record has no `blindSpans` key at all. Is that a clean
+record or an old one?"**
+
+Fires through "checking whether a record is old enough that its
+blindness counts are absent rather than zero", and it is step 1 for a
+reason: it is the question that decides whether the other steps can run.
+The key is optional and read as zero when absent, every record written
+before 2026-10-24 omits it, and for those records zero is wrong but
+unknowable [E17]. The honest answer is that the record cannot be asked,
+which is a different answer from either one the prompt offers.
+
+## Should not fire
+
+**4. "This span scored 0.82 against a generation but the corroborator
+came back `rival`, so the resolver dropped it to
+`no_generation_provenance`. Is that right, or did the person really edit
+that generation?"**
+
+Should not fire. This is `adjudicating-uncertain-spans`' own third
+trigger prompt, and it tests the hardest boundary this skill has: it
+names this skill's class, its `descent` field and the rival demotion
+route, in this skill's vocabulary, and it is still not this skill's
+work. The question is whether **this one span** descends from **that
+one generation**, which is a per-span adjudication. This skill never
+settles a span; it rules on what a class total is made of. The
+description's exclusion "for deciding the label on any one span the
+resolver flagged `uncertain`" is the clause that has to catch it, and
+`uncertain` is set on exactly this route [E13].
+
+**5. "Trial three is a prose record and trial two was a repo. Can I put
+their no-provenance shares in the same table?"**
+
+Should not fire, and this is the second hardest boundary.
+`quoting-a-number-from-an-outcome-record`'s own trigger says
+"no-provenance shares" in so many words. The ruling it needs is about
+segmentation mode and denominators, which decide whether two numbers
+are the same kind of number at all. This skill supplies one input to
+that ruling and does not make it, which step 4's last bullet says
+explicitly. Fires here and the user gets a decomposition of two figures
+that should never have been in one table.
+
+**6. "We need a third trial for the corpus. Which repo should I point
+`ursa run` at?"**
+
+Should not fire. `running-an-outcome-record-trial`'s own trigger.
+Nothing has been resolved yet, so there is no share to audit. The
+description excludes "choosing a trial subject or running the capture".
+The two skills do touch, and the direction is one-way: the trial skill
+owns the capture-completeness precondition, and this skill cites it as a
+precondition rather than restating it.
+
+**7. "`ursa run` just produced four records for the site project.
+Distill them into tuning.json so I can paste the block into ChatGPT."**
+
+Should not fire. `distilling-a-tuning-record`'s own trigger. The
+artifact changes under the same vocabulary: the output is `tuning.json`
+and not a figure from `outcome_record.json`. Excluded by "turning
+labels into tuning axioms". §5e's artifact test is what makes this
+boundary the easy one of the eight.
+
+**8. "Add a bound that a record's verbatim-survived character count
+never exceeds its generated character count. It is obviously true and
+the gate should catch it."**
+
+Should not fire. `adding-a-bound-to-the-record-gate`'s own trigger.
+The shape is close in a way the artifact test cannot see, which is
+§5r's amendment to §5e: both skills reason about whether a record's
+figures are trustworthy. The difference is that a bound is a rule
+asserted over every future record, while this skill rules on one
+record's figure. The place they genuinely meet is step 2's arithmetic
+check, and the skill says there that a mismatch is the gate's business
+and not its own.
+
+**9. "The gate workflow is green on my record, so I'm pasting the
+conversation into the design doc as the example payload. Any reason
+not to?"**
+
+Should not fire. `clearing-a-record-for-release`'s own trigger. It
+shares the shape "a green signal is being read as permission", which is
+this skill's step 1 argument too, and the object is different: what may
+leave the machine, versus what a figure is made of. Excluded by
+"deciding whether a passage of raw text may be released".
+
+**10. "The signals block says one loop with two recurrences, but I
+count three places she complains about the constellation being dark.
+Which one is right?"**
+
+Should not fire. `auditing-a-detected-correction-loop`'s own trigger.
+Both are audits of a record block against what really happened, and
+both are called an audit, so the verb does not separate them. The block
+does: `signals` is settled by no span label and no percentage, while
+this skill reads only span reason fields and the class total they sum
+to.
+
+**11. "This record says `decayRate: 0`. Can I put 'none of the model's
+output was later removed' in the methods note?"**
+
+Should not fire. `auditing-a-durability-walk`'s own trigger. This is
+the closest of the four non-span-area boundaries, because it is the same
+judgment — a zero that might be an absence, about to be written into a
+methods note — applied to a different block. Step 1 of this skill makes
+that argument about `blindSpans` [E17] and the durability skill makes
+it about `decayRate`. A reader matching on shape will reach for the
+wrong one, so the descriptions carry the block names and not the shape:
+this one names `no_generation_provenance`, that one names `durability`.
+
+## Why the cut is where it is
+
+§5c says a skill with three or more neighbours is probably describing a
+topic, and §5e narrows that test to whether the neighbours name the same
+file. Three of them do: `adjudicating-uncertain-spans`,
+`quoting-a-number-from-an-outcome-record` and this skill all read
+`files[].spans`. So the warning is live and this section is the answer
+to it rather than a dismissal.
+
+The cut is by **field**, which is how `skills/README.md` already
+separates the sixth and eighth skills from the first three. The
+adjudication skill works on a span's `class` and its `candidate`. The
+quoting skill works on a figure's denominator. This skill works on the
+reason fields — `noCandidate`, `tokenSuppression`, `descent`, and the
+absence of all three [E10] — which no other skill in the library reads,
+and on the one question those fields exist to answer, which the
+resolver's own comment says was answerable only by reading its source
+until 2026-10-24 [E6].
+
+The test that this is a piece of work and not a topic: the procedure has
+an output a person can be wrong about. It ends in a ruling on what may
+be written down, and step 4 lists three of them. A topic would end in a
+tour of the fields.
