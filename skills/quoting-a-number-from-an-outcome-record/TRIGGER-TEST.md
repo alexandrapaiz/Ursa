@@ -286,3 +286,34 @@ one. Ask whether the question would survive someone answering "those
 two walks ended at different commits". If that answer dissolves the
 question, it was the durability skill's. If the question is still there
 afterwards, it is this skill's. `skills/README.md` records the order.
+
+## Added 2026-11-02: the ninth skill's boundary
+
+The run that landed `auditing-an-untraced-share` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**11. "The record says 34 percent no-provenance. A lab wants to
+commission collection concentrated where our models are weakest and
+they're pricing off that number. Can they?"**
+
+`auditing-an-untraced-share`'s own trigger 1, and it should not fire
+here.
+
+This is the hardest boundary in the library to hold, and this file's
+own trigger 3 is the near miss on the sibling's side of it. Both
+skills stand between a record figure and something a reader will
+trust. This one owns the question "what is it a share of"; the sibling
+owns "what is it made of". Those are different questions about the same
+sentence, and a prompt will usually ask only one of them.
+
+It should not fire, because no denominator is in doubt. The 34 per cent
+is well-formed and comparable; the problem is that it sums seven routes
+and the buyer is paying for one of them. Answering from this skill
+produces a correct ruling on the figure's shape and leaves the contract
+mispriced, which is the costly failure mode §5 says the near misses
+exist to catch. The two run in sequence on the same sentence, and the
+sibling's step 4 says explicitly that it supplies an input to this
+skill's ruling rather than making it.

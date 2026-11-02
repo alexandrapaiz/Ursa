@@ -3803,3 +3803,97 @@ register has been able to publish:
   windows without reaching `main`, so every clause this register earns is
   one more line of unmerged instruction. That curve is not this seat's to
   bend and it is named here rather than reported as progress.
+
+## Week of 2026-11-02
+
+**The section heading is the first finding of the week.** Every entry
+above dated 2026-10-24 through 2026-11-01 is filed under `## Week of
+2026-10-19`, which is two Mondays stale, and there is no `## Week of
+2026-10-26` section at all. Roughly twenty windows ran that week and
+each appended to the newest heading it could see rather than opening the
+one its own date belongs to. HQ's console parses these headings, so it
+has been attributing a fortnight of this company's improvements to one
+week. Nothing above is edited: re-filing fifty entries by hand against
+dates taken from prose is a larger claim than this window can verify.
+From here, open the section for your own Monday. `date -u +%G-W%V` costs
+nothing and is the only reading that cannot drift.
+
+### The age of this seat's own output surface, measured for the first time, which retracted the previous entry's last line
+
+- **Proposal.** The seventy-fourth window, 2026-11-02, from Ursa's skill
+  seat's note at 23:59:07Z the night before. That seat had graded eleven
+  of twelve charters here as carrying no clone rule, correctly, against
+  `main`. All eleven carry it in this seat's open `#618`, written
+  2026-10-27 and unmerged. So the finding was not a gap in the company's
+  charters. It was the age of the surface they are read from, and this
+  seat had no instrument for it.
+- **Merged.** **Not yet.** `tools/seat/charter-lag.mjs` and its test
+  ship in this window's pull request, which carries no `prompts/` path
+  and is therefore Tier B rather than Tier C. That property is the
+  improvement, not a detail of it.
+- **Effect.** The first reading, taken 2026-11-02: `prompts/exo-agent.md`
+  last reached `main` **14.2 days** ago, seven of the ten sibling
+  charters **27.9 days** ago, **6,509** charter lines are written and
+  unmerged across eleven files, **437** branches have been opened by
+  their own seats since those seats' charters froze, and **one** open
+  pull request holds every pending line. The number this replaces is the
+  previous entry's: it reported the lane as *"sixteen windows without
+  reaching `main`"*, which is the queue's clock and not the reader's.
+- **Rule.** A rule is in force when it is merged, so the seat that
+  writes rules for other seats measures the age of the file those seats
+  are handed. An instrument set that points only outward cannot
+  distinguish a rule that binds from a rule that was written.
+- **Next measure.** The brief of **2026-11-04**. Two readings, both from
+  the same tool: the lag on `prompts/exo-agent.md`, and whether any
+  `tools/` path remains in `#618`'s diff.
+
+### The retraction, which is the part worth more than the instrument
+
+- **Proposal.** Same window, same measurement. The entry for the week of
+  2026-10-19 closed with *"That curve is not this seat's to bend."* It
+  is, in part, and the mechanism was already in the standard this seat
+  cites weekly. `docs/standards/pm.md` §10's Tier B criterion 4 is one
+  line: the PM merges only when `gh pr diff --name-only` shows no Tier C
+  path. The tier is therefore the **maximum over a branch's paths**, and
+  this seat puts both of its lanes on one branch, so four tested tools in
+  `#618` are queued at a charter's tier.
+- **Merged.** **Not yet**, and deliberately not in this branch. The
+  charter clause that states "one tier per branch" is itself a `prompts/`
+  path, so adding it here would reproduce the defect inside the entry
+  that describes it. It is written on the charter branch and named in
+  the owner ask.
+- **Effect.** One comparison, this repository, this week. Ursa's engineer
+  shipped `tools/ensure-full-clone.sh` in a pull request containing that
+  one file; it reached `main` in **2 days**. This seat's eleven charter
+  lines telling eleven seats to run it were written three days later and
+  have not reached `main` in **6**. Same subject, same week, two tiers,
+  and what decided it was what else rode the branch.
+- **Rule.** Split a run's output at the tier boundary the gate reads,
+  not at the lane boundary the author feels. And the general half: when a
+  curve is flat and the named cause is somebody else's availability,
+  test whether your own artifact layout is an input to it first, because
+  that is the hypothesis that costs you something.
+- **Next measure.** The brief of **2026-11-04**: how many of this seat's
+  open pull requests contain both a `prompts/` path and a non-`prompts/`
+  path. Today it is two of two.
+
+### Compounding ratio, this window
+
+- **Seats touched: 11 for the measurement, 0 for a merged change.** The
+  instrument reads every charter in the repository and names every seat
+  whose runs are being handed a stale one. No sibling charter is edited
+  in this branch, on purpose.
+- **Files touched: 4, all one tier.** `tools/seat/charter-lag.mjs`, its
+  test, `docs/agents/incidents.md`, this file, plus the run log. No
+  `prompts/` path, which is what makes the branch mergeable in a PM pass
+  rather than in an owner pass.
+- **Does the next change get cheaper?** Yes, in the one way that
+  compounds: the tool makes the freeze visible from **inside any seat's
+  own run** rather than only to this one, and it is a refusing instrument
+  rather than a reporting one, so it cannot hand a later window the
+  comfortable wrong answer the way the clone does.
+- **Is the curve flat?** The charter lane is flat and this window did not
+  add to it, which is the first window in seventeen that did not. The
+  tools lane is not flat and was never the problem. Saying "flat" about
+  the whole of this seat's output was the error the second entry above
+  retracts.

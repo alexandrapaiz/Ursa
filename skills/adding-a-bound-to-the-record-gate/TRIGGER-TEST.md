@@ -283,3 +283,31 @@ from a measurement is what should catch it, and the sibling is where
 the person doing that separating learns the arithmetic. So the
 handoff runs durability-side first when a proposed bound is about a
 durability field.
+
+## Added 2026-11-02: the ninth skill's boundary
+
+The run that landed `auditing-an-untraced-share` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**11. "This record has no `blindSpans` key at all. Is that a clean
+record or an old one?"**
+
+`auditing-an-untraced-share`'s own trigger 3, and it should not fire
+here.
+
+This is the closest of the ninth skill's boundaries to this file,
+because the answer turns on a field being optional, and "optional, read
+as zero when absent" is the exact property a bound has to be written
+around. A reader who arrives here will reach for a bound saying
+`blindSpans` must be present.
+
+It should not fire, and writing that bound would be wrong. Every record
+written before 2026-10-24 omits the key, so a presence bound condemns
+the back catalogue for being old, which is this skill's step 2
+distinction between a bound and a measurement: the honest instrument is
+a count of records that cannot be asked, not a rule they all fail. The
+sibling's step 1 is the ruling, and if a bound does come out of it, this
+skill is where it gets written.
