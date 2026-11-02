@@ -1,10 +1,10 @@
 # Trigger test — attributing-a-deleted-span
 
 ```counts
-prompts: 12
+prompts: 13
 should-fire: 3
-near-misses: 9
-neighbours: 9
+near-misses: 10
+neighbours: 10
 ```
 
 The counts above are checked by `node skills/trigger-coverage.mjs`,
@@ -311,3 +311,41 @@ other way. Excluding a `pre_existing` file discards a true
 is a cost the sibling's own procedure records about its output. That is
 a note the sibling owes, not a deletion cause this skill can attribute,
 because once a path is excluded there is no span here to carry one.
+
+## Added 2026-11-02: the ninth skill's boundary, paid on merge
+
+`auditing-an-untraced-share` landed on `main` while this file sat in an
+unmerged pull request, so neither file carried the other's boundary and
+§5r's debt fell due in both directions on the same merge. This section
+is this file's half.
+
+**13. "Our no-provenance share went from 27 to 41 percent across two
+records of the same repo and nothing about the project changed. Is that
+signal or is the matcher going blind?"**
+
+`auditing-an-untraced-share`'s own trigger 2, and it should not fire
+here.
+
+This is the closest boundary any sibling has to this file, because the
+pull is not vocabulary. It is a shared cause. A share that moves while
+the work holds still is the signature of an apparatus defect, and this
+skill exists because one particular apparatus defect, a clone that
+cannot read a merge commit, corrupts an attribution while every figure
+built on it stays green. A reader who has internalised that recognises
+the shape of the question before its object, and arrives here with
+`unreadable_merge_commit` already in mind.
+
+It should not fire, and the reason is that the two classes run in
+opposite directions. `generated_deleted` is text the model produced that
+the finished work does not contain, and this skill asks what destroyed
+it. `no_generation_provenance` is text the finished work contains that
+no generation produced, and the sibling asks whether the walk could see.
+Nothing this skill rules on can move the sibling's figure, because a
+span this skill is about is not in the finished work at all.
+
+What is true, and worth stating rather than hiding, is that one clone
+defect inflates both. That makes the two siblings in cause and strangers
+in object, which is the hardest pair for a description to separate and
+the reason this near miss is written at full length. The handoff runs
+sibling-side first whenever the prompt names a share or a percentage,
+and this-side first whenever it names a span that is gone.

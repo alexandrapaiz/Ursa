@@ -1,10 +1,10 @@
 # Trigger test — distilling-a-tuning-record
 
 ```counts
-prompts: 12
+prompts: 13
 should-fire: 3
-near-misses: 9
-neighbours: 9
+near-misses: 10
+neighbours: 10
 ```
 
 The counts above are checked by `node skills/trigger-coverage.mjs`,

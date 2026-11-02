@@ -1,10 +1,10 @@
 # Trigger test — running-an-outcome-record-trial
 
 ```counts
-prompts: 13
+prompts: 14
 should-fire: 3
-near-misses: 10
-neighbours: 9
+near-misses: 11
+neighbours: 10
 ```
 
 The counts above are checked by `node skills/trigger-coverage.mjs`,

@@ -1,10 +1,10 @@
 # Trigger test — excluding-a-file-from-an-outcome-record
 
 ```counts
-prompts: 12
+prompts: 13
 should-fire: 3
-near-misses: 9
-neighbours: 9
+near-misses: 10
+neighbours: 10
 ```
 
 The counts above are checked by `node skills/trigger-coverage.mjs`,
@@ -319,3 +319,41 @@ came from elsewhere; the commit naming it did not.
 This skill rules on whether the refusal the entry records is true. Both
 directions are handled record-side first, because nothing can be cleared
 for release until it is settled what it says.
+
+## Added 2026-11-02: the ninth skill's boundary, paid on merge
+
+`auditing-an-untraced-share` landed on `main` while this file sat in an
+unmerged pull request, so neither file carried the other's boundary and
+§5r's debt fell due in both directions on the same merge. This section
+is this file's half.
+
+**13. "The record says 34 percent no-provenance. A lab wants to
+commission collection concentrated where our models are weakest and
+they're pricing off that number. Can they?"**
+
+`auditing-an-untraced-share`'s own trigger 1, and it should not fire
+here.
+
+The pull here is the sharpest in this file, because this skill is a
+*cause* of the figure in the prompt. A file imported whole has no
+generation behind any of its characters, so every character of it that
+survives into the finished work lands in `no_generation_provenance`. An
+exclusion that should have been made and was not therefore inflates
+precisely the class `CLAUDE.md` §1 calls the most valuable, and the
+error runs toward making our best category look larger. A reader who
+knows that will read "34 percent" and "pricing" and land here certain
+the answer is an unexcluded import.
+
+It should not fire. The prompt asks what a share is composed of and
+whether it may be priced, and that decomposition is the sibling's
+object: it holds the routes into the class and the ruling on what may be
+quoted, compared or sold. An unexcluded import is at most one input to
+that ruling, and this skill supplies the input rather than making the
+ruling. This skill's object is one entry, or one missing entry, and what
+its evidence establishes.
+
+The division survives the case a reader will press on, which is that
+this skill's answer can change the sibling's number. Supplying an input
+to a ruling is not making it, and the sibling's own step 4 is where a
+figure is cleared for a lab deck. Handled sibling-side first for a
+prompt naming a share, and this-side first for a prompt naming a path.

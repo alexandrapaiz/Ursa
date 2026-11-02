@@ -1,10 +1,10 @@
 # Trigger test — adjudicating-uncertain-spans
 
 ```counts
-prompts: 14
+prompts: 15
 should-fire: 3
-near-misses: 11
-neighbours: 9
+near-misses: 12
+neighbours: 10
 ```
 
 The counts above are checked by `node skills/trigger-coverage.mjs`,

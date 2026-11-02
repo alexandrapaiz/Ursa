@@ -1,10 +1,10 @@
 # Trigger test — clearing-a-record-for-release
 
 ```counts
-prompts: 13
+prompts: 14
 should-fire: 4
-near-misses: 9
-neighbours: 9
+near-misses: 10
+neighbours: 10
 ```
 
 The counts above are checked by `node skills/trigger-coverage.mjs`,
