@@ -16561,3 +16561,50 @@ the owner to accept or reject.
   table into the instrument that fills it.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 — A board read that names no window asks a question whose answer expires, and `/api/runs` is the route with no cursor to page out of it
+
+- Trigger: HQ's exo-centralizer seat wrote to this seat at 05:34Z saying it had
+  widened this seat's run-row number across four companies and downgraded an
+  escalation on it. Re-measuring the number to check that claim is what found
+  the number was wrong.
+- Why: this seat published a wrong number today and HQ acted on it. Queue row
+  10 of `docs/agents/pending-workflow-changes.md` and a note to HQ's
+  exo-centralizer at 04:15Z said 561 Ursa run rows carried zero GitHub Actions
+  `run_url`, and concluded a workflow step "has never fired". HQ widened it to
+  1,584 rows across four companies and downgraded its own escalation on the
+  strength of it. The read behind the number named no `days`, and `days`
+  defaults to 10 on that route, while the last Actions firing was 2026-10-17,
+  sixteen days back. At `days=90` there are 666 rows and **40** carry an
+  Actions `run_url`. The full measurement and what the forty rows actually
+  show is `docs/security/audit-2026-11-02h.md` F64.
+- The property worth building against, stated once: a default window is an
+  unstated premise that **expires**. A ten-day window reached 2026-10-17 until
+  2026-10-27 and not after, so the same read with the same parameters was
+  correct for ten days and then became wrong with nothing changed and nothing
+  raised. `tools/board/page.mjs` already carries the sibling lesson for a
+  `limit` cap — "it does not sample the window; it truncates it" — and covers
+  `/api/messages` only.
+- What: `/api/runs` cannot be paged the way `page.mjs` pages messages. It
+  honours `company, seat, days, limit` and nothing else, measured by asking it
+  for a fifth filter, so `days` widens the window and never moves it, and
+  `limit` is hard-capped at 200 whatever is asked for (200, 201, 500 and 1000
+  all answered `"limit": 200`). A seat with more than 200 rows inside the
+  window therefore has older rows that are unreachable by any parameter; the
+  pm seat is in that state today, which is why this run's 666 is reported as a
+  floor.
+- First step: a small reader beside `page.mjs` that is honest about what this
+  route can and cannot answer. Three properties, all cheap: it never sends a
+  bare read, so the `days` it used appears in its own output; it prints the
+  `created_at` of the oldest row it reached, so a quoted figure carries its
+  own reach; and it refuses to print a count from a reply carrying
+  `"saturated": true`, reporting a floor instead. That is
+  `docs/standards/pm.md` §15 applied to a second route, and it is the shape
+  `page.mjs` already has minus the cursor the route does not offer.
+- Not a gate, deliberately. The rule is a judgement about what a seat
+  publishes, and the instrument's job is to make the honest form the easy one.
+  The rule itself is written where the measurements live,
+  `docs/design/board-read-conformance.md` §2a, and in the header of
+  `tools/board/read-filters.mjs` where the runs window is declared.
+- Cost: $0
+- Status: proposed
