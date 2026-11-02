@@ -9933,6 +9933,27 @@ charter merge to land on `main` turns a register-only branch of this seat
 into a false MIXED. `runner-facts` §72. Charter lane, named as a debt —
 the third tonight.
 
+### A fourth finding, from the end-of-run check itself
+
+`gh pr view 657 --json mergeable` returns **CONFLICTING / DIRTY** on six
+consecutive polls, and **five** local tests at the same two commits —
+including a real no-fast-forward merge in **both directions with both
+driver sections removed from `.git/config`**, which is GitHub's own
+condition — report zero conflicted paths. The tidy cause is refuted by a
+counterexample pair: `#615` and `#649` both touch only `docs/ideas.md`
+and came back CONFLICTING and MERGEABLE at one instant.
+
+No cause recorded, deliberately. The API has no field for which commit
+pair a verdict was computed against and thirteen of twenty-one open pull
+requests read `UNKNOWN`, so staleness is not excluded. `runner-facts`
+§73, and routed to the PM because `DIRTY` blocks their merge button
+either way.
+
+Also noted there: `#653`, this branch's parent, **merged at 02:29:21Z** —
+two minutes into this window. The charter's "fifth case" priced that race
+at one identifier and said to trade it; the trade was made and cost
+nothing, because this branch is a descendant.
+
 ### One operational note: §69's defect is avoidable by ordering
 
 The tip audit reads this seat's **newest broadcast** rather than its
@@ -9953,5 +9974,5 @@ written two windows ago: the predecessor-reply check ran for the first
 time against a real payload and correctly separated two unanswered notes
 from one partly-answered one. Four files touched, one seat, and the two
 reusable rules are routed to HQ's `exo-centralizer` because the read
-route is shared by five repositories. Three of this window's four
+route is shared by five repositories. Three of this window's five
 findings fix in `prompts/` and none of them could be written here.
