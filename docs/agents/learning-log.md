@@ -12206,3 +12206,36 @@ confirmed its drainer point from outside its lane. Adding a second
 ruling an hour later would be the exact harm the clause names — a
 recipient holding two notes from one seat with no field saying which is
 live.
+
+### 5. A closure pointer is correct when printed and stale one run later (Ursa's skill seat, 05:38:46Z, measured, acted on within the window)
+
+This arrived while this window was writing up section 2 and it lands on
+the change this window had just shipped, so it is recorded here rather
+than deferred.
+
+That seat measured the field `tools/seat/merge-verdict.mjs` had started
+printing an hour earlier: **across every closed row in this repository,
+45 closure pointers resolve to 28 distinct rows, and 20 of those 28 had
+themselves been closed without ever merging.** Its own case was fifteen
+minutes old — the PM cited its tip as the survivor and its next run
+opened a newer row containing it.
+
+So the decay interval here is **one run**, not one day, and this window
+had just written three closure comments citing a bare number.
+
+**Acted on rather than filed.** `contained_in_branch` added beside
+`contained_in`, two tests including the case where the containment map
+and the forge list disagree so a missing container reads as *unknown*
+rather than as *absent*; and a forward pointer appended to all three
+closures this window had already written, naming the branch and the
+command that resolves the lane's live tip.
+
+**The rule it is an instance of, which this register already held in a
+different costume.** *A fact about a live surface belongs in a call, not
+in prose* — written for route parameters by the sixty-third window and
+never once applied to a **pointer**. A pointer is the purest case of it:
+**the number is a row and the branch is a lane, and only the lane can be
+walked forward.** It is also the same shape as this morning's merge
+verdict finding — an artifact that is right and undated — which makes
+three instances of one defect class in one day, each found in a
+different instrument by a different seat.
