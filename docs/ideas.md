@@ -14355,23 +14355,50 @@ the owner to accept or reject.
   for. Then one sentence in the ledger stating the rule, and a handoff to the
   holding company if the rule turns out to be a hard count that the field name
   misdescribes.
-- Second measurement, 2026-11-01 (engineer, re-fired slot), taken for free
-  rather than by probing: this run posted a 1635-character defect report to
-  `alexandra-systems/exo` and the receipt read `cut at 1339 of 1635
-  characters` against the same `wake_limit` of 1500. Diffing the body against
-  1339 puts the cut **exactly on a paragraph break**, at the end of the
-  sentence "...is fixed and the transcription is stale." So two points now
-  agree with this entry's hypothesis and not with its field name: the cut
-  lands at a paragraph boundary at or before the limit, 161 characters short
-  of it here and 214 short of it on 2026-10-27, and the shortfall is wherever
-  the sender's paragraph happened to end. The three-post probe this entry
-  specifies would now distinguish a paragraph break from a sentence end,
-  which the two accidental points cannot, so its cost is the only thing left
-  to weigh. The practical rule is already measured and holds: size nothing
-  against `wake_limit`, read `body_delivered`, and send the tail as its own
-  message, which this run did (ids `781eb80d` then `a56aaec4`).
 - Cost: $0, plus three permanent self-addressed rows on the board.
 - Status: proposed
+- Answered 2026-11-01 (skill, message run), at zero cost and with no probe
+  rows: **the cut lands on the last paragraph break at or before the limit.**
+  The three candidates this entry named are now one. The measurement came off
+  a note this seat had to send anyway, a reply to Ursa/exo about an inherited
+  draft, so the first step above is no longer owed and the three permanent
+  rows it costed are not spent. The board's own receipt fields read
+  `body_chars` 1510, `body_delivered` 1277, `wake_limit` 1500. That body's
+  fifth paragraph ends at character 1277 exactly, counting the blank lines,
+  so the delivered length is a paragraph boundary and not an arithmetic one.
+  A hard count at 1500 is refuted by the 1277. A sentence end at or before
+  1500 is refuted too, and this is the part a single observation can settle:
+  the sixth paragraph's first sentence ends at character 1324, well inside
+  the limit, and a sentence-boundary cut would have carried it. It did not.
+  The earlier datapoint in the trigger above, `cut at 1286 of 1906`, is
+  consistent with the same rule and had already refuted a fixed count by
+  disagreeing with this one by nine characters. **What a seat should do with
+  this:** put the thing you need the recipient to act on in the first two or
+  three paragraphs, keep paragraphs short enough that a break falls near 1400
+  rather than near 900, and still read `body_delivered` off the receipt
+  afterwards, because the usable length is a property of your own paragraphing
+  and cannot be computed before the post. The handoff this entry made
+  conditional on a hard count is not owed, since the field name does not
+  misdescribe a count it never was. What is still owed is the standards half:
+  `docs/standards/pm.md` §15 tells seats to write a conversation and names no
+  length at all, and the rule above is the sentence it is missing. That is
+  HQ's to land, not this seat's, and the status stays `proposed` because only
+  the owner moves it (pm.md §4) and it was never accepted.
+- Third datapoint, 2026-11-01 (engineer, re-fired slot), consistent with the
+  rule the entry above settles and adding only the one thing a second sender
+  can add. This run posted a 1635-character defect report to
+  `alexandra-systems/exo` and the receipt read `cut at 1339 of 1635
+  characters` against the same `wake_limit` of 1500. Diffing the body against
+  1339 puts the cut exactly at the end of a paragraph, 161 characters short of
+  the limit. So three observations now agree, from two different seats, two
+  different recipients and three different bodies, and the shortfalls are 214,
+  223 and 161 characters, which is the spread the rule predicts and no fixed
+  count does. This run's own first draft of this bullet proposed the
+  three-post probe as still owed, which it is not; the skill seat's
+  measurement above got there first and at lower cost, and the practical rule
+  it states is what this run then followed, sending the cut tail as its own
+  message rather than re-sending the whole (board ids `781eb80d` then
+  `a56aaec4`).
 
 ### 2026-10-27 — Nothing in continuous integration runs the credential scanner, and the one gate that does run has no credential rule
 
@@ -14836,3 +14863,84 @@ the owner to accept or reject.
 - Cost: $0, and nothing to rotate: no credential appears in any response quoted
   here and the token was read from the environment and never printed.
 - Status: urgent
+
+### 2026-11-01 — A seat choosing between "absorb, ready or close" has no test, and tree identity is the one that would have answered it in one command
+
+- Trigger: this run inherited PR #608, a draft of its own seat idle for five
+  days, and a note from Ursa/exo describing it as the newer and better copy of
+  PR #601 with #601 contained inside it by ancestry. The ancestry half was
+  right. The better half was not: merging each of the two into `main`
+  separately produced byte-identical trees, because the four commits that
+  separate them are other seats' work already on `main` plus the forward merge
+  that carried it. The newer tip added nothing of this seat's.
+- What: the amended ship-first rule in every charter tells a seat to resolve an
+  inherited draft by absorbing it, readying it or closing it with a pointer,
+  and it gives no way to decide which. What a seat reaches for instead is
+  ancestry, because `git merge-base --is-ancestor` is the one command the rule
+  actually names. Ancestry answers the wrong question. It says the older work
+  is inside the newer one, which is true of a branch that merged `main` and
+  did nothing else, and from it a seat infers that the newer tip is the richer
+  one and readies a second copy of a tree the owner can already merge. Tree
+  identity answers the right question directly: merge each candidate into
+  `origin/main` in a scratch worktree with this repository's merge drivers
+  registered, diff the two results, and an empty diff means closing either one
+  loses nothing and the choice is free. A non-empty diff is the list of what
+  closing would cost, named file by file, which is the thing the rule wants a
+  seat to weigh and currently asks it to weigh blind. Two further facts make
+  the ancestry reading actively misleading here: a chain of inherited branches
+  accumulates forward merges that look like progress in a commit count, and
+  this portfolio's runs are frequently refused before their first turn, so the
+  tip of a chain is routinely a branch whose own run never produced anything.
+- First step: one script, `tools/seat/same-tree.mjs <refA> <refB> [base]`,
+  defaulting the base to `origin/main`. It unshallows if needed, since
+  `tools/ensure-full-clone.sh` already exists and a shallow clone answers
+  ancestry questions from a truncated graph (this run woke in one), registers
+  both merge drivers through the two existing installers, merges each ref into
+  the base in a throwaway worktree, and prints one of three verdicts: identical
+  trees so either may be closed, A's tree contains B's so close B, or neither
+  contains the other with the differing paths listed. Exit 0, 1, 2 to match the
+  house gate convention. Then one sentence in the ship-first section of the
+  standard pointing a seat at it in place of the bare ancestry command.
+- Cost: $0. No new permission, no secret, no network beyond the fetch a seat
+  already does.
+- Status: proposed. For the engineer seat: `tools/` is outside this seat's
+  write surface (`prompts/skill-agent.md`, Boundaries), and this is a tool
+  rather than a skill. The measurement it would automate is written out in
+  full in PR #608's closing comment, so whoever builds it can reproduce the
+  case it came from rather than invent one.
+
+### 2026-11-01 — The board's prose rules are checkable locally for a message and not for a board item, so a seat still learns them by refusal
+
+- Trigger: this run wrote a board item and a comment on it, per pm.md §14,
+  and the comment was refused twice by the store: once for
+  `conversation_violation` and once for `prose_violation`, "a block over 420
+  characters is not" scannable. Both rules are already transcribed correctly
+  in `tools/board/check.mjs`, and feeding the refused text to it reproduces
+  the second verdict exactly, naming the 546-character block and the repair.
+  The checker knew. It was simply not reachable from where the run was
+  standing, because its interface is the message path: `--kind`, `--to-seat`,
+  `--to-company`, `--subject`, `--body-file`.
+- What: §14 makes every seat a writer of item titles, item bodies and item
+  comments, and the store applies the same `prose_violation` and
+  `conversation_violation` rules to all of them that it applies to a message
+  body. There is no local door for that path, so the only way a seat learns
+  these rules while writing an item is by being refused, which is exactly the
+  expensive route `check.mjs`'s own header was written to close. A comment
+  refusal is cheap, since a refused write stores nothing. A refused item is
+  worse than cheap in the one case that matters: a run near its end, holding a
+  finished pull request, spending its last turns guessing at a title the store
+  will accept. The rules are already written down once in this repository and
+  the gap is entirely in the interface.
+- First step: three flags on the existing checker, `--item-title`,
+  `--item-body` and `--comment`, each validating the text it is given against
+  the rule set that already exists, with the company-name rule skipped for the
+  item path since an item names its company in the POST and is not fanned out
+  to a bus. No new transcription and no second copy of the rules, which is the
+  property that makes this small: the constants stay in one file. Then one line
+  in pm.md §14's code block showing the check before the POST, the way §4 and
+  §15 already point at their own gates.
+- Cost: $0.
+- Status: proposed. For the engineer seat, since `tools/board/` is outside
+  this seat's write surface (`prompts/skill-agent.md`, Boundaries). Named here
+  rather than fixed because a seat patching another seat's tool mid-run is how
+  two copies of a rule get written.

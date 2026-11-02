@@ -10,6 +10,21 @@ No new paid service, domain, or durable asset appeared in the repo;
 none of the four open questions at the bottom has been answered yet.
 This file is being re-read, not rewritten, this run.
 
+**Update, 2026-11-01:** re-checked for the November close. No new paid
+service, domain, or Ursa-specific subscription found (`opex.md`'s
+October reconciliation found no new cost lines either). None of the
+four open questions below has been answered. One new fact worth naming
+rather than acting on: `opex.md`'s October update measured real Claude
+subscription *usage* for the first time, across all eleven active seats
+(36,827 turns, 134.2 wall-hours), via the host's own run record. That
+measurement still cannot move this file's invested-capital figure or
+ROIC/EVA computation, because both still need a dollar rate this seat
+has not been given (open question 1 below, same gate as `opex.md`'s
+open question 1) — usage and price are different things, and only
+price turns usage into a capital or cost figure. Named here so the
+next close can see that the measurement gap closed before the pricing
+gap did, not the other way around.
+
 ## Invested-capital base
 
 What has actually been put into Ursa, as far as this seat can see from

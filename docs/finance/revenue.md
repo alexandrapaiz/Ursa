@@ -9,6 +9,17 @@ never touches Stripe or any billing surface directly.
 table, or read-only revenue channel. None exists. Status below is
 unchanged from the first close.
 
+**Update, 2026-11-01:** re-checked again for the November close. No
+signed contract, subscribers table, or read-only revenue channel exists
+(same searches as every prior close, repeated against the current
+tree). One piece of new, named evidence rather than a repeat of the
+same absence: `docs/market/briefs/2026-10-26-message-23.md` names a
+tactic the market seat is "keeping in view for whenever Minor's own lab
+conversations start" — phrasing that confirms, from the market seat's
+own October work, that no lab conversation has started yet, consistent
+with everything below. Status unchanged: $0, by design on the Major
+side and by not having sold anything yet on the Minor side.
+
 ## Status at first close (2026-09-30): zero, by design on one side
 
 Ursa Major (the consumer product) has **no revenue stream, permanently,

@@ -1,39 +1,35 @@
-# Dispatch queue — 2026-10-27, hook-triggered standup run
+# Dispatch queue — 2026-11-01, message-triggered standup (fifth pass of the day)
 
 `PM_DISPATCH_ENABLED` is unset in this run's environment
 (`echo "PM_DISPATCH_ENABLED=$PM_DISPATCH_ENABLED"` prints empty). The
 switch is off, so nothing below fires even if it qualified.
 
-## Checked against the criteria table (pm.md §11.3), nothing qualifies
+## Checked against the criteria table (pm.md §11.3), nothing qualifies for a workflow dispatch
 
-- **Failed runs in the last 24h:** `gh run list --limit 30` shows every
-  run green (`redaction-gate`, pull_request and push triggers). Nothing
-  to diagnose or hand to the engineer.
+- **Failed runs in the last 24h:** `gh run list --limit 10` is all
+  `redaction-gate`, green. Nothing to triage, rerun, or hand off.
 - **A seat's open draft with failing CI or an unanswered review comment
-  >24h:** none of today's drafts (#600 engineer, #601 skill, #602
-  security, #603 exo, #604 frontend) are old enough to qualify — all
-  opened 05:06-05:08 UTC, under ten minutes before this check, and are
-  each seat's own live hook run in progress, the same shape this run's
-  own draft has.
-- **Two or more open PRs on one scope, none merged:** engineer has
-  three open PRs (#591, #598, #600). Checked rather than assumed: #600
-  is titled "continuing the run that was cut off at turn 41" and reads
-  as that seat's own hook run absorbing #598 right now, the same
-  pattern this run just did for its own seat's #599/#576. Not a stalled
-  stack to dispatch into; it is already self-resolving.
+  >24h:** today's drafts (exo's own, skill's second pass, engineer's
+  hook pass) all show activity inside the last few minutes of this
+  pass starting — each seat's own live run, not stale.
+- **Two or more open PRs on one scope, none merged:** the engineer
+  stack the fourth pass handed back on the board is unchanged — still
+  a board handoff already posted, not a fresh dispatch to fire again.
 - **A ruling or ADR merged since the last run names a seat and no run
-  followed:** no ADR merged to `main` since the last run (`git log
-  --oneline -5 main` shows #594, finance, as the latest merge, already
-  actioned).
+  followed:** nothing new merged to `main` on this repository since
+  the fourth pass's own two merges (okr, skill).
 - **A milestone due within three days with open items:** `gh api
   repos/alexandrapaiz/Ursa/milestones` returns an empty list. None
   configured.
-- **An owner-merge PR older than seven days:** none found; the oldest
-  open PR is #395 (2026-10-24), three days old, already Tier C and
-  already carrying its own confirmation comment.
+- **An owner-merge PR older than seven days:** still #395 (research,
+  now nine days old), unchanged from every prior pass today; recorded
+  in `pending.md`, not fired here — the row's own dispatch column is
+  "nobody."
 
-## Nothing proposed this run
+## Nothing proposed as a workflow dispatch this run
 
-Every row came back empty or already self-resolving. Saying so
-cheaply, per the table's own last row, rather than manufacturing a
-candidate to fill the section.
+This pass's own triggering event (exo's board note asking which of a
+tool or an endpoint was declined) was already answered by the prior
+pass's board reply before this pass started; re-checking it is a board
+read, not a dispatch candidate. Every row above came back empty or
+already answered, so nothing is proposed.
