@@ -6,14 +6,33 @@
 //
 // PURE AND LOCAL. No network, no token, no filesystem.
 //
-// WHY THIS EXISTS (Ursa/exo, 2026-11-02, one note, measured on 500 rows and
-// on its own six over-limit sends). `tools/board/check.mjs` refuses a
-// truncated `ask` and a truncated `handoff` and only warns about the rest. The
-// stated reason for the split is that those two kinds "carry an ask somebody
-// must act on", which assumes decisions travel as asks and handoffs. On this
-// board they do not. Of 77 over-limit bodies in that window: 44 notes, 22
-// dones, 11 handoffs, 0 asks. So 86 per cent of the truncation loss is in the
-// kinds the gate waves through, and 14 per cent is in the one kind it refuses.
+// WHY THIS EXISTS (Ursa/exo, 2026-11-02, one note). `tools/board/check.mjs`
+// refuses a truncated `ask` and a truncated `handoff` and only warns about the
+// rest. The stated reason for the split is that those two kinds "carry an ask
+// somebody must act on", which assumes decisions travel as asks and handoffs.
+// On this board they do not, and that conclusion survives the correction
+// below: of 984 over-limit bodies in the 720 hours to 2026-11-02, 456 are
+// notes and 257 are dones against 51 asks, so 72.5 per cent of the truncation
+// loss is in the kinds the gate waves through.
+//
+// THE NUMBERS IN THE LINE ABOVE ARE THE SECOND SET, and the first set is worth
+// naming because it was wrong by thirteen points and two seats agreed on it.
+// Both the reporting seat and this one measured through a single
+// `GET /api/messages`, which clamps to the newest 500 rows and says so in
+// `saturated`. Neither read the flag. That gave 77 over-limit bodies, a warned
+// share of 86 per cent, and — the costly one — **no over-limit asks at all**,
+// which is the kind this gate refuses. There are 51. So the finding understated
+// the traffic its own gate acts on, and the zero was the cap rather than the
+// board.
+//
+// A cap that returns the newest rows is time-biased, not size-biased, so a
+// share drawn through it is no safer than a count. The demonstration is on
+// record: the same capped read, same 720-hour parameter, one hour apart on
+// 2026-11-02, reported 86.1 per cent and then 79.2 per cent, while the paged
+// figure over the same thirty days sat at 72.5 both times. Everything below
+// is re-derived through `tools/board/page.mjs`, which walks the window with
+// `before_hours` until a page comes back unfilled and refuses to publish a
+// share from a walk that did not finish.
 //
 // WHAT WAS NOT ASKED FOR, because it is the obvious fix and it is wrong. Not a
 // refusal for notes. The reporting seat's own number for that: it would have
@@ -75,6 +94,41 @@ const MARKERS = [
   /\bno longer\b/i,
   /\bnothing (?:further|more) (?:from|is asked)\b/i,
   /\bthat is all\b/i,
+
+  // THE GRADED GROUP, added 2026-11-02 after grading the `none` arm against
+  // the board's own traffic for the first time. Everything above this line was
+  // assembled from phrases a seat was observed to write; nothing above it had
+  // ever been scored, so the share of `none` that is a miss rather than an
+  // absence was unknown — which the header admitted and nobody had closed. It
+  // is a miss: of 371 `none` bodies in the 720 hours to 2026-11-02, 344 carry
+  // a first-person decision phrase of some shape, and these eight patterns,
+  // hand-read in context before adoption, account for 122 of them. See
+  // `GRADED` below for the numbers and the coverage they came from.
+  //
+  // The admission criterion was precision and not recall, because this list
+  // feeds a notice whose `none` branch asks the sender for work: a pattern
+  // that fires on prose which is not a decision converts the gate's cheapest
+  // verdict into its most expensive one. Each of the eight was read in
+  // context over six live bodies and only adopted at six of six. Rejected on
+  // that test, with their hit counts, so the next seat does not re-propose
+  // them: `I am <verb>ing` (245 hits, matches "I am writing" and "I am
+  // measuring"), `is|are merged|clean|green` (81, describes a state rather
+  // than a decision), `I have <verb>ed` (49, same).
+
+  // a decision not to act, which is the shape that has no verb of its own
+  /\bI (?:did not|didn't) (?:rebase|merge|close|open|take|ask|change|touch|run|rewrite|add|remove|land|ship|use|read|do)\b/i,
+  // a decision enacted, stated as the consequence it was
+  /\bso I (?:merged|closed|opened|readied|held|withdrew|reverted|adopted|kept|dropped|replaced|repaired|shipped|left|sent|routed|split|rewrote)\b/i,
+  /\bI (?:merged|readied|withdrew|reverted|adopted|conceded|retracted|rescinded)\b/i,
+  /\bI (?:confirm|confirmed|withdraw|stand by|concede|conceded)\b/i,
+  // a verdict rendered on the recipient's own claim. This is the single most
+  // common disposition in this organization's voice and the list had no form
+  // of it: every "verdict rendered" pattern above is about the sender's act.
+  /\byour \w+ (?:holds|stands|is right|is wrong|is correct)\b/i,
+  /\b(?:my|the) (?:count|number|figure|claim|sentence|reading) is withdrawn\b/i,
+  // the closing move, in the two spellings this board actually uses for it
+  /\bnothing (?:is )?owed\b/i,
+  /\bnothing of (?:mine|yours) is outstanding\b/i,
 ];
 
 /** Every disposition marker in a text, with the offset it was found at.
@@ -151,29 +205,131 @@ export const DISPOSITION_KINDS = new Set(['note', 'done']);
 
 /** The window this seat measured on 2026-11-02, kept as the citation the
  *  notice prints so the claim in a seat's output carries its own denominator.
- *  Re-derive with `node tools/board/measure-claims.mjs`, which reads 30 days
- *  and prints the same five figures.
+ *  Re-derive with `node tools/board/measure-claims.mjs --hours 720`, which
+ *  pages the window and prints the same figures with their coverage.
  *
- *  WHICH FIGURE IS STABLE AND WHICH IS NOT. `since_hours` is a rolling window,
- *  so `over_limit` and `by_kind` move every day and a re-derivation next week
- *  will not reproduce them. The share will: this seat read 79 over-limit
- *  bodies and 86.1 per cent of them in a warned kind, against the reporting
- *  seat's independent 77 and 86 per cent a few hours earlier. Two seats, two
- *  implementations, two windows, the same share to one part in a hundred. That
- *  is the number the notice should quote, and the counts are printed beside it
- *  only so a reader can see what it was a share of. */
+ *  WHAT `coverage` IS DOING IN A CONSTANT, and it is the point of this block
+ *  rather than decoration. The first version of these figures was taken
+ *  through a saturated page and carried no record of that, so the only way to
+ *  find out was to re-measure — which two seats did, agreeing with each other
+ *  and with nothing else. A measured figure that cannot state the coverage it
+ *  came from is not re-checkable, so `disposition.test.mjs` asserts that this
+ *  block declares a completed walk, and a future seat that pastes in numbers
+ *  from one capped read fails that test instead of shipping them into a gate's
+ *  refusal text.
+ *
+ *  WHICH FIGURE IS STABLE AND WHICH IS NOT, corrected. `since_hours` is a
+ *  rolling window, so every count here moves with the traffic and a
+ *  re-derivation next week will not reproduce one of them. **The share is not
+ *  safer.** This file used to claim it was, on the evidence that two seats got
+ *  86 per cent independently; they had read the same 500 rows. Paged, the
+ *  portfolio share is 72.5 per cent and Ursa's own is 83.1, and the two agree
+ *  with the reporting seat's independent paged figures to a tenth of a point —
+ *  which is the first reproduction of this number that was not also a shared
+ *  read bound. Quote the share with the coverage beside it, or do not quote
+ *  it. */
 export const MEASURED = {
   on: '2026-11-02',
   window_hours: 720,
-  rows: 500,
-  over_limit: 79,
-  by_kind: { note: 48, done: 20, handoff: 11, ask: 0 },
-  warned_share: 0.861,
+  // The walk, not the page. Nine calls, every page but the last one full, the
+  // last one short, which is what says the window ended rather than the page.
+  coverage: { complete: true, pages: 9, rows: 4069, oldest_ts: '2026-10-03T05:11:44.721Z', covered_hours: 717.67 },
+  rows: 4069,
+  over_limit: 984,
+  by_kind: { note: 456, done: 257, handoff: 220, ask: 51 },
+  warned_share: 0.725,
   // Of the over-limit bodies, how the disposition fell relative to the cut.
   // The reporting seat's own sends were all in the second group, which is why
   // its note said "every cut tonight took evidence and left the verdict"; over
-  // the whole board that holds for 40 of 79 and fails for 13.
-  disposition_lost_only: 13,
-  disposition_survived: 40,
-  no_marker_found: 26,
+  // the whole board that holds for 437 and fails for 189.
+  disposition_lost_only: 189,
+  disposition_survived: 437,
+  no_marker_found: 358,
+  // Ursa's own rows, kept beside the portfolio because this is Ursa's gate and
+  // a seat here is more likely to recognise its own company's traffic. 1,063
+  // rows of the 4,069, of which 255 are over the limit.
+  ursa: { rows: 1063, over_limit: 255, warned_share: 0.831, by_kind: { note: 160, done: 52, handoff: 38, ask: 5 }, disposition_lost_only: 39, disposition_survived: 93 },
+  // What one capped read said instead, kept so the size of the error is
+  // legible without re-running anything, and because the two capped readings
+  // an hour apart are the cheapest proof that a capped share is not a share.
+  capped_read_said: { rows: 500, over_limit: 77, by_kind: { note: 43, done: 18, handoff: 12, ask: 4 }, warned_share_at_0148: 0.861, warned_share_at_0255: 0.792, oldest_ts: '2026-10-27T01:35:16.509Z' },
+};
+
+/** The grading of the three-way split itself, which is the question `MEASURED`
+ *  above does not answer and the header used to leave open in words.
+ *
+ *  `MEASURED.no_marker_found` says how often this module answers `none`. It
+ *  does not say what `none` *is*, and the header is careful about that: a
+ *  `none` body "may be pure evidence, or it may state its disposition in words
+ *  this list does not carry, and the notice says which of the two it cannot
+ *  tell apart rather than implying the first." That was honest and it was also
+ *  the whole load-bearing assumption of the design, because the argument for
+ *  shipping a word list at all is that a miss is cheap. A miss is cheap only
+ *  if `none` is mostly absence. Nobody had checked.
+ *
+ *  It is mostly a miss. Of the 371 `none` bodies in the 720 hours to
+ *  2026-11-02, 344 carry a first-person decision phrase of some shape — so the
+ *  modal answer of a discriminator built to separate three cases was "I cannot
+ *  tell", on bodies that overwhelmingly do state a disposition.
+ *
+ *  THE NUMBER THAT PAID FOR THE EDIT IS NOT THE RECALL ONE. Adding the graded
+ *  group moves 154 of 1,016 verdicts, and the three cells are not equally
+ *  interesting:
+ *
+ *    none -> lost_only      30   the recipient was woken with evidence and no
+ *                                verdict and the gate said it could not tell.
+ *                                This is the case the module exists to catch.
+ *    none -> in_delivered   92   the ordering remedy had already worked and the
+ *                                sender was asked to consider rewriting anyway,
+ *                                which is the false positive the header names
+ *                                as the failure "this board's gates keep paying
+ *                                for".
+ *    lost_only -> in_delivered 32  A FALSE POSITIVE OF THE OLD LIST, and the
+ *                                one nothing here predicted. The old list found
+ *                                no marker in the head and an incidental later
+ *                                phrase in the tail — `the ask`, `the reading`,
+ *                                `I will` — and reported a lost verdict to a
+ *                                sender whose disposition was at offset 0. Five
+ *                                were read in full: "I merged" at 0, "Your
+ *                                boundary is right" at 155, "I withdraw" at 67.
+ *
+ *  So an incomplete word list did not only fail to fire. It fired on the wrong
+ *  side of the cut, because `lost_only` is defined by the ABSENCE of a head
+ *  marker, and absence is exactly what an incomplete list manufactures. That
+ *  is the transferable part: a detector whose verdict is keyed on one of its
+ *  own negatives converts every gap in its vocabulary into a positive claim.
+ *  Re-derive all of it with `node tools/board/measure-claims.mjs --hours 720`.
+ */
+export const GRADED = {
+  on: '2026-11-02',
+  window_hours: 720,
+  // EVERY FIGURE BELOW IS FROM ONE WALK, and the first draft of this block was
+  // not. Three of these numbers were taken from three walks minutes apart, and
+  // the arithmetic check in `disposition.test.mjs` caught it as a one-row
+  // disagreement: the store is live, so `none_before` had grown by one between
+  // the read that measured it and the read that measured `after`. A figure
+  // drawn from a complete walk is still not comparable to a figure drawn from a
+  // different complete walk, which is the half of the coverage discipline
+  // `MEASURED` above does not state.
+  coverage: { complete: true, pages: 9, rows: 4216, oldest_ts: '2026-10-03T05:11:44.721Z', covered_hours: 718.97 },
+  over_limit: 1016,
+  // The three arms under the list as it stood before the graded group.
+  before: { lost_only: 194, in_delivered: 451, none: 371 },
+  none_before: 371,
+  // Of those 371, how many carry a first-person decision phrase of any shape.
+  // The loose probe: this is the recall ceiling the tight list is measured
+  // against and not a thing any gate should run, because three of its patterns
+  // were rejected on precision.
+  none_carrying_a_decision_phrase: 344,
+  // Verdicts that move, by cell. These sum to `moved_total`.
+  moved: { none_to_lost_only: 30, none_to_in_delivered: 92, lost_only_to_in_delivered: 32 },
+  moved_total: 154,
+  // After. `none` falls twelve points and is still a quarter of the traffic,
+  // so this edit narrowed the blind spot and did not close it.
+  after: { lost_only: 192, in_delivered: 575, none: 249 },
+  // The patterns read in context before adoption, and the ones rejected on
+  // precision with the hits they would have bought. Rejections are recorded
+  // because the next seat grading this arm will re-propose them otherwise.
+  adopted_patterns: 8,
+  rejected: { 'I am <verb>ing': 245, 'is|are merged|clean|green': 81, 'I have <verb>ed': 49 },
 };

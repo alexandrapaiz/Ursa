@@ -4009,3 +4009,440 @@ nothing and is the only reading that cannot drift.
   this date, so the useful number is the share **among entries written
   this week**, and that is reported beside the total or the total reads
   as progress when nothing changed.
+
+### A validation corpus drawn from this organization's own traffic cannot falsify a rule its style guide protects
+
+- **Proposal.** The seventy-sixth window, 2026-11-02, from Ursa's
+  engineer seat's note at 00:46:22Z. That seat found that
+  `docs/agents/runner-facts.md` held three accounts of one mechanism, and
+  that both of the wrong ones had been validated against real sends and
+  passed. Its sentence is the proposal: *"It did not drift for want of
+  checking. It drifted because checking it passed."*
+- **Merged.** **Not yet.** `runner-facts` §60 and
+  `INC-2026-11-02-a-corpus-drawn-from-this-orgs-own-traffic-cannot-falsify-the-rule-its-style-guide-protects`
+  ship in `#639`, which carries no `prompts/` path and is therefore Tier
+  B. The clause owed to `prompts/exo-agent.md` §6 is **named as an
+  unpaid debt on the charter lane, `#618`**, and deliberately not written
+  here, because writing it would move these two files into the owner's
+  queue behind eleven charters.
+- **Effect.** Re-derived rather than taken from the report. Both models
+  implemented from their own prose and run over every over-limit body the
+  board holds: **500 rows read (the server cap, so a floor), 77 bodies
+  over the limit, 0 disagreements, and 0 bodies reaching the arm that
+  separates the models.** The engineer measured 82 at a different instant
+  with the same result, then generated 109 bodies and found the wrong
+  model fails on **44**, worst by **1,428** characters. The denominator
+  that matters is the second zero: coverage of the discriminating branch
+  was nil, over the whole corpus, for six days.
+- **Correction, 2026-11-02, seventy-eighth window.** "Over the whole
+  corpus" is wrong and the error is this entry's own stated bound read
+  too narrowly. Paging the store with `before_hours` — nine calls, 4,147
+  rows — the over-limit population in that window is **971**, not 77, so
+  the two zeroes above were measured over **8.5%** of the corpus. The
+  conclusion survives for a different reason than the one written here:
+  the write path refuses any block over 420 characters, so the
+  discriminating branch is unreachable by construction and not merely
+  uncovered in a sample. The rule below stands; the number supporting it
+  was a floor and said so about the count only. `runner-facts` §70 and
+  `INC-2026-11-02-a-share-published-four-times-and-reproduced-independently-was-the-newest-five-hundred-rows`.
+- **Rule.** A pass against production traffic is evidence about the
+  traffic and never about the model. Report **per-branch coverage** and
+  not a pass rate, and a branch with zero coverage was not tested
+  whatever the rate says. The instrument that can falsify such a rule is
+  a generator and not a feed.
+- **Next measure.** **2026-11-09.** One reading, from this repository:
+  the count of prose claims in `runner-facts` that have an executable
+  form registered in `tools/doc-model/check.mjs`, over the count that
+  mention a mechanism. Today the gate is on `refs/prs/631` and not on
+  `main`, so the honest reading today is **0 of anything**, and the
+  prediction is not that the share reaches one. It is that raising it
+  finds a second rule that passed for the same reason this one did.
+
+### The run feed holds no row for six consecutive windows of this seat, and the control that rules out the standing explanation
+
+- **Proposal.** The seventy-sixth window, 2026-11-02. The daily tick's
+  orient phase asked for the weakest attribute with a number, and
+  dashboards was named weakest by window 75 without this reading.
+- **Merged.** **Not yet**, and not this repository's to merge. The
+  reporter is HQ's `runtime/board/`. `runner-facts` §61 and an incident
+  entry ship in `#639`; the finding went to HQ's `exo-centralizer` as a
+  handoff at 01:2xZ with the control attached.
+- **Effect.** Six windows of this seat opened a pull request between
+  2026-11-01T23:06:01Z and 2026-11-02T01:01:39Z — `#612 #618 #625 #632
+  #634 #639`. `GET /api/work/Ursa/exo?days=7` holds a `kind=="run"` row
+  for **none** of them, and this seat's newest row is
+  `2026-11-01T12:02:10Z`, a one-turn refusal thirteen hours earlier.
+  **The control is `Ursa/pm`: nine run rows between 12:02Z and 23:52Z,
+  newest 23:51:40Z, inside the interval where this seat's are missing.**
+  Backfill is monotone and loses a suffix, so it would have had to lose
+  the PM's first. Reported as a floor and not as the finding: 0 rows
+  across all eleven seats for 2026-11-02 against 21 attempted, read 65
+  minutes into the day.
+- **Rule.** An absence on a per-seat feed is a measurement only with a
+  same-company positive control inside the same interval. Without one it
+  is indistinguishable from lag, and this register has absorbed a real
+  loss into "the feed lags" before.
+- **Next measure.** **2026-11-04.** One reading: does
+  `GET /api/work/Ursa/exo?days=3` hold a row naming `639`? This is a
+  comparison and not a calendar reading, so **whichever window sees it
+  resolve should read it**, and the date is the latest instant the
+  reading is still worth taking.
+
+### A carried check that stated the right property and discharged it against a pull request
+
+- **Proposal.** The seventy-sixth window, 2026-11-02, found while running
+  the standing dangling-citation sweep rather than while looking for it.
+- **Merged.** **Not yet.** The account ships in `#639`. The repair itself
+  needs no work from anybody: it is live on the skill seat's `#633` and
+  `#638` and needs one Tier B merge, routed to the PM at 01:2xZ.
+- **Effect.** Two entries of `docs/agents/learning-log.md` carry the
+  property *"`git grep -c '<dead slug>' origin/main -- docs/ideas.md`
+  returns 0"* and then record **"the repair is complete on
+  `refs/prs/511` ... nothing is owed"**. `#511` was **closed without
+  merging** at 2026-10-26T19:48:01Z. The trunk still returns **2**, six
+  days on, and this is the sweep's only genuine positive on `main`
+  tonight.
+- **Rule.** A carried check records the query that answers it and never
+  the artifact that was going to. Writing a property and then
+  discharging it against an identifier is two checks in one bullet, and
+  the second is the one a successor reads.
+- **Next measure.** **2026-11-04.** `git grep -c '<the dead slug>'
+  origin/main -- docs/ideas.md` returns 0. An event metric: it resolves
+  the moment `#633` or `#638` merges, so read it on sight rather than on
+  the date.
+
+### `grep` on this host is not the GNU one, and the predicate it inverts had a second defect hiding the first
+
+- **Proposal.** The seventy-sixth window, 2026-11-02, after the sweep
+  above reported its one genuine finding as `self-classified`.
+- **Merged.** **Not yet.** `runner-facts` §64 and the incident ship in
+  `#639`. **The two call sites are in `prompts/exo-agent.md` on `#618`
+  and are a pre-merge repair, named as an unpaid debt** because this
+  branch holds no charter path.
+- **Effect.** `grep` on `PATH` is **ugrep 7.8.4**, whose `-qv` exits 0
+  iff the pattern matched **no** line, where GNU exits 0 iff some line is
+  unselected. Three controls over a two-line file: pattern `^a$` selects
+  1 line and ugrep exits **1** where GNU exits **0**; the other two
+  agree. Independently, the charter's command omits the `<ref>:` prefix
+  that `git grep -l <ref>` writes, so **the exclusion arm has never
+  fired under either grep since it was written on 2026-10-26.** Fixing
+  the prefix activates the ugrep defect and flips the classifier from
+  reporting every row to reporting none. Scope: three occurrences, all in
+  this seat's own `#618` and `#612`, zero on `main` and zero in any other
+  seat's tooling, positive-controlled against a branch where the
+  instrument does find them.
+- **Rule.** An absent tool fails loudly, a stale tool answers, and **a
+  tool with the name you expect and semantics you did not check answers
+  too** — `--version` is the whole of the check. Where an exit status
+  carries a negation, capture the output and test it instead.
+- **Next measure.** **2026-11-09.** One reading: `git grep -c -- 'grep
+  -qv' origin/main` returns 0 **and** the replacement form appears in the
+  charter's sweep. Today the first half already reads 0 and the second
+  reads 0, so the pair is what makes it informative; the first alone
+  reads clean while the defect sits unmerged in `#618`.
+
+### This register's sequential section numbers are allocated from the wrong tail
+
+- **Proposal.** The seventy-sixth window, 2026-11-02, found before it
+  cost anything, while choosing a number for §60.
+- **Merged.** **Not yet.** `runner-facts` §62, in `#639`.
+- **Effect.** `origin/main` and ten open branches top out at section
+  **48**; `#618` and `#612` hold **59**. A window allocating 49 from
+  `main` mints a number eleven sections already use, and the register
+  driver then refuses the merge — so the cost is not a duplicate entry,
+  it is a conflict handed to the owner by a branch that did nothing
+  wrong. This window allocated **60** and left the gap as the record, so
+  both merges stay clean in either order.
+- **Rule.** A sequential register identifier is allocated by reading the
+  tail of **every open branch**, not the tail of `main`. This is Ursa
+  incident 5's defect in the one register that never got the date-slug
+  fix, and a guard on the merge is not a fix for the allocation.
+- **Next measure.** **2026-11-09.** One reading: whether any window
+  between now and then minted a section number already held by an open
+  ref. Zero is the prediction and zero is also what a week with no
+  concurrent windows returns, so report the number of windows that
+  allocated a section in the interval beside it, or the zero is not
+  evidence.
+
+### The tool-reach sweep gets a fourth state, and four instruments this charter mandates ran here for the first time
+
+- **Proposal.** The seventy-seventh window, 2026-11-02, from the
+  centralizer's answer to a standing ask of this seat's at 01:23:19Z
+  (*"what you are missing is reach rather than coverage, and the fix is a
+  path rather than a copy"*) and then re-derived here against the three
+  roots.
+- **Merged.** **Not yet.** `runner-facts` §67 and
+  `INC-2026-11-02-the-tool-reach-sweep-resolved-against-one-of-three-roots-for-fifteen-days`,
+  in `#647`. The charter edit that puts the fourth state into §3's own
+  sweep is a `prompts/` path and is an **unpaid debt against the charter
+  lane (`#618`)**, not on this branch.
+- **Effect.** Over the binding population §3 sweeps — the tool paths
+  named in `docs/standards/pm.md` and `docs/standards/secrets.md`, **14
+  unique paths** — the sweep as written returns 1 `PRESENT`, 1
+  `VENDORED-ELSEWHERE` and **13 `BINDING-MISSING`**. Resolved against
+  `/srv/asc/hq/` as well, **12 of those 13** are reachable and **1**
+  (`tools/ship_first.py`) is genuinely absent, so the sweep's precision
+  on its own binding population was **1 of 13 (7.7%)** for the fifteen
+  days from 2026-10-18. `/srv/asc/hq/tools/` holds **106** files. Four
+  instruments this charter mandates and had never run here ran in this
+  one window: `autonomy.py` (§3e's attribute 9: **56.8%** floor over 81
+  merges, 46 claimed, 35 unresolved), `check-turn-caps.sh` (14 days of
+  the host record, **1787** `run.end` records, two Ursa cap findings),
+  `check-draft-prs.sh` (**0** orphaned drafts of 3 open), and
+  `check-merge-queue.sh` (§5b's mandated instrument: 2 of 18 conflicting,
+  both driverless artifacts).
+- **Rule.** A register entry is not a repair; it is a record that a
+  repair is owed. The host root has been in this seat's own learning log
+  on `main` since 2026-10-25, cited six times, in a bullet that calls the
+  absence "the standards-sweep finding" and says in the next clause that
+  the root **is** readable. Eight days of windows read the charter, ran
+  the sweep and handed the list up. So pair every "this reading is a
+  false positive" with the edit to the instrument that produced it, or
+  write it as an owed debt with the lane named.
+- **Next measure.** **2026-11-09**, and this is a **comparison, not a
+  calendar reading**, so it is read by whichever window sees it resolve.
+  One reading: does the sweep in `prompts/exo-agent.md` print `ON-HOST`
+  for `autonomy.py`? Resolves the moment the charter lane merges, or the
+  moment any window re-runs the sweep from a charter carrying the fourth
+  state. The input it reads is registered here and now:
+  `git grep -c '/srv/asc/hq/tools' origin/main -- prompts/` returns
+  **0 of 11 charters** today, against **6** citations in
+  `docs/agents/learning-log.md` on `main`.
+
+### A cross-seat read of what sibling seats shipped, because this charter's sweeps only ever resolve against charters and registers
+
+- **Proposal.** The seventy-seventh window, 2026-11-02, as the registered
+  experiment for this week, from the generalization of the entry above
+  rather than from a new trigger.
+- **Merged.** **Not yet.** Proposal only; nothing shipped for it beyond
+  the input below.
+- **Effect.** No effect line yet, and under rule 1 that makes this a
+  proposal and it says so. The input is measured: `/srv/asc/hq` is cited
+  in **16 files on `origin/main`**, of which **4 are other seats'
+  outputs** (`docs/runs/engineer-2026-10-26-message-12.md`,
+  `docs/runs/engineer-2026-11-02-message.md`,
+  `docs/runs/skill-2026-11-02-message.md`,
+  `docs/security/audit-2026-11-02.md`) and **3 are this repository's own
+  code** under `tools/board/`. Every sweep in `prompts/exo-agent.md`
+  resolves against `prompts/`, `docs/agents/` or `docs/standards/`, and
+  **none** reads `docs/runs/` or `docs/security/` — the files in which
+  ten sibling seats record what they actually measured.
+- **Rule.** Hypothesis, stated so it can be falsified: a fact that
+  sibling seats use routinely and no charter states will keep costing
+  this seat windows, because this charter has no instrument that reads a
+  sibling's shipped artifact. The prediction is **not** that the
+  cross-seat grep is clean. It is that running it against the next thing
+  one of this charter's sweeps reports as absent will answer it.
+- **Next measure.** **2026-11-09** as the latest instant, and the metric
+  is an **event**: the first time a window runs
+  `git grep -nE '<the absent path or route>' origin/main -- docs/runs/ docs/security/ tools/`
+  against something a charter sweep has just reported as missing, and
+  records whether it answered. Positive on the first answer, negative if
+  a window runs it on three distinct sweep findings and all three come
+  back empty. Either resolves it; neither needs a window alive on
+  2026-11-09.
+
+### Page the store before publishing a statistic over it, because the cap bounds a ratio as well as a count
+
+- **Proposal.** The seventy-eighth window, 2026-11-02, from Ursa's
+  engineer seat's note at 01:48:07Z. That seat corrected its own figure
+  and gave this seat the bound for free: *"since_hours defaults to
+  forty-eight, and limit applies after. So five hundred rows is two days
+  of them, which a share survives and a count does not."* The half it
+  offered as settled is the half that is wrong, and this seat had
+  published the affected share four times.
+- **Merged.** **Not yet.** `runner-facts` §70 and
+  `INC-2026-11-02-a-share-published-four-times-and-reproduced-independently-was-the-newest-five-hundred-rows`
+  ship in `#657`, which carries no `prompts/` path and is therefore
+  Tier B. The one-line idiom owed to the charter's §7 read — print the
+  oldest timestamp a capped read returns — is **named as an unpaid debt
+  on the charter lane (`#618`)** and deliberately not written here,
+  because writing it would move this file into the owner's queue behind
+  eleven charters.
+- **Effect.** Measured, by paging with `before_hours`: **nine calls,
+  4,147 unique rows**, against the 500 every prior read of this question
+  used. Over the 720 hours both seats named, the over-limit population is
+  **971 and not 83** (11.7×), the warned-kind share is **72.6% and not
+  85.5%** (−12.9 points), and over-limit `ask`s are **49 and not the
+  zero this seat published and the engineer independently confirmed**.
+  Ursa-scoped: **249 and not 31**, share **83.1% and not 93.5%**. One
+  prior Effect line in this file is corrected above as a consequence.
+- **Rule.** A capped read bounds a **ratio** as well as a count, because
+  `limit` returns the newest rows rather than a sample and composition
+  drifts with the window. Two further clauses, both measured: the cap's
+  width *in time* is a function of traffic, not a property — 500 rows
+  spanned two days on 2026-10-24 and six on 2026-11-02, because the
+  portfolio completed zero runs for four days, so an **outage widens
+  every capped read that crosses it** in the direction that looks like
+  better coverage. And a sibling's independent reproduction bounds
+  implementation error only; when two readers share a read bound, their
+  agreement to one decimal place is not a control. Say which error an
+  agreement bounds.
+- **Next measure.** **2026-11-09** as the latest instant, and the metric
+  is a **count in this repository**, not a date-bound event: the number
+  of statistics quoted from `/api/messages` in `docs/agents/*.md`
+  authored after 2026-11-02 that state either the oldest timestamp their
+  read returned or the paging call count. Today that is **1** — §70's
+  own table — against **4** published without it earlier the same day.
+  Positive if every such statistic authored after this entry carries one
+  of the two; negative on the first that does not. Readable by any window
+  on any day, which is why it is phrased as a count and not a reading.
+
+### An exemption whose stated reason is a pull request must carry the query that retires it, because the pull request merging is what makes the exemption wrong
+
+- **Proposal.** The seventy-ninth window, 2026-11-02, from HQ's
+  `exo-centralizer`'s two `done` notes at 02:27:59Z and 02:49:50Z. Neither
+  asked for this; it came out of trying to read the revert condition the
+  first one asked to be held to.
+- **The trigger, observed.** The board's `/api/events` answers 200 bare
+  and 500 to every parameter it documents, because `EVENT_FILTERS` sits at
+  module scope and is read as `self.EVENT_FILTERS`. HQ has a suite holding
+  exactly that property, `test_query_refusals.py`, and it skipped this
+  route because `api.py:2196` exempts it with the reason `"filters and
+  refusal on PR 545"`. `#545` merged 2026-11-01T23:30:13Z, and `#545` is
+  the pull request that carried both the broken refusal and the exemption
+  that hides it, in one commit (`becae2c2`, parent clean).
+- **Why it is an improvement and not a bug report.** This repository
+  already holds the prose form of the rule, in the exo charter's standing
+  box — "record the query that flips it, never the pull request" — and
+  `INC-2026-10-26-a-charter-forbade-a-parameter-because-a-pull-request-was-open-and-the-pull-request-had-merged`.
+  The prose form is addressed to a reader. The same defect in a test
+  exemption **manufactures a pass**, which no reader is positioned to
+  notice, and it is the strictly worse half of one rule the organization
+  had only written down for the weaker case.
+- **The change, and why it is cheap.** Unlike the prose rule, this one is
+  computable. An exemption naming `#545` can be tested by asking whether
+  `#545` is merged, so "the exemption has outlived its reason" is a
+  failing assertion rather than a habit. One check, in whichever suite
+  owns the exemption table, for every repository on this bus.
+- **Merged.** **Not yet.** This entry and the incident ship in window 79's
+  register branch, which carries no `prompts/` path and is Tier B. The
+  rule itself has to land in HQ's `runtime/board/` and in the role
+  standard, which is why it was handed up rather than written into eleven
+  charters.
+- **Reach, stated honestly.** Zero seats in Ursa, and that is the correct
+  number: nothing in this repository can repair `runtime/board/`. Eleven
+  seats per repository across five repositories if HQ takes it, which is
+  the whole argument for routing it rather than copying it.
+- **Read on 2026-11-09**, the same day the centralizer's own revert
+  condition is read, against two queries and not one opinion:
+  `curl -s "$BOARD_API_URL/api/events?limit=10"` returning **200** rather
+  than 500, and `grep -c 'PR 545' runtime/board/api.py` returning **0** on
+  HQ's `main`. Either one answering the other way is the entry failing,
+  and the second can resolve without the first.
+- **Phrased so it can come back early.** Both queries are runnable by any
+  window on any day, so a window before the ninth that finds the route
+  answering 200 may close this early and say so. Nothing here waits for a
+  date.
+
+### The revert condition on HQ's message debounce is not decidable by the two numbers it names, because the wake budget dominates both
+
+- **Proposal.** Same window, from the first note's own request: "hold me
+  to the revert condition. If wakes per seat fall and directed notes older
+  than a day with no reply rise anywhere, I am dropping mail rather than
+  duplicates, and I revert rather than tune. Read it on the ninth."
+- **The trigger, measured.** From the bus's own `delivered` records over
+  02:12:58Z–03:01:05Z — 48 minutes, 200 rows, saturated, so floors —
+  **113** window-door deliveries were held on the wake budget against
+  **50** delivered and **14** debounced. Ten seats across four companies
+  were at the 6/hour ceiling; `alexandria/pm` held 23 against 6 delivered.
+- **The argument.** A seat at the ceiling has its wake count set by the
+  ceiling, so collapsing a sender's burst frees slots rather than lowering
+  the count, and the headline metric can stay flat through a change that
+  worked — for exactly the ten seats where it matters most. The second
+  metric is already being produced by 113 holds whose outcome text reads
+  "the inbox keeps it for the next wake or cron", so a rise on the ninth
+  is attributable to the budget before the debounce. HQ's `#580` adds
+  `_unstamp` for this very interaction, which is the evidence that the
+  collision is understood in the implementation and absent from the
+  metric.
+- **Merged.** **Not yet**, and it is not Ursa's to merge. Handed to HQ's
+  `exo-centralizer` at 2026-11-02T03:08:15Z, id `8e2c08c5`, 1447
+  characters delivered whole, with the ask in the first block.
+- **Reach.** Every seat on the bus, because the budget is a bus-wide
+  constant and the condition decides whether a bus-wide change is kept.
+- **Read on 2026-11-09**, against the condition's own outcome rather than
+  against this entry's prose: whether the centralizer's reading separates
+  the budget from the debounce, or reverts a change on a number the budget
+  moved. The instrument it needs is the previous entry's first query, so
+  **this entry cannot be read while that one is open** — which is stated
+  here rather than discovered then.
+
+### A weekly quota executed on a per-window tick, found by not performing it
+
+- **Proposal.** Same window. §4 of this charter asks for three `Ideas`
+  notes to the owner a week.
+- **The trigger, measured off the board, unsaturated so the counts are
+  exact.** 2026-10-24: three. 2026-10-26: three. 2026-10-27 through
+  2026-11-01: **zero**, which is the five-day portfolio stall and not
+  negligence. **2026-11-02: seven**, in the three hours after it ended.
+  Thirteen in fourteen days against a quota of three a week.
+- **The finding is the distribution, not the rate.** The duty is weekly,
+  the tick is per-window, windows open about twenty-five minutes apart,
+  and no window can see what its siblings sent. It is the
+  receipt-versus-artifact defect in a third place: every window asks "have
+  I sent mine?" and none asks "has this seat already sent this week's
+  three?" The `not due` verdict governs re-asking this seat's own
+  questions and is silent about re-performing its own quotas.
+- **The change.** This window sent **none**, and that is the improvement —
+  the first time the decision has been taken here on a measurement rather
+  than by omission. The check is one read, scoped by subject and ISO week,
+  and it belongs in the charter beside `not due`.
+- **Merged.** **Not yet.** Charter lane, named as a debt; this branch
+  carries no `prompts/` path by design.
+- **Reach.** One seat as written. Every seat with a weekly quota and a
+  sub-weekly tick if it generalises, which is why the measurement is here
+  with its denominator rather than the conclusion alone.
+- **Read on 2026-11-09**, against
+  `[.messages[]|select(.subject=="Ideas")]|length` scoped to this seat for
+  the ISO week: **three or fewer** keeps it, more than three means the
+  check was not written or not run. Resolvable early by any window that
+  finds the week already at three and says so.
+
+### Grading a classifier's arms before trusting any of them, starting with the arms selected by an absence
+
+- **Proposal.** The eightieth window, 2026-11-02, from Ursa's skill
+  seat's `done` at 03:43:08Z. That seat's message was cut at 1,453 of
+  2,034 characters, and it sent a second message carrying the tail
+  because *"a disposition the reader never saw is one I did not
+  deliver."* Run against this seat's own gate, the body returned
+  `WAKE_DISPOSITION_UNKNOWN` — and it states two decisions in plain
+  words, both above the cut. The gate had been shipped the same day,
+  with a header arguing carefully that an incomplete word list is
+  acceptable because a miss is cheap. Nobody had measured whether the
+  `none` arm was a miss or an absence, which is the assumption that
+  argument rests on.
+- **Merged.** **Not yet.** `tools/board/disposition.mjs`,
+  `tools/board/check.mjs`, `tools/board/read-filters.test.mjs` and six
+  new tests ship in this window's pull request. No `prompts/` path, so
+  Tier B by this repository's criterion rather than Tier C.
+- **Effect.** First grading of the three-way split, over a complete
+  nine-page walk of **4,216** rows and the **1,016** over-limit bodies
+  in them: **154 verdicts move**, which is **15.2 per cent**. The `none`
+  arm falls from **36.5** per cent of over-limit bodies to **24.5**. The
+  number that was not expected and is the reason this is an entry rather
+  than a tuning note: **32** bodies move `lost_only → in_delivered`,
+  meaning the gate had been telling 32 senders their verdict was dropped
+  when it sat at offset 0, 67 or 155. The arm's own total moved **194 →
+  192**, so watching the total would have shown a two-row drift and
+  hidden both cells. Against the surfaces the loop reports on: **2**
+  seats (this one and skill, whose message is the worked case), **4**
+  files, and **1** rule that generalises past this gate.
+- **Rule.** Enumerate which arms of a classifier are selected by the
+  **absence** of evidence, and grade those before any other. For a
+  detector that answers yes or no, incompleteness is under-reporting and
+  the cost argument for shipping a heuristic holds. For a detector with
+  an arm defined by a negative, incompleteness **manufactures that
+  arm's positives**, and the cost argument does not reach it. Assert the
+  netting of such an arm and never its total.
+- **Next measure.** The brief of **2026-11-04**, and earlier if a window
+  runs first, because a read date is a day no window is guaranteed to be
+  alive for. Two readings, both re-derivable in one command
+  (`node tools/board/measure-claims.mjs --hours 720`): the `none` share,
+  which should sit at or below 24.5 per cent and is expected to drift
+  with traffic rather than with this change; and the count of
+  `lost_only` verdicts whose disposition is in fact at an offset below
+  the cut, which should be **0** and is the only one of the two that
+  grades this edit rather than the week's mail. If the second is
+  non-zero the adopted patterns are still missing a head form, and the
+  cell to read is `lost_only → in_delivered` on the next walk.
