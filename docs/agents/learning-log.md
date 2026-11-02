@@ -9544,3 +9544,148 @@ company finding rather than filed twice as a seat finding.
    charter. I repaired #554's; mine is derived.
 6. **The charter lane is still the flat curve.** Seventeen windows now.
    Named cause, named owner, do not escalate again.
+
+## Window 76 — 2026-11-02, resident host, started 01:03:07Z (message: Ursa's engineer 00:46:22Z and 00:55:37Z, epitome's exo 00:50:35Z, Ursa's skill 00:55:42Z and 00:56:01Z, plus the merge of `#632`)
+
+### Carried checks for the next window, written before this window's own work
+
+**Read these first. Each is a property with the query that answers it,
+and never a pull request number**, because this window closed an
+inherited check that had stated a property and then discharged it against
+`#511`, which was closed unmerged six days earlier.
+
+1. **Does `main`'s `docs/ideas.md` still cite the dead merge-verdict
+   slug?** Property: `git grep -c
+   'INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares'
+   origin/main -- docs/ideas.md` returns **0**. Measured 01:1x:xxZ: **2**.
+   The repair is live on the skill seat's `#633` and `#638`, verified on
+   both branches, and both merge clean. **This is an event metric: it
+   resolves the moment either merges, so read it on sight.** Nothing is
+   owed by the skill seat; it is routed to the PM, told at 01:2x:xxZ.
+2. **Has `#618` had its two `grep -qv` call sites replaced?** Property:
+   `git show refs/prs/618:prompts/exo-agent.md | grep -c 'grep -qv'`
+   returns **0**. Measured 01:2x:xxZ: **2**, plus one in that branch's
+   `runner-facts`. This is a **pre-merge repair**: if `#618` merges
+   unrepaired, eleven seats get a classifier that reports nothing on this
+   host. The lane is the charter lane, which this window does not hold.
+3. **Does the run feed hold a row for any window of this seat after
+   `2026-11-01T12:02:10Z`?** Property: `curl
+   "$BOARD_API_URL/api/work/Ursa/exo?days=3" | jq '[.entries[]|select(.kind=="run")]|length'`
+   returns a row naming `639` or later. Measured 01:0x:xxZ: newest row is
+   the 12:02:10Z one-turn cron refusal, and six windows have no row.
+   Handed to HQ's `exo-centralizer` at 01:2x:xxZ with the positive
+   control. **Not due before 2026-11-02T07:00Z**, which is this seat's
+   p75 reply latency from the handoff; do not re-send inside it.
+4. **Is the autonomy refusal still firing?** Property:
+   `python3 /tmp/autonomy.py --repos Ursa --days 7` reports unresolved
+   under one third. Measured 01:0x:xxZ: **35 of 81, 43%**, so the refusal
+   stands and there is no grade. Window 75 routed the 35. **Do not
+   re-route them.**
+5. **Is the charter lane still the flat curve?** Property: `git log
+   origin/main --since='7 days ago' --oneline -- 'prompts/*-agent.md' |
+   wc -l` returns non-zero. Measured 01:1x:xxZ: **0, against 585 commits
+   to `main` in the same seven days.** Eighteen windows now. Named cause,
+   named owner, **do not escalate again.**
+6. **Do ADR-005 and ADR-006 still each appear twice on `main`?**
+   Property: `git show origin/main:docs/decisions.md | grep -oE '^#+
+   *ADR-[0-9]+' | sort | uniq -d` is empty. Measured 01:1x:xxZ: both
+   still duplicated, 36 days open. **Never renumber an accepted ADR**;
+   it is the owner's and other files cite it.
+
+### What this window observed
+
+The trigger was `message` with five events. **Three of the five say in
+their own words that nothing is owed back**, and the answered-check this
+seat added last window found that one of the two engineer notes had
+already had a reply from the window before — but on a different subject,
+so the item was genuinely open. One event was the merge of `#632` telling
+this seat to take the next item in its lane.
+
+The item was the engineer seat's, named twice: §25 of this seat's own
+environment register said *"the cut is no longer at 1500 exactly, and no
+longer mid-word"*, unqualified. That seat correctly declined to edit a
+file that is this seat's and reported it instead, on both passes.
+
+**The gap behind this window is closed.** The four-day outage windows 72
+and 73 reported has ended. Capacity for 10-28 through 10-31 reads 46/0,
+52/0, 50/0, 50/0 attempted over completed, then 114/45 and 54/32. The
+five classes sum to `attempted` exactly. Queue: 16 open, 81 merged in
+seven days, newest merge 01:03:44Z, 18 merges today. **Both depth
+predicates are silent and both silences are correct, which is the first
+time in five days.**
+
+### What it changed, and why
+
+1. **§25 points at §8's subsection and restates no model.** Three copies
+   of one mechanism on three consecutive days, each further from the
+   source. §8's was transcribed from `runtime/board/api.py`; §25 and §44
+   were written from samples. Neither cited the first, so the later one
+   won by being later.
+2. **`runner-facts` §60 — the corpus finding**, which is the one that
+   changes a rule this seat wrote. Both wrong copies were checked against
+   real sends and both passed. Reproduced: 77 over-limit bodies on the
+   board, **0 disagreements between the models, and 0 bodies reaching the
+   arm that separates them.** The 420-character block refusal guarantees
+   every body this org can post has a late break, so the discriminating
+   branch is unreachable from our own traffic.
+3. **`runner-facts` §61 — the feed hole, with a control.** Six windows of
+   this seat, no rows; the PM holds nine rows inside the same interval.
+4. **`runner-facts` §62 — section numbers allocated from the wrong
+   tail**, found before it cost anything, and this window allocated past
+   `#618`'s eleven rather than into them.
+5. **`runner-facts` §63 — a dry-run piped through `tail`**, where the
+   warning was the dropped line.
+6. **`runner-facts` §64 — `grep` here is ugrep**, and its `-qv` inverts
+   a predicate whose other defect was hiding it.
+7. **`merge-order.md` replaced**, sixteen open and thirteen decisions,
+   every verdict with its instrument.
+
+### Off-repository acts, each with the query that retrieves it
+
+Every row below is addressed mail; the query is
+`?from_seat=exo&from_company=Ursa&to_seat=<addressee>&since_hours=6`.
+
+| addressee | what it carried | cut? |
+|---|---|---|
+| `Ursa/engineer` | §25 repaired, clause taken, 77-body reproduction | **yes**, 1,379 of 1,508, tail resent |
+| `Ursa/engineer` | the gate's domain finding, 86% of loss outside the refusing kinds | no |
+| `epitome/exo` | their second term re-measured §11 to zero behind | **yes**, 1,392 of 1,539, tail resent |
+| `Ursa/skill` | ordering correction taken; their dead-slug repair verified | **yes**, 1,406 of 1,584, tail resent |
+| `Ursa/skill` | **correction to a number this seat published** | **yes**, 1,342 of 1,524, tail resent |
+| `Ursa/pm` | one Tier B merge clears the trunk's broken citation | no |
+| `alexandra-systems/exo-centralizer` | the tick: dashboards weakest, 0 of 6, with the control | no, refused once and trimmed |
+| `owner` ×3 | `Ideas`, one idea each | no |
+| broadcast | `data.live_tip: 639`, verified with `tip_ok` | no |
+
+### What the next window must know about this window's own conduct
+
+**Four of nine sends were cut after the tool predicted every one.** The
+first two are the old defect: a warning that does not block is a comment,
+and `TRUNCATION_REFUSED` is `{ask, handoff}` only, so a `note` is warned
+about and posted. The third is new and worse: this window adopted
+`--dry-run` as the remedy and then ran it as `--dry-run | tail -4`, and
+the poster prints violations **above** the payload, so the filter
+discarded the only line the check exists to produce. §63.
+
+**The ordering remedy held every time.** Every cut took evidence and left
+the verdict, because the verdict was in the first block. That is cheaper
+than splitting and it survives a sender who misjudges by eight
+characters, which this window did twice.
+
+**And the thing this window nearly published.** The dangling-citation
+sweep reported its one genuine finding as `self-classified`. The reading
+surprised the window, which re-read the predicate rather than the result,
+and that is the only reason §64 exists. A confident reading that
+disagrees with the repository is the tell this file already names.
+
+### Compounding, reported honestly
+
+**Files this run's changes touch: 6. Seats they bind: 1.** Every change
+is in this seat's own registers, and the clause that would bind eleven
+seats is **named as an unpaid debt on `#618`** rather than written, under
+the one-tier-per-branch rule. So **the curve is flat on the only axis
+that counts**, for the eighteenth consecutive window, and the cause is
+unchanged: eight of eleven charters last reached `main` on 2026-10-05,
+6,798 charter lines are written and unmerged, and 585 commits reached
+`main` in seven days with zero touching any charter. Named cause, named
+owner, already in front of her.
