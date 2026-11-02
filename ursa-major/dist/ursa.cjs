@@ -2195,10 +2195,10 @@ function stampPairingBounds(record, bounds) {
 function gateRecords(records) {
   const violations = records.flatMap((r) => checkRecord(r));
   if (violations.length === 0) return { violations, report: "" };
-  const plural = violations.length === 1 ? "" : "s";
+  const plural2 = violations.length === 1 ? "" : "s";
   return {
     violations,
-    report: `${violations.length} record invariant${plural} violated. The records are written and are still the evidence, but the numbers above cannot all be true at once, so this run is not reporting success.
+    report: `${violations.length} record invariant${plural2} violated. The records are written and are still the evidence, but the numbers above cannot all be true at once, so this run is not reporting success.
 ${formatViolations(violations)}`
   };
 }
@@ -5618,6 +5618,555 @@ var init_address_cli = __esm({
   }
 });
 
+// src/adapters/github-pr.ts
+function parseHunkRanges(patch) {
+  const ranges = [];
+  for (const line of patch.split("\n")) {
+    const m = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/.exec(line);
+    if (!m) continue;
+    const start = Number(m[1]);
+    const count = m[2] === void 0 ? 1 : Number(m[2]);
+    ranges.push([start, start + Math.max(count, 1) - 1]);
+  }
+  return ranges;
+}
+function agentMarkerOf(c, opts) {
+  const trailer = opts.agentTrailerPattern ?? DEFAULT_TRAILER2;
+  const author = opts.agentAuthorPattern ?? DEFAULT_AUTHOR2;
+  if (trailer.test(c.trailers)) return c.trailers;
+  if (author.test(c.authorName)) return c.authorName;
+  if (c.authorLogin && author.test(c.authorLogin)) return c.authorLogin;
+  return null;
+}
+function acceptanceOf(snap) {
+  const ref = `${snap.repo}#${snap.number}`;
+  if (snap.revertedBy) {
+    return {
+      accepted: false,
+      basis: `merged then reverted by ${snap.revertedBy.sha.slice(0, 9)} ("${snap.revertedBy.subject}"): the merge was withdrawn`,
+      at: snap.revertedBy.at
+    };
+  }
+  if (snap.outcome === "merged") {
+    const who = snap.mergedByLogin;
+    if (who && !BOT_LOGIN.test(who)) {
+      return { accepted: true, basis: `${who} merged ${ref} at ${snap.mergedAt}: an explicit act, not retention`, at: snap.mergedAt };
+    }
+    return {
+      accepted: null,
+      basis: who ? `${ref} was merged by ${who}, a bot account, so no human declared acceptance` : `${ref} is merged but the merging account is unknown, so no human declaration is recorded`,
+      at: snap.mergedAt
+    };
+  }
+  if (snap.outcome === "closed_unmerged") {
+    return { accepted: false, basis: `${ref} was closed without merging at ${snap.closedAt}: the work was thrown away`, at: snap.closedAt };
+  }
+  return { accepted: null, basis: `${ref} is still open at capture time (${snap.capturedAt}); an unmerged PR is undeclared, never accepted`, at: null };
+}
+function statedCorrectionsFor(snap, paths, afterSha) {
+  const byIndex = new Map(snap.commits.map((c, i) => [c.sha, i]));
+  const from = byIndex.get(afterSha);
+  const out = [];
+  for (const comment of snap.reviewComments) {
+    if (!paths.includes(comment.path)) continue;
+    if (from !== void 0) {
+      const genAt = snap.commits[from].authoredAt;
+      if (comment.createdAt < genAt) continue;
+    }
+    for (const c of snap.commits) {
+      if (c.authoredAt < comment.createdAt) continue;
+      if (!c.files.includes(comment.path)) continue;
+      const ranges = c.changedRanges?.[comment.path];
+      const overlaps = comment.line !== null && ranges !== void 0 && ranges.some(([s, e]) => comment.line >= s && comment.line <= e);
+      out.push({
+        commentId: comment.id,
+        path: comment.path,
+        line: comment.line,
+        body: comment.body,
+        at: comment.createdAt,
+        answeredBySha: c.sha,
+        evidenceBasis: overlaps ? "line-overlap" : "path-only"
+      });
+      break;
+    }
+  }
+  return out;
+}
+function resolvedPaths(reader, mergeSha, candidates) {
+  const parents = reader.parents(mergeSha);
+  if (parents.length < 2) return [];
+  return candidates.filter((p) => {
+    const atMerge = reader.blobId(mergeSha, p);
+    if (atMerge === null) return false;
+    return parents.every((parent) => reader.blobId(parent, p) !== atMerge);
+  });
+}
+function interveningMergesFor(commits, reader, genIndex, closureIndex, genFiles) {
+  const merges = [];
+  const unreadable = [];
+  const end = Math.min(closureIndex, commits.length);
+  for (let j = genIndex + 1; j < end; j++) {
+    const c = commits[j];
+    if (c.parentCount <= 1) continue;
+    const paths = c.files.filter((p) => genFiles.includes(p));
+    if (paths.length === 0) continue;
+    const parents = c.parents ?? reader.parents(c.sha);
+    if (parents.length < 2) {
+      unreadable.push(c.sha);
+      continue;
+    }
+    merges.push({
+      sha: c.sha,
+      parents,
+      paths,
+      author: c.authorName,
+      date: c.authoredAt,
+      subject: c.subject
+    });
+  }
+  return { merges, unreadable };
+}
+function pairsFromPullRequest(snap, reader, opts = {}) {
+  const commits = [...snap.commits].sort((a, b) => a.authoredAt.localeCompare(b.authoredAt));
+  const merge = snap.mergeCommitSha;
+  const mergeParentCount = merge ? reader.parents(merge).length : 0;
+  const squashed = merge !== null && mergeParentCount === 1;
+  const acceptance = acceptanceOf(snap);
+  const base = {
+    repo: snap.repo,
+    number: snap.number,
+    acceptance,
+    squashed,
+    ...snap.revertedBy ? { regression: snap.revertedBy } : {}
+  };
+  const sites = commits.map((c, index) => ({ c, index })).filter(({ c }) => c.parentCount > 1).map(({ c, index }) => ({ sha: c.sha, index, at: c.authoredAt, author: c.authorName }));
+  if (merge !== null && snap.outcome === "merged" && mergeParentCount > 1) {
+    sites.push({ sha: merge, index: commits.length, at: snap.mergedAt ?? "", author: snap.mergedByLogin ?? "unknown" });
+  }
+  const pairs = [];
+  for (let i = 0; i < commits.length; i++) {
+    const gen = commits[i];
+    if (gen.parentCount > 1) continue;
+    const marker = agentMarkerOf(gen, opts);
+    if (!marker) continue;
+    const genFiles = [...new Set(gen.files)];
+    if (genFiles.length === 0) continue;
+    const candidates = [];
+    for (let j = i + 1; j < commits.length; j++) {
+      const fin = commits[j];
+      if (agentMarkerOf(fin, opts)) continue;
+      if (fin.parentCount > 1) continue;
+      const overlap = fin.files.filter((p) => genFiles.includes(p));
+      if (overlap.length === 0) continue;
+      candidates.push({ closure: "branch-edit", sha: fin.sha, index: j, at: fin.authoredAt, author: fin.authorName, paths: overlap });
+      break;
+    }
+    for (const site of sites) {
+      if (site.index <= i) continue;
+      const resolved = resolvedPaths(reader, site.sha, genFiles);
+      if (resolved.length === 0) continue;
+      candidates.push({ closure: "merge-resolution", sha: site.sha, index: site.index, at: site.at, author: site.author, paths: resolved });
+      break;
+    }
+    let chosen = candidates.sort((a, b) => a.index - b.index)[0];
+    if (!chosen && merge !== null && snap.outcome === "merged") {
+      const kept = genFiles.filter((p) => reader.blobId(merge, p) !== null);
+      if (kept.length > 0) {
+        chosen = {
+          closure: "merge-as-accepted",
+          sha: merge,
+          index: commits.length,
+          at: snap.mergedAt ?? "",
+          author: snap.mergedByLogin ?? "unknown",
+          paths: kept
+        };
+      }
+    }
+    if (!chosen) continue;
+    const walked = interveningMergesFor(commits, reader, i, chosen.index, genFiles);
+    pairs.push({
+      generatedSha: gen.sha,
+      finalSha: chosen.sha,
+      paths: chosen.paths,
+      generatedAuthor: gen.authorName,
+      finalAuthor: chosen.author,
+      generatedAt: gen.authoredAt,
+      finalAt: chosen.at,
+      agentMarker: marker,
+      subject: gen.subject,
+      interveningMerges: walked.merges,
+      pullRequest: {
+        ...base,
+        closure: chosen.closure,
+        statedCorrections: statedCorrectionsFor(snap, chosen.paths, gen.sha),
+        ...walked.unreadable.length > 0 ? { unreadableMerges: walked.unreadable } : {}
+      }
+    });
+  }
+  return pairs;
+}
+function episodesFromPullRequest(pairs, projectPath) {
+  const slug = (0, import_node_path9.basename)(projectPath).toLowerCase().replace(/[^a-z0-9-]+/g, "-");
+  return pairs.map((p) => ({
+    id: `${slug}-pr${p.pullRequest.number}-${p.generatedSha.slice(0, 7)}`,
+    projectPath,
+    status: "closed",
+    openedAt: p.generatedAt,
+    closedAt: p.finalAt,
+    closureHeuristic: "github-pr",
+    touchedFiles: p.paths,
+    interveningMerges: p.interveningMerges,
+    // The merges that never became MergeEvents. Without this the
+    // attributor would see an empty-or-short merge list and read it as
+    // "nothing destroyed this", which is the accusation the `unknown`
+    // cause exists to avoid (src/deletion.ts).
+    ...p.pullRequest.unreadableMerges?.length ? { unreadableMerges: p.pullRequest.unreadableMerges } : {},
+    generatedSha: p.generatedSha,
+    finalSha: p.finalSha,
+    agentMarker: p.agentMarker,
+    subject: p.subject,
+    distilled: false,
+    pullRequest: p.pullRequest
+  }));
+}
+var import_node_path9, DEFAULT_TRAILER2, DEFAULT_AUTHOR2, BOT_LOGIN;
+var init_github_pr = __esm({
+  "src/adapters/github-pr.ts"() {
+    "use strict";
+    import_node_path9 = require("node:path");
+    DEFAULT_TRAILER2 = /claude|codex|cursor|gpt/i;
+    DEFAULT_AUTHOR2 = /claude|codex|cursor|gpt|copilot|github-actions|\[bot\]/i;
+    BOT_LOGIN = /\[bot\]$|^github-actions$/i;
+  }
+});
+
+// src/adapters/git-reader.ts
+function git5(repoPath, args) {
+  return (0, import_node_child_process6.execFileSync)("git", ["-C", repoPath, ...args], {
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+}
+function fetchPullRequestRef(repoPath, number, remote = "origin") {
+  git5(repoPath, ["fetch", "--no-tags", remote, `+refs/pull/${number}/head:refs/ursa/pr/${number}`]);
+  return git5(repoPath, ["rev-parse", `refs/ursa/pr/${number}`]).trim();
+}
+function gitRepoReader(repoPath) {
+  const blobs = /* @__PURE__ */ new Map();
+  const parentsOf = /* @__PURE__ */ new Map();
+  return {
+    blobId(sha, path) {
+      const key = `${sha}:${path}`;
+      if (!blobs.has(key)) {
+        let id = null;
+        try {
+          id = git5(repoPath, ["rev-parse", `${sha}:${path}`]).trim() || null;
+        } catch {
+          id = null;
+        }
+        blobs.set(key, id);
+      }
+      return blobs.get(key);
+    },
+    parents(sha) {
+      if (!parentsOf.has(sha)) {
+        let list = [];
+        try {
+          const out = git5(repoPath, ["rev-list", "--parents", "-n", "1", sha]).trim();
+          list = out.split(/\s+/).slice(1);
+        } catch {
+          list = [];
+        }
+        parentsOf.set(sha, list);
+      }
+      return parentsOf.get(sha);
+    }
+  };
+}
+function findRevert(repoPath, mergeSha, baseRef, subject) {
+  let out = "";
+  try {
+    out = git5(repoPath, [
+      "log",
+      `${mergeSha}..${baseRef}`,
+      "--date=iso-strict",
+      "--pretty=format:%H%x09%aI%x09%s%x09%b"
+    ]);
+  } catch {
+    return null;
+  }
+  for (const line of out.split("\n").filter(Boolean)) {
+    const [sha, at, subj, body = ""] = line.split("	");
+    const revertsSha = body.includes(mergeSha) || body.includes(mergeSha.slice(0, 7));
+    const revertsSubject = subject !== void 0 && subj === `Revert "${subject}"`;
+    if (revertsSha || revertsSubject) return { sha, subject: subj, at };
+  }
+  return null;
+}
+var import_node_child_process6;
+var init_git_reader = __esm({
+  "src/adapters/git-reader.ts"() {
+    "use strict";
+    import_node_child_process6 = require("node:child_process");
+  }
+});
+
+// src/adapters/gh.ts
+function gh(args) {
+  const out = (0, import_node_child_process7.execFileSync)("gh", args, {
+    encoding: "utf8",
+    maxBuffer: 128 * 1024 * 1024,
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+  return JSON.parse(out);
+}
+function currentRepo(repoPath) {
+  const out = (0, import_node_child_process7.execFileSync)("gh", ["repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"], {
+    cwd: repoPath,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+  return out.trim();
+}
+function coAuthoredBy(message) {
+  return message.split("\n").map((l) => /^Co-Authored-By:\s*(.+)$/i.exec(l.trim())?.[1]).filter((v) => Boolean(v)).join("|");
+}
+function capturePullRequest(repo, number, opts = {}) {
+  const pull = gh(["api", `repos/${repo}/pulls/${number}`]);
+  const rawCommits = gh(["api", `repos/${repo}/pulls/${number}/commits`, "--paginate"]);
+  const rawComments = gh(["api", `repos/${repo}/pulls/${number}/comments`, "--paginate"]);
+  const commits = rawCommits.map((c) => {
+    const detail = gh(["api", `repos/${repo}/commits/${c.sha}`]);
+    const files = detail.files ?? [];
+    const changedRanges = {};
+    if (!opts.noPatches) {
+      for (const f of files) {
+        if (f.patch) changedRanges[f.filename] = parseHunkRanges(f.patch);
+      }
+    }
+    return {
+      sha: c.sha,
+      authorName: c.commit.author.name,
+      ...c.author?.login ? { authorLogin: c.author.login } : {},
+      authoredAt: c.commit.author.date,
+      subject: c.commit.message.split("\n")[0],
+      trailers: coAuthoredBy(c.commit.message),
+      parentCount: c.parents.length,
+      // The API already answers this on the list call, so recording it
+      // costs nothing and makes merge attribution work on a pull request
+      // whose commits are not in the local clone (a fork, or a branch
+      // deleted after merge).
+      parents: c.parents.map((p) => p.sha),
+      files: files.map((f) => f.filename),
+      ...opts.noPatches ? {} : { changedRanges }
+    };
+  });
+  const reviewComments = rawComments.map((c) => ({
+    id: c.id,
+    path: c.path,
+    line: c.line ?? c.original_line ?? null,
+    body: c.body,
+    createdAt: c.created_at,
+    ...c.user?.login ? { authorLogin: c.user.login } : {}
+  }));
+  const outcome = pull.merged ? "merged" : pull.state === "closed" ? "closed_unmerged" : "open";
+  const revertedBy = opts.repoPath && pull.merged && pull.merge_commit_sha ? findRevert(opts.repoPath, pull.merge_commit_sha, `origin/${pull.base.ref}`, pull.title) : null;
+  return {
+    repo,
+    number,
+    title: pull.title,
+    baseRef: pull.base.ref,
+    headRef: pull.head.ref,
+    headSha: pull.head.sha,
+    outcome,
+    mergedAt: pull.merged_at,
+    closedAt: pull.closed_at,
+    mergedByLogin: pull.merged_by?.login ?? null,
+    mergeCommitSha: pull.merge_commit_sha,
+    commits,
+    reviewComments,
+    ...revertedBy ? { revertedBy } : {},
+    capturedAt: (/* @__PURE__ */ new Date()).toISOString()
+  };
+}
+var import_node_child_process7;
+var init_gh = __esm({
+  "src/adapters/gh.ts"() {
+    "use strict";
+    import_node_child_process7 = require("node:child_process");
+    init_github_pr();
+    init_git_reader();
+  }
+});
+
+// src/adapters/pr-launch.ts
+function runPullRequestLaunch(opts) {
+  const { projectPath, snapshot } = opts;
+  const minChars = opts.minChars ?? PR_LAUNCH_MIN_CHARS;
+  const reader = opts.reader ?? gitRepoReader(projectPath);
+  const pairs = pairsFromPullRequest(snapshot, reader, opts.adapter ?? {});
+  const episodes = episodesFromPullRequest(pairs, projectPath);
+  const erasedIds = erasedEpisodeIds(projectPath, episodes.map((ep) => ep.id));
+  const erased = [];
+  const dropped = newDroppedUnits(minChars);
+  const records = [];
+  const recordPaths = [];
+  for (const ep of episodes) {
+    if (erasedIds.has(ep.id)) {
+      erased.push(ep.id);
+      continue;
+    }
+    const record = resolveEpisode(projectPath, ep);
+    if (!keepRecord(record, minChars, dropped)) continue;
+    record.signals = deriveSignals(record, ep.pullRequest.acceptance);
+    recordPaths.push(saveRecord(projectPath, record));
+    records.push(record);
+  }
+  saveEpisodes(projectPath, episodes);
+  const gate = gateRecords(records);
+  return {
+    episodes,
+    records,
+    recordPaths,
+    dropped,
+    erased,
+    gate,
+    exitCode: gate.violations.length > 0 ? 1 : 0
+  };
+}
+function plural(n2, word) {
+  return `${n2} ${word}${n2 === 1 ? "" : "s"}`;
+}
+function renderPullRequestSummary(snapshot, result, projectPath) {
+  const { records, episodes, dropped, erased } = result;
+  const lines = [];
+  const mutated = records.reduce((n2, r) => n2 + r.stats.byClass.survived_mutated.chars, 0);
+  const verbatim = records.reduce((n2, r) => n2 + r.stats.byClass.survived_verbatim.chars, 0);
+  const humanDeleted = records.reduce((n2, r) => n2 + r.stats.generated.humanDeletedChars, 0);
+  const mergeDeleted = records.reduce((n2, r) => n2 + r.stats.generated.mergeDeletedChars, 0);
+  const unknownDeleted = records.reduce((n2, r) => n2 + r.stats.generated.unknownDeletedChars, 0);
+  lines.push(
+    `${snapshot.repo}#${snapshot.number}: ${plural(episodes.length, "work unit")}, ${plural(records.length, "record")}.`
+  );
+  if (records.length === 0 && erased.length > 0) {
+    lines.push(
+      `${erased.length === episodes.length ? "Every one of them is" : `${erased.length} of them are`} erased. Nothing was rebuilt.`
+    );
+    lines.push(`
+Records: ${projectPath}/.ursa/records/`);
+    return lines.join("\n");
+  }
+  lines.push(`${verbatim.toLocaleString()} chars survived verbatim, ${mutated.toLocaleString()} survived edited.`);
+  lines.push(
+    `${humanDeleted.toLocaleString()} chars the person dropped, ${mergeDeleted.toLocaleString()} destroyed by a merge inside the pull request, ${unknownDeleted.toLocaleString()} with no readable cause.`
+  );
+  if (dropped.belowMinChars > 0) {
+    lines.push(
+      `
+${plural(dropped.belowMinChars, "work unit")} ${dropped.belowMinChars === 1 ? "was" : "were"} found and not recorded, because ${dropped.belowMinChars === 1 ? "it" : "they"} carried fewer than ${dropped.minChars.toLocaleString()} generated characters, which is the --min-chars floor. The largest carried ${dropped.largestBelowFloor.toLocaleString()}, so --min-chars ${dropped.largestBelowFloor} would record it.`
+    );
+  }
+  if (dropped.unresolvable > 0) {
+    lines.push(
+      `
+${plural(dropped.unresolvable, "work unit")} resolved to nothing, with no import to state: the generated file was not readable at the final commit, or no path in it survived to be classified.`
+    );
+  }
+  if (erased.length > 0) {
+    lines.push(`
+${plural(erased.length, "work unit")} you erased stayed erased.`);
+  }
+  lines.push(`
+Records: ${projectPath}/.ursa/records/`);
+  return lines.join("\n");
+}
+var PR_LAUNCH_MIN_CHARS;
+var init_pr_launch = __esm({
+  "src/adapters/pr-launch.ts"() {
+    "use strict";
+    init_launch();
+    init_resolve_episode();
+    init_signals();
+    init_store();
+    init_git_reader();
+    init_github_pr();
+    PR_LAUNCH_MIN_CHARS = 200;
+  }
+});
+
+// src/adapters/pr-command.ts
+var pr_command_exports = {};
+__export(pr_command_exports, {
+  runPullRequestCommand: () => runPullRequestCommand
+});
+function runPullRequestCommand(opts) {
+  const out = opts.out ?? ((l) => console.log(l));
+  const err = opts.err ?? ((l) => console.error(l));
+  const { projectPath } = opts;
+  if (!opts.snapshotPath && !opts.pr) {
+    err("ursa pr needs --pr N, or --snapshot <file> for a pull request captured earlier");
+    return 2;
+  }
+  let snapshot;
+  if (opts.snapshotPath) {
+    snapshot = JSON.parse((0, import_node_fs8.readFileSync)(opts.snapshotPath, "utf8"));
+  } else {
+    const number = Number(opts.pr);
+    if (!Number.isInteger(number) || number <= 0) {
+      err(`ursa pr: --pr ${opts.pr} is not a pull request number`);
+      return 2;
+    }
+    snapshot = capturePullRequest(opts.repo || currentRepo(projectPath), number, {
+      noPatches: opts.noPatches === true,
+      repoPath: projectPath
+    });
+  }
+  const reader = gitRepoReader(projectPath);
+  if (snapshot.mergeCommitSha && reader.parents(snapshot.mergeCommitSha).length === 0) {
+    err(
+      `warning: merge commit ${snapshot.mergeCommitSha.slice(0, 9)} is not in this clone, so merge-resolution and merge-as-accepted cannot be read. Fix: git -C ${projectPath} fetch --no-tags origin ${snapshot.baseRef} (add --unshallow on a shallow clone).`
+    );
+  }
+  try {
+    fetchPullRequestRef(projectPath, snapshot.number);
+  } catch {
+  }
+  const result = runPullRequestLaunch({
+    projectPath,
+    snapshot,
+    reader,
+    minChars: opts.minChars ?? PR_LAUNCH_MIN_CHARS
+  });
+  out(renderPullRequestSummary(snapshot, result, projectPath));
+  const unreadable = [...new Set(result.episodes.flatMap((ep) => ep.pullRequest.unreadableMerges ?? []))];
+  if (unreadable.length > 0) {
+    out(
+      `
+warning: ${unreadable.length} intervening merge${unreadable.length === 1 ? "" : "s"} could not be read (${unreadable.map((x) => x.slice(0, 9)).join(", ")}), so a deletion at those boundaries is reported as unknown rather than as the person's discard. Fix: git -C ${projectPath} fetch --no-tags origin ${snapshot.baseRef}.`
+    );
+  }
+  if (result.records.length > 0) {
+    out(`Resolved by: ${formatResolverIdentity(result.records[0].task.resolvedBy ?? null)}`);
+    const gate = result.records[0].task.gatedBy;
+    if (gate) out(`Checked against: ${gate.codes.length} bounds, set \`${gate.boundsDigest}\``);
+  }
+  if (result.gate.violations.length > 0) err(`
+${result.gate.report}`);
+  return result.exitCode;
+}
+var import_node_fs8;
+var init_pr_command = __esm({
+  "src/adapters/pr-command.ts"() {
+    "use strict";
+    import_node_fs8 = require("node:fs");
+    init_gh();
+    init_git_reader();
+    init_pr_launch();
+    init_resolver_identity();
+  }
+});
+
 // src/publish.cli.ts
 var publish_cli_exports = {};
 __export(publish_cli_exports, {
@@ -5717,7 +6266,7 @@ function envelopeFailure(envelope) {
 function runClaudePrint(prompt, model, timeoutMs) {
   let out;
   try {
-    out = (0, import_node_child_process6.execFileSync)("claude", ["-p", "--model", model, "--output-format", "json"], {
+    out = (0, import_node_child_process8.execFileSync)("claude", ["-p", "--model", model, "--output-format", "json"], {
       input: prompt,
       encoding: "utf8",
       maxBuffer: 16 * 1024 * 1024,
@@ -5740,11 +6289,11 @@ function runClaudePrint(prompt, model, timeoutMs) {
   if (failure !== null) throw new Error(failure);
   return envelope.result;
 }
-var import_node_child_process6;
+var import_node_child_process8;
 var init_claude_cli = __esm({
   "src/claude-cli.ts"() {
     "use strict";
-    import_node_child_process6 = require("node:child_process");
+    import_node_child_process8 = require("node:child_process");
   }
 });
 
@@ -6029,7 +6578,7 @@ function mergeWindow(payload, opts = {}) {
 }
 function parentCountOf(repoPath, sha) {
   try {
-    const out = (0, import_node_child_process7.execFileSync)("git", ["-C", repoPath, "rev-list", "--parents", "-n", "1", sha], {
+    const out = (0, import_node_child_process9.execFileSync)("git", ["-C", repoPath, "rev-list", "--parents", "-n", "1", sha], {
       encoding: "utf8"
     }).trim();
     return out.split(/\s+/).filter(Boolean).length - 1;
@@ -6038,15 +6587,15 @@ function parentCountOf(repoPath, sha) {
   }
 }
 function mergeWindowFromEvent(eventPath, repoPath) {
-  const payload = JSON.parse((0, import_node_fs8.readFileSync)(eventPath, "utf8"));
+  const payload = JSON.parse((0, import_node_fs9.readFileSync)(eventPath, "utf8"));
   return mergeWindow(payload, { parentCountOf: (sha) => parentCountOf(repoPath, sha) });
 }
-var import_node_fs8, import_node_child_process7, NotAMergedPullRequest;
+var import_node_fs9, import_node_child_process9, NotAMergedPullRequest;
 var init_window = __esm({
   "src/ci/window.ts"() {
     "use strict";
-    import_node_fs8 = require("node:fs");
-    import_node_child_process7 = require("node:child_process");
+    import_node_fs9 = require("node:fs");
+    import_node_child_process9 = require("node:child_process");
     NotAMergedPullRequest = class extends Error {
     };
   }
@@ -6055,7 +6604,7 @@ var init_window = __esm({
 // src/ci/distill-mode.ts
 function claudeOnPath() {
   try {
-    (0, import_node_child_process8.execFileSync)("claude", ["--version"], { encoding: "utf8", timeout: 2e4, stdio: "pipe" });
+    (0, import_node_child_process10.execFileSync)("claude", ["--version"], { encoding: "utf8", timeout: 2e4, stdio: "pipe" });
     return true;
   } catch {
     return false;
@@ -6082,11 +6631,11 @@ function selectDistillMode(env, opts = {}) {
   }
   return { kind: "model", model, reason: `${credential} is set and the claude CLI is on PATH` };
 }
-var import_node_child_process8, CREDENTIAL_VARS;
+var import_node_child_process10, CREDENTIAL_VARS;
 var init_distill_mode = __esm({
   "src/ci/distill-mode.ts"() {
     "use strict";
-    import_node_child_process8 = require("node:child_process");
+    import_node_child_process10 = require("node:child_process");
     CREDENTIAL_VARS = ["ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN"];
   }
 });
@@ -6414,7 +6963,7 @@ async function runCi(opts) {
     range: window.range,
     windowNote: window.note,
     declarationBasis: declaration2.basis,
-    recordsPath: (0, import_node_path9.join)(ursaDir(opts.projectPath), "records"),
+    recordsPath: (0, import_node_path10.join)(ursaDir(opts.projectPath), "records"),
     dropped,
     refused,
     // The walk's own count, for the same reason `bounds` above is taken
@@ -6484,7 +7033,7 @@ function renderStepOutputs(fields, commentUrl) {
   ].join("\n");
 }
 function writeStepOutputs(path, fields, commentUrl) {
-  (0, import_node_fs9.appendFileSync)(path, renderStepOutputs(fields, commentUrl));
+  (0, import_node_fs10.appendFileSync)(path, renderStepOutputs(fields, commentUrl));
 }
 async function readReactions(api, prNumber, log) {
   try {
@@ -6503,7 +7052,7 @@ async function readReactions(api, prNumber, log) {
 }
 function appendAcceptance(projectPath, prior) {
   const dir = ursaDir(projectPath);
-  (0, import_node_fs9.mkdirSync)(dir, { recursive: true });
+  (0, import_node_fs10.mkdirSync)(dir, { recursive: true });
   const entry = {
     schemaVersion: "0.1.0",
     commentUrl: prior.comment.commentUrl,
@@ -6515,7 +7064,7 @@ function appendAcceptance(projectPath, prior) {
     mark: prior.mark,
     readAt: (/* @__PURE__ */ new Date()).toISOString()
   };
-  (0, import_node_fs9.appendFileSync)((0, import_node_path9.join)(dir, "acceptance.jsonl"), JSON.stringify(entry) + "\n");
+  (0, import_node_fs10.appendFileSync)((0, import_node_path10.join)(dir, "acceptance.jsonl"), JSON.stringify(entry) + "\n");
 }
 function distillAll(projectPath, records, mode, log) {
   const base = {
@@ -6529,8 +7078,8 @@ function distillAll(projectPath, records, mode, log) {
     return base;
   }
   if (records.length === 0) return base;
-  const tuningPath = (0, import_node_path9.join)(ursaDir(projectPath), "tuning.json");
-  let tuning = (0, import_node_fs9.existsSync)(tuningPath) ? JSON.parse((0, import_node_fs9.readFileSync)(tuningPath, "utf8")) : emptyTuning("ci");
+  const tuningPath = (0, import_node_path10.join)(ursaDir(projectPath), "tuning.json");
+  let tuning = (0, import_node_fs10.existsSync)(tuningPath) ? JSON.parse((0, import_node_fs10.readFileSync)(tuningPath, "utf8")) : emptyTuning("ci");
   for (const record of records) {
     if (tuning.sources.some((s) => s.recordId === record.task.id)) continue;
     try {
@@ -6543,15 +7092,15 @@ function distillAll(projectPath, records, mode, log) {
       log(`ursa ci: distill failed on ${record.task.id} (${err.message}); continuing`);
     }
   }
-  (0, import_node_fs9.writeFileSync)(tuningPath, JSON.stringify(tuning, null, 2) + "\n");
+  (0, import_node_fs10.writeFileSync)(tuningPath, JSON.stringify(tuning, null, 2) + "\n");
   return base;
 }
-var import_node_fs9, import_node_path9, NO_PRIOR;
+var import_node_fs10, import_node_path10, NO_PRIOR;
 var init_run = __esm({
   "src/ci/run.ts"() {
     "use strict";
-    import_node_fs9 = require("node:fs");
-    import_node_path9 = require("node:path");
+    import_node_fs10 = require("node:fs");
+    import_node_path10 = require("node:path");
     init_pairfinder();
     init_episodes();
     init_signals();
@@ -6602,9 +7151,9 @@ async function listenOnLoopback(server, port, what) {
   return typeof address === "object" && address ? address.port : port;
 }
 function tuningUnits(projectPath) {
-  const path = (0, import_node_path10.join)(ursaDir(projectPath), "tuning.json");
-  if (!(0, import_node_fs10.existsSync)(path)) return [];
-  const record = JSON.parse((0, import_node_fs10.readFileSync)(path, "utf8"));
+  const path = (0, import_node_path11.join)(ursaDir(projectPath), "tuning.json");
+  if (!(0, import_node_fs11.existsSync)(path)) return [];
+  const record = JSON.parse((0, import_node_fs11.readFileSync)(path, "utf8"));
   return record.axioms.map((a) => ({
     id: a.id,
     statement: a.statement,
@@ -6641,7 +7190,7 @@ function recordSummary(record, distilled) {
 }
 function storePayload(projectPath) {
   const dir = ursaDir(projectPath);
-  const exists = (0, import_node_fs10.existsSync)(dir);
+  const exists = (0, import_node_fs11.existsSync)(dir);
   const ids = listRecordIds(projectPath);
   const distilledIds = new Set(loadEpisodes(projectPath).filter((e) => e.distilled).map((e) => e.id));
   const records = [];
@@ -6651,7 +7200,7 @@ function storePayload(projectPath) {
   }
   return {
     schemaVersion: "0.1.0",
-    project: (0, import_node_path10.basename)(projectPath),
+    project: (0, import_node_path11.basename)(projectPath),
     store: STORE_DIR_NAME,
     storeExists: exists,
     readAt: (/* @__PURE__ */ new Date()).toISOString(),
@@ -6667,10 +7216,10 @@ function handleStoreRequest(projectPath, method, url) {
     return {
       status: 200,
       body: {
-        project: (0, import_node_path10.basename)(projectPath),
+        project: (0, import_node_path11.basename)(projectPath),
         ok: true,
         store: STORE_DIR_NAME,
-        storeExists: (0, import_node_fs10.existsSync)(ursaDir(projectPath)),
+        storeExists: (0, import_node_fs11.existsSync)(ursaDir(projectPath)),
         recordCount: listRecordIds(projectPath).length
       }
     };
@@ -6679,10 +7228,10 @@ function handleStoreRequest(projectPath, method, url) {
     return { status: 200, body: storePayload(projectPath) };
   }
   if (path === "/records") {
-    return { status: 200, body: { project: (0, import_node_path10.basename)(projectPath), ids: listRecordIds(projectPath) } };
+    return { status: 200, body: { project: (0, import_node_path11.basename)(projectPath), ids: listRecordIds(projectPath) } };
   }
   if (path === "/tuning") {
-    return { status: 200, body: { project: (0, import_node_path10.basename)(projectPath), units: tuningUnits(projectPath) } };
+    return { status: 200, body: { project: (0, import_node_path11.basename)(projectPath), units: tuningUnits(projectPath) } };
   }
   if (path.startsWith("/records/")) {
     const id = decodeURIComponent(path.slice("/records/".length));
@@ -6718,7 +7267,7 @@ async function startStoreServer(opts) {
       res.writeHead(200, { ...cors, "content-type": "application/json" });
       res.end(JSON.stringify({
         server: "ursa-store",
-        project: (0, import_node_path10.basename)(projectPath),
+        project: (0, import_node_path11.basename)(projectPath),
         store: STORE_DIR_NAME,
         routes: ["/health", "/store", "/records", "/records/<id>", "/tuning"]
       }));
@@ -6730,8 +7279,8 @@ async function startStoreServer(opts) {
   const port = opts.port ?? DEFAULT_SERVE_PORT;
   const bound = await listenOnLoopback(server, port, "the store server");
   const dir = ursaDir(projectPath);
-  const state = (0, import_node_fs10.existsSync)(dir) && (0, import_node_fs10.statSync)(dir).isDirectory() ? `${listRecordIds(projectPath).length} record(s) in ${STORE_DIR_NAME}/` : `no ${STORE_DIR_NAME}/ yet: run \`ursa run ${projectPath}\` and reload, nothing here is cached`;
-  log(`store server up: ${(0, import_node_path10.basename)(projectPath)} on http://127.0.0.1:${bound} \u2014 ${state}`);
+  const state = (0, import_node_fs11.existsSync)(dir) && (0, import_node_fs11.statSync)(dir).isDirectory() ? `${listRecordIds(projectPath).length} record(s) in ${STORE_DIR_NAME}/` : `no ${STORE_DIR_NAME}/ yet: run \`ursa run ${projectPath}\` and reload, nothing here is cached`;
+  log(`store server up: ${(0, import_node_path11.basename)(projectPath)} on http://127.0.0.1:${bound} \u2014 ${state}`);
   return {
     port: bound,
     url: `http://127.0.0.1:${bound}`,
@@ -6740,13 +7289,13 @@ async function startStoreServer(opts) {
     })
   };
 }
-var import_node_http, import_node_fs10, import_node_path10, STORE_DIR_NAME, DEFAULT_SERVE_PORT, LOOPBACK_ORIGIN;
+var import_node_http, import_node_fs11, import_node_path11, STORE_DIR_NAME, DEFAULT_SERVE_PORT, LOOPBACK_ORIGIN;
 var init_serve = __esm({
   "src/serve.ts"() {
     "use strict";
     import_node_http = require("node:http");
-    import_node_fs10 = require("node:fs");
-    import_node_path10 = require("node:path");
+    import_node_fs11 = require("node:fs");
+    import_node_path11 = require("node:path");
     init_store();
     STORE_DIR_NAME = ".ursa";
     DEFAULT_SERVE_PORT = 7818;
@@ -6771,7 +7320,7 @@ var init_ursa_bridge_stub = __esm({
 
 // src/bin/ursa.ts
 var import_node_util = require("node:util");
-var import_node_path11 = require("node:path");
+var import_node_path12 = require("node:path");
 init_pairfinder();
 init_vendored();
 init_signals();
@@ -7277,14 +7826,22 @@ async function main(argv) {
       // why it is opt-in.
       record: { type: "string" },
       pages: { type: "string" },
-      check: { type: "boolean" }
+      check: { type: "boolean" },
+      // `ursa pr`. `--pr` is the number; `--snapshot` names a captured
+      // snapshot on disk so the launch runs with no `gh` and no network,
+      // which is also how `src/adapters/pr-launch.test.ts` drives it.
+      pr: { type: "string" },
+      snapshot: { type: "string" }
     }
   });
   const [cmd, project] = positionals;
-  if (cmd !== "run" && cmd !== "bridge" && cmd !== "serve" && cmd !== "ci" && cmd !== "publish" && cmd !== "address" || !project) {
+  if (cmd !== "run" && cmd !== "pr" && cmd !== "bridge" && cmd !== "serve" && cmd !== "ci" && cmd !== "publish" && cmd !== "address" || !project) {
     console.error("Usage: ursa run <projectPath> [--limit N] [--min-chars N]");
     console.error("         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]");
     console.error("         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)");
+    console.error("       ursa pr <projectPath> --pr N [--repo owner/name] [--snapshot f.json] [--min-chars N]");
+    console.error("         resolves ONE pull request instead of the default branch's commit pairs, which is the");
+    console.error("         only path that finds anything on a repository whose every commit is an agent's");
     console.error("       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]");
     console.error("       ursa serve <projectPath> [--port N]");
     console.error("         serves this project's .ursa/ store read-only on loopback for a local page; no passphrase, no sync, no model");
@@ -7300,7 +7857,7 @@ async function main(argv) {
   if (cmd === "address") {
     const { runAddress: runAddress2 } = await Promise.resolve().then(() => (init_address_cli(), address_cli_exports));
     return runAddress2({
-      projectPath: (0, import_node_path11.resolve)(project),
+      projectPath: (0, import_node_path12.resolve)(project),
       recordId: values.record ?? null,
       // `GITHUB_REPOSITORY` is read here for the same reason `publish`
       // reads it: on a runner it is the one fact about the repository
@@ -7309,10 +7866,20 @@ async function main(argv) {
       check: values.check === true
     });
   }
+  if (cmd === "pr") {
+    const { runPullRequestCommand: runPullRequestCommand2 } = await Promise.resolve().then(() => (init_pr_command(), pr_command_exports));
+    return runPullRequestCommand2({
+      projectPath: (0, import_node_path12.resolve)(project),
+      pr: values.pr ?? null,
+      repo: values.repo ?? process.env.GITHUB_REPOSITORY ?? null,
+      snapshotPath: values.snapshot ?? null,
+      minChars: values["min-chars"] ? Number(values["min-chars"]) : void 0
+    });
+  }
   if (cmd === "publish") {
     const { runPublish: runPublish2 } = await Promise.resolve().then(() => (init_publish_cli(), publish_cli_exports));
     return runPublish2({
-      projectPath: (0, import_node_path11.resolve)(project),
+      projectPath: (0, import_node_path12.resolve)(project),
       outDir: values.out,
       repository: values.repo ?? process.env.GITHUB_REPOSITORY ?? null,
       acknowledged: values.yes === true
@@ -7336,7 +7903,7 @@ async function main(argv) {
     }
     const { runCi: runCi2 } = await Promise.resolve().then(() => (init_run(), run_exports));
     const result = await runCi2({
-      projectPath: (0, import_node_path11.resolve)(project),
+      projectPath: (0, import_node_path12.resolve)(project),
       eventPath,
       repo,
       token,
@@ -7360,7 +7927,7 @@ async function main(argv) {
   if (cmd === "serve") {
     const { startStoreServer: startStoreServer2 } = await Promise.resolve().then(() => (init_serve(), serve_exports));
     const handle = await startStoreServer2({
-      projectPath: (0, import_node_path11.resolve)(project),
+      projectPath: (0, import_node_path12.resolve)(project),
       port: values.port ? Number(values.port) : void 0
     });
     await new Promise((resolve2) => {
@@ -7382,7 +7949,7 @@ async function main(argv) {
     warnIfWeakPassphrase(passphrase);
     const { startBridge: startBridge2 } = await Promise.resolve().then(() => (init_ursa_bridge_stub(), ursa_bridge_stub_exports));
     const handle = await startBridge2({
-      projectPath: (0, import_node_path11.resolve)(project),
+      projectPath: (0, import_node_path12.resolve)(project),
       passphrase,
       syncUrl: (values["sync-url"] ?? "https://ursa-overlay.vercel.app").replace(/\/$/, ""),
       session: values.session,
@@ -7400,7 +7967,7 @@ async function main(argv) {
     });
     return 0;
   }
-  const projectPath = (0, import_node_path11.resolve)(project);
+  const projectPath = (0, import_node_path12.resolve)(project);
   const minChars = Number(values["min-chars"] ?? 200);
   const limit = values.limit ? Number(values.limit) : Infinity;
   let declaration2 = UNDECLARED;
