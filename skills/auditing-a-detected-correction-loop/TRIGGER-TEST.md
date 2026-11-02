@@ -224,3 +224,32 @@ treat a decayed span as evidence against `accepted_tacitly` is the
 obvious next move and was deliberately left undone. If that lands, a
 prompt about a decayed span contradicting a tacit acceptance sits on a
 real new edge, and this section is what has to be read again.
+
+## Added 2026-11-02: the ninth skill's boundary
+
+The run that landed `auditing-an-untraced-share` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**11. "Our no-provenance share went from 27 to 41 percent across two
+records of the same repo and nothing about the project changed. Is that
+signal or is the matcher going blind?"**
+
+`auditing-an-untraced-share`'s own trigger 2, and it should not fire
+here.
+
+This is the closest of the ninth skill's boundaries to this file,
+because the prompt asks the question this skill is built on — is this
+number telling me about the work, or about the instrument that produced
+it? — and it asks it in those words. The verb is the same too, since
+both skills are called an audit.
+
+It should not fire, because the block decides and the shape does not.
+This skill reads `signals`, which is the one block no span label and no
+percentage can settle, and that is why its own procedure goes back to
+the transcript. The sibling never reads a transcript: it reads span
+reason fields and the class total they sum to. A prompt naming a
+percentage of the finished work is on the sibling's side of that line
+however much the question rhymes with this one.
