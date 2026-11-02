@@ -16888,7 +16888,7 @@ the owner to accept or reject.
   guard executes. The preceding run reached the same conclusion about
   `grep` dialects from the other direction. Two instruments, one frame,
   no exit status available there.
-- First step, and it is not this seat's to take: add to the all-seats
+- First step: not this seat's to take, and it is to add to the all-seats
   "Read your own seat's open PRs first" paragraph, in each of the eleven
   `prompts/*-agent.md` files that carry it, one line placing
   `bash tools/ensure-full-clone.sh` before the first `merge-base` call,
@@ -16977,5 +16977,147 @@ the owner to accept or reject.
   and asserts the slug-scoped update still succeeds; a second edits the
   cited text itself and asserts the refusal names that ref. Owner: the
   next run of this seat that touches `check-evidence.mjs`.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — The containment gate in front of "close this one as superseded" passes by construction in the two cases it exists for
+- Trigger: a note on the board from this company's ExO seat, addressed to
+  this seat, naming pull request #601 as the merge queue's oldest real
+  conflict, twelve files all under `skills/`, and handing the rebase to
+  this seat as the only one that can clear it. The measurement was
+  correct and reproduced here exactly. The first question it raised was
+  whether #601 still carries anything, so this run reached for
+  `tools/stack/absent-text.py`, which that file's own header offers as
+  "the gate in front of 'close this one as superseded'". Asked the
+  question twice, the gate gave opposite answers, and the answer that
+  would have been acted on was the one that examined nothing.
+- What: two defects, both reproduced rather than inferred, in the same
+  twenty lines of `main()`.
+  The first is the base. `base` defaults to `git merge-base OLD TIP`
+  (`tools/stack/absent-text.py:244`) and the file list is
+  `git diff --name-only base old` (`:251`). When `old` is an ancestor of
+  `tip`, `merge-base` returns `old`, so that diff is empty, the per-file
+  loop never runs, and the function returns `0` having printed nothing.
+  Measured on the real pair this run was sent to resolve:
+  `absent-text.py refs/prs/601 refs/prs/660` exits **0** with no output
+  and zero lines examined, while the same pair given the base the
+  question actually needs, `--base $(git merge-base refs/prs/601
+  origin/main)`, examines **56 files and 33,226 lines** and exits **1**
+  on 43 of them. Same question, opposite exit codes. The silent pass is
+  indistinguishable at the exit code from a full-coverage pass, which is
+  the one distinction the header's four classes were invented to draw.
+  The second is the ref scan, and it is the worse of the two. A path
+  missing from the tip is looked for on `refs/prs`, `refs/remotes/origin`
+  and `refs/heads` before being called `at-risk`, and the only ref
+  excluded from that search is the tip (`:263`). `old` is not excluded,
+  and `old` is reachable under `refs/heads` or `refs/prs` in every real
+  invocation. So a file that exists on the retiring branch and nowhere
+  else is found on the retiring branch, classified `elsewhere`, printed
+  as "not at risk", and given exit `0`. Reproduced on a throwaway branch
+  off `main` carrying one file present on exactly one ref, confirmed by
+  scanning all three namespaces by hand: the gate answered
+  `skills/ZZ-only-on-this-branch.md: missing from the tip, present on 1
+  other ref(s) -- not at risk (e.g.
+  refs/heads/repro/absent-text-self-carrier)`, naming the branch being
+  closed as the reassurance for closing it. `at-risk` is the only class
+  that earns an exit code, and it can never fire for the only case where
+  closing the branch actually loses the text.
+- Why it matters here and not in general: this seat closes its own older
+  pull requests as contained in its newer tip, and that file's header
+  says so in its first paragraph of rationale. It is the gate on a
+  destructive decision, and both defects fail in the permissive
+  direction. The measurement that mattered this run came out right only
+  because the explicit base was passed by hand: #601 holds **2,296 lines
+  absent from `main` and 2,615 rewritten**, plus **24 files `main` does
+  not have at all**, among them two complete skills
+  (`attributing-a-deleted-span`, `excluding-a-file-from-an-outcome-record`,
+  `SKILL.md` and `TRIGGER-TEST.md` each) and twenty run reports. Those 24
+  came back `elsewhere`, correctly, because branches 633 through 660 do
+  carry them. Had they not, the same class and the same exit code would
+  have been printed.
+- First step: exclude `old` from the ref scan alongside `tip`, so the
+  branch under test cannot vouch for itself, and print one line plus a
+  distinct exit when the file list is empty, saying that `old` is an
+  ancestor of `tip` and that nothing was examined. Both are one-line
+  changes with a one-test receipt each: a fixture where `old` is an
+  ancestor of `tip` must not report a bare `0`, and a fixture with a file
+  on `old` alone must exit non-zero. The file's own closing line, "a
+  count is not evidence, only the sentence tells you which you have", is
+  the standard the empty case fails, because in the empty case there is
+  no sentence. Owner: the engineer seat. `tools/stack/` is outside this
+  seat's boundary, so this is a ledger entry rather than an edit.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — A suite that asserts zero violations on a gate which classifies some violations as the owner's goes red on the owner's queue, not on the branch
+- Trigger: running the repository's own test suites over this seat's
+  stack after merging its tip, to check the merge rather than to trust
+  it. `tools/ledger` came back 124 passed and 2 failed on the stack
+  where `origin/main` is 126 passed and 0 failed, so two gates were red
+  on this seat's work and nothing had reported it. One was this seat's to
+  repair and is repaired in this branch. The other cannot be repaired by
+  any seat, and the gate it belongs to says so itself.
+- What: `tools/ledger/check-closures.mjs` sorts its findings into ones a
+  seat must repair and ones only the owner can, and prints the split:
+  "clean as far as a seat can take it. 2 violation(s) above need the
+  owner, not a seat." Both remaining findings are `CLOSURE_STATUS` on
+  entries whose status line reads `proposed`, and the gate's own message
+  names the holder: "Held by the owner: pm.md §4 gives only her the move
+  out of 'proposed'." The test at
+  `tools/ledger/check-closures.test.mjs:194` then asserts the violation
+  list is empty, with no such scoping, so it fails on exactly those two.
+  Its sibling in the same family is written the other way, and its name
+  is the whole fix: `check.test.mjs`'s case is "the real ledger carries
+  no violation a seat could repair", and that one passes.
+- Why it matters, and the direction: the normal and correct sequence is
+  that a seat ships the work and writes the closure marker, and the owner
+  moves the status afterwards. So this suite is red for the whole
+  interval between a correct ship and an owner merge, which on this queue
+  is days. A red check is a hard stop under `docs/standards/pm.md` §10
+  Tier B criterion 3 regardless of why it is red, so a gate that goes red
+  on the owner's latency blocks merges for a reason that is not about the
+  branch. It also trains the reading this organisation has already paid
+  for twice: a suite that is red for a known harmless reason is a suite
+  whose red stops being read.
+- First step: scope the assertion the way its sibling is scoped, to the
+  violations a seat could repair, and add a second case asserting that an
+  owner-held violation is reported and does not fail the suite. The split
+  already exists in the gate's return value, so the test is reading the
+  wrong field rather than needing a new one. Owner: the engineer seat,
+  `tools/ledger/` being outside this seat's boundary.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — A containment verdict should name what it examined, and §5ai is why this run filed the rule instead of writing it
+- Trigger: this run needed a §5 section of `prompts/skill-extract.md`
+  and did not write one, which is itself worth recording, because §5ai
+  landed in this seat's own stack hours earlier and forbids it. §5ai's
+  operative clause is that a run needing a new section writes it in a
+  pull request carrying nothing that cites it, section first and
+  citations second, never the same branch. This run's pull request
+  carries seven of this seat's pull requests merged together, which is
+  the opposite shape, so the section cannot land here without breaking
+  the rule on the branch that would introduce it.
+- What: the rule the section would state, kept here so the next run does
+  not have to re-derive it from the pull request. A containment verdict
+  in this library states what it examined before it states what it
+  found, and a verdict that examined nothing says so in place of a
+  number. The two readings behind it are measured in the sibling entry on
+  `tools/stack/absent-text.py` filed under this date: the same tool, the
+  same pair of refs, exit 0 on zero lines and exit 1 on 33,226, and the
+  passing run is the one that looked at nothing. The generalisation is
+  not about that tool. §5j already says a lock proves the lines did not
+  change rather than that they support the claim, and §5s already says a
+  guard that skips its subject reports on the subject it has left. This
+  is the third face of the same shape, and the one this library has no
+  section for: a gate whose scope is computed from its own arguments can
+  compute an empty scope, and an empty scope is reported as success by
+  every gate in this repository that returns an exit code.
+- First step: write the section, in a pull request that carries the
+  section and its ledger closure and nothing citing it, per §5ai, and
+  pay §5ai's own grep check on it. Then, and only in a later run, the
+  guards under `skills/` that could carry it. Owner: the next run of
+  this seat that would add a §5 section, which is the same owner §5ai
+  itself was filed with.
 - Cost: $0
 - Status: proposed
