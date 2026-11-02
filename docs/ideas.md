@@ -17122,7 +17122,7 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
-### 2026-11-02 (skill) — The board documents four store rules it enforces by refusal and has a fifth it enforces by truncation, which arrives as a success
+### 2026-11-02 (skill) — The board enforces a rule by truncation that its documented table of refusals cannot hold, and the table never says it is a table of refusals
 - Trigger: this run's own board reply, posted to answer the ExO seat's
   note about the merge conflict. The POST returned `HTTP 201` with a
   message id, so by the only signal most seats check it succeeded. Its
@@ -17156,10 +17156,32 @@ the owner to accept or reject.
   real error only in the response body. This is the third instance, and
   all three are read correctly only by a caller that prints the raw
   response.
-- First step: add the wake limit to §15's enforced-rules paragraph,
-  which means changing "Four" to "Five" and giving the limit a sentence
-  that says it is not a refusal, so the paragraph's own promise holds for
-  the rule that most needs it. The repair this run used in the meantime,
+- First step: **corrected 2026-11-02 by Ursa's exo seat on the board, and
+  the correction is taken.** Not a fifth row. That seat's words are that
+  "the four you counted it against are refusals, where the write does not
+  happen. A truncation is not a refusal, since the store keeps the whole
+  body and cuts only the notification. So it is not a fifth row of that
+  table. The table's real defect is that it never says it is a table of
+  refusals." That is right, and it is right against this entry's own
+  analysis one bullet above, which had already found the scoping and
+  called it consistent before proposing a repair that breaks it. Adding
+  the wake limit as a fifth member of a list of refusals would make the
+  list wrong in order to make it complete, and it would do so in the one
+  paragraph whose value is that a seat can trust what the list means.
+  So the repair is two sentences and not a recount: give §15's paragraph
+  a heading or a clause that says it enumerates what the store
+  **refuses**, and name the wake limit separately as the one rule that
+  reports instead of refusing. Four stays four. The handoff already
+  posted to `alexandra-systems/exo-centralizer` carries the old first
+  step; this correction goes back on the board under the same thread, so
+  HQ reads the repair this entry now asks for rather than the one it
+  asked for at 03:44. This entry's title was amended in the same edit for
+  the same reason, and it read "The board documents four store rules it
+  enforces by refusal and has a fifth it enforces by truncation, which
+  arrives as a success"; the old wording is kept here because the title
+  is what the owner reads in a list and leaving a corrected claim
+  standing there is not a small cost. What is unchanged is the finding,
+  the measured figures, and the owner. The repair this run used in the meantime,
   and the one the store's notice itself recommends, is to split: the cut
   tail went out as a second message naming the first by id, since the
   store has no delete route and a truncated record is the honest one to
@@ -17235,5 +17257,90 @@ the owner to accept or reject.
   seat may propose but not unilaterally rescope; the next run of this seat
   that would add a §5 section pays the stricter reading by hand in the
   meantime, as this run did.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — The board's disposition gate reports honestly about one of its two arms, and the other one tells a sender a falsehood with a non-zero exit
+- Trigger: Ursa's exo seat ran this seat's 2,034-character `done` of
+  03:43 through `tools/board/check.mjs` and reported that the gate could
+  not tell which side the disposition fell on, then graded that arm for
+  the first time over a complete walk of 4,200 rows. Confirmed in this
+  clone before being written down: `dispositionRisk(body, 1453)` returns
+  `markers_found: 0` on that body, while its two decisions sit at offsets
+  **233** and **729**, "I did not rebase it" and "So I merged my tip
+  instead". `MARKERS` carries `not merged` and `I took` and `I decided`,
+  and carries neither an `I did not <verb>` form nor an affirmative
+  `I merged`, so it holds the negations of actions and not the actions.
+- What: `tools/board/disposition.mjs` argues in its own header that a
+  word list is acceptable here because "a miss costs a seat nothing it
+  was not already paying", and it keeps that promise for one of its two
+  arms. `markers_missing` exists precisely so the `none` verdict prints
+  as "no marker found" and never as "no disposition present". The
+  `lost_only` arm next to it makes a positive claim about the delivered
+  head out of the same silence, and it is not reported as a reading. The
+  reporting seat's figures for the grading: **154** of **1,016** verdicts
+  move, and **32** bodies were told their verdict had been cut while it
+  sat at offset zero. Those are that seat's numbers, reported as that
+  seat's; the confirmation above is this seat's.
+- Why it matters more than a missed finding: a presence-keyed list that
+  is incomplete produces a false negative and the operator sees nothing,
+  which is cheap and is reachable only by a second instrument. An
+  absence-keyed list that is incomplete produces a false positive with a
+  named subject, a non-zero exit and a prescribed repair, all of them
+  wrong. The same list is therefore cheap in one direction and expensive
+  in the other, and this gate has priced only the cheap half. The
+  expensive direction also runs toward the behaviour the gate exists to
+  encourage: the seats most likely to be falsely accused are the ones
+  that put the verdict first, in their own words, rather than in this
+  list's.
+- First step: not this seat's to take. `tools/` is not in this charter's
+  write surface and the seat that found it is already repairing it. What
+  is filed here is the general form, written as
+  `prompts/skill-extract.md` §5al and paid on this library's own
+  amendment graph in the same pull request, plus one specific suggestion
+  for whoever takes the gate: the repair that generalises is not a wider
+  list, because a wider list has the same property one spelling further
+  out. It is to report `lost_only` as a reading of the vocabulary and to
+  print the vocabulary beside it, which is what `markers_missing` already
+  does for the arm beside it. Owner: Ursa's exo seat, which owns the
+  file and raised it.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — A claim written without the verb reaches neither of this library's two amendment patterns, and the writer deletes two correct lines without refusing
+- Trigger: paying §5al clause 3 on `skills/trigger-coverage.mjs`. The
+  wider recognizer added there splits an absence into "nothing here" and
+  "something here this check cannot read", and it is itself a vocabulary.
+  Measured on `prompts/skill-extract.md`: re-spelling §5ak's claim as
+  "This section supersedes §5s and §5w" carries no `amend` word, so it
+  reaches neither pattern. The graph drops 2 of its 11 edges, the check
+  reports no unreadable claim, and `withBackPointers` does not refuse: it
+  deletes §5s's and §5w's generated back pointers and returns **8** where
+  the unmodified file returns **10**.
+- What: clause 5 of §5al, the writer's refusal, is keyed on the same
+  wider pattern as clause 3, so it protects exactly the cases that
+  pattern reaches and nothing beyond them. That is not a defect in the
+  clause, it is the clause's stated cost, and it is in the ledger rather
+  than in the section's prose because it is a live unprotected path in a
+  tool that edits a charter file.
+- Why not repaired in the same run: every repair considered makes a
+  worse trade. Keying the refusal on "any section whose back pointer
+  would be deleted and not rewritten" would refuse every legitimate
+  removal, which is what `--write` is for when a note stops claiming an
+  amendment, and §5ah's orphan kind exists for that case. Requiring the
+  note's claim to be machine-written would move the vocabulary problem
+  into a format gate over a prose file this seat writes by hand. The
+  option worth one run's work, and the one this entry proposes, is to
+  make `--write` compare the back pointers it is about to delete against
+  the ones it is about to write and refuse on any net loss, naming the
+  sections, which is a property of the edit rather than of any
+  vocabulary. That is a real design change to the only writer in this
+  library and it is not a line this run should add at the end of itself.
+- First step: the next run of this seat that touches
+  `skills/trigger-coverage.mjs` implements the net-loss refusal in
+  `withBackPointers`, with the "supersedes" variant as its positive
+  control and a note that genuinely stopped claiming an amendment as its
+  negative one, since that second case is the one the refusal must not
+  block. Owner: this seat.
 - Cost: $0
 - Status: proposed
