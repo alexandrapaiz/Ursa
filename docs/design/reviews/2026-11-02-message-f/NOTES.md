@@ -186,5 +186,81 @@ stub naming the command it is waiting on, at the moment the command is
 issued rather than at the moment it returns.** Then the same cut leaves
 "waiting on `npm ci --cache …`, started 06:45:09Z" instead of silence.
 
-(in progress: run g's own install started 07:19:56Z. Verdict and numbers
-land in this section when it returns.)
+**The verdict: the remedy works.** `npm ci --cache <a directory this run
+owns>` in `ursa-minor` exited **0** and added **611 packages in 4m48s**,
+against a cache that started empty. The `EEXIST` of §2 did not recur.
+Then `npm run build` exited **0** in **1m28s**, compiling in 41s, type
+checking in 31s and prerendering all six static pages. So the thing the
+failure was blocking is unblocked, which is the claim §2 could not make.
+
+Receipts, committed next to this file: `data/npmci-cold-private-cache.log`
+and `data/next-build.log`.
+
+Run g put the cache at `.fe-run-g/npm-cache` inside its own checkout
+rather than at a bare `/tmp` name. Run f proposed `/tmp/npm-fe-f`, which
+is the shape L55's rule is written to forbid, since every seat on this
+host runs as the same unix user and `/tmp` is mode 1777, so a bare
+`/tmp/<noun>` is shared and not private. The checkout directory is the
+one path the host already hands this run alone, and `.gitignore` ignores
+every root-level dot-entry, so scratch there is private by construction
+and committed by accident never. **L55's rule should name the checkout,
+not `/tmp`.**
+
+**The cost, and L55 named the wrong one.** L55 priced this remedy in
+time, at "a tarball fetch at 30 to 46 seconds and an install of some
+minutes". That estimate holds. Over the 612 cache misses this install
+took, the per-request durations npm logs ran from 17.2s at the fastest to
+271.0s at the slowest, with a median of **39.7s**, and the install
+finished in under five minutes. Those per-request figures are durations
+under npm's own request concurrency rather than serial latencies, so they
+should not be added up, and the wall clock is the number that matters.
+
+The cost L55 missed is **disk**, and the run that went looking for it hit
+it rather than predicting it. A second `npm ci`, issued against the
+now-warm private cache to price the steady state, failed:
+
+```
+npm warn tar TAR_ENTRY_ERROR ENOSPC: no space left on device, write
+```
+
+`/tmp` and `/srv/asc` are **one 45G volume** on this host, and at 07:27Z
+it was at **100%, with 199M free**. The measurement this section wanted
+could not be taken, and the reason it could not be taken is the finding.
+
+| what | size |
+|---|---|
+| run g's private cache, `ursa-minor` alone | **176M** |
+| run f's private cache, still at `/tmp/npm-fe-f` 32 minutes after that run ended | **210M** |
+| the shared cache every seat contends over, `~/.npm/_cacache`, entire | **65M** |
+| the volume both of them sit on | 45G, 100% used |
+
+Two things follow, and they pull against each other honestly.
+
+**First, private caches are not free and nothing collects them.** Run f
+left 210M behind at a path no later run would recognise as garbage, and
+it was still there half an hour later. Six seat checkouts were live on
+this volume at 07:27Z at roughly 870M each, so the caches are a minority
+of the pressure rather than its cause. But a shared cache adds **zero**
+per project per run and a private one adds 176M, so this rule converts a
+rare contention failure into a steady charge against a volume that has no
+headroom to charge. **L55's rule needs the other half: the private cache
+is scratch, so delete it before the run ends.** Run g deleted both its
+own and run f's at 07:27Z, which is why the warm number is missing rather
+than merely slow.
+
+**Second, and unexplained: the shared cache is smaller than one project's
+private one.** 65M shared against 176M for `ursa-minor` by itself. A
+cache that twenty seats of five companies have been filling should not be
+a third the size of one project's dependency closure. Either something
+prunes it or it holds far less of any given install than "warm" implies,
+and in both cases L55's premise that "a warm shared cache is
+near-instant" is doing work it has not earned. Not measured, labelled as
+a hypothesis, and it changes the trade if true: if the shared cache is
+mostly cold anyway, the private cache costs disk and buys safety at
+almost no extra time.
+
+**What is settled.** The install succeeds and the build succeeds behind a
+cache the run owns, which is what §2 asked. What is not settled is the
+price, and the honest summary is that this remedy is right about the
+failure mode and incomplete as a rule until it says where the cache lives
+and when it is deleted. Both go in L56.
