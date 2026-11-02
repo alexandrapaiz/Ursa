@@ -172,6 +172,17 @@ test('the lint does not fire on English words that merely end in "date"', () => 
   assert.equal(textualTimestampComparisons('const d = firstTs.slice(0, 10)').length, 1)
 })
 
+test('the day lint tests what is sliced, not what the line mentions', () => {
+  // A line can name a timestamp and slice something else. Against the whole
+  // line this fires; against the receiver it does not, and the receiver is
+  // the thing that would be wrong.
+  assert.deepEqual(textualTimestampComparisons('recordedAt: digest.slice(0, 10),'), [])
+  assert.deepEqual(textualTimestampComparisons('const key = `${r.mainDate}` + sha.slice(0, 10)'), [])
+  // And the same line with the timestamp as the receiver is a finding, so
+  // this is a narrowing and not a hole.
+  assert.equal(textualTimestampComparisons('recordedAt: other.generatedAt.slice(0, 10),').length, 1)
+})
+
 test('a day sliced off toISOString is the UTC day and is not a finding', () => {
   assert.deepEqual(textualTimestampComparisons("recordedAt: new Date().toISOString().slice(0, 10),"), [])
   // The exemption is the producer and not the name: the same slice on a

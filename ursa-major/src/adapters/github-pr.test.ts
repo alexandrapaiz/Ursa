@@ -693,6 +693,44 @@ describe('timestamps are compared as instants and not as text', () => {
       .toEqual(fromApi.map((p) => [p.generatedSha, p.finalSha]))
   })
 
+  it('statedCorrectionsFor picks the first commit that truly follows the comment', () => {
+    // The second comparison in this function, which the first version of
+    // these tests left uncovered: a rehearsal reverted it to `<` and nothing
+    // went red.
+    //
+    // The comment is 10:00Z. `early0` is 11:00Z written for a committer five
+    // hours west, `2026-11-02T06:00:00-05:00`, so it genuinely follows the
+    // comment and is the commit that answered it. As text its string starts
+    // `...T06`, which sorts before `...T10`, so it was skipped as predating
+    // the comment and the credit went to `late000` an hour later instead.
+    // The record then names the wrong commit as the one that acted on the
+    // correction, which is the field a lab would join on.
+    const commentAt = '2026-11-02T10:00:00Z'
+    const earlyAt = '2026-11-02T06:00:00-05:00'    // = 11:00Z
+    expect(earlyAt < commentAt).toBe(true)
+    expect(instantBefore(earlyAt, commentAt)).toBe(false)
+
+    const snap = snapshot({
+      commits: [
+        commit({ sha: 'gen0000', authoredAt: '2026-11-02T09:00:00Z', files: ['a.md'] }),
+        commit({
+          sha: 'early0', authoredAt: earlyAt, authorName: 'Human Owner',
+          trailers: '', files: ['a.md'],
+        }),
+        commit({
+          sha: 'late000', authoredAt: '2026-11-02T12:00:00Z', authorName: 'Human Owner',
+          trailers: '', files: ['a.md'],
+        }),
+      ],
+      reviewComments: [
+        { id: 3, path: 'a.md', line: null, body: 'tighten this', createdAt: commentAt },
+      ],
+    })
+    const found = statedCorrectionsFor(snap, ['a.md'], 'gen0000')
+    expect(found).toHaveLength(1)
+    expect(found[0].answeredBySha).toEqual('early0')
+  })
+
   it('statedCorrectionsFor drops a comment written before the generation, in either spelling', () => {
     // The generation is 09:00Z, written the way git prints it for a
     // committer five hours west: `2026-11-02T04:00:00-05:00`. The comment is
