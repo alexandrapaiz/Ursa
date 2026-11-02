@@ -2,6 +2,86 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-01 hook (re-fired 2026-11-02, standup): three Tier B merges, five Tier C PRs unchanged, nothing new for you
+
+This run is the scheduled daily-cadence hook for 2026-11-01, which the
+provider refused before it took a turn; it fired again after the
+provider's limit reset and is run now, dated for the slot it was
+scheduled against. 2026-11-01 was a Sunday, so this is the standup half
+of the cadence (docs/standards/pm.md §11, company ADR-033), not the
+Monday ceremony. The repo has since moved well past that slot through a
+long run of message-triggered passes (the sixth through eighth,
+ending in #630, merged 2026-11-02T00:41:45Z), so this standup finds a
+state already close to current rather than a 2026-11-01 snapshot. It
+still runs its own checklist rather than trusting the last pass's
+numbers unread.
+
+**This run's own checkout was shallow and single-branch again**
+(`git rev-parse --is-shallow-repository` true, 2 remote-tracking refs),
+the same recurring defect the eighth pass named and repaired for
+itself. Repeating the repair here with `tools/ensure-full-clone.sh`
+(1,966 → 3,951 commits, 2 → 292 refs) before trusting any `gh pr diff`,
+mergeable state, or ancestry check below — `gh pr diff --name-only` on a
+shallow clone's local git commands silently returns wrong-sized diffs,
+and this pass caught it concretely: PR #627 looked like a 40-file,
+cross-seat diff before the repair and a clean 4-file, market-only diff
+after it. **Worth generalizing past this one pass:** two PM runs in a
+row have now hit the same shallow-clone defect independently and each
+repaired it for themselves. If a third run hits it, that is a pattern,
+not a coincidence, and the fix belongs in the checkout step the
+workflow runs before any agent turn, not in each run's own first few
+commands.
+
+1. **Three pull requests merged under Tier B.** #632 (exo, four
+   knowledge-surface files, clean) and #629 (security, after this pass
+   resolved a docs-only `docs/ideas.md` conflict with `main` on its own
+   branch — two inserted ledger entries at the same point, resolved by
+   keeping both and restoring the shared closing `- Status: proposed`
+   line each needed, pushed to `ursa-security/2026-11-02-message`, not
+   to `main`) both merged clean. #627 (market) also merged: the
+   redaction-gate false positive the eighth pass's comment flagged
+   (a public URL's UUID-shaped path segment) was already fixed by
+   market's own next push, which landed after that comment and before
+   this pass read it, and the accurate full-history diff confirmed the
+   real change is 4 files in market's own lane, not the 40 the shallow
+   clone showed. All three deleted their branches on merge.
+2. **Five PRs confirmed Tier C, unchanged, now checked against accurate
+   diffs instead of the shallow clone's.** #618 and #612 (exo) touch
+   nine `prompts/*.md` files each and both now show `dirty`/conflicting
+   against current `main` (confirmed by `git merge-tree`, real conflict
+   in `docs/agents/incidents.md`), consistent with the eighth pass's
+   finding that #618 contains #612. #615 (engineer) touches
+   `tools/secret-scan.baseline.json`, reserved to your merge by that
+   file's own text, and is now genuinely conflicting in `docs/ideas.md`
+   where the eighth pass still read it as clean — a real change since
+   that pass, not a stale read. #601 (skill) touches
+   `prompts/skill-extract.md` and is genuinely conflicting in
+   `skills/running-an-outcome-record-trial/TRIGGER-TEST.md`. #395
+   (research) touches `prompts/engineer-agent.md` and
+   `prompts/research-agent.md`, merges clean on top of current `main`,
+   and is now ten days old.
+3. **Nothing new for you.** No milestone due within three days (the
+   API returns an empty list), no ruling in `docs/decisions.md` naming
+   a seat without a run since the last pass, and the one failed run in
+   the last 24 hours (market, 2026-11-02T00:36:12Z) retried and passed
+   four minutes later before this pass ever read it — a transient
+   failure, not a defect, and already superseded by #627's merge above.
+
+**The sprint-ceremony gap the eighth pass named is unchanged and not
+re-run here.** `sprint-2026-10-12.md` is still the only sprint file on
+`main`; three Mondays (2026-10-19, 2026-10-26, 2026-11-02 itself) have
+passed with only standup- and message-cadence passes and no ceremony
+PR. This run's own slot (2026-11-01) was never a ceremony slot, so it
+does not open one either. Flagging again rather than absorbing it
+silently: the next Monday-dated hook run is the one that owes a
+ceremony PR, and if it is also refired late or skipped, that is now two
+consecutive misses worth a line in `docs/decisions.md`, not three.
+
+Board note not posted this pass: the eighth pass already posted the
+equivalent first-person note for the same merge set plus #627/#629, and
+a second note minutes later restating the same three merges would be
+noise rather than new information. This pass's own PR is the record.
+
 ## Top three for the owner, 2026-11-02 message-triggered (eighth pass): three Tier B merges, one red-check finding handed to market, nothing new for you
 
 Triggered by a message asking for the full routine at once: inbox and
