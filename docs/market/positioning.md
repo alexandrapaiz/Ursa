@@ -1796,3 +1796,104 @@ Zep's post-restructure $25/mo Flex tier (2026-10-25 update) than to
 any enterprise contract — worth holding as a single low-confidence data
 point, not a trend, until something with real engagement prices the
 same promise.
+
+## A tracked competitor's own CEO argues portability is structurally wrong, and one of his four points has no answer on file (2026-11-02, message, 13th run)
+
+docs/market/landscape.md's Zep entry gained a dated update this run:
+founder Daniel Chalef's "The Private Agent Memory Fallacy" (2025-06-19
+— old ground, newly surfaced here, not a this-week event) argues
+portable AI memory is unworkable on four grounds — vendor incentive
+misalignment, a user "privacy paradox," non-standardizable/
+non-transferable context across domains, and compounding
+security/liability risk under a shared or portable store.
+
+This is the charter's "a finding that stings needs weaker sourcing"
+case run the other direction: it stings, and the source is about as
+strong as this file gets — a named, tracked competitor's own founder,
+making the argument in his own words, not a secondhand paraphrase.
+
+Run point by point against what is already on file rather than
+answered generically. Point 1 (incentive misalignment) is answered by
+Major's own zero-monetization design, but not for the labs Major needs
+cooperation from — the same "central strategic problem" CLAUDE.md §5
+already names, so this corroborates a risk already tracked rather than
+adding one. Point 2 (privacy paradox) is a live, untested claim against
+Major's own two trials (n=1, n=2, both owner-declared unsatisfied) —
+on-device automatic inference answers the "continuous decisions"
+mechanism Chalef describes, but there is no user-base evidence yet
+either way, so call this open, not answered. Point 4 (security/
+liability) is partly structural for Major (on-device processing,
+CLAUDE.md §0 constraint 3, no shared tenant boundary to poison the way
+Mem0's CVE-2026-116575 did, docs/market/landscape.md) but the
+aggregation layer itself is a new pooling point with no evidence
+against it either way yet.
+
+Point 3 (non-standardizable, non-transferable context, with semantic
+collision across domains as the sharp example — "shooting" meaning
+different things to a photography assistant and a mental-health one)
+is the one this file has no answer for anywhere. The eight-entry
+no-neutral-standard cross-cutting note (docs/market/landscape.md,
+2026-10-05 through 2026-10-26) tracks format and schema
+interoperability — whether one product's export can be read by
+another — and the academic study it cites (Goyal and Ray, arXiv
+2609.05339) quantifies format survival, not semantic collision across
+domains. Nothing on file asks whether a single preference profile
+*means the same thing* when carried from one domain of use into
+another, which is a sharper and different question than whether the
+bytes round-trip. No pricing or landscape-vendor change argued by this
+alone; it is a named gap in Major's own product thesis, surfaced by a
+competitor, for whoever next scopes Major's inference layer to read
+before claiming cross-domain portability is solved by format
+compatibility alone.
+
+## A vendor-interested source restates known deals as a new argument this file should not repeat uncritically (2026-11-02, message, 13th run)
+
+A search for fresh provenance/consent news surfaced fiund.com's "state
+of the market" page arguing "provenance moved from preference to
+requirement" in AI data buying — scraped-from-web treated as a risk
+flag, signed rights chains and revocability terms now required in
+diligence. Checked who runs the page before citing the claim, same
+discipline this file already applies to aidata.broker (2026-10-26):
+Fiund is itself a managed marketplace that brokers AI training data,
+selling exactly the provenance-clean licensing it says the market now
+requires. The claim is vendor-interested marketing, not independent
+confirmation.
+
+The underlying facts it cites (News Corp/OpenAI ~$250M/5yr, Reddit/
+Google ~$60M/yr, Reddit's IPO-filed ~$203M aggregate) are already on
+file (above, 2026-07 entries) — nothing new there either. Recorded so
+the next run that meets this source does not re-cite its framing as
+market consensus. No pricing or positioning change argued by this.
+
+## A memory vendor's self-reported benchmark got caught by its own users, which is the labs' own verifier problem playing out in public (2026-11-02, message, 9th run)
+
+docs/market/landscape.md's Category 3 already flagged MemoryLake's own
+94.03% LoCoMo claim as unverified self-report, no third party named.
+This run found the next step down that path already happened to a
+different vendor, in public: MemPalace, a Show HN post (67 points, 17
+comments), claimed "the highest-scoring AI memory system ever
+benchmarked," and the thread itself took the claim apart. The 100%
+LongMemEval score needed "targeted fixes for three failing questions"
+plus LLM reranking (98.4% without). The 100% LoCoMo score used a
+retrieval top-k of 50 against a benchmark with fewer sessions than
+that, which cannot fail by construction. A linked GitHub issue thread
+reportedly found independent end-to-end QA testing, as opposed to the
+vendor's own retrieval metrics, dropped the scores "dramatically."
+
+The "so what" for Minor's own pitch: this is CLAUDE.md §1's claim
+("labs fall back on preference proxies... because they have no
+verifier") happening to an adjacent category, live, in a way Minor can
+point to as evidence rather than argue in the abstract. The proxy here
+is a leaderboard number the vendor could tune to the test, not even a
+rater's stated preference, and the correction mechanism that caught it
+was an unpaid public argument on a forum thread, not a repeatable
+process anyone could rely on twice. An outcome record cannot be tuned
+to a held-out eval the same way, because there is no eval to tune to —
+the label is what the real work did with the output, after the fact,
+not a score against a fixed test set set before the vendor is even
+aware which test it will be marked on. This is a sharper, more concrete
+version of a line this file has made before (LongMemEval/LoCoMo scores
+measuring format survival, not whether a deliverable used the output);
+it does not change the pricing or landscape structure on its own, but
+it is a real example worth having on hand next time the pitch needs
+one.

@@ -112,35 +112,51 @@ test('the shipped registry has no errors for the seat that owns the files it can
   const errs = r.findings.filter((f) => f.severity === 'error');
   assert.deepEqual(errs.map((f) => `${f.code} ${f.site || ''}`), [],
     'the gate must be green on the branch that introduces it');
-  // EVERY CANDIDATE IS ACCOUNTED FOR, which is not the same as every
-  // candidate being registered, and the difference is this gate's own
-  // ownership rule rather than a loophole added to make a red go green.
+  // RESOLVED IN FAVOUR OF THE TRUNK, 2026-11-02, fifteenth message pass.
+  // This seat's #716 carried its own repair of the same defect, reached
+  // independently and with the same diagnosis: `candidates === sites +
+  // unregistered.length`. The trunk's version below implies that equality and
+  // adds two things it did not have, a `candidates >= sites` floor and a
+  // per-finding check that each unregistered candidate names both its site and
+  // its owning seat, so the branch's copy was dropped rather than merged. The
+  // remediation the branch's message spelled out is still the remediation: an
+  // unregistered candidate on a surface this seat can edit is fixed by
+  // transcribing its rule into tools/doc-model/models.mjs, or by recording it
+  // as `mentions-only` with the reason it states no rule.
+  // This asserted `candidates === sites` until 2026-11-02, and it was red on
+  // `main` from the hour it merged. Two sections of docs/agents/runner-facts.md
+  // mention this mechanism and are not in the registry, so probe finds 16
+  // candidates against 14 sites. That file belongs to the `exo` seat, and the
+  // gate is deliberately built for exactly this: `mineToEdit` downgrades both
+  // UNREGISTERED_SITE findings to `warn` and routes them to that seat by mail
+  // instead of through an exit code. The assertion above honours that
+  // ownership rule and this one did not, so the suite went red on prose no
+  // seat reading it was permitted to edit. PWC-15 names that shape about the
+  // ledger gate's exit 2: a check no branch can turn green is one every seat
+  // learns to ignore.
   //
-  // The first version asserted `candidates === sites` flat. That held on the
-  // branch that introduced it and went red on 2026-11-02 at 16 against 14,
-  // because two sections of `docs/agents/runner-facts.md` had come to mention
-  // wake-cut. That file is the `exo` seat's surface, so `auditMechanism`
-  // downgrades its UNREGISTERED_SITE findings to warnings on purpose and
-  // mails them instead -- the assertion directly above, that no finding is an
-  // error, is the same rule stated once already. A flat count equality
-  // therefore asked this suite to go red until another seat edited its own
-  // file, which is the cross-lane demand the downgrade exists to refuse, and
-  // no run of this repository could clear it.
-  //
-  // So the invariant keeps its teeth where they belong: every candidate is
-  // either registered, or named in a warning owed to the seat that owns it.
-  // An unregistered candidate on a surface THIS seat can edit is still an
-  // error and still fails, via the assertion above.
-  const unregistered = r.findings.filter((f) => f.code === 'UNREGISTERED_SITE');
-  assert.equal(r.checked.candidates, r.checked.sites + unregistered.length,
-    'every candidate found by probe must be either a registered site or a reported '
-    + `UNREGISTERED_SITE, and vice versa: ${r.checked.candidates} candidates against `
-    + `${r.checked.sites} sites plus ${unregistered.length} reported`);
-  assert.deepEqual(
-    unregistered.filter((f) => !f.ownedBy).map((f) => f.site), [],
-    'an unregistered candidate with no owning seat is this seat\'s own to register: '
-    + 'transcribe its rule into tools/doc-model/models.mjs, or record it as `mentions-only` '
-    + 'with the reason it states no rule');
+  // So assert what the gate actually guarantees, which is the property worth
+  // having: no candidate is silently unaccounted for. Every one is either
+  // registered, or carries a finding naming it. An unregistered section that
+  // produced no finding at all is the defect this mechanism exists to catch.
+  const accounted = new Set(r.findings.filter((f) => f.site).map((f) => f.site));
+  assert.ok(
+    r.checked.candidates >= r.checked.sites,
+    `probe found ${r.checked.candidates} candidates against ${r.checked.sites} registered sites; `
+    + 'a registered site that probe cannot find is SITE_MOVED and should have been caught above',
+  );
+  const unaccounted = r.checked.candidates - r.checked.sites;
+  assert.equal(
+    r.findings.filter((f) => f.code === 'UNREGISTERED_SITE').length,
+    unaccounted,
+    `${unaccounted} candidate(s) are not registered and the gate reported `
+    + `${r.findings.filter((f) => f.code === 'UNREGISTERED_SITE').length} UNREGISTERED_SITE `
+    + 'finding(s); each unregistered candidate must produce exactly one',
+  );
+  for (const f of r.findings.filter((f) => f.code === 'UNREGISTERED_SITE')) {
+    assert.ok(accounted.has(f.site), `${f.site} is unregistered and names no site`);
+    assert.ok(f.ownedBy, `${f.site} is unregistered and names no owning seat to route it to`);
+  }
 });
 
 test('MODEL_DRIFT fires when a stated rule is wrong', async () => {

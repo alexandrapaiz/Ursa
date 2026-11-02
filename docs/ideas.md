@@ -2,11 +2,60 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-02 (security, eleventh run): the site's build and lint are the last two instruments nothing runs, and the cost is a second dependency tree
+
+**Status:** proposed, day-sized. **For:** the engineer, and whoever prices
+runner time. **Severity:** low. **Found by:** taking the board item on getting
+every test and gate into continuous integration, and measuring what the
+repair does not cover. **Full reading:** `docs/security/audit-2026-11-02k.md`
+§10.
+
+**What now runs, after this run.** `scripts/ci-checks.mjs` declares 14 checks
+across three scopes and is the one command the queued workflow needs to call.
+Tooling: the 47 `node --test` suites and eight gates. Product: `ursa-major`'s
+`tsc --noEmit` and its 52 `vitest` suites. Site: `ursa-minor`'s three `check:*`
+scripts, which need no dependency install and were free coverage nobody was
+taking.
+
+**What still runs nowhere.** `ursa-minor`'s `next build` and its `eslint`.
+Both are real instruments and a broken site build currently reaches `main`
+with every reported check green, the same way the three red tests in §5 of
+that audit did.
+
+**Why this is filed and not fixed.** They are the only two checks in the
+repository that need a second `npm ci`, against a Next.js dependency tree,
+and `next build` is the slowest thing here by a wide margin. Adding them to
+`ci-checks.mjs` is four lines. Doing it silently would put minutes of runner
+time on every pull request in the repository, on a decision nobody made, and
+this seat does not price runner time. So the four lines are named and left
+undone rather than smuggled in under a security fix.
+
+**First step: measure before deciding.** Time `npm ci && npm run build` and
+`npm run lint` in `ursa-minor` once on a runner, then choose between three
+shapes with the number in hand: both on every pull request; both on a
+separate job keyed to `paths: ursa-minor/**` so they cost nothing on the
+hundreds of docs-only branches this repository actually produces, which is
+the likely answer; or `eslint` on every pull request and `next build` on
+`push: branches: [main]` only. `ci-checks.mjs` already supports the second
+and third without modification, through `--only` and `--skip`, and a check
+named in `--skip` is reported as skipped in the job log rather than silently
+dropped.
+
+**Cost:** $0 in services, plus the runner minutes the measurement prices.
+
+**Status:** proposed
+
 ## Ledger entry — 2026-11-02 (security, seventh run): the secret-print hook arrives outside the one sentence that protects workflows, and it is the only sentence of its kind
 
 **Status:** proposed. **For:** the owner, and HQ, because the repair is a
 clause in seat charters and in the dispatch text and this seat may not edit
-charters. **Severity:** medium, and **latent until PR #683 merges**.
+charters. **Severity:** medium, and **still latent, but no longer behind
+#683** — that pull request closed unmerged at 2026-11-02T06:41:41Z and both
+paths are absent from `main`, while the commit that installs them,
+`ee8c893c`, sits on five open `ursa-pm` branches. Corrected 2026-11-02
+(security, eleventh run, F77): reading the original line today would have
+said the exposure was gone because its named trigger is closed. It is one
+merge away on five branches instead, and the repair below is unchanged.
 **Full reading:** `docs/security/audit-2026-11-02g.md` §5, filed there as
 F66.
 
@@ -18069,3 +18118,55 @@ the owner to accept or reject.
   every seat on this host shares it, and the failure mode two seats have
   now reported is a silent truncation of a tracked file rather than an
   error. A run that loses a commit is the cheap version of this.
+
+### 2026-11-02 (market, message, 13th run) — Scope Major's inference layer against cross-domain semantic collision, not only cross-product format round-trip
+- Trigger: docs/market/positioning.md, this run's entry on Zep CEO
+  Daniel Chalef's "The Private Agent Memory Fallacy" (2025-06-19). Of
+  his four arguments against portable AI memory, three have some
+  answer already on file; the fourth — a single preference carried
+  across domains can mean something different, even harmful, in the
+  new domain ("shooting" to a photography assistant versus a
+  mental-health one) — has none.
+- What: every portability test this file has proposed or tracked
+  (MemTether/MemHub round-trips, MacPaw's `.mem`, the Goyal and Ray
+  arXiv 2609.05339 format-survival numbers) checks whether bytes or
+  schema survive a transfer. None checks whether a *meaning* survives
+  correctly across a domain boundary. Whoever scopes Major's inference
+  layer should name which domains a single derived preference is
+  allowed to cross automatically, and which require a re-confirmation
+  step, before this gap surfaces as a real incident rather than a
+  competitor's hypothetical.
+- First step: an inventory of Major's own planned inference categories
+  (style, tone, depth, format, per CLAUDE.md §3), checked for any pair
+  where the same word or signal plausibly means different things in
+  different use contexts, and a decision on whether cross-domain
+  carry is automatic, gated, or scoped per-domain from the start.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (market, message, 14th run) — Use a named, independently-debunked benchmark-gaming case as evidence the next time methodology is published
+- Trigger: docs/market/positioning.md, this run's entry on MemPalace,
+  a memory vendor whose "highest-scoring AI memory system ever
+  benchmarked" claim was taken apart by its own Show HN commenters
+  (targeted fixes for failing LongMemEval questions, a LoCoMo top-k
+  that structurally cannot fail, independent end-to-end QA scores
+  dropping "dramatically" per linked GitHub issues).
+- What: CLAUDE.md §5 already commits Minor to publishing methodology
+  openly as both the sales channel and the user-trust proof, and
+  CLAUDE.md §1 argues labs fall back on preference proxies because
+  they have no verifier for open-ended work. MemPalace is a named,
+  dated, public instance of exactly that proxy failing in the way the
+  pitch predicts: a vendor tuned a leaderboard number to its own test,
+  and the correction came from an unpaid forum thread, not a
+  repeatable process. Whoever next drafts anything for lab-facing
+  methodology publication should have this example (and MemoryLake's
+  own still-unverified 94.03% LoCoMo self-report, docs/market/landscape.md)
+  on hand as a concrete contrast case for why an outcome record's label
+  cannot be tuned to a held-out eval the same way, rather than arguing
+  the point only in the abstract.
+- First step: whoever owns the methodology-publication draft keeps a
+  running file of concrete gamed-benchmark examples (this one plus any
+  future ones this seat's landscape watch surfaces) to cite instead of
+  describing the failure mode generically.
+- Cost: $0
+- Status: proposed

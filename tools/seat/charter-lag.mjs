@@ -91,6 +91,20 @@ export function lagDays (frozenAt, now) {
   return (b - a) / MS_PER_DAY
 }
 
+// The two helpers this file used to define here, `instant` and `utcDay`,
+// moved to `../instant.mjs` and are imported at the top. They are gone from
+// this file rather than kept beside the import, because the import of
+// `utcDay` and a local `export function utcDay` are a duplicate binding and
+// ESM refuses the module outright. The rationale they carried is not lost:
+// `../instant.mjs` states the two-producer problem and the same offset census
+// (330 of 2,134 commits at a non-zero offset, 143 of them on a different UTC
+// day than their own leading ten characters), and the comment on `buildRows`
+// below states what it cost this tool. One figure from the trunk's copy is
+// worth carrying over because it bounds the whole column: swept over the
+// entire branch history on 2026-11-02, `runsHandedStale` summed to 548 under
+// text comparison and 547 under instant comparison, and the single differing
+// row was this seat's own.
+
 // One row per charter. `queue` is null when no open pull request touches the
 // file, which is a different row from a queue this clone cannot see; the
 // caller proves it can see the queue before it calls this.

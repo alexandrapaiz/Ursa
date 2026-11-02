@@ -256,6 +256,13 @@ test('transcribed: the events read refuses unknown filters, so the INERT finding
   // make this assertion pass on text from a different handler.
   assert.notEqual(end, -1, 'store.events( no longer follows the events route; this slice would read the rest of the file');
   const route = block.slice(0, end);
+  // The behaviour under both spellings was probed rather than inferred, on
+  // 2026-11-02 and by the trunk's own version of this test: `GET
+  // /api/events?nosuchfilter=1` against the live board answers 400 with `no
+  // such filter: nosuchfilter` and a `honours` array, while an impossible
+  // `company` returns 0 rows against 5 unfiltered. The route refuses, and it
+  // always did. The halves below are what distinguishes that refusal moving
+  // from that refusal going away.
   // Half one: the route refuses, before it reads. Either spelling counts --
   // the shared helper as it stands today, or an inline sentence as it stood
   // before -- because the claim is about the refusal and not about where the

@@ -10,9 +10,22 @@ without saving and the kit finds it in whichever sibling package has it.
 will ever touch, and point `PW_ROOT` at it:
 
 ```bash
-mkdir -p /tmp/pw && cd /tmp/pw && npm i --no-save playwright && npx playwright install chromium
+# from your checkout root, with <id> this run's own suffix
+export FE_CACHE="$PWD/.fe-run-<id>/npm-cache"
+
+mkdir -p /tmp/pw && cd /tmp/pw \
+  && npm i --no-save playwright --cache "$FE_CACHE" \
+  && npx playwright install chromium
 export PW_ROOT=/tmp/pw/node_modules
+
+# and at the end of the run
+rm -rf "$FE_CACHE"
 ```
+
+`--cache` is not optional and `PW_ROOT` does not cover it: `PW_ROOT`
+isolates `node_modules` and the cache is a separate shared resource one
+directory up, which is L55 and L56 and the scratch-path rule near the
+bottom of this file. Delete that cache when the run ends.
 
 `PW_ROOT` is the first entry in `lib/browser.mjs`'s search order and has
 been since that file was written, and until 2026-11-02 it appeared in no
@@ -32,6 +45,10 @@ rather than the install. A prefix nothing else owns is immune to both.
 | `measure-hit-areas.mjs` | The real tappable area of every control, probed outward one CSS pixel at a time so an `::after` overlay is seen rather than parsed. Promoted here on 2026-10-24g from `reviews/2026-10-24e/`, where it was written; `--base`, `--pages name=/path,…`, `--out`, `--json`, `--until`, and `--state` since 2026-10-26. |
 | `measure-narrow.mjs` | What every surface does below 390, which is the narrowest viewport the charter reviews. Reports a clipped edge (unreachable) separately from an overflow (scrollable), attributes offenders to the nearest scroll container, and exempts full-bleed decoration, screen-reader text and closed drawers. Waits for the geometry to stop changing rather than for a settle somebody guessed. Written 2026-10-26b out of L25; its six exemptions and how each was earned are in its own header. `--base`, `--pages`, `--widths`, `--height`, `--until`, `--state`, `--out`, `--json`. |
 | `measure-contrast.mjs` | The WCAG ratio of every run of text against the pixels actually behind it, including placeholders. The backdrop is photographed, never read off the stylesheet, so a starfield, a gradient and an ancestor's `opacity` are all in the number. Reports a per-pixel median, fifth percentile and worst, exempts inactive components under 1.4.3, and refuses to answer for a page that moved between its two frames. Written 2026-10-25c. Since 2026-11-02e it narrates on **stderr**, one line per page with the five stage timings, because until then it wrote nothing at all until after `browser.close()` and a run making progress was indistinguishable from a wedged one. That cost a whole review its contrast number; L53. `--base`, `--pages name=/path,…`, `--only`, `--out`, `--json [path]`, `--until`. |
+| `measure-focus.mjs` | The keyboard pass, written 2026-11-02 (run f). Walks the tab ring with real Tab presses, compares what Tab reaches against every focusable element the DOM offers, and names the controls in the difference. Then photographs each stop focused and blurred: the indicator is whatever pixels differ, so an outline, a box-shadow, a wash and a pseudo-element all answer without being named in advance, and each indicator pixel's ratio is taken against its own unfocused colour, which is the adjacency 1.4.11 asks for. Carries the SHARE of the indicator above 3:1 as well as its median, because a ring visible on one edge and invisible on the other three is what no single statistic shows. A third blurred frame gates on drift: a stop whose neighbourhood moves is UNSTABLE rather than given a number. The 2.4.11 area column is reported and never failed on, since the ring's weight is identity. `--base`, `--pages`, `--only`, `--viewports`, `--until`, `--state`, `--out`, `--json`, `--frames`. Selftest `selftest/check-focus.mjs`, 21 assertions. |
+| `measure-swatches.mjs` | The WCAG 1.4.11 ratio of every swatch in a legend against the pixels behind it, and of each swatch's marks against each other. Samples **every pixel** of the swatch rather than its centre column, which is the only sample a 1px ring inside the box cannot fool, and reports the share of the area clearing 3:1 alongside the ratio, because one bright pixel in a flat box passes a ratio on its own. Promoted 2026-10-27 from the probe that found the dashboard's fourth provenance key at 1.20:1; L36, L43. |
+| `measure-floor.py` | How much of a frame set is actually deterministic, over **N** independent shoots rather than a pair. Reports how many of the C(N,2) pairs drawn from them would have seen no floor at all, which is the number a two-shoot diff cannot produce and the reason this file exists; L48. Selftest `selftest/check-floor.py`, 12 assertions. |
+| `verify-hover.mjs` | Every hover state on the site, photographed as a **pair**: one frame at rest and one hovered and settled, over the same frozen sky, plus what the computed style did. `diff-frames.py rest hover` then says how many pixels the hover is worth. The pair is the point: three of this site's hover rules style a descendant rather than the hovered element, so a computed-style read alone reports "nothing changed" for them, and a wash too faint to register in a PNG is what the property read catches instead. A `disabled` control gets the verdict `by-design-disabled`, because a correctly inert hover and a broken spring print the same `none`. |
 | `lib/freeze.mjs` | Pins the animation clock and seeds `Math.random` before any page script runs, so the starfield draws the same sky twice. Without it 6 of the 15 review frames differ from themselves by up to 19,140 pixels. Since 2026-11-02 it also pins the page's `Date` on request, which is `shoot.mjs --pin-now`. |
 | `lib/pin-clock.mjs` | Pins `Date` in a **server** process, as a `node --import` preload, so a timestamp the server stamps into a payload stops moving between two shoots. Written 2026-11-02 out of L47: the overlay dashboard's `read at HH:MM:SS` comes from `serve.ts`, not from the browser, so no init script can reach it. Refuses rather than defaulting, because a preload that quietly does nothing is the defect it exists to repair. |
 | `diff-frames.py` | Counts the pixels that differ between two frame sets, per frame, with the row and column range. Only meaningful on frozen frames. |
@@ -62,6 +79,23 @@ reviews that could not have seen it. Calibrate the narrow sweep the way
 this README asks for everything else: point it at the overlay, whose
 before and after at these widths are written down in L25, before
 believing it about a surface nobody has measured.
+
+**Every instrument here that produces a headline has a selftest, and
+until 2026-11-02 (run f) the table above listed none of them.** Four of
+the kit's own tools were missing from it too, which matters more than it
+reads: this README is the index, the index is why the kit exists rather
+than a fourth rewrite of the same script in a dated folder, and a tool
+absent from it is a tool the next run writes again. The set, each
+runnable on its own with no server and no network:
+
+| selftest | what it holds the tool to |
+|---|---|
+| `selftest/check-contrast.mjs` | 17 hand-computable ratios for `measure-contrast.mjs`, over `selftest/contrast.html`. |
+| `selftest/check-hit-areas.mjs` | That `measure-hit-areas.mjs` can still fail. Its headline on the real site went to zero on 2026-10-25b, and zero is also what a tool that had stopped looking would print, so this serves `selftest/hit-areas.html`, whose right answers are built in, and asserts each of the four verdicts actually fires. |
+| `selftest/check-focus.mjs` | 21 assertions for `measure-focus.mjs`, including a focus trap it has to report as unreachable controls rather than a short clean ring, and L36's two hand-taken ratios recomputed by a different code path. |
+| `selftest/check-floor.py` | 12 assertions for `measure-floor.py`, the load-bearing one being that six shoots split four and two report seven blind pairs of fifteen. |
+| `selftest/check-pin-now.mjs` | That `shoot.mjs --pin-now` pins the page's clock and refuses the two ways it can be asked for what it cannot do. It needs its own fixture because neither product reads the wall clock client-side, so no page here would prove the flag works. |
+| `selftest/check-redaction.mjs` | That each of the gate's three rules still fires, that the allowlist still forgives what the gate forgives, and that an unparseable gate is a refusal. |
 
 **`selftest/check-redaction.mjs` writes its fixtures at run time and
 commits none of them.** A fixture for a redaction checker has to contain
@@ -143,8 +177,29 @@ a pull request body to `/tmp/prbody.md`, another seat on the same host
 wrote its own body to the same path, and for about ninety seconds this
 seat's pull request published another seat's prose. Twenty or so seats
 share one unix user and one `/tmp` here. A parse that succeeds is no
-evidence of authorship, so nothing at the read can catch it. Write to
-`/tmp/<seat>-<date>-<trigger>/` and nothing else, and that includes
-scratch files, server logs and anything handed to `--body-file`.
+evidence of authorship, so nothing at the read can catch it.
 
-The run that built this is `docs/design/reviews/2026-10-24/`.
+**Write scratch inside your own checkout**, in a root-level dot-entry
+such as `.fe-run-<id>/`, and nothing outside it. That covers scratch
+files, server logs and anything handed to `--body-file`. The checkout is
+the one directory the host hands a single run, and `.gitignore` ignores
+every root-level dot-entry, so the path is private by construction and
+cannot be committed by accident. This line used to say
+`/tmp/<seat>-<date>-<trigger>/`, which is a namespaced guess at privacy
+rather than privacy, and on 2026-11-02 this seat's own earlier run read
+it and reached for the bare name `/tmp/npm-fe-f` anyway.
+
+**That includes the path npm chooses for you.** Every `npm` this seat
+runs passes `--cache <checkout>/.fe-run-<id>/npm-cache`, because npm's
+content-addressed cache defaults into a home directory twenty seats
+share and a collision there empties `node_modules` before it fails, so
+the tree ends up worse than before the command ran. L55 found that and
+L56 measured the remedy: install 611 packages in 4m48s and a clean
+build behind it, at a cost of **176M of disk per project per run** on a
+45G volume that `/tmp` and `/srv/asc` share and that runs at 100%. So
+**delete the cache before the run ends.** Nothing on this host collects
+run scratch, and a cache left behind is 176M nobody will recognise as
+garbage.
+
+The run that built this is `docs/design/reviews/2026-10-24/`, and the
+cache paragraph is `docs/design/reviews/2026-11-02-message-f/` §2.1.

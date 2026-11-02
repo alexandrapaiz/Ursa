@@ -8,6 +8,12 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { seatOfBranch, lagDays, buildRows, formatTable, formatSummary, cloneFitness } from './charter-lag.mjs'
+// `utcDay` moved out of charter-lag.mjs into the shared timestamp module when
+// this seat's #694 landed it, so the trunk's import of it from './charter-lag.mjs'
+// is taken from '../instant.mjs' here instead. Its contract changed with the
+// move: it returns null for an unplaceable value rather than the table's '?',
+// because the placeholder is a rendering decision and formatTable makes it.
+import { utcDay } from '../instant.mjs'
 
 test('seatOfBranch takes the whole first segment, with or without a company prefix', () => {
   assert.equal(seatOfBranch('ursa-skill/2026-11-02-message'), 'skill')
@@ -179,4 +185,89 @@ test('cloneFitness names each fault by the property it is a fault in', () => {
   const handed = cloneFitness({ shallow: true, prRefs: 0, originRefs: 1 })
   assert.equal(handed.length, 3)
   assert.equal(handed.filter((f) => f.startsWith('breadth:')).length, 2)
+})
+
+// --- the two producers, which every fixture above was blind to -----------
+//
+// Every `mainDate` and `createdAt` above ends in `Z`. `git --format=%cI`
+// never prints `Z`, so the whole fixture set was drawn from one producer
+// and could not fail on a comparison between two. Rehearsed red: with
+// `b.createdAt > c.mainDate` restored, both tests below fail and every
+// test above still passes.
+
+const OFFSET_CHARTERS = [
+  {
+    // 12:28:03-06:00 is 18:28:03Z. As text the hour reads 12.
+    seat: 'engineer',
+    path: 'prompts/engineer-agent.md',
+    mainDate: '2026-10-09T12:28:03-06:00',
+    mainLines: 342,
+    queue: null
+  },
+  {
+    // git's rendering of a UTC commit: `+00:00`, never `Z`.
+    seat: 'exo',
+    path: 'prompts/exo-agent.md',
+    mainDate: '2026-10-18T18:50:50+00:00',
+    mainLines: 2221,
+    queue: null
+  }
+]
+
+test('a branch inside the offset window is before the freeze, not after it', () => {
+  const rows = buildRows({
+    charters: OFFSET_CHARTERS,
+    branches: [
+      // 57 minutes BEFORE the 18:28:03Z freeze, and after it as text.
+      { branch: 'ursa-engineer/a', createdAt: '2026-10-09T17:31:08Z' },
+      // 32 minutes after it, by both readings.
+      { branch: 'ursa-engineer/b', createdAt: '2026-10-09T19:00:00Z' }
+    ],
+    nowIso: '2026-11-02T00:00:00Z'
+  })
+  assert.equal(rows.find((r) => r.seat === 'engineer').runsHandedStale, 1)
+})
+
+test('at zero offset the suffix decides, and `+` sorts below `Z`', () => {
+  const rows = buildRows({
+    charters: OFFSET_CHARTERS,
+    // The same instant as the freeze, rendered by the other producer. It is
+    // not after it, and as text `...50Z` > `...50+00:00`.
+    branches: [{ branch: 'ursa-exo/a', createdAt: '2026-10-18T18:50:50Z' }],
+    nowIso: '2026-11-02T00:00:00Z'
+  })
+  assert.equal(rows.find((r) => r.seat === 'exo').runsHandedStale, 0)
+})
+
+test('the day column is the UTC day of the instant, not its leading ten characters', () => {
+  assert.equal(utcDay('2026-11-01T23:34:57-05:00'), '2026-11-02')
+  assert.equal(utcDay('2026-10-09T12:28:03-06:00'), '2026-10-09')
+  assert.equal(utcDay('2026-10-18T18:50:50+00:00'), '2026-10-18')
+  // null, not '?': see the import note above. The '?' is asserted on the
+  // formatter, which is the only place it is a correct answer.
+  assert.equal(utcDay('not a date'), null)
+  assert.match(formatTable(buildRows({
+    charters: [{ seat: 'engineer', path: 'prompts/engineer-agent.md', mainDate: 'not a date', mainLines: 1, queue: null }],
+    branches: [],
+    nowIso: '2026-11-02T06:00:00Z'
+  })), /\?/)
+})
+
+test('formatTable itself renders the UTC day, and not the string it was handed', () => {
+  // Rehearsed red separately from the utcDay test above: that one asserts on
+  // the exported helper, so it stays green while the formatter regresses.
+  const out = formatTable(buildRows({
+    charters: [{
+      seat: 'engineer',
+      path: 'prompts/engineer-agent.md',
+      // 23:34:57-05:00 is 04:34:57Z the NEXT day, so the two readings differ.
+      mainDate: '2026-11-01T23:34:57-05:00',
+      mainLines: 342,
+      queue: null
+    }],
+    branches: [],
+    nowIso: '2026-11-02T06:00:00Z'
+  }))
+  assert.match(out, /2026-11-02/)
+  assert.doesNotMatch(out, /2026-11-01/)
 })
