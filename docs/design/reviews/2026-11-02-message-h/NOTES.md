@@ -298,3 +298,143 @@ reads `COMPOSITE` rather than failing. A ring along one edge only does
 not clear it, and a ring drawn in its own backdrop's colour has no
 clearing pixels at all, which is the selftest's fixture 4 and it still
 fails as it should. L60.
+
+## 4. The after state, and the one claim I nearly shipped without checking
+
+**The numbers below were nearly wrong, and the way they were nearly wrong
+is worth more than the numbers.** The first "after" sweep came back with
+every page reporting the same control boxes at 390 and at 1440, which a
+responsive layout cannot do. The cause was that the old `next start` was
+still holding the port, serving HTML that pointed at a stylesheet chunk
+the rebuild had replaced. That chunk answered **500**, so three
+viewports' worth of "verified" measurements had been taken on an
+unstyled page, and every one of them looked plausible. The check that
+caught it was two numbers being equal that had no business being equal.
+
+So the rule this run adds for itself: after a rebuild, fetch the page's
+own stylesheet link and assert it is a 200 before measuring anything.
+One `curl`. It is in §6.
+
+**With the server actually serving the new build**, over five pages at
+the three review viewports:
+
+| viewport | stops | below a floor | unreachable | unstable |
+|---|---|---|---|---|
+| phone 390x844 | 28 | 1 | 1 | 0 |
+| tablet 820x1180 | 28 | 1 | 0 | 0 |
+| desktop 1440x900 | 28 | 1 | 0 | 0 |
+
+The one below a floor at each viewport is the file input of §3.1, which
+is the control this run fixed, and it was still reported as
+`NO_INDICATOR` because of §4.1 below rather than because the fix had
+failed.
+
+The two `UNSTABLE` verdicts and the inflated stop counts from the first
+pass are gone, which is the scroll pin doing its job. The 404's control
+now reads `COMPOSITE` at 582 clearing pixels against a 558 pixel
+perimeter, which is the verdict §3.5 argued for, reached by arithmetic
+rather than by me deciding the site was fine.
+
+### 4.1 The fix was correct and the instrument still could not see it
+
+This is the fifth instrument defect and the one most worth writing down,
+because it would have let a correct fix be reported as a failed one.
+
+After the CSS change the file input still reported `NO_INDICATOR` at all
+three viewports. The ring is drawn on the **label**, the input is a 1x1
+box somewhere inside that label, and the tool photographs a rectangle
+padded 12px around the focused element. None of the label's ring falls
+inside that rectangle.
+
+I checked the page itself rather than trusting either the tool or the
+diff:
+
+```
+matched: {"fv":true,
+          "labelMatches":true,
+          "labelOutline":"rgb(168, 199, 250) solid 1px"}
+```
+
+and photographed the label by hand, which is
+`frames/record-label-cta-focused-after.png` against its blurred twin. The
+ring is there, 1px, polar, 3px offset, the same ring every other control
+on the site gets.
+
+`verify-hover.mjs` already knows the mirror of this and says so in the
+kit's own README: three of this site's hover rules style a descendant
+rather than the hovered element, so a computed-style read alone reports
+"nothing changed" for them. Focus has the same shape one direction up,
+and nothing in the kit had it. A control under 8px on a side is now
+photographed over its nearest ancestor with a real box, capped at five
+levels and at half the viewport so the climb cannot end at `<body>`, and
+the row prints which box it used.
+
+With that in place, `/record` at all three viewports:
+
+| page | vp | stop | control | box | indicator px | share | median | verdict |
+|---|---|---|---|---|---|---|---|---|
+| set | phone | 4 | input | 182x47 (ancestor:label) | 488 | 100% | 11.99 | ok |
+| set | tablet | 4 | input | 182x47 (ancestor:label) | 486 | 100% | 11.99 | ok |
+| set | desktop | 4 | input | 182x47 (ancestor:label) | 488 | 100% | 11.99 | ok |
+
+**0 of 18 tab stops below a floor on that page, at every viewport.** The
+control that answered with nothing now answers exactly like its
+neighbours. Receipt: `data/after-focus-set-widened.md`.
+
+The selftest was re-run after every one of these changes and holds at
+**21 of 21** each time. `data/check-focus-selftest-after.log`.
+
+## 5. Two findings this run measured and did not fix
+
+Both are on the home page, both are new, and neither is a polish item
+this seat should take without saying what it is first.
+
+**A copy button the keyboard cannot reach, at phone width only.**
+
+```
+home/phone button.cta.rec-hit@49,3257 57x29 offscreen "copy"
+```
+
+Three copy buttons on the home page, two reached, one not, and only at
+390. At 820 and 1440 the same page reports zero unreachable. The `@49,3257`
+is its position: it is far down a long page. This is the first unreachable
+control any instrument in this kit has ever reported, so the first thing
+the next run should establish is whether the tab walk is terminating early
+rather than whether the button is genuinely stranded. The walk stops when a
+stop's key repeats, and a page this tall at this width is where that
+assumption is most likely to be wrong. Named here, with its measurement,
+rather than fixed on a guess.
+
+**Two tab stops the DOM enumeration does not declare.** They are the
+`<pre>` blocks that hold the install commands. Chromium makes a
+scrollable region keyboard-focusable, which is correct behaviour and not
+a bug on either side, and it means the home page has two tab stops with
+no accessible name and no focus treatment anybody chose. They show as
+`UNDECLARED` now instead of vanishing. Whether they should carry a name,
+or be made unscrollable, or be left exactly as they are, is a product
+question rather than a polish one.
+
+## 6. The run's own hygiene, since it cost most of the morning
+
+1. **Before any `npm` in a tree, ask the kernel whether one is already
+   there.** `readlink -f /proc/<pid>/cwd` for every live `npm ci` or
+   `npm install`. An exit status will not answer this; L57.
+2. **After a rebuild, assert the stylesheet is a 200 before measuring.**
+   Three viewports of measurements were taken on an unstyled page this
+   run and every number looked reasonable. §4.
+3. **One scratch directory per run, deleted at the end.** Not just the
+   npm cache, which is what L56 said: the frozen build and the served
+   tree are bigger. §1.3.
+4. **Never wait on a string your own command line contains.** L57.
+
+All four are in the kit's README now.
+
+## External sources read
+
+Nothing. This run fetched no page, ran no search, and read no content
+from outside this repository's committed files. The benchmark step in
+the charter was not run, which is stated plainly rather than omitted:
+fixing the build took the first part of the run, per the charter's rule
+that when the build fails, fixing the build is the run, and the rest
+went on the keyboard pass and the five defects it turned up. No
+benchmark notes are offered because none were taken.

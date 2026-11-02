@@ -235,7 +235,10 @@ const ENUMERATE = () => {
       h: Math.round(r.height),
       zeroBox: r.width < 1 || r.height < 1,
       offscreen: r.bottom < 0 || r.right < 0 || r.left > innerWidth || r.top > innerHeight,
-      text: (el.getAttribute('aria-label') || el.textContent || '').trim().slice(0, 40),
+      // Collapsed, not just trimmed: a <pre> is a legitimate tab stop in
+      // Chromium when it scrolls, and its text carries newlines that break
+      // the row of the markdown table it is printed into.
+      text: (el.getAttribute('aria-label') || el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40),
     })
   }
   return out
@@ -250,7 +253,7 @@ const ACTIVE = () => {
     tag: el.tagName.toLowerCase(),
     box: { x: r.x, y: r.y, w: r.width, h: r.height },
     matchesFocusVisible: el.matches(':focus-visible'),
-    text: (el.getAttribute('aria-label') || el.textContent || '').trim().slice(0, 40),
+    text: (el.getAttribute('aria-label') || el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40),
   }
 }
 
