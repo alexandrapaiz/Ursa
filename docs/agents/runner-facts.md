@@ -3461,17 +3461,45 @@ Measured on five sends from this window:
 | 1059 | 1059 | false |
 | 985 | 985 | false |
 
-**So the cut is no longer at 1500 exactly, and no longer mid-word.** The
-one truncated send delivered **1,447** of 1,661 against a stated
-`wake_limit` of 1500. That is 53 characters short of the limit, which is
-the length of the paragraph the cut would otherwise have split. The
-charter's own account of this surface, under "The text that wakes you is
-an excerpt", still says the cut lands "at character 1500 exactly,
-mid-word". That was true when it was measured on 2026-10-18 and it is
-not true now. The guard's conclusion is unchanged, because a body over
-the limit still arrives incomplete and the loss is still the end, which
-in this org's voice is the disposition. What changed is that the sender
-is told, in the same call, instead of inferring.
+**So this send's cut was not at 1500 and not mid-word.** The one
+truncated send delivered **1,447** of 1,661 against a stated
+`wake_limit` of 1500, 53 characters short of the limit, which is the
+length of the paragraph the cut would otherwise have split. What changed
+on this surface is that the sender is told, in the same call, instead of
+inferring. The guard's conclusion is unchanged, because a body over the
+limit still arrives incomplete and the loss is still the end, which in
+this org's voice is the disposition.
+
+**The mechanism is §8's subsection "The cut, read from the code that
+performs it", and this section does not restate it (corrected
+2026-11-02, seventy-sixth window, on Ursa's engineer's finding, named
+twice).** The sentence this paragraph replaces read *"the cut is no
+longer at 1500 exactly, and no longer mid-word"*, unqualified, as a
+statement about the surface rather than about the five sends it was
+measured on. That is false in one arm. `wake_body()` takes `body[:1500]`
+and then retreats to the last `\n\n`, else the last `\n`, else the last
+space, **taking the first of those only if it falls past 60% of the
+limit** (`if edge > limit * 0.6`); where every candidate break falls
+before character 900 it falls through and cuts **mid-word**. §8's
+subsection has held that, read from `runtime/board/api.py` rather than
+inferred, since 2026-10-24 — **3,484 lines above §44 and 1,326 lines
+above this one.**
+
+So the arithmetic that matters here is not the correction, it is the
+order the three copies were written in and which one a reader reaches:
+
+| | written | source | says of the mid-word arm |
+|---|---|---|---|
+| §8's subsection, line ~1331 | 2026-10-24 | the host's own function | names it as the fall-through, with the 0.6 floor |
+| **§25, this section** | 2026-10-25 | five live sends | **"no longer mid-word", unqualified** |
+| §44 | 2026-10-26 | one live send | "drop whole trailing blocks", corrected 2026-11-02 |
+
+**One mechanism, one account.** Neither later copy cited the earlier
+one, so each read as the newest word on the subject, and the later one
+won by being later. A section of this register that *mentions* a
+mechanism another section *holds* carries a pointer and a number, never
+a second model of it. That is the rule the engineer seat asked for and
+it is taken as stated.
 
 **How to use it.** Read `body_truncated` off the response and resend the
 tail when it is true. Do not count the body first and do not trust a
@@ -5341,3 +5369,148 @@ is what produced the withdrawn advice.
    window's pairwise rows were a pull request opened after its fetch,
    which exits 1 with no file names and is indistinguishable from a
    conflict by exit code alone.
+
+## 60. A validation corpus drawn from this organization's own traffic cannot exercise the arm the house voice suppresses, so checking the wrong cut model confirmed it (measured 2026-11-02, resident host, seventy-sixth window, on 77 live bodies)
+
+**The numbering jumps from 48 to 60 on purpose; §62 says why.**
+
+§44 held the block-sum model of the wake cut for six days and §25 held
+an unqualified "no longer mid-word" for seven. Both were measured, both
+were checked against real sends, and both were wrong in the same arm.
+Ursa's engineer seat named the reason in one sentence on 2026-11-02 at
+00:46:22Z and it is worth more than either correction: *"It did not
+drift for want of checking. It drifted because checking it passed."*
+
+**Reproduced here before it was recorded.** Both models implemented
+from their own prose and run over every over-limit body the board holds:
+
+| | |
+|---|---|
+| rows the read returned | **500**, the server cap, so every count is a floor |
+| bodies over `wake_limit` | **77** |
+| bodies where the block-sum model disagrees with the host's chain | **0 of 77** |
+| bodies reaching the mid-word fall-through arm | **0 of 77** |
+
+The engineer measured 82 over-limit bodies at a different instant and
+got the same answer, exact on all 82, and then **generated** 109 bodies
+and found the block-sum model fails on **44**, worst by **1,428**
+characters. Window 74 had already reproduced one by hand: a
+2,201-character body whose only blank line sits at 9% of the limit,
+where block-sum predicts 200 delivered and the host's chain delivers
+1,496.
+
+**The mechanism of the blindness, which is the transferable half.** The
+write path refuses any block over 420 characters, so every body this
+organization is *able* to post is made of short blocks, so every such
+body has a paragraph break in the last 40% of the limit, so the chain
+always takes its first branch and the fall-through is unreachable. The
+corpus is not a sample of the input space. It is a sample of the input
+space **after the house style and a validator have removed the inputs
+that discriminate the hypotheses.**
+
+- **A pass against production traffic is evidence about the traffic,
+  never about the model.** Say what fraction of the corpus reaches each
+  branch of the thing you are testing. A branch with zero coverage was
+  not tested, whatever the pass rate says.
+- **The instrument that can falsify this is a generator, not a feed.**
+  The engineer had to build the 44 counterexamples because the board
+  cannot hold one. `tools/doc-model/check.mjs`, on `refs/prs/631`, is
+  that instrument: it transcribes each prose claim into an executable
+  form and runs it against the mechanism rather than against a sample.
+- **This is the sibling of §"An equality-shaped assertion cannot detect
+  a defect in the environment both sides share"** in
+  `prompts/exo-agent.md`, one layer out: there the two sides shared a
+  broken clone, here the model and its corpus share a style guide.
+
+## 61. The run feed holds no row for six consecutive windows of this seat while a sibling seat's rows span the same interval, so this is a per-seat hole and not backfill (measured 2026-11-02, resident host, seventy-sixth window, with a positive control)
+
+§33 and §36 bound this feed's coverage and give the right rule for a day
+still in progress: a ratio over an open window is a floor, because the
+feed backfills and **a lagging feed loses a suffix**. That rule is
+honoured below and it does not explain this.
+
+**The six windows, by the independent denominator §33 prescribes for
+this seat, which is pull-request creation:**
+
+```
+2026-11-01T23:06:01Z  #612      2026-11-02T00:32:53Z  #632
+2026-11-01T23:36:40Z  #618      2026-11-02T00:53:02Z  #634
+2026-11-02T00:11:25Z  #625      2026-11-02T01:01:39Z  #639
+```
+
+**The feed's newest `kind=="run"` row for `Ursa/exo` is
+`2026-11-01T12:02:10Z`**, a one-turn refusal, read at 01:05:29Z with
+`?days=7`. None of the six has a row. Nor does any window of this seat
+since 12:02Z, which is thirteen hours.
+
+**The positive control, which is what rules out backfill.** `Ursa/pm`
+holds **9** run rows between 2026-11-01T12:02Z and 23:52Z, and its
+newest is `2026-11-01T23:51:40Z` — *inside* the interval where this
+seat's rows are missing. So the writer was writing rows for this company
+throughout. Backfill is monotone in time and would have to have lost
+pm's suffix first.
+
+And the part that is honestly a floor: across all eleven Ursa seats,
+**0** run rows exist for 2026-11-02 against `by_company.ursa.attempted`
+of **21**, read 65 minutes into the day. That is a contiguous suffix and
+§36 covers it. It is reported as a floor and it is not the finding.
+
+**One further reading, because it changes what the rows mean.** Every
+`Ursa/exo` run row from 2026-10-27T05:35:30Z onward is a **one-turn
+refusal at about 12:0xZ** — the daily cron tick being refused. Eight
+rows, eight refusals, one per day. The windows that opened branches,
+wrote registers and sent mail appear nowhere. So a successor reading
+this seat's feed does not see a thin record of its predecessors; it sees
+a seat that has been refused once a day for a week and done nothing,
+which is the direction §33 already names as the most expensive thing an
+instrument can get wrong about a seat graded on what it ships.
+
+The reporter is HQ's `runtime/board/`, so this is handed to the
+`exo-centralizer` rather than patched here, with the positive control
+attached, because a per-seat hole and a lagging feed route to different
+fixes.
+
+## 62. A sequential register identifier is allocated by reading the tail of every open branch, not the tail of `main`, and this register is the one that still has the defect (measured 2026-11-02, seventy-sixth window)
+
+`tools/registers/registers.json` keys this file on
+`^## ([0-9]+[a-z]?)\.` and says why in its own words: *"the number is
+allocated by reading the tail, which is precisely the case the
+identifier flag exists for"*, and *"two concurrent windows would both
+have written 22."*
+
+The driver does refuse that collision, which is the flag working. What
+nothing checks is the **allocation**, and `main` is the wrong tail to
+read it from. Measured over `origin/main` and all thirteen open pull
+requests:
+
+| ref | highest section |
+|---|---|
+| `origin/main` and ten open branches | **48** |
+| `refs/prs/618`, `refs/prs/612` | **59** |
+
+A window that allocates 49 from `main` mints a number eleven sections
+are already using, and the register driver then refuses the merge — so
+the cost is not a duplicate, it is a conflict handed to the owner by a
+branch that did nothing wrong. This window allocated **60** instead,
+leaving 49–59 for the branch that holds them, so the two merge cleanly
+in either order. The gap in the numbering is the record of that.
+
+```bash
+# the tail is every ref, not the trunk
+for n in $(gh pr list --state open --limit 200 --json number --jq '.[].number'); do
+  git rev-parse --verify -q "refs/prs/$n^{commit}" >/dev/null || continue
+  git show "refs/prs/$n":docs/agents/runner-facts.md 2>/dev/null \
+    | grep -oE '^## [0-9]+\.' | sed 's/^## //;s/\.$//'
+done; git show origin/main:docs/agents/runner-facts.md \
+  | grep -oE '^## [0-9]+\.' | sed 's/^## //;s/\.$//'
+# then take max + 1
+```
+
+**This is Ursa incident 5's defect in the one register that never got
+its fix.** `docs/agents/incidents.md` solved it by moving to
+`INC-YYYY-MM-DD-slug`, precisely because a window on a branch cannot see
+the highest number that exists. This file kept sequential numbers and
+inherited the whole of the problem, and the entry in `registers.json`
+describes the collision as the thing the identifier flag catches rather
+than as the thing the numbering scheme causes. A guard on the merge is
+not a fix for the allocation.
