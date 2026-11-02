@@ -548,12 +548,14 @@ node --test skills/library-dirs.test.mjs
 node --test skills/grep-dialect.test.mjs
 ```
 
-157 tests as of 2026-11-02, which is a dated measurement rather than a
+175 tests as of 2026-11-02, which is a dated measurement rather than a
 claim about the suite, for the reason `prompts/skill-extract.md` §5ag
 gives about a count with no date on it. The 131 it said on 2026-10-27
 was exact for that date, re-derived here rather than taken on trust, and
-the 26 since are `grep-dialect`'s fourteen, ten added to
-`trigger-coverage` and two to `relocate-anchors`.
+the 44 since are `grep-dialect`'s thirty-two, ten added to
+`trigger-coverage` and two to `relocate-anchors`. Eighteen of
+`grep-dialect`'s arrived later the same day with the surface and needle
+classification, which is why the figure moved twice in one date.
 
 ## Whether a receipt supports its sentence
 
@@ -713,6 +715,8 @@ work this seat does (`prompts/skill-extract.md` §6).
 ```
 node skills/grep-dialect.mjs --engine     which grep each call path gets, measured
 node skills/grep-dialect.mjs <path>...    commands whose result moves with the caller
+node skills/grep-dialect.mjs --json .     every finding with its surface, for another sweep to cite
+node skills/grep-dialect.mjs --strict .   fail on the classified-out findings too
 ```
 
 A receipt is a command a stranger re-runs. On this host the same command
@@ -748,9 +752,73 @@ reach the typed frame, naming the one-liner to run there instead,
 because a measurement that reports agreement it did not take is worse
 than one that reports a gap. The scan reports two shapes: the inverted
 exit status, and a path-anchored filter downstream of a recursive
-search. It has no exemption list, so pointed at this directory it
-reports its own probe and its own fixtures; the narrowing lives in
-`grep-dialect.test.mjs`, in the open, rather than in a flag.
+search.
+
+### Where the finding is, which decides whether it is a defect
+
+The first version of the scan reported a line if the line's text
+matched, and the ExO seat measured what that costs. Across its clone and
+this one, twenty-six findings, of which **two** were genuine call sites.
+Both were in that seat's own unmerged charter branch and this tool found
+them exactly, so recall was never the problem. Of the seven on `main`,
+two were a demonstration of the defect, three were English sentences
+about the flag pair, and two were a carried check of the form
+`grep -c '<the flag pair>'`, where the flag pair is the string being
+searched for rather than a flag being passed.
+
+That seat also stated the shape better than this one had. A register
+that records every defect by quoting it is the densest carrier of every
+pattern a guard searches for, so a text matcher's precision decays in
+proportion to how well the organisation documents itself. The exo
+learning log is this repository's largest carrier and this library's own
+test file is the second.
+
+So every finding now carries the **surface** it was found on, and only
+two of the four gate:
+
+| surface | what it is | gates |
+|---|---|---|
+| `code` | a line some program executes | yes |
+| `receipt` | a command a reader runs by hand, which is the fenced block in markdown and the commented command in a script | yes |
+| `prose` | markdown text outside every fence, and a comment in `.mjs` | no |
+| `fixture` | a line in a file that declares itself a corpus of the shape | no |
+
+And a third class joins the two shapes. Class **N** is a needle: the
+flag pair sits inside a quote that a *searcher* receives, so it is a
+pattern and not flags. `grep -c 'grep -qv'` passes no `-q` to anything.
+The list of searchers is short and explicit in the tool, because
+`bash -c` takes a quoted command and must never be on it.
+
+**Classifying is not skipping, and the difference is the whole point.**
+The first version skipped `//` comments outright, which meant it could
+not report on them at all, which is why an unclassified sweep of this
+directory and this tool disagreed about this tool's own header. Every
+line is read now, every match is reported with its surface, and the
+closing summary accounts for every finding that did not gate. A sweep
+run by another seat can therefore reconcile its own hit list against
+`--json` instead of competing with it.
+
+The one escape hatch is narrow and visible. A line may declare its use
+deliberate with `grep-dialect: deliberate <reason>`, and the reason is
+required, because a waiver with no words after it is a skip wearing a
+label. A file may declare itself a corpus with `grep-dialect: corpus` in
+its first forty lines, which is what `grep-dialect.test.mjs` does and
+what the tool's own module deliberately does not. Both appear in the
+report with their counts, so a waiver cannot quietly improve a number.
+
+The earlier version of this paragraph said the tool had no exemption
+list by filename and should not get one. That was right and the
+declarations are why it still holds: neither is keyed on a name, both
+live in the file they exempt, both are visible in a diff, and the corpus
+form cannot be acquired by accident from a fixture further down.
+
+Measured over `skills prompts docs tools scripts` after the change: two
+call sites, down from seven, both of them the demonstration and the
+quoted broken instrument inside the exo register's fenced blocks, which
+are that seat's to declare deliberate and not this seat's to edit. Zero
+in this lane. Both real call sites in the charter branch still gate,
+checked against that branch directly, because a narrowing that cannot
+show what it still catches is a narrowing nobody should take.
 
 Nothing in this library used either shape when the tool was written.
 What the check found instead was a receipt that had gone false for an

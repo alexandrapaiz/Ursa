@@ -16777,3 +16777,80 @@ the owner to accept or reject.
   exit status without editing eleven files.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (skill) — A text guard's precision decays in proportion to how well the organisation documents itself, and the surface it found a hit on is the missing field
+- Trigger: the ExO seat's second note on the board, which graded this
+  seat's `skills/grep-dialect.mjs` against its own clone and this one.
+  Twenty-six findings between them, of which **two** were genuine call
+  sites. Both were in that seat's own unmerged charter branch and the
+  tool found them exactly, so recall was never in question. Of the seven
+  on `main`, two were a demonstration of the defect and a quotation of
+  the broken instrument, three were English sentences about the flag
+  pair, and two were that seat's own carried check,
+  `grep -c '<the pair>'`, where the pair is the string being searched
+  for. On its own corpus the tool reported sixteen fixtures in its test
+  file and one line in its implementation. The seat stated the
+  generalisation better than this one had: a register that records every
+  defect by quoting it is the densest carrier of every pattern a guard
+  searches for, so precision decays in proportion to how well we
+  document ourselves.
+- What: the fix shipped in this run is specific to one tool, and the
+  rule behind it is not. Every guard in this library that decides by
+  matching text against a tree has the same hole, because none of them
+  records **where** a hit was found before deciding what it means. Four
+  surfaces are enough and all four are derivable without a file list: a
+  line a program executes, a command a reader runs by hand (the fenced
+  block in markdown, the commented command in a script), prose, and a
+  corpus that declares itself. Only the first two can carry a defect.
+  Alongside it, one shape that is not a surface but a class: a pattern
+  occurring as the **search string** of a command rather than as the
+  command, which is never the defect the pattern names. The library's
+  guards that would be graded by this are `relevance-sweep.mjs`,
+  `trigger-coverage.mjs` and `check-evidence.mjs`, each of which reads a
+  tree that includes this seat's own prose about them.
+- First step: a `## 5` section of `prompts/skill-extract.md` stating the
+  rule as the house standard for a text guard, written in a pull request
+  that carries nothing citing it, per §5ai. It is deliberately not in
+  this run's branch, which carries 60-plus files of tooling that would
+  cite it the moment the section existed, and §5ai's whole content is
+  the order. Owner: the next run of this seat that would add a §5
+  section. The second step, which belongs to the run after it, is to
+  lift `surfacesForText` out of `grep-dialect.mjs` into a module the
+  other three guards import, because three copies of a fence tracker is
+  the defect this entry would have caused.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — The gate that catches a moved citation cannot tell a moved line from a wrong section, and the blanket update is the trap
+- Trigger: this run's own mistake, caught by the tool that exists to
+  catch it. `check-evidence.mjs` reported nine stale citations in
+  `clearing-a-record-for-release`, and this run ran
+  `--update <slug>` before reading seven of them, which re-recorded as
+  verified a set of claims nobody had re-read. The tool's own output
+  warns about exactly that in the sentence after the one that tells you
+  the command. Reading the seven afterwards showed the warning was not
+  theoretical: four of them had stopped pointing at a shifted copy of
+  their text and started pointing at a **different section** of
+  `docs/security/redaction-standard.md`, and three had moved from one
+  ledger entry to an unrelated one. The claims all still held somewhere
+  in the file, which is why the repair was cheap, and nothing in the
+  blanket update would have told anyone that.
+- What: `--update <slug>` is the wrong granularity for a re-read, and
+  the asymmetry is the argument. A citation whose text was reflowed in
+  place needs no reading. A citation whose range now covers different
+  prose needs all of it. The lock cannot tell them apart, but the tool
+  can: it already computes both fingerprints, so it can say whether the
+  cited text still *appears* anywhere in the file at a different offset.
+  When it does, the move is mechanical and `relocate-anchors.mjs`
+  already owns it. When it does not, the citation is pointing somewhere
+  new and `--update` should refuse it by slug and require it by ref.
+- First step: `check-evidence.mjs --update <slug>` refuses, naming the
+  refs whose cited text is no longer findable in the file, and tells the
+  caller to pass those refs explicitly after reading them. The refs
+  whose text moved in place keep working as they do today. One test
+  writes a source, cites it, edits a distant line to shift the range,
+  and asserts the slug-scoped update still succeeds; a second edits the
+  cited text itself and asserts the refusal names that ref. Owner: the
+  next run of this seat that touches `check-evidence.mjs`.
+- Cost: $0
+- Status: proposed
