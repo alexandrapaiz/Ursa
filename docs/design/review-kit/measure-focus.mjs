@@ -425,10 +425,48 @@ for (const [vpName, width, height] of VPS) {
       // the page is still moving, and the focused frame and the blurred
       // frame come from two different offsets. freezeContext pins the
       // behaviour; this re-read is what makes the rectangle right.
-      const box = await el.boundingBox()
-      if (!box || box.width < 1 || box.height < 1) {
+      const rawBox = await el.boundingBox()
+      if (!rawBox || rawBox.width < 1 || rawBox.height < 1) {
         rows.push({ page: pageName, viewport: vpName, ...stop, verdict: 'ZERO_BOX' })
         continue
+      }
+
+      /* A control small enough that its indicator cannot be on it.
+         `measure-hit-areas.mjs` has the mirror of this and `verify-hover.mjs`
+         says it outright: three of this site's hover rules style a
+         descendant rather than the hovered element. Focus has the same
+         shape one direction up. The file input in the record loader is
+         `sr-only`, so it is a 1x1 box inside a 182x47 label, and the ring
+         that says it is focused is drawn on the label. A rectangle padded
+         12px around the input contains none of that ring and the stop
+         reported NO_INDICATOR for a control whose focus is correct.
+         Measured 2026-11-02: the label matches `:has(> input:focus-visible)`
+         and its computed outline is `rgb(168,199,250) solid 1px`, while
+         this tool photographed nothing.
+
+         So a control under 8px on either side is photographed over the
+         nearest ancestor that has a real box. The climb is capped at five
+         levels and at half the viewport's area, because an uncapped climb
+         ends at <body> and photographs the page. The row says which box it
+         used, so nobody reads an ancestor's ring as the control's own. */
+      let box = rawBox
+      let measuredOn = 'self'
+      if (rawBox.width < 8 || rawBox.height < 8) {
+        const widened = await el.evaluate((n, maxArea) => {
+          let a = n.parentElement
+          for (let i = 0; i < 5 && a; i++, a = a.parentElement) {
+            const r = a.getBoundingClientRect()
+            if (r.width >= 8 && r.height >= 8) {
+              if (r.width * r.height > maxArea) return null
+              return { x: r.x, y: r.y, width: r.width, height: r.height, tag: a.tagName.toLowerCase() }
+            }
+          }
+          return null
+        }, (width * height) / 2)
+        if (widened) {
+          box = widened
+          measuredOn = `ancestor:${widened.tag}`
+        }
       }
       const vp = page.viewportSize()
       const clip = {
@@ -476,6 +514,7 @@ for (const [vpName, width, height] of VPS) {
         stop: stop.stop,
         focusVisible: isFV,
         box: { w: Math.round(box.width), h: Math.round(box.height) },
+        measuredOn,
         indicatorPx: indicator.length,
         driftPx: drift,
         // WCAG 2.4.11's minimum: the area of a 2px perimeter of the
@@ -587,7 +626,7 @@ L.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|')
 for (const r of rows) {
   const n = (v, d = 2) => (typeof v === 'number' && isFinite(v) ? v.toFixed(d) : '-')
   L.push(
-    `| ${r.page} | ${r.viewport} | ${r.stop} | ${r.tag} ${r.text ? `"${r.text}"` : ''} | ${r.box ? `${r.box.w}x${r.box.h}` : '-'} | ${r.indicatorPx ?? '-'} | ${r.clearPx ?? '-'} | ${r.share !== undefined ? `${(r.share * 100).toFixed(0)}%` : '-'} | ${r.ringRatio !== undefined ? n(r.ringRatio) : '-'} | ${n(r.median)} | ${n(r.min)} | ${r.areaRatio !== undefined ? n(r.areaRatio) : '-'} | ${r.verdict} |`,
+    `| ${r.page} | ${r.viewport} | ${r.stop} | ${r.tag} ${r.text ? `"${r.text}"` : ''} | ${r.box ? `${r.box.w}x${r.box.h}${r.measuredOn && r.measuredOn !== 'self' ? ` (${r.measuredOn})` : ''}` : '-'} | ${r.indicatorPx ?? '-'} | ${r.clearPx ?? '-'} | ${r.share !== undefined ? `${(r.share * 100).toFixed(0)}%` : '-'} | ${r.ringRatio !== undefined ? n(r.ringRatio) : '-'} | ${n(r.median)} | ${n(r.min)} | ${r.areaRatio !== undefined ? n(r.areaRatio) : '-'} | ${r.verdict} |`,
   )
 }
 
