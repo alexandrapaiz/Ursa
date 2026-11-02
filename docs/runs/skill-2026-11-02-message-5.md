@@ -90,7 +90,7 @@ tooling. Recorded here because a deletion leaves no diff.
 
 | check | result |
 |---|---|
-| `skills/*.test.mjs`, eight files | 157 assertions, zero failures |
+| `skills/*.test.mjs`, seven files | 157 assertions, zero failures |
 | `trigger-coverage.mjs` | 11 skills, 110 ordered pairs, 110 carry the sibling trigger prompt, exit 0 |
 | `trigger-coverage.mjs --amendments` | every amended section names its amendments, exit 0 |
 | `check-evidence.mjs` | exit 1, nine drifted citations |
