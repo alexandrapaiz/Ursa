@@ -79,11 +79,16 @@
 //   node scripts/redaction-check.mjs --history=origin/main   # from a ref
 //   node scripts/redaction-check.mjs --history=all   # every blob in every ref
 //
-// Two more flags exist as test seams and are documented so that nobody
+// Three more flags exist as test seams and are documented so that nobody
 // mistakes them for configuration. `--root=<dir>` scans somewhere other
-// than this repository, and `--workflow=<file>` reads the rules from
-// somewhere other than the gate. The suite needs both to exercise a dirty
-// tree and a gate it cannot parse. In normal use neither is passed.
+// than this repository, `--workflow=<file>` reads the rules from
+// somewhere other than the gate, and `--stream-budget=<bytes>` shrinks the
+// per-batch byte budget of `scanHistory` so the suite can cross a batch
+// boundary without building 64 MiB of history to do it. The suite needs the
+// first two to exercise a dirty tree and a gate it cannot parse, and the
+// third because the one thing batching can get wrong -- a line number read
+// against the wrong batch's frames -- is invisible in a scan that never
+// flushes twice. In normal use none is passed.
 //
 // No dependencies, no network.
 
@@ -257,6 +262,12 @@ function dropGitIgnored(lines) {
 // ---------------------------------------------------------------- history
 
 const MAX_BLOB_BYTES = 4 * 1024 * 1024; // the figure tools/secret-scan.mjs uses
+
+// How many bytes of blob text go into one string handed to grep. V8's maximum
+// string length is around 512 MiB on 64-bit, so this is an order of magnitude
+// under it, and `MAX_BLOB_BYTES` above is a sixteenth of it, which is what
+// makes the budget hold for any blob the scan will read. See `scanHistory`.
+const STREAM_BUDGET_BYTES = Number(flag('stream-budget') ?? 64 * 1024 * 1024);
 
 // Every blob reachable from `ref`, deduplicated by content, with the first
 // path it was seen at kept for reporting. A blob is content and a path is
@@ -475,12 +486,52 @@ function scanHistory(ref, gate) {
   const { paths, wanted, oversize } = historyBlobs(ref, gate);
   const skipBinary = gate.flags.includes('I');
 
-  // Read once, scan three times. The expensive part is the objects, so the
-  // stream is built once and every pattern runs over the same one.
-  const frames = [];
-  const lines = [];
+  // Read once, scan every pattern over the same bytes, in batches bounded by
+  // BYTES and not by blob count.
+  //
+  // WHY THE BOUND IS BYTES, found 2026-11-02 by this seat's third run of the
+  // day. This function used to join every text line of every blob in scope
+  // into ONE JavaScript string and grep that once per pattern, which is the
+  // right shape at one ref and impossible at every ref. `--history=all` on a
+  // complete clone of this repository -- 4,075 commits, 298 remote-tracking
+  // refs, 7,046 blobs -- threw `RangeError: Invalid string length` out of
+  // `Array.join`, with no handler, so the process died at exit 1. Exit 1 on
+  // this tool means "the tree is dirty", so a crash was indistinguishable
+  // from a finding to anything reading the status, which is worse than the
+  // crash. The mode had never run on a complete clone, because the clone a
+  // seat is handed is shallow and the mode correctly refuses there, so the
+  // only clone shape it CAN run on is the only one nobody had tried.
+  //
+  // Blob count was never a safe bound. Blobs are capped at 4 MiB each by
+  // `MAX_BLOB_BYTES`, so the old batch of 500 bounded one stream at 2 GiB,
+  // four times the string limit it hit. A byte budget cannot be defeated that
+  // way: the largest readable blob is a sixteenth of it, so every batch fits
+  // whatever the blobs turn out to be.
   const binaries = [];
+  const perPattern = new Map(gate.pairs.map((pair) => [pair.label, []]));
   let scanned = 0;
+
+  // One batch's worth of lines, scanned and then dropped. `frames` is parallel
+  // to `lines` by index, which is what `grep -n`'s line number maps back
+  // through, so both reset together or the mapping is off by a batch.
+  let frames = [];
+  let lines = [];
+  let bytes = 0;
+
+  const flush = () => {
+    if (lines.length === 0) return;
+    const stream = `${lines.join('\n')}\n`;
+    for (const { label, pattern } of gate.pairs) {
+      for (const index of grepNumbered(pattern, gate.flags, stream)) {
+        const frame = frames[index];
+        if (frame) perPattern.get(label).push(frame);
+      }
+    }
+    frames = [];
+    lines = [];
+    bytes = 0;
+  };
+
   for (let i = 0; i < wanted.length; i += 500) {
     for (const blob of readBlobs(wanted.slice(i, i + 500))) {
       scanned += 1;
@@ -494,13 +545,15 @@ function scanHistory(ref, gate) {
         frames.push({ sha: blob.sha, line: String(n + 1), text: text[n] });
         lines.push(text[n]);
       }
+      bytes += blob.bytes.length;
+      if (bytes >= STREAM_BUDGET_BYTES) flush();
     }
   }
-  const stream = `${lines.join('\n')}\n`;
+  flush();
 
   const findings = [];
   for (const { label, pattern } of gate.pairs) {
-    const hit = grepNumbered(pattern, gate.flags, stream).map((i) => frames[i]).filter(Boolean);
+    const hit = perPattern.get(label);
     // Without a line number and without matched text, which is the same
     // location-only shape the gate prints for a binary file.
     for (const blob of binaries) {

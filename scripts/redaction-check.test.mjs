@@ -435,6 +435,47 @@ describe('redaction-check', () => {
     }
   });
 
+  // The batch boundary, added 2026-11-02 after `--history=all` on a complete
+  // clone of this repository threw `RangeError: Invalid string length` out of
+  // `Array.join` and died at exit 1, which on this tool means a dirty tree. A
+  // byte budget fixed it, and the one thing a byte budget can get wrong is the
+  // mapping from a line number back to the blob it came from: `grep -n`
+  // numbers each batch's stream from 1, so a frame list that does not reset
+  // with the stream attributes a hit to whatever line sat at that index in an
+  // earlier batch. Both tests below drive a one byte budget, which flushes
+  // after every blob, so every hit crosses a boundary.
+  test('a hit keeps its own file and line across a batch boundary', () => {
+    const dir = gitRepo([
+      { 'first.md': 'one\ntwo\nthree\nfour\nfive\n' },
+      { 'second.md': 'a\nb\nc\n' },
+      { 'third.md': `x\ny\nid: ${fakeSessionId}\n` },
+    ]);
+    try {
+      const batched = runCheck(dir, ['--history', '--stream-budget=1']);
+      assert.equal(batched.code, 1);
+      assert.match(batched.stderr, /third\.md:3/, 'the third line of the third file, not an index into an earlier batch');
+      assert.ok(!batched.stderr.includes(fakeSessionId));
+      // And the unbatched scan of the same repository agrees, which is what
+      // says the budget changed the batching and nothing else.
+      const whole = runCheck(dir, ['--history']);
+      assert.equal(whole.code, 1);
+      assert.equal(batched.stderr, whole.stderr);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('a clean repository is still clean when every blob is its own batch', () => {
+    const dir = gitRepo([{ 'a.md': 'clean\n' }, { 'b.md': 'also clean\n' }, { 'c.md': 'and c\n' }]);
+    try {
+      const { code, stdout } = runCheck(dir, ['--history=all', '--stream-budget=1']);
+      assert.equal(code, 0);
+      assert.match(stdout, /Redaction history clean/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   test('a one-ref sweep says so, because its answer is the smaller one', () => {
     const dir = gitRepo([{ 'a.md': `id: ${fakeSessionId}\n` }, { 'a.md': 'clean now\n' }]);
     try {

@@ -644,6 +644,26 @@ entry's conclusion holds and only its method needs the correction. Then run
 `node scripts/redaction-check.mjs` on the same tree and confirm it agrees
 with the gate, which its suite now covers in both directions.
 
+**This entry is now narrower than it was, 2026-11-02 by security run c,
+and it is still owed.** The metadata channel no longer depends on this
+flag landing. `tools/image-metadata.mjs` is a gate in this seat's own
+lane that reads every tracked image at the container level and fails on
+any chunk that can hold text, which is a different question from this
+entry's and a strictly wider answer within the metadata channel: this
+entry applies three patterns to whatever a chunk holds, and that gate
+asks whether a chunk capable of holding anything exists at all. 1,303
+images, 8,914 chunks, zero carriers after one was removed, and the
+enumerator's seventh extraction.
+
+So what dropping `-I` still buys, stated precisely so nobody closes this
+as done: it reaches **formats and channels the chunk gate does not
+parse** on the day one arrives, and it reaches **text sitting in a
+binary file that is not an image at all** — a font, an archive, a
+compiled artifact — which nothing in this repository looks at today.
+Neither of those is hypothetical at a tree that grows by twenty
+screenshots a merge. The flag is still the right change and it is still
+HQ's.
+
 ## PWC-14 — No gate in this repository has ever looked for a credential
 
 **Queued by:** security seat, 2026-10-27 run 16. Queued because the run
