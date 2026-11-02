@@ -17869,3 +17869,158 @@ the owner to accept or reject.
 - Status: urgent — every seat on this host is exposed today, and a run that
   publishes another company's prose to this company's pull request is a
   disclosure, not an inconvenience.
+
+### 2026-11-02 (engineer, fourteenth message pass) — `mergeable: CONFLICTING` on a GitHub row is not a measurement of this repository's merge work, and a dispatch pass that reads it as one overstates by the whole of it
+- Trigger: the handoff this pass acted on. `Ursa/pm` named four open
+  engineer rows "each conflicting against main" and asked for a rebase and
+  consolidation, and the nineteenth dispatch pass named the same thing
+  before it. Measured this pass: all five of this seat's open rows conflict
+  on exactly one path, `docs/ideas.md`, and on nothing else. With this
+  repository's own registered drivers installed, all five merged onto
+  `main` clean, in sequence, with no hand resolution at all. The rebase the
+  handoff asked for was one `install-driver.sh` away from being unnecessary.
+- What: the cause is structural rather than a mistake by any seat.
+  `.gitattributes` declares `docs/ideas.md merge=ledger`, and a `merge=`
+  name is resolved against per-clone `git config` that
+  `tools/ledger/install-driver.sh` writes. GitHub's mergeability check runs
+  in no clone of ours and cannot execute that driver, so it necessarily
+  falls back to the default text merge and necessarily reports a conflict
+  on every row that appends to the ledger. Every row appends to the ledger,
+  because this charter orders it. Therefore `mergeable: CONFLICTING` is,
+  for this repository, close to a constant rather than a signal, and the
+  queue-depth and conflict numbers reported to the owner inherit that.
+  What a reader actually wants is the conflict set *after* the drivers run.
+  That is computable locally in a worktree, which is how this pass measured
+  it: merge the row onto the trunk with the drivers switched off, list
+  `--diff-filter=U`, then merge it again with them on and list again. The
+  difference between the two lists is the set of paths a driver already
+  handles, and what remains is the only part that needs a person.
+- First step: `tools/stack/driver-aware-mergeable.mjs`, reading a list of
+  pull request numbers and printing one row each: the paths that conflict
+  without the drivers, the paths that still conflict with them, and a
+  verdict of `driver-resolves`, `needs-human`, or `clean`. It reuses
+  `tools/stack/merge-surface.mjs`, which already walks heads against the
+  trunk and already knows which paths a driver owns, so this is a reporting
+  layer over an existing walk and not a second walk. Rehearse it red
+  against a row with a genuine code conflict, which the five measured this
+  pass are not.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, fourteenth message pass) — A `transcribed:` test can report that another team's code regressed when it was hardened, and a false red in that direction is worse than a miss
+- Trigger: `tools/board/read-filters.test.mjs` went red this pass saying
+  "the events read no longer refuses unknown filters; the INERT finding has
+  regressed and the prober should be re-run". It had not regressed. HQ had
+  collapsed two copies of the refusal sentence into one helper,
+  `Handler.refuse_unknown`, because their own `test_one_implementation` went
+  red on the duplication, and the string this test grepped for had simply
+  moved out of the slice it was searching. The refusal was intact and
+  strictly better, and a reader who believed the test would have re-opened
+  a finding HQ had just closed.
+- What: this repository keeps a family of tests named `transcribed:` whose
+  job is to check an Ursa claim against HQ's source on the resident host,
+  and their headers already handle absence well — they skip rather than
+  fail when the file is not there, and say a skip means unchecked. What no
+  header handles is *presence with a changed shape*, which is the common
+  case, because HQ refactors its own board and has no reason to preserve
+  our grep. A transcription keyed to a string literal inside a byte range
+  measures the spelling and not the rule, and its failure message asserts
+  a regression it has no evidence for. The repair this pass applied to the
+  one instance generalizes into a shape: assert the *call* at the site,
+  accepting either the current or the prior spelling, then follow it one
+  hop and assert the *behaviour* in the definition, and word each half so
+  the failure says which hop broke. The second half is what makes the
+  first safe, since accepting two spellings on its own would weaken the
+  claim.
+- First step: audit the other `transcribed:` tests for the same keying.
+  `grep -n "transcribed:" tools/**/*.test.mjs` lists them; for each, check
+  whether its assertion is a string literal inside an `indexOf` range over
+  a file under `/srv/asc/hq/`, which is the exact shape that failed here.
+  Convert the ones that are, and give each a rehearsal that mutates the
+  real source in memory — call deleted, behaviour softened, prior spelling
+  restored — since that is what distinguished the two causes this pass.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, fourteenth message pass) — The board answers `/api/standing` with its own document shell, so a route-existence check that reads the status code reports a dead route as live
+- Trigger: the standing condition attached to this pass's wake instructed
+  this seat to confirm the condition with `GET /api/standing` before
+  spending a turn on it, which is good advice this run followed by another
+  route. `$BOARD_API_URL/api/standing` returns the board's SvelteKit
+  document shell — `<!doctype html>`, a `modulepreload` list, a CSP meta
+  tag — rather than JSON or a 404. The condition was confirmed from
+  GitHub's pull request timeline instead, which is the authority for
+  whether a row is a draft anyway.
+- What: an SPA fallback answering `200 text/html` for every unmatched path
+  is ordinary and correct for a browser, and it is a trap for every
+  instrument in this repository that probes the board. Two of them already
+  live here: `tools/board/read-filters.mjs` reasons about what a route
+  honours, and `tools/board/live-target.mjs` decides whether a board is
+  reachable at all. Both treat a non-2xx as the signal that something is
+  wrong, so an unmatched API path is indistinguishable from a working one
+  to anything that does not inspect the body. The cheap discrimination is
+  the content type: a JSON route answers `application/json` and the
+  fallback answers `text/html`, so a probe that records the content type
+  alongside the status can tell "this route does not exist" from "this
+  route answered". Whether the board should answer 404 under `/api/` is
+  HQ's call on HQ's file; what is Ursa's is that our probes stop believing
+  the status code alone.
+- First step: add a `contentType` to whatever `tools/board/live-target.mjs`
+  returns, and one fault code for `200 text/html` under an `/api/` path,
+  worded so it names the SPA fallback as the likely cause rather than
+  reporting the board down. Rehearse it against `/api/standing`, which is
+  a live instance of exactly this, and against `/api/messages`, which must
+  stay clean. Report the 404 question to HQ as a message rather than
+  filing it as work here.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, fourteenth message pass) — Craft scan: Wire (usewire.io), whose own critique of export-based portability names the defect this pass spent its day inside
+- Scanned: Wire, `usewire.io`, Category 3 of `docs/market/landscape.md`
+  (personalization and memory layers). Picked because the rotation has
+  never craft-scanned it while scanning Letta, Mem0, Graphiti, Vals AI and
+  LMArena more than once each, and because its stated thesis is adjacent to
+  this pass's own work. Read from the landscape entry already committed to
+  this repository, last observed there 2026-10-26, plus working knowledge.
+  No page was fetched for this note, and the entry's own citations are
+  where its quotations come from.
+- Worth stealing, and it is an argument rather than a feature. Wire's
+  2026-08-31 company post argues that export "satisfies data-portability
+  obligations without changing the practical cost", because a migration
+  tool creates **two copies that drift apart**, and that the fix is a
+  store that lives outside any one vendor. Read as a claim about consumer
+  AI memory, that is the premise Ursa Major already rests on. Read as a
+  claim about *any* two representations of the same fact, it is the exact
+  defect class this pass fixed three times in one run, and that second
+  reading is the stealable one. `tools/doc-model/` exists because a
+  document's prose and the executable transcription beside it are two
+  copies that drift. `tools/board/read-filters.test.mjs` went red this
+  pass because Ursa's transcription of HQ's refusal was a third copy of a
+  sentence HQ had just deduplicated down to one, for the same reason, in
+  their own words — `test_one_implementation`, the assertion that keeps a
+  third from appearing. Wire sells "one store instead of several" to
+  developers. The same sentence is an engineering rule this repository
+  keeps rediscovering one file at a time, and the thing to steal is
+  stating it once, as a rule about representations, rather than as five
+  separate gates each guarding its own pair.
+- What Ursa does better, which is where the analogy stops. Wire's fix for
+  lock-in is to become the new centralized point every agent reads from,
+  which trades a per-vendor copy for a single copy somebody else holds.
+  That is the opposite of CLAUDE.md §0 constraint 3, where raw processing
+  is on-device and raw data never reaches the aggregation layer, and it
+  has no consent or revoke surface because its customer is the developer
+  integrating it rather than the person the context is about. The
+  engineering half inverts the same way: this repository's answer to two
+  drifting copies is never "one copy on a server", it is a driver or a
+  gate that makes the drift fail loudly in the clone where the work
+  happens — `merge=ledger` resolving by entry identity, a transcription
+  that follows a refactor one hop. Wire centralizes to remove the
+  divergence; Ursa keeps the copies distributed and makes divergence
+  detectable, which is the only version of the fix compatible with the
+  user holding their own data.
+- Not proposed here: this scan argues for a rule rather than a build, and
+  the two instruments it would touch are already proposed above under
+  their own triggers, so it carries no `- First step:` label of its own.
+  That label is `pm.md` §4's commitment of work, and a scan note carrying
+  it is read by `tools/ledger/block-kinds.mjs` as an idea owing all five
+  fields.
