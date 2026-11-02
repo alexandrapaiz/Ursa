@@ -15344,3 +15344,24 @@ the owner to accept or reject.
   (what an AI generated and what survived), not how Minor is paid.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (market) — Stretch the Scale AI S-1 recheck cadence from every one to two weeks to monthly
+- Trigger: this run's landscape watch (docs/market/landscape.md, Scale
+  AI entry). A third direct EDGAR company search (2026-11-02), six
+  weeks after the first and three weeks after the second, again finds
+  no S-1 on file for Scale AI. All three checks (2026-09-30, 2026-10-14,
+  2026-11-02) agree.
+- What: this gap has been rechecked three times in six weeks, each run
+  spending one search to reconfirm the same "no filing" answer. The
+  underlying question (has Scale AI filed an S-1) moves on the order of
+  weeks to months, not days, so a recheck cadence tighter than the
+  question's own rate of change is spending a search on reconfirmation
+  rather than new information. This is a process adjustment to this
+  charter's own weekly rhythm, not a market finding.
+- First step: the next run touching this entry should recheck EDGAR
+  only if a new aggregator claim surfaces (the original trigger for
+  checking at all) or if a month has passed since the last check,
+  whichever comes first, rather than on every pass that happens to
+  reach Category 1's Scale AI entry.
+- Cost: $0
+- Status: proposed

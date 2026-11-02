@@ -1652,3 +1652,49 @@ own public messaging as "practitioners are already naming this as the
 failure mode," distinct from the portability argument Category 3's
 main read already carries. No ledger proposal opened for this one;
 it strengthens an existing claim rather than opening new work. [Hacker News: Agents don't need memory, they need documentation](https://news.ycombinator.com/item?id=49945933), [liao.gg: Agents don't need memory, they need documentation](https://liao.gg/blog/agents-dont-need-memory).
+
+## A frontier lab's own sitting CEO just personally bought into the authored side of the gap (2026-11-02, message, 8th run)
+
+Every prior entry on the "build the task and the verifier"
+sub-category (the 42-name rl-list.com market, plus Mercor/Deeptune,
+Halluminate, and micro1 individually) treated the money behind it as
+venture capital: funds betting that constructed, verifier-graded
+environments are what labs will buy. This run's landscape watch
+(docs/market/landscape.md, new Plato entry) adds a different kind of
+money to that read. Plato, a new entrant in the same sub-category
+($16M Series A, announced 2026-10-28, building simulated
+customer-support, HR, finance, and healthcare workplaces for AI to
+practice in), lists Mustafa Suleyman, Microsoft AI's own sitting CEO,
+as a personal participant in the round, alongside the institutional
+investors.
+
+So what: this is the first time this map has found a frontier lab's
+own chief executive putting personal money into the authored-
+simulation side of the gap, rather than that lab buying the output at
+arm's length as a customer. It does not change the structural read
+CLAUDE.md §1 already makes — Plato's own language ("paying
+professionals to recreate their jobs in simulated environments") is
+the identical constructed-task mechanism every other name in this
+sub-category uses, not a real deliverable joined backward to its own
+generation history. What it sharpens is the confidence with which a
+lab brief can say the market, all the way up to individual lab
+executives, is still betting on better-built simulations rather than
+on provenance over real work: this isn't only a VC fund's thesis
+anymore, it's also a frontier AI executive's personal one. No pricing
+recommendation made; this is evidence for how deep the
+"authored, not real" bet runs, not a price decision. [Yahoo Finance:
+Plato Raises $16 Million to Build the Training Grounds for AI's Next
+Leap Into Real Work](https://finance.yahoo.com/technology/ai/articles/plato-raises-16-million-build-131700376.html).
+
+## A third EDGAR check agrees with the first two, and the recheck cadence should stretch (2026-11-02, message, 8th run)
+
+The Scale AI S-1 question (docs/market/landscape.md) has now had three
+direct EDGAR company searches, spread across six weeks (2026-09-30,
+2026-10-14, 2026-11-02), all returning "No matching companies." Three
+consecutive agreements is a different evidentiary weight than the
+first unconfirmed sighting of a circulating aggregator claim, though it
+still cannot make the claim false outright, since a filing could land
+the day after any check. The practical read: this gap moves slowly
+enough that rechecking it every one to two weeks spends a search on a
+question unlikely to have changed. Ledger proposal below to stretch
+the cadence rather than drop the watch.
