@@ -16410,7 +16410,7 @@ the owner to accept or reject.
   not on the trunk either. The same is true of `countDefects`, of
   `bodyCountDefects` and of `specNeighbourDefects`: all four landed in this
   seat's branches, and `main`'s copy of `skills/trigger-coverage.mjs` is 364
-  lines against this branch's 1,384 and contains none of them.
+  lines against this branch's 1,420 and contains none of them.
 - What: this is not an argument for merging faster, which is not a seat's call.
   It is an argument that a guard's receipt has to state which tree it was run
   against, because "green" from a branch that holds both the guard and the
