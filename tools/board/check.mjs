@@ -53,7 +53,7 @@
 // transcription against cases taken from its own docstrings.
 import { readFileSync, existsSync } from 'node:fs';
 import { unreffedClaims } from './claim-ref.mjs';
-import { dispositionRisk, DISPOSITION_KINDS, MEASURED } from './disposition.mjs';
+import { dispositionRisk, DISPOSITION_KINDS, MEASURED, GRADED } from './disposition.mjs';
 
 const HERE = new URL('.', import.meta.url).pathname;
 const TABLE = JSON.parse(readFileSync(new URL('./companies.json', import.meta.url), 'utf8'));
@@ -562,7 +562,16 @@ export function notices(m) {
     } else {
       out.push({
         code: 'WAKE_DISPOSITION_UNKNOWN',
-        line: `no disposition phrase was found anywhere in this body, which means this gate cannot tell a message that is pure evidence from one that states its verdict in words this list does not carry; the tail opens "${risk.lost_opens_with}"`,
+        // THE SHARE BELONGS IN THE LINE, added 2026-11-02 after grading this
+        // arm for the first time. "Cannot tell" reads like a rare fallback and
+        // it is not: it was the answer on 36.5 per cent of over-limit bodies
+        // before the graded group and is still a quarter of them. A reader
+        // given the verdict without the rate reasonably infers their message
+        // is unusual, and the honest inference is the opposite — this arm is
+        // where the vocabulary runs out, so read the tail yourself rather than
+        // treating the gate's silence as a finding. `GRADED` carries the
+        // measurement and the coverage it was taken from.
+        line: `no disposition phrase was found anywhere in this body, which means this gate cannot tell a message that is pure evidence from one that states its verdict in words this list does not carry; this is the arm where the list runs out and it was ${Math.round(100 * GRADED.after.none / GRADED.over_limit)} per cent of over-limit bodies on ${GRADED.on}, so read the tail rather than reading this as unusual; the tail opens "${risk.lost_opens_with}"`,
         repair: 'read the opening of the tail above. If that is where you say what you decided or what you want, move it up; if the tail is evidence, the cut costs nothing',
       });
     }
