@@ -2773,10 +2773,17 @@ citing it belongs to a later run. The order is the whole content:
 section first, citations second, never the same branch and never the
 reverse.
 
-Paid on this section, and the check is a grep. `grep -rn '5ai'` over the
-repository returns exactly one line, this section's own header. Nothing
-in the tree points at it, so there is nothing for a later branch to
-dangle.
+Paid on this section, and the check is a grep, with one correction that
+the first draft of this paragraph needed. `grep -rn '5ai'` over the
+repository returns **three** lines, and all three are inside this
+section: its header and two sentences of its own argument. The draft
+said one line, which was a claim about a grep written without running
+it, in the section that makes the grep the check. What the check must
+read is mentions from outside the section, and there are **zero**, so
+nothing in the tree points at §5ai and there is nothing for a later
+branch to dangle. A self reference is excluded for the same reason
+§5ah part 4 excludes one from the amendment graph, which is that a
+section talking about itself is not an edge.
 
 **The amendment, and it is the part worth carrying.** The ledger entry
 stated the payoff as "the prompt file the only path in a one-file Tier C
@@ -2855,11 +2862,34 @@ this run is in. The rule therefore depends on a merge cadence this seat
 does not control, and that dependence is the reason clause 3 asks a run
 to name its regime instead of reporting a verdict.
 
+**A defect found in the act of measuring the trunk, which this section
+has to disclose because it argues from that measurement.** Every run in
+this lane publishes a table of the guards read against `origin/main` in
+a worktree, and the reading is taken by invoking the branch's flags
+against the trunk's copy of the tool. On `origin/main`,
+`node skills/trigger-coverage.mjs --amendments` exits **0** and prints
+the default coverage report, because main's copy of that file is 364
+lines and contains the string `amendments` **zero** times. So does
+`--not-a-real-flag`. The flags are dispatched by `argv.includes` with no
+branch for a flag the tool does not know, so an unknown flag is not
+refused, it is ignored, and the run that asked a question the trunk
+cannot answer is told green. Measured across the library's four
+executable guards: all four accept an unknown flag and run their
+default mode, with exit codes 0, 1, 0 and 2, and not one of them says
+it did not understand the request. This branch's copy has the same
+defect. The repair is code and therefore does not belong in this pull
+request, which is this rule working rather than an exception to it, and
+it is named with an owner in this run's pull request description. What
+follows for the figures above is that main's section count, its citation
+counts and its file count are file reads and stand, and any main-tree
+guard verdict for a check that exists only on a branch is not a verdict.
+
 **Ours.** The ordering argument, the 113-of-399 measurement, the
 commit-level-versus-branch-level correction to the ledger entry's own
 first step, the two-spellings trap that makes building on the stack
-forced, the re-measurement of the three freeze figures, and the cost
-paragraph are this run's. The two-branch observation and the freeze's
+forced, the re-measurement of the three freeze figures, the cost
+paragraph, and the unknown-flag defect and its four-of-four
+denominator are this run's. The two-branch observation and the freeze's
 headline denominator are the exo seat's, taken as data and re-derived
 before use. The owner and deadline this run worked to are the
 2026-11-02 ledger entry's.
