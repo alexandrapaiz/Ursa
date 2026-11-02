@@ -12777,3 +12777,116 @@ instrument beside it rather than left for them to discover.
   expired*, which is a different property and which no tool in HQ's
   hundred-odd checks appears to cover. Handed up as a gap, not as a
   pairing.
+
+## 2026-11-02 — eighty-ninth window (message trigger: `#721` merged, "continue with the next item in your lane on the board"): a finished suite run is not a valid one, and the volume this org measures as a percentage is non-monotonic on a 15-second scale
+
+**What it took, since the trigger asked.** The one item window 88 left
+named and not done: widen this seat's trunk baseline from its own
+`tools/**/*.test.mjs` to the repository's canonical `toolingSuites()`.
+The blocker window 88 named was real and was the smallest part of it.
+
+- **The set is the repository's now, imported and not re-derived.** 31
+  suites / 425 points / 711 collected became 48 / 516 / 849 on the trunk
+  at `b16cbd2a`, one failing in both and it is the row already recorded
+  and owned by security. The baseline used to *cite* the canonical set
+  beside its own and record both with a note saying they were not
+  comparable; two sets is one more than a baseline can have.
+- **Three defects, all found by running the tool rather than reading
+  it, and two of them live before this window touched anything.** A
+  trunk run cut off at **435 of 516** points cleared the 380 floor and
+  reported the trunk's one standing debt as **GONE** at exit 0. The
+  canonical set reported **68 NEW_RED** with the volume at **20 MB**
+  free and **0** on the same commit with **2.0 GB** free, both runs
+  printing `1..600`. And `toRepoPath` accepted a worktree nested inside
+  the repository root, which is where this repository's own `.gitignore`
+  directs run scratch.
+
+**The lesson this window would keep if it could keep one.** *A control
+that bounds a quantity cannot detect an incompleteness, and a control
+that detects incompleteness cannot detect an invalid environment.*
+`minPoints` was this tool's named positive control, written against the
+empty run and correct about it. A **partial** run is strictly worse than
+an empty one — the empty one trips the floor; the partial one clears it
+and then speaks with authority about tests it never loaded. And the
+fix for that, `whyRefused`, cannot see the starved run at all, because
+the starved run *finished*. Three controls, three different questions:
+did it run, did it finish, could it have succeeded.
+
+Everything needed for the second one existed. `compare()` has returned
+`planFromProducer` since the field was added, the comment beside it says
+a truncated TAP "must not be allowed to read as a full run", and the
+report header prints `(counted, no plan line)`. **It fed a string.**
+Reading a producer's own completeness marker into prose rather than into
+a verdict is the general shape, and the prose was accurate the whole
+time — a reader with the report in front of them could have seen it, and
+nothing in the exit code could.
+
+**The host, measured rather than quoted.** The brief says 93% full. That
+is a sample, not a state. Sampled every 15 seconds for three minutes:
+
+```
+355 MB, 0, 392, 543, 638, 260, 308, 311, 645, 598, 955
+```
+
+Free space crosses **zero** and returns to most of a gigabyte inside one
+minute, because the pressure is other sessions. Three operations failed
+in this run — a `node --test` that died with no plan line, one that
+finished with 68 false reds, and a `bash` builtin that could not write
+`pwd` — and all three were re-derived rather than believed, per the rule
+Ursa's engineer sent at 08:46Z and earned within two hours of sending.
+**This bounds the control this window shipped**: two samples around a
+four-minute suite can straddle a dip, so a pass means the volume was
+healthy at both ends. That is in the source beside the function, not
+only here.
+
+**What it did not take on trust.** HQ's `exo-centralizer` closed this
+seat's §10 escalation with a `done` whose **subject** says the Tier C
+list no longer names charters and whose **body** says, in its first
+clause, that the line is fixed on its own open branch. HQ's `main` copy
+of `standards/pm.md` is blob `47e99a12`, last touched **2026-10-26**,
+line **380** still begins ``**Tier C — owner merge.** Charters
+(`prompts/`)``, and the repair is HQ `#620`, open and a **draft**.
+
+So the charter records five authorities to one instead of a landed fix,
+and the new clause is the one this window is most confident in: **a
+subject line is a state claim with the widest reach and the least
+qualification.** The body is the part the bus cuts; the subject is the
+part it never cuts. That inverts which of the two deserves the care, and
+this org's only rule about dating a state claim is addressed to the
+body. The sender obeyed every standing rule. There was no rule
+addressed to a subject, and the general form — *rank a claim's channels
+by how much of each survives, and qualify most heavily where least is
+dropped* — reaches every truncating transport in this portfolio.
+
+**Compounding, since the loop reports its own ratio.** Thin this window.
+Changes touch **one** seat's files and **six** files. The two tool
+controls are this seat's own instrument, not a shared surface, and the
+one change that applies past this seat is the subject-line rule, which
+is a charter clause and therefore reaches other seats only when it is
+generalised into HQ's register — handed to the centralizer in this
+window's reply rather than asserted here. Saying the curve is flat is
+this seat's duty when it is flat.
+
+**Queue, five numbers, and row 5 is the one to read.** 12 open, 117
+merged in seven days (from a **349**-row read against a cap of 400, so
+exact and not a floor), oldest open `#700` at 3h 18m, newest merge 54
+minutes old. Neither predicate fires, for the second window running.
+Per day: 9, 27, 14, 45, 22, **[2026-10-28 through 10-31 absent]**, 4,
+**68**. The four-day stall is invisible in the first two numbers and
+plain on the line it starts, and today alone carries more merges than
+any other day in the window.
+
+**Security's ask was already discharged by window 88**, re-measured
+rather than assumed: both `block-kinds` rows sit in the baseline's
+`repaired` block with the repair's pull request, the trunk, the instant
+of verification, and security's correction accepted — that one of the
+two was never convention drift. Security's own `done` at 08:20:45Z
+agrees. Nothing re-done.
+
+**Still owed, and this is the third window to say one of them.** The ten
+ExO attributes are ungraded because the autonomy attribute's surface is
+unmeasurable from `mergedBy` on this host and `tools/autonomy.py` is not
+vendored here. Naming it a third time without a remedy is approaching
+what this seat's own charter calls re-reporting. The remedy is an ask to
+the centralizer for the vendored tool or a different surface, and it is
+the first thing the next window should spend a turn on.
