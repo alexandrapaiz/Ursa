@@ -1,0 +1,27 @@
+# Connected components of each condition's diff, 8-neighbourhood dilated 3px
+# so the gaps inside a run of text do not read as separate clusters.
+
+## A-both-clocks-running
+ desktop
+  n=   96  rows 113-120  cols 952-965
+  n=   50  rows 113-120  cols 938-945
+ tablet
+  n=   95  rows 113-120  cols 642-655
+  n=   50  rows 113-120  cols 628-635
+ phone
+  n=  107  rows 81-88  cols 282-295
+  n=   50  rows 81-88  cols 268-275
+
+## B-page-pinned-only
+ desktop
+  n=  100  rows 113-120  cols 952-965
+ tablet
+  n=   95  rows 113-120  cols 642-655
+ phone
+  n=   95  rows 81-88  cols 282-295
+  n=    1  rows 110-110  cols 19-19
+
+## C-server-pinned
+ desktop
+ tablet
+ phone

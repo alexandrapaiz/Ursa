@@ -52,6 +52,8 @@
 // revision, not inferred from refusals, and `--self-test` asserts the
 // transcription against cases taken from its own docstrings.
 import { readFileSync, existsSync } from 'node:fs';
+import { unreffedClaims } from './claim-ref.mjs';
+import { dispositionRisk, DISPOSITION_KINDS, MEASURED } from './disposition.mjs';
 
 const HERE = new URL('.', import.meta.url).pathname;
 const TABLE = JSON.parse(readFileSync(new URL('./companies.json', import.meta.url), 'utf8'));
@@ -472,6 +474,29 @@ export function violations(m) {
     }
   }
 
+  // A path's ref, which is the wider form of the rule above one more time: a
+  // quantity is not a join key without its denominator, and a path is not a
+  // location without its ref. The predicate, what counts as a ref, and why a
+  // pull request number is not one of the three forms are all in
+  // `tools/board/claim-ref.mjs`.
+  //
+  // WHY THIS REFUSES RATHER THAN WARNS, which is the opposite of the call made
+  // one rule below for truncated notes, so the difference should be stated.
+  // The repair here is three words long and the sender knows them for free at
+  // the moment of writing; the reader cannot recover them at any price. And
+  // the cost of the miss is not a round trip, it is a rebuild: Ursa incident 9
+  // measured four seats in one week reading an unmerged thing against `main`
+  // and concluding it did not exist. A truncated note, by contrast, often has
+  // its verdict above the cut already, so refusing it would refuse a message
+  // the sender had already made safe.
+  for (const claim of unreffedClaims({ body, data: m.data })) {
+    out.push({
+      code: 'PATH_WITHOUT_REF',
+      line: `body states that ${claim.path} is in some state and names no ref, so the sentence is equally true of a working tree, of a branch and of the trunk: ${JSON.stringify(claim.sentence.slice(0, 90))}`,
+      repair: 'name where it is readable: the branch, a commit, or the words "on main". A pull request number cannot go in the body, because the store refuses codes in prose, so that one goes in --data (ref, branch, pr, commit)',
+    });
+  }
+
   return out;
 }
 
@@ -479,8 +504,10 @@ export function violations(m) {
  *  same `{code, line, repair}` shape as a violation so one printer handles
  *  both. These never change an exit code.
  *
- *  There is exactly one of these today and it is the truncation prediction
- *  for the kinds `violations` does not refuse. It is a separate channel
+ *  All of these today are about the truncation prediction for the kinds
+ *  `violations` does not refuse: one for the quantity of loss and exactly one
+ *  of three for which side of the cut the sender's disposition landed on. It
+ *  is a separate channel
  *  rather than a violation with a severity field, because every caller of
  *  `violations` treats a non-empty return as "post nothing", and a severity
  *  those callers do not read would have turned every long note into a refusal
@@ -498,6 +525,47 @@ export function notices(m) {
       line: `the wake will carry ${r.body_delivered} of ${r.body_chars} characters and drop the last ${r.body_lost}; the board stores the whole body and cuts only the notification`,
       repair: `nothing is refused for this. If the end of the body is where this message says what it decided or what it wants, cut ${r.body_chars - r.wake_limit} characters so the recipient is woken with it, because the only other way they read it is by fetching the row`,
     });
+    // WHAT THE LOST TAIL ACTUALLY CONTAINS, added 2026-11-02 on the reporting
+    // seat's domain finding. The notice above names a quantity of loss, and a
+    // quantity of loss is not a risk: this board's own numbers say that 72.5
+    // per cent of the truncation on it is in the two kinds this notice covers,
+    // and that the same seat's cuts "took evidence and left the verdict"
+    // whenever the verdict was written first. So the only question worth a
+    // second line is which side of the cut the disposition landed on, and the
+    // three answers are separated rather than averaged. See
+    // `tools/board/disposition.mjs` for the word list and for why a lexical
+    // test is honest in a notice and would not be in a violation.
+    //
+    // THE SHARE IN THE LINE ABOVE WAS 86 PER CENT UNTIL 2026-11-02 02:55, and
+    // the thirteen-point correction is in `disposition.mjs`'s header: the
+    // original came from a single `GET /api/messages` that returned the newest
+    // 500 of 4,069 rows and said so in a flag nobody read. The conclusion is
+    // unchanged — most of the loss is still in the kinds only warned about —
+    // but the figure that was quoted at a seat as independent corroboration
+    // was two implementations sharing one read bound.
+    const risk = dispositionRisk(body, r.body_delivered);
+    const kindNote = DISPOSITION_KINDS.has(kind)
+      ? `a ${kind} is the kind this board's verdicts travel in (${MEASURED.by_kind.note} notes and ${MEASURED.by_kind.done} dones of the ${MEASURED.over_limit} over-limit bodies on ${MEASURED.on}, against ${MEASURED.by_kind.ask} asks)`
+      : `this kind is not refused for truncation`;
+    if (risk.lost_only) {
+      out.push({
+        code: 'WAKE_DISPOSITION_LOST',
+        line: `the dropped tail is where this message states its disposition and the delivered part does not: the first lost phrase is ${JSON.stringify(risk.first_lost_phrase)}, and the tail opens "${risk.lost_opens_with}". ${kindNote}, so the recipient is woken with the evidence and none of the verdict`,
+        repair: `move the disposition above the cut, which is the remedy that survives misjudging the length, or cut ${r.body_lost} characters. Nothing is refused for this and splitting the message is not asked for`,
+      });
+    } else if (risk.in_delivered) {
+      out.push({
+        code: 'WAKE_DISPOSITION_SAFE',
+        line: `the disposition is above the cut, so the ${r.body_lost} lost characters are evidence rather than verdict. ${kindNote}`,
+        repair: 'nothing to do. This line exists so that a sender who already put the verdict first is told the cut is harmless instead of being asked to rewrite a message that is already right',
+      });
+    } else {
+      out.push({
+        code: 'WAKE_DISPOSITION_UNKNOWN',
+        line: `no disposition phrase was found anywhere in this body, which means this gate cannot tell a message that is pure evidence from one that states its verdict in words this list does not carry; the tail opens "${risk.lost_opens_with}"`,
+        repair: 'read the opening of the tail above. If that is where you say what you decided or what you want, move it up; if the tail is evidence, the cut costs nothing',
+      });
+    }
   }
   return out;
 }

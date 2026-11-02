@@ -1,0 +1,3 @@
+dashboard-desktop.png                     146 px    0.011%  rows 113-120, cols 938-965  (same size)
+dashboard-phone.png                       157 px    0.048%  rows 81-88, cols 268-295  (same size)
+dashboard-tablet.png                      145 px    0.015%  rows 113-120, cols 628-655  (same size)

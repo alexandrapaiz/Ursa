@@ -71,6 +71,25 @@ function flag(name) {
 }
 const has = (name) => process.argv.includes(`--${name}`);
 
+// EVERY ARGUMENT IS CHECKED, because the one that is not is the one that
+// downgrades the scan. `has('history')` is an exact match on `--history`, so
+// until 2026-11-02 `--history=all` fell through every mode test and ran a TREE
+// scan at exit 0. That is not a hypothetical typo: it is the real and correct
+// spelling on `scripts/redaction-check.mjs`, this seat's sibling tool, which
+// takes `--history`, `--history=<ref>` and `--history=all` as three different
+// scopes, and the two are run together in the same sweep. The cost is exact
+// and it is the worst shape a scanner has: on a shallow single-branch clone,
+// which is what a seat is handed, `--history` REFUSES at exit 2 and
+// `--history=all` answered clean at exit 0. The refusal that exists to stop a
+// truncated graph reporting clean was one equals sign away from being skipped.
+// So an argument this file does not know is exit 2, never a narrower scan.
+const KNOWN_FLAGS = ['history', 'since', 'json', 'patterns', 'repo'];
+const unknownFlags = process.argv.slice(2).filter((a) => {
+  const name = a.replace(/^--/, '').split('=')[0];
+  return !a.startsWith('--') || !KNOWN_FLAGS.includes(name);
+});
+const valuedWrong = process.argv.slice(2).filter((a) => a === '--history=all' || a.startsWith('--history='));
+
 const REPO = resolve(flag('repo') ?? REPO_ROOT);
 const JSON_OUT = has('json');
 
@@ -337,6 +356,19 @@ function scanHistory(since) {
     unit: 'blobs',
     hits,
   };
+}
+
+if (unknownFlags.length > 0 || valuedWrong.length > 0) {
+  const bad = [...new Set([...unknownFlags, ...valuedWrong])];
+  const v = unusable(
+    `${bad.length} argument(s) this scanner does not know, so the scope it would have run is not the scope that was asked for`,
+    `${bad.join(' ')} — it takes ${KNOWN_FLAGS.map((f) => `--${f}`).join(', ')}. `
+      + 'This scanner\'s history mode is every blob in every ref and takes no value; '
+      + '--history=all is scripts/redaction-check.mjs\'s spelling, not this one\'s.',
+  );
+  if (JSON_OUT) console.log(JSON.stringify({ usable: false, verdict: v }, null, 2));
+  else for (const out of renderVerdict(v)) console.error(out);
+  process.exit(v.exitCode);
 }
 
 if (has('patterns')) {

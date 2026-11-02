@@ -65,6 +65,52 @@ export const ENTRY_HEADING = /^###\s+(\d{4}-\d{2}-\d{2})(?:\s+(\([^)]+\)))?\s+�
 const SCAN_TITLE = /^(craft|competitive)\s+scan\b\s*(\([^)]*\))?\s*:/i;
 
 /**
+ * A SEAT TAG that announces a craft scan, which is the second place the
+ * grammar lets a seat announce one and the place `announcesScan` used to not
+ * look.
+ *
+ * `ENTRY_HEADING` accepts an optional parenthesized seat tag after the date
+ * and captures it, and the engineer seat writes its scans as
+ * `### 2026-11-02 (engineer, craft scan) — Letta Context Repositories: ...`,
+ * putting the announcement in the tag rather than in the title. Measured on
+ * `main` at 2026-11-02: that heading classified as an `idea`, owed all five
+ * §4 fields, carried none of them, and `tools/ledger/check.mjs` was red on
+ * the default branch over a block that owes no fields at all. One block in
+ * docs/ideas.md matches this shape and it is that one.
+ *
+ * WHY THIS IS THE POSITION AND NOT THE VOCABULARY. This file's header warns
+ * against keying a contract on which English words a block happens to use,
+ * and a 2026-10-26 run was lost proposing exactly that repair to SCAN_TITLE,
+ * which already matched the heading it was handed. This is the other half of
+ * the same lesson rather than a repeat of the error: the vocabulary is
+ * unchanged, the two spellings are SCAN_TITLE's own two, and what changes is
+ * that the checker now reads the capture group it already takes.
+ *
+ * The strictness survives the move. `a heading that merely mentions
+ * scanning is not a scan note` is the discrimination this rule has to keep,
+ * so the tag is split on commas and an ELEMENT must be the whole phrase: the
+ * tag `(engineer, redaction scan tooling)` announces nothing.
+ */
+const SCAN_TAG = /^(craft|competitive)\s+scan$/i;
+
+/**
+ * Does the heading announce a craft scan, in either of the two places the
+ * grammar allows one?
+ * @param {string} title capture 3 of ENTRY_HEADING
+ * @param {string | undefined} seatTag capture 2, with its parentheses
+ * @returns {boolean}
+ */
+function headingAnnouncesScan(title, seatTag) {
+  if (SCAN_TITLE.test(title.trim())) return true;
+  if (seatTag === undefined) return false;
+  return seatTag
+    .replace(/^\(/, '')
+    .replace(/\)$/, '')
+    .split(',')
+    .some((element) => SCAN_TAG.test(element.trim()));
+}
+
+/**
  * A scan note that commits a day of work is an idea wearing a scan heading.
  *
  * `First step` is the field that does the committing: §4 defines it as "the
@@ -173,7 +219,7 @@ export function classifyBlock(block) {
   }
 
   const [, date, seatTag, title] = m;
-  const announcesScan = SCAN_TITLE.test(title.trim());
+  const announcesScan = headingAnnouncesScan(title, seatTag);
   const isScan = announcesScan && !COMMITS_WORK.test(block.text);
   return {
     kind: isScan ? 'scan' : 'idea',

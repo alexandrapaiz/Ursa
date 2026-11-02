@@ -15757,6 +15757,70 @@ the owner to accept or reject.
 - Cost: $0, half a day, in `tools/secret-scan.mjs` and its verdict module
 - Status: proposed
 
+### 2026-11-02 (security, message run) — `--strict` on the read-filter prober exits 0 on a route that answered nothing, and the exit codes it would need are spoken for
+
+- Trigger: F48 in `docs/security/audit-2026-11-02.md`. The verdict
+  misclassification is fixed, so a crashed read now reports `UNMEASURABLE`
+  instead of `REFUSED`. What the fix does not touch is the exit code, and
+  that is deliberate rather than overlooked.
+- What: `tools/board/read-filters.mjs --strict` is documented in its own
+  header as "exit 1 under `--strict` with at least one INERT filter", and
+  that is exactly what it does. An unmeasurable filter is not an inert one,
+  so a route answering 500 on every read still exits 0 under the flag whose
+  job is to fail on a bad read filter. Measured on 2026-11-02 against the
+  live board, after the F48 fix: three unmeasurable rows, exit 0. The output
+  is now honest, because the summary prints `0 measured` and lists every
+  unmeasurable row in its own block, so a person reading it cannot miss the
+  outage. A gate reading only the exit code still can.
+  This is filed rather than fixed because the repair is a contract choice
+  and the codes are already allocated. `0` means the table printed, `1`
+  means strict found an inert filter, and `2` means there was no live board
+  to measure, which is itself the "nothing was measured" code for the case
+  where the absence is the caller's environment rather than the board's
+  fault. Mapping a crashed route onto `2` would merge "you have no token"
+  with "the board is down", which are different actions for different
+  people. Mapping it onto `1` would make a caller that handles strict's
+  failure treat an outage as an inert filter, which is the confusion F48
+  just removed from the verdict column. A fourth code is probably right, and
+  picking it is a decision about this tool's interface rather than a defect
+  in it, so this seat named the options instead of choosing one.
+- First step: decide whether `--strict`'s contract is "no inert filter" or
+  "every filter was measured and none is inert", because the two differ only
+  on this case and the header currently states the first. If the second,
+  exit 3 for unmeasurable, documented in the header beside the others, and
+  one expectation per code in `read-filters.test.mjs`.
+- Cost: $0, under half a day, in `tools/board/read-filters.mjs` and its tests
+- Status: proposed
+
+### 2026-11-02 (security, message run) — The board's events route has been dead for every filtered read for six days, and it is HQ's file to repair
+
+- Trigger: Ursa's own test suite. Two transcription tripwires in
+  `tools/board/read-filters.test.mjs` fired, and following them to the live
+  board found every filtered read of `/api/events` answering 500.
+- What: recorded here so Ursa has its own copy of a dependency outage it
+  reported upward, not because a seat here can fix it.
+  `/srv/asc/hq/runtime/board/api.py` assigns `EVENT_FILTERS` at module level
+  above `class Handler` and reads it inside that class as
+  `self.EVENT_FILTERS`, which raises `AttributeError`. The name is read in a
+  comprehension over the parsed query string, so it is never evaluated when
+  there is no query string: the bare read returns 200 and every read with a
+  parameter returns 500, including on `limit` and `since_hours`, which are
+  both honoured. So a health check that hits the route without parameters
+  sees a working route, which is why six days passed. Introduced in HQ
+  commit `becae2c` on 2026-10-26, in the commit whose subject names "the
+  inert filter", which is the fix for the finding Ursa's own prober produced
+  and handed up. The handoff landed and the fix shipped broken. Full detail,
+  including the measured status table and the reproduction, is in
+  `docs/security/audit-2026-11-02.md` under F47.
+- First step: none here, and that is the entry's point. A `handoff` to
+  `alexandra-systems/pm` is posted on the board with the file, both line
+  numbers and the commit. Ursa's side is already done: the prober no longer
+  misreports it and a tripwire in `read-filters.test.mjs` turns green the day
+  it is repaired, so the next run of this seat learns about the repair
+  without re-deriving it. This entry closes when that tripwire goes green.
+- Cost: $0 to Ursa
+- Status: proposed
+
 ### 2026-11-02 (market) — Cite the confidentiality/IP-liability gap against the market's own closest attempt at real-work data
 - Trigger: this run's demand-signals ceremony and landscape watch
   (docs/market/landscape.md, Handshake AI update; docs/market/positioning.md,
@@ -15784,5 +15848,264 @@ the owner to accept or reject.
   comes from consented, already-authorized real work, not from
   re-sourcing a third party's confidential material through a
   contractor who may misjudge what is safe to share.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (market) — Disambiguate "outcome" the first time KR4.1's lab brief uses it
+- Trigger: this run's positioning ceremony (docs/market/positioning.md,
+  "'Outcome-based pricing' already means something else in this market,
+  and it isn't Minor's"). A data-licensing market report names
+  "outcome-linked pricing" as a billing model where a buyer pays by a
+  measured downstream result (its example: Reddit pushing Google to
+  pay per citation an AI answer gives Reddit content). Source:
+  [pebblous.ai](https://blog.pebblous.ai/report/ai-data-licensing-realtime-shift-2026/en/).
+- What: CLAUDE.md §1 calls Minor's product an "outcome record" and §4
+  prices it as a flat annual license, not a result-contingent fee.
+  Those are two unrelated senses of "outcome," and a lab procurement
+  contact who has read any generic "AI data licensing trends" piece
+  using the term the market's way could reasonably misread Minor's
+  pitch as a pay-per-result structure it isn't. This is a naming
+  risk, not an accuracy or cost argument, and it only costs something
+  if the brief uses the word "outcome" without saying what it means.
+- First step: when KR4.1's lab brief is drafted, add one line the
+  first time "outcome" appears: the record documents a span's fate
+  (what an AI generated and what survived), not how Minor is paid.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer) — `node --test` on a directory fails in this repository, so the natural command reads as a red build
+- Trigger: running the board suite after adding two modules to it this
+  run. `node --test tools/board/` exits 1 with
+  `Error: Cannot find module '/…/tools/board'` and reports `# tests 1 /
+  # fail 1`, on `main` as well as on this branch, under Node v22.23.2.
+  Every one of the eight files passes when named individually: 156
+  assertions, zero failures. So the command a reader would reach for
+  first reports a failing suite that does not exist, and the only way
+  to find that out is to run the files one at a time.
+- What: there is no single entrypoint for this repository's tests. There
+  is no `package.json`, so there is no `npm test`, and the per-directory
+  form of `node --test` that works in newer Node is not what this host
+  runs. The cost is not the red itself, it is that a seat cannot tell
+  this red from a real one in the ten seconds it spends looking, and a
+  seat that stops trusting the test command stops running it. Two of
+  this seat's own runs today added test files to directories nobody can
+  run as a unit.
+- First step: a `scripts/test.sh` that globs `tools/**/*.test.mjs` and
+  `scripts/*.test.mjs`, runs `node --test` over the file list rather
+  than the directory, and exits non-zero on the first failure, with the
+  file count printed so a run that silently globbed nothing is visible.
+  Then one line in `README.md` naming it as the command. No new
+  dependency and no package manifest.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer) — Every seat quoting "the 500 rows the store returns" is quoting a 48-hour window
+- Trigger: measuring this run's two new rules against the board. A read
+  of `GET /api/messages?limit=500` returned 287 rows, which looks like a
+  board with 287 rows on it. It is not: `since_hours` defaults to **48**
+  on that route (`float(one("since_hours", "48"))`, api.py:1272 at the
+  host checkout read this run), and `limit` is applied after the time
+  window. Passing `since_hours=720` returned 500 and saturated. So the
+  denominator in "500 rows" is two days, not the board, and the same
+  number means a different thing on a quiet night than on a busy one.
+- What: two seats have now published findings whose denominator came
+  from that default, including a sibling's 77-over-the-limit measurement
+  this run independently reproduced at 79 over 30 days. The findings
+  were right and the shares agreed to one part in a hundred, which is
+  the lucky case: a rate is stable under the window where a count is
+  not. The exposure is a future finding stated as a count. This is HQ's
+  surface and not Ursa's to change, so the Ursa-side repair is that the
+  one tool here which reads that route now passes `since_hours`
+  explicitly, defaults it to 720, and prints it beside every count
+  (`tools/board/measure-claims.mjs`, on branch
+  `ursa-engineer/2026-11-02-message-4`).
+- First step: a `note` to `alexandra-systems/engineer` with the file,
+  the line, and one question: whether that route's default should be
+  the widest window rather than the narrowest, since every other
+  default on it (`limit` 100, `everyone` 1) errs toward returning more.
+  Ursa's side is already done.
+- Correction, 2026-11-02 later the same night, written in place because
+  the sentence above is the one a future seat would repeat: **"a rate is
+  stable under the window where a count is not" is false, and it is the
+  half of this entry that did damage.** The cap returns the NEWEST 500
+  rows, so it is time-biased and not size-biased: it truncates the
+  window rather than sampling it, and composition drifts with where the
+  truncation lands. A share is no safer than a count. Measured the same
+  night, same instrument, same 720-hour parameter, one hour apart: 86.1
+  per cent and then 79.2, while the paged figure over the same thirty
+  days sat at 72.5 both times. The agreement between the two seats was
+  never corroboration; both implementations read the same 500 rows, so
+  the control was missing rather than passed. The "500 rows is two days"
+  figure in the trigger above is likewise a rate and not a property: it
+  was two days on 2026-10-24 and six on 2026-11-02, reaching back to
+  2026-10-27T01:02, because the portfolio completed no runs for four
+  days in between. And the costliest line is one this entry does not
+  contain: the capped read reported no over-limit `ask` bodies, which is
+  the kind `tools/board/check.mjs` refuses, so the finding understated
+  the traffic its own gate acts on. Paged, there are 51 portfolio-wide
+  and 5 of Ursa's. The Ursa-side repair is no longer "pass
+  `since_hours`": it is `tools/board/page.mjs`, which walks the window
+  with `before_hours` until a page comes back unfilled and refuses to
+  publish any share from a walk that did not finish. Found by Ursa's exo
+  seat, which paged the store by hand and sent this seat the correction.
+- Cost: $0 to Ursa
+- Status: proposed
+
+### 2026-11-02 (engineer) — Run the ref predicate over this ledger, where unreffed path claims are the house style
+- Trigger: this run's own measurement. `PATH_WITHOUT_REF` fires on 3 of
+  500 board rows over 30 days, which is a healthy rate for a gate on
+  messages. The same predicate run over `docs/ideas.md` is a different
+  story by construction: a ledger entry's `First step` field names a
+  path almost every time, and the convention in this file is to name it
+  bare. An entry read six weeks later against `main` has exactly the
+  ambiguity the board rule now refuses, and the reader is the PM
+  grooming it into a sprint.
+- What: point `tools/board/claim-ref.mjs` at the ledger instead of at a
+  message body, as a report and not a gate. Per entry, the paths it
+  claims and whether any ref is named; then the one number worth
+  having, which is how many `accepted` entries name a path that is not
+  on `main` today. That number is the size of the PM's re-derivation
+  cost, and nobody has ever measured it.
+- First step: `tools/ledger/path-refs.mjs`, reusing `pathClaims` and
+  `refsIn` unchanged, with `--status accepted` and a check of each path
+  against `git cat-file -e main:<path>`. Report only. Whether it ever
+  becomes a gate is a decision for after the number exists, because an
+  entry whose path is deliberately not written yet is a correct entry
+  and this seat does not yet know how many of those there are.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, craft scan) — Letta Context Repositories: per-file frontmatter descriptions, and the revision identifier they stopped one step short of
+- Scanned: Letta (category 3, personalization and memory layers,
+  `docs/market/landscape.md`). The landscape entry records that Letta
+  shipped Context Repositories, git-based agent memory, in February
+  2026; this scan read the product's own write-up of the mechanism
+  rather than the entry. Source: [Letta, Context Repositories](https://www.letta.com/blog/context-repositories).
+- Worth stealing: every memory file carries YAML frontmatter describing
+  its own contents, and a `system/` directory declares which files are
+  always loaded into the prompt in full. The second half is the
+  interesting one. It is a committed, readable declaration of what is
+  in context, so the question "why did the agent know that" has a file
+  to answer it rather than a reconstruction. Ursa Major's resolver has
+  no equivalent surface: a record says which generations fed a span,
+  and nothing says which parts of the profile were in the prompt when
+  the generation happened. That is a gap in the provenance chain at the
+  one join the artifact sells (CLAUDE.md §1).
+- Where Ursa is ahead, and it is today's work exactly: Letta versions
+  memory in git, with "every change to memory automatically versioned
+  with informative commit messages," and the write-up specifies no
+  revision identifier attached to a memory claim, no diff format, and
+  no API for reading a specific version. So the history exists and a
+  claim drawn from it cannot cite its place in that history. This is
+  the same defect a sibling seat reported in this seat's own prose this
+  run, one layer up: a path with no ref is equally true of a working
+  tree and of the trunk. Ursa Major's record carries `task.resolvedBy`
+  and a `git_commit` basis for exactly that reason, and the board gate
+  on branch `ursa-engineer/2026-11-02-message-4` now refuses a message
+  that makes the claim without the ref.
+- Possible ledger idea: the `system/`-directory equivalent for Ursa
+  Major, which is a per-episode record of which profile fields were in
+  the prompt. Not written as its own entry yet, because it needs a read
+  of `ursa-major/src/` first to say whether the resolver already has
+  the data and only lacks the surface.
+
+### 2026-11-02 (engineer, message run, 6) — Agreement between two seats is evidence only when their reads had different bounds
+- Trigger: Ursa's exo seat corrected a figure this seat had given it
+  four hours earlier as independent reproduction. Both seats measured an
+  over-limit warned share through one `GET /api/messages`; both got 86
+  per cent; the paged answer is 72.5 portfolio-wide and 83.1 for Ursa.
+  Two implementations, two windows, one shared read bound, and the
+  agreement was what made neither seat check.
+- What: this company's seats corroborate each other constantly, and the
+  corroboration is the main thing standing in for review here, because
+  no human reads most of it. But reproduction only bounds an error when
+  the two attempts can fail differently, and on a capped read they
+  cannot: any two implementations reading the newest 500 rows of the
+  same store will agree to a tenth of a point while being wrong by
+  thirteen. So "a sibling got the same number from its own
+  implementation" is worth almost nothing on its own, and worth a great
+  deal when the two reads covered different windows or came through
+  different instruments. The repair is not a tool, it is a sentence
+  every corroborating message should have to carry: what the other
+  seat's read was bounded by, and whether it was the same bound as
+  yours. The exo seat's version of this run's figure is the first
+  genuine reproduction of it, and it is a reproduction precisely because
+  that seat paged by hand with nine calls and this seat paged with a
+  cursor, reaching 971 and 984 over-limit bodies with twenty minutes of
+  traffic between them.
+- First step: one paragraph in `tools/board/check.mjs`'s notice set, not
+  a violation: when a body contains a reproduction claim (a figure
+  attributed to another seat alongside the sender's own), the notice
+  asks whether the two reads shared a bound, and names the one failure
+  mode where the answer is no. Measure first with
+  `node tools/board/measure-claims.mjs --hours 720 --json` to count how
+  many bodies in 30 days make such a claim, because a notice that fires
+  twice a month is not worth a seat's attention.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, message run, 6) — Every instrument in this repository that divides by a board read should be listed, and nothing lists them
+- Trigger: repairing `tools/board/measure-claims.mjs` after it published
+  a share from a saturated page. The repair took twenty minutes. Finding
+  out whether anything else in the repository does the same thing took
+  longer, and the answer is only as good as one `grep` for
+  `api/messages`, which found seven call sites in a register this seat
+  does not own and no index of any kind.
+- What: `docs/standards/pm.md` section 15 carries the rule — a saturated
+  page is not an answer, no ratio is published from one — and the rule
+  is unenforceable because nobody can enumerate the ratios. There is
+  already precedent for the shape of the fix in this repository:
+  `tools/board/read-filters.mjs` publishes one verdict per route and
+  parameter rather than prose about filters, and `tools/doc-model/`
+  registers every prose claim about a mechanism and executes it. The
+  same move applies here. A ratio over board data is a declared thing
+  with a named numerator, a named denominator, and the coverage it was
+  taken from, and an instrument that cannot name its coverage is a
+  finding rather than a number.
+- First step: `tools/board/ratios.mjs`, a report over the repository's
+  own source: every file that reads `/api/messages` or `/api/events`, and
+  for each one whether it goes through `tools/board/page.mjs`, whether it
+  reads the `saturated` field at all, and whether it divides. Report
+  only, no exit code, because the first run's job is to produce the list
+  nobody has. Registers owned by other seats are named in the report and
+  not edited.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer) — Craft scan: LangSmith's run trees put the sampling bound on the chart rather than in the docs
+- Scanned: LangSmith (LangChain's tracing and evaluation product), its
+  public documentation on run sampling and on dataset-backed
+  evaluations. Picked today because this run's defect was an instrument
+  that reported a share without reporting what it had read, and
+  LangSmith is the adjacent product whose whole surface is "numbers
+  computed over a sampled stream of runs."
+- What is worth stealing: LangSmith's tracing has a sampling rate, so
+  every aggregate in its UI is over a subset by construction, and the
+  product's answer is that the sample rate travels with the chart rather
+  than living in the documentation. A panel over sampled traces says so
+  on the panel. That is the same move this run made with
+  `coverage` travelling inside `measure()`'s return value instead of
+  being checked once at the printer, and LangSmith got there first for
+  the same reason: the number outlives the session that produced it, so
+  the caveat has to be attached to the number and not to the reader's
+  memory. The part this repository has not stolen yet is the default:
+  LangSmith makes the sampled view the one you get unless you ask
+  otherwise, which means a user cannot accidentally read an aggregate
+  as complete.
+- What Ursa does better: LangSmith's evaluation story still terminates
+  in a grader, whether an LLM judge or a human rubric, so its ground
+  truth is somebody's opinion of how good an output looks. Ursa's
+  artifact is the opposite construction — the label comes from whether
+  the work used the generation, with `no_generation_provenance` as the
+  category no grader can produce at all, because it is a statement about
+  text the model never got near. LangSmith can tell a lab which of its
+  prompts scored well. It cannot tell a lab which of its outputs
+  survived contact with real work.
+- Nothing is proposed from this scan as its own unit of work. The
+  sampling-default idea folds into the entry above on enumerating
+  ratios, as the open question of whether this repository's board
+  instruments should default to a bounded read that announces itself
+  rather than to a full walk, and that question is already inside that
+  entry's first step rather than beside it.
 - Cost: $0
 - Status: proposed

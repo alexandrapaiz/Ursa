@@ -322,5 +322,18 @@ export const GATE = describeGate({
           detail: 'Unexpected token } in JSON',
         }),
     },
+    {
+      // Added 2026-11-02. `--history=all` is the sibling checker's spelling and
+      // fell through every mode test here into a tree scan at exit 0, on a
+      // clone where the bare flag refuses. An argument the scanner does not
+      // know is now the same ground as a graph it cannot walk, because both
+      // end in a scope that is not the scope that was asked for.
+      name: 'an argument the scanner does not know, so the scope is not the one asked for',
+      call: () =>
+        unusable(
+          '1 argument(s) this scanner does not know, so the scope it would have run is not the scope that was asked for',
+          '--history=all — it takes --history, --since, --json, --patterns, --repo.',
+        ),
+    },
   ],
 })
