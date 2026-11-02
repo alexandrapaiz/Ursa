@@ -10789,3 +10789,84 @@ merge is re-measured rather than quoted. `docs/agents/merge-order.md` has
 carried an instant in its header since 2026-10-04 and carried no sha
 until this window, which is why its own headline claim had to be
 withdrawn inside the window that wrote it.
+
+## INC-2026-11-02-an-identifier-minted-in-a-parked-charter-is-cited-onto-main-by-the-windows-that-read-the-parked-charter
+
+**Status: open. The repair is a citation discipline and it is applied
+here; the only thing that closes it is the owner merging `#618`.**
+
+**What happened.** Two incident identifiers are cited on `origin/main`
+and defined nowhere on `origin/main`:
+
+| identifier | cited on `main` in | authoring commit | reachable from |
+|---|---|---|---|
+| `INC-2026-10-26-a-charter-forbade-a-parameter-because-a-pull-request-was-open-and-the-pull-request-had-merged` | `improvements.md`, `incidents.md`, `learning-log.md` | `0aa4376e` | **`#618` only** |
+| `INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout` | `runner-facts.md`, and `merge-order.md` as of this window | `d8a59d3f` | **`#618` only** |
+
+Measured 2026-11-02: the sweep ran against `HEAD` and against `origin/main`, both scoped
+`docs/ docs ':!docs/standards/lessons.md' ':!docs/design/'` plus
+`prompts/`. 122 slugs cited on `HEAD`, 107 headings, 15 raw
+unresolvable; on `main`, 120 cited, 105 headings, 15 raw. After the
+four-state classification — prefix of a live heading, foreign or
+invented, self-classified by its own row, report — **five** rows
+survived to `REPORT` and **two** of those are the rows above. The other
+three are one known rename and two prefix forms of these same two.
+
+**Why it happens, and it is structural rather than careless.** §0 tells a
+window to read this charter from whichever open pull request carries the
+longest copy, while the working tree is a `main` checkout. So the
+instruction set and the artifact are split by design, and **every
+identifier the parked charter mints and cites is unresolvable from the
+tree the window is writing into.** A window that copies such a citation
+into a register — which is the ordinary, correct thing to do, because
+the charter is the authority and the citation is how a memoryless
+successor learns why a rule exists — lands a broken citation on `main`
+the moment that register merges.
+
+**This window reproduced it on itself, which is the proof.** It read the
+charter from `#618`, took the five-day-outage identifier out of §5b, and
+wrote it into `docs/agents/merge-order.md`, a file that merges under
+Tier B within the hour. The citation was correct in the document it was
+copied from and dangling in the document it was copied into, and nothing
+in the act felt like an error.
+
+**The class, stated once.** This is §3's **fourth tool state** — *parked
+in the pull request that names it* — arriving on **identifiers** instead
+of on tool paths. The two share a mechanism and a blind spot: the only
+windows that can see the clause are the windows that cannot see the
+referent, and only this seat reads the parked charter at all.
+
+**The repair, which is a sentence and not a rename.** Do **not** re-spell
+a parked identifier. Ursa's skill seat established the discriminator on
+2026-10-26: a record's slug is how the record is found, so it stays
+greppable. Instead, **say in the same sentence that it is parked and
+where**, exactly as this charter already requires for a tool it names
+before the tool lands:
+
+> `INC-…` — parked in `#618` and not defined on `main` —
+
+Applied to this window's own instance in `docs/agents/merge-order.md`.
+The two older ones are left as they stand, because editing another
+window's register prose to annotate an identifier the owner is about to
+merge would churn three files for a condition one merge removes.
+
+**The standing check, and it is a widening of one that already runs.**
+The dangling-citation sweep is already run against `HEAD` and against
+`origin/main`. Add the fifth state to its classifier, because a row in
+it is a finding with a different owner from every other row:
+
+```sh
+# a row with authoring commits that are on no merged ref is parked, not broken
+ac=$(git log --all --format='%H' -S"## $slug" -- docs/agents/incidents.md | tail -1)
+git merge-base --is-ancestor "$ac" origin/main \
+  && echo "defined on main" \
+  || echo "PARKED: defined only on an unmerged ref; annotate the citation, do not rename it"
+```
+
+**What the org grows from it.** The sweep's measured precision on `main`
+was **zero** across four independent reads before this one, and this
+window's two rows are the first `REPORT` survivors that are neither a
+rename nor a prefix. The check earned its place by being pointed at
+`HEAD` as well as at the trunk, which is the clause the sixty-fifth
+window added for exactly this reason. `runner-facts.md` §78 and §79 are
+this window's other two measurements.

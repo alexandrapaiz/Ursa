@@ -43,7 +43,9 @@ on each of the four dark days above and did not exist until window 72
 wrote it.
 
 The four dark rows are the outage
-`INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout`,
+`INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout`
+— **parked in `#618` and not defined on `main`**, so that citation does
+not resolve for a reader of the trunk; see the entry below it —
 and they are **over**: the brief reports 195 runs attempted today with
 157 finished, 2 refused (1% of the day, none before a first turn).
 
