@@ -48,6 +48,25 @@
 // `tools/image-metadata.mjs` already keeps by reading chunk types and never
 // chunk contents.
 //
+// AND A FIFTH THING, WHICH IS WHAT THE QUEUE ENTRY ACTUALLY PRESCRIBES.
+// PWC-13's `Change` paragraph says to take `2>&1` on the capture so the notice
+// reaches `hits`. Measured, that does work: the pipeline goes red on a binary
+// carrier. It also merges every OTHER thing grep writes to standard error into
+// the same variable, and `hits` is non-empty is the whole of the gate's test.
+// A directory grep cannot read turns the gate red under the label `Absolute
+// home path with a real username. Write /Users/<you>/ or ~/ instead.`, which
+// names a cause that is false and prescribes a repair that does nothing.
+// Measured on a tree carrying no private value at all.
+//
+// So the gate has two states and neither is the right one. As it ships,
+// `2>/dev/null` swallows that condition and a partial scan is reported clean.
+// With `2>&1`, a partial scan is reported as a leak. The condition is a GROUND
+// fault -- the scan did not finish -- and this repository already has the
+// discipline for it in `tools/gates/verdict-shape.mjs`, one named cause per
+// condition, and already has the implementation in
+// `scripts/redaction-check.mjs`, which separates the binary notice from
+// anything else on that stream and exits 2 on the rest.
+//
 // `-l` HAS A COST AND IT IS NAMED RATHER THAN DISCOVERED LATER. The gate's
 // allowance is line-scoped: it drops a hit whose TEXT contains `/home/runner/`
 // or `/Users/<you>/`. There is no line in `-l` output, so an allowance that
@@ -74,6 +93,9 @@ export const LAYER = {
   FILTER_SKIPS_BINARY: 'FILTER_SKIPS_BINARY',
   /** The pipeline reports it, by printing the matched bytes. */
   REACHES_BY_ECHOING: 'REACHES_BY_ECHOING',
+  /** It reports it, by merging standard error into the hits, so every grep
+   *  diagnostic becomes a redaction violation under the wrong label. */
+  REACHES_BY_MERGING_STDERR: 'REACHES_BY_MERGING_STDERR',
   /** The pipeline reports it by naming the file, quoting nothing. */
   REACHES: 'REACHES',
 }
@@ -154,11 +176,13 @@ export function binaryReach(p) {
           repair: 'read standard error and turn the notice into a location-only finding, or scan with -l.',
         }
       : {
-          layer: LAYER.REACHES,
+          layer: LAYER.REACHES_BY_MERGING_STDERR,
           line:
-            `gate-binary-reach: the scan runs \`grep ${scanFlags}\` and keeps standard error, where a ` +
-            'binary match is announced by path with no matched text, so the pipeline reports it and quotes nothing.',
-          repair: 'none: this reports the file without echoing its bytes.',
+            `gate-binary-reach: the scan runs \`grep ${scanFlags}\` and merges standard error into the hits, ` +
+            'so it does reach a binary carrier and every other thing grep says there is reported as a redaction violation too.',
+          repair:
+            'classify standard error instead of merging it: a binary notice is a finding, and anything ' +
+            'else grep says means part of the tree went unread, which is neither clean nor a leak.',
         }
   }
 
@@ -171,8 +195,10 @@ export function binaryReach(p) {
         `gate-binary-reach: the scan runs \`grep ${scanFlags}\`, which names a matching file and prints ` +
         'none of its contents, so a binary carrier is reported and no value is quoted.',
       repair:
-        'none for reach. The gate\'s allowance is line-scoped and -l output has no line, so the ' +
-        'allowance moves to a path-scoped form or to a second pass over text files.',
+        'none for reach, and none for the echoing. Two things remain and they are separate: the ' +
+        'allowance is line-scoped and -l output has no line, so it moves to a path-scoped form or a ' +
+        'second pass over text files; and standard error still needs classifying, or a subtree grep ' +
+        'could not read stays silent.',
     }
   }
 

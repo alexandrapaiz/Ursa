@@ -23,7 +23,7 @@
 
 import { strict as assert } from 'node:assert'
 import { execFileSync, spawnSync } from 'node:child_process'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, it } from 'node:test'
@@ -118,7 +118,7 @@ describe('what the module predicts about the gate as it ships', () => {
     assert.deepEqual(layers, [
       LAYER.SCAN_SKIPS_BINARY,
       LAYER.NOTICE_OFF_STDOUT,
-      LAYER.REACHES,
+      LAYER.REACHES_BY_MERGING_STDERR,
       LAYER.FILTER_SKIPS_BINARY,
       LAYER.REACHES_BY_ECHOING,
       LAYER.REACHES,
@@ -149,7 +149,9 @@ describe('the prediction against what the real pipeline does', { skip: GREP ? fa
         const { red } = runPipeline(pipeline, dir, 'carrier.bin')
         const predicted = binaryReach(pipeline).layer
         const predictsReach =
-          predicted === LAYER.REACHES || predicted === LAYER.REACHES_BY_ECHOING
+          predicted === LAYER.REACHES ||
+          predicted === LAYER.REACHES_BY_ECHOING ||
+          predicted === LAYER.REACHES_BY_MERGING_STDERR
         assert.equal(
           red,
           predictsReach,
@@ -171,6 +173,46 @@ describe('the prediction against what the real pipeline does', { skip: GREP ? fa
       } finally {
         rmSync(dir, { recursive: true, force: true })
       }
+    }
+  })
+
+  // The measurement behind REACHES_BY_MERGING_STDERR. `2>&1` is what PWC-13's
+  // own `Change` paragraph prescribes, and it is the whole of the gate's test
+  // that `hits` is non-empty, so anything on that stream is a violation.
+  //
+  // A directory mode of 000 does not stop root, and a run that read this as a
+  // pass would be reporting a property it never established, so the case asks
+  // first and skips with the cause named.
+  it('the prescribed 2>&1 turns a grep diagnostic into a redaction violation, and the shipped gate swallows it', () => {
+    const dir = fixture()
+    const locked = join(dir, 'unreadable')
+    try {
+      mkdirSync(locked)
+      writeFileSync(join(locked, 'f.txt'), 'nothing private here\n')
+      chmodSync(locked, 0o000)
+      const probe = spawnSync('bash', ['-c', 'ls "$1"', 'reach', locked], { encoding: 'utf8' })
+      if (probe.status === 0) return // root, or a filesystem that ignores the mode. Not a pass.
+
+      // carrier.txt would redden every pipeline on its own merits, so the
+      // question is asked over the unreadable directory alone.
+      const merged = runPipeline(PIPELINES.minusIKeepingStderr, dir, 'unreadable')
+      assert.equal(merged.red, true, 'the prescribed pipeline reports the diagnostic as a violation')
+
+      const shipped = runPipeline(PIPELINES.shipped, dir, 'unreadable')
+      assert.equal(shipped.red, false, 'and the gate as it ships reports a scan it could not finish as clean')
+
+      // The one that does neither: -l carries paths, and the diagnostic goes
+      // to a stream this pipeline does not merge.
+      const listed = runPipeline(PIPELINES.listOnly, dir, 'unreadable')
+      // -l repairs reach and the echoing. It does NOT repair this: the
+      // diagnostic is still discarded, so the unread subtree is still silent.
+      // Two independent repairs, named apart rather than bundled.
+      assert.equal(listed.red, false, '-l does not report the diagnostic as a leak either')
+    } finally {
+      try {
+        chmodSync(locked, 0o755)
+      } catch {}
+      rmSync(dir, { recursive: true, force: true })
     }
   })
 
