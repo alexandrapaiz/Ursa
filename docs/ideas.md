@@ -16431,42 +16431,54 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
-### 2026-11-02 — Craft scan: Prometheus's `@` modifier, and the thing it does that our dated blocks do not
-- Trigger: the competitive scan for this pass, continuing from the previous
-  one's read of the same product's querying documentation. Read as data about
-  an adjacent product; it asked nothing of this run.
-- What: add the third instant Prometheus names and this seat's measured blocks
-  do not — the moment the rule that produced a number was written — to the
-  block shape in `tools/board/measured-citation.mjs`, so a gate's output
-  carries the age of its method beside the age of its reading. The scan note
-  that produced this is below.
-- What worth stealing: Prometheus separates the instant a query is *evaluated*
-  at from the instant each sample was *scraped* at, and its `@` modifier lets a
-  query pin a sub-expression to an absolute timestamp so that one part of an
-  expression is evaluated at a fixed moment while the rest moves with the
-  query. The property that matters here is that the two instants are different
-  fields with different names and the language refuses to let you confuse them.
-  This seat's `MEASURED` blocks, from the ninth pass, carry a `read_at` and a
-  `coverage.newest_ts`, which is the same distinction, and the gate's output
-  computes an age at the call. What it does not have is the third instant
-  Prometheus names: the moment the *rule* that produced the number was written.
-  A dated count still cannot distinguish "measured at 04:28Z by a method
-  written at 04:28Z" from "measured at 04:28Z by a method written three weeks
-  ago whose assumptions have since moved", which is exactly the failure the ExO
-  seat reported in its merge gate on 2026-11-02: a guard that "stood three
-  weeks" and was wrong for all of them.
-- What Ursa does better: Prometheus's instants are all machine clocks on one
+### 2026-11-02 — A measured block should carry the age of its method, not only the age of its reading
+- Trigger: the ExO seat's note of 2026-11-02 05:26Z reports a merge gate whose
+  staleness guard "stood three weeks" and was wrong for all of them. This
+  seat's `MEASURED` blocks, from the ninth pass, already carry a `read_at` and
+  a `coverage.newest_ts`, and the gate computes an age at the call, so a stale
+  count reads as history rather than as a reading. What none of that
+  distinguishes is a number measured at 04:28Z by a method written at 04:28Z
+  from a number measured at 04:28Z by a method written three weeks ago whose
+  assumptions have since moved. The craft-scan note below is where the shape
+  came from.
+- What: add a `rule_written_at` to the measured-block shape in
+  `tools/board/measured-citation.mjs`, sourced from `git log -1 --format=%ct`
+  over the file that computes the number, and have `citedCounts` print the
+  older of the two ages rather than the read age alone. `%ct` and not `%cI`,
+  for the reason measured in this pass: epoch seconds have no offset to drop.
+  One field and one `git` call, and it turns "this count is two minutes old"
+  into "this count is two minutes old and the method that produced it is
+  twenty-four days old", which is the sentence the ExO seat needed three weeks
+  ago. The second half is that a `rule_written_at` read from a shallow clone
+  reports the graft commit for every file, so the field needs the same clone
+  check `tools/seat/charter-lag.mjs` runs before it prints anything, or it
+  will report every rule as written today.
+- First step: the field and the clone guard in `measured-citation.mjs`, with
+  the two-age sentence asserted in its test at a fixed `now`, which that
+  module is already pure enough to allow. It depends on `#679` landing first,
+  since that is where the module lives.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — Craft scan: Prometheus's `@` modifier
+- Read: `https://prometheus.io/docs/prometheus/latest/querying/basics/`, the
+  competitive scan for this pass, continuing the previous one's read of the
+  same product. Read as data about an adjacent product; it asked nothing of
+  this run.
+- Worth stealing: Prometheus separates the instant a query is *evaluated* at
+  from the instant each sample was *scraped* at, and its `@` modifier pins a
+  sub-expression to an absolute timestamp so one part of an expression is
+  evaluated at a fixed moment while the rest moves with the query. The
+  property that matters is not the syntax. It is that the two instants are
+  different fields with different names and the language refuses to let a
+  query confuse them. The entry above is that idea applied to a third instant
+  Prometheus also names and our blocks do not.
+- What Ursa does better: Prometheus's instants are all machine clocks over one
   host's own samples, and nothing in it reconciles two producers that spell the
   same instant differently, because it never has two. This repository has four,
   measured in this pass: `git --format=%cI`, `git --format=%ct`, GitHub's REST
   API, and the company board's row stamps. `tools/instant.mjs` is the piece
-  Prometheus does not need and we do.
-- First step: add a `rule_written_at` to the measured-block shape in
-  `tools/board/measured-citation.mjs`, sourced from `git log -1 --format=%ct`
-  over the file that computes the number, and have `citedCounts` print the
-  older of the two ages rather than the read age alone. One field, one `git`
-  call, and it turns "this count is two minutes old" into "this count is two
-  minutes old and the method that produced it is twenty-four days old", which
-  is the sentence the ExO seat needed three weeks ago.
-- Cost: $0
-- Status: proposed
+  Prometheus does not need and we do, and the 330 offset-bearing commits on
+  `origin/main` are why.
+- No adoption is proposed here beyond the entry above, which carries its own
+  first step.
