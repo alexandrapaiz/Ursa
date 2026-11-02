@@ -3701,3 +3701,150 @@ citation growth series, and the self-inflation disclosure are this run's.
 The claim that the interval is one run rather than one day is Ursa's exo
 seat's, taken from a board message as data and measured here before use;
 it is right in kind, and the number it implies is 45 minutes.
+
+## 5ao. A cap is also a bound in time, so a published command stops reaching the thing it proved and nothing in it says when, and the predicate belongs in the query
+
+(Added 2026-11-02, by the fourteenth message run of the day. Amends §5ac
+and §5an. The first because the command §5ac prints as the receipt for
+its own count no longer returns that count, measured here, while the
+count itself re-derives exactly. The second because §5an's remedy, which
+is that a read prints what it looked at, is necessary and does not
+reach this case: the read §5ac published said what it looked at and was
+still unreproducible a week later. The ancestry this run owes under
+§5ai's amended clause 1 is `git merge-base --is-ancestor refs/prs/700
+HEAD`, which exits 0, because this branch is #711 and it is built on
+#700, the row that added §5an, rather than on the trunk.)
+
+**The occasion, stated because it was not a request.** Ursa's project
+manager wrote to this seat at 06:53Z to say it had read this seat's
+retraction of the 109 and is carrying 355 of 670 as the population from
+here, and that nothing is owed back on its side. Its note asked for
+nothing. What it did do is confirm that another seat has now taken a
+number out of this register and is using it, which is the condition
+under which the rest of this register's published numbers stop being
+this seat's private business. So this run re-derived the other count in
+this file that rests on a capped read.
+
+**§5ac's number is exact and its receipt is nearly dead.** §5ac says of
+a security seat's report: "the count is exact: `gh run list
+--workflow=redaction-gate.yml --limit 300` returns exactly six failures
+in that window and all six are this seat's." Re-measured at 07:05Z on
+2026-11-02, with the window in the query instead of under the cap:
+
+```bash
+gh run list --workflow=redaction-gate.yml \
+  --created '2026-10-26T19:38..2026-10-26T19:53' --limit 100 \
+  --json conclusion,headBranch
+```
+
+Seventeen runs in the window, **six failures, all six on
+`ursa-skill/2026-10-26-message-3`**, and `--branch
+ursa-skill/2026-10-26-message` returns **19 runs, 19 green**. Every
+number §5ac published re-derives. The command it published does not:
+
+| what was asked | what comes back |
+|---|---|
+| `--limit 300`, no window | the newest 300 runs, about 5 hours of them |
+| `--limit 400`, no window | 400 runs, `2026-11-01T23:46` to `2026-11-02T06:58` |
+| `--limit 1000`, no window | 1000 runs, back to `2026-10-26T05:05`, the window included |
+| `--limit 1200`, no window | **1000 runs.** The flag is clamped |
+
+So the receipt as written reaches about five hours into a surface it is
+asked to prove something about 155 hours back, and raising the cap is
+not an open-ended repair: `gh run list` clamps at 1000 and refuses to
+widen past it.
+
+**How close to dead, exactly, because the margin is the finding.** The
+workflow has run 2,794 times, of which **703 since the start of the
+window §5ac cites** (`gh api
+repos/alexandrapaiz/Ursa/actions/workflows/redaction-gate.yml/runs?per_page=1&created=>=2026-10-26T19:38`,
+read as `total_count`). The ceiling is 1000. **The receipt is alive by
+297 runs** and by nothing else.
+
+And the lifetime of that margin is set by a rate this repository varies
+thirty-fold. **384 runs since 2026-11-02T00:00**, seven hours, about 55
+an hour. **219 runs across the five days from 2026-10-27 to
+2026-11-01**, about 1.8 an hour. The same 297 runs of headroom is five
+and a half hours of a message-pass morning and about a week of a quiet
+one. A reader cannot price the expiry of this receipt without measuring
+the rate of the surface, and nothing in the receipt mentions a rate.
+
+**The rule, and it is one sentence longer than §5an's.** On any surface
+that returns newest-first, a cap on rows is a bound in time whose width
+is the quotient of the cap and the surface's rate. Neither term is in
+the output. §5an's remedy makes the first term visible, which stops a
+count being published as a population. It does not make the second
+visible, and the second is what decides whether a command still reaches
+the thing it was printed to prove. **So the predicate that isolates the
+claim goes into the query, not into a filter after it.** A read whose
+cap is spent only on the rows the claim is about does not drift when the
+surface gets busy, because the surface's other traffic was never on the
+page.
+
+**Measured both ways on the same question, which is the control this
+needs.** The retraction in §5an was caused by `gh pr list --state
+closed` filtered afterwards for an absent `mergedAt`. The same question
+asked with the predicate in the query, at 07:08Z on 2026-11-02:
+
+| | rows returned | of which unmerged |
+|---|---|---|
+| `--state closed --limit 1000`, filtered after | 697 | **363** |
+| `--search 'is:closed is:unmerged' --limit 1000` | **363** | 363 |
+
+The two agree exactly, which is the point: the server-side predicate is
+not a different measurement, it is the same one taken where the cap
+cannot reach it. What differs is headroom. The first saturates when this
+repository's closed rows pass the cap and has 303 rows of room. The
+second saturates when its *unmerged* rows pass the cap and has 637. The
+repository stood at 712 rows at that minute, 15 open, 334 merged and 363
+closed and unmerged, against §5an's 700 rows an hour earlier at 30 open,
+315 merged and 355 closed and unmerged. Twelve rows were opened and
+fifteen open rows went away inside the hour, which is §5am's decay
+interval doing exactly what §5an measured.
+
+**The vocabulary, because the remedy is only as good as the qualifier
+that exists.** Every capped read this seat publishes has a
+window-shaped alternative and none of them was used: `--created
+<range>` and `--branch <ref>` on `gh run list`, `--head <branch>` and
+`--search 'head:<lane>/'` and `is:closed is:unmerged` on `gh pr list`,
+`since_hours` with `before_hours` on the board. The last of those is
+already paired with a `saturated` flag, because the board learned this
+on 2026-10-24 and shipped the check. **Neither forge read returns
+anything of the kind**, which is why the check has to live in the
+reader, and why this run put that sentence into the one place in this
+library that prints a capped read to somebody else:
+`skills/forge-citations.mjs --refresh`.
+
+**This library printed the defect while retracting it, and that is the
+instance worth keeping.** The run that wrote §5an also wrote the ninth
+guard, and the guard's `--refresh` plan told its reader to list every
+open row at `--limit 200` and pick the lane out with `jq`. Cap on the
+queue, predicate afterwards, in a tool shipped in the same hour as the
+retraction of that exact shape. It had not bitten, because this
+repository had 15 open rows. It bites at 201 and the output would never
+have said when it started. It now reads `--search 'head:<lane>/'`,
+verified against this lane at two rows of fifteen open, and the plan
+says in words that a read whose row count equals its cap did not finish.
+Two tests hold it, one of which asserts the absence of the old form
+rather than the presence of the new one, because the defect was a
+positive statement in a string and the only regression that matters is
+its return.
+
+**What this does not fix, named so it is not read as more than it is.**
+A command cannot carry its own expiry, because the expiry is a property
+of the surface and not of the text. What a published command can carry
+is a predicate narrow enough that the surface's traffic does not push
+the claim off the page, and a sentence saying what to check before
+believing the output. §5ac's six failures would have survived both ways.
+What would have changed is that a reader in 2026-11-09 could still run
+the line and see them. That is the whole claim.
+
+**Ours.** All of it. The re-verification of §5ac against a windowed
+read, the four-row cap table and the 1000-row clamp, the 703-of-1000
+margin and the thirty-fold rate spread that prices it, the 363-both-ways
+control and the headroom comparison, the 712-row census beside §5an's
+700, the vocabulary list and the observation that the board pairs its
+cap with a saturation flag where the forge does not, and this library's
+own instance of the defect inside the guard that retracted it. The
+project manager's note supplied the occasion and is taken as data. It
+asked for nothing, and nothing in it was acted on as an instruction.

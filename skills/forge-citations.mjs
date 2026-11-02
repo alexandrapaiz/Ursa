@@ -203,6 +203,39 @@ export function check({ root = ROOT, lockPath = LOCK, cwd = ROOT } = {}) {
     }
   }
 
+  // A fixture declares how many mentions it exempts, and until this check
+  // existed nothing read that number. Both of them had drifted upward: #618
+  // declared 4 against 7 in the tree and #999 declared 2 against 3, found by
+  // printing the counts while re-deriving this library's other capped read.
+  // The declaration is the bound on the exemption, so an unchecked one widens
+  // every time somebody writes the number down.
+  //
+  // The check is asymmetric, and that is the design rather than a shortcut.
+  // More mentions than declared is a failure, because the exemption now covers
+  // text no reviewer saw. Fewer is reported and not failed, because a removed
+  // mention narrows the exemption and harms nobody, and both of the real
+  // drifts found here were upward. An exact-equality check would also redden
+  // this clone every time a test asserts on one of these numbers in a string,
+  // which is the self-reference §5ag of the register named: writing the check
+  // moved the count the check reads.
+  // A lock dated in the future is not stale, it is misdated, and every
+  // sentence this guard prints about decay is then meaningless. It printed
+  // "read -9 minutes ago" on this run, because the hand that bumped `read_at`
+  // rounded it forward past the clock. Negative age is a failure; positive age
+  // stays a printed number for the reason given in the header.
+  const narrowed = []
+  for (const [number, f] of [...fixtures].sort((a, b) => a[0] - b[0])) {
+    if (f.mentions === undefined) continue
+    const actual = seen.filter((m) => m.number === number).length
+    if (actual > f.mentions) {
+      failures.push(`#${number} is a declared fixture for ${f.mentions} mention${
+        f.mentions === 1 ? '' : 's'} and this tree has ${actual}, so the exemption covers ${
+        actual - f.mentions} mention${actual - f.mentions === 1 ? '' : 's'} nobody declared`)
+    } else if (actual < f.mentions) {
+      narrowed.push(`#${number} declares ${f.mentions} mentions and this tree has ${actual}`)
+    }
+  }
+
   // A lock row nobody cites is not a failure. It is a citation a run removed,
   // and removing the row would destroy the dated reading. It is reported.
   const orphans = [...rows.keys()].filter((n) => !cited.has(n)).sort((a, b) => a - b)
@@ -211,8 +244,12 @@ export function check({ root = ROOT, lockPath = LOCK, cwd = ROOT } = {}) {
     ? Math.round((Date.now() - Date.parse(lock.read_at.replace(/Z$/, ':00Z'))) / 60000)
     : null
 
+  if (ageMinutes !== null && ageMinutes < 0) {
+    failures.push(`the lock's read_at is ${-ageMinutes} minutes in the future, so it was not read when it says it was`)
+  }
+
   return {
-    lock, rows, fixtures, mentions: seen, cited, failures, unverifiable, orphans, ageMinutes,
+    lock, rows, fixtures, mentions: seen, cited, failures, unverifiable, orphans, narrowed, ageMinutes,
     fixtureMentions: seen.filter((m) => fixtures.has(m.number)).length,
     clone: cloneDepth(cwd),
   }
@@ -281,6 +318,12 @@ if (run) {
   if (r.orphans.length) {
     console.log(`\n${r.orphans.length} lock row${r.orphans.length === 1 ? ' is' : 's are'} cited nowhere: #${
       r.orphans.join(', #')}. Kept deliberately; a dated reading is not deleted because a citation moved.`)
+  }
+  if (r.narrowed.length) {
+    console.log(`\n${r.narrowed.length} fixture declaration${
+      r.narrowed.length === 1 ? ' is' : 's are'} wider than the tree needs:`)
+    for (const n of r.narrowed) console.log(`  ${n}`)
+    console.log(`  Reported and not failed: a removed mention narrows the exemption.`)
   }
   if (r.unverifiable.length) {
     console.log(`\n${r.unverifiable.length} merge commit${

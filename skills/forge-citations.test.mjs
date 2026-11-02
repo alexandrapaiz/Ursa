@@ -166,6 +166,41 @@ test('the refresh plan puts the lane in the query and never filters a capped lis
   assert.match(plan, /equals its cap did not finish/)
 })
 
+test('a fixture that covers more mentions than it declares is a failure, and fewer is only reported', () => {
+  const root = tree({ 'prompts/skill-extract.md': 'twice over: #777 and #777\n' })
+  const under = lockFile(root, {
+    read_at: '2026-11-02T06:16Z', fixtures: [{ number: 777, why: 'a fixture', mentions: 1 }], rows: [],
+  })
+  const r = check({ root, lockPath: under })
+  assert.equal(r.failures.length, 1)
+  assert.match(r.failures[0], /declared fixture for 1 mention and this tree has 2/)
+  assert.match(r.failures[0], /covers 1 mention nobody declared/)
+
+  const exact = lockFile(root, {
+    read_at: '2026-11-02T06:16Z', fixtures: [{ number: 777, why: 'a fixture', mentions: 2 }], rows: [],
+  })
+  assert.deepEqual(check({ root, lockPath: exact }).failures, [])
+
+  // A declaration wider than the tree is the harmless direction, so it is
+  // reported and the check still exits 0.
+  const over = lockFile(root, {
+    read_at: '2026-11-02T06:16Z', fixtures: [{ number: 777, why: 'a fixture', mentions: 5 }], rows: [],
+  })
+  const o = check({ root, lockPath: over })
+  assert.deepEqual(o.failures, [])
+  assert.equal(o.narrowed.length, 1)
+})
+
+test('a lock dated in the future is a failure, because a negative age makes every decay sentence meaningless', () => {
+  const root = tree({ 'prompts/skill-extract.md': 'no citations here\n' })
+  const ahead = new Date(Date.now() + 90 * 60000).toISOString().slice(0, 16) + 'Z'
+  const path = lockFile(root, { read_at: ahead, fixtures: [], rows: [] })
+  const r = check({ root, lockPath: path })
+  assert.equal(r.failures.length, 1)
+  assert.match(r.failures[0], /minutes in the future/)
+  assert.ok(r.ageMinutes < 0)
+})
+
 test('end to end on the real library: the lock covers every citation in the tree', () => {
   const r = check()
   assert.deepEqual(r.failures, [], r.failures.join('\n'))
