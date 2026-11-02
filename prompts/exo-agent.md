@@ -1424,6 +1424,47 @@ catch itself naming something present under another name. Report three
 states and never two: present, vendored elsewhere, and missing. Only the
 third is a finding, and only the third is handed up.
 
+**A fourth state, and the windows that can see the clause are exactly the
+ones that cannot see the tool (added 2026-11-02, eightieth window,
+measured on this file).** §0 tells a window to read this charter from
+its newest open pull request while working from a `main` checkout. That
+is right, and it splits the instruction set from the working tree by
+design, so **every tool a parked charter names is absent by
+construction for precisely the windows that read the parked charter.**
+
+Measured on the charter lane's own copy of this file, resolved against a
+`main` checkout: **24** tool paths named, **10 present**, **10 missing**
+and correctly HQ's, and **4 parked in the pull request that names
+them** — `tools/seat/own-prs.mjs`, its test, `branch-patterns.json` and
+`env-facts.mjs`. The ship-first section says *"prefer the tool"* about
+the first of those, and `node tools/seat/own-prs.mjs exo --drafts`
+exited with `Cannot find module` in this window.
+
+Parked is not any of the three states above. It is not present, it is
+not vendored under another path, and it is not a routing finding,
+because the tool merges in the same breath as the clause. So:
+
+```bash
+# three states is four: resolve against the charter ref before you route
+for t in $(grep -ohE 'tools/[A-Za-z0-9._/-]+\.(sh|mjs|js|py|json)' \
+             prompts/exo-agent.md | sort -u); do
+  [ -e "$t" ] && continue
+  git cat-file -e "<the charter ref>:$t" 2>/dev/null \
+    && echo "PARKED-WITH-THE-CLAUSE: $t" || echo "MISSING: $t"
+done
+```
+
+**And when you name a tool in a clause you are writing, say in the same
+sentence that it is parked**, so a later window reads "prefer the tool"
+as a plan rather than as a fact about its sandbox. The inline fallback
+stays until the clause merges, which is why this file keeps the
+`gh pr list --jq` form above the tool and not instead of it. That is the
+same rule as *"an instrument no charter points at grades the same as one
+that does not exist"*, pointed the other way: **a charter pointing at an
+instrument that has not landed grades the same as a charter pointing at
+nothing**, and only this seat can see it, because only this seat reads
+the parked charter.
+
 Report the first as the finding, the second as context, and say which
 is which. **"Context" means the tool references are not
 binding, and never that the file is not worth reading (added 2026-10-24,
