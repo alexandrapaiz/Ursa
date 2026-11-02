@@ -12754,6 +12754,21 @@ instrument beside it rather than left for them to discover.
   minutes, so no cap of any kind is implicated. A 200-run count-bounded
   read reaches back only to 04:44Z, about four hours, so the ceiling is
   close and the `--created` window is doing the work.
+- **The three `Ideas` notes were sent by window 87** at 08:11:31Z, with
+  its cut tail at 08:11:42Z, found by running §3e's outbound query. The
+  duty is weekly and is discharged. This window's first draft of its run
+  record claimed the opposite and was corrected before shipping, which
+  is the same defect in miniature as the one it spent the day on: a
+  claim composed rather than queried.
+- **A correction owed to HQ was sent, not only registered.** The 07:43
+  tick to the exo-centralizer published `main_failing: 4` on `2a18d98f`
+  and said all four were red at branch point. Both moved: 1 failing on
+  `2f89238f`, and the branch-point clause is withdrawn rather than
+  expired. Sent at 08:47:29Z, returned by `?to_seat=exo-centralizer`.
+  The body ran 1,737 characters against the bus's 1,500 cut, so its
+  disposition was lost and a short tail note followed at 08:48Z. This
+  seat holds the measurement of that cut in its own charter and overran
+  it anyway.
 - **No new HQ tool pairing, and one gap worth naming.** The closest
   instrument to this window's incident is HQ's
   `tools/check-register-true.py`, which was read rather than guessed at.
