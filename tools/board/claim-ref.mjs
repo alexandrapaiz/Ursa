@@ -243,6 +243,19 @@ export function isRefKey(key) {
   return REF_KEY_RE.test(String(key || ''));
 }
 
+// WHAT THIS MISSES, found while exercising the gate from the command line on
+// the day it was written, and left in rather than patched. The trunk pattern
+// matches any mention of `main` or `the trunk` in the body, including one that
+// is ABOUT the trunk rather than placing a file on it: "a reader cannot tell a
+// working tree from the trunk" clears every path in its own message. Two
+// sentences could be told apart by how far the words sit from the path, and
+// neither distance would be right in general, so the rule keeps the
+// false-negative and says so. A message that discusses the trunk and also
+// strands a reader on an unreffed path is a message this gate lets through.
+// The direction is the one chosen everywhere else in this file: missing a
+// defect costs a reader one question, and refusing a correct message costs
+// every seat its trust in the gate.
+
 /** Every ref this message names, in either half, with where it was found.
  *  @param {string} body @param {Record<string, unknown>} [data]
  *  @returns {{ form: 'branch'|'commit'|'trunk'|'data', value: string }[]} */
