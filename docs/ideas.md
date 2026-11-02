@@ -14348,6 +14348,30 @@ the owner to accept or reject.
   length at all, and the rule above is the sentence it is missing. That is
   HQ's to land, not this seat's, and the status stays `proposed` because only
   the owner moves it (pm.md §4) and it was never accepted.
+- Answered again 2026-11-02 (engineer, message run), and the answer above is
+  **right about the common case and wrong about the sentence that follows it.**
+  The rule is not one boundary, it is a three-branch fallback, transcribed
+  from `wake_body` in the holding company's `runtime/board/api.py`: take
+  `body[:limit]`, walk back to the last blank line inside it, and use that
+  **only if it falls past sixty percent of the limit**; otherwise fall to the
+  last newline, otherwise to the last space, otherwise keep the hard cut at
+  the limit. The single observation this entry settled it on (1277 of 1510)
+  is consistent with every reading of the first branch, which is why one
+  datapoint could not separate them.
+- The claim this refutes is the last one, "the usable length is a property of
+  your own paragraphing and **cannot be computed before the post**". It can,
+  exactly, with no network call and no probe row. `wakeCut` and `wakeReceipt`
+  in `tools/board/check.mjs` do it, and the test beside them runs the host's
+  own Python over the same bodies and compares character for character: 47 of
+  47 identical, including a body whose last blank line falls early, where the
+  paragraph-boundary rule predicts 11 delivered characters and the host
+  delivers 1500. So the advice this entry gives a seat ("still read
+  `body_delivered` off the receipt afterwards") is now the fallback rather
+  than the method, since the receipt arrives after the row is permanent.
+- Status unchanged at `proposed`, which only the owner moves. The standards
+  half it names is still owed and still HQ's, and the sentence §15 is missing
+  is now a four-line algorithm rather than a boundary rule, which is an
+  argument for pointing §15 at a gate instead of restating it in prose.
 
 ### 2026-11-01 — A seat choosing between "absorb, ready or close" has no test, and tree identity is the one that would have answered it in one command
 
@@ -14429,3 +14453,161 @@ the owner to accept or reject.
   this seat's write surface (`prompts/skill-agent.md`, Boundaries). Named here
   rather than fixed because a seat patching another seat's tool mid-run is how
   two copies of a rule get written.
+
+### 2026-11-02 — Every events read on the live board is erroring, and Ursa's own inert-filter finding cannot be re-proved until it is up
+
+- Trigger: the three pre-existing failures in `tools/board/read-filters.test.mjs`,
+  which fail identically on `origin/main` and are not this run's doing. Two are
+  drift detectors firing correctly. The third is a live probe that expected a
+  200 and got a 500. Probed directly against the running board: an unfiltered
+  events read, one filtered by a company that cannot exist, and one filtered by
+  a real company all return the same body, naming an attribute error for the
+  handler's events-filter list.
+- What: the cause is a scope mismatch in the holding company's
+  `runtime/board/api.py` and not a database fault, which the board's own error
+  line says explicitly. The filter tuple is defined at module level, above
+  `class Handler`, with a comment saying it was put there so the refusal and
+  the call beneath it could not drift apart. Both readers reach it through
+  `self`, which resolves only a class attribute, so every events read raises
+  before it opens a connection. The sibling list for the message read is
+  inside the class, which is why message reads still refuse an unknown filter
+  with a 400 correctly. That contrast is the whole diagnosis. The live code is
+  the deploy the host chair announced at 00:20 tonight.
+- First step: none here, because the file is HQ's and a seat patching another
+  company's runtime is the thing this org's own rules refuse. Reported to HQ's
+  engineer seat on the board this pass, with both spellings of the fix named
+  and no preference stated. What is owed on Ursa's side is one re-run of
+  `tools/board/read-filters.mjs` once the read answers, because this
+  repository carries a committed finding that the events company filter is
+  inert and that finding is proved by comparing a filtered count to an
+  unfiltered one. Neither count can be taken right now, so the finding is
+  neither confirmed nor refuted rather than confirmed by a silence.
+- Cost: $0.
+- Status: urgent
+
+### 2026-11-02 — The containment check every charter names answers wrongly in the clone every seat gets, and the direction of the error is the dangerous one
+
+- Trigger: the first measurement this run took. The org rule in
+  `prompts/engineer-agent.md` tells this seat to settle a stack with
+  `git merge-base --is-ancestor`, so it did, on the clone it was handed. The
+  clone is shallow and single-branch. It answered that current `main` is
+  contained in the newest branch of the stack. After
+  `bash tools/ensure-full-clone.sh` took the checkout from 4033 commits and 2
+  remote refs to 4158 and 288, the same command on the same two refs answered
+  the opposite, and it is the second answer that is true.
+- What: `docs/standards/lessons.md` already names this fault twice, and both
+  entries describe the error as a **false negative**: no common base found,
+  non-zero exit, and non-zero read as not-contained. What this run measured is
+  the other direction, which neither lesson names: exit 0, contained, for a
+  pair whose containment is false. A false negative costs a seat a rebase it
+  did not need. A false positive is a seat concluding that the mainline is
+  already in its branch, skipping the rebase, and handing the owner a branch
+  that cannot merge, which is a quieter failure and the one a PM handoff then
+  reports as a conflict of unknown cause.
+- First step: `tools/contains.mjs`, one command whose only job is to answer a
+  containment question or refuse to: it runs `bash tools/ensure-full-clone.sh
+  --check` first and exits 2 with the repair named when the clone cannot
+  answer, rather than passing the question to git and returning git's
+  confident wrong answer. Exit 0 contained, exit 1 not contained, exit 2 this
+  checkout cannot say. Then the code block in the org rule points at it
+  instead of at the bare git invocation, since the rule is read by every seat
+  in five repositories and the bare command is the thing that is unsafe.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 — The two body gates pull in opposite directions, so a sender edits three times where one edit would do
+
+- Trigger: four board replies written this pass, three of which took two or
+  three passes through `tools/board/check.mjs` before they were clean, and the
+  loop was the same every time. The new truncation notice says the body is too
+  long and names the characters to cut. The paragraph gate says a block is
+  over 420 characters and the repair is to split it. Splitting a block adds a
+  blank line, which makes the body longer, which moves the cut. One reply went
+  1595 characters with a 431-character block, then 1648 after the split, then
+  clean only after a third edit.
+- What: both gates are correct and each one's repair is the other one's
+  violation, because the host sets the two limits independently and says so.
+  What a sender is missing is not another rule, it is the shape of its own
+  body: where each block starts, how long each is, which block the cut lands
+  inside, and how much room is left before the next boundary moves. Every
+  number needed for that is already computed inside `wakeCut` and
+  `PARAGRAPH_SPLIT`; none of it is shown. The gates report verdicts about a
+  body nobody has seen laid out.
+- First step: `--explain` on `check.mjs`, printing one line per block with its
+  index, its character count against the 420 limit, its cumulative offset, and
+  a marker on the block the wake cut falls inside, plus the delivered total.
+  No new rule and no new constant: it is a view over the two functions that
+  already exist, which is what makes it small. Then the repair strings on both
+  gates name `--explain` so a sender reaches it at the moment it is useful
+  rather than discovering it later.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 — The new quantity rule keeps its own list of what the portfolio counts, which is the second-registry defect the standard names
+
+- Trigger: writing `QUANTITY_STEMS` in `tools/board/check.mjs` this pass. The
+  other half of that rule, the company spellings a key can use to name its
+  scope, is derived from `tools/board/companies.json`, which cites the line of
+  the holding company's runtime it was transcribed from and is re-read by
+  `check.mjs --host`. The stem half has no such origin. It is a list of names
+  this seat believed the five repositories each count, written from reading
+  the board's scorecard and then committed as if it were a fact.
+- What: the company standard's own lesson on instrument scope has two clauses,
+  and the first is that a portfolio-wide question takes its scope from the
+  company's registry rather than from a list kept inside the tool, because a
+  list inside the tool is a second registry that will disagree with the first.
+  That is exactly what the stem list is. The concrete drift: the board's
+  scorecard gained and renamed columns through October, and a quantity key a
+  seat writes tomorrow for something that surface started counting last week
+  passes this gate silently, which is the same silent pass the rule exists to
+  close.
+- First step: derive the stems from the running board the way the company
+  table already is. The scorecard handler names its own columns in one place
+  and `GET /api/scorecard` returns them as keys, so the committed list becomes
+  `tools/board/quantity-keys.json` with a citation line and a re-derivation
+  command, and `check.mjs --host` grows a second drift check beside the
+  company one. The predicate does not change; only where its vocabulary comes
+  from does.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 (engineer, message run) — Craft scan: `git merge-tree --write-tree` against `gh pr view --json mergeable`, where one instrument's first answer is not an answer
+
+- Rotated to because this run had to settle whether three stacked pull
+  requests merge against today's mainline, and the handoff that sent it there
+  reported all of them as conflicting. Two products answer that question and
+  they disagreed, so both were measured rather than trusted.
+- **The trap, measured three times in a row on one pull request.**
+  `gh pr view 615 --json mergeable,mergeStateStatus` answered
+  `UNKNOWN UNKNOWN` on the first call and `MERGEABLE CLEAN` on the second and
+  third. The forge computes mergeability lazily, so the first read is what
+  triggers the computation rather than what reports it. A caller that reads
+  the field once and believes it is not reading a stale answer, it is reading
+  a *request* it mistook for an answer. This is the most plausible route to
+  the handoff's claim that the survivor conflicted, since it did not.
+- **The other instrument.** `git merge-tree --write-tree origin/main
+  refs/prs/615` completed in 9 milliseconds, wrote nothing to the working
+  tree (`git status --porcelain` stayed empty), needed no network, and printed
+  the merged tree's object id on success. On failure it prints the conflicted
+  paths. Its exit code is the verdict and it is never provisional.
+- **One thing worth stealing: the answer and the artifact are the same
+  object.** `merge-tree` does not simulate the merge and report on it. It
+  performs the merge into the object database, where a tree is cheap and
+  invisible, and hands back the tree it produced. So "would this merge" and
+  "what would it produce" are one call, and the result is reusable rather
+  than thrown away. Ursa's gates mostly answer a question and discard the
+  state they computed to answer it: `tools/board/check.mjs` builds the exact
+  cut a wake will carry inside `wakeCut` and returns only its length. The
+  stealable shape is to return the artifact beside the verdict, which is
+  what the `--explain` idea above is reaching for.
+- **One thing Ursa does better: the repair travels with the verdict.** Every
+  violation in `tools/board/check.mjs` carries a `repair` field, and a test
+  asserts that none is shorter than ten characters, because a refusal without
+  one is a riddle. `merge-tree --write-tree` prints a bare 40-character object
+  id on success and nothing at all about what to do on failure. Its manual
+  page carries the contract and the command does not, so a caller who has not
+  read the page cannot tell exit 1 from exit 128, which are a conflict and a
+  broken invocation. Ursa's gates never make that distinction a reading
+  exercise.
+- Cost: $0.
+- Status: proposed
