@@ -7,7 +7,7 @@
 // asserts it refuses to print a table.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { seatOfBranch, lagDays, buildRows, formatTable, formatSummary, cloneFitness } from './charter-lag.mjs'
+import { seatOfBranch, lagDays, buildRows, formatTable, formatSummary, cloneFitness, queueScan } from './charter-lag.mjs'
 // `utcDay` moved out of charter-lag.mjs into the shared timestamp module when
 // this seat's #694 landed it, so the trunk's import of it from './charter-lag.mjs'
 // is taken from '../instant.mjs' here instead. Its contract changed with the
@@ -179,12 +179,175 @@ test('cloneFitness names each fault by the property it is a fault in', () => {
   assert.deepEqual(cloneFitness({ shallow: false, prRefs: 14, originRefs: 30 }), [])
   const shallow = cloneFitness({ shallow: true, prRefs: 14, originRefs: 30 })
   assert.equal(shallow.length, 1)
-  assert.match(shallow[0], /^depth:/)
+  assert.match(shallow[0].fault, /^depth:/)
   // The clone this host hands a seat fails both properties at once, and the
   // single-branch refspec fails breadth twice: no refs/prs and one origin ref.
   const handed = cloneFitness({ shallow: true, prRefs: 0, originRefs: 1 })
   assert.equal(handed.length, 3)
-  assert.equal(handed.filter((f) => f.startsWith('breadth:')).length, 2)
+  assert.equal(handed.filter((f) => f.fault.startsWith('breadth:')).length, 2)
+})
+
+test('each fault carries the repair for ITSELF, and ensure-full-clone is not named for the namespace it declines', () => {
+  // Rehearsed red: with the single `repair: bash tools/ensure-full-clone.sh`
+  // line this file printed under every fault until 2026-11-02, the second
+  // assertion here fails, because that script's own header says it does not
+  // fetch refs/pull/*.
+  const depth = cloneFitness({ shallow: true, prRefs: 14, originRefs: 30 })[0]
+  assert.equal(depth.repair, 'bash tools/ensure-full-clone.sh')
+  const breadth = cloneFitness({ shallow: false, prRefs: 0, originRefs: 30 })[0]
+  assert.match(breadth.fault, /^breadth: no refs\/prs/)
+  assert.match(breadth.repair, /git fetch origin 'refs\/pull\/\*\/head:refs\/prs\/\*'/)
+  assert.doesNotMatch(breadth.repair, /ensure-full-clone/)
+})
+
+test('a clone that can see SOME pull request head but not the open ones is a fault, not a pass', () => {
+  // THE DEFECT THIS TEST PINS, logged by Ursa's PM against line 165 of
+  // charter-lag.mjs on 2026-11-02. `prRefs` is a count of what is present,
+  // not a check of what is needed. One stale head from a long-merged row
+  // satisfies `prRefs !== 0`, every open row then fails `rev-parse --verify`
+  // inside the scan, and the table prints `-` in every queue column: the same
+  // output as a queue in which no open row touches a charter.
+  const partial = cloneFitness({
+    shallow: false, prRefs: 1, originRefs: 30, openPrs: 60, readablePrRefs: 0
+  })
+  assert.equal(partial.length, 1)
+  assert.match(partial[0].fault, /^coverage: 0 of 60 open pull requests/)
+  assert.match(partial[0].fault, /60 would be skipped/)
+  assert.match(partial[0].repair, /refs\/pull\/\*\/head/)
+
+  // Complete coverage is not a fault.
+  assert.deepEqual(
+    cloneFitness({ shallow: false, prRefs: 80, originRefs: 30, openPrs: 60, readablePrRefs: 60 }),
+    []
+  )
+  // Total absence is named ONCE, by breadth, and not twice.
+  const none = cloneFitness({ shallow: false, prRefs: 0, originRefs: 30, openPrs: 60, readablePrRefs: 0 })
+  assert.equal(none.length, 1)
+  assert.match(none[0].fault, /^breadth:/)
+  // And the coverage check stays silent when the caller did not measure it,
+  // which is every caller written before this field existed.
+  assert.deepEqual(cloneFitness({ shallow: false, prRefs: 5, originRefs: 30 }), [])
+})
+
+// --- queueScan: the two skips that used to leave no trace ----------------
+
+/** The four injected reads, over a hand-built clone. */
+function io ({ refs, bases, touched, lines }) {
+  return {
+    refExists: (ref) => refs.includes(ref),
+    mergeBase: (_a, ref) => bases[ref] ?? null,
+    touches: (_base, ref, _path) => Boolean(touched[ref]),
+    linesAt: (rev, _path) => (rev in lines ? lines[rev] : null)
+  }
+}
+
+const MAIN = 'refs/remotes/origin/main'
+const CHARTER = 'prompts/engineer-agent.md'
+
+test('queueScan finds the newest open row that touches the charter', () => {
+  const scan = queueScan(CHARTER, [700, 690, 680], io({
+    refs: ['refs/prs/700', 'refs/prs/690', 'refs/prs/680'],
+    bases: { 'refs/prs/700': 'abc', 'refs/prs/690': 'abc', 'refs/prs/680': 'abc' },
+    touched: { 'refs/prs/690': true, 'refs/prs/680': true },
+    lines: { [MAIN]: 342, 'refs/prs/690': 980 }
+  }), MAIN)
+  assert.deepEqual(scan.copy, { number: 690, lines: 980 })
+  assert.equal(scan.scanned, 3)
+  assert.deepEqual(scan.skipped, [])
+  assert.deepEqual(scan.degraded, [])
+})
+
+test('a missing refs/prs/<n> is counted and named, not dropped', () => {
+  // Rehearsed red: with `if (!...) continue` and no census, `skipped` does not
+  // exist and this scan is indistinguishable from the one below it, where the
+  // rows are all present and genuinely do not touch the charter.
+  const absent = queueScan(CHARTER, [700, 690], io({
+    refs: [], bases: {}, touched: {}, lines: { [MAIN]: 342 }
+  }), MAIN)
+  assert.equal(absent.copy, null)
+  assert.equal(absent.scanned, 0)
+  assert.deepEqual(absent.skipped, [{ pr: 700, cause: 'no-ref' }, { pr: 690, cause: 'no-ref' }])
+
+  const present = queueScan(CHARTER, [700, 690], io({
+    refs: ['refs/prs/700', 'refs/prs/690'],
+    bases: { 'refs/prs/700': 'abc', 'refs/prs/690': 'abc' },
+    touched: {},
+    lines: { [MAIN]: 342 }
+  }), MAIN)
+  assert.equal(present.copy, null)
+  assert.equal(present.scanned, 2)
+  assert.deepEqual(present.skipped, [])
+  // Same `copy`. Only the census separates them, which is the whole point.
+  assert.notDeepEqual(absent.skipped, present.skipped)
+})
+
+test('an unanswerable merge base degrades to a blob comparison and says which rows it did that for', () => {
+  const scan = queueScan(CHARTER, [700], io({
+    refs: ['refs/prs/700'],
+    bases: {},                       // merge-base printed nothing
+    touched: {},                     // so no diff was ever taken
+    lines: { [MAIN]: 342, 'refs/prs/700': 980 }
+  }), MAIN)
+  assert.deepEqual(scan.copy, { number: 700, lines: 980 })
+  assert.deepEqual(scan.degraded, [700])
+})
+
+test('a degraded row whose charter is byte-identical to main is not a queue copy', () => {
+  const scan = queueScan(CHARTER, [700], io({
+    refs: ['refs/prs/700'],
+    bases: {},
+    touched: {},
+    lines: { [MAIN]: 342, 'refs/prs/700': 342 }
+  }), MAIN)
+  assert.equal(scan.copy, null)
+  assert.deepEqual(scan.degraded, [700])
+})
+
+test('a degraded row the clone cannot read the charter at all for is not guessed at', () => {
+  const scan = queueScan(CHARTER, [700], io({
+    refs: ['refs/prs/700'], bases: {}, touched: {}, lines: { [MAIN]: 342 }
+  }), MAIN)
+  assert.equal(scan.copy, null)
+  assert.deepEqual(scan.degraded, [700])
+})
+
+test('the summary distinguishes a queue with nothing in it from a queue it could not read', () => {
+  const rows = buildRows({
+    charters: [{ seat: 'engineer', path: CHARTER, mainDate: '2026-10-09T18:28:03Z', mainLines: 342, queue: null }],
+    branches: [],
+    nowIso: '2026-11-02T08:00:00Z'
+  })
+  const clean = formatSummary(rows, {
+    nowIso: '2026-11-02T08:00:00Z',
+    branchRead: { pullRequestsRead: 60, limit: 1000, capped: false },
+    queueRead: { openPrs: 60, skipped: 0, degraded: [] }
+  })
+  assert.match(clean, /60 open pull requests scanned for charter edits, none skipped/)
+  assert.doesNotMatch(clean, /floor/)
+
+  const blind = formatSummary(rows, {
+    nowIso: '2026-11-02T08:00:00Z',
+    branchRead: { pullRequestsRead: 60, limit: 1000, capped: false },
+    queueRead: { openPrs: 60, skipped: 60, degraded: [] }
+  })
+  assert.match(blind, /60 of them SKIPPED for a missing refs\/prs/)
+  assert.match(blind, /every queue column below is a floor/)
+
+  const degraded = formatSummary(rows, {
+    nowIso: '2026-11-02T08:00:00Z',
+    branchRead: { pullRequestsRead: 60, limit: 1000, capped: false },
+    queueRead: { openPrs: 60, skipped: 0, degraded: [690, 700] }
+  })
+  assert.match(degraded, /2 answered by blob comparison and not by diff/)
+  assert.match(degraded, /#690, #700/)
+
+  // A caller that measured no queue read gets no sentence about one, rather
+  // than a sentence with a zero in it that it did not measure.
+  const silent = formatSummary(rows, {
+    nowIso: '2026-11-02T08:00:00Z',
+    branchRead: { pullRequestsRead: 60, limit: 1000, capped: false }
+  })
+  assert.doesNotMatch(silent, /open pull requests scanned/)
 })
 
 // --- the two producers, which every fixture above was blind to -----------

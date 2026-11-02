@@ -190,7 +190,7 @@ export function formatTable (rows) {
 //   seat branches the population `stale runs` is a share of
 //   pull requests how many `gh pr list` rows the branch population came from,
 //                 and whether that read hit its own limit
-export function formatSummary (rows, { nowIso, branchRead }) {
+export function formatSummary (rows, { nowIso, branchRead, queueRead }) {
   const stale = rows.reduce((n, r) => n + r.runsHandedStale, 0)
   const seatBranches = rows.reduce((n, r) => n + r.seatBranches, 0)
   const pending = rows.reduce((n, r) => n + Math.max(0, r.pendingLines), 0)
@@ -212,30 +212,116 @@ export function formatSummary (rows, { nowIso, branchRead }) {
     `${stale} of ${seatBranches} branches of these seats opened after their own seat's charter froze` +
     `, from ${read.pullRequestsRead ?? seatBranches} pull requests read${cap}`
   )
+  // THE QUEUE SIDE SAYS WHAT IT SAW. Every number above is about the branch
+  // side of the table. The queue columns had no line of their own, so a `-`
+  // under `queue` was read as "no open row touches this charter" when it could
+  // equally mean "no open row was readable". These two sentences are the
+  // difference, and they print even when both numbers are zero, because the
+  // zero is the reassurance.
+  if (queueRead) {
+    out.push(
+      `${queueRead.openPrs} open pull requests scanned for charter edits` +
+      (queueRead.skipped > 0
+        ? `, ${queueRead.skipped} of them SKIPPED for a missing refs/prs/<n>, so every queue column below is a floor`
+        : ', none skipped')
+    )
+    if (queueRead.degraded.length > 0) {
+      out.push(
+        `${queueRead.degraded.length} answered by blob comparison and not by diff, having no merge base with main ` +
+        `(#${queueRead.degraded.join(', #')}): a difference there may be trunk text the row has not merged ` +
+        'rather than the row\'s own edit'
+      )
+    }
+  }
   return out.join('\n')
 }
 
-export function cloneFitness ({ shallow, prRefs, originRefs }) {
+// Each fault carries the command that repairs IT, and not one repair line
+// printed under all of them. Until 2026-11-02 `main` printed `repair: bash
+// tools/ensure-full-clone.sh` under every fault this function returns,
+// including the `refs/prs/*` ones, and that script declines the `refs/prs/*`
+// namespace on purpose in the paragraph of its own header headed WHAT IT DOES
+// NOT DO. So a seat that hit the breadth fault was told to re-run a script it
+// had already run, which cannot clear it. The security seat measured and
+// fixed the identical shape in `tools/stack/repair-pending.test.mjs` the same
+// day: one named cause for a condition reachable three ways, false for one of
+// the three, and the three do not share a repair.
+const FETCH_PR_REFS = "git fetch origin 'refs/pull/*/head:refs/prs/*'"
+
+/**
+ * @param {{
+ *   shallow: boolean,
+ *   prRefs: number,
+ *   originRefs: number,
+ *   openPrs?: number|null,
+ *   readablePrRefs?: number|null
+ * }} m
+ * @returns {{ fault: string, repair: string }[]}
+ */
+export function cloneFitness ({ shallow, prRefs, originRefs, openPrs = null, readablePrRefs = null }) {
   const faults = []
   if (shallow) {
-    faults.push('depth: the clone is shallow, so every charter would read as changed today')
+    faults.push({
+      fault: 'depth: the clone is shallow, so every charter would read as changed today',
+      repair: 'bash tools/ensure-full-clone.sh'
+    })
   }
   if (prRefs === 0) {
-    faults.push('breadth: no refs/prs/* present, so every queue column would read as absent')
+    faults.push({
+      fault: 'breadth: no refs/prs/* present, so every queue column would read as absent',
+      repair: FETCH_PR_REFS
+    })
   }
   if (originRefs <= 1) {
-    faults.push('breadth: only one origin/* ref resolves, so the handed refspec is still single-branch')
+    faults.push({
+      fault: 'breadth: only one origin/* ref resolves, so the handed refspec is still single-branch',
+      repair: 'bash tools/ensure-full-clone.sh'
+    })
+  }
+  // COVERAGE, which is the fault the other three could not see. `prRefs !== 0`
+  // proves that SOME pull request head is present; it does not prove that the
+  // heads of the open rows about to be scanned are. A clone holding one stale
+  // `refs/prs/<n>` from a long-merged row satisfies every check above and then
+  // skips every open row at `rev-parse --verify`, so the table prints `-` in
+  // every queue column and `0` in every `pending` column, which is
+  // indistinguishable from a queue in which nobody has touched a charter.
+  // That is the reading this instrument exists to produce and the one the
+  // merge rule's Tier C routing leans on, so a partial read is refused rather
+  // than printed. Gated on `prRefs !== 0` so the total-absence case is named
+  // once, by the breadth fault above, instead of twice.
+  if (prRefs !== 0 && openPrs !== null && readablePrRefs !== null && readablePrRefs < openPrs) {
+    const missing = openPrs - readablePrRefs
+    faults.push({
+      fault: `coverage: ${readablePrRefs} of ${openPrs} open pull requests have a refs/prs/<n> in this clone, ` +
+        `so ${missing} would be skipped without being counted and every queue column would under-report`,
+      repair: FETCH_PR_REFS
+    })
   }
   return faults
 }
 
-function measureClone () {
+// `openPrs` is passed in rather than read here so the fitness check and the
+// scan that follows it are measured against the SAME list of open rows. Read
+// twice, they can disagree: a row that merges between the two reads makes the
+// coverage check pass on a list the scan no longer uses.
+function measureClone (openPrs) {
   const shallow = git(['rev-parse', '--is-shallow-repository']) === 'true'
-  const prRefs = (git(['for-each-ref', '--format=%(refname)', 'refs/prs/'], { allowFail: true }) || '')
-    .split('\n').filter(Boolean).length
+  const prRefNames = (git(['for-each-ref', '--format=%(refname)', 'refs/prs/'], { allowFail: true }) || '')
+    .split('\n').filter(Boolean)
   const originRefs = (git(['for-each-ref', '--format=%(refname)', 'refs/remotes/origin/'], { allowFail: true }) || '')
     .split('\n').filter(Boolean).length
-  return { shallow, prRefs, originRefs }
+  // One `for-each-ref` and a set membership test, not one `rev-parse` per open
+  // row: at 60-odd open pull requests the per-row form is 60 process spawns to
+  // answer a question one spawn already answered.
+  const present = new Set(prRefNames)
+  const readablePrRefs = openPrs.filter((n) => present.has(`refs/prs/${n}`)).length
+  return {
+    shallow,
+    prRefs: prRefNames.length,
+    originRefs,
+    openPrs: openPrs.length,
+    readablePrRefs
+  }
 }
 
 function charterPaths () {
@@ -253,16 +339,87 @@ function lineCount (rev, path) {
 // The newest open pull request that changes this charter, newest by pull
 // request number, which on this host is creation order. Read from the local
 // refs/prs/* mirror so the measurement does not depend on the API being up.
-function newestQueueCopy (path, openPrs, mainRev) {
+//
+// NO SILENT SKIPS, which is the repair of the defect Ursa's PM logged against
+// line 165 of this file on 2026-11-02 and the reason this function returns a
+// census instead of a value. The two `continue` statements it used to carry
+// each dropped a pull request out of the scan and left no trace:
+//
+//   no-ref         `refs/prs/<n>` is not in this clone. On the clone a seat is
+//                  handed, that is EVERY open row, because the handed refspec
+//                  is `+refs/heads/main:refs/remotes/origin/main` and nothing
+//                  fetches the pull namespace. `cloneFitness` now refuses the
+//                  whole read for this, so reaching it here means the clone
+//                  changed under the run.
+//   base-unknown   `git merge-base` printed nothing and exited non-zero, so
+//                  `allowFail` returned null. On a shallow clone that is every
+//                  pair; on a complete one it is a head whose history is
+//                  genuinely unrelated to main's.
+//
+// Both skips meant "this pull request does not touch this charter", which is a
+// claim, and neither had measured it. `base-unknown` now DEGRADES rather than
+// skipping: with no merge base there is no diff to take, but the two blobs are
+// still comparable, so the charter at `refs/prs/<n>` is compared against the
+// charter at `main` and a difference counts as a queue copy. That is a weaker
+// finding than a diff against a base, since it cannot tell this row's own edit
+// from trunk text this row has not yet merged, so every row answered that way
+// is named in `degraded` and the summary says so. A weaker answer that reports
+// its own weakness beats a silent `-`.
+//
+// The four git reads it needs are injected, which is what makes every branch
+// above assertable with no clone and no network. The same split `buildRows`
+// and `formatSummary` already make, for the same reason.
+//
+// @param {string} path
+// @param {number[]} openPrs       newest first
+// @param {{
+//   refExists: (ref: string) => boolean,
+//   mergeBase: (a: string, b: string) => string|null,
+//   touches: (base: string, ref: string, path: string) => boolean,
+//   linesAt: (rev: string, path: string) => number|null
+// }} io
+// @param {string} mainRev
+// @returns {{ copy: {number: number, lines: number|null}|null,
+//             scanned: number,
+//             skipped: {pr: number, cause: 'no-ref'}[],
+//             degraded: number[] }}
+export function queueScan (path, openPrs, io, mainRev) {
+  const skipped = []
+  const degraded = []
+  const mainLines = io.linesAt(mainRev, path)
+  let copy = null
+  let scanned = 0
   for (const pr of openPrs) {
     const ref = `refs/prs/${pr}`
-    if (!git(['rev-parse', '--verify', '--quiet', ref], { allowFail: true })) continue
-    const base = git(['merge-base', mainRev, ref], { allowFail: true })
-    if (!base) continue
-    const changed = git(['diff', '--name-only', `${base}..${ref}`, '--', path], { allowFail: true })
-    if (changed) return { number: pr, lines: lineCount(ref, path) }
+    if (!io.refExists(ref)) {
+      skipped.push({ pr, cause: 'no-ref' })
+      continue
+    }
+    scanned += 1
+    // The census over every open row is the point, so the loop runs to the
+    // end; only the per-row git reads stop once the newest copy is found.
+    if (copy !== null) continue
+    const base = io.mergeBase(mainRev, ref)
+    if (base === null) {
+      const lines = io.linesAt(ref, path)
+      degraded.push(pr)
+      if (lines !== null && lines !== mainLines) copy = { number: pr, lines }
+      continue
+    }
+    if (io.touches(base, ref, path)) copy = { number: pr, lines: io.linesAt(ref, path) }
   }
-  return null
+  return { copy, scanned, skipped, degraded }
+}
+
+// The one binding of `queueScan`'s four reads to this clone.
+function gitQueueIo () {
+  return {
+    refExists: (ref) => Boolean(git(['rev-parse', '--verify', '--quiet', ref], { allowFail: true })),
+    mergeBase: (a, b) => git(['merge-base', a, b], { allowFail: true }) || null,
+    touches: (base, ref, path) =>
+      Boolean(git(['diff', '--name-only', `${base}..${ref}`, '--', path], { allowFail: true })),
+    linesAt: (rev, path) => lineCount(rev, path)
+  }
 }
 
 function openPrNumbers () {
@@ -304,16 +461,23 @@ function main (argv) {
   const boundIdx = argv.indexOf('--max-lag-days')
   const bound = boundIdx === -1 ? null : Number(argv[boundIdx + 1])
 
-  const faults = cloneFitness(measureClone())
+  // The open-row list is read BEFORE the fitness check, because the check is
+  // now partly about that list: "can this clone see the rows it is about to
+  // scan" is not answerable without knowing which rows those are.
+  const mainRev = 'refs/remotes/origin/main'
+  const openPrs = openPrNumbers()
+  const queueIo = gitQueueIo()
+
+  const faults = cloneFitness(measureClone(openPrs))
   if (faults.length) {
     console.error('this clone cannot answer the question, so nothing was measured:')
-    for (const f of faults) console.error(`  ${f}`)
-    console.error('repair: bash tools/ensure-full-clone.sh')
+    for (const f of faults) {
+      console.error(`  ${f.fault}`)
+      console.error(`    repair: ${f.repair}`)
+    }
     return 2
   }
 
-  const mainRev = 'refs/remotes/origin/main'
-  const openPrs = openPrNumbers()
   const branchRead = allBranches()
   const branches = branchRead.rows
   // Read once, here, and threaded into every age in the output. The table
@@ -335,15 +499,24 @@ function main (argv) {
       // of the next reader of this line parsing it incorrectly.
       mainDate: toUtcInstant(parseEpochSeconds(git(['log', '-1', '--format=%ct', mainRev, '--', c.path]))),
       mainLines: lineCount(mainRev, c.path),
-      queue: newestQueueCopy(c.path, openPrs, mainRev)
+      scan: queueScan(c.path, openPrs, queueIo, mainRev)
     }))
+    .map((c) => ({ ...c, queue: c.scan.copy }))
+
+  // The queue read, summed over every charter, so the summary can state what
+  // the scan could and could not see instead of letting a `-` stand for both.
+  const queueRead = {
+    openPrs: openPrs.length,
+    skipped: charters.reduce((n, c) => Math.max(n, c.scan.skipped.length), 0),
+    degraded: [...new Set(charters.flatMap((c) => c.scan.degraded))].sort((a, b) => a - b)
+  }
 
   const rows = buildRows({ charters, branches, nowIso })
   if (json) {
-    console.log(JSON.stringify({ measuredAt: nowIso, branchRead, rows }, null, 2))
+    console.log(JSON.stringify({ measuredAt: nowIso, branchRead, queueRead, rows }, null, 2))
   } else {
     console.log(formatTable(rows))
-    console.log(formatSummary(rows, { nowIso, branchRead }))
+    console.log(formatSummary(rows, { nowIso, branchRead, queueRead }))
   }
 
   if (bound !== null) {
