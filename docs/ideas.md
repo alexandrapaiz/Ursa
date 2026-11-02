@@ -16482,3 +16482,40 @@ the owner to accept or reject.
   `origin/main` are why.
 - No adoption is proposed here beyond the entry above, which carries its own
   first step.
+
+### 2026-11-02 — The record invariants accept a bare calendar day as a readable date
+- Trigger: reading `ursa-major/src/invariants.ts` while checking whether this
+  pass's timestamp repair reached the gates. `RIVAL_NOT_AFTER_FINAL` and
+  `EXCLUSION_NOT_CLASSIFIED` both state their readability clause as "a date
+  `Date.parse` can read", and both implement it as `Date.parse(date)` against
+  `NaN`. That is correct about offsets, which is the half this pass was
+  repairing elsewhere, and lax about the other half: `Date.parse('2026-10-09')`
+  returns a number. So a rival verdict whose date is a bare calendar day
+  passes the readability clause and is then ordered against
+  `task.generatedAt` as if it were UTC midnight on that day.
+- What: the ordering those two bounds perform is the one in the product that
+  decides whether a span is dropped from a record. `EXCLUSION_NOT_CLASSIFIED`'s
+  own text says an exclusion "drops a whole file out of every figure in the
+  record, and on this repository's own history one exclusion removed 60,616
+  characters, 84.7% of that run's headline survival figure". A sibling copy
+  dated `2026-10-09` is being compared at `00:00:00Z`, which is up to
+  twenty-four hours earlier than the instant it stands for, and the comparison
+  it feeds is `is this copy from the record's own future`. Reading the day as
+  its earliest instant biases that answer toward "no", which is the direction
+  that keeps the exclusion and drops the file. No record in this repository
+  carries such a date today, so this is latent; it is filed rather than fixed
+  because tightening an invariant changes which already-written records pass
+  it, and that acceptance set is the owner's to move, not a seat's. The same
+  module's second rule — an invariant is a bound, a measurement is not — is the
+  reason the choice matters.
+- First step: measure before changing anything. Walk every record under
+  `ursa-major/trial/` and `fixtures/` and count the descent and exclusion
+  dates by `timestampShape` from `tools/instant.mjs` — `utc-z`, `utc-offset`,
+  `offset`, `naive`, `invalid`, and absent, which is legal and unchecked by
+  design. If the count of day-only and zoneless dates is zero, the bound can
+  be tightened with no record changing verdict and the entry closes in one
+  commit. If it is not zero, the number is the decision the owner needs and
+  the entry is about records already sold rather than about a regex.
+- Cost: $0
+- Status: proposed
+
