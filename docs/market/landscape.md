@@ -648,6 +648,41 @@ Environments for Coding](https://www.rl-list.com/rl-environments-for-coding),
 [YC Launch: Idler](https://www.ycombinator.com/launches/SxT-idler-push-the-frontier-of-your-model),
 [runtimewire: Idler launches AI data lab after a $9M Paradigm-led seed](https://runtimewire.com/article/idler-launches-ai-data-lab-9m-paradigm-seed).
 
+### Taste Labs
+
+What it is: a San Francisco vendor selling preference datasets,
+reasoning data, rubrics, and evaluation environments to frontier AI
+labs, targeting subjective creative quality specifically — starting
+with design, with copywriting named as a second domain. New entry,
+found this run via the demand-signals ceremony (a search-result
+summary naming it among October 2026 RLHF vendor news) rather than a
+landscape sweep. Who it serves: unnamed "top frontier labs" for
+model evaluation/improvement, plus app-layer companies via a Brand API
+product that codifies a company's visual identity into executable
+design rules. Pricing: not public; a $18.5M seed (announced
+2026-06-16, co-led by CRV and Amplify Partners, Latitud writing the
+first check at inception) and reported revenue in the "tens of
+millions" annualized range, with a team of roughly 20 as of the
+announcement. Founder: Thais Castello Branco, formerly at Exa.
+Mechanism: roughly 1,000 contracted "Tastemakers," professional
+designers and copywriters, who evaluate AI-generated outputs and
+decompose subjective qualities (typography, layout, tone) into
+measurable components, producing the preference data the company
+sells onward. Strengths: a founding thesis that states the gap this
+whole map is built around almost word for word — coding and math are
+verifiable, subjective domains aren't, and models "collapse to the
+mean" without a quality signal for them — making this the clearest
+articulation yet, from a funded competitor's own marketing, of why
+CLAUDE.md §1's target domains have no verifier today. Weakness
+against Ursa: the mechanism is still solicited judgment, 1,000
+professionals paid to grade AI output on request, the identical
+structural gap this category's every other entry carries. A
+Tastemaker scoring a generated layout against a rubric is a grader's
+opinion, not a record of whether a real client's actual brand
+deliverable survived contact with the work. Last observed 2026-10-27:
+[Latitud: The Taste Layer for the AI Ecosystem](https://latitudlatam.substack.com/p/the-taste-layer-for-the-ai-ecosystem),
+[hyper.ai: Taste Labs Trains AI on Curated Quality to Combat Creative Slop](https://hyper.ai/en/stories/df1a0e0d52c2bb0d561782479941f19a).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -1666,3 +1701,14 @@ Upgrade?](https://arxiv.org/abs/2609.05339).
   that is also an ad-targeting gate, directly extending the prior
   run's "consent is a distinct axis from transparency" finding.
   Positioning consequence in docs/market/positioning.md.
+- 2026-10-27 (message, 5th run) — added Taste Labs (Category 1, new
+  entry), a $18.5M-seeded vendor selling solicited preference data for
+  subjective creative quality (design, copywriting) via ~1,000
+  contracted "Tastemakers." Found via the demand-signals ceremony. The
+  same structural gap as every other Category 1 entry, but notable
+  for stating CLAUDE.md §1's own "no verifier for subjective domains"
+  claim almost word for word in its own funded marketing. Positioning
+  consequence (a second pitch-collision risk, in a domain even closer
+  to Minor's own "writing" language than Surge's or Mercor's) in
+  docs/market/positioning.md and a dated note on the existing
+  2026-10-07 ledger proposal.
