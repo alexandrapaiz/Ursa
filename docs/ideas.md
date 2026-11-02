@@ -16335,3 +16335,87 @@ the owner to accept or reject.
   table into the instrument that fills it.
 - Cost: $0
 - Status: proposed
+
+## Skill run 2026-11-02 (message, eleventh) — the forward-merge prescription, measured on the rows it names
+
+Run opened. Trigger: Ursa/exo's board note of 2026-11-02 04:4xZ to this
+seat, which withdraws its own prediction that this seat's tip would not
+clear on its own, credits the forward merge that cleared it, and asks for
+seven more of them on this seat's other refused rows. Entries below are
+this run's, measured at `main` `9c3c52dc` with both drivers installed and
+their programs asserted inside this checkout.
+
+### 2026-11-02 — A forward merge is the remedy for the tip of a chain and a harm to every row the tip contains
+
+- Trigger: Ursa/exo's note asking this seat for one forward merge of the
+  trunk on each of its rows that the forge reports `CONFLICTING` while
+  this repository's drivers merge them clean. The premise is correct and
+  was reproduced here. The prescription is correct for one of the rows it
+  names and wrong for the rest, and the difference is mechanical rather
+  than a matter of judgement.
+- What: five of this seat's open rows read `CONFLICTING` at `9c3c52dc`.
+  All five merge clean in the drivered arm, 0 conflicted paths each, and
+  all five refuse in the driverless arm the forge's button performs, every
+  one of them on `docs/ideas.md` and on nothing else. So far this is
+  exactly what the note says. The part the note cannot see from outside
+  the branch: all five are ancestors of this seat's tip, which is clean in
+  both arms, so the only row of the nine the owner can merge with the
+  button is the one that already carries the other eight. Performing the
+  prescribed merge on a contained row was measured rather than reasoned
+  about, in a throwaway worktree on the oldest of them. It buys the
+  driverless arm, exit 1 to exit 0. It costs the containment proof:
+  `git merge-base --is-ancestor` goes from exit 0 to exit 1, which is the
+  one command that lets the owner close eight duplicate rows as one
+  decision instead of reviewing the same work eight times. And it adds
+  nothing, which is the whole point — merging the forward-merged row into
+  the tip yields tree `3fe42efc`, the tip's own tree, unchanged. A field
+  flip bought with the proof that the row is redundant, on a row whose
+  only remaining value is that it is provably redundant.
+- The tool that already does this repo-wide has no guard for it.
+  `tools/ledger/requeue.sh` selects on exactly
+  `.mergeable == "CONFLICTING"` and merges the trunk into every row it
+  finds. Run with `--push` against this queue today it would push five
+  such merges into this seat's own contained rows, and the eight-row
+  closure this seat has twice offered the owner would stop being
+  checkable. Nobody has done that; the tool predates the chain it would
+  now damage.
+- First step: a containment guard in `tools/ledger/requeue.sh`, which is
+  the engineer's file and not this seat's, so this is a ledger entry and
+  not a patch. Before merging into row N, ask whether N's tip is an
+  ancestor of any other open row; if it is, skip it and print the
+  containing row's number instead of the merge. That is one
+  `merge-base --is-ancestor` per candidate pair and it turns the drainer
+  from a queue-wide sweep into one that treats a chain as a chain. The
+  same test belongs in whatever reads the forge's field as a merge-gate
+  condition, because a contained row owes a closure and the gate currently
+  reads it as owing a judgement.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — The stream-collapse this repository has recorded four times is also one keystroke wide on the caller's side
+
+- Trigger: this seat reproduced it on itself in one command while
+  measuring the entry above, five lines below having read the header that
+  enumerates the previous four occasions.
+- What: `tools/stack/merge-surface.mjs` guards the tree identifier
+  positively, two separate pipes, stdout's first line must be forty hex
+  digits and name an object that exists, because a driver's diagnostic
+  text is not knowable in advance. The guard works and the four recorded
+  occasions are all clone-side. This one was not. A hand-typed
+  `git merge-tree --write-tree A B 2>&1 | head -1` put the ledger driver's
+  own success line, "0 block(s) taken from the other branch", where the
+  tree identifier belongs, and the comparison that followed reported
+  DIFFERENT for two trees that are byte-identical. Re-run with the streams
+  kept apart, the same pair reports the same tree. The driver writes its
+  diagnostic to stderr and is blameless; `2>&1` is the entire defect, and
+  the wrong answer arrived at exit 0 with no warning, which is the same
+  shape as the four.
+- First step: nothing in the tool, which already refuses this. What is
+  missing is a sentence where the mistake is made, so: any seat needing a
+  tree identifier out of `merge-tree` calls
+  `tools/stack/merge-surface.mjs` and does not type the command, and a
+  measurement in a pull request that reports a tree comparison names which
+  of the two it used. Worth one line in `docs/agents/merge-order.md`
+  beside the existing driver-path assertion, which is the engineer's file.
+- Cost: $0
+- Status: proposed
