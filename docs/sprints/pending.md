@@ -2,6 +2,74 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## 2026-11-02 ~03:1x UTC message-triggered (fifteenth pass of the day): three Tier B merges (#656, #659, #661), #657 still held unchanged, one tripwire false alarm noted, nothing new for you
+
+**Trigger.** Three things on this run's wake: exo's run finished (naming
+#657 and repeating the standing note about #661); #659, a pull request
+security opened; and a report that a host-window run of security exited
+1 after 151 turns in 37 minutes.
+
+**#657 — unchanged, not re-derived a third time.** The fourteenth pass
+already ran seven local tests plus a live `gh pr merge` attempt and all
+seven agreed the tree is clean while GitHub's own merge engine refused
+it live. Checked this pass only that nothing has moved since
+(`mergeStateStatus` still `DIRTY`, `mergeable` still `CONFLICTING`,
+`updatedAt` unchanged at 02:51:27Z, no new board note from exo). Re-running
+the same seven tests against the same unchanged head would not produce
+new evidence, so this pass did not. Still held, still flagged to exo as
+a platform-level question this clone cannot resolve.
+
+**#661 — the standing claim stayed stale, but the PR itself moved.** The
+fourteenth pass checked `GET /api/standing` live and found it empty, so
+the claim that this draft was "mine to ready, merge, or close" was never
+a live condition, and the PR's own body said the draft was intentional
+(ship-first placeholder) pending engineer's own next run. That next run
+landed eight minutes later: #661 is no longer a draft, its checks pass,
+and it merges clean. **Merged under Tier B this pass** (board-note
+reconciliation tool, `docs/ideas.md` note, no Tier C path, no owner
+comment since the last push — the one comment on it is this seat's own
+from the fourteenth pass, predating the final push).
+
+**#659 (security) — merged under Tier B.** The image-metadata gate
+(checks every tracked image for a text-bearing chunk, not just a text
+pattern), two tooling defects fixed (the all-refs scanner's
+`RangeError` on a full clone, and `--history=all` silently falling
+through to a tree-only scan), and a self-caught redaction near-miss in
+its own test fixture. 539 tests, 0 fail. Checks green, clean merge, no
+Tier C path, no draft, no hold. The one upstream-owned half of the
+original item (the `.github/workflows` flag) stays PWC-13, still
+HQ's.
+
+**#656 (security) — merged under Tier B.** A one-file audit report
+(`docs/security/audit-2026-11-02b.md`), confirmed not superseded by
+#659 per that PR's own body. Clean, checks green, no Tier C path.
+
+**The failed security run (02:26:41Z–03:03:14Z, exit 1, 151 turns) is
+the same run that produced #659.** Confirmed against the host audit
+log (`/srv/asc/state/.epito/audit.jsonl`): the `run.start` at
+02:26:41.627Z and the next `ursa-security` `run.end` at 03:03:14.346Z
+(151 turns, ~36.5 minutes) are the only pair that fits the report, and
+#659's branch pushed commits throughout that exact window. Classified
+under pm.md §11.7 as the no-ship tripwire's known false-alarm shape
+(Incident 12 of `docs/agents/incidents.md`, open since 2026-10-11, now
+on its seventh occurrence): the run's PR exists with real, finished,
+green-checked work, so no rerun. Addendum added to Incident 12; no new
+handoff to `alexandra-systems/exo-centralizer`, since this is the same
+surface already escalated there six times, not new evidence.
+
+**For the owner, the three most important lines:**
+
+1. Nothing needs you tonight. Three Tier B merges landed (#656, #659,
+   #661), #657 stays held on a platform-level question with no
+   seat-side fix to try, and the one failed run tonight was a known
+   false alarm, not a defect.
+2. #657 (exo) has been stuck since before the fourteenth pass: seven
+   local tests say the merge is clean and GitHub's own merge button
+   disagrees, live, with no cause recorded. Flagging again only so it
+   does not read as newly missed if it is still stuck tomorrow.
+3. #395 (research) is now nine days old on an owner-merge PR, unchanged
+   from prior passes.
+
 ## 2026-11-02 ~03:0x UTC message-triggered (fourteenth pass of the day): #657 re-derived seven ways and still refused by a live merge attempt, #661 confirmed a draft on purpose and left with engineer, nothing new for you
 
 **Trigger.** A board note from exo asking this seat to re-derive #657's
