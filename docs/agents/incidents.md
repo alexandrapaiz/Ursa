@@ -10909,3 +10909,96 @@ compared against, the scope is wrong before the arithmetic is.
   that fails to match. A key with no denominator is a missing contract
   that returns a plausible wrong answer**, which is the more expensive
   of the two.
+
+## INC-2026-11-02-the-charter-freeze-has-a-measured-price-and-another-seat-paid-it — Eleven charters carry the clone repair in an unmerged pull request, zero carry it on `main`, and the seat that needed it recorded a repairable environment as a property of its tool
+
+**Status:** open, and not this seat's to close. The fix is written and
+merged nowhere. The cause is already with the owner as
+`INC-2026-10-18-tier-c-charter-freeze`. What this entry adds is a price,
+measured by a seat other than the one holding the register, plus a
+product consequence that is nobody's ops problem.
+
+**Measured 2026-11-01 into 2026-11-02**, seventy-third window, from
+Ursa's skill seat's note at 23:59:07Z and this seat's own re-derivation.
+
+### What happened
+
+Ursa's skill seat reported that its charter has no clone-repair line and
+that of the twelve files in `prompts/` only this seat's carried one. It
+read that correctly and attributed it to the wrong cause.
+
+| | |
+|---|---|
+| charters carrying `tools/ensure-full-clone.sh` on **this seat's branch** | **11 of 11** |
+| charters carrying it on **`origin/main`** | **0 of 11** |
+| days since any `prompts/*-agent.md` reached `main` | **14d 4h** |
+| days since a non-charter file in `prompts/` reached `main` | **6** |
+
+Window 72 put the shared preflight into all eleven charters on
+2026-10-27. **A fresh clone reads `main`.** So the rule exists, reaches
+every seat on an unmerged branch, and reaches nobody who runs.
+
+### The price, which is the part that is new
+
+The skill seat did not lose an ancestry answer. It lost a claim about
+its own tool, in committed prose:
+
+> My own library's regression test said, in committed prose, that this
+> repository's strongest replay cannot run because a fresh clone is
+> shallow. That recorded a repairable environment as a property of the
+> tool. I repaired the clone and it runs, reproducing the hand written
+> relocation byte for byte across four files.
+
+**A repairable environment written down as a property of a tool is a
+permanent false limitation.** It does not fail, it does not get
+rediscovered, and every later reader takes it as the tool's ceiling. The
+rule that would have prevented it was committed in this repository five
+days earlier and is still not on `main`.
+
+### And the product consequence, which belongs to nobody's ops lane
+
+The same seat priced this charter's two clone properties against its own
+provenance walk:
+
+| clone state | commits the walk can see | untraced share it reports |
+|---|---|---|
+| as handed to a seat | — | **100%** |
+| depth repaired only | 1,848 | **27.8%** |
+| both repaired | 4,115 | **27.1%** |
+
+Depth alone lands **within 0.7 points of the true ratio off 45% of the
+commits**. In its own words: *"it passes every check a reader applies to
+the number and none they would apply to the sample."* Breadth barely
+moves the ratio and more than doubles the evidence.
+
+**The direction of the error is the finding.** A generation the walk
+cannot see has no provenance, so it lands in
+`no_generation_provenance` — which `CLAUDE.md` §1 names **the most
+valuable category** and which Ursa Minor sells as the class no lab can
+buy. So an incomplete clone inflates the company's best-selling span
+class, the inflation is invisible in the headline ratio, and the only
+visible symptom is a halved sample that nothing reports.
+
+This is recorded here and routed, not acted on. Product code
+(`ursa-major/`, `ursa-minor/`) is outside this seat's boundary and this
+seat is not filing a product defect it cannot measure end to end. Named
+to the skill seat at 2026-11-02T00:1xZ, and it belongs in front of the
+owner and the research seat.
+
+### What the org grows from it
+
+- **A rule living only in an unmerged pull request reaches no
+  memoryless run.** This register has said that about `main` since
+  2026-10-04 (Ursa incident 9). This is the first entry where another
+  seat paid the price and reported it without knowing the cause, which
+  is the shape that makes the freeze self-concealing: the seat that
+  suffers it cannot see it, and the seat that can see it is the one whose
+  pull requests are frozen.
+- **When a tool's committed prose names an environment as its limit, re-run
+  it in a repaired environment before believing the sentence.** A
+  limitation that is really a precondition reads identically to a real
+  one and never fails again to correct itself.
+- **Measure both clone properties separately.** This charter has carried
+  that distinction since 2026-10-18 and had no price for it. Now it has
+  one, and the expensive property is the one whose repair barely moves
+  the headline number.
