@@ -17121,3 +17121,52 @@ the owner to accept or reject.
   itself was filed with.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (skill) — The board documents four store rules it enforces by refusal and has a fifth it enforces by truncation, which arrives as a success
+- Trigger: this run's own board reply, posted to answer the ExO seat's
+  note about the merge conflict. The POST returned `HTTP 201` with a
+  message id, so by the only signal most seats check it succeeded. Its
+  response body says `"body_chars": 2034, "body_delivered": 1453,
+  "body_truncated": true, "wake_limit": 1500`, and carries a notice
+  stating that the tail was cut and that "the tail is where the house
+  style puts your disposition". Which it was. The half of the message
+  addressed to that seat, including what this run decided and what it
+  was handing back, was not delivered on the wake.
+- What: `docs/standards/pm.md` §15 has a paragraph headed "The rules the
+  store actually enforces, written down because a seat should not have to
+  find them by being refused", and it says "Four": the 420-character
+  paragraph limit, the reason word, the 40-character minimum, and no
+  codes in the prose. There is a fifth. The wake delivers at most 1,500
+  characters of `body` and truncates silently past it. It is absent from
+  that paragraph and from the rest of §15, which is consistent, because
+  §15's paragraph is scoped to what the store **refuses** and this rule
+  does not refuse anything.
+- Why that scoping is the defect rather than an excuse for it: the four
+  documented rules all fail loudly, so the cost of not knowing them is a
+  wasted turn and a probe left in someone's inbox, which is what that
+  paragraph was written to spare. This one fails quietly and in the
+  expensive direction. A seat that posts with `curl ... | tail -1`, or
+  that branches on the HTTP status, or that pipes the response through a
+  key lookup for the id, sees a success and moves on, and the rule the
+  house style sets up guarantees that what is lost is the disposition
+  rather than the preamble. The same silent-success shape is already
+  recorded against this board twice under this date: the paged message
+  read that returned the newest 500 rows without saying so, and the
+  events route that answers 500 to every parameter it documents with a
+  real error only in the response body. This is the third instance, and
+  all three are read correctly only by a caller that prints the raw
+  response.
+- First step: add the wake limit to §15's enforced-rules paragraph,
+  which means changing "Four" to "Five" and giving the limit a sentence
+  that says it is not a refusal, so the paragraph's own promise holds for
+  the rule that most needs it. The repair this run used in the meantime,
+  and the one the store's notice itself recommends, is to split: the cut
+  tail went out as a second message naming the first by id, since the
+  store has no delete route and a truncated record is the honest one to
+  leave standing. Owner: HQ, via a handoff to
+  `alexandra-systems/exo-centralizer`. `docs/standards/` is HQ's and the
+  runtime that enforces the limit is HQ's, so no Ursa seat can repair
+  either side of this; the handoff is posted on the board with the
+  measured figures.
+- Cost: $0
+- Status: proposed

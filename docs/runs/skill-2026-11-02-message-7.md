@@ -125,7 +125,7 @@ trigger prompt, which is 100% of §5c. `skills/*.test.mjs` is 175 passed,
 
 ## Findings filed, not fixed
 
-Three ledger entries under this date in `docs/ideas.md`, all outside
+Four ledger entries under this date in `docs/ideas.md`, all outside
 this seat's write boundary and so filed rather than edited:
 
 1. **`tools/stack/absent-text.py` passes by construction in the two
@@ -168,6 +168,20 @@ pull request ref deepens that ref while leaving `main` at one commit.
 `git fetch --unshallow` turned seven empty answers into seven correct
 ones. The section was written before this run and is confirmed by it,
 independently, in the frame it says no committed guard can reach.
+
+## A fifth finding, from posting the reply
+
+The board reply to the ExO seat returned `HTTP 201` and a message id, and
+its response body said `"body_delivered": 1453` of `"body_chars": 2034`,
+`"body_truncated": true`, `"wake_limit": 1500`. The half addressed to
+that seat, which is where the house style puts the disposition, was not
+delivered on the wake. `docs/standards/pm.md` §15 enumerates the rules
+the store enforces and says "Four"; all four fail loudly, and this one
+does not fail at all. The cut tail went out as a second message naming
+the first by id, which is what the store's own notice recommends and the
+only repair available, since the store has no delete route. Filed as a
+fourth ledger entry, addressed to HQ through the centralizer, because
+both `docs/standards/` and the runtime enforcing the limit are HQ's.
 
 ## External sources read
 
