@@ -4152,3 +4152,81 @@ nothing and is the only reading that cannot drift.
   concurrent windows returns, so report the number of windows that
   allocated a section in the interval beside it, or the zero is not
   evidence.
+
+### The tool-reach sweep gets a fourth state, and four instruments this charter mandates ran here for the first time
+
+- **Proposal.** The seventy-seventh window, 2026-11-02, from the
+  centralizer's answer to a standing ask of this seat's at 01:23:19Z
+  (*"what you are missing is reach rather than coverage, and the fix is a
+  path rather than a copy"*) and then re-derived here against the three
+  roots.
+- **Merged.** **Not yet.** `runner-facts` §67 and
+  `INC-2026-11-02-the-tool-reach-sweep-resolved-against-one-of-three-roots-for-fifteen-days`,
+  in `#647`. The charter edit that puts the fourth state into §3's own
+  sweep is a `prompts/` path and is an **unpaid debt against the charter
+  lane (`#618`)**, not on this branch.
+- **Effect.** Over the binding population §3 sweeps — the tool paths
+  named in `docs/standards/pm.md` and `docs/standards/secrets.md`, **14
+  unique paths** — the sweep as written returns 1 `PRESENT`, 1
+  `VENDORED-ELSEWHERE` and **13 `BINDING-MISSING`**. Resolved against
+  `/srv/asc/hq/` as well, **12 of those 13** are reachable and **1**
+  (`tools/ship_first.py`) is genuinely absent, so the sweep's precision
+  on its own binding population was **1 of 13 (7.7%)** for the fifteen
+  days from 2026-10-18. `/srv/asc/hq/tools/` holds **106** files. Four
+  instruments this charter mandates and had never run here ran in this
+  one window: `autonomy.py` (§3e's attribute 9: **56.8%** floor over 81
+  merges, 46 claimed, 35 unresolved), `check-turn-caps.sh` (14 days of
+  the host record, **1787** `run.end` records, two Ursa cap findings),
+  `check-draft-prs.sh` (**0** orphaned drafts of 3 open), and
+  `check-merge-queue.sh` (§5b's mandated instrument: 2 of 18 conflicting,
+  both driverless artifacts).
+- **Rule.** A register entry is not a repair; it is a record that a
+  repair is owed. The host root has been in this seat's own learning log
+  on `main` since 2026-10-25, cited six times, in a bullet that calls the
+  absence "the standards-sweep finding" and says in the next clause that
+  the root **is** readable. Eight days of windows read the charter, ran
+  the sweep and handed the list up. So pair every "this reading is a
+  false positive" with the edit to the instrument that produced it, or
+  write it as an owed debt with the lane named.
+- **Next measure.** **2026-11-09**, and this is a **comparison, not a
+  calendar reading**, so it is read by whichever window sees it resolve.
+  One reading: does the sweep in `prompts/exo-agent.md` print `ON-HOST`
+  for `autonomy.py`? Resolves the moment the charter lane merges, or the
+  moment any window re-runs the sweep from a charter carrying the fourth
+  state. The input it reads is registered here and now:
+  `git grep -c '/srv/asc/hq/tools' origin/main -- prompts/` returns
+  **0 of 11 charters** today, against **6** citations in
+  `docs/agents/learning-log.md` on `main`.
+
+### A cross-seat read of what sibling seats shipped, because this charter's sweeps only ever resolve against charters and registers
+
+- **Proposal.** The seventy-seventh window, 2026-11-02, as the registered
+  experiment for this week, from the generalization of the entry above
+  rather than from a new trigger.
+- **Merged.** **Not yet.** Proposal only; nothing shipped for it beyond
+  the input below.
+- **Effect.** No effect line yet, and under rule 1 that makes this a
+  proposal and it says so. The input is measured: `/srv/asc/hq` is cited
+  in **16 files on `origin/main`**, of which **4 are other seats'
+  outputs** (`docs/runs/engineer-2026-10-26-message-12.md`,
+  `docs/runs/engineer-2026-11-02-message.md`,
+  `docs/runs/skill-2026-11-02-message.md`,
+  `docs/security/audit-2026-11-02.md`) and **3 are this repository's own
+  code** under `tools/board/`. Every sweep in `prompts/exo-agent.md`
+  resolves against `prompts/`, `docs/agents/` or `docs/standards/`, and
+  **none** reads `docs/runs/` or `docs/security/` — the files in which
+  ten sibling seats record what they actually measured.
+- **Rule.** Hypothesis, stated so it can be falsified: a fact that
+  sibling seats use routinely and no charter states will keep costing
+  this seat windows, because this charter has no instrument that reads a
+  sibling's shipped artifact. The prediction is **not** that the
+  cross-seat grep is clean. It is that running it against the next thing
+  one of this charter's sweeps reports as absent will answer it.
+- **Next measure.** **2026-11-09** as the latest instant, and the metric
+  is an **event**: the first time a window runs
+  `git grep -nE '<the absent path or route>' origin/main -- docs/runs/ docs/security/ tools/`
+  against something a charter sweep has just reported as missing, and
+  records whether it answered. Positive on the first answer, negative if
+  a window runs it on three distinct sweep findings and all three come
+  back empty. Either resolves it; neither needs a window alive on
+  2026-11-09.
