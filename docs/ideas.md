@@ -2,6 +2,81 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-02 (security, fifth run): the containment check every charter orders is unrunnable in the clone every seat is handed, and it fails in the direction that duplicates work
+
+**Status:** urgent. **For:** the owner, because the text is in eleven
+charters and charters are hers alone. **Found by:** a test skip, not by
+reading: `tools/stack/repair-pending.test.mjs` abstained with "bootstrap
+refspec not fetched; nothing to measure" on a clone this run had already
+repaired with `tools/ensure-full-clone.sh`.
+
+**The finding.** The "Read your own seat's open PRs first" rule — this
+repository's version of HQ's L-E10 — tells a seat to check whether an older
+pull request is already contained in a newer one with
+`git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>`. That command
+names a ref namespace that does not exist in a seat's clone. Measured here
+at 04:0xZ, on a clone already repaired for both depth and refspec:
+
+```
+$ git for-each-ref refs/prs | wc -l
+0
+$ git merge-base --is-ancestor refs/prs/664 refs/prs/672
+fatal: Not a valid object name refs/prs/664
+exit 128
+$ git merge-base --is-ancestor \
+    origin/ursa-security/2026-11-02-message-4 \
+    origin/ursa-security/2026-11-02-message-5
+exit 0
+```
+
+The second command is the true answer for the same pair: contained. The
+first is the one the charters tell a seat to run, and it exits 128.
+
+**Why it matters, and in which direction.** `--is-ancestor` communicates
+through its exit code, and every non-zero value means NOT CONTAINED. A
+missing ref is non-zero, so the error is indistinguishable from the answer
+"no" in exactly the idiom a seat writes it in, `git merge-base
+--is-ancestor A B && echo contained`. Having read "not contained", the
+seat follows the charter's next sentence and combines the branches by
+hand — rebuilding work that was already merged. That is precisely the
+waste the rule exists to prevent, delivered by the command the rule
+supplies. This is also fault 1 from the header of
+`tools/ensure-full-clone.sh`, "non-zero means NOT CONTAINED — the opposite
+of the truth", reached through a different door than the one that file
+closes.
+
+**Scope.** All eleven seat charters carry it, seventeen occurrences:
+`grep -rc refs/prs prompts/*.md`, run 2026-11-02. Not one of them says to
+fetch the refspec first. Nothing in the repository does it either, and
+`tools/ensure-full-clone.sh` declines on purpose, in a paragraph headed
+"WHAT IT DOES NOT DO": pull request heads are not branches, and fetching
+every head in a repository with hundreds of pull requests is not a
+precondition for reading history. That reasoning is sound and this entry
+does not argue with it. The defect is the gap between a tool that
+deliberately does not provide the refs and eleven charters that assume it
+does.
+
+**What would fix it.** Either of two one-line changes, and the choice is
+the owner's:
+
+1. Have the charters name the refs that exist. `origin/<branch>` is
+   present in any clone repaired by `tools/ensure-full-clone.sh`, and
+   `gh pr view <n> --json headRefName` turns a number into that name. This
+   needs no fetch and no new objects.
+2. Have the charters prefix the fetch:
+   `git fetch origin "refs/pull/<n>/head:refs/prs/<n>"` for the two numbers
+   in question, which is the "asks for them by name" case
+   `ensure-full-clone.sh` says it is leaving to the caller.
+
+The first is preferable: it removes a fetch rather than adding one, and it
+cannot half-succeed.
+
+**Not fixed here.** `prompts/` is outside this seat's write surface — "Never
+edit charters" in `prompts/security-agent.md`, Boundaries — and the text is
+identical across eleven files, so this is one owner edit and not eleven seat
+edits. This run used form 1 above for its own containment check and said so
+in its pull request, which is why it found the gap at all.
+
 ## Ledger entry — 2026-10-18 (skill, relevance sweep slice 3): the six evidence kinds are written down twice and nothing checks that the two agree
 
 **Status:** proposed. **For:** the engineer seat. **Found by:** reading, not

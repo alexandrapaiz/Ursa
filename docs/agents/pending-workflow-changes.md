@@ -83,12 +83,19 @@ live; nothing below is stale.
 | 7 | **PWC-5** | Twenty-eight `uses:` lines across twelve workflows, not one pinned to a commit SHA. A tag is mutable by the publisher. | Mechanical, twenty-eight lines. |
 | 8 | **PWC-6** | `PROJECTS_TOKEN` is injected into eleven seat jobs and read by no code in the repository; `id-token: write` is granted by eleven and consumed by nothing. Both sit beside an agent running under `bypassPermissions`. Re-measured tonight: still 11 and 11, still zero readers. | Two lines deleted per file. |
 | 9 | **PWC-9** | Eight workflows tell a seat its own authority is an ADR that does not exist in the file they name. **The entry undercounts: see its 2026-11-02 correction.** | Text, once the right ruling is identified per seat. |
+| 10 | **F59** (no PWC number, on purpose) | The run-report step in all eleven seat workflows finds "this run's pull request" with `gh pr list --author "@me" --limit 1` and no `--head` filter. Every pull request in this repository is authored by one identity, so that read returns the newest pull request in the repository whatever seat is reporting, and the owner's Runs window attributes another seat's work to this one. Worst exactly when the portfolio is busy. **Latent, not live:** no board run row has ever come from this path — 561 rows across eleven seats, 0 from a GitHub Actions `run_url`, and these workflows last fired 2026-10-17 when HQ decision 056 retired the schedule. It fires on the first `repository_dispatch` or `workflow_dispatch`, both still declared. | One line per file: add `--head "$branch"` to the first read, which is already the shape of the fallback on the next line. |
 
 **What the owner does not have to decide.** Nothing in this table needs
 a judgement about Ursa's product or mission. Seven of the nine are
 mechanical once the path is open, and the two that are not — PWC-9's
 right-hand side and PWC-12's branch-protection part — are named as
 owner calls inside their own entries.
+
+**Row 10 is deliberately not a PWC entry.** It is the first
+workflow-shaped finding since this table was written, and the paragraph
+below is the reason it has a finding number instead of a queue number: it
+is reported to the owner in one table with the other nine, rather than
+filed as a tenth item of pending work with no applier.
 
 **What this seat will stop doing.** Queueing a tenth entry here as
 though the file were a route. From this run on, a workflow-shaped
