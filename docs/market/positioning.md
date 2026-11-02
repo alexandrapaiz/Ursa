@@ -1593,3 +1593,62 @@ article and not a session; summarizing Deedy Das / Menlo Ventures'
 landscape map; no primary source link found this run), [TechCrunch: OpenAI is reportedly asking
 contractors to upload real work from past
 jobs](https://techcrunch.com/2026/01/10/openai-is-reportedly-asking-contractors-to-upload-real-work-from-past-jobs/).
+
+## "Outcome-based pricing" already means something else in this market, and it isn't Minor's (2026-11-02, message, 7th run)
+
+A data-licensing market report (pebblous.ai, citing "Media and the
+Machine," June 2026, plus Ithaka S+R's tracker; no byline or publish
+date on the report itself, so treat its 2026 figures as the report's
+own projections) names "outcome-linked pricing" as the newest of four
+generations of AI data-licensing billing, after fixed annual fees and
+usage-/query-based metering. Its example is Reddit's reported push to
+have Google pay by the share of citations Reddit content earns inside
+AI answers — compensation tied to a measurable downstream result, not
+to volume delivered. 91 disclosed deals total, 34 projected for 2026
+in the real-time-access category this term sits inside.
+
+This is bulk-content licensing (news, forums, retrieval corpora), a
+different Category entirely from Minor's RLHF/preference-data market,
+but the term itself is a problem for Minor regardless: CLAUDE.md §1
+calls Minor's product an "outcome record," and §4 prices it as a flat
+annual license, not a result-contingent fee. A lab's procurement team
+that has just read an "AI data licensing trends" piece using "outcome-
+based" to mean *pay-per-citation* could reasonably expect Minor's
+pitch to be a similar pay-per-result structure, which it is not — the
+record is priced for what it contains (a generation joined backward to
+what survived), not for what happens after the lab buys it. Worth a
+one-line disambiguation in KR4.1's lab brief the first time "outcome"
+appears, so the word doesn't do the opposite of its intended work:
+"outcome" names what the record documents (a span's fate), not how
+Minor is paid for it. No pricing recommendation follows from this; it
+is a naming-collision risk, same category as the Taste Labs and
+"Type 1/Type 2" entries already on file, not a new accuracy or cost
+argument. Ledger proposal opened below. [pebblous.ai: AI Data Licensing: The Shift to Real-Time Access](https://blog.pebblous.ai/report/ai-data-licensing-realtime-shift-2026/en/).
+
+## A market critique of memory plugins independently names the defect Major's non-negotiable already answers (2026-11-02, message, 7th run)
+
+A Hacker News post with real traction for this category (392 points,
+312 comments, posted 2026-10-03, found this run rather than in its own
+week) argues the opposite side of Category 3's whole premise: that
+RAG-based agent memory plugins are the wrong fix, and the specific
+failure named first is that they are "unauditable" — stored memories
+accumulate in a way that makes it "impossible to track which memories
+influence behavior." The post is about coding-agent session memory,
+not cross-model personal-preference portability, and its own proposed
+fix (maintained documentation, not a memory store) is not a competing
+product in Major's category at all. But the defect it names by name —
+memory a user cannot audit back to what it actually drives — is
+exactly the gap CLAUDE.md's non-negotiable #2 ("the user can always
+see, edit, revoke, and delete what's been inferred") commits Major to
+closing, and this run's update to the ChatGPT Memory entry
+(docs/market/landscape.md, 2026-10-05) already found a concrete case
+of a shipped competitor failing that same test (an edit in OpenAI's
+Memory Summary not reliably reaching the "User Knowledge Memories" the
+model actually uses). So what: this is independent, non-Minor-sourced,
+well-trafficked corroboration that auditability is a real and current
+practitioner complaint about memory systems generally, not a
+differentiator Major invented to sound good. Worth citing in Major's
+own public messaging as "practitioners are already naming this as the
+failure mode," distinct from the portability argument Category 3's
+main read already carries. No ledger proposal opened for this one;
+it strengthens an existing claim rather than opening new work. [Hacker News: Agents don't need memory, they need documentation](https://news.ycombinator.com/item?id=49945933), [liao.gg: Agents don't need memory, they need documentation](https://liao.gg/blog/agents-dont-need-memory).
