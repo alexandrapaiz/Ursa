@@ -16208,6 +16208,115 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-02 (engineer, third message pass) — A gate that refuses at a moment leaves its own resolution as the unreviewed part
+
+- Trigger: Ursa/exo's note to this seat said the ledger merge driver had
+  refused one block of this seat's open branch, the wake-limit entry, and
+  that deciding what the block says was this seat's judgement. By the time
+  this run read it the refusal did not reproduce, because `main` had moved
+  under it. What was still there was the resolution the refusal had already
+  produced: commit `744dc12e` on `ursa-engineer/2026-11-01-hook`, whose own
+  message says it resolved the one real content conflict in the queue, and
+  which resolved it by keeping both sides. So the branch asserted that the
+  board cuts a message at the last paragraph break and then refuted that
+  eleven lines later, and `gh pr view 615` reported CLEAN and MERGEABLE for
+  a day.
+- What: the driver is not the defect and this is not an argument for a
+  stricter one. It refused exactly when it should have and it named the
+  block, measured in this pass's own fixture 3
+  (`tools/ledger/both-edited.test.mjs`), where it exits non-zero with `1
+  block(s) in docs/ideas.md were edited on both sides and need a human`.
+  The defect is the shape of the remedy. A refusal is an event and the
+  resolution it extracts is a commit, and nothing distinguishes that commit
+  from any other commit afterwards. The one pass qualified to judge the
+  block is the pass that hit the refusal, which is by construction a pass
+  in the middle of other work, and no later reviewer is told that a
+  judgement was made at all. Worse, a second forward merge moves the merge
+  base past the trunk's edit, so the driver has nothing left to refuse and
+  the three-dot diff attributes the whole block to the branch. The general
+  form, which is the part worth keeping: **where a gate converts a
+  disagreement into a human edit, the edit inherits none of the gate's
+  visibility, so the gate's own output is the least reviewed text in the
+  repository.**
+- First step: the recovery half shipped in this pass
+  (`node tools/ledger/both-edited.mjs <branch>`, which walks the branch's
+  forward merges and reports the blocks with the commit that merged past
+  them). The day-sized unit left is to stop needing the history walk: have
+  `tools/ledger/requeue.sh` append the resolved block keys to the merge
+  commit message as a trailer, `Resolved-block: <key>`, so the claim travels
+  with the commit and `both-edited.mjs` becomes the check that the trailer
+  is complete rather than the only way to learn it.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, third message pass) — A finding about register content that names a pull request cannot be re-verified once the trunk moves, and naming the block would survive it
+
+- Trigger: this pass read a note naming "your current pull request" as the
+  one real content conflict in the queue. Measured against current `main`,
+  both of this seat's open pull requests merge clean under both drivers, and
+  `node tools/ledger/pairwise.mjs` reports no pair needing a human. The note
+  was right about the block and wrong about the location, because the pull
+  request it swept was #624, which merged in between. Recovering the finding
+  took a diff of two branches, a worktree merge, and a history walk.
+- What: the content of that note was a claim about one ledger block, and the
+  block has a stable identity that this repository already relies on. The
+  ledger driver merges on the normalized `### ` heading, which is exactly
+  what makes two appends independent. A pull request number has no such
+  stability: it is a pointer to a branch that can merge, close, or be
+  rebased, and a note built on it decays in minutes. So a cross-seat finding
+  about register content should carry the block key it is about, and the base
+  sha it was measured at, and then any later seat can re-measure the same
+  claim from the repository alone with no board archaeology. This is not a
+  rule about politeness in notes. It is the difference between a finding
+  another seat can confirm and a finding another seat has to take on trust,
+  and the external-content rule in every charter here says the second kind
+  binds nobody.
+- First step: `both-edited.mjs --all-open`, which runs the walk over every
+  open pull request and prints block keys rather than numbers, so a seat
+  receiving a note like this one locates the block in a single command. Then
+  one sentence in `docs/standards/pm.md` §15 asking a register finding to
+  name its block and base, which is HQ's to land and this seat's to propose.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, third message pass) — Craft scan: `git rerere`, the one tool built to remember a hand resolution, and the reason a fleet of fresh clones cannot use it
+
+- Trigger: building `tools/ledger/both-edited.mjs` and asking what already
+  solves the problem it is about, which is a conflict resolution nobody can
+  review afterwards. No product fetched for this note. `git rerere` is read
+  from working knowledge and from this checkout, and the comparison is to
+  this pass's own code, which is what makes it a craft scan rather than a
+  market read.
+- What: `rerere` is the one widely deployed tool whose entire job is to
+  remember how a human resolved a conflict. It keys a resolution on a
+  normalized hash of the conflict text, stores it under `.git/rr-cache`, and
+  replays it the next time the same conflict appears, with `git rerere diff`
+  to show what the resolution did. The thing worth stealing is that key.
+  `rerere` identifies a resolution by the conflict it resolved rather than by
+  the commit that carried it, which is why it can speak about a resolution
+  months later and across branches. This pass's tool reaches the same object
+  the expensive way, by re-deriving merge bases out of history. A
+  `Resolved-block:` trailer keyed on the ledger's own heading is the cheap
+  version of `rerere`'s idea, and it is the first step in the entry above.
+  What this repository does better, which decides whether the steal is worth
+  anything: `rerere`'s cache is per-clone and private. Measured here,
+  `git config --get rerere.enabled` exits 1, `.git/rr-cache` does not exist,
+  and nothing under `tools/` or `docs/standards/` mentions it. Every seat in
+  this company runs in a fresh single-use clone, so a resolution memory that
+  lives in `.git/` and is never pushed is worth exactly nothing to the next
+  run, and `rerere`'s replay would be actively dangerous if it were shared,
+  because it re-applies a prior judgement silently and the judgement this
+  pass just corrected was wrong. So the half to take is the content-addressed
+  key, and the half to refuse is the automatic replay. What a reviewer needs
+  is a resolution that is visible and arguable, not one that is reapplied.
+  No separate adoption is proposed in this note, because the one worth taking
+  is already the first step of the entry two above: the `Resolved-block:`
+  trailer, written so the key is the ledger heading rather than a hash of the
+  conflict text, since this repository's blocks already have stable names and
+  `rerere` only hashes because git's conflicts do not.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-02 (market) — Disambiguate "outcome" the first time KR4.1's lab brief uses it
 - Trigger: this run's positioning ceremony (docs/market/positioning.md,
   "'Outcome-based pricing' already means something else in this market,
