@@ -17079,3 +17079,121 @@ the owner to accept or reject.
   than a pass/fail guess.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (engineer) — A published verdict should name the time its evidence was read, because a stale verdict and a wrong one read identically
+- Trigger: tonight's whole run. Ursa's PM commented on this seat's pull
+  request that "the run behind it ended 8 minutes before the claim
+  reached me." At the moment it was written, 03:03:08, every word of
+  that was true of the evidence available. By 03:08:11 the run had
+  pushed again and readied the pull request itself, and the comment was
+  stale. Nothing in the comment distinguishes those two states, so the
+  next reader of that thread has to re-derive the facts to find out
+  which one they are looking at, and this seat spent a run doing
+  exactly that.
+- What: board messages and pull-request comments carry a conclusion and
+  an `as of` for the evidence under it, as a field rather than as a
+  habit. `tools/board/post.mjs` already refuses a path claim with no
+  ref (`tools/board/claim-ref.mjs`), on the identical argument one
+  layer down: a sentence that cannot be located is equally true of two
+  worlds and the reader cannot choose. A verdict with no read time is
+  the same defect about the time axis instead of the ref axis. The
+  notice form matters more than the gate form here, because a seat that
+  already wrote "read at 03:03" should be told it did the right thing
+  rather than nagged.
+- First step: `tools/board/as-of.mjs`, a notice in the `notices` half of
+  `tools/board/check.mjs`, pure and lexical like
+  `tools/board/disposition.mjs`: find the sentences that state a
+  conclusion about another seat's live state, check whether any
+  timestamp or `as of` phrase appears in the same block, and report
+  `stated`, `absent`, or `cannot tell`. Measure it over the board's own
+  rows first, the way the disposition discriminator was measured,
+  before anyone argues about whether it should ever change an exit
+  code.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer) — Measure how long each seat leaves its own draft unreadied, because this seat's 24 minutes cost a sibling seat a whole run
+- Trigger: `docs/standards/pm.md` §8 says ready "at the first moment the
+  branch would be worth merging as it stands, not when you are
+  finished." This seat's sixth pass tonight opened a draft at 02:44:08
+  and readied it at 03:08:11, at its fourth and last commit. Inside
+  that window a sibling seat read the placeholder, concluded the work
+  was abandoned by design, and wrote a comment and a note about it. The
+  rule was followed in the letter that a draft was resolved before the
+  run ended and broken in the clause that matters, and no instrument
+  anywhere reports which.
+- What: a per-seat readiness lag. The quantity is minutes from the
+  second commit on a branch to its `ready_for_review`, because the
+  first commit is the ship-first placeholder and the second is the
+  earliest moment there is anything worth merging. Reported per seat
+  over a window, with the count of sibling-seat reads that landed
+  inside each unreadied window, which is the cost side of the number
+  and the only reason to care about it.
+- First step: a `--ready-lag` mode on `tools/seat/draft-fault-measure.mjs`,
+  which already reads every commit date and every `ready_for_review`
+  for a window of pull requests and already knows how to exclude a
+  stacked branch from a one-run window. The sibling-read count comes
+  from the same timeline call, filtered to `commented` events by an
+  author whose own branch is not this one.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer) — Wire the draft discriminator into the PM's merge pass, which is a proposal and not an action because that pass is not this seat's lane
+- Trigger: `tools/seat/draft-fault.mjs` ships on branch
+  `ursa-engineer/2026-11-02-message-7` with a `--strict` exit code and
+  nothing calls it. The run that produced it is the wrong seat to call
+  it: Tier B clause 2 and the orphaned-draft clause both live in the
+  PM's daily pass, and `prompts/engineer-agent.md` forbids this seat
+  editing planning surfaces or another seat's charter.
+- What: the PM's daily run reads `node tools/seat/draft-fault.mjs
+  --json` once, before it decides anything about a draft, and treats a
+  refused row as a draft it may not resolve this pass. That is one
+  request and it replaces an inference the PM currently has no
+  instrument for. The same read answers the engineer charter's "resolve
+  any draft your seat left behind" check, which today is a `gh pr list`
+  that cannot tell an inherited draft from this run's own.
+- First step: not code. The owner or HQ decides whether §10's Tier B
+  clause 2 and the orphaned-draft clause gain a sentence pointing at
+  this tool. If they do, the PM charter's daily sequence gains the line
+  and this seat does nothing further.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, craft scan) — Graphiti's temporal edge invalidation, advertised as a differentiator and documented without the field names that would let a reader check it
+- Scanned: Zep / Graphiti (category 3, personalization and memory
+  layers, `docs/market/landscape.md`). The landscape entry records the
+  product and its October 2026 repackaging; this scan read the
+  product's own documentation for the mechanism, which the entry does
+  not describe. Sources: [Graphiti overview](https://help.getzep.com/graphiti/getting-started/overview),
+  [Graphiti graph namespacing](https://help.getzep.com/graphiti/core-concepts/graph-namespacing).
+- Worth stealing, and it is the exact shape of tonight's defect one
+  layer up. The overview page lists "temporal edge invalidation" as the
+  property separating Graphiti from GraphRAG, and says "graph edges
+  include temporal metadata to record relationship lifecycles." A fact
+  that stops being true is not deleted, it is marked invalid, and the
+  edge survives with its own lifetime attached. Ursa's outcome record
+  already has the two-clock shape in `survived_mutated` and
+  `generated_deleted` (CLAUDE.md §1) and the time dimension says "not
+  just what survived but how long." What it has no form for is the
+  thing tonight's run needed: a conclusion about a live state, carrying
+  the time at which that state was read, so that a later reader can
+  tell a stale verdict from a wrong one. That is the ledger entry above
+  this one, and this product is where the shape came from.
+- Where Ursa is ahead, measured against the two pages actually read
+  rather than against the feature's reputation. Neither page names a
+  single field. Not `valid_at`, not `invalid_at`, not `expired_at`;
+  `created_at` appears once inside an unrelated edge example. Neither
+  page says whether an invalidated edge records which later fact caused
+  the invalidation, which is the whole question a reader has once they
+  are told invalidation exists. So the mechanism is sold at the
+  level of its name and the identifier that would let a buyer audit it
+  is absent, which is the same failure a sibling seat reported in this
+  seat's prose this week: a claim stated in a form that is equally true
+  of several different systems. Ursa's record names its fields in the
+  schema it publishes and its resolver cites a commit, and tonight's
+  `MEASURED` block exists so that a number in a comment and a number in
+  code cannot drift apart.
+- Possible ledger idea: none that is not already the first entry above.
+  Recorded as a scan rather than split into a second entry, because the
+  observation that triggered the idea and the product the shape came
+  from are the same observation.
