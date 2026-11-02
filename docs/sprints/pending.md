@@ -2,6 +2,59 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (nineteenth pass): the eighteenth pass's own repair merged, three more seats landed, nothing newly blocked
+
+Triggered by the day's own event stream: a skill retraction, a
+distribution note on the gitignore install, exo's window-84 pull
+request, exo's window-84 run finishing, the skill run finishing, an
+engineer correction, a market pull request, and four repeats of the
+standing reminder naming `#704` as possibly orphaned. Read as data,
+each independently re-checked against the live repository rather than
+taken on word.
+
+1. **Nothing new to merge here.** The eighteenth pass's own pull
+   request (`#707`, pure `docs/sprints/` and `docs/agents/`) is now
+   self-merged under Tier A. Three more pull requests merged under
+   Tier B this pass: `#702` (security, the redaction-argument guard),
+   `#703` (engineer, the containment guard that confirmed the six
+   superseded rows the eighteenth pass closed), and `#706` (market,
+   the forward-merge brief that supersedes the now-closed `#686`).
+   Each was green, clean, not a draft, carried no charter or secret
+   path, and had sat with no owner comment since its last push.
+2. **The standing reminder naming `#704` as orphaned was stale by the
+   time this pass read it.** `check-draft-prs.sh --repo
+   alexandrapaiz/Ursa` reports `#704`, `#705`, `#708` and the newly
+   opened `#709` all idle under their own seat's timeout window, not
+   past it — `#704` itself took a real commit four minutes before this
+   pass's check ran. None readied, none closed; a live run is not this
+   seat's to touch.
+3. **`#701` (this seat's own) still carries the secret-print guard and
+   still conflicts with the trunk on `tools/root-entries.test.mjs`**,
+   unchanged from the eighteenth pass: a real code conflict, not a
+   merge-button question, and Tier B on top of being this seat's own
+   row, so it waits for the owner or HQ's PM regardless. `#699` (exo,
+   window 84) is new this pass and is Tier C by path — it touches the
+   charter file for nearly every seat — and also carries one real
+   content conflict against the trunk, in the incidents register; both
+   facts replied to exo on the board rather than acted on. `#395`
+   (research) and `#700` (skill) stay Tier C by path exactly as named
+   before, both otherwise clean; `#700` still contains `#689` and
+   `#692` by ancestry.
+
+**Also carried, not new:** the sprint-ceremony gap stands —
+`sprint-2026-10-12.md` is still the newest sprint file on `main`, and
+today's events were all message-triggered rather than the Monday
+cron, so this pass did not open the ceremony either (see "Boundaries
+honored" in this pass's own run log for why opening it unprompted
+would be the wrong call, not an oversight). Engineer's five mutually
+non-ancestral open pull requests (`#665`, `#679`, `#685`, `#694`,
+`#703` before it merged) are now four (`#665`, `#679`, `#685`,
+`#694`), re-checked directly with `git merge-base --is-ancestor`
+rather than trusted from a prior pass's count — all four still
+pairwise non-ancestral and all four `dirty` against the trunk after
+this pass's merges. Neither is a conflict this seat resolves in code
+(pm.md §10 condition 5); named here for engineer to rebase.
+
 ## Top three for the owner, 2026-11-02 message-triggered (eighteenth pass): the two divergent PM chains the seventeenth pass flagged are now one decision each side, five more seats' PRs merged, one chain still waits on you
 
 1. **Nothing to merge here.** This pass's own repair (six of this
