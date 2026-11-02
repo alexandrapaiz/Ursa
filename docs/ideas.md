@@ -16350,3 +16350,80 @@ the owner to accept or reject.
   denominator is a grep, so it is an hour, not a day.
 - Cost: $0, in `skills/trigger-coverage.mjs`
 - Status: proposed
+
+### 2026-11-02 (skill, third run) — The check the two hand repairs asked for is built, and the defect it was built from is live on the trunk while it is being built
+
+<!-- closes: docs/ideas.md 2026-11-02 "The README construct repeats, so the count claim 2026-10-27 left as a hand repair is a check after all" -->
+<!-- closes: docs/ideas.md 2026-10-27 "The README states counts of the library in prose, and the detector built for skill bodies finds nine of them and none of the defect" -->
+
+- Trigger: the two entries above, in order. The 2026-10-27 one named this seat
+  and "the next run of this seat that edits `skills/README.md`" as its owner and
+  deadline, and set one condition for building rather than hand-repairing: that
+  the construct repeat twice. The 2026-11-02 one reported that it repeated and
+  proposed the check. This run built it, which is the first time in this lane a
+  proposal has been built by the run named in it rather than by a later run
+  rediscovering the finding.
+- What: `areaHeadingDefects` in `skills/trigger-coverage.mjs`, with
+  `explainAreas` beside it and ten tests. The denominator is the list of
+  `**The ... area.**` paragraph openers, which is a grep; the two claims graded
+  against it are the `## <N> areas` heading ordinal and the `areas` key in the
+  `counts` block. It prints with the other stated counts and exits 1 on its own.
+- The measurement that makes this worth more than the fix: the check was run
+  backwards over every commit that has ever touched `skills/README.md`, nineteen
+  of them. Clean through 2026-10-26. **Red from the commit that landed the ninth
+  skill, and still red on `main` right now:** `## Seven areas` standing over six
+  labelled areas. So the defect this seat found by hand on one branch is on the
+  trunk, and the branch that repairs it is #633, which is in the owner's queue.
+  A guard written on a branch cannot be red about a trunk nobody runs it on.
+- Wider than the proposal in exactly one place, named here because the proposal
+  is a committed file and a silent widening of it is the thing this library
+  grades other files for. The proposal graded the heading ordinal and left the
+  `areas` key alone, on the reasoning that an area is a §5e judgement. That
+  reasoning is right about the judgement and wrong about the number: the
+  judgement is expressed by which labels exist, so the labels are a list and the
+  key is a restatement of its length. Measured: on `main` there is no `counts`
+  block at all, so the proposal as written catches `main`'s defect and says
+  nothing about the key, and grading the heading alone would certify an ordinal
+  while leaving the key free to contradict it.
+- Two things the proposal got right that this run would not have guessed. The
+  first is that pointing `libraryCountsInBody` at the index returns nine hits
+  with the live defect not among them, because the index's job includes
+  recording and quoting counts; that measurement is why this is a construct and
+  not a pattern. The second is that the detector matched spelled words and the
+  defect was written as a digit, so the ordinal here is read as either, and a
+  word the map does not hold is reported as unreadable rather than skipped.
+- First step: none left in this lane. The code, the ten tests, the index prose
+  and the history sweep are in this pull request, and the two entries above are
+  closed by marker rather than by status, because `docs/standards/pm.md` §4
+  gives only the owner the move out of `proposed`. What remains for a reader is
+  the one judgement a seat should not make for her: whether grading the `areas`
+  key is the widening argued above or an overreach, which is a two-line revert
+  in `areaHeadingDefects` if she reads it the other way.
+- Cost: $0, spent
+- Status: proposed
+
+### 2026-11-02 (skill, third run) — A guard about `main` cannot be red about `main` from the branch that defines it, and this lane now has four such guards
+
+- Trigger: measured while closing the two entries above, not recalled. The
+  check built this run is green on this branch and red on `origin/main`, and the
+  only reason the trunk is not failing is that the file defining the check is
+  not on the trunk either. The same is true of `countDefects`, of
+  `bodyCountDefects` and of `specNeighbourDefects`: all four landed in this
+  seat's branches, and `main`'s copy of `skills/trigger-coverage.mjs` is 364
+  lines against this branch's 1,384 and contains none of them.
+- What: this is not an argument for merging faster, which is not a seat's call.
+  It is an argument that a guard's receipt has to state which tree it was run
+  against, because "green" from a branch that holds both the guard and the
+  repair says nothing about the tree the owner is protecting. This seat's run
+  records already measure every guard against `origin/main` in a worktree, which
+  is the right instrument and was adopted for a different reason. What is
+  missing is the third column: green here, red there, and **the date the
+  defect-on-the-trunk started**, which is a sweep over the file's own history
+  and took one command.
+- First step: when a run in this lane builds a guard, it runs that guard over
+  the history of the file the guard reads and reports the first commit it is red
+  on, in the pull request. Nineteen commits took under a second here. The reason
+  to make it a habit rather than a rule is that it converts "this check would
+  have caught it" from a claim into a date.
+- Cost: $0, one command per guard built
+- Status: proposed

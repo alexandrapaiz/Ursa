@@ -33,9 +33,17 @@ areas: 8
 Two numbers of different kinds, which is why they sit in a block rather
 than in a sentence. `skills` is derived from the directory listing, and
 `node skills/trigger-coverage.mjs` measures it and fails on a
-disagreement. `areas` is a judgement about where an edge falls, no tool
-can derive it, and it is kept by hand on purpose. There are fewer areas
-than skills because the record area holds four of them.
+disagreement. `areas` was kept by hand on purpose until 2026-11-02,
+because where an edge falls is a judgement no tool makes. That is still
+true of the judgement and it was never true of the number. The
+judgement is expressed by which `**The ... area.**` labels exist below,
+so the labels are a list a tool can count, and the same command now
+measures `areas` against them and fails on a disagreement too. There
+are fewer areas than skills because the record area holds four of them.
+
+What the author still decides is the list. An area this file means and
+never labels is reported as a disagreement, which is the right answer,
+because a reader counting the labels cannot see it either.
 
 The first draft of this paragraph said "the count is in the heading and
 nothing checks it", and it meant the areas. The sentence it was in
@@ -43,8 +51,9 @@ carried the library's size as well, which is mechanical, so a disclaimer
 written about the judgement exempted the derivable number standing beside
 it. That is `prompts/skill-extract.md` §5ae's own cause reappearing
 inside §5ae's own statement of residue, which is why §5af exists and why
-these two numbers are no longer in one sentence. The heading still says
-eight, because a heading is prose and the block is what the tool reads.
+these two numbers are no longer in one sentence. The heading says eight
+as well, and since 2026-11-02 it is read rather than taken on trust:
+the ordinal is graded against the labels in the same pass as the block.
 
 The heading read seven when this merge landed it, with six areas
 labelled under it. The run that added the ninth skill moved the heading
@@ -52,6 +61,13 @@ and placed that skill inside the span area in the same breath, and both
 of its own sentences about that skill put it there, so the heading was
 the outlier rather than the list. Eight is the count of labelled areas,
 and it is the only reading the prose and the list agree on.
+
+That repair was made by hand, and the entry recording it said one
+instance is a hand repair and two is a check. It was the second. The
+first was the sentence counting the ordered pairs, repaired the same
+way five days earlier. So the check exists now, and it was run
+backwards over every commit that has touched this file: clean through
+2026-10-26, red from the commit that landed the ninth skill.
 The first three skills work on `files[].spans` and `stats` inside
 `outcome_record.json`. The fourth works on `tuning.json`. The fifth
 works on neither: it works on the checker those records are held
@@ -440,12 +456,23 @@ Two mechanics a run adding another skill will meet:
   near miss filed as a should-fire prompt inflates coverage.
 
 Since 2026-10-27 the same command checks the counts this library states
-about itself, in three places: the `counts` block at the head of each
-trigger test, the `Refs` column in the table above, and the `skills` key
-in the block under "Eight areas". Each is measured from the files and a
+about itself, on these surfaces: the `counts` block at the head of each
+trigger test, the `Refs` column in the table above, the `skills` key in
+the block under "Eight areas", and, since 2026-11-02, the area count in
+that same block and in the heading over it, both read against the
+`**The ... area.**` labels. Each is measured from the files and a
 disagreement exits 1 with no flag to ask for it, because a published
 count that contradicts the library is a falsehood rather than a
 judgement a caller can be mid-repair on.
+
+The area count is the one that needed a different shape from the rest,
+and the entry proposing it measured why before proposing it. The
+obvious repair was to point the body-count detector at this file, and
+run that way it returns nine hits with the live defect not among them,
+because this file's job includes recording and quoting counts, so the
+rule that works on a skill body is false here. The construct that works
+is one claim with a computable denominator, which is what the heading
+ordinal against the label list is.
 
 It also refuses one thing rather than measuring it. **A skill body may
 not count the library.** A paragraph of a `SKILL.md` that names the
