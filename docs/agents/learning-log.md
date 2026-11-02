@@ -9976,3 +9976,143 @@ from one partly-answered one. Four files touched, one seat, and the two
 reusable rules are routed to HQ's `exo-centralizer` because the read
 route is shared by five repositories. Three of this window's five
 findings fix in `prompts/` and none of them could be written here.
+
+## Window 79 — 2026-11-02, resident host, started 03:0xZ (message: HQ's `exo-centralizer` 02:27:59Z and 02:49:50Z, collapsed into one wake)
+
+Both notes were `done` kind — acknowledgements of this seat's own
+handoffs, not asks. The predecessor-reply check ran first, per the
+fourth-half rule: window 78 had written to this sender twice at 02:42, so
+the check returned non-empty, and reading those two replies showed they
+answered a different subject (the capped read's ratio). So the payload was
+genuinely unanswered and a reply was owed. The rule's two new outcomes —
+"answered, read it first" versus "unanswered" — were both exercised and
+they separated correctly.
+
+**A third note from the same sender, 02:28:12Z, is not in this window's
+payload and was never in any window's.** The bus's own delivery record
+says why, and it is not the mechanism the note itself describes. See
+below.
+
+### The first finding, and the one with the widest reach: the events route refuses every parameter it documents
+
+`/api/events` answers 200 bare and **500** to `since_hours`, `limit`,
+`type`, `company`, `seat` and `target`, with `AttributeError: 'Handler'
+object has no attribute 'EVENT_FILTERS'`. The constant is declared at
+module scope and read off the handler instance. Its sibling
+`MESSAGE_FILTERS` is declared inside the class and read identically,
+which is why one route refuses a typo and the other raises.
+
+The transferable half is why it lived: the only reference to the missing
+attribute sits in the `if` clause of a comprehension over the query
+string, so an empty query never evaluates it. **The call shape that
+validates nothing is the one shape that cannot reach the validator's own
+defect**, and that is the shape every readiness probe makes.
+`runner-facts` §74 has the table, the source lines and the provenance.
+
+### The second finding: the suite built for exactly this property exempts exactly this route, and cites the pull request that broke it
+
+HQ has `test_query_refusals.py`, whose docstring says it exists so the
+next silent default is "a failing test rather than a discovery six days
+later". It skipped this route, because `api.py:2196` exempts it by name
+with the reason `"filters and refusal on PR 545"`. `#545` merged last
+night — and `#545` is the pull request that carried **both** the broken
+refusal and the exemption that hides it, in one commit, so no instant ever
+existed in which the exemption read as stale. At review time its
+justification was the pull request being reviewed.
+
+It obeys `L-A68` ("a check that skips quietly reports a pass it never
+ran") exactly: it is named, not silent. **Named is what it needed in order
+not to be silent. It is not what it needed in order to expire.**
+
+This repository already holds the prose form of this rule — the charter's
+standing box, "record the query that flips it, never the pull request" —
+and `INC-2026-10-26-a-charter-forbade-a-parameter-...`. The extension is
+that the same defect in a **test exemption** manufactures a pass where the
+prose form only misleads a reader who can check it, and that the exemption
+form is **computable**: an exemption naming a pull request can be tested by
+asking whether that pull request merged. Incident filed with the table.
+
+### The third finding: the wake budget, not the debounce, is what moves wakes per seat
+
+HQ's centralizer asked to be held to a revert condition — "if wakes per
+seat fall and directed notes older than a day with no reply rise [...] I
+revert rather than tune. Read it on the ninth." Measured from the bus's
+own `delivered` records over 48 minutes: **113 deliveries held on the
+budget** against 50 delivered and 14 debounced. Ten seats across four
+companies at the 6/hour ceiling; `alexandria/pm` 23 held against 6
+delivered.
+
+So a seat at the ceiling has its wake count set by the ceiling, and
+collapsing a sender's burst frees slots rather than lowering the count.
+The second metric is already being produced by 113 holds whose own outcome
+text says "the inbox keeps it for the next wake or cron". HQ's `#580` adds
+`_unstamp` for this very interaction, so it is modelled in the code and
+not in the metric meant to judge the code. `runner-facts` §75.
+
+**And it is the same finding as the first.** Reading wakes per seat over a
+week needs `since_hours`, `target` and `limit`. All three 500.
+
+### The fourth: this window's own inference, refuted by the record
+
+The missing third note was **13.9 seconds** after the first — precisely
+what a sender-keyed 600-second debounce predicts, so it read as the
+unmerged change having been deployed ahead of its merge. The delivery
+record says `held: 6 wakes this hour is the budget`. **Two mechanisms
+produce the same observable at a seat's own wake and only the delivery
+record separates them.** A window looking at its own payload for evidence
+about a bus change is looking at the one surface where the debounce and
+the budget are indistinguishable. Recorded because it was wrong, and
+because the charter's §0 lesson — say which property each guard fixes —
+has a sibling: say which mechanism each observation distinguishes.
+
+Both halves of the 02:27:59Z note are also still unmerged and undeployed:
+46 live inbox rows carry 15 fields and no `answered_by`, and `#580` is
+open. The note states both in the present indicative. Nobody misbehaved —
+it is the natural tense for a change you have just written — and it is the
+same shape as "write the receipt, then the register", pointed at a
+deployment instead of at a message.
+
+### A duty measured and then deliberately not performed
+
+§4 asks for three `Ideas` notes to the owner a week. Read off the board,
+scoped to this seat, unsaturated so the counts are exact and not floors:
+
+| day | `Ideas` notes |
+|---|---|
+| 2026-10-24 | 3 |
+| 2026-10-26 | 3 |
+| 2026-10-27 .. 2026-11-01 | **0** |
+| **2026-11-02** | **7** |
+
+Thirteen in fourteen days against a quota of three a week is roughly
+twice the rate, but the rate is not the finding — **the distribution is.**
+Seven went out in the three hours after the five-day portfolio stall
+ended, because the duty is weekly, the tick is per-window, and no window
+can see what its siblings sent. It is the receipt-versus-artifact defect
+again, in a third place: every window asks "have I sent mine?" and none
+asks "has this seat already sent this week's three?"
+
+So this window sent **none**, which is the first time that decision has
+been taken here on a measurement rather than by omission. The owner's
+attention is the scarcest resource in this organization and an eighth,
+ninth and tenth idea delivered to it this morning is noise. The check is
+one read and belongs in the charter beside the `not due` verdict, which
+governs re-asking this seat's own questions and is silent about
+re-performing its own quotas. Charter lane, named as a debt — this
+branch carries no `prompts/` path by design.
+
+### Compounding, stated plainly
+
+**Positive on reach for the first time in three windows, and the reach is
+not Ursa's.** The route defect, the exemption rule and the budget
+measurement are all in HQ's `runtime/board/`, which is shared by five
+repositories and eleven seats per repository, so one repair reaches every
+seat on the bus rather than this one. Nothing here is a charter line, so
+by the strict test this seat applies to itself the Ursa-internal curve is
+again **flat**, and that is now three consecutive windows — the same
+complaint windows 77 and 78 filed against themselves, and it has one
+cause, which is that `#618` holds 8021 charter lines behind an owner
+decision while every register-only branch merges in hours.
+
+Four files touched, one seat, one handoff routed to HQ. Two of the four
+findings fix in `prompts/` and neither could be written here.
