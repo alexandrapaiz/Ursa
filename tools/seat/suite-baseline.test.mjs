@@ -248,6 +248,52 @@ test('a failure that appears only nested is still caught, and counted once', () 
   assert.equal(cmp.points, 1, 'but only one of them is a top-level point')
 })
 
+// SKIPPED IS A THIRD STATE, and this is the defect that made it one.
+// `tools/board/read-filters.test.mjs` keys on /srv/asc/hq/runtime/board/api.py,
+// a host path outside this repository, and skips when it is absent. Its red
+// is therefore not a property of `main`, and on a host without HQ's checkout
+// an earlier draft of this tool reported the trunk's debt as GONE and offered
+// to drop it. Rehearsed red: with `point.skipped` forced to false, both tests
+// below fail.
+const SKIP_TAP = [
+  'TAP version 13',
+  'ok 26 - transcribed: the events read refuses unknown filters, so the INERT finding was acted on # SKIP no board source on this host',
+  '  ---',
+  "  location: '/repo/tools/board/read-filters.test.mjs:234:1'",
+  '  ...',
+  '1..1'
+].join('\n')
+
+test('a TAP directive comes off the name, so a changed skip reason is the same test', () => {
+  const [p] = parseTap(SKIP_TAP)
+  assert.equal(p.name, 'transcribed: the events read refuses unknown filters, so the INERT finding was acted on')
+  assert.equal(p.directive, 'SKIP')
+  assert.equal(p.directiveReason, 'no board source on this host')
+  assert.equal(p.skipped, true)
+  assert.equal(p.ok, true, "node really does print a skip as `ok`; that is the trap")
+})
+
+test('a baseline entry that skips is UNRUNNABLE, never FIXED and never GONE', () => {
+  const baseline = { minPoints: 1, red: ONE_RED }
+  const cmp = compare(parseTap(SKIP_TAP), baseline, readSummary(SKIP_TAP))
+  assert.equal(cmp.unrunnable.length, 1, 'the debt stays open')
+  assert.equal(cmp.fixed.length, 0, 'a skip is not a pass')
+  assert.equal(cmp.vanished.length, 0, 'and it was collected, so it did not vanish')
+  assert.equal(cmp.stillRed.length, 0)
+  assert.equal(exitCodeFor(cmp, baseline), 0, 'an unrunnable test is not the running seat\'s fault')
+  const out = formatReport(cmp, baseline)
+  assert.match(out, /UNRUNNABLE {2}1/)
+  assert.match(out, /no board source on this host/)
+})
+
+test('a skipped test is not counted as a pass elsewhere either', () => {
+  const mixed = 'TAP version 13\nok 1 - a\nok 2 - b # SKIP nope\nnot ok 3 - c\n1..3\n'
+  const cmp = compare(parseTap(mixed), { minPoints: 1, red: [] }, readSummary(mixed))
+  assert.equal(cmp.skipped, 1)
+  assert.equal(cmp.newRed.length, 1, 'the real failure is still the only failure')
+  assert.equal(cmp.newRed[0].name, 'c')
+})
+
 test('keyOf separates name from file with a character neither can contain', () => {
   assert.equal(keyOf({ file: 'a', name: 'b' }), 'a\u0000b')
   // A test whose location was never printed still gets a stable key rather

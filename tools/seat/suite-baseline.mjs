@@ -90,6 +90,23 @@ export const BASELINE_PATH = resolve(HERE, 'suite-baseline.json')
 // `node --test` makes, and a guard that relies on it would be relying on
 // the absence of a feature its subjects are free to start using.
 const POINT = /^(\s*)(not ok|ok) (\d+) - (.*)$/
+// A TAP directive: `ok 26 - the host test # SKIP no board source on this host`.
+// It must come OFF the name, for two independent reasons found by running
+// this tool against a baseline entry that skips:
+//
+//  1. Glued on, the directive is part of the key, so a test whose skip
+//     REASON changes becomes a different test.
+//  2. A skip is reported by `node --test` as `ok`, so a baseline entry that
+//     starts skipping reads as passing — and this tool then called it GONE
+//     and offered to drop it. Either way a real debt gets written off by a
+//     host that simply cannot run the test.
+//
+// That second one is not hypothetical here. `tools/board/read-filters.test.mjs`
+// keys on `/srv/asc/hq/runtime/board/api.py`, a HOST path outside this
+// repository, and skips itself when it is absent. So its red is not a
+// property of `main` at all, and on a host without HQ's checkout this tool
+// would have announced the trunk's debt as paid.
+const DIRECTIVE = /\s+#\s*(SKIP|TODO)\b\s*(.*)$/i
 // The failure's YAML block carries an absolute path; the baseline stores a
 // repo-relative one so it compares equal across hosts and worktrees.
 const LOCATION = /^\s+location: '(.+?):(\d+):(\d+)'$/
@@ -120,14 +137,22 @@ export function parseTap (text) {
   for (let i = 0; i < lines.length; i++) {
     const m = POINT.exec(lines[i])
     if (m === null) continue
+    const raw = m[4].trim()
+    const dir = DIRECTIVE.exec(raw)
     const point = {
       ok: m[2] === 'ok',
       number: Number(m[3]),
-      name: m[4].trim(),
+      // The name without the directive, so the key survives a changed reason.
+      name: dir === null ? raw : raw.slice(0, dir.index).trim(),
+      directive: dir === null ? null : dir[1].toUpperCase(),
+      directiveReason: dir === null ? null : dir[2].trim(),
       depth: m[1].length,
       file: null,
       line: null
     }
+    // A skipped test did not pass. `node --test` prints it as `ok`, and
+    // treating that as a pass is how an unrunnable test reads as a fixed one.
+    point.skipped = point.directive === 'SKIP' || point.directive === 'TODO'
     // Scan the YAML block that belongs to this point, stopping at the next
     // point so a passing test cannot inherit the previous failure's site.
     for (let j = i + 1; j < lines.length; j++) {
@@ -188,8 +213,11 @@ export function compare (points, baseline, summary = {}) {
   const known = new Map((baseline.red ?? []).map((e) => [`${e.file}\u0000${e.name}`, e]))
   // Failures from every nesting level, de-duplicated by key so a nested
   // failure counted twice is still one failure.
-  const failing = dedupeByKey(points.filter((p) => !p.ok))
-  const passing = points.filter((p) => p.ok)
+  const failing = dedupeByKey(points.filter((p) => !p.ok && !p.skipped))
+  // Passing means passing: a skip is neither a pass nor a failure, and it
+  // gets its own verdict below rather than being folded into either.
+  const passing = points.filter((p) => p.ok && !p.skipped)
+  const skipped = points.filter((p) => p.skipped)
 
   const newRed = failing.filter((p) => !known.has(keyOf(p)))
   const stillRed = failing
@@ -201,11 +229,16 @@ export function compare (points, baseline, summary = {}) {
   // is reported separately: silently dropping it would quietly shrink the
   // trunk's recorded debt without anybody having paid it.
   const passingKeys = new Set(passing.map(keyOf))
+  const skippedByKey = new Map(skipped.map((p) => [keyOf(p), p]))
   const allKeys = new Set(points.map(keyOf))
   const fixed = []
   const vanished = []
+  const unrunnable = []
   for (const [k, e] of known) {
-    if (passingKeys.has(k)) fixed.push(e)
+    // Order matters: skipped is checked before passing, because a skip
+    // arrives wearing `ok`.
+    if (skippedByKey.has(k)) unrunnable.push({ ...e, reason: skippedByKey.get(k).directiveReason })
+    else if (passingKeys.has(k)) fixed.push(e)
     else if (!allKeys.has(k)) vanished.push(e)
   }
   return {
@@ -213,6 +246,8 @@ export function compare (points, baseline, summary = {}) {
     stillRed,
     fixed,
     vanished,
+    unrunnable,
+    skipped: skipped.length,
     // The floor's quantity. node's own `1..N` when the TAP carries it, and
     // our count of top-level points when it does not, because a truncated
     // TAP with no plan line must not be allowed to read as a full run.
@@ -259,13 +294,23 @@ export function formatReport (cmp, baseline) {
     for (const e of cmp.fixed) out.push(`  ${e.file}  ${e.name}`)
     out.push('')
   }
+  if (cmp.unrunnable.length > 0) {
+    out.push(`UNRUNNABLE  ${cmp.unrunnable.length} — skipped on this host, so neither paid nor broken:`)
+    out.push('  A skip is reported as `ok`. It is not a pass and this debt stays open.')
+    for (const e of cmp.unrunnable) {
+      out.push(`  ${e.file}  ${e.name}`)
+      out.push(`      skipped: ${e.reason || '(no reason given)'}`)
+    }
+    out.push('')
+  }
   if (cmp.vanished.length > 0) {
     out.push(`GONE  ${cmp.vanished.length} — in the baseline and no longer collected at all.`)
     out.push('  A deleted or renamed test is not a paid debt. Say which it was:')
     for (const e of cmp.vanished) out.push(`  ${e.file}  ${e.name}`)
     out.push('')
   }
-  if (cmp.newRed.length === 0 && cmp.fixed.length === 0 && cmp.vanished.length === 0) {
+  if (cmp.newRed.length === 0 && cmp.fixed.length === 0 &&
+      cmp.vanished.length === 0 && cmp.unrunnable.length === 0) {
     out.push(cmp.stillRed.length === 0
       ? 'Green, and the baseline is empty — the trunk owes nothing.'
       : 'No change: every failure is the trunk\'s own, already recorded and owned.')

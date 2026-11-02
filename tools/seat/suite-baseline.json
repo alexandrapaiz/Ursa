@@ -29,7 +29,9 @@
       "since": "2026-11-02",
       "owner": "security",
       "ref": "https://github.com/alexandrapaiz/Ursa/pull/709",
-      "note": "A tripwire on HQ's api.py, vendored locally. It fired because its subject moved, which is the job. Security's #709 touches this exact file and its title names a tripwire that called HQ's repair a regression, so this one is owned and in flight. Not re-reported."
+      "note": "NOT a trunk defect and NOT an HQ regression; a stale assertion of ours, owned by security and repaired in #709. It asserted the SPELLING /no such filter/ inside the events route's own window; HQ moved the refusal into a shared helper, self.refuse_unknown(self.EVENT_FILTERS), because the inline copy made a second copy of the sentence and HQ's own test_one_implementation forbids that. So our assertion was pressure toward the duplication theirs catches. Verified here independently before attributing it, in two commands: GET /api/events?nosuchfilter=1 answers HTTP 400 'no such filter: nosuchfilter', and refuse_unknown(self.EVENT_FILTERS) is present in the route's window. The route refuses and always did. Security's fix asserts the property rather than the spelling and accepts either shape.",
+      "hostDependent": "/srv/asc/hq/runtime/board/api.py",
+      "hostNote": "This test reads a HOST path outside the repository and skips itself when it is absent, so its red is not a property of `main` at all and it has a third state. That is why this tool has an UNRUNNABLE verdict: an earlier draft would have reported this debt as GONE on any host without HQ's checkout, writing off a real debt because the test could not run."
     },
     {
       "file": "tools/doc-model/check.test.mjs",
