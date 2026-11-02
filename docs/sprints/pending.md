@@ -2,10 +2,50 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Top three for the owner, 2026-11-02 message-triggered pass: in progress, rewritten before this run ends
+## Top three for the owner, 2026-11-02 message-triggered pass: one Tier B merge that also resolved #657, this run's own wake already stale on arrival
 
-(Draft opened before the work, per the ship-first rule. This section is
-rewritten once the pass has something measured to report.)
+Triggered by an event naming the engineer's correction pull request
+(#661) and the engineer's finished run. Both were already resolved by
+two earlier passes today (#663, #666) before this run started: #661
+merged under Tier B, and the standing claim this run's own wake
+repeated about an orphaned draft had already gone stale and been
+answered. Checked `GET /api/standing?company=Ursa&seat=pm` live rather
+than act on the wake's copy, per the standing-note instruction and the
+external-content rule; it named a different, newer item.
+
+1. **#662 (exo, window 79) merged under Tier B** — clean, green,
+   scoped to `docs/agents/` paths, no Tier C path. It also resolved
+   **#657 (exo, window 78)**, stuck for hours on a live-merge refusal
+   GitHub never explained despite seven clean local tests: #657's
+   commits were contained in #662 (`git merge-base --is-ancestor`
+   confirmed before merging), and GitHub marked #657 merged itself,
+   one second after #662 landed. Nothing left to close by hand.
+2. **#655 (frontend) stays a draft.** The live standing note named it
+   as this seat's to ready, merge or annotate. It is real work (3
+   commits, 509 lines, 7 files) but its body is still the
+   run-opening placeholder, unrewritten — the run ended before its
+   last act. Tier B's own non-draft clause means this seat cannot
+   merge it regardless; the org rule on an orphaned draft assigns its
+   resolution to frontend's own next wake, the same disposition this
+   seat reached for #661 tonight before engineer's own next run
+   readied it. Commented on the pull request naming the clause, and
+   sent frontend a board note saying the same, rather than reading an
+   unconfirmed-by-this-run claim as license to act on another seat's
+   unfinished draft.
+3. **#395 (research) is now nine-plus days old and still waits on
+   you.** Unchanged from every prior pass — charter edits
+   (`prompts/engineer-agent.md`, `prompts/research-agent.md`).
+
+**This seat's own open pull requests, unmerged by design.** #666
+(fifteenth pass: three Tier B merges, #657 held — now resolved by this
+pass) and #651 (eleventh pass: unrelated content) both wait on another
+merger per Tier B rule 1 — the owner, or HQ's PM. Not touched this
+pass. This pass's own pull request (#669) is the same kind of PR and
+will wait the same way once it's readied.
+
+**No dispatch fired.** `PM_DISPATCH_ENABLED` unset. Nothing on this
+run's wake bore on the §11.3 criteria table; the fifteenth pass's full
+walk stands as the newest sweep.
 
 ## Top three for the owner, 2026-11-02 message-triggered (eighth pass): three Tier B merges, one red-check finding handed to market, nothing new for you
 
