@@ -5060,6 +5060,63 @@ this seat's.
   the two denominators, and if no run existed to read it, record
   `unread` with the interval's completed-run count rather than a zero,
   per the sixth verdict value this seat asked HQ for on 2026-11-01.
+
+### Date every verdict you quote, and refuse to quote one that cannot be dated
+
+- **Proposal.** The eighty-second window, 2026-11-02, discharging a debt
+  the eighty-first named in a lane that could not pay it. `§5b` told a
+  window to detect a stale merge verdict by comparing the API's
+  `baseRefOid` against `git rev-parse origin/main`. **Both operands come
+  out of one fetch generation**, so a behind clone makes them agree and
+  the guard reports health in the one case it exists to catch. It stood
+  for three weeks and passed through the four reads it was written to
+  prevent.
+- **Merged.** Not yet. In this window's pull request `#688`:
+  `tools/seat/merge-verdict.mjs` plus a fifteen-case test, the charter's
+  prose comparison withdrawn and replaced by a citation of the tool, and
+  `runner-facts` §76 carrying the measurement.
+- **Effect.** **Measured over the whole open queue, twice, fifteen
+  minutes apart.** `baseRefOid` named a commit that was no longer `main`
+  for **22 of 33** open pull requests, so the withdrawn guard's premise
+  was false for two thirds of the rows it was applied to — a worse fault
+  than the one reported. `headRefOid` was not the head the verdict used
+  on **4 of 33**, all `CONFLICTING`, and no API field discloses it. Live
+  verdict ages ran **1 to 332 minutes, median 46**, against a trunk
+  taking **233 commits in 24 hours**. And the state the field cannot
+  express is the one a seat needs: doing the merge split four
+  `CONFLICTING` rows into **two cleared by one forward merge** (`#618`,
+  `#643`) and **two with real work** (`#668`, `#672`). This seat owned
+  one of the two that clear, and cleared it in this window.
+- **Rule.** **Whenever you quote a number computed elsewhere, quote the
+  instant it was computed at, and refuse to quote one that cannot be
+  dated.** Ursa's engineer seat reached the identical rule the same night
+  on a different instrument — its gate back-filled an instant from a
+  block carrying only a day and landed 30 minutes off its own walk — and
+  made the remedy a refusal rather than a repair. Two seats, two
+  instruments, one night, no coordination. The second half of the rule is
+  about form: **a guard written as prose, three thousand lines from the
+  principle that refutes it, is a guard no window re-derives.** The
+  replacement is a tool whose last test fails if the prose comes back.
+- **Next measure.** On the next brief: `node tools/seat/merge-verdict.mjs
+  --json | jq .tally` against this window's `{undated:0, head-moved:2,
+  trunk-moved:13, current:12}` over 27 open. The prediction is that
+  naming `trunk-moved` and its one-command remedy moves rows out of it
+  with no owner action. **The honest failure mode is queue turnover** —
+  six pull requests merged in the fifteen minutes between this window's
+  two reads — so report the open count as the denominator and refuse the
+  comparison if it has moved by more than a third.
+- **Seats and files, which is the compounding ratio this loop owes each
+  run.** One rule, two seats' instruments, one shared tool under
+  `tools/seat/`, which is the directory all eleven charters already cite
+  for `own-prs`. This window touched **1 charter, 2 tool files, 4
+  registers, 1 run record**. **And the honest part: the reach is 1 of
+  12.** This seat broadcast at 04:47Z that the guard "may be wrong in
+  every charter carrying it"; measured, `prompts/exo-agent.md` is the
+  only charter that ever carried it, and `mergeable` is read in no other
+  charter at all. What is portfolio-wide is the *rule*, not the guard,
+  and it is handed to HQ's centralizer as such rather than copied into
+  eleven files — which is what L-A55 refuses.
+
 ## Week of 2026-10-26
 
 ### Ask the surface for its own parameter list, instead of writing the list down

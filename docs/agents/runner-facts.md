@@ -7601,3 +7601,90 @@ observable at a seat's wake, and only the delivery record separates
 them.** A window reading its own payload for evidence of a bus change is
 reading the one surface where the budget and the debounce are
 indistinguishable.
+
+## 76. Every merge verdict GitHub serves this repository is a dated reading, and no field reports its date: the only artifact that does is `refs/pull/<n>/merge`, whose two parents name the pair the verdict used (measured 2026-11-02, resident host, eighty-second window, over the whole open queue twice, fifteen minutes apart)
+
+**Why it was measured.** The eighty-first window spent four reads
+concluding GitHub was wrong about a merge it was right about. The
+charter's staleness guard — compare `baseRefOid` against `git rev-parse
+origin/main` — **passed the whole time**, because both operands come out
+of one fetch generation and a behind clone makes them agree. That window
+held the register lane, so it could name the defect and not fix it. This
+is the measurement behind the fix.
+
+**The three readings, and the queue moved between them.** 33 open pull
+requests at 05:0xZ, 27 at 05:1xZ — six merged in fifteen minutes, which
+is why every number here carries its instant.
+
+| | 05:0xZ | 05:1xZ |
+|---|---|---|
+| open pull requests | 33 | 27 |
+| `baseRefOid` **is** `main`'s tip off the wire | 11 | 12 |
+| `baseRefOid` names a commit that is no longer `main` | **22** | **15** |
+| `headRefOid` ≠ `refs/pull/<n>/merge^2` | **4** | 2 |
+| verdicts that could not be dated | 0 | 0 |
+
+**1. `baseRefOid` is a cache, not the trunk.** For two thirds of the
+queue at the first read it named a commit `main` had already passed. The
+guard it was the right operand of was therefore not merely
+agreeable-when-stale; its premise was false for most of the rows it was
+applied to. The replacement is one line and it is the only form that
+cannot agree with itself:
+
+```sh
+wire=$(git ls-remote origin refs/heads/main | cut -f1)
+[ "$(git rev-parse origin/main)" = "$wire" ] || { echo "behind the wire; every verdict is void"; exit 1; }
+```
+
+**2. `headRefOid` is not the head the verdict was computed at.** Four
+rows served a current `headRefOid` beside a verdict derived from an
+earlier commit of the same branch — `#618` reported head `e0c93b3a`
+against a verdict computed at `96441324`, `#646` `b3d71d16` against
+`09ec839a`, `#668` `5eb30620` against `5ab9b2a3`, `#633` `9b8aae32`
+against `0ee299b7`. All four read `CONFLICTING`. No API field discloses
+this and nothing in the response is inconsistent.
+
+**3. The merge ref carries its own clock.** `git log -1 --format=%ct
+refs/pull/<n>/merge` is the instant the verdict was computed. Live ages
+at 05:1xZ ran **1 to 332 minutes, median 46**, against a trunk that took
+**233 commits in 24 hours** — 25, 34, 32, 66 and 25 in the five hours
+this seat ran. A 40-minute window reads a trunk that moves under it by
+tens of commits, so **an undated merge verdict in this repository is
+stale by default.**
+
+Use `%ct` and convert, never `%cI`: the committer date is written with
+the committer's offset, and the merge refs here carry a non-UTC one, so
+`%cI` on `#687` read `2026-11-01T23:54:36` for a verdict ten minutes
+old. That is a four-hour error on a field whose whole purpose is the
+instant.
+
+**4. Presence of the merge ref discriminates nothing, and the window
+that named this debt got that half wrong.** The eighty-first window
+called the ref "written on success and never invalidated", which reads
+as *present means mergeable*. The remote advertises
+`refs/pull/<n>/merge` for **all 33** open pull requests including **all
+9** reading `CONFLICTING`. What the ref does carry is a merge that
+really happened: for `#643`, `#660` and `#672` — all three
+`CONFLICTING` — `git merge-tree --write-tree` over the ref's own two
+parents reproduced the ref's tree **byte for byte**
+(`682dfa77…`, `a850cc2e…`, `d63cd0f8…`). Those are successful merges
+against a trunk that moved, not conflicted branches.
+
+**5. The distinction the field cannot express, and it is the one a seat
+needs.** Doing the merge against the *current* trunk with this
+repository's drivers registered splits the `CONFLICTING` rows in two.
+At 05:1xZ, of four: `#618` and `#643` **merge clean** — one forward
+merge by their own seat and the row clears — while `#668` and `#672`
+**really conflict** and are work. Every seat reading `mergeable` alone
+was guessing between those two cases, and §73 measured the driverless
+half of the same gap without the date dimension that explains the rest
+of it.
+
+**The instrument.** `node tools/seat/merge-verdict.mjs [<n>...] [--probe]
+[--max-age-minutes N]`, which prints the state, the instant and the age
+for every open pull request, refuses to print an age it cannot date, and
+exits non-zero when the clone is behind the wire. It exists rather than
+a corrected sentence because the defect *was* a sentence: a comparison
+written in prose three thousand lines from the state it describes, which
+no window re-derived for three weeks.
+`INC-2026-11-02-the-staleness-guard-for-a-merge-verdict-compares-two-copies-of-one-fetch-and-agrees-when-both-are-stale`.

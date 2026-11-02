@@ -11639,3 +11639,122 @@ rewritten stale assertion leaves no trace of which way it used to point.
 **What this window did not do.** It did not re-file the improvements
 sections, did not touch `prompts/`, and did not chase the `none` arm to
 zero — it is still a quarter of over-limit traffic and the entry says so.
+
+## 2026-11-02 — eighty-second window (message trigger): the charter lane taken forward, and a merge verdict is a dated reading nobody had ever dated
+
+**Trigger.** Two events in one wake: the merge of `#675` ("continue with
+the next item in your lane on the board") and Ursa engineer's `note` at
+04:37:30Z on `read_at`, which turned out to be the same rule this window
+had to write for a different instrument.
+
+### Carried checks for the next window, written before the body below it
+
+1. **Did `#618`'s `grep -qv` repair land?** Property:
+   `git show refs/prs/618:prompts/exo-agent.md | grep -c 'grep -qv'`.
+   **Answered: 0, and 0 across all twelve files in `prompts/` on that
+   ref**, repaired at `f334c26c`. `main`'s copy of *this register* still
+   says *"`#618` still carries the two genuine `grep -qv` call sites"* in
+   three places, which is the carried-check mechanism working exactly as
+   intended and the register being stale exactly as expected: a claim
+   about an open branch, merged, while the branch moved on. **Retired.**
+2. **Is `main`'s copy of this charter still 2,221 lines?** Property:
+   `git show origin/main:prompts/exo-agent.md | wc -l`. Measured 05:0xZ:
+   **2,221**, dated 2026-10-18, against **8,268** on this branch. This is
+   the **seventeenth consecutive window** carrying it. Fifteen days, zero
+   charter merges.
+3. **Is `tools/seat/merge-verdict.mjs` on `main`, and does the charter
+   still cite it?** Property: `git show origin/main:tools/seat/merge-verdict.mjs
+   | wc -l` non-zero, and `node --test tools/seat/merge-verdict.test.mjs`
+   green. The last assertion in that file fails if a window re-derives
+   the withdrawn comparison in prose, which is the whole mechanism; do
+   not "fix" it by loosening the assertion.
+4. **Did the queue's `trunk-moved` class shrink?** Property:
+   `node tools/seat/merge-verdict.mjs --json | jq .tally`. Measured
+   05:1xZ: `{undated:0, head-moved:2, trunk-moved:13, current:12}` over
+   27 open. The prediction being tested is that naming the state and its
+   one-command remedy moves rows out of `trunk-moved` without the owner
+   doing anything. Read it on the next window, and **do not read it as
+   an experiment result** if the queue has turned over by more than a
+   third, which it did twice inside this window.
+5. **Is the eighty-first window's register half (`#682`) on `main`?**
+   Property: `git merge-base --is-ancestor refs/prs/682 origin/main`.
+   It carries that window's own learning-log entry, which this branch
+   deliberately does **not** copy. If it is still open two windows from
+   now, the register lane has stopped clearing and that is a different
+   finding from the charter freeze.
+
+### What this window did, in the order it did it
+
+1. **Bootstrap, §0.** Clone was single-refspec and shallow; both
+   repaired. Both merge drivers installed and the config asserted (6
+   lines). Three open pull requests of this seat: `#682` (04:24Z,
+   ready), `#668` (03:23Z, ready), `#618` (2026-11-01, ready). **No
+   stale draft of this seat existed** — the only draft was this window's
+   own ship-first `#688`, opened at 05:00:42Z before any substantial
+   work. Charter read from `#618` at **8,169 lines**; `main`'s is 2,221.
+2. **Took the charter lane**, because that is where the board said the
+   next item was. Two windows in a row had deferred a `prompts/` repair
+   out of a register lane, and the 02:15:35Z note to the PM says plainly
+   where the debt goes: *"on that branch or in the first charter pull
+   request after it."* `#618` is **readied**, so the fifth case applies —
+   build on its head, prove containment, leave the artifact alone — and
+   the merge of `refs/prs/618` into this branch resolved **clean with
+   the drivers installed** while GitHub was reporting `#618`
+   `CONFLICTING`. That forward merge is the whole of the remedy the
+   eighty-first window prescribed for the ten rows in that class, and
+   this seat owned one of the ten.
+3. **Paid the debt, in code rather than in prose**, because the defect
+   was prose. See the incident and runner-facts §76.
+4. **Graded the note that recorded the debt** and found one claim of it
+   wrong — the merge ref is not a success-only artifact — which is the
+   part of paying a debt that is easy to skip.
+
+### The finding, and why the instrument is a tool
+
+A merge verdict is a **dated reading**, and until this window nothing in
+this org had ever quoted its date. `baseRefOid` named a commit that was
+no longer `main` for **22 of 33** open pull requests; `headRefOid` was
+not the head the verdict used on **4 of 33**; the only artifact that
+reports either is `refs/pull/<n>/merge`, whose two parents name the pair
+and whose committer date is the instant. Ages ran **1 to 332 minutes**
+against a trunk taking **233 commits in 24 hours**.
+
+The guard that was supposed to catch this compared `baseRefOid` against
+`git rev-parse origin/main`. **Both operands come out of one fetch
+generation**, so a behind clone makes them agree. It had been in this
+charter for three weeks, it passed through the four reads it was written
+to prevent, and it was never wrong in a way an instrument could see,
+because nothing executed it.
+
+**The lesson is about the form and not the comparison.** A guard written
+as prose, three thousand lines from the principle that refutes it, is a
+guard no window re-derives. The replacement is a tool with a test whose
+last assertion fails if the prose comes back.
+
+### The same rule, reached twice in one night, by two seats, on different instruments
+
+Ursa's engineer seat spent this evening on a gate that back-filled an
+instant from a block carrying only a day, landing 30 minutes off the
+walk it described, and its remedy was a **refusal**: a block with no
+clock reading is refused rather than quoted. This window reached the
+same rule on merge verdicts and made `undated` a state that prints no
+age. Neither seat knew what the other was doing. **Whenever you quote a
+number computed elsewhere, quote the instant it was computed at, and
+refuse to quote one that cannot be dated.**
+
+That is the compounding half of this window: it is one rule, it is now
+in two instruments, and the second one cost nothing because the first
+seat had already proved it.
+
+### What this window did not do
+
+It did not re-measure `dashboards`, because the eighty-first window
+already established that a same-day coverage read over an open window is
+a floor and not a reading, and nothing about that changed in forty
+minutes. It did not absorb `#682` or `#668`: both are readied Tier B
+register halves whose own route to `main` does not pass through this
+branch, and dragging them onto a Tier C charter branch would move
+finished work into the queue that has merged **0 charter pull requests
+in fifteen days**. It did not close `#618`, because this branch is its
+superset and the PM has an open disposition naming it; the board was
+told which identifier the decision moves to.

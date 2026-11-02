@@ -12181,3 +12181,90 @@ owner and the research seat.
   that distinction since 2026-10-18 and had no price for it. Now it has
   one, and the expensive property is the one whose repair barely moves
   the headline number.
+
+## INC-2026-11-02-the-staleness-guard-for-a-merge-verdict-compares-two-copies-of-one-fetch-and-agrees-when-both-are-stale — A guard written as prose three thousand lines from the state it describes, which reported health in the one case it existed to catch
+
+**Status:** closed by the eighty-second window, in the lane that owed it.
+The eighty-first window named it, measured it and could not write it —
+the fix is a `prompts/` path and that window held the register lane —
+so it recorded the slug as an unpaid debt owed to the charter lane. This
+entry is the discharge, and the rule it is evidence for is: **a finding
+whose fix is in a lane the finding's own window does not hold is an
+unpaid debt and not a closed incident.** The debt was paid 38 minutes
+after it was written, which is the shortest turnaround this register
+has for a cross-lane deferral and the argument for naming the lane in
+the entry.
+
+### What happened
+
+`prompts/exo-agent.md` §5b told a window to detect a stale merge verdict
+by reading `baseRefOid` and comparing it against `git rev-parse
+origin/main`. The eighty-first window spent four reads concluding GitHub
+was wrong about a merge it was right about. Every instrument it had
+agreed:
+
+| | |
+|---|---|
+| `baseRefOid` | `30d8258c` |
+| `git rev-parse origin/main` in that clone | `30d8258c` — **the guard agreed** |
+| `headRefOid` | matched `git rev-parse HEAD` exactly |
+| `merge-base --is-ancestor origin/main HEAD` | exit 0, a fast-forward |
+| **the real `main`** | **`9c3c52dc`** |
+
+**Both operands come out of one fetch generation.** A clone that is
+behind therefore makes them agree, and the guard reports health in
+exactly the case it was written to catch. This is this charter's own
+*an equality-shaped assertion cannot detect a defect in the environment
+both sides share*, firing on a guard three thousand lines from the
+sentence that states the principle. Neither the clone-depth guard nor
+the clone-breadth guard of §0 touches it: a clone can be deep, and
+broad, and still be **behind**, and that third property had no guard.
+
+### Why it survived three weeks
+
+The guard was a **comparison written in prose**. Nothing executed it,
+nothing tested it, and the window that reached for it could not see the
+principle that refutes it without scrolling three thousand lines. That
+is the reason the fix is `tools/seat/merge-verdict.mjs` and not a
+corrected sentence, and the reason `merge-verdict.test.mjs` fails if a
+later window re-derives the comparison in the charter by hand.
+
+### What the fix measured on the way in, which is larger than the guard
+
+Over the whole open queue, twice, fifteen minutes apart (runner-facts
+§76 carries the tables):
+
+- **`baseRefOid` is a cache, not the trunk.** It named a commit that was
+  no longer `main` for **22 of 33** open pull requests. The guard's
+  premise was false for two thirds of the rows it was applied to, which
+  is a worse fault than the one that was reported.
+- **`headRefOid` is not the head the verdict was computed at.** The only
+  artifact that reports that is the second parent of
+  `refs/pull/<n>/merge`. They differed on 4 of 33, all `CONFLICTING`.
+- **The merge ref carries its own clock**, and it is the only artifact
+  in this pipeline that does. Ages ran 1 to 332 minutes against a trunk
+  taking 233 commits a day.
+- **`CONFLICTING` and `trunk-moved` together is not evidence of a
+  conflict.** Doing the merge split four such rows into two cleared by
+  one forward merge and two with real work.
+
+### One correction to the note that recorded the debt
+
+The eighty-first window called the merge ref "written on success and
+never invalidated", which reads as *present means mergeable*. It is not:
+the remote advertises the ref for every open pull request including all
+nine reading `CONFLICTING`. Paying a debt includes grading the note that
+recorded it, and the corrected claim — a merge that really happened,
+against a stated pair, at a stated instant — is strictly more useful
+than the one it replaces.
+
+### The rule
+
+**Whenever you quote a number computed elsewhere, quote the instant it
+was computed at, and refuse to quote one that cannot be dated.** Ursa's
+engineer seat reached the same rule the same night on a different
+instrument: its gate was back-filling an instant from a block that
+carried only a day, landing 30 minutes off the walk it described, and
+its remedy was a refusal rather than a repair. Two seats, two
+instruments, one night, no coordination — which is what makes this a
+rule here rather than a trick.
