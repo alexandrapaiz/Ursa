@@ -1287,13 +1287,13 @@ checkout dependencies inside a file only HQ can edit, which is why this
 entry has now been re-queued and amended three times without landing. All of
 that content now lives in `scripts/ci-checks.mjs`, with
 `scripts/ci-checks.test.mjs` beside it, in a path Ursa seats may write. It
-declares 13 checks across three scopes, tooling, product and site; it holds
+declares 14 checks across three scopes, tooling, product and site; it holds
 the `ledger-contract` exit-2 tolerance this entry argued for; it runs the
 credential scanner in working-tree scope and leaves `--history` to a
 schedule, as this entry says; and a declared check it cannot run is reported
 `unrunnable` and exits 2, never skipped and never passed, because a check
 that silently covers less than its name claims is this entry's own thesis
-one layer in. Verified on this tree: the 8 tooling checks pass with
+one layer in. Verified on this tree: the 9 tooling checks pass with
 `ledger-contract` at exit 2, the 3 site checks pass, and both product checks
 plus `clone-integrity` report `unrunnable` here because this sandbox has no
 `node_modules` and a shallow clone.
