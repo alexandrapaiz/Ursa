@@ -177,6 +177,19 @@ S-1 claim from unconfirmed to confirmed, or downgrades it to false; it
 remains unconfirmed, two EDGAR checks three weeks apart in agreement.
 Last observed 2026-10-14: [SEC EDGAR company search](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=scale+ai&type=S-1), [TechStackIPO: Scale AI](https://www.techstackipo.com/company/scale-ai).
 
+Update 2026-11-02 (message, 8th run): a third direct EDGAR company
+search, three weeks after the second, again returns "No matching
+companies" for Scale AI under any filing type. Three independent
+checks spanning six weeks (2026-09-30, 2026-10-14, 2026-11-02) now
+agree: no S-1 has been filed. This still does not make the aggregator
+claim false (a company can file the day after any check), but a third
+consecutive agreement is a different evidentiary weight than the first
+unconfirmed sighting, and re-running this same search every one to two
+weeks without new aggregator activity to check it against is a
+recurring cost for a question that moves slowly. Ledger proposal below
+to stretch the recheck cadence rather than drop the watch entirely.
+Last observed 2026-11-02: [SEC EDGAR company search](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=scale+ai&type=S-1).
+
 ### Mercor
 
 What it is: an expert-contractor marketplace that pivoted into RLHF,
@@ -659,6 +672,37 @@ Environments for Coding](https://www.rl-list.com/rl-environments-for-coding),
 [runtimewire: Idler launches AI data lab after a $9M Paradigm-led seed](https://runtimewire.com/article/idler-launches-ai-data-lab-9m-paradigm-seed).
 
 Update 2026-11-02 (message, 6th run): a new supply channel feeding this same mapped sub-category, found via the demand-signals ceremony. MIT Technology Review (2026-10-13) and corroborating coverage report AI labs buying the operational records of shut-down startups — Sunset (Brooklyn, founded 2023) runs startup wind-downs and, as part of the service, buys the dying company's data outright and licenses it onward, describing the material (per founder Brendan Mahory) as fuel for "reinforcement-learning environments, where AI agents practice tasks inside simulated companies." This is a new real-data source, not a new vendor type: the "operational exhaust" Sunset sells is genuinely real (an actual company's actual records), closer to CLAUDE.md §1's raw material than anything authored, but per Sunset's own description it still becomes an input to a constructed simulated-company environment rather than an outcome record joined backward to a real deliverable's own fate. It sharpens rather than closes this note's standing gap: the market is now sourcing real data specifically to build better-constructed gyms, not to stop constructing them. Last observed 2026-11-02: [MIT Technology Review: AI labs are buying data from dead startups to train their models](https://www.technologyreview.com/2026/10/13/1145755/ai-labs-buying-data-from-dead-startups-to-train-models/).
+
+### Plato
+
+What it is: a "build the task and the verifier" vendor (same
+sub-category as Mercor/Deeptune, Halluminate, micro1/Realm, and the
+42-name rl-list.com market above) building simulated work
+environments — "working simulations of real jobs and tasks for AI
+training and evaluation" in customer support, HR, finance, accounting,
+and healthcare, where models practice workflows before deployment. New
+entry, found this run via the demand-signals ceremony (a funding-news
+search) rather than a landscape sweep, the same discovery method as
+TELUS Digital and micro1. Who it serves: not publicly named; no
+frontier-lab customer disclosed in the announcement. Pricing: not
+public; a $16M Series A (announced 2026-10-28, led by Nava Ventures,
+with Gradient Ventures and Transpose Platform participating) brings
+total funding to $19M. Founders Robert Farlow (CEO) and Pranav Putta
+(CTO) both previously trained computer-use models at Yutori and
+MultiOn. Strengths: a notable personal investor alongside the
+institutional round — Mustafa Suleyman, Microsoft AI's CEO, backed
+this round personally, which is the first instance this map has found
+of a frontier lab's own sitting chief executive putting personal money
+into the authored-simulation sub-category, rather than that lab buying
+from a vendor at arm's length. Weakness against Ursa, stated in the
+company's own words: it plans to use the new funding to expand its
+library "by paying professionals to recreate their jobs in simulated
+environments," the identical constructed-task structure this
+sub-category's other names carry, not a real deliverable joined
+backward to its own generation history. Last observed 2026-11-02:
+[Yahoo Finance: Plato Raises $16 Million to Build the Training Grounds
+for AI's Next Leap Into Real
+Work](https://finance.yahoo.com/technology/ai/articles/plato-raises-16-million-build-131700376.html).
 
 ### Taste Labs
 

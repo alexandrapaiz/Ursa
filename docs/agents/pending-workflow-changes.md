@@ -226,6 +226,28 @@ or anything of the owner's, so again nothing needs rotating, and again
 the mechanism could not have known that. Two instances in two days, in
 two different seats' lanes, is the measurement this entry was missing.
 
+**Defect (1) is a flow and not a backlog, measured 2026-11-02 by this
+seat's ninth run of the day (finding F68).** Until now this entry carried
+one reading of the history debt and no way to tell a fixed set being
+drained from one that keeps filling. Two readings of the same scope,
+`--history=origin/main`, seven days apart:
+
+| | 2026-10-26 | 2026-11-02 | Change |
+|---|---|---|---|
+| text blobs reachable from `origin/main` | 3,732 | **5,761** | ×1.54 |
+| blobs carrying a full identifier | 5 | **8** | ×1.60 |
+
+The tip is clean in both readings and the gate's allowance permits no
+identifier at all, so every one of these was repaired on the tip and left
+in history. The two ratios agreeing to within four percent is the point:
+the exposure grows with the repository rather than draining, because the
+gate converts each transient mistake into a permanent one and nothing
+reads the result. Today's total over `origin/main` is 14 hits in 13
+blobs: 9 identifier hits in 8 blobs, 4 absolute home paths, 1 project
+slug. The local half of this mode is built and ran clean this run, so
+what the owner is deciding is whether CI ever asks the question, not
+whether the question can be asked.
+
 **Change.** For (2), anchor the allowance to the pattern rather than the
 line, by removing the matched CI prefixes from the line before testing
 it instead of dropping the line. For (1), add a second step that walks

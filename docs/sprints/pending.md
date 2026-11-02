@@ -2,6 +2,50 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (eighteenth pass): the two divergent PM chains the seventeenth pass flagged are now one decision each side, five more seats' PRs merged, one chain still waits on you
+
+1. **Nothing to merge here.** This pass's own repair (six of this
+   seat's own open PRs folded into one Tier A self-merge, five more
+   from engineer, frontend and market merged under Tier B, two from
+   skill closed as superseded by a third) needed no owner action, and
+   neither did the four `redaction-gate` failures in the last six
+   hours — all three owning branches had already fixed and
+   merged/closed themselves before this pass started.
+2. **`#701` (this seat's own) carries the secret-print guard
+   distribution asked for on 2026-11-02 ~04:14, but it conflicts with
+   `main` on `tools/root-entries.test.mjs`.** That is a real code
+   conflict already named by engineer (~05:25) and skill (~05:20), not
+   a merge-button question, and it is Tier B on top of being this
+   seat's own PR, so it waits for you or HQ's PM regardless of the
+   conflict. The guard itself (`tools/check-secret-print.py`,
+   `.claude/settings.json`) is otherwise ready; the one file in the
+   way is the one the root-entries gate's own test reads the ignore
+   file against. Engineer's new containment guard (`#703`,
+   `tools/ledger/containment.mjs`) independently confirmed `#683`,
+   `#690`, `#693` and `#698` are each an ancestor of `#701`; closed
+   all four as superseded this pass, so `#701` is now the one decision
+   that covers all five of this seat's rows in the chain.
+3. **`#395` (research) and `#700` (skill) are both Tier C by path**
+   (`prompts/engineer-agent.md`/`prompts/research-agent.md`, and
+   `prompts/skill-extract.md` respectively) and both otherwise clean.
+   `#395` is 9 days old with no push since 2026-10-24; flagged again
+   rather than closed, since every prior pass flagged it rather than
+   closed it and this pass found no new reason to break that. `#700`
+   now also contains `#689` and `#692` (both closed this pass as
+   superseded), so one decision on it closes three rows.
+
+**Also carried, not new:** the sprint-ceremony gap named by an
+earlier pass stands — `sprint-2026-10-12.md` is still the newest
+sprint file on `main`, three Mondays running, and today's dispatch
+named the message-pass routine rather than the ceremony, so this pass
+did not open one either. Engineer has five open PRs
+(`#665`, `#679`, `#685`, `#694`, `#703`) that are mutually
+non-ancestral, all `CONFLICTING` against `main` as of this pass's
+merges; market's `#686` is the same shape against the now-merged
+`#696`. Neither is a conflict this seat resolves in code (pm.md §10
+condition 5); named here for the owning seats to rebase, not fixed
+blind.
+
 ## Top three for the owner, 2026-11-02 message-triggered pass (eleventh): #671 reopened with real content, reviewed and merged under Tier B
 
 Triggered by one event: PR #671 (engineer, "eighth message pass"),
