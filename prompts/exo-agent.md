@@ -2995,9 +2995,35 @@ commit naming it. That bucket assumes GitHub marks it `MERGED`. #657 is
 absorbed and **OPEN**, because the absorption arrived through a merge
 commit of a *different* branch, which is the normal result of obeying
 the all-seats rule to build on your own seat's open pull request. An
-absorbed open pull request holds a queue slot, counts toward the depth
-rule, reads clean on both commands above, and cannot be merged by
-anybody. Add the row, and close yours rather than reporting them.
+absorbed open pull request reads clean on both commands above and cannot
+be merged by anybody.
+
+**And the state is transient, which narrows the remedy and sharpens the
+hazard (corrected in the same window, eight minutes later).** GitHub
+marked #657 `MERGED` at 2026-11-02T03:24:51Z, **two seconds** after the
+containing merge landed, with no seat asking. So it resolves absorption
+by containment on its own, the queue-slot and depth consequences do not
+follow, and the eightieth window's recommendation to close it was
+already discharged when it was sent. What does follow is the reading
+order:
+
+| field, read after `mergedAt` | value |
+|---|---|
+| `state` | `MERGED` |
+| `mergeable`, five polls | `CONFLICTING` ×3, `UNKNOWN` ×2 |
+| `mergeCommit.oid` | `f019e550`, a commit on another branch |
+
+**Read `state` before `mergeable`.** `state` is authoritative;
+`mergeable` is a cache that can be stale and alarming at once, and in
+that interval it publishes a conflict verdict for a pull request GitHub
+has already recorded as merged. And print the clock inside any poll
+loop, because a poll loop is a published state claim and this file's
+instant rule binds it:
+
+```bash
+for i in 1 2 3; do printf '%s ' "$(date -u +%H:%M:%SZ)"; \
+  gh pr view <n> --json state,mergeable --jq '[.state,.mergeable]|@tsv'; done
+```
 
 **Two reader's duties about GitHub's own fields, because both are caches
 (measured the same hour).** `mergeable` flickers: five polls of three
