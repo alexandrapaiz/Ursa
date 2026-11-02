@@ -4603,3 +4603,151 @@ nothing and is the only reading that cannot drift.
   share climbs again as the new week is consumed. If it reaches 100 per
   cent on any day, that is the stall recurring and it is reportable to
   the owner the same hour rather than five days later.
+
+### The instrument for charter lag selected by the proxy its own charter had retired, and 86 per cent of the pending total was the cost
+
+- **Proposal.** The eighty-seventh window, 2026-11-02, found while
+  running the §2 instrument this seat shipped five days ago. The window
+  opened on `#704` merging with the dispatch "continue with the next item
+  in your lane on the board". There is no `exo` card on the Ursa board —
+  52 items, 0 for this seat — so the lane is this charter's loop, and the
+  first instrument it mandates returned the finding.
+- **Merged.** **Not yet.** `tools/seat/charter-lag.mjs`, its test, and
+  three charter edits ship in this window's pull request. The branch
+  carries a `prompts/` path, so it is Tier B under HQ's `check-tier.sh`
+  and Tier C under `pm.md` §10's older list. The tier split this register
+  prescribed on 2026-11-02 was not available: this run's dispatch
+  mandates exactly one pull request, and that is being told rather than
+  being unable.
+- **Effect.** Measured 2026-11-02T08:00Z over eleven charters. The
+  shipped selector took the highest open pull request number that touches
+  each charter and returned the first match. It reported **1,089**
+  pending charter lines; reading every open copy reports **7,586**. The
+  under-report is **6,497 lines, 86 per cent of the total**, on **2 of
+  11** rows — exo by 6,414 lines and research by 83. Nine rows were
+  exactly right, which is why it was invisible: the two wrong rows are
+  the only two seats with more than one open copy. The tool's own header
+  had the right number on the day it was written (7,732 lines), so the
+  code did not drift. **This seat's practice did**: opening each window's
+  pull request on a fresh root off `main`, to keep it free of a
+  `prompts/` path and mergeable, decoupled recency from depth and
+  inverted the selector without changing a line of it.
+- **Rule.** **A guard on what an instrument can see is not a guard on
+  what it selects.** This file already holds *an absence is a measurement
+  and it needs a positive control*; so does a choice. When a tool
+  resolves many candidates to one, print the count it resolved and the
+  difference the resolution made, or its silence reads as there having
+  been one candidate. And the compounding half: **charter lag is not only
+  a rule the other ten seats are not handed, it is a rule this seat's own
+  next instrument is built without.** §0 retired `newest` on 2026-10-25
+  with the inversion named; the repair is a `prompts/` path, so it sat on
+  the charter branch; eight days later this seat compiled the retired
+  proxy into the staleness instrument itself, from `main`. Every sweep in
+  this charter resolves a charter against a register or a standard, and
+  none resolves a charter against the code this seat writes.
+- **Next measure.** **2026-11-09**, and earlier on sight, because this is
+  a comparison and not a calendar reading. One command, one number:
+  `node tools/seat/charter-lag.mjs --copies` and the `sel.loss` column.
+  The prediction is **not** that it reaches zero — it reaches zero only
+  when the queue holds one copy per charter, which is a fact about the
+  owner's merges and not about this edit. The prediction is that the
+  *company total* and the *single-newest-copy* line it now prints beside
+  it stay unequal while two lanes are open, so any later window that sees
+  them equal with two copies listed has found a regression in the fix.
+
+### §0's repair was already written, by this seat, eight days ago, and this window shipped it to `main` for the first time
+
+- **Proposal.** Same window, same measurement, and this is the half the
+  all-seats "read your own open pull requests first" rule earned. The
+  first draft of the finding above claimed §0's selector as a discovery.
+  It is not. The forty-fifth window measured it on 2026-10-25 and the
+  amendment has been sitting in `#699` ever since, under
+  `INC-2026-10-25-the-authority-split-inverted-the-bootstrap-block-that-tells-a-window-to-re-read-its-charter`,
+  complete with the inversion condition stated in advance.
+- **Merged.** **Not yet**, and that is the point of the entry: for eight
+  days the repair existed and bound nothing. `main`'s §0 said `newest`
+  until this pull request. The clause now on `main`'s copy is the
+  forty-fifth window's wording, attributed to it.
+- **Effect.** One residual, measured, which the original repair did not
+  claim and could not have: **the longest copy is the best single read
+  and is not a superset.** `#699` at 8,726 lines lacks **154** normalised
+  lines that `#714` holds, including the whole of the eighty-sixth
+  window's clause on probe cost; and research's longest copy `#395` is 83
+  lines longer than `#699` while lacking **97** of its lines, which is
+  the proxy inversion the forty-fifth window predicted for this file,
+  arriving on a sibling charter instead. Neither of this seat's two open
+  pull requests contains the other, in either direction, by ancestry or
+  by content. So §0 keeps the cheap `wc -l` pick and gains one `diff`
+  against the newest, and the all-seats rule stops saying the newest
+  usually contains the older.
+- **Rule.** When a window finds a defect in its own charter, grep the
+  deepest open copy for the **property** before claiming the finding,
+  because this seat's unmerged copy is where its last three weeks of
+  repairs live. A rediscovery published as a discovery costs the register
+  its credit and costs the next window a second fix.
+- **Next measure.** **2026-11-09.** One reading:
+  `git log -1 --format=%cI origin/main -- prompts/exo-agent.md`. Today it
+  is 2026-10-18, a 14.6-day lag. This is the only entry here whose metric
+  the owner moves rather than this seat.
+
+### The run feed's six-window absence was lag, not loss, and it resolved two days early by the register asking for a re-read
+
+- **Proposal.** Carried from the seventy-sixth window, read date
+  2026-11-04, read here on 2026-11-02 because the clause above it says
+  whichever window sees it resolve should read it.
+- **Merged.** Not applicable: the reporter is HQ's `runtime/board/`, and
+  nothing in this repository changed to produce the result.
+- **Effect.** **Resolved positively.** `GET /api/work/Ursa/exo?days=3`
+  now holds **13** `kind=="run"` rows, with a row naming `#639` and rows
+  for every one of the six windows reported missing — `#612 #618 #625
+  #634 #639` and on to `#675`. The absence was **lag**, not loss, and the
+  rows arrived. The honest second half: the feed's newest row is
+  `2026-11-02T04:21:48Z` and **six** exo runs have opened pull requests
+  since — `#682 #688 #695 #699 #704 #714` — so the gap did not close, it
+  **moved**, and at 08:00Z it is a trailing lag of about 3 hours 40
+  minutes with six runs uncounted.
+- **Rule.** The seventy-sixth window's rule was that an absence on a
+  per-seat feed is a measurement only with a same-company positive
+  control inside the same interval. It needs its second half: **a control
+  inside the interval separates loss from lag only if it is read at the
+  same lag.** The PM's nine rows were genuinely inside the interval and
+  the interval was this seat's *trailing edge*, where lag and loss are
+  indistinguishable by construction. The control that actually decides it
+  is time: re-read the same interval later. A window cannot do that, so
+  **register the re-read instead of grading the absence** — which is what
+  the seventy-sixth window did, and is why this came back.
+- **Next measure.** Retired. The subject is closed and the standing
+  reading it leaves behind is the trailing lag, which belongs to HQ and
+  is already in its hands.
+
+### Compounding ratio, this window
+
+- **Seats touched: 11 for the measurement, 1 for a change.** The
+  instrument reads every charter in `prompts/` and both of its new
+  columns are populated from every open copy, so all eleven rows get a
+  truthful pending figure where two were wrong. Only `prompts/exo-agent.md`
+  is edited, deliberately: the defect is this seat's.
+- **Files touched: 6, over two tiers on one branch.**
+  `tools/seat/charter-lag.mjs`, `tools/seat/charter-lag.test.mjs`,
+  `prompts/exo-agent.md`, `docs/agents/incidents.md`, this file, and the
+  run log. **The tier split this register prescribed on 2026-11-02 is
+  violated here, and the reason is a narrowed window and not an
+  oversight**: the dispatch that opened this run mandates exactly one pull
+  request. HQ's `check-tier.sh` now calls an ordinary charter edit Tier B,
+  which is most of what the split was buying.
+- **Charter length, in the order §5 requires.** **2,314 lines**, up from
+  2,221 on `main`; **+102 −9** against `main`; replacement ratio
+  **8.8 per cent**. The 91-line §0 block is the forty-fifth window's
+  existing amendment arriving on `main`, not new prose.
+- **Does the next change get cheaper?** Yes, and in the one direction
+  this seat had no instrument for. `sel.loss` makes a dropped candidate
+  visible from inside any seat's own run, and the §5 duty points the next
+  tool at the deepest charter copy before it compiles a judgment this
+  charter already makes. The loop that produced this bug — lag suppresses
+  the fix for lag — now has a check in it.
+- **Is the curve flat?** Not this window. The charter lane and the tools
+  lane are on one branch by instruction, and the register is wrong about
+  the lane being unbendable in the other direction too: `main`'s charter
+  moves in this pull request for the first time since 2026-10-18, and
+  what moved it was shipping another window's eight-day-old amendment
+  rather than writing a new one.
