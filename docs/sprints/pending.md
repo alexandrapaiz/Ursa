@@ -2,6 +2,64 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (twenty-third pass): #719's CI-gate finding merged as a stack, three more Tier B merges, one stale PR closed
+
+Triggered by security's `#719` ("the CI job we kept queueing would have
+gone green without testing the product"), named on the wake for review
+against the merge rule, plus a standing note naming `#721` (exo) as an
+orphaned draft.
+
+1. **Nothing needs you.** Four Tier B merges and one close, all other
+   seats' PRs, none of this seat's own: `#709`, `#719`, `#705`, `#720`
+   merged; `#395` closed as stale.
+2. **`#719` was the tip of a two-PR stack, not a single PR.** Its branch
+   carries `#709`'s commits (`git merge-base --is-ancestor` confirmed
+   this before touching either). Merged the base first, `#709`, then
+   `#719` once GitHub recomputed a clean merge state, per §10's "merge
+   the base of a stack first." Both Tier B: not this seat's own PR, not
+   drafts, no `hold` label, no owner comment, checks green (`scan`),
+   `gh pr diff --name-only` showed no Tier C path for either (no
+   `prompts/`, no `.github/workflows/`, no `company.yaml`), both
+   `MERGEABLE`/`CLEAN`, both opened today. `#719`'s own finding (F73–F77
+   in `docs/security/audit-2026-11-02k.md`) is itself a real one: the
+   CI gate HQ has queued for three runs would have gone green against
+   `node:` builtins alone and never touched `ursa-major`'s or
+   `ursa-minor`'s own test suites. That fix moves with `#719`, now on
+   `main`.
+3. **The standing note on `#721` was checked live and found stale,**
+   the same way the twenty-second pass found `#715`/`#716` stale.
+   `/srv/asc/hq/tools/check-draft-prs.sh --repo alexandrapaiz/Ursa`
+   reports `#721` idle 8 minutes against the workflow's own
+   timeout window: "run may still be live; leave it alone." `#722`
+   (security, idle 2m) and `#716` (engineer, idle 1m) are the same
+   shape. None of the three drafts open right now are orphans. Left
+   alone, contrary to the wake's framing that `#721`'s run had already
+   ended.
+4. **Two more open PRs are Tier C by path, not Tier B, and wait for
+   you or HQ's PM:** `#699` (exo) and `#714` (exo) both edit files
+   under `prompts/` directly (`prompts/engineer-agent.md` and ten other
+   charters in `#699`; `prompts/exo-agent.md` in `#714`). Charters are
+   reserved to the owner under §10 Tier C regardless of how clean the
+   checks are. Both `MERGEABLE`/`CLEAN`, unchanged by this pass.
+5. **`#395` (research) closed, stale.** Open since 2026-10-24, nine
+   days, no movement in the last seven. Closed with a one-line note
+   naming what would reopen it (a new commit or a fresh PR rebased
+   onto current `main`), per §10 Tier B's age rule rather than left to
+   accumulate.
+6. **This seat's own two open PRs, unchanged.** `#701` (pass 17) still
+   waits on you or HQ's PM for the `tools/root-entries.test.mjs`
+   conflict, a code conflict and not a docs-only one, so not this
+   seat's to resolve under §10 Tier B rule 5. `#718` (pass 22) is
+   subsumed by this pass's own `#723`: every commit in `#718` is an
+   ancestor of `#723`, so merging `#723` closes `#718` for free: one
+   decision instead of two. `#718`'s own `redaction-gate` failure
+   (the only non-success run in the last 30, `gh run list`) is already
+   resolved on this branch — `node scripts/redaction-check.mjs` reports
+   clean here.
+7. **Board:** posted one `done` naming the four merges and the close
+   in `data.merged`/`data.closed`, first person, per the board-message
+   protocol (§15).
+
 ## Top three for the owner, 2026-11-02 message-triggered (twenty-second pass): a failed exo run that had already repaired itself, two Tier B merges, one tool defect now tracked
 
 Triggered by four things: the engineer's note on `tools/stack/lag-or-rewrite.mjs`
