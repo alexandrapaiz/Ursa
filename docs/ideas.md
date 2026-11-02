@@ -17170,3 +17170,70 @@ the owner to accept or reject.
   measured figures.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (skill, eighth run) — The rule for a check that read none of its population is written, and the ordering clause it was written under is blind to the one thing that makes a citation dangle
+
+<!-- closes: docs/ideas.md 2026-11-02 "A containment verdict should name what it examined, and §5ai is why this run filed the rule instead of writing it" -->
+
+- Trigger: a note on the board from this company's ExO seat, addressed to
+  this seat, reporting two call sites in its own self-classification sweep
+  that could never fire and offering the shared shape as the thing worth
+  more than either case: a check that silently drops part of its
+  population has no failing output, so it can contradict nothing, and is
+  reachable only by a second instrument over the same ground returning a
+  different number. That is the generalisation the entry this marker
+  closes had asked a later run to write, arriving from a different lane
+  the same night with an independent case behind it.
+- What: the methodology section the closed entry owed, in
+  `prompts/skill-extract.md`, stated at the width the cases share rather
+  than at the width of a containment verdict. Five clauses. A check states
+  the size of the population it examined in the same line as its verdict;
+  an empty population is not a pass and does not share an exit code with a
+  full one; a drop is found by a second instrument and not by reading the
+  check; an instrument agreeing with its own earlier run is not evidence;
+  and a repair of one of these is controlled both ways in the same run,
+  because fixing a silent drop can produce a silent over-report. Every
+  figure in it was measured in this clone, including both of the ExO
+  seat's, which were re-derived from the commits rather than taken from
+  the note.
+- What it found while being paid, which is the part worth a reader's time:
+  the gate that enforces the amendment rule had the same defect, in this
+  seat's own write surface. `skills/trigger-coverage.mjs --amendments`
+  read an amendment claim out of a section's dated note by matching the
+  gerund alone, where the rule it enforces is stated as a note that "says
+  it amends" the other section. The note added by this run spelled the
+  claim `Amends`, so it declared an edge the gate could not see, and the
+  mode printed "every amended section names its amendments" over a
+  population that note had been dropped from. Measured: 32 of the file's
+  43 numbered sections carry a dated note, 31 spell the claim `amending`,
+  and the one that did not was the one being added, so the drop was 1 of
+  32 and the only output was the clean line. Repaired here: three
+  inflections, case-insensitive, with the negative control in the tests so
+  a widened verb cannot read the file's commentary about itself as a
+  claim, and the verdict line now names its population in three parts,
+  separating what the graph cannot speak for from what it read and found
+  nothing in.
+- First step: not this seat's to take, and it is to scope one clause. The
+  ordering clause this section landed under reads its own check tier-blind. §5ai says the branch
+  introducing a section must carry nothing that cites it, and the check is
+  a grep over the whole tree. The risk the clause exists to stop is
+  narrower than the grep: a citation dangles only when the citing path can
+  merge while `prompts/` waits, and under `docs/standards/pm.md` §10
+  `prompts/` is Tier C while `docs/ideas.md` grooming is Tier A and
+  everything else here is Tier B. Measured on this branch: the file holds
+  37 `## 5` sections and `origin/main` holds 19, so 17 exist only on this
+  seat's open pull requests, and all 17 are cited from `docs/ideas.md`,
+  all 17 from paths under `docs/runs/` and `skills/`, across 36 files, and
+  15 from inside the prompt file itself. The grep that is supposed to
+  guarantee no dangling citation therefore passes nothing today and the
+  exposure is 17 of 17, every one of it from a path of a lower tier than
+  the file it points into. A same-file mention can never dangle and should
+  not count; a mention from a Tier A or Tier B path is the whole defect
+  and counts twice. The repair is one sentence in §5ai scoping its check
+  to paths outside the prompt file, plus the tier reading, and `prompts/`
+  is a charter path. Owner: the owner, since §5ai is in a Tier C file this
+  seat may propose but not unilaterally rescope; the next run of this seat
+  that would add a §5 section pays the stricter reading by hand in the
+  meantime, as this run did.
+- Cost: $0
+- Status: proposed
