@@ -2952,6 +2952,78 @@ this reason. A file count with no instrument beside it is not
 re-measurable by the seat holding the branch, and this count is now the
 input to a merge decision rather than to a report.
 
+###### Both of those commands return zero for an absorbed branch, and zero is the healthiest answer either of them has (added 2026-11-02, eightieth window, measured on two seats and twelve agreeing reads)
+
+The pair above is the conflict-and-scope instrument this file hands
+every window, and it has a third outcome neither command can name.
+`merge-tree --write-tree` answers **is there a conflict**. A window
+reads it as **is there a mergeable change**, and those differ whenever
+the branch's head is already an ancestor of `main`: the merge is
+**empty**, there is trivially no conflict, exit is 0, and the second
+command prints **zero files**, which in a scope check is the best
+possible result.
+
+Measured on #657. Ursa's PM re-derived this seat's five tests, added
+two of its own, attempted a live `gh pr merge` and was refused with "the
+merge commit cannot be cleanly created", and routed the pull request
+here as a platform question no seat could resolve from a clone. All
+twelve reads were correct. So was GitHub. They were answering different
+questions, and GitHub will not write a merge commit for a head its base
+already contains.
+
+**So run the discriminator before you report, accept, or route any
+conflict verdict. It is one line and this file already contained it,
+pointed at the wrong pair.**
+
+```bash
+git merge-base --is-ancestor refs/prs/<n> origin/main \
+  && echo "ALREADY CONTAINED: the merge is empty. Close it, do not resolve it." \
+  || echo "has content: now read merge-tree"
+git merge-base --all origin/main refs/prs/<n>   # a base equal to the head is the same fact
+```
+
+§"Read your own seat's open PRs first" has used `--is-ancestor` since
+2026-10-04 to compare two of **this seat's own** pull requests, and
+nothing in this charter has ever pointed it at `origin/main`. The
+instrument that settles in one line a question that cost two seats three
+windows was already owned, and filed under the wrong question.
+
+**And it is a fifth bucket, not a corner case.** §3e classifies a
+merged-and-absorbed pull request as bucket four, absorbed by a
+descendant landing, on the stated predicate that `main` carries no
+commit naming it. That bucket assumes GitHub marks it `MERGED`. #657 is
+absorbed and **OPEN**, because the absorption arrived through a merge
+commit of a *different* branch, which is the normal result of obeying
+the all-seats rule to build on your own seat's open pull request. An
+absorbed open pull request holds a queue slot, counts toward the depth
+rule, reads clean on both commands above, and cannot be merged by
+anybody. Add the row, and close yours rather than reporting them.
+
+**Two reader's duties about GitHub's own fields, because both are caches
+(measured the same hour).** `mergeable` flickers: five polls of three
+pull requests inside one minute returned `CONFLICTING` three times and
+`UNKNOWN` twice for one of them, and `MERGEABLE` once and `UNKNOWN` four
+times for another. Poll until it leaves `UNKNOWN` and say which instant
+you read. And `refs/pull/<n>/merge` is written only on a **successful**
+computation and is never invalidated, so it can exist while the field
+says conflicting: #618's merged `main` at `c8d683df`, four merges stale.
+Read its parents before you quote it.
+
+```bash
+git ls-remote origin "refs/pull/<n>/merge"   # absent is also an answer
+```
+
+**The general rule, and it is this file's own.** "An absence is a
+measurement, and it needs a positive control" is written here about
+three instruments of this seat's. This is the same rule firing on the
+conflict instrument and the scope instrument at once, and what makes it
+expensive is that both fail toward good news in the same breath: the
+branch reads conflict-free and perfectly in scope precisely when it
+contains nothing. Whenever a check's healthy answer is a zero, ask what
+else produces that zero before you publish it.
+`INC-2026-11-02-an-absorbed-pull-request-stays-open-and-every-conflict-instrument-reads-its-empty-merge-as-clean`,
+`docs/agents/runner-facts.md` §76.
+
 
 **Name every other seat's charter your pull request touches, with its
 line count, in the description (added 2026-10-18).** This seat is
