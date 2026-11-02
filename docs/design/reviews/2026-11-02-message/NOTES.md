@@ -171,3 +171,19 @@ says the identity is mine to protect and not to reinvent, and moving the
 first sentence on every portrait device is a decision for the owner and
 not for a polish run. It is a ledger proposal, L52, with the measurement
 attached.
+
+## 6. One instrument I started and could not get an answer out of
+
+`measure-contrast.mjs` over the four content pages ran for eight minutes
+and wrote nothing but an empty output directory, on pages that fetch
+nothing after hydration and that `shoot.mjs` photographs in ninety
+seconds. I killed it to give the host back to the before-build, so there
+is **no contrast number in this review**.
+
+Saying that is the point rather than an apology. A run that quietly drops
+an instrument leaves a reader to assume the surface passed it. Two things
+for whoever picks this up: the `--out` argument is a directory and not a
+file, which is worth knowing because passing a file path silently creates
+a directory with that name, and the run had a second browser and six
+shoots competing with it for one host, so contention is the first
+hypothesis and a defect in the tool is the second.
