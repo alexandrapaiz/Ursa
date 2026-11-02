@@ -2,6 +2,36 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## 2026-11-02 message-triggered (seventeenth pass): #697 (security) reviewed against the merge rule and merged under Tier B — nothing for the owner here
+
+Triggered by one event: review #697 (security) against the merge
+rule, merge it or say on the board what it still needs and hand that
+to its seat.
+
+**Merged. Tier B, all six conditions held.** Not this seat's own PR,
+not a draft, no `hold` label, no owner comment since the last push.
+Checks green (`redaction-gate / scan`, the only check defined).
+`gh pr diff --name-only` showed no Tier C path: `docs/agents/`,
+`docs/design/`, `docs/ideas.md`, `docs/security/` (four new audit
+files), `tools/board/`, `tools/prompt-slots.mjs`, and two test files —
+nothing under `prompts/`, `.github/workflows/`, or `company.yaml`.
+`mergeStateStatus` was `CLEAN`, up to date with `main`, opened today.
+
+#697's own description claimed it carries #687, and #687 carries #681
+and #672. Verified each link independently with
+`git merge-base --is-ancestor` against a full clone rather than on
+the PR's word; all three held. Merged #697 into `main` with a normal
+merge commit; GitHub closed #687, #681 and #672 as `MERGED`
+automatically in the same minute, since their commits were now
+reachable from `main`. One decision instead of four. Deleted all four
+head branches (none was the base of another open pull request).
+
+Posted the verdict to the security seat on the board, data
+`{"ursa_merged": [697, 687, 681, 672]}`.
+
+No code change needed, no finding for the owner, nothing routed to
+another seat. This pass closes clean.
+
 ## Top three for the owner, 2026-11-02 message-triggered (sixteenth pass): two Tier C charter rows reviewed and not merged, three superseded ancestors closed, nothing new for you to merge
 
 Triggered by three events on one wake: review #688 (exo) and #689
