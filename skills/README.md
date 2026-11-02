@@ -19,8 +19,9 @@ run, quality over count. The owner's merge is the gate.
 | [clearing-a-record-for-release](clearing-a-record-for-release/SKILL.md) | Which of the three exits a release is taking, what that exit demands of raw text, and what an erasure has to reach once something has already left | 41 | draft, `validated: false` |
 | [auditing-a-detected-correction-loop](auditing-a-detected-correction-loop/SKILL.md) | Whether a detected correction loop is the loop the user actually ran, what `recurrences`, `openedStep`, `closedStep` and `resolution` compute rather than name, and where a complaint the user plainly made went when no signal carries it | 32 | draft, `validated: false` |
 | [auditing-a-durability-walk](auditing-a-durability-walk/SKILL.md) | Whether the forward walk behind a `durability` block ran at all, over which window and to which tip, and what `decayRate`, `durableChars`, `fate` and `medianIntactSeconds` compute rather than name | 27 | draft, `validated: false` |
+| [auditing-an-untraced-share](auditing-an-untraced-share/SKILL.md) | Which of the seven routes into `no_generation_provenance` produced a given share, which of them are statements about the apparatus rather than the work, and whether the figure may be quoted, compared or priced | 25 | draft, `validated: false` |
 
-## Six areas, and the edges between them
+## Seven areas, and the edges between them
 
 The first three skills work on `files[].spans` and `stats` inside
 `outcome_record.json`. The fourth works on `tuning.json`. The fifth
@@ -32,16 +33,33 @@ label and no percentage can settle. The eighth is inside the record
 too and is cut by time rather than by object: `durability` and
 `spans[].lifespan` are the only blocks computed from what happened
 *after* the episode closed, so they are the only ones that can answer
-differently tomorrow. Every near miss in
+differently tomorrow. The ninth is inside the record and inside the
+span area, and it is cut by **field** rather than by block: it is the
+only skill that reads `noCandidate`, `tokenSuppression`, `descent` and
+the absence of all three, which are the fields that say *why* a span
+carries the label rather than which label it carries. Every near miss in
 `distilling-a-tuning-record/TRIGGER-TEST.md` and in
 `adding-a-bound-to-the-record-gate/TRIGGER-TEST.md` fails by sitting on
 the record side of its own edge, which is what `prompts/skill-extract.md`
 §5e means by counting artifacts rather than neighbours.
 
-**The record area.** The three are adjacent and share almost all their
-vocabulary, so each ships a `TRIGGER-TEST.md` whose near misses include
-its siblings' triggers. Read those before adding another skill in this
-area.
+**The record area.** Four skills now read `files[].spans`, and they are
+adjacent and share almost all their vocabulary, so each ships a
+`TRIGGER-TEST.md` whose near misses include its siblings' triggers.
+Read those before adding another skill in this area.
+
+Per §5d, the order a prompt spanning the area resolves in:
+`running-an-outcome-record-trial` produces the record,
+`adjudicating-uncertain-spans` settles an individual span's label,
+`auditing-an-untraced-share` rules on what one class's total is made
+of, and `quoting-a-number-from-an-outcome-record` rules last on what
+may be written down and against which denominator. A prompt about one
+span goes to the second. A prompt about what a class figure is composed
+of goes to the third, which supplies an input to the fourth rather than
+making the fourth's ruling. The tightest pair is the second and the
+third, because both read `files[].spans` and both are about whether the
+headline class deserves to be believed; the division is that one
+settles a span and the other rules on a figure.
 
 As of 2026-10-24 every skill in the library does, for every other skill
 in the library, which `node skills/trigger-coverage.mjs` measures and
@@ -201,8 +219,10 @@ The other two guards are about receipts. This one is about the half of a
 skill that decides whether it runs at all, which nothing checked until
 2026-10-24. `prompts/skill-extract.md` §5c asks every skill for one near
 miss per adjacent skill, and adjacency here is every other skill in the
-library, so the tool reads all 30 ordered pairs and asks whether this
-skill's near misses carry that sibling's own trigger prompt.
+library, so the tool reads every ordered pair and asks whether this
+skill's near misses carry that sibling's own trigger prompt. With nine
+skills that is 72 pairs; the count grows as the square of the library,
+which is the whole reason the debt in §5r falls on the landing run.
 
 The failure it exists to catch is arithmetic rather than carelessness.
 The budget is one near miss per neighbour, so landing a sixth skill put
@@ -214,8 +234,9 @@ newest covered all five, six skills and six distinct values in order with
 no ties. The newest looked compliant for the same reason the oldest
 looked negligent, which is position in a sequence.
 
-It is green as of 2026-10-24, at 30 of 30, and that is the state to keep
-it in. Two mechanics a run adding the seventh skill will meet:
+It was green on 2026-10-24 at 30 of 30 with six skills, and it is green
+on 2026-11-02 at 72 of 72 with nine, which is the state to keep it in.
+Two mechanics a run adding another skill will meet:
 
 - A near miss has to carry the sibling's **own** prompt, not a
   paraphrase. A paraphrase tests the test's author; the sibling's words

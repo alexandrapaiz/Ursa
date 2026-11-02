@@ -254,3 +254,30 @@ of thing an axiom should not be built on, so a run that distils from
 records carrying durability blocks should know what those blocks mean
 first. That is a reason to read the sibling before distilling, not a
 reason to answer its prompts here.
+
+## Added 2026-11-02: the ninth skill's boundary
+
+The run that landed `auditing-an-untraced-share` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**11. "Our no-provenance share went from 27 to 41 percent across two
+records of the same repo and nothing about the project changed. Is that
+signal or is the matcher going blind?"**
+
+`auditing-an-untraced-share`'s own trigger 2, and it should not fire
+here.
+
+The artifact test in `prompts/skill-extract.md` §5e makes this the
+easier of this file's boundaries, and it is still worth writing down
+because the prompt is about two records of one project drifting apart,
+and this skill's own trigger 3 is also about re-running over a changed
+history. Both are "the number moved and the project did not".
+
+It should not fire. The output here is `tuning.json`, and no axiom is
+in question: the prompt names a share of the finished work, which is an
+`outcome_record.json` figure. The confidence count this skill reasons
+about is a count of records agreeing, not a count of spans the matcher
+declined to look at.

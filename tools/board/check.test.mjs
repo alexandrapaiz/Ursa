@@ -18,11 +18,12 @@ import { existsSync, readFileSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { violations, companiesFromHost } from './check.mjs';
+import { violations, notices, companiesFromHost, isGlobalSeat, wakeCut, wakeReceipt, WAKE_BODY_CHARS } from './check.mjs';
 
 const CHECK = new URL('./check.mjs', import.meta.url).pathname;
 const POST = new URL('./post.mjs', import.meta.url).pathname;
 const STORE = '/srv/asc/hq/runtime/board/store.py';
+const API = '/srv/asc/hq/runtime/board/api.py';
 
 /** A message with every rule satisfied, so each test changes exactly one thing. */
 const ok = (over = {}) => ({
@@ -123,9 +124,161 @@ test('data.files as a count is refused, because the read side iterates it', () =
 });
 
 test('a bare number in data.merged is refused, because numbers repeat across repositories', () => {
-  assert.deepEqual(codes(ok({ data: { merged: [260] } })), ['MERGED_BARE_NUMBER']);
+  assert.deepEqual(codes(ok({ data: { merged: [260] } })), ['QUANTITY_UNSCOPED']);
   assert.deepEqual(codes(ok({ data: { merged: { Ursa: 260 } } })), []);
   assert.deepEqual(codes(ok({ data: { merged: ['Ursa#260'] } })), []);
+});
+
+// --- the three addressees whose company field the board discards -----------
+//
+// These are the rule's point and not an edge of it: the gate used to refuse a
+// correctly addressed message to the owner, and the alternative a sender took
+// was to pass a company the board then threw away.
+
+test('the owner and the chairs need no company, because the board discards it for them', () => {
+  for (const seat of ['owner', 'chair', 'chair:ursa', 'chair:hq-console', 'Owner', ' CHAIR ']) {
+    assert.deepEqual(codes(ok({ toSeat: seat, toCompany: '' })), [], seat);
+  }
+});
+
+test('a role several companies hold still needs one, so the exemption is not a hole', () => {
+  for (const seat of ['pm', 'exo', 'engineer', 'security', 'chairman', 'co-chair']) {
+    assert.deepEqual(codes(ok({ toSeat: seat, toCompany: '' })), ['COMPANY_OMITTED'], seat);
+  }
+});
+
+test('a company passed beside a global seat is not refused either, because the board accepts and drops it', () => {
+  assert.deepEqual(codes(ok({ toSeat: 'owner', toCompany: 'Ursa' })), []);
+  // But a misspelled one is still refused, since that spelling is wrong
+  // everywhere it appears and the sender should stop writing it.
+  assert.deepEqual(codes(ok({ toSeat: 'owner', toCompany: 'ursa' })), ['COMPANY_SPELLING']);
+});
+
+test('the clean line says the company was discarded rather than naming a company', () => {
+  const r = run(CHECK, '--kind', 'note', '--to-seat', 'owner',
+    '--subject', 'A subject', '--body', 'A body long enough to pass, because it gives a reason.');
+  assert.equal(r.code, 0);
+  assert.match(r.out, /one actor in the portfolio/);
+});
+
+// --- a quantity's denominator ---------------------------------------------
+
+test('an unscoped cross-company quantity is refused whatever key it is under', () => {
+  for (const key of ['merged', 'merges', 'merged_total', 'prs', 'pull_requests', 'open_issues',
+                     'commits', 'drafts', 'queue_depth', 'runs', 'incidents', 'mergedCount']) {
+    assert.deepEqual(codes(ok({ data: { [key]: 3 } })), ['QUANTITY_UNSCOPED'], key);
+  }
+});
+
+test('a key that names its own scope passes, in either half of the vocabulary', () => {
+  for (const key of ['ursa_merged', 'merged_ursa', 'portfolio_merges', 'by_company_merges',
+                     'per_repo_prs', 'alexandra-systems_merged', 'atelier-app_commits', 'global_runs']) {
+    assert.deepEqual(codes(ok({ data: { [key]: 3 } })), [], key);
+  }
+});
+
+test('a scope word is matched as a word, so reported_merges is not read as scoped', () => {
+  // `repo` is a substring of `reported` and `asc` of `ascending`. Both read as
+  // scoped under a substring match, which is what the first draft of this rule
+  // did and what this test exists to keep repaired.
+  assert.deepEqual(codes(ok({ data: { reported_merges: 3 } })), ['QUANTITY_UNSCOPED']);
+  assert.deepEqual(codes(ok({ data: { ascending_merges: 3 } })), ['QUANTITY_UNSCOPED']);
+});
+
+test('a quantity whose denominator is the run, not a repository, is left alone', () => {
+  for (const key of ['turns', 'characters', 'exit', 'minutes', 'tokens', 'seconds', 'lines']) {
+    assert.deepEqual(codes(ok({ data: { [key]: 1511 } })), [], key);
+  }
+});
+
+test('the value can carry the scope instead of the key', () => {
+  assert.deepEqual(codes(ok({ data: { merges: { Ursa: 3, epitome: 1 } } })), []);
+  assert.deepEqual(codes(ok({ data: { merges: ['Ursa#260', 'epitome#201'] } })), []);
+  assert.deepEqual(codes(ok({ data: { pr_url: 'https://github.com/alexandrapaiz/Ursa/pull/260' } })), []);
+});
+
+test('the reported shape is caught: a scoped key beside an unscoped one', () => {
+  // Ursa/exo, 2026-11-02: the prefixed key read correctly and the unprefixed
+  // one was read at headquarters as that company's own figure.
+  const v = violations(ok({ data: { ursa_merged: 3, merged_total: 40 } }));
+  assert.deepEqual(v.map((x) => x.code), ['QUANTITY_UNSCOPED']);
+  assert.match(v[0].line, /data\.merged_total/);
+});
+
+// --- what the wake will carry, predicted before the POST -------------------
+
+// Blocks of 300 characters, not one block of 1800: a single long paragraph is
+// refused by PARAGRAPH_LIMIT at 420 before the wake rule is ever reached, so a
+// fixture written that way would test the wrong gate. The two limits are set
+// independently on the host and this is where that shows.
+const LONG_BODY = ['because the two limits are independent', ...Array.from({ length: 6 }, () => 'word '.repeat(60).trim())].join('\n\n');
+
+
+test('a body inside the limit is delivered whole and raises nothing', () => {
+  const r = wakeReceipt('because ' + 'x'.repeat(100));
+  assert.equal(r.body_truncated, false);
+  assert.equal(r.body_delivered, r.body_chars);
+  assert.equal(r.body_lost, 0);
+  assert.deepEqual(notices(ok()), []);
+});
+
+test('eleven characters over the limit can cost a whole block, which is why this is predicted', () => {
+  // The reported case: 1511 characters delivered as 1170. Reconstructed to
+  // that shape rather than quoted, because the body itself was a message.
+  const block = (n) => 'w'.repeat(n);
+  const body = [block(380), block(380), block(400), block(338)].join('\n\n');
+  assert.equal(body.length, 1504);
+  const r = wakeReceipt(body);
+  assert.equal(r.body_truncated, true);
+  assert.equal(r.body_delivered, 1164);           // the first three blocks
+  assert.equal(r.body_lost, 340);                 // four over the limit, 340 lost
+  assert.ok(r.body_lost > body.length - WAKE_BODY_CHARS);
+});
+
+test('a handoff and an ask over the limit are refused; a note is told and sent', () => {
+  for (const kind of ['ask', 'handoff']) {
+    const v = violations(ok({ kind, body: LONG_BODY }));
+    assert.deepEqual(v.map((x) => x.code), ['WAKE_TRUNCATION'], kind);
+    assert.match(v[0].repair, /--accept-truncation/);
+    assert.deepEqual(notices(ok({ kind, body: LONG_BODY })), [], `${kind} is refused, so it is not also noticed`);
+  }
+  for (const kind of ['note', 'done']) {
+    assert.deepEqual(codes(ok({ kind, body: LONG_BODY })), [], kind);
+    assert.deepEqual(notices(ok({ kind, body: LONG_BODY })).map((n) => n.code), ['WAKE_TRUNCATION_PREDICTED'], kind);
+  }
+});
+
+test('--accept-truncation turns the refusal into the same prediction as a note', () => {
+  const m = ok({ kind: 'handoff', body: LONG_BODY, acceptTruncation: true });
+  assert.deepEqual(codes(m), []);
+  assert.deepEqual(notices(m).map((n) => n.code), ['WAKE_TRUNCATION_PREDICTED']);
+});
+
+test('the prediction is printed by both the checker and the poster, before anything is sent', () => {
+  for (const [file, extra] of [[CHECK, []], [POST, ['--dry-run', '--seat', 'engineer']]]) {
+    const r = run(file, ...extra, '--kind', 'note', '--to-seat', 'pm', '--to-company', 'Ursa',
+      '--subject', 'A subject', '--body', LONG_BODY);
+    assert.equal(r.code, 0, `${file}: ${r.err}`);
+    assert.match(r.err, /WAKE_TRUNCATION_PREDICTED/, file);
+    assert.match(r.err, new RegExp(`of ${LONG_BODY.length} characters`), file);
+  }
+});
+
+test('--wake-limit lets a sender check against a host that raised it', () => {
+  assert.equal(wakeReceipt(LONG_BODY, 4000).body_truncated, false);
+  assert.deepEqual(notices({ kind: 'note', body: LONG_BODY, wakeLimit: 4000 }), []);
+  const r = run(CHECK, '--kind', 'note', '--to-seat', 'pm', '--to-company', 'Ursa',
+    '--subject', 'A subject', '--body', LONG_BODY, '--wake-limit', '4000');
+  assert.equal(r.code, 0);
+  assert.doesNotMatch(r.err, /WAKE_TRUNCATION_PREDICTED/);
+});
+
+test('isGlobalSeat is the predicate and not a list, so a fourth global seat needs no edit here', () => {
+  assert.equal(isGlobalSeat('owner'), true);
+  assert.equal(isGlobalSeat('chair:anything-at-all'), true);
+  assert.equal(isGlobalSeat('chairperson'), false);
+  assert.equal(isGlobalSeat(''), false);
+  assert.equal(isGlobalSeat(undefined), false);
 });
 
 test('every violation carries a repair, because a refusal without one is a riddle', () => {
@@ -228,7 +381,7 @@ test('transcribed: every reason word the store accepts is accepted here', { skip
   }
 });
 
-test('transcribed: the committed company table matches the running board', { skip: existsSync('/srv/asc/hq/runtime/board/api.py') ? false : 'host runtime not on this machine' }, () => {
+test('transcribed: the committed company table matches the running board', { skip: existsSync(API) ? false : 'host runtime not on this machine' }, () => {
   const live = companiesFromHost();
   assert.ok(Array.isArray(live) && live.length > 0, 'could not read REPOS from the host');
   const table = JSON.parse(readFileSync(new URL('./companies.json', import.meta.url), 'utf8'));
@@ -264,6 +417,48 @@ test('transcribed: a claim or a release with no surface is refused', { skip: sto
   for (const kind of ['claim', 'release']) {
     assert.deepEqual(codes(ok({ kind, body: 'x' })), ['SURFACE_REQUIRED'], kind);
   }
+});
+
+test('transcribed: the wake limit is still 1500 in the live runtime', { skip: existsSync(API) ? false : `${API} not on this machine` }, () => {
+  const api = readFileSync(API, 'utf8');
+  const m = api.match(/^WAKE_BODY_CHARS\s*=\s*int\(os\.environ\.get\("WAKE_BODY_CHARS",\s*"(\d+)"\)\)/m);
+  assert.ok(m, 'WAKE_BODY_CHARS not found in the runtime');
+  assert.equal(Number(m[1]), 1500);
+  // Read from the environment under the same name on both sides, so this is
+  // the default and not the live value when the host sets one.
+  assert.match(readFileSync(CHECK, 'utf8'), /process\.env\.WAKE_BODY_CHARS \|\| 1500/);
+});
+
+// The one test here that is not a transcription check but a differential one:
+// the same bodies through `wakeCut` and through the host's own `wake_body`,
+// compared character for character. A constant can be checked by matching a
+// literal; a four-branch algorithm cannot, and the branch this seat got wrong
+// in its first reading of the report (a body whose last blank line falls in
+// the first 60% of the limit is cut mid-block at a word boundary, not at a
+// block boundary) is exactly the kind a literal match would have missed.
+test('transcribed: wakeCut agrees with the host wake_body on every branch', { skip: existsSync(API) ? false : `${API} not on this machine` }, () => {
+  const bodies = [
+    'because ' + ('word '.repeat(60) + '\n\n').repeat(6),   // blank line late: block boundary
+    'x'.repeat(3000),                                        // no boundary at all: hard cut at the limit
+    'short intro\n\n' + 'y'.repeat(3000),                   // blank line early: the branch the report missed
+    'z'.repeat(1500),                                        // exactly at the limit, untruncated
+    'z'.repeat(1501),                                        // one over
+    'a'.repeat(1000) + ' ' + 'b'.repeat(2000),               // one space, past 60%: word boundary
+    'p '.repeat(200) + '\n\n' + 'q '.repeat(400) + '   \n\n' + 'r '.repeat(400),  // trailing whitespace at the cut
+  ];
+  const py = spawnSync('python3', ['-c', [
+    'import json,sys',
+    'sys.path.insert(0, "/srv/asc/hq/runtime/board")',
+    'import api',
+    'bodies = json.load(sys.stdin)',
+    'print(json.dumps([api.wake_body(b, marker="") if len(b) > api.WAKE_BODY_CHARS else b for b in bodies]))',
+  ].join('\n')], { input: JSON.stringify(bodies), encoding: 'utf8' });
+  assert.equal(py.status, 0, `the host runtime would not import: ${py.stderr}`);
+  const theirs = JSON.parse(py.stdout);
+  bodies.forEach((body, i) => {
+    assert.equal(wakeCut(body), theirs[i], `body ${i} (${body.length} characters) cut differently`);
+    assert.equal(wakeReceipt(body).body_delivered, theirs[i].length, `body ${i} delivered length`);
+  });
 });
 
 test('an empty subject is refused, because the store refuses it first', () => {

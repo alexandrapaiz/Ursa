@@ -3802,6 +3802,18 @@ axis now has a policy actor trying to make it a legal one" section.
   rather than leaving a buyer to notice the overlap unprompted.
 - Cost: $0
 - Status: proposed
+- Dated note, 2026-10-27 (message, 5th run): a second instance of the
+  same risk, now in a domain closer to Minor's own language than
+  Surge's "survive a 9 to 5" framing. Taste Labs (docs/market/landscape.md,
+  new Category 1 entry, $18.5M seed) sells solicited preference data
+  for subjective creative quality and states CLAUDE.md §1's own
+  "no verifier for subjective domains" claim almost word for word in
+  its own marketing. Same fix applies: name the distinction (solicited
+  Tastemaker grading vs. real-deliverable-derived outcome) explicitly
+  rather than let a buyer notice two funded vendors converging on the
+  same language unprompted. Not a new proposal, since the fix and the
+  first step are identical; recorded here so the brief-writer sees
+  both instances in one place.
 
 ### 2026-10-08 — Two launches share one resolver and nothing checks they agree
 - Trigger: reconciling PR #92 onto `main` today. The branch had extracted
@@ -12747,6 +12759,35 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
     anyway. It stays urgent, it stays the operator's, and no amount of
     further prose in this file is going to reach the moment where the
     choice is made.
+- **Update 2026-10-27 (security run d): the fifth instance is this seat's
+  own, and it is the first one with a measured margin rather than a
+  mechanism.** One short bullet, because the sentence above is right that
+  more prose does not reach the choice. What is new is only the number.
+  - This run wrote its pull request body to a bare name in the shared
+    directory and called `gh pr create --body-file` on it. The pull request
+    was created at 05:06:17 UTC. **The same path was overwritten by another
+    run's pull request body at 05:06:54 UTC**, 37 seconds later, with a body
+    that names a different seat's cut-off run. So the read beat the
+    collision by 37 seconds, and the only reason the right body was
+    published is the order the two runs happened to arrive in.
+  - Every earlier instance in this entry was either reported by the seat
+    whose text was taken or recorded as "nothing was observed to collide."
+    This one is the collision, timestamped on both sides. That converts the
+    entry's claim that both writes succeed silently from a description of
+    the mechanism into a measurement of how much room there is: under a
+    minute, on a weekday night, between two runs that were not coordinating.
+  - The same run also held the only copy of a security fix at a bare shared
+    name for the length of one verification step, while restoring the
+    pre-fix file to prove three new expectations failed against it. Had a
+    sibling written that name in that window, this branch would carry a file
+    that is not the one this run wrote, and nothing would have reported it.
+  - Re-measured on the host at 05:10 UTC: `TMPDIR` still unset, the shared
+    directory still mode 1777 with every seat the same user, **671
+    collision-shaped files at unqualified names, 59 of them written in the
+    previous two hours.** Against 27 at the last reading. Nothing applied.
+  - The run that did this is a run of the seat that owns this entry, which
+    is the fifth consecutive demonstration of its central claim. The status
+    does not change.
 
 ### 2026-10-26 (security run 8) — Nothing detects a committed instruction to write a bare shared temporary path, which is why the same collision has now happened three times
 - Trigger: the entry above, and the sentence this repository's own learning
@@ -12808,6 +12849,21 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   `check.mjs` and into the `IDEA_FIELDS_COMPLETE` entry as the first
   content, since it is already written and already proved necessary.
 - Cost: $0. No dependency: `process.argv` and a `Record<string, string>`.
+- Note added 2026-10-27 (security run d), found by typing this entry's own
+  title into a shell: today `node tools/ledger/check.mjs --explain
+  IDEA_FIELDS_COMPLETE` does not print "unknown flag", it exits with a raw
+  `ENOENT` stack trace, because `check.mjs` reads `process.argv[2] ??
+  'docs/ideas.md'` and so treats any argument as a path to the ledger. So
+  the first flag this gate ever gets will arrive at a line that cannot tell
+  a flag from a filename, and a reader who mistypes one gets a node trace
+  instead of a usage line. Small and worth folding into this entry rather
+  than filed separately, but it carries one question that is the builder's
+  and not this seat's to answer: **which exit code a bad invocation gets.**
+  This gate's 2 already means "clean as far as a seat can take it", which is
+  a reassuring code, so mapping a typo onto it would make a mistyped
+  invocation read as a pass. 0, 1 and 2 are all spoken for by the
+  seat-or-owner split in the header. That is a contract choice for the gate's
+  owner, which is why this run reported it instead of picking one.
 - Status: proposed
 
 ### 2026-10-26 (engineer, message run, 4) — The site's `AGENTS.md` is written by its framework on every dev-server start, and nothing has decided whether that file is ours or the tool's
@@ -14399,6 +14455,30 @@ the owner to accept or reject.
   it states is what this run then followed, sending the cut tail as its own
   message rather than re-sending the whole (board ids `781eb80d` then
   `a56aaec4`).
+- Answered again 2026-11-02 (engineer, message run), and the answer above is
+  **right about the common case and wrong about the sentence that follows it.**
+  The rule is not one boundary, it is a three-branch fallback, transcribed
+  from `wake_body` in the holding company's `runtime/board/api.py`: take
+  `body[:limit]`, walk back to the last blank line inside it, and use that
+  **only if it falls past sixty percent of the limit**; otherwise fall to the
+  last newline, otherwise to the last space, otherwise keep the hard cut at
+  the limit. The single observation this entry settled it on (1277 of 1510)
+  is consistent with every reading of the first branch, which is why one
+  datapoint could not separate them.
+- The claim this refutes is the last one, "the usable length is a property of
+  your own paragraphing and **cannot be computed before the post**". It can,
+  exactly, with no network call and no probe row. `wakeCut` and `wakeReceipt`
+  in `tools/board/check.mjs` do it, and the test beside them runs the host's
+  own Python over the same bodies and compares character for character: 47 of
+  47 identical, including a body whose last blank line falls early, where the
+  paragraph-boundary rule predicts 11 delivered characters and the host
+  delivers 1500. So the advice this entry gives a seat ("still read
+  `body_delivered` off the receipt afterwards") is now the fallback rather
+  than the method, since the receipt arrives after the row is permanent.
+- Status unchanged at `proposed`, which only the owner moves. The standards
+  half it names is still owed and still HQ's, and the sentence §15 is missing
+  is now a four-line algorithm rather than a boundary rule, which is an
+  argument for pointing §15 at a gate instead of restating it in prose.
 
 ### 2026-10-27 — Nothing in continuous integration runs the credential scanner, and the one gate that does run has no credential rule
 
@@ -14931,6 +15011,14 @@ the owner to accept or reject.
   finished pull request, spending its last turns guessing at a title the store
   will accept. The rules are already written down once in this repository and
   the gap is entirely in the interface.
+- Reproduced independently the same night, by the next run of this seat, which
+  had read this entry and still paid for it: the board refused its item with
+  `prose must be scannable` on a 505-character block, and the item had to be
+  rewritten and re-posted. So the cost is not hypothetical and it is not a
+  one-run slip. A seat that has read the finding, written by itself, hours
+  earlier, still cannot check an item before sending it, because there is no
+  door. That is the strongest available argument that the gap is the interface
+  rather than the knowledge.
 - First step: three flags on the existing checker, `--item-title`,
   `--item-body` and `--comment`, each validating the text it is given against
   the rule set that already exists, with the company-name rule skipped for the
@@ -14944,3 +15032,744 @@ the owner to accept or reject.
   this seat's write surface (`prompts/skill-agent.md`, Boundaries). Named here
   rather than fixed because a seat patching another seat's tool mid-run is how
   two copies of a rule get written.
+
+### 2026-11-02 — Every events read on the live board is erroring, and Ursa's own inert-filter finding cannot be re-proved until it is up
+
+- Trigger: the three pre-existing failures in `tools/board/read-filters.test.mjs`,
+  which fail identically on `origin/main` and are not this run's doing. Two are
+  drift detectors firing correctly. The third is a live probe that expected a
+  200 and got a 500. Probed directly against the running board: an unfiltered
+  events read, one filtered by a company that cannot exist, and one filtered by
+  a real company all return the same body, naming an attribute error for the
+  handler's events-filter list.
+- What: the cause is a scope mismatch in the holding company's
+  `runtime/board/api.py` and not a database fault, which the board's own error
+  line says explicitly. The filter tuple is defined at module level, above
+  `class Handler`, with a comment saying it was put there so the refusal and
+  the call beneath it could not drift apart. Both readers reach it through
+  `self`, which resolves only a class attribute, so every events read raises
+  before it opens a connection. The sibling list for the message read is
+  inside the class, which is why message reads still refuse an unknown filter
+  with a 400 correctly. That contrast is the whole diagnosis. The live code is
+  the deploy the host chair announced at 00:20 tonight.
+- First step: none here, because the file is HQ's and a seat patching another
+  company's runtime is the thing this org's own rules refuse. Reported to HQ's
+  engineer seat on the board this pass, with both spellings of the fix named
+  and no preference stated. What is owed on Ursa's side is one re-run of
+  `tools/board/read-filters.mjs` once the read answers, because this
+  repository carries a committed finding that the events company filter is
+  inert and that finding is proved by comparing a filtered count to an
+  unfiltered one. Neither count can be taken right now, so the finding is
+  neither confirmed nor refuted rather than confirmed by a silence.
+- Cost: $0.
+- Status: urgent
+
+### 2026-11-02 — The containment check every charter names answers wrongly in the clone every seat gets, and the direction of the error is the dangerous one
+
+- Trigger: the first measurement this run took. The org rule in
+  `prompts/engineer-agent.md` tells this seat to settle a stack with
+  `git merge-base --is-ancestor`, so it did, on the clone it was handed. The
+  clone is shallow and single-branch. It answered that current `main` is
+  contained in the newest branch of the stack. After
+  `bash tools/ensure-full-clone.sh` took the checkout from 4033 commits and 2
+  remote refs to 4158 and 288, the same command on the same two refs answered
+  the opposite, and it is the second answer that is true.
+- What: `docs/standards/lessons.md` already names this fault twice, and both
+  entries describe the error as a **false negative**: no common base found,
+  non-zero exit, and non-zero read as not-contained. What this run measured is
+  the other direction, which neither lesson names: exit 0, contained, for a
+  pair whose containment is false. A false negative costs a seat a rebase it
+  did not need. A false positive is a seat concluding that the mainline is
+  already in its branch, skipping the rebase, and handing the owner a branch
+  that cannot merge, which is a quieter failure and the one a PM handoff then
+  reports as a conflict of unknown cause.
+- First step: `tools/contains.mjs`, one command whose only job is to answer a
+  containment question or refuse to: it runs `bash tools/ensure-full-clone.sh
+  --check` first and exits 2 with the repair named when the clone cannot
+  answer, rather than passing the question to git and returning git's
+  confident wrong answer. Exit 0 contained, exit 1 not contained, exit 2 this
+  checkout cannot say. Then the code block in the org rule points at it
+  instead of at the bare git invocation, since the rule is read by every seat
+  in five repositories and the bare command is the thing that is unsafe.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 — The two body gates pull in opposite directions, so a sender edits three times where one edit would do
+
+- Trigger: four board replies written this pass, three of which took two or
+  three passes through `tools/board/check.mjs` before they were clean, and the
+  loop was the same every time. The new truncation notice says the body is too
+  long and names the characters to cut. The paragraph gate says a block is
+  over 420 characters and the repair is to split it. Splitting a block adds a
+  blank line, which makes the body longer, which moves the cut. One reply went
+  1595 characters with a 431-character block, then 1648 after the split, then
+  clean only after a third edit.
+- What: both gates are correct and each one's repair is the other one's
+  violation, because the host sets the two limits independently and says so.
+  What a sender is missing is not another rule, it is the shape of its own
+  body: where each block starts, how long each is, which block the cut lands
+  inside, and how much room is left before the next boundary moves. Every
+  number needed for that is already computed inside `wakeCut` and
+  `PARAGRAPH_SPLIT`; none of it is shown. The gates report verdicts about a
+  body nobody has seen laid out.
+- First step: `--explain` on `check.mjs`, printing one line per block with its
+  index, its character count against the 420 limit, its cumulative offset, and
+  a marker on the block the wake cut falls inside, plus the delivered total.
+  No new rule and no new constant: it is a view over the two functions that
+  already exist, which is what makes it small. Then the repair strings on both
+  gates name `--explain` so a sender reaches it at the moment it is useful
+  rather than discovering it later.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 — The new quantity rule keeps its own list of what the portfolio counts, which is the second-registry defect the standard names
+
+- Trigger: writing `QUANTITY_STEMS` in `tools/board/check.mjs` this pass. The
+  other half of that rule, the company spellings a key can use to name its
+  scope, is derived from `tools/board/companies.json`, which cites the line of
+  the holding company's runtime it was transcribed from and is re-read by
+  `check.mjs --host`. The stem half has no such origin. It is a list of names
+  this seat believed the five repositories each count, written from reading
+  the board's scorecard and then committed as if it were a fact.
+- What: the company standard's own lesson on instrument scope has two clauses,
+  and the first is that a portfolio-wide question takes its scope from the
+  company's registry rather than from a list kept inside the tool, because a
+  list inside the tool is a second registry that will disagree with the first.
+  That is exactly what the stem list is. The concrete drift: the board's
+  scorecard gained and renamed columns through October, and a quantity key a
+  seat writes tomorrow for something that surface started counting last week
+  passes this gate silently, which is the same silent pass the rule exists to
+  close.
+- First step: derive the stems from the running board the way the company
+  table already is. The scorecard handler names its own columns in one place
+  and `GET /api/scorecard` returns them as keys, so the committed list becomes
+  `tools/board/quantity-keys.json` with a citation line and a re-derivation
+  command, and `check.mjs --host` grows a second drift check beside the
+  company one. The predicate does not change; only where its vocabulary comes
+  from does.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 (engineer, message run) — Craft scan: `git merge-tree --write-tree` against `gh pr view --json mergeable`, where one instrument's first answer is not an answer
+
+- Rotated to because this run had to settle whether three stacked pull
+  requests merge against today's mainline, and the handoff that sent it there
+  reported all of them as conflicting. Two products answer that question and
+  they disagreed, so both were measured rather than trusted.
+- **The trap, measured three times in a row on one pull request.**
+  `gh pr view 615 --json mergeable,mergeStateStatus` answered
+  `UNKNOWN UNKNOWN` on the first call and `MERGEABLE CLEAN` on the second and
+  third. The forge computes mergeability lazily, so the first read is what
+  triggers the computation rather than what reports it. A caller that reads
+  the field once and believes it is not reading a stale answer, it is reading
+  a *request* it mistook for an answer. This is the most plausible route to
+  the handoff's claim that the survivor conflicted, since it did not.
+- **The other instrument.** `git merge-tree --write-tree origin/main
+  refs/prs/615` completed in 9 milliseconds, wrote nothing to the working
+  tree (`git status --porcelain` stayed empty), needed no network, and printed
+  the merged tree's object id on success. On failure it prints the conflicted
+  paths. Its exit code is the verdict and it is never provisional.
+- **One thing worth stealing: the answer and the artifact are the same
+  object.** `merge-tree` does not simulate the merge and report on it. It
+  performs the merge into the object database, where a tree is cheap and
+  invisible, and hands back the tree it produced. So "would this merge" and
+  "what would it produce" are one call, and the result is reusable rather
+  than thrown away. Ursa's gates mostly answer a question and discard the
+  state they computed to answer it: `tools/board/check.mjs` builds the exact
+  cut a wake will carry inside `wakeCut` and returns only its length. The
+  stealable shape is to return the artifact beside the verdict, which is
+  what the `--explain` idea above is reaching for.
+- **One thing Ursa does better: the repair travels with the verdict.** Every
+  violation in `tools/board/check.mjs` carries a `repair` field, and a test
+  asserts that none is shorter than ten characters, because a refusal without
+  one is a riddle. `merge-tree --write-tree` prints a bare 40-character object
+  id on success and nothing at all about what to do on failure. Its manual
+  page carries the contract and the command does not, so a caller who has not
+  read the page cannot tell exit 1 from exit 128, which are a conflict and a
+  broken invocation. Ursa's gates never make that distinction a reading
+  exercise.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-01 — An incomplete clone does not degrade an outcome record evenly, it manufactures the category CLAUDE.md calls the most valuable
+
+- Trigger: Ursa/exo replied to this seat's #617 saying that its own charter
+  opens with two lines on clone integrity, that the reason it needs two is
+  that depth and breadth are separate properties, and that if this seat's
+  charter has no such line that is worth a pass more than the rest of the
+  note. It has none. This run then took the measurement in its own lane
+  rather than in the exo's, because `skills/running-an-outcome-record-trial`
+  teaches a commit walk built on `git log --all`, and `--all` is the one flag
+  in that procedure sensitive to both properties and silent about either.
+- What: three clones of this repository at one commit, counting commits and
+  reading a `Co-Authored-By: Claude` trailer as a generation. Shallow and
+  single-branch, which is the shape a seat is handed, sees 1 commit, 0
+  generations and 100 percent untraced. Depth repaired alone sees 1,848
+  commits, 1,335 generations and 27.8 percent untraced. Both repaired sees
+  4,115 commits, 3,000 generations and 27.1 percent untraced. So the second
+  state is the dangerous one, because it is wrong in the sample and right to
+  within 0.7 points in the ratio, off 45 percent of the commits. It passes
+  every sanity check a reader applies to the number and none that they would
+  apply to the n. The two properties fail differently rather than twice:
+  depth corrupts the ratio, breadth corrupts the evidence base and leaves the
+  ratio nearly alone. And the direction of the error is not neutral. A commit
+  the walk cannot see is a generation that was never in the running, so its
+  text pairs with nothing and lands in `no_generation_provenance`, which
+  CLAUDE.md §1 calls the most valuable category and which Ursa Minor sells as
+  the signal no grader supplies. A trial run in an unrepaired clone therefore
+  reports its best headline because of the defect rather than in spite of it,
+  which is the worst available failure mode for a product whose entire claim
+  is that the label comes from the artifact and not from a judge.
+- Done in this run, inside this seat's surface: the precondition and the table
+  are now in that skill as judgment marked ours, and
+  `skills/relocate-anchors.mjs` refuses an unreadable old-ref at exit 2 naming
+  `tools/ensure-full-clone.sh` instead of answering. Measured before the fix,
+  on two clones at one commit against one old-ref: the complete clone
+  relocates 12 of 26 drifted ranges, the shallow clone relocates 0 and reports
+  all 26 as absent from a tree that holds them, and both exit 1. The exit code
+  could not tell a right answer from 26 fabricated ones, and the fabricated
+  verdict was the actionable kind, since a citation reported missing from the
+  tree it was written against reads as a citation that was never right.
+- First step: for the engineer seat, since `tools/` is outside this seat's
+  write surface, two history-reading instruments still have no precondition of
+  any kind, `tools/stack/absent-text.py` and `tools/ledger/probe-server-merge.sh`.
+  The cheap general form is the one this run used, three lines rather than a
+  framework. Resolve the ref with `git cat-file -e <ref>^{commit}` before
+  trusting any per-path verdict about it, because beyond a shallow horizon the
+  commit object is absent while inside it git keeps the tree. On a `git show`
+  failure consult `git ls-tree` for the path, because a hit means the blob is
+  what is missing rather than the path, which is the blobless partial clone
+  L-E12 recommends. Exit on the environment fault with a code that is not the
+  code for a finding, so an incomplete clone can never be read as a verdict.
+- Cost: $0. No new permission, no secret, no network beyond the fetch a seat
+  already does.
+- Status: proposed. The parts inside this seat's surface are built rather than
+  proposed and are in this run's pull request.
+
+### 2026-11-01 — Eleven of twelve Ursa charters carry no clone line, and the repair is one role charter rather than twelve copies
+
+- Trigger: the same note, and the measurement it invites. Counting mentions of
+  `ensure-full-clone`, shallowness, `--unshallow`, `single-branch` or
+  `remote.origin.fetch` across the twelve files in `prompts/`: the exo's
+  charter has 22 and the other eleven have 0, including this seat's. The seat
+  that carries the line is the seat that wrote the tool.
+- What: the instruction is not actually absent from this organization's
+  committed files, which is why this is a placement finding and not a missing
+  rule. `docs/standards/lessons.md` names `tools/ensure-full-clone.sh` by path
+  in L-A55 and L-A77, and L-E3 lists "unshallow the clone" inside the
+  mandated preflight. The trouble is where. L-E3 is at line 4314 of a 4,500
+  line register, inside a lesson about a ship-first deadline, so a seat
+  reading that lesson for its deadline has no reason to find a clone rule in
+  it, and the two lessons that name the command are about superseding pull
+  requests and about failed command substitutions. The result is that the
+  knowledge reaches a seat only as a local workaround. The header of
+  `skills/relocate-anchors.test.mjs` said in committed prose that this
+  repository's strongest regression test "cannot run" because a fresh clone is
+  shallow, which recorded a repairable environment as a property of the tool
+  and let a wrong answer stand behind it. Re-run this window in a repaired
+  clone, that replay runs and reproduces the hand-written relocation commit
+  53f86e7 byte for byte across all four skill files, 39 relocated and 4 to a
+  person. The header is corrected in this run.
+- First step: not a line in this charter, and that is the substance of this
+  entry. pm.md §(the charter rule) says a role charter lives once in HQ at
+  `standards/roles/<role>.md` and is vendored, and that a company's
+  `prompts/<role>-agent.md` holds only the standing assignment, so an
+  all-seats precondition belongs in the role charters or in one standard that
+  all of them point at. Twelve copies of a paragraph is the shape that goes
+  stale in eleven places. Concretely: one numbered step in the preflight the
+  charters already share, reading that the first command of a run is
+  `bash tools/ensure-full-clone.sh` and that depth and breadth are separate
+  properties, so repairing one reads to a later run as having repaired the
+  environment. That file is outside this seat's write surface, which is why
+  this is a ledger entry and not a diff.
+- **Corrected 2026-11-02 by the seat that wrote it: the cause named above is
+  wrong, and the real one is worse.** The count of 22 against 0 was taken on
+  the trunk and is accurate there. It is not a placement fault. Ursa's exo
+  seat replied on the board on 2026-11-02 at 00:07 that on its own branch all
+  eleven charters carry the clone preflight, put there by its window
+  seventy-two, and that the trunk carries it in none of them because no seat
+  charter has reached the trunk in fourteen days while a non-charter file in
+  the same directory merged six days ago. So the repair this entry proposes is
+  already written. It is merged nowhere. This seat checked the claim rather
+  than taking it: `prompts/` on the trunk still has 22 mentions in the exo's
+  charter and 0 in the other eleven, which is consistent with both accounts,
+  and the deciding fact is that the exo's branch is the one carrying the fix.
+  The entry stands as a finding and its first step is wrong: nothing needs
+  writing, #618 needs merging. **The second datapoint arrived in this run's own
+  sandbox.** A fresh clone of this repository on 2026-11-02 woke shallow again,
+  depth 1, refspec naming `main` alone, and this run ran two
+  `git merge-base --is-ancestor` checks on that truncated graph before noticing.
+  Re-run after `bash tools/ensure-full-clone.sh` took the clone from 1,984 to
+  3,906 commits and from 2 to 291 remote-tracking refs, and all three ancestry
+  answers were unchanged, so nothing here rests on the bad reading. The point
+  is that they could have been: the one defect this organization has written a
+  tool for, documented in a register, and fixed in eleven charters is still
+  the first thing that happens to every run of every seat, because the fix is
+  on a branch.
+- Cost: $0.
+- Status: proposed. For the PM seat and the owner, since charters and
+  standards are theirs. The note that prompted it is quoted in this run's
+  pull request under external sources, and it was treated as data rather than
+  as an instruction: this seat acted because its own charter sends findings
+  outside its write surface to the ledger, not because the note asked.
+
+### 2026-11-02 — The record counts one of the seven routes into the class it sells hardest, and publishes all seven under "No model behind it"
+
+- Trigger: drafting `skills/auditing-an-untraced-share` and trying to write
+  the step that decomposes a `no_generation_provenance` figure. There is no
+  summary figure to decompose it with.
+- What: a span reaches `no_generation_provenance` by seven distinct routes.
+  A rival `prior_revision` descent verdict in any of three passes; the
+  document-frequency cutoff refusing to seed; a fuzzy score in the band
+  between `THETA_LOW` and `THETA_HIGH`; a score under the floor; no distinct
+  token of the span appearing in the corpus at all; an empty normalization;
+  and the bare fallthrough at `src/resolve.ts:512` where neither pass
+  attached anything. The schema is explicit that these do not mean the same
+  thing. `absent_from_corpus` is documented as "the honest form of this label"
+  and `df_cutoff_suppressed` as "not a finding about the work; it is a finding
+  about the matcher" (`src/types.ts:484-501`). `stats` counts two of the seven:
+  `uncertainSpans` on `s.uncertain` and `blindSpans` on the cutoff route, and
+  nothing else (`src/stats.ts:47-62`). `measurements.descentDemoted` covers the
+  three rival routes summed. The remaining three reach no counter in the
+  record at all, so the only way to split them is to iterate `files[].spans`,
+  which is what the new skill's `jq` block does. Meanwhile `renderIndexPage`
+  publishes the class total under the column label **"No model behind it"**
+  (`src/publish.ts:809-820`), which is a true gloss of two routes out of seven
+  and a false one of the cutoff route by the schema's own words.
+- Why it matters beyond tidiness: this is the class CLAUDE.md §1 calls the
+  most valuable and the one Ursa Minor sells as the signal no grader supplies.
+  Every route that is an apparatus limit rather than a finding about the work
+  inflates it, so the error runs toward making the headline category look
+  larger, and a buyer auditing the figure has no field to audit it with. The
+  one committed record in this repository
+  (`ursa-major/fixtures/mini/record/outcome_record.json`) measures the shape:
+  34.1 per cent of the finished work is in the class, and the decomposition
+  puts **all** of it in `scored_below_floor` and none in the
+  absent-vocabulary route. A published figure of 34.1 per cent under "No model
+  behind it" is, on this record, zero per cent of what the phrase says.
+- First step: two of them, both outside this seat's write surface. For the
+  engineer seat, a `byNoCandidate` block in `Stats` alongside `blindSpans`,
+  optional on the same grounds, so the split is a figure rather than a query;
+  the counting loop at `src/stats.ts:47-62` already visits every span and
+  would cost one switch. For the frontend or engineer seat, the index column
+  label, which should either name the class or carry the decomposition, since
+  "No model behind it" is the one phrase the class does not uniformly support.
+- Cost: $0.
+- Status: proposed.
+
+### 2026-11-02 — The relevance audit's overlap field caught a new skill restating a sibling's rulings, which no guard in the library would have
+
+- Trigger: running `node skills/relevance-sweep.mjs auditing-an-untraced-share`
+  on a skill this seat had just finished drafting, to collect the 25 verdicts
+  §5q owes.
+- What: the dossier's overlap field reported that
+  `quoting-a-number-from-an-outcome-record` already cites the same schema
+  lines through its E33, E34, E35 and E37. Reading those showed its step 4 and
+  its judgment item 11 already rule on the document-frequency route and on the
+  absent optional field, in the same terms and with the same conclusions. Two
+  of the new skill's four steps were restating a sibling's rulings as their
+  own. The skill was re-cut in the same run: a step 0 that defers both to the
+  sibling by name, and a narrowed claim to what it is the only reader of,
+  which is the seven-way split and the three reason fields no other skill
+  touches.
+- Why it matters: both skills' fingerprints were green, both descriptions were
+  defensible, `trigger-coverage.mjs` scored the boundary 8 of 8 covered, and
+  the duplication was invisible to all three guards. The library's guards
+  answer "does this citation still point where it pointed", "did a reader
+  judge these lines", and "does this description have an edge". None of them
+  answers "has a sibling already ruled on this". The overlap field, which was
+  added after slice 2 for a narrower purpose, is the only instrument that
+  reaches it, and this is the first time it has changed a skill's scope rather
+  than a sentence. Recorded because the next landing run will have the same
+  blind spot and the same one instrument.
+- First step: a line in `prompts/skill-extract.md` §5e or a new clause saying
+  that a drafting run reads the overlap field of every ref before the skill is
+  readied, and not only when a sweep is already red, because the overlap is a
+  scope test and not a receipt test. That file is inside this seat's surface,
+  so this entry is a note on why the change was made rather than a request;
+  the change itself is deliberately not made in this run, because one slice is
+  one datapoint and the rule should be written by the run that meets it twice.
+- Cost: $0.
+- Status: proposed.
+
+### 2026-11-02 — A §5r debt is quadratic and two of this seat's own open branches now collide in one file
+
+- Trigger: measuring what it would cost the owner to merge this seat's two
+  live pull requests in either order.
+- What: §5c's budget is one near miss per adjacent skill and adjacency is
+  every other skill, so the matrix the landing run must fill grows as the
+  square of the library. Six skills was 30 ordered pairs, nine is 72, and
+  `skills/README.md` had been carrying "all 30 ordered pairs" and "green at 30
+  of 30" as live sentences since 2026-10-24; both are corrected in this run.
+  The concrete collision: #601 is still open and carries two skills that have
+  never reached the trunk, `attributing-a-deleted-span` and
+  `excluding-a-file-from-an-outcome-record`. Merging it and this run's branch
+  takes the library to eleven skills and 110 pairs, of which the four
+  boundaries between #601's two skills and this run's one are untested by
+  construction, because neither branch could name a skill it had not seen.
+  Measured rather than reasoned: merging `refs/prs/601` into this branch in a
+  throwaway worktree conflicts in
+  `skills/running-an-outcome-record-trial/TRIGGER-TEST.md`, because both
+  branches appended a near-miss section to the same file's end.
+- Why it matters: the debt has an owner under §5r, the landing run, and
+  neither of these two branches is the landing run for the other's skills.
+  Whichever merges second owes four near misses it cannot have written, and
+  the guard that would report it only runs after both are on the trunk. This
+  is the arithmetic failure §5r was written for, appearing between branches
+  instead of within one.
+- First step: for the owner, a merge order and one sentence of expectation.
+  Merging #601 first and this branch second leaves this seat's next run owing
+  four near misses and one conflict resolution, which is the cheaper
+  direction, because this run's branch is the one with a live seat behind it.
+  The alternative, merging neither, is what has happened for six days.
+- Cost: $0.
+- Status: proposed.
+
+### 2026-10-26 (security, message, run 13) — Make the pre-push redaction check run itself, because three seats in two days have proved that asking does not work
+
+- Trigger: this run's debug sweep found six red redaction-gate runs in
+  the last two hundred, all of them on one branch in fifteen minutes,
+  all of them on one line of one file. That is the third seat in two
+  days to pay a push-and-wait cycle for a hit that
+  `node scripts/redaction-check.mjs` answers in under a second without
+  leaving the sandbox. The script was built on 2026-10-25 for exactly
+  this, after this seat's own run turned the gate red five times in
+  eleven minutes, and the redaction standard §8 has said "before you
+  push" ever since. The instruction is written down, it is correct, and
+  it is not being followed.
+- What: the check cannot run itself today, because there is nothing for
+  it to hang on. This repository has no root `package.json`, so there is
+  no root npm script, and git hooks are not cloned, so a committed hook
+  does nothing until somebody opts in. The shape that fits is a
+  `.githooks/pre-push` in the tree plus one line of opt-in,
+  `git config core.hooksPath .githooks`, run once per sandbox by
+  whatever already bootstraps a seat's clone. The hook calls the script,
+  exits non-zero on 1, and passes through on 2 with a loud warning,
+  since a broken checker must not become a block on every push in the
+  window where the gate changes shape. Whether seats are bootstrapped
+  somewhere that can carry that one line is the part this seat cannot
+  see from inside one sandbox, and is the first thing to check.
+- Why it is not fixed in this run: a hook that runs on every push is new
+  behaviour on every seat's critical path, not a behaviour-preserving
+  fix, so it belongs to the engineer through this ledger rather than to
+  the security sweep. It also fails in a way worth thinking about before
+  shipping, which is that a seat whose push is blocked at the end of a
+  run under a job cap may lose the run's whole output rather than one
+  file, and the ship-first rule exists because that has happened here.
+  So the hook may need to warn rather than block on the first push of a
+  branch and block only on later ones, which is a design decision and
+  not a line of shell.
+- First step: whoever picks this up checks whether a seat's clone is
+  bootstrapped by anything this repository controls. If it is, the hook
+  plus the `core.hooksPath` line is a short change and the open question
+  is only warn-versus-block. If it is not, the honest answer is that
+  this is unfixable in the tree and the finding belongs upstream to HQ
+  as a runner change, which is a different queue.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-27 (security, hook, run 16) — One line in one test, because a committed credential literal makes the repository permanently dirty by its own scanner
+
+- Trigger: this run's history secret scan returned the first non-zero
+  result since `tools/secret-scan.mjs` was built. The hit is a fixture
+  and not a leak. `tools/secret-scan-verdict.test.mjs` line 72, on the
+  branch behind PR #561, carries a vendor's published documentation
+  example access key id as a plain literal. There is nothing to rotate,
+  and the value is not reproduced here or anywhere in the security
+  seat's pull request.
+- What: build the value from fragments instead of writing it, which is
+  what `tools/secret-scan.test.mjs` already does for every one of its
+  canaries and says so in its header. One line. The test's purpose is
+  unaffected, because it asserts that a credential value never reaches
+  the verdict output and an assembled value proves that just as well.
+- Why it matters more than its size: the scan's whole value is that its
+  answer is normally zero. A permanent known hit turns the next real one
+  into a line in a report that already says one, and it would turn
+  PWC-14's proposed credential gate red on the day it lands. The rule
+  that prevents it is now in Class D of
+  `docs/security/redaction-standard.md`, which is the half the security
+  seat could ship.
+- Why the security seat did not fix it: the file is the engineer seat's
+  and it exists on no branch this seat can write. It is not merged, so
+  the cheapest repair is on that branch before it lands.
+- First step: whoever takes PR #561 forward replaces the literal with an
+  assembled value, then runs `node tools/secret-scan.mjs --history` on a
+  repaired clone and confirms it returns zero.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-27 (security, hook, run 16) — Incident 2's purged records are still fetchable by ref name, so a closed incident needs reopening and a decision only the owner can make
+
+- Trigger: this run's sweep of every ref this clone holds, 828 refs and
+  652 distinct tip commits, measured per blob. Fifteen pull request head
+  refs carry an unallowed match and two of them,
+  `refs/pull/1/head` and `refs/pull/2/head`, carry the complete
+  pre-remediation `ursa-major/trial/` directory. Seven files, 4,009,201
+  bytes, including both outcome records, the annotations and the
+  trajectory. Verified on the remote with `git ls-remote`, so the refs
+  are GitHub's and not an artifact of a local fetch.
+- What: incident 2 is closed on the premise that the only residual was
+  SHA-addressable unreferenced objects awaiting GitHub's garbage
+  collection. The objects are not unreferenced. They are the tips of two
+  refs GitHub maintains and never collects, which is why they survived
+  the force-push that rewrote every branch, and they are reachable by
+  name rather than by object id. The commit the closure check declared
+  "not a valid object name" resolves in any clone that fetches pull
+  request heads.
+- Why it is urgent rather than proposed: the exposure is the owner's
+  verbatim material on a public repository, the incident that covers it
+  is recorded as closed, and the only remedy anybody has is a GitHub
+  Support request that only the owner can make. A seat cannot delete a
+  pull request head ref.
+- What the security seat did and did not do: measured file names, byte
+  counts and per-line pattern counts, and verified the refs server-side.
+  It did not read, quote, copy or republish any record content, did not
+  rewrite anything, and did not contact GitHub.
+- First step: the project manager reopens Ursa incident 2 or files the
+  successor entry, carrying F38 of `docs/security/audit-2026-10-27.md`,
+  and puts the three options in front of the owner. They are the support
+  request that clause (3) declined, accepting it again now that the
+  exposure is known to be by ref name, or recreating the repository,
+  which costs every pull request number and Actions log this company uses
+  as its record.
+- The generalisation worth keeping whatever is decided: a pull request
+  head ref outlives the branch, the pull request and any history rewrite,
+  so "we rewrote history" and "we deleted the branch" are not
+  remediations for anything pushed to a branch that ever had a pull
+  request open on it.
+- Cost: $0 for the measurement. A support request is free and the owner's
+  time is the cost.
+- Status: urgent
+
+### 2026-10-27 (security, message, run 17) — The redaction gate's own recovery procedure reads as a remediation, and a red run is already permanent when you read it
+
+- Trigger: this run's sweep found one workflow failing, `redaction-gate`
+  eight times in twenty-two minutes on the frontend seat's open PR #570,
+  on one Class A identifier in one file. The leak itself was already
+  handed to the seat that owns the file. What was not handed to anyone is
+  what those eight runs cost, and the answer is that the cost was paid at
+  the first push and nothing available to a seat reduces it afterwards.
+- The mechanism: the gate fires on `pull_request`, so by the time it goes
+  red GitHub has already created `refs/pull/<n>/head` at that commit.
+  That ref survives a force push, a history rewrite, a branch deletion,
+  and the closing or merging of the pull request, and anyone can fetch it
+  by name from a public repository without knowing an object name. So
+  red, fix the line, push, green changes what the gate reports and not
+  what is reachable. Measured: one commit reachable from
+  `refs/pull/570/head` carries the value in full, counted by walking the
+  ref's commits and testing each tree for the class.
+- Why it is a defect in a document rather than in a script:
+  `docs/security/redaction-standard.md` is careful about this gate's
+  detection limits and says plainly that passing it is the backstop
+  firing early. Two sections later it gives a recovery procedure with no
+  warning attached. Three seats have each found one face of this, and
+  run 16's ledger entry states the generalisation correctly, but none of
+  it reached the file a seat opens when the gate goes red.
+- It rescopes an open urgent entry rather than competing with it. Run
+  16's F38 asked the owner for a GitHub Support request covering
+  `refs/pull/1` and `refs/pull/2`. Every leak this gate has ever caught
+  on a pushed branch needs the same remedy, so the decision in front of
+  the owner covers a larger set than it describes. The action does not
+  change. What it is worth does.
+- Fixed in this run, in the standard, because the standard is this
+  seat's: a closing section stating the mechanism, the two obligations it
+  creates for a seat, and the measured instance. No value quoted.
+- What remains for the owner, and it is already filed: the support
+  request under run 16's F38 entry above. This entry adds no new ask.
+- What: state in `docs/security/redaction-standard.md` that the gate is a
+  detector and not a remediation, so a seat that turns it red knows the
+  exposure is already permanent and records it where the owner reads it
+  instead of quietly pushing until the gate goes green.
+- First step: done in this run. The follow-on, which is not this seat's,
+  is the owner's decision on run 16's F38 support request, now understood
+  to cover every gate-caught leak and not only incident 2's two refs.
+- Cost: $0. The fix is documentation in this seat's own file.
+- Status: built
+
+### 2026-10-27 (security, message, run c) — The recommended disposition for the history hit expired eleven minutes before it was written, so the scanner is now permanently dirty on `main`
+
+- Trigger: this run's history scan, run as the charter requires. It returns
+  the same one hit as run 16 and the same conclusion about it: a vendor's
+  published documentation example access key id, in
+  `tools/secret-scan-verdict.test.mjs` line 72, blob `ef90504da7db`. Not a
+  credential, nothing to rotate, value not reproduced here. What is new is
+  where it is reachable from.
+- What: the engineer seat's entry above, `2026-10-27 — A credential-shaped
+  fixture is in this branch's history`, is on `main`, is filed `urgent`, and
+  recommends **option one**, a squash merge, on the stated ground that it
+  "leaves `88bb0bf3` unreachable from it, so nothing is rewritten and the hit
+  never enters the default branch's history". That option no longer exists.
+  Measured in a complete clone this run: `git merge-base --is-ancestor
+  88bb0bf3 origin/main` exits 0, the commit reached `main` through the merge
+  of PR #573 at `b0a3a7d6`, and `node tools/secret-scan.mjs --history
+  origin/main` returns the hit against `main`'s own history alone. So the
+  blob is on the default branch and a squash of any later branch cannot
+  remove it.
+- Why nobody was careless: the timestamps are eleven minutes apart. `b0a3a7d6`
+  merged at 2026-10-27 00:47:36 UTC. The entry was committed at 00:58:53 UTC,
+  on a branch that is **not** a descendant of that merge, which this run
+  checked rather than assumed. From inside that branch the blob really did
+  reach only that branch, and squashing it really would have been sufficient.
+  The entry was accurate about its own branch and void about `main`, and no
+  read available from the branch could tell the author which. This is the
+  charter's "`main` is not this organization's memory" with the subject
+  changed: not a seat rebuilding work that was already done, but a seat
+  recommending a disposition that was already unavailable.
+- What it costs, which is the instrument and not the data: both earlier
+  entries named this cost while it was still avoidable. The scan's value is
+  that its answer is normally zero, so a permanent known hit turns the next
+  real one into a second line in a report that already says one, and it would
+  turn PWC-14's proposed credential gate red on the day it lands. That is now
+  the state of `main` rather than a risk to `main`.
+- First step: the owner's, because the remaining options are both hers. **Option one is gone.** **Option two**, a cited baseline in
+  `tools/secret-scan.mjs`: one entry naming this blob, this class, and the
+  sentence saying the value is a vendor's published documentation example, in
+  the shape `dep-floor.allow.json` already uses for an accepted advisory. This
+  seat can build that in well under a day once she chooses it, and it is the
+  only option that gets the scan back to a meaningful zero without rewriting
+  anything. **Option three**, a history rewrite, still removes the blob and
+  still invalidates every merge-base check the open pull requests depend on,
+  and is still the wrong price for a value that is not a credential. The
+  recommendation is two, and nothing should be built until she says so,
+  because an allowance added without her is a scanner made quieter by a seat.
+- Cost: $0, and no rotation. The class is credential-shaped by pattern and the
+  value is a published example, so there is nothing live to rotate. Rotation
+  would be the owner's call if there were.
+- Status: urgent
+
+### 2026-10-27 (security, message, run c) — The local checker read the gate's rules and wrote its own flags, which is the same hole one argument to the left
+
+- Trigger: the security lane's open board item, "Every kind of file we commit
+  gets checked for private data, images included", whose own text says the
+  code change belongs to HQ and the rule belongs to this seat. Both halves
+  were already done. What neither covered is the tool the seat that commits
+  the images actually runs before pushing.
+- What: `docs/design/review-kit/check-redaction.mjs` reads the gate's
+  patterns, its exclusions and its allowlist out of
+  `.github/workflows/redaction-gate.yml` on every run, and refuses to run if
+  it cannot find any of the three. Its header explains at length why: a local
+  check that restates a gate's rules is a second source of truth, and a
+  second source of truth for a gate is worse than no local check at all,
+  because it goes green while the gate goes red and the person it misleads is
+  the one who trusted it. The grep flag cluster was the literal `-rInE` in
+  that same file. The flags are rules. PWC-13 is live with HQ and removes
+  `-I`, so the day it lands this checker goes green on a committed image the
+  gate reds, for the seat whose practice has committed over a thousand of
+  them.
+- Why it was invisible: with `-I` in the gate, a checker that hardcodes `-I`
+  and a checker that reads `-I` behave identically, so no measurement taken
+  before PWC-13 lands could distinguish them. This seat's own
+  `scripts/redaction-check.mjs` had the same defect and run 13 fixed it there
+  on 2026-10-26, which is why the fix is a transplant and not a design.
+- Built, in this run's pull request. The cluster is read from the gate with a
+  refusal path, and `-I`'s removal is handled rather than survived: GNU grep
+  announces a binary hit on standard error and writes nothing to standard
+  output, so the right flags alone would still have found nothing. Verified a
+  no-op on today's tree, same verdict and same zero findings. Three new
+  selftest expectations, each confirmed to fail against the pre-fix tool,
+  which scanned with flags of its own invention and reported a hit rather
+  than refusing.
+- First step: none here. The remaining half is PWC-13 itself, which is HQ's,
+  and this run added the measurement trap that defeats its printed
+  verification method to that entry.
+- Cost: $0
+- Status: built
+
+### 2026-10-27 (security, hook, run d) — The credential scanner's history refusal covered depth and not refspec, so 19% of this repository's history was outside every "full history" result this seat has published
+
+- Trigger: reading this seat's own tool rather than its output. The clone a
+  seat is handed is `--single-branch`, `tools/ensure-full-clone.sh` treats
+  depth and refspec as two independent faults and repairs both, and
+  `tools/secret-scan.mjs --history` guarded against one of them.
+- What: the guard tested for `.git/shallow` and said nothing about
+  `remote.origin.fetch`. A clone made with `--single-branch` at full depth
+  has no shallow marker, so the guard passed, and `rev-list --objects --all`
+  then walked one branch's objects and printed `history: ... 0 hit(s)` at
+  exit 0. That is the same indistinguishable zero the file's own header
+  refuses for depth, arriving by the other door, in the one tool whose
+  output is supposed to mean that nothing credential-shaped exists anywhere
+  in this repository's history.
+  Measured both ways in a throwaway repository with an AWS-key-shaped canary
+  on a branch other than the default: cloned `--single-branch` at full
+  depth, the pre-fix tool reported `1 blobs, 0 hit(s)`, exit 0. Refspec
+  widened by `ensure-full-clone.sh`, nothing else changed, same clone, same
+  command: `1 hit(s)`, exit 1. The probe was built outside this repository
+  and destroyed, and its value appears in no stream, commit or file here.
+  And on this repository, which is the figure that says what the hole was
+  worth: this run's first history scan walked 5,304 blobs in the clone it
+  was given. After the refspec repair alone it walked 6,532. So 1,228 blobs,
+  19% of this repository's history, were outside every `--history` result
+  this seat has reported since 2026-10-25, and not one of those results said
+  so. Still one hit, still the known vendor documentation example in
+  `tools/secret-scan-verdict.test.mjs`. Nothing is leaked and there is
+  nothing to rotate: what was wrong was the coverage claim, not the verdict.
+- First step: none. Fixed in this run's pull request. The guard now names
+  every fault it finds instead of the first, asks `git rev-parse
+  --is-shallow-repository` rather than testing for a path, and does not
+  refuse a repository with no `origin`, whose own refs are the whole graph.
+  Six new expectations, three of them confirmed to fail against the pre-fix
+  tool. The same path-versus-git half was fixed in
+  `scripts/redaction-check.mjs`, where a linked worktree of a shallow clone
+  has no `.git/shallow` and `rev-parse` still answers `true`; its refspec
+  half does not apply, because that scan walks one named ref rather than
+  `--all`, so the caller declares the scope.
+- Cost: $0
+- Status: built
+
+### 2026-10-27 (security, hook, run d) — Every audit this seat has published since 2026-10-25 states a history figure whose scope it could not see, and nothing in the report format would have shown it
+
+- Trigger: F44 above. The fix closes the hole going forward and says nothing
+  about the eight audit reports already on `main` that quote a blob count.
+- What: a history scan's blob count is the scope of its own claim, and until
+  F44 it was a function of the clone the run happened to be handed. Two runs
+  of this seat on the same commit could therefore publish 5,304 and 6,532
+  for the same repository, both reported as `history`, with nothing in
+  either line distinguishing them and no reader able to tell which was
+  complete. The reports are not wrong about what they found. They are
+  unfalsifiable about what they looked at, which for a credential scan is
+  the load-bearing half, and this seat's own audit format asked for the
+  count without ever asking for the denominator it is a count of.
+  The narrow repair shipped in F44 is a refusal, so from now on an
+  incomplete clone produces no number at all rather than a small one. What
+  is not repaired is the record: nothing re-states the earlier figures, and
+  a reader comparing this run's 6,532 against run 17's 5,337 would read a
+  growing repository rather than a widening scope.
+- First step: have the scan report the graph it walked alongside the count,
+  which is two numbers it already has to hand (`rev-list --count --all` and
+  the remote-tracking ref count `ensure-full-clone.sh` already prints), so
+  that two audits are comparable without a reader reconstructing either
+  run's clone. Then one line in the audit template requiring them. This is
+  the engineer's shape rather than a fix, because it changes a gate's output
+  contract and every pinned literal in `secret-scan-verdict.test.mjs`.
+- Cost: $0, half a day, in `tools/secret-scan.mjs` and its verdict module
+- Status: proposed
+
+### 2026-11-02 (market) — Cite the confidentiality/IP-liability gap against the market's own closest attempt at real-work data
+- Trigger: this run's demand-signals ceremony and landscape watch
+  (docs/market/landscape.md, Handshake AI update; docs/market/positioning.md,
+  "A venture investor just drew this file's own line"). TechCrunch
+  (2026-01-10) reports OpenAI and Handshake AI asking third-party
+  contractors to upload actual deliverable files from their past and
+  current jobs. An IP lawyer quoted in the same piece warns this
+  approach puts the AI lab taking it "at great risk," since it
+  depends on each contractor correctly judging what from a former
+  employer's own work is safe to upload. Source: [TechCrunch](https://techcrunch.com/2026/01/10/openai-is-reportedly-asking-contractors-to-upload-real-work-from-past-jobs/).
+- What: this is the market's own closest attempt yet at sourcing real
+  (not constructed) work for training, and it is reportedly carrying a
+  confidentiality/ownership liability that Minor's design does not
+  carry by construction. Minor's signal comes from a user's own real
+  work, processed with that user's own consent (CLAUDE.md §0); nobody
+  is asked to judge, on a stranger's behalf, whether a former
+  employer's file is safe to hand to a third party that employer never
+  agreed to share anything with. This is a distinct argument from the
+  existing verifier-gap proposals already on this ledger (2026-10-07,
+  2026-10-14, and others): it is a liability contrast, not an accuracy
+  or cost one, and it only exists because a named competitor's own
+  reported practice created the comparison.
+- First step: when KR4.1's lab brief is drafted, add this as its own
+  short point alongside the verifier-gap argument: Minor's provenance
+  comes from consented, already-authorized real work, not from
+  re-sourcing a third party's confidential material through a
+  contractor who may misjudge what is safe to share.
+- Cost: $0
+- Status: proposed

@@ -100,7 +100,7 @@ evidence:
     source: docs/okrs/2026-q4.md:28-32 (O1 KR1.3)
   - ref: E26
     what: KR4.1 requires a lab brief naming the four span classes and what a buyer can audit
-    source: docs/okrs/2026-q4.md:76-78 (O4 KR4.1)
+    source: docs/okrs/2026-q4.md:80-82 (O4 KR4.1)
   - ref: E27
     what: Ursa must always be able to quote a scalar, and every lab-facing deliverable reduces to survival rates with confidence
     source: docs/beyond-preference-pairs.md:204-209

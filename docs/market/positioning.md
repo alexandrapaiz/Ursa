@@ -1195,6 +1195,8 @@ labs decide it serves them. [Linux Foundation: Agentic AI Foundation
 Announces Four New
 Projects](https://www.linuxfoundation.org/press/agentic-ai-foundation-announces-four-new-projects-agent-skills-open-responses-openenv-and-opensandbox).
 
+**Update 2026-11-02 (message, 6th run): a second cooperative standard, four days old at this run and much closer to the consent layer than AAIF's infra projects were.** OpenAI, Google, Microsoft, and Anthropic have agreed to support a single shared robots.txt token (`__usage_ai-training`, draft authored by Anthropic's Kevin Kelley, dated 2026-10-30) letting any publisher opt its content out of training across all four companies' crawlers with one line, instead of a separate rule per crawler. Anthropic has already started honoring it; Microsoft commits to 2027-02-01, Google to sometime in 2027, OpenAI to "coming months." This is the sharper half of the "unlikely" sentence this entry already revised once: not agent infrastructure, but a shared, voluntary, consent-adjacent mechanism, four labs deep, with no regulatory trigger named. It still does not touch Major's own layer (a user's personal preference profile, not a publisher's website content), and it has two limits worth carrying into any lab-brief comparison: it cannot retroactively revoke content already used in training, and it "carries no binding enforcement power," both softer than CLAUDE.md §0's own user-facing promise (revoke and delete, not just stop future use, and meant as a hard constraint, not a voluntary signal crawlers may honor). So what: the standing watch item is now sharper than "will AAIF grow an eleventh project aimed at personal data" — it is "will the next shared standard these four labs ship move from website-level training consent to individual-level preference/memory consent," since the gap between the two is now the entire remaining distance, not an open question of whether labs cooperate on consent mechanisms at all. [DEV Community: OpenAI, Google, Microsoft and Anthropic to support a unified AI training opt-out token in robots.txt](https://dev.to/delimitter/openai-google-microsoft-and-anthropic-to-support-a-unified-ai-training-opt-out-token-in-robotstxt-4204).
+
 ## A real exodus event, and the cheapest paid comp yet for manual portability (2026-10-26)
 
 This run's demand-signals ceremony found Memory Forge
@@ -1488,3 +1490,106 @@ Sources: [Townhall: New report scrutinizes US AI data sales to
 China](https://townhall.com/news/tayte-christensen/2026/10/26/new-report-scrutinizes-us-ai-data-sales-to-china-n2685323)
 (summarizing the CASE report, "American AI Advantage Is for Sale,"
 2026-10-26).
+
+## A second pitch-collision risk, this one in a domain closer to Minor's own language than the first (2026-10-27, message, 5th run)
+
+The 2026-10-07 entry named Surge AI's "economically valuable work"
+benchmarks as close enough to CLAUDE.md §1's own framing that a buyer
+could mistake one for the other. This run's landscape watch
+(docs/market/landscape.md, new Taste Labs entry) finds a second,
+independently funded instance of the same risk, and it lands closer to
+home. Taste Labs, an $18.5M-seeded vendor (CRV and Amplify Partners
+co-leading, announced 2026-06-16), sells preference data for
+subjective creative quality — design, copywriting — collected from
+roughly 1,000 contracted "Tastemakers." Its own founding thesis, per
+its public coverage, is that coding and math are verifiable while
+subjective domains are not, and that models "collapse to the mean"
+without a trained quality signal for them: a close paraphrase of
+CLAUDE.md §1's own opening claim, and closer to Minor's explicit
+"writing" example than Surge's "survive a 9 to 5" framing was.
+
+It does not close the gap any more than Surge's benchmarks did. A
+Tastemaker is a professional paid to grade a generated layout against
+a rubric on request; the label is still supplied by a grader, not by
+whether a real client's actual brand deliverable survived contact with
+the work. The distinction is identical to the one the 2026-10-07 entry
+already named, now with a second named example in a domain the lab
+brief is more likely to be asked about directly, since "writing" is
+CLAUDE.md §1's own flagship case. No pricing recommendation made; this
+sharpens the same wording task, not a new one. Dated note added to the
+existing 2026-10-07 ledger proposal (docs/ideas.md) rather than a new
+one, since the fix is identical. Last observed 2026-10-27:
+[Latitud: The Taste Layer for the AI Ecosystem](https://latitudlatam.substack.com/p/the-taste-layer-for-the-ai-ecosystem),
+[hyper.ai: Taste Labs Trains AI on Curated Quality to Combat Creative Slop](https://hyper.ai/en/stories/df1a0e0d52c2bb0d561782479941f19a).
+
+## A venture investor just drew this file's own line, and called it "Type 1 vs Type 2" (2026-11-02, message, 6th run)
+
+Every prior entry in this file has argued CLAUDE.md §1's "real work
+beats a constructed grader" claim from the outcome record's own side.
+This run's demand-signals ceremony found the same line drawn from the
+buy side, by someone with no reason to flatter Minor: Deedy Das, a
+Menlo Ventures partner, published an industry landscape map (reported
+via BigGo Finance, 2026-07-24, no primary link found) naming "Type 2"
+data as "tasks designed by humans and completed by experts" — this
+file's entire Category 1, by definition — and "Type 1" as "data
+captured directly from real business operations," arguing the
+marginal value of Type 1 is "rising rapidly" precisely because models
+have already learned to "solve exam problems" and now need to learn
+"how work is actually done in the real world." The report calls
+GitHub "the world's largest Type 1 data repository" and credits it
+with coding's fastest capability gains of any domain — an argument
+that a real, unprompted, provenance-rich corpus (commits, not graded
+exercises) is *why* one domain got a verifier nobody designed on
+purpose. That is an investor making CLAUDE.md §1's own argument about
+domains with no Type 1 corpus yet, independent of anything Minor has
+published.
+
+This does not hand Minor the category. The report names the vendors
+it considers early Type 1 plays — Handshake (via its OpenAI
+partnership), Protege, Sunset, and SF Data — and docs/market/landscape.md's
+entries this run on Protege and the Handshake/OpenAI program both
+land the same way every "Type 1" candidate checked by this file has
+landed before: real data, no provenance. Protege licenses bulk
+real-world records (clinical notes, medical images) with no
+generation to join any of it backward to. The Handshake/OpenAI program
+is either an uploaded real file with zero generation-provenance
+collected (per TechCrunch) or an authored task simulation (per
+bespacific.com) — the two reports disagree, but neither reading is an
+outcome record either. So what: an investor has now independently
+named and priced the shift toward real data as the thing worth funding
+next, which is corroboration Minor's lab brief can cite that is not
+Minor-sourced, but every named entrant into that shift so far still
+stops at "real," short of "provenance-resolved." The brief's sharpest
+line is not "a VC agrees real data matters" (anyone selling Type 2
+data would want that undercut) but "every funded attempt at Type 1 so
+far still stops at bulk real data; none joins it backward to a
+generation."
+
+**A new, concrete liability contrast, from the same Handshake/OpenAI
+finding.** TechCrunch quotes an IP lawyer warning that OpenAI's
+reported contractor-upload program (whichever deliverable account is
+accurate) is "putting itself at great risk," because it depends on a
+contractor correctly judging what from a past employer's own work is
+safe to upload — the lab is trusting thousands of individuals to
+self-police someone else's confidentiality on its behalf. This is a
+liability Minor's design does not carry, stated precisely for the
+first time in this file: Minor's signal comes from a user's own real
+work, which they already have standing authorization to use and share
+on their own terms, processed with their own consent (CLAUDE.md §0),
+never from a contractor re-uploading a former employer's files to a
+third party that employer never agreed to share anything with. Worth
+a line in KR4.1's lab brief distinct from the verifier-gap argument:
+not just "we have a signal nobody else has," but "we have it without
+the confidentiality exposure the market's own closest attempt at
+sourcing real data is now visibly carrying." Ledger proposal opened
+below. No pricing recommendation made.
+
+Sources: BigGo Finance, "Revenue Surges 100-Fold in a Year — The AI
+Training Data Sector Spawns a Near-$100 Billion Valuation Business"
+(finance.biggo.com, found by headline search; the URL is not quoted
+here because its article-id path is UUID shaped and trips the
+redaction gate's Class C pattern, though it names a public news
+article and not a session; summarizing Deedy Das / Menlo Ventures'
+landscape map; no primary source link found this run), [TechCrunch: OpenAI is reportedly asking
+contractors to upload real work from past
+jobs](https://techcrunch.com/2026/01/10/openai-is-reportedly-asking-contractors-to-upload-real-work-from-past-jobs/).

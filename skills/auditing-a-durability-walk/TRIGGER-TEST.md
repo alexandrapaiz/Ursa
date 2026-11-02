@@ -229,3 +229,31 @@ direction is owed in
 `quoting-a-number-from-an-outcome-record/TRIGGER-TEST.md`, under §5r's
 rule that the run landing a skill pays the debt in every existing
 skill's file, and this run pays it there rather than claiming it here.
+
+## Added 2026-11-02: the ninth skill's boundary
+
+The run that landed `auditing-an-untraced-share` owes a near miss to
+every skill already in the library, in their own files, in the same
+pull request (`prompts/skill-extract.md` §5r). This section is this
+file's payment, and the prompt is the new sibling's own trigger,
+copied rather than paraphrased.
+
+**11. "This record has no `blindSpans` key at all. Is that a clean
+record or an old one?"**
+
+`auditing-an-untraced-share`'s own trigger 3, and it should not fire
+here.
+
+This is the closest of the ninth skill's boundaries to this file, and
+the sibling's own test says so from its side. The judgment is
+word-for-word this skill's trigger 1: a zero that might be an absence,
+about to be written into something a reader will trust. Both skills
+exist because that distinction is invisible in the figure.
+
+It should not fire, because the two skills answer it about different
+blocks and neither generalizes. Here the question is whether the
+forward walk ran at all, over which window and to which tip. There the
+question is whether a count was written by a resolver old enough to
+have the field. A reader matching on shape will pick wrong, which is
+why both descriptions name their block rather than the shape: this one
+names `durability`, the sibling names `no_generation_provenance`.
