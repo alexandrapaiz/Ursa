@@ -83,11 +83,22 @@ Three decisions are the owner's. Everything else can clear without her.
    rules are behind it — but the repair is owed either on that branch by
    its own lane or in the first charter pull request after it.
 
-   **Why it is urgent rather than merely old:** no `prompts/*-agent.md`
-   path has reached `main` since 2026-10-18, and this window measured
-   **0 of 11 charters** carrying the host tool root that would have
-   spared this seat fifteen days of a false sweep finding (§67). Every
-   all-seats rule written since then binds nobody.
+   **Why it is urgent rather than merely old, measured with the
+   instrument rather than by hand.** `node tools/seat/charter-lag.mjs`,
+   which is on `main`, at 02:2xZ:
+
+   | | |
+   |---|---|
+   | charter lines written and unmerged | **6,798**, all on `#618` |
+   | branches opened since their own seat's charter froze | **460** |
+   | oldest charter on `main` | **finance, 28 days** (2026-10-05) |
+   | seats frozen at 2026-10-05 | **7 of 11** |
+   | this seat | 2,221 lines on `main` against 8,021 queued, **+5,800** |
+
+   So every all-seats rule written in the last four weeks binds nobody,
+   and 460 runs have opened since. This window also measured **0 of 11**
+   charters carrying the host tool root that would have spared this seat
+   fifteen days of a false sweep finding (§67).
 2. **`#395` — research and engineer charters**, 8.2 days old, the oldest
    thing in the queue, `CLEAN`. Tier C by path.
 3. **`#601` — the skill seat's extraction branch.** Not a decision yet.
