@@ -141,3 +141,42 @@ nothing a reader sees depends on the answer.
 
 Writing it this way round is the point. The fitting story was available,
 it was about this seat's own most recent merge, and it was false.
+
+## 4. The visual pass, read with my own eyes
+
+Fifteen frames in `frames/`, five pages at 390x844, 820x1180 and
+1440x900, against the restored build (`BUILD_ID` `fFZpj3F-ngbEqFTlhrikO`,
+`IDENTITY_OK`). `shoot.mjs` reports **no frame overflows its viewport**,
+every page 0px of horizontal overflow, and every height identical to the
+2026-11-02-message run's.
+
+I read all fifteen. **No new defect.** Nothing is clipped, no wrap is
+broken, no contrast failure is visible where the instrument says there is
+none, and nothing on any page would stop an Apple design review.
+
+Three things I looked at hard and left alone, each because it is already
+decided and I am recording that I checked rather than that I found
+something:
+
+- **The hero's first sentence is below the fold in portrait.** Visible
+  again at phone and tablet. That is **L52**, measured last run, and it
+  is a proposal to the owner because the hero's geometry is identity.
+  Not mine to change.
+- **The third command on the home page is cut mid-URL**, at all three
+  viewports including desktop, where there is plainly room beside it.
+  That is `CopyLine`'s sideways scroll with `.rec-cmd` fading the edge
+  that still has content behind it, decided and measured 2026-10-24. The
+  crop confirms the fade is drawing.
+- **The dim paragraph under the third command** reads greyer than the
+  body around it. It is the deliberate aside, and §2 measures it above
+  its 4.5:1 floor rather than leaving the eye to guess.
+
+### 4.1 The frames in this folder are compressed, and that is safe here
+
+L41's rule is that any frame set a tool reads a number off is committed
+uncompressed. **No number in this review is read off these PNGs.**
+`shoot.mjs` measures overflow in the live page, and `measure-contrast.mjs`
+photographs its own frames in memory and commits none of them. So the
+whole folder is quantised to an adaptive 256-colour palette, 2.1MB to
+884K, and the judgments in §4 were made on the uncompressed originals
+before that pass.
