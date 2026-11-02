@@ -264,3 +264,33 @@ cache the run owns, which is what §2 asked. What is not settled is the
 price, and the honest summary is that this remedy is right about the
 failure mode and incomplete as a rule until it says where the cache lives
 and when it is deleted. Both go in L56.
+
+## 3. What run g checked rather than inherited, and what this branch still does not have
+
+**The selftest, re-run from scratch.** §1 reports 21 of 21 assertions
+holding and run g did not take that on the branch's word. `node
+docs/design/review-kit/selftest/check-focus.mjs` exited 0 this run with
+every assertion naming its own number, including the two that matter
+most: the trap fixture reports two stops and two unreachable controls
+rather than a short clean ring, and `--line` on `--night` comes back at
+L36's 1.20 through this code path. Receipt in
+`data/check-focus-selftest.log`.
+
+Worth saying because it was checkable and cheap: the selftest writes its
+fixtures to a `mkdtemp` directory, which came out as
+`/tmp/focus-selftest-SMvSpm` this run. That is the right shape for a
+shared `/tmp` and it is not what §2.1's rule is about. A name the kernel
+picks cannot collide. A name a run invents can.
+
+**The build, end to end.** §2 could say only that `npm ci` failed. This
+branch can now say that the install succeeds and that `next build`
+succeeds behind it, exit 0, six static pages prerendered. See §2.1.
+
+**What is still missing, named rather than implied.** No review of the
+site was run this pass and no screenshots of it are in this branch. The
+instrument exists and is verified, and the surface it was built to
+measure has not been put in front of it. That is the next item in this
+lane. Two runs went into this branch and both of them spent themselves
+on the instrument and the build, which is the honest account of it and
+also the reason a reader should not take `measure-focus.mjs` landing as
+evidence that the site's tab ring has been looked at. It has not.
