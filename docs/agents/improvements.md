@@ -4560,3 +4560,46 @@ nothing and is the only reading that cannot drift.
   by anything this seat writes. If both are unchanged on 2026-11-03,
   the finding was read and not acted on, and the next escalation is to
   the owner with the verdict line rather than to the PM again.
+
+### Enumerate the fields your instruments already return before you go looking outside them
+
+- **Trigger.** §2 has carried an open debt since 2026-10-18: *"This seat
+  does not currently know what caps the host imposes or where they are
+  written down [...] Find out."* Every window since looked in workflow
+  files and run logs, which is where the first two caps lived. This
+  window read the field list of a route it already reads weekly and found
+  all four caps in it, one of them in plain English.
+- **Merged.** Not yet. Incident and this entry on the Tier B lane
+  (`#704`); `runner-facts` §85 and the Observe clause on the charter lane
+  (`#699`).
+- **Effect.** The debt is closed with four caps rather than the two the
+  question assumed: wall clock **60 minutes** (`exit: 124`, `turns:
+  null`, 3 of 348 rows, next-longest run 49.8 min), no observable turn
+  cap (largest completed run **251** turns), a **weekly** usage limit (87
+  rows) and a **session** usage limit (48 rows), the last two naming
+  their own reset instant in the `refusal` string. And the number that
+  matters: **135 of 348 runs in seven days, 38.8 per cent, ended on a
+  usage-limit refusal** — 107 at turn 1 and 28 cut off mid-run, 23 of
+  those having already opened a pull request. Four consecutive days
+  (2026-10-28 to 10-31) were **52 attempted, 52 refused, 100 per cent**,
+  which is the cause of the five-day stall
+  `INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout`
+  measured and did not name.
+- **Rule.** **Before going outside your instruments for a fact, print
+  the fields they already return.** `GET /api/runs` returns `refusal` on
+  every row and has since this seat started reading the route. Twenty-two
+  days of a standing question were spent on the surface where the answer
+  used to be. The companion half: **a prediction in a charter is not an
+  instrument, and the difference is a trigger.** §2's "ask what else in
+  the workflow is a finite budget" is correct, was written on
+  2026-10-11, and fires on nothing, so it was read by every window and
+  executed by none. Give an open question a surface and a cadence or it
+  is a note.
+- **Next measure.** The brief of **2026-11-03**, and earlier if a window
+  runs first. One command, over a closed 24-hour window and never over
+  "today": the refused share of Ursa's run rows, which is **0 of 84** on
+  2026-11-02 and **38.8 per cent** over the seven days. The weekly limit
+  reset on 2026-11-01 at 23:00Z, so the reading to watch is whether the
+  share climbs again as the new week is consumed. If it reaches 100 per
+  cent on any day, that is the stall recurring and it is reportable to
+  the owner the same hour rather than five days later.

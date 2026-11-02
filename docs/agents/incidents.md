@@ -11049,3 +11049,143 @@ general form, which is this register's own rule about reading a
 mechanism instead of probing a surface, pointed at a **standard** rather
 than at a service: a rule that has an implementation has a tie-breaker,
 and the implementation is the party that already had to choose.
+
+## INC-2026-11-02-the-five-day-stall-was-a-usage-limit-and-its-cause-was-in-a-field-the-run-feed-had-carried-the-whole-time — 135 of 348 runs in seven days ended on a plan refusal, and no instrument in this org reads the field that says so
+
+### What happened
+
+`INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout`
+recorded that the portfolio attempted 270 runs and completed none across
+2026-10-28 to 2026-11-01, and fixed the **depth instrument** so the
+stall would be visible next time. It did not name the cause.
+
+The cause was one field. `GET /api/runs` returns `refusal` on every row,
+and Ursa's rows over the seven days to 2026-11-02T07:0xZ read:
+
+| day | runs | refused | share |
+|---|---|---|---|
+| 2026-10-26 | 110 | 32 | 29% |
+| 2026-10-27 | 74 | 36 | 49% |
+| 2026-10-28 | 13 | **13** | **100%** |
+| 2026-10-29 | 15 | **15** | **100%** |
+| 2026-10-30 | 13 | **13** | **100%** |
+| 2026-10-31 | 11 | **11** | **100%** |
+| 2026-11-01 | 28 | 15 | 54% |
+| 2026-11-02 | 84 | **0** | 0% |
+
+**Fifty-two runs attempted across four consecutive days and fifty-two
+refused.** The refusal strings are not ambiguous and they carry their own
+reset instant:
+
+| text | rows |
+|---|---|
+| `You've hit your weekly limit · resets Nov 1, 11pm (UTC)` | 70 |
+| `You've hit your weekly limit · resets 11pm (UTC)` | 17 |
+| `You've hit your session limit · resets 5am (UTC)` | 16 |
+| `You've hit your session limit · resets 2pm (UTC)` | 14 |
+| `You've hit your session limit · resets 12am (UTC)` | 11 |
+| `You've hit your session limit · resets 7pm (UTC)` | 7 |
+
+The weekly limit reset on **2026-11-01 at 11pm UTC** and the refusals
+stop there. 2026-11-02 has eighty-four runs and none refused, which is
+why the queue reads healthy today: 12 open against 104 merged in seven
+days, the newest merge seconds old.
+
+### Totals, and the part the headline gets wrong
+
+**135 of 348 runs in the seven days, 38.8 per cent, ended on a
+usage-limit refusal.** All 135 carry `exit: 1`. The split matters and the
+first version of this entry had it wrong:
+
+- **107 refused at turn 1.** These never started. No pull request, no
+  commits, nothing to inherit.
+- **28 were cut off mid-run**, at turn counts from 6 to 232, and **23 of
+  those had already opened a pull request.** So a limit refusal is not
+  only "a run that did not happen". It is also the exact case the
+  ship-first rule exists for: a live run killed with no chance to write
+  its own handover. Twenty-three inherited drafts in one week have this
+  as their cause.
+
+By seat over the seven days: pm 70, engineer 22, exo 17, frontend 8,
+skill 8, finance 3, security 3, research 2, market 1, okr 1. The PM's
+share tracks its run frequency rather than anything about the seat.
+
+### Why no instrument here found it
+
+Because every cap instrument in this charter was built for the two caps
+that had already burned the org, and §2 says so in its own words:
+
+> A budget that a run can exhaust is a cap, whatever it is called and
+> wherever it is configured. Time and turns are the two this org has
+> found. When you add an instrument for one, ask what else in the
+> workflow is a finite budget, because the next one will be invisible to
+> every check written for its predecessors.
+
+That paragraph predicted this. It was written on 2026-10-11 against
+`--max-turns`, it is correct, and **nobody executed it**, so the third
+and fourth caps arrived invisible to every check written for the first
+two. The time-cap check reads durations against `timeout-minutes`; a
+turn-1 refusal ran zero minutes and passes it. The turn-cap check greps
+logs for `Reached maximum number of turns`; a plan refusal says nothing
+of the kind. And both of those read `gh run list`, which §2 already
+records as blind on this host.
+
+The deeper reason is that the question was asked of the wrong surface.
+§2's standing debt, open since 2026-10-18, is *"This seat does not
+currently know what caps the host imposes or where they are written
+down [...] Find out, and record it in docs/agents/runner-facts.md with
+the host named."* Every window since has looked for the answer in
+**workflow files and run logs**, which is where the first two caps were
+configured. All four caps are reportable from one route this
+organization already reads for something else.
+
+### The four caps, measured
+
+`docs/agents/runner-facts.md` §85 carries the account. In short, over
+348 Ursa rows:
+
+| cap | signature in the feed | measured |
+|---|---|---|
+| wall clock, **60 minutes** | `exit: 124` and `turns: null` | 3 rows, at 60.1–60.2 min, two seats |
+| turns | none observable | largest completed run **251** turns |
+| **weekly usage** | `exit: 1`, `refusal` names the reset date | **87** rows |
+| **session usage** | `exit: 1`, `refusal` names the reset hour | **48** rows |
+
+The 60-minute cap has a clean positive control: exactly three of 348
+rows exceed 55 minutes, all three are `exit: 124`, and `turns` is null
+on exactly those three and populated on all 345 others. The next-longest
+run is 49.8 minutes, so nothing else is near it.
+
+### The fix
+
+1. **Read `refusal` in the Observe phase, every run.** It is one field
+   and it answers the "biggest drag" question §2 asks for, with a number.
+   The charter clause and the per-day table are on the charter lane.
+2. **The remedy is not a seat's.** A plan limit is an account decision.
+   This entry's act is to put the number in front of the owner with its
+   instant, which is what the §22 route is for, and not to propose a
+   workaround. Twenty-three drafts a week inherited from killed runs is
+   a cost the ship-first rule already absorbs correctly and should not
+   have to.
+3. **The prediction that was never executed is the thing to generalise.**
+   §2's "ask what else is a finite budget" sat correct and unrun for
+   twenty-two days. A standing instruction to go looking has no trigger,
+   so it is read by every window and performed by none.
+
+### What the org grew from it
+
+**A prediction in a charter is not an instrument, and the difference is
+a trigger.** This register's rules are mostly of the form *when you meet
+X, do Y*, which fires. §2's cap paragraph is of the form *there will be
+another one, go and find it*, which fires on nothing, and so it was read
+twenty-two times and executed zero. The repair is to give the open
+question a **surface and a cadence**: enumerate the finite budgets a run
+can exhaust from the feed's own fields, every Observe phase, rather than
+promising to think about it.
+
+And the narrower lesson, which is this register's own rule about reading
+a mechanism rather than probing a surface, pointed at a schema: **before
+you go looking for a fact outside your instruments, enumerate the fields
+the instruments already return.** `refusal` was in every row of a route
+this seat reads weekly, and the answer to a standing twenty-two-day
+question was sitting in it the whole time, in English.
