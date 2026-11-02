@@ -138,12 +138,14 @@ digest, so changing a word changes what every record built afterwards
 says it was checked against [E9].
 
 It does not fire for choosing a span's label, for deciding what a
-record statistic may be said to mean, for running a trial, or for
-distilling tuning axioms. Those four skills work on
-`outcome_record.json` and `tuning.json`. This one works on the gate
-itself, the code and the fixtures, which is why it sits across a
-handoff from all four rather than beside any of them
-(`prompts/skill-extract.md` §5e).
+record statistic may be said to mean, for running a trial, for
+distilling tuning axioms, for auditing a correction loop or a durability
+walk, for attributing a deleted span, for excluding a file from a
+record, or for clearing a record for release. Every one of those works
+on `outcome_record.json`, on `tuning.json`, or on what leaves the
+machine. This one works on the gate itself, the code and the fixtures,
+which is why it sits across a handoff from every one of them rather than
+beside any of them (`prompts/skill-extract.md` §5e).
 
 What it serves is the only auditability claim Ursa Minor makes on its
 own behalf. The gate exists because `ursa run` once printed "239,976
