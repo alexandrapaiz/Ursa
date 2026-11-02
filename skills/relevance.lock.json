@@ -1477,11 +1477,11 @@
     "passages": "38c04c177ffb8d6f"
   },
   "distilling-a-tuning-record/E25": {
-    "verdict": "supports",
-    "read": "2026-10-18",
+    "verdict": "re-read",
+    "read": "2026-11-02",
     "lines": "deb4a78051b460e3",
     "what": "3c368d88e4b1ca5f",
-    "passages": "e21eb96d301a96d8"
+    "passages": "4f05eddf1e0c10fa"
   },
   "distilling-a-tuning-record/E26": {
     "verdict": "widened",

@@ -371,11 +371,19 @@ that history, with a rebase, an amend or a squash, produces new shas,
 new episode ids, and a record of the same work that the guard does not
 recognise, so every axiom it touches gains evidence a second time. The
 watermark the design intended for this, a `distilled` flag on each
-episode with an `isDistilled` lookup against it, exists in the code and
-is never set to true by anything [E25]. Ours: before distilling, check
-`sources` for a record covering the same commits rather than the same
-id, and if the project's history has been rewritten since the last
-distill, start a new store rather than reconciling the old one.
+episode with an `isDistilled` lookup against it, exists in the code
+and is written `false` by every path that writes it [E25]. Ours,
+measured 2026-11-02: the only `true` in the tree is one `serve` test's
+fixture, which exists to exercise the reporting side, so no real run
+ever raises the watermark and the lookup answers false for every
+episode a user has. This sentence read "never set to true by anything"
+until today, which was true the day it was written and stopped being
+true when that fixture landed, and the claim it was making was always
+about the writing paths rather than about an absence a test can
+falsify. Ours: before distilling, check `sources` for a record
+covering the same commits rather than the same id, and if the
+project's history has been rewritten since the last distill, start a
+new store rather than reconciling the old one.
 
 **An axiom is a claim about a person, and the record is a claim about
 text.** The prompt asks the model for the general why rather than the
