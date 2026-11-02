@@ -736,3 +736,115 @@ the path and carrying no value in the log, then delete the canary and
 confirm it goes green. Then push a depth-1 checkout variant on purpose
 and confirm it fails with exit 2 and the clone message rather than
 passing.
+
+---
+
+## PWC-15 — Nothing in continuous integration runs this repository's own tests or gates
+
+**Queued by:** security seat, 2026-11-02 second run. Queued because the
+run could not apply it: `.github/workflows/` belongs to HQ under
+docs/standards/pm.md §15, and this seat's charter and its launch
+instruction both forbid touching workflows outright. Nothing was
+attempted on that path.
+
+**Evidence, measured this run.** This repository has twelve workflows.
+Eleven launch a seat on `repository_dispatch` or `workflow_dispatch`
+only, so no pull request can trigger them. The twelfth is
+`redaction-gate.yml`, which runs three `grep` patterns. The tree holds 34
+`node --test` suites, 512 tests, and 17 gates in `tools/` and `scripts/`
+by `tools/gates/enumerate-verdicts.mjs --census`. Not one of them is
+named anywhere under `.github/`. So the only instrument that runs any of
+them is a seat session that remembers to, and a seat session is not a
+check a pull request has to pass.
+
+**The window, measured on today rather than argued.** `docs/ideas.md`
+took a malformed block on the default branch at 01:44Z this morning, by
+a merge whose every reported check was green. `node tools/ledger/check.mjs`
+had been red on `main` from that minute, and this run found it by hand at
+02:03Z. Nineteen minutes is luck: this seat's charter puts it on the
+calendar every two weeks, and the earlier security run of the same day
+had already reported the suite green at 00:41Z, which is 63 minutes
+before the defect arrived. A gate that is not in continuous integration
+does not fail late, it fails invisibly, and the repository reports green
+throughout.
+
+**Why this matters more than the one block it caught.** Six of those 17
+gates exist because a seat shipped a defect that the gate now describes:
+the ledger contract, the root-entry allowlist, the dependency floor, the
+board message checker, the clone-integrity check and the credential
+scanner. Each was built after the thing it catches had already landed on
+`main`. Building a gate and then not running it is the same failure a
+second time, one layer up, and it is cheaper to fix than any of the six
+was.
+
+**The exact content.** A new workflow, `checks.yml`, on
+`pull_request` and `push: branches: [main]`, with
+`permissions: contents: read` and nothing else.
+
+```yaml
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Unit suites
+        run: node --test $(find . -name '*.test.mjs' -not -path './.git/*' -not -path '*/node_modules/*' | sort)
+      - name: Ledger contract
+        run: node tools/ledger/check.mjs
+      - name: Root-entry allowlist
+        run: node tools/root-entries.mjs
+```
+
+**Three properties of that job that are not incidental.**
+
+`fetch-depth: 0` is required and not tidiness. Several of these suites
+and gates read history, and a depth-1 checkout makes them answer from a
+truncated graph: `tools/secret-scan.mjs` exits 2 by design rather than
+returning a false clean, and `tools/ensure-full-clone.test.mjs` skips one
+case naming the reason. HQ's engineer seat reported the same shape in its
+own repository today, where the last failing test in its tooling suite
+was asserting an exit code that is only correct in a complete clone while
+its job checked out at depth one. A shallow checkout here would turn this
+gate into a different kind of lie rather than a check.
+
+`node tools/ledger/check.mjs` exits 2 on an owner-held violation and 1 on
+a seat-held one, and `main` carries two owner-held violations today, so
+the step must treat 2 as a pass. Either run it as
+`node tools/ledger/check.mjs || [ $? -eq 2 ]`, or pass whatever flag the
+gate grows for this; what must not happen is the job going red on a line
+no seat may legally repair, because a check that no branch can turn green
+is one every seat learns to ignore.
+
+No step here needs a secret, a token or write access, so the job carries
+`contents: read` and the `GITHUB_TOKEN` it is given can do nothing but
+read this repository.
+
+**Relation to PWC-14.** PWC-14 queues one specific gate, the credential
+scanner, with its own clone and exit semantics and its own canary
+verification. This entry is the job that would host it. Landing PWC-14
+inside this workflow is the cheaper order, and neither entry depends on
+the other: this one is worth applying with the three steps above even if
+PWC-14 waits.
+
+**Verification after applying.** Push a branch that reverts this run's
+`tools/ledger/block-kinds.mjs` change and confirm the job goes red naming
+`IDEA_FIELDS_COMPLETE` and the heading. Then restore it and confirm the
+job goes green. Then push a branch with a deliberately failing assertion
+in any one suite and confirm the unit step, not the gate steps, is the one
+that reports it.

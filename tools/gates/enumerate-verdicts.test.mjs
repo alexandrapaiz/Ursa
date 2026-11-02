@@ -1,5 +1,5 @@
 // Does the enumerator detect the defect it was built for, and does it stay
-// quiet on the five gates that are already right?
+// quiet on the six gates that are already right?
 //
 // THE ONE TEST THAT MATTERS IS `the historical defect`. Four gates passing
 // proves nothing on its own: a check that always returns "clean" passes four
@@ -46,7 +46,7 @@ function run(args = []) {
   }
 }
 
-describe('the five extracted gates, end to end', () => {
+describe('the six extracted gates, end to end', () => {
   it('exits 0 and reports every branch holding its properties', () => {
     const { code, json } = run()
     assert.equal(code, 0)
@@ -54,17 +54,25 @@ describe('the five extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 27 distinct causes with 32 probes, which is the number the text sweep could not see', () => {
+  it('reaches 30 distinct causes with 38 probes, which is the number the text sweep could not see', () => {
     const { json } = run()
-    // 28 and 23 until 2026-10-27. The four added are all post.mjs's: three
-    // sender branches, where a seat named by neither flag nor variable, a
-    // seat differing from a roster seat only in case, and a company with no
+    // 28 and 23 until 2026-10-27. The four added then were all post.mjs's:
+    // three sender branches, where a seat named by neither flag nor variable,
+    // a seat differing from a roster seat only in case, and a company with no
     // declaration used to be two literal defaults between them; and the
     // board answering that it cut the body at its wake limit, which this
     // file's caller used to discard along with three other response fields.
-    assert.equal(json.branches.length, 32)
+    //
+    // 27 and 32 until 2026-11-02, when `root-entries-verdict.mjs` became the
+    // sixth extraction and the first one written in this shape rather than
+    // retrofitted into it. Its three causes are the allowlist holding, an
+    // entry outside it, and the inverted ignore rule being absent so that
+    // there is no allowlist to compare against; its six probes are those
+    // three plus the two shapes separately, both together, and a second
+    // ground branch for a directory that is not a git repository.
+    assert.equal(json.branches.length, 38)
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
-    assert.equal(causes.size, 27)
+    assert.equal(causes.size, 30)
   })
 
   it('carries an exit 3, which no gate of the first four could have reached', () => {

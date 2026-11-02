@@ -49,11 +49,35 @@
 // The mode answers the question the gate cannot ask. It never answers it
 // on a shallow clone, because a truncated graph reports clean.
 //
+// `--history=all`, added 2026-11-02 for finding F50. Until today this mode
+// walked ONE named ref, and the comment above `shallowClone` argued that the
+// refspec fault F44 found in `tools/secret-scan.mjs` therefore did not apply:
+// the scope is what the caller declared, so a narrow refspec cannot quietly
+// shrink it. That is true about the refspec and wrong about the scope. The
+// question this mode exists to answer is whether a private value is readable
+// in a PUBLIC repository, and that is a question about every ref GitHub
+// serves, not about one ref's ancestry. No caller has ever declared, or could
+// practically declare, 292 of them.
+//
+// Measured on the day the flag was added, which is what says what the hole was
+// worth. 1,425 text blobs are reachable from some ref and not from HEAD, and
+// four files among them carry Ursa incident 2's own three classes -- a real
+// machine path and username, the real project slug, a full trial conversation
+// UUID -- on two branches whose pull requests are closed and which were never
+// deleted. `main` carries none of it; the incident-2 rewrite took it off main
+// and left it on the pre-rewrite lineage. Every `--history` result this seat
+// has published read zero of those blobs and none of them said so.
+//
+// In this scope the refspec fault DOES apply, because `--all` is exactly what
+// a narrow refspec shrinks, so `--history=all` refuses on either fault while
+// a named ref still refuses only on depth.
+//
 // Usage:
 //   node scripts/redaction-check.mjs            # exit 1 on a violation
 //   node scripts/redaction-check.mjs --json     # same exit code, JSON out
-//   node scripts/redaction-check.mjs --history  # every blob reachable
+//   node scripts/redaction-check.mjs --history  # every blob reachable from HEAD
 //   node scripts/redaction-check.mjs --history=origin/main   # from a ref
+//   node scripts/redaction-check.mjs --history=all   # every blob in every ref
 //
 // Two more flags exist as test seams and are documented so that nobody
 // mistakes them for configuration. `--root=<dir>` scans somewhere other
@@ -243,10 +267,13 @@ const MAX_BLOB_BYTES = 4 * 1024 * 1024; // the figure tools/secret-scan.mjs uses
 // marker lives in the main git directory, so the path test is false in a
 // worktree of a shallow clone and the refusal does not fire. `git rev-parse`
 // answers the question wherever it is asked from, and it is what
-// `tools/ensure-full-clone.sh` and `tools/secret-scan.mjs` both ask. The
-// refspec fault that F44 found in `secret-scan.mjs` does not apply here: this
-// scan walks one named ref rather than `--all`, so its scope is what the
-// caller declared and a narrow refspec cannot quietly shrink it.
+// `tools/ensure-full-clone.sh` and `tools/secret-scan.mjs` both ask.
+//
+// The sentence that stood here until 2026-11-02 said the refspec fault F44
+// found in `secret-scan.mjs` did not apply, because this scan walks one named
+// ref rather than `--all`. That stays true of a named ref and is why
+// `refspecFault` is consulted only in the all-refs scope. What it got wrong is
+// in the header under `--history=all`.
 function shallowClone() {
   try {
     return (
@@ -261,23 +288,75 @@ function shallowClone() {
   }
 }
 
+// The word a caller passes to mean "every ref", and the one `git rev-list`
+// wants. Kept apart so `--history=--all` is not quietly a second spelling of
+// the same thing: this mode's scope is named in its own output and a reader
+// has to be able to match the word in the log to the word in the command.
+//
+// NOT EXPORTED, deliberately. This file calls `run()` at module scope, so an
+// `import` of it would scan the repository and exit, which is the trap
+// `tools/board/live-target.mjs` was split out of `post.mjs` to escape. The
+// suite drives both of these through the CLI instead. Anything here that a
+// second caller needs gets split into its own module first.
+const ALL_REFS = 'all';
+const revListScope = (ref) => (ref === ALL_REFS ? ['--all'] : [ref]);
+
+/** The fault `tools/secret-scan.mjs` calls out in `incompleteClone`, asked
+ *  here only for the all-refs scope. A narrow refspec is what shrinks `--all`;
+ *  it cannot shrink the ancestry of a ref the caller named, which is why a
+ *  named ref is not refused on it. A repository with no `origin` is not a
+ *  truncated copy of anything, so it is not a fault. */
+function refspecFault() {
+  const ask = (args) => {
+    try {
+      return execFileSync('git', args, {
+        cwd: SCAN_ROOT,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      }).trim();
+    } catch {
+      return null;
+    }
+  };
+  if (ask(['config', '--get', 'remote.origin.url']) === null) return null;
+  const refspecs = (ask(['config', '--get-all', 'remote.origin.fetch']) ?? '').split('\n');
+  return refspecs.includes('+refs/heads/*:refs/remotes/origin/*')
+    ? null
+    : "this clone's fetch refspec covers one branch, so the other branches' objects are not here";
+}
+
+/** How the scope reads in a sentence, so `--history` and `--history=all` are
+ *  distinguishable in a log six weeks later. */
+function scopeNoun(ref) {
+  return ref === ALL_REFS ? 'any ref in this clone' : ref;
+}
+
 function historyBlobs(ref, gate) {
-  if (shallowClone()) {
+  const faults = [];
+  if (shallowClone()) faults.push('this clone is shallow');
+  if (ref === ALL_REFS) {
+    const refspec = refspecFault();
+    if (refspec) faults.push(refspec);
+  }
+  if (faults.length > 0) {
     stale(
-      `this clone is shallow, so a history scan of ${ref} would walk a truncated graph and report clean. ` +
-        'Run bash tools/ensure-full-clone.sh first.'
+      `${faults.join(', and ')}, so a history scan of ${scopeNoun(ref)} would walk a truncated ` +
+        'graph and report clean. Run bash tools/ensure-full-clone.sh first.'
     );
   }
 
   let listing;
   try {
-    listing = execFileSync('git', ['rev-list', '--objects', ref], {
+    listing = execFileSync('git', ['rev-list', '--objects', ...revListScope(ref)], {
       cwd: SCAN_ROOT,
       encoding: 'utf8',
       maxBuffer: 256 * 1024 * 1024,
     });
   } catch (err) {
-    stale(`git rev-list --objects ${ref} failed: ${(err.stderr ?? err.message).toString().trim().split('\n')[0]}`);
+    stale(
+      `git rev-list --objects ${revListScope(ref).join(' ')} failed: ` +
+        `${(err.stderr ?? err.message).toString().trim().split('\n')[0]}`
+    );
   }
 
   const excludeDirs = new Set(gate.excludeDirs);
@@ -482,21 +561,25 @@ function runHistory(ref, json) {
   if (json) {
     console.log(
       JSON.stringify(
-        { mode: 'history', ref, clean: total === 0, scanned, blobs, oversize, binary, findings },
+        { mode: 'history', ref, scope: scopeNoun(ref), clean: total === 0, scanned, blobs, oversize, binary, findings },
         null,
         2
       )
     );
   } else if (total === 0) {
     console.log(
-      `Redaction history clean: ${scanned} blob(s) reachable from ${ref}, ${gate.pairs.length} patterns, read from the workflow.`
+      `Redaction history clean: ${scanned} blob(s) reachable from ${scopeNoun(ref)}, ${gate.pairs.length} patterns, read from the workflow.`
     );
   } else {
     report(
       findings,
-      `${total} hit(s) in history reachable from ${ref}. The gate reads the working tree, so these are ` +
+      `${total} hit(s) in history reachable from ${scopeNoun(ref)}. The gate reads the working tree, so these are ` +
         'already past it and a tip-tree fix does not reach them. Rewriting published history is the ' +
-        "owner's call; see docs/security/redaction-standard.md."
+        "owner's call; see docs/security/redaction-standard.md." +
+        (ref === ALL_REFS
+          ? ' A hit on a ref other than this repository\'s default branch is reachable on GitHub even' +
+            ' after the branch is deleted, because a closed pull request keeps refs/pull/<n>/head.'
+          : ' This walked one ref. Run --history=all for every ref, which is a different and larger answer.')
     );
   }
   if (oversize > 0) console.error(`note: ${oversize} blob(s) over 4 MiB were not read.`);

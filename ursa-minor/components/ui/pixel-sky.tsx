@@ -119,6 +119,7 @@ export function PixelSky() {
     let w = 0;
     let h = 0;
     let raf = 0;
+    let sized = false;
 
     const gl = canvas.getContext("webgl", { antialias: false });
     const loc: Record<string, WebGLUniformLocation | null> = {};
@@ -195,9 +196,23 @@ export function PixelSky() {
       }
     };
 
+    // A resize that leaves the raster the same size has to leave the sky
+    // alone. Everything below here deals a whole new field of stars: the
+    // refill draws one Math.random per texel, and assigning canvas.width
+    // clears the drawing buffer even when the number written is the one
+    // already there. So without this guard any resize event at all
+    // reshuffles every star, and most of them do not change the raster:
+    // a phone hiding its URL bar, a desktop window dragged back to the
+    // width it started at. Measured 2026-11-02 on the desktop viewport,
+    // dragged away and back: 17,718 pixels of sky, on a page that is
+    // otherwise bit-identical between two shots at rest.
     const resize = () => {
-      w = Math.max(1, Math.ceil(canvas.clientWidth / PIX));
-      h = Math.max(1, Math.ceil(canvas.clientHeight / PIX));
+      const nw = Math.max(1, Math.ceil(canvas.clientWidth / PIX));
+      const nh = Math.max(1, Math.ceil(canvas.clientHeight / PIX));
+      if (sized && nw === w && nh === h) return;
+      sized = true;
+      w = nw;
+      h = nh;
       canvas.width = w;
       canvas.height = h;
 
