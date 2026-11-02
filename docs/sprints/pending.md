@@ -2,6 +2,104 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## 2026-11-02 ~02:2x UTC message-triggered (thirteenth pass of the day): #653 merged under Tier B, #646 reviewed a third time and found unchanged, two live handoffs routed, nothing new for you
+
+**Trigger.** An event bus message asking this seat to review #646
+against the merge rule and dispose of two drafts it named as stale
+(#650, #642), repeating a standing condition that was already stale by
+the time it reached this run — both are explained below as a pattern,
+not a surprise. Two live board handoffs arrived mid-run and are
+answered here rather than carried forward: exo's on #653/#618, skill's
+on #646's true block.
+
+**The standing text this run was woken with was already wrong, for the
+third time today.** It named #650 and #642 as drafts with no live run
+behind them. Both were merged by the twelfth pass (#654) nine and
+twelve minutes before this run's first `gh pr view`. It also implied
+#651 needed readying; `gh pr view` shows it has not been a draft since
+earlier passes readied it. Checked live, not taken on report, per the
+pattern the eleventh and twelfth passes already established. Naming
+this a third time because it is now a pattern worth the owner's
+attention in its own right, not because any instance of it cost
+anything today: the board text and the live GitHub state diverge by
+minutes, every time, and every pass so far has caught it before acting
+on it. A pass that didn't would merge nothing wrong — the stale claims
+have all pointed at things already resolved, never at things broken —
+but the next one might not be so lucky.
+
+**#646 (skill) reviewed against the merge rule for the third time
+today: unchanged, still Tier C, now also `CONFLICTING`.** Still edits
+`prompts/skill-extract.md` directly, which is Tier C by path regardless
+of draft state, conflict state, or live-run status — the tenth and
+eleventh passes already said so on the PR itself and nothing here
+repeats that comment. New since the eleventh pass: the skill seat's own
+#652 (draft, `MERGEABLE` against `main`) now carries #646, #644, #638,
+#633 and #601 as ancestors — verified independently with `git
+merge-base --is-ancestor`, not taken on the skill seat's board note,
+and confirmed true for all five. #652 also touches
+`prompts/skill-extract.md`, so the consolidation changes nothing about
+who merges it: still Tier C, still the owner's, still blocked on the
+skill seat's own run (still a draft) rather than on anything this seat
+can do. The courtesy note: once #652 is readied, #601, #633, #638, #644
+and #646 are superseded by it and should close pointing there, the way
+the eleventh pass closed #612 into #618 — not done here while #652's
+own run may still be live, per the standing-condition pattern above.
+
+**#653 (exo) reviewed and merged under Tier B.** Five `docs/agents/`
+files (`improvements.md`, `incidents.md`, `learning-log.md`,
+`merge-order.md`, `runner-facts.md`), no `prompts/`, no secrets, no
+workflow. Checks green, not a draft, no labels, no comments, `MERGEABLE`,
+opened today. Merged, branch deleted.
+
+**Exo's handoff on #618, routed rather than actioned — this seat
+cannot fix it and should not merge it.** #618 (exo, the all-seats
+charter lane, Tier C by path on `prompts/exo-agent.md`) carries a real
+defect per exo's own board message: two `grep -qv` call sites whose
+exclusion never fires, because the `grep` on this host is `ugrep`, and
+`ugrep -qv` reports "pattern matched nothing" rather than GNU grep's
+"line found," so the sweep it gates has been silently inert. Exo says
+merging #618 is still correct — the defect is pre-existing, not
+introduced by the merge — and the repair belongs on that branch or in
+the first charter pull request after it. This seat cannot push a fix
+onto #618 (charters are the owner's to edit) and cannot merge #618
+either way (Tier C). For you: #618 is sound to merge as-is per exo's
+own account, and the `grep -qv`/ugrep repair is a follow-up, not a
+blocker.
+
+**The dead-incident-slug citation on `main`'s `docs/ideas.md`, also
+routed rather than fixed here.** Exo's handoff says the fix is already
+verified on #633 and #638. Checked: both are part of the same Tier C
+skill stack as #646 (both touch `prompts/skill-extract.md`, both now
+ancestors of #652), so landing the fix means the same owner decision as
+the rest of that stack, not a separate Tier B merge this seat can make
+early.
+
+**Unchanged from the twelfth pass, not re-swept:** #395 (research,
+now 8.2 days old, owner-merge, `prompts/engineer-agent.md` and
+`prompts/research-agent.md`), #601/#615/#631/#640/#643/#649 — no new
+fact found on any of them this pass.
+
+**#651 and #654, this seat's own.** #651 (eleventh pass) and #654
+(twelfth pass) both stay open: Tier B rule 1 forbids a PM seat from
+merging its own pull request, so both wait for another merger (the
+owner, or HQ's PM). This pass's branch was built on #654's tip per the
+org rule on reading this seat's own open PRs first, then merged current
+`main` (which had moved to include #650 since #654 opened) on top.
+Once this PR (#658) is reviewed, #654 is superseded by it and #651
+still stands on its own, unrelated content.
+
+**Sprint ceremony gap, named again and not re-explained: today is the
+fourth Monday running with no ceremony PR.** `sprint-2026-10-12.md` is
+still the only sprint file on `main`. 2026-10-19, 2026-10-26 and
+2026-11-02 have each now passed with message- and hook-triggered
+passes only. Not run here either — this pass's trigger is a specific
+PR review plus two board handoffs, the same standup shape every pass
+has run under today.
+
+Board handoffs from exo (#653/#618) and skill (#646's true block)
+answered with a `done` naming both; nothing left unanswered in the
+inbox as of this pass's read.
+
 ## 2026-11-02 ~02:1x UTC message-triggered (twelfth pass of the day): a frontend timeout triaged, two inherited drafts resolved, nothing new for you
 
 Narrow trigger: HQ's event that the frontend seat's window run hit its
