@@ -1,145 +1,88 @@
-# Merge order — measured 2026-11-02 at 01:31:11Z, window 76
+# Merge order for the owner — replaced each window by Ursa's exo seat
 
-Replaced wholesale each window by `prompts/exo-agent.md` §5b. The older
-copy is stale by construction, so take the later window's whole file;
-`tools/registers/registers.json` declares this register `enabled: false`
-for that reason and says so by name.
+**Measured 2026-11-02T02:09:16Z by window 77**, on `origin/main` at
+`383afa21`. Replaces the previous week's plan, per §5b of
+`prompts/exo-agent.md`. Every verdict below names the instrument that
+produced it.
 
-`origin/main` at `ccb1366f`. Sixteen open pull requests. **Both drivers
-registered in the parent clone before any measurement**, path asserted:
-
-```
-merge.ledger.driver    node .../tools/ledger/union-merge.mjs   %O %A %B %L %P
-merge.register.driver  node .../tools/registers/merge-driver.mjs %O %A %B %L %P
-```
-
-**Measuring, not merging.** Everything here is information for the owner
-and the PM. This seat never merges, never enables auto-merge, and never
-advises a seat to merge its own work.
-
-## The queue, five numbers
+## The five queue numbers (§5b)
 
 | | |
 |---|---|
-| open now | **16** |
-| merged in the last seven days | **81** |
-| oldest open | `#395`, 2026-10-24T21:21:40Z, **8.2 days** |
-| newest merge | **2026-11-02T01:03:44Z** |
-| merges per day | 10-26 **45**, 10-27 **22**, 10-28 **0**, 10-29 **0**, 10-30 **0**, 10-31 **0**, 11-01 **4**, 11-02 **18** |
+| open now | **15** (3 drafts, all with live runs behind them) |
+| merged, last 7 days | **81** |
+| oldest open | `#395`, 2026-10-24T21:21Z, **8.2 days** |
+| newest merge | 2026-11-02T02:00:10Z, **9 minutes** before this read |
+| merges per day | 10-23: 9, 10-24: 27, 10-25: 14, 10-26: 45, 10-27: 22, 11-01: 4, 11-02: 20 |
 
-**Neither predicate fires, and for the first time in five days both
-silences are correct.** Open does not outnumber the week's merges, and
-the newest merge is minutes rather than days old. The four zero days are
-the outage windows 72 and 73 reported, and it has ended: capacity reads
-46/0, 52/0, 50/0 and 50/0 attempted over completed for 10-28 to 10-31,
-then 114/45 and 54/32. The five classes sum to `attempted` exactly,
-54 = 32 + 0 + 0 + 22 + 0.
+**Neither depth predicate fires.** Open does not outnumber the week's
+merges (15 against 81) and the gate moved inside the last ten minutes.
+This is the first window since 2026-10-27 able to say the second half of
+that, and it is worth saying plainly: the five-day outage window 72
+recorded is over. 2026-10-28 through 10-31 attempted **198** runs and
+completed **0**; 2026-11-01 completed 45; 2026-11-02 has completed 57 of
+74 attempted.
 
-## Conflict verdicts, with the instrument beside each
+## Conflicts, by performing the merge rather than asking GitHub
 
-Instrument for every row: `git merge-tree --write-tree --name-only
-origin/main refs/prs/<n>`, both drivers registered, **no `2>&1`**, and
-**branched on the exit code rather than its sign** — 0 clean, 1
-conflict, anything else a claim about this clone and not a verdict. Refs
-re-fetched at 01:31:11Z, immediately before the census, because §0's
-fetch cannot contain an identifier opened after it.
+Instrument: `git merge-tree --write-tree --name-only origin/main
+refs/prs/<n>`, with **this repository's merge drivers installed**
+(`tools/ledger/install-driver.sh`, `tools/registers/install-drivers.sh`;
+`git config --get-regexp '^merge\.'` non-empty), exit code branched on
+`0` / `1` / other rather than on truthiness, and `2>&1` **not** used so
+that a driver's diagnostic on stderr does not displace the tree object.
 
-| state | pull requests | instrument |
-|---|---|---|
-| **clean** | `#395 #615 #618 #631 #633 #636 #638 #639 #640 #641 #642 #643 #644 #645` | `merge-tree`, exit 0 |
-| **conflict** | `#601`, `#612` | `merge-tree`, exit 1, files below |
-| unresolvable ref | none | `rev-parse --verify` |
+**14 of 15 clean. One conflicts.**
 
-**`#601` — twelve files under `skills/`.** Not a judgement anybody owes.
-`#601` **is contained in** `#633`, which is clean, so the conflict
-resolves by the skill seat closing `#601` as superseded rather than by
-anyone merging it.
+| | |
+|---|---|
+| `#601` | **CONFLICT**, real, in **11 files under `skills/`** plus `skills/README.md`. `docs/ideas.md` is *not* among them — the ledger driver merged it by block identity, 13 blocks taken. |
+| every other open pull request | `CLEAN` |
 
-```
-git merge-base --is-ancestor refs/prs/601 refs/prs/633   # exit 0 = contained
-```
+**`#601` is the authoring seat's to resolve, not the owner's.**
+`docs/standards/pm.md` §11.3 dispatches that seat with the number and
+"build on the open branch". It is Ursa's skill seat, the branch is
+`ursa-skill/2026-10-27-hook-2`, it is **164 commits behind `main`**, and
+the conflicts are content disagreements in its own lane rather than
+driverless artifacts.
 
-**`#612` — `docs/agents/merge-order.md` alone.** This file, and the
-conflict is correct and by construction: this charter replaces it every
-window, so two windows' replacements cannot merge. `#612` **is contained
-in** `#618`. It is also the live example of the one-lane rule —
-`registers.json` declares this register unmergeable by driver and the
-charter says it therefore belongs on exactly one lane, the register
-lane, and `#612` is the charter lane carrying it. Nothing to resolve;
-the newer copy wins.
+**Two readings disagreed and the difference is the drivers, which is the
+standing point of this section.** HQ's `check-merge-queue.sh`, run from
+`/srv/asc/hq/tools/` in this same window, reported **2 of 18**
+conflicting: `#601` and `#612`. That tool pins the **driverless** merge
+deliberately, because the merge button has no drivers and that is its
+verdict permanently. Both readings are correct about different merges.
+`#612` has since been closed, so the live disagreement is zero.
 
-## The second measurement: does the repository's own merge agree with the button
+## The order
 
-Run for every clean pull request whose diff touches a path
-`.gitattributes` gives a `merge=` attribute, by performing the merge in a
-detached scratch worktree with the drivers registered in the parent
-clone. The six managed paths are `docs/ideas.md`,
-`docs/agents/incidents.md`, `docs/decisions.md`,
-`docs/agents/learning-log.md`, `docs/agents/runner-facts.md` and
-`docs/agents/improvements.md`.
+Three decisions are the owner's. Everything else can clear without her.
 
-| pull request | driver paths in the diff | verdict |
-|---|---|---|
-| `#615 #631 #633 #638 #640 #643 #644` | `docs/ideas.md` | agrees |
-| `#618` | improvements, incidents, learning-log, runner-facts | agrees |
-| `#639` | incidents, runner-facts | agrees |
+1. **`#618` — the charter lane.** The one that matters. It holds the
+   unmerged charter work for **eleven seats** plus four tested tools, it
+   is `CLEAN`, 28 commits behind `main`. `#612` was a strict ancestor of
+   it and is now closed, so one decision covers the lane. Ursa's PM
+   reviewed it on 2026-11-02 at 00:25:24Z and ruled it Tier C by path,
+   not its to merge, and logged it in `pending.md`'s top three.
+   **Why it is urgent rather than merely old:** no `prompts/*-agent.md`
+   path has reached `main` since 2026-10-18, and this window measured
+   **0 of 11 charters** carrying the host tool root that would have
+   spared this seat fifteen days of a false sweep finding (§67). Every
+   all-seats rule written since then binds nobody.
+2. **`#395` — research and engineer charters**, 8.2 days old, the oldest
+   thing in the queue, `CLEAN`. Tier C by path.
+3. **`#601` — the skill seat's extraction branch.** Not a decision yet.
+   It is the one conflicting pull request and it goes back to its
+   authoring seat first.
 
-**No `drivers-disagree` row this pass**, so no seat owes a judgement on a
-block the button would combine by line position. Nine of nine agree.
+**The rest is the PM's.** Of the 15 open, the ones carrying no
+`prompts/*-agent.md` path can be merged in a pass under Tier B without
+the owner, which is where 81 of the last 7 days' merges came from.
 
-## Containment, so the queue is shorter than its count
+## What this window did not measure
 
-| contained | in | instrument |
-|---|---|---|
-| `#612` | `#618` | `merge-base --is-ancestor`, exit 0 |
-| `#601` | `#633` | `merge-base --is-ancestor`, exit 0 |
-| `#601` | `#638` | `merge-base --is-ancestor`, exit 0 |
-| `#633` | `#638` | `merge-base --is-ancestor`, exit 0 |
-
-So sixteen identifiers are **thirteen decisions**, and two of the three
-absorbed ones belong to the skill seat's own chain.
-
-## The order, and who each step is for
-
-Simulated by performing these merges in sequence in a detached scratch
-worktree against `origin/main`, not reasoned about. Steps 1 to 4 are the
-PM's under Tier B; step 5 is the owner's alone.
-
-1. **`#639`** — this window's register half. No `prompts/` path, so Tier
-   B. Clears the trunk's only genuine broken citation's companion
-   finding and repairs the environment register's §25.
-2. **`#633`**, then **`#638`** — the skill seat's chain. `#633` is the
-   one merge that clears the **only genuine broken citation on `main`**:
-   two rows of `docs/ideas.md` cite an incident identifier that no
-   longer exists, and `#633` carries the live slug twice and the dead one
-   zero times, verified on the branch. `#638` contains `#633`, so
-   merging `#638` alone also does it.
-3. **`#601` closed, not merged** — contained in both of the above. The
-   skill seat's to close, with the ancestry command in the comment.
-4. **`#615 #631 #640 #641 #643`** — the engineer, PM and market seats'
-   clean Tier B work, any order.
-5. **`#618`** — the owner's, and the only step that is. Eleven charters,
-   6,798 written and unmerged charter lines, and `#612` contained in it,
-   so one decision covers both. **It carries a pre-merge repair named in
-   `INC-2026-11-02-grep-on-this-host-is-ugrep-and-its-qv-inverts-a-predicate-whose-other-defect-was-hiding-it`:**
-   two call sites of a predicate that answers backwards on this host. If
-   `#618` merges unrepaired, eleven seats are handed a classifier that
-   reports nothing.
-
-## Drafts open with no live run behind them
-
-`#636 #642 #644 #645`, all opened today by the security, frontend and
-skill seats and the engineer seat. **None is this seat's** — the only
-`exo/` draft tonight was `#639`, readied at 01:1xZ — and the anchored
-pattern `^([a-z0-9-]+-)?(exo)/` claims none of them, which is the
-pattern working. They are their own seats' to ready or close, and under
-the correction of 2026-10-27 this seat does not absorb another seat's
-open branch.
-
-## What is not in this file and why
-
-No autonomy grade. HQ's `tools/autonomy.py --repos Ursa --days 7`
-returns 81 merges, 46 seat-claimed, 35 unresolved, floor 56.8%, and
-**43% unresolved is above the one-third ceiling at which that tool
-refuses to report**. So the refusal stands, this is not a grade, and the
-35 were already routed by window 75.
+`#642`, `#649` and `#650` are drafts with live runs behind them, so
+`check-draft-prs.sh` reports **no orphaned drafts** and they are
+correctly left alone. The count of orphaned drafts, which §"Ship first"
+has asked for by hand since 2026-10-05, is now one command:
+`bash /srv/asc/hq/tools/check-draft-prs.sh`.
