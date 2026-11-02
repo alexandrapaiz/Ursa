@@ -14416,6 +14416,14 @@ the owner to accept or reject.
   finished pull request, spending its last turns guessing at a title the store
   will accept. The rules are already written down once in this repository and
   the gap is entirely in the interface.
+- Reproduced independently the same night, by the next run of this seat, which
+  had read this entry and still paid for it: the board refused its item with
+  `prose must be scannable` on a 505-character block, and the item had to be
+  rewritten and re-posted. So the cost is not hypothetical and it is not a
+  one-run slip. A seat that has read the finding, written by itself, hours
+  earlier, still cannot check an item before sending it, because there is no
+  door. That is the strongest available argument that the gap is the interface
+  rather than the knowledge.
 - First step: three flags on the existing checker, `--item-title`,
   `--item-body` and `--comment`, each validating the text it is given against
   the rule set that already exists, with the company-name rule skipped for the
@@ -14429,3 +14437,101 @@ the owner to accept or reject.
   this seat's write surface (`prompts/skill-agent.md`, Boundaries). Named here
   rather than fixed because a seat patching another seat's tool mid-run is how
   two copies of a rule get written.
+
+### 2026-11-01 — An incomplete clone does not degrade an outcome record evenly, it manufactures the category CLAUDE.md calls the most valuable
+
+- Trigger: Ursa/exo replied to this seat's #617 saying that its own charter
+  opens with two lines on clone integrity, that the reason it needs two is
+  that depth and breadth are separate properties, and that if this seat's
+  charter has no such line that is worth a pass more than the rest of the
+  note. It has none. This run then took the measurement in its own lane
+  rather than in the exo's, because `skills/running-an-outcome-record-trial`
+  teaches a commit walk built on `git log --all`, and `--all` is the one flag
+  in that procedure sensitive to both properties and silent about either.
+- What: three clones of this repository at one commit, counting commits and
+  reading a `Co-Authored-By: Claude` trailer as a generation. Shallow and
+  single-branch, which is the shape a seat is handed, sees 1 commit, 0
+  generations and 100 percent untraced. Depth repaired alone sees 1,848
+  commits, 1,335 generations and 27.8 percent untraced. Both repaired sees
+  4,115 commits, 3,000 generations and 27.1 percent untraced. So the second
+  state is the dangerous one, because it is wrong in the sample and right to
+  within 0.7 points in the ratio, off 45 percent of the commits. It passes
+  every sanity check a reader applies to the number and none that they would
+  apply to the n. The two properties fail differently rather than twice:
+  depth corrupts the ratio, breadth corrupts the evidence base and leaves the
+  ratio nearly alone. And the direction of the error is not neutral. A commit
+  the walk cannot see is a generation that was never in the running, so its
+  text pairs with nothing and lands in `no_generation_provenance`, which
+  CLAUDE.md §1 calls the most valuable category and which Ursa Minor sells as
+  the signal no grader supplies. A trial run in an unrepaired clone therefore
+  reports its best headline because of the defect rather than in spite of it,
+  which is the worst available failure mode for a product whose entire claim
+  is that the label comes from the artifact and not from a judge.
+- Done in this run, inside this seat's surface: the precondition and the table
+  are now in that skill as judgment marked ours, and
+  `skills/relocate-anchors.mjs` refuses an unreadable old-ref at exit 2 naming
+  `tools/ensure-full-clone.sh` instead of answering. Measured before the fix,
+  on two clones at one commit against one old-ref: the complete clone
+  relocates 12 of 26 drifted ranges, the shallow clone relocates 0 and reports
+  all 26 as absent from a tree that holds them, and both exit 1. The exit code
+  could not tell a right answer from 26 fabricated ones, and the fabricated
+  verdict was the actionable kind, since a citation reported missing from the
+  tree it was written against reads as a citation that was never right.
+- First step: for the engineer seat, since `tools/` is outside this seat's
+  write surface, two history-reading instruments still have no precondition of
+  any kind, `tools/stack/absent-text.py` and `tools/ledger/probe-server-merge.sh`.
+  The cheap general form is the one this run used, three lines rather than a
+  framework. Resolve the ref with `git cat-file -e <ref>^{commit}` before
+  trusting any per-path verdict about it, because beyond a shallow horizon the
+  commit object is absent while inside it git keeps the tree. On a `git show`
+  failure consult `git ls-tree` for the path, because a hit means the blob is
+  what is missing rather than the path, which is the blobless partial clone
+  L-E12 recommends. Exit on the environment fault with a code that is not the
+  code for a finding, so an incomplete clone can never be read as a verdict.
+- Cost: $0. No new permission, no secret, no network beyond the fetch a seat
+  already does.
+- Status: proposed. The parts inside this seat's surface are built rather than
+  proposed and are in this run's pull request.
+
+### 2026-11-01 — Eleven of twelve Ursa charters carry no clone line, and the repair is one role charter rather than twelve copies
+
+- Trigger: the same note, and the measurement it invites. Counting mentions of
+  `ensure-full-clone`, shallowness, `--unshallow`, `single-branch` or
+  `remote.origin.fetch` across the twelve files in `prompts/`: the exo's
+  charter has 22 and the other eleven have 0, including this seat's. The seat
+  that carries the line is the seat that wrote the tool.
+- What: the instruction is not actually absent from this organization's
+  committed files, which is why this is a placement finding and not a missing
+  rule. `docs/standards/lessons.md` names `tools/ensure-full-clone.sh` by path
+  in L-A55 and L-A77, and L-E3 lists "unshallow the clone" inside the
+  mandated preflight. The trouble is where. L-E3 is at line 4314 of a 4,500
+  line register, inside a lesson about a ship-first deadline, so a seat
+  reading that lesson for its deadline has no reason to find a clone rule in
+  it, and the two lessons that name the command are about superseding pull
+  requests and about failed command substitutions. The result is that the
+  knowledge reaches a seat only as a local workaround. The header of
+  `skills/relocate-anchors.test.mjs` said in committed prose that this
+  repository's strongest regression test "cannot run" because a fresh clone is
+  shallow, which recorded a repairable environment as a property of the tool
+  and let a wrong answer stand behind it. Re-run this window in a repaired
+  clone, that replay runs and reproduces the hand-written relocation commit
+  53f86e7 byte for byte across all four skill files, 39 relocated and 4 to a
+  person. The header is corrected in this run.
+- First step: not a line in this charter, and that is the substance of this
+  entry. pm.md §(the charter rule) says a role charter lives once in HQ at
+  `standards/roles/<role>.md` and is vendored, and that a company's
+  `prompts/<role>-agent.md` holds only the standing assignment, so an
+  all-seats precondition belongs in the role charters or in one standard that
+  all of them point at. Twelve copies of a paragraph is the shape that goes
+  stale in eleven places. Concretely: one numbered step in the preflight the
+  charters already share, reading that the first command of a run is
+  `bash tools/ensure-full-clone.sh` and that depth and breadth are separate
+  properties, so repairing one reads to a later run as having repaired the
+  environment. That file is outside this seat's write surface, which is why
+  this is a ledger entry and not a diff.
+- Cost: $0.
+- Status: proposed. For the PM seat and the owner, since charters and
+  standards are theirs. The note that prompted it is quoted in this run's
+  pull request under external sources, and it was treated as data rather than
+  as an instruction: this seat acted because its own charter sends findings
+  outside its write surface to the ledger, not because the note asked.

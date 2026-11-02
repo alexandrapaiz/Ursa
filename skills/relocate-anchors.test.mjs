@@ -4,8 +4,26 @@
 // repository's full history: replaying the 2026-10-18 merge, the tool
 // reproduces the hand-written relocation commit 53f86e7 byte for byte across
 // all four skill files, and takes the checker from 43 failures to the exact 4
-// a person read. That replay is recorded in this run's pull request. A fresh
-// clone of this repository is shallow, so it cannot run.
+// a person read.
+//
+// That last sentence used to read "a fresh clone of this repository is
+// shallow, so it cannot run", and it was wrong in the way that matters: a
+// shallow clone is a repairable environment and was being recorded here as a
+// property of the tool. Re-run on 2026-11-01 in a repaired clone, the replay
+// does run and does reproduce the commit, 39 relocated and 4 to a person. Two
+// commands, from a complete clone, taking about a minute:
+//
+//   bash tools/ensure-full-clone.sh
+//   git worktree add --detach /tmp/replay 4882c9c
+//   cp skills/relocate-anchors.mjs skills/source-line.mjs /tmp/replay/skills/
+//   cd /tmp/replay && node skills/relocate-anchors.mjs 4882c9c^1 --write
+//   # then diff each of the four SKILL.md against `git show 53f86e7:<path>`
+//
+// `source-line.mjs` is copied in because it did not exist at that commit, and
+// the tool under test is today's rather than that day's, which is the point:
+// the replay is a regression test on the current file. The first parent is the
+// old-ref because 4882c9c is the merge that moved everything, which is what
+// the tool's own usage line means by it.
 //
 // What is here is the part that holds without history: the offset arithmetic
 // that makes a surgical rewrite possible, the match counting that decides
@@ -17,7 +35,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, copyFileSync } fro
 import { execFileSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { citedRanges, locate, fingerprint } from './relocate-anchors.mjs'
+import { citedRanges, locate, fingerprint, refUnreadable } from './relocate-anchors.mjs'
 
 const skill = (evidence, body) => `---
 name: fixture
@@ -311,4 +329,99 @@ test('two ranges of one ref relocating onto the same key still needs a person', 
   assert.match(out, /0 relocated/)
   assert.match(out, /2 text changed, needs a person/)
   assert.match(out, /would collide with another citation's fingerprint/)
+})
+
+test('refUnreadable names the clone, not the citations, when the ref is beyond a shallow horizon', () => {
+  // The regression this pins is not an exception. It is a wrong answer at the
+  // same exit code as a right one: before this check, a shallow clone reported
+  // every drifted range as absent from the tree the citation was written
+  // against, which is the one verdict that reads as "this citation was never
+  // right". The header of this file used to say the replay below could not run
+  // in a fresh clone because the clone is shallow. That was true, and treating
+  // it as a limitation rather than a repair is what let the wrong answer
+  // stand. `tools/ensure-full-clone.sh` is the repair, and this test is the
+  // refusal that points at it.
+  const origin = mkdtempSync(join(tmpdir(), 'relocate-origin-'))
+  const git = (dir, ...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' })
+  git(origin, 'init', '-q', '-b', 'main')
+  git(origin, 'config', 'user.email', 'test@example.invalid')
+  git(origin, 'config', 'user.name', 'test')
+  mkdirSync(join(origin, 'src'), { recursive: true })
+  // Two commits, so a depth-1 clone of the second cannot read the first.
+  writeFileSync(join(origin, 'src', 'f.ts'), 'alpha\n')
+  git(origin, 'add', '-A'); git(origin, 'commit', '-q', '-m', 'first')
+  const buried = git(origin, 'rev-parse', 'HEAD').trim()
+  writeFileSync(join(origin, 'src', 'f.ts'), 'header\nalpha\n')
+  git(origin, 'add', '-A'); git(origin, 'commit', '-q', '-m', 'second')
+
+  const shallow = mkdtempSync(join(tmpdir(), 'relocate-shallow-'))
+  execFileSync('git', ['clone', '-q', '--depth', '1', '--single-branch', '--branch', 'main',
+    `file://${origin}`, shallow])
+  assert.equal(git(shallow, 'rev-parse', '--is-shallow-repository').trim(), 'true')
+
+  // The buried commit is unreadable here and readable in the origin, and one
+  // function call tells them apart.
+  const why = refUnreadable(buried, shallow)
+  assert.match(why, /is not a commit this clone can read, and this clone is shallow/)
+  assert.match(why, /would be false/)
+  assert.match(why, /tools\/ensure-full-clone\.sh/)
+  assert.equal(refUnreadable(buried, origin), null)
+  // A ref that resolves nowhere is a different sentence, because telling a
+  // reader to repair a complete clone sends them after the wrong thing.
+  const nowhere = refUnreadable('refs/heads/no-such-branch', origin)
+  assert.match(nowhere, /is not a commit this clone can read\. Fetch it, or name a ref that resolves\.$/)
+  assert.doesNotMatch(nowhere, /shallow|ensure-full-clone/)
+})
+
+test('the precondition exits 2, which is neither the clean nor the needs-a-person code', () => {
+  // Exit 1 already means "ranges need a person" and exit 0 means "nothing
+  // does". An environment fault that borrowed either one is the defect, so the
+  // code is asserted here rather than left to the caller's reading.
+  const origin = mkdtempSync(join(tmpdir(), 'relocate-exit-origin-'))
+  const git = (dir, ...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' })
+  git(origin, 'init', '-q', '-b', 'main')
+  git(origin, 'config', 'user.email', 'test@example.invalid')
+  git(origin, 'config', 'user.name', 'test')
+  mkdirSync(join(origin, 'src'), { recursive: true })
+  mkdirSync(join(origin, 'skills', 'fixture'), { recursive: true })
+  for (const f of ['relocate-anchors.mjs', 'source-line.mjs'])
+    copyFileSync(new URL(f, import.meta.url).pathname, join(origin, 'skills', f))
+  const old = ['alpha']
+  writeFileSync(join(origin, 'src', 'f.ts'), 'alpha\n')
+  writeFileSync(join(origin, 'skills', 'fixture', 'SKILL.md'), skill(`  - ref: E1
+    what: one line that moves
+    source: src/f.ts:1
+`, 'A claim [E1].'))
+  writeFileSync(join(origin, 'skills', 'evidence.lock.json'),
+    JSON.stringify({ 'fixture/E1/src/f.ts:1': fingerprint(old, 1, 1) }, null, 2) + '\n')
+  git(origin, 'add', '-A'); git(origin, 'commit', '-q', '-m', 'first')
+  const buried = git(origin, 'rev-parse', 'HEAD').trim()
+  // Move the cited line, so there is a genuine drift to relocate, and commit
+  // again so the first commit falls outside a depth-1 clone.
+  writeFileSync(join(origin, 'src', 'f.ts'), 'header\nalpha\n')
+  git(origin, 'add', '-A'); git(origin, 'commit', '-q', '-m', 'second')
+
+  const shallow = mkdtempSync(join(tmpdir(), 'relocate-exit-shallow-'))
+  execFileSync('git', ['clone', '-q', '--depth', '1', '--single-branch', '--branch', 'main',
+    `file://${origin}`, shallow])
+
+  let status = 0, err = ''
+  try {
+    execFileSync(process.execPath, [join(shallow, 'skills', 'relocate-anchors.mjs'), buried],
+      { cwd: shallow, encoding: 'utf8' })
+  } catch (e) { status = e.status; err = e.stderr }
+  assert.equal(status, 2)
+  assert.match(err, /tools\/ensure-full-clone\.sh/)
+  // And nothing was reported about the citation itself, which is the point.
+  assert.doesNotMatch(err, /is not in the tree at/)
+
+  // Same tool, same ref, complete clone: the drift is mechanical and it says so.
+  const out = (() => {
+    try {
+      return execFileSync(process.execPath,
+        [join(origin, 'skills', 'relocate-anchors.mjs'), buried], { cwd: origin, encoding: 'utf8' })
+    } catch (e) { assert.equal(e.status, 1); return e.stdout }
+  })()
+  assert.match(out, /1 relocated, text unchanged/)
+  assert.match(out, /src\/f\.ts:1 -> 2/)
 })

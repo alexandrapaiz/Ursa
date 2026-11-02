@@ -119,6 +119,48 @@ export function locate(haystackLines, needleLines) {
 const formatRange = (start, length, spanned) =>
   length > 1 || spanned ? `${start}-${start + length - 1}` : String(start)
 
+// Whether <old-ref> is a commit this clone can actually read, and if not, why.
+// Returns null when it is readable, or the sentence to print.
+//
+// WHY THIS IS A PRECONDITION AND NOT A PER-RANGE VERDICT. Measured 2026-11-01
+// on two clones of this repository at the same commit, one complete and one
+// `--depth 1 --single-branch`, against the same <old-ref> 30 commits back.
+// Both read 389 cited ranges, both found the same 363 settled and 26 drifted,
+// and both exited 1. The complete clone relocated 12 of the 26 mechanically.
+// The shallow clone relocated 0 and sent all 26 to a person, each under the
+// sentence `<path> is not in the tree at <ref>`, which is false: the path is
+// in that tree, and the object is merely not local. So the failure was not a
+// refusal. It was 26 fabricated verdicts at the same exit code as the truth,
+// and the one a reader would act on, because a citation reported absent from
+// the tree it was written against reads as a citation that was never right.
+//
+// `git cat-file -e <ref>^{commit}` is the whole discriminator. Beyond a
+// shallow horizon the commit object is absent and this fails; inside it, or at
+// the boundary, git keeps the commit's tree, so a later `git show` failure on
+// a path is a genuine verdict about that path. The second clause covers the
+// blobless partial clone (`--filter=blob:none`, which L-E12 recommends as the
+// cheap flag that does not rewrite the caller's history): there the commit and
+// tree resolve and only the blob is missing, so `atOldRef` discriminates that
+// case with `git ls-tree` at the point of failure rather than here.
+export function refUnreadable(oldRef, cwd) {
+  try {
+    execFileSync('git', ['cat-file', '-e', `${oldRef}^{commit}`],
+      { cwd, stdio: 'ignore' })
+    return null
+  } catch {
+    let shallow = false
+    try {
+      shallow = execFileSync('git', ['rev-parse', '--is-shallow-repository'],
+        { cwd, encoding: 'utf8' }).trim() === 'true'
+    } catch { /* not a git repository at all; the ref is unreadable either way */ }
+    return shallow
+      ? `${oldRef} is not a commit this clone can read, and this clone is shallow.\n`
+        + `  Every drifted range would be reported as absent from that tree, which would be false.\n`
+        + `  Repair the clone first: bash tools/ensure-full-clone.sh`
+      : `${oldRef} is not a commit this clone can read. Fetch it, or name a ref that resolves.`
+  }
+}
+
 function main(argv) {
   const write = argv.includes('--write')
   const oldRef = argv.find((a) => !a.startsWith('--'))
@@ -126,6 +168,11 @@ function main(argv) {
     console.error('usage: node skills/relocate-anchors.mjs <old-ref> [--write]')
     console.error('  <old-ref> is the git ref whose tree the current citations were written against,')
     console.error('  e.g. the first parent of the merge that moved everything.')
+    return 2
+  }
+  const unreadable = refUnreadable(oldRef, root)
+  if (unreadable) {
+    console.error(`relocate-anchors: ${unreadable}`)
     return 2
   }
   if (!existsSync(lockPath)) {
@@ -141,6 +188,20 @@ function main(argv) {
         oldFiles.set(path, splitLines(execFileSync('git', ['show', `${oldRef}:${path}`],
           { cwd: root, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 })))
       } catch {
+        // `git show` failed, and the two reasons it can fail mean opposite
+        // things. The path is absent from that tree, which is a verdict about
+        // the citation, or the object is absent from this clone, which is a
+        // verdict about the clone. `ls-tree` names the path when the tree
+        // holds it, so a hit here means the blob is what is missing and
+        // nothing below may be trusted.
+        let listed = ''
+        try {
+          listed = execFileSync('git', ['ls-tree', '--name-only', oldRef, '--', path],
+            { cwd: root, encoding: 'utf8' }).trim()
+        } catch { /* the tree itself is unreadable; refUnreadable already ran */ }
+        if (listed) throw new Error(
+          `${path} is in the tree at ${oldRef} but its content is not in this clone, `
+          + `so no verdict about it would be true. Repair the clone: bash tools/ensure-full-clone.sh`)
         oldFiles.set(path, null)
       }
     }
@@ -305,4 +366,13 @@ function main(argv) {
   return left ? 1 : 0
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) process.exit(main(process.argv.slice(2)))
+// An incomplete clone is an environment fault, so it leaves as exit 2 and a
+// sentence, not as a stack trace a reader would file against the citations.
+if (import.meta.url === `file://${process.argv[1]}`) {
+  try {
+    process.exit(main(process.argv.slice(2)))
+  } catch (e) {
+    console.error(`relocate-anchors: ${e.message}`)
+    process.exit(2)
+  }
+}
