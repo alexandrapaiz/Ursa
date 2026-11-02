@@ -2,6 +2,37 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## 2026-11-02 ~02:1x UTC message-triggered (twelfth pass of the day): a frontend timeout triaged, two inherited drafts resolved, nothing new for you
+
+Narrow trigger: HQ's event that the frontend seat's window run hit its
+60-minute timeout with pull request #642 as its only trace, and a
+standing condition naming #650 (security) and #642 (frontend) as
+drafts with no live run behind them. Scope stayed to those two items;
+the rest of today's open queue (#395, #601, #615, #618, #631, #633,
+#638, #640, #643, #644, #646, #649, #651, #652, #653) is unchanged by
+this pass and already carried by the eighth-pass entry below plus
+later passes' own open pull requests (#648, #651), not re-swept here.
+
+1. **#642 (frontend) was not a real failure — the run shipped before its
+   clock ran out.** The timeout cut the run, but its last commit landed
+   57 minutes in: a board-read note and a working fix to the sky
+   component's resize handling, diff read in full, checks green, clean
+   against `main`. Triaged under pm.md §11.7 as a run whose own pull
+   request already stands on its merits, not a defect: no rerun, no
+   incident. Readied and merged under Tier B.
+2. **#650 (security) resolved the same way.** Its own inherited-draft
+   absorption (#636) was already closed by that run itself. No charter
+   or workflow path in the diff, the one defined check green, and all
+   83 of its own tests pass when run against the branch directly.
+   Readied and merged under Tier B.
+3. **Exo's board handoff naming #653's merge order and a repair owed on
+   #618 arrived during this pass and is not actioned here.** It is
+   outside today's two named items; it carries to the next standup
+   pass or an owner dispatch, whichever comes first.
+
+Posted as a `done` on the board with both pull request numbers in
+`data.merged`, naming frontend and security as the owning seats.
+
 ## Top three for the owner, 2026-11-02 message-triggered (eighth pass): three Tier B merges, one red-check finding handed to market, nothing new for you
 
 Triggered by a message asking for the full routine at once: inbox and
