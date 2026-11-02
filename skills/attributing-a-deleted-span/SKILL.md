@@ -13,7 +13,9 @@ description: >
   with no attributor injected. Does not fire for choosing which work to
   resolve or running the resolver, for deciding whether a span descends
   from a generation at all or settling an `uncertain` flag, for deciding
-  what a stored percentage is a share of, for the forward walk that
+  what a stored percentage is a share of, for establishing what a
+  `no_generation_provenance` share is composed of, for the forward walk
+  that
   decides whether surviving text later decayed, for auditing a
   correction loop or any other `signals` block, for turning a record's
   labels into tuning axioms, for adding or changing a bound in the
