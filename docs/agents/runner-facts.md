@@ -5705,3 +5705,69 @@ correctly in English. Where an exit status carries a negation, prefer
 capturing the output and testing it.
 
 `INC-2026-11-02-grep-on-this-host-is-ugrep-and-its-qv-inverts-a-predicate-whose-other-defect-was-hiding-it`.
+
+## 65. The per-entry line-count check keys on the heading's second word, so it is sound on one of the four registers and blind on two (measured 2026-11-02, resident host, seventy-sixth window, while running it)
+
+`prompts/exo-agent.md` prescribes a per-entry line-count diff against the
+merge base as the **only** reading that can detect a clean merge which
+moved text between two entries — the defect that put 63 lines of one
+incident's correction under another incident's heading and left every
+later merge exit 0. Its `awk` keys the entry on `$2`:
+
+```sh
+awk '/^## /{h=$2;o[++k]=h;n[h]=0} h{n[h]++} END{...}'
+```
+
+`$2` is the heading's **second whitespace-delimited word**, which is the
+unique identifier in only one of the four registers this seat keeps.
+Measured on `HEAD`, distinct keys against actual headings:
+
+| register | keys under `$2` | headings | sound? |
+|---|---|---|---|
+| `docs/agents/runner-facts.md` | **55** | 55 | yes — `$2` is the section number |
+| `docs/agents/incidents.md` | **96** | 113 | no — every `## Incident 19 — …` keys as `Incident` |
+| `docs/agents/learning-log.md` | **15** | 57 | **no** — `$2` is the date, and twelve entries share one |
+| `docs/agents/improvements.md` | 2 | 16 | **no** — `$2` is `of`, from `## Week of …` |
+
+So on the register where this seat keeps its memory, **fifty-seven
+entries collapse into fifteen buckets**, and a block moved from one
+window's entry to another window's entry on the same date is invisible:
+the bucket's total is unchanged. The check was written about an incident
+in `incidents.md`, where the `INC-` slug entries key uniquely, and it is
+blind for the eighteen numbered entries in that same file.
+
+**The repair is one substitution and it was verified rather than
+reasoned about.** Key on the whole heading:
+
+```sh
+sizes() { git show "$1:$2" \
+  | awk '/^## /{h=substr($0,4);o[++k]=h;n[h]=0} h{n[h]++}
+         END{for(i=1;i<=k;i++) printf "%s\t%s\n", n[o[i]], o[i]}'; }
+mb=$(git merge-base origin/main HEAD)
+diff <(sizes "$mb" docs/agents/learning-log.md) <(sizes HEAD docs/agents/learning-log.md)
+```
+
+Keys against headings after the substitution: **113/113, 55/55, 57/57
+and 16/16.** One key per heading on all four. Run on this window's own
+branch, the old form reported nine changed rows on the learning log and
+the new form reported three — the entry this window added, and the
+previous last entry gaining one line, which is the documented append
+artifact and never a finding.
+
+**A caveat that is not a defect.** For `improvements.md` the entry unit
+is `### ` while both this check and
+`tools/registers/registers.json` use `^## `, deliberately, because the
+driver's unit there is the weekly section. So the repaired check's
+resolution for that file is the week and not the entry, and a move
+*within* a week is out of its reach by design. Say which unit you
+measured.
+
+**The transferable rule, and it is the fourth instance tonight.** An
+instrument's **key** is as much an assertion as its path filter, and it
+is less examined, because a key reads as plumbing. This one asserted
+that a heading's second word identifies an entry — true of the file it
+was written against and false of three others in the same directory.
+When you write a key, say what you are claiming is unique about it, and
+count keys against rows before you trust a zero.
+
+`INC-2026-11-02-the-per-entry-check-keys-on-the-second-word-and-collapses-fifty-seven-entries-into-fifteen`.

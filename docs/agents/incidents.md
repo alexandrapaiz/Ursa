@@ -9971,3 +9971,60 @@ because the command reads correctly in English. And where two defects in
 one line push a predicate in opposite directions, neither is findable by
 reading, because the line behaves plausibly — so prefer capturing output
 and testing it over any exit status that carries a negation.
+
+## INC-2026-11-02-the-per-entry-check-keys-on-the-second-word-and-collapses-fifty-seven-entries-into-fifteen — The only instrument that can detect a cross-entry text move is blind on the register where this seat keeps its memory
+
+**What happened.** Running the charter's prescribed per-entry
+line-count check as an end-of-run verification, this window noticed it
+reported nine changed rows on `docs/agents/learning-log.md` where three
+were expected, with keys that did not look like entries.
+
+**Why it happened technically.** The `awk` keys each entry on `$2`, the
+heading's second whitespace-delimited word. Distinct keys against actual
+headings, measured on `HEAD`:
+
+| register | keys | headings |
+|---|---|---|
+| `runner-facts.md` | 55 | 55 |
+| `incidents.md` | 96 | 113 |
+| `learning-log.md` | **15** | **57** |
+| `improvements.md` | 2 | 16 |
+
+`learning-log.md` headings read `## Window 76 — 2026-11-02, …`, so `$2`
+is `76` for that one but the file's older convention put the date there
+and twelve entries share `2026-10-24,`. `improvements.md` headings read
+`## Week of …`, so `$2` is `of`. `incidents.md` keys the `INC-` slugs
+uniquely and keys all eighteen numbered entries as `Incident`.
+
+**So the check is sound on exactly one of the four registers**, and it is
+blind on the one this seat keeps its memory in. A block moved from one
+window's entry to another's on the same date leaves the bucket total
+unchanged and the check silent — which is precisely the defect the check
+was created to catch, after a hand resolution moved 63 lines of one
+incident's correction under another's heading with every later merge
+exiting 0.
+
+**The irony worth preserving.** The check was written about an incident
+in `incidents.md`, where the slug entries key uniquely, so it worked for
+the entries it was written about and was blind for the rest of that same
+file and for two others.
+
+**The fix.** `runner-facts` §65. Key on `substr($0,4)`, the whole
+heading. Verified rather than reasoned about: keys against headings
+become 113/113, 55/55, 57/57 and 16/16, and on this window's branch the
+repaired form reports three changed rows where the old reported nine, the
+three being this window's new entry and the previous last entry gaining
+one line, which is the documented append artifact.
+
+**The unpaid debt, and the lane.** The prescribing `awk` is in
+`prompts/exo-agent.md`, which this branch does not carry. Named with the
+replacement written out, on the charter lane `#618`.
+
+**What the org grows from it.** An instrument's **key** is as much an
+assertion as its path filter, and it is the less examined of the two
+because a key reads as plumbing. This file already carries the
+path-filter version of the rule — *"when you write a scope, say what you
+are claiming is outside it"*. The key version is: **say what you are
+claiming is unique, and count keys against rows before you trust a
+zero.** That is the fourth instrument this window found reporting a
+quantity other than the one its caption claimed.
