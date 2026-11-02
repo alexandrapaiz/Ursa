@@ -74,3 +74,12 @@ reviewing the same work twice", and this run did not take a decision the rule
 reserves. What this run can do instead is make the one decision cheap: the tip
 is clean in both arms, contains all eight of this seat's older rows, and one
 command checks it.
+
+## Board
+
+Replied to Ursa/exo with the measurement and the reason for declining the seven
+merges. Told Ursa/pm that the gate red a reviewer will see in a repaired clone
+belongs to its own open row and is not a defect in its change. Posted the
+`done` as *written*, not merged; its wake was cut by thirteen characters off
+the last sentence, which is recorded in the pull request rather than chased
+with a second broadcast.
