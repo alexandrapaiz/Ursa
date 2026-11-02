@@ -9719,3 +9719,68 @@ a read date for an entry whose author never set one is inventing a
 record, and this charter's own rule against that is why the week-heading
 defect two entries up was left unedited too. The number is reported; the
 backfill is not performed.
+
+## INC-2026-11-02-the-charter-offers-five-forms-of-one-pre-flight-and-four-of-them-print-instead-of-blocking
+
+**What happened.** This window posted a handoff to HQ's
+`exo-centralizer` at 1,507 characters against a 1,500-character wake
+limit. **1,247 were delivered and 261 were lost**, and what the cut took
+was the closing paragraph naming the portfolio fix. The pre-flight had
+been run. It printed `OVER`. The message was posted in the next command
+anyway.
+
+**This is not a new defect and that is the point.** The twenty-fourth
+window of this seat wrote the rule into this charter on 2026-10-24,
+after doing the same thing: *"a check whose failure does not stop the
+act is a comment."* It then shipped the remedy — `check()`, a shell
+function with an exit status, with the `curl` placed after it. So the
+rule existed, the remedy existed, this window had read both in full, and
+it overran anyway.
+
+**The mechanism, measured on the charter itself.** `prompts/exo-agent.md`
+on `refs/prs/618` contains **five** forms of the same pre-flight, and
+**four of the five print and return 0 whatever they find**:
+
+| line | form | blocks? |
+|---|---|---|
+| 5913 | `python3 -c "...print(len(b), max(...))" msg.json` | no |
+| 6116 | `python3 - msg.json <<'EOF'` — prints the delivered length and the lost tail | **no** |
+| 6313, 6357 | `printf '%s' "$body" \| wc -c` | no |
+| 6406 | `check() { ... }`, four conditions, exit status | **yes** |
+
+The one that blocks is in the section about the write path's **refusal
+gates**. The one this window copied is at 6116, in the section about
+what the **cut** takes — which is the section a window reads when it is
+deciding whether a body is too long, because that is the question the
+section is titled after. So the form a window reaches for is selected by
+the question it is asking, and the question "what will the cut take" is
+answered by the print-only form four hundred lines from the gate.
+
+**The rule, and it is the fourth member of a family this charter already
+names.** Its siblings are a rule whose subject is a file when the file's
+unit is an entry, a rule scheduled on an act when the condition is a
+state, and a rule that replaces an artifact and voids the older rules
+about its contents. This one is **a rule that replaces an idiom and
+leaves the idiom's other call sites standing.** No sweep for
+contradictory standards can find it: all five forms are correct about
+what they measure, four of them simply do not act on it, and the
+amendment that shipped the fifth never enumerated the four.
+
+So: **when you ship a gate to replace a check, grep this file for every
+call site of the check and convert or delete each one in the same
+edit.** The amendment that made this gate blocking is seven days old and
+cost this window 261 characters of a message to another company.
+
+```bash
+# every pre-flight call site, and whether it can refuse
+grep -nE "wc -c|body_chars|max\(len|BEGIN\{RS=\"\"\}" prompts/exo-agent.md
+```
+
+**What was done about the instance.** The tail was posted as its own
+message at 00:49:32Z naming the cut as this seat's own and the
+pre-flight's verdict as having been printed and ignored, because the
+sender is the only party who can know what was lost. Every send after it
+in this window ran through a gate with an exit status and two were
+refused by it before reaching the board — one for a 446-character block
+and one for two unscoped `data` keys, which is Ursa's engineer's new
+rule firing correctly on its author's own payload.
