@@ -477,6 +477,268 @@ started, and merging into a seat's still-moving draft risks exactly
 the race this standard's merge rule exists to avoid. Naming them here
 rather than leaving a silent gap: the next pass, hook or message, owes
 them a first read.
+## 2026-11-02 ~03:1x UTC message-triggered (fifteenth pass of the day): three Tier B merges (#656, #659, #661), #657 still held unchanged, one tripwire false alarm noted, nothing new for you
+
+**Trigger.** Three things on this run's wake: exo's run finished (naming
+#657 and repeating the standing note about #661); #659, a pull request
+security opened; and a report that a host-window run of security exited
+1 after 151 turns in 37 minutes.
+
+**#657 — unchanged, not re-derived a third time.** The fourteenth pass
+already ran seven local tests plus a live `gh pr merge` attempt and all
+seven agreed the tree is clean while GitHub's own merge engine refused
+it live. Checked this pass only that nothing has moved since
+(`mergeStateStatus` still `DIRTY`, `mergeable` still `CONFLICTING`,
+`updatedAt` unchanged at 02:51:27Z, no new board note from exo). Re-running
+the same seven tests against the same unchanged head would not produce
+new evidence, so this pass did not. Still held, still flagged to exo as
+a platform-level question this clone cannot resolve.
+
+**#661 — the standing claim stayed stale, but the PR itself moved.** The
+fourteenth pass checked `GET /api/standing` live and found it empty, so
+the claim that this draft was "mine to ready, merge, or close" was never
+a live condition, and the PR's own body said the draft was intentional
+(ship-first placeholder) pending engineer's own next run. That next run
+landed eight minutes later: #661 is no longer a draft, its checks pass,
+and it merges clean. **Merged under Tier B this pass** (board-note
+reconciliation tool, `docs/ideas.md` note, no Tier C path, no owner
+comment since the last push — the one comment on it is this seat's own
+from the fourteenth pass, predating the final push).
+
+**#659 (security) — merged under Tier B.** The image-metadata gate
+(checks every tracked image for a text-bearing chunk, not just a text
+pattern), two tooling defects fixed (the all-refs scanner's
+`RangeError` on a full clone, and `--history=all` silently falling
+through to a tree-only scan), and a self-caught redaction near-miss in
+its own test fixture. 539 tests, 0 fail. Checks green, clean merge, no
+Tier C path, no draft, no hold. The one upstream-owned half of the
+original item (the `.github/workflows` flag) stays PWC-13, still
+HQ's.
+
+**#656 (security) — merged under Tier B.** A one-file audit report
+(`docs/security/audit-2026-11-02b.md`), confirmed not superseded by
+#659 per that PR's own body. Clean, checks green, no Tier C path.
+
+**The failed security run (02:26:41Z–03:03:14Z, exit 1, 151 turns) is
+the same run that produced #659.** Confirmed against the host audit
+log (`/srv/asc/state/.epito/audit.jsonl`): the `run.start` at
+02:26:41.627Z and the next `ursa-security` `run.end` at 03:03:14.346Z
+(151 turns, ~36.5 minutes) are the only pair that fits the report, and
+#659's branch pushed commits throughout that exact window. Classified
+under pm.md §11.7 as the no-ship tripwire's known false-alarm shape
+(Incident 12 of `docs/agents/incidents.md`, open since 2026-10-11, now
+on its seventh occurrence): the run's PR exists with real, finished,
+green-checked work, so no rerun. Addendum added to Incident 12; no new
+handoff to `alexandra-systems/exo-centralizer`, since this is the same
+surface already escalated there six times, not new evidence.
+
+**For the owner, the three most important lines:**
+
+1. Nothing needs you tonight. Three Tier B merges landed (#656, #659,
+   #661), #657 stays held on a platform-level question with no
+   seat-side fix to try, and the one failed run tonight was a known
+   false alarm, not a defect.
+2. #657 (exo) has been stuck since before the fourteenth pass: seven
+   local tests say the merge is clean and GitHub's own merge button
+   disagrees, live, with no cause recorded. Flagging again only so it
+   does not read as newly missed if it is still stuck tomorrow.
+3. #395 (research) is now nine days old on an owner-merge PR, unchanged
+   from prior passes.
+
+## 2026-11-02 ~03:0x UTC message-triggered (fourteenth pass of the day): #657 re-derived seven ways and still refused by a live merge attempt, #661 confirmed a draft on purpose and left with engineer, nothing new for you
+
+**Trigger.** A board note from exo asking this seat to re-derive #657's
+`CONFLICTING`/`DIRTY` reading before routing it, since the API gives no
+cause and the obvious one (a driver-managed path) has a same-instant
+counterexample in #615/#649. Attached to the same wake, a standing note
+naming #661 as mine to ready, merge, or close under the merge rule.
+
+**#657: re-derived independently, then taken one step further than
+either of us had gone.** Exo's own note (now in `docs/agents/runner-facts.md`
+§73 on its own branch, not yet on `main`) reported five local tests
+clean at head `76b58de0`: merge-tree with and without drivers in both
+directions, and a real no-ff merge in each direction. This pass repeated
+all five at the newer head `bdfeae3` (two commits later) and added two
+more — merge-tree against both the PR's own stale recorded base
+(`de16a7e`, from before #653 merged) and current `main` (`2b32cc6`),
+with the driver sections fully removed from `.git/config` rather than
+emptied. All seven agree: clean, zero conflicted paths, same tree hash
+both times.
+
+Then this pass did what neither of us had: asked GitHub itself to merge
+it, with `gh pr merge 657 --merge`. It refused, live, in the same
+minute: "the merge commit cannot be cleanly created." That is a fresh
+server-side attempt, not a cached field, and it disagrees with seven
+agreeing local reads. So this is not simply a stale `mergeable` flag
+that a background recompute will clear — a live attempt failed too. No
+cause is recorded, matching exo's own "do not guess" conclusion; the
+disposition instead is operational: **not asking exo to rebase** (there
+is nothing in the content that conflicts), and **not treating this as
+something that will resolve itself** (a live attempt already failed).
+#657 is held unmerged, flagged on the board as a platform-level question
+this clone cannot resolve, since no git operation open to a seat changes
+what GitHub's server computes. Full reasoning posted to exo on the
+board (first the main finding, then a second send after the first
+truncated at the 1500-character wake limit before reaching the
+disposition — the lesson in that for next time is to lead with the ask,
+not the evidence).
+
+This is worth your attention only in that it blocks a Tier B merge this
+seat would otherwise have made tonight (#657 is a knowledge-surface
+diff, rooted on #653 which already merged). It is not an action for you
+yet, since no seat-side fix exists to try first.
+
+**#661 (engineer, draft): confirmed a draft on purpose, left with its
+owning seat.** The standing text attached to this run's wake named #661
+as mine to ready-and-merge, close, or annotate, since its run ended
+eight minutes before the claim reached me. Checked rather than acted:
+`GET /api/standing?company=Ursa&seat=pm` returned `{"standing": "",
+"empty": true}`, so the claim was not a live standing condition. It also
+would not have changed the disposition: #661's own body says the draft
+exists so the work survives the run and gets rewritten when it lands,
+which is engineer's ship-first placeholder, not abandoned work, and
+Tier B's merge rule requires a pull request not be a draft before the
+PM merges it. The org rule on an orphaned draft hands its resolution to
+"the next run of your seat," meaning engineer's, not the PM's. Left a
+comment on #661 naming engineer as the owner and the Tier B clause as
+the reason it stays a draft, and a board note saying the same, rather
+than reading an unconfirmed standing claim as authority to act in
+another seat's lane. No action needed from you.
+
+**Nothing else new.** `gh pr list --state open` shows no new Tier B
+candidate this pass beyond #657 (held, above); this seat's own two
+sibling pull requests from last week and #395 (research) are unchanged
+and still wait on you, not repeated in full since no new fact arrived
+about any of them this pass.
+
+## 2026-11-02 ~02:2x UTC message-triggered (thirteenth pass of the day): #653 merged under Tier B, #646 reviewed a third time and found unchanged, two live handoffs routed, nothing new for you
+
+**Trigger.** An event bus message asking this seat to review #646
+against the merge rule and dispose of two drafts it named as stale
+(#650, #642), repeating a standing condition that was already stale by
+the time it reached this run — both are explained below as a pattern,
+not a surprise. Two live board handoffs arrived mid-run and are
+answered here rather than carried forward: exo's on #653/#618, skill's
+on #646's true block.
+
+**The standing text this run was woken with was already wrong, for the
+third time today.** It named #650 and #642 as drafts with no live run
+behind them. Both were merged by the twelfth pass (#654) nine and
+twelve minutes before this run's first `gh pr view`. It also implied
+#651 needed readying; `gh pr view` shows it has not been a draft since
+earlier passes readied it. Checked live, not taken on report, per the
+pattern the eleventh and twelfth passes already established. Naming
+this a third time because it is now a pattern worth the owner's
+attention in its own right, not because any instance of it cost
+anything today: the board text and the live GitHub state diverge by
+minutes, every time, and every pass so far has caught it before acting
+on it. A pass that didn't would merge nothing wrong — the stale claims
+have all pointed at things already resolved, never at things broken —
+but the next one might not be so lucky.
+
+**#646 (skill) reviewed against the merge rule for the third time
+today: unchanged, still Tier C, now also `CONFLICTING`.** Still edits
+`prompts/skill-extract.md` directly, which is Tier C by path regardless
+of draft state, conflict state, or live-run status — the tenth and
+eleventh passes already said so on the PR itself and nothing here
+repeats that comment. New since the eleventh pass: the skill seat's own
+#652 (draft, `MERGEABLE` against `main`) now carries #646, #644, #638,
+#633 and #601 as ancestors — verified independently with `git
+merge-base --is-ancestor`, not taken on the skill seat's board note,
+and confirmed true for all five. #652 also touches
+`prompts/skill-extract.md`, so the consolidation changes nothing about
+who merges it: still Tier C, still the owner's, still blocked on the
+skill seat's own run (still a draft) rather than on anything this seat
+can do. The courtesy note: once #652 is readied, #601, #633, #638, #644
+and #646 are superseded by it and should close pointing there, the way
+the eleventh pass closed #612 into #618 — not done here while #652's
+own run may still be live, per the standing-condition pattern above.
+
+**#653 (exo) reviewed and merged under Tier B.** Five `docs/agents/`
+files (`improvements.md`, `incidents.md`, `learning-log.md`,
+`merge-order.md`, `runner-facts.md`), no `prompts/`, no secrets, no
+workflow. Checks green, not a draft, no labels, no comments, `MERGEABLE`,
+opened today. Merged, branch deleted.
+
+**Exo's handoff on #618, routed rather than actioned — this seat
+cannot fix it and should not merge it.** #618 (exo, the all-seats
+charter lane, Tier C by path on `prompts/exo-agent.md`) carries a real
+defect per exo's own board message: two `grep -qv` call sites whose
+exclusion never fires, because the `grep` on this host is `ugrep`, and
+`ugrep -qv` reports "pattern matched nothing" rather than GNU grep's
+"line found," so the sweep it gates has been silently inert. Exo says
+merging #618 is still correct — the defect is pre-existing, not
+introduced by the merge — and the repair belongs on that branch or in
+the first charter pull request after it. This seat cannot push a fix
+onto #618 (charters are the owner's to edit) and cannot merge #618
+either way (Tier C). For you: #618 is sound to merge as-is per exo's
+own account, and the `grep -qv`/ugrep repair is a follow-up, not a
+blocker.
+
+**The dead-incident-slug citation on `main`'s `docs/ideas.md`, also
+routed rather than fixed here.** Exo's handoff says the fix is already
+verified on #633 and #638. Checked: both are part of the same Tier C
+skill stack as #646 (both touch `prompts/skill-extract.md`, both now
+ancestors of #652), so landing the fix means the same owner decision as
+the rest of that stack, not a separate Tier B merge this seat can make
+early.
+
+**Unchanged from the twelfth pass, not re-swept:** #395 (research,
+now 8.2 days old, owner-merge, `prompts/engineer-agent.md` and
+`prompts/research-agent.md`), #601/#615/#631/#640/#643/#649 — no new
+fact found on any of them this pass.
+
+**#651 and #654, this seat's own.** #651 (eleventh pass) and #654
+(twelfth pass) both stay open: Tier B rule 1 forbids a PM seat from
+merging its own pull request, so both wait for another merger (the
+owner, or HQ's PM). This pass's branch was built on #654's tip per the
+org rule on reading this seat's own open PRs first, then merged current
+`main` (which had moved to include #650 since #654 opened) on top.
+Once this PR (#658) is reviewed, #654 is superseded by it and #651
+still stands on its own, unrelated content.
+
+**Sprint ceremony gap, named again and not re-explained: today is the
+fourth Monday running with no ceremony PR.** `sprint-2026-10-12.md` is
+still the only sprint file on `main`. 2026-10-19, 2026-10-26 and
+2026-11-02 have each now passed with message- and hook-triggered
+passes only. Not run here either — this pass's trigger is a specific
+PR review plus two board handoffs, the same standup shape every pass
+has run under today.
+
+Board handoffs from exo (#653/#618) and skill (#646's true block)
+answered with a `done` naming both; nothing left unanswered in the
+inbox as of this pass's read.
+
+## 2026-11-02 ~02:1x UTC message-triggered (twelfth pass of the day): a frontend timeout triaged, two inherited drafts resolved, nothing new for you
+
+Narrow trigger: HQ's event that the frontend seat's window run hit its
+60-minute timeout with pull request #642 as its only trace, and a
+standing condition naming #650 (security) and #642 (frontend) as
+drafts with no live run behind them. Scope stayed to those two items;
+the rest of today's open queue (#395, #601, #615, #618, #631, #633,
+#638, #640, #643, #644, #646, #649, #651, #652, #653) is unchanged by
+this pass and already carried by the eighth-pass entry below plus
+later passes' own open pull requests (#648, #651), not re-swept here.
+
+1. **#642 (frontend) was not a real failure — the run shipped before its
+   clock ran out.** The timeout cut the run, but its last commit landed
+   57 minutes in: a board-read note and a working fix to the sky
+   component's resize handling, diff read in full, checks green, clean
+   against `main`. Triaged under pm.md §11.7 as a run whose own pull
+   request already stands on its merits, not a defect: no rerun, no
+   incident. Readied and merged under Tier B.
+2. **#650 (security) resolved the same way.** Its own inherited-draft
+   absorption (#636) was already closed by that run itself. No charter
+   or workflow path in the diff, the one defined check green, and all
+   83 of its own tests pass when run against the branch directly.
+   Readied and merged under Tier B.
+3. **Exo's board handoff naming #653's merge order and a repair owed on
+   #618 arrived during this pass and is not actioned here.** It is
+   outside today's two named items; it carries to the next standup
+   pass or an owner dispatch, whichever comes first.
+
+Posted as a `done` on the board with both pull request numbers in
+`data.merged`, naming frontend and security as the owning seats.
 
 ## Top three for the owner, 2026-11-02 message-triggered (eighth pass): three Tier B merges, one red-check finding handed to market, nothing new for you
 
