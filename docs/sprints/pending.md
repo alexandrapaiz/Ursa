@@ -2,6 +2,72 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## 2026-11-02 ~03:0x UTC message-triggered (fourteenth pass of the day): #657 re-derived seven ways and still refused by a live merge attempt, #661 confirmed a draft on purpose and left with engineer, nothing new for you
+
+**Trigger.** A board note from exo asking this seat to re-derive #657's
+`CONFLICTING`/`DIRTY` reading before routing it, since the API gives no
+cause and the obvious one (a driver-managed path) has a same-instant
+counterexample in #615/#649. Attached to the same wake, a standing note
+naming #661 as mine to ready, merge, or close under the merge rule.
+
+**#657: re-derived independently, then taken one step further than
+either of us had gone.** Exo's own note (now in `docs/agents/runner-facts.md`
+§73 on its own branch, not yet on `main`) reported five local tests
+clean at head `76b58de0`: merge-tree with and without drivers in both
+directions, and a real no-ff merge in each direction. This pass repeated
+all five at the newer head `bdfeae3` (two commits later) and added two
+more — merge-tree against both the PR's own stale recorded base
+(`de16a7e`, from before #653 merged) and current `main` (`2b32cc6`),
+with the driver sections fully removed from `.git/config` rather than
+emptied. All seven agree: clean, zero conflicted paths, same tree hash
+both times.
+
+Then this pass did what neither of us had: asked GitHub itself to merge
+it, with `gh pr merge 657 --merge`. It refused, live, in the same
+minute: "the merge commit cannot be cleanly created." That is a fresh
+server-side attempt, not a cached field, and it disagrees with seven
+agreeing local reads. So this is not simply a stale `mergeable` flag
+that a background recompute will clear — a live attempt failed too. No
+cause is recorded, matching exo's own "do not guess" conclusion; the
+disposition instead is operational: **not asking exo to rebase** (there
+is nothing in the content that conflicts), and **not treating this as
+something that will resolve itself** (a live attempt already failed).
+#657 is held unmerged, flagged on the board as a platform-level question
+this clone cannot resolve, since no git operation open to a seat changes
+what GitHub's server computes. Full reasoning posted to exo on the
+board (first the main finding, then a second send after the first
+truncated at the 1500-character wake limit before reaching the
+disposition — the lesson in that for next time is to lead with the ask,
+not the evidence).
+
+This is worth your attention only in that it blocks a Tier B merge this
+seat would otherwise have made tonight (#657 is a knowledge-surface
+diff, rooted on #653 which already merged). It is not an action for you
+yet, since no seat-side fix exists to try first.
+
+**#661 (engineer, draft): confirmed a draft on purpose, left with its
+owning seat.** The standing text attached to this run's wake named #661
+as mine to ready-and-merge, close, or annotate, since its run ended
+eight minutes before the claim reached me. Checked rather than acted:
+`GET /api/standing?company=Ursa&seat=pm` returned `{"standing": "",
+"empty": true}`, so the claim was not a live standing condition. It also
+would not have changed the disposition: #661's own body says the draft
+exists so the work survives the run and gets rewritten when it lands,
+which is engineer's ship-first placeholder, not abandoned work, and
+Tier B's merge rule requires a pull request not be a draft before the
+PM merges it. The org rule on an orphaned draft hands its resolution to
+"the next run of your seat," meaning engineer's, not the PM's. Left a
+comment on #661 naming engineer as the owner and the Tier B clause as
+the reason it stays a draft, and a board note saying the same, rather
+than reading an unconfirmed standing claim as authority to act in
+another seat's lane. No action needed from you.
+
+**Nothing else new.** `gh pr list --state open` shows no new Tier B
+candidate this pass beyond #657 (held, above); this seat's own two
+sibling pull requests from last week and #395 (research) are unchanged
+and still wait on you, not repeated in full since no new fact arrived
+about any of them this pass.
+
 ## 2026-11-02 ~02:2x UTC message-triggered (thirteenth pass of the day): #653 merged under Tier B, #646 reviewed a third time and found unchanged, two live handoffs routed, nothing new for you
 
 **Trigger.** An event bus message asking this seat to review #646
