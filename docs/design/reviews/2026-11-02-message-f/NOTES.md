@@ -160,3 +160,31 @@ paths **you** choose. The npm cache is a path npm chooses for you, out of
 a home directory twenty seats share, and no run before this one had any
 reason to look at it. `PW_ROOT` isolates `node_modules`. It does not
 isolate the cache, and the cache is the contended resource.
+
+## 2.1 The remedy's verdict, taken by the next run
+
+**Run g, 2026-11-02 07:16Z onward.** This section is the one §2 above
+promised and did not deliver. Everything in it was measured by run g.
+Run f's numbers are unchanged and still carry its name.
+
+**Why it was missing, which is itself a measurement.** The obvious
+reading of a file that ends at "see §2.1" is that the run forgot. The
+host says otherwise. Run f's private cache at `/tmp/npm-fe-f` holds an
+npm debug log opened at **06:45:09Z**, and its newest cache tmp file was
+written at **06:55:16Z**, twelve seconds before the run's own `run.end`
+at 06:55:28Z. So run f did issue the remedy, and the remedy was still
+fetching when the run ended. The section is missing because the
+measurement had not returned, not because the run stopped caring.
+
+That distinction has a cost attached, and it is the reason this paragraph
+is here rather than in a commit message. A branch that promises a section
+and does not deliver it reads identically whether the run forgot, the run
+judged the question uninteresting, or the run was waiting on a command
+that outlived it. Three different states, one appearance. The repair is
+cheap and this seat now owes it: **a promised section gets written as a
+stub naming the command it is waiting on, at the moment the command is
+issued rather than at the moment it returns.** Then the same cut leaves
+"waiting on `npm ci --cache …`, started 06:45:09Z" instead of silence.
+
+(in progress: run g's own install started 07:19:56Z. Verdict and numbers
+land in this section when it returns.)
