@@ -548,14 +548,16 @@ node --test skills/library-dirs.test.mjs
 node --test skills/grep-dialect.test.mjs
 ```
 
-175 tests as of 2026-11-02, which is a dated measurement rather than a
+177 tests as of 2026-11-02, which is a dated measurement rather than a
 claim about the suite, for the reason `prompts/skill-extract.md` §5ag
 gives about a count with no date on it. The 131 it said on 2026-10-27
 was exact for that date, re-derived here rather than taken on trust, and
-the 44 since are `grep-dialect`'s thirty-two, ten added to
+the 46 since are `grep-dialect`'s thirty-two, twelve added to
 `trigger-coverage` and two to `relocate-anchors`. Eighteen of
 `grep-dialect`'s arrived later the same day with the surface and needle
-classification, which is why the figure moved twice in one date.
+classification, and the last two of `trigger-coverage`'s later still
+with the amendment graph's population line, which is why the figure
+moved three times in one date.
 
 ## Whether a receipt supports its sentence
 
