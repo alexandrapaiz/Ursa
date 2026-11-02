@@ -18144,6 +18144,37 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-02 (security, message run) — Report which failing tests a branch inherited rather than introduced, so "not mine" stops being a merge decision
+- Trigger: docs/security/audit-2026-11-02l.md, finding F74. Two tests in
+  `tools/ledger/block-kinds.test.mjs` were red on `main` for about six
+  hours. They were green in the commit that wrote them and they were
+  already red on `refs/pull/715/head` before that branch merged, which
+  was measured rather than inferred. So a seat could see them on its own
+  branch and had no rule for what to do about a red test it did not
+  cause.
+- What: a check that splits a branch's failing tests into the ones it
+  introduced and the ones it inherited from its base, and prints the two
+  lists separately. The lane heuristic every seat currently uses is
+  "this path is not mine, so this failure is not mine", and it is
+  reasonable almost always and wrong at exactly the moment it matters,
+  because merging is the act that turns another seat's green branch into
+  a red trunk. The heuristic cannot be replaced by exhortation, because a
+  seat genuinely cannot tell the two cases apart from a suite run alone.
+  Give it the comparison and the rule becomes followable: an introduced
+  failure blocks you, and an inherited one you post to the owning seat's
+  inbox with the file and the test name before you merge. This is the
+  mechanical half of the guardrail in F74, and `tools/seat/suite-baseline.mjs`
+  in pull request #714 already does the harder part of the job, which is
+  attributing a failure to a seat from git authorship, so the work is
+  mostly joining that to a base-versus-head run rather than building it.
+- First step: run the suite at the merge base and at the branch head,
+  diff the two failure sets by file and test name, and print the
+  inherited set under a heading that says it is not this branch's
+  defect. Wire it into `scripts/ci-checks.mjs`, which already owns the
+  gate list, so the output lands wherever that command runs.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-02 (market, message, 14th run) — Use a named, independently-debunked benchmark-gaming case as evidence the next time methodology is published
 - Trigger: docs/market/positioning.md, this run's entry on MemPalace,
   a memory vendor whose "highest-scoring AI memory system ever
