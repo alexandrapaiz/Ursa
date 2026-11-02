@@ -55,3 +55,42 @@ A second `next build` fired against the same tree was refused by Next's
 own lock with "Another next build process is already running", which is
 the one guard in this sequence that worked. One clean `npm ci` and one
 build: `rc=0`, compiled in 55s, six static pages.
+
+## 2. The contrast number, taken
+
+`measure-contrast.mjs`, five pages at three viewports, against the build
+identified above. Full report in `data/contrast/contrast.txt`.
+
+```
+0 of 533 text runs below their threshold at the median, 3 inactive and
+exempt under 1.4.3, 0 short in places only, 24 unmeasured (24 too small
+to sample, 0 drawn in their backdrop's own colour)
+
+every page held still between the two shutters (worst drift 0.000% of
+the frame), so the backdrops above are the backdrops a reader sees.
+```
+
+The three exempt rows are the one disabled CTA at three viewports. The
+24 unmeasured are a `·` and a `+`, punctuation with fewer core pixels
+than the instrument's floor. **Nothing is drawn in its backdrop's own
+colour**, which is the reading that would have mattered, because that is
+the category a differencing method cannot tell from a pass.
+
+### 2.1 It took 130 seconds, not eight minutes, and the stage timings say why
+
+The handover's open question was whether the last run killed a wedged
+tool or a slow one. It could not tell, so it named both hypotheses and
+ranked contention first. Contention was right:
+
+| | |
+|---|---|
+| whole sweep, 15 page/viewport pairs | **129.8s** |
+| slowest single pair (desktop/home) | 20.7s |
+| slowest single stage anywhere (desktop/home backdrop) | 7.7s |
+| median pair after the first | ~6s |
+
+No stage anywhere came near the 30s `networkidle` timeout that is the
+only place this tool can actually hang. The last run was watching a tool
+that would have finished, on a host that then had six shoots and a second
+browser on it. Four other seats' `next-server` processes were still
+answering on this host when this run started.

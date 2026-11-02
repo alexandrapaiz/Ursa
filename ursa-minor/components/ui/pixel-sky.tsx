@@ -236,7 +236,7 @@ export function PixelSky() {
     // exactly the behaviour it has today and only a later collapse is
     // ignored.
     const resize = () => {
-      if (sized && (canvas.clientWidth < PIX || canvas.clientHeight < PIX)) return;
+      // TEMPORARILY REVERTED by run 2026-11-02e to re-take the before number.
       const nw = Math.max(1, Math.ceil(canvas.clientWidth / PIX));
       const nh = Math.max(1, Math.ceil(canvas.clientHeight / PIX));
       if (sized && nw === w && nh === h) return;
