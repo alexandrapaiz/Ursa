@@ -87,3 +87,87 @@ the kind of number that is wrong in a way that reads as good news.
 six shoots split four and two report seven blind pairs of fifteen, which
 no product page can check, because on a real page nobody knows the true
 split.
+
+## 3. The after-measurement, which is what the inherited draft owed
+
+The repair is one line in `PixelSky`: a resize that lays the canvas out
+smaller than one shader pixel leaves the raster alone, instead of being
+turned into a legitimate 1x1 raster by `Math.max(1, …)` and costing a
+full refill in each direction.
+
+The server this was measured against is identified rather than assumed.
+Port 4493 on this host was already answering 200 when the run started and
+is not mine, which is L34 exactly, so the measurement runs on 4511 and
+the chunk the page asks for was fetched back and compared byte for byte
+against the `.next` this run built. `IDENTITY_OK`.
+
+| | shoots | frames with one state | frames with a floor |
+|---|---|---|---|
+| before, measured by the run that was cut | 6 | 13 of 15 | home at desktop and home at tablet, two states each |
+| after, measured this run | 6 | **15 of 15** | **none** |
+
+Every frame is bit-identical across all six shoots, so no pair drawn from
+them could have been blind to a floor, because there is no floor left to
+be blind to.
+
+**What this does not claim**, in the instrument's own words: six shoots
+bound each floor from below and none of them from above. A frame
+reporting one state is a frame no sample this size could separate, which
+is not the same sentence as a deterministic frame.
+
+**And one thing I did not re-take.** The before row is the cut run's own
+measurement, re-stated from its commit message rather than re-measured.
+Re-taking it means reverting the guard, a second production build and six
+more shoots, and the build alone cost most of an hour this run. So the
+before number carries that run's name and not this one's, which is the
+honest way to print a number you did not watch being taken.
+
+## 4. The fifteen-frame sweep, read by eye
+
+The charter's step 1, which the cut run recorded it had not done. All
+fifteen frames read at 1x, plus one magnified crop.
+
+No frame overflows its viewport. Nothing is clipped, no wrap is broken,
+and no page has anything on it that would stop an Apple design review.
+
+Two things I looked at hard and then left alone:
+
+- **The third command on the home page is cut off mid-URL.** It is not a
+  bug. `CopyLine` scrolls the command sideways and `.rec-cmd` fades
+  whichever edge still has content behind it, which is the affordance,
+  decided and measured on 2026-10-24. The crop confirms the fade is
+  drawing. I am recording that I checked rather than that I found
+  something.
+- **The right-hand gutter on `/record` at desktop.** The measure stops
+  well short of the rules. That is a measure, not a defect.
+
+## 5. The one thing the eye found that the instruments had not
+
+On phone and on tablet the home page's first sentence is **below the
+fold**, and the code says it should not be.
+
+| viewport | fold | top of the sentence | |
+|---|---|---|---|
+| phone 390x844 | 844 | 887 | 43px below |
+| tablet 820x1180 | 1180 | 1196 | 16px below |
+| desktop 1440x900 | 900 | 452 | in view |
+
+The hero copy carries `portrait:mt-[92svh]`, and the comment above it
+says in so many words that portrait is untouched because the copy
+already sits 92svh below the mark. 92svh is 776 at phone and 1086 at
+tablet. The sentence is at 887 and 1196, which is 105svh and 101svh, and
+the gap is the same 110px at both, because the margin starts below the
+header rather than at the top of the viewport.
+
+So the intent is legible and the number does not deliver it. 92svh is a
+choice to let the copy peek above the fold and invite the scroll. What
+the page does instead is show a full screen of sky with nothing of the
+sentence in it, at both portrait sizes, by 43px and by 16px. Sixteen
+pixels is the worst distance to miss by, because it reads as an accident
+rather than a decision.
+
+**I did not change it.** The hero's geometry is identity, the charter
+says the identity is mine to protect and not to reinvent, and moving the
+first sentence on every portrait device is a decision for the owner and
+not for a polish run. It is a ledger proposal, L52, with the measurement
+attached.
