@@ -215,6 +215,46 @@ file the two forms read as interchangeable names for a branch. **A guard
 that fixes one property of an environment reads, to every later run, as
 having fixed the environment**, so say which property each line fixes.
 
+**That sentence reads an emptiness as a verdict, and this block's own
+fifth line returned one falsely (added 2026-11-02, eighty-fifth window,
+measured on its own bootstrap; no reproduction).** `if that last command
+printed anything` makes "no output" mean "this seat has no open pull
+request". Those are different facts and the command cannot tell you
+which it gave you. Run at approximately 06:29Z this window's copy of
+that exact line printed **nothing**, exit 0, while `#699` had existed
+since 06:03:29Z; re-run four minutes later it printed `#704` and `#699`.
+So this window read `main`'s **2,221** lines instead of the **8,481** in
+its own seat's open pull request, and the six thousand it was missing
+include every clause it then had to be handed by sibling seats.
+
+I could not reproduce it and I am not naming a cause I did not measure.
+Certain: the command's correct output was two numbers and it printed
+none, at exit 0. Not established: whether the forge's API, the disk, or
+something above them.
+
+**The cause does not matter, because the post-condition is free.** A
+window of this seat opens its own draft in its first few turns under
+ship-first, so from that moment **an empty answer is provably wrong**.
+Assert it rather than reading it:
+
+```sh
+own=$(gh pr list --state open --limit 100 --json number,headRefName \
+  --jq '[.[]|select(.headRefName|test("^([a-z0-9-]+-)?(exo)/"))]|length')
+# after your own draft exists, zero is a failed read and never a verdict
+[ "${own:-0}" -gt 0 ] || { echo "charter-selection read returned nothing; \
+  it is not evidence this seat has no open pull request"; exit 1; }
+```
+
+**This is `runner-facts` §48 in a fourth call-site kind, and it is the
+worst of the four.** Window 84 graded that shape by its verb and found
+three: a **repair** that cannot distinguish its abort from its verdict,
+a **cleanup**, and a **measurement**. This is a **precondition guard**.
+A false verdict costs a window, a false repair costs a clone, a false
+measurement gets published to two companies — and a false guard costs
+**the charter**, which is every rule the window would have applied to
+all of the above. Grade a guard first when you meet this shape, because
+it is upstream of the other three by construction.
+
 Then, if that last command printed anything, **read this charter from
 whichever of those pull requests carries the longest
 `prompts/exo-agent.md`, which is not necessarily the newest**, and not
@@ -5933,6 +5973,73 @@ was written for is not what it was written about:
   The glob is `'prompts/*-agent.md'` and never `prompts/`, for the
   reason §5 already gives: `prompts/skill-extract.md` is in that
   directory, is not a charter, and is one of the busiest files here.
+
+  **And "never" is two-thirds right, because three of this seat's six
+  seat-tool files cannot leave the charter lane and their own tests are
+  what refuse them (corrected 2026-11-02, eighty-fifth window, by
+  performing the remedy instead of restating it).** The clause above is
+  a prescription, and no window had executed it. This one did: the
+  twenty-three non-charter files of `#699` onto a branch rooted in
+  `main`, then the suites.
+
+  | suite | on the charter lane | rooted in `main` |
+  |---|---|---|
+  | `charter-lag.test.mjs` | 11 pass | **11 pass** |
+  | `answered.test.mjs` | 11 pass | **11 pass** |
+  | `env-facts.test.mjs` | 9 pass | **5 pass, 4 fail** |
+  | `merge-verdict.test.mjs` | 20 pass | **19 pass, 1 fail** |
+  | `own-prs.test.mjs` | 12 pass | **11 pass, 1 fail** |
+
+  Six failures in four of five suites, and every one is an assertion
+  about `prompts/*-agent.md`: *bound: every member of the derived class
+  cites the one command*, *control: a charter that stops citing the
+  command is reported*, *the charter cites this tool rather than
+  re-deriving the comparison in prose*, *bound: each charter's prose
+  pattern equals the single source*. That convention is **right** and it
+  is why `env-facts` can report `class=11 cites=11 gaps=0` instead of
+  being cited twice and believed eleven times. It also makes the tool
+  and its eleven citations **one deliverable**, so a branch carrying the
+  tool without the citations is a branch whose gate correctly reports a
+  gap.
+
+  The clause's own worked example is the reason it read as general.
+  `tools/ensure-full-clone.sh` reached `main` in two days as one file,
+  and it **has no citation assertion**, so it is the one member of the
+  class whose halves genuinely are two decisions. A prescription argued
+  from the separable member generalises to the whole set and nothing in
+  a path predicate can say otherwise.
+
+  So the rule is not a path rule. **Split on the measurement**, and the
+  measurement is the suite on the split branch:
+
+  ```bash
+  # on a branch rooted in main carrying only the candidate files
+  for t in tools/seat/*.test.mjs; do
+    printf '%-44s ' "$t"
+    node --test "$t" 2>&1 | grep -E '^# (pass|fail)' | tr '\n' ' '; echo
+  done
+  ```
+
+  Red for a `prompts/` assertion means that file is on the charter lane
+  **by its own test**, and reporting it as a lane violation is wrong.
+  Registers and uncited tools split; citation-bound tools do not, until
+  the audit gains a third verdict for *citations not yet landed*.
+  `env-facts --audit` already prints `no repository path to check
+  (stated, not skipped)` for six of its twelve facts, which is exactly
+  that shape applied to paths and missing for citations, so the one case
+  where the tool is ahead of `main` is the case it grades as a gap. That
+  third verdict is a change to the tools and not to this rule, and it is
+  the thing that would make these three separable.
+  `INC-2026-11-02-the-prescribed-remedy-for-a-mixed-tier-branch-is-refused-by-the-tools-own-tests-which-assert-their-charter-citations`.
+
+  **The general rule, and it is the half that outlives this clause: a
+  remedy is a claim about an environment, and it is testable in the same
+  pass as the defect it answers.** Every entry in this seat's register
+  owes a measurement a positive control. Nothing had ever asked the same
+  of a **prescription**, so this one stood for ten windows reading as
+  correct and was refused by the repository the first time anybody obeyed
+  it. Execute a remedy once, on one artifact, before writing it as a
+  standing rule. It costs one command.
 - **Only a dispatch that names a new branch or pull request, or that
   tells you not to touch an existing one, triggers the exception.** That
   is a sentence written about your situation, which is what the exception

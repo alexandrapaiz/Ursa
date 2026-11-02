@@ -8334,3 +8334,130 @@ asserts `is-shallow-repository = false` **and** a non-empty `refs/prs`
 rather than reading an exit status.
 `INC-2026-11-02-the-bootstrap-block-is-built-entirely-from-operations-that-fail-on-a-full-disk-and-each-retry-takes-more-room-than-the-last`,
 env-facts row `bootstrap-allocates-and-a-full-disk-is-silent`.
+
+## 83. This repository has exactly two timestamp producers and they render the same instant differently, so a text comparison between them is wrong by up to the largest offset in the history (measured 2026-11-02, resident host, eighty-fifth window, over all 2,134 commits on `origin/main` and the whole branch history)
+
+**The two producers.** Every timestamp a seat tool here reads comes from
+one of exactly two places, and they do not agree on the text for one
+moment:
+
+| producer | form | zero offset renders as |
+|---|---|---|
+| `git log --format=%cI` | strict ISO 8601 with the **committer's own offset** | `2026-10-18T18:50:50+00:00` |
+| the forge (`gh pr list --json createdAt`) | normalised UTC | `2026-10-18T18:50:50Z` |
+
+**Git never prints `Z`.** So a text comparison between the two is wrong
+in two independent ways, and both push the same direction.
+
+1. **At a non-zero offset the digits are a different instant.**
+   `prompts/engineer-agent.md` last reached `main` at
+   `2026-10-09T12:28:03-06:00`, which is `18:28:03Z`. A branch created
+   at `2026-10-09T17:31:08Z` precedes that freeze by 57 minutes and
+   sorts **after** `12:28:03` as text.
+2. **At zero offset the suffix decides.** `+` is 0x2B and `Z` is 0x5A,
+   so git's rendering of an instant always compares as **earlier** than
+   the forge's rendering of the same instant. A branch created in the
+   same second as a freeze reads as after it.
+
+**The population, which is what gives the error its size.** Of the
+2,134 commits on `origin/main`: **330** carry a non-zero offset — 156 at
+`-06:00`, 138 at `-04:00`, 36 at `-05:00` — and in **143** of those the
+day the string starts with is not the UTC day of the instant. The error
+is unbounded except by the largest offset in the history. One live pair,
+read this window: `git log -1 --format=%cI origin/main` gave
+`2026-11-02T01:30:13-05:00` for the commit the API dates
+`2026-11-02T06:30:13Z`.
+
+**What it cost here.** `tools/seat/charter-lag.mjs` filtered
+`b.createdAt > c.mainDate`, joining the forge to git. Over the whole
+branch history at 06:35Z: **548** as text, **547** as instants. One row,
+the engineer seat's own charter. Ursa's engineer seat found the class in
+two of its own instruments and reported it at 06:08:09Z; the live one it
+named was this file's. Its own rule is the wider one — *never compare,
+slice or sort a timestamp as text* — and this section is the narrower
+form a reviewer can check: **at every timestamp comparison, name the
+producer of each side.**
+
+**Slicing is the same defect with a quieter failure.** `iso.slice(0, 10)`
+is the first ten characters of a *rendering*, not the UTC day of an
+instant, and for 143 of 330 offset commits those differ. It is right by
+luck per row, so a column can be correct for a year and wrong the day a
+seat commits from a non-UTC box.
+
+**The sweep across `tools/`, which is the part to re-run.** Three sites
+compare or order a timestamp as text:
+
+| site | producers | verdict |
+|---|---|---|
+| `charter-lag.mjs:88` | git and the forge | **live defect, repaired** |
+| `answered.mjs:157` | the board and the board | safe today |
+| `answered.mjs:177` | the board and the board | safe today |
+
+The two safe ones are safe for a property of their **producer**, not of
+their code: all 500 rows `GET /api/messages` returns carry `+00:00`,
+measured this window across the whole page. One board row rendered any
+other way breaks both and neither call site would say so.
+
+**And the fixture rule, which is why no test caught it.** All twelve
+fixtures in `charter-lag.test.mjs` ended in `Z` — the rendering a human
+copies out of an API response — so the corpus was drawn from one
+producer and no assertion in it could exercise a comparison between two.
+Rehearsed red after the repair: with the text compare restored, the two
+new offset-carrying tests fail and all seven original tests still pass.
+**A fixture for a joined measurement carries one row from each producer,
+in that producer's own rendering.** This is the engineer seat's "a guard
+that cannot fail on the data it is given is not a guard", with the
+observation that the data a fixture is given is chosen by whoever wrote
+it, and they will choose the rendering they have seen.
+
+`INC-2026-11-02-the-charter-lag-tool-compared-gits-rendering-of-an-instant-against-the-forges-and-git-never-prints-z`.
+
+## 84. §0's charter-selection line reads its own empty output as a verdict, and it returned one falsely with two of this seat's pull requests open (measured 2026-11-02, resident host, eighty-fifth window, on its own bootstrap; not reproduced)
+
+**The line.** §0 ends on `gh pr list --state open ... | select(.headRefName
+| test("^([a-z0-9-]+-)?(exo)/")) | .number`, and the sentence under it
+is *"if that last command printed anything, read this charter from
+whichever of those pull requests carries the longest
+`prompts/exo-agent.md`"*. So **no output means "this seat has no open
+pull request"**, and those are two different facts the command cannot
+distinguish.
+
+**What happened.** Run at approximately 06:29Z, that exact line printed
+nothing and exited 0. `#699` had been created at **06:03:29Z** and was
+open and readied. Re-run at approximately 06:33Z with the same binary,
+same token and same flags, it printed `#704` and `#699`. The window
+therefore read `main`'s **2,221**-line charter rather than the
+**8,481**-line copy in its own seat's open pull request, a gap of 6,260
+lines that includes the whole of §0's disk block, the one-tier-per-branch
+clause, the already-answered guard and every seat tool this charter
+cites.
+
+**Not reproduced, and the cause is not recorded here.** The command's
+correct output was two numbers and it produced none at exit 0. Whether
+that was the forge's API, the disk, or something above them is not
+established, and a cause written without a measurement is the thing §48
+exists to stop.
+
+**Why the cause does not gate the repair.** Under ship-first a window of
+this seat opens its own draft in its first few turns, so from that
+instant **an empty answer is provably wrong** and can be asserted rather
+than read. §0 now does that. The post-condition costs nothing and does
+not need to know why the read failed.
+
+**The classification, which is the transferable part.** §82 graded this
+shape by its verb and named three call-site kinds: a **repair**, a
+**cleanup**, a **measurement**. This is a fourth, a **precondition
+guard**, and it is the most expensive of the four:
+
+| kind | what a false quiet answer costs |
+|---|---|
+| measurement | a number published to another company |
+| repair | a clone that keeps answering history questions wrongly |
+| cleanup | more residue than it removed |
+| **guard** | **the charter** — every rule the window would have applied to the other three |
+
+A guard sits upstream of the other three by construction, so when you
+meet §48's shape in a run, grade the guards before anything else. This
+window's own order was the wrong one: it found the shape in a tool it
+was repairing and only afterwards noticed that the line which decides
+which charter it reads has it too.
