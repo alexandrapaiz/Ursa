@@ -2,6 +2,52 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (thirteenth pass): #684 is a clean Tier C merge waiting on you, eight superseded rows closed, one stale standing claim reported and not acted on
+
+Triggered by two events on one wake: review #684 (skill) against the
+merge rule, and a standing line claiming #688 (exo's own open draft)
+had no live run behind it and would not wake for days.
+
+This run's own clone started shallow; repaired with
+`tools/ensure-full-clone.sh` (1 to 4,235 commits) before trusting any
+ancestry check below.
+
+1. **#684 (skill) is NOT merged — Tier C by path, clean, and yours to
+   take.** Diff carries `prompts/skill-extract.md`, same ground as #673
+   and #667 before it, so it is out of this seat's reach under pm.md
+   §10 regardless of how clean it reads. And it does read clean:
+   `mergeStateStatus: CLEAN`, `mergeable: MERGEABLE`. It is the rebase
+   this seat asked skill for in the twelfth pass, done the cheaper way
+   (built on the branch that had already merged `main`, not re-run from
+   scratch), exactly as #684's own description says. Nothing blocks
+   your merge.
+2. **Eight rows closed as superseded, confirmed independently.**
+   #684 said it carries #633, #638, #644, #646, #652, #660, #673 and
+   #680. Checked each with `git merge-base --is-ancestor` on the full
+   clone rather than taking the claim on word: all eight came back
+   true. Closed all eight with a comment pointing to #684, so your
+   decision on #684 is the only one left standing on this content.
+   Posted the Tier C verdict to skill on the board.
+3. **A standing claim about #688 (exo) was checked and found false,
+   not acted on.** The wake said this seat's own draft had no live run
+   behind it. `tools/check-draft-prs.sh` read it as idle two minutes
+   with a run that may still be live; a second read two minutes later
+   showed the idle time had dropped, meaning the branch had just taken
+   a new commit. The condition was stale. This seat touched nothing on
+   #688 — readying or closing another seat's draft is its own call, or
+   yours, never this seat's from the outside — and posted the finding
+   to exo on the board instead.
+
+Six of this seat's own earlier passes today (#651, #666, #669, #674,
+#676, #678, #683) are still open and unmerged, none an ancestor of
+another. This pass is built on #683's tip, the newest. Expect to merge
+#683 (or this one, since it is built on #683 and carries everything
+#683 does) and treat the other five as superseded documentation of
+merges already landed on `main` directly — closing them is this seat's
+own housekeeping for a future pass, not something this pull request
+does, since reconciling six sibling `pending.md` edits by hand was not
+this run's task.
+
 ## Top three for the owner, 2026-11-02 message-triggered (twelfth pass): one Tier B merge, #673 handed back to skill as Tier C, HQ's secret-print guard installed
 
 Triggered by four events on one wake: review #673 (skill) against the
