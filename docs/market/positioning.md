@@ -1734,3 +1734,65 @@ anyone. Ledger proposal below: watch whether this token's machinery
 since that would be the first real encroachment on Minor's structural
 claim rather than another authored-verifier entrant. No pricing or
 positioning change argued by this alone.
+
+## A second, independent "software is not the moat" case, and it is a solo project this time (2026-11-02, message, 12th run)
+
+The head-start-vs-position test the 2026-10-24 MemHub entry built
+("does a release cost Ursa the lead time before someone else built the
+software, or the two-sided trust relationship itself") gets a second
+case to run against: MemTether, a new Category 3 entry
+(docs/market/landscape.md), a free, Apache-2.0, forked solo project
+with no company and no funding behind it, not a frontier-lab release
+like MemHub.
+
+Applying the same two criteria. (a) A consenting user base whose
+derived signal flows somewhere monetizable: unmet, the project is a
+shared local SQLite file for one person's own developer tools, with no
+aggregation layer of any kind. (b) A trust relationship with an AI lab
+on the licensing side: unmet, there is no company to hold one. Both
+criteria fail, same as MemHub, so this is a head-start cost, not a
+position cost, by the same test.
+
+What's sharper this time is the head-start itself. MemHub matched four
+of Major's five claimed properties; this one matches a narrower slice
+of the *data model* CLAUDE.md §1 describes rather than Major's
+consumer-facing portability claim — "corrections supersede, the old
+value stays queryable, every write is hash-chained, a conflict needs a
+human to adjudicate" is closer to "survived, mutated, with a time
+dimension and a trajectory" than anything else found in this
+landscape, built by one person for a narrower problem (keeping several
+coding tools' memories from corrupting each other) and given away for
+free under a permissive license. The lesson is not new in kind — §0's
+fourth constraint already conceded this before either case existed —
+but it is now corroborated twice, independently, by two actors with no
+relationship to each other or to Ursa: a frontier lab's open-source
+division and an anonymous solo developer converged on adjacent pieces
+of the same data structure. That is a stronger form of "anyone
+competent could build it" than one example supports, and worth citing
+as such rather than re-arguing the MemHub case alone.
+
+Separately, the same run's landscape watch found CVE-2026-116575, a
+patched cross-tenant information-disclosure bug in Mem0, this
+category's largest-by-adoption product (docs/market/landscape.md, Mem0
+entry). It extends the "trust has a provenance axis too" line
+(2026-10-07 above) one level deeper than any prior case: the compromise
+sits inside the memory product's own multi-tenant isolation code, not
+at the vendor-ownership or supply-chain level the earlier cases
+tracked. No positioning change argued by this alone; it is one more
+dated instance of a risk category Major's on-device processing
+(CLAUDE.md §0, constraint 3) does not carry by construction, since
+there is no shared tenant boundary to collide across.
+
+A final, weak-signal item, named as weak rather than dropped: a Show HN
+post this week ("AI Context Flow," 1 point, 4 comments) pitched a
+browser extension carrying context between ChatGPT, Claude, Grok,
+Gemini, and Perplexity at $12/month after a free beta, with a builder's
+comment framing it as "one of the few 'memory layer' approaches that
+feels grounded in how we actually switch between models." This is not
+evidence of market validation at this engagement level, but it is a
+dated, concrete price point for cross-model memory portability sitting
+inside this file's existing price ladder (2026-09-26) — closer to
+Zep's post-restructure $25/mo Flex tier (2026-10-25 update) than to
+any enterprise contract — worth holding as a single low-confidence data
+point, not a trend, until something with real engagement prices the
+same promise.
