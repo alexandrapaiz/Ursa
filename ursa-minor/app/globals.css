@@ -215,6 +215,34 @@
   outline-offset: 3px;
 }
 
+/* The one control the rule above cannot reach.
+
+   "Open a record" on /record is a <label class="cta"> wrapping an
+   <input type="file" class="sr-only">. That is the standard way to give a
+   file picker a styled trigger, and it has one consequence nobody had
+   looked at: the focusable element is the input, the input is clipped to
+   1x1, and so the ring above is drawn perfectly, around a single pixel,
+   behind the label. With a pointer the control is fine. With a keyboard it
+   is the only tab stop on this site where focus moves and the screen does
+   not change at all.
+
+   Measured 2026-11-02 by measure-focus.mjs at 1440x900 and 820x1180:
+   tab stop 4 of 6 on /record, a 1x1 box, NO_INDICATOR, zero pixels
+   different between the focused frame and the blurred one. Every other
+   stop on that page reported 11.99:1. This was invisible to every other
+   instrument in the kit, because measure-hit-areas.mjs sees the label's
+   full box and a pointer finds it.
+
+   The fix forwards the ring to the thing a reader can see rather than
+   restyling the control: same outline, same offset, same token, so this
+   adds no new value to the design system. :has() is used rather than
+   :focus-within because the label also contains text, and :focus-within
+   would fire for a keyboard focus the user did not give to this input. */
+.cta:has(> input:focus-visible) {
+  outline: 1px solid var(--polar);
+  outline-offset: 3px;
+}
+
 html {
   scroll-behavior: smooth;
 }

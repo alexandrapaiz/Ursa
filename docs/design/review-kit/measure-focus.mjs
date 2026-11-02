@@ -88,6 +88,27 @@
  *   indicator is reported UNSTABLE rather than given a number. A number
  *   this tool cannot stand behind is not printed as one, which is L15.
  *
+ *   A wash around the ring. ADDED 2026-11-02 (run h), after the share
+ *   column failed a focus treatment that is correct. `.quiet-link` on the
+ *   404 page answers focus with three things at once: the site ring at
+ *   11:1, a brightened border, and a 6% background wash over the control's
+ *   whole interior. The wash is most of the changed pixels and almost none
+ *   of the contrast, so the share came out at 5% and the verdict said
+ *   BELOW_FLOOR for a ring that the magnified frames show is excellent.
+ *   The share statistic silently assumes the indicator is only the ring.
+ *
+ *   So a stop that fails the share is asked a second question before it is
+ *   failed: do the pixels that DO clear 3:1 cover at least a 1 CSS px
+ *   perimeter of the control on their own, which is (w+2)(h+2) - wh. That
+ *   is the ring this site declares, measured off the control's own box, so
+ *   it is arithmetic rather than a tuned threshold, and it is the same
+ *   yardstick as the 2.4.11 column one weight down. A ring plus a wash
+ *   clears it and is reported COMPOSITE. A ring drawn along one edge only
+ *   does not, because one edge of a 230x47 control is 230 pixels against a
+ *   558 pixel perimeter, and it stays BELOW_FLOOR. A ring drawn in its own
+ *   backdrop's colour has no clearing pixels at all and stays BELOW_FLOOR
+ *   too, which is the selftest's fixture 4.
+ *
  *   One bright pixel. A single high-contrast pixel in a 1px ring would
  *   carry a minimum-of-all-pixels report to a pass if the report were a
  *   maximum, and to a failure if it were a minimum, and neither is the
@@ -293,7 +314,12 @@ for (const [vpName, width, height] of VPS) {
   for (const [pageName, path] of PAGES) {
     const t0 = Date.now()
     const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1 })
-    if (!LIVE) await freezeContext(ctx)
+    // `scroll: true`, because this tool scrolls the page on purpose and
+    // then photographs a rectangle it computed before the scroll. The site
+    // declares `scroll-behavior: smooth`, so without this pin the two
+    // frames of a stop can come from two different scroll offsets. See
+    // lib/freeze.mjs and L59.
+    if (!LIVE) await freezeContext(ctx, { scroll: true })
     const page = await ctx.newPage()
     await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle', timeout: 30000 })
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
@@ -340,25 +366,29 @@ for (const [vpName, width, height] of VPS) {
     // measured is the thing the keyboard actually reaches.
     let measured = 0
     for (const stop of reached) {
-      if (stop.probe === null) continue
+      // A stop Tab reaches that the enumeration never offered. This is the
+      // exact mirror of `unreachable` below, and until 2026-11-02 it was a
+      // bare `continue`: the stop vanished from the table with no row and
+      // no count, so a page reporting "5 focusable in the DOM, 6 tab stops"
+      // printed five rows and nobody could say what the sixth was. Both
+      // directions of the set difference are findings, and only one of them
+      // was being reported.
+      if (stop.probe === null) {
+        rows.push({ page: pageName, viewport: vpName, ...stop, verdict: 'UNDECLARED' })
+        continue
+      }
       const el = page.locator(`[data-focus-probe="${stop.probe}"]`)
-      if ((await el.count()) !== 1) continue
+      if ((await el.count()) !== 1) {
+        rows.push({ page: pageName, viewport: vpName, ...stop, verdict: 'GONE_FROM_DOM' })
+        continue
+      }
       await el.evaluate((n) => n.scrollIntoView({ block: 'center', behavior: 'instant' }))
       await page.waitForTimeout(80)
-      const box = await el.boundingBox()
-      if (!box || box.width < 1 || box.height < 1) {
+      const preBox = await el.boundingBox()
+      if (!preBox || preBox.width < 1 || preBox.height < 1) {
         rows.push({ page: pageName, viewport: vpName, ...stop, verdict: 'ZERO_BOX' })
         continue
       }
-      const vp = page.viewportSize()
-      const clip = {
-        x: Math.max(0, Math.floor(box.x - PAD)),
-        y: Math.max(0, Math.floor(box.y - PAD)),
-        width: 0,
-        height: 0,
-      }
-      clip.width = Math.min(vp.width - clip.x, Math.ceil(box.width + 2 * PAD + (box.x - PAD - clip.x)))
-      clip.height = Math.min(vp.height - clip.y, Math.ceil(box.height + 2 * PAD + (box.y - PAD - clip.y)))
 
       // Keyboard focus, so :focus-visible applies. focus() alone does not
       // raise it in Chromium for a non-text control, which is the whole
@@ -386,6 +416,40 @@ for (const [vpName, width, height] of VPS) {
       }
       const isFV = await el.evaluate((n) => n.matches(':focus-visible'))
       await page.waitForTimeout(60)
+
+      // The box is re-read HERE, after the keyboard focus has landed, and
+      // not before it. Driving Shift+Tab and Tab makes the browser scroll
+      // two controls into view, so a clip computed from the box taken
+      // before that is a rectangle the control has since left. With
+      // `scroll-behavior: smooth` on the document it is worse than stale:
+      // the page is still moving, and the focused frame and the blurred
+      // frame come from two different offsets. freezeContext pins the
+      // behaviour; this re-read is what makes the rectangle right.
+      const box = await el.boundingBox()
+      if (!box || box.width < 1 || box.height < 1) {
+        rows.push({ page: pageName, viewport: vpName, ...stop, verdict: 'ZERO_BOX' })
+        continue
+      }
+      const vp = page.viewportSize()
+      const clip = {
+        x: Math.max(0, Math.floor(box.x - PAD)),
+        y: Math.max(0, Math.floor(box.y - PAD)),
+        width: 0,
+        height: 0,
+      }
+      clip.width = Math.min(vp.width - clip.x, Math.ceil(box.width + 2 * PAD + (box.x - PAD - clip.x)))
+      clip.height = Math.min(vp.height - clip.y, Math.ceil(box.height + 2 * PAD + (box.y - PAD - clip.y)))
+
+      // A control whose box lies outside the viewport gives a clip with a
+      // zero or negative side, and `page.screenshot` throws on it. Until
+      // 2026-11-02 that threw out of the whole run: the phone pass died on
+      // the fourth of five pages and printed no table at all, so three
+      // pages that had already been measured were lost with it. One stop
+      // that cannot be photographed is a row, not the end of the report.
+      if (clip.width < 1 || clip.height < 1) {
+        rows.push({ page: pageName, viewport: vpName, ...stop, verdict: 'OFF_VIEWPORT' })
+        continue
+      }
       const fFocused = await page.screenshot({ clip, animations: 'disabled' })
       await el.evaluate((n) => n.blur())
       await page.waitForTimeout(60)
@@ -442,8 +506,16 @@ for (const [vpName, width, height] of VPS) {
         row.median = ratios[Math.floor(ratios.length / 2)]
         row.p5 = ratios[Math.floor(ratios.length * 0.05)]
         row.min = min
+        row.clearPx = clears
         row.areaRatio = indicator.length / row.minAreaPx
-        row.verdict = row.share >= SHARE_FLOOR ? 'ok' : 'BELOW_FLOOR'
+        // A 1 CSS px perimeter of the unfocused control: (w+2)(h+2) - wh.
+        // This is the site's own declared ring, so it is the area a ring
+        // that is actually drawn all the way round has to reach. It is
+        // arithmetic off the control's own box and not a tuned constant.
+        row.ringPx = Math.round(2 * box.width + 2 * box.height + 4)
+        row.ringRatio = clears / row.ringPx
+        row.verdict =
+          row.share >= SHARE_FLOOR ? 'ok' : row.ringRatio >= 1 ? 'COMPOSITE' : 'BELOW_FLOOR'
       }
       rows.push(row)
       measured++
@@ -510,12 +582,12 @@ if (unreachableTotal) {
 L.push('')
 L.push('## The indicator, photographed at every stop')
 L.push('')
-L.push('| page | viewport | stop | control | box | indicator px | share >=3:1 | median | min | area/2.4.11 | verdict |')
-L.push('|---|---|---|---|---|---|---|---|---|---|---|')
+L.push('| page | viewport | stop | control | box | indicator px | clearing px | share >=3:1 | ring 1px | median | min | area/2.4.11 | verdict |')
+L.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|')
 for (const r of rows) {
   const n = (v, d = 2) => (typeof v === 'number' && isFinite(v) ? v.toFixed(d) : '-')
   L.push(
-    `| ${r.page} | ${r.viewport} | ${r.stop} | ${r.tag} ${r.text ? `"${r.text}"` : ''} | ${r.box ? `${r.box.w}x${r.box.h}` : '-'} | ${r.indicatorPx ?? '-'} | ${r.share !== undefined ? `${(r.share * 100).toFixed(0)}%` : '-'} | ${n(r.median)} | ${n(r.min)} | ${r.areaRatio !== undefined ? n(r.areaRatio) : '-'} | ${r.verdict} |`,
+    `| ${r.page} | ${r.viewport} | ${r.stop} | ${r.tag} ${r.text ? `"${r.text}"` : ''} | ${r.box ? `${r.box.w}x${r.box.h}` : '-'} | ${r.indicatorPx ?? '-'} | ${r.clearPx ?? '-'} | ${r.share !== undefined ? `${(r.share * 100).toFixed(0)}%` : '-'} | ${r.ringRatio !== undefined ? n(r.ringRatio) : '-'} | ${n(r.median)} | ${n(r.min)} | ${r.areaRatio !== undefined ? n(r.areaRatio) : '-'} | ${r.verdict} |`,
   )
 }
 
@@ -524,6 +596,19 @@ L.push('## Headline')
 L.push('')
 L.push(
   `${bad.length} of ${rows.length} tab stops below a floor, ${unreachableTotal} controls the keyboard cannot reach, ${unstable.length} unstable.`,
+)
+// Every verdict, counted. Before 2026-11-02 the headline named three of
+// them and the rest were visible only to somebody reading all 27 rows, so
+// a stop the tool could not photograph at all left the summary looking
+// clean. A verdict with no line in the headline is a verdict nobody reads.
+const tally = {}
+for (const r of rows) tally[r.verdict] = (tally[r.verdict] ?? 0) + 1
+L.push('')
+L.push(
+  `By verdict: ${Object.entries(tally)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `${v} ${k}`)
+    .join(', ')}.`,
 )
 const withArea = rows.filter((r) => r.areaRatio !== undefined)
 if (withArea.length) {
