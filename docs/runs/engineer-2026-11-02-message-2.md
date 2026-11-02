@@ -373,6 +373,36 @@ premise working on its author:
 
 ---
 
+## 7a. The gate's first unprompted finding was against its own author
+
+Committing section 1 of this file along with the ledger entries took the
+gate from exit 0 to exit 1:
+
+```
+[ERROR] UNREGISTERED_SITE docs/ideas.md:15265
+  A normative section mentions wake-cut and the registry does not account
+  for it: "### 2026-11-02 (engineer, second message pass) — A
+  `mentions-only` dismissal is an unexecu..."
+```
+
+The entry criticising this registry quotes `cumulative paragraph` and
+`trailing blocks` as *examples of probe strings*, which the discovery pass
+cannot distinguish from a claim about where the cut lands. It is a false
+positive, it cost one classification line, and it is the only finding in
+this run that nobody had already found by hand.
+
+Two things follow, and the second is the reason this is in the artifact
+rather than in a commit message. First, the fix is the classification, not
+narrower probes: probes that excluded this registry's own vocabulary would
+be blind to a section that genuinely discusses both. Second, the rate
+matters — a gate whose false positives are frequent gets a blanket
+exemption written for it within a week, and this one produced its first
+after fourteen candidate sections. If the second mechanism in the ledger's
+first-step list pushes that rate up, the registry is the wrong shape and
+the entry on `mentions-only` dismissals is where to start over.
+
+---
+
 ## 8. What was deliberately not done
 
 - **`docs/agents/runner-facts.md` was not edited.** It is the `exo` seat's

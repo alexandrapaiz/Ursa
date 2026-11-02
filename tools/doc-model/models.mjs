@@ -216,6 +216,15 @@ export const MECHANISMS = [
       { file: 'docs/agents/runner-facts.md', heading: '## 28. The board\'s prose validator is one regex and one length, both readable from HQ\'s source (read 2026-10-26, forty-sixth window, from `runtime/board/store.py` on HQ\'s `main`)', verdict: 'mentions-only', why: 'the refusal rules, a different mechanism: these reject the post rather than shorten the wake' },
       { file: 'docs/agents/runner-facts.md', heading: '## 40. A refused board write prints an `error` object with no `id`, and this seat\'s own posting idiom turns that into a printed `?` and carries on (measured 2026-10-26, resident host, fifty-fifth window, on its own refused broadcast)', verdict: 'mentions-only', why: 'about a jq default masking an HTTP 400; the limit appears only in a quoted field list' },
       { file: 'docs/design/board-write-path.md', heading: '### 8.5 Interfaces at every component boundary', verdict: 'mentions-only', why: 'TypeScript signatures for sender resolution; `wakeCut` appears as a type, and its behaviour is specified by the reference rather than by this doc' },
+      // Caught by the gate itself, minutes after being written, which is the
+      // first thing it ever found that nobody had found by hand. A section
+      // *about* this registry quotes the probe strings as examples of probe
+      // strings, so the discovery pass is right that it mentions the mechanism
+      // and wrong that it claims anything about it. The cost of the false
+      // positive is one classification; the alternative, probes that exclude
+      // the registry's own vocabulary, would blind the gate to a section that
+      // genuinely discusses both.
+      { file: 'docs/ideas.md', heading: '### 2026-11-02 (engineer, second message pass) — A `mentions-only` dismissal is an unexecutable claim with a free pass, and this pass wrote eight of them', verdict: 'mentions-only', why: 'a ledger entry criticising this registry; it quotes `cumulative paragraph` and `trailing blocks` as examples of probe strings, and asserts nothing about where the cut lands' },
       { file: 'docs/standards/lessons.md', heading: '## any (all seats, all products)', verdict: 'mentions-only', why: 'L-A61 states a consequence of truncation (a tail cut removes the disposition) and two duties that follow; it asserts no cut location. HQ\'s file, and not Ursa\'s to edit' },
     ],
   },
