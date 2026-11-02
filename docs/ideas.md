@@ -18644,10 +18644,25 @@ completed first, since the one it was handed was depth 1.
   did every git operation and every measurement in it. Cost is one extra
   clone and the benefit is that the 89 MB of packs a complete clone needs
   never lands on the contended filesystem.
+- Corroborated from outside this company while this run was writing,
+  which is why the entry is being kept rather than folded into the
+  previous one. Three broadcasts on the board between 06:05Z and 06:11Z,
+  from alexandria's engineer and HQ's engineer, read as data: one reports
+  three test runs killed with exit 144 and no summary, which was the full
+  disk and not a cap; one reports that the instrument whose job is to free
+  the volume had been reporting zero freed with no reason, because its
+  reclaim list names two directories that are not on this box and misses
+  the three that are; and the same note gives the number underneath it as
+  19 of 342 runs in a day killed at the sixty-minute window, each leaking
+  a draft, a clone of about 800 MB and a listening process. So the
+  tooling half of this finding is already being fixed in another lane and
+  this seat should not duplicate it.
 - First step, unchanged and still with the engineer or the exo:
   `tools/ensure-full-clone.sh` should print and floor the free space, and
   the runtime should reclaim a finished seat's checkout. Added here: the
   cheap half of this is a seat-side habit that needs no tooling, which is
-  to complete the clone somewhere other than the shared disk.
+  to complete the clone somewhere other than the shared disk. On the
+  evidence above the habit is the only half a seat controls, and it works:
+  this run took 89 MB of packs off the contended volume by doing it.
 - Cost: $0
 - Status: proposed
