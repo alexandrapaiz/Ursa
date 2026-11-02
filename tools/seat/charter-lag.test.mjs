@@ -7,7 +7,7 @@
 // asserts it refuses to print a table.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { seatOfBranch, lagDays, buildRows, formatTable, cloneFitness, utcDay } from './charter-lag.mjs'
+import { seatOfBranch, lagDays, buildRows, formatTable, cloneFitness, utcDay, copiesOf, selectCopies, selectionFaults } from './charter-lag.mjs'
 
 test('seatOfBranch takes the whole first segment, with or without a company prefix', () => {
   assert.equal(seatOfBranch('ursa-skill/2026-11-02-message'), 'skill')
@@ -78,7 +78,11 @@ test('formatTable pads to content width and renders the two null columns as a da
   assert.equal(lines.length, 4)
   assert.match(lines[0], /^seat {3}charter on main/)
   assert.match(lines[2], /#618/)
-  assert.match(lines[3], /-\s+-\s+0\s+0$/)
+  // A charter with no open copy renders every queue-side column as a dash or
+  // a zero, and the count of them is part of the contract: `copies` is 0 and
+  // not a dash, because zero copies is a measured number and the two
+  // identifier columns are the ones that have no value to render.
+  assert.match(lines[3], /\s0\s+-\s+-\s+0\s+0\s+0$/)
 })
 
 test('cloneFitness names each fault by the property it is a fault in', () => {
@@ -169,4 +173,109 @@ test('formatTable itself renders the UTC day, and not the string it was handed',
   }))
   assert.match(out, /2026-11-02/)
   assert.doesNotMatch(out, /2026-11-01/)
+})
+
+// --- the selection control (added 2026-11-02, eighty-seventh window) -------
+//
+// Every assertion below is the measurement that found the defect, frozen as a
+// fixture. The numbers are this repository's own at 2026-11-02T08:00Z: exo's
+// charter stood at 2,221 lines on `main`, 2,312 on the newest open copy #714
+// and 8,726 on the older #699.
+
+const EXO_COPIES = [{ number: 714, lines: 2312 }, { number: 699, lines: 8726 }]
+
+test('copiesOf accepts the single-pick shape as the one-copy case, not as absence', () => {
+  assert.deepEqual(copiesOf({ copies: EXO_COPIES }), EXO_COPIES)
+  assert.deepEqual(copiesOf({ queue: { number: 618, lines: 328 } }), [{ number: 618, lines: 328 }])
+  assert.deepEqual(copiesOf({ queue: null }), [])
+  assert.deepEqual(copiesOf({}), [])
+})
+
+test('selectCopies returns both selectors, and they disagree on the real pair', () => {
+  const { newest, deepest, count } = selectCopies(EXO_COPIES)
+  assert.equal(count, 2)
+  assert.equal(newest.number, 714)
+  assert.equal(deepest.number, 699)
+  // The order the caller hands them in must not decide the answer, because
+  // the collector walks open pull requests newest-first and a later one may
+  // walk them in any order.
+  const reversed = selectCopies([...EXO_COPIES].reverse())
+  assert.equal(reversed.newest.number, 714)
+  assert.equal(reversed.deepest.number, 699)
+})
+
+test('the row carries both readings and the difference between them', () => {
+  const rows = buildRows({
+    charters: [{
+      seat: 'exo',
+      path: 'prompts/exo-agent.md',
+      mainDate: '2026-10-18T00:00:00Z',
+      mainLines: 2221,
+      copies: EXO_COPIES
+    }],
+    branches: [],
+    nowIso: '2026-11-02T08:00:00Z'
+  })
+  const exo = rows[0]
+  assert.equal(exo.queueCopies, 2)
+  assert.equal(exo.queuePr, 699)
+  assert.equal(exo.newestPr, 714)
+  assert.equal(exo.pendingLines, 6505)
+  assert.equal(exo.recencyPendingLines, 91)
+  assert.equal(exo.selectionLoss, 6414)
+})
+
+test('selectionFaults is empty when recency and depth agree, and names the pair when they do not', () => {
+  const agree = buildRows({
+    charters: [{
+      seat: 'skill',
+      path: 'prompts/skill-agent.md',
+      mainDate: '2026-10-09T00:00:00Z',
+      mainLines: 236,
+      copies: [{ number: 699, lines: 328 }]
+    }],
+    branches: [],
+    nowIso: '2026-11-02T08:00:00Z'
+  })
+  assert.deepEqual(selectionFaults(agree), [])
+
+  const split = buildRows({
+    charters: [{
+      seat: 'exo',
+      path: 'prompts/exo-agent.md',
+      mainDate: '2026-10-18T00:00:00Z',
+      mainLines: 2221,
+      copies: EXO_COPIES
+    }],
+    branches: [],
+    nowIso: '2026-11-02T08:00:00Z'
+  })
+  const faults = selectionFaults(split)
+  assert.equal(faults.length, 1)
+  assert.match(faults[0], /exo #714->#699/)
+  assert.match(faults[0], /6414 fewer pending lines/)
+  // The fault must not promise that the deepest copy is the one to read,
+  // because depth is not containment: measured the same day, #714 held 154
+  // normalised lines #699 does not.
+  assert.match(faults[0], /depth is not containment/)
+})
+
+test('a charter with two copies of equal length still reports one fault-free row', () => {
+  const rows = buildRows({
+    charters: [{
+      seat: 'pm',
+      path: 'prompts/pm-agent.md',
+      mainDate: '2026-10-05T00:00:00Z',
+      mainLines: 390,
+      copies: [{ number: 700, lines: 512 }, { number: 650, lines: 512 }]
+    }],
+    branches: [],
+    nowIso: '2026-11-02T08:00:00Z'
+  })
+  // Equal lines means the sort is stable on the first element, so deepest and
+  // newest resolve to the same pull request and nothing is lost. Two copies
+  // is still reported, because the reader has two files to read either way.
+  assert.equal(rows[0].queueCopies, 2)
+  assert.equal(rows[0].selectionLoss, 0)
+  assert.deepEqual(selectionFaults(rows), [])
 })
