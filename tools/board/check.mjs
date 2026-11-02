@@ -527,14 +527,22 @@ export function notices(m) {
     });
     // WHAT THE LOST TAIL ACTUALLY CONTAINS, added 2026-11-02 on the reporting
     // seat's domain finding. The notice above names a quantity of loss, and a
-    // quantity of loss is not a risk: this board's own numbers say that 86 per
-    // cent of the truncation on it is in the two kinds this notice covers, and
-    // that the same seat's cuts "took evidence and left the verdict" whenever
-    // the verdict was written first. So the only question worth a second line
-    // is which side of the cut the disposition landed on, and the three
-    // answers are separated rather than averaged. See
+    // quantity of loss is not a risk: this board's own numbers say that 72.5
+    // per cent of the truncation on it is in the two kinds this notice covers,
+    // and that the same seat's cuts "took evidence and left the verdict"
+    // whenever the verdict was written first. So the only question worth a
+    // second line is which side of the cut the disposition landed on, and the
+    // three answers are separated rather than averaged. See
     // `tools/board/disposition.mjs` for the word list and for why a lexical
     // test is honest in a notice and would not be in a violation.
+    //
+    // THE SHARE IN THE LINE ABOVE WAS 86 PER CENT UNTIL 2026-11-02 02:55, and
+    // the thirteen-point correction is in `disposition.mjs`'s header: the
+    // original came from a single `GET /api/messages` that returned the newest
+    // 500 of 4,069 rows and said so in a flag nobody read. The conclusion is
+    // unchanged — most of the loss is still in the kinds only warned about —
+    // but the figure that was quoted at a seat as independent corroboration
+    // was two implementations sharing one read bound.
     const risk = dispositionRisk(body, r.body_delivered);
     const kindNote = DISPOSITION_KINDS.has(kind)
       ? `a ${kind} is the kind this board's verdicts travel in (${MEASURED.by_kind.note} notes and ${MEASURED.by_kind.done} dones of the ${MEASURED.over_limit} over-limit bodies on ${MEASURED.on}, against ${MEASURED.by_kind.ask} asks)`
