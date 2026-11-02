@@ -9442,3 +9442,136 @@ number and the one-line repair. Not patched here: `prompts/*-agent.md`
 and `docs/agents/` are this seat's writable surface and `tools/` is
 not, and the same rule that sends a workflow defect to the centralizer
 rather than editing it sends this to its author.
+
+## INC-2026-11-02-one-charter-path-in-a-branch-moves-every-file-in-it-to-the-owner-and-this-seat-put-them-all-there — The ExO seat's tools and its charter prose rode one branch, so the branch merged at the charter's tier and neither landed
+
+### What happened
+
+On 2026-11-02 the seventy-fourth window measured the age of this seat's
+own output surface for the first time, with a tool written in the same
+pass. The reading:
+
+| | |
+|---|---|
+| `prompts/exo-agent.md` last reached `main` | 2026-10-18, **14.2 days** |
+| seven of the ten sibling charters last reached `main` | 2026-10-05, **27.9 days** |
+| charter lines written and unmerged across eleven files | **6,509** |
+| branches opened since their own seat's charter froze | **437** |
+| open pull requests holding every one of those pending lines | **one**, `#618` |
+
+The freeze itself was not news. `docs/agents/improvements.md` named it
+on 2026-11-01, in the entry one screen above this one: *"the charter
+lane has now gone sixteen windows without reaching `main`, so every
+clause this register earns is one more line of unmerged instruction.
+That curve is not this seat's to bend."*
+
+The second half of that sentence is what this entry retracts.
+
+### Why it happened technically
+
+`docs/standards/pm.md` §10 makes the PM's Tier B merge conditional on
+six criteria, and the fourth is one line: *"`gh pr diff --name-only`
+shows no Tier C path."* `prompts/` is a Tier C path. So the tier is a
+property of the **widest path in a branch's diff**, and a single charter
+file moves every other file in that branch to the owner's queue with it.
+
+This seat's branches carry both lanes. `#618`'s diff is thirteen
+charters plus `tools/seat/env-facts.mjs`, `tools/seat/own-prs.mjs` and
+their two test files: four working, tested tools on a path the PM merges
+in a daily pass, blocked behind 5,685 lines of charter prose on a path
+only the owner can merge.
+
+The comparison that settles it is in the same week and in this
+repository. Ursa's engineer wrote `tools/ensure-full-clone.sh`, the
+repair for the clone fault that half this register is about, in one pull
+request containing that one file. It reached `main` in two days. The
+eleven charter lines telling eleven seats to run it were written by this
+seat three days later and have not reached `main` in six.
+
+Same company, same week, same subject, two tiers, and the difference was
+decided by what else happened to be on the branch.
+
+### Why the previous entry could say it was not this seat's to bend
+
+Because the measurement it had was the merge queue's, and the queue is
+measured in pull requests and their ages. Nothing in this charter read
+the **age of the file a sibling seat's run is handed**, which is the
+only number that says whether a written rule is in force. This seat has
+instruments for the depth of the queue, the age of each pull request,
+the portfolio's completed runs, the board's filters and its own draft
+hygiene. It had none for its own output.
+
+So the freeze was legible as a fact about the owner's availability and
+not as a fact about this seat's branch layout, and the available reading
+was the one that required nothing.
+
+### Why the instrument could not simply be written
+
+Both ways this question can be asked wrongly are silent, and both answer
+that everything is fine. Measured on a clone configured exactly as this
+host hands one (`--depth 1 --single-branch --branch main`):
+
+- **Depth.** `git log -1 --format=%cI -- prompts/<seat>-agent.md`
+  returns the clone's graft commit for **every** charter, so all eleven
+  read as changed today and a 27.9-day freeze prints as lag `0.0`.
+- **Breadth.** `refs/prs/*` is empty and one `origin/*` ref resolves, so
+  the queue column is absent for every row and `6,509` pending lines
+  print as `0`.
+
+That is the shape Ursa's skill seat reported on 2026-11-01 about its own
+commit walk, in its own words: *"The error runs in our favour, which is
+worse."* `tools/seat/charter-lag.mjs` therefore proves it can see both
+properties before it prints a row, and exits 2 naming each fault and the
+repair when it cannot.
+
+### The class
+
+**A gate's tier is the maximum over its inputs, so mixing lanes in one
+artifact prices the cheap lane at the dear one.** The rule is not about
+charters. Any pipeline whose approval level is computed over a set
+charges every member the worst member's price, and the author chooses
+that set when they choose what to put in one branch. Nothing warns them,
+because each file individually satisfies its own tier.
+
+The companion failure is the reporting one: this seat recorded the
+consequence as an external constraint for sixteen windows. **When a
+curve is flat and the cause is named as somebody else's, check whether
+your own artifact layout is an input to it**, because that is the
+hypothesis that costs you something to test and the other one does not.
+
+### What the org should grow
+
+> **One tier per branch.** Split a run's output at the tier boundary the
+> gate reads, not at the lane boundary the author feels. If a window
+> produces knowledge surfaces and a charter amendment, that is two pull
+> requests, and the cheap one lands the same day.
+
+> **Measure the age of your own output surface, not only the depth of
+> the queue it sits in.** A rule is in force when it is merged. A seat
+> whose instruments all point outward cannot tell a rule it wrote from a
+> rule that binds.
+
+### Status
+
+Instrument shipped in this window: `tools/seat/charter-lag.mjs`, with
+`tools/seat/charter-lag.test.mjs` and the shallow-clone positive control
+recorded above. This window's own pull request carries no `prompts/`
+path, so it is Tier B and the PM can merge it in a pass.
+
+Not patched here, with the predicate that tells a later run it landed.
+The split of `#618` into a charter branch and a tools branch is this
+seat's to do and it is not done: closing or rewriting a readied pull
+request mid-queue while the PM is merging against it costs more than the
+split saves, and `#612` and `#618` are both readied and both young under
+§10 criterion 6. The check that distinguishes landed from pending:
+
+```bash
+# pending while this prints a tools/ path; landed when it prints nothing
+gh pr diff 618 --name-only | grep '^tools/'
+```
+
+The charter amendment stating "one tier per branch" is itself Tier C and
+belongs in `prompts/exo-agent.md`, which is the file this entry is
+about. It is written on the charter branch and named in the owner ask on
+the board rather than added to this branch, because adding it here would
+reproduce the defect inside the entry describing it.
