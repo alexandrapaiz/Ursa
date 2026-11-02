@@ -172,7 +172,13 @@ const header = LIVE
   : `# frozen at t=${PINNED_MS}ms, seeded Math.random, CSS animations rewound.` +
     (PIN_NOW === null
       ? '\n# the page clock is NOT pinned: a surface that reads it differs from itself.'
-      : `\n# the page's Date is pinned to ${new Date(PIN_NOW).toISOString()}, verified in the page. A clock stamped by a server is not covered; see lib/pin-clock.mjs.`)
+      : `\n# the page's Date is pinned to ${new Date(PIN_NOW).toISOString()}, verified in the page.`) +
+    // Said on both branches, because the gap is the same either way and a set
+    // whose header reports a pin is the set most likely to be trusted past
+    // what the pin covers. This tool runs the browser and cannot see whether
+    // the server behind it was preloaded, so it states the limit rather than
+    // a guarantee it is not in a position to give.
+    '\n# this covers the clock inside the page only. A timestamp a server stamps into a payload is pinned by lib/pin-clock.mjs, in the serving process, or not at all.'
 const settle = `# settled ${WAIT}ms after networkidle${UNTIL ? ` and after \`${UNTIL}\` appeared` : ''}${STATE ? `, with \`${STATE}\` run to enter the state` : ''} before each shutter.`
 // A frame set shot at a width nobody expects has to say so in its own
 // manifest, or the next run compares it against the charter's three and
