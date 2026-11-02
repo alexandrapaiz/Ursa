@@ -17054,3 +17054,28 @@ the owner to accept or reject.
   always holds the whole graph and never has to ask whether it does.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (market, message, 12th run) — Test whether MemTether's own round-trip scripts can ingest a Major export, now that a second open-source memory tool ships adapters for other products
+- Trigger: docs/market/landscape.md, this run's new MemTether entry — a
+  free, solo, Apache-2.0 "cross-client AI memory hub" whose own
+  repository ships `examples/mem0_migration.py` and a markdown export,
+  the same shape of round-trip surface the 2026-10-26 ledger entries
+  already proposed testing against MacPaw's `.mem` adapters and
+  MemoryLake's MCP/REST ingest.
+- What: two independent open-source projects (MemHub, tracked
+  2026-10-24, and now MemTether) both ship import adapters for other
+  tools but neither one, on the evidence read so far, writes an export
+  a frontier lab's own native memory (ChatGPT Memory, Gemini Personal
+  Intelligence, Claude's memory) could ingest automatically. Whether
+  Major's own export can round-trip through either tool is a cheaper,
+  more concrete test of the "symmetric portability" bar
+  (docs/market/positioning.md) than waiting for a vendor-side round
+  trip to appear, and it is the kind of test this seat cannot run
+  itself without touching Major's own product.
+- First step: whoever owns Major's export surface runs it against
+  MemTether's `mem0_migration.py` path (or the markdown export) the
+  same way the 19th/21st/26th/27th/28th runs' proposals already queued
+  for MacPaw and MemoryLake, and records the measured result rather
+  than a pass/fail guess.
+- Cost: $0
+- Status: proposed

@@ -902,6 +902,28 @@ correction overwriting a stale fact, let alone a user-facing
 edit/delete surface. Weakness against Ursa otherwise unchanged. Last
 observed 2026-10-25: [FourWeekMBA: Mem0's memory build cost](https://fourweekmba.com/ai-mem0s-memory-build-cost-more-than-full-context-study-finds/).
 
+Update 2026-11-02 (message, 12th run): a patched information-disclosure
+bug, published 2026-10-26 as CVE-2026-116575 (CVSS 6.3, medium), found
+that Mem0's own session-scoping code joined caller-controlled `user_id`,
+`agent_id`, and `run_id` values with unescaped `&`/`=` delimiters,
+letting a crafted identifier collide with another tenant's session key
+and read or write that tenant's memory. Fixed in Python SDK 2.0.18 and
+TypeScript SDK 3.1.6. This is the category's largest-by-adoption
+product (63k+ GitHub stars, used inside AWS's own agent tooling, this
+entry's 2026-10-25 update) shipping a real cross-tenant memory leak,
+not a hypothetical one. Read against docs/market/positioning.md's
+standing "trust has a provenance axis too" line: that entry has so far
+tracked compromise at the vendor level (an equity stake, a supply-chain
+breach of contractor data). This is the first instance in this file of
+the compromise sitting inside the memory product's own multi-tenant
+isolation code, the exact mechanism a user-owned, on-device-processed
+profile (CLAUDE.md §0, constraint 3) is built not to need, since there
+is no shared tenant boundary to collide across when raw processing
+never leaves the device. No pricing or positioning change argued by
+this alone; it is one more dated data point for an argument already on
+file. Last observed 2026-11-02: [Strix: CVE-2026-116575 — mem0
+Information Disclosure](https://strix.ai/cve/CVE-2026-116575).
+
 ### Letta (formerly MemGPT)
 
 What it is: an open-source platform for "stateful agents" — an
@@ -1320,6 +1342,63 @@ API output, tool calls) is not the same object as a
 provenance-resolved outcome record; Wire has nothing analogous to the
 revealed-preference flywheel Minor's pricing depends on. Last observed
 2026-10-26: [Wire: AI Memory Lock-in](https://usewire.io/blog/ai-memory-lock-in-blocks-your-own-product/), [Wire](https://usewire.io/).
+
+### MemTether
+
+What it is: a solo/small open-source "cross-client AI memory hub" —
+one physical local SQLite file, read and written by many separate AI
+coding tools (23 named: Claude Code, Claude Desktop, Cursor, Windsurf,
+VS Code, Zed, JetBrains, Cline, Roo Code, Gemini CLI, and others) via
+MCP, a REST API, and file-level pointers. New entry, found this run
+via the demand-signals ceremony (a general agent-memory news search)
+rather than a landscape sweep, then verified directly against the
+project's own GitHub repository and a CVE-adjacent dev.to writeup
+rather than taken from a headline. Who it serves: developers running
+several separate AI coding tools on one machine who want one shared
+memory instead of one per tool — the same audience MemHub (this
+category's Tencent entry) serves, with coding IDEs/CLIs in place of
+MemHub's chat/coding mix. Pricing: free, Apache-2.0, `pip install
+memtether`; no funding or company found, and the repository is itself
+a fork (`Fire162/MemTether`, forked from `Jah-yee/MemTether`).
+
+Strengths, read precisely: of every entry in this category, this one's
+own governance model is the closest architectural analog yet to
+CLAUDE.md §1's span-and-trajectory idea. "Corrections don't delete":
+a correction supersedes the prior fact rather than overwriting it, the
+old value stays queryable (bi-temporal `valid_from` vs `recorded_at`),
+every write joins a SHA-256 hash chain, and a conflict gate requires a
+human to adjudicate contradictory facts rather than silently picking
+one. That is a solo open-source project implementing, for its own
+narrower purpose (session hygiene across coding tools), something
+structurally closer to "survived, mutated, with a timestamp" than any
+funded competitor this file has found, including the better-resourced
+MemHub. Worth naming alongside MemHub as a second, independent proof
+of CLAUDE.md §0's fourth constraint ("the software is not the moat"):
+the specific data structure this project's business plan would need —
+a record of what changed, when, and why — keeps turning out to already
+exist somewhere, built by someone with no stake in Ursa's outcome.
+
+Weakness against Ursa: the shared store is one SQLite file on one
+machine, read by MCP-connected developer tools, not a profile that
+moves between separately-run, separately-vendored products the way a
+Major profile is designed to move between Claude, ChatGPT, and Gemini.
+The repository documents an `examples/mem0_migration.py` round-trip
+script and a markdown export, but nothing that writes into or reads
+from a frontier lab's own native consumer memory (ChatGPT Memory,
+Gemini Personal Intelligence, Claude's own memory) — the portability
+gap this category's every other entry also carries. Also worth naming
+as a discovery-method note, not a claim about the project itself: the
+same project, under the same author handle, was found cross-posted the
+same week into at least six different "awesome-list" and
+MCP-marketplace repositories (cline, kyrolabs, bradAGI, Arindam200,
+RyanAlberts, and a dev.to pair of posts) rather than organically
+discovered once — the self-submission pattern does not change what the
+code does, but it means the apparent breadth of "who's talking about
+this" overstates independent adoption, a distinction worth holding
+onto before citing adoption breadth for anything found this way again.
+Last observed 2026-11-02: [GitHub: Fire162/MemTether](https://github.com/Fire162/MemTether),
+[DEV Community: Your AI Agent Remembers Things. Who Audits What It
+Remembers?](https://dev.to/lanbass869cell/your-ai-agent-remembers-things-who-audits-what-it-remembers-50l).
 
 ### Skillsync (YC W26)
 
