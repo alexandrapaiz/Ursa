@@ -18,5 +18,22 @@ merged pull requests and finds a human writing the final text in 6 of
 them. The corrections were never missing. They were inside the pull
 requests.
 
+## The launch over the PR adapter
+
+`src/adapters/pr-launch.ts` is the launch: it turns one captured pull
+request into records on disk. `src/adapters/pr-command.ts` is the command
+layer over it, reached two ways, `ursa pr <projectPath> --pr N` and
+`cli.ts run --pr N --project <path>`, with one function under both.
+
+It exists as a named launch since 2026-11-02. Before that the same loop was
+inline in `cli.ts run`, and because it was never on the surface a person
+types, it asked none of the three questions `src/launch.ts` holds for every
+launch: it rebuilt an episode the user had erased, it never checked a record
+against the eighteen bounds, and it asked the `--min-chars` floor directly
+instead of through `clearsSizeFloor`, so a refusal-only record was dropped
+by a threshold aimed at something else. The drifts, the measurement on this
+repository's own pull request #645, and the two things the launch
+deliberately does not do are in `docs/design/pr-launch-parity.md`.
+
 Design, closures, failure modes and the exact commands:
 `docs/design/pr-adapter.md`.

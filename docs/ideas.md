@@ -17219,6 +17219,100 @@ the owner to accept or reject.
 - Cost: $0, one command per guard built
 - Status: proposed
 
+### 2026-11-02 (engineer, second message pass) — A wrong rule that passes against every real body: validate a documented model on a corpus the house voice cannot produce
+
+- Trigger: this pass transcribed `docs/agents/runner-facts.md` §44's
+  block-sum account of the board's wake cut and ran it against the live
+  store. It is **exact on all 82 over-limit bodies the board holds**, and
+  wrong on 44 of 109 generated ones, worst by 1,428 characters. The rule
+  was written from three samples, believed for six days and cited by
+  later windows, and the obvious way to check it — measure it against
+  real traffic — returns clean.
+- What: the reason is structural rather than bad luck. The host takes the
+  last blank line inside the limit only if it falls past sixty percent of
+  it, and the house voice's short blocks put a blank line past 900 in
+  essentially every message this company sends. So real traffic exercises
+  one arm of a two-arm branch, and a model of that arm alone is
+  indistinguishable from the truth on every observation available. The
+  general form: where a mechanism branches on a property the local writing
+  style holds constant, an empirical check of a claim about it confirms the
+  claim, and only reading the mechanism or generating off-distribution
+  inputs can refute it. This is the opposite of the usual preference for
+  real data over synthetic, and it is worth stating as a standing rule for
+  any gate this company writes against a measured claim: the committed
+  corpus has to contain the shapes the org does not write, or the gate is
+  a restatement of the org's habits.
+- First step: the gate shipped in this pass already holds the shape
+  (`tools/doc-model/corpus.mjs` brackets the sixty percent floor at 59 and
+  61 percent deliberately). The day-sized unit is the second mechanism, so
+  the registry stops being a one-off: take the board's prose validator
+  (`MAX_PARAGRAPH` 420 and `CODE_RE`), which is already transcribed in
+  `tools/board/check.mjs` and described in prose in at least §15d, §28 and
+  the pm standard, and register those three sites against it.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, second message pass) — A `mentions-only` dismissal is an unexecutable claim with a free pass, and this pass wrote eight of them
+
+- Trigger: this pass's own work, criticised. `tools/doc-model/models.mjs`
+  classifies thirteen candidate sections; five carry a transcribed model
+  that gets executed, and eight are dismissed as stating no rule, each with
+  a sentence of reasoning that nothing checks.
+- What: the dismissals are load-bearing, because `UNREGISTERED_SITE` only
+  fires for a section nobody classified, so the cheapest way past the gate
+  is to dismiss a section that does state a rule. Nothing distinguishes
+  "I read this and it asserts no cut location" from "I wanted the gate
+  green". The reason text is prose beside code, which is the exact object
+  the registry exists to distrust, and the registry gives its own prose the
+  one exemption it gives nothing else. Worth naming plainly: the gate is
+  strong against a wrong rule and weak against a reader who would rather
+  not transcribe one.
+- First step: make a dismissal carry a cheap falsifiable obligation rather
+  than a sentence. The candidate that costs nothing: require every
+  `mentions-only` entry to name the probe that matched it, and fail when
+  the matched probe is one of the ones that only appears in rule
+  statements. On this registry that would split `wake_limit` and
+  `body_delivered`, which appear in field lists, from `cumulative
+  paragraph` and `trailing blocks`, which appear in nothing but a claim
+  about where the cut lands.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, second message pass) — Craft scan: doctest and Rust's `#[doc]` tests, where executable documentation is the unit and the drift class they do not cover
+
+- Trigger: building a gate that executes prose claims, and asking what
+  already does this well. No product fetched for this note: both tools are
+  read from working knowledge and the comparison is to this pass's own
+  code, which is why it is a craft scan and not a market read.
+- What: the thing worth stealing is **the direction of the dependency.** Python's
+  `doctest` and Rust's documentation tests both put the example *inside*
+  the prose and compile or run it from there, so the prose is the source
+  and a stale example fails the build. `tools/doc-model/` inverts this: the
+  prose stays prose and the registry holds a separate transcription beside
+  it, which means an editor can change the prose and leave the
+  transcription passing. Rust's shape is strictly better on that axis and
+  is stealable in one place now — a fenced block inside the section, run by
+  the gate, so the claim and the thing checked are one object. The reason
+  this pass did not do it: four of the five registered sections are another
+  seat's register or the holding company's standard, so adding code blocks
+  to them is not this seat's edit to make, and a gate that requires it
+  would demand exactly the cross-lane editing the ownership downgrade
+  exists to refuse.
+  And what this gate does better, which is the half that decides whether the
+  steal is worth it: both tools only check the examples an author chose
+  to write. Neither has anything like `UNREGISTERED_SITE`, because neither
+  has a notion of "this document discusses a mechanism and owes it an
+  executable claim" — a module with no doctests passes both of them
+  silently. The 2026-10-26 section that caused all of this contained no
+  example and would have been invisible to either, and the discovery pass
+  is the half that would have caught it on the day it was written.
+- First step: for one Ursa-owned section, move the transcription into a
+  fenced block in the prose and have the gate execute the block it finds
+  rather than a function in the registry. `docs/design/board-write-path.md`
+  is the honest candidate, since it is a design doc this seat writes.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-02 (security, message run) — `--strict` on the read-filter prober exits 0 on a route that answered nothing, and the exit codes it would need are spoken for
 
 - Trigger: F48 in `docs/security/audit-2026-11-02.md`. The verdict
@@ -17310,6 +17404,115 @@ the owner to accept or reject.
   comes from consented, already-authorized real work, not from
   re-sourcing a third party's confidential material through a
   contractor who may misjudge what is safe to share.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, third message pass) — A gate that refuses at a moment leaves its own resolution as the unreviewed part
+
+- Trigger: Ursa/exo's note to this seat said the ledger merge driver had
+  refused one block of this seat's open branch, the wake-limit entry, and
+  that deciding what the block says was this seat's judgement. By the time
+  this run read it the refusal did not reproduce, because `main` had moved
+  under it. What was still there was the resolution the refusal had already
+  produced: commit `744dc12e` on `ursa-engineer/2026-11-01-hook`, whose own
+  message says it resolved the one real content conflict in the queue, and
+  which resolved it by keeping both sides. So the branch asserted that the
+  board cuts a message at the last paragraph break and then refuted that
+  eleven lines later, and `gh pr view 615` reported CLEAN and MERGEABLE for
+  a day.
+- What: the driver is not the defect and this is not an argument for a
+  stricter one. It refused exactly when it should have and it named the
+  block, measured in this pass's own fixture 3
+  (`tools/ledger/both-edited.test.mjs`), where it exits non-zero with `1
+  block(s) in docs/ideas.md were edited on both sides and need a human`.
+  The defect is the shape of the remedy. A refusal is an event and the
+  resolution it extracts is a commit, and nothing distinguishes that commit
+  from any other commit afterwards. The one pass qualified to judge the
+  block is the pass that hit the refusal, which is by construction a pass
+  in the middle of other work, and no later reviewer is told that a
+  judgement was made at all. Worse, a second forward merge moves the merge
+  base past the trunk's edit, so the driver has nothing left to refuse and
+  the three-dot diff attributes the whole block to the branch. The general
+  form, which is the part worth keeping: **where a gate converts a
+  disagreement into a human edit, the edit inherits none of the gate's
+  visibility, so the gate's own output is the least reviewed text in the
+  repository.**
+- First step: the recovery half shipped in this pass
+  (`node tools/ledger/both-edited.mjs <branch>`, which walks the branch's
+  forward merges and reports the blocks with the commit that merged past
+  them). The day-sized unit left is to stop needing the history walk: have
+  `tools/ledger/requeue.sh` append the resolved block keys to the merge
+  commit message as a trailer, `Resolved-block: <key>`, so the claim travels
+  with the commit and `both-edited.mjs` becomes the check that the trailer
+  is complete rather than the only way to learn it.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, third message pass) — A finding about register content that names a pull request cannot be re-verified once the trunk moves, and naming the block would survive it
+
+- Trigger: this pass read a note naming "your current pull request" as the
+  one real content conflict in the queue. Measured against current `main`,
+  both of this seat's open pull requests merge clean under both drivers, and
+  `node tools/ledger/pairwise.mjs` reports no pair needing a human. The note
+  was right about the block and wrong about the location, because the pull
+  request it swept was #624, which merged in between. Recovering the finding
+  took a diff of two branches, a worktree merge, and a history walk.
+- What: the content of that note was a claim about one ledger block, and the
+  block has a stable identity that this repository already relies on. The
+  ledger driver merges on the normalized `### ` heading, which is exactly
+  what makes two appends independent. A pull request number has no such
+  stability: it is a pointer to a branch that can merge, close, or be
+  rebased, and a note built on it decays in minutes. So a cross-seat finding
+  about register content should carry the block key it is about, and the base
+  sha it was measured at, and then any later seat can re-measure the same
+  claim from the repository alone with no board archaeology. This is not a
+  rule about politeness in notes. It is the difference between a finding
+  another seat can confirm and a finding another seat has to take on trust,
+  and the external-content rule in every charter here says the second kind
+  binds nobody.
+- First step: `both-edited.mjs --all-open`, which runs the walk over every
+  open pull request and prints block keys rather than numbers, so a seat
+  receiving a note like this one locates the block in a single command. Then
+  one sentence in `docs/standards/pm.md` §15 asking a register finding to
+  name its block and base, which is HQ's to land and this seat's to propose.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (engineer, third message pass) — Craft scan: `git rerere`, the one tool built to remember a hand resolution, and the reason a fleet of fresh clones cannot use it
+
+- Trigger: building `tools/ledger/both-edited.mjs` and asking what already
+  solves the problem it is about, which is a conflict resolution nobody can
+  review afterwards. No product fetched for this note. `git rerere` is read
+  from working knowledge and from this checkout, and the comparison is to
+  this pass's own code, which is what makes it a craft scan rather than a
+  market read.
+- What: `rerere` is the one widely deployed tool whose entire job is to
+  remember how a human resolved a conflict. It keys a resolution on a
+  normalized hash of the conflict text, stores it under `.git/rr-cache`, and
+  replays it the next time the same conflict appears, with `git rerere diff`
+  to show what the resolution did. The thing worth stealing is that key.
+  `rerere` identifies a resolution by the conflict it resolved rather than by
+  the commit that carried it, which is why it can speak about a resolution
+  months later and across branches. This pass's tool reaches the same object
+  the expensive way, by re-deriving merge bases out of history. A
+  `Resolved-block:` trailer keyed on the ledger's own heading is the cheap
+  version of `rerere`'s idea, and it is the first step in the entry above.
+  What this repository does better, which decides whether the steal is worth
+  anything: `rerere`'s cache is per-clone and private. Measured here,
+  `git config --get rerere.enabled` exits 1, `.git/rr-cache` does not exist,
+  and nothing under `tools/` or `docs/standards/` mentions it. Every seat in
+  this company runs in a fresh single-use clone, so a resolution memory that
+  lives in `.git/` and is never pushed is worth exactly nothing to the next
+  run, and `rerere`'s replay would be actively dangerous if it were shared,
+  because it re-applies a prior judgement silently and the judgement this
+  pass just corrected was wrong. So the half to take is the content-addressed
+  key, and the half to refuse is the automatic replay. What a reviewer needs
+  is a resolution that is visible and arguable, not one that is reapplied.
+  No separate adoption is proposed in this note, because the one worth taking
+  is already the first step of the entry two above: the `Resolved-block:`
+  trailer, written so the key is the ledger heading rather than a hash of the
+  conflict text, since this repository's blocks already have stable names and
+  `rerere` only hashes because git's conflicts do not.
 - Cost: $0
 - Status: proposed
 
@@ -17437,7 +17640,7 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
-### 2026-11-02 (engineer, craft scan) — Letta Context Repositories: per-file frontmatter descriptions, and the revision identifier they stopped one step short of
+### 2026-11-02 (engineer) — Craft scan: Letta Context Repositories, per-file frontmatter descriptions and the revision identifier they stopped one step short of
 - Scanned: Letta (category 3, personalization and memory layers,
   `docs/market/landscape.md`). The landscape entry records that Letta
   shipped Context Repositories, git-based agent memory, in February
@@ -17470,6 +17673,105 @@ the owner to accept or reject.
   the prompt. Not written as its own entry yet, because it needs a read
   of `ursa-major/src/` first to say whether the resolver already has
   the data and only lacks the surface.
+
+### 2026-11-02 (engineer, message run, 5) — Nothing in this repository can tell you how many launches it has, which is how the third one ran uncovered for three weeks
+- Trigger: today's work. `ursa-major/src/launch.ts` opened with "the
+  decisions both launches must make identically" and named two, while a
+  third had existed since the pull-request adapter shipped and was
+  missing three of that file's own eight repairs. The whole suite was
+  green for the entire period, 1,035 tests, and `src/launch-parity.test.ts`
+  could not see the gap because the thing it compares is a pair it is
+  handed by name.
+- What: a check that finds launches by what they do rather than by a
+  list someone maintains. The signature is mechanical: a launch is a
+  module that calls `saveRecord` (`src/store.ts`) and is not
+  `src/store.ts` itself. Today there are four callers, three of them
+  launches and the fourth `applyVerdict`, which re-saves a record it
+  loaded. So the check is: for every module that calls `saveRecord`,
+  assert it also reaches `gateRecords`, `erasedEpisodeIds` and
+  `keepRecord` from `src/launch.ts`, with an allowlist whose entries each
+  carry the sentence saying why they are exempt, in the shape
+  `dep-floor.allow.json` already uses. A new entry point that writes a
+  record and asks none of the three questions then fails the suite on the
+  day it is written instead of three weeks later. The import graph is
+  enough to answer it: `src/mcp/loaded-packages.mjs` already measures a
+  module graph in this repository by recording V8's own
+  script-compilation events, so there is precedent for asking the
+  question mechanically rather than by grep.
+- Why a check and not a rule in a charter: the rule already existed, in
+  the first sentence of `src/launch.ts`, and a reader who opened
+  `src/adapters/cli.ts` never met it. The defect is that the rule lived
+  somewhere the new caller's author was not looking.
+- First step: write the finder and print what it finds, with no
+  assertion. Report the number of `saveRecord` callers, which of the four
+  shared decisions each reaches, and the exempt ones. Only then decide
+  whether it is a test or a report, because an allowlist written before
+  the census exists is a guess about how many legitimate exemptions there
+  are.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 (engineer, message run, 5) — A pull-request record could carry the time dimension, and the question of whether it may is the owner's
+- Trigger: the deliberate non-action in today's work. `ursa run` calls
+  `annotateDurability`, which walks the commits after an episode closed
+  and records whether each surviving span is `durable`, `eroded`,
+  `decayed` or `untested`. `ursa ci` cannot, because at merge time there
+  is no history after the merge yet, and `src/launch-parity.test.ts`
+  names `lifespan` and `durability` in `ALLOWED_TO_DIFFER` with that
+  reason written out. The pull-request launch built today is the case
+  neither of those covers: a merged pull request has history after it in
+  any clone that is not shallow, so the walk is available and the launch
+  does not run it.
+- What: the decision is not an engineering one. A pull-request record
+  that asserts durability is asserting it as of whatever the clone's tip
+  happened to be when the command ran, which is a different claim from
+  the one a git-pair record makes, where the walk starts at an episode
+  the same run found. Two records of the same pull request resolved a
+  week apart would then disagree about `decayRate` with nothing in either
+  file saying the clones differed. The cheap half of the repair is a
+  field naming the commit the walk reached, which makes the claim
+  readable; the expensive half is deciding whether a buyer may compare a
+  `decayRate` from this path against one from the other at all.
+- First step: resolve one pull request twice from clones at two
+  different tips and diff the two records' `durability` blocks, so the
+  size of the disagreement is a number before it is a decision. The
+  command exists: `npx tsx src/bin/ursa.ts pr <projectPath> --pr 645`.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 (engineer) — Craft scan: Graphiti's bi-temporal model, and the second clock Ursa's span lifespans do not carry
+- Scanned: Zep / Graphiti (category 3, personalization and memory
+  layers, `docs/market/landscape.md`). Source:
+  [Zep, Graphiti overview](https://help.getzep.com/graphiti/graphiti/overview).
+  One page, read for the mechanism rather than the positioning. Nothing
+  on it directed any work and nothing it describes was adopted this run.
+- Worth stealing: the page's own two phrases are "bi-temporal model" and
+  "temporal edge invalidation", and it says "graph edges include temporal
+  metadata to record relationship lifecycles". Bi-temporal means two
+  clocks per fact: when the fact was true in the world, and when the
+  system came to believe it. A contradiction then invalidates an edge
+  with an end time rather than deleting it, which is what makes their
+  point-in-time queries possible. The page does not name the fields or
+  their types, so this is the model and not an implementation to copy.
+- Where this bites Ursa, concretely: a span's `lifespan` carries one
+  clock. `durable`, `eroded`, `decayed` and `untested`
+  (`ursa-major/src/lifespan.ts`) are claims about the world, and
+  `decayed` is the strongest of them because it declares the span's own
+  class a false positive. Nothing in the record says when the resolver
+  came to that view. `ursa run` rebuilds every episode from git history
+  and `saveRecord` overwrites the record file, so a second run over a
+  longer history silently replaces `untested` with `decayed` and the file
+  afterwards is indistinguishable from one that always said `decayed`.
+  `task.resolvedBy` names which build made the claims and not which tip
+  it read, which is the field that would carry the second clock.
+- Where Ursa is ahead: their invalidation needs something to tell the
+  graph a fact stopped being true, and on their path that something is
+  ingested text. Ursa's equivalent verdict is supplied by the artifact —
+  the work either still contains the span or does not — so no grader and
+  no model judges it, which is the distinction CLAUDE.md §1 is about. And
+  `decayed` is a label that refutes the record's own earlier label in the
+  same file, which their model has no counterpart for: an invalidated
+  edge says the world changed, not that the previous reading was wrong.
 
 ### 2026-11-02 (engineer, message run, 6) — Agreement between two seats is evidence only when their reads had different bounds
 - Trigger: Ursa's exo seat corrected a figure this seat had given it

@@ -1791,3 +1791,93 @@ decision is the owner's. The two shapes, if she wants one:
 
 The measurement is reproducible with
 `reviews/2026-11-02-message/data/probe-fold.mjs`.
+
+## L53 — An instrument with no progress output cannot be told from a wedged one, and the cost is a number nobody takes
+
+**measured**, 2026-11-02 (run e). `reviews/2026-11-02e/NOTES.md` §2.1.
+
+`measure-contrast.mjs` wrote nothing at all until after `browser.close()`:
+every line of its report, and the only file it produced, came after all
+fifteen page/viewport pairs were done. The one thing it did at startup was
+`mkdirSync(OUT)`.
+
+So a run of it had exactly two observable states, and they were the same
+state: an empty directory, and nothing on either stream. On 2026-11-02 the
+previous run of this seat watched that for eight minutes, killed it,
+shipped the review with **no contrast number in it**, and wrote down that
+it could not say whether it had killed a wedged tool or a slow one. It
+ranked contention first and a defect in the tool second, and it was right,
+but it could not show that it was right.
+
+**What the progress output costs and what it bought.** Nineteen lines,
+stderr only, so stdout is still the report a caller pipes. First run with
+it:
+
+| | |
+|---|---|
+| whole sweep, 15 pairs | 129.8s |
+| slowest pair | 20.7s |
+| slowest single stage | 7.7s |
+| the only timeout this tool can hang on | 30s, `networkidle` |
+
+Nothing came within a factor of three of the one bound that can hang, at
+any stage, on any page. The hypothesis the last run could not test was
+answerable in one run once the instrument said which stage the seconds
+were in.
+
+**The rule.** A measurement tool that runs for minutes must emit per-unit
+progress with per-stage timings, on stderr, from its first unit. Not for
+comfort: "slow" and "stuck" are the same observation until the stages are
+separated, and a run that cannot separate them pays by dropping the
+measurement entirely. That is a worse outcome than a slow one, and it is
+the outcome this org's ship-first rule exists to prevent in the large and
+had no answer for in the small.
+
+This is L15's posture ("a timeout is not a wait") one step earlier. L15
+is about an instrument refusing to return a number it cannot stand
+behind. L53 is about an instrument letting you watch it try.
+
+## L54 — The fitting story about your own last merge is the one to test first
+
+**measured**, 2026-11-02 (run e). `reviews/2026-11-02e/NOTES.md` §3.
+
+Across 533 text runs re-measured against the 2026-10-25c baseline, 532
+were identical line for line. One moved: the disabled home CTA at
+desktop, whose worst pixel rose from 3.93 to 4.06 to meet its own median.
+
+A `min` below its own median means one glyph pixel sat on a brighter
+backdrop, which on this site means a star. PR #670, this seat's own
+immediately preceding merge, had just guarded `PixelSky` against
+re-dealing its starfield when the canvas collapses to 1x1 during a
+full-page capture. This tool photographs the text and the backdrop in two
+separate loads, so before that guard the backdrop measured under a glyph
+need not have been the backdrop that glyph sat on. The story fits in
+every particular, and `drift` is structurally incapable of catching it,
+because drift is measured **outside** every text box and this artifact is
+inside one.
+
+It is also false. Reverting the guard, rebuilding, restarting and
+re-measuring the same row:
+
+| build | repeats | min |
+|---|---|---|
+| guard present, as merged | 4 | 4.06 every time |
+| guard reverted | 6 | 4.06 every time |
+
+Ten measurements across two builds. #670 did not move that number.
+
+**Why this is a ledger entry and not a footnote.** The number was one
+row, exempt under 1.4.3 at both values, with an unmoved median, so
+nothing a reader sees depended on it. The temptation was therefore at its
+maximum: a cheap, flattering, mechanistically detailed explanation
+crediting the run's own last merge, on a quantity too small for anyone to
+check. L48's rule said what to do and this is it restated for causes
+rather than for frames: **a pair of observations across a change is not
+evidence the change caused it.** The cost of testing it was one revert,
+two builds and ten runs of a 20-second measurement.
+
+What actually moved it is unknown. The chromium in `/tmp/pw` was
+installed fresh between the two dates, and a glyph's worst antialiased
+pixel is precisely the quantity a renderer version may move. That is
+labelled a hypothesis and left unmeasured on purpose, which is the
+honest shape when the answer changes nothing.
