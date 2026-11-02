@@ -72,8 +72,8 @@
 // and the path that falls out is the last one". That was true of the case it
 // was found in, where one `ledger` diagnostic preceded the tree id. It is not
 // a constant. The `register` driver writes one line per covered path it
-// touches plus two more lines for each refusal, so on `refs/prs/668` the
-// offset is FIVE:
+// touches plus two more for each refusal, so on `refs/prs/668`, BEFORE this
+// module existed, the offset was FIVE:
 //
 //   1 register driver: docs/agents/runner-facts.md merged by entry identity ...
 //   2 register driver: docs/agents/learning-log.md merged by entry identity ...
@@ -82,12 +82,20 @@
 //   5 register driver: wrote git's own line-based merge into the working tree ...
 //   6 <the tree object id, which a one-line skip would still miss by four>
 //
-// So a sweep "fixed" by dropping one line, or by reading from line two, is
-// still wrong, and it is wrong by an amount that depends on the branch rather
-// than on the tool. `collapseCost` reports that number for the pair actually
-// measured, so no seat has to estimate it. The only safe rule remains the one
-// `docs/agents/merge-order.md` already states in bold -- do not collapse the
-// streams -- and this number is how expensive ignoring it was, this time.
+// So a sweep "fixed" by dropping one line, or by reading from line two, was
+// still wrong, and wrong by an amount that depends on the branch rather than
+// on the tool.
+//
+// AND THIS MODULE MADE THAT NUMBER WORSE, which is the reason it is printed
+// rather than written down. The attribution line below is one more line of
+// stderr per driver invocation, so the same pair now costs NINE, measured
+// after the change on the same two commits. A document stating "five" would
+// have been stale the moment it was committed, by the commit that stated it.
+// `collapseCost` reports the figure for the pair actually measured, so no seat
+// has to estimate it and no seat has to trust this paragraph. The only safe
+// rule remains the one `docs/agents/merge-order.md` already states in bold --
+// do not collapse the streams -- and this number is how expensive ignoring it
+// would have been, on this pair, today.
 //
 // WHAT IS MEASURED AND WHAT IS ASSUMED, stated because the number above rests
 // on an ordering. That all five stderr lines land before the tree id was
