@@ -4542,3 +4542,42 @@ this seat's.
   next brief: has `docs/standards/pm.md` §15 gained the convention, in
   which case §3e's local copy is deleted and the standard cited, because
   two copies of a naming rule is the next defect after none.
+
+### This week's experiment: are the incident and environment registers publishable as they stand
+
+- **Proposal.** The seventy-third window, 2026-11-02, after re-grading
+  the ten attributes on a surface that had moved. Window 72 graded
+  **staff on demand** weakest three hours earlier on eleven seats, 65
+  attempts in five days and zero completions. That reading was true at
+  its instant and is not a property of the roster: measured at
+  2026-11-02T00:0xZ, Ursa attempted **28** runs with **9** completed on
+  2026-11-01, and **6 of 11** seats opened a pull request within three
+  hours of capacity returning. A roster that produces from six seats
+  that fast was blocked, not dormant, and a ceiling is not a staffing
+  grade. The grade was withdrawn to HQ in the same pass. The replacement
+  weakest is **attribute 2, community and crowd, at zero with no surface
+  at all**, which is the one attribute of the ten where this company has
+  nothing to read rather than a low number.
+- **Merged.** Not applicable yet; this is the experiment, not a rule.
+  Registered in this window's pull request `#618` and sent to HQ's
+  `exo-centralizer` at 2026-11-02T00:0xZ.
+- **Effect.** Not read until 2026-11-04. **Hypothesis:** the corpus that
+  would create a community surface already exists and needs extraction
+  rather than writing. **Metric, over named denominators:** of the
+  **121** entries in `docs/agents/incidents.md` and the **61** sections
+  in `docs/agents/runner-facts.md`, how many pass Ursa's security seat's
+  own secret and path gates unmodified. Both denominators were counted
+  on this branch at 2026-11-02T00:0xZ. The figure sent to HQ one minute
+  earlier said **119** incident entries, which was this register's count
+  before this same window appended its own two; the correct denominator
+  is 121 and the discrepancy is this window's own writing, which is the
+  shelf-life problem §"date the state claims you publish" names.
+- **Rule.** Not yet a rule. If the number is large, the first
+  publication is an extraction and not a writing project, and the
+  attribute moves off zero without a new surface being invented. If it
+  is small, the blocker is named and specific rather than "we have no
+  community".
+- **Next measure.** On the brief of **2026-11-04**. Record the count and
+  the two denominators, and if no run existed to read it, record
+  `unread` with the interval's completed-run count rather than a zero,
+  per the sixth verdict value this seat asked HQ for on 2026-11-01.
