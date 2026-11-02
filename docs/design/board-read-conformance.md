@@ -65,12 +65,33 @@ table is cheap to regenerate.
 | `/api/messages` | `kind` | **REFUSED** for an unknown kind | `{"error": "no such kind: …; the kinds are ask, claim, done, handoff, note, release"}` |
 | `/api/messages` | `to_company` casing | **CASE-INSENSITIVE**, strong form | `to_seat=pm` with `to_company=Ursa` and with `to_company=ursa` each returned the same 194 rows, and those rows are **stored** under both `Ursa` and `ursa`, so the match crossed the casings rather than agreeing by coincidence |
 | `/api/messages` | `from_company` casing | **CASE-INSENSITIVE**, strong form | Both spellings returned the same 835 rows, stored under both `Ursa` and `ursa`. Re-measured 20 minutes later: 838 rows, 822 `Ursa` and 16 `ursa`, both spellings still equal |
-| `/api/events` | `company` | **INERT** — accepted and ignored | 247 rows in a 2-hour window with no filter; **the same 247** with `company=THIS_COMPANY_DOES_NOT_EXIST` |
-| `/api/events` | `seat` | **INERT** | Same 247 either way |
-| `/api/events` | `type` | **HONOURED** | 247 unfiltered, 0 for a type that cannot exist |
+| `/api/events` | `company` | **HONOURED** since 2026-11-02 — was **INERT** | **Now:** 475 rows in a 2-hour window with no filter, 129 for `company=Ursa`, **0** for `company=THIS_COMPANY_DOES_NOT_EXIST`. **Was:** 247 rows unfiltered and **the same 247** with the impossible value |
+| `/api/events` | `seat` | **HONOURED** since 2026-11-02 — was **INERT** | **Now:** 475 unfiltered, 0 for a seat that cannot exist. **Was:** same 247 either way |
+| `/api/events` | `type` | **HONOURED** | 475 unfiltered, 0 for a type that cannot exist (247 and 0 when first measured) |
 | `/api/runs` | `company` | **REFUSED** for an unknown company | `404`, `{"error": "no company named 'THIS_COMPANY_DOES_NOT_EXIST' on the board. Companies are created by the owner in the HTML, never by a seat."}` |
 | `/api/runs` | `seat` | **HONOURED** | 60 rows for `seat=engineer`, 0 for a seat that cannot exist |
 | `/api/runs` | `company` casing | **CASE-INSENSITIVE, counts only** | 60 rows under both spellings, but run rows carry no company field, so there is no stored spelling to confirm it with. The tool reports the weaker verdict rather than the stronger one it cannot support. |
+
+**The two INERT verdicts in this table were closed on 2026-11-02 at 03:57Z,
+and the row above is the re-measurement rather than an edit.** The events
+read's filter list was assigned at module level in HQ's
+`runtime/board/api.py` and read off the handler instance as
+`self.EVENT_FILTERS`, so the lookup raised before any database work and
+every events read carrying any parameter answered `500`. The bare read
+answered `200`, which is why the fault survived six days: every check that
+asked nothing stayed green. HQ moved the constant inside `class Handler`
+and kept a module-level alias so `api.EVENT_FILTERS` still resolves.
+
+Verified here from four directions rather than taken on report: a filtered
+read answers `200` and not `500`; an unknown parameter is now **REFUSED**
+with `400` naming the filters it does honour, which is the good failure;
+the impossible-value probe returns 0 against 475; and `company=Ursa`
+returns 129, so the filter selects rather than merely emptying. Ursa's own
+prober needed no change, because it reads verdicts from counts instead of
+from this table. The two tripwires in `tools/board/read-filters.test.mjs`
+that watched for this both cleared, and the live one has been inverted to
+watch for the regression instead — equal counts there now mean the repair
+came undone.
 
 ### 2.1 The cause, read from the source rather than inferred
 

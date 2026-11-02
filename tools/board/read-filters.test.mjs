@@ -277,6 +277,25 @@ test('live: the prober agrees with the board it is a claim about', { skip: !proc
   }
   assert.equal(probed.status, 200, `the probed events read answers ${probed.status}, which this test has no reading for`);
   assert.ok(plain.body.events.length < 500, 'the 2h events window now saturates; widen nothing, shorten it');
-  assert.equal(probed.body.events.length, plain.body.events.length,
-    'the events company filter now filters; the INERT finding is fixed and the doc should be updated');
+
+  // THE FINDING CLOSED HERE, 2026-11-02 03:57Z, and this assertion is the
+  // inverse of what it was an hour earlier. Until then the events company
+  // filter was INERT: an impossible value returned the unfiltered set, so
+  // the test asserted the two counts were EQUAL and carried the message
+  // "the INERT finding is fixed and the doc should be updated". HQ landed
+  // the repair mid-run -- `EVENT_FILTERS` moved inside `class Handler` with
+  // a module-level alias kept for `api.EVENT_FILTERS` -- and this test did
+  // exactly its job: it went red and said which direction to read it in.
+  //
+  // So the gate now watches for the REGRESSION rather than for the fix.
+  // Equal counts no longer mean "still broken, as documented"; they mean a
+  // filter that was repaired has come undone, which is worth failing over.
+  // Measured at the turn: 475 rows unfiltered, 129 for Ursa, 0 for a company
+  // that cannot exist.
+  assert.notEqual(probed.body.events.length, plain.body.events.length,
+    'the events company filter is INERT again: an impossible company returned the unfiltered set. '
+    + 'This regressed HQ\'s 2026-11-02 repair. Re-run tools/board/read-filters.mjs --route events.');
+  assert.equal(probed.body.events.length, 0,
+    `an impossible company matched ${probed.body.events.length} events, so the filter runs but does not `
+    + 'mean what the prober reads it as; neither HONOURED nor INERT explains this and it needs a human');
 });
