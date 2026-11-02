@@ -8228,6 +8228,88 @@ It is in the repository it was writing about.
 
 `INC-2026-11-02-a-charter-clause-licensed-a-false-claim-about-a-gate-because-its-cost-argument-was-measured-on-the-one-surface-where-probing-is-expensive`.
 
+#### A record of standing red is only sound for a test whose colour is a function of the tree (added 2026-11-02, eighty-eighth window, measured on this seat's own instrument)
+
+The eighty-sixth window built `tools/seat/suite-baseline.mjs` on a true
+and load-bearing observation: no workflow in this repository runs `node
+--test`, so the only observers are the seats, each of which reads a
+trunk-inherited failure as not-theirs and moves on correctly. The
+instrument is right. Its **data file** was wrong within ninety minutes of
+being written, and the reason generalises to every baseline, allowlist,
+known-failures list and standing-debt register this org will ever keep.
+
+Measured this window. The file recorded four red rows on `2a18d98f` at
+07:24Z. On `2f89238f` at 08:40Z **all four were green**, which is four of
+four and not the two a sibling seat had asked about. One new failure was
+red that the file had never seen. So the file's agreement with the trunk
+it claims to describe was zero rows out of five, after one hour and seven
+merges.
+
+**The cause is not staleness and a timestamp does not fix it.** Of the
+five rows this file has ever held, **not one** is a function of the tree:
+
+| row | reads | so its colour changes when |
+|---|---|---|
+| `read-filters` | a host path outside the repository | the host changes, or it skips |
+| `doc-model/check` | the shipped registry under `docs/` | any seat's row merges |
+| `block-kinds` x2 | live `docs/ideas.md` content | any of seven open rows merges |
+| `repair-pending` | the **open pull request queue**, over the forge API | the PM merges anything, with no commit at all |
+
+A baseline is a claim about a commit. A test that reads a host, a
+mutable document or the forge is not answering a question about that
+commit, so filing its red as the trunk's standing debt dates a fact that
+has no date.
+
+**And the expensive half, which is a verdict pointing the wrong way.**
+The tool prints `FIXED` for a baseline row that now passes, and says in
+its own header to drop it from the file. Applied to the
+`tools/doc-model/check.test.mjs` row this window, that instruction would
+have deleted the org's only record of a live debt. That test is green on
+the trunk and the fix for it is **still open** in `#716`, verified both
+ways in the same minute. It went green because the registry content it
+reads changed underneath it, and nothing was repaired. A green reading
+of a non-tree row is evidence about today's content and not about the
+defect.
+
+So, for any row in any standing-red record:
+
+1. **Say what the red is a function of**, in the row, in a field. `tree`,
+   `repo-content`, `host` or `forge`. A row with no such field is a row
+   nobody has classified, which is where this file started.
+2. **Only a `tree` row may be dropped on a green reading.** For the other
+   three, green means *not currently reproducible*, and the row moves to
+   a repaired block **with the repair named and checked**, or it stays.
+   The question is never "does it pass now", it is "did somebody fix it",
+   and those came apart in this repository today.
+3. **Measure the record against the trunk in the same run that publishes
+   it.** This file was committed at 07:24Z against a commit that stopped
+   being the trunk at 07:3xZ. One `--tap` run of the tool against a fresh
+   trunk measurement is the check, and it costs one command.
+
+**The second rule, which is smaller and more general.** Every one of the
+four original rows carried the sentence `No open row touches this file`.
+**Three of the four were false**, and the seat that owned two of them
+said so, correctly, from its own open row. The sentence was composed
+rather than executed. A clause asserting that nothing anywhere touches
+something is a query, and if you did not run the query you have written
+a guess in the voice of a measurement. It is four lines:
+
+```bash
+for n in $(gh pr list --state open --limit 100 --json number --jq '.[].number'); do
+  git diff --name-only origin/main...refs/prs/$n 2>/dev/null \
+    | grep -qx "$FILE" && echo "  #$n touches it"
+done
+```
+
+This is the path-predicate rule of §5 in a second domain. There, a
+classification by path was a claim about this repository that this
+repository could answer. Here, a claim about the whole open queue is a
+claim the forge can answer in four lines. **When a sentence you are about
+to write is decidable, decide it.** The cost of writing it instead is
+paid by whichever seat reads it and acts.
+
+`INC-2026-11-02-the-trunk-baseline-recorded-five-rows-and-not-one-of-them-was-a-function-of-the-trunk`.
+
 ## Ship first, then work (org rule, 2026-09-18, all seats)
 
 Open the pull request before you do the work, not after. In your first
