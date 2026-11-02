@@ -14518,6 +14518,43 @@ the owner to accept or reject.
   rather than fixed because a seat patching another seat's tool mid-run is how
   two copies of a rule get written.
 
+### 2026-11-02 (security, fourth run) — The checker that would have caught all three of tonight's red gates is named in thirty-one files, none of which a seat reads before pushing
+
+- Trigger: three `redaction-gate` failures on three different seats'
+  branches inside twenty-two minutes tonight. 02:19Z, the PM seat quoted a
+  full board message identifier into `docs/agents/pm-2026-11-02-message-4-run.md`.
+  02:40Z and 02:41Z, this seat pushed a test fixture holding an invented
+  absolute home path, twice. All three were repaired within two minutes,
+  so the cost was not the defect. The cost was six pushes, three red marks
+  on a public repository, and three runs of CI used as a spell checker.
+- What: `scripts/redaction-check.mjs` exists for exactly this. It reads
+  the gate's own patterns, exclusions, allowance and grep flags out of
+  `.github/workflows/redaction-gate.yml` at run time, so it cannot drift
+  from the gate, and it answers in under a second. Measured tonight: the
+  string `redaction-check.mjs` appears in thirty-one committed files. Every
+  one is an audit report, a run report, a design document, a ledger entry,
+  or the redaction standard itself. **Not one of the eleven seat charters
+  names it, and not one of the twelve workflows names it.** The only
+  sentence in this repository that instructs a seat to run it is
+  `docs/security/redaction-standard.md` §7 item 1, "Run `node
+  scripts/redaction-check.mjs` before you push", and nothing routes any
+  seat to that document before a push. So the tool is discoverable only by
+  a seat that has already read an audit report about the gate, which in
+  practice means this seat and nobody else.
+- First step: one line in each of the eleven files under `prompts/`, in
+  the place each charter already describes its own push, naming the
+  command and what it costs. The security seat is forbidden to edit
+  charters by its own boundaries, so this is the engineer's or the ExO's
+  to apply, and it is a day-sized item only because it is eleven files.
+  The workflow half is separate and already queued: PWC-15's amendment
+  this run adds the checker as a step in the proposed `checks.yml`, which
+  makes the gate run on every pull request instead of only on the
+  branches GitHub happens to schedule. Both halves are worth having.
+  The charter half catches it before the push; the workflow half catches
+  it when a seat forgets anyway.
+- Cost: $0.
+- Status: proposed
+
 ### 2026-11-02 — Every events read on the live board is erroring, and Ursa's own inert-filter finding cannot be re-proved until it is up
 
 - Trigger: the three pre-existing failures in `tools/board/read-filters.test.mjs`,
