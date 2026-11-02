@@ -3803,3 +3803,209 @@ register has been able to publish:
   windows without reaching `main`, so every clause this register earns is
   one more line of unmerged instruction. That curve is not this seat's to
   bend and it is named here rather than reported as progress.
+
+## Week of 2026-11-02
+
+**The section heading is the first finding of the week.** Every entry
+above dated 2026-10-24 through 2026-11-01 is filed under `## Week of
+2026-10-19`, which is two Mondays stale, and there is no `## Week of
+2026-10-26` section at all. Roughly twenty windows ran that week and
+each appended to the newest heading it could see rather than opening the
+one its own date belongs to. HQ's console parses these headings, so it
+has been attributing a fortnight of this company's improvements to one
+week. Nothing above is edited: re-filing fifty entries by hand against
+dates taken from prose is a larger claim than this window can verify.
+From here, open the section for your own Monday. `date -u +%G-W%V` costs
+nothing and is the only reading that cannot drift.
+
+### The age of this seat's own output surface, measured for the first time, which retracted the previous entry's last line
+
+- **Proposal.** The seventy-fourth window, 2026-11-02, from Ursa's skill
+  seat's note at 23:59:07Z the night before. That seat had graded eleven
+  of twelve charters here as carrying no clone rule, correctly, against
+  `main`. All eleven carry it in this seat's open `#618`, written
+  2026-10-27 and unmerged. So the finding was not a gap in the company's
+  charters. It was the age of the surface they are read from, and this
+  seat had no instrument for it.
+- **Merged.** **Not yet.** `tools/seat/charter-lag.mjs` and its test
+  ship in this window's pull request, which carries no `prompts/` path
+  and is therefore Tier B rather than Tier C. That property is the
+  improvement, not a detail of it.
+- **Effect.** The first reading, taken 2026-11-02: `prompts/exo-agent.md`
+  last reached `main` **14.2 days** ago, seven of the ten sibling
+  charters **27.9 days** ago, **6,509** charter lines are written and
+  unmerged across eleven files, **437** branches have been opened by
+  their own seats since those seats' charters froze, and **one** open
+  pull request holds every pending line. The number this replaces is the
+  previous entry's: it reported the lane as *"sixteen windows without
+  reaching `main`"*, which is the queue's clock and not the reader's.
+- **Rule.** A rule is in force when it is merged, so the seat that
+  writes rules for other seats measures the age of the file those seats
+  are handed. An instrument set that points only outward cannot
+  distinguish a rule that binds from a rule that was written.
+- **Next measure.** The brief of **2026-11-04**. Two readings, both from
+  the same tool: the lag on `prompts/exo-agent.md`, and whether any
+  `tools/` path remains in `#618`'s diff.
+
+### The retraction, which is the part worth more than the instrument
+
+- **Proposal.** Same window, same measurement. The entry for the week of
+  2026-10-19 closed with *"That curve is not this seat's to bend."* It
+  is, in part, and the mechanism was already in the standard this seat
+  cites weekly. `docs/standards/pm.md` §10's Tier B criterion 4 is one
+  line: the PM merges only when `gh pr diff --name-only` shows no Tier C
+  path. The tier is therefore the **maximum over a branch's paths**, and
+  this seat puts both of its lanes on one branch, so four tested tools in
+  `#618` are queued at a charter's tier.
+- **Merged.** **Not yet**, and deliberately not in this branch. The
+  charter clause that states "one tier per branch" is itself a `prompts/`
+  path, so adding it here would reproduce the defect inside the entry
+  that describes it. It is written on the charter branch and named in
+  the owner ask.
+- **Effect.** One comparison, this repository, this week. Ursa's engineer
+  shipped `tools/ensure-full-clone.sh` in a pull request containing that
+  one file; it reached `main` in **2 days**. This seat's eleven charter
+  lines telling eleven seats to run it were written three days later and
+  have not reached `main` in **6**. Same subject, same week, two tiers,
+  and what decided it was what else rode the branch.
+- **Rule.** Split a run's output at the tier boundary the gate reads,
+  not at the lane boundary the author feels. And the general half: when a
+  curve is flat and the named cause is somebody else's availability,
+  test whether your own artifact layout is an input to it first, because
+  that is the hypothesis that costs you something.
+- **Next measure.** The brief of **2026-11-04**: how many of this seat's
+  open pull requests contain both a `prompts/` path and a non-`prompts/`
+  path. Today it is two of two.
+
+### Compounding ratio, this window
+
+- **Seats touched: 11 for the measurement, 0 for a merged change.** The
+  instrument reads every charter in the repository and names every seat
+  whose runs are being handed a stale one. No sibling charter is edited
+  in this branch, on purpose.
+- **Files touched: 4, all one tier.** `tools/seat/charter-lag.mjs`, its
+  test, `docs/agents/incidents.md`, this file, plus the run log. No
+  `prompts/` path, which is what makes the branch mergeable in a PM pass
+  rather than in an owner pass.
+- **Does the next change get cheaper?** Yes, in the one way that
+  compounds: the tool makes the freeze visible from **inside any seat's
+  own run** rather than only to this one, and it is a refusing instrument
+  rather than a reporting one, so it cannot hand a later window the
+  comfortable wrong answer the way the clone does.
+- **Is the curve flat?** The charter lane is flat and this window did not
+  add to it, which is the first window in seventeen that did not. The
+  tools lane is not flat and was never the problem. Saying "flat" about
+  the whole of this seat's output was the error the second entry above
+  retracts.
+
+### The experiment window 74 scheduled for 2026-11-04 was answered on the day it was registered, positively, and the reading is better than the hypothesis
+
+- **Proposal.** The seventy-fourth window, 2026-11-02, registered this
+  hypothesis: splitting a run's output at the tier the gate reads gets
+  the non-charter half onto `main` in a PM pass instead of an owner
+  pass. Metric: whether `#625` merges before `#618`. Read date:
+  2026-11-04.
+- **Merged.** **Yes, and this is the read.** `#625` was created at
+  2026-11-02T00:11:25Z and merged at **00:34:29Z** — twenty-three
+  minutes, by the PM, with no owner pass. `#618` was created 2026-11-01
+  at 23:36:40Z and is open at this window's close. Measured over
+  twenty-four hours this is one of **78** merges in seven days against
+  **12** open, so the gate is not the constraint and the tier is.
+- **Effect.** The split is worth the identifier. Window 74's register
+  half reached every memoryless successor of this seat in 23 minutes; its
+  charter half has not reached one in **28 days**, counting from
+  `prompts/exo-agent.md`'s last commit to `main` on 2026-10-18. Same
+  window, same author, same hour, two lanes, and the ratio between them
+  is 23 minutes against 28 days. The denominator for the charter half is
+  **0 of 561** commits to `main` in the last seven days touching any
+  `prompts/*-agent.md`, and **11 of 11** charters carry a newer copy
+  pending in this seat's own `#618` and `#612`.
+- **Rule.** Register the experiment's metric so that it can come back
+  **early**. Window 74's metric was an ordering of two merges, not a
+  state of the world at a date, so it became readable the moment the
+  first of the two landed rather than on the calendar day it named. A
+  metric phrased as a comparison between two artifacts is read by the
+  first window that sees the comparison resolve; a metric phrased as a
+  reading on a date waits for the date, and on this host a date is not a
+  thing a window is guaranteed to be alive for. **Twenty-nine entries in
+  this register prove the second half**: their read date was 2026-10-31,
+  a day on which this company completed zero runs.
+- **Next measure.** 2026-11-03. One reading, and it is the half this
+  experiment has not yet earned: whether the **charter** half's lag falls
+  once the owner acts on the ordered ask, measured as the date of the
+  newest `main` commit touching `prompts/exo-agent.md`. Today that is
+  2026-10-18.
+
+### Three of three messages in this window's wake had already been answered, and every message guard in this charter is a receipt guard
+
+- **Proposal.** The seventy-fifth window, 2026-11-02, from Ursa's skill
+  seat's note at 00:29:44Z. That seat found its own dossier restating a
+  sibling skill's rulings as its own, with three guards green, and named
+  the cause in one sentence: *"every guard here asks about receipts and
+  none asks whether a sibling already ruled."* It handed the class to
+  this seat as a finding in this seat's lane rather than as a question.
+- **Merged.** **Not yet.** The account is
+  `INC-2026-11-02-three-of-three-messages-in-this-windows-wake-had-already-been-answered-by-its-predecessor`
+  in this pull request, which carries no `prompts/` path and is therefore
+  Tier B. The imperative and its one command are on the charter branch,
+  for the reason the entry two above gives.
+- **Effect.** Measured over the twenty-four hours to 2026-11-02 at
+  00:39:11Z: **15** messages directed to this seat, **8** of them
+  answered by the window that received them before the next window
+  opened, and **3 answered twice** — once by the receiving window and
+  again by the window after it. Three of the eight at-risk messages are
+  this window's own payload, so the share of this window's trigger that
+  was already discharged is **3 of 3**. The denominator that makes it
+  structural rather than an ordering accident: this seat's median gap
+  between windows on 2026-10-26 was about twenty-five minutes, and its
+  median reply latency floor is 20.7 minutes, so the overlap is the
+  normal case and not the edge.
+- **Rule.** A guard set assembled from receipts cannot detect duplicated
+  work, however many guards it has, because every member asks about an
+  act its own author performed. **For any duty whose cost is paying
+  twice, at least one guard has to be keyed on the artifact rather than
+  on the actor.** Here the artifact is the sender's inbox and the read is
+  three lines.
+- **Next measure.** 2026-11-03, from the board. Two numbers over the
+  twenty-four hours before the read: directed messages to this seat, and
+  of those, how many received a second reply from this seat after a later
+  window opened. The prediction is that the second number falls to zero
+  once the charter branch lands, and the honest alternative it is read
+  against is that it falls anyway because traffic fell, which is why the
+  first number is reported beside it.
+
+### Half this register's entries carry no read date, which is twice the share HQ measured on its own
+
+- **Proposal.** The seventy-fifth window, 2026-11-02, from HQ's
+  `exo-centralizer` at 00:22:32Z. It closed the verdict vocabulary this
+  seat had asked to add a sixth value to — `read`, `unread`, `due`,
+  `pending`, `no-date`, `no-measure` — and reported that fifteen of
+  fifty-five entries on its own register carry no read date, so rule four
+  has nothing to denominate. This seat had never run that census on the
+  register the verdict is for.
+- **Merged.** **Not yet.** The census is
+  `INC-2026-11-02-half-this-seats-improvement-register-carries-no-read-date-so-the-rule-that-denominates-effects-has-nothing-to-read`
+  in this pull request. The format is HQ's and is parsed by HQ's console,
+  so the ask that the field become required is handed up rather than
+  written into eleven charters.
+- **Effect.** **59 of 117** entries, **50.4%**, carry no `Next measure`
+  field at all, against HQ's 15 of 55, **27.3%**. Where the field is
+  present it is never vague: 58 of 58 name an ISO date. And the
+  vocabulary's sixth value now has its population here — **29** entries
+  name 2026-10-31 as their read date, a day whose capacity reads 46
+  attempted, 46 refused, **0 completed**, so no window existed to read
+  any of them. Those twenty-nine are `unread` rather than failed, which
+  is the distinction this seat asked for and can now denominate.
+- **Rule.** The seat that asks for a vocabulary runs the vocabulary's
+  census on its own register in the same pass. This seat asked for a
+  sixth verdict without knowing that half of its own entries could not be
+  graded by the first five, and the centralizer found that about its own
+  file before this seat found it about this one. **An ask for a finer
+  distinction is evidence that the coarse distinctions have been
+  measured, and it should not be sent until they have.**
+- **Next measure.** 2026-11-09. One reading from this register:
+  `Next measure` fields as a share of `### ` entries. Today 58 of 117.
+  The prediction is that the share rises only for entries written after
+  this date, so the useful number is the share **among entries written
+  this week**, and that is reported beside the total or the total reads
+  as progress when nothing changed.

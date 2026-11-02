@@ -55,7 +55,7 @@
 // value, and this paragraph says what is true instead of claiming more than
 // the code does. The 2026-10-27 security audit, F37.
 import { readFileSync } from 'node:fs';
-import { violations } from './check.mjs';
+import { notices, violations } from './check.mjs';
 import { liveTargetFault } from './live-target.mjs';
 import { unreachable, verdict } from './post-verdict.mjs';
 import { declarationOf, senderFault, senderOf } from './sender.mjs';
@@ -86,8 +86,10 @@ const flag = (name, dflt = '') => {
 const has = (name) => argv.includes(name);
 
 if (has('--help') || has('-h') || argv.length === 0) {
-  console.log('usage: post.mjs --seat YOUR_SEAT --kind K --subject S (--body B | --body-file F) [--to-seat S] [--to-company C] [--company C] [--ref URL] [--surface S] [--data JSON] [--reasoning R] [--everyone] [--dry-run]');
+  console.log('usage: post.mjs --seat YOUR_SEAT --kind K --subject S (--body B | --body-file F) [--to-seat S] [--to-company C] [--company C] [--ref URL] [--surface S] [--data JSON] [--reasoning R] [--everyone] [--accept-truncation] [--wake-limit N] [--dry-run]');
   console.log('       --seat is required unless ASC_SEAT is set; there is no default sender.');
+  console.log('       --to-seat owner, chair or chair:<label> needs no company: the board discards it for those three.');
+  console.log('       an ask or a handoff over the wake limit is refused here; --accept-truncation says the ask is above the cut.');
   process.exit(0);
 }
 
@@ -101,7 +103,20 @@ const msg = {
   data: flag('--data') ? JSON.parse(flag('--data')) : null,
   surface: flag('--surface'),
   everyone: has('--everyone'),
+  acceptTruncation: has('--accept-truncation'),
+  wakeLimit: Number(flag('--wake-limit')) || 0,
 };
+
+// What the wake will carry, before the POST rather than in the 201 after it.
+// The receipt at the bottom of this file already names the cut, and it names
+// it to a sender who can no longer do anything about it: the store has no
+// delete route, so by the time that line prints, the half-delivered message
+// is permanent. Printed here, the same two numbers are an edit. Not a verdict
+// and not routed through `say`, because it never changes the exit code.
+for (const n of notices(msg)) {
+  console.error(`${n.code}: ${n.line}`);
+  console.error(`  note: ${n.repair}`);
+}
 
 const found = violations(msg);
 if (found.length) {

@@ -3,105 +3,112 @@
 Replaced wholesale each run by Ursa's ExO seat under
 `prompts/exo-agent.md` §5b. Nothing in this file is carried forward: a
 line absent from the newest copy is the point of the file, not a loss.
+This file is declared `enabled: false` in
+`tools/registers/registers.json` for that reason, so it is the one
+register the drivers must not merge, and it belongs on exactly one lane.
 
-**Measured 2026-10-26, 20:3x UTC, sixty-second window**, against
-`origin/main` at `9e2f21b7`, in a clone that was unshallowed and had its
-refspec widened first (§0, verified: `--is-shallow-repository` prints
-`false`, `main` carries 1,616 commits), **and that had the repository's
-merge drivers registered before any merge was performed**. Every verdict
-was performed rather than asked of GitHub.
+**Measured 2026-11-02 at 00:43:24Z, seventy-fifth window**, against
+`origin/main` at `9c662b72`, in a clone that was unshallowed and had its
+refspec widened before anything was read (§0), with both merge drivers
+registered in **this** checkout and the path asserted after the scratch
+worktree was removed. `refs/pull/*/head` was re-fetched **after** this
+window opened its own pull request, because §0 runs before ship-first and
+cannot contain the identifier ship-first creates.
 
-**The driver registration is new this run and it is the difference
-between this copy and the last one.** `bash tools/registers/install-drivers.sh`,
-once in the checkout and once in every scratch worktree, because a
-worktree does not inherit it. Without it `git merge-tree` exits 128 with
-`fatal: custom merge driver ledger lacks command line.` on any pair that
-both touch `docs/ideas.md`, `docs/decisions.md` or
-`docs/agents/runner-facts.md`, and §5b's old wording reads that as a
-conflict. The measurement, the three failure modes and the exit-code
-table are `docs/agents/runner-facts.md` §48.
-
-## The headline: there is no conflict in this queue, and eight merges close all seventeen
-
-The previous copy of this file named a trunk conflict on one head and an
-order-independent collision on a pair, and told the engineer seat to
-rebase. **Both are withdrawn.** The trunk verdict was already withdrawn
-by window 61. The collision is real driverless and resolves to nothing
-with the driver registered, which is Ursa's engineer seat's measurement,
-reproduced independently here on the same pair.
-
-| order | merge | seat | closes with it | verdict vs `main` | tier | instrument |
-|---|---|---|---|---|---|---|
-| 1 | **549** | engineer | 520, 530, 540, 545 | CLEAN | B | `merge-tree` + sequenced `git merge`, drivers registered |
-| 2 | **550** | pm | 517, 546 | CLEAN | B | same |
-| 3 | **551** | security | 532 | CLEAN | B | same |
-| 4 | **548** | exo | 536 | CLEAN | B | same |
-| 5 | **552** | skill | 547 | CLEAN | B | same |
-| 6 | **509** | market | — | CLEAN | B | same |
-| 7 | **395** | research | — | CLEAN | **C** | same |
-| 8 | **447** | exo | — | CLEAN | **C** | same |
-
-Eight merges, seventeen pull requests closed. Nine of the seventeen are
-contained in another open head and close for free.
-
-**The order is verified by performing it**, in a detached scratch
-worktree with the drivers registered, against `origin/main` and never
-against `main`:
-
-```
-549 OK  550 OK  551 OK  548 OK  552 OK  395 OK  447 OK  509 OK
-all 17 open heads contained in the simulated result
-```
-
-The two Tier C rows are last deliberately, because they wait on the
-owner and nothing below them depends on them.
-
-## Containment, measured rather than assumed
-
-Instrument: `git merge-base --is-ancestor refs/prs/<contained> refs/prs/<tip>`,
-exit 0 meaning contained, stated in the direction §"Read your own seat's
-open PRs first" requires.
-
-```
-517 is contained in 546, 550        532 is contained in 551
-520 is contained in 540, 549        536 is contained in 548
-530 is contained in 540, 549        540 is contained in 549
-545 is contained in 549             546 is contained in 550
-547 is contained in 552
-```
-
-The eight tips above are exactly the heads contained in nothing.
-
-## Pairwise, and the half this seat cannot measure
-
-Every ordered pair of the seventeen open heads, drivers registered:
-**zero** real conflicts. Driverless, fourteen pairs collide and all
-fourteen are on `docs/ideas.md`.
-
-**GitHub's green button honours no `.gitattributes` driver.** That is the
-engineer seat's measurement, written up in its own repository as Finding 1
-of `docs/design/server-side-merge-measurement.md`, and this seat has not
-independently reproduced it. So the second head of a colliding pair will
-show CONFLICTING at the button the moment the first lands, and the
-remedy is one command on the second head,
-`bash tools/ledger/requeue.sh --push <second>`, rather than a rebase.
-Either order works. Nothing in the table above needs reordering for it.
-
-## The two numbers for the owner
+## The five numbers, and neither predicate fires
 
 | | |
 |---|---|
-| open pull requests | **17** |
-| merged in the last seven days | **87** |
-| oldest open | 395, created 2026-10-24 21:21 UTC, about 47 hours |
+| 1. open now | **12** at 00:37Z, **13** by 00:38Z as another seat opened one |
+| 2. merged in seven days | **78** |
+| 3. oldest open | **#395**, 2026-10-24T21:21:40Z, **8.1 days** |
+| 4. newest merge | **2026-11-02T00:35:21Z** |
+| 5. merges per day | 10-23: 9, 10-24: 27, 10-25: 14, 10-26: 45, 10-27: 22, **10-28 to 10-31: no row**, 11-01: 4, 11-02: 11 |
 
-Open is far below the week's merges, so **no depth warning**. The gate is
-absorbing faster than the seats produce.
+Open does not outnumber the week's merges, 12 against 78. The newest
+merge is minutes old, not a day. **So the gate is alive and it is not
+the constraint.** Row 5 is printed as eight rows rather than summed,
+because the four missing rows are the outage and a sum erases them: the
+portfolio attempted 198 runs across 2026-10-28 to 2026-10-31 and
+completed zero, every one refused.
 
-**The queue moved four times while this file was being written**, from 14
-to 17 open heads between 20:0x and 20:3x UTC, and two of this window's
-own pairwise rows were pull requests that did not exist at its fetch. A
-row in this table is a claim about 20:3x UTC and no later instant. Fetch
-`refs/prs/*` immediately before acting on any row of it, because a
-missing ref exits 1 with an empty file list and reads as a conflict
-(runner-facts §48).
+## The verdicts, each with the instrument beside it
+
+Performed rather than asked of GitHub. `git merge-tree --write-tree
+--name-only origin/main refs/prs/<n>`, with the ref resolved first and
+the branch taken on the **exit code**: 0 clean, 1 conflict, anything
+else an error about this clone and not a verdict.
+
+| pull request | seat | verdict | instrument | files |
+|---|---|---|---|---|
+| #395 | research | CLEAN | `merge-tree`, exit 0 | — |
+| #601 | skill | **CONFLICT** | `merge-tree`, exit 1 | `skills/relocate-anchors.mjs`, `skills/relocate-anchors.test.mjs` |
+| #612 | exo | CLEAN | `merge-tree`, exit 0 | — |
+| #615 | engineer | **CONFLICT** | `merge-tree`, exit 1 | `docs/ideas.md` — the ledger driver names **one block edited on both sides**: *"2026-10-27 — the wake limit is not the length a message is cut at"* |
+| #618 | exo | CLEAN | `merge-tree`, exit 0 | — |
+| #627 | market | CLEAN | `merge-tree`, exit 0 | — |
+| #628 | frontend | CLEAN | `merge-tree`, exit 0 | — |
+| #629 | security | CLEAN | `merge-tree`, exit 0 | — |
+| #630 | pm | CLEAN | `merge-tree`, exit 0 | — |
+| #631 | engineer | CLEAN | `merge-tree`, exit 0 | — |
+| #632 | exo | CLEAN | `merge-tree`, exit 0 | — |
+| #633 | — | CLEAN | `merge-tree`, exit 0 | — |
+
+**The third state, measured and empty.** For every pull request the
+sweep called clean whose diff touches a path `.gitattributes` gives a
+`merge=` attribute, a real `git merge` was performed in a detached
+scratch worktree with the drivers registered, which is the only
+instrument that can find `drivers-disagree` — the row where the
+button merges and this repository's own semantics refuse. Four
+qualified: **#612, #618, #627 and #633, all four agree.** None of the
+twelve is in that state today.
+
+**#615 is the authoring seat's judgement and not the owner's.** The
+ledger driver names one block of `docs/ideas.md` edited on both sides
+and asks for a human; that human is Ursa's engineer, who wrote the entry,
+and the repair is one block move on an open branch rather than a rebase
+or a merge decision. Reported there rather than here.
+
+**#601's is a code conflict in the skill seat's own lane**, two files
+under `skills/`, and it is that seat's to resolve. That pull request
+has been open since 2026-10-27T05:06:10Z, which makes it the second
+oldest in the queue.
+
+## The order
+
+Everything clean is independently landable, so the only real ordering
+constraint in this queue is containment within one seat's chain.
+
+1. **#632 (exo, this window) — the PM's, now.** Tier B: `git diff
+   --name-only origin/main...HEAD -- 'prompts/*-agent.md'` prints
+   **nothing**. Two registers and no charter. It carries the two
+   measurements this window exists for.
+2. **#630, #631, #627, #628, #629, #633 — the PM's.** Clean, each in its
+   own seat's lane, no containment between them.
+3. **#618 (exo) — the owner's, and it is the whole charter decision.**
+   Eleven charters plus six files under `tools/seat/`. `#612` **is
+   contained in `#618`** — `git merge-base --is-ancestor refs/prs/612
+   refs/prs/618` exits 0 — so one merge closes both, and the merged
+   trees differ (`8ed58273` against `0752d664`), which is the check
+   that says `#618` is the superset rather than a second copy.
+4. **#612 (exo) — left standing deliberately**, not because it is
+   needed. Ursa's PM has reviewed it in writing as standing for the
+   owner and addressed this seat by name, and this charter forbids
+   closing a pull request another seat has named in a live owner ask.
+   The pointer moved instead.
+5. **#601 and #395 — their own seats', not the gate's.** #601 conflicts
+   and #395 is clean but eight days old with another seat's charter lines
+   on it, which the staleness sweep below reports.
+
+## The one number behind the order
+
+**0 of 561** commits reaching `main` in the last seven days touched any
+`prompts/*-agent.md`. **11 of 11** charters have a newer copy pending,
+every one of them in `#618` and `#612`, with `prompts/engineer-agent.md`
+and `prompts/research-agent.md` additionally newer in research's `#395`.
+`prompts/exo-agent.md` last reached `main` on **2026-10-18**.
+
+So the queue is shallow, the gate is fast, and one class of file has not
+moved in fifteen days. That is not a depth problem and no measurement in
+this file will fix it. It is one decision, it is named in the ordered ask
+on the board, and item 3 above is the whole of it.

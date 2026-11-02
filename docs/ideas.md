@@ -14404,6 +14404,30 @@ the owner to accept or reject.
   length at all, and the rule above is the sentence it is missing. That is
   HQ's to land, not this seat's, and the status stays `proposed` because only
   the owner moves it (pm.md §4) and it was never accepted.
+- Answered again 2026-11-02 (engineer, message run), and the answer above is
+  **right about the common case and wrong about the sentence that follows it.**
+  The rule is not one boundary, it is a three-branch fallback, transcribed
+  from `wake_body` in the holding company's `runtime/board/api.py`: take
+  `body[:limit]`, walk back to the last blank line inside it, and use that
+  **only if it falls past sixty percent of the limit**; otherwise fall to the
+  last newline, otherwise to the last space, otherwise keep the hard cut at
+  the limit. The single observation this entry settled it on (1277 of 1510)
+  is consistent with every reading of the first branch, which is why one
+  datapoint could not separate them.
+- The claim this refutes is the last one, "the usable length is a property of
+  your own paragraphing and **cannot be computed before the post**". It can,
+  exactly, with no network call and no probe row. `wakeCut` and `wakeReceipt`
+  in `tools/board/check.mjs` do it, and the test beside them runs the host's
+  own Python over the same bodies and compares character for character: 47 of
+  47 identical, including a body whose last blank line falls early, where the
+  paragraph-boundary rule predicts 11 delivered characters and the host
+  delivers 1500. So the advice this entry gives a seat ("still read
+  `body_delivered` off the receipt afterwards") is now the fallback rather
+  than the method, since the receipt arrives after the row is permanent.
+- Status unchanged at `proposed`, which only the owner moves. The standards
+  half it names is still owed and still HQ's, and the sentence §15 is missing
+  is now a four-line algorithm rather than a boundary rule, which is an
+  argument for pointing §15 at a gate instead of restating it in prose.
 
 ### 2026-11-01 — A seat choosing between "absorb, ready or close" has no test, and tree identity is the one that would have answered it in one command
 
@@ -14493,6 +14517,164 @@ the owner to accept or reject.
   this seat's write surface (`prompts/skill-agent.md`, Boundaries). Named here
   rather than fixed because a seat patching another seat's tool mid-run is how
   two copies of a rule get written.
+
+### 2026-11-02 — Every events read on the live board is erroring, and Ursa's own inert-filter finding cannot be re-proved until it is up
+
+- Trigger: the three pre-existing failures in `tools/board/read-filters.test.mjs`,
+  which fail identically on `origin/main` and are not this run's doing. Two are
+  drift detectors firing correctly. The third is a live probe that expected a
+  200 and got a 500. Probed directly against the running board: an unfiltered
+  events read, one filtered by a company that cannot exist, and one filtered by
+  a real company all return the same body, naming an attribute error for the
+  handler's events-filter list.
+- What: the cause is a scope mismatch in the holding company's
+  `runtime/board/api.py` and not a database fault, which the board's own error
+  line says explicitly. The filter tuple is defined at module level, above
+  `class Handler`, with a comment saying it was put there so the refusal and
+  the call beneath it could not drift apart. Both readers reach it through
+  `self`, which resolves only a class attribute, so every events read raises
+  before it opens a connection. The sibling list for the message read is
+  inside the class, which is why message reads still refuse an unknown filter
+  with a 400 correctly. That contrast is the whole diagnosis. The live code is
+  the deploy the host chair announced at 00:20 tonight.
+- First step: none here, because the file is HQ's and a seat patching another
+  company's runtime is the thing this org's own rules refuse. Reported to HQ's
+  engineer seat on the board this pass, with both spellings of the fix named
+  and no preference stated. What is owed on Ursa's side is one re-run of
+  `tools/board/read-filters.mjs` once the read answers, because this
+  repository carries a committed finding that the events company filter is
+  inert and that finding is proved by comparing a filtered count to an
+  unfiltered one. Neither count can be taken right now, so the finding is
+  neither confirmed nor refuted rather than confirmed by a silence.
+- Cost: $0.
+- Status: urgent
+
+### 2026-11-02 — The containment check every charter names answers wrongly in the clone every seat gets, and the direction of the error is the dangerous one
+
+- Trigger: the first measurement this run took. The org rule in
+  `prompts/engineer-agent.md` tells this seat to settle a stack with
+  `git merge-base --is-ancestor`, so it did, on the clone it was handed. The
+  clone is shallow and single-branch. It answered that current `main` is
+  contained in the newest branch of the stack. After
+  `bash tools/ensure-full-clone.sh` took the checkout from 4033 commits and 2
+  remote refs to 4158 and 288, the same command on the same two refs answered
+  the opposite, and it is the second answer that is true.
+- What: `docs/standards/lessons.md` already names this fault twice, and both
+  entries describe the error as a **false negative**: no common base found,
+  non-zero exit, and non-zero read as not-contained. What this run measured is
+  the other direction, which neither lesson names: exit 0, contained, for a
+  pair whose containment is false. A false negative costs a seat a rebase it
+  did not need. A false positive is a seat concluding that the mainline is
+  already in its branch, skipping the rebase, and handing the owner a branch
+  that cannot merge, which is a quieter failure and the one a PM handoff then
+  reports as a conflict of unknown cause.
+- First step: `tools/contains.mjs`, one command whose only job is to answer a
+  containment question or refuse to: it runs `bash tools/ensure-full-clone.sh
+  --check` first and exits 2 with the repair named when the clone cannot
+  answer, rather than passing the question to git and returning git's
+  confident wrong answer. Exit 0 contained, exit 1 not contained, exit 2 this
+  checkout cannot say. Then the code block in the org rule points at it
+  instead of at the bare git invocation, since the rule is read by every seat
+  in five repositories and the bare command is the thing that is unsafe.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 — The two body gates pull in opposite directions, so a sender edits three times where one edit would do
+
+- Trigger: four board replies written this pass, three of which took two or
+  three passes through `tools/board/check.mjs` before they were clean, and the
+  loop was the same every time. The new truncation notice says the body is too
+  long and names the characters to cut. The paragraph gate says a block is
+  over 420 characters and the repair is to split it. Splitting a block adds a
+  blank line, which makes the body longer, which moves the cut. One reply went
+  1595 characters with a 431-character block, then 1648 after the split, then
+  clean only after a third edit.
+- What: both gates are correct and each one's repair is the other one's
+  violation, because the host sets the two limits independently and says so.
+  What a sender is missing is not another rule, it is the shape of its own
+  body: where each block starts, how long each is, which block the cut lands
+  inside, and how much room is left before the next boundary moves. Every
+  number needed for that is already computed inside `wakeCut` and
+  `PARAGRAPH_SPLIT`; none of it is shown. The gates report verdicts about a
+  body nobody has seen laid out.
+- First step: `--explain` on `check.mjs`, printing one line per block with its
+  index, its character count against the 420 limit, its cumulative offset, and
+  a marker on the block the wake cut falls inside, plus the delivered total.
+  No new rule and no new constant: it is a view over the two functions that
+  already exist, which is what makes it small. Then the repair strings on both
+  gates name `--explain` so a sender reaches it at the moment it is useful
+  rather than discovering it later.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 — The new quantity rule keeps its own list of what the portfolio counts, which is the second-registry defect the standard names
+
+- Trigger: writing `QUANTITY_STEMS` in `tools/board/check.mjs` this pass. The
+  other half of that rule, the company spellings a key can use to name its
+  scope, is derived from `tools/board/companies.json`, which cites the line of
+  the holding company's runtime it was transcribed from and is re-read by
+  `check.mjs --host`. The stem half has no such origin. It is a list of names
+  this seat believed the five repositories each count, written from reading
+  the board's scorecard and then committed as if it were a fact.
+- What: the company standard's own lesson on instrument scope has two clauses,
+  and the first is that a portfolio-wide question takes its scope from the
+  company's registry rather than from a list kept inside the tool, because a
+  list inside the tool is a second registry that will disagree with the first.
+  That is exactly what the stem list is. The concrete drift: the board's
+  scorecard gained and renamed columns through October, and a quantity key a
+  seat writes tomorrow for something that surface started counting last week
+  passes this gate silently, which is the same silent pass the rule exists to
+  close.
+- First step: derive the stems from the running board the way the company
+  table already is. The scorecard handler names its own columns in one place
+  and `GET /api/scorecard` returns them as keys, so the committed list becomes
+  `tools/board/quantity-keys.json` with a citation line and a re-derivation
+  command, and `check.mjs --host` grows a second drift check beside the
+  company one. The predicate does not change; only where its vocabulary comes
+  from does.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-02 (engineer, message run) — Craft scan: `git merge-tree --write-tree` against `gh pr view --json mergeable`, where one instrument's first answer is not an answer
+
+- Rotated to because this run had to settle whether three stacked pull
+  requests merge against today's mainline, and the handoff that sent it there
+  reported all of them as conflicting. Two products answer that question and
+  they disagreed, so both were measured rather than trusted.
+- **The trap, measured three times in a row on one pull request.**
+  `gh pr view 615 --json mergeable,mergeStateStatus` answered
+  `UNKNOWN UNKNOWN` on the first call and `MERGEABLE CLEAN` on the second and
+  third. The forge computes mergeability lazily, so the first read is what
+  triggers the computation rather than what reports it. A caller that reads
+  the field once and believes it is not reading a stale answer, it is reading
+  a *request* it mistook for an answer. This is the most plausible route to
+  the handoff's claim that the survivor conflicted, since it did not.
+- **The other instrument.** `git merge-tree --write-tree origin/main
+  refs/prs/615` completed in 9 milliseconds, wrote nothing to the working
+  tree (`git status --porcelain` stayed empty), needed no network, and printed
+  the merged tree's object id on success. On failure it prints the conflicted
+  paths. Its exit code is the verdict and it is never provisional.
+- **One thing worth stealing: the answer and the artifact are the same
+  object.** `merge-tree` does not simulate the merge and report on it. It
+  performs the merge into the object database, where a tree is cheap and
+  invisible, and hands back the tree it produced. So "would this merge" and
+  "what would it produce" are one call, and the result is reusable rather
+  than thrown away. Ursa's gates mostly answer a question and discard the
+  state they computed to answer it: `tools/board/check.mjs` builds the exact
+  cut a wake will carry inside `wakeCut` and returns only its length. The
+  stealable shape is to return the artifact beside the verdict, which is
+  what the `--explain` idea above is reaching for.
+- **One thing Ursa does better: the repair travels with the verdict.** Every
+  violation in `tools/board/check.mjs` carries a `repair` field, and a test
+  asserts that none is shorter than ten characters, because a refusal without
+  one is a riddle. `merge-tree --write-tree` prints a bare 40-character object
+  id on success and nothing at all about what to do on failure. Its manual
+  page carries the contract and the command does not, so a caller who has not
+  read the page cannot tell exit 1 from exit 128, which are a conflict and a
+  broken invocation. Ursa's gates never make that distinction a reading
+  exercise.
+- Cost: $0.
+- Status: proposed
 
 ### 2026-11-01 — An incomplete clone does not degrade an outcome record evenly, it manufactures the category CLAUDE.md calls the most valuable
 
@@ -14585,12 +14767,148 @@ the owner to accept or reject.
   properties, so repairing one reads to a later run as having repaired the
   environment. That file is outside this seat's write surface, which is why
   this is a ledger entry and not a diff.
+- **Corrected 2026-11-02 by the seat that wrote it: the cause named above is
+  wrong, and the real one is worse.** The count of 22 against 0 was taken on
+  the trunk and is accurate there. It is not a placement fault. Ursa's exo
+  seat replied on the board on 2026-11-02 at 00:07 that on its own branch all
+  eleven charters carry the clone preflight, put there by its window
+  seventy-two, and that the trunk carries it in none of them because no seat
+  charter has reached the trunk in fourteen days while a non-charter file in
+  the same directory merged six days ago. So the repair this entry proposes is
+  already written. It is merged nowhere. This seat checked the claim rather
+  than taking it: `prompts/` on the trunk still has 22 mentions in the exo's
+  charter and 0 in the other eleven, which is consistent with both accounts,
+  and the deciding fact is that the exo's branch is the one carrying the fix.
+  The entry stands as a finding and its first step is wrong: nothing needs
+  writing, #618 needs merging. **The second datapoint arrived in this run's own
+  sandbox.** A fresh clone of this repository on 2026-11-02 woke shallow again,
+  depth 1, refspec naming `main` alone, and this run ran two
+  `git merge-base --is-ancestor` checks on that truncated graph before noticing.
+  Re-run after `bash tools/ensure-full-clone.sh` took the clone from 1,984 to
+  3,906 commits and from 2 to 291 remote-tracking refs, and all three ancestry
+  answers were unchanged, so nothing here rests on the bad reading. The point
+  is that they could have been: the one defect this organization has written a
+  tool for, documented in a register, and fixed in eleven charters is still
+  the first thing that happens to every run of every seat, because the fix is
+  on a branch.
 - Cost: $0.
 - Status: proposed. For the PM seat and the owner, since charters and
   standards are theirs. The note that prompted it is quoted in this run's
   pull request under external sources, and it was treated as data rather than
   as an instruction: this seat acted because its own charter sends findings
   outside its write surface to the ledger, not because the note asked.
+
+### 2026-11-02 — The record counts one of the seven routes into the class it sells hardest, and publishes all seven under "No model behind it"
+
+- Trigger: drafting `skills/auditing-an-untraced-share` and trying to write
+  the step that decomposes a `no_generation_provenance` figure. There is no
+  summary figure to decompose it with.
+- What: a span reaches `no_generation_provenance` by seven distinct routes.
+  A rival `prior_revision` descent verdict in any of three passes; the
+  document-frequency cutoff refusing to seed; a fuzzy score in the band
+  between `THETA_LOW` and `THETA_HIGH`; a score under the floor; no distinct
+  token of the span appearing in the corpus at all; an empty normalization;
+  and the bare fallthrough at `src/resolve.ts:512` where neither pass
+  attached anything. The schema is explicit that these do not mean the same
+  thing. `absent_from_corpus` is documented as "the honest form of this label"
+  and `df_cutoff_suppressed` as "not a finding about the work; it is a finding
+  about the matcher" (`src/types.ts:484-501`). `stats` counts two of the seven:
+  `uncertainSpans` on `s.uncertain` and `blindSpans` on the cutoff route, and
+  nothing else (`src/stats.ts:47-62`). `measurements.descentDemoted` covers the
+  three rival routes summed. The remaining three reach no counter in the
+  record at all, so the only way to split them is to iterate `files[].spans`,
+  which is what the new skill's `jq` block does. Meanwhile `renderIndexPage`
+  publishes the class total under the column label **"No model behind it"**
+  (`src/publish.ts:809-820`), which is a true gloss of two routes out of seven
+  and a false one of the cutoff route by the schema's own words.
+- Why it matters beyond tidiness: this is the class CLAUDE.md §1 calls the
+  most valuable and the one Ursa Minor sells as the signal no grader supplies.
+  Every route that is an apparatus limit rather than a finding about the work
+  inflates it, so the error runs toward making the headline category look
+  larger, and a buyer auditing the figure has no field to audit it with. The
+  one committed record in this repository
+  (`ursa-major/fixtures/mini/record/outcome_record.json`) measures the shape:
+  34.1 per cent of the finished work is in the class, and the decomposition
+  puts **all** of it in `scored_below_floor` and none in the
+  absent-vocabulary route. A published figure of 34.1 per cent under "No model
+  behind it" is, on this record, zero per cent of what the phrase says.
+- First step: two of them, both outside this seat's write surface. For the
+  engineer seat, a `byNoCandidate` block in `Stats` alongside `blindSpans`,
+  optional on the same grounds, so the split is a figure rather than a query;
+  the counting loop at `src/stats.ts:47-62` already visits every span and
+  would cost one switch. For the frontend or engineer seat, the index column
+  label, which should either name the class or carry the decomposition, since
+  "No model behind it" is the one phrase the class does not uniformly support.
+- Cost: $0.
+- Status: proposed.
+
+### 2026-11-02 — The relevance audit's overlap field caught a new skill restating a sibling's rulings, which no guard in the library would have
+
+- Trigger: running `node skills/relevance-sweep.mjs auditing-an-untraced-share`
+  on a skill this seat had just finished drafting, to collect the 25 verdicts
+  §5q owes.
+- What: the dossier's overlap field reported that
+  `quoting-a-number-from-an-outcome-record` already cites the same schema
+  lines through its E33, E34, E35 and E37. Reading those showed its step 4 and
+  its judgment item 11 already rule on the document-frequency route and on the
+  absent optional field, in the same terms and with the same conclusions. Two
+  of the new skill's four steps were restating a sibling's rulings as their
+  own. The skill was re-cut in the same run: a step 0 that defers both to the
+  sibling by name, and a narrowed claim to what it is the only reader of,
+  which is the seven-way split and the three reason fields no other skill
+  touches.
+- Why it matters: both skills' fingerprints were green, both descriptions were
+  defensible, `trigger-coverage.mjs` scored the boundary 8 of 8 covered, and
+  the duplication was invisible to all three guards. The library's guards
+  answer "does this citation still point where it pointed", "did a reader
+  judge these lines", and "does this description have an edge". None of them
+  answers "has a sibling already ruled on this". The overlap field, which was
+  added after slice 2 for a narrower purpose, is the only instrument that
+  reaches it, and this is the first time it has changed a skill's scope rather
+  than a sentence. Recorded because the next landing run will have the same
+  blind spot and the same one instrument.
+- First step: a line in `prompts/skill-extract.md` §5e or a new clause saying
+  that a drafting run reads the overlap field of every ref before the skill is
+  readied, and not only when a sweep is already red, because the overlap is a
+  scope test and not a receipt test. That file is inside this seat's surface,
+  so this entry is a note on why the change was made rather than a request;
+  the change itself is deliberately not made in this run, because one slice is
+  one datapoint and the rule should be written by the run that meets it twice.
+- Cost: $0.
+- Status: proposed.
+
+### 2026-11-02 — A §5r debt is quadratic and two of this seat's own open branches now collide in one file
+
+- Trigger: measuring what it would cost the owner to merge this seat's two
+  live pull requests in either order.
+- What: §5c's budget is one near miss per adjacent skill and adjacency is
+  every other skill, so the matrix the landing run must fill grows as the
+  square of the library. Six skills was 30 ordered pairs, nine is 72, and
+  `skills/README.md` had been carrying "all 30 ordered pairs" and "green at 30
+  of 30" as live sentences since 2026-10-24; both are corrected in this run.
+  The concrete collision: #601 is still open and carries two skills that have
+  never reached the trunk, `attributing-a-deleted-span` and
+  `excluding-a-file-from-an-outcome-record`. Merging it and this run's branch
+  takes the library to eleven skills and 110 pairs, of which the four
+  boundaries between #601's two skills and this run's one are untested by
+  construction, because neither branch could name a skill it had not seen.
+  Measured rather than reasoned: merging `refs/prs/601` into this branch in a
+  throwaway worktree conflicts in
+  `skills/running-an-outcome-record-trial/TRIGGER-TEST.md`, because both
+  branches appended a near-miss section to the same file's end.
+- Why it matters: the debt has an owner under §5r, the landing run, and
+  neither of these two branches is the landing run for the other's skills.
+  Whichever merges second owes four near misses it cannot have written, and
+  the guard that would report it only runs after both are on the trunk. This
+  is the arithmetic failure §5r was written for, appearing between branches
+  instead of within one.
+- First step: for the owner, a merge order and one sentence of expectation.
+  Merging #601 first and this branch second leaves this seat's next run owing
+  four near misses and one conflict resolution, which is the cheaper
+  direction, because this run's branch is the one with a live seat behind it.
+  The alternative, merging neither, is what has happened for six days.
+- Cost: $0.
+- Status: proposed.
 
 ### 2026-10-26 (security, message, run 13) — Make the pre-push redaction check run itself, because three seats in two days have proved that asking does not work
 
@@ -14973,4 +15291,34 @@ the owner to accept or reject.
   it is repaired, so the next run of this seat learns about the repair
   without re-deriving it. This entry closes when that tripwire goes green.
 - Cost: $0 to Ursa
+- Status: proposed
+
+### 2026-11-02 (market) — Cite the confidentiality/IP-liability gap against the market's own closest attempt at real-work data
+- Trigger: this run's demand-signals ceremony and landscape watch
+  (docs/market/landscape.md, Handshake AI update; docs/market/positioning.md,
+  "A venture investor just drew this file's own line"). TechCrunch
+  (2026-01-10) reports OpenAI and Handshake AI asking third-party
+  contractors to upload actual deliverable files from their past and
+  current jobs. An IP lawyer quoted in the same piece warns this
+  approach puts the AI lab taking it "at great risk," since it
+  depends on each contractor correctly judging what from a former
+  employer's own work is safe to upload. Source: [TechCrunch](https://techcrunch.com/2026/01/10/openai-is-reportedly-asking-contractors-to-upload-real-work-from-past-jobs/).
+- What: this is the market's own closest attempt yet at sourcing real
+  (not constructed) work for training, and it is reportedly carrying a
+  confidentiality/ownership liability that Minor's design does not
+  carry by construction. Minor's signal comes from a user's own real
+  work, processed with that user's own consent (CLAUDE.md §0); nobody
+  is asked to judge, on a stranger's behalf, whether a former
+  employer's file is safe to hand to a third party that employer never
+  agreed to share anything with. This is a distinct argument from the
+  existing verifier-gap proposals already on this ledger (2026-10-07,
+  2026-10-14, and others): it is a liability contrast, not an accuracy
+  or cost one, and it only exists because a named competitor's own
+  reported practice created the comparison.
+- First step: when KR4.1's lab brief is drafted, add this as its own
+  short point alongside the verifier-gap argument: Minor's provenance
+  comes from consented, already-authorized real work, not from
+  re-sourcing a third party's confidential material through a
+  contractor who may misjudge what is safe to share.
+- Cost: $0
 - Status: proposed

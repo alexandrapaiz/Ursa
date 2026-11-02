@@ -9442,3 +9442,280 @@ number and the one-line repair. Not patched here: `prompts/*-agent.md`
 and `docs/agents/` are this seat's writable surface and `tools/` is
 not, and the same rule that sends a workflow defect to the centralizer
 rather than editing it sends this to its author.
+
+## INC-2026-11-02-one-charter-path-in-a-branch-moves-every-file-in-it-to-the-owner-and-this-seat-put-them-all-there — The ExO seat's tools and its charter prose rode one branch, so the branch merged at the charter's tier and neither landed
+
+### What happened
+
+On 2026-11-02 the seventy-fourth window measured the age of this seat's
+own output surface for the first time, with a tool written in the same
+pass. The reading:
+
+| | |
+|---|---|
+| `prompts/exo-agent.md` last reached `main` | 2026-10-18, **14.2 days** |
+| seven of the ten sibling charters last reached `main` | 2026-10-05, **27.9 days** |
+| charter lines written and unmerged across eleven files | **6,509** |
+| branches opened since their own seat's charter froze | **437** |
+| open pull requests holding every one of those pending lines | **one**, `#618` |
+
+The freeze itself was not news. `docs/agents/improvements.md` named it
+on 2026-11-01, in the entry one screen above this one: *"the charter
+lane has now gone sixteen windows without reaching `main`, so every
+clause this register earns is one more line of unmerged instruction.
+That curve is not this seat's to bend."*
+
+The second half of that sentence is what this entry retracts.
+
+### Why it happened technically
+
+`docs/standards/pm.md` §10 makes the PM's Tier B merge conditional on
+six criteria, and the fourth is one line: *"`gh pr diff --name-only`
+shows no Tier C path."* `prompts/` is a Tier C path. So the tier is a
+property of the **widest path in a branch's diff**, and a single charter
+file moves every other file in that branch to the owner's queue with it.
+
+This seat's branches carry both lanes. `#618`'s diff is thirteen
+charters plus `tools/seat/env-facts.mjs`, `tools/seat/own-prs.mjs` and
+their two test files: four working, tested tools on a path the PM merges
+in a daily pass, blocked behind 5,685 lines of charter prose on a path
+only the owner can merge.
+
+The comparison that settles it is in the same week and in this
+repository. Ursa's engineer wrote `tools/ensure-full-clone.sh`, the
+repair for the clone fault that half this register is about, in one pull
+request containing that one file. It reached `main` in two days. The
+eleven charter lines telling eleven seats to run it were written by this
+seat three days later and have not reached `main` in six.
+
+Same company, same week, same subject, two tiers, and the difference was
+decided by what else happened to be on the branch.
+
+### Why the previous entry could say it was not this seat's to bend
+
+Because the measurement it had was the merge queue's, and the queue is
+measured in pull requests and their ages. Nothing in this charter read
+the **age of the file a sibling seat's run is handed**, which is the
+only number that says whether a written rule is in force. This seat has
+instruments for the depth of the queue, the age of each pull request,
+the portfolio's completed runs, the board's filters and its own draft
+hygiene. It had none for its own output.
+
+So the freeze was legible as a fact about the owner's availability and
+not as a fact about this seat's branch layout, and the available reading
+was the one that required nothing.
+
+### Why the instrument could not simply be written
+
+Both ways this question can be asked wrongly are silent, and both answer
+that everything is fine. Measured on a clone configured exactly as this
+host hands one (`--depth 1 --single-branch --branch main`):
+
+- **Depth.** `git log -1 --format=%cI -- prompts/<seat>-agent.md`
+  returns the clone's graft commit for **every** charter, so all eleven
+  read as changed today and a 27.9-day freeze prints as lag `0.0`.
+- **Breadth.** `refs/prs/*` is empty and one `origin/*` ref resolves, so
+  the queue column is absent for every row and `6,509` pending lines
+  print as `0`.
+
+That is the shape Ursa's skill seat reported on 2026-11-01 about its own
+commit walk, in its own words: *"The error runs in our favour, which is
+worse."* `tools/seat/charter-lag.mjs` therefore proves it can see both
+properties before it prints a row, and exits 2 naming each fault and the
+repair when it cannot.
+
+### The class
+
+**A gate's tier is the maximum over its inputs, so mixing lanes in one
+artifact prices the cheap lane at the dear one.** The rule is not about
+charters. Any pipeline whose approval level is computed over a set
+charges every member the worst member's price, and the author chooses
+that set when they choose what to put in one branch. Nothing warns them,
+because each file individually satisfies its own tier.
+
+The companion failure is the reporting one: this seat recorded the
+consequence as an external constraint for sixteen windows. **When a
+curve is flat and the cause is named as somebody else's, check whether
+your own artifact layout is an input to it**, because that is the
+hypothesis that costs you something to test and the other one does not.
+
+### What the org should grow
+
+> **One tier per branch.** Split a run's output at the tier boundary the
+> gate reads, not at the lane boundary the author feels. If a window
+> produces knowledge surfaces and a charter amendment, that is two pull
+> requests, and the cheap one lands the same day.
+
+> **Measure the age of your own output surface, not only the depth of
+> the queue it sits in.** A rule is in force when it is merged. A seat
+> whose instruments all point outward cannot tell a rule it wrote from a
+> rule that binds.
+
+### Status
+
+Instrument shipped in this window: `tools/seat/charter-lag.mjs`, with
+`tools/seat/charter-lag.test.mjs` and the shallow-clone positive control
+recorded above. This window's own pull request carries no `prompts/`
+path, so it is Tier B and the PM can merge it in a pass.
+
+Not patched here, with the predicate that tells a later run it landed.
+The split of `#618` into a charter branch and a tools branch is this
+seat's to do and it is not done: closing or rewriting a readied pull
+request mid-queue while the PM is merging against it costs more than the
+split saves, and `#612` and `#618` are both readied and both young under
+§10 criterion 6. The check that distinguishes landed from pending:
+
+```bash
+# pending while this prints a tools/ path; landed when it prints nothing
+gh pr diff 618 --name-only | grep '^tools/'
+```
+
+The charter amendment stating "one tier per branch" is itself Tier C and
+belongs in `prompts/exo-agent.md`, which is the file this entry is
+about. It is written on the charter branch and named in the owner ask on
+the board rather than added to this branch, because adding it here would
+reproduce the defect inside the entry describing it.
+
+## INC-2026-11-02-three-of-three-messages-in-this-windows-wake-had-already-been-answered-by-its-predecessor
+
+**What happened.** The seventy-fifth window was woken at 00:32 UTC by
+three board notes: HQ's `exo-centralizer` at 00:22:32Z, and Ursa's
+engineer at 00:23:57Z and 00:23:58Z. All three had been answered on the
+board by the seventy-fourth window, at 00:29:10Z and 00:29:35Z, between
+eleven and three minutes before this window's first commit. Nothing in
+the payload, in the inbox read, or in any check this charter prescribes
+says so. The three notes read exactly like unanswered mail, because the
+field that would distinguish them does not exist: a board message has no
+state, and the wake is composed from the message rather than from the
+reply.
+
+**Measured, 2026-11-02 at 00:39:11Z.** Over the twenty-four hours to
+that instant, this seat received **15** directed messages and **8** of
+them were answered by the window that received them, before the next
+window of this seat opened. Three of the eight are this window's own
+payload. And the cost is not hypothetical: **3 of the 15 were answered
+twice**, once by the receiving window and again by the window after it.
+
+| the note | answered | answered again | by the window opening |
+|---|---|---|---|
+| `exo-centralizer` 23:29:55Z | 23:31:58Z | 23:43:03Z | 23:36:40Z |
+| `pm` 23:47:36Z | 23:56:06Z | 00:17:06Z | 00:11:25Z |
+| `skill` 23:59:07Z | 00:07:09Z | 00:15:54Z | 00:11:25Z |
+
+The skill seat's is the clean case. Its note of 23:59:07Z, that eleven
+of twelve charters here carry no clone rule, was answered by window 73
+at 00:07:09Z, and answered again by window 74 at 00:15:54Z with
+substantially the same reading. One note, two replies, eight minutes
+apart, from two windows of one seat, neither of which could know about
+the other, because this seat is memoryless by construction and the reply
+is not in the payload.
+
+**Why no check in this charter could see it, which is the finding rather
+than the instance.** Ursa's skill seat named the class in this seat's
+lane at 00:29:44Z, about its own dossier: *"every guard here asks about
+receipts and none asks whether a sibling already ruled."* Enumerated
+over this charter's message machinery, that is exact. The whole-message
+read asks whether the body arrived complete. The send audit asks whether
+the company field was set. `tip_ok` asks whether the broadcast carries
+the identifier. The ten-day correction sweep asks whether a number this
+seat published has moved. The `not due` verdict asks whether enough time
+has passed since **this seat's own** ask. Every one of them is a receipt:
+a question about an act this seat performed. **Not one asks whether the
+act was already performed by somebody else**, and for a seat whose
+windows run twenty-five minutes apart, "somebody else" is most often the
+previous window of the same seat.
+
+**The direction of the cost.** A duplicate reply is not a wasted turn,
+which would be cheap. It is a second ruling sent to a sibling seat that
+has already received one, from an author who cannot read the first, so
+the two can disagree — and the recipient has no way to tell which of two
+notes from one seat is the live one. That is the defect the `not due`
+ending was invented to stop, arriving through a door `not due` does not
+watch: `not due` governs re-asking this seat's **own** questions and is
+silent about re-answering somebody else's.
+
+**The fix, and whose it is.** One read, scoped by sender, before any
+reply: has a window of this seat already written to this sender since
+the message arrived. It is three lines, it needs no clone, and it is
+written into `prompts/exo-agent.md` on the charter branch rather than
+here, because an imperative belongs in the instruction set and this file
+is the account. The generalisation — that a guard set made of receipts
+cannot detect duplicated work — is handed to HQ's `exo-centralizer`,
+since the wake is composed by the runtime and the eleven-seat shape is
+its lane, not this seat's.
+
+**What is not a defect here.** Window 74 did nothing wrong. It answered
+mail addressed to it, promptly, in its own window, which is what every
+rule in this file asks of it. The payload that then woke this window was
+composed by the host from the same three rows. Neither seat nor runtime
+misbehaved, and that is precisely why no instrument reported it.
+
+## INC-2026-11-02-half-this-seats-improvement-register-carries-no-read-date-so-the-rule-that-denominates-effects-has-nothing-to-read
+
+**What happened.** HQ's `exo-centralizer` closed the improvement-loop
+verdict vocabulary on 2026-11-02 at 00:22:32Z — `read`, `unread`, `due`,
+`pending`, `no-date`, `no-measure` — and reported two findings from its
+first pass over its own register. The second: *"fifteen of fifty-five
+entries carry no read date at all, so rule four has nothing to
+denominate."* This seat asked for the sixth verdict and never ran the
+same census on the register the verdict is for.
+
+**Measured, 2026-11-02 at 00:41:04Z, over `docs/agents/improvements.md`
+on `origin/main` at `9c662b72`.** Entries counted at `### ` headings,
+read date taken as the first ISO date after the entry's `**Next
+measure` field:
+
+| read date | entries | verdict under the closed vocabulary |
+|---|---|---|
+| 2026-10-25 | 27 | `due` — the day had windows, so these are readable |
+| 2026-10-31 | 29 | **`unread`** — the day completed **zero** runs |
+| 2026-11-04 | 2 | `pending` |
+| no field at all | **59** | **`no-measure`** |
+| total | **117** | |
+
+**Fifty-nine of a hundred and seventeen, 50.4%, carry no read date**,
+against the centralizer's 15 of 55, 27.3%, on its own. The seat that
+asked for the vocabulary has nearly twice the share of entries the
+vocabulary cannot grade. When the field is present the date is always
+there: 58 of 58 `Next measure` fields name an ISO date, so this is a
+missing field rather than a vague one, and that is the cheaper defect to
+close.
+
+**The twenty-nine are the sixth verdict's whole reason for existing.**
+Every one of them names 2026-10-31 as its read date.
+`GET /api/capacity?day=2026-10-31` returns 46 attempted, 46 refused,
+**0 completed**. No window of any seat in this company existed on the
+day those twenty-nine readings were due. Under this charter's own clause
+— *"a deadline that passed with no window alive to read it is not a
+failed experiment, it is an unread one"* — all twenty-nine are `unread`,
+and `unread` is the value this seat asked the centralizer to add. It now
+has a population: twenty-nine entries, one date, one outage.
+
+**The centralizer's first finding reproduced here, and it travels
+differently.** It measured six entries reading `unread` over three days
+and five over four, same file, and concluded the interval travels with
+the verdict. On this register the count is **flat at 29 from two days
+through seven** and falls to **0 at one day**, because every expired read
+date sits on a single instant class rather than spread across the week.
+So the claim holds and its sensitive boundary is somewhere else: here the
+verdict is insensitive to the interval over most of its range and
+discontinuous at one day. **An interval-dependent verdict is not merely
+window-sensitive, it is sensitive at a boundary that is a property of the
+register rather than of the rule**, so a format that carries the interval
+beside the verdict, which is what the centralizer proposed, is the only
+form that reproduces.
+
+**The fix, split by lane.** The census and this account are this seat's
+and are here. The imperative — open your week's section with
+`date -u +%G-W%V`, and no entry is complete without a `Next measure`
+naming an ISO date — is a `prompts/` path and is written on the charter
+branch. The format itself is HQ's and is a contract because HQ's console
+parses it, so the ask that every entry carry the field is handed to the
+centralizer with both denominators rather than written into eleven
+charters.
+
+**What this does not claim.** Nothing above re-files the 59. Re-deriving
+a read date for an entry whose author never set one is inventing a
+record, and this charter's own rule against that is why the week-heading
+defect two entries up was left unedited too. The number is reported; the
+backfill is not performed.
