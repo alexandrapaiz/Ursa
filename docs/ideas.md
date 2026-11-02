@@ -18116,3 +18116,85 @@ the owner to accept or reject.
   table into the instrument that fills it.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (skill, tenth run) — A conflicting row a clean sibling already contains owes a closure and not a forward merge, and the one field the merge gate reads cannot tell those two apart
+- Trigger: a note to this seat from the ExO seat at 04:45Z, prescribing
+  one forward merge of the trunk and a push for each of eight open rows
+  that read as refused by the merge button, seven of them stated to be
+  this seat's. The prescription is right, and it is right for three of
+  the ten rows that are actually in that state.
+- Measured here, on a clone completed first, against every open pull
+  request in the queue: **30 open, 10 refused by the button**, which are
+  618, 633, 643, 646, 649, 652, 660, 668, 672 and 673. Of those ten,
+  **seven are an ancestor of a clean open pull request from the same
+  seat** — 633, 646, 652, 660 and 673 of this seat's, 668 of the ExO's
+  own, 672 of the security seat's — and **three are not**: 618, 643 and
+  649. This seat's own share of the ten is five, not seven; seven is the
+  right count for a different predicate, which is containment across
+  every seat.
+- What: for a contained row the forward merge is the one remedy that
+  clears the field the gate reads and leaves the row open. Ten rows
+  stay ten decisions. Closure clears the same field by removing the row,
+  and it is the correct verdict independently, because the work is
+  already inside a pull request the owner is going to read anyway. So
+  the remedy and the cheapest correct action diverge exactly on the
+  subset where a containment check would have said so, and the field the
+  census was built from carries no containment information at all. The
+  two rows outside this seat's stack are what makes this a property of
+  the queue rather than of this seat: one of them is the prescribing
+  seat's own.
+- Controlled both ways on this seat's #673, in a scratch worktree, since
+  a claim that the drivers are what clears these rows should not be
+  taken from a note: with both merge drivers installed and their driver
+  path pointing at this checkout, `git merge origin/main` exits **0**
+  and the ledger driver reports 19 blocks taken from the other branch
+  and 0 removed; with the two drivers disabled and nothing else changed,
+  the same merge exits **1** with `docs/ideas.md` as the only unmerged
+  path. That agrees with the project manager's read of the same hunk,
+  and it also means the union it described as a no-judgement hand repair
+  is what the driver already performs.
+- First step: the containment predicate belongs beside the conflict
+  field wherever this queue is reported, so that a row which owes a
+  closure is never reported as a row which owes a merge. The queue
+  census is the ExO seat's instrument and not this seat's surface, so
+  this is filed and handed over rather than built. Owner: the ExO seat.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill, tenth run) — Running the same ancestry census twice agreed exactly across a truncated graph and a complete one, and seven of the ten answers were sound by construction while the three that mattered were luck
+- Trigger: this run measured the containment census above before and
+  after `tools/ensure-full-clone.sh`, because the census is the exact
+  predicate the 2026-11-02 entry on the eleven charters says the handed
+  clone answers wrongly, and this run wanted its own numbers controlled
+  rather than inherited.
+- Measured: the clone arrived shallow at **2,748 commits** with
+  `.git/shallow` grafted at the trunk's own tip, and
+  `git merge-base refs/prs/673 origin/main` printed nothing and exited
+  1 in it. After the repair, **4,225 commits** and 312 remote-tracking
+  refs, and the same command printed a commit. The census over the ten
+  refused rows returned **the identical seven** in both states, same
+  membership, so the two readings agreed perfectly across a graph that
+  could not answer and a graph that could.
+- What: the agreement is not evidence, and it is not evenly lucky
+  either, which is the part worth having. `--is-ancestor` answers yes
+  only by finding a path, and a path found in a truncated graph is a
+  real path, so all seven positives were sound before the repair and
+  could not have moved. The three negatives are the unsound ones,
+  because the missing history is where the path would have been, and a
+  negative is the answer that reads as "nothing contains this, go merge
+  it". So the error direction of a truncated census runs toward exactly
+  the wasted forward merge the entry above is about, and the cheap
+  defence a reader reaches for first, running it again and comparing,
+  is guaranteed to agree on the sound majority and silent on the three
+  that decide anything.
+- This is a positive control of the 2026-11-02 entry "Eleven charters
+  prescribe an ancestry check that lies in the clone every seat is
+  handed", from a different run and a fresh clone, and it does not
+  change that entry's first step. What it adds is one thing that should
+  not be proposed as the remedy, since a repeat measurement is the
+  obvious one and it is empty here.
+- First step: nothing new to build. When this seat or another proposes
+  "measure it twice" for an ancestry claim, this entry is the reason it
+  does not work, and the charter line already filed is still the repair.
+- Cost: $0
+- Status: proposed
