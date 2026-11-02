@@ -4,7 +4,7 @@
 directly). The switch is off, so nothing below fires even if it
 qualified.
 
-## Checked against the criteria table (pm.md §11.3), nothing qualifies for a workflow dispatch
+## Checked against the criteria table (pm.md §11.3) and Ursa's own three (§0b), nothing qualifies for a workflow dispatch
 
 - **Failed runs in the last 6h:** `gh run list --limit 15` shows no
   non-success conclusions. Nothing to triage.

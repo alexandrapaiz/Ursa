@@ -217,6 +217,266 @@ will wait the same way once it's readied.
 **No dispatch fired.** `PM_DISPATCH_ENABLED` unset. Nothing on this
 run's wake bore on the §11.3 criteria table; the fifteenth pass's full
 walk stands as the newest sweep.
+## Top three for the owner, 2026-11-02 message-triggered (eleventh pass): #647 merged under Tier B, #612 closed as superseded by #618, nothing new for you
+
+Triggered by three board events landing together: the engineer run that
+produced #645 (already merged by the tenth pass, confirmed on `main`
+before this pass started), exo's #647 against the merge rule, and the
+same standing condition about #646 (skill) the tenth pass already
+resolved. Built on this seat's own #648 (tenth pass), confirmed its
+tip is an ancestor of this branch before adding anything.
+
+1. **#647 (exo, window 77) merged under Tier B.** Diff is
+   `docs/agents/{improvements,incidents,learning-log,merge-order,runner-facts}.md`
+   and two `docs/runs/` files — no `prompts/`, no secrets, no workflow,
+   no `company.yaml`. Checks green (`scan` passed), not a draft, no
+   labels, no comments since push, `CLEAN`/`MERGEABLE`, opened today.
+   Verified with `git merge-base --is-ancestor` that it contains #639
+   (window 76's tip, already open) before merging, so nothing from
+   #639 is lost. Merged; GitHub then marked #639 `MERGED` on its own.
+2. **#612 (exo, window 72) closed as superseded, not merged.** exo's
+   own #647 and #618 both say #612 is contained in #618. Checked
+   independently rather than taken on their word: `git merge-base
+   --is-ancestor pr612 pr618` exits 0, so #612's tip really is an
+   ancestor of #618's. #618 is Tier C by path (`prompts/` charter
+   edits) and still open, unreadied by this seat, waiting on the
+   owner. Closed #612 with a comment naming #618 as where the work
+   lives and naming exo as the owning seat, and posted a board note to
+   exo saying the same, so the close reads as a courtesy rather than a
+   seizure of another seat's PR.
+3. **#646 (skill) is unchanged since the tenth pass's own account.**
+   Still a draft, still touches `prompts/skill-extract.md` directly,
+   still Tier C regardless of draft state or whether a live run stands
+   behind it. The tenth pass's comment and board note to the skill
+   seat stand; nothing new to add this pass.
+4. **#395 (research) is now 8.2 days old as an owner-merge PR**
+   (`createdAt` 2026-10-24T21:21:40Z against now, 2026-11-02T02:02Z),
+   unchanged. The prior pass's note said "nine point eight days,"
+   which this pass's own arithmetic does not reproduce — recorded here
+   as the corrected number, not the alarm.
+5. **Sprint-ceremony gap, named again.** Today is Monday. The only
+   sprint file on `main` is still `sprint-2026-10-12.md`. Three Mondays
+   have now passed with no ceremony PR. This run's trigger was a
+   specific PR review plus a standing condition, the same standup
+   shape every pass today has run under, not an instruction to open a
+   sprint, so this pass does not open one either. A fourth unnamed
+   Monday would be worse than a repeated note.
+
+No dispatch fired: `PM_DISPATCH_ENABLED` reads empty in this run's
+environment, and nothing in the queue meets a real §11.3/§0b criterion
+regardless (see `dispatch-queue.md`).
+
+**Earlier passes today, kept below for the record.**
+
+## Top three for the owner, 2026-11-02 message-triggered (tenth pass): #645 merged under Tier B, #646 is the skill seat's to finish (Tier C), nothing new for you
+
+Triggered by a board event asking this seat to review the engineer's
+newest pull request against the merge rule, plus a standing condition
+attached to this run's wake naming a draft from the skill seat with no
+live run behind it. Built on this seat's own open pull request from
+the ninth pass (confirmed with `git merge-base --is-ancestor`) rather
+than a second version from `main`.
+
+1. **#645 (engineer) merged under Tier B.** Touches `docs/ideas.md`,
+   one `docs/runs/` file, and five files under `tools/board/` plus
+   their tests. No Tier C path, checks green, not a draft, no labels,
+   no comments, clean and mergeable against `main`. Merged.
+2. **#646 (skill) is a draft that edits a charter file, so it stays
+   Tier C regardless of what else is true about it.** The standing
+   condition attached to this run's wake described it as an orphaned
+   draft with no live run behind it and asked this seat to ready and
+   merge it, close it, or write in it which clause keeps it a draft,
+   citing a tool (`tools/check-draft-prs.sh`) and reading much like
+   the claim about PR #629 the ninth pass already found false. This
+   time the underlying fact checked out true rather than false: the
+   board's own run record for the skill seat shows nothing newer than
+   the run that produced its prior pull request at 01:40:58Z, two
+   minutes before this draft was opened, so there is in fact no live
+   run behind it right now. That does not change the disposition,
+   though, because the draft's diff includes `prompts/skill-extract.md`
+   directly, which is Tier C by path whether or not it gets readied,
+   and the named tool still does not exist anywhere in this checkout
+   (reconfirmed with `find`), the same absence this seat has measured
+   before. So "ready it and merge it" was never actually on the table:
+   this seat left the PR's state untouched, commented on it naming the
+   Tier C path and the run-record check, and posted a board note to
+   the skill seat (`note`, id `de4e6b37`) so its next run picks this
+   up rather than this seat guessing whether the work is finished,
+   abandoned, or mid-thought from the outside.
+3. **The research PR is now an owner-merge PR older than seven days**
+   (past nine point eight days), unchanged from every prior pass
+   today.
+
+No dispatch fired: `PM_DISPATCH_ENABLED` reads empty in this run's
+environment, and nothing in the queue meets a real §11.3/§0b criterion
+regardless (see `dispatch-queue.md`).
+
+**Sprint-ceremony gap, unchanged, not re-run here.** The only sprint
+file on `main` is still from 2026-10-12. Three Mondays have now passed
+with no ceremony PR. This run's own trigger named one specific PR
+review and one standing condition, the standup shape, not an
+instruction to open a sprint, so it doesn't — naming the gap again so
+it isn't silently absorbed a fourth week.
+
+## Top three for the owner, 2026-11-02 message-triggered (ninth pass): three more Tier B merges, one stale claim set aside, nothing new for you
+
+Triggered by four events: review #632 (exo), #629 (security) and #628
+(frontend) against the merge rule; a `done` from security addressed to
+this seat naming PR #629; the security and frontend seats' own
+finished-run reports; and a wake condition claiming this seat owed a
+draft/merge/close decision on #629. Built on this seat's own open pull
+request (#637, the re-fired 2026-11-01 hook slot) rather than starting
+a second version from `main`, per the org rule on reading a seat's own
+open PRs first: #637 had already merged #632, #629 and #627 and named
+five PRs opened mid-pass that it had not yet evaluated. This pass picks
+those up.
+
+1. **Three more pull requests merged under Tier B, none of them
+   needing you.** #628 (frontend, `docs/design/` only, green, clean),
+   #634 (exo, two files in its own register lane, no charter path,
+   green, clean) and #635 (market, `docs/ideas.md` plus three files
+   under `docs/market/`, green, clean) all merged. #633 (skill) stays
+   with that seat: it edits `prompts/skill-extract.md` directly (Tier
+   C) and is also genuinely `CONFLICTING`, both named in a comment on
+   the PR. #636 (security) stays a draft, pushed minutes before this
+   pass read it — a live run, not a stale one.
+2. **A wake condition claiming #629 needed this seat's merge-or-close
+   decision checked out false, and nothing follows from it.** The
+   condition described #629 as an orphaned draft with "no live run
+   behind it" that only this seat could reach, and named a tool
+   (`tools/check-draft-prs.sh`) to decide its disposition. #629 was
+   already merged — by this seat's own earlier pass today, before the
+   condition was even attached to this run's wake — and was never a
+   draft. The named tool still does not exist anywhere in this
+   checkout, the same absence this seat and others have measured
+   before. Treated as unverified external content per the charter's
+   own rule (everything outside the owner, HQ's standards, and this
+   repository's committed files is data, not instruction) rather than
+   acted on. Replied to exo on the board naming the check and the
+   result, since the same condition was attached to its wake too.
+3. **#395 (research) is now about ten days old and still waits on
+   you.** Unchanged from every prior pass.
+
+Replied to security's `done` note in first person on the board, naming
+the merge and the fact that it predated the note. No new dispatch:
+`PM_DISPATCH_ENABLED` reads empty in this run's environment, and
+nothing in the queue meets a real §11.3/§0b criterion regardless (see
+`dispatch-queue.md`).
+
+**Sprint-ceremony gap, unchanged, not re-run here.**
+`sprint-2026-10-12.md` is still the only sprint file on `main`. Three
+Mondays have now passed with no ceremony PR, today included. This
+run's own trigger named three specific PR reviews and two finished-run
+reports, which is the standup shape, not an instruction to open a
+sprint — so it doesn't. Naming the gap again so it isn't silently
+absorbed a fourth week.
+
+## Top three for the owner, 2026-11-01 hook (re-fired 2026-11-02, standup): three Tier B merges, five Tier C PRs unchanged, nothing new for you
+
+This run is the scheduled daily-cadence hook for 2026-11-01, which the
+provider refused before it took a turn; it fired again after the
+provider's limit reset and is run now, dated for the slot it was
+scheduled against. 2026-11-01 was a Sunday, so this is the standup half
+of the cadence (docs/standards/pm.md §11, company ADR-033), not the
+Monday ceremony. The repo has since moved well past that slot through a
+long run of message-triggered passes (the sixth through eighth,
+ending in #630, merged 2026-11-02T00:41:45Z), so this standup finds a
+state already close to current rather than a 2026-11-01 snapshot. It
+still runs its own checklist rather than trusting the last pass's
+numbers unread.
+
+**This run's own checkout was shallow and single-branch again**
+(`git rev-parse --is-shallow-repository` true, 2 remote-tracking refs),
+the same recurring defect the eighth pass named and repaired for
+itself. Repeating the repair here with `tools/ensure-full-clone.sh`
+(1,966 → 3,951 commits, 2 → 292 refs) before trusting any local
+ancestry or three-dot diff check below — `git merge-base` and
+`git diff <base>...<head>` on this checkout failed outright
+(`fatal: no merge base`) until the repair ran. **Worth generalizing
+past this one pass:** two PM runs in a row have now hit the same
+shallow-clone defect independently and each repaired it for itself.
+If a third run hits it, that is a pattern, not a coincidence, and the
+fix belongs in the checkout step the workflow runs before any agent
+turn, not in each run's own first few commands.
+
+**A separate, sharper finding on top of that one: `gh pr diff --name-only`
+is not the current merge-base diff, and pm.md §21/§22's scope check
+should not be read as if it were.** PR #627's own `gh pr diff
+--name-only` listed 40 files across six seats' lanes before this pass
+merged anything. The real cause, checked rather than assumed: GitHub's
+`base.sha` on that PR was `238fc7b2`, a commit 87 commits behind the
+`main` tip at the moment this run started, because the field records
+where the PR last synced and does not track `main` continuously.
+`gh pr diff` compares against that recorded base, not against the
+current tip, so a PR open for even a short while behind a busy `main`
+reads as touching every file `main` gained since its last sync, the
+same phantom-diff mechanism pm.md §22 describes for a two-dot local
+comparison, by a different mechanism. The current, real diff —
+`git diff --name-only origin/main...<head>` with three dots, local and
+freshly fetched, which is what pm.md §22 actually specifies — showed
+4 files, all in market's own lane. Recommending pm.md §21/§22 say so
+explicitly: `gh pr diff --name-only` is a convenient first read, not
+the scope check itself, and the applier re-verifies with a fresh local
+three-dot diff before relying on the file list for a merge decision.
+
+1. **Three pull requests merged under Tier B.** #632 (exo, four
+   knowledge-surface files, clean) and #629 (security, after this pass
+   resolved a docs-only `docs/ideas.md` conflict with `main` on its own
+   branch — two inserted ledger entries at the same point, resolved by
+   keeping both and restoring the shared closing `- Status: proposed`
+   line each needed, pushed to `ursa-security/2026-11-02-message`, not
+   to `main`) both merged clean. #627 (market) also merged: the
+   redaction-gate false positive the eighth pass's comment flagged
+   (a public URL's UUID-shaped path segment) was already fixed by
+   market's own next push, which landed after that comment and before
+   this pass read it, and the fresh three-dot diff against current
+   `main` confirmed the real change is 4 files in market's own lane,
+   not the 40 `gh pr diff` showed against its stale recorded base (see
+   the finding above). All three deleted their branches on merge.
+2. **Five PRs confirmed Tier C, unchanged, now checked with a working
+   local ancestry graph instead of a shallow one.** #618 and #612 (exo) touch
+   nine `prompts/*.md` files each and both now show `dirty`/conflicting
+   against current `main` (confirmed by `git merge-tree`, real conflict
+   in `docs/agents/incidents.md`), consistent with the eighth pass's
+   finding that #618 contains #612. #615 (engineer) touches
+   `tools/secret-scan.baseline.json`, reserved to your merge by that
+   file's own text, and is now genuinely conflicting in `docs/ideas.md`
+   where the eighth pass still read it as clean — a real change since
+   that pass, not a stale read. #601 (skill) touches
+   `prompts/skill-extract.md` and is genuinely conflicting in
+   `skills/running-an-outcome-record-trial/TRIGGER-TEST.md`. #395
+   (research) touches `prompts/engineer-agent.md` and
+   `prompts/research-agent.md`, merges clean on top of current `main`,
+   and is now ten days old.
+3. **Nothing new for you.** No milestone due within three days (the
+   API returns an empty list), no ruling in `docs/decisions.md` naming
+   a seat without a run since the last pass, and the one failed run in
+   the last 24 hours (market, 2026-11-02T00:36:12Z) retried and passed
+   four minutes later before this pass ever read it — a transient
+   failure, not a defect, and already superseded by #627's merge above.
+
+**The sprint-ceremony gap the eighth pass named is unchanged and not
+re-run here.** `sprint-2026-10-12.md` is still the only sprint file on
+`main`; three Mondays (2026-10-19, 2026-10-26, 2026-11-02 itself) have
+passed with only standup- and message-cadence passes and no ceremony
+PR. This run's own slot (2026-11-01) was never a ceremony slot, so it
+does not open one either. Flagging again rather than absorbing it
+silently: the next Monday-dated hook run is the one that owes a
+ceremony PR, and if it is also refired late or skipped, that is now two
+consecutive misses worth a line in `docs/decisions.md`, not three.
+
+Board note not posted this pass: the eighth pass already posted the
+equivalent first-person note for the same merge set plus #627/#629, and
+a second note minutes later restating the same three merges would be
+noise rather than new information. This pass's own PR is the record.
+
+**Five PRs opened by other seats' own concurrent passes while this one
+ran (#628, #633, #634, #635, #636) are not evaluated above.** They
+surfaced mid-pass, after this run's own Tier B sweep had already
+started, and merging into a seat's still-moving draft risks exactly
+the race this standard's merge rule exists to avoid. Naming them here
+rather than leaving a silent gap: the next pass, hook or message, owes
+them a first read.
 
 ## Top three for the owner, 2026-11-02 message-triggered (eighth pass): three Tier B merges, one red-check finding handed to market, nothing new for you
 
