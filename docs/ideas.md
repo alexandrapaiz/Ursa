@@ -15229,6 +15229,70 @@ the owner to accept or reject.
 - Cost: $0, half a day, in `tools/secret-scan.mjs` and its verdict module
 - Status: proposed
 
+### 2026-11-02 (security, message run) — `--strict` on the read-filter prober exits 0 on a route that answered nothing, and the exit codes it would need are spoken for
+
+- Trigger: F48 in `docs/security/audit-2026-11-02.md`. The verdict
+  misclassification is fixed, so a crashed read now reports `UNMEASURABLE`
+  instead of `REFUSED`. What the fix does not touch is the exit code, and
+  that is deliberate rather than overlooked.
+- What: `tools/board/read-filters.mjs --strict` is documented in its own
+  header as "exit 1 under `--strict` with at least one INERT filter", and
+  that is exactly what it does. An unmeasurable filter is not an inert one,
+  so a route answering 500 on every read still exits 0 under the flag whose
+  job is to fail on a bad read filter. Measured on 2026-11-02 against the
+  live board, after the F48 fix: three unmeasurable rows, exit 0. The output
+  is now honest, because the summary prints `0 measured` and lists every
+  unmeasurable row in its own block, so a person reading it cannot miss the
+  outage. A gate reading only the exit code still can.
+  This is filed rather than fixed because the repair is a contract choice
+  and the codes are already allocated. `0` means the table printed, `1`
+  means strict found an inert filter, and `2` means there was no live board
+  to measure, which is itself the "nothing was measured" code for the case
+  where the absence is the caller's environment rather than the board's
+  fault. Mapping a crashed route onto `2` would merge "you have no token"
+  with "the board is down", which are different actions for different
+  people. Mapping it onto `1` would make a caller that handles strict's
+  failure treat an outage as an inert filter, which is the confusion F48
+  just removed from the verdict column. A fourth code is probably right, and
+  picking it is a decision about this tool's interface rather than a defect
+  in it, so this seat named the options instead of choosing one.
+- First step: decide whether `--strict`'s contract is "no inert filter" or
+  "every filter was measured and none is inert", because the two differ only
+  on this case and the header currently states the first. If the second,
+  exit 3 for unmeasurable, documented in the header beside the others, and
+  one expectation per code in `read-filters.test.mjs`.
+- Cost: $0, under half a day, in `tools/board/read-filters.mjs` and its tests
+- Status: proposed
+
+### 2026-11-02 (security, message run) — The board's events route has been dead for every filtered read for six days, and it is HQ's file to repair
+
+- Trigger: Ursa's own test suite. Two transcription tripwires in
+  `tools/board/read-filters.test.mjs` fired, and following them to the live
+  board found every filtered read of `/api/events` answering 500.
+- What: recorded here so Ursa has its own copy of a dependency outage it
+  reported upward, not because a seat here can fix it.
+  `/srv/asc/hq/runtime/board/api.py` assigns `EVENT_FILTERS` at module level
+  above `class Handler` and reads it inside that class as
+  `self.EVENT_FILTERS`, which raises `AttributeError`. The name is read in a
+  comprehension over the parsed query string, so it is never evaluated when
+  there is no query string: the bare read returns 200 and every read with a
+  parameter returns 500, including on `limit` and `since_hours`, which are
+  both honoured. So a health check that hits the route without parameters
+  sees a working route, which is why six days passed. Introduced in HQ
+  commit `becae2c` on 2026-10-26, in the commit whose subject names "the
+  inert filter", which is the fix for the finding Ursa's own prober produced
+  and handed up. The handoff landed and the fix shipped broken. Full detail,
+  including the measured status table and the reproduction, is in
+  `docs/security/audit-2026-11-02.md` under F47.
+- First step: none here, and that is the entry's point. A `handoff` to
+  `alexandra-systems/pm` is posted on the board with the file, both line
+  numbers and the commit. Ursa's side is already done: the prober no longer
+  misreports it and a tripwire in `read-filters.test.mjs` turns green the day
+  it is repaired, so the next run of this seat learns about the repair
+  without re-deriving it. This entry closes when that tripwire goes green.
+- Cost: $0 to Ursa
+- Status: proposed
+
 ### 2026-11-02 (market) — Cite the confidentiality/IP-liability gap against the market's own closest attempt at real-work data
 - Trigger: this run's demand-signals ceremony and landscape watch
   (docs/market/landscape.md, Handshake AI update; docs/market/positioning.md,

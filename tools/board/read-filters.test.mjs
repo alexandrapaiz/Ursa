@@ -52,6 +52,50 @@ test('any other 4xx on the probe is also refused, and carries the reason', () =>
   assert.match(v.why, /no company named/);
 });
 
+test('a 5xx on the probe is unmeasurable, because a crashed route is not a refusal', () => {
+  // The case this file did not have on 2026-11-02, when the live events route
+  // answered 500 on every filtered read and the tool printed REFUSED, which
+  // this file's own header calls the good failure.
+  const v = verdict(ok(210), { status: 500, count: null, saturated: false, error: "events read: a defect in the board's own code" });
+  assert.equal(v.verdict, 'UNMEASURABLE');
+  assert.match(v.why, /the probe read failed with 500/);
+  assert.match(v.why, /nothing about this filter was measured/);
+});
+
+test('a 5xx on the baseline is unmeasurable too, and names which read failed', () => {
+  const v = verdict({ status: 503, count: null, saturated: false, error: 'upstream down' }, ok(0));
+  assert.equal(v.verdict, 'UNMEASURABLE');
+  assert.match(v.why, /the baseline read failed with 503/);
+});
+
+test('a 4xx is still REFUSED, so the fix for the 5xx case did not widen', () => {
+  // The guard on the change above: every refusal verdict this tool published
+  // before 2026-11-02 came through a 4xx, and all of them must be unchanged.
+  for (const status of [400, 403, 404, 422, 499]) {
+    const v = verdict(ok(210), { status, count: null, saturated: false, error: 'nope' });
+    assert.equal(v.verdict, 'REFUSED', `${status} must still be REFUSED`);
+  }
+});
+
+test('two reads with no row list are unmeasurable, not INERT', () => {
+  // `null === null` is true, so without the count guard a pair of reads that
+  // returned no rows at all compared equal and reported the unfiltered set.
+  const v = verdict({ status: 200, count: null, saturated: false, error: '' }, { status: 200, count: null, saturated: false, error: '' });
+  assert.equal(v.verdict, 'UNMEASURABLE');
+  assert.match(v.why, /no row list/);
+});
+
+test('a casing pair with no count is unmeasurable, not a positive finding', () => {
+  // `pageAll` returns `count: null` when a slice read fails. `null !== null`
+  // is false, so this fell through to the equal-count branches and published
+  // CASE-INSENSITIVE (counts only) over two reads that never answered.
+  const v = casingVerdict({ count: null, spellings: [] }, { count: null, spellings: [] });
+  assert.equal(v.verdict, 'UNMEASURABLE');
+  assert.match(v.why, /no count/);
+  // And the one-sided case, which is how a single failed slice arrives.
+  assert.equal(casingVerdict({ count: 66, spellings: [] }, { count: null, spellings: [] }).verdict, 'UNMEASURABLE');
+});
+
 test('a baseline that refuses to answer without the parameter is required, not inert', () => {
   const v = verdict({ status: 400, count: null, saturated: false, error: 'company and seat are both required' }, ok(60));
   assert.equal(v.verdict, 'REQUIRED');
@@ -136,25 +180,69 @@ test('transcribed: the message read honours exactly the filters this tool probes
   }
 });
 
-test('transcribed: the events read validates nothing, which is why company reads INERT', { skip: !existsSync(API) && 'no board source on this host' }, () => {
+// THESE TWO TRIPWIRES FIRED ON 2026-11-02 AND THIS IS THEM RESOLVED.
+// Both asserted the absence of a fix, so that the run which found the fix
+// present would be told to re-measure. HQ added it in `becae2c` on
+// 2026-10-26, in the commit whose subject names "the inert filter", so the
+// handoff this tool's finding produced did land. Each now asserts the new
+// state, and the tripwire below asserts the thing that is still wrong.
+test('transcribed: the events read refuses unknown filters, so the INERT finding was acted on', { skip: !existsSync(API) && 'no board source on this host' }, () => {
   const src = readFileSync(API, 'utf8');
-  const block = src.slice(src.indexOf('if EVENTS_ROUTE.match(self.path):'));
-  const body = block.slice(0, block.indexOf('store.events('));
-  // If this ever gains an unknown-parameter check, the INERT verdict becomes
-  // a REFUSED one and the handoff this tool's finding produced has landed.
-  assert.equal(/no such filter/.test(body), false,
-    'the events read now refuses unknown filters; re-run the prober, the INERT finding may be fixed');
+  const start = src.indexOf('if EVENTS_ROUTE.match(self.path):');
+  assert.notEqual(start, -1, 'the events route is no longer matched this way; re-read api.py');
+  const block = src.slice(start);
+  const end = block.indexOf('store.events(');
+  // Bounded explicitly: `slice(0, -1)` on a missing marker is the whole rest
+  // of the file, which contains the message route's own refusal and would
+  // make this assertion pass on text from a different handler.
+  assert.notEqual(end, -1, 'store.events( no longer follows the events route; this slice would read the rest of the file');
+  assert.equal(/no such filter/.test(block.slice(0, end)), true,
+    'the events read no longer refuses unknown filters; the INERT finding has regressed and the prober should be re-run');
 });
 
-test('transcribed: store.events takes no company argument, so the filter cannot exist', { skip: !existsSync(STORE) && 'no board source on this host' }, () => {
+test('transcribed: store.events takes a company, so the events company filter is real', { skip: !existsSync(STORE) && 'no board source on this host' }, () => {
   const src = readFileSync(STORE, 'utf8');
   const sig = src.match(/^def events\(([^)]*)\)/m);
   assert.ok(sig, 'store.events not found');
-  assert.equal(/company/.test(sig[1]), false,
-    'store.events now takes a company; the events company filter may be real and the prober should be re-run');
+  assert.equal(/company/.test(sig[1]), true,
+    'store.events no longer takes a company; the events company filter may be inert again');
 });
 
-test('live: the prober agrees with the board it is a claim about', { skip: !process.env.BOARD_API_URL || !process.env.BOARD_RUNTIME_TOKEN ? 'no live board in this environment' : false }, async () => {
+test('transcribed: the events filter list is reachable from where it is read', { skip: !existsSync(API) && 'no board source on this host' }, (t) => {
+  // THE DEFECT THIS RUN FOUND, as a tripwire that goes green when HQ fixes it.
+  // `EVENT_FILTERS` is assigned at column 0, above `class Handler`, and read
+  // inside the handler as `self.EVENT_FILTERS`. A module-level name is not an
+  // attribute of the instance, so the read raises AttributeError and every
+  // filtered events read answers 500. The route survives only the request
+  // with no query string at all, because the comprehension that reads the
+  // name never runs when the parsed query is empty.
+  const src = readFileSync(API, 'utf8');
+  const lines = src.split('\n');
+  const assigned = lines.findIndex((l) => /^EVENT_FILTERS\s*=/.test(l));
+  if (assigned === -1) return; // moved into the class, or renamed: nothing to check here.
+  const classAt = lines.findIndex((l) => /^class Handler\b/.test(l));
+  assert.notEqual(classAt, -1, 'class Handler not found; re-read api.py');
+  const readsViaSelf = src.includes('self.EVENT_FILTERS');
+  // REPORTED AND SKIPPED RATHER THAN FAILED, on purpose. This file is HQ's
+  // and Ursa cannot edit it, so a failing assertion here would hold this
+  // suite red for a defect no run of this repository can clear, and every
+  // run reports its suite as a verification baseline. The header's rule for
+  // the transcribed tests already says a skip means the claim went unchecked
+  // rather than that it passed. The finding travels by the three instruments
+  // that can carry it: the prober now prints UNMEASURABLE instead of
+  // REFUSED, docs/security/audit-2026-11-02.md records it, and the security
+  // seat handed it to HQ on the board. This test's job is to go GREEN the
+  // day HQ repairs it, which is how Ursa learns to re-measure.
+  if (readsViaSelf && assigned < classAt) {
+    t.diagnostic(`api.py assigns EVENT_FILTERS at module level (line ${assigned + 1}, before class Handler `
+      + `at line ${classAt + 1}) and reads it as self.EVENT_FILTERS, so every filtered /api/events read `
+      + `answers 500 with AttributeError. HQ's file, not Ursa's. See docs/security/audit-2026-11-02.md.`);
+    return t.skip('the upstream defect this tripwire watches is still present; reported, not Ursa\'s to fix');
+  }
+  assert.ok(true, 'EVENT_FILTERS is reachable from its read site');
+});
+
+test('live: the prober agrees with the board it is a claim about', { skip: !process.env.BOARD_API_URL || !process.env.BOARD_RUNTIME_TOKEN ? 'no live board in this environment' : false }, async (t) => {
   const base = process.env.BOARD_API_URL.replace(/\/$/, '');
   const h = { Authorization: `Bearer ${process.env.BOARD_RUNTIME_TOKEN}` };
   const get = async (p) => {
@@ -169,7 +257,25 @@ test('live: the prober agrees with the board it is a claim about', { skip: !proc
   // the page. An equal count here is only evidence because of that.
   const plain = await get('/api/events?since_hours=2&limit=500');
   const probed = await get('/api/events?since_hours=2&limit=500&company=THIS_COMPANY_DOES_NOT_EXIST');
-  assert.equal(probed.status, 200, 'the events read now refuses an unknown filter, which would be the fix');
+
+  // A 5XX IS NOT THE FIX, and this assertion said it was. Until 2026-11-02 it
+  // read `assert.equal(probed.status, 200, 'the events read now refuses an
+  // unknown filter, which would be the fix')`, so when the route began
+  // answering 500 from a defect in its own code the suite failed with a
+  // message telling the reader the finding had been fixed. Three statuses are
+  // distinguishable here and each means something different, so each is named.
+  for (const [which, r] of [['unfiltered', plain], ['probed', probed]]) {
+    if (r.status >= 500) {
+      t.diagnostic(`the events read answers ${r.status} on the ${which} read: ${(r.body.error || '').slice(0, 160)}`);
+      return t.skip('the live events route is failing, so this claim went unchecked; it is not a refusal and not the fix');
+    }
+  }
+  if (probed.status === 400) {
+    assert.match(probed.body.error || '', /no such filter/,
+      'the probed events read answers 400 without naming the filter, which is a refusal the prober cannot explain');
+    return; // The fix landed and works. REFUSED is the good failure.
+  }
+  assert.equal(probed.status, 200, `the probed events read answers ${probed.status}, which this test has no reading for`);
   assert.ok(plain.body.events.length < 500, 'the 2h events window now saturates; widen nothing, shorten it');
   assert.equal(probed.body.events.length, plain.body.events.length,
     'the events company filter now filters; the INERT finding is fixed and the doc should be updated');
