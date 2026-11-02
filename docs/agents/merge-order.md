@@ -47,6 +47,83 @@ The four dark rows are the outage
 and they are **over**: the brief reports 195 runs attempted today with
 157 finished, 2 refused (1% of the day, none before a first turn).
 
+## Amended at 04:43:00Z, in the same window, because the trunk moved twice under the measurement
+
+**Everything below was measured at `main` = `30d8258c`. `main` is now
+`9c3c52dc`.** `#675` — this seat's own other register half — merged at
+04:34:58Z and `main` took seven commits while this window was reading.
+Three things change, and the third is the finding.
+
+1. **`#680` is now `MERGEABLE` and its driverless merge exits 0.** The
+   sentence below saying its verdict "will not clear on its own" is
+   **withdrawn**. It was right that staleness could not explain it and
+   wrong that nothing could fix it. The skill seat merged `origin/main`
+   into its own branch at `8b749f48` and pushed, which is exactly the
+   remedy this file prescribes, and the row cleared. That is a positive
+   control for the remedy from an independent seat's act rather than
+   from this seat's reasoning, and it is better evidence than the
+   prediction it refutes.
+
+2. **The `needs-local-merge` class is nine, not ten, and at 04:43 not
+   one member's base is `main`'s tip.** Re-measured against
+   `9c3c52dc`: `#618 #643 #646 #649 #652 #660 #667 #673` all merge with
+   the drivers and all refuse driverless, eight on `docs/ideas.md` and
+   `#618` on `learning-log.md` and `runner-facts.md`. Every one has a
+   stale base, so every one is explicable by the trunk having moved plus
+   the driverless ledger collision, and the one-command remedy is right
+   for all of them.
+
+3. **The staleness guard this charter prescribes passed while both of
+   its operands were seven commits stale, and that is why this window
+   spent four reads concluding GitHub was wrong about a fast-forward.**
+   §5b says to read `mergeable`, `mergeStateStatus` and `baseRefOid`
+   together and "compare the last against `git rev-parse origin/main`".
+   Measured at 04:39:0xZ on this window's own branch: `baseRefOid` was
+   `30d8258c`, local `origin/main` was `30d8258c`, the guard agreed, and
+   the real `main` was `9c3c52dc`. GitHub was computing against the real
+   trunk and reporting `CONFLICTING` **correctly**.
+
+   **Both operands of that comparison come from one fetch generation**,
+   so when the clone is stale they are stale together and the guard
+   reports health. This charter already names the class — *an
+   equality-shaped assertion cannot detect a defect in the environment
+   both sides share* — and wrote it about a test three thousand lines
+   away from the guard it applies to.
+
+   The right operand has to come off the wire, and the fetch has to
+   happen immediately before any verdict you intend to publish:
+
+   ```sh
+   git fetch origin --quiet
+   wire=$(git ls-remote origin refs/heads/main | cut -f1)
+   [ "$(git rev-parse origin/main)" = "$wire" ] || { echo "clone is behind the wire"; exit 1; }
+   ```
+
+   **And `headRefOid` is not the head the verdict was computed at.** The
+   only field that reports that is the second parent of
+   `refs/pull/<n>/merge`, which is written on success and never
+   invalidated. Measured at 04:39Z: `#680` and `#673` current, `#618`
+   and `#682` stale on the head side while `headRefOid` read correctly
+   for all four.
+
+   ```sh
+   git fetch -q origin "refs/pull/$n/merge:refs/prm$n" && \
+     git log -1 --format='%P' "refs/prm$n"   # 2nd parent != headRefOid means stale
+   ```
+
+   The amendment is a `prompts/` path and therefore Tier C, so it is
+   **not written on this branch** — this lane is registers only, by the
+   one-tier-per-branch rule. It is owed to the charter lane `#618`, and
+   the account is
+   `INC-2026-11-02-the-staleness-guard-for-a-merge-verdict-compares-two-copies-of-one-fetch-and-agrees-when-both-are-stale`.
+
+4. **The general rule, which is the reusable half.** A conflict verdict
+   in this repository has a shelf life measured in minutes, because the
+   trunk took 33 merges today. So **a queue census carries the trunk sha
+   it was taken at, and a verdict older than the newest merge is
+   re-measured rather than quoted.** This file's own header has carried
+   an instant since 2026-10-04 and never the sha until this window.
+
 ## The headline: ten of thirty-one are waiting on their own author, not on the owner
 
 GitHub's `mergeable` field and the merge this repository's own drivers
@@ -80,8 +157,9 @@ refuses — agreement on **31 of 31**, no exceptions in either direction:
 | `#673` | skill | `docs/ideas.md` | `cdbdcdff` |
 | **`#680`** | skill | `docs/ideas.md` | **`30d8258c`** — `main`'s own tip |
 
-`#680`'s base **is** `main`, so its verdict cannot be explained by
-staleness and will not clear on its own. Controlled both ways on it, same
+`#680`'s base **is** `main`, so its verdict could not be explained by
+staleness. **Withdrawn at 04:43:00Z: it cleared when its own seat
+forward-merged `main`. See the amendment above.** Controlled both ways on it, same
 commits, one minute apart:
 
 ```sh
