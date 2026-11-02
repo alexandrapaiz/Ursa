@@ -17698,3 +17698,146 @@ the owner to accept or reject.
   the entry is about records already sold rather than about a regex.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 — The thirteen ancestry call sites, and the two that guard the empty base
+
+- Trigger: this run opened by publishing a false severe finding, that four of
+  this seat's five open pull requests reverted the security seat's 05:15Z fix
+  to `tools/root-entries.test.mjs`. The branches had never touched that file.
+  The finding came out of `MB=$(git merge-base origin/main refs/prs/694)`
+  returning the empty string on the shallow clone the run was handed, which
+  made `git rev-parse "$MB:<path>"` run as `git rev-parse ":<path>"`, and a
+  leading colon is git's syntax for the index. Git answered at exit 0 with the
+  staged blob, and in a seat's clone the index is the trunk, so the laundered
+  value was the trunk wearing the merge base's name.
+- What: thirteen tracked files mention `git merge-base`. `tools/stack/base.mjs`
+  (new today) is the primitive that cannot return an empty base, and
+  `tools/stack/repair-pending.mjs` and `tools/registers/reproduce-collision.sh`
+  already guard the empty result by hand with their own reasoning in place. The
+  remaining ten have not been checked, and one of them is a measured defect of
+  the same family rather than a hypothetical: `tools/seat/charter-lag.mjs:165`
+  computes the base with `allowFail: true` and the next line is
+  `if (!base) continue`. So on a shallow clone it skips every pull request and
+  reports that no open row changed the charter, which is "clean" standing in
+  for "unknowable". That file is currently owned by this seat's open pull
+  request 694, which also edits it, so it is named here rather than touched.
+- First step: port `tools/seat/charter-lag.mjs` to `mergeBase` from
+  `tools/stack/base.mjs` on top of 694 rather than beside it, so a base it
+  cannot compute becomes a refusal naming `bash tools/ensure-full-clone.sh`
+  instead of a `continue`. Then sweep the remaining nine, which splits into
+  two shapes needing two repairs: the ones that interpolate a computed base
+  into another command, and the ones that read `--is-ancestor`'s exit code,
+  where a shallow clone's exit 1 means NOT CONTAINED and that is the opposite
+  of the truth.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — The engineer charter has no bootstrap block, and this run paid for it in its first twenty turns
+
+- Trigger: `prompts/exo-agent.md` opens at §0 with two commands and the
+  sentence "by the time you reach the section that needs them you have already
+  acted on their absence". `prompts/engineer-agent.md` has no equivalent. Its
+  first instruction is "Fresh clone. Read the current sprint first", and its
+  own section "Read your own seat's open PRs first" orders exactly the
+  `git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>` comparison that
+  a shallow clone answers wrongly, without saying to repair the clone. This
+  run followed that section in order, on the clone it was handed, and the
+  first thing it produced was a false accusation against four of its own rows.
+- What: the engineer charter should carry the clone repair as its first act,
+  as a reference to `bash tools/ensure-full-clone.sh` rather than as a copy of
+  the commands, since a copied block drifts from the script it duplicates. The
+  specific sentence that is wrong today is in "Read your own seat's open PRs
+  first": it says "check with `git merge-base --is-ancestor` before you assume
+  you have to combine them by hand", and on a handed clone that check answers
+  non-zero for every pair, which reads as NOT CONTAINED and sends the run to
+  combine branches by hand that already contain each other.
+- Why it is a ledger entry and not a pull request: charters are edited only by
+  the owner's merge, and this seat's own boundaries forbid including a charter
+  edit in its daily pull request. So the proposal is filed and the deviation is
+  not taken.
+- First step: the owner adds one paragraph at the top of the Observe section
+  naming `bash tools/ensure-full-clone.sh` and `git fetch origin
+  '+refs/pull/*/head:refs/prs/*'`, and one clause in "Read your own seat's open
+  PRs first" saying that the ancestry check is unsound until the clone is
+  repaired. Both are two sentences.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — `git log --remerge-diff` as the detector for a resurrection that already landed
+
+- Trigger: today's craft scan, of `git` 2.43.0 itself as the adjacent product,
+  taken while building `tools/stack/lag-or-rewrite.mjs`. That tool answers
+  "would merging this open row revert trunk text the trunk has superseded",
+  and the scan found that git ships the retrospective half of the same
+  question and this repository uses neither half.
+- What worth stealing, from the product: `git log --remerge-diff <merge>`
+  recomputes the merge from its parents and shows only where the recorded
+  merge differs from the clean remerge. That is precisely "what did the person
+  who resolved this conflict decide", isolated from everything the merge
+  carried along, and it needs no instrument of ours to produce. Verified
+  available in the version this repository runs, 2.43.0, by running it against
+  `origin/main`'s tip merge. `git range-diff` is the sibling: it compares two
+  commit ranges by patch content rather than by commit id, which is the shape
+  that answers "is this branch a stale copy of that one" without an ancestry
+  relation existing at all.
+- What this repository does better: both of those are blind to the thing
+  `tools/ledger/both-edited.mjs` recovers, which is a block two sides wrote
+  into where some earlier forward merge has already moved the merge base past
+  the trunk's edit, so there is nothing left for a remerge to disagree about.
+  Ours also carries the judgement in the output line, naming the commit whose
+  change would be reverted with its author and date, where `--remerge-diff`
+  hands back a diff and leaves the reader to find out whether either side ever
+  argued about it.
+- What: a retrospective pass over merges already on `main`, using
+  `--remerge-diff` to list every merge whose recorded result differs from its
+  clean remerge, which is the complete set of hand resolutions in this
+  repository's history. `tools/ledger/both-edited.mjs` finds the ledger blocks
+  inside that set; this finds the set, for every file, and it is one git
+  command per merge commit rather than a walk.
+- First step: `node tools/stack/hand-resolutions.mjs --since 2026-10-01`,
+  printing one row per merge commit where `--remerge-diff` is non-empty, with
+  the files it touched and whether any of them is a file a gate owns. Run it
+  once over October and count. If the count is small the whole class can be
+  reread by hand; if it is large, that number is itself the finding.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — `/tmp` is shared across every seat's run on the resident host, and two runs picked the same filename
+
+- Trigger: this run wrote its pull request description to `/tmp/pr-body.md`,
+  edited it, and pushed it. Between the write and the push another run on the
+  same host wrote the same path, so the body that landed on pull request 708
+  was a different seat's standup report, opening "Tier A. Four events in one
+  wake" and describing a shelves registry and a note from `atelier/pm`. It was
+  live on the wrong pull request for about two minutes before being replaced.
+  Nothing was lost and no other row was touched, but the mechanism is not
+  specific to this seat or to this company.
+- What: the resident host gives each run its own checkout under
+  `/tmp/<company>-<seat>-<id>/`, and that directory is private. `/tmp` itself
+  is not. Every seat of every company in the portfolio shares it, and the
+  filenames a seat reaches for are the obvious ones, so `/tmp/pr-body.md`,
+  `/tmp/msg.md` and `/tmp/body.md` are collision-prone by construction rather
+  than by bad luck. The collision is silent in both directions: the writer's
+  own later read succeeds and returns someone else's bytes, so there is no
+  error to notice, only content that is confidently wrong. That is the same
+  shape as this run's other finding, where an empty merge base laundered into
+  a plausible answer instead of a failure.
+- Why the usual defence does not cover it: this repository already ignores
+  every root-level dot-entry in `.gitignore` precisely so a run's scratch
+  cannot be committed, and `tools/root-entries.mjs` gates it. That defends the
+  repository from the scratch. It says nothing about where the scratch should
+  live, and the one place a seat is sure it may write is the place that is
+  shared.
+- First step: a one-paragraph rule, and the paragraph belongs in
+  `docs/standards/` where it binds every seat rather than in this charter.
+  "A run's scratch goes under its own checkout, in an ignored root dot-entry
+  such as `.ursa-run/`, and never under `/tmp`." This run moved to
+  `.ursa-run/pr-708-body.md` and `tools/root-entries.mjs` stays green on it,
+  so the convention costs nothing and is already gated. The instrument version,
+  if the rule is wanted with teeth, is cheap: a check that refuses an argument
+  under `/tmp` that is not inside the run's own checkout, which is one
+  `realpath` comparison.
+- Cost: $0
+- Status: urgent — every seat on this host is exposed today, and a run that
+  publishes another company's prose to this company's pull request is a
+  disclosure, not an inconvenience.
