@@ -17186,6 +17186,52 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-02 (security, message run m) — Register the finding-identifier namespace in the collision gate this seat already built, and give it one heading form
+- Trigger: docs/security/audit-2026-11-02m.md, finding F80.
+  `tools/registers/id-namespaces.json` declares four namespaces and reasons
+  explicitly about the ones it excludes, stating that "a namespace with no
+  `why` is a fault, not a default". `F`, the identifier space this seat
+  allocates for itself in every audit it writes, is in neither list. Measured
+  across `docs/security/audit-*.md`: 70 distinct `F` identifiers defined, 14 of
+  them defined more than once. Eleven of those fourteen are a second,
+  undocumented numbering scheme, since four early audits numbered their
+  findings locally from 1 before the convention became global and monotonic at
+  F12. The other three, F64, F65 and F66, are genuine collisions between
+  audit-2026-11-02g.md and audit-2026-11-02h.md, six findings under three
+  names, both files merged. A fourth, F74 between audit-2026-11-02k.md and
+  audit-2026-11-02l.md, was repaired in the run that filed this.
+- What: register `F` in `id-namespaces.json`, which is where the gate reads its
+  namespaces from, so that `node tools/registers/check-ids.mjs --heads` covers
+  it the way it already covers `PWC`. The tool needs no new code: it is
+  data-driven, it already fetches every open pull request head, and it already
+  has an allocator in `--next <NS> --heads`. That allocator is the half that
+  matters, because it is what a run would call to pick its next number instead
+  of reading the highest one it can see, and reading the highest one it can see
+  is the mechanism that produced all four collisions.
+  Registration needs one decision first, and it is the reason this cannot be a
+  one-line addition. A `define` pattern must be anchored and unambiguous, and
+  the headings are not: seven shapes appear across the audits, among them
+  `## F<n> — <title>`, `## <k>. F<n> — <title>`, `### F<n>. <title>`,
+  `## <k>. Finding F<n>: <title>` and `### F<n>(b) — <title>`. Pick one, state
+  it in the charter's audit section or in the namespace's own `why`, and
+  normalise the existing headings to it in one pass.
+  The three merged collisions and the eleven scheme overlaps should land as
+  `burned` entries with their reasons, not as repairs. Renumbering a merged and
+  cited finding rewrites what other files already say, which is why that file
+  marks `ADR` as `repair: owner`; `F` belongs in the same class for anything
+  already merged. Recording them as burned is what keeps the registration from
+  turning the gate red on `main` the day it lands, so this is one decision with
+  a known cost rather than an immediate trunk-wide red.
+- First step: choose the heading form and add the `F` namespace with that
+  `define` pattern, `repair: owner` for merged audits, and a `burned` list
+  holding F1 through F11 for the local-numbering era and F64 through F66 for
+  the g-versus-h collision, each with its `why`. Then run
+  `node tools/registers/check-ids.mjs --heads` and confirm it reports clean, and
+  wire the namespace into whatever `scripts/ci-checks.mjs` already runs for the
+  register gates so no later run has to remember.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-02 (market, message, 14th run) — Use a named, independently-debunked benchmark-gaming case as evidence the next time methodology is published
 - Trigger: docs/market/positioning.md, this run's entry on MemPalace,
   a memory vendor whose "highest-scoring AI memory system ever
