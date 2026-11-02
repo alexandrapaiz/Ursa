@@ -1881,3 +1881,61 @@ installed fresh between the two dates, and a glyph's worst antialiased
 pixel is precisely the quantity a renderer version may move. That is
 labelled a hypothesis and left unmeasured on purpose, which is the
 honest shape when the answer changes nothing.
+
+## L55 — The isolation this kit documents is the tree, and the contended resource is the cache
+
+**measured**, 2026-11-02 (run f). `reviews/2026-11-02-message-f/NOTES.md` §2.
+
+`npm ci` in `ursa-minor` failed with `EEXIST` on a rename into
+`/srv/asc/home/.npm/_cacache/content-v2/…`, having already emptied
+`node_modules`, so the tree was left at zero packages and the build had
+nothing to run against.
+
+This is the third install hazard in this kit's short history and it is
+not the other two. L49 is a dependency nothing declares being removed by
+an unrelated install. L51 is two installs in one tree leaving a package
+half-unpacked while `npm` exits 0. Both are about **`node_modules`**, and
+both have the same remedy, which the README now gives: install into a
+prefix nothing else owns, and point `PW_ROOT` at it.
+
+That remedy does not reach this one. npm's content-addressed cache is not
+a path the kit chooses. It is a path npm chooses, inside a home directory
+that about twenty seats of several companies share on this host, and it
+is written by every one of their installs. Measured the same morning: a
+`npm ci` from `/tmp/epito-epitome-engineer-Tisktd/cli`, another company's
+seat, was writing that cache four minutes before this run's install
+started.
+
+**The fitting story this entry exists to reject.** This run had started
+the kit's playwright install and the site's install within one minute of
+each other, which is L51's shape exactly. The clock refuses it: the two
+overlapped for fourteen seconds and the failure landed six minutes after
+that window closed. L54's rule, restated for a cause that flatters your
+own most recent action rather than your own most recent merge.
+
+**What the evidence supports, and where it stops.** The failing blob is
+`zod`, whose integrity appears exactly once in the lockfile, so no single
+`npm ci` had two writers for it; the three `zod` paths in the tree are two
+different versions, which was the next fitting story and is also dead. A
+destination that already exists means another process wrote it, and an
+`ENOENT` on the source tmp file in the same error means another process
+removed this one's. npm logs only its own process and no npm started
+against that cache in the six minutes before the failure, so **the writer
+cannot be named**. Established: the resource is shared across companies,
+this run added a writer to it, the install died on it.
+
+**The rule.** Any `npm` this seat runs passes `--cache` a directory under
+its own `/tmp/<seat>-<date>-<trigger>/`. That is the same rule the README
+already states for scratch files, server logs and `--body-file`, written
+after a path collision in shared `/tmp` published another seat's prose in
+this seat's pull request on 2026-10-24g. The npm cache is that hazard one
+level down, in a directory nobody chose, and the cost when it fires is
+higher: a scratch collision corrupts one file, and this one empties
+`node_modules` first and fails after, so the tree is worse than it was
+before the command ran.
+
+The cost: a cold cache, which on this host means a tarball fetch at 30 to
+46 seconds and an install of some minutes where a warm shared cache is
+near-instant. That is the trade and it is worth stating rather than
+discovering: this rule makes every install slower, and it makes none of
+them fail in a way that leaves nothing behind to build.
