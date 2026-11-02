@@ -143,15 +143,77 @@ export function blobAt(root, rev, path) {
       'the caller computed a rev that came back empty; find that call and make it branch on its fault',
     );
   }
-  const r = git(root, ['rev-parse', '--verify', '--quiet', `${rev}:${path}`]);
-  if (r.status === 0) return { oid: r.stdout.trim() };
-  // `--verify --quiet` exits 1 both for "no such path at that rev" and for
-  // "no such rev". The rev was already verified by every caller here, so the
-  // remaining case is the absent path, which is a real answer.
+  // One code path with `blobsAt`, deliberately: two implementations of "read a
+  // blob at a rev" is two places for the empty-rev refusal to be forgotten.
+  const batch = blobsAt(root, [{ rev, path }]);
+  if (batch.fault) return batch;
+  if (batch.oids[0] !== null) return { oid: batch.oids[0] };
+  // `missing` covers two different things and they are not the same answer: a
+  // rev that does not exist is a fault the caller must handle, and a path
+  // absent at a rev that does exist is an answer (`null`).
   if (git(root, ['rev-parse', '--verify', '--quiet', `${rev}^{commit}`]).status !== 0) {
     return fault(FAULT.NO_SUCH_REV, `${rev} does not resolve to a commit in this checkout`, REPAIR_CLONE);
   }
   return { oid: null };
+}
+
+/**
+ * Many blob ids in ONE `git` process, for callers that have a whole file list.
+ *
+ * WHY THIS EXISTS BESIDE `blobAt`. `classify` needs three blobs per differing
+ * path, and the per-call form spawns one process each. Measured on this
+ * repository, 2026-11-02: pull request 665 differs from `origin/main` in 139
+ * files, so 417 `git rev-parse` processes, and the run took 20 seconds of wall
+ * clock against 2 seconds of user time -- the cost was process creation, not
+ * work. One `cat-file --batch-check` answers all 417 in a single process.
+ *
+ * `--batch-check` answers `<oid> <type> <size>` per input line, in the order
+ * given, or `<input> missing` for a spec it cannot resolve. A path absent at
+ * that rev answers `missing`, which is an answer (null) and not a fault.
+ *
+ * @param {string} root a repository working directory.
+ * @param {{rev: string, path: string}[]} specs
+ * @returns {{oids: (string|null)[]} | {fault: {code: string, line: string, repair: string}}}
+ *   `oids` is index-aligned with `specs`.
+ */
+export function blobsAt(root, specs) {
+  for (const { rev, path } of specs) {
+    if (typeof rev !== 'string' || rev.trim() === '') {
+      return fault(
+        FAULT.EMPTY_REV,
+        `refusing to read ${path} at an empty rev: git reads ":${path}" as the index and exits 0`,
+        'find the call that produced the empty rev and make it branch on its fault',
+      );
+    }
+  }
+  if (specs.length === 0) return { oids: [] };
+  const r = spawnSync('git', ['-C', root, 'cat-file', '--batch-check'], {
+    input: `${specs.map(({ rev, path }) => `${rev}:${path}`).join('\n')}\n`,
+    encoding: 'utf8',
+    maxBuffer: 1 << 28,
+  });
+  if (r.status !== 0) {
+    return fault(
+      FAULT.GIT_UNUSABLE,
+      `git cat-file --batch-check failed: ${(r.stderr ?? '').trim()}`,
+      'this is an environment fault, not a verdict on any branch',
+    );
+  }
+  const lines = r.stdout.split('\n').filter((l) => l !== '');
+  if (lines.length !== specs.length) {
+    return fault(
+      FAULT.GIT_UNUSABLE,
+      `git cat-file --batch-check answered ${lines.length} lines for ${specs.length} specs,`
+      + ' so the answers cannot be aligned with the questions',
+      'this is an environment fault; the per-spec blobAt form does not batch and can be used instead',
+    );
+  }
+  return {
+    oids: lines.map((line) => {
+      const parts = line.split(' ');
+      return parts[parts.length - 2] === 'blob' ? parts[0] : null;
+    }),
+  };
 }
 
 /**

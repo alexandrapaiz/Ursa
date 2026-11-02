@@ -62,7 +62,9 @@
 // index, which is deliberate: the fault it reports is a fetch away from fixed
 // and the fetch belongs to `tools/ensure-full-clone.sh`, where the command
 // that repairs it is also the command a reader can see and refuse.
-import { mergeBase, blobAt, git, cloneGaps } from './base.mjs';
+import { spawnSync } from 'node:child_process';
+
+import { mergeBase, blobsAt, git, cloneGaps } from './base.mjs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
@@ -74,8 +76,18 @@ export const CLASS = {
 };
 
 /** How many trunk commits touching one path this will walk before abstaining.
- *  An abstention is reported as such; it is never folded into a clean class. */
-export const HISTORY_CAP = 300;
+ *  An abstention is reported as such; it is never folded into a clean class.
+ *
+ *  WHY IT IS 5000 AND NOT 300. The first draft resolved one blob per commit
+ *  with one `git rev-parse` process per commit, so the cap was a cost ceiling
+ *  and 300 was where it sat. Run against this repository it abstained on
+ *  exactly one path, `docs/ideas.md` at 301 commits, which is the ledger --
+ *  the most-merged file here and the one where resurrecting superseded text
+ *  does the most damage. Abstaining precisely there is the worst possible
+ *  place to abstain. `git cat-file --batch-check` resolves every commit's blob
+ *  in ONE process, so the walk is no longer per-commit work and the cap is
+ *  only a guard against a pathological path. */
+export const HISTORY_CAP = 5000;
 
 /**
  * Every blob this path has held on the trunk, newest first, excluding the one
@@ -90,13 +102,35 @@ export function supersededBlobs(root, trunk, path, cap = HISTORY_CAP) {
   const revs = git(root, ['rev-list', `--max-count=${cap + 1}`, trunk, '--', path]).stdout
     .split('\n').filter(Boolean);
   if (revs.length > cap) return { capped: revs.length };
+  if (revs.length < 2) return { superseded: new Map() };
+
+  // One process for the whole walk. `--batch-check` takes one revision:path
+  // per line on stdin and answers `<oid> <type> <size>` per line, in order,
+  // or `<input> missing` for a line it cannot resolve. A commit that does not
+  // carry the path answers `missing`, which happens on a merge commit whose
+  // rev-list entry touched the path on one side only, so the line is skipped
+  // rather than treated as a blob.
+  const r = spawnSync('git', ['-C', root, 'cat-file', '--batch-check'], {
+    input: `${revs.map((rev) => `${rev}:${path}`).join('\n')}\n`,
+    encoding: 'utf8',
+    maxBuffer: 1 << 28,
+  });
+  if (r.status !== 0) return { capped: revs.length };
+  const answers = r.stdout.split('\n').filter(Boolean);
+  if (answers.length !== revs.length) return { capped: revs.length };
+
+  const oidOf = answers.map((line) => {
+    const [first, second] = line.split(' ');
+    return second === 'blob' ? first : null;
+  });
+
   const superseded = new Map();
-  // revs is newest-first. revs[0] is the commit holding the current blob, so
-  // the commit that superseded revs[i+1]'s blob is revs[i].
+  // revs is newest-first. revs[0] holds the blob the trunk has NOW, so the
+  // commit that superseded revs[i]'s blob is the newer revs[i - 1].
   for (let i = 1; i < revs.length; i += 1) {
-    const older = blobAt(root, revs[i], path);
-    if (older.fault || older.oid === null) continue;
-    if (!superseded.has(older.oid)) superseded.set(older.oid, revs[i - 1]);
+    const older = oidOf[i];
+    if (older === null || older === oidOf[0]) continue;
+    if (!superseded.has(older)) superseded.set(older, revs[i - 1]);
   }
   return { superseded };
 }
@@ -120,16 +154,20 @@ export function classify(root, trunk, branch) {
   const differing = git(root, ['diff', '--name-only', '-z', trunk, branch]).stdout
     .split('\0').filter(Boolean);
 
+  // Three blobs per path, all of them in one `git` process. See
+  // `blobsAt` in base.mjs for the measurement that made this a batch.
+  const specs = differing.flatMap((path) => [
+    { rev: base, path }, { rev: trunk, path }, { rev: branch, path },
+  ]);
+  const got = blobsAt(root, specs);
+  if (got.fault) return got;
+
   const rows = [];
   const abstained = [];
-  for (const path of differing) {
-    const atBase = blobAt(root, base, path);
-    const atTrunk = blobAt(root, trunk, path);
-    const atBranch = blobAt(root, branch, path);
-    if (atBase.fault || atTrunk.fault || atBranch.fault) {
-      abstained.push({ path, why: (atBase.fault ?? atTrunk.fault ?? atBranch.fault).line });
-      continue;
-    }
+  for (const [i, path] of differing.entries()) {
+    const atBase = { oid: got.oids[i * 3] };
+    const atTrunk = { oid: got.oids[i * 3 + 1] };
+    const atBranch = { oid: got.oids[i * 3 + 2] };
     const branchMoved = atBranch.oid !== atBase.oid;
     const trunkMoved = atTrunk.oid !== atBase.oid;
 
@@ -152,7 +190,13 @@ export function classify(root, trunk, branch) {
     if (branchMoved && atBranch.oid !== null) {
       const hist = supersededBlobs(root, trunk, path);
       if (hist.capped !== undefined) {
-        row.history = `abstained: ${hist.capped} trunk commits touch this path, over the ${HISTORY_CAP} cap`;
+        // Reported as an abstention and not as a clean class, because "no
+        // resurrection found" and "the walk did not run" are different facts
+        // and only one of them is evidence.
+        const why = `${hist.capped} trunk commits touch this path, over the ${HISTORY_CAP} cap,`
+          + ' so this path was NOT checked for a resurrected blob';
+        row.history = `abstained: ${why}`;
+        abstained.push({ path, why });
       } else if (hist.superseded.has(atBranch.oid)) {
         row.cls = CLASS.RESURRECTS;
         row.supersededBy = describeCommit(root, hist.superseded.get(atBranch.oid));
