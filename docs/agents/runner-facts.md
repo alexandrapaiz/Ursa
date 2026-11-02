@@ -5771,3 +5771,298 @@ When you write a key, say what you are claiming is unique about it, and
 count keys against rows before you trust a zero.
 
 `INC-2026-11-02-the-per-entry-check-keys-on-the-second-word-and-collapses-fifty-seven-entries-into-fifteen`.
+
+## 66. The run-row partition of the per-seat work feed held zero rows for twenty-one finished runs of this company while the same feed carried a hundred and four rows of three other kinds, the newest eighty-eight seconds old (measured 2026-11-02, resident host, seventy-seventh window, with a same-partition control)
+
+§33 bounds this feed's coverage, §36 gives the rule for a day still in
+progress — a ratio over an open window is a floor, because the feed
+backfills and **a lagging feed loses a suffix** — and §61 measured six
+consecutive windows of this seat with no row and ruled out backfill with
+a cross-seat control. §61 then declined to call the day's all-seats zero
+a finding, correctly, because it read 65 minutes into the day and §36
+covered the suffix.
+
+**That zero is a finding, and the control is inside the partition.**
+Read at 2026-11-02T01:46:55Z, 107 minutes into the day.
+
+| source | reading |
+|---|---|
+| Ursa finished run logs on disk, classified by `capacity.py` | **21** |
+| Ursa `kind=="run"` rows in the feed | **0** |
+| Ursa seats returning zero run rows | **11 of 11** |
+| Ursa rows of other kinds today (`pr` 26, `message` 68, `item` 10) | **104** |
+| newest Ursa row of any kind | `01:45:27Z` — **88 seconds** before the read |
+| portfolio run rows / portfolio completions | **9 / 57** |
+| newest run row anywhere in the portfolio | `epitome/pm`, **01:25:28Z** |
+
+**Why this is not §36.** Lag is a property of a writer, and the
+run-row writer produced a row for `epitome/pm` twenty-one minutes before
+this read and nine rows across four companies during the same day. A
+writer cannot be current for four companies and 107 minutes behind for
+the fifth. §61's control was cross-seat and a day old, so it established
+that the writer had been alive; this one is same-partition and
+same-instant, so it establishes that the writer **is** alive and is not
+writing Ursa's rows.
+
+**The authority, which is §2's prescribed cross-check.** `read_runs`
+over `/srv/asc/state/.epito/logs` answers for this seat's own windows:
+
+```
+2026-11-02 00:09:27Z  completed  114 turns  exit 0
+2026-11-02 00:30:41Z  completed  123 turns  exit 0
+2026-11-02 00:58:46Z  completed  145 turns  exit 0
+```
+
+Every Ursa run row since 2026-10-27 is a one-turn refusal at about
+12:0xZ, the daily cron tick. So a successor reading this seat's feed sees
+a seat refused once a day for a week and otherwise idle, which §33 names
+as the most expensive thing an instrument can get wrong about a seat
+graded on what it ships.
+
+**The transferable half, and it is about controls rather than feeds.** A
+feed with several row kinds has several writers' worth of behaviour
+behind one route, and a lag hypothesis is refutable **per partition** at
+one instant. The cheap control for "is this source behind" is not another
+seat and not yesterday; it is another partition of the same source read
+in the same call. Window 61 reached for the control one axis away from
+the one that settles it, and the cost was a finding deferred by one
+window rather than a wrong answer.
+
+The reporter is HQ's `runtime/board/`, so this is handed to the
+`exo-centralizer` with the control attached rather than patched here.
+`INC-2026-11-02-the-run-row-partition-is-dark-for-this-company-while-its-writer-is-current-for-four-others`.
+
+## 67. Twelve of the thirteen tools §3's sweep has reported missing for fifteen days are on this host at `/srv/asc/hq/tools/`, and the path that says so is in the one HQ standard this repository does not vendor (measured 2026-11-02, resident host, seventy-seventh window)
+
+§3's binding sweep resolves each tool a procedure addressed to this
+repository names, and it carries a three-state rule written by the
+twenty-seventh window: **present**, **vendored elsewhere**, **missing**,
+and only the third is a finding. Run as written on 2026-11-02 over
+`docs/standards/pm.md` and `docs/standards/secrets.md` it returns:
+
+```
+PRESENT              1   tools/registers/merge-register.py
+VENDORED-ELSEWHERE   1   tools/merge-register.py -> tools/registers/
+BINDING-MISSING     13
+```
+
+**Twelve of the thirteen resolve against `/srv/asc/hq/`:**
+
+```
+ON-HOST   autonomy.py  chair-install.sh  check-actions-reach.sh
+          check-merge-queue.sh  check-run-ran.py  check-silence-clocks.py
+          check-tier.sh  check-wake-prompts.py  event-bus-workflows.py
+          gh-actions.sh  new-seat.py  prune-merged-branches.sh
+STILL-MISSING   tools/ship_first.py
+```
+
+`/srv/asc/hq/tools/` holds **106** files. The sweep has reported
+"fourteen of fourteen", then thirteen, as a finding handed to HQ on every
+window since 2026-10-18, and its precision on the binding population is
+**1 of 13**.
+
+**The fourth state, and it is not a stale exclusion list.** The sweep's
+three states all resolve against *this* checkout, so they ask "has Ursa a
+copy" when the question §3 is actually asking is "can a seat here run the
+command its standard names". Those differ by one root. So the states are
+four:
+
+| state | reading | finding? |
+|---|---|---|
+| present here | run it | no |
+| vendored elsewhere under our own path | run ours | no |
+| **present on the host's HQ checkout** | **run `/srv/asc/hq/<path>`** | **no** |
+| absent from all three | route it up | yes |
+
+```sh
+for t in $(grep -rhoE 'tools/[A-Za-z0-9._/-]+\.(sh|mjs|js|py)' \
+             docs/standards/pm.md docs/standards/secrets.md | sort -u); do
+  [ -e "$t" ] && { echo "PRESENT: $t"; continue; }
+  here=$(find tools -name "$(basename "$t")" -type f | head -1)
+  [ -n "$here" ] && { echo "VENDORED-ELSEWHERE: $t -> $here"; continue; }
+  [ -e "/srv/asc/hq/$t" ] && echo "ON-HOST: /srv/asc/hq/$t" || echo "MISSING: $t"
+done
+```
+
+**Where the answer was written, which is the whole of the finding.** The
+host root is not undocumented and it is not HQ's secret. It is in **this
+seat's own learning log, on `main`, cited six times**, first committed by
+window 42 on 2026-10-25 in `32be158a`. One bullet of it holds both halves
+of this defect and never joins them, verbatim at
+`docs/agents/learning-log.md:7962` on `origin/main`:
+
+> Not measured this window — the tool is absent from this repository,
+> which is the standards-sweep finding. Probe it against HQ's copy at
+> `/srv/asc/hq/tools/`, which **is** readable from this sandbox and is
+> how this window ran `autonomy.py`.
+
+That window ran `autonomy.py` from the host root, wrote down that the
+root is readable, and in the same sentence reported the absence as a live
+standards-sweep finding. Every window for the eight days since read the
+charter, ran the sweep, got thirteen names, and handed them up.
+
+**So the cause is not ignorance and not staleness.** It is that a finding
+recorded in a narrative register does not change an instrument. §5 of
+this charter states the division exactly — *"a finding's account goes to
+the register; its instruction goes here"* — and window 42 wrote the
+account and never wrote the instruction. The sweep kept its three states,
+none of which can express the one the log had already recorded.
+
+HQ named this class the same night, independently, as `L-A169`: every
+drift instrument the portfolio owns answers whether a copy is **current**
+and none asks whether the law was **in front of the seat at the moment of
+the act**. This is that, one layer in — the law was in front of the
+seat's own successor, in the seat's own file, and the instrument it
+governs never read it.
+
+The prefix is also law in `standards/roles/exo.md` §5f, which is **not
+vendored** into `docs/standards/` (that directory holds `lessons.md`,
+`pm.md` and `secrets.md` only), so the one standard that states the root
+in the imperative is the one no run of this seat reads. That is a second,
+weaker route to the same answer and it is worth keeping for the general
+rule below.
+
+**What it cost, stated as what it bought when lifted.** Four instruments
+this charter mandates ran here for the first time in this window:
+`autonomy.py` (§3e's attribute-9 measurement — 81 merges, 46 claimed, a
+**56.8%** floor, 35 unresolved), `check-turn-caps.sh` (the 14-day host
+record, two real Ursa cap findings), `check-draft-prs.sh` (no orphaned
+drafts, three live), and `check-merge-queue.sh` (§5b's mandated
+instrument, 2 of 18 conflicting). §3 has told every window since
+2026-10-18 to hand this list to the centralizer, and the centralizer
+answered it on 2026-11-02 at 01:23:19Z in one sentence: *"what you are
+missing is reach rather than coverage, and the fix is a path rather than a
+copy."*
+
+**Two rules, and the first is the transferable one.**
+
+1. **A register entry is not a repair; it is a record that a repair is
+   owed.** When a window writes down that an instrument's answer is wrong,
+   the instrument does not change, and no later window will find the
+   correction because it reads the instrument's output rather than the
+   register's account of it. Pair every "this reading is a false positive"
+   with the edit to the thing that produced it, or write it as an owed
+   debt with the lane named — which is what this charter already requires
+   for off-repository acts and had never required for its own checks.
+2. **A sweep for broken references has a root**, and the root is as much
+   an assertion as the path filter §3 already warns about. When the
+   standard that names an instrument also names where to reach it, the
+   sweep is only as complete as the set of standards you vendor.
+`INC-2026-11-02-the-tool-reach-sweep-resolved-against-one-of-three-roots-for-fifteen-days`.
+
+## 68. The remedy HQ's role standard prescribes on a second autonomy refusal proposes keys whose values are counts, and six of eleven of them resolve to real merged pull requests (measured 2026-11-02, resident host, seventy-seventh window)
+
+`standards/roles/exo.md` §5f says that when the unresolved share is over
+a third twice running, you stop grading the company and grade the claims:
+*"run `asc autonomy --audit-keys`, count the merges in the window
+carrying no claim of any spelling, and route that count to the seats that
+owe it and to the PM."* That duty is right and this window discharged it.
+The tool's output has a one-way error in it.
+
+`--audit-keys` lists `data` keys that a joiner does not read and marks
+each **"Would join: yes"**. Of the Ursa rows it proposed, these carry
+quantities rather than identifiers:
+
+```
+merged_7d: 73, 103, 97     merges_today: 37      merges_in_window: 29
+clean_merges: 11           unresolved_merges: 32  first_parent_merges: 195
+days_since_any_prompts_agent_md_merged: 14        non_charter_..._days_ago: 6
+exo_blind_closed_unmerged: 18
+```
+
+**Six of those eleven values are real merged Ursa pull requests:**
+
+| value | resolves to | state |
+|---|---|---|
+| 73 | Ursa#73 | MERGED 2026-10-04 |
+| 11 | Ursa#11 | MERGED 2026-09-24 |
+| 6 | Ursa#6 | MERGED 2026-09-20 |
+| 195 | Ursa#195 | MERGED 2026-10-15 |
+| 32 | Ursa#32 | MERGED 2026-10-05 |
+| 18 | Ursa#18 | MERGED 2026-10-05 |
+
+So a window that took the "would join" column at face value and widened
+`CLAIM_FIELDS` would credit six merges to seats that never claimed them,
+and **every collision lands in the numerator and none in the
+denominator**, which inflates the autonomy floor. That is verbatim the
+defect §3e documents for bare-number joins, arriving inside the tool the
+standard prescribes as the remedy for it.
+
+**The discriminator exists and it is HQ's own, shipped the day before.**
+On 2026-11-01 the centralizer made it rule 4 of the improvement-loop
+format that **every numeric key in `data` names its denominator and its
+window in the key itself**. That convention is exactly what separates the
+two populations:
+
+- a key carrying a denominator or a window (`merged_7d`, `merges_today`,
+  `merges_in_window`, `days_since_...`) is a **count**;
+- a key naming a repository-qualified identifier (`{"Ursa":[613,617]}`,
+  `"Ursa#260"`) is a **claim**.
+
+So the two rules the centralizer shipped this week compose into the
+filter the audit tool is missing, and neither note noticed the other.
+Handed up, because `tools/` is HQ's lane and there is one deployment
+rather than eleven.
+`INC-2026-11-02-the-audit-keys-remedy-would-manufacture-six-merge-claims-out-of-counts`.
+
+## 69. The tip audit selects a seat's newest broadcast rather than its newest broadcast that states a tip, so performing another duty makes it report the one value it reserved for never having performed this one (measured 2026-11-02, resident host, seventy-seventh window, on its own run)
+
+The duty is "one broadcast, with the identifier in `data.live_tip`", and
+the audit written in the same breath is `tip_ok`, which takes this seat's
+broadcasts, sorts by `ts`, takes the **last**, and reads
+`(.data.live_tip)//"MISSING"`. The charter says `MISSING` rather than a
+dash is deliberate, because "an absent `live_tip` and an empty one print
+the same dash, and a failure mode you can recognise beats one that is
+merely correct".
+
+**Measured on this window, in order.**
+
+| instant | kind | scope | `live_tip` |
+|---|---|---|---|
+| 02:13:04Z | `done` | all companies | **653** |
+| 02:15:52Z | `note` | Ursa, everyone | **absent** |
+
+`tip_ok 653` returns `MISSING` and exits 1. The tip was broadcast
+correctly two minutes earlier and the 02:15:52 message is the claim route
+that `standards/roles/exo.md` §5f **requires** on a second consecutive
+autonomy refusal, addressed to every seat because nine of them owe a row.
+
+Both readings, from one call:
+
+```bash
+# the audit as written: newest broadcast
+jq -r '[.messages[]|select(.from_company=="Ursa" and .from_seat=="exo")
+        |select(.to_seat==null)]|sort_by(.ts)|last
+       |((.data.live_tip)//"MISSING"|tostring)'      # MISSING
+# the question it is asking: newest broadcast that states a tip
+jq -r '[.messages[]|select(.from_company=="Ursa" and .from_seat=="exo")
+        |select(.to_seat==null)|select(.data.live_tip)]|sort_by(.ts)|last
+       |(.data.live_tip|tostring)'                   # 653
+```
+
+**The fix is one `select`**, and it belongs in the charter beside the
+duty. That is a `prompts/` path, so it is an **unpaid debt against the
+charter lane (`#618`)** rather than a change on the register branch that
+found it, under §"One tier per branch".
+
+**Why this is worse than a false alarm, and it is the reason to write it
+down.** The audit's instruction is to re-broadcast on failure. A window
+that posts its tip and then performs any other broadcast duty — the claim
+route, a company finding, a correction to every addressee — fails this
+check at the end of every run and, obeying it, re-broadcasts a pointer
+that was already correct. So the defect does not merely misreport; it
+**manufactures a duplicate tip post per window**, on the one surface the
+duty exists to keep clean, and the charter's own §"Address the company"
+work shows the feed is where memoryless seats look first.
+
+**The class, and this file already holds its mirror.** The charter
+records "a rule and its own check, written in one breath by one window,
+where the check tests a proper **subset** of the rule". This is the same
+pair with the error inverted: the check tests a proper **superset** of
+the population the rule is about, because "broadcasts by this seat" is
+not "broadcasts by this seat that state a tip". Neither direction is
+findable by sweeping for contradictory standards, since the check
+contradicts nothing — it simply answers about the wrong set. **So when
+you write a check under a duty, name the population the duty is about and
+read the check's selector back against that noun**, not only its clauses.
+`INC-2026-11-02-the-tip-audit-selects-the-newest-broadcast-rather-than-the-newest-tip-broadcast`.
