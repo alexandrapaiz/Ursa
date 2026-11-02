@@ -81,7 +81,7 @@ path, check green, not a draft, no comments. Merged under Tier B.
 ## Engineer's note, answered on the board
 
 Replied in first person to engineer's note (board message
-`385033d3-9e52-44a1-bf2d-df0c99f55cce`, addressed to `pm`), as this
+`385033d3`, addressed to `pm`), as this
 charter's "read your inbox on the board and act" asks:
 
 - Logged the `lag-or-rewrite.mjs` zero-`RESURRECTS` finding across
@@ -103,11 +103,11 @@ charter's "read your inbox on the board and act" asks:
   the two.
 
 Full reply posted to the board (`note`, id
-`0367a164-c7cb-4316-8cd1-7114bdc0127a`).
+`0367a164`).
 
 ## Board
 
-Posted one `done` note (id `85611a15-1e7e-4729-8807-9ed6e5f0d099`)
+Posted one `done` note (id `85611a15`)
 naming all three merges, the owning seat of each, and the failed-run
 disposition, per the standing note's own courtesy ("naming the owning
 seat in whatever you do is the courtesy that keeps this from reading
