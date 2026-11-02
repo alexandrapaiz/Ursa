@@ -5,10 +5,11 @@
 // instead of reading the board: validating the wrong rule against real traffic
 // passes, so a seat that checked it the obvious way would have confirmed it.
 import { test } from 'node:test';
+import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { MECHANISMS } from './models.mjs';
 import { corpus, namedBodies, generatedBodies } from './corpus.mjs';
-import { auditMechanism, normativeFiles } from './check.mjs';
+import { auditMechanism, normativeFiles, revSectionHasMark } from './check.mjs';
 import { wakeCut } from '../board/check.mjs';
 
 const L = 1500;
@@ -201,4 +202,41 @@ test('record surfaces are exempt and the registers are not', () => {
   }
   assert.ok(!files.some((f) => f.startsWith('docs/runs/')), 'run docs are dated records');
   assert.ok(!files.some((f) => f.startsWith('docs/security/')), 'audits are dated records');
+});
+
+test('the correction lookup reads the named rev and is scoped to the section', () => {
+  // Real revs on both sides of exo's correction landing, resolved rather than
+  // pinned so a rewritten history skips instead of lying. The merge commit has
+  // the correction under §44; its first parent is main just before it.
+  let after;
+  try {
+    after = execFileSync('git', ['log', '--format=%H', '-1',
+      '--grep', 'pull request #625', 'origin/main'], { encoding: 'utf8' }).trim();
+  } catch { after = ''; }
+  if (!after) { console.log('skipped: origin/main does not carry the merge of exo\'s correction'); return; }
+  const before = execFileSync('git', ['rev-parse', `${after}^1`], { encoding: 'utf8' }).trim();
+  const path = 'docs/agents/runner-facts.md';
+  const s44 = MECH.sites.find((x) => x.heading.startsWith('## 44.'));
+  const s25 = MECH.sites.find((x) => x.heading.startsWith('## 25.'));
+
+  assert.equal(revSectionHasMark(after, path, s44.heading, s44.correctionMarks), true,
+    'the correction is under §44 at that rev');
+  assert.equal(revSectionHasMark(before, path, s44.heading, s44.correctionMarks), false,
+    'and was not one commit earlier');
+  // The scoping claim, which is the whole reason this is section-scoped: the
+  // same mark is in the same file at the same rev, and must not clear §25.
+  assert.equal(revSectionHasMark(after, path, s25.heading, s25.correctionMarks), false,
+    '§25 must not borrow §44\'s correction from 1,343 lines away');
+  // A rev that does not exist is false, never a throw.
+  assert.equal(revSectionHasMark('refs/heads/no-such-branch', path, s44.heading,
+    s44.correctionMarks), false);
+});
+
+test('a spent correctedIn pointer is reported rather than left to rot', async () => {
+  const s44 = MECH.sites.find((x) => x.heading.startsWith('## 44.'));
+  assert.equal(s44.correctedIn, undefined, 'the shipped registry carries no spent pointer');
+  const r = await auditMechanism(oneSite({
+    ...s44, correctedIn: 'ursa-exo/2026-11-02-message',
+  }));
+  assert.ok(r.findings.some((f) => f.code === 'POINTER_SPENT'), 'no POINTER_SPENT');
 });

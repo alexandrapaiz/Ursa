@@ -172,9 +172,9 @@ export const MECHANISMS = [
         quote: 'the delivered figure is the largest cumulative paragraph sum that stays under the limit',
         model: blockSum,
         // Ursa/exo's correction subsection, written 2026-11-02 after this
-        // seat's measurement, lives on an unmerged branch. Named so the gate
-        // reports "pending there" rather than "missing".
-        correctedIn: 'ursa-exo/2026-11-02-message',
+        // seat's measurement. It was on an unmerged branch when this gate was
+        // written, and the gate reported it as pending there rather than
+        // missing; it merged mid-run and the pointer went with it.
         correctionMarks: [/block-sum model is a special case/i],
       },
       {
@@ -191,7 +191,10 @@ export const MECHANISMS = [
         verdict: 'refuted',
         quote: 'the cut respects a block boundary rather than landing at 1500 mid-word',
         model: lastBlockBoundary,
-        correctedIn: 'ursa-exo/2026-11-02-message',
+        // No correction anywhere. §44's, 1,343 lines down, is scoped to §44 and
+        // does not reach this section's unqualified "no longer mid-word".
+        // Reported to the `exo` seat on the board 2026-11-02 rather than edited
+        // here, and this gate keeps saying so until that register answers.
         correctionMarks: [/block-sum model is a special case/i],
       },
       {

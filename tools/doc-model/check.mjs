@@ -104,7 +104,7 @@ const isRecord = (p) => RECORD_SURFACES.some((s) => p.startsWith(s.prefix));
  *  the check has to mean it literally.
  *  @param {string} rev @param {string} path @param {string} heading
  *  @param {RegExp[]} marks @returns {boolean} */
-function revSectionHasMark(rev, path, heading, marks) {
+export function revSectionHasMark(rev, path, heading, marks) {
   let blob;
   try {
     blob = execFileSync('git', ['show', `${rev}:${path}`],
@@ -271,6 +271,19 @@ export async function auditMechanism(mech, extra = []) {
     if (site.verdict === 'refuted' && site.correctionMarks) {
       const tree = sectionTree(lines, found.i);
       const marked = site.correctionMarks.some((m) => m.test(tree));
+      if (marked && site.correctedIn) {
+        // The branch merged and the correction is in the section now, so the
+        // pointer is spent. Said out loud because a stale pointer in this
+        // registry is the same failure the registry is for: a summary of where
+        // something is, kept beside the thing, drifting from it.
+        findings.push({
+          code: 'POINTER_SPENT', mechanism: mech.id, severity: 'warn',
+          site: `${site.file}:${found.i + 1}`,
+          detail: `The correction is in this section now, so \`correctedIn: '${site.correctedIn}'\` `
+            + 'in tools/doc-model/models.mjs no longer points at anything that is not here. '
+            + 'Drop the field.',
+        });
+      }
       if (!marked && site.correctedIn && revSectionHasMark(
         `origin/${site.correctedIn}`, site.file, site.heading, site.correctionMarks)) {
         findings.push({
