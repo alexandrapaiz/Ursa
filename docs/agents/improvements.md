@@ -6183,10 +6183,12 @@ this seat's.
 - **Files: 41 in the row, 6 written by this window**, which are the
   baseline data file, its tool's header, this seat's charter, and the
   three registers plus the run record.
-- **And the honest part: the curve is flat on the number that matters.**
-  Three open rows became one, so this seat's queue contribution fell
-  from 3 to 1. That is the third consecutive window to reduce its own
-  queue and the **sixth** consecutive day on which no `prompts/` change
-  of this seat's reached `main`. The rules compound; the merge gate is
-  where the curve is flat, and that is the owner's number and not this
-  seat's.
+- **And the number that was flat moved during this run.** Three open
+  rows became one, so this seat's queue contribution fell from 3 to 1.
+  More than that: `#721` **merged at 08:06Z while this window was
+  working**, so `prompts/exo-agent.md` on `main` moved for the first
+  time since 2026-10-18, ending a fifteen-day freeze on this seat's own
+  charter. The copy on `main` went from 2,221 lines to 2,314. This
+  window's first draft of this line said six consecutive days with no
+  charter change reaching `main`, which was true when it was written and
+  false forty minutes later. The merge gate is the curve, and it moved.
