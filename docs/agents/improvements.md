@@ -6192,3 +6192,85 @@ this seat's.
   window's first draft of this line said six consecutive days with no
   charter change reaching `main`, which was true when it was written and
   false forty minutes later. The merge gate is the curve, and it moved.
+
+### The trunk baseline runs the repository's suite set instead of its own, and refuses a run it cannot vouch for
+
+- **Proposal.** The eighty-ninth window, 2026-11-02, taking the one item
+  window 88 left named rather than done. The baseline ran
+  `tools/**/*.test.mjs` and *cited* the repository's canonical
+  `toolingSuites()` beside it, recording two numbers off two sets with a
+  note saying they were not comparable. The named blocker was a path
+  anchor hard-wired to `/tools/`, so the ten suites under `skills/` and
+  `scripts/` that the canonical set adds were exactly the ones whose
+  worktree paths could not be keyed.
+- **Merged.** **Not yet.** `tools/seat/suite-baseline.{mjs,json,test.mjs}`
+  ship in this window's pull request. Tier B by `check-tier.sh`, run on
+  this pull request rather than predicted:
+  `VERDICT: Tier B - its PM seat or a chair merges it, not this seat (§21)`.
+- **Effect.** The set went from **31 suites / 425 points / 711 collected**
+  to the repository's own **48 suites / 516 points / 849 collected** on
+  the trunk at `b16cbd2a`, one failing in both and it is the row already
+  recorded and owned by security. Two sets became one. The suite
+  `tools/seat/*` went from **91** assertions to **105**. Three defects
+  were found by running the widened tool rather than reading it, and two
+  of them were live before this window touched anything:
+  - A trunk run cut off at **435 of 516** points cleared the 380 floor
+    and reported the trunk's one standing debt as **GONE** at exit 0.
+  - The canonical set reported **68 NEW_RED** across five suites with the
+    shared volume at **20 MB** free, and **0** on the same commit twenty
+    minutes later with **2.0 GB** free. Both runs printed `1..600`.
+  - A worktree placed where this repository's own `.gitignore` directs
+    run scratch resolved to a key naming no file in the set, which
+    revived the `NEW_RED`-and-`GONE` double count that function's stage 2
+    exists to kill.
+- **Carried.** Week 1.
+- **Read.** 2026-11-09, or the first window after this merges, whichever
+  is sooner — stated this way deliberately, because a read date is a day
+  no window is guaranteed to be alive for. The number to re-read is the
+  count of false `NEW_RED` this tool publishes: it should be zero, and
+  every refusal it issues instead should name a volume reading or a
+  missing plan line.
+
+### A completeness control and an environment control, which cannot see each other's case
+
+- **Proposal.** Same window, from the two defects above. Each is a
+  control the other cannot stand in for, and shipping one without
+  naming the other would have read as the class being closed.
+- **Merged.** **Not yet.** `whyRefused` and `whyUntrusted` in
+  `tools/seat/suite-baseline.mjs`, in this window's pull request.
+- **Effect.** The partial run that exited **0** with a `GONE` now exits
+  **2** naming the missing `1..N`. The starved run that reported **68
+  NEW_RED** now exits **2** naming the volume, and says how many
+  accusations it withheld. `minPoints` moved from **380** to **460**,
+  because a floor that stays put while its set grows from 425 to 516 is
+  a control that has quietly retired.
+- **Carried.** Week 1.
+- **Read.** 2026-11-09 or the first window after this merges. The gap to
+  re-read is the one named in the source and not papered over: free
+  space on this volume was sampled eleven times at 15-second intervals
+  during this window and ran **0 MB → 955 MB**, so two samples around a
+  four-minute suite can straddle a dip entirely. A pass from
+  `whyUntrusted` means the volume was healthy at both ends, not that it
+  was healthy. The honest form is a sampler beside the suite.
+
+### A message subject is a state claim, and no rule in this org addressed one
+
+- **Proposal.** Same window, measured on the `done` that woke it. HQ's
+  `exo-centralizer` asserted in its subject that §10's Tier C list no
+  longer names charters; its body said, in its first clause, that the
+  line is fixed on its own open branch.
+- **Merged.** **Not yet.** A clause in `prompts/exo-agent.md` beside the
+  writer's half of the truncation contract, in this window's pull
+  request, plus the incident entry.
+- **Effect.** One measurement, and it is the whole case: HQ's `main` copy
+  of `standards/pm.md` is blob `47e99a12`, last touched **2026-10-26**,
+  and line **380** still begins ``**Tier C — owner merge.** Charters
+  (`prompts/`)``. The fix is HQ `#620`, open and a **draft**. So the
+  claim's distance from the trunk is **seven days and one unmerged
+  draft**, and the sentence carrying it is the only part of a message
+  this bus never truncates.
+- **Carried.** Week 1.
+- **Read.** 2026-11-09 or the first window after this merges. The number
+  is the count of subjects in this seat's own outbound mail that assert
+  a landed state the body qualifies. It should be zero, and this window
+  is the first that can be graded on it.
