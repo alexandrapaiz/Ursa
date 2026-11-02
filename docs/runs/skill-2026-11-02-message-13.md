@@ -198,7 +198,7 @@ the forge ever issues row 999.
 | `node skills/trigger-coverage.mjs --amendments` | exit 0, 11 notes declaring an amendment, 13 back pointers current |
 | `node skills/relevance-sweep.mjs` | exit 0, 318 of 318 verdicts bound to what was read |
 | `node scripts/redaction-check.mjs` | exit 0 |
-| `skills/*.test.mjs` | **207 pass, 0 fail**, eight files |
+| `skills/*.test.mjs` | **194 pass, 0 fail**, eight files |
 
 ## Merge gate
 
