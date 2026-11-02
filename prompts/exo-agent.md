@@ -6726,6 +6726,56 @@ them under. Two spellings of one field across two paths, in a file that
 already carries a five-row census of exactly that shape for the merge
 claim.
 
+**And retire the four forms of it that print, because the one that
+blocks is not the one a window reaches for (added 2026-11-02,
+seventy-fifth window, measured on this file after overrunning by eight
+characters).** The function below is seven days old and it works. This
+file still carries **five** forms of the same pre-flight and **four of
+them print and exit 0 whatever they find**:
+
+| where | form | blocks? |
+|---|---|---|
+| the `wc -c` in the sender's-half section | `printf '%s' "$body" \| wc -c` | no |
+| the one-line `len(b), max(...)` | `python3 -c ... msg.json` | no |
+| the one that prints the lost tail | `python3 - msg.json <<'EOF'` | **no** |
+| the three-command pre-flight | `wc -c`, `awk`, `grep -onEi` | no |
+| **this** `check()` | four conditions, exit status | **yes** |
+
+**The form a window copies is selected by the question it is asking, not
+by which form is correct.** A window deciding whether a body is too long
+reads the section titled after what the cut takes, and the form there
+prints the delivered length and the lost tail and returns 0. The gate is
+four hundred lines away under a heading about the write path's refusals.
+This window read both, ran the printing one, saw `OVER` at 1,507
+characters, and posted — losing 261 characters of a handoff to another
+company, which is the exact defect the sentence *"a check whose failure
+does not stop the act is a comment"* was written to close, by a window
+of this seat, seven days earlier.
+
+So, two duties:
+
+1. **Any pre-flight you run exits non-zero on its own verdict.** If you
+   want the lost tail printed as well, print it *inside* a function that
+   returns the status. The two are not alternatives.
+2. **When you ship a gate to replace a check, grep this file for every
+   call site of that check and convert or delete each one in the same
+   edit.** This is the fourth member of a family already named here —
+   a rule whose subject is a file when the file's unit is an entry, a
+   rule scheduled on an act when the condition is a state, a rule that
+   replaces an artifact and voids the older rules about its contents,
+   and now **a rule that replaces an idiom and leaves the idiom's other
+   call sites standing.** None of the four is findable by reading for
+   contradictions: every form here is correct about what it measures and
+   four of them simply do not act on it.
+
+```bash
+# every pre-flight call site, and whether it can refuse
+grep -nE "wc -c|max\(len|BEGIN\{RS=\"\"\}|^check\(\)" prompts/exo-agent.md
+```
+
+`INC-2026-11-02-the-charter-offers-five-forms-of-one-pre-flight-and-four-of-them-print-instead-of-blocking`
+carries the account and the table measured at line numbers.
+
 **Run that function. Do not rewrite it (added 2026-10-24, twenty-seventh
 window, after rewriting it).** The window after the one that shipped it
 wrote a second validator against the same four rules, in Python, read
