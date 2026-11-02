@@ -2,6 +2,69 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (sixteenth pass): two Tier C charter rows reviewed and not merged, three superseded ancestors closed, nothing new for you to merge
+
+Triggered by three events on one wake: review #688 (exo) and #689
+(skill) against the merge rule, merge or report what each still
+needs; and process the skill seat's finished run, the same #689, by
+merging what qualifies, closing what is superseded, and handing the
+next thing to a seat.
+
+This run's own checkout started shallow and single-branch, the same
+recurring defect named in the charter's own clone-repair clause;
+repaired with `tools/ensure-full-clone.sh` (1 to 4,261 commits, 2 to
+324 remote-tracking refs) before trusting any ancestry check below.
+
+1. **#688 (exo) is NOT merged — Tier C by path, clean, and yours to
+   take.** Diff carries eleven files under `prompts/`, including this
+   seat's own `pm-agent.md`, so it is out of this seat's reach under
+   pm.md §10 regardless of how clean it reads. It does read clean:
+   `mergeStateStatus: CLEAN`, up to date with current `main`, checks
+   green. Independently verified (not on the PR's own word) that #618
+   and, through it, #612 are each a strict git ancestor of #688's
+   head (`git merge-base --is-ancestor`, full clone). #612 had already
+   been closed as superseded by #618 in an earlier pass; closed #618
+   as superseded by #688 the same way, so your one decision on #688
+   now covers all three. Posted the verdict to exo on the board.
+2. **#689 (skill) is NOT merged — Tier C by path (`prompts/
+   skill-extract.md`), clean, and yours to take.** Same shape: clean,
+   up to date with `main`, checks green. It names #684 as its own
+   superseded tip and eight further rows #684 already carried
+   (#633, #638, #644, #646, #652, #660, #673, #680, all closed in an
+   earlier pass); verified #684 is a strict ancestor of #689's head
+   and closed it, so your decision on #689 now covers all nine ahead
+   of it. Posted the verdict to skill on the board.
+3. **Handed the next thing to the engineer seat, on the board, since
+   dispatch is disabled in this run's environment
+   (`PM_DISPATCH_ENABLED` unset) and this one cannot wait for a
+   workflow run.** #689's own measurement found `tools/ledger/
+   requeue.sh` selects purely on the forge's conflict field and would,
+   with its push flag, merge the trunk into every row this run just
+   confirmed is already contained in a sibling's tip — destroying the
+   containment proof that lets you close duplicates as one decision.
+   The ledger entry carrying the measurement is filed inside #689
+   itself, proposed and not yet on `main`, so the board handoff is
+   the only place this is owed anywhere today. No code change made
+   here: `tools/ledger/requeue.sh` is the engineer's file.
+
+**Unchanged, not re-explained in full:** #395 (research) remains as
+prior passes left it, now nine days old and still Tier C
+(`prompts/engineer-agent.md`, `prompts/research-agent.md`). #601
+(skill) stays closed, superseded in an earlier pass. **#615
+(engineer) is no longer pending — merged since the last pass's PR**
+(`state: MERGED`, `updatedAt` 2026-11-02T03:50:46Z), so this line is
+removed from the queue rather than carried forward stale. No board
+message in the last few hours addressed this seat as an `ask`
+directly; the three events above arrived as the trigger for this run
+itself. Failed runs in the last six hours (`gh run list --status
+failure`) are the same three branches named by the dispatch queue,
+all already accounted for before this pass started; nothing new.
+
+Board notes posted this pass: to exo (#688's verdict and the #618/#612
+closures), to skill (#689's verdict and the #684 closure), and a
+handoff to engineer (the requeue containment guard), each referenced
+to this seat's own PR #698.
+
 ## Top three for the owner, 2026-11-02 message-triggered (fifteenth pass): a false-positive red explained on two of my own rows, nothing new for you to merge
 
 Triggered by a board note from the skill seat about a red on its own
