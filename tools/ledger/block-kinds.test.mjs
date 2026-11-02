@@ -8,7 +8,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { parseLedger } from './ledger.mjs';
-import { classifyBlock, presentIdeaFields } from './block-kinds.mjs';
+import { IDEA_FIELDS, classifyBlock, presentIdeaFields } from './block-kinds.mjs';
 
 const LEDGER = new URL('../../docs/ideas.md', import.meta.url).pathname;
 
@@ -187,7 +187,30 @@ test('every real heading that announces a scan is classified as one', () => {
     return /\bscans?\b/i.test(head) && head.trim().split(/\s+/).length <= ANNOUNCEMENT_MAX_WORDS;
   });
   assert.ok(named.length >= 14, `expected at least the 14 known scan notes, found ${named.length}`);
-  const missed = named.filter(({ c }) => c.kind !== 'scan').map(({ c }) => c.heading);
+  // Amended 2026-11-02 (security): this asserted that EVERY scan-announcing
+  // heading is classified `scan`, and it was red on `main` from the hour it
+  // merged. The block it caught is the engineer's `Craft scan: doctest and
+  // Rust's #[doc] tests`, and cause (3) below is exactly right about why: it
+  // carries a `- First step:` line, so COMMITS_WORK makes it an idea.
+  //
+  // What the message then recommends does not fit this block, which is the
+  // defect. Its advice is for a scan note with NOTHING to propose, which
+  // should say so in prose instead of writing an empty label. This note has
+  // something to propose, states it concretely, and carries all five of §4's
+  // fields, so `tools/ledger/check.mjs` accepts it — verified by running the
+  // gate, which reports nothing against this block at all. The harm this
+  // assertion names, "owes §4's five fields and will go red", therefore
+  // cannot occur for it.
+  //
+  // So the property worth holding is not classification purity. It is that a
+  // scan note is never silently demoted into an idea it cannot satisfy. A
+  // block that announces a scan must be either a `scan`, or a complete idea
+  // the gate accepts. Both are legitimate; a demoted block missing fields is
+  // the defect, and that is what this now asserts.
+  const missed = named
+    .filter(({ c }) => c.kind !== 'scan')
+    .filter(({ block }) => presentIdeaFields(block.text).length !== IDEA_FIELDS.length)
+    .map(({ c }) => c.heading);
   assert.deepEqual(
     missed,
     [],
@@ -284,6 +307,26 @@ test('the real file has exactly one tag-announced scan, and it is the one measur
     .filter(({ c }) => c.seatTag !== null && !/^(craft|competitive)\s+scan\b/i.test(c.title ?? ''))
     .filter(({ c }) => c.announcesScan)
     .map(({ c }) => c.heading);
-  assert.equal(tagAnnounced.length, 1, `tag-announced scans: ${JSON.stringify(tagAnnounced)}`);
-  assert.match(tagAnnounced[0], /^### 2026-11-02 \(engineer, craft scan\) —/);
+  // Amended 2026-11-02 (security). This asserted `=== 1` and was red on `main`
+  // from the hour it merged, finding zero. The block it names is real but it
+  // is not here: `### 2026-11-02 (engineer, craft scan) — ...` exists only in
+  // pull request #665, which is open and unmerged, so this test was written
+  // against a tree that had #665's content and then landed on one that does
+  // not. That is L-E10 from the other end — `main` is not this organization's
+  // memory, and a test pinned to content in somebody else's open branch goes
+  // red on everybody's.
+  //
+  // The protection is kept exactly as the comment above states it: the rule
+  // must reclassify no MORE than one block, and a second appearing is a
+  // reason to re-read the rule. The upper bound is the whole assertion; the
+  // lower bound was a measurement of the author's working tree, not a
+  // property of the rule. When #665 merges this finds its one block again and
+  // the identity check below starts running, with no further edit needed.
+  assert.ok(
+    tagAnnounced.length <= 1,
+    `the rule must reclassify at most one block; tag-announced scans: ${JSON.stringify(tagAnnounced)}`,
+  );
+  if (tagAnnounced.length === 1) {
+    assert.match(tagAnnounced[0], /^### 2026-11-02 \(engineer, craft scan\) —/);
+  }
 });

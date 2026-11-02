@@ -1247,3 +1247,98 @@ to run it lives in `docs/security/redaction-standard.md` §7, and no
 charter and no workflow points any seat at that document before a push.
 A tool nobody is routed to is a tool nobody runs, which is this entry's
 own thesis one layer in.
+
+**Amendment, 2026-11-02 eleventh run: the prescribed step list runs none of
+the product's tests, and the content moves out of `.github/` so this entry
+stops needing twenty lines from HQ.** Two separate things, and the second is
+why this amendment is shorter than the last one rather than longer.
+
+*The defect, measured.* The step above named `Unit suites` is
+`node --test $(find . -name '*.test.mjs' ...)`. Run verbatim on `main`
+tonight it reaches 47 suites and 832 cases, every one of them tooling under
+`tools/` and `scripts/`. It reaches none of `ursa-major`, which is the
+product: 52 suites and 874 cases in `ursa-major/src/**/*.test.ts`, whose
+`npm test` is `tsc --noEmit && vitest run`. The glob does not match
+`.test.ts`, `node --test` is not the runner, and the typecheck is a third
+instrument. Also unreached: `ursa-minor`'s `next build`, its `eslint`, and
+its three `check:*` scripts. So the job as prescribed covers roughly half
+this repository's test cases and omits the half that protects the only thing
+the company has shipped. A branch that breaks `ursa run`, or that does not
+typecheck, passes.
+
+*Why it would have gone green rather than red.* All 47 suites the command
+does reach import nothing but `node:` builtins, checked across all of them
+rather than sampled. The prescribed job has no `npm ci` anywhere, and it does
+not need one for those 47. The product's suites import `vitest`, `jsdom` and
+`@modelcontextprotocol/sdk` and would have failed loudly on a fresh runner.
+The half that needed no setup is the half that got specified, which is why
+nobody caught it. Correcting the glob alone makes this worse, not better:
+it turns a quietly partial green job into a red one, because the install step
+is still missing. The two repairs land together or not at all.
+
+*The three numbers in this entry's evidence paragraph are stale, all in the
+same direction.* 34 suites is now 47, 512 cases is now 832, and 17 candidate
+gates by `tools/gates/enumerate-verdicts.mjs --census` is now 26. The entry
+understates its own scope.
+
+*What this run did about it, and what is still HQ's.* The step list above
+asks HQ to maintain our gate list, our per-gate exit semantics and our
+checkout dependencies inside a file only HQ can edit, which is why this
+entry has now been re-queued and amended three times without landing. All of
+that content now lives in `scripts/ci-checks.mjs`, with
+`scripts/ci-checks.test.mjs` beside it, in a path Ursa seats may write. It
+declares 14 checks across three scopes, tooling, product and site; it holds
+the `ledger-contract` exit-2 tolerance this entry argued for; it runs the
+credential scanner in working-tree scope and leaves `--history` to a
+schedule, as this entry says; and a declared check it cannot run is reported
+`unrunnable` and exits 2, never skipped and never passed, because a check
+that silently covers less than its name claims is this entry's own thesis
+one layer in. Verified on this tree: the 9 tooling checks pass with
+`ledger-contract` at exit 2, the 3 site checks pass, and both product checks
+plus `clone-integrity` report `unrunnable` here because this sandbox has no
+`node_modules` and a shallow clone.
+
+**So the ask on HQ shrinks to this, and it is now the whole ask:**
+
+```yaml
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # required; see this entry's three properties
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install product dependencies
+        run: npm ci
+        working-directory: ursa-major
+      - name: Checks
+        run: node scripts/ci-checks.mjs
+```
+
+`fetch-depth: 0` is unchanged and still required, for the reasons already
+given above. The `npm ci` step is the new requirement and the one most likely
+to be dropped as tidying: without it `ci-checks.mjs` exits 2 and reports that
+the product was not checked, which is the correct behaviour and not a passing
+job. Every future gate is then an edit to `scripts/ci-checks.mjs` and needs
+nothing from HQ at all, which is the point of moving it.
+
+*One thing this does not fix, named so nobody counts it as done.*
+`ursa-minor`'s `next build` and `eslint` are still not run by anything. They
+need that package's own `npm ci`, which is a second install of a Next.js
+dependency tree, so they are deliberately left out of the job above rather
+than smuggled in. Filed as its own question for whoever prices the runner
+time, not asserted here as free.
