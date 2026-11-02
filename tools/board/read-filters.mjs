@@ -69,6 +69,23 @@
 // proves nothing, so every probe here runs inside a window small enough that
 // the unfiltered read does not saturate, and reports UNMEASURABLE rather than
 // guessing when it cannot find one.
+//
+// Two corrections to that paragraph, both from 2026-11-02, because it was
+// describing an intention and not this code.
+//
+// First, "the message read says so in `saturated`" is exactly right and was
+// read as though it covered all three routes. It does not: the events read
+// sends no such field, so the guard was dead there. `saturationOf` below
+// infers it from the asked-for limit, and the paragraph now holds for every
+// route rather than for one.
+//
+// Second, the windows are declared per route and were not revisited as the
+// board got busier, so "small enough" was a claim about 2026-10-18 traffic.
+// Each `window` below now carries the count it was chosen against and the
+// date of that reading, so the next seat can tell a measurement from a
+// habit. There is no search for a window here: the tool abstains when the
+// declared one does not work, and an adaptive window is filed as a ledger
+// entry rather than written in a security run.
 import { liveTargetFault } from './live-target.mjs';
 
 /** The routes this tool knows how to probe, and what it counts in each. */
@@ -105,11 +122,28 @@ export const ROUTES = {
       to_company: { values: ['Ursa', 'ursa'], field: 'to_company', with: 'to_seat=pm&everyone=0' },
       from_company: { values: ['Ursa', 'ursa'], field: 'from_company', with: '' },
     },
-    window: 'since_hours=6',
+    // SHORTENED FROM SIX HOURS ON 2026-11-02, same reading as the events
+    // route below and a worse consequence, because here the tool was already
+    // being honest about it and nobody was reading the output. The unscoped
+    // baseline at 6h returned 500 of 500 and the board sets `saturated`, so
+    // four of the six message probes (`to_company`, `from_company`,
+    // `to_seat`, `from_seat`) reported UNMEASURABLE on every run. The tool
+    // prints "an unmeasurable filter is not a passing one" under them and
+    // the summary line still read "14 probed", so an instrument that had
+    // stopped measuring four of its fourteen claims looked like one that
+    // was measuring all of them.
+    //
+    // Measured at 2026-11-02 05:1xZ, unscoped and 500-row page: 6h=500 and
+    // saturated, 4h=120 scoped, 3h=100 scoped, 2h=239 unsaturated. Two
+    // hours is the widest reading with room left, and after it all fourteen
+    // probes measure.
+    window: 'since_hours=2',
     // The casing probe needs a window wide enough to contain a row stored
     // under the non-canonical spelling, and this board makes 500 message
     // rows in well under a day, so that window always saturates one page.
-    // It is therefore paged (see `pageAll`) rather than widened.
+    // It is therefore paged (see `pageAll`) rather than widened. This is
+    // why shortening `window` above does not touch the casing claim: that
+    // one reads `casingHours` and pages it.
     casingHours: 720,
   },
   events: {
@@ -121,7 +155,27 @@ export const ROUTES = {
       type: 'this.type.does.not.exist',
     },
     casing: {},
-    window: 'since_hours=2',
+    // SHORTENED FROM TWO HOURS ON 2026-11-02, because the board outgrew it
+    // and the window is the only knob that keeps this probe measurable. The
+    // comment at the top of this file promises every probe runs "inside a
+    // window small enough that the unfiltered read does not saturate", and
+    // that stopped being true of this one: measured within a few minutes at
+    // 05:0xZ, 2h returned 493 then 488 then 489 of a 500-row page, which is
+    // a page that fills on any busy minute.
+    //
+    // Measured at the same turn, so the choice is a reading and not a
+    // preference: 2h=493, 1h=268, 0.5h=127, 0.25h=60. Half an hour is a
+    // quarter of a page, which leaves room for the board to get four times
+    // busier before this needs looking at again, and is still wide enough
+    // that the window is not empty (an empty window is the other way this
+    // probe stops measuring, and it abstains there too).
+    //
+    // Widening is the wrong direction and the test that caught this says so
+    // in those words. A wider window does not collect more evidence here,
+    // it collects the same newest 500 rows and loses the rest, so it buys a
+    // number that looks bigger and means less. The messages route needs a
+    // wide window for a real reason and pages it (`pageAll`) instead.
+    window: 'since_hours=0.5',
   },
   runs: {
     path: '/api/runs',
@@ -137,6 +191,49 @@ export const ROUTES = {
     window: 'days=14',
   },
 };
+
+/**
+ * Whether a page filled, for a route that may not say so itself.
+ *
+ * THE FIELD THIS TOOL KEYS ON IS ABSENT ON ONE OF ITS THREE ROUTES, and
+ * `verdict()`'s UNMEASURABLE guard was therefore dead code on that route
+ * from the day it was written. Read from the board's own source rather
+ * than inferred: `/api/messages` replies with `limit` and `saturated`
+ * (api.py line 1327) and `/api/runs` with `saturated` (line 1410), but
+ * `/api/events` replies with `{"events": [...]}` and nothing else (line
+ * 709). So `Boolean(body.saturated)` is always `false` for events, the
+ * `if (base.saturated)` branch can never be taken there, and the tool
+ * reports a count from a page that filled as though it were an answer.
+ *
+ * Measured on 2026-11-02 at 05:0xZ: the declared 2-hour events window
+ * returned 489 of the 500 asked for, 97.8% of a page, and the tool
+ * printed "489 rows unfiltered" with "0 unmeasurable". The same read
+ * had crossed 500 ten minutes earlier, which is how this was found: it
+ * is the live assertion in `read-filters.test.mjs` going red.
+ *
+ * The board is HQ's and this is not a seat's to change there, so the
+ * repair is on the reading side: when the route sends no `saturated`,
+ * infer it the same way the board does, `len(rows) >= applied`, using
+ * the limit the caller asked for. The board clamps `limit` to [1, 2000]
+ * (api.py line 705) and this tool asks for 500, so the asked-for bound
+ * is the applied bound and the comparison is exact rather than a guess.
+ *
+ * The bias of getting this wrong runs one way, which is why it is worth
+ * a function: a row the page never reached looks like a row that does
+ * not exist, so the instrument is least trustworthy exactly when the
+ * board is busiest.
+ *
+ * @param {Record<string, unknown>} body the parsed response
+ * @param {string} rowsKey the key holding the row array
+ * @param {number|null} limit the limit the caller asked for, if known
+ * @returns {boolean}
+ */
+export function saturationOf(body, rowsKey, limit) {
+  if (typeof body?.saturated === 'boolean') return body.saturated;
+  const rows = Array.isArray(body?.[rowsKey]) ? body[rowsKey] : null;
+  if (!rows || !Number.isFinite(limit) || limit === null) return false;
+  return rows.length >= limit;
+}
 
 /**
  * The verdict, as a pure function of what the two reads returned, so the
@@ -271,10 +368,13 @@ async function read(path, rowsKey) {
   let body = {};
   try { body = JSON.parse(text); } catch { body = { error: text.slice(0, 200) }; }
   const rows = Array.isArray(body[rowsKey]) ? body[rowsKey] : null;
+  // The limit comes back out of the path because that is the only place it
+  // exists for a route that does not echo it. See `saturationOf`.
+  const asked = /[?&]limit=(\d+)/.exec(path);
   return {
     status: res.status,
     count: rows ? rows.length : null,
-    saturated: Boolean(body.saturated),
+    saturated: saturationOf(body, rowsKey, asked ? Number(asked[1]) : null),
     error: body.error || '',
     rows: rows || [],
   };
