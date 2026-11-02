@@ -10,8 +10,21 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
   parseTap, toRepoPath, keyOf, compare, formatReport, exitCodeFor,
-  readSummary, BASELINE_PATH, SUITE_GLOB, SUITE_ROOT
+  readSummary, BASELINE_PATH, RETIRED_SUITE_GLOB, suiteRoots, canonicalSuites,
+  resetSuitesCache, whyRefused
 } from './suite-baseline.mjs'
+
+// The set every path assertion below resolves against, pinned so this file
+// stays a unit test: the live set comes from `git ls-files` and grows every
+// time any seat adds a suite, and a test that asserts on it would be
+// measuring the repository rather than this tool. The three roots are the
+// real ones as of 2026-11-02.
+const SET = [
+  'tools/board/read-filters.test.mjs',
+  'tools/seat/own-prs.test.mjs',
+  'skills/library-dirs.test.mjs',
+  'scripts/ci-checks.test.mjs'
+]
 
 // Real `node --test` output, trimmed: a pass, a fail with its YAML block,
 // and a pass after it. The indented `# Subtest:` line is here on purpose —
@@ -69,7 +82,7 @@ test('a failure carries its own site, and a neighbouring pass does not inherit i
 })
 
 test('an absolute path inside the repository becomes repo-relative', () => {
-  assert.equal(toRepoPath('/repo/tools/a.test.mjs', '/repo'), 'tools/a.test.mjs')
+  assert.equal(toRepoPath('/repo/tools/a.test.mjs', '/repo', SET), 'tools/a.test.mjs')
 })
 
 // THE WORKTREE CASE, which is the defect that running the tool found and
@@ -80,21 +93,140 @@ test('an absolute path inside the repository becomes repo-relative', () => {
 // keep passing, because they never leave the root.
 test('a test file measured in another checkout normalises to the same key', () => {
   assert.equal(
-    toRepoPath('/tmp/wt699/tools/board/read-filters.test.mjs', '/repo'),
+    toRepoPath('/tmp/wt699/tools/board/read-filters.test.mjs', '/repo', SET),
     'tools/board/read-filters.test.mjs'
   )
   // And the identity that matters is the key, not the string.
-  const here = { file: toRepoPath('/repo/tools/a.test.mjs', '/repo'), name: 'x' }
-  const there = { file: toRepoPath('/tmp/wt/tools/a.test.mjs', '/repo'), name: 'x' }
+  const here = { file: toRepoPath('/repo/tools/a.test.mjs', '/repo', SET), name: 'x' }
+  const there = { file: toRepoPath('/tmp/wt/tools/a.test.mjs', '/repo', SET), name: 'x' }
   assert.equal(keyOf(here), keyOf(there))
 })
 
-test('a path outside the suite root is left alone rather than given a false form', () => {
+// THE WIDENING CASE, which is the blocker window 88 named rather than fixed.
+// The set used to be this tool's own `tools/**/*.test.mjs` and the worktree
+// anchor was the single segment read off it, so the suites the canonical set
+// ADDS — six under `skills/`, four under `scripts/` — were exactly the ones
+// whose worktree paths could not be keyed. Measured before the fix, both
+// non-`tools` rows below came back unchanged and absolute.
+//
+// POSITIVE CONTROL, because an absence is a measurement. The second half
+// rehearses the old behaviour by passing a `tools`-only set: with no
+// `skills/` path to match and no `skills` root to anchor on, the path is
+// handed back absolute. That is the defect, reproduced on demand, so a
+// future edit that narrows the set again fails here instead of going quiet.
+test('a suite outside tools/ normalises too, and the old tools-only set is why it did not', () => {
+  assert.equal(
+    toRepoPath('/tmp/wt699/skills/library-dirs.test.mjs', '/repo', SET),
+    'skills/library-dirs.test.mjs'
+  )
+  assert.equal(
+    toRepoPath('/tmp/wt699/scripts/ci-checks.test.mjs', '/repo', SET),
+    'scripts/ci-checks.test.mjs'
+  )
+  const toolsOnly = SET.filter((f) => f.startsWith('tools/'))
+  assert.equal(
+    toRepoPath('/tmp/wt699/skills/library-dirs.test.mjs', '/repo', toolsOnly),
+    '/tmp/wt699/skills/library-dirs.test.mjs',
+    'the pre-fix behaviour, kept as the control: unplaceable, so handed back as it came'
+  )
+})
+
+// Stage 3, which is the only reason the root anchor survives the rewrite.
+// A sibling branch measured in a worktree may add a suite this checkout's
+// index does not carry, so the file is real, keyable, and absent from the
+// set. Stage 2 cannot match it and stage 2 alone would hand it back absolute.
+test('a suite a sibling branch added, absent from this index, still keys off its root', () => {
+  assert.equal(
+    toRepoPath('/tmp/wt699/tools/added-over-there.test.mjs', '/repo', SET),
+    'tools/added-over-there.test.mjs'
+  )
+  assert.equal(
+    toRepoPath('/tmp/wt699/skills/added-over-there.test.mjs', '/repo', SET),
+    'skills/added-over-there.test.mjs'
+  )
+})
+
+// THE NESTED WORKTREE, which is the defect the widening fix introduced and
+// running it found within the hour. Stage 1 used to accept any `relative()`
+// result that did not escape the root, and a worktree INSIDE the root does
+// not escape it. `.scratch/` is where this repository's own .gitignore
+// directs run scratch, so the sanctioned place to put a worktree was exactly
+// the place that defeated the normaliser.
+//
+// Measured on a real trunk worktree at `.scratch/wt-main`: the report came
+// out NEW_RED 1 *and* GONE 1 for one failure that had not moved — the same
+// double count stage 2 was written to kill, revived from the other side. It
+// accuses the branch of breaking a test and writes off the trunk's debt in
+// one breath, and both halves point the expensive way.
+//
+// Rehearsed red: put the stage-1 clause back ahead of the exact match and
+// this test fails while every other path test here keeps passing, because
+// they all use a worktree OUTSIDE the root.
+test('a worktree nested inside the repository root still normalises', () => {
+  assert.equal(
+    toRepoPath('/repo/.scratch/wt-main/tools/board/read-filters.test.mjs', '/repo', SET),
+    'tools/board/read-filters.test.mjs'
+  )
+  // And for a suite that checkout does not carry, stage 3 has to anchor past
+  // the nested prefix rather than accepting it.
+  assert.equal(
+    toRepoPath('/repo/.scratch/wt-main/tools/added-over-there.test.mjs', '/repo', SET),
+    'tools/added-over-there.test.mjs'
+  )
+  // The key is the point: one failure, two checkouts, one identity.
+  const outer = { file: toRepoPath('/repo/tools/board/read-filters.test.mjs', '/repo', SET), name: 'x' }
+  const nested = { file: toRepoPath('/repo/.scratch/wt-main/tools/board/read-filters.test.mjs', '/repo', SET), name: 'x' }
+  assert.equal(keyOf(outer), keyOf(nested))
+})
+
+test('the longest match wins, so a nested copy of a suite path is not mistaken for it', () => {
+  const set = ['a/b.test.mjs', 'x/a/b.test.mjs']
+  assert.equal(toRepoPath('/tmp/wt/x/a/b.test.mjs', '/repo', set), 'x/a/b.test.mjs')
+})
+
+test('a path outside every suite root is left alone rather than given a false form', () => {
   // `relative('/repo', '/elsewhere/x')` is `../elsewhere/x`, which names no
   // file in this repository, and there is no suite root to anchor on either.
-  assert.equal(toRepoPath('/elsewhere/x.test.mjs', '/repo'), '/elsewhere/x.test.mjs')
-  assert.equal(toRepoPath('tools/a.test.mjs', '/repo'), 'tools/a.test.mjs')
-  assert.equal(SUITE_ROOT, 'tools', 'the anchor is read off the glob, not written twice')
+  assert.equal(toRepoPath('/elsewhere/x.test.mjs', '/repo', SET), '/elsewhere/x.test.mjs')
+  assert.equal(toRepoPath('tools/a.test.mjs', '/repo', SET), 'tools/a.test.mjs')
+  assert.deepEqual(
+    suiteRoots(SET).sort(),
+    ['scripts', 'skills', 'tools'],
+    'the roots are derived from the set, so widening the set widens them'
+  )
+})
+
+// A LOAD CHECK AND NOT A PARSE CHECK. Ursa's engineer measured this class on
+// 2026-11-02: git merged an import of a name on one side with a new export of
+// the same name on the other, in one file, with no conflict marker anywhere,
+// and `node --check` passes a duplicate binding because it is a link error
+// and not a parse error. This tool now imports `toolingSuites` across a lane
+// boundary, which is where that class lives, so the import is asserted rather
+// than assumed. The rest of this file would still pass with the import broken
+// in that way; node resolves the module graph before any test runs only
+// because this suite imports it at the top, and a seat that later moves to a
+// dynamic import loses that for free.
+test('the canonical set resolves, and resolving it is a load of another lane\'s module', () => {
+  resetSuitesCache()
+  const set = canonicalSuites()
+  assert.ok(Array.isArray(set) && set.length > 0, 'an empty set is a failed resolve, never a green suite')
+  assert.ok(set.every((f) => f.endsWith('.test.mjs')), 'every member is a suite file')
+  assert.deepEqual(set, [...set].sort(), 'sorted, because the invocation order is the report order')
+  assert.ok(
+    suiteRoots(set).includes('tools') && suiteRoots(set).length > 1,
+    'the live set reaches past tools/, which is the whole point of widening it'
+  )
+  resetSuitesCache()
+})
+
+test('the set is cached, because toRepoPath consults it once per path', () => {
+  resetSuitesCache()
+  let calls = 0
+  const resolver = () => { calls += 1; return ['tools/a.test.mjs'] }
+  canonicalSuites(resolver)
+  canonicalSuites(resolver)
+  assert.equal(calls, 1, 'one git ls-files per process, not one per TAP point')
+  resetSuitesCache()
 })
 
 test('the real worktree comparison that failed now agrees', () => {
@@ -136,7 +268,7 @@ test('a TAP with no plan line falls back to counting, and says so', () => {
 })
 
 test('a recorded failure is STILL_RED and carries its owner through', () => {
-  const cmp = compare(parseTap(TAP), { minPoints: 1, red: ONE_RED })
+  const cmp = compare(parseTap(TAP), { minPoints: 1, red: ONE_RED }, readSummary(TAP))
   assert.equal(cmp.newRed.length, 0)
   assert.equal(cmp.stillRed.length, 1)
   assert.equal(cmp.stillRed[0].owner, 'security')
@@ -146,7 +278,7 @@ test('a recorded failure is STILL_RED and carries its owner through', () => {
 
 test('an unrecorded failure is NEW_RED and blocks', () => {
   const baseline = { minPoints: 1, red: [] }
-  const cmp = compare(parseTap(TAP), baseline)
+  const cmp = compare(parseTap(TAP), baseline, readSummary(TAP))
   assert.equal(cmp.newRed.length, 1)
   assert.equal(cmp.stillRed.length, 0)
   assert.equal(exitCodeFor(cmp, baseline), 1)
@@ -166,14 +298,14 @@ test('inserting a test file upstream renumbers the run and changes no verdict', 
     .replace('ok 148 -', 'ok 348 -')
     .replace('not ok 149 -', 'not ok 349 -')
     .replace('ok 150 -', 'ok 350 -')
-  const cmp = compare(parseTap(shifted), { minPoints: 1, red: ONE_RED })
+  const cmp = compare(parseTap(shifted), { minPoints: 1, red: ONE_RED }, readSummary(shifted))
   assert.equal(cmp.stillRed.length, 1, 'a renumbered run must not turn a known red into a new one')
   assert.equal(cmp.newRed.length, 0)
 })
 
 test('one test file renamed is not the same test, because the key carries the file', () => {
   const moved = TAP.replace('tools/board/read-filters.test.mjs', 'tools/board/filters.test.mjs')
-  const cmp = compare(parseTap(moved), { minPoints: 1, red: ONE_RED })
+  const cmp = compare(parseTap(moved), { minPoints: 1, red: ONE_RED }, readSummary(moved))
   assert.equal(cmp.newRed.length, 1, 'a failure at a new path is a new failure until somebody says otherwise')
   assert.equal(cmp.vanished.length, 1, 'and the old entry is GONE, not FIXED')
   assert.equal(cmp.fixed.length, 0)
@@ -182,7 +314,7 @@ test('one test file renamed is not the same test, because the key carries the fi
 test('a baseline entry that now passes is FIXED, and says so without blocking', () => {
   const green = TAP.replace('not ok 149 -', 'ok 149 -')
   const baseline = { minPoints: 1, red: ONE_RED }
-  const cmp = compare(parseTap(green), baseline)
+  const cmp = compare(parseTap(green), baseline, readSummary(green))
   assert.equal(cmp.fixed.length, 1)
   assert.equal(cmp.newRed.length, 0)
   assert.equal(exitCodeFor(cmp, baseline), 0)
@@ -192,9 +324,51 @@ test('a baseline entry that now passes is FIXED, and says so without blocking', 
 // THE POSITIVE CONTROL. An absence is a measurement and needs one.
 test('a run that collected nothing is refused, not reported as green', () => {
   const baseline = { minPoints: 380, red: [] }
-  const cmp = compare(parseTap('TAP version 13\n1..0\n# tests 0\n'), baseline)
+  const complete = 'TAP version 13\n1..0\n# tests 0\n'
+  const cmp = compare(parseTap(complete), baseline, readSummary(complete))
   assert.equal(cmp.newRed.length, 0, 'zero tests really does yield zero failures')
   assert.equal(exitCodeFor(cmp, baseline), 2, 'and that must not be an exit of 0')
+})
+
+// THE PARTIAL RUN, which the floor cannot see and which happened for real.
+// A trunk run on this host was cut off at 435 of 516 points on 2026-11-02:
+// it cleared the 380 floor, found none of the baseline's entries because it
+// never reached them, and reported the trunk's one standing debt as GONE at
+// exit 0. Ursa's engineer lost a whole suite run's output file the same day
+// on the same volume, and the salvaged half reported eight failures where the
+// complete re-run reported one. So the shape is the host's, not a fixture's.
+//
+// Rehearsed red: with the `planFromProducer` clause removed from
+// `whyRefused`, this test fails and the two floor tests above keep passing,
+// because 435 is over the floor and the floor is the only control they have.
+test('a run that stopped before the end is refused, even well over the floor', () => {
+  const baseline = { minPoints: 380, red: ONE_RED }
+  // 435 points, no `1..N`, no `# tests` — the exact shape of a lost output
+  // file, and well clear of the floor.
+  const partial = 'TAP version 13\n'
+    + Array.from({ length: 435 }, (_, i) => `ok ${i + 1} - t${i}`).join('\n') + '\n'
+  const cmp = compare(parseTap(partial), baseline, readSummary(partial))
+  assert.equal(cmp.points, 435, 'counted, since there is no plan to prefer')
+  assert.equal(cmp.planFromProducer, false)
+  assert.ok(cmp.points > baseline.minPoints, 'the floor is cleared, which is the whole problem')
+  assert.equal(cmp.vanished.length, 1, 'and the baseline entry reads as GONE, which is the harm')
+  assert.equal(exitCodeFor(cmp, baseline), 2, 'so completeness has to be its own control')
+  assert.match(whyRefused(cmp, baseline), /did not finish/)
+})
+
+test('a plan with no summary is incomplete too, because node prints both last', () => {
+  const baseline = { minPoints: 1, red: [] }
+  const planOnly = 'TAP version 13\nok 1 - t\n1..1\n'
+  const cmp = compare(parseTap(planOnly), baseline, readSummary(planOnly))
+  assert.equal(exitCodeFor(cmp, baseline), 2)
+  assert.match(whyRefused(cmp, baseline), /# tests/)
+})
+
+test('the floor still answers first, so its message is not replaced by the newer one', () => {
+  const baseline = { minPoints: 380, red: [] }
+  const complete = 'TAP version 13\n1..0\n# tests 0\n'
+  const cmp = compare(parseTap(complete), baseline, readSummary(complete))
+  assert.match(whyRefused(cmp, baseline), /floor is 380/)
 })
 
 test('the MODULE_NOT_FOUND shape — one failing point for a bare directory — is refused too', () => {
@@ -203,7 +377,7 @@ test('the MODULE_NOT_FOUND shape — one failing point for a bare directory — 
   // the floor calls it what it is, a suite that never ran.
   const baseline = { minPoints: 380, red: [] }
   const dirRun = 'TAP version 13\nnot ok 1 - tools\n  ---\n  error: |-\n    test failed\n  ...\n1..1\n# tests 1\n# fail 1\n'
-  const cmp = compare(parseTap(dirRun), baseline)
+  const cmp = compare(parseTap(dirRun), baseline, readSummary(dirRun))
   assert.equal(exitCodeFor(cmp, baseline), 2)
 })
 
@@ -241,7 +415,7 @@ test('a failure that appears only nested is still caught, and counted once', () 
     '      ...',
     '1..1'
   ].join('\n')
-  const cmp = compare(parseTap(nested), { minPoints: 1, red: [] })
+  const cmp = compare(parseTap(nested), { minPoints: 1, red: [] }, readSummary(nested))
   const names = cmp.newRed.map((p) => p.name)
   assert.ok(names.includes('the inner one that actually broke'), 'the nested failure must not hide')
   assert.equal(cmp.newRed.length, 2, 'the suite point and the inner test are two distinct failures')
@@ -261,7 +435,11 @@ const SKIP_TAP = [
   '  ---',
   "  location: '/repo/tools/board/read-filters.test.mjs:234:1'",
   '  ...',
-  '1..1'
+  '1..1',
+  // `# tests` is here because node prints it and a fixture that omits it is
+  // modelling a run that stopped, which `whyRefused` now refuses. Four
+  // fixtures in this file omitted it and read as complete until that landed.
+  '# tests 1'
 ].join('\n')
 
 test('a TAP directive comes off the name, so a changed skip reason is the same test', () => {
@@ -311,6 +489,10 @@ test('the committed baseline is well formed, and every entry is attributable', (
     assert.ok(e.owner, 'every entry names an owner or says UNOWNED; it never omits the question')
     assert.ok(e.note, 'and says what it measured, so the next run need not re-derive it')
   }
-  // The glob is the contract with the invocation traps in the header.
-  assert.equal(SUITE_GLOB, 'tools/**/*.test.mjs')
+  // The retired glob is kept as a named constant, not invoked, because the
+  // baseline's recorded history cites the numbers it produced and a reader
+  // comparing them against today's needs to know they came off a smaller set.
+  assert.equal(RETIRED_SUITE_GLOB, 'tools/**/*.test.mjs')
+  assert.ok(b.suiteSet && b.suiteSet.source, 'the baseline names the set it was measured over')
+  assert.ok(b.suiteSet.suites > 0 && b.suiteSet.points > 0, 'with its size, so a count is comparable')
 })

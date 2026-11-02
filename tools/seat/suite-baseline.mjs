@@ -69,11 +69,36 @@ import { readFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve, relative } from 'node:path'
+// The repository's own definition of its tooling suite set, imported rather
+// than re-derived. The baseline file has named `scripts/ci-checks.mjs ->
+// toolingSuites()` as the canonical set since 2026-11-02; until this import
+// existed that was a citation, and this tool still ran a narrower set of its
+// own. Two sets is the defect the baseline's own header complains about, so
+// there is now one, and it is the repository's and not this seat's.
+import { toolingSuites } from '../../scripts/ci-checks.mjs'
 
-export const SUITE_GLOB = 'tools/**/*.test.mjs'
+// The set this tool used to run, kept as a named constant and no longer
+// invoked. It is here because the baseline's recorded history cites its
+// numbers (425 points, 711 collected) and a reader comparing those against
+// today's needs to know they came off a different set, not off a movement of
+// the trunk. Do not reach for it: see `canonicalSuites()` below.
+export const RETIRED_SUITE_GLOB = 'tools/**/*.test.mjs'
 const HERE = dirname(fileURLToPath(import.meta.url))
 export const REPO_ROOT = resolve(HERE, '..', '..')
 export const BASELINE_PATH = resolve(HERE, 'suite-baseline.json')
+
+// The canonical set, resolved at run time from the index and cached for the
+// process. `toolingSuites()` shells out to `git ls-files`, and `toRepoPath`
+// below consults the set once per path, so a per-call resolve would turn one
+// TAP parse into hundreds of forks.
+let suitesCache = null
+export function canonicalSuites (resolver = toolingSuites) {
+  if (suitesCache === null) suitesCache = resolver()
+  return suitesCache
+}
+// Visible for tests: the cache is process-wide and a test that injects a
+// resolver must be able to put it back.
+export function resetSuitesCache () { suitesCache = null }
 
 // A TAP point: `not ok 149 - <name>` / `ok 150 - <name>`, top level only.
 // Nested subtests are indented by `node --test`, and the indented copies
@@ -168,12 +193,15 @@ export function parseTap (text) {
   return points
 }
 
-// The suite's own root segment, taken from the glob rather than written
-// twice. Everything this tool can ever see a failure in lives under it.
-export const SUITE_ROOT = SUITE_GLOB.split('/')[0]
+// The distinct top-level segments of the suite set. Derived from the set
+// itself, so it widens when the set does and there is nothing to keep in
+// step by hand. On 2026-11-02 these are `tools`, `skills` and `scripts`.
+export function suiteRoots (known = canonicalSuites()) {
+  return [...new Set(known.map((f) => f.split('/')[0]))]
+}
 
-// Absolute -> repo-relative, in two stages, because one is not enough and
-// the second one was found by running the tool rather than by thinking.
+// Absolute -> repo-relative, in three stages, because two were not enough
+// and the third was named as a blocker before it was fixed.
 //
 // STAGE 1 is relative-to-root, which is right whenever the TAP was produced
 // in this checkout.
@@ -187,19 +215,65 @@ export const SUITE_ROOT = SUITE_GLOB.split('/')[0]
 // breaking four tests and simultaneously reported four of the trunk's debts
 // as no longer collected. Both halves point the expensive way.
 //
-// So when stage 1 escapes the root, anchor on the suite root segment
-// instead: the last `/tools/` in the path begins the part that is the same
-// in every checkout. This couples the function to SUITE_GLOB, which is why
-// it reads the segment off the glob instead of repeating the word.
-export function toRepoPath (p, root = REPO_ROOT) {
+// Stage 2 used to anchor on the LAST `/tools/` in the path, a segment read
+// off this tool's own narrow glob. That is the blocker window 88 recorded
+// when it declined to widen the set: a failure under `skills/` or
+// `scripts/`, measured in a worktree, matched no anchor and was handed back
+// absolute, so exactly the rows the wider set adds were the rows that could
+// not be keyed. Reproduced before the fix, with the root hard-wired to
+// `tools`:
+//
+//     /tmp/wt699/tools/seat/own-prs.test.mjs   -> tools/seat/own-prs.test.mjs
+//     /tmp/wt699/skills/ledger/check.test.mjs  -> UNCHANGED, absolute
+//     /tmp/wt699/scripts/ci-checks.test.mjs    -> UNCHANGED, absolute
+//
+// So stage 2 is now an EXACT match and not an anchor: the suite set is a
+// list of repo-relative paths, and a worktree copy of one of them ends with
+// `/<that path>`. Longest match wins, so a set holding both `a/b.test.mjs`
+// and `x/a/b.test.mjs` resolves the more specific one. This answers the
+// question the anchor was approximating, and it needs no root segment at
+// all.
+//
+// STAGE 3 is the old anchor, generalised over every root in the set rather
+// than one read off a glob, and it is the fallback rather than the rule. It
+// earns its place on the case stage 2 cannot serve: a sibling branch
+// measured in a worktree may ADD a test file this checkout's index does not
+// have, so the file is real and keyable and absent from `known`. Anchoring
+// on its root segment still produces the key that branch's own baseline
+// read would produce.
+export function toRepoPath (p, root = REPO_ROOT, known = canonicalSuites()) {
   if (!p.startsWith('/')) return p
+  // STAGE 2 RUNS FIRST, and the numbering is kept because the comment above
+  // is the history. An exact match against the set is checkout-independent
+  // by construction, so there is no checkout in which it is the wrong
+  // answer, and ordering relative-to-root ahead of it was this function's
+  // next defect rather than its fix. See the nested-worktree case below.
+  let best = null
+  for (const f of known) {
+    if (p.endsWith(`/${f}`) && (best === null || f.length > best.length)) best = f
+  }
+  if (best !== null) return best
+  // STAGE 1, now guarded. Relative-to-root is right when the TAP was
+  // produced in this checkout, and a path that merely LIVES under the root
+  // is not the same thing. A worktree nested inside the root — `.scratch/`,
+  // which this repository's own .gitignore directs runs to use — produces
+  // `.scratch/wt-main/tools/stack/repair-pending.test.mjs`, which does not
+  // start with `..`, so the unguarded form accepted it and returned a key
+  // naming no file in the set. Measured: that revived the four-NEW_RED-and-
+  // four-GONE double count stage 2 was written to kill, and it reported the
+  // trunk's one standing failure as both newly broken and no longer
+  // collected. So the result has to start at a suite root to be believed.
   const rel = relative(root, p)
-  if (!rel.startsWith('..')) return rel
-  const anchor = `/${SUITE_ROOT}/`
-  const at = p.lastIndexOf(anchor)
+  if (!rel.startsWith('..') && suiteRoots(known).includes(rel.split('/')[0])) return rel
+  // STAGE 3, the generalised anchor, for a suite a sibling branch added that
+  // this checkout's index does not carry.
+  for (const r of suiteRoots(known)) {
+    const at = p.lastIndexOf(`/${r}/`)
+    if (at !== -1) return p.slice(at + 1)
+  }
   // No suite root in the path means this is not one of our test files at
   // all, and a path we cannot place is left exactly as it came.
-  return at === -1 ? p : p.slice(at + 1)
+  return p
 }
 
 // Identity of a test, for the baseline. Name plus file: the name alone can
@@ -318,18 +392,58 @@ export function formatReport (cmp, baseline) {
   return out.join('\n')
 }
 
-// exit 2 = the suite did not run (refuse, do not report health)
+// exit 2 = the suite did not run, or did not FINISH (refuse, do not report
+//          health)
 // exit 1 = NEW_RED
 // exit 0 = everything else, including a red trunk somebody else owns
+//
+// THE FLOOR IS A FLOOR ON VOLUME AND CANNOT SEE INCOMPLETENESS, which is
+// the hole `whyRefused` closes. `minPoints` was built against the empty run
+// — "zero failures from zero tests is not green" — and a PARTIAL run clears
+// it comfortably and then writes off every debt it never reached. Measured
+// on this host on 2026-11-02: a trunk run cut off at 435 of 516 points
+// cleared the 380 floor, reported `GONE 1` for the trunk's one recorded
+// standing failure, and exited 0. The baseline's whole purpose is to stop a
+// debt being written off by a run that could not see it, and the floor let
+// it happen one level up.
+//
+// The producer already says whether it finished. `node --test` prints
+// `1..N` and `# tests N` last, so their ABSENCE is the signal, and `compare`
+// has reported it in `planFromProducer` since the field was added — into a
+// string in the report header, where nothing acted on it. Reading a
+// producer's own completeness marker into prose rather than into a verdict
+// is the general shape here.
+//
+// This is not hypothetical and it is not rare. Ursa's engineer lost a full
+// suite run's output file mid-flight the same day, on the same volume, and
+// the salvaged half reported eight failures where the complete re-run
+// reported one.
+export function whyRefused (cmp, baseline) {
+  if (cmp.points < baseline.minPoints) {
+    return `parsed ${cmp.points} top-level points, floor is ${baseline.minPoints}`
+  }
+  if (!cmp.planFromProducer) {
+    return `the TAP carries no \`1..N\` plan line, so the run did not finish; ${cmp.points} points were counted before it stopped`
+  }
+  if (cmp.collected === null) {
+    return 'the TAP carries no `# tests` summary, so the run did not finish'
+  }
+  return null
+}
+
 export function exitCodeFor (cmp, baseline) {
-  if (cmp.points < baseline.minPoints) return 2
+  if (whyRefused(cmp, baseline) !== null) return 2
   return cmp.newRed.length > 0 ? 1 : 0
 }
 
 function runSuite () {
-  // No shell, and the glob is passed to node itself, which expands it. A
-  // directory argument here is the MODULE_NOT_FOUND trap in the header.
-  const r = spawnSync(process.execPath, ['--test', SUITE_GLOB], {
+  // No shell, and no glob: the set is a list of repo-relative paths resolved
+  // from the index, which is what the repository's own `ci-checks.mjs` passes
+  // `node --test`. The glob form this tool used to pass had to go to node
+  // rather than a shell because node expands `**` itself and a directory
+  // argument dies with MODULE_NOT_FOUND; naming the files removes that trap
+  // along with the narrower set.
+  const r = spawnSync(process.execPath, ['--test', ...canonicalSuites()], {
     cwd: REPO_ROOT,
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024
@@ -345,9 +459,11 @@ function main (argv) {
   const cmp = compare(parseTap(tap), baseline, readSummary(tap))
   const code = exitCodeFor(cmp, baseline)
   if (code === 2) {
-    console.error(`REFUSED: parsed ${cmp.points} top-level points, floor is ${baseline.minPoints}.`)
-    console.error('The suite did not run. Zero failures from zero tests is not green.')
-    console.error(`Expected invocation: node --test '${SUITE_GLOB}' (a directory argument dies with MODULE_NOT_FOUND).`)
+    console.error(`REFUSED: ${whyRefused(cmp, baseline)}.`)
+    console.error('This is not a verdict on the trunk. A run that did not finish has not')
+    console.error('paid any debt it failed to reach, and reporting one as GONE writes it off.')
+    console.error(`The set is ${canonicalSuites().length} suites, resolved from the index by scripts/ci-checks.mjs -> toolingSuites().`)
+    console.error('If that count is 0, the resolve failed and not the suite: this is not a verdict on the trunk.')
     process.exit(2)
   }
   console.log(formatReport(cmp, baseline))
