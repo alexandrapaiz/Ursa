@@ -116,7 +116,18 @@ const NEAR_MISS = /^skills?\.(md|markdown)$/i
  */
 export function indexedRows(readmeText) {
   const out = []
-  for (const m of readmeText.matchAll(/^\|\s*\[([^\]]+)\]\(([^)]+)\/SKILL\.md\)/gm))
-    out.push({ label: m[1], dir: m[2] })
+  for (const m of readmeText.matchAll(/^\|\s*\[([^\]]+)\]\(([^)]+)\/SKILL\.md\)([^\n]*)$/gm)) {
+    // The row's remaining cells, by position: what it decides, how many refs,
+    // status. `refs` is the third column and is returned as a number only when
+    // the cell holds nothing but digits, so a caller can tell a count that
+    // disagrees with the library from a cell that states no count at all. See
+    // trigger-coverage.mjs, which checks it: on 2026-10-27 three of the ten
+    // rows were wrong by up to five refs, because the column is a derived
+    // count maintained by hand and §5u's rule reached the trigger tests'
+    // headers and not this table.
+    const cells = m[3].split('|').map((c) => c.trim())
+    const refsCell = cells[2] ?? ''
+    out.push({ label: m[1], dir: m[2], refs: /^\d+$/.test(refsCell) ? Number(refsCell) : null })
+  }
   return out
 }

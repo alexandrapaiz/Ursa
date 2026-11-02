@@ -89,7 +89,7 @@ evidence:
     source: ursa-major/src/types.ts:565-566
   - ref: E20
     what: the walk runs on the launch path only, after the record survives the size drop and before signals are derived
-    source: ursa-major/src/bin/ursa.ts:648-654
+    source: ursa-major/src/bin/ursa.ts:649-655
   - ref: E21
     what: the one durability sentence the CLI prints, pooled across every record of the run by characters
     source: ursa-major/src/bin/ursa.ts:377-388
