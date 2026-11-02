@@ -10,22 +10,57 @@ without saving and the kit finds it in whichever sibling package has it.
 will ever touch, and point `PW_ROOT` at it:
 
 ```bash
-# from your checkout root, with <id> this run's own suffix
-export FE_CACHE="$PWD/.fe-run-<id>/npm-cache"
+# from your checkout root, with <id> this run's own suffix.
+# One directory holds everything this run writes, so there is one thing
+# to delete at the end and one place to look for what a dead run left.
+export FE_RUN="$PWD/.fe-run-<id>"
+mkdir -p "$FE_RUN/pw"
 
-mkdir -p /tmp/pw && cd /tmp/pw \
-  && npm i --no-save playwright --cache "$FE_CACHE" \
+cd "$FE_RUN/pw" \
+  && npm i --no-save playwright --cache "$FE_RUN/npm-cache" \
   && npx playwright install chromium
-export PW_ROOT=/tmp/pw/node_modules
+export PW_ROOT="$FE_RUN/pw/node_modules"
+cd -
 
-# and at the end of the run
-rm -rf "$FE_CACHE"
+# before any npm in a tree: is one already running there?
+ps -eo pid,args | grep -v grep | grep -q "npm" && \
+  for pid in $(pgrep -f "npm (ci|install)"); do \
+    [ "$(readlink -f /proc/$pid/cwd 2>/dev/null)" = "$PWD" ] && \
+      echo "REFUSING: npm $pid is live in this tree"; \
+  done
+
+# and at the end of the run, the whole directory and not just the cache
+rm -rf "$FE_RUN"
 ```
 
 `--cache` is not optional and `PW_ROOT` does not cover it: `PW_ROOT`
 isolates `node_modules` and the cache is a separate shared resource one
 directory up, which is L55 and L56 and the scratch-path rule near the
-bottom of this file. Delete that cache when the run ends.
+bottom of this file.
+
+**Three things in that block changed on 2026-11-02 (run h), each because
+this seat broke them that morning.**
+
+The playwright prefix moved from `/tmp/pw` into the run's own directory.
+The bare `/tmp` name was this file contradicting itself: the scratch rule
+near the bottom says write inside your checkout and names the reason,
+and this block at the top said `/tmp/pw` anyway. Both halves are about
+the same hazard and the top one is the half a run reads first.
+
+The deletion at the end is now the whole run directory. L56 told a run to
+delete its npm cache and nothing told it to delete anything else, so the
+cache was the one pile that got collected and the larger ones did not. On
+the morning of 2026-11-02 this seat's own earlier runs had 321M sitting
+on the volume in three directories, none of them a cache, with three
+server processes still pointed at two of them six and seven hours after
+the runs ended. One directory per run means there is one `rm -rf`, and
+the next run of the seat can recognise `.fe-run-*` from another day as
+garbage without knowing what was in it.
+
+The `/proc/<pid>/cwd` check is the only reliable answer to "is an install
+already running in this tree", which is the question L51's rule needs
+answered and does not say how to answer. An exit status will not do it;
+see the end of this file.
 
 `PW_ROOT` is the first entry in `lib/browser.mjs`'s search order and has
 been since that file was written, and until 2026-11-02 it appeared in no
