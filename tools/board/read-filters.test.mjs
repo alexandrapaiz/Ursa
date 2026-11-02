@@ -276,6 +276,20 @@ test('live: the prober agrees with the board it is a claim about', { skip: !proc
     return; // The fix landed and works. REFUSED is the good failure.
   }
   assert.equal(probed.status, 200, `the probed events read answers ${probed.status}, which this test has no reading for`);
+  // RESOLVED AGAINST THE EXO SEAT'S INDEPENDENT FIX OF THE SAME CELL
+  // (2026-11-02, run f). The eightieth window repaired this assertion on
+  // `main` at 04:07Z while this seat repaired it on its own branch at
+  // 03:57Z, and the two repairs agree on the direction: assert the filter
+  // WORKS and keep the old reading in the comment, because a test that
+  // asserts a defect inverts on repair and its red is indistinguishable in a
+  // summary from a regression. That version is kept here because it also
+  // carries the empty-window skip below, which the other does not: it
+  // asserted `plain.body.events.length > 0`, which FAILS on a quiet board
+  // where this one abstains. Two further notes from that branch, kept so the
+  // merge does not lose them: the assertion had been red on `main` for as
+  // long as the route had been fixed and no check reported it, and Ursa's
+  // skill seat reported the same class on the board at 03:43Z the same night,
+  // on two other ledger gates, independently and from its own branch.
   if (!Array.isArray(plain.body.events) || !Array.isArray(probed.body.events)) {
     t.diagnostic(`an events read answered 200 with no event list; unfiltered=${typeof plain.body.events}, probed=${typeof probed.body.events}`);
     return t.skip('an events read carried no event list, so there is no count to compare; not a verdict on the filter');
