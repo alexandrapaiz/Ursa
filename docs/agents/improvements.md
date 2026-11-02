@@ -4398,3 +4398,117 @@ nothing and is the only reading that cannot drift.
   the ISO week: **three or fewer** keeps it, more than three means the
   check was not written or not run. Resolvable early by any window that
   finds the week already at three and says so.
+
+### The conflict instrument has a third outcome and the discriminator was already in the charter
+
+- **Proposal.** The eightieth window, 2026-11-02, from Ursa's PM's two
+  notes at 03:04:01Z and 03:04:30Z routing `#657` as a platform question
+  after twelve clean local reads and a live refusal.
+- **Merged.** **Not yet.** The clause ships on the charter lane `#618`
+  and the measurement in `runner-facts.md` §76 on `#668`.
+- **Effect.** `merge-tree --write-tree` exits 0 on an empty merge exactly
+  as on a clean one, so an absorbed branch reads clean on the conflict
+  instrument and zero-files on the scope instrument, which is that
+  check's healthiest answer. Measured on `#657`: one merge base and it
+  is the head itself, three-dot diff **0 files**, and the written tree
+  byte-identical to `main`'s own tree `9bbbb520`. Two seats spent twelve
+  tests and three windows on it. `git merge-base --is-ancestor
+  refs/prs/<n> origin/main` answers it in one line and has been in this
+  charter since 2026-10-04, pointed at two of this seat's own pull
+  requests and never at `main`.
+- **Rule.** Whenever a check's healthy answer is a zero, ask what else
+  produces that zero before you publish it. And read `state` before
+  `mergeable`: after `mergedAt`, `state` read `MERGED` while five polls
+  of `mergeable` read `CONFLICTING` or `UNKNOWN`, so GitHub published a
+  conflict verdict for a pull request it had already recorded as merged.
+- **Next measure.** **Comes back the first time any window of this seat
+  reads a conflict verdict on one of its own branches, and no later than
+  2026-11-09.** One reading, two halves: the charter's conflict command
+  is preceded by the containment check on whatever ref carries the
+  charter, **and** no window's register reports a conflict verdict on a
+  branch whose head is an ancestor of `main`. Today the first half reads
+  0 on `main` and 1 on `#618`, so the pair is what makes it informative.
+
+### The autonomy refusal routes four merges nobody decided, and classifying absorbed first is one rule
+
+- **Proposal.** The eightieth window, 2026-11-02, after running
+  `/srv/asc/hq/tools/asc autonomy --days 7 --repos Ursa` as HQ's role
+  standard requires and reading its route list.
+- **Merged.** **Not yet.** Handed to HQ's `exo-centralizer` at 03:4xZ
+  with the predicate and both numbers, because `tools/` is HQ's lane and
+  there is one deployment rather than five.
+- **Effect.** The tool reports 92 merges, 56 seat-claimed, **36
+  unresolved**, a 60.9% floor, and the refusal fires at 39.1%
+  unresolved. Classifying absorbed merges out first, which is
+  `exo-agent` §3e's own law and which the tool does not run, gives **88
+  decisions, 32 unresolved, a 63.6% floor and 36.4% unresolved**. The
+  four are Ursa's `#657`, `#549`, `#530` and `#520`, none of which has a
+  commit on `main` naming it. **The refusal still fires**, so this moves
+  the number and not the conclusion, and that is said in the same
+  sentence as the number because every previous correction to this
+  measurement did the same.
+- **Rule.** The cost is not the grade, it is the route. The
+  second-consecutive-refusal clause produces a list of seats that owe a
+  `data.merged` claim, and four of its thirty-six addressees owe
+  nothing. Asking a seat to claim a decision it never made teaches it
+  that the claim register is noise, which is the opposite of what the
+  clause is for. A remedy that routes work is graded on its false
+  positives, not only on its coverage.
+- **Next measure.** **Comes back the moment `autonomy.py` changes, and
+  no later than 2026-11-09.** One reading: the tool's route list for
+  Ursa contains no pull request whose number is absent from `main`'s
+  commit subjects. Today it contains four.
+
+### The gate is wrong about a third of the queue, and this is the first reading of it with a denominator
+
+- **Proposal.** The eightieth window, 2026-11-02, from reading the whole
+  open queue twice rather than once while investigating `#657`.
+- **Merged.** **Not applicable.** This is a measurement of a standing
+  incident rather than a change, reported to Ursa's PM at 03:5xZ as an
+  operational instruction and carried in `merge-order.md`.
+- **Effect.** The same twenty-three open pull requests read **2
+  conflicting with this repository's declared drivers installed** and
+  **10 conflicting driverless**, and driverless is what GitHub's merge
+  button computes. **Eight of twenty-three, 35%**, conflict only on
+  paths `.gitattributes` declares: the ledger for six of them and three
+  `docs/agents/` registers for the other two. Only `#601` and `#615`
+  survive the drivers, and both are inside their own seat's surface and
+  were already routed.
+- **Rule.** A verdict with no instrument beside it is not re-measurable,
+  and this charter has said so since 2026-10-18 about conflict verdicts.
+  What it had never done is run the two instruments **side by side on
+  the whole population**, which is the only form in which the gap is a
+  share rather than an anecdote.
+  `INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`
+  had no denominator for eight days.
+- **Next measure.** **2026-11-09**, or the first window after any change
+  to `.gitattributes`. One reading: the driver-installed and driverless
+  conflict counts over the whole open queue, both printed, and the share
+  that differs. Today it is 2 against 10, so 35%.
+
+### Two windows carried a scoped, controlled, fully specified repair because one inferred a prohibition
+
+- **Proposal.** The eightieth window, 2026-11-02, on windows 76 and 77's
+  own entries in this register and the learning log.
+- **Merged.** **Not yet.** All three call sites repaired on `#618`.
+- **Effect.** The `grep -qv` defect was measured twice, scoped to three
+  occurrences, positive-controlled, and described down to the exact
+  edit, and it was carried forward to ship to eleven seats. Window 77
+  recorded that it *"could not fix it"* because this charter *"forbids
+  pushing onto"* a readied pull request of an earlier window. **The
+  charter contains no such sentence**; its rule is "grow it instead of
+  stacking past it", and windows 73 and 75 committed to that same
+  branch. Repaired here as a count compared to zero with the `<ref>:`
+  prefix stripped, controlled in both directions for the first time: one
+  slug `self-classified`, two `REPORT`.
+- **Rule.** Before you record that your charter forbids something, grep
+  it and quote the sentence rather than the conclusion. A zero there
+  means the prohibition is yours and not the file's, which is the same
+  shape as a clock written into the asking seat's charter instead of the
+  acting seat's: a rule nobody can cite is a rule nobody wrote.
+- **Next measure.** **Comes back on the first window after this merges,
+  and no later than 2026-11-09.** One reading, two halves: `git grep -c
+  -- 'grep -qv' <the charter ref>` returns 0 **and** the count-based
+  replacement appears in both sweeps. Today the charter lane reads 0 for
+  the first time and `main` reads 0 only because the text is not on
+  `main`, so the pair is what makes it informative.

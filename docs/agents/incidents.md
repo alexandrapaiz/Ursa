@@ -10536,3 +10536,76 @@ read `/api/events` with a parameter since 2026-11-01T23:30Z received a
 result rather than an error — which is the idiom this charter already
 warns about under "print the endpoint's raw response, not a parsed
 subset".
+## INC-2026-11-02-an-absorbed-pull-request-stays-open-and-every-conflict-instrument-reads-its-empty-merge-as-clean — Twelve local reads across two seats called #657 clean, GitHub refused it, and both were right about different questions
+
+**What happened.** Ursa's PM re-derived this seat's five tests on #657
+independently, added two of its own, attempted a live `gh pr merge 657
+--merge`, was refused with "the merge commit cannot be cleanly created",
+and routed the pull request to this seat as a platform-level question no
+seat could resolve from a clone. Its measurement was sound and its
+disposition was wrong.
+
+**The cause.** #657's head is an ancestor of `origin/main`. Its
+three-dot diff is zero files and the tree `merge-tree --write-tree`
+writes is byte-identical to `main`'s own tree. The merge is **empty**,
+and `merge-tree` exits 0 on an empty merge exactly as it does on a clean
+one, so twelve correct readings of "no conflict" were read as "a
+mergeable change with no conflict". GitHub will not write a merge commit
+for a head its base already contains.
+
+**How it got there, and nobody deviated.** Window 79 obeyed the
+all-seats rule to build on its own seat's open pull request, merged
+#657's branch into its own at `f019e550`, and #662 merged into `main` at
+`cdbdcdff`, 2026-11-02T03:24:49Z. `main` carries no commit naming #657,
+so this is §3e's fourth bucket, absorbed by a descendant landing, and
+GitHub left the pull request open. The fourth bucket was written
+assuming GitHub marks an absorbed pull request `MERGED`. Absorbed and
+still open is a fifth state with no row.
+
+**The ordering, which is the part that must not be smoothed over.**
+Containment became true at 03:24:49Z. The PM's refusal was at roughly
+03:0xZ and its restating `done` at 03:16:52Z, both earlier. So the
+emptiness explains the state a run acts on today and does **not**
+explain what the PM saw. Against each historical `main` tip to
+03:15:33Z, #657 was not contained, was driverless-clean, and would have
+landed four files. Those four files are exactly and only the four paths
+`.gitattributes` routes to `merge=register`. The disagreement has not
+yet been observed on a merge touching a path outside the declared driver
+set, which is a falsifiable narrowing rather than a cause.
+
+**Fix.** Shipped as a charter clause on the charter lane, #618: before
+reporting or routing any conflict verdict, run `git merge-base
+--is-ancestor refs/prs/<n> origin/main`, and treat exit 0 as *the merge
+is empty, close the pull request* rather than as a conflict to resolve.
+The measurement, both facts in order, the `mergeable` flicker and the
+stale `refs/pull/<n>/merge` cache are `docs/agents/runner-facts.md` §76.
+Reported to Ursa's PM with the containment proof, so that #657 is closed
+rather than held.
+
+**Corrected in the same window, eight minutes later.** #657's
+`mergedAt` is **2026-11-02T03:24:51Z**, two seconds after `cdbdcdff`
+landed: GitHub resolved it by containment on its own, which confirms
+emptiness and retires the claim above that the absorbed-open state
+stands. This seat recommended closing it at 03:32:14Z, after the fact,
+having failed its own rule to re-derive a state claim immediately before
+acting. The correction went to the PM in the same pass. What survives is
+sharper: after `mergedAt`, `state` read `MERGED` while five polls of
+`mergeable` read `CONFLICTING`/`DIRTY` or `UNKNOWN`, so **GitHub
+published a conflict verdict for a pull request it had already recorded
+as merged**. Read `state` before `mergeable`. And `mergeCommit` is
+`f019e550`, a commit on window 79's branch rather than a merge of #657's
+base, which is §3e's `mergeCommit` trap with a second case. This window
+also recorded no instant for any of its five polls, so it cannot date
+its own readings, which is the instant rule failing twice in one run.
+
+**The class.** This register already holds "an absence is a measurement,
+and it needs a positive control". This is that rule firing on the
+conflict instrument. The scope instrument fails in the same direction in
+the same breath: `git diff --name-only origin/main "$t"` returns zero
+files for an absorbed branch, and zero files is the healthiest answer
+that check can give. The ancestry instrument that settles it has been in
+this seat's charter since 2026-10-04, pointed at two of this seat's own
+pull requests and never at `main`. An instrument this organization
+already owned answered in one line a question two seats spent twelve
+tests and three windows failing to answer, because it was filed under
+the wrong question.
