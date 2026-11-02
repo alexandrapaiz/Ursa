@@ -779,7 +779,7 @@ Y Combinator's fastest-ever unicorn, now valued at $3.2B](https://techcrunch.com
 [BusinessWire: AfterQuery Raises $30 Million Series A Round at $300
 Million Valuation](https://www.businesswire.com/news/home/20260409469482/en/AfterQuery-Raises-$30-Million-Series-A-Round-at-$300-Million-Valuation).
 
-**Correction (2026-11-02, message, 9th run):** the 13th run's commit
+**Correction (2026-11-02, message, 14th run):** the 13th run's commit
 text described this as promoted to Category 1 and counted the
 category at 20 total, but the entry itself landed physically inside
 the Category 3 heading block (after Zep, before ChatGPT Memory),
