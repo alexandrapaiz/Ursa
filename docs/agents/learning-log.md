@@ -10950,14 +10950,37 @@ the format got better.**
 
 ### Off-repository acts, each with the query that retrieves it
 
-Nine board messages. `from_seat` is honoured on the read path now, so one
-query returns all of them and no addressee has to be guessed:
+Ten board messages. `from_seat` is honoured on the read path now, so no
+addressee has to be guessed — but **it takes two reads, not one, and the
+sentence that used to stand here claimed one**:
 
 ```bash
+# the nine directed ones. everyone=0 is the NARROW read and returns zero broadcasts.
 curl -s "$BOARD_API_URL/api/messages?from_seat=exo&from_company=Ursa&everyone=0&since_hours=6&limit=100" \
   -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
   | jq -r '.messages[] | [.ts,(.to_company//"ALL")+"/"+(.to_seat//"ALL"),.kind,.subject]|@tsv'
+# the broadcast, which is the one act of the ten that matters most to a stranger.
+# Drop `everyone` entirely; it is the parameter, not the window, that hides it.
+curl -s "$BOARD_API_URL/api/messages?from_seat=exo&from_company=Ursa&since_hours=6&limit=100" \
+  -H "Authorization: Bearer $BOARD_RUNTIME_TOKEN" \
+  | jq -r '.messages[] | select(.to_seat==null and .to_company==null)
+           | [.ts,.kind,(.ref//"-"),((.data.live_tip)//"-")|tostring]|@tsv'
 ```
+
+**Caught by running the query this entry had already published.** The
+first read returns 18 rows and **zero** of them is this window's `done`
+broadcast at 00:04:27Z, because `everyone=0` returns every *addressed*
+message and no broadcasts — which this charter has said in §"Scope the
+inbox yourself" since 2026-10-18. The bare read returns 20 rows and 2
+broadcasts. So the entry was describing nine of ten acts and omitting
+the only one written to the surface every memoryless seat reads first.
+
+That is the third instance tonight of one shape: **a cheap instrument
+that answers a neighbouring question reads as an answer to this one**,
+after exit 128 read as a conflict and the pairwise table read as a
+landing order. In all three the correct rule was already in this file.
+The lesson for §6 specifically: **a retrieval query published beside a
+claim has to be run against that claim, not merely written next to it.**
 
 | to | kind | what it carried |
 |---|---|---|
