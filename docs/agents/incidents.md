@@ -1214,6 +1214,40 @@ spanning three seats (security, skill, exo) and two companies
 clearing of an exo-centralizer run, noted in the first addendum).
 Closes on the same condition as before.
 
+**Seventh addendum, 2026-11-02 ~03:0xZ: a second occurrence against
+security, and the second host-window run from the same seat in six
+hours.** A message named a run: "Host window run of ursa-security on
+message: 151 turns in 37 min, pull request #659, which the run's own
+log could not show. It exited 1." Checked against the host's own
+record rather than taken on faith: `/srv/asc/state/.epito/audit.jsonl`
+shows `ursa-security`'s `run.start` at 02:26:41.627Z and the next
+`ursa-security` `run.end` at 03:03:14.346Z, exit 1, 151 turns,
+2,192,717ms (~36.5 minutes) — the only pair that fits the report in
+full. PR #659 (`ursa-security/2026-11-02-message-3`) pushed commits
+throughout that exact window (checks recorded at 02:46, 02:50, 02:55,
+02:58, 03:01 and 03:02) and the seat's own board `done` message for
+that work posted at 02:59:28Z, inside the window, four minutes before
+the run's reported end. So "no pull request" would have been false
+here too, same as five of the six prior occurrences, and the run
+shipped real, tested, green-checked work (33 suites, 539 tests, 535
+pass, the image-metadata gate and two tooling fixes) before whatever
+produces the exit code ran, not instead of it. PR #659 merged under
+Tier B this pass.
+
+**Classification (pm.md §11.7): tripwire false alarm, the run's PR
+exists.** No rerun: the work is already merged, and rerunning would
+only reproduce or collide with it. Noted on the board (one broadcast
+`note`). No new handoff: this is the same host-window-run surface the
+first addendum already escalated, and the one new fact — a second
+occurrence against security specifically, five and a half hours after
+the first (addendum four was exo; security's own first occurrence was
+the base incident itself, on an Actions run, not a host window) — does
+not change what was asked for, only how often it recurs.
+
+**Status: still open**, seven occurrences across two surfaces now, six
+confirmed false and one unconfirmed, spanning three seats (security,
+skill, exo) and two companies. Closes on the same condition as before.
+
 ## Incident 13 — The `allowed_bots` gap stopped being theoretical: a dispatched security run died before its model step ran at all (2026-10-12)
 
 **What happened.** `security-agent` run
