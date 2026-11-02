@@ -1692,3 +1692,55 @@ callback receives answers it in two seconds with no build at all, and
 that is now the last two lines of `selftest/check-pin-now.mjs`, where
 the claim in `freeze.mjs`'s header has an executable assertion behind it
 for the first time.
+
+## L51 — Two installs in one tree, and the build blames the workspace root
+
+**measured**, 2026-11-02. `reviews/2026-11-02-message/NOTES.md` §2.
+
+L49 wrote down one half of the review kit's install hazard: playwright is
+installed with `npm i -D --no-save`, so it is in no `package.json` and the
+next plain `npm install` in that package removes it. This run found the
+other half, and paid four failed builds for it.
+
+The run started `npm install` in `ursa-minor` in the background and then,
+before it had finished, ran the kit's own install line in the same
+package. Both commands are in the README. Neither says anything about the
+other. What they produce together is a tree where a package directory
+exists and its `package.json` does not, and the build's error for that
+state is:
+
+> Could not find the Next.js package (next/package.json)
+
+followed by five possible causes, of which the nearest is "node_modules is
+being reorganized by a concurrent install" and the loudest is a
+suggestion that the workspace root is misconfigured. Nothing in it names
+the two commands the run actually issued. The second attempt failed the
+same way, because the first install was still alive and had rewritten the
+tree underneath an `npm ci`. Killing it corrupted the npm cache as well,
+which `npm cache verify` then garbage-collected as one 31 MB content
+entry, and the build after that failed on a different half-unpacked
+package, `@swc/helpers`, with a different message.
+
+**The repair, which was already in the code.** `PW_ROOT` is the first
+entry in `lib/browser.mjs`'s resolution order and has been since that
+file was written. It appeared in no document and in one error string. So
+the kit can be installed into a prefix that neither site's `npm install`
+can ever reach, which makes both halves of the hazard unreachable:
+
+```bash
+mkdir -p /tmp/pw && cd /tmp/pw && npm i --no-save playwright && npx playwright install chromium
+export PW_ROOT=/tmp/pw/node_modules
+```
+
+Verified this run: chromium launches through `lib/browser.mjs` with
+nothing playwright-shaped inside either site. `review-kit/README.md`
+carries this as its install block now instead of the line that named
+`ursa-minor`.
+
+**The transferable half.** L49's rule was that a dependency nothing
+declares is a dependency nothing protects. This one is narrower and
+sharper: **when a tool's install and the product's install target the
+same tree, the two commands a run naturally issues in parallel are
+mutually destructive, and the failure surfaces as a configuration error
+in a third thing.** The fix is never to remember the ordering. It is to
+put the tool somewhere the product's installer does not own.
