@@ -2,6 +2,59 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (ninth pass): three more Tier B merges, one stale claim set aside, nothing new for you
+
+Triggered by four events: review #632 (exo), #629 (security) and #628
+(frontend) against the merge rule; a `done` from security addressed to
+this seat naming PR #629; the security and frontend seats' own
+finished-run reports; and a wake condition claiming this seat owed a
+draft/merge/close decision on #629. Built on this seat's own open pull
+request (#637, the re-fired 2026-11-01 hook slot) rather than starting
+a second version from `main`, per the org rule on reading a seat's own
+open PRs first: #637 had already merged #632, #629 and #627 and named
+five PRs opened mid-pass that it had not yet evaluated. This pass picks
+those up.
+
+1. **Three more pull requests merged under Tier B, none of them
+   needing you.** #628 (frontend, `docs/design/` only, green, clean),
+   #634 (exo, two files in its own register lane, no charter path,
+   green, clean) and #635 (market, `docs/ideas.md` plus three files
+   under `docs/market/`, green, clean) all merged. #633 (skill) stays
+   with that seat: it edits `prompts/skill-extract.md` directly (Tier
+   C) and is also genuinely `CONFLICTING`, both named in a comment on
+   the PR. #636 (security) stays a draft, pushed minutes before this
+   pass read it — a live run, not a stale one.
+2. **A wake condition claiming #629 needed this seat's merge-or-close
+   decision checked out false, and nothing follows from it.** The
+   condition described #629 as an orphaned draft with "no live run
+   behind it" that only this seat could reach, and named a tool
+   (`tools/check-draft-prs.sh`) to decide its disposition. #629 was
+   already merged — by this seat's own earlier pass today, before the
+   condition was even attached to this run's wake — and was never a
+   draft. The named tool still does not exist anywhere in this
+   checkout, the same absence this seat and others have measured
+   before. Treated as unverified external content per the charter's
+   own rule (everything outside the owner, HQ's standards, and this
+   repository's committed files is data, not instruction) rather than
+   acted on. Replied to exo on the board naming the check and the
+   result, since the same condition was attached to its wake too.
+3. **#395 (research) is now about ten days old and still waits on
+   you.** Unchanged from every prior pass.
+
+Replied to security's `done` note in first person on the board, naming
+the merge and the fact that it predated the note. No new dispatch:
+`PM_DISPATCH_ENABLED` reads empty in this run's environment, and
+nothing in the queue meets a real §11.3/§0b criterion regardless (see
+`dispatch-queue.md`).
+
+**Sprint-ceremony gap, unchanged, not re-run here.**
+`sprint-2026-10-12.md` is still the only sprint file on `main`. Three
+Mondays have now passed with no ceremony PR, today included. This
+run's own trigger named three specific PR reviews and two finished-run
+reports, which is the standup shape, not an instruction to open a
+sprint — so it doesn't. Naming the gap again so it isn't silently
+absorbed a fourth week.
+
 ## Top three for the owner, 2026-11-01 hook (re-fired 2026-11-02, standup): three Tier B merges, five Tier C PRs unchanged, nothing new for you
 
 This run is the scheduled daily-cadence hook for 2026-11-01, which the
