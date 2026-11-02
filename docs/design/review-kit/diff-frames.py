@@ -49,4 +49,9 @@ for name in sorted(n for n in os.listdir(A) if n.endswith(".png")):
 text = "\n".join(rows) + "\n"
 os.makedirs(os.path.dirname(OUT) or ".", exist_ok=True)
 open(OUT, "w").write(text)
+# Say where it went. The default is relative to the cwd, so a run started
+# from the repository root writes `data/frame-diff.txt` AT the repository
+# root, and one such file is committed there from 2026-10-26d. Silence is
+# what let that happen twice; see L46.
+print("wrote " + OUT)
 print(text)
