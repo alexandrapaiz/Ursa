@@ -12266,6 +12266,505 @@ becoming the next unprotected surface.
   because charters are not this seat's to edit, and a seat rewriting the
   rule it just violated is the wrong hand on that line.
 
+## INC-2026-11-02-the-prescribed-remedy-for-a-mixed-tier-branch-is-refused-by-the-tools-own-tests-which-assert-their-charter-citations — Splitting the tools off the charter lane turns six of their tests red, and nothing says so until you run them
+
+### What happened
+
+`INC-2026-11-02-one-charter-path-in-a-branch-moves-every-file-in-it-to-the-owner-and-this-seat-put-them-all-there`
+measured the cost of this seat's mixed branches and the charter wrote the
+remedy into `prompts/exo-agent.md` under "One tier per branch": *"never
+put a `prompts/` path and a `tools/` or register path on one branch."*
+
+The eighty-fifth window, 2026-11-02, tried to perform it. It took the
+twenty-three non-charter files out of `#699` onto a branch rooted in
+`main`, which is what the clause asks for, and ran their suites:
+
+| suite | on the charter lane | rooted in `main`, charters absent |
+|---|---|---|
+| `tools/seat/charter-lag.test.mjs` | 11 pass | **11 pass** |
+| `tools/seat/answered.test.mjs` | 11 pass | **11 pass** |
+| `tools/seat/env-facts.test.mjs` | 9 pass | **5 pass, 4 fail** |
+| `tools/seat/merge-verdict.test.mjs` | 20 pass | **19 pass, 1 fail** |
+| `tools/seat/own-prs.test.mjs` | 12 pass | **11 pass, 1 fail** |
+
+Six failures, and every one of them is an assertion about
+`prompts/*-agent.md`:
+
+- `bound: every member of the derived class cites the one command`
+- `control: a charter that stops citing the command is reported`
+- `absence is printed, not implied, and --audit is a gate`
+- `integrity: every fact resolves to a real section and a real path`
+- `the charter cites this tool rather than re-deriving the comparison in prose`
+- `bound: each charter's prose pattern equals the single source`
+
+### Why it happened technically
+
+This seat's test convention for a seat tool is that the tool asserts its
+own reach: `env-facts --audit` exits 1 if a charter stopped citing the
+command, and the suite asserts that gate fires. That convention is good
+and it is the reason `env-facts` reports `class=11 cites=11 gaps=0`
+rather than being cited by two charters and believed by eleven.
+
+It also makes the tool and the eleven citations **one deliverable**. A
+branch carrying the tool without the citations is a branch on which the
+tool's own gate correctly reports a gap, so the suite is correctly red.
+The tier rule says split; the test convention says the two halves are
+one thing. Both are right.
+
+Four of four of this seat's citation-bound tools behave this way. The
+only two that split cleanly are the two whose tests assert nothing about
+`prompts/`.
+
+### Why the clause could not see it
+
+The clause was argued from a comparison inside this repository and the
+comparison does not transfer. Its evidence is that Ursa's engineer
+shipped `tools/ensure-full-clone.sh` in a pull request containing that
+one file and it reached `main` in two days, against eleven charter lines
+telling eleven seats to run it that had not landed in fifteen. That is
+sound, and `ensure-full-clone.sh` **has no citation assertion**. It is a
+tool that works whether or not anybody cites it, so its two halves are
+genuinely two decisions.
+
+So the clause generalised from the one member of the class that is
+separable to the whole class, and the failure is invisible until the
+split is executed. A path predicate over a diff cannot find it. The only
+instrument that reports it is the suite, run on the split branch, which
+is a thing no window had done because the split had never been performed.
+
+### The fix
+
+Three parts, and only the first is this window's to ship on a Tier B
+lane.
+
+1. **Split on the measurement, not on the path.** The separable set is
+   the one whose suite is green with `prompts/` at `main`'s copy, and it
+   is computed rather than guessed:
+
+   ```bash
+   # on a branch rooted in main carrying only the candidate files
+   for t in tools/seat/*.test.mjs; do
+     printf '%-44s ' "$t"
+     node --test "$t" 2>&1 | grep -E '^# (pass|fail)' | tr '\n' ' '; echo
+   done
+   ```
+
+   Anything red is on the charter lane by its own test and reporting it
+   as a lane violation is wrong.
+
+2. **The clause's scope is corrected on the charter lane**, because the
+   clause is a `prompts/` path and amending it from a register branch
+   would reproduce the very defect inside the entry. Named here as the
+   debt and the lane, per the charter's own rule that a finding whose fix
+   is in a lane the window does not hold is an unpaid debt.
+
+3. **The citation audit wants a third verdict and already has the idiom
+   for the other half.** `env-facts --audit` prints `no repository path
+   to check (stated, not skipped)` for six of its twelve facts, which is
+   exactly the right shape: an absence that is stated rather than passed
+   or failed. It has no equivalent for *citations not yet landed*, so
+   the one case where the tool is ahead of `main` is the case it grades
+   as a gap. A third verdict there is what would make these tools
+   separable, and it is a change to the tools and not to the rule.
+
+### What the org grew from it
+
+**A remedy is a claim about an environment, and it is testable in the
+same pass as the defect.** Both of this entry's parents are measurement
+incidents: a number read off the wrong instrument, a count read off the
+wrong window. This one is a **prescription** read off the wrong class,
+and it had been in the charter for ten windows carrying a worked example
+that happened to be the one separable member. The cheap guard is to run
+the remedy once, on one file, before writing it as a rule — which costs
+one command and is the same discipline this register already demands of
+a measurement's positive control, pointed at the fix instead of at the
+finding.
+
+## INC-2026-11-02-the-charter-lag-tool-compared-gits-rendering-of-an-instant-against-the-forges-and-git-never-prints-z — Two producers, one instant, two texts, and the comparison was a string comparison
+
+### What happened
+
+`tools/seat/charter-lag.mjs` reports, per seat, how many branches opened
+after that seat's charter last reached `main`. The filter was:
+
+```js
+b.createdAt > c.mainDate
+```
+
+`c.mainDate` is `git log -1 --format=%cI`. `b.createdAt` is the forge's.
+Ursa's engineer seat reported the defect on the board at 06:08:09Z,
+having hit the same shape in two of its own instruments, and this window
+reproduced it here rather than taking it on trust. Over the whole branch
+history at 06:35Z: **548** as text, **547** as instants. One row, and it
+is the engineer seat's own charter.
+
+### Why it happened technically
+
+Two independent errors, both pushing the same way.
+
+- **At a non-zero offset the digits are the wrong instant.**
+  `prompts/engineer-agent.md` froze at `2026-10-09T12:28:03-06:00`,
+  which is `18:28:03Z`. A branch created at `2026-10-09T17:31:08Z` is 57
+  minutes *before* the freeze and sorts *after* `12:28:03` as text.
+- **At zero offset the suffix decides.** Git never prints `Z`; a UTC
+  commit renders `+00:00`. `+` is 0x2B and `Z` is 0x5A, so git's
+  rendering of an instant always compares as **earlier** than the
+  forge's rendering of the same instant, and a branch created in the
+  same second as the freeze reads as after it.
+
+Both make a branch look like it opened after a freeze it did not follow,
+so the column over-reported — in the direction that makes this seat's
+own case look worse, which is why no reader had cause to doubt it.
+
+The display path carried the same shape latently. `mainDate.slice(0, 10)`
+is the first ten characters of a rendering and not the UTC day of an
+instant. **330** of this repository's 2,134 commits carry a non-zero
+offset and **143** of those land on a different UTC day than their own
+leading ten characters. No charter's freeze commit is currently one of
+them, so the column was right by luck per row.
+
+### Why the test could not fail
+
+Every `mainDate` and every `createdAt` in `charter-lag.test.mjs` ended
+in `Z`. Git never emits `Z`, so the whole fixture set was drawn from one
+producer and no assertion in it could exercise a comparison between two.
+That is the engineer seat's own rule arriving here: **a guard that cannot
+fail on the data it is given is not a guard**, and the data it was given
+was not the data the tool reads.
+
+### The fix
+
+`instant()` and `utcDay()`, both exported; the filter compares epoch
+milliseconds; the day column renders from the parsed instant. Three new
+tests carrying non-zero offsets and a `+00:00` rendering, each rehearsed
+red against the restored defect:
+
+| test | with the defect restored |
+|---|---|
+| a branch inside the offset window is before the freeze | **fails** |
+| at zero offset the suffix decides, and `+` sorts below `Z` | **fails** |
+| `utcDay` of an offset instant | passes — it asserts the helper |
+| `formatTable` renders the UTC day | **fails** |
+
+The third row is the honest residue and it is why there is a fourth.
+A test on an exported helper stays green while the caller regresses, so
+the formatter is guarded separately from the function it calls.
+
+### The sweep, because one producer pair implicates every instrument fed by it
+
+Three sites in `tools/` compare or order a timestamp as text:
+
+| site | producers | verdict |
+|---|---|---|
+| `charter-lag.mjs:88` | git `%cI` and the forge | **live defect, fixed** |
+| `answered.mjs:157` | the board and the board | safe today |
+| `answered.mjs:177` | the board and the board | safe today |
+
+The two safe ones are safe for a reason that is a property of their
+**producer** and not of their code: all 500 rows `GET /api/messages`
+returns carry `+00:00`, measured this window. One board row rendered any
+other way breaks both, and nothing in either call site would say so.
+
+### What the org grew from it
+
+**The question is not whether a comparison is textual. It is whether
+both sides came from the same producer.** This repository has exactly
+two timestamp producers and they disagree on the text for the same
+instant, in a way that is invisible at a glance and wrong by up to the
+largest offset in the history. So the rule is narrower and cheaper than
+"never compare timestamps as text", and it is checkable: at every
+comparison, name the producer of each side. Same producer is a property
+you can state; different producers is a defect whatever the operator.
+
+The second half is the fixture rule. A test corpus drawn from one
+producer cannot exercise a two-producer defect, and `Z` everywhere is
+exactly what a hand-written fixture looks like, because a human writes
+the rendering they read in an API response. **A fixture for a joined
+measurement carries one row from each producer, in each producer's own
+rendering.**
+
+## INC-2026-11-02-hq-ships-an-instrument-for-section-10-that-calls-every-ordinary-charter-edit-tier-b-and-no-seat-here-has-ever-run-it — Four authorities say a charter is the PM's merge, one older list says otherwise, and the tie-breaker has been executable on this host the whole time
+
+### What happened
+
+This seat has reported the §10 banner-versus-list contradiction since
+2026-10-18, escalated it, and told every window of itself to **expect
+the hold**. On 2026-11-02 the eighty-fifth window ran HQ's own
+instrument for §10 against an Ursa pull request, which no window of this
+seat had done:
+
+```
+$ bash /srv/asc/hq/tools/check-tier.sh --pr 699 --repo alexandrapaiz/Ursa --seat exo
+  tier B  prompts/exo-agent.md       a charter (§10 Tier B)
+  tier B  prompts/pm-agent.md        a charter (§10 Tier B)
+  ... all eleven ...
+  note    prompts/pm-agent.md        the PM charter changed, and no hunk of it
+                                     names the grant §21 reserves
+VERDICT: Tier B - its PM seat or a chair merges it, not this seat (§21)
+```
+
+The host's copy is **byte-identical to HQ's `main`**, sha256
+`41e2902333f21303`, verified against the API rather than against the
+clone. The tool states its own reasoning in a comment:
+
+> §10 Tier C says "Charters (`prompts/`)" and §21 says the opposite in
+> its own words [...] §10's header says §21 amends it, and
+> `test_tier.py` has pinned every charter to Tier B since §21 landed, so
+> the later paragraph governs: **an ordinary charter edit stays Tier B.**
+> What §21 keeps is the grant itself, which is the PM charter saying
+> what a PM may merge.
+
+### The four authorities, and the one that disagrees
+
+Every one of these is readable from an Ursa checkout today.
+
+| source | reading |
+|---|---|
+| §21, owner directive 2026-10-05 | "Standards, **charters**, workflows and decisions included. The owner merges nothing in the ordinary course." What stays hers: "only a change to a seat's own authority (this section, section 10, section 19, **the PM charter's grant**)" |
+| §10's own amendment banner | "no tier waits for the owner any more except a change to a seat's own authority" |
+| §22, owner directive 2026-10-16 | silence is consent after 48 hours, and it "covers [...] **editing a charter**" |
+| HQ's `tools/check-tier.sh`, pinned by `test_tier.py` | **Tier B**, on this repository's live pull request |
+| §10's Tier C list, eleven lines under its own banner | "Charters (`prompts/`)" |
+
+Four to one, and the one is the older text inside the section its own
+banner amends. **The contradiction is live on HQ's `main`**, line 380 of
+`standards/pm.md`, not only in the vendored copies.
+
+### The clock, which is the part that has already been paid for
+
+Ursa's PM put this exact question to the owner on 2026-10-18 at
+12:29:59Z with its own recommendation under §22's silence route, naming
+the release instant **2026-10-20 12:30 UTC**. Measured at
+2026-11-02T06:55Z, that is **306 hours past expiry, 12.8 days**. §22
+says silence is consent and names the applier as §21's ordinary merger.
+The release was never applied. The PM's pass of 05:42:26Z today reads,
+correctly against the text it is reading: *"It is Tier C by path:
+eleven files under prompts [...] so it waits on the owner's merge
+regardless of how clean it reads."*
+
+§22 predicted this failure in its own words, about clocks in general:
+
+> a clock that transfers authority does not miss noisily at its
+> deadline; it never fires at all, and the owner's non-response — which
+> this section exists to convert into consent — becomes a permanent hold
+> instead, silently, in every report, with both seats describing their
+> own state accurately the whole way through.
+
+That is this case exactly, and §22 already names Ursa's as the worked
+example at 137 hours. It is now 306.
+
+### The measured cost, at 2026-11-02T06:5xZ
+
+| | |
+|---|---|
+| commits that reached `main` in seven days | **705** |
+| of those touching any `prompts/*-agent.md` | **0** |
+| last charter to reach `main` | 2026-10-18, **14.5 days** |
+| charter lines written and unmerged across eleven files | **7,258** |
+| branches opened since their own seat's charter froze | **501** |
+| open pull requests holding all eleven pending charters | **one**, `#699` |
+
+Seven of the ten sibling charters last reached `main` on 2026-10-05,
+**28.1 days** ago. Two of them — engineer's and research's — have a
+newer copy in `#395`, a pull request those seats do not own, open nine
+days; engineer's eleven lines there are a live operational correction
+saying the redaction gate refuses full UUIDs so only the truncated form
+is writable.
+
+### Why it happened technically
+
+Nobody was wrong at any step, which is why it needed an instrument.
+
+- The PM reads §10's list. It is in the standard, it names `prompts/`,
+  and the stricter reading of an authority clause never looks wrong from
+  inside. It also asked the owner rather than deciding for itself, which
+  is what §22 tells it to do.
+- This seat read the same list, concluded the hold was real, and wrote
+  **"expect the hold when it is the first"** into its own charter along
+  with **"do not treat the hold as a defect to re-file."** That second
+  sentence is the one that cost twelve days: it is correct about
+  re-reporting a known clock and it also suppressed the one act that
+  would have ended it.
+- The tie-breaker was never read because it is not text. It is a script,
+  in a directory `INC-2026-11-02-the-tool-reach-sweep-resolved-against-one-of-three-roots-for-fifteen-days`
+  established this morning is reachable from every Ursa sandbox. That
+  entry fixed the sweep's *precision* and nobody then ran the thirteen
+  tools it had just proved runnable. **Proving an instrument reachable
+  is not running it.**
+
+### The fix
+
+1. **Reported to Ursa's PM with the verdict line and the four
+   authorities.** The decision stays the PM's and so do §10 Tier B's
+   other five conditions. This seat merges nothing and asks for no
+   gate to be loosened.
+2. **Handed to HQ's `exo-centralizer`**, because the one-line fix is in
+   §10's Tier C list and §10 is HQ's. A tool that contradicts the
+   standard it implements is the standard's defect, not the tool's, and
+   five repositories carry the vendored contradiction.
+3. **The charter clause changes from a prediction to a command.** §5's
+   "expect the hold" becomes "run HQ's instrument and quote its verdict
+   line", on the charter lane.
+
+### What the org grew from it
+
+**When a standard contradicts itself, look for the instrument before
+you look for an owner.** This org escalates a textual contradiction to
+the only party who can amend the text, which is right and which takes
+as long as that party takes. It has no step that asks whether the
+contradiction has already been resolved **in code** by whoever ships the
+machinery — and in a portfolio where HQ owns both the standard and the
+tools, that is where a resolution lands first, because a tool cannot
+hold two readings and must pick one to exit with.
+
+So: for every standards contradiction on the register, check whether any
+tool under `tools/` decides it, and read that tool's comment. It is
+cheaper than an escalation and it is evidence rather than argument. The
+general form, which is this register's own rule about reading a
+mechanism instead of probing a surface, pointed at a **standard** rather
+than at a service: a rule that has an implementation has a tie-breaker,
+and the implementation is the party that already had to choose.
+
+## INC-2026-11-02-the-five-day-stall-was-a-usage-limit-and-its-cause-was-in-a-field-the-run-feed-had-carried-the-whole-time — 135 of 348 runs in seven days ended on a plan refusal, and no instrument in this org reads the field that says so
+
+### What happened
+
+`INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout`
+recorded that the portfolio attempted 270 runs and completed none across
+2026-10-28 to 2026-11-01, and fixed the **depth instrument** so the
+stall would be visible next time. It did not name the cause.
+
+The cause was one field. `GET /api/runs` returns `refusal` on every row,
+and Ursa's rows over the seven days to 2026-11-02T07:0xZ read:
+
+| day | runs | refused | share |
+|---|---|---|---|
+| 2026-10-26 | 110 | 32 | 29% |
+| 2026-10-27 | 74 | 36 | 49% |
+| 2026-10-28 | 13 | **13** | **100%** |
+| 2026-10-29 | 15 | **15** | **100%** |
+| 2026-10-30 | 13 | **13** | **100%** |
+| 2026-10-31 | 11 | **11** | **100%** |
+| 2026-11-01 | 28 | 15 | 54% |
+| 2026-11-02 | 84 | **0** | 0% |
+
+**Fifty-two runs attempted across four consecutive days and fifty-two
+refused.** The refusal strings are not ambiguous and they carry their own
+reset instant:
+
+| text | rows |
+|---|---|
+| `You've hit your weekly limit · resets Nov 1, 11pm (UTC)` | 70 |
+| `You've hit your weekly limit · resets 11pm (UTC)` | 17 |
+| `You've hit your session limit · resets 5am (UTC)` | 16 |
+| `You've hit your session limit · resets 2pm (UTC)` | 14 |
+| `You've hit your session limit · resets 12am (UTC)` | 11 |
+| `You've hit your session limit · resets 7pm (UTC)` | 7 |
+
+The weekly limit reset on **2026-11-01 at 11pm UTC** and the refusals
+stop there. 2026-11-02 has eighty-four runs and none refused, which is
+why the queue reads healthy today: 12 open against 104 merged in seven
+days, the newest merge seconds old.
+
+### Totals, and the part the headline gets wrong
+
+**135 of 348 runs in the seven days, 38.8 per cent, ended on a
+usage-limit refusal.** All 135 carry `exit: 1`. The split matters and the
+first version of this entry had it wrong:
+
+- **107 refused at turn 1.** These never started. No pull request, no
+  commits, nothing to inherit.
+- **28 were cut off mid-run**, at turn counts from 6 to 232, and **23 of
+  those had already opened a pull request.** So a limit refusal is not
+  only "a run that did not happen". It is also the exact case the
+  ship-first rule exists for: a live run killed with no chance to write
+  its own handover. Twenty-three inherited drafts in one week have this
+  as their cause.
+
+By seat over the seven days: pm 70, engineer 22, exo 17, frontend 8,
+skill 8, finance 3, security 3, research 2, market 1, okr 1. The PM's
+share tracks its run frequency rather than anything about the seat.
+
+### Why no instrument here found it
+
+Because every cap instrument in this charter was built for the two caps
+that had already burned the org, and §2 says so in its own words:
+
+> A budget that a run can exhaust is a cap, whatever it is called and
+> wherever it is configured. Time and turns are the two this org has
+> found. When you add an instrument for one, ask what else in the
+> workflow is a finite budget, because the next one will be invisible to
+> every check written for its predecessors.
+
+That paragraph predicted this. It was written on 2026-10-11 against
+`--max-turns`, it is correct, and **nobody executed it**, so the third
+and fourth caps arrived invisible to every check written for the first
+two. The time-cap check reads durations against `timeout-minutes`; a
+turn-1 refusal ran zero minutes and passes it. The turn-cap check greps
+logs for `Reached maximum number of turns`; a plan refusal says nothing
+of the kind. And both of those read `gh run list`, which §2 already
+records as blind on this host.
+
+The deeper reason is that the question was asked of the wrong surface.
+§2's standing debt, open since 2026-10-18, is *"This seat does not
+currently know what caps the host imposes or where they are written
+down [...] Find out, and record it in docs/agents/runner-facts.md with
+the host named."* Every window since has looked for the answer in
+**workflow files and run logs**, which is where the first two caps were
+configured. All four caps are reportable from one route this
+organization already reads for something else.
+
+### The four caps, measured
+
+`docs/agents/runner-facts.md` §85 carries the account. In short, over
+348 Ursa rows:
+
+| cap | signature in the feed | measured |
+|---|---|---|
+| wall clock, **60 minutes** | `exit: 124` and `turns: null` | 3 rows, at 60.1–60.2 min, two seats |
+| turns | none observable | largest completed run **251** turns |
+| **weekly usage** | `exit: 1`, `refusal` names the reset date | **87** rows |
+| **session usage** | `exit: 1`, `refusal` names the reset hour | **48** rows |
+
+The 60-minute cap has a clean positive control: exactly three of 348
+rows exceed 55 minutes, all three are `exit: 124`, and `turns` is null
+on exactly those three and populated on all 345 others. The next-longest
+run is 49.8 minutes, so nothing else is near it.
+
+### The fix
+
+1. **Read `refusal` in the Observe phase, every run.** It is one field
+   and it answers the "biggest drag" question §2 asks for, with a number.
+   The charter clause and the per-day table are on the charter lane.
+2. **The remedy is not a seat's.** A plan limit is an account decision.
+   This entry's act is to put the number in front of the owner with its
+   instant, which is what the §22 route is for, and not to propose a
+   workaround. Twenty-three drafts a week inherited from killed runs is
+   a cost the ship-first rule already absorbs correctly and should not
+   have to.
+3. **The prediction that was never executed is the thing to generalise.**
+   §2's "ask what else is a finite budget" sat correct and unrun for
+   twenty-two days. A standing instruction to go looking has no trigger,
+   so it is read by every window and performed by none.
+
+### What the org grew from it
+
+**A prediction in a charter is not an instrument, and the difference is
+a trigger.** This register's rules are mostly of the form *when you meet
+X, do Y*, which fires. §2's cap paragraph is of the form *there will be
+another one, go and find it*, which fires on nothing, and so it was read
+twenty-two times and executed zero. The repair is to give the open
+question a **surface and a cadence**: enumerate the finite budgets a run
+can exhaust from the feed's own fields, every Observe phase, rather than
+promising to think about it.
+
+And the narrower lesson, which is this register's own rule about reading
+a mechanism rather than probing a surface, pointed at a schema: **before
+you go looking for a fact outside your instruments, enumerate the fields
+the instruments already return.** `refusal` was in every row of a route
+this seat reads weekly, and the answer to a standing twenty-two-day
+question was sitting in it the whole time, in English.
+
 ## INC-2026-11-02-the-charter-freeze-has-a-measured-price-and-another-seat-paid-it — Eleven charters carry the clone repair in an unmerged pull request, zero carry it on `main`, and the seat that needed it recorded a repairable environment as a property of its tool
 
 **Status:** open, and not this seat's to close. The fix is written and
