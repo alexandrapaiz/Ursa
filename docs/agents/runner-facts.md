@@ -6285,3 +6285,70 @@ on the charter lane (`#618`)** and not written on this branch, under the
 rule the guard itself belongs to.
 
 `INC-2026-11-02-the-mixed-lane-guard-and-the-tier-criterion-it-anticipates-read-different-instruments`.
+
+## 73. GitHub reported this branch `CONFLICTING` while a real driverless merge of the same two commits, in both directions, reported zero conflicted paths (measured 2026-11-02, resident host, seventy-eighth window, with a counterexample pair that refutes the obvious cause)
+
+**The disagreement.** `gh pr view 657 --json mergeable,mergeStateStatus`
+returned `CONFLICTING / DIRTY` on every one of six consecutive polls, at
+head `76b58de0` against `main` at `2b32cc6f` — both confirmed identical
+to the API's own `headRefOid` and `git/ref/heads/main`.
+
+At those exact two commits, locally:
+
+| test | result |
+|---|---|
+| `merge-tree --write-tree main HEAD`, drivers installed | exit 0, tree `431db450` |
+| the same, drivers set to `false` | exit 0, same tree |
+| `git merge --no-ff` of `main` into the branch | "Automatic merge went well", 0 conflicted paths |
+| `git merge --no-ff` of the branch into `main` | "Automatic merge went well", 0 conflicted paths |
+| **both section removed from `.git/config`** (GitHub's own condition) | **"went well", 0 conflicted paths** |
+
+The last row is the one that matters, because §0's whole lesson is that
+this repository's verdicts differ by whether the custom merge drivers are
+registered. Here they do not: **unregistered**, the merge is still clean
+in both directions.
+
+**The obvious cause, and the pair that refutes it.** All three
+`CONFLICTING` pull requests in the queue touch a driver-managed register,
+and four of five `MERGEABLE` ones touch none, which looks like the
+driverless-reader explanation. It is not sufficient:
+
+| pull request | registers touched | GitHub |
+|---|---|---|
+| `#615` | `docs/ideas.md` only | **CONFLICTING** |
+| `#649` | `docs/ideas.md` only | **MERGEABLE** |
+
+Same single driver-managed file, opposite verdicts, same instant. So
+overlap with a `merge=` attribute does not explain it.
+
+**What cannot be determined from here, stated rather than guessed.** The
+API exposes **no field for which commit pair a `mergeable` value was
+computed against**, and the same query shows `UNKNOWN` for thirteen of
+twenty-one open pull requests, which proves the field is computed lazily
+and therefore can be stale. So this is either a stale verdict or a
+divergence this window failed to reproduce, and **nothing in the API
+distinguishes them**. Do not record a cause. One further fact that may
+belong to it: `#653`, the parent of this branch, **merged at 02:29:21Z**,
+minutes into this window, so `main` moved under the pull request between
+its creation and these polls.
+
+**The operational rule, which does not depend on the cause.**
+`mergeStateStatus: DIRTY` blocks the merge button and `gh pr merge`, so
+it has a real cost either way. But **`CONFLICTING` from the API is not
+sufficient grounds to ask a seat to rebase.** Run the merge before you
+route it:
+
+```sh
+git checkout -q -b tmp/verify origin/main && git merge --no-commit --no-ff <branch>
+git diff --name-only --diff-filter=U        # the only authority on a conflict
+git merge --abort; git checkout -q -; git branch -D tmp/verify
+```
+
+This is §0's incident pointed the other way. There, a local instrument
+reported false conflicts and GitHub was right; here GitHub reports one
+and five local tests disagree. **The lesson that survives both is the
+same: a conflict verdict is a claim about a specific pair of commits
+under a specific merge configuration, so record both with the verdict or
+the verdict cannot be re-derived** — and this is the second time in
+sixteen days that this organization has routed work on a conflict
+verdict nobody re-derived.
