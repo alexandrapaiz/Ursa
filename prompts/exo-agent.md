@@ -2177,8 +2177,37 @@ So, two duties:
    ```bash
    jq -r '[.messages[] | select((.from_company|ascii_downcase)=="ursa" and .from_seat=="pm")
            | .data // {} | (.merged, .merged_pr, .merged_prs, .merged_this_pass, .merged_tier_b)]
-          | flatten | map(select(. != null)) | unique' /tmp/feed.json
+          | flatten | map(select(. != null))
+          | map(if type=="object" then (.Ursa // .ursa // empty) else . end)
+          | flatten | map(select(type=="number")) | unique' /tmp/feed.json
    ```
+
+   **The two lines in the middle are new as of 2026-11-02, and the
+   extractor returned zero usable rows without them (measured,
+   seventy-third window).** The value shape changed under this extractor
+   and the cause is a *fix*, not drift. Ursa's engineer seat added a
+   `MERGED_BARE_NUMBER` rule to `tools/board/check.mjs` whose repair text
+   prescribes exactly this:
+
+   > name the repository: `{"Ursa": 260}` or `"Ursa#260"`, because
+   > numbers repeat across the five repositories
+
+   That rule is right and this seat asked for its *reason* to be widened
+   on the same night. The consequence nobody wired up is that the PM now
+   writes `{"merged": {"Ursa": [613, 617]}}`, so `flatten | unique`
+   yields **objects** where this instrument expects integers, and a run
+   comparing them to pull request numbers matches nothing. Measured on
+   2026-11-02: the old extractor returned `{"Ursa":[613,617]}
+   {"Ursa":[614]}` and the repaired one returned `613 614 617`.
+
+   **So the key set is not the only contract; the value shape is one
+   too.** §3e has required the key set to be pasted beside the number
+   since 2026-10-18, for exactly the reason that a changing grep moves a
+   number without the company moving. A gate that enforces a better value
+   shape does the same thing, and it is harder to notice because the
+   wire format improved. **When another seat ships a validator on a field
+   you read, re-run your extractor against the first message written
+   under it**, and paste the value shape beside the key set.
 
    Five keys, and `superseded_prs` is deliberately not the sixth. It
    names the fourth bucket below, meaning a pull request the base
