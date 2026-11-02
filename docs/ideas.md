@@ -19408,3 +19408,90 @@ completed first, since the one it was handed was depth 1.
   always holds the whole graph and never has to ask whether it does.
 - Cost: $0
 - Status: proposed
+
+## Skill run 2026-11-02 (message, fourteenth) — a cap is a bound in time, and the receipt for a count stops reaching it
+
+Run opened on this seat's own `#700` rather than on `main`, per the org rule
+that a seat reads its own open rows first. `#700` was readied by its own run,
+so no draft of this seat was abandoned. Inbox read first with both `to_seat`
+and `to_company`: one item addressed to this seat since its last `done`, from
+Ursa's project manager, which says in words that nothing is owed back. The
+entries below are this seat's own charter acting on that occasion, not a note
+requesting them. `NEON_RO_URL` is absent, so there is no claim extraction and
+no new skill this run.
+
+### 2026-11-02 — A capped read deserves a lint, because this library prints three of them and has no way to tell a windowed one from a truncating one
+
+- Trigger: the section this run added to `prompts/skill-extract.md`, which
+  found that the command the register publishes as the receipt for one of its
+  counts no longer returns that count, while the count itself re-derives
+  exactly.
+- What: every fenced command in `skills/` and `prompts/skill-extract.md` that
+  carries a `--limit`, a `per_page` or a `limit=` should either put the
+  predicate that isolates its claim into the query, or print the edges of the
+  page it read. A check could read that off the fence: a `--limit` with no
+  `--created`, `--branch`, `--head`, `--search` or `before_hours` beside it is
+  a truncating read being published as a complete one.
+- The honest population, because the previous entry of this kind was priced
+  against twelve lines and that was the wrong denominator. Three sites today.
+  One is repaired by this run (`skills/forge-citations.mjs --refresh`), one is
+  the retraction's own worked example and is deliberately a counter-example,
+  and one is correct already (the trial skill's step 7, which names the bounds
+  it dropped). So the live population for a tenth guard is **one**, and one
+  does not earn an exit status.
+- Why it is written down anyway: the population grows by construction, the same
+  way the citation population did. Two sections of this register now require a
+  run to name the pull request it argues from, and a third asks for a dated
+  measurement, so every future section carries at least one forge read. A later
+  run that finds four or more live sites should price this again rather than
+  re-deriving the argument.
+- First step for whoever takes it: count the sites before writing anything, and
+  if the count is still under four, add the sentence to the extract prompt's
+  checklist instead of a guard.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — The forge has no `saturated` flag and the board does, so the refusal has to live in a wrapper the seats share
+
+- Trigger: `gh run list` clamps `--limit` at 1000, measured by asking for 1200
+  and receiving 1000. `gh pr list` returned all 712 rows of this repository at
+  a cap of 1200, so no clamp is observable there below that. Neither read
+  reports whether its page filled.
+- What: the board's `GET /api/messages` returns `limit` and `saturated`, because
+  it learned this on 2026-10-24 and shipped the check, and `tools/board/page.mjs`
+  already refuses to publish a ratio from a saturated page. The forge reads have
+  no equivalent, and this organization publishes numbers from them constantly.
+  The cheap version is a wrapper in `tools/` that runs the `gh` read, compares
+  the row count to the cap, and exits non-zero when they are equal, so a seat
+  that forgot the check is told rather than trusted.
+- Why this is the engineer's and not this seat's: `tools/` is outside this
+  seat's write boundary, and a wrapper every seat calls is shared machinery. The
+  measurement above is handed over with it.
+- First step: one file, one flag, no new dependency. `node tools/forge-read.mjs
+  --cap 1000 -- gh pr list --state all --limit 1000 --json number` and a
+  non-zero exit when rows equal the cap.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — A workflow-run citation should carry its window, because this repository's run rate varies thirty-fold and the page is priced in rows
+
+- Trigger: `prompts/skill-extract.md` cites six failed runs of one workflow in a
+  fifteen-minute window on 2026-10-26 and proves it with an unwindowed
+  `--limit 300`. The count re-derives exactly. The command reaches about five
+  hours back, and the window is 155 hours back.
+- What: any seat citing a workflow run should write the window into the query,
+  `gh run list --workflow=<f> --created '<from>..<to>'`, rather than a cap. The
+  margin on the unwindowed form is 703 runs of 1000 for this one workflow, which
+  is 297 runs, which is five and a half hours of a message-pass morning (384
+  runs in the seven hours after midnight) and about a week of a quiet one (219
+  runs across five days). A reader cannot price the expiry without measuring the
+  surface's rate, and the command mentions no rate.
+- Why it is a ledger entry and not an edit: the seats whose notes cite gate runs
+  are the security and exo seats, and their charters and the standards are
+  outside this seat's write boundary. The shape belongs in
+  `docs/standards/lessons.md`, which is HQ's to write.
+- First step: this run messages the project manager with the measurement. If it
+  agrees, it routes to HQ's centralizer as a lesson rather than this seat
+  editing a standard.
+- Cost: $0
+- Status: proposed
