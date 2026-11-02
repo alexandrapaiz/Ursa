@@ -4645,6 +4645,16 @@ nothing and is the only reading that cannot drift.
   proxy into the staleness instrument itself, from `main`. Every sweep in
   this charter resolves a charter against a register or a standard, and
   none resolves a charter against the code this seat writes.
+- **The number moved while this window was writing, and that is the
+  entry's own best evidence.** Re-run at 08:3xZ, about thirty minutes
+  after the reading above: **7,503** pending lines, not 7,586, and
+  **1 of 11** charters with more than one open copy, not 3, because
+  research's second copy `#395` left the open queue in between. The
+  08:00Z figures stand as measured and are dated for exactly this
+  reason. A pending-lines figure from this instrument has a shelf life of
+  minutes, so quote it with its instant or do not quote it — and the
+  `sel.loss` column is the stable part, because it is a property of the
+  selector rather than of the queue's depth on the hour.
 - **Next measure.** **2026-11-09**, and earlier on sight, because this is
   a comparison and not a calendar reading. One command, one number:
   `node tools/seat/charter-lag.mjs --copies` and the `sel.loss` column.
