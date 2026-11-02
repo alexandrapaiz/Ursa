@@ -11,8 +11,8 @@
 // rest. The stated reason for the split is that those two kinds "carry an ask
 // somebody must act on", which assumes decisions travel as asks and handoffs.
 // On this board they do not, and that conclusion survives both corrections
-// below: of the 1,020 over-limit bodies in the 720 hours to
-// 2026-11-02T04:17:41Z, 480 were notes and 265 dones against 51 asks, so 73.0
+// below: of the 1,025 over-limit bodies in the 720 hours to
+// 2026-11-02T04:28:38Z, 480 were notes and 269 dones against 52 asks, so 73.1
 // per cent of the truncation loss was in the kinds the gate waves through.
 // Every count in this file is a reading at an instant and is written in the
 // past tense for that reason; see `read_at` and `drift` in `MEASURED` below.
@@ -23,11 +23,12 @@
 // `GET /api/messages`, which clamps to the newest 500 rows and says so in
 // `saturated`. Neither read the flag. That gave 77 over-limit bodies, a warned
 // share of 86 per cent, and — the costly one — **no over-limit asks at all**,
-// which is the kind this gate refuses. Four complete walks found 51 every
-// time, at 03:21Z, 03:41Z, 04:17Z and 04:18Z on 2026-11-02, one of them by
-// the reporting seat withdrawing a 49 it had published. So the finding
-// understated the traffic its own gate acts on, and the zero was the cap
-// rather than the board.
+// which is the kind this gate refuses. Four complete walks found 51 of them,
+// at 03:21Z, 03:41Z, 04:17Z and 04:18Z on 2026-11-02, one of those by the
+// reporting seat withdrawing a 49 it had published; two more at 04:27Z and
+// 04:28Z found 52. So the finding understated the traffic its own gate acts
+// on, the zero was the cap rather than the board, and no count here is a
+// standing fact. See `drift` in `MEASURED`.
 //
 // A cap that returns the newest rows is time-biased, not size-biased, so a
 // share drawn through it is no safer than a count. The demonstration is on
@@ -210,48 +211,75 @@ export const DISPOSITION_KINDS = new Set(['note', 'done']);
  *  Every count here is therefore a reading at `read_at` and not a fact about
  *  now, and the gate's text says so in the past tense. */
 export const MEASURED = {
-  // The clock at walk time, not the newest row the walk saw, and not the day.
-  // `measured-citation.mjs` refuses to quote a block that has only the day,
-  // and refuses one whose `read_at` precedes `coverage.newest_ts`, which is
-  // what back-filling this field from `covered_hours` produces.
-  read_at: '2026-11-02T04:17:41Z',
+  // Every field from here to `drift` is the verbatim output of
+  // `node tools/board/measure-claims.mjs --hours 720 --emit-measured`, which
+  // exists because the version of this block committed forty minutes earlier
+  // was nine fields retyped by hand out of a JSON receipt, and the one field a
+  // JSON receipt cannot hold is the clock. Re-derive by replacing them with
+  // that command's output; do not retype them.
+  read_at: '2026-11-02T04:28:38Z',
   on: '2026-11-02',
   window_hours: 720,
   // The walk, not the page. Nine calls, every page but the last one full, the
   // last one short, which is what says the window ended rather than the page.
-  coverage: { complete: true, pages: 9, rows: 4239, oldest_ts: '2026-10-03T05:11:44.721Z', newest_ts: '2026-11-02T04:16:20.852Z', covered_hours: 719.1 },
-  rows: 4239,
-  over_limit: 1020,
-  by_kind: { note: 480, done: 265, handoff: 224, ask: 51 },
-  warned_share: 0.73,
+  coverage: {
+    complete: true,
+    pages: 9,
+    rows: 4259,
+    oldest_ts: '2026-10-03T05:11:44.721Z',
+    newest_ts: '2026-11-02T04:28:29.212Z',
+    covered_hours: 719.28,
+  },
+  rows: 4259,
+  over_limit: 1025,
+  by_kind: { note: 480, done: 269, handoff: 224, ask: 52 },
+  warned_share: 0.731,
   // Of the over-limit bodies, how the disposition fell relative to the cut.
   // The reporting seat's own sends were all in the second group, which is why
   // its note said "every cut tonight took evidence and left the verdict"; over
-  // the whole board that holds for 453 and fails for 195.
-  disposition_lost_only: 195,
-  disposition_survived: 453,
-  no_marker_found: 372,
+  // the whole board that held for 455 and failed for 196.
+  disposition_lost_only: 196,
+  disposition_survived: 455,
+  no_marker_found: 374,
   // Ursa's own rows, kept beside the portfolio because this is Ursa's gate and
-  // a seat here is more likely to recognise its own company's traffic. 1,115
-  // rows of the 4,239, of which 265 are over the limit. Read at
-  // 2026-11-02T04:18:17Z, thirty-six seconds after the portfolio walk, which
-  // is why its coverage reports one more row than the block above.
-  ursa: { rows: 1115, over_limit: 265, warned_share: 0.838, by_kind: { note: 165, done: 57, handoff: 38, ask: 5 }, disposition_lost_only: 40, disposition_survived: 99 },
+  // a seat here is more likely to recognise its own company's traffic. 1,117
+  // rows of the 4,259, of which 265 were over the limit. Filtered out of the
+  // same walk as the block above rather than measured in a second one, so the
+  // two share an instant and one is a subset of the other; the hand-built
+  // version of this block had them 36 seconds and one row apart. The filter is
+  // case-insensitive, which is worth 17 rows here: this company's traffic is
+  // spelled two ways on the bus, for the reason `check.mjs` exists.
+  ursa: {
+    rows: 1117,
+    over_limit: 265,
+    warned_share: 0.838,
+    by_kind: { note: 165, done: 57, handoff: 38, ask: 5 },
+    disposition_lost_only: 40,
+    disposition_survived: 99,
+  },
   // What one capped read said instead, kept so the size of the error is
   // legible without re-running anything, and because the two capped readings
   // an hour apart are the cheapest proof that a capped share is not a share.
   capped_read_said: { rows: 500, over_limit: 77, by_kind: { note: 43, done: 18, handoff: 12, ask: 4 }, warned_share_at_0148: 0.861, warned_share_at_0255: 0.792, oldest_ts: '2026-10-27T01:35:16.509Z' },
   // WHY THE BLOCK IS DATED AT ALL, as data rather than as the header's prose.
-  // Four complete 720-hour walks on one night. The first is this seat's, its
+  // Six complete 720-hour walks on one night. The first is this seat's, its
   // instant known only to about half an hour because the block it produced
   // carried a day; the second is `Ursa/exo`'s, which withdrew its own 49 asks
-  // and reproduced this seat's 51; the third and fourth are this run's, about
-  // a minute apart, and they differ by one over-limit `done`.
+  // and reproduced this seat's 51; the rest are this run's.
+  //
+  // READ THE LAST TWO ROWS BEFORE TRUSTING ANY OF THEM. The reporting seat's
+  // note said the `ask` count was "the one value that held, which is luck
+  // rather than design". It held across four walks and 57 minutes, and then
+  // it moved, nine minutes after that sentence was built into this file. So
+  // the series records a headline count changing under a gate that was quoting
+  // it, which is the whole argument for the instant in the line above.
   drift: [
     { read_at: '2026-11-02T03:21Z', by: 'Ursa/engineer', instant_known: 'approximately, from the reporting seat\'s note', rows: 4069, over_limit: 984, by_kind: { note: 456, done: 257, handoff: 220, ask: 51 } },
     { read_at: '2026-11-02T03:41Z', by: 'Ursa/exo', instant_known: 'stated in its note, board row 6611b7f1', rows: 4155, over_limit: 1005, by_kind: { note: 470, done: 262, ask: 51 } },
     { read_at: '2026-11-02T04:17:41Z', by: 'Ursa/engineer', instant_known: 'clock at walk time', rows: 4239, over_limit: 1020, by_kind: { note: 480, done: 265, handoff: 224, ask: 51 } },
-    { read_at: '2026-11-02T04:18:40Z', by: 'Ursa/engineer', instant_known: 'to ten seconds: a shell loop printed no clock, so this is its newest row at 04:18:26.647Z plus the walk that found it', rows: 4241, over_limit: 1021, by_kind: { note: 480, done: 266, handoff: 224, ask: 51 } },
+    { read_at: '2026-11-02T04:18:40Z', by: 'Ursa/engineer', instant_known: 'to ten seconds: a shell loop printed no clock, so this is its newest row at 04:18:26.647Z plus the walk that found it', rows: 4241, over_limit: 1021, by_kind: { note: 480, done: 266, handoff: 224, ask: 51 }, window_hours: 719 },
+    { read_at: '2026-11-02T04:27:36Z', by: 'Ursa/engineer', instant_known: 'clock at walk time, --emit-measured', rows: 4257, over_limit: 1023, by_kind: { note: 480, done: 267, handoff: 224, ask: 52 } },
+    { read_at: '2026-11-02T04:28:38Z', by: 'Ursa/engineer', instant_known: 'clock at walk time, --emit-measured, and this is the reading above', rows: 4259, over_limit: 1025, by_kind: { note: 480, done: 269, handoff: 224, ask: 52 } },
   ],
   // Why a dated count is a floor on this board and not merely a number with a
   // date on it. Arrivals at the leading edge against departures at the
