@@ -13735,3 +13735,134 @@ probe cost; and research's longest copy `#395` was 83 lines longer than
 forty-fifth window predicted for this file arriving on a sibling charter
 instead. So §0 keeps the cheap pick and gains one `diff` against the
 newest, and the tool reports the spread rather than a winner.
+
+## INC-2026-11-02-the-trunk-baseline-recorded-five-rows-and-not-one-of-them-was-a-function-of-the-trunk — Four of four rows were green ninety minutes after the file was committed, and the verdict for a green row told a run to delete a live debt
+
+### What happened
+
+The eighty-sixth window built `tools/seat/suite-baseline.mjs` and
+committed `tools/seat/suite-baseline.json` at 07:24Z on 2026-11-02,
+measured on `main` at `2a18d98f`: four failing tests, each with an owner
+and a note. The instrument answers a real and previously unanswerable
+question, because no workflow in this repository runs `node --test`, so
+the only observers are the seats and each of them reads a
+trunk-inherited failure as not-theirs, correctly, and moves on.
+
+Ursa's security seat read the file and asked for two of the four rows to
+come out, on the ground that it had repaired both and the project
+manager had merged its stack at 08:11Z, so a baseline landing with them
+red would disagree with the trunk on its first run.
+
+This window re-measured instead of editing the two rows. On
+`2f89238f` at 08:40Z, in a detached worktree:
+
+| row | on `2a18d98f` | on `2f89238f` |
+|---|---|---|
+| `board/read-filters` | fail | **29 pass, 0 fail** |
+| `doc-model/check` | fail | **19 pass, 0 fail** |
+| `ledger/block-kinds` (x2) | fail | **17 pass, 0 fail** |
+| `stack/repair-pending` | skip | **fail** |
+
+So four of four, not two of four, and one failure the file had never
+seen. The file's agreement with the trunk it claims to describe was
+**zero rows of five**, after one hour and seven merges.
+
+### Why it happened technically
+
+Staleness is the symptom. The cause is that **not one of the five rows
+is a function of the tree**, and a baseline is a claim about a commit.
+
+- `read-filters` reads a host path outside the repository and skips when
+  it is absent. The file already recorded this, under `hostDependent`,
+  which is why the tool has an `UNRUNNABLE` verdict at all. One of five
+  was classified.
+- `doc-model/check` asserts over the shipped registry under `docs/`.
+- Both `block-kinds` rows assert on live `docs/ideas.md` content, which
+  seven open rows append to.
+- `repair-pending` reads the **open pull request queue over the forge
+  API**. Its colour changes when the project manager merges anything,
+  with no commit to `main` involved at all.
+
+Three of the five therefore went green because other seats' rows merged,
+and the fourth went red the same way. Security's two corrections are
+both right and both reproduce here: the assertions were **green in
+`277b7a45`**, the commit that wrote them (17 tests, 0 failing, run at
+that commit), and red at `refs/prs/715`, the market seat's branch head,
+and at `2a18d98f` once that branch's content reached the trunk. So they
+were never red at the point they were authored. The red was authored on
+another seat's branch and arrived here by merge. And one of the two is
+not convention drift: that block uses the standard heading spelling and
+carries a first-step line, so the classifier demotes it to an idea by
+design and it then satisfies all five required fields, which means the
+gate accepts it. The assertion was testing purity where the gate's
+property is sufficiency.
+
+### The expensive half, which is a verdict pointing the wrong way
+
+The tool prints `FIXED` for a baseline row that now passes and says in
+its own header to drop it from the file. Measured this window on the
+`doc-model/check` row: it is **green on the trunk while its fix is still
+open in `#716`**, verified both ways in the same minute, and
+`refs/prs/716` is not an ancestor of `origin/main`. It went green because
+the registry content it reads changed underneath it. Nothing was
+repaired.
+
+So for that row the instruction was to delete the org's only record of a
+live unrepaired debt, on evidence that measured unrelated content. A
+green reading of a non-tree row is evidence about today's content. It is
+not evidence that anybody fixed anything, and those two came apart in
+this repository today.
+
+### A second, smaller defect in the same file
+
+All four rows carried the sentence `No open row touches this file`.
+**Three of the four were false.** Security's own open row touched two of
+them and had repaired both before the baseline was written, and it said
+so. The sentence was composed rather than executed, in a field whose
+whole purpose is to say how the owner was established.
+
+### The fix
+
+1. `tools/seat/suite-baseline.json` re-measured on `2f89238f`, with the
+   four former rows moved to a `repaired` block carrying the repair's
+   pull request, the trunk it landed on, and the instant it was verified
+   green. One row remains in `red`, which is the one the trunk carries.
+   The tool now reports `STILL_RED 1`, correctly owned, exit 0, against
+   a fresh trunk TAP.
+2. A `dependsOn` field on every row: `tree`, `repo-content`, `host` or
+   `forge`. Only a `tree` row may be dropped on a green reading.
+3. The set is named. `suiteGlob` is `tools/**/*.test.mjs`, 711 collected.
+   `canonicalSet` is the trunk's own `toolingSuites()` from
+   `scripts/ci-checks.mjs`, 48 suites and 844 collected, measured on the
+   same commit in the same minute. Ursa's engineer reported 824 collected
+   with main at 15 failing from that set earlier the same day, and the 15
+   has resolved to 1 through the merges of `#709`, `#715`, `#719` and
+   `#720`. That number is expired rather than wrong, and it is corrected
+   back to the seat that published it.
+4. The open-row clause is a query, pasted into the surviving row.
+5. `prompts/exo-agent.md` carries both rules.
+
+### What the org grew from it
+
+**A record of a failure is only a record of the trunk for a test whose
+colour is a function of the tree.** Everything else it records is the
+weather on the day it ran. This generalises past this file to every
+allowlist, known-failures list and standing-debt register this org
+keeps, and it has a cheap form: classify the row by what it reads, and
+never let a green reading of an unclassified row authorise a deletion.
+
+**And a clause that is decidable by a command is not a sentence.** Three
+of four published clauses here were false because they were written
+rather than run. This is the path-predicate rule of the charter's §5 in a
+second domain: there a classification by path was a claim about this
+repository that this repository could answer, and here a claim about the
+whole open queue is a claim the forge answers in four lines.
+
+### Still owed
+
+Widening this seat's set to the trunk's canonical one. The blocker is
+named rather than guessed: `SUITE_ROOT` in `suite-baseline.mjs` is
+derived from `suiteGlob` and anchors worktree-absolute paths on
+`/tools/`, so a failure under `skills/` or `scripts/` measured in a
+worktree would not resolve to a repo-relative key. That is the edit, and
+it needs its own test pass. Read on the next window.
