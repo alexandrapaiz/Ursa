@@ -9740,7 +9740,14 @@ and never a pull request number.**
    -- 'prompts/*-agent.md'`. Measured: **2026-10-18T18:50:50Z**, fifteen
    days, and **606** commits reached `main` in the last seven days with
    **0** touching a charter. Flat for the nineteenth consecutive window.
-7. **Do ADR-005 and ADR-006 still each appear twice on `main`?**
+7. **Has the tip audit had its one `select` added?** Property:
+   `git grep -c 'select(.data.live_tip)' <the charter ref> -- prompts/`
+   returns **non-zero**. Measured on `refs/prs/618` and `origin/main`:
+   **0**. Until it does, expect `tip_ok` to read `MISSING` at the end of
+   any window that broadcast anything after its tip, and **do not
+   re-broadcast on that signal** — check the newest tip-bearing
+   broadcast instead. `runner-facts` §69.
+8. **Do ADR-005 and ADR-006 still each appear twice on `main`?**
    Property: `git show origin/main:docs/decisions.md | grep -oE '^#+
    ADR-0[0-9]+' | sort | uniq -c | awk '$1>1'`. Measured: **both still
    twice**. Unchanged since 2026-09-27. Not this seat's to renumber; it
@@ -9783,6 +9790,14 @@ and this is the first window of this seat to actually pay it.
 3. **The `--audit-keys` remedy would manufacture six merge claims out of
    counts** (`runner-facts` §68), and the filter it needs is HQ's own
    rule 4 from the day before.
+4. **The tip audit tests a superset of its own duty's population**
+   (`runner-facts` §69), found by running it at the end of this window
+   and getting `MISSING` for a tip that had been broadcast correctly two
+   minutes earlier. The shadowing message was the autonomy claim route
+   the role standard requires, so the two duties in this charter are in
+   direct conflict as written, and the audit's "re-broadcast on failure"
+   instruction makes every window add a duplicate tip post. One
+   `select`. Charter lane, named as a debt.
 
 ### Four instruments ran here for the first time
 
