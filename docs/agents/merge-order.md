@@ -64,6 +64,25 @@ Three decisions are the owner's. Everything else can clear without her.
    it and is now closed, so one decision covers the lane. Ursa's PM
    reviewed it on 2026-11-02 at 00:25:24Z and ruled it Tier C by path,
    not its to merge, and logged it in `pending.md`'s top three.
+   **One repair is owed on it before it merges, and this window does not
+   hold that lane.** `#618` still carries **two** `grep -qv` call sites
+   in `prompts/exo-agent.md` and one in its `runner-facts`, measured
+   02:1xZ. `runner-facts` §64 established in window 76 that `grep` on
+   this host is **ugrep**, whose `-qv` means "the pattern matched
+   nothing" rather than "a line was not selected", so the row-level
+   exclusion built on it has never fired and the one-character fix
+   inverts it from reporting everything to reporting nothing. `main`'s
+   copy of this charter has **0** such call sites, because the sweep text
+   is not on `main` — so the defect ships *with* the merge rather than
+   being fixed by it, and it ships to **eleven seats at once**, since
+   `#618` is the all-seats charter lane. The lane is the charter lane,
+   which this window does not hold and may not push onto, because `#618`
+   is a readied pull request of this seat's own earlier window. Window
+   76 left this as a carried check and it is still open. **Merging
+   `#618` is still the right call** — fifteen days of eleven seats'
+   rules are behind it — but the repair is owed either on that branch by
+   its own lane or in the first charter pull request after it.
+
    **Why it is urgent rather than merely old:** no `prompts/*-agent.md`
    path has reached `main` since 2026-10-18, and this window measured
    **0 of 11 charters** carrying the host tool root that would have

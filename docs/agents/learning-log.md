@@ -9689,3 +9689,123 @@ unchanged: eight of eleven charters last reached `main` on 2026-10-05,
 6,798 charter lines are written and unmerged, and 585 commits reached
 `main` in seven days with zero touching any charter. Named cause, named
 owner, already in front of her.
+
+## Window 77 — 2026-11-02, resident host, started 01:40:48Z (cron, the scheduled tick)
+
+### Carried checks for the next window
+
+**Read these first. Each is a property with the query that answers it,
+and never a pull request number.**
+
+1. **Has `#618`'s `grep -qv` repair landed, on whatever ref now carries
+   the charter lane?** Property:
+   `git show <the charter ref>:prompts/exo-agent.md | grep -c 'grep -qv'`
+   returns **0**. Measured 02:1xZ on `refs/prs/618`: **2**, plus 1 in
+   that branch's `runner-facts`. `main`'s copy returns 0 only because the
+   sweep text is not on `main`, so **the defect ships with the merge**,
+   to eleven seats at once. This window could not fix it — `#618` is a
+   readied pull request of this seat's own earlier window and this
+   charter forbids pushing onto one — so it is flagged beside decision 1
+   in `merge-order.md` instead. **Event metric: resolves when the charter
+   lane merges or when any window re-measures a charter ref.** Inherited
+   from window 76 and still open.
+2. **Does `main`'s `docs/ideas.md` still cite the dead merge-verdict
+   slug?** Property: `git grep -c
+   'INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares'
+   origin/main -- docs/ideas.md` returns **0**. Measured 02:1xZ: **2**.
+   The repair is live and verified on the skill seat's `#633` and `#638`
+   (both return 0), both still OPEN. Nothing is owed by the skill seat.
+   **Event metric: resolves the moment either merges.** Inherited from
+   window 76, re-measured, still `pending`.
+3. **Does §3's sweep in the charter print `ON-HOST` rather than
+   `BINDING-MISSING` for `autonomy.py`?** Property:
+   `git grep -c '/srv/asc/hq/tools' <the charter ref> -- prompts/`
+   returns **non-zero**. Measured on `origin/main`: **0 of 11 charters**,
+   against 6 citations in `docs/agents/learning-log.md` on `main`. This
+   is this window's registered experiment and the whole of §67. The lane
+   is the charter lane; **unpaid debt, named**.
+4. **Is the run-row partition still dark for this company?** Property:
+   run rows for Ursa today versus finished run logs on disk. Measured
+   2026-11-02T01:46:55Z: **0 rows against 21 finished logs**, 11 of 11
+   seats at zero, with 104 rows of other kinds whose newest was 88
+   seconds old. Handed to the centralizer at 02:2xZ. Re-derive before
+   acting; do **not** re-derive it as a discovery — §66 has the control.
+5. **Is the autonomy refusal still firing, and was the route taken?**
+   Property: `python3 /srv/asc/hq/tools/autonomy.py --repos Ursa --days 7`
+   exits 0. Measured: **exits 1**, 81 merges, 46 claimed, **35
+   unresolved (43%)**, floor **56.8%**. The role standard's
+   second-refusal duty is to grade the claims and route the count; that
+   was done this window. The route is the measure, not the ratio.
+6. **Is the charter curve still flat?** Property: `git log origin/main -1
+   -- 'prompts/*-agent.md'`. Measured: **2026-10-18T18:50:50Z**, fifteen
+   days, and **606** commits reached `main` in the last seven days with
+   **0** touching a charter. Flat for the nineteenth consecutive window.
+7. **Do ADR-005 and ADR-006 still each appear twice on `main`?**
+   Property: `git show origin/main:docs/decisions.md | grep -oE '^#+
+   ADR-0[0-9]+' | sort | uniq -c | awk '$1>1'`. Measured: **both still
+   twice**. Unchanged since 2026-09-27. Not this seat's to renumber; it
+   is the owner's, and other files cite the numbers.
+
+### What this window was and what it did
+
+Trigger `cron`, not a message, so no payload claim needed re-deriving.
+Charter read from `refs/prs/618` — **8,021 lines against the handed
+checkout's 2,221**. Built on `refs/prs/639`, window 76's readied
+register tip, under the fifth case of "Read your own seat's open PRs
+first", with the merged trees compared before readying.
+
+**It opened `#647`, readied it at 01:52Z, and `#647` merged at
+02:00:08Z — eight minutes later, mid-window.** That is the named cost of
+ready-at-coherence, and the charter's instruction is to trade the
+identifier. `#653` carries the register half written after the merge.
+One window, two identifiers, nothing superseded and no decision split.
+Worth recording because the charter calls this risk "the smaller cost"
+and this is the first window of this seat to actually pay it.
+
+### The three findings
+
+1. **The run-row partition is dark while its writer is live**
+   (`runner-facts` §66). Window 76's §61 proved a per-seat hole with a
+   cross-seat control and correctly deferred the day's all-seats zero to
+   §36's backfill rule. The control that settles it is **another
+   partition of the same call at the same instant**: 104 non-run rows,
+   newest 88 seconds old, against 0 run rows for 21 finished runs, and a
+   portfolio run row written 21 minutes before the read. A writer cannot
+   be current for four companies and 107 minutes behind for the fifth.
+2. **Twelve of thirteen "missing" tools are on this host**
+   (`runner-facts` §67), and the cause is not staleness. The root is in
+   **this seat's own learning log on `main`, six times since
+   2026-10-25**, in a bullet that calls the absence "the standards-sweep
+   finding" and says in its next clause that the root **is** readable.
+   The rule: **a register entry is not a repair; it is a record that a
+   repair is owed.** HQ reached the same class the same night as
+   `L-A169`.
+3. **The `--audit-keys` remedy would manufacture six merge claims out of
+   counts** (`runner-facts` §68), and the filter it needs is HQ's own
+   rule 4 from the day before.
+
+### Four instruments ran here for the first time
+
+`autonomy.py`, `check-turn-caps.sh`, `check-draft-prs.sh` and
+`check-merge-queue.sh`, all from `/srv/asc/hq/tools/`. That is the whole
+measurable payoff of finding 2 and it is the only compounding this window
+has: it is not a charter line, so it does not reach the other ten seats,
+which is finding 2's own lesson pointed at itself.
+
+### One correction this window made to itself, recorded because the method is the point
+
+It first read `check-turn-caps.sh` with a grep that spanned **two
+tables** — the host record and the dormant Actions residue — and
+concluded that three Ursa seats had three disagreeing caps. They do not.
+The manifest and the host record agree on all eleven. The unprefixed rows
+were the second table's. Caught by re-reading the instrument's captions
+before writing the number down, which is this charter's own rule, and the
+claim never left the sandbox.
+
+### Attribute grades and the weakest
+
+In the pull request body and the handoff to the centralizer. **Dashboards
+(7) is weakest for the fifth consecutive week, at 0 of 21**, and the
+repetition is itself this window's finding: the surface is HQ's
+`runtime/board/`, so Ursa can grade it every week and never move it. That
+is handed up as a company finding rather than published as a fifth grade.
