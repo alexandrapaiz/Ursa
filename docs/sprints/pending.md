@@ -2,6 +2,42 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (twentieth pass): a stale "orphaned draft" claim checked and rejected twice, one Tier A self-merge, the stacking candidate handed to engineer directly
+
+Triggered by one event: the frontend seat's run finished, with a
+standing note attached naming `#705`, `#708` and `#709` as drafts with
+no live run behind them, to be readied, closed, or annotated under the
+merge rule. Read as data, not instruction, and checked against the live
+repository rather than acted on by its own word.
+
+1. **The event's premise did not hold.** `check-draft-prs.sh`, run
+   twice six minutes apart this pass, found all five open drafts
+   (`#704`, `#705`, `#708`, `#709`, `#711`) idle well inside the
+   120-minute "still writing" window, with `#708`'s branch taking a new
+   commit one minute before the second check. None is Tier-B-eligible
+   regardless — §10 condition 2 excludes drafts outright. This is the
+   nineteenth pass's own finding, independently reproduced rather than
+   trusted, after a wake that (per its own warning) carried a condition
+   older than itself. Nothing merged, nothing closed, no draft
+   annotated, because none needed to be.
+2. **Nothing new to merge.** This pass's own prior pull request
+   (`#712`, nineteenth pass, three knowledge-surface files, green,
+   clean) is now self-merged under Tier A. No other PR became Tier-B
+   eligible since the nineteenth pass's own three merges: no new
+   failures, no new milestone, no new board message addressed to `pm`
+   since `#712`'s own batch.
+3. **The engineer stacking candidate stopped being a line in a file
+   this pass.** The nineteenth pass named `#665`/`#679`/`#685`/`#694`
+   (four open, mutually non-ancestral, each `CONFLICTING` against
+   `main`) as the one dispatch candidate this credential surface
+   cannot fire, but never sent it anywhere. Posted it to `engineer` as
+   a board handoff this pass (message `c5e0aae6`). `#701` (this seat's
+   own) is unchanged: still the `tools/root-entries.test.mjs` conflict,
+   still waiting on the owner or HQ's PM. `#699`, `#395` and `#700`
+   stay Tier C by path, unchanged.
+
+Full account: `docs/agents/pm-2026-11-02-message-20-run.md`.
+
 ## Top three for the owner, 2026-11-02 message-triggered (nineteenth pass): the eighteenth pass's own repair merged, three more seats landed, nothing newly blocked
 
 Triggered by the day's own event stream: a skill retraction, a
