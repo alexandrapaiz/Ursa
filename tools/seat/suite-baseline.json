@@ -14,7 +14,7 @@
     "`# tests`. Those are 421 and 707 here and conflating them refuses a",
     "healthy suite; this seat did exactly that on the tool's first real run.",
     "",
-    "`owner` is established from an open row that touches the failing file, or",
+    "`owner` is established from an open row that touches the failing file, or from git authorship of its last change, and `ownerEvidence` says which. It is never a guess about whose lane a file looks like, and it says UNOWNED when neither is available.",
     "it says UNOWNED. It is never a guess about whose lane a file looks like."
   ],
   "measuredAt": "2026-11-02T07:24:00Z",
@@ -37,22 +37,25 @@
       "file": "tools/doc-model/check.test.mjs",
       "name": "the shipped registry has no errors for the seat that owns the files it can fix",
       "since": "2026-11-02",
-      "owner": "UNOWNED",
-      "note": "Two error-severity findings where the assertion wants none, and candidates 14 against sites 16: two probe-found candidates are not registered sites. The test's own message is 'the gate must be green on the branch that introduces it' — it is not green on main. No open row touches this file."
+      "owner": "engineer",
+      "note": "Two error-severity findings where the assertion wants none, and candidates 14 against sites 16: two probe-found candidates are not registered sites. The test's own message is 'the gate must be green on the branch that introduces it' — it is not green on main. No open row touches this file.",
+      "ownerEvidence": "git authorship: feacc416 \"doc-model: section-scope the correction lookup, and report a spent pointer\", author ursa-engineer, 2026-11-02T00:48:34Z. No open row touches this file."
     },
     {
       "file": "tools/ledger/block-kinds.test.mjs",
       "name": "every real heading that announces a scan is classified as one",
       "since": "2026-11-02",
-      "owner": "UNOWNED",
-      "note": "Asserts on live docs/ideas.md content. No open row touches this file; seven open rows append to docs/ideas.md."
+      "owner": "security",
+      "note": "Asserts on live docs/ideas.md content. No open row touches this file; seven open rows append to docs/ideas.md.",
+      "ownerEvidence": "git authorship: 277b7a45 \"security: a scan note can announce itself in the seat tag, which is where the ledger gate went red\", author ursa-security, 2026-11-02T02:08:18Z. No open row touches this file."
     },
     {
       "file": "tools/ledger/block-kinds.test.mjs",
       "name": "the real file has exactly one tag-announced scan, and it is the one measured",
       "since": "2026-11-02",
-      "owner": "UNOWNED",
-      "note": "Expected 1, got 0. The test matches a heading spelled `### 2026-11-02 (engineer, craft scan) —`; docs/ideas.md now spells it `### 2026-11-02 (engineer, message run) — Craft scan: ...`, with the scan word moved past the em dash. The test's own comment anticipated the count RISING ('a second one appearing here is a reason to re-read the rule') and has no reading for it falling to zero. The convention moved; the assertion did not."
+      "owner": "security",
+      "note": "Expected 1, got 0. The test matches a heading spelled `### 2026-11-02 (engineer, craft scan) —`; docs/ideas.md now spells it `### 2026-11-02 (engineer, message run) — Craft scan: ...`, with the scan word moved past the em dash. The test's own comment anticipated the count RISING ('a second one appearing here is a reason to re-read the rule') and has no reading for it falling to zero. The convention moved; the assertion did not.",
+      "ownerEvidence": "git authorship: 277b7a45 \"security: a scan note can announce itself in the seat tag, which is where the ledger gate went red\", author ursa-security, 2026-11-02T02:08:18Z. No open row touches this file."
     }
   ]
 }
