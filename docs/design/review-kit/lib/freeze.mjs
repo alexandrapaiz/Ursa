@@ -34,6 +34,26 @@
 //
 // Verified, not assumed: with this applied, all 15 frames are
 // bit-identical across two shoots. See reviews/2026-10-24f §2.
+//
+// THE THIRD THING, ADDED 2026-11-02, AND WHY IT IS OFF BY DEFAULT. A page
+// can also read the wall clock, and then the frame differs from itself
+// because the page is telling the truth about when it was read. `now` pins
+// `Date` for exactly that, and it is opt-in rather than defaulted for the
+// reason L45 gives: a run that is only photographing should get the real
+// page, and the instant has to be chosen by the caller because a 1970 clock
+// draws a page the product never draws.
+//
+// `performance.now()` is deliberately left running. React's scheduler times
+// its work slices off it and a frozen one is a loop with no exit, so pinning
+// it would hang the page this is meant to photograph. Nothing either product
+// renders is computed from it.
+//
+// **This half pins the page's clock and no other process's.** The overlay's
+// dashboard prints `read at HH:MM:SS` from `readAt`, which
+// `ursa-major/src/serve.ts` stamps with `new Date().toISOString()` in the
+// serving process before the string ever reaches the browser. No init script
+// can reach that, which is measured in reviews/2026-11-02 §3. `pin-clock.mjs`
+// in this directory is the half that can.
 
 export const PINNED_MS = 2000
 
@@ -45,7 +65,7 @@ export const SEED = 0x9e3779b9
  * through addInitScript rather than closing over them, because the
  * function is serialised across the process boundary.
  */
-export function freezeInit({ t, seed, clock = true, random = true }) {
+export function freezeInit({ t, seed, clock = true, random = true, now = null }) {
   let s = seed >>> 0
   // xorshift32. Any seeded generator would do; this one is three lines and
   // needs no dependency in a page we are only photographing.
@@ -59,9 +79,35 @@ export function freezeInit({ t, seed, clock = true, random = true }) {
       return s / 4294967296
     }
   }
-  if (clock) {
-    const raf = window.requestAnimationFrame.bind(window)
-    window.requestAnimationFrame = (cb) => raf(() => cb(t))
+  if (clock && typeof globalThis.requestAnimationFrame === 'function') {
+    const raf = globalThis.requestAnimationFrame.bind(globalThis)
+    globalThis.requestAnimationFrame = (cb) => raf(() => cb(t))
+  }
+  if (now !== null) {
+    const Native = globalThis.Date
+    const fixed = Number(now)
+    // A function and not a `class`, because `Date()` called without `new`
+    // returns a string and a class constructor throws when it is. Nothing in
+    // either product calls it that way today, and a shim that changes what a
+    // built-in does when nobody is looking is how an instrument starts lying.
+    const Pinned = function Date(...args) {
+      if (!new.target) return new Native(fixed).toString()
+      return args.length === 0 ? new Native(fixed) : new Native(...args)
+    }
+    // Statics come through the prototype chain, so `parse`, `UTC` and anything
+    // a future engine adds keep working without being listed here. Only `now`
+    // is answered differently.
+    //
+    // Sharing the prototype keeps `instanceof` true in both directions, and it
+    // leaves exactly one thing behind: `Date.prototype.constructor` is still
+    // the native constructor, so `d.constructor === Date` is false under the
+    // pin. Nothing in either product asks that, and the alternative is writing
+    // to a shared built-in's prototype, which is a larger footprint than the
+    // question is worth. Said here rather than discovered later.
+    Object.setPrototypeOf(Pinned, Native)
+    Pinned.prototype = Native.prototype
+    Pinned.now = () => fixed
+    globalThis.Date = Pinned
   }
 }
 
@@ -69,8 +115,8 @@ export function freezeInit({ t, seed, clock = true, random = true }) {
  * Make every page in this context render the same frame twice. Call before
  * the first navigation; addInitScript applies to each one.
  */
-export async function freezeContext(ctx, { t = PINNED_MS, seed = SEED, clock = true, random = true } = {}) {
-  await ctx.addInitScript(freezeInit, { t, seed, clock, random })
+export async function freezeContext(ctx, { t = PINNED_MS, seed = SEED, clock = true, random = true, now = null } = {}) {
+  await ctx.addInitScript(freezeInit, { t, seed, clock, random, now })
   return ctx
 }
 

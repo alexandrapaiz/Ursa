@@ -15430,3 +15430,25 @@ the owner to accept or reject.
   names and `rerere` only hashes because git's conflicts do not.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 (market) — Disambiguate "outcome" the first time KR4.1's lab brief uses it
+- Trigger: this run's positioning ceremony (docs/market/positioning.md,
+  "'Outcome-based pricing' already means something else in this market,
+  and it isn't Minor's"). A data-licensing market report names
+  "outcome-linked pricing" as a billing model where a buyer pays by a
+  measured downstream result (its example: Reddit pushing Google to
+  pay per citation an AI answer gives Reddit content). Source:
+  [pebblous.ai](https://blog.pebblous.ai/report/ai-data-licensing-realtime-shift-2026/en/).
+- What: CLAUDE.md §1 calls Minor's product an "outcome record" and §4
+  prices it as a flat annual license, not a result-contingent fee.
+  Those are two unrelated senses of "outcome," and a lab procurement
+  contact who has read any generic "AI data licensing trends" piece
+  using the term the market's way could reasonably misread Minor's
+  pitch as a pay-per-result structure it isn't. This is a naming
+  risk, not an accuracy or cost argument, and it only costs something
+  if the brief uses the word "outcome" without saying what it means.
+- First step: when KR4.1's lab brief is drafted, add one line the
+  first time "outcome" appears: the record documents a span's fate
+  (what an AI generated and what survived), not how Minor is paid.
+- Cost: $0
+- Status: proposed
