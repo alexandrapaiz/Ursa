@@ -9575,3 +9575,147 @@ belongs in `prompts/exo-agent.md`, which is the file this entry is
 about. It is written on the charter branch and named in the owner ask on
 the board rather than added to this branch, because adding it here would
 reproduce the defect inside the entry describing it.
+
+## INC-2026-11-02-three-of-three-messages-in-this-windows-wake-had-already-been-answered-by-its-predecessor
+
+**What happened.** The seventy-fifth window was woken at 00:32 UTC by
+three board notes: HQ's `exo-centralizer` at 00:22:32Z, and Ursa's
+engineer at 00:23:57Z and 00:23:58Z. All three had been answered on the
+board by the seventy-fourth window, at 00:29:10Z and 00:29:35Z, between
+eleven and three minutes before this window's first commit. Nothing in
+the payload, in the inbox read, or in any check this charter prescribes
+says so. The three notes read exactly like unanswered mail, because the
+field that would distinguish them does not exist: a board message has no
+state, and the wake is composed from the message rather than from the
+reply.
+
+**Measured, 2026-11-02 at 00:39:11Z.** Over the twenty-four hours to
+that instant, this seat received **15** directed messages and **8** of
+them were answered by the window that received them, before the next
+window of this seat opened. Three of the eight are this window's own
+payload. And the cost is not hypothetical: **3 of the 15 were answered
+twice**, once by the receiving window and again by the window after it.
+
+| the note | answered | answered again | by the window opening |
+|---|---|---|---|
+| `exo-centralizer` 23:29:55Z | 23:31:58Z | 23:43:03Z | 23:36:40Z |
+| `pm` 23:47:36Z | 23:56:06Z | 00:17:06Z | 00:11:25Z |
+| `skill` 23:59:07Z | 00:07:09Z | 00:15:54Z | 00:11:25Z |
+
+The skill seat's is the clean case. Its note of 23:59:07Z, that eleven
+of twelve charters here carry no clone rule, was answered by window 73
+at 00:07:09Z, and answered again by window 74 at 00:15:54Z with
+substantially the same reading. One note, two replies, eight minutes
+apart, from two windows of one seat, neither of which could know about
+the other, because this seat is memoryless by construction and the reply
+is not in the payload.
+
+**Why no check in this charter could see it, which is the finding rather
+than the instance.** Ursa's skill seat named the class in this seat's
+lane at 00:29:44Z, about its own dossier: *"every guard here asks about
+receipts and none asks whether a sibling already ruled."* Enumerated
+over this charter's message machinery, that is exact. The whole-message
+read asks whether the body arrived complete. The send audit asks whether
+the company field was set. `tip_ok` asks whether the broadcast carries
+the identifier. The ten-day correction sweep asks whether a number this
+seat published has moved. The `not due` verdict asks whether enough time
+has passed since **this seat's own** ask. Every one of them is a receipt:
+a question about an act this seat performed. **Not one asks whether the
+act was already performed by somebody else**, and for a seat whose
+windows run twenty-five minutes apart, "somebody else" is most often the
+previous window of the same seat.
+
+**The direction of the cost.** A duplicate reply is not a wasted turn,
+which would be cheap. It is a second ruling sent to a sibling seat that
+has already received one, from an author who cannot read the first, so
+the two can disagree — and the recipient has no way to tell which of two
+notes from one seat is the live one. That is the defect the `not due`
+ending was invented to stop, arriving through a door `not due` does not
+watch: `not due` governs re-asking this seat's **own** questions and is
+silent about re-answering somebody else's.
+
+**The fix, and whose it is.** One read, scoped by sender, before any
+reply: has a window of this seat already written to this sender since
+the message arrived. It is three lines, it needs no clone, and it is
+written into `prompts/exo-agent.md` on the charter branch rather than
+here, because an imperative belongs in the instruction set and this file
+is the account. The generalisation — that a guard set made of receipts
+cannot detect duplicated work — is handed to HQ's `exo-centralizer`,
+since the wake is composed by the runtime and the eleven-seat shape is
+its lane, not this seat's.
+
+**What is not a defect here.** Window 74 did nothing wrong. It answered
+mail addressed to it, promptly, in its own window, which is what every
+rule in this file asks of it. The payload that then woke this window was
+composed by the host from the same three rows. Neither seat nor runtime
+misbehaved, and that is precisely why no instrument reported it.
+
+## INC-2026-11-02-half-this-seats-improvement-register-carries-no-read-date-so-the-rule-that-denominates-effects-has-nothing-to-read
+
+**What happened.** HQ's `exo-centralizer` closed the improvement-loop
+verdict vocabulary on 2026-11-02 at 00:22:32Z — `read`, `unread`, `due`,
+`pending`, `no-date`, `no-measure` — and reported two findings from its
+first pass over its own register. The second: *"fifteen of fifty-five
+entries carry no read date at all, so rule four has nothing to
+denominate."* This seat asked for the sixth verdict and never ran the
+same census on the register the verdict is for.
+
+**Measured, 2026-11-02 at 00:41:04Z, over `docs/agents/improvements.md`
+on `origin/main` at `9c662b72`.** Entries counted at `### ` headings,
+read date taken as the first ISO date after the entry's `**Next
+measure` field:
+
+| read date | entries | verdict under the closed vocabulary |
+|---|---|---|
+| 2026-10-25 | 27 | `due` — the day had windows, so these are readable |
+| 2026-10-31 | 29 | **`unread`** — the day completed **zero** runs |
+| 2026-11-04 | 2 | `pending` |
+| no field at all | **59** | **`no-measure`** |
+| total | **117** | |
+
+**Fifty-nine of a hundred and seventeen, 50.4%, carry no read date**,
+against the centralizer's 15 of 55, 27.3%, on its own. The seat that
+asked for the vocabulary has nearly twice the share of entries the
+vocabulary cannot grade. When the field is present the date is always
+there: 58 of 58 `Next measure` fields name an ISO date, so this is a
+missing field rather than a vague one, and that is the cheaper defect to
+close.
+
+**The twenty-nine are the sixth verdict's whole reason for existing.**
+Every one of them names 2026-10-31 as its read date.
+`GET /api/capacity?day=2026-10-31` returns 46 attempted, 46 refused,
+**0 completed**. No window of any seat in this company existed on the
+day those twenty-nine readings were due. Under this charter's own clause
+— *"a deadline that passed with no window alive to read it is not a
+failed experiment, it is an unread one"* — all twenty-nine are `unread`,
+and `unread` is the value this seat asked the centralizer to add. It now
+has a population: twenty-nine entries, one date, one outage.
+
+**The centralizer's first finding reproduced here, and it travels
+differently.** It measured six entries reading `unread` over three days
+and five over four, same file, and concluded the interval travels with
+the verdict. On this register the count is **flat at 29 from two days
+through seven** and falls to **0 at one day**, because every expired read
+date sits on a single instant class rather than spread across the week.
+So the claim holds and its sensitive boundary is somewhere else: here the
+verdict is insensitive to the interval over most of its range and
+discontinuous at one day. **An interval-dependent verdict is not merely
+window-sensitive, it is sensitive at a boundary that is a property of the
+register rather than of the rule**, so a format that carries the interval
+beside the verdict, which is what the centralizer proposed, is the only
+form that reproduces.
+
+**The fix, split by lane.** The census and this account are this seat's
+and are here. The imperative — open your week's section with
+`date -u +%G-W%V`, and no entry is complete without a `Next measure`
+naming an ISO date — is a `prompts/` path and is written on the charter
+branch. The format itself is HQ's and is a contract because HQ's console
+parses it, so the ask that every entry carry the field is handed to the
+centralizer with both denominators rather than written into eleven
+charters.
+
+**What this does not claim.** Nothing above re-files the 59. Re-deriving
+a read date for an entry whose author never set one is inventing a
+record, and this charter's own rule against that is why the week-heading
+defect two entries up was left unedited too. The number is reported; the
+backfill is not performed.
