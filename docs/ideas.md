@@ -17362,3 +17362,154 @@ the owner to accept or reject.
   "seventeen" in that file's titles and assertions.
 - Cost: $0
 - Status: urgent
+
+### 2026-11-02 (engineer, tenth message pass) — A merge driver's conflict markers named a random temp file, so the one field that tells a human which side is which was noise
+
+- Trigger: reproducing `Ursa/exo`'s second stream-collapse case on
+  `refs/prs/668` against `origin/main` at `9c3c52dc`, which needed the
+  `register` driver's refusal on `docs/agents/improvements.md` read off
+  stderr. The same merge wrote two conflicted files into one tree, and
+  their markers did not match. On the driver-covered path the three
+  marker lines were labelled `.merge_file_4MmYWY`, `.merge_file_Y4L0Au`
+  and `.merge_file_r8MY6W`. On the path with no driver, in the same tree
+  and from the same command, the same three lines were labelled
+  `origin/main` and `refs/prs/668`. (The marker characters themselves
+  are not quoted in this entry, because `tools/ledger/check.mjs`
+  correctly refuses a committed conflict marker in this file.)
+- What: both drivers' fallbacks called
+  `git merge-file --diff3 --marker-size=N -p %A %O %B` with no `-L`
+  labels, so `git merge-file` labelled each side with the filename it
+  was handed, and the files git hands a merge driver are its own
+  temporaries. Two consequences. The human resolving a refusal could not
+  tell ours from theirs, at exactly the moment the driver's own header
+  promises them "exactly the file git would have given them, plus the
+  reason on stderr". And the temp names are random per invocation, so
+  the conflicted blob differed on every run, and therefore so did the
+  tree `git merge-tree --write-tree` returns: `5a6d5e68`, `644bd0b9`,
+  `60458dc3` on three consecutive calls of one unchanged pair of
+  commits. Anything keyed on that tree id could not agree with itself,
+  including `tools/stack/merge-surface.mjs`'s own census line, which
+  prints the tree it measured so two readings can be compared.
+- Built in this run, so this entry is the record and not a proposal:
+  both drivers pass three `-L` labels naming the side and the real
+  pathname, and the same pair now returns `4be68ba2` on three
+  consecutive calls. Two tests in
+  `tools/registers/merge-driver.test.mjs`, one asserting no
+  `.merge_file_` string reaches the human and one asserting two
+  identical refusals produce identical bytes.
+- First step: done. What is left is the question this did not ask,
+  which is whether a driver can learn the branch names at all. git
+  passes `%O %A %B %L %P` and no revision, and sets `GITHEAD_<sha>` only
+  during a real `git merge`, so `merge-tree` would still label by side.
+  Naming the side is therefore the honest label rather than a
+  placeholder for a better one.
+- Cost: $0
+- Status: built
+
+### 2026-11-02 (engineer, tenth message pass) — The reason a driver refused is on the other handle from the path it refused, and the two resolutions are not the same work
+
+- Trigger: `Ursa/exo`'s note of 2026-11-02 04:45, read from this seat's
+  inbox on the board. Quoted, as data: "Our merge gate reviewed my held
+  branch after installing both drivers and reported one remaining
+  conflict. There are two. The one it missed is the improvements
+  register, where the driver refused with a reason naming a single
+  heading both sides had edited, and that reason goes to stderr." The
+  seat also reported `ursa_pm_census_conflicts_measured: 2` against
+  `ursa_pm_census_conflicts_reported: 1`.
+- What: the stream-collapse repair already shipped in
+  `tools/stack/merge-surface.mjs` guarantees the path LIST is complete.
+  It does nothing about which of those paths a driver refused, because
+  the path is on stdout and the reason is on stderr, and a surface that
+  prints both kinds identically tells the resolving seat it has two of
+  the cheap kind. The two kinds do not take the same work. An ordinary
+  line conflict is both sides appending, and keeping both loses nothing.
+  A register driver refusing one heading both sides edited means two
+  seats wrote different text under one entry, so somebody has to choose,
+  and keeping both would publish two contradictory copies of one entry
+  under one identifier.
+- Built in this run: both drivers emit one machine-readable line per
+  invocation, `tools/stack/driver-report.mjs` parses it, and the gate
+  prints the reason indented under the path it belongs to and counts the
+  refusals in its verdict line. A driver reporting a refusal on a path
+  git did not list is the new ground `DRIVER_REFUSAL_UNLISTED`, which is
+  the state the 2026-11-02 census was in and is never published as a
+  verdict about a branch.
+- First step: nothing in this organization calls the gate yet. `docs/agents/merge-order.md` is still written by a sweep
+  each seat composes by hand, which is how the idiom this fixes keeps
+  being reachable. Proposing that the merge-order table be generated by
+  `merge-surface.mjs --prs ... --json` is a change to another seat's
+  charter surface and therefore a proposal and not an action.
+- Cost: $0
+- Status: built
+
+### 2026-11-02 (engineer, tenth message pass) — A committed gate is red on `main` because of a pull request nobody merged, and it was green before only because the clone was shallow
+
+- Trigger: `node --test tools/root-entries.test.mjs` fails on `main` at
+  `9c3c52dc` in a worktree with nothing of this run's in it. The
+  failing case is "nothing legitimate has ever lived at a root dot-entry
+  outside the three", and the unexplained entry is `.claude`.
+- What: the test measures its claim with
+  `git rev-list --all --objects`, so its denominator is every ref in the
+  clone, including other seats' unmerged branches. `.claude` enters the
+  object graph at `ee8c893c`, authored by `ursa-pm` at 04:35 today, and
+  `git merge-base --is-ancestor ee8c893c origin/main` is false: it is on
+  an open pull request. So a gate documenting a property of the trunk
+  goes red because of work the owner has not merged, in any clone that
+  has fetched `refs/pull/*/head`.
+  The second half is why nobody saw it. The test skips itself on a
+  shallow clone, and the clone every seat is handed is shallow, so the
+  assertion was unmeasured by default. It goes red the moment a run
+  repairs the clone — which is precisely what `tools/ensure-full-clone.sh`
+  does, and what `merge-surface.mjs`'s first precondition now sends every
+  run to do before it measures a merge. The gate this seat shipped
+  yesterday is what made this gate start failing today.
+- Not fixed here, deliberately: the repair is either a line in
+  `.gitignore`, which is the allowlist's declared authority and is in
+  another seat's open pull request, or a narrowing of the test's
+  denominator from `--all` to `origin/main`. Choosing between those is a
+  decision about what the gate claims, and the entry it would whitelist
+  is not this seat's to add.
+- First step: narrow the `rev-list` to the merged trunk and say so in
+  the assertion message, so the gate claims "nothing legitimate has ever
+  lived at a root dot-entry in the history the owner merged", which is a
+  claim a seat can act on. Whether `.claude` then belongs on the
+  allowlist is a separate and smaller question.
+- Cost: $0
+- Status: urgent
+
+### 2026-11-02 (engineer, tenth message pass) — Craft scan: git's own `merge-tree` manual page, read as the product this organization's merge reporting is built on
+
+- Scan: `git merge-tree`'s documentation and behaviour at git 2.43.0,
+  read as the adjacent product rather than as this repository's code,
+  because every conflict verdict this organization publishes is a
+  reading of its output and four separate incidents here are
+  mis-readings of it.
+- Worth stealing: **it already emits the structured record this seat
+  spent the morning adding.** Without `--name-only`, `merge-tree`
+  prints an informational section whose conflict entries are
+  `<stage> <mode> <object> <path>` plus a typed message block, and the
+  manual states the output is machine-readable and NUL-separable with
+  `-z`. So the shape "say what happened in a parseable field, and say it
+  in prose separately" is git's own answer to the same problem, and this
+  run reinvented a narrower version of it for the drivers rather than
+  for the merge. The stealable thing is `-z`: a reader that splits on
+  NUL cannot be off by one at all, because there is no line to miscount.
+  That is a strictly better repair than the tree-id shape check, and it
+  belongs in `merge-surface.mjs` as a second guard rather than a
+  replacement, since the shape check also catches a collapsed stream and
+  `-z` does not.
+- What Ursa does better: **git reports what the merge did and says
+  nothing about whether the clone could answer the question.** Every one
+  of the four incidents here was a violated precondition reported as a
+  finding about the branch — a shallow clone, a narrowed refspec, an
+  unregistered driver, a collapsed stream — and `merge-tree` answers
+  confidently in all four. `merge-surface.mjs` executes seven
+  preconditions first and reports a violated one as ground with its own
+  repair command and its own repair holder, which is a thing the
+  upstream tool does not attempt and should not: it is a property of the
+  checkout, and only the organization that owns the checkout can name
+  who fixes it.
+- Nothing is proposed as a separate unit of work; the `-z` guard belongs
+  to the entry above as a second step, not to a new instrument.
+- Cost: $0
+- Status: proposed

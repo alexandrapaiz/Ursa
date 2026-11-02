@@ -9,11 +9,13 @@
 // because it has already made the choice the driver is responsible for.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdtempSync, writeFileSync, readFileSync, rmSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { DISPOSITION, parseResultLine } from '../stack/driver-report.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
@@ -61,14 +63,16 @@ function scenario({ path, ours, theirs, base = BASE_ENTRIES, attribute = 'regist
   writeFileSync(join(dir, path), register([...base, ...ours]));
   git('commit', '-qam', 'ours appends');
 
-  let status = 0;
-  let output = '';
-  try {
-    output = git('merge', '--no-edit', 'theirs');
-  } catch (err) {
-    status = err.status ?? 1;
-    output = `${err.stdout ?? ''}${err.stderr ?? ''}`;
-  }
+  // Both handles, on both outcomes. This used to take `execFileSync`'s return
+  // value on success, which is stdout alone, so every line a driver writes to
+  // STDERR was invisible to any test of a merge that WORKED. That is the same
+  // one-handle reading the 2026-11-02 incident is about, in the suite that
+  // tests the driver that incident was about.
+  const run = spawnSync('git', ['-C', dir, 'merge', '--no-edit', 'theirs'], {
+    encoding: 'utf8',
+  });
+  const status = run.status ?? 1;
+  const output = `${run.stdout ?? ''}${run.stderr ?? ''}`;
   const merged = readFileSync(join(dir, path), 'utf8');
   rmSync(dir, { recursive: true, force: true });
   return { status, output, merged, headings: [...merged.matchAll(/^## (.+)$/gm)].map((m) => m[1]) };
@@ -143,6 +147,83 @@ test('a refusal leaves conflict markers in the file, so it cannot be committed a
   assert.ok(r.merged.includes('<<<<<<<'), 'the working-tree copy carries markers');
   assert.ok(r.merged.includes('>>>>>>>'), 'both sides are present for the human');
   assert.match(r.output, /wrote git's own line-based merge/);
+});
+
+test('the markers on a refusal name the sides, not the random temp files git handed the driver', () => {
+  // MEASURED DEFECT, 2026-11-02, found while reproducing a merge gate that
+  // reported one conflict of two. Without `-L`, `git merge-file` labels each
+  // side with the FILENAME it was given, and the files git gives a merge
+  // driver are its own temporaries, so the markers this driver wrote read
+  //
+  //   <<<<<<< .merge_file_4MmYWY
+  //   ||||||| .merge_file_Y4L0Au
+  //   >>>>>>> .merge_file_r8MY6W
+  //
+  // while in the SAME merged tree, on a path with no driver, git's own markers
+  // read `<<<<<<< origin/main` and `>>>>>>> refs/prs/668`. This file's header
+  // promises the human "exactly the file git would have given them", and the
+  // one field that tells them which side is which was a random string.
+  const r = scenario({
+    path: 'docs/agents/incidents.md',
+    ours: [{ heading: 'Incident 19 — the PM pass', body: '**Status:** open.' }],
+    theirs: [{ heading: 'Incident 19 — the exo window', body: '**Status:** open.' }],
+  });
+  assert.ok(r.merged.includes('<<<<<<< ours: docs/agents/incidents.md'), r.merged.slice(0, 400));
+  assert.ok(r.merged.includes('||||||| merge base: docs/agents/incidents.md'));
+  assert.ok(r.merged.includes('>>>>>>> theirs: docs/agents/incidents.md'));
+  assert.doesNotMatch(r.merged, /\.merge_file_/, 'no temp filename reaches the human');
+});
+
+test('a refusal is deterministic, because the temp names it used to embed were random per run', () => {
+  // The second consequence of the same defect, and the one a person would
+  // never notice by reading a file: the temp names change on every
+  // invocation, so the blob differed every time and therefore so did the tree
+  // `git merge-tree --write-tree` returns. Measured on `refs/prs/668` before
+  // the fix: 5a6d5e68, 644bd0b9, 60458dc3 on three consecutive calls of one
+  // unchanged pair of commits. Anything keyed on that tree id -- a cache, a
+  // comparison of two measurements, `tools/stack/merge-surface.mjs`'s own
+  // census line -- could not agree with itself.
+  const of = () =>
+    scenario({
+      path: 'docs/agents/incidents.md',
+      ours: [{ heading: 'Incident 19 — the PM pass', body: '**Status:** open.' }],
+      theirs: [{ heading: 'Incident 19 — the exo window', body: '**Status:** open.' }],
+    }).merged;
+  assert.equal(of(), of());
+});
+
+test('a refusal emits one machine-readable attribution line, which is how the reason reaches a gate', () => {
+  // The reason a driver refused is on STDERR and the path it refused is on
+  // STDOUT, so a reader holding the complete conflict surface still cannot
+  // tell which of its paths a driver refused. That gap is what `Ursa/exo`
+  // reported on 2026-11-02: a merge gate with both drivers installed reported
+  // one conflict of two, and the one it dropped was this driver refusing.
+  // `tools/stack/driver-report.mjs` parses this line; see its header.
+  const r = scenario({
+    path: 'docs/agents/incidents.md',
+    ours: [{ heading: 'Incident 19 — the PM pass', body: '**Status:** open.' }],
+    theirs: [{ heading: 'Incident 19 — the exo window', body: '**Status:** open.' }],
+  });
+  const line = r.output.split('\n').find((l) => l.startsWith('merge-driver-result:'));
+  assert.ok(line, `expected an attribution line, got:\n${r.output}`);
+  const parsed = parseResultLine(line);
+  assert.equal(parsed.driver, 'register');
+  assert.equal(parsed.disposition, DISPOSITION.REFUSED);
+  assert.equal(parsed.path, 'docs/agents/incidents.md');
+  assert.match(parsed.reason, /Incident 19/, 'the reason names the entry both sides edited');
+  // And the reason does NOT repeat the path, because the gate prints it next
+  // to the path it already named.
+  assert.doesNotMatch(parsed.reason, /the merger refused/);
+});
+
+test('a clean merge emits the merged attribution, so a gate can tell silence from success', () => {
+  const r = scenario({ path: 'docs/agents/incidents.md', ours: OURS_ONE, theirs: THEIRS_ONE });
+  assert.equal(r.status, 0);
+  const line = r.output.split('\n').find((l) => l.startsWith('merge-driver-result:'));
+  const parsed = parseResultLine(line);
+  assert.equal(parsed.disposition, DISPOSITION.MERGED);
+  assert.equal(parsed.path, 'docs/agents/incidents.md');
+  assert.equal(parsed.reason, '');
 });
 
 test('an undeclared path is refused rather than parsed with somebody else\'s grammar', () => {
