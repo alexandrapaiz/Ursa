@@ -2,6 +2,66 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-02 (security, sixth run): the fence this seat queued for the eleven workflow prompts can be stepped out of, and the step lands in the slot the prompt calls binding
+
+**Status:** proposed. **For:** the owner, because the change is in
+`.github/workflows/` and every seat dispatch says never touch workflows.
+**Found by:** reading this seat's own queued repair rather than the code it
+repairs. **Corrected in place:** PWC-11 in
+`docs/agents/pending-workflow-changes.md` now carries the amended form, so
+nobody applies the unsafe one. **Full reading:**
+`docs/security/audit-2026-11-02f.md` §2, filed there as F62.
+
+**What was already known and is not re-filed.** PWC-11 holds the finding
+that all eleven seat workflows interpolate
+`${{ github.event.client_payload.text }}` into the `prompt:` block with no
+marker saying the text is data, and the 2026-11-02d audit reconfirmed it
+live. Severity stays low to medium. Nothing here widens the channel.
+
+**What is new, in one sentence.** The mitigation would not have mitigated
+it. PWC-11 proposes wrapping the slot in the literal lines `BEGIN EVENT`
+and `END EVENT`. Both are fixed strings known to whoever composes the event
+text, Actions substitutes that text raw, and YAML offers no escape hook, so
+the close marker is a string the fenced content may itself contain.
+
+**And the step-out has somewhere to land.** Measured across all eleven
+files with `tools/prompt-slots.mjs`, added this run: in ten of them exactly
+one newline separates the end of the event slot from the literal header
+"Owner instructions for this dispatch, binding for this run and extending
+the charter". PWC-11 leaves that block unfenced on purpose, for a reason
+that is right about the owner and does not cover the path:
+`repository_dispatch` declares no `inputs:`, so on exactly the trigger that
+fills the event slot, `${{ inputs.owner_instructions }}` resolves to
+nothing. The binding slot is empty whenever the forgeable one is full.
+
+**Why the two precedents PWC-11 reasons from did not catch this.** Both are
+safe and neither is safe for the reason the entry gave. They do not trust a
+delimiter. They make the content unable to produce one.
+`ursa-major/src/tuning/distill.ts` passes every fenced field through
+`JSON.stringify`, so no line break survives into the prompt.
+`ursa-major/src/verdict.ts` flattens `[\r\n]` to spaces in `shownText`
+before the transcript reaches the fence, as a side effect of an offset
+invariant it documents for a different reason. A workflow prompt can do
+neither, because there is no code between the event text and the prompt.
+
+**The change, three one-line differences, written out in full in PWC-11.**
+Move the owner block above the event block so the untrusted slot is last.
+Suffix both markers with `${{ github.run_id }}`, which the payload cannot
+contain because the run does not exist when the payload is composed. Keep
+PWC-11's label sentence as written. The first is the one to apply if only
+one is applied, because it removes the target instead of guarding it and no
+payload can defeat it.
+
+**Verification after applying**, replacing PWC-11's proposed
+`grep -c 'BEGIN EVENT'`, which would have reported the unsafe form fixed:
+`node tools/prompt-slots.mjs --strict` exits 0 with every column `yes`.
+Today it reports 11 of 11 slots open and 0 untrusted interpolations in any
+`run:` block, the latter being the audit's standing prose claim measured
+rather than restated.
+
+**Day-sized or smaller.** Eleven files, three lines each, no new
+dependency, and the instrument to check it already exists and is tested.
+
 ## Ledger entry — 2026-11-02 (security, fifth run): the containment check every charter orders is unrunnable in the clone every seat is handed, and it fails in the direction that duplicates work
 
 **Status:** urgent. **For:** the owner, because the text is in eleven
