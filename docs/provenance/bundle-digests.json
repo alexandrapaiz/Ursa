@@ -690,6 +690,19 @@
           "subject": "Pin the three repaired drifts with tests that fail without them"
         }
       ]
+    },
+    {
+      "digest": "a77afc742812d2d3",
+      "sha256": "a77afc742812d2d33c10075f6d436f1c2b4759e6426bc3beab8350c6131e85bc",
+      "blob": "1581fd60deccec256be7b78daadd9cc0e3b1ce94",
+      "bytes": 334215,
+      "introducedBy": [
+        {
+          "commit": "f8bb31cbd3e97c43d61380f2a7a5bdb54d2920ef",
+          "date": "2026-11-02T07:52:37.000Z",
+          "subject": "consolidation: rebuild the bundle, and three reds the five rows left behind"
+        }
+      ]
     }
   ]
 }

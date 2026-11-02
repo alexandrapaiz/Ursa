@@ -5663,6 +5663,25 @@ function acceptanceOf(snap) {
   }
   return { accepted: null, basis: `${ref} is still open at capture time (${snap.capturedAt}); an unmerged PR is undeclared, never accepted`, at: null };
 }
+function instantMs(value) {
+  if (typeof value !== "string") return null;
+  if (!/(?:Z|[+-]\d{2}:?\d{2})$/.test(value)) return null;
+  const ms = Date.parse(value);
+  return Number.isNaN(ms) ? null : ms;
+}
+function instantBefore(a, b) {
+  const x = instantMs(a);
+  const y = instantMs(b);
+  return x !== null && y !== null && x < y;
+}
+function compareByInstant(a, b) {
+  const x = instantMs(a);
+  const y = instantMs(b);
+  if (x === null && y === null) return 0;
+  if (x === null) return 1;
+  if (y === null) return -1;
+  return x - y;
+}
 function statedCorrectionsFor(snap, paths, afterSha) {
   const byIndex = new Map(snap.commits.map((c, i) => [c.sha, i]));
   const from = byIndex.get(afterSha);
@@ -5671,10 +5690,10 @@ function statedCorrectionsFor(snap, paths, afterSha) {
     if (!paths.includes(comment.path)) continue;
     if (from !== void 0) {
       const genAt = snap.commits[from].authoredAt;
-      if (comment.createdAt < genAt) continue;
+      if (instantBefore(comment.createdAt, genAt)) continue;
     }
     for (const c of snap.commits) {
-      if (c.authoredAt < comment.createdAt) continue;
+      if (instantBefore(c.authoredAt, comment.createdAt)) continue;
       if (!c.files.includes(comment.path)) continue;
       const ranges = c.changedRanges?.[comment.path];
       const overlaps = comment.line !== null && ranges !== void 0 && ranges.some(([s, e]) => comment.line >= s && comment.line <= e);
@@ -5727,7 +5746,7 @@ function interveningMergesFor(commits, reader, genIndex, closureIndex, genFiles)
   return { merges, unreadable };
 }
 function pairsFromPullRequest(snap, reader, opts = {}) {
-  const commits = [...snap.commits].sort((a, b) => a.authoredAt.localeCompare(b.authoredAt));
+  const commits = [...snap.commits].sort((a, b) => compareByInstant(a.authoredAt, b.authoredAt));
   const merge = snap.mergeCommitSha;
   const mergeParentCount = merge ? reader.parents(merge).length : 0;
   const squashed = merge !== null && mergeParentCount === 1;

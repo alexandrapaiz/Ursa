@@ -133,11 +133,46 @@ before(() => {
     driver,
     '#!/usr/bin/env bash\n' +
       'set -u\n' +
-      'echo "ledger driver: $4 merged by block identity." >&2\n' +
+      'echo "ledger driver: $5 merged by block identity." >&2\n' +
+      'echo "merge-driver-result: driver=ledger disposition=merged path=\\"$5\\"" >&2\n' +
       'cat "$2" "$3" | awk \'!seen[$0]++\' > "$2.u" && mv "$2.u" "$2"\n' +
       'exit 0\n',
   )
   chmodSync(driver, 0o755)
+
+  // The driver that LIES: it reports refusing the path and then exits 0, so
+  // git records the path as cleanly merged and the conflict surface is an
+  // under-report that looks complete. Neither real driver in this repository
+  // can do this -- both exit 1 on every refusal -- which is exactly why the
+  // branch needs a fixture to be rehearsed at all. See
+  // `DRIVER_REFUSAL_UNLISTED`.
+  const liar = join(clone, 'bin', 'liar.sh')
+  writeFileSync(
+    liar,
+    '#!/usr/bin/env bash\n' +
+      'set -u\n' +
+      'echo "ledger driver: refusing to merge $5. the grammar does not hold." >&2\n' +
+      'echo "merge-driver-result: driver=ledger disposition=refused path=\\"$5\\" reason=the grammar does not hold" >&2\n' +
+      'exit 0\n',
+  )
+  chmodSync(liar, 0o755)
+
+  // The driver that refuses HONESTLY: it reports the refusal and exits 1, so
+  // git records a conflict and the path IS on stdout while the reason is on
+  // stderr. That is the real 2026-11-02 shape, and it is the only fixture that
+  // drives the gate's reason-attachment through the program rather than
+  // through declared probe data.
+  const refuser = join(clone, 'bin', 'refuser.sh')
+  writeFileSync(
+    refuser,
+    '#!/usr/bin/env bash\n' +
+      'set -u\n' +
+      'echo "ledger driver: refusing to merge $5. two blocks were edited on both sides." >&2\n' +
+      'echo "merge-driver-result: driver=ledger disposition=refused path=\\"$5\\" reason=2 block(s) edited on both sides: 2026-11-02 one" >&2\n' +
+      'exit 1\n',
+  )
+  chmodSync(refuser, 0o755)
+
   git(clone, 'config', 'merge.ledger.name', 'fixture union driver')
   git(clone, 'config', 'merge.ledger.driver', `bash ${driver} %O %A %B %L %P`)
 })
@@ -322,6 +357,99 @@ describe('the gate as a program, against a fixture repository', () => {
     assert.equal(code, 0)
     assert.equal(json.rows.length, 1)
   })
+
+  it('carries the driver attribution and the collapse cost into the census of a real run', () => {
+    const { json } = run(['--head=origin/feat/conflict'])
+    const row = json.rows[0]
+    // Two lines of stderr from one driver invocation on ledger.md, one of them
+    // the attribution. These are the two numbers the verdict line prints, and
+    // they come out of the run rather than out of a constant.
+    assert.equal(row.seen.attributed, 1)
+    assert.equal(row.seen.collapseCost, row.seen.diagnostics.length)
+    assert.match(row.line, /1 of 2 diagnostic line\(s\) carried a driver attribution/)
+    assert.match(row.line, /would have put 2 line\(s\) of stderr where the tree id belongs/)
+    // The conflicted path here is a line conflict on a file no driver owns, so
+    // nothing is attributed to it.
+    assert.match(row.line, /1 conflicted path\(s\), 0 of them refused by a merge driver/)
+  })
+
+  it('carries a real driver refusal from stderr onto the path git listed, end to end', () => {
+    // ARM 3 OF THE RED REHEARSAL, and the reason this test exists. Deleting
+    // the gate program's reason-attachment left the whole suite green, because
+    // every other assertion about it reads the reason out of a `GATE` probe,
+    // where it is declared data. A probe cannot prove the program puts the two
+    // handles back together; only a run can. So this drives a driver that
+    // refuses and exits 1, which is what both real drivers do, and asserts the
+    // reason comes out beside the path git named on the other stream.
+    const driverKey = 'merge.ledger.driver'
+    const was = git(clone, 'config', '--get', driverKey)
+    git(clone, 'config', driverKey, `bash ${join(clone, 'bin', 'refuser.sh')} %O %A %B %L %P`)
+    try {
+      const { code, json } = run(['--head=origin/feat/conflict'])
+      assert.equal(code, 1)
+      const row = json.rows[0]
+      assert.equal(row.cause, 'PATHS_CONFLICT')
+      // Two conflicted paths now: `plain.md` is an ordinary line conflict and
+      // `ledger.md` is the driver refusing.
+      assert.deepEqual(row.paths.sort(), ['ledger.md', 'plain.md'])
+      assert.match(row.line, /2 conflicted path\(s\), 1 of them refused by a merge driver with a reason/)
+      assert.match(row.seen.diagnostics.join('\n'), /two blocks were edited on both sides/)
+    } finally {
+      git(clone, 'config', driverKey, was)
+    }
+  })
+
+  it('prints the refusal reason under the path on the console, which is where a resolving seat reads it', () => {
+    const driverKey = 'merge.ledger.driver'
+    const was = git(clone, 'config', '--get', driverKey)
+    git(clone, 'config', driverKey, `bash ${join(clone, 'bin', 'refuser.sh')} %O %A %B %L %P`)
+    try {
+      let out = ''
+      try {
+        out = execFileSync('node', [GATE_PATH, `--repo=${clone}`, '--head=origin/feat/conflict'], {
+          cwd: REPO_ROOT,
+          encoding: 'utf8',
+        })
+      } catch (err) {
+        out = err.stdout ?? ''
+      }
+      const lines = out.split('\n')
+      const at = lines.findIndex((l) => l.trim() === 'ledger.md')
+      assert.ok(at > 0, `expected a line for ledger.md, got:\n${out}`)
+      assert.match(lines[at + 1], /refused by the ledger driver/)
+      assert.match(lines[at + 1], /2 block\(s\) edited on both sides/)
+      // And the ordinary line conflict in the same output gets no second line.
+      const plainAt = lines.findIndex((l) => l.trim() === 'plain.md')
+      assert.doesNotMatch(lines[plainAt + 1] ?? '', /refused by the/)
+    } finally {
+      git(clone, 'config', driverKey, was)
+    }
+  })
+
+  it('refuses a driver that reports refusing a path git did not list, end to end, at exit 2', () => {
+    // The 2026-11-02 under-report, as a program. The lying driver reports a
+    // refusal on `ledger.md` and exits 0, so git merges the path cleanly and
+    // the surface git prints does not contain it. A gate that published that
+    // surface would be telling a seat the branch has one conflict when a
+    // driver has just said it could not merge a second file.
+    const driverKey = 'merge.ledger.driver'
+    const was = git(clone, 'config', '--get', driverKey)
+    git(clone, 'config', driverKey, `bash ${join(clone, 'bin', 'liar.sh')} %O %A %B %L %P`)
+    try {
+      const { code, json } = run(['--head=origin/feat/conflict'])
+      assert.equal(code, 2)
+      const row = json.rows[0]
+      assert.equal(row.cause, 'DRIVER_REFUSAL_UNLISTED')
+      assert.equal(row.derived_from, 'ground')
+      // No surface is published under it, which is the whole point: an
+      // under-report is ground and never a verdict about the branch.
+      assert.deepEqual(row.paths, [])
+      assert.match(row.line, /ledger: ledger\.md/)
+      assert.match(row.line, /under-report that looks complete/)
+    } finally {
+      git(clone, 'config', driverKey, was)
+    }
+  })
 })
 
 describe('the clone precondition, rehearsed red', () => {
@@ -368,11 +496,11 @@ describe('the clone precondition, rehearsed red', () => {
 })
 
 describe('the verdict module, through its own declared space', () => {
-  it('declares three findings probes and six grounds, each with a distinct cause', () => {
+  it('declares four findings probes and seven grounds, each with a distinct cause', () => {
     const causes = new Set(GATE.groundProbes.map((p) => p.call().cause))
-    assert.equal(GATE.probes.length, 3)
-    assert.equal(GATE.groundProbes.length, 6)
-    assert.equal(causes.size, 6)
+    assert.equal(GATE.probes.length, 4)
+    assert.equal(GATE.groundProbes.length, 7)
+    assert.equal(causes.size, 7)
   })
 
   it('names the seat as the repair holder on every conflict verdict and nowhere else', () => {
@@ -400,6 +528,52 @@ describe('the verdict module, through its own declared space', () => {
       findings.map(pathLine),
       findings.map((f) => `  ${f.path}`),
     )
+  })
+
+  // The 2026-11-02 second case, as a test. A merge gate holding the complete
+  // path list still reported one conflict of two, because the sentence saying
+  // the register driver had refused `docs/agents/improvements.md` was on
+  // stderr. These three assertions are the three places that sentence now has
+  // to appear for a resolving seat to see it: beside the path, as a count in
+  // the verdict line, and as the distinction in the trailer.
+  it("names the driver and the reason beside the path a driver refused, which is refs/prs/668's improvements register", () => {
+    const probe = GATE.probes.find((p) => p.seen.head === 'refs/prs/668')
+    assert.ok(probe, 'the refs/prs/668 probe is the one this case was measured on')
+    const refused = probe.findings.find((f) => f.reason)
+    const lines = pathLine(refused).split('\n')
+    assert.equal(lines.length, 2)
+    assert.equal(lines[0], `  ${refused.path}`)
+    assert.match(lines[1], /refused by the register driver/)
+    assert.match(lines[1], /both sides edited '## Week of 2026-11-02' differently/)
+
+    // An ordinary line conflict in the SAME probe stays one line, so the
+    // two-line shape is the refusal and not the gate getting wordier.
+    const plain = probe.findings.find((f) => !f.reason)
+    assert.equal(pathLine(plain), `  ${plain.path}`)
+  })
+
+  it('counts the refusals in the verdict line and explains the resolution only when there is one', () => {
+    const probe = GATE.probes.find((p) => p.seen.head === 'refs/prs/668')
+    const v = verdict(probe.findings, probe.seen)
+    assert.match(v.line, /2 conflicted path\(s\), 1 of them refused by a merge driver with a reason/)
+    assert.match(v.line, /4 of 9 diagnostic line\(s\) carried a driver attribution/)
+    assert.match(v.line, /would have put 9 line\(s\) of stderr where the tree id belongs/)
+    assert.match(v.trailer.join('\n'), /needs somebody to choose/)
+
+    // And the block is absent when no driver refused anything, because a
+    // paragraph printed on every conflict is a paragraph nobody reads by the
+    // third one.
+    const plain = verdict(GATE.probes[1].findings, GATE.probes[1].seen)
+    assert.match(plain.line, /3 conflicted path\(s\), 0 of them refused/)
+    assert.doesNotMatch(plain.trailer.join('\n'), /needs somebody to choose/)
+  })
+
+  it('drops the attribution clause rather than printing an undefined count for a caller that predates it', () => {
+    const { attributed, collapseCost, ...older } = GATE.probes[1].seen
+    const v = verdict(GATE.probes[1].findings, older)
+    assert.doesNotMatch(v.line, /undefined/)
+    assert.doesNotMatch(v.line, /diagnostic line\(s\) carried/)
+    assert.doesNotMatch(v.line, /where the tree id belongs/)
   })
 
   it('carries the commit pair into the trailer of both outcomes, never only the failing one', () => {

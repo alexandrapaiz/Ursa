@@ -50,6 +50,23 @@
 // get a conflict surface out of this program without the tree that produced
 // it.
 //
+// AND THE REASON A DRIVER REFUSED IS ON THE OTHER HANDLE FROM THE PATH IT
+// REFUSED, which the tree-id guard above does not help with at all. Added
+// 2026-11-02 after `Ursa/exo` reported a second case of the collapse: a merge
+// gate that had installed both drivers reported ONE remaining conflict on its
+// held branch where there were two, and the one it dropped was the
+// `improvements` register, which the `register` driver had refused with a
+// reason naming a single heading both sides had edited. Re-measured here on
+// `refs/prs/668` against `origin/main` at `9c3c52dc` before anything was
+// built, and it reproduces: the path is on stdout, the sentence is on stderr.
+// So both drivers now emit one machine-readable attribution line per
+// invocation, `tools/stack/driver-report.mjs` parses it, and this gate prints
+// the reason under the path it belongs to -- because the two kinds of
+// conflicted path need different work, and keeping both sides is the correct
+// resolution for one of them and actively wrong for the other. A driver that
+// reports refusing a path git did not list is `DRIVER_REFUSAL_UNLISTED`, which
+// is ground: that is the state the 2026-11-02 census was in.
+//
 // WHICH QUESTION THE ANSWER IS TO, because there are two and they have
 // different answers. With this repository's drivers registered, "does this
 // conflict" means **can a seat resolve this without a person**. With them
@@ -116,6 +133,7 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { LOCUS, renderVerdict } from '../gates/verdict-shape.mjs'
+import { classify, collapseCost, reconcile } from './driver-report.mjs'
 import { GROUND, pathLine, verdict } from './merge-surface-verdict.mjs'
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
@@ -301,7 +319,19 @@ function measure({ repo, base, head }) {
     return { v: GROUND.treeIdUnreadable(parsed.fault), findings: [], seen: {} }
   }
 
-  const findings = parsed.paths.map((path) => ({ path, locus: LOCUS.SEAT }))
+  // What the drivers themselves said they did, read off the stderr this
+  // function already holds on its own pipe. The path list above says WHICH
+  // paths conflict; this says which of them a driver REFUSED and why, which is
+  // the half that was on the other handle. See `driver-report.mjs`.
+  const reported = classify(diagnostics)
+  const agreement = reconcile(reported.results, parsed.paths)
+
+  const findings = parsed.paths.map((path) => {
+    const refusal = agreement.reasonByPath[path]
+    return refusal
+      ? { path, locus: LOCUS.SEAT, driver: refusal.driver, reason: refusal.reason }
+      : { path, locus: LOCUS.SEAT }
+  })
   const seen = {
     base,
     head,
@@ -310,6 +340,17 @@ function measure({ repo, base, head }) {
     tree: parsed.tree,
     drivers: d.keys,
     diagnostics,
+    attributed: reported.results.length,
+    collapseCost: collapseCost(diagnostics),
+  }
+
+  // A driver saying it refused a path git did not list means the surface is an
+  // under-report while looking complete, so there is no verdict to publish
+  // about the branch. Checked BEFORE the exit-code/path-count agreement below,
+  // because this one names the specific path that is missing and that one can
+  // only say the two numbers disagree.
+  if (agreement.refusalsUnlisted.length > 0) {
+    return { v: GROUND.driverRefusalUnlisted(agreement.refusalsUnlisted), findings: [], seen }
   }
   if (disagrees(status, findings.length)) {
     return {
