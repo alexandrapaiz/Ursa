@@ -162,3 +162,139 @@ The 726M is the number L56 was missing. Its disk accounting priced the
 of the total. The real charge a run of this seat puts on a 45G volume
 shared by five companies is the cache plus the tree plus the frozen
 build, which is why §1.3's 321M of abandoned scratch was findable at all.
+
+## 3. What the instrument said about the site, and what it said about itself
+
+The instrument was calibrated first, which the kit requires: 21 of 21
+assertions in `selftest/check-focus.mjs` hold on this host, re-run from
+scratch rather than taken on PR #705's word, including the trap fixture
+and L36's 1.20 recomputed through this code path. Receipt in
+`data/check-focus-selftest.log`.
+
+Then it was pointed at `ursa-minor`, built with `next build` and served
+with `next start`, at the three review viewports over five pages.
+
+**The first pass found one defect in the site and three in itself.** That
+ratio is the honest headline of this run, and it is what happens the
+first time an instrument meets a surface it was not written against.
+
+### 3.1 The site defect: the one tab stop where focus moves and nothing changes
+
+`/record`, tab stop 4 of 6, at 1440x900 and 820x1180. An `input` with a
+**1x1** box, **zero** pixels different between the focused frame and the
+blurred one, on a page where every other stop reports 11.99:1.
+
+It is the file input inside "Open a record":
+
+```jsx
+<label className="cta ...">
+  Open a record
+  <input type="file" className="sr-only" … />
+</label>
+```
+
+The focusable element is the input, `sr-only` clips it to one pixel, and
+the site's global `:focus-visible` ring is therefore drawn perfectly,
+around that one pixel, behind the label. A pointer user never notices. A
+keyboard user tabs onto the control and the screen does not change.
+
+**Why no earlier review could have found it.** `measure-hit-areas.mjs`
+measures the label's box and reports a healthy 44px target. Reading the
+stylesheet finds a global focus rule that is correct and that does apply
+here. The defect lives only in the join, and the only way to see it is to
+put a keyboard on the control and photograph the result. That is the
+argument for the instrument, made by the instrument, on its first outing.
+
+The fix forwards the ring to the label with `:has(> input:focus-visible)`,
+same token, same weight, same offset, so no new value enters the design
+system. L59.
+
+### 3.2 The instrument defect that produced a contrast ratio from page text
+
+`ursa-minor` declares `html { scroll-behavior: smooth }`. The kit's
+freeze does not touch it, because it is not an `requestAnimationFrame`
+loop the page owns, and Playwright's `animations: 'disabled'` does not
+reach it either.
+
+`measure-focus.mjs` takes a control's box, then drives `Shift+Tab` and
+`Tab` to give it a keyboard focus, which makes the browser scroll, and
+then photographs the rectangle it computed before the scroll. The two
+frames of one stop therefore came from two different offsets.
+
+The proof is a pair of frames rather than an argument. For the
+`mini-fixture` link on `/record` at 820x1180 the tool reported
+`BELOW_FLOOR`, 49% of 655 indicator pixels, median 2.87. Magnified, the
+focused frame shows a passage reading `no_generation_pro…` and the
+blurred frame shows a different part of the page. **Neither frame
+contains the link.** The 655 pixels were page text that had slid, and the
+tool printed a contrast ratio for them.
+
+The same cause produced two `UNSTABLE` verdicts, a `NO_INDICATOR` on a
+header link that read 11.99 one viewport over, the inflated stop counts
+in §3.4, and the crash in §3.3.
+
+Repaired in two places: `lib/freeze.mjs` takes a `scroll` option that
+pins `scroll-behavior: auto`, opt-in on the same reasoning as `now`, and
+`measure-focus.mjs` re-reads the bounding box after the focus has landed
+instead of before. L58.
+
+### 3.3 The instrument defect that threw away four pages of measurements
+
+The phone pass **crashed**:
+
+```
+page.screenshot: Expected options.clip.height to be greater than 0
+    at docs/design/review-kit/measure-focus.mjs:389
+```
+
+A control whose box lies outside the viewport gives a clip with a
+non-positive side. The tool guards the element's box and never guards the
+clip computed from it, so the exception escaped the per-stop loop, the
+per-page loop and the per-viewport loop, and the run ended with no table
+at all. Three pages it had already measured went with it.
+
+The enumeration is explicit that a zero-box element is a legitimate tab
+stop and says "record it, flag it, do not drop it". The photographer one
+stage later does not hold the same line. One stop that cannot be
+photographed is now a row with the verdict `OFF_VIEWPORT`.
+
+### 3.4 The instrument defect that counted stops that were not there
+
+Before the scroll fix the reach table read "5 focusable in the DOM, 6 tab
+stops" on home at two viewports and "5 focusable, 8 tab stops" on the
+phone, and the extra stops appeared in no row of the table, because a
+stop the enumeration had not declared was a bare `continue`.
+
+Two things were wrong and the second hid the first. The extra stops were
+the moving page: a stop with no probe is keyed by its coordinates, and a
+page that is still scrolling gives one control a new key on every pass.
+With `scroll-behavior` pinned, every page reports exactly as many stops
+as the DOM declares. And the silent `continue` meant that a tool whose
+entire headline is a set difference was reporting one direction of it. An
+undeclared stop is now a row.
+
+### 3.5 The verdict that was wrong about a ring that is excellent
+
+The 404 page's only control reported `BELOW_FLOOR` at **5%** of 11,319
+indicator pixels, median 1.12, at two viewports. The magnified frames,
+committed as `frames/404-desktop-stop1-focused.png` and its blurred
+twin, show a bright unbroken ring at a 3px offset with the border
+brightened behind it. The site is right and the verdict was wrong.
+
+`.quiet-link` answers focus with three things at once: the ring at about
+11:1, a brightened border, and a 6% wash across the control's whole
+interior. The wash is most of the pixels and almost none of the
+contrast, so a share-of-all-changed-pixels statistic reads 5%. The share
+is not a bad statistic; it has an unstated assumption, which is that the
+indicator is only the ring, and every focus treatment that layers a
+quiet wash under a loud ring inverts it.
+
+A stop that fails the share is now asked a second question that needs no
+new constant: do the pixels that *do* clear 3:1 cover at least a 1 CSS px
+perimeter of the control on their own, `(w+2)(h+2) - wh`. That is the
+ring this site declares, measured off the control's own box. The 404's
+566 clearing pixels against a 558 pixel perimeter clear it, and the stop
+reads `COMPOSITE` rather than failing. A ring along one edge only does
+not clear it, and a ring drawn in its own backdrop's colour has no
+clearing pixels at all, which is the selftest's fixture 4 and it still
+fails as it should. L60.
