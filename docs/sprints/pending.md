@@ -2,6 +2,237 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (sixteenth pass): two Tier C charter rows reviewed and not merged, three superseded ancestors closed, nothing new for you to merge
+
+Triggered by three events on one wake: review #688 (exo) and #689
+(skill) against the merge rule, merge or report what each still
+needs; and process the skill seat's finished run, the same #689, by
+merging what qualifies, closing what is superseded, and handing the
+next thing to a seat.
+
+This run's own checkout started shallow and single-branch, the same
+recurring defect named in the charter's own clone-repair clause;
+repaired with `tools/ensure-full-clone.sh` (1 to 4,261 commits, 2 to
+324 remote-tracking refs) before trusting any ancestry check below.
+
+1. **#688 (exo) is NOT merged — Tier C by path, clean, and yours to
+   take.** Diff carries eleven files under `prompts/`, including this
+   seat's own `pm-agent.md`, so it is out of this seat's reach under
+   pm.md §10 regardless of how clean it reads. It does read clean:
+   `mergeStateStatus: CLEAN`, up to date with current `main`, checks
+   green. Independently verified (not on the PR's own word) that #618
+   and, through it, #612 are each a strict git ancestor of #688's
+   head (`git merge-base --is-ancestor`, full clone). #612 had already
+   been closed as superseded by #618 in an earlier pass; closed #618
+   as superseded by #688 the same way, so your one decision on #688
+   now covers all three. Posted the verdict to exo on the board.
+2. **#689 (skill) is NOT merged — Tier C by path (`prompts/
+   skill-extract.md`), clean, and yours to take.** Same shape: clean,
+   up to date with `main`, checks green. It names #684 as its own
+   superseded tip and eight further rows #684 already carried
+   (#633, #638, #644, #646, #652, #660, #673, #680, all closed in an
+   earlier pass); verified #684 is a strict ancestor of #689's head
+   and closed it, so your decision on #689 now covers all nine ahead
+   of it. Posted the verdict to skill on the board.
+3. **Handed the next thing to the engineer seat, on the board, since
+   dispatch is disabled in this run's environment
+   (`PM_DISPATCH_ENABLED` unset) and this one cannot wait for a
+   workflow run.** #689's own measurement found `tools/ledger/
+   requeue.sh` selects purely on the forge's conflict field and would,
+   with its push flag, merge the trunk into every row this run just
+   confirmed is already contained in a sibling's tip — destroying the
+   containment proof that lets you close duplicates as one decision.
+   The ledger entry carrying the measurement is filed inside #689
+   itself, proposed and not yet on `main`, so the board handoff is
+   the only place this is owed anywhere today. No code change made
+   here: `tools/ledger/requeue.sh` is the engineer's file.
+
+**Unchanged, not re-explained in full:** #395 (research) remains as
+prior passes left it, now nine days old and still Tier C
+(`prompts/engineer-agent.md`, `prompts/research-agent.md`). #601
+(skill) stays closed, superseded in an earlier pass. **#615
+(engineer) is no longer pending — merged since the last pass's PR**
+(`state: MERGED`, `updatedAt` 2026-11-02T03:50:46Z), so this line is
+removed from the queue rather than carried forward stale. No board
+message in the last few hours addressed this seat as an `ask`
+directly; the three events above arrived as the trigger for this run
+itself. Failed runs in the last six hours (`gh run list --status
+failure`) are the same three branches named by the dispatch queue,
+all already accounted for before this pass started; nothing new.
+
+Board notes posted this pass: to exo (#688's verdict and the #618/#612
+closures), to skill (#689's verdict and the #684 closure), and a
+handoff to engineer (the requeue containment guard), each referenced
+to this seat's own PR #698.
+
+## Top three for the owner, 2026-11-02 message-triggered (fifteenth pass): a false-positive red explained on two of my own rows, nothing new for you to merge
+
+Triggered by a board note from the skill seat about a red on its own
+full-suite run against a repaired clone, naming my own open row
+(#683) as the branch the one unexplained entry lives on, and saying
+plainly that the red is not a defect in my change.
+
+1. **Verified, not just read.** Checked #683's diff directly: it adds
+   one legitimate root dot-entry, `.claude/`, negates it in
+   `.gitignore`, and updates `tools/root-entries.test.mjs`'s own
+   allowlist literal to four, consistent with itself and with `main`
+   on its own. The test that goes red in a repaired clone runs
+   `git rev-list --all --objects` against an allowlist literal read
+   from one branch's working tree, so a clone holding both `main`
+   (three names) and this branch (four) reads the fourth name as
+   unexplained. #683's own CI is green; the red is clone-shape, not
+   content.
+2. **Said so on both rows.** Commented on #683 and on #684's sibling
+   #690 (which carries the same `.gitignore`/test change) that a red
+   seen there in a repaired clone is this known artifact, pointing at
+   the ledger entry rather than re-arguing it, so the next reviewer
+   does not spend an hour re-deriving what the skill seat already
+   measured. Replied to skill on the board in first person, naming
+   both rows and the ledger entry.
+3. **Owed to the engineer, carried here so it is not lost:** the
+   ledger entry in `docs/ideas.md`, 2026-11-02, "The root-entry gate
+   guards one of the clone's two properties..." (filed via #689,
+   status proposed) asks `tools/root-entries.test.mjs`'s history claim
+   to scope itself to the refs the working tree came from
+   (`git rev-list HEAD --objects`) rather than `--all`, or else name
+   the introducing ref for each unexplained entry. Not this seat's
+   file to patch. Nothing for you to merge on this item; flagging so
+   the engineer's next pass picks it up.
+
+## Top three for the owner, 2026-11-02 message-triggered (thirteenth pass): #684 is a clean Tier C merge waiting on you, eight superseded rows closed, one stale standing claim reported and not acted on
+
+Triggered by two events on one wake: review #684 (skill) against the
+merge rule, and a standing line claiming #688 (exo's own open draft)
+had no live run behind it and would not wake for days.
+
+This run's own clone started shallow; repaired with
+`tools/ensure-full-clone.sh` (1 to 4,235 commits) before trusting any
+ancestry check below.
+
+1. **#684 (skill) is NOT merged — Tier C by path, clean, and yours to
+   take.** Diff carries `prompts/skill-extract.md`, same ground as #673
+   and #667 before it, so it is out of this seat's reach under pm.md
+   §10 regardless of how clean it reads. And it does read clean:
+   `mergeStateStatus: CLEAN`, `mergeable: MERGEABLE`. It is the rebase
+   this seat asked skill for in the twelfth pass, done the cheaper way
+   (built on the branch that had already merged `main`, not re-run from
+   scratch), exactly as #684's own description says. Nothing blocks
+   your merge.
+2. **Eight rows closed as superseded, confirmed independently.**
+   #684 said it carries #633, #638, #644, #646, #652, #660, #673 and
+   #680. Checked each with `git merge-base --is-ancestor` on the full
+   clone rather than taking the claim on word: all eight came back
+   true. Closed all eight with a comment pointing to #684, so your
+   decision on #684 is the only one left standing on this content.
+   Posted the Tier C verdict to skill on the board.
+3. **A standing claim about #688 (exo) was checked and found false,
+   not acted on.** The wake said this seat's own draft had no live run
+   behind it. `tools/check-draft-prs.sh` read it as idle two minutes
+   with a run that may still be live; a second read two minutes later
+   showed the idle time had dropped, meaning the branch had just taken
+   a new commit. The condition was stale. This seat touched nothing on
+   #688 — readying or closing another seat's draft is its own call, or
+   yours, never this seat's from the outside — and posted the finding
+   to exo on the board instead.
+
+Six of this seat's own earlier passes today (#651, #666, #669, #674,
+#676, #678, #683) are still open and unmerged, none an ancestor of
+another. This pass is built on #683's tip, the newest. Expect to merge
+#683 (or this one, since it is built on #683 and carries everything
+#683 does) and treat the other five as superseded documentation of
+merges already landed on `main` directly — closing them is this seat's
+own housekeeping for a future pass, not something this pull request
+does, since reconciling six sibling `pending.md` edits by hand was not
+this run's task.
+
+## Top three for the owner, 2026-11-02 message-triggered (twelfth pass): one Tier B merge, #673 handed back to skill as Tier C, HQ's secret-print guard installed
+
+Triggered by four events on one wake: review #673 (skill) against the
+merge rule; read the skill seat's own report of the same run; read an
+engineer `done` about #671, already merged by this seat's own eleventh
+pass (#678); and a distribution handoff asking this seat to install
+HQ's secret-print guard, because this repository carried the rule
+(L-X5) and not the checker.
+
+This run's own clone started shallow; repaired with
+`git fetch --unshallow` before trusting any ancestry or merge-base
+check below, per the all-seats preconditions rule.
+
+1. **#675 (exo) merged under Tier B, not blindly.** Tier B by path
+   (`docs/agents/`, `tools/board/`, no `prompts/`, no workflow, no
+   secret). Re-derived mergeability with `git merge-tree --write-tree`
+   rather than trusting the cached field (clean, single tree), and ran
+   the two test files the diff touches in a throwaway worktree before
+   merging (43/43 pass) rather than taking the PR's own "722 pass"
+   claim on word. Fixes a real false-positive arm in the board's own
+   message-disposition gate (32 of 1,016 over-limit bodies were told
+   "your verdict was dropped" when it was delivered at offset zero) and
+   a test that had gone red on `main` for the right reason (it asserted
+   a defect that a different fix had already repaired).
+2. **#673 (skill) is NOT merged — Tier C by path, and it supersedes
+   #667.** Diff includes `prompts/skill-extract.md`, which puts the
+   whole pull request out of this seat's reach under pm.md §10 same as
+   #667 was. Confirmed #667 is a strict ancestor of #673's head
+   (`git merge-base --is-ancestor`, full clone), so #673 already
+   carries everything #667 did; closed #667 as superseded rather than
+   leaving two decisions where one covers both. #673 itself is not yet
+   mergeable even by the owner: a real `docs/ideas.md` conflict against
+   two entries #671 (engineer) added after #673's branch was cut,
+   confirmed with `git merge-tree` and read in full in a scratch
+   worktree. Both sides only append distinct dated sections at the same
+   point, so the fix is a union, not a judgment call — handed to the
+   skill seat on the board to rebase, with the exact commands.
+3. **HQ's secret-print guard is now installed, this pass's own
+   commit.** Distribution's handoff named the gap precisely: no
+   `tools/check-secret-print.py`, no `.claude/` directory at all, so no
+   command any seat runs here is checked before it runs. Ran HQ's own
+   `tools/install-secret-hook.py` from the resident host's
+   `alexandra-systems` checkout against this repository (needs no
+   credential, writes only the checker and the hook registration, never
+   pushes). Found and fixed a second gap the installer doesn't cover:
+   `.claude/` fell under this repository's own blanket
+   root-dot-entry rule in `.gitignore`, which would have silently
+   dropped the hook registration from every future clone — added the
+   negation the file's comment calls for and updated
+   `tools/root-entries.test.mjs`'s three-entry literals to four (21/21
+   green). Also added `tools/secret-print-baseline.txt`, matching HQ's
+   own baseline byte for byte in reasoning, accepting the two GH
+   Actions masking lines the checker now correctly flags in every
+   `agent-*.yml` workflow — this repository cannot fix those lines
+   itself (no seat token may edit `.github/workflows/`), and HQ already
+   accepts the identical idiom for the identical reason.
+
+4. **#601 (skill) also closed as superseded by #673**, confirmed by
+   the same ancestry check as #667 (full clone, `git merge-base
+   --is-ancestor`). A prior pass had checked containment against #623
+   and correctly found it absent there; #673 is a different, later
+   branch and holds it.
+
+**The rest of the open queue, unchanged since the eighth/ninth/tenth/
+eleventh passes and not re-explained in full:** #618 and #612 (exo)
+are Tier C by path, #612 contained in #618; #615 (engineer) is
+confirmed `MERGED` live (`gh pr view 615`, 03:50:44Z, this seat's
+ninth pass #674), so it drops off this list entirely from this pass
+on; #395 (research) is past nine days old on an owner-merge pull
+request, unchanged.
+
+**Failures, since the last pass: none new.** `gh run list --status
+failure --created ">=$(date -u -d '-6 hours' +%FT%TZ)"` returns four
+rows, all from branches already merged, closed or superseded before
+this pass started (`ursa-security/2026-11-02-message-3`,
+`ursa-pm/2026-11-02-message-4`, `ursa-market/2026-11-02-message`) —
+nothing from this pass's own window to triage.
+
+**Dispatch.** `PM_DISPATCH_ENABLED` unset this run; queue written in
+full in `dispatch-queue.md`, nothing fires.
+
+Board posts this pass: a reply to distribution's handoff naming the
+install and the two gaps found and closed; an acknowledgment to the
+engineer's `done` about #671, confirming nothing is blocked on this
+seat; a note to the skill seat on #673/#667; and one broadcast `done`
+naming the merge, the close and the install, with merged numbers in
+`data`.
+
 ## Top three for the owner, 2026-11-02 message-triggered (eighth pass): three Tier B merges, one red-check finding handed to market, nothing new for you
 
 Triggered by a message asking for the full routine at once: inbox and
