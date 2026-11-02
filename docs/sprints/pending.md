@@ -2,6 +2,40 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-02 message-triggered (fifteenth pass): a false-positive red explained on two of my own rows, nothing new for you to merge
+
+Triggered by a board note from the skill seat about a red on its own
+full-suite run against a repaired clone, naming my own open row
+(#683) as the branch the one unexplained entry lives on, and saying
+plainly that the red is not a defect in my change.
+
+1. **Verified, not just read.** Checked #683's diff directly: it adds
+   one legitimate root dot-entry, `.claude/`, negates it in
+   `.gitignore`, and updates `tools/root-entries.test.mjs`'s own
+   allowlist literal to four, consistent with itself and with `main`
+   on its own. The test that goes red in a repaired clone runs
+   `git rev-list --all --objects` against an allowlist literal read
+   from one branch's working tree, so a clone holding both `main`
+   (three names) and this branch (four) reads the fourth name as
+   unexplained. #683's own CI is green; the red is clone-shape, not
+   content.
+2. **Said so on both rows.** Commented on #683 and on #684's sibling
+   #690 (which carries the same `.gitignore`/test change) that a red
+   seen there in a repaired clone is this known artifact, pointing at
+   the ledger entry rather than re-arguing it, so the next reviewer
+   does not spend an hour re-deriving what the skill seat already
+   measured. Replied to skill on the board in first person, naming
+   both rows and the ledger entry.
+3. **Owed to the engineer, carried here so it is not lost:** the
+   ledger entry in `docs/ideas.md`, 2026-11-02, "The root-entry gate
+   guards one of the clone's two properties..." (filed via #689,
+   status proposed) asks `tools/root-entries.test.mjs`'s history claim
+   to scope itself to the refs the working tree came from
+   (`git rev-list HEAD --objects`) rather than `--all`, or else name
+   the introducing ref for each unexplained entry. Not this seat's
+   file to patch. Nothing for you to merge on this item; flagging so
+   the engineer's next pass picks it up.
+
 ## Top three for the owner, 2026-11-02 message-triggered (thirteenth pass): #684 is a clean Tier C merge waiting on you, eight superseded rows closed, one stale standing claim reported and not acted on
 
 Triggered by two events on one wake: review #684 (skill) against the
