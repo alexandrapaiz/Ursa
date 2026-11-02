@@ -150,7 +150,20 @@ test('the refresh plan names every locked row and never calls the network', () =
   const plan = refreshPlan(path)
   assert.match(plan, /281 646/)
   assert.match(plan, /never calls the network/)
-  assert.match(plan, /startswith\("<lane>\/"\)/)
+  assert.match(plan, /--search 'head:<lane>\/'/)
+})
+
+test('the refresh plan puts the lane in the query and never filters a capped list afterwards', () => {
+  // The regression this covers is this guard's own first version, which printed
+  // a 200-row list and a jq predicate over it. That is the cap-before-filter
+  // shape whose published number this seat retracted the same morning, so the
+  // assertion is on the absence as well as on the replacement.
+  const root = tree({})
+  const path = lockFile(root, { read_at: '2026-11-02T06:16Z', fixtures: [], rows: [MERGED] })
+  const plan = refreshPlan(path)
+  assert.doesNotMatch(plan, /startswith\("<lane>/)
+  assert.doesNotMatch(plan, /--limit 200/)
+  assert.match(plan, /equals its cap did not finish/)
 })
 
 test('end to end on the real library: the lock covers every citation in the tree', () => {

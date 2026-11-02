@@ -58,6 +58,23 @@
 // weather. Printing the age with the interval beside it hands the reader the
 // one judgement a clone cannot make for itself.
 //
+// THE COMMANDS THIS GUARD PRINTS ARE ALSO EVIDENCE, and the first version of
+// them carried the defect the run that wrote this guard had just retracted.
+// `--refresh` told its reader to list every open row under a cap of 200 and
+// then pick the lane out with jq, which is a cap spent on the queue and a
+// predicate applied to whatever the cap admitted. That is the same shape as
+// `gh pr list --state closed` filtered for an absent `mergedAt`, which reported
+// 109 closed and unmerged rows where the population was 355. It did not bite
+// here, because this repository had 15 open rows when it was written. It bites
+// at 201, and nothing in the output would say when it started.
+//
+// Both halves of the repair are in the plan now. The lane goes into the query
+// as `--search 'head:<lane>/'`, verified against this lane on 2026-11-02 at
+// two rows out of fifteen open. And the plan says in words that a read whose
+// row count equals its cap did not finish, because neither forge read returns
+// anything like the board's `saturated` flag and the reader is the only place
+// that check can live.
+//
 // An unknown flag is refused rather than ignored. All four of this library's
 // older guards accept `--not-a-real-flag` and run their default mode, measured
 // on 2026-11-02, which is how a run that asked a question the tool could not
@@ -215,10 +232,15 @@ export function refreshPlan(lockPath = LOCK) {
     '',
     'For a row that is closed or open, the disposition is a snapshot and the lane is',
     'the durable field. This resolves the lane\'s live tip, which is the thing a',
-    'reader actually wants:',
+    'reader actually wants. The predicate is in the query and not in a filter after',
+    'it, so the cap is spent on the lane rather than on the whole queue:',
     '',
-    '  gh pr list --state open --limit 200 --json number,headRefName \\',
-    '    --jq \'.[] | select(.headRefName | startswith("<lane>/"))\'',
+    '  gh pr list --state open --search \'head:<lane>/\' --limit 100 \\',
+    '    --json number,headRefName,updatedAt',
+    '',
+    'Both of these reads are capped, and neither surface says so. A read whose row',
+    'count equals its cap did not finish, so it is a subset and not an answer: widen',
+    'the cap or narrow the window and run it again before writing anything down.',
   ].join('\n')
 }
 
