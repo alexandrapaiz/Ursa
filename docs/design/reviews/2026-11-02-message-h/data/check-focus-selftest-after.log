@@ -1,0 +1,26 @@
+rings.html
+  ok    1. the tab walk reaches controls
+  ok    6/7. declared counts only what Tab can reach: 3, not 6
+  ok       and so nothing is unreachable
+  ok    3. polar on night: every indicator pixel clears 3:1
+  ok    3. polar on night: median is L36's 11.99
+  ok    3. and the verdict is ok
+  ok    4. line on night: no indicator pixel clears 3:1
+  ok    4. line on night: median is L36's 1.20
+  ok    4. and the verdict is BELOW_FLOOR
+  ok    5. outline:none is NO_INDICATOR, not a ratio
+  ok    5. and it carries no share
+  ok    8. 2.4.11 minimum for a 100x24 box is 512px
+  ok    8. a 3px ring at 3px offset measures 852px
+  ok    8. so the area column reads 1.66
+  ok    10. exit 1, because one stop is below a floor
+trap.html
+  ok    2. the DOM offers four controls
+  ok    2. the walk stops at the trap, two stops
+  ok    2. and the two behind it are reported unreachable
+  ok    2. exit 1, because unreachable alone fails
+drift.html
+  ok    9. a moving neighbourhood is UNSTABLE, not a ratio
+  ok    9. and it carries no share
+
+all assertions hold (fixtures in /tmp/focus-selftest-pLNlzM)
