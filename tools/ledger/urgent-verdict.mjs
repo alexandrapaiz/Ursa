@@ -28,6 +28,26 @@
 // A seat whose entry this tool says `symptom-cleared` has done nothing wrong
 // and must not be handed a red light for it.
 //
+// THE KNOWN FALSE POSITIVE, MEASURED RATHER THAN HEDGED AGAINST. A probe an
+// entry names is not always the probe that would decide it, because prose
+// cites a path as a subject as readily as as a test. The worked case is the
+// ledger entry of 2026-10-27, "A credential-shaped fixture is in this branch's
+// history, where a one-line edit cannot reach it". It names
+// `tools/secret-scan-verdict.test.mjs` because that file is WHERE the fixture
+// sits, and this tool therefore runs that file's unit suite, whose greenness
+// says nothing whatever about git history. The decisive command is
+// `node tools/secret-scan.mjs --history`, which no sentence in the entry puts
+// inside a span this extractor reads. Run by hand on 2026-11-08 it prints
+// `7829 blobs, 16 classes, 0 hit(s), 1 accepted by baseline`, and the accepted
+// line is that same blob `ef90504da7db`: so the scanner is clean, the blob is
+// still in history, and the entry is waiting on the owner's choice between a
+// permanent baseline and a history rewrite. The classification this tool
+// reached, `symptom-cleared`, happens to be the right word for that. It
+// reached it by luck. That is the reason the disposition is named
+// `symptom-cleared` and not `resolved`, the reason the report's last line says
+// so in the output rather than only here, and the reason this tool can never
+// be allowed to edit the field it reports on.
+//
 // WHY IT NEVER REWRITES THE LEDGER. `prompts/engineer-agent.md` reserves the
 // status field: the owner moves `proposed`, and the only transition this seat
 // holds is `accepted` to `built`. `urgent` is not in that grant. So the output
@@ -59,7 +79,17 @@ export const REPO_ROOTS = [
  *  present in `git ls-files`. Nothing else is ever run, and an entry naming
  *  `ursa-major/src/resolver.test.ts` is reported as naming no probe rather
  *  than being handed to a second runner. */
-export const PROBE_SHAPE = /^tools\/[\w./-]+\.test\.mjs$/
+//  Written segment by segment rather than as one character class. The first
+//  version of this constant was `/^tools\/[\w./-]+\.test\.mjs$/`, which put `.`
+//  and `/` in the same class and therefore accepted
+//  `tools/../../etc/passwd.test.mjs`. Its own test case caught that. Every
+//  segment here must open with an alphanumeric or an underscore, so a `..`
+//  segment is refused by shape and the refusal does not depend on the
+//  traversal happening to land on a path nobody tracks.
+const SEGMENT = '[A-Za-z0-9_][A-Za-z0-9_.-]*'
+export const PROBE_SHAPE = new RegExp(
+  `^tools(?:/${SEGMENT})*/${SEGMENT}\\.test\\.mjs$`,
+)
 
 /** Inline code spans, which is the only place this tool looks for a path.
  *  Ledger prose names files in backticks by convention and names concepts
