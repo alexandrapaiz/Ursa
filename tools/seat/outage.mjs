@@ -11,6 +11,8 @@
 //                                                      # runs completed between
 //                                                      # a registration and a read
 //     node tools/seat/outage.mjs --board               # add the board-author read
+//     node tools/seat/outage.mjs --why                 # which limit refused, in
+//                                                      # the provider's own words
 //
 // Exit 0 the read succeeded and (under --gate) no dark day was found. Exit 1
 // --gate and a dark day exists. Exit 2 usage. Exit 3 the question cannot be
@@ -83,6 +85,51 @@
 // joining against GET /api/work/<Company>/<seat>, rather than leaving the
 // reader to assume.
 //
+// AND `provider` IS TWO CLASSES, WHICH IS WHY --why EXISTS (added 2026-11-08,
+// ninety-third window, measured over 98 refused Ursa run rows in seven days).
+//
+// `darkCause` below reads the day's four counts and answers `provider` when
+// refusals dominate and happened before the first turn. That is right and it
+// stops one question short, because this host has met two provider refusals
+// with the same four counts and opposite remedies:
+//
+//   2026-10-28..10-31   "You've hit your weekly limit, resets Nov 8, 11pm (UTC)"
+//   2026-11-03..11-07   "You've hit your org's monthly spend limit, ask your
+//                        admin to raise it at claude.ai/admin-settings/usage,
+//                        your weekly limit resets Nov 8, 11pm (UTC)"
+//
+// A weekly limit is a clock and waiting is the whole remedy. An org spend limit
+// names an account decision that no run of any seat can take. Both print
+// `DARK provider`, so the class a returning window reads cannot tell it whether
+// the stall ends on its own.
+//
+// The text is on every refused row of GET /api/runs and has been the whole
+// time, under `refusal`. Nothing in this organization read it until the
+// eighty-fifth window, and nothing classified it until this one.
+//
+// AND CLASSIFY ON THE LIMIT WORD, NOT ON THE FORMAT OF THE INSTANT. The
+// charter's four-cap table in prompts/exo-agent.md §2 separates weekly usage
+// from session usage by whether the refusal "names a reset date" or "names a
+// reset hour". Run over the 98 live rows, that discriminator puts
+//
+//   64 rows  names a DATE   text says monthly spend limit   -> called weekly
+//   21 rows  names a DATE   text says weekly limit          -> called weekly
+//   13 rows  names an HOUR  text says monthly spend limit   -> called SESSION
+//
+// so 13 of 98 are graded as a per-session cap that clears within the hour when
+// the provider's own sentence names an org spend limit. Zero of 98 are a true
+// session refusal. The format of the instant is the provider's rendering
+// choice; the limit word is the fact. `classifyRefusal` keys on the word.
+//
+// AND THE OUTCOME, because a class is not a prediction. Every Ursa run that
+// started at or after 2026-11-08T23:02Z completed with exit 0 — exo at 146
+// turns, pm at 41 and 52, engineer at 63 — so this stall did clear at the
+// weekly reset instant named inside the monthly-spend text, and the account
+// decision the text asks for was not required. That is one occurrence. Report
+// the class and the outcome separately, because the text names a limit that no
+// clock in it resets, and a window that reads only the class cannot tell which
+// of the two stalls it is standing in.
+//
 // THE GENERAL RULE, which is the part worth more than this file: whether a
 // surface can over-report is a function of WHO CAN WRITE TO IT, not of what it
 // is about. /api/capacity reads the host's own log directory and cannot be
@@ -115,6 +162,43 @@ export function darkCause(day) {
   if (refused > hostSide && turnOne > 0) return 'provider';
   if (hostSide > 0 && hostSide >= refused) return 'host';
   return 'mixed';
+}
+
+/**
+ * Which limit refused a run, from the provider's own sentence.
+ *
+ * Keyed on the LIMIT WORD and never on the format of the instant beside it,
+ * because one live string names a monthly spend limit and a weekly reset hour
+ * in the same breath, and a discriminator reading the instant calls that a
+ * per-session cap. Checked most-binding-first: a sentence naming both the
+ * monthly and the weekly limit is reporting the monthly one as the thing that
+ * stopped the run, and the weekly reset as the next clock it knows about.
+ *
+ *   spend-monthly  — an org spend limit. No clock in the text resets it; the
+ *                    remedy it names is an account decision under
+ *                    docs/standards/pm.md §§21-22 and is nobody's run to take.
+ *   usage-weekly   — a weekly usage limit. A clock, and waiting is the remedy.
+ *   usage-session  — a per-session usage limit. A shorter clock.
+ *   null           — the row was not refused.
+ *   unclassified   — refused, and this function does not know the sentence.
+ *                    Never folded into one of the four above: an unknown
+ *                    refusal read as a known one is the class error this
+ *                    function exists to stop.
+ */
+export function classifyRefusal(text) {
+  if (text === null || text === undefined || String(text).trim() === '') return null;
+  const t = String(text).toLowerCase();
+  if (/(monthly|month's)\s+spend|spend\s+limit/.test(t)) return 'spend-monthly';
+  if (/weekly\s+limit/.test(t)) return 'usage-weekly';
+  if (/session\s+limit|per-session|5-?hour|five-hour/.test(t)) return 'usage-session';
+  return 'unclassified';
+}
+
+/** Does this refusal name a clock that will clear it on its own? */
+export function clearsOnAClock(cls) {
+  if (cls === 'usage-weekly' || cls === 'usage-session') return true;
+  if (cls === 'spend-monthly') return false;
+  return null;                       // unclassified or not refused: unknown
 }
 
 /**
@@ -244,6 +328,40 @@ export function classifyAuthors({ rows, runRows = {} }) {
     .sort((x, y) => String(y.last).localeCompare(String(x.last)));
 }
 
+/**
+ * Group refused run rows by the limit that refused them.
+ *
+ * `rows` are run rows: { seat, started_at, exit, turns, refusal }.
+ * Returns one entry per class, newest-first by last occurrence, each carrying
+ * the distinct sentences the provider actually sent, so a reader can grade the
+ * classifier rather than trusting it.
+ */
+export function refusalClasses(rows) {
+  const by = new Map();
+  for (const r of rows) {
+    const cls = classifyRefusal(r?.refusal);
+    if (cls === null) continue;
+    if (!by.has(cls)) by.set(cls, { cls, runs: 0, days: new Set(), texts: new Map(), last: '' });
+    const e = by.get(cls);
+    e.runs += 1;
+    e.days.add(String(r.started_at || '').slice(0, 10));
+    const t = String(r.refusal);
+    e.texts.set(t, (e.texts.get(t) || 0) + 1);
+    if (String(r.started_at) > e.last) e.last = String(r.started_at);
+  }
+  return [...by.values()]
+    .map((e) => ({
+      cls: e.cls,
+      runs: e.runs,
+      days: [...e.days].sort(),
+      last: e.last,
+      clears_on_a_clock: clearsOnAClock(e.cls),
+      texts: [...e.texts.entries()].map(([text, n]) => ({ text, runs: n }))
+        .sort((a, b) => b.runs - a.runs),
+    }))
+    .sort((x, y) => String(y.last).localeCompare(String(x.last)));
+}
+
 // ------------------------------------------------------------------- network
 
 async function get(path) {
@@ -286,6 +404,23 @@ async function boardRead(hours) {
   return { rows, saturated: rows.length >= 500 };
 }
 
+/** Refused run rows for this company's seats. Per seat, because
+ *  GET /api/runs refuses a company-only call and jq's `length` of null prints
+ *  that refusal as a zero (prompts/exo-agent.md §2). */
+async function refusedRuns(company, seats, days) {
+  const out = [];
+  for (const seat of seats) {
+    try {
+      const j = await get(`/api/runs?company=${company}&seat=${seat}&days=${days}&limit=500`);
+      if (!Array.isArray(j.runs)) continue;         // a refusal, not an empty seat
+      for (const r of j.runs) {
+        out.push({ seat, started_at: r.started_at, exit: r.exit, turns: r.turns, refusal: r.refusal });
+      }
+    } catch { /* a seat the route does not know contributes no rows */ }
+  }
+  return out;
+}
+
 async function runRowsFor(authors, days) {
   const out = {};
   for (const key of authors) {
@@ -303,18 +438,22 @@ async function runRowsFor(authors, days) {
 
 function usage(code) {
   process.stdout.write(`usage: node tools/seat/outage.mjs [--days N] [--json] [--gate]
-                                   [--board] [--interval FROM,TO]\n`);
+                                   [--board] [--interval FROM,TO]
+                                   [--why] [--company NAME]\n`);
   return code;
 }
 
 async function main(argv) {
   let days = DEFAULT_DAYS, json = false, gate = false, board = false, interval = null;
+  let why = false, company = 'Ursa';
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--days') days = Number(argv[++i]);
     else if (a === '--json') json = true;
     else if (a === '--gate') gate = true;
     else if (a === '--board') board = true;
+    else if (a === '--why') why = true;
+    else if (a === '--company') company = String(argv[++i] || '');
     else if (a === '--interval') interval = String(argv[++i] || '').split(',');
     else if (a === '--help' || a === '-h') return usage(0);
     else return usage(2);
@@ -345,6 +484,15 @@ async function main(argv) {
     });
   }
 
+  let refusals = null, refusedRowCount = null;
+  if (why) {
+    const seats = ['engineer', 'exo', 'finance', 'frontend', 'market', 'okr',
+                   'pm', 'research', 'sales', 'security', 'skill'];
+    const rows = await refusedRuns(company, seats, days);
+    refusedRowCount = { rows: rows.length, refused: rows.filter((r) => r.refusal).length };
+    refusals = refusalClasses(rows);
+  }
+
   let authors = null, saturated = false;
   if (board) {
     const read = await boardRead(days * 24);
@@ -354,7 +502,8 @@ async function main(argv) {
   }
 
   const report = { now: now.toISOString(), days, rows, dark_days: dark, dark_span: span,
-                   interval: intervalRead, authors, board_read_saturated: saturated };
+                   interval: intervalRead, authors, board_read_saturated: saturated,
+                   refusal_classes: refusals, refused_rows: refusedRowCount };
 
   if (json) process.stdout.write(JSON.stringify(report, null, 2) + '\n');
   else {
@@ -382,6 +531,32 @@ async function main(argv) {
         `${intervalRead.since_read_date.to}: ` +
         `${intervalRead.since_read_date.completed} completed ` +
         `-> read verdict ${intervalRead.verdict}\n`);
+    }
+    if (refusals) {
+      process.stdout.write(
+        `\nwhy ${company} was refused, over ${refusedRowCount.refused} refused ` +
+        `of ${refusedRowCount.rows} run row(s) in ${days} day(s):\n`);
+      if (!refusals.length) process.stdout.write('  no refused row carried a reason.\n');
+      for (const r of refusals) {
+        const clock = r.clears_on_a_clock === true ? 'clears on a clock'
+          : r.clears_on_a_clock === false ? 'NO CLOCK CLEARS IT -- an account decision'
+          : 'whether a clock clears it is unknown';
+        process.stdout.write(
+          `  ${r.cls.padEnd(14)} ${String(r.runs).padStart(4)} run(s) over ` +
+          `${r.days.length} day(s), last ${r.last.slice(0, 16)}  ${clock}\n`);
+        for (const t of r.texts) {
+          process.stdout.write(`      ${String(t.runs).padStart(4)}x ${t.text}\n`);
+        }
+      }
+      process.stdout.write(
+        '  The class is keyed on the limit WORD, never on the format of the instant\n' +
+        '  beside it: one live sentence names an org spend limit and a weekly reset\n' +
+        '  hour together, and a discriminator reading the instant calls that a\n' +
+        '  per-session cap. unclassified is never folded into a known class.\n' +
+        '  A class is not a prediction. spend-monthly says no clock in the text\n' +
+        '  resets it, not that the stall will not end; on 2026-11-08 a five-day\n' +
+        '  spend-monthly stall cleared at the weekly reset anyway. Report the class\n' +
+        '  and the outcome separately.\n');
     }
     if (authors) {
       process.stdout.write(`\nboard authors in the last ${days} day(s)` +
