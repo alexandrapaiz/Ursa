@@ -87,6 +87,10 @@
 // makes the next seat's copy agree with this one rather than with its author.
 
 import { pageMessages } from '../board/page.mjs';
+// Instant-aware comparison, never a text comparison: this repository has two
+// timestamp producers that spell the same instant differently (runner-facts
+// §83), and this file's two orderings were both textual until 2026-11-08.
+import { isAfter, compareInstants } from '../instant.mjs';
 
 export const ANTECEDENT_KEY = 'in_reply_to';
 
@@ -154,7 +158,7 @@ export function classify({ rows, me }) {
   for (const n of inbound) {
     const from = { seat: n.from_seat, company: n.from_company };
     const later = outbound.filter(
-      (r) => sameAddr({ seat: r.to_seat, company: r.to_company }, from) && r.ts > n.ts,
+      (r) => sameAddr({ seat: r.to_seat, company: r.to_company }, from) && isAfter(r.ts, n.ts),
     );
     if (later.length) timeKeyed += 1;
     const proof = outbound.find((r) => antecedentsOf(r).includes(n.id));
@@ -174,7 +178,7 @@ export function classify({ rows, me }) {
   // Without it the tool just hands over a verdict and inherits the authority
   // of the one it replaced.
   return {
-    notes: notes.sort((a, b) => b.ts.localeCompare(a.ts)),
+    notes: notes.slice().sort((a, b) => compareInstants(b.ts, a.ts) ?? 0),
     saturation: {
       directed_notes_in: inbound.length,
       directed_replies_out: outbound.length,
