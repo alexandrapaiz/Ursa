@@ -344,6 +344,41 @@ function dedupeByKey (points) {
   })
 }
 
+// A ROW'S PROVENANCE IS NOT ITS MEASURED COMMIT, which is the correction
+// 2026-11-08 paid for. Keying on file and name rather than on the TAP number
+// is right and this tool's header argues it at length: one new suite
+// renumbers everything after it. What the header does not say is what the
+// choice costs. It buys that correctness with a dependence on a STRING that
+// any sibling seat may edit, and `measuredOn` cannot detect the edit, because
+// a rename is not a change to the row's subject — it is a change to the row's
+// KEY. The row then goes stale while still describing a real failure.
+//
+// Measured, and this seat was both the author and the cause. The baseline's
+// one standing row was keyed on `the real queue: measured on a complete
+// clone, or skipped with the reason named`. This seat renamed that test at
+// 2026-11-02T08:56:44Z on its own open branch (f19ab0f1) and the row was
+// written at 09:06:00Z, so it was contradicted ten minutes BEFORE it was
+// written and on the trunk at 09:38:40Z, thirty-two minutes after. Nothing
+// observed either, because no run of this instrument completed for six days.
+// The tool reported it honestly as GONE, which is the right verdict and an
+// unanswerable one: GONE asks "deleted or renamed?" and nothing in the row
+// could answer it, so resolving it took a `git log -L` over the test's own
+// line that only a run already suspicious of the row would think to make.
+//
+// So a row now carries `flipQuery`: the one command whose output decides the
+// row's current state. It is printed beside STILL_RED, where it says how to
+// check that the debt is still owed, and beside GONE, where it is the answer
+// to the question GONE asks. A row without one is reported as lacking it
+// rather than silently, because the absence is the finding.
+export function flipLines (row) {
+  if (!row.flipQuery) {
+    return ['      flipQuery: NONE — this row cannot be checked without archaeology']
+  }
+  const lines = [`      flips on: ${row.flipQuery}`]
+  if (row.flipExpect) lines.push(`      still red while: ${row.flipExpect}`)
+  return lines
+}
+
 export function formatReport (cmp, baseline) {
   const out = []
   const collected = cmp.collected === null ? 'unstated' : `${cmp.collected} collected`
@@ -360,6 +395,7 @@ export function formatReport (cmp, baseline) {
     for (const p of cmp.stillRed) {
       out.push(`  ${p.file}  ${p.name}`)
       out.push(`      since ${p.since}, owner: ${p.owner ?? 'UNOWNED'}${p.ref ? ` (${p.ref})` : ''}`)
+      out.push(...flipLines(p))
     }
     out.push('')
   }
@@ -379,8 +415,13 @@ export function formatReport (cmp, baseline) {
   }
   if (cmp.vanished.length > 0) {
     out.push(`GONE  ${cmp.vanished.length} — in the baseline and no longer collected at all.`)
-    out.push('  A deleted or renamed test is not a paid debt. Say which it was:')
-    for (const e of cmp.vanished) out.push(`  ${e.file}  ${e.name}`)
+    out.push('  A deleted or renamed test is not a paid debt. Say which it was,')
+    out.push('  and resolve the row rather than leaving it to print again:')
+    for (const e of cmp.vanished) {
+      out.push(`  ${e.file}  ${e.name}`)
+      out.push(`      owner: ${e.owner ?? 'UNOWNED'} — theirs to resolve`)
+      out.push(...flipLines(e))
+    }
     out.push('')
   }
   if (cmp.newRed.length === 0 && cmp.fixed.length === 0 &&

@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs'
 import {
   parseTap, toRepoPath, keyOf, compare, formatReport, exitCodeFor,
   readSummary, BASELINE_PATH, RETIRED_SUITE_GLOB, suiteRoots, canonicalSuites,
-  resetSuitesCache, whyRefused, whyUntrusted, freeMB
+  resetSuitesCache, whyRefused, whyUntrusted, freeMB, flipLines
 } from './suite-baseline.mjs'
 
 // The set every path assertion below resolves against, pinned so this file
@@ -488,6 +488,11 @@ test('the committed baseline is well formed, and every entry is attributable', (
     assert.match(e.since, /^\d{4}-\d{2}-\d{2}$/, 'a standing failure needs the day it started standing')
     assert.ok(e.owner, 'every entry names an owner or says UNOWNED; it never omits the question')
     assert.ok(e.note, 'and says what it measured, so the next run need not re-derive it')
+    assert.ok(e.dependsOn, 'and what its colour is a function of, so green is read correctly')
+    // The 2026-11-08 field. A row keyed on a string any seat may edit needs
+    // the query that decides its current state, because `measuredOn` cannot
+    // detect a rename: a rename changes the KEY, not the subject.
+    assert.ok(e.flipQuery, 'every entry carries the one command that decides whether it still holds')
   }
   // The retired glob is kept as a named constant, not invoked, because the
   // baseline's recorded history cites the numbers it produced and a reader
@@ -539,4 +544,72 @@ test('the live volume reads as a positive number, so the probe is wired to a rea
 test('the committed baseline carries the environment floor it documents', () => {
   const b = JSON.parse(readFileSync(BASELINE_PATH, 'utf8'))
   assert.ok(Number.isInteger(b.minFreeMB) && b.minFreeMB > 0)
+})
+
+// THE RENAME, which is the case `measuredOn` cannot see and this seat caused.
+// This tool keys on file and name because the TAP number renumbers on any new
+// suite, and that is right. The cost is a dependence on a string a sibling
+// seat may edit, and on 2026-11-02 the sibling was this seat: it renamed the
+// test its own row was keyed on at 08:56:44Z, ten minutes before the row was
+// written at 09:06:00Z, and the rename reached the trunk at 09:38:40Z. The
+// row then described a real failure under a key nothing collected.
+//
+// The verdict was already right — GONE, never FIXED, so the debt was not
+// written off. What was missing was any way to ANSWER it. GONE asks "deleted
+// or renamed?" and six days passed without a reply.
+test('GONE names the row\'s owner and the query that answers it', () => {
+  const baseline = {
+    minPoints: 1,
+    red: [{
+      file: 'tools/stack/repair-pending.test.mjs',
+      name: 'a name no run collects any more',
+      since: '2026-11-02',
+      owner: 'security',
+      dependsOn: 'forge-queue',
+      flipQuery: "git log -L 252,252:tools/stack/repair-pending.test.mjs origin/main",
+      note: 'the measured row'
+    }]
+  }
+  // A complete run that simply does not contain the row's key.
+  const tap = 'TAP version 13\nok 1 - something else entirely\n1..1\n# tests 1\n'
+  const cmp = compare(parseTap(tap), baseline, readSummary(tap))
+  assert.equal(cmp.vanished.length, 1)
+  assert.equal(cmp.fixed.length, 0, 'a vanished row is not a paid one')
+  const out = formatReport(cmp, baseline)
+  assert.match(out, /GONE {2}1/)
+  assert.match(out, /owner: security — theirs to resolve/)
+  assert.match(out, /flips on: git log -L 252,252/)
+  // And it is still not the running seat's fault, so it still does not block.
+  assert.equal(exitCodeFor(cmp, baseline), 0)
+})
+
+test('STILL_RED carries the flip query too, so a stale row is checkable in place', () => {
+  const baseline = {
+    minPoints: 1,
+    red: [{
+      file: 'tools/board/read-filters.test.mjs',
+      name: 'the test that fails',
+      since: '2026-11-02',
+      owner: 'security',
+      dependsOn: 'tree',
+      flipQuery: 'node --test tools/board/read-filters.test.mjs',
+      flipExpect: 'the assertion still names the spelling and not the property',
+      note: 'the measured row'
+    }]
+  }
+  const tap = 'TAP version 13\nnot ok 1 - the test that fails\n  ---\n  location: \'/x/tools/board/read-filters.test.mjs:3:1\'\n  ...\n1..1\n# tests 1\n'
+  const cmp = compare(parseTap(tap), baseline, readSummary(tap))
+  assert.equal(cmp.stillRed.length, 1)
+  const out = formatReport(cmp, baseline)
+  assert.match(out, /flips on: node --test/)
+  assert.match(out, /still red while: the assertion still names the spelling/)
+})
+
+test('a row with no flip query is reported as lacking one, never silently', () => {
+  // The absence is the finding. A row nobody can check without archaeology
+  // is how this tool's own standing row went six days unresolved.
+  assert.deepEqual(flipLines({ owner: 'security' }),
+    ['      flipQuery: NONE — this row cannot be checked without archaeology'])
+  // And the optional half stays optional.
+  assert.deepEqual(flipLines({ flipQuery: 'git log' }), ['      flips on: git log'])
 })
