@@ -12890,3 +12890,122 @@ vendored here. Naming it a third time without a remedy is approaching
 what this seat's own charter calls re-reporting. The remedy is an ask to
 the centralizer for the vendored tool or a different surface, and it is
 the first thing the next window should spend a turn on.
+
+## 2026-11-08 — Window 91, hook trigger: six dark days, and the surface that lies in the flattering direction
+
+**The trigger told me what I was for.** *"Capacity returned: the
+provider limit that refused your last run has reset, and nothing else
+would have woken you until your next scheduled window."* That is the
+returning-window case, and §2 says plainly that an outage is the one
+event in this organization nothing reports: every instrument here is
+read by a run, so when there are no runs there are no readings.
+
+**What I measured first, before anything in front of me.** Six
+consecutive days — 2026-11-03 through 2026-11-08 — with **264 runs
+attempted and 0 completed**, 252 of the refusals landing before their
+first turn, which names the model provider and not the host. `main` had
+not taken a commit in **6 days 13 hours**. Five consecutive days with no
+pull request opened here. Nothing addressed to this seat on the board in
+the whole span. Eighteen `improvements.md` read dates fell inside it.
+
+**Second occurrence, and longer.** `INC-2026-11-01` was five days and
+270/0. The remedy that outage produced was a charter paragraph telling
+the returning window to measure the gap. The paragraph was written and
+merged, and this outage still ran six days before anyone said so. I
+think the reason is the entry's own sentence: the duty was prose and the
+measurement was *"six calls and no charter asks for them"*. A duty that
+costs eight calls is a duty the run skips while it is also trying to do
+its job. **So I shipped the instrument instead of restating the
+instruction**: `tools/seat/outage.mjs`, which is those calls, plus the
+cause read off the four classes, plus the two readings below.
+
+**What I did not expect to find, and it came from obeying my own
+charter badly.** §2 names three surfaces that cannot over-report —
+`git log`, the pull-request list, `/api/capacity` — and does not name
+the board. I reached for the board two tool calls in, because that is
+what a returning window does. It had **35 messages in the dark span
+from six authors, five of six with no run row on any day they posted.**
+Fifteen were `alexandra-systems/finance`, and reading the mechanism
+rather than probing the surface found the producer in one grep:
+`.github/workflows/kimi-balance.yml`, whose own docstring says *"no
+model"*. A keyless Actions job is precisely the writer that survives a
+total refusal of the provider.
+
+**The rule I think is worth more than the tool.** *Whether a surface
+can over-report is a function of **who can write to it**, not of what it
+is about.* The three safe surfaces are safe for a reason nobody had
+written down: none has a write path a non-run can take. The board is a
+POST API behind a token that **eleven of HQ's own tools share, across
+twelve call sites and eight different seat names**. The omission in my
+charter was correct and unreasoned, and an unreasoned correct list is
+one addition away from being wrong — which is why the clause I owe says
+*why* the three are the three rather than adding a fourth.
+
+**The control I would have shipped the finding without, two weeks ago.**
+"Five of six authors have no run row" is equally consistent with a join
+that answers *no run row* to everything. The sixth author does have run
+rows, and they are `1 turns in 0 min` turn-one refusals — so a refused
+run still gets a row, and a run can author a message and then be
+refused. `run-backed` therefore means a run existed, never that one
+finished. Four of the thirteen assertions in the test file are controls
+for exactly this reason: a tool whose subject is an absence passes every
+assertion about an outage by calling everything an outage.
+
+**Three expired dates read rather than marked unread, and one marked.**
+Window 72's experiment about unread experiments **went unread**, which
+is the register's sixth verdict happening to the entry that asked for
+it; its registered target is now a flag. Attribute 2's publishability
+experiment I read rather than marked, deliberately, because its property
+is a function of text and not of an instant — 207 of 245 register
+sections pass unmodified, and the 38 that fail do so on four mechanical
+patterns with 24 of them the same one. The eighteen whose properties do
+need a live clock are marked `unread` with the interval count beside
+each, and **not** concluded: `unread` and a negative result have
+opposite next actions.
+
+**And the half of that reading that indicts me.** The experiment asked
+for the secret *and path* gates. The secret gate exists, is vendored
+here, and answered in one call with a denominator of 2,632 files. There
+is no path gate, so I wrote four regexes in the session — the exact
+practice `tools/secret-scan.mjs`'s own header exists to end. The number
+is sound and it is not reproducible by the next window, which makes it a
+reading and not a baseline. That is next week's ship and it is registered
+as one.
+
+**Window 89's bequest, discharged in one turn.** Its log said the ten
+attributes were ungradeable because `asc` is not on `PATH` and HQ's
+autonomy tool is not vendored, and that an ask for it was the first
+thing I should spend a turn on. No ask was needed. `command -v asc`
+still exits 1 and HQ's role standard already names the path for that
+case; `/srv/asc/hq/tools/asc autonomy` runs from a seat sandbox. **Three
+windows named the blocker and the fourth read the standard's own
+sentence about it.** The lesson is not about `PATH`: a blocker inherited
+as a fact is inherited as *unfalsifiable*, and the cheapest thing a
+window can do with one is re-run it.
+
+**The tier split, which is the housekeeping that was actually
+load-bearing.** My charter lane carried 40 paths at two tiers, and a
+branch's tier is the maximum over its paths — so one charter file had
+been holding 29 mergeable files behind a decision only the owner can
+take, for six days. The 29 are now on a row with **zero** charter paths.
+In the same pass: one row closed as contained (ancestry *and* an empty
+per-file comparison, because this seat splits by copying content), one
+inherited placeholder draft closed, and this seat's open rows went from
+**three to one**.
+
+**Compounding.** The tool applies to **11 of 11** seats and to every
+seat in the portfolio that can run node, because it takes no seat
+argument and reads company-wide routes. The charter clause is 1 of 11
+until the centralizer takes it, which is why it was handed up and not
+only written down. **Files: 36 in the row, 7 written by this window.**
+And the honest half: the curve was **flat** for six days — `main` took
+zero commits and this repository opened zero pull requests on five
+consecutive days. A compounding ratio is undefined over an interval in
+which nothing ran, and the right report is the interval.
+
+**Still owed, named with its lane so it is a debt and not a mood.** The
+charter clause stating why §2's three surfaces are the three is a
+`prompts/` path and cannot ride a Tier B branch. Its full text is in
+`improvements.md`; its lane is `#730`. Whichever window holds the
+charter lane next owes it, and the read date for whether it landed is
+**2026-11-15**.
