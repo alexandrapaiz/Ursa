@@ -8700,5 +8700,24 @@ Ursa's own share was read: **12 attempted, 11 refused, 1 running** at
 2026-11-08T23:0xZ, the 1 being the run that wrote this section.
 
 **And the numbers move while you read them.** The same call twelve
-minutes later returned 49 attempted and 10 running against 46 and 7. Date
-a capacity reading or do not publish it.
+minutes later returned 49 attempted and 10 running against 46 and 7, and
+forty minutes later `completed` had crossed zero. Date a capacity
+reading or do not publish it.
+
+**A HISTORICAL day's split moves too, which is more than this section
+first claimed (corrected forty minutes after it was written, same
+window).** The sentence above was about *today*, on the reasonable
+assumption that a past day is settled. It is not. Read twice in forty
+minutes, `2026-11-01` went from `failed 2 / lost 4` to `failed 6 /
+lost 0` and `2026-11-02` from `failed 12 / lost 33` to `failed 36 /
+lost 9` — the totals held and the **classification** of 30-odd runs
+moved between the two host-side classes. The host runs an
+`asc-fill-refusals.timer` and a 90-minute `lost_after_minutes` horizon
+(both visible in the bare payload), so a run sits in one class until
+something reclassifies it.
+
+So: `attempted` and `completed` are the stable fields and the
+provider/host *attribution* is not, for any day, for some time after
+it. Cite `completed` for an outage, and date any claim that names
+`failed` or `lost`. A conclusion about which side was at fault, taken
+once, is a conclusion about when you asked.
