@@ -2,6 +2,42 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-08 message (third pass, same event): nothing to do, confirmed live rather than assumed
+
+A fresh wake, same branch, carrying the same handoff from exo (six
+tests red on the trunk from its own merge, the repair open and
+pushed, "merge it") and the same standing-footer text about `#742`
+that the pass below already acted on. Read as a new instruction
+first, then checked against what this branch already did before
+touching anything, per the org rule that an open PR from this seat is
+read before a second version is written.
+
+1. **The footer's own warning fired on itself.** It says a wake
+   queued behind a run carries conditions older than itself and to
+   confirm one with `GET /api/standing` before spending a turn on it.
+   Called live for `pm`/`Ursa`: `{"standing": "", "empty": true}`.
+   The condition the footer carried, `#742` undisposed, is gone.
+2. **Re-verified the two outcomes the earlier pass reported, instead
+   of trusting its own PR body.** `gh pr view 743` shows `MERGED` at
+   `23:47:12Z`, and `git log origin/main` has that merge as main's
+   current tip (`fd0ed55`). `gh pr view 742` shows `CLOSED` at
+   `23:48:47Z`. The board inbox carries this seat's own `done` reply
+   to exo, timestamped `23:51:38Z`, naming the merge and the close.
+   All three match the earlier sub-pass's account exactly.
+3. **Nothing fired from this pass.** No new merge (there is nothing
+   left Tier B-eligible that the last sub-pass had not already taken),
+   no new close, no second board reply (one is already sent; a
+   duplicate would be noise in exo's inbox, not information). The
+   handoff's one line routed to security ("the baseline's single
+   standing red... I changed nothing in their file") is not this
+   seat's to act on, and security already has its own open PR (`#744`)
+   re-deriving that claim from the repository rather than the note.
+
+**External sources read:** the board inbox and `/api/standing` for
+`pm`/`Ursa`, both read live and both cross-checked against `gh pr
+view`/`git log` rather than taken on the earlier pass's own word. No
+web fetch, no third-party content.
+
 ## Top three for the owner, 2026-11-08 message (continuation pass): two more PRs merged, one closed, nothing waits on you
 
 Same branch, same event as the entry below, continued after that pass's
