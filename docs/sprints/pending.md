@@ -2,6 +2,51 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-08 standup (hook, re-fired slot)
+
+Re-fire of the 2026-11-08T11:05:25Z scheduled slot; the provider
+refused it before this seat took a turn and the limit reset the same
+day, so this is the only run covering 2026-11-08. The last PM run
+recorded anywhere in this file or `docs/decisions.md` is 2026-11-02
+(message pass twenty-five) — nothing landed from this seat between
+2026-11-03 and 2026-11-07.
+
+1. **The open-PR backlog from 2026-11-02 turns seven days old
+   tomorrow.** Eleven PRs from that date are still open: `#700`,
+   `#701` (this seat, see item 2), `#711`, `#725` are `CONFLICTING`;
+   `#714`, `#724`, `#730`, `#734` (draft), `#735` (closed this pass,
+   see item 2), `#736`, `#737` are `MERGEABLE`/`CLEAN`. None has
+   merged in six days. Two dispatch candidates queued in
+   `dispatch-queue.md` (skill: `#700`/`#711`; exo: `#714`/`#730`/
+   `#734`/`#738`), neither can fire — `PM_DISPATCH_ENABLED` and
+   `DEFAULT_WORKFLOW_TOKEN` are both unset in this run's environment,
+   the same wall every pass has found since the eighteenth message
+   pass. `#725` (market) and `#701` (this seat) are stale too but
+   don't clear a criterion alone: market has only the one PR, and a
+   seat cannot dispatch itself.
+2. **This seat's own open PRs, resolved per "read your own open PRs
+   first."** `#735` (draft, opened 2026-11-02, message pass
+   twenty-six) was a dead placeholder — "Full account to follow...
+   before the PR is readied" was never followed up, and the branch
+   held no other content. Closed with a pointer to this run's PR
+   (`#740`). `#701` (pass seventeen, not a draft, `CONFLICTING`) is
+   different: it carries real unlanded work, a vendored HQ
+   secret-print PreToolUse hook (`tools/check-secret-print.py`,
+   `.claude/settings.json`, `.gitignore` carve-out for `.claude/`)
+   that has never reached `main`. Confirmed neither the hook script
+   nor the settings file exists on `main` today, so this is not
+   superseded, just stuck. Still carried as the twenty-fifth pass left
+   it: the conflict (`tools/root-entries.test.mjs`) is not this seat's
+   to resolve by hand. Whoever next touches this scope should know a
+   security control is sitting dark for a code conflict, not a
+   decision anyone is waiting on.
+3. **Nothing else needs you.** `gh run list --limit 30` is all
+   `success`, no failure to diagnose. Nothing new in
+   `docs/decisions.md` since the 2026-10-17 token-wall update. `gh api
+   repos/alexandrapaiz/Ursa/milestones` returns none. Today is a
+   Sunday, so this is the standup alone — no sprint, retro, or ledger
+   grooming this run.
+
 ## Top three for the owner, 2026-11-02 message-triggered (twenty-fifth pass): #731 merged under Tier B, closing #716 and #727, with a correction to my own last pass
 
 Triggered by the engineer's `done` on `#731`, answering my own pass
