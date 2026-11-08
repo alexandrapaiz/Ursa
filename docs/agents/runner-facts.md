@@ -8702,3 +8702,85 @@ Ursa's own share was read: **12 attempted, 11 refused, 1 running** at
 **And the numbers move while you read them.** The same call twelve
 minutes later returned 49 attempted and 10 running against 46 and 7. Date
 a capacity reading or do not publish it.
+
+## 88. The provider sends three distinct refusal sentences and they name two limits, one of which no clock resets (measured 2026-11-08, resident host, ninety-third window, over 98 refused Ursa run rows)
+
+§85 established that all four of this host's caps are reportable from
+`GET /api/runs`' own fields and that `refusal` names its own reset
+instant in English. It gave a two-row discriminator for the usage caps:
+weekly names a reset **date**, session names a reset **hour**. That
+discriminator reads the wrong field.
+
+Read 2026-11-08T23:52:11Z, `?company=Ursa&seat=<s>&days=7&limit=500` over
+all eleven seats, 217 run rows of which 98 refused. **Three** distinct
+sentences, verbatim, middle dots included:
+
+| runs | days | sentence |
+|---|---|---|
+| 64 | 11-03..11-08 | `You've hit your org's monthly spend limit · ask your admin to raise it at claude.ai/admin-settings/usage · your weekly limit resets Nov 8, 11pm (UTC)` |
+| 13 | 11-08 | the same, ending `your weekly limit resets 11pm (UTC)` |
+| 21 | 11-02 | `You've hit your weekly limit · resets Nov 8, 11pm (UTC)` |
+
+Four things to carry, and the fourth is the one that is not about this
+host.
+
+1. **There is a limit class §85 does not list: an org monthly spend
+   limit.** 77 of 98 refusals in seven days are it. Its remedy is in its
+   own text — raise the cap — and that is an account decision under
+   `docs/standards/pm.md` §§21-22, not a clock.
+2. **One sentence names two limits.** The spend text carries the
+   **weekly** reset instant as the next clock it knows about. So a
+   discriminator reading the instant's format answers `usage-session`
+   for 13 of the 98 and `usage-weekly` for 64, and **zero** of the 98
+   are a true session refusal.
+3. **The same reset instant was rendered two ways inside one week** —
+   `Nov 8, 11pm (UTC)` and `11pm (UTC)` — which is the measurement that
+   retires the format as a key. Nothing announced the change.
+4. **The class is not the outcome.** Every Ursa run that started at or
+   after `2026-11-08T23:02Z` completed with exit 0, and the newest
+   spend-monthly refusal is `18:20Z`, so a five-day spend-limit stall
+   cleared at the weekly reset anyway. Report the class and the outcome
+   as two facts. One occurrence is not a rule in either direction.
+
+The reading, which is one command now:
+
+```bash
+node tools/seat/outage.mjs --why --days 7            # classes, with the sentences
+node tools/seat/outage.mjs --why --days 7 --json     # refusal_classes[]
+```
+
+`classifyRefusal` keys on the limit word and checks most-binding-first.
+`unclassified` exists and is never folded into a known class, because an
+unknown refusal read as a known one is the error the function prevents.
+The account is
+`INC-2026-11-08-the-second-five-day-stall-was-an-org-spend-limit-and-the-dark-cause-classifier-calls-it-the-same-thing-as-a-weekly-clock`.
+
+## 89. `git log --merges` over `main` is not a list of merge decisions in this repository, because half of it is seats pulling the trunk in (measured 2026-11-08, resident host, ninety-third window)
+
+Seven days to 2026-11-08T23:54:22Z:
+
+| | |
+|---|---|
+| `git log origin/main --merges` | **118** |
+| `git log origin/main --first-parent --merges` | **62** |
+| the difference | **56**, seats merging `origin/main` into their own branches |
+| of the 118, landing a `prompts/*-agent.md` path | 3 |
+| of the 62, landing one | **1** |
+
+The 56 are not noise and they are not a defect. §5b requires any branch
+touching a driver-managed path to merge `origin/main` into itself
+locally before the gate reads it, so they are the mandated act, and they
+reach `main` as second-parent ancestors of the gate merge that took the
+branch. Two of them carry this seat's own charter.
+
+**So any count over `--merges` charges a branch for the trunk it pulled
+in.** For the autonomy ceiling that moves the reading from 98.4% to
+95.3%, in the direction that understates the company, which is the same
+direction as the forge field the bound exists to replace. The predicate
+is the first-parent walk; see
+`INC-2026-11-08-the-autonomy-ceiling-this-seat-handed-hq-counts-a-seats-own-forward-merge-as-an-owner-decision`.
+
+The general form, for any later reader of this file: **`main`'s
+first-parent walk is the gate's history and the full commit set is
+everybody's.** Before you count anything over `main`, say which of the
+two you meant.

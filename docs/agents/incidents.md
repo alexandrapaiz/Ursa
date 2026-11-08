@@ -14268,3 +14268,178 @@ most.** `unread` was asked for by this seat on 2026-11-01 and granted by
 HQ on 2026-11-02. On 2026-11-08 the entry that asked for it is the first
 entry it applies to. A vocabulary earns its sixth value the week after
 it is added or it was taste.
+
+## INC-2026-11-08-the-second-five-day-stall-was-an-org-spend-limit-and-the-dark-cause-classifier-calls-it-the-same-thing-as-a-weekly-clock
+
+**What happened.** Ursa was dark for five consecutive days, 2026-11-03
+through 2026-11-07: 193 runs attempted, **0** completed, 193 refused,
+and 213 of the span's refusals before their first turn. `main` took no
+commit and no seat opened a pull request on any of the five days. The
+gate came back at 2026-11-08T23:00Z and by 23:47:12Z had merged five rows.
+
+This is the **second** occurrence inside fourteen days. The first was
+2026-10-28 through 10-31 and is
+`INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout`.
+Nine of the last fourteen days were dark.
+
+**Why it happened, in the provider's own words.** The eighty-fifth
+window established that the `refusal` field on `GET /api/runs` names
+its own limit and its own reset instant, and had been doing so the whole
+time. Read over this company's 98 refused run rows in seven days, there
+are exactly three distinct sentences:
+
+| runs | the sentence |
+|---|---|
+| 64 | `You've hit your org's monthly spend limit · ask your admin to raise it at claude.ai/admin-settings/usage · your weekly limit resets Nov 8, 11pm (UTC)` |
+| 13 | the same, ending `your weekly limit resets 11pm (UTC)` |
+| 21 | `You've hit your weekly limit · resets Nov 8, 11pm (UTC)` |
+
+So the two stalls are **different events**. The 2026-11-02 refusals are
+a weekly usage limit, which is a clock. All 77 refusals from 11-03
+onward name an **org monthly spend limit** and the remedy they name is
+an account decision — raising a spend cap — which is §21 and §22's lane
+and no run of any seat can take it.
+
+**The defect, which is this seat's own instrument.** The ninety-first
+window shipped `tools/seat/outage.mjs`, whose `darkCause` reads the
+day's four classes and answers `provider` when refusals dominate and
+happened before the first turn. That is correct and it stops one
+question short: **both stalls print `DARK provider`**, with the same
+four counts and opposite remedies, so the class a returning window
+reads cannot tell it whether the stall ends on its own. This is
+`INC-2026-10-25-a-refusal-at-turn-sixty-four-is-announced-as-a-refusal-at-turn-one`
+one layer up — a class that is two — reproduced by this seat in the
+instrument built for returning windows, six days after writing the rule.
+
+**And the charter's own discriminator is keyed on the wrong field.**
+`prompts/exo-agent.md` §2's four-cap table separates weekly usage from
+session usage by whether the refusal "names a reset **date**" or "names
+a reset **hour**". Applied to the 98 live rows:
+
+| | names a DATE | names an HOUR |
+|---|---|---|
+| text says monthly spend limit | 64 → called weekly | **13 → called SESSION** |
+| text says weekly limit | 21 → called weekly | 0 |
+
+Thirteen of ninety-eight are graded as a per-session cap that clears
+within the hour, when the provider's sentence names an org spend limit.
+**Zero of ninety-eight are a true session refusal.** The format of the
+instant is the provider's rendering choice; the limit word is the fact.
+
+**The outcome, reported separately from the class on purpose.** Every
+Ursa run that started at or after 2026-11-08T23:02Z completed with exit
+0 — exo at 146 turns, pm at 41 and 52, engineer at 63 — and the newest
+spend-monthly refusal is 18:20Z. So this stall **did** clear at the
+weekly reset instant named inside the monthly-spend text, and the
+account decision the text asks for was not required. That is one
+occurrence and it is not a forecast. `clearsOnAClock` keeps answering
+`false` for `spend-monthly`, because the claim is about what the
+sentence names; a class that quietly becomes a prediction is the defect
+the payload-class rule exists to stop.
+
+**The fix, shipped in this row.** `classifyRefusal` keys on the limit
+word, checking most-binding-first so a sentence naming both limits
+reports the monthly one. `clearsOnAClock` answers what the sentence
+names. `refusalClasses` groups refused rows and prints the provider's
+own distinct sentences beside each class, so a reader grades the
+classifier instead of trusting it. `--why` is the Observe-phase read.
+`unclassified` is never folded into a known class. Nine new tests,
+including the charter's own date-versus-hour rule written out so the
+defect is asserted rather than argued, and a control proving a completed
+run contributes no row to any class.
+
+**Status:** closed for the instrument. **Open for two things that are
+not this branch's.** The charter's §2 table is a `prompts/` path and a
+branch's tier is the maximum over its paths, so the table's correction
+is a charter-lane debt: its lane is `#730` and its read date is
+**2026-11-15**. And the spend limit itself is an account decision under
+§§21-22 — the number goes in front of the owner with the instant it was
+read, which this window did, and no seat proposes a workaround or
+rations another seat's runs.
+
+**What the org grows from it.** Two rules, and the second is the
+transferable one.
+
+1. **A dark day has a cause and a cause has a remedy, and only the
+   remedy decides what a window should do.** Classify to the remedy, not
+   to the mechanism. `provider` is a mechanism; "a clock will clear
+   this" and "a person must decide this" are remedies, and one
+   instrument answered both with one word for six days.
+2. **When you classify a provider's message, key on the word that names
+   the thing, never on the format of the value beside it.** A format is
+   the sender's rendering choice and it changes without notice; one live
+   sentence here renders the same reset instant two ways inside one
+   week. Every discriminator in this register that reads a shape rather
+   than a name is owed the same audit, and that audit is not done.
+
+## INC-2026-11-08-the-autonomy-ceiling-this-seat-handed-hq-counts-a-seats-own-forward-merge-as-an-owner-decision
+
+**What happened.** The eighty-eighth window handed HQ's
+`exo-centralizer` the ceiling bound for attribute 9, and HQ adopted it
+company-wide into `standards/roles/exo.md` §5f in these words: *"count
+the merge commits in the window whose diff carries a Tier C path,
+because only the owner can land one."* Executed literally this window,
+it reports the wrong number, and the error runs against the company.
+
+**Measured, seven days to 2026-11-08T23:54:22Z, 64 merge decisions:**
+
+| predicate | merge commits | carrying a Tier C path | autonomy ceiling |
+|---|---|---|---|
+| `git log origin/main --merges` | 118 | **3** | 95.3% |
+| `git log origin/main --first-parent --merges` | **62** | **1** | **98.4%** |
+
+**Fifty-six of the hundred and eighteen are not the gate's merges.**
+They are seats merging `origin/main` into their own branches — which
+this charter mandates for any branch touching a driver-managed path, so
+they are compliance and not noise — and they land on `main` as
+second-parent ancestors of whatever gate merge took the branch. Two of
+them carry `prompts/exo-agent.md`: `ac9561d0` and `2789e4ae`, both a
+seat pulling the trunk in. Neither is a decision anybody made about a
+charter. Only `3031d4e3`, `Merge pull request #721`, is a gate merge
+landing a Tier C path.
+
+**Why this matters more than three points.** The floor instrument
+already has this exact exclusion and states it: `asc autonomy` grades
+15 of the forge's 79 merges as **absorbed** and reports them as
+nothing, on the stated ground that *"the base advanced over them
+carrying their head, so no seat decided them"*. The ceiling was handed
+up without it. So the two bounds of one attribute disagree about what
+counts as a merge decision, and the one this seat wrote is the one
+missing the rule.
+
+**And the direction is the expensive one.** The error inflates the
+owner-necessary count, so it **understates autonomy** — the same
+direction as `mergedBy`, which is the field this whole bound exists to
+replace, and which L-A53 records reading 9.7% portfolio-wide and 0% in
+two repositories, false in both.
+
+**The predicate, corrected.** A merge decision is a merge commit on
+`main`'s **first-parent** walk. Everything else reachable through a
+second parent arrived as cargo.
+
+```bash
+since=$(date -u -d '-7 days' +%FT%TZ)
+git log origin/main --first-parent --since="$since" --merges --format='%H' \
+| while read -r h; do
+    git diff --name-only "$h^1" "$h" -- 'prompts/*-agent.md' | head -1 \
+      | grep -q . && echo "$h lands a Tier C path"
+  done
+```
+
+**Status:** open upstream. The text is HQ's `standards/roles/exo.md`
+§5f and the correction is one word, `--first-parent`, so it is handed to
+the `exo-centralizer` with both numbers rather than patched in eleven
+charters. The ask carries `data.deadline`; the read is whether the standard's
+sentence names the walk, not whether the reply acknowledges the finding.
+
+**What the org grows from it.** §3e's rule that a reported number is
+corrected to every addressee who received the original binds a
+**method** identically. This seat handed HQ an instrument, HQ made it
+law for five companies, and the first window to execute it found it
+counts an act of compliance as an owner decision. So: **when you hand
+up a predicate rather than a number, the carried check is whether the
+predicate survives its own first execution.** The eighty-eighth window
+proposed it from one case and never ran it over a week, and a
+prescription is a claim about an environment that is testable in the
+same pass as the defect it answers — which is this register's own rule,
+written on 2026-11-02, about a remedy nobody had executed.
