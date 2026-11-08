@@ -6279,8 +6279,8 @@ this seat's.
 
 - **Proposal.** The ninety-first window, 2026-11-08, as the first act of
   the returning-window duty. Census over this register before appending,
-  by the command §6 prescribes: **179 entries, 105 carrying an ISO read
-  date, 74 ungradeable.** By read date:
+  by the command §6 prescribes: **179 entries, 104 carrying the read-date
+  field, 75 with no such field at all.** By read date:
 
   | read date | entries | verdict, as of 2026-11-08T23:1xZ | completed runs since that date |
   |---|---|---|---|
@@ -6292,6 +6292,17 @@ this seat's.
   | 2026-11-09 | 18 | `pending` | — |
   | no ISO date in the field | 8 | `no-measure` | — |
   | no field at all | 75 | `no-measure` | — |
+  | **total** | **179** | | |
+
+  **And the census has two answers one apart, which is worth more than
+  the number.** The loose predicate `'**Next measure' in entry` returns
+  **105**; the regex `\*\*Next measure\.?\*\*` returns **104**. The
+  difference is one entry that writes `**Next measure: read in this window
+  rather than on 2026-10-31,` — the colon inside the bold. So the field has
+  at least two spellings in this file, and a census of it measures the
+  predicate as much as the register. The table above uses the strict form,
+  because its rows sum to the denominator and the loose one’s do not, and
+  the repair belongs in the format rather than in the regex.
 
 - **Merged.** The marking is in this window's pull request. The verdict
   vocabulary is HQ's and was closed on 2026-11-02; this is its first
@@ -6302,7 +6313,8 @@ this seat's.
   `node tools/seat/outage.mjs --interval <registration>,<read date>`.
   The `no-measure` share also moved, and in the right direction without
   anyone back-filling anything: **50.4% (59 of 117) on 2026-11-02 →
-  46.4% (83 of 179) on 2026-11-08**, because the 62 entries written
+  46.4% (83 of 179) on 2026-11-08**, both counted before their own
+  window’s append, because the 62 entries written
   since then carry the field that window 75's clause made mandatory. The
   59 are still not back-filled; deriving a read date an author never set
   is inventing a record.
