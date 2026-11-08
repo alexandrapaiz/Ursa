@@ -126,6 +126,21 @@ export interface CorpusShape {
    */
   multiSourceRecords: string[]
   /**
+   * The distinct subjects grouped by the first two segments of their path,
+   * counted, sorted by count descending and then by name.
+   *
+   * Reported because the size of a corpus and the SUBJECT of a corpus are
+   * different facts, and on this repository the second one is the finding.
+   * Of the 15 distinct subjects the 2026-11-08 sweep classified, 10 are under
+   * `docs/runs/`, which is where the agent seats write their own run logs. A
+   * reader told only "10 of 15 subjects are on the prose path" would conclude
+   * the prose clause of KR1.3 was answered by a corpus of real prose work. It
+   * is answered by a corpus of agents writing about their own runs, which is
+   * a much weaker demonstration and is the sort of thing a lab evaluating the
+   * data would find on its own.
+   */
+  subjectsByArea: Array<{ area: string; subjects: number }>
+  /**
    * Records carrying a correction: any edited span, or a signal derived from
    * one. This is not in KR1.3 and is reported anyway, because it is the thing
    * the corpus is FOR. A record of 12,000 verbatim characters and no edit
@@ -223,9 +238,38 @@ export function corpusShape(entries: CorpusEntry[]): CorpusShape {
   return {
     distinctSubjects,
     proseSubjects: distinctSubjects.filter((p) => surfaceOf(p) === 'prose'),
+    subjectsByArea: groupByArea(distinctSubjects),
     multiSourceRecords: multiSource,
     correctionCarryingRecords: withCorrections,
   }
+}
+
+/**
+ * Group paths by their first two segments, or by the first where there is no
+ * second, or by `.` for a path at the root.
+ *
+ * Two segments rather than one because one is uninformative on this
+ * repository's own shape: `docs/` holds the vision, the ADRs, the designs and
+ * the seats' run logs, and the difference between `docs/design` and
+ * `docs/runs` is exactly the difference the grouping exists to show.
+ */
+export function groupByArea(paths: string[]): Array<{ area: string; subjects: number }> {
+  const counts = new Map<string, number>()
+  for (const path of paths) {
+    // The DIRECTORY's first two segments, never the path's. Grouping a
+    // path's own first two segments files `docs/a.md` under `docs/a.md`,
+    // which is one area per file and no grouping at all. Caught by the
+    // root-level case in `src/corpus.test.ts`, which is the only input where
+    // the two readings differ visibly.
+    const dir = path.split('/').slice(0, -1)
+    const area = dir.length === 0 ? '.' : dir.slice(0, 2).join('/')
+    counts.set(area, (counts.get(area) ?? 0) + 1)
+  }
+  return [...counts.entries()]
+    .map(([area, subjects]) => ({ area, subjects }))
+    // Count descending, then name ascending, so the output is stable across
+    // runs and the largest area is the first thing read.
+    .sort((a, b) => b.subjects - a.subjects || a.area.localeCompare(b.area))
 }
 
 function pct(part: number, whole: number): string {
@@ -308,6 +352,11 @@ export function renderCorpus(entries: CorpusEntry[], window: string): string {
     `  "at least one joins generations from more than one source": ` +
     `${shape.multiSourceRecords.length} record(s). A pull-request record carries no ` +
     `conversations, so zero here is a fact about this path and not a missing measurement.`,
+  )
+  lines.push(
+    `  What those ${shape.distinctSubjects.length} finished work(s) ARE, by area, because the size of a ` +
+    `corpus and its subject are different facts: ` +
+    `${shape.subjectsByArea.map((a) => `${a.area} ${a.subjects}`).join(', ')}.`,
   )
   lines.push(
     `  Not in KR1.3, and the reason the corpus exists: ` +

@@ -6182,9 +6182,19 @@ function corpusShape(entries) {
   return {
     distinctSubjects,
     proseSubjects: distinctSubjects.filter((p) => surfaceOf(p) === "prose"),
+    subjectsByArea: groupByArea(distinctSubjects),
     multiSourceRecords: multiSource,
     correctionCarryingRecords: withCorrections
   };
+}
+function groupByArea(paths) {
+  const counts = /* @__PURE__ */ new Map();
+  for (const path of paths) {
+    const dir = path.split("/").slice(0, -1);
+    const area = dir.length === 0 ? "." : dir.slice(0, 2).join("/");
+    counts.set(area, (counts.get(area) ?? 0) + 1);
+  }
+  return [...counts.entries()].map(([area, subjects]) => ({ area, subjects })).sort((a, b) => b.subjects - a.subjects || a.area.localeCompare(b.area));
 }
 function pct(part, whole) {
   if (whole === 0) return "n/a";
@@ -6229,6 +6239,9 @@ function renderCorpus(entries, window) {
   );
   lines.push(
     `  "at least one joins generations from more than one source": ${shape.multiSourceRecords.length} record(s). A pull-request record carries no conversations, so zero here is a fact about this path and not a missing measurement.`
+  );
+  lines.push(
+    `  What those ${shape.distinctSubjects.length} finished work(s) ARE, by area, because the size of a corpus and its subject are different facts: ${shape.subjectsByArea.map((a) => `${a.area} ${a.subjects}`).join(", ")}.`
   );
   lines.push(
     `  Not in KR1.3, and the reason the corpus exists: ${shape.correctionCarryingRecords.length} of ${totals.records} record(s) carry a correction, meaning an edited span or a signal derived from one.`

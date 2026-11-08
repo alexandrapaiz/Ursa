@@ -16,6 +16,7 @@ import {
   PROSE_EXTENSIONS,
   carriesCorrection,
   corpusShape,
+  groupByArea,
   renderCorpus,
   summarizeCorpus,
   surfaceOf,
@@ -55,6 +56,8 @@ function fakeRecord(spec: FakeRecordSpec): OutcomeRecord {
       id: `c${i}`,
       title: `conversation ${i}`,
       adapter: 'claude-code' as const,
+      turns: 0,
+      userTurns: 0,
     })),
     generations: [],
     stats: {
@@ -179,6 +182,60 @@ describe('corpusShape (the three KR1.3 clauses)', () => {
   })
 })
 
+describe('groupByArea (what the corpus is OF)', () => {
+  it('groups by two segments, because one does not separate docs/design from docs/runs', () => {
+    expect(groupByArea(['docs/design/a.md', 'docs/runs/b.md', 'docs/runs/c.md'])).toEqual([
+      { area: 'docs/runs', subjects: 2 },
+      { area: 'docs/design', subjects: 1 },
+    ])
+  })
+
+  it('sorts by count descending and then by name, so two runs print the same order', () => {
+    const grouped = groupByArea(['b/x/1.md', 'a/y/1.md', 'a/y/2.md', 'c/z/1.md', 'b/x/2.md'])
+    expect(grouped).toEqual([
+      { area: 'a/y', subjects: 2 },
+      { area: 'b/x', subjects: 2 },
+      { area: 'c/z', subjects: 1 },
+    ])
+  })
+
+  it('files a root-level path under a name rather than dropping it', () => {
+    expect(groupByArea(['README.md', 'docs/a.md'])).toEqual([
+      { area: '.', subjects: 1 },
+      { area: 'docs', subjects: 1 },
+    ])
+  })
+
+  it('reproduces the 2026-11-08 sweep\'s own finding, which is the reason it exists', () => {
+    // The real 15 subjects, measured. Ten of them are seat run logs, so a
+    // reader told only "10 of 15 are prose" would read a corpus of real prose
+    // work where the truth is agents writing about their own runs.
+    const measured = [
+      'docs/provenance/bundle-digests.json',
+      'docs/provenance/bundle-digests.md',
+      'docs/runs/2026-11-02-engineer-message-13.md',
+      'docs/runs/2026-11-08-exo-window-91.md',
+      'docs/runs/engineer-2026-11-02-message-10.md',
+      'docs/runs/engineer-2026-11-02-message-11.md',
+      'docs/runs/engineer-2026-11-02-message-14.md',
+      'docs/runs/engineer-2026-11-02-message-15.md',
+      'docs/runs/engineer-2026-11-02-message-16.md',
+      'docs/runs/engineer-2026-11-02-message-4.md',
+      'docs/runs/engineer-2026-11-02-message-7.md',
+      'docs/runs/engineer-2026-11-02-message-9.md',
+      'ursa-major/src/adapters/github-pr.test.ts',
+      'ursa-major/src/adapters/github-pr.ts',
+      'ursa-major/tools/bundle-digest-index.ts',
+    ]
+    expect(groupByArea(measured)).toEqual([
+      { area: 'docs/runs', subjects: 10 },
+      { area: 'docs/provenance', subjects: 2 },
+      { area: 'ursa-major/src', subjects: 2 },
+      { area: 'ursa-major/tools', subjects: 1 },
+    ])
+  })
+})
+
 describe('carriesCorrection (the thing the corpus is for)', () => {
   it('is false for a record of pure verbatim survival, however large', () => {
     const record = fakeRecord({
@@ -208,8 +265,8 @@ describe('carriesCorrection (the thing the corpus is for)', () => {
       paths: ['docs/a.md'],
       signals: {
         oneShotCorrections: [
-          { id: 'osc-1', step: 1, text: 'AGENT: x\nFINAL: y', domain: 'tone', quotes: [] },
-        ] as LabSignals['oneShotCorrections'],
+          { step: 1, text: 'AGENT: x\nFINAL: y', domain: 'tone', quotes: [] },
+        ],
       },
     })
     expect(carriesCorrection(record)).toBe(true)
@@ -309,6 +366,12 @@ describe('renderCorpus', () => {
     expect(text).toContain('measured, not scored')
     // No pass/fail verdict on an owner-held key result.
     expect(text).not.toMatch(/\bKR1\.3 (met|unmet|passes|fails)\b/)
+  })
+
+  it('says what the finished works ARE, by area, beside how many there are', () => {
+    const text = renderCorpus(corpus, 'w')
+    expect(text).toContain('the size of a corpus and its subject are different facts')
+    expect(text).toContain('docs/runs 1')
   })
 
   it('reports the correction count even when it is zero, because zero is the finding', () => {
