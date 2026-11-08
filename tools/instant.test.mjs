@@ -172,6 +172,30 @@ test('the lint does not fire on English words that merely end in "date"', () => 
   assert.equal(textualTimestampComparisons('const d = firstTs.slice(0, 10)').length, 1)
 })
 
+test('the lint does not fire on plurals that merely end in "ts"', () => {
+  // The same defect as the `date` corpus above, in the alternative that had
+  // not had the treatment. `[Tt]s` matched any identifier ending in those
+  // two letters, so this fired on `if (cmp.points < baseline.minPoints) {` —
+  // two integers, in `tools/seat/suite-baseline.mjs` — and that line was one
+  // of the six reds the trunk carried on 2026-11-08. The corpus is plurals
+  // this repository actually compares.
+  for (const word of ['points', 'results', 'events', 'counts', 'parts', 'digits', 'scripts']) {
+    assert.deepEqual(
+      textualTimestampComparisons(`if (cmp.${word} < baseline.min${word}) {`),
+      [], word
+    )
+    assert.deepEqual(
+      textualTimestampComparisons(`rows.sort((a, b) => b.${word}.localeCompare(a.${word}))`),
+      [], word
+    )
+  }
+  // And it still fires on the three forms that really are timestamp names,
+  // so this is a narrowing and not a hole.
+  assert.equal(textualTimestampComparisons('const later = r.ts > n.ts').length, 1)
+  assert.equal(textualTimestampComparisons('if (firstTs < lastTs) {').length, 1)
+  assert.equal(textualTimestampComparisons('if (a.start_ts < b.start_ts) {').length, 1)
+})
+
 test('the day lint tests what is sliced, not what the line mentions', () => {
   // A line can name a timestamp and slice something else. Against the whole
   // line this fires; against the receiver it does not, and the receiver is

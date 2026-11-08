@@ -87,6 +87,11 @@
 // makes the next seat's copy agree with this one rather than with its author.
 
 import { pageMessages } from '../board/page.mjs';
+// The board spells an instant one way and the forge API another, so both of
+// this file's orderings went through `instant.mjs` rather than through `>` and
+// `localeCompare`. Caught by tools/instant.test.mjs's own gate on 2026-11-08,
+// on the trunk, hours after this file landed there.
+import { isAfter, sortByInstant } from '../instant.mjs';
 
 export const ANTECEDENT_KEY = 'in_reply_to';
 
@@ -154,7 +159,7 @@ export function classify({ rows, me }) {
   for (const n of inbound) {
     const from = { seat: n.from_seat, company: n.from_company };
     const later = outbound.filter(
-      (r) => sameAddr({ seat: r.to_seat, company: r.to_company }, from) && r.ts > n.ts,
+      (r) => sameAddr({ seat: r.to_seat, company: r.to_company }, from) && isAfter(r.ts, n.ts),
     );
     if (later.length) timeKeyed += 1;
     const proof = outbound.find((r) => antecedentsOf(r).includes(n.id));
@@ -174,7 +179,10 @@ export function classify({ rows, me }) {
   // Without it the tool just hands over a verdict and inherits the authority
   // of the one it replaced.
   return {
-    notes: notes.sort((a, b) => b.ts.localeCompare(a.ts)),
+    // Newest first, which is what the `localeCompare` here spelled.
+    // `sortByInstant` is ascending and stable, so the reverse is the
+    // descending order and ties keep the order they arrived in.
+    notes: sortByInstant(notes, (n) => n.ts).reverse(),
     saturation: {
       directed_notes_in: inbound.length,
       directed_replies_out: outbound.length,

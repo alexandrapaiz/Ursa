@@ -208,9 +208,21 @@ export function sortByInstant (rows, key) {
  * finding this tool does not report, and a wrong name is a line somebody has
  * to hand-clear. Of the two, the false positive is the one that gets a lint
  * switched off, so it is the one that was worth a corpus.
+ *
+ * `ts` NEEDED THE SAME TREATMENT AS `date` AND HAD NOT HAD IT, which is this
+ * seat's correction rather than a new rule. The paragraph above is right and
+ * the alternative it was applied to was `Date` alone: `[Tt]s` matched any
+ * identifier whose last two letters are those, so `points`, `results`,
+ * `events`, `counts` and `digits` all read as timestamp names. Measured on
+ * the trunk at 613fc803, this made `if (cmp.points < baseline.minPoints) {`
+ * — a comparison of two integers, in `tools/seat/suite-baseline.mjs` — a
+ * TEXTUAL_ORDER finding, and that false positive was one of the six reds the
+ * trunk carried on 2026-11-08. So the tail is `Ts` with a capital, or a
+ * `_ts` tail, or the whole identifier being `ts`, which keeps `firstTs`,
+ * `start_ts` and `r.ts` and drops every plural that happens to end in them.
  */
 const TIMESTAMP_NAME =
-  /(?:^|[^A-Za-z0-9_$])(?:[A-Za-z_$][A-Za-z0-9_$]*)?(?:Date|\bdate|_date|At|_at|[Tt]ime|[Tt]imestamp|[Ii]so|ISO|[Tt]s)(?![A-Za-z0-9_$])/
+  /(?:^|[^A-Za-z0-9_$])(?:[A-Za-z_$][A-Za-z0-9_$]*)?(?:Date|\bdate|_date|At|_at|[Tt]ime|[Tt]imestamp|[Ii]so|ISO|Ts|_ts|\bts)(?![A-Za-z0-9_$])/
 
 /**
  * Source lines that compare, sort or slice something whose name says it is a
