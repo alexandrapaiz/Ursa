@@ -190,6 +190,53 @@ test('a day sliced off toISOString is the UTC day and is not a finding', () => {
   assert.equal(textualTimestampComparisons('recordedAt: other.generatedAt.slice(0, 10),').length, 1)
 })
 
+test('a plural ending in ts is not a timestamp, and the camel and underscore forms still are', () => {
+  // The `Date` corpus one alternative over, measured 2026-11-08 over this
+  // repository's tracked source: 15,466 distinct identifiers, 446 matching
+  // TIMESTAMP_NAME, 355 of them on a `ts` tail — and 8 of those 355 are
+  // timestamps. The other 347 are English plurals. The live cost was a real
+  // finding, not a hypothetical one: the gate reported
+  // `if (cmp.points < baseline.minPoints)` in tools/seat/suite-baseline.mjs
+  // as a timestamp ordered as text, beside two genuine findings, so a reader
+  // had three offenders and no way to rank them without reading the detector.
+  for (const line of [
+    '  if (cmp.points < baseline.minPoints) {',
+    '  if (aCommits > bCommits) {',
+    '  if (ourResults >= theirResults) {',
+    '  rows.sort((a, b) => b.points.localeCompare(a.points))',
+  ]) {
+    assert.deepEqual(textualTimestampComparisons(line), [], line)
+  }
+  // The narrowing is a narrowing and not a hole: every spelling this
+  // repository actually uses for a timestamp is still a finding. Without
+  // these four the repair above is indistinguishable from deleting the
+  // alternative, which is the mistake that makes a lint stop finding things.
+  for (const line of [
+    '  const later = rows.filter((r) => r.ts > n.ts)',
+    '  if (firstTs < lastTs) {',
+    '  if (a.created_ts < b.created_ts) {',
+    '  rows.sort((a, b) => b.ts.localeCompare(a.ts))',
+  ]) {
+    assert.equal(textualTimestampComparisons(line).length, 1, line)
+    assert.equal(textualTimestampComparisons(line)[0].code, 'TEXTUAL_ORDER', line)
+  }
+})
+
+test('the at alternative is deliberately NOT narrowed, and this pins the measurement that says so', () => {
+  // Measured in the same pass: all 57 `at`-tail matches in this tree are
+  // createdAt/_at-shaped and none is a plain English word, so there is no
+  // false-positive corpus behind narrowing it. A narrowing with nothing
+  // behind it is a guess, and a test that pins the decision is cheaper than
+  // the next window re-measuring to find out why only one was changed.
+  assert.equal(textualTimestampComparisons('  if (a.created_at < b.created_at) {').length, 1)
+  assert.equal(textualTimestampComparisons('  if (createdAt < updatedAt) {').length, 1)
+  // And the words the prefix rule already keeps out, which is why no change
+  // was needed: these reach the pattern only as whole identifiers.
+  for (const line of ['  if (concat < format) {', '  if (float > stat) {']) {
+    assert.deepEqual(textualTimestampComparisons(line), [], line)
+  }
+})
+
 test('no source file outside a test orders timestamps as text', () => {
   // The gate, and the reason this file imports git. TEXTUAL_ORDER is wrong
   // wherever it appears; the remaining instances in this repository are all
