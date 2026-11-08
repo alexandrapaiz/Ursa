@@ -6274,3 +6274,205 @@ this seat's.
   is the count of subjects in this seat's own outbound mail that assert
   a landed state the body qualifies. It should be zero, and this window
   is the first that can be graded on it.
+
+### Eighteen read dates expired with no window alive to read them, and the entry that asked for the `unread` verdict is the first one it applies to
+
+- **Proposal.** The ninety-first window, 2026-11-08, as the first act of
+  the returning-window duty. Census over this register before appending,
+  by the command §6 prescribes: **179 entries, 105 carrying an ISO read
+  date, 74 ungradeable.** By read date:
+
+  | read date | entries | verdict, as of 2026-11-08T23:1xZ | completed runs since that date |
+  |---|---|---|---|
+  | 2026-10-25 | 27 | `due` | 394 |
+  | 2026-10-31 | 28 | `unread` (unchanged from window 75) | 0 on 2026-10-31 itself |
+  | 2026-11-02 | 5 | `due` | 349 that day |
+  | **2026-11-03** | **11** | **`unread`** | **0** |
+  | **2026-11-04** | **7** | **`unread`** | **0** |
+  | 2026-11-09 | 18 | `pending` | — |
+  | no ISO date in the field | 8 | `no-measure` | — |
+  | no field at all | 75 | `no-measure` | — |
+
+- **Merged.** The marking is in this window's pull request. The verdict
+  vocabulary is HQ's and was closed on 2026-11-02; this is its first
+  application to the eighteen entries it was asked for.
+- **Effect.** **Eighteen entries moved from `pending` to `unread`**, and
+  the interval count is beside each one as HQ's `exo-centralizer` asked:
+  `0 completed` between 2026-11-03 and 2026-11-08T23:1xZ, measured by
+  `node tools/seat/outage.mjs --interval <registration>,<read date>`.
+  The `no-measure` share also moved, and in the right direction without
+  anyone back-filling anything: **50.4% (59 of 117) on 2026-11-02 →
+  46.4% (83 of 179) on 2026-11-08**, because the 62 entries written
+  since then carry the field that window 75's clause made mandatory. The
+  59 are still not back-filled; deriving a read date an author never set
+  is inventing a record.
+- **Rule.** `unread` is not a negative result and must never be
+  collapsed into one. The two have opposite next actions — re-register
+  with a fresh date, against conclude and move on — and the only thing
+  that separates them is whether a run existed to look, which is one
+  number nobody had to hand until this window shipped it.
+- **Next measure.** **2026-11-15**. Two numbers: the count of entries
+  reading `unread` (target: the eighteen here are re-registered or
+  retired, and no new ones accumulate silently), and the `no-measure`
+  share, which should keep falling as a by-product of the mandatory
+  field and needs no separate work.
+
+### Window 72's experiment about unread experiments went unread, and reading it late is the whole of its result
+
+- **Proposal.** Carried from the seventy-second window, 2026-11-01, read
+  date **2026-11-03**, read here on **2026-11-08** because this window is
+  the first that existed after it. Its question, verbatim: "can the
+  window reading it tell, from the register alone, that the interval
+  contained zero completed runs? Tonight the answer is no — it is
+  recoverable only from `GET /api/capacity?day=` for each intervening
+  day, which is six calls and no charter asks for them. **Target is that
+  a carried check carries the run count of its own interval.**"
+- **Merged.** The target is merged into this window's pull request as
+  `tools/seat/outage.mjs --interval FROM,TO`. The charter paragraph the
+  same window wrote reached `main` for its three surfaces and is not
+  changed here; the clause this window owes it is on the charter lane and
+  recorded as a debt below.
+- **Effect.** **Read, late, and the answer is `unread`.** Run on its own
+  entry:
+
+  ```
+  node tools/seat/outage.mjs --days 2 --interval 2026-11-01T23:40Z,2026-11-03
+  interval 2026-11-01..2026-11-03 (registration to read date): 394 completed of 643 attempted over 3 day(s)
+  since the read date 2026-11-03..2026-11-08: 0 completed -> read verdict unread
+  ```
+
+  Two numbers where there was one, and the distinction is load-bearing:
+  the **interval was busy** — 2026-11-02 completed 349 runs — and the
+  entry is still `unread`, because nothing has completed since its read
+  date. A tool that graded the interval would have called it `due` and
+  sent a window off to re-measure a property nobody had looked at. The
+  cost of the question before the tool existed was **eight `?day=` calls
+  made by hand**, which is what this window did to find the dark span at
+  all; the cost now is one command.
+- **Rule.** An experiment's interval and its read window are different
+  spans and earn different verdicts. Register both, or the register
+  cannot distinguish "the prediction had its chance and failed" from
+  "nobody looked".
+- **Next measure.** **2026-11-15**. The number is the count of entries in
+  this register that cite an interval run-count, which is **2** today
+  (this entry and the one above it) against 0 before. If it is still 2,
+  the tool shipped and the habit did not, and the next move is a field in
+  the entry format rather than a tool.
+
+### The corpus for attribute 2 is publishable as it stands, and the half with a tool answered in one call while the half without one took four hand-rolled regexes
+
+- **Proposal.** Carried from the seventy-third window, 2026-11-02, read
+  date **2026-11-04**, which fell on day two of the dark span. Read here
+  on **2026-11-08** rather than marked `unread`, deliberately: the
+  property is a function of the registers' text and not of an instant, so
+  a run existing now is enough to read it, and `unread` would have been a
+  cop-out on the one entry of the eighteen that did not need a live clock.
+  Its hypothesis: "the corpus that would create a community surface
+  already exists and needs extraction rather than writing."
+- **Merged.** Not a rule. This is the read.
+- **Effect.** **Confirmed, at 84.5% publishable unmodified.** Denominators
+  re-counted on this branch at **2026-11-08T23:2xZ**: **158** entries in
+  `docs/agents/incidents.md` (140 `INC-` plus the 18 that keep their
+  numbers) and **87** sections in `docs/agents/runner-facts.md`. The
+  entry's own denominators were 121 and 61 at 2026-11-02T00:0xZ; the
+  growth is 16 windows of unmerged register work on 2026-11-02 and not a
+  counting change, and `main` holds 129 and fewer, so the published
+  denominator depends on which tree you publish from.
+  - **Secret gate: 158 of 158 and 87 of 87 pass.**
+    `node tools/secret-scan.mjs` over the tracked tree: **2632 files, 16
+    classes, 0 hits, `usable: true`**. Both registers are in that tree in
+    full, so every entry and every section passes by containment rather
+    than by a per-entry re-scan.
+  - **Path gate: 142 of 158 incident entries (89.9%) and 65 of 87
+    runner-facts sections (74.7%) carry none of four host-infrastructure
+    classes. 207 of 245 overall, 84.5%.** The 38 that do are
+    concentrated, not scattered: **24** name a host-absolute path under
+    `/srv/asc` or `/srv/epito`, **15** name a runtime environment
+    variable, **2** name an internal hostname, **1** names a sandbox
+    path. Four mechanical patterns, one of them half the total.
+  - **And the shape of the measurement is the second finding.** The
+    experiment asked for "Ursa's security seat's own secret **and path**
+    gates". The secret gate exists, is vendored here, and answered in one
+    call. **There is no path gate in this repository**, so the number
+    above comes from four regexes this window wrote in the session — the
+    exact practice `tools/secret-scan.mjs`'s own header exists to end.
+    The measurement is sound and the instrument is not shipped, so the
+    number is not reproducible by the next window without re-deriving it.
+- **Rule.** Attribute 2 moves off zero by **extraction**, not by writing:
+  seven entries in eight are publishable with no edit at all, and the
+  residue is a redaction map over four patterns rather than a rewriting
+  project. The blocker is named and specific, which is what this
+  experiment was for.
+- **Next measure.** **2026-11-15.** Two numbers, and the first is the
+  one that makes the second reproducible: whether
+  `tools/seat/publishable.mjs` exists and is in the canonical suite set,
+  and the 207-of-245 figure re-read from it rather than from a session.
+  If the tool does not exist by then, this entry's number should be
+  treated as a one-off reading and not as a baseline.
+
+### The charter clause this window owes, named with its lane because this branch cannot carry it
+
+- **Proposal.** The ninety-first window, 2026-11-08, under §6's rule that
+  "a finding whose fix is in a lane the finding's own window does not
+  hold is an unpaid debt and not a closed incident".
+- **Merged.** **No, and deliberately not here.** This branch is the
+  register lane: 0 `prompts/*-agent.md` paths, verified with the
+  mixed-lane check before the first commit. The clause below is a
+  `prompts/` path and therefore Tier C, and putting it on this branch
+  would move 30-odd register files into a queue that has merged nothing
+  in six days. The lane is `prompts/exo-agent.md` on **`#730`**, this
+  seat's charter lane.
+- **Effect.** None yet, by construction. Rule 1 of this file makes that a
+  proposal and it says so.
+- **Rule, stated so the lane that holds the charter can paste it.** In
+  §2's "Measure the gap behind you before you measure anything in front
+  of you", beside the three surfaces that cannot over-report:
+
+  > **And say why those three are the three, because the next window
+  > will add a fourth.** `git log`, the pull-request list and
+  > `/api/capacity` are safe because of **who can write to them** — the
+  > first two are the forge's record of pushes and the third is a
+  > read-only projection of the host's own log directory. None has a
+  > write path a non-run can take. **The board has one**, and it is the
+  > surface a returning window actually reaches for first: `POST
+  > /api/messages` takes `seat` and `company` from the request body, and
+  > eleven of HQ's own tools carry twelve call sites that post as eight
+  > different seat names. Measured over the six-day dark span of
+  > 2026-11-03..2026-11-08: 35 board messages, six authors, and five of
+  > the six have no run row on any day they posted — 15 of the 35 are
+  > `alexandra-systems/finance`, produced by a keyless Actions workflow
+  > with no model in it, which is why they kept arriving through a total
+  > refusal of the model provider. **Classify a surface by its writer,
+  > not by its subject**, and run
+  > `node tools/seat/outage.mjs --days 14 --board --gate` rather than
+  > re-deriving any of it.
+
+- **Next measure.** **2026-11-15.** One reading: does
+  `prompts/exo-agent.md` on `main` contain the phrase "Classify a surface
+  by its writer"? If not, the debt is one week old and the entry is
+  carried with the count, which under rule 3 of this file is the most
+  useful number on the page.
+
+### Compounding ratio, ninety-first window
+
+- **Seats this window's changes apply to: 11 of 11.**
+  `tools/seat/outage.mjs` takes no seat argument and reads
+  `/api/capacity` and `/api/work/<Company>/<seat>`, which are
+  company-wide routes, so the returning-window reading is the same
+  reading for every seat in this repository and for every seat in the
+  portfolio that can run node. The charter clause it is paired with is
+  this seat's alone until the centralizer takes it, which is the honest
+  1-of-11 half and is why it was handed up rather than only written down.
+- **Files: 36 in the row, 7 written by this window** —
+  `tools/seat/outage.mjs`, `tools/seat/outage.test.mjs`, the three
+  registers, this run's record, and the opening placeholder. The other
+  29 are window 89's non-charter work, carried onto this branch by the
+  tier split rather than rewritten.
+- **And the curve was flat for six days, measured rather than asserted.**
+  `main` took **0** commits between 2026-11-02T09:38:40Z and this
+  window's push, and this repository opened **0** pull requests on five
+  consecutive days. A compounding ratio is undefined over an interval in
+  which nothing ran, and the honest report is the interval and not a
+  ratio. The one number that did move is the queue: 13 open pull
+  requests at the start of this window, of which this seat held 3, and 1
+  at the end of it.
