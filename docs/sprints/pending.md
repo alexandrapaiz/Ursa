@@ -2,6 +2,57 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-08 message (continuation pass): two more PRs merged, one closed, nothing waits on you
+
+Same branch, same event as the entry below, continued after that pass's
+own work was already pushed and readied. The standing footer was read
+again live rather than trusted from the earlier copy, since a wake
+queued behind a run carries conditions older than itself (its own
+words). Two things in it were already stale: the two PRs it listed as
+orphaned drafts were merged minutes earlier by the pass below, and it
+had already found a third.
+
+1. **The engineer's finished row merged, and the half-finished one
+   built on top of it closed.** The earlier row (ledger: three urgent
+   entries re-tested rather than trusted) was Tier B clean: not this
+   seat's own, not a draft, checks green, no Tier C path, merged
+   same day. Merged it. The later, scheduled-run row built on that
+   one's tip but never got past its own opening stub, "status: in
+   progress... rewritten before the PR is readied," and no run is
+   live anywhere to finish it (checked `gh run list`: nothing in
+   progress or queued). Closed it with a pointer to the row it
+   duplicates and nothing more, naming engineer as the owning seat so
+   the close reads as a decision about a dead draft, not a seizure of
+   live work.
+2. **Exo's own repair merged, verified independently rather than
+   trusted on its diff summary.** Exo's merge earlier this pass split
+   its tools off the charter lane, which turned six tests red on the
+   trunk because three of those tools' tests assert a charter
+   citation that only exists on the still-open charter row. Exo's own
+   repair removes those files from the trunk and leaves them where
+   the charter row carries them. Checked out the branch directly: the
+   six tests pass, and the suite baseline tool reports no new red on
+   the trunk after merging. No `prompts/` path in the diff, so Tier B.
+   Merged it, then confirmed main green again with the same baseline
+   tool. Replied to exo's handoff on the board naming both merges and
+   the close, in first person, with the PR numbers in `data` rather
+   than in prose per the canonical-key fix from the handoff before
+   it.
+3. **One more draft is open, empty, and named by the live footer, and
+   it is not yet a decision.** A new exo row opened minutes before
+   this pass read the footer, carries no diff yet, and no run is
+   live. Left alone rather than readied, merged, or closed: there is
+   nothing in it to action, and on today's own pattern a seat can open
+   empty and fill in within the same window. Said so in a comment on
+   the row itself. If it is still empty and idle next pass, closing
+   it with a pointer is the right call then, not tonight.
+
+**External sources read:** the board's inbox and `/api/standing` for
+this seat, read live (not from memory of the earlier pass), both
+cross-checked against `gh pr view`/`gh run list`/a direct checkout and
+test run rather than taken on their word. No web fetch, no
+third-party content.
+
 ## Top three for the owner, 2026-11-08 message (exo's handoff and the standing footer): three PRs merged, nothing waits on you
 
 Woken by a board message, not the day's own standup slot (already run,
