@@ -1,89 +1,94 @@
-# Merge order for the owner — replaced each window by Ursa's exo seat
+# Merge order — measured 2026-11-02 08:58Z, eighty-eighth exo window
 
-**Measured 2026-11-02T03:17:11Z by window 79**, on `origin/main` at
-`e9cf564b`. Replaces window 77's plan (02:09:16Z, `383afa21`), per §5b of
-`prompts/exo-agent.md`. Every verdict below names the instrument that
-produced it.
+Replaces the previous plan. Written by Ursa's exo seat under
+`prompts/exo-agent.md` §5b. **Measuring the queue and naming the order
+is information for the owner. Merging is hers alone, and nothing here
+loosens that.**
 
-## The five queue numbers (§5b)
+## The three numbers
 
 | | |
 |---|---|
-| open now | **21** (4 drafts, all opened in the last hour with live runs behind them) |
-| merged, last 7 days | **90** |
-| oldest open | `#395`, 2026-10-24T21:21:40Z, **8.2 days** |
-| newest merge | 2026-11-02T03:15:34Z, **80 seconds** before this read |
-| merges per day | 10-23: 9, 10-24: 27, 10-25: 14, 10-26: 45, 10-27: 22, 11-01: 4, 11-02: 27 |
+| Open pull requests | **10** |
+| Merged in the last seven days | **119** |
+| Age of the oldest open row | **2h 55m** (`#699`, opened 06:03:29Z) |
+| Drafts among the open rows | 3, all with live runs behind them |
 
-**Neither depth predicate fires.** Open does not outnumber the week's
-merges (21 against 90), and the gate moved inside the last two minutes.
-Report the per-day row as seven rows and never as a sum: the four absent
-days, 10-28 through 10-31, are the five-day portfolio stall that
-`INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout`
-records, and the gate has fully recovered — 27 merges today is the second
-busiest day in the window.
+**Merges outnumber open rows by twelve to one, and the oldest row in the
+queue is under three hours old.** This is the first window in this
+register's history able to write that sentence. The depth rule in §5b
+fires when open rows outnumber the last seven days' merges, and it does
+not fire. The queue is not the constraint today.
 
-**The queue moved three times during this measurement**, from 25 open to
-21 in roughly two minutes, and `main` moved from `2b32cc6f` to `e9cf564b`
-mid-sweep. The sweep below was re-run in full against `e9cf564b` rather
-than reported against the commit it started on, because a conflict verdict
-names a pair of commits or it names nothing.
+For the record of what the constraint was: this seat reported depth at
+seventeen on 2026-09-27, thirty-seven and then fifty-two through
+2026-10-04, and sixty-five on 2026-10-05. It is ten.
 
-## What actually conflicts: 19 clean, 2 conflicting
+## Conflicts with `main`, by performing the merge
 
-Instrument: `git merge-tree --write-tree --name-only <main> refs/prs/<n>`,
-exit code read as three-valued, both revisions resolved first, this
-repository's `ledger` and `register` drivers installed and their path
-asserted against `$PWD`. **No `2>&1`.** `refs/prs/*` re-fetched after this
-window opened its own pull request.
+Instrument for every row below: `git merge-tree --write-tree
+--name-only origin/main refs/prs/<n>`, run at 08:58Z on an unshallowed
+clone whose refspec was widened per §0. GitHub's `mergeable` field was
+not consulted and is not a usable instrument here (Ursa incident 17).
 
-| | files | owner |
-|---|---|---|
-| **`#601`** `ursa-skill/2026-10-27-hook-2` | **12** under `skills/` — `README.md`, `relevance-audit.md`, `relocate-anchors.mjs`, `relocate-anchors.test.mjs`, and eight `TRIGGER-TEST.md` | Ursa's **skill** seat |
-| **`#615`** `ursa-engineer/2026-11-01-hook` | **3** — `tools/gates/enumerate-verdicts.mjs`, its `.test.mjs`, and `tools/secret-scan-verdict.mjs` | Ursa's **engineer** seat |
+| row | verdict | files | instrument |
+|---|---|---|---|
+| #728 | clean | — | `merge-tree` 08:58Z |
+| #727 | **conflict** | `tools/seat/charter-lag.mjs`, `charter-lag.test.mjs` | `merge-tree` 08:58Z |
+| #725 | clean | — | `merge-tree` 08:58Z |
+| #724 | clean | — | `merge-tree` 08:58Z |
+| #716 | **conflict** | `docs/ideas.md`, `tools/board/read-filters.test.mjs`, `tools/doc-model/check.test.mjs`, `tools/seat/charter-lag.mjs`, `charter-lag.test.mjs` | `merge-tree` 08:58Z |
+| #714 | clean | — | `merge-tree` 08:58Z |
+| #711 | **conflict** | `docs/ideas.md` | `merge-tree` 08:58Z |
+| #701 | **conflict** | `docs/sprints/dispatch-queue.md`, `pending.md`, `tools/root-entries.test.mjs` | `merge-tree` 08:58Z |
+| #700 | **conflict** | `docs/ideas.md` | `merge-tree` 08:58Z |
+| #699 | **conflict** | `docs/agents/improvements.md`, `incidents.md`, `learning-log.md`, `prompts/exo-agent.md` | `merge-tree` 08:58Z |
 
-Both route to their authoring seat and neither is the owner's to resolve.
-`#601` is six days old and the only open pull request older than two days
-besides `#395`; its conflict surface is twelve files in one seat's own
-directory, which is a rebase that seat can do in one window.
+**Two of those conflicts were created by a merge of this seat's own work
+and the seats holding them did not cause them.** `#721` merged at 08:06Z
+carrying this seat's `tools/seat/charter-lag.*`, which is why `#727` and
+`#716` now collide on those two files. Both branches were clean against
+the trunk they were cut from. This is said here rather than left for
+them to find, under the rule that a conflict verdict with no instrument
+beside it cannot be re-measured by the seat holding the branch.
 
-**One instrument correction, measured in this window, that changes `#615`'s
-number.** This window's first sweep piped `merge-tree` through `2>&1` and
-reported `#615` as **two** files. The charter forbids that redirection
-precisely because a merge driver writes its diagnostic to stderr and the
-redirection puts that line where the tree object identifier belongs. Run
-in the prescribed form, `#615` conflicts in **three** files — the third is
-`tools/secret-scan-verdict.mjs`, and a seat handed the two-file verdict
-would have rebased and still been refused. The charter's warning is
-reproduced rather than taken on faith, and the under-report is in the
-direction that looks like progress.
+**And `#699` is this seat's and is closed by this window**, not rebased,
+because it is contained in `#714` which is clean. One of the four
+conflicts above disappears by closing a row rather than by resolving
+anything.
 
-## The order to hand her
+## Containment: the queue is shorter than its count
 
-**Nothing is blocked on the owner that is not already moving.** The gate is
-merging at 27 a day and the two conflicts are their seats' work, so the
-useful order is by what unblocks the most other branches:
+Instrument: `git merge-base --is-ancestor refs/prs/<contained>
+refs/prs/<tip>`, exit 0 meaning contained. Stated in the direction §"Read
+your own seat's open PRs first" requires, which cannot invert.
 
-1. **`#618`** — this seat's charter lane, **clean**, 8021 lines of
-   `prompts/exo-agent.md` against 2221 on `main`. Tier C, so it is the
-   owner's and nobody else's. It is the single largest blocked item in the
-   repository and it is why this seat has now reported a **flat
-   compounding curve for three consecutive windows**: every rule three
-   windows have written for the other ten seats is in that branch, and
-   `charter-lag.mjs` reads seven of eleven charters as frozen for 28 days.
-   This is the one line on this page that is an owner decision.
-2. **`#395`** — 8.2 days old, **clean**, research. Oldest open and the
-   only thing on this page at risk of Ursa incident 6 by age alone.
-3. **The nineteen clean ones**, in merge order, lowest first. All Tier A
-   or B by content.
-4. **`#601` and `#615`** — not yours. Routed to skill and engineer.
+- **`#699` is contained in `#714`.** This seat's. Closed by this window,
+  with the check pasted into the closing comment.
+- **`#700` is contained in `#711`.** The skill seat's, both open. One
+  owner decision covers the pair and `#711` is the one to merge.
+- **`#716` is contained in `#727`.** The engineer seat's, both open. One
+  owner decision covers the pair and `#727` is the one to merge. Note
+  that `#716` is the row the engineer named to this seat as carrying its
+  `doc-model` fix, so the fix travels in `#727`.
 
-## This seat's own three open pull requests, declared
+So ten open rows are seven decisions, and three of the ten close on the
+merge of a row that already contains them.
 
-- **`#662`** — window 79, readied, Tier B, register-only. The live tip.
-- **`#657`** — window 78, readied, Tier B, **contained in `#662`**
-  (`git merge-base --is-ancestor refs/prs/657 refs/prs/662` exits 0), so
-  merging `#662` absorbs it and merging both is harmless.
-- **`#618`** — the charter lane, Tier C, item 1 above. Deliberately not
-  absorbed into either register branch, because absorbing it would make a
-  Tier B branch Tier C and freeze the registers behind the charter.
+## Landing order
+
+Simulated in a detached scratch worktree against `origin/main`, never
+against `main`, per §5b's two traps.
+
+1. **#714** (this seat, clean, Tier C by path). Carries the consolidated
+   exo row and closes `#699`.
+2. **#728, #725, #724** (clean, independent).
+3. **#727** (engineer), which subsumes `#716`. Its only conflict is the
+   `charter-lag` pair this seat's merge created, and resolving it is
+   taking `main`'s copy of both files.
+4. **#711** (skill), which subsumes `#700`. `docs/ideas.md` only.
+5. **#701** (pm), which needs the sprint files resolved.
+
+`docs/ideas.md` is the single busiest collision surface in the queue,
+named in three of the six conflicts. That is a standing finding and not
+a defect in any of the three seats.
