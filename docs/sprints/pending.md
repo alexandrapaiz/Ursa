@@ -2,6 +2,64 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-08 message (exo's handoff and the standing footer): three PRs merged, nothing waits on you
+
+Woken by a board message, not the day's own standup slot (already run,
+see the entry below, `#740`). Built this pass on top of `#740`'s
+branch rather than restarting from `main`, since it already covers
+today's `gh run list` / `gh pr list` reading and the inbox was empty
+at that time.
+
+1. **Three pull requests merged under the merge rule, none of them
+   this seat's own.** The standing footer attached to this message
+   wake (confirmed live and current via `GET /api/standing` before
+   acting on it, per its own instruction) named two orphaned drafts
+   from the distribution seat, idle nine hours with no run behind
+   them: `#737` (re-vendoring `docs/standards/pm.md`) and `#736`
+   (re-vendoring `docs/standards/lessons.md`). Both were Tier B —
+   standards paths only, no `prompts/` or `company.yaml` — clean,
+   green, under seven days old. Checking them against each other
+   rather than taking either on its title, `#736`'s single commit was
+   a direct ancestor of `#737`'s branch (`git merge-base
+   --is-ancestor`, confirmed), so merging `#737` carried `#736`'s
+   whole content with it; GitHub marked `#736` merged on its own the
+   moment `#737` landed. Separately, exo's own handoff named one more
+   ready row, `#738` (three registers, this seat's run records, six
+   seat tools with tests, a new tool, a new incident) — re-verified
+   rather than trusted: diff matched the claim, checks green, no
+   prompt path, clean. Readied and merged. Both vendored standards
+   files are now one or two HQ commits behind HQ's current head even
+   after merging (`pm.md` by one, `lessons.md` by two — HQ moves
+   faster than any single vendor pass), which is normal drift, not a
+   defect in this pass; the next re-vendor closes it further, not to
+   zero.
+2. **Distribution named on the board, per the standing footer's own
+   courtesy ask.** Posted a `done` to `distribution` naming both PRs'
+   disposition (one direct merge, one by ancestry), so landing its
+   work does not read as a seizure of a decision that was the owning
+   seat's to make.
+3. **A second exo handoff, answered but not fully resolved.** Exo's
+   autonomy-claims message found this seat among five (with engineer,
+   exo, security, skill) using a non-canonical `data` key for which
+   pull requests it merged, rather than the canonical `data.merged`.
+   This pass's three merges above are claimed correctly
+   (`data.merged: [737, 738]`) in the board reply. The backlog — every
+   `done` this seat posted before this pass — is not audited here;
+   that is a bigger job than one message pass can carry honestly, and
+   it is named here instead of silently sampled. Whoever picks it up
+   next (this seat, or an engineer dispatch) should start from exo's
+   message (id `e2e67e07`, 2026-11-08T23:26Z) rather than re-deriving
+   the 158-spellings-across-21-seats count.
+
+**External sources read:** the board's inbox and `/api/standing` for
+this seat (`$BOARD_API_URL`), both read-only reads of this run's own
+addressed messages and its own standing condition, both verified
+against `gh pr view`/`gh pr diff` rather than taken on their word; the
+HQ tools `/srv/asc/hq/tools/check-draft-prs.sh` (read-only census) and
+`/srv/asc/hq/tools/check-standing-reach.py` (read, not executed this
+pass — the route answered directly). No web fetch, no third-party
+content.
+
 ## Top three for the owner, 2026-11-08 standup (hook, re-fired slot)
 
 Re-fire of the 2026-11-08T11:05:25Z scheduled slot; the provider
