@@ -208,9 +208,33 @@ export function sortByInstant (rows, key) {
  * finding this tool does not report, and a wrong name is a line somebody has
  * to hand-clear. Of the two, the false positive is the one that gets a lint
  * switched off, so it is the one that was worth a corpus.
+ *
+ * AND `ts` TAKES THE SAME TREATMENT, ONE ALTERNATIVE OVER, FOR THE SAME
+ * REASON AND IT DID NOT GET IT UNTIL 2026-11-08. The paragraph above fixed
+ * `date`, checked that `firstTs` still matched, and left `[Tt]s` accepting any
+ * identifier that merely ends in those two letters — which in English is most
+ * plurals. Re-measured over this repository's tracked source: **15,466
+ * distinct identifiers, 446 matching this pattern, and 355 of the 446 match
+ * on a `ts` tail. Eight of those 355 are timestamps.** The other **347** are
+ * `seats`, `commits`, `results`, `points`, `exits`, `hits`, `reports`,
+ * `units`, `scripts`, `costs`, `shots` and so on: an accuracy of **2.3 per
+ * cent** on that alternative.
+ *
+ * It cost a real false finding rather than a hypothetical one. On 2026-11-08
+ * the gate reported `if (cmp.points < baseline.minPoints)` in
+ * `tools/seat/suite-baseline.mjs` as a timestamp ordered as text, in the same
+ * run as two genuine findings, so a window had three offenders to hand-clear
+ * and no way to tell which were real except by reading the detector.
+ *
+ * The `at` alternative was measured in the same pass and is **left alone**:
+ * all **57** of its matches are `createdAt`/`_at`-shaped and none is a plain
+ * English word, so `format`, `concat`, `float` and `stat` are reached only
+ * through the `[^A-Za-z0-9_$]` prefix this pattern already requires. A
+ * narrowing with no false positives behind it is a guess, and this one is not
+ * made.
  */
 const TIMESTAMP_NAME =
-  /(?:^|[^A-Za-z0-9_$])(?:[A-Za-z_$][A-Za-z0-9_$]*)?(?:Date|\bdate|_date|At|_at|[Tt]ime|[Tt]imestamp|[Ii]so|ISO|[Tt]s)(?![A-Za-z0-9_$])/
+  /(?:^|[^A-Za-z0-9_$])(?:[A-Za-z_$][A-Za-z0-9_$]*)?(?:Date|\bdate|_date|At|_at|[Tt]ime|[Tt]imestamp|[Ii]so|ISO|Ts|\bts|_ts)(?![A-Za-z0-9_$])/
 
 /**
  * Source lines that compare, sort or slice something whose name says it is a
