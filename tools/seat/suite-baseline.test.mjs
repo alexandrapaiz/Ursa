@@ -312,6 +312,14 @@ test('one test file renamed is not the same test, because the key carries the fi
 })
 
 test('a baseline entry that now passes is FIXED, and says so without blocking', () => {
+  // THIS FIXTURE IS NOT THE REALISTIC SHAPE, and saying so is the point of
+  // the comment. Rewriting `not ok 149` to `ok 149` keeps the failure's
+  // `location:` line, so this exercises the exact file+name match — a path
+  // real `node --test` output never takes for a pass, because it prints no
+  // location for one. The test is kept, because the exact match is still the
+  // match for a point that does carry a file; it is no longer the only one.
+  // See REAL_GREEN at the end of this file for the shape that was missing,
+  // and `compare`'s own header for what its absence cost.
   const green = TAP.replace('not ok 149 -', 'ok 149 -')
   const baseline = { minPoints: 1, red: ONE_RED }
   const cmp = compare(parseTap(green), baseline, readSummary(green))
@@ -612,4 +620,99 @@ test('a row with no flip query is reported as lacking one, never silently', () =
     ['      flipQuery: NONE — this row cannot be checked without archaeology'])
   // And the optional half stays optional.
   assert.deepEqual(flipLines({ flipQuery: 'git log' }), ['      flips on: git log'])
+})
+
+// FIXED WAS UNREACHABLE AGAINST REAL OUTPUT, which is the defect underneath
+// the stale key above. `node --test` (v22.23.2, measured 2026-11-08) prints
+// `location:` in a point's YAML block for FAILURES ONLY, so a passing point
+// has no file, `keyOf` gives it `?\0<name>`, and no baseline row naming a real
+// path could ever match one. Every repaired row therefore reported GONE.
+//
+// It survived the suite because the FIXED fixture was made by rewriting
+// `not ok 149` to `ok 149`, which KEEPS the failure's `location:` line. The
+// two real passes in that same fixture carry none. So the fixture was
+// self-contradictory and the only realistic shape was the untested one.
+//
+// This is the realistic shape: a pass with duration and type and no location.
+const REAL_GREEN = [
+  'TAP version 13',
+  '# Subtest: transcribed: the events read refuses unknown filters',
+  'ok 149 - transcribed: the events read refuses unknown filters, so the INERT finding was acted on',
+  '  ---',
+  '  duration_ms: 2.5',
+  "  type: 'test'",
+  '  ...',
+  '1..1',
+  '# tests 1',
+  '# pass 1',
+  '# fail 0'
+].join('\n')
+
+test('a real passing point carries no file, which is the trap', () => {
+  const [p] = parseTap(REAL_GREEN)
+  assert.equal(p.ok, true)
+  assert.equal(p.file, null, 'node prints `location:` for failures only')
+  assert.equal(keyOf(p), `?\u0000${ONE_RED[0].name}`, 'so its key can never equal a row naming a path')
+})
+
+test('a baseline row whose test now passes is FIXED and not GONE', () => {
+  const baseline = { minPoints: 1, red: ONE_RED }
+  const cmp = compare(parseTap(REAL_GREEN), baseline, readSummary(REAL_GREEN))
+  assert.equal(cmp.fixed.length, 1, 'this is the assertion that failed before the name fallback')
+  assert.equal(cmp.vanished.length, 0, 'a collected, passing test has not vanished')
+  assert.equal(cmp.fixed[0].matchedBy, 'name')
+  const out = formatReport(cmp, baseline)
+  assert.match(out, /FIXED {2}1/)
+  assert.match(out, /matched on the name/)
+})
+
+test('an ambiguous name says how many files it matched', () => {
+  // The cost of the fallback, stated in the report rather than hidden. Two
+  // files may legitimately hold "the happy path".
+  const two = REAL_GREEN.replace('1..1', 'ok 150 - transcribed: the events read refuses unknown filters, so the INERT finding was acted on\n1..2')
+  const cmp = compare(parseTap(two), { minPoints: 1, red: ONE_RED }, readSummary(two))
+  assert.equal(cmp.fixed[0].nameMatches, 2)
+  assert.match(formatReport(cmp, { minPoints: 1, red: ONE_RED }), /matched on the NAME in 2 files/)
+})
+
+test('the name fallback does not resurrect a row whose failure merely moved file', () => {
+  // The fallback consults PASSING points only. A failure at a new path is
+  // still a new failure and the old row is still GONE, which is the property
+  // the file-keyed test above asserts and this must not undo.
+  const moved = TAP.replace('tools/board/read-filters.test.mjs', 'tools/board/filters.test.mjs')
+  const cmp = compare(parseTap(moved), { minPoints: 1, red: ONE_RED }, readSummary(moved))
+  assert.equal(cmp.fixed.length, 0)
+  assert.equal(cmp.vanished.length, 1)
+  assert.equal(cmp.newRed.length, 1)
+})
+
+test('a skip with no location is UNRUNNABLE, not GONE', () => {
+  // Same absent-location trap in the other verdict: a skip is printed as `ok`
+  // and carries no location either, so without the fallback a debt that
+  // merely cannot be run here would read as one no longer collected.
+  const realSkip = REAL_GREEN.replace(
+    'ok 149 - transcribed: the events read refuses unknown filters, so the INERT finding was acted on',
+    'ok 149 - transcribed: the events read refuses unknown filters, so the INERT finding was acted on # SKIP no board source on this host')
+  const baseline = { minPoints: 1, red: ONE_RED }
+  const cmp = compare(parseTap(realSkip), baseline, readSummary(realSkip))
+  assert.equal(cmp.unrunnable.length, 1, 'the debt stays open')
+  assert.equal(cmp.fixed.length, 0, 'a skip is not a pass')
+  assert.equal(cmp.vanished.length, 0)
+  assert.match(formatReport(cmp, baseline), /no board source on this host/)
+})
+
+test('FIXED on a row that is not a function of the tree still refuses to be a repair', () => {
+  // The 2026-11-02 rule, now printed at the point of temptation rather than
+  // only in the baseline's header. `tools/doc-model/check.test.mjs` went green
+  // on the trunk while its fix was an open pull request, because the content
+  // it reads changed under it.
+  const row = [{ ...ONE_RED[0], dependsOn: 'repo-content', note: 'x', flipQuery: 'q' }]
+  const cmp = compare(parseTap(REAL_GREEN), { minPoints: 1, red: row }, readSummary(REAL_GREEN))
+  const out = formatReport(cmp, { minPoints: 1, red: row })
+  assert.match(out, /NOT CURRENTLY REPRODUCIBLE/)
+  // And a tree-dependent row gets no such caveat, so the warning means something.
+  const treeRow = [{ ...ONE_RED[0], dependsOn: 'tree', note: 'x', flipQuery: 'q' }]
+  assert.doesNotMatch(formatReport(
+    compare(parseTap(REAL_GREEN), { minPoints: 1, red: treeRow }, readSummary(REAL_GREEN)),
+    { minPoints: 1, red: treeRow }), /NOT CURRENTLY REPRODUCIBLE/)
 })
