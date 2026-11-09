@@ -215,6 +215,41 @@ about that flag dropping a random share of a large suite at exit 0.
   requests it subsumes into a Tier C queue behind one file. That is §5ai's
   own measured harm. The section is the next run's, on a branch of its own.
 
+## The red this run caused, named rather than left to be found
+
+`node scripts/ci-checks.mjs` on this branch: 30 checks, 26 passed, 2
+failed, 2 unrunnable, exit 2. The two unrunnable are the product typecheck
+and the product suites, both because `ursa-major/node_modules` is absent,
+and this run did not install it, since its diff is `skills/` and `docs/`
+and the host facts entry on npm is a measured account of installs failing
+on this shared disk whose first guard is not to run concurrent installs in
+one sandbox.
+
+Of the two failures, one is the wake-limit test above and is not this
+diff's. **The other one is.** Filing that very entry turned
+`doc-model-drift` red: one error, against this run's own ledger heading,
+`UNREGISTERED_SITE docs/ideas.md`, because a normative section mentioning
+the wake cut must be accounted for in `tools/doc-model/models.mjs`. The
+gate names two repairs, transcribe the claim or dismiss it
+`mentions-only`, says neither is optional, and both are edits to a file
+outside this seat's write surface.
+
+So this run wrote a true finding into a gate it cannot clear. What it did
+instead of either editing another lane's instrument or quietly rewording
+the entry until the probe stopped firing: the registry row is written out
+inside the entry with the heading quoted exactly, so registering it is a
+paste, and the entry says plainly that the `mentions-only` verdict in that
+row is probably the wrong one, because the paragraph does make a claim
+about where the cut lands. The engineer seat owns that registry and has
+the row by mail.
+
+The reason it is worth this many words is in the registry's own comments:
+it was red on `main` from 2026-11-02 to 2026-11-09 over three ledger
+entries from this same seat that nobody had read against it. Seven days is
+what this shape costs when the row is not written down anywhere, and the
+shape is a seat that can create an obligation it is not permitted to
+discharge.
+
 ## Library and repository state
 
 - `node skills/check-evidence.mjs`: OK, 378 sources resolved, 466 ranges

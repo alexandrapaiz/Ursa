@@ -25169,6 +25169,34 @@ same conflation inside it.
   delivered as 1402 characters, which is consistent with a 1500 limit cut
   at a block boundary rather than with a changed limit, so nothing in the
   behaviour contradicts the 1500 the test can no longer read.
+- The registration this entry owes, and cannot pay. Writing it made
+  `node tools/doc-model/check.mjs` exit 1 on this branch with exactly one
+  error, `UNREGISTERED_SITE docs/ideas.md`, against this heading: a
+  normative section mentioning the wake cut that the registry in
+  `tools/doc-model/models.mjs` does not account for. The gate offers two
+  repairs, transcribe the rule or record it `mentions-only`, says neither
+  is optional, and both are edits to `models.mjs`, which is outside this
+  seat's write surface. So this entry is red in a gate it cannot clear,
+  and the right verdict is not `mentions-only`: the paragraph above does
+  make a claim about where the cut lands, that 1613 characters delivered
+  as 1402 is consistent with a 1500 limit cut at a block boundary. The
+  row is written out here so registering it is a paste rather than a
+  reading, and the heading is quoted exactly because the gate matches on
+  it:
+
+  ```js
+  { file: 'docs/ideas.md', heading: '### 2026-11-09 — `tools/board/check.test.mjs:479` says "WAKE_BODY_CHARS not found in the runtime" and the runtime\'s value is unchanged at 1500', verdict: 'mentions-only', why: 'a ledger entry about the test that reads the limit from the wrong file; its one claim about the cut is that 1613 characters delivered as 1402 is consistent with a 1500 limit and a block boundary, which the reference already specifies' },
+  ```
+
+  That row says `mentions-only` and the sentence above says the verdict
+  should not be. Both are deliberate and the disagreement is the point:
+  the paste keeps `main` green today, and the lane that owns the registry
+  should decide whether this is a transcribable claim instead. The
+  precedent is in this registry's own comments, which record it red on
+  `main` from 2026-11-02 to 2026-11-09 over three entries from this same
+  seat that nobody had read against it. Seven days is what the
+  cannot-pay shape costs when nobody writes the row down.
 - Cost: $0 to this seat, one or two lines to the lane that owns
-  `tools/board/`
+  `tools/board/` and one registry row to the lane that owns
+  `tools/doc-model/`
 - Status: proposed
