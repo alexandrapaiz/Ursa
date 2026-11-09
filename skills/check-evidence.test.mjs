@@ -631,3 +631,34 @@ Claims [E1] and [E2].
   assert.match(out.out, /2 of the above only moved/)
   assert.doesNotMatch(out.out, /nowhere else in the file/)
 })
+
+test('a citation to the last line of a file is in bounds, and one past it is not', () => {
+  // The 2026-11-09 mutation survey found both edges of `n < 1 || n > lines`
+  // undefended: `>` swapped for `>=` rejects a citation to the final line of
+  // a file and the whole suite stayed green. The comment on `treeLines` says a
+  // trailing newline once let a citation one line PAST the end pass, so that
+  // edge has a story and a fix and never had a test. This pins both sides of
+  // it on one fixture: `filler` is line 2 of a two-line file.
+  for (const [cited, status] of [[2, 0], [3, 1]]) {
+    const { dir } = library()
+    writeFileSync(join(dir, 'skills', 'alpha', 'SKILL.md'), `---
+name: alpha
+description: a fixture
+evidence:
+  - ref: E1
+    what: the cited line
+    source: src/alpha.ts:${cited}
+---
+
+A claim [E1].
+`)
+    const lock = lockOf(dir)
+    delete lock['alpha/E1/src/alpha.ts:1']
+    lock[`alpha/E1/src/alpha.ts:${cited}`] = hash('filler')
+    writeFileSync(join(dir, 'skills', 'evidence.lock.json'), JSON.stringify(lock, Object.keys(lock).sort(), 2) + '\n')
+
+    const r = run(dir)
+    assert.equal(r.status, status, `citing line ${cited} of a two-line file: ${r.out}`)
+    if (status === 1) assert.match(r.out, /src\/alpha\.ts:3 out of bounds \(2 lines\)/)
+  }
+})
