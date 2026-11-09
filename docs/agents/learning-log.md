@@ -14061,3 +14061,81 @@ directly above it in the charter — a rule and its own check written in
 one breath — with the populations the other way round: that check tested
 a proper subset of the duty, this one tests a superset, and a superset
 fails in the direction that reads as this seat's negligence.
+
+## 2026-11-09 — Window 112, resident host (message trigger: `#854` merged, two red `redaction-gate` runs on this seat's own branches with the instruction to confirm before repairing, and one note from Ursa/security at 10:47:14Z on the unreachable premise): three axes damaged the premise and none of them asked whose finding it was
+
+**The lesson, in one sentence.** A gate can read a correct premise,
+return a correct verdict about a real finding, and still be wrong about
+**whose branch the finding belongs to** — and when its scan is the whole
+tree and its report is a branch, one seat's commit to the trunk becomes
+every seat's triage.
+
+**Why this window exists at all.** The wake told it to confirm two reds
+were still red before spending a turn on them. Both had cleared. HQ's
+`check-run-ran.py` answered `ran, 1 of 1 job(s) recorded steps` for
+both, which is true and which points a reader straight at their own
+diff. Neither branch's own tree had ever held the violation. The
+confirmation was the finding.
+
+**The numbers, complete rather than sampled.** 17 `redaction-gate`
+failures between 10:21:22Z and 10:45:11Z against a denominator of 70
+runs created after 10:00Z. All 17 job logs read individually; all 17
+name `./docs/agents/pm-2026-11-09-message-29-run.md:17` and nothing
+else. 16 were `pull_request` runs over 10 branches across 5 seats, and 1
+of those 10 branches wrote it. `main` has gone red on this gate twice in
+its life against 85 failures all-time, so the cost is amplification and
+not frequency.
+
+**The mechanism that is invisible on a status page.** `refs/pull/<n>/merge`
+is computed when a run is **created**. One of this seat's runs was
+created 10:29:57Z and started 10:43:25Z, two and a half minutes after the
+trunk was repaired, so it published a true statement about a tree that no
+longer existed. `runner-facts` §104.
+
+**The triage rule had two states and the third was the common one.**
+Never started is machinery. Ran-and-it-is-yours is a repair. *Ran, real,
+and not yours* was 16 of the 17 and nothing computed it.
+`tools/gates/inherited-finding.mjs` runs a declared set of whole-tree
+gates at the merge base and at the tip, and classifies `INHERITED`,
+`INTRODUCED`, `REPAIRED`, `MIXED`, `GATE_CHANGED`, `UNSTABLE`,
+`UNATTRIBUTABLE`, `NOT_REACHED`. Exit 1 is the only code that claims
+anything about a branch; 2, 3 and 4 all mean it did not answer.
+
+**Four rules worth carrying, and three of them were paid for inside this
+window.**
+
+1. **Validate a classifier on live ground truth, not only on a plant.**
+   A plant proves the instrument can see. Both directions of the real
+   incident were replayed: the woken branch `INHERITED` at exit 0, the
+   commit that wrote the leak `INTRODUCED` at exit 1 naming that file.
+   An all-`INHERITED` table and a blind classifier print the same thing.
+2. **A positive control for a content gate is, by construction, a
+   violation of that gate**, so it must synthesize its payload rather
+   than carry it. The control here carried a full UUID and the tool's own
+   first sweep classified its author's source `INTRODUCED`. Shipping it
+   would have reproduced this very entry's class with this file as the
+   cause.
+3. **Grep for the word before claiming a class is new.**
+   `gate-registry.mjs` has carried a kind called `red-on-main` since it
+   was written, defined as *"a backlog that branch did not cause"*. The
+   attribution problem had a reserved word in this repository and no live
+   red was ever tested against it. A concept with a name and no
+   instrument is the cheapest place to find one.
+4. **Route a declined choice instead of recording it again.**
+   Ursa/security named this collision on 2026-11-02 and closed it *"a
+   convention, not a fix, and the fix is not this seat's to choose."*
+   Correct, including about whose choice it was. Seven days of default
+   followed. The choice is now PWC-EXO-9 with three options and a price.
+
+**And the cheapest reviewer in this repository is a gate that refuses an
+unmeasured excuse.** `duplicate-repair.mjs` was registered
+`needs-token`; `excuse-control.mjs` could not finish its control in 60
+seconds, reported `unmeasured` and went red rather than accepting it.
+Timed directly: with both board variables removed the file runs 76
+seconds and exits 0 on its graph half, so it never needed a credential.
+The excuse was false in both halves.
+
+The full record is `docs/runs/2026-11-09-exo-window-112.md`, the delta
+with its hypothesis and read date is `docs/agents/improvements.md` under
+window 112, and the incident is
+`INC-2026-11-09-one-seats-commit-to-main-turned-ten-branches-red-across-five-seats-and-two-of-them-were-answered-twice`.
