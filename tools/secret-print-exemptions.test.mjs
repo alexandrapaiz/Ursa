@@ -57,10 +57,16 @@ const BASELINE = 'tools/secret-print-baseline.txt'
 // omission visible. `run_checker` in the gate itself raises `CannotRun` on
 // both a refusing exit status and an unparseable document. Only the
 // JavaScript helper trusted the status alone.
+// `opts.cwd` added 2026-11-09 by this seat with F126. Every case in this file
+// passed before that fix and the defect was real, because this helper pinned
+// `cwd` to `root` and so asked the gate exactly one of the questions it can
+// be asked. The gate resolves its own tree from `__file__`, so the working
+// directory is a premise it is not supposed to read, and an argument that can
+// move it is the only way a case can assert that.
 function run(root, args = [], opts = {}) {
   const interpreter = opts.interpreter || 'python3'
   const out = spawnSync(interpreter, [path.join(root, GATE), ...args], {
-    cwd: root,
+    cwd: opts.cwd || root,
     encoding: 'utf8',
     maxBuffer: opts.maxBuffer || 32 * 1024 * 1024,
   })
@@ -476,6 +482,98 @@ test('the marker census conserves, so a marker cannot go uncounted', () => {
   assert.ok(report.markers_incidental <= report.markers_inert,
     'an incidental marker is a kind of inert one')
   assert.ok(report.markers > 0, 'a tree with no markers would not test this')
+})
+
+// ---------------------------------------------------------------------------
+// F126: THE WORKING DIRECTORY IS A PREMISE THIS GATE MUST NOT READ.
+//
+// The gate resolves its own tree from `__file__`, and everything downstream
+// of that agrees: the sweep that lists the files runs `cwd=ROOT` and so does
+// the checker that scans them. `marker_census` was the one consumer that did
+// not. It opened the sweep's ROOT-relative paths against the process cwd, and
+// caught the `OSError` with a comment calling it somebody else's problem.
+//
+// So from any directory but the repository root the census read zero files,
+// reported `0 marker line(s)` in place of 44, and the verdict line above it
+// went on printing `every exemption is decided and in date` at exit 0. The
+// inert direction immediately above is the newest half of this gate and the
+// reason it was written, and it was off by default.
+//
+// Ursa's exo seat found it on the empty-non-git-directory axis, where the
+// verdict line is byte-identical to the in-repo run. The case below uses
+// `tools/` inside the real tree instead, because that is a directory a person
+// actually runs a tool from, and it fails identically.
+//
+// Why these two cases and not a third that asserts the census is non-empty.
+// A count is the discriminating assertion and a non-empty check is not: the
+// pre-fix gate answered 0 where the fixed one answers 44, so equality against
+// the root's own run is what moves. It is written as an equality between two
+// runs rather than against the literal 44, because the literal is a property
+// of today's tree and would make this case a second baseline to maintain.
+
+test('the verdict does not depend on the directory it was run from', () => {
+  const atRoot = json(ROOT)
+  const fromTools = json(ROOT, [], { cwd: path.join(ROOT, 'tools') })
+  assert.equal(fromTools.code, atRoot.code,
+    'the exit status moved with the working directory')
+  assert.equal(fromTools.report.markers, atRoot.report.markers,
+    'the marker census moved with the working directory, which is the '
+    + 'F126 shape: one half of the gate reading cwd while the verdict '
+    + 'half reads ROOT')
+  assert.equal(fromTools.report.markers_inert, atRoot.report.markers_inert,
+    'the inert direction moved with the working directory')
+  assert.ok(atRoot.report.markers > 0,
+    'a tree with no markers would let the broken gate pass this case')
+})
+
+// A file the sweep lists and nothing downstream can read. Three stages read
+// that list — the sweep, the checker, and the marker census — and this case
+// asserts the invariant they share rather than which of them speaks, because
+// measured here the CHECKER is what catches a permission error, one stage
+// before the census reaches it: `the checker refused to run: ... cannot read
+// .github/workflows/agent-engineer.yml`. So the `CannotRun` added to the
+// census with F126 is a backstop and not this case's subject. It covers the
+// narrower shape the checker cannot see, where the sweep and the census
+// disagree about what exists rather than about what is readable, and that is
+// precisely the shape the cwd defect was.
+//
+// Mode 000 and not a dangling symlink: the sweep's `find` predicate is
+// `-type f`, so a broken link is never listed and the case would prove
+// nothing. The victim is a workflow file because it is pure scan input; the
+// sweep script and the checker are on their own list too, and making either
+// unreadable fails at a stage that is not the one under test.
+test('a listed file nothing can read is exit 2 and no verdict, not a short count', () => {
+  const dir = instance()
+  const target = path.join(dir, '.github/workflows/agent-engineer.yml')
+  assert.ok(fs.existsSync(target), 'the victim must be on the sweep list')
+  fs.chmodSync(target, 0o000)
+  let got
+  try {
+    got = run(dir)
+  } finally {
+    fs.chmodSync(target, 0o644)
+  }
+  assert.equal(got.code, 2,
+    `an unreadable listed file must be exit 2 for no answer, not exit `
+    + `${got.code}. stdout: ${got.stdout}`)
+  assert.equal(got.stdout.trim(), '',
+    'the gate printed a verdict over a scan it could not complete')
+  assert.match(got.stderr, /agent-engineer\.yml/,
+    'the refusal must name the file it could not read')
+})
+
+test('with its own tree absent the gate refuses and claims nothing', () => {
+  // The absence that matters for this gate is not an empty working directory,
+  // which it is right to ignore. It is ROOT itself holding nothing, because
+  // ROOT is the premise it does read. Script alone, no tree around it.
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), `ursa-exempt-${process.pid}-lone-`))
+  INSTANCES.push(dir)
+  fs.mkdirSync(path.join(dir, 'tools'))
+  fs.copyFileSync(path.join(ROOT, GATE), path.join(dir, GATE))
+  const got = run(dir)
+  assert.equal(got.code, 2, `expected a refusal, got ${got.code}: ${got.stdout}`)
+  assert.equal(got.stdout.trim(), '',
+    'a gate with no tree to read must print no verdict at all')
 })
 
 // ---------------------------------------------------------------------------
