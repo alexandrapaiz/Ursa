@@ -2,6 +2,61 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (twelfth pass): this seat's own stuck three-PR chain absorbed, #765 and #773 merged under Tier B, two inbox asks and one routed note answered on the board
+
+Four things on the wake: an ask from exo about the charter-carry row
+(already merged, by the eleventh pass, before this wake was read), a
+pull request opened by frontend (`#765`) to review against the merge
+rule, a note from `alexandra-systems/exo-centralizer` routing a
+redaction-gate finding here, and the recurring standing block naming
+this seat's own draft and two other seats' drafts as orphaned. Full
+account in `docs/agents/pm-2026-11-09-message-12-run.md`.
+
+1. **This seat's own stuck chain is closed, and nothing in it was
+   lost.** Three of this seat's own open pull requests — the seventh,
+   eighth and ninth passes — had been sitting unmerged since this seat
+   cannot merge its own row, while the tenth and eleventh passes had
+   each branched fresh from `main` instead of from that chain. The
+   result: `main`'s own copy of this file was missing three passes'
+   worth of history. Fixed by merging that chain into this pass's own
+   branch (`git merge-base --is-ancestor` confirmed all three
+   contained before closing them) and keeping both sides' sections,
+   newest first, nothing dropped. Nothing needs you here beyond
+   reading the restored history below.
+2. **Two Tier B merges, neither needing you.** `#765` (frontend, a
+   before/after visual sweep, two instrument fixes, and a design-ledger
+   correction) and `#773` (market, a redaction-gate false-positive
+   workaround that also subsumes an earlier row) were both reviewed
+   against the merge rule directly: not drafts, no `hold` label, no
+   comment against them, one green check each, `check-merge-queue.sh`
+   reports both clean against current `main` independent of GitHub's
+   cached field, no Tier C path. Merged.
+3. **The redaction-gate's underlying pattern is logged, not fixed, and
+   it is not blocking anyone right now.** `exo-centralizer` routed a
+   finding here: the gate's UUID-shaped-slug pattern will false-positive
+   on the next news citation with the same shape, and the fix is a
+   workflow-file edit outside every seat's charter surface except
+   engineer's. Market's workaround already landed (point 2 above), so
+   nothing is walled tonight. The actual fix is logged in
+   `docs/sprints/dispatch-queue.md` for engineer, not fired this pass
+   since engineer's own open row is a live draft. Separately, security's
+   dependency finding (F93, 23 advisories in `ursa-minor`'s dev
+   dependencies, 7 high, none reaching production) is logged the same
+   way for the same reason. Replied to exo, exo-centralizer and
+   security on the board, each in first person, naming what moved and
+   why nothing fired.
+4. **The standing block recurred a fourth time, with different
+   numbers, and the premise still does not hold.** It named this
+   seat's own prior pass (`#777`) as an open draft needing readying —
+   already merged, hours before this wake was read. It named `#765`
+   (already not a draft by the time this pass checked) and `#776`
+   (security) as orphaned. `check-draft-prs.sh`, run fresh: no
+   orphaned drafts, `#776` idle 1-4 minutes, "run may still be live;
+   leave it alone." `GET /api/standing?company=Ursa&seat=pm` now reads
+   empty. Not acted on, not filed as a new incident: this is the same
+   recurring defect Incident 19 already named, checked and rejected
+   for the fourth time rather than a new occurrence.
+
 ## Top three for the owner, 2026-11-09 message-triggered (eleventh pass): #771 and #775 merged under Tier B, the injected draft-merge note checked and not acted on a second time
 
 Two items on the wake: review `#771` (security) against the merge rule,
