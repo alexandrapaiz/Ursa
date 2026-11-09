@@ -80,13 +80,17 @@ const run = (dir, ...args) => {
 const lockOf = (dir) => JSON.parse(readFileSync(join(dir, 'skills', 'evidence.lock.json'), 'utf8'))
 
 test('a bare --update over a drifted library refuses and writes nothing', () => {
+  // Re-pointed 2026-11-09, second message run of the day: the relocate-anchors
+  // assertion moved to the test below. This fixture drifts by replacement, so
+  // its cited text is gone rather than moved, and the refusal now names the
+  // repair each half wants rather than one route for both.
   const { dir, lock } = library(['alpha'])
   assert.equal(run(dir).status, 1)
   const refused = run(dir, '--update')
   assert.equal(refused.status, 2)
   assert.match(refused.out, /refusing to --update/)
   assert.match(refused.out, /alpha\/E1\/src\/alpha\.ts:1/)
-  assert.match(refused.out, /relocate-anchors\.mjs/)
+  assert.match(refused.out, /nowhere in the file any more/)
   assert.deepEqual(lockOf(dir), lock, 'the lock is untouched by a refusal')
 })
 
@@ -101,12 +105,15 @@ test('a bare --update over a clean library still records everything', () => {
 })
 
 test('a scoped --update records what was named and leaves the rest red', () => {
-  // Both skills drift by relocation, which is the kind a slug still covers,
-  // because this test is about the scope mechanics and not about the gone-or-
-  // moved split. Before 2026-11-09 the fixture drifted by replacement and the
-  // slug covered that too; the two tests below are what changed that.
+  // This test is about the scope mechanics and not about the gone-or-moved
+  // split, so it names the one range it wants recorded at the granularity the
+  // gate asks for. It has been re-pointed twice in one day and the history is
+  // the point: the fixture drifted by replacement and a slug covered it, then
+  // by relocation because a slug still covered that, and now by relocation
+  // named by ref, because as of the second message run of 2026-11-09 a slug is
+  // not a name for a drifted range of either kind.
   const { dir, lock } = library([], ['alpha', 'beta'])
-  const updated = run(dir, '--update', 'alpha')
+  const updated = run(dir, '--update', 'alpha/E1')
   assert.equal(updated.status, 0)
   assert.match(updated.out, /left drifted on purpose/)
   assert.match(updated.out, /beta\/E1\/src\/beta\.ts:1/)
@@ -179,7 +186,7 @@ test('a slug does not license re-recording a range whose cited text is gone', ()
   const { dir, lock } = library(['alpha'])
   const refused = run(dir, '--update', 'alpha')
   assert.equal(refused.status, 2)
-  assert.match(refused.out, /no longer carries the lines the lock recorded, anywhere in the file/)
+  assert.match(refused.out, /1 whose cited text is nowhere in the file any more/)
   assert.match(refused.out, /alpha\/E1\/src\/alpha\.ts:1/)
   // And it prints the narrower name the caller has to use, rather than leaving
   // them to work out that a slug is not the only granularity there is.
@@ -202,37 +209,71 @@ test('naming the ref is the way through, and it is not the same as naming the sl
   assert.deepEqual(lockOf(dir), lock)
 })
 
-test('a slug still covers a range whose text moved rather than changed', () => {
-  // The other half of the split, and the reason it is a split rather than a
-  // tightening: nine tenths of a real drift batch is a line number that moved
-  // while the lines said the same thing, so refusing on that would turn the
-  // ordinary case into a per-ref chore and the gate into something to route
-  // around. skills/relocate-anchors.mjs carries the two measurements.
+test('a slug does not license re-recording a range whose cited text has moved either', () => {
+  // Re-pointed from 'a slug still covers a range whose text moved rather than
+  // changed', 2026-11-09, second message run of the day. The old premise was
+  // deliberate and it was measured wrong on the same day it shipped: the
+  // argument for it was that nine tenths of a drift batch needs no reading,
+  // which is true of the text and false of the anchor. Pointed at the sixteen
+  // drifted ranges on main, the gate sorted fifteen as moved and would have
+  // re-recorded all fifteen at line numbers no longer holding the claim. The
+  // ledger entry carries the batch.
   const { dir, lock } = library([], ['alpha'])
   assert.equal(run(dir).status, 1, 'a shifted range is drift like any other')
-  const updated = run(dir, '--update', 'alpha')
+  const refused = run(dir, '--update', 'alpha')
+  assert.equal(refused.status, 2)
+  assert.match(refused.out, /1 whose cited text is still in the file, at a different offset/)
+  // The offset the text moved to is the part that makes the refusal actionable
+  // rather than a wall, and it is the same number relocate-anchors.mjs writes.
+  assert.match(refused.out, /cited text now at src\/alpha\.ts:2/)
+  assert.match(refused.out, /relocate-anchors\.mjs/)
+  assert.deepEqual(lockOf(dir), lock, 'the lock is untouched by a refusal')
+})
+
+test('naming a moved range by ref is a decision the gate accepts, and it still says what moved', () => {
+  // The escape has to exist for the moved half too, and it is not a formality.
+  // A range whose line numbers are the citation rather than its text is a real
+  // case: the caller is saying this claim means these lines and not the text
+  // that used to be at them. Naming one range is the act that says a person
+  // looked at that range, which is the whole difference from the slug.
+  const { dir, lock } = library([], ['alpha'])
+  const updated = run(dir, '--update', 'alpha/E1')
   assert.equal(updated.status, 0)
   assert.notEqual(lockOf(dir)['alpha/E1/src/alpha.ts:1'], lock['alpha/E1/src/alpha.ts:1'])
   // Succeeding quietly would hide the one thing worth saying about this case,
-  // which is that re-recording the anchor is not the repair the drift wanted.
+  // which is that re-recording the anchor is probably not the repair the drift
+  // wanted, and the caller is the person best placed to notice.
+  assert.match(updated.out, /which you named by ref/)
   assert.match(updated.out, /cited text now at src\/alpha\.ts:2/)
   assert.match(updated.out, /relocate-anchors\.mjs/)
 })
 
-test('one gone range in a slug refuses the whole scope and names only that one', () => {
-  // The mixed case, which is the shape a real drift batch has. The refusal has
-  // to be legible about which of the two ranges it is about, or a caller reads
-  // it as "this slug is unrecordable" and names every ref in it, which is the
-  // name-them-all habit the first refusal was written to replace.
+test('a mixed batch is refused as two halves, each with the repair it wants', () => {
+  // The mixed case, which is the shape a real drift batch has. Re-pointed
+  // 2026-11-09, second message run: the old version asserted that the moved
+  // half was not named at all, because a slug covered it. Both halves are
+  // refused now, so what the refusal owes a reader is no longer "which one of
+  // these" but "which of two repairs for each one", and a caller who cannot
+  // tell them apart falls back to naming every ref, which is the name-them-all
+  // habit the refusal exists to replace.
   const { dir, lock } = library(['alpha'], ['beta'])
   const refused = run(dir, '--update', 'alpha', 'beta')
   assert.equal(refused.status, 2)
-  assert.match(refused.out, /1 drifted range no longer carries/)
-  assert.match(refused.out, /alpha\/E1\/src\/alpha\.ts:1/)
-  assert.doesNotMatch(refused.out, /beta\/E1/)
-  assert.deepEqual(lockOf(dir), lock, 'nothing is written, including the half that was coverable')
-  // Named at the granularity each one needs, both go through in one command.
-  const out = run(dir, '--update', 'alpha/E1', 'beta')
+  assert.match(refused.out, /2 drifted ranges named by no ref/)
+  assert.match(refused.out, /1 whose cited text is still in the file, at a different offset/)
+  assert.match(refused.out, /1 whose cited text is nowhere in the file any more/)
+  // Each key appears under its own half, and only there.
+  const movedHalf = refused.out.split('still in the file, at a different offset')[1].split('nowhere in the file')[0]
+  assert.match(movedHalf, /beta\/E1\/src\/beta\.ts:1/)
+  assert.doesNotMatch(movedHalf, /alpha\/E1/)
+  const goneHalf = refused.out.split('nowhere in the file any more')[1]
+  assert.match(goneHalf, /alpha\/E1\/src\/alpha\.ts:1/)
+  assert.doesNotMatch(goneHalf, /beta\/E1/)
+  assert.deepEqual(lockOf(dir), lock, 'nothing is written, including the half that is only an anchor')
+  // Named by ref, both go through in one command. The moved half would
+  // ordinarily go to relocate-anchors.mjs instead; this asserts the gate is
+  // satisfiable, not that this is the repair to reach for.
+  const out = run(dir, '--update', 'alpha/E1', 'beta/E1')
   assert.equal(out.status, 0)
   const after = lockOf(dir)
   assert.notEqual(after['alpha/E1/src/alpha.ts:1'], lock['alpha/E1/src/alpha.ts:1'])
@@ -241,13 +282,15 @@ test('one gone range in a slug refuses the whole scope and names only that one',
 })
 
 test('a gone range outside the named scope is left red rather than refused', () => {
-  // The boundary between the two refusals. Out of scope means untouched, so an
-  // unreadable range nobody named keeps the value the lock holds and stays red
-  // on its own account. Refusing on it would force a run to resolve the whole
-  // library before it could record one skill, which is the quadratic shape the
-  // scope was introduced to avoid.
+  // The boundary of the refusal. Out of scope means untouched, so an unreadable
+  // range nobody named keeps the value the lock holds and stays red on its own
+  // account. Refusing on it would force a run to resolve the whole library
+  // before it could record one range, which is the quadratic shape the scope
+  // was introduced to avoid. Re-pointed to name beta by ref, 2026-11-09 second
+  // message run, for the reason the two tests above carry; the boundary this
+  // test is about is the scope filter and not the granularity.
   const { dir, lock } = library(['alpha'], ['beta'])
-  const out = run(dir, '--update', 'beta')
+  const out = run(dir, '--update', 'beta/E1')
   assert.equal(out.status, 0)
   assert.match(out.out, /left drifted on purpose/)
   assert.match(out.out, /alpha\/E1\/src\/alpha\.ts:1/)
@@ -255,16 +298,29 @@ test('a gone range outside the named scope is left red rather than refused', () 
   assert.equal(run(dir).status, 1, 'alpha is still red, and on its own account')
 })
 
-test('a bare --update is still caught by the first refusal, not the second', () => {
-  // Order matters only for the message, and the message is the product here.
-  // A bare command over a mixed batch should hear "you named nothing", which
-  // is actionable, rather than "one of these is unreadable", which invites
-  // naming that one and running the bare command again.
+test('a bare --update hears the same two halves a slug does, because there is one refusal now', () => {
+  // Re-pointed from 'a bare --update is still caught by the first refusal, not
+  // the second', 2026-11-09 second message run. There were two refusals and
+  // their order was asserted here, on the argument that a bare command should
+  // hear "you named nothing" rather than "one of these is unreadable", because
+  // the latter invites naming that one and running the bare command again.
+  // That argument is answered rather than abandoned: the one refusal names
+  // every range and the repair each wants, so there is nothing left to invite.
+  // The set the first refusal caught was a subset of the second's all along,
+  // since naming by ref implies naming, so collapsing them changed no exit
+  // status. What it changed is that the bare command used to end by printing
+  // `--update <slug>` as the way through, and under this rule that is a
+  // command the gate would then refuse.
   const { dir, lock } = library(['alpha'], ['beta'])
   const out = run(dir, '--update')
   assert.equal(out.status, 2)
-  assert.match(out.out, /that nothing on the command line named/)
-  assert.doesNotMatch(out.out, /anywhere in the file/)
+  assert.match(out.out, /named by no ref/)
+  assert.match(out.out, /still in the file, at a different offset/)
+  assert.match(out.out, /nowhere in the file any more/)
+  // A bare slug and nothing else. `\b` is not the boundary here, because it
+  // matches before the slash of `alpha/E1`, which is the name the gate accepts.
+  assert.doesNotMatch(out.out, /--update alpha\s*$/m, 'it never prescribes the slug it would refuse')
+  assert.doesNotMatch(out.out, /--update beta\s*$/m)
   assert.deepEqual(lockOf(dir), lock)
 })
 

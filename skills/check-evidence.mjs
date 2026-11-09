@@ -10,12 +10,13 @@
 //   node skills/check-evidence.mjs --update <slug>/<ref>  ... only that citation
 //   node skills/check-evidence.mjs --base origin/main   verify against that tree
 //
-// Which granularity a re-record needs is not the caller's choice. A drifted
-// range whose recorded lines are still somewhere in the file moved rather than
-// changed, and a slug covers it. A drifted range whose recorded lines are
-// nowhere in the file now covers prose nobody has read, and that one has to be
-// named by ref. The refusal says which is which; see the second refusal below
-// for what bought the distinction.
+// Which granularity a re-record needs is not the caller's choice, and a slug is
+// not a name for a range that has drifted. A slug covers a range the lock has
+// never recorded, which is a new or re-anchored citation and the ordinary
+// authoring path. Once the lock holds a different value for a range, the range
+// has to be named by ref, or followed by relocate-anchors.mjs when the lines it
+// cited merely moved. The refusal below sorts the two and names the repair each
+// one wants; see it for what bought the rule.
 //
 // What `--base` is for, and why a tense is a defect. Without it this script
 // reads the working tree and nothing else, so a green exit status is a claim
@@ -291,75 +292,86 @@ for (const entry of readdirSync(skillsDir)) {
 }
 
 if (update) {
-  // A bare `--update` over a drifted library is the one way to discharge this
-  // whole guard by accident, and until 2026-10-18 it was the command the docs
-  // prescribed. Measured on the real 2026-10-18 drift batch: the checker said
-  // "43 of them drifted", one bare `--update` exited 0, and the checker then
-  // said OK while all 43 citations still pointed at the lines main had moved
-  // under them. That is the 2026-10-08 failure the lock exists to prevent,
-  // reachable in one command. So re-recording a drifted range now has to name
-  // it, which is the difference between a run that decided and a run that ran
-  // a command.
+  // One refusal, and it says a drifted range is never covered by a skill slug.
   //
-  // The rule is about what is being re-recorded, not about what has drifted.
-  // A drifted range outside the named scope keeps the value the lock already
-  // holds, so it stays red and needs no refusal; blocking on it would force a
-  // run to name every drifted range at once, which is the "name them all"
-  // habit this is trying to replace. With a scope given this list is therefore
-  // empty by construction, and the case it catches is the bare command.
-  const unnamed = drifted.filter((d) => inScope(d.entry, d.ref, d.key) && !named(d.entry, d.ref, d.key))
-  if (unnamed.length) {
-    console.error(`refusing to --update: it would re-record ${unnamed.length} drifted range${unnamed.length === 1 ? '' : 's'} that nothing on the command line named`)
-    for (const d of unnamed) console.error('  ' + d.key)
-    console.error('\nRe-recording these certifies that you read them against the new lines.')
-    console.error('Most of them are probably a line number that moved while the lines stayed put:')
-    console.error('  node skills/relocate-anchors.mjs <old-ref>        # the mechanical share, no reading needed')
-    console.error('Then name what is left, by skill slug or by lock key:')
-    console.error(`  node skills/check-evidence.mjs --update ${[...new Set(unnamed.map((d) => d.entry))].join(' ')}`)
-    process.exit(2)
-  }
-  // The second refusal, and the asymmetry is the argument for it. The one
-  // above catches the run that named nothing. This one catches the run that
-  // named a slug, which until 2026-11-09 licensed re-recording every drifted
-  // range under it, however the range had drifted.
+  // It was two until 2026-11-09. The first caught the run that named nothing,
+  // the second the run that named a slug over a range whose cited text had
+  // gone, and a slug still covered a range whose text had merely moved. The
+  // measurement that collapsed them into this one is in the ledger entry
+  // "Fifteen of sixteen drifted ranges are re-recorded at the anchor they
+  // already had, and the gate that now says so still allows it": pointed at
+  // the sixteen drifted ranges on `origin/main` at `55ab0ca8`, the split
+  // sorted them fifteen moved and one gone, and all fifteen would have been
+  // re-recorded at an anchor whose line numbers no longer held the claim. The
+  // lock would then assert the claim is at those lines, which is the
+  // 2026-10-05 failure it exists to prevent, and the checker would be green
+  // over it.
   //
-  // What bought it. On 2026-11-02 this seat's own run saw nine drifted ranges
-  // in `clearing-a-record-for-release` and ran `--update <slug>` before
-  // reading seven of them. The tool's own output warns about exactly that in
-  // the sentence after the one that prints the command. Reading the seven
-  // afterwards showed the warning was not theoretical: four had stopped
-  // pointing at a shifted copy of their own text and started pointing at a
-  // different section of `docs/security/redaction-standard.md`, and three had
-  // moved from one ledger entry to an unrelated one. The claims all still held
-  // somewhere in the file, which is why that repair was cheap, and nothing in
-  // the blanket update would have told anyone. See the 2026-11-02 ledger entry
-  // "The gate that catches a moved citation cannot tell a moved line from a
-  // wrong section, and the blanket update is the trap".
+  // That happened to the run which shipped the warning, one hour after
+  // writing it: `#801` merged mid-run, `docs/ideas.md` moved under `E37`,
+  // `E38` and `E39`, and `--update <slug>` named all three as moved, printed
+  // the offsets their text had gone to, and recorded the old anchors at exit
+  // 0. The only thing between that command and three wrong anchors on `main`
+  // was a person reading the output rather than the exit status. A guard whose
+  // correctness depends on that is a warning, not a guard.
   //
-  // So a drifted range is sorted by one question the lock can answer and the
-  // reader cannot: are the lines it recorded still somewhere in this file.
+  // So the gone-or-moved split no longer decides WHETHER to refuse. It decides
+  // what the refusal tells you to do:
   //
   //   found elsewhere  the line number moved and the text did not, which needs
   //                    no reading, and `relocate-anchors.mjs` owns it
   //   found nowhere    the citation now covers prose nobody has read, which is
-  //                    the 2026-10-05 failure the lock exists to prevent
+  //                    the 2026-10-05 failure, and a person owes it a reading
   //
-  // A slug stays enough for the first and is no longer enough for the second,
-  // which has to be named by ref or by lock key. That is deliberately a
-  // narrower escape hatch than the slug and not a flag, because a flag would
-  // be the thing a run reaches for once and then always.
+  // What a slug still covers, because the answer is not "nothing" and reading
+  // it that way would make this look like the gate nobody can satisfy. A range
+  // the lock has never recorded is not drift, it is a new or re-anchored
+  // citation, and `--update <slug>` is still the way to pay it. That is the
+  // ordinary authoring path and it is untouched. The slug stopped being a name
+  // for a range the lock already holds a different value for.
+  //
+  // The escape for both halves is the same and it is per-range on purpose: the
+  // ref, or the whole lock key. Naming one range is the act that says a person
+  // looked at that range, which a slug cannot say about nine of them. It is
+  // deliberately not a flag, because a flag is the thing a run reaches for once
+  // and then always.
+  //
+  // The split now runs before the refusal rather than after it, and the
+  // ordering is load-bearing rather than tidy. The old first refusal ended by
+  // printing `--update <slug>` as the way through, which under this rule is a
+  // command the gate would then refuse, and a tool that prescribes its own
+  // refusal is worse than one that says less. Naming the right repair needs
+  // the split, so the split has to be computed before anything is printed.
+  // The cost falls on a command that is about to exit 2: the search is 0.71s
+  // over the sixteen-range batch above, across three files, one of them an
+  // 11,000-line ledger.
   const sorted = drifted
     .filter((d) => inScope(d.entry, d.ref, d.key))
     .map((d) => ({ ...d, found: findableAt(d.path, d.body, d.to - d.from + 1, lock[d.key]) }))
   const byRef = (d) => scope.some((s) => s === `${d.entry}/${d.ref}` || s === d.key)
-  const unread = sorted.filter((d) => d.found.length === 0 && !byRef(d))
-  if (unread.length) {
-    console.error(`refusing to --update: ${unread.length} drifted range${unread.length === 1 ? '' : 's'} no longer carr${unread.length === 1 ? 'ies' : 'y'} the lines the lock recorded, anywhere in the file`)
-    for (const d of unread) console.error('  ' + d.key)
-    console.error('\nA skill slug is not enough for these. The cited text did not move, it went,')
-    console.error('so the range covers prose nobody has read and re-recording it certifies a')
-    console.error('claim against lines you have not seen. Read each one, then name it:')
-    for (const d of unread) console.error(`  node skills/check-evidence.mjs --update ${d.entry}/${d.ref}`)
+  const unnamed = sorted.filter((d) => !byRef(d))
+  if (unnamed.length) {
+    const n = unnamed.length
+    const movedAway = unnamed.filter((d) => d.found.length)
+    const gone = unnamed.filter((d) => d.found.length === 0)
+    console.error(`refusing to --update: ${n} drifted range${n === 1 ? '' : 's'} named by no ref, and a skill slug is not a name for a drifted range`)
+    console.error('\nRe-recording a drifted range certifies that you read that range against the')
+    console.error('lines it now covers. These are sorted by whether the lines the lock recorded')
+    console.error('are still somewhere in the file, which decides which repair each one wants.')
+    if (movedAway.length) {
+      console.error(`\n  ${movedAway.length} whose cited text is still in the file, at a different offset.`)
+      console.error('  The line number moved and the text did not, so follow the text rather than')
+      console.error('  re-recording the anchor. No reading is owed on these:')
+      for (const d of movedAway) console.error(`    ${d.key}  cited text now at ${d.path}:${d.found.join(' or ')}`)
+      console.error('  node skills/relocate-anchors.mjs <old-ref>        # the mechanical share')
+    }
+    if (gone.length) {
+      console.error(`\n  ${gone.length} whose cited text is nowhere in the file any more.`)
+      console.error('  The range covers prose nobody has read. Read each one against the lines it')
+      console.error('  covers now, then name it:')
+      for (const d of gone) console.error(`    ${d.key}`)
+      for (const d of gone) console.error(`  node skills/check-evidence.mjs --update ${d.entry}/${d.ref}`)
+    }
     process.exit(2)
   }
   // Out of scope means untouched: keep the value the lock already holds, so a
@@ -386,16 +398,20 @@ if (update) {
     console.log(`  left drifted on purpose, outside the scope you named:`)
     for (const d of leftRed) console.log('    ' + d.key)
   }
-  // The residual the refusal above deliberately does not block, said out loud
-  // rather than left for the next run to rediscover. A range whose recorded
-  // lines are still in the file reached this command without being relocated,
-  // so what just got recorded is whatever those line numbers hold now, and the
-  // claim's own text is sitting at the offset printed here. Re-recording is the
-  // wrong repair for that and it is also not dangerous enough to refuse, since
-  // the cited text is one command away and nothing has been lost.
+  // A moved range that reached the write, which from 2026-11-09 means somebody
+  // named it by ref rather than by slug. That is the one case where recording
+  // the old anchor is a decision and not an accident: the caller is saying the
+  // citation means those line numbers and not the text that used to be there.
+  // It stays printed, because the thing worth saying is unchanged and the
+  // caller is the person best placed to notice they meant the other repair.
+  //
+  // Until this morning this block was the whole guard against a wrong anchor,
+  // and the refusal above is what it became. The note it used to carry, that
+  // the case was "not dangerous enough to refuse", was wrong on the batch that
+  // was sitting on `main` while it was written: fifteen of sixteen.
   const moved = sorted.filter((d) => d.found.length)
   if (moved.length) {
-    console.log(`  re-recorded at the anchor each one already had, and the lines they cited are still in the file:`)
+    console.log(`  recorded at the anchor each one already had, which you named by ref, and the lines they cited are still in the file:`)
     for (const d of moved) console.log(`    ${d.key}  cited text now at ${d.path}:${d.found.join(' or ')}`)
     console.log(`  node skills/relocate-anchors.mjs <old-ref>      # follows the text instead of re-recording the anchor`)
   }
