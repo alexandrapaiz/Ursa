@@ -81,6 +81,7 @@
 import { readFileSync } from 'node:fs';
 import { WAKE_BODY_CHARS, TRUNCATION_REFUSED, wakeReceipt } from './check.mjs';
 import { pageMessages, ratioFault } from './page.mjs';
+import { escapeAsserted } from './escape-trace.mjs';
 
 /** The three severity positions this bus actually exhibits on the wake cut,
  *  each with the company whose seats traverse it and the artifact that puts
@@ -150,7 +151,7 @@ export function read(rows, limit = WAKE_BODY_CHARS, only = null) {
   const companies = new Map();
   const bump = (key, field) => {
     if (!companies.has(key)) {
-      companies.set(key, { company: key, sent: 0, cut: 0, tail: 0, corroborated: 0 });
+      companies.set(key, { company: key, sent: 0, cut: 0, tail: 0, corroborated: 0, asserted: 0 });
     }
     companies.get(key)[field] += 1;
   };
@@ -181,6 +182,11 @@ export function read(rows, limit = WAKE_BODY_CHARS, only = null) {
       bump(c, 'cut');
       kinds.get(kind).cut += 1;
       seats.get(seatKey).cut += 1;
+      // Of the cut rows, how many say the sender meant it. `escape-trace.mjs`
+      // ships the field in this same commit, so a reading taken before any
+      // seat has sent under it reports zero -- which is a floor and not a
+      // finding, and the renderer says so rather than printing a bare 0.
+      if (escapeAsserted(r, limit) === true) bump(c, 'asserted');
     }
     if (isTailRepair(r)) {
       bump(c, 'tail');
@@ -302,6 +308,16 @@ function render(r, step, coverage) {
   out.push('');
   out.push('  tail-repair is a LEXICAL class on the subject line and the bus has no field for it.');
   out.push('  `corroborated` is how many of those rows had an earlier cut row from the same seat.');
+  out.push('');
+  const assertedTotal = r.companies.reduce((n, c) => n + c.asserted, 0);
+  const cutTotal = r.companies.reduce((n, c) => n + c.cut, 0);
+  out.push(`  escape asserted on ${assertedTotal} of ${cutTotal} cut rows (data.wake_truncation_accepted).`);
+  out.push(assertedTotal === 0
+    ? '  Zero here is a FLOOR and not a finding: escape-trace.mjs ships that field in the same'
+      + '\n  commit as this gauge, so no row sent before it can carry one. The number becomes'
+      + '\n  evidence once senders have run under it, and until then every cut row is unexplained'
+      + '\n  rather than careless -- which is the distinction window 103 named and did not close.'
+    : '  A cut row with the field is a considered send; one without it asserted nothing.');
   out.push('');
   out.push('  REPAIRS/CUT is the column that separates the three positions, and the cut rate is not.');
   out.push('  The store reports the cut on its own 201, so a sender under ABSENT learns of it too —');
