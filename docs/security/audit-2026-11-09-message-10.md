@@ -77,6 +77,73 @@ way.
 
 Severity: low.
 
+### F113 — a repository gate fetched and executed a package from the public registry
+
+The one finding here that is not about this seat's own guard, and the one
+with the highest severity in this run.
+
+`scripts/ci-checks.mjs` runs its two product checks as `npx tsc --noEmit`
+and `npx vitest run`. `npx` with no `--no-install` resolves a missing binary
+**against the public npm registry**: it downloads a package of that name and
+executes it.
+
+**Measured, in that check, not reasoned about.** This run installed
+`ursa-major` and started the two product checks while the install was still
+in flight. `product-typecheck` printed
+
+```
+npm warn exec The following package was not found and will be installed: tsc@2.0.4
+npm warn deprecated tsc@2.0.4: Package no longer supported.
+```
+
+and ran it. `tsc` on the registry is an unrelated legacy package, not the
+TypeScript compiler, and it said so in its own banner. The mechanism is
+name-based, so what gets executed is whatever the registry serves under that
+name, in a seat sandbox under `bypassPermissions` with live tokens in the
+environment.
+
+**Why the existing guard did not stop it.** There is a guard, and it is the
+right idea read off the wrong thing. `needsNodeModules` tests
+`existsSync('<package>/node_modules')`, the DIRECTORY. A tree where the
+directory exists and the binary does not passes that test, and then `npx`
+fills the gap from the network.
+
+That tree is not hypothetical and this seat did not have to imagine it. It is
+a measured npm failure mode on this very host, carried by `node
+tools/seat/env-facts.mjs` under `npm-cache-is-a-shared-home-path`: *exit 0
+with no `node_modules/.bin`*. Ursa's frontend seat lost three installs to it
+on 2026-11-09.
+
+**Fixed, in two parts.**
+
+1. Both `npx` invocations now pass `--no-install`, so a missing binary is a
+   refusal rather than a download. Verified: `npx --no-install tsc` exits 1
+   with `npx canceled due to missing packages and no YES option:
+   ["tsc@2.0.4"]`, which also names what would have been fetched.
+2. Each `npx` check declares the binary it needs in `needsBin`, and the
+   classifier reports `unrunnable` when that binary is absent, with a message
+   that separates a partial install from a missing one, because the remedy
+   differs and the first looks like the second.
+
+`classify` stays a pure function of what it is handed: the filesystem read
+moved to a new `installedBins()` beside `installedPackages()`, so the
+suite for that function does not depend on whether a sandbox happens to have
+run `npm ci`. `installedBins` defaults to none rather than to all, so a
+caller that forgets the argument gets `unrunnable`. Defaulting the other way
+would make a forgotten argument read as a passing check, and that is the
+bias this whole audit is about.
+
+Severity: high as a class, low as an incident. Nothing malicious was served,
+and `tsc@2.0.4` is a long-dead real package rather than a typosquat. But a
+gate that executes registry code on a condition nobody declared is the kind
+of thing that is only ever found by accident, and this one was found by an
+accident this run caused itself.
+
+Two cases added to `scripts/ci-checks.test.mjs`: one asserting a
+package-present-binary-absent tree is `unrunnable`, and one asserting that
+every `npx` check carries `--no-install` and declares a `needsBin`, so the
+next check added with `npx` cannot quietly reopen this.
+
 ### The gate reads the new direction too
 
 `tools/secret-print-exemptions.py` reports an entry whose premise holds and
@@ -114,8 +181,16 @@ than assumed because the probe writes into the working tree.
 - **Repository check suite.** `node scripts/ci-checks.mjs`: 21 checks, **19
   passed, 2 unrunnable, 0 failed.** The two unrunnable are
   `product-typecheck` and `product-suites`, both for an absent
-  `ursa-major/node_modules`; this run installed it and re-ran them, recorded
-  below.
+  `ursa-major/node_modules`. This run installed it and re-ran both: **both
+  pass**, `tsc --noEmit` clean and 1,070 vitest tests passing over 52 files
+  with 1 file and 4 tests skipped. So all 21 checks are green on this branch,
+  which no prior audit in this seat's series had been able to say.
+
+  Getting there is what produced F113, and the sequence is worth recording
+  because the first result was this run's own fault rather than a defect: the
+  two product checks were started while `npm ci` was still in flight, so they
+  ran against a half-populated tree. The product failure was a race. What the
+  race exposed was not.
 
   Worth naming as a change rather than a pass: run 8's audit recorded
   `tooling-suites` and `ledger-contract` failing on `main`, measured and
