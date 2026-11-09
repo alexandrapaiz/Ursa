@@ -6,7 +6,16 @@
 //
 //   node skills/check-evidence.mjs                      verify
 //   node skills/check-evidence.mjs --update             re-record the fingerprints
+//   node skills/check-evidence.mjs --update <slug>      ... only under that skill
+//   node skills/check-evidence.mjs --update <slug>/<ref>  ... only that citation
 //   node skills/check-evidence.mjs --base origin/main   verify against that tree
+//
+// Which granularity a re-record needs is not the caller's choice. A drifted
+// range whose recorded lines are still somewhere in the file moved rather than
+// changed, and a slug covers it. A drifted range whose recorded lines are
+// nowhere in the file now covers prose nobody has read, and that one has to be
+// named by ref. The refusal says which is which; see the second refusal below
+// for what bought the distinction.
 //
 // What `--base` is for, and why a tense is a defect. Without it this script
 // reads the working tree and nothing else, so a green exit status is a claim
@@ -145,11 +154,47 @@ const inTree = base === null ? '' : ` in ${base}`
 
 // The cited lines, whitespace-normalized, hashed. Keyed by skill/ref/path:range
 // so a range that moves gets a new key and cannot inherit an old fingerprint.
+//
+// Split in two on 2026-11-09 so the window search below hashes by the same
+// rule rather than by a second copy of it. The only thing `fingerprint` adds
+// is the 1-based slice, which is the part a window search does not want.
+const hashLines = (trimmed) =>
+  createHash('sha256').update(trimmed.join('\n')).digest('hex').slice(0, 16)
 const fingerprint = (lines, from, to) =>
-  createHash('sha256')
-    .update(lines.slice(from - 1, to).map((l) => l.trim()).join('\n'))
-    .digest('hex')
-    .slice(0, 16)
+  hashLines(lines.slice(from - 1, to).map((l) => l.trim()))
+
+// Where in this file the lines a lock row recorded can still be found, by
+// hashing every window of the same height and comparing to the recorded value.
+// Returns the 1-based start of each match, so an empty array means the cited
+// text is not in this file at all any more.
+//
+// Why this is here and not a call into relocate-anchors.mjs, which asks a
+// question that looks identical. That tool recovers the as-cited lines from
+// `git show <old-ref>:<path>` and then searches for them, so it needs a ref
+// and refuses without one. This question has no ref to be given: the lock
+// holds the hash and not the text, and a hash is enough to search for when
+// you are willing to hash every window. That is the whole reason the split
+// below is computable inside a guard that takes no ref.
+//
+// WHERE IT IS WRONG, and the direction is permissive. More than one match
+// means a person has to choose which offset, and this returns them all rather
+// than deciding, so the caller can print every one and the ambiguity is
+// visible; relocate-anchors.mjs is the tool that refuses to choose by
+// proximity. And a range that is entirely blank after trimming matches every
+// blank window in the file, so it would always read as moved and a slug would
+// always cover it. That is a citation to nothing rather than a receipt, and it
+// is not guarded for here: measured 2026-11-09 over all 466 rows of the lock,
+// the count of such ranges is zero. If one appears, the citation is the defect.
+const trimmedLines = new Map()
+const findableAt = (path, lines, height, want) => {
+  if (height < 1 || height > lines.length) return []
+  if (!trimmedLines.has(path)) trimmedLines.set(path, lines.map((l) => l.trim()))
+  const trimmed = trimmedLines.get(path)
+  const at = []
+  for (let i = 0; i + height <= trimmed.length; i++)
+    if (hashLines(trimmed.slice(i, i + height)) === want) at.push(i + 1)
+  return at
+}
 
 // A directory under skills/ that this loop's own `continue` would skip. It is
 // reported before the loop rather than inside it, because the point is that
@@ -214,7 +259,11 @@ for (const entry of readdirSync(skillsDir)) {
         const key = `${entry}/${ref}/${path}:${part}`
         const fp = fingerprint(body, from, to)
         fresh[key] = fp
-        if (key in lock && lock[key] !== fp) drifted.push({ entry, ref, key })
+        // The range is carried along with the key because the gone-or-moved
+        // split below needs the window height and the file's lines, and this
+        // is the one place that already has both.
+        if (key in lock && lock[key] !== fp)
+          drifted.push({ entry, ref, key, path, from, to, body })
         if (update) continue
         if (!(key in lock)) {
           // Under `--base` this is not an authoring debt, it is the citation
@@ -269,6 +318,50 @@ if (update) {
     console.error(`  node skills/check-evidence.mjs --update ${[...new Set(unnamed.map((d) => d.entry))].join(' ')}`)
     process.exit(2)
   }
+  // The second refusal, and the asymmetry is the argument for it. The one
+  // above catches the run that named nothing. This one catches the run that
+  // named a slug, which until 2026-11-09 licensed re-recording every drifted
+  // range under it, however the range had drifted.
+  //
+  // What bought it. On 2026-11-02 this seat's own run saw nine drifted ranges
+  // in `clearing-a-record-for-release` and ran `--update <slug>` before
+  // reading seven of them. The tool's own output warns about exactly that in
+  // the sentence after the one that prints the command. Reading the seven
+  // afterwards showed the warning was not theoretical: four had stopped
+  // pointing at a shifted copy of their own text and started pointing at a
+  // different section of `docs/security/redaction-standard.md`, and three had
+  // moved from one ledger entry to an unrelated one. The claims all still held
+  // somewhere in the file, which is why that repair was cheap, and nothing in
+  // the blanket update would have told anyone. See the 2026-11-02 ledger entry
+  // "The gate that catches a moved citation cannot tell a moved line from a
+  // wrong section, and the blanket update is the trap".
+  //
+  // So a drifted range is sorted by one question the lock can answer and the
+  // reader cannot: are the lines it recorded still somewhere in this file.
+  //
+  //   found elsewhere  the line number moved and the text did not, which needs
+  //                    no reading, and `relocate-anchors.mjs` owns it
+  //   found nowhere    the citation now covers prose nobody has read, which is
+  //                    the 2026-10-05 failure the lock exists to prevent
+  //
+  // A slug stays enough for the first and is no longer enough for the second,
+  // which has to be named by ref or by lock key. That is deliberately a
+  // narrower escape hatch than the slug and not a flag, because a flag would
+  // be the thing a run reaches for once and then always.
+  const sorted = drifted
+    .filter((d) => inScope(d.entry, d.ref, d.key))
+    .map((d) => ({ ...d, found: findableAt(d.path, d.body, d.to - d.from + 1, lock[d.key]) }))
+  const byRef = (d) => scope.some((s) => s === `${d.entry}/${d.ref}` || s === d.key)
+  const unread = sorted.filter((d) => d.found.length === 0 && !byRef(d))
+  if (unread.length) {
+    console.error(`refusing to --update: ${unread.length} drifted range${unread.length === 1 ? '' : 's'} no longer carr${unread.length === 1 ? 'ies' : 'y'} the lines the lock recorded, anywhere in the file`)
+    for (const d of unread) console.error('  ' + d.key)
+    console.error('\nA skill slug is not enough for these. The cited text did not move, it went,')
+    console.error('so the range covers prose nobody has read and re-recording it certifies a')
+    console.error('claim against lines you have not seen. Read each one, then name it:')
+    for (const d of unread) console.error(`  node skills/check-evidence.mjs --update ${d.entry}/${d.ref}`)
+    process.exit(2)
+  }
   // Out of scope means untouched: keep the value the lock already holds, so a
   // scoped update cannot bless a neighbour, and keep out-of-scope orphans too
   // rather than dropping keys this run never looked at.
@@ -292,6 +385,19 @@ if (update) {
   if (leftRed.length) {
     console.log(`  left drifted on purpose, outside the scope you named:`)
     for (const d of leftRed) console.log('    ' + d.key)
+  }
+  // The residual the refusal above deliberately does not block, said out loud
+  // rather than left for the next run to rediscover. A range whose recorded
+  // lines are still in the file reached this command without being relocated,
+  // so what just got recorded is whatever those line numbers hold now, and the
+  // claim's own text is sitting at the offset printed here. Re-recording is the
+  // wrong repair for that and it is also not dangerous enough to refuse, since
+  // the cited text is one command away and nothing has been lost.
+  const moved = sorted.filter((d) => d.found.length)
+  if (moved.length) {
+    console.log(`  re-recorded at the anchor each one already had, and the lines they cited are still in the file:`)
+    for (const d of moved) console.log(`    ${d.key}  cited text now at ${d.path}:${d.found.join(' or ')}`)
+    console.log(`  node skills/relocate-anchors.mjs <old-ref>      # follows the text instead of re-recording the anchor`)
   }
   if (scope.length) console.log(`  scope: ${scope.join(', ')}`)
   // The nudge this command owes the reading half of the receipts. Re-recording
