@@ -2336,3 +2336,86 @@ backdrop specifically. External sources read, this entry: [Memobase](https://mem
 [Show HN: AMP](https://news.ycombinator.com/item?id=47309161), [GitHub:
 agentmemoryprotocol/agentmemoryprotocol](https://github.com/agentmemoryprotocol/agentmemoryprotocol),
 [GitHub: akshayaggarwal99/amp](https://github.com/akshayaggarwal99/amp).
+
+## A ninth reward-model source complicates the sharp form of the gap, without closing it (2026-11-09, message, 23rd run)
+
+Every reward-model-unreliability source in this file so far argues
+that constructed graders (judges, rubrics, panels) fail at the
+accuracy axis: they disagree with ground truth, flip under
+reformatting, and reward-hack. This run's find argues a different
+axis and the honest read is that it stings rather than flatters.
+
+"Where and What to Reward? Understanding Generalization Between
+Verifiable and Open-Ended Domains in Reinforcement Learning" (Yin,
+Fu, Dong, and Shi, arXiv 2605.15464, submitted 2026-05-14, revised
+2026-10-26) finds that training with a reward model on open-ended
+prompts "substantially improves conversational ability and also
+brings large gains in reasoning and coding," while training with a
+rule-based verifier (RLVR) improves reasoning but "plateaus far below"
+RLHF on conversational quality. Read plainly, this says a reward
+model — the exact solicited-judgment product every Category 1 vendor
+in this file already sells — is the thing that currently works for
+training capability in open-ended domains, not a stopgap waiting to
+be replaced. That is evidence against the sharpest form of CLAUDE.md
+§1's framing ("no verifier at all today"), if the claim is read as "no
+usable training signal exists."
+
+The honest hedge, checked directly rather than assumed: the paper
+measures whether training with a reward model generalizes capability
+gains, not whether the reward model's own judgments are accurate.
+Its ethical-considerations section notes in passing that "the reward
+models and judges we rely on encode the preferences of their training
+data, which can include social biases, and optimizing against them
+can amplify such biases," but it runs no validation study against
+human ground truth and does not address reward hacking. So the paper
+and the eight prior sources are not in direct conflict; they answer
+different questions. The eight prior sources say a reward model's
+verdicts are frequently wrong against ground truth. This one says
+training with a reward model (right or wrong) still transfers
+capability better than training with a verifier. Both can be true at
+once, and if they are, the sharper lab-brief claim is not "reward
+models don't work" but "reward models work well enough to keep using,
+and still encode unmeasured error that an outcome record's survival
+signal does not share" — complementary, the same word this file's own
+positioning line already uses, rather than displacing.
+
+No pricing or packaging action; this is a correction to how sharply
+KR4.1's lab brief should state the verifier-gap claim, not a change to
+Minor's product. External sources read, this entry: [arXiv 2605.15464:
+Where and What to Reward? Understanding Generalization Between
+Verifiable and Open-Ended Domains in Reinforcement
+Learning](https://arxiv.org/abs/2605.15464).
+
+## A new labor-side price-ladder figure, from a vendor whose own pitch collapses Category 1 and the rl-list.com construction into one sentence (2026-11-09, message, 23rd run)
+
+Cocient (new landscape.md entry, Category 1, 28th) advertises
+$60-130/hr for remote, contract "Data Scientist (AI training &
+evaluation)" roles, found via a November 2026 Hacker News hiring
+post. This brackets tightly against Mercor's already-tracked
+~$85/hr average ($200+/hr senior), both vendors naming credentialed
+domain expertise, not scale, as the reason the rate clears ordinary
+crowd-labeling pay. No new price-ladder conclusion follows from the
+bracket alone — two points close together is not a trend — but it is
+a second independent data point on the same axis, worth keeping if a
+third appears.
+
+The more useful finding is structural, not pricing. Cocient's own
+site describes its work as "write hard, realistic problems... grade
+model answers... identify where a model's reasoning breaks" — which
+is the identical authored-task-and-rubric construction the
+rl-list.com cross-cutting note (landscape.md, 2026-10-26) already
+mapped across 42 named companies building "the task and the
+verifier" together. Cocient is a Category 1 entry (paid solicited
+judgment on a model's output) describing itself, in its own words, as
+doing the Category-2-adjacent construction this file has otherwise
+tracked as a separate cluster. That is not a contradiction in this
+file's taxonomy; it is evidence the taxonomy's boundary is softer in
+practice than the three-category split implies, since the same
+underlying business ("pay an expert to write the problem and judge
+the answer") shows up marketed as straightforward RLHF labeling in
+one listing and as "build the task and the verifier" in another.
+Worth a line in whatever next revisits the category boundaries, not
+an action on its own. External sources read, this entry: [Cocient —
+Human Expertise, Machine Scale](https://cocient.com/), [Ask HN: Who is
+hiring? (November
+2026)](https://news.ycombinator.com/item?id=50338728).

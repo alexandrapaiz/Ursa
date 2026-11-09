@@ -23765,3 +23765,61 @@ same conflation inside it.
   fragmented.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (market, 23rd run) — Soften KR4.1's lab brief verifier-gap claim from "no verifier exists" to "reward models work for capability transfer but still carry unmeasured error," citing arXiv 2605.15464
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (23rd run)
+  section. "Where and What to Reward?" (Yin, Fu, Dong, and Shi, arXiv
+  2605.15464, revised 2026-10-26) finds that RLHF with a reward model
+  on open-ended prompts transfers capability gains far better than a
+  rule-based verifier does, i.e. a reward model — the exact product
+  every Category 1 vendor in landscape.md already sells — currently
+  works for training open-ended capability. It does not validate that
+  the reward model's own judgments are accurate; the paper is silent
+  on that axis.
+- What: if KR4.1's lab brief states the verifier gap as "no usable
+  signal exists for open-ended domains today," this paper is a
+  direct, citable counter-example a skeptical lab researcher could
+  raise in the room. The sharper and still-true claim, consistent
+  with this file's own standing "complementary to your existing RLHF
+  pipeline" line: reward models work well enough that labs keep using
+  them for capability transfer, and still encode the unmeasured,
+  frequently-wrong judgments the eight prior reward-model-
+  unreliability sources in positioning.md document — which an outcome
+  record's survival signal does not share, because nobody graded it.
+- Why it is not actioned by this run: KR4.1's lab brief is drafted by
+  whoever owns that deliverable, not this seat (read-only market
+  research, no copy or decks).
+- First step: whoever drafts or next revises KR4.1's lab brief checks
+  its verifier-gap language against this file's hedge and cites arXiv
+  2605.15464 directly if a lab audience is expected to push back on
+  the strong form of the claim.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, 23rd run) — Don't let KR4.1's lab brief state a hard "Category 1 vendors sell labeling, a separate cluster builds tasks-and-verifiers" line; a new vendor markets itself as both at once
+
+- Trigger: docs/market/landscape.md's new 2026-11-09 (23rd run) entry,
+  Cocient — a domain-expert solicited-feedback vendor ($60-130/hr
+  contractor pay, found via a November 2026 HN hiring post) whose own
+  site describes its work as "write hard, realistic problems... grade
+  model answers... identify where a model's reasoning breaks," which
+  is the identical construction the rl-list.com cross-cutting note
+  (2026-10-26) already mapped across 42 named companies building "the
+  task and the verifier" together.
+- What: landscape.md's own three-category split treats Category 1
+  (preference-data vendors) and the rl-list.com-mapped "build the
+  task and the verifier" cluster as distinct. Cocient markets the
+  identical underlying business as both framings at once. If KR4.1's
+  lab brief draws a clean line between the two clusters to make a
+  market-sizing or positioning point, a lab researcher who knows
+  Cocient (or others marketed the same way) can point out the line
+  doesn't hold. Safer to state the boundary as soft, not structural.
+- Why it is not actioned by this run: KR4.1's lab brief is drafted by
+  whoever owns that deliverable, not this seat (read-only market
+  research, no copy or decks).
+- First step: whoever drafts or next revises KR4.1's lab brief checks
+  any Category 1 / task-and-verifier distinction against this caveat
+  before stating it as a clean split.
+- Cost: $0
+- Status: proposed

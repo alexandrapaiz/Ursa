@@ -1126,6 +1126,44 @@ guide](https://wetheflywheel.com/en/guides/ai-training-data-providers-2026/)
 (source of the "platform-led labelling" and "to a lesser degree"
 framing).
 
+### Cocient
+
+What it is: a domain-expert solicited-feedback vendor contracting
+doctors, lawyers, engineers, scientists, and other credentialed
+professionals to write hard, realistic problems in their own field,
+grade model answers against them, and flag where a model's reasoning
+breaks. New entry, found via a Hacker News "Who is hiring?" posting
+from November 2026, not a vendor-lead list this time. Who it serves:
+not named on the company's own site or in any source checked this
+run; the pitch ("AI development is downstream of high quality data")
+is addressed to AI labs generically. Pricing: not disclosed on the
+buyer side; the labor side is public and specific, a rarity in this
+category — job postings advertise $60-130/hr for remote, contract-
+basis "Data Scientist (AI training & evaluation)" roles, framed as
+"pay rates reflect the value of your expertise." That figure is a
+useful new price-ladder data point: it brackets tightly against
+Mercor's already-tracked ~$85/hr average ($200+/hr for senior
+specialists), both naming domain expertise as the reason the rate
+clears ordinary crowd-labeling pay. Strengths: the pitch leans
+entirely on credentialed-expert depth rather than scale or
+cost, the same differentiation Mercor and Handshake AI already claim
+in this file, so Cocient reads as another entrant in an already-
+crowded expert-labor niche rather than a new approach. Weakness
+against Ursa: the same structural gap as the rest of Category 1 —
+experts are paid to produce a judgment on request, not to do their
+own real work and have an outcome recorded. A second, category-wide
+weakness this entry sharpens rather than introduces: "writing hard,
+realistic problems" and "grading model answers" is the same
+authored-task-and-rubric structure the rl-list.com cross-cutting note
+above already maps across 42 named companies, so Cocient is this
+file's clearest case yet of a Category 1 entry and that Category 2-
+adjacent construction describing the identical business in one
+sentence. Last observed 2026-11-09: [Cocient — Human Expertise,
+Machine Scale](https://cocient.com/), [Ask HN: Who is hiring?
+(November 2026)](https://news.ycombinator.com/item?id=50338728),
+[JobPilot: Data Scientist (AI training & evaluation) at
+Cocient](https://jobpilot.suxrobgm.net/jobs/data-scientist-ai-training-evaluation-at-cocient-5c477e).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -2632,3 +2670,13 @@ agentmemoryprotocol/agentmemoryprotocol](https://github.com/agentmemoryprotocol/
   name, none aware of the others, none clearing the note's
   independent-implementation bar. Positioning consequence in
   docs/market/positioning.md.
+- 2026-11-09 (message, 23rd run) — added Cocient (Category 1, 28th
+  entry), a domain-expert solicited-feedback vendor found via a
+  November 2026 Hacker News hiring post rather than a prior lead
+  list. Its $60-130/hr contractor pay is a new labor-side price-
+  ladder figure that brackets tightly against Mercor's already-
+  tracked range, and its own pitch ("write hard, realistic problems,"
+  "grade model answers") is the clearest case yet of a Category 1
+  entry describing the same authored-task-and-rubric structure the
+  rl-list.com cross-cutting note already maps across 42 names.
+  Positioning consequence in docs/market/positioning.md.
