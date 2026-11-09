@@ -245,6 +245,53 @@ const CODE_SPAN = /`([^`\n]+)`/g
 
 const PATH_TOKEN = /^[\w][\w./-]*$/
 
+/** A trailing source locator: `:324`, or `:324:12` in the line-and-column form
+ *  `tsc`, `eslint` and `node --test` all print. Stripped from a token before
+ *  it is tested as a path, and kept, because it is the most useful thing in
+ *  the citation rather than noise.
+ *
+ *  WHY THIS IS HERE AT ALL. Before it, precision cost an entry its
+ *  measurability. The ledger entry of 2026-11-02, "A root dot-entry gate on
+ *  `main` is red in any complete clone and skipped in the clone every run is
+ *  handed", is the most precisely cited `urgent` entry in this ledger: it
+ *  names the exact failing assertion, `tools/root-entries.test.mjs:324`, and
+ *  quotes the assertion's own text. The `:324` put a `:` in the token,
+ *  `PATH_TOKEN` has no `:` in its class, so the token was not read as a path,
+ *  so the file was never offered to `PROBE_SHAPE`, so the entry reported
+ *  `[none]`, no runnable probe. The neighbouring entry, which names the same
+ *  file with no line number, measured fine.
+ *
+ *  THE RISK, NAMED RATHER THAN HEDGED. A token like `docs/vision.md:2026`,
+ *  where the suffix is prose and not a locator, is stripped too and its
+ *  "locator" is meaningless. That is accepted on purpose and pinned by a test:
+ *  stripping only ever WIDENS what is offered to the existing allowlists, and
+ *  neither `PATH_TOKEN`, `PROBE_SHAPE`, `SCRIPT_SHAPE` nor the `isTracked`
+ *  membership test is loosened by one character. So the worst case is a
+ *  locator printed as context that points at a line nobody meant, next to a
+ *  path that really is tracked. A `:word` suffix is NOT stripped, because
+ *  `tools/x.mjs:main` is not a locator in any tool's output. */
+const LOCATOR = /:(\d+)(?::(\d+))?$/
+
+/**
+ * One code-span token reduced to the path it names and the locator it carried,
+ * or null when it names no repository path. The single place a token becomes a
+ * path, so `pathsIn` and `locatorsIn` cannot disagree about what a token says.
+ * @param {string} raw one whitespace-separated token from inside a code span
+ * @returns {{ path: string, locator: string | null } | null}
+ */
+export function pathToken(raw) {
+  // Strip trailing sentence punctuation a seat wrote inside the span, and
+  // a trailing slash, so `tools/` and `tools` are one answer.
+  const trimmed = raw.replace(/[),.;:]+$/, '').replace(/\/$/, '')
+  const hit = LOCATOR.exec(trimmed)
+  const path = hit ? trimmed.slice(0, hit.index) : trimmed
+  const locator = hit ? (hit[2] === undefined ? hit[1] : `${hit[1]}:${hit[2]}`) : null
+  if (!PATH_TOKEN.test(path)) return null
+  if (!path.includes('/')) return null
+  if (!REPO_ROOTS.includes(path.split('/')[0])) return null
+  return { path, locator }
+}
+
 /**
  * Every repository path an entry names inside a code span, de-duplicated and
  * in first-appearance order.
@@ -253,18 +300,38 @@ const PATH_TOKEN = /^[\w][\w./-]*$/
  */
 export function pathsIn(text) {
   const found = []
-  for (const [, span] of text.matchAll(CODE_SPAN)) {
-    for (const raw of span.split(/\s+/)) {
-      // Strip trailing sentence punctuation a seat wrote inside the span, and
-      // a trailing slash, so `tools/` and `tools` are one answer.
-      const token = raw.replace(/[),.;:]+$/, '').replace(/\/$/, '')
-      if (!PATH_TOKEN.test(token)) continue
-      if (!token.includes('/')) continue
-      if (!REPO_ROOTS.includes(token.split('/')[0])) continue
-      if (!found.includes(token)) found.push(token)
-    }
+  for (const { path } of tokensIn(text)) if (!found.includes(path)) found.push(path)
+  return found
+}
+
+/**
+ * The locators an entry wrote next to the paths it cites, first one per path,
+ * in first-appearance order. Reported as context on a verdict so a reader told
+ * that `tools/root-entries.test.mjs` is incomplete is also told which subtest
+ * the entry's author was looking at, which the entry already answered.
+ * @param {string} text one ledger block's verbatim lines
+ * @returns {Array<{ path: string, locator: string }>}
+ */
+export function locatorsIn(text) {
+  const found = []
+  for (const { path, locator } of tokensIn(text)) {
+    if (locator === null) continue
+    if (found.some((f) => f.path === path)) continue
+    found.push({ path, locator })
   }
   return found
+}
+
+/** @param {string} text @returns {Array<{ path: string, locator: string | null }>} */
+function tokensIn(text) {
+  const out = []
+  for (const [, span] of text.matchAll(CODE_SPAN)) {
+    for (const raw of span.split(/\s+/)) {
+      const hit = pathToken(raw)
+      if (hit !== null) out.push(hit)
+    }
+  }
+  return out
 }
 
 /**
@@ -278,6 +345,41 @@ export function pathsIn(text) {
 export function probesIn(text, isTracked) {
   return pathsIn(text).filter((p) => PROBE_SHAPE.test(p) && isTracked(p))
 }
+
+/**
+ * @typedef {'complete' | 'incomplete' | 'unknown'} CloneState
+ *   'complete'    `.git/shallow` is absent and `remote.origin.fetch` covers
+ *                 every branch, so a probe that reads history can answer.
+ *   'incomplete'  at least one of those is false, so a probe that reads
+ *                 history answers from a truncated graph or refuses.
+ *   'unknown'     this tool could not find out. Never folded into either of
+ *                 the other two: the whole subject of this module is the
+ *                 difference between a measurement and the absence of one.
+ *
+ * WHY A THIRD AXIS AND NOT A FOURTH DISPOSITION. A disposition is a statement
+ * about one urgent entry. The clone is a statement about the whole run, and
+ * every entry in a pass shares it, so putting it in the disposition would
+ * duplicate one fact nineteen times and would also change what `tally` counts.
+ * It belongs where it is read: in the clause that tells a reader what the
+ * repair is, and in the summary line that carries the counts.
+ *
+ * WHAT IT COST TO NOT HAVE IT, measured on 2026-11-09 by running this tool
+ * twice over the same ledger at the same commit, once in the shallow
+ * single-branch clone every seat is handed and once after
+ * `bash tools/ensure-full-clone.sh`:
+ *
+ *   disposition        shallow clone   complete clone
+ *   holds                          0                3
+ *   symptom-cleared                2                3
+ *   unverifiable                  18               14
+ *
+ * The count that moves most is the one a reader acts on first, and it moves
+ * from zero. A report whose headline is "0 still failing a probe they name" is
+ * read as "nothing urgent is still broken", and in the clone every seat is
+ * handed that sentence was printed while three of the entries were still
+ * failing the command they themselves declare. The tool already knew the cause
+ * and said so three times in its own comments. It never said so in its output.
+ */
 
 /**
  * @typedef {'holds' | 'symptom-cleared' | 'unverifiable'} Disposition
@@ -298,7 +400,8 @@ export function probesIn(text, isTracked) {
  *   probes: Array<{ path: string, passed: boolean | null }>,
  *   pathsMissing: string[], disposition: Disposition, why: string,
  *   basis: 'declared' | 'inferred' | 'none',
- *   declarationsRefused: Array<{ raw: string, reason: string }>
+ *   declarationsRefused: Array<{ raw: string, reason: string }>,
+ *   locators: Array<{ path: string, locator: string }>
  * }} EntryVerdict
  */
 
@@ -307,8 +410,12 @@ export function probesIn(text, isTracked) {
  * @param {{
  *   probeResults: Map<string, boolean | 'cannot-answer' | 'incomplete'>,
  *   isTracked: (p: string) => boolean,
- *   today: string
- * }} evidence `probeResults` maps a probe's identity string to its outcome:
+ *   today: string,
+ *   clone?: CloneState
+ * }} evidence `clone` is what `bash tools/ensure-full-clone.sh --check` said
+ *   about the checkout the probes ran in, and it defaults to `'unknown'` so a
+ *   caller that does not measure it is reported as not having measured it
+ *   rather than as having found the clone fine. `probeResults` maps a probe's identity string to its outcome:
  *   `true` exited 0, `false` exited non-zero, `'cannot-answer'` exited 2, `'incomplete'`
  *   exited 0 while skipping at least one of its own subtests. A
  *   key absent from the map was not run and is reported as not run rather
@@ -345,7 +452,7 @@ export function probesIn(text, isTracked) {
  *   suite was right and the reader of the report was misled.
  * @returns {EntryVerdict}
  */
-export function classifyEntry(entry, { probeResults, isTracked, today }) {
+export function classifyEntry(entry, { probeResults, isTracked, today, clone = 'unknown' }) {
   const paths = pathsIn(entry.text)
   const plan = probePlan(entry.text, isTracked)
   // `passed: null` is "named, allowlisted, not run". Keeping it distinct from
@@ -370,6 +477,18 @@ export function classifyEntry(entry, { probeResults, isTracked, today }) {
   const authority = plan.basis === 'declared'
     ? ', on the command the entry itself declares'
     : ', on a probe inferred from a path the entry mentions rather than one it declares'
+  // Where to send the reader when a probe did not answer. The three clone
+  // states need three different sentences, and the one that matters is
+  // `complete`: in a complete clone `tools/stack/repair-pending.test.mjs`
+  // still skips a subtest, so sending that reader to
+  // `bash tools/ensure-full-clone.sh` would be sending them to run a command
+  // that cannot help. Measured 2026-11-09 after completing this clone: that
+  // suite's skip survives, `tools/root-entries.test.mjs`'s does not.
+  const cloneRepair = clone === 'incomplete'
+    ? ', and this clone is incomplete, so start with `bash tools/ensure-full-clone.sh`'
+    : clone === 'complete'
+      ? ', and this clone is already complete, so completing it is not the repair'
+      : ', and this tool did not establish whether this clone is complete, so rule that out first'
   if (probes.length > 0 && run.length === 0) {
     // Named a probe and nobody ran it. Reported as its own sentence rather
     // than folded into the clause above, because the two have different
@@ -381,9 +500,9 @@ export function classifyEntry(entry, { probeResults, isTracked, today }) {
   } else if (refusing.length > 0) {
     // Ordered before the clear, not after it, so a pass on one probe and a
     // refusal on another can never add up to `symptom-cleared`.
-    why = `refused to answer in this clone at exit 2 (${refusing.join(', ')}), which is not the same as the condition having cleared; the repair is to make the probe answerable here, not to re-read the entry${authority}`
+    why = `refused to answer in this clone at exit 2 (${refusing.join(', ')}), which is not the same as the condition having cleared; the repair is to make the probe answerable here, not to re-read the entry${cloneRepair}${authority}`
   } else if (incomplete.length > 0) {
-    why = `exited 0 while skipping at least one of its own subtests (${incomplete.join(', ')}), so the suite did not measure everything it names and no clear can be read from it; run it directly and read which subtest skipped${authority}`
+    why = `exited 0 while skipping at least one of its own subtests (${incomplete.join(', ')}), so the suite did not measure everything it names and no clear can be read from it; run it directly and read which subtest skipped${cloneRepair}${authority}`
   } else if (passing.length > 0) {
     disposition = 'symptom-cleared'
     why = `every probe it names passes today (${passing.join(', ')}), so the symptom it describes is gone and the entry is a candidate for re-reading${authority}`
@@ -398,6 +517,7 @@ export function classifyEntry(entry, { probeResults, isTracked, today }) {
     why,
     basis: plan.basis,
     declarationsRefused: plan.refused,
+    locators: locatorsIn(entry.text),
   }
 }
 
@@ -438,10 +558,14 @@ export function daysBetween(from, to) {
  * The whole report, as lines. Returned rather than printed so the test can
  * assert the text and the CLI stays a `console.log` over this.
  * @param {EntryVerdict[]} verdicts
- * @param {{ ledgerPath: string, today: string }} seen
+ * @param {{ ledgerPath: string, today: string, clone?: CloneState, cloneWhy?: string[] }} seen
+ *   `clone` defaults to `'unknown'`, and `cloneWhy` is whatever
+ *   `bash tools/ensure-full-clone.sh --check` printed on stderr, one line per
+ *   repair it found needed, passed through verbatim rather than paraphrased so
+ *   the reason a count is provisional is the script's own words.
  * @returns {string[]}
  */
-export function report(verdicts, { ledgerPath, today }) {
+export function report(verdicts, { ledgerPath, today, clone = 'unknown', cloneWhy = [] }) {
   const lines = []
   const order = { holds: 0, 'symptom-cleared': 1, unverifiable: 2 }
   const sorted = [...verdicts].sort(
@@ -458,6 +582,15 @@ export function report(verdicts, { ledgerPath, today }) {
     // it is invisible to them if the only place it appears is this module.
     for (const r of v.declarationsRefused) {
       lines.push(`                 declaration refused: "${r.raw}" ${r.reason}`)
+    }
+    // The locator the entry's author wrote. Printed only when the entry is not
+    // cleared, because on a `symptom-cleared` the line it points at is a line
+    // that now passes and naming it sends a reader somewhere with nothing to
+    // see.
+    if (v.disposition !== 'symptom-cleared') {
+      for (const l of v.locators) {
+        lines.push(`                 the entry points at ${l.path}:${l.locator}, which is where its author was looking`)
+      }
     }
   }
   const counts = tally(sorted)
@@ -481,7 +614,45 @@ export function report(verdicts, { ledgerPath, today }) {
     + 'here edits the ledger, and `symptom-cleared` means a named test is green rather than that '
     + 'the entry is finished.',
   )
+  lines.push(...cloneLines(clone, cloneWhy))
   return lines
+}
+
+/**
+ * What the counts above are a measurement OF. Always printed, including on a
+ * complete clone, because "measured somewhere that could answer" is the thing
+ * a reader needs stated rather than inferred from the absence of a warning.
+ * @param {CloneState} clone
+ * @param {string[]} cloneWhy verbatim lines from `ensure-full-clone.sh --check`
+ * @returns {string[]}
+ */
+export function cloneLines(clone, cloneWhy = []) {
+  if (clone === 'complete') {
+    return [
+      'Measured in a COMPLETE clone: no `.git/shallow`, and `remote.origin.fetch` covers every '
+      + 'branch, so a probe that reads git history is able to answer here. The counts above are a '
+      + 'measurement of this repository and not only of this checkout.',
+    ]
+  }
+  if (clone === 'incomplete') {
+    return [
+      'Measured in an INCOMPLETE clone, so every count above describes this checkout and not this '
+      + 'repository. Run `bash tools/ensure-full-clone.sh` and re-run this tool before quoting any '
+      + 'number above, because a probe that reads git history either refuses here or answers from a '
+      + 'truncated graph. Measured on 2026-11-09 over this same ledger at the same commit, the '
+      + 'shallow single-branch clone every seat is handed reported 0 entries still failing and 18 '
+      + 'with no measurement; the same tool after completing the clone reported 3 still failing and '
+      + '14 with no measurement. The number that moves is the one a reader acts on first, and it '
+      + 'moves from zero. Two columns, entry by entry: docs/design/clone-aware-recheck.md section 2.',
+      ...cloneWhy.map((w) => `  clone: ${w}`),
+    ]
+  }
+  return [
+    'This tool could not establish whether this clone is complete, so it cannot say whether a probe '
+    + 'that reads git history is able to answer here, and no count above should be quoted as a fact '
+    + 'about this repository.',
+    ...cloneWhy.map((w) => `  clone: ${w}`),
+  ]
 }
 
 /** @param {number | null} d @returns {string} */

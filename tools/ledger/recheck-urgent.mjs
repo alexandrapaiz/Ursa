@@ -27,8 +27,30 @@
 // The grammar that line must satisfy, and the reason it is narrower than a
 // shell command rather than wider, is in `./urgent-verdict.mjs`. A declaration
 // that fails it is printed as refused with its reason, never dropped.
-import { readFileSync } from 'node:fs'
+//
+// THE CLONE IS MEASURED, NOT ASSUMED (added 2026-11-09). This tool runs probes
+// that read git history, and the clone every seat on this host is handed is
+// shallow and single-branch, so those probes refuse or answer from a truncated
+// graph. That was already written down in three comments in this file and in
+// `./urgent-verdict.mjs` and it was never in the output, so the report's
+// headline count was being read as a fact about the repository when it was a
+// fact about the checkout. Run twice on 2026-11-09 over the same ledger at the
+// same commit: 0 entries still failing before `bash tools/ensure-full-clone.sh`
+// and 3 after, 18 with no measurement before and 14 after. So the first thing
+// this tool now does is ask `bash tools/ensure-full-clone.sh --check`, and the
+// answer is printed with the counts. It does NOT repair the clone: completing a
+// clone fetches 4,700 commits and 334 branches, and a reporting tool that
+// silently rewrites `.git/config` and the object store is not a reporting tool.
+//
+// IT STILL EXITS 0 WHEN THE CLONE IS INCOMPLETE, deliberately. The reasoning
+// is in `./urgent-verdict.mjs`'s header under WHY IT REPORTS AND NEVER GATES,
+// and the clone is the case that tests it: a seat handed a shallow clone has
+// done nothing wrong, cannot be blamed for one, and would learn to ignore a
+// red light it cannot clear. The output says the counts are provisional in
+// words, in the same paragraph as the counts, which is where a reader is.
+import { existsSync, readFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import { parseLedger } from './ledger.mjs'
 import { statusOf } from './block-kinds.mjs'
 import { classifyEntry, probePlan, report } from './urgent-verdict.mjs'
@@ -38,6 +60,42 @@ const noRun = args.includes('--no-run')
 const todayAt = args.indexOf('--today')
 const today = todayAt !== -1 ? args[todayAt + 1] : new Date().toISOString().slice(0, 10)
 const ledgerPath = args.find((a, i) => !a.startsWith('--') && args[i - 1] !== '--today') ?? 'docs/ideas.md'
+
+/**
+ * Whether this checkout can answer a question about git history, asked of the
+ * one script in this repository whose entire subject that is rather than
+ * re-derived here. `bash tools/ensure-full-clone.sh --check` exits 0 complete,
+ * 1 a repair is needed, 2 there is nothing here to repair (no repo, no
+ * `origin`), and prints one line per repair on stderr. Those lines are passed
+ * through verbatim.
+ *
+ * Resolved from this module's own URL, not from the process's cwd, because
+ * this tool takes a ledger path as an argument and a caller may well run it
+ * from somewhere else. A missing script is `'unknown'` and never `'complete'`:
+ * the safe direction for a tool whose subject is the difference between a
+ * measurement and the absence of one.
+ *
+ * No shell. `spawnSync('bash', [...])` with a fixed argument vector, for the
+ * same reason the probe runner uses one.
+ * @returns {{ clone: 'complete' | 'incomplete' | 'unknown', cloneWhy: string[] }}
+ */
+function cloneState() {
+  const script = fileURLToPath(new URL('../ensure-full-clone.sh', import.meta.url))
+  if (!existsSync(script)) {
+    return { clone: 'unknown', cloneWhy: [`tools/ensure-full-clone.sh is not present at ${script}, so completeness was never asked`] }
+  }
+  const out = spawnSync('bash', [script, '--check'], { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 })
+  const why = (out.stderr ?? '')
+    .split('\n')
+    .map((l) => l.replace(/^ensure-full-clone: /, '').trim())
+    .filter((l) => l !== '' && !l.startsWith('Run: '))
+  if (out.status === 0) return { clone: 'complete', cloneWhy: [] }
+  if (out.status === 1) return { clone: 'incomplete', cloneWhy: why }
+  return {
+    clone: 'unknown',
+    cloneWhy: why.length > 0 ? why : [`\`bash tools/ensure-full-clone.sh --check\` exited ${out.status === null ? 'without running' : String(out.status)}`],
+  }
+}
 
 /** Every path git tracks. The 64 MiB ceiling is deliberate and is the fix for
  *  a defect this repository has already filed: `child_process`'s default
@@ -107,6 +165,12 @@ try {
   process.exit(2)
 }
 
+const { clone, cloneWhy } = cloneState()
+if (clone !== 'complete') {
+  process.stderr.write(`recheck-urgent: clone is ${clone}; counts below describe this checkout, not the repository\n`)
+  for (const w of cloneWhy) process.stderr.write(`recheck-urgent:   ${w}\n`)
+}
+
 const tracked = trackedPaths()
 /** Directories, derived from the file list. `git ls-files` lists files only,
  *  and ledger entries cite directories as often as files (`docs/standards`,
@@ -151,8 +215,8 @@ if (!noRun) {
   }
 }
 
-const verdicts = urgent.map((e) => classifyEntry(e, { probeResults, isTracked, today }))
-for (const line of report(verdicts, { ledgerPath, today })) console.log(line)
+const verdicts = urgent.map((e) => classifyEntry(e, { probeResults, isTracked, today, clone }))
+for (const line of report(verdicts, { ledgerPath, today, clone, cloneWhy })) console.log(line)
 // The skip counts, printed on stdout with the report rather than left on
 // stderr, because they are the reason an entry above reads `incomplete` and a
 // reader who cannot see them has to take the word `incomplete` on trust.
