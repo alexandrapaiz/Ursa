@@ -34,7 +34,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { launch } from './lib/browser.mjs'
 import { freezeContext } from './lib/freeze.mjs'
 import { drive as drivePanelPayload } from './state/panel-payload.mjs'
-import { tracker } from './lib/reached.mjs'
+import { tracker, UNREACHED } from './lib/reached.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const BASE = arg('base', 'http://127.0.0.1:4488')
@@ -181,7 +181,20 @@ const rows = []
 
 const ctx0 = await browser.newContext({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1, reducedMotion: 'no-preference' })
 const probe = await ctx0.newPage()
-await probe.goto(`${BASE}/`, { waitUntil: 'networkidle' })
+// This navigation is a premise too, and until 2026-11-09 (run z) it was the
+// uncovered one: the target loop below had its reach tracker and this probe,
+// which runs first, threw straight out of the file. Against a dead port the
+// whole tool ended at exit 1 with an empty stdout and a node stack trace,
+// which is a non-zero status by accident. There is nothing to fall through
+// to here, so this refuses immediately, in the status AND in the slot a
+// reader scans.
+if (!(await reach.visit(probe, `${BASE}/`, '/')).ok) {
+  console.log(reach.lines().join('\n').trim())
+  console.log(`\nNO VERDICT: the harness probe could not load ${BASE}/, so this run never reached a hover target and makes no claim about any of them.`)
+  await ctx0.close()
+  await browser.close()
+  process.exit(UNREACHED)
+}
 // If this is false every hover rule on the site is behind a media query
 // that does not match, and every verdict below would read `no-hover-rule`
 // for a reason that has nothing to do with the site.
@@ -219,7 +232,14 @@ for (const t of TARGETS) {
   const ctx = await browser.newContext({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1, reducedMotion: 'no-preference' })
   await freezeContext(ctx)
   const page = await ctx.newPage()
-  reach.saw(t.path, await page.goto(url, { waitUntil: 'networkidle' }))
+  // The navigation is the premise, and only it is wrapped. The drive below
+  // already has its own per-target catch, for the reason written under it.
+  if (!(await reach.visit(page, url, t.path)).ok) {
+    lines.push(`${t.label.padEnd(20)} ${'COULD-NOT-LOAD'.padEnd(22)} ${url}`)
+    rows.push({ ...t, verdict: 'could-not-load', count: 0, reason: 'page.goto failed' })
+    await ctx.close()
+    continue
+  }
   // A drive that throws used to take the whole file down, which looked like
   // the careful behaviour and was not. Measured 2026-11-09 (run w): pointed
   // at a page answering 200 that carries none of this site's vocabulary,

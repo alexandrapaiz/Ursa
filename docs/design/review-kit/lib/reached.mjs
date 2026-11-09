@@ -74,12 +74,28 @@ export function tracker({ expect404 = [], label = 'page' } = {}) {
       seen.push({ path: String(path), status, declared: expected.has(String(path)) })
       return status
     },
+    // The LOUD absence: `page.goto` threw, so there is no response to read a
+    // status off. Recorded as a row rather than allowed to propagate, because
+    // an uncaught throw exits 1 with a node stack trace on stderr, and 1 is
+    // the status every other failure in the process already carries. Measured
+    // over this kit on 2026-11-09 (run z): five of six browser-driving tools
+    // ended exactly that way against a dead port, which is a non-zero status
+    // by accident and not by examination.
+    threw(path, err) {
+      seen.push({
+        path: String(path),
+        status: null,
+        declared: false,
+        error: String(err && err.message ? err.message : err).split('\n')[0],
+      })
+      return null
+    },
     // Anything the caller asked for that answered 400 or worse without
     // having been declared. A declared path that answers 200 is also wrong
     // and is reported, because a 404 page that started returning 200 means
     // a route now shadows it, but it is not absence so it does not gate.
     unreached() {
-      return seen.filter((s) => s.status !== null && s.status >= 400 && !s.declared)
+      return seen.filter((s) => s.error || (s.status !== null && s.status >= 400 && !s.declared))
     },
     surprises() {
       return seen.filter((s) => s.declared && s.status !== null && s.status < 400)
@@ -88,12 +104,15 @@ export function tracker({ expect404 = [], label = 'page' } = {}) {
       const out = []
       const bad = this.unreached()
       const odd = this.surprises()
-      const unknown = seen.filter((s) => s.status === null)
+      const unknown = seen.filter((s) => s.status === null && !s.error)
       if (bad.length) {
+        const threw = bad.filter((s) => s.error)
+        const status = bad.filter((s) => !s.error)
         out.push('')
-        out.push(`NOT MEASURED: ${bad.length} of ${seen.length} ${label} loads answered 400 or worse and were not declared, so this run makes no claim about them.`)
-        for (const s of bad) out.push(`  ${s.path} -> HTTP ${s.status}`)
-        out.push('Declare an intentionally-absent path with --expect-404 <paths> if that status is the subject.')
+        out.push(`NOT MEASURED: ${bad.length} of ${seen.length} ${label} loads did not reach their subject, so this run makes no claim about them.`)
+        for (const s of threw) out.push(`  ${s.path} -> COULD NOT LOAD: ${s.error}`)
+        for (const s of status) out.push(`  ${s.path} -> HTTP ${s.status}`)
+        if (status.length) out.push('Declare an intentionally-absent path with --expect-404 <paths> if that status is the subject.')
       } else if (seen.length) {
         out.push('')
         out.push(`every one of the ${seen.length} ${label} loads this run measured was reached: ${seen.map((s) => `${s.path} ${s.status === null ? 'same-document' : s.status}`).join(', ')}.`)
@@ -106,5 +125,38 @@ export function tracker({ expect404 = [], label = 'page' } = {}) {
       return this.unreached().length ? UNREACHED : 0
     },
     rows() { return seen.slice() },
+    // True when not one subject was reached, which is the case a computed
+    // headline must not be printed for. "0 of 0 below the floor" is inside
+    // the legal range of the real answer and reads as a pass, so the slot a
+    // reader scans has to carry the refusal instead of a number taken over
+    // nothing. See `refused()` below.
+    nothingReached() {
+      return seen.length > 0 && this.unreached().length === seen.length
+    },
+    // The headline for that case. It occupies the verdict slot rather than
+    // sitting beside a verdict, which is the property Ursa's security seat
+    // named on 2026-11-09 and the reason its own house rule is an EMPTY
+    // stdout: in a `$(...)` consumer, emptiness is the only way to keep the
+    // slot clear. These tools are read, not substituted, so here the slot is
+    // kept clear by filling it with the refusal. Same requirement, two
+    // channel kinds; the full argument is in the README.
+    refused() {
+      return `NO VERDICT: every one of the ${seen.length} ${label} loads failed, so this run measured nothing and its headline is withheld rather than computed over an empty set.`
+    },
+    // Wraps the ONE call that establishes the premise and nothing else.
+    // Deliberately not a try/catch around the measuring that follows: a
+    // refusal scoped one call too wide turns a finding into a non-answer,
+    // which is the trap Ursa's security seat reported walking into on
+    // 2026-11-09 when one gate wrapped every git call instead of the one
+    // that read the tree.
+    async visit(page, url, path, opts = { waitUntil: 'networkidle' }) {
+      try {
+        const resp = await page.goto(url, opts)
+        return { ok: true, resp, status: this.saw(path, resp) }
+      } catch (err) {
+        this.threw(path, err)
+        return { ok: false, resp: null, status: null, error: err }
+      }
+    },
   }
 }

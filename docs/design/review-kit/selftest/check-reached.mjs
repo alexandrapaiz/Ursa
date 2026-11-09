@@ -71,6 +71,16 @@ const u4 = tracker({ expect404: ['/gone'] })
 u4.saw('/gone', resp(200))
 const u5 = tracker({})
 u5.saw('/boom', resp(500))
+// The loud absence, which until 2026-11-09 (run z) only `measure-narrow.mjs`
+// examined and the other five tools hit as an uncaught throw.
+const u6 = tracker({})
+u6.threw('/', new Error('page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4599/'))
+// Partial: one subject reached, one not. The headline over the one that was
+// reached is legitimate, so this must NOT be suppressed, which is the
+// too-wide-refusal trap stated as an expectation.
+const u7 = tracker({})
+u7.saw('/ok', resp(200))
+u7.threw('/dead', new Error('page.goto: net::ERR_CONNECTION_REFUSED'))
 
 const run = (extra) =>
   new Promise((resolve) => {
@@ -147,6 +157,13 @@ try {
     ['(unit) a declared path answering 200 is reported', /REPORTED, not a failure/.test(u4.lines().join('\n')), true],
     ['(unit) and reporting it does not gate', u4.code(), 0],
     ['(unit) a 500 is unreached too', u5.code(), UNREACHED],
+    ['(unit) a load that threw is unreached', u6.code(), UNREACHED],
+    ['(unit) and it is named COULD NOT LOAD', /COULD NOT LOAD/.test(u6.lines().join('\n')), true],
+    ['(unit) and it quotes the reason it got', /ERR_CONNECTION_REFUSED/.test(u6.lines().join('\n')), true],
+    ['(unit) nothing reached means the headline is withheld', u6.nothingReached(), true],
+    ['(unit) and the withheld headline says NO VERDICT', /NO VERDICT/.test(u6.refused()), true],
+    ['(unit) one subject reached still gates', u7.code(), UNREACHED],
+    ['(unit) but does NOT withhold the headline', u7.nothingReached(), false],
 
     ['(0) the fixture really serves 404 for the missing path', gone.status, 404],
 

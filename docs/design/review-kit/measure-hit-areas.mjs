@@ -268,7 +268,9 @@ for (const [vname, w, h] of VIEWPORTS) {
   });
   const page = await ctx.newPage();
   for (const [name, path] of PAGES) {
-    reach.saw(path, await page.goto(BASE + path, { waitUntil: "networkidle" }));
+    // Only the navigation is wrapped. Everything below it is the measuring,
+    // and a refusal scoped over that would turn a finding into a non-answer.
+    if (!(await reach.visit(page, BASE + path, path)).ok) continue;
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 });
     if (enterState) await enterState(page, name);
     await page.waitForTimeout(250);
