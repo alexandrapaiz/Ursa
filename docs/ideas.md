@@ -70,7 +70,14 @@ Contract in docs/standards/pm.md §4.
   to seven, or with this run's registration, from one to two. The remaining one
   is in the `tools/seat/` lane and reads like `needs-network` or
   `schedule-only`, since its verdict is refined by the board, but the seat that
-  wrote it should say which.
+  wrote it should say which. That one file is responsible for two of the gate
+  list's reds on main and not one: `instant-lint` is red there too, on the same
+  three lines, `duplicate-repair.mjs:364`, `:369` and `:408`, each a
+  `TEXTUAL_ORDER` sort comparing instants as strings. Measured in a separate
+  `origin/main` worktree, where `instant-gate.mjs` reports 3 offenders, 8
+  cleared and 40 in test files, identical to this branch. So of the two
+  registered checks red on main today, both name the same file, and neither is
+  in this seat's lane.
 - Why the suites did not catch any of this. `tooling-suites` resolves every
   tracked `*.test.mjs`, so `registeredPaths` already mapped
   `skills/check-evidence.test.mjs` and five more like it. The candidate sweep
