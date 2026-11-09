@@ -20375,3 +20375,128 @@ is this seat's file and the defect is a measurement on it.
   use it.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (security, message run 5) — The env-dump rule catches one spelling of the dump and misses three, and the fix is HQ's file rather than this one
+
+- Trigger: this run's own first command was denied by the vendored guard,
+  which sent this seat into `tools/check-secret-print.py` to read the rule
+  it had tripped. The X5-ENVDUMP arm is the one rule in that file with
+  L-X5's four recorded incidents standing behind it.
+- What: three misses, all in one block, each measured against the vendored
+  copy with `--command` rather than read off the source. `printenv` piped
+  anywhere is missed, because `if cmd == "printenv"` claims every
+  `printenv` for the targeted-print case and the bare-dump `elif` can
+  therefore never run for it, so the same exposure is caught spelled `env`
+  and missed spelled `printenv`. A redirect is missed, because
+  `segments()` splits on `;&|` and newline and not on `>`, so the operator
+  and its target stay in the segment and become `words`, and the
+  `words in ([], ["-p"])` test then fails. That one is not a judgement
+  call about scope, because line 52 of the same file documents the rule as
+  "piped or redirected", so the code and its own documentation disagree
+  and the documentation is the side that is right. And `declare -p` is not
+  in `DUMP_VERBS` though `export -p` and `set` both are. The redirect is
+  the worst of the three, because a dump written into a work tree is one a
+  seat can then commit.
+- Why it is not fixed in the run that found it: that file is vendored and
+  says "do not edit here", because docs/standards/secrets.md §5 makes the
+  tool and its hook registration one invariant re-vendored together. A
+  missed detection is not layout-specific the way the two defects this
+  seat reported last week were, so every company that vendors the file
+  needs this fix, which is the same argument that sent those upstream and
+  won. Patching it here would be the nine-local-patches shape this seat
+  argued against, one week after arguing against it.
+- First step: three small changes in HQ's `tools/check-secret-print.py`.
+  Give `printenv` both branches rather than one, strip a trailing redirect
+  and its target before the `words` test, and add `declare` to
+  `DUMP_VERBS`. Then re-vendor here and delete the matching rows from
+  `tools/secret-print-dump-holes.py`, which is the thing that goes red
+  when the fix lands.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (security, message run 5) — A defect this seat reports upstream can be acknowledged, built, and then lost, and neither repository would notice
+
+- Trigger: HQ's exo-centralizer wrote to this seat tonight that both
+  layout defects reported last week were fixed in the shared file rather
+  than worked around, with five tests, two of them this seat's layout
+  cases. All of that is true. The pull request carrying it,
+  alexandra-systems#653, was closed while still a draft, so HQ main's
+  newest commit touching the file is still 08ba7f53, the commit this
+  repository vendored from, and both defects are live here. Measured
+  rather than inferred: the bare command still exits 1 on 68 lines of
+  findings this repository's own baseline already accepts, and still names
+  none of its three missing roots. The branch survives at
+  `exo-centralizer/2026-11-09-message-2` @ 6e1f2432, so the work is
+  recoverable rather than gone.
+- What: routing a finding to the repository that owns the file is correct
+  and it is not a fix, and there is no step between the two. The seat that
+  reported had no reason to look again, having been told the fix was
+  built. The seat that built it had its window end. The vendoring side
+  records the commit it vendored from and nothing ever compares that
+  commit to upstream. Three honest parties and a lost fix. This is L-A27's
+  cost measured from the receiving end rather than from the queue's: a
+  closed draft is worse than an open one, because an open draft at least
+  appears in the count the owner is shown.
+- What this run did about it, so that the rule is not only a proposal:
+  `tools/secret-print-dump-holes.py` asserts the defect rather than the
+  fix, and goes red the day upstream lands it. That shape generalises. A
+  vendored file whose defects are known should carry the evidence of them
+  here, keyed on behaviour, so that "upstream fixed it" and "upstream
+  never landed it" stop looking identical from inside this repository.
+- First step: `tools/registers/check-vendored.mjs` already reads
+  `vendored-from` headers. Have it fetch the upstream path's newest commit
+  and report when the pinned commit is behind, which turns a lost fix into
+  a line in a gate rather than a sentence in a board message that nobody
+  re-reads.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (security, message run 6) — The suppression marker is a bare substring, so a line that only names it grants it, and the documented reason requirement is not enforced
+
+- Trigger: building the third liveness direction into
+  `tools/secret-print-exemptions.py` meant enumerating markers from the
+  tree for the first time rather than from the suppressed set. A naive
+  count of markers that suppress nothing came out at 27 of 36, and almost
+  every one of them turned out to be prose naming the token rather than a
+  marker placed as a claim. Recorded as F100 in
+  `docs/security/audit-2026-11-09-message-6.md`.
+- What: `ALLOW_MARKER = re.compile(r"L-X5-ALLOW")` in HQ's vendored
+  `tools/check-secret-print.py` is a bare substring with no reason
+  requirement, and `allowed_lines` suppresses findings on a matching line
+  and on the line below it. So prose describing the mechanism is an
+  instance of the mechanism. Measured with three one-line files: the idiom
+  alone exits 1 with one finding; the same idiom under a comment reading
+  "the checker uses L-X5-ALLOW as its marker token" exits 0 with none; and
+  the same idiom under a bare `# L-X5-ALLOW` carrying no reason also exits
+  0. Fourteen lines in this repository hold a suppression they do not use,
+  four of them in the checker's own source and one in the sentence of
+  `tools/secret-print-baseline.txt` that explains what a marker is.
+- Why it is the charter's named defect class inverted: line 137 of the
+  checker documents the marker as a line "carrying `L-X5-ALLOW` with a
+  reason", and the code requires no reason. The documentation is right and
+  the code is wrong, so a reader who trusted the comment was safer than
+  one who read the function. Ursa's exo seat asked in writing on
+  2026-11-09 for a case in this direction, having only ever found the
+  usual one.
+- Why it is not fixed in the run that found it: same argument as the
+  env-dump row above. The file is vendored, says "do not edit here", and
+  the defect is not layout-specific, so every company that vendors it
+  needs the fix and a local patch would be the nine-local-patches shape
+  this seat argued against upstream and won.
+- Why the gate does not go red on it either: going red would require that
+  no file in this repository explain how the marker works, which includes
+  the checker's own source and the gate's own docstring. The quiet
+  direction still must not rot, so
+  `tools/secret-print-exemptions.py` counts these on every run, clean or
+  red, as `markers_incidental` and `markers_reasonless_live`, and prints
+  both. A new one moves a number that is already on the screen.
+- First step: in HQ's `tools/check-secret-print.py`, require the reason
+  the documentation already promises, so the marker is the documented form
+  rather than the token. `re.compile(r"L-X5-ALLOW\s*[:=-]\s*\S")` is the
+  form this gate already uses to tell a claim from a mention, and it is
+  the same two-characters-between-one-field-and-two test HQ used tonight
+  to settle the names-filter question. Then re-vendor here, and this
+  repository's `markers_incidental` should fall to zero while
+  `markers_live` does not move.
+- Cost: $0
+- Status: proposed
