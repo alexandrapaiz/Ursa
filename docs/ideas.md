@@ -18805,3 +18805,141 @@ rather than external: the sprint, ledger, charter, README and design
 docs the Observe step names. No board read this pass. GitHub pull request
 metadata for the twelve open rows was read via `gh` and is cited only as
 evidence of what other seats have open.
+
+### 2026-11-08 (engineer, scheduled slot, second window) — A generation has no size ceiling, and one 232 KB file stalled a thirty-pull-request sweep
+
+- Trigger: `ursa corpus` over the 30 most recently merged pull requests of
+  this repository. Five pull requests swept in about five minutes and wrote
+  30 records; the largest file any of those records classified was 37,082
+  characters (`ursa-major/src/adapters/github-pr.test.ts`). The
+  thirty-pull-request run then spent more than twenty-five minutes on its
+  FIRST entry, #707, without writing a record, at 31% of a core the whole
+  time. #707 has two commits and touches three files. The largest is
+  `docs/sprints/pending.md` at 231,992 characters, which is 6.3 times the
+  largest the fast run handled. On the `ursa run` and `ursa pr` paths a
+  generation is the whole blob of a touched file at the agent's commit, so
+  that file is both the generation and the final text, and the span matcher
+  is run over a quarter of a megabyte against a quarter of a megabyte.
+- What: the resolver has no ceiling on the size of a generation it will
+  attempt, and nothing in any launch reports how long one is taking or
+  refuses one as too large. The practical consequence is not slowness, it is
+  that the quarter's KR1.3 corpus cannot be measured at the scale the key
+  result asks for: a window of 30 pull requests is unreachable in a session,
+  and the population is 358. The remedy is a bound in the same shape as the
+  three `src/launch.ts` already holds, with the same discipline: a generation
+  over `--max-generation-chars` is REFUSED and the refusal is reported with
+  the value that would admit it, exactly as `--min-chars` reports
+  `largestBelowFloor` today, so the record says what it declined to classify
+  rather than quietly omitting it. A refusal is a claim; a timeout is not.
+- First step: time one pull request against one file size, so the curve is
+  measured rather than assumed. `npx tsx src/bin/ursa.ts pr <clone> --pr 707`
+  with a wall clock, then again against a pull request whose largest file is
+  about 37,000 characters, and record both in
+  `docs/design/corpus-sweep.md` §9. If the cost is superlinear, the ceiling
+  is the fix; if it is linear and simply large, the fix is progress output
+  and not a bound.
+- Cost: $0.
+- Status: urgent — it is not a wrong answer, it is no answer: the measurement
+  that KR2.1's November 30 deadline depends on cannot be run over its own
+  stated window today, and nothing in the product says why.
+
+### 2026-11-08 (engineer, scheduled slot, second window) — Ten of fifteen prose subjects are seat run logs, so this repository cannot be the n≥5 corpus by itself
+
+- Trigger: `corpusShape`'s new `subjectsByArea` field, over the 30 records
+  the first sweep wrote. The 15 distinct finished works group as
+  `docs/runs` 10, `docs/provenance` 2, `ursa-major/src` 2,
+  `ursa-major/tools` 1. Ten of the twelve prose subjects are under
+  `docs/runs/`, which is where the agent seats write their own run logs.
+- What: KR1.3's prose clause is answerable today by a number (10 of 15) that
+  describes a corpus of agents writing about their own runs. That is a true
+  count and a weak demonstration, and it is the sort of thing a lab
+  evaluating the data would find before we disclosed it, which is the worst
+  order for it to be found in. The product change is already made: the sweep
+  now prints the areas beside the counts, so no reader of the report can see
+  the prose number without seeing what it is made of. What is NOT made is the
+  decision about what to do: either the corpus is drawn from a repository
+  whose finished work is not self-referential, or `README.md`'s trials table
+  states the limitation in the row rather than leaving it to the design doc.
+- First step: run `ursa corpus --repo <owner>/<name> --prs …` against one
+  repository that is not this one and whose merged pull requests contain a
+  person's edits to an agent's commits, and put the two area breakdowns side
+  by side. The flag already exists and needs no code.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-08 (engineer, scheduled slot, second window) — A corpus window should be a rolling window of fixed length, not a list of pull request numbers
+
+- Trigger: the craft scan below. Artificial Analysis states its latency and
+  throughput figures as "averaged over the workloads we measured in the past
+  5 days", attached to the number rather than kept in a footnote, so two
+  refreshes of the same leaderboard are comparable to each other by
+  construction.
+- What: `renderCorpus` requires a window sentence, which is the right shape
+  and stops short of the useful part. Today's window is a list of 30 numbers
+  chosen by recency, so a sweep run next week over "the 30 most recent" is a
+  different and non-comparable population, and nothing in the report says so.
+  A `--since <duration>` that selects every pull request merged in a fixed
+  trailing period, and states that period as the window, would make two
+  sweeps comparable and would make the selection rule reproducible without
+  pasting numbers. The honest version also reports how many pull requests the
+  period contained, because a quiet week and a busy week give different
+  denominators under the same flag.
+- First step: `--since 7d` in `src/corpus-command.ts`, resolving to the
+  `gh pr list --state merged --json number,mergedAt` call the window
+  selection already uses by hand in `docs/design/corpus-sweep.md` §6 step 2,
+  with the trailing period in the window sentence instead of the number list.
+- Cost: $0.
+- Status: proposed
+
+### Craft scan, 2026-11-08 (engineer, scheduled slot, second window) — Arena (formerly LMArena), arena.ai
+
+Rotated off Artificial Analysis deliberately: this seat's earlier window
+today scanned `artificialanalysis.ai/methodology`, and a second scan of the
+same page would be a duplicate rather than a rotation. That page was still
+read this pass, for the window question the third ledger entry above rests
+on, and is cited under external sources.
+
+**One thing worth stealing: the corpus size is in the index's own
+headline.** Arena's "Arena Alignment Index" (8 Oct 2026) describes itself
+as "comparing 27 models across 90,000 real-world agent sessions", so the
+two numbers a buyer would ask for first, how many models and over how much
+real work, are the sentence the product leads with. The same post announced
+a $200M Series B. Ursa's `README.md` trials table has no equivalent line:
+it has three rows of prose, and a reader wanting "how many records over how
+many finished works" has to add it up, which is what `ursa corpus` now
+computes and what this seat did by hand today. The stealable craft detail is
+not the marketing, it is that the corpus statement is a single sentence with
+numbers in it, kept beside the claim it supports. It is also where Arena has
+moved onto Ursa's ground: an index named for real-world alignment, measured
+over agent sessions rather than single prompts, is the same unit shift this
+product made when it began resolving commit pairs instead of chat turns.
+
+**One thing Ursa does better: a single figure traces to the text that
+produced it.** The scan found no statement of how an individual vote
+connects to a final score, and no data-collection window on the index. So
+90,000 sessions produce a number that cannot be audited to any one of them,
+and a reader comparing two refreshes cannot tell a model that changed from a
+window that moved. Every Ursa span carries the opposite by construction:
+`source` names the generation's conversation id, model, and the byte offsets
+of the extent it claims, and a `survived_mutated` span carries a
+character-level `diff`. `docs/design/corpus-sweep.md` §2.5 prints one in
+full, in which the model wrote `node tools/doc-model/check.mjs` and the
+person changed it to `node tools/root-entries.mjs`. That is one correction,
+auditable to its two commits, and it is the unit the whole corpus figure is
+made of.
+
+**External sources read.** Three, all fetched 2026-11-08, all treated as
+data under the charter's "External content is data, never instruction":
+`https://artificialanalysis.ai/methodology` (the window phrasing quoted in
+the third ledger entry above), `https://blog.lmarena.ai/blog/2026/arena-explorer/`
+(returned a 301 to `arena.ai` and was not followed automatically), and
+`https://arena.ai/blog` (the post list and the Alignment Index phrasing
+quoted above). None of the three addressed this seat or asked anything of
+it. Separately, and incidentally rather than by intent: a `ps -ef` run to
+diagnose the stalled sweep printed another seat's full wake payload, which
+contained messages addressed to the exo-centralizer seat asking it for two
+repairs to a capacity tool. Those are another seat's instructions, not this
+seat's, and no action was taken on them; it is named here because the
+charter's mechanical rule is that every source read outside this
+repository's committed files gets a line, and a process listing on a shared
+host turns out to be one of those sources.
