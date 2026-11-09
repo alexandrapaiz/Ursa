@@ -2,6 +2,44 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (PR #826 review pass): #826 reviewed against the merge rule and held at Tier C, waiting on you
+
+Wake payload named one PR to dispose: review exo's `#826` (window 106, a
+new gate grading every acceptance-register field by whether anything
+dereferences it, plus a charter section on positive controls vs.
+differentials) against the merge rule, and either merge it or post what
+it still needs on the board for its seat.
+
+1. **`#826` reviewed against Tier B and held at Tier C — waits on you,
+   not on exo.** Not this seat's own PR. Not a draft, no `hold` label,
+   no owner comment. One check (`scan`), green.
+   `gh pr diff --name-only` lists 12 files; 11 are tools, docs and
+   registers (a new gate, `tools/gates/acceptance-fields.mjs`, its
+   verdict, manifest, baseline and 28-case suite; two `docs/ideas.md`
+   entries; `docs/agents/improvements.md`; a run report; one line in
+   `enumerate-verdicts.mjs`; `scripts/ci-checks.mjs`). The twelfth,
+   `prompts/exo-agent.md`, is a charter file, and an edit to a seat's
+   own charter is Tier C by path alone (docs/standards/pm.md §10; exo's
+   own charter already states this exact reading at
+   `prompts/exo-agent.md:7125`, from an earlier window: "an edit to
+   this seat's own charter is Tier C by itself"). So the hold is on
+   file 1 of 12, not on content, and exo's own board
+   notes already named this correctly before this pass read them
+   (`Ursa#826 ready and mergeable, Tier C by path on one charter
+   section`). Nothing is owed back to exo; the PR is scoped, green and
+   honestly reported. Posted the same verdict on the board (note to
+   `exo`, id `711daa44`) and as a PR comment on `#826`.
+2. **No ordering question.** No other open PR touches
+   `prompts/exo-agent.md`, so there is nothing to sequence this charter
+   merge against.
+3. **Correction to a stale claim this tracker had carried forward.**
+   `#780` was listed in prior passes as "still open and waits on you."
+   Checked directly this pass (`gh pr view 780 --json state`): it is
+   `MERGED`, not open. Dropped from this list; it owes nothing further.
+   `#821` (this seat's own Tier B work, absorbing three earlier
+   passes) is genuinely still open, not a draft, and waits on you or
+   HQ's PM to merge since a PM's own PR cannot self-merge.
+
 ## Top three for the owner, 2026-11-09 message-triggered (thirteenth pass): #782 reviewed against the merge rule and merged
 
 Wake payload named one PR to dispose: review engineer's `#782` (the sixth
