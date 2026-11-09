@@ -454,20 +454,25 @@ const TIMESTAMP_NAME =
  * timestamp, as text. Returns `{code, line, text, repair}` in the same shape
  * `tools/board/check.mjs` already prints, one per finding.
  *
- * Four codes. Three match the defects in this file's header; the fourth is a
- * misuse of this file's own repair rather than a defect it replaced:
+ * Five codes. Three match the defects in this file's header; the other two
+ * are misuses of this file's own repairs rather than defects they replaced:
  *
- *   TEXTUAL_ORDER     a relational operator or `localeCompare` between two
- *                     timestamp-named operands. Its repair names both the
- *                     instant functions and the day functions, because the
- *                     lint cannot see which the field holds; see below.
- *   TEXTUAL_DAY       `slice(0, 10)` or `substring(0, 10)` on one
- *   TEXTUAL_DROP      `slice(0, 19)` immediately re-suffixed with a zone
- *   REFUSAL_AS_ORDER  `compareDays` or `compareInstants` inside a `.sort(`
- *                     callback. Not name-shaped: it needs no timestamp name,
- *                     because the callee IS the evidence. Checked before the
- *                     repaired-site exemption, which would otherwise clear
- *                     it — see the comment at that line.
+ *   TEXTUAL_ORDER       a relational operator or `localeCompare` between two
+ *                       timestamp-named operands. Its repair names both the
+ *                       instant functions and the day functions, because the
+ *                       lint cannot see which the field holds; see below.
+ *   TEXTUAL_DAY         `slice(0, 10)` or `substring(0, 10)` on one
+ *   TEXTUAL_DROP        `slice(0, 19)` immediately re-suffixed with a zone
+ *   REFUSAL_AS_ORDER    `compareDays` or `compareInstants` inside a `.sort(`
+ *                       callback. Not name-shaped: it needs no timestamp
+ *                       name, because the callee IS the evidence. Checked
+ *                       before the repaired-site exemption, which would
+ *                       otherwise clear it — see the comment at that line.
+ *   SHAPE_AS_EXISTENCE  `timestampShape(…)` compared against `'day'`. Also
+ *                       not name-shaped, also checked before the exemption,
+ *                       and the exemption is the whole reason it is a code
+ *                       rather than one seat's test — see the comment at
+ *                       that line.
  *
  * A line carrying `instant.mjs`-sourced calls is not a finding, which is how
  * the repaired call sites stay clean without an inline suppression comment.
@@ -549,6 +554,47 @@ export function textualTimestampComparisons (source) {
         line,
         text: text.trim(),
         repair: `${refused[1]} answers null for a value it will not place, and Array.prototype.sort coerces null to 0, so a refused row reads as equal and the array comes back in input order with no error. Use ${refused[1] === 'compareDays' ? 'sortByDay(rows, key)' : 'sortByInstant(rows, key)'}, which keeps unplaceable rows and sorts them last; use the comparator only where you can read the null`
+      })
+      return
+    }
+    // SHAPE_AS_EXISTENCE, AND IT IS ABOVE THE SKIP FOR A SECOND REASON, NOT
+    // THE SAME ONE (exo, 2026-11-09, on Ursa's engineer seat's measurement).
+    //
+    // `REFUSAL_AS_ORDER` above is a family member whose REFUSAL a caller can
+    // consume as an answer. This is the other way the name-keyed skip lies:
+    // `timestampShape` is a family member that answers a WEAKER QUESTION than
+    // its caller asked. It decides a spelling; `parseDay` decides an
+    // existence. `'2026-02-30'` is a `'day'` to the first and null to the
+    // second, and a caller reaching for the first to mean "this is a day I
+    // can use" has accepted a date the calendar does not have.
+    //
+    // The ordering is not a nicety; it is the only reason this is reachable.
+    // The line that produced the defect was
+    //
+    //   return utcDay(now) ?? (timestampShape(now) === 'day' ? String(now) : null)
+    //
+    // which calls `utcDay(`, so the skip below cleared it. Measured on this
+    // tree before the code existed: all three bypass shapes returned no
+    // finding, and that first one returned none BECAUSE OF THE SKIP rather
+    // than for want of a pattern. Move this block below the skip and the test
+    // that pins that distinction goes red, which is the point of pinning it.
+    //
+    // Both tokens must be on one line, and that is what keeps this module off
+    // its own report without a filename exemption: `parseInstant` names
+    // `'day'` among the shapes it refuses on the line AFTER its
+    // `timestampShape` call. A one-line refusal of the same kind would be
+    // reported here, and the honest handling of that day is an entry in
+    // `tools/instant-gate.json` carrying the argument — not a widening of
+    // this pattern. Refusing on a spelling is safe and accepting on one is
+    // not, and a line lint cannot see which way the answer flows; the repair
+    // text therefore asks the reader rather than deciding for them, for the
+    // reason the narrowing note above gives.
+    if (/\btimestampShape\s*\(/.test(bare) && /['"]day['"]/.test(bare)) {
+      out.push({
+        code: 'SHAPE_AS_EXISTENCE',
+        line,
+        text: text.trim(),
+        repair: 'timestampShape decides a spelling, not an existence: it answers \'day\' for \'2026-02-30\', which parseDay refuses. If this line is ACCEPTING the value, gate on parseDay(value) and take the day from utcDay(value) when the input may be an instant. If it is REFUSING it, refuse against parseDay too, or argue for the line in tools/instant-gate.json. Ursa\'s engineer seat is landing calendarDay(value) as the collapse of that pair; prefer it once it is on main'
       })
       return
     }
