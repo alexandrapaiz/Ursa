@@ -312,6 +312,19 @@ export const CANDIDATE_LANGS = [
   },
 ]
 
+/** The trees the candidate sweep visits.
+ *
+ *  Exported because `tools/gates/gate-registry.mjs` needs to say whether a
+ *  baseline entry's path is somewhere this sweep looks, and a second copy of
+ *  this list over there is the defect that file exists to catch. Ursa/exo
+ *  measured on 2026-11-09 that widening it takes the candidate set from 58 to
+ *  64 on `main` and declined to widen it in the same window, for a stated
+ *  reason: a whole-tree gate that goes red names whichever branch is tested
+ *  next rather than the one that caused it. So this stays as it is, and the
+ *  widening is that seat's to land.
+ */
+export const CANDIDATE_ROOTS = ['tools', 'scripts']
+
 /** Files under `roots` that could be a gate, by the table above.
  *
  *  Returns null, never [], when the facts cannot be established: an empty
@@ -320,7 +333,7 @@ export const CANDIDATE_LANGS = [
  */
 export function gateCandidatePaths({
   langs = CANDIDATE_LANGS,
-  roots = ['tools', 'scripts'],
+  roots = CANDIDATE_ROOTS,
   exclude = ['tools/gates/enumerate-verdicts.mjs', 'tools/gates/verdict-shape.mjs'],
   excludePattern = /-verdict\.mjs$/,
 } = {}) {

@@ -66,7 +66,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { CANDIDATE_LANGS, gateCandidatePaths } from './enumerate-verdicts.mjs'
+import { CANDIDATE_LANGS, CANDIDATE_ROOTS, gateCandidatePaths } from './enumerate-verdicts.mjs'
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const BASELINE = join(REPO_ROOT, 'tools', 'gates', 'gate-registry.baseline.json')
@@ -165,10 +165,13 @@ export function registeredPaths(checks) {
  *
  *  `committed` defaults to agreeing with `exists`, which is what a caller
  *  that cannot ask the object store should assume, and it is the pre-F141
- *  behaviour for every caller that does not pass it.
+ *  behaviour for every caller that does not pass it. `roots` is the sweep's
+ *  own list, imported rather than restated, because this function has to be
+ *  able to say that a path is somewhere the sweep does not look.
  */
 export function decide({
   candidates, registered, baseline, exists, committed = exists, checkIds, ledgerHeadings = [],
+  roots = CANDIDATE_ROOTS,
 }) {
   const byPath = new Map((baseline.entries ?? []).map((e) => [e.path, e]))
   const rows = []
@@ -258,6 +261,37 @@ export function decide({
     //
     // So the deleted-it instruction now requires both halves of its premise,
     // and the third state carries the opposite instruction.
+    // AND THE SAME SHAPE WITH A DURABLE CAUSE (F142, 2026-11-09, found in the
+    // debug sweep by reading what landed on `main`). Ursa's skill seat
+    // measured this arm from the other side and wrote it into
+    // `skills/gate-registration.test.mjs` and the ledger: the gate-list route
+    // is order-safe because `registeredPaths` is consulted per candidate, so
+    // an entry for a path the sweep cannot yet see costs nothing and goes
+    // live when the sweep widens, while the baseline route is order-unsafe
+    // because this loop calls any undiscovered path stale. The consequence is
+    // concrete rather than theoretical: `skills/relocate-anchors.mjs` is a
+    // repair tool that wants a `write-action` row, the row cannot land until
+    // `roots` widens, and that seat declined to invent a verdict mode for it
+    // to satisfy a registry. It was right to decline.
+    //
+    // So the same repair as F141 on the other premise. The sweep visits
+    // `roots` and nothing else, so a tracked, committed file outside them was
+    // never looked at either, and an entry about it is unswept rather than
+    // stale. Reported, not inert: a row that excuses a path this gate does
+    // not visit should be visible, because the alternative is a baseline that
+    // can accumulate rows nobody is accountable for.
+    if (exists(entry.path) && !underRoots(entry.path, roots)) {
+      problems.push({
+        kind: 'out-of-scope-entry',
+        path: entry.path,
+        why: `${entry.path} is excused by the baseline and is tracked under none of the trees `
+          + `the candidate sweep visits (${roots.join(', ')}), so the sweep never looked at it `
+          + 'and this gate cannot say the entry decides nothing. Either widen the sweep\'s '
+          + 'roots in tools/gates/enumerate-verdicts.mjs, which is Ursa/exo\'s call and has a '
+          + 'stated ordering, or delete the row if the file is genuinely not a gate candidate',
+      })
+      continue
+    }
     if (exists(entry.path) && !committed(entry.path)) {
       problems.push({
         kind: 'pending-entry',
@@ -292,6 +326,20 @@ export function decide({
   return { rows, problems }
 }
 
+/** The two problem kinds that mean "the sweep never looked", not "the row is
+ *  wrong". Kept as a set next to `verdict` so a third one cannot be added to
+ *  `decide` without this file deciding what it does to the exit code. */
+export const UNSWEPT_KINDS = new Set(['pending-entry', 'out-of-scope-entry'])
+
+/** Whether `path` is inside one of the sweep's roots.
+ *
+ *  Compared on path segments, not with `startsWith`, so a root of `tools`
+ *  does not claim a sibling directory whose name merely begins with it.
+ */
+export function underRoots(path, roots) {
+  return roots.some((r) => path === r || path.startsWith(`${r}/`))
+}
+
 export function verdict({ rows, problems, candidates }) {
   if (candidates === 0) {
     return {
@@ -315,21 +363,22 @@ export function verdict({ rows, problems, candidates }) {
   for (const p of problems) byKind[p.kind] = (byKind[p.kind] ?? 0) + 1
   const named = Object.entries(byKind).map(([k, n]) => `${n} ${k}`).join(', ')
 
-  // F141: a `pending-entry` is not a finding about this branch, so it must not
-  // be aggregated with the ones that are. Exit 1 here means at least one gate
-  // we built is reached by nothing, which is a claim about the tree. Exit 2 is
-  // already this file's "the facts could not be established", and that is
-  // precisely what a tracked file with no committed blob leaves this gate in.
-  // Mixed is exit 1: a real finding outranks a refusal about one row, because
-  // the finding is established and the branch owes it.
-  if (problems.every((p) => p.kind === 'pending-entry')) {
+  // F141 and F142: neither of these is a finding about this branch, so neither
+  // may be aggregated with the ones that are. Exit 1 here means at least one
+  // gate we built is reached by nothing, which is a claim about the tree. Exit
+  // 2 is already this file's "the facts could not be established", and that is
+  // precisely what an unswept file leaves this gate in. Mixed is exit 1: a
+  // real finding outranks a refusal about one row, because the finding is
+  // established and the branch owes it.
+  if (problems.every((p) => UNSWEPT_KINDS.has(p.kind))) {
     return {
       exitCode: 2,
-      cause: 'entries-pending',
+      cause: 'entries-unswept',
       line: `gate-registry: NO VERDICT (exit 2). ${candidates} gate candidate(s) and `
-        + `${problems.length} baseline entry/entries whose file is tracked with no committed `
-        + 'blob, so this gate could not look at them. Commit them and run it again. Nothing '
-        + 'above is a finding about this branch.',
+        + `${problems.length} baseline entry/entries about a file the candidate sweep did not `
+        + 'look at, either because it has no committed blob yet or because it is outside the '
+        + 'sweep\'s roots. Each one is named above with what to do about it. Nothing above is '
+        + 'a finding about this branch.',
     }
   }
   return {
