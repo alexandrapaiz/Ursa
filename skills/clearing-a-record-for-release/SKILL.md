@@ -106,7 +106,7 @@ evidence:
     source: docs/security/redaction-standard.md:11-27
   - ref: E28
     what: the five surfaces a record reaches the public through, that the viewer is a second full copy of the sensitive fields rather than a rendering of the safe ones, that a screenshot of any surface carries that surface's text as pixels, and that redaction happens before entry rather than at rendering, so redacting at capture time is the same mistake
-    source: docs/security/redaction-standard.md:29-59
+    source: docs/security/redaction-standard.md:29-63
   - ref: E29
     what: the five classes, verbatim human text, machine and account identity, session identity, credentials, and other people
     source: docs/security/redaction-standard.md:67-129
@@ -133,13 +133,13 @@ evidence:
     source: docs/design/consent-and-erasure.md:549-571
   - ref: E37
     what: the ledger finding that the publish disclosure claims the text was already public and never checks whether the repository is, and that an unstated visibility must print the private sentence
-    source: docs/ideas.md:8418-8421
+    source: docs/ideas.md:8990-8993
   - ref: E38
     what: the ledger finding that nothing tells a publisher what of theirs is live right now and nothing takes one record back down between publishes
-    source: docs/ideas.md:8425-8428
+    source: docs/ideas.md:8997-9000
   - ref: E39
     what: the ledger finding that a republish leaves the pages it no longer lists, so an erased record stays readable at an address somebody already has
-    source: docs/ideas.md:8438-8441
+    source: docs/ideas.md:9010-9013
   - ref: E40
     what: the five poisoned payloads the audit is asserted to catch, including the whole record passed off as a batch, which is the failure mode that existed before the module
     source: ursa-major/src/disclosure.test.ts:256-310
