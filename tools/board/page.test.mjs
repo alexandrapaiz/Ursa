@@ -94,6 +94,8 @@ test('more rows than a page inside one instant is reported as unreachable rather
   const { coverage } = await pageMessages({ hours: 720, fetchPage: s.fetchPage, now: clock });
   assert.equal(coverage.complete, false);
   assert.equal(coverage.incomplete_reason, 'CURSOR_STUCK');
+  assert.equal(coverage.incomplete_code, 'COVERAGE_CURSOR_STUCK');
+  assert.equal(ratioFault(coverage).code, 'COVERAGE_CURSOR_STUCK');
   assert.ok(ratioFault(coverage).line.includes('counts from this read are floors'));
 });
 
@@ -104,6 +106,7 @@ test('a page that errors stops the walk and names the page', async () => {
   const { coverage } = await pageMessages({ hours: 720, fetchPage: s.fetchPage, now: clock });
   assert.equal(coverage.complete, false);
   assert.equal(coverage.incomplete_reason, 'READ_FAILED');
+  assert.equal(ratioFault(coverage).code, 'COVERAGE_READ_FAILED');
   assert.match(coverage.incomplete_line, /page 1 answered 500/);
   assert.match(ratioFault(coverage).line, /reached no rows at all/);
 });
@@ -125,7 +128,24 @@ test('a walk that repeats itself is NO_PROGRESS and not an infinite loop', async
   const fetchPage = async () => { calls += 1; return { status: 200, rows: page, limit: PAGE_CEILING, saturated: true, error: '' }; };
   const { coverage } = await pageMessages({ hours: 720, fetchPage, now: clock });
   assert.equal(coverage.incomplete_reason, 'NO_PROGRESS');
+  assert.equal(ratioFault(coverage).code, 'COVERAGE_NO_PROGRESS');
   assert.equal(calls, 2, 'one page, one confirmation, then stop');
+});
+
+test('a full page carrying no parseable timestamp is NO_TIMESTAMP, which no test named before today', async () => {
+  // The fifth of the six refusals this walk can make, and until 2026-11-09
+  // the only evidence it existed was one `reason:` literal: `ratioFault` built
+  // its code out of a template, so `COVERAGE_NO_TIMESTAMP` was a string no
+  // file in the repository contained. `tools/gates/code-census.mjs` is what
+  // made the gap countable.
+  const undated = Array.from({ length: PAGE_CEILING }, (_, i) => ({ id: `u${i}`, ts: 'not a timestamp', body: 'x', kind: 'note' }));
+  const fetchPage = async () => ({ status: 200, rows: undated, limit: PAGE_CEILING, saturated: true, error: '' });
+  const { coverage } = await pageMessages({ hours: 720, fetchPage, now: clock });
+  assert.equal(coverage.complete, false);
+  assert.equal(coverage.incomplete_reason, 'NO_TIMESTAMP');
+  assert.equal(coverage.incomplete_code, 'COVERAGE_NO_TIMESTAMP');
+  assert.equal(ratioFault(coverage).code, 'COVERAGE_NO_TIMESTAMP');
+  assert.match(coverage.incomplete_line, /carried no parseable ts/);
 });
 
 test('nextBeforeHours walks strictly below the oldest row, by the overlap', () => {

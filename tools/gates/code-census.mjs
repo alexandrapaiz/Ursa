@@ -183,7 +183,8 @@ export function emissionSites(source) {
       while (k < n && /[ \t]/.test(source[k])) k += 1
       if (CODE_PROPS.has(word) && source[k] === ':' && source[k + 1] !== ':') {
         const { value, end } = readValue(source, k + 1)
-        sites.push({ line, prop: word, value, codes: codesIn(value) })
+        const read = codesIn(value)
+        sites.push({ line, prop: word, value, kind: read.kind, codes: read.codes })
         line += countNewlines(source, k + 1, end)
         i = end
         continue
@@ -240,26 +241,45 @@ function readValue(s, start) {
 }
 
 /**
- * The codes a value provably emits, or `null` when the source does not hold
- * them. A ternary over code-shaped literals is enumerable because both arms
- * are present; anything carrying a template, a call or a bare identifier is
- * not. See the header for why that asymmetry is the honest one.
+ * What a `code:` value tells us about the vocabulary behind it. Three answers,
+ * and the three-way split is the whole correctness argument of this file.
+ *
+ * - `literal`: every path through the expression ends at a code-shaped string
+ *   literal present in the source, so the set is complete and readable. One
+ *   literal qualifies; so does a ternary whose two arms are both literals,
+ *   which is what `tools/board/measured-citation.mjs:154` writes.
+ * - `forwarded`: no literal at all, just an identifier or a member access, so
+ *   the code was spelled somewhere else and this site only carries it. NOT a
+ *   finding. Forwarding moves the obligation to the producer rather than
+ *   hiding it, and every producer in `tools/` and `scripts/` is itself
+ *   scanned, so the union over the trees is still complete. The count is
+ *   printed in the verdict line so that "not a finding" is not the same as
+ *   "unremarked".
+ * - `constructed`: the site builds a name the source does not contain, with a
+ *   template or a concatenation, or mixes a literal with a non-literal path so
+ *   that the literals present are provably not the whole set. This IS a
+ *   finding, because no amount of parsing recovers the vocabulary and a census
+ *   that passed over it would return a smaller set and call it clean.
  *
  * @param {string} value
- * @returns {string[] | null}
+ * @returns {{kind: 'literal'|'forwarded'|'constructed', codes: string[]}}
  */
 export function codesIn(value) {
-  if (value === '') return null
-  if (value.includes('`')) return null
   const literals = [...value.matchAll(/(['"])([^'"\\]*)\1/g)].map((m) => m[2])
-  if (literals.length === 0) return null
-  if (!literals.every((l) => CODE_SHAPE.test(l))) return null
-  // Everything outside the literals has to be ternary punctuation or a
-  // comparison, never a call or a member access that could produce a sixth
-  // code the source does not spell.
-  const skeleton = value.replace(/(['"])[^'"\\]*\1/g, '§')
-  if (/[`(]/.test(skeleton)) return null
-  return [...new Set(literals)]
+  const codes = [...new Set(literals.filter((l) => CODE_SHAPE.test(l)))]
+  if (value.includes('`')) return { kind: 'constructed', codes }
+  if (literals.length === 0) {
+    return { kind: value === '' ? 'constructed' : 'forwarded', codes: [] }
+  }
+  if (!literals.every((l) => CODE_SHAPE.test(l))) return { kind: 'constructed', codes }
+  // Every path has to END at one of those literals. `§` for a literal, so the
+  // two accepted skeletons are a bare literal and a ternary with literal arms.
+  // `c.reason || 'COVERAGE_UNKNOWN'` is deliberately NOT accepted: one of its
+  // two paths is an identifier, so the literal is a default and not the set.
+  const skeleton = value.replace(/(['"])[^'"\\]*\1/g, '§').replace(/\s+/g, ' ').trim()
+  if (skeleton === '§') return { kind: 'literal', codes }
+  if (/^[^?]+\?\s*§\s*:\s*§$/.test(skeleton)) return { kind: 'literal', codes }
+  return { kind: 'constructed', codes }
 }
 
 /** Tracked source under the scanned trees, tests separated out: a test file is
@@ -286,7 +306,8 @@ export function trackedSources(root = REPO_ROOT) {
  */
 export function census(detectors, tests, baseline) {
   const codes = new Map() // code -> {code, detector, line}
-  const unreadable = []
+  const constructed = []
+  const forwarded = []
   let sites = 0
   let regexLiterals = 0
 
@@ -295,9 +316,15 @@ export function census(detectors, tests, baseline) {
     regexLiterals += scan.regexLiterals
     for (const site of scan.sites) {
       sites += 1
-      if (site.codes === null) {
-        unreadable.push({ detector: path, line: site.line, value: site.value })
+      if (site.kind === 'forwarded') {
+        forwarded.push({ detector: path, line: site.line, value: site.value })
         continue
+      }
+      if (site.kind === 'constructed') {
+        constructed.push({ detector: path, line: site.line, value: site.value })
+        // The literals it DID spell are still part of the vocabulary and are
+        // still decided below. Dropping them would make a constructed site
+        // hide its readable half as well as its unreadable one.
       }
       for (const code of site.codes) {
         if (!codes.has(code)) codes.set(code, { code, detector: path, line: site.line })
@@ -337,21 +364,21 @@ export function census(detectors, tests, baseline) {
     }
   }
 
-  return { rows, unreadable, stale, sites, regexLiterals }
+  return { rows, constructed, forwarded, stale, sites, regexLiterals }
 }
 
 /** @param {ReturnType<typeof census>} c */
 export function findingsOf(c) {
   const findings = []
-  for (const u of c.unreadable) {
+  for (const u of c.constructed) {
     findings.push({
       locus: LOCUS.COMMITTED,
-      rule: 'CODE_SITE_NOT_ENUMERABLE',
+      rule: 'CODE_SITE_CONSTRUCTS_CODE',
       message:
-        `${u.detector}:${u.line}: this site assigns a defect code the source does not spell ` +
-        `(${JSON.stringify(u.value.slice(0, 80))}), so its vocabulary cannot be read off it and ` +
-        'every code it can produce is outside this census. Spell the codes as literals, or move ' +
-        'the set into a frozen constant this scan can see.',
+        `${u.detector}:${u.line}: this site BUILDS a defect code the source never spells ` +
+        `(${JSON.stringify(u.value.slice(0, 80))}), so the set it can produce cannot be read off ` +
+        'it and every code in that set is outside this census. Spell each one as a literal at ' +
+        'the site that produces it, and forward it from here.',
     })
   }
   for (const r of c.rows.filter((r) => r.state === 'undecided')) {
@@ -377,7 +404,9 @@ export function findingsOf(c) {
 }
 
 export function verdict(findings, seen = {}) {
-  const { codes = 0, detectors = 0, asserted = 0, excused = 0, sites = 0, ground = null } = seen
+  const {
+    codes = 0, detectors = 0, asserted = 0, excused = 0, sites = 0, forwarded = 0, ground = null,
+  } = seen
 
   if (ground) {
     return verdictOf({
@@ -398,9 +427,10 @@ export function verdict(findings, seen = {}) {
       exitCode: 0,
       cause: 'EVERY_CODE_DECIDED',
       line:
-        `Code census: ${counted}. Every emission site's vocabulary was readable off its own ` +
-        'source, so no code in these trees is emitted with nothing watching it. "Named by a ' +
-        'test" is weaker than "asserted on"; see this file\'s header.',
+        `Code census: ${counted}. No emission site builds a code the source does not spell, ` +
+        `and the ${forwarded} site(s) that forward one got it from a producer in these same ` +
+        'trees, so no code here is emitted with nothing watching it. "Named by a test" is ' +
+        'weaker than "asserted on"; see this file\'s header.',
     })
   }
 
@@ -412,7 +442,7 @@ export function verdict(findings, seen = {}) {
     line:
       `Code census: ${findings.length} finding(s) over ${counted}. Every one is a committed ` +
       `file, so every checkout and CI has it too, and repairing it is a pull request. ${sites} ` +
-      'emission site(s) were scanned.',
+      `emission site(s) were scanned, ${forwarded} of them forwarding a code named elsewhere.`,
   })
 }
 
@@ -493,6 +523,7 @@ if (invokedDirectly) {
     asserted: c.rows.filter((r) => r.state === 'asserted').length,
     excused: c.rows.filter((r) => r.state === 'excused').length,
     sites: c.sites,
+    forwarded: c.forwarded.length,
   })
 
   if (JSON_OUT) {
