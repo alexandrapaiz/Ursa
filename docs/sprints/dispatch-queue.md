@@ -1,9 +1,9 @@
-# Dispatch queue — 2026-11-09, message-triggered (fifth pass)
+# Dispatch queue — 2026-11-09, message-triggered (sixth pass)
 
-**Fifth message pass of today.** Rechecked fresh against the criteria
+**Sixth message pass of today.** Rechecked fresh against the criteria
 table below rather than carried forward: the merge queue moved twice
-this pass (`#748`, `#753`) and one row closed (`#744`), none of which
-changes anything in this section.
+this pass (`#742`, `#750`), none of which changes anything in this
+section.
 
 `PM_DISPATCH_ENABLED` cannot be read on this run's token (`gh variable
 get` 403s, the same wall every host pass has found since 2026-10-17's
@@ -16,19 +16,23 @@ below could fire from this run even if it qualified.
 
 - **A seat run failed in the last 24h, diagnosable from its log:**
   zero non-success runs in the last fifteen (`gh run list --limit
-  15`), all `success`.
+  15`), all `success` (the `in_progress` row is this pass's own
+  `redaction-gate` check, not a failure).
 - **A seat's open draft has failing CI, or a review comment
   unanswered >24h:** four drafts open (`#756` frontend, `#757`
   security, `#758` engineer, `#759` exo), all from live runs started
-  this pass's own window, none old enough to qualify and none waiting
-  on an unanswered question.
+  within the last twenty minutes of this pass's own window, none old
+  enough to qualify and none waiting on an unanswered question.
 - **A sprint item due this week with no run from its owning seat:**
   the board's own current-sprint object is the known duplicate
   record (flagged 2026-10-12, unchanged); "This sprint" holds no
-  items right now to be late against.
+  items right now to be late against. The engineer-lane staleness
+  (sprint file 28 days old) is a ceremony-grooming finding, not a
+  dispatch trigger, and is carried to `docs/sprints/pending.md`
+  instead.
 - **A seat has two or more open PRs on one scope, none merged:** none
-  now. Frontend and security each hold exactly one open draft, their
-  own next pull request, not a stack.
+  now. Frontend, security, engineer and exo each hold exactly one open
+  draft, their own next pull request, not a stack.
 - **A ruling or ADR merged since the last run names a seat with no
   run following:** nothing new in `docs/decisions.md` since the last
   pass's own check.
@@ -42,7 +46,9 @@ below could fire from this run even if it qualified.
 ## Nothing to fire this run
 
 Everything actionable this pass was handled directly: two Tier B
-merges (`#748`, `#753`), one close already done by another seat's own
-live run before this pass reached it (`#744`), one board reply to
-exo's note, one `done` summarizing the pass. See
-`docs/agents/pm-2026-11-09-message-5-run.md` for the full account.
+merges (`#742`, `#750`, with the docs-only conflict between them
+resolved in this pass rather than handed back), one stale close
+comment identified and voided rather than acted on, one ledger finding
+(three `urgent` entries still `hold`, not cleared as previously
+reported) carried to the owner's queue. See
+`docs/agents/pm-2026-11-09-message-6-run.md` for the full account.
