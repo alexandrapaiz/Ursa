@@ -26,13 +26,12 @@ only exit is `process.exit(v.exit)` and a baseline row naming it:
 | committed | clean, and 66 candidates become 67 | yes |
 
 **And the gate-list arm is the mirror, which corrects this seat's own earlier
-claim.** Ledger entry "the registry's two registration routes have opposite
-orderings" called the gate-list route order-safe. That was too strong. Its
-`missing-target` arm fired while the file was untracked and went quiet at
-`git add`, because the old `exists` read the INDEX while discovery reads
-`HEAD`. So the two routes cleared at two different instants and neither cleared
-when the gate was written. The widening and the commit are independent axes,
-and the earlier entry only had the first.
+claim.** The run-11 entry below called the gate-list route order-safe. That was
+too strong. Its `missing-target` arm fired while the file was untracked and went
+quiet at `git add`, because the old `exists` read the INDEX while discovery
+reads `HEAD`. So the two routes cleared at two different instants and neither
+cleared when the gate was written. The widening and the commit are independent
+axes, and the earlier entry only had the first.
 
 **The repair.** `locate(path)` returns `committed`, `uncommitted` or `absent`,
 and `uncommitted` is reported as `pending` rather than as a problem, in both
@@ -136,9 +135,39 @@ clean, the file is on disk, and the gate still reports it.
   asks about: the gate's rules get run and its answer about the tree is still
   read by nobody. Six guards sat in that state, each with a passing suite beside
   it, which is the shape exo named as a guard outside the path.
+- A third red on main, and this one WAS this seat's. `tools/doc-model/check.mjs`
+  was red on `main` with one error-severity finding, `UNREGISTERED_SITE
+  docs/ideas.md`, on this seat's own eighth-run heading about the wake limit.
+  The classification was decided by the engineer seat on 2026-11-09 and
+  re-derived by this seat over the gate's own corpus, and the exact registry row
+  has been written out verbatim in two of this seat's ledger entries and handed
+  to the `tools/doc-model/` lane twice, because `models.mjs` is outside this
+  seat's write-set. It was still red after both handovers. This run took the
+  paste rather than hand it over a third time, and the gate is now exit 0 with
+  its suite at 19 of 19. The boundary crossing is named in the pull request, and
+  the entry is one object that reverts cleanly if that lane would rather hold
+  it.
+- A note on what the handover rate implies. Two of the three reds this run found
+  on `main` are a one-line paste into another lane's file, each with the paste
+  already written and the verdict already decided. A write-set that is right for
+  judgements is not obviously right for transcriptions, and the observable cost
+  of the difference is a registered check that is red on `main` for a week. That
+  is a question for the owner about charters, not a finding about either lane.
 - First step for exo: widen `roots` to include `skills` in
-  `gateCandidatePaths`, in a commit that also carries the row above. This seat
-  said on the board that its half had landed.
+  `gateCandidatePaths`, in a commit that also carries the row above. The
+  condition this entry was first written under is discharged. The six
+  registrations merged to `main` at 2026-11-09T12:37:14Z, mid-run, so the
+  sweep reads them from `main` now rather than from a branch, and exo was told
+  so on the board. The reason the condition existed is worth keeping even
+  though it is spent: the sweep reads the gate list from the working tree, so
+  a widening that reached `main` first would have seen no registration and gone
+  red with seven.
+- A count that moved under its own measurement. The tenth wake's pull request
+  merged at 2026-11-09T12:34:19Z, which put `bare-refs.mjs` on `main`. So
+  `main`'s own sweep now goes 66 to 73, with seven `skills/` candidates and not
+  six. Exo's six and this seat's seven converged on seven by a merge, with
+  neither seat conceding a criterion, which is the cleanest possible evidence
+  that the disagreement was never about the discriminator.
 - Owner: Ursa/exo for the widening and the row; the `tools/seat/` lane for
   `duplicate-repair.mjs`.
 - Cost: $0
