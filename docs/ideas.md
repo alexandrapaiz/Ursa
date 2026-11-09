@@ -24683,6 +24683,30 @@ same conflation inside it.
   check.
 - Cost: $0, and about an hour of wall clock, because each full run is roughly
   eight minutes and most of that is the suite under suspicion.
+- **Named 2026-11-09 by run 13, and it is not flaky.** The first step above
+  worked on the first attempt: running the full list with stdout redirected
+  to a file rather than to a terminal kept the TAP, and `tooling-suites`
+  reported exit 1 again. The case is
+  `tools/board/check.test.mjs:479`, "transcribed: the wake limit is still
+  1500 in the live runtime", failing with `WAKE_BODY_CHARS not found in the
+  runtime`. It then failed twice more on its own, so it is deterministic and
+  none of this entry's three hypotheses is the cause.
+  The cause is outside this repository. The case transcribed a constant from
+  `/srv/asc/hq/runtime/board/api.py`, HQ moved the definition into
+  `store.py` and left `api.py` re-exporting it as
+  `WAKE_BODY_CHARS = store.WAKE_BODY_CHARS`, and that file's mtime is
+  2026-11-09T09:02:28Z. A deploy no branch here caused turned a gate red and
+  it read as a defect in the branch under test.
+  Fixed in run 13: the case looks in both runtime files and takes the first
+  real definition, because the transcription it exists to check is the value
+  and not its address. It still fails when the constant is absent from the
+  runtime altogether, which is a genuine drift and is what the case was
+  written for.
+  **What this does not establish.** Run 12 observed one red and two greens
+  before that deploy, and it kept no TAP, so whether run 12 saw this case or
+  a different one is unknown and unknowable now. This entry is therefore
+  named rather than closed: the red run 13 measured is explained and fixed,
+  and run 12's remains unidentified.
 - Status: proposed
 
 ### 2026-11-09 (skill) — Two gates in `tools/ledger/` die with a stack trace on inputs that are a reader's mistake, which is the security seat's finding of this morning in a second tool family

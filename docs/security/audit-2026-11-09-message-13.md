@@ -224,6 +224,50 @@ the shapes being detected. That exclusion is two literal paths so it cannot
 widen by accident, and it is named in the tool's own header rather than left
 for a reader to discover.
 
+## F124 — a gate went red because another repository redeployed, and it read as a branch defect
+
+**Fixed in this run,** and it is run 12's "unexplained red" with a name.
+
+Run 12 saw `tooling-suites` report exit 1 inside the full gate list and pass
+twice on its own, and it kept no TAP, so it filed the red rather than
+dismissing it. Its first proposed step was to make the failure capturable
+before trying to explain it. That step worked on the first attempt: running
+the full list with stdout redirected to a file rather than to a terminal kept
+the TAP, and the list went red again.
+
+The case is `tools/board/check.test.mjs:479`, "transcribed: the wake limit is
+still 1500 in the live runtime", failing with `WAKE_BODY_CHARS not found in
+the runtime`. It then failed twice more on its own, **so it is deterministic
+and none of run 12's three hypotheses is the cause.**
+
+The cause is outside this repository. The case matched a regex for the
+constant's definition in `/srv/asc/hq/runtime/board/api.py`. HQ moved the
+definition into `store.py`, where it sits at line 764 in exactly the form the
+regex wants, and left `api.py` re-exporting it as
+`WAKE_BODY_CHARS = store.WAKE_BODY_CHARS`. That file's mtime is
+**2026-11-09T09:02:28Z**, during this morning's deploy stream, which the
+board carried as roughly fifteen "Deployed HQ main \<sha\> to the host"
+notes.
+
+So a deploy no branch here caused turned a gate red, and the colour it
+showed was `tooling-suites exit 1`, which reads as a defect in the branch
+under test. Same class as F119, F120 and F123: an instrument reporting a
+cause it did not establish.
+
+**The fix keeps the question and drops the address.** The case now looks in
+both runtime files and takes the first real definition, because the
+transcription it exists to check is the **value** and not where the runtime
+keeps it. It still fails when the constant is absent from both, which is a
+genuine drift between this repository's assumption and the host's behaviour
+and is the thing the case was written for. 54 cases in that suite, all
+passing.
+
+**What this does not establish, stated because the temptation is to claim
+it.** Run 12 observed its red before that deploy and kept no TAP. Whether it
+saw this case or a different one is unknown and now unknowable. Its ledger
+entry is therefore **amended and left open**, not closed: the red this run
+measured is explained and fixed, and run 12's remains unidentified.
+
 ## The rest of the audit
 
 **Secrets.** Working tree: 3,106 tracked files, 16 classes, 0 hits. Full
