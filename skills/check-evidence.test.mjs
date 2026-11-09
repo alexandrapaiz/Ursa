@@ -30,8 +30,14 @@ const IMPORTS = ['source-line.mjs', 'citing-files.mjs', 'library-dirs.mjs']
 
 /** A library with two skills, each citing one line of its own file, and a lock
  *  recording fingerprints for both. `drift` names the skills whose cited line
- *  is changed afterwards, so their recorded fingerprint no longer matches. */
-function library(drift = []) {
+ *  is changed afterwards, so their recorded fingerprint no longer matches.
+ *
+ *  `shift` names the skills that drift the other way: a line is inserted above
+ *  the cited one, so the citation's line number now covers different text while
+ *  the text it cited is still in the file one line down. Both arms are drift to
+ *  the lock and the gate below has to tell them apart, so a fixture that can
+ *  only produce one of them cannot test the thing. */
+function library(drift = [], shift = []) {
   const dir = mkdtempSync(join(tmpdir(), 'check-evidence-'))
   mkdirSync(join(dir, 'src'), { recursive: true })
   mkdirSync(join(dir, 'skills'), { recursive: true })
@@ -58,6 +64,8 @@ A claim [E1].
     JSON.stringify(lock, Object.keys(lock).sort(), 2) + '\n')
   for (const slug of drift)
     writeFileSync(join(dir, 'src', `${slug}.ts`), `a different line of ${slug}\nfiller\n`)
+  for (const slug of shift)
+    writeFileSync(join(dir, 'src', `${slug}.ts`), `an inserted first line\nthe cited line of ${slug}\nfiller\n`)
   return { dir, lock }
 }
 
@@ -93,7 +101,11 @@ test('a bare --update over a clean library still records everything', () => {
 })
 
 test('a scoped --update records what was named and leaves the rest red', () => {
-  const { dir, lock } = library(['alpha', 'beta'])
+  // Both skills drift by relocation, which is the kind a slug still covers,
+  // because this test is about the scope mechanics and not about the gone-or-
+  // moved split. Before 2026-11-09 the fixture drifted by replacement and the
+  // slug covered that too; the two tests below are what changed that.
+  const { dir, lock } = library([], ['alpha', 'beta'])
   const updated = run(dir, '--update', 'alpha')
   assert.equal(updated.status, 0)
   assert.match(updated.out, /left drifted on purpose/)
@@ -135,8 +147,13 @@ test('an --update that records anything says a re-read is owed', () => {
   // red erases the only visible sign that a claim needs reading again. The
   // reading half is a different file and nobody runs a tool they do not know
   // about, so the command that hides the signal is the one that has to name it.
+  //
+  // Scoped by ref rather than by slug because alpha's cited text was replaced
+  // rather than moved, and a slug has not been enough for that since
+  // 2026-11-09. A re-read being owed is the same either way, which is why this
+  // test takes the stricter arm rather than switching to the shifted fixture.
   const { dir } = library(['alpha'])
-  const updated = run(dir, '--update', 'alpha')
+  const updated = run(dir, '--update', 'alpha/E1')
   assert.equal(updated.status, 0)
   assert.match(updated.out, /A re-recorded range is a claim somebody has to read again/)
   assert.match(updated.out, /relevance-sweep\.mjs --stale/)
@@ -146,6 +163,127 @@ test('an --update that records anything says a re-read is owed', () => {
   const refused = run(library(['alpha']).dir, '--update')
   assert.equal(refused.status, 2)
   assert.doesNotMatch(refused.out, /has to read again/)
+})
+
+// The 2026-11-09 split. A skill slug used to license re-recording every
+// drifted range under it, whatever the drift was. On 2026-11-02 a run of this
+// seat saw nine drifted ranges in one skill, ran `--update <slug>` before
+// reading seven, and four of those seven had stopped pointing at a shifted
+// copy of their own text and started pointing at a different section of the
+// file. So the gate now sorts a drifted range by whether the lines the lock
+// recorded are still somewhere in the file, and only the half that is still
+// there stays coverable by a slug. Both arms are drift to the lock, which is
+// why the fixture above grew a second one.
+
+test('a slug does not license re-recording a range whose cited text is gone', () => {
+  const { dir, lock } = library(['alpha'])
+  const refused = run(dir, '--update', 'alpha')
+  assert.equal(refused.status, 2)
+  assert.match(refused.out, /no longer carries the lines the lock recorded, anywhere in the file/)
+  assert.match(refused.out, /alpha\/E1\/src\/alpha\.ts:1/)
+  // And it prints the narrower name the caller has to use, rather than leaving
+  // them to work out that a slug is not the only granularity there is.
+  assert.match(refused.out, /--update alpha\/E1\b/)
+  assert.deepEqual(lockOf(dir), lock, 'the lock is untouched by a refusal')
+})
+
+test('naming the ref is the way through, and it is not the same as naming the slug', () => {
+  // The escape hatch the refusal above points at. Without this the gate would
+  // make a genuinely changed claim unrecordable, which is a gate nobody can
+  // satisfy and therefore a gate somebody deletes.
+  const { dir, lock } = library(['alpha'])
+  for (const scope of ['alpha/E1', 'alpha/E1/src/alpha.ts:1']) {
+    const { dir: d, lock: l } = library(['alpha'])
+    const out = run(d, '--update', scope)
+    assert.equal(out.status, 0, `${scope} is a name the gate accepts`)
+    assert.notEqual(lockOf(d)['alpha/E1/src/alpha.ts:1'], l['alpha/E1/src/alpha.ts:1'])
+  }
+  assert.equal(run(dir, '--update', 'alpha').status, 2, 'the slug still is not')
+  assert.deepEqual(lockOf(dir), lock)
+})
+
+test('a slug still covers a range whose text moved rather than changed', () => {
+  // The other half of the split, and the reason it is a split rather than a
+  // tightening: nine tenths of a real drift batch is a line number that moved
+  // while the lines said the same thing, so refusing on that would turn the
+  // ordinary case into a per-ref chore and the gate into something to route
+  // around. skills/relocate-anchors.mjs carries the two measurements.
+  const { dir, lock } = library([], ['alpha'])
+  assert.equal(run(dir).status, 1, 'a shifted range is drift like any other')
+  const updated = run(dir, '--update', 'alpha')
+  assert.equal(updated.status, 0)
+  assert.notEqual(lockOf(dir)['alpha/E1/src/alpha.ts:1'], lock['alpha/E1/src/alpha.ts:1'])
+  // Succeeding quietly would hide the one thing worth saying about this case,
+  // which is that re-recording the anchor is not the repair the drift wanted.
+  assert.match(updated.out, /cited text now at src\/alpha\.ts:2/)
+  assert.match(updated.out, /relocate-anchors\.mjs/)
+})
+
+test('one gone range in a slug refuses the whole scope and names only that one', () => {
+  // The mixed case, which is the shape a real drift batch has. The refusal has
+  // to be legible about which of the two ranges it is about, or a caller reads
+  // it as "this slug is unrecordable" and names every ref in it, which is the
+  // name-them-all habit the first refusal was written to replace.
+  const { dir, lock } = library(['alpha'], ['beta'])
+  const refused = run(dir, '--update', 'alpha', 'beta')
+  assert.equal(refused.status, 2)
+  assert.match(refused.out, /1 drifted range no longer carries/)
+  assert.match(refused.out, /alpha\/E1\/src\/alpha\.ts:1/)
+  assert.doesNotMatch(refused.out, /beta\/E1/)
+  assert.deepEqual(lockOf(dir), lock, 'nothing is written, including the half that was coverable')
+  // Named at the granularity each one needs, both go through in one command.
+  const out = run(dir, '--update', 'alpha/E1', 'beta')
+  assert.equal(out.status, 0)
+  const after = lockOf(dir)
+  assert.notEqual(after['alpha/E1/src/alpha.ts:1'], lock['alpha/E1/src/alpha.ts:1'])
+  assert.notEqual(after['beta/E1/src/beta.ts:1'], lock['beta/E1/src/beta.ts:1'])
+  assert.equal(run(dir).status, 0)
+})
+
+test('a gone range outside the named scope is left red rather than refused', () => {
+  // The boundary between the two refusals. Out of scope means untouched, so an
+  // unreadable range nobody named keeps the value the lock holds and stays red
+  // on its own account. Refusing on it would force a run to resolve the whole
+  // library before it could record one skill, which is the quadratic shape the
+  // scope was introduced to avoid.
+  const { dir, lock } = library(['alpha'], ['beta'])
+  const out = run(dir, '--update', 'beta')
+  assert.equal(out.status, 0)
+  assert.match(out.out, /left drifted on purpose/)
+  assert.match(out.out, /alpha\/E1\/src\/alpha\.ts:1/)
+  assert.equal(lockOf(dir)['alpha/E1/src/alpha.ts:1'], lock['alpha/E1/src/alpha.ts:1'])
+  assert.equal(run(dir).status, 1, 'alpha is still red, and on its own account')
+})
+
+test('a bare --update is still caught by the first refusal, not the second', () => {
+  // Order matters only for the message, and the message is the product here.
+  // A bare command over a mixed batch should hear "you named nothing", which
+  // is actionable, rather than "one of these is unreadable", which invites
+  // naming that one and running the bare command again.
+  const { dir, lock } = library(['alpha'], ['beta'])
+  const out = run(dir, '--update')
+  assert.equal(out.status, 2)
+  assert.match(out.out, /that nothing on the command line named/)
+  assert.doesNotMatch(out.out, /anywhere in the file/)
+  assert.deepEqual(lockOf(dir), lock)
+})
+
+test('a range the lock never recorded is not sorted by the split at all', () => {
+  // The split reads lock[key], so a key with no lock row has nothing to search
+  // for. That is the new-citation path, which the checker already reports as an
+  // authoring debt, and an --update over it has always been the way to pay it.
+  // Asserting it here because a split keyed on a lookup that can miss is one
+  // `undefined` away from hashing every window of every file against nothing.
+  const { dir } = library()
+  const lock = lockOf(dir)
+  delete lock['alpha/E1/src/alpha.ts:1']
+  writeFileSync(join(dir, 'skills', 'evidence.lock.json'),
+    JSON.stringify(lock, Object.keys(lock).sort(), 2) + '\n')
+  assert.equal(run(dir).status, 1)
+  const out = run(dir, '--update', 'alpha')
+  assert.equal(out.status, 0, 'a missing fingerprint is paid by recording it, as before')
+  assert.doesNotMatch(out.out, /anywhere in the file/)
+  assert.ok('alpha/E1/src/alpha.ts:1' in lockOf(dir))
 })
 
 // The 2026-10-23 widening: a citation lives in any markdown file of a skill
@@ -251,7 +389,7 @@ test('--base names the tree in the failing line too, and says the merge owes the
   // tree would follow to other lines.
   const { dir } = committed()
   driftAfterCommit(dir, 'alpha')
-  run(dir, '--update', 'alpha')
+  run(dir, '--update', 'alpha/E1')
   assert.equal(run(dir).status, 0, 'the checkout is green after re-recording')
   const there = run(dir, '--base', 'trunk')
   assert.equal(there.status, 1)
