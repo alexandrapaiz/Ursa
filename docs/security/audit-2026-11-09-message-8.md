@@ -164,27 +164,36 @@ pid-prefixed and so none of them from code carrying this fix, on a
 filesystem at 98 per cent. Twelve of those were created between 05:38Z and
 05:44Z, which is inside this run's window and not by this run.
 
-## F111 — `tools/doc-model/check.mjs` is run by no gate, and it is not green
+## F111 — withdrawn, and it was a duplicate of run 7's F106 reached by a worse route
 
-**Not fixed here. Routed to the ledger as `proposed`.**
+**Withdrawn by this run, before the pull request was readied.** No fix, and
+the ledger entry it had been written into was deleted rather than left
+standing.
 
-`node tools/doc-model/check.mjs` reports `3 error(s), 28 warning(s)` against
-the tree as committed. All three errors are `UNREGISTERED_SITE` in
-`docs/ideas.md`, at lines 14275, 15386 and 18851.
+What it claimed: that `node tools/doc-model/check.mjs` reports
+`3 error(s), 28 warning(s)` against the tree as committed, that no gate list
+runs it, and that the suite CI does run asserts against the generated corpus
+in `tools/doc-model/corpus.mjs` rather than against the repository.
 
-That check appears in no gate list. `scripts/ci-checks.mjs` does not mention
-`doc-model`, and neither does any file under `.github/`. What CI does run is
-`tools/doc-model/check.test.mjs`, which `tooling-suites` resolves with
-`git ls-files '*.test.mjs'`, and that suite asserts against a generated
-corpus in `tools/doc-model/corpus.mjs` rather than against the repository. So
-the tool's model of itself is tested and the tool's verdict on this tree is
-asked by nobody.
+The first part is true. The last part is false, and it is the part the
+finding rested on. `tools/doc-model/check.test.mjs:110` runs
+`auditMechanism(MECH)` over the real tree and asserts the error list is
+empty, with the message "the gate must be green on the branch that
+introduces it". So the gate's verdict on this repository is asked on every CI
+run, through `tooling-suites`, and it is red. That is one of the three red
+self-check suites run 7 measured as F106, naming this file and this line
+number.
 
-Left to the ledger rather than fixed for two reasons. The three errors are in
-`docs/ideas.md`, which belongs to the engineer and exo lane, and the gate list
-in `scripts/ci-checks.mjs` is a file run 7 is already reporting on in F105
-through F107. Adding a red check to a list that already has two reds on
-`main` would be the wrong order of operations.
+**How the error was made, since it is the charter's own named failure.** The
+`grep` that concluded the suite was corpus-only matched `corpus(L)` on line
+105 and did not reach line 110. The charter's L-E10 warning is that an open
+card is not evidence that nobody built it, and the directly analogous mistake
+here was to treat a gate's absence from `scripts/ci-checks.mjs` as evidence
+that nothing asks it. A gate can reach CI through its own suite, which is
+exactly how this one does.
+
+Run 7's F106 is the live finding and it is already in the owner's queue in
+#798. There is no residue worth a second row.
 
 ## What else this run checked and found clean
 
