@@ -390,6 +390,46 @@ trips the redaction gate's private-session-UUID check on an unencoded
 public URL; verified the encoded URL still resolves to the same
 article before committing).
 
+### Turing (turing.com)
+
+What it is: a Palo Alto developer-talent marketplace (4M+ developers
+and professionals in its network) that pivoted a chunk of its business
+into commissioned AI training data: RLHF datasets, direct-preference-
+optimization data, and packaged "LLM Lab" modules for coding,
+reasoning, multimodal, and agentic tasks, plus a tool (ALAN) to
+accelerate fine-tuning and measure gains. New entry, found this run
+not via a fresh lead but by closing a name this file had cited three
+times without ever giving it one: the 2026-10-07 and 2026-10-27
+updates to the Surge AI and Mercor entries both name Turing, alongside
+Surge, Mercor, and AfterQuery, as one of four vendors a Forbes
+investigation found collectively selling ~$500M/year of training data
+to Chinese AI labs, and this file never followed that citation back to
+what Turing's own AI-data business is. Who it serves: OpenAI,
+Anthropic, Google, and Meta are reported customers, the same frontier-
+lab cohort as Surge and Mercor. Pricing: no public rate card; engagement-
+priced, with one disclosed example (coding data) pricing a modern
+codebase's worth of work at $1,000-$10,000 per pull request and a
+legacy-codebase (COBOL, .NET, Java) engagement at $10,000-$100,000+ —
+a third labor-pricing data point on a different axis (per-deliverable,
+not per-hour) than Mercor's ~$85/hr or Cocient's $60-130/hr. Scale: a
+$111M Series E (closed 2025-03-06, led by Khazanah Nasional Berhad,
+Malaysia's sovereign wealth fund) at a $2.2B valuation, on top of
+$376.9M raised across 10 rounds total including a further $97M round
+reported November 2025; the AI-data pivot reportedly tripled revenue
+to a ~$300M annualized run-rate while reaching profitability.
+Strengths: the same structural strength as Surge and Mercor — real
+frontier-lab spend at meaningful scale, confirmed independently rather
+than only by Turing's own marketing. Weakness against Ursa: identical
+to every other Category 1 entry, plus the same dual-market exposure
+already on file for Surge, Mercor, and AfterQuery — a vendor serving
+US frontier labs and Chinese labs from the same network at the same
+time, the fact this entry exists specifically to close out. Last
+observed 2026-11-09: [SiliconANGLE: AI training data provider Turing
+closes $111M investment](https://siliconangle.com/2025/03/06/ai-training-data-provider-turing-closes-111m-investment/),
+[aiweekly.co: Forbes — Surge AI, Mercor, AfterQuery and Turing sold
+~$500M/year of training data to Chinese labs](https://aiweekly.co/alerts/forbes-surge-ai-mercor-afterquery-and-turing-sold-500myear-of-training-data-to),
+[Troveo: RLHF Data Providers](https://www.troveo.ai/resources/rlhf-data-providers).
+
 ### Prolific
 
 What it is: an academic-research participant marketplace that has
@@ -2680,3 +2720,18 @@ agentmemoryprotocol/agentmemoryprotocol](https://github.com/agentmemoryprotocol/
   entry describing the same authored-task-and-rubric structure the
   rl-list.com cross-cutting note already maps across 42 names.
   Positioning consequence in docs/market/positioning.md.
+- 2026-11-09 (message, 24th run) — added Turing (Category 1, 29th
+  entry), not a fresh find but a name this file had cited three times
+  since 2026-10-07 (alongside Surge AI, Mercor, and AfterQuery, as one
+  of four vendors reportedly selling ~$500M/year of training data to
+  Chinese AI labs) without ever giving it its own entry. Its AI-data
+  pivot (RLHF datasets, direct-preference-optimization data) tripled
+  revenue to a ~$300M annualized run-rate on a $111M Series E at a
+  $2.2B valuation, with OpenAI, Anthropic, Google, and Meta as
+  reported customers — the same frontier-lab cohort already on file
+  for Surge and Mercor. Its one disclosed pricing example (coding
+  data, $1,000-$10,000 per pull request, up to $100,000+ for legacy
+  codebases) is a third labor-pricing axis, per-deliverable rather
+  than per-hour, next to Mercor's ~$85/hr and Cocient's $60-130/hr.
+  No positioning consequence beyond the already-filed dual-market
+  exposure note this entry exists to close out.
