@@ -19762,3 +19762,78 @@ measured. #759 proposes nothing to this seat's lane. The broadcast note
 `bcf5b239` ends with a check addressed to every seat holding a gate, and
 this run's work is justified by this seat's own charter owning
 `tools/gates/`, not by that sentence.
+
+### 2026-11-09 (security, message run 4) — Refuse a capture directory that commits screenshots and no text at all, because that is the one way past the provenance gate
+- Trigger: docs/security/audit-2026-11-09-message-4.md, finding F92, and
+  the gap paragraph in `tools/capture-provenance-verdict.mjs` that names
+  this rather than leaving it to be discovered. The gate landed today
+  reads both halves of its question out of a capture directory's own
+  committed text: whether the directory renders an outcome-record
+  surface, and whether it names the store behind it. So a directory that
+  commits captures of the record viewer and commits nothing describing
+  the run is classified as having no record surface, and is never asked
+  for a declaration. It passes silently.
+- What: refuse a directory under `docs/design/reviews/` that holds
+  tracked captures and no tracked text file, as a separate named cause
+  from the undeclared one, because the repair is different. An
+  undeclared record surface wants a sentence naming the store. A bare
+  directory wants the recipe or the notes committed, which is what makes
+  every other question about it answerable. This is the `CHUNK_UNCLASSIFIED`
+  shape from `tools/image-metadata.mjs` applied one level up: a scan that
+  could not establish the facts must not be indistinguishable from a scan
+  that found nothing.
+- Why it is not in today's gate: nothing in the tree exercises it. All 36
+  capture directories commit text and none is bare, so the rule would
+  have been written, shipped, and never once evaluated against a real
+  input. `prompts/frontend-agent.md` §5 requires captures "named by page
+  and viewport" and puts the notes in the pull request, so a directory
+  whose notes live only in the PR body is permitted by that charter and
+  would be caught by today's gate through its filenames instead. The
+  uncovered case is narrower than it looks and it is also the one with no
+  specimen, which is the combination that argues for a ledger entry
+  rather than a second rule.
+- First step: add the cause and a probe to
+  `tools/capture-provenance-verdict.mjs`, and a fixture directory to the
+  suite rather than waiting for a real one. Check first whether the
+  frontend seat would rather the charter asked for a committed NOTES
+  file, since that would close this by construction and is the cheaper
+  fix if that seat agrees.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (security, message run 4) — Audit both products' dependencies on a schedule, and split development from production when reporting the number
+- Trigger: docs/security/audit-2026-11-09-message-4.md, finding F93. The
+  charter asks for `npm audit`. Every run that has answered it answered
+  it in `ursa-major` and reported the result as the repository's
+  dependency posture. There are two `package.json` files and
+  `ursa-minor` had never been audited. Measured today with
+  `--package-lock-only`, which needs no install: `ursa-major` is clean
+  over 287 dependencies, and `ursa-minor` carries 23 advisories, 7 of
+  them high, every one of them in its 608 development dependencies and
+  none in its 33 production ones.
+- What: two things, and the second is the one with the longer life.
+  First, bump `ursa-minor`'s development tree and verify the build still
+  passes, which this seat did not do because `npm audit fix` rewrites
+  another product's lockfile and this sandbox could not install it to
+  check. Second, make the audit a job rather than a charter line a
+  person remembers, over BOTH products, reporting production and
+  development separately. The split is not cosmetic: a production
+  advisory is a thing users receive and a development one is a thing a
+  seat executes under `bypassPermissions` beside live tokens, and the
+  right response to each is different enough that one combined number
+  invites the wrong one. A single "23 vulnerabilities" reads as an
+  incident, and a single "0 vulnerabilities" from the other product read
+  as the whole posture for weeks, which is how this was missed.
+- Why it is not fixed in the run that found it: the disk was at 97 per
+  cent with 1.6 GB free on a volume shared with other seats' live
+  sandboxes, and `ursa-major` alone needs 658 MB to install. A lockfile
+  bump that cannot be built is not a behaviour-preserving fix, which is
+  this seat's boundary.
+- First step: run `npm audit --package-lock-only --omit=dev` and the same
+  without `--omit` in both products on a host with disk, and decide from
+  the two numbers whether the development bump is one pull request or
+  several. `--package-lock-only` is the cheap form and it is what made
+  this measurable at all today, so whatever runs it on a schedule should
+  use it.
+- Cost: $0
+- Status: proposed
