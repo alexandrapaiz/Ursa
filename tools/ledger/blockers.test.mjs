@@ -15,12 +15,14 @@ import {
   BLOCKER_PHRASES,
   GRADED,
   UNRESOLVABLE_SHAPES,
+  acknowledgedRetirements,
   acknowledgedStale,
   blockerClaims,
   declaredStatus,
   entries,
   sentences,
   staleBlockers,
+  unclassifiedHits,
 } from './blockers.mjs'
 import { findingFor } from './check-blockers.mjs'
 import { verdict } from './blockers-verdict.mjs'
@@ -204,7 +206,7 @@ test('GRADED carries a read instant and every false positive it counts', () => {
   for (const fp of GRADED.false_positives_named) assert.ok(fp.why.length > 20, fp.entry)
 })
 
-test('--grade exits non-zero when the ledger has moved under the published grading', () => {
+test('--grade exits non-zero on a hit nobody has classified', () => {
   // A grading nobody re-derived is the defect the flag exists to find, and
   // this is the assertion that keeps the flag itself honest: it found this
   // file's own first published numbers wrong within the hour.
@@ -217,10 +219,27 @@ test('--grade exits non-zero when the ledger has moved under the published gradi
   )
 })
 
-test('--grade exits 0 against the ledger GRADED was measured over', () => {
+test('--grade exits 0 when every live hit is classified, even after the ledger grows', () => {
+  // The totals are printed and NOT asserted, which is the correction this
+  // flag needed within minutes of landing: `entries` grows whenever any seat
+  // appends, including the run that appends the entry proposing the next
+  // repair, so asserting it made the flag red for a reason that is not a
+  // defect. What is asserted is the classification.
   const out = execFileSync('node', [GATE, '--grade', LEDGER], { encoding: 'utf8' })
-  assert.match(out, new RegExp(`entries:\\s+${GRADED.entries}\\b`))
-  assert.match(out, new RegExp(`same-sentence hits:\\s+${GRADED.same_sentence_hits}\\b`))
+  assert.match(out, /entries:\s+\d+/)
+  assert.doesNotMatch(out, /UNCLASSIFIED/)
+})
+
+test('unclassifiedHits accounts for a title by prefix, so an extended heading stays classified', () => {
+  assert.deepEqual(unclassifiedHits(GRADED.true_positives_named), [])
+  assert.deepEqual(unclassifiedHits(GRADED.false_positives_named.map((f) => f.entry)), [])
+  assert.deepEqual(
+    unclassifiedHits([`${GRADED.true_positives_named[0]}, now with a longer heading`]),
+    [],
+  )
+  assert.deepEqual(unclassifiedHits(['2099-01-01 — A brand new entry nobody graded']), [
+    '2099-01-01 — A brand new entry nobody graded',
+  ])
 })
 
 test('every unresolvable blocker shape says why it cannot be looked up', () => {
@@ -290,4 +309,16 @@ test('acknowledgedStale counts nothing when the open set is unknown', () => {
 test('the real ledger is clean, which is the gate running on its own repository', () => {
   const out = execFileSync('node', [GATE, LEDGER, '--open', '679'], { encoding: 'utf8' })
   assert.match(out, /Exit 0/)
+})
+
+test('a marker with no reference is inert rather than broad', () => {
+  // The craft-scan contrast of 2026-11-09: `/* eslint-disable */` with no
+  // rule list suppresses EVERYTHING, so the weakest thing an author can
+  // write is also the broadest. Here the marker is keyed on the reference,
+  // so the weakest thing a seat can write clears nothing and the finding
+  // stays up.
+  for (const bare of ['<!-- blocker-retired: -->', '<!-- blocker-retired: all of them -->']) {
+    assert.equal(acknowledgedRetirements(bare).size, 0, bare)
+    assert.equal(staleBlockers(blockerClaims(`${ONE_CLAIM}\n${bare}\n`), new Set([])).length, 1, bare)
+  }
 })

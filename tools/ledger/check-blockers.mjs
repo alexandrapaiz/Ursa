@@ -38,6 +38,7 @@ import { LOCUS } from '../gates/verdict-shape.mjs'
 import {
   GRADED,
   UNRESOLVABLE_SHAPES,
+  unclassifiedHits,
   acknowledgedStale,
   blockerClaims,
   entries,
@@ -129,26 +130,28 @@ if (invokedDirectly) {
           `${e.title} ${e.body}`,
         ) && /(?:(?:Ursa|alexandria|alexandra-systems|epitome)\s*)?#\d{2,5}(?!\d)/.test(`${e.title} ${e.body}`),
     )
-    console.log(`entries:                 ${all.length}   (GRADED says ${GRADED.entries})`)
-    console.log(`entry-scoped hits:       ${entryScoped.length}   (GRADED says ${GRADED.entry_scoped_hits})`)
-    console.log(`same-sentence hits:      ${sameSentence.length}   (GRADED says ${GRADED.same_sentence_hits})`)
+    console.log(`entries:                 ${all.length}   (GRADED read ${GRADED.entries})`)
+    console.log(`entry-scoped hits:       ${entryScoped.length}   (GRADED read ${GRADED.entry_scoped_hits})`)
+    console.log(`same-sentence hits:      ${sameSentence.length}   (GRADED read ${GRADED.same_sentence_hits})`)
     console.log(`read_at in GRADED:       ${GRADED.read_at}`)
-    for (const e of entryScoped) console.log(`  entry-scoped: ${e.title.slice(0, 92)}`)
     for (const c of sameSentence) console.log(`  same-sentence: ${c.sentence.slice(0, 92)}`)
-    // Exit 1 when the file has moved under the published numbers, so this is
-    // a check and not a report.
-    const drifted =
-      all.length !== GRADED.entries ||
-      entryScoped.length !== GRADED.entry_scoped_hits ||
-      sameSentence.length !== GRADED.same_sentence_hits
-    if (drifted) {
+
+    // The totals above are PRINTED and not asserted; see GRADED's own note on
+    // why. What is asserted is that every entry-scoped hit has been read in
+    // context and classified, because that is the obligation a grading
+    // carries and the only part of it that does not move on its own.
+    const unclassified = unclassifiedHits(entryScoped.map((e) => e.title))
+    for (const title of unclassified) console.log(`  UNCLASSIFIED: ${title.slice(0, 92)}`)
+    if (unclassified.length > 0) {
       console.error(
-        'GRADED no longer describes this ledger. Re-read it, re-read the new hits in ' +
-          'context, and update GRADED in tools/ledger/blockers.mjs with the new ' +
-          'read_at. A grading nobody re-derived is the defect this flag exists to find.',
+        `${unclassified.length} entry-scoped hit(s) are named in neither ` +
+          "GRADED.true_positives_named nor GRADED.false_positives_named. Read each in " +
+          "context, decide whether the same-sentence rule gets it right, add it to the " +
+          "right list with its reason, and set a new read_at from `date -u`. A grading " +
+          "nobody re-derived is the defect this flag exists to find.",
       )
     }
-    process.exit(drifted ? 1 : 0)
+    process.exit(unclassified.length > 0 ? 1 : 0)
   }
 
   // The positional argument, which is every token that is neither a flag nor

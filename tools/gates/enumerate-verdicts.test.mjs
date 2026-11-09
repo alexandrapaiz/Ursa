@@ -54,7 +54,7 @@ describe('the eleven extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 52 distinct causes with 71 probes, which is the number the text sweep could not see', () => {
+  it('reaches 52 distinct causes with 72 probes, which is the number the text sweep could not see', () => {
     const { json } = run()
     // RESOLVED 2026-11-02 BY MEASUREMENT, NOT BY CHOICE. This line conflicted:
     // the hook branch claimed 36 causes over 46 probes and `main` claimed 36
@@ -170,15 +170,19 @@ describe('the eleven extracted gates, end to end', () => {
     // counts move together, like image-metadata's, because each of the three
     // branches is the only one reporting its cause.
     //
-    // 71 and 52 since 2026-11-09, when `tools/ledger/blockers-verdict.mjs`
+    // 72 and 52 since 2026-11-09, when `tools/ledger/blockers-verdict.mjs`
     // became the eleventh extraction. Its three causes are every named row
     // still open, a named row that has left the open set, and a forge whose
-    // open set could not be read; its five probes are those three plus a
-    // clean run that names an unresolvable remainder and a two-finding red
-    // run, both of which are there because the lines carry COUNTS and a
-    // one-finding probe cannot tell a count from the constant one — the same
-    // reason capture-provenance has a fourth. Both counts move together, so
-    // each of the three branches is the only one reporting its cause.
+    // open set could not be read. Its SIX probes are those three plus three
+    // that exist because the lines carry counts and a one-finding probe
+    // cannot tell a count from the constant one — the same reason
+    // capture-provenance has a fourth: a clean run naming an unresolvable
+    // remainder, a two-finding red run, and a clean run whose one retirement
+    // is already acknowledged by a marker, which is the only probe reaching
+    // the longer of the clean line's two forms. The causes do NOT move with
+    // the probes here, which is the first gate in this registry where they
+    // diverge: three of its six probes share ALL_BLOCKERS_LIVE, because a
+    // clean verdict with a different sentence is still one cause.
     //
     // THE FORGE BRANCH IS WHY THIS GATE'S REGISTRATION CHANGED THE GATE. It
     // first returned exit 2 from a boolean in `seen` with an empty findings
@@ -186,7 +190,7 @@ describe('the eleven extracted gates, end to end', () => {
     // minute it was registered: red with nothing printed above the verdict.
     // An unreachable forge is reported as a `clone` finding now, so the
     // verdict is derived from findings like every other branch here.
-    assert.equal(json.branches.length, 71)
+    assert.equal(json.branches.length, 72)
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
     assert.equal(causes.size, 52)
   })

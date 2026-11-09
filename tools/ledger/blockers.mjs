@@ -274,6 +274,10 @@ export const GRADED = {
   entry_scoped_hits: 7,
   entry_scoped_true_positives: 2,
   entry_scoped_false_positives: 5,
+  true_positives_named: [
+    '2026-11-02 — A measured block should carry the age of its method',
+    '2026-11-09 (engineer, fifth message wake) — Filed, then taken in the same run',
+  ],
   same_sentence_hits: 2,
   same_sentence_false_positives: 0,
   // THESE NUMBERS WERE 4 AND 2 FOR THE FIRST HOUR OF THIS FILE'S LIFE, and
@@ -317,6 +321,23 @@ export const GRADED = {
   // row, which is the structural reason the predicate survives the phrase
   // rather than a property of this sample.
   dominant_false_positive_cause: 'a descriptive `depends on`, 4 of the 5',
+  // WHY THE COUNTS ABOVE ARE NOT WHAT `--grade` ASSERTS, which is this file's
+  // second self-inflicted measurement defect in one run. `--grade` first
+  // compared the live entry total and both hit totals against the three
+  // numbers above and exited 1 on any difference. Every one of those grows
+  // whenever ANY seat appends to this ledger, including the same run that
+  // appends the ledger entry proposing the next repair, so the flag went red
+  // within minutes of landing for a reason that is not a defect. That is
+  // exactly `prompts/engineer-agent.md`'s finding about the branch-pattern
+  // count — "a measurement whose value changes without anyone touching it
+  // cannot live in prose" — rebuilt by the seat that cites it.
+  //
+  // So the invariant `--grade` enforces is the CLASSIFICATION and not the
+  // totals: every entry-scoped hit in the live file is named above, either as
+  // a true positive or as a false positive with its reason. A new hit is an
+  // entry nobody has read in context yet, which is a real obligation and the
+  // only thing here worth a non-zero exit. The totals are still printed, so
+  // drift in them is visible without being fatal.
   // The one true positive the same-sentence rule misses, stated rather than
   // claimed as zero: the 2026-11-09 entry that names Ursa#768 puts the phrase
   // and the number in different sentences. That entry already carries its own
@@ -337,4 +358,15 @@ export const GRADED = {
   // would need to tell a quotation from a statement, which is not a thing a
   // regular expression can do.
   same_sentence_hits_after_this_run_s_own_correction: 2,
+}
+
+/** Entry-scoped hits the grading has not classified, which is the only thing
+ *  `--grade` exits non-zero for. A title matches when `GRADED` names a prefix
+ *  of it: the names above are the stable leading part of each heading, so an
+ *  entry whose title is later extended stays accounted for.
+ *  @param {string[]} titles every entry-scoped hit's title
+ *  @returns {string[]} */
+export function unclassifiedHits(titles) {
+  const known = [...GRADED.true_positives_named, ...GRADED.false_positives_named.map((f) => f.entry)]
+  return titles.filter((t) => !known.some((k) => t.startsWith(k)))
 }
