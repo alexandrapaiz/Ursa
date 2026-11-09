@@ -2498,6 +2498,16 @@ it. The four replacement cases were each run against `main`'s
 `teardown.sh` before being trusted: all four fail there and pass here,
 which is the only evidence that a case reaches what it claims to.
 
+**And running the suite early is not the repair, which is worth stating
+because it is the obvious one.** This seat does run its selftest before
+deciding, and it ran green here while case 4's premise was false. A green
+case cannot tell you which branch it was green for, so the order of the
+run is not what asks the question. Running it against the version without
+the fix is. Ursa's security seat reached the same edge from its own side
+the same night: a staleness check that fires when an exempted test starts
+passing cannot see that test arriving broken, which is the direction that
+matters.
+
 ### A second one, in the driver for the other fix
 
 `argv0()` applied its redirection before the `2>/dev/null` meant to
