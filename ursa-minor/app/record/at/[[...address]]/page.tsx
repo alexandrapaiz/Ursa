@@ -57,7 +57,7 @@ export default async function RecordAtAddressPage({
     <>
       <SiteHeader href="/" />
 
-      <main className="w-full px-[clamp(2rem,8vw,6rem)] pb-4 xl:mx-auto xl:max-w-6xl">
+      <main className="w-full px-[clamp(2rem,8vw,6rem)] pb-4 mx-auto max-w-6xl">
         <div className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[var(--dim)]">
           <span className="text-[var(--polar)]">✦</span> A record at its address
         </div>

@@ -269,34 +269,13 @@ var init_pairfinder = __esm({
 
 // src/normalize.ts
 function normalize(text) {
-  let norm = "";
   const map = [];
-  let pendingSpace = false;
-  let spaceIdx = -1;
-  for (let i = 0; i < text.length; i++) {
-    let ch = text[i];
-    if (ch in FOLD) ch = FOLD[ch];
-    if (/\s/.test(ch)) {
-      if (norm.length > 0) {
-        pendingSpace = true;
-        if (spaceIdx < 0) spaceIdx = i;
-      }
-      continue;
-    }
-    if (pendingSpace) {
-      norm += " ";
-      map.push(spaceIdx);
-      pendingSpace = false;
-      spaceIdx = -1;
-    }
-    for (const c of ch.toLowerCase()) {
-      norm += c;
-      map.push(i);
-    }
-  }
-  return { norm, map };
+  return { norm: fold(text, map), map };
 }
-var FOLD;
+function normText(text) {
+  return fold(text, null);
+}
+var FOLD, WS, isWhitespace, fold;
 var init_normalize = __esm({
   "src/normalize.ts"() {
     "use strict";
@@ -308,7 +287,44 @@ var init_normalize = __esm({
       "\u2013": "-",
       "\u2014": "-",
       "\u2026": "...",
-      "\xA0": " "
+      " ": " "
+    };
+    WS = /\s/;
+    isWhitespace = (ch) => {
+      if (ch.length === 1) {
+        const c = ch.charCodeAt(0);
+        if (c < 128) return c === 32 || c >= 9 && c <= 13;
+      }
+      return WS.test(ch);
+    };
+    fold = (text, map) => {
+      const out = [];
+      let any = false;
+      let pendingSpace = false;
+      let spaceIdx = -1;
+      for (let i = 0; i < text.length; i++) {
+        let ch = text[i];
+        if (ch in FOLD) ch = FOLD[ch];
+        if (isWhitespace(ch)) {
+          if (any) {
+            pendingSpace = true;
+            if (spaceIdx < 0) spaceIdx = i;
+          }
+          continue;
+        }
+        if (pendingSpace) {
+          out.push(" ");
+          map?.push(spaceIdx);
+          pendingSpace = false;
+          spaceIdx = -1;
+        }
+        for (const c of ch.toLowerCase()) {
+          out.push(c);
+          map?.push(i);
+          any = true;
+        }
+      }
+      return out.join("");
     };
   }
 });
@@ -415,22 +431,23 @@ function gitDescentCorroborator(projectPath, generatedSha, commits, horizonSha) 
   const blobCache = /* @__PURE__ */ new Map();
   const read = (sha, path) => {
     const key = `${sha}:${path}`;
-    let got = blobCache.get(key);
-    if (!got) {
-      got = blobLookup(projectPath, sha, path);
-      blobCache.set(key, got);
+    let entry = blobCache.get(key);
+    if (!entry) {
+      const got = blobLookup(projectPath, sha, path);
+      entry = { got, norm: got.kind === "present" ? normText(got.text) : null };
+      blobCache.set(key, entry);
     }
-    return got;
+    return entry;
   };
   return (filePath, spanText) => {
-    const needle = normalize(spanText).norm;
+    const needle = normText(spanText);
     if (needle.length < MIN_VERBATIM_LEN) {
       return { basis: "unverified", reason: "span_too_short" };
     }
     for (const p of parents) {
-      const got = read(p, filePath);
-      if (got.kind !== "present") continue;
-      if (!normalize(got.text).norm.includes(needle)) continue;
+      const { got, norm } = read(p, filePath);
+      if (got.kind !== "present" || norm === null) continue;
+      if (!norm.includes(needle)) continue;
       return {
         basis: "rival",
         sha: p.slice(0, SHORT),
@@ -454,14 +471,14 @@ function gitDescentCorroborator(projectPath, generatedSha, commits, horizonSha) 
       if (searched >= MAX_RIVAL_BLOBS) {
         return { basis: "unverified", reason: "rival_search_capped" };
       }
-      const got = read(c.sha, filePath);
+      const { got, norm } = read(c.sha, filePath);
       if (got.kind === "absent") continue;
       if (got.kind === "unreadable") {
         hole ??= c.sha;
         continue;
       }
       searched++;
-      if (!normalize(got.text).norm.includes(needle)) continue;
+      if (norm === null || !norm.includes(needle)) continue;
       return {
         basis: "rival",
         sha: c.sha.slice(0, SHORT),
@@ -2930,7 +2947,7 @@ function resolve(input) {
   const preps = gens.map((gen) => {
     const mode = gen.filePath ? modeForPath(gen.filePath) : gen.kind === "assistant_text" ? "prose" : "code";
     const sentences = segment(gen.text, mode).map((s) => {
-      const norm = normalize(s.text).norm;
+      const norm = normText(s.text);
       return { ...s, norm, tokenSet: new Set(tokens(norm)) };
     });
     return { gen, mode, norm: normalize(gen.text), sentences };
@@ -3013,7 +3030,7 @@ function resolve(input) {
     const mode = modeForPath(f.path);
     const spans = [];
     for (const s of segment(f.text, mode)) {
-      const sNorm = normalize(s.text).norm;
+      const sNorm = normText(s.text);
       const base = { start: s.start, end: s.end, text: s.text };
       let span = null;
       if (sNorm.length >= MIN_VERBATIM_LEN) {
@@ -3307,21 +3324,22 @@ function gitDeletionAttributor(projectPath, merges, opts = {}) {
   const lookups = /* @__PURE__ */ new Map();
   const read = (sha, path) => {
     const key = `${sha}:${path}`;
-    let got = lookups.get(key);
-    if (!got) {
-      got = blobLookup(projectPath, sha, path);
-      lookups.set(key, got);
+    let entry = lookups.get(key);
+    if (!entry) {
+      const got = blobLookup(projectPath, sha, path);
+      entry = { got, norm: got.kind === "present" ? normText(got.text) : null };
+      lookups.set(key, entry);
     }
-    return got;
+    return entry;
   };
   const holds = (sha, path, needle) => {
-    const got = read(sha, path);
+    const { got, norm } = read(sha, path);
     if (got.kind === "unreadable") return "unreadable";
     if (got.kind === "absent") return false;
-    return normalize(got.text).norm.includes(needle);
+    return norm !== null && norm.includes(needle);
   };
   return (filePath, spanText) => {
-    const needle = normalize(spanText).norm;
+    const needle = normText(spanText);
     if (needle.length === 0) return HUMAN;
     let pending = null;
     for (const m of merges) {
@@ -7737,7 +7755,7 @@ function traceFile(repoPath, path, spans, closedAt, revisions, crossings) {
   const unitsBySpan = /* @__PURE__ */ new Map();
   const live = [];
   for (const span of spans) {
-    const units = segment(span.text, mode).map((u) => ({ span, norm: normalize(u.text).norm, chars: u.text.length, diedAt: null })).filter((u) => u.norm.length >= MIN_TRACEABLE_LEN);
+    const units = segment(span.text, mode).map((u) => ({ span, norm: normText(u.text), chars: u.text.length, diedAt: null })).filter((u) => u.norm.length >= MIN_TRACEABLE_LEN);
     unitsBySpan.set(span, units);
     span.lifespan = {
       revisionsChecked: 0,
@@ -7768,7 +7786,7 @@ function traceFile(repoPath, path, spans, closedAt, revisions, crossings) {
       crossings?.push({ sha: rev.sha, from: rev.renamedFrom, to: rev.path });
     }
     lastPath = rev.path;
-    const fileNorm = text === null || text.length > MAX_BLOB_CHARS ? "" : normalize(text).norm;
+    const fileNorm = text === null || text.length > MAX_BLOB_CHARS ? "" : normText(text);
     const fileTokens = new Set(tokens(fileNorm));
     const revMs = Date.parse(rev.at);
     const touchedSpans = /* @__PURE__ */ new Set();

@@ -158,6 +158,21 @@ that matters.**
 
 ### 2.4 The thirty-pull-request run did not finish, and that is the finding
 
+> **Resolved 2026-11-09, and this section's suspect was wrong.** Read what
+> follows as the record of what was known on 2026-11-08; nothing in it is
+> edited away, because the reasoning is the thing worth keeping. The
+> measurement is `docs/design/resolve-cost.md`. Two corrections to the
+> figures below, neither of which changes this section's conclusion that
+> cost scales with file size rather than pull request count. First, the
+> cause is not per-span subprocess fan-out: 212 `git` and `gh`
+> invocations over the whole stalled attempt, 0 in a ten-second window
+> mid-stall, the process in state `R`, against 4,139 spans in the file.
+> It was `normalize()` re-folding the same cached blob once per span.
+> Second, `docs/sprints/pending.md` is 207,964 characters at #707's final
+> commit and 207,658 at its generation commit, not 231,992, so the ratio
+> of the two largest files is 5.6 rather than 6.3. Both ratios support the
+> same reading.
+
 The sweep of the §2.1 window was started at 23:52Z and was still inside
 its **first** entry, #707, thirty-five minutes later, at 31% of one core
 the whole time, with no record written. It reached no second pull request.
@@ -609,6 +624,26 @@ recognises them.
    typing a longer `--prs`: until the §2.4 defect is understood, a longer
    list buys a longer stall. The ordering is therefore fixed — measure
    where the resolve time goes, then widen the window.
+
+   **Measured and repaired 2026-11-09; the first half of that ordering is
+   discharged and the figures above are untouched.**
+   `docs/design/resolve-cost.md` is the measurement. The cost was not the
+   per-span `git` fan-out §2.4 named as its suspect: 212 subprocesses
+   over the whole stalled attempt, 0 in a ten-second window mid-stall,
+   and the process in state `R`. It was `normalize()` being called on the
+   same already-cached file blob once per span, so one file cost `spans ×
+   rivals × |blob|` characters of folding. `src/corroborate.ts` and
+   `src/deletion.ts` now cache the normalized blob alongside the raw one,
+   and `src/normalize.ts` gained `normText`, the same fold with no offset
+   map built. #707's 4,139 spans went from a projected 10,759 seconds to
+   5.7, and `ursa pr --pr 707` from over 35 minutes with no record to
+   37.77 seconds with two. **No record's shape changed**, which is what
+   `src/normalize-equivalence.test.ts` exists to say: it pins the
+   pre-change `normalize` byte for byte and grades both new entry points
+   against it over every file in `src/`, `fixtures/` and `docs/`. So the
+   0.6% edited share and the 9-of-30 correction rate are the same numbers
+   on the same window, and the second half of the ordering — widening the
+   window — is now a measurement somebody can take rather than a stall.
 2. **The corpus is of one repository.** KR1.3's words are "distinct real
    finished works", and 14 distinct files inside one repository is a
    defensible reading of that phrase and not the only one. A corpus over

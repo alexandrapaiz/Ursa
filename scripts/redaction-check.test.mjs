@@ -701,4 +701,217 @@ describe('redaction-check', () => {
       }
     });
   });
+
+  // ------------------------------------------------------------------
+  // THE PROPOSED CLASS C NARROWING (docs/security/redaction-gate-uuid-narrowing.md)
+  //
+  // The gate's Class C pattern matches session identity by shape, and the
+  // article-id path segment of a cited public URL has the same shape. The
+  // market seat paid for that twice, a week apart: on 2026-11-02 (a0087473)
+  // it deleted three source URLs and replaced them with prose saying the URL
+  // was omitted because the gate rejects it, and on 2026-11-09 (9512b85b) it
+  // percent-encoded one hyphen inside the slug in three files so the shape
+  // would stop matching while the link still resolved. Neither touched the
+  // gate, so the next seat citing the next UUID-slug host pays again.
+  //
+  // The remedy has to be an ALLOWANCE and not a narrower Class C pattern,
+  // because deciding this needs to look LEFT of the match, at whether a URL
+  // precedes it, and POSIX extended regular expressions, which is what
+  // `grep -E` gives the gate, have no lookbehind.
+  //
+  // These cases run the real script against the real gate's rules with the
+  // proposal applied in memory, so they are a review of the proposal rather
+  // than a review of a copy of it. The proposal's own regular expression is
+  // BUILT FROM the gate's Class C pattern read out of the workflow, so there
+  // is no second copy of that pattern here either.
+  describe('the proposed Class C narrowing for cited public URLs', () => {
+    const SOURCE_HOST = 'finance.biggo.com';
+
+    function gateRules(yml) {
+      const scans = [...yml.matchAll(/scan\s+"([^"]+)"\s*\\\s*\n\s*'([^']+)'/g)].map(
+        ([, label, pattern]) => ({ label, pattern })
+      );
+      const allowance = yml.match(/grep\s+-vE\s+'([^']+)'/);
+      assert.ok(allowance, 'the gate should still declare one shared allowance');
+      const classC = scans.find((s) => /UUID/i.test(s.label));
+      assert.ok(classC, 'the gate should still declare a Class C scan naming UUID');
+      return { scans, classC, allowance: allowance[1] };
+    }
+
+    // One allowlisted host, one URL path, then the gate's OWN Class C
+    // pattern. Allowlist and not denylist because the two failure
+    // directions are not symmetric: a missing allowlist entry costs one
+    // seat one red gate and a one-line addition, and a missing denylist
+    // entry publishes a private conversation identifier.
+    function proposedAllowance(yml) {
+      const { classC } = gateRules(yml);
+      const host = SOURCE_HOST.replace(/\./g, '\\.');
+      return `https?://${host}/[A-Za-z0-9._~%/+-]*${classC.pattern}`;
+    }
+
+    function withProposal(yml) {
+      const { allowance } = gateRules(yml);
+      const addition = proposedAllowance(yml);
+      if (allowance.includes(addition)) return yml; // already applied, idempotent
+      return yml.replace(`grep -vE '${allowance}'`, `grep -vE '${allowance}|${addition}'`);
+    }
+
+    // Written to a temp file rather than to the repository, because the
+    // gate under test is the repository's and this one is a candidate.
+    function gateFile(yml) {
+      const dir = mkdtempSync(join(tmpdir(), 'redaction-proposal-'));
+      const file = join(dir, 'redaction-gate.yml');
+      writeFileSync(file, yml);
+      return file;
+    }
+
+    const REAL = () => readFileSync(REAL_WORKFLOW, 'utf8');
+
+    // The same assembled value in four positions. Same value on purpose:
+    // it is the position and not the value that the proposal reads, and a
+    // test using a different value in each position could not show that.
+    const citedUrl = `https://${SOURCE_HOST}/news/${fakeSessionId}`;
+    const conversationUrl = `https://claude.ai/chat/${fakeSessionId}`;
+    const otherHostUrl = `https://example.invalid/news/${fakeSessionId}`;
+
+    test('reproduces the defect: today\'s gate rejects a cited public URL', () => {
+      const dir = sandbox({ 'docs/market/landscape.md': `Source: [BigGo](${citedUrl}).\n` });
+      try {
+        const { code, stderr } = runCheck(dir);
+        assert.equal(code, 1, 'this is the false positive the market seat worked around twice');
+        assert.match(stderr, /landscape\.md:1/);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test('with the proposal applied, the same cited URL passes', () => {
+      const dir = sandbox({ 'docs/market/landscape.md': `Source: [BigGo](${citedUrl}).\n` });
+      const gate = gateFile(withProposal(REAL()));
+      try {
+        const { code, stdout } = runCheck(dir, [`--workflow=${gate}`]);
+        assert.equal(code, 0, 'a public article id in a cited URL is not session identity');
+        assert.match(stdout, /clean \(3 patterns, read from the workflow\)/);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+        rmSync(dirname(gate), { recursive: true, force: true });
+      }
+    });
+
+    test('the proposal still rejects the very same value when it is bare', () => {
+      const dir = sandbox({ 'docs/runs/note.md': `Posted one note (id ${fakeSessionId}).\n` });
+      const gate = gateFile(withProposal(REAL()));
+      try {
+        const { code, stderr } = runCheck(dir, [`--workflow=${gate}`]);
+        assert.equal(code, 1, 'the exemption is positional, so the bare form must still fail');
+        assert.match(stderr, /note\.md:1/);
+        assert.ok(!stderr.includes(fakeSessionId), 'and must not print the value it caught');
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+        rmSync(dirname(gate), { recursive: true, force: true });
+      }
+    });
+
+    // This is why the list is an allowlist. A conversation-sharing link is a
+    // URL, so "a UUID inside a URL is public" is false, and a URL-shaped
+    // allowance with no host test would exempt exactly the class the gate
+    // exists for.
+    test('the proposal still rejects a UUID inside a conversation-sharing URL', () => {
+      const dir = sandbox({ 'docs/design/plan.md': `Trial: ${conversationUrl}\n` });
+      const gate = gateFile(withProposal(REAL()));
+      try {
+        const { code, stderr } = runCheck(dir, [`--workflow=${gate}`]);
+        assert.equal(code, 1, 'claude.ai/chat/<id> carries session identity and must stay caught');
+        assert.match(stderr, /plan\.md:1/);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+        rmSync(dirname(gate), { recursive: true, force: true });
+      }
+    });
+
+    test('the proposal still rejects a UUID path on a host not on the list', () => {
+      const dir = sandbox({ 'docs/market/brief.md': `Source: ${otherHostUrl}\n` });
+      const gate = gateFile(withProposal(REAL()));
+      try {
+        const { code } = runCheck(dir, [`--workflow=${gate}`]);
+        assert.equal(code, 1, 'a new source host is a one-line addition, not an automatic pass');
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+        rmSync(dirname(gate), { recursive: true, force: true });
+      }
+    });
+
+    // THE RESIDUAL COST, asserted rather than described, because a known
+    // hole that no test pins is a hole that moves. The gate shares ONE
+    // allowance across all three patterns and applies it with `grep -vE`,
+    // which is line scoped. So a line the proposal exempts stops being
+    // checked for Class A and Class B as well.
+    //
+    // The proposal does not create this; the allowance has been shared and
+    // line scoped since the gate was written, and this script's own header
+    // names it. The proposal adds one more line shape that can trigger it.
+    // Measured cost over every blob in every ref, by
+    // `node scripts/uuid-shape-census.mjs`: Q4 is 0 lines of 8,969 blobs,
+    // and Q3, lines carrying both an exempt and a bare value, is also 0.
+    // The structural repair is a per-scan allowance, which changes the
+    // gate's shape and is a separate proposal.
+    test('documents the residual: one line carrying both loses the other classes', () => {
+      const dir = sandbox({
+        'docs/market/brief.md': `Source ${citedUrl} read from ${fakeHomePath}\n`,
+      });
+      const gate = gateFile(withProposal(REAL()));
+      try {
+        const { code } = runCheck(dir, [`--workflow=${gate}`]);
+        assert.equal(
+          code,
+          0,
+          'KNOWN COST of a shared line-scoped allowance: the Class A path on this line is missed. ' +
+            'If this ever starts failing, the gate grew per-scan allowances and this test is the ' +
+            'one to delete.'
+        );
+        // And the same Class A path on its own line is still caught, so the
+        // loss is the line and not the pattern.
+        const split = sandbox({
+          'docs/market/brief.md': `Source ${citedUrl}\nread from ${fakeHomePath}\n`,
+        });
+        try {
+          const { code: splitCode, stderr } = runCheck(split, [`--workflow=${gate}`]);
+          assert.equal(splitCode, 1);
+          assert.match(stderr, /brief\.md:2/);
+        } finally {
+          rmSync(split, { recursive: true, force: true });
+        }
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+        rmSync(dirname(gate), { recursive: true, force: true });
+      }
+    });
+
+    // So that the owner applying the patch twice, or applying it to a gate
+    // that already carries it, is not a second alternative in the allowance.
+    test('applying the proposal twice is the same file as applying it once', () => {
+      const once = withProposal(REAL());
+      assert.equal(withProposal(once), once);
+      assert.notEqual(once, REAL(), 'and applying it once must actually change the gate');
+    });
+
+    // The patch the owner applies and this suite's in-memory transformation
+    // must be the same edit, or the tests above are green about something
+    // nobody will ship.
+    test('the committed patch makes exactly the edit these tests exercise', () => {
+      const patch = resolve(HERE, '..', 'docs', 'security', 'redaction-gate-uuid-narrowing.patch');
+      const dir = mkdtempSync(join(tmpdir(), 'redaction-patch-'));
+      try {
+        mkdirSync(join(dir, '.github', 'workflows'), { recursive: true });
+        writeFileSync(join(dir, '.github', 'workflows', 'redaction-gate.yml'), REAL());
+        execFileSync('git', ['init', '--quiet'], { cwd: dir });
+        execFileSync('git', ['apply', patch], { cwd: dir });
+        const applied = readFileSync(join(dir, '.github', 'workflows', 'redaction-gate.yml'), 'utf8');
+        assert.equal(applied, withProposal(REAL()), 'the patch and the test transformation diverged');
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+  });
+
 });

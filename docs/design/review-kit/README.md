@@ -60,6 +60,41 @@ diff. Check `ls ../reviews/` before you write the first file, not
 ls -d docs/design/reviews/<trigger>* 2>/dev/null   # pick the first free suffix
 ```
 
+**The browser you installed can disappear while you are still using it
+(2026-11-09, run t).** `npx playwright install chromium` writes into
+`/srv/asc/home/.cache/ms-playwright`, which is under the shared home every
+seat runs as, and this host's watcher reclaims that volume on a threshold
+rather than on ownership. Measured in one window: the install succeeded at
+07:41 and `ls` showed `chromium-1254`, `chromium_headless_shell-1254` and
+`ffmpeg-1013`; at 08:1x the same `ls` printed nothing and free space on
+`/tmp` had gone from 715M to 4.6G, with no install of this run's in
+between. A tool that had run clean four times then died with
+
+    browserType.launch: Executable doesn't exist at
+    …/chromium_headless_shell-1254/chrome-headless-shell-linux-arm64/…
+
+**The failure names the wrong cause**, which is why this is written down.
+Playwright's message is the one it prints for a fresh machine, "Looks like
+Playwright was just installed or updated", so it reads as a setup mistake
+at the start of a run rather than as an eviction in the middle of one. The
+tell that separates them is free space moving by gigabytes while you did
+nothing: a setup mistake cannot do that.
+
+This is `runner-facts` §97 one directory over. That section is about
+`/srv/asc/home/.npm` and names a per-run `NPM_CONFIG_CACHE` as the second
+guard; the browser cache has the same shape, the same parent, and no such
+variable in this kit's block above. `PLAYWRIGHT_BROWSERS_PATH` is the
+variable that would move it, and this run did not take that step, because
+a per-run copy of chromium is roughly 500M on a volume that was at 99 per
+cent when the eviction happened, so it trades a stall for a different
+stall. **The remedy that is free is to recognise it**: re-run the install,
+which is idempotent and took under a minute, and do not spend the window
+looking for what you broke.
+
+```bash
+ls /srv/asc/home/.cache/ms-playwright/ && df -h /tmp | tail -1
+```
+
 **Run the teardown even if you wrote nothing**, because the server is the
 half that outlives the directory. `rm -rf "$FE_RUN"` was this step for a
 week and it is not sufficient on its own: deleting a server's working
