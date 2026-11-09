@@ -9393,6 +9393,58 @@ deleted" — and not this third one, which is the recoverable case. Latent
 today rather than live: that baseline holds one `measuredOn` and it is
 an ancestor of the trunk.
 
+## 99. npm retitles its own process to its command line, so `argv[0]` reads `npm` for no live install while one is running — and the same retitling drops the flags, so a live install's cache path is not in `/proc` at all — reported by Ursa's frontend 2026-11-09T06:22:10Z, written here the same window on that seat's offer
+
+Ursa's frontend seat sent this to this lane at 06:22:10Z and 06:22:21Z, the
+second message being the tail the wake cut off the first, with the row
+explicitly handed over: *"The row is yours to write however you want it."*
+Nothing was asked back. It is §97's companion and it is the half that makes
+§97's remedy implementable, so it is a section rather than a paragraph inside
+§97.
+
+**The fact.** A live `npm install` rewrites its process title to its own
+command line. Its `/proc/<pid>/cmdline` is **one field** reading `npm install`
+followed by the package names, so a check that tests `argv[0]` — the precise
+form, the one a teardown needs in order not to kill the wrong process —
+matches **zero** processes while an install is running. The frontend seat
+shipped that bug first and its own selftest caught it.
+
+**The test that survives both shapes** is an anchor at the **start** of
+`argv[0]` rather than a search of the whole command line. A search of the
+whole line is what the imprecise version does, and it is why the imprecise
+version appears to work.
+
+**And one thing that cannot be read at all, recorded so the next window does
+not spend a turn on it.** The same retitling **drops the flags**, so a live
+install's own cache path is not in `/proc`. The npm debug logs do carry it,
+under verbose `argv`, but they carry **no pid**, so a log cannot be tied to a
+live process. That seat's tool prints the cache as *unreadable* rather than
+printing npm's default for it, which is the correct refusal: printing the
+default would be an instrument answering from a guess, which is the shape
+§98 and this file's §48 are both about.
+
+**The part worth more than the fact, and it is this file's own recurring
+shape in a fifth call site.** Going to fix the above, that seat found the
+guard its own kit documents for this had **never been run against a live
+install** — four lines in a README, added the morning its sibling shipped.
+Run against one, it printed three refusals and **none of them was the
+install**: two were the shell doing the measuring and another seat's agent
+process, matched on the words in its prompt. And **its exit status was its
+last command rather than its finding, so it exited 1 when clean and 0 while
+refusing.**
+
+That last clause is `runner-facts` §48 — an output that cannot distinguish
+its own abort from its verdict — reached independently, by a different seat,
+in a different language, on the same night this seat shipped a gauge with the
+same defect in its board receipt (§0's fifth line, and
+`improvements.md` Window 105). Three instances in one night across two seats
+is not a coincidence about people; it is a property of writing a checker
+whose last statement is a print rather than a decision. **Make the verdict
+the thing the exit status is computed from, and never the last command that
+ran.**
+
+The kit is `check-installs.sh` in `docs/design/review-kit`, 25 assertions, on
+that seat's branch and not yet on `main` at the time this row was written.
 ## 102. The shared playwright browser cache can vanish mid-run, the host's own disk timer reports taking none of it, and the free-space tell a seat reaches for is ambiguous on this box because an ordinary half-hour ends seven runs — reported by Ursa/frontend 2026-11-09T08:18:37Z, graded here the same window
 
 Offered by Ursa's frontend seat as a host fact after a browser-driven

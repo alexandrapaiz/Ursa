@@ -226,6 +226,13 @@ if (wantHeads) {
 /** @type {Map<string, {ns: object, id: string, occurrences: {ref: string, label: string, line: number, number: number, text: string}[]}>} */
 const defined = new Map()
 let registersRead = 0
+// Per namespace, how many refs actually yielded a register file. The global
+// count above was computed and never read by any branch of this program, which
+// is why the do-nothing verdict below went unmeasured for a day: the gate
+// counted the one quantity that proves it opened anything and then discarded
+// it.
+/** @type {Map<string, number>} */
+const readsPerNamespace = new Map()
 
 for (const ns of manifest.namespaces) {
   // Compiled once per namespace and applied per line rather than per file.
@@ -241,9 +248,16 @@ for (const ns of manifest.namespaces) {
       // A ref that does not carry the register is not a finding. Branches are
       // built off older roots here and a register file that postdates a root
       // is absent for a reason that has nothing to do with identifiers.
+      //
+      // That reasoning is sound PER REF and says nothing about the set. If
+      // NONE of the refs carried it, the explanation is not an old root, it is
+      // a path that resolves to no file anywhere -- which the loop below
+      // refuses rather than scanning past. Same shape as HEAD_UNREADABLE
+      // above: an unmeasurable scope is not an absent finding.
       continue
     }
     registersRead += 1
+    readsPerNamespace.set(ns.name, (readsPerNamespace.get(ns.name) ?? 0) + 1)
     const lines = text.split('\n')
     for (const [index, line] of lines.entries()) {
       const match = pattern.exec(line)
@@ -260,6 +274,44 @@ for (const ns of manifest.namespaces) {
       defined.get(key).occurrences.push({ ref, label, line: index + 1, number, text: line.trim() })
     }
   }
+}
+
+// THE DO-NOTHING CONTROL, and it is this gate's own rule turned on itself
+// (added 2026-11-09, window 110, measured before it was believed).
+//
+// Ask what the instrument returns when it does nothing, and whether that value
+// is in band. Measured on a fixture whose register was renamed and whose
+// manifest was left alone -- the one-commit mistake this repository makes
+// routinely -- both answers were in band and at the reassuring end:
+//
+//   findings:  `0 identifier(s) in 1 namespace(s) across 1 ref(s), every one
+//               defined once and no burned one reissued. Exit 0.`
+//   allocator: `Window 1`, exit 0.
+//
+// The findings line is the strongest reassurance this gate has, over a file it
+// never opened. The allocator is worse than reassuring: `Window 1` is held by
+// a real entry in the real register, so the do-nothing value of an allocator
+// whose job is to avoid collisions is a GUARANTEED collision, issued at exit
+// 0. git's own `fatal: path ... does not exist` goes to stderr, and `--next`
+// exists to be consumed as `$(... --next Window --heads)`, which reads stdout
+// alone; a caller in that command substitution received `Window 1` and a zero
+// status with nothing else to read.
+//
+// `example` in the manifest does not cover this. It proves `define` matches a
+// string the manifest carries, which is a check against the author's typo in
+// the pattern. This is a check against the world moving under a path that was
+// correct when it was written, and only a read at a real ref can see it.
+const unreadNamespaces = manifest.namespaces.filter((ns) => (readsPerNamespace.get(ns.name) ?? 0) === 0)
+if (unreadNamespaces.length > 0) {
+  finish(
+    scopeUnreadable({
+      code: 'REGISTER_UNREAD',
+      detail:
+        `${unreadNamespaces.length} namespace(s) had no register file at any of the ${refs.length} ref(s) in scope, ` +
+        `so a clean verdict and an allocated number would both be computed from nothing: ` +
+        unreadNamespaces.map((ns) => `${ns.name} (${ns.register})`).join(', '),
+    }),
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -301,7 +353,9 @@ if (nextOf !== undefined) {
   const n = highest + 1
   console.log(spellId(ns, n))
   console.log(
-    `  computed from ${numbers.length} identifier(s) defined or burned across ${refs.length} ref(s): highest is ${highest}, so the next free one is ${n}.`,
+    `  computed from ${numbers.length} identifier(s) defined or burned across ${refs.length} ref(s) ` +
+      `and ${readsPerNamespace.get(ns.name) ?? 0} copy/copies of ${ns.register}: ` +
+      `highest is ${highest}, so the next free one is ${n}.`,
   )
   console.log(`  register: ${ns.register}`)
   process.exit(0)
@@ -353,6 +407,7 @@ finish(
     ids: defined.size,
     namespaces: manifest.namespaces.length,
     refs: refs.length,
+    registers: registersRead,
     scope: wantHeads ? `${base} and every open pull request head` : base,
   }),
   lines,
