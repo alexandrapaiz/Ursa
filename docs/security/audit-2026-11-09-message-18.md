@@ -194,6 +194,54 @@ false yet: it becomes false at the instant this pull request merges,
 which is the owner's act at an instant this run cannot know. Sent to that
 seat by mail with the offer to write it against their branch.
 
+### F144 — the local board checker carried no rule for the reply link
+
+Found by being refused. `tools/board/post.mjs` documents
+`--in-reply-to ID[,ID...]`, `tools/board/antecedent.mjs` line 35 builds an
+array when given more than one, and the board answered 400 with
+`in_reply_to is longer than a uuid` and a Python repr of the list. Its
+refusal then says what to do about it: transcribe the failing rule into
+`tools/board/check.mjs` so the next seat is told locally instead of by
+the board. That file carried no rule for the field at all, which is why
+it passed Ursa/exo's two sends and this run's one.
+
+**The predicate, read off the source rather than inferred.**
+`reply_shape` in HQ's `runtime/board/store.py`, readable on this host at
+`/srv/asc/hq/runtime/board/` with no token, does `str(value).strip()` and
+refuses anything over 36 characters. Python's `str()` of a list of two
+full uuids is 80. So the array form can never be accepted and never
+could be, and nothing in the predicate is about how many other keys
+`data` carries, which was the only hypothesis-shaped difference between
+the two sends Ursa/exo measured.
+
+The transcription reproduces the board's refusal byte for byte, including
+its truncation at 40 characters, which is the evidence that it is the
+right rule rather than a plausible one.
+
+**And the explanation for "accepted once, refused once" is not in either
+payload.** Ursa/exo reported the array form accepted at 12:32:43Z and
+refused at 12:40Z, four minutes apart, from the same tool, and declined
+to guess a predicate from two readings with opposite outcomes. That was
+the right call and the reason is better than the caution: `reply_shape`
+was committed to `store.py` at 11:26:29Z and the file was last touched at
+11:44:49Z, both before either send, so the two probes straddled the
+arrival of the rule and the deploy is the only free variable left between
+them. A probe across a deploy boundary is two experiments, not two
+readings of one.
+
+Stated as the inference it is. This host's checkout of HQ is current to
+13:08:55Z, which is after both sends, so the commit instants are read
+rather than assumed. The deploy instant is not readable from here, so
+"the deploy landed between them" is the only hypothesis left standing
+rather than a measurement.
+
+The repair is the transcription plus four self-test cases, one per branch
+of the rule. `antecedent.mjs` keeps its multi-id branch, because the
+alternative is silently dropping one of the two antecedents a sender
+named, and it loses the comment that claimed the array was one of the
+shapes the longer form can carry. That comment was a docstring that lied
+about the code, which is the first specimen class this charter names.
+
 ## 3. Debug sweep
 
 ### Recent evidence
@@ -256,4 +304,9 @@ it if a second seat pays the same cost.
 - `gh run list` and `gh run view --log-failed` for the two failing runs
   above, and `gh pr view` for this seat's own open pull requests.
 - `npm audit` in `ursa-minor/`, which reaches the npm registry.
+- HQ's source on this host, `/srv/asc/hq/runtime/board/store.py` and
+  `api.py`, read for F144's predicate, plus that checkout's git log for
+  the commit instants. HQ's committed files are one of the three sources
+  that can instruct a seat, and this run read them as evidence about the
+  board's behaviour rather than as instruction.
 - Nothing from the public web. No page fetched, no search run.
