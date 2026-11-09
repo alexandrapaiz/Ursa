@@ -455,3 +455,50 @@ describe('exit 2 is a refusal, not a finding', () => {
     }
   })
 })
+
+// ---------------------------------------------------------------------------
+// A skip is not a pass, which is the second half of the same lesson.
+//
+// WHAT THIS CHANGED IN THE PUBLISHED NUMBER. Run against this repository's own
+// ledger on 2026-11-09, the report said 6 entries' every named probe passes.
+// Four of those six were real; two were suites that skipped one subtest each
+// and exited 0, and for `tools/root-entries.test.mjs` the skipped subtest is
+// the entry's whole subject. After this change the same run prints 4 and names
+// the other two as unmeasured.
+
+describe('exit 0 with a skipped subtest is not a clear', () => {
+  const withOutcome = (outcome) => classifyEntry(
+    entry('- What: `tools/root-entries.test.mjs` is red on a complete clone'),
+    ev(new Map([['tools/root-entries.test.mjs', outcome]])),
+  )
+
+  it('does not clear and does not hold', () => {
+    const v = withOutcome('incomplete')
+    assert.equal(v.disposition, 'unverifiable')
+    assert.match(v.why, /exited 0 while skipping at least one of its own subtests/)
+    assert.match(v.why, /no clear can be read from it/)
+    assert.match(v.why, /run it directly and read which subtest skipped/)
+  })
+
+  it('is distinct from a refusal, because the two have different repairs', () => {
+    assert.notEqual(withOutcome('incomplete').why, withOutcome('cannot-answer').why)
+  })
+
+  it('an outright refusal outranks a skip, and a real failure outranks both', () => {
+    const two = (a, b) => classifyEntry(
+      entry('- Recheck: `node tools/secret-scan.mjs --history`\n- Recheck: `node scripts/ci-checks.mjs`'),
+      ev(new Map([
+        ['node tools/secret-scan.mjs --history', a],
+        ['node scripts/ci-checks.mjs', b],
+      ])),
+    )
+    assert.match(two('cannot-answer', 'incomplete').why, /refused to answer/)
+    assert.equal(two(false, 'incomplete').disposition, 'holds')
+    assert.match(two('incomplete', true).why, /skipping at least one of its own subtests/)
+  })
+
+  it('normalizeOutcome keeps incomplete distinct from a refusal', () => {
+    assert.equal(normalizeOutcome('incomplete'), 'incomplete')
+    assert.equal(normalizeOutcome('skipped'), 'cannot-answer')
+  })
+})

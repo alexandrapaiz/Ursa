@@ -75,8 +75,17 @@ function trackedPaths() {
  * urgent condition still holds" would turn a refusal into a finding. A spawn
  * that never started (`out.status === null`, which is what a timeout or a
  * missing interpreter looks like) is the same answer for the same reason.
+ *
+ * A `node --test` suite that SKIPS a subtest still exits 0, so for an inferred
+ * probe the exit code alone cannot tell a pass from a measurement that did not
+ * happen. `tools/root-entries.test.mjs` skips its central assertion on a
+ * shallow clone, on purpose and with a message saying the claim is unmeasured,
+ * and the shallow clone is what every seat is handed. So the TAP summary is
+ * read too, and exit 0 with a non-zero skip count is `'incomplete'`. The skip
+ * count is returned alongside so the report can print the one number a reader
+ * needs to go and look.
  * @param {string[]} argv what follows the interpreter
- * @returns {true | false | 'cannot-answer'}
+ * @returns {{ outcome: true | false | 'cannot-answer' | 'incomplete', skipped: number }}
  */
 function runProbe(argv) {
   const out = spawnSync(process.execPath, argv, {
@@ -84,9 +93,10 @@ function runProbe(argv) {
     maxBuffer: 64 * 1024 * 1024,
     timeout: 300_000,
   })
-  if (out.status === 0) return true
-  if (out.status === 2 || out.status === null) return 'cannot-answer'
-  return false
+  const skipped = Number(/^# skipped (\d+)$/m.exec(out.stdout ?? '')?.[1] ?? 0)
+  if (out.status === 2 || out.status === null) return { outcome: 'cannot-answer', skipped }
+  if (out.status !== 0) return { outcome: false, skipped }
+  return { outcome: skipped > 0 ? 'incomplete' : true, skipped }
 }
 
 let source
@@ -123,8 +133,10 @@ function headingDate(text) {
 /** Keyed on the probe's identity string, which is the test path for an
  *  inferred probe and the whole command line for a declared one, so two
  *  entries that declare the same command pay for it once. */
-/** @type {Map<string, true | false | 'cannot-answer'>} */
+/** @type {Map<string, true | false | 'cannot-answer' | 'incomplete'>} */
 const probeResults = new Map()
+/** @type {Array<{ key: string, skipped: number }>} */
+const skipping = []
 if (!noRun) {
   /** @type {Map<string, string[]>} identity -> argv */
   const wanted = new Map()
@@ -133,12 +145,20 @@ if (!noRun) {
   }
   for (const key of [...wanted.keys()].sort()) {
     process.stderr.write(`recheck-urgent: running ${key}\n`)
-    probeResults.set(key, runProbe(wanted.get(key)))
+    const { outcome, skipped } = runProbe(wanted.get(key))
+    probeResults.set(key, outcome)
+    if (skipped > 0) skipping.push({ key, skipped })
   }
 }
 
 const verdicts = urgent.map((e) => classifyEntry(e, { probeResults, isTracked, today }))
 for (const line of report(verdicts, { ledgerPath, today })) console.log(line)
+// The skip counts, printed on stdout with the report rather than left on
+// stderr, because they are the reason an entry above reads `incomplete` and a
+// reader who cannot see them has to take the word `incomplete` on trust.
+for (const { key, skipped } of skipping) {
+  console.log(`measurement note: \`${key}\` exited 0 with ${skipped} skipped subtest(s), so its zero is not a measurement of everything it asserts.`)
+}
 if (noRun) {
   console.log('--no-run was passed, so no probe was executed and every entry above is unverified by construction.')
 }

@@ -305,11 +305,12 @@ export function probesIn(text, isTracked) {
 /**
  * @param {{ heading: string, date: string | null, text: string }} entry
  * @param {{
- *   probeResults: Map<string, boolean | 'cannot-answer'>,
+ *   probeResults: Map<string, boolean | 'cannot-answer' | 'incomplete'>,
  *   isTracked: (p: string) => boolean,
  *   today: string
  * }} evidence `probeResults` maps a probe's identity string to its outcome:
- *   `true` exited 0, `false` exited non-zero, `'cannot-answer'` exited 2. A
+ *   `true` exited 0, `false` exited non-zero, `'cannot-answer'` exited 2, `'incomplete'`
+ *   exited 0 while skipping at least one of its own subtests. A
  *   key absent from the map was not run and is reported as not run rather
  *   than as failing, because "we did not look" and "it is broken" are the two
  *   answers this repository keeps conflating.
@@ -327,6 +328,21 @@ export function probesIn(text, isTracked) {
  *   measurable here" are different facts about an urgent entry and they have
  *   different repairs: one needs the work done, the other needs
  *   `bash tools/ensure-full-clone.sh`.
+ *
+ *   `'incomplete'` IS THE SAME MISTAKE ONE LAYER DOWN, and it was live in the
+ *   numbers this tool published. A `node --test` suite that SKIPS a subtest
+ *   still exits 0, so a skip and a pass are the same exit code. Measured on
+ *   2026-11-09: of the 6 entries this tool called `symptom-cleared`, two rest
+ *   on suites that skipped exactly one subtest each,
+ *   `tools/root-entries.test.mjs` at 20 pass 1 skip and
+ *   `tools/stack/repair-pending.test.mjs` at 19 pass 1 skip. For the first of
+ *   those the skipped subtest IS the entry's subject. The ledger entry of
+ *   2026-11-02, "A root dot-entry gate on `main` is red in any complete clone
+ *   and skipped in the clone every run is handed", says in its own text that
+ *   the test skips itself on a shallow clone "with the honest message that the
+ *   claim is unmeasured rather than passing". That honesty was then discarded
+ *   by this tool, which saw exit 0 and printed that the symptom was gone. The
+ *   suite was right and the reader of the report was misled.
  * @returns {EntryVerdict}
  */
 export function classifyEntry(entry, { probeResults, isTracked, today }) {
@@ -346,6 +362,7 @@ export function classifyEntry(entry, { probeResults, isTracked, today }) {
   const run = probes.filter((p) => p.passed !== null)
   const failing = run.filter((p) => p.passed === false).map((p) => p.path)
   const refusing = run.filter((p) => p.passed === 'cannot-answer').map((p) => p.path)
+  const incomplete = run.filter((p) => p.passed === 'incomplete').map((p) => p.path)
   const passing = run.filter((p) => p.passed === true).map((p) => p.path)
 
   let disposition = 'unverifiable'
@@ -365,6 +382,8 @@ export function classifyEntry(entry, { probeResults, isTracked, today }) {
     // Ordered before the clear, not after it, so a pass on one probe and a
     // refusal on another can never add up to `symptom-cleared`.
     why = `refused to answer in this clone at exit 2 (${refusing.join(', ')}), which is not the same as the condition having cleared; the repair is to make the probe answerable here, not to re-read the entry${authority}`
+  } else if (incomplete.length > 0) {
+    why = `exited 0 while skipping at least one of its own subtests (${incomplete.join(', ')}), so the suite did not measure everything it names and no clear can be read from it; run it directly and read which subtest skipped${authority}`
   } else if (passing.length > 0) {
     disposition = 'symptom-cleared'
     why = `every probe it names passes today (${passing.join(', ')}), so the symptom it describes is gone and the entry is a candidate for re-reading${authority}`
@@ -388,12 +407,13 @@ export function classifyEntry(entry, { probeResults, isTracked, today }) {
  * for the two ordinary answers; anything else is read as a refusal rather than
  * as a pass, which is the safe direction: a value this module does not
  * recognise must never clear an urgent entry.
- * @param {boolean | 'cannot-answer' | unknown} value
- * @returns {true | false | 'cannot-answer'}
+ * @param {boolean | 'cannot-answer' | 'incomplete' | unknown} value
+ * @returns {true | false | 'cannot-answer' | 'incomplete'}
  */
 export function normalizeOutcome(value) {
   if (value === true) return true
   if (value === false) return false
+  if (value === 'incomplete') return 'incomplete'
   return 'cannot-answer'
 }
 
