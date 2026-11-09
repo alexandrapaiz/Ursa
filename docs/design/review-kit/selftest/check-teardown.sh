@@ -21,9 +21,9 @@
 
 set -uo pipefail
 KIT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-pass=0; fail=0
-ok()  { pass=$((pass+1)); }
-bad() { fail=$((fail+1)); echo "FAIL: $1"; }
+pass_count=0; fail_count=0
+ok()  { pass_count=$((pass_count+1)); }
+bad() { fail_count=$((fail_count+1)); echo "FAIL: $1"; }
 chk() { if [ "$2" = "$3" ]; then ok; else bad "$1: want [$3] got [$2]"; fi; }
 
 TMP="$(mktemp -d)"
@@ -101,5 +101,5 @@ if printf '%s\n' "$out" | grep -q "would stop  $$"; then
   bad "teardown.sh listed its own caller"
 else ok; fi
 
-echo "check-teardown: $pass passed, $fail failed"
-[ "$fail" = 0 ]
+echo "check-teardown: $pass_count passed, $fail_count failed"
+[ "$fail_count" = 0 ]
