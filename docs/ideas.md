@@ -2,6 +2,83 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (security, message run): HQ's secret-print guard has never been on this trunk, it still works, and the one PR this run may open is the wrong one to carry it
+
+**Status:** proposed, hour-sized, and it is **this seat's own next first
+act** rather than the engineer's, because it is secrets tooling.
+**Severity:** medium. Nothing is exposed by its absence, and what is absent
+is the only instrument that would have caught four recorded incidents.
+**Found by** a named handoff from the PM seat on the board, 2026-11-09T00:36Z,
+after that seat closed `#701` as superseded and noticed the one piece of
+real, never-merged content it was carrying.
+
+**Where it is, so it cannot be lost a third time.** Commit **`ee8c893c`**,
+"tools: install HQ's secret-print guard (checker + harness hook), carve out
+.claude/ in .gitignore", authored 2026-11-02T04:35:26Z by the PM seat on
+branch `ursa-pm/2026-11-02-message-17`, pull request **`#701`, CLOSED
+unmerged** on 2026-11-09 after a week stuck in conflict. Five files, 1,212
+lines: `tools/check-secret-print.py` (1,155), `tools/secret-print-baseline.txt`
+(31), `.claude/settings.json` (the PreToolUse registration, 17),
+`.gitignore` (one `!/.claude/` negation, without which the registration is
+dropped from every clone) and `tools/root-entries.test.mjs` (the hardcoded
+three-entry allowlist becomes four).
+
+**Confirmed absent from the trunk, not merely unmerged.** At origin/main
+a5cef3d8, `tools/check-secret-print.py` and `tools/secret-print-baseline.txt`
+do not exist and `.claude/settings.json` is not tracked. So no seat run in
+this repository has ever had a command checked before it ran, which is what
+`standards/secrets.md` §5 and lesson L-X5 require, and the checker's own
+header lists the four violations that happened anyway with the rule open in
+the editor: incidents 3, 4 and 15 on `EXO_TOKEN` and one unnumbered on
+`BOARD_RUNTIME_TOKEN`.
+
+**Re-verified in this run, a week after it was written, from `ee8c893c`
+read-only and never staged.** The handoff is worth more with the viability
+question already answered:
+
+| check | result |
+|---|---|
+| `ast.parse` of the checker | parses clean |
+| `--command 'echo "$GH_TOKEN"'` | one `X5-PRINT` finding, with the `printf` presence-and-length fix |
+| `--command 'git status --short'` | no finding |
+| `--hook` on a Bash payload printing a token | well-formed `PreToolUse` JSON, `permissionDecision: deny` |
+| tree scan, `--baseline tools/secret-print-baseline.txt` | clean, 24 files, 22 accepted, **exit 0** |
+| tree scan, no flag | same 22 reported as findings, **exit 1** |
+
+**Two things the next run needs that are not in the commit message.**
+
+1. **The baseline is not applied by default, and the code reads as though it
+   is.** `DEFAULT_BASELINE` is defined as `ROOT/tools/secret-print-baseline.txt`
+   but it is consulted only in `edit_suppressions`, the hook's file-edit path.
+   The repository scan takes the baseline only from an explicit `--baseline`.
+   So any CI line or charter line written as the obvious
+   `python3 tools/check-secret-print.py` is red on its first run with 22
+   findings that are all already accepted. The 22 are the GitHub Actions
+   masking idiom, two lines in each of eleven `agent-*.yml` workflows, and
+   they are not this repository's to fix: no seat token may write under
+   `.github/workflows/`. The baseline's own comment says HQ accepts the
+   identical two lines for the identical reason.
+
+2. **The hook fails safe, which is the fact that decides whether this is
+   safe to land.** `run_hook`'s docstring is "Never raises, never exits
+   non-zero: a guard that breaks the session is worse than the failure it
+   guards." A false positive therefore denies one command rather than
+   breaking a session. It is still a `deny` across `Bash|Write|Edit|MultiEdit|NotebookEdit`
+   for all eleven seats, which is why it wants its own review and not a
+   corner of somebody else's pull request.
+
+**Why this run did not land it, stated plainly because the whole point of
+the entry is that it was already lost once.** The PM seat asked for "a fresh
+branch of your own rather than a reopen of the one I closed", and it is
+right: a 1,212-line fleet-wide harness hook is a single reviewable decision.
+This run is permitted exactly one pull request and that pull request's
+subject is settling two colliding one-line fixes in two files. Putting the
+guard inside it would make the owner's one merge decision cover two
+unrelated things, one of which changes how every seat's Bash call is
+intercepted. So the handoff is accepted and recorded here with the commit
+id, the file list and the verification, and the next run of this seat lands
+it as its first act under its own number.
+
 ## Ledger entry — 2026-11-09 (security, message run): the timestamp gate asserts over two of its three codes, so four live `TEXTUAL_DAY` findings sit on the trunk unobserved
 
 **Status:** proposed, hour-sized. **For:** the engineer, or exo for the three
