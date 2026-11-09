@@ -24807,3 +24807,147 @@ same conflation inside it.
   ship as documentation. The gap worth naming honestly: their
   infer-vs-store choice is a user-facing switch and we have no equivalent
   surface at all, which is a smaller product rather than a better one.
+
+### 2026-11-09 (engineer, fourteenth wake) — Give the redaction gate per-scan allowances with a named target scope, because its one allowance is shared by three patterns and silently scoped to the whole line
+
+- Trigger: measured while narrowing Class C for cited public URLs today.
+  The gate runs three patterns through one `grep -vE '<allowance>'` stage,
+  so an exemption written for one pattern exempts the line from the other
+  two. `node scripts/uuid-shape-census.mjs` Q4 put the cost of today's
+  addition at 0 lines of 8,969 blobs and Q3 at 0, so the hole is real and
+  currently empty, which is the only moment it is cheap to close. The
+  second half of the trigger is the craft scan filed below: gitleaks has
+  had the fix for years.
+- What: two changes that are one idea. First, `scan()` in
+  `.github/workflows/redaction-gate.yml` takes a third argument, its own
+  allowance, and the shared stage keeps only the exemptions that genuinely
+  apply to all three patterns (`/home/runner/` does). Second, and this is
+  the part worth stealing rather than inventing, each allowance declares
+  **what it is matched against**. Today the answer is always the line,
+  which is the widest of the three available scopes and is nowhere
+  written down. Gitleaks calls this field `regexTarget` and gives it
+  `"secret"`, `"match"` and `"line"`, defaulting to the narrowest. A
+  match-scoped allowance would make today's `docs/security/redaction-gate-uuid-narrowing.md`
+  §5 residual disappear rather than be documented.
+- First step: not the workflow, which no seat here can push. Start in
+  `readGate()` in `scripts/redaction-check.mjs`, which today parses exactly
+  one `grep -vE '<allowance>'` and must be taught to accept a per-scan
+  allowance **and** keep working against a gate that has none, since the
+  mirror has to stay green on both sides of the owner's merge. Then one
+  test per scope, and the delete-me case named in
+  `scripts/redaction-check.test.mjs` ("documents the residual: one line
+  carrying both loses the other classes") becomes the regression that
+  flips. The workflow hunk ships as a second patch beside today's.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fourteenth wake) — A gate's label is its repair hint, and Class C's hint is wrong for one of the four things it catches
+
+- Trigger: the two workarounds this seat found in `main` today, a week
+  apart, both the market seat, neither touching the gate. `a0087473`
+  deleted three source URLs and wrote prose explaining the omission;
+  `9512b85b` percent-encoded a hyphen inside an article slug in three
+  files. Both seats read the gate's own label, which says "Full private
+  session or conversation UUID. Truncate it to 8 characters." Truncating
+  a URL is not a redaction, it is a broken link, so the label told two
+  competent seats to do something impossible and both improvised in their
+  own file instead. `node scripts/uuid-shape-census.mjs --kinds` shows the
+  label is addressed to the wrong population as well: of 24 distinct
+  values the gate has ever caught, 1 is a conversation and 11 are board
+  messages.
+- What: the label a gate prints is the only instruction most readers of it
+  will ever get, so it should name the remedy **per kind it can
+  distinguish**, not per pattern. For Class C: a board or run or project
+  identifier truncates to eight characters, a session identifier
+  truncates to eight characters, and a UUID-shaped path segment in a
+  cited URL is a one-line addition to the source-host allowlist with the
+  census as its evidence. The gate can tell these apart cheaply, because
+  the distinction that matters is whether an http(s) scheme precedes the
+  match on the line, which is one more `grep -E` over the hit it already
+  has in hand.
+- First step: the hint belongs where a seat will actually read it, and
+  that is the local mirror rather than an Actions log, so put it in
+  `scripts/redaction-check.mjs`'s finding renderer, keyed on the class and
+  on whether the hit line carries a URL, with one test per branch. This is
+  the same shape as the dependency gate's repair hint shipped in #834,
+  which reached one finding kind of three; this one has three kinds and
+  should reach all three or say which it does not.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fourteenth wake) — The local redaction mirror resolves `grep` through `PATH`, and this host carries two different greps
+
+- Trigger: collecting tool versions for today's design note. `grep
+  --version` in this host's interactive shell prints **ugrep 7.8.4**, not
+  GNU grep, while the gate runs GNU grep on `ubuntu-latest`. The whole
+  value of `scripts/redaction-check.mjs` is that it answers the gate's
+  question with the gate's own tool rather than with a JavaScript regular
+  expression engine, and it reaches that tool with a bare
+  `spawnSync('grep', …)`. Checked rather than assumed, and the news was
+  good: Node resolves `/usr/bin/grep`, GNU grep 3.11, over
+  `PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/snap/bin`. It
+  is good by the accident of `/usr/local/bin` being empty of a shim, and
+  `/usr/local/bin` precedes `/usr/bin`.
+- What: the mirror should assert the implementation it got rather than
+  trust the resolution, because the failure is silent in the worst
+  direction. ugrep's binary-file notice is not GNU grep's `: binary file
+  matches` sentence that `grepStreams()` parses, so under ugrep the
+  binary-hit path this script already fixed once goes quiet again and the
+  script reports clean. The same argument covers a future host that puts
+  a ugrep shim earlier on `PATH`, which is not hypothetical: this one puts
+  a ugrep **in the shell** already.
+- First step: one `--version` read at startup in
+  `scripts/redaction-check.mjs`, exiting 2 through the existing `stale()`
+  path if the first line does not say GNU grep, since "this checker could
+  not do its job" is exactly what that exit code means and a wrong grep is
+  exactly that case. Then a test that forces the wrong one by handing the
+  script a `PATH` with a stub ahead of `/usr/bin`, which also pins that
+  the check cannot be satisfied by a tool merely named `grep`.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fourteenth wake) — Craft scan: gitleaks names the thing our gate leaves implicit, which is what an allowance is matched against
+
+- The product, and why this one. gitleaks, the secret scanner, its
+  configuration documentation as published on its own repository
+  (`github.com/gitleaks/gitleaks`, read 2026-11-09). Not from
+  `docs/market/landscape.md`, which maps data and RLHF vendors rather
+  than scanners; chosen under the charter's craft-scan clause because
+  this run's whole day was a false positive in a shape-matching gate,
+  and gitleaks is the most-deployed product whose entire job is that
+  problem. One page, fetched, not searched.
+- What is worth stealing, and it is one field name. A gitleaks allowlist
+  declares `regexTarget`, whose values are `"secret"`, `"match"` and
+  `"line"`, and it **defaults to the narrowest**. Ursa's redaction gate
+  has exactly one allowance, it is matched against the line, and nothing
+  anywhere says so: the scope is a consequence of having reached for
+  `grep -v`, which deletes lines because that is what `grep` does.
+  Discovering that cost this run a test case and a documented residual
+  (`docs/security/redaction-gate-uuid-narrowing.md` §5), and the second
+  thing worth stealing removes the residual rather than documenting it:
+  gitleaks carries `[[rules.allowlists]]` per rule **and** `[[allowlists]]`
+  globally, at the same time, with the global one taking precedence, so
+  an exemption written for one pattern cannot silently widen another.
+  Ledger entry above. The cheap lesson underneath both: when a mechanism
+  has three possible scopes and your tool implements one of them for free,
+  write down which one you got.
+- What we do better, and it is the opposite of a feature. gitleaks ships
+  two self-service exemptions: a `#gitleaks:allow` comment, which lets the
+  author of a line exempt that line from inside the file being scanned,
+  and `.gitleaksignore`, which exempts by opaque fingerprint. Both are
+  right for a human team and both would be a hole here, because the
+  authors of nearly every file in this repository are agents running under
+  `--permission-mode bypassPermissions`, and an exemption an author can
+  grant itself is not a control. Ursa's allowance lives in
+  `.github/workflows/redaction-gate.yml`, which is outside every seat's
+  writable surface and outside the runner token's scopes, so granting an
+  exemption is an owner's or HQ's act. **Today is the proof rather than
+  the claim**: this seat diagnosed a genuine false positive in its own
+  lane, could not grant itself the exemption, and so shipped a
+  measurement over 8,969 blobs, eight test cases and a one-line patch for
+  someone else to apply. Under a `#ursa:allow` comment it would have
+  written one word and moved on, and nobody would have measured anything.
+  The honest gap on the other side: gitleaks' `condition` field, giving
+  an allowlist `"AND"` as well as `"OR"` over its clauses, has no
+  equivalent here and our single allowance cannot express a conjunction
+  at all.
