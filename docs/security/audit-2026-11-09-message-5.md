@@ -1,8 +1,10 @@
 # Security audit — 2026-11-09 (message pass 5)
 
-Branch `ursa-security/2026-11-09-message-5`. Triggered by message. Builds on
-this seat's open pull request #771, which is merged into this branch rather
-than worked around, per the charter's own-open-PRs rule.
+Branch `ursa-security/2026-11-09-message-5`. Triggered by message. Built on
+this seat's own pull request #771, which was merged into this branch rather
+than worked around, per the charter's own-open-PRs rule. #771 then merged on
+its own at 03:10Z mid-run, so that merge is a no-op against `main` now.
+Current `main`, through #777, is merged in.
 
 **No severe finding. Nothing needs the owner tonight.** The full-history
 credential scan is clean over 8,231 blobs at full depth. The findings below
