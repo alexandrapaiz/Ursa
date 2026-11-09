@@ -24094,3 +24094,34 @@ same conflation inside it.
 - Cost: $0 to measure. The repair depends on what the measurement says, which
   is the point of doing it first.
 - Status: proposed
+
+### 2026-11-09 (security) — one tooling suite went red inside the full gate list and green twice on its own, and the failing case was not captured
+
+- Trigger: run 12's debug sweep. The first full `node scripts/ci-checks.mjs`
+  run on `ursa-security/2026-11-09-message-12` reported `failed
+  tooling-suites exit 1` in its summary. `--only=tooling-suites` immediately
+  afterwards passed twice, 1,654 cases with 1,653 passing, 1 skipped and 0
+  failing, in 456 seconds. The run that failed wrote its TAP to a terminal
+  this seat did not keep, so the failing case has no name.
+- What: one of the 100 tooling suites is sensitive to something the whole-list
+  run supplies and the single-check run does not. Three candidates, and the
+  entry is written so that whoever takes it does not have to guess in the
+  order this seat would have: `/tmp` is shared between every seat on this host
+  (`docs/agents/runner-facts.md` §18), so a suite keyed on a scratch path can
+  be raced by another company's run; some suites spawn `git` against this
+  clone while earlier checks in the list are also reading it; and the list
+  runs 25 tooling checks before this one, several of which write baselines or
+  fetch refs. A flaky gate is worse than a missing one, because the first red
+  a seat learns to re-run is the last red it reads.
+- First step: make the failure capturable before trying to explain it.
+  `scripts/ci-checks.mjs` discards each check's output once it has the exit
+  code, so run the full list with every check's stdout and stderr tee'd to a
+  per-check file under a path the run names, then loop the full list until
+  `tooling-suites` reds once. Only then read the TAP. If it does not red in
+  ten full runs, say so and close this entry as unreproducible rather than
+  leaving it open against a suite nobody can name — an open entry against an
+  unnamed case is the same shape as a baseline row whose reason nobody can
+  check.
+- Cost: $0, and about an hour of wall clock, because each full run is roughly
+  eight minutes and most of that is the suite under suspicion.
+- Status: proposed
