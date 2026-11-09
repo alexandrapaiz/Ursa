@@ -292,36 +292,81 @@ function withoutComments(source) {
   return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1')
 }
 
-function census(extractedIds, branchesByGate) {
+/** The one language table this repository's gate discovery runs on.
+ *
+ *  `tools/gates/gate-registry.mjs` asks the same question of the same tree
+ *  from the other side -- is each candidate reached by a gate list -- and it
+ *  extends this table with Python and shell rather than restating the
+ *  JavaScript half. Two copies of a discovery rule is the defect that put
+ *  `register-ids` in no gate list for a week, so there is one copy and the
+ *  callers pass their own scope into it.
+ */
+export const CANDIDATE_LANGS = [
+  {
+    name: 'javascript',
+    file: /\.(mjs|js|ts)$/,
+    testFile: /\.test\.(mjs|js|ts)$/,
+    anyExit: /process\.exit\s*\(/,
+    failingExit: /process\.exit\s*\(\s*[1-9]/g,
+    stripComments: withoutComments,
+  },
+]
+
+/** Files under `roots` that could be a gate, by the table above.
+ *
+ *  Returns null, never [], when the facts cannot be established: an empty
+ *  array and an unavailable census read the same to a caller and only one of
+ *  them is a clean sweep.
+ */
+export function gateCandidatePaths({
+  langs = CANDIDATE_LANGS,
+  roots = ['tools', 'scripts'],
+  exclude = ['tools/gates/enumerate-verdicts.mjs', 'tools/gates/verdict-shape.mjs'],
+  excludePattern = /-verdict\.mjs$/,
+} = {}) {
   let listing = ''
   try {
-    listing = execFileSync('git', ['-C', REPO_ROOT, 'ls-files', 'tools', 'scripts'], {
-      encoding: 'utf8',
-    })
+    listing = execFileSync('git', ['-C', REPO_ROOT, 'ls-files', ...roots], { encoding: 'utf8' })
   } catch {
     return null // not a git checkout; the census is unavailable, not empty
   }
-  const NOT_A_GATE = ['tools/gates/enumerate-verdicts.mjs', 'tools/gates/verdict-shape.mjs']
-  const candidates = []
-  for (const path of listing.split('\n').filter((p) => /\.(mjs|js|ts)$/.test(p))) {
-    if (/\.test\.(mjs|js|ts)$/.test(path)) continue
-    if (/-verdict\.mjs$/.test(path) || NOT_A_GATE.includes(path)) continue
+  const out = []
+  for (const path of listing.split('\n').filter(Boolean)) {
+    const lang = langs.find((l) => l.file.test(path))
+    if (!lang) continue
+    if (lang.testFile.test(path)) continue
+    if (exclude.includes(path) || (excludePattern && excludePattern.test(path))) continue
     let source = ''
     try {
-      source = execFileSync('git', ['-C', REPO_ROOT, 'show', `HEAD:${path}`], { encoding: 'utf8' })
+      source = execFileSync('git', ['-C', REPO_ROOT, 'show', `HEAD:${path}`],
+        // stderr discarded on purpose: a file staged and not yet committed is
+        // the ordinary case while a gate is being written, and git prints
+        // `exists on disk, but not in HEAD` to stderr, which read as a tool
+        // failure in the middle of a clean sweep's output.
+        { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
     } catch {
       continue // staged but not committed; nothing to report about it yet
     }
-    const code = withoutComments(source)
-    if (!/process\.exit\s*\(/.test(code)) continue
-    candidates.push({
+    const code = lang.stripComments ? lang.stripComments(source) : source
+    if (!lang.anyExit.test(code)) continue
+    out.push({
       path,
-      extracted: extractedIds.has(path),
-      exitCalls: (code.match(/process\.exit\s*\(\s*[1-9]/g) ?? []).length,
-      branchesMeasured: branchesByGate.get(path) ?? null,
+      lang: lang.name,
+      exitCalls: (code.match(lang.failingExit) ?? []).length,
     })
   }
-  return candidates
+  return out
+}
+
+function census(extractedIds, branchesByGate) {
+  const found = gateCandidatePaths()
+  if (found === null) return null
+  return found.map((c) => ({
+    path: c.path,
+    extracted: extractedIds.has(c.path),
+    exitCalls: c.exitCalls,
+    branchesMeasured: branchesByGate.get(c.path) ?? null,
+  }))
 }
 
 // ---------------------------------------------------------------------------
