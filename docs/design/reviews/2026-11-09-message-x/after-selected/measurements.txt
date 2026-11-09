@@ -3,6 +3,6 @@
 # this covers the clock inside the page only. A timestamp a server stamps into a payload is pinned by lib/pin-clock.mjs, in the serving process, or not at all.
 # settled 400ms after networkidle, with `docs/design/reviews/2026-11-09-message-x/data/state-span-selected.mjs` run to enter the state before each shutter.
 # viewports phone 390x844, tablet 820x1180, desktop 1440x900
-record-mini-fixture-phone        200    390/390   overflow    0px  height  3086px
-record-mini-fixture-tablet       200    820/820   overflow    0px  height  2456px
-record-mini-fixture-desktop      200   1440/1440  overflow    0px  height  2263px
+record-mini-fixture-phone        200    390/390   overflow    0px  height  3090px
+record-mini-fixture-tablet       200    820/820   overflow    0px  height  2460px
+record-mini-fixture-desktop      200   1440/1440  overflow    0px  height  2267px

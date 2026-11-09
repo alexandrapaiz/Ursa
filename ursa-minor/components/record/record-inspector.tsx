@@ -65,10 +65,25 @@ export function RecordInspector({
             {typeof span.score === "number" ? (
               <span className="text-[var(--dim)]"> · similarity {span.score.toFixed(3)}</span>
             ) : null}
+            {/* `rec-hit` and a 16px gap above it, which every other standalone
+                `.rec-action` on this site has carried since 2026-10-24 and
+                this one did not. Its drawn box is 18px tall against the 44px
+                floor, measured SHORT by 26 at all three viewports.
+
+                Why it survived six hit-area sweeps: this panel only exists
+                once a passage is selected, and nothing had ever driven the
+                viewer into that state to measure it. The control was not
+                missed, it was out of frame. See
+                reviews/2026-11-09-message-x/data/hit-areas-selected.txt.
+
+                `mt-4` rather than `mt-3` for the reason the 44px floor block
+                in globals.css gives for the three form buttons: the overlay
+                reaches 13px past the box, and a 12px gap does not hold it off
+                the line above. 16px clears it by 3. */}
             <button
               type="button"
               onClick={() => onJump(src.generationIndex, { start: src.start, end: src.end })}
-              className="rec-action mt-3 block font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)]"
+              className="rec-action rec-hit mt-4 block font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)]"
             >
               See it inside the generation →
             </button>
