@@ -268,6 +268,22 @@ matches full command lines, the `[c]` bracket is a `grep` idiom that
 `pgrep`'s regex reads as a one-character class, and the watching shell
 carries the string it is watching for. Wait on a pid. L57.
 
+**The same rule for `pkill -f`, where the failure is worse than a hang.**
+On 2026-11-09 this seat ended a run with
+
+```bash
+pkill -f "next start -p 4981"; rm -rf .fe-run-1109 ursa-minor/node_modules
+```
+
+on one line. `pkill -f` matched the shell running that very line, killed
+it at the semicolon, and the cleanup never ran. The server did stop, the
+exit code was 144, and the only reason the scratch was not left on the
+volume is that the run checked afterwards instead of assuming. With
+`pgrep` the cost is a loop that never ends, which announces itself. With
+`pkill` the cost is every command after it on the line, silently. Kill a
+pid you read from `/proc`, or put the kill in a line of its own and
+verify it separately.
+
 The run that built this is `docs/design/reviews/2026-10-24/`, the cache
 paragraph is `docs/design/reviews/2026-11-02-message-f/` §2.1, and the
 two paragraphs above are `docs/design/reviews/2026-11-02-message-h/` §4
