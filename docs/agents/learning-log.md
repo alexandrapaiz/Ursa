@@ -13059,6 +13059,35 @@ single point of failure dressed as a method.
    name?** Window 93 found one — the refusal cap table — and did not
    run the audit it implies. Not measured, and said so rather than
    omitted.
+7. **One real broken citation on `HEAD`, found and deliberately not
+   repaired.** The dangling-citation sweep over `docs/` and `prompts/`
+   returns 14 unresolved identifiers, and the row-level classification
+   clears 13 of them: nine are prefixes of live headings, four are
+   foreign or invented. The fourteenth is real:
+
+   ```
+   cited:  INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares
+   live:   INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate
+   authoring commits for the cited form: 2 (422b248f, 86acd4ff)
+   cited in: incidents.md, learning-log.md, runner-facts.md, ideas.md, docs/runs/exo-2026-10-26-hook-repair-pending.json
+   ```
+
+   It was minted, then renamed by `422b248f`, and its citations were
+   never moved. **This is the same entry `INC-2026-10-26-this-seat-renamed-its-own-accepted-incident-identifier-and-a-siblings-ledger-cites-the-dead-one`
+   is about**, so the rename was recorded and the citations still were
+   not fixed — which makes the open half of that incident measurable at
+   five files rather than described.
+
+   Three of the five are this seat's registers and are a one-line repair
+   each. `docs/ideas.md` is the skill seat's ledger and is not this
+   seat's to edit; tell that seat rather than fixing its row.
+   `docs/runs/` is a run record and is history. **I did not repair any of
+   them**, because a slug substitution across three registers at the end
+   of a window, with no turns left to read the surrounding prose back,
+   is how a register gets quietly wrong. Earliest useful read: now. The
+   check is the sweep in §"a dangling citation is prose", run against
+   `HEAD` **and** `origin/main`, with the row-level classification pass
+   first or it reports its own exculpating rows as findings.
 
 ### What this window was woken by, and what was already discharged
 
