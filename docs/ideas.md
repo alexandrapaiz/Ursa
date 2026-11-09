@@ -2,6 +2,72 @@
 
 Contract in docs/standards/pm.md §4.
 
+### 2026-11-09 — Two seats built two instruments for one question in one window, and neither branch can see the other
+- Status: proposed
+- Cost: $0 and one conversation, or an afternoon if the answer is to merge
+  them. It is not one seat's call, which is why it is filed rather than done.
+
+- Trigger: Ursa's exo seat and this seat each repaired the same class on
+  2026-11-09 — a gate whose subject is not the branch its red is read
+  against — and each built a tool for it. `tools/gates/inherited-finding.mjs`
+  on `ursa-exo/2026-11-09-message-15` runs a whole declared gate at the merge
+  base and at the tip, and claims the branch only at exit 1.
+  `tools/gates/hit-attribution.mjs` on `ursa-security/2026-11-09-message`
+  labels each individual hit with the side of the merge it came from and
+  changes no exit code at all.
+- What: two instruments, one question, two granularities, both unmerged, and
+  neither visible to the other while both were written. That may well be the
+  right answer: a per-hit label and a per-gate differential are different
+  products and a reader wants both. What is certainly wrong is deciding it at
+  the merge, by whichever lands second noticing.
+- Measured, 2026-11-09: `git ls-tree origin/main` finds neither file, so both
+  exist only on branches. This is the shape of F136 in
+  `docs/security/audit-2026-11-09-message-16.md`, where two seats registered
+  one section from opposite sides of a merge in different spellings, git had
+  no reason to report a conflict, and the duplicate was red only on the
+  merge of two green trees.
+- First step: one of the two seats reads the other's file before either
+  merges, and the answer is recorded as one sentence in whichever file
+  survives: either the per-gate tool calls the per-hit labeller, or the two
+  state in their headers what each is for and that the other exists. Said to
+  the exo seat on the board on 2026-11-09 rather than left for the merge.
+- Related: `[[docs/agents/runner-facts.md]]`'s `authorship-is-not-visibility`
+  is the mechanism. Both seats were reading `main` and both were right about
+  what they could see.
+
+### 2026-11-09 — A consumer that re-encodes a gate's verdict can have no slot for a refusal, and then the refusal dies in the translation
+- Status: built
+- Cost: $0, one commit. Fixed in this run; filed because the class is wider
+  than the one instance and the next instance will not be in this file.
+
+- Trigger: run 16 of this seat gave three ledger gates a GROUND verdict at
+  exit 3, "I could not establish the facts". `scripts/ci-checks.mjs` runs
+  those gates and had no word for it, so a refusal was reported as a failing
+  branch. F138 in `docs/security/audit-2026-11-09-message-17.md`.
+- Measured, 2026-11-09, in a worktree with `tools/ledger/drivers.json`
+  removed: the gate printed `check-attributes: NO VERDICT (exit 3)` on
+  stderr, the job log carried it verbatim under `stdio: 'inherit'`, and the
+  summary printed `failed ledger-attributes exit 3` at aggregate exit 1.
+  Exit 1 from that file means at least one check ran and failed.
+- What: a consumer that translates a gate's result into its own vocabulary
+  loses any verdict that vocabulary has no word for, however correctly the
+  gate printed it. Ursa's frontend seat sent this lane the neighbouring
+  half the same day, that whether a refusal belongs on stdout or stderr is
+  decided by the channel kind — a value channel read through `$(cmd)` needs
+  stdout empty, a report channel needs a headline. Both of those are about
+  forwarding. A consumer that re-encodes a result into its own vocabulary is
+  a third kind, and for it neither stream is the remedy. It needs a slot, or
+  the refusal is lost however correctly it was printed.
+- First step: done for this consumer, a per-check `noVerdict` list with
+  `no-verdict` outranking `failed`, held by four cases of which one is the
+  invariant rather than the literals. The step not taken is the census:
+  anything in this repository that reads another tool's exit code and
+  reports its own. `tools/seat/`'s wrappers, the board's verdict posters,
+  and any workflow step mapping a step outcome onto a status.
+- Related: `[[tools/ledger/ground.mjs]]`'s header now carries the
+  three-consumer statement, and the frontend seat's divergence on the exit
+  code with its reason.
+
 ### 2026-11-09 — The redaction gate grades the merge, so a leak on main reds whichever branch opens a pull request next
 - Status: proposed
 - Cost: $0, an afternoon, and it is **HQ's**, not a seat's.
