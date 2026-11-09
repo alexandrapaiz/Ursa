@@ -26,6 +26,7 @@ import {
   IDEA_FIELDS,
   STATUSES,
   classifyBlock,
+  nearMissFieldLine,
   presentIdeaFields,
   statusOf,
 } from './block-kinds.mjs';
@@ -127,11 +128,23 @@ for (const block of blocks) {
     let explained = !c.announcesScan;
     for (const field of IDEA_FIELDS) {
       if (!present.includes(field)) {
+        // The near miss, said before the generic explanation, because when
+        // there is one it is the whole repair and the generic paragraph is
+        // about a different cause. See nearMissFieldLine in block-kinds.mjs
+        // for the seven days this sentence cost by not existing.
+        const near = nearMissFieldLine(block.text, field);
         violation(
           'seat',
           'IDEA_FIELDS_COMPLETE',
           `${c.heading} is missing the "- ${field}:" line (pm.md §4)` +
-            (explained ? '' : explanation),
+            (near === null
+              ? ''
+              : ` — and this is a separator and not an absent field: the block` +
+                ` already carries ${JSON.stringify(near.length > 90 ? `${near.slice(0, 90)}…` : near)}.` +
+                ` The colon has to land where the label ends, because statusOf and` +
+                ` a groomer both read the text after it, so the repair is to move` +
+                ` the colon and keep the qualifier after it. Do not write a second line.`) +
+            (explained || near !== null ? '' : explanation),
         );
         explained = true;
       }
