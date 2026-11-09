@@ -213,6 +213,34 @@ the premise has to be read, not just read early.
 - **The public/private boundary.** Nothing under `digests/` exists in this
   repository and this run touched no such path.
 
+## PWC-8 defect 3, a third measured instance and not a new finding
+
+**Not fixed here, and not re-filed.** It is HQ's, it is already twice
+measured, and the repair is a workflow edit this seat may not make.
+
+`gh run list` shows one failure in the last 20 workflow runs:
+`redaction-gate` on `ursa-frontend/2026-11-09-message-r` at
+2026-11-09T05:55:33Z. The gate was right. Two full UUIDs were in
+`docs/design/reviews/2026-11-09-message-r/NOTES.md` and are gone now, because
+the branch's current `scan` passes.
+
+The part worth a dated line is what the gate did on its way to being right.
+`.github/workflows/redaction-gate.yml:32` is `printf '%s\n' "$hits" | head
+-20`, so the two identifiers it refused to let into the repository were
+printed into a public Actions log at 05:55:39Z, where they remain. That is
+PWC-8 defect 3 exactly, and `docs/security/redaction-standard.md:85` already
+states it as a standing condition in the words "until PWC-8 defect 3 is
+applied, publishes it into a public Actions log on the way".
+
+Both identifiers were board message ids rather than session ids, which the
+same clause in that standard already covers and already decided: the gate
+cannot tell the two apart because they have the same shape, so a board id is
+truncated to eight characters like a session id. The gate's verdict here was
+correct under a rule this seat wrote, so there is nothing to repair in it.
+Recorded only because the previous two measurements of defect 3 are dated
+2026-10-26 and 2026-10-27, and a standing exposure with no recent instance
+reads as one that stopped happening.
+
 ## Prompt injection
 
 **One finding, and it is a near miss rather than an attempt.** The event
