@@ -1,0 +1,77 @@
+<!doctype html>
+<meta charset="utf-8">
+<!--
+  The set view's record rows, with the real stylesheet (rec.css) and the
+  real busy behaviour. `?mode=before` carries the `disabled` attribute the
+  component ships; `?mode=after` carries `aria-disabled` plus the handler
+  guard that replaces it. Everything else is identical between the two.
+
+  WHY THE NODES ARE MUTATED IN PLACE AND NOT RE-RENDERED FROM A STRING.
+  The whole question here is whether focus survives a state change, and
+  `innerHTML = ...` destroys focus by itself, in every mode, because it
+  replaces the node focus was on. A fixture written that way would
+  reproduce the previous run's stated cause instead of testing this one,
+  and would pass identically on the fix. The real component renders each
+  row under `key={s.id}` (published-site.tsx:364), so React's reconciler
+  keeps the same DOM node across this state change and sets attributes on
+  it. So that is what this does: build the list once, then only ever set
+  and remove attributes. The `nodeIdentityHeld` assertion below checks it.
+
+  The busy state is set the way `openRecord` sets it: one piece of state
+  naming the record being fetched, applied to EVERY row, held across an
+  awaited fetch. The fetch is stubbed with a flag because what is measured
+  is the attribute's effect on focus, not the network.
+-->
+<link rel="stylesheet" href="rec.css">
+<title>set view rows</title>
+<ul id="list"></ul>
+<script>
+const MODE = new URLSearchParams(location.search).get('mode') || 'before';
+const IDS = [
+  'ursa-2026-11-08-a-first-record-of-the-set-view',
+  'ursa-2026-11-08-the-second-record-in-this-index',
+  'ursa-2026-11-08-a-third-and-final-record-here',
+];
+let opening = null;
+
+// Built once. Never rebuilt.
+document.getElementById('list').innerHTML = IDS.map((id) => `
+  <li class="rec-item">
+    <button type="button" class="rec-row" data-id="${id}">
+      <span class="rec-row-id">${id}</span>
+      <span class="rec-meta">2026-11-08 &middot; 4,120 characters of finished work</span>
+    </button>
+    <p class="addr"><a href="#" class="rec-action">a link to this record alone</a></p>
+  </li>`).join('');
+
+const ROWS = [...document.querySelectorAll('.rec-row')];
+ROWS.forEach((b, i) => { b.dataset.n = String(i); });
+
+function apply() {
+  for (const b of ROWS) {
+    const id = b.dataset.id;
+    if (MODE === 'before') {
+      if (opening !== null) b.setAttribute('disabled', '');
+      else b.removeAttribute('disabled');
+    } else {
+      b.setAttribute('aria-disabled', String(opening !== null));
+      b.setAttribute('aria-busy', String(opening === id));
+    }
+    b.querySelector('.rec-row-id').textContent =
+      opening === id ? id + ' — fetching…' : id;
+  }
+}
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('.rec-row');
+  if (!b) return;
+  // The guard `after` needs, and the one `before` gets from the attribute.
+  if (MODE === 'after' && opening !== null) return;
+  opening = b.dataset.id;
+  apply();
+});
+
+window.finish = () => { opening = null; apply(); };
+window.ROWS = ROWS;
+apply();
+</script>
