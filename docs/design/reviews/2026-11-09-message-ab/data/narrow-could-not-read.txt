@@ -1,0 +1,11 @@
+  base http://localhost:3310   widths 320, 360, 375, 390   height 844   state docs/design/reviews/2026-11-09-message-ab/data/state-at-could-not-read.mjs
+
+  width page    content box     verdict                           where
+  320   at      320 at 0        fits                              
+  360   at      360 at 0        fits                              
+  375   at      375 at 0        fits                              
+  390   at      390 at 0        fits                              
+
+  0 of 4 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose and is not counted.
+
+every one of the 4 cell loads this run measured was reached: /record/at 200, /record/at 200, /record/at 200, /record/at 200.

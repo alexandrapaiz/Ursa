@@ -1,0 +1,8 @@
+# frozen at t=2000ms, seeded Math.random, CSS animations rewound.
+# the page clock is NOT pinned: a surface that reads it differs from itself.
+# this covers the clock inside the page only. A timestamp a server stamps into a payload is pinned by lib/pin-clock.mjs, in the serving process, or not at all.
+# settled 400ms after networkidle, with `docs/design/reviews/2026-11-09-message-ab/data/state-at-opened.mjs` run to enter the state before each shutter.
+# viewports phone 390x844, tablet 820x1180, desktop 1440x900
+record-at-phone                  200    390/390   overflow    0px  height  3588px
+record-at-tablet                 200    820/820   overflow    0px  height  2637px
+record-at-desktop                200   1440/1440  overflow    0px  height  2489px
