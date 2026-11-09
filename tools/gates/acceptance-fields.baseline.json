@@ -1,0 +1,176 @@
+{
+  "what": "Entry fields of an acceptance register that no consumer dereferences today, each with the reason it is not repaired here. tools/gates/acceptance-fields.mjs exits 1 on any unread field that is not listed below, and exits 1 on any entry below whose field is now read or no longer on an entry, so this file can only shrink.",
+  "why_this_file_is_not_a_permanent_excuse": "The premise of every entry below -- that no consumer dereferences this field -- is RE-DERIVED from the tree on every run, in both directions, rather than read off this file. That is deliberate and it is the whole lesson this gate was built from. Ursa's security seat gave each EXPECTED_ABSENT_FIXTURES entry an absent_path read off the filesystem every run, and the entry still absorbed a red that had nothing to do with the absence, because `the test fails BECAUSE of that` is a claim about causation and no reading of the tree decides it. So an entry here claims only what the scan recomputes. The `why` beside it is prose and is NOT under test, which is the one thing this file cannot fix about itself and says rather than hides.",
+  "what_this_baseline_does_not_excuse": "Three of the twenty-one are not deferred repairs at all but the instrument under-claiming, and they are marked `instrument` rather than `repair`. The scan counts a read only on a dereference, so a field validated by name through a schema list reads as unread. Separated out because a baseline that mixes `nobody reads this` with `my scan cannot see this read` is a file whose own count means nothing.",
+  "measured_at": "2026-11-09, origin/main f7b89ff, by Ursa's exo seat in the hundred-and-sixth window",
+  "excused": [
+    {
+      "register": "tools/gates/code-census.baseline.json",
+      "field": "measured",
+      "owner": "engineer",
+      "kind": "repair",
+      "why": "The date the exclusion was measured. Nothing reads it, so an entry measured four weeks ago and an entry measured tonight are the same object to the gate. The repair is the one tools/secret-scan-baseline.mjs already makes for accepted_on: validate it as an ISO date and compare it to the entry's own staleness window. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/gates/code-census.baseline.json",
+      "field": "repair",
+      "owner": "engineer",
+      "kind": "repair",
+      "why": "A citation into docs/ideas.md by heading text, and nothing resolves it. Measured here by hand: of the three distinct citations across this file and import-effects.baseline.json, resolving them took three attempts -- a raw grep found two of three, unwrapping the hard-wrapped prose found no more, and the third resolved only after normalising the backticks the citation drops around `origin/main`. All three do resolve today. A citation a reader gets wrong two times in three is a citation a tool should resolve, which is what tools/registers/check-ids.mjs already does for identifiers.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/gates/import-effects.baseline.json",
+      "field": "measured",
+      "owner": "engineer",
+      "kind": "repair",
+      "why": "Same field and same repair as code-census.baseline.json / measured.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/gates/import-effects.baseline.json",
+      "field": "repair",
+      "owner": "engineer",
+      "kind": "repair",
+      "why": "Same field and same repair as code-census.baseline.json / repair.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/gates/import-effects.baseline.json",
+      "field": "why",
+      "owner": "engineer",
+      "kind": "repair",
+      "why": "The reason the module is excused, and this gate's output line never prints it: verified by running `node tools/gates/import-effects.mjs`, whose clean line carries the counts and no entry text. code-census.mjs reads its own `why` and prints it beside the row, so the repair is one line of the same shape in import-effects.mjs's row printer.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/registers/registers.json",
+      "field": "why_identifier",
+      "owner": "engineer",
+      "kind": "repair",
+      "why": "The reason a register uses the identifier scheme it does. tools/registers/check-ids.mjs reads `identifier` and enforces the scheme, so the claim is enforced and the reason beside it is not printed anywhere the enforcement fires. The repair is to print it in the finding that cites the register, so a reader who trips the rule reads why it exists.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/secret-scan.baseline.json",
+      "field": "cites",
+      "owner": "security",
+      "kind": "instrument",
+      "why": "The register validates every field for presence and type -- tools/secret-scan-baseline.mjs builds REQUIRED from Object.keys(FIELDS) and refuses the run on a missing one -- and `cites` is the only field whose content is then never dereferenced. So this is half instrument and half real: the presence check is a read the scan cannot see, and nothing reads the value. This register is the exemplar for the rest of the file and should stay it: it prints why_not_a_credential in the accepted-hit line and compares `where` in a staleness check, and its _note already declares `where` documentation-only in prose. The repair is to move that prose declaration into a `_documentation_only` key and put `cites` in it, which is the security seat's to make.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "note",
+      "owner": "security",
+      "kind": "repair",
+      "why": "Free prose beside a repaired entry. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "correctionNote",
+      "owner": "security",
+      "kind": "repair",
+      "why": "A correction to an earlier reading of the same entry. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "resolution",
+      "owner": "security",
+      "kind": "repair",
+      "why": "How the entry was resolved. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "resolved",
+      "owner": "security",
+      "kind": "repair",
+      "why": "Whether it was resolved. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "resolvedNote",
+      "owner": "security",
+      "kind": "repair",
+      "why": "Prose beside `resolved`. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "repairedIn",
+      "owner": "security",
+      "kind": "repair",
+      "why": "The pull request the repair landed in. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "repairedOnTrunk",
+      "owner": "security",
+      "kind": "repair",
+      "why": "Whether the repair is on origin/main. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "repairedOnTrunkEvidence",
+      "owner": "security",
+      "kind": "repair",
+      "why": "The command whose output supports `repairedOnTrunk`. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "verifiedGreen",
+      "owner": "security",
+      "kind": "repair",
+      "why": "That the test was observed green after the repair. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "verdictWasRight",
+      "owner": "security",
+      "kind": "repair",
+      "why": "Whether the original red was a true finding. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "notPaidByGreen",
+      "owner": "security",
+      "kind": "repair",
+      "why": "That a green run does not discharge this entry. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "staleWithinOneRun",
+      "owner": "security",
+      "kind": "repair",
+      "why": "That the entry went stale inside a single run. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "reportedBy",
+      "owner": "security",
+      "kind": "repair",
+      "why": "Which seat reported it. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/seat/suite-baseline.json",
+      "field": "ownerEvidence",
+      "owner": "security",
+      "kind": "repair",
+      "why": "The evidence for the `owner` field, which IS read. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md 2026-11-09 by this window.",
+      "measured": "2026-11-09"
+    }
+  ]
+}
