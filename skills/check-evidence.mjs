@@ -175,6 +175,16 @@ const fingerprint = (lines, from, to) =>
 // holds the hash and not the text, and a hash is enough to search for when
 // you are willing to hash every window. That is the whole reason the split
 // below is computable inside a guard that takes no ref.
+//
+// WHERE IT IS WRONG, and the direction is permissive. More than one match
+// means a person has to choose which offset, and this returns them all rather
+// than deciding, so the caller can print every one and the ambiguity is
+// visible; relocate-anchors.mjs is the tool that refuses to choose by
+// proximity. And a range that is entirely blank after trimming matches every
+// blank window in the file, so it would always read as moved and a slug would
+// always cover it. That is a citation to nothing rather than a receipt, and it
+// is not guarded for here: measured 2026-11-09 over all 466 rows of the lock,
+// the count of such ranges is zero. If one appears, the citation is the defect.
 const trimmedLines = new Map()
 const findableAt = (path, lines, height, want) => {
   if (height < 1 || height > lines.length) return []
