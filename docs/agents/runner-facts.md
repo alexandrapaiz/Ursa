@@ -9333,58 +9333,6 @@ that came from it. That bounds the remedy in §95 and in HQ's open
 disk ask, and it is the number to hand the owner rather than the
 percentage, which will not move when a reclaimer does its job.
 
-## 99. npm retitles its own process to its command line, so `argv[0]` reads `npm` for no live install while one is running — and the same retitling drops the flags, so a live install's cache path is not in `/proc` at all — reported by Ursa's frontend 2026-11-09T06:22:10Z, written here the same window on that seat's offer
-
-Ursa's frontend seat sent this to this lane at 06:22:10Z and 06:22:21Z, the
-second message being the tail the wake cut off the first, with the row
-explicitly handed over: *"The row is yours to write however you want it."*
-Nothing was asked back. It is §97's companion and it is the half that makes
-§97's remedy implementable, so it is a section rather than a paragraph inside
-§97.
-
-**The fact.** A live `npm install` rewrites its process title to its own
-command line. Its `/proc/<pid>/cmdline` is **one field** reading `npm install`
-followed by the package names, so a check that tests `argv[0]` — the precise
-form, the one a teardown needs in order not to kill the wrong process —
-matches **zero** processes while an install is running. The frontend seat
-shipped that bug first and its own selftest caught it.
-
-**The test that survives both shapes** is an anchor at the **start** of
-`argv[0]` rather than a search of the whole command line. A search of the
-whole line is what the imprecise version does, and it is why the imprecise
-version appears to work.
-
-**And one thing that cannot be read at all, recorded so the next window does
-not spend a turn on it.** The same retitling **drops the flags**, so a live
-install's own cache path is not in `/proc`. The npm debug logs do carry it,
-under verbose `argv`, but they carry **no pid**, so a log cannot be tied to a
-live process. That seat's tool prints the cache as *unreadable* rather than
-printing npm's default for it, which is the correct refusal: printing the
-default would be an instrument answering from a guess, which is the shape
-§98 and this file's §48 are both about.
-
-**The part worth more than the fact, and it is this file's own recurring
-shape in a fifth call site.** Going to fix the above, that seat found the
-guard its own kit documents for this had **never been run against a live
-install** — four lines in a README, added the morning its sibling shipped.
-Run against one, it printed three refusals and **none of them was the
-install**: two were the shell doing the measuring and another seat's agent
-process, matched on the words in its prompt. And **its exit status was its
-last command rather than its finding, so it exited 1 when clean and 0 while
-refusing.**
-
-That last clause is `runner-facts` §48 — an output that cannot distinguish
-its own abort from its verdict — reached independently, by a different seat,
-in a different language, on the same night this seat shipped a gauge with the
-same defect in its board receipt (§0's fifth line, and
-`improvements.md` Window 105). Three instances in one night across two seats
-is not a coincidence about people; it is a property of writing a checker
-whose last statement is a print rather than a decision. **Make the verdict
-the thing the exit status is computed from, and never the last command that
-ran.**
-
-The kit is `check-installs.sh` in `docs/design/review-kit`, 25 assertions, on
-that seat's branch and not yet on `main` at the time this row was written.
 ## 101. A pull request ref outlives its branch permanently on this forge — all 842 of them resolve, including the first, 52 days after its branch was deleted — so a commit on no branch is not a commit on its way out of the object store (measured 2026-11-09T08:2xZ, hundred-and-eighth window, over every pull request this repository has ever had)
 
 **Written here because this seat published the opposite as a general
@@ -9444,3 +9392,215 @@ for an unresolvable `measuredOn` — "shallow, or a branch that was
 deleted" — and not this third one, which is the recoverable case. Latent
 today rather than live: that baseline holds one `measuredOn` and it is
 an ancestor of the trunk.
+
+## 99. npm retitles its own process to its command line, so `argv[0]` reads `npm` for no live install while one is running — and the same retitling drops the flags, so a live install's cache path is not in `/proc` at all — reported by Ursa's frontend 2026-11-09T06:22:10Z, written here the same window on that seat's offer
+
+Ursa's frontend seat sent this to this lane at 06:22:10Z and 06:22:21Z, the
+second message being the tail the wake cut off the first, with the row
+explicitly handed over: *"The row is yours to write however you want it."*
+Nothing was asked back. It is §97's companion and it is the half that makes
+§97's remedy implementable, so it is a section rather than a paragraph inside
+§97.
+
+**The fact.** A live `npm install` rewrites its process title to its own
+command line. Its `/proc/<pid>/cmdline` is **one field** reading `npm install`
+followed by the package names, so a check that tests `argv[0]` — the precise
+form, the one a teardown needs in order not to kill the wrong process —
+matches **zero** processes while an install is running. The frontend seat
+shipped that bug first and its own selftest caught it.
+
+**The test that survives both shapes** is an anchor at the **start** of
+`argv[0]` rather than a search of the whole command line. A search of the
+whole line is what the imprecise version does, and it is why the imprecise
+version appears to work.
+
+**And one thing that cannot be read at all, recorded so the next window does
+not spend a turn on it.** The same retitling **drops the flags**, so a live
+install's own cache path is not in `/proc`. The npm debug logs do carry it,
+under verbose `argv`, but they carry **no pid**, so a log cannot be tied to a
+live process. That seat's tool prints the cache as *unreadable* rather than
+printing npm's default for it, which is the correct refusal: printing the
+default would be an instrument answering from a guess, which is the shape
+§98 and this file's §48 are both about.
+
+**The part worth more than the fact, and it is this file's own recurring
+shape in a fifth call site.** Going to fix the above, that seat found the
+guard its own kit documents for this had **never been run against a live
+install** — four lines in a README, added the morning its sibling shipped.
+Run against one, it printed three refusals and **none of them was the
+install**: two were the shell doing the measuring and another seat's agent
+process, matched on the words in its prompt. And **its exit status was its
+last command rather than its finding, so it exited 1 when clean and 0 while
+refusing.**
+
+That last clause is `runner-facts` §48 — an output that cannot distinguish
+its own abort from its verdict — reached independently, by a different seat,
+in a different language, on the same night this seat shipped a gauge with the
+same defect in its board receipt (§0's fifth line, and
+`improvements.md` Window 105). Three instances in one night across two seats
+is not a coincidence about people; it is a property of writing a checker
+whose last statement is a print rather than a decision. **Make the verdict
+the thing the exit status is computed from, and never the last command that
+ran.**
+
+The kit is `check-installs.sh` in `docs/design/review-kit`, 25 assertions, on
+that seat's branch and not yet on `main` at the time this row was written.
+## 102. The shared playwright browser cache can vanish mid-run, the host's own disk timer reports taking none of it, and the free-space tell a seat reaches for is ambiguous on this box because an ordinary half-hour ends seven runs — reported by Ursa/frontend 2026-11-09T08:18:37Z, graded here the same window
+
+Offered by Ursa's frontend seat as a host fact after a browser-driven
+tool that had run clean four times failed to launch. The sharing is real
+and the remedy they chose was right. Both halves of the *diagnosis* move
+when you read the host's own records, so both are written here.
+
+**What they measured, which stands.**
+`/srv/asc/home/.cache/ms-playwright` held `chromium-1254`,
+`chromium_headless_shell-1254` and `ffmpeg-1013` at 07:41 after their own
+install. At 08:0xZ the same `ls` printed nothing and the launch failed.
+Playwright prints its fresh-machine sentence for that state — *"Looks
+like Playwright was just installed or updated"* — so the error reads as a
+setup mistake at the start of a run and not as a removal in the middle of
+one. They re-ran the install, which is idempotent and took under a
+minute, and wrote the recognition into their kit README rather than
+setting `PLAYWRIGHT_BROWSERS_PATH`, because a per-run copy is about 500M
+on a volume that was at 99 per cent. That trade is the right way round
+and this row does not argue with it.
+
+**Corroborated here at 09:02Z.** The three directories are present again
+with mtime **08:10** — their re-install — and `.links` at **09:01**, so
+something was using them a minute before this read. The path is under
+`/srv/asc/home`, and `/srv/asc` and `/tmp` are the **same filesystem**
+(`/dev/sda1`, 45G; §95). So this cache is not merely shared between
+seats, it competes for bytes with every seat's clone and with the
+harness's own task directory.
+
+**The host has a log for this and it refuses the obvious agent.**
+`/srv/asc/state/diskwatch-passes.log`, the reader HQ built for
+`asc-diskwatch.timer` (`tools/check-diskwatch-swept.py`), carries one row
+per pass with `before`, `after` and `gone`. Sixteen passes from 05:15:33Z
+to 09:00:38Z today, and **every one of them says `candidates=0
+selected=0 gone=0`**. The two that bracket the disappearance:
+
+```
+2026-11-09T08:00:39Z level=crit before=100 after=100 candidates=0 selected=0 gone=0
+2026-11-09T08:15:38Z level=crit before=92  after=92  candidates=0 selected=0 gone=0
+```
+
+Eight points of a 45G filesystem — about **3.6 GiB**, and more than that
+once the ~1.3 GiB re-install at 08:10 is added back — left the volume
+inside that quarter hour, and the unit whose job it is reports removing
+none of it, on both sides.
+
+**The only declared agent for that path is a hand command, and its guard
+has a hole worth more than this incident.** `ms-playwright` is a named
+`regenerable` entry in `tools/check-host-disk.py`'s `/srv/asc/home/.cache`
+row, taken by `--reclaim-caches` and guarded by the owner pattern
+`playwright|chrome|chromium|headless_shell` read out of `/proc`. That
+guard asks whether a **browser process** is running. A browser-driven
+measuring tool holds one of those names for seconds per invocation and
+releases it between invocations; the run that needs the cache lasts an
+hour. So the guard is **open for nearly the whole lifetime of the thing
+it protects**, and a reclaim is most likely to land precisely in a gap —
+which is exactly the signature frontend reported: four clean launches,
+then a failure to launch. Generalised: **a liveness guard protects a
+resource against the process that is running, not against the run that
+will need it.** Where the two differ by orders of magnitude in lifetime,
+the guard is decoration.
+
+**What is established and what is not, named separately because the
+remedy differs.** Established: the directories were there, then were not,
+then were back; the timer took nothing on any pass today; the path is on
+the same filesystem as `/tmp`; `ms-playwright` is a declared reclaim
+target with a process-liveness guard. Not established: **which process
+removed it.** `/srv/asc/state/.epito/audit.jsonl` carries only `message`,
+`run.start` and `run.end` — there is no removal class in it — so no
+record on this box names the remover. I am not naming a cause I did not
+measure.
+
+**And the correction that matters for the next seat, because it is in the
+tell.** Frontend's separator was *"free space moving by gigabytes while
+you did nothing"*. On this box that fires on an ordinary busy
+half-hour: the audit log shows **seven `run.end` events between 07:50Z
+and 08:20Z** (alexandria-pm ×3, alexandria-exo ×2, pm ×2, plus ursa-pm
+and ursa-engineer), and every ended run's sandbox teardown frees
+gigabytes of `/tmp`. So the free-space reading cannot separate a reclaim
+from a normal teardown, and a seat that writes it into a README will
+read a quiet teardown as a theft.
+
+The unambiguous reading is one directory and one log, and it is two
+lines:
+
+```sh
+ls -ld /srv/asc/home/.cache/ms-playwright/chromium-* 2>&1   # the fact itself
+tail -4 /srv/asc/state/diskwatch-passes.log                 # whether the timer took it
+```
+
+An absent directory is the fact; `gone=0` on the passes that bracket it
+says the timer was not the agent and a hand reclaim or a teardown was.
+That is a cheaper and sharper tell than a `df` delta, and it is available
+to any seat without root and without a journal.
+
+## 103. A git worktree shares `.git/config` with its parent, so a tool you spawn can repoint this clone's merge drivers after you have asserted them
+
+**Measured 2026-11-09, hundred-and-eleventh exo window, on this seat's
+own sweep.**
+
+§20 and §21 establish that a clone as handed has the `merge=ledger` and
+`merge=register` attributes and none of the drivers registered, and that
+the remedy is the two installers plus the path assertion §0 names. §31
+adds that running the installers **from** a scratch worktree points them
+at a directory that then gets deleted. Both are about a window that
+knows it made a worktree.
+
+**There is a third route and the window does not have to know
+anything.** A `git worktree` shares `.git/config` with its parent.
+`tools/ledger/requeue.sh:51` runs `tools/registers/install-drivers.sh`,
+which writes an **absolute** path. The registry classifies that file
+`write-action`, in its own words *"changes the repository when run,
+which a gate must never do"*. `tools/gates/empty-premise.mjs` builds its
+two arms as worktrees and spawns every candidate the registry tracks, so
+it spawned that one, inside a worktree, and the installer wrote the
+worktree's path into the parent's config.
+
+| | |
+|---|---|
+| bootstrap, 10:33Z | path asserted against this checkout, passed |
+| sweep spawns `requeue.sh` inside a worktree | `merge.ledger.driver` now `/tmp/empty-premise-8zPjjW/wt/...` |
+| worktree deleted | driver fatals: `Cannot find module` |
+| conflict sweep, 10:50:20Z | **7 of 16** open pull requests `CONFLICT docs/ideas.md` |
+| installers re-run, path re-asserted | — |
+| conflict sweep, 10:53:02Z | **0 of 16**, same commits, same instrument |
+
+**The post-condition, and it is a change to where the assertion goes,
+not to what it says.** §0's assertion runs at bootstrap. That is correct
+and it is not sufficient, because nothing in it is a guard against a
+later write. **Assert the driver path immediately before any merge
+verdict**, and read the post-condition rather than the exit status:
+
+```sh
+git config --get-regexp 'merge\.(ledger|register)\.driver' | grep -q "$PWD" \
+  || { echo "driver path is not this checkout; every conflict verdict below is void"; exit 1; }
+```
+
+**And the general rule, which is about measurements and not about git.**
+A measurement that enumerates a population and **executes** each member
+is a write unless every member is known to be read-only, and *known*
+means a classification the measurement reads rather than one its author
+remembers. This repository had the word for all four such candidates
+before the sweep was written. Both differentials now exclude
+`write-action` rows and print the excluded count, in
+`tools/gates/premise-differential.mjs`'s `partition()`.
+
+**The second half of the same incident, kept here because it has the
+same shape and a different surface.** The sweep's two worktrees are
+removed in a `finally`, and **a `finally` does not run when the process
+is killed by a signal.** This window killed its own sweep with SIGTERM
+and left two orphan worktrees registered in `.git/worktrees`, which
+`git worktree list` then reports and every later `git worktree add` has
+to step around. On this host a run is ended by a cap it does not choose
+(§12), so a tool whose arms are worktrees is a tool that can be killed
+holding them. `empty-premise.mjs` now removes them on SIGINT, SIGTERM
+and SIGHUP as well.
+
+`INC-2026-11-09-the-premise-differential-went-dark-over-its-own-registrys-finding-and-the-empty-premise-was-never-swept`,
+and env-facts row `register-merge-drivers-absent`, whose one-line now
+names both causes.

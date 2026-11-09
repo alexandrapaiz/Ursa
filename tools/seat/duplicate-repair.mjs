@@ -361,12 +361,17 @@ export function grade(commits, edits, { rows = null, coverage = null, run = git,
     // — one reachable from the other, hence the same run's chain — and two
     // concurrent commits by one actor stay two representatives.
     const reps = [];
-    const ordered = [...b.commits].sort((x, y) => (x.ts < y.ts ? -1 : 1));
+    // `Date.parse` and not a string compare. These instants come from git's
+    // `%cI`, which carries the committer's OFFSET, so `2026-11-09T04:22:37-06:00`
+    // sorts before `2026-11-09T09:00:00+00:00` textually and after it in fact.
+    // `tools/instant-gate.mjs` had this file red on `main` on three lines for
+    // exactly this reason and nothing carried a ledger pointer for it.
+    const ordered = [...b.commits].sort((x, y) => Date.parse(x.ts) - Date.parse(y.ts));
     for (const c of ordered) {
       const home = reps.find((r) => r.actor === c.actor && !concurrent(r.sha, c.sha, { run }));
       if (!home) reps.push(c);
     }
-    const actors = reps.sort((x, y) => (x.ts < y.ts ? -1 : 1));
+    const actors = reps.sort((x, y) => Date.parse(x.ts) - Date.parse(y.ts));
     for (let i = 0; i < actors.length; i += 1) {
       for (let j = i + 1; j < actors.length; j += 1) {
         const first = actors[i];
@@ -405,7 +410,7 @@ export function grade(commits, edits, { rows = null, coverage = null, run = git,
       }
     }
   }
-  pairs.sort((a, b) => (a.first.ts < b.first.ts ? 1 : -1));
+  pairs.sort((a, b) => Date.parse(b.first.ts) - Date.parse(a.first.ts));
 
   const counts = { DUPLICATED: 0, COORDINATED: 0, SAME_CHANGE: 0, SEQUENTIAL: 0, INDETERMINATE: 0 };
   for (const p of pairs) counts[p.klass] += 1;

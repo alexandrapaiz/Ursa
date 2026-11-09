@@ -13,14 +13,9 @@
       "why": "It reads `npm audit --json`, which resolves advisories against the public registry, so on a runner with no network it would report a clean floor over a scope it never measured."
     },
     {
-      "path": "tools/board/post.mjs",
-      "kind": "write-action",
-      "why": "Posting a message to the company board is an outward-facing write. A gate that posted on every push would put a seat's name on rows no seat wrote."
-    },
-    {
-      "path": "tools/board/direct-post-hook.mjs",
+      "path": "scripts/uuid-shape-census.mjs",
       "kind": "not-a-gate",
-      "why": "A PreToolUse hook that runs inside a seat's own session and decides one tool call. It has no verdict about a branch to fail on."
+      "why": "A census, not a verdict. It measures the population of 8-4-4-4-12 hex strings in this repository's blobs so that a proposed narrowing of the redaction gate's Class C pattern can be judged over the population it runs on. Both of its exits are 2, meaning the facts could not be established; it has no exit 1 and so no verdict about a branch to fail on. The gate whose change it argues for is the redaction gate, which scripts/redaction-check.mjs already runs under the redaction-tree check."
     },
     {
       "path": "tools/board/bypass.mjs",
@@ -34,6 +29,11 @@
       "why": "It asks what the board's checks actually prevented over a window of real traffic, through pageMessages in tools/board/page.mjs, so it needs BOARD_RUNTIME_TOKEN and answers nothing without it."
     },
     {
+      "path": "tools/board/direct-post-hook.mjs",
+      "kind": "not-a-gate",
+      "why": "A PreToolUse hook that runs inside a seat's own session and decides one tool call. It has no verdict about a branch to fail on."
+    },
+    {
       "path": "tools/board/measure-claims.mjs",
       "kind": "needs-token",
       "why": "It counts what two board rules would do to the board's real traffic, which is a read of the live board rather than of this tree."
@@ -42,6 +42,11 @@
       "path": "tools/board/page.mjs",
       "kind": "needs-token",
       "why": "The board read this repository is allowed to use as the denominator of a ratio. It walks a cursor over the live message route and needs a credential a per-change gate is not given."
+    },
+    {
+      "path": "tools/board/post.mjs",
+      "kind": "write-action",
+      "why": "Posting a message to the company board is an outward-facing write. A gate that posted on every push would put a seat's name on rows no seat wrote."
     },
     {
       "path": "tools/board/read-filters.mjs",
@@ -67,10 +72,25 @@
       "_note": "Registering the bare command here instead of the sweep is the known hole; see the secret-print-tree comment in scripts/ci-checks.mjs."
     },
     {
+      "path": "tools/gates/empty-premise.mjs",
+      "kind": "schedule-only",
+      "why": "The second axis of the same differential, with the same cost shape: three subprocesses per candidate over every candidate here, plus two git worktrees of HEAD. One pass is minutes of wall clock. Its rules are asserted in tools/gates/empty-premise.test.mjs, which tooling-suites runs, and its ANSWER about the tree belongs on the same schedule as tools/gates/premise-differential.mjs. Registered schedule-only for the same reason and by the same argument."
+    },
+    {
+      "path": "tools/gates/premise-differential.mjs",
+      "kind": "schedule-only",
+      "why": "Three subprocesses per candidate over every candidate in this file, so one pass is minutes of wall clock and it spawns every other gate here. A per-change gate is the wrong place for it. Its rules are asserted in tools/gates/premise-differential.test.mjs, which tooling-suites runs, and its ANSWER about the tree belongs on a schedule beside tools/ledger/ci/ledger-gate.yml."
+    },
+    {
       "path": "tools/instant-sweep.mjs",
       "kind": "covered-by",
       "covered_by": "instant-lint",
       "why": "It reports every finding tools/instant.mjs's lint can produce and returns 0 on all of them. tools/instant-gate.mjs is the half that decides, and that is what instant-lint runs."
+    },
+    {
+      "path": "tools/ledger/both-edited.mjs",
+      "kind": "not-a-gate",
+      "why": "It names the register blocks two sides both wrote into, which is an instrument a seat reads while resolving a merge. Every outcome is information and none of them is a failure."
     },
     {
       "path": "tools/ledger/check-blockers.mjs",
@@ -88,9 +108,9 @@
       "why": "It classifies the collisions a merge queue cannot see across every open pull request, so it fetches every open head. Measured in this run: it had not finished after 40 seconds in a sandbox with the token set."
     },
     {
-      "path": "tools/ledger/both-edited.mjs",
-      "kind": "not-a-gate",
-      "why": "It names the register blocks two sides both wrote into, which is an instrument a seat reads while resolving a merge. Every outcome is information and none of them is a failure."
+      "path": "tools/ledger/probe-server-merge.sh",
+      "kind": "write-action",
+      "why": "It measures whether GitHub's server-side merge honours a .gitattributes merge driver by creating the refs that would prove it, so running it is a write to the forge."
     },
     {
       "path": "tools/ledger/recheck-urgent.mjs",
@@ -101,11 +121,6 @@
       "path": "tools/ledger/requeue.sh",
       "kind": "write-action",
       "why": "It merges origin/main into every conflicting pull request's branch and pushes. A gate must never change the repository it is grading."
-    },
-    {
-      "path": "tools/ledger/probe-server-merge.sh",
-      "kind": "write-action",
-      "why": "It measures whether GitHub's server-side merge honours a .gitattributes merge driver by creating the refs that would prove it, so running it is a write to the forge."
     },
     {
       "path": "tools/ledger/union-merge.mjs",
@@ -123,31 +138,10 @@
       "why": "The committed instrument behind every number in docs/design/register-merge.md, so a reader can re-derive them instead of trusting the document. It reproduces a past incident rather than judging the tree."
     },
     {
-      "path": "tools/seat/read-dates.mjs",
-      "kind": "red-on-main",
-      "ledger": "two seat gates are red on main for a backlog no branch caused",
-      "why": "A real gate and red: `--gate` exits 1 with 106 register read dates due. Every branch would inherit that red, and a gate whose light can only be cleared by work no branch contains is a gate every seat learns to ignore."
-    },
-    {
       "path": "tools/seat/answered.mjs",
       "kind": "red-on-main",
       "ledger": "two seat gates are red on main for a backlog no branch caused",
       "why": "A real gate and red: `--gate` exits 1 over 64 board notes its predecessor's time-keyed guard had called already answered. Same shape as read-dates above and the same repair."
-    },
-    {
-      "path": "tools/seat/tool-reach.mjs",
-      "kind": "host-dependent",
-      "why": "It grades every tool path a standard or charter names against every root this host actually has, including other companies' checkouts under /srv/asc/repos. A GitHub runner has none of those roots, so it would answer differently about an unchanged tree."
-    },
-    {
-      "path": "tools/seat/spend.mjs",
-      "kind": "host-dependent",
-      "why": "It reads this run's own price out of the host's run logs under /srv/asc/state, which no runner grading a pull request has."
-    },
-    {
-      "path": "tools/seat/suite-baseline.mjs",
-      "kind": "host-dependent",
-      "why": "It asks whether the trunk is red and whether this seat did it, from a baseline recorded on one host at one commit. The question is about a run, not about the tree a gate is handed."
     },
     {
       "path": "tools/seat/baseline-drift.mjs",
@@ -158,6 +152,16 @@
       "path": "tools/seat/charter-lag.mjs",
       "kind": "needs-token",
       "why": "It asks how stale the charter each seat's run was actually handed, which needs the run feed and the forge rather than this tree."
+    },
+    {
+      "path": "tools/seat/draft-fault-measure.mjs",
+      "kind": "needs-token",
+      "why": "It re-derives every number in draft-fault.mjs's measured block from the live repository, so it reads the forge for the same reason."
+    },
+    {
+      "path": "tools/seat/draft-fault.mjs",
+      "kind": "needs-token",
+      "why": "It asks whether anything licenses a reader to treat somebody else's draft pull request as abandoned, which is a question about live drafts."
     },
     {
       "path": "tools/seat/outage.mjs",
@@ -176,19 +180,45 @@
       "why": "It lists which open pull requests belong to a seat, through `gh`. Its `--audit` mode is a real gate over the anchored branch pattern and what it grades is the forge's pull request history, not the branch."
     },
     {
-      "path": "tools/seat/draft-fault.mjs",
-      "kind": "needs-token",
-      "why": "It asks whether anything licenses a reader to treat somebody else's draft pull request as abandoned, which is a question about live drafts."
+      "path": "tools/seat/read-dates.mjs",
+      "kind": "red-on-main",
+      "ledger": "two seat gates are red on main for a backlog no branch caused",
+      "why": "A real gate and red: `--gate` exits 1 with 106 register read dates due. Every branch would inherit that red, and a gate whose light can only be cleared by work no branch contains is a gate every seat learns to ignore."
     },
     {
-      "path": "tools/seat/draft-fault-measure.mjs",
-      "kind": "needs-token",
-      "why": "It re-derives every number in draft-fault.mjs's measured block from the live repository, so it reads the forge for the same reason."
+      "path": "tools/seat/spend.mjs",
+      "kind": "host-dependent",
+      "why": "It reads this run's own price out of the host's run logs under /srv/asc/state, which no runner grading a pull request has."
+    },
+    {
+      "path": "tools/seat/suite-baseline.mjs",
+      "kind": "host-dependent",
+      "why": "It asks whether the trunk is red and whether this seat did it, from a baseline recorded on one host at one commit. The question is about a run, not about the tree a gate is handed."
+    },
+    {
+      "path": "tools/seat/tool-reach.mjs",
+      "kind": "host-dependent",
+      "why": "It grades every tool path a standard or charter names against every root this host actually has, including other companies' checkouts under /srv/asc/repos. A GitHub runner has none of those roots, so it would answer differently about an unchanged tree."
+    },
+    {
+      "path": "tools/stack/absent-text.py",
+      "kind": "not-a-gate",
+      "why": "It answers whether the text of an older branch is still in the tip, which is a question about two revisions a seat names rather than about the branch under test."
     },
     {
       "path": "tools/stack/integrate.sh",
       "kind": "write-action",
       "why": "It merges every open pull request into a throwaway copy of main and runs the suites on the union. It fetches every open head and creates commits, so it is an experiment a seat runs rather than a verdict on one branch."
+    },
+    {
+      "path": "tools/stack/lag-or-rewrite.mjs",
+      "kind": "not-a-gate",
+      "why": "For one open row it reports which files it rewrites, which it merely lags, and which it drags the trunk backwards. Three named outcomes a reviewer weighs, not a pass and a fail."
+    },
+    {
+      "path": "tools/stack/merge-surface.mjs",
+      "kind": "not-a-gate",
+      "why": "It reports the conflict surface of one pair of commits and requires `--head` or `--prs` to have a subject at all, so there is no tree-wide question for a gate to ask it."
     },
     {
       "path": "tools/stack/repair-pending.mjs",
@@ -204,26 +234,6 @@
       ],
       "kind": "needs-token",
       "why": "It asks whether a string on the base is actually unrepaired, which means reading the open pull requests that might already carry the repair."
-    },
-    {
-      "path": "tools/stack/lag-or-rewrite.mjs",
-      "kind": "not-a-gate",
-      "why": "For one open row it reports which files it rewrites, which it merely lags, and which it drags the trunk backwards. Three named outcomes a reviewer weighs, not a pass and a fail."
-    },
-    {
-      "path": "tools/stack/merge-surface.mjs",
-      "kind": "not-a-gate",
-      "why": "It reports the conflict surface of one pair of commits and requires `--head` or `--prs` to have a subject at all, so there is no tree-wide question for a gate to ask it."
-    },
-    {
-      "path": "tools/stack/absent-text.py",
-      "kind": "not-a-gate",
-      "why": "It answers whether the text of an older branch is still in the tip, which is a question about two revisions a seat names rather than about the branch under test."
-    },
-    {
-      "path": "scripts/uuid-shape-census.mjs",
-      "kind": "not-a-gate",
-      "why": "A census, not a verdict. It measures the population of 8-4-4-4-12 hex strings in this repository's blobs so that a proposed narrowing of the redaction gate's Class C pattern can be judged over the population it runs on. Both of its exits are 2, meaning the facts could not be established; it has no exit 1 and so no verdict about a branch to fail on. The gate whose change it argues for is the redaction gate, which scripts/redaction-check.mjs already runs under the redaction-tree check."
     }
   ]
 }
