@@ -96,15 +96,25 @@ export function RecordInspector({
         {span.diff?.length ? (
           <Field label="Your edit">
             <p className="rec-diff font-mono text-[0.76rem] leading-[1.8]">
-              {span.diff.map((part, i) =>
-                part.added ? (
-                  <ins key={i}>{part.value}</ins>
-                ) : part.removed ? (
-                  <del key={i}>{part.value}</del>
-                ) : (
-                  <span key={i}>{part.value}</span>
-                ),
-              )}
+              {span.diff.flatMap((part, i) => {
+                if (!part.added && !part.removed) return [<span key={i}>{part.value}</span>];
+                // The space a word diff puts inside a run belongs to neither
+                // side of the change, and drawing a strike or a highlight
+                // through it welds the run to the word next to it. The
+                // fixture's removal is " is involved at any point", with its
+                // leading space, and the strike through that space met the "r"
+                // of "grader", so the two read as one hyphenated word. Emitted
+                // as plain text, the space separates them the way it does in
+                // the sentence it came from. The run itself is unchanged, so
+                // nothing about what was added or removed is restated here.
+                const [, lead, core, tail] = /^(\s*)([\s\S]*?)(\s*)$/.exec(part.value)!;
+                const Tag = part.added ? "ins" : "del";
+                return [
+                  lead ? <span key={`${i}l`}>{lead}</span> : null,
+                  core ? <Tag key={i}>{core}</Tag> : null,
+                  tail ? <span key={`${i}t`}>{tail}</span> : null,
+                ].filter(Boolean);
+              })}
             </p>
             <p className="mt-3 text-[0.78rem] text-[var(--dim)]">
               Struck text is the model&rsquo;s wording you removed. The change itself is the
