@@ -25,10 +25,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { compareInstants, isAfter, isBefore } from '../instant.mjs'
+import { compareInstants, isAfter, isBefore, compareDays, parseDay } from '../instant.mjs'
 import {
   splitEntries, labelAtHead, readDateField, gradeEntry, labelCensus, report,
-  REGISTER_PATH, HOUSE_LABEL, ALT_LABELS, VERDICTS, NO_FIELD, FIELD_NO_ISO, compareDays, gateExitCode
+  REGISTER_PATH, HOUSE_LABEL, ALT_LABELS, VERDICTS, NO_FIELD, FIELD_NO_ISO, gateExitCode,
+  nowDay
 } from './read-dates.mjs'
 
 // The capacity rows this organization actually had, which is outage.test.mjs's
@@ -230,23 +231,58 @@ test('live: the label census sums to the entry count, which is what makes it a c
   for (const l of census) assert.ok(known.has(l.label), `${l.label} is not a declared label`)
 })
 
-test('control: compareDays orders days and REFUSES an instant, which compareInstants cannot do for a day', () => {
+test('a future read date is decided on the UTC day, not on the first ten characters of --now', () => {
+  // The line this replaces was `field.date > String(now).slice(0, 10)`. For a
+  // Z-suffixed `now` the two agree, which is why the defect was invisible.
+  assert.equal(nowDay('2026-11-09T04:34:57Z'), '2026-11-09')
+  // They disagree whenever `--now` carries an offset. This instant is
+  // 2026-11-10T01:00:00Z, so the UTC day is the 10th and the slice said the 9th.
+  assert.equal('2026-11-09T20:00:00-05:00'.slice(0, 10), '2026-11-09')
+  assert.equal(nowDay('2026-11-09T20:00:00-05:00'), '2026-11-10')
+  // So an entry read on the 10th is no longer graded as read in the future.
+  const entry = { heading: 'x', body: '- **Read on 2026-11-10**, in this window.\n' }
+  const graded = gradeEntry(entry, { now: '2026-11-09T20:00:00-05:00', completedSince: 0 })
+  assert.equal(graded.date, '2026-11-10')
+  assert.notEqual(graded.verdict, null)
+  // --now also accepts a bare day, which it always has, and that form is
+  // returned unchanged rather than pushed through a function that refuses it.
+  assert.equal(nowDay('2026-11-09'), '2026-11-09')
+  assert.equal(nowDay('not a time'), null)
+  assert.equal(nowDay(null), null)
+})
+
+test('control: the day comparator orders days and REFUSES an instant, which compareInstants cannot do for a day', () => {
   // The repository's lint forbids ordering a `date`-named value as text and
-  // names `isAfter/isBefore/compareInstants` as the repair. All three are
-  // unavailable for a bare day: `timestampShape` calls one `invalid`, so
-  // `compareInstants` answers null and both predicates answer false. Pinned
-  // here, because the day this stops being true is the day this function
-  // should be deleted rather than kept out of habit.
+  // its repair line used to name `isAfter/isBefore/compareInstants` alone. All
+  // three are unavailable for a bare day: `compareInstants` answers null and
+  // both predicates answer false in both directions. Still pinned, because
+  // this file's read-date field is a bare day and that is the reason it needs
+  // a different comparator at all.
+  //
+  // THESE THREE DO NOT CHANGE, and this comment used to say the day they did
+  // was the day this file's private `compareDays` should be deleted. That was
+  // the wrong signal and it would never have fired. `tools/instant.mjs` keeps
+  // refusing a day from its instant functions on purpose, and shipped a
+  // separate day family beside them on 2026-11-09. So the private function is
+  // gone, the import below is the shared one, and the deletion was a choice
+  // made on reading the module rather than a test failure that forced it.
   assert.equal(compareInstants('2026-11-09', '2026-11-15'), null)
   assert.equal(isAfter('2026-11-15', '2026-11-09'), false)
   assert.equal(isBefore('2026-11-09', '2026-11-15'), false)
   assert.equal(compareDays('2026-11-09', '2026-11-15'), -1)
   assert.equal(compareDays('2026-11-15', '2026-11-09'), 1)
   assert.equal(compareDays('2026-11-09', '2026-11-09'), 0)
-  // And the control: text order is exact for a padded day and NOT for an
-  // instant, so a caller holding one is refused instead of quietly served.
-  assert.throws(() => compareDays('2026-11-09T00:48Z', '2026-11-15'), /YYYY-MM-DD/)
-  assert.throws(() => compareDays('2026-11-9', '2026-11-15'), /YYYY-MM-DD/)
+  // And the control: a caller holding an instant is refused instead of
+  // quietly served. The refusal is a null rather than the TypeError the
+  // private version threw, which is the shared module's convention — every
+  // refusal in it is a null or a false.
+  assert.equal(compareDays('2026-11-09T00:48Z', '2026-11-15'), null)
+  assert.equal(compareDays('2026-11-9', '2026-11-15'), null)
+  // And one the private version could not do: a day that does not exist. The
+  // old `BARE_DAY` regex passed this string and sorted it between February 29
+  // and March 1.
+  assert.equal(parseDay('2026-02-30'), null)
+  assert.equal(compareDays('2026-02-30', '2026-03-01'), null)
 })
 
 test('control: the gate exits 3 on all three ways of establishing nothing, and 0 only over a real reading', () => {
