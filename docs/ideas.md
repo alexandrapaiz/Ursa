@@ -25072,3 +25072,51 @@ same conflation inside it.
 - Cost: $0, in `skills/relevance-audit.md` and
   `skills/relevance.lock.json`
 - Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, eighth message run): the registry that exists to catch a gate reached by nothing cannot see seven gates, because its candidate sweep is scoped to two roots
+
+### 2026-11-09 — `skills/` holds seven gate candidates, none of them run by a check, and none of them in the registry's numerator or its denominator
+
+- Trigger: this run added `skills/bare-refs.mjs` and asked the obvious
+  question of it, whether anything would run it. `node
+  tools/gates/gate-registry.mjs` exits 0 and says "61 gate candidate(s),
+  23 run by a check in `scripts/ci-checks.mjs` and 38 excused in writing",
+  which reads as a complete answer about gates reached by nothing. The new
+  guard is in neither number.
+- What: `gateCandidatePaths` in `tools/gates/enumerate-verdicts.mjs`
+  defaults `roots` to `['tools', 'scripts']`. Measured with that function
+  itself, by passing a third root: 50 candidates over the two roots, 57
+  over the three, so **seven candidates live under `skills/` and the sweep
+  cannot see one of them**. They are `check-evidence.mjs`,
+  `trigger-coverage.mjs`, `relevance-sweep.mjs`, `relocate-anchors.mjs`,
+  `forge-citations.mjs`, `grep-dialect.mjs` and `bare-refs.mjs`.
+  `grep -n skills scripts/ci-checks.mjs` returns nothing, so none of the
+  seven is run by any check, and because they are not candidates no
+  baseline row is owed for any of them either. They are absent from the
+  numerator and from the denominator at once, which is the one way a
+  coverage figure can be wrong without any number in it being wrong.
+  The eleven suites under `skills/` do run, because `toolingSuites()` is
+  `git ls-files '*.test.mjs'` over the whole repository rather than over
+  two roots. So the tools are tested in CI and the library they police is
+  never swept by them in CI.
+- Why this entry is not the same as the open one about
+  `tools/gates/import-effects.mjs`: that entry is one gate whose own
+  reader is scoped to two trees, and its consequence is one undetected
+  mutant. This is the registry whose entire subject is scope, measured on
+  its own helper, and its consequence is that adding a guard under
+  `skills/` cannot fail any check no matter how red the library gets. Both
+  have the same cause, a default root list copied from the first tool that
+  needed one, and that is the argument for fixing them together.
+- First step: not this seat's, because `scripts/ci-checks.mjs` and
+  `tools/gates/` are both outside its write surface. The cheap half is one
+  argument, a third root in the registry's default, which turns seven
+  silent gates into seven rows that must each be registered or excused in
+  writing. The decision that follows is which of the seven belong in
+  `ci-checks.mjs` as tree gates: `check-evidence.mjs`, `bare-refs.mjs` and
+  `trigger-coverage.mjs --check` are offline, fast and clean on this
+  branch, while `relocate-anchors.mjs` and `relevance-sweep.mjs --record`
+  are authoring tools that write, so the honest answer for those two is a
+  baseline row and not a check.
+- Cost: $0 to this seat, one argument and three to five registry rows to
+  the engineer or exo lane
+- Status: proposed

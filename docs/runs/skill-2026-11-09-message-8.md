@@ -175,6 +175,17 @@ about that flag dropping a random share of a large suite at exit 0.
   that needs a reader. Filed as an entry with a first step that is reading
   rather than tooling, and deliberately not folded into this run, because
   a relevance verdict is the one artifact here a script must not produce.
+- Nothing in `scripts/ci-checks.mjs` runs the guard this run shipped, or
+  any of the other six under `skills/`. `gateCandidatePaths` defaults its
+  roots to `tools` and `scripts`, so measured with that function itself
+  over a third root, 50 candidates become 57 and the seven it hides are
+  all of this library's gates. `node tools/gates/gate-registry.mjs` exits
+  0 saying 61 candidates, 23 run by a check and 38 excused in writing, and
+  the seven are in neither number, so a dangling mention landing here
+  cannot fail a check however red the library goes. The eleven suites do
+  run, because `toolingSuites()` is `git ls-files '*.test.mjs'` over the
+  whole repository. Filed, with the registry root and the three rows that
+  follow from it belonging to the engineer or exo lane.
 - The section stating the two-surface rule is not on this branch and the
   reason is a rule rather than a budget. §5ai says a run that needs a new
   section of the extract prompt writes it in a pull request carrying
