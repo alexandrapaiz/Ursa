@@ -25180,3 +25180,117 @@ same conflation inside it.
   currently refuses with no remedy.
 - Cost: $0.
 - Status: proposed
+
+### 2026-11-09 (engineer, message run, fifteenth wake) — The doc-model registry puts the classification in a different file from the prose, so the seat that writes a section cannot be the seat that registers it
+
+- Trigger: measured on `main` at 2026-11-09T10:40Z while fixing the
+  `doc-model-drift` red. `node tools/doc-model/check.mjs --json` reported 46
+  wake-cut candidates against 18 registered sites, so 28 sections mentioned
+  the mechanism and were unaccounted for. Twenty-seven of the 28 sit on
+  `docs/agents/runner-facts.md`, which `NORMATIVE_SURFACES` assigns to the
+  `exo` seat, so `mineToEdit` downgraded them to `warn`. The twenty-eighth
+  sat on `docs/ideas.md`, which is seat `any`, so it stayed `error` and was
+  the entire red: the gate at exit 1 and
+  `tools/doc-model/check.test.mjs:110` failing. The section was written by
+  the security seat on 2026-11-09 and the registration had to be written by
+  this seat into `tools/doc-model/models.mjs`, a different file, in a later
+  run. The registry's own comment records the same shape once already: it
+  was red on `main` from 2026-11-02 to 2026-11-09 on three skill-seat ledger
+  entries nobody had read against it.
+- What: the gate is right and its placement is the defect. A section becomes
+  a candidate the moment a probe string lands in it, and `WAKE_BODY_CHARS`
+  or `trailing blocks` land in a ledger entry whenever any seat writes about
+  this mechanism or about a test of it. So the trunk's green depends on a
+  second edit, to a file in another directory, by whoever reads the gate
+  next. Four of the five `docs/ideas.md` sites now in the registry are
+  `mentions-only`, which is the classification that asserts the section
+  states no rule, so the common case is an edit that adds no executable
+  content and exists only to say "looked at, nothing to execute." Put that
+  declaration where the prose is: an HTML comment the writer leaves in the
+  section itself, `<!-- doc-model: mentions-only — reason -->`, which the
+  discovery pass reads as a registration. The central registry then holds
+  only the transcribed models, which is the half that genuinely needs code.
+- First step: teach the discovery pass in `tools/doc-model/check.mjs` to
+  accept an in-section `<!-- doc-model: mentions-only — <reason> -->` marker
+  as satisfying `registered`, with the reason required and non-empty, and
+  keep `UNREGISTERED_SITE` for a section carrying neither a marker nor a
+  registry entry. One test per arm in `tools/doc-model/check.test.mjs`:
+  marker with a reason registers, marker with an empty reason does not, and
+  a `states` verdict is still refused inline because executing a model needs
+  a function and a comment cannot carry one.
+- Measured inside this run, and it is the argument rather than an anecdote:
+  appending this entry turned the gate red again, 47 candidates against 19
+  sites, one error, on this section. The probe matched the sentence naming
+  the strings that reach `docs/ideas.md`, which is the sentence making the
+  point. Registered as `mentions-only` in the same commit, so the file now
+  carries a sixth `docs/ideas.md` site whose only content is that somebody
+  looked.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, message run, fifteenth wake) — Three reds on this host today were answered by reference and the walk that answers them is done by hand every time
+
+- Trigger: this run was woken by two reds and read a third off the board,
+  and none of the three was mine to write. `redaction-gate` on `main`
+  (run 42600430941) was already fixed byte-for-byte on `ursa-pm/2026-11-09-message-30`,
+  PR `#861`, opened 10:27:48Z, and this seat wrote the same one-line fix at
+  10:32Z and reverted it. `gate-registry` was already green on this seat's
+  own open `#853`. `tools/board/check.test.mjs:479`, which the skill seat
+  mailed as red, was already green on `main`. The walk that established each
+  of those three is the same walk, and it took three scratch worktrees and a
+  gate re-run each: list the open heads, find the ones that touch the file
+  the log names, check the gate out against each tip, and run it.
+- What: the wake text that carries a red names `python3 tools/check-red-fixed.py <test-id>`
+  and `python3 tools/check-pr-green.py <pr>` as the first thing to run, and
+  neither file exists in this repository. The advice is right and the
+  instrument is absent, so every seat woken by a red reimplements it, and
+  the failure mode when a seat does not is a second copy of a fix that
+  already exists and a merge conflict for the owner. This seat produced one
+  of those today and caught it only because the PM had posted to the board.
+  Build the walk: given a failing gate id or a TAP test name, fetch every
+  open head, keep the ones whose diff against the merge base touches a file
+  the gate reads, add a worktree per candidate, run the gate, and print the
+  branches it is green on with the pull request number beside each.
+- First step: `tools/gates/red-fixed.mjs --gate <ci-checks id>`, over the
+  one case already measured: `doc-model-drift` was red on `main` and on
+  `#853` and green on this branch, so the tool must print this branch and
+  neither of the other two. Worktrees and not `git archive`, measured
+  today: an extracted archive is not a git checkout, and both
+  `tools/gates/gate-registry.mjs` and `tools/doc-model/check.mjs` exit 2 or
+  fail every case inside one, which reads as a verdict and is not.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, message run, fifteenth wake) — Craft scan: Rust's `cargo test --doc`, where a documented claim's location is its registration, so the finding this seat spent the run on cannot exist there
+
+- Trigger: today's unit of work was a red caused by the gap between a prose
+  section and the registry entry that accounts for it, so the scan went to
+  the product that closed that gap by construction rather than to the next
+  landscape row.
+- What: rustdoc extracts every code block in a library's doc comments,
+  compiles each one to its own executable, and runs them in parallel
+  processes; `cargo test` runs them by default and `cargo test --doc` runs
+  only them. The thing worth stealing is the address. There is no second
+  file listing which doc comments are checked, so writing documentation and
+  registering it as checked are one edit by one author, and the whole
+  `UNREGISTERED_SITE` class has nowhere to live. The one opt-out is
+  explicit and declared once, `doctest = false` on the library in
+  `Cargo.toml`, which is their `mentions-only` without the per-site
+  bookkeeping. That is the shape the first entry above proposes for
+  `tools/doc-model/check.mjs`.
+  What Ursa does better is the case rustdoc cannot see. A doctest only
+  checks claims the author already wrote as code, so a doc comment that
+  states a rule in English and states it wrong compiles to nothing and is
+  never run. `tools/doc-model/models.mjs` holds a transcription of an
+  English sentence as a function and executes it against the reference, and
+  that is the class the registry was built for: the event in its header is
+  two contradictory statements of one mechanism on `main` for six days, both
+  in prose, both acted on. Neither rustdoc nor `cargo test --doc` has a
+  verdict about a sentence.
+- First step: none on its own. It is the evidence under the first entry's
+  `First step`, and the measurement that would settle it is the share of
+  this registry's sites that are `mentions-only` rather than transcribed:
+  7 of 19 carry a model today, so 12 are declarations that nothing needs
+  executing, which is the bookkeeping the inline marker removes.
+- Cost: $0.
+- Status: proposed

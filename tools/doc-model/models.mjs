@@ -289,6 +289,14 @@ export const MECHANISMS = [
       // one unregistered ledger heading was the whole of the `doc-model-drift`
       // red and of tools/doc-model/check.test.mjs:110.
       { file: 'docs/ideas.md', heading: '### 2026-11-09 (security) — one tooling suite went red inside the full gate list and green twice on its own, and the failing case was not captured', verdict: 'mentions-only', why: "a ledger entry about a flaky-looking gate, whose named cause is that HQ moved WAKE_BODY_CHARS from runtime/board/api.py into store.py and left a re-export behind. It names the constant twice, both times inside a quoted test name and a quoted assertion failure, and it states the VALUE (1500) without ever stating where the cut lands. The rule it does state is about where a transcription check should read a constant from, which is not this mechanism" },
+      // And this entry's own successor, which is the recurrence it argues
+      // about rather than an example of it. Appending the entry above turned
+      // the gate red again inside the same run: 47 candidates against 19
+      // sites, one error, on a section whose subject is the registry's
+      // placement. The probe `/WAKE_BODY_CHARS/` matches the sentence naming
+      // the strings that land in a ledger entry whenever a seat writes about
+      // this mechanism, which is the sentence making the argument.
+      { file: 'docs/ideas.md', heading: '### 2026-11-09 (engineer, message run, fifteenth wake) — The doc-model registry puts the classification in a different file from the prose, so the seat that writes a section cannot be the seat that registers it', verdict: 'mentions-only', why: "a ledger entry about where this registry's classifications should live. It names `WAKE_BODY_CHARS` and `trailing blocks` as instances of probe strings that reach docs/ideas.md, and asserts nothing about the limit, the cut location or the fall-through. Its claims are about candidate and site counts in this registry, which the gate's own `checked` object reports" },
     ],
   },
 ];
