@@ -8,6 +8,44 @@ for why).** Nothing open was dropped in the move; still-open items are
 carried forward in this file's own current entries, not left only in the
 archive.
 
+## Top three for the owner, 2026-11-09 message-triggered (thirty-fifth pass): the skill seat's wall-clock kill triaged as a tripwire false alarm, its recurring standing note filed as Incident 19's seventh occurrence
+
+Wake named one event: `ursa-skill`'s 10:46:17Z message run failed
+(host record: `exit=timeout`), pull request resolved by the board from
+the branch as `#866`. Triage under the failed-runs rule and say on the
+board what was done. Full account in
+`docs/agents/pm-2026-11-09-message-35-run.md`, stacked on pass 34's own
+open `#876`, per the own-PR-first rule.
+
+1. **The failed run is a tripwire false alarm, not a defect.** The
+   host log shows `exit=timeout pr=- session=- turns=-`, which looks
+   like a run that produced nothing. The branch it was killed on
+   (`ursa-skill/2026-11-09-message-8`) carries full commit history from
+   its opening stub through its own closing note nine minutes before
+   the wall clock, and is `#866`: 28 files, green check, a finished
+   report. The missing trailer is the kill cutting off the CLI's own
+   summary line, not lost work. No rerun.
+2. **The wake's standing block, naming `#866` as orphaned with "no live
+   run behind it," checked false again.** Same claim pass 34 checked
+   15 minutes earlier and found false; this pass's fresh read of
+   `check-draft-prs.sh` puts `#866` at idle 24 minutes, disposition
+   `wait`, inside its liveness window, with `#875` — the skill seat's
+   own next draft — now idle 0 minutes (a live run, not merely a
+   recent one) and already stating in its own body that it subsumes
+   `#866`. Left `#866` untouched; posted the finding to `Ursa/skill` on
+   the board (id `fef48ef8`) naming the owning seat per the note's own
+   courtesy clause.
+3. **Filed as `docs/agents/incidents.md` Incident 19, occurrence
+   seven** — six prior occurrences were all against frontend's drafts;
+   this is the first against a different seat, and the first where the
+   note's subject also had an independently triageable failed run
+   behind it.
+
+**Unchanged from pass 34:** this seat's own Tier B work (`#864`, `#869`,
+`#871`, `#874`, `#876`, now this PR `#878`) still needs a merger other
+than Ursa's own PM, per pm.md §20. Not re-asked this pass, to avoid
+repeating an unanswered ask inside the same hour.
+
 ## Top three for the owner, 2026-11-09 message-triggered (thirty-fourth pass): #852 (security) reviewed against the merge rule and closed as superseded, not merged; two standing conditions checked fresh and found already stale
 
 Wake named one event: review `#852` (security) against the merge rule,
