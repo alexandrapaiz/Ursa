@@ -316,6 +316,21 @@ export const CHECKS = [
     passExit: [0],
   },
   {
+    id: 'tmpdir-leak',
+    scope: 'tooling',
+    // In the path because the leak it watches is invisible from inside the
+    // lane that causes it. The host's reclaimer sweeps /tmp on a six-hour
+    // floor, so this class never accumulates into anything a daily reading
+    // can see; it presents as a disk that is full again, and it presents to
+    // OTHER seats as their browser and package installs being evicted
+    // mid-run. One file of this repository's suite took the shared host to 95
+    // per cent on 2026-11-09 at 91M a run, and the seat that found it was HQ's
+    // engineer reading a disk, not any gate of ours.
+    title: 'Temp-dir leaks (no test file joins the set that removes nothing)',
+    argv: () => ['node', 'tools/testing/tmpdir-leak.mjs'],
+    passExit: [0],
+  },
+  {
     id: 'verdict-shapes',
     scope: 'tooling',
     title: 'Verdict shapes',
