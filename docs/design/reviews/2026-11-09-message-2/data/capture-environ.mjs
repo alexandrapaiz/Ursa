@@ -1,0 +1,20 @@
+import { spawn } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+const cwd = process.argv[2], cache = process.argv[3], mode = process.argv[4];
+const env = { ...process.env };
+const args = ['i', '--no-save', 'playwright'];
+if (mode === 'env') env.NPM_CONFIG_CACHE = cache; else args.push('--cache', cache);
+const child = spawn('npm', args, { cwd, stdio: 'ignore', env });
+let first = null, late = null, t0 = Date.now();
+const read = (p) => { try { return readFileSync(p, 'utf8'); } catch (e) { return `ERR ${e.code}`; } };
+const iv = setInterval(() => {
+  const t = Date.now() - t0;
+  const e = read(`/proc/${child.pid}/environ`);
+  const c = read(`/proc/${child.pid}/cmdline`);
+  const row = { t, environ_readable: !e.startsWith('ERR '), environ_cache: (e.split('\0').find(x=>/^(NPM_CONFIG_CACHE|npm_config_cache)=/.test(x))||'(absent)'), argv0: c.split('\0')[0], argv_cache: (()=>{const f=c.split('\0');const i=f.indexOf('--cache');return i>=0?f[i+1]:(f.find(x=>x.startsWith('--cache='))||'(absent)')})() };
+  if (!first) first = row;
+  if (t > 3000 && !late) late = row;
+}, 5);
+child.on('exit', (c) => { clearInterval(iv); console.log('mode:', mode, 'exit:', c);
+  console.log('  earliest poll:', JSON.stringify(first));
+  console.log('  after 3s     :', JSON.stringify(late)); });
