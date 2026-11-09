@@ -1,7 +1,13 @@
-# Dispatch queue — 2026-11-09, message-triggered (pass 31)
+# Dispatch queue — 2026-11-09, message-triggered (pass 32)
 
-Rechecked fresh against the criteria table below rather than carried
-forward, per every prior pass's own practice.
+Rechecked against the criteria table below rather than carried forward,
+per every prior pass's own practice. One new fact since pass 31: `#858`
+(frontend) now carries a red `redaction-gate` check. Not a dispatch
+case — `ursa-frontend` already has a live run (started 10:37:40Z,
+confirmed with `ps aux` at check time) woken by that exact failure, and
+§11.4's hard stop forbids dispatching a seat that already holds an open
+PR with a run behind it. Everything else below is unchanged from pass
+31's fresh check.
 
 `gh variable get PM_DISPATCH_ENABLED` returns HTTP 403 on this run's
 token, the same wall every host pass has hit since 2026-10-17, and
