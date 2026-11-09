@@ -216,7 +216,7 @@ export async function pageMessages({
     const page = await fetchPage({ sinceHours: hours, beforeHours: before, limit: PAGE_CEILING, extra });
     const sizeBefore = byId.size;
     if (page.status >= 400) {
-      incomplete = { reason: 'READ_FAILED', line: `page ${pages.length + 1} answered ${page.status}${page.error ? `: ${page.error}` : ''}` };
+      incomplete = { reason: 'READ_FAILED', code: 'COVERAGE_READ_FAILED', line: `page ${pages.length + 1} answered ${page.status}${page.error ? `: ${page.error}` : ''}` };
       pages.push({ before_hours: before, status: page.status, rows: 0, saturated: false, new_rows: 0 });
       break;
     }
@@ -247,11 +247,11 @@ export async function pageMessages({
     // a `before_hours` the route accepted and ignored, which is exactly the
     // INERT verdict `tools/board/read-filters.mjs` exists to detect.
     if (fresh === 0) {
-      incomplete = { reason: 'NO_PROGRESS', line: `page ${pages.length} returned ${page.rows.length} rows and none of them new, so the cursor is being accepted and ignored and the walk is repeating itself` };
+      incomplete = { reason: 'NO_PROGRESS', code: 'COVERAGE_NO_PROGRESS', line: `page ${pages.length} returned ${page.rows.length} rows and none of them new, so the cursor is being accepted and ignored and the walk is repeating itself` };
       break;
     }
     if (oldest === null) {
-      incomplete = { reason: 'NO_TIMESTAMP', line: `page ${pages.length} filled at ${page.rows.length} rows and carried no parseable ts, so the cursor cannot advance` };
+      incomplete = { reason: 'NO_TIMESTAMP', code: 'COVERAGE_NO_TIMESTAMP', line: `page ${pages.length} filled at ${page.rows.length} rows and carried no parseable ts, so the cursor cannot advance` };
       break;
     }
     // A full page whose rows all share one timestamp is the one case a cursor
@@ -261,7 +261,7 @@ export async function pageMessages({
     // else sits at it. Both failures are invisible in a row count, so this is
     // the check that keeps `complete` from being a lie.
     if (newestTsIn(page.rows) === oldest) {
-      incomplete = { reason: 'CURSOR_STUCK', line: `page ${pages.length} filled at ${page.rows.length} rows that all carry the timestamp ${oldest}, so no cursor value can pass them without skipping rows at it` };
+      incomplete = { reason: 'CURSOR_STUCK', code: 'COVERAGE_CURSOR_STUCK', line: `page ${pages.length} filled at ${page.rows.length} rows that all carry the timestamp ${oldest}, so no cursor value can pass them without skipping rows at it` };
       break;
     }
     const next = nextBeforeHours({ oldestTs: oldest, now: now(), overlapSeconds });
@@ -272,14 +272,14 @@ export async function pageMessages({
       // overlap for this step is safe here precisely because the span is
       // longer than one instant, which the check above has established.
       if (overlapSeconds > 0) { overlapSeconds = 0; continue; }
-      incomplete = { reason: 'CURSOR_STUCK', line: `page ${pages.length} filled at ${page.rows.length} rows spanning less than this walk can step, even with no overlap, so rows at ${oldest} are unreachable` };
+      incomplete = { reason: 'CURSOR_STUCK', code: 'COVERAGE_CURSOR_STUCK', line: `page ${pages.length} filled at ${page.rows.length} rows spanning less than this walk can step, even with no overlap, so rows at ${oldest} are unreachable` };
       break;
     }
     before = next;
   }
 
   if (!incomplete && pages.length >= maxPages && pages[pages.length - 1]?.saturated) {
-    incomplete = { reason: 'PAGE_BUDGET', line: `stopped after ${maxPages} pages with the last one still full, so older rows remain unread` };
+    incomplete = { reason: 'PAGE_BUDGET', code: 'COVERAGE_PAGE_BUDGET', line: `stopped after ${maxPages} pages with the last one still full, so older rows remain unread` };
   }
 
   const rows = [...byId.values()];
@@ -290,6 +290,14 @@ export async function pageMessages({
     coverage: {
       complete: incomplete === null,
       incomplete_reason: incomplete ? incomplete.reason : null,
+      // The fault code a caller prints, spelled at each site that refuses
+      // rather than built here from the reason. `tools/gates/code-census.mjs`
+      // found this file on 2026-11-09 as the one place in tools/ and scripts/
+      // that assembled a defect code out of a template: `ratioFault` wrote
+      // `COVERAGE_${c.incomplete_reason || 'UNKNOWN'}`, so the six codes this
+      // walk can refuse with appeared nowhere in the source, one of the six
+      // was asserted, and a reader of the file could not list the other five.
+      incomplete_code: incomplete ? incomplete.code : null,
       incomplete_line: incomplete ? incomplete.line : null,
       requested_hours: hours,
       pages: pages.length,
@@ -327,8 +335,17 @@ export function ratioFault(c) {
   const reached = c.oldest_ts
     ? `the read reached back to ${c.oldest_ts}, ${c.covered_hours} of the ${c.requested_hours} hours asked for`
     : 'the read reached no rows at all';
+  // Forwarded, never built. A receipt from a walk older than this field is
+  // the only way to reach the fallback, and it gets its own literal so that
+  // the code is in this file either way.
+  if (!c.incomplete_code) {
+    return {
+      code: 'COVERAGE_UNKNOWN',
+      line: `I could not look at the whole window and the receipt does not say which check stopped the walk, so no share is published: ${c.incomplete_line}. ${reached}`,
+    };
+  }
   return {
-    code: `COVERAGE_${c.incomplete_reason || 'UNKNOWN'}`,
+    code: c.incomplete_code,
     line: `I could not look at the whole window, so no share is published: ${c.incomplete_line}. ${reached}. A cap returns the NEWEST rows, so what is missing is the oldest part of the window and the composition of the part that is missing is unknown; counts from this read are floors and shares from it are not bounded in either direction`,
   };
 }

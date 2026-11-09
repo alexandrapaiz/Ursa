@@ -63,8 +63,16 @@ scratch/
 # written. Every one of them was a run writing a ship-first placeholder at
 # its own opening, which is the moment the run is holding its wake payload.
 #
+# Python bytecode. This repository had no Python outside `docs/design/` until
+# the vendored secret-print guard landed on 2026-11-09, and running its test
+# suite writes `tools/tests/__pycache__/`. `__pycache__` is not a dot-entry,
+# so the inverted root rule below does not reach it, and this run committed a
+# 53 KB `.pyc` once before noticing.
+__pycache__/
+*.pyc
+
 # So the rule is inverted. Every root-level dot-entry is ignored and the
-# three this repository actually commits are named back in. That needs no
+# four this repository actually commits are named back in. That needs no
 # prediction about the next name a run invents, and it costs nothing: in
 # the whole history of this repository the only root-level entries that are
 # not dot-entries are the twelve real ones, so the inversion has never had
@@ -77,3 +85,15 @@ scratch/
 !/.gitignore
 !/.gitattributes
 !/.github/
+!/.claude/
+
+# `.claude/` is negated above so one tracked file can live there: the
+# PreToolUse registration in `.claude/settings.json`, which is the whole
+# reason the secret-print guard runs at all. The negation on its own
+# un-ignores the entire directory, and the harness writes session
+# transcripts, prompt history and local permission overrides into it. So
+# the directory is re-ignored here and the one tracked file named back in,
+# which is the same inverted rule this file argues for above, applied one
+# level down.
+/.claude/*
+!/.claude/settings.json

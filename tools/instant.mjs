@@ -64,6 +64,66 @@
 // *and* routes every comparison through this module, because either one
 // alone leaves a live hole.
 //
+// THE FOURTH VALUE CLASS, AND WHY IT NEEDED ITS OWN FUNCTIONS (2026-11-09).
+// A bare calendar day, `2026-11-09`, is not a badly spelled instant. It is a
+// different unit: it names a day with no zone and no time, which is the form
+// the holding company's register console writes and parses. Until today this
+// module classified one as `invalid`, which is true of `parseInstant` and was
+// false as a description of the value, and the cost was paid by the lint
+// rather than by the module.
+//
+// The lint's `TEXTUAL_ORDER` repair line named `isAfter`, `isBefore` and
+// `compareInstants`. All three REFUSE a bare day on purpose: `compareInstants`
+// answers null and both predicates answer false in both directions. So on a
+// field named `date` that holds a day — `tools/seat/read-dates.mjs` has 115
+// such entries and no other form of the field — the lint was correct about the
+// defect and named a repair that silently produces no ordering at all. A guard
+// whose repair does not work on the value it caught gets worked around, and
+// the ExO seat's note of 2026-11-09 01:06Z is it being worked around: that
+// seat shipped a private `compareDays` because this module had none.
+//
+// So: `parseDay`, `compareDays`, `isDayAfter`, `isDayBefore`, `sortByDay`,
+// mirroring the instant five. The refusal is now SYMMETRIC, which is the
+// property worth having. The instant functions refuse a day, the day functions
+// refuse an instant, and neither coerces. A caller holding an instant who
+// wants day granularity writes the projection out loud:
+//
+//     compareDays(utcDay(gitDate), utcDay(apiDate))
+//
+// WHY `compareDays` PARSES RATHER THAN COMPARING TEXT. Text order IS day order
+// for a zero-padded `YYYY-MM-DD`, so a string compare would have been correct
+// and is why `tools/seat/outage.mjs` compares `r.day` as text and passes this
+// lint clean. It is still not what this module should ship, for one reason:
+// a string compare cannot tell `2026-02-30` from a day. `Date.parse` cannot
+// either — it answers 1772409600000, silently rolling the value to March 2 —
+// so `parseDay` round-trips through `Date.UTC` and refuses what does not come
+// back unchanged. Ordering and existence get decided in one call.
+//
+// THE NAMING CONVENTION, STATED HERE BECAUSE THE LINT HAS BEEN RELYING ON IT
+// UNWRITTEN. `TIMESTAMP_NAME` below matches `date`, `Date`, `At`, `ts` and
+// `time`, and does NOT match `day`. That is why `tools/seat/outage.mjs`
+// compares or sorts day strings as text on seven lines — 212, 234, 266, 317,
+// 328, 356, 362, eight comparisons, since 266 carries two — and is reported by
+// nothing, and is right anyway. The convention the lint's accuracy depends on
+// is therefore:
+//
+//   a field named `date`/`Date`/`At`/`ts`/`time` carries an INSTANT, and a
+//   field carrying a bare calendar day is named `day`.
+//
+// AND THE CONVENTION IS LOOSER THAN THAT IN PRACTICE, which is worth knowing
+// before anyone leans on it. Two of those seven lines, 328 and 362, order a
+// field named `last`, which holds a bare day and is matched by no alternative
+// in the pattern either. So the lint's silence on a day is not evidence that
+// the author followed a convention; it is evidence that the author did not use
+// one of five particular words. Those two lines are correct, and nothing in
+// the tooling would have told anybody if they were not.
+//
+// It was a convention nothing stated, which is the defect the ExO seat
+// actually found. Stating it is half the repair; the other half is that
+// `TEXTUAL_ORDER`'s repair text now names which of its repairs applies to
+// which shape, and narrows to the day branch whenever the offending line
+// carries its own evidence of a day (see `dayEvidence`).
+//
 // RELATED AND DELIBERATELY NOT MERGED WITH THIS.
 // `tools/board/measured-citation.mjs` has an `isInstant` that REFUSES an
 // offset and demands `Z`. That is correct there and would be wrong here: the
@@ -72,6 +132,11 @@
 // whatever offset the committer had. Same family, opposite verdict on the
 // same string, so they stay two functions. `timestampShape` is the field
 // that lets a caller see which regime a value is in.
+
+/** A zero-padded calendar day with no time and no zone, which is what the
+ *  holding company's register console writes. Spelling only: `2026-02-30`
+ *  matches and `parseDay` refuses it. */
+const BARE_DAY = /^\d{4}-\d{2}-\d{2}$/
 
 /** The offset-bearing or Z-suffixed forms this repository's producers emit. */
 const ISO_WITH_ZONE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?(Z|[+-]\d{2}:?\d{2})$/
@@ -85,12 +150,25 @@ const ISO_WITH_ZONE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\
  *   'utc-offset'  2026-11-02T04:34:57+00:00     git at TZ=UTC
  *   'offset'      2026-11-01T23:34:57-05:00     git anywhere else
  *   'naive'       2026-11-02T04:34:57           no zone: unplaceable
- *   'invalid'     anything else, including a bare day
+ *   'day'         2026-11-02                    a calendar day, not an instant
+ *   'invalid'     anything else
+ *
+ * `'day'` IS NOT `'invalid'`, AS OF 2026-11-09, and the difference is the
+ * whole repair described in this file's header. A bare day is a well-formed
+ * value of a different class, so a caller that gets `'day'` back knows to
+ * route to `compareDays` rather than that its input is garbage. The three
+ * instant comparators are UNCHANGED by this: `parseInstant` names `'day'`
+ * among the shapes it refuses, so `compareInstants` on two days still answers
+ * null and both predicates still answer false.
+ *
+ * Spelling only, like the instant branch below it. `'2026-02-30'` is a `'day'`
+ * here and is refused by `parseDay`, which is where existence is decided.
  */
 export function timestampShape (value) {
   if (typeof value !== 'string') return 'invalid'
   const m = ISO_WITH_ZONE.exec(value)
   if (!m) {
+    if (BARE_DAY.test(value)) return 'day'
     return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,9})?)?$/.test(value) ? 'naive' : 'invalid'
   }
   const zone = m[7]
@@ -103,10 +181,17 @@ export function timestampShape (value) {
  * itself on the line. A 'naive' string returns null rather than being read
  * as UTC: reading it as UTC is defect 3, and guessing silently is how a
  * four-hour error gets reported as health.
+ *
+ * A `'day'` is refused for the same reason and the refusal is NAMED here
+ * rather than inherited. Before 2026-11-09 a bare day reached this line as
+ * `'invalid'` and got the same null by accident; now it is listed, so the
+ * contract "the instant functions do not place a day" is a line of code that
+ * a reader can find and a test can pin, instead of a side effect of how
+ * `timestampShape` happened to classify it. Use `parseDay` for a day.
  */
 export function parseInstant (value) {
   const shape = timestampShape(value)
-  if (shape === 'invalid' || shape === 'naive') return null
+  if (shape === 'invalid' || shape === 'naive' || shape === 'day') return null
   const ms = Date.parse(value)
   return Number.isNaN(ms) ? null : ms
 }
@@ -186,6 +271,113 @@ export function sortByInstant (rows, key) {
     .map((e) => e.row)
 }
 
+// --- days, which are a unit and not a degraded instant -------------------
+//
+// Five functions mirroring the five above them, one shape narrower. They exist
+// because the lint above caught a real textual sort over a field holding bare
+// days and prescribed three functions that all refuse that value. See this
+// file's header, "THE FOURTH VALUE CLASS".
+
+/**
+ * Milliseconds at UTC midnight of a bare calendar day, or null.
+ *
+ * Refuses three things and each refusal has a reason:
+ *
+ *   1. Anything that is not exactly `YYYY-MM-DD`. An INSTANT included, and
+ *      that is the point of the function rather than a limitation of it. A
+ *      caller holding `2026-11-02T04:34:57Z` and wanting its day writes
+ *      `utcDay(value)` first, out loud, because which calendar an instant
+ *      falls in is a question with a real answer and this function will not
+ *      pick one silently.
+ *   2. A day that does not exist. `Date.parse('2026-02-30')` answers
+ *      1772409600000 — it rolls the value forward to March 2 and tells
+ *      nobody — so the round-trip through `Date.UTC` below is not belt and
+ *      braces, it is the only check that fires. `2026-02-30` and `2026-13-01`
+ *      both return null here.
+ *   3. A two-digit-mapped year. `Date.UTC(0, 0, 1)` is 1900-01-01, a legacy
+ *      mapping in the language, so `0000-01-01` would otherwise have come back
+ *      as a placeable day 1900 years from where it was written. The same
+ *      round-trip catches it.
+ *
+ * WHY MIDNIGHT UTC AND NOT MIDNIGHT ANYWHERE ELSE. A day has no zone, so any
+ * instant chosen for it is a convention. This one is only ever used to order
+ * and subtract days against each other, where the choice cancels. It is not a
+ * licence to compare the result against an instant: that comparison asks what
+ * zone the day was written in, which the value does not carry. The module
+ * refuses to answer questions the value cannot answer, which is the same rule
+ * that makes `'naive'` unplaceable.
+ */
+export function parseDay (value) {
+  if (typeof value !== 'string' || !BARE_DAY.test(value)) return null
+  const year = Number(value.slice(0, 4))
+  const month = Number(value.slice(5, 7))
+  const day = Number(value.slice(8, 10))
+  const ms = Date.UTC(year, month - 1, day)
+  if (!Number.isFinite(ms)) return null
+  const back = new Date(ms)
+  if (back.getUTCFullYear() !== year) return null
+  if (back.getUTCMonth() + 1 !== month) return null
+  if (back.getUTCDate() !== day) return null
+  return ms
+}
+
+/**
+ * Negative, zero or positive, as `Array.prototype.sort` wants. Null when
+ * either side is not a bare calendar day, exactly as `compareInstants`
+ * answers null for a value it will not place.
+ *
+ * WHY NULL AND NOT A THROW, which is where this differs from the ExO seat's
+ * private `compareDays` in `tools/seat/read-dates.mjs`. That one throws a
+ * `TypeError` naming `compareInstants`, and the pointer is a genuinely better
+ * teacher at the moment it fires. It is still the wrong convention for this
+ * module: every refusal here is a null or a false, so one function that exits
+ * by exception means a caller cannot route the five uniformly, and a sweep
+ * tool that lints a corpus of other seats' values would die on the first bad
+ * row instead of reporting it. The pointer is kept, moved to where it cannot
+ * crash a caller: the lint's `TEXTUAL_ORDER` repair text now names the shape
+ * each repair applies to.
+ *
+ * THE HAZARD THIS SHARES WITH `compareInstants`, named because it is the
+ * reason `sortByDay` exists. `null` handed to `Array.prototype.sort` coerces
+ * to 0, which reads as "equal" and leaves the rows in place, so a comparator
+ * that refuses its input produces an unsorted array and no error. Use
+ * `sortByDay` for a sort; use this one where you can read the null.
+ */
+export function compareDays (a, b) {
+  const x = parseDay(a)
+  const y = parseDay(b)
+  if (x === null || y === null) return null
+  return x < y ? -1 : x > y ? 1 : 0
+}
+
+/** Strictly a later day. False when either side is not a day: absent, not true. */
+export function isDayAfter (a, b) {
+  return compareDays(a, b) === 1
+}
+
+/** Strictly an earlier day. False when either side is not a day. */
+export function isDayBefore (a, b) {
+  return compareDays(a, b) === -1
+}
+
+/**
+ * Ascending by calendar day, stable, with rows this module will not place kept
+ * and sorted last in their original order. Returns a new array. `key` reads
+ * the day off a row. This is the repair for the finding that produced the
+ * whole day family: a `.sort(...localeCompare...)` over a field of bare days.
+ */
+export function sortByDay (rows, key) {
+  return rows
+    .map((row, i) => ({ row, i, ms: parseDay(key(row)) }))
+    .sort((a, b) => {
+      if (a.ms === null && b.ms === null) return a.i - b.i
+      if (a.ms === null) return 1
+      if (b.ms === null) return -1
+      return a.ms === b.ms ? a.i - b.i : a.ms - b.ms
+    })
+    .map((e) => e.row)
+}
+
 // --- the lint, because a rule nobody can grep for is not enforced --------
 
 /**
@@ -244,12 +436,47 @@ const TIMESTAMP_NAME =
  * Three codes, matching the three defects in this file's header:
  *
  *   TEXTUAL_ORDER   a relational operator or `localeCompare` between two
- *                   timestamp-named operands
+ *                   timestamp-named operands. Its repair names both the
+ *                   instant functions and the day functions, because the
+ *                   lint cannot see which the field holds; see below.
  *   TEXTUAL_DAY     `slice(0, 10)` or `substring(0, 10)` on one
  *   TEXTUAL_DROP    `slice(0, 19)` immediately re-suffixed with a zone
  *
  * A line carrying `instant.mjs`-sourced calls is not a finding, which is how
  * the repaired call sites stay clean without an inline suppression comment.
+ *
+ * WHY `TEXTUAL_ORDER` NAMES TWO SETS OF REPAIRS RATHER THAN ONE (2026-11-09).
+ * This is a NAME-shape lint, so it knows a field is called `date` and cannot
+ * know whether that field holds `2026-11-02T04:34:57Z` or `2026-11-02`. The
+ * two take different repairs and the instant repair silently produces no
+ * ordering on a day, so a single-branch repair line sent one of the two
+ * classes somewhere that refuses it. It now names both and says how to tell.
+ *
+ * AND WHY IT IS NOT NARROWED AUTOMATICALLY, which was the first thing tried.
+ * The idea was to read the offending line for its own evidence of a day — a
+ * `'2026-11-09'` literal, or a `slice(0, 10)` — and print only the matching
+ * branch. Measured against the patterns below, on 2026-11-09, it does not
+ * work in either direction:
+ *
+ *   - A day literal can never be an operand the relational pattern sees. Its
+ *     operand class starts `[A-Za-z_$]`, so the leading quote excludes it, and
+ *     `r.date > '2026-11-09'` matches nothing at all today. The narrowing
+ *     would have had no reachable true case.
+ *   - A `slice(0, 10)` on the line is consumed by `TEXTUAL_DAY` above, which
+ *     returns before either order branch runs, whenever the sliced receiver is
+ *     timestamp-named — and when it is not, neither order pattern fires.
+ *   - Line-level evidence is positively WRONG on the one shape that does
+ *     reach it: a relational compare of two `createdAt` values, on a line that
+ *     also carries an equality test against a `'2026-11-09'` literal, is a
+ *     genuine INSTANT comparison on a line that merely mentions a day, and
+ *     evidence-based narrowing prints the day repair for it. That shape is
+ *     written out as code in `instant.test.mjs` rather than here, because
+ *     written here it is a finding of this very lint — which this module's own
+ *     two self-checks catch, and did.
+ *
+ * So the shape stays a question for the reader, and the repair line's job is
+ * to make sure the reader knows it is being asked. Deciding it statically
+ * needs types, which plain `.mjs` does not have.
  */
 export function textualTimestampComparisons (source) {
   const out = []
@@ -257,7 +484,11 @@ export function textualTimestampComparisons (source) {
   lines.forEach((text, i) => {
     const line = i + 1
     const bare = text.replace(/\/\/.*$/, '')
-    if (/\b(?:parseInstant|compareInstants|isAfter|isBefore|utcDay|sortByInstant|parseEpochSeconds|toUtcInstant)\s*\(/.test(bare)) return
+    // The day five are listed beside the instant five as of 2026-11-09, so a
+    // site repaired with `compareDays` is clean for the same reason a site
+    // repaired with `compareInstants` is. Without them the lint would have gone
+    // on reporting the very line its own repair text now prescribes.
+    if (/\b(?:parseInstant|compareInstants|isAfter|isBefore|utcDay|sortByInstant|parseEpochSeconds|toUtcInstant|parseDay|compareDays|isDayAfter|isDayBefore|sortByDay)\s*\(/.test(bare)) return
     // `new Date().toISOString()` is UTC by construction, so a day sliced off
     // the end of one is the UTC day and is not defect 2. This is the only
     // exemption in the lint and it is a producer exemption, not a name one.
@@ -290,7 +521,7 @@ export function textualTimestampComparisons (source) {
         code: 'TEXTUAL_ORDER',
         line,
         text: text.trim(),
-        repair: `isAfter/isBefore/compareInstants: '${relational[2]}' between two timestamp strings compares spellings, not instants`
+        repair: `instants: isAfter/isBefore/compareInstants. Bare days ('2026-11-09'): isDayAfter/isDayBefore/compareDays, since the instant three refuse a day and answer null, false, false. '${relational[2]}' between two timestamp strings compares spellings, not instants`
       })
       return
     }
@@ -300,7 +531,7 @@ export function textualTimestampComparisons (source) {
         code: 'TEXTUAL_ORDER',
         line,
         text: text.trim(),
-        repair: 'sortByInstant(rows, key): localeCompare orders spellings, and git and the GitHub API spell the same instant differently'
+        repair: 'instants: sortByInstant(rows, key). Bare days (\'2026-11-09\'): sortByDay(rows, key), since sortByInstant refuses a day and would sort every row last in input order. localeCompare orders spellings, and git and the GitHub API spell the same instant differently'
       })
     }
   })

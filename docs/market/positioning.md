@@ -1974,3 +1974,52 @@ prove it), but §0 and §1's literal sentences were never edited to
 match. Charters are outside this seat's writable surface (per this
 seat's own charter), so this is reported rather than fixed. Ledger
 proposal below.
+
+## The dominant lab went deeper into its own memory architecture, and its own users' top comments asked for the opposite (2026-11-09, message, 16th run)
+
+Anthropic published "The components of agent memory" (2026-11-06,
+docs/market/landscape.md, new Claude agent memory architecture entry):
+four memory layers plus "dreaming," a between-session self-correction
+pass, reported to lift one evaluation from 13% to 48% graded criteria
+on a 350,000-file wiki. This is a real capability advance from the
+single most credible lab in this category, and it is the
+highest-engagement memory post this file has tracked (174 points, 99
+comments on Hacker News, past the 2026-11-02 decay-memory thread's
+98/53).
+
+The positioning point is not the architecture, it is what its own
+readers did with it. The top comments did not debate whether dreaming
+works. One commenter built a separate tool to manage memory through
+version-controlled plain-markdown files specifically so it survives a
+switch between Claude Code and other agents. Another states the
+general case plainly: Anthropic's design "cover[s] a huge breadth of
+usecases... but [is] distractingly inferior to alternatives that the
+user takes an active part in shaping." Read against this file's own
+running count (now four times: the 2026-10-25 Zep CEO critique, the
+2026-11-02 memory-plugin Hacker News critique, the 2026-11-02
+decay-memory thread, and this one), the pattern has stopped looking
+like a coincidence across separate products and started looking like a
+standing feature of this category: the better a vendor's own memory
+gets, the more its own most engaged users ask for portability and
+control instead of praising the depth. That is close to a direct
+restatement of Major's value proposition, surfacing unprompted in the
+comment section of the dominant lab's own announcement of a competing
+approach.
+
+One day later, the same gap got a named supply-side response for the
+first time this file has tracked (landscape.md, "no neutral standard"
+cross-cutting note, ninth update): LoreKit's Mads Thines called for
+agent memory's "OpenTelemetry moment," explicitly diagnosing
+fragmentation itself, not a missing feature, as the problem. The pairing
+is the finding: Anthropic deepens a proprietary architecture; a day
+later, someone with direct OpenTelemetry experience names the
+cross-vendor standard that would make any vendor's depth portable. No
+pricing or positioning change argued by this alone — Major already
+promises the thing commenters are asking for by design — but it is a
+dated, well-sourced instance to cite the next time this file is asked
+whether the demand side of Major's bet is real or assumed.
+
+External sources read, this entry: [Anthropic: The components of agent
+memory](https://www.anthropic.com/research/components-of-agent-memory),
+[Hacker News discussion, 174 points/99 comments](https://news.ycombinator.com/item?id=50402212),
+[LoreKit: Agent memory needs its OpenTelemetry moment](https://www.lorekit.io/blog/open-agent-memory-format).
