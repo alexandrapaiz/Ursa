@@ -70,35 +70,44 @@ const DETECTOR = 'tools/instant.mjs'
  * rather than a clean tree: an absence is a measurement and it needs a
  * control (this charter's §6, 2026-10-26).
  */
-export const PROBES = [
-  'if (a.createdAt < b.createdAt) { return -1 }',
-  'rows.sort((a, b) => a.date.localeCompare(b.date))',
-  'const day = row.mainDate.slice(0, 10)',
-  "const at = row.generatedAt.slice(0, 19) + 'Z'"
-]
+const CORPUS = JSON.parse(readFileSync(resolve(REPO_ROOT, 'tools/instant-gate.json'), 'utf8'))
 
 /**
- * Every code the detector can emit. Declared ∪ observed, and neither alone:
+ * Lines that provably trip each defect the lint names: the positive control,
+ * and half of the code census. If driving the detector over these returns
+ * nothing, this tool reports exit 2 rather than a clean tree, because an
+ * absence is a measurement and it needs a control (charter §6, 2026-10-26).
  *
- *   declared — the `code:` literals in the detector's own source. Catches a
- *              code whose trigger no probe here happens to hit.
- *   observed — what the detector actually returns when driven. Catches a code
- *              built by expression rather than written as a literal.
- *
- * The union is the obligation. A disposition for a code nobody can emit is
- * harmless; a code nobody decided is the defect this file closes.
+ * In `tools/instant-gate.json` rather than here, with the reason in that
+ * file's own header: every string in it is a line that trips the lint, so
+ * holding them as source made this file the largest offender in the tree.
  */
-export function emittableCodes (detectorSource, probes = PROBES) {
-  const declared = [...detectorSource.matchAll(/\bcode:\s*'([A-Z_]+)'/g)].map((m) => m[1])
-  const observed = probes.flatMap((line) => textualTimestampComparisons(line).map((f) => f.code))
-  return { declared: [...new Set(declared)].sort(), observed: [...new Set(observed)].sort(), codes: [...new Set([...declared, ...observed])].sort() }
-}
+export const PROBES = CORPUS.probes
 
 /**
- * What this repository has decided about each code. `forbidden` outside a
- * test file, with or without an allowlist. Nothing else is a disposition: a
- * code mapped to a reason for ignoring it is still a decision and still
- * printed, but there is no state here that means "not looked at".
+ * Lines cleared by argument. `file` and `text` must both match a finding
+ * exactly, after trimming.
+ *
+ * KEYED ON THE LINE'S OWN TEXT, which is the security seat's own proposal and
+ * better than the two alternatives. A line number rots on the next edit
+ * anywhere above it. A file name clears every future slice in that file,
+ * which is this hole again at file granularity. The text is the thing being
+ * argued for, so moving the line keeps it cleared and CHANGING the line costs
+ * a fresh argument.
+ *
+ * `tools/instant.mjs`'s own `utcDay` is NOT in it, and the first draft of this
+ * file put it there. The stale-entry check printed it on the first run: that
+ * line carries `toUtcInstant(` and the detector's own caller exemption already
+ * clears it, so the entry argued for a finding that does not exist. That is
+ * the check working on its author before anything else.
+ */
+export const ALLOWLIST = CORPUS.allowlist
+
+/**
+ * What this repository has decided about each code. `forbidden` outside a test
+ * file, with or without an allowlist. Nothing else is a disposition: there is
+ * no state here that means "not looked at", which is the state TEXTUAL_DAY was
+ * in.
  */
 export const DISPOSITIONS = {
   TEXTUAL_ORDER: {
@@ -114,7 +123,7 @@ export const DISPOSITIONS = {
   TEXTUAL_DAY: {
     forbidden: true,
     allowlisted: true,
-    why: 'the committer local day is not the UTC day on 143 of this repository 2,134 commits; display columns that mean the local day are argued for by name below'
+    why: 'the committer local day is not the UTC day on 143 of this repository 2,134 commits; display columns that mean the local day are argued for by name in the corpus file'
   }
 }
 
@@ -127,60 +136,27 @@ export const DISPOSITIONS = {
 export const TEST_FILE = /\.test\.(mjs|js|cjs|ts|tsx)$/
 
 /**
- * Lines cleared by argument. `file` and `text` must both match a finding
- * exactly, after trimming. Each `why` is the argument; a reader who disagrees
- * with one deletes the entry and the gate goes red until somebody repairs the
- * line.
+ * Every code the detector can emit. Declared ∪ observed, and neither alone:
+ *
+ *   declared — the `code:` literals in the detector's own source. Catches a
+ *              code whose trigger no probe here happens to hit, which is the
+ *              exact shape of the defect this gate closes.
+ *   observed — what the detector actually returns when driven over the probe
+ *              corpus. Catches a code built by expression rather than written
+ *              as a literal, and doubles as the positive control.
+ *
+ * The union is the obligation. A disposition for a code nobody can emit is
+ * harmless; a code nobody decided is the hole.
  */
-export const ALLOWLIST = [
-  // `tools/instant.mjs`'s own `utcDay` is NOT here, and the first draft of
-  // this file put it here. The stale-entry check printed it on the first run:
-  // the line carries `toUtcInstant(` and the detector's own caller exemption
-  // already clears it, so the entry argued for a finding that does not exist.
-  // That is the check working on its author before anything else — an
-  // allowlist entry is a claim about the tree, and a claim nobody re-derives
-  // is how the next window inherits a defect that was already fixed.
-  {
-    file: 'ursa-major/src/episodes.ts',
-    text: 'id: `${slug}-${p.generatedAt.slice(0, 10)}-${p.generatedSha.slice(0, 7)}`,',
-    why: 'Episode.id is a record identifier already written to this repository trial artifacts; changing the day changes published ids'
-  },
-  {
-    file: 'ursa-major/overlay/app/dashboard/page.tsx',
-    text: 'return iso.slice(0, 10)',
-    why: 'display: the dashboard day column, which means the day the owner would say the work happened'
-  },
-  {
-    file: 'ursa-major/src/parse.ts',
-    text: 'date: firstTs?.slice(0, 10),',
-    why: 'display: the parsed record day, rendered beside the local-time conversation it came from'
-  },
-  {
-    file: 'ursa-major/src/publish.ts',
-    text: "cell('when', 'Resolved', escapeHtml(r.generatedAt.slice(0, 10))),",
-    why: 'display: the Resolved column of the published table'
-  },
-  {
-    file: 'ursa-major/src/viewer.ts',
-    text: "meta.textContent = 'generated ' + R.task.generatedAt.slice(0, 10) + ' · ' + R.files.length + ' files · ' + R.generations.length + ' generations · ' + R.conversations.length + ' conversation' + (R.conversations.length === 1 ? '' : 's');",
-    why: 'display: the viewer meta line'
-  },
-  {
-    file: 'ursa-minor/components/record/published-site.tsx',
-    text: 'index.publishedAt ? `published ${index.publishedAt.slice(0, 10)}` : "",',
-    why: 'display: the published-site index caption'
-  },
-  {
-    file: 'ursa-minor/components/record/published-site.tsx',
-    text: '{s.generatedAt ? s.generatedAt.slice(0, 10) : "undated"}',
-    why: 'display: the published-site record row'
-  },
-  {
-    file: 'ursa-minor/components/record/record-view.tsx',
-    text: '`resolved ${record.task.generatedAt.slice(0, 10)}`,',
-    why: 'display: the record view resolved caption'
+export function emittableCodes (detectorSource, probes = PROBES) {
+  const declared = [...detectorSource.matchAll(/\bcode:\s*'([A-Z_]+)'/g)].map((m) => m[1])
+  const observed = probes.flatMap((line) => textualTimestampComparisons(line).map((f) => f.code))
+  return {
+    declared: [...new Set(declared)].sort(),
+    observed: [...new Set(observed)].sort(),
+    codes: [...new Set([...declared, ...observed])].sort()
   }
-]
+}
 
 function cleared (finding) {
   return ALLOWLIST.find((e) => e.file === finding.file && e.text === finding.text.trim()) ?? null
