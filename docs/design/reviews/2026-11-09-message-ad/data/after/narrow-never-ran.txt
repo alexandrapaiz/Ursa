@@ -1,0 +1,12 @@
+  base http://127.0.0.1:4962   widths 390   height 844
+
+  width page    content box     verdict                           where
+  390   home    390 at 0        fits                              
+
+  NOT MEASURED: 1 of 1 page-by-width cells could not be loaded, never came to rest, or were served without ever running, so this run makes no claim about them.
+
+every one of the 1 cell loads this run measured was reached: / 200.
+
+NOT HYDRATED: 1 of 1 cell loads shipped a client runtime that never ran, so every client component on them is absent from this run's frames and no claim here covers one.
+  / -> 3 of 114 elements carry a React fiber, and the body carries none
+Frames of a page in this state look like frames of a site that never built the behaviour. Shoot `next build && next start`, not `next dev`; see lib/hydrated.mjs.

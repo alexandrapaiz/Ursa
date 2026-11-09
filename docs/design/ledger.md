@@ -3474,3 +3474,104 @@ explanation and the gate is the memory.
 This is a candidate for canon rather than canon, per this file's header,
 and it generalises past the frontend lane, so it is worth the owner's eye
 before anyone states it as a standard.
+
+## L80 — A reserved refusal code is not a routed one, and the premise added last is the one that is not
+
+**measured**, 2026-11-09 (run ad), answering Ursa's exo seat. L79 above
+closed with the open item: the hydration gate was wired into `shoot.mjs`
+only, and the other browser-driving tools still measured whatever they
+were pointed at. Exo's note arrived with the general form of why that
+happens, measured on its own file:
+
+> A status channel needs a code RESERVED for the refusal, and reserving
+> one is necessary and not sufficient. Each premise has to be routed to
+> it, and the premise added last is the one that is not.
+
+Measured on this kit. `lib/reached.mjs` reserved exit 2 in run w and six
+of nine page-driving instruments route to it. `lib/hydrated.mjs` reserved
+the same 2 four hours later in run ac and one of nine did. Eleven of
+eighteen premise/instrument pairs acquired a premise and never read it.
+
+**What makes this the entry and not a repair note.** Routing the premise
+into seven files by hand fixes today, because the eighth premise will be
+added the way the second was. So the shape of the repair is the content of
+the entry:
+
+- **`lib/verdict.mjs` holds the premise list and nothing else does.**
+  `premises()` acquires every premise on that list in one call and decides
+  on all of them. Adding an entry routes it in every instrument that uses
+  the bundle, and no instrument is edited.
+- **One call returns the status and the words.** Exo's own repair put the
+  exit and the printed line in one function "so the status and the report
+  cannot disagree". This kit had paid for the split version twice: a run
+  of `measure-focus.mjs` printed a passing headline and refused on the
+  next line, and a gate's prose survived three layers of carriage that
+  each reported zero.
+- **A gate fails for the next one.**
+  `selftest/check-premise-routing.mjs` names any page-driving instrument
+  that acquires a premise without reading it, and refuses with its own 2
+  when `PREMISES` names something it has no signal for, rather than
+  printing a clean table that silently skips it.
+
+**The in-band case, in full, because it is the part no test over today's
+data catches.** `measure-focus.mjs` against the production build and
+against `next dev`, home page, desktop: 6 focusable elements against 5, 28
+stops with an area reading against 27, a new `UNDECLARED` verdict where
+`CopyLine`'s accessible name should be, and the byte-identical headline
+`0 of 28 tab stops below a floor` at exit 0 both times. Nothing is below a
+floor on either page, so the number is true and carries no information. It
+is right by luck and the luck is that the real answer is zero.
+
+**Two findings the same question produced, neither of which was the
+question.** `measure-focus.mjs` counted `UNDECLARED` and `GONE_FROM_DOM`
+in its per-verdict tally and in neither its headline nor its status, which
+is the defect its own 2026-11-02 comment says it fixed. And
+`verify-hover.mjs`'s only reading of hydration was a thrown error offering
+two causes at once, "the form is not hydrated or the address is rejected",
+at node's exit 1 for an uncaught throw.
+
+Evidence: `reviews/2026-11-09-message-ad/data/premise-routing.txt`, three
+instruments driven at all three states, before columns taken from a
+pristine checkout of the pre-run kit rather than from this branch reverted.
+
+## L81 — A check's own premise is a premise, and on this host the port it binds belongs to eleven seats
+
+**measured**, 2026-11-09 (run ad), found by applying L80's question one
+layer out and paid for while this run was working.
+
+Four of the kit's selftests start a fixture server on a fixed port and
+route a bind failure through a bare `catch` to exit 1, which is the status
+those same files use for *the instrument under test answered wrongly*.
+Port 4975 was held by another seat's `python3`, pid 1416700, so
+`selftest/check-narrow.mjs` printed `Error: fixture never answered` and
+exited 1. Verified on a pristine checkout of the pre-run kit:
+byte-identical, so it is the host and not this run's edits.
+
+**Why this is worth an entry.** The false green and the false red are the
+same defect read from two sides, and the red is the more expensive one
+here, because it points a reader at a bug in the instrument under test.
+A run that trusted it would have gone looking in `measure-narrow.mjs`.
+
+**And it is a fact about this host nobody had written down.**
+`docs/agents/runner-facts.md` carries `tmp-is-shared-between-seats`: a
+charter-named scratch path is another seat's path too. The port space is
+the same fact with a different resource in it, and the eleven seats share
+0.0.0.0 exactly the way they share `/tmp`. The remedy in
+`lib/fixture-server.mjs` is to ask the operating system for the port
+rather than naming one, and to give a premise failure the reserved code.
+
+One measurement inside it, because the obvious implementation is wrong on
+this host: a `fetch` to a port nothing listens on returns `TimeoutError`
+with `err.cause` undefined, so the refusal is not distinguishable from a
+slow service by reading the error. A raw socket returns `ECONNREFUSED`.
+The first version read the fetch error, called every empty port occupied,
+and refused twenty times in a row, which is the over-refusal trap
+`lib/reached.mjs` states as an expectation and exo named as the one it
+nearly shipped.
+
+`check-narrow` goes from 1 to 0 with all seven expectations holding;
+`check-contrast`, `check-hit-areas` and `check-reached` stay 0.
+
+**Offered for the owner's eye as a candidate for the runner-facts
+register rather than for this file.** The port claim is not a frontend
+fact and the register is not this seat's to write.

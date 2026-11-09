@@ -1,0 +1,8 @@
+  base http://127.0.0.1:43165   widths 390   height 844
+
+  width page    content box     verdict                           where
+
+  NOT MEASURED: 1 of 1 page-by-width cells could not be loaded or never came to rest, so this run makes no claim about them.
+
+  COULD NOT LOAD
+  390 home (/): page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:43165/

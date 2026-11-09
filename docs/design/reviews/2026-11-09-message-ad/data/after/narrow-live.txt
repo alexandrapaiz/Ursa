@@ -1,0 +1,10 @@
+  base http://127.0.0.1:4961   widths 390   height 844
+
+  width page    content box     verdict                           where
+  390   home    390 at 0        fits                                [bleed: canvas.pointer-events-none -9.7..400]
+
+  0 of 1 page-by-width cells put content out of reach; 0 overflow reachably; 1 carry decoration that bleeds on purpose and is not counted.
+
+every one of the 1 cell loads this run measured was reached: / 200.
+
+every one of the 1 cell loads that shipped a client runtime had hydrated when this run measured it.

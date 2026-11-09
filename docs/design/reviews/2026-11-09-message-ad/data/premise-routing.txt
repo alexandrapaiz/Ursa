@@ -1,0 +1,108 @@
+# Premise routing across the review kit, before and after run ad
+# 2026-11-09, ursa-minor built with `next build`, served three ways.
+#
+# The columns are the three states a page-driving instrument can be given,
+# and the third one is the subject of this run.
+#
+#   live        `next start` on 4961. 88 of 103 elements carry a React fiber,
+#               the body carries one.
+#   never-ran   `next dev` on 4962. HTTP 200, the right HTML, the right type,
+#               and 3 of 114 elements fibered with the body carrying none.
+#   unreached   a port confirmed empty over a socket.
+#
+# Probe, same instrument on both servers, 3s after networkidle:
+#
+#                  runtime shipped   body hydrated   fibers
+#   next start           yes             yes          88 / 103
+#   next dev             yes             no            3 / 114
+
+## Static routing, from selftest/check-premise-routing.mjs
+
+                        before run ad          after run ad
+  pairs                 18                     18
+  instruments            9                      9
+  reached   routed       6 of 9                 9 of 9
+  hydrated  routed       1 of 9                 9 of 9
+  UNROUTED              11 of 18                0 of 18
+
+The asymmetry is the finding, not the count. `lib/reached.mjs` reserved
+exit 2 on 2026-11-09 (run w) and six instruments route to it. `lib/hydrated.mjs`
+reserved the same 2 the same day, four hours later (run ac), and one
+instrument routed to it. The premise added last is the one that is not.
+
+## Measured, not inferred: three instruments driven at all three states
+
+                          before              after
+  measure-focus
+    live                  exit 0  headline    exit 0  headline
+    never-ran             exit 0  headline    exit 2  refusal
+    unreached             exit 2  refusal     exit 2  refusal
+  measure-narrow
+    live                  exit 0  headline    exit 0  headline
+    never-ran             exit 0  headline    exit 2  refusal
+    unreached             exit 2  refusal     exit 2  refusal
+  hover.mjs
+    live                  exit 0  value       exit 0  value
+    never-ran             exit 0  value       exit 2  refusal
+    unreached             exit 1  EMPTY       exit 2  refusal
+                                  stdout,
+                                  node stack
+                                  on stderr
+
+The `before` rows were taken from a pristine checkout of the pre-run kit
+at `origin/ursa-frontend/2026-11-09-message-ac`, not from this branch with
+the edits reverted.
+
+## The exact in-band case, measure-focus on the home page at desktop
+
+Both runs printed the byte-identical headline and both exited 0.
+
+                               live        never-ran
+  focusable in the DOM, home     6             5
+  tab stops Tab found, home      6             6
+  stops with an area reading    28            27
+  headline                  0 of 28 tab stops below a floor   (identical)
+  exit                           0             0
+
+The stop that changed is `CopyLine`'s scroll region, and what changed is
+its accessible name:
+
+  live        pre "command, scrolls sideways"   493x44      ok
+  never-ran   pre "mkdir -p .github/workflows curl -fsSL ht" 492.84x43.75  UNDECLARED
+
+So the dead page produced a NEW verdict class, `UNDECLARED`, the tally
+went from `27 ok, 1 COMPOSITE` to `26 ok, 1 UNDECLARED, 1 COMPOSITE`, and
+the headline did not move. That is exo's third line: the in-band value
+that is also the right answer today. Nothing is below a floor on either
+page, so the number is true and carries no information.
+
+Two of the kit's verdict classes, `UNDECLARED` and `GONE_FROM_DOM`, were
+counted in that tally and reached neither the headline nor the status.
+Repaired here and now named in both.
+
+## The same rule one layer out, and it cost a false red while this run worked
+
+Four of the kit's selftests bind a fixed port for their fixture server and
+route a bind failure to exit 1, which is the status those files use for
+`the instrument under test answered wrongly`.
+
+  port 4975 was held by another seat's python3, pid 1416700, on this host
+  selftest/check-narrow.mjs   Error: fixture never answered   exit 1
+
+Verified on the pristine pre-run kit: byte-identical failure, so it is the
+host and not this run's edits. Ports are shared between the eleven seats
+the way `/tmp` is, which is `runner-facts.md`'s fact with a different
+resource in it. After `lib/fixture-server.mjs`:
+
+  check-narrow      exit 1  ->  exit 0, all 7 expectations hold
+  check-contrast    exit 0  ->  exit 0, all 23 hold
+  check-hit-areas   exit 0  ->  exit 0
+  check-reached     exit 0  ->  exit 0
+
+One measurement inside that repair worth keeping: on this host a `fetch`
+to a port nothing listens on returns `TimeoutError: The operation was
+aborted due to timeout` with `err.cause` undefined, so a refusal is not
+distinguishable from a slow service by reading the error. A raw socket
+returns `ECONNREFUSED`. The first version of the free-port finder read the
+fetch error, called every empty port occupied, and refused twenty times in
+a row, which is the over-refusal trap three files over.

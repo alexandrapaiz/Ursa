@@ -1,0 +1,26 @@
+base http://127.0.0.1:43165
+viewports desktop 1440x900
+floors: 3:1 on the indicator, 60% of its pixels
+
+## Reach: what the DOM offers against what Tab finds
+
+| page | viewport | focusable in DOM | tab stops | unreachable | sec |
+|---|---|---|---|---|---|
+
+## The indicator, photographed at every stop
+
+| page | viewport | stop | control | box | indicator px | clearing px | share >=3:1 | ring 1px | median | min | area/2.4.11 | verdict |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+
+## Headline
+
+NO VERDICT: every one of the 5 page loads failed, so this run measured nothing and its headline is withheld rather than computed over an empty set.
+
+By verdict: .
+
+NOT MEASURED: 5 of 5 page loads did not reach their subject, so this run makes no claim about them.
+  / -> COULD NOT LOAD: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:43165/
+  /record -> COULD NOT LOAD: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:43165/record
+  /record/mini-fixture -> COULD NOT LOAD: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:43165/record/mini-fixture
+  /record/at -> COULD NOT LOAD: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:43165/record/at
+  /this-page-does-not-exist -> COULD NOT LOAD: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:43165/this-page-does-not-exist

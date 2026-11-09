@@ -1,0 +1,23 @@
+# premise routing, 18 rows over 9 page-driving instruments
+# premises from lib/verdict.mjs: reached, hydrated
+
+every one of the 18 premise/instrument pairs either routes its premise to the reserved code or declares an exemption with a reason.
+
+  hover.mjs              reached   routed
+  hover.mjs              hydrated  routed
+  measure-contrast.mjs   reached   routed
+  measure-contrast.mjs   hydrated  routed
+  measure-focus.mjs      reached   routed
+  measure-focus.mjs      hydrated  routed
+  measure-hit-areas.mjs  reached   routed
+  measure-hit-areas.mjs  hydrated  routed
+  measure-narrow.mjs     reached   routed
+  measure-narrow.mjs     hydrated  routed
+  measure-swatches.mjs   reached   routed
+  measure-swatches.mjs   hydrated  routed
+  sample-motion.mjs      reached   routed
+  sample-motion.mjs      hydrated  routed
+  shoot.mjs              reached   routed
+  shoot.mjs              hydrated  routed
+  verify-hover.mjs       reached   routed
+  verify-hover.mjs       hydrated  routed

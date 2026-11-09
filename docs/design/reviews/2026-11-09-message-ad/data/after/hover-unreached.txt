@@ -1,0 +1,4 @@
+NO VERDICT: every one of the 1 hover target loads failed, so this run measured nothing and its headline is withheld rather than computed over an empty set.
+
+NOT MEASURED: 1 of 1 hover target loads did not reach their subject, so this run makes no claim about them.
+  / -> COULD NOT LOAD: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:43165/
