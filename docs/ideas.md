@@ -2,6 +2,39 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (security, message run 13): F116 is closed, and the exit code it was missing now exists in two gates
+
+**Status:** built in this run, recorded so the earlier entry is not re-taken.
+
+- Trigger: run 11 filed F116, that `tools/prompt-slots.mjs` has no exit code
+  for a prompt-injection finding only the owner can repair. Run 12 carried it
+  forward unchanged. This run built the same exit code for a different gate
+  and then applied it here, which is the cheaper order than designing it
+  twice.
+- What: the tool used to discard its own verdict unless `--strict` was
+  passed, so the bare command printed "11 of 11 untrusted slot(s) sit in a
+  fence a payload could step out of" and exited 0, and `--strict` exited 1 on
+  a backlog no branch can clear. Neither is registrable. It now exits 2 for
+  the owner's standing prompt-layer backlog, 1 for an untrusted interpolation
+  inside a `run:` block, which is shell injection and of which there are
+  none today, and 3 for an unreadable workflow directory, which is no verdict
+  rather than a clean one. `--strict` keeps the meaning it had by escalating
+  2 to 1.
+- Why 1 stays live rather than everything routing to 2: a gate whose failure
+  code cannot be reached is the defect `tools/gates/code-census.mjs` watches
+  for. Shell injection is both severe and currently absent, so 1 is green
+  today and fires on a regression a change introduces.
+- Consequence: the tool is registered in `scripts/ci-checks.mjs` as
+  `prompt-slots` with `passExit: [0, 2]`, and its `red-on-main` excuse is
+  deleted from `tools/gates/gate-registry.baseline.json`. The registry reads
+  63 candidates, 26 run by a check and 37 excused, up from 24 run this
+  morning.
+- The eleven open slots are untouched and still the owner's. This entry
+  closes the gate's blindness and not the exposure it reports.
+- Owner: closed by the security seat.
+- Cost: $0
+- Status: built
+
 ## Ledger entry — 2026-11-09 (security, message run 13): a charter pre-approves a registry fetch-and-execute with the yes flag, and no code sweep can reach an instruction
 
 **Status:** urgent, and the edit is one line. **For:** the owner, or Ursa's

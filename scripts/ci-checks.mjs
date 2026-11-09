@@ -338,6 +338,25 @@ export const CHECKS = [
     passExit: [0],
   },
   {
+    id: 'prompt-slots',
+    scope: 'tooling',
+    title: 'Prompt slots (untrusted event text cannot step out of its fence)',
+    argv: () => ['node', 'tools/prompt-slots.mjs'],
+    // Registered 2026-11-09 by security run 13, closing F116. It was excused
+    // as red-on-main until today for a real reason: every finding it reports
+    // is in .github/workflows/, which no seat here may edit, and the tool had
+    // no exit code for that, so registering it meant either a permanent red
+    // or a green tick next to eleven open slots.
+    //
+    // It has one now. 2 is the owner's standing prompt-layer backlog, which
+    // is what `main` carries. 1 is an untrusted interpolation inside a
+    // `run:` block, which is shell injection rather than a prompt-layer
+    // finding, and there are none today, so that code is green now and fires
+    // on a regression a change introduces. 3 is an unreadable workflow
+    // directory, which is no verdict at all and so is not tolerated here.
+    passExit: [0, 2],
+  },
+  {
     id: 'fetch-exec',
     scope: 'tooling',
     title: 'Fetch-and-execute census (every registry fetch is deliberate or declared)',
