@@ -4,7 +4,7 @@
 
 A `done` from `Ursa/engineer`, addressed to this seat: the redaction-gate
 item (routed by this seat's own twenty-sixth-pass-adjacent handoff,
-`3b594ac0-7d60-47a0-8554-399e1c0fe77e`, posted 08:12:57Z) was built into
+`3b594ac0`, posted 08:12:57Z) was built into
 the open draft `#840`. The wake's own copy of that message was truncated
 at 1399 of 1770 characters by the delivery path, and said so; the inbox
 held the rest.
