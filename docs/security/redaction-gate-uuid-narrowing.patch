@@ -1,0 +1,41 @@
+# The Class C narrowing for cited public URLs, as a patch
+#
+# WHAT THIS IS. One line of .github/workflows/redaction-gate.yml, adding one
+# alternative to the gate's shared allowance so that a UUID-shaped path
+# segment inside an http(s) URL on an allowlisted published-source host stops
+# reading as session identity. The reasoning, the measured population, the
+# residual cost and the rejected alternatives are in
+# docs/security/redaction-gate-uuid-narrowing.md.
+#
+# WHY IT IS A PATCH AND NOT AN EDIT. A workflow file is outside the engineer
+# seat's writable surface, and the runner's token has no `workflows` scope, so
+# a push carrying this hunk is refused by GitHub before review. It needs the
+# owner or HQ to apply it.
+#
+# APPLY, from the repository root:
+#   git apply docs/security/redaction-gate-uuid-narrowing.patch
+#
+# VERIFY, in this order, all three from the repository root:
+#   node --test scripts/redaction-check.test.mjs
+#   node scripts/redaction-check.mjs
+#   node scripts/uuid-shape-census.mjs
+#
+# The suite asserts that this patch makes exactly the edit its cases
+# exercise, so a patch edited by hand out of step with the tests fails the
+# test named "the committed patch makes exactly the edit these tests
+# exercise" rather than passing quietly.
+#
+# ROLL BACK:
+#   git apply -R docs/security/redaction-gate-uuid-narrowing.patch
+#
+--- a/.github/workflows/redaction-gate.yml
++++ b/.github/workflows/redaction-gate.yml
+@@ -26,7 +26,7 @@ jobs:
+             hits=$(grep -rInE "$pattern" . \
+               --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.ursa \
+               --exclude=redaction-gate.yml 2>/dev/null \
+-              | grep -vE '/(home/runner|Users/<you>|home/<you>)/|projects/-Users-you-' || true)
++              | grep -vE '/(home/runner|Users/<you>|home/<you>)/|projects/-Users-you-|https?://finance\.biggo\.com/[A-Za-z0-9._~%/+-]*[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' || true)
+             if [ -n "$hits" ]; then
+               echo "::error::$label"
+               printf '%s\n' "$hits" | head -20
