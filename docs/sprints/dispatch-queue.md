@@ -1,9 +1,10 @@
-# Dispatch queue — 2026-11-09, message-triggered (sixth pass)
+# Dispatch queue — 2026-11-09, message-triggered (seventh pass)
 
-**Sixth message pass of today.** Rechecked fresh against the criteria
-table below rather than carried forward: the merge queue moved twice
-this pass (`#742`, `#750`), none of which changes anything in this
-section.
+**Seventh message pass of today.** Rechecked fresh against the
+criteria table below rather than carried forward: the merge queue
+moved once this pass (`#756`), which doesn't change anything in this
+section, and a new frontend draft (`#765`) opened mid-pass, which
+doesn't either.
 
 `PM_DISPATCH_ENABLED` cannot be read on this run's token (`gh variable
 get` 403s, the same wall every host pass has found since 2026-10-17's
@@ -16,23 +17,22 @@ below could fire from this run even if it qualified.
 
 - **A seat run failed in the last 24h, diagnosable from its log:**
   zero non-success runs in the last fifteen (`gh run list --limit
-  15`), all `success` (the `in_progress` row is this pass's own
-  `redaction-gate` check, not a failure).
+  15`), all `success`.
 - **A seat's open draft has failing CI, or a review comment
-  unanswered >24h:** four drafts open (`#756` frontend, `#757`
-  security, `#758` engineer, `#759` exo), all from live runs started
-  within the last twenty minutes of this pass's own window, none old
-  enough to qualify and none waiting on an unanswered question.
+  unanswered >24h:** five drafts open (`#762` exo, `#763` engineer,
+  `#764` security, `#765` frontend, plus this pass's own `#766`), all
+  from runs live within the last twenty minutes of this pass's own
+  window (confirmed live, not merely recent, against
+  `tools/check-draft-prs.sh` and fresh `redaction-gate` checks landing
+  on each — see the standing-claim finding in this pass's run
+  account). None old enough to qualify and none waiting on an
+  unanswered review comment.
 - **A sprint item due this week with no run from its owning seat:**
-  the board's own current-sprint object is the known duplicate
-  record (flagged 2026-10-12, unchanged); "This sprint" holds no
-  items right now to be late against. The engineer-lane staleness
-  (sprint file 28 days old) is a ceremony-grooming finding, not a
-  dispatch trigger, and is carried to `docs/sprints/pending.md`
-  instead.
-- **A seat has two or more open PRs on one scope, none merged:** none
-  now. Frontend, security, engineer and exo each hold exactly one open
-  draft, their own next pull request, not a stack.
+  unchanged from the sixth pass — "This sprint" holds no items right
+  now to be late against; the engineer-lane staleness is a
+  ceremony-grooming finding, carried in `docs/sprints/pending.md`.
+- **A seat has two or more open PRs on one scope, none merged:** none.
+  Every seat with an open draft holds exactly one.
 - **A ruling or ADR merged since the last run names a seat with no
   run following:** nothing new in `docs/decisions.md` since the last
   pass's own check.
@@ -40,15 +40,14 @@ below could fire from this run even if it qualified.
   (unchanged).
 - **Ursa's own three (§0b):** no tuning or trial run with unrecorded
   ledger results; no failing check on an open Minor-site or
-  Major-resolver PR (none open right now); no ADR naming an
-  experiment with no run started within two days.
+  Major-resolver PR; no ADR naming an experiment with no run started
+  within two days.
 
 ## Nothing to fire this run
 
-Everything actionable this pass was handled directly: two Tier B
-merges (`#742`, `#750`, with the docs-only conflict between them
-resolved in this pass rather than handed back), one stale close
-comment identified and voided rather than acted on, one ledger finding
-(three `urgent` entries still `hold`, not cleared as previously
-reported) carried to the owner's queue. See
-`docs/agents/pm-2026-11-09-message-6-run.md` for the full account.
+The only actionable item this pass was `#756`, reviewed against the
+merge rule's conditions directly and merged under Tier B. The
+standing block's claim that `#763` and `#764` were orphaned drafts was
+checked live rather than acted on and found already false — both have
+live runs behind them — so neither was readied, closed, nor annotated.
+See `docs/agents/pm-2026-11-09-message-7-run.md` for the full account.
