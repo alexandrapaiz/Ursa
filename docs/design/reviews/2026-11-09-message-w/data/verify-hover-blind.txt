@@ -1,0 +1,53 @@
+# verify-hover against a server answering 200 at / and 404 elsewhere,
+# carrying none of this site's hover vocabulary. The column the control
+# harness cannot construct from outside, because this tool's paths are
+# hardcoded. Before run w it exited 0 over a table of MISSING rows,
+# because it computed no exit status at all; and once it did compute one,
+# the unguarded per-target drive threw first and exit 1 escaped instead.
+
+harness: (hover:hover)=true  (any-hover:hover)=true  (pointer:fine)=true  (prefers-reduced-motion:reduce)=false
+viewport: 1440x900   settle: 520ms   frames: frozen (clock pinned, Math.random seeded)
+
+cta-home             MISSING?               .cta matches nothing on http://127.0.0.1:4978/, and this target declares no content gate, so this may be a race rather than a finding
+rec-action-home      MISSING?               .rec-action matches nothing on http://127.0.0.1:4978/, and this target declares no content gate, so this may be a race rather than a finding
+quiet-link-404       MISSING?               .quiet-link matches nothing on http://127.0.0.1:4978/this-page-does-not-exist, and this target declares no content gate, so this may be a race rather than a finding
+mark-link-404        MISSING?               .mark-link matches nothing on http://127.0.0.1:4978/this-page-does-not-exist, and this target declares no content gate, so this may be a race rather than a finding
+rec-action-index     MISSING?               .rec-action matches nothing on http://127.0.0.1:4978/record, and this target declares no content gate, so this may be a race rather than a finding
+rec-row-index        DRIVE-FAILED           TimeoutError: page.fill: Timeout 30000ms exceeded.
+rec-action-record    MISSING?               .rec-action matches nothing on http://127.0.0.1:4978/record/mini-fixture, and this target declares no content gate, so this may be a race rather than a finding
+sp-verbatim          MISSING?               .sp-survived_verbatim matches nothing on http://127.0.0.1:4978/record/mini-fixture, and this target declares no content gate, so this may be a race rather than a finding
+sp-mutated           MISSING?               .sp-survived_mutated matches nothing on http://127.0.0.1:4978/record/mini-fixture, and this target declares no content gate, so this may be a race rather than a finding
+sp-ngp               MISSING?               .sp-no_generation_provenance matches nothing on http://127.0.0.1:4978/record/mini-fixture, and this target declares no content gate, so this may be a race rather than a finding
+panel-run-overlay    NOT-REACHED            .panel-run needs --overlay-base, so nothing here is known about it
+panel-action-overlay NOT-REACHED            .panel-action needs --overlay-base, so nothing here is known about it
+dash-action-overlay  NOT-REACHED            .dash-action needs --overlay-base, so nothing here is known about it
+
+A verdict of `changes` is not yet a verified hover. It says the computed
+style moved. Whether a reader can see it moving is the pixel count from
+  python3 diff-frames.py /tmp/fe848-vh-blind/rest /tmp/fe848-vh-blind/hover
+and a hover worth fewer pixels than the hairline it draws is a finding.
+
+NOT MEASURED: 10 of 13 targets were asked for and nothing is known about them, so this run makes no claim about those hovers.
+  cta-home (.cta on /): missing?
+  rec-action-home (.rec-action on /): missing?
+  quiet-link-404 (.quiet-link on /this-page-does-not-exist): missing?
+  mark-link-404 (.mark-link on /this-page-does-not-exist): missing?
+  rec-action-index (.rec-action on /record): missing?
+  rec-row-index (.rec-row on /record): drive-failed
+  rec-action-record (.rec-action on /record/mini-fixture): missing?
+  sp-verbatim (.sp-survived_verbatim on /record/mini-fixture): missing?
+  sp-mutated (.sp-survived_mutated on /record/mini-fixture): missing?
+  sp-ngp (.sp-no_generation_provenance on /record/mini-fixture): missing?
+3 target(s) were not asked for at all: panel-run-overlay needs --overlay-base, panel-action-overlay needs --overlay-base, dash-action-overlay needs --overlay-base. That is this invocation's scope and not a finding.
+
+NOT MEASURED: 6 of 10 target loads answered 400 or worse and were not declared, so this run makes no claim about them.
+  /record -> HTTP 404
+  /record -> HTTP 404
+  /record/mini-fixture -> HTTP 404
+  /record/mini-fixture -> HTTP 404
+  /record/mini-fixture -> HTTP 404
+  /record/mini-fixture -> HTTP 404
+Declare an intentionally-absent path with --expect-404 <paths> if that status is the subject.
+
+
+exit=2

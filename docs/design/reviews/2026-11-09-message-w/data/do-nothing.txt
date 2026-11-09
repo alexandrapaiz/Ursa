@@ -4,26 +4,22 @@
 instrument         column  exit      claims-pass  abstains  last line
 shoot              live    0         true         false     no frame overflows its viewport
 shoot              dead    1         false        false     node:internal/modules/run_main:123
-shoot              wrong   0         true         false     no frame overflows its viewport
+shoot              wrong   2         false        true      no claim about overflow: see above.
 measure-contrast   live    0         true         true      record/desktop               span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED
 measure-contrast   dead    1         false        false     [   0.0s] writing to docs/design/reviews/2026-11-09-message-w/data/cells/measure-contrast-dead/contrast.txt, 2 page(s) a
-measure-contrast   wrong   0         true         true      no-such-route-9d1f/desktop   span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED
-measure-focus      live    1         true         false     The 2.4.11 area column is reported and never failed on: median 0.54 of the 2px-perimeter minimum, across 33 stops. The r
+measure-contrast   wrong   2         false        true      no claim about contrast: the pages above were not reached.
+measure-focus      live    0         true         false     every one of the 6 page loads this run measured was reached: / 200, /record 200, / 200, /record 200, / 200, /record 200.
 measure-focus      dead    1         false        false     node:internal/modules/run_main:123
-measure-focus      wrong   1         true         false     The 2.4.11 area column is reported and never failed on: median 10.03 of the 2px-perimeter minimum, across 12 stops. The 
-measure-hit-areas  live    0         true         false       document spans are: none, on no page
+measure-focus      wrong   2         false        true      Declare an intentionally-absent path with --expect-404 <paths> if that status is the subject.
+measure-hit-areas  live    0         true         false     every one of the 6 page loads this run measured was reached: / 200, /record 200, / 200, /record 200, / 200, /record 200.
 measure-hit-areas  dead    1         false        false     node:internal/modules/run_main:123
-measure-hit-areas  wrong   0         true         false       document spans are: none, on no page
-measure-narrow     live    0         true         false       0 of 8 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose a
+measure-hit-areas  wrong   2         false        true      no claim about hit areas: the pages above were not reached.
+measure-narrow     live    0         true         false     every one of the 8 cell loads this run measured was reached: / 200, /record 200, / 200, /record 200, / 200, /record 200,
 measure-narrow     dead    2         false        true        390 set (/record): page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/record
-measure-narrow     wrong   0         true         false       0 of 8 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose a
-verify-hover       live    1         false        false     node:internal/modules/run_main:123
+measure-narrow     wrong   2         false        true      Declare an intentionally-absent path with --expect-404 <paths> if that status is the subject.
+verify-hover       live    0         false        false     every one of the 1 target load loads this run measured was reached: / 200.
 verify-hover       dead    1         false        false     node:internal/modules/run_main:123
-verify-hover       wrong   1         false        false     node:internal/modules/run_main:123
+verify-hover       wrong   0         false        false     every one of the 1 target load loads this run measured was reached: / 200.
 
-5 of 12 absence cells are IN BAND: the instrument did nothing and said so with a value a caller reads as success.
-  shoot wrong: exit 0, and prints a passing headline
-  measure-contrast wrong: exit 0, and prints a passing headline
-  measure-focus wrong: exit 1, and prints a passing headline
-  measure-hit-areas wrong: exit 0, and prints a passing headline
-  measure-narrow wrong: exit 0, and prints a passing headline
+0 of 11 scorable absence cells are in band.
+  not scored: verify-hover wrong is a repeat of its live column, because that tool's paths are hardcoded and cannot be made wrong from outside.

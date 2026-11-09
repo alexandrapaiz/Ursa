@@ -8,9 +8,9 @@ page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/
 Call log:
   - navigating to "http://127.0.0.1:4999/", waiting until "networkidle"
 
-    at /tmp/epito-ursa-frontend-JKpAec/docs/design/review-kit/measure-contrast.mjs:348:18
-    at mark (/tmp/epito-ursa-frontend-JKpAec/docs/design/review-kit/measure-contrast.mjs:343:25)
-    at /tmp/epito-ursa-frontend-JKpAec/docs/design/review-kit/measure-contrast.mjs:347:11 {
+    at /tmp/epito-ursa-frontend-JKpAec/docs/design/review-kit/measure-contrast.mjs:354:34
+    at mark (/tmp/epito-ursa-frontend-JKpAec/docs/design/review-kit/measure-contrast.mjs:349:25)
+    at /tmp/epito-ursa-frontend-JKpAec/docs/design/review-kit/measure-contrast.mjs:353:11 {
   log: [
     '  - navigating to "http://127.0.0.1:4999/", waiting until "networkidle"'
   ],

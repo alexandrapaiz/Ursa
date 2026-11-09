@@ -1,41 +1,11 @@
 
-=== phone 390x844 · home /no-such-route-9d1f ===
-  box WxH       hit WxH      lines  verdict           control
-  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
-  229.6x47.3    230x48       1      ok                a.quiet-link "Back to Ursa Minor"
-  -> 0 of 2 standalone controls under 44px tall (0 inline, exempt; 0 document spans, 0 not covering their own line)
+NOT MEASURED: 6 of 6 page loads answered 400 or worse and were not declared, so this run makes no claim about them.
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+Declare an intentionally-absent path with --expect-404 <paths> if that status is the subject.
 
-=== phone 390x844 · set /no-such-route-9d1f ===
-  box WxH       hit WxH      lines  verdict           control
-  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
-  229.6x47.3    230x48       1      ok                a.quiet-link "Back to Ursa Minor"
-  -> 0 of 2 standalone controls under 44px tall (0 inline, exempt; 0 document spans, 0 not covering their own line)
-
-=== tablet 820x1180 · home /no-such-route-9d1f ===
-  box WxH       hit WxH      lines  verdict           control
-  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
-  229.6x47.3    230x48       1      ok                a.quiet-link "Back to Ursa Minor"
-  -> 0 of 2 standalone controls under 44px tall (0 inline, exempt; 0 document spans, 0 not covering their own line)
-
-=== tablet 820x1180 · set /no-such-route-9d1f ===
-  box WxH       hit WxH      lines  verdict           control
-  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
-  229.6x47.3    230x48       1      ok                a.quiet-link "Back to Ursa Minor"
-  -> 0 of 2 standalone controls under 44px tall (0 inline, exempt; 0 document spans, 0 not covering their own line)
-
-=== desktop 1440x900 · home /no-such-route-9d1f ===
-  box WxH       hit WxH      lines  verdict           control
-  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
-  229.6x47.3    230x48       1      ok                a.quiet-link "Back to Ursa Minor"
-  -> 0 of 2 standalone controls under 44px tall (0 inline, exempt; 0 document spans, 0 not covering their own line)
-
-=== desktop 1440x900 · set /no-such-route-9d1f ===
-  box WxH       hit WxH      lines  verdict           control
-  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
-  229.6x47.3    230x48       1      ok                a.quiet-link "Back to Ursa Minor"
-  -> 0 of 2 standalone controls under 44px tall (0 inline, exempt; 0 document spans, 0 not covering their own line)
-
-=== total across every page and viewport ===
-  0 short of 12 standalone, 0 inline and exempt by 2.5.8, 0 document spans (0 not covering their own line), 12 targets seen
-  the floor reached no control on: no page — every page here had at least one standalone control
-  document spans are: none, on no page
+no claim about hit areas: the pages above were not reached.

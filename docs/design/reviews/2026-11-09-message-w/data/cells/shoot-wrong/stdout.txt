@@ -5,4 +5,13 @@ no-such-route-9d1f-tablet        404    820/820   overflow    0px  height  1180p
 no-such-route-9d1f-desktop       404   1440/1440  overflow    0px  height   900px
 no-such-route-9d1f-desktop       404   1440/1440  overflow    0px  height   900px
 
-no frame overflows its viewport
+NOT MEASURED: 6 of 6 frame loads answered 400 or worse and were not declared, so this run makes no claim about them.
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+Declare an intentionally-absent path with --expect-404 <paths> if that status is the subject.
+
+no claim about overflow: see above.

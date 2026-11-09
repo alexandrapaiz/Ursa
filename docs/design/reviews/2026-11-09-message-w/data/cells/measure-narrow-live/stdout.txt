@@ -11,3 +11,5 @@
   390   set     390 at 0        fits                              
 
   0 of 8 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose and is not counted.
+
+every one of the 8 cell loads this run measured was reached: / 200, /record 200, / 200, /record 200, / 200, /record 200, / 200, /record 200.

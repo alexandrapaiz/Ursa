@@ -7,7 +7,7 @@
       "tool": "shoot",
       "col": "live",
       "code": 0,
-      "seconds": 21,
+      "seconds": 25,
       "claims_pass": true,
       "abstains": false,
       "head": "no frame overflows its viewport"
@@ -16,7 +16,7 @@
       "tool": "shoot",
       "col": "dead",
       "code": 1,
-      "seconds": 3,
+      "seconds": 7,
       "claims_pass": false,
       "abstains": false,
       "head": "node:internal/modules/run_main:123"
@@ -24,17 +24,17 @@
     {
       "tool": "shoot",
       "col": "wrong",
-      "code": 0,
-      "seconds": 21,
-      "claims_pass": true,
-      "abstains": false,
-      "head": "no frame overflows its viewport"
+      "code": 2,
+      "seconds": 22,
+      "claims_pass": false,
+      "abstains": true,
+      "head": "no claim about overflow: see above."
     },
     {
       "tool": "measure-contrast",
       "col": "live",
       "code": 0,
-      "seconds": 54,
+      "seconds": 56,
       "claims_pass": true,
       "abstains": true,
       "head": "record/desktop               span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED"
@@ -43,7 +43,7 @@
       "tool": "measure-contrast",
       "col": "dead",
       "code": 1,
-      "seconds": 8,
+      "seconds": 4,
       "claims_pass": false,
       "abstains": false,
       "head": "[   0.0s] writing to docs/design/reviews/2026-11-09-message-w/data/cells/measure-contrast-dead/contrast.txt, 2 page(s) a"
@@ -51,26 +51,26 @@
     {
       "tool": "measure-contrast",
       "col": "wrong",
-      "code": 0,
-      "seconds": 47,
-      "claims_pass": true,
+      "code": 2,
+      "seconds": 40,
+      "claims_pass": false,
       "abstains": true,
-      "head": "no-such-route-9d1f/desktop   span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED"
+      "head": "no claim about contrast: the pages above were not reached."
     },
     {
       "tool": "measure-focus",
       "col": "live",
-      "code": 1,
-      "seconds": 48,
+      "code": 0,
+      "seconds": 50,
       "claims_pass": true,
       "abstains": false,
-      "head": "The 2.4.11 area column is reported and never failed on: median 0.54 of the 2px-perimeter minimum, across 33 stops. The r"
+      "head": "every one of the 6 page loads this run measured was reached: / 200, /record 200, / 200, /record 200, / 200, /record 200."
     },
     {
       "tool": "measure-focus",
       "col": "dead",
       "code": 1,
-      "seconds": 4,
+      "seconds": 6,
       "claims_pass": false,
       "abstains": false,
       "head": "node:internal/modules/run_main:123"
@@ -78,11 +78,11 @@
     {
       "tool": "measure-focus",
       "col": "wrong",
-      "code": 1,
-      "seconds": 27,
-      "claims_pass": true,
-      "abstains": false,
-      "head": "The 2.4.11 area column is reported and never failed on: median 10.03 of the 2px-perimeter minimum, across 12 stops. The "
+      "code": 2,
+      "seconds": 26,
+      "claims_pass": false,
+      "abstains": true,
+      "head": "Declare an intentionally-absent path with --expect-404 <paths> if that status is the subject."
     },
     {
       "tool": "measure-hit-areas",
@@ -91,13 +91,13 @@
       "seconds": 13,
       "claims_pass": true,
       "abstains": false,
-      "head": "  document spans are: none, on no page"
+      "head": "every one of the 6 page loads this run measured was reached: / 200, /record 200, / 200, /record 200, / 200, /record 200."
     },
     {
       "tool": "measure-hit-areas",
       "col": "dead",
       "code": 1,
-      "seconds": 3,
+      "seconds": 2,
       "claims_pass": false,
       "abstains": false,
       "head": "node:internal/modules/run_main:123"
@@ -105,26 +105,26 @@
     {
       "tool": "measure-hit-areas",
       "col": "wrong",
-      "code": 0,
-      "seconds": 13,
-      "claims_pass": true,
-      "abstains": false,
-      "head": "  document spans are: none, on no page"
+      "code": 2,
+      "seconds": 16,
+      "claims_pass": false,
+      "abstains": true,
+      "head": "no claim about hit areas: the pages above were not reached."
     },
     {
       "tool": "measure-narrow",
       "col": "live",
       "code": 0,
-      "seconds": 17,
+      "seconds": 23,
       "claims_pass": true,
       "abstains": false,
-      "head": "  0 of 8 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose a"
+      "head": "every one of the 8 cell loads this run measured was reached: / 200, /record 200, / 200, /record 200, / 200, /record 200,"
     },
     {
       "tool": "measure-narrow",
       "col": "dead",
       "code": 2,
-      "seconds": 4,
+      "seconds": 5,
       "claims_pass": false,
       "abstains": true,
       "head": "  390 set (/record): page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/record"
@@ -132,26 +132,26 @@
     {
       "tool": "measure-narrow",
       "col": "wrong",
-      "code": 0,
-      "seconds": 23,
-      "claims_pass": true,
-      "abstains": false,
-      "head": "  0 of 8 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose a"
+      "code": 2,
+      "seconds": 19,
+      "claims_pass": false,
+      "abstains": true,
+      "head": "Declare an intentionally-absent path with --expect-404 <paths> if that status is the subject."
     },
     {
       "tool": "verify-hover",
       "col": "live",
-      "code": 1,
-      "seconds": 60,
+      "code": 0,
+      "seconds": 15,
       "claims_pass": false,
       "abstains": false,
-      "head": "node:internal/modules/run_main:123"
+      "head": "every one of the 1 target load loads this run measured was reached: / 200."
     },
     {
       "tool": "verify-hover",
       "col": "dead",
       "code": 1,
-      "seconds": 4,
+      "seconds": 5,
       "claims_pass": false,
       "abstains": false,
       "head": "node:internal/modules/run_main:123"
@@ -159,11 +159,11 @@
     {
       "tool": "verify-hover",
       "col": "wrong",
-      "code": 1,
-      "seconds": 59,
+      "code": 0,
+      "seconds": 9,
       "claims_pass": false,
       "abstains": false,
-      "head": "node:internal/modules/run_main:123"
+      "head": "every one of the 1 target load loads this run measured was reached: / 200."
     }
   ]
 }

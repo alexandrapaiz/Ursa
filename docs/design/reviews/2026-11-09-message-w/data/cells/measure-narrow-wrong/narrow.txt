@@ -10,4 +10,15 @@
   390   home    390 at 0        fits                              
   390   set     390 at 0        fits                              
 
-  0 of 8 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose and is not counted.
+  NOT MEASURED: 8 of 8 page-by-width cells could not be loaded or never came to rest, so this run makes no claim about them.
+
+NOT MEASURED: 8 of 8 cell loads answered 400 or worse and were not declared, so this run makes no claim about them.
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+Declare an intentionally-absent path with --expect-404 <paths> if that status is the subject.

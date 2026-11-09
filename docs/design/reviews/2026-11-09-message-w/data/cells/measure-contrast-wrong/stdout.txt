@@ -1,13 +1,12 @@
-0 of 74 text runs below their threshold at the median, 0 inactive and exempt under 1.4.3, 0 short in places only, 8 unmeasured (8 too small to sample, 0 drawn in their backdrop's own colour)
 
-every page held still between the two shutters (worst drift 0.000% of the frame), so the backdrops above are the backdrops a reader sees.
+NOT MEASURED: 6 of 6 page loads answered 400 or worse and were not declared, so this run makes no claim about them.
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+Declare an intentionally-absent path with --expect-404 <paths> if that status is the subject.
 
-no-such-route-9d1f/tablet    span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED (too small to sample, 1 px, best coverage 0.98)  "·"
-no-such-route-9d1f/tablet    span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED (too small to sample, 1 px, best coverage 0.98)  "·"
-no-such-route-9d1f/tablet    span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED (too small to sample, 1 px, best coverage 0.98)  "·"
-no-such-route-9d1f/tablet    span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED (too small to sample, 1 px, best coverage 0.98)  "·"
-no-such-route-9d1f/desktop   span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED (too small to sample, 1 px, best coverage 0.98)  "·"
-no-such-route-9d1f/desktop   span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED (too small to sample, 1 px, best coverage 0.98)  "·"
-no-such-route-9d1f/desktop   span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED (too small to sample, 1 px, best coverage 0.98)  "·"
-no-such-route-9d1f/desktop   span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED (too small to sample, 1 px, best coverage 0.98)  "·"
+no claim about contrast: the pages above were not reached.
 

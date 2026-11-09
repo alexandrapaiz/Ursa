@@ -1,20 +1,6 @@
-/no-such-route-9d1/phone: 2 focusable in the DOM     2 tab stops     0 unreachable  4.3s
-/no-such-route-9d1/phone: 2 focusable in the DOM     2 tab stops     0 unreachable  3.2s
-/no-such-route-9d1/tablet: 2 focusable in the DOM    2 tab stops     0 unreachable  4.7s
-/no-such-route-9d1/tablet: 2 focusable in the DOM    2 tab stops     0 unreachable  4.3s
-/no-such-route-9d1/desktop: 2 focusable in the DOM   2 tab stops     0 unreachable  4.2s
-/no-such-route-9d1/desktop: 2 focusable in the DOM   2 tab stops     0 unreachable  3.9s
-node:fs:2430
-    return binding.writeFileUtf8(
-                   ^
-
-Error: EISDIR: illegal operation on a directory, open 'docs/design/reviews/2026-11-09-message-w/data/cells/measure-focus-wrong'
-    at writeFileSync (node:fs:2430:20)
-    at file:///tmp/epito-ursa-frontend-JKpAec/docs/design/review-kit/measure-focus.mjs:721:10 {
-  errno: -21,
-  code: 'EISDIR',
-  syscall: 'open',
-  path: 'docs/design/reviews/2026-11-09-message-w/data/cells/measure-focus-wrong'
-}
-
-Node.js v22.23.2
+home/phone: 2 focusable in the DOM                   2 tab stops     0 unreachable  3.8s
+set/phone: 2 focusable in the DOM                    2 tab stops     0 unreachable  4.3s
+home/tablet: 2 focusable in the DOM                  2 tab stops     0 unreachable  3.4s
+set/tablet: 2 focusable in the DOM                   2 tab stops     0 unreachable  3.4s
+home/desktop: 2 focusable in the DOM                 2 tab stops     0 unreachable  3.9s
+set/desktop: 2 focusable in the DOM                  2 tab stops     0 unreachable  3.5s

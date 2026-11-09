@@ -697,8 +697,16 @@ for (const r of rows) {
 L.push('')
 L.push('## Headline')
 L.push('')
+// The reach verdict REPLACES the headline rather than following it. Measured
+// in this run's own control table: the first version of this repair appended
+// the reach lines after the headline, so a run over a matrix of not-found
+// pages printed `0 of 38 tab stops below a floor` and then refused, and the
+// harness reading stdout still saw a passing headline. A refusal that comes
+// after a pass is read as a pass.
 L.push(
-  `${bad.length} of ${rows.length} tab stops below a floor, ${unreachableTotal} controls the keyboard cannot reach, ${unstable.length} unstable.`,
+  reach.code()
+    ? `NOT MEASURED: ${reach.unreached().length} of ${reach.rows().length} page loads answered 400 or worse, so this run makes no claim about tab stops on them.`
+    : `${bad.length} of ${rows.length} tab stops below a floor, ${unreachableTotal} controls the keyboard cannot reach, ${unstable.length} unstable.`,
 )
 // Every verdict, counted. Before 2026-11-02 the headline named three of
 // them and the rest were visible only to somebody reading all 27 rows, so

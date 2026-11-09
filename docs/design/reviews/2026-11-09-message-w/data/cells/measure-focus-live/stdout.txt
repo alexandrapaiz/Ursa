@@ -6,55 +6,55 @@ floors: 3:1 on the indicator, 60% of its pixels
 
 | page | viewport | focusable in DOM | tab stops | unreachable | sec |
 |---|---|---|---|---|---|
-|  | phone | 5 | 8 | 0 | 7.5 |
-| /recor | phone | 6 | 6 | 0 | 7.8 |
-|  | tablet | 5 | 6 | 0 | 6.8 |
-| /recor | tablet | 6 | 6 | 0 | 7.6 |
-|  | desktop | 5 | 6 | 0 | 7.3 |
-| /recor | desktop | 6 | 6 | 0 | 6.7 |
+| home | phone | 5 | 8 | 0 | 7.4 |
+| set | phone | 6 | 6 | 0 | 9.5 |
+| home | tablet | 5 | 6 | 0 | 8.0 |
+| set | tablet | 6 | 6 | 0 | 9.4 |
+| home | desktop | 5 | 6 | 0 | 5.3 |
+| set | desktop | 6 | 6 | 0 | 7.0 |
 
 ## The indicator, photographed at every stop
 
 | page | viewport | stop | control | box | indicator px | clearing px | share >=3:1 | ring 1px | median | min | area/2.4.11 | verdict |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-|  | phone | 0 | pre "git clone https://github.com/alexandrapa" | 292x41.4375 | - | - | - | - | - | - | - | UNDECLARED |
-|  | phone | 1 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
-|  | phone | 2 | pre "npx tsx src/bin/ursa.ts run ~/code/your-" | 292x20.71875 | - | - | - | - | - | - | - | UNDECLARED |
-|  | phone | 3 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
-|  | phone | 4 | a "the record viewer" | 116x17 | 294 | 294 | 100% | 1.09 | 11.99 | 11.99 | 0.54 | ok |
-|  | phone | 5 | a "a published record" | 278x43 | 364 | 364 | 100% | 0.56 | 11.99 | 11.99 | 0.28 | ok |
-|  | phone | 6 | pre "mkdir -p .github/workflows curl -fsSL ht" | 292x41.4375 | - | - | - | - | - | - | - | UNDECLARED |
-|  | phone | 7 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
-| /recor | phone | 0 | a "Ursa Minor" | 135x24 | 346 | 346 | 100% | 1.08 | 11.99 | 11.99 | 0.53 | ok |
-| /recor | phone | 1 | a "mini-fixture →" | 114x17 | 290 | 290 | 100% | 1.09 | 11.99 | 11.99 | 0.54 | ok |
-| /recor | phone | 2 | a "read it at its own address" | 169x17 | 400 | 400 | 100% | 1.06 | 11.99 | 7.27 | 0.53 | ok |
-| /recor | phone | 3 | input "the address of a published site" | 326x26 | 1058 | 1058 | 100% | 1.49 | 11.99 | 10.00 | 0.74 | ok |
-| /recor | phone | 4 | input  | 182x47 (ancestor:label) | 488 | 488 | 100% | 1.06 | 11.99 | 11.99 | 0.52 | ok |
-| /recor | phone | 5 | input "the address of a published record" | 326x26 | 1058 | 1058 | 100% | 1.49 | 11.99 | 10.00 | 0.74 | ok |
-|  | tablet | 0 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
-|  | tablet | 1 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
-|  | tablet | 2 | a "the record viewer" | 541x43 | 346 | 346 | 100% | 0.30 | 11.99 | 11.99 | 0.15 | ok |
-|  | tablet | 3 | a "a published record" | 556x43 | 366 | 366 | 100% | 0.30 | 11.99 | 11.99 | 0.15 | ok |
-|  | tablet | 4 | pre "mkdir -p .github/workflows curl -fsSL ht" | 573.65625x43.75 | - | - | - | - | - | - | - | UNDECLARED |
-|  | tablet | 5 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
-| /recor | tablet | 0 | a "Ursa Minor" | 135x24 | 344 | 344 | 100% | 1.07 | 11.99 | 11.99 | 0.53 | ok |
-| /recor | tablet | 1 | a "mini-fixture →" | 114x17 | 290 | 290 | 100% | 1.09 | 11.99 | 11.99 | 0.54 | ok |
-| /recor | tablet | 2 | a "read it at its own address" | 169x17 | 400 | 400 | 100% | 1.06 | 11.99 | 11.72 | 0.53 | ok |
-| /recor | tablet | 3 | input "the address of a published site" | 569x27 | 1789 | 1789 | 100% | 1.49 | 11.99 | 10.00 | 0.75 | ok |
-| /recor | tablet | 4 | input  | 182x47 (ancestor:label) | 486 | 486 | 100% | 1.05 | 11.99 | 11.99 | 0.52 | ok |
-| /recor | tablet | 5 | input "the address of a published record" | 401x27 | 1285 | 1285 | 100% | 1.49 | 11.99 | 10.00 | 0.74 | ok |
-|  | desktop | 0 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
-|  | desktop | 1 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
-|  | desktop | 2 | a "the record viewer" | 541x43 | 346 | 346 | 100% | 0.30 | 11.99 | 9.90 | 0.15 | ok |
-|  | desktop | 3 | a "a published record" | 556x43 | 364 | 364 | 100% | 0.30 | 11.99 | 11.99 | 0.15 | ok |
-|  | desktop | 4 | pre "mkdir -p .github/workflows curl -fsSL ht" | 492.84375x43.75 | - | - | - | - | - | - | - | UNDECLARED |
-|  | desktop | 5 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
-| /recor | desktop | 0 | a "Ursa Minor" | 135x24 | 346 | 346 | 100% | 1.08 | 11.99 | 11.99 | 0.53 | ok |
-| /recor | desktop | 1 | a "mini-fixture →" | 114x17 | 290 | 290 | 100% | 1.09 | 11.99 | 11.99 | 0.54 | ok |
-| /recor | desktop | 2 | a "read it at its own address" | 169x17 | 400 | 400 | 100% | 1.06 | 11.99 | 7.27 | 0.53 | ok |
-| /recor | desktop | 3 | input "the address of a published site" | 840x27 | 2604 | 2604 | 100% | 1.50 | 11.99 | 10.00 | 0.75 | ok |
-| /recor | desktop | 4 | input  | 182x47 (ancestor:label) | 488 | 488 | 100% | 1.06 | 11.99 | 11.99 | 0.52 | ok |
-| /recor | desktop | 5 | input "the address of a published record" | 672x27 | 2100 | 2100 | 100% | 1.50 | 11.99 | 10.00 | 0.75 | ok |
+| home | phone | 0 | pre "git clone https://github.com/alexandrapa" | 292x41.4375 | - | - | - | - | - | - | - | UNDECLARED |
+| home | phone | 1 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
+| home | phone | 2 | pre "npx tsx src/bin/ursa.ts run ~/code/your-" | 292x20.71875 | - | - | - | - | - | - | - | UNDECLARED |
+| home | phone | 3 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
+| home | phone | 4 | a "the record viewer" | 116x17 | 294 | 294 | 100% | 1.09 | 11.99 | 11.99 | 0.54 | ok |
+| home | phone | 5 | a "a published record" | 278x43 | 364 | 364 | 100% | 0.56 | 11.99 | 11.99 | 0.28 | ok |
+| home | phone | 6 | pre "mkdir -p .github/workflows curl -fsSL ht" | 292x41.4375 | - | - | - | - | - | - | - | UNDECLARED |
+| home | phone | 7 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
+| set | phone | 0 | a "Ursa Minor" | 135x24 | 346 | 346 | 100% | 1.08 | 11.99 | 11.99 | 0.53 | ok |
+| set | phone | 1 | a "mini-fixture →" | 114x17 | 290 | 290 | 100% | 1.09 | 11.99 | 11.99 | 0.54 | ok |
+| set | phone | 2 | a "read it at its own address" | 169x17 | 400 | 400 | 100% | 1.06 | 11.99 | 7.27 | 0.53 | ok |
+| set | phone | 3 | input "the address of a published site" | 326x26 | 1058 | 1058 | 100% | 1.49 | 11.99 | 10.00 | 0.74 | ok |
+| set | phone | 4 | input  | 182x47 (ancestor:label) | 488 | 488 | 100% | 1.06 | 11.99 | 11.99 | 0.52 | ok |
+| set | phone | 5 | input "the address of a published record" | 326x26 | 1058 | 1058 | 100% | 1.49 | 11.99 | 10.00 | 0.74 | ok |
+| home | tablet | 0 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
+| home | tablet | 1 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
+| home | tablet | 2 | a "the record viewer" | 541x43 | 346 | 346 | 100% | 0.30 | 11.99 | 11.99 | 0.15 | ok |
+| home | tablet | 3 | a "a published record" | 556x43 | 366 | 366 | 100% | 0.30 | 11.99 | 11.99 | 0.15 | ok |
+| home | tablet | 4 | pre "mkdir -p .github/workflows curl -fsSL ht" | 573.65625x43.75 | - | - | - | - | - | - | - | UNDECLARED |
+| home | tablet | 5 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
+| set | tablet | 0 | a "Ursa Minor" | 135x24 | 344 | 344 | 100% | 1.07 | 11.99 | 11.99 | 0.53 | ok |
+| set | tablet | 1 | a "mini-fixture →" | 114x17 | 290 | 290 | 100% | 1.09 | 11.99 | 11.99 | 0.54 | ok |
+| set | tablet | 2 | a "read it at its own address" | 169x17 | 400 | 400 | 100% | 1.06 | 11.99 | 11.72 | 0.53 | ok |
+| set | tablet | 3 | input "the address of a published site" | 569x27 | 1789 | 1789 | 100% | 1.49 | 11.99 | 10.00 | 0.75 | ok |
+| set | tablet | 4 | input  | 182x47 (ancestor:label) | 486 | 486 | 100% | 1.05 | 11.99 | 11.99 | 0.52 | ok |
+| set | tablet | 5 | input "the address of a published record" | 401x27 | 1285 | 1285 | 100% | 1.49 | 11.99 | 10.00 | 0.74 | ok |
+| home | desktop | 0 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
+| home | desktop | 1 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
+| home | desktop | 2 | a "the record viewer" | 541x43 | 346 | 346 | 100% | 0.30 | 11.99 | 9.90 | 0.15 | ok |
+| home | desktop | 3 | a "a published record" | 556x43 | 364 | 364 | 100% | 0.30 | 11.99 | 11.99 | 0.15 | ok |
+| home | desktop | 4 | pre "mkdir -p .github/workflows curl -fsSL ht" | 492.84375x43.75 | - | - | - | - | - | - | - | UNDECLARED |
+| home | desktop | 5 | button "copy" | 57x29 | 200 | 200 | 100% | 1.14 | 11.99 | 11.99 | 0.56 | ok |
+| set | desktop | 0 | a "Ursa Minor" | 135x24 | 346 | 346 | 100% | 1.08 | 11.99 | 11.99 | 0.53 | ok |
+| set | desktop | 1 | a "mini-fixture →" | 114x17 | 290 | 290 | 100% | 1.09 | 11.99 | 11.99 | 0.54 | ok |
+| set | desktop | 2 | a "read it at its own address" | 169x17 | 400 | 400 | 100% | 1.06 | 11.99 | 7.27 | 0.53 | ok |
+| set | desktop | 3 | input "the address of a published site" | 840x27 | 2604 | 2604 | 100% | 1.50 | 11.99 | 10.00 | 0.75 | ok |
+| set | desktop | 4 | input  | 182x47 (ancestor:label) | 488 | 488 | 100% | 1.06 | 11.99 | 11.99 | 0.52 | ok |
+| set | desktop | 5 | input "the address of a published record" | 672x27 | 2100 | 2100 | 100% | 1.50 | 11.99 | 10.00 | 0.75 | ok |
 
 ## Headline
 
@@ -63,3 +63,5 @@ floors: 3:1 on the indicator, 60% of its pixels
 By verdict: 33 ok, 5 UNDECLARED.
 
 The 2.4.11 area column is reported and never failed on: median 0.54 of the 2px-perimeter minimum, across 33 stops. The ring's weight is identity and a change to it is the owner's.
+
+every one of the 6 page loads this run measured was reached: / 200, /record 200, / 200, /record 200, / 200, /record 200.

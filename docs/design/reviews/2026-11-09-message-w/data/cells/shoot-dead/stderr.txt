@@ -6,7 +6,7 @@ page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/
 Call log:
   - navigating to "http://127.0.0.1:4999/", waiting until "networkidle"
 
-    at /tmp/epito-ursa-frontend-JKpAec/docs/design/review-kit/shoot.mjs:124:32 {
+    at /tmp/epito-ursa-frontend-JKpAec/docs/design/review-kit/shoot.mjs:135:47 {
   log: [
     '  - navigating to "http://127.0.0.1:4999/", waiting until "networkidle"'
   ],

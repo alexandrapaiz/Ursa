@@ -70,3 +70,5 @@
   the floor reached no control on: no page — every page here had at least one standalone control
   document spans are: none, on no page
 
+every one of the 6 page loads this run measured was reached: / 200, /record 200, / 200, /record 200, / 200, /record 200.
+
