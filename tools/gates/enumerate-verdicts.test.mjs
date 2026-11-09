@@ -46,7 +46,7 @@ function run(args = []) {
   }
 }
 
-describe('the nine extracted gates, end to end', () => {
+describe('the ten extracted gates, end to end', () => {
   it('exits 0 and reports every branch holding its properties', () => {
     const { code, json } = run()
     assert.equal(code, 0)
@@ -54,7 +54,7 @@ describe('the nine extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 46 distinct causes with 62 probes, which is the number the text sweep could not see', () => {
+  it('reaches 49 distinct causes with 66 probes, which is the number the text sweep could not see', () => {
     const { json } = run()
     // RESOLVED 2026-11-02 BY MEASUREMENT, NOT BY CHOICE. This line conflicted:
     // the hook branch claimed 36 causes over 46 probes and `main` claimed 36
@@ -160,9 +160,18 @@ describe('the nine extracted gates, end to end', () => {
     // no format it parses. Both counts move together here, unlike the
     // secret-scan case above, because that branch is the only one reporting
     // that cause.
-    assert.equal(json.branches.length, 62)
+    //
+    // 66 and 49 since 2026-11-09, when `capture-provenance-verdict.mjs` became
+    // the tenth extraction. Its three causes are no captures tracked at all,
+    // every record surface naming its store, and a record surface naming none;
+    // its four probes are those three plus a second undeclared directory,
+    // which is there because the failing line carries a COUNT of directories
+    // and a one-finding probe cannot tell a count from the constant one. Both
+    // counts move together, like image-metadata's, because each of the three
+    // branches is the only one reporting its cause.
+    assert.equal(json.branches.length, 66)
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
-    assert.equal(causes.size, 46)
+    assert.equal(causes.size, 49)
   })
 
   it('carries an exit 3, which no gate of the first four could have reached', () => {

@@ -2,7 +2,9 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
-import { partition } from './instant-sweep.mjs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { decide } from './instant-gate.mjs'
 import {
   timestampShape, parseInstant, parseEpochSeconds, toUtcInstant,
   compareInstants, isAfter, isBefore, utcDay, sortByInstant,
@@ -252,10 +254,67 @@ test('the shape that defeats evidence-based narrowing, as code rather than as a 
 test('a site repaired with the day family is clean, which is what makes the repair followable', () => {
   // If this fails, the lint reports the exact line its own repair text
   // prescribes, and the only way to obey it is to suppress the lint.
-  assert.deepEqual(textualTimestampComparisons('rows.sort((a, b) => compareDays(a.date, b.date))'), [])
+  //
+  // ONE ASSERTION WAS DELETED FROM THIS TEST (exo, 2026-11-09), and the
+  // reason is the reason the test exists pointed the other way. It pinned
+  // `rows.sort((a, b) => compareDays(a.date, b.date))` CLEAN, as a repaired
+  // site. It is not a repaired site. `compareDays` answers null for a value
+  // it will not place and `Array.prototype.sort` coerces null to 0, so that
+  // line sorts nothing and raises nothing — which this module's own docblocks
+  // state twice, as the stated reason `sortByDay` exists. The pin made the
+  // hazard permanently invisible to the lint, so it now lives below as a
+  // REFUSAL_AS_ORDER assertion instead.
   assert.deepEqual(textualTimestampComparisons('const asc = sortByDay(rows, (r) => r.date)'), [])
   assert.deepEqual(textualTimestampComparisons('if (isDayAfter(entry.date, now.date)) return'), [])
   assert.deepEqual(textualTimestampComparisons('const ms = parseDay(field.date)'), [])
+  // And the comparator on its own line stays clean, because there the null is
+  // a value the author can read. The hazard is the sort callback, not the
+  // function.
+  assert.deepEqual(textualTimestampComparisons('const c = compareDays(a, b)'), [])
+  assert.deepEqual(textualTimestampComparisons('const c = compareInstants(a.createdAt, b.createdAt)'), [])
+})
+
+test('REFUSAL_AS_ORDER: a null-returning comparator inside a sort callback, which the repaired-site exemption used to clear', () => {
+  // The positive case. Note it carries no timestamp-named operand
+  // requirement: this code is keyed on the CALLEE, because a comparator that
+  // can refuse is evidence on its own.
+  const [day] = textualTimestampComparisons('rows.sort((a, b) => compareDays(a.date, b.date))')
+  assert.equal(day.code, 'REFUSAL_AS_ORDER')
+  assert.match(day.repair, /sortByDay\(rows, key\)/)
+  assert.match(day.repair, /coerces null to 0/)
+
+  const [inst] = textualTimestampComparisons('items.sort((x, y) => compareInstants(x.at, y.at))')
+  assert.equal(inst.code, 'REFUSAL_AS_ORDER')
+  assert.match(inst.repair, /sortByInstant\(rows, key\)/)
+
+  // Indented and trailing-comma'd, which is how the one real instance in this
+  // repository was written.
+  assert.equal(
+    textualTimestampComparisons('      .sort((a, b) => compareDays(a.date, b.date)),')[0].code,
+    'REFUSAL_AS_ORDER'
+  )
+
+  // The negative controls. An absence is a measurement and it needs a
+  // positive control; the three above are it.
+  assert.deepEqual(textualTimestampComparisons('rows.sort((a, b) => a.n - b.n)'), [])
+  assert.deepEqual(textualTimestampComparisons('rows.sort((a, b) => a.i - b.i)'), [])
+  // `sortByDay` is the repair, so it is clean inside a sort-shaped line too.
+  assert.deepEqual(textualTimestampComparisons('const out = sortByDay(rows, (r) => r.date)'), [])
+})
+
+test('REFUSAL_AS_ORDER is checked before the repaired-site exemption, and that order is the defect it closes', () => {
+  // This is the regression guard for the ORDERING and not for the pattern. If
+  // somebody moves the new check below the family-name exemption, the
+  // exemption clears the line and this assertion is the only thing that says
+  // so. Both the ordering and the pattern have to be wrong for the test above
+  // to pass while this one fails, which is why it is written separately.
+  const line = 'rows.sort((a, b) => compareDays(a.date, b.date))'
+  const EXEMPTION =
+    /\b(?:parseInstant|compareInstants|isAfter|isBefore|utcDay|sortByInstant|parseEpochSeconds|toUtcInstant|parseDay|compareDays|isDayAfter|isDayBefore|sortByDay)\s*\(/
+  // The line DOES match the exemption. That is the point: it is cleared by it
+  // unless something runs first.
+  assert.ok(EXEMPTION.test(line))
+  assert.equal(textualTimestampComparisons(line).length, 1)
 })
 
 test('the lint does not fire on arithmetic, on counts, or on a repaired call site', () => {
@@ -358,25 +417,30 @@ test('the at alternative is deliberately NOT narrowed, and this pins the measure
   }
 })
 
-test('no source file outside a test orders timestamps as text', () => {
-  // The gate, and the reason this file imports git. TEXTUAL_ORDER is wrong
-  // wherever it appears; the remaining instances in this repository are all
-  // inside test files that demonstrate the inversion on purpose, and each one
-  // sits next to the instant-aware assertion that contradicts it.
+test('no source file outside a test violates ANY code the lint can emit', () => {
+  // The gate, and the reason this file imports git. It used to assert over
+  // TEXTUAL_ORDER and TEXTUAL_DROP and say nothing about TEXTUAL_DAY, which
+  // the lint detects on every run: Ursa's security seat found four instances
+  // of it standing in non-test source on the trunk on 2026-11-09 for exactly
+  // that reason, and a class a file calls a defect was being dropped on the
+  // floor with no record that it was.
+  //
+  // The decision lives once, in tools/instant-gate.mjs, which reads the set
+  // of codes it owes a disposition off this module's own source instead of
+  // restating it. Two implementations of one obligation agree only on the day
+  // they are written, so this test drives that one rather than keeping a
+  // narrower copy of it alive beside it.
   const files = execFileSync('git', ['ls-files', '-z', '*.mjs', '*.js', '*.cjs', '*.ts', '*.tsx'], { encoding: 'utf8' })
     .split('\0').filter(Boolean)
-  const { scanned } = partition(files)
-  const offenders = []
-  for (const file of scanned) {
-    if (/\.test\.(mjs|js|ts|tsx)$/.test(file)) continue
-    let source
-    try { source = readFileSync(file, 'utf8') } catch { continue }
-    for (const f of textualTimestampComparisons(source)) {
-      if (f.code === 'TEXTUAL_ORDER' || f.code === 'TEXTUAL_DROP') offenders.push(`${file}:${f.line} ${f.code} ${f.text}`)
-    }
-  }
-  assert.deepEqual(offenders, [])
+  const here = dirname(fileURLToPath(import.meta.url))
+  const r = decide({
+    files,
+    read: (f) => readFileSync(resolve(here, '..', f), 'utf8'),
+    detectorSource: readFileSync(resolve(here, 'instant.mjs'), 'utf8')
+  })
+  assert.deepEqual(r.offenders.map((f) => `${f.file}:${f.line} ${f.code} ${f.text}`), [])
+  assert.deepEqual(r.undecided, [], 'the lint can emit a code the gate has no disposition for')
   // A positive control, so a sweep that silently read nothing cannot pass
   // this test: the tree is not empty and the lint is reachable.
-  assert.ok(scanned.length > 300, `only ${scanned.length} files scanned`)
+  assert.ok(r.scanned > 300, `only ${r.scanned} files scanned`)
 })

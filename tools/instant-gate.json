@@ -1,0 +1,71 @@
+{
+  "_comment": [
+    "The gate's corpus, as data and not as source, for a reason the gate found",
+    "about itself on its first full run.",
+    "",
+    "Both lists below are lines that TRIP tools/instant.mjs's lint, by",
+    "construction: the probes are the positive control and each allowlist key",
+    "is the exact text of a finding being argued for. Held as string literals",
+    "in tools/instant-gate.mjs they made that file the worst offender in the",
+    "tree -- twelve findings, every one of them this file's own subject matter",
+    "-- and the only ways out were a self-exemption by filename or twelve",
+    "allowlist entries for the allowlist. A gate that has to exempt itself has",
+    "stopped being a measurement of the tree.",
+    "",
+    "So: a corpus of defective lines belongs in data, where no detector reads",
+    "it as code. The same shape as tools/secret-scan.baseline.json next door,",
+    "and for the same reason.",
+    "",
+    "`why` is the argument. A reader who disagrees with one deletes the entry",
+    "and the gate goes red until somebody repairs the line."
+  ],
+  "probes": [
+    "if (a.createdAt < b.createdAt) { return -1 }",
+    "rows.sort((a, b) => a.date.localeCompare(b.date))",
+    "const day = row.mainDate.slice(0, 10)",
+    "const at = row.generatedAt.slice(0, 19) + 'Z'",
+    "rows.sort((a, b) => compareDays(a.date, b.date))"
+  ],
+  "allowlist": [
+    {
+      "file": "ursa-major/src/episodes.ts",
+      "text": "id: `${slug}-${p.generatedAt.slice(0, 10)}-${p.generatedSha.slice(0, 7)}`,",
+      "why": "Episode.id is a record identifier already written to this repository's trial artifacts; changing the day changes published ids"
+    },
+    {
+      "file": "ursa-major/overlay/app/dashboard/page.tsx",
+      "text": "return iso.slice(0, 10)",
+      "why": "display: the dashboard day column, which means the day the owner would say the work happened"
+    },
+    {
+      "file": "ursa-major/src/parse.ts",
+      "text": "date: firstTs?.slice(0, 10),",
+      "why": "display: the parsed record day, rendered beside the local-time conversation it came from"
+    },
+    {
+      "file": "ursa-major/src/publish.ts",
+      "text": "cell('when', 'Resolved', escapeHtml(r.generatedAt.slice(0, 10))),",
+      "why": "display: the Resolved column of the published table"
+    },
+    {
+      "file": "ursa-major/src/viewer.ts",
+      "text": "meta.textContent = 'generated ' + R.task.generatedAt.slice(0, 10) + ' · ' + R.files.length + ' files · ' + R.generations.length + ' generations · ' + R.conversations.length + ' conversation' + (R.conversations.length === 1 ? '' : 's');",
+      "why": "display: the viewer meta line"
+    },
+    {
+      "file": "ursa-minor/components/record/published-site.tsx",
+      "text": "index.publishedAt ? `published ${index.publishedAt.slice(0, 10)}` : \"\",",
+      "why": "display: the published-site index caption"
+    },
+    {
+      "file": "ursa-minor/components/record/published-site.tsx",
+      "text": "{s.generatedAt ? s.generatedAt.slice(0, 10) : \"undated\"}",
+      "why": "display: the published-site record row"
+    },
+    {
+      "file": "ursa-minor/components/record/record-view.tsx",
+      "text": "`resolved ${record.task.generatedAt.slice(0, 10)}`,",
+      "why": "display: the record view resolved caption"
+    }
+  ]
+}
