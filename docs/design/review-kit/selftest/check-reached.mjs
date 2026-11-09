@@ -108,6 +108,35 @@ try {
   const blind = await run(['--base', base, '--pages', 'gone=/no-such-file.html'])
   const declared = await run(['--base', base, '--pages', 'gone=/no-such-file.html', '--expect-404', '/no-such-file.html'])
 
+  // Refuse rather than assert when the subject never ran. The three cases
+  // above drive a real browser, and with no `playwright` resolvable the
+  // subject exits 1 before it reaches the code under test. Measured
+  // 2026-11-09: this file then printed `7 of 20 expectations failed`, naming
+  // the exit status and the missing headline, which is what it prints when
+  // the repair being tested has regressed. Ten units had just passed, so the
+  // output read as a tool that works and a repair that does not.
+  //
+  // A checker whose "the subject could not start" and whose "the subject
+  // answered wrongly" print the same words is the hazard this kit's README
+  // names for `check-redaction.mjs`, and it was absent from the one selftest
+  // that shells out. One line of the subject's own stderr is the evidence,
+  // so it is quoted rather than summarised.
+  const notStarted = [seeing, blind, declared].find((r) => /ERR_MODULE_NOT_FOUND|Executable doesn't exist|browserType\.launch/.test(r.text))
+  if (notStarted) {
+    // The thrown line is echoed before the message on an ESM resolution
+    // failure, and the echo is the `throw new ERR_MODULE_NOT_FOUND(...)`
+    // source rather than anything a reader can act on. Prefer the message.
+    const why = (
+      notStarted.text.match(/^(?:Error.*|.*Cannot find package.*|.*Executable doesn't exist.*|.*browserType\.launch.*)$/m) || ['']
+    )[0].trim()
+    console.error('REFUSING: the three end-to-end cases never ran, so this file cannot report on them.')
+    console.error(`  the subject said: ${why}`)
+    console.error('  install the browser and set PW_ROOT as the kit README describes, then run this again.')
+    console.error('  the 10 unit expectations above this point do not need a browser and were not affected.')
+    stop()
+    process.exit(2)
+  }
+
   const want = [
     ['(unit) an undeclared 404 is unreached', u1.unreached().length, 1],
     ['(unit) and the code is the instrument code', u1.code(), UNREACHED],
