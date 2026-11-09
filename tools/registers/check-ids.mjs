@@ -42,7 +42,7 @@ import { execFileSync } from 'node:child_process'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { renderVerdict } from '../gates/verdict-shape.mjs'
-import { manifestFault, manifestUnusable, scopeUnreadable, verdict } from './id-verdict.mjs'
+import { manifestFault, manifestUnusable, scopeUnreadable, spellId, unspellId, verdict } from './id-verdict.mjs'
 
 const argv = process.argv.slice(2)
 
@@ -207,7 +207,16 @@ if (wantHeads) {
 // The scan.
 // ---------------------------------------------------------------------------
 
-/** @type {Map<string, {ns: object, occurrences: {ref: string, label: string, line: number, text: string}[]}>} */
+// WHY THE KEY IS THE NAMESPACE AND THE IDENTIFIER, not the identifier alone.
+// Every namespace this file held before 2026-11-09 spelled its identifiers
+// with its own prefix, so an identifier string was globally unique and one map
+// keyed on it was correct by accident. `RunnerFact` spells its identifiers as
+// bare numbers, so a second bare-numbered register would make this register's
+// section 93 and that one's section 93 one key with two texts: a reported
+// collision between two files that have nothing to do with each other, in the
+// namespace whose repair is a seat's. The identifier is carried in the value
+// because it is what the finding has to print.
+/** @type {Map<string, {ns: object, id: string, occurrences: {ref: string, label: string, line: number, number: number, text: string}[]}>} */
 const defined = new Map()
 let registersRead = 0
 
@@ -233,8 +242,15 @@ for (const ns of manifest.namespaces) {
       const match = pattern.exec(line)
       if (match === null) continue
       const id = match[1]
-      if (!defined.has(id)) defined.set(id, { ns, occurrences: [] })
-      defined.get(id).occurrences.push({ ref, label, line: index + 1, text: line.trim() })
+      // The number comes from capture group 2, which the manifest validator
+      // guarantees exists, rather than from slicing the identifier against the
+      // namespace's name. The slice was the allocator's only source of a
+      // number until 2026-11-09 and it returns "" for a bare-numbered
+      // identifier, which `Number()` reads as 0 rather than as NaN.
+      const number = Number(match[2])
+      const key = `${ns.name}\u0000${id}`
+      if (!defined.has(key)) defined.set(key, { ns, id, occurrences: [] })
+      defined.get(key).occurrences.push({ ref, label, line: index + 1, number, text: line.trim() })
     }
   }
 }
@@ -242,6 +258,18 @@ for (const ns of manifest.namespaces) {
 // ---------------------------------------------------------------------------
 // The allocator.
 // ---------------------------------------------------------------------------
+
+/**
+ * A burned identifier's number, read through the namespace's own spelling.
+ * The manifest validator has already refused any burn this cannot parse, so
+ * the fault branch here is unreachable and throws rather than returning a
+ * number that would silently shrink the allocator's range.
+ */
+const unspelledNumber = (ns, id) => {
+  const parsed = unspellId(ns, id)
+  if ('fault' in parsed) throw new Error(`burned id ${id} is unspellable in ${ns.name}, which the validator should have refused`)
+  return parsed.n
+}
 
 if (nextOf !== undefined) {
   const ns = manifest.namespaces.find((n) => n.name === nextOf)
@@ -254,18 +282,17 @@ if (nextOf !== undefined) {
     )
   }
   const numbers = []
-  for (const [id, entry] of defined) {
+  for (const entry of defined.values()) {
     if (entry.ns.name !== ns.name) continue
-    numbers.push(Number(id.slice(ns.name.length + 1)))
+    numbers.push(entry.occurrences[0].number)
   }
-  for (const b of ns.burned ?? []) numbers.push(Number(b.id.slice(ns.name.length + 1)))
+  for (const b of ns.burned ?? []) numbers.push(unspelledNumber(ns, b.id))
   // Highest plus one, never the lowest gap. A gap in this repository is a
   // burned identifier, and filling one makes an old citation resolve silently
   // to a new decision, which is strictly worse than a citation that dangles.
   const highest = numbers.length === 0 ? 0 : Math.max(...numbers)
   const n = highest + 1
-  const padded = String(n).padStart(ns.pad, '0')
-  console.log(`${ns.name}-${padded}`)
+  console.log(spellId(ns, n))
   console.log(
     `  computed from ${numbers.length} identifier(s) defined or burned across ${refs.length} ref(s): highest is ${highest}, so the next free one is ${n}.`,
   )
@@ -283,7 +310,9 @@ const lines = []
 const burnedOf = (ns) => new Set((ns.burned ?? []).map((b) => b.id))
 const reasonOf = (ns, id) => (ns.burned ?? []).find((b) => b.id === id)?.why ?? ''
 
-for (const [id, { ns, occurrences }] of [...defined].sort((a, b) => a[0].localeCompare(b[0]))) {
+for (const { ns, id, occurrences } of [...defined.values()].sort((a, b) =>
+  `${a.ns.name} ${a.id}`.localeCompare(`${b.ns.name} ${b.id}`),
+)) {
   const texts = new Set(occurrences.map((o) => o.text))
   const perRef = new Map()
   for (const o of occurrences) perRef.set(o.ref, (perRef.get(o.ref) ?? 0) + 1)
