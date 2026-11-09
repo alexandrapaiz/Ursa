@@ -111,3 +111,44 @@ extended since each was opened.
 seven days' merges, 16 against 86, and the newest merge is minutes old
 rather than more than twenty-four hours. The gate is live and absorbing
 faster than the org produces.
+
+## Window 112's reading, 2026-11-09 (supersedes the order above for this seat's lane only)
+
+**#870 is the tip and it absorbs two of the four.** Measured, with the
+pair in the order it was run, and `exit 0` means the first is contained
+in the second:
+
+```
+git merge-base --is-ancestor refs/prs/846 refs/prs/870   # exit 0
+git merge-base --is-ancestor refs/prs/863 refs/prs/870   # exit 0
+```
+
+So `#846` is contained in `#870` and `#863` is contained in `#870`.
+`#863` is closed by this window with the proof in its closing comment.
+`#846` is **left open deliberately**: Ursa's PM told the owner at
+09:40:27Z that exo's window-109 row was "left for the owner", and moving
+an artifact a seat has promised the owner would not move costs more than
+the queue slot saves. The decision should move to `#870`.
+
+**#826 and #833 are NOT subsumed, and `merge-tree` is not what says so.**
+`merge-tree --write-tree` reports a conflict against `main` for both,
+which for this seat is the size of its six-register file set rather than
+the size of any divergence. The per-file comparison is the instrument
+that can come back empty, and it came back full:
+
+| branch | own-lane work absent from #870 |
+|---|---|
+| **#826** | `tools/gates/acceptance-fields.mjs` **401** lines, its suite **342**, its spec **114**, its baseline **176**, plus a verdict module **158** |
+| **#833** | `tools/board/wake-cost.mjs` **412** lines, its suite **265**, `escape-trace.mjs` **101**, its suite **120** |
+
+Whole tools, not superseded wordings. These are **three independent
+decisions and not one**, and closing either as contained would lose work
+that exists nowhere else.
+
+**The order this seat would take:**
+
+```
+#870              the tip; lands windows 109, 111 and 112 in one decision
+#833  then #826   charter lane; each needs its prompts/exo-agent.md hunk re-merged after #870
+#846              contained in #870 already; close rather than merge, once the owner has seen it
+```
