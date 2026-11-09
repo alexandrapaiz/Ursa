@@ -34,6 +34,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { launch } from './lib/browser.mjs'
 import { freezeContext } from './lib/freeze.mjs'
 import { drive as drivePanelPayload } from './state/panel-payload.mjs'
+import { tracker } from './lib/reached.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const BASE = arg('base', 'http://127.0.0.1:4488')
@@ -79,9 +80,31 @@ const TARGETS = [
   // page that had not been asked for anything yet.
   {
     label: 'rec-row-index', path: '/record', sel: '.rec-row', until: '.rec-row',
+    // Fill, then WAIT for the control to agree it is fillable, and re-fill
+    // if it does not. Measured 2026-11-09 (run w): the submit button ships
+    // `disabled` in the server-rendered HTML and is enabled by the client
+    // component once its state holds an address, so a fill that lands
+    // before hydration sets the DOM value against no listener, React keeps
+    // its own state empty, and the button never enables. `page.click` then
+    // waited its full 30s on an actionability condition nothing was going
+    // to satisfy. The previous run of this file won that race and this one
+    // lost it, which is the worst kind of instrument: one whose answer
+    // depends on how warm the dev server was.
+    //
+    // The loop converges instead of guessing a settle. If it never
+    // converges that is a DRIVE-FAILED verdict and gates, which is the
+    // repair this file received the same morning.
     drive: async (page, base) => {
-      await page.fill('input[aria-label="the address of a published site"]', `${base}/fixtures/site-04/`)
-      await page.click('button:has-text("read the site")')
+      const field = page.locator('input[aria-label="the address of a published site"]')
+      const submit = page.locator('button:has-text("read the site")')
+      await field.waitFor({ state: 'visible', timeout: 15000 })
+      for (let i = 0; i < 20; i++) {
+        await field.fill(`${base}/fixtures/site-04/`)
+        await page.waitForTimeout(250)
+        if (await submit.isEnabled()) break
+        if (i === 19) throw new Error('the submit button never enabled after 20 fills, so the form is not hydrated or the address is rejected')
+      }
+      await submit.click()
     },
   },
   { label: 'rec-action-record',  path: '/record/mini-fixture',  sel: '.rec-action' },
@@ -147,6 +170,11 @@ const readTree = (el, props) => {
 mkdirSync(`${OUT}/rest`, { recursive: true })
 mkdirSync(`${OUT}/hover`, { recursive: true })
 
+// `/this-page-does-not-exist` is two of this file's own targets, because
+// the not-found page carries the quiet-link and mark-link treatments and
+// is reviewed like any other page, so its status is the subject.
+const reach = tracker({ expect404: ['/this-page-does-not-exist'], label: 'target' })
+
 const browser = await launch()
 const lines = []
 const rows = []
@@ -191,8 +219,30 @@ for (const t of TARGETS) {
   const ctx = await browser.newContext({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1, reducedMotion: 'no-preference' })
   await freezeContext(ctx)
   const page = await ctx.newPage()
-  await page.goto(url, { waitUntil: 'networkidle' })
-  if (t.drive) await t.drive(page, origin)
+  reach.saw(t.path, await page.goto(url, { waitUntil: 'networkidle' }))
+  // A drive that throws used to take the whole file down, which looked like
+  // the careful behaviour and was not. Measured 2026-11-09 (run w): pointed
+  // at a page answering 200 that carries none of this site's vocabulary,
+  // `rec-row-index`'s drive timed out filling an input that was not there,
+  // the error escaped, node set exit 1, and the nine verdicts already
+  // computed were lost along with the blindness verdict this file had just
+  // learned to compute. Exit 1 by escape is the `right by accident` case
+  // Ursa's exo seat named: the status was a property of nothing.
+  //
+  // So a failed drive is a verdict about this target and the run continues.
+  let drove = 'none'
+  if (t.drive) {
+    drove = 'ok'
+    try {
+      await t.drive(page, origin)
+    } catch (e) {
+      drove = 'failed'
+      lines.push(`${t.label.padEnd(20)} ${'DRIVE-FAILED'.padEnd(22)} ${String(e).split('\n')[0]}`)
+      rows.push({ ...t, verdict: 'drive-failed', count: 0, reason: String(e).split('\n')[0] })
+      await ctx.close()
+      continue
+    }
+  }
 
   // A page that fetches its own data is a race against a fixed settle, and
   // the kit has lost that race twice before. A target on such a page
@@ -282,7 +332,7 @@ for (const t of TARGETS) {
 
   lines.push(`${t.label.padEnd(20)} ${verdict.padEnd(22)} ${t.sel} on ${url}  (${count} match${count === 1 ? '' : 'es'}, ${meta.tag}${meta.disabled ? ', disabled' : ''}, box ${Math.round(box.width)}x${Math.round(box.height)})`)
   for (const d of deltas) lines.push(`${' '.repeat(22)}${d}`)
-  rows.push({ ...t, verdict, count, meta, deltas, clip, gate })
+  rows.push({ ...t, verdict, count, meta, deltas, clip, gate, drove })
 
   await ctx.close()
 }
@@ -293,8 +343,43 @@ lines.push('style moved. Whether a reader can see it moving is the pixel count f
 lines.push(`  python3 diff-frames.py ${OUT}/rest ${OUT}/hover`)
 lines.push('and a hover worth fewer pixels than the hairline it draws is a finding.')
 
+// WHAT THIS FILE DID NOT DO UNTIL 2026-11-09 (run w). It computed no exit
+// status at all. It ended on `await browser.close()`, so a run in which
+// every target printed MISSING left the same zero as a run in which every
+// hover was verified, and the enumerated list whose whole point is that an
+// absence shows was showing it in one channel only.
+//
+// That is the shape Ursa's exo seat generalised the same day: the
+// do-nothing value is inside the legal range of the real answer and sits at
+// the reassuring end of it. This instrument's do-nothing value was the best
+// value it could return.
+//
+// Three categories, and they are not the same verdict:
+//
+//   MISSING / MISSING? / GATE-TIMEOUT / DRIVE-FAILED
+//       the target was asked for and nothing is known about it.
+//       Blindness. Exit 2.
+//   NOT-REACHED                         a flag this invocation did not
+//       pass. Nothing was asked of that surface, so this is scope and not
+//       blindness. Reported with the flag that would reach it, never gated
+//       on, because gating would make every ordinary run of this file fail.
+//   NO-CHANGE / by-design-disabled      a verdict about the SITE, which
+//       the reader of the table makes. Exit 0 however bad it is.
+const blind = rows.filter((r) => ['missing', 'missing?', 'gate-timeout', 'drive-failed'].includes(r.verdict))
+const scoped = rows.filter((r) => r.verdict === 'not-reached')
+lines.push('')
+if (blind.length) {
+  lines.push(`NOT MEASURED: ${blind.length} of ${rows.length} targets were asked for and nothing is known about them, so this run makes no claim about those hovers.`)
+  for (const r of blind) lines.push(`  ${r.label} (${r.sel} on ${r.path}): ${r.verdict}`)
+} else {
+  lines.push(`every one of the ${rows.length - scoped.length} targets this run asked for was reached.`)
+}
+if (scoped.length) lines.push(`${scoped.length} target(s) were not asked for at all: ${scoped.map((r) => `${r.label} needs ${r.reason.replace(/^no /, '')}`).join(', ')}. That is this invocation's scope and not a finding.`)
+lines.push(...reach.lines())
+
 const text = lines.join('\n') + '\n'
 writeFileSync(`${OUT}/states.txt`, text)
-writeFileSync(`${OUT}/states.json`, JSON.stringify({ base: BASE, harness: hoverMedia, settleMs: SETTLE, rows }, null, 2) + '\n')
+writeFileSync(`${OUT}/states.json`, JSON.stringify({ base: BASE, harness: hoverMedia, settleMs: SETTLE, blind: blind.length, scoped: scoped.length, reached: reach.rows(), rows }, null, 2) + '\n')
 console.log(text)
 await browser.close()
+if (blind.length || reach.code()) process.exit(2)
