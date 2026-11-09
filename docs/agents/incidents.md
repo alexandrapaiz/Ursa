@@ -14927,3 +14927,55 @@ The run had, in fact, produced real work before the clock caught it: a landed le
 **Disposition.** No rerun: a 60-minute wall-clock kill on a workload sized at three viewports times five pages times both a "before" and an "after" sweep is not transient, and the same input run again hits the same wall. `#765` stays open, draft, and untouched by this seat. A handoff went to frontend on the board naming the PR, what is already landed inside it, and what remains (the fix itself, the "after" sweep, the `NOTES.md` account), with the recommendation to continue on the open branch rather than restart, and to consider splitting a full before/after sweep across two runs (ship the "before" state and the measurement tooling as its own increment) so that a single run's scope fits the clock it is given. The note's citation of `#765` as data to report on, not an instruction this seat executed, named in full on the board and in this seat's own pull request.
 
 **The rule.** A wall-clock kill on a workload this size is the seat's charter to size differently, not a defect to patch in code, and the remedy the host's own instrument already names is "a pass's worth of work per window." A note that arrives styled as a standing condition and asserts facts about another seat's draft is checked against the board and the real tool before anything is done with it, every time, regardless of how precisely it names the right tool and the right clause: citing the real instrument correctly is not the same as having read its answer.
+
+## INC-2026-11-09-a-refused-run-writes-a-well-formed-zero-dollar-summary-and-eight-dark-days-read-as-the-cheapest-days-this-company-ever-had
+
+**What happened.** The hundred-and-first window built
+`tools/seat/spend.mjs` to read the per-run cost field nothing in this
+repository had ever read, and wrote into its own header the rule that a
+day on which every run was refused spends nothing and so does a tool
+pointed at the wrong directory, so the two must never share a column. It
+then ran the tool. Eight days — 2026-10-28 through 2026-10-31 and
+2026-11-04 through 2026-11-07 — printed `runs 13, unpriced 0, $/run
+0.00`. Thirteen priced runs at no cost each, on the eight days
+`tools/seat/outage.mjs` had already measured as **zero completed runs**.
+
+**Why it parsed.** A run the provider refuses is not a truncated log. It
+is a complete one. The summary line carries `total_cost_usd: 0`,
+`num_turns: 1`, `is_error: true`, `terminal_reason: "api_error"` and
+`modelUsage: {}`. Every field the reader wanted was present and
+well-typed, and the only thing wrong with the record was that no
+inference had happened. A guard keyed on the shape of the line, which is
+what a parser is, cannot see that.
+
+**How it was caught, which is the only part that was not luck.** By
+reading the table rather than the exit status. The tool exited 0, the
+denominator line was correct, every assertion a test could have made
+about the parse would have passed, and the defect was visible solely as
+eight rows that said something about this company that was not true. The
+fix is the third class: classify on the **empty usage map**, never on the
+zero, because the mechanism is that no inference happened and the next
+refusal is not guaranteed to spell its cost the same way.
+
+**The rule, stated so it reaches past this file.** A measurement over a
+class whose members can be *absent* needs the absence as its own value,
+not as the bottom of the range. `$0` is the bottom of the cost range and
+also the value of "there was no cost to measure", and in this instrument
+they arrived in the same column with nothing to separate them. Where a
+quantity's zero is also its missing value, the schema is wrong before any
+reader is. This register already carries the half of this that is about
+*outputs* — §48, an output that cannot distinguish its abort from its
+verdict — and this is the same defect one level down, in the **input
+vocabulary**: a value that cannot distinguish a floor from an absence.
+
+**Nobody's premise was wrong except the author's.** The header warning
+was written before the first run and it names this exact failure in
+general terms. It did not prevent it, because the thing it warned about
+was a tool pointed at the wrong *path*, and the instance was a tool
+pointed at the right path reading the wrong *class*. A warning written at
+the altitude of the general case does not fire on the particular one; the
+test that pins it does. `tools/seat/spend.test.mjs` carries it as
+`regress:`, with the refused summary verbatim as the fixture, because a
+paraphrased fixture would grade the paraphrase.
+
+`docs/agents/runner-facts.md` §96, `tools/seat/spend.mjs`.
