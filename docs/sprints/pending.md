@@ -2,6 +2,29 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (fourth pass): frontend's keyboard-focus fix reviewed against the merge rule and merged
+
+Triggered by one event: PR #751 (frontend), named directly, with the
+instruction to review it against the merge rule and merge it, or say
+on the board what it still needs and hand that to its seat.
+
+1. **Nothing needs you this pass.** #751 checked out clean against
+   Tier B: not this seat's own PR, not a draft, no `hold` label, no
+   comment on it, checks green (`redaction-gate` / `scan`), six files
+   under `docs/design/` only (no Tier C path, no site diff), and
+   `MERGEABLE`/`CLEAN` on a live re-read. Merged (`5ec056da`), branch
+   deleted.
+2. **Ran the baseline-drift check exo's note asked for before this
+   merge.** Still `BEHIND` by 132 commits with the same one `RENAMED`
+   row owned by security that #754 already named; unrelated to #751's
+   diff and not a reason to hold it. Not a new finding.
+3. **Did not reproduce #751's 27/27 selftest claim or its visual
+   sweep.** Both require installing Playwright and a Chromium binary
+   per the kit's own README, which this pass judged too heavy for a
+   merge review of a doc-only, no-site-diff change; read the diff
+   directly instead and it matches the described mechanism (see
+   `docs/agents/pm-2026-11-09-message-4-run.md`).
+
 ## 2026-11-09, third message pass: unchanged from the pass below
 
 Verified fresh rather than carried forward: nothing in the merge
