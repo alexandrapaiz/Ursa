@@ -1,0 +1,51 @@
+{
+  "comment": "The premise set for the EMPTY axis, declared here rather than derived, because a derived set changes under the sweep and a sweep whose population moves cannot be compared with its own previous run. Each entry names a file this repository's gates read as their population, and the empty form that is a LEGAL state of it. Zero bytes is the empty form of a markdown register: nothing in the grammar of these files forbids a register with no entries, which is exactly why a gate's reassuring sentence over one is so cheap to produce.",
+  "why_this_axis": "tools/gates/premise-differential.mjs removes the repository. An absent premise crashes and gets looked at. An empty one prints a sentence the reader already expected, at exit 0 (Ursa/security, 2026-11-09: check-closures over a zero-byte docs/ideas.md printed `0 marker(s) in 0 document(s), all resolved and all closed` and ci-checks took it at passExit 0 and 2). Absent and empty are two premises and only absent was swept.",
+  "premise": [
+    {
+      "path": "docs/ideas.md",
+      "empty": "truncate",
+      "why": "The ledger, 602 entries on main. Ursa/security measured the zero-byte case on this exact file, so it is the row with ground truth behind it."
+    },
+    {
+      "path": "docs/agents/incidents.md",
+      "empty": "truncate",
+      "why": "The incident register. Two seats append to its tail and three register tools key on its headings."
+    },
+    {
+      "path": "docs/decisions.md",
+      "empty": "truncate",
+      "why": "The ADR register. tools/registers/check-ids.mjs reads it for identifier collisions, which is a count that is legal at zero."
+    },
+    {
+      "path": "docs/agents/learning-log.md",
+      "empty": "truncate",
+      "why": "The largest register this seat keeps. A heading sweep over it is the shape that merges the whole file as one block when a pattern stops matching."
+    },
+    {
+      "path": "docs/agents/runner-facts.md",
+      "empty": "truncate",
+      "why": "The host-facts register, keyed by section number. Cited by every charter in the roster, so a gate that reads it for citation integrity has an empty-at-zero answer."
+    },
+    {
+      "path": "docs/agents/improvements.md",
+      "empty": "truncate",
+      "why": "The improvement register HQ's console parses. tools/seat/read-dates.mjs counts its entries and its read dates, and both counts are legal at zero."
+    },
+    {
+      "path": "docs/standards/lessons.md",
+      "empty": "truncate",
+      "why": "HQ's vendored lessons register. Named here because a vendored file that arrives empty from a sync is the real-world way this premise goes to zero without anybody deciding it."
+    }
+  ],
+  "not_swept": [
+    {
+      "what": "*.baseline.json and the gate registry's own JSON",
+      "why": "Zero bytes is not the empty form of a JSON document, it is a parse error, which is the ABSENT premise the repository axis already sweeps. The legal empty form differs per schema -- {\"entries\":[]} here, {\"rows\":[]} there -- so emptying them correctly means reading seven schemas, and a wrong empty form would grade a parse failure as an empty-premise finding. Named rather than swept, and counted in the ungraded total."
+    },
+    {
+      "what": "the board store and the forge",
+      "why": "Not files. Their empty form is a 200 with an empty collection, which is a third axis and needs a stub server rather than a worktree. Ursa/security's credential axis is the nearest existing reading of it."
+    }
+  ]
+}
