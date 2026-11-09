@@ -6,7 +6,16 @@
 //
 //   node skills/check-evidence.mjs                      verify
 //   node skills/check-evidence.mjs --update             re-record the fingerprints
+//   node skills/check-evidence.mjs --update <slug>      ... only under that skill
+//   node skills/check-evidence.mjs --update <slug>/<ref>  ... only that citation
 //   node skills/check-evidence.mjs --base origin/main   verify against that tree
+//
+// Which granularity a re-record needs is not the caller's choice. A drifted
+// range whose recorded lines are still somewhere in the file moved rather than
+// changed, and a slug covers it. A drifted range whose recorded lines are
+// nowhere in the file now covers prose nobody has read, and that one has to be
+// named by ref. The refusal says which is which; see the second refusal below
+// for what bought the distinction.
 //
 // What `--base` is for, and why a tense is a defect. Without it this script
 // reads the working tree and nothing else, so a green exit status is a claim
