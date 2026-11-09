@@ -19891,3 +19891,56 @@ this run's work is justified by this seat's own charter owning
   use it.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (market, 18th run) — Cite Mercor's own 2030 margin-expansion and revenue targets as the quantified comp for Minor's cost-structure pitch
+- Trigger: docs/market/landscape.md's Mercor entry, 2026-11-09 update.
+  A second BigGo Finance article (2026-09-28) reports Mercor
+  management's own stated 2030 targets: revenue "approaching $69
+  billion" and gross margin rising from 33% today to 56% by 2030. This
+  is the quantified version of a constraint this file's prior updates
+  only described qualitatively (contractor payouts eating roughly
+  two-thirds of revenue).
+- What: whoever drafts KR4.1's lab brief or any cost-structure
+  argument for Minor should cite this as a named, dated comp: the
+  category's largest-by-growth vendor is planning to spend the same
+  decade cutting both its customer concentration (already proposed,
+  2026-11-09, 17th run) and its structural labor-cost margin drag, from
+  a 33% floor set by paying out contractors. Minor's near-zero
+  marginal-cost structure (CLAUDE.md §2, "cost structure... light,"
+  raw processing on-device) can be stated against this specific
+  number rather than against an assumption of what solicited-labor
+  vendors cost to run.
+- Why it is not actioned by this run: pricing and brief-drafting
+  decisions are the owner's and the PM's, not this seat's charter
+  (prompts/market-agent.md: "pricing decisions are the owner's; your
+  job is that she never makes one blind").
+- First step: whoever owns KR4.1's brief adds one sentence citing the
+  33%-to-56%-by-2030 margin trajectory alongside the already-proposed
+  91%-concentration/under-one-third-by-2030 citation, both from the
+  same vendor and the same underlying disclosure family.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, 18th run) — Name Toloka as a concrete transparency-posture contrast for Minor's "publish methodology openly" pitch
+- Trigger: docs/market/landscape.md's new Toloka entry and
+  docs/market/positioning.md's 2026-11-09 (18th run) section. Every
+  other Category 1 vendor checked in this file prices itself through a
+  sales conversation (not public, NDA, sales-led) or a secondhand
+  contractor-rate inference. Toloka's own platform page states a buyer
+  sees "a clear price and timeline estimate" before committing, no
+  sales call required.
+- What: Minor's CLAUDE.md §2 key activity is "publish methodology
+  openly... because both sides can audit what's happening." Every
+  vendor's marketing claims some form of transparency; naming a
+  specific, checkable contrast (Toloka publishes a rate card, the rest
+  of the category doesn't) gives a lab-facing pitch something concrete
+  to point at instead of an unfalsifiable claim competing with other
+  unfalsifiable claims.
+- Why it is not actioned by this run: positioning language for a pitch
+  deck or brief is the PM's or owner's to draft, not this seat's to
+  write; this seat's charter is research, not copy.
+- First step: whoever next drafts lab-facing positioning copy adds one
+  sentence naming Toloka's self-serve rate card as the category's
+  exception, with the citation in docs/market/positioning.md.
+- Cost: $0
+- Status: proposed
