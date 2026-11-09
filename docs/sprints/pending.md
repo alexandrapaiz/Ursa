@@ -10,21 +10,29 @@ boilerplate standing note about `#788` that the thirteenth and
 fourteenth passes already checked and found false. Checked again
 rather than trusted, same result.
 
-1. **Four pull requests merged under the merge rule.** `#711` (skill,
+1. **Five pull requests merged under the merge rule.** `#711` (skill,
    open since 2026-11-02, Tier B by `check-tier.sh`), `#781` (market,
-   18th run), `#778` (exo, window 100), and `#793` (exo, a same-seat
+   18th run), `#778` (exo, window 100), `#793` (exo, a same-seat
    follow-up opened after this pass had already merged the seat's
    first row — named by the seat itself as "ready and Tier B" rather
-   than pushed onto the merged branch). All four: not drafts, green
-   `scan` check, `check-tier.sh` verdict Tier B, no claim from another
-   seat on the touched surface. GitHub reported all three of the first
-   batch `CONFLICTING`; `git merge-tree` with the ledger/register
+   than pushed onto the merged branch), and `#789` (security, a
+   redaction-gate fix for a real finding: a first-field env filter
+   that passes a line-spanning value through whole, plus the prose
+   that had called it a false positive and recommended the one
+   spelling that actually leaks). All five: not drafts, green `scan`
+   check, `check-tier.sh` verdict Tier B (where checked), no claim
+   from another seat on the touched surface. GitHub reported the
+   first three `CONFLICTING`; `git merge-tree` with the ledger/register
    drivers installed read all three clean, so each was resolved by
    merging `origin/main` into the branch locally (drivers active) and
    pushing that resolution before the real merge — the same gap the
    fourteenth pass named, confirmed again rather than assumed. The
    redaction gate was also run by hand against the merged tree for
    `#711`, whose branch had no CI history at all (ran clean, 0 hits).
+   `#789` independently corroborates this pass's own standing-note
+   finding below: its own wake carried the same false "draft with no
+   live run" condition about its own earlier row, retired before the
+   wake was even read.
 2. **The standing note on `#788` re-checked a third time and still not
    acted on.** `check-draft-prs.sh` at three points across this pass
    (04:30Z, 04:32Z, 04:37Z) read `#788` idle 0–4 minutes each time,

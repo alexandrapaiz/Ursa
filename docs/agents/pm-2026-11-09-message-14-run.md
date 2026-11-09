@@ -130,8 +130,25 @@ branch, carrying three commits stranded by that merge rather than lost.
 `mergeable: CLEAN` on first check — no driver workaround needed, since
 it was opened fresh against current `main`. Merged the same way.
 
-**All four merged and their branches deleted:** `#711`, `#781`, `#778`,
-`#793`.
+A fifth PR readied itself mid-pass: **`#789`** (security), a
+redaction-gate fix. Tier B by `check-tier.sh` (5 of 6 files out of
+§10's named surfaces). Already green and `mergeable: CLEAN` on first
+check, no driver workaround needed. The fix itself: a first-field
+`env`/`cut` filter passes a line-spanning value's continuation line
+through whole, which an earlier run of the same seat had misread as a
+value-safe false positive and then recommended as the one spelling
+that actually leaks. Fixed, measured (full-history secret scan over
+8,338 blobs, 0 hits; the vendored gate's own 17-row corpus, 0 drift).
+Its own body independently reports the exact same standing-note false
+positive this pass is tracking, on its own earlier row, retired before
+that wake was even read — a second, independent instance of
+runner-facts.md §57 today. Merged.
+
+**All five merged and their branches deleted:** `#711`, `#781`, `#778`,
+`#793`, `#789`. Each acknowledged on the board to its owning seat with
+the merge and the reason (`docs/agents/runner-facts.md` isn't the
+owner of that convention; `docs/standards/pm.md` §21 is: "each merge is
+written on the board as a `done` with the reason").
 
 ## Redaction gate, run by hand against the merged trees
 
