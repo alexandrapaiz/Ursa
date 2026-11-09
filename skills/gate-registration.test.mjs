@@ -36,10 +36,12 @@
 //     baseline today produces exactly the red the ordering exists to avoid,
 //     one step earlier than anyone is watching for it.
 //
-// That asymmetry is asserted below rather than described, because it is the
-// reason `skills/relocate-anchors.mjs` is excused in THIS file and not in the
-// baseline, and a reader who did not know it would move the row and be right
-// to think they were tidying up.
+// That asymmetry is the reason `skills/relocate-anchors.mjs` is excused in
+// THIS file and not in the baseline, and a reader who did not know it would
+// move the row and be right to think they were tidying up. It used to be
+// asserted below as the literal string `stale-entry`, and the third correction
+// at the bottom of this header is about why a literal was the wrong way to
+// hold it.
 //
 // A CORRECTION TO THE PARAGRAPH ABOVE, measured 2026-11-09 after it was
 // written. "Order-safe" was too strong a word for the gate-list route, because
@@ -61,6 +63,53 @@
 // separate from the widening test because the two axes are independent: a path
 // can be invisible for being uncommitted, for being outside the swept roots, or
 // for both.
+
+// A THIRD CORRECTION, measured 2026-11-09 by this seat after Ursa/security
+// wrote to ask it to decide the question. Security's note said this suite
+// "asserts UNREGISTRABLE's coverage rather than the asymmetry, which means
+// nothing will catch the drift", and offered to add four lines putting the
+// paragraphs above into the past tense. Both halves of the premise were wrong,
+// and the way they were wrong is the interesting part.
+//
+// The suite did assert the asymmetry, against `decide()` directly. So it was
+// not green-and-blind: it was already RED against security's own branch tip
+// the day the note was written, because that branch returns
+// `out-of-scope-entry` where this file expected `stale-entry`. A dated past
+// tense would have left that red in place.
+//
+// But the drift security was reaching for is real, and it arrives by the
+// opposite mechanism. The old assertion was a literal, and the literal's value
+// is decided by a roots default that lives on a THIRD seat's branch. Measured
+// one configuration at a time:
+//
+//   this library's branch alone                    stale-entry         green
+//   Ursa#888 alone                                 out-of-scope-entry  RED
+//   Ursa#888 plus Ursa#879's widening              stale-entry         green
+//
+// The last row is the one that matters. With `skills` in the roots the excused
+// path is a discovered candidate, the new arm never runs, and the old literal
+// matches again -- so the test passes in the one configuration where the thing
+// it was written to assert has ceased to exist. A test whose verdict is a
+// function of merge order is not holding anything. It is three outcomes
+// wearing one name.
+//
+// So the test below asserts the PROPERTY in each world and names no kind: that
+// an excuse for a path this gate never looked at is refused rather than
+// silently honoured, and that the refusal never tells the author to delete a
+// row that is correct and merely early. That property holds on both repairs
+// and fails on `main`, which is the tree that still carries the defect
+// sentence. Verified across all five trees before this was written.
+//
+// AND ONE FINDING THAT IS NOT THIS SEAT'S TO FIX, recorded here because this
+// file is where it was found. `decide()` is being given two mutually exclusive
+// signatures on two open branches: one replaces the boolean `exists` with
+// `locate(path) -> committed|uncommitted|absent` and throws a TypeError when
+// `locate` is absent, the other keeps `exists` and adds `committed` and
+// `roots`. Whichever merges second, every caller of the other dies in the
+// call rather than returning a wrong answer. The fixtures below therefore pass
+// all three spellings, so this suite keeps answering about the library
+// whichever way the owner merges. `tools/gates/` is not this seat's lane, so
+// the incompatibility itself is in the ledger and on the board.
 
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
@@ -162,80 +211,210 @@ test('each excuse names a kind the registry actually has, and a reason long enou
   }
 })
 
-test('the baseline route cannot be taken before the root widens, and the gate-list route can', () => {
-  // The asymmetry the header names, asserted against `decide()` itself so that
-  // a change to the registry's ordering behaviour breaks this file rather than
-  // being discovered by a red on somebody else's branch.
-  //
-  // The candidate set here is the NARROW one that is live today: no skills/
-  // path is in it, which is exactly the condition under test.
-  const candidates = [{ path: 'tools/example.mjs', lang: 'javascript', exitCalls: 1 }]
-  const shared = {
-    candidates,
-    locate: () => 'committed',
+/** The tree-shaped arguments `decide()` needs, in every spelling a live
+ *  version of it has asked for, with all of them agreeing that the given paths
+ *  are present and committed.
+ *
+ *  WHY ALL THREE AND NOT THE ONE THIS BRANCH USES. `decide()`'s signature is
+ *  being rewritten on two branches at once and the rewrites are mutually
+ *  exclusive: one replaces the boolean `exists` with `locate(path) ->
+ *  committed|uncommitted|absent` and THROWS when `locate` is absent, the other
+ *  keeps `exists` and adds `committed` and `roots`. A fixture that names one
+ *  spelling does not fail an assertion against the other, it dies in the call,
+ *  and a suite that cannot run says nothing about the library it guards. This
+ *  seat does not own `tools/gates/`, so the incompatibility is reported in the
+ *  ledger rather than resolved here. What is owned is this file still working
+ *  whichever way the owner merges the two. */
+function treeArgs(uncommitted = []) {
+  const unc = new Set(uncommitted)
+  return {
+    locate: (path) => (unc.has(path) ? 'uncommitted' : 'committed'),
+    exists: () => true,
+    committed: (path) => !unc.has(path),
     checkIds: ['example'],
     ledgerHeadings: [],
   }
+}
 
+/** Everything `decide()` said about one path, across both channels a live
+ *  version of it reports through: `problems`, and the softened `pending` the
+ *  `locate` rewrite adds. Normalising here is what lets the assertions below
+ *  be about the SENTENCE a reader acts on rather than about which array it
+ *  arrived in, and the sentence is the thing that was wrong. */
+function saidAbout(result, path) {
+  return [...(result.problems ?? []), ...(result.pending ?? [])].filter((p) => p.path === path)
+}
+
+/** Whether the live candidate sweep, at ITS OWN default roots, reaches this
+ *  library. Asked behaviourally rather than by importing the roots list,
+ *  because the list is a named export on one branch and a parameter default on
+ *  another, and a test that imports the spelling is a test that breaks on
+ *  whichever of the two merges. What this file needs is not the list. It is
+ *  the one bit the list decides. */
+function sweepReachesLibrary() {
+  const all = gateCandidatePaths({ langs: CANDIDATE_LANGS })
+  assert.ok(all !== null, 'the candidate sweep was unavailable, so its roots cannot be read')
+  return all.some((c) => c.path.startsWith('skills/'))
+}
+
+test('a baseline excuse this library cannot yet take is refused, before and after the widening', () => {
+  // WHY THIS TEST IS SHAPED AS TWO ARMS AND NOT ONE ASSERTION, measured
+  // 2026-11-09 by this seat after Ursa/security asked it to decide the
+  // question. The previous version of this test asserted the literal
+  // `['stale-entry']`, and that literal is a function of a default that lives
+  // in another seat's branch, so the test's verdict was decided by MERGE
+  // ORDER. Three readied-or-draft branches, measured one at a time:
+  //
+  //   this branch alone              stale-entry        GREEN
+  //   Ursa#888 alone (out-of-scope-
+  //     entry for a tracked path
+  //     outside the roots)           out-of-scope-entry RED, on security's
+  //                                                    own tip, today
+  //   Ursa#888 + Ursa#879's widening stale-entry        GREEN AGAIN
+  //
+  // The third row is the one worth the paragraph. With `skills` in the roots
+  // the excused path is a discovered candidate, so the new arm never runs and
+  // the old literal matches again -- the test goes green in the single
+  // configuration where the thing it was written to assert no longer exists.
+  // Ursa/security's note predicted drift that nothing would catch and named
+  // the wrong mechanism: this suite does assert the asymmetry, it is already
+  // red against #888, and the way it fails to catch the drift is by passing
+  // vacuously afterwards. Asserting a symptom's NAME was the defect.
+  //
+  // So each arm asserts the property that is true in its own world, and both
+  // of them fail on the one outcome that is dangerous in either: the excuse
+  // being silently honoured for a path this gate never looked at.
+  const library = 'skills/relocate-anchors.mjs'
+  const entry = {
+    path: library,
+    kind: 'write-action',
+    why: 'a reason comfortably past the twenty-character floor the registry enforces',
+  }
+  const shared = treeArgs()
+  const outside = [{ path: 'tools/example.mjs', lang: 'javascript', exitCalls: 1 }]
+
+  if (sweepReachesLibrary()) {
+    // AFTER the widening. The path is swept, so the row is a live excuse and
+    // the registry one layer up is what guards this library. The ordering this
+    // suite exists to protect is discharged, and the row must now be HONOURED
+    // -- reported as excused, with no problem naming it.
+    const viaBaseline = decide({
+      ...shared,
+      candidates: [...outside, { path: library, lang: 'javascript', exitCalls: 1 }],
+      registered: new Map([['tools/example.mjs', ['example']]]),
+      baseline: { entries: [entry] },
+    })
+    assert.deepEqual(
+      viaBaseline.problems.map((p) => p.path), [],
+      `the sweep now reaches ${library}, so its baseline row is a live excuse and must cost `
+        + 'nothing. If this is a finding, the widening landed without the row and this '
+        + "library's guards are red for a reason that is not about them",
+    )
+    assert.deepEqual(
+      viaBaseline.rows.filter((r) => r.path === library).map((r) => r.state), ['excused'],
+      `${library} is swept and excused in the baseline, so it must read as excused`,
+    )
+    return
+  }
+
+  // BEFORE the widening. The path is not swept, so the row decides nothing and
+  // the gate must say so. WHICH kind it says it with is not asserted: `main`
+  // says `stale-entry`, Ursa#888 says `out-of-scope-entry`, and both are
+  // refusals. What is asserted is that it is not silence, and that the
+  // sentence does not tell the reader to delete a row that is correct and
+  // merely early.
   const viaBaseline = decide({
     ...shared,
+    candidates: outside,
     registered: new Map([['tools/example.mjs', ['example']]]),
-    baseline: {
-      entries: [{
-        path: 'skills/relocate-anchors.mjs',
-        kind: 'write-action',
-        why: 'a reason comfortably past the twenty-character floor the registry enforces',
-      }],
-    },
+    baseline: { entries: [entry] },
   })
+  const named = viaBaseline.problems.filter((p) => p.path === library)
+  assert.equal(
+    named.length, 1,
+    `the sweep does not reach ${library}, so excusing it in the baseline must be reported `
+      + 'exactly once. Silence here is the dangerous outcome: it would mean a baseline row can '
+      + 'excuse a path this gate never looked at, which is an exemption with nothing behind it',
+  )
   assert.deepEqual(
-    viaBaseline.problems.map((p) => p.kind), ['stale-entry'],
-    'excusing a skills/ path in the baseline while the roots default is tools+scripts must be a '
-      + 'finding; if it is not, the ordering this suite documents has changed',
+    viaBaseline.rows.filter((r) => r.path === library), [],
+    `${library} is not a candidate, so it cannot appear as an excused row`,
   )
 
   const viaGateList = decide({
     ...shared,
+    candidates: outside,
     registered: new Map([
       ['tools/example.mjs', ['example']],
-      ['skills/relocate-anchors.mjs', ['some-skill-check']],
+      [library, ['some-skill-check']],
     ]),
     baseline: { entries: [] },
   })
   assert.deepEqual(
     viaGateList.problems, [],
-    'naming a skills/ path in the gate list before the sweep can see it must cost nothing',
+    'naming a skills/ path in the gate list before the sweep can see it must cost nothing. '
+      + 'This half of the asymmetry is what makes scripts/ci-checks.mjs the route a library '
+      + 'guard takes first, and it holds in both worlds',
   )
 })
 
-test('a library row written before the commit is pending, so the row survives', () => {
-  // The second axis, on this library's own case. A seat writing a new guard
-  // under skills/ and its baseline row in the same working tree used to be told
-  // to delete the row, by a sentence that was false in both directions: the
-  // file is on disk, and it has never been a candidate so it cannot be "no
-  // longer" one. The row has to survive the author's own next read of the gate,
-  // or the convention in EXPECTED_ABSENT_FIXTURES above cannot be followed.
-  const { problems, pending } = decide({
+test('a library row written before the commit survives the author\'s own read of the gate', () => {
+  // The second axis, on this library's own case, and independent of the first:
+  // a path can be invisible to the sweep for being uncommitted, for being
+  // outside the swept roots, or for both. A seat writing a new guard under
+  // skills/ and its baseline row in the same working tree used to be told to
+  // delete the row, by a sentence that was false in both directions: the file
+  // is on disk, and it has never been a candidate so it cannot be "no longer"
+  // one. The row has to survive the author's own next read of the gate, or the
+  // convention in UNREGISTRABLE above cannot be followed.
+  //
+  // WHAT IS ASSERTED, AND WHY IT IS NOT THE CHANNEL. Two branches repair this
+  // and they report it two ways: one returns it in a softened `pending` array
+  // gated on `authoring`, the other keeps it in `problems` and refuses the
+  // verdict with exit 2. Both are defensible and this seat does not pick
+  // between them. Neither may tell the author to delete a row that is correct
+  // and merely early, and that is the regression worth a test.
+  const written = 'skills/not-yet-committed.mjs'
+  const result = decide({
     candidates: [{ path: 'tools/example.mjs', lang: 'javascript', exitCalls: 1 }],
     registered: new Map([['tools/example.mjs', ['example']]]),
-    locate: (path) => (path === 'skills/not-yet-committed.mjs' ? 'uncommitted' : 'committed'),
-    // The author's working tree, which is the only place this state exists:
+    // The author's working tree, which is the only place this state exists.
     // `decide()` will not soften a finding on a clean tree, because that is
-    // what every runner checks out.
+    // what every runner checks out, so the flag is part of the fixture.
     authoring: true,
-    checkIds: ['example'],
-    ledgerHeadings: [],
+    ...treeArgs([written]),
     baseline: {
       entries: [{
-        path: 'skills/not-yet-committed.mjs',
+        path: written,
         kind: 'write-action',
         why: 'a reason comfortably past the twenty-character floor the registry enforces',
       }],
     },
   })
-  assert.deepEqual(problems, [], 'a guard being written must not make its own excuse a finding')
-  assert.deepEqual(pending.map((p) => p.kind), ['pending-entry'])
-  assert.match(pending[0].why, /Do NOT delete the entry/)
+
+  const said = saidAbout(result, written)
+  assert.equal(
+    said.length, 1,
+    `a guard being written must be accounted for exactly once. Silence would mean its baseline `
+      + 'row excuses a path the gate never looked at',
+  )
+  // The bare imperative, and deliberately not the word "delete". Ursa#888's
+  // out-of-scope sentence ends "or delete the row if the file is genuinely not
+  // a gate candidate", which is a hedged alternative offered with its
+  // condition attached, and a test that reddened on it would be reddening on a
+  // correct sentence. What was wrong on `main` was the unconditional form:
+  // "so the entry decides nothing. Delete it".
+  assert.doesNotMatch(
+    said[0].why, /[.;]\s*Delete it\b/,
+    `the gate told the author of ${written} to delete a row that is correct and merely early, `
+      + 'with no condition attached. That sentence is the defect both repairs to decide() exist '
+      + 'to remove, and it is false in two ways at once: the file is on disk, and it has never '
+      + `been a candidate so it cannot be "no longer" one. What it said: ${said[0]?.why}`,
+  )
+  assert.deepEqual(
+    result.rows.filter((r) => r.path === written), [],
+    `${written} is not a candidate yet, so it cannot appear as an excused row`,
+  )
 })
 
 test('every library path the gate list names is a file, and is one of these candidates', () => {
