@@ -97,6 +97,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { argumentFault } from './redaction-args.mjs';
+import { attribute, attributionLines } from '../tools/gates/hit-attribution.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -698,10 +699,32 @@ function run() {
   const note = skipped === 0 ? '' : ` ${skipped} hit${skipped === 1 ? '' : 's'} in gitignored paths not counted; the gate runs on a fresh checkout and cannot see them.`;
 
   if (json) {
-    console.log(JSON.stringify({ clean: findings.length === 0, findings, ignoredHits: skipped }, null, 2));
+    const paths = findings.flatMap((f) => f.hits.map((h) => h.split(':', 1)[0]));
+    console.log(
+      JSON.stringify(
+        {
+          clean: findings.length === 0,
+          findings,
+          ignoredHits: skipped,
+          // Same field for a programmatic reader as the note line gives a
+          // human one. `scope` is 'unknown' both when there are no hits and
+          // when the base did not resolve; `why` is set only in the second.
+          attribution: attribute(paths),
+        },
+        null,
+        2
+      )
+    );
   } else if (findings.length === 0) {
     console.log(`Redaction gate clean (${gate.pairs.length} patterns, read from the workflow).${note}`);
   } else {
+    // Attribution is computed once over every finding's paths rather than per
+    // finding, because the reader's question is about the red as a whole: can
+    // this branch clear it. F133, 2026-11-09: it could not, twice, and nothing
+    // in this output said so. See tools/gates/hit-attribution.mjs.
+    const hitPaths = findings.flatMap((f) => f.hits.map((h) => h.split(':', 1)[0]));
+    const whose = attribute(hitPaths);
+
     for (const f of findings) {
       console.error(`error: ${f.label}`);
       // Never reprint more than the gate does. The hit line can itself
@@ -713,6 +736,7 @@ function run() {
       }
       if (f.hits.length > 20) console.error(`  ... and ${f.hits.length - 20} more`);
     }
+    for (const line of attributionLines(whose)) console.error(line);
     console.error(
       'Redaction gate would fail. See docs/security/redaction-standard.md and Ursa incident 4.'
     );
