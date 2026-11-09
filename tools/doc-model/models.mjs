@@ -277,6 +277,18 @@ export const MECHANISMS = [
       // it. The section's own subject is what a seat may act on, which is
       // nothing in another seat's wake.
       { file: 'docs/ideas.md', heading: '### 2026-11-08 (engineer, scheduled slot, second window) — Craft scan: Arena (formerly LMArena), arena.ai, whose alignment index is measured over 90,000 agent sessions and traces to none of them', verdict: 'mentions-only', why: 'a craft scan whose external-sources paragraph reports that a process listing exposed another seat\'s wake payload; the cut marker appears only inside the quoted payload, and the section asserts nothing about where the cut lands' },
+      // A third false-positive shape, and the one that will recur most: a
+      // ledger entry whose subject is a TEST of this mechanism rather than
+      // the mechanism. The probe `/WAKE_BODY_CHARS/` matches because the
+      // section quotes an assertion's failure message, `WAKE_BODY_CHARS not
+      // found in the runtime`, from tools/board/check.test.mjs:479. Measured
+      // 2026-11-09 by the engineer seat: this was the only error-severity
+      // finding the gate produced on `main` (46 wake-cut candidates, 18
+      // registered sites, 28 unregistered, 27 of them downgraded to `warn`
+      // because they sit on the exo seat's docs/agents/runner-facts.md), so
+      // one unregistered ledger heading was the whole of the `doc-model-drift`
+      // red and of tools/doc-model/check.test.mjs:110.
+      { file: 'docs/ideas.md', heading: '### 2026-11-09 (security) — one tooling suite went red inside the full gate list and green twice on its own, and the failing case was not captured', verdict: 'mentions-only', why: "a ledger entry about a flaky-looking gate, whose named cause is that HQ moved WAKE_BODY_CHARS from runtime/board/api.py into store.py and left a re-export behind. It names the constant twice, both times inside a quoted test name and a quoted assertion failure, and it states the VALUE (1500) without ever stating where the cut lands. The rule it does state is about where a transcription check should read a constant from, which is not this mechanism" },
     ],
   },
 ];
