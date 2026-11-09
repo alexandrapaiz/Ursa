@@ -17,7 +17,15 @@ import { readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, it } from 'node:test'
-import { GATE, manifestFault, manifestUnusable, scopeUnreadable, verdict } from './id-verdict.mjs'
+import {
+  GATE,
+  manifestFault,
+  manifestUnusable,
+  scopeUnreadable,
+  spellId,
+  unspellId,
+  verdict,
+} from './id-verdict.mjs'
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SEEN = { ids: 24, namespaces: 4, refs: 1, scope: 'origin/main' }
@@ -33,6 +41,8 @@ const good = () => ({
       register: 'docs/decisions.md',
       pad: 3,
       define: '^## (ADR-(\\d+)) \\u2014 (.+)$',
+      spell: 'ADR-{n}',
+      example: '## ADR-002 \u2014 Activation wave 1: okr, pm, exo (2026-09-18)',
       repair: 'owner',
       why: 'architecture decisions',
       burned: [{ id: 'ADR-009', why: 'burned for a reason' }],
@@ -212,6 +222,29 @@ describe('the manifest validator refuses before any ref is read', () => {
       'BURNED_NOT_NUMBERED',
     ))
 
+  it('NAMESPACE_SPELL_UNUSABLE when there is no {n} to substitute', () =>
+    assert.equal(broken((ns) => (ns.spell = 'ADR-')), 'NAMESPACE_SPELL_UNUSABLE'))
+  it('NAMESPACE_SPELL_UNUSABLE when there are two, since only the first substitutes', () =>
+    assert.equal(broken((ns) => (ns.spell = 'ADR-{n}-{n}')), 'NAMESPACE_SPELL_UNUSABLE'))
+  it('NAMESPACE_NO_EXAMPLE', () =>
+    assert.equal(broken((ns) => delete ns.example), 'NAMESPACE_NO_EXAMPLE'))
+  it('EXAMPLE_NOT_DEFINED, which is how a pattern that matches nothing in its own register is caught', () =>
+    // The failure this case exists for is silent in the worst way: a pattern
+    // matching no heading makes the gate count zero identifiers in that
+    // namespace and print Exit 0, so the register reads as clean because it
+    // was never looked at.
+    assert.equal(
+      broken((ns) => (ns.example = '### ADR-002: a heading in some other shape')),
+      'EXAMPLE_NOT_DEFINED',
+    ))
+  it('EXAMPLE_SPELLING_DISAGREES when pad would write the example a different way', () =>
+    // pad 1 writes ADR-002's number as "2", so the allocator would hand out
+    // `ADR-2` for a register whose every citation spells it `ADR-002`, and
+    // every citation in this repository is a string match.
+    assert.equal(broken((ns) => (ns.pad = 1)), 'EXAMPLE_SPELLING_DISAGREES'))
+  it('EXAMPLE_SPELLING_DISAGREES when spell and define disagree on the prefix', () =>
+    assert.equal(broken((ns) => (ns.spell = 'ADR{n}')), 'EXAMPLE_SPELLING_DISAGREES'))
+
   it('accepts the shape it is meant to accept, so the suite is not just refusals', () => {
     assert.equal(manifestFault(good()), null)
   })
@@ -226,10 +259,13 @@ describe('the committed manifest', () => {
     assert.equal(manifestFault(manifest), null)
   })
 
-  it('declares the four namespaces this repository allocates for itself', () => {
+  it('declares the six namespaces this repository allocates for itself', () => {
+    // Was four until 2026-11-09. `Window` and `RunnerFact` are the two that
+    // tools/registers/registers.json already described the race for, in its
+    // own `why_identifier` fields, while this file did not carry them.
     assert.deepEqual(
       manifest.namespaces.map((n) => n.name),
-      ['ADR', 'PWC', 'PWC-ENG', 'PWC-EXO'],
+      ['ADR', 'PWC', 'PWC-ENG', 'PWC-EXO', 'Window', 'RunnerFact'],
     )
   })
 
@@ -244,13 +280,74 @@ describe('the committed manifest', () => {
     }
   })
 
-  it('every define pattern finds its own namespace prefix and nothing else', () => {
+  it('every define pattern matches a heading its own register really carries', () => {
+    // This test used to build its sample as `## ${ns.name}-${padded} — a
+    // heading`, which asserted the thing it was testing: it could only pass
+    // for a namespace spelled `NAME-<digits>`, so it certified the four that
+    // were and was unreachable for the two that were missing. The sample is
+    // now the namespace's own `example`, which is a line copied out of the
+    // register, so the assertion is against the repository rather than
+    // against the test's own idea of a heading.
     for (const ns of manifest.namespaces) {
-      const re = new RegExp(ns.define)
-      const sample = `## ${ns.name}-${'1'.padStart(ns.pad, '0')} — a heading`
-      const match = re.exec(sample)
-      assert.ok(match, `${ns.name} does not match its own heading shape: ${sample}`)
-      assert.equal(match[1], `${ns.name}-${'1'.padStart(ns.pad, '0')}`)
+      const match = new RegExp(ns.define).exec(ns.example)
+      assert.ok(match, `${ns.name} does not match its own example: ${ns.example}`)
+      assert.equal(match[1], spellId(ns, Number(match[2])))
+    }
+  })
+
+  it('every example is a line that is really in the register it names', () => {
+    // One step past the validator, which only checks the example against the
+    // pattern. A plausible-looking example that no register carries would let
+    // a pattern drift away from the file it reads while both tests stayed
+    // green, so this reads the register off disk.
+    for (const ns of manifest.namespaces) {
+      const body = readFileSync(join(REPO_ROOT, ns.register), 'utf8')
+      // A prefix match, not equality, so a namespace whose register carries
+      // very long headings can cite a readable truncation of a real one. The
+      // `define` patterns are written to match a truncation as well, which is
+      // what makes that safe; `RunnerFact` below is exactly that case.
+      const lines = body.split('\n')
+      assert.ok(
+        lines.some((line) => line.startsWith(ns.example)),
+        `${ns.name}: no line in ${ns.register} starts with its example ${JSON.stringify(ns.example)}`,
+      )
+    }
+  })
+
+  it('accounts for every register tools/registers/registers.json declares', () => {
+    // WHY THIS TEST IS THE DURABLE PART OF THE 2026-11-09 CHANGE. Adding the
+    // two missing namespaces fixes today; this is what keeps tomorrow's added
+    // register from drifting the same way. Both files describe the same set of
+    // append-only registers from different angles, and until now nothing read
+    // one against the other, so a register declared for entry-keyed merging
+    // and absent from the identifier gate was indistinguishable from a
+    // register deliberately left out. Every path is now either a namespace or
+    // an entry in `excluded` with a reason, and this test is the thing that
+    // makes the absence of a third option visible.
+    const registers = JSON.parse(
+      readFileSync(join(REPO_ROOT, 'tools/registers/registers.json'), 'utf8'),
+    )
+    const claimed = new Set(manifest.namespaces.map((n) => n.register))
+    const excluded = new Set((manifest.excluded ?? []).map((e) => e.register))
+    for (const r of registers.registers) {
+      assert.ok(
+        claimed.has(r.path) || excluded.has(r.path),
+        `${r.path} is a register in registers.json and is in neither \`namespaces\` nor \`excluded\` in id-namespaces.json`,
+      )
+    }
+  })
+
+  it('every exclusion carries a reason long enough to review', () => {
+    for (const e of manifest.excluded ?? []) {
+      assert.equal(typeof e.register, 'string')
+      assert.ok(e.why.length > 80, `${e.register} is excluded with a reason too short to review`)
+    }
+  })
+
+  it('does not exclude a register it also claims, which would be two answers for one path', () => {
+    const claimed = new Set(manifest.namespaces.map((n) => n.register))
+    for (const e of manifest.excluded ?? []) {
+      assert.ok(!claimed.has(e.register), `${e.register} is both claimed and excluded`)
     }
   })
 
@@ -258,6 +355,48 @@ describe('the committed manifest', () => {
     const burned = manifest.namespaces.flatMap((n) => n.burned ?? [])
     assert.equal(burned.length, 6)
     for (const b of burned) assert.ok(b.why.length > 20, `${b.id} has a reason too short to review`)
+  })
+})
+
+describe('the spelling helpers', () => {
+  const adr = { spell: 'ADR-{n}', pad: 3 }
+  const section = { spell: '{n}', pad: 1 }
+  const window = { spell: 'Window {n}', pad: 1 }
+
+  it('pads to the register, because ADR-007 and ADR-7 are one number and two strings', () => {
+    assert.equal(spellId(adr, 7), 'ADR-007')
+    assert.equal(spellId(section, 7), '7')
+    assert.equal(spellId(window, 106), 'Window 106')
+  })
+
+  it('does not truncate a number wider than the pad', () => {
+    assert.equal(spellId(adr, 1234), 'ADR-1234')
+  })
+
+  it('round-trips every spelling it can write', () => {
+    for (const ns of [adr, section, window]) {
+      for (const n of [1, 9, 10, 99, 100, 105]) {
+        assert.deepEqual(unspellId(ns, spellId(ns, n)), { n })
+      }
+    }
+  })
+
+  it('separates a wrong namespace from a wrong number, because the repairs differ', () => {
+    assert.deepEqual(unspellId(adr, 'PWC-9'), { fault: 'SHAPE' })
+    assert.deepEqual(unspellId(adr, 'ADR-draft'), { fault: 'NUMBER' })
+    assert.deepEqual(unspellId(adr, 'ADR-'), { fault: 'NUMBER' })
+  })
+
+  it('reads a bare number, which is the case `${name}-` could not express at all', () => {
+    assert.deepEqual(unspellId(section, '93'), { n: 93 })
+    assert.deepEqual(unspellId(section, '1b'), { fault: 'NUMBER' })
+  })
+
+  it('refuses a suffix spelling whose tail is absent rather than reading past it', () => {
+    const dotted = { spell: '{n}.', pad: 1 }
+    assert.deepEqual(unspellId(dotted, '93.'), { n: 93 })
+    assert.deepEqual(unspellId(dotted, '93'), { fault: 'SHAPE' })
+    assert.deepEqual(unspellId(dotted, '.'), { fault: 'NUMBER' })
   })
 })
 
