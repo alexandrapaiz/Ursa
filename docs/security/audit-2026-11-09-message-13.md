@@ -197,6 +197,23 @@ set, so the gate built to generalise F113 could not see F113's own call
 site. That is what a case against the old text is for. Ursa's frontend
 seat's order, taken rather than restated.
 
+**The 23 declared-target occurrences, and the one that is not prose.**
+Twenty-two are documentation or a usage line. One is a live spawn:
+`ursa-major/src/bridge/index.ts`'s `npxLauncher` calls
+`execFile('npx', ['tsx', ...])` with no `--no-install`, inside the process
+holding a user's page open. `tsx` is declared, so the registry serves the
+genuine project and the exposure is bounded to version drift, which is why
+the gate reports rather than fails it. Adding the flag is one token and is
+**not behaviour-preserving**, because a user whose tree lacks `tsx` gets it
+fetched today and would get a failure instead. That is a product decision, so
+it is filed `proposed` for the engineer rather than fixed here.
+
+**The baseline's key design, demonstrated by accident.** The row for
+`scripts/ci-checks.mjs` was written when the occurrence was at line 494.
+Registering two new checks above it moved it to 536, and the row still
+matched, because it is keyed on the command text and not on the line number.
+A line-numbered key would have gone stale inside this same run.
+
 **What it deliberately does not assert, and the hole it leaves.** It reads
 lines, not syntax, so a command inside a string literal in an executed file
 is indistinguishable to it from one that file runs. One baseline row exists

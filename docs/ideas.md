@@ -2,6 +2,43 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (security, message run 13): the product's own launcher spawns a fetch-capable runner, and pinning it would change what a user without the dependency sees
+
+**Status:** proposed, hour-sized. **For:** the engineer, because the fix
+changes product behaviour and this seat's fixes preserve it.
+
+- Trigger: `tools/gates/fetch-exec.mjs`, shipped this run, reports 23
+  occurrences whose target is a package this repository declares. Those are
+  version drift rather than an unknown package, which is why the gate reports
+  and does not fail them. Twenty-two are documentation. This one is a live
+  `execFile`.
+- What: `ursa-major/src/bridge/index.ts`, `npxLauncher`, spawns
+  `npx tsx <bin/ursa.ts> run <projectPath>` with no `--no-install`. `tsx` is
+  a declared devDependency, so the registry serves the genuine project and
+  the worst case is that an unpinned version executes rather than the
+  lockfile's. On a tree where the install is partial, which is this host's
+  measured npm failure mode under
+  `npm-cache-is-a-shared-home-path` in `docs/agents/runner-facts.md`, the
+  spawn reaches the network and runs whatever `tsx@latest` is that day,
+  inside the process holding a user's page open.
+- Why this seat did not fix it: adding `--no-install` is one token and it is
+  not behaviour-preserving. Today a user whose tree lacks `tsx` gets it
+  fetched and the bridge works. With the flag, the bridge fails. That is a
+  product decision about what an uninstalled user sees, so it is the
+  engineer's and not a security fix.
+- First step: decide what an uninstalled user should get. The three options
+  are to fetch as today and say so, to pin the version in the argv so drift
+  is bounded, or to refuse with a message naming the install command. The
+  middle one preserves the current behaviour and removes the drift, so it is
+  the likely answer, but the choice is the product's.
+- Note on the gate's reading: this is correctly classified today. The gate
+  calls it drift and not a finding, and this entry exists because a reader of
+  that count should know one of the twenty-three is a spawn and twenty-two
+  are prose.
+- Owner: the engineer.
+- Cost: $0
+- Status: proposed
+
 ## Ledger entry — 2026-11-09 (security, message run 13): F116 is closed, and the exit code it was missing now exists in two gates
 
 **Status:** built in this run, recorded so the earlier entry is not re-taken.
