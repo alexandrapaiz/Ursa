@@ -183,14 +183,28 @@ if (invokedDirectly) {
   }
   const findings = stale.map((s) => findingFor(s, how))
 
-  for (const f of findings) console.log(`::error::${f.code}: ${f.message}`)
-  if (resolved.why) console.error(`FORGE_OPEN_SET_UNKNOWN: gh pr list failed: ${resolved.why}`)
+  // An unreachable forge is reported as a finding at `clone`, not as a flag
+  // on the verdict, so the exit-2 line has something printed above it. See
+  // `blockers-verdict.mjs` for the enumerator rule that forced this shape.
+  if (resolved.open === null) {
+    findings.unshift({
+      held: LOCUS.CLONE,
+      code: 'FORGE_OPEN_SET_UNKNOWN',
+      message:
+        `gh pr list failed, so the set of open rows is unknown and every ` +
+        `blocker claim is unresolved rather than live: ${resolved.why}`,
+    })
+  }
+
+  for (const f of findings) {
+    const level = f.held === LOCUS.CLONE ? 'warning' : 'error'
+    console.log(`::${level}::${f.code}: ${f.message}`)
+  }
 
   const v = verdict(findings, {
     claims: claims.length,
     entries: entries(source).length,
     unresolvable: UNRESOLVABLE_SHAPES.length,
-    openSetKnown: resolved.open !== null,
     ledgerPath,
   })
   ;(v.stream === 'err' ? console.error : console.log)(v.line)

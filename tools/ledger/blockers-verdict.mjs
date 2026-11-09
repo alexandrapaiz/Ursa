@@ -44,7 +44,7 @@ import { LOCUS, describeGate, verdictOf } from '../gates/verdict-shape.mjs'
  * @param {Finding[]} findings every stale blocker, already printed one per
  *   line by the caller.
  * @param {{claims?: number, entries?: number, unresolvable?: number,
- *          openSetKnown?: boolean, ledgerPath?: string}} seen the census, for
+ *          ledgerPath?: string}} seen the census, for
  *   the clean line. `unresolvable` is the count of blocker shapes the gate
  *   read and cannot look up, named in the clean line on purpose so a green
  *   run states its own scope instead of implying it covered everything.
@@ -55,7 +55,6 @@ export function verdict(findings, seen = {}) {
     claims = 0,
     entries = 0,
     unresolvable = 0,
-    openSetKnown = true,
     ledgerPath = 'docs/ideas.md',
   } = seen
 
@@ -63,11 +62,23 @@ export function verdict(findings, seen = {}) {
     `${claims} resolvable blocker claim(s) across ${entries} entr(ies) of ${ledgerPath}` +
     (unresolvable > 0 ? `, with ${unresolvable} blocker shape(s) this gate cannot look up` : '')
 
-  // Checked before the findings array, because an unknown open set produces
-  // an EMPTY findings array by construction — `staleBlockers` returns nothing
-  // for a null set — so the clean branch below would otherwise print "all
-  // still open" over a question that was never asked.
-  if (!openSetKnown) {
+  // Split by locus rather than by a `seen` flag, which is the correction
+  // `tools/gates/enumerate-verdicts.mjs` forced on this module the hour it
+  // was registered. The first version took an `openSetKnown` boolean and
+  // returned exit 2 with an EMPTY findings array, and the enumerator's
+  // EXIT_0_WHEN_CLEAN rule is right about that: a gate that goes red with
+  // nothing printed above the verdict tells a reader to go find out why
+  // themselves. An unreachable forge is a finding — it is just not a
+  // finding about the ledger — so it is reported as one, at `clone`, and the
+  // verdict reads it off the same array as everything else.
+  const byClone = findings.filter((f) => f.held === LOCUS.CLONE)
+  const bySeat = findings.filter((f) => f.held !== LOCUS.CLONE)
+
+  // Checked first, because an unknown open set produces an empty SEAT array
+  // by construction — `staleBlockers` returns nothing for a null set — so the
+  // clean branch would otherwise print "every named row still open" over a
+  // question that was never asked.
+  if (byClone.length > 0) {
     return verdictOf({
       exitCode: 2,
       cause: 'FORGE_OPEN_SET_UNKNOWN',
@@ -80,7 +91,7 @@ export function verdict(findings, seen = {}) {
     })
   }
 
-  if (findings.length === 0) {
+  if (bySeat.length === 0) {
     return verdictOf({
       exitCode: 0,
       cause: 'ALL_BLOCKERS_LIVE',
@@ -93,7 +104,7 @@ export function verdict(findings, seen = {}) {
     cause: 'BLOCKER_RETIRED',
     cites: [LOCUS.SEAT],
     line:
-      `Ledger blockers: ${counted}, ${findings.length} of them name a row ` +
+      `Ledger blockers: ${counted}, ${bySeat.length} of them name a row ` +
       `that has left the open set, so the stated reason for not shipping is ` +
       `no longer a fact. A seat can repair each by writing the correction ` +
       `above the entry it belongs to. Exit 1.`,
@@ -110,6 +121,7 @@ export function verdict(findings, seen = {}) {
 }
 
 const seat = (code = 'BLOCKER_RETIRED') => ({ held: LOCUS.SEAT, code, message: 'x' })
+const clone = (code = 'FORGE_OPEN_SET_UNKNOWN') => ({ held: LOCUS.CLONE, code, message: 'x' })
 
 /** The input space. Outcomes are measured by the enumerator, never declared. */
 export const GATE = describeGate({
@@ -134,8 +146,8 @@ export const GATE = describeGate({
     },
     {
       name: 'the forge was unreachable',
-      findings: [],
-      seen: { claims: 1, entries: 509, openSetKnown: false },
+      findings: [clone()],
+      seen: { claims: 1, entries: 509 },
     },
   ],
 })

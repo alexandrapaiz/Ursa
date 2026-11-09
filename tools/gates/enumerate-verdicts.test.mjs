@@ -46,7 +46,7 @@ function run(args = []) {
   }
 }
 
-describe('the ten extracted gates, end to end', () => {
+describe('the eleven extracted gates, end to end', () => {
   it('exits 0 and reports every branch holding its properties', () => {
     const { code, json } = run()
     assert.equal(code, 0)
@@ -54,7 +54,7 @@ describe('the ten extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 49 distinct causes with 66 probes, which is the number the text sweep could not see', () => {
+  it('reaches 52 distinct causes with 71 probes, which is the number the text sweep could not see', () => {
     const { json } = run()
     // RESOLVED 2026-11-02 BY MEASUREMENT, NOT BY CHOICE. This line conflicted:
     // the hook branch claimed 36 causes over 46 probes and `main` claimed 36
@@ -169,9 +169,26 @@ describe('the ten extracted gates, end to end', () => {
     // and a one-finding probe cannot tell a count from the constant one. Both
     // counts move together, like image-metadata's, because each of the three
     // branches is the only one reporting its cause.
-    assert.equal(json.branches.length, 66)
+    //
+    // 71 and 52 since 2026-11-09, when `tools/ledger/blockers-verdict.mjs`
+    // became the eleventh extraction. Its three causes are every named row
+    // still open, a named row that has left the open set, and a forge whose
+    // open set could not be read; its five probes are those three plus a
+    // clean run that names an unresolvable remainder and a two-finding red
+    // run, both of which are there because the lines carry COUNTS and a
+    // one-finding probe cannot tell a count from the constant one — the same
+    // reason capture-provenance has a fourth. Both counts move together, so
+    // each of the three branches is the only one reporting its cause.
+    //
+    // THE FORGE BRANCH IS WHY THIS GATE'S REGISTRATION CHANGED THE GATE. It
+    // first returned exit 2 from a boolean in `seen` with an empty findings
+    // array, and this file's EXIT_0_WHEN_CLEAN check caught it in the same
+    // minute it was registered: red with nothing printed above the verdict.
+    // An unreachable forge is reported as a `clone` finding now, so the
+    // verdict is derived from findings like every other branch here.
+    assert.equal(json.branches.length, 71)
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
-    assert.equal(causes.size, 49)
+    assert.equal(causes.size, 52)
   })
 
   it('carries an exit 3, which no gate of the first four could have reached', () => {

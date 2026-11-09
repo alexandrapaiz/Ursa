@@ -142,11 +142,18 @@ test('a finding quotes the entry title and the sentence, so it is locatable with
 })
 
 test('the verdict refuses to report clean when the open set was never read', () => {
-  const v = verdict([], { claims: 1, entries: 509, openSetKnown: false })
+  const v = verdict([{ held: 'clone', code: 'FORGE_OPEN_SET_UNKNOWN', message: 'x' }], {
+    claims: 1,
+    entries: 509,
+  })
   assert.equal(v.exitCode, 2)
   assert.equal(v.cause, 'FORGE_OPEN_SET_UNKNOWN')
   assert.equal(v.stream, 'err')
   assert.doesNotMatch(v.line, /every named row still open/)
+  // The reason this is a finding and not a flag: a gate that exits non-zero
+  // with nothing printed above the verdict is what the enumerator calls
+  // EXIT_0_WHEN_CLEAN, and it is right.
+  assert.equal(verdict([], { claims: 1, entries: 509 }).exitCode, 0)
 })
 
 test("the exit-1 trailer tells the seat to keep the entry, and not to touch its status", () => {
