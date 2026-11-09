@@ -101,5 +101,28 @@ if printf '%s\n' "$out" | grep -q "would stop  $$"; then
   bad "teardown.sh listed its own caller"
 else ok; fi
 
+# 10 and 11. The directory half, added 2026-11-09 after this seat ran the
+#    script with FE_RUN pointing at the checkout and lost `ursa-minor/`
+#    source and all. The guard has to refuse a tracked tree and still take
+#    an untracked scratch directory, and both arms are asserted, because a
+#    guard that refuses everything passes the first test alone.
+GITTED="$TMP/a-work-tree"
+mkdir -p "$GITTED"
+git -C "$GITTED" init -q 2>/dev/null
+echo hello > "$GITTED/tracked.txt"
+git -C "$GITTED" add tracked.txt 2>/dev/null
+out="$(FE_RUN="$GITTED" bash "$KIT/teardown.sh" 2>&1)"
+if [ -f "$GITTED/tracked.txt" ] && printf '%s\n' "$out" | grep -q "REFUSED  $GITTED"; then
+  ok
+else bad "teardown.sh removed, or did not refuse, a directory holding tracked files"; fi
+
+SCRATCH="$TMP/scratch-run"
+mkdir -p "$SCRATCH/nested"
+echo x > "$SCRATCH/nested/f"
+out="$(FE_RUN="$SCRATCH" bash "$KIT/teardown.sh" 2>&1)"
+if [ ! -e "$SCRATCH" ] && printf '%s\n' "$out" | grep -q "removed  $SCRATCH"; then
+  ok
+else bad "teardown.sh refused an untracked scratch directory it was meant to remove"; fi
+
 echo "check-teardown: $pass_count passed, $fail_count failed"
 [ "$fail_count" = 0 ]
