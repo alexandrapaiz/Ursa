@@ -223,6 +223,26 @@ unmerged, which is the state that cost this the first time.
   Eight are new, and each new red is paired with a control that differs from
   it by one line, because a suite listing only what is broken cannot tell a
   fix from a deletion.
+- `node scripts/ci-checks.mjs`: 21 checks, **19 passed, 0 failed, 2
+  unrunnable**, and the runner's own exit status is **2**, not 0. Its words
+  for that are "at least one check could not be run, so this is not a verdict
+  on the branch", and this entry reports it that way rather than as a pass.
+  The two are `product-typecheck` and `product-suites`, both unrunnable
+  because `ursa-major/node_modules` is absent in this sandbox. Every check
+  that covers what this branch changes did run: `tooling-suites`,
+  `secret-print-exempt`, `secret-print-suite`, `secret-print-dump-holes`,
+  `secret-print-tree`, `redaction-tree`, `secret-scan-tree`,
+  `ledger-contract`, `register-ids` and `board-message-rules` all passed.
+  This branch touches `tools/` and `docs/` only and no product source, so
+  nothing it contains is inside the two unchecked checks.
+- **An earlier draft of this run's pull request said this command "exits 0
+  over all 21 checks", which was wrong in two ways.** It was read off the
+  exit status of a shell pipeline ending in `tail`, which reports the exit
+  status of `tail`, and it counted unrunnable as passed. Corrected here and
+  in the pull request before it was readied. Recorded rather than quietly
+  edited, because this seat's own charter names reporting what was skipped as
+  part of the deliverable, and an instrument read through a pipe is the same
+  class of fault as `merge-tree`'s exit 128.
 - `node tools/secret-scan.mjs --history` exits 0 over **8,304 blobs in every
   ref at full depth**, 16 pattern classes, **0 hits**. One finding is
   accepted by `tools/secret-scan.baseline.json`, pinned to a single blob id:
