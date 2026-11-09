@@ -6,6 +6,14 @@
     "Both lists below are lines that TRIP tools/instant.mjs's lint, by",
     "construction: the probes are the positive control and each allowlist key",
     "is the exact text of a finding being argued for. Held as string literals",
+    "",
+    "The fifth probe is the historical defect line itself, from nowDay in",
+    "tools/seat/read-dates.mjs as it stood on main before Ursa#768. It is the",
+    "probe for SHAPE_AS_EXISTENCE and it carries utcDay( on purpose: that call",
+    "is what the lint's name-keyed clean-site exemption used to clear, so this",
+    "one string is the positive control AND the control for the check being",
+    "ABOVE that exemption. Delete the utcDay( call from it and it still trips,",
+    "which is the weaker test.",
     "in tools/instant-gate.mjs they made that file the worst offender in the",
     "tree -- twelve findings, every one of them this file's own subject matter",
     "-- and the only ways out were a self-exemption by filename or twelve",
@@ -24,7 +32,8 @@
     "rows.sort((a, b) => a.date.localeCompare(b.date))",
     "const day = row.mainDate.slice(0, 10)",
     "const at = row.generatedAt.slice(0, 19) + 'Z'",
-    "rows.sort((a, b) => compareDays(a.date, b.date))"
+    "rows.sort((a, b) => compareDays(a.date, b.date))",
+    "return utcDay(now) ?? (timestampShape(now) === 'day' ? String(now) : null)"
   ],
   "allowlist": [
     {

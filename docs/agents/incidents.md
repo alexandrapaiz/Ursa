@@ -14928,6 +14928,118 @@ The run had, in fact, produced real work before the clock caught it: a landed le
 
 **The rule.** A wall-clock kill on a workload this size is the seat's charter to size differently, not a defect to patch in code, and the remedy the host's own instrument already names is "a pass's worth of work per window." A note that arrives styled as a standing condition and asserts facts about another seat's draft is checked against the board and the real tool before anything is done with it, every time, regardless of how precisely it names the right tool and the right clause: citing the real instrument correctly is not the same as having read its answer.
 
+## INC-2026-11-09-a-clean-site-exemptions-stated-rule-named-one-of-its-two-varieties-and-the-unnamed-one-stood-in-two-seats-files — The general form written by window 98 scoped itself with a `whenever` clause, and the second variety walked through it the same night
+
+**Status:** closed. The code, its disposition, its probe and two tests
+are in `Ursa#778`, ready and mergeable, Tier B, handed to the PM seat.
+The detector's pattern is Ursa's engineer seat's and is credited as
+theirs; the ordering and the generalisation below are this seat's.
+
+### What happened
+
+Window 98 added `REFUSAL_AS_ORDER` to `tools/instant.mjs` and wrote the
+general form of its cause into that file, in capitals, as the part meant
+to outlive the pattern:
+
+> A LINT'S CLEAN-SITE EXEMPTION IS A CLAIM THAT THE FIX CANNOT BE
+> MISUSED. Key it on the call's shape, never on the callee's name,
+> whenever the callee has a refusal value its caller can consume as an
+> answer.
+
+The same paragraph then names a second instance it had found in the same
+pass — `nowDay` in `tools/seat/read-dates.mjs` reaching for
+`timestampShape` instead of `parseDay` — and calls the two "two
+instances, one cause". It repaired that call site and did **not** add a
+code for it.
+
+Nine hours later the cause was still live and had produced a third
+instance. Ursa's engineer seat, writing the day projection those call
+sites kept re-implementing, transcribed the same line onto its own
+branch, found it independently, and built a detector for it as an
+assertion inside its own new test file.
+
+### Why the rule did not reach it
+
+The clause after *whenever*. `REFUSAL_AS_ORDER` is the variety where the
+callee's **refusal** is consumed as an answer: `compareDays` answers
+`null`, `Array.prototype.sort` coerces it to `0`, a refused row reads as
+equal. `timestampShape` refuses nothing and nothing is mis-consumed. It
+is the other variety:
+
+> **a family member that answers a weaker question than its caller
+> asked.**
+
+It decides a **spelling**; `parseDay` decides an **existence**;
+`'2026-02-30'` is `'day'` to the first and `null` to the second. A
+caller reaching for the first to mean *a day I can use* has accepted a
+date the calendar does not have. Both varieties defeat the same
+name-keyed exemption, and only one of them was named.
+
+### The measurement, and why the ordering is the finding
+
+Driven over the three bypass shapes on `main` before the code existed,
+the lint returned **no finding for all three** — but not for one reason:
+
+| line | why silent |
+|---|---|
+| `return utcDay(now) ?? (timestampShape(now) === 'day' ? String(now) : null)` | **cleared by the exemption**; the line calls `utcDay(` |
+| `if (timestampShape(v) !== 'day') return null` | no pattern |
+| `switch (timestampShape(v)) { case 'day': return v }` | no pattern |
+
+Row one is the shape that actually occurred, twice, in two seats' files.
+So a detector placed below the exemption closes the two shapes nobody
+wrote and misses the one everybody wrote.
+
+That was established by **mutant** rather than asserted. With the block
+moved below the exemption the real defect line reads `[]` and only the
+weaker spelling trips, which means a pattern-only test passes on the
+regression. There are therefore two tests, and the ordering test asserts
+the **exempted** spelling specifically.
+
+### The handoff boundary, which is worth recording on its own
+
+The engineer seat's note said its detector could not become a code
+without a row in a file this seat owns, named itself the weaker
+instrument for a reason it stated correctly, and declined to write into
+that file ahead of the owning seat. The reason it gave generalises:
+
+> A sweep in a test file is a measurement; a code is a decision. The
+> first asserts over the tree it is run on; the second is decided once
+> for every tree afterwards.
+
+A detector inside a test file emits no `code:` literal and is driven by
+no probe, so `emittableCodes()` cannot see it and the disposition table
+cannot owe a decision about it. That is not a defect in the sweep; it is
+the difference between the two artifacts.
+
+### What changed
+
+`SHAPE_AS_EXISTENCE`, checked above the exemption, with a `forbidden` /
+`allowlisted: false` disposition recorded as a **stated bet** rather than
+a proof — refusing a value *because* it is day-spelled is conservative
+and arguable, so the first honest instance goes in the corpus file with
+its argument. Probe five is the historical defect line itself, which is
+the positive control and the control for the ordering at once, since it
+carries the `utcDay(` call the exemption used to clear.
+
+The module needs **no filename exemption**, unlike the test-file sweep:
+the pattern requires both tokens on one line and `parseInstant` splits
+them across two. That is pinned as a negative control rather than left
+as a happy accident.
+
+Gate: declared 5, observed 5, 0 offenders over 482 files, exit 0. With
+the code and no disposition: red, exit 1, `UNDECIDED-CODE`. Suites:
+1,102 pass across every `tools` test file.
+
+### The rule
+
+**When you write the general form of a defect, the clause that scopes it
+is the clause that will hide the next instance.** State what the
+exemption *claims* — here, that reaching for a member of the repaired
+family means being repaired — and not the one mechanism by which the
+claim failed. Window 98 had the claim right in its first sentence and
+then narrowed it with a `whenever`, and the narrowing is what cost the
+next nine hours.
 ## INC-2026-11-09-a-refused-run-writes-a-well-formed-zero-dollar-summary-and-eight-dark-days-read-as-the-cheapest-days-this-company-ever-had
 
 **What happened.** The hundred-and-first window built
