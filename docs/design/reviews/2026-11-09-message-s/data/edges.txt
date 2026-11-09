@@ -1,0 +1,36 @@
+
+== phone 390x844
+   header wordmark                    left    32 right   172 
+   hero headline                      left    32 right   358 
+   hero cta                           left    32 right   195 
+   h2[0] "✦ North stars"              left    32 right   358 
+   h2[1] "✦ Run it on your own wor"   left    32 right   358 
+   code[0]                            left    49 right   341 CLIPPED scrollW=357 clientW=292
+   code[1]                            left    49 right   341 CLIPPED scrollW=469 clientW=292
+   code[2]                            left    49 right   341 CLIPPED scrollW=1029 clientW=292
+   footer                             left     0 right   390 
+   footer first child                 left     0 right   390 
+
+== tablet 820x1180
+   header wordmark                    left    66 right   205 
+   hero headline                      left    66 right   754 
+   hero cta                           left    66 right   228 
+   h2[0] "✦ North stars"              left    66 right   754 
+   h2[1] "✦ Run it on your own wor"   left    66 right   754 
+   code[0]                            left    87 right   660 fits
+   code[1]                            left    87 right   660 fits
+   code[2]                            left    87 right   660 CLIPPED scrollW=1029 clientW=574
+   footer                             left     0 right   820 
+   footer first child                 left     0 right   820 
+
+== desktop 1440x900
+   header wordmark                    left    96 right   236 
+   hero headline                      left    96 right   758 
+   hero cta                           left    96 right   259 
+   h2[0] "✦ North stars"              left   416 right  1024 
+   h2[1] "✦ Run it on your own wor"   left   416 right  1024 
+   code[0]                            left   437 right   930 fits
+   code[1]                            left   437 right   930 fits
+   code[2]                            left   437 right   930 CLIPPED scrollW=1029 clientW=493
+   footer                             left     0 right  1440 
+   footer first child                 left   384 right  1056 

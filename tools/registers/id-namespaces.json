@@ -3,16 +3,30 @@
     "Every numeric identifier namespace this repository allocates for itself.",
     "Read by tools/registers/check-ids.mjs. Each namespace names the register",
     "that defines its identifiers, the anchored pattern that constitutes a",
-    "definition, who repairs a collision, and every identifier that is burned.",
+    "definition, how an allocated number is spelled back into a heading, one",
+    "real heading from that register, who repairs a collision, and every",
+    "identifier that is burned.",
     "A namespace with no `why` is a fault, not a default: a reader who cannot",
     "tell why an identifier is burned cannot tell whether reissuing it is safe.",
     "",
-    "NOT IN HERE, deliberately. docs/standards/lessons.md allocates L-A and L-E",
-    "and is a vendored copy of an HQ standard, so neither a collision nor a",
-    "burn in it is repairable in this repository at all; HQ allocates those",
-    "with its own tools/check-queue-ids.sh. docs/agents/incidents.md keys on",
-    "INC-<date>-<slug>, which is content-derived rather than allocated, so two",
-    "runs cannot race for the same one.",
+    "`spell` and `example` were added 2026-11-09 and are not decoration.",
+    "`spell` is the form a seat pastes into a heading, with `{n}` standing for",
+    "the number zero-padded to `pad`; before it existed the allocator had",
+    "`NAME-<digits>` hard-coded in two places, so it could not allocate in a",
+    "register that spells its identifiers any other way. `example` is a heading",
+    "copied out of the register, and the validator refuses the manifest unless",
+    "`define` matches it and `spell` writes its number back to the same string.",
+    "That is the one check that catches a pattern matching nothing in its own",
+    "register, which would make this gate count zero identifiers and exit 0.",
+    "",
+    "EVERY REGISTER IS ACCOUNTED FOR, HERE OR IN `excluded`. The registers this",
+    "repository keeps are enumerated in tools/registers/registers.json, and",
+    "tools/registers/id-verdict.test.mjs fails if a path declared there appears",
+    "in neither `namespaces` nor `excluded` below. That test is what makes this",
+    "file's silence readable: before it existed, two registers whose own entries",
+    "in registers.json describe the exact race this gate exists for were absent",
+    "from here, and nothing could tell that absence from a decision. Ursa's exo",
+    "seat found both by hand on 2026-11-09.",
     "",
     "`repair` is a locus from tools/gates/verdict-shape.mjs. `owner` means a",
     "seat must not touch it: an accepted ADR is the owner's decision record and",
@@ -26,7 +40,9 @@
       "define": "^## (ADR-(\\d+)) \\u2014 (.+)$",
       "repair": "owner",
       "why": "Architecture decisions, numbered in date order per the convention the file follows everywhere else. Cited as a resolvable number by docs/agents/org-chart.md, docs/backlog.md, docs/decisions.md itself and skills/running-an-outcome-record-trial/SKILL.md. Eleven files under .github/workflows/ also cite ADR numbers and say they are in docs/decisions.md. Eleven distinct numbers appear there and ten of them resolve to nothing in this register (ADR-11, ADR-12, ADR-14, ADR-17, ADR-20, ADR-22, ADR-23, ADR-24, ADR-037, ADR-049, all of them HQ's numbering); only ADR-002 resolves. That is the security seat's PWC-9 and not this namespace's defect.",
-      "burned": []
+      "burned": [],
+      "spell": "ADR-{n}",
+      "example": "## ADR-002 — Activation wave 1: okr, pm, exo (2026-09-18)"
     },
     {
       "name": "PWC",
@@ -60,7 +76,9 @@
           "id": "PWC-10",
           "why": "Renamed in place to PWC-EXO-4 when the identifiers became seat-scoped on 2026-10-04. docs/agents/learning-log.md cites the old number twice."
         }
-      ]
+      ],
+      "spell": "PWC-{n}",
+      "example": "## PWC-5 — Pin every action to a commit SHA"
     },
     {
       "name": "PWC-ENG",
@@ -69,7 +87,9 @@
       "define": "^## (PWC-ENG-(\\d+)) \\u2014 (.+)$",
       "repair": "seat",
       "why": "The engineer seat's own queue, split out of the unscoped namespace on 2026-10-05 after PWC-7 collided.",
-      "burned": []
+      "burned": [],
+      "spell": "PWC-ENG-{n}",
+      "example": "## PWC-ENG-3 — Install the build-and-test gate (queued 2026-10-08 by the engineer seat)"
     },
     {
       "name": "PWC-EXO",
@@ -78,7 +98,53 @@
       "define": "^## (PWC-EXO-(\\d+)) \\u2014 (.+)$",
       "repair": "seat",
       "why": "The ExO seat's own queue, split out of the unscoped namespace on 2026-10-04. PWC-EXO-1 through 4 were renamed in place from PWC-7 through PWC-10.",
+      "burned": [],
+      "spell": "PWC-EXO-{n}",
+      "example": "## PWC-EXO-2 — Four ADRs, two numbers (queued 2026-09-27, ExO)"
+    },
+    {
+      "name": "Window",
+      "pad": 1,
+      "register": "docs/agents/improvements.md",
+      "define": "^## (Window (\\d+))\\b.*$",
+      "spell": "Window {n}",
+      "example": "## Window 37, 2026-10-24, hook on returned capacity",
+      "repair": "seat",
+      "why": "The per-window delta the exo seat appends every window, and the number is allocated by reading the tail of the file, which is what makes it a race rather than a label. tools/registers/registers.json already states the cost in its own entry for this register: two windows filing 'Window 42' are refused by name instead of both landing, 'which would give the console two deltas for one window', and HQ's console parses this file so its format is a contract. It happened: two windows of the exo seat both claimed 103 and were resolved by renumbering on the merge, which `--next Window --heads` would have prevented and `--heads` would have caught. Added 2026-11-09 by the engineer seat after Ursa's exo seat measured the omission and named it rather than taking it. The other heading form in this register, `## Week of <date>`, is not matched, and the reason stated here until 2026-11-09 was wrong in the direction that claimed safety. It said a date produces one string rather than two claims on one number, which is true and is why the case is WORSE rather than safer, as Ursa's exo seat corrected it the same day. Measured both ways by the engineer seat before taking the correction, against the real file with the real driver: two branches claiming `## Window 108` are refused by name, the refusal prescribes renumbering the newer entry at its source (L-A18), and renumbering one to 109 merges at exit 0 with both entries surviving, because a free next number is exactly what this allocator supplies. Two branches each appending a `###` sub-entry inside the existing `## Week of 2026-11-09` block are refused with `both sides edited ... differently`, which names no remedy and has none of this kind available: the `## ` heading is the merge unit, the write unit is the `###` sub-entry inside it, and a date cannot be renumbered. So the recoverable collision is guarded here and the unrecoverable one is not. It stays unmatched because a date holds no number for this allocator to allocate, which makes this the wrong instrument for the gap rather than evidence that the gap is absent; the instrument it needs is filed in docs/ideas.md under 2026-11-09. The INC exclusion below is a genuinely different case and keeps its reason: those identifiers are content-derived, so two concurrent runs mint two different strings and never contend for one.",
       "burned": []
+    },
+    {
+      "name": "RunnerFact",
+      "pad": 1,
+      "register": "docs/agents/runner-facts.md",
+      "define": "^## ((\\d+)[a-z]?)\\. .+$",
+      "spell": "{n}",
+      "example": "## 94. The register merge drivers are per-clone and neither install script runs itself",
+      "repair": "seat",
+      "why": "The numbered sections of the runner-facts register, cited across this repository as section numbers and surfaced by `node tools/seat/env-facts.mjs` as '§3, §9'. The number is allocated by reading the tail, and registers.json's own entry for this register states the measured race: 'Window 41 wrote section 21 and window 42 wrote section 22 within an hour; two concurrent windows would both have written 22', after which 'a cross-reference in another register silently stops resolving'. The namespace name is a label rather than a prefix, because this register spells its identifiers as a bare number; that is why `spell` exists. The letter-suffixed sections (1b, 1c) are deliberately distinct identifiers that share a number: the suffix is how a section is inserted next to a related one without renumbering the file, so `define` captures `1b` as the identifier and `1` as the number it allocates from. Added 2026-11-09 by the engineer seat, same trigger as Window above.",
+      "burned": []
+    }
+  ],
+  "excluded": [
+    {
+      "register": "docs/agents/incidents.md",
+      "why": "Two forms and neither is allocatable here. Entries 1 through 18 are numbers that this register's own header freezes and forbids allocating 19 from, so there is no next number to race for. Everything from 2026-10-18 keys on INC-<date>-<slug>, which is content-derived rather than allocated, so two concurrent runs produce two different identifiers rather than one contested one."
+    },
+    {
+      "register": "docs/standards/lessons.md",
+      "why": "Allocates L-A and L-E and is a vendored copy of an HQ standard, so neither a collision nor a burn in it is repairable in this repository at all; HQ allocates those with its own tools/check-queue-ids.sh. Claiming it here would produce findings whose repair is held by neither locus this gate has."
+    },
+    {
+      "register": "docs/agents/learning-log.md",
+      "why": "Its entries are dated window headings with a free-text trigger in parentheses, so there is no number to allocate and heading identity is the whole key. registers.json declares `identifier: null` for it for the same reason."
+    },
+    {
+      "register": "docs/ideas.md",
+      "why": "The ledger keys each entry on a date and a name (`### YYYY-MM-DD — <idea>`), so two seats filing on one day produce two distinct headings rather than two claims on one number. It allocates no counter."
+    },
+    {
+      "register": "docs/agents/merge-order.md",
+      "why": "Not append-only: the exo charter replaces this file wholesale every run, so its headings are stable section names rather than allocated entries. registers.json excludes it from entry-keyed merging for the same reason."
     }
   ]
 }

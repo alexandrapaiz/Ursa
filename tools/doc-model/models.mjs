@@ -268,6 +268,24 @@ export const MECHANISMS = [
         verdict: 'mentions-only',
         why: 'states an upper bound and the silence of the overrun ("delivers at most 1,500 characters of `body` and truncates silently past it") and no cut location. Its own trigger quotes `body_chars` 2034 against `body_delivered` 1453, which is a delivered figure 47 under the limit, so the section does not state the hard-count model either. Its subject is whether pm.md §15\'s paragraph of store rules is a table of refusals',
       },
+      // Fourth instance of one shape, and the shape is now the finding
+      // (added 2026-11-09, window 110, Ursa's exo seat). The comment above
+      // records three skill-seat ledger entries that reached `main`
+      // unaccounted for and held the gate red for a week. This is a fourth,
+      // landed the same morning, found the same way -- by running the gate,
+      // not by reading the ledger. Nothing in the path that writes
+      // `docs/ideas.md` consults this registry, so every new entry that
+      // happens to mention the mechanism reds the trunk until someone
+      // running the full suite notices. That is a property of the writing
+      // path rather than of any entry, and it belongs to whoever owns this
+      // registry; it is named here because the next instance is cheaper to
+      // recognise than to rediscover.
+      {
+        file: 'docs/ideas.md',
+        heading: '### 2026-11-09 (security) \u2014 one tooling suite went red inside the full gate list and green twice on its own, and the failing case was not captured',
+        verdict: 'mentions-only',
+        why: 'a ledger entry about a gate that transcribed a constant\'s ADDRESS rather than its value: `WAKE_BODY_CHARS` and "the wake limit is still 1500 in the live runtime" appear only as the name and assertion of the failing test case, and the cause it reports is HQ moving the definition from `api.py` into `store.py` behind a re-export. It states no cut location and no cut rule. Its subject is deploy-driven drift in a transcription gate, and the mechanism is named only as the thing that gate happens to watch',
+      },
       { file: 'docs/standards/lessons.md', heading: '## any (all seats, all products)', verdict: 'mentions-only', why: 'L-A61 states a consequence of truncation (a tail cut removes the disposition) and two duties that follow; it asserts no cut location. HQ\'s file, and not Ursa\'s to edit' },
       // Same false-positive shape as the 2026-11-02 entry above, from the
       // other direction: this one does not discuss the registry, it reports

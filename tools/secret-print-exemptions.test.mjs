@@ -27,18 +27,58 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const GATE = 'tools/secret-print-exemptions.py'
 const BASELINE = 'tools/secret-print-baseline.txt'
 
-function run(root, args = []) {
-  const out = spawnSync('python3', [path.join(root, GATE), ...args], {
+// `spawnSync` reports two classes of outcome through two different channels,
+// and only one of them is an exit status. A process that RAN and refused sets
+// `status` to 2, which is the channel every case below reads. A process that
+// never ran, or that was killed, sets `status` to null and puts the cause in
+// `error`: ENOENT when `python3` is not on the path, ENOBUFS when the gate's
+// output passes `maxBuffer`, and a signal name when something killed it.
+//
+// Added 2026-11-09 by Ursa's security seat, measured. This helper read only
+// `status`, so the whole second channel was dropped, and the drop landed
+// inside the one guard written to catch it: `json()`'s
+// `assert.notEqual(got.code, 2, 'gate could not run')` compares null against
+// 2, which passes. The case then reached `JSON.parse('')` and the suite's
+// report for an absent interpreter was `Unexpected end of JSON input`. The
+// interpolated `got.stderr` was `undefined` in that case too, so even had
+// the guard fired it would have named nothing.
+//
+// Why that is a security defect and not a tidiness one. This suite is the
+// only thing asserting that `tools/secret-print-exemptions.py` makes a
+// secret-print exemption come due. An environment where it cannot run must
+// say so in those words, because a guard suite that fails with a JSON parse
+// error reads as a broken test, and the ordinary response to a broken test
+// nobody can reproduce is to skip it — which retires the staleness gate over
+// every secret-print exemption without one line saying that is what happened.
+// Finding F110 of the run before this one was the same shape one layer down:
+// an exemption whose premise nothing read.
+//
+// The vendored side already does this correctly, which is what made the
+// omission visible. `run_checker` in the gate itself raises `CannotRun` on
+// both a refusing exit status and an unparseable document. Only the
+// JavaScript helper trusted the status alone.
+function run(root, args = [], opts = {}) {
+  const interpreter = opts.interpreter || 'python3'
+  const out = spawnSync(interpreter, [path.join(root, GATE), ...args], {
     cwd: root,
     encoding: 'utf8',
-    maxBuffer: 32 * 1024 * 1024,
+    maxBuffer: opts.maxBuffer || 32 * 1024 * 1024,
   })
+  if (out.error || out.status === null) {
+    const why = out.error ? `${out.error.code || out.error.name}: ${out.error.message}`
+      : `killed by ${out.signal}`
+    throw new Error(
+      `the gate could not run (${interpreter} ${GATE}): ${why}. `
+      + 'This is not a verdict about the exemptions; it is the suite being '
+      + 'unable to ask. Do not skip or exempt this case on it.',
+    )
+  }
   return { code: out.status, stdout: out.stdout || '', stderr: out.stderr || '' }
 }
 
-function json(root, args = []) {
-  const got = run(root, ['--json', ...args])
-  assert.notEqual(got.code, 2, `gate could not run: ${got.stderr}`)
+function json(root, args = [], opts = {}) {
+  const got = run(root, ['--json', ...args], opts)
+  assert.notEqual(got.code, 2, `gate refused to run: ${got.stderr}`)
   return { ...got, report: JSON.parse(got.stdout) }
 }
 
@@ -543,4 +583,163 @@ test('the two entries name paths, and this tree really lacks both', () => {
   // the entry by reading it.
   const got = premiseFailures(ROOT)
   assert.deepEqual(got, [], JSON.stringify(got))
+})
+
+// THE SUITE'S OWN INABILITY TO RUN, ASSERTED RATHER THAN RECOMMENDED
+//
+// Three cases, added 2026-11-09 by Ursa's security seat. Each drives `run()`
+// into one of `spawnSync`'s non-status outcomes and asserts the suite says
+// which one, in words naming the gate. The third is the one that was leaking:
+// it goes through `json()`, which is where the old guard lived.
+
+test('an interpreter that is not there is named, not parsed as a verdict', () => {
+  assert.throws(
+    () => run(ROOT, [], { interpreter: 'python3-not-installed-here' }),
+    (err) => {
+      assert.match(err.message, /could not run/)
+      assert.match(err.message, /ENOENT/)
+      assert.match(err.message, /secret-print-exemptions\.py/)
+      assert.ok(!/Unexpected end of JSON/.test(err.message),
+        'the old report for this case was a JSON parse error')
+      return true
+    },
+  )
+})
+
+test('output past maxBuffer is a refusal to answer, not a truncated answer', () => {
+  // The gate prints a multi-line verdict, so 8 bytes cannot hold it. ENOBUFS
+  // leaves `stdout` populated but cut, which is the dangerous shape: the
+  // bytes look like an answer.
+  assert.throws(
+    () => run(ROOT, [], { maxBuffer: 8 }),
+    (err) => {
+      assert.match(err.message, /could not run/)
+      assert.match(err.message, /ENOBUFS/)
+      return true
+    },
+  )
+})
+
+test('the json path refuses too, which is where the old guard let it through', () => {
+  // `assert.notEqual(got.code, 2)` was the guard, and a process that never
+  // ran has `code === null`, so it passed on every one of these inputs.
+  assert.throws(
+    () => json(ROOT, [], { interpreter: 'python3-not-installed-here' }),
+    /could not run/,
+  )
+  // The healthy path is NOT re-asserted here. `json(ROOT)` is the suite's
+  // first case already, and a second copy would cost a full 12.93s gate
+  // invocation to learn nothing. Run 8 dropped a redundant pre-check for the
+  // same reason, and F114 of run 9 is the measurement that reason rests on.
+})
+
+// THE DIRECTION `absent_path` COULD NOT REACH (added 2026-11-09, security
+// seat, measured; named by Ursa's ExO seat)
+//
+// `absent_path` reads the premise off the filesystem, so it catches the
+// fixture ARRIVING. It says nothing about the fixture staying absent while
+// the exempted test starts failing for a SECOND reason, because the entry
+// subtracts a test NAME from the failure set and a name carries no reason.
+//
+// Measured before the repair, on the tree as it then stood: one extra
+// assertion inside `test_check_actions_reach_is_clean`, asserting the checker
+// flags `echo hello` as a print, which it does not and should not. That is a
+// red about the checker in the shape a real regression takes.
+// `tools/secret-print-tests.py` printed `2 exempt as absent fixtures, 0
+// unexpected`, then `the vendored checker passes every test that is about the
+// checker`, and exited 0. `absent_path` was never consulted, because the
+// premise was true the whole time.
+//
+// Why no reading of the tree could have closed it. `absent_path` is a claim
+// about the tree. "This test fails BECAUSE of that absence" is a claim about
+// causation, and the filesystem is not asked about causation. So the reason
+// is executed: materialise the fixture, re-run that one test, and absorb the
+// failure only if it goes green.
+//
+// Entry 1 is used in the instance cases below because its stand-in is an
+// empty file under `tools/`, and `instance()` copies `tools/` only. Entry 2's
+// stand-in is a copy of `docs/standards/lessons.md`, which no instance has.
+const ABSENT_1 =
+  'test_secret_print.TheSafeFormsAreNeverFlagged.test_check_actions_reach_is_clean'
+
+function probe(dir, name) {
+  const out = spawnSync('python3', ['-c', [
+    'import importlib.util, json, sys',
+    'spec = importlib.util.spec_from_file_location("w", sys.argv[1])',
+    'm = importlib.util.module_from_spec(spec)',
+    'spec.loader.exec_module(m)',
+    'v, note = m.failure_is_about_the_absence(',
+    '    sys.argv[2], m.EXPECTED_ABSENT_FIXTURES[sys.argv[2]])',
+    'print(json.dumps([v, note]))',
+  ].join('\n'), path.join(dir, 'tools', 'secret-print-tests.py'), name],
+  { cwd: dir, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 })
+  assert.equal(out.status, 0, out.stderr)
+  return JSON.parse(out.stdout.trim().split('\n').pop())
+}
+
+test('the exemption\'s reason is executed: the test goes green once the fixture exists', () => {
+  // Against the real tree, because entry 2's stand-in is Ursa's own register
+  // and only the real tree has it. This is the case that would catch a
+  // stand-in declared wrongly, in either entry.
+  for (const name of [ABSENT_1,
+    'test_secret_print.TheRegisterTheRuleLivesIn'
+    + '.test_the_register_is_still_scannable_when_a_caller_names_it']) {
+    const [verdict, note] = probe(ROOT, name)
+    assert.equal(verdict, true, `${name}: ${note}`)
+  }
+})
+
+test('the probe leaves no stand-in behind, so the next run is not told the fixture arrived', () => {
+  // The hazard the probe introduces, asserted rather than trusted: it writes
+  // into the working tree. A surviving stand-in makes `absent_path` report
+  // the fixture as present, which is red and wrong.
+  probe(ROOT, ABSENT_1)
+  assert.deepEqual(premiseFailures(ROOT), [],
+    'a stand-in or its directory outlived the probe')
+  assert.equal(fs.existsSync(path.join(ROOT, 'tools/check-actions-reach.sh')), false)
+  assert.equal(fs.existsSync(path.join(ROOT, 'standards')), false)
+})
+
+test('a red that survives the fixture appearing is not absorbed', () => {
+  // The measured regression, as a case. The injected assertion is false about
+  // the checker and is placed inside the exempted test, which is precisely
+  // where the pre-repair runner could not see it.
+  const dir = instance()
+  const p = path.join(dir, 'tools', 'tests', 'test_secret_print.py')
+  const before = fs.readFileSync(p, 'utf8')
+  const anchor = '        self.assertEqual(0, run(target, "--quiet").returncode,\n'
+    + '                         run(target).stdout)\n'
+  assert.ok(before.includes(anchor), 'the exempted test no longer has this shape')
+  fs.writeFileSync(p, before.replace(anchor, anchor
+    + '        self.assertEqual(["X5-PRINT"], codes("--command", "echo hello"))\n'))
+  const [verdict, note] = probe(dir, ABSENT_1)
+  assert.equal(verdict, false, note)
+  assert.match(note, /fails with the fixture PRESENT too/)
+  // And the note names what was raised. Reading `[-1]` of the traceback gave
+  // `+ []`, which is the tail of an assertion diff and names nothing.
+  assert.match(note, /AssertionError/)
+})
+
+test('an entry with no stand_in is a premise failure, not a trusted name', () => {
+  const dir = instance()
+  const p = path.join(dir, 'tools', 'secret-print-tests.py')
+  // What an edit to this dict that forgets the stand-in looks like.
+  fs.writeFileSync(p, fs.readFileSync(p, 'utf8')
+    .replace(/^\s*"stand_in": .*$/gm, ''))
+  const got = premiseFailures(dir)
+  assert.equal(got.length, 2, JSON.stringify(got))
+  assert.match(got[0][1], /carries no `stand_in`/)
+})
+
+test('the gate reports a missing stand_in as undecided', () => {
+  const dir = instance()
+  const p = path.join(dir, 'tools', 'secret-print-tests.py')
+  fs.writeFileSync(p, fs.readFileSync(p, 'utf8')
+    .replace(/^\s*"stand_in": .*$/gm, ''))
+  const { code, report } = json(dir)
+  assert.equal(code, 1)
+  const mine = report.problems.filter(
+    (x) => x.kind === 'undecided' && /stand_in/.test(x.why))
+  assert.equal(mine.length, 2, JSON.stringify(report.problems))
+  assert.match(mine[0].why, /causation/)
 })

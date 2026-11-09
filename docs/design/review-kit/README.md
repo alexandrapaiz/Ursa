@@ -16,22 +16,83 @@ will ever touch, and point `PW_ROOT` at it:
 export FE_RUN="$PWD/.fe-run-<id>"
 mkdir -p "$FE_RUN/pw"
 
+# The cache as a VARIABLE and not as a --cache flag, and it is exported once
+# here so every npm this run issues inherits it. Two reasons, and the second
+# is the one that is not obvious. First, it covers `npx` and anything npm
+# shells out to, which a flag on one command does not. Second, it is the only
+# form in which the check below can SEE this run's installs: npm overwrites
+# its own argv about 358 ms in and the flags are gone from /proc after that,
+# while /proc/<pid>/environ keeps the variable for the whole install.
+# Measured both ways in ../reviews/2026-11-09-message-2/data/.
+export NPM_CONFIG_CACHE="$FE_RUN/npm-cache"
+
+# BEFORE any npm, and before every later one: would it race one already
+# running, in this tree, elsewhere in this checkout, or on this cache?
+# Exits 3 if so, and prints a count line either way. ONE INSTALL AT A TIME
+# is the point of it; the private cache is a second guard for a different
+# case. Do not background an install and start another.
+bash docs/design/review-kit/check-installs.sh || exit 3
+
 cd "$FE_RUN/pw" \
-  && npm i --no-save playwright --cache "$FE_RUN/npm-cache" \
+  && npm i --no-save playwright \
   && npx playwright install chromium
 export PW_ROOT="$FE_RUN/pw/node_modules"
 cd -
 
-# before any npm in a tree: is one already running there?
-ps -eo pid,args | grep -v grep | grep -q "npm" && \
-  for pid in $(pgrep -f "npm (ci|install)"); do \
-    [ "$(readlink -f /proc/$pid/cwd 2>/dev/null)" = "$PWD" ] && \
-      echo "REFUSING: npm $pid is live in this tree"; \
-  done
-
 # and at the end of the run: stop what you started, THEN delete what you
 # wrote. One command does both and prints a count line either way.
 bash docs/design/review-kit/teardown.sh            # --dry-run to look first
+```
+
+**A free branch name is not a free review directory.** The runtime names
+your branch after the trigger and tells you to append a suffix if the
+branch exists. The review directory under `../reviews/` takes the same
+name and has to be checked separately, because a merged branch is deleted
+and its directory is not: on 2026-11-09 the branch
+`ursa-frontend/2026-11-09-message` was free, `reviews/2026-11-09-message/`
+was not, and opening the run's `NOTES.md` there replaced a previous run's
+278-line one with three lines. Nothing failed and nothing conflicted; the
+merge took one side and the loss would have reached `main` as a clean
+diff. Check `ls ../reviews/` before you write the first file, not
+`gh pr list`:
+
+```bash
+ls -d docs/design/reviews/<trigger>* 2>/dev/null   # pick the first free suffix
+```
+
+**The browser you installed can disappear while you are still using it
+(2026-11-09, run t).** `npx playwright install chromium` writes into
+`/srv/asc/home/.cache/ms-playwright`, which is under the shared home every
+seat runs as, and this host's watcher reclaims that volume on a threshold
+rather than on ownership. Measured in one window: the install succeeded at
+07:41 and `ls` showed `chromium-1254`, `chromium_headless_shell-1254` and
+`ffmpeg-1013`; at 08:1x the same `ls` printed nothing and free space on
+`/tmp` had gone from 715M to 4.6G, with no install of this run's in
+between. A tool that had run clean four times then died with
+
+    browserType.launch: Executable doesn't exist at
+    …/chromium_headless_shell-1254/chrome-headless-shell-linux-arm64/…
+
+**The failure names the wrong cause**, which is why this is written down.
+Playwright's message is the one it prints for a fresh machine, "Looks like
+Playwright was just installed or updated", so it reads as a setup mistake
+at the start of a run rather than as an eviction in the middle of one. The
+tell that separates them is free space moving by gigabytes while you did
+nothing: a setup mistake cannot do that.
+
+This is `runner-facts` §97 one directory over. That section is about
+`/srv/asc/home/.npm` and names a per-run `NPM_CONFIG_CACHE` as the second
+guard; the browser cache has the same shape, the same parent, and no such
+variable in this kit's block above. `PLAYWRIGHT_BROWSERS_PATH` is the
+variable that would move it, and this run did not take that step, because
+a per-run copy of chromium is roughly 500M on a volume that was at 99 per
+cent when the eviction happened, so it trades a stall for a different
+stall. **The remedy that is free is to recognise it**: re-run the install,
+which is idempotent and took under a minute, and do not spend the window
+looking for what you broke.
+
+```bash
+ls /srv/asc/home/.cache/ms-playwright/ && df -h /tmp | tail -1
 ```
 
 **Run the teardown even if you wrote nothing**, because the server is the
@@ -69,10 +130,60 @@ the runs ended. One directory per run means there is one `rm -rf`, and
 the next run of the seat can recognise `.fe-run-*` from another day as
 garbage without knowing what was in it.
 
-The `/proc/<pid>/cwd` check is the only reliable answer to "is an install
-already running in this tree", which is the question L51's rule needs
-answered and does not say how to answer. An exit status will not do it;
-see the end of this file.
+The install check became `check-installs.sh` on 2026-11-09, and the four
+lines it replaces were wrong in three ways that no reader of them could
+see, because they printed nothing on the clean path. Measured with one
+real `npm install` live in a sibling tree of the same run: the old block
+printed three `REFUSING` lines and not one of them was that install. It
+matched `pgrep -f`, so it matched the measuring shell itself and another
+seat's agent process whose prompt quotes a board message about npm; it
+was keyed on `$PWD`, so it missed the install six directories away
+sharing the same cache; and it exited 1 when clean and 0 while refusing,
+so nothing could gate on it. L68.
+
+**The repair of 2026-11-09 (run 2), and the honest size of it.** The
+version above anchored on field 0 of `/proc/<pid>/cmdline` alone, and a
+5 ms poll on a real install showed that is one of THREE shapes npm
+presents: for the first 358 ms /proc holds the seven fields the kernel was
+handed, `node /usr/bin/npm i --no-save playwright --cache x`, with argv[0]
+`node`. The anchor said yes 316 ms after the process appeared. So the guard
+read clean exactly while an install was beginning, which is the same shape
+as the `_cacache` detection line it replaced, and the exo seat's correction
+on that one is why this was gone looking for.
+
+The window is narrow and it does not explain the incident: the three
+concurrent installs of that morning started 33 s and 78 s apart, so none of
+them was inside another's 358 ms. What the run actually bought is three
+other things, and they are worth more than the window.
+
+- The cache a live install is using went from `UNREADABLE` to a path, by
+  reading `/proc/<pid>/environ` as well as the argv. Confirmed end to end
+  against a real install in `data/endtoend-env.txt`: three paired readings,
+  the old tool saying `cache=UNREADABLE` each time and the new one naming
+  the path and adding `same-cache`, which is a refusal reason the old one
+  could not produce.
+- The `--cache` flag became `NPM_CONFIG_CACHE` in the block above, because
+  legibility turns out to be a property of how the cache was SET and not of
+  when you look. The flag is readable for 358 ms; the variable is readable
+  for the whole install.
+- The guard's own latency, 0.9 to 1.7 s and up to 3.6 s under load, down to
+  0.31 to 0.61 s, by reading each `cmdline` with a NUL `mapfile` in the
+  shell instead of a subshell and a `tr` per pid, of which /proc here held
+  312. This is the one that matters most for a check a run is told to make
+  immediately before it installs, and it is also why the end-to-end
+  CANNOT see the 358 ms window: a scan costs longer than the window lasts,
+  so the unit cases against a real process in that argv shape are the
+  evidence for that half, and `data/endtoend-flag.txt` is the run that
+  tried and is reported as not discriminating.
+
+**The question it needs to answer is not the one L51 asks.** L51 is two
+installs in one `node_modules`. The resource that actually failed on
+2026-11-09 is the cache, and Ursa's exo seat established from npm's own
+debug logs that the three concurrent installs that cost that morning
+twenty minutes were **one seat's own, in one sandbox**, with no two
+intervals from different sandboxes overlapping anywhere in the day. A
+per-run cache holds all of a run's installs, so the `--cache` rule below
+does not separate them and this check is the guard that does.
 
 `PW_ROOT` is the first entry in `lib/browser.mjs`'s search order and has
 been since that file was written, and until 2026-11-02 it appeared in no
@@ -314,6 +425,20 @@ cannot be committed by accident. This line used to say
 `/tmp/<seat>-<date>-<trigger>/`, which is a namespaced guess at privacy
 rather than privacy, and on 2026-11-02 this seat's own earlier run read
 it and reached for the bare name `/tmp/npm-fe-f` anyway.
+
+**Ask npm where its cache is; never ask the filesystem.** The detection
+line this seat offered the other seats for the shared cache was `ls -ld
+/srv/asc/home/.npm/_cacache`, and it fails open. npm removes that
+directory between installs and the host's watcher reclaims at eighty per
+cent, so it is absent exactly when nobody has installed yet, which is the
+moment a run is about to. Measured absent twice by the exo seat and a
+third time here on 2026-11-09. `npm config get cache` resolves whether or
+not anything was ever downloaded, which is why its answer is the finding:
+
+```bash
+bash docs/design/review-kit/check-installs.sh --cache-path
+# cache=/srv/asc/home/.npm shared_home=yes source=resolved
+```
 
 **That includes the path npm chooses for you.** Every `npm` this seat
 runs passes `--cache <checkout>/.fe-run-<id>/npm-cache`, because npm's

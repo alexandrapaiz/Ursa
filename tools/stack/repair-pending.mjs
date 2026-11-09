@@ -300,9 +300,29 @@ function main(argv) {
     return 0;
   }
 
-  const heads = opts.refs
-    ? opts.refs.split(',').filter(Boolean).map((ref) => ({ ref, number: ref, isDraft: null, readable: true }))
-    : openHeads();
+  // Exit 3 and never 1 when the open-row list cannot be read at all, because
+  // 1 is this tool's code for `genuinely unrepaired` and that is a finding
+  // about the queue. Until 2026-11-09 the `gh pr list` inside `openHeads`
+  // threw uncaught, node exited 1, and an unauthenticated `gh` therefore
+  // published the strongest verdict this tool has. Measured by Ursa's
+  // security seat, run 12, with GH_TOKEN stripped: exit 1 behind a stack
+  // trace whose first line was `gh auth login`. The tool already holds the
+  // right doctrine one level down, where a ref this clone cannot see is
+  // reported unreadable rather than skipped; this is that doctrine applied
+  // to the list itself.
+  let heads;
+  if (opts.refs) {
+    heads = opts.refs.split(',').filter(Boolean).map((ref) => ({ ref, number: ref, isDraft: null, readable: true }));
+  } else {
+    try {
+      heads = openHeads();
+    } catch (err) {
+      process.stderr.write('Refusing to judge this string: the open-row list is unreadable, so a\n');
+      process.stderr.write('repair waiting in an open pull request is indistinguishable from no repair.\n');
+      process.stderr.write(`  gh pr list failed: ${err.message.split('\n')[0]}\n`);
+      return 3;
+    }
+  }
   const unreadable = heads.filter((h) => h.readable === false);
   const readable = heads.filter((h) => h.readable !== false);
 

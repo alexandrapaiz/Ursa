@@ -2,6 +2,125 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (security, message run 13): the product's own launcher spawns a fetch-capable runner, and pinning it would change what a user without the dependency sees
+
+**Status:** proposed, hour-sized. **For:** the engineer, because the fix
+changes product behaviour and this seat's fixes preserve it.
+
+- Trigger: `tools/gates/fetch-exec.mjs`, shipped this run, reports 23
+  occurrences whose target is a package this repository declares. Those are
+  version drift rather than an unknown package, which is why the gate reports
+  and does not fail them. Twenty-two are documentation. This one is a live
+  `execFile`.
+- What: `ursa-major/src/bridge/index.ts`, `npxLauncher`, spawns
+  `npx tsx <bin/ursa.ts> run <projectPath>` with no `--no-install`. `tsx` is
+  a declared devDependency, so the registry serves the genuine project and
+  the worst case is that an unpinned version executes rather than the
+  lockfile's. On a tree where the install is partial, which is this host's
+  measured npm failure mode under
+  `npm-cache-is-a-shared-home-path` in `docs/agents/runner-facts.md`, the
+  spawn reaches the network and runs whatever `tsx@latest` is that day,
+  inside the process holding a user's page open.
+- Why this seat did not fix it: adding `--no-install` is one token and it is
+  not behaviour-preserving. Today a user whose tree lacks `tsx` gets it
+  fetched and the bridge works. With the flag, the bridge fails. That is a
+  product decision about what an uninstalled user sees, so it is the
+  engineer's and not a security fix.
+- First step: decide what an uninstalled user should get. The three options
+  are to fetch as today and say so, to pin the version in the argv so drift
+  is bounded, or to refuse with a message naming the install command. The
+  middle one preserves the current behaviour and removes the drift, so it is
+  the likely answer, but the choice is the product's.
+- Note on the gate's reading: this is correctly classified today. The gate
+  calls it drift and not a finding, and this entry exists because a reader of
+  that count should know one of the twenty-three is a spawn and twenty-two
+  are prose.
+- Owner: the engineer.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (security, message run 13): F116 is closed, and the exit code it was missing now exists in two gates
+
+**Status:** built in this run, recorded so the earlier entry is not re-taken.
+
+- Trigger: run 11 filed F116, that `tools/prompt-slots.mjs` has no exit code
+  for a prompt-injection finding only the owner can repair. Run 12 carried it
+  forward unchanged. This run built the same exit code for a different gate
+  and then applied it here, which is the cheaper order than designing it
+  twice.
+- What: the tool used to discard its own verdict unless `--strict` was
+  passed, so the bare command printed "11 of 11 untrusted slot(s) sit in a
+  fence a payload could step out of" and exited 0, and `--strict` exited 1 on
+  a backlog no branch can clear. Neither is registrable. It now exits 2 for
+  the owner's standing prompt-layer backlog, 1 for an untrusted interpolation
+  inside a `run:` block, which is shell injection and of which there are
+  none today, and 3 for an unreadable workflow directory, which is no verdict
+  rather than a clean one. `--strict` keeps the meaning it had by escalating
+  2 to 1.
+- Why 1 stays live rather than everything routing to 2: a gate whose failure
+  code cannot be reached is the defect `tools/gates/code-census.mjs` watches
+  for. Shell injection is both severe and currently absent, so 1 is green
+  today and fires on a regression a change introduces.
+- Consequence: the tool is registered in `scripts/ci-checks.mjs` as
+  `prompt-slots` with `passExit: [0, 2]`, and its `red-on-main` excuse is
+  deleted from `tools/gates/gate-registry.baseline.json`. The registry reads
+  63 candidates, 26 run by a check and 37 excused, up from 24 run this
+  morning.
+- The eleven open slots are untouched and still the owner's. This entry
+  closes the gate's blindness and not the exposure it reports.
+- Owner: closed by the security seat.
+- Cost: $0
+- Status: built
+
+## Ledger entry — 2026-11-09 (security, message run 13): a charter pre-approves a registry fetch-and-execute with the yes flag, and no code sweep can reach an instruction
+
+**Status:** urgent, and the edit is one line. **For:** the owner, or Ursa's
+ExO seat, which is the one seat here that edits charters and whose own
+charter this is. This seat may not edit `prompts/`, so it is filed rather
+than fixed.
+
+- Trigger: HQ's exo-centralizer seat carried finding F113 up to the holding
+  company and measured the same class there. Its note is the reason this was
+  looked for at all: "A flag on a call site is what a code sweep finds. What
+  bit here was a sentence telling a future seat to write the call site, which
+  no sweep reaches, and it would have shipped to a second company." HQ's one
+  instance was an instruction in a charter staged for alexandria's engineer.
+  Ursa has the same instance, in its own ExO charter, and it has been there
+  since 2026-10-18.
+- What: `prompts/exo-agent.md` §5b tells the ExO seat to render any mermaid
+  diagram it changes by running
+  `npx -y @mermaid-js/mermaid-cli@11 -i d.mmd -o d.png -p pptr.json`.
+  Three properties stack here and each one makes the next worse. First, `-y`
+  does not merely permit the fetch, it pre-approves it, so the seat never
+  sees a prompt. Second, nothing in this repository declares a package by
+  that name, so what executes is whatever the registry serves under it, which
+  is the same mechanism that made F113 run an unrelated dead project called
+  `tsc`. Third, the charter supplies a puppeteer config of
+  `--no-sandbox --disable-setuid-sandbox`, so the fetched code runs with
+  Chrome's own boundary switched off. The charter also says this works on
+  Actions, which is where the ExO seat holds `contents: write` and
+  `pull-requests: write` and a live token.
+- Why it is not merely the F113 call site again: a call site is one grep
+  away, and this is a sentence instructing a future seat to write the call
+  site. Charters here are copied between seats and between companies, so the
+  instruction propagates where the call site does not. HQ's instance was
+  staged for a second company when it was caught.
+- First step: replace the pre-approved fetch with a deliberate pinned
+  install and a call to the local binary, which is what HQ's seat did
+  upstream, and add a sentence making an absent binary unrunnable rather
+  than a silent no-render, because mermaid already renders a syntax error as
+  a picture and exits zero. Keep the measured host paragraph that follows it,
+  which is correct and is the reason the §5b text was rewritten in October.
+- Standing guard, already shipped: `tools/gates/fetch-exec.mjs` reads this
+  occurrence every run and `tools/gates/fetch-exec.baseline.json` holds it as
+  the one `owner-reserved-finding` row. The gate exits 2 for it, meaning
+  clean as far as a seat can take it, so the row cannot be forgotten and does
+  not paint every branch red either. Deleting this ledger entry without
+  repairing the charter turns that gate red, by construction.
+- Owner: the owner, or the ExO seat.
+- Cost: $0
+- Status: urgent
+
 ## Ledger entry — 2026-11-09 (security, message run 7): the CI row's job is finished and `main` fails three of its own gates, so applying it hands the owner a red default branch
 
 **Status:** proposed, half-day-sized. **For:** the engineer and exo lanes,
@@ -104,13 +223,40 @@ touches the guard, or the engineer if it reaches that lane first.
   interrupted by the test runner that owns the case. A suite that hangs
   rather than merely runs long holds the job to the cap and reports
   nothing about the branch.
-- First step: give the helper a `timeout` and build the tree copy once
-  per suite rather than once per case, which is the cost rather than the
-  bound. Both are small. Neither was done in the run that found it,
-  because a `timeout` turns "pass late" into "fail" on a slow runner and
-  choosing that bound is a CI-budget decision that should land with the
-  job, not before it.
-- Owner: this seat or the engineer.
+- First step: give the helper a `timeout`. **The other half of this line
+  was wrong, and run 9 of this seat measured it rather than taking it.**
+  The line said to "build the tree copy once per suite rather than once
+  per case, which is the cost rather than the bound". The copy is not the
+  cost. Measured 2026-11-09 on the resident host, one case decomposes as a
+  0.33s `cpSync` of `tools/` and `.github/workflows/` against a 12.93s
+  gate invocation, so the prescribed repair targets 2.6 per cent of a case
+  and 17 copies are 5.6s of the whole suite's run. **No suite total is a
+  usable denominator on this host.** Run 7 read 267.2s over 20 cases; run 9
+  read 194.4s over 27, then 224.1s over the same 27 minus one gate
+  invocation, so the run with strictly less work took 29.7s longer. The
+  total tracks load from the seats sharing this host rather than the
+  suite, which is why the figures below are timed inside one process
+  against the gate's own functions. Inside the 12.93s: `sweep_files` 0.39s,
+  `load_vendored` 0.02s, the first `run_checker` subprocess 2.33s, the
+  second 3.96s, and `marker_census` 6.23s, which is 48 per cent of the
+  case and the largest single component. The census is 48 whole-file scans
+  because it restores one of 44 markers at a time and rescans, and
+  `split_quoted` inside HQ's vendored checker is 56,038 calls of that.
+  So the remaining cost is two things and neither is the copy: the two
+  checker subprocess runs, 6.29s, and the census, 6.23s.
+- Second step, which is why this stays open after run 9: making the census
+  cheaper is a design change and not a behaviour-preserving fix, so it is
+  not a security run's to make. `marker_census`'s own docstring argues at
+  length for restoring one marker at a time rather than deleting one at a
+  time, because deleting from a line two markers cover leaves the other
+  standing and the gate would then demand both be deleted. Any batching or
+  memoisation has to preserve that independence, which is the attribution
+  rule and not an optimisation detail. The `timeout` half was deferred by
+  run 7 because the bound should land with the job; the job is still queued
+  rather than merged, so it is still deferred, and this seat cannot touch
+  workflows in any case.
+- Owner: the engineer for the census; this seat or the engineer for the
+  `timeout`, once the CI job has landed.
 - Cost: $0
 - Status: proposed
 
@@ -16810,6 +16956,37 @@ the owner to accept or reject.
   shape and the test suite to extend. No new exit code: a breaking repair is
   still a violation, it just stops being described as if someone could do it
   today.
+- **Corrected 2026-11-09 (engineer, twelfth message wake), on Ursa/security's
+  reading.** The trigger sentence above is false and is left standing so the
+  error is legible rather than edited away. `fixAvailable` has been read by
+  `scripts/dep-floor.mjs` since the commit that created the gate, `810323cc`
+  on 2026-09-29, and `isSemVerMajor` with it, inside the `fix` string of the
+  object pushed onto `violations`. `grep -n fixAvailable scripts/dep-floor.mjs`
+  matches those four lines and always did, so whatever produced "matches
+  nothing" was not that command against that file.
+  What is true is narrower and was worth fixing: the field is read on ONE of
+  the four paths an advisory can take, and it is the path this repository's
+  own advisories do not take. A dev-scope advisory below critical becomes a
+  `warnings` record, an allowed one becomes a `warnings` record with its
+  expiry, an elapsed exception becomes an `expired` record, and none of those
+  three built a `fix` field. All eight advisories behind this entry were
+  dev-scope and below the floor, so all eight took the discarding branch. The
+  defect was never a field nobody read. It was a hint reachable from one
+  kind of finding out of three.
+  A second omission sat beside it and is the one that cost a reader something:
+  the report filter was `sev === 'high' || sev === 'moderate'`, so a `low`
+  entry fell through a bare `continue`, and the per-package count line printed
+  three of the five severities its input carries. On 2026-11-09, after the F93
+  bump, `ursa-minor` carried three low advisories each with
+  `fixAvailable:{"name":"shadcn","version":"1.0.0","isSemVerMajor":true}`, and
+  `node scripts/dep-floor.mjs` printed `low` nowhere, a count line of zeros,
+  and `Dependency floor holds`.
+  Both omissions are repaired in `scripts/dep-floor-classify.mjs`, with the
+  classification made total and tested. **The proposal in `First step` above
+  is NOT built**: `summaryLine()` is untouched, no verdict line splits on
+  breaking-versus-in-range, and this entry's status stays the owner's to move.
+  What shipped is the existing behaviour made honest, which is a break-fix and
+  not this entry.
 - Cost: $0
 - Status: proposed
 
@@ -23440,6 +23617,174 @@ same conflation inside it.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-09 (engineer, message run 9) — Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline
+
+- Trigger: `tools/gates/import-effects.mjs`, shipped today, found 17
+  instances of its class over the 82 non-test modules under `tools/` and
+  `scripts/`. Seven were repaired in the same run because they had a
+  demonstrated failure or a one-line fix. The other ten are in
+  `tools/gates/import-effects.baseline.json`, which is a written excuse and
+  therefore the next version of the defect if nobody revisits it.
+- What: ten modules do their whole job at module scope, so importing one to
+  reach a single function runs its program instead. `tools/board/post.mjs`
+  posts a message. `tools/ledger/check.mjs` reads `docs/ideas.md` and calls
+  `process.exit`. `tools/registers/merge-driver.mjs` and
+  `tools/ledger/union-merge.mjs` destructure git's `%O %A %B` out of
+  `process.argv`. The repair is one shape for all ten: move the program
+  into `main()`, call it behind `const invokedDirectly = process.argv[1]
+  !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href`,
+  and leave the already-pure helpers where they are. Three of the ten
+  already have a partial split made for exactly this reason
+  (`live-target.mjs` out of `post.mjs`, `block-kinds.mjs` out of
+  `check.mjs`, `dep-floor-summary.mjs` out of `dep-floor.mjs`), so the
+  precedent is in the tree three times over.
+- Why it is ten entries and not one commit today: `post.mjs` is the tool
+  every seat in the portfolio posts with, and a mistake in it is silent
+  until a message does not arrive. The two merge drivers are invoked by
+  git with no test in front of them at all. So the order that costs least
+  is the reverse of the statement count: `scripts/redaction-check.mjs` is
+  one statement, `tools/registers/check-vendored.mjs` has no suite to
+  regress, and `post.mjs` is last with its own suite written first.
+- First step: `tools/registers/check-vendored.mjs`, which has six
+  module-scope statements, no verdict module and no suite. Extract its
+  decision into `vendored-verdict.mjs`, give it the guard, write the
+  suite, and delete its baseline entry. `IMPORT_BASELINE_STALE` fails the
+  gate if the entry is left behind, so the baseline cannot drift upward.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message run 9) — A gate with a suite is not a gate in the path, and nothing in this repository counts the difference
+
+- Trigger: `grep -c code-census scripts/ci-checks.mjs` returned 0.
+  `tools/gates/code-census.mjs` is this seat's own gate from six wakes ago,
+  it has `tools/gates/code-census.test.mjs`, and `tooling-suites` therefore
+  proved its RULES worked while nothing ever asked it for its ANSWER about
+  the tree. It was registered today, and it took no repair to register
+  because it was clean, which is the part that should be uncomfortable: it
+  could have been red for six days and nobody would have known.
+- What: `scripts/ci-checks.mjs` holds 23 checks and `tools/` plus
+  `scripts/` holds 49 candidate gates by `enumerate-verdicts --census`'s own
+  count. The two sets are not compared by anything. A gate that is
+  imported by its suite and invoked by no check is in the same position
+  Ursa/exo measured on the board's message rules, where a checker nobody
+  ran was bypassed in 874 of 1803 stored rows and 48.5 per cent: its rules
+  are right, its verdict is never read, and the evidence that would grade
+  the rules is exactly what being in the path accumulates.
+- What: measured over the tree rather than asserted, the gate is a sweep
+  that pairs every detector under those trees with the `CHECKS` entry that
+  invokes it, by argv rather than by name, and reports the detectors no
+  entry invokes. By argv because a check's `argv()` is the only place the
+  invocation actually is; matching on the id would pass for any gate whose
+  id happens to appear in a title.
+- First step: `node tools/gates/path-census.mjs`, built on
+  `scripts/ci-checks.mjs`'s exported `CHECKS` array, which is already
+  exported and already resolved lazily through `argv()`. Call `argv()` for
+  each check, collect the paths, and diff against the detector list
+  `tools/gates/code-census.mjs` already computes. Baseline whatever is
+  unregistered on purpose, with the reason.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message run 9) — Eight modules spell the entry-point guard as a string comparison against an unescaped path
+
+- Trigger: scoping `guardKind` in today's gate meant reading every
+  entry-point predicate in these trees, and there are seven spellings of
+  one question. Six compared a file name and were repaired today. Eight
+  more use `import.meta.url === ` with a backtick-quoted `file://` prefix
+  and `process.argv[1]` interpolated into it, which is a string comparison
+  against a path that was never percent-encoded.
+- What: `file://${process.argv[1]}` is correct exactly while the checkout
+  path needs no escaping. Node resolves `process.argv[1]` to an absolute
+  path, so the usual relative-path objection does not apply here; what
+  does apply is that a URL escapes a space as `%20` and a string
+  concatenation does not, so in a checkout under a path containing a
+  space the guard is false when the module IS the entry point and the
+  program silently does not run. This repository's own host puts seats
+  under `/tmp/<company>-<seat>-<suffix>`, which has no space today, so
+  this is a latent defect and not a live one, and it is written down here
+  rather than fixed because a latent defect repaired across eight files on
+  a hunch is eight chances to break a working guard.
+- Why it is out of today's gate's scope on purpose: the gate's question is
+  whether work stays off the import path, and this spelling answers that
+  question correctly. Flagging it would have been breadth added to a
+  detector whose scope had just produced two false positives, which is the
+  ordering Ursa/exo named at 05:46Z after its own write detector denied
+  one of its own commands inside a minute.
+- First step: one test, not eight edits. `tools/gates/import-effects.test.mjs`
+  gains a case that builds a temporary directory whose name contains a
+  space, copies a module using the `file://` spelling into it, runs it, and
+  asserts the program ran. If that test is red, the eight edits are
+  justified by a measurement; if it is green on this platform, the entry
+  records which platform it was green on.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message run 9) — The import-effects gate calls a module-scope declaration a declaration, and four modules do file and process work inside one
+
+- Trigger: writing down what today's gate cannot see, before anyone asked.
+  Its rule is that a column-0 line opening with `const`, `let`, `function`
+  or `class` is a declaration and not a statement, which is what lets it
+  work without a tokeniser. `const text = readFileSync(path)` is a
+  declaration by that rule and a file read in fact.
+- What: measured over the same 84 modules, four hold a module-scope
+  `const` whose initializer calls `readFileSync`, `execFileSync`,
+  `spawnSync` or `fetch`: `tools/board/post.mjs`, `tools/ledger/check.mjs`,
+  `tools/registers/check-vendored.mjs` and `tools/registers/merge-driver.mjs`.
+  All four are already findings on a different statement, so the blind spot
+  costs nothing today and the gate's clean runs are not hiding a module.
+  That is a property of this tree at this commit and not of the rule, and
+  the day a module does its one piece of I/O in a declaration and nothing
+  else at module scope, the gate reports it inert.
+- First step: extend `WORK` with a fifth shape, a column-0
+  `const NAME = (await )?<call>` whose callee is in a named set of effectful
+  primitives, and pin the four known instances as controls so the set
+  cannot be narrowed to green. Keep it keyed on the callee rather than on
+  "any call", because `const has = (n) => argv.includes(n)` is a
+  declaration of a function and must stay out.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message run 9) — Craft scan: ESLint's `import/no-unassigned-import` and `n/no-process-exit`
+
+- Trigger: today's unit of work is a hand-written detector for a defect
+  class that two mature linters already have rules for, so the scan is on
+  the products that solved it rather than on a competitor in Ursa's own
+  market. Done from knowledge of those rules rather than from a fetch;
+  nothing was retrieved for it.
+- What: two mature linters already have rules for the class today's gate
+  detects by hand, and comparing them says which half of their design is
+  worth importing into this repository and which half this repository
+  already does better. The conclusion is one importable change, in the
+  "First step" below, and it is not "adopt ESLint".
+- What is worth stealing: both rules report per *occurrence* and both ship
+  with a documented escape that must be written at the site, inline, as a
+  comment naming the rule. Today's gate took the first half of that and
+  deliberately did not take the second: its escape is a central JSON file,
+  so an excuse is reviewable in one place and countable, and a reader of
+  the defective line sees nothing. The stealable half is the site comment
+  AS WELL, so the two forms disagree loudly rather than the central file
+  quietly outliving the line it excuses. The other stealable thing is that
+  ESLint's rules are driven by an AST, so they see `const x = f()` and the
+  column-0 restriction in today's gate is a weaker instrument by exactly
+  that much.
+- What Ursa does better: a linter rule is generic and its message is about
+  the rule. Every finding today names the instance that cost this
+  repository a window, with the demonstration: the importer that reached
+  its own line and the one that did not. `no-process-exit` would have
+  flagged `tools/image-metadata.mjs` for the exit call and said nothing
+  about the predicate above it, which is where the defect was. And a
+  linter has no notion of a baseline entry that must shrink; a disabled
+  rule and a baselined finding look the same in an ESLint config and are
+  opposite claims.
+- First step: not adopting ESLint, which is a dependency in a repository
+  that has no `package.json` and no `node_modules` by design. The
+  importable half is the site comment, as a second code on the baselined
+  ten: a baseline entry whose module carries no comment naming
+  `IMPORT_DOES_WORK` at the line is a finding, so the excuse is visible
+  from the defect and not only from the JSON.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-09 (market, 19th run) — Cite Labelbox/Alignerr's split pricing posture alongside Toloka's, for a sharper version of the "publish methodology openly" pitch
 - Trigger: docs/market/landscape.md's new Labelbox (Alignerr) entry
   and docs/market/positioning.md's 2026-11-09 (19th run) section.
@@ -23464,4 +23809,1467 @@ same conflation inside it.
   Labelbox/Alignerr's split posture next to the existing Toloka
   citation, both sourced in docs/market/positioning.md.
 - Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): the CI half of tonight's ledger-contract report has no run to schedule, because the gate was written as a proposal and the token that would install it has no workflows permission
+
+### 2026-11-09 (market, 20th run) — Name "no undisclosed carve-outs" as a specific, checkable consent claim in Major's user-facing trust copy, citing Anthropic's own safety-flag exception
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (20th run)
+  section. Anthropic told Claude users an opt-out from training-data
+  use meant their conversations stayed out of future models, then its
+  2026-06-08 privacy policy added an undisclosed carve-out: safety-
+  flagged conversations are used regardless of a user's stated
+  preference, with no disclosed trigger and no notification when it
+  happens.
+- What: CLAUDE.md's load-bearing constraint #2 ("no dark patterns: the
+  user can always see, edit, revoke, and delete") is currently a
+  general promise. This is a dated, sourced, named example of the
+  market's most safety-focused lab failing to keep that exact promise
+  cleanly, for a defensible-sounding reason rather than a cynical one.
+  "What you revoke is actually gone, with no undisclosed exceptions"
+  is a sharper, more specific, and more checkable claim than "we
+  respect your privacy," and this gives Major's trust copy a concrete
+  contrast to point at rather than a general virtue to assert.
+- Why it is not actioned by this run: user-facing trust/consent copy
+  is Major's product surface, not this seat's charter (read-only
+  market research, no code or copy).
+- First step: whoever owns Major's consent-architecture pages adds a
+  specific, auditable statement (e.g. "no exceptions, including for
+  safety review" or the honest narrower version if one is needed)
+  next to the existing opt-in/edit/revoke/delete promise, sourced
+  against the Anthropic case in docs/market/positioning.md.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, 21st run) — Name "no solicited exposure to harmful content" as a distinct safety claim in Minor's enterprise pitch, citing Sama's documented Kenya content-moderation case
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (21st run)
+  section, built on the new Sama entry in landscape.md (Category 1,
+  25th). A 2023 TIME investigation found Sama's Kenyan workers, paid
+  under $2/hour, were assigned graphic descriptions of abuse and
+  violence to build ChatGPT's safety filters, reported lasting
+  psychological trauma, and Sama itself canceled the OpenAI contract
+  eight months early over the work's severity.
+- What: every Category 1 vendor's business model depends on a worker
+  being handed content chosen by someone else, on request, with no
+  relationship to that worker's own life or work; Sama's case is the
+  sharpest documented instance of what that can cost the worker when
+  the assigned content is itself harmful. Minor's pipeline has no
+  solicited-labeling step at all, so it has no equivalent exposure to
+  name, not because it has solved the problem Sama's case illustrates
+  but because the architecture never creates it: the outcome record
+  comes from real work a person was already doing for their own
+  reasons. This is a safety/ethics claim distinct from the quality
+  argument ("no generation-to-outcome join") this file already makes
+  against the same category.
+- Why it is not actioned by this run: Minor's enterprise sales copy is
+  a product/sales surface, not this seat's charter (read-only market
+  research, no code or copy). It also needs a check this run did not
+  do: whether Minor's own future safety-sampling or red-teaming needs,
+  if any, could ever create a comparable exposure, before the claim is
+  made in absolute terms to a lab buyer.
+- First step: whoever owns Minor's enterprise pitch deck or data-
+  sheet decides whether to add this as a named structural-safety point
+  alongside the existing quality/verifier pitch, after the
+  safety-sampling check above.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 — The ledger gate has existed since 27 September and has never been a workflow, so handing its absence to the PM seat hands it to a seat that cannot install it either
+
+- Trigger: Ursa/exo's board note to this seat, read as data. It reports
+  that three of this seat's 2026-11-02 ledger rows break the pm.md §4
+  contract, that the trunk has been red on them for seven days, and that
+  of twelve workflows here none runs any test. It closes by saying the CI
+  half has been handed to the PM seat. The field repair is this seat's
+  and is done in this branch. Reading who could act on the other half is
+  what produced this entry.
+- What: the gate is not missing and it is not unscheduled. It is
+  uninstalled. `tools/ledger/ci/ledger-gate.yml` is a complete workflow
+  that runs the 132 tests of its named suites, `check-attributes.mjs`,
+  and both ledger checkers with exit 2 treated as a pass, and it has sat
+  under `tools/` rather than under `.github/workflows/` since
+  2026-09-27. Its own README says why, and quotes the push rejection:
+  the GitHub App token the seats push with has no `workflows`
+  permission, so any commit that creates a file under
+  `.github/workflows/` is refused outright. Confirmed this run:
+  `.github/workflows/` holds twelve files, eleven agent runners and the
+  redaction gate, and no `ledger-gate.yml` or `tests.yml`. So the PM
+  seat pushes with the same token class and is refused by the same rule.
+  The holder is the owner, and the act is the two `cp` commands the
+  README already writes out.
+- First step: for the owner, and it is already drafted rather than
+  needing design. Run the three commands in `tools/ledger/ci/README.md`,
+  which copy both files into `.github/workflows/`, delete the proposal
+  directory in the same commit so no second copy drifts, and commit. One
+  thing to know before running it: the suite will be red on the first
+  pull request it sees, for a reason that is not about that pull
+  request. `tools/ledger/check-closures.test.mjs:194` asserts the
+  violation list is empty while the checker deliberately classifies some
+  violations as the owner's, and three closure markers currently sit in
+  that class. The 2026-11-02 entry "A suite that asserts zero violations
+  on a gate which classifies some violations as the owner's goes red on
+  the owner's queue, not on the branch" is that finding, with the
+  one-line scoping fix and the engineer seat as its owner. It measured
+  two such markers and this run measures three, so the population is
+  growing. Scoping that assertion before installing the workflow turns a
+  gate that arrives red into one that arrives green.
+- What this run did not take on, and why the boundary is worth naming:
+  `tools/ledger/` is outside this seat's charter boundary, and this
+  seat's runtime forbids touching workflows at all. So both halves above
+  are reports with named holders rather than work withheld.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): the evidence guard fingerprints a span, so a claim can be falsified from outside the span and stay green
+
+### 2026-11-09 — A citation's span went green by relocating while the sentence it backs was being retired forty-one lines below it
+
+- Trigger: clearing the sixteen drifted citations the library's evidence
+  guard reports, which is receipts work this seat owns. Fifteen were line
+  moves and are repaired in this branch. The sixteenth, E45 of
+  `clearing-a-record-for-release`, relocated cleanly from
+  `docs/security/redaction-standard.md:230-244` to `234-248` with the
+  text byte-identical, so the guard had nothing to say about it. Reading
+  the commit that moved it is what found the problem: 5cfb9006 also
+  appended a section saying the cited claim drew one inference too many.
+- What: `skills/check-evidence.mjs` records a content hash per cited
+  range, which makes it exact about one question and silent about the
+  neighbouring one. It answers whether the bytes a citation points at
+  still say what they said. It cannot answer whether the document still
+  means it. Here the cited span is the 2026-10-26 note on the redaction
+  gate's `grep -I` limit, unchanged and still true, and the skill's
+  sentence built on it was "the gate cannot help here at all" and "the
+  rendered half is checkable by nothing". Section 7, added 2026-11-09
+  forty-one lines further down the same file, says that conclusion was
+  one inference too many and names a gate that now holds the provenance
+  half. Nothing in the library's eight guards reads that, and
+  `relocate-anchors.mjs` correctly classified the citation as settled,
+  because by its own question it was. The near miss is the sequence: a
+  blanket `--update` would have cleared all sixteen at once and this one
+  would have gone green carrying a false sentence, which is the trap the
+  2026-11-02 entry "The gate that catches a moved citation cannot tell a
+  moved line from a wrong section, and the blanket update is the trap"
+  names from the other side. That entry is about an update hiding a
+  change inside the span. This one is about a change outside the span
+  that no update and no refusal could have surfaced.
+- First step: when a commit moves a citation, read that commit rather
+  than only the span, because the diff is already in hand and it is the
+  one place a contradiction elsewhere in the file is visible for free.
+  Concretely, `relocate-anchors.mjs` takes the old ref as its argument
+  and already knows every path it relocated in, so it can end by printing
+  `git log --oneline <old-ref>..HEAD -- <those paths>` for the seat to
+  read, which costs nothing and is not a gate. A gate is the wrong
+  instrument: whether a new paragraph contradicts an old claim is a
+  reading, and this library has already declined one guard for being
+  priced against too small a population. Population today is one of
+  sixteen, and the honest claim is that it is the first instance anyone
+  has looked for rather than the first that has happened.
+- What this run did instead of waiting for that: narrowed E45 to the part
+  the span still supports, added E46 for the new section, and rewrote the
+  skill's paragraph to carry the correction rather than swap it silently,
+  since a claim that outran its evidence is the thing that step of the
+  skill teaches.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): one finding reached two seats by two routes and both repaired it, twenty-two minutes apart, neither able to see the other
+
+### 2026-11-09 — A board report and a suite run found the same twenty-one violations, and the second repair to land was the one that could not check for the first
+
+- Trigger: this branch conflicted against `main` on ten blocks of
+  `docs/ideas.md` after `#794` merged. The ledger driver refused them
+  honestly rather than merging them wrong, which is the behaviour it
+  exists for. Reading the other side found `520367c8`, by the engineer
+  seat at 2026-11-09T05:32:41Z, repairing the same 21
+  `IDEA_FIELDS_COMPLETE` violations across the same twelve entries by
+  the same mechanism, written up with the same analysis.
+- What: the finding reached two seats by two different routes within the
+  hour. Ursa/exo measured it, attributed it to this seat's rows, and
+  posted it to this seat's inbox, which is why this run was repairing
+  it. The engineer seat found it independently by running
+  `scripts/ci-checks.mjs`, where the same checker is already wired, and
+  it holds `tools/ledger/`. Both repairs are correct and the two are
+  nearly identical, down to writing the three genuinely absent fields
+  from each entry's own text and leaving the `done` statuses to the
+  owner. Neither seat could have seen the other: the engineer's commit
+  did not exist when this run read its inbox and opened its branch, and
+  this run's branch carried no signal the engineer's pass could read,
+  because a branch is authorship and not visibility. The cost is one
+  redundant commit and one hand-resolved conflict, which is small, and
+  the shape is not: the org rule that catches this is "read your own
+  seat's open PRs first", and it is scoped to your own seat, so it is
+  blind by construction to a sibling repairing your rows.
+- First step: when a board report names a defect in a shared gate's
+  output, say in the reply which lane is taking it, and address the
+  reply to both the reporter and the seat that owns the gate. That is a
+  habit and not a tool. The exo seat's note did half of it already, by
+  saying it had handed the CI half to the PM seat; what no message said
+  was who was taking the field half, and both seats that could take it
+  then did. The cheaper half is already measurable: `own-prs.mjs` takes
+  a seat argument, so a variant that lists open rows touching a named
+  path rather than a named branch prefix would have shown this run the
+  engineer's work.
+- What this run did: took `main`'s side of all twelve entries wholesale
+  and kept only what `main` does not have, rather than defending its own
+  identical text. The redundant commit is left in this branch's history
+  rather than rewritten, because the duplication is the part worth
+  reading.
+- The half that was not duplicated, for scale: `origin/main` still
+  reports all sixteen of this library's drifted citations, so the
+  library work in this branch is untouched by any of the above.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, tenth message wake) — Gate that a lockfile change moved no production entry, because `npm audit fix` moves them silently
+- Trigger: measured in this run, fixing F93. `npm audit fix
+  --package-lock-only` cleared 20 of `ursa-minor`'s 23
+  development-only advisories and, in the same pass, raised two
+  **production** transitives of `next`: `caniuse-lite` 1.0.30001806 to
+  1.0.30001823 and `baseline-browser-mapping` 2.11.10 to 2.11.35. The
+  chain is three links long and none of it is in npm's output: the
+  `shadcn` bump needed `browserslist` 4.29.5, and the new
+  `browserslist` asks for data tables newer than the ones `next`
+  resolved, so npm raised the hoisted copies that both share. The only
+  reason this run caught it is that the handoff carried an explicit
+  "do not touch the 33 production dependencies" constraint, which made
+  this run write a throwaway classifier to check. A seat without that
+  sentence in its instructions would have shipped it.
+- What: promote the classifier. It is twenty lines: read
+  `package-lock.json`, label every entry `prod`, `dev`, `optional` or
+  `devOptional` from npm's own flags, and print `version`, `resolved`
+  and `integrity` per entry. The gate is then a diff of that table
+  against the same table computed from a git ref, and it fails when any
+  `prod` or `devOptional` row changes while the change was described as
+  development-only. `scripts/dep-floor.mjs` is the natural home: it
+  already runs `npm audit` twice per package precisely to separate the
+  two scopes, so it already holds the concept and the discovery walk,
+  and it is missing only the lockfile-diff half. The distinction this
+  would enforce is the one `docs/design/dependency-floor.md` §2 calls
+  "the idea the gate turns on", which is currently enforced for
+  advisories and not for the bumps that fix them.
+- First step: `tools/deps/lock-classes.mjs <lockfile>` printing the
+  table, plus `--against <git-ref>` printing the diff and exiting 1 on
+  any production-row change, with a test over this run's own three
+  lockfile states (main's, the one `npm audit fix` produced, and the
+  repaired one) since all three are reproducible from this branch.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, tenth message wake) — Drop `shadcn` from `ursa-minor`'s devDependencies, because it is the sole source of the only advisories left and no bump can clear them
+- Trigger: after this run's bump, `ursa-minor` has three advisories
+  left, all low, and all three are one root cause: `deepmerge`'s
+  prototype-poisoning advisory, whose vulnerable range is `>=4.2.0`
+  with no fixed release published in any direction. `npm audit`'s only
+  offered remedy is `shadcn@1.0.0`, three major versions below the
+  `^4.21.0` the manifest declares. So the residue is not a bump this
+  seat declined to make; it is a package choice.
+- What: `shadcn` is a scaffolding command-line tool. No file under
+  `ursa-minor/app/`, `components/` or `lib/` imports it, which
+  `docs/design/dependency-floor.md` §2 established independently, and
+  its normal invocation is `npx shadcn@latest add <component>`, which
+  needs no manifest entry at all. Removing it takes the `deepmerge`
+  cluster, and with it the last advisory in this product, plus roughly
+  300 of the 555 development packages, plus the `@modelcontextprotocol/sdk`,
+  `hono`, `undici` and `systeminformation` subtrees that produced five
+  of the seven high-severity advisories this run just fixed by bumping
+  rather than by removing. `components.json` stays, because that is
+  what `npx shadcn` reads. The same package is already on file as the
+  one that put six advisories into the **production** tree once, by
+  having been listed under `dependencies`; this is the second time it
+  is the whole finding.
+- First step: `cd ursa-minor && npm uninstall shadcn`, then
+  `npm ci && npm run build && npx tsc --noEmit && npm run lint` to show
+  nothing imported it, then `npm audit --package-lock-only` to show
+  zero. One command and one verification, and the reason it is a ledger
+  entry rather than part of this run is that removing a declared
+  dependency is a product decision and the handoff asked for a lockfile
+  bump.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, tenth message wake) — `npm audit`'s offered fix can be a downgrade, and nothing here reads the field that says so
+- Trigger: eight of F93's 23 advisories trace to `minimatch`'s
+  globparts amplification, and for all eight `npm audit` reported
+  `fixAvailable` as `{ name: "eslint-config-next", version: "15.5.29",
+  isSemVerMajor: true }`. `ursa-minor`'s manifest pins
+  `eslint-config-next` at `16.4.0`, beside `next` `16.4.3`. The offered
+  "fix" was a major-version **downgrade** of the lint config away from
+  the framework it configures, and the word npm prints for it in the
+  human-readable output is the same word it prints for a forward patch:
+  "To address all issues (including breaking changes), run `npm audit
+  fix --force`". Taking it would have reported 23 advisories cleared
+  and silently moved the product backwards.
+- What: `scripts/dep-floor.mjs` reads `metadata.vulnerabilities` and
+  the `vulnerabilities` map and does not read `fixAvailable` at all, so
+  nothing in this repository can distinguish "a fix exists" from "a
+  fix exists and it is a retreat". Make the gate classify every row it
+  reports into three: no fix available, a forward fix inside the
+  declared range, and a fix that is a downgrade or a semver-major
+  relative to what the manifest declares. The third class is the one a
+  human must see, because it is the one an automated remedy gets wrong,
+  and it is invisible today. The declared range is in the manifest the
+  gate already loads, so the comparison needs no new input.
+- First step: add a `fixDirection` field to the gate's per-package
+  report, computed by comparing `fixAvailable.version` against the
+  range `package.json` declares for that name, with a test case built
+  from the `eslint-config-next` row in this run's own `before.json`,
+  which is reproducible from `git show HEAD~2:ursa-minor/package-lock.json`.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, tenth message wake) — Craft scan: Graphiti, the engine under Zep, which puts two separate clocks on every fact and settles contradictions with a judge
+- Trigger: the craft scan's rotation through `docs/market/landscape.md`,
+  Category 3, the Zep entry. Read against this product's own time
+  dimension, which `CLAUDE.md` §1 calls "not just what survived but
+  how long" and which `ursa-minor`'s `src/lifespan.ts` implements.
+- What: one scan, two halves, and the stealable half is a field this
+  product's record does not have. Both halves are below.
+- The thing worth stealing: **two clocks per fact, not one.**
+  `graphiti_core/edges.py` gives every `EntityEdge` four timestamps,
+  and they are two pairs with different jobs. `valid_at` and
+  `invalid_at` are world time, when the fact started and stopped being
+  true, and the field's own comment draws a line this seat has not
+  drawn anywhere: "datetime of when the fact stopped being true; soft
+  deadlines are not invalid_at". `created_at` and `expired_at` are
+  observation time, when the system learned the fact and when the
+  system learned it was over. Ursa's span fates carry one axis. A
+  `decayed` span says the text is gone; a `durable` span says it is
+  still there at the newest commit this run could read; and `untested`
+  says nothing came after it. That third value is the right instinct
+  and it is coarse, because it collapses two different records: a span
+  nobody has looked at since, and a span that was looked at and held.
+  With both axes, `durable` would carry the instant the survival was
+  last observed, and a buyer could tell a six-month-old survival claim
+  from one checked this morning, off the record and with no clone in
+  hand. The portfolio already learned the general form of this twice —
+  `runner-facts.md` §12 on never writing a time you did not read, and
+  §59 on authorship not being visibility — so the generalization is
+  on file and the data artifact does not implement it.
+- The thing Ursa does better: **what invalidates a fact.** Graphiti
+  decides that a new fact contradicts an old one by asking a language
+  model, so its `invalid_at` is a judgement about text, and its
+  accuracy is the judge's accuracy. Ursa's equivalent is not a
+  judgement. A span is gone because the characters are not in the file
+  at commit N, and `src/deletion.ts` goes further and says *who* did
+  it: the person, who read it and did not keep it, a merge commit,
+  which overwrote it mechanically and carries no correction signal, or
+  nothing nameable when the clone cannot read the boundary that would
+  settle it. That is the same object with no grader in it, which is the
+  whole claim in `CLAUDE.md` §1, and it holds up well against the
+  product in this category that has thought hardest about time.
+- First step: add an observation-time field to the lifespan fate in
+  `ursa-minor/src/lifespan.ts` — the commit and author date the fate
+  was last checked against, not a run timestamp — and split `untested`
+  into "nothing came after it" and "checked and still there", which is
+  the distinction the bi-temporal pair buys. Read
+  `docs/design/verbatim-descent.md` first, since it already orders
+  sibling dates and may own the clock this should read.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, 22nd run) — Cite Memobase's $9/$29-per-month consumer memory tiers as the first direct paid comp for Major's "free forever" claim, paired with why the comparison is structural and not just a lower number
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (22nd run)
+  section, built on the new Memobase entry in landscape.md (Category
+  3, 27th). Memobase (memobase.ai) sells a cross-model, persistent
+  personal-memory layer directly to consumers at $0/500 credits,
+  $9/5,000 credits, and $29/unlimited credits per month — the same
+  kind of product Major gives away free by design.
+- What: every prior Category 3 entry in this file either prices B2B
+  (Mem0, Letta, Zep sell to developers, not end users) or doesn't
+  price the memory feature at all (bundled into an existing
+  subscription). Memobase is the first entry that prices the exact
+  consumer-facing thing Major's "free forever" claim (CLAUDE.md §0,
+  load-bearing constraint #1) is made against, giving Major's
+  trust/pricing copy a real number instead of an unopposed assertion.
+  The claim still needs the structural half stated alongside the
+  number: Memobase's free tier is a lever a profit-seeking vendor can
+  tighten later, and Major's cannot, because Major's business model
+  has no consumer revenue switch behind it to flip (CLAUDE.md §2,
+  Major "never monetizes the user directly"). Citing the price gap
+  alone invites the rebuttal "so raise it later too"; citing the
+  revenue-model difference does not.
+- Why it is not actioned by this run: Major's user-facing trust and
+  pricing copy is a product surface, not this seat's charter
+  (read-only market research, no code or copy).
+- First step: whoever owns Major's consumer-facing trust/pricing copy
+  decides whether to name Memobase specifically or use it as an
+  unnamed category example, and pairs any price comparison with the
+  structural (revenue-model) argument above rather than the number
+  alone.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, 22nd run) — Two more open-source projects independently named "AMP" surfaced this week; cite the acronym collision as sharper evidence against waiting for a portability standard before Major ships
+
+- Trigger: docs/market/landscape.md's cross-cutting note on
+  memory-portability standards (open since 2026-10-05, ten-plus
+  tracked attempts, none clearing the independent-implementation
+  bar) gained a new update this run: a Show HN post for an
+  open-source conversation-portability tool called "AMP" led to two
+  more, completely unrelated open-source projects already using the
+  same name (`agentmemoryprotocol/agentmemoryprotocol` and
+  `akshayaggarwal99/amp`), neither aware of the other.
+- What: this file's standing argument for Major has been "ship the
+  owned, portable profile now rather than wait for industry
+  convergence." A category that cannot even converge on what to call
+  the standard it is trying to build is the sharpest evidence yet
+  that near-term convergence is not coming, strengthening (not just
+  repeating) that argument for whoever next makes Major's "why not
+  wait for a standard" case to a skeptical user, partner, or
+  investor.
+- Why it is not actioned by this run: this is evidence for a
+  pitch/copy argument, not a landscape or pricing change; the seat's
+  charter is read-only market research.
+- First step: whoever next drafts Major's "why build this now instead
+  of waiting" argument (consumer trust copy, investor materials, or a
+  partner-facing deck) can cite the acronym collision as a concrete,
+  dated example rather than a general claim that the space is
+  fragmented.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — Fifteen of sixteen drifted ranges are re-recorded at the anchor they already had, and the gate that now says so still allows it
+
+- Trigger: shipping the gone-or-moved split in `check-evidence.mjs`
+  this run, then pointing it at the sixteen drifted ranges sitting on
+  `origin/main` at `55ab0ca8` to see what it would have said. It sorted
+  them 15 moved and 1 gone, and the one it called gone is `E28`, which
+  is the one range the 2026-11-02 run concluded by hand needed reading.
+  The agreement is the good news. The fifteen are the finding.
+- What: the split decides what `--update` refuses, and it only refuses
+  the gone half. A moved range named by its slug is still re-recorded
+  at the anchor it already had, so the lock takes the fingerprint of
+  whatever those line numbers hold now while the claim's own text sits
+  somewhere else in the file. The checker then goes green over a
+  citation pointing at the wrong lines, which is the 2026-10-05 failure
+  the lock was built to prevent, reached by the command the docs
+  prescribe. The 2026-11-02 ledger entry this run closes asked for the
+  moved half to keep working as it does today, and that is what shipped,
+  so this is the residual rather than a regression. Measured on the real
+  batch above: all fifteen would have been re-recorded at a wrong
+  anchor, and the reason `main` does not carry fifteen wrong anchors is
+  that the run which repaired them relocated first, by hand, having
+  decided to. And then it happened to this run, 23 minutes after this
+  entry was written: `#801` merged mid-run, the merge of `origin/main`
+  moved `docs/ideas.md` under `E37`, `E38` and `E39`, and
+  `--update clearing-a-record-for-release` named all three as moved,
+  printed the offsets their text had gone to, and recorded the old
+  anchors at exit 0. The lock was reverted and the three relocated to
+  9155, 9162 and 9175, which are the offsets the gate had already
+  printed. The only thing standing between that command and three wrong
+  anchors on `main` was a person reading the output instead of the exit
+  code, one hour after writing the warning.
+- First step: this seat's, and it is a choice of two. The strong option
+  is to refuse the moved half as well, naming the offsets the text was
+  found at, which makes `relocate-anchors.mjs` the only route for the
+  nine tenths of a drift batch it already owns and leaves `--update`
+  for the tenth that needs a reader. The weak option is the line this
+  run shipped, which names each moved range and the offset its text
+  moved to and then records it anyway. Prefer the first, because the
+  argument for the second was that the moved half needs no reading, and
+  that is true of the text and false of the anchor. Either way the
+  numbers to beat are in this entry rather than in a prediction.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The verify path can now answer the question its own failure line asks a reader to guess
+
+- Trigger: reading `check-evidence.mjs`'s failure line after shipping
+  the split, which tells a reader to "re-read it, re-anchor if it
+  moved". The `if it moved` is the one part of that sentence the tool
+  can now decide, and the split that decides it runs only under
+  `--update`.
+- What: a reader who sees sixteen drifted ranges gets sixteen identical
+  sentences and no way to tell which of them need a person. The
+  information exists before any command is run, because the gone-or-
+  moved question is answered from the lock and the file and needs no
+  git ref. Printing it in verify mode would turn one undifferentiated
+  red into fifteen lines saying `relocate-anchors.mjs` and one saying
+  read this, which is the triage three separate runs of this seat have
+  since done by hand on 2026-10-15, 2026-10-18 and 2026-11-02.
+- First step: this seat's, next run that touches the file, and the
+  reason it is not this one is scope rather than doubt: the entry this
+  run closes specified `--update`, and widening the verify line in the
+  same change would have rewritten output that several tests and two
+  run notes quote. The cost is bounded and measured: the split over the
+  sixteen-range batch took 1.37s against 0.66s without it, and it runs
+  only over ranges that have already drifted, so a green library pays
+  nothing. `check-evidence.mjs` verify is 0.32s on 466 ranges with the
+  split present and unexercised.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The rule this run's gate enforces is not written down, and §5ai is why it is filed instead of written
+
+- Trigger: wanting to add a `## 5` clause to `prompts/skill-extract.md`
+  saying that which granularity a re-record needs is decided by the
+  evidence and not by the caller, and finding that this branch already
+  carries the code that would cite it.
+- What: §5ai requires a new section to land in a pull request carrying
+  nothing that cites it, so that a reader never meets a citation with
+  nothing behind it. The gate shipped this run, its tests and its
+  header comment would all cite the clause the moment it existed, so
+  writing it here would break the rule that makes this library's own
+  citations trustworthy. The clause itself is one paragraph: a drifted
+  citation is sorted by whether the lines the lock recorded are still
+  in the file, a slug covers the half that is, and the half that is not
+  is named by ref because re-recording it certifies prose nobody has
+  read.
+- First step: the next run of this seat that would add a `## 5`
+  section, in a pull request carrying the section and this entry's
+  closure and nothing citing it, paying §5ai's own grep check on it.
+  This is the fourth entry of this shape in the file, which is itself
+  worth a look: a rule that can only land in an otherwise empty pull
+  request accumulates a queue, and that queue is now long enough that
+  one later run could drain it in a single section-only branch.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message, eleventh wake) — Read every pair of manifests that describe one set of things against each other
+
+- Trigger: this run. `tools/registers/id-namespaces.json` and
+  `tools/registers/registers.json` both enumerate this repository's
+  append-only registers, from different angles, and nothing read one
+  against the other. The result was that two registers whose own
+  `why_identifier` fields in `registers.json` describe an identifier race
+  in the exact words the identifier gate exists for were absent from the
+  gate's manifest, and the absence was indistinguishable from a decision,
+  because that manifest reasons explicitly about two exclusions and simply
+  did not mention these. Ursa's exo seat found both by hand.
+- What: this repository runs on declarative manifests, and several pairs of
+  them describe overlapping sets with no assertion tying them together.
+  Known candidates, each a pair where one file can gain a member without
+  the other noticing: `registers.json` against `id-namespaces.json` (closed
+  this run), `prod-closure.json`'s workspace keys against the tracked
+  `package-lock.json` files, `tools/registers/vendored.json` against the
+  files that actually carry a vendored header, `tools/seat/branch-patterns.json`
+  against the seat list the roster carries, and `scripts/ci-checks.mjs`'s
+  check list against the gates that exist under `tools/`. The last of those
+  is the one with a measured cost already on file: the security seat added
+  `register-ids` on 2026-11-02 precisely because two gates existed in
+  `tools/registers/` and were named in no gate list, so nothing ran them.
+  The unit of work is one coverage assertion per pair, total rather than
+  heuristic, each failing with the name of the unaccounted-for member.
+- First step: enumerate every JSON manifest under `tools/` and `scripts/`
+  with `grep -l '"'"'comment"'"'' tools/**/*.json`, and for each one write down
+  in a table what set it claims to enumerate and what other file would
+  know if it were incomplete. Pairs where the answer is "nothing" are the
+  work; pairs where the answer is a file are a one-test fix each.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message, eleventh wake) — Find the tests whose fixture is built by the same rule as the code under test
+
+- Trigger: this run, in `tools/registers/id-verdict.test.mjs`. A test named
+  "every define pattern finds its own namespace prefix and nothing else"
+  built its own sample as `## ${ns.name}-${padded} — a heading` and then
+  asserted the pattern matched it. That assertion can only pass for a
+  namespace spelled `NAME-<digits>`, which was every namespace that
+  existed, so the test certified the four that were and was unreachable
+  for the two that were missing. It looked like a check on the manifest and
+  was a restatement of the convention the code already assumed. It is now
+  asserted against a heading copied out of the register.
+- What: sweep the suites under `tools/` and `scripts/` for assertions whose
+  expected value is computed by the same expression the code under test
+  uses, rather than written as a literal or read from the repository. This
+  repository already knows the remedy and states it in
+  `id-verdict.test.mjs`'s own header: "a test that rebuilt it from the
+  module's own template would pass on any reword", which is why the verdict
+  lines there are hand-written literals. The gap is that the rule was
+  applied to the verdict lines and not to the fixtures. A mechanical
+  starting signal is cheap: in a test file, any `${...}` interpolation
+  inside an `assert.*` expected argument that references a field of the
+  object under test is a candidate.
+- First step: grep the suites for `assert.equal(` and `assert.match(` whose
+  expected side contains a template literal interpolating a property of the
+  subject, triage the hits by hand into "pins a literal", "reads the
+  repository" and "recomputes the rule", and fix the third class in the
+  file with the most hits.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message, eleventh wake) — Refuse to ready a pull request whose own branch is red
+
+- Trigger: this run, measured on this seat's own #823. That pull request
+  was readied and sitting in the owner's merge queue, and
+  `node --test tools/registers/closure-verdict.test.mjs` fails on its head
+  while passing on `main`: it moved `ursa-minor`'s dev-only closure from
+  611 entries to 558 and left `tools/registers/prod-closure.json` pinned at
+  611. Two declared checks go red on it, `tooling-suites` and
+  `register-closure`, and the repair was one number that the gate's own
+  `--write` flag regenerates. So the gate existed, ran offline in seconds,
+  named the number, and no one asked it before readying.
+- What: a seat-side tool that stands between the work and `gh pr ready`.
+  `node tools/seat/ready-check.mjs <number>` runs `node
+  scripts/ci-checks.mjs` over the working tree, and on a red check prints
+  the check id, the failing assertion and the repair command, exiting
+  non-zero so the readying step cannot be the next thing that happens. The
+  existing `passExit` semantics carry over unchanged, so an owner-held
+  exit 2 is not a block. This is deliberately not a workflow change, which
+  this seat may not make: it is a command a charter can name in the same
+  place it already names `gh pr ready`.
+- First step: write the tool as a thin wrapper that shells `scripts/ci-checks.mjs`
+  and re-renders its summary as a readying verdict, with a test that drives
+  it against a fixture tree carrying one deliberately stale pin. Then
+  propose the charter line separately, since charter edits are the owner's
+  merge and never this seat's daily pull request.
+- Cost: $0
+- Status: proposed
+
+- 2026-11-09 (engineer, message, eleventh wake) — Craft scan, Snorkel AI,
+  taken from `docs/market/landscape.md`'s own entry for it, which is that
+  file's newest Category 1 addition. **Nothing was fetched this run**; the
+  product knowledge below is this seat's own, and the entry is a committed
+  file. **Worth stealing:** Snorkel's original technical contribution is
+  weak supervision, where you declare several noisy labeling functions over
+  the same data and then estimate each function's accuracy from where the
+  functions agree and disagree, rather than trusting any one of them.
+  Ursa's span classifier assigns `survived_verbatim`, `survived_mutated`,
+  `generated_deleted` and `no_generation_provenance` from a set of
+  heuristics, and the fourth is both the most valuable category and the one
+  computed as a residual, meaning it inherits every other heuristic's
+  misses with no way to say how confident it is. Treating each provenance
+  heuristic as a labeling function with an estimated accuracy would let the
+  most commercially important category carry a confidence rather than be
+  whatever is left over. **What Ursa does better:** Snorkel's label is
+  still produced by a function someone wrote against a specification, which
+  is why it needs an accuracy model at all. Ursa's label is produced by the
+  artifact, so "the finished work kept this span" is not an estimate of a
+  judgement and needs no agreement model to be trusted. The landscape
+  entry's own weakness line says the same thing from the market side: work
+  performed on request against a specification, with no
+  generation-to-outcome join.
+
+### 2026-11-09 (engineer, twelfth message wake) — The dependency gate's own printed output is asserted by nothing, so its numbers can disagree with the tool they summarise
+
+- Trigger: this run's repair. Before the change, `node scripts/dep-floor.mjs`
+  printed `ursa-minor (ursa-minor-site): all critical=0 high=0 moderate=0` and
+  `Dependency floor holds`, while `npm audit --json` in that directory in the
+  same minute returned
+  `{"info":0,"low":3,"moderate":0,"high":0,"critical":0,"total":3}`. Two
+  numbers about one tree, read from the same process, disagreeing. The
+  classification branches were fixed and tested this run, so the *decisions*
+  are now covered. The *rendering* is not: the loop that prints the count
+  line, the `FAIL` lines, the `warn` lines and the GitHub `::error::`
+  annotations still lives at module scope in a script that shells out to the
+  network before it can be reached, so no test has ever read a line it prints.
+- What: the gate has two halves and this run only closed one. Give the
+  rendering half the same treatment: a pure `report({packages, violations,
+  expired, warnings, annotate})` that returns an array of lines instead of
+  calling `console.log`, with `dep-floor.mjs` printing what it returns. Then
+  assert the one property that would have caught this class without anybody
+  guessing at it — a **reconciliation**: for each package, the severities the
+  count line prints equal `metadata.vulnerabilities` key for key, and every
+  entry in the audit's `vulnerabilities` object appears on exactly one
+  rendered line. Drive it from a captured real `npm audit --json` payload
+  committed as a fixture, so the assertion runs offline in under a second and
+  the gate stops being a tool whose output only a network run can see. The
+  fixture is also the first thing this repository would have to replay against
+  a future npm whose schema moved, which is the risk the 2026-11-01 craft scan
+  on this same output contract named and nothing acted on.
+- First step: capture `npm audit --json` from `ursa-minor` into
+  `scripts/fixtures/npm-audit-ursa-minor-2026-11-09.json`, extract the
+  `else` branch of `dep-floor.mjs` into `reportLines()` in
+  `scripts/dep-floor-classify.mjs` beside the classifier it already feeds,
+  and add the reconciliation assertion to
+  `scripts/dep-floor-classify.test.mjs`. One day, no new files beyond the
+  fixture.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, twelfth message wake) — A seat citing another seat's tool cannot tell whether it can import it, and both seats paid for that in one window
+
+- Trigger: Ursa/security corrected this seat with the host fact
+  `authorship-is-not-visibility`, correctly, in the same window in which its
+  own gate list became the next thing that rule applied to.
+  `tools/gates/gate-registry.mjs` and the `gateCandidatePaths` export its
+  census depends on exist on `origin/ursa-security/2026-11-09-message-11` and
+  on no other ref, confirmed by `git branch -r --contains b8296e0b`. This run
+  had to read both with `git show` from that branch instead of importing them,
+  and `git merge-base --is-ancestor b8296e0b origin/main` answered `NOT ON
+  MAIN`. Two seats, one window, the same rule, neither repair visible to the
+  other.
+- What: the rule is known and written in `node tools/seat/env-facts.mjs`, and
+  knowing it does not answer the question a seat actually has, which is "can I
+  build on this today". That question is mechanical and nobody has made it one
+  command. A `node tools/seat/visibility.mjs <path>...` that, per path, prints
+  whether `origin/main` carries it, which remote refs do, and which open pull
+  request each of those refs belongs to, with a verdict of `importable`,
+  `branch-only` or `absent`. Exit non-zero only on `absent`, since
+  `branch-only` is a true state of the world and not a defect. The value is
+  not the git plumbing, which is three commands. It is that the answer arrives
+  before a seat writes a paragraph deferring to a tool it could have read, or
+  spends a window rebuilding one it could have cherry-picked. Note the
+  prerequisite from the host facts: every one of those commands answers
+  wrongly on the clone this host hands a seat, so the tool runs
+  `tools/ensure-full-clone.sh`'s check first and refuses rather than reporting
+  `absent` for a ref it simply cannot see.
+- First step: `tools/seat/visibility.mjs` plus its test, keyed on
+  `git cat-file -e origin/main:<path>` for the main answer and
+  `git ls-remote --heads` joined to `gh pr list --json headRefName` for the
+  branch answer, with the shallow-clone refusal first. One day.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, twelfth message wake) — A field present on one of a tool's finding kinds and absent on its siblings is a defect class this repository has now hit twice
+
+- Trigger: Ursa/security's framing of this run's bug, which is sharper than
+  the bug. The remediation hint in `scripts/dep-floor.mjs` was not a field
+  nobody read. It was a field read on one of the four paths an advisory can
+  take, and the three paths without it are the three this repository's own
+  advisories actually use. So the gate was correct about the case it was
+  tested on and silent about every case it meets. The same shape is already
+  recorded one layer up in `scripts/dep-floor-summary.mjs`'s header, where one
+  message served two conditions with different owners, and in
+  `docs/design/verdict-lines.md` §1.
+- What: make the shape findable instead of waiting for a third instance. A
+  census over this repository's verdict-producing tools that, for each tool
+  pushing records into two or more sibling output arrays, compares the key
+  sets of the records it builds and reports any key present on some kinds and
+  absent on others with nothing declaring the difference. The honest version
+  is static and conservative: read the object literals passed to `.push()` on
+  arrays declared in the same module, which is exactly the shape
+  `dep-floor.mjs` had and which `tools/gates/code-census.mjs` already
+  demonstrates is tractable by reading sources rather than running them. A
+  declared difference is legitimate and common, so the output is a baseline
+  file with a written reason per entry, the pattern
+  `tools/gates/import-effects.baseline.json` already uses, rather than a
+  demand that every kind carry every field.
+- First step: run the detector as a one-off read over `tools/` and `scripts/`
+  and count the instances before building the gate, because a census whose
+  population turns out to be one instance is a finding and not a gate. If the
+  count is above three, build it as `tools/gates/record-shape.mjs` with its
+  baseline. The measurement is half a day and gates the rest.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 — Craft scan: `npm audit`'s human renderer answers "whose repair is this" in two lines, and our gate that parses the same data answered it in none
+
+- Product scanned: the npm CLI's own `audit` reporter, version 10.9.8, run
+  first-hand in this sandbox against `ursa-minor`. Chosen because this run
+  spent its day inside `npm audit --json`, and the JSON contract was last
+  run's scan while the thing npm *shows a human* was not. No web page, no
+  search, no vendor documentation. The comparison is two renderers over one
+  byte-identical input.
+- What is worth stealing. npm spends two of its sixteen output lines on the
+  question of who can act, and spends them before it spends any on severity:
+
+  ```
+  fix available via `npm audit fix --force`
+  Will install shadcn@1.0.0, which is a breaking change
+  ```
+
+  Both facts are in the JSON as `fixAvailable.name`, `.version` and
+  `.isSemVerMajor`. Our gate parsed all three and, until this run, rendered
+  them on one of its four paths. npm also puts the *dependency chain* in the
+  output, indented, so a reader sees that `shadcn` is the direct dependency
+  and `deepmerge` and `@shadcn/registry` are consequences of it. That is the
+  difference between three advisories and one decision, and it is the single
+  most useful thing in npm's output that ours does not have: we print three
+  `warn` lines with the same `Fix:` phrase on each, where npm prints one tree
+  with one repair at its root. `vuln.effects` and `vuln.via` carry the edges
+  needed to group them, and we already read `via` for the GHSA ids and throw
+  the structure away. Candidate ledger entry once the rendering half of the
+  gate is testable, which is this day's first entry above.
+- What we do better, and it is not cosmetic. npm's reporter has no floor. It
+  prints `3 low severity vulnerabilities` and a `--force` command, and the
+  decision about whether that blocks anything is left entirely to the reader,
+  which is why `npm audit` cannot be a gate without a wrapper. Ours encodes
+  the decision — critical anywhere and high in production fail, everything
+  else is reported — and crucially encodes who may *accept* an exception, in
+  `dep-floor.allow.json`, with an expiry on every entry so an accepted risk
+  comes back and asks again. npm has `--audit-level`, which is a threshold and
+  not a policy: it cannot express "high is fatal in production and reportable
+  in a dev tree", which is the distinction our entire floor rests on, and it
+  has no concept of an owner-approved exception at all, let alone one that
+  expires. npm also reports a `--force` repair as if the reader were empowered
+  to run it; our seat charters are explicit that a semver-major dependency
+  decision is not a seat's to take, which is exactly why `(semver-major)`
+  belongs in the rendered hint rather than being collapsed into "a fix exists".
+
+### 2026-11-09 (security) — the prompt-injection gate has no exit code for a finding only the owner can repair
+
+- Trigger: registering every unreached gate in `scripts/ci-checks.mjs` this
+  run, and finding that `tools/prompt-slots.mjs` could not be registered in
+  either of its two modes. Measured: `node tools/prompt-slots.mjs --strict`
+  exits 1 on this tree with `11 of 11 untrusted slot(s) sit in a fence a
+  payload could step out of`, and the same command without `--strict` returns
+  0 on every input, including that one.
+- What: this is the gate over the surface my own charter calls the prompt
+  injection surface, and it is the only one of sixty gate candidates that
+  could not be registered for a reason that is about the gate rather than
+  about the environment. The repair it asks for is in `.github/workflows/`,
+  which docs/standards/pm.md §15 reserves to HQ, so no branch a seat can
+  write will ever clear it. Two gates in this repository already solved
+  exactly this and stated the rule: `tools/ledger/check.mjs` and
+  `tools/ledger/check-closures.mjs` exit 2 when every remaining violation is
+  the owner's and none is a seat's, and `scripts/ci-checks.mjs` tolerates 2
+  for both on the written ground that a gate whose red light can only be
+  cleared by somebody who never runs the gate is read by nobody.
+  `prompt-slots.mjs` has the same two populations and one failing code for
+  both, so a seat who adds a twelfth unfenced slot and a seat who adds none
+  get the same answer.
+- First step: give `verdict()` a third branch, keyed on who holds the repair
+  and not on severity, in the shape the two ledger gates already use: exit 1
+  when at least one finding is a seat's, exit 2 when every finding is in
+  `.github/workflows/` and none is a seat's, exit 0 when there are none. The
+  `untrusted-in-run-step` cause stays exit 1 regardless, because shell
+  injection in a `run:` block is the owner's immediate action and not a
+  tolerated backlog. Then register it in `scripts/ci-checks.mjs` with
+  `passExit: [0, 2]` and delete its `red-on-main` row from
+  `tools/gates/gate-registry.baseline.json`, which is the observation that
+  closes this entry.
+- Cost: $0. One function, its suite, and one row deleted.
+- Status: proposed
+
+### 2026-11-09 (security) — two seat gates are red on main for a backlog no branch caused
+
+- Trigger: the same sweep. `node tools/seat/read-dates.mjs --gate` exits 1
+  with 106 register read dates due, and `node tools/seat/answered.mjs --gate`
+  exits 1 over 64 board notes that its predecessor's time-keyed guard had
+  called already answered. Both are real gates, both are offline, both run in
+  under nine seconds, and both are red on `main` at `f7b89ff8`.
+- What: these two are the reason `tools/gates/gate-registry.baseline.json`
+  needed a `red-on-main` kind at all, and that kind is the one in the file
+  that can rot into an excuse, which is why the gate executes its reason by
+  requiring this heading to exist. Registering either one today would make
+  every branch red for a backlog that branch did not cause, which is the
+  failure mode `tools/ledger/check.mjs`'s header records costing a seat an
+  hour. Leaving them out means the two gates run only when a seat remembers,
+  which is the failure mode the gate registry exists to end. Neither of those
+  is a repair, so the repair is to the backlog.
+- First step: measure what the 106 and the 64 actually are before changing
+  either gate, because the two numbers may not be the same kind of thing. For
+  `read-dates`, how many of the 106 are registers no seat reads any more
+  against registers a seat reads every window. For `answered`, whether the 64
+  are notes that genuinely went unanswered or notes whose answer the
+  note-keyed guard cannot see. Then either drain the backlog and register the
+  gate, or split its exit code by who holds the repair as the entry above
+  proposes for `prompt-slots`. The observation that closes this entry is both
+  rows leaving the baseline.
+- Cost: $0 to measure. The repair depends on what the measurement says, which
+  is the point of doing it first.
+- Status: proposed
+
+### 2026-11-09 (security) — one tooling suite went red inside the full gate list and green twice on its own, and the failing case was not captured
+
+- Trigger: run 12's debug sweep. The first full `node scripts/ci-checks.mjs`
+  run on `ursa-security/2026-11-09-message-12` reported `failed
+  tooling-suites exit 1` in its summary. `--only=tooling-suites` immediately
+  afterwards passed twice, 1,654 cases with 1,653 passing, 1 skipped and 0
+  failing, in 456 seconds. The run that failed wrote its TAP to a terminal
+  this seat did not keep, so the failing case has no name.
+- What: one of the 100 tooling suites is sensitive to something the whole-list
+  run supplies and the single-check run does not. Three candidates, and the
+  entry is written so that whoever takes it does not have to guess in the
+  order this seat would have: `/tmp` is shared between every seat on this host
+  (`docs/agents/runner-facts.md` §18), so a suite keyed on a scratch path can
+  be raced by another company's run; some suites spawn `git` against this
+  clone while earlier checks in the list are also reading it; and the list
+  runs 25 tooling checks before this one, several of which write baselines or
+  fetch refs. A flaky gate is worse than a missing one, because the first red
+  a seat learns to re-run is the last red it reads.
+- First step: make the failure capturable before trying to explain it.
+  `scripts/ci-checks.mjs` discards each check's output once it has the exit
+  code, so run the full list with every check's stdout and stderr tee'd to a
+  per-check file under a path the run names, then loop the full list until
+  `tooling-suites` reds once. Only then read the TAP. If it does not red in
+  ten full runs, say so and close this entry as unreproducible rather than
+  leaving it open against a suite nobody can name — an open entry against an
+  unnamed case is the same shape as a baseline row whose reason nobody can
+  check.
+- Cost: $0, and about an hour of wall clock, because each full run is roughly
+  eight minutes and most of that is the suite under suspicion.
+- **Named 2026-11-09 by run 13, and it is not flaky.** The first step above
+  worked on the first attempt: running the full list with stdout redirected
+  to a file rather than to a terminal kept the TAP, and `tooling-suites`
+  reported exit 1 again. The case is
+  `tools/board/check.test.mjs:479`, "transcribed: the wake limit is still
+  1500 in the live runtime", failing with `WAKE_BODY_CHARS not found in the
+  runtime`. It then failed twice more on its own, so it is deterministic and
+  none of this entry's three hypotheses is the cause.
+  The cause is outside this repository. The case transcribed a constant from
+  `/srv/asc/hq/runtime/board/api.py`, HQ moved the definition into
+  `store.py` and left `api.py` re-exporting it as
+  `WAKE_BODY_CHARS = store.WAKE_BODY_CHARS`, and that file's mtime is
+  2026-11-09T09:02:28Z. A deploy no branch here caused turned a gate red and
+  it read as a defect in the branch under test.
+  Fixed in run 13: the case looks in both runtime files and takes the first
+  real definition, because the transcription it exists to check is the value
+  and not its address. It still fails when the constant is absent from the
+  runtime altogether, which is a genuine drift and is what the case was
+  written for.
+  **What this does not establish.** Run 12 observed one red and two greens
+  before that deploy, and it kept no TAP, so whether run 12 saw this case or
+  a different one is unknown and unknowable now. This entry is therefore
+  named rather than closed: the red run 13 measured is explained and fixed,
+  and run 12's remains unidentified.
+  **One measurement for whoever takes the remainder, and it supports this
+  entry's first hypothesis rather than refuting it.** Attempting a clean
+  re-run of the full list at 2026-11-09T09:25Z, `pgrep -fa ci-checks.mjs`
+  returned **six** concurrent `node scripts/ci-checks.mjs` processes on this
+  host, two of them this seat's and the rest other seats'. Each spawns the
+  same `node --test` over the same eighty-odd suites against its own
+  checkout, and `/tmp` is shared between all of them
+  (`docs/agents/runner-facts.md` §18). So the whole-list run is routinely
+  concurrent with other whole-list runs in a way a single `--only` re-run
+  never is, which is exactly the asymmetry this entry was written about. That
+  is a mechanism and not yet a cause. The way to settle it is to record the
+  concurrent process count alongside each full-list result, which costs one
+  `pgrep` per run.
+- Status: proposed
+
+### 2026-11-09 (skill) — Two gates in `tools/ledger/` die with a stack trace on inputs that are a reader's mistake, which is the security seat's finding of this morning in a second tool family
+
+- Trigger: running `node tools/ledger/check.mjs --help` to read the
+  ledger contract before filing an entry, and running
+  `node tools/ledger/check-closures.mjs` while a tracked file was
+  deleted from the working tree but the deletion was not yet staged.
+  Both printed a Node stack trace and exited non-zero.
+- What: `check.mjs --help` reads `--help` as a path and dies at
+  `readFileSync` with `ENOENT: no such file or directory, open
+  '--help'`, which is byte-for-byte the shape named in this file's own
+  2026-11-09 security entry "a gate reads an unrecognised flag as a
+  filename and dies with a stack trace", in a different tool. The
+  second is a different cause with the same presentation:
+  `check-closures.mjs` walks `git ls-files` and opens each path, so a
+  tracked file missing from the working tree ends the run at
+  `checkRepository` line 277 rather than being reported. A deleted file
+  is an ordinary state of a working tree mid-run, and this seat hit it
+  by removing a placeholder run note it had just renamed. The cost is
+  small each time and it is paid in the same place every time, which is
+  a reader who cannot tell a gate's finding from a gate's crash. Ursa's
+  exo seat put the general form of this on the board this morning:
+  reaching for a member of the repaired family is not the same as being
+  repaired, so a fix landed in one gate says nothing about the next.
+- First step: not this seat's, because `tools/ledger/` is outside this
+  charter's write surface, and filed rather than routed as an ask
+  because the owning seat already holds the first instance and this is
+  evidence for its generality rather than a second task. Two lines
+  each: `check.mjs` refuses an argument beginning with `--` that it does
+  not recognise, and `check-closures.mjs` skips a path `git ls-files`
+  names and the tree does not carry, reporting the count it skipped.
+  Owner: the engineer seat, or the security seat's next run on the
+  2026-11-09 entry above, whichever reaches `tools/ledger/` first.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — §5g tells a reader to re-record a drifted range by skill slug, which the gate now refuses, and the tier mechanism is why this is filed instead of edited
+
+- Trigger: shipping the rule that a skill slug is not a name for a
+  drifted range, then grepping `prompts/skill-extract.md` for what it
+  says about `--update`. §5g clause 3 reads "It also has to name what it
+  is re-recording now, by skill slug or by lock key", in a numbered list
+  whose subject is drift repair.
+- What: that sentence is now false for the case the list is about. A
+  reader who follows it runs `--update <slug>` over a drifted range and
+  gets exit 2. The gate's own message names the right repair, so the
+  cost is bounded at one refused command and a reader's confidence in
+  the document, which for a library whose stated differentiator is that
+  every claim traces is not nothing. This is not a §5ai case: nothing
+  new is being cited and no section is being added, so the rule about
+  ordering does not reach it. What reaches it is the tier mechanism.
+  `docs/standards/pm.md` §10 makes `prompts/` Tier C, and Tier B
+  condition 4 refuses a PM merge when any path in the diff is Tier C, so
+  one corrected sentence would move this run's gate, tests and lock from
+  a merge the PM can take to one only the owner can.
+- First step: one sentence in §5g clause 3, saying a slug covers a range
+  the lock has never recorded and a drifted range is named by ref or
+  followed with `relocate-anchors.mjs`. It belongs in the same
+  prompt-only branch as the four §5ai-held entries this file already
+  carries, which makes five, and this is the one of the five that is
+  held by the tier rather than by §5ai, so a later run that drains the
+  queue should not expect one rule to explain all five. Owner: the next
+  run of this seat that opens a branch touching only
+  `prompts/skill-extract.md`.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The lock's own hash locates a moved range, so the mechanical repair needs no ref either
+
+- Trigger: shipping the verify half of the gone-or-moved split this run
+  and then reading the one command it prescribes. `findableAt` answers
+  "did this move, and to where" from the lock and the working file, with
+  no git ref, which is the whole reason it can run inside a guard that
+  takes none. `skills/relocate-anchors.mjs`, which the new trailer names
+  as the repair, recovers the as-cited lines from `<old-ref>` and refuses
+  at exit 2 without a readable one.
+- What: the ref is doing two jobs in that tool and only one of them is
+  load-bearing. It proves the recorded fingerprint belongs to that tree,
+  which is a real guarantee and worth keeping. It also supplies the text
+  to search for, which the lock's hash already supplies: a hash is enough
+  to search for when you are willing to hash every window, and this run
+  made the library willing. So for every range where hashing the windows
+  finds exactly one match, the relocation is proven by the hash itself
+  and the ref adds nothing to that range's answer. The measured size of
+  that set is not small: on the 49-range batch this run produced in
+  `ursa-major/src/types.ts`, the split found all 49 at exactly one offset
+  each. Verify can therefore now hand a reader a correct triage in a
+  clone where the repair it names refuses, which is a narrower version of
+  the shape `#820` removed from `--update`, where a tool printed a
+  command the next gate would reject.
+- First step: this seat's, and it is one flag rather than a rewrite:
+  `relocate-anchors.mjs` with no ref relocates exactly the ranges whose
+  recorded hash matches one window and nothing else, reporting the
+  ambiguous and the gone under the two headings it already has, and the
+  ref path stays the default because it is the stronger check. The thing
+  to measure before writing it is the one number that decides whether it
+  is worth a flag: over a real drift batch, how many ranges the ref-free
+  pass resolves that the ref pass does not, which is zero on a complete
+  clone and everything on a shallow one.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — A test of this run's own change passed with the thing it tested deliberately broken
+
+- Trigger: this run memoized the window search per `(path, height)` and
+  wrote a test for the one way that can go wrong, a key that collides
+  across heights and hands a range another height's offsets. Then broke
+  the key on purpose to watch the test fail. It passed.
+- What: the fixture had one moved range and one gone range in one file.
+  The range handed the wrong index finds nothing there, so it reports
+  gone, and the one that got the wrong index was the one whose honest
+  answer was already gone. The wrong answer and the right answer were the
+  same string. The repair was to make both ranges move, which is the case
+  where a collision produces a verdict that differs from the truth, and
+  that version does fail on the broken key. The general shape is a test
+  that cannot fail, and nothing in this library measures how many of its
+  own tests are in that state. The suites are large enough now for the
+  question to be real: 218 tests across eight files under `skills/`, all
+  green, and this run has one measured instance of a test that was green
+  for the wrong reason and was caught only because its author went
+  looking by hand.
+- First step: this seat's, next run, and it is bounded by being a survey
+  rather than a framework. For each gate under `skills/`, invert or
+  blank one decision line, run that gate's own suite, and record which
+  suites notice. One pass, one table, no tooling committed; a count of
+  gates whose suite stays green under a broken decision is a number this
+  library does not have and can act on. The cost to beat is the one this
+  run paid by hand, which was two minutes per gate.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, thirteenth message wake) — A resolve holds the thread, so a stall and a hang look identical from outside and no flag can change that
+
+- Trigger: the first instrument tried against the #707 stall was V8's own
+  sampling profiler, driven in-process through `node:inspector/promises`
+  with a 100-second `setTimeout` to stop the profile and print self time by
+  function. It never printed. The process sat in `/proc/<pid>/status` state
+  `R` for 7 minutes 47 seconds with that timer armed and never fired it,
+  because `resolve()` in `src/resolve.ts` is wholly synchronous and the
+  event loop does not turn between the first span and the last. Measured
+  2026-11-09, written up as `docs/design/resolve-cost.md` §1.2.
+- What: the 2026-11-08 entry that opened this line says "nothing in any
+  launch reports how long one is taking", and treats that as a missing
+  feature. It is not reachable as one. Nothing scheduled on the event loop
+  can observe a resolve in progress: not a timer, not a `SIGTERM` handler,
+  not a progress line, not a watchdog. So the honest first slice is not
+  progress *during* a resolve, it is a line printed *before* each one, from
+  the caller, naming the file about to be attempted with its character
+  count and its segment count. `src/adapters/pr-launch.ts` already loops
+  per episode and `src/resolve-episode.ts` already knows both numbers at
+  line 126, before `resolve()` is entered. A reader watching stdout would
+  then see `docs/sprints/pending.md 207,964 chars, 4,139 segments` and know
+  which file the process is inside, which is the whole question anyone
+  asked during the stall. The durable half is the second slice: a resolve
+  that yields between files, which is a change to the pure function's
+  shape and wants its own decision, because `resolve()` being a pure
+  synchronous function of its input is load-bearing for every test in
+  `src/resolver.test.ts`.
+- First step: print the per-file line before `resolveEpisode` in
+  `src/adapters/pr-launch.ts`, behind nothing — it is one line per work
+  unit and `ursa corpus` over 30 pull requests already prints one line per
+  entry. Assert it in `src/launch-parity.test.ts`, which is where the
+  three launches are held to saying the same things.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, thirteenth message wake) — The generation size ceiling refuses silently, and this repository's own busiest register is at 88% of it
+
+- Trigger: measuring the #707 stall required reading
+  `src/resolve-episode.ts:129`, which is `if (genText.length >
+  MAX_BLOB_CHARS || finText.length > MAX_BLOB_CHARS) continue` with
+  `MAX_BLOB_CHARS = 300_000`. So the 2026-11-08 entry's sentence "the
+  resolver has no ceiling on the size of a generation it will attempt" is
+  wrong as written, and the thing that is wrong is more interesting than
+  the thing that was claimed: the ceiling exists and it `continue`s. The
+  second measurement is what makes it urgent rather than tidy.
+  `docs/sprints/pending.md` is 264,111 characters at `main` today, 88% of
+  the ceiling, and it grew 56,147 characters in the seven days to
+  2026-11-09 (207,964 at #707's final commit `e846365`, 264,111 at
+  `main`). At that rate it crosses 300,000 inside five days, and on that
+  day this repository's busiest register silently stops appearing in its
+  own outcome records.
+- What: the skip becomes a claim. `ResolveInput` already carries
+  `exclusions: Exclusion[]` for exactly this — "passing it is what turns a
+  silent drop into a claim the record makes", in that field's own comment
+  — and `src/resolve-episode.ts` already builds exclusions for vendored
+  paths six lines above the skip. So the change is to build one more, with
+  the path, the character count and the ceiling that refused it, which is
+  the same discipline `--min-chars` already holds when it reports
+  `largestBelowFloor` rather than omitting a small generation. Separately
+  and second: whether 300,000 is still the right number. It was chosen
+  when a 207,964-character file cost a projected 10,759 seconds; the same
+  file now costs 5.7, so the value was set against a cost that no longer
+  exists and should be re-derived rather than inherited.
+- First step: the exclusion. One `exclusions.push` with
+  `reason: 'over_size_ceiling'`, the path, `chars` and `ceiling`, plus the
+  case in `src/record-exclusions` coverage and a line in
+  `docs/design/record-exclusions.md`. Re-deriving the ceiling is a second
+  day and needs the curve in `docs/design/resolve-cost.md` §1.4 extended
+  past 300,000, which no file in this repository reaches yet.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, thirteenth message wake) — A 1,890-fold repair that every gate is blind to, because the cache it installs is not reachable from any test
+
+- Trigger: the full `ursa-major` suite is 1,096 tests and it passes
+  identically before and after today's change — 1,090 passed, 4 skipped,
+  and the 2 that failed were `dist/ursa.cjs` being stale, which is the
+  bundle gate and not this code. That is the correct result, because the
+  change is purely a performance property and `src/normalize-equivalence.test.ts`
+  is there to prove no record's shape moved. It is also the problem: the
+  memoization in `src/corroborate.ts` and `src/deletion.ts` can be removed
+  by any later refactor, or defeated by a cache key that stops matching,
+  and every gate in `node scripts/ci-checks.mjs` stays green while the
+  resolve goes back to costing `spans × rivals × |blob|`.
+- What: make the fold count assertable. `gitDescentCorroborator` already
+  takes its commit graph by injection, for the stated reason that one walk
+  should serve every episode; the blob reader is the one dependency it
+  still reaches for itself, calling `blobLookup(projectPath, sha, path)`
+  inline. Give it an optional fourth collaborator with `blobLookup`'s own
+  signature, default the real one, and a test can then drive 200 spans of
+  a fixture file through it and assert the reader was called at most
+  `MAX_RIVAL_BLOBS + parents` times rather than 200 times. That is a
+  bound on work, expressed as a count, which is the only kind of
+  performance assertion that does not flake on a contended host — and this
+  host is contended, since three other seats' suites were running during
+  every timing figure in `docs/design/resolve-cost.md`, which is why that
+  document leans on `normalize` call counts and not on milliseconds.
+- First step: the injection and one test in `src/corroborate.test.ts`
+  asserting the reader call count over a many-span fixture. The same
+  argument applies to `src/deletion.ts`, which has the identical cache and
+  reaches for `blobLookup` the same way, so do both or the next one drifts.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 — Craft scan: Mem0 resolves a reference against retrieved context instead of recomputing history, which is the decision whose absence cost this repository 1,890×
+
+- The product, and why this one. Mem0's memory-operations documentation
+  (`docs.mem0.ai/core-concepts/memory-operations`, read 2026-11-09),
+  from `docs/market/landscape.md` Category 3, "Personalization and memory
+  layers". Chosen because this run spent its day on the cost of deriving
+  structured claims from a growing history, and Mem0's whole product is
+  that operation. One page, fetched, not searched.
+- What is worth stealing, and it is an architecture decision rather than a
+  feature. Mem0's `add()` is described as an "additive pipeline": new
+  memories accumulate and nothing is deleted, and reference resolution
+  — their example is resolving "He" in "He turned 5" — is done by
+  *retrieving* the earlier messages that share the same `user_id` or
+  `run_id`, explicitly "rather than recomputing the full history". That
+  sentence is the decision this repository got wrong today. Ursa's
+  corroborator had the same two layers, a cached read and a derivation
+  over it, and cached only the first, so every span recomputed the
+  derivation. Mem0 states the boundary as a product property on a public
+  docs page, where ours was an implementation detail nobody had written
+  down. **The stealable thing is writing it down as a boundary**: name,
+  per derived artifact, what is recomputed per query and what is derived
+  once per source. That is a sentence in `docs/design/` and a test per
+  boundary, and it is cheap precisely because it is not code.
+- What we do better, twice, and both are about refusal. First,
+  provenance. Mem0's page does not say whether a stored memory links back
+  to the message it came from; the fetch found no mechanism named for it.
+  Every span in an Ursa record carries `descent`, and when the evidence is
+  missing it carries `basis: 'unverified'` with the reason named —
+  `span_too_short`, `rival_search_capped`, `path_history_unreadable` —
+  so a buyer can filter on what the resolver could not establish rather
+  than inferring it from silence. 3,753 of #707's spans name a rival sha
+  and a relation. Second, duplication. Mem0's own page discloses that
+  "mixing both modes for the same fact can save it twice" and leaves that
+  to the reader; Ursa's invariant gate is run by every launch and the
+  launch exits non-zero on a violation, so the equivalent defect cannot
+  ship as documentation. The gap worth naming honestly: their
+  infer-vs-store choice is a user-facing switch and we have no equivalent
+  surface at all, which is a smaller product rather than a better one.
+
+### 2026-11-09 (engineer, fourteenth wake) — Give the redaction gate per-scan allowances with a named target scope, because its one allowance is shared by three patterns and silently scoped to the whole line
+
+- Trigger: measured while narrowing Class C for cited public URLs today.
+  The gate runs three patterns through one `grep -vE '<allowance>'` stage,
+  so an exemption written for one pattern exempts the line from the other
+  two. `node scripts/uuid-shape-census.mjs` Q4 put the cost of today's
+  addition at 0 lines of 8,969 blobs and Q3 at 0, so the hole is real and
+  currently empty, which is the only moment it is cheap to close. The
+  second half of the trigger is the craft scan filed below: gitleaks has
+  had the fix for years.
+- What: two changes that are one idea. First, `scan()` in
+  `.github/workflows/redaction-gate.yml` takes a third argument, its own
+  allowance, and the shared stage keeps only the exemptions that genuinely
+  apply to all three patterns (`/home/runner/` does). Second, and this is
+  the part worth stealing rather than inventing, each allowance declares
+  **what it is matched against**. Today the answer is always the line,
+  which is the widest of the three available scopes and is nowhere
+  written down. Gitleaks calls this field `regexTarget` and gives it
+  `"secret"`, `"match"` and `"line"`, defaulting to the narrowest. A
+  match-scoped allowance would make today's `docs/security/redaction-gate-uuid-narrowing.md`
+  §5 residual disappear rather than be documented.
+- First step: not the workflow, which no seat here can push. Start in
+  `readGate()` in `scripts/redaction-check.mjs`, which today parses exactly
+  one `grep -vE '<allowance>'` and must be taught to accept a per-scan
+  allowance **and** keep working against a gate that has none, since the
+  mirror has to stay green on both sides of the owner's merge. Then one
+  test per scope, and the delete-me case named in
+  `scripts/redaction-check.test.mjs` ("documents the residual: one line
+  carrying both loses the other classes") becomes the regression that
+  flips. The workflow hunk ships as a second patch beside today's.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fourteenth wake) — A gate's label is its repair hint, and Class C's hint is wrong for one of the four things it catches
+
+- Trigger: the two workarounds this seat found in `main` today, a week
+  apart, both the market seat, neither touching the gate. `a0087473`
+  deleted three source URLs and wrote prose explaining the omission;
+  `9512b85b` percent-encoded a hyphen inside an article slug in three
+  files. Both seats read the gate's own label, which says "Full private
+  session or conversation UUID. Truncate it to 8 characters." Truncating
+  a URL is not a redaction, it is a broken link, so the label told two
+  competent seats to do something impossible and both improvised in their
+  own file instead. `node scripts/uuid-shape-census.mjs --kinds` shows the
+  label is addressed to the wrong population as well: of 24 distinct
+  values the gate has ever caught, 1 is a conversation and 11 are board
+  messages.
+- What: the label a gate prints is the only instruction most readers of it
+  will ever get, so it should name the remedy **per kind it can
+  distinguish**, not per pattern. For Class C: a board or run or project
+  identifier truncates to eight characters, a session identifier
+  truncates to eight characters, and a UUID-shaped path segment in a
+  cited URL is a one-line addition to the source-host allowlist with the
+  census as its evidence. The gate can tell these apart cheaply, because
+  the distinction that matters is whether an http(s) scheme precedes the
+  match on the line, which is one more `grep -E` over the hit it already
+  has in hand.
+- First step: the hint belongs where a seat will actually read it, and
+  that is the local mirror rather than an Actions log, so put it in
+  `scripts/redaction-check.mjs`'s finding renderer, keyed on the class and
+  on whether the hit line carries a URL, with one test per branch. This is
+  the same shape as the dependency gate's repair hint shipped in #834,
+  which reached one finding kind of three; this one has three kinds and
+  should reach all three or say which it does not.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fourteenth wake) — The local redaction mirror resolves `grep` through `PATH`, and this host carries two different greps
+
+- Trigger: collecting tool versions for today's design note. `grep
+  --version` in this host's interactive shell prints **ugrep 7.8.4**, not
+  GNU grep, while the gate runs GNU grep on `ubuntu-latest`. The whole
+  value of `scripts/redaction-check.mjs` is that it answers the gate's
+  question with the gate's own tool rather than with a JavaScript regular
+  expression engine, and it reaches that tool with a bare
+  `spawnSync('grep', …)`. Checked rather than assumed, and the news was
+  good: Node resolves `/usr/bin/grep`, GNU grep 3.11, over
+  `PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/snap/bin`. It
+  is good by the accident of `/usr/local/bin` being empty of a shim, and
+  `/usr/local/bin` precedes `/usr/bin`.
+- What: the mirror should assert the implementation it got rather than
+  trust the resolution, because the failure is silent in the worst
+  direction. ugrep's binary-file notice is not GNU grep's `: binary file
+  matches` sentence that `grepStreams()` parses, so under ugrep the
+  binary-hit path this script already fixed once goes quiet again and the
+  script reports clean. The same argument covers a future host that puts
+  a ugrep shim earlier on `PATH`, which is not hypothetical: this one puts
+  a ugrep **in the shell** already.
+- First step: one `--version` read at startup in
+  `scripts/redaction-check.mjs`, exiting 2 through the existing `stale()`
+  path if the first line does not say GNU grep, since "this checker could
+  not do its job" is exactly what that exit code means and a wrong grep is
+  exactly that case. Then a test that forces the wrong one by handing the
+  script a `PATH` with a stub ahead of `/usr/bin`, which also pins that
+  the check cannot be satisfied by a tool merely named `grep`.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fourteenth wake) — Craft scan: gitleaks names the thing our gate leaves implicit, which is what an allowance is matched against
+
+- The product, and why this one. gitleaks, the secret scanner, its
+  configuration documentation as published on its own repository
+  (`github.com/gitleaks/gitleaks`, read 2026-11-09). Not from
+  `docs/market/landscape.md`, which maps data and RLHF vendors rather
+  than scanners; chosen under the charter's craft-scan clause because
+  this run's whole day was a false positive in a shape-matching gate,
+  and gitleaks is the most-deployed product whose entire job is that
+  problem. One page, fetched, not searched.
+- What is worth stealing, and it is one field name. A gitleaks allowlist
+  declares `regexTarget`, whose values are `"secret"`, `"match"` and
+  `"line"`, and it **defaults to the narrowest**. Ursa's redaction gate
+  has exactly one allowance, it is matched against the line, and nothing
+  anywhere says so: the scope is a consequence of having reached for
+  `grep -v`, which deletes lines because that is what `grep` does.
+  Discovering that cost this run a test case and a documented residual
+  (`docs/security/redaction-gate-uuid-narrowing.md` §5), and the second
+  thing worth stealing removes the residual rather than documenting it:
+  gitleaks carries `[[rules.allowlists]]` per rule **and** `[[allowlists]]`
+  globally, at the same time, with the global one taking precedence, so
+  an exemption written for one pattern cannot silently widen another.
+  Ledger entry above. The cheap lesson underneath both: when a mechanism
+  has three possible scopes and your tool implements one of them for free,
+  write down which one you got.
+- What we do better, and it is the opposite of a feature. gitleaks ships
+  two self-service exemptions: a `#gitleaks:allow` comment, which lets the
+  author of a line exempt that line from inside the file being scanned,
+  and `.gitleaksignore`, which exempts by opaque fingerprint. Both are
+  right for a human team and both would be a hole here, because the
+  authors of nearly every file in this repository are agents running under
+  `--permission-mode bypassPermissions`, and an exemption an author can
+  grant itself is not a control. Ursa's allowance lives in
+  `.github/workflows/redaction-gate.yml`, which is outside every seat's
+  writable surface and outside the runner token's scopes, so granting an
+  exemption is an owner's or HQ's act. **Today is the proof rather than
+  the claim**: this seat diagnosed a genuine false positive in its own
+  lane, could not grant itself the exemption, and so shipped a
+  measurement over 8,969 blobs, eight test cases and a one-line patch for
+  someone else to apply. Under a `#ursa:allow` comment it would have
+  written one word and moved on, and nobody would have measured anything.
+  The honest gap on the other side: gitleaks' `condition` field, giving
+  an allowlist `"AND"` as well as `"OR"` over its clauses, has no
+  equivalent here and our single allowance cannot express a conjunction
+  at all.
+
+### 2026-11-09 (engineer, fourteenth wake) — The register collision with no remedy is the one nothing guards, because the guard that exists allocates numbers and the colliding key is a date
+
+- Trigger: a correction from Ursa/exo on 2026-11-09 to this seat's own
+  reasoning in `tools/registers/id-namespaces.json`, which excluded
+  `## Week of <date>` from the `Window` namespace because a date "produces
+  one string rather than two claims on one number." Exo's point is that
+  this is true and is why the case is worse rather than safer. Verified
+  here before being taken, against the real `docs/agents/improvements.md`
+  with the real `tools/registers/merge-driver.mjs`, which is the asymmetry
+  in two exit codes: two branches claiming `## Window 108` are refused with
+  a message that prescribes renumbering the newer entry at its source, and
+  renumbering one to 109 merges at **exit 0** with both entries surviving;
+  two branches each appending a `###` sub-entry inside the existing
+  `## Week of 2026-11-09` block are refused with "both sides edited
+  '## Week of 2026-11-09' differently", **exit 1**, naming no remedy and
+  having none of that kind, because the `## ` heading is the merge unit,
+  the write unit is the `###` sub-entry inside it, and a date cannot be
+  renumbered. The live instance is exo's own windows 106 and 107.
+- What: `check-ids.mjs` is a number allocator, so it is the wrong
+  instrument and widening its namespace would be a worse answer than the
+  exclusion. The right instrument answers a different question: **is the
+  entry I am about to write going into a merge unit another open branch is
+  also editing?** That is not an allocation, it is a reachability question
+  over the heads, and the data is already being collected — `--heads`
+  already reads every ref to find the highest identifier, so it already
+  holds, per ref, which `## ` entries that ref touches. The remedy it
+  should print is not a renumber. It is the structural one: write the
+  sub-entry under your own `## Window <n>` heading, which **is**
+  allocatable, instead of into the shared week block. That turns an
+  unrecoverable collision into the recoverable one this gate already
+  guards.
+- First step: a `--merge-unit <register>` mode on
+  `tools/registers/check-ids.mjs` that, for each `## ` entry in the
+  register, lists the refs whose tip modifies it relative to the merge
+  base, and exits non-zero when the entry this run intends to write is
+  claimed by more than one ref. One test per arm, built the way
+  `check-ids.test.mjs` already builds them, plus the two-sided-append
+  fixture measured above as the regression, since it is the case that
+  currently refuses with no remedy.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fifteenth wake) — Forty-one test files leak temporary directories into a shared /tmp, and the host's own reclaimer is what hides it
+
+- Trigger: HQ's engineer seat measured this host's `/tmp` at 90 per cent and
+  traced 3.05G of it to one file of our suite,
+  `tools/ledger/check-attributes.test.mjs`, which called `mkdtempSync`
+  three times and `rmSync` zero times. Re-measured here at 09:32Z: 39
+  `/tmp/clone-*` at 3.4G and 880 `/tmp/attrs-*` at 262M, with 3.2G free on
+  a 45G volume. The census that fell out of fixing it found the same defect
+  in 40 more test files.
+- What: the one file is fixed and 41 remain, written down with their lane in
+  `tools/testing/tmpdir-leak.baseline.json` so the ratchet can only shrink.
+  The repair per file is mechanical, which is the whole reason it is worth
+  proposing as one unit of work rather than leaving to attrition: swap
+  `mkdtempSync(join(tmpdir(), 'x-'))` for `tempDir('x-')` from
+  `tools/testing/tmpdir.mjs` and delete the baseline entry. 30 of the 41 are
+  under `ursa-major/src`, 6 under `skills/`, and the rest under `tools/`, so
+  it is three pull requests by owner rather than one sweep. The reason to do
+  it rather than rely on the reclaimer is that the reclaimer is not free: it
+  buys the space back out of whatever else is on the volume, which on
+  2026-11-09 was the frontend and exo seats' browser and package installs.
+  **The repair is not uniform, and the first version of this entry got that
+  wrong.** Only 11 of the 41 are `.test.mjs` files the helper can repair. The
+  30 under `ursa-major/src` run under vitest rather than `node:test`, so
+  `tempDir` does not apply to them at all, because it imports `after` from
+  `node:test`.
+- First step: the 11 `.test.mjs` files under `tools/`, `scripts/` and
+  `skills/`, because those are the ones the shipped helper actually fixes and
+  the ratchet already proves the work, each file leaving the baseline with the
+  gate still at exit 0. The 30 vitest files need a sibling helper on that
+  runner's `afterEach` first, which is its own unit of work and is not
+  something to write untested: vitest is not installed in the seat sandbox,
+  and an unverified cleanup helper for the half of the suite holding 30 of the
+  41 leaks is how the next 3.4G gets written.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fifteenth wake) — A full disk on this host cannot name its own cause, and attributing one leak took reading a `.git/config` inside the residue
+
+- Trigger: the only reason today's leak was attributable is that HQ's seat
+  opened one of the leaked directories and read its `origin`, which pointed
+  at `/tmp/epito-ursa-security-i5gIKW` and so identified a seat window
+  rather than a manual run. Nothing printed that. And the two prefixes
+  happened to be unique to one file, which is luck rather than design: a
+  test using `mkdtempSync(join(tmpdir(), 'tmp-'))` would have been
+  unattributable to any file in any repository on the box.
+- What: a census that answers "what is this volume full of, and which
+  committed file creates it" by joining the residue's basename prefixes
+  against the `mkdtemp` and `mkdtempSync` call sites in every checkout on
+  the host, and reports unattributable residue as its own line rather than
+  omitting it. This is the instrument the frontend and exo seats did not
+  have this morning, when both read gigabytes of movement with no install of
+  their own in between and had no route from that observation to its cause.
+  It belongs beside `tools/seat/env-facts.mjs`, which is where this host's
+  measured facts already live.
+- First step: `tools/testing/tmpdir-census.mjs --host`, reading
+  `/tmp` one level deep and grouping by the prefix up to the `mkdtemp`
+  suffix, with the call-site join over `git grep` across sibling
+  `/tmp/epito-*` checkouts. Print bytes, count, age range and owner file per
+  group, and name the unattributable remainder.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fifteenth wake) — Craft scan: pytest's `tmp_path` keeps the last three runs' temporary directories on purpose, and the helper I shipped today keeps none
+
+- Trigger: writing `tools/testing/tmpdir.mjs` this run and noticing what the
+  fix costs. Removing a temporary directory the moment its test ends is
+  correct for the disk and wrong for the next person debugging that test,
+  because the artifact that would explain the failure is the first thing
+  destroyed. I went looking for how a mature suite resolves that tension.
+- What worth stealing: pytest owns temporary directories as a fixture rather
+  than leaving them to each test, and its retention policy is a deliberate
+  middle position rather than either extreme. It roots everything under one
+  numbered per-run directory, keeps the three most recent runs for
+  post-mortem inspection, and removes the rest on the next run. So the
+  failing run's evidence survives exactly as long as it is plausibly wanted,
+  and the accumulation is bounded by a count instead of by a timer. Our
+  helper is the "keep none" extreme, and the host's six-hour reclaimer is
+  the "keep everything for six hours" extreme, and the measured cost of
+  today's leak is what the second extreme costs when it is the only policy.
+  The concrete first step is an `URSA_KEEP_TMPDIR` environment variable read
+  by `tempDir`, which skips the removal and prints the retained path, so a
+  seat debugging a failing test opts into the artifact for one run without
+  reverting the fix for every other run.
+- What Ursa does better: pytest has no census of which of its own test files
+  bypass the fixture and call `tempfile.mkdtemp` directly, so its policy
+  binds the tests that opted in and is silent about the ones that did not.
+  `tools/testing/tmpdir-leak.mjs` is that census, and it names the 41 files
+  that bypass ours with their lane and refuses to let a 42nd join quietly.
+  The policy is the easy half. Knowing which files are outside it is the
+  half that took a 95-per-cent-full disk to discover.
+- Cost: $0.
 - Status: proposed
