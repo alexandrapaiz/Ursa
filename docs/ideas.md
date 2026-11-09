@@ -24030,3 +24030,69 @@ same conflation inside it.
   one later run could drain it in a single section-only branch.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (skill) — Two gates in `tools/ledger/` die with a stack trace on inputs that are a reader's mistake, which is the security seat's finding of this morning in a second tool family
+
+- Trigger: running `node tools/ledger/check.mjs --help` to read the
+  ledger contract before filing an entry, and running
+  `node tools/ledger/check-closures.mjs` while a tracked file was
+  deleted from the working tree but the deletion was not yet staged.
+  Both printed a Node stack trace and exited non-zero.
+- What: `check.mjs --help` reads `--help` as a path and dies at
+  `readFileSync` with `ENOENT: no such file or directory, open
+  '--help'`, which is byte-for-byte the shape named in this file's own
+  2026-11-09 security entry "a gate reads an unrecognised flag as a
+  filename and dies with a stack trace", in a different tool. The
+  second is a different cause with the same presentation:
+  `check-closures.mjs` walks `git ls-files` and opens each path, so a
+  tracked file missing from the working tree ends the run at
+  `checkRepository` line 277 rather than being reported. A deleted file
+  is an ordinary state of a working tree mid-run, and this seat hit it
+  by removing a placeholder run note it had just renamed. The cost is
+  small each time and it is paid in the same place every time, which is
+  a reader who cannot tell a gate's finding from a gate's crash. Ursa's
+  exo seat put the general form of this on the board this morning:
+  reaching for a member of the repaired family is not the same as being
+  repaired, so a fix landed in one gate says nothing about the next.
+- First step: not this seat's, because `tools/ledger/` is outside this
+  charter's write surface, and filed rather than routed as an ask
+  because the owning seat already holds the first instance and this is
+  evidence for its generality rather than a second task. Two lines
+  each: `check.mjs` refuses an argument beginning with `--` that it does
+  not recognise, and `check-closures.mjs` skips a path `git ls-files`
+  names and the tree does not carry, reporting the count it skipped.
+  Owner: the engineer seat, or the security seat's next run on the
+  2026-11-09 entry above, whichever reaches `tools/ledger/` first.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — §5g tells a reader to re-record a drifted range by skill slug, which the gate now refuses, and the tier mechanism is why this is filed instead of edited
+
+- Trigger: shipping the rule that a skill slug is not a name for a
+  drifted range, then grepping `prompts/skill-extract.md` for what it
+  says about `--update`. §5g clause 3 reads "It also has to name what it
+  is re-recording now, by skill slug or by lock key", in a numbered list
+  whose subject is drift repair.
+- What: that sentence is now false for the case the list is about. A
+  reader who follows it runs `--update <slug>` over a drifted range and
+  gets exit 2. The gate's own message names the right repair, so the
+  cost is bounded at one refused command and a reader's confidence in
+  the document, which for a library whose stated differentiator is that
+  every claim traces is not nothing. This is not a §5ai case: nothing
+  new is being cited and no section is being added, so the rule about
+  ordering does not reach it. What reaches it is the tier mechanism.
+  `docs/standards/pm.md` §10 makes `prompts/` Tier C, and Tier B
+  condition 4 refuses a PM merge when any path in the diff is Tier C, so
+  one corrected sentence would move this run's gate, tests and lock from
+  a merge the PM can take to one only the owner can.
+- First step: one sentence in §5g clause 3, saying a slug covers a range
+  the lock has never recorded and a drifted range is named by ref or
+  followed with `relocate-anchors.mjs`. It belongs in the same
+  prompt-only branch as the four §5ai-held entries this file already
+  carries, which makes five, and this is the one of the five that is
+  held by the tier rather than by §5ai, so a later run that drains the
+  queue should not expect one rule to explain all five. Owner: the next
+  run of this seat that opens a branch touching only
+  `prompts/skill-extract.md`.
+- Cost: $0
+- Status: proposed
