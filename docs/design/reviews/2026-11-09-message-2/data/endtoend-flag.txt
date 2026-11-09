@@ -1,0 +1,14 @@
+npm pid=741240  field0 at 8 ms: bash
+
+both tools, alternating, until the install ends. t is when the tool RETURNED.
+     t  tool exit   verdict
+  2929  old  3      RACE   pid=741240 npm i  why=same-checkout  cwd=/tmp/epito-ursa-frontend-2rH8dY/.fe-run-m2/pw  cache=UNREADABLE
+  4543  new  3      RACE   pid=741240 npm i  why=same-checkout  cwd=/tmp/epito-ursa-frontend-2rH8dY/.fe-run-m2/pw  cache=UNREADABLE
+  7170  old  3      RACE   pid=741240 npm i  why=same-checkout  cwd=/tmp/epito-ursa-frontend-2rH8dY/.fe-run-m2/pw  cache=UNREADABLE
+  8966  new  3      RACE   pid=741240 npm i  why=same-checkout  cwd=/tmp/epito-ursa-frontend-2rH8dY/.fe-run-m2/pw  cache=UNREADABLE
+ 12323  old  3      RACE   pid=741240 npm i  why=same-checkout  cwd=/tmp/epito-ursa-frontend-2rH8dY/.fe-run-m2/pw  cache=UNREADABLE
+ 14674  new  3      RACE   pid=741240 npm i  why=same-checkout  cwd=/tmp/epito-ursa-frontend-2rH8dY/.fe-run-m2/pw  cache=UNREADABLE
+ 17830  old  3      RACE   pid=741240 npm i  why=same-checkout  cwd=/tmp/epito-ursa-frontend-2rH8dY/.fe-run-m2/pw  cache=UNREADABLE
+ 19028  new  0      check-installs: installs_live=0 racing=0 elsewhere=0 cache=/tmp/epito-ursa-frontend-2rH8dY/.fe-run-m2/e2e-cache shared_home=no
+
+install exit=0  total 19037 ms

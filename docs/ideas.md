@@ -24292,3 +24292,133 @@ same conflation inside it.
   entry's own weakness line says the same thing from the market side: work
   performed on request against a specification, with no
   generation-to-outcome join.
+
+### 2026-11-09 (skill) — Two gates in `tools/ledger/` die with a stack trace on inputs that are a reader's mistake, which is the security seat's finding of this morning in a second tool family
+
+- Trigger: running `node tools/ledger/check.mjs --help` to read the
+  ledger contract before filing an entry, and running
+  `node tools/ledger/check-closures.mjs` while a tracked file was
+  deleted from the working tree but the deletion was not yet staged.
+  Both printed a Node stack trace and exited non-zero.
+- What: `check.mjs --help` reads `--help` as a path and dies at
+  `readFileSync` with `ENOENT: no such file or directory, open
+  '--help'`, which is byte-for-byte the shape named in this file's own
+  2026-11-09 security entry "a gate reads an unrecognised flag as a
+  filename and dies with a stack trace", in a different tool. The
+  second is a different cause with the same presentation:
+  `check-closures.mjs` walks `git ls-files` and opens each path, so a
+  tracked file missing from the working tree ends the run at
+  `checkRepository` line 277 rather than being reported. A deleted file
+  is an ordinary state of a working tree mid-run, and this seat hit it
+  by removing a placeholder run note it had just renamed. The cost is
+  small each time and it is paid in the same place every time, which is
+  a reader who cannot tell a gate's finding from a gate's crash. Ursa's
+  exo seat put the general form of this on the board this morning:
+  reaching for a member of the repaired family is not the same as being
+  repaired, so a fix landed in one gate says nothing about the next.
+- First step: not this seat's, because `tools/ledger/` is outside this
+  charter's write surface, and filed rather than routed as an ask
+  because the owning seat already holds the first instance and this is
+  evidence for its generality rather than a second task. Two lines
+  each: `check.mjs` refuses an argument beginning with `--` that it does
+  not recognise, and `check-closures.mjs` skips a path `git ls-files`
+  names and the tree does not carry, reporting the count it skipped.
+  Owner: the engineer seat, or the security seat's next run on the
+  2026-11-09 entry above, whichever reaches `tools/ledger/` first.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — §5g tells a reader to re-record a drifted range by skill slug, which the gate now refuses, and the tier mechanism is why this is filed instead of edited
+
+- Trigger: shipping the rule that a skill slug is not a name for a
+  drifted range, then grepping `prompts/skill-extract.md` for what it
+  says about `--update`. §5g clause 3 reads "It also has to name what it
+  is re-recording now, by skill slug or by lock key", in a numbered list
+  whose subject is drift repair.
+- What: that sentence is now false for the case the list is about. A
+  reader who follows it runs `--update <slug>` over a drifted range and
+  gets exit 2. The gate's own message names the right repair, so the
+  cost is bounded at one refused command and a reader's confidence in
+  the document, which for a library whose stated differentiator is that
+  every claim traces is not nothing. This is not a §5ai case: nothing
+  new is being cited and no section is being added, so the rule about
+  ordering does not reach it. What reaches it is the tier mechanism.
+  `docs/standards/pm.md` §10 makes `prompts/` Tier C, and Tier B
+  condition 4 refuses a PM merge when any path in the diff is Tier C, so
+  one corrected sentence would move this run's gate, tests and lock from
+  a merge the PM can take to one only the owner can.
+- First step: one sentence in §5g clause 3, saying a slug covers a range
+  the lock has never recorded and a drifted range is named by ref or
+  followed with `relocate-anchors.mjs`. It belongs in the same
+  prompt-only branch as the four §5ai-held entries this file already
+  carries, which makes five, and this is the one of the five that is
+  held by the tier rather than by §5ai, so a later run that drains the
+  queue should not expect one rule to explain all five. Owner: the next
+  run of this seat that opens a branch touching only
+  `prompts/skill-extract.md`.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The lock's own hash locates a moved range, so the mechanical repair needs no ref either
+
+- Trigger: shipping the verify half of the gone-or-moved split this run
+  and then reading the one command it prescribes. `findableAt` answers
+  "did this move, and to where" from the lock and the working file, with
+  no git ref, which is the whole reason it can run inside a guard that
+  takes none. `skills/relocate-anchors.mjs`, which the new trailer names
+  as the repair, recovers the as-cited lines from `<old-ref>` and refuses
+  at exit 2 without a readable one.
+- What: the ref is doing two jobs in that tool and only one of them is
+  load-bearing. It proves the recorded fingerprint belongs to that tree,
+  which is a real guarantee and worth keeping. It also supplies the text
+  to search for, which the lock's hash already supplies: a hash is enough
+  to search for when you are willing to hash every window, and this run
+  made the library willing. So for every range where hashing the windows
+  finds exactly one match, the relocation is proven by the hash itself
+  and the ref adds nothing to that range's answer. The measured size of
+  that set is not small: on the 49-range batch this run produced in
+  `ursa-major/src/types.ts`, the split found all 49 at exactly one offset
+  each. Verify can therefore now hand a reader a correct triage in a
+  clone where the repair it names refuses, which is a narrower version of
+  the shape `#820` removed from `--update`, where a tool printed a
+  command the next gate would reject.
+- First step: this seat's, and it is one flag rather than a rewrite:
+  `relocate-anchors.mjs` with no ref relocates exactly the ranges whose
+  recorded hash matches one window and nothing else, reporting the
+  ambiguous and the gone under the two headings it already has, and the
+  ref path stays the default because it is the stronger check. The thing
+  to measure before writing it is the one number that decides whether it
+  is worth a flag: over a real drift batch, how many ranges the ref-free
+  pass resolves that the ref pass does not, which is zero on a complete
+  clone and everything on a shallow one.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — A test of this run's own change passed with the thing it tested deliberately broken
+
+- Trigger: this run memoized the window search per `(path, height)` and
+  wrote a test for the one way that can go wrong, a key that collides
+  across heights and hands a range another height's offsets. Then broke
+  the key on purpose to watch the test fail. It passed.
+- What: the fixture had one moved range and one gone range in one file.
+  The range handed the wrong index finds nothing there, so it reports
+  gone, and the one that got the wrong index was the one whose honest
+  answer was already gone. The wrong answer and the right answer were the
+  same string. The repair was to make both ranges move, which is the case
+  where a collision produces a verdict that differs from the truth, and
+  that version does fail on the broken key. The general shape is a test
+  that cannot fail, and nothing in this library measures how many of its
+  own tests are in that state. The suites are large enough now for the
+  question to be real: 218 tests across eight files under `skills/`, all
+  green, and this run has one measured instance of a test that was green
+  for the wrong reason and was caught only because its author went
+  looking by hand.
+- First step: this seat's, next run, and it is bounded by being a survey
+  rather than a framework. For each gate under `skills/`, invert or
+  blank one decision line, run that gate's own suite, and record which
+  suites notice. One pass, one table, no tooling committed; a count of
+  gates whose suite stays green under a broken decision is a number this
+  library does not have and can act on. The cost to beat is the one this
+  run paid by hand, which was two minutes per gate.
+- Cost: $0
+- Status: proposed

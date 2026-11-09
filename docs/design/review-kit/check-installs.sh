@@ -84,6 +84,33 @@ fi
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 
+# npm's default for this user, with the overrides stripped, because
+# `npm config get cache` under a run that has already set NPM_CONFIG_CACHE
+# returns the run's own cache and not the default. Empty if npm cannot be
+# reached, and then the one determinate nothing-found below stays UNREADABLE
+# rather than being filled in from nothing.
+#
+# **Resolved on first need and never on the way in.** The first version of
+# this resolved it next to the run's own cache, which put an `npm config get`
+# between the invocation and the scan and made the whole guard take 1.1 s to
+# reach its first /proc read. Measured by its own end-to-end: against one
+# real install, the older tool scanned at 150 ms and saw the install live,
+# this one scanned a second later and reported installs_live=0 because the
+# install had finished in between — a guard made blind by the cost of
+# answering a question it usually does not need. The answer is needed only
+# for a process in the kernel's argv form carrying neither a flag nor a
+# variable, so it is a memo and not a prologue.
+DEFAULT_CACHE=""
+DEFAULT_CACHE_TRIED=0
+default_cache() {
+  if [ "$DEFAULT_CACHE_TRIED" = 0 ]; then
+    DEFAULT_CACHE_TRIED=1
+    DEFAULT_CACHE="$(env -u NPM_CONFIG_CACHE -u npm_config_cache npm config get cache 2>/dev/null || true)"
+    case "$DEFAULT_CACHE" in *$'\n'*|'') DEFAULT_CACHE="" ;; esac
+  fi
+  printf '%s\n' "$DEFAULT_CACHE"
+}
+
 # Self and every ancestor, because this script's own command line names
 # npm and a guard that reports itself is the defect it exists to prevent.
 SELF_CHAIN=" "
@@ -93,48 +120,112 @@ while [ -n "$_p" ] && [ "$_p" != "0" ] && [ "$_p" != "1" ]; do
   _p="$(awk '{print $4}' "/proc/$_p/stat" 2>/dev/null)"
 done
 
-argvn() { tr '\0' '\n' < "/proc/$1/cmdline" 2>/dev/null; }
+# The brace group matters. `2>/dev/null` on `tr` alone suppresses tr's
+# stderr and NOT the shell's, and the message for a pid that exits between
+# the enumeration and the read comes from the shell's own redirection:
+# `/proc/96891/cmdline: No such file or directory`. Found by live use, not
+# by the selftest, on a run where a process vanished mid-walk. A guard that
+# prints a filesystem error above its own count line is the kind of output
+# a reader learns to scroll past.
+argvn() { { tr '\0' '\n' < "/proc/$1/cmdline"; } 2>/dev/null; }
 
-# **npm's argv[0] IS its command line**, and that is why this is not a one
-# line copy of teardown.sh's process test. Measured 2026-11-09 on a live
-# install: `/proc/<pid>/cmdline` is 123 bytes holding ONE field,
-# `npm install typescript playwright esbuild`, followed by eighty empty
-# ones. npm sets `process.title` to its whole invocation, so the field a
-# teardown reads to get a short exec name gets the full line here.
+# **npm's argv[0] IS its command line, but only once it has retitled
+# itself**, and that is why this is not a one line copy of teardown.sh's
+# process test. npm sets `process.title` to its whole invocation, so the
+# field a teardown reads to get a short exec name gets the full line here.
 #
 # The first version of this script tested `${argv0##*/}` against `npm` and
 # therefore found zero installs while one was running six directories
 # away, which is the same false-clean the block it replaces produced. The
-# distinction that survives both is to anchor at the START of argv[0]
-# rather than to search the command line: a shell that mentions npm has
-# argv[0] `/bin/bash`, and another seat's agent has argv[0] `claude`, so
-# both are excluded by the anchor while npm's self-titled form is caught.
+# distinction that survives is to anchor at the START of the argv rather
+# than to search the command line: a shell that mentions npm has argv[0]
+# `/bin/bash`, and another seat's agent has argv[0] `claude`, so both are
+# excluded by an anchor while npm's self-titled form is caught.
 #
-# So npm is either of two shapes, and both are real: `npm` before it
-# retitles, and `npm <subcommand> ...` after.
+# **The second version of this script anchored on field 0 alone, and that
+# is blind for the first 358 ms of every install.** Measured 2026-11-09
+# with a 5 ms poll on a real install, in
+# `../reviews/2026-11-09-message-2/data/cache-legibility.txt`: /proc holds
+# the SEVEN fields the kernel was handed,
+# `node /usr/bin/npm i --no-save playwright --cache x`, with argv[0]
+# `node`, until npm overwrites the argv area at 358 ms. The anchor on
+# field 0 first said yes 316 ms after the process appeared, on an install
+# that ran 13.7 s.
+#
+# 2.3 per cent of an install sounds like nothing and it is the wrong 2.3
+# per cent. The only reader of this guard is a run deciding whether to
+# START a second install, so a run that checks inside that window is told
+# the tree is clear and is precisely the run that then races. A check that
+# reads clean exactly while the hazard is beginning is the shape the exo
+# seat named in this seat's previous detection line, which keyed on
+# `_cacache` and so read `not shared` exactly when nobody had installed
+# yet. Landing the same class on the replacement is why the window was
+# gone looking for rather than assumed away.
+#
+# So npm is THREE shapes on this host and all three are real:
+#
+#   node /usr/bin/npm i --no-save playwright --cache x   first 358 ms
+#   npm                                                  mid-retitle
+#   npm i playwright                                     the rest
+#
+# This prints the index where npm's own arguments begin, 0 for the
+# retitled forms and 1 for the kernel's, and returns non-zero for anything
+# that is not an npm. It is still an anchor and not a search: a node
+# process whose field 1 is some other script fails the second basename
+# test, and nothing whose field 0 is a shell or an agent reaches it.
 first_word() { printf '%s\n' "${1%% *}"; }
-is_npm() {
-  local w; w="$(first_word "$1")"
+npm_offset() {
+  local w; w="$(first_word "${1:-}")"
   case "${w##*/}" in
-    npm|npm-cli.js) return 0 ;;
+    npm|npm-cli.js) printf '0\n'; return 0 ;;
+  esac
+  # The kernel's form. Gate on the interpreter first, so `node` is what
+  # opens the door and field 1 is what names what it is running.
+  case "${w##*/}" in
+    node|nodejs|node[0-9]*|bun|deno) ;;
+    *) return 1 ;;
+  esac
+  case "${2##*/}" in
+    npm|npm-cli.js|npx|npx-cli.js) printf '1\n'; return 0 ;;
   esac
   return 1
 }
-# The subcommand, from argv[1] if npm has not retitled itself and from the
-# second word of argv[0] if it has.
-subcommand_of() {
-  local a0="$1"; shift
-  local rest="${a0#* }"
-  if [ "$rest" != "$a0" ]; then
-    printf '%s\n' "${rest%% *}"
-    return
-  fi
+
+# The first field that is not a flag, which is where npm keeps its
+# subcommand in every shape that still has separate fields.
+first_nonflag() {
   local tok
   for tok in "$@"; do
     case "$tok" in -*) continue ;; esac
     printf '%s\n' "$tok"; return
   done
   printf '\n'
+}
+
+# The subcommand. Three shapes, so three answers: the second word of
+# argv[0] when npm has retitled with its arguments, the first non-flag
+# field after npm's own path when the kernel's form is still in place, and
+# the first non-flag field after argv[0] for the bare `npm` moment.
+#
+# The offset is load-bearing rather than cosmetic. Without it the kernel's
+# form hands `first_nonflag` the list beginning `/usr/bin/npm`, which is
+# not a flag, so the subcommand reads `/usr/bin/npm`, `writes_cache` says
+# no and the install is skipped — the same miss as before, moved one
+# function along.
+subcommand_of() {
+  local off="$1"; shift
+  local -a f=( "$@" )
+  if [ "$off" = 0 ]; then
+    local a0="${f[0]}"
+    local rest="${a0#* }"
+    if [ "$rest" != "$a0" ]; then
+      printf '%s\n' "${rest%% *}"
+      return
+    fi
+    first_nonflag "${f[@]:1}"
+    return
+  fi
+  first_nonflag "${f[@]:$((off + 1))}"
 }
 
 # The subcommands that write the cache. `npm config get` does not.
@@ -145,31 +236,84 @@ writes_cache() {
   return 1
 }
 
-# The cache a live install is using, read off its own argv.
+# The cache a live install is using, read off its own argv and its own
+# environment.
 #
-# **On this host this is usually unreadable, and it says so rather than
-# guessing.** npm's `process.title` keeps the subcommand and the positional
-# arguments and DROPS the flags, so a live `npm install --cache X foo`
-# presents argv[0] as `npm install foo` and the `--cache` is gone from
-# /proc entirely. The first version of this function returned DEFAULT in
-# that case and the count line then printed the shared home as the other
-# process's cache, which is a specific path asserted from nothing read.
-# That is the class this whole file is about, so the answer here is
-# `unreadable` and the classification below decides what to do with an
-# unknown. npm's own debug log under `_logs` does record the full argv,
+# **How legible the other install's cache is turns out to be a property of
+# how that install SET its cache, not of when you look.** Measured
+# 2026-11-09 at a 5 ms poll on two real installs, in
+# `../reviews/2026-11-09-message-2/data/cache-legibility.txt`:
+#
+#   npm i --cache <path>             argv    <path> at 29 ms, absent at 3 s
+#                                    environ absent at both
+#   NPM_CONFIG_CACHE=<path> npm i    argv    absent at both
+#                                    environ <path> at 12 ms and at 3 s
+#
+# The flag disappears because npm's `process.title` keeps the subcommand
+# and the positional arguments and DROPS the flags, so a live
+# `npm install --cache X foo` presents argv[0] as `npm install foo` from
+# 358 ms onward and the `--cache` is gone from /proc entirely. The
+# environment does not disappear, and `/proc/<pid>/environ` was readable at
+# every poll in both modes, because every seat on this host runs as the
+# same user. That is the same sharing that makes the default cache a shared
+# path in the first place, used here to read rather than to collide.
+#
+# So this reads both, and the order is argv first because a run that passed
+# the flag EXPLICITLY on this invocation is a better answer than whatever
+# its environment happened to carry in.
+#
+# It still refuses to guess. The first version of this function returned
+# DEFAULT whenever it found nothing and the count line then printed the
+# shared home as the other process's cache, which is a specific path
+# asserted from nothing read. There is now one case where nothing-found IS
+# an answer and it is narrow: the kernel's argv form is still in place, so
+# no flag can have been dropped yet, and the environment names no cache
+# either, so that process really is on npm's default. Everything else is
+# `UNREADABLE` and the classification below decides what to do with an
+# unknown. npm's own debug log under `_logs` records the full argv
 # including the flags, but it carries no pid, so a log cannot be tied to a
 # live process and this does not read one.
+# One named variable out of another process's environment, or non-zero if it
+# is not set there or the environment cannot be read. The brace group is
+# argvn's, for argvn's reason: the shell's own redirection is what prints
+# `No such file or directory` for a pid that exits mid-walk.
+environ_var_of() {
+  local pid="$1" want="$2" line
+  while IFS= read -r line; do
+    case "$line" in
+      "$want"=*) printf '%s\n' "${line#*=}"; return 0 ;;
+    esac
+  done < <( { tr '\0' '\n' < "/proc/$pid/environ"; } 2>/dev/null )
+  return 1
+}
+environ_cache_of() {
+  environ_var_of "$1" NPM_CONFIG_CACHE || environ_var_of "$1" npm_config_cache
+}
 cache_of() {
-  local prev="" tok
-  # Both forms, because a retitled npm has every flag inside argv[0] as
-  # spaces rather than as separate NUL-delimited fields.
-  for tok in $(argvn "$1" | tr '\n' ' '); do
+  local pid="$1" off="$2" prev="" tok
+  # Both argv forms, because a retitled npm has every flag inside argv[0]
+  # as spaces rather than as separate NUL-delimited fields.
+  for tok in $(argvn "$pid" | tr '\n' ' '); do
     case "$tok" in
       --cache=*) printf '%s\n' "${tok#--cache=}"; return ;;
     esac
     [ "$prev" = "--cache" ] && { printf '%s\n' "$tok"; return; }
     prev="$tok"
   done
+  local e
+  if e="$(environ_cache_of "$pid")"; then printf '%s\n' "$e"; return; fi
+  # The one determinate nothing-found. Only in the kernel's form, where the
+  # flags are provably still present, so their absence is evidence, and only
+  # when that process's HOME is ours, because npm's default is under the
+  # home of whoever is running it and this host's sharing is the reason the
+  # two are normally the same.
+  if [ "$off" = 1 ]; then
+    local theirhome; theirhome="$(environ_var_of "$pid" HOME || true)"
+    if [ -z "$theirhome" ] || [ "$theirhome" = "${HOME:-}" ]; then
+      local d; d="$(default_cache)"
+      [ -n "$d" ] && { printf '%s\n' "$d"; return; }
+    fi
+  fi
   printf 'UNREADABLE\n'
 }
 
@@ -179,16 +323,25 @@ others=0
 for pid in $(ls -1 /proc 2>/dev/null | grep -E '^[0-9]+$'); do
   case "$SELF_CHAIN" in *" $pid "*) continue ;; esac
   [ -O "/proc/$pid" ] || continue
-  mapfile -t av < <(argvn "$pid")
+  # Read NUL-delimited, in the shell, rather than through `argvn`. Not a
+  # style preference: `mapfile -t av < <(argvn "$pid")` is a subshell and a
+  # `tr` per pid, and /proc on this host held 312 of them, so the guard took
+  # 0.9 to 1.7 s to answer and up to 3.6 s under load. That is pre-existing
+  # and it matters here because this is the one check a run is told to make
+  # immediately before starting an install: the answer it returns is about a
+  # host it last looked at seconds ago. The brace group and the redirection
+  # are argvn's, for argvn's reason.
+  av=()
+  { mapfile -d '' -t av < "/proc/$pid/cmdline"; } 2>/dev/null
   [ "${#av[@]}" -ge 1 ] || continue
-  is_npm "${av[0]}" || continue
-  sub="$(subcommand_of "${av[0]}" "${av[@]:1}")"
+  off="$(npm_offset "${av[0]}" "${av[1]:-}")" || continue
+  sub="$(subcommand_of "$off" "${av[@]}")"
   writes_cache "$sub" || continue
   seen=$((seen + 1))
 
   cwd="$(readlink "/proc/$pid/cwd" 2>/dev/null)"
   path="${cwd% (deleted)}"
-  theirs="$(cache_of "$pid")"
+  theirs="$(cache_of "$pid" "$off")"
 
   # Three reasons to refuse, and they are different hazards.
   why=""
