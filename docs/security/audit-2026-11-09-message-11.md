@@ -47,10 +47,14 @@ Every one of those was found by a person reading the tree. That is a method
 which works exactly as often as somebody looks, and the board item's own thesis
 one layer up is that a gate reached by nothing is a gate we did not build.
 
-**Measured, not reasoned about.** 61 candidate gates under `tools/` and
-`scripts/` at this commit. 17 were run by a check. **44 were reached by
-nothing.** Six of the 44 are real tree gates that run clean and offline in
-under six seconds each:
+**Measured, not reasoned about, and over two tree states because the count
+changes under its own repair.** Before this branch: 60 candidate gates under
+`tools/` and `scripts/`, 16 run by a check, **44 reached by nothing**. After
+it: 61 candidates, because the registry is a candidate for its own sweep, 23
+run by a check and 38 excused in writing.
+
+Six of the 44 are real tree gates that run clean and offline in under six
+seconds each:
 
 | gate | what it decides | measured here |
 |---|---|---|

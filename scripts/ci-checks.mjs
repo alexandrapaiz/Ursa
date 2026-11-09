@@ -330,9 +330,10 @@ export const CHECKS = [
     // Four entries above record the same history in their own comments: a gate
     // was built, nobody registered it, and the only thing that ever ran it was
     // a seat who remembered. That is a method which works as often as somebody
-    // looks. Measured when this was added: 60 candidates, 44 of them reached by
-    // no check at all, six of those real tree gates that run clean and offline,
-    // which are the six entries below this one.
+    // looks. Measured when this was added: 60 candidates and 16 run by a check,
+    // so 44 reached by nothing; six of those are real tree gates that run clean
+    // and offline, and they are the six entries below this one. Adding this file
+    // makes 61, because the registry is a candidate for its own sweep.
     argv: () => ['node', 'tools/gates/gate-registry.mjs'],
     passExit: [0],
   },
