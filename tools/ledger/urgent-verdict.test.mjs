@@ -20,6 +20,7 @@ import {
   classifyEntry,
   daysBetween,
   declarationsIn,
+  normalizeOutcome,
   parseDeclaration,
   pathsIn,
   probePlan,
@@ -392,5 +393,65 @@ describe('classifyEntry and report over declarations', () => {
       basisTally([declared(true), classifyEntry(entry('`tools/root-entries.test.mjs`'), ev())]),
       { declared: 1, inferred: 1, none: 0 },
     )
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Exit 2, which is a refusal and not a finding.
+//
+// WHY THIS BLOCK EXISTS AT ALL. The first version of this module read every
+// non-zero exit as "the condition still holds". The first declared command
+// this seat reached for, `node tools/secret-scan.mjs --history --no-baseline`
+// on the two 2026-10-27 history entries, exits 2 in the clone a seat is
+// handed, because the clone is shallow and single-branch and the scanner
+// refuses rather than walking a truncated graph. Under the first version the
+// report would have printed `holds` and the owner would have read a refusal
+// as a live finding.
+
+describe('exit 2 is a refusal, not a finding', () => {
+  const withOutcome = (outcome) => classifyEntry(
+    entry('- Recheck: `node tools/secret-scan.mjs --history`'),
+    ev(new Map([['node tools/secret-scan.mjs --history', outcome]])),
+  )
+
+  it('does not hold and does not clear', () => {
+    const v = withOutcome('cannot-answer')
+    assert.equal(v.disposition, 'unverifiable')
+    assert.match(v.why, /refused to answer in this clone at exit 2/)
+    assert.match(v.why, /not the same as the condition having cleared/)
+    assert.match(v.why, /make the probe answerable here, not to re-read the entry/)
+  })
+
+  it('a refusal alongside a pass is still not a clear', () => {
+    const v = classifyEntry(
+      entry('- Recheck: `node tools/secret-scan.mjs --history`\n- Recheck: `node scripts/ci-checks.mjs`'),
+      ev(new Map([
+        ['node tools/secret-scan.mjs --history', 'cannot-answer'],
+        ['node scripts/ci-checks.mjs', true],
+      ])),
+    )
+    assert.equal(v.disposition, 'unverifiable')
+    assert.match(v.why, /refused to answer/)
+  })
+
+  it('a real failure alongside a refusal still holds, because one of them is a finding', () => {
+    const v = classifyEntry(
+      entry('- Recheck: `node tools/secret-scan.mjs --history`\n- Recheck: `node scripts/ci-checks.mjs`'),
+      ev(new Map([
+        ['node tools/secret-scan.mjs --history', 'cannot-answer'],
+        ['node scripts/ci-checks.mjs', false],
+      ])),
+    )
+    assert.equal(v.disposition, 'holds')
+    assert.equal(v.probes.filter((p) => p.passed === false).length, 1)
+  })
+
+  it('normalizeOutcome reads an unrecognised value as a refusal, never as a pass', () => {
+    assert.equal(normalizeOutcome(true), true)
+    assert.equal(normalizeOutcome(false), false)
+    assert.equal(normalizeOutcome('cannot-answer'), 'cannot-answer')
+    for (const odd of [undefined, null, 0, 1, 'pass', {}]) {
+      assert.equal(normalizeOutcome(odd), 'cannot-answer', String(odd))
+    }
   })
 })

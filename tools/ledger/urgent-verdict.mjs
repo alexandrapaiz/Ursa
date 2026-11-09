@@ -305,13 +305,28 @@ export function probesIn(text, isTracked) {
 /**
  * @param {{ heading: string, date: string | null, text: string }} entry
  * @param {{
- *   probeResults: Map<string, boolean>,
+ *   probeResults: Map<string, boolean | 'cannot-answer'>,
  *   isTracked: (p: string) => boolean,
  *   today: string
- * }} evidence `probeResults` maps a probe path to whether `node --test` exited
- *   0. A path absent from the map was not run and is reported as not run
- *   rather than as failing, because "we did not look" and "it is broken" are
- *   the two answers this repository keeps conflating.
+ * }} evidence `probeResults` maps a probe's identity string to its outcome:
+ *   `true` exited 0, `false` exited non-zero, `'cannot-answer'` exited 2. A
+ *   key absent from the map was not run and is reported as not run rather
+ *   than as failing, because "we did not look" and "it is broken" are the two
+ *   answers this repository keeps conflating.
+ *
+ *   THE THIRD VALUE IS NOT A REFINEMENT, it is the fix for a defect this
+ *   module shipped with. Exit 2 is this repository's code for a gate that
+ *   could not do its job, stated in `tools/board/post.mjs`'s header and in
+ *   `../ledger/recheck-urgent.mjs`'s own. The first version here read every
+ *   non-zero exit as "the condition still holds", so the first declared
+ *   command this seat tried — `node tools/secret-scan.mjs --history
+ *   --no-baseline`, on the 2026-10-27 history entries — would have been
+ *   reported as `holds` when what actually happened is that the scanner
+ *   REFUSED, because the clone every seat is handed is shallow and a history
+ *   scan over a truncated graph would report clean. "Still true" and "not
+ *   measurable here" are different facts about an urgent entry and they have
+ *   different repairs: one needs the work done, the other needs
+ *   `bash tools/ensure-full-clone.sh`.
  * @returns {EntryVerdict}
  */
 export function classifyEntry(entry, { probeResults, isTracked, today }) {
@@ -322,7 +337,7 @@ export function classifyEntry(entry, { probeResults, isTracked, today }) {
   // is not an entry that came back clean.
   const probes = plan.probes.map(({ path }) => ({
     path,
-    passed: probeResults.has(path) ? probeResults.get(path) === true : null,
+    passed: probeResults.has(path) ? normalizeOutcome(probeResults.get(path)) : null,
   }))
 
   const pathsMissing = paths.filter((p) => !isTracked(p))
@@ -330,6 +345,8 @@ export function classifyEntry(entry, { probeResults, isTracked, today }) {
 
   const run = probes.filter((p) => p.passed !== null)
   const failing = run.filter((p) => p.passed === false).map((p) => p.path)
+  const refusing = run.filter((p) => p.passed === 'cannot-answer').map((p) => p.path)
+  const passing = run.filter((p) => p.passed === true).map((p) => p.path)
 
   let disposition = 'unverifiable'
   let why = 'names no runnable probe, so this tool reports its age and the paths it cites and nothing more'
@@ -344,9 +361,13 @@ export function classifyEntry(entry, { probeResults, isTracked, today }) {
   } else if (failing.length > 0) {
     disposition = 'holds'
     why = `still failing today: ${failing.join(', ')}${authority}`
-  } else if (run.length > 0) {
+  } else if (refusing.length > 0) {
+    // Ordered before the clear, not after it, so a pass on one probe and a
+    // refusal on another can never add up to `symptom-cleared`.
+    why = `refused to answer in this clone at exit 2 (${refusing.join(', ')}), which is not the same as the condition having cleared; the repair is to make the probe answerable here, not to re-read the entry${authority}`
+  } else if (passing.length > 0) {
     disposition = 'symptom-cleared'
-    why = `every probe it names passes today (${run.map((p) => p.path).join(', ')}), so the symptom it describes is gone and the entry is a candidate for re-reading${authority}`
+    why = `every probe it names passes today (${passing.join(', ')}), so the symptom it describes is gone and the entry is a candidate for re-reading${authority}`
   }
   return {
     heading: entry.heading,
@@ -359,6 +380,21 @@ export function classifyEntry(entry, { probeResults, isTracked, today }) {
     basis: plan.basis,
     declarationsRefused: plan.refused,
   }
+}
+
+/**
+ * One probe outcome, as recorded by the caller, in this module's vocabulary.
+ * Booleans are accepted because they are what the runner naturally produces
+ * for the two ordinary answers; anything else is read as a refusal rather than
+ * as a pass, which is the safe direction: a value this module does not
+ * recognise must never clear an urgent entry.
+ * @param {boolean | 'cannot-answer' | unknown} value
+ * @returns {true | false | 'cannot-answer'}
+ */
+export function normalizeOutcome(value) {
+  if (value === true) return true
+  if (value === false) return false
+  return 'cannot-answer'
 }
 
 /**

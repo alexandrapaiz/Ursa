@@ -67,8 +67,16 @@ function trackedPaths() {
  * `- Recheck:` line. Nothing else is accepted by either allowlist, so this function does no
  * validation of its own and must not start doing any: a check here would be a
  * second, weaker copy of a rule that belongs in one place.
+ *
+ * Exit 2 is reported as `'cannot-answer'` and never as a failure. That is this
+ * repository's own convention for a gate that could not do its job, and here it
+ * is load-bearing: `node tools/secret-scan.mjs --history` exits 2 in the
+ * shallow single-branch clone every seat is handed, so reading non-zero as "the
+ * urgent condition still holds" would turn a refusal into a finding. A spawn
+ * that never started (`out.status === null`, which is what a timeout or a
+ * missing interpreter looks like) is the same answer for the same reason.
  * @param {string[]} argv what follows the interpreter
- * @returns {boolean} whether it exited 0
+ * @returns {true | false | 'cannot-answer'}
  */
 function runProbe(argv) {
   const out = spawnSync(process.execPath, argv, {
@@ -76,7 +84,9 @@ function runProbe(argv) {
     maxBuffer: 64 * 1024 * 1024,
     timeout: 300_000,
   })
-  return out.status === 0
+  if (out.status === 0) return true
+  if (out.status === 2 || out.status === null) return 'cannot-answer'
+  return false
 }
 
 let source
@@ -113,7 +123,7 @@ function headingDate(text) {
 /** Keyed on the probe's identity string, which is the test path for an
  *  inferred probe and the whole command line for a declared one, so two
  *  entries that declare the same command pay for it once. */
-/** @type {Map<string, boolean>} */
+/** @type {Map<string, true | false | 'cannot-answer'>} */
 const probeResults = new Map()
 if (!noRun) {
   /** @type {Map<string, string[]>} identity -> argv */
