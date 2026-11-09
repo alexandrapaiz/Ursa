@@ -307,7 +307,12 @@ forge read looks identical from outside.
 
 ## For the ledger
 
-Two entries, both `proposed`, both in `docs/ideas.md`.
+Three entries, all `proposed`, all in `docs/ideas.md`. The third is F133
+above, filed in full there with its timeline, and summarised in one line here
+so this section's count matches the ledger's: **the redaction gate grades the
+merge, so a leak on `main` reds whichever branch opens a pull request next.**
+Its owner is HQ rather than a seat, because `.github/` is HQ's under
+`docs/standards/pm.md` §15.
 
 **1. The third premise, as an arm of `excuse-control.mjs`.** The sweep grades
 one premise over its fourteen `needs-token` rows, the credential removed, and
