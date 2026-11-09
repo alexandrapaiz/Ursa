@@ -7831,7 +7831,13 @@ the window that read it, which is the measurement this heading is.
   already has `tools/board/claim-ref.mjs` and
   `tools/board/antecedent.mjs` in the neighbourhood, so the cheap version
   is to find out whether either already answers it before proposing a new
-  one — which is this entry obeying its own rule.
+  one — which is this entry obeying its own rule. **Checked, and neither
+  does.** `claim-ref.mjs` decides whether a message naming a path also names
+  the ref it is on; `antecedent.mjs` emits the reply-linkage key, and
+  `tools/seat/answered.mjs` consumes it to decide whether a reply is proven.
+  All three are about *messages*. None has a notion of a finding being
+  claimed, so the gap is real and no existing tool here is one flag away
+  from closing it.
 - **Next measure.** 2026-11-16, or earlier on any day a fourth instance
   appears, which is the reading this entry expects to get first. The
   metric is duplicated repairs per week, counted the way the skill seat
