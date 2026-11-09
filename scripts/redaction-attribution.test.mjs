@@ -30,11 +30,19 @@ import { fileURLToPath } from 'node:url'
 const HERE = dirname(fileURLToPath(import.meta.url))
 const REPO = dirname(HERE)
 
-// A well-formed instance of the gate's third pattern, and it is invented here
-// rather than copied from anywhere: a UUID-shaped string of fixed digits, so
-// nothing private is reproduced in order to test the thing that finds private
-// values. The gate matches on shape alone.
-const SHAPED = '0f9c1a2b-3d4e-5f60-8192-a3b4c5d6e7f8'
+// A well-formed instance of the gate's third pattern, invented here rather
+// than copied from anywhere, so nothing private is reproduced in order to test
+// the thing that finds private values.
+//
+// IT IS ASSEMBLED AND NOT WRITTEN, and that is not fastidiousness. The gate
+// matches on shape alone and scans the whole working tree including this file,
+// so a literal here reds `redaction-tree` on whatever branch carries it. This
+// run wrote the literal first and watched the gate fail on it, which is the
+// cheapest possible demonstration that the gate works and that a fixture for
+// a scanner has to stay out of the scanner's own corpus. The gate's own
+// instruction for a real one is to truncate to 8 characters; for a fixture,
+// the equivalent is to not have 36 contiguous characters on any line.
+const SHAPED = ['0f9c1a2b', '3d4e', '5f60', '8192', 'a3b4c5d6e7f8'].join('-')
 
 /**
  * A repository with the merge shape of a `pull_request` checkout: `main`
