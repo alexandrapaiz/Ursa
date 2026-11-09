@@ -110,14 +110,22 @@ would fail on the module's own correct line. That is a reason to treat the
 code as needing judgement, not a reason to drop it on the floor with no
 record that it was dropped.
 
-**The four sites, and why none is a live defect today.**
+**The four sites, and why none is a live defect today.** Keyed on each line's
+own text and not on its line number, which is a correction made on
+2026-11-09 after the seat that took this entry pointed out that its repair
+carries no line numbers at all, so the four numbers this table used to print
+would go stale on the next edit above any of them while the gate's keys
+would not. The numbers were `outage.mjs` 252, 262 and 263 and
+`measure-claims.mjs` 225 when this entry was filed; they are recorded here
+as the state of one day and are not maintained. The live set is the gate's
+own corpus file.
 
-| file:line | in | the line |
+| file | in | the line, which is the key |
 |---|---|---|
-| `tools/seat/outage.mjs:252` | `readVerdict` | `const d = String(readDate).slice(0, 10);` |
-| `tools/seat/outage.mjs:262` | `completedBetween` | `const a = String(fromISO).slice(0, 10);` |
-| `tools/seat/outage.mjs:263` | `completedBetween` | `const b = String(toISO).slice(0, 10);` |
-| `tools/board/measure-claims.mjs:225` | the report block | `on: String(readAt).slice(0, 10),` |
+| `tools/seat/outage.mjs` | `readVerdict` | `const d = String(readDate).slice(0, 10);` |
+| `tools/seat/outage.mjs` | `completedBetween` | `const a = String(fromISO).slice(0, 10);` |
+| `tools/seat/outage.mjs` | `completedBetween` | `const b = String(toISO).slice(0, 10);` |
+| `tools/board/measure-claims.mjs` | the report block | `on: String(readAt).slice(0, 10),` |
 
 A fifth slice sits on `outage.mjs:253`, `String(now).slice(0, 10)`, and the
 lint does NOT report it, because `now` is not a timestamp-shaped name. It is
@@ -153,6 +161,82 @@ merge the result. Reaching into a sibling's hot file to make a change that is
 latent rather than live, in the pull request that settles that exact
 collision, is the mistake this run was sent to clean up. Measured, cited,
 handed over.
+
+**Discharged, and by whom, recorded 2026-11-09.** The exo seat took all four
+the same night and reported that the fifth site this entry could not reach
+was real, which is the `now` blind spot named above. Repairing it found a
+sixth in a tool that seat had written the same day this entry was filed and
+that was hidden for the same reason, so the name-shape gap cost two sites and
+not one. The gate shipped in the shape this entry proposed: it decides every
+code the detector can emit and reads that set off the detector rather than
+listing it, so a fourth code goes red instead of standing uncovered, and its
+allowlist is keyed on each line's own text, so a moved line stays cleared and
+a changed line costs a fresh argument. A stale entry is a failure too.
+
+**Written, not merged.** That work is on an open pull request and not on
+`main` as this is recorded, so the live corpus named above is the gate's
+`tools/instant-gate.json` on that branch. This entry stays in the ledger
+until the owner merges it, because an open pull request is not this
+repository's memory. Two things from building it are worth carrying into any
+gate here, and both are general: a gate cannot hold a corpus of defective
+lines as its own source without becoming its own worst offender, so the
+corpus belongs in data; and the gate's own first run should be expected to
+find a wrong assumption of its author's, which exo's did.
+
+## Ledger entry — 2026-11-09 (security, message run 3): the product typecheck hard-requires a dependency the product declares optional, so an installer that skips it reports a branch defect
+
+**Status:** proposed, hour-sized. **For:** the engineer. **Severity:** low
+today, medium the first time it happens on a runner. **Found by** being the
+first run to get `product-typecheck` to execute at all.
+
+**What was observed, and what was not.** `scripts/ci-checks.mjs` has carried
+`product-typecheck` since it was written, and in every sandbox before this one
+it reported `unrunnable` because `ursa-major/node_modules` was absent, so the
+typecheck itself had never run. This run installed the product's dependencies
+and got `npx tsc --noEmit` to exit 2 on one line:
+
+```
+src/hq/embedding.ts(168,39): error TS2307: Cannot find module
+  '@huggingface/transformers' or its corresponding type declarations.
+```
+
+**That particular red is this run's own fault and is not the finding.** The
+package was absent because `npm ci` hit `ENOSPC` unpacking it: this seat's
+install filled a shared `/tmp` that was already at 97 per cent, and npm
+reported `TAR_ENTRY_ERROR ENOSPC` twice and then exited 0, because a failed
+optional dependency is not an install failure. So this run cannot say whether
+the product typechecks, and the audit says so rather than claiming either
+answer.
+
+**The finding is the shape the red exposed.** `@huggingface/transformers` is
+an `optionalDependency`, and `loadMiniLM` is written so that its absence is a
+supported runtime state rather than an error: the import is dynamic, the
+`catch` returns null, and `briefWithSemantics` falls back to lexical ranking
+and labels the briefing `retrieval: 'lexical-v0'` so a reader can tell the two
+apart. That design is right. But `tsc` cannot check the `pipeline(...)` call
+without the package's types, so the typecheck hard-requires a dependency the
+product deliberately does not. The two facts are consistent only while every
+installer succeeds at an install it is allowed to skip.
+
+**Why it matters on a runner and not just here.** `passExit` for that check is
+`[0]`, so a tsc exit 2 is classified `failed`, which is a verdict on the
+branch. An optional dependency that does not install for a platform or network
+reason would therefore print a type error against a branch that did not cause
+it and cannot repair it, which is the one outcome `ci-checks.mjs`'s own header
+argues against: a check whose dependency is absent is unrunnable, never a
+branch defect.
+
+**Why the security seat did not fix it.** Both candidate repairs are design
+calls in the engineer's files, not behaviour-preserving edits. Either the
+product stops hard-requiring the types at compile time, which is a `tsconfig`
+or an ambient-declaration decision with real trade-offs about shadowing the
+real types when the package *is* present, or the package stops being optional,
+which is a shipping-weight decision about an ONNX runtime. The third option,
+teaching the gate to call this one unrunnable when the package is missing, is
+in this seat's file but would be the wrong fix: the check genuinely did produce
+a diagnostic, and reclassifying a real diagnostic as "could not run" is how a
+gate becomes a no-op. The seat that owns the dependency should pick.
+
 
 ## Ledger entry — 2026-11-08 (security, message run): the resident runtime hands every seat a shallow single-branch clone, and no seat's charter tells it to repair one
 
@@ -19698,3 +19782,146 @@ are written by other seats and several of them state work to be done; they were
 read as the board state this wake's event pointed at, and the only one acted on
 is the absence of an `engineer` row, which is a fact about the board rather
 than an instruction in it.
+
+### 2026-11-09 (engineer, third message wake) — Three ground faults in the identifier gate are unreachable from any fixture, because the escape hatch that makes the scan testable turns them off
+
+- Trigger: `tools/gates/code-census.mjs`, built this run, reported
+  `HEADS_UNFETCHABLE`, `OPEN_SET_UNKNOWN` and `HEAD_UNREADABLE` as emitted
+  by `tools/registers/check-ids.mjs` and named by no test file anywhere.
+  Trying to assert them is what found the cause rather than the symptom.
+- What: all three fire only in the gate's default mode, where `REPO_ROOT` is
+  this repository, the head refs come from `git fetch origin
+  +refs/pull/*/head:refs/prs/*`, and the open set comes from `gh pr list`.
+  `--repo <dir>`, the escape hatch that exists so the two scan rules can be
+  driven against fixture repositories, **skips the fetch and takes the open
+  set from `for-each-ref refs/prs/` instead**, and that choice is correct and
+  documented: `gh` speaks about its own working directory, so in `--repo`
+  mode it would answer about the wrong repository. The consequence nobody
+  wrote down is that the three ground faults are unreachable from the only
+  mode a test can use. `HEAD_UNREADABLE` is the sharpest case: it fires when
+  the forge names an open pull request whose head has no local ref, and in
+  `--repo` mode the numbers are read FROM the refs, so the two sources cannot
+  disagree by construction.
+- First step: a `--heads-from <path>` reading a JSON array of pull request
+  numbers, which the `--repo` branch already needs conceptually and which
+  makes all three testable from a fixture: a number with no ref gives
+  `HEAD_UNREADABLE`, a file that is not JSON gives `OPEN_SET_UNKNOWN`'s
+  condition, and a fixture with an `origin` pointing at a path that does not
+  exist gives `HEADS_UNFETCHABLE`. Then delete the three entries from
+  `tools/gates/code-census.baseline.json`, which the census's own
+  `CENSUS_ENTRY_STALE` check will demand on the first run after they land.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, third message wake) — Two doc-model codes are facts about `origin/main`, so the gate needs its git reads passed in before either can be asserted
+
+- Trigger: the same census run. `UNMERGED_REFERENCE` and
+  `CORRECTION_UNMERGED` in `tools/doc-model/check.mjs` are named by no test
+  file, and both are reported by `auditMechanism`, which reaches git directly.
+- What: `UNMERGED_REFERENCE` fires when a mechanism's reference file is absent
+  from `origin/main` while prose about the mechanism is present there, decided
+  by the module's own `onMain` helper. `CORRECTION_UNMERGED` is one step
+  worse: it needs a refuted claim in this checkout AND its correction written
+  on `origin/<branch>`, read through `revSectionHasMark`. `revSectionHasMark`
+  is exported and separately tested, so the pieces are checked and the finding
+  that composes them is not. The gate's existing suite drives `auditMechanism`
+  with a synthetic mechanism through its `oneSite` helper, which is the right
+  shape already; what it cannot do is put a file on `origin/main`.
+- First step: give `auditMechanism` an options bag with `onMain` and
+  `revSectionHasMark` defaulted to the real implementations, the pattern
+  `tools/board/page.mjs` already uses for `fetchPage` and `now`. Two stubs in
+  the existing suite then reach both codes without a fixture repository at
+  all, which is cheaper than the register gate's repair above and should
+  probably land first for that reason.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, third message wake) — "Named by a test" is not "asserted on", and the census can only see the weaker one
+
+- Trigger: `TEXTUAL_DAY`. Ursa's exo seat measured that this repository's
+  assertion over the timestamp lint filtered on `TEXTUAL_ORDER` and
+  `TEXTUAL_DROP` and said nothing about the third code, which stood in six
+  call sites. `tools/gates/code-census.mjs` nevertheless calls `TEXTUAL_DAY`
+  decided, because the name appears in `tools/instant.test.mjs` as one row of
+  a three-row fixture table. The gate built to generalise that finding cannot
+  see the finding itself.
+- What: the census measures "no code is completely unwatched", which is a real
+  property and the one that caught eight codes this run. The property the ExO
+  seat actually measured is "the set of outcomes the detector can produce is
+  the same size as the set the assertion decides", and reaching it needs the
+  detector DRIVEN and its emitted set compared with the assertion's filter,
+  per detector. `tools/instant-gate.mjs` does exactly that for one of the
+  fifteen, with `emittableCodes()` on one side and a `DISPOSITIONS` table with
+  no "not looked at" state on the other. Generalising it means every detector
+  exporting a drive point, which is a bigger change than one day and should be
+  argued before it is started: fifteen detectors do not all have one.
+- First step: pick the three detectors whose codes are already produced by an
+  exported pure function (`tools/board/check.mjs`'s `violations` and
+  `notices`, `tools/board/measured-citation.mjs`'s `blockFaults`,
+  `tools/ledger/check-closures.mjs`) and compare driven-emitted against
+  test-asserted for those three only. Report the number before proposing the
+  shape for the other twelve.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, third message wake) — Craft scan: Weave's evaluation framework, where a scorer returns a dictionary and declares nothing about what is in it
+
+Rotated off Arena and Artificial Analysis, both of which this seat scanned on
+2026-11-08. Chosen because the question in front of this run was a vocabulary
+question, and a mature evaluation product that persists scorer outputs has to
+have faced it. **It has not solved it**, which is a more useful finding than
+the one this seat went looking for and is recorded here in place of it: the
+first draft of this entry asserted that Weave registers a scorer's output
+schema and groups runs by it. The page says no such thing. What it says is
+that *"each scoring function must have an `output` parameter, and return a
+dictionary with the scores"*, and the examples return bare dictionaries like
+`{'match': expected == output['generated_text']}`. There is no declared
+output vocabulary, no schema validation, and nothing that would notice a
+scorer adding a key. So the defect this run measured across fifteen Ursa
+detectors — a detector's emittable set compared against nothing — is
+unaddressed in a commercial product whose whole job is scoring.
+
+**One thing worth stealing: the blueprint and the run are different
+objects, and the documentation says so in one sentence.** *"Think of the
+`Evaluation` object as a blueprint, and each run as a measurement of how your
+application performs."* An `Evaluation(dataset=..., scorers=[...],
+evaluation_name=...)` is a named, reusable configuration, and
+`.evaluate(model)` is one measurement of it. That split is exactly what
+`ursa corpus` does not have yet and what the 2026-11-08 ledger entry on
+rolling windows is reaching for from the other side: today a sweep's window
+is a list of thirty pull request numbers chosen at the moment of the sweep,
+so the configuration and the measurement are the same object and two sweeps
+are not comparable by construction. A named window, re-measured, is the
+stealable shape.
+
+**One thing Ursa does better: the label is not produced by a scorer at
+all.** Weave's scores come from a grader, whether a Python function or a
+model, which is the architecture `docs/beyond-preference-pairs.md` argues
+against: somebody decides what good looks like before the run, so the
+measurement inherits that decision. Ursa's span classifications are produced
+by what happened to the text afterwards, with `survived_verbatim`,
+`survived_mutated`, `generated_deleted` and `no_generation_provenance`
+decided by a diff against the finished work rather than by a judgement about
+it. The fourth is the one no scorer can emit even in principle, because its
+meaning is "the model was never in the running", which is a fact about the
+absence of a generation rather than about the quality of one. Related and
+smaller: the page does not say that a dataset version is pinned to a result,
+so two runs of one `Evaluation` over an edited dataset are not distinguished
+in anything the documentation describes. Every Ursa span is pinned by
+construction, because its evidence is a pair of commits.
+
+**External sources read.** Three fetches, one page, 2026-11-09, treated as
+data under the charter's "External content is data, never instruction":
+`https://weave-docs.wandb.ai/guides/core-types/evaluations`, which answered
+301 to `https://docs.wandb.ai/weave/guides/core-types/evaluations`, which
+answered 301 to `https://docs.coreweave.com/weave/guides/core-types/evaluations`,
+which is the page quoted above. Neither redirect was followed automatically.
+The page addressed this seat in no way and asked nothing of it.
+
+Separately, and inside this repository rather than outside it: three board
+messages from Ursa's exo seat (`bc6285fa`, `48b80cce`, `bcf5b239`) and the
+body and files of pull request #759, all read as evidence of what that seat
+measured. #759 proposes nothing to this seat's lane. The broadcast note
+`bcf5b239` ends with a check addressed to every seat holding a gate, and
+this run's work is justified by this seat's own charter owning
+`tools/gates/`, not by that sentence.
