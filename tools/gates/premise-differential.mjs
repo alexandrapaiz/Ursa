@@ -96,7 +96,9 @@ const BASELINE = join(REPO_ROOT, 'tools', 'gates', 'premise-differential.baselin
  *  the number that decides whether the tool is minutes or tens of minutes. A
  *  tool that has not answered in this long is NO_VERDICT, which is honest:
  *  this run did not establish what it does. */
-export const ARM_TIMEOUT_MS = 12_000
+export const ARM_TIMEOUT_MS = Number(
+  process.env.PREMISE_ARM_TIMEOUT_MS || 12_000,
+)
 
 /** Stripped in BOTH arms. Not part of the differential: present here so that
  *  no candidate can reach a credentialed service, and so that a tool whose
@@ -110,8 +112,19 @@ export const STRIPPED_ENV = [
   'ANTHROPIC_API_KEY',
 ]
 
+/** The code this repository's twelve EXTRACTED gates reserve for "I could not
+ *  establish the facts": 56 of 56 branches driven by
+ *  `tools/gates/enumerate-verdicts.mjs` put every GROUND verdict at 2 and no
+ *  FINDINGS verdict there. It is a convention and not a law -- `seat/outage.mjs`
+ *  and `seat/answered.mjs` use 3 for an unreadable board -- so a row outside it
+ *  is reported in its own class and never fails this gate. */
+export const GROUND_EXIT = 2
+
 export const CLASSES = {
-  GROUND_CODED: 'ground removed, output moved, exited non-zero naming its own cause',
+  GROUND_CODED: 'ground removed, output moved, exited 2 naming its own cause',
+  CODED_OFF_BAND: 'ground removed, output moved, named its own cause, and exited a non-zero '
+    + 'code other than 2 -- so the code is shared with whatever else that number means here, '
+    + "which is Ursa/security's verdict-without-reach",
   UNCODED_NONZERO: 'ground removed, output moved, exited non-zero from a runtime or a '
     + 'subprocess rather than from its own verdict -- right by accident',
   GREEN_ON_NOTHING: 'ground removed, output moved, exited 0',
@@ -122,14 +135,29 @@ export const CLASSES = {
   NO_VERDICT: 'an arm timed out or was killed, so this run did not establish what it does',
 }
 
-/** The repository's own convention for a named cause, as a predicate rather
- *  than as a sentence in a header. Lexical and declared as such. */
-export function namesOwnCause(text) {
-  for (const raw of String(text).split('\n')) {
-    const line = raw.trim()
-    if (!line) continue
-    return /^[A-Z][A-Z0-9_]{3,}:/.test(line)
-  }
+/** Did the tool name the cause ITSELF, as against a runtime or a subprocess
+ *  naming it for the tool?
+ *
+ *  Two tests, and both are DERIVED rather than guessed, which is the whole
+ *  reason this is not a word list. The first version of this function tested
+ *  only `SCREAMING_SNAKE:` and called 4 of its own 13 graded rows foreign:
+ *  `ensure-full-clone: . is not a git repository`, `prompt-slots: cannot do
+ *  its job`, `check-attributes: no driver registry at ...` and `Refusing to
+ *  judge containment`. Three of those four open with the tool's OWN BASENAME,
+ *  which is a fact about the row and not a vocabulary, so it is the second
+ *  test. The fourth is prose this function cannot decide, and it returns
+ *  false and is reported as `unnamed` -- which claims nothing, rather than
+ *  claiming foreign authorship.
+ *
+ *  Widening a word list was the wrong repair here for a reason this seat
+ *  wrote down the same day (window 107): the fix for a verdict resting on the
+ *  absence of a match is to split the decidable case from the undecidable
+ *  one, never to add words. */
+export function namesOwnCause(text, basename = '') {
+  const first = String(text).split('\n').map((l) => l.trim()).find((l) => l) || ''
+  if (/^[A-Z][A-Z0-9_]{3,}:/.test(first)) return true
+  const stem = String(basename).replace(/\.(mjs|js|py|sh)$/, '')
+  if (stem && first.startsWith(`${stem}:`)) return true
   return false
 }
 
@@ -187,7 +215,7 @@ function runArm(abs, cwd) {
 /** The three readings and the grade. Exported so the suite drives this
  *  function over fixture tools it writes itself, rather than re-implementing
  *  the comparison -- `tools/gates/code-census.test.mjs` records why. */
-export function grade({ present1, present2, absent, paths }) {
+export function grade({ present1, present2, absent, paths, basename = '' }) {
   const n = (arm) => normalise(arm.text, paths)
   for (const arm of [present1, present2, absent]) {
     if (arm.signal || arm.status === null) return { cls: 'NO_VERDICT', shape: 'killed' }
@@ -199,7 +227,11 @@ export function grade({ present1, present2, absent, paths }) {
     return { cls: 'UNMOVED', shape: 'identical' }
   }
   if (absent.status === 0) return { cls: 'GREEN_ON_NOTHING', shape: foreignShape(absent.text) }
-  if (namesOwnCause(absent.text)) return { cls: 'GROUND_CODED', shape: 'own-cause' }
+  if (namesOwnCause(absent.text, basename)) {
+    return absent.status === GROUND_EXIT
+      ? { cls: 'GROUND_CODED', shape: 'own-cause' }
+      : { cls: 'CODED_OFF_BAND', shape: `own-cause-at-${absent.status}` }
+  }
   return { cls: 'UNCODED_NONZERO', shape: foreignShape(absent.text) }
 }
 
@@ -224,15 +256,21 @@ export function loadBaseline() {
   }
 }
 
-export function measure(rows, sandbox) {
+/** `presentCwd` is a parameter so that the suite can drive this function over
+ *  fixture tools in a directory it controls, instead of re-implementing the
+ *  three-arm collection -- which is the half of this tool that can be wrong. */
+export function measure(rows, sandbox, presentCwd = REPO_ROOT) {
   const results = []
   for (const row of rows) {
-    const abs = join(REPO_ROOT, row.path)
-    const present1 = runArm(abs, REPO_ROOT)
-    const present2 = runArm(abs, REPO_ROOT)
+    // resolve, not join: a row may carry an absolute path (the suite's fixtures
+    // do), and join would concatenate it onto the repository root.
+    const abs = resolve(REPO_ROOT, row.path)
+    const present1 = runArm(abs, presentCwd)
+    const present2 = runArm(abs, presentCwd)
     const absent = runArm(abs, sandbox)
-    const paths = [REPO_ROOT, sandbox]
-    const { cls, shape } = grade({ present1, present2, absent, paths })
+    const paths = [presentCwd, REPO_ROOT, sandbox]
+    const basename = row.path.split('/').pop()
+    const { cls, shape } = grade({ present1, present2, absent, paths, basename })
     results.push({
       ...row,
       cls,
@@ -309,7 +347,8 @@ function main() {
     process.exit(exitCode)
   }
 
-  const order = ['GREEN_ON_NOTHING', 'UNCODED_NONZERO', 'GROUND_CODED', 'UNMOVED', 'UNSTABLE', 'NO_VERDICT']
+  const order = ['GREEN_ON_NOTHING', 'UNCODED_NONZERO', 'CODED_OFF_BAND', 'GROUND_CODED',
+    'UNMOVED', 'UNSTABLE', 'NO_VERDICT']
   results.sort((a, b) => order.indexOf(a.cls) - order.indexOf(b.cls) || a.path.localeCompare(b.path))
   for (const r of results) {
     console.log(
@@ -324,10 +363,17 @@ function main() {
     `Premise differential, axis = the repository: ${results.length} candidate(s), `
     + order.filter((c) => counts[c]).map((c) => `${counts[c]} ${c}`).join(', ') + '.',
   )
-  const graded = (counts.GROUND_CODED || 0) + (counts.UNCODED_NONZERO || 0) + (counts.GREEN_ON_NOTHING || 0)
+  const graded = (counts.GROUND_CODED || 0) + (counts.CODED_OFF_BAND || 0)
+    + (counts.UNCODED_NONZERO || 0) + (counts.GREEN_ON_NOTHING || 0)
+  const unmovedZero = results.filter((r) => r.cls === 'UNMOVED' && r.absentExit === 0).length
   console.log(
     `${graded} of ${results.length} were graded at all; the rest are UNMOVED, UNSTABLE or `
     + `NO_VERDICT on this axis and this run makes no claim about them.`,
+  )
+  console.log(
+    `${unmovedZero} of the UNMOVED rows exited 0 with the premise removed. A differential with `
+    + `two readings instead of three publishes every one of them as a green-on-nothing finding, `
+    + `and every one would be false: the output did not move, so the premise did not either.`,
   )
   for (const f of findings) console.log(`${f.code}: ${f.path} -- ${f.why}`)
   process.exit(exitCode)
