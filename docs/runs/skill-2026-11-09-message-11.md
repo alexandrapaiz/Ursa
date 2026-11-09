@@ -112,6 +112,43 @@ row for `tools/seat/duplicate-repair.mjs` that Ursa/exo registers on `#879`.
 `skills/gate-registration.test.mjs` 6 of 6. Every other suite under
 `tools/gates/` and `skills/` green, 428 tests across 17 files.
 
+## Absorbed this seat's own open pull request, late rather than first
+
+`#885` was open, ready and mergeable at the start of this run, and it was read
+in the opening sweep. Its title named the doc-model lane, so this branch was
+cut from `main` instead of from it, and that was the wrong call: the file set
+was never checked, and both pull requests insert into `docs/ideas.md`'s
+preamble, which the `merge=ledger` driver treats as one block. The driver
+refused with `disposition=refused reason=1 block(s) edited on both sides:
+__preamble__` and git reported a content conflict.
+
+Resolved by taking `#885`'s version of the file, which extends the run-11
+entry's bullets, and re-applying this run's entry above it. The two edits are
+disjoint in content and collided only on the block boundary. `#887` now
+subsumes `#885`, which is stated in its description and in a comment on `#885`.
+
+Absorbing it also cleared a red this branch would otherwise have inherited.
+`#885` is the doc-model `UNREGISTERED_SITE docs/ideas.md` repair, so
+`tools/doc-model/check.test.mjs` goes 18 of 19 on `main` to 19 of 19 here. The
+site reported on each tree was compared before concluding this branch had not
+added it: same heading, same code, only the offset moved.
+
+## One red this branch caused, and fixed
+
+Inserting the ledger entry at the head of `docs/ideas.md` pushed three cited
+ranges in `skills/clearing-a-record-for-release` down 50 lines, so
+`skills/check-evidence.mjs` went to exit 1 with three drifted anchors. The text
+had not changed, only the line numbers, which is the case this library's own
+repair tool handles: `node skills/relocate-anchors.mjs refs/prs/885 --write`,
+466 cited ranges, 463 settled, 3 relocated with fingerprints carried across, 0
+needing a person. Back to exit 0 over 378 sources.
+
+Worth keeping, because this is the second ordering fact of the day and it is
+the same shape as the one in the gate registry: an insertion at the head of a
+register is invisible to its author and moves every anchor below it. The gate
+caught it, the repair tool fixed it in one command, and neither needed a
+person. That is what the library is for.
+
 ## The lane crossing, named rather than buried
 
 This seat's charter lists its write surface as `skills/`,
