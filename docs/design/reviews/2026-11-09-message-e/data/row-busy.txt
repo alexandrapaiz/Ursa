@@ -1,0 +1,10 @@
+activating row 2 of 3 with the keyboard, 1440x900
+
+mode    activeElement after Enter    node held  tabs back  after settle
+before  BODY                         True       7          BODY
+after   button[row 1].rec-row        True       0          button[row 1].rec-row
+
+tabs back = Tab presses needed to return to that row once the fetch
+settles. 0 means focus never left it.
+node held = the row's DOM node is the same object after the state
+change, so a focus loss is the attribute's and not a replacement's.

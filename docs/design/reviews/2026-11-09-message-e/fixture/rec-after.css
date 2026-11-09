@@ -1,0 +1,170 @@
+/* The row block of ursa-minor/app/globals.css, copied verbatim, plus the
+   five custom properties, the one global :focus-visible rule, and the few
+   Tailwind utilities the component carries on these elements. Nothing here
+   is written for the fixture.
+
+   SOURCE: this branch's working tree, the shipped rules
+*/
+
+:root {
+  --night: #020308;
+  --star: #e8edf7;
+  --dim: #707fa0;
+  --polar: #a8c7fa;
+  --line: #141b2b;
+  --font-sans: "Helvetica Neue", -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+:focus-visible {
+  outline: 1px solid var(--polar);
+  outline-offset: 3px;
+}
+
+.rec-row-id {
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition:
+    text-decoration-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* The busy guard on every `.rec-row` rule below is `[aria-disabled="true"]`
+   and not `:disabled`, and it has to stay that way.
+
+   The row used to carry the `disabled` attribute while a record was being
+   fetched, and `disabled` is not a styling choice: a disabled button is
+   not focusable, so the state change took focus off the row the person had
+   just activated and left it on <body>. Measured 2026-11-09 at 1440x900,
+   activating row 2 of 3 from the keyboard: BODY, and 7 Tab presses back to
+   that row once the fetch settled. The row now carries `aria-disabled`, it
+   keeps its focus and its place in the accessibility tree, and the click is
+   refused by the handler instead.
+
+   `:disabled` therefore matches nothing on this control any more, so a
+   guard written with it would be a guard that never fires and the wash
+   would light up under the pointer while the list is busy. Specificity is
+   unchanged: an attribute selector and a pseudo-class both contribute the
+   same, and `:not()` takes its argument's. `.cta` further up this file is
+   genuinely `disabled` and keeps `:not(:disabled)`. */
+.rec-row[aria-disabled="true"] {
+  /* was `disabled:cursor-wait`, a Tailwind utility, and it moves here
+     rather than becoming `aria-disabled:cursor-wait` because this run had
+     no disk to install the site's dependencies and so could not build the
+     stylesheet to see whether that variant was emitted. The rest of this
+     control's states are declared in this file already, so the cursor is
+     not a new kind of thing to put here. */
+  cursor: wait;
+}
+
+@media (hover: hover) {
+  .rec-row:hover:not([aria-disabled="true"]) .rec-row-id {
+    text-decoration-color: var(--polar);
+  }
+}
+
+.rec-row:focus-visible .rec-row-id,
+.rec-row:active:not([aria-disabled="true"]) .rec-row-id {
+  text-decoration-color: var(--polar);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rec-row-id {
+    transition-duration: 1ms;
+  }
+}
+
+/*
+ * The row's own wash, which the benchmark that prescribed it predates by
+ * six weeks.
+ *
+ * The "hover craft" note further up this file is the 2026-09-24 reading of
+ * Linear, Vercel and Elicit, and the one sentence in it about a row says
+ * Linear washes a hovered row with rgba(255,255,255,0.03) over 160ms. That
+ * reading was translated into `.quiet-link`, which is a 230x47 button, and
+ * the site's only actual row never got it.
+ *
+ * Measured 2026-11-09 (run k) with `verify-hover.mjs` and `diff-frames.py`
+ * at 1440: the whole hover response of `.rec-row`, a 960x106 button and the
+ * primary control of the set view, was 218 pixels, 0.177 per cent of its
+ * own box, confined to one pixel row and 217 of its 960 columns. That is
+ * the id's underline and nothing else. For scale, in the same sweep
+ * `.quiet-link` moved 65.6 per cent of its box and a 216x19 inline span
+ * moved 43.7. The largest control on the site had the smallest hover on
+ * it, by two orders of magnitude.
+ *
+ * Light and not movement, which is the benchmark's actual finding: all
+ * three sites animate light or colour rather than moving the control. So
+ * no lift and no spring here. `--spring-lift` stays on the two box-shaped
+ * buttons it was measured for, because a third motion character is a third
+ * identity and the same benchmark found thirteen groups of same-shaped
+ * controls across six products with not one giving its members different
+ * physics.
+ *
+ * 0.03 is Linear's own figure rather than `.quiet-link`'s 0.06. The row is
+ * roughly nine times the area of that button, and a wash reads by total
+ * light rather than by alpha.
+ *
+ * On the item and not on the button, because the item carries the padding
+ * (see the note on the markup) and a wash on the button alone would be a
+ * band floating inside the row with the padding dark above and below it.
+ * Keyed off the button's hover rather than the item's, so the wash answers
+ * the row's control and not the address link that sits beside it. The item
+ * is geometrically untouched: no padding and no margin move, so nothing
+ * about the row at rest changes, including the width of its hairline.
+ *
+ * The asymmetry is this file's established one, 160ms in and 260ms out, the
+ * wash answering immediately and taking longer to fade.
+ */
+.rec-item {
+  background-color: rgba(232, 237, 247, 0);
+  transition: background-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* `:has()` is guarded the way `linear()` is above: a browser without it
+   never enters the block and the row keeps the underline-only hover that
+   shipped before today, rather than losing the hover to an invalid
+   selector. */
+@supports selector(:has(*)) {
+  @media (hover: hover) {
+    .rec-item:has(.rec-row:hover:not([aria-disabled="true"])) {
+      background-color: rgba(232, 237, 247, 0.03);
+      transition-duration: 160ms;
+    }
+  }
+
+  /* Touch has no hover at all, so the press is the only thing that can
+     answer the finger. Same state, same reason `.rec-row-id`'s `:active`
+     is outside the `(hover: hover)` block. */
+  .rec-item:has(.rec-row:active:not([aria-disabled="true"])) {
+    background-color: rgba(232, 237, 247, 0.03);
+    transition-duration: 160ms;
+  }
+}
+
+/* The hovered and pressed states each set their own duration for the
+   asymmetry above, and both selectors outrank a bare `.rec-item`, so a
+   reduced-motion block written against `.rec-item` alone is overridden in
+   exactly the state that moves. Caught by `check-row-wash.mjs`, which read
+   0.16s here while the rule above it said 1ms. `.rec-row-id` does not have
+   this problem because its hover rule sets a colour and never a duration,
+   which is why copying its shape was not enough. */
+@media (prefers-reduced-motion: reduce) {
+  .rec-item,
+  .rec-item:has(.rec-row:hover:not([aria-disabled="true"])),
+  .rec-item:has(.rec-row:active:not([aria-disabled="true"])) {
+    transition-duration: 1ms;
+  }
+}
+
+/* ---- the Tailwind utilities the component carries on these three
+        elements, and the page frame. Identical between the two files. ---- */
+body { background: var(--night); font-family: var(--font-sans); margin: 0; padding: 24px; }
+ul { list-style: none; margin: 0; padding: 0; max-width: 960px; }
+.rec-item { padding-top: 1.75rem; padding-bottom: 1.75rem; }
+.rec-item + .rec-item { border-top: 1px solid var(--line); }
+.rec-row { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+.rec-row-id { display: block; overflow-wrap: anywhere; font-family: ui-monospace, monospace; font-size: 0.76rem; line-height: 1.6; letter-spacing: 0.04em; color: var(--polar); }
+.rec-meta { display: block; margin-top: 0.75rem; font-family: ui-monospace, monospace; font-size: 0.68rem; line-height: 1.9; letter-spacing: 0.04em; color: var(--dim); }
+.addr { display: block; margin-top: 0.75rem; font-family: ui-monospace, monospace; font-size: 0.68rem; color: var(--dim); }

@@ -171,6 +171,83 @@ invocation under `--until "button"` measured one of them in the wrong
 state and reported 1 target where there are 16, and exited 0. Gate each
 state on a selector only that state has.
 
+## When there is no disk for `npm install`, there is still a browser
+
+Measured 2026-11-09 (run e). The volume `/tmp` and `/srv/asc` share is a
+single 45G filesystem carrying about twenty seats' checkouts, and it was at
+100 per cent with 392M free. Run `-c` had attempted an install at a
+comparable figure that morning and it "consumed all of it and left the tree
+half-unpacked", which is the anti-idempotent failure in
+`docs/agents/runner-facts.md` §18/§82: each retry needs more room than the
+last.
+
+**The browser is not on the volume that is full.** Playwright's chromium and
+a Python Playwright are both cached under `/srv/asc/home/.cache/`, so
+driving a browser against a fixture, or against anything already built,
+costs zero disk. Three facts about that path on this host:
+
+- **It is `aarch64`.** The libs prefix is laid out under
+  `usr/lib/aarch64-linux-gnu`. `lib/browser.mjs` joins
+  `x86_64-linux-gnu` onto `LD_LIBRARY_PATH`, which is the right name on a
+  different host and resolves to nothing here.
+- **The full `chrome` does not start and `chrome-headless-shell` does.**
+  With the prefix on the path, `ldd` reports `libatk-bridge-2.0.so.0`,
+  `libcups.so.2`, `libcairo.so.2` and `libpango-1.0.so.0` missing from
+  `chrome`, and reports nothing missing from the shell. Six libraries went
+  into `CHROMIUM_LIBS` that morning one failed launch at a time. These four
+  are not needed at all if the shell is what you launch.
+- **Pass `executable_path` rather than letting the library resolve it.**
+  Python Playwright 1.64.1 asks for build 1248; 1254 is what is installed,
+  and the error it prints for that ("Executable doesn't exist") is the same
+  one it prints when no browser is installed at all.
+
+```bash
+V=/srv/asc/home/.cache/asc-frontend-venv
+L=/srv/asc/home/.cache/asc-frontend-libs
+S=/srv/asc/home/.cache/ms-playwright/chromium_headless_shell-1254/chrome-headless-shell-linux-arm64/chrome-headless-shell
+LD_LIBRARY_PATH="$L/usr/lib/aarch64-linux-gnu:$L/usr/lib" "$V/bin/python3" your-script.py
+# ... launch(executable_path=S)
+```
+
+Both of this run's instruments are written against it:
+`reviews/2026-11-09-message-e/data/measure-row-busy.py` and
+`check-wash-guard.py`. What this path cannot do is render the site, so a
+run on it measures fixtures over the real stylesheet and has to say so;
+see that run's notes §1 for where the line falls.
+
+## Three ways a driven dev server looks broken when it is only refusing
+
+Measured 2026-11-09 (run e), reaching `/record`'s set view. Each of these
+presents as a hung or dead page, and none of them logs anything that names
+itself. Together they cost more of that run than the defect it was chasing.
+
+- **Drive `localhost`, never `127.0.0.1`.** Next refuses dev requests from
+  an origin outside `allowedDevOrigins`, so the client runtime never starts
+  and the page stays as server-rendered HTML. Typed text still lands in the
+  DOM and still reads back correctly from `input.value`, but no React state
+  updates, so anything gated on state — here `disabled={busy || !address}`
+  — stays gated forever. The only symptom is a failed HMR websocket, which
+  looks like an unrelated dev-tooling complaint. **Check hydration by
+  asserting on a control that state controls, not on the value you typed.**
+- **A field under a tap-target overlay cannot be clicked.** `.rec-field` is
+  a label carrying the 44px press over the input, so a click at the input's
+  own box is intercepted and times out at 30s. `page.focus()` then type.
+  This is L29 arriving as an instrument failure rather than a site one.
+- **Scope the submit button to its own form.** `/record` renders two
+  address forms, so a bare `button[type="submit"]` resolves to two elements,
+  takes the first, and waits 30s for a button that is disabled because its
+  own field is empty.
+
+`reviews/2026-11-09-message-e/data/drive-real-set-view.py` carries all
+three in its header and is the worked example.
+
+**And one about the frames, not the drive.** That script clips to the row
+after `scrollIntoView`, which lands at a different offset on each load, so
+its frames are not pixel-comparable between two runs of it. The run that
+wrote it published no diff for them and said so. If you need a pixel
+comparison across arms, clip to something that does not move, or do not
+scroll.
+
 ## Three things to know before you trust a number out of this
 
 **Calibrate first.** Point `sample-motion.mjs` and `fit-motion.mjs` at

@@ -132,10 +132,40 @@ done
 
 # Only then the directory, because the reverse order is what leaves a
 # process whose owning run can no longer be named.
+# REFUSE TO DELETE TRACKED FILES. Measured 2026-11-09 by doing it: this
+# seat invoked the script with FE_RUN pointing at `ursa-minor/`, the site's
+# own directory inside the checkout, and the script removed 782MB of
+# node_modules AND every source file under it. The work survived only
+# because it had been committed and pushed minutes earlier.
+#
+# It is the same class L64 named for the process match, now on the other
+# half of the script. A teardown wide enough to remove every scratch
+# directory is wide enough to remove the checkout, and a cleanup that can
+# destroy the run is worse than no cleanup. The caller named the wrong
+# path, and a script that deletes recursively has to be unhappy to obey a
+# path it was given rather than one it created.
+#
+# The test is git's own answer about the path, so it needs no list of
+# blessed names and it stays right if the repository is laid out
+# differently: if `git ls-files` finds anything tracked under it, the
+# directory is part of somebody's work tree and this script will not take
+# it. Scratch directories the kit creates are untracked by construction,
+# so nothing it is meant to remove is caught.
+guarded=0
+tracked_under() {
+  git -C "$1" rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 1
+  [ -n "$(git -C "$1" ls-files -- . 2>/dev/null | head -1)" ]
+}
+
 removed=0
 for d in "${FE_RUN:-}" "$HERE"/.fe-run-*; do
   [ -z "$d" ] && continue
   [ -e "$d" ] || continue
+  if tracked_under "$d"; then
+    echo "REFUSED  $d  holds files tracked by git; not a scratch directory"
+    guarded=$((guarded + 1))
+    continue
+  fi
   sz="$(du -sh "$d" 2>/dev/null | cut -f1)"
   if [ "$DRY" = 1 ]; then
     echo "would remove  $d  ($sz)"
@@ -147,4 +177,4 @@ done
 
 # A count line on every path, so "nothing to do" and "did not look" are
 # different outputs. This is the kit's own narration rule (L53).
-echo "teardown: servers_stopped=$killed servers_left=$skipped dirs_removed=$removed dry_run=$DRY"
+echo "teardown: servers_stopped=$killed servers_left=$skipped dirs_removed=$removed dirs_refused=$guarded dry_run=$DRY"
