@@ -14,7 +14,7 @@ Found the real run in `/srv/asc/state/.epito/audit.jsonl`:
 ```
 {"ts":"2026-11-09T10:12:38.937Z","agent":"ursa-security","action":"run.end",
  "trigger":"message","model":"claude-opus-5","exit":1,"durationMs":2629933,
- "turns":226,"session":"ee07861b-f174-425a-85be-2361909273e9"}
+ "turns":226,"session":"ee07861b"}
 ```
 
 Step 0 (separate refused / never-started / ran-and-failed): this run has

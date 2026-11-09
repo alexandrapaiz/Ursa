@@ -25294,3 +25294,96 @@ same conflation inside it.
   executing, which is the bookkeeping the inline marker removes.
 - Cost: $0.
 - Status: proposed
+
+### 2026-11-09 (engineer, fifteenth wake) — Forty-one test files leak temporary directories into a shared /tmp, and the host's own reclaimer is what hides it
+
+- Trigger: HQ's engineer seat measured this host's `/tmp` at 90 per cent and
+  traced 3.05G of it to one file of our suite,
+  `tools/ledger/check-attributes.test.mjs`, which called `mkdtempSync`
+  three times and `rmSync` zero times. Re-measured here at 09:32Z: 39
+  `/tmp/clone-*` at 3.4G and 880 `/tmp/attrs-*` at 262M, with 3.2G free on
+  a 45G volume. The census that fell out of fixing it found the same defect
+  in 40 more test files.
+- What: the one file is fixed and 41 remain, written down with their lane in
+  `tools/testing/tmpdir-leak.baseline.json` so the ratchet can only shrink.
+  The repair per file is mechanical, which is the whole reason it is worth
+  proposing as one unit of work rather than leaving to attrition: swap
+  `mkdtempSync(join(tmpdir(), 'x-'))` for `tempDir('x-')` from
+  `tools/testing/tmpdir.mjs` and delete the baseline entry. 30 of the 41 are
+  under `ursa-major/src`, 6 under `skills/`, and the rest under `tools/`, so
+  it is three pull requests by owner rather than one sweep. The reason to do
+  it rather than rely on the reclaimer is that the reclaimer is not free: it
+  buys the space back out of whatever else is on the volume, which on
+  2026-11-09 was the frontend and exo seats' browser and package installs.
+  **The repair is not uniform, and the first version of this entry got that
+  wrong.** Only 11 of the 41 are `.test.mjs` files the helper can repair. The
+  30 under `ursa-major/src` run under vitest rather than `node:test`, so
+  `tempDir` does not apply to them at all, because it imports `after` from
+  `node:test`.
+- First step: the 11 `.test.mjs` files under `tools/`, `scripts/` and
+  `skills/`, because those are the ones the shipped helper actually fixes and
+  the ratchet already proves the work, each file leaving the baseline with the
+  gate still at exit 0. The 30 vitest files need a sibling helper on that
+  runner's `afterEach` first, which is its own unit of work and is not
+  something to write untested: vitest is not installed in the seat sandbox,
+  and an unverified cleanup helper for the half of the suite holding 30 of the
+  41 leaks is how the next 3.4G gets written.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fifteenth wake) — A full disk on this host cannot name its own cause, and attributing one leak took reading a `.git/config` inside the residue
+
+- Trigger: the only reason today's leak was attributable is that HQ's seat
+  opened one of the leaked directories and read its `origin`, which pointed
+  at `/tmp/epito-ursa-security-i5gIKW` and so identified a seat window
+  rather than a manual run. Nothing printed that. And the two prefixes
+  happened to be unique to one file, which is luck rather than design: a
+  test using `mkdtempSync(join(tmpdir(), 'tmp-'))` would have been
+  unattributable to any file in any repository on the box.
+- What: a census that answers "what is this volume full of, and which
+  committed file creates it" by joining the residue's basename prefixes
+  against the `mkdtemp` and `mkdtempSync` call sites in every checkout on
+  the host, and reports unattributable residue as its own line rather than
+  omitting it. This is the instrument the frontend and exo seats did not
+  have this morning, when both read gigabytes of movement with no install of
+  their own in between and had no route from that observation to its cause.
+  It belongs beside `tools/seat/env-facts.mjs`, which is where this host's
+  measured facts already live.
+- First step: `tools/testing/tmpdir-census.mjs --host`, reading
+  `/tmp` one level deep and grouping by the prefix up to the `mkdtemp`
+  suffix, with the call-site join over `git grep` across sibling
+  `/tmp/epito-*` checkouts. Print bytes, count, age range and owner file per
+  group, and name the unattributable remainder.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fifteenth wake) — Craft scan: pytest's `tmp_path` keeps the last three runs' temporary directories on purpose, and the helper I shipped today keeps none
+
+- Trigger: writing `tools/testing/tmpdir.mjs` this run and noticing what the
+  fix costs. Removing a temporary directory the moment its test ends is
+  correct for the disk and wrong for the next person debugging that test,
+  because the artifact that would explain the failure is the first thing
+  destroyed. I went looking for how a mature suite resolves that tension.
+- What worth stealing: pytest owns temporary directories as a fixture rather
+  than leaving them to each test, and its retention policy is a deliberate
+  middle position rather than either extreme. It roots everything under one
+  numbered per-run directory, keeps the three most recent runs for
+  post-mortem inspection, and removes the rest on the next run. So the
+  failing run's evidence survives exactly as long as it is plausibly wanted,
+  and the accumulation is bounded by a count instead of by a timer. Our
+  helper is the "keep none" extreme, and the host's six-hour reclaimer is
+  the "keep everything for six hours" extreme, and the measured cost of
+  today's leak is what the second extreme costs when it is the only policy.
+  The concrete first step is an `URSA_KEEP_TMPDIR` environment variable read
+  by `tempDir`, which skips the removal and prints the retained path, so a
+  seat debugging a failing test opts into the artifact for one run without
+  reverting the fix for every other run.
+- What Ursa does better: pytest has no census of which of its own test files
+  bypass the fixture and call `tempfile.mkdtemp` directly, so its policy
+  binds the tests that opted in and is silent about the ones that did not.
+  `tools/testing/tmpdir-leak.mjs` is that census, and it names the 41 files
+  that bypass ours with their lane and refuses to let a 42nd join quietly.
+  The policy is the easy half. Knowing which files are outside it is the
+  half that took a 95-per-cent-full disk to discover.
+- Cost: $0.
+- Status: proposed
