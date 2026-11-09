@@ -1,0 +1,631 @@
+{
+ "base": "http://127.0.0.1:4959",
+ "rows": [
+  {
+   "page": "home",
+   "viewport": "tablet",
+   "id": "p0",
+   "tag": "button",
+   "text": "copy",
+   "stop": 0,
+   "focusVisible": true,
+   "box": {
+    "w": 57,
+    "h": 29
+   },
+   "indicatorPx": 200,
+   "driftPx": 0,
+   "minAreaPx": 360,
+   "share": 1,
+   "median": 11.271134008323301,
+   "p5": 11.257727245869162,
+   "min": 10.938569891857911,
+   "areaRatio": 0.5555555555555556,
+   "verdict": "ok"
+  },
+  {
+   "page": "home",
+   "viewport": "tablet",
+   "id": "p1",
+   "tag": "button",
+   "text": "copy",
+   "stop": 1,
+   "focusVisible": true,
+   "box": {
+    "w": 57,
+    "h": 29
+   },
+   "indicatorPx": 200,
+   "driftPx": 0,
+   "minAreaPx": 360,
+   "share": 1,
+   "median": 11.271134008323301,
+   "p5": 11.257727245869162,
+   "min": 10.938569891857911,
+   "areaRatio": 0.5555555555555556,
+   "verdict": "ok"
+  },
+  {
+   "page": "home",
+   "viewport": "tablet",
+   "id": "p2",
+   "tag": "a",
+   "text": "the record viewer",
+   "stop": 2,
+   "focusVisible": true,
+   "box": {
+    "w": 541,
+    "h": 43
+   },
+   "indicatorPx": 346,
+   "driftPx": 0,
+   "minAreaPx": 2353,
+   "share": 1,
+   "median": 11.247964878107405,
+   "p5": 11.247964878107405,
+   "min": 8.508662567786944,
+   "areaRatio": 0.14704632384190394,
+   "verdict": "ok"
+  },
+  {
+   "page": "home",
+   "viewport": "tablet",
+   "id": "p3",
+   "tag": "a",
+   "text": "a published record",
+   "stop": 3,
+   "focusVisible": true,
+   "box": {
+    "w": 556,
+    "h": 43
+   },
+   "indicatorPx": 366,
+   "driftPx": 0,
+   "minAreaPx": 2412,
+   "share": 1,
+   "median": 11.257727245869162,
+   "p5": 11.247964878107405,
+   "min": 9.42684210743228,
+   "areaRatio": 0.1517412935323383,
+   "verdict": "ok"
+  },
+  {
+   "page": "home",
+   "viewport": "tablet",
+   "id": "p4",
+   "tag": "button",
+   "text": "copy",
+   "stop": 5,
+   "focusVisible": true,
+   "box": {
+    "w": 57,
+    "h": 29
+   },
+   "indicatorPx": 200,
+   "driftPx": 0,
+   "minAreaPx": 360,
+   "share": 1,
+   "median": 11.33273664214714,
+   "p5": 11.33273664214714,
+   "min": 11.33273664214714,
+   "areaRatio": 0.5555555555555556,
+   "verdict": "ok"
+  },
+  {
+   "page": "set",
+   "viewport": "tablet",
+   "id": "p0",
+   "tag": "a",
+   "text": "Ursa Minor",
+   "stop": 0,
+   "focusVisible": true,
+   "box": {
+    "w": 135,
+    "h": 24
+   },
+   "indicatorPx": 344,
+   "driftPx": 0,
+   "minAreaPx": 650,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 11.985685008047135,
+   "min": 11.985685008047135,
+   "areaRatio": 0.5292307692307693,
+   "verdict": "ok"
+  },
+  {
+   "page": "set",
+   "viewport": "tablet",
+   "id": "p1",
+   "tag": "a",
+   "text": "mini-fixture →",
+   "stop": 1,
+   "focusVisible": true,
+   "box": {
+    "w": 114,
+    "h": 17
+   },
+   "indicatorPx": 655,
+   "driftPx": 0,
+   "minAreaPx": 540,
+   "share": 0.4916030534351145,
+   "median": 2.8665382764618865,
+   "p5": 1.0063319640882924,
+   "min": 1.003327971303557,
+   "areaRatio": 1.212962962962963,
+   "verdict": "BELOW_FLOOR"
+  },
+  {
+   "page": "set",
+   "viewport": "tablet",
+   "id": "p2",
+   "tag": "a",
+   "text": "read it at its own address",
+   "stop": 2,
+   "focusVisible": true,
+   "box": {
+    "w": 169,
+    "h": 17
+   },
+   "indicatorPx": 400,
+   "driftPx": 0,
+   "minAreaPx": 759,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 11.985685008047135,
+   "min": 11.719597351540235,
+   "areaRatio": 0.5270092226613966,
+   "verdict": "ok"
+  },
+  {
+   "page": "set",
+   "viewport": "tablet",
+   "id": "p3",
+   "tag": "input",
+   "text": "the address of a published site",
+   "stop": 3,
+   "focusVisible": true,
+   "box": {
+    "w": 569,
+    "h": 27
+   },
+   "indicatorPx": 1789,
+   "driftPx": 0,
+   "minAreaPx": 2401,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 10.000612704234412,
+   "min": 10.000612704234412,
+   "areaRatio": 0.7451062057476051,
+   "verdict": "ok"
+  },
+  {
+   "page": "set",
+   "viewport": "tablet",
+   "id": "p4",
+   "tag": "input",
+   "text": "",
+   "stop": 4,
+   "focusVisible": true,
+   "box": {
+    "w": 1,
+    "h": 1
+   },
+   "indicatorPx": 0,
+   "driftPx": 0,
+   "minAreaPx": 24,
+   "verdict": "NO_INDICATOR"
+  },
+  {
+   "page": "set",
+   "viewport": "tablet",
+   "id": "p5",
+   "tag": "input",
+   "text": "the address of a published record",
+   "stop": 5,
+   "focusVisible": true,
+   "box": {
+    "w": 401,
+    "h": 27
+   },
+   "indicatorPx": 1285,
+   "driftPx": 0,
+   "minAreaPx": 1730,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 10.000612704234412,
+   "min": 10.000612704234412,
+   "areaRatio": 0.7427745664739884,
+   "verdict": "ok"
+  },
+  {
+   "page": "record",
+   "viewport": "tablet",
+   "id": "p0",
+   "tag": "a",
+   "text": "Ursa Minor",
+   "stop": 0,
+   "focusVisible": true,
+   "box": {
+    "w": 135,
+    "h": 24
+   },
+   "indicatorPx": 0,
+   "driftPx": 0,
+   "minAreaPx": 650,
+   "verdict": "NO_INDICATOR"
+  },
+  {
+   "page": "record",
+   "viewport": "tablet",
+   "id": "p1",
+   "tag": "span",
+   "text": "no generation provenance: # Field Notes ",
+   "stop": 1,
+   "focusVisible": true,
+   "box": {
+    "w": 216,
+    "h": 19
+   },
+   "indicatorPx": 198,
+   "driftPx": 448,
+   "minAreaPx": 956,
+   "verdict": "UNSTABLE"
+  },
+  {
+   "page": "record",
+   "viewport": "tablet",
+   "id": "p2",
+   "tag": "span",
+   "text": "survived verbatim: The resolver joins fi",
+   "stop": 2,
+   "focusVisible": true,
+   "box": {
+    "w": 560,
+    "h": 19
+   },
+   "indicatorPx": 1186,
+   "driftPx": 0,
+   "minAreaPx": 2332,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 11.985685008047135,
+   "min": 11.985685008047135,
+   "areaRatio": 0.5085763293310464,
+   "verdict": "ok"
+  },
+  {
+   "page": "record",
+   "viewport": "tablet",
+   "id": "p3",
+   "tag": "span",
+   "text": "survived mutated: Provenance is establis",
+   "stop": 3,
+   "focusVisible": true,
+   "box": {
+    "w": 592,
+    "h": 19
+   },
+   "indicatorPx": 1250,
+   "driftPx": 0,
+   "minAreaPx": 2460,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 11.985685008047135,
+   "min": 11.985685008047135,
+   "areaRatio": 0.508130081300813,
+   "verdict": "ok"
+  },
+  {
+   "page": "record",
+   "viewport": "tablet",
+   "id": "p4",
+   "tag": "span",
+   "text": "no generation provenance: I wrote this c",
+   "stop": 4,
+   "focusVisible": true,
+   "box": {
+    "w": 624,
+    "h": 43
+   },
+   "indicatorPx": 1364,
+   "driftPx": 0,
+   "minAreaPx": 2685,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 11.985685008047135,
+   "min": 11.985685008047135,
+   "areaRatio": 0.5080074487895717,
+   "verdict": "ok"
+  },
+  {
+   "page": "record",
+   "viewport": "tablet",
+   "id": "p5",
+   "tag": "span",
+   "text": "survived verbatim: Outcome records give ",
+   "stop": 5,
+   "focusVisible": true,
+   "box": {
+    "w": 456,
+    "h": 19
+   },
+   "indicatorPx": 978,
+   "driftPx": 0,
+   "minAreaPx": 1916,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 11.985685008047135,
+   "min": 11.985685008047135,
+   "areaRatio": 0.5104384133611691,
+   "verdict": "ok"
+  },
+  {
+   "page": "record",
+   "viewport": "tablet",
+   "id": "p6",
+   "tag": "button",
+   "text": "01-claude · turn 1 · claude-opus-563.2% ",
+   "stop": 6,
+   "focusVisible": true,
+   "box": {
+    "w": 689,
+    "h": 17
+   },
+   "indicatorPx": 1438,
+   "driftPx": 0,
+   "minAreaPx": 2840,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 11.985685008047135,
+   "min": 11.985685008047135,
+   "areaRatio": 0.5063380281690141,
+   "verdict": "ok"
+  },
+  {
+   "page": "record",
+   "viewport": "tablet",
+   "id": "p7",
+   "tag": "button",
+   "text": "02-chatgpt · turn 1 · gpt-5100.0% surviv",
+   "stop": 7,
+   "focusVisible": true,
+   "box": {
+    "w": 689,
+    "h": 17
+   },
+   "indicatorPx": 1438,
+   "driftPx": 0,
+   "minAreaPx": 2840,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 11.985685008047135,
+   "min": 11.985685008047135,
+   "areaRatio": 0.5063380281690141,
+   "verdict": "ok"
+  },
+  {
+   "page": "record",
+   "viewport": "tablet",
+   "id": "p8",
+   "tag": "a",
+   "text": "/records/mini-fixture.json",
+   "stop": 8,
+   "focusVisible": true,
+   "box": {
+    "w": 208,
+    "h": 18
+   },
+   "indicatorPx": 480,
+   "driftPx": 0,
+   "minAreaPx": 920,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 11.985685008047135,
+   "min": 10.288808890277647,
+   "areaRatio": 0.5217391304347826,
+   "verdict": "ok"
+  },
+  {
+   "page": "record",
+   "viewport": "tablet",
+   "id": "p9",
+   "tag": "a",
+   "text": "a record of your own",
+   "stop": 9,
+   "focusVisible": true,
+   "box": {
+    "w": 138,
+    "h": 17
+   },
+   "indicatorPx": 340,
+   "driftPx": 0,
+   "minAreaPx": 638,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 11.985685008047135,
+   "min": 11.985685008047135,
+   "areaRatio": 0.5329153605015674,
+   "verdict": "ok"
+  },
+  {
+   "page": "address",
+   "viewport": "tablet",
+   "id": "p0",
+   "tag": "a",
+   "text": "Ursa Minor",
+   "stop": 0,
+   "focusVisible": true,
+   "box": {
+    "w": 135,
+    "h": 24
+   },
+   "indicatorPx": 344,
+   "driftPx": 0,
+   "minAreaPx": 650,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 11.985685008047135,
+   "min": 11.985685008047135,
+   "areaRatio": 0.5292307692307693,
+   "verdict": "ok"
+  },
+  {
+   "page": "address",
+   "viewport": "tablet",
+   "id": "p1",
+   "tag": "input",
+   "text": "a record address",
+   "stop": 1,
+   "focusVisible": true,
+   "box": {
+    "w": 554,
+    "h": 27
+   },
+   "indicatorPx": 1741,
+   "driftPx": 0,
+   "minAreaPx": 2340,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 10.000612704234412,
+   "min": 10.000612704234412,
+   "areaRatio": 0.744017094017094,
+   "verdict": "ok"
+  },
+  {
+   "page": "address",
+   "viewport": "tablet",
+   "id": "p2",
+   "tag": "a",
+   "text": "read the whole set instead",
+   "stop": 2,
+   "focusVisible": true,
+   "box": {
+    "w": 566,
+    "h": 37
+   },
+   "indicatorPx": 426,
+   "driftPx": 0,
+   "minAreaPx": 2427,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 11.985685008047135,
+   "min": 11.985685008047135,
+   "areaRatio": 0.17552533992583436,
+   "verdict": "ok"
+  },
+  {
+   "page": "address",
+   "viewport": "tablet",
+   "id": "p3",
+   "tag": "a",
+   "text": "Opening the same record through its site",
+   "stop": 3,
+   "focusVisible": true,
+   "box": {
+    "w": 274,
+    "h": 17
+   },
+   "indicatorPx": 612,
+   "driftPx": 0,
+   "minAreaPx": 1182,
+   "share": 1,
+   "median": 11.985685008047135,
+   "p5": 11.985685008047135,
+   "min": 11.985685008047135,
+   "areaRatio": 0.5177664974619289,
+   "verdict": "ok"
+  },
+  {
+   "page": "404",
+   "viewport": "tablet",
+   "id": "p0",
+   "tag": "a",
+   "text": "Ursa Minor",
+   "stop": 0,
+   "focusVisible": true,
+   "box": {
+    "w": 135,
+    "h": 24
+   },
+   "indicatorPx": 344,
+   "driftPx": 0,
+   "minAreaPx": 650,
+   "share": 1,
+   "median": 11.33273664214714,
+   "p5": 11.247964878107405,
+   "min": 8.541892975088755,
+   "areaRatio": 0.5292307692307693,
+   "verdict": "ok"
+  },
+  {
+   "page": "404",
+   "viewport": "tablet",
+   "id": "p1",
+   "tag": "a",
+   "text": "Back to Ursa Minor",
+   "stop": 1,
+   "focusVisible": true,
+   "box": {
+    "w": 230,
+    "h": 47
+   },
+   "indicatorPx": 11270,
+   "driftPx": 0,
+   "minAreaPx": 1124,
+   "share": 0.05146406388642413,
+   "median": 1.1178121791440043,
+   "p5": 1.1156340223578698,
+   "min": 1.0010879491088185,
+   "areaRatio": 10.026690391459075,
+   "verdict": "BELOW_FLOOR"
+  }
+ ],
+ "pageNotes": [
+  {
+   "page": "home",
+   "viewport": "tablet",
+   "declared": 5,
+   "stops": 6,
+   "measured": 5,
+   "unreachable": [],
+   "seconds": "24.5"
+  },
+  {
+   "page": "set",
+   "viewport": "tablet",
+   "declared": 6,
+   "stops": 6,
+   "measured": 6,
+   "unreachable": [],
+   "seconds": "7.2"
+  },
+  {
+   "page": "record",
+   "viewport": "tablet",
+   "declared": 10,
+   "stops": 10,
+   "measured": 10,
+   "unreachable": [],
+   "seconds": "7.2"
+  },
+  {
+   "page": "address",
+   "viewport": "tablet",
+   "declared": 4,
+   "stops": 4,
+   "measured": 4,
+   "unreachable": [],
+   "seconds": "4.7"
+  },
+  {
+   "page": "404",
+   "viewport": "tablet",
+   "declared": 2,
+   "stops": 2,
+   "measured": 2,
+   "unreachable": [],
+   "seconds": "11.2"
+  }
+ ]
+}

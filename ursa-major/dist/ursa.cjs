@@ -5274,7 +5274,7 @@ function resolverValue(by) {
 }
 function renderIndexPage(index) {
   const n2 = (x) => x.toLocaleString("en-US");
-  const pct = (part, whole) => whole > 0 ? (part / whole * 100).toFixed(1) + "%" : "\u2014";
+  const pct2 = (part, whole) => whole > 0 ? (part / whole * 100).toFixed(1) + "%" : "\u2014";
   const rows = index.records.map((r) => {
     const verbatim = r.charsByClass.survived_verbatim ?? 0;
     const mutated = r.charsByClass.survived_mutated ?? 0;
@@ -5284,9 +5284,9 @@ function renderIndexPage(index) {
       '<tr class="record">',
       cell("id", "Record", `<a href="${escapeAttr(r.html)}">${escapeHtml2(r.id)}</a>`),
       cell("num", "Final characters", n2(r.finalChars)),
-      cell("num verbatim", "Kept unchanged", pct(verbatim, r.finalChars)),
-      cell("num mutated", "Kept, edited", pct(mutated, r.finalChars)),
-      cell("num human", "No model behind it", pct(none, r.finalChars)),
+      cell("num verbatim", "Kept unchanged", pct2(verbatim, r.finalChars)),
+      cell("num mutated", "Kept, edited", pct2(mutated, r.finalChars)),
+      cell("num human", "No model behind it", pct2(none, r.finalChars)),
       cell("when", "Resolved", escapeHtml2(r.generatedAt.slice(0, 10))),
       cell("raw", "Raw record", `<a href="${escapeAttr(r.json)}">JSON</a>`),
       "</tr>"
@@ -5663,6 +5663,25 @@ function acceptanceOf(snap) {
   }
   return { accepted: null, basis: `${ref} is still open at capture time (${snap.capturedAt}); an unmerged PR is undeclared, never accepted`, at: null };
 }
+function instantMs(value) {
+  if (typeof value !== "string") return null;
+  if (!/(?:Z|[+-]\d{2}:?\d{2})$/.test(value)) return null;
+  const ms = Date.parse(value);
+  return Number.isNaN(ms) ? null : ms;
+}
+function instantBefore(a, b) {
+  const x = instantMs(a);
+  const y = instantMs(b);
+  return x !== null && y !== null && x < y;
+}
+function compareByInstant(a, b) {
+  const x = instantMs(a);
+  const y = instantMs(b);
+  if (x === null && y === null) return 0;
+  if (x === null) return 1;
+  if (y === null) return -1;
+  return x - y;
+}
 function statedCorrectionsFor(snap, paths, afterSha) {
   const byIndex = new Map(snap.commits.map((c, i) => [c.sha, i]));
   const from = byIndex.get(afterSha);
@@ -5671,10 +5690,10 @@ function statedCorrectionsFor(snap, paths, afterSha) {
     if (!paths.includes(comment.path)) continue;
     if (from !== void 0) {
       const genAt = snap.commits[from].authoredAt;
-      if (comment.createdAt < genAt) continue;
+      if (instantBefore(comment.createdAt, genAt)) continue;
     }
     for (const c of snap.commits) {
-      if (c.authoredAt < comment.createdAt) continue;
+      if (instantBefore(c.authoredAt, comment.createdAt)) continue;
       if (!c.files.includes(comment.path)) continue;
       const ranges = c.changedRanges?.[comment.path];
       const overlaps = comment.line !== null && ranges !== void 0 && ranges.some(([s, e]) => comment.line >= s && comment.line <= e);
@@ -5727,7 +5746,7 @@ function interveningMergesFor(commits, reader, genIndex, closureIndex, genFiles)
   return { merges, unreadable };
 }
 function pairsFromPullRequest(snap, reader, opts = {}) {
-  const commits = [...snap.commits].sort((a, b) => a.authoredAt.localeCompare(b.authoredAt));
+  const commits = [...snap.commits].sort((a, b) => compareByInstant(a.authoredAt, b.authoredAt));
   const merge = snap.mergeCommitSha;
   const mergeParentCount = merge ? reader.parents(merge).length : 0;
   const squashed = merge !== null && mergeParentCount === 1;
@@ -6092,6 +6111,273 @@ var init_pr_launch = __esm({
     init_git_reader();
     init_github_pr();
     PR_LAUNCH_MIN_CHARS = 200;
+  }
+});
+
+// src/corpus.ts
+function surfaceOf(path) {
+  const dot = path.lastIndexOf(".");
+  const slash = Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"));
+  if (dot <= slash + 1) return "other";
+  return PROSE_EXTENSIONS.includes(path.slice(dot).toLowerCase()) ? "prose" : "other";
+}
+function summarizeCorpus(entries) {
+  const totals = {
+    entries: entries.length,
+    entriesWithRecords: 0,
+    entriesRefused: 0,
+    workUnits: 0,
+    records: 0,
+    belowMinChars: 0,
+    unresolvable: 0,
+    erased: 0,
+    violations: 0,
+    finalChars: 0,
+    byClass: ZERO_BY_CLASS(),
+    generatedChars: 0,
+    humanDeletedChars: 0,
+    mergeDeletedChars: 0,
+    unknownDeletedChars: 0
+  };
+  for (const entry of entries) {
+    if (entry.refusal) totals.entriesRefused += 1;
+    if (entry.records.length > 0) totals.entriesWithRecords += 1;
+    totals.workUnits += entry.workUnits;
+    totals.records += entry.records.length;
+    totals.belowMinChars += entry.belowMinChars;
+    totals.unresolvable += entry.unresolvable;
+    totals.erased += entry.erased;
+    totals.violations += entry.violations;
+    for (const record of entry.records) {
+      totals.finalChars += record.stats.finalChars;
+      for (const klass of Object.keys(totals.byClass)) {
+        totals.byClass[klass] += record.stats.byClass[klass]?.chars ?? 0;
+      }
+      totals.generatedChars += record.stats.generated.totalChars;
+      totals.humanDeletedChars += record.stats.generated.humanDeletedChars;
+      totals.mergeDeletedChars += record.stats.generated.mergeDeletedChars;
+      totals.unknownDeletedChars += record.stats.generated.unknownDeletedChars;
+    }
+  }
+  return totals;
+}
+function carriesCorrection(record) {
+  if ((record.stats.byClass.survived_mutated?.chars ?? 0) > 0) return true;
+  const signals = record.signals;
+  if (!signals) return false;
+  return signals.correctionLoops.length > 0 || signals.oneShotCorrections.length > 0 || signals.regressions.length > 0 || signals.repairAttempts.length > 0;
+}
+function corpusShape(entries) {
+  const subjects = /* @__PURE__ */ new Set();
+  const multiSource = [];
+  const withCorrections = [];
+  for (const entry of entries) {
+    for (const record of entry.records) {
+      for (const file of record.files) subjects.add(file.path);
+      if ((record.conversations?.length ?? 0) > 1) multiSource.push(record.task.id);
+      if (carriesCorrection(record)) withCorrections.push(record.task.id);
+    }
+  }
+  const distinctSubjects = [...subjects].sort();
+  return {
+    distinctSubjects,
+    proseSubjects: distinctSubjects.filter((p) => surfaceOf(p) === "prose"),
+    subjectsByArea: groupByArea(distinctSubjects),
+    multiSourceRecords: multiSource,
+    correctionCarryingRecords: withCorrections
+  };
+}
+function groupByArea(paths) {
+  const counts = /* @__PURE__ */ new Map();
+  for (const path of paths) {
+    const dir = path.split("/").slice(0, -1);
+    const area = dir.length === 0 ? "." : dir.slice(0, 2).join("/");
+    counts.set(area, (counts.get(area) ?? 0) + 1);
+  }
+  return [...counts.entries()].map(([area, subjects]) => ({ area, subjects })).sort((a, b) => b.subjects - a.subjects || a.area.localeCompare(b.area));
+}
+function pct(part, whole) {
+  if (whole === 0) return "n/a";
+  return `${(part / whole * 100).toFixed(1)}%`;
+}
+function renderCorpus(entries, window) {
+  const totals = summarizeCorpus(entries);
+  const shape = corpusShape(entries);
+  const lines = [];
+  lines.push(`Corpus: ${window}`);
+  lines.push("");
+  lines.push("| source | work units | records | verbatim | edited | person dropped | refused |");
+  lines.push("|---|---|---|---|---|---|---|");
+  for (const entry of entries) {
+    const verbatim = entry.records.reduce((n2, r) => n2 + (r.stats.byClass.survived_verbatim?.chars ?? 0), 0);
+    const mutated = entry.records.reduce((n2, r) => n2 + (r.stats.byClass.survived_mutated?.chars ?? 0), 0);
+    const dropped = entry.records.reduce((n2, r) => n2 + r.stats.generated.humanDeletedChars, 0);
+    lines.push(
+      `| ${entry.label} | ${entry.workUnits} | ${entry.records.length} | ${verbatim.toLocaleString()} | ${mutated.toLocaleString()} | ${dropped.toLocaleString()} | ${entry.refusal ?? ""} |`
+    );
+  }
+  lines.push("");
+  lines.push(
+    `${totals.entries} source(s) swept, ${totals.entriesWithRecords} with at least one record, ${totals.entriesRefused} this sweep could not measure.`
+  );
+  lines.push(
+    `${totals.workUnits} work unit(s) found, ${totals.records} became records. ${totals.belowMinChars} fell under the --min-chars floor, ${totals.unresolvable} resolved to nothing with no import to state, ${totals.erased} stayed erased.`
+  );
+  lines.push(
+    `${totals.finalChars.toLocaleString()} characters of finished work classified: ${totals.byClass.survived_verbatim.toLocaleString()} kept unchanged (${pct(totals.byClass.survived_verbatim, totals.finalChars)}), ${totals.byClass.survived_mutated.toLocaleString()} kept after an edit (${pct(totals.byClass.survived_mutated, totals.finalChars)}), ${totals.byClass.no_generation_provenance.toLocaleString()} with no generation behind them (${pct(totals.byClass.no_generation_provenance, totals.finalChars)}).`
+  );
+  lines.push(
+    `${totals.generatedChars.toLocaleString()} generated characters: ${totals.humanDeletedChars.toLocaleString()} the person dropped, ${totals.mergeDeletedChars.toLocaleString()} destroyed by a merge, ${totals.unknownDeletedChars.toLocaleString()} with no readable cause.`
+  );
+  lines.push("");
+  lines.push("Against KR1.3 (docs/okrs/2026-q4.md), measured, not scored:");
+  lines.push(
+    `  "five or more completed outcome records on distinct real finished works": ${shape.distinctSubjects.length} distinct finished work(s) across ${totals.records} record(s).`
+  );
+  lines.push(
+    `  "at least two use the prose path (.md/.txt/.tex)": ${shape.proseSubjects.length} of those ${shape.distinctSubjects.length}.`
+  );
+  lines.push(
+    `  "at least one joins generations from more than one source": ${shape.multiSourceRecords.length} record(s). A pull-request record carries no conversations, so zero here is a fact about this path and not a missing measurement.`
+  );
+  lines.push(
+    `  What those ${shape.distinctSubjects.length} finished work(s) ARE, by area, because the size of a corpus and its subject are different facts: ${shape.subjectsByArea.map((a) => `${a.area} ${a.subjects}`).join(", ")}.`
+  );
+  lines.push(
+    `  Not in KR1.3, and the reason the corpus exists: ${shape.correctionCarryingRecords.length} of ${totals.records} record(s) carry a correction, meaning an edited span or a signal derived from one.`
+  );
+  if (totals.violations > 0) {
+    lines.push("");
+    lines.push(
+      `${totals.violations} invariant violation(s) across the corpus. The records are on disk: an impossible record is still the evidence of the defect.`
+    );
+  }
+  return lines.join("\n");
+}
+var PROSE_EXTENSIONS, ZERO_BY_CLASS;
+var init_corpus = __esm({
+  "src/corpus.ts"() {
+    "use strict";
+    PROSE_EXTENSIONS = [".md", ".txt", ".tex"];
+    ZERO_BY_CLASS = () => ({
+      survived_verbatim: 0,
+      survived_mutated: 0,
+      no_generation_provenance: 0
+    });
+  }
+});
+
+// src/corpus-command.ts
+var corpus_command_exports = {};
+__export(corpus_command_exports, {
+  defaultWindow: () => defaultWindow,
+  parsePrList: () => parsePrList,
+  runCorpusCommand: () => runCorpusCommand
+});
+function runCorpusCommand(opts) {
+  const out = opts.out ?? ((l) => console.log(l));
+  const err = opts.err ?? ((l) => console.error(l));
+  const { projectPath } = opts;
+  if (opts.prs.length === 0) {
+    err("ursa corpus needs --prs N,N,N: the pull requests to sweep");
+    return 2;
+  }
+  const repo = opts.repo || currentRepo(projectPath);
+  const reader = gitRepoReader(projectPath);
+  const minChars = opts.minChars ?? PR_LAUNCH_MIN_CHARS;
+  const entries = [];
+  for (const number of opts.prs) {
+    const label = `${repo}#${number}`;
+    err(`ursa corpus: ${label}`);
+    let entry;
+    try {
+      const snapshot = capturePullRequest(repo, number, {
+        noPatches: opts.noPatches === true,
+        repoPath: projectPath
+      });
+      try {
+        fetchPullRequestRef(projectPath, snapshot.number);
+      } catch {
+      }
+      const result = runPullRequestLaunch({ projectPath, snapshot, reader, minChars });
+      entry = {
+        label,
+        workUnits: result.episodes.length,
+        records: result.records,
+        belowMinChars: result.dropped.belowMinChars,
+        unresolvable: result.dropped.unresolvable,
+        erased: result.erased.length,
+        violations: result.gate.violations.length
+      };
+      if (snapshot.mergeCommitSha && reader.parents(snapshot.mergeCommitSha).length === 0) {
+        entry.refusal = `merge commit ${snapshot.mergeCommitSha.slice(0, 9)} not in this clone`;
+      }
+    } catch (e) {
+      entry = {
+        label,
+        workUnits: 0,
+        records: [],
+        belowMinChars: 0,
+        unresolvable: 0,
+        erased: 0,
+        violations: 0,
+        refusal: `could not capture: ${e instanceof Error ? e.message.split("\n")[0] : String(e)}`
+      };
+    }
+    entries.push(entry);
+  }
+  const measured = entries.filter((e) => !e.refusal || e.records.length > 0);
+  if (measured.length === 0) {
+    err(
+      `ursa corpus: none of the ${entries.length} pull request(s) could be measured, so there is no corpus to report. The reasons, one per line:`
+    );
+    for (const e of entries) err(`  ${e.label}: ${e.refusal}`);
+    return 2;
+  }
+  const window = opts.window ?? defaultWindow(repo, opts.prs);
+  out(renderCorpus(entries, window));
+  out("");
+  out(`Records: ${projectPath}/.ursa/records/`);
+  return entries.some((e) => e.violations > 0) ? 1 : 0;
+}
+function defaultWindow(repo, prs) {
+  const asked = [...prs].sort((a, b) => a - b);
+  return `${asked.length} pull request(s) of ${repo}, resolved through the pull-request launch on ${(/* @__PURE__ */ new Date()).toISOString().slice(0, 10)}: #${asked.join(", #")}`;
+}
+function parsePrList(spec) {
+  const seen = /* @__PURE__ */ new Set();
+  const prs = [];
+  for (const piece of spec.split(",").map((s) => s.trim()).filter(Boolean)) {
+    const range = /^(\d+)-(\d+)$/.exec(piece);
+    if (range) {
+      const lo = Number(range[1]);
+      const hi = Number(range[2]);
+      if (lo > hi) return { error: `--prs ${piece} counts down; write ${hi}-${lo}` };
+      for (let n3 = lo; n3 <= hi; n3 += 1) {
+        if (!seen.has(n3)) {
+          seen.add(n3);
+          prs.push(n3);
+        }
+      }
+      continue;
+    }
+    const n2 = Number(piece);
+    if (!Number.isInteger(n2) || n2 <= 0) return { error: `--prs ${piece} is not a pull request number` };
+    if (!seen.has(n2)) {
+      seen.add(n2);
+      prs.push(n2);
+    }
+  }
+  if (prs.length === 0) return { error: "--prs was empty" };
+  return { prs };
+}
+var init_corpus_command = __esm({
+  "src/corpus-command.ts"() {
+    "use strict";
+    init_gh();
+    init_git_reader();
+    init_pr_launch();
+    init_corpus();
   }
 });
 
@@ -7652,8 +7938,8 @@ function renderRunSummary(records, episodes, diagnostics, droppedUnits) {
     lines.push(`${written.toLocaleString()} chars were generated to get there, and ${claimed.toLocaleString()} of them reached the finished work unedited.`);
   }
   if (traced > 0 && humanDeleted > 0) {
-    const pct = Math.round(humanDeleted / traced * 100);
-    lines.push(`You discarded ${humanDeleted.toLocaleString()} chars of draft on the way, ${pct}% of the ${traced.toLocaleString()} whose fate this run could trace.`);
+    const pct2 = Math.round(humanDeleted / traced * 100);
+    lines.push(`You discarded ${humanDeleted.toLocaleString()} chars of draft on the way, ${pct2}% of the ${traced.toLocaleString()} whose fate this run could trace.`);
   }
   if (mergeDeleted > 0) {
     lines.push(`A further ${mergeDeleted.toLocaleString()} chars were destroyed by merges rather than by you, so they are not counted against you.`);
@@ -7761,8 +8047,8 @@ function renderRunSummary(records, episodes, diagnostics, droppedUnits) {
       durable += r.durability?.durableChars ?? 0;
       decayed += r.durability?.decayedChars ?? 0;
     }
-    const pct = Math.round(decayed / (durable + decayed || 1) * 100);
-    lines.push(`Of what you kept at the time, ${pct}% was gone by the latest commit.`);
+    const pct2 = Math.round(decayed / (durable + decayed || 1) * 100);
+    lines.push(`Of what you kept at the time, ${pct2}% was gone by the latest commit.`);
     lines.push(`Surviving your first edit is not the same as surviving the work.`);
   }
   return lines.join("\n");
@@ -7831,17 +8117,27 @@ async function main(argv) {
       // snapshot on disk so the launch runs with no `gh` and no network,
       // which is also how `src/adapters/pr-launch.test.ts` drives it.
       pr: { type: "string" },
-      snapshot: { type: "string" }
+      snapshot: { type: "string" },
+      // `ursa corpus`. `--prs` is a comma-separated list with inclusive
+      // `A-B` ranges, parsed by `parsePrList` in src/corpus-command.ts;
+      // `--window` overrides the sentence the report states its own
+      // measurement window in, for a sweep whose selection rule is
+      // narrower than "these numbers" (a sampled range, one month).
+      prs: { type: "string" },
+      window: { type: "string" }
     }
   });
   const [cmd, project] = positionals;
-  if (cmd !== "run" && cmd !== "pr" && cmd !== "bridge" && cmd !== "serve" && cmd !== "ci" && cmd !== "publish" && cmd !== "address" || !project) {
+  if (cmd !== "run" && cmd !== "pr" && cmd !== "corpus" && cmd !== "bridge" && cmd !== "serve" && cmd !== "ci" && cmd !== "publish" && cmd !== "address" || !project) {
     console.error("Usage: ursa run <projectPath> [--limit N] [--min-chars N]");
     console.error("         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]");
     console.error("         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)");
     console.error("       ursa pr <projectPath> --pr N [--repo owner/name] [--snapshot f.json] [--min-chars N]");
     console.error("         resolves ONE pull request instead of the default branch's commit pairs, which is the");
     console.error("         only path that finds anything on a repository whose every commit is an agent's");
+    console.error('       ursa corpus <projectPath> --prs 645,647,700-710 [--repo owner/name] [--min-chars N] [--window "one sentence"]');
+    console.error("         runs the pull-request launch over MANY pull requests and reports them as one corpus:");
+    console.error("         totals, how many distinct finished works they cover, and how many carry a correction");
     console.error("       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]");
     console.error("       ursa serve <projectPath> [--port N]");
     console.error("         serves this project's .ursa/ store read-only on loopback for a local page; no passphrase, no sync, no model");
@@ -7864,6 +8160,25 @@ async function main(argv) {
       // that is always present and always right.
       pages: values.pages ?? process.env.GITHUB_REPOSITORY ?? null,
       check: values.check === true
+    });
+  }
+  if (cmd === "corpus") {
+    const { parsePrList: parsePrList2, runCorpusCommand: runCorpusCommand2 } = await Promise.resolve().then(() => (init_corpus_command(), corpus_command_exports));
+    if (!values.prs) {
+      console.error("ursa corpus needs --prs N,N,N (ranges allowed: 700-710)");
+      return 2;
+    }
+    const parsed = parsePrList2(values.prs);
+    if ("error" in parsed) {
+      console.error(`ursa corpus: ${parsed.error}`);
+      return 2;
+    }
+    return runCorpusCommand2({
+      projectPath: (0, import_node_path12.resolve)(project),
+      prs: parsed.prs,
+      repo: values.repo ?? process.env.GITHUB_REPOSITORY ?? null,
+      minChars: values["min-chars"] ? Number(values["min-chars"]) : void 0,
+      window: values.window ?? void 0
     });
   }
   if (cmd === "pr") {

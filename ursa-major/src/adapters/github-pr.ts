@@ -234,6 +234,76 @@ function acceptanceOf(snap: PullRequestSnapshot): PullRequestProvenance['accepta
 }
 
 /**
+ * Milliseconds for a timestamp this module holds, or null when the string
+ * does not place itself on the line.
+ *
+ * WHY THIS IS NOT `a < b`, which is what these three call sites were until
+ * 2026-11-02. Every timestamp on a `PullRequestSnapshot` is a string, and
+ * this module compares strings from two producers that spell the same
+ * instant differently:
+ *
+ *   src/adapters/gh.ts     `c.commit.author.date` out of GitHub's REST API,
+ *                          which normalises to `2026-11-02T04:34:57Z`
+ *   git, in this module's   `git show -s --format=%aI`, which for commit
+ *   own integration test    `9c3c52dc` prints `2026-11-01T23:34:57-05:00`
+ *                          for that same instant, and which spells UTC
+ *                          `+00:00` rather than `Z` even at zero offset
+ *
+ * Measured over all 2,134 commits reachable from this repository's
+ * `origin/main`: 330 carry a non-zero offset (-06:00 on 156, -04:00 on 138,
+ * -05:00 on 36) and 143 of those fall on a different UTC day than the day
+ * their string begins with.
+ *
+ * So the REST path is safe only because GitHub normalises, which is the
+ * producer's choice and not this module's guarantee, and the integration
+ * test at the bottom of github-pr.test.ts already feeds git-shaped dates
+ * into these same comparisons. What the defect would cost if it fired is
+ * not cosmetic: `pairsFromPullRequest` orders commits by this field, and a
+ * mis-ordered branch picks the wrong closure for a generation, which is a
+ * wrong span classification in the outcome record. `src/corroborate.ts`
+ * reached this conclusion on 2026-10-14 and wrote it into
+ * `authoredAfterHorizon`; this module is the one that did not inherit it.
+ *
+ * Deliberately local and not an import from `tools/instant.mjs`: this
+ * package is TypeScript with its own bundle, `tools/` is plain `.mjs` run by
+ * `node --test`, and one shared file across that boundary would put a tools
+ * path into `ursa-major/dist/ursa.cjs`. The rule is shared; the three lines
+ * are copied. `tools/instant.mjs` carries the lint that finds the next
+ * copy of the defect in either tree.
+ */
+function instantMs(value: string | null | undefined): number | null {
+  if (typeof value !== 'string') return null
+  // A zone is required. Without one the string is unplaceable and
+  // `Date.parse` would read it as UTC, which is a silent guess.
+  if (!/(?:Z|[+-]\d{2}:?\d{2})$/.test(value)) return null
+  const ms = Date.parse(value)
+  return Number.isNaN(ms) ? null : ms
+}
+
+/** Strictly before, by instant. False when either side is unplaceable. */
+export function instantBefore(a: string | null | undefined, b: string | null | undefined): boolean {
+  const x = instantMs(a)
+  const y = instantMs(b)
+  return x !== null && y !== null && x < y
+}
+
+/**
+ * Ascending by instant, stable, with unplaceable rows kept in their original
+ * relative order at the end. A comparator and not a filter: dropping a
+ * commit whose date this module cannot read would lose a generation, and a
+ * lost generation is a span that silently becomes
+ * `no_generation_provenance`.
+ */
+export function compareByInstant(a: string | null | undefined, b: string | null | undefined): number {
+  const x = instantMs(a)
+  const y = instantMs(b)
+  if (x === null && y === null) return 0
+  if (x === null) return 1
+  if (y === null) return -1
+  return x - y
+}
+
+/**
  * Review comments that a later commit answered with a change to the same
  * path. A comment with no following change to its path is not returned:
  * v0 reports stated corrections only where the artifact shows the
@@ -251,10 +321,10 @@ export function statedCorrectionsFor(
     if (!paths.includes(comment.path)) continue
     if (from !== undefined) {
       const genAt = snap.commits[from].authoredAt
-      if (comment.createdAt < genAt) continue
+      if (instantBefore(comment.createdAt, genAt)) continue
     }
     for (const c of snap.commits) {
-      if (c.authoredAt < comment.createdAt) continue
+      if (instantBefore(c.authoredAt, comment.createdAt)) continue
       if (!c.files.includes(comment.path)) continue
       const ranges = c.changedRanges?.[comment.path]
       const overlaps =
@@ -371,8 +441,11 @@ export function pairsFromPullRequest(
   opts: PullRequestAdapterOptions = {},
 ): PullRequestPair[] {
   // Array#sort is stable, so commits that share a timestamp keep the
-  // order the API returned, which is the branch's own order.
-  const commits = [...snap.commits].sort((a, b) => a.authoredAt.localeCompare(b.authoredAt))
+  // order the API returned, which is the branch's own order. `localeCompare`
+  // until 2026-11-02, which ordered spellings rather than instants: see
+  // `instantMs` above for the two producers and the 330 commits it matters
+  // on.
+  const commits = [...snap.commits].sort((a, b) => compareByInstant(a.authoredAt, b.authoredAt))
   const merge = snap.mergeCommitSha
   const mergeParentCount = merge ? reader.parents(merge).length : 0
   const squashed = merge !== null && mergeParentCount === 1

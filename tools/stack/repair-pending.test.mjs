@@ -249,7 +249,7 @@ test('cloneState names the two clone properties this tool abstains on', () => {
   assert.equal(wide.singleBranch, false);
 });
 
-test('the real queue: measured on a complete clone, or skipped with the reason named', (t) => {
+test('the real queue: every open head is measurable on a complete clone', (t) => {
   // The measurement of 2026-10-26, run against the repository rather than a
   // fixture. Skipped rather than failed once the repair merges, because the
   // string leaving `main` is the success condition, not a regression.
@@ -259,8 +259,30 @@ test('the real queue: measured on a complete clone, or skipped with the reason n
   // host hands a seat they were wrong together and identically and the
   // assertion passed green — and it passed BECAUSE of the defect, since an
   // empty merge-base manufactured the very `stale-root` class it asserted the
-  // existence of. So the clone is now checked first and the assertions are
-  // absolute.
+  // existence of. So the clone is now checked first.
+  //
+  // WHAT THIS TEST MAY ASSERT, and the correction of 2026-11-02. The repair
+  // above left the clone honest and the assertions absolute, and two of those
+  // absolute assertions were not about the tool at all. They required that
+  // today's open queue contain a `stale-root` head and a `repaired` head, so
+  // the colour of this file became a function of which pull requests happen
+  // to be open this morning, and no commit on any branch could move it. It
+  // went red on `main` when the queue stopped supplying a `stale-root` row:
+  // measured here, 10 open heads, 2 `repaired`, 8 `unchanged`, 0
+  // `stale-root`, nothing undecided. Ursa/engineer and Ursa/exo each handed
+  // that red back to this seat with the same three numbers.
+  //
+  // The line between the two halves, which is Ursa/engineer's and is right:
+  // every head being measurable is a property of a COMPLETE CLONE and belongs
+  // in an exit code. A `stale-root` head existing is a CENSUS LINE about one
+  // morning's queue and belongs in a diagnostic.
+  //
+  // Nothing is lost by moving the census out, which was checked rather than
+  // assumed: the test at 'assess: one real repair among stale-root heads is
+  // still pending' drives one `assess` call over a `stale-root` head and a
+  // `repaired` head that BOTH read zero, and asserts the classes and that
+  // only the real one is credited. That is this census's whole claim, on a
+  // fixture, where it is true every day.
   const REAL = 'INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares';
   if (git('rev-parse', '--verify', '--quiet', 'origin/main') === null) {
     return t.skip('no origin/main in this clone');
@@ -273,7 +295,10 @@ test('the real queue: measured on a complete clone, or skipped with the reason n
   }
   const onMain = countAt('origin/main', 'docs/ideas.md', REAL);
   if (!onMain) return t.skip('the string has left main; the finding is closed');
-  assert.equal(onMain, 2, 'two occurrences, as reported to the board at 10:58:49Z');
+  // A census line, not an assertion. It read 2 when reported to the board at
+  // 10:58:49Z, and any edit to `docs/ideas.md` may move it without any defect
+  // in this tool.
+  t.diagnostic(`census: ${onMain} occurrences of the identifier on origin/main`);
   // The OPEN heads, which is what the tool reads in production. The first
   // version of this test swept every `refs/prs/*` in the clone, 526 of them,
   // which took 92 seconds and measured hundreds of long-merged pull requests
@@ -318,14 +343,31 @@ test('the real queue: measured on a complete clone, or skipped with the reason n
     read: (r, p) => git('show', `${r}:${p}`),
     mergeBase: (a, b) => (git('merge-base', a, b) ?? '').trim() || null,
   });
-  assert.equal(got[0].verdict, 'pending', 'the repair is open and unmerged, so this is not a dangling citation');
+  // ASSERTED. Each of these holds on any complete clone, whatever is open.
+  assert.equal(got.length, 1, 'the path carries the identifier, so it yields exactly one finding');
+  assert.equal(got[0].baseCount, onMain, "the tool's own count of the base agrees with a direct read");
   // The assertion that makes the green mean something: on a complete clone
   // every head is measurable, so no head may abstain. On the clone this test
   // used to run in, this line is what would have failed.
   assert.deepEqual(got[0].undecidedBy, [],
     'a complete clone must measure every head; any base-unknown here is the clone, not the queue');
+  assert.notEqual(got[0].verdict, 'indeterminate',
+    'the consequence of the line above, stated as the verdict a caller reads');
+  // Per head, because `undecidedBy` names the heads but a failure here says
+  // which ref the clone could not answer for.
+  for (const h of got[0].heads) {
+    assert.notEqual(h.mergeBase, null, `no merge-base for ${h.ref} on a complete clone`);
+    assert.notEqual(h.forkCount, null, `no fork count for ${h.ref} on a complete clone`);
+  }
+
+  // CENSUS. Reported so the measurement survives in the job log, never
+  // asserted, because every number below is a fact about which rows are open
+  // this morning and not about this tool.
+  const tally = {};
+  for (const h of got[0].heads) tally[h.klass] = (tally[h.klass] ?? 0) + 1;
+  const census = Object.keys(tally).sort().map((k) => `${k}=${tally[k]}`).join(' ');
+  t.diagnostic(`census: ${got[0].heads.length} readable of ${all.length} open heads; ${census}`);
+  t.diagnostic(`census: verdict ${got[0].verdict}, repaired by ${JSON.stringify(got[0].repairedBy)}`);
   const zero = got[0].heads.filter((h) => h.headCount === 0);
-  assert.ok(zero.some((h) => h.klass === 'stale-root'),
-    'at least one head reads zero without repairing anything — the class a bare count credits');
-  assert.ok(zero.some((h) => h.klass === 'repaired'));
+  t.diagnostic(`census: zero-reading heads ${zero.map((h) => `${h.number}=${h.klass}`).join(' ') || 'none'}`);
 });

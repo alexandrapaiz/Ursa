@@ -232,6 +232,20 @@ test('transcribed: the message read honours exactly the filters this tool probes
 // handoff this tool's finding produced did land. Each now asserts the new
 // state, and the tripwire below asserts the thing that is still wrong.
 test('transcribed: the events read refuses unknown filters, so the INERT finding was acted on', { skip: !existsSync(API) && 'no board source on this host' }, () => {
+  // READ THIS BEFORE "FIXING" A FAILURE HERE, because the first version of
+  // this test failed for the opposite of the reason it claimed. It asserted
+  // that the literal string `no such filter` appeared between the route match
+  // and `store.events(`, which held only while the route restated the refusal
+  // inline. On 2026-11-02 HQ collapsed two copies of that sentence into one
+  // helper, `Handler.refuse_unknown`, because their own
+  // `test_one_implementation` had gone red on the duplication. The behaviour
+  // was intact and strictly better; the string had simply moved out of the
+  // slice. This test then reported "the INERT finding has regressed", which
+  // was false, and a reader who believed it would have re-opened a finding
+  // HQ had just hardened. A transcription of someone else's source has to
+  // follow a refactor by one hop or it measures the spelling instead of the
+  // rule, so this version checks the call and the sentence separately and
+  // says which half broke.
   const src = readFileSync(API, 'utf8');
   const start = src.indexOf('if EVENTS_ROUTE.match(self.path):');
   assert.notEqual(start, -1, 'the events route is no longer matched this way; re-read api.py');
@@ -241,8 +255,40 @@ test('transcribed: the events read refuses unknown filters, so the INERT finding
   // of the file, which contains the message route's own refusal and would
   // make this assertion pass on text from a different handler.
   assert.notEqual(end, -1, 'store.events( no longer follows the events route; this slice would read the rest of the file');
-  assert.equal(/no such filter/.test(block.slice(0, end)), true,
-    'the events read no longer refuses unknown filters; the INERT finding has regressed and the prober should be re-run');
+  const route = block.slice(0, end);
+  // The behaviour under both spellings was probed rather than inferred, on
+  // 2026-11-02 and by the trunk's own version of this test: `GET
+  // /api/events?nosuchfilter=1` against the live board answers 400 with `no
+  // such filter: nosuchfilter` and a `honours` array, while an impossible
+  // `company` returns 0 rows against 5 unfiltered. The route refuses, and it
+  // always did. The halves below are what distinguishes that refusal moving
+  // from that refusal going away.
+  // Half one: the route refuses, before it reads. Either spelling counts --
+  // the shared helper as it stands today, or an inline sentence as it stood
+  // before -- because the claim is about the refusal and not about where the
+  // code for it lives.
+  const callsHelper = /refuse_unknown\(\s*self\.EVENT_FILTERS\s*\)/.test(route);
+  const inlineSentence = /no such filter/.test(route);
+  assert.equal(callsHelper || inlineSentence, true,
+    'the events route no longer refuses unknown filters before reading: it neither calls '
+    + 'refuse_unknown(self.EVENT_FILTERS) nor states "no such filter" inline. THIS is the '
+    + 'regression of the INERT finding, and the prober should be re-run.');
+  // Half two: whatever it calls still answers 400 with the sentence a caller
+  // has learned. Only checked on the helper arm, since the inline arm just
+  // proved the sentence is present.
+  if (callsHelper) {
+    const def = src.indexOf('def refuse_unknown(');
+    assert.notEqual(def, -1,
+      'the events route calls refuse_unknown and api.py does not define it; re-read api.py');
+    const body = src.slice(def, src.indexOf('\n    def ', def + 1));
+    assert.equal(/no such filter/.test(body), true,
+      'refuse_unknown no longer answers with "no such filter"; the refusal a caller has '
+      + 'learned since 2026-10-18 has changed wording, so the prober\'s expectation needs '
+      + 're-reading rather than the route.');
+    assert.equal(/self\.reply\(400/.test(body), true,
+      'refuse_unknown no longer replies 400; an unknown filter may now be answered rather '
+      + 'than refused, which is the INERT shape returning by a different door.');
+  }
 });
 
 test('transcribed: store.events takes a company, so the events company filter is real', { skip: !existsSync(STORE) && 'no board source on this host' }, () => {

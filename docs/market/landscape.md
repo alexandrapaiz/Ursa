@@ -329,6 +329,37 @@ Mercor after a data
 breach](https://www.aol.com/articles/meta-paused-ai-training-startup-042644659.html),
 BigGo Finance, "Mercor's annualized revenue tops $2 billion" (2026-06-25; link omitted here because the article's URL slug is itself UUID-shaped and trips the redaction gate's private-session-UUID check, see docs/market/briefs/2026-10-26-message-24.md).
 
+Update 2026-11-09 (message, 17th run): the same $614M H1 2026 figure
+already on file (2026-10-05 update) has a sharper number attached to
+it, found this run via a different outlet covering the same underlying
+disclosure. BigGo Finance (2026-07-22, citing The Information's
+2026-07-09 report) states that approximately 91% of that H1 revenue
+came from AI foundation-model companies specifically (OpenAI,
+Anthropic, Google DeepMind named, alongside smaller labs Reflection AI
+and Thinking Machines Lab and a short enterprise list — Ramp, Blue Owl,
+Citigroup). The article's own framing is blunt: this concentration is
+"a sword of Damocles hanging over its head," citing Meta's indefinite
+contract pause after the 2026-03-31/04-04 breach (already tracked in
+this entry's 2026-10-26 update) as the demonstrated downside case, and
+reports Mercor's own stated mitigation target of reducing foundation-
+model-company revenue to "less than one-third" of the total by 2030.
+
+So what: this is the category's largest-by-growth vendor publicly
+naming, and setting a multi-year target against, the exact customer-
+concentration structure CLAUDE.md §4 predicts for Minor itself ("one
+or two of them accounting for most of revenue... standard shape for an
+enterprise data infrastructure business"). Read as a comp rather than
+a warning, it is confirmation that the predicted shape is real and
+that frontier labs are in fact willing to be that concentrated a buyer.
+Read as a risk, it is the incumbent closest to Minor's own target
+market stating in its own words that the identical structure is
+dangerous enough to need a decade-long diversification plan, not a
+hypothetical a smaller or newer vendor could dismiss. Positioning
+consequence in docs/market/positioning.md. Last observed 2026-11-09:
+[BigGo Finance: AI Data Factory Mercor's H1 Revenue Surges Past $615
+Million, With 90% Fueled by OpenAI and Other
+Giants](https://finance.biggo.com/news/865c23cb%2D3e0d-4c21-aa0d-6bf2a7fc8d1a).
+
 ### Prolific
 
 What it is: an academic-research participant marketplace that has
@@ -613,6 +644,10 @@ AI Training Data Products](https://www.afterquery.com/products),
 [Bespoke Labs](https://bespokelabs.ai/), [rl-list.com: Fleet AI vendor
 profile](https://www.rl-list.com/vendors/fleet-ai).
 
+(AfterQuery's own entry has since outgrown this footnote — $3.2B
+valuation and named clients including Nvidia, see its own ### entry
+above — promoted there 2026-11-02, message 13th run.)
+
 **Update (2026-10-26, 31st run): a full-directory sweep of all 42
 names found one closer case than the six already checked —
 Idler — and it still reads as constructed, not real-deliverable.**
@@ -738,6 +773,94 @@ opinion, not a record of whether a real client's actual brand
 deliverable survived contact with the work. Last observed 2026-10-27:
 [Latitud: The Taste Layer for the AI Ecosystem](https://latitudlatam.substack.com/p/the-taste-layer-for-the-ai-ecosystem),
 [hyper.ai: Taste Labs Trains AI on Curated Quality to Combat Creative Slop](https://hyper.ai/en/stories/df1a0e0d52c2bb0d561782479941f19a).
+
+### AfterQuery
+
+What it is: a solicited-expert-feedback vendor training models on how
+knowledge professionals (doctors, lawyers, other specialists) work,
+"encoding the patterns, decisions, and reasoning of the world's best
+practitioners" rather than grading answer accuracy. Already referenced
+in this file's Forbes-sourced China-sales note (Surge AI entry) and
+the rl-list.com cross-cutting note above, which rated it the one
+"build the task and verifier" name worth a caveat rather than a clean
+"authored" tag, on the strength of 300,000+ "verified practitioners"
+producing "expert-demonstrated trajectories." Promoted to its own
+entry in the 2026-11-02 13th run because the scale has outgrown a
+footnote: a $30 million Series A at a $300 million valuation
+(announced 2026-04-09) was followed, by 2026-09-01, by a reported
+$3.2 billion valuation — "more than a 10x increase in less than half
+a year" — which Y Combinator's own partner called the fastest
+launch-to-unicorn run in the accelerator's history, 18 months out of
+its Winter 2025 cohort. Who it serves: named clients include Nvidia,
+Legora, and Motif Technologies (a Korean AI lab) — the first name in
+this entire Category 1 list that is a major AI infrastructure company
+rather than a frontier model lab or an enterprise buyer. Pricing: not
+public. Revenue: an annualized run rate of $100M reported at the
+April Series A. Founders are 22 and 23 years old. Strengths: the
+practitioner-demonstration model is the closest any Category 1 vendor
+gets to "tacit knowledge, the kind that shows up only in action"
+(vision.md §0b, principle 3), ahead of pure solicited grading.
+Weakness against Ursa unchanged from the cross-cutting note: a
+practitioner demonstrating a task on request to generate training
+data is still not a deliverable that existed because real work needed
+it done — it is demonstration data collected to train on, not a
+record joined backward to its own generation history after the fact.
+Last observed 2026-11-02: [TechCrunch: AfterQuery reportedly becomes
+Y Combinator's fastest-ever unicorn, now valued at $3.2B](https://techcrunch.com/2026/09/01/afterquery-reportedly-becomes-y-combinators-fastest-ever-unicorn-now-valued-at-3-2b/),
+[BusinessWire: AfterQuery Raises $30 Million Series A Round at $300
+Million Valuation](https://www.businesswire.com/news/home/20260409469482/en/AfterQuery-Raises-$30-Million-Series-A-Round-at-$300-Million-Valuation).
+
+**Correction (2026-11-02, message, 14th run):** the 13th run's commit
+text described this as promoted to Category 1 and counted the
+category at 20 total, but the entry itself landed physically inside
+the Category 3 heading block (after Zep, before ChatGPT Memory),
+where it sat describing itself as "this entire Category 1 list."
+Moved here, into the section its own text already claimed to be in.
+Recounting with the move applied: Category 1 holds 13 named vendor
+entries (Surge AI, Scale AI, Mercor, Prolific, Invisible Technologies,
+Handshake AI, Protege, Halluminate, TELUS Digital, micro1, Plato,
+Taste Labs, AfterQuery) plus the one cross-cutting note, not 20. No
+claim found for where "20" came from; likely conflated with the
+cross-cutting note's count of 42 mapped adjacent-market names, 7 of
+them individually examined elsewhere in this file. No pricing or
+positioning consequence; this is a structural fix to the living map,
+recorded here rather than silently, per this charter's "add and
+retire entries with dated notes; never silently delete."
+
+### Centific
+
+What it is: a frontier AI data foundry (founded 2020) selling almost
+everything on the human side of model development under one roof —
+RLHF and preference data, human evaluation, multilingual annotation,
+red-teaming, synthetic data, and, since mid-2025, "RL
+Environments-as-a-Service" (RLEaaS). New entry, found this run via the
+demand-signals ceremony while checking a different search term
+entirely. Who it serves: a named customer list broader than any other
+Category 1 entry in this file — OpenAI, Anthropic, xAI, Mistral AI,
+Microsoft, Google, Nvidia, Dell, Lenovo, and AWS, per its own
+funding-announcement coverage (SiliconANGLE, 2025-06-25) — a claim this
+run did not independently verify against any of the named labs'
+own disclosures, same caveat this file applies to every self-reported
+customer list elsewhere (Handshake AI, Mercor). Pricing: not public.
+Scale: 1.8M+ domain experts claimed, 350+ languages, a $60M Series A
+(2025-06-25, led by Granite Asia) on top of prior funding, no
+valuation disclosed. Strengths: RLEaaS is explicit about what it is
+not — Centific's own product page describes a "Simulation Enterprise
+Builder" generating "fully stateful digital companies complete with
+org charts, ERP and CRM data environments" and an "Expert
+Human-in-the-Loop layer" where domain experts "author evaluation
+rubrics and generate structured reward signals" — the same
+authored-task-and-rubric structure as the rl-list.com-mapped
+42-company market this file's Category 1 cross-cutting note already
+tracks (2026-10-26, 29th/31st runs), confirming Centific belongs beside
+that cohort rather than inside Protege's or Taste Labs' real-data or
+solicited-opinion categories. Weakness against Ursa: identical to the
+rest of this category and stated by the vendor's own marketing more
+plainly than most — a constructed simulation with an expert-authored
+rubric, not a deliverable that existed because real work needed it,
+and no generation-to-outcome join of any kind. Last observed
+2026-11-02: [SiliconANGLE: AI data foundry provider Centific lands $60M to grow enterprise footprint](https://siliconangle.com/2025/06/25/ai-data-foundry-provider-centific-lands-60m-grow-enterprise-footprint/),
+[Centific: Centific Launches RL Environments-as-a-Service](https://www.centific.com/blog/centific-launches-rl-environments-as-a-service-the-first-industry-authentic-training-infrastructure-for-enterprise-ai-agents).
 
 ## Category 2 — Evaluation and arena products
 
@@ -902,6 +1025,28 @@ correction overwriting a stale fact, let alone a user-facing
 edit/delete surface. Weakness against Ursa otherwise unchanged. Last
 observed 2026-10-25: [FourWeekMBA: Mem0's memory build cost](https://fourweekmba.com/ai-mem0s-memory-build-cost-more-than-full-context-study-finds/).
 
+Update 2026-11-02 (message, 12th run): a patched information-disclosure
+bug, published 2026-10-26 as CVE-2026-116575 (CVSS 6.3, medium), found
+that Mem0's own session-scoping code joined caller-controlled `user_id`,
+`agent_id`, and `run_id` values with unescaped `&`/`=` delimiters,
+letting a crafted identifier collide with another tenant's session key
+and read or write that tenant's memory. Fixed in Python SDK 2.0.18 and
+TypeScript SDK 3.1.6. This is the category's largest-by-adoption
+product (63k+ GitHub stars, used inside AWS's own agent tooling, this
+entry's 2026-10-25 update) shipping a real cross-tenant memory leak,
+not a hypothetical one. Read against docs/market/positioning.md's
+standing "trust has a provenance axis too" line: that entry has so far
+tracked compromise at the vendor level (an equity stake, a supply-chain
+breach of contractor data). This is the first instance in this file of
+the compromise sitting inside the memory product's own multi-tenant
+isolation code, the exact mechanism a user-owned, on-device-processed
+profile (CLAUDE.md §0, constraint 3) is built not to need, since there
+is no shared tenant boundary to collide across when raw processing
+never leaves the device. No pricing or positioning change argued by
+this alone; it is one more dated data point for an argument already on
+file. Last observed 2026-11-02: [Strix: CVE-2026-116575 — mem0
+Information Disclosure](https://strix.ai/cve/CVE-2026-116575).
+
 ### Letta (formerly MemGPT)
 
 What it is: an open-source platform for "stateful agents" — an
@@ -965,6 +1110,44 @@ price ladder should carry; added there this run. Weakness against
 Ursa unchanged: still infrastructure the developer's product owns, not
 a profile the end user owns and carries. Last observed 2026-10-25:
 [Vectorize: Mem0 vs Zep (Graphiti)](https://vectorize.io/articles/mem0-vs-zep).
+
+Update 2026-11-02 (message, 13th run): found, not newly published, a
+direct argument against Major's whole premise from this entry's own
+founder. Zep CEO Daniel Chalef's "The Private Agent Memory Fallacy"
+(published 2025-06-19, so this is old ground newly surfaced to this
+file, not a this-week event) names four reasons portable, user-owned
+AI memory "wallets" are structurally unworkable: (1) user context is
+the vendor's own competitive advantage, so asking vendors to support
+portability asks them to "voluntarily surrender" it; (2) a stated
+"privacy paradox" — users say they want control but act otherwise
+(cites Facebook usage rising through #DeleteFacebook); (3) context is
+"domain-specific and often non-transferable," with cross-domain
+semantic collisions as the sharp example ("shooting" meaning different
+things to a photography assistant and a mental-health one); (4)
+memory-poisoning/injection risk compounds under a shared or portable
+store, with liability diffusing across vendor, platform, and the
+portability layer itself. His proposed fix is automated,
+platform-local privacy controls instead of portability.
+
+Read against CLAUDE.md rather than dismissed: (1) is answered by
+design for Major specifically (zero user monetization, revenue sits at
+Minor selling to labs, not at Major locking in context) but not for
+the labs Major needs cooperation from, which is exactly §5's "central
+strategic problem" already on file, so this is corroboration of an
+existing named risk, not a new one. (2) is a real, untested claim
+against Major's own two trials (n=1, n=2, owner-declared unsatisfied);
+on-device automatic inference removes the "continuous decisions"
+burden Chalef describes, but no user-base evidence exists yet either
+way. (3) is the sharpest point and the least answered anywhere in this
+file: no entry in the no-neutral-standard cross-cutting note below
+addresses semantic collision across domains, only format/schema
+interoperability. (4) is partly structural for Major (on-device
+processing, CLAUDE.md §0 constraint 3, means no shared tenant store to
+poison the way Mem0's CVE-2026-116575 did) but the aggregation layer
+itself is a new pooling point this argument doesn't yet have evidence
+against either way. Positioning consequence (points 1 and 3,
+specifically) in docs/market/positioning.md. Last observed 2026-11-02:
+[Zep: The Private Agent Memory Fallacy](https://www.getzep.com/blog/the-ai-memory-wallet-fallacy).
 
 ### ChatGPT Memory (OpenAI)
 
@@ -1093,6 +1276,65 @@ test predates this page, so it has not been re-run against Claude's
 current export. Worth a direct product test before leaning further on
 either "one-directional" or "symmetric" as the precise word. Last
 observed 2026-10-14: [Claude support: Importing and exporting your memory from Claude](https://support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude).
+
+Update 2026-11-09 (message, 16th run), re-checked at the monthly cadence
+since this was the most stale entry on the map (26 days): Anthropic's
+own support page, re-fetched this run, states the same mechanism as the
+2026-10-14 update — export is still "copying and pasting" text "into a
+local file on your computer," with no named file format or API, and the
+page still neither states nor implies a competitor could read a Claude
+export back in automatically. No material change. Separately, a search
+this run surfaced secondary coverage (an unverified aggregator article,
+not independently corroborated, that returned HTTP 403 on direct
+refetch) claiming a stronger story — that a "legacy" export expired
+2026-09-09 and that current exports "can't be imported into another
+personal Claude account" at all. Neither claim appears on Anthropic's
+own page, so this file is not acting on them; recorded here as a
+discrepancy between a secondary source and the primary one rather than
+as a finding, per this file's standing practice of sourcing every claim.
+Last observed 2026-11-09: [Claude support: Importing and exporting your
+memory from Claude](https://support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude).
+
+### Claude agent memory architecture — notes, dreaming, wiki representations (Anthropic)
+
+What it is: Anthropic's own published architecture for how Claude
+retains knowledge between sessions, distinct from the Claude Memory
+Import entry above (that entry is the cross-platform import/export
+*feature*; this is the underlying memory *architecture* Anthropic
+itself researches and builds). New entry, added this run. Published as
+"The components of agent memory" (2026-11-06): four layers (a small
+block of injected context, memory notes Claude writes, wiki-style
+representations linking those notes, and raw transcripts), plus
+"dreaming," a between-session review pass where Claude rereads its own
+logs, corrects stale notes, and promotes or reorganizes memory into
+linked representations. Anthropic's own reported result: a wiki built
+from roughly 350,000 files raised one evaluation's graded-criteria
+score from 13% to 48%. Who it serves: Claude's own long-running-agent
+users (the post frames this around coding and research agents working
+over many sessions, not the consumer memory-import audience). Pricing:
+included with Claude access. Strengths: this is a materially deeper,
+self-correcting memory architecture than any single-layer "store a
+fact, retrieve a fact" competitor in this category, and Anthropic
+publishing the mechanism (rather than only a benchmark number) gives
+outside readers, including this file, something concrete to check
+claims against. Weakness against Ursa, and the sharpest one: this is
+the highest-engagement memory-category post this file has tracked —
+174 points, 99 comments on Hacker News, beating this file's prior
+high-water mark (the 2026-11-02 decay-memory Show HN thread at 98/53)
+— and its own top comments converge on exactly Major's thesis rather
+than praising the architecture. One commenter built a separate,
+version-controlled plain-markdown memory tool specifically to survive
+switching between Claude Code and other tools; another states plainly
+that Anthropic's design "cover[s] a huge breadth of usecases... but are
+distractingly inferior to alternatives the user takes an active part in
+shaping." The pattern repeats from the 2026-11-02 brief's memory
+finding: the deeper a vendor's own memory architecture gets, the more
+its own users' top comments ask for portability and user control
+instead, not better architecture. Last observed 2026-11-06: [Anthropic:
+The components of agent
+memory](https://www.anthropic.com/research/components-of-agent-memory),
+[Hacker News discussion, 174 points/99
+comments](https://news.ycombinator.com/item?id=50402212).
 
 ### Gemini Personal Intelligence (Google)
 
@@ -1321,6 +1563,63 @@ provenance-resolved outcome record; Wire has nothing analogous to the
 revealed-preference flywheel Minor's pricing depends on. Last observed
 2026-10-26: [Wire: AI Memory Lock-in](https://usewire.io/blog/ai-memory-lock-in-blocks-your-own-product/), [Wire](https://usewire.io/).
 
+### MemTether
+
+What it is: a solo/small open-source "cross-client AI memory hub" —
+one physical local SQLite file, read and written by many separate AI
+coding tools (23 named: Claude Code, Claude Desktop, Cursor, Windsurf,
+VS Code, Zed, JetBrains, Cline, Roo Code, Gemini CLI, and others) via
+MCP, a REST API, and file-level pointers. New entry, found this run
+via the demand-signals ceremony (a general agent-memory news search)
+rather than a landscape sweep, then verified directly against the
+project's own GitHub repository and a CVE-adjacent dev.to writeup
+rather than taken from a headline. Who it serves: developers running
+several separate AI coding tools on one machine who want one shared
+memory instead of one per tool — the same audience MemHub (this
+category's Tencent entry) serves, with coding IDEs/CLIs in place of
+MemHub's chat/coding mix. Pricing: free, Apache-2.0, `pip install
+memtether`; no funding or company found, and the repository is itself
+a fork (`Fire162/MemTether`, forked from `Jah-yee/MemTether`).
+
+Strengths, read precisely: of every entry in this category, this one's
+own governance model is the closest architectural analog yet to
+CLAUDE.md §1's span-and-trajectory idea. "Corrections don't delete":
+a correction supersedes the prior fact rather than overwriting it, the
+old value stays queryable (bi-temporal `valid_from` vs `recorded_at`),
+every write joins a SHA-256 hash chain, and a conflict gate requires a
+human to adjudicate contradictory facts rather than silently picking
+one. That is a solo open-source project implementing, for its own
+narrower purpose (session hygiene across coding tools), something
+structurally closer to "survived, mutated, with a timestamp" than any
+funded competitor this file has found, including the better-resourced
+MemHub. Worth naming alongside MemHub as a second, independent proof
+of CLAUDE.md §0's fourth constraint ("the software is not the moat"):
+the specific data structure this project's business plan would need —
+a record of what changed, when, and why — keeps turning out to already
+exist somewhere, built by someone with no stake in Ursa's outcome.
+
+Weakness against Ursa: the shared store is one SQLite file on one
+machine, read by MCP-connected developer tools, not a profile that
+moves between separately-run, separately-vendored products the way a
+Major profile is designed to move between Claude, ChatGPT, and Gemini.
+The repository documents an `examples/mem0_migration.py` round-trip
+script and a markdown export, but nothing that writes into or reads
+from a frontier lab's own native consumer memory (ChatGPT Memory,
+Gemini Personal Intelligence, Claude's own memory) — the portability
+gap this category's every other entry also carries. Also worth naming
+as a discovery-method note, not a claim about the project itself: the
+same project, under the same author handle, was found cross-posted the
+same week into at least six different "awesome-list" and
+MCP-marketplace repositories (cline, kyrolabs, bradAGI, Arindam200,
+RyanAlberts, and a dev.to pair of posts) rather than organically
+discovered once — the self-submission pattern does not change what the
+code does, but it means the apparent breadth of "who's talking about
+this" overstates independent adoption, a distinction worth holding
+onto before citing adoption breadth for anything found this way again.
+Last observed 2026-11-02: [GitHub: Fire162/MemTether](https://github.com/Fire162/MemTether),
+[DEV Community: Your AI Agent Remembers Things. Who Audits What It
+Remembers?](https://dev.to/lanbass869cell/your-ai-agent-remembers-things-who-audits-what-it-remembers-50l).
+
 ### Skillsync (YC W26)
 
 What it is: a YC-backed ($500K, Y Combinator plus Character Capital)
@@ -1420,6 +1719,76 @@ tally from the cross-cutting note's own count of protocol/format
 [MemoryLake: Is AI Memory a Feature or a Lock-In?](https://www.memorylake.ai/en/blogs/is-ai-memory-a-feature-or-lock-in),
 [MemoryLake](https://www.memorylake.ai/), [MemoryLake pricing](https://www.memorylake.ai/en/pricing),
 [Tracxn: MemoryLake company profile](https://tracxn.com/d/companies/memorylake/___0NgAT2k9L33aWunlgxgnpw3otgpFY9Q6kIe_kmuA8o).
+
+### MemPalace
+
+What it is: a local-first AI memory system (language-based compression
+over conversation history, one-command ChromaDB ingest, MIT-licensed),
+with imports from Claude Code, ChatGPT, and Slack, marketed as "the
+highest-scoring AI memory system ever benchmarked." New entry, found
+this run via the demand-signals ceremony: a Show HN post (67 points,
+17 comments, well above this file's usual signal-to-noise bar for a
+Show HN) that turned into the clearest public case this map has yet
+tracked of a memory vendor's own benchmark numbers being independently
+debunked rather than merely unverified. Who it serves: individual
+developers wanting a local, portable memory store; notable only for
+the demand signal, not as a frontier-lab or enterprise comp. Pricing:
+free, open-source. Strengths: none claimed against Ursa; the local-
+first, MIT-licensed architecture is closer to user-owned than the
+centralized stores (Mem0, Wire, MemoryLake) this file already tracks.
+Weakness against Ursa, and the finding worth carrying into
+positioning.md: HN commenters found the claimed 100% LongMemEval score
+depended on "targeted fixes for three failing questions" plus LLM
+reranking, dropping to 98.4% with reranking removed, and the claimed
+100% LoCoMo score used a retrieval top-k of 50 against a benchmark with
+fewer sessions than that, meaning the metric could not fail by
+construction. A separate commenter cited GitHub issues documenting that
+independent testers running actual end-to-end QA, rather than the
+vendor's own retrieval metrics, saw scores "dropped dramatically."
+MemoryLake's entry above already flagged a self-reported 94.03% LoCoMo
+score as unverified by any third party; this is the same shape of claim
+one step further down the pipeline, with the verification actually
+done, in public, by the market itself. One contributor's identity
+(the actress Milla Jovovich, reported as behind the project) drove
+some of the HN attention but is not load-bearing for the benchmark
+finding. Direct read for CLAUDE.md §1: this is a concrete instance of
+"labs fall back on preference proxies... because they have no
+verifier," except here the proxy is a leaderboard number a vendor
+tuned to the test rather than a stated preference, and the market's
+own correction mechanism is a GitHub issue thread, not a repeatable
+process. Last observed 2026-11-02: [Show HN: MemPalace](https://news.ycombinator.com/item?id=47672792).
+
+### Mnemory-class decay-based memory (unnamed Show HN entrant)
+
+What it is: a memory layer for AI agents applying the Ebbinghaus
+forgetting curve — memories decay over time unless reinforced through
+recall, with unused data pruned to cut token waste — plus a graph layer
+over vector storage. New entry, found this run via the demand-signals
+ceremony: a Show HN post (98 points, 53 comments, above even
+MemPalace's 67/17), making it the highest-engagement memory Show HN
+this file has tracked. Who it serves: individual developers; notable
+only as a demand signal, not a frontier-lab or enterprise comp.
+Pricing: not established (early Show HN stage). Strengths against
+Ursa: none claimed. The claimed numbers moved between the post and its
+own updates — "52% Recall@5, nearly double...stateless vector stores,"
+84% token-waste reduction, later "84.8%...recall top 5 and 86.8% nDCG"
+against LongMemEval — the same self-reported-benchmark pattern already
+flagged for MemoryLake and MemPalace above, unverified by any third
+party as of this run. The more load-bearing finding is in the comment
+thread rather than the product: one commenter rejects agent memory as
+a category outright ("I've stopped trying to achieve general
+memory...The agent is not my friend"), proposing comprehensive
+markdown documentation instead as cheaper and more reliable, and a
+separate commenter calls the "biological memory" framing "marketing
+fluff on basic cache mechanisms." A third sums up the thread's
+consensus: "Everyone trying, no one making a clean breakthrough." So
+what: this is the demand-signal half of the same point MemPalace's
+entry makes on the supply side — not just that vendors self-report
+gameable scores, but that practitioners closest to the problem are
+openly skeptical any current memory product, named or not, has solved
+it, which is corroborating evidence for CLAUDE.md §1's "no verifier"
+claim from the buyer side rather than the vendor side. Last observed
+2026-11-02: [Show HN: AI memory with biological decay](https://news.ycombinator.com/item?id=47914367).
 
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
@@ -1541,6 +1910,38 @@ representation would still fail this test. Positioning consequence
 docs/market/positioning.md. Last observed 2026-10-26: [arXiv
 2609.05339: Does Your Agent's Memory Survive a Model
 Upgrade?](https://arxiv.org/abs/2609.05339).
+
+Update 2026-11-09 (message, 16th run): a ninth attempt, but a different
+kind than the first eight — not a new format joining the pile, but the
+first entrant naming the pile itself as the problem and saying what
+would fix it. Mads Thines, LoreKit's maintainer (and, separately, an
+engineer at observability vendor Dash0), published "Agent memory needs
+its OpenTelemetry moment" (2026-11-07), arguing the shortage is not a
+missing tool but a missing agreement across four layers: a data model,
+semantic conventions, a protocol, and reference implementations — the
+same four-layer shape OpenTelemetry used to unify observability vendors
+after the 2019 OpenTracing/OpenCensus merger. LoreKit's own MIT-licensed
+schema is offered only as "one concrete input," with the author stating
+outright "this isn't a pitch that LoreKit has solved memory" and
+explicitly inviting the community to "compare notes." Checked against
+this note's standing bar (independent implementation, neutral
+governance, adoption beyond the format's own author): unmet, same as
+all eight prior attempts — and unlike those eight, this one does not
+claim otherwise. It is a call to convergence, not a competing format.
+Worth tracking on its own because it reframes a pattern this note has
+repeated eight times running (another entrant, same gap) as something
+one of the entrants is now naming out loud, by a person with direct
+experience building the exact kind of cross-vendor standard (OpenTelemetry)
+this category still lacks. Nine attempts/calls now, zero that clear the
+bar. Read together with the new Claude agent memory architecture entry
+above, published one day earlier: the dominant lab is going deeper into
+its own proprietary memory architecture at the same moment a smaller
+open-source maintainer is calling for the cross-vendor standard that
+would make that depth portable — the gap this file has been tracking
+on the demand side (users building their own workaround tools) now has
+a named supply-side proposal aimed at it, for the first time. Last
+observed 2026-11-09: [LoreKit: Agent memory needs its OpenTelemetry
+moment](https://www.lorekit.io/blog/open-agent-memory-format).
 
 ## Changelog
 
@@ -1795,3 +2196,27 @@ Upgrade?](https://arxiv.org/abs/2609.05339).
   agent-memory plugins independently names "unauditable" storage as
   the defect, corroboration for Major's own inspectability promise
   from outside Category 3 entirely. Both in docs/market/positioning.md.
+- 2026-11-02 (message, 13th run) — promoted AfterQuery from a
+  cross-cutting-note footnote to its own Category 1 entry (now 20
+  total): a reported $3.2B valuation by 2026-09-01, a 10x jump from
+  its April Series A, called Y Combinator's fastest launch-to-unicorn
+  run, plus the category's first named AI-infrastructure client
+  (Nvidia) rather than a frontier lab or enterprise buyer. Dated
+  update to Zep (Category 3): surfaced its own CEO's 2025 "memory
+  wallet fallacy" post, the sharpest direct argument against Major's
+  premise found in this file from a named, tracked competitor, run
+  point-by-point against CLAUDE.md's own constraints rather than
+  dismissed. Positioning consequence in docs/market/positioning.md.
+- 2026-11-09 (message, 16th run) — re-checked Claude Memory Import
+  (Category 3), the map's most stale entry at 26 days: no material
+  change on re-fetch of Anthropic's own page, an unverified secondary
+  source's stronger claim recorded but not acted on. Added a new
+  Category 3 entry, Claude agent memory architecture (notes, dreaming,
+  wiki representations), Anthropic's own 2026-11-06 research post —
+  the highest-engagement memory post this file has tracked (174
+  points/99 comments), whose own top comments ask for portability and
+  user control rather than praising the architecture. Dated update to
+  the Category 3 "no neutral standard" cross-cutting note: a ninth
+  attempt, but the first to name the fragmentation itself as the
+  problem rather than add to it (LoreKit's "agent memory needs its
+  OpenTelemetry moment," 2026-11-07).

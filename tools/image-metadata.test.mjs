@@ -21,7 +21,7 @@ import { join } from 'node:path'
 import { describe, it } from 'node:test'
 import { LOCUS } from './gates/verdict-shape.mjs'
 import { GATE, TEXT_CHUNKS, carrierLine, unusable, verdict } from './image-metadata-verdict.mjs'
-import { icoChunks, pngChunks, scan, trackedImages } from './image-metadata.mjs'
+import { icoChunks, looksBinary, pngChunks, scan, trackedImages, unreadBinaries } from './image-metadata.mjs'
 
 const PNG_SIG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 
@@ -121,7 +121,7 @@ describe('the verdict', () => {
   it('declares every probe the enumerator needs, and no outcome', () => {
     assert.equal(GATE.id, 'tools/image-metadata.mjs')
     assert.equal(GATE.probes.length, 5)
-    assert.equal(GATE.groundProbes.length, 3)
+    assert.equal(GATE.groundProbes.length, 4)
     for (const probe of GATE.probes) assert.ok(!('exitCode' in probe), 'a probe may not declare its own outcome')
   })
 })
@@ -208,6 +208,55 @@ describe('the scan', () => {
     assert.equal(ground.cause, 'SCAN_GROUND_UNUSABLE')
   })
 
+  // The surface this gate did not have an enumerator for until 2026-11-02.
+  // A binary that is not a recognised image was selected by nothing here and
+  // skipped by the redaction gate's `-I`, so the fixtures below are the whole
+  // of the evidence that it is now refused rather than passed over. No real
+  // path or identifier goes into any of them, the same rule as the PNGs above.
+  // The NUL is the whole of what makes this binary, and binary is the whole of
+  // what these tests are about: the gate's question here is whether the file
+  // was ENUMERATED, not what it holds. So the path is the redaction standard's
+  // own placeholder form rather than a username-shaped string. That is not
+  // cosmetic. Writing a plausible `/Users/<name>/` here reds
+  // `scripts/redaction-check.mjs` on this very file, which this run did once
+  // and is recorded in its audit, and a security suite that trips the
+  // redaction gate to demonstrate the redaction gate is not a fixture.
+  const NUL_WITH_TEXT = Buffer.concat([
+    Buffer.from([0x00, 0x01, 0xff]),
+    Buffer.from('/Users/<you>/notes'),
+    Buffer.from([0x00]),
+  ])
+
+  it('refuses a tracked binary in no format it parses, rather than reporting the tree clean', () => {
+    const { ground, carriers } = scan(repoWith({ 'a.png': png(), 'font.woff2': NUL_WITH_TEXT }))
+    assert.equal(carriers, undefined, 'a ground fault must not also report a clean carrier list')
+    assert.equal(ground.cause, 'BINARY_UNREAD')
+    assert.match(ground.detail, /font\.woff2/)
+    assert.match(ground.why, /nothing reads it/)
+  })
+
+  it('counts every unread binary, so the one it names is not read as the only one', () => {
+    const { ground } = scan(repoWith({ 'a.bin': NUL_WITH_TEXT, 'b.bin': NUL_WITH_TEXT, 'c.bin': NUL_WITH_TEXT }))
+    assert.match(ground.why, /^3 tracked binary files are/)
+    assert.match(ground.detail, /and 2 more$/)
+  })
+
+  it('leaves text files alone however they are named, since the redaction gate reads those', () => {
+    const dir = repoWith({ 'a.png': png(), 'notes.woff2': Buffer.from('plain text, no NUL'), 'logo.svg': Buffer.from('<svg/>') })
+    assert.deepEqual(unreadBinaries(dir), [])
+    assert.equal(scan(dir).ground, undefined)
+  })
+
+  it('keeps the sharper diagnosis when the unread binary is an image, since that names the reader it needs', () => {
+    const { ground } = scan(repoWith({ 'a.jpg': Buffer.from([0xff, 0xd8, 0xff, 0x00]) }))
+    assert.equal(ground.cause, 'FORMAT_UNPARSED', 'the image walk has to run before the binary sweep')
+  })
+
+  it('calls an unreadable file binary, because unreadable is as unestablished as unparsed', () => {
+    const dir = repoWith({ 'a.png': png() })
+    assert.equal(looksBinary(join(dir, 'does-not-exist')), true)
+  })
+
   it('reads the tracked set and not the working copy, so untracked scratch is out of scope', () => {
     const dir = repoWith({ 'a.png': png() })
     writeFileSync(join(dir, 'loose.png'), png(chunk('tEXt', Buffer.from('k\0v'))))
@@ -222,6 +271,13 @@ describe('this repository', () => {
     assert.equal(ground, undefined, 'the scan must be able to establish the facts here')
     assert.deepEqual(carriers, [], 'a tracked image carries a chunk that can hold text')
     assert.ok(seen.images > 1300, `only ${seen.images} images parsed, so the scan is reading less than the tree`)
+  })
+
+  it('tracks no binary that this gate does not parse, so `images` is a coverage claim', () => {
+    // The equality the BINARY_UNREAD fault buys. Asserted against the real
+    // tree rather than stated in a comment, so the day a font or an archive
+    // is committed this suite says so and not only the gate.
+    assert.deepEqual(unreadBinaries('.'), [], 'a tracked binary is read by nothing in this repository')
   })
 
   it("carries a favicon whose embedded PNG lost its EXIF chunk and none of its pixels", () => {

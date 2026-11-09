@@ -226,6 +226,14 @@ export const MECHANISMS = [
       // genuinely discusses both.
       { file: 'docs/ideas.md', heading: '### 2026-11-02 (engineer, second message pass) — A `mentions-only` dismissal is an unexecutable claim with a free pass, and this pass wrote eight of them', verdict: 'mentions-only', why: 'a ledger entry criticising this registry; it quotes `cumulative paragraph` and `trailing blocks` as examples of probe strings, and asserts nothing about where the cut lands' },
       { file: 'docs/standards/lessons.md', heading: '## any (all seats, all products)', verdict: 'mentions-only', why: 'L-A61 states a consequence of truncation (a tail cut removes the disposition) and two duties that follow; it asserts no cut location. HQ\'s file, and not Ursa\'s to edit' },
+      // Same false-positive shape as the 2026-11-02 entry above, from the
+      // other direction: this one does not discuss the registry, it reports
+      // that a `ps -ef` on the shared host printed another seat's whole wake
+      // payload, cut marker and all, while this run was diagnosing a stalled
+      // sweep. The mechanism is mentioned because the quoted payload contains
+      // it. The section's own subject is what a seat may act on, which is
+      // nothing in another seat's wake.
+      { file: 'docs/ideas.md', heading: '### 2026-11-08 (engineer, scheduled slot, second window) — Craft scan: Arena (formerly LMArena), arena.ai, whose alignment index is measured over 90,000 agent sessions and traces to none of them', verdict: 'mentions-only', why: 'a craft scan whose external-sources paragraph reports that a process listing exposed another seat\'s wake payload; the cut marker appears only inside the quoted payload, and the section asserts nothing about where the cut lands' },
     ],
   },
 ];

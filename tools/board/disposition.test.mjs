@@ -9,6 +9,7 @@ import assert from 'node:assert/strict';
 import {
   dispositionRisk, dispositionSpans, firstWords, DISPOSITION_KINDS, MEASURED, GRADED,
 } from './disposition.mjs';
+import { blockFaults, isInstant } from './measured-citation.mjs';
 
 test('a disposition in the dropped tail and nowhere else is the one case worth a line', () => {
   const body = 'Here is the evidence at length.\n\nWhat I would ask is that you name the ref.';
@@ -118,7 +119,7 @@ test('a measured figure declares the coverage it was taken from', () => {
   // `pages` is greater than one whenever `rows` exceeds a page.
   assert.equal(MEASURED.coverage.complete, true, 'no share is published from a walk that did not finish');
   assert.ok(MEASURED.coverage.rows >= MEASURED.rows, 'the walk read at least what was counted');
-  assert.ok(MEASURED.coverage.pages > 1, 'more than one page, because 4,069 rows do not fit in a 500-row page');
+  assert.ok(MEASURED.coverage.pages > 1, 'more than one page, because 4,239 rows do not fit in a 500-row page');
   assert.ok(MEASURED.coverage.covered_hours > MEASURED.window_hours * 0.95,
     `the walk covered ${MEASURED.coverage.covered_hours}h of the ${MEASURED.window_hours}h claimed`);
   // Ursa's own slice is a subset of the portfolio's, which is the arithmetic
@@ -127,6 +128,20 @@ test('a measured figure declares the coverage it was taken from', () => {
   assert.ok(MEASURED.ursa.rows < MEASURED.coverage.rows);
   assert.equal(MEASURED.ursa.over_limit,
     MEASURED.ursa.by_kind.note + MEASURED.ursa.by_kind.done + MEASURED.ursa.by_kind.handoff + MEASURED.ursa.by_kind.ask);
+});
+
+test('and the instant it was taken at, because the coverage alone cannot date it', () => {
+  // Added 2026-11-02 on the reporting seat's second note. `covered_hours` ends
+  // at the newest row the walk saw, so a block can declare complete coverage
+  // and still be undatable. The strictness lives in
+  // `tools/board/measured-citation.mjs`, which is what the gate's text goes
+  // through; this asserts the block this repository actually ships.
+  assert.deepEqual(blockFaults(MEASURED), [], 'the committed block is citable');
+  assert.ok(isInstant(MEASURED.read_at), `read_at is ${MEASURED.read_at}`);
+  assert.ok(isInstant(MEASURED.coverage.newest_ts), 'the newest row the walk saw, as an instant');
+  assert.ok(Date.parse(MEASURED.read_at) >= Date.parse(MEASURED.coverage.newest_ts),
+    'a read cannot precede its own evidence');
+  assert.ok(Date.parse(MEASURED.read_at) > Date.parse(MEASURED.coverage.oldest_ts));
 });
 
 test('the kinds this board carries its dispositions in are the two the gate only warns about', () => {

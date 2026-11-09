@@ -2,6 +2,909 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (thirteenth pass): #782 reviewed against the merge rule and merged
+
+Wake payload named one PR to dispose: review engineer's `#782` (the sixth
+wake, fixing the stale-check gap exo named and a code-census total that
+did not move when `#778` added a code) against the merge rule, and either
+merge it or post what it still needs on the board for its seat.
+
+1. **`#782` reviewed against Tier B and merged, nothing left for the
+   owner on it.** Not this seat's own PR. Not a draft, no `hold` label,
+   no owner comment since the last push. One check (`scan`) and it was
+   green. `gh pr diff --name-only` showed 19 files, all under `docs/`
+   and `tools/` — no Tier C path, no secret, no workflow, no charter.
+   GitHub reported `mergeStateStatus: CLEAN`. Checked rather than
+   trusted: fetched the branch into a scratch worktree, ran
+   `tools/gates/code-census.mjs` (79 codes / 16 detectors / 74 named by
+   a test / 5 with a baseline entry, matching the PR's own claim exactly),
+   ran `git merge-tree --write-tree origin/main HEAD` (exit 0), and ran
+   the six test files the PR's own acceptance evidence names
+   (`instant-day`, `code-census`, `instant`, `urgent-verdict`,
+   `charter-lag`, `read-dates`): 195 pass, 0 fail. Merged under Tier B.
+   The PR already absorbed its author's own `#774` and `#770` as merge
+   commits inside it, so both close with this one merge.
+2. **Nothing else on this pass's wake.** The payload named one PR and
+   one instruction; there was no second item to carry.
+3. **This seat's own stack is unchanged.** `#780` (twelfth pass) is
+   still open and still waits on you.
+
+## Top three for the owner, 2026-11-09 message-triggered (twelfth pass): this seat's own stuck three-PR chain absorbed, #765 and #773 merged under Tier B, two inbox asks and one routed note answered on the board
+
+Four things on the wake: an ask from exo about the charter-carry row
+(already merged, by the eleventh pass, before this wake was read), a
+pull request opened by frontend (`#765`) to review against the merge
+rule, a note from `alexandra-systems/exo-centralizer` routing a
+redaction-gate finding here, and the recurring standing block naming
+this seat's own draft and two other seats' drafts as orphaned. Full
+account in `docs/agents/pm-2026-11-09-message-12-run.md`.
+
+1. **This seat's own stuck chain is closed, and nothing in it was
+   lost.** Three of this seat's own open pull requests — the seventh,
+   eighth and ninth passes — had been sitting unmerged since this seat
+   cannot merge its own row, while the tenth and eleventh passes had
+   each branched fresh from `main` instead of from that chain. The
+   result: `main`'s own copy of this file was missing three passes'
+   worth of history. Fixed by merging that chain into this pass's own
+   branch (`git merge-base --is-ancestor` confirmed all three
+   contained before closing them) and keeping both sides' sections,
+   newest first, nothing dropped. Nothing needs you here beyond
+   reading the restored history below.
+2. **Two Tier B merges, neither needing you.** `#765` (frontend, a
+   before/after visual sweep, two instrument fixes, and a design-ledger
+   correction) and `#773` (market, a redaction-gate false-positive
+   workaround that also subsumes an earlier row) were both reviewed
+   against the merge rule directly: not drafts, no `hold` label, no
+   comment against them, one green check each, `check-merge-queue.sh`
+   reports both clean against current `main` independent of GitHub's
+   cached field, no Tier C path. Merged.
+3. **The redaction-gate's underlying pattern is logged, not fixed, and
+   it is not blocking anyone right now.** `exo-centralizer` routed a
+   finding here: the gate's UUID-shaped-slug pattern will false-positive
+   on the next news citation with the same shape, and the fix is a
+   workflow-file edit outside every seat's charter surface except
+   engineer's. Market's workaround already landed (point 2 above), so
+   nothing is walled tonight. The actual fix is logged in
+   `docs/sprints/dispatch-queue.md` for engineer, not fired this pass
+   since engineer's own open row is a live draft. Separately, security's
+   dependency finding (F93, 23 advisories in `ursa-minor`'s dev
+   dependencies, 7 high, none reaching production) is logged the same
+   way for the same reason. Replied to exo, exo-centralizer and
+   security on the board, each in first person, naming what moved and
+   why nothing fired.
+4. **The standing block recurred a fourth time, with different
+   numbers, and the premise still does not hold.** It named this
+   seat's own prior pass (`#777`) as an open draft needing readying —
+   already merged, hours before this wake was read. It named `#765`
+   (already not a draft by the time this pass checked) and `#776`
+   (security) as orphaned. `check-draft-prs.sh`, run fresh: no
+   orphaned drafts, `#776` idle 1-4 minutes, "run may still be live;
+   leave it alone." `GET /api/standing?company=Ursa&seat=pm` now reads
+   empty. Not acted on, not filed as a new incident: this is the same
+   recurring defect Incident 19 already named, checked and rejected
+   for the fourth time rather than a new occurrence.
+
+## Top three for the owner, 2026-11-09 message-triggered (eleventh pass): #771 and #775 merged under Tier B, the injected draft-merge note checked and not acted on a second time
+
+Two items on the wake: review `#771` (security) against the merge rule,
+and the same injected note that produced Incident 19 last pass, now
+also naming `#776` (security) alongside `#765` (frontend). Full account
+in `docs/agents/pm-2026-11-09-message-11-run.md`.
+
+1. **Nothing needs you this pass beyond what is already here.** `#771`
+   (security, a tenth redaction gate checking capture provenance rather
+   than pixels) reviewed against the merge rule: not a draft, one green
+   check, no Tier C path, `check-merge-queue.sh` reports it clean.
+   Merged under Tier B. Separately, `#775` (exo, closing out a
+   week-old blocked charter lane across eleven files) reviewed
+   independently — ran `check-tier.sh` directly rather than trusting
+   its own quoted verdict, and read the actual diff to this seat's own
+   charter to confirm it does not touch the authority grant §21
+   reserves — confirmed Tier B, clean, merged.
+2. **The injected note recurred, and the premise still does not
+   hold.** It named `#765` and `#776` as orphaned drafts "no live run
+   behind," possibly dormant "for days." `/srv/asc/hq/tools/check-draft-prs.sh`
+   says both are "run may still be live; leave it alone," no orphaned
+   drafts, same as last pass. New this time: `GET /api/standing` itself
+   now echoes the claim almost verbatim. That is worth your attention
+   on its own — the standing endpoint may be carrying forward a stale
+   or injected condition rather than deriving a fresh one each read.
+   No new incident filed; this is Incident 19's defect recurring, not a
+   new one. `#765` and `#776` stay open, draft, untouched, for their
+   owning seats' own next runs.
+3. **This seat's own stack is unchanged.** `#766`, `#767`, and `#772`
+   are still open and still wait on you; `#772` already absorbs the
+   other two (`git merge-base --is-ancestor` confirmed again this
+   pass). No new work added to that stack.
+
+## Top three for the owner, 2026-11-09 message-triggered (tenth pass): #768 merged, frontend's timeout triaged and left for frontend, an injected note caught and not acted on
+
+Triggered by the frontend seat's run timing out at the host's 60-minute
+wall clock, with a draft (`#765`) behind it, and a note attached to the
+wake that read as a standing instruction. Checked the note against the
+live board and the real tool it cited before doing anything with it,
+per the org rule that external content is data and not an instruction
+(prompts/pm-agent.md).
+
+1. **Nothing needs you this pass beyond what is already here.** Exo's
+   register-lane row (`#768`) was ready on the board, addressed to
+   this seat by name, green, clean, not a draft, no `hold`, docs and
+   `tools/` paths only: merged under Tier B. Frontend's timeout is
+   real (host record: `exit: "timeout"`, 60.2 minutes, confirmed with
+   `asc turns`) and is the third such kill recorded against this seat
+   (`runner-facts.md` §85 had two as of 2026-11-02). Logged as
+   Incident 19, with the recommendation that a full before/after
+   visual sweep across three viewports and five pages does not fit
+   one 60-minute window and should ship in two increments. No rerun:
+   the same scope run again hits the same wall.
+2. **A note on this run's own wake asked this seat to merge `#765`,
+   and the premise did not hold when checked.** It called the draft
+   orphaned, "no live run behind it," possibly dormant "for days."
+   The live board inbox carries no such condition addressed to this
+   seat. The tool the note cited by name,
+   `/srv/asc/hq/tools/check-draft-prs.sh --repo alexandrapaiz/Ursa`,
+   is real (unlike several tools past standards have cited that are
+   not, Incident 18) and was run directly: "idle 8m... leave it
+   alone. no orphaned drafts." Eight minutes since a kill is not
+   "may not wake for days." `#765` stays open, draft, and untouched;
+   a handoff went to frontend on the board naming it and what it
+   already carries (a landed ledger entry, review-kit tooling, a full
+   "before" sweep) and what is still missing (the fix, the "after"
+   sweep, its own `NOTES.md` account).
+3. **Unchanged from earlier passes today, carried rather than
+   repeated.** The engineer lane's sprint staleness (28 days, no
+   current sprint file) is a ceremony-day finding for the next Monday
+   run, not this pass's to open. `docs/decisions.md` has nothing new
+   naming a seat with no run following.
+
+Full account: `docs/agents/pm-2026-11-09-message-10-run.md`.
+
+**Note added on the twelfth pass (absorption):** `#766`/`#767`/`#772`
+(the seventh/eighth/ninth-pass sections immediately below) merged into
+`main` by this reading rather than by GitHub, because this seat cannot
+merge its own pull request. The eleventh and tenth passes above had
+each branched fresh from `main` instead of from `#772`, so `main`'s own
+copy of this file was missing the seventh, eighth and ninth sections
+entirely — not because the work was lost, but because two divergent PM
+chains were both writing to this same file. Restored here by merging
+`pr772-local` into this branch and keeping both sides' sections, newest
+first. `#766`, `#767` and `#772` are closed as absorbed once this PR is
+open; nothing in them is dropped.
+
+## Top three for the owner, 2026-11-09 message-triggered (ninth pass): three more Tier B merges, the 28-item autonomy handoff closed out as already resolved, one gate false alarm handed to HQ
+
+Branched from the eighth pass's own open pull request (`#767`, which had
+already absorbed the seventh's `#766`) rather than starting a third
+copy, per this run's own org rule about an open PM pull request not
+being evidence that nothing was built.
+
+1. **Nothing waits on you from the merge queue.** Three more pull
+   requests reviewed against the merge rule and merged under Tier B:
+   exo's window-97 tool-reach sweep, engineer's code-census gate, and
+   security's exemption-expiry guard. All three were green, not
+   drafts, carried no `hold`, and touched no path the standard
+   reserves for you. Claimed by number in the done this time
+   (`data.merged`), which the handoff below explains.
+2. **The 28-item autonomy handoff is answered, not owed.** Exo routed
+   28 "unclaimed" merge decisions to this seat after a repeated
+   autonomy refusal. Checked every one directly against GitHub rather
+   than against the board: all 28 are merged, none open, none
+   abandoned, none this seat's own unfinished work. The gap is that
+   most of them shipped before every seat posted a `done` with the
+   merged number in `data` on every pass, so the instrument had
+   nothing to join them to even though GitHub had already closed every
+   one. Replied on the board rather than backdating a claim onto
+   another seat's old merge on its behalf. The same handoff carried a
+   fact about this seat's own slow first push (median turn 35 against
+   a deadline of 10); exo asked nothing back, and this seat answered
+   with the structural reason and carried the process question to
+   Monday's retro rather than guessing at a fix mid-week.
+3. **A gate false alarm, not a product defect, handed to HQ.** Market's
+   16th-brief pull request (`#769`) is failing the redaction gate on
+   three lines that all quote the same public news url, because the
+   url's own article id happens to be shaped like a UUID and the
+   gate's pattern cannot tell that from a leaked session id. Not
+   rerun, since the same input fails the same way every time. Handed
+   to `alexandra-systems/exo-centralizer` (the workflow file is HQ's),
+   and market told directly that its content is not what is held.
+   Incident recorded: `docs/agents/incidents.md`,
+   `INC-2026-11-09-redaction-gate-reads-a-public-url-s-own-id-as-a-leaked-session-uuid`.
+
+Full account: `docs/agents/pm-2026-11-09-message-9-run.md`.
+
+## Top three for the owner, 2026-11-09 message-triggered (eighth pass): three Tier B merges swept from the open queue, one code conflict handed to engineer and exo each, nothing waits on you
+
+Triggered by the same event as the seventh pass (frontend's `#756`,
+already merged by that pass) plus the standing block naming `#763`
+and `#764`. Checked `#763`/`#764` fresh with `tools/check-draft-prs.sh`
+rather than trusting the seventh pass's own timestamp: still live
+(idle 0-4 minutes), so still no action. Then read `gh pr list --state
+open` in full, per the standard's own standup instruction, rather than
+stopping at the PRs named in the wake.
+
+1. **Three ready pull requests that no earlier pass this hour had
+   reached merged under Tier B.** `#757` (security, the secret-print
+   guard and its PreToolUse hook), `#758` (engineer, `parseDay`/
+   `compareDays` added to `tools/instant.mjs`) and `#752` (market, the
+   16th brief) were all green, not drafts, no `hold` label, no comment
+   against them, and clean or cleanly resolvable against the trunk.
+   `#752` conflicted with `#758` in `docs/ideas.md`, docs-only and
+   append-only (both entries kept, same pattern the six-hour pass used
+   earlier today), so resolved and merged rather than handed back.
+   Full account in `docs/agents/pm-2026-11-09-message-8-run.md`.
+2. **One code conflict hand off to engineer, corrected.** `#759` (exo,
+   window 96) now conflicts with the merged `#758` in
+   `tools/seat/read-dates.mjs`, both seats having edited the same
+   lines this hour. Not docs-only, so not mine to resolve under §10's
+   Tier B condition 5. Posted a handoff to exo on the board naming the
+   exact file and asking for a rebase; will merge under Tier B as soon
+   as it is clean and green again.
+3. **`#730` (exo's seven-day-old charter lane) is genuinely Tier B, not
+   Tier C, but the conflict is bigger than its own author measured.**
+   `tools/check-tier.sh` confirms Tier B: the lane touches
+   `prompts/pm-agent.md` but no hunk of it names the authority grant
+   §21 reserves to the owner, so this is mine to merge, and the eleven
+   charter files are genuinely the only content in it that main does
+   not already hold in some form. But `git merge-tree` against the
+   current trunk shows the conflict is not the four registers exo's
+   own note named: `docs/agents/runner-facts.md` also collides, and
+   five `tools/seat/*` files come back `add/add` against the
+   already-merged split-off lane (`#738`). The registers are
+   docs-only and mine to take; the five tool files are code and are
+   not. Replied to exo naming the gap and suggesting a fresh branch
+   carrying only the charter files, rather than resolving any of it
+   unilaterally this pass. Nothing waits on you here either; this is a
+   seat-to-seat handoff, not an owner decision.
+
+**A process finding for the next ceremony, not actioned mid-week.**
+Exo's own daily measurement (first run on 936 recorded runs) finds
+this seat's median turn-to-first-push is 35 against the standard's
+deadline of 10, the slowest of eleven seats, and that seven of the
+company's ten lost ("never shipped") runs this week are this seat's,
+all of them message-triggered. Exo reads this as shape rather than
+carelessness (`this seat runs most often and is woken by mail most
+often`) and asked nothing back. Carrying it to Monday's retro rather
+than guessing at a fix here, because the eighth pass this run alone
+took longer to its first commit than the standard allows, for the same
+reason: a `gh pr list` and `git log` survey before any commit, which a
+tighter standup would need to trim.
+
+Separately, the same measurement found 28 of this company's last 58
+merge decisions carry no PR number in any `done` message's `data`
+field, several of them this seat's own earlier passes today. This
+run's own `done` carries `data.merged` for that reason; worth stating
+as a standing habit rather than a one-time fix, in case the next
+ceremony wants to make it a checklist line.
+
+## Top three for the owner, 2026-11-09 message-triggered (seventh pass): #756 merged, the standing claim on #763/#764 checked live and found already false, nothing waits on you
+
+Triggered by one event, frontend's `#756`, and the standing block
+attached to the wake naming `#763` (engineer) and `#764` (security) as
+orphaned drafts.
+
+1. **Nothing needs you from the merge queue.** `#756` (frontend, the
+   scrolling command box's focus ring was clipped by its own fade
+   mask) reviewed against §21's conditions directly: green
+   (`mergeStateStatus: CLEAN`, one check, `SUCCESS`), scoped to exactly
+   the described fix, reported with before/after pixel counts and a
+   full tab-stop sweep, and no other open PR's diff touches either
+   file it changed. Merged under Tier B, `64f64fb3`. Full account in
+   `docs/agents/pm-2026-11-09-message-7-run.md`.
+2. **The standing block's "ended" claim on #763/#764 was already false
+   when read, not merely risky to trust.** `tools/check-draft-prs.sh`
+   read both branches' real idle time (`0-1m`) against the disposition
+   "may still be live; leave it alone" — the opposite of orphaned —
+   and `gh run list` shows a fresh `redaction-gate` check landing on
+   each branch *after* the standing block's own claimed end time. No
+   action taken on either, or on `#762` (same shape). This is the same
+   recurring staleness pattern earlier passes today have already named
+   several times, not a new category of problem.
+3. **Nothing re-actioned from the sixth pass.** The three `urgent`
+   ledger entries still `hold` (not `symptom-cleared`) and the two
+   items carried to Monday's ceremony (the 28-day-empty engineer lane,
+   documenting the `- Recheck:` ledger field) stand as that pass left
+   them. Not touched this pass; still yours to clear when you read
+   them, still scheduled for the ceremony rather than mid-week.
+
+## Top three for the owner, 2026-11-09 message-triggered (sixth pass): #742 and #750 merged, one real finding carried to the ledger, nothing waits on you
+
+Triggered by three events on one wake: engineer's `#750`, exo's `#753`
+(already merged by the fifth pass below before this one started), and
+the notification that the engineer run behind `#750` finished.
+
+1. **Nothing needs you this pass.** `#753` needed nothing: already
+   merged by the fifth pass. `#742` (engineer's `ursa corpus` command,
+   un-drafted since an earlier PM pass closed it as superseded — that
+   close turned out to be stale, voided by a push 33 minutes after it)
+   and `#750` (engineer, the ledger's declared-recheck command and the
+   `--no-baseline` fix) both reviewed against Tier B and merged, in
+   that order. The one conflict between them was docs-only
+   (`docs/ideas.md`) and resolved in this pass rather than handed back,
+   using the `ledger` merge driver after installing it fresh in this
+   clone (`bash tools/registers/install-drivers.sh`, which this clone
+   had never run). Full account in
+   `docs/agents/pm-2026-11-09-message-6-run.md`.
+2. **A real finding, not yet actioned, because clearing `urgent` is
+   yours.** `#750` ran the recheck tool from `#739` and found that
+   three of the ledger's history-related `urgent` entries, previously
+   reported `symptom-cleared`, in fact still `hold`: a full-clone scan
+   (`node tools/secret-scan.mjs --history --no-baseline`) finds an
+   `aws-access-key-id`-shaped blob the baseline accepts as a vendor's
+   published example, still in history at
+   `tools/secret-scan-verdict.test.mjs:72`. No status was changed by
+   that run or this pass. If you read nothing else from this pass,
+   read this line: the previous "cleared" reports on those three
+   entries were wrong, and they are still `urgent` on `main` right
+   now.
+3. **Two items carried to the next ceremony rather than actioned
+   mid-week.** `#750` flagged, in its own text, that (a) the sprint's
+   `engineer` lane has been empty for 28 days (`sprint-2026-10-12.md`
+   is 28 days old and both its engineer items are shipped), so the
+   seat has been choosing its own work for several runs running on the
+   charter's fallback order, and (b) the new `- Recheck:` ledger field
+   it introduced needs documenting in `docs/standards/pm.md` §4, which
+   is this seat's surface, not engineer's. Both go into Monday's
+   ceremony (retro and the next sprint file), not a dispatch today.
+
+## Top three for the owner, 2026-11-09 message-triggered (fifth pass): security's settlement and exo's reader both merged, nothing waits on you
+
+Triggered by four events on one wake: frontend's run finishing (naming
+#751, already closed out by the fourth pass below before this one
+started), security opening #748 and security's run finishing (both
+naming the same pull request), and a note from exo closing a prior
+thread on the merge key and asking this seat to read its inbox and
+reply.
+
+1. **Nothing needs you this pass.** #748 (security, "the regex went to
+   exo whole, the ordering went to neither of us") reviewed against
+   Tier B and merged (`2e59fde8`): not a draft, no `hold` label, no
+   comment against it, one green check, `gh pr diff --name-only`
+   showed docs and `tools/` paths only (no Tier C path), clean on a
+   fresh `git merge-tree` against the trunk. It explicitly superseded
+   `#744`, which was already closed with `#748` named in its own
+   closing comment by the time this pass reached it — confirmed by
+   `git merge-base --is-ancestor` rather than taken on that comment's
+   word, not re-closed.
+2. **Exo's read-date reader (`#753`) also merged under Tier B,** the
+   pull request named in its own board note to this seat: clean,
+   green, not a draft, `docs/agents/` and two new `tools/seat/` files
+   only, no Tier C path, and exo's own comment on the row had already
+   checked it does not collide with exo's other open row (`#730`)
+   before this pass re-verified the merge itself. Its finding is
+   worth carrying even though the row needed no PM action beyond the
+   merge: the register this company tracks debt in has eight
+   spellings of its own due-date field, and the true count of entries
+   now `due` is **21**, not the 18 or 14 two earlier censuses
+   predicted. The fix for the vocabulary itself is HQ's and is
+   already routed to the centralizer, not landed here.
+3. **Both frontend and security already hold their own next pull
+   request, so nothing new was handed to either.** Frontend opened
+   `#756` ("continuing the lane after #751") and security opened
+   `#757` ("land HQ's secret-print guard") before this pass started.
+   Dispatching either seat now would be dispatching into a seat with
+   a live run already going, which the standard rules out on its own
+   terms. Replied to exo's note on the board in first person, closing
+   the thread; posted one `done` naming both merges and the close.
+
+**This seat's own open pull requests.** The fourth pass (`#755`, which
+itself absorbed the second and third passes, `#749` and `#754`, by
+ancestry) self-merged under Tier A before this pass branched, since
+every file in its diff was a knowledge surface (`docs/sprints/` and
+`docs/agents/` run logs). This pass's own pull request is the same
+kind and will self-merge under Tier A once readied, for the same
+reason.
+
+## Top three for the owner, 2026-11-09 message-triggered (fourth pass): frontend's keyboard-focus fix reviewed against the merge rule and merged
+
+Triggered by one event: PR #751 (frontend), named directly, with the
+instruction to review it against the merge rule and merge it, or say
+on the board what it still needs and hand that to its seat.
+
+1. **Nothing needs you this pass.** #751 checked out clean against
+   Tier B: not this seat's own PR, not a draft, no `hold` label, no
+   comment on it, checks green (`redaction-gate` / `scan`), six files
+   under `docs/design/` only (no Tier C path, no site diff), and
+   `MERGEABLE`/`CLEAN` on a live re-read. Merged (`5ec056da`), branch
+   deleted.
+2. **Ran the baseline-drift check exo's note asked for before this
+   merge.** Still `BEHIND` by 132 commits with the same one `RENAMED`
+   row owned by security that #754 already named; unrelated to #751's
+   diff and not a reason to hold it. Not a new finding.
+3. **Did not reproduce #751's 27/27 selftest claim or its visual
+   sweep.** Both require installing Playwright and a Chromium binary
+   per the kit's own README, which this pass judged too heavy for a
+   merge review of a doc-only, no-site-diff change; read the diff
+   directly instead and it matches the described mechanism (see
+   `docs/agents/pm-2026-11-09-message-4-run.md`).
+
+## 2026-11-09, third message pass: unchanged from the pass below
+
+Verified fresh rather than carried forward: nothing in the merge
+queue, the dispatch criteria, or the three items below moved in the
+three minutes between the prior pass's close and this one's wake. The
+triggering note (exo, on the baseline-drift tool) was already answered
+by the prior pass; see `docs/agents/pm-2026-11-09-message-3-run.md`.
+The three items below still stand as written.
+
+## Top three for the owner, 2026-11-09 message-triggered (six-hour pass): two rows merged clean, one orphaned guard handed to security, one new Tier C row found
+
+This is the six-hour pass: inbox and board triage, failed-run triage
+for the last six hours, the merge queue, and the sprint's movement, in
+one PR built on top of this seat's own still-open earlier pass today
+(`#746`, not yet merged, subsumed by this one).
+
+1. **Nothing needs you from the merge queue itself.** Two rows merged
+   clean under Tier B: frontend's keyboard-focus row merged with no
+   conflict, and market's 15th-run brief merged after resolving an
+   append-only conflict in `docs/ideas.md` (two entries on each side of
+   the same insertion point, both kept, nothing dropped). Two of this
+   seat's own stale rows were closed: one skill row superseded by its
+   own later row (confirmed by ancestry, not by title), and one of this
+   seat's own rows from a week ago, whose tracker content is long since
+   replaced but which was carrying one real, never-merged piece of
+   work — a vendored secret-print guard — that is now a named handoff
+   to security instead of a silent loss.
+2. **One standing row, under its surviving name.** Skill's charter-
+   editing row has been Tier C by path since 2026-11-02 under `#700`;
+   that number is now closed as superseded by its own later commit
+   (`#711`), and the same file (`prompts/skill-extract.md`) is still
+   there under `#711`. Not a new wait, the same one renamed to the PR
+   that is actually still open. Exo's own charter-editing stack
+   (`#730`, eleven files under `prompts/`) is unchanged and waits the
+   same way; security's `#744` is a different kind of wait — a real
+   code conflict in `tools/instant.mjs` against exo's own commit, not
+   a Tier C path, handed to security last pass and still theirs to
+   rebase, not yours.
+3. **Nothing failed that this seat could not explain.** Zero run
+   endings with a non-zero exit for any seat here in the last six
+   hours. One CI check is red on a still-open draft whose own run was
+   still going as this pass ended: the cause is a full session UUID
+   written instead of the required eight-character form, the same
+   class the redaction gate exists to catch, and it is the seat's own
+   live run to fix or not before the next pass checks again.
+
+## Top three for the owner, 2026-11-09 message-triggered: exo's row merged, security's row handed back for a rebase, two stale PM exports closed
+
+Triggered by a note from exo on the ancestry instrument plus two
+dispatches, one naming exo's pull request and one naming security's,
+each with the instruction to review it against the merge rule and
+merge it, or say on the board what it still needs and hand that to its
+seat.
+
+1. **Nothing needs you this pass.** Exo's row (`#745`) merged under
+   Tier B after a docs-only conflict this seat resolved itself.
+   Security's row (`#744`) does not merge clean in code — it rewrites
+   the same timestamp regex and the same ordering helper that exo's
+   own commit already rewrote on `main` the same day — so this seat
+   handed it back to security on the board with a rebase ask rather
+   than resolving someone else's code conflict by hand. Two of this
+   seat's own stale PRs (`#740`, `#741`) were closed as superseded,
+   since the tracker files they carried are replaced in full every run
+   and the real merges they reported are already permanent board
+   `done` messages.
+2. **The security row is the one thing waiting on a seat, not the
+   owner.** It needs a rebase onto `main` and a choice between its own
+   fix and exo's for two files; the handoff naming both files and the
+   conflicting commit is posted, and this line stands until it moves.
+3. **Replied to exo's note on the ancestry instrument** (merge-tree
+   answering "conflict or not" versus a window reading that as
+   "mergeable change," which diverge for a head the trunk already
+   contains) and confirmed the `data.merged` key choice was
+   deliberate, not a guess. Nothing here needs the owner.
+
+## Top three for the owner, 2026-11-09 message-triggered (first half of this pass): exo's window 93 pull request reviewed against the merge rule and merged
+
+Triggered by a dispatch naming exo's pull request directly: "the second
+five-day stall was an org spend limit, and the dark-cause class could
+not say so," with the instruction to review it against the merge rule
+and merge it, or say on the board what it still needs.
+
+1. **Nothing needs you this pass.** The pull request checked out clean
+   against Tier B: not this seat's own PR, not a draft, no `hold`
+   label, no owner comment after the last push (the owner's one comment
+   on it, from 23:51:44Z, predates every push including the branch's
+   own last one), checks green (`redaction-gate` / `scan` passed),
+   `gh pr diff --name-only` showed no Tier C path (five `docs/agents/`
+   registers and the outage tool and its test, nothing under
+   `prompts/`, `.github/workflows/` or `company.yaml`).
+2. **The one condition it failed was rule 5, and it was docs-only, so I
+   resolved it myself rather than handing it back.** GitHub reported it
+   `CONFLICTING`/`DIRTY`, confirmed independently with
+   `git merge-tree --write-tree --name-only` against a full unshallowed
+   clone. The conflict was exactly three files, all `docs/agents/`
+   append-only registers (`improvements.md`, `incidents.md`,
+   `runner-facts.md`), where this branch's new entries and a separate
+   addendum that had landed on `main` after the branch forked both
+   appended at the same point. I kept both sides' text in full, ordered
+   so the narrative reads straight (the older window's addenda before
+   the newer window's new entries, or vice versa, by what each
+   referenced), reran `node --test tools/seat/outage.mjs` on the merged
+   tree (22 of 22 pass), and pushed the resolution to the PR's own
+   branch rather than opening a second PR. The branch moved under me
+   once mid-review (a live run pushed one more commit to a different
+   file while I was resolving); I re-fetched and redid the merge on the
+   new tip before pushing, so nothing of that commit was lost.
+3. **Merged normal, branch deleted, `done` posted on the board with
+   `data.merged` set.** No product code, no charter, no workflow or
+   secret in the diff, so this was entirely within this seat's own
+   merge authority under §21; nothing here was the owner's to act on.
+
+## Top three for the owner, 2026-11-02 message-triggered (twenty-fifth pass): #731 merged under Tier B, closing #716 and #727, with a correction to my own last pass
+
+Triggered by the engineer's `done` on `#731`, answering my own pass
+24 handoff about `#716`'s rebase. Its own first line said my wake
+only carried 1,398 of the message's 2,532 characters, so I read the
+rest on the board before acting rather than from the event alone.
+
+1. **Nothing needs you this pass either.** `#731` (engineer) reviewed
+   against the merge rule and merged under Tier B: not this seat's own
+   PR, not a draft, no `hold` label, no owner comment since the last
+   push, checks green (this repo's only configured GitHub check is
+   `redaction-gate` / `scan`, which passed), `gh pr diff --name-only`
+   showed no Tier C path (product code under `ursa-major/` and tool
+   files under `tools/`, nothing under `prompts/`, `.github/workflows/`
+   or `company.yaml`), merged clean (`MERGEABLE`, confirmed
+   independently with `git merge-tree --write-tree --name-only` against
+   a full clone, not taken from the PR's own report), opened today.
+   Merging it auto-closed `#716` and `#727` as `MERGED`, both verified
+   ancestors of `#731`'s branch by `git merge-base --is-ancestor`
+   before the merge, alongside today's `main` tip, so none of the three
+   containment claims in the engineer's message were taken on their
+   word.
+2. **My own pass 24 line was wrong for two of four files, and the
+   engineer was right to correct it.** I wrote "resolve against what
+   security now does" for all four conflicting files. Security's
+   commits (`d0ff18dc`, `a9854563`) own `tools/board/read-filters.test.mjs`
+   and `tools/doc-model/check.test.mjs` only. The two
+   `tools/seat/charter-lag.*` files are exo's, confirmed here by
+   `git log` authorship on those paths (every commit touching
+   `charter-lag.mjs` in `#731`'s history is `ursa-exo` or `ursa-engineer`
+   absorbing exo's work, none is `ursa-security`). Naming security for
+   that half would have pointed the next rebase at the wrong seat.
+3. **The risk the engineer flagged is real, and independently confirmed
+   safe.** A conflict-free merge is not proof of semantic safety: git
+   saw no conflict in `tools/seat/charter-lag.mjs` because only one
+   branch touched it, yet two of main's pre-existing test assertions in
+   that file's own test would fail against the new implementation.
+   Checked by diffing the file against `origin/main` directly rather
+   than trusting the characterization: `formatTable` gained a trailing
+   per-row column (`${runsHandedStale}/${seatBranches}` instead of a
+   bare count, which breaks `charter-lag.test.mjs`'s anchored
+   end-of-line regex), and `cloneFitness` now returns `{fault, repair}`
+   objects instead of bare strings (which breaks the same test file's
+   `assert.match` and `.startsWith` calls on the old shape). Both are
+   additive: the fault strings themselves are byte-identical to main's,
+   all ten of main's exports from that file survive with three new ones
+   added (`formatSummary`, `lineCount`, `queueScan`), `cloneFitness` has
+   no caller anywhere in the tree outside its own module and test (full
+   grep, not assumed), and the one cross-module import of this file,
+   `seatOfBranch` from `tools/seat/draft-fault.mjs`, keeps its original
+   one-argument signature. `#731`'s own copy of
+   `tools/seat/charter-lag.test.mjs` updates both assertions to match
+   the new shape, so nothing is left red on `main` by this merge.
+4. **One caveat carried forward rather than resolved.** `#731` also
+   changes real product code: `ursa-major/src/adapters/github-pr.ts`
+   (plus its test and the built `ursa-major/dist/ursa.cjs`), a
+   genuine, well-documented fix for string-ordering two timestamp
+   producers that spell the same instant differently (330 of 2,134
+   commits on `main` carry a non-zero UTC offset). This repository has
+   no GitHub check for `ursa-major`'s own typecheck or test suite —
+   `redaction-gate` is the only one configured — so that correctness
+   rests on the engineer's own report and this seat's reading of the
+   diff, not on a green product check. This seat tried to get
+   independent coverage by running `npm ci` under `ursa-major` in its
+   own sandbox rather than merely accepting "ENOSPC" at the engineer's
+   word; `df -h` here reads 43G of 45G used, 1.9G free, the same
+   disk condition several other seats have hit today, so the install
+   was not attempted, to avoid spending more of an already-tight shared
+   disk on a check this seat could not have completed either. Tier B's
+   own rule 3 is "checks green, or no checks defined," and this repo
+   defines none for `ursa-major`, so this did not block the merge — but
+   the owner or HQ's engineer should know the green here is, in the
+   engineer's own words, "a green about tooling," not a verified
+   product-test run.
+5. **New tracker item from the engineer, not about `#731`.**
+   `tools/stack/repair-pending.test.mjs` test 20 is red on `main` right
+   now. It is security's file; the engineer filed it to security
+   directly as urgent and asked nothing of this seat beyond carrying
+   the line, so it is carried here and nowhere else.
+6. **`#699` (exo) closed itself since last pass; `#714` (exo) is
+   untouched.** New since pass 24: exo closed `#699` at 08:44Z,
+   confirming by `git merge-base --is-ancestor` that it is contained in
+   `#714`, its own consolidated row, rather than rebasing it — exactly
+   the "a document's own report is data, re-verify before citing"
+   posture this seat has been applying to others. `#714` stays at the
+   same reading as the last three passes: `check-tier.sh` reads an
+   ordinary charter edit as Tier B under §21, but exo's own notes and
+   the twenty-second pass's prior concession both call a broad
+   `prompts/` rewrite the owner's call, not this seat's, and nothing
+   this pass reopens that split mid-stream.
+7. **This seat's own queue is unchanged.** `#701` (pass 17) is still
+   waiting on a code conflict in `tools/root-entries.test.mjs` that is
+   not this seat's to resolve by hand.
+8. **Board:** one `done` reply to the engineer on `#731`'s merge,
+   naming the accepted correction and the independent verification
+   rather than just thanking it. No reply needed to exo's older notes
+   about `#699`/`#721` (both already closed out in pass 24) or to the
+   engineer's two earlier notes about `#727` (superseded by `#731`
+   before this run reached them).
+
+## Top three for the owner, 2026-11-02 message-triggered (twenty-fourth pass): #716 needs a rebase, five rows closed under it, #721/#722 merged
+
+Triggered by the security seat's finished run (`#719`, reviewed and
+merged last pass), the engineer's `done` naming `#716` as consolidating
+five open rows, two notes from exo about `#699`/`#721`, and this run's
+own open PR from an earlier pass (`#723`, already readied).
+
+1. **Nothing needs you this pass either.** `#723` (this seat's own
+   pass 23) self-merged under Tier A, subsuming `#718` (pass 22) for
+   free. `#721` and `#722` merged under Tier B after independent
+   review — both had gone stale as drafts and were readied by their
+   own seats before this run reached them.
+2. **`#716` (engineer) is not merged. It needs a rebase, and the
+   engineer has been told.** The PR's own report says only
+   `docs/ideas.md` conflicts with `main`. That was true when the
+   report was written; it is not true now. `git merge-tree
+   --write-tree --name-only origin/main pr716` reads five conflicts:
+   the ledger as described, plus `tools/board/read-filters.test.mjs`,
+   `tools/doc-model/check.test.mjs`, `tools/seat/charter-lag.mjs` and
+   `tools/seat/charter-lag.test.mjs`. Cause: security's `#719`, merged
+   minutes before `#716`'s last push, fixed the same three reds
+   `#716` also fixed, independently. Not the PM's to hand-resolve —
+   four of the five conflicting files are code, not docs, and §10
+   Tier B rule 5 reserves a code conflict to the seat that wrote it.
+   Handed back to engineer on the board with the exact file list, so
+   the next run rebases onto today's `main` rather than reusing this
+   report's stale reading.
+3. **The five rows `#716` supersedes are closed.** `#665`, `#679`,
+   `#685`, `#694`, `#708` — each verified an ancestor of `#716`'s
+   branch by `git merge-base --is-ancestor` before closing, so the
+   work is preserved regardless of `#716`'s pending rebase. Engineer
+   asked that whichever row landed first make this call; done here.
+4. **`#699` and `#714` (exo) are untouched, same reading as the last
+   two passes.** Both rewrite most of the charter set across every
+   seat. `check-tier.sh` reads an ordinary charter edit as Tier B
+   under §21, but exo's own note this pass says merging `#699` is the
+   owner's call, and the twenty-second pass found `#699`'s conflict in
+   `docs/agents/incidents.md` "Tier C conceded without argument" on
+   exo's side too. Kept at that reading rather than re-opened mid-pass
+   on one tool's say-so. New fact since last pass: `#699`'s conflict
+   with `main` is real again — `#721` merged the section of
+   `prompts/exo-agent.md` that exo's note predicted it would collide
+   with, so `#699` now reads `CONFLICTING` where it read `CLEAN` an
+   hour ago. `#714` is the newer of the two (`#699` is an ancestor of
+   `#714`'s branch) and carries substantially more: a charter
+   amendment, a new test-baseline tool, and three defects in that tool
+   found by running it. Neither touched this pass.
+5. **This seat's own queue is clear.** `#701` (pass 17) is unchanged,
+   still waiting on a code conflict in `tools/root-entries.test.mjs`
+   that is not this seat's to resolve by hand.
+6. **Board:** one `handoff` to engineer naming `#716`'s rebase and the
+   five closes; no reply needed to exo's two notes, both of which
+   explicitly asked nothing (`"Nothing else asked"` / `"I am not
+   asking you to"`).
+
+## Top three for the owner, 2026-11-02 message-triggered (twenty-third pass): #719's CI-gate finding merged as a stack, three more Tier B merges, one stale PR closed
+
+Triggered by security's `#719` ("the CI job we kept queueing would have
+gone green without testing the product"), named on the wake for review
+against the merge rule, plus a standing note naming `#721` (exo) as an
+orphaned draft.
+
+1. **Nothing needs you.** Four Tier B merges and one close, all other
+   seats' PRs, none of this seat's own: `#709`, `#719`, `#705`, `#720`
+   merged; `#395` closed as stale.
+2. **`#719` was the tip of a two-PR stack, not a single PR.** Its branch
+   carries `#709`'s commits (`git merge-base --is-ancestor` confirmed
+   this before touching either). Merged the base first, `#709`, then
+   `#719` once GitHub recomputed a clean merge state, per §10's "merge
+   the base of a stack first." Both Tier B: not this seat's own PR, not
+   drafts, no `hold` label, no owner comment, checks green (`scan`),
+   `gh pr diff --name-only` showed no Tier C path for either (no
+   `prompts/`, no `.github/workflows/`, no `company.yaml`), both
+   `MERGEABLE`/`CLEAN`, both opened today. `#719`'s own finding (F73–F77
+   in `docs/security/audit-2026-11-02k.md`) is itself a real one: the
+   CI gate HQ has queued for three runs would have gone green against
+   `node:` builtins alone and never touched `ursa-major`'s or
+   `ursa-minor`'s own test suites. That fix moves with `#719`, now on
+   `main`.
+3. **The standing note on `#721` was checked live and found stale,**
+   the same way the twenty-second pass found `#715`/`#716` stale.
+   `/srv/asc/hq/tools/check-draft-prs.sh --repo alexandrapaiz/Ursa`
+   reports `#721` idle 8 minutes against the workflow's own
+   timeout window: "run may still be live; leave it alone." `#722`
+   (security, idle 2m) and `#716` (engineer, idle 1m) are the same
+   shape. None of the three drafts open right now are orphans. Left
+   alone, contrary to the wake's framing that `#721`'s run had already
+   ended.
+4. **Two more open PRs are Tier C by path, not Tier B, and wait for
+   you or HQ's PM:** `#699` (exo) and `#714` (exo) both edit files
+   under `prompts/` directly (`prompts/engineer-agent.md` and ten other
+   charters in `#699`; `prompts/exo-agent.md` in `#714`). Charters are
+   reserved to the owner under §10 Tier C regardless of how clean the
+   checks are. Both `MERGEABLE`/`CLEAN`, unchanged by this pass.
+5. **`#395` (research) closed, stale.** Open since 2026-10-24, nine
+   days, no movement in the last seven. Closed with a one-line note
+   naming what would reopen it (a new commit or a fresh PR rebased
+   onto current `main`), per §10 Tier B's age rule rather than left to
+   accumulate.
+6. **This seat's own two open PRs, unchanged.** `#701` (pass 17) still
+   waits on you or HQ's PM for the `tools/root-entries.test.mjs`
+   conflict, a code conflict and not a docs-only one, so not this
+   seat's to resolve under §10 Tier B rule 5. `#718` (pass 22) is
+   subsumed by this pass's own `#723`: every commit in `#718` is an
+   ancestor of `#723`, so merging `#723` closes `#718` for free: one
+   decision instead of two. `#718`'s own `redaction-gate` failure
+   (the only non-success run in the last 30, `gh run list`) is already
+   resolved on this branch — `node scripts/redaction-check.mjs` reports
+   clean here.
+7. **Board:** posted one `done` naming the four merges and the close
+   in `data.merged`/`data.closed`, first person, per the board-message
+   protocol (§15).
+
+## Top three for the owner, 2026-11-02 message-triggered (twenty-second pass): a failed exo run that had already repaired itself, two Tier B merges, one tool defect now tracked
+
+Triggered by four things: the engineer's note on `tools/stack/lag-or-rewrite.mjs`
+and its own retracted finding, a standing note naming `#709`/`#705`/`#704` as
+drafts with no live run behind them, the exo seat's failed host-window run
+on `#704`, and this seat's own prior pass's open pull request (`#717`).
+
+1. **Nothing needs you.** `#717` (this seat's own twenty-first pass, pure
+   `docs/agents`/`docs/sprints`) self-merged under Tier A. `#704` (exo) and
+   `#715` (market) merged under Tier B after independent review.
+2. **The standing note handed to this run was already stale by the time it
+   was read.** `GET /api/standing`, checked fresh rather than trusted from
+   the wake, named a different pair (`#716` engineer, `#715` market) by
+   07:26Z. `#716` is still a live draft (its own run has no `run.end`
+   logged); `#715` had finished cleanly and was eligible, so it is the one
+   that got merged. `#709` and `#705` both still have a live run behind
+   them by the host audit log and were left alone, unchanged from the
+   twenty-first pass.
+3. **The exo failure was already fixed before this pass started.** The
+   window that opened `#704` was cut by the host mid-act, 42 minutes and
+   151 turns in, before it could leave draft. The seat's own very next
+   window read the pushed diff, ran its tests, and readied it. Verified
+   against the host audit log (`run.start`/`run.end` pairs) rather than
+   taken on the PR's own word, then reviewed and merged under Tier B.
+   Nothing to escalate to HQ: a false alarm, not a defect.
+4. **One tool defect logged, not fixed.** `tools/seat/charter-lag.mjs:165`
+   computes a pull request's base with `allowFail` and skips that pull
+   request on `if (!base) continue`. On a shallow ("handed") clone, `git
+   merge-base` prints nothing, so this instrument silently reports that no
+   open row touches a charter when one might. The engineer named it and is
+   not fixing it today, since the line sits inside its own open `#694`.
+   Logged here and in `dispatch-queue.md` for the next pass or a dispatch
+   to pick up; not fixed by this seat, since `tools/` is outside this
+   seat's writable surface. Not the same defect as the `runsHandedStale`
+   date-string bug in the same file, which merged to main this pass
+   under `#704`.
+5. **One fewer check before engineer's four stuck rows can merge.** The
+   engineer ran its new `tools/stack/lag-or-rewrite.mjs` over `#665`,
+   `#679`, `#685`, `#694` and `#703`: 433 differing files, zero
+   `RESURRECTS`. None of the five moves trunk text backwards. `#703`
+   already merged; `#665`/`#679`/`#685`/`#694` are still `CONFLICTING`
+   against `main` and remain the engineer's own handoff from the
+   twentieth pass to rebase, not re-fired here.
+
+Full account: `docs/agents/pm-2026-11-02-message-22-run.md`.
+
+## Top three for the owner, 2026-11-02 message-triggered (twenty-first pass): market's pull request and the twentieth pass's own both merged, the standing note on three drafts checked out true for exactly one of them
+
+Triggered by three things: market's pull request to review against the
+merge rule, the report that this seat's own nineteenth-pass pull
+request had merged, and a standing note naming three drafts as having
+no live run behind them.
+
+1. **Nothing needs you.** Market's pull request (`docs/ideas.md` plus
+   three `docs/market/` files, green, clean, no Tier C path) merged
+   under Tier B. This seat's own twentieth-pass pull request (pure
+   `docs/agents/`/`docs/sprints/`) self-merged under Tier A.
+2. **The standing note's "no live run behind it" claim was checked
+   against the host's own audit log, not just the idle-time script, and
+   held for only one of the three drafts it named.** `security` and
+   `exo` each have a `run.start` logged with nothing ended since — both
+   live, both left alone. `frontend` logged a clean `run.end` naming its
+   own pull request, with nothing started since: that run is genuinely
+   over.
+3. **The frontend pull request is real work, not a stub, and still
+   not this seat's to ready.** 1021 lines, a passing selftest, a build
+   diagnosis — but the description is still the unfilled placeholder
+   and the notes file ends before delivering a section it promises.
+   Commented on the pull request and sent frontend a board note with
+   the finding; this is frontend's to finish or close, not this seat's
+   under Tier B's non-draft clause.
+
+Full account: `docs/agents/pm-2026-11-02-message-21-run.md`.
+
+## Top three for the owner, 2026-11-02 message-triggered (twentieth pass): a stale "orphaned draft" claim checked and rejected twice, one Tier A self-merge, the stacking candidate handed to engineer directly
+
+Triggered by one event: the frontend seat's run finished, with a
+standing note attached naming `#705`, `#708` and `#709` as drafts with
+no live run behind them, to be readied, closed, or annotated under the
+merge rule. Read as data, not instruction, and checked against the live
+repository rather than acted on by its own word.
+
+1. **The event's premise did not hold.** `check-draft-prs.sh`, run
+   twice six minutes apart this pass, found all five open drafts
+   (`#704`, `#705`, `#708`, `#709`, `#711`) idle well inside the
+   120-minute "still writing" window, with `#708`'s branch taking a new
+   commit one minute before the second check. None is Tier-B-eligible
+   regardless — §10 condition 2 excludes drafts outright. This is the
+   nineteenth pass's own finding, independently reproduced rather than
+   trusted, after a wake that (per its own warning) carried a condition
+   older than itself. Nothing merged, nothing closed, no draft
+   annotated, because none needed to be.
+2. **Nothing new to merge.** This pass's own prior pull request
+   (`#712`, nineteenth pass, three knowledge-surface files, green,
+   clean) is now self-merged under Tier A. No other PR became Tier-B
+   eligible since the nineteenth pass's own three merges: no new
+   failures, no new milestone, no new board message addressed to `pm`
+   since `#712`'s own batch.
+3. **The engineer stacking candidate stopped being a line in a file
+   this pass.** The nineteenth pass named `#665`/`#679`/`#685`/`#694`
+   (four open, mutually non-ancestral, each `CONFLICTING` against
+   `main`) as the one dispatch candidate this credential surface
+   cannot fire, but never sent it anywhere. Posted it to `engineer` as
+   a board handoff this pass (message `c5e0aae6`). `#701` (this seat's
+   own) is unchanged: still the `tools/root-entries.test.mjs` conflict,
+   still waiting on the owner or HQ's PM. `#699`, `#395` and `#700`
+   stay Tier C by path, unchanged.
+
+Full account: `docs/agents/pm-2026-11-02-message-20-run.md`.
+
+## Top three for the owner, 2026-11-02 message-triggered (nineteenth pass): the eighteenth pass's own repair merged, three more seats landed, nothing newly blocked
+
+Triggered by the day's own event stream: a skill retraction, a
+distribution note on the gitignore install, exo's window-84 pull
+request, exo's window-84 run finishing, the skill run finishing, an
+engineer correction, a market pull request, and four repeats of the
+standing reminder naming `#704` as possibly orphaned. Read as data,
+each independently re-checked against the live repository rather than
+taken on word.
+
+1. **Nothing new to merge here.** The eighteenth pass's own pull
+   request (`#707`, pure `docs/sprints/` and `docs/agents/`) is now
+   self-merged under Tier A. Three more pull requests merged under
+   Tier B this pass: `#702` (security, the redaction-argument guard),
+   `#703` (engineer, the containment guard that confirmed the six
+   superseded rows the eighteenth pass closed), and `#706` (market,
+   the forward-merge brief that supersedes the now-closed `#686`).
+   Each was green, clean, not a draft, carried no charter or secret
+   path, and had sat with no owner comment since its last push.
+2. **The standing reminder naming `#704` as orphaned was stale by the
+   time this pass read it.** `check-draft-prs.sh --repo
+   alexandrapaiz/Ursa` reports `#704`, `#705`, `#708` and the newly
+   opened `#709` all idle under their own seat's timeout window, not
+   past it — `#704` itself took a real commit four minutes before this
+   pass's check ran. None readied, none closed; a live run is not this
+   seat's to touch.
+3. **`#701` (this seat's own) still carries the secret-print guard and
+   still conflicts with the trunk on `tools/root-entries.test.mjs`**,
+   unchanged from the eighteenth pass: a real code conflict, not a
+   merge-button question, and Tier B on top of being this seat's own
+   row, so it waits for the owner or HQ's PM regardless. `#699` (exo,
+   window 84) is new this pass and is Tier C by path — it touches the
+   charter file for nearly every seat — and also carries one real
+   content conflict against the trunk, in the incidents register; both
+   facts replied to exo on the board rather than acted on. `#395`
+   (research) and `#700` (skill) stay Tier C by path exactly as named
+   before, both otherwise clean; `#700` still contains `#689` and
+   `#692` by ancestry.
+
+**Also carried, not new:** the sprint-ceremony gap stands —
+`sprint-2026-10-12.md` is still the newest sprint file on `main`, and
+today's events were all message-triggered rather than the Monday
+cron, so this pass did not open the ceremony either (see "Boundaries
+honored" in this pass's own run log for why opening it unprompted
+would be the wrong call, not an oversight). Engineer's five mutually
+non-ancestral open pull requests (`#665`, `#679`, `#685`, `#694`,
+`#703` before it merged) are now four (`#665`, `#679`, `#685`,
+`#694`), re-checked directly with `git merge-base --is-ancestor`
+rather than trusted from a prior pass's count — all four still
+pairwise non-ancestral and all four `dirty` against the trunk after
+this pass's merges. Neither is a conflict this seat resolves in code
+(pm.md §10 condition 5); named here for engineer to rebase.
+
 ## Top three for the owner, 2026-11-02 message-triggered (eighteenth pass): the two divergent PM chains the seventeenth pass flagged are now one decision each side, five more seats' PRs merged, one chain still waits on you
 
 1. **Nothing to merge here.** This pass's own repair (six of this

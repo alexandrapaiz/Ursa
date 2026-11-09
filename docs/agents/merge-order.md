@@ -1,89 +1,96 @@
-# Merge order for the owner — replaced each window by Ursa's exo seat
+# Merge order — measured 2026-11-09 03:01Z, ninety-ninth exo window
 
-**Measured 2026-11-02T03:17:11Z by window 79**, on `origin/main` at
-`e9cf564b`. Replaces window 77's plan (02:09:16Z, `383afa21`), per §5b of
-`prompts/exo-agent.md`. Every verdict below names the instrument that
-produced it.
+Replaces the previous plan. Written by Ursa's exo seat under
+`prompts/exo-agent.md` §5b. **Measuring the queue and naming the order
+is information for the owner. Merging is hers alone, and nothing here
+loosens that.**
 
-## The five queue numbers (§5b)
+Both merge drivers were registered in this clone before any verdict
+below was taken, and the path was asserted against this checkout rather
+than the exit status read:
+
+```
+git config --get-regexp 'merge\.(ledger|register)\.'          # 6 lines
+git config --get-regexp 'merge\.(ledger|register)\.driver' | grep -q "$PWD"
+```
+
+`refs/prs/*` was re-fetched **after** this window opened its own pull
+request, because §0 runs before ship-first and cannot contain the
+identifier ship-first creates.
+
+## The queue
 
 | | |
 |---|---|
-| open now | **21** (4 drafts, all opened in the last hour with live runs behind them) |
-| merged, last 7 days | **90** |
-| oldest open | `#395`, 2026-10-24T21:21:40Z, **8.2 days** |
-| newest merge | 2026-11-02T03:15:34Z, **80 seconds** before this read |
-| merges per day | 10-23: 9, 10-24: 27, 10-25: 14, 10-26: 45, 10-27: 22, 11-01: 4, 11-02: 27 |
+| open pull requests | **10** |
+| merged in the last 7 days | **76** |
+| oldest open | `#711`, 2026-11-02T06:55Z |
+| newest merge | **2026-11-09T03:00:01Z** (`#768`, this seat's) |
+| merges per day, last 7 rows present | 10-25 14, 10-26 45, 10-27 22, 11-01 4, 11-02 74, 11-08 5, 11-09 22 |
 
 **Neither depth predicate fires.** Open does not outnumber the week's
-merges (21 against 90), and the gate moved inside the last two minutes.
-Report the per-day row as seven rows and never as a sum: the four absent
-days, 10-28 through 10-31, are the five-day portfolio stall that
-`INC-2026-11-01-the-portfolio-completed-zero-runs-for-five-days-and-the-depth-rule-reported-a-healthy-gate-throughout`
-records, and the gate has fully recovered — 27 merges today is the second
-busiest day in the window.
+merges (10 against 76), and the newest merge is one minute old rather
+than a day. The gate is working.
 
-**The queue moved three times during this measurement**, from 25 open to
-21 in roughly two minutes, and `main` moved from `2b32cc6f` to `e9cf564b`
-mid-sweep. The sweep below was re-run in full against `e9cf564b` rather
-than reported against the commit it started on, because a conflict verdict
-names a pair of commits or it names nothing.
+**Five of the last seven calendar days have no row at all**, which the
+per-day column shows and a weekly sum would hide. That is the provider
+outage of 2026-11-03 to 11-07, routed to the owner this window with the
+instant attached. It is not a queue problem and nothing in this file can
+act on it.
 
-## What actually conflicts: 19 clean, 2 conflicting
+## The conflict sweep
 
-Instrument: `git merge-tree --write-tree --name-only <main> refs/prs/<n>`,
-exit code read as three-valued, both revisions resolved first, this
-repository's `ledger` and `register` drivers installed and their path
-asserted against `$PWD`. **No `2>&1`.** `refs/prs/*` re-fetched after this
-window opened its own pull request.
+Exit codes read as codes and never as a sign, and the containment
+discriminator run **before** `merge-tree`, because an absorbed branch
+reads clean on every conflict instrument there is.
 
-| | files | owner |
-|---|---|---|
-| **`#601`** `ursa-skill/2026-10-27-hook-2` | **12** under `skills/` — `README.md`, `relevance-audit.md`, `relocate-anchors.mjs`, `relocate-anchors.test.mjs`, and eight `TRIGGER-TEST.md` | Ursa's **skill** seat |
-| **`#615`** `ursa-engineer/2026-11-01-hook` | **3** — `tools/gates/enumerate-verdicts.mjs`, its `.test.mjs`, and `tools/secret-scan-verdict.mjs` | Ursa's **engineer** seat |
+| row | verdict |
+|---|---|
+| `#711` | CLEAN |
+| `#765` | CLEAN |
+| `#766` | CLEAN |
+| `#767` | CLEAN |
+| `#770` | CLEAN |
+| `#771` | CLEAN |
+| `#772` | CLEAN |
+| `#773` | CLEAN |
+| `#774` | CLEAN |
+| `#775` | CLEAN |
 
-Both route to their authoring seat and neither is the owner's to resolve.
-`#601` is six days old and the only open pull request older than two days
-besides `#395`; its conflict surface is twelve files in one seat's own
-directory, which is a rebase that seat can do in one window.
+**Ten of ten clean, zero already-contained, zero unresolvable.** No row
+in this queue needs its owning seat before it can be read.
 
-**One instrument correction, measured in this window, that changes `#615`'s
-number.** This window's first sweep piped `merge-tree` through `2>&1` and
-reported `#615` as **two** files. The charter forbids that redirection
-precisely because a merge driver writes its diagnostic to stderr and the
-redirection puts that line where the tree object identifier belongs. Run
-in the prescribed form, `#615` conflicts in **three** files — the third is
-`tools/secret-scan-verdict.mjs`, and a seat handed the two-file verdict
-would have rebased and still been refused. The charter's warning is
-reproduced rather than taken on faith, and the under-report is in the
-direction that looks like progress.
+## The order, and the reason for it
 
-## The order to hand her
+1. **`#775`** — this seat's. It carries eleven charters and the seven
+   `tools/seat` instruments those charters cite. It is first not because
+   it is this seat's but because **every other seat's next window reads
+   one of those eleven files**, and ten of the eleven currently instruct
+   a seat to hand-roll a query against a tool that lands here. The cost
+   of its waiting is paid by every window of every seat, once per window.
+2. **`#771`, `#774`, `#765`** — the three drafts. Not mergeable at all
+   while they are drafts, so they occupy a queue slot and answer no
+   decision. Their own seats resolve them; nothing here can.
+3. **`#766`, `#767`, `#772`** — the PM's three. Its own lane, its own
+   merge authority under §21 for the Tier B rows among them.
+4. **`#770`, `#773`** — engineer and market, both clean, neither blocking
+   anything else in this sweep.
+5. **`#711`** — oldest at seven days, and the only row in this queue
+   whose age is worth a sentence. The skill seat's. Age alone is not the
+   measure this file uses, and it is last here because it blocks nothing
+   and conflicts with nothing, not because it is unimportant.
 
-**Nothing is blocked on the owner that is not already moving.** The gate is
-merging at 27 a day and the two conflicts are their seats' work, so the
-useful order is by what unblocks the most other branches:
+## What this window changed about the order itself
 
-1. **`#618`** — this seat's charter lane, **clean**, 8021 lines of
-   `prompts/exo-agent.md` against 2221 on `main`. Tier C, so it is the
-   owner's and nobody else's. It is the single largest blocked item in the
-   repository and it is why this seat has now reported a **flat
-   compounding curve for three consecutive windows**: every rule three
-   windows have written for the other ten seats is in that branch, and
-   `charter-lag.mjs` reads seven of eleven charters as frozen for 28 days.
-   This is the one line on this page that is an owner decision.
-2. **`#395`** — 8.2 days old, **clean**, research. Oldest open and the
-   only thing on this page at risk of Ursa incident 6 by age alone.
-3. **The nineteen clean ones**, in merge order, lowest first. All Tier A
-   or B by content.
-4. **`#601` and `#615`** — not yours. Routed to skill and engineer.
+`#730` left the queue. It was this seat's charter lane, open since
+2026-11-02, and it was the only row in the last three sweeps carrying
+conflicts. It is closed, and its unlanded content is `#775`.
 
-## This seat's own three open pull requests, declared
-
-- **`#662`** — window 79, readied, Tier B, register-only. The live tip.
-- **`#657`** — window 78, readied, Tier B, **contained in `#662`**
-  (`git merge-base --is-ancestor refs/prs/657 refs/prs/662` exits 0), so
-  merging `#662` absorbs it and merging both is harmless.
-- **`#618`** — the charter lane, Tier C, item 1 above. Deliberately not
-  absorbed into either register branch, because absorbing it would make a
-  Tier B branch Tier C and freeze the registers behind the charter.
+**The reason it sat is the entry this file should carry forward.** Its
+four register conflicts held **zero** lines absent from `main`. Every
+one was the `register` driver refusing a heading present on *both*
+sides, which is a redundant fork rather than a disagreement. A conflict
+count does not measure unlanded content, and on an append-only register
+it is close to independent of it. Before any later window resolves a
+register conflict in this queue, run the set difference against `main`
+and read the number.

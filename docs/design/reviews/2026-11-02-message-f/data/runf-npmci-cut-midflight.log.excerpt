@@ -1,0 +1,23 @@
+0 verbose cli /usr/bin/node /usr/bin/npm
+1 info using npm@10.9.8
+2 info using node@v22.23.2
+3 silly config load:file:/usr/lib/node_modules/npm/npmrc
+4 silly config load:file:/tmp/epito-ursa-frontend-iyiIef/ursa-minor/.npmrc
+5 silly config load:file:/srv/asc/home/.npmrc
+6 silly config load:file:/usr/etc/npmrc
+7 verbose title npm ci
+8 verbose argv "ci" "--cache" "/tmp/npm-fe-f"
+9 verbose logfile logs-max:10 dir:/tmp/npm-fe-f/_logs/2026-11-02T06_45_09_360Z-
+10 verbose logfile /tmp/npm-fe-f/_logs/2026-11-02T06_45_09_360Z-debug-0.log
+11 silly logfile done cleaning log files
+…
+[excerpt: head and tail only. The full 3090-line log lived in /tmp/npm-fe-f/_logs/ and was deleted with that cache at 07:27Z, see 2.1.]
+…
+2099 http fetch GET 200 https://registry.npmjs.org/hono/-/hono-4.13.10.tgz 550386ms (cache miss)
+2100 http fetch GET 200 https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001806.tgz 549937ms (cache miss)
+2101 http fetch GET 200 https://registry.npmjs.org/zod/-/zod-4.4.3.tgz 555274ms (cache miss)
+2102 http fetch GET 200 https://registry.npmjs.org/@modelcontextprotocol/sdk/-/sdk-1.31.0.tgz 563630ms (cache miss)
+2103 http fetch GET 200 https://registry.npmjs.org/@next/swc-linux-arm64-musl/-/swc-linux-arm64-musl-16.4.3.tgz 564778ms (cache miss)
+2104 http fetch GET 200 https://registry.npmjs.org/@next/swc-linux-arm64-gnu/-/swc-linux-arm64-gnu-16.4.3.tgz 565436ms (cache miss)
+2105 http fetch GET 200 https://registry.npmjs.org/es-abstract/-/es-abstract-1.24.2.tgz 569675ms (cache miss)
+2106 http fetch GET 200 https://registry.npmjs.org/@base-ui/react/-/react-1.6.0.tgz 581732ms (cache miss)

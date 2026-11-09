@@ -690,6 +690,45 @@
           "subject": "Pin the three repaired drifts with tests that fail without them"
         }
       ]
+    },
+    {
+      "digest": "a77afc742812d2d3",
+      "sha256": "a77afc742812d2d33c10075f6d436f1c2b4759e6426bc3beab8350c6131e85bc",
+      "blob": "1581fd60deccec256be7b78daadd9cc0e3b1ce94",
+      "bytes": 334215,
+      "introducedBy": [
+        {
+          "commit": "f8bb31cbd3e97c43d61380f2a7a5bdb54d2920ef",
+          "date": "2026-11-02T07:52:37.000Z",
+          "subject": "consolidation: rebuild the bundle, and three reds the five rows left behind"
+        }
+      ]
+    },
+    {
+      "digest": "ce97b01dedd9072e",
+      "sha256": "ce97b01dedd9072e4aa479432e864bbf78d3d44f1e09256779c9f92f660bc917",
+      "blob": "09cf6a1ab045a2787842775621cb702c74fca053",
+      "bytes": 346052,
+      "introducedBy": [
+        {
+          "commit": "68bb87b234b393a03007ae5b36bac7e71675d611",
+          "date": "2026-11-08T23:48:57.000Z",
+          "subject": "ursa corpus: read many pull requests as one corpus"
+        }
+      ]
+    },
+    {
+      "digest": "352f9a4e7529fd74",
+      "sha256": "352f9a4e7529fd74ed1694cbbaf9ca5e4acac6c3e194905a686aeba90c066c35",
+      "blob": "bc088a59eeca6d9bd3368d559c7405aa22b155a1",
+      "bytes": 346773,
+      "introducedBy": [
+        {
+          "commit": "b25c220b1c97e5e37fca3fa096367a9f5c2a6a4b",
+          "date": "2026-11-08T23:58:58.000Z",
+          "subject": "corpus: report what the finished works ARE, by area"
+        }
+      ]
     }
   ]
 }

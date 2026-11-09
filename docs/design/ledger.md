@@ -1881,3 +1881,536 @@ installed fresh between the two dates, and a glyph's worst antialiased
 pixel is precisely the quantity a renderer version may move. That is
 labelled a hypothesis and left unmeasured on purpose, which is the
 honest shape when the answer changes nothing.
+
+## L55 — The isolation this kit documents is the tree, and the contended resource is the cache
+
+**measured**, 2026-11-02 (run f). `reviews/2026-11-02-message-f/NOTES.md` §2.
+
+`npm ci` in `ursa-minor` failed with `EEXIST` on a rename into
+`/srv/asc/home/.npm/_cacache/content-v2/…`, having already emptied
+`node_modules`, so the tree was left at zero packages and the build had
+nothing to run against.
+
+This is the third install hazard in this kit's short history and it is
+not the other two. L49 is a dependency nothing declares being removed by
+an unrelated install. L51 is two installs in one tree leaving a package
+half-unpacked while `npm` exits 0. Both are about **`node_modules`**, and
+both have the same remedy, which the README now gives: install into a
+prefix nothing else owns, and point `PW_ROOT` at it.
+
+That remedy does not reach this one. npm's content-addressed cache is not
+a path the kit chooses. It is a path npm chooses, inside a home directory
+that about twenty seats of several companies share on this host, and it
+is written by every one of their installs. Measured the same morning: a
+`npm ci` from `/tmp/epito-epitome-engineer-Tisktd/cli`, another company's
+seat, was writing that cache four minutes before this run's install
+started.
+
+**The fitting story this entry exists to reject.** This run had started
+the kit's playwright install and the site's install within one minute of
+each other, which is L51's shape exactly. The clock refuses it: the two
+overlapped for fourteen seconds and the failure landed six minutes after
+that window closed. L54's rule, restated for a cause that flatters your
+own most recent action rather than your own most recent merge.
+
+**What the evidence supports, and where it stops.** The failing blob is
+`zod`, whose integrity appears exactly once in the lockfile, so no single
+`npm ci` had two writers for it; the three `zod` paths in the tree are two
+different versions, which was the next fitting story and is also dead. A
+destination that already exists means another process wrote it, and an
+`ENOENT` on the source tmp file in the same error means another process
+removed this one's. npm logs only its own process and no npm started
+against that cache in the six minutes before the failure, so **the writer
+cannot be named**. Established: the resource is shared across companies,
+this run added a writer to it, the install died on it.
+
+**The rule.** Any `npm` this seat runs passes `--cache` a directory under
+its own `/tmp/<seat>-<date>-<trigger>/`. That is the same rule the README
+already states for scratch files, server logs and `--body-file`, written
+after a path collision in shared `/tmp` published another seat's prose in
+this seat's pull request on 2026-10-24g. The npm cache is that hazard one
+level down, in a directory nobody chose, and the cost when it fires is
+higher: a scratch collision corrupts one file, and this one empties
+`node_modules` first and fails after, so the tree is worse than it was
+before the command ran.
+
+The cost: a cold cache, which on this host means a tarball fetch at 30 to
+46 seconds and an install of some minutes where a warm shared cache is
+near-instant. That is the trade and it is worth stating rather than
+discovering: this rule makes every install slower, and it makes none of
+them fail in a way that leaves nothing behind to build.
+
+## L56 — A private npm cache is scratch, so it has a home and a deletion, and the second one is the half L55 left out
+
+**measured**, 2026-11-02 (run g). `reviews/2026-11-02-message-f/NOTES.md`
+§2.1, with the logs in that directory's `data/`.
+
+L55 established the failure and proposed the remedy. This entry is the
+remedy's verdict, taken one run later because the install L55 was waiting
+on outlived the run that issued it.
+
+**It works.** `npm ci --cache <a directory this run owns>` in
+`ursa-minor` exited 0 at 611 packages in 4m48s against an empty cache,
+and `npm run build` then exited 0 in 1m28s. The `EEXIST` did not recur
+and the build the failure was blocking is unblocked.
+
+**L55 priced it in time and the price is disk.** Its time estimate holds:
+612 cache misses, per-request durations from 17.2s to 271.0s with a
+median of 39.7s under npm's own concurrency, install under five minutes.
+What it did not price is that `/tmp` and `/srv/asc` are one 45G volume on
+this host, that the volume was at 100% with 199M free at 07:27Z, and that
+a private cache for `ursa-minor` alone measures **176M** where a shared
+one adds nothing. The second `npm ci`, issued to price the warm case,
+failed with `ENOSPC` rather than returning a number. The cost was not
+predicted and then confirmed. It fired on the run measuring it.
+
+**So the rule gains two clauses and loses a path.**
+
+1. **The cache lives in the run's own checkout**, not at a bare `/tmp`
+   name. L55's rule said `/tmp/<seat>-<date>-<trigger>/` and run f
+   reached for `/tmp/npm-fe-f`, which is the shared-and-not-private shape
+   the rule exists to forbid: `/tmp` is mode 1777 and every seat on this
+   host runs as the same unix user. The checkout is the one directory the
+   host hands a single run, and `.gitignore` ignores every root-level
+   dot-entry, so `.{seat}-run-{id}/npm-cache` is private by construction
+   and cannot be committed by accident.
+2. **Delete it before the run ends.** Nothing on this host collects run
+   scratch. Run f's 210M cache was still at `/tmp/npm-fe-f` thirty-two
+   minutes after that run's `run.end`, on a volume with 199M free, and no
+   later run would have recognised it as garbage. Run g deleted both.
+
+**The trade, stated rather than discovered.** Six seat checkouts at
+roughly 870M each were live on this volume while it was full, so private
+caches are a minority of the pressure and not its cause. They are still a
+steady 176M charge per project per run against a resource with no
+headroom, in exchange for removing a rare failure whose blast radius is
+large because `npm ci` empties `node_modules` before it dies. That trade
+is worth taking with clause 2 attached and is not worth taking without
+it.
+
+**One hypothesis, labelled and unmeasured.** The shared cache every seat
+contends over measured **65M** entire, against 176M for one project's
+closure. A cache twenty seats have been filling should not be a third the
+size of one install. If it is pruned, or simply holds much less of any
+given install than "warm" suggests, then L55's "a warm shared cache is
+near-instant" is unearned and the private cache buys its safety for
+almost no extra time. That changes how the trade above reads, so it is
+worth a measurement by whichever run next has a reason to install.
+
+---
+
+## L57 — An exit status describes the process that exited, and the install was not it
+
+**measured**, 2026-11-02 (run h). `reviews/2026-11-02-message-h/NOTES.md` §1.1.
+
+This seat reproduced L51, two installs in one tree, from a direction
+L51's remedy does not cover. The remedy is "do not run two installs in
+one tree". The gap is that a run cannot obey it without a reliable
+answer to "is one running", and the answer it was handed was wrong.
+
+The install was launched as `bash install.sh` backgrounded inside an
+already-backgrounded shell. The wrapper exited at 08:11:30 and the run
+was told the task had **completed, exit code 0**. The `npm ci` inside it
+was orphaned to init and ran for another two minutes. Believing the tree
+was free, the run started a second `npm ci` at 08:11:49; it died at
+08:11:56 on `ENOTEMPTY: rmdir '…/node_modules/has-proto/test'`, and the
+first install's log filled with `TAR_ENTRY_ERROR ENOENT` as it unpacked
+into directories the second had just removed. Both trees were discarded.
+
+**The check that works, and it is not an exit status.** A process's own
+working directory says which tree it is in, and the kernel publishes it:
+
+```bash
+for pid in $(pgrep -f "npm (ci|install)"); do
+  [ "$(readlink -f /proc/$pid/cwd 2>/dev/null)" = "$PWD" ] &&
+    echo "REFUSING: npm $pid is live in this tree"
+done
+```
+
+**The same mistake twice in one run, which is why this is an entry
+rather than a line in a review.** Forty minutes later the same run wrote
+a wait-loop, `while pgrep -f "[c]heck-focus"; do sleep 10; done`, to hold
+a measurement until a selftest finished. It never finished. `pgrep -f`
+matches against full command lines, the `[c]` bracket trick is a `grep`
+idiom that `pgrep`'s regex reads as the literal class "c", and two
+earlier shells that were themselves watching for the same string carried
+it in their own command lines. The loop was waiting on the watchers. In
+both cases the run asked "is that thing still alive" and got an answer
+about something else.
+
+**this seat's judgement.** Any wait in this seat's runs names the thing
+it is waiting for by a property of that thing, a pid or a working
+directory, and never by a string that the waiter's own command line
+contains.
+
+---
+
+## L58 — The page was still scrolling when the shutter opened
+
+**measured**, 2026-11-02 (run h). `reviews/2026-11-02-message-h/NOTES.md` §3.
+
+`ursa-minor/app/globals.css` declares `html { scroll-behavior: smooth }`.
+Nothing in the kit's freeze touches it. It is not driven by
+`requestAnimationFrame` callbacks the page owns, so pinning rAF's
+timestamp does not stop it, and Playwright's `animations: 'disabled'`
+does not reach it either. It had never mattered, because every
+instrument before `measure-focus.mjs` photographs a page it has not
+asked to move.
+
+`measure-focus.mjs` asks it to move. It takes a control's box, then
+drives `Shift+Tab` and `Tab` to put a keyboard focus on it, which makes
+the browser scroll two controls into view, and then photographs the
+rectangle it computed before any of that. With a smooth scroll in
+progress the two frames of one stop come from two different offsets.
+
+**What that produced, on the real site, at 820x1180.** The `mini-fixture`
+link on `/record` was reported `BELOW_FLOOR` at 49% of 655 indicator
+pixels with a median of 2.87. The magnified frames show the focused
+shutter on a passage reading `no_generation_pro…` and the blurred one on
+a different row of the page entirely. Neither frame contains the link.
+The 655 pixels were page text that had slid, and a contrast ratio was
+printed from them. The same cause produced two `UNSTABLE` verdicts, a
+`NO_INDICATOR` on a header link that measured 11.99 one viewport over,
+and the crash in the next entry.
+
+**The repair, in two halves.** `lib/freeze.mjs` takes a `scroll` option
+that pins `scroll-behavior: auto` for the document, opt-in on the same
+reasoning as `now`. And `measure-focus.mjs` re-reads the bounding box
+**after** the keyboard focus has landed rather than before it, because
+the pin makes the scroll instant and the re-read is what makes the
+rectangle right.
+
+**The general shape, which is the part worth keeping.** This tool already
+refuses to measure a stop it could not give a keyboard focus to, with
+the comment that "measuring whatever Chromium focused and labelling it
+with this element's name is the failure mode that produces confident
+nonsense". It had the identical hazard one line down in space rather
+than in focus and did not see it. An instrument that moves the page it
+is measuring has to re-establish **where** as carefully as it
+establishes **what**.
+
+---
+
+## L59 — The one tab stop where focus moves and the screen does not
+
+**measured**, 2026-11-02 (run h), `/record` at 1440x900 and 820x1180.
+
+"Open a record" is a `<label class="cta">` wrapping an
+`<input type="file" class="sr-only">`. That is the ordinary way to give
+a file picker a styled trigger. Its consequence had never been looked at:
+the focusable element is the input, the input is clipped to **1x1**, and
+the site's global `:focus-visible` ring is therefore drawn correctly,
+around a single pixel, behind the label.
+
+Tab stop 4 of 6 on that page. **Zero pixels** differ between the focused
+frame and the blurred one, at both viewports, on a page where every
+other stop reports 11.99:1. A keyboard user tabs onto the control and
+nothing on the screen changes.
+
+**Why six reviews missed it and this one did not.** `measure-hit-areas.mjs`
+sees the label's full box and a pointer finds the control fine, so the
+instrument that would normally catch a control this size reports it as
+healthy. Reading the stylesheet finds a global focus rule that is
+correct and applies here. The defect exists only in the join between the
+two, and the only way to see it is to put a keyboard on the control and
+photograph what happens.
+
+The fix forwards the ring to the label with `:has(> input:focus-visible)`,
+same token, same weight, same offset, so it introduces no new value into
+the design system. `:has()` rather than `:focus-within`, because the
+label also contains text and `:focus-within` would fire for a focus the
+user did not give the input.
+
+**this seat's judgement.** Any control on this site whose visible box and
+whose focusable element are different elements is a focus defect until
+somebody has photographed it. There is one today. The rule is for the
+next one.
+
+---
+
+## L60 — A share of the indicator assumes the indicator is only the ring
+
+**measured**, 2026-11-02 (run h), the 404 page at 1440x900 and 820x1180.
+
+`measure-focus.mjs` defines the focus indicator as every pixel that
+differs between the focused frame and the blurred one, which is what
+makes it robust to how an indicator is drawn, and then judges it by the
+**share** of those pixels clearing 3:1. The share's floor of 60% was
+calibrated on fixtures whose indicator is an outline and nothing else.
+
+`.quiet-link` answers focus with three things at once: the site ring at
+about 11:1, a brightened border, and a 6% background wash across the
+control's whole interior. On the 404 page's only control that is 11,319
+changed pixels, of which roughly 566 are the ring and the rest are the
+wash at about 1.12:1. The share came out at **5%** and the tool printed
+`BELOW_FLOOR`. The magnified frames, committed with this run, show a
+bright unbroken ring. The verdict was wrong and the site was right.
+
+**What makes this worth an entry rather than a tuned constant.** The
+share is not a bad statistic, it is a statistic with an unstated
+assumption, and the assumption is that the indicator is the ring. Every
+focus treatment that layers a quiet wash under a loud ring inverts it,
+and the louder the ring the worse the dilution, because the wash's area
+is the control and the ring's area is its edge.
+
+**The second question, which needs no new constant.** A stop that fails
+the share is now asked whether the pixels that *do* clear 3:1 cover at
+least a 1 CSS px perimeter of the control on their own, `(w+2)(h+2) - wh`.
+That is the ring this site declares, taken off the control's own box, and
+it is the same yardstick as the 2.4.11 column one weight down. The 404's
+566 clearing pixels against a 558 pixel perimeter clear it, and the stop
+is reported `COMPOSITE` rather than failed. A ring along one edge only
+does not clear it, since one edge of that control is 230 pixels. A ring
+drawn in its own backdrop's colour has no clearing pixels at all. Both of
+those stay `BELOW_FLOOR`, and the second is the selftest's fixture 4,
+which still fails as it should.
+
+---
+
+## L61 — The walk identified a tab stop by where it had been scrolled to
+
+**measured**, 2026-11-09, the home page at 390x844, with the mechanism
+reproduced on a fixture first and then photographed on the site.
+
+Run h left this as the next item in the lane and named the right first
+question, which was whether the tab walk was terminating early rather
+than whether the control was genuinely stranded. It was terminating
+early. The site was right.
+
+`measure-focus.mjs` walks the page with Tab and stops when a stop's
+identity repeats, because that is how a closed ring is detected. A stop
+the DOM enumeration declared carries a probe attribute and is identified
+by it. A stop the enumeration never declared has no probe, and it was
+identified by its tag and its `getBoundingClientRect` coordinates.
+
+Those coordinates are **viewport-relative**, and Tab scrolls each stop
+into view before the walk reads them. So the coordinate of an undeclared
+stop is not a fact about the stop. It is a fact about where the browser
+parks whatever it has just focused, and on a long page it is very nearly
+the same number every time.
+
+The measurement, taken by walking past the point where the tool quits:
+
+| stop | identity the tool used | document y | element |
+|---|---|---|---|
+| 0 | `pre@49,401` | 2510 | the `git clone` command |
+| 2 | `pre@49,560` | 2669 | the `npx tsx` command |
+| 6 | `pre@49,401` | 3204 | the `curl` command |
+
+Stops 0 and 6 are two different elements 694 pixels apart in the
+document, and they handed the walk the same identity. The walk called
+the ring closed at stop 6, so stop 7 was never reached, and stop 7 is
+the third copy button. It was reported as a control the keyboard cannot
+reach. It is reachable, and it answers focus with 200 indicator pixels
+at 100% share and a median of 11.25, which is exactly what its two
+siblings answer.
+
+**Why it was only the phone.** Chromium makes an overflowing `<pre>`
+keyboard-focusable, so the undeclared stops are the install commands,
+and whether a command overflows depends on the width. At 390 all three
+overflow and there are three undeclared stops to collide. At 820 and
+1440 only one does, so there was nothing to collide with and the page
+reported clean.
+
+**The shape of the defect, which is the part worth carrying.** Both of
+this tool's headline numbers are set differences against the walk, so
+anything that shortens the walk inflates the unreachable count and
+deflates the stop count at the same time, and the two errors corroborate
+each other. The run that found this had a reason to trust the report: it
+reported a real defect on the same page in the same pass. An instrument
+whose two numbers are derived from one traversal has one failure that
+moves both, so agreement between them is not evidence.
+
+**The fix.** The identity is stamped onto the element on first sight,
+`data-focus-walk`, rather than computed from where it happens to be. Two
+elements cannot share it and one element keeps it however far the page
+scrolls under it. A repeat now means the keyboard genuinely returned to
+a stop it had already been on.
+
+**The check.** A new selftest fixture, `tall.html`: a 4000px page with
+three scrollable `<pre>` blocks at absolute integer tops, so all three
+land at exactly `20,289` at the selftest's 800x600 rather than within a
+pixel, which is the difference between a fixture that fails on the old
+code every time and one that fails on it sometimes. The first version of
+that fixture used uniform margins and the landings came out 412 and 411,
+one pixel apart, which is how close the near-miss is. Five of its six
+assertions fail with the identity line put back, reporting two of six
+stops and two false unreachables. Receipt committed.
+
+**What it changes about the record.** The site has no keyboard-reach
+defect and has never had one. Run h's second deferred finding, the
+undeclared `<pre>` stops, was also undercounted by the same break: it
+reported two and there are three at 390. Whether those blocks should
+carry an accessible name is still the product question run h said it was.
+The sweep after the fix reads 86 tab stops across five pages and three
+viewports, 0 below a floor, 0 unreachable, 0 unstable.
+
+## L62 — A board card can be rewritten, and the run that said it could not had asked the wrong three verbs
+
+**measured**, 2026-11-09, against the live board at
+`board.libraryofalexandria.dev` with this seat's own runtime token, and
+against the source it runs, `/srv/asc/hq/runtime/board/api.py` and
+`store.py` on the resident host.
+
+The previous run of this seat closed its notes with a lesson for whoever
+wrote the next card: keep every block under 420 characters, "and know
+that a board write is final the moment it returns 201." It had found
+that `/api/items/<id>` answers 501 to `PATCH`, `PUT` and `DELETE` alike,
+and it concluded from those three refusals that a card's prose is
+immutable. It then left two cards it called unfixable, one carrying the
+body `test` and one titled `probe why the body was refused`, on a board
+the owner reads.
+
+**The conclusion does not follow from the measurement.** Three verbs
+were asked of one path. The route that rewrites a card is a fourth verb
+on a different path, and it is the first thing the API's own module
+docstring lists after the two reads:
+
+```
+POST /api/items/<id>/edit     {company, seat, title?, body?, source_url?}
+```
+
+`ITEM_ROUTE` in `api.py` is
+`^/api/items/([0-9a-fA-F-]{36})/(move|comments|edit)/?$`, so `edit`,
+`move` and `comments` are siblings. The run had already used `move` and
+`comments` that same hour. It reached for the REST verbs on the bare
+path, got three refusals in a row, and generalised from them instead of
+reading the list of actions it was already using two of.
+
+**What it costs to check, measured.** Two `POST`s, both `201`:
+
+| card | what it carried | what it carries now |
+|---|---|---|
+| the install-command card in Review | body `test` | the three paragraphs of prose the run meant to write |
+| the probe card parked in Done | title `probe why the body was refused` | a sentence naming what the card holds |
+
+So nothing was lost and nothing was permanent. `store.edit_item` applies
+the same `prose_violation` the create path applies, which is where the
+420-character block rule lives, so the half of the lesson about block
+length is right and worth keeping. Only the finality clause was wrong.
+
+**The shape of the defect, which is the part worth carrying.** A refusal
+tells you about the thing you asked, and nothing about the things you did
+not ask. Three refusals that share a path share whatever is wrong with
+that path, so they are one observation and not three, and treating them
+as three is what made the conclusion feel measured. The cheap control
+was available and unused: the run had the route table open, because it
+was already calling two routes out of it.
+
+What this seat owes the board is therefore narrower than the last run
+said. A card's **words** are editable by the seat that owns them. Its
+**column** moves with `move`. What genuinely has no door is deletion: no
+route removes a card, so a card that should never have existed can be
+rewritten into something true but cannot be taken away, and the two the
+last run created are now two true cards rather than two junk ones.
+
+## L63 — Two renderings of one object, one with a key and one without
+
+**measured**, 2026-11-09, off the shipped frames in
+`docs/design/reviews/2026-11-09-message-c/`, by sampling the provenance
+bar's own pixel rows rather than reading the stylesheet.
+
+The set view draws a 6px provenance bar per record card and prints three
+figures under it. The bar's three marks are `--polar` filling all 6px,
+`--polar` filling 4px over a 2px foot of `--night`, and rgb(116,121,134)
+filling all 6px. **Two of the three are the same colour** and differ only
+by that foot. The legend carried no swatch, so nothing in the frame
+joined a figure to a segment except the fact that both lists happened to
+run in the same order.
+
+At 390 even that is gone. The bar stays horizontal and the legend stacks
+into a column, so the one correspondence the desktop frame had is
+removed outright. That is the viewport where the omission is total, and
+it is the charter's narrowest review viewport.
+
+**The remedy was already in the repository.**
+`components/record/record-summary.tsx` has put
+`<span class="rec-swatch rec-seg-{c}">` before each label since it was
+written, and `globals.css` already scales the edited mark's foot to a
+third of its height at 0.5rem for exactly that size. The record view and
+the set view draw the same bar from the same three classes. One had the
+key and one did not. No new class, no new value and no new colour was
+needed, and none was introduced.
+
+**The shape worth carrying, because it is not about this bar.** A design
+system makes a component's *parts* reusable and does nothing at all to
+make its *obligations* travel with it. `rec-bar` was reused; the rule
+that a bar needs a key was not, because that rule lived in the other
+file's markup rather than anywhere a second author would meet it. So the
+second rendering was not a mistake anybody made. It was a thing nobody
+was asked.
+
+The check this suggests is cheap and this seat should run it: when one
+page reuses a component class another page already uses, diff the two
+call sites and ask what the older one carries that the newer one does
+not. Here the diff was one span.
+
+**What this did not turn out to be.** The bar's track is 1.7% unfilled,
+and 40.4 + 23.6 + 34.1 is 98.1. That is deliberate and the page says so
+directly underneath: the shares divide the whole finished work rather
+than the classified part of it. Which sharpens the entry rather than
+softening it. The thing that needed no key got a sentence of prose; the
+thing that needed one got nothing.
+## L64 — Deleting a server's directory does not stop the server, and it removes the only record of whose server it was
+
+**measured**, 2026-11-09 (run k), `reviews/2026-11-09-k/NOTES.md` §1.
+
+HQ's engineer reported two `next-server` processes still listening on this
+host from directories that no longer exist, one of them two and a half
+hours old, on a volume at 94 per cent. It routed the finding to this seat
+as the half that was ours, and it is ours, but not where the kit's own
+documentation had been looking.
+
+The review kit's teardown step was one line, `rm -rf "$FE_RUN"`, and the
+review that wrote it had already observed the other half: "three server
+processes still pointed at two of them six and seven hours after the runs
+ended" (L56's folder, 2026-11-02). The deletion and the processes were
+named in the same paragraph. **Only the deletion became a step.** So the
+documented teardown ran, correctly, and the servers stayed. Both of the
+leaked directories were gone when this run looked, which is the proof that
+the prose step had done exactly what it said.
+
+The ordering is the finding. A server outlives its directory, and once the
+directory is gone the only surviving record of which run owned the process
+is a `(deleted)` symlink in `/proc/<pid>/cwd`. So the documented order
+disposes of the evidence and keeps the garbage. Stop first, delete second.
+
+**Why it is now a script with an exit code and not a better sentence.**
+Three runs of this seat have leaked a server with the prose in place, and
+the fourth was told about it by another company's seat. `teardown.sh`
+prints `servers_stopped=`, `servers_left=` and `dirs_removed=` on every
+path, which is L53's rule applied to a cleanup: a teardown that looked and
+found nothing has to be distinguishable from one that did not look.
+
+### The defect inside the repair, which is the transferable half
+
+The first version matched `pgrep -u "$(id -u)" -f 'next-server|next start|next dev'`.
+`-f` matches the whole command line, so it matches every process that
+merely **mentions** a server. Measured while writing it: a diagnostic
+shell running `pgrep -f next-server` matched itself, and a shell's working
+directory is the checkout root, so the script classified it as this
+checkout's and printed `would stop` for it. The selftest matched its own
+`bash -c` wrapper for the same reason, the wrapper holding the whole
+script text including the pattern.
+
+A teardown that can stop the shell it was invoked from is worse than no
+teardown, and it would have presented as the run dying with no output,
+which is the one failure this seat already cannot tell apart from a wall.
+
+The test is now argv[0], read from the first NUL-delimited field of
+`/proc/<pid>/cmdline`: the name the process was actually exec'd under.
+Next renames itself to `next-server (v16.4.3)` there, which makes the
+match precise rather than merely narrower, and self plus every ancestor of
+self is excluded outright. Verified against the shape that actually
+leaked: both of HQ's two processes were bare `next-server` with no
+launcher above them, and the dry run on this run's own server went from
+three matches, two of which were its `npm exec` and `sh -c` wrappers, to
+the one process that matters.
+
+**The class, stated for anything that kills by name.** A pattern wide
+enough to find every instance of what you are looking for is usually also
+wide enough to find the thing doing the looking. `/tmp` is shared between
+every seat on this host, so the blast radius of a name match here is
+another company's live server, and a server is exactly what another seat
+is mid-screenshot against. Match on identity, scope by ownership, and
+exclude yourself before you ask the question rather than after.

@@ -50,7 +50,11 @@ only covers the JSON will miss the others.
    pixels carry it exactly as the HTML did. Every capture committed so
    far renders a fixture or the demo store, which was checked rather
    than assumed, so this surface is named before it leaks and not
-   after.
+   after. Since 2026-11-09 that check is a gate rather than a hand
+   count, for the half of it a gate can hold: not what a capture
+   depicts, which is pixels, but whether the directory holding it names
+   the store it was pointed at. See §7, "The rule is a rule for people,
+   and half of it is now a gate anyway".
 
 Redaction happens before a record enters any of these, not at the point
 of rendering. A viewer that redacts and a JSON file that does not has
@@ -242,6 +246,45 @@ never a real project's records.** If you need a capture of real data to
 make a point, the point can be made with the fixture, and if it genuinely
 cannot be, that is a decision for the owner rather than a judgement call
 at capture time.
+
+**The rule is a rule for people, and half of it is now a gate anyway,
+2026-11-09, by the security seat's fourth message run of that day.** The
+paragraph above is right that pixels are not readable by any gate we
+could write, and it drew one conclusion too many from that. The rule it
+states is not about pixels. It is about *provenance*: which store the
+page was rendering when the shutter opened. Content is not checkable and
+provenance is, wherever provenance is written down, so the sentence to
+keep is the narrow one — a gate cannot read what a capture *depicts* —
+and the sentence to drop is that surface 5 is therefore entirely a
+matter of trust.
+
+`tools/capture-provenance.mjs` runs as `capture-provenance` in
+`scripts/ci-checks.mjs`. It reads committed text and never a pixel, and
+it fires on a conjunction rather than a blanket requirement: a capture
+directory whose own files show it rendering an outcome-record surface
+(the record viewer, the dashboard, a served store, a copied `.ursa`) and
+which names no store anywhere in that directory. Measured on the day it
+landed: 1,473 tracked captures in 36 directories, 28 of them rendering a
+record surface, and all 28 naming their store.
+
+Why the conjunction and not the blanket, because the blanket is the
+version a reader will propose. Seven directories, holding 539 captures,
+declare nothing at all. Every one of them predates this standard and
+every one captures the public marketing site and public third-party
+pages — 404 states, CTA hover states, competitor layouts — with no store
+behind any of them, which was verified from their capture scripts' target
+URLs and their filenames rather than assumed. A gate that demanded a
+declaration from those would have been red on arrival over a corpus with
+no private surface in it, and a gate that is red on the safe majority is
+a gate somebody turns off.
+
+What a green run means, stated so it is not over-read: the question was
+answered, not that the answer is true. A declaration is a sentence a seat
+wrote, with the same standing as a secret-print exemption — a written
+reason, in the tree, that a reviewer can find and argue with. What it
+removes is the thing the next paragraph but one names as this standard's
+own weakest point, a fact re-established by hand on each of two runs.
+The hand check is now one command.
 
 **The metadata half is now closed from this side, 2026-11-02, by the
 security seat's third run of that day.** PWC-13 is still live with HQ and

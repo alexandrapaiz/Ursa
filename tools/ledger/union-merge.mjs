@@ -14,6 +14,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { mergeLedgers } from './ledger.mjs';
+import { DISPOSITION, formatResultLine } from '../stack/driver-report.mjs';
 
 const [ancestor, ours, theirs, markerSize, pathname] = process.argv.slice(2);
 
@@ -35,6 +36,33 @@ const result = mergeLedgers(read(ancestor), read(ours), read(theirs), size);
 
 const label = pathname ?? 'ledger';
 
+/** The three conflict-marker labels. Without `-L`, `git merge-file` labels
+ *  each side with the temp FILENAME git handed this driver, so the markers
+ *  read `<<<<<<< .merge_file_4MmYWY` instead of naming a side. Measured on
+ *  2026-11-02 on the sibling `register` driver, which had the identical defect
+ *  on the identical call: in one merged tree, this repository's driver-covered
+ *  paths carried random temp names in their markers while git's own
+ *  driverless paths in the same tree carried `origin/main` and the head ref.
+ *  The temp names are also random per invocation, which made the tree
+ *  `git merge-tree --write-tree` returns differ on every run of one unchanged
+ *  pair of commits. The side names are what a human resolving the file needs
+ *  and the only varying bytes, so labelling them fixes the legibility and the
+ *  reproducibility together. See tools/registers/merge-driver.mjs. */
+function markerLabels() {
+  const where = pathname ? `: ${pathname}` : '';
+  return ['-L', `ours${where}`, '-L', `merge base${where}`, '-L', `theirs${where}`];
+}
+
+/** The machine-readable half of a diagnostic, in the grammar
+ *  `tools/stack/driver-report.mjs` declares. The prose below is for the human;
+ *  this line is for `tools/stack/merge-surface.mjs`, which reads the
+ *  conflicted path list off STDOUT and otherwise has no way to tell which of
+ *  those paths a driver refused and why, because the reason is on stderr. */
+function reportResult(disposition, reason) {
+  if (!pathname) return;
+  console.error(formatResultLine({ driver: 'ledger', disposition, path: pathname, reason }));
+}
+
 // A refusal means the file is not the shape this grammar describes, so the
 // merge result is meaningless and must not reach the working tree. Added
 // 2026-10-24, after measuring what this driver does to a `## `-keyed register:
@@ -43,9 +71,10 @@ const label = pathname ?? 'ledger';
 // exactly what they would have got without any driver, plus the reason.
 if (result.refusal) {
   console.error(`ledger driver: refusing to merge ${label}. ${result.refusal}`);
+  reportResult(DISPOSITION.REFUSED, result.refusal);
   const git = spawnSync(
     'git',
-    ['merge-file', '--diff3', `--marker-size=${size}`, '-p', ours, ancestor, theirs],
+    ['merge-file', '--diff3', `--marker-size=${size}`, ...markerLabels(), '-p', ours, ancestor, theirs],
     { encoding: 'utf8', maxBuffer: 1024 * 1024 * 64 },
   );
   if (typeof git.stdout === 'string' && git.stdout.length > 0) {
@@ -69,9 +98,20 @@ if (result.conflicts.length > 0) {
     `ledger driver: ${result.conflicts.length} block(s) in ${label} were edited on both sides and need a human:`,
   );
   for (const key of result.conflicts) console.error(`  ${key}`);
+  // A per-block conflict is a refusal of the PATH as far as git is concerned:
+  // this driver exits 1 and git records the conflict. The reason names the
+  // blocks, because "keep both sides" is exactly the resolution that is wrong
+  // here -- two seats wrote different text into one entry, so somebody has to
+  // choose, and the resolving seat needs to be told that rather than handed a
+  // path that looks like an ordinary append collision.
+  reportResult(
+    DISPOSITION.REFUSED,
+    `${result.conflicts.length} block(s) edited on both sides: ${result.conflicts.join(', ')}`,
+  );
   process.exit(1);
 }
 console.error(
   `ledger driver: ${label} merged by block identity. ${result.added.length} block(s) taken from the other branch, ${result.removed.length} removed.`,
 );
+reportResult(DISPOSITION.MERGED);
 process.exit(0);

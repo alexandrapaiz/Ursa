@@ -7,6 +7,9 @@
 //   node tools/board/measure-claims.mjs --json          # machine-readable
 //   node tools/board/measure-claims.mjs --paths         # also list the paths
 //   node tools/board/measure-claims.mjs --company Ursa  # one company's rows
+//   node tools/board/measure-claims.mjs --emit-measured # the paste-ready
+//                                                       # MEASURED block,
+//                                                       # read instant and all
 //
 // Exit 0 the window was covered and the table printed. Exit 1 the window was
 // not covered: the counts print as floors, every share is withheld, and the
@@ -57,8 +60,20 @@
 // implementations, one shared read bound, and the agreement between them was
 // not a control for anything. The same read reported **no** over-limit `ask`
 // bodies, which is the kind `tools/board/check.mjs` refuses, so the domain
-// finding understated the traffic its own gate acts on; there are 49
+// finding understated the traffic its own gate acts on; that walk found 49
 // portfolio-wide and 5 for Ursa.
+//
+// EVERY FIGURE IN THE PARAGRAPH ABOVE IS A READING AND NOT A STANDING FACT,
+// and this comment is the second time that cost something on one night. Those
+// counts came from a paged walk earlier on 2026-11-02 whose clock instant
+// nothing recorded, so "49" cannot be reconciled with the 51 in
+// `disposition.mjs` by reading either file: the two are different reads of a
+// rolling window, and only one direction of that difference is distinguishable
+// from an error. Four later walks, dated, agree on 51. The dated series is
+// `MEASURED.drift` in `tools/board/disposition.mjs`, and
+// `tools/board/measured-citation.mjs` is why a count cannot reach a seat's
+// output undated any more. A count in a comment still can, which is the
+// unguarded surface this run named rather than closed.
 //
 // AND THE OTHER THING IT SAID, which was wrong in a different way: that five
 // hundred rows is two days of them, "which a share survives and a count does
@@ -71,7 +86,9 @@
 // Still a floor even when the walk completes, for the reason the reporting
 // seat put best: the corpus "is not a sample of the input space, it is a
 // sample of what the style guide and a validator leave behind."
+import { utcDay } from '../instant.mjs';
 import { liveTargetFault } from './live-target.mjs';
+import { blockFaults } from './measured-citation.mjs';
 import { pageMessages, ratioFault } from './page.mjs';
 import { unreffedClaims, pathClaims, isStateClaim, refsIn } from './claim-ref.mjs';
 import { wakeReceipt, WAKE_BODY_CHARS } from './check.mjs';
@@ -168,6 +185,82 @@ export function measure(msgs, hours, coverage) {
   };
 }
 
+/** The paste-ready `MEASURED` block for `tools/board/disposition.mjs`, built
+ *  from a walk's own output and a clock reading, so re-deriving that constant
+ *  is a copy and not a transcription.
+ *
+ *  WHY THIS IS A FUNCTION AND NOT A NOTE IN A PULL REQUEST. The block it
+ *  produces is quoted to seats by `tools/board/check.mjs`, and on 2026-11-02
+ *  the committed version of it carried a calendar day instead of a read
+ *  instant. That did not happen because anyone decided a day was enough. It
+ *  happened because nine fields were retyped out of a JSON receipt by hand,
+ *  and a clock reading is the one field a JSON receipt does not contain: the
+ *  walk reports the newest ROW it saw, which lags the clock by however long
+ *  the bus was quiet, twenty-nine minutes that night. So the clock is read
+ *  here, at the only moment it is knowable, and handed in as an argument so
+ *  this stays testable.
+ *
+ *  Returns the block and whatever is wrong with it. `faults` is non-empty for
+ *  a walk that did not finish, because every share in the block would be a
+ *  share of a window nobody covered, and for a `readAt` that precedes the
+ *  walk's own newest row, which is the back-fill `measured-citation.mjs`
+ *  exists to refuse. A caller that prints a block with faults is printing a
+ *  constant a gate will decline to quote.
+ *  @param {object} out the return value of `measure`
+ *  @param {string} readAt a full UTC instant, from the clock at walk time
+ *  @param {{company?: string, out?: object}} [company] one company's walk
+ *  @returns {{block: object, faults: {code: string, line: string, repair: string}[]}} */
+export function measuredBlock(out, readAt, company = {}) {
+  const c = out.coverage || {};
+  const k = out.over_limit_by_kind || {};
+  const slice = (o) => ({
+    rows: o.rows,
+    over_limit: o.over_limit,
+    warned_share: o.over_limit_warned_share,
+    by_kind: o.over_limit_by_kind,
+    disposition_lost_only: o.disposition_lost_only,
+    disposition_survived: o.disposition_survived_the_cut,
+  });
+  const block = {
+    read_at: readAt,
+    // The UTC day of the read, and not `slice(0, 10)` of it. `readAt` is a
+    // board instant today, so the slice agreed; it stops agreeing the moment
+    // a caller hands this an offset-bearing git date, and this block is a
+    // published citation. Null rather than a guess when unplaceable, because
+    // `tools/board/measured-citation.mjs` reads this field and a wrong day
+    // passes its checks while a null does not.
+    on: utcDay(readAt),
+    window_hours: out.since_hours,
+    coverage: {
+      complete: c.complete,
+      pages: c.pages,
+      rows: c.rows,
+      oldest_ts: c.oldest_ts,
+      newest_ts: c.newest_ts,
+      covered_hours: c.covered_hours,
+    },
+    rows: out.rows,
+    over_limit: out.over_limit,
+    by_kind: { note: k.note || 0, done: k.done || 0, handoff: k.handoff || 0, ask: k.ask || 0 },
+    warned_share: out.over_limit_warned_share,
+    disposition_lost_only: out.disposition_lost_only,
+    disposition_survived: out.disposition_survived_the_cut,
+    // The third bucket, stated rather than left to be inferred: an over-limit
+    // body in which the word list found no disposition phrase at all.
+    no_marker_found: out.over_limit - out.disposition_lost_only - out.disposition_survived_the_cut,
+  };
+  if (company && company.out && company.company) block[String(company.company).toLowerCase()] = slice(company.out);
+  const faults = blockFaults(block);
+  if (!c.complete) {
+    faults.push({
+      code: 'WALK_INCOMPLETE',
+      line: `the walk covered ${c.covered_hours}h of the ${c.requested_hours}h asked for and ${out.shares_withheld || 'did not finish'}, so every share in this block is a share of a window nobody read`,
+      repair: 'run the walk again until it ends on a page that did not fill, which is what `coverage.complete` means. Do not paste a block from a capped read into a gate: that is the 13-point error of 2026-11-02 02:55Z',
+    });
+  }
+  return { block, faults };
+}
+
 if (process.argv[1] === new URL(import.meta.url).pathname) {
   const fault = liveTargetFault({ apiUrl: process.env.BOARD_API_URL, token: process.env.BOARD_RUNTIME_TOKEN });
   if (fault) {
@@ -191,6 +284,34 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
     : rows;
   const out = measure(msgs, hours, coverage);
   if (company) out.from_company = company;
+  if (process.argv.includes('--emit-measured')) {
+    // The clock, read here and nowhere else: this is the instant the walk
+    // above finished, and it is the field no receipt can reconstruct.
+    const readAt = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+    // Both scopes off ONE walk. The committed block before this flag existed
+    // had its portfolio figures from a 04:17:41Z walk and its Ursa figures
+    // from a 04:18:17Z one, so its own coverage disagreed with itself by a
+    // row and the two slices were not a partition of anything. Filtering the
+    // rows this walk already holds costs no request and makes the nested
+    // slice a subset of the block it sits in by construction.
+    //
+    // Case-insensitive, like the `--company` filter above, and the difference
+    // is 17 rows rather than a style point: `tools/board/check.mjs` exists
+    // because `POST /api/messages` accepts `ursa` and the wake fan-out drops
+    // it, so this company's own traffic is spelled two ways on the bus. An
+    // exact match on `'Ursa'` reported 1,098 rows where the case-insensitive
+    // one reported 1,115, both at 04:28Z, and the 17 it dropped are exactly
+    // the rows whose senders hit the spelling defect this directory is for.
+    const nested = company ? {} : {
+      company: 'Ursa',
+      out: measure(rows.filter((m) => String(m.from_company || '').toLowerCase() === 'ursa'), hours, coverage),
+    };
+    const { block, faults } = measuredBlock(out, readAt, nested);
+    for (const f of faults) console.error(`${f.code}: ${f.line}\n  repair: ${f.repair}`);
+    console.log(`// Re-derived with \`node tools/board/measure-claims.mjs --hours ${hours}${company ? ` --company ${company}` : ''} --emit-measured\`.`);
+    console.log(`export const MEASURED = ${JSON.stringify(block, null, 2)};`);
+    process.exit(faults.length ? 1 : 0);
+  }
   if (process.argv.includes('--json')) {
     const drop = new Set(process.argv.includes('--paths') ? [] : ['paths_cited']);
     if (!process.argv.includes('--pages')) drop.add('page_log');

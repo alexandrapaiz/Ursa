@@ -235,6 +235,21 @@ function blobSha256(root: string, blob: string): { sha256: string; bytes: number
  *
  * Throws if history is unavailable; call `historyUnavailable` first.
  */
+/**
+ * Ascending by instant, falling back to the text order only when a date
+ * cannot be placed on the line at all. Two commits' `%cI` dates can differ
+ * by an offset of up to a day, and this file's whole claim is that its row
+ * order "is a function of history alone"; a text sort makes that claim false
+ * the first time a committer is not in UTC. The same rule, with its
+ * measurement, is in `tools/instant.mjs`.
+ */
+function instantOrder(a: string, b: string): number {
+  const x = /(?:Z|[+-]\d{2}:?\d{2})$/.test(a) ? Date.parse(a) : NaN
+  const y = /(?:Z|[+-]\d{2}:?\d{2})$/.test(b) ? Date.parse(b) : NaN
+  if (Number.isNaN(x) || Number.isNaN(y)) return a.localeCompare(b)
+  return x - y
+}
+
 export function buildIndex(root: string): BundleDigestIndex {
   const commits = commitTable(root)
   const blobs = blobsAtPath(root, commits.keys())
@@ -257,13 +272,20 @@ export function buildIndex(root: string): BundleDigestIndex {
   const rows: BundleDigestRow[] = []
   for (const [blob, intro] of byBlob) {
     const { sha256, bytes } = blobSha256(root, blob)
-    intro.sort((a, b) => (a.date === b.date ? a.commit.localeCompare(b.commit) : a.date.localeCompare(b.date)))
+    // By instant and not by spelling. `date` is read from
+    // `git log --format=...%cI...`, which carries the committer's own offset,
+    // so `localeCompare` here ordered two introductions that straddle an
+    // offset boundary backwards. Every date in the committed
+    // `docs/provenance/bundle-digests.json` is `.000Z` today, so no row in
+    // that file is currently mis-ordered; the defect was latent, kept safe by
+    // what the producer happened to emit rather than by this line.
+    intro.sort((a, b) => (a.date === b.date ? a.commit.localeCompare(b.commit) : instantOrder(a.date, b.date)))
     rows.push({ digest: sha256.slice(0, 16), sha256, blob, bytes, introducedBy: intro })
   }
   // Oldest introduction first, ties broken by digest so the file is a
   // function of history alone and not of Map insertion order.
   rows.sort((a, b) => {
-    const d = a.introducedBy[0].date.localeCompare(b.introducedBy[0].date)
+    const d = instantOrder(a.introducedBy[0].date, b.introducedBy[0].date)
     return d !== 0 ? d : a.digest.localeCompare(b.digest)
   })
 

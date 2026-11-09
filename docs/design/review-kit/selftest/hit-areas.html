@@ -15,7 +15,7 @@
       --out selftest.txt
 
   Expected, and asserted by `check-hit-areas.mjs` beside this file:
-  2 standalone of 2 short, 1 inline exempt, 4 document spans of which
+  4 standalone of 4 short, 2 inline exempt, 4 document spans of which
   1 does not cover its own line and 1 is covered outright.
 -->
 <style>
@@ -39,6 +39,11 @@
   .clip-lower { position: absolute; left: 0; right: 0; background: transparent; }
   /* (7): something sits over the whole line. COVERED. */
   .clip-all { position: absolute; left: 0; right: 0; background: transparent; }
+  /* (8): the link and its neighbouring words share one line box. */
+  #t8 { font: 11px/14px monospace; color: #a8c7fa; }
+  #t8 + span { font: 11px/14px monospace; color: #8a93a5; }
+  /* (9): two controls abutting, no prose. Inline-block and under the floor. */
+  .chip { display: inline-block; height: 17px; padding: 0 6px; margin: 0; font: 11px/17px monospace; background: none; color: inherit; border: 1px solid #555; }
 </style>
 
 <button class="tiny" id="t1">a seventeen pixel control</button>
@@ -46,6 +51,20 @@
 
 <p>A sentence with <a href="#x">an inline link</a> inside it, surrounded by
 real words on both sides so that the sentence test has something to see.</p>
+
+<!-- (8): an inline link whose neighbouring words are wrapped in a span
+     rather than left as a bare text node. This is the set view's record
+     address line, which on 2026-11-09 came back SHORT by 29 at all three
+     viewports because the sentence test only looked at text nodes. It is
+     one line box, one sentence, and 2.5.8 exempts it. -->
+<p><a href="#y" id="t8">a link to this record alone</a><span> &middot; pages/someone/their-repo/their-repo-2026-10-17</span></p>
+
+<!-- (9): the case the fix must NOT swallow. Two inline-block controls side
+     by side with no prose between them is a row of controls, not a
+     sentence, and 2.5.8 does not exempt it. A test that only asked for
+     "words in a sibling element" would exempt both of these, because each
+     is words in a sibling element of the other. -->
+<p id="toolbar"><button class="chip" id="t9a">copy</button><button class="chip" id="t9b">share</button></p>
 
 <pre class="doc" id="doc"><span class="sp" role="button" tabindex="0">a tiled span that is fine</span><span>  </span><span class="sp" role="button" tabindex="0">a second tiled span, also fine</span>
 <span class="sp" role="button" tabindex="0">this one is clipped from below</span>

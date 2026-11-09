@@ -83,7 +83,19 @@ const has = (name) => process.argv.includes(`--${name}`);
 // `--history=all` answered clean at exit 0. The refusal that exists to stop a
 // truncated graph reporting clean was one equals sign away from being skipped.
 // So an argument this file does not know is exit 2, never a narrower scan.
-const KNOWN_FLAGS = ['history', 'since', 'json', 'patterns', 'repo'];
+// `no-baseline` was missing from this list until 2026-11-09 while three other
+// places advertised it: the usage block above, the `--no-baseline exists so the
+// raw set is always one flag away` paragraph at the baseline read below, and —
+// the one that cost something — the remediation sentence this scanner PRINTS on
+// every accepted-hit verdict, `Re-run with --no-baseline to see the raw set`
+// (tools/secret-scan-verdict.mjs, pinned by its own test). `has('no-baseline')`
+// read it correctly; the unknown-flag refusal above ran first and exited 2, so
+// the escape hatch an auditor is told to use had never once been reachable, and
+// the only way to find that out was to follow the tool's own advice.
+// `tools/secret-scan.test.mjs` now asserts that every flag this file documents
+// or advises is a flag it accepts, so the next addition cannot drift the same
+// way.
+const KNOWN_FLAGS = ['history', 'since', 'json', 'patterns', 'repo', 'no-baseline'];
 const unknownFlags = process.argv.slice(2).filter((a) => {
   const name = a.replace(/^--/, '').split('=')[0];
   return !a.startsWith('--') || !KNOWN_FLAGS.includes(name);

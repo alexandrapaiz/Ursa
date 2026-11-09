@@ -380,6 +380,13 @@ npx tsx src/bin/ursa.ts run <projectPath> --declare unsatisfied
 npx tsx src/bin/ursa.ts pr <projectPath> --pr 645
 npx tsx src/bin/ursa.ts pr <projectPath> --snapshot /tmp/pr-645.json   # no gh, no network
 
+# Resolve MANY pull requests and read them as one corpus: the totals, how
+# many distinct finished works they cover, what those works are by area,
+# and how many of the records carry a correction at all. Prints the window
+# it was measured over, because a corpus figure without one is not a figure.
+npx tsx src/bin/ursa.ts corpus <projectPath> --prs 736,737,738,731,732
+npx tsx src/bin/ursa.ts corpus <projectPath> --prs 700-710 --window "one sentence"
+
 # Distill one record's corrections into evidence-backed tuning units.
 # Runs locally through the claude CLI on your own subscription.
 npx tsx src/tuning/cli.ts distill --record <project>/.ursa/records/<id>.json \
@@ -486,6 +493,7 @@ the tuning store never leave the machine they were made on.
 | n=1 | Ursa Major run over the building of the Ursa Minor site, from Claude Code session logs | 193 generations, 79.2% of the site survived verbatim, 82.1% of generated characters deleted, four correction loops and three regressions hand-annotated |
 | n=2 | the full alexandria repo, 374 commits, from git commit pairs | 19 records from one command, 11 carrying the owner's corrections; the digest is the most-corrected artifact. Owner-declared unsatisfied, so survived text is not endorsed text. |
 | n=3 | this repository, 470 commits, from git commit pairs. The first prose-dominant corpus the resolver was pointed at, and a dogfood run rather than a trial: nobody declared satisfaction either way | **zero records, and zero is the finding.** The first pass reported five records and 71,566 surviving characters. 84.7% of that was one file synced from the holding company, paired with the next sync of itself, because the `Co-Authored-By` pattern knew four vendor names and not the `[bot]` convention. The remaining four records each named an agent seat as the person. Every commit on this branch is an agent's, so the git-commit-pair path has nothing to find here; the owner's corrections are in the pull requests she merged, which is the pull-request path's job (`docs/design/agent-coauthor-detection.md`) |
+| n=3b | this repository again, five merged pull requests, through the pull-request path rather than git commit pairs. A dogfood measurement, not a trial: nobody declared satisfaction either way | **30 records over 14 distinct finished works, and 1,901 characters that survived after the person edited them.** This is the n=3 row's open question answered: the corrections really are inside the pull requests, and the git-commit-pair path could not see them. Nine of the 30 records carry a correction. The caveat is in the same figure: 10 of the 14 finished works are on the prose path and nine of those ten are seat run logs, so this corpus is largely agents writing about their own runs. A sweep of 30 pull requests was attempted and stalled inside its first one, which is a defect of its own (`docs/design/corpus-sweep.md`) |
 
 Raw trial records contain verbatim prompts and are kept in a private
 repository. Redacted records return here only after the security

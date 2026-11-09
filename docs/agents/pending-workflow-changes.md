@@ -78,7 +78,7 @@ live; nothing below is stale.
 | 2 | **PWC-14** | No gate in this repository has ever looked for a credential. The scanner exists and runs only when a seat remembers. | One job, or three steps inside PWC-15's. |
 | 3 | **PWC-12** | The gate does not run at all on a push made while a branch conflicts, so it is off on exactly the branches that sit public longest. Re-measured tonight: three open pull requests have tips that no gate has ever read, public for 22, 66 and 140 minutes at 03:13Z. | Two workflow lines, plus one branch-protection setting that needs the owner in repository settings. |
 | 4 | **PWC-11** | The event text that wakes a seat lands in its prompt in the instruction position, unfenced, in all eleven seat workflows. The resident host already fences it; GitHub Actions does not. | Six lines per file, wording given verbatim. |
-| 5 | **PWC-13** | The gate's `-I` flag makes every binary file an unscanned surface. Still live: the gate ran `grep -rInE` tonight. | One character, deleted from one line. |
+| 5 | **PWC-13** | The gate's `-I` flag makes every binary file an unscanned surface. Still live: the gate ran `grep -rInE` tonight. **This row's remedy was wrong until 2026-11-02: see the entry's own correction.** | **Not one character.** Two edits at a minimum, and the entry's own `Change` paragraph always said so while this column said otherwise. The flag alone produces a gate that looks changed and catches nothing, measured. The shape that costs least afterwards is `-rlaE`, which names a carrying file and quotes none of it, plus classifying standard error rather than merging it. |
 | 6 | **PWC-8** | The gate reads only the working tree, so a value it catches and a seat then truncates stays readable at the commit before it, in a public repository, forever. | A history mode in the gate. The local half is already built and ran tonight. |
 | 7 | **PWC-5** | Twenty-eight `uses:` lines across twelve workflows, not one pinned to a commit SHA. A tag is mutable by the publisher. | Mechanical, twenty-eight lines. |
 | 8 | **PWC-6** | `PROJECTS_TOKEN` is injected into eleven seat jobs and read by no code in the repository; `id-token: write` is granted by eleven and consumed by nothing. Both sit beside an agent running under `bypassPermissions`. Re-measured tonight: still 11 and 11, still zero readers. | Two lines deleted per file. |
@@ -811,6 +811,73 @@ convention a run has to remember is not a control. Naming it is this
 entry's main purpose, and the standard was amended in the same pull
 request to list rendered images as a governed surface.
 
+**Corrected 2026-11-02, and the correction is about this entry's own
+summary rather than about the gate.** Two things, and the first is smaller
+than it looks while the second is new.
+
+First, what was wrong. The ranked table at the top of this file gave this
+entry's remedy as "One character, deleted from one line." The `Change`
+paragraph above has said since the day it was written that the capture also
+has to take `2>&1` or the gate "looks changed and catches nothing", so the
+table contradicted the entry it summarises, and the table is the artifact a
+reader decides from. The summary is corrected. The request routed to HQ did
+carry the stderr trap, so nothing was ever handed up missing it, and a first
+reading on this run that said otherwise is withdrawn here rather than left
+in a report.
+
+Second, what is new, and it is a defect in the prescribed repair rather than
+in the diagnosis. `2>&1` does reach a binary carrier, measured on GNU grep
+3.11 by running the gate's own `scan()` body against a file holding a
+fabricated Class B path. It also merges everything else grep says on that
+stream into `hits`, and `[ -n "$hits" ]` is the whole of the gate's test. So
+a directory the runner cannot read turns the gate red under the label
+`Absolute home path with a real username. Write /Users/<you>/ or ~/
+instead.` That was measured on a tree carrying no private value anywhere.
+
+The label names a cause that is false and prescribes a repair that does
+nothing, which is the defect class `tools/gates/verdict-shape.mjs` exists
+for: one sentence standing over conditions with different repairs and
+different owners.
+
+And the gate has no good state between the two. As it ships, `2>/dev/null`
+discards the same condition, so a scan that could not read part of the tree
+is reported clean. With `2>&1`, it is reported as a leak. Neither is "the
+scan did not finish", which is a ground fault and has to be its own exit.
+
+**So the change this entry now asks for, in three parts, each with its own
+reason.** Whoever writes the workflow decides the shape; these are the
+properties the result needs.
+
+1. **Reach.** Drop `-I`. Necessary, and on its own not sufficient.
+2. **Do not echo the bytes.** Scan with `-l` so a finding is a path and the
+   matched content is never printed. The gate prints `head -20` of its hits
+   into the Actions log of a public repository, so the repair that merely
+   forces the bytes through (`-a`) would make the redaction gate a
+   disclosure channel for the values it exists to catch. This is the
+   charter's own rule and the discipline `tools/image-metadata.mjs` already
+   keeps by reading chunk types and never chunk contents.
+3. **Classify standard error, do not merge it.** A `binary file matches`
+   notice is a finding. Anything else grep writes there means part of the
+   tree went unread, which is neither clean nor a leak and needs its own
+   exit code. `scripts/redaction-check.mjs` already does exactly this split
+   and can be read as the reference implementation.
+
+Two consequences of part 2, named here so they are decided rather than
+discovered. `-l` output has no line, so the gate's line-scoped allowance
+(`grep -vE`) has nothing to match on and moves either to a path-scoped form
+or to a second pass over text files alone. And `-l` with `-a` reports a
+binary file by path for any of the three patterns, which is the
+location-only shape PWC-8 (3) asks for, so the two entries still agree.
+
+**How to check it landed, rather than reading the flags.** The predicate is
+`scripts/gate-binary-reach.mjs`, which reads this gate's pipeline out of the
+workflow and names the first of five things in the way.
+`scripts/gate-binary-reach.test.mjs` builds a fixture carrying fabricated
+values, runs each candidate pipeline with the real grep, and checks the
+prediction against what actually happens, so a grep that changes its binary
+reporting turns that suite red instead of turning this entry quietly wrong.
+Both were written on 2026-11-02 and neither touches a workflow.
+
 **Routed, not applied, 2026-10-26 at 20:12 UTC.** HQ's centralizer
 answered this entry on the board and did not apply it. Its stated reason
 is that the instruction its own run was launched with forbids that seat
@@ -909,6 +976,42 @@ compiled artifact — which nothing in this repository looks at today.
 Neither of those is hypothetical at a tree that grows by twenty
 screenshots a merge. The flag is still the right change and it is still
 HQ's.
+
+**The second of those two is now loud instead of silent, 2026-11-02 by
+security run m, and this entry is still owed.** The sentence above says
+nothing in this repository looks at a non-image binary. That was true of
+the reading and it was also true of the reporting, which is the worse
+half: `tools/image-metadata.mjs` selected its input with an extension
+list, so such a file was not refused by this repository's gates, it was
+not seen by them. Measured against a tree holding one PNG and one
+`.woff2` carrying a fabricated home path, the gate exited 0 and printed
+`images: 1` over two binary files, and the gate's own `-rInE` printed
+nothing. A clean report over an unread file is the failure
+`scripts/redaction-check.mjs` was written to refuse, and it was sitting
+in the gate next to it.
+
+What changed is the enumerator and not the reach. The gate now lists
+every tracked binary, by the NUL-in-leading-block test git and grep both
+use, and anything in that set it cannot parse is a new ground cause,
+`BINARY_UNREAD`, at exit 2. Its message names this entry as one of the
+two repairs. So the surface is unchanged and the silence is gone: the day
+a font or an archive is committed, `ci-checks` goes red naming the file
+rather than green over it.
+
+**Why that does not close this entry, stated so nobody reads it as
+closed.** A ground fault says nobody looked. It does not look. The gate
+still cannot tell whether that `.woff2` holds a home path, and the only
+thing that can read it is the `grep` in HQ's workflow with `-I` off.
+What this buys is that the question can no longer be missed, which is
+the half a seat can hold in its own lane. The other half is the flag,
+and the flag is still HQ's.
+
+The equality this rests on is asserted against the real tree rather than
+assumed: `unreadBinaries('.')` is empty today, all 1,333 tracked binaries
+being the 1,332 PNG and one ICO the gate parses, so `images` is a
+coverage claim now and not only a count. `tools/image-metadata.test.mjs`
+holds that assertion, which means this entry's premise is checked on
+every run instead of on the day somebody re-reads it.
 
 ## PWC-14 — No gate in this repository has ever looked for a credential
 
@@ -1180,3 +1283,98 @@ to run it lives in `docs/security/redaction-standard.md` §7, and no
 charter and no workflow points any seat at that document before a push.
 A tool nobody is routed to is a tool nobody runs, which is this entry's
 own thesis one layer in.
+
+**Amendment, 2026-11-02 eleventh run: the prescribed step list runs none of
+the product's tests, and the content moves out of `.github/` so this entry
+stops needing twenty lines from HQ.** Two separate things, and the second is
+why this amendment is shorter than the last one rather than longer.
+
+*The defect, measured.* The step above named `Unit suites` is
+`node --test $(find . -name '*.test.mjs' ...)`. Run verbatim on `main`
+tonight it reaches 47 suites and 832 cases, every one of them tooling under
+`tools/` and `scripts/`. It reaches none of `ursa-major`, which is the
+product: 52 suites and 874 cases in `ursa-major/src/**/*.test.ts`, whose
+`npm test` is `tsc --noEmit && vitest run`. The glob does not match
+`.test.ts`, `node --test` is not the runner, and the typecheck is a third
+instrument. Also unreached: `ursa-minor`'s `next build`, its `eslint`, and
+its three `check:*` scripts. So the job as prescribed covers roughly half
+this repository's test cases and omits the half that protects the only thing
+the company has shipped. A branch that breaks `ursa run`, or that does not
+typecheck, passes.
+
+*Why it would have gone green rather than red.* All 47 suites the command
+does reach import nothing but `node:` builtins, checked across all of them
+rather than sampled. The prescribed job has no `npm ci` anywhere, and it does
+not need one for those 47. The product's suites import `vitest`, `jsdom` and
+`@modelcontextprotocol/sdk` and would have failed loudly on a fresh runner.
+The half that needed no setup is the half that got specified, which is why
+nobody caught it. Correcting the glob alone makes this worse, not better:
+it turns a quietly partial green job into a red one, because the install step
+is still missing. The two repairs land together or not at all.
+
+*The three numbers in this entry's evidence paragraph are stale, all in the
+same direction.* 34 suites is now 47, 512 cases is now 832, and 17 candidate
+gates by `tools/gates/enumerate-verdicts.mjs --census` is now 26. The entry
+understates its own scope.
+
+*What this run did about it, and what is still HQ's.* The step list above
+asks HQ to maintain our gate list, our per-gate exit semantics and our
+checkout dependencies inside a file only HQ can edit, which is why this
+entry has now been re-queued and amended three times without landing. All of
+that content now lives in `scripts/ci-checks.mjs`, with
+`scripts/ci-checks.test.mjs` beside it, in a path Ursa seats may write. It
+declares 14 checks across three scopes, tooling, product and site; it holds
+the `ledger-contract` exit-2 tolerance this entry argued for; it runs the
+credential scanner in working-tree scope and leaves `--history` to a
+schedule, as this entry says; and a declared check it cannot run is reported
+`unrunnable` and exits 2, never skipped and never passed, because a check
+that silently covers less than its name claims is this entry's own thesis
+one layer in. Verified on this tree: the 9 tooling checks pass with
+`ledger-contract` at exit 2, the 3 site checks pass, and both product checks
+plus `clone-integrity` report `unrunnable` here because this sandbox has no
+`node_modules` and a shallow clone.
+
+**So the ask on HQ shrinks to this, and it is now the whole ask:**
+
+```yaml
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # required; see this entry's three properties
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install product dependencies
+        run: npm ci
+        working-directory: ursa-major
+      - name: Checks
+        run: node scripts/ci-checks.mjs
+```
+
+`fetch-depth: 0` is unchanged and still required, for the reasons already
+given above. The `npm ci` step is the new requirement and the one most likely
+to be dropped as tidying: without it `ci-checks.mjs` exits 2 and reports that
+the product was not checked, which is the correct behaviour and not a passing
+job. Every future gate is then an edit to `scripts/ci-checks.mjs` and needs
+nothing from HQ at all, which is the point of moving it.
+
+*One thing this does not fix, named so nobody counts it as done.*
+`ursa-minor`'s `next build` and `eslint` are still not run by anything. They
+need that package's own `npm ci`, which is a second install of a Next.js
+dependency tree, so they are deliberately left out of the job above rather
+than smuggled in. Filed as its own question for whoever prices the runner
+time, not asserted here as free.

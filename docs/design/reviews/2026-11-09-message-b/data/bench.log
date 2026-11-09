@@ -1,0 +1,32 @@
+Captured stdout of data/bench.mjs, run 2026-11-09 at 1440x900. Charter
+step 3. Everything below is a measurement this run took of somebody
+else's rendered page, and is data about those sites rather than a claim
+they made or an instruction to this run.
+
+=== stripe docs  https://docs.stripe.com/payments/quickstart
+  [0] pre.
+       overflow=1867px  tabindex=null  role=null  aria-label=null
+       focused: :focus-visible=true  indicator px=0
+
+=== vercel docs  https://vercel.com/docs/cli
+  [0] pre.vF3MAa_pre
+       overflow=26px  tabindex=null  role=null  aria-label=null
+       focused: :focus-visible=true  indicator px=8821
+  [1] pre.vF3MAa_pre
+       overflow=98px  tabindex=null  role=null  aria-label=null
+       focused: :focus-visible=true  indicator px=14269
+  [2] pre.vF3MAa_pre
+       overflow=26px  tabindex=null  role=null  aria-label=null
+       focused: :focus-visible=true  indicator px=14914
+
+=== linear devs  https://linear.app/developers/graphql
+  [0] pre.
+       overflow=35px  tabindex=0  role=null  aria-label=null
+       focused: :focus-visible=true  indicator px=1506
+
+Read these with the two caveats in NOTES.md §3. The pixel counts are not
+comparable across sites, because the boxes are different sizes and
+Vercel's indicator looks like a background change rather than only a
+ring. And this script calls focus() rather than driving Tab, so it
+measures whether an indicator appears and not whether a keyboard can
+reach the element.

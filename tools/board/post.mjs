@@ -58,6 +58,7 @@ import { readFileSync } from 'node:fs';
 import { notices, violations } from './check.mjs';
 import { liveTargetFault } from './live-target.mjs';
 import { unreachable, verdict } from './post-verdict.mjs';
+import { antecedentData } from './antecedent.mjs';
 import { declarationOf, senderFault, senderOf } from './sender.mjs';
 import { LOCUS, renderVerdict } from '../gates/verdict-shape.mjs';
 
@@ -86,8 +87,10 @@ const flag = (name, dflt = '') => {
 const has = (name) => argv.includes(name);
 
 if (has('--help') || has('-h') || argv.length === 0) {
-  console.log('usage: post.mjs --seat YOUR_SEAT --kind K --subject S (--body B | --body-file F) [--to-seat S] [--to-company C] [--company C] [--ref URL] [--surface S] [--data JSON] [--reasoning R] [--everyone] [--accept-truncation] [--wake-limit N] [--dry-run]');
+  console.log('usage: post.mjs --seat YOUR_SEAT --kind K --subject S (--body B | --body-file F) [--to-seat S] [--to-company C] [--company C] [--ref URL] [--surface S] [--data JSON] [--in-reply-to ID[,ID...]] [--reasoning R] [--everyone] [--accept-truncation] [--wake-limit N] [--dry-run]');
   console.log('       --seat is required unless ASC_SEAT is set; there is no default sender.');
+  console.log('       --in-reply-to names the message ids this one answers. Without it, tools/seat/answered.mjs');
+  console.log('       reports your reply as unproven rather than answered, because it keys on the antecedent.');
   console.log('       --to-seat owner, chair or chair:<label> needs no company: the board discards it for those three.');
   console.log('       an ask or a handoff over the wake limit is refused here; --accept-truncation says the ask is above the cut.');
   process.exit(0);
@@ -100,7 +103,7 @@ const msg = {
   body: bodyFile ? readFileSync(bodyFile, 'utf8') : flag('--body'),
   toSeat: flag('--to-seat'),
   toCompany: flag('--to-company'),
-  data: flag('--data') ? JSON.parse(flag('--data')) : null,
+  data: antecedentData(flag('--data'), flag('--in-reply-to')),
   surface: flag('--surface'),
   everyone: has('--everyone'),
   acceptTruncation: has('--accept-truncation'),

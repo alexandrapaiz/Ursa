@@ -1,0 +1,32 @@
+
+> ursa-minor-site@0.1.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 1147ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 54s
+  Running TypeScript ...
+  Finished TypeScript in 35.2s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/6) ...
+  Generating static pages using 3 workers (1/6) 
+  Generating static pages using 3 workers (2/6) 
+  Generating static pages using 3 workers (4/6) 
+✓ Generating static pages using 3 workers (6/6) in 3.3s
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /record
+├   /record/[id]
+│ └ ● /record/mini-fixture
+└ ƒ /record/at/[[...address]]
+
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

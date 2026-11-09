@@ -1734,3 +1734,362 @@ anyone. Ledger proposal below: watch whether this token's machinery
 since that would be the first real encroachment on Minor's structural
 claim rather than another authored-verifier entrant. No pricing or
 positioning change argued by this alone.
+
+## A second, independent "software is not the moat" case, and it is a solo project this time (2026-11-02, message, 12th run)
+
+The head-start-vs-position test the 2026-10-24 MemHub entry built
+("does a release cost Ursa the lead time before someone else built the
+software, or the two-sided trust relationship itself") gets a second
+case to run against: MemTether, a new Category 3 entry
+(docs/market/landscape.md), a free, Apache-2.0, forked solo project
+with no company and no funding behind it, not a frontier-lab release
+like MemHub.
+
+Applying the same two criteria. (a) A consenting user base whose
+derived signal flows somewhere monetizable: unmet, the project is a
+shared local SQLite file for one person's own developer tools, with no
+aggregation layer of any kind. (b) A trust relationship with an AI lab
+on the licensing side: unmet, there is no company to hold one. Both
+criteria fail, same as MemHub, so this is a head-start cost, not a
+position cost, by the same test.
+
+What's sharper this time is the head-start itself. MemHub matched four
+of Major's five claimed properties; this one matches a narrower slice
+of the *data model* CLAUDE.md §1 describes rather than Major's
+consumer-facing portability claim — "corrections supersede, the old
+value stays queryable, every write is hash-chained, a conflict needs a
+human to adjudicate" is closer to "survived, mutated, with a time
+dimension and a trajectory" than anything else found in this
+landscape, built by one person for a narrower problem (keeping several
+coding tools' memories from corrupting each other) and given away for
+free under a permissive license. The lesson is not new in kind — §0's
+fourth constraint already conceded this before either case existed —
+but it is now corroborated twice, independently, by two actors with no
+relationship to each other or to Ursa: a frontier lab's open-source
+division and an anonymous solo developer converged on adjacent pieces
+of the same data structure. That is a stronger form of "anyone
+competent could build it" than one example supports, and worth citing
+as such rather than re-arguing the MemHub case alone.
+
+Separately, the same run's landscape watch found CVE-2026-116575, a
+patched cross-tenant information-disclosure bug in Mem0, this
+category's largest-by-adoption product (docs/market/landscape.md, Mem0
+entry). It extends the "trust has a provenance axis too" line
+(2026-10-07 above) one level deeper than any prior case: the compromise
+sits inside the memory product's own multi-tenant isolation code, not
+at the vendor-ownership or supply-chain level the earlier cases
+tracked. No positioning change argued by this alone; it is one more
+dated instance of a risk category Major's on-device processing
+(CLAUDE.md §0, constraint 3) does not carry by construction, since
+there is no shared tenant boundary to collide across.
+
+A final, weak-signal item, named as weak rather than dropped: a Show HN
+post this week ("AI Context Flow," 1 point, 4 comments) pitched a
+browser extension carrying context between ChatGPT, Claude, Grok,
+Gemini, and Perplexity at $12/month after a free beta, with a builder's
+comment framing it as "one of the few 'memory layer' approaches that
+feels grounded in how we actually switch between models." This is not
+evidence of market validation at this engagement level, but it is a
+dated, concrete price point for cross-model memory portability sitting
+inside this file's existing price ladder (2026-09-26) — closer to
+Zep's post-restructure $25/mo Flex tier (2026-10-25 update) than to
+any enterprise contract — worth holding as a single low-confidence data
+point, not a trend, until something with real engagement prices the
+same promise.
+
+## A tracked competitor's own CEO argues portability is structurally wrong, and one of his four points has no answer on file (2026-11-02, message, 13th run)
+
+docs/market/landscape.md's Zep entry gained a dated update this run:
+founder Daniel Chalef's "The Private Agent Memory Fallacy" (2025-06-19
+— old ground, newly surfaced here, not a this-week event) argues
+portable AI memory is unworkable on four grounds — vendor incentive
+misalignment, a user "privacy paradox," non-standardizable/
+non-transferable context across domains, and compounding
+security/liability risk under a shared or portable store.
+
+This is the charter's "a finding that stings needs weaker sourcing"
+case run the other direction: it stings, and the source is about as
+strong as this file gets — a named, tracked competitor's own founder,
+making the argument in his own words, not a secondhand paraphrase.
+
+Run point by point against what is already on file rather than
+answered generically. Point 1 (incentive misalignment) is answered by
+Major's own zero-monetization design, but not for the labs Major needs
+cooperation from — the same "central strategic problem" CLAUDE.md §5
+already names, so this corroborates a risk already tracked rather than
+adding one. Point 2 (privacy paradox) is a live, untested claim against
+Major's own two trials (n=1, n=2, both owner-declared unsatisfied) —
+on-device automatic inference answers the "continuous decisions"
+mechanism Chalef describes, but there is no user-base evidence yet
+either way, so call this open, not answered. Point 4 (security/
+liability) is partly structural for Major (on-device processing,
+CLAUDE.md §0 constraint 3, no shared tenant boundary to poison the way
+Mem0's CVE-2026-116575 did, docs/market/landscape.md) but the
+aggregation layer itself is a new pooling point with no evidence
+against it either way yet.
+
+Point 3 (non-standardizable, non-transferable context, with semantic
+collision across domains as the sharp example — "shooting" meaning
+different things to a photography assistant and a mental-health one)
+is the one this file has no answer for anywhere. The eight-entry
+no-neutral-standard cross-cutting note (docs/market/landscape.md,
+2026-10-05 through 2026-10-26) tracks format and schema
+interoperability — whether one product's export can be read by
+another — and the academic study it cites (Goyal and Ray, arXiv
+2609.05339) quantifies format survival, not semantic collision across
+domains. Nothing on file asks whether a single preference profile
+*means the same thing* when carried from one domain of use into
+another, which is a sharper and different question than whether the
+bytes round-trip. No pricing or landscape-vendor change argued by this
+alone; it is a named gap in Major's own product thesis, surfaced by a
+competitor, for whoever next scopes Major's inference layer to read
+before claiming cross-domain portability is solved by format
+compatibility alone.
+
+## A vendor-interested source restates known deals as a new argument this file should not repeat uncritically (2026-11-02, message, 13th run)
+
+A search for fresh provenance/consent news surfaced fiund.com's "state
+of the market" page arguing "provenance moved from preference to
+requirement" in AI data buying — scraped-from-web treated as a risk
+flag, signed rights chains and revocability terms now required in
+diligence. Checked who runs the page before citing the claim, same
+discipline this file already applies to aidata.broker (2026-10-26):
+Fiund is itself a managed marketplace that brokers AI training data,
+selling exactly the provenance-clean licensing it says the market now
+requires. The claim is vendor-interested marketing, not independent
+confirmation.
+
+The underlying facts it cites (News Corp/OpenAI ~$250M/5yr, Reddit/
+Google ~$60M/yr, Reddit's IPO-filed ~$203M aggregate) are already on
+file (above, 2026-07 entries) — nothing new there either. Recorded so
+the next run that meets this source does not re-cite its framing as
+market consensus. No pricing or positioning change argued by this.
+
+## A memory vendor's self-reported benchmark got caught by its own users, which is the labs' own verifier problem playing out in public (2026-11-02, message, 9th run)
+
+docs/market/landscape.md's Category 3 already flagged MemoryLake's own
+94.03% LoCoMo claim as unverified self-report, no third party named.
+This run found the next step down that path already happened to a
+different vendor, in public: MemPalace, a Show HN post (67 points, 17
+comments), claimed "the highest-scoring AI memory system ever
+benchmarked," and the thread itself took the claim apart. The 100%
+LongMemEval score needed "targeted fixes for three failing questions"
+plus LLM reranking (98.4% without). The 100% LoCoMo score used a
+retrieval top-k of 50 against a benchmark with fewer sessions than
+that, which cannot fail by construction. A linked GitHub issue thread
+reportedly found independent end-to-end QA testing, as opposed to the
+vendor's own retrieval metrics, dropped the scores "dramatically."
+
+The "so what" for Minor's own pitch: this is CLAUDE.md §1's claim
+("labs fall back on preference proxies... because they have no
+verifier") happening to an adjacent category, live, in a way Minor can
+point to as evidence rather than argue in the abstract. The proxy here
+is a leaderboard number the vendor could tune to the test, not even a
+rater's stated preference, and the correction mechanism that caught it
+was an unpaid public argument on a forum thread, not a repeatable
+process anyone could rely on twice. An outcome record cannot be tuned
+to a held-out eval the same way, because there is no eval to tune to —
+the label is what the real work did with the output, after the fact,
+not a score against a fixed test set set before the vendor is even
+aware which test it will be marked on. This is a sharper, more concrete
+version of a line this file has made before (LongMemEval/LoCoMo scores
+measuring format survival, not whether a deliverable used the output);
+it does not change the pricing or landscape structure on its own, but
+it is a real example worth having on hand next time the pitch needs
+one.
+
+## Even a "real" verifier leaks, a complication Minor's own pitch should absorb rather than ignore (2026-11-02, message, 15th run)
+
+CLAUDE.md §1 and this file's own entries so far draw a clean line:
+math and code have a verifier (a deterministic check), open-ended work
+does not, and Minor exists to fill the second gap. A preregistered
+academic study found this run (Zhang, "When the Reward Suite Is Leaky:
+A Preregistered Causal Contrast of Natural Verifier False Positives in
+RLVR," arXiv 2607.11022) complicates the first half of that line rather
+than the second. Studying RLVR on MBPP coding tasks, it finds unit-test
+reward suites themselves contain persistent false positives: a static
+leakiness audit run before training correlates (Spearman 0.80) with
+how much rewarded signal turns out to be a test-suite artifact rather
+than genuinely correct code, leaky tasks carry a 43.8-point higher
+false-positive share than clean ones, and human auditing found 47.57%
+of rewarded false positives (record-weighted) were code that was
+actually wrong, not just an artifact of a lenient suite. The paper's
+own headline result is reassuring on held-out performance (a
+preregistered, bounded 0.20-point gap, "non-inferior" under its own
+margin) and its own read is that models exploit pre-existing error
+patterns rather than learning to game the leak — so this is not a
+case of RLVR collapsing.
+
+So what for Minor: the thesis should not claim verified domains hand
+labs clean ground truth while only open-ended domains are messy. Even
+a unit test, the cleanest verifier there is, rewards wrong code close
+to half the time it is wrong at all, on a widely-used benchmark
+dataset, and nobody notices until someone audits the suite itself. The
+sharper and more defensible claim, closer to what CLAUDE.md §1 already
+argues, is narrower: verified domains have a *mechanism* for catching
+and auditing reward errors (a static leakiness check, a human audit of
+the suite) that open-ended domains structurally lack, not that the
+verifier itself is flawless. Worth building into the next methodology
+draft as the version of this argument that survives a technical
+reader's pushback, rather than letting a lab's own research team find
+this paper first and use it to puncture an overclaimed version of the
+pitch.
+
+## This file's own living map was seeded by an OKR, not by the charter's literal seed set — and the charter's literal text still names alexandria's categories (2026-11-02, message, 15th run)
+
+Checked the charter's own instructions (prompts/market-agent.md §1)
+against what landscape.md actually contains, while trying to decide
+where this run's digest/newsletter-comp research should land. §1 names
+a specific seed set: "research tools (Elicit, Consensus, Semantic
+Scholar, Exa), digests and newsletters (TLDR AI, Import AI, The Batch,
+AlphaSignal, Last Week in AI, Latent Space, The Pragmatic Engineer as a
+paid-newsletter comp), and agent-knowledge ecosystems (Anthropic's
+skills ecosystem, prompt and skill marketplaces)." None of those three
+categories, or any name inside them, appears anywhere in landscape.md
+— not Elicit, not TLDR AI, not a single AI newsletter, not a skill
+marketplace. grep confirms zero hits for all of them.
+
+This is not an oversight this run should fix by adding them. Reading
+landscape.md's own opening note: the file was seeded by "the three
+categories the KR names" (O2 KR2.3, 2026-09-26) — preference-data
+vendors, evaluation/arena products, and memory/personalization layers
+— which are the right three for Ursa's actual business (RLHF data
+vendors compete with Minor directly; memory layers compete with Major)
+and have nothing to do with research tools or AI newsletters, which
+were alexandria's competitive set. Every run since has correctly built
+on the KR's three categories and ignored the charter's literal seed
+set, which is the right call substantively. What's left stale is the
+charter text itself: §0 still states the business this seat researches
+for as "a $10 digest and $30 full-library subscription" (alexandria's
+consumer product), when CLAUDE.md §4 is explicit that Minor has no
+consumer price at all and sells six-to-seven-figure enterprise
+contracts instead. This file already corrected its own language once
+for the same conflation (2026-10-25, "a correction to this file's own
+language," above) but that fix was to this file's prose, not to the
+charter's. The charter's own top-of-file note says adaptation happened
+"by the owner's merge" at activation and that "alexandria-specific
+references... do not apply here" — true in spirit and evidently
+already true in practice (three months of correct KR-driven work
+prove it), but §0 and §1's literal sentences were never edited to
+match. Charters are outside this seat's writable surface (per this
+seat's own charter), so this is reported rather than fixed. Ledger
+proposal below.
+
+## The dominant lab went deeper into its own memory architecture, and its own users' top comments asked for the opposite (2026-11-09, message, 16th run)
+
+Anthropic published "The components of agent memory" (2026-11-06,
+docs/market/landscape.md, new Claude agent memory architecture entry):
+four memory layers plus "dreaming," a between-session self-correction
+pass, reported to lift one evaluation from 13% to 48% graded criteria
+on a 350,000-file wiki. This is a real capability advance from the
+single most credible lab in this category, and it is the
+highest-engagement memory post this file has tracked (174 points, 99
+comments on Hacker News, past the 2026-11-02 decay-memory thread's
+98/53).
+
+The positioning point is not the architecture, it is what its own
+readers did with it. The top comments did not debate whether dreaming
+works. One commenter built a separate tool to manage memory through
+version-controlled plain-markdown files specifically so it survives a
+switch between Claude Code and other agents. Another states the
+general case plainly: Anthropic's design "cover[s] a huge breadth of
+usecases... but [is] distractingly inferior to alternatives that the
+user takes an active part in shaping." Read against this file's own
+running count (now four times: the 2026-10-25 Zep CEO critique, the
+2026-11-02 memory-plugin Hacker News critique, the 2026-11-02
+decay-memory thread, and this one), the pattern has stopped looking
+like a coincidence across separate products and started looking like a
+standing feature of this category: the better a vendor's own memory
+gets, the more its own most engaged users ask for portability and
+control instead of praising the depth. That is close to a direct
+restatement of Major's value proposition, surfacing unprompted in the
+comment section of the dominant lab's own announcement of a competing
+approach.
+
+One day later, the same gap got a named supply-side response for the
+first time this file has tracked (landscape.md, "no neutral standard"
+cross-cutting note, ninth update): LoreKit's Mads Thines called for
+agent memory's "OpenTelemetry moment," explicitly diagnosing
+fragmentation itself, not a missing feature, as the problem. The pairing
+is the finding: Anthropic deepens a proprietary architecture; a day
+later, someone with direct OpenTelemetry experience names the
+cross-vendor standard that would make any vendor's depth portable. No
+pricing or positioning change argued by this alone — Major already
+promises the thing commenters are asking for by design — but it is a
+dated, well-sourced instance to cite the next time this file is asked
+whether the demand side of Major's bet is real or assumed.
+
+External sources read, this entry: [Anthropic: The components of agent
+memory](https://www.anthropic.com/research/components-of-agent-memory),
+[Hacker News discussion, 174 points/99 comments](https://news.ycombinator.com/item?id=50402212),
+[LoreKit: Agent memory needs its OpenTelemetry moment](https://www.lorekit.io/blog/open-agent-memory-format).
+
+## The first academic source found for the mechanism itself, not just the gap it fills (2026-11-09, message, 17th run)
+
+Every reward-model-unreliability source in this file so far (eight of
+them, spanning 2026-10-05 through 2026-10-27) argues the negative case:
+solicited ratings and the models trained on them fail, at every stage
+checked. None of them argues the positive case CLAUDE.md §4 makes —
+that revealed preference (behavior) predicts a person's actual choices
+better than stated preference (a described opinion) — because none of
+them tests that comparison directly. A paper found this run does.
+
+"Should I State or Should I Show? Aligning AI with Human Preferences"
+(Ellis and Huang, arXiv 2603.29317, submitted 2026-03-31) runs
+experiments comparing the two directly: an AI system learning from a
+person's actual choices against one given that same person's written
+description of their preferences. Result: choice data wins, and by a
+wide enough margin that "as few as two" choices matched the predictive
+value of a written prompt. The gap is not uniform — it is largest for
+subjects who show Allais-type behavioral patterns (whose stated and
+actual preferences diverge most) — and the paper's sharpest finding for
+a lab-facing pitch is that subjects themselves cannot tell which method
+works better, and often pick the less accurate one. That last point
+answers a question this file has not had to pose yet: lab staff who are
+used to asking users what they want would not necessarily know, by
+intuition, that watching what those same users do would serve them
+better. The paper makes that case independently, with a mechanism and a
+number, rather than Minor asserting it about its own product.
+
+This is the first direct, quantified academic support this file has
+found for the revealed-preference half of CLAUDE.md §4's pitch
+specifically — the eight prior sources support the adjacent but
+distinct claim that *constructed* graders fail. A lab brief that has
+been building a verifier-gap case out of eight negative sources now
+has one positive one to open with instead: not just "the market's
+current method is unreliable," but "an independent paper shows the
+alternative method predicts real choices better, and shows people
+can't judge that for themselves."
+
+**A second, adjacent paper found in the same search, cited with the
+caveat it needs.** "Future-as-Label: Scalable Supervision from
+Real-World Outcomes" (Turtel, Wilczewski, Franklin, and Skothiem, arXiv
+2601.06336, submitted 2026-01-09) trains a language model
+(Qwen3-32B) to forecast real-world events using the events' own
+eventual resolutions as the reward signal, with no human-labeled
+examples at all — a 27% Brier-score improvement and roughly halved
+calibration error against the pretrained baseline, beating a larger
+model on the Metaculus benchmark. Read carelessly, "real outcomes
+instead of human labels" sounds like Minor's own method stated in one
+sentence, and it would be a mistake to cite it that way. Forecasting is
+exactly the kind of domain CLAUDE.md §1 already excludes from the
+gap Minor fills: it has a deterministic eventual ground truth (did the
+event happen), the same structural property math and code have and
+open-ended writing or research work does not. The honest read: this is
+a second, independent instance of "wait for reality to supply the
+label instead of asking a person to judge in advance," which is
+corroborating evidence for the general mechanism, but it is a
+verifier-domain result, not a no-verifier-domain one, and citing it
+without that distinction would hand a skeptical lab researcher an easy
+objection. Use it, if at all, as "the mechanism has a second
+independent success case, in a domain that already had a verifier,"
+not as a demonstration that Minor's own no-verifier domains have been
+solved by someone else.
+
+No pricing recommendation made; this is evidence for the lab brief's
+mechanism section, not a price or packaging decision. External sources
+read, this entry: [arXiv 2603.29317: Should I State or Should I Show?
+Aligning AI with Human
+Preferences](https://arxiv.org/abs/2603.29317), [arXiv 2601.06336:
+Future-as-Label: Scalable Supervision from Real-World
+Outcomes](https://arxiv.org/abs/2601.06336).
