@@ -206,7 +206,48 @@ export function wakeReceipt(body, limit = WAKE_BODY_CHARS) {
 // those 161 that were handoffs and asks). Everything else gets the
 // prediction printed and its exit code untouched. `--accept-truncation` is
 // how a sender says the ask is above the cut and it meant to send the rest.
-const TRUNCATION_REFUSED = new Set(['ask', 'handoff']);
+/** The kinds whose truncation this file REFUSES, as opposed to the kinds it
+ *  only predicts. Exported because `wake-cost.mjs` grades what this membership
+ *  buys, and a gauge that carried its own copy of the set would agree with the
+ *  guard only on the day it was written — which is the rule window 103 wrote
+ *  about the bypass hook and then did not apply to its own instruments.
+ *
+ *  WIDENING THIS IS THE REGISTERED EXPERIMENT OF 2026-11-09, window 107, and
+ *  it is deliberately NOT done here. `docs/agents/improvements.md` under the
+ *  hundred-and-seventh window carries the hypothesis, the metric, the read
+ *  date and the one-line diff.
+ *
+ *  Why the measurement is not enough to move it inside one run. Two windows
+ *  declined to widen this with reasons on the record, and those reasons are
+ *  encoded in FIFTEEN assertions across four test files — "a note is told and
+ *  sent" is asserted, not assumed. So the narrow scope is load-bearing in this
+ *  repository rather than an incidental literal, and the window that changes
+ *  it rewrites a twice-made decision. That is the PM's review and the owner's
+ *  merge under `docs/standards/pm.md` §21, not a seat's one-line edit.
+ *
+ *  What the experiment is now standing on, which those two windows did not
+ *  have. Both reasoned about the COST OF REFUSING and estimated it correctly:
+ *  26.5 per cent of Ursa's traffic. Neither had the cost of NOT refusing.
+ *  Over 1,987 rows, 154 of Ursa's 159 cut rows were in the predicted kinds,
+ *  8.3 per cent against 28.6, a step of 3.4x across this one line. In rows
+ *  rather than rates, Ursa spent 88 sends in 200 hours carrying nothing but a
+ *  tail an earlier send lost: 14.7 per cent of its traffic, double
+ *  alexandria's, which holds no checker at all. The company that owns this
+ *  file pays the highest tail tax on the bus.
+ *
+ *  And the datum that is not a rate. Window 107 cut THREE OF ITS OWN THREE
+ *  board sends while building the instrument that measures cutting, at 1,530,
+ *  1,528 and 1,502 characters, with `post.mjs` printing the exact overage
+ *  before each POST. The first dropped its own disposition. So the
+ *  proposition that a notice suffices for a careful sender has a
+ *  counterexample in the author of the gauge for it.
+ *
+ *  And what had to ship first regardless of the outcome: the escape this
+ *  widening would hand every sender used to leave no trace, so a window that
+ *  widened the Set could not afterwards tell a sender who split a message
+ *  from one who passed the flag. `./escape-trace.mjs` closes that.
+ *  Measurability before policy. */
+export const TRUNCATION_REFUSED = new Set(['ask', 'handoff']);
 
 // ---- a quantity's denominator, which is the wider form of one key's rule ----
 //
@@ -585,11 +626,43 @@ export function notices(m, now = new Date()) {
         repair: `move the disposition above the cut, which is the remedy that survives misjudging the length, or cut ${r.body_lost} characters. Nothing is refused for this and splitting the message is not asked for`,
       });
     } else if (risk.in_delivered) {
-      out.push({
-        code: 'WAKE_DISPOSITION_SAFE',
-        line: `the disposition is above the cut, so the ${r.body_lost} lost characters are evidence rather than verdict. ${kindNote}`,
-        repair: 'nothing to do. This line exists so that a sender who already put the verdict first is told the cut is harmless instead of being asked to rewrite a message that is already right',
-      });
+      // THIS ARM USED TO PUBLISH A FALSE GREEN, and it was caught on this
+      // seat's own send (2026-11-09, window 107, board row `bfeb30f2`).
+      //
+      // Its premise is EXISTENTIAL over the delivered half: a marker was
+      // found above the cut. Its old verdict was UNIVERSAL over the lost
+      // half: "so the lost characters are evidence rather than verdict".
+      // Nothing licenses the second from the first. `in_lost` being false is
+      // not evidence the tail holds no disposition, because its falsity is
+      // indistinguishable from the marker list simply not covering the words
+      // the tail used — which is the exact limitation the UNKNOWN arm below
+      // states out loud and this arm assumed away.
+      //
+      // Measured on the instance: a 1,530-character note whose only matched
+      // marker was "Your gradient holds", at index 8, in its first sentence.
+      // The real disposition — "Not widening the set ... I shipped what makes
+      // it decidable" — was at index 1,274, in the dropped 258 characters,
+      // and matched nothing on the list. The gate printed "nothing to do" and
+      // the recipient was woken with every number and no decision.
+      //
+      // So the two cases are separated, and only one of them is a green. See
+      // window 106's rule: a premise and the claim attached to it can be of
+      // different kinds, and re-reading the premise more carefully never
+      // reaches the claim.
+      const lostText = body.slice(r.body_delivered).trim();
+      if (!lostText) {
+        out.push({
+          code: 'WAKE_DISPOSITION_SAFE',
+          line: `a disposition phrase is above the cut and nothing of substance is below it. ${kindNote}`,
+          repair: 'nothing to do. This line exists so that a sender who already put the verdict first is told the cut is harmless instead of being asked to rewrite a message that is already right',
+        });
+      } else {
+        out.push({
+          code: 'WAKE_DISPOSITION_ABOVE_AND_TAIL_UNREAD',
+          line: `a disposition phrase is above the cut, which is the half this gate can check, and it CANNOT tell you whether the dropped ${r.body_lost} characters carry another one in words this list does not hold — the same limit the UNKNOWN arm names, and it applies here too. ${kindNote}. The tail opens "${risk.lost_opens_with}"`,
+          repair: 'read the dropped tail yourself and ask whether it decides anything. Nothing is refused for this. This gate used to call this case safe, and it was wrong on the send that found it: the only matched phrase was in the first sentence and the actual decision was in the dropped tail',
+        });
+      }
     } else {
       out.push({
         code: 'WAKE_DISPOSITION_UNKNOWN',

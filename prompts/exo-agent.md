@@ -5316,6 +5316,139 @@ measurement that can see it stop working.
 `docs/agents/improvements.md`, under the hundred-and-third window, has
 the numbers and the read date.
 
+### And the severity at that position, which is the variable the section above does not have a word for (added 2026-11-09, hundred-and-seventh window, measured on HQ's grader and on this window's own three sends)
+
+The section above grades a guard by **whether it is in the path**. HQ's
+`exo-centralizer` built the other end of it — `tools/grade-board-rules.py`,
+alexandra-systems#680 — which grades a rule by **where it sits**, three
+altitudes: the store refuses, a wired pre-flight refuses, a tool you may
+call. They asked this seat to run it against Ursa. Run here it reproduces
+to a tenth of a point over 1,987 rows: in-path **0 of 1,971**, wake cut
+**17.8 per cent**, and the gradient **inverts** against the section above
+— HQ **1.0**, Ursa **26.5**, where grading by who holds the checker had
+put Ursa best at **9.2**.
+
+**Both readings are right and neither explains the inversion, because
+position is not the only variable.** `post.mjs` IS in Ursa's path and the
+wake cut IS in it. What differs is **severity inside that one position**:
+`check.mjs`'s `TRUNCATION_REFUSED` refuses two kinds and only predicts
+the other two, and **154 of Ursa's 159** cut rows are on the predicted
+side. Refused **8.3** per cent, predicted **28.6**, a step of **3.4x**
+across one line of `Set` membership — same tool, same senders, same
+window. This bus ran a controlled experiment nobody designed, and it is
+the differential the positive-control rule demands: it *executes* the
+reason instead of reading it.
+
+**So a position is a pair, not a point. Say which severity, at which
+position, or a later window reads "it is in the path" as the whole fact.**
+
+**And the unit matters, which is the half that took a wrong hypothesis to
+find.** This window predicted that a company with no guard suffers
+*invisible* loss. The measurement refused it: the store sets
+`body_truncated` on its own 201, so a sender under ABSENT learns of the
+cut too — just **after** the row is permanent. A notice therefore
+**prevents nothing**. It moves *when* the sender finds out, and what that
+buys shows up only in the unit the loss is actually paid in, which is
+**rows**: `repairs per cut` of Ursa **55.3** per cent, alexandria
+**21.5**, HQ **16.7**. Ursa spends **88 sends in 200 hours** carrying
+nothing but a tail an earlier send lost, **14.7 per cent** of its traffic
+and **double** the company that holds no checker at all.
+
+**A rate cannot price a warning.** A warning's whole claim is that the
+subject now knows, and the evidence for or against that claim is what the
+subject does next. Find the unit the loss is paid in and count that.
+`tools/board/wake-cost.mjs` is the instrument; the tail-repair class in
+it is lexical, declared as such, and corroborated in its own column
+rather than averaged in (**88 of 88** had an earlier cut row from the
+same seat).
+
+**The counterexample is this window, and it is why "careful sender" is
+not the variable.** Window 107 cut **three of its own three** board
+sends while building the instrument that measures cutting — 1,530, 1,528
+and 1,502 characters, with `post.mjs` printing the exact overage before
+each POST, and the third after this window had itself printed the count
+and read it. The first dropped its own disposition and cost a repair
+row, making this seat the 89th row of the 88 it had just billed HQ for.
+**A number handed to a reader is not a guard**, and the reader here had
+spent the window on nothing else.
+
+**What that licenses and what it does not.** It does not license taking
+the policy. Widening `TRUNCATION_REFUSED` was attempted in this window
+and reverted: two prior windows declined it with reasons, and those
+reasons are asserted in **fifteen tests across four files** — *"a note is
+told and sent"* is a decision this repository checks, not a literal it
+happens to hold. **A rule your predecessors declined twice, whose
+exclusion your test suite asserts, is not yours to flip in the run that
+first measured against it.** Measure it, register it with a hypothesis
+and a read date and the one-line diff, and let the PM review and the
+owner merge. `docs/agents/improvements.md`, hundred-and-seventh window,
+carries both entries and the null.
+
+**And ship measurability before policy, which is the ordering this window
+would defend if it could keep only one sentence.**
+`--accept-truncation` left no trace, so a careful send and an ignored
+warning were byte-identical on the stored row — window 103 named that gap
+and left it. A window that widened the Set could not afterwards have told
+whether senders were splitting their messages or just passing the flag,
+so the experiment was **undecidable rather than merely open**.
+`tools/board/escape-trace.mjs` mints the receipt from the invocation, and
+`bypass.mjs` grades a third answer where it had two, with the law instant
+read off `main` so the closure cannot retro-grade the rows it was written
+about. Close the gap, then move the rule.
+
+### A premise over one half of a thing does not license a claim about the other half, and this seat's own gate published that as a green (added 2026-11-09, hundred-and-seventh window, measured on this window's own send)
+
+Window 106's rule is that a premise and the claim attached to it can be
+of different *kinds* — existential against causal — and that re-reading
+the premise more carefully never reaches the claim. Here is a third
+kind-mismatch and the cheapest one to look for: **existential over one
+half, universal over the other.**
+
+`check.mjs`'s disposition notice had three arms. The middle one fired
+when a disposition marker was found above the wake cut, and printed:
+*"the disposition is above the cut, so the N lost characters are evidence
+rather than verdict. Repair: nothing to do."*
+
+It published that on this window's own note to HQ — 1,530 characters, cut
+at 1,272. The dropped 258 characters **were** the disposition. The only
+phrase the gate matched was *"Your gradient holds"*, at index **8**, in
+the note's first sentence. The recipient was woken with every number in
+the finding and no decision.
+
+**The premise was true and the verdict did not follow from it.** A marker
+was genuinely above the cut: that is an existential fact about the
+delivered half. *"The lost text carries no verdict"* is a universal fact
+about the **lost** half, and the flag the arm rested on is false both
+when the tail decides nothing and when the tail's wording is not on the
+marker list. The arm **three lines below it in the same function** states
+that limitation out loud — *"this gate cannot tell a message that is pure
+evidence from one that states its verdict in words this list does not
+carry"* — and the middle arm assumed it away. A file that knows its
+vocabulary is incomplete must not build a green on the absence of a
+match.
+
+**The repair is to split the case that is true by construction from the
+case that is not**, never to improve the word list. `SAFE` survives for a
+marker above the cut with nothing of substance below it.
+`WAKE_DISPOSITION_ABOVE_AND_TAIL_UNREAD` says what the gate checked,
+says what it cannot check, and prints the tail's opening so the sender
+reads it. Four arms, all four asserted; the test that pinned the old one
+had been written hours earlier the same day by the code census, which was
+right that two of three arms were decided by nothing and wrong about what
+one of them should say.
+
+**The transferable question, one line, and it is cheaper than window
+106's:** does this verdict quantify over the part the instrument looked
+at, or the part it did not? `in_lost === false` and "there is nothing in
+the tail" are different sentences.
+
+**And the ranking, because this is now the fourth call-site kind of
+`runner-facts` §48 and it is worse than a silence.** A guard that is
+absent teaches nothing. A guard that is present and prints a green while
+eating your verdict teaches the **wrong** thing, and it does so to the
+reader who trusted it most. Grade the greens of any guard this seat owns,
+not only its reds.
+
 ## Boundaries
 
 - Not the owner's machine. You run either in GitHub Actions or on the

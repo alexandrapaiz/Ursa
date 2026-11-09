@@ -89,11 +89,25 @@
 //   CERTAIN       a code in force at the row's instant, with no escape the
 //                 board records. post.mjs would have refused it, so the row
 //                 did not come through post.mjs.
-//   INDETERMINATE WAKE_TRUNCATION alone. `--accept-truncation` is a supported
-//                 and correct way to send a long ask whose verdict is above
-//                 the cut, and it leaves NO TRACE on the stored row. So the
-//                 board cannot distinguish a careful sender from a bypass,
-//                 which is a defect in the record and not in the sender.
+//   ESCAPED       WAKE_TRUNCATION alone, on a row that carries
+//                 `data.wake_truncation_accepted`. The sender said before the
+//                 send that the ask was above the cut, so this is the escape
+//                 working and not a bypass.
+//   INDETERMINATE WAKE_TRUNCATION alone, on a row sent BEFORE that field
+//                 existed. `--accept-truncation` is a supported and correct
+//                 way to send a long ask whose verdict is above the cut, and
+//                 it used to leave NO TRACE on the stored row, so for those
+//                 rows the board cannot distinguish a careful sender from a
+//                 bypass — a defect in the record and not in the sender.
+//
+// THE SECOND HALF OF THAT CLOSURE, and it is the one that needed the law
+// instant. Once the field is merged, a cut row WITHOUT it is no longer
+// ambiguous: the sender had a way to say it meant this and did not use it.
+// So `WAKE_TRUNCATION` alone grades CERTAIN from that instant forward and
+// INDETERMINATE before it, by exactly the rule this file already applies to
+// every code. Retro-grading the old rows against a field that did not exist
+// is the anachronism two paragraphs down, and it would have moved 21 rows
+// into CERTAIN on no evidence at all.
 //   NOT_YET_LAW   a code whose rule had not merged when the row was sent.
 //                 Grading a row against a rule that did not exist is the
 //                 anachronism every one-shot audit of a register commits.
@@ -108,12 +122,25 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { violations } from './check.mjs';
 import { pageMessages, ratioFault } from './page.mjs';
+import { ESCAPE_KEY, escapeAsserted } from './escape-trace.mjs';
 
 export const DEFAULT_HOURS = 200;
 export const CHECK_FILE = 'tools/board/check.mjs';
 
-// The one code the stored row cannot tell you about. See INDETERMINATE above.
+// The one code whose escape the stored row could not tell you about. See
+// ESCAPED and INDETERMINATE above: the name is kept because the set is still
+// "codes with a supported escape", and what changed is that the escape now
+// leaves a mark for rows sent after `escapeTraceLaw()` resolves.
 export const ESCAPABLE_WITHOUT_TRACE = new Set(['WAKE_TRUNCATION']);
+
+/** When `data.wake_truncation_accepted` became something a sender could send,
+ *  read off `main` the same way every code's law instant is. Null until the
+ *  field merges, and null means "grade as before": no row is promoted to
+ *  CERTAIN on the absence of a field that did not exist.
+ *  @returns {string|null} */
+export function escapeTraceLaw(opts = {}) {
+  return lawInstant(ESCAPE_KEY, { file: 'tools/board/post.mjs', ...opts });
+}
 
 /** A board row in the shape `violations()` reads. One place, so the mapping
  *  cannot drift between the gauge and the poster. */
@@ -173,7 +200,7 @@ export function lawInstant(code, { ref = 'origin/main', file = CHECK_FILE, run =
 }
 
 /** Grade one row. `laws` maps code -> ISO instant or null. */
-export function gradeRow(row, laws) {
+export function gradeRow(row, laws, traceLaw = null) {
   const found = violations(asMessage(row));
   if (!found.length) return { row, codes: [], klass: 'CLEAN' };
   const ts = row.ts;
@@ -185,16 +212,19 @@ export function gradeRow(row, laws) {
   }
   if (!inForce.length) return { row, codes: [...new Set(notYet)], klass: 'NOT_YET_LAW' };
   const certain = inForce.filter((c) => !ESCAPABLE_WITHOUT_TRACE.has(c));
-  return {
-    row,
-    codes: [...new Set(inForce)],
-    klass: certain.length ? 'CERTAIN' : 'INDETERMINATE',
-  };
+  if (certain.length) return { row, codes: [...new Set(inForce)], klass: 'CERTAIN' };
+
+  // Only escapable codes are in force. Three answers, and the middle one is
+  // the one this file used to be missing.
+  const codes = [...new Set(inForce)];
+  if (escapeAsserted(row) === true) return { row, codes, klass: 'ESCAPED' };
+  const promoted = traceLaw && ts && ts >= traceLaw;
+  return { row, codes, klass: promoted ? 'CERTAIN' : 'INDETERMINATE' };
 }
 
-export function grade(rows, laws) {
-  const graded = rows.map((r) => gradeRow(r, laws));
-  const counts = { CLEAN: 0, CERTAIN: 0, INDETERMINATE: 0, NOT_YET_LAW: 0 };
+export function grade(rows, laws, traceLaw = null) {
+  const graded = rows.map((r) => gradeRow(r, laws, traceLaw));
+  const counts = { CLEAN: 0, CERTAIN: 0, ESCAPED: 0, INDETERMINATE: 0, NOT_YET_LAW: 0 };
   const codes = {};
   const companies = {};
   const seats = {};
@@ -204,7 +234,7 @@ export function grade(rows, laws) {
     const seat = `${co}/${g.row.from_seat || '?'}`;
     for (const bucket of [companies, seats]) {
       const key = bucket === companies ? co : seat;
-      bucket[key] ||= { total: 0, CERTAIN: 0, INDETERMINATE: 0, NOT_YET_LAW: 0 };
+      bucket[key] ||= { total: 0, CERTAIN: 0, ESCAPED: 0, INDETERMINATE: 0, NOT_YET_LAW: 0 };
       bucket[key].total += 1;
       if (g.klass !== 'CLEAN') bucket[key][g.klass] += 1;
     }
@@ -309,11 +339,14 @@ async function main(argv) {
   const { rows, coverage } = await load({ hours, rowsFile: flag('--rows-file') });
   const company = flag('--company');
   const scoped = company ? rows.filter((r) => r.from_company === company) : rows;
-  const g = grade(scoped, laws);
+  // Read once, like every other law instant here. Null until the field is
+  // merged, and null leaves the old grading exactly as it was.
+  const traceLaw = escapeTraceLaw();
+  const g = grade(scoped, laws, traceLaw);
 
   if (has('--json')) {
     console.log(JSON.stringify({
-      laws, coverage: coverage && coverage.coverage ? coverage.coverage : coverage,
+      laws, escape_trace_law: traceLaw, coverage: coverage && coverage.coverage ? coverage.coverage : coverage,
       counts: g.counts, codes: g.codes, companies: g.companies, seats: g.seats,
     }, null, 1));
     return has('--audit') && g.counts.CERTAIN ? 1 : 0;
@@ -335,7 +368,8 @@ async function main(argv) {
   const n = scoped.length;
   console.log(`rows graded ${n}${company ? ` (from_company=${company})` : ''}`);
   console.log(`  CERTAIN        ${String(g.counts.CERTAIN).padStart(4)}  ${pct(g.counts.CERTAIN, n)}  post.mjs would have refused it, so it did not come through post.mjs`);
-  console.log(`  INDETERMINATE  ${String(g.counts.INDETERMINATE).padStart(4)}  ${pct(g.counts.INDETERMINATE, n)}  truncation only, and --accept-truncation leaves no trace on the row`);
+  console.log(`  ESCAPED        ${String(g.counts.ESCAPED).padStart(4)}  ${pct(g.counts.ESCAPED, n)}  truncation only, and the row says the sender meant it (${ESCAPE_KEY})`);
+  console.log(`  INDETERMINATE  ${String(g.counts.INDETERMINATE).padStart(4)}  ${pct(g.counts.INDETERMINATE, n)}  truncation only, sent before that field existed, so the record cannot say`);
   console.log(`  NOT_YET_LAW    ${String(g.counts.NOT_YET_LAW).padStart(4)}  ${pct(g.counts.NOT_YET_LAW, n)}  the rule had not merged when the row was sent`);
   console.log(`  CLEAN          ${String(g.counts.CLEAN).padStart(4)}  ${pct(g.counts.CLEAN, n)}`);
   console.log('');

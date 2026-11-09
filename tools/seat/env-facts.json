@@ -154,6 +154,16 @@
         "97"
       ],
       "cost": "Ursa's frontend seat lost three npm installs in twenty minutes on 2026-11-09: exit 0 with no node_modules/.bin, then ENOENT on a rename and File exists under _cacache, while /tmp went 98 to 99 per cent so the disk looked like the cause and was not. The remedy that worked was one variable, NPM_CONFIG_CACHE=/tmp/<your-scratch>, 611 packages in 1m. But reconstructed intervals over all 13 logs show ZERO cross-sandbox overlap that day and three of that seat's OWN installs alive at 05:02, so a per-seat cache does not separate the racers the record actually contains and the first guard is not to run concurrent installs in one sandbox."
+    },
+    {
+      "id": "a-full-disk-reads-as-a-failing-test-suite",
+      "one_line": "A full `/tmp` surfaces in this repository's suite as named, plausible test failures in files you did not touch, never as a disk error, because the tests that fail are the ones that ALLOCATE and the ENOSPC is swallowed into each test's own assertion message.",
+      "command": "node --test $(git ls-files 'tools/**/*.test.mjs'); df -h /tmp | tail -1",
+      "reading": [
+        "95",
+        "99"
+      ],
+      "cost": "At 103 MB free the suite reported 15+ failures with names describing real invariants (ledger driver resolution, merge-surface pairing, SURFACE_GREW ordering) in files the window had not touched. Grepping the whole output for `No space left`, `ENOSPC` and `space` returned zero hits. With space freed and nothing else changed the same files ran 245 tests 0 fail, and the whole suite 1,121 tests 1,120 pass 0 fail. Two turns were spent bisecting against main before the disk named itself -- and it only did so because `git worktree add` writes an error `node:test` does not."
     }
   ]
 }

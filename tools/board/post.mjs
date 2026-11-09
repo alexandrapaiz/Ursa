@@ -59,6 +59,7 @@ import { notices, violations } from './check.mjs';
 import { liveTargetFault } from './live-target.mjs';
 import { unreachable, verdict } from './post-verdict.mjs';
 import { antecedentData } from './antecedent.mjs';
+import { ESCAPE_KEY, escapeTrace } from './escape-trace.mjs';
 import { declarationOf, senderFault, senderOf } from './sender.mjs';
 import { LOCUS, renderVerdict } from '../gates/verdict-shape.mjs';
 
@@ -164,7 +165,18 @@ if (msg.toCompany) payload.to_company = msg.toCompany;
 if (msg.surface) payload.surface = msg.surface;
 if (flag('--ref')) payload.ref = flag('--ref');
 if (flag('--reasoning')) payload.reasoning = flag('--reasoning');
-if (msg.data) payload.data = msg.data;
+// The escape receipt, minted here rather than in `msg` above: the checks read
+// `msg` to decide whether this message is well formed, and whether the sender
+// used its one escape is a fact about the SEND. Derived from the invocation,
+// so a hand-supplied value of the same key loses and the caller is told —
+// `./escape-trace.mjs` has the asymmetry and why it is the opposite of
+// `in_reply_to`'s.
+const trace = escapeTrace(msg);
+if (trace.overwrote) {
+  console.error(`ESCAPE_TRACE_DERIVED: --data carried ${ESCAPE_KEY} and it is written from the invocation instead`);
+  console.error('  note: this key is evidence only because no sender types it; a hand-supplied value would be a claim rather than a receipt');
+}
+if (trace.data) payload.data = trace.data;
 
 // The sender's own company is matched by the same exact-match table on the
 // read side, so it gets the same check rather than a different one.

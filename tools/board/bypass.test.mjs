@@ -2,8 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   CONTROL_ROWS, ESCAPABLE_WITHOUT_TRACE,
-  asMessage, control, grade, gradeRow, lawInstant,
+  asMessage, control, escapeTraceLaw, grade, gradeRow, lawInstant,
 } from './bypass.mjs';
+import { ESCAPE_KEY } from './escape-trace.mjs';
 
 const LAWS = { QUANTITY_UNSCOPED: '2026-11-02T00:34:52.000Z', WAKE_TRUNCATION: '2026-11-02T00:34:52.000Z' };
 
@@ -129,4 +130,84 @@ test('lawInstant returns null rather than guessing when the code is not there', 
 test('lawInstant survives a clone where git refuses, because a gauge is not a repair', () => {
   const run = () => { throw new Error('fatal: not a git repository'); };
   assert.equal(lawInstant('QUANTITY_UNSCOPED', { run }), null);
+});
+
+// ---- the third answer, added with `escape-trace.mjs` ----
+//
+// The class above was a defect in the record that this repository has now
+// closed at the source: `post.mjs` writes `data.wake_truncation_accepted`
+// from the invocation. These four tests pin all three answers AND the one
+// thing the closure may not do, which is retro-grade the old rows.
+
+test('truncation on a row that asserts the escape is ESCAPED, not a bypass', () => {
+  const g = gradeRow(row({
+    kind: 'handoff', surface: 'Ursa:tools/board', body: longBody(),
+    data: { [ESCAPE_KEY]: true },
+  }), LAWS);
+  assert.equal(g.klass, 'ESCAPED');
+  assert.deepEqual(g.codes, ['WAKE_TRUNCATION']);
+});
+
+test('truncation with no trace, sent AFTER the field was law, is CERTAIN', () => {
+  const traceLaw = '2026-11-09T00:00:00.000Z';
+  const g = gradeRow(row({
+    kind: 'handoff', surface: 'Ursa:tools/board', body: longBody(),
+    ts: '2026-11-09T06:00:00Z',
+  }), LAWS, traceLaw);
+  assert.equal(g.klass, 'CERTAIN');
+});
+
+test('truncation with no trace, sent BEFORE the field was law, stays INDETERMINATE', () => {
+  // The anachronism this closure may not commit. 21 rows of this repository's
+  // history would otherwise move into CERTAIN on the absence of a field that
+  // did not exist when they were sent.
+  const traceLaw = '2026-11-09T00:00:00.000Z';
+  const g = gradeRow(row({
+    kind: 'handoff', surface: 'Ursa:tools/board', body: longBody(),
+    ts: '2026-11-08T06:00:00Z',
+  }), LAWS, traceLaw);
+  assert.equal(g.klass, 'INDETERMINATE');
+});
+
+test('with no law instant for the field, grading is exactly as it was', () => {
+  // `escapeTraceLaw()` returns null until the field merges, and null must be
+  // inert rather than permissive or strict. This is the positive control on
+  // the closure being a no-op before its own merge.
+  const g = gradeRow(row({
+    kind: 'handoff', surface: 'Ursa:tools/board', body: longBody(),
+    ts: '2026-11-09T06:00:00Z',
+  }), LAWS, null);
+  assert.equal(g.klass, 'INDETERMINATE');
+});
+
+test('a code with no escape is CERTAIN even on a row that asserts the escape', () => {
+  // The escape is scoped to the one code it belongs to. A row that carries
+  // the field and also breaks an unrelated rule is not excused by it.
+  const g = gradeRow(row({ data: { merged: 4, [ESCAPE_KEY]: true } }), LAWS);
+  assert.equal(g.klass, 'CERTAIN');
+});
+
+test('grade threads the law instant to every row and counts the new class', () => {
+  const rows = [
+    row({ kind: 'handoff', surface: 'Ursa:tools/board', body: longBody(), data: { [ESCAPE_KEY]: true } }),
+    row({ kind: 'handoff', surface: 'Ursa:tools/board', body: longBody(), ts: '2026-11-09T06:00:00Z' }),
+  ];
+  const g = grade(rows, LAWS, '2026-11-09T00:00:00.000Z');
+  assert.equal(g.counts.ESCAPED, 1);
+  assert.equal(g.counts.CERTAIN, 1);
+  assert.equal(g.counts.INDETERMINATE, 0);
+});
+
+test('escapeTraceLaw reads post.mjs and not check.mjs, because that is where the field is minted', () => {
+  // Asserted on the call rather than on the result: the result is null until
+  // this commit merges, and a test that asserted null would pass for the wrong
+  // reason forever after it does.
+  const seen = [];
+  const law = escapeTraceLaw({
+    run: (args) => { seen.push(args); throw new Error('no git here'); },
+  });
+  assert.equal(law, null);
+  assert.ok(seen.length > 0, 'escapeTraceLaw asked git nothing');
+  assert.ok(seen[0].includes('tools/board/post.mjs'), `looked at ${seen[0].join(' ')}`);
+  assert.ok(seen[0].some((a) => String(a).includes(ESCAPE_KEY)), 'did not search for the key');
 });
