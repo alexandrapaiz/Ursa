@@ -71,8 +71,8 @@ each shape, but the first reading was not the reading it claimed to be.
 |---|---|
 | exit 1 from an unhandled undici rejection | 4 |
 | refused with a GROUND code | 3 |
-| answered at exit 0, because the board is not their subject | 4 |
-| did not finish inside 110 seconds, cause not established | 2 |
+| answered without the board, because the board is not their subject | 5 |
+| did not finish inside the probe's budget, cause not established | 1 |
 
 The four that exited 1: `tools/board/bypass.mjs --audit`,
 `tools/board/measure-claims.mjs`, `tools/board/page.mjs`,
@@ -86,11 +86,12 @@ that produces verdicts having run.
 
 The three that refused correctly are `tools/board/route-reach.mjs --gate` at
 3, `tools/seat/outage.mjs` at 3, and `tools/seat/charter-lag.mjs` at 2. The
-four that answered at 0 read the forge rather than the board, so this premise
-left their subject alone and exit 0 is correct for them. That is worth
-recording as a second fact about the baseline: `needs-token` is one kind
-covering two different credentials, and a row of it cannot be read as a claim
-about the board.
+five that answered read the forge rather than the board, so this premise left
+their subject alone and their exit codes are correct for them: four at 0, and
+`tools/ledger/pairwise.mjs` at 1 over real findings about pull request pairs,
+with no stack trace. That is worth recording as a second fact about the
+baseline: `needs-token` is one kind covering two different credentials, and a
+row of it cannot be read as a claim about the board.
 
 ### Why F125's repair could not cover it
 
@@ -159,15 +160,25 @@ fail, though they fail at import rather than on an assertion, because the
 exports they read do not exist there. The behavioural claim rests on the CLI
 measurement in the table above and not on those two cases.
 
-## What this run did not establish
+## What this run did not establish, and one thing it first got wrong
 
-`tools/ledger/pairwise.mjs` and `tools/seat/draft-fault-measure.mjs` did not
-finish inside 110 seconds under this premise. `draft-fault-measure.mjs`
-printed `37/120 read` and was still counting, which is the shape of a walk
-that keeps asking rather than one that refuses. Whether that is the premise or
-the file's ordinary runtime is **not established here**, and it is not filed
-as an instance. Both read the forge as well as the board, and a slow forge
-read looks identical from outside. Stated rather than rounded into the four.
+**`tools/ledger/pairwise.mjs` was briefly in this section and should not have
+been.** It read `rc=124` under the unreachable premise, which is a timeout and
+not a verdict, and the first draft of this report filed it as unestablished.
+The control is what settles it: `pairwise.mjs` takes 1m56s against the **live**
+board, so 124 at a 110-second probe was the probe's budget and nothing else.
+Re-run with 400 seconds it exits 1 with real findings about pull request pairs
+and no stack trace, so the forge is its subject and it belongs with the five
+that answered. The reading is corrected here rather than quietly replaced,
+because a timeout that reads as a refusal is the same mistake this finding is
+about, one instrument down.
+
+**`tools/seat/draft-fault-measure.mjs` remains unestablished.** It printed
+`37/120 read` and was still counting at 100 seconds, which is the shape of a
+walk that keeps asking rather than one that refuses. Whether that is the
+premise or the file's ordinary runtime is not established here, and it is not
+filed as an instance: it reads the forge as well as the board, and a slow
+forge read looks identical from outside.
 
 ## Standing audit items
 
