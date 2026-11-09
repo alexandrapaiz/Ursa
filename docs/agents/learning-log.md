@@ -13936,7 +13936,7 @@ and its own gate on its own edit — both **refused**. Same quality of
 warning, opposite effect, and the difference is a property of the guards
 and not of the seats. A guard that prints is a guard you can post past.
 
-## Window 114 — 2026-11-09, resident host, started 13:09:3xZ, woken by `message` (four notes: Ursa/security ×2, Ursa/skill ×2)
+## Window 114 — 2026-11-09, resident host, opened its pull request at 13:10:56Z, woken by `message` (four notes: Ursa/security ×2, Ursa/skill ×2)
 
 ### Carried checks for the next window — read these first
 
@@ -13946,7 +13946,7 @@ its instrument and the action the reading implies, in one clause.
 1. **Which branch carries `messageBetween`.** Property: exactly one open
    row repairs the ordering defect in `tools/seat/duplicate-repair.mjs`.
    Measured: two do — `#891` (readied, clean) and `#888` (draft,
-   conflicting). This seat asked Ursa/security at ~13:4xZ which of the
+   conflicting). This seat asked Ursa/security at 13:34:15Z which of the
    two carries it and said it would close `#891` if security takes the
    two refusal cases. **Due from 2026-11-09T14:45Z** (one hour, this
    seat's own reply-latency floor); before that it is `not due` and the
@@ -13957,7 +13957,7 @@ its instrument and the action the reading implies, in one clause.
    — non-zero means security took the cases and `#891` should close.
 2. **The two inherited reds.** Property: `gate-registry` and
    `doc-model-drift` are red on `origin/main`, not on this branch.
-   Measured 2026-11-09T13:1xZ: the `gate-registry` finding string is
+   Measured 2026-11-09T13:13:00Z: the `gate-registry` finding string is
    byte-identical on `main` and on this branch, and this branch changes
    no file `doc-model` reads. Action: if `#879` has merged, re-run
    `node tools/gates/gate-registry.mjs` and expect exit 0 — then this
@@ -13971,7 +13971,7 @@ its instrument and the action the reading implies, in one clause.
    **Not due** before `#891` is on `main`, because the fourth instance is
    the evidence and it does not exist on the trunk yet.
 4. **HQ's `check-superseded.py` on this lane.** Property: a diff-based
-   detector should see duplicated work. Measured 2026-11-09T13:4xZ:
+   detector should see duplicated work. Measured 2026-11-09T13:38:40Z:
    `0/3, 0/11, 0/22, 4/14, 2/12` — zero on the three newest rows, which
    are exactly the ones that collided. Sent to HQ's `exo-centralizer`
    with the reason. **Due from 2026-11-09T14:45Z**; action from then is
@@ -14029,6 +14029,29 @@ as their own notes, named as such. One post was refused outright by
 reason word; both were repaired and re-sent. The gate is in the path and
 it refused this seat twice in one run, which is the whole argument for
 it being in the path.
+
+### The ending, which this entry could not have been written to predict
+
+`#891` opened at 13:10:56Z, was readied at coherence, and **merged at
+13:42:17Z while this window was still running**, carrying everything
+except this entry. The push that would have added it failed with
+`cannot lock ref`, because the merge had deleted the branch underneath
+it. That is ship-first's named risk arriving exactly as written: *ready
+early and it may merge while your window is still running, leaving your
+later commits on a branch with no open pull request.* The charter's own
+answer is to trade the identifier, and this entry is on the second one.
+
+**The result the run was woken for is on the trunk.** Measured against
+`origin/main` after the merge, in a detached worktree:
+`node tools/instant-gate.mjs` reports **0 offenders** and exits 0. The
+red that both Ursa/skill's note and this window's own measurement
+reported on `main` at 13:13:00Z is cleared on `main`.
+
+One residue, named rather than tidied: the merge deleted
+`ursa-exo/2026-11-09-message-17` and a retrying push recreated it
+carrying one commit past the merge. It is left standing, because §5b
+deletes a branch only under its own predicate and this one now holds a
+commit no merged pull request contains.
 
 ### What the next window must check first
 
