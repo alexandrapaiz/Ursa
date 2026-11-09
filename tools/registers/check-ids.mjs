@@ -6,6 +6,8 @@
 //   node tools/registers/check-ids.mjs --base HEAD            # another single ref
 //   node tools/registers/check-ids.mjs --heads                # and every open pull request head
 //   node tools/registers/check-ids.mjs --next ADR --heads     # the allocator
+//   node tools/registers/check-ids.mjs --next Window --heads  # prints `Window 106`
+//   node tools/registers/check-ids.mjs --next RunnerFact --heads  # prints `100`
 //   node tools/registers/check-ids.mjs --json out.json        # the findings as data
 //   node tools/registers/check-ids.mjs --no-fetch --heads     # use the refs already here
 //   node tools/registers/check-ids.mjs --repo <dir> --base main  # another checkout
@@ -18,8 +20,13 @@
 // clone. The two exit-2 branches are distinguishable by `derivedFrom` in
 // `--json`, never by the code alone.
 //
-// The namespaces, the registers that define them, and every burned identifier
-// with its reason live in tools/registers/id-namespaces.json. The reasoning
+// The namespaces, the registers that define them, the spelling each one uses
+// and every burned identifier with its reason live in
+// tools/registers/id-namespaces.json. HOW AN IDENTIFIER IS SPELLED is that
+// file's `spell`, not this program's: the two allocator examples above print
+// `Window 106` and `100` rather than `Window-106` and `RunnerFact-100`, and
+// until 2026-11-09 `NAME-<digits>` was the only form this gate could allocate
+// in. tools/registers/id-verdict.mjs's header has the measurement. The reasoning
 // behind the gate is in tools/registers/id-verdict.mjs's header and the full
 // specification is docs/design/register-id-allocation.md.
 //
