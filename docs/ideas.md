@@ -111,7 +111,11 @@ touches the guard, or the engineer if it reaches that lane first.
   cost. Measured 2026-11-09 on the resident host, one case decomposes as a
   0.33s `cpSync` of `tools/` and `.github/workflows/` against a 12.93s
   gate invocation, so the prescribed repair targets 2.6 per cent of a case
-  and 17 copies are 5.6s of 267s. Inside the 12.93s: `sweep_files` 0.39s,
+  and 17 copies are 5.6s of the whole suite's run. The denominator moved
+  too: run 7 recorded 267.2s over 20 cases and run 9 measures 194.4s over
+  27 on the same host, so neither total is cited as the per-case cost and
+  the decomposition below is timed against the gate's own functions.
+  Inside the 12.93s: `sweep_files` 0.39s,
   `load_vendored` 0.02s, the first `run_checker` subprocess 2.33s, the
   second 3.96s, and `marker_census` 6.23s, which is 48 per cent of the
   case and the largest single component. The census is 48 whole-file scans

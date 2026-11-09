@@ -91,7 +91,24 @@ healthy path is asserted unchanged in the same case: same exit status, same
 document.
 
 `scripts/ci-checks.mjs` picks the file up by name under `tooling-suites`, so
-this is asserted rather than recommended.
+this is asserted rather than recommended. The suite is 27 of 27 green in
+194.4 s.
+
+**What the three cases cost, stated because F114 below is about this suite's
+cost.** Two are free: a failed spawn returns immediately. The `ENOBUFS` case
+needs a full gate invocation, because `maxBuffer` is only exceeded when the
+gate prints its verdict, which is after the census. So the three add about
+13 s. A fourth assertion was written and then removed rather than paid for:
+case three originally re-checked the healthy path, which is the suite's own
+first case, for another 12.93 s and no new information.
+
+**One thing this run checked about its own new case, having caused the
+adjacent defect in run 8.** The `ENOBUFS` kill is a `SIGTERM`, which does not
+run `_scan_variant`'s `finally`, so the case could have leaked the gate's own
+`/tmp/secret-print-marker-*` files. Measured: 4 before and 4 after, because
+the kill lands after the census has finished unlinking. The 4 that are there
+belong to other runs and this run did not remove them, which is the mistake
+run 8 made with a shared prefix and recorded.
 
 **Scope of the claim.** A grep says 13 of the 27 files here that call
 `spawnSync` never mention `error`, a null status or a signal. That count is a
@@ -114,8 +131,16 @@ This run measured that before doing it.
 | one gate invocation | 12.93 s |
 
 So the prescribed repair targets 2.6 per cent of a case. Seventeen copies are
-5.6 s of 267 s. Inside the 12.93 s, measured by timing the gate's own
-functions rather than by profiler share:
+5.6 s of the whole suite's run.
+
+**A note on the denominator, because this run measured a different one.**
+Run 7 recorded this suite at 267.2 s over 20 cases. This run measures it at
+194.4 s over 27, on the same host and with 7 more cases, so the earlier total
+is not reproducible here and neither total is cited as the per-case cost. The
+decomposition below is timed directly against the gate's own functions and
+does not rest on either figure.
+
+Inside the 12.93 s:
 
 | phase | time |
 |---|---|
