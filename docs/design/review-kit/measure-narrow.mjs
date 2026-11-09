@@ -141,7 +141,12 @@
  */
 import { launch } from "./lib/browser.mjs";
 import { writeFileSync } from "node:fs";
-import { tracker } from "./lib/reached.mjs";
+// The premise bundle, not the reach tracker alone. Narrow-width clipping is
+// a fact about the served HTML and survives a page that never ran, which is
+// exactly why this tool needed the premise and did not have it: it keeps
+// measuring, keeps printing a true table, and the frames and the verdict both
+// look like a site that was reviewed. See lib/verdict.mjs.
+import { premises } from "./lib/verdict.mjs";
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1]; };
 const BASE = arg("base", process.env.URSA_BASE ?? "http://127.0.0.1:4953");
@@ -186,7 +191,8 @@ const EXPECT_404 = arg(
   "expect-404",
   PAGES.some(([, p]) => p === "/this-page-does-not-exist") ? "/this-page-does-not-exist" : "",
 ).split(",").filter(Boolean);
-const reach = tracker({ expect404: EXPECT_404, label: "cell" });
+const gates = premises({ expect404: EXPECT_404, label: "cell" });
+const reach = gates.reach;
 
 // The page column is as wide as the widest name in this run plus a space,
 // never a number somebody guessed. It was 10, and `--pages panel-synced=/`
@@ -348,6 +354,9 @@ for (const w of WIDTHS) {
     try {
       reach.saw(path, await page.goto(BASE + path, { waitUntil: "networkidle", timeout: 45000 }));
       if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 });
+      // After the caller's own waiting, because hydration is a race and this
+      // tool's `settle` below waits again for a different reason.
+      await gates.probed(page, path);
       if (enterState) await enterState(page, label);
       const m = await settle(page);
       json.push({ width: w, page: label, path, ...m });
@@ -397,15 +406,15 @@ const out = [
   // The headline names its own denominator, because L23 measured that a
   // denominator of zero reads exactly like a pass, and it refuses to
   // report a pass while any cell is unmeasured.
-  failures.length || unsettled.length || reach.code()
-    ? `  NOT MEASURED: ${failures.length + unsettled.length || reach.unreached().length} of ${cells} page-by-width cells could not be loaded or never came to rest, so this run makes no claim about them.`
+  failures.length || unsettled.length || gates.code()
+    ? `  NOT MEASURED: ${failures.length + unsettled.length || gates.reach.unreached().length + gates.hydration.dead().length} of ${cells} page-by-width cells could not be loaded, never came to rest, or were served without ever running, so this run makes no claim about them.`
     : `  ${clipped.length} of ${cells} page-by-width cells put content out of reach; ${over.length} overflow reachably; ` +
       `${json.filter((r) => r.bleedCount > 0).length} carry decoration that bleeds on purpose and is not counted.`,
   ...(failures.length ? ["", "  COULD NOT LOAD", ...failures] : []),
   ...(unsettled.length ? ["", "  NEVER CAME TO REST", ...unsettled] : []),
   // In words as well as in the status, because a status is a single value
   // every wrapper may replace and a printed line is forwarded by default.
-  ...reach.lines(),
+  ...gates.lines(),
 ].join("\n");
 
 console.log(out);
@@ -448,4 +457,8 @@ if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(json, null, 2) + "\n");
 // Widened 2026-11-09 (run w) to the quiet absence: a path that answers 400
 // or worse without having been declared. The loud case and the quiet case
 // are the same verdict about the instrument and take the same status.
-if (failures.length || unsettled.length || reach.code()) process.exitCode = 2;
+// Widened again 2026-11-09 (run ad) to the quietest absence of the three: a
+// page that answered 200, parsed, laid out, and never ran a line of its own
+// JavaScript. The table above stays true over it and the headline does not,
+// which is the distinction this status carries.
+if (failures.length || unsettled.length || gates.code()) process.exitCode = 2;

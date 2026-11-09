@@ -1,0 +1,23 @@
+# premise routing, 18 rows over 9 page-driving instruments
+# premises from lib/verdict.mjs: reached, hydrated
+
+UNROUTED: 11 of 18 premise/instrument pairs acquire a premise and never read its status, so each of those instruments can exit 0 over a subject it could not measure.
+
+  hover.mjs              reached   UNROUTED
+  hover.mjs              hydrated  UNROUTED
+  measure-contrast.mjs   reached   routed
+  measure-contrast.mjs   hydrated  UNROUTED
+  measure-focus.mjs      reached   routed
+  measure-focus.mjs      hydrated  UNROUTED
+  measure-hit-areas.mjs  reached   routed
+  measure-hit-areas.mjs  hydrated  UNROUTED
+  measure-narrow.mjs     reached   routed
+  measure-narrow.mjs     hydrated  UNROUTED
+  measure-swatches.mjs   reached   UNROUTED
+  measure-swatches.mjs   hydrated  UNROUTED
+  sample-motion.mjs      reached   UNROUTED
+  sample-motion.mjs      hydrated  UNROUTED
+  shoot.mjs              reached   routed
+  shoot.mjs              hydrated  routed
+  verify-hover.mjs       reached   routed
+  verify-hover.mjs       hydrated  UNROUTED

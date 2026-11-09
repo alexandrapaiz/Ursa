@@ -34,7 +34,16 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { launch } from './lib/browser.mjs'
 import { freezeContext } from './lib/freeze.mjs'
 import { drive as drivePanelPayload } from './state/panel-payload.mjs'
-import { tracker, UNREACHED } from './lib/reached.mjs'
+// The premise bundle, not the reach tracker alone. This file already carries
+// the paragraph about the premise it missed in run z, and it missed the next
+// one the same way four hours later: its only reading of hydration is a
+// thrown error twenty fills into the address form, whose message offers two
+// causes at once ("the form is not hydrated or the address is rejected") and
+// whose status is node's 1 for an uncaught throw. Every other target here
+// reads a CSS hover rule, which is served and not run, so a page that never
+// ran scores them exactly as a live page does. See lib/verdict.mjs.
+import { premises } from './lib/verdict.mjs'
+import { UNREACHED } from './lib/reached.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const BASE = arg('base', 'http://127.0.0.1:4488')
@@ -102,7 +111,10 @@ const TARGETS = [
         await field.fill(`${base}/fixtures/site-04/`)
         await page.waitForTimeout(250)
         if (await submit.isEnabled()) break
-        if (i === 19) throw new Error('the submit button never enabled after 20 fills, so the form is not hydrated or the address is rejected')
+        if (i === 19) // Two causes in one message until 2026-11-09 (run ad). The hydration
+        // premise is read above now, so by the time this line is reachable the
+        // page HAS run and only one cause is left.
+        throw new Error('the submit button never enabled after 20 fills on a page that had hydrated, so the address is being rejected')
       }
       await submit.click()
     },
@@ -173,7 +185,8 @@ mkdirSync(`${OUT}/hover`, { recursive: true })
 // `/this-page-does-not-exist` is two of this file's own targets, because
 // the not-found page carries the quiet-link and mark-link treatments and
 // is reviewed like any other page, so its status is the subject.
-const reach = tracker({ expect404: ['/this-page-does-not-exist'], label: 'target' })
+const gates = premises({ expect404: ['/this-page-does-not-exist'], label: 'target' })
+const reach = gates.reach
 
 const browser = await launch()
 const lines = []
@@ -188,7 +201,7 @@ const probe = await ctx0.newPage()
 // which is a non-zero status by accident. There is nothing to fall through
 // to here, so this refuses immediately, in the status AND in the slot a
 // reader scans.
-if (!(await reach.visit(probe, `${BASE}/`, '/')).ok) {
+if (!(await gates.visit(probe, `${BASE}/`, '/')).ok) {
   console.log(reach.lines().join('\n').trim())
   console.log(`\nNO VERDICT: the harness probe could not load ${BASE}/, so this run never reached a hover target and makes no claim about any of them.`)
   await ctx0.close()
@@ -234,7 +247,7 @@ for (const t of TARGETS) {
   const page = await ctx.newPage()
   // The navigation is the premise, and only it is wrapped. The drive below
   // already has its own per-target catch, for the reason written under it.
-  if (!(await reach.visit(page, url, t.path)).ok) {
+  if (!(await gates.visit(page, url, t.path)).ok) {
     lines.push(`${t.label.padEnd(20)} ${'COULD-NOT-LOAD'.padEnd(22)} ${url}`)
     rows.push({ ...t, verdict: 'could-not-load', count: 0, reason: 'page.goto failed' })
     await ctx.close()
@@ -395,11 +408,25 @@ if (blind.length) {
   lines.push(`every one of the ${rows.length - scoped.length} targets this run asked for was reached.`)
 }
 if (scoped.length) lines.push(`${scoped.length} target(s) were not asked for at all: ${scoped.map((r) => `${r.label} needs ${r.reason.replace(/^no /, '')}`).join(', ')}. That is this invocation's scope and not a finding.`)
-lines.push(...reach.lines())
+// One call decides the status and composes the slot. `blind` is this file's
+// own premise, a site with no hover rule anywhere, and it takes the same 2
+// as the two in lib/verdict.mjs because it is the same kind of verdict: one
+// no caller can make from outside.
+const decision = gates.decide({
+  headline: blind.length
+    ? `NO VERDICT: ${blind.length} of ${rows.length} targets were measured against a harness that found no hover rule at all, so this run makes no claim about them.`
+    : '',
+  siteCode: blind.length ? 2 : 0,
+})
+// The refusal goes at the TOP and not at the bottom, because the file is read
+// from the top and a refusal printed after a table of verdicts is read as a
+// table of verdicts.
+if (decision.headline) lines.unshift(decision.headline, '')
+lines.push(...decision.lines)
 
 const text = lines.join('\n') + '\n'
 writeFileSync(`${OUT}/states.txt`, text)
-writeFileSync(`${OUT}/states.json`, JSON.stringify({ base: BASE, harness: hoverMedia, settleMs: SETTLE, blind: blind.length, scoped: scoped.length, reached: reach.rows(), rows }, null, 2) + '\n')
+writeFileSync(`${OUT}/states.json`, JSON.stringify({ base: BASE, harness: hoverMedia, settleMs: SETTLE, blind: blind.length, scoped: scoped.length, reached: reach.rows(), hydration: gates.hydration.rows(), rows }, null, 2) + '\n')
 console.log(text)
 await browser.close()
-if (blind.length || reach.code()) process.exit(2)
+process.exit(decision.code)

@@ -126,7 +126,13 @@ import { launch, VIEWPORTS } from './lib/browser.mjs'
 import { freezeContext } from './lib/freeze.mjs'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { tracker } from './lib/reached.mjs'
+// The premise bundle rather than the reach tracker alone. This tool's own
+// subject is the one the hydration premise bites hardest: `CopyLine` sets its
+// tab stop from an effect, so on a page that was served and never ran the
+// stop is simply not in the walk, and "0 of 38 tab stops below a floor" is a
+// true sentence about a page with three fewer stops than the site has. In
+// band, exit 0, and indistinguishable from a pass. See lib/verdict.mjs.
+import { premises } from './lib/verdict.mjs'
 
 const arg = (n, d) => {
   const i = process.argv.indexOf(`--${n}`)
@@ -183,7 +189,8 @@ const PAGES = arg(
 // the subject, so it is declared. A caller passing its own `--pages`
 // declares its own with `--expect-404`.
 const EXPECT_404 = arg('expect-404', PAGES.some(([, p]) => p === '/this-page-does-not-exist') ? '/this-page-does-not-exist' : '').split(',').filter(Boolean)
-const reach = tracker({ expect404: EXPECT_404, label: 'page' })
+const gates = premises({ expect404: EXPECT_404, label: 'page' })
+const reach = gates.reach
 
 const enterState = STATE
   ? (await import(new URL(STATE, `file://${process.cwd()}/`).href)).default
@@ -352,9 +359,14 @@ for (const [vpName, width, height] of VPS) {
     if (!LIVE) await freezeContext(ctx, { scroll: true })
     const page = await ctx.newPage()
     // Only the navigation is wrapped; the tab walk below is the measuring.
-    const visit = await reach.visit(page, `${BASE}${path}`, path, { waitUntil: 'networkidle', timeout: 30000 })
+    const visit = await gates.visit(page, `${BASE}${path}`, path, { waitUntil: 'networkidle', timeout: 30000 })
     if (!visit.ok) { await ctx.close(); continue }
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
+    // Asked again after `--until`, because a tool told to wait for something
+    // has to do its waiting before the premise is read, and `gates.visit`
+    // above asked before this line existed. The second reading replaces the
+    // first for this path rather than adding a row to it.
+    if (UNTIL) await gates.probed(page, path)
     if (enterState) await enterState(page, `${pageName}-${vpName}`)
     // The sky is a canvas with a requestAnimationFrame loop. freezeContext
     // pins its clock, but the first frame still has to be painted before
@@ -658,6 +670,21 @@ const L = []
 const bad = rows.filter((r) => r.verdict === 'NO_INDICATOR' || r.verdict === 'BELOW_FLOOR')
 const unstable = rows.filter((r) => r.verdict === 'UNSTABLE')
 const unreachableTotal = pageNotes.reduce((n, p) => n + (p.unreachable?.length ?? 0), 0)
+// Stops Tab reached that could not be measured at all: `UNDECLARED` is one
+// the enumeration never offered, so it carries no probe to find it by, and
+// `GONE_FROM_DOM` is one that moved between the enumeration and the walk.
+// Both have been written as rows since 2026-11-02 and counted in the tally,
+// and neither has ever reached the headline or the status. Found 2026-11-09
+// (run ad) by the thing that found it: shooting this tool at a page that was
+// served and never ran turned one `ok` stop on the home page into one
+// `UNDECLARED`, the tally changed from `27 ok, 1 COMPOSITE` to `26 ok, 1
+// UNDECLARED, 1 COMPOSITE`, and the headline stayed the byte-identical
+// `0 of 28 tab stops below a floor` at exit 0. The file's own comment above
+// says a verdict with no line in the headline is a verdict nobody reads; two
+// of its classes were still in that state. Exit 1 and not 2, by this file's
+// own symmetry: `unreachable` is the other direction of the same set
+// difference and already exits 1.
+const unmeasured = rows.filter((r) => r.verdict === 'UNDECLARED' || r.verdict === 'GONE_FROM_DOM')
 
 L.push(`base ${BASE}`)
 L.push(`viewports ${VPS.map((v) => `${v[0]} ${v[1]}x${v[2]}`).join(', ')}`)
@@ -705,11 +732,16 @@ L.push('')
 // pages printed `0 of 38 tab stops below a floor` and then refused, and the
 // harness reading stdout still saw a passing headline. A refusal that comes
 // after a pass is read as a pass.
-L.push(
-  reach.code()
-    ? `NOT MEASURED: ${reach.unreached().length} of ${reach.rows().length} page loads did not reach their subject, so this run makes no claim about tab stops on them.`
-    : `${bad.length} of ${rows.length} tab stops below a floor, ${unreachableTotal} controls the keyboard cannot reach, ${unstable.length} unstable.`,
-)
+// ONE call decides the status and fills this slot, so the two cannot be out
+// of step. Before 2026-11-09 (run ad) the condition here read `reach.code()`
+// and the exit below read it a second time, which was fine for as long as
+// there was one premise; the hydration premise arrived four hours after the
+// reach premise and reached neither place.
+const decision = gates.decide({
+  headline: `${bad.length} of ${rows.length} tab stops below a floor, ${unreachableTotal} controls the keyboard cannot reach, ${unstable.length} unstable, ${unmeasured.length} Tab reached and this run could not measure.`,
+  siteCode: bad.length || unreachableTotal || unmeasured.length ? 1 : 0,
+})
+L.push(decision.headline)
 // Every verdict, counted. Before 2026-11-02 the headline named three of
 // them and the rest were visible only to somebody reading all 27 rows, so
 // a stop the tool could not photograph at all left the summary looking
@@ -734,16 +766,17 @@ if (withArea.length) {
 
 // In words as well as in the status, and inside `text` so it reaches the
 // committed file and not only this session's stdout.
-L.push(...reach.lines())
+L.push(...decision.lines)
 const text = L.join('\n')
 console.log(text)
 if (OUT) writeFileSync(OUT, `${text}\n`)
-if (JSON_OUT) writeFileSync(JSON_OUT, `${JSON.stringify({ base: BASE, rows, pageNotes, reached: reach.rows() }, null, 1)}\n`)
+if (JSON_OUT) writeFileSync(JSON_OUT, `${JSON.stringify({ base: BASE, rows, pageNotes, reached: reach.rows(), hydration: gates.hydration.rows() }, null, 1)}\n`)
 
 // Absence before findings, because a finding counted over pages that were
 // never reached is not a finding. Added 2026-11-09 (run w): until then a
 // matrix of not-found pages walked, measured and printed its headline at
-// the same status as the real site.
-if (reach.code()) process.exit(reach.code())
+// the same status as the real site. `decision.code` is the same expression
+// that wrote the headline above, which is the half run ad added.
+if (decision.refused) process.exit(decision.code)
 if (pageNotes.some((p) => p.note)) process.exit(2)
-process.exit(bad.length || unreachableTotal ? 1 : 0)
+process.exit(decision.code)

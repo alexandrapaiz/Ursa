@@ -60,7 +60,11 @@
  */
 import { launch, VIEWPORTS } from "./lib/browser.mjs";
 import { writeFileSync } from "node:fs";
-import { tracker } from "./lib/reached.mjs";
+// The premise bundle, not the reach tracker alone: the controls this tool
+// sizes are drawn by client components on two of its three surfaces, so a
+// page that was served and never ran offers it a smaller set of targets and
+// every one of them measures fine. See lib/verdict.mjs.
+import { premises } from "./lib/verdict.mjs";
 
 // Promoted into the kit on 2026-10-24g from the review that wrote it,
 // `reviews/2026-10-24e/`, because a second surface needed it the same
@@ -119,7 +123,8 @@ const EXPECT_404 = arg(
   "expect-404",
   PAGES.some(([, p]) => p === "/this-page-does-not-exist") ? "/this-page-does-not-exist" : "",
 ).split(",").filter(Boolean);
-const reach = tracker({ expect404: EXPECT_404, label: "page" });
+const gates = premises({ expect404: EXPECT_404, label: "page" });
+const reach = gates.reach;
 
 const probe = (MIN) => {
   /* A press "owns" a control if it lands on the control, on something
@@ -270,7 +275,7 @@ for (const [vname, w, h] of VIEWPORTS) {
   for (const [name, path] of PAGES) {
     // Only the navigation is wrapped. Everything below it is the measuring,
     // and a refusal scoped over that would turn a finding into a non-answer.
-    if (!(await reach.visit(page, BASE + path, path)).ok) continue;
+    if (!(await gates.visit(page, BASE + path, path)).ok) continue;
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 });
     if (enterState) await enterState(page, name);
     await page.waitForTimeout(250);
@@ -370,13 +375,15 @@ lines.push(
 
 // The reach verdict goes into the committed report and not only into this
 // session's stdout, because the file is what a later run reads.
-const reachReport = reach.lines().join("\n");
-const text = (reach.code()
-  ? `${reachReport}\n\nno claim about hit areas: the pages above were not reached.`
-  : `${lines.join("\n")}\n${reachReport}`) + "\n";
+// One call decides the status and composes the slot, so the committed file
+// and the exit status cannot disagree. The findings stay exit 0 however bad
+// they are, because selftest/check-hit-areas.mjs reads them from the JSON;
+// a premise failure is the other kind of verdict and takes 2.
+const decision = gates.decide({ headline: lines.join("\n"), siteCode: 0 });
+const text = (decision.refused
+  ? `${decision.headline}\n${decision.lines.join("\n")}\n\nno claim about hit areas: see above.`
+  : decision.text) + "\n";
 writeFileSync(OUT, text);
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(all, null, 2));
 console.log(text);
-// A verdict about the INSTRUMENT. The findings stay exit 0 however bad
-// they are, because selftest/check-hit-areas.mjs reads them from the JSON.
-if (reach.code()) process.exit(reach.code());
+if (decision.code) process.exit(decision.code);

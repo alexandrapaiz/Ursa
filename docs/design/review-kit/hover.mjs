@@ -32,6 +32,18 @@
 
 import { launch } from './lib/browser.mjs'
 import { freezeContext } from './lib/freeze.mjs'
+// No premise was routed in this file at all, and the charter's order to
+// verify hover by screenshot runs through it. Two of its premises are loud:
+// a dead port throws out of `page.goto`, and a selector that is not there
+// throws out of `$$`. The third is silent. A page served without ever running
+// still has the element, still has the stylesheet, and `getAnimations()`
+// returns an empty list on it, so `scrub` falls through to the computed value
+// at rest and this tool prints a transition value, writes a frame, and exits
+// 0. For a control whose hover is declared in CSS that reading is right; for
+// anything behind `--state`, and for every control the overlay panel draws
+// after a key is derived, it is a photograph of a page that does nothing.
+// See lib/verdict.mjs.
+import { premises } from './lib/verdict.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const URL_ = arg('url', 'http://127.0.0.1:4488/')
@@ -73,8 +85,28 @@ const browser = await launch()
 const ctx = await browser.newContext({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1, reducedMotion: 'no-preference' })
 if (!LIVE) await freezeContext(ctx)
 const page = await ctx.newPage()
-await page.goto(URL_, { waitUntil: 'networkidle' })
+const gates = premises({ label: 'hover target' })
+const target = new URL(URL_).pathname
+if (!(await gates.reach.visit(page, URL_, target)).ok) {
+  console.log(gates.reach.refused())
+  console.log(gates.reach.lines().join('\n'))
+  await browser.close()
+  process.exit(gates.code())
+}
 if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
+// After `--until` and before `--state`, for the reason shoot.mjs gives: a
+// tool told to wait has done its waiting, and the state drive is client code
+// that cannot run on a page that never ran. Reading the premise before the
+// drive means the refusal says "it never arrived" and not "your state module
+// threw".
+await gates.probed(page, target)
+if (gates.code()) {
+  console.log(gates.hydration.refused())
+  console.log(gates.hydration.lines().join('\n'))
+  console.log(`\nnothing was written${SHOT ? ` to ${SHOT}` : ''}: a hover frame of a page that never ran shows the control at rest whatever the pointer does.`)
+  await browser.close()
+  process.exit(gates.code())
+}
 if (enterState) await enterState(page, 'hover')
 await page.waitForTimeout(800)
 
@@ -156,4 +188,8 @@ if (CURVE) {
   }
 }
 
+// The premise verdict in words as well as in the status, on the way out, so
+// a run that was fine says so in the channel a reader scans and not only in a
+// code three layers of carriage are entitled to replace.
+console.log(gates.lines().join('\n'))
 await browser.close()
