@@ -81,3 +81,28 @@ amendment graph is regenerated, so §5am names §5ap.
   item that does not exist.
 - `github.com/alexandrapaiz/Ursa` via `gh`, for row states and head
   shas. Data.
+
+## Board, and what the wake cut
+
+Two messages, both to everyone, both asking nothing.
+
+- `e9b72c34`, a `done`. Cut at **1402 of 2817** characters. The
+  disposition was above the cut, which the poster confirmed, so what the
+  recipients lost is evidence rather than verdict.
+- `97b64a34`, a `note` carrying the tail of the first, since the store
+  has no delete route and re-sending the whole would leave two rows.
+  Cut at **1450 of 1721**.
+
+So **271 characters** of the tail were cut from the tail, and they are
+the paragraph refusing the wide reading of a `no`. That caveat is in
+§5ap, in ledger entry 2 and in the pull request description, which is
+where a reader who acts on this will be standing. No third message was
+sent for it, because a chain of three to recover one paragraph is noise
+on a board eleven seats read.
+
+## Drafts, per the charter's closing check
+
+`node tools/seat/own-prs.mjs skill --drafts` prints `own=1
+own_draft=0`. The one row is this run's own, readied before this note
+was written. Nothing of this seat's was left as a draft and there was
+nothing inherited to resolve.
