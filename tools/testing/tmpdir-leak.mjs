@@ -90,8 +90,82 @@ export const MAKES = /\bmkdtemp(Sync)?\s*\(/g;
  *  file that uses it must not be reported for lacking an rmSync of its own. */
 export const REMOVES = /\b(rmSync|rmdirSync|rimraf|tempDir)\s*\(|\brm\s*\(|rm\s+-rf/;
 
-const withoutComments = (source) =>
-  source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+/** The source with its comments removed and everything else preserved.
+ *
+ *  WHY THIS IS A SCANNER AND NOT TWO `replace` CALLS, with the price. The
+ *  first version of this function was
+ *
+ *    source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1')
+ *
+ *  and a regex cannot tell a comment opener from the same two characters
+ *  inside a string, because knowing the difference is exactly the state a
+ *  regex does not carry. `tools/ledger/containment.test.mjs` line 129 holds a
+ *  git refspec, `'+refs/heads/*:refs/remotes/origin/*'`. The `/*` in it opened
+ *  a comment that ran to the next real `*\/` six lines later, and the text
+ *  deleted in between was line 133, `after(() => rmSync(ROOT, ...))` -- the
+ *  file's actual cleanup. So the gate reported a file that removes its one
+ *  directory as removing nothing, and the entry went into the baseline as a
+ *  measured finding on 2026-11-09. Measured at the time of this repair: one
+ *  false positive today, and 10 of this repository's 136 test files under
+ *  ROOTS contain `/*` inside a quoted literal, so the hazard was live and
+ *  simply had not landed on the other nine.
+ *
+ *  The direction that would have been worse never happened, and it was
+ *  checked rather than assumed: a swallowed `mkdtemp` drops the file from the
+ *  census entirely, which hides a leak instead of inventing one. Zero files
+ *  were in that state. The check is kept as a case in the test file beside
+ *  this one, because the next refspec could land either way.
+ *
+ *  Scope, stated because a scanner invites the question. It tracks line
+ *  comments, block comments, and the three quote forms, which is what the
+ *  measured defect needed. It does not track regular-expression literals, so
+ *  a `/*` inside a character class (`/[a-z/*]/`) would still open a comment
+ *  here. No file in this repository has one; that is why it is written down
+ *  rather than handled, and `REGEX_LITERAL_BLIND_SPOT` names it for a reader
+ *  who hits it.
+ */
+export const REGEX_LITERAL_BLIND_SPOT =
+  'withoutComments does not parse regex literals, so /* inside a character class opens a comment';
+
+export function withoutComments(source) {
+  let out = '';
+  let i = 0;
+  while (i < source.length) {
+    const two = source.slice(i, i + 2);
+    if (two === '//') {
+      while (i < source.length && source[i] !== '\n') i += 1;
+      continue; // the newline itself is left for the next iteration
+    }
+    if (two === '/*') {
+      i += 2;
+      while (i < source.length && source.slice(i, i + 2) !== '*/') {
+        if (source[i] === '\n') out += '\n'; // keep line numbering honest
+        i += 1;
+      }
+      i += 2;
+      continue;
+    }
+    const quote = source[i];
+    if (quote === '"' || quote === "'" || quote === '`') {
+      out += quote;
+      i += 1;
+      while (i < source.length) {
+        if (source[i] === '\\') {
+          out += source.slice(i, i + 2);
+          i += 2;
+          continue;
+        }
+        out += source[i];
+        i += 1;
+        if (source[i - 1] === quote) break;
+      }
+      continue;
+    }
+    out += source[i];
+    i += 1;
+  }
+  return out;
+}
 
 /** Every test file under ROOTS with its temp-directory state.
  *
