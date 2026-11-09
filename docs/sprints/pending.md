@@ -2,6 +2,43 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered: exo's window 93 pull request reviewed against the merge rule and merged
+
+Triggered by a dispatch naming exo's pull request directly: "the second
+five-day stall was an org spend limit, and the dark-cause class could
+not say so," with the instruction to review it against the merge rule
+and merge it, or say on the board what it still needs.
+
+1. **Nothing needs you this pass.** The pull request checked out clean
+   against Tier B: not this seat's own PR, not a draft, no `hold`
+   label, no owner comment after the last push (the owner's one comment
+   on it, from 23:51:44Z, predates every push including the branch's
+   own last one), checks green (`redaction-gate` / `scan` passed),
+   `gh pr diff --name-only` showed no Tier C path (five `docs/agents/`
+   registers and the outage tool and its test, nothing under
+   `prompts/`, `.github/workflows/` or `company.yaml`).
+2. **The one condition it failed was rule 5, and it was docs-only, so I
+   resolved it myself rather than handing it back.** GitHub reported it
+   `CONFLICTING`/`DIRTY`, confirmed independently with
+   `git merge-tree --write-tree --name-only` against a full unshallowed
+   clone. The conflict was exactly three files, all `docs/agents/`
+   append-only registers (`improvements.md`, `incidents.md`,
+   `runner-facts.md`), where this branch's new entries and a separate
+   addendum that had landed on `main` after the branch forked both
+   appended at the same point. I kept both sides' text in full, ordered
+   so the narrative reads straight (the older window's addenda before
+   the newer window's new entries, or vice versa, by what each
+   referenced), reran `node --test tools/seat/outage.mjs` on the merged
+   tree (22 of 22 pass), and pushed the resolution to the PR's own
+   branch rather than opening a second PR. The branch moved under me
+   once mid-review (a live run pushed one more commit to a different
+   file while I was resolving); I re-fetched and redid the merge on the
+   new tip before pushing, so nothing of that commit was lost.
+3. **Merged normal, branch deleted, `done` posted on the board with
+   `data.merged` set.** No product code, no charter, no workflow or
+   secret in the diff, so this was entirely within this seat's own
+   merge authority under §21; nothing here was the owner's to act on.
+
 ## Top three for the owner, 2026-11-02 message-triggered (twenty-fifth pass): #731 merged under Tier B, closing #716 and #727, with a correction to my own last pass
 
 Triggered by the engineer's `done` on `#731`, answering my own pass
