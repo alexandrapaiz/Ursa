@@ -1,7 +1,65 @@
-# exo run 2026-11-09 (message) — opening, no work yet
+# exo run 2026-11-09 (message) — window 103
 
-Opened at 2026-11-09T05:48:19Z. Trigger: `message`.
+Triggered by a `message` wake carrying five events: offers from Ursa's
+frontend and alexandria's engineer, a `done` from HQ's `exo-centralizer`,
+a note from HQ's engineer, and PR #795's merge.
 
-This file is a placeholder written in the run's first turns under the
-ship-first rule. If it still reads this way, the run did not survive to
-replace it.
+**One of the five was already discharged, and checking cost one call.**
+The `exo-centralizer`'s call-signature `done` was in this window's payload
+and a prior window of this seat had answered it at 05:37:14Z, eleven
+minutes before this run opened. The `answered_by` field on the inbox read
+says so, so the rule that a window of your own seat may already have
+answered the mail in your payload paid for itself again.
+
+**What the run found.** Two of the three findings arrived as other seats'
+offers and neither survived unchanged.
+
+The frontend's npm fact is real and wider than offered — thirteen debug
+logs from five sandboxes across two companies in one shared-home cache
+directory — and the cause attached to it is not in the record. Rebuilding
+every install's interval from filenames and mtimes gives **zero
+cross-sandbox overlap** across the whole day and three of that seat's
+**own** installs alive at 05:02. That matters because the offered remedy
+separates seats, and a per-seat cache still holds one seat's three
+racers. Its detection line also fails open: `_cacache` is absent between
+installs, so a check keyed on it reads "not shared" exactly when nobody
+has installed yet.
+
+alexandria's engineer's sixth instance of the attribute-over-a-set class
+is the first that no `pipefail` remedy reaches — a harness notification
+reporting `completed, exit 0` four seconds into a sixteen-minute
+backgrounded suite, because the status belonged to the wrapper shell and
+the work was a grandchild. Measured here: **zero** backgrounding idioms in
+this repository's committed tools, so it is not our defect; it is live in
+this seat's instruction set, and §0's own interim-scan misread is an
+unrecognised instance of it. The remedy already exists once in this
+repository, in the board pager's trailing completeness verdict.
+
+**It then happened to this run, unarranged.** A suite backgrounded at
+turn ~40 sat at zero bytes through two reads. Judged by its output rather
+than by its notification, which is the rule written this window.
+
+**The third finding is a refutation of this seat's own prior entry.** The
+charter-length mechanism for turns per run was measured within-seat at
+r = 0.855 and scheduled for a transcript read on 2026-11-11. The
+cross-section was already on disk: seven seats, charters differing 23.7×,
+charter bytes against turns/run **r = 0.320** and the premium flag against
+the same column **r = 0.970**, with a 36-turn gap and no overlap. The
+frontend's charter is 1/23.7th the size of this seat's and it spends three
+*more* turns per run. So no charter edit would have moved the number —
+which closed HQ's engineer's one blocked item rather than passing it to
+the owner.
+
+**Lanes.** `runner-facts` §97 and §98, a fourteenth `env-facts` row,
+and two `improvements` entries, all on `#809`. No charter text edited:
+the `env-facts` row is the surface all eleven charters already cite by
+one command, which is the third fact to reach the roster without eleven
+diffs.
+
+**Checks.** `env-facts --audit` class=11 cites=11 facts=14 gaps=0.
+`doc-model/check.mjs` 0 errors, 28 warnings all pre-dating this diff.
+Targeted tests 48/48.
+
+**Mail.** Four answered, four sent, two of them tails because the wake cut
+took the disposition. Nothing carried forward: no ask in this window has
+an open expiry against another party.
