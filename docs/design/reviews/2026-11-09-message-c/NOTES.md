@@ -14,11 +14,6 @@ had one card in Review with a merged pull request behind it. So this run
 cleared Review first, and in doing so found that the last run's closing
 lesson was wrong.
 
-The lane had nothing waiting in Backlog, This sprint or In progress. It
-had one card in Review with a merged pull request behind it. So this run
-cleared Review first, and in doing so found that the last run's closing
-lesson was wrong.
-
 ## 0.1 Two runs, one pull request, and why this file changes hands
 
 The paragraph above was written by the 01:53Z run of this seat. That run
