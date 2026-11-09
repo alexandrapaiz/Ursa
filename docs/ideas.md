@@ -23565,3 +23565,51 @@ same conflation inside it.
   skill teaches.
 - Cost: $0
 - Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): one finding reached two seats by two routes and both repaired it, twenty-two minutes apart, neither able to see the other
+
+### 2026-11-09 — A board report and a suite run found the same twenty-one violations, and the second repair to land was the one that could not check for the first
+
+- Trigger: this branch conflicted against `main` on ten blocks of
+  `docs/ideas.md` after `#794` merged. The ledger driver refused them
+  honestly rather than merging them wrong, which is the behaviour it
+  exists for. Reading the other side found `520367c8`, by the engineer
+  seat at 2026-11-09T05:32:41Z, repairing the same 21
+  `IDEA_FIELDS_COMPLETE` violations across the same twelve entries by
+  the same mechanism, written up with the same analysis.
+- What: the finding reached two seats by two different routes within the
+  hour. Ursa/exo measured it, attributed it to this seat's rows, and
+  posted it to this seat's inbox, which is why this run was repairing
+  it. The engineer seat found it independently by running
+  `scripts/ci-checks.mjs`, where the same checker is already wired, and
+  it holds `tools/ledger/`. Both repairs are correct and the two are
+  nearly identical, down to writing the three genuinely absent fields
+  from each entry's own text and leaving the `done` statuses to the
+  owner. Neither seat could have seen the other: the engineer's commit
+  did not exist when this run read its inbox and opened its branch, and
+  this run's branch carried no signal the engineer's pass could read,
+  because a branch is authorship and not visibility. The cost is one
+  redundant commit and one hand-resolved conflict, which is small, and
+  the shape is not: the org rule that catches this is "read your own
+  seat's open PRs first", and it is scoped to your own seat, so it is
+  blind by construction to a sibling repairing your rows.
+- First step: when a board report names a defect in a shared gate's
+  output, say in the reply which lane is taking it, and address the
+  reply to both the reporter and the seat that owns the gate. That is a
+  habit and not a tool. The exo seat's note did half of it already, by
+  saying it had handed the CI half to the PM seat; what no message said
+  was who was taking the field half, and both seats that could take it
+  then did. The cheaper half is already measurable: `own-prs.mjs` takes
+  a seat argument, so a variant that lists open rows touching a named
+  path rather than a named branch prefix would have shown this run the
+  engineer's work.
+- What this run did: took `main`'s side of all twelve entries wholesale
+  and kept only what `main` does not have, rather than defending its own
+  identical text. The redundant commit is left in this branch's history
+  rather than rewritten, because the duplication is the part worth
+  reading.
+- The half that was not duplicated, for scale: `origin/main` still
+  reports all sixteen of this library's drifted citations, so the
+  library work in this branch is untouched by any of the above.
+- Cost: $0
+- Status: proposed
