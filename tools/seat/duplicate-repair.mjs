@@ -134,21 +134,38 @@ export function entrySpans(text, { heading, identifier }) {
   const idRe = identifier ? new RegExp(identifier) : null;
   const lines = text.split('\n');
   const spans = [];
+  // AN ENTRY ENDS AT THE NEXT HEADING OF ITS OWN DEPTH OR SHALLOWER, not at
+  // the next heading that MATCHES. The first version ended a span at the next
+  // match and it cost the second false-positive class of the first live
+  // reading. `docs/ideas.md` declares `^### ` as its entry grammar and the
+  // file also carries `## Ledger entry — …` and `## Skill run …` blocks above
+  // that depth, so a seat appending a `##` block was recorded as having
+  // edited the last `###` entry, which had merely stopped being last.
+  // Markdown's own nesting settles it: a `###` section cannot contain a `##`
+  // one. Measured: `a45dfc2e` reported one entry it had not touched before
+  // this, and none after.
   for (let i = 0; i < lines.length; i += 1) {
+    const atx = /^(#{1,6}) /.exec(lines[i]);
+    if (!atx) continue;
+    const level = atx[1].length;
+    // Close any open span this heading is not nested inside.
+    const open = spans[spans.length - 1];
+    if (open && open.end === lines.length && level <= open.level) open.end = i;
     if (!headRe.test(lines[i])) continue;
     let id;
     if (idRe) {
       const m = idRe.exec(lines[i]);
-      // A heading that matches the heading pattern but not the identifier
-      // pattern is not an entry of this register — it is a section of prose
-      // at the same depth. Skipping it is why `identifier` is read at all.
+      // A heading at the entry depth that does not match the identifier is
+      // not an entry of this register — it is prose at the same depth, and
+      // the line above has already closed the previous entry at it. That is
+      // deliberate: two seats editing a prose section are not repairing an
+      // entry, so the right answer is "no entry" and not "the one above".
       if (!m) continue;
       id = m[1] ?? m[0];
     } else {
       id = lines[i].replace(/\s+/g, ' ').trim();
     }
-    if (spans.length) spans[spans.length - 1].end = i;        // previous ends here
-    spans.push({ id, start: i + 1, end: lines.length });
+    spans.push({ id, level, start: i + 1, end: lines.length });
   }
   return spans;
 }
@@ -159,66 +176,56 @@ export function entryAt(spans, line) {
   return null;
 }
 
-/** Hunks of a -U0 diff as [{ preStart, preCount, postStart, postCount }]. */
-export function parseHunks(diff) {
-  const out = [];
-  for (const line of diff.split('\n')) {
-    const m = /^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/.exec(line);
-    if (!m) continue;
-    out.push({
-      preStart: +m[1],
-      preCount: m[2] === undefined ? 1 : +m[2],
-      postStart: +m[3],
-      postCount: m[4] === undefined ? 1 : +m[4],
-    });
-  }
-  return out;
+/** The text of one entry, with trailing blank lines dropped.
+ *
+ *  The trim is load-bearing, not tidiness. An entry's span runs to the next
+ *  heading, so the LAST entry in a file runs to end-of-file, and appending a
+ *  new entry below it changes where its blank tail stops. Without the trim
+ *  every append would report the previous entry as edited. */
+export function entryText(lines, span) {
+  return lines.slice(span.start - 1, span.end).join('\n').replace(/\s+$/, '');
 }
 
 /** The pre-existing entries one commit edited in one register.
  *
- *  Both sides of each hunk are mapped, because a repair that deletes a stale
- *  line and a repair that rewrites one are the same event and only the
- *  post-image sees the second. An entry counts only if it is in the parent,
- *  so a pure append contributes nothing. */
+ *  BY COMPARING EACH ENTRY'S TEXT, not by mapping diff hunks onto entry
+ *  spans, and the first version did the latter. The question is "which
+ *  entries that already existed are different now", and content answers it
+ *  directly while hunk positions only approximate it. The approximation has
+ *  a false-positive class that dominated the first live reading:
+ *
+ *  An added block at the end of a register begins at a post-image line that
+ *  may still fall inside the LAST pre-existing entry's span — one blank line
+ *  before the new heading is enough. So every seat that appended its own
+ *  ledger entry was reported as having edited whichever entry happened to be
+ *  last. Measured on the first reading: `a45dfc2e` (skill), `d3a04302`
+ *  (security) and `599b9f65` (market) were all credited with editing one
+ *  security entry none of them had touched, which manufactured five
+ *  DUPLICATED events out of three unrelated appends.
+ *
+ *  Content comparison cannot have that defect, needs no hunk arithmetic, and
+ *  costs one git call fewer per (commit, register). An entry counts only if
+ *  it is present in BOTH revisions, so an append contributes nothing and a
+ *  deletion of a whole entry is not a repair of it. */
 export function editedEntries(sha, reg, { run = git } = {}) {
-  let preText; let postText; let diff;
+  let preText; let postText;
   try {
     preText = run(['show', `${sha}^1:${reg.path}`]);
-  } catch { preText = null; }          // the register did not exist yet
+  } catch { return []; }               // the register did not exist yet
   try {
     postText = run(['show', `${sha}:${reg.path}`]);
-  } catch { postText = null; }         // the register was deleted
-  if (preText === null || postText === null) return [];
-  try {
-    diff = run(['diff', '-U0', `${sha}^1`, sha, '--', reg.path]);
-  } catch { return []; }
+  } catch { return []; }               // the register was deleted
 
-  const preSpans = entrySpans(preText, reg);
-  const postSpans = entrySpans(postText, reg);
-  const preIds = new Set(preSpans.map((s) => s.id));
-  const touched = new Set();
-
-  for (const h of parseHunks(diff)) {
-    if (h.preCount > 0) {
-      for (let l = h.preStart; l < h.preStart + h.preCount; l += 1) {
-        const id = entryAt(preSpans, l);
-        if (id !== null) touched.add(id);
-      }
-    }
-    if (h.postCount > 0) {
-      for (let l = h.postStart; l < h.postStart + h.postCount; l += 1) {
-        const id = entryAt(postSpans, l);
-        // Only an entry that already existed. This is the append filter.
-        if (id !== null && preIds.has(id)) touched.add(id);
-      }
-    }
+  const preLines = preText.split('\n');
+  const postLines = postText.split('\n');
+  const pre = new Map();
+  for (const s of entrySpans(preText, reg)) pre.set(s.id, entryText(preLines, s));
+  const touched = [];
+  for (const s of entrySpans(postText, reg)) {
+    if (!pre.has(s.id)) continue;      // new entry: an append is not a repair
+    if (pre.get(s.id) !== entryText(postLines, s)) touched.push(s.id);
   }
-  // An addition at a hunk whose pre-image is empty still lands inside some
-  // pre-existing entry's span; the preIds guard above keeps it only when the
-  // entry is old, which is the behaviour the measured instance needs: those
-  // repairs added a field line to an entry written a week earlier.
-  return [...touched].filter((id) => preIds.has(id));
+  return touched;
 }
 
 /** Every non-merge, seat-authored commit touching any register in the window,

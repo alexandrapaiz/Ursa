@@ -14,7 +14,6 @@ import {
   registers,
   entrySpans,
   entryAt,
-  parseHunks,
   editedEntries,
   repairCommits,
   concurrent,
@@ -60,15 +59,31 @@ test('a heading that matches the heading pattern but not the identifier is not a
   const text = ['## 1. a fact', 'a', '## Notes on reading this file', 'b', '## 2. another', 'c'].join('\n');
   const spans = entrySpans(text, { heading: '^## ', identifier: '^## ([0-9]+[a-z]?)\\.' });
   assert.deepEqual(spans.map((s) => s.id), ['1', '2']);
-  // and the prose section's lines belong to the fact above it, not to a third
-  // entry, so an edit there is attributed rather than dropped
-  assert.equal(entryAt(spans, 4), '1');
+  // and the prose section's lines belong to NO entry. This assertion was the
+  // other way round when it was written, on the reasoning that attributing is
+  // better than dropping. It is not: two seats editing a shared prose section
+  // are not repairing an entry, so crediting the numbered fact above it
+  // manufactures a duplication of a fact nobody touched.
+  assert.equal(entryAt(spans, 4), null);
+  assert.equal(entryAt(spans, 2), '1');
 });
 
 test('entrySpans falls back to the normalised heading text when identifier is null', () => {
   const text = ['### 2026-11-02 —  a   spaced   heading ', 'body', '### another', 'b'].join('\n');
   const spans = entrySpans(text, { heading: '^### ', identifier: null });
   assert.deepEqual(spans.map((s) => s.id), ['### 2026-11-02 — a spaced heading', '### another']);
+});
+
+test('a span ends at the next heading of its own depth or shallower', () => {
+  // Markdown nesting: a ### section cannot contain a ## one. docs/ideas.md
+  // declares ^###  as its entry grammar and carries ## blocks above it, so
+  // without this every append of a ## block read as an edit to whichever
+  // ### entry had just stopped being last.
+  const text = ['### E1', 'a', '#### deeper', 'still e1', '## a shallower block', 'not e1', '### E2', 'b'].join('\n');
+  const spans = entrySpans(text, { heading: '^### ', identifier: null });
+  assert.deepEqual(spans.map((s) => s.id), ['### E1', '### E2']);
+  assert.equal(entryAt(spans, 4), '### E1');     // the deeper heading nests
+  assert.equal(entryAt(spans, 6), null);         // the shallower one does not
 });
 
 test('spans are contiguous and the last one runs to the end of the file', () => {
@@ -92,33 +107,11 @@ test('a file with no headings yields no entries rather than throwing', () => {
   assert.deepEqual(entrySpans('just prose\nmore prose', { heading: '^## ', identifier: null }), []);
 });
 
-// -------------------------------------------------------------- the hunk parser
-
-test('parseHunks reads both the one-line and the counted form', () => {
-  const diff = [
-    '--- a/f', '+++ b/f',
-    '@@ -10 +10 @@',
-    '-old', '+new',
-    '@@ -20,0 +21,3 @@',
-    '+a', '+b', '+c',
-    '@@ -30,2 +34,0 @@',
-    '-x', '-y',
-  ].join('\n');
-  assert.deepEqual(parseHunks(diff), [
-    { preStart: 10, preCount: 1, postStart: 10, postCount: 1 },
-    { preStart: 20, preCount: 0, postStart: 21, postCount: 3 },
-    { preStart: 30, preCount: 2, postStart: 34, postCount: 0 },
-  ]);
-});
-
-test('parseHunks ignores a @@ that is body text rather than a hunk header', () => {
-  const diff = ['@@ -1 +1 @@', '-a', '+@@ this line is prose about hunks @@'].join('\n');
-  assert.equal(parseHunks(diff).length, 1);
-});
-
 // ------------------------------------------------------- editedEntries, injected
 
-/** A fake `git` that answers from a table of {show, diff} by commit. */
+/** A fake `git` that answers `show` from a table by revision. `editedEntries`
+ *  compares the two revisions' content and never shells out to `diff`, so
+ *  `show` is the whole surface a stub has to cover. */
 function fakeRun(table) {
   return (args) => {
     if (args[0] === 'show') {
@@ -128,7 +121,6 @@ function fakeRun(table) {
       if (!entry || entry[path] === undefined) throw new Error(`no ${spec}`);
       return entry[path];
     }
-    if (args[0] === 'diff') return table.diffs[`${args[2]}..${args[3]}`] ?? '';
     throw new Error(`unexpected ${args.join(' ')}`);
   };
 }
@@ -140,7 +132,6 @@ test('a rewrite inside a pre-existing entry is reported', () => {
   const post = ['## A', 'new line', '## B', 'b'].join('\n');
   const run = fakeRun({
     'sha^1': { 'r.md': pre }, sha: { 'r.md': post },
-    diffs: { 'sha^1..sha': '@@ -2 +2 @@\n-old line\n+new line' },
   });
   assert.deepEqual(editedEntries('sha', REG, { run }), ['## A']);
 });
@@ -152,7 +143,6 @@ test('a pure append of a NEW entry is not a repair', () => {
   const post = ['## A', 'a', '## B', 'b'].join('\n');
   const run = fakeRun({
     'sha^1': { 'r.md': pre }, sha: { 'r.md': post },
-    diffs: { 'sha^1..sha': '@@ -2,0 +3,2 @@\n+## B\n+b' },
   });
   assert.deepEqual(editedEntries('sha', REG, { run }), []);
 });
@@ -165,7 +155,6 @@ test('an added line INSIDE a pre-existing entry is a repair', () => {
   const post = ['## A', 'a', 'Effect: measured', '## B', 'b'].join('\n');
   const run = fakeRun({
     'sha^1': { 'r.md': pre }, sha: { 'r.md': post },
-    diffs: { 'sha^1..sha': '@@ -2,0 +3 @@\n+Effect: measured' },
   });
   assert.deepEqual(editedEntries('sha', REG, { run }), ['## A']);
 });
@@ -175,18 +164,17 @@ test('a deletion is mapped through the PRE-image, so a removed entry still count
   const post = ['## A', '## B', 'b'].join('\n');
   const run = fakeRun({
     'sha^1': { 'r.md': pre }, sha: { 'r.md': post },
-    diffs: { 'sha^1..sha': '@@ -2 +1,0 @@\n-stale' },
   });
   assert.deepEqual(editedEntries('sha', REG, { run }), ['## A']);
 });
 
 test('a register that did not exist in the parent yields nothing', () => {
-  const run = fakeRun({ sha: { 'r.md': '## A\na' }, diffs: {} });
+  const run = fakeRun({ sha: { 'r.md': '## A\na' } });
   assert.deepEqual(editedEntries('sha', REG, { run }), []);
 });
 
 test('a register deleted by the commit yields nothing rather than throwing', () => {
-  const run = fakeRun({ 'sha^1': { 'r.md': '## A\na' }, diffs: {} });
+  const run = fakeRun({ 'sha^1': { 'r.md': '## A\na' } });
   assert.deepEqual(editedEntries('sha', REG, { run }), []);
 });
 
@@ -195,7 +183,6 @@ test('two entries edited in one commit are both reported', () => {
   const post = ['## A', 'a2', '## B', 'b2'].join('\n');
   const run = fakeRun({
     'sha^1': { 'r.md': pre }, sha: { 'r.md': post },
-    diffs: { 'sha^1..sha': '@@ -2 +2 @@\n-a\n+a2\n@@ -4 +4 @@\n-b\n+b2' },
   });
   assert.deepEqual(editedEntries('sha', REG, { run }).sort(), ['## A', '## B']);
 });
