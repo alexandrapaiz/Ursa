@@ -6,7 +6,7 @@
     python3 tools/secret-print-exemptions.py --today 2027-03-01   # what will fail
 
 exit 0 = every suppression is decided and in date
-        1 = at least one is undecided, expired or stale
+        1 = at least one is undecided, expired, stale or inert
         2 = could not run
 
 WHY THIS EXISTS, AND WHOSE QUESTION IT ANSWERS
@@ -51,8 +51,11 @@ suppressed set is the checker, so this asks the checker.
 
 WHAT IT DECIDES, AND IN WHICH DIRECTION
 
-Both directions, because an exemption has two failure modes and only one of
-them is the obvious one.
+All three directions, because a suppression is a claim about the tree and a
+claim fails in three ways, not two. Ursa's exo seat stated the general rule
+on 2026-11-09, having hit all three in its own gate as three unrelated
+accidents: an input claiming too much goes red loudly, an input claiming
+nothing goes quiet, and the quiet direction rots.
 
   undecided     a suppressed finding with no exemption that accounts for it,
                 or a baseline entry with no `review-by` above it
@@ -62,11 +65,24 @@ them is the obvious one.
                 exemption is now a standing argument for a finding that does
                 not exist. Exo's gate found exactly this in itself on its
                 first run, which is the only kind of check worth its line.
+  inert         a marker that suppresses nothing, outside a declared
+                specimen file. The same widening as `stale`, in the surface
+                this gate could not see until markers were enumerated from
+                the tree: see `marker_census`, which is where the reason
+                that direction was unreachable rather than merely unwritten
+                is set out.
 
-A stale entry is exit 1 and not a warning. It is the form in which an
-exemption quietly widens: the text it was keyed on disappears, the entry
-stays, and the next line that happens to match it is cleared by an argument
-written about something else.
+A stale or inert exemption is exit 1 and not a warning. It is the form in
+which an exemption quietly widens: the text it was keyed on disappears, the
+entry stays, and the next line that happens to match it is cleared by an
+argument written about something else.
+
+Two things are counted and never red, both of them properties of HQ's
+vendored marker test rather than of this tree, and both set out in `decide`:
+a line that names the marker token without claiming anything by it, and a
+marker that suppresses while naming no reason. The census prints on every
+run, clean or red, so that the quiet direction stays visible without this
+gate demanding edits to a file whose first line reads "do not edit here".
 
 WHAT IT DOES NOT DO
 
