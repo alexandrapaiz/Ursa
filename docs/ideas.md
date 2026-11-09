@@ -227,6 +227,51 @@ Contract in docs/standards/pm.md §4.
   owner's call, not a seat's, and it is named in the audit rather than filed
   as work.
 
+### 2026-11-09 (security, message run 18) — A written rule cannot stop a fixture entering its own scanner's corpus, and the fourth instance proves it
+- Status: proposed
+- Cost: $0, half a day. For the engineer, or for whoever next edits
+  `tools/gates/`, because the gate it asks for is a tree lint and not a
+  security surface.
+
+- Trigger: the fourth instance of the class in
+  `docs/security/redaction-standard.md` §3, measured on this run's own branch.
+  The three before it were each explained by the rule being too narrow: it was
+  written for credential shapes, and three seats planting a Class C positive
+  control in a gate's own test did not see themselves in it. This run
+  generalised the clause to every shape those gates match, in that file, with
+  all three instances tabulated. **Four commits later the same run wrote two
+  uuid literals into `tools/board/check.mjs`'s self-test and reddened the
+  gate.** So the narrow-rule explanation is retired by the one instance it
+  cannot cover.
+- What: a lint that fails when a file under `tools/`, `scripts/` or `skills/`
+  carries a contiguous literal of a shape one of this repository's own
+  tree-scanning gates matches. The patterns are already written down once, in
+  `.github/workflows/redaction-gate.yml`, and `scripts/redaction-check.mjs`
+  already reads them from there rather than restating them, so the lint has a
+  source for its table and must not acquire a second copy.
+- Why a lint and not a louder rule. The existing remedy works and costs one
+  line: assemble the shape at run time. Nothing about it is hard to do and
+  nothing about it is hard to agree with. What fails is remembering it at the
+  moment a test needs a fixture, and a rule in a standard is read at a
+  different moment from the one where it binds. Four instances in one day
+  across three seats is enough evidence that the gap is not comprehension.
+- The difference from the gate that already exists. `redaction-gate.yml`
+  catches this and that is how all four were found, but it catches it on the
+  merge, so the red names whichever branch opens a pull request next rather
+  than the author. A tree lint in `scripts/ci-checks.mjs` catches it on the
+  branch, where the author is still holding the file, and it can say the one
+  sentence the gate cannot: this is your fixture, assemble it.
+- The limit, stated so the next reader does not over-claim it. A literal
+  assembled at run time is invisible to both instruments, which is the point,
+  so neither can distinguish a fixture from a real value that was assembled to
+  evade the scan. That is a property of the remedy and not a defect in the
+  lint, and the answer to it is the same as it has always been: the scanner's
+  value is that its answer is normally zero.
+- First step: one case in `scripts/redaction-check.mjs`'s own suite asserting
+  that a planted literal in a `tools/**/*.test.mjs` fixture is reported with
+  the assemble-it repair, and the patterns read from the workflow rather than
+  restated.
+
 ### 2026-11-09 — The unreachable premise is a third reading, and it is the one that tells a gate its subject is foreign
 - Status: proposed
 - Cost: $0, day-sized. For whoever holds `tools/gates/excuse-control.mjs`,
