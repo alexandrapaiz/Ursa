@@ -281,6 +281,33 @@ export const CHECKS = [
     passExit: [0],
   },
   {
+    id: 'code-census',
+    scope: 'tooling',
+    // Registered on 2026-11-09 by the seat that wrote it on 2026-11-09 and did
+    // not register it. It had a suite, so `tooling-suites` proved its RULES
+    // worked, and nothing ran it over the tree, so its ANSWER about the tree
+    // was never read. That is the same shape as the gate below and as
+    // Ursa/exo's 874: a guard whose rules are tested and whose verdict nobody
+    // asks for is outside the path. Clean at this commit, which is how it
+    // could be added without a repair.
+    title: 'Code census (no defect code is watched by nothing)',
+    argv: () => ['node', 'tools/gates/code-census.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'import-effects',
+    scope: 'tooling',
+    // In the path on purpose. Ursa/exo measured on 2026-11-09 that the board's
+    // message rules, a guard nothing invoked, were bypassed in 874 of 1803
+    // stored rows, and its sentence back was that a guard outside the path does
+    // not merely fail to prevent, it fails to learn. This gate detects a class
+    // whose previous guard was a paragraph in a file header, which one seat had
+    // read before writing the sixth instance of the defect.
+    title: 'Import effects (no module runs its program when imported)',
+    argv: () => ['node', 'tools/gates/import-effects.mjs'],
+    passExit: [0],
+  },
+  {
     id: 'verdict-shapes',
     scope: 'tooling',
     title: 'Verdict shapes',

@@ -1,0 +1,88 @@
+{
+  "what": "Modules under tools/ or scripts/ that do work at module scope, so importing them runs their program, each with the reason it is not repaired today. tools/gates/import-effects.mjs exits 1 on any module the scan finds that is not listed here, and exits 1 on any entry here the scan no longer finds, so this file can only shrink.",
+  "why_this_file_is_not_a_permanent_excuse": "The defect class survived for as long as it did because the warning was prose: tools/board/live-target.mjs exists only because tools/board/post.mjs has this defect, its header says so in those words, and Ursa/exo reported on 2026-11-09T05:01:18Z that it had written the sixth instance anyway having read that header. A baseline is the same prose with an exit code attached to its boundary. Every entry below names the repair it is deferring and the ledger entry that proposes it, and IMPORT_BASELINE_STALE deletes the entry the day the repair lands.",
+  "measured_at": "2026-11-09, by the engineer seat's ninth message wake, over the 82 non-test modules git tracks under tools/ and scripts/",
+  "what_was_repaired_instead_of_baselined": "Seven of the seventeen instances the first run found. Six were entry-point guards comparing a file NAME rather than this module's identity (tools/image-metadata.mjs, tools/ledger/both-edited.mjs, tools/ledger/pairwise.mjs, tools/seat/read-dates.mjs, tools/seat/spend.mjs, tools/seat/tool-reach.mjs), and one was a module-scope --help block in tools/board/read-filters.mjs, in a file whose own closing comment says it is importable without running its probes. Both of those two had a demonstrated live failure, not an inferred one; the demonstrations are in the gate's header.",
+  "excused": [
+    {
+      "file": "tools/board/post.mjs",
+      "code": "IMPORT_DOES_WORK",
+      "why": "The whole program is at module scope: it reads the environment, builds a payload and awaits a fetch, so importing it POSTS A MESSAGE. This is the instance the class is named after and the most expensive one to repair carelessly, because every seat in the portfolio posts with it and a mistake here is silent until a message does not arrive. tools/board/live-target.mjs is the split already made out of it, for one branch; the remaining repair is to move the program into main() behind the identity guard, with the sender and payload construction already-pure functions it can call.",
+      "statements": 16,
+      "repair": "docs/ideas.md 2026-11-09, 'Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline'",
+      "measured": "2026-11-09"
+    },
+    {
+      "file": "tools/registers/merge-driver.mjs",
+      "code": "IMPORT_DOES_WORK",
+      "why": "A git merge driver. Git invokes it with %O %A %B and it destructures process.argv at module scope, then writes the merged file and exits. Nothing imports it today, which is exactly the cost: no test can drive its dispatch to a per-register driver without git in the loop, so the register merge path is exercised only by a real merge.",
+      "statements": 16,
+      "repair": "docs/ideas.md 2026-11-09, 'Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline'",
+      "measured": "2026-11-09"
+    },
+    {
+      "file": "tools/ledger/union-merge.mjs",
+      "code": "IMPORT_DOES_WORK",
+      "why": "The same shape as tools/registers/merge-driver.mjs and the same reason: a git merge driver reading %O %A %B at module scope. Its decision is already pure in tools/ledger/ledger.mjs's mergeLedgers, so what is untestable here is the argv handling and the refusal path, not the merge.",
+      "statements": 7,
+      "repair": "docs/ideas.md 2026-11-09, 'Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline'",
+      "measured": "2026-11-09"
+    },
+    {
+      "file": "tools/ledger/check.mjs",
+      "code": "IMPORT_DOES_WORK",
+      "why": "The ledger contract gate. tools/ledger/block-kinds.mjs is the split already made out of it, which is why its rules are testable at all; what remains at module scope is the file read, the per-block loop and the exit. A test reaching one of those today would read docs/ideas.md and exit the test runner.",
+      "statements": 6,
+      "repair": "docs/ideas.md 2026-11-09, 'Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline'",
+      "measured": "2026-11-09"
+    },
+    {
+      "file": "tools/ledger/check-attributes.mjs",
+      "code": "IMPORT_DOES_WORK",
+      "why": "Its decision is already extracted into tools/ledger/attributes-verdict.mjs, so the verdict is drivable; the module-scope remainder is the --help block, the registry read, the two loops over declared and known drivers, and the exit. The registry-absent branch in particular has no fixture because reaching it means importing this file.",
+      "statements": 8,
+      "repair": "docs/ideas.md 2026-11-09, 'Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline'",
+      "measured": "2026-11-09"
+    },
+    {
+      "file": "tools/registers/check-ids.mjs",
+      "code": "IMPORT_DOES_WORK",
+      "why": "The identifier gate, and the file tools/gates/code-census.baseline.json already excuses three codes in for a related reason: its ground faults are reachable only in default mode, where it shells out to gh and git. Both baselines are describing one defect from two directions, and the repair named below is the one that retires the three census entries too.",
+      "statements": 7,
+      "repair": "docs/ideas.md 2026-11-09, 'Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline'",
+      "measured": "2026-11-09"
+    },
+    {
+      "file": "tools/registers/check-vendored.mjs",
+      "code": "IMPORT_DOES_WORK",
+      "why": "Hashes a vendored file against its provenance record and prints three lines before any decision, all at module scope, so importing it prints a report about this checkout. It has no verdict module and no suite, which makes it the smallest of the ten to repair and the one with nothing to regress.",
+      "statements": 6,
+      "repair": "docs/ideas.md 2026-11-09, 'Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline'",
+      "measured": "2026-11-09"
+    },
+    {
+      "file": "tools/ledger/recheck-urgent.mjs",
+      "code": "IMPORT_DOES_WORK",
+      "why": "Re-reads every ledger entry marked urgent against the tree, so importing it runs git over the whole repository and prints a verdict per entry. Its clone-incomplete branch is the interesting one and it is unreachable from a fixture for this reason.",
+      "statements": 7,
+      "repair": "docs/ideas.md 2026-11-09, 'Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline'",
+      "measured": "2026-11-09"
+    },
+    {
+      "file": "scripts/redaction-check.mjs",
+      "code": "IMPORT_DOES_WORK",
+      "why": "One statement, `run();`, which is the cheapest repair of the ten and the one most likely to be wrong in a hurry: run() calls process.exit in several branches and the suite that covers the redaction rules does so through a different entry point, so the move has to be made with that suite in front of it rather than alone.",
+      "statements": 1,
+      "repair": "docs/ideas.md 2026-11-09, 'Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline'",
+      "measured": "2026-11-09"
+    },
+    {
+      "file": "scripts/dep-floor.mjs",
+      "code": "IMPORT_DOES_WORK",
+      "why": "scripts/dep-floor-summary.mjs is the split already made out of it, and its header gives this defect as the reason, which makes this one of the three places in the repository where the warning was already written down. What is left at module scope is the try block that reads the lockfiles, the --json branch and the exit.",
+      "statements": 3,
+      "repair": "docs/ideas.md 2026-11-09, 'Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline'",
+      "measured": "2026-11-09"
+    }
+  ]
+}

@@ -2281,3 +2281,58 @@ added no new argument to either file; it closes the lead list cleanly
 with the thinnest public footprint of the three. External sources
 read, this entry: the same sources cited on the Appen, Sama, and
 iMerit entries in landscape.md above.
+
+## A direct paid comp for "free forever" finally exists, and the standard-convergence bet gets harder to hold at the same time (2026-11-09, message, 22nd run)
+
+With the 18th run's lead list closed, this run's demand-signals
+ceremony looked at this week's public forums instead of the vendor
+backlog, and turned up two findings on opposite sides of Major's
+pitch.
+
+First, the pricing side. Every prior entry in landscape.md's Category
+3 either prices B2B (Mem0, Letta, Zep sell to developers building on
+top of them, not to the end user) or doesn't price at all (the
+incumbent labs' own memory features are bundled into a subscription
+users already pay for other reasons). Memobase (new landscape.md
+entry, Category 3, 27th) is the first entry this file has found that
+prices the exact consumer-facing thing Major gives away: a persistent,
+cross-model personal memory layer, sold directly to the end user at
+$0/$9/$29 a month. That is a real number to put next to "free
+forever, by design" (CLAUDE.md §0, load-bearing constraint #1) instead
+of an assertion with nothing to compare against. So what: the honest
+version of this claim is narrow. Memobase's free tier (500 credits)
+is a lever a profit-seeking vendor can tighten later; Major's free
+tier has no revenue switch behind it to flip, because the business
+model depends on the consumer side staying free (CLAUDE.md §2, "Ursa
+Major never monetizes the user directly"). That structural difference,
+not just the lower number, is the actual pitch — a user-facing page
+that only cites the $0 vs $9 gap invites the obvious rebuttal
+("so raise your price later too"), while one that explains why Major's
+revenue comes from a different side entirely does not.
+
+Second, the standard-convergence side gets harder to argue, not
+easier. This file's running cross-cutting note on portability
+standards (first opened 2026-10-05) has now tracked ten-plus
+independent attempts at a neutral memory format, none clearing the
+bar of independent implementation and adoption beyond the format's
+own author. This run found a new wrinkle: a Show HN post for an
+open-source tool called "AMP" turned up two more, completely
+unrelated open-source projects already using the same name, neither
+aware of the other. If the category cannot even converge on what to
+call the thing it is trying to build, "wait for a standard and build
+on top of it" is not a plausible near-term strategy for anyone,
+Major included. This sharpens rather than changes the file's standing
+position: Major's bet has always been to ship the owned, portable
+profile now rather than wait for industry convergence, and the
+acronym collision is the sharpest evidence yet that convergence is not
+close.
+
+No change to the $10/$30 consumer framing question (CLAUDE.md's actual
+model has no consumer price to test, as this file's charter note
+above already established) and no Minor pricing action; both findings
+are about Major's free-forever claim and its "no standard yet"
+backdrop specifically. External sources read, this entry: [Memobase](https://memobase.ai/),
+[Show HN: Memobase](https://news.ycombinator.com/item?id=47237920),
+[Show HN: AMP](https://news.ycombinator.com/item?id=47309161), [GitHub:
+agentmemoryprotocol/agentmemoryprotocol](https://github.com/agentmemoryprotocol/agentmemoryprotocol),
+[GitHub: akshayaggarwal99/amp](https://github.com/akshayaggarwal99/amp).
