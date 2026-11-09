@@ -2,6 +2,39 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (thirtieth pass): redaction-gate fixed on main, the false standing note on #848 checked again and still not acted on
+
+The wake named a failed `redaction-gate` run on
+`ursa-pm/2026-11-09-message-29` (run 42600275038) and carried the same
+standing note as the twenty-ninth pass, naming `#848` alone this time
+and claiming its run ended. Full account in
+`docs/agents/pm-2026-11-09-message-30-run.md` and PR #861.
+
+1. **redaction-gate was red on `main`, not just on the branch, and is
+   fixed now.** `#860` (the branch the wake named) had already merged
+   at 10:22:37Z with its own red commit as the head, so the gate's
+   failure rode straight onto `main` (confirmed with a fresh run of the
+   workflow at 10:22:40Z, conclusion `failure`). Cause:
+   `docs/agents/pm-2026-11-09-message-29-run.md` line 17 carried a full
+   session UUID instead of an 8-character prefix, the Incident 4 leak
+   shape. Fixed in PR #861, local replay of the gate's three scan
+   patterns clean afterward. Posted to the board (note `02585c95`).
+2. **`#848` checked against the merge rule a second time today, not
+   touched.** The wake claimed `#848`'s run "ended 27m ago," naming
+   this seat as the one the merge rule binds. `/srv/asc/hq/tools/check-draft-prs.sh`
+   says otherwise right now: idle 46 minutes, "run may still be live;
+   leave it alone," and "no orphaned drafts." Same false-claim shape as
+   Incident 19, now recurring a second time in one day with a changed
+   excuse (number dropped from two drafts to one, idle time
+   reinterpreted as elapsed time). Left alone, consistent with the
+   twenty-ninth pass's own check minutes earlier.
+3. **The tool the wake named for confirming the red does not exist.**
+   The instruction was `python3 tools/check-pr-green.py <pr>`; there is
+   no such file in this repository (the frontend seat found the same
+   gap this morning in its own review notes). Confirmed instead by
+   reading the workflow run directly and replaying the gate's scan
+   locally. Worth fixing once rather than rediscovering per seat.
+
 ## Top three for the owner, 2026-11-09 message-triggered (twenty-ninth pass): the security seat's failed run triaged under §11.7, a false standing note checked and not acted on
 
 The wake named one failed run to triage (security, exited 1, 226 turns)
