@@ -367,11 +367,31 @@ function SiteSet({
                   block without stacking two paddings between rows. An
                   anchor may not live inside a button, which is the other
                   reason it is a sibling and not part of the control. */}
+              {/* `aria-disabled` and a guard in the handler, rather than
+                  `disabled`. A disabled button is not focusable, so the
+                  moment this list goes busy the browser takes focus off
+                  whichever row the person just activated and puts it on
+                  <body>. Measured 2026-11-09 at 1440x900 over this
+                  stylesheet, activating row 2 of 3 from the keyboard:
+                  with `disabled`, `document.activeElement` is BODY and it
+                  costs 7 Tab presses to get back to that row once the
+                  fetch settles; with `aria-disabled` it is the row, and 0.
+                  The row's DOM node is the same object across the change
+                  in both arms, because of `key={s.id}` below, so the loss
+                  is the attribute's doing and not a re-render's.
+
+                  The control stays in the accessibility tree and stays
+                  announced, which `disabled` also took away, and the
+                  handler is what actually refuses the second click now. */}
               <button
                 type="button"
-                onClick={() => onOpen(s)}
-                disabled={opening !== null}
-                className="rec-row block w-full text-left disabled:cursor-wait"
+                onClick={() => {
+                  if (opening !== null) return;
+                  onOpen(s);
+                }}
+                aria-disabled={opening !== null}
+                aria-busy={opening === s.id}
+                className="rec-row block w-full text-left"
               >
                 {/* The id gets the full measure and breaks anywhere. It is
                     a slug long enough to overflow a phone on its own. */}

@@ -2414,3 +2414,81 @@ every seat on this host, so the blast radius of a name match here is
 another company's live server, and a server is exactly what another seat
 is mid-screenshot against. Match on identity, scope by ownership, and
 exclude yourself before you ask the question rather than after.
+
+## L65 — `disabled` is a focus decision before it is a styling one
+
+**measured**, 2026-11-09, at 1440x900 against the two real stylesheets, by
+driving the set view's record rows from the keyboard. Instrument and
+numbers in `docs/design/reviews/2026-11-09-message-e/`.
+
+The set view's record row shipped as
+`<button disabled={opening !== null}>`. One piece of state names the
+record being fetched, and it is held across an awaited `fetch`, so
+activating any row disables every row in the list for the length of a
+network round trip. Including the one the person is standing on.
+
+A disabled button is not focusable. So the state change takes focus off
+the control that was just activated and the browser puts it on `<body>`:
+
+| | `disabled` | `aria-disabled` |
+|---|---|---|
+| `document.activeElement` after Enter | **BODY** | the row |
+| still BODY once the fetch settles | **yes** | — |
+| Tab presses back to that row | **7** | **0** |
+| the row's DOM node survives the change | yes | yes |
+
+Row 2 of 3 was chosen so a focus loss could not be read as the top of the
+list, and seven is what two rows of two stops each costs with the address
+field in front of them. On a real index it is however long the list is.
+
+**The last line of that table is the one that makes the rest mean
+anything.** The row's DOM node is the same object before and after, in
+both arms, so the focus did not go anywhere because the node was
+replaced. It went because of the attribute. This matters here
+specifically: run k reported a press state that arrived on three
+invocations out of five and attributed it to the set view replacing its
+row nodes when the fetched index lands. The rows are keyed `key={s.id}`
+(`published-site.tsx:364`), so React's reconciler keeps the node, and the
+fixture that establishes the table above holds node identity and
+reproduces the loss anyway. **The cause run k named is not the cause.**
+The attribute is, and the flake it saw is the same defect seen through a
+pointer instead of a keyboard.
+
+**this seat's judgement.** A control that is busy is not a control that
+is unavailable, and the two want different attributes. `disabled`
+removes the control from the focus order and from the accessibility tree,
+which is right for something a person may not use at all and wrong for
+something they have just used and are waiting on. `aria-disabled` plus a
+guard in the handler keeps the control where the person left it, keeps it
+announced, and still refuses the second activation. The refusal moves
+from the browser into one line of the handler, which is the cost.
+
+**The corollary that is easy to miss, and was load-bearing here.** Six
+rules in `globals.css` guarded `.rec-row`'s hover and press wash with
+`:not(:disabled)`. Once the attribute changes, `:disabled` matches
+nothing on that control and all six guards become selectors that can
+never fire. Nothing about that is visible: the resting page is unchanged
+and only a pointer held over a busy row shows it. `check-wash-guard.py`
+asserts the guard from both sides in both arms, twelve assertions, and
+two of them fail when the old guard is restored. **A guard rewritten to
+follow an attribute has to be tested in its negative case, because a
+guard that never matches and a guard that always passes produce the same
+frame.** L61 and L63 are the same shape: an instrument or a rule that has
+stopped discriminating looks exactly like one that found nothing wrong.
+
+**Confirmed in the shipped component, not only in a fixture.** The table
+above was taken over the real stylesheet with a hand-built list, and the
+same drive was then run against `published-site.tsx` itself under
+`next dev`, with the `before` arm being `origin/main`'s two files checked
+into the tree and recompiled. Same result, including the last row:
+`disabled=true` and `activeElement` BODY before, `aria-disabled=true` with
+focus held after, and the row's DOM node surviving in both arms.
+
+**Where else this applies, not changed this run.** The same file's
+`readSite` submit button is `disabled={busy}` while the index is
+fetched. It is one control rather than a list, so the person lands on
+`<body>` from a single stop rather than from seven, and the form's
+`onSubmit` would need the same guard. It is the same defect at a smaller
+size and it is written here rather than fixed, because the charter allows
+two interaction refinements a run and this run spent its measurement on
+the row.
