@@ -290,13 +290,19 @@ export function manifestFault(manifest) {
 /**
  * @param {Finding[]} findings every collision, each already printed by the
  *   caller as one line.
- * @param {{ids?: number, namespaces?: number, refs?: number, scope?: string}} seen
- *   the census, for the clean line.
+ * @param {{ids?: number, namespaces?: number, refs?: number, registers?: number, scope?: string}} seen
+ *   the census, for the clean line. `registers` is how many (ref, register)
+ *   pairs were actually opened, and it is in the line rather than in a
+ *   `--json` field because it is the denominator of every other number here:
+ *   `0 identifier(s)` reads as a clean register and `0 identifier(s) over 0
+ *   register file(s)` reads as a gate that found nothing to grade. check-ids
+ *   counted this and printed neither until 2026-11-09.
  * @returns {import('../gates/verdict-shape.mjs').Verdict}
  */
 export function verdict(findings, seen = {}) {
-  const { ids = 0, namespaces = 0, refs = 1, scope = 'origin/main' } = seen
-  const counted = `${ids} identifier(s) in ${namespaces} namespace(s) across ${refs} ref(s), from ${scope}`
+  const { ids = 0, namespaces = 0, refs = 1, registers, scope = 'origin/main' } = seen
+  const over = registers === undefined ? '' : ` over ${registers} register file(s)`
+  const counted = `${ids} identifier(s)${over} in ${namespaces} namespace(s) across ${refs} ref(s), from ${scope}`
 
   const byOwner = findings.filter((f) => f.held === LOCUS.OWNER)
   // Anything not explicitly the owner's lands on the seat, which is the louder
