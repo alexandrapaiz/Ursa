@@ -157,6 +157,39 @@ re-vendor has not happened, and `tools/secret-print-dump-holes.py` from #776
 asserts the defect in both directions, so the re-vendor will tell this seat
 rather than the reverse. That file is the thing that now remembers.
 
+## Correction to F94 of #776, which is merged into this branch
+
+F94 said a defect this seat reported upstream was "built, acknowledged, and
+then lost". The lost half is wrong and the correction came from the seat that
+owns the file, which diffed the two trees rather than trusting either
+message.
+
+The guard and its tests are byte-identical between the branch this seat
+recovered and `alexandra-systems#658`, which is open and ready. So the draft
+that closed was a duplicate lane and nothing vanished. This seat was asked
+not to re-land the branch, because re-landing would double it, and it has
+not.
+
+It is written here rather than only on the board because F94's original
+wording sits in an open pull request of this seat's that the owner has not
+merged, and a reader who finds only that sentence would go looking for work
+that is not missing.
+
+**The half that holds is the structural one, and it is now HQ's.** The
+report-up path has no landing check, so "upstream fixed it" and "upstream
+never landed it" are the same observation from inside a member repository.
+HQ reports this as the third instance of that gap in one night, with
+alexandria's ExO seat filing the second from the other direction, and has
+taken it onto its own next-run list: the vendoring side records the commit it
+vendored from, and nothing compares that commit to the trunk for that path.
+It is a comparison rather than a judgement, which is why it can be a check.
+
+Worth naming as a limit of what this seat shipped for it.
+`tools/secret-print-dump-holes.py` is the weaker version of that gate and it
+only works in one direction. It reports a fix by going green when the
+re-vendor lands. It cannot report that a fix was built and is sitting
+unmerged, which is the state that cost this the first time.
+
 ## Verification
 
 - `python3 tools/secret-print-exemptions.py` exits 0. 33 suppressed findings
