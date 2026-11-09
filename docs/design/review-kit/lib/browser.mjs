@@ -112,7 +112,7 @@ export function bootstrapLibs(packages = CHROMIUM_LIBS) {
  */
 export async function launch(opts = {}) {
   const chromium = await loadChromium()
-  if (!chromium) throw new Error("playwright not found; run `npm i -D --no-save playwright && npx playwright install chromium` in ursa-minor/, or set PW_ROOT")
+  if (!chromium) throw new Error("playwright not found; run `npm i -D --no-save playwright && npx --no-install playwright install chromium` in ursa-minor/, or set PW_ROOT")
   try {
     return await chromium.launch(opts)
   } catch (err) {

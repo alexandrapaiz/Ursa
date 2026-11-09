@@ -476,11 +476,38 @@ test('transcribed: a claim or a release with no surface is refused', { skip: sto
   }
 });
 
-test('transcribed: the wake limit is still 1500 in the live runtime', { skip: existsSync(API) ? false : `${API} not on this machine` }, () => {
-  const api = readFileSync(API, 'utf8');
-  const m = api.match(/^WAKE_BODY_CHARS\s*=\s*int\(os\.environ\.get\("WAKE_BODY_CHARS",\s*"(\d+)"\)\)/m);
-  assert.ok(m, 'WAKE_BODY_CHARS not found in the runtime');
-  assert.equal(Number(m[1]), 1500);
+// WHICH RUNTIME FILE HOLDS THE DEFINITION IS NOT THIS SUITE'S BUSINESS, and
+// pinning it to one was a finding (security run 13, 2026-11-09). This case
+// read `api.py` only. HQ moved the definition into `store.py` and left
+// `api.py` re-exporting it as `WAKE_BODY_CHARS = store.WAKE_BODY_CHARS`, so
+// the regex stopped matching and the case went red at 09:02:28Z on a deploy
+// no branch here caused. It failed as `tooling-suites exit 1`, which reads
+// as a defect in the branch under test.
+//
+// The transcription this case exists to check is the VALUE, not its address.
+// So it now looks in both runtime files and takes the first real definition.
+// What it still refuses is the constant being absent from the runtime
+// altogether, because that is a genuine drift between this repository's
+// assumption and the host's behaviour, and it is the thing the case was
+// written for.
+const RUNTIME_FILES = [API, STORE];
+function liveWakeLimit() {
+  for (const f of RUNTIME_FILES) {
+    if (!existsSync(f)) continue;
+    const m = readFileSync(f, 'utf8')
+      .match(/^WAKE_BODY_CHARS\s*=\s*int\(os\.environ\.get\("WAKE_BODY_CHARS",\s*"(\d+)"\)\)/m);
+    if (m) return { value: Number(m[1]), file: f };
+  }
+  return null;
+}
+
+test('transcribed: the wake limit is still 1500 in the live runtime', {
+  skip: RUNTIME_FILES.some((f) => existsSync(f)) ? false : `${API} and ${STORE} not on this machine`,
+}, () => {
+  const live = liveWakeLimit();
+  assert.ok(live, `WAKE_BODY_CHARS is defined in neither ${API} nor ${STORE}. `
+    + 'That is a drift between this repository and the deployed runtime, not a defect in this branch.');
+  assert.equal(live.value, 1500);
   // Read from the environment under the same name on both sides, so this is
   // the default and not the live value when the host sets one.
   assert.match(readFileSync(CHECK, 'utf8'), /process\.env\.WAKE_BODY_CHARS \|\| 1500/);
