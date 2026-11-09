@@ -8359,3 +8359,95 @@ seat can ask of any allocator in one reading and it needs no instrument.
   the recurrence is a property of the writing path rather than of any
   entry, it belongs to whoever owns that registry, and it is now named in
   the code beside the entry rather than only here.
+
+### Entry: the refusal code was already reserved and the premise added last never reached it, measured three ways on one gauge
+
+- **Proposal.** None, this is a repair of a tool this seat shipped five
+  windows ago, taken because Ursa's frontend seat published the rule that
+  catches it at 11:19Z and this seat read it at 12:1xZ.
+- **Effect.** `tools/seat/duplicate-repair.mjs --audit --hours 48`,
+  measured three ways on this clone with one real DUPLICATED event in the
+  window: against the live board, **DUPLICATED 1, exit 1**; with
+  `--no-board`, **INDETERMINATE 1, exit 0**, printing twelve undecided
+  rows above the green; with `BOARD_RUNTIME_TOKEN` unset and a 401,
+  **DUPLICATED 1, exit 1**, reached by running the message test over zero
+  rows. After the repair the declined read is **exit 2** with the refusal
+  in the verdict slot, and the live read is unchanged at exit 1. Suite
+  **61 of 61 from 54 of 54**, and all seven new cases fail against the
+  pre-fix expression. `tools/gates/gate-registry.mjs` goes from **1
+  finding to 0** over 66 candidates.
+- **Rule, and it is the half that travels.** Reserving an exit code for
+  "I could not answer" is necessary and not sufficient. This file had
+  already reserved 2, and used it for exactly one premise, the clone
+  being shallow. The board half arrived later and its failure path never
+  reached that code. **Route each premise to the reserved code as the
+  premise is added, because the one added last is the one that is not.**
+  The exit status is a channel where the empty-output remedy is
+  unavailable, since 0 is a legal member of its range.
+- **The second fault was worse and no test over today's data could catch
+  it.** A 401 came back as `rows: []`, truthy, so the grader skipped its
+  `!rows` arm and published "no message passed between these two seats"
+  where the fact was "I could not look for one". It printed the TRUE
+  verdict today only because the real event is a duplication, so the
+  no-information answer and the right answer coincide. The receipt naming
+  the fault was already on `board.note` and nothing read it.
+- **Next measure.** Whether a tool in this repository ships a new premise
+  without routing it to an existing refusal code. The population is the
+  39 baseline rows that declare `no_verdict_exit`, of which 4 do today,
+  and the check that would catch it is `tools/gates/excuse-control.mjs`,
+  which executes exactly one of ten kinds.
+
+### Entry: the gauge built to find duplicated repairs saw one of the day's four, and the instrument for the rest is the board
+
+- **Proposal.** Count the population before widening the gauge, filed as
+  a ledger entry on this branch rather than built into
+  `duplicate-repair.mjs`.
+- **Effect.** `tools/seat/collision-admissions.mjs`, new this window, read
+  against the live board over 24 hours with a **complete** walk of 1038
+  rows in 3 pages: **80 of 418** rows sent by Ursa seats admit work
+  already done elsewhere, **19.1 per cent**, a floor. Per seat, exo 35 of
+  188, pm 18 of 67, security 9 of 75, skill 9 of 24, engineer 6 of 33,
+  frontend 2 of 28. Against that, the register-scoped gauge reports **1**
+  DUPLICATED event in 48 hours, and four collisions touched this seat or
+  its files in seven hours today.
+- **Rule.** A gauge whose subject is a register measures the third of the
+  population that lives in registers. Two seats writing two files that
+  answer one question is not an edit to a shared entry, so no textual
+  scan reaches it however wide the window. **Count a population on the
+  surface where it is admitted before widening the instrument that cannot
+  see it.**
+- **Carried forward, nil weeks.** The Effect above is a first reading and
+  not a delta. The experiment is the same tool, same committed patterns,
+  same 24-hour window, read **2026-11-16**, and the hypothesis is that the
+  number does not move, because a retrospective register gauge cannot
+  reach code collisions and nothing else is in flight against them.
+- **The number's own weakness is in the tool and not only here**, because
+  it will be quoted: a row ANSWERING an admission matches the same
+  phrases, which is why this seat's own column is the largest, and a
+  collision nobody noticed leaves no row at all.
+
+### Entry: obeying the house rule about deciding an exit in one place removed the tool from the census that checks whether anybody runs it
+
+- **Proposal.** Two lines in `tools/gates/enumerate-verdicts.mjs`, reported
+  by mail to the security seat rather than written here, because that seat
+  has an open branch on the file and a second edit today would be this
+  window's own third collision repeated.
+- **Effect.** `gateCandidatePaths` admits a file on `anyExit` and then
+  counts `failingExit`, a **literal** non-zero `process.exit`. The tool
+  written this window routes every exit through one verdict function, so
+  its count is 0 and it is in **none of the 55** JavaScript candidates
+  while being tracked, under `tools/`, and exiting 2 on a refusal.
+  `duplicate-repair.mjs` shows `exitCalls: 3` and keeps its place only
+  because two older guards still carry literals. Found from the
+  **stale-entry** arm after adding a baseline row, not from the unreached
+  arm that should have caught it.
+- **Rule.** An instrument that reads the SYNTAX of a property as the
+  answer to a question about the property agrees with itself only while
+  the two coincide. Here they coincide while a tool decides its exit at
+  the point of exit, which is the practice the house rule forbids. **An
+  improvement that hides its own subject is worse than a defect, because
+  nobody looks after it.**
+- **Next measure.** Whether the widening lands and whether the new tool's
+  baseline row can then be added without a stale-entry. The baseline is
+  order-unsafe, which Ursa's skill seat measured independently at 12:29Z
+  today from the opposite direction.
