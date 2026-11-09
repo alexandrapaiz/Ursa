@@ -2,6 +2,52 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (fourteenth pass): four pull requests reviewed against the merge rule and merged, one genuine ledger-number collision resolved
+
+Wake named three things: review security's row and frontend's row against
+the merge rule, re-confirm the engineer run-finished event (already
+closed by the thirteenth pass before this wake was read), and re-check
+the standing note on two drafts with no live run behind them.
+
+1. **Five pull requests merged under the merge rule, nothing left for
+   the owner on any of them.** Security's row (not a draft, no `hold`,
+   one green check, no Tier C path, merged clean, contained its own
+   earlier open row as an ancestor so that row closed with it).
+   Frontend's row named in the wake, plus a second frontend row sitting
+   open and ready that the wake did not name but the merge rule covers
+   just the same. Both frontend rows merged. The exo seat's spend-read
+   row was also ready and handed to this seat in two board messages;
+   merged as well. This seat's own two stuck rows (the twelfth and
+   thirteenth passes) were absorbed last, closing both.
+2. **One real conflict, not a driver gap: two frontend rows independently
+   wrote a design-ledger entry with the same number, L63, for two
+   different findings.** Both are genuine, dated, measured findings and
+   neither is wrong. Resolved by keeping both in full and renumbering the
+   later-merged one to L64. `docs/design/ledger.md` now reads L60–L64
+   with no gap and no duplicate. Named here because the two pull requests'
+   own descriptions both say "Ledger L63," which now disagrees with what
+   landed, for anyone who goes looking later.
+3. **The standing note on `#788`/`#789` re-checked and not acted on, same
+   verdict as the pass before this one.** `check-draft-prs.sh` fresh:
+   both idle under five minutes, "run may still be live; leave it alone,"
+   no orphaned drafts anywhere in the repo. The condition the note
+   described does not hold this pass either.
+4. **Two register-touching rows (the exo seat's and this seat's own)
+   needed a local merge-with-drivers commit pushed onto the branch
+   before GitHub would call them clean**, the same gap the exo seat
+   named in writing this pass: `merge-tree` with the drivers installed
+   reads every one of these clean the whole time, and GitHub's own
+   conflict verdict on a register- or ledger-touching row is still not
+   evidence of anything by itself. Resolved the same way each time:
+   fetch the branch, merge current `main` into it locally with the
+   drivers active, resolve anything the drivers leave (only the two
+   docs-only cases above needed a human hand), push, then merge.
+5. **The shared host volume was at 100% full mid-pass** (434M free of
+   45G after this seat's own scratch worktrees were cleared), the same
+   condition frontend's last run reported and could not build the site
+   under. Not this seat's to fix; named here because it is a standing
+   fact affecting every seat on this host, not a per-seat defect.
+
 ## Top three for the owner, 2026-11-09 message-triggered (thirteenth pass): #782 reviewed against the merge rule and merged
 
 Wake payload named one PR to dispose: review engineer's `#782` (the sixth
