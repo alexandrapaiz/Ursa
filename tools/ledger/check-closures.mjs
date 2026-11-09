@@ -49,6 +49,7 @@ import { pathToFileURL } from 'node:url';
 import { verdict } from './closures-verdict.mjs';
 import { parseLedger } from './ledger.mjs';
 import { classifyBlock, statusOf } from './block-kinds.mjs';
+import { readGround, requireEntries, refuse } from './ground.mjs';
 
 /**
  * `<!-- closes: <ledger-path> <YYYY-MM-DD> "<title>" -->`, where <title> is
@@ -295,7 +296,34 @@ const invokedDirectly =
 
 if (invokedDirectly) {
   const ledgerPath = process.argv[2] ?? 'docs/ideas.md';
-  const { violations, markers, docs } = checkRepository({ cwd: process.cwd(), ledgerPath });
+  const cwd = process.cwd();
+  // GROUND BEFORE FINDINGS (F127/F128, 2026-11-09). Three things had to hold
+  // before this gate's verdict meant anything and none of them was checked.
+  // An absent ledger threw out of `node:fs:440` with the stack trace as the
+  // whole output. A ledger that parsed to zero entries printed `all resolved
+  // and all closed` at exit 0, which `scripts/ci-checks.mjs` accepts at
+  // `passExit: [0, 2]`. And the document set comes from `git ls-files`, which
+  // answers nothing outside a repository. All three are now exit 3 with the
+  // cause named. The full argument is in ./ground.mjs.
+  const ledgerSource = readGround(
+    'check-closures', `${cwd}/${ledgerPath}`,
+    'the ledger every closure marker is checked against');
+  requireEntries(
+    'check-closures', ledgerIndex(ledgerSource).size,
+    'dated, titled ledger entr(ies)', ledgerPath);
+  let tracked;
+  try {
+    tracked = trackedMarkdown(cwd);
+  } catch (err) {
+    refuse('check-closures',
+      `\`git ls-files\` could not list the documents to check: `
+      + `${err.code ?? err.message}. The checkout is what to repair here, `
+      + `not a closure marker.`);
+  }
+  requireEntries(
+    'check-closures', tracked.length,
+    'tracked markdown file(s)', "`git ls-files -z '*.md'`");
+  const { violations, markers, docs } = checkRepository({ cwd, ledgerPath });
   for (const v of violations) {
     const level = v.held === 'seat' ? 'error' : 'warning';
     console.log(`::${level}::${v.rule}: ${v.message}`);
