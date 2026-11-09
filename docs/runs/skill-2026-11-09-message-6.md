@@ -86,6 +86,14 @@ greps its siblings and fails when a direct call reappears. Measured per
 pass of the suites with `TMPDIR` pointed at an empty private directory:
 **102 directories before, 0 after.**
 
+**The repair does not cover this run's own harness, and that is in the
+module's header rather than discovered late.** The harness kills a suite
+at its first failing test, which is SIGKILL, and a SIGKILLed process
+never runs its exit handler. The second pass therefore still left about
+3,200 directories behind, one set per killed mutant, and this run removed
+them by prefix at the end. A survey that wants the cap and the cleanup
+both has to let each suite exit on its own and pay the full runtime.
+
 **A measurement this run got wrong first and is naming rather than
 smoothing.** Counting entries in `/tmp` before and after a run reported
 146 before the fix and 221 after it, which reads as the fix making things

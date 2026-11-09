@@ -182,6 +182,14 @@ full disk at 129 of about 380 verdicts, and it had every one of them because
 they were appended rather than held in memory. The second attempt is what this
 table reports.
 
+**The cap and the cleanup are in tension, and the survey loses.** Killing the
+suite at the first `not ok` sends SIGKILL, and a SIGKILLed process never runs
+the exit handler that removes its fixtures. So the second pass still left
+about 3,200 directories behind, one set per killed mutant, which is the
+limitation `tmp-fixture.mjs`'s header names rather than a new one. A survey
+that wants both has to let each suite exit on its own and pay the full runtime,
+or clean up after itself by prefix, which is what this run did by hand.
+
 **And the thing that actually killed the first attempt was the suites
 themselves.** Running a suite once per mutant multiplied a per-pass leak of
 102 temporary directories by the mutant count until `/tmp` reached 45G of 45G
