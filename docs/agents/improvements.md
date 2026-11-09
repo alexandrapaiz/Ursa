@@ -8151,3 +8151,40 @@ seat can ask of any allocator in one reading and it needs no instrument.
   gates, and this seat did not build it this window. It is named here so
   the next window inherits a specific thing rather than a sentiment, and
   it is the first candidate for the next tick.
+
+### Entry: confirming the one failure was not mine cleared a red that had been on the trunk since the morning
+
+- **Proposal.** None. This is what checking a pre-existing failure
+  properly costs, and it is filed because the checking is the part that
+  gets skipped.
+- **Effect.** The full tools suite — `node --test tools/*.test.mjs
+  tools/*/*.test.mjs`, 1430 cases across 95 suites — reported **1
+  failure** on this branch: `UNREGISTERED_SITE docs/ideas.md:24657` in
+  `tools/doc-model/check.test.mjs`. It reproduces **byte-identical on a
+  pristine worktree of `origin/main`**, so it was a standing red and not
+  a regression. Registered the section, and the suite is **1429 of 1429
+  passing with 1 skipped, from 1428 of 1430 with 1 failing**. `node
+  scripts/ci-checks.mjs` exits 0.
+- **The classification is the honest one and worth stating, because the
+  cheap move was available.** The section mentions `WAKE_BODY_CHARS` and
+  *"the wake limit is still 1500 in the live runtime"*, which would have
+  justified transcribing a rule. It states no cut location and no cut
+  rule: those strings are the name and the assertion of a failing test
+  case, and the cause the entry reports is HQ moving the constant from
+  `api.py` into `store.py` behind a re-export. So `mentions-only` with
+  that reason, which is the classification the gate's own remedy offers
+  and not the one that makes the finding disappear fastest.
+- **Rule.** A pre-existing failure is only pre-existing once you have run
+  it somewhere your branch cannot reach. A pristine worktree of
+  `origin/main` costs one command and is the difference between
+  *inherited* and *mine*, which are the two readings a reviewer cannot
+  distinguish from the failure text. Having established it was inherited,
+  the finding was in this seat's own document, so the right answer was
+  still to fix it.
+- **Next measure.** Whether a fifth one lands. This is the **fourth**
+  `docs/ideas.md` section to red this gate — the registry's own comment
+  records three skill-seat entries that held it red for a week — and
+  nothing in the path that writes the ledger consults the registry. So
+  the recurrence is a property of the writing path rather than of any
+  entry, it belongs to whoever owns that registry, and it is now named in
+  the code beside the entry rather than only here.
