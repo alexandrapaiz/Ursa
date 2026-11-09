@@ -5,7 +5,8 @@ an obligation. Two of the four were red-workflow notifications for the same
 branch, and the thing worth saying about them first is that neither needed a
 repair.
 
-**Nothing severe. No secret found, nothing to rotate.** Four findings, all
+**Nothing severe. No secret found, nothing to rotate. No advisory above `low`
+in either package.** Four findings, all
 fixed. Two reds and one standing condition retired by reference rather than by
 work. Two ledger entries. Two of the four findings were not looked for: they
 arrived as reds on this branch that `main` had put there, which is the same
@@ -261,11 +262,40 @@ history, and that the blob carrying the untruncated value is still reachable on
 to rotate in a session identifier. It is restated here only so that a reader of
 this report is not left thinking it was closed by the two greens above.
 
-**Dependencies.** Not re-run. `dep-floor.mjs` reads `npm audit --json` against
-the public registry and is registered `needs-network` for that reason; this
-sandbox's network reaches GitHub and the board and the registry check was not
-attempted, so this report claims nothing about advisories today. Run 15's
-report is the most recent that does.
+**Dependencies.** Run, and this paragraph replaces an earlier draft of itself
+that said the registry was out of reach. It is not: `npm audit` resolves
+advisories from here.
+
+| package | critical | high | moderate | low |
+|---|---|---|---|---|
+| `ursa-minor` | 0 | 0 | 0 | 3 |
+| `ursa-major` | 0 | 0 | 0 | 0 |
+
+The three are one chain, not three problems: `deepmerge` at `>=4.2.0`, reached
+through `@shadcn/registry` and `shadcn`. That is the component-scaffolding tool
+rather than anything the site serves, both of the outer two are
+development-time, and all three are `low`. Nothing here is urgent and nothing
+needs the owner today.
+
+**One caveat on the `ursa-major` row, because a zero is the easiest number to
+read too well.** `ursa-major/node_modules` is absent in this sandbox, so that
+audit resolved from `package-lock.json` alone. That is a real reading and not a
+silent failure, the report being well-formed with a complete metadata block at
+exit 0, but it is a reading about the lockfile rather than about an installed
+tree. The install was not attempted on purpose: three of this host's npm
+installs were lost in twenty minutes earlier today to a shared home cache
+(`env-facts`, `npm-cache-is-a-shared-home-path`), and that fact's first
+guard is not to run a concurrent install in one sandbox.
+
+**Surfaces this charter names that this repository does not have.** `mcp/`,
+`site/`, `digests/` and `pipeline/` are all absent, so the charter's
+`mcp/server.py` section, its `npm audit in site/` instruction and its
+`digests/` boundary rule have no subject here. That follows from the activation
+note at the top of the charter, which says the alexandria-specific references
+do not carry over; it is written down because a section of a charter with no
+subject and no note reads, to the next run, exactly like a section that was
+skipped. The live equivalents are `ursa-minor` for the site and `ursa-major`
+for the product, and both are covered above.
 
 **Workflows.** Posture unchanged from run 15, which read and recorded it. One
 observation added, in the untested-tip paragraph above: `redaction-gate.yml` is
