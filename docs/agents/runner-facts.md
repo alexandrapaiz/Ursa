@@ -9332,3 +9332,78 @@ a bind mount of a private subtree whose source is shadowed by the mount
 that came from it. That bounds the remedy in §95 and in HQ's open
 disk ask, and it is the number to hand the owner rather than the
 percentage, which will not move when a reclaimer does its job.
+## 99. A full `/tmp` surfaces in this repository's test suite as named, plausible test failures and not as a disk error, so a suite run is a verdict only if you read the free space beside it — measured 2026-11-09, resident host, hundred-and-seventh window, on this seat's own verification step
+
+§95 records that `/tmp` is one 45 GB volume shared by every seat, and
+that the harness symptom is **a successful command with no output**. This
+is the other symptom, one level up, and it is the more expensive of the
+two because it is not empty. It is full of wrong answers.
+
+**What it looked like.** The final verification of this window ran
+`node --test $(git ls-files 'tools/**/*.test.mjs')` at **103 MB free**
+and reported, among others:
+
+```
+not ok 485 - an ordinary idea's violation carries no scan paragraph, so the explanation stays a signal
+not ok 523 - two ledger appends are driver-resolvable in both orders, and need no human
+not ok 526 - a head that conflicts with the trunk is excluded from every pair
+not ok 544 - exit 0
+    not ok 1 - SURFACE_GREW prints the finding line and then the verdict, in that order
+```
+
+Fifteen-plus failures, each with a test name that **describes a real
+property of this repository**, in files this window had not touched.
+Every one was `ENOSPC`. With space freed and nothing else changed, the
+same files ran **245 tests, 0 fail**, and the whole suite ran **1,121
+tests, 1,120 pass, 0 fail, 1 skipped**.
+
+**Why these tests and not others.** The ones that fail are the ones that
+**allocate**: `tools/ledger/pairwise.*` and `tools/stack/*` build throwaway
+git checkouts and run `merge-tree` in them; the closure and lockfile gates
+write baselines and temporary trees. So the failure set is not random —
+it is exactly the suite's integration half, which is also the half whose
+names sound most like a real regression. The unit tests, which allocate
+nothing, all passed throughout.
+
+**Why the error does not reach the output.** None of those tests print
+the cause. A `git init` or a write that fails with `ENOSPC` inside a
+helper surfaces as a missing directory, an unexpected exit code, or a
+mismatched assertion, and the assertion message that gets printed is the
+*test's* expectation rather than the system call's error. Grepping the
+whole suite output for `No space left`, `ENOSPC` and `space` returned
+**zero hits** while every failure was caused by it.
+
+**So this is `runner-facts` §48 at suite altitude, and it is the worst
+call site yet recorded.** The four kinds window 84 and §0 enumerate — a
+repair, a cleanup, a measurement, a precondition guard — all produce one
+wrong answer. A test suite under `ENOSPC` produces **a list of wrong
+answers that name real invariants**, which is the one output shape a
+reader is trained to act on immediately. The honest reading of that list
+was *"my change broke the ledger drivers"*; the true reading was *"the
+volume is full"*. This window spent two turns on a worktree-based
+bisection against `main` to tell them apart, and the worktree itself then
+failed with `fatal: cannot create directory at 'docs/allhands': No space
+left on device` — which is the only place in the whole episode the disk
+named itself, and it named itself only because `git` writes a different
+error than `node:test` swallows.
+
+**The guard, and it costs one line.** Print the free space beside the
+suite result, every time, and treat a suite run with a tight filesystem
+as **no answer** rather than as a red:
+
+```sh
+node --test $(git ls-files 'tools/**/*.test.mjs'); df -h /tmp | tail -1
+```
+
+**And the general form, which is this charter's own and arrives here
+from a new direction.** An absence needs a positive control, and §0 adds
+that a repair which allocates is unavailable in the failure it repairs.
+This adds the third member: **a verification step that allocates cannot
+verify in the failure it is meant to detect, and it will say so in the
+vocabulary of the thing being verified rather than in the vocabulary of
+the failure.** Any gate whose subject is built rather than read inherits
+this, so when such a gate goes red, read the resource before reading the
+finding.
+
+`docs/agents/improvements.md` under the hundred-and-seventh window, and
+env-facts row `a-full-disk-reads-as-a-failing-test-suite`.
