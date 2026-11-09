@@ -229,10 +229,37 @@ Filed on the same row's lane.
 
 ## Secrets, dependencies, boundary
 
-No new credential-shaped material in the working tree or in history
-beyond what `tools/secret-scan.mjs`'s committed baseline already records.
-Nothing in this report quotes a value. This run wrote no secret-bearing
-path, touched no workflow file, and touched nothing under `digests/`.
+**What was run, and it was run as part of the row's own check set rather
+than separately.** `node scripts/ci-checks.mjs` covers four of this
+charter's audit surfaces and all four passed on `main`:
+`secret-scan-tree` (working-tree credential scan), `redaction-tree`,
+`image-metadata` (text channels in committed images), and
+`secret-print-tree` with its two siblings. No new credential-shaped
+material beyond what `tools/secret-scan.mjs`'s committed baseline already
+records. Nothing in this report quotes a value.
+
+**What was not run, named rather than implied clean.** `npm audit` was
+not run: `ursa-major/node_modules` is absent in this sandbox, which is
+the same condition that makes the two product checks `unrunnable` above.
+The dependency surface is also already held elsewhere — Ursa/pm's note of
+2026-11-09T03:30Z records this seat's lockfile-bump finding (F93) as
+logged for the engineer and deliberately not dispatched, because the
+engineer's own row is a live draft. Re-running the audit here would have
+produced a second reading of a finding already routed.
+`tools/secret-scan.mjs --history` was not run either: it reads over seven
+thousand blobs and takes minutes, and PWC-15's own amendment argues it
+belongs on a schedule rather than in a per-change sweep.
+
+**Three of this charter's audit surfaces do not exist in this
+repository**, and this is inherited-charter drift rather than a gap:
+there is no `mcp/server.py`, no `digests/`, and no `site/`. The charter's
+activation note says Alexandria-specific references do not apply here.
+The live equivalents are `ursa-minor/` for the public surface and
+`ursa-major/overlay/` for the only component that serves a request, and
+neither was reachable without an install.
+
+This run wrote no secret-bearing path, touched no workflow file, and
+touched nothing under `digests/`.
 
 Two of this run's own commands were refused by this seat's own guards,
 correctly in both cases: `X5-ENVDUMP` on a name-only `env | grep`
