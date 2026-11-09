@@ -145,7 +145,7 @@ named data shape, not a verb.
 | **C** | `check-ids.mjs` | `id-verdict.mjs` | A `Finding[]` and a `Census`, in; a `Verdict` object, out. No printing happens in the verdict module and no verdict is computed in the program. |
 | **D** | `id-verdict.mjs` | `check-ids.mjs` | `Verdict`, the object defined in `tools/gates/verdict-shape.mjs`: `{exitCode, stream, position, line, trailer, derivedFrom, cause, cites, quoted}`. |
 | **E** | `id-verdict.mjs` | `tools/gates/verdict-shape.mjs` | A `GateSpec`, passed to `describeGate()`, which throws on a spec missing a locus naming pattern. |
-| **F** | `tools/gates/enumerate-verdicts.mjs` | `id-verdict.mjs` | The `GATE` export, imported by path from that file's `REGISTRY` array, where `'./../registers/id-verdict.mjs'` is the sixth entry as of this commit. |
+| **F** | `tools/gates/enumerate-verdicts.mjs` | `id-verdict.mjs` | The `GATE` export, imported by path from that file's `REGISTRY` array, where `'./../registers/id-verdict.mjs'` is the ninth of twelve entries as of 2026-11-09; it was the sixth of six when this document was written, and the position is incidental rather than meaningful. |
 | **H** | `tools/registers/registers.json` | `tools/registers/id-verdict.test.mjs` | The `registers` array's `path` fields, as a `Set<string>`. Read only by the test and never by a program at runtime: the assertion is that every path there appears in `id-namespaces.json` either as a namespace's `register` or as an `excluded` entry, which is what makes an unaccounted-for register a red test rather than a silence. Added 2026-11-09; see §9.4. |
 | **G** | `check-ids.mjs` | the terminal | One block per collision naming the identifier, the count of distinct definitions, the holder of the repair and every defining line; then the single verdict sentence; then `process.exit(verdict.exitCode)`. |
 
@@ -418,10 +418,19 @@ bash tools/ensure-full-clone.sh
 # Both suites, 72 cases as of 2026-11-09, 62 when this document was written.
 node --test "tools/registers/id-verdict.test.mjs" "tools/registers/check-ids.test.mjs"
 
-# The whole repository's node suites, 421 cases, after this branch.
+# The whole repository's node suites. 1425 cases, 0 failures, measured
+# 2026-11-09 on this branch; this document said 421 when it was written, and
+# the growth is five weeks of other seats' gates rather than this change.
+# Before the closure repin on the next line it reported one failure, and that
+# failure was #823's rather than this branch's.
 node --test "tools/**/*.test.mjs" "scripts/*.test.mjs"
 
-# The verdict-branch enumeration, which now carries a sixth gate.
+# The pin a dependency change moves, regenerated rather than hand-edited.
+node tools/registers/check-closure.mjs --write
+
+# The verdict-branch enumeration. 56 branches across 12 extracted gates,
+# unchanged by this branch. This line said "a sixth gate" when written, which
+# was `id-verdict.mjs`'s position in REGISTRY then and is its ninth now.
 node tools/gates/enumerate-verdicts.mjs
 ```
 
