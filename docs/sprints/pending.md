@@ -2,6 +2,70 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (eighth pass): three Tier B merges swept from the open queue, one code conflict handed to engineer and exo each, nothing waits on you
+
+Triggered by the same event as the seventh pass (frontend's `#756`,
+already merged by that pass) plus the standing block naming `#763`
+and `#764`. Checked `#763`/`#764` fresh with `tools/check-draft-prs.sh`
+rather than trusting the seventh pass's own timestamp: still live
+(idle 0-4 minutes), so still no action. Then read `gh pr list --state
+open` in full, per the standard's own standup instruction, rather than
+stopping at the PRs named in the wake.
+
+1. **Three ready pull requests that no earlier pass this hour had
+   reached merged under Tier B.** `#757` (security, the secret-print
+   guard and its PreToolUse hook), `#758` (engineer, `parseDay`/
+   `compareDays` added to `tools/instant.mjs`) and `#752` (market, the
+   16th brief) were all green, not drafts, no `hold` label, no comment
+   against them, and clean or cleanly resolvable against the trunk.
+   `#752` conflicted with `#758` in `docs/ideas.md`, docs-only and
+   append-only (both entries kept, same pattern the six-hour pass used
+   earlier today), so resolved and merged rather than handed back.
+   Full account in `docs/agents/pm-2026-11-09-message-8-run.md`.
+2. **One code conflict hand off to engineer, corrected.** `#759` (exo,
+   window 96) now conflicts with the merged `#758` in
+   `tools/seat/read-dates.mjs`, both seats having edited the same
+   lines this hour. Not docs-only, so not mine to resolve under §10's
+   Tier B condition 5. Posted a handoff to exo on the board naming the
+   exact file and asking for a rebase; will merge under Tier B as soon
+   as it is clean and green again.
+3. **`#730` (exo's seven-day-old charter lane) is genuinely Tier B, not
+   Tier C, but the conflict is bigger than its own author measured.**
+   `tools/check-tier.sh` confirms Tier B: the lane touches
+   `prompts/pm-agent.md` but no hunk of it names the authority grant
+   §21 reserves to the owner, so this is mine to merge, and the eleven
+   charter files are genuinely the only content in it that main does
+   not already hold in some form. But `git merge-tree` against the
+   current trunk shows the conflict is not the four registers exo's
+   own note named: `docs/agents/runner-facts.md` also collides, and
+   five `tools/seat/*` files come back `add/add` against the
+   already-merged split-off lane (`#738`). The registers are
+   docs-only and mine to take; the five tool files are code and are
+   not. Replied to exo naming the gap and suggesting a fresh branch
+   carrying only the charter files, rather than resolving any of it
+   unilaterally this pass. Nothing waits on you here either; this is a
+   seat-to-seat handoff, not an owner decision.
+
+**A process finding for the next ceremony, not actioned mid-week.**
+Exo's own daily measurement (first run on 936 recorded runs) finds
+this seat's median turn-to-first-push is 35 against the standard's
+deadline of 10, the slowest of eleven seats, and that seven of the
+company's ten lost ("never shipped") runs this week are this seat's,
+all of them message-triggered. Exo reads this as shape rather than
+carelessness (`this seat runs most often and is woken by mail most
+often`) and asked nothing back. Carrying it to Monday's retro rather
+than guessing at a fix here, because the eighth pass this run alone
+took longer to its first commit than the standard allows, for the same
+reason: a `gh pr list` and `git log` survey before any commit, which a
+tighter standup would need to trim.
+
+Separately, the same measurement found 28 of this company's last 58
+merge decisions carry no PR number in any `done` message's `data`
+field, several of them this seat's own earlier passes today. This
+run's own `done` carries `data.merged` for that reason; worth stating
+as a standing habit rather than a one-time fix, in case the next
+ceremony wants to make it a checklist line.
+
 ## Top three for the owner, 2026-11-09 message-triggered (seventh pass): #756 merged, the standing claim on #763/#764 checked live and found already false, nothing waits on you
 
 Triggered by one event, frontend's `#756`, and the standing block
