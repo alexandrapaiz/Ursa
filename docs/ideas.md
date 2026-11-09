@@ -23095,3 +23095,55 @@ same conflation inside it.
   are reports with named holders rather than work withheld.
 - Cost: $0
 - Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): the evidence guard fingerprints a span, so a claim can be falsified from outside the span and stay green
+
+### 2026-11-09 — A citation's span went green by relocating while the sentence it backs was being retired forty-one lines below it
+
+- Trigger: clearing the sixteen drifted citations the library's evidence
+  guard reports, which is receipts work this seat owns. Fifteen were line
+  moves and are repaired in this branch. The sixteenth, E45 of
+  `clearing-a-record-for-release`, relocated cleanly from
+  `docs/security/redaction-standard.md:230-244` to `234-248` with the
+  text byte-identical, so the guard had nothing to say about it. Reading
+  the commit that moved it is what found the problem: 5cfb9006 also
+  appended a section saying the cited claim drew one inference too many.
+- What: `skills/check-evidence.mjs` records a content hash per cited
+  range, which makes it exact about one question and silent about the
+  neighbouring one. It answers whether the bytes a citation points at
+  still say what they said. It cannot answer whether the document still
+  means it. Here the cited span is the 2026-10-26 note on the redaction
+  gate's `grep -I` limit, unchanged and still true, and the skill's
+  sentence built on it was "the gate cannot help here at all" and "the
+  rendered half is checkable by nothing". Section 7, added 2026-11-09
+  forty-one lines further down the same file, says that conclusion was
+  one inference too many and names a gate that now holds the provenance
+  half. Nothing in the library's eight guards reads that, and
+  `relocate-anchors.mjs` correctly classified the citation as settled,
+  because by its own question it was. The near miss is the sequence: a
+  blanket `--update` would have cleared all sixteen at once and this one
+  would have gone green carrying a false sentence, which is the trap the
+  2026-11-02 entry "The gate that catches a moved citation cannot tell a
+  moved line from a wrong section, and the blanket update is the trap"
+  names from the other side. That entry is about an update hiding a
+  change inside the span. This one is about a change outside the span
+  that no update and no refusal could have surfaced.
+- First step: when a commit moves a citation, read that commit rather
+  than only the span, because the diff is already in hand and it is the
+  one place a contradiction elsewhere in the file is visible for free.
+  Concretely, `relocate-anchors.mjs` takes the old ref as its argument
+  and already knows every path it relocated in, so it can end by printing
+  `git log --oneline <old-ref>..HEAD -- <those paths>` for the seat to
+  read, which costs nothing and is not a gate. A gate is the wrong
+  instrument: whether a new paragraph contradicts an old claim is a
+  reading, and this library has already declined one guard for being
+  priced against too small a population. Population today is one of
+  sixteen, and the honest claim is that it is the first instance anyone
+  has looked for rather than the first that has happened.
+- What this run did instead of waiting for that: narrowed E45 to the part
+  the span still supports, added E46 for the new section, and rewrote the
+  skill's paragraph to carry the correction rather than swap it silently,
+  since a claim that outran its evidence is the thing that step of the
+  skill teaches.
+- Cost: $0
+- Status: proposed
