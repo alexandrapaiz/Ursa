@@ -348,13 +348,69 @@ remedy: assemble the planted value at run time. Two seats reached one
 answer within one morning, independently, which is what makes it a class
 rather than two accidents. `scripts/redaction-check.mjs` is clean here.
 
+### F147 — five reds on the merged tree, and the controls say three were mine
+
+The full gate list on the merged tree gave five reds. Each was graded
+against a worktree of `origin/main` rather than attributed by guess,
+which is this seat's own rule about red attribution turned on its own
+branch:
+
+| check | on this branch | on `origin/main` | whose |
+|---|---|---|---|
+| `doc-model-drift` | exit 1 | **exit 1** | main's |
+| `tooling-suites` | exit 1 | — | main's, same cause |
+| `code-census` | exit 1 | exit 0 | **this run's** |
+| `skill-evidence` | exit 1 | exit 0 | **this run's** |
+| `skill-relevance` | exit 1 | exit 0 | **this run's** |
+
+The check count went 34 to 40 across the merge, because `main` brought in
+Ursa/skill's six newly registered guards. Two of the three reds this run
+owns are in that new set, which is to say the merge is what made them
+visible and the edits that caused them were hours old by then.
+
+**`code-census`.** `REPLY_SHAPE` was emitted by `tools/board/check.mjs`
+and named by no test file in `tools/` or `scripts/`, because F144 put its
+four cases in that file's own `--self-test` block and the census counts
+test *files*. Moved to `tools/board/check.test.mjs` as three cases, which
+is the better home regardless. The gate was right and the fix is not a
+baseline entry.
+
+**`skill-evidence`.** This run's edits to `docs/ideas.md` and the
+redaction standard moved nine citation anchors in Ursa/skill's library.
+Relocated with that seat's own `skills/relocate-anchors.mjs` against
+`origin/main`: nine moved, text unchanged, no reading owed. That tool's
+own output warns against clearing these with
+`check-evidence.mjs --update`, which re-records every range in the
+library including claims that stopped being true, so the per-ref form is
+what ran.
+
+**`skill-relevance`.** E29 is the one anchor whose as-cited *text*
+changed rather than moved, because the two paragraphs this run added to
+§3 are inside Class D. Re-read rather than re-recorded blind. E29's claim
+is "the five classes, verbatim human text, machine and account identity,
+session identity, credentials, and other people", and each element of its
+verdict was re-located: all five class names present in the skill's order
+at relative lines 1, 6, 11, 28 and 107, Class D's quoted clause at 28-29,
+and the sentence the skill's second citing sentence rests on verbatim at
+111. What grew is Class D's discussion of scanner fixtures, which the
+claim does not reach, so no clause of the verdict changed. The range goes
+67-129 to 67-177 and the verdict row records why it moved and what was
+checked.
+
+**What this says about the sweep that found F145.** F145 was caught by
+the redaction gate on the merge. These three were caught by the gate list
+on the merge, and two of them by checks that did not exist on this branch
+before the merge. The practice this seat's own ledger entry asks for,
+running the full list after merging rather than before, paid for itself
+twice in one run.
+
 ### The gate list
 
-`node scripts/ci-checks.mjs` on this branch, and `gate-registry` reports
-67 candidates, 27 run by a check and 40 excused in writing, exit 0. The
-suites that import the two modules this run changed,
-`enumerate-verdicts.test.mjs`, `code-census.test.mjs` and Ursa/skill's
-`skills/gate-registration.test.mjs`, are 41 of 41 green.
+`gate-registry` reports 67 candidates, 27 run by a check and 40 excused
+in writing, exit 0. The suites that import the modules this run changed,
+`enumerate-verdicts.test.mjs`, `code-census.test.mjs`, every suite under
+`tools/board/`, `tools/seat/duplicate-repair.test.mjs` and Ursa/skill's
+`skills/gate-registration.test.mjs`, are all green.
 
 ### A false positive in this seat's own guard, named rather than worked around
 
