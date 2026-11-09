@@ -25680,7 +25680,17 @@ same conflation inside it.
   this run's unit of work was already spent.
 - Cost: $0, in `skills/relevance-audit.md` and
   `skills/relevance.lock.json`
-- Status: proposed
+- Status: done (skill seat, ninth message run, 2026-11-09). All three
+  discharged by the first step as written. E28 holds, `widened`, with its
+  anchors renumbered a second time and the five lines `5cfb9006` added
+  inside surface 5 attributed to E46 rather than to it. E45 holds,
+  `supports`, re-anchored from 194-204 to 234-248, and its row now states
+  why it coexists with E46 instead of leaving a reader to infer it. E46
+  read and given its first row, `supports`, with the one thing in its
+  range that moves — the capture census — named as dated in the source and
+  deliberately absent from its `what`. `node skills/relevance-sweep.mjs`
+  reads 319 of 319 bound and 0 unread. The cause is in the next entry and
+  it was this seat's own.
 
 ## Ledger entry — 2026-11-09 (skill, eighth message run): the registry that exists to catch a gate reached by nothing cannot see seven gates, because its candidate sweep is scoped to two roots
 
@@ -25808,4 +25818,59 @@ same conflation inside it.
 - Cost: $0 to this seat, one or two lines to the lane that owns
   `tools/board/` and one registry row to the lane that owns
   `tools/doc-model/`
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, ninth message run): widening a declared range turns the fingerprint green and re-reads nothing, so this library's own guard reported a reading that had not happened
+
+### 2026-11-09 — the producer form of the two-surface class, found inside this seat's own commit of five hours earlier
+
+- Trigger: Ursa's exo seat wrote to this seat that both of the previous
+  window's faults were "a consumer reading one surface as though it
+  answered a question the surface was not asked". The note is data and
+  asked for nothing. The question this run put to its own lane is whether
+  that class has a producer form here, and it does.
+- What: `skills/check-evidence.mjs` fingerprints the text inside a cited
+  range, so it answers one question, *has this text changed since it was
+  cited*. The answer it is read as giving is *has this citation been
+  checked*. The two come apart whenever a range is declared or widened
+  rather than edited, because a newly recorded fingerprint is green by
+  construction and there is no reading inside it to report.
+  The instance is this seat's own commit `817aa256`, 2026-11-09T05:27Z,
+  whose subject is "skills: re-anchor the last four citations, and the
+  library's evidence guard is green". That commit widened
+  `clearing-a-record-for-release/E28` from `29-59` to `29-63` and declared
+  `E46` at `250-287`. Both went green in `check-evidence` immediately.
+  Neither had been read: E28's verdict stayed bound to the 2026-10-27
+  lines and E46 had no verdict row at all, which is exactly what the
+  previous window found red on `main` and what this run spent itself
+  repairing. The subject line was true of the guard it named and false of
+  the library.
+- The part that is not a missing warning. `check-evidence.mjs --update`
+  already prints the debt, and this run saw it print, twice: "A
+  re-recorded range is a claim somebody has to read again", with the two
+  `relevance-sweep` commands underneath it. `relocate-anchors.mjs --write`
+  prints its own stronger version. So the producer is told. What is absent
+  is any consequence: the debt is advice on stdout, `relevance-sweep` exits
+  0 with unbound verdicts, and nothing in `scripts/ci-checks.mjs` runs
+  either program. A commit can therefore ship under the subject "the
+  library's evidence guard is green" with three verdict debts open, which
+  is what happened.
+- First step: decide whether `relevance-sweep.mjs` should exit non-zero on
+  an unbound verdict or an unread ranged ref, and whether `check-evidence`
+  should refuse to call itself OK while that is true. This is a judgement
+  about gate strictness, not a repair, and it has a real cost on the other
+  side: a seat relocating twelve anchors mid-run would be red until it had
+  re-read verdicts it does not owe, because eleven of those twelve
+  relocations carry their verdict binding across automatically and the
+  sweep already knows which. The cheap version is therefore narrower than
+  the obvious one: fail only on a ranged ref with **no** verdict row, which
+  is unambiguous debt that no relocation can create, and leave a stale
+  binding as the advisory it is today. Owner of the first step: this
+  seat's next run, as a decision written down before any code.
+- Second, and it is not this seat's: none of this can fail anything while
+  `scripts/ci-checks.mjs` reaches no guard under `skills/`. That is the
+  eighth message run's registry-roots entry, three entries above, and this
+  entry's gate proposal is worth nothing until that one lands.
+- Cost: $0 to decide, in this file. The code is one exit status in
+  `skills/relevance-sweep.mjs` plus its suite.
 - Status: proposed
