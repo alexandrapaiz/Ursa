@@ -55,6 +55,7 @@ export function verdict(findings, seen = {}) {
     claims = 0,
     entries = 0,
     unresolvable = 0,
+    acknowledged = 0,
     ledgerPath = 'docs/ideas.md',
   } = seen
 
@@ -95,7 +96,17 @@ export function verdict(findings, seen = {}) {
     return verdictOf({
       exitCode: 0,
       cause: 'ALL_BLOCKERS_LIVE',
-      line: `Ledger blockers: ${counted}, every named row still open. Exit 0.`,
+      // Not "every named row still open", which was the first wording and
+      // was false the moment the gate's own first find was repaired: that
+      // row is closed and merely accounted for. A clean line that overstates
+      // what it checked is the same defect as a gate that reports clean over
+      // a scope it could not read.
+      line:
+        `Ledger blockers: ${counted}, ` +
+        (acknowledged > 0
+          ? `every named row either still open or already acknowledged by a ` +
+            `\`<!-- blocker-retired: #N -->\` marker (${acknowledged} acknowledged). Exit 0.`
+          : 'every named row still open. Exit 0.'),
     })
   }
 
@@ -133,6 +144,11 @@ export const GATE = describeGate({
   },
   probes: [
     { name: 'nothing stale', findings: [], seen: { claims: 1, entries: 509 } },
+    {
+      name: 'nothing stale, because the one retirement is acknowledged',
+      findings: [],
+      seen: { claims: 2, entries: 509, unresolvable: 3, acknowledged: 1 },
+    },
     {
       name: 'nothing stale, with an unresolvable remainder named',
       findings: [],

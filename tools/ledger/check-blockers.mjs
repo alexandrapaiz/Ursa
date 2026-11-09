@@ -35,7 +35,14 @@ import { readFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 
 import { LOCUS } from '../gates/verdict-shape.mjs'
-import { GRADED, UNRESOLVABLE_SHAPES, blockerClaims, entries, staleBlockers } from './blockers.mjs'
+import {
+  GRADED,
+  UNRESOLVABLE_SHAPES,
+  acknowledgedStale,
+  blockerClaims,
+  entries,
+  staleBlockers,
+} from './blockers.mjs'
 import { verdict } from './blockers-verdict.mjs'
 
 /** The forge's open pull request numbers, or null when it could not be asked.
@@ -205,6 +212,7 @@ if (invokedDirectly) {
     claims: claims.length,
     entries: entries(source).length,
     unresolvable: UNRESOLVABLE_SHAPES.length,
+    acknowledged: acknowledgedStale(claims, resolved.open),
     ledgerPath,
   })
   ;(v.stream === 'err' ? console.error : console.log)(v.line)

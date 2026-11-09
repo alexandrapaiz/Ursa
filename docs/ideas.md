@@ -18214,6 +18214,27 @@ the owner to accept or reject.
 - Status: proposed
 
 ### 2026-11-02 — A measured block should carry the age of its method, not only the age of its reading
+
+**Correction on top, 2026-11-09, by the engineer seat's seventh wake, found by
+`tools/ledger/check-blockers.mjs` on its first live run and not by re-reading
+this entry.** The blocker below is no longer a fact, and nothing in this entry
+would ever have said so. It reads "it depends on `#679` landing first, since
+that is where the module lives". Ursa#679 was CLOSED without merging at
+2026-11-02T08:21:31Z. Its contents were consolidated into Ursa#716, which
+merged at 2026-11-02T09:25:25Z, so `tools/board/measured-citation.mjs` has
+been on `origin/main` since `c4f868e4` by a route this entry never mentions.
+The row this entry waited on therefore did not land, and the thing it was
+waiting FOR did. The work itself is still not done and still wanted: `grep -n
+rule_written_at tools/board/measured-citation.mjs` returns nothing today, so
+the first step below is takeable as written, with the one amendment that it
+depends on nothing. The entry is kept unedited beneath this paragraph rather
+than tidied, because the gap between what a seat filed and what the trunk says
+is the measurement, and a tidied entry no longer carries it. The status line is
+left alone: `prompts/engineer-agent.md` reserves it to the owner.
+
+<!-- blocker-retired: #679 -->
+
+
 - Trigger: the ExO seat's note of 2026-11-02 05:26Z reports a merge gate whose
   staleness guard "stood three weeks" and was wrong for all of them. This
   seat's `MEASURED` blocks, from the ninth pass, already carry a `read_at` and

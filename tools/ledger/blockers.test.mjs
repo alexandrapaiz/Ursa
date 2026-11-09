@@ -15,6 +15,7 @@ import {
   BLOCKER_PHRASES,
   GRADED,
   UNRESOLVABLE_SHAPES,
+  acknowledgedStale,
   blockerClaims,
   declaredStatus,
   entries,
@@ -228,4 +229,65 @@ test('every unresolvable blocker shape says why it cannot be looked up', () => {
     assert.ok(s.shape.length > 5)
     assert.ok(s.why.length > 20, s.shape)
   }
+})
+
+test('a marker acknowledging the retirement clears the finding', () => {
+  // The defect this pins is the gate's own first shape: with no
+  // acknowledgement at all, the repair its exit-1 trailer prescribes leaves
+  // the blocker sentence in place, so the gate went red again on the entry it
+  // had just correctly fixed.
+  const marked = `${ONE_CLAIM}\n<!-- blocker-retired: #679 -->\n`
+  assert.deepEqual(blockerClaims(marked)[0].acknowledged, [679])
+  assert.equal(staleBlockers(blockerClaims(marked), new Set([])).length, 0)
+  assert.equal(staleBlockers(blockerClaims(ONE_CLAIM), new Set([])).length, 1)
+})
+
+test('a marker clears only the rows it names, so a second blocker reopens the finding', () => {
+  const two = `### T
+- First step: blocked on #679 and #680 landing.
+- Status: proposed
+
+<!-- blocker-retired: #679 -->
+`
+  assert.equal(staleBlockers(blockerClaims(two), new Set([])).length, 1)
+  assert.equal(staleBlockers(blockerClaims(two.replace('#679 -->', '#679, #680 -->')), new Set([])).length, 0)
+})
+
+test('a quotation of a blocker inside its own correction is also a claim, and one marker clears both', () => {
+  // Writing the correction on top means quoting the blocker sentence, so the
+  // entry ends up with two sentences that each state a blocker and name the
+  // same row. Both are claims; the acknowledgement is keyed on the reference
+  // and scoped to the entry, which is what clears both at once.
+  const corrected = `### T
+- First step: it depends on \`#679\` landing first.
+- Status: proposed
+
+Correction: it reads "it depends on \`#679\` landing first", and #679 is closed.
+
+<!-- blocker-retired: #679 -->
+`
+  assert.equal(blockerClaims(corrected).length, 2)
+  assert.equal(staleBlockers(blockerClaims(corrected), new Set([])).length, 0)
+})
+
+test('the clean line does not say "still open" over a row that is closed and acknowledged', () => {
+  const marked = `${ONE_CLAIM}\n<!-- blocker-retired: #679 -->\n`
+  const claims = blockerClaims(marked)
+  const ack = acknowledgedStale(claims, new Set([]))
+  assert.equal(ack, 1)
+  const v = verdict([], { claims: claims.length, entries: 1, acknowledged: ack })
+  assert.equal(v.exitCode, 0)
+  assert.doesNotMatch(v.line, /every named row still open\./)
+  assert.match(v.line, /already acknowledged/)
+  // And with nothing acknowledged it keeps the shorter, true sentence.
+  assert.match(verdict([], { claims: 1, entries: 1 }).line, /every named row still open\./)
+})
+
+test('acknowledgedStale counts nothing when the open set is unknown', () => {
+  assert.equal(acknowledgedStale(blockerClaims(ONE_CLAIM), null), 0)
+})
+
+test('the real ledger is clean, which is the gate running on its own repository', () => {
+  const out = execFileSync('node', [GATE, LEDGER, '--open', '679'], { encoding: 'utf8' })
+  assert.match(out, /Exit 0/)
 })

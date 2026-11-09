@@ -141,6 +141,36 @@ export function withoutListPrefix(sentence) {
     .trim()
 }
 
+/** The marker a seat writes into an entry once it has put the correction for
+ *  a retired blocker on top of it: `<!-- blocker-retired: #679 -->`, one or
+ *  more references, comma-separated or repeated.
+ *
+ *  WHY A MARKER AND NOT A PHRASE, which is the one thing about this gate that
+ *  was wrong by construction rather than by a typo. As first written it had
+ *  no acknowledgement at all, and the repair its own exit-1 trailer
+ *  prescribes — keep the blocker sentence and write the correction above it —
+ *  leaves the blocker sentence in the file, so the gate went straight back to
+ *  red on the entry it had just been used to fix correctly. A gate that fires
+ *  forever on repaired work is a gate a seat learns to pass over, which is
+ *  the failure `check-closures.mjs`'s header calls "a gate whose red light
+ *  only its author can clear is a gate nobody reads". That gate had already
+ *  solved this exact problem with exactly this mechanism, one HTML comment
+ *  carrying the key, and the shape is copied from it rather than invented so
+ *  a reader who has learned one of this directory's gates has learned both.
+ *
+ *  Lexical detection of a correction paragraph was the alternative and it is
+ *  rejected for the reason `tools/board/disposition.mjs` gives for keeping
+ *  its own word list out of a refusal: a miss here would silence a live
+ *  finding, which is the one direction this gate must not fail in.
+ *  @param {string} body @returns {Set<number>} */
+export function acknowledgedRetirements(body) {
+  const out = new Set()
+  for (const m of String(body || '').matchAll(/<!--\s*blocker-retired:\s*([^>]*?)\s*-->/g)) {
+    for (const n of m[1].matchAll(/#(\d{2,5})(?!\d)/g)) out.add(Number(n[1]))
+  }
+  return out
+}
+
 /** Every sentence in a ledger that states a blocker AND names the pull
  *  request it is blocked on, which is the only blocker shape a program can
  *  resolve. A blocker naming an owner action, a permission or an unnamed set
@@ -153,6 +183,7 @@ export function blockerClaims(source) {
   const out = []
   for (const entry of entries(source)) {
     const status = declaredStatus(entry.body)
+    const acknowledged = acknowledgedRetirements(entry.body)
     for (const sentence of sentences(`${entry.title}. ${entry.body}`)) {
       if (!BLOCKER_PHRASES.some((re) => re.test(sentence))) continue
       const refs = [...sentence.matchAll(PR_REF)].map((m) => ({
@@ -160,7 +191,13 @@ export function blockerClaims(source) {
         number: Number(m[2]),
       }))
       if (refs.length === 0) continue
-      out.push({ title: entry.title, status, sentence: withoutListPrefix(sentence), refs })
+      out.push({
+        title: entry.title,
+        status,
+        sentence: withoutListPrefix(sentence),
+        refs,
+        acknowledged: [...acknowledged],
+      })
     }
   }
   return out
@@ -176,6 +213,24 @@ export const UNRESOLVABLE_SHAPES = [
   { shape: 'a repository permission', why: 'resolvable, but against the Actions configuration rather than the pull request list, which is a second forge call this gate does not make' },
   { shape: 'an unnamed set of rows', why: '"the five blocked pull requests" names a count and no numbers, so there is nothing to look up' },
 ]
+
+/** Claims whose every retired row is already acknowledged by a marker, which
+ *  is what the clean line counts so a green run does not claim "every named
+ *  row still open" over a row that is closed and merely accounted for.
+ *  @param {ReturnType<typeof blockerClaims>} claims
+ *  @param {Set<number>|null} openSet
+ *  @returns {number} */
+export function acknowledgedStale(claims, openSet) {
+  if (!openSet) return 0
+  let n = 0
+  for (const claim of claims) {
+    const retired = claim.refs.map((r) => r.number).filter((x) => !openSet.has(x))
+    if (retired.length !== claim.refs.length || retired.length === 0) continue
+    const ack = new Set(claim.acknowledged ?? [])
+    if (retired.every((x) => ack.has(x))) n += 1
+  }
+  return n
+}
 
 /** Which claims are stale, given the forge's open set.
  *
@@ -198,6 +253,12 @@ export function staleBlockers(claims, openSet) {
   for (const claim of claims) {
     const retired = claim.refs.map((r) => r.number).filter((n) => !openSet.has(n))
     if (retired.length !== claim.refs.length) continue
+    // A retirement the entry already acknowledges is not a finding. Every
+    // retired row has to be acknowledged, not just one of them, so adding a
+    // second blocker to an entry that already carries a marker reopens the
+    // finding rather than inheriting the old acknowledgement.
+    const ack = new Set(claim.acknowledged ?? [])
+    if (retired.every((n) => ack.has(n))) continue
     out.push({ ...claim, retired, code: 'BLOCKER_RETIRED' })
   }
   return out
@@ -213,7 +274,7 @@ export const GRADED = {
   entry_scoped_hits: 7,
   entry_scoped_true_positives: 2,
   entry_scoped_false_positives: 5,
-  same_sentence_hits: 1,
+  same_sentence_hits: 2,
   same_sentence_false_positives: 0,
   // THESE NUMBERS WERE 4 AND 2 FOR THE FIRST HOUR OF THIS FILE'S LIFE, and
   // `--grade` is what found them wrong, on its first live run, against the
@@ -263,4 +324,17 @@ export const GRADED = {
   // rule gets the right answer on it for a reason unrelated to why it is
   // right. That is luck, not a property.
   known_miss: '2026-11-09 — Filed, then taken in the same run: phrase and number in different sentences, and already repaired in place',
+  // THE SECOND SAME-SENTENCE HIT IS THIS RUN'S OWN CORRECTION, and it is
+  // correct behaviour rather than noise. Writing the correction on top of the
+  // 2026-11-02 entry meant QUOTING the blocker sentence, so the entry now
+  // carries two sentences that each state a blocker and name #679: the
+  // original and the quotation of it inside the paragraph that retires it.
+  // Both are claims and both are cleared by the one
+  // `<!-- blocker-retired: #679 -->` marker, which is the reason the
+  // acknowledgement is keyed on the reference and scoped to the entry rather
+  // than counted per sentence. A gate that cleared only the first would go
+  // red on the repair, and a gate that stopped counting quoted blockers
+  // would need to tell a quotation from a statement, which is not a thing a
+  // regular expression can do.
+  same_sentence_hits_after_this_run_s_own_correction: 2,
 }
