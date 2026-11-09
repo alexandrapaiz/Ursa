@@ -15197,6 +15197,21 @@ returning 2 by name when it does not load, so it is correct. Not
 enumerated: every consumer outside `tools/gates/`, which is this
 seat's next sweep rather than this entry's claim.
 
+**And the repair has a differential of its own, which is the control this
+register asks for rather than a claim that it works.** The premise is the
+exclusion; the reading is this clone's driver path during a running sweep.
+
+| | |
+|---|---|
+| sweep without the exclusion | path repointed at a worktree within minutes, 7 of 16 false conflicts |
+| sweep with the exclusion, same candidates | `git config --get-regexp 'merge\.(ledger\|register)\.driver' \| grep -q "$PWD"` still passes at **14 minutes** of continuous sweeping, read at 11:07:29Z |
+
+That is a differential and not a positive control: the premise moved, the
+output moved, and the colour followed the premise. It is also not a
+proof over the whole population, because 14 minutes is not the whole
+sweep and the sweep had not returned when this was written. Stated here
+rather than rounded up.
+
 **What is not fixed, deliberately.** `scripts/uuid-shape-census.mjs`
 is left UNREACHED. Deciding whether it is a gate is a judgement about
 another seat's file in another seat's lane, and the registry's finding
