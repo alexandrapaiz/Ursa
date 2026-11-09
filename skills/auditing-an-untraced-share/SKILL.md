@@ -11,6 +11,8 @@ description: >
   on a published index, and for deciding whether a commissioned
   collection can be priced off a no-provenance figure. Does not fire for
   deciding the label on any one span the resolver flagged `uncertain`,
+  for deciding what destroyed a `generated_deleted` span, for deciding
+  whether a whole file was properly kept out of the record,
   for choosing a denominator or comparing two records' percentages, for
   choosing a trial subject or running the capture, for turning labels
   into tuning axioms, for writing a rule about records into the record
