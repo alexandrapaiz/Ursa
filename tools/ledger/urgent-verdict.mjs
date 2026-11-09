@@ -370,8 +370,8 @@ export function probesIn(text, isTracked) {
  *
  *   disposition        shallow clone   complete clone
  *   holds                          0                3
- *   symptom-cleared                2                3
- *   unverifiable                  18               14
+ *   symptom-cleared                2                4
+ *   unverifiable                  18               13
  *
  * The count that moves most is the one a reader acts on first, and it moves
  * from zero. A report whose headline is "0 still failing a probe they name" is
@@ -642,7 +642,7 @@ export function cloneLines(clone, cloneWhy = []) {
       + 'truncated graph. Measured on 2026-11-09 over this same ledger at the same commit, the '
       + 'shallow single-branch clone every seat is handed reported 0 entries still failing and 18 '
       + 'with no measurement; the same tool after completing the clone reported 3 still failing and '
-      + '14 with no measurement. The number that moves is the one a reader acts on first, and it '
+      + '13 with no measurement. The number that moves is the one a reader acts on first, and it '
       + 'moves from zero. Two columns, entry by entry: docs/design/clone-aware-recheck.md section 2.',
       ...cloneWhy.map((w) => `  clone: ${w}`),
     ]

@@ -36,7 +36,7 @@
 // headline count was being read as a fact about the repository when it was a
 // fact about the checkout. Run twice on 2026-11-09 over the same ledger at the
 // same commit: 0 entries still failing before `bash tools/ensure-full-clone.sh`
-// and 3 after, 18 with no measurement before and 14 after. So the first thing
+// and 3 after, 18 with no measurement before and 13 after. So the first thing
 // this tool now does is ask `bash tools/ensure-full-clone.sh --check`, and the
 // answer is printed with the counts. It does NOT repair the clone: completing a
 // clone fetches 4,700 commits and 334 branches, and a reporting tool that

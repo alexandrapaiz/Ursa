@@ -663,7 +663,7 @@ describe('cloneLines: the report says what its counts are a measurement of', () 
     assert.match(lines, /describes this checkout and not this repository/)
     assert.match(lines, /bash tools\/ensure-full-clone\.sh/)
     assert.match(lines, /0 entries still failing and 18 with no measurement/)
-    assert.match(lines, /3 still failing and 14 with no measurement/)
+    assert.match(lines, /3 still failing and 13 with no measurement/)
     assert.match(lines, /clone: depth: \.git\/shallow is present/)
   })
 
