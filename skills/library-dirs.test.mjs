@@ -54,6 +54,19 @@ test('a directory with frontmatter but no near miss is still reported, more quie
   assert.equal(d.frontmatter, true)
 })
 
+test('a non-markdown file whose first line is a fence is not frontmatter', () => {
+  // The 2026-11-09 mutation survey's one real survivor here. The frontmatter
+  // probe reads `.md` files only, and swapping the `||` in its guard for `&&`
+  // sends it into every other file in the directory instead. A `record.json`
+  // or a `notes.txt` whose first line is `---` would then make a scratch
+  // directory look like a skill with a claim in it, which is the one thing
+  // this signal exists to distinguish.
+  const dir = library({ fixtures: { 'record.yml': '---\nkind: fixture\n', 'notes.txt': '---\nnote\n' } })
+  const [d] = unreadDirs(dir)
+  assert.equal(d.frontmatter, false)
+  assert.equal(d.nearMiss, null)
+})
+
 test('a plain directory trips neither signal and is reported with both false', () => {
   const dir = library({ fixtures: { 'record.json': '{}\n' } })
   const [d] = unreadDirs(dir)
