@@ -210,7 +210,43 @@ export function wakeReceipt(body, limit = WAKE_BODY_CHARS) {
  *  only predicts. Exported because `wake-cost.mjs` grades what this membership
  *  buys, and a gauge that carried its own copy of the set would agree with the
  *  guard only on the day it was written — which is the rule window 103 wrote
- *  about the bypass hook and then did not apply to its own instruments. */
+ *  about the bypass hook and then did not apply to its own instruments.
+ *
+ *  WIDENING THIS IS THE REGISTERED EXPERIMENT OF 2026-11-09, window 107, and
+ *  it is deliberately NOT done here. `docs/agents/improvements.md` under the
+ *  hundred-and-seventh window carries the hypothesis, the metric, the read
+ *  date and the one-line diff.
+ *
+ *  Why the measurement is not enough to move it inside one run. Two windows
+ *  declined to widen this with reasons on the record, and those reasons are
+ *  encoded in FIFTEEN assertions across four test files — "a note is told and
+ *  sent" is asserted, not assumed. So the narrow scope is load-bearing in this
+ *  repository rather than an incidental literal, and the window that changes
+ *  it rewrites a twice-made decision. That is the PM's review and the owner's
+ *  merge under `docs/standards/pm.md` §21, not a seat's one-line edit.
+ *
+ *  What the experiment is now standing on, which those two windows did not
+ *  have. Both reasoned about the COST OF REFUSING and estimated it correctly:
+ *  26.5 per cent of Ursa's traffic. Neither had the cost of NOT refusing.
+ *  Over 1,987 rows, 154 of Ursa's 159 cut rows were in the predicted kinds,
+ *  8.3 per cent against 28.6, a step of 3.4x across this one line. In rows
+ *  rather than rates, Ursa spent 88 sends in 200 hours carrying nothing but a
+ *  tail an earlier send lost: 14.7 per cent of its traffic, double
+ *  alexandria's, which holds no checker at all. The company that owns this
+ *  file pays the highest tail tax on the bus.
+ *
+ *  And the datum that is not a rate. Window 107 cut THREE OF ITS OWN THREE
+ *  board sends while building the instrument that measures cutting, at 1,530,
+ *  1,528 and 1,502 characters, with `post.mjs` printing the exact overage
+ *  before each POST. The first dropped its own disposition. So the
+ *  proposition that a notice suffices for a careful sender has a
+ *  counterexample in the author of the gauge for it.
+ *
+ *  And what had to ship first regardless of the outcome: the escape this
+ *  widening would hand every sender used to leave no trace, so a window that
+ *  widened the Set could not afterwards tell a sender who split a message
+ *  from one who passed the flag. `./escape-trace.mjs` closes that.
+ *  Measurability before policy. */
 export const TRUNCATION_REFUSED = new Set(['ask', 'handoff']);
 
 // ---- a quantity's denominator, which is the wider form of one key's rule ----
