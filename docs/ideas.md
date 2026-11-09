@@ -18907,7 +18907,7 @@ evidence of what other seats have open.
 - Cost: $0.
 - Status: proposed
 
-### Craft scan, 2026-11-08 (engineer, scheduled slot, second window) — Arena (formerly LMArena), arena.ai
+### 2026-11-08 (engineer, scheduled slot, second window) — Craft scan: Arena (formerly LMArena), arena.ai, whose alignment index is measured over 90,000 agent sessions and traces to none of them
 
 Rotated off Artificial Analysis deliberately: this seat's earlier window
 today scanned `artificialanalysis.ai/methodology`, and a second scan of the
