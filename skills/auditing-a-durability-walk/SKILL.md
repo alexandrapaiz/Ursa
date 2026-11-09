@@ -59,19 +59,19 @@ evidence:
     source: ursa-major/src/lifespan.ts:392-414
   - ref: E10
     what: intactRevisions and intactSeconds advance only in revisions where every unit of the span was still present
-    source: ursa-major/src/lifespan.ts:450-458
+    source: ursa-major/src/lifespan.ts:454-462
   - ref: E11
     what: fate is assigned from how many units were lost, and diedAtSha is the earliest loss in the order the revision list came back in
-    source: ursa-major/src/lifespan.ts:461-478
+    source: ursa-major/src/lifespan.ts:465-482
   - ref: E12
     what: durableChars and decayedChars accumulate over every tested surviving span whatever its fate, and medianIntactSeconds is built only from spans that lost something
-    source: ursa-major/src/lifespan.ts:545-557
+    source: ursa-major/src/lifespan.ts:549-561
   - ref: E13
     what: the baseline is the same arithmetic over no_generation_provenance spans, which is the repository's own churn
-    source: ursa-major/src/lifespan.ts:558-564
+    source: ursa-major/src/lifespan.ts:562-568
   - ref: E14
     what: both rates are null rather than zero when nothing was testable, and both rename roll-ups are absent rather than zero
-    source: ursa-major/src/lifespan.ts:578-600
+    source: ursa-major/src/lifespan.ts:582-604
   - ref: E15
     what: the four fates and the two reasons for untested, as the record's own type declares them
     source: ursa-major/src/types.ts:342-354
@@ -110,7 +110,7 @@ evidence:
     source: docs/design/span-lifespan.md:561-581
   - ref: E27
     what: median returns null on an empty list, which is what makes medianIntactSeconds null rather than zero when no span lost anything
-    source: ursa-major/src/lifespan.ts:495-500
+    source: ursa-major/src/lifespan.ts:499-504
 supersedes: []
 ---
 
