@@ -510,6 +510,46 @@ test('the committed baseline is well formed, and every entry is attributable', (
   assert.ok(b.suiteSet.suites > 0 && b.suiteSet.points > 0, 'with its size, so a count is comparable')
 })
 
+test('every resolved row says which commit resolved it, and `repaired` is checked as hard as `red`', () => {
+  // NOTHING ASSERTED OVER `repaired` UNTIL 2026-11-09, and on that day it
+  // became the larger half of the file: the trunk went green, `red` emptied,
+  // and all eleven rows this baseline has ever held moved across. A block the
+  // tool does not read and no test checks is a block that decays, and the one
+  // thing every reader of it needs is the same thing `flipQuery` gives a red
+  // row -- the evidence that decides whether the row is still resolved.
+  //
+  // `repairedOnTrunk` is allowed to be null ON PURPOSE. Five of these rows
+  // were resolved by their tests being MOVED OFF the trunk rather than by a
+  // commit repairing them, so there is no repairing commit to name and
+  // inventing one would be the lie this field exists to prevent. What is
+  // required is that `resolution` says which of the two happened.
+  const b = JSON.parse(readFileSync(BASELINE_PATH, 'utf8'))
+  assert.ok(Array.isArray(b.repaired) && b.repaired.length > 0)
+  for (const e of b.repaired) {
+    assert.ok(e.file && e.name, `${e.name}: a row with no file or name cannot be matched to a run`)
+    assert.ok(e.owner, `${e.name}: a resolved row still names who owned it`)
+    assert.ok(e.dependsOn, `${e.name}: and what its colour was a function of`)
+    assert.ok(e.verifiedGreen, `${e.name}: and the measurement that says it is resolved`)
+    assert.ok(
+      e.repairedOnTrunk || e.resolution,
+      `${e.name}: a row with no repairing commit must say in \`resolution\` why there is none`
+    )
+  }
+})
+
+test('a red row and a resolved row are never both present for the same test', () => {
+  // The failure mode this guards is the one the 2026-11-09 window was sent to
+  // settle one level up: two records of the same subject, each honest on its
+  // own, disagreeing. Here it would read as a debt that is simultaneously
+  // standing and paid, and `compare` only consults `red`, so the resolved
+  // copy would be the one nobody saw.
+  const b = JSON.parse(readFileSync(BASELINE_PATH, 'utf8'))
+  const resolved = new Set(b.repaired.map((e) => keyOf(e)))
+  for (const e of b.red) {
+    assert.ok(!resolved.has(keyOf(e)), `${e.file} ${e.name} is in both \`red\` and \`repaired\``)
+  }
+})
+
 // THE STARVED RUN, which is the bound on the control added beside it rather
 // than an extension of it. Measured on this seat's own branch on 2026-11-02:
 // the canonical set reported 68 NEW_RED across five suites with the shared
