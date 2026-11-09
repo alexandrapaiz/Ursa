@@ -86,14 +86,22 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, basename, resolve } from 'node:path';
 
-const TOOL_RE = /\btools\/[A-Za-z0-9._/-]+\.(?:sh|mjs|js|py|json)\b/g;
+export const TOOL_RE = /\btools\/[A-Za-z0-9._/-]+\.(?:sh|mjs|js|py|json)\b/g;
 
 // Files addressed to a seat HERE as procedure. A tool name in one of these is a
 // command this repository is expected to run, so its absence is the defect.
-const BINDING = ['docs/standards/pm.md', 'docs/standards/secrets.md'];
+export const BINDING = ['docs/standards/pm.md', 'docs/standards/secrets.md'];
 // HQ's portfolio narrative register. A tool name here is almost always part of
 // an account of something that happened in another repository. Context only.
-const CONTEXT = ['docs/standards/lessons.md'];
+export const CONTEXT = ['docs/standards/lessons.md'];
+
+// Only `missing` and `sibling-repo` route anywhere. The order is the order a
+// report prints them in, worst first, and the set is asserted in the test file
+// rather than trusted, because a sixth state added without a route is a row a
+// reader will read as handled.
+export const STATES = [
+  'missing', 'sibling-repo', 'parked', 'vendored-elsewhere', 'hq-root', 'present',
+];
 
 const HOST_ROOT_DIRS = ['/srv/asc/hq', '/srv/asc/repos'];
 
@@ -108,7 +116,7 @@ function usage(code) {
 // has been short every time. A root counts when it carries a `tools/` directory;
 // anything else cannot answer a `tools/...` path and padding the set with it
 // would make the printed root count a worse description of the reading.
-function hostRoots(selfRoot) {
+export function hostRoots(selfRoot) {
   const out = [];
   const seen = new Set();
   const add = (dir, kind) => {
@@ -145,7 +153,7 @@ function hostRoots(selfRoot) {
   return out;
 }
 
-function namesIn(file) {
+export function namesIn(file) {
   let text;
   try { text = readFileSync(file, 'utf8'); } catch { return null; }
   return [...new Set(text.match(TOOL_RE) || [])].sort();
@@ -153,7 +161,7 @@ function namesIn(file) {
 
 // A basename hit is only meaningful inside this repository's own `tools/`, which
 // is the surface a deliberate re-vendoring lands on.
-function vendoredElsewhere(path, selfRoot) {
+export function vendoredElsewhere(path, selfRoot) {
   const want = basename(path);
   const walk = (dir) => {
     let kids = []; try { kids = readdirSync(dir, { withFileTypes: true }); } catch { return null; }
@@ -193,110 +201,114 @@ export function classify(path, { selfRoot, roots, ref }) {
   return { state: 'missing', where: null };
 }
 
-const argv = process.argv.slice(2);
-const opt = { files: [], context: [], ref: null, json: false, gate: false, roots: false };
-for (let i = 0; i < argv.length; i++) {
-  const a = argv[i];
-  if (a === '--file') { const v = argv[++i]; if (!v) usage(2); opt.files.push(v); }
-  else if (a === '--context') { const v = argv[++i]; if (!v) usage(2); opt.context.push(v); }
-  else if (a === '--ref') { const v = argv[++i]; if (!v) usage(2); opt.ref = v; }
-  else if (a === '--json') opt.json = true;
-  else if (a === '--gate') opt.gate = true;
-  else if (a === '--roots') opt.roots = true;
-  else if (a === '-h' || a === '--help') usage(0);
-  else usage(2);
-}
-
-let selfRoot;
-try {
-  selfRoot = execFileSync('git', ['rev-parse', '--show-toplevel'],
-    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-} catch { selfRoot = process.cwd(); }
-
-const roots = hostRoots(selfRoot);
-
-if (opt.roots) {
-  process.stdout.write(`self: ${selfRoot}\n`);
-  for (const r of roots) process.stdout.write(`${r.kind.padEnd(12)} ${r.root}${r.origin ? '  ' + r.origin : ''}\n`);
-  process.stdout.write(`${roots.length} root(s) with a tools/ directory, besides this one\n`);
-  process.exit(0);
-}
-
-const bindingFiles = opt.files.length || opt.context.length ? opt.files : BINDING;
-const contextFiles = opt.files.length || opt.context.length ? opt.context : CONTEXT;
-
-const rows = [];
-const unreadable = [];
-for (const [files, binding] of [[bindingFiles, true], [contextFiles, false]]) {
-  for (const f of files) {
-    const names = namesIn(join(selfRoot, f));
-    if (names === null) { unreadable.push(f); continue; }
-    for (const n of names) rows.push({ file: f, binding, path: n, ...classify(n, { selfRoot, roots, ref: opt.ref }) });
+function main(argv) {
+  const opt = { files: [], context: [], ref: null, json: false, gate: false, roots: false };
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--file') { const v = argv[++i]; if (!v) usage(2); opt.files.push(v); }
+    else if (a === '--context') { const v = argv[++i]; if (!v) usage(2); opt.context.push(v); }
+    else if (a === '--ref') { const v = argv[++i]; if (!v) usage(2); opt.ref = v; }
+    else if (a === '--json') opt.json = true;
+    else if (a === '--gate') opt.gate = true;
+    else if (a === '--roots') opt.roots = true;
+    else if (a === '-h' || a === '--help') usage(0);
+    else usage(2);
   }
-}
 
-if (!rows.length) {
-  process.stderr.write(
-    unreadable.length
-      ? `no readable input: ${unreadable.join(', ')}\n`
-      : 'no tools/ path in any input; the sweep cannot distinguish that from a clean repository\n');
-  process.exit(3);
-}
+  let selfRoot;
+  try {
+    selfRoot = execFileSync('git', ['rev-parse', '--show-toplevel'],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch { selfRoot = process.cwd(); }
 
-// A path can be named by both a binding file and a narrative one. The binding
-// reading is the one that routes, so it wins; keep the other only as a count.
-const byPath = new Map();
-for (const r of rows) {
-  const prev = byPath.get(r.path);
-  if (!prev || (r.binding && !prev.binding)) byPath.set(r.path, r);
-}
-const uniq = [...byPath.values()].sort((a, b) => a.path.localeCompare(b.path));
-const bindingRows = uniq.filter((r) => r.binding);
-const contextRows = uniq.filter((r) => !r.binding);
-const bindingMissing = bindingRows.filter((r) => r.state === 'missing');
-const siblingFindings = bindingRows.filter((r) => r.state === 'sibling-repo');
+  const roots = hostRoots(selfRoot);
 
-if (opt.json) {
-  process.stdout.write(JSON.stringify({
-    self: selfRoot, ref: opt.ref, unreadable,
-    roots: roots.map((r) => ({ root: r.root, kind: r.kind, origin: r.origin || null })),
-    binding: bindingFiles, context: contextFiles,
-    rows: uniq, binding_missing: bindingMissing.length,
-    sibling_repo: siblingFindings.length,
-  }, null, 2) + '\n');
-} else {
-  // The root set is part of the reading, so it is printed before the reading and
-  // not behind a flag. A count of missing tools is meaningless without it.
-  process.stdout.write(
-    `roots: this one, plus ${roots.length} on the host ` +
-    `(${roots.map((r) => `${r.name}:${r.kind}`).join(', ')})` +
-    `${opt.ref ? `; parked resolved against ${opt.ref}` : '; no --ref, so `parked` cannot be distinguished from `missing`'}\n\n`);
-  const order = ['missing', 'sibling-repo', 'parked', 'vendored-elsewhere', 'hq-root', 'present'];
-  for (const grp of order) {
-    const hit = uniq.filter((r) => r.state === grp);
-    if (!hit.length) continue;
-    process.stdout.write(`${grp}  (${hit.length})\n`);
-    for (const r of hit) {
-      process.stdout.write(`  ${r.binding ? 'BINDING ' : 'context '}${r.path}` +
-        `${r.where && r.where !== r.path ? ` -> ${r.where}` : ''}\n`);
+  if (opt.roots) {
+    process.stdout.write(`self: ${selfRoot}\n`);
+    for (const r of roots) process.stdout.write(`${r.kind.padEnd(12)} ${r.root}${r.origin ? '  ' + r.origin : ''}\n`);
+    process.stdout.write(`${roots.length} root(s) with a tools/ directory, besides this one\n`);
+    process.exit(0);
+  }
+
+  const bindingFiles = opt.files.length || opt.context.length ? opt.files : BINDING;
+  const contextFiles = opt.files.length || opt.context.length ? opt.context : CONTEXT;
+
+  const rows = [];
+  const unreadable = [];
+  for (const [files, binding] of [[bindingFiles, true], [contextFiles, false]]) {
+    for (const f of files) {
+      const names = namesIn(join(selfRoot, f));
+      if (names === null) { unreadable.push(f); continue; }
+      for (const n of names) rows.push({ file: f, binding, path: n, ...classify(n, { selfRoot, roots, ref: opt.ref }) });
     }
-    process.stdout.write('\n');
   }
-  process.stdout.write(
-    `${bindingRows.length} path(s) named in binding text, ${contextRows.length} in narrative only. ` +
-    `${bindingMissing.length} binding miss(es) to route.\n`);
-  if (unreadable.length) process.stdout.write(`unreadable input: ${unreadable.join(', ')}\n`);
-  if (siblingFindings.length) {
+
+  if (!rows.length) {
+    process.stderr.write(
+      unreadable.length
+        ? `no readable input: ${unreadable.join(', ')}\n`
+        : 'no tools/ path in any input; the sweep cannot distinguish that from a clean repository\n');
+    process.exit(3);
+  }
+
+  // A path can be named by both a binding file and a narrative one. The binding
+  // reading is the one that routes, so it wins; keep the other only as a count.
+  const byPath = new Map();
+  for (const r of rows) {
+    const prev = byPath.get(r.path);
+    if (!prev || (r.binding && !prev.binding)) byPath.set(r.path, r);
+  }
+  const uniq = [...byPath.values()].sort((a, b) => a.path.localeCompare(b.path));
+  const bindingRows = uniq.filter((r) => r.binding);
+  const contextRows = uniq.filter((r) => !r.binding);
+  const bindingMissing = bindingRows.filter((r) => r.state === 'missing');
+  const siblingFindings = bindingRows.filter((r) => r.state === 'sibling-repo');
+
+  if (opt.json) {
+    process.stdout.write(JSON.stringify({
+      self: selfRoot, ref: opt.ref, unreadable,
+      roots: roots.map((r) => ({ root: r.root, kind: r.kind, origin: r.origin || null })),
+      binding: bindingFiles, context: contextFiles,
+      rows: uniq, binding_missing: bindingMissing.length,
+      sibling_repo: siblingFindings.length,
+    }, null, 2) + '\n');
+  } else {
+    // The root set is part of the reading, so it is printed before the reading and
+    // not behind a flag. A count of missing tools is meaningless without it.
     process.stdout.write(
-      '\nA binding standard names a tool that only a sibling product owns. Run it where it is,\n' +
-      'then tell that repository, because neither vendoring it nor routing it to HQ is the fix:\n');
-    for (const r of siblingFindings) {
-      process.stdout.write(`  ${r.path}  owned by ${r.rootName}  ->  ${r.where}\n`);
+      `roots: this one, plus ${roots.length} on the host ` +
+      `(${roots.map((r) => `${r.name}:${r.kind}`).join(', ')})` +
+      `${opt.ref ? `; parked resolved against ${opt.ref}` : '; no --ref, so `parked` cannot be distinguished from `missing`'}\n\n`);
+    const order = ['missing', 'sibling-repo', 'parked', 'vendored-elsewhere', 'hq-root', 'present'];
+    for (const grp of order) {
+      const hit = uniq.filter((r) => r.state === grp);
+      if (!hit.length) continue;
+      process.stdout.write(`${grp}  (${hit.length})\n`);
+      for (const r of hit) {
+        process.stdout.write(`  ${r.binding ? 'BINDING ' : 'context '}${r.path}` +
+          `${r.where && r.where !== r.path ? ` -> ${r.where}` : ''}\n`);
+      }
+      process.stdout.write('\n');
+    }
+    process.stdout.write(
+      `${bindingRows.length} path(s) named in binding text, ${contextRows.length} in narrative only. ` +
+      `${bindingMissing.length} binding miss(es) to route.\n`);
+    if (unreadable.length) process.stdout.write(`unreadable input: ${unreadable.join(', ')}\n`);
+    if (siblingFindings.length) {
+      process.stdout.write(
+        '\nA binding standard names a tool that only a sibling product owns. Run it where it is,\n' +
+        'then tell that repository, because neither vendoring it nor routing it to HQ is the fix:\n');
+      for (const r of siblingFindings) {
+        process.stdout.write(`  ${r.path}  owned by ${r.rootName}  ->  ${r.where}\n`);
+      }
+    }
+    if (!bindingMissing.length && !siblingFindings.length) {
+      process.stdout.write('\nNothing to route. Every binding path resolves somewhere nameable.\n');
     }
   }
-  if (!bindingMissing.length && !siblingFindings.length) {
-    process.stdout.write('\nNothing to route. Every binding path resolves somewhere nameable.\n');
-  }
+
+  process.exit(opt.gate && bindingMissing.length ? 1 : 0);
+
 }
 
-process.exit(opt.gate && bindingMissing.length ? 1 : 0);
+if (process.argv[1] && process.argv[1].endsWith('tool-reach.mjs')) main(process.argv.slice(2));
