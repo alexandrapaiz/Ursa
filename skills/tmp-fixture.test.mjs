@@ -80,6 +80,36 @@ test('a directory removed by the test itself does not make exit throw', () => {
   assert.equal(out.trim(), 'ok')
 })
 
+test('importing this module installs nothing, and the first call installs one handler', () => {
+  // tools/gates/import-effects.mjs forbids a module under tools/ or scripts/
+  // from doing work when imported. It reads `git ls-files tools scripts`, so
+  // skills/ is outside it and this property has no gate. The property is worth
+  // keeping anyway, so it is asserted here instead.
+  const box = fixtureDir('tmp-fixture-box-')
+  const script = join(box, 'child.mjs')
+  writeFileSync(script, [
+    `const mod = '${join(HERE, 'tmp-fixture.mjs')}'`,
+    `const { fixtureDir, outstanding } = await import(mod)`,
+    `console.log('after import', process.listenerCount('exit'))`,
+    `outstanding()`,
+    `console.log('after outstanding', process.listenerCount('exit'))`,
+    `fixtureDir('child-arm-')`,
+    `console.log('after first call', process.listenerCount('exit'))`,
+    `fixtureDir('child-arm-')`,
+    `console.log('after second call', process.listenerCount('exit'))`,
+  ].join('\n'))
+  const sandbox = join(box, 'tmp')
+  mkdirSync(sandbox)
+  const out = execFileSync('node', [script], { env: { ...process.env, TMPDIR: sandbox }, encoding: 'utf8' })
+  assert.deepEqual(out.trim().split('\n'), [
+    'after import 0',
+    'after outstanding 0',
+    'after first call 1',
+    'after second call 1',
+  ])
+  assert.deepEqual(readdirSync(sandbox), [])
+})
+
 test('no suite under skills/ makes a temporary directory of its own', () => {
   // The regression guard. Before 2026-11-09 twenty call sites did, and one
   // pass of the eight suites left 102 directories in a /tmp shared by every

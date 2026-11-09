@@ -23,10 +23,21 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 const made = []
+let armed = false
 
 /** A fresh temporary directory, removed when this process exits. `prefix` is
  *  passed through to mkdtemp, so it carries its own trailing separator. */
 export function fixtureDir(prefix) {
+  if (!armed) {
+    // Registered on the first call and not at module scope. Importing this
+    // file to reach `outstanding` must not install a handler, which is the
+    // rule tools/gates/import-effects.mjs enforces over tools/ and scripts/
+    // and cannot see here: it reads `git ls-files tools scripts`, so skills/
+    // is outside it. Applying its own `scanModule` to this tree reports one
+    // IMPORT_DOES_WORK statement for the module-scope version of this line.
+    process.on('exit', sweep)
+    armed = true
+  }
   const dir = mkdtempSync(join(tmpdir(), prefix))
   made.push(dir)
   return dir
@@ -35,8 +46,8 @@ export function fixtureDir(prefix) {
 /** How many this process is holding. For the suite that tests this file. */
 export const outstanding = () => made.length
 
-process.on('exit', () => {
+function sweep() {
   for (const dir of made) {
     try { rmSync(dir, { recursive: true, force: true }) } catch { /* nothing left to do at exit */ }
   }
-})
+}
