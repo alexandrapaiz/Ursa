@@ -24,7 +24,7 @@
 // `survived_mutated` as before.
 
 import { diffChars, diffWords } from 'diff'
-import { normalize, type Normalized } from './normalize'
+import { normalize, normText, type Normalized } from './normalize'
 import { segment, modeForPath, type Span } from './segment'
 import {
   THETA_HIGH, THETA_LOW, MIN_VERBATIM_LEN, MAX_TOKEN_DF, FUZZY_TOP_K,
@@ -134,7 +134,7 @@ export function resolve(input: ResolveInput): OutcomeRecord {
       ? modeForPath(gen.filePath)
       : gen.kind === 'assistant_text' ? 'prose' : 'code'
     const sentences = segment(gen.text, mode).map((s) => {
-      const norm = normalize(s.text).norm
+      const norm = normText(s.text)
       return { ...s, norm, tokenSet: new Set(tokens(norm)) }
     })
     return { gen, mode, norm: normalize(gen.text), sentences }
@@ -335,7 +335,7 @@ export function resolve(input: ResolveInput): OutcomeRecord {
     const spans: FinalSpan[] = []
 
     for (const s of segment(f.text, mode)) {
-      const sNorm = normalize(s.text).norm
+      const sNorm = normText(s.text)
       const base = { start: s.start, end: s.end, text: s.text }
       let span: FinalSpan | null = null
 
