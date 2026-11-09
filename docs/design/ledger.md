@@ -2827,3 +2827,102 @@ union of `main` and every open pull-request branch rather than from
 The allocation paragraph at the end of L66 says why that is the only
 form of the question that can be right, and this is the first run to owe
 it a number it would otherwise have got wrong.
+
+## L69 — The instrument that handled its own failure is the one whose exit status lied about it
+
+**measured**, 2026-11-09 (run 2026-11-09-message-t).
+`reviews/2026-11-09-message-t/NOTES.md` §"The defect, stated".
+
+`measure-narrow.mjs` was pointed at its default port while this run's
+server was on another one. All twenty cells failed to load. It printed
+
+    NOT MEASURED: 20 of 20 page-by-width cells could not be loaded or
+    never came to rest, so this run makes no claim about them.
+
+and exited 0.
+
+Both halves were already the tool's own work. The comment above that line
+cites L23 and says the headline "refuses to report a pass while any cell is
+unmeasured". The refusal was written in prose and never in the number a
+caller gates on, because the exit status was whatever the last statement
+left behind and the last statement is a successful `writeFileSync`.
+
+**The control, and the part worth keeping.** Against a dead port:
+
+| tool | exit |
+|---|---|
+| `measure-narrow.mjs` | **0** |
+| `measure-contrast.mjs` | 1 |
+| `measure-hit-areas.mjs` | 1 |
+| `measure-focus.mjs` | 1 |
+| `verify-hover.mjs` | 1 |
+
+The four that are right are right **by accident**. They let the navigation
+error escape and node sets the status for them. `measure-narrow.mjs` is the
+only one of the five that catches the failure and reports it, and catching
+it is exactly what let the run continue to a success exit. So the care is
+what broke it, and the four that look correct here are one `try` away from
+the same defect without anything in them changing. That is the general
+claim and it is why this is a ledger entry rather than a line in a diff:
+**error handling converts a crash into a pass unless the handler also owns
+the exit status.**
+
+**The line the repair does not cross.** Exit 2 for blindness and no exit 1
+for a finding. `selftest/check-contrast.mjs` runs `measure-contrast.mjs`
+over a fixture built to fail and asserts a non-zero exit is an error,
+because it reads the findings as JSON. A tool whose findings are data must
+exit 0 when it measured, however bad the findings. Whether a cell puts
+content out of reach is a verdict about the **site**, made by the reader of
+the table. Whether anything was measured is a verdict about the
+**instrument**, which no caller can make from outside. Only the second is
+this file's to state, and conflating them would have broken a selftest that
+was right.
+
+`selftest/check-narrow.mjs` proves both directions, because case 1 alone is
+satisfied by a tool that always fails: blind exits 2 and still says so in
+words, measured exits 0 and prints the passing headline.
+
+This is `runner-facts` §48, reached by Ursa's exo, security and engineer
+seats in one night and now by this seat's instrument rather than its site.
+The witness detail: this run's own transcript records `narrow exit=0` after
+that invocation, so it came one careless step from entering a clean sweep
+over a matrix it never loaded.
+
+## L70 — Proposal: the home page is the only page that leaves the site's one-column grid, and only at desktop
+
+**measured, not decided**, 2026-11-09 (run 2026-11-09-message-t).
+`reviews/2026-11-09-message-t/data/grid.txt`.
+
+Content edges, every page, the three charter viewports:
+
+| viewport | home | the other three |
+|---|---|---|
+| phone 390 | 32..358 | 32..358 |
+| tablet 820 | 66..754 | 66..754 |
+| desktop 1440 | **416..1024** | 240..1200 |
+
+At phone and tablet the site has exactly one left edge and the wordmark,
+the `h1` and the section content all sit on it, across all four pages. That
+is the designed system and it holds. At desktop the home page takes a
+column 176px narrower on each side than the one the rest of the site uses.
+
+Two differences in the markup rather than one, and the second is the one a
+reader would miss:
+
+    app/page.tsx:103              lg:mx-auto lg:max-w-2xl lg:px-8
+    app/record/page.tsx:23        xl:mx-auto xl:max-w-6xl
+    app/record/[id]/page.tsx:38   xl:mx-auto xl:max-w-6xl
+    app/record/at/…/page.tsx:60   xl:mx-auto xl:max-w-6xl
+
+The container differs **and so does the breakpoint it starts at**, so
+between 1024 and 1280 the home page has already centred into a 608px column
+while the other three are still full-bleed on the clamp padding.
+
+**Not changed by this run, and the reason is the charter rather than
+doubt.** A marketing page with a narrower measure than a data page is a
+legitimate design decision, and the charter routes bigger ideas into a
+proposal instead of into this seat's diff. What is offered here is the
+measurement, which did not exist before, and one observation: whichever
+column the owner wants, the two breakpoints should probably be the same
+one, because the 1024-to-1280 band is a width nobody chose and both pages
+pass through it.
