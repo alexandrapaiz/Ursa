@@ -10,22 +10,57 @@ without saving and the kit finds it in whichever sibling package has it.
 will ever touch, and point `PW_ROOT` at it:
 
 ```bash
-# from your checkout root, with <id> this run's own suffix
-export FE_CACHE="$PWD/.fe-run-<id>/npm-cache"
+# from your checkout root, with <id> this run's own suffix.
+# One directory holds everything this run writes, so there is one thing
+# to delete at the end and one place to look for what a dead run left.
+export FE_RUN="$PWD/.fe-run-<id>"
+mkdir -p "$FE_RUN/pw"
 
-mkdir -p /tmp/pw && cd /tmp/pw \
-  && npm i --no-save playwright --cache "$FE_CACHE" \
+cd "$FE_RUN/pw" \
+  && npm i --no-save playwright --cache "$FE_RUN/npm-cache" \
   && npx playwright install chromium
-export PW_ROOT=/tmp/pw/node_modules
+export PW_ROOT="$FE_RUN/pw/node_modules"
+cd -
 
-# and at the end of the run
-rm -rf "$FE_CACHE"
+# before any npm in a tree: is one already running there?
+ps -eo pid,args | grep -v grep | grep -q "npm" && \
+  for pid in $(pgrep -f "npm (ci|install)"); do \
+    [ "$(readlink -f /proc/$pid/cwd 2>/dev/null)" = "$PWD" ] && \
+      echo "REFUSING: npm $pid is live in this tree"; \
+  done
+
+# and at the end of the run, the whole directory and not just the cache
+rm -rf "$FE_RUN"
 ```
 
 `--cache` is not optional and `PW_ROOT` does not cover it: `PW_ROOT`
 isolates `node_modules` and the cache is a separate shared resource one
 directory up, which is L55 and L56 and the scratch-path rule near the
-bottom of this file. Delete that cache when the run ends.
+bottom of this file.
+
+**Three things in that block changed on 2026-11-02 (run h), each because
+this seat broke them that morning.**
+
+The playwright prefix moved from `/tmp/pw` into the run's own directory.
+The bare `/tmp` name was this file contradicting itself: the scratch rule
+near the bottom says write inside your checkout and names the reason,
+and this block at the top said `/tmp/pw` anyway. Both halves are about
+the same hazard and the top one is the half a run reads first.
+
+The deletion at the end is now the whole run directory. L56 told a run to
+delete its npm cache and nothing told it to delete anything else, so the
+cache was the one pile that got collected and the larger ones did not. On
+the morning of 2026-11-02 this seat's own earlier runs had 321M sitting
+on the volume in three directories, none of them a cache, with three
+server processes still pointed at two of them six and seven hours after
+the runs ended. One directory per run means there is one `rm -rf`, and
+the next run of the seat can recognise `.fe-run-*` from another day as
+garbage without knowing what was in it.
+
+The `/proc/<pid>/cwd` check is the only reliable answer to "is an install
+already running in this tree", which is the question L51's rule needs
+answered and does not say how to answer. An exit status will not do it;
+see the end of this file.
 
 `PW_ROOT` is the first entry in `lib/browser.mjs`'s search order and has
 been since that file was written, and until 2026-11-02 it appeared in no
@@ -45,7 +80,7 @@ rather than the install. A prefix nothing else owns is immune to both.
 | `measure-hit-areas.mjs` | The real tappable area of every control, probed outward one CSS pixel at a time so an `::after` overlay is seen rather than parsed. Promoted here on 2026-10-24g from `reviews/2026-10-24e/`, where it was written; `--base`, `--pages name=/path,…`, `--out`, `--json`, `--until`, and `--state` since 2026-10-26. |
 | `measure-narrow.mjs` | What every surface does below 390, which is the narrowest viewport the charter reviews. Reports a clipped edge (unreachable) separately from an overflow (scrollable), attributes offenders to the nearest scroll container, and exempts full-bleed decoration, screen-reader text and closed drawers. Waits for the geometry to stop changing rather than for a settle somebody guessed. Written 2026-10-26b out of L25; its six exemptions and how each was earned are in its own header. `--base`, `--pages`, `--widths`, `--height`, `--until`, `--state`, `--out`, `--json`. |
 | `measure-contrast.mjs` | The WCAG ratio of every run of text against the pixels actually behind it, including placeholders. The backdrop is photographed, never read off the stylesheet, so a starfield, a gradient and an ancestor's `opacity` are all in the number. Reports a per-pixel median, fifth percentile and worst, exempts inactive components under 1.4.3, and refuses to answer for a page that moved between its two frames. Written 2026-10-25c. Since 2026-11-02e it narrates on **stderr**, one line per page with the five stage timings, because until then it wrote nothing at all until after `browser.close()` and a run making progress was indistinguishable from a wedged one. That cost a whole review its contrast number; L53. `--base`, `--pages name=/path,…`, `--only`, `--out`, `--json [path]`, `--until`. |
-| `measure-focus.mjs` | The keyboard pass, written 2026-11-02 (run f). Walks the tab ring with real Tab presses, compares what Tab reaches against every focusable element the DOM offers, and names the controls in the difference. Then photographs each stop focused and blurred: the indicator is whatever pixels differ, so an outline, a box-shadow, a wash and a pseudo-element all answer without being named in advance, and each indicator pixel's ratio is taken against its own unfocused colour, which is the adjacency 1.4.11 asks for. Carries the SHARE of the indicator above 3:1 as well as its median, because a ring visible on one edge and invisible on the other three is what no single statistic shows. A third blurred frame gates on drift: a stop whose neighbourhood moves is UNSTABLE rather than given a number. The 2.4.11 area column is reported and never failed on, since the ring's weight is identity. `--base`, `--pages`, `--only`, `--viewports`, `--until`, `--state`, `--out`, `--json`, `--frames`. Selftest `selftest/check-focus.mjs`, 21 assertions. |
+| `measure-focus.mjs` | The keyboard pass, written 2026-11-02 (run f). Walks the tab ring with real Tab presses, compares what Tab reaches against every focusable element the DOM offers, and names the controls in the difference. Then photographs each stop focused and blurred: the indicator is whatever pixels differ, so an outline, a box-shadow, a wash and a pseudo-element all answer without being named in advance, and each indicator pixel's ratio is taken against its own unfocused colour, which is the adjacency 1.4.11 asks for. Carries the SHARE of the indicator above 3:1 as well as its median, because a ring visible on one edge and invisible on the other three is what no single statistic shows. A third blurred frame gates on drift: a stop whose neighbourhood moves is UNSTABLE rather than given a number. The 2.4.11 area column is reported and never failed on, since the ring's weight is identity. Since 2026-11-02 (run h), after its first outing on the real site: the context pins `scroll-behavior`, because the site declares `smooth` and the tool was photographing a rectangle the control had scrolled out of (L58); the box is re-read after the focus lands rather than before; a stop that cannot be photographed is a row rather than the end of the run, which cost a whole viewport's table the first time; a stop Tab reaches that the DOM never declared gets a row too, instead of the silent `continue` that was reporting one direction of a set difference; a control under 8px on a side is photographed over its nearest ancestor, because an `sr-only` input's ring is drawn on its label and a crop around the input contains none of it; and a ring plus a low-contrast wash is `COMPOSITE` rather than `BELOW_FLOOR` when the clearing pixels alone cover a 1px perimeter of the control (L60). Since 2026-11-09: a stop the enumeration never declared is identified by a mark stamped on the element rather than by its coordinates, because `getBoundingClientRect` is viewport-relative and Tab scrolls each stop into view, so two undeclared stops of the same tag on a tall page hand the walk one identity and it stops short, reporting everything behind them as unreachable (L61). `--base`, `--pages`, `--only`, `--viewports`, `--until`, `--state`, `--out`, `--json`, `--frames`. Selftest `selftest/check-focus.mjs`, 27 assertions. |
 | `measure-swatches.mjs` | The WCAG 1.4.11 ratio of every swatch in a legend against the pixels behind it, and of each swatch's marks against each other. Samples **every pixel** of the swatch rather than its centre column, which is the only sample a 1px ring inside the box cannot fool, and reports the share of the area clearing 3:1 alongside the ratio, because one bright pixel in a flat box passes a ratio on its own. Promoted 2026-10-27 from the probe that found the dashboard's fourth provenance key at 1.20:1; L36, L43. |
 | `measure-floor.py` | How much of a frame set is actually deterministic, over **N** independent shoots rather than a pair. Reports how many of the C(N,2) pairs drawn from them would have seen no floor at all, which is the number a two-shoot diff cannot produce and the reason this file exists; L48. Selftest `selftest/check-floor.py`, 12 assertions. |
 | `verify-hover.mjs` | Every hover state on the site, photographed as a **pair**: one frame at rest and one hovered and settled, over the same frozen sky, plus what the computed style did. `diff-frames.py rest hover` then says how many pixels the hover is worth. The pair is the point: three of this site's hover rules style a descendant rather than the hovered element, so a computed-style read alone reports "nothing changed" for them, and a wash too faint to register in a PNG is what the property read catches instead. A `disabled` control gets the verdict `by-design-disabled`, because a correctly inert hover and a broken spring print the same `none`. |
@@ -92,7 +127,7 @@ runnable on its own with no server and no network:
 |---|---|
 | `selftest/check-contrast.mjs` | 17 hand-computable ratios for `measure-contrast.mjs`, over `selftest/contrast.html`. |
 | `selftest/check-hit-areas.mjs` | That `measure-hit-areas.mjs` can still fail. Its headline on the real site went to zero on 2026-10-25b, and zero is also what a tool that had stopped looking would print, so this serves `selftest/hit-areas.html`, whose right answers are built in, and asserts each of the four verdicts actually fires. |
-| `selftest/check-focus.mjs` | 21 assertions for `measure-focus.mjs`, including a focus trap it has to report as unreachable controls rather than a short clean ring, and L36's two hand-taken ratios recomputed by a different code path. |
+| `selftest/check-focus.mjs` | 27 assertions for `measure-focus.mjs`, including a focus trap it has to report as unreachable controls rather than a short clean ring, L36's two hand-taken ratios recomputed by a different code path, and a 4000px page whose three undeclared stops all land at the same viewport coordinate, which the walk has to run to the end of. That last fixture fails five of its six assertions on the code of 2026-11-02, which is how it was checked. |
 | `selftest/check-floor.py` | 12 assertions for `measure-floor.py`, the load-bearing one being that six shoots split four and two report seven blind pairs of fifteen. |
 | `selftest/check-pin-now.mjs` | That `shoot.mjs --pin-now` pins the page's clock and refuses the two ways it can be asked for what it cannot do. It needs its own fixture because neither product reads the wall clock client-side, so no page here would prove the flag works. |
 | `selftest/check-redaction.mjs` | That each of the gate's three rules still fires, that the allowlist still forgives what the gate forgives, and that an unparseable gate is a refusal. |
@@ -201,5 +236,55 @@ build behind it, at a cost of **176M of disk per project per run** on a
 run scratch, and a cache left behind is 176M nobody will recognise as
 garbage.
 
-The run that built this is `docs/design/reviews/2026-10-24/`, and the
-cache paragraph is `docs/design/reviews/2026-11-02-message-f/` §2.1.
+**After a rebuild, check that the page's own stylesheet answers 200
+before you measure anything.** On 2026-11-02 this seat rebuilt
+`ursa-minor` while the previous `next start` still held the port. That
+server went on serving HTML whose stylesheet chunk the rebuild had
+replaced, so the link 404'd into a 500 and every page rendered unstyled.
+Three viewports of focus measurements were taken that way and all of them
+looked reasonable. What caught it was 390 and 1440 reporting identical
+control boxes, which a responsive layout cannot do. Nothing else would
+have.
+
+```bash
+css=$(curl -s "$BASE/record" | grep -o '/_next/static/chunks/[^"]*\.css' | head -1)
+[ -n "$css" ] || { echo "NO STYLESHEET LINK FOUND: the check did not run"; exit 1; }
+[ "$(curl -s -o /dev/null -w '%{http_code}' "$BASE$css")" = 200 ] || echo "STALE SERVER"
+```
+
+The emptiness guard on the second line is not decoration. Without it a
+grep that matches nothing leaves `$css` empty, the fetch falls back to
+`$BASE` itself, the page answers 200, and the check prints a pass for
+having tested the home page instead of a stylesheet. A run on 2026-11-09
+did exactly that by reaching for `/_next/static/css/` from memory rather
+than copying the pattern above, and the only reason it noticed was that
+it looked at the empty variable. A check whose failure mode is to
+silently measure something else is worse than no check, because it is
+cited as evidence afterwards.
+
+**Never wait on a string your own command line contains.** A loop like
+`while pgrep -f "[c]heck-focus"; do sleep 10; done` never exits: `pgrep -f`
+matches full command lines, the `[c]` bracket is a `grep` idiom that
+`pgrep`'s regex reads as a one-character class, and the watching shell
+carries the string it is watching for. Wait on a pid. L57.
+
+**The same rule for `pkill -f`, where the failure is worse than a hang.**
+On 2026-11-09 this seat ended a run with
+
+```bash
+pkill -f "next start -p 4981"; rm -rf .fe-run-1109 ursa-minor/node_modules
+```
+
+on one line. `pkill -f` matched the shell running that very line, killed
+it at the semicolon, and the cleanup never ran. The server did stop, the
+exit code was 144, and the only reason the scratch was not left on the
+volume is that the run checked afterwards instead of assuming. With
+`pgrep` the cost is a loop that never ends, which announces itself. With
+`pkill` the cost is every command after it on the line, silently. Kill a
+pid you read from `/proc`, or put the kill in a line of its own and
+verify it separately.
+
+The run that built this is `docs/design/reviews/2026-10-24/`, the cache
+paragraph is `docs/design/reviews/2026-11-02-message-f/` §2.1, and the
+two paragraphs above are `docs/design/reviews/2026-11-02-message-h/` §4
+and §6.

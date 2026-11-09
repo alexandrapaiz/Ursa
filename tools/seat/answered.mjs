@@ -90,7 +90,7 @@ import { pageMessages } from '../board/page.mjs';
 // Instant-aware comparison, never a text comparison: this repository has two
 // timestamp producers that spell the same instant differently (runner-facts
 // §83), and this file's two orderings were both textual until 2026-11-08.
-import { isAfter, compareInstants } from '../instant.mjs';
+import { isAfter, sortByInstant } from '../instant.mjs';
 
 export const ANTECEDENT_KEY = 'in_reply_to';
 
@@ -178,7 +178,29 @@ export function classify({ rows, me }) {
   // Without it the tool just hands over a verdict and inherits the authority
   // of the one it replaced.
   return {
-    notes: notes.slice().sort((a, b) => compareInstants(b.ts, a.ts) ?? 0),
+    // Newest first, which is what the `localeCompare` here spelled before
+    // 2026-11-08. `compareInstants(b.ts, a.ts) ?? 0` replaced it and ordered
+    // instants correctly, but the `??` spends the refusal the module exists
+    // to make: `compareInstants` returns null for a `ts` it cannot place
+    // precisely so a caller cannot get a confident ordering out of it, and
+    // `?? 0` turns that into "equal to everything". One unplaceable row then
+    // makes the comparator inconsistent -- it says BAD == n1 and BAD == n2
+    // while n2 > n1 -- and TimSort given an inconsistent comparator leaves
+    // the PLACEABLE rows out of order too. Measured over 20,000 generated
+    // inputs: of the 7,671 carrying at least one unplaceable `ts`, 1,430
+    // came out with the good rows not in descending order. Of the 12,329
+    // with none, zero differ from the line below, so this settlement is
+    // invisible on well-formed board traffic and only shows up on the row a
+    // reader most needs to find.
+    //
+    // `sortByInstant` is the repair the lint itself names, and it is total:
+    // ascending, stable, unplaceable rows kept rather than dropped. It has
+    // no descending mode, and `sortByInstant(notes, k).reverse()` is not one
+    // -- reversing a stable ascending sort reverses the ties, so three notes
+    // on the same second come out C,B,A where every earlier version of this
+    // line gave A,B,C. Reversing the input first cancels that: ties are
+    // reversed twice and land in arrival order.
+    notes: sortByInstant(notes.slice().reverse(), (n) => n.ts).reverse(),
     saturation: {
       directed_notes_in: inbound.length,
       directed_replies_out: outbound.length,

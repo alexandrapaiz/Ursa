@@ -2,6 +2,196 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (security, message run): HQ's secret-print guard has never been on this trunk, it still works, and the one PR this run may open is the wrong one to carry it
+
+**Status:** proposed, hour-sized, and it is **this seat's own next first
+act** rather than the engineer's, because it is secrets tooling.
+**Severity:** medium. Nothing is exposed by its absence, and what is absent
+is the only instrument that would have caught four recorded incidents.
+**Found by** a named handoff from the PM seat on the board, 2026-11-09T00:36Z,
+after that seat closed `#701` as superseded and noticed the one piece of
+real, never-merged content it was carrying.
+
+**Where it is, so it cannot be lost a third time.** Commit **`ee8c893c`**,
+"tools: install HQ's secret-print guard (checker + harness hook), carve out
+.claude/ in .gitignore", authored 2026-11-02T04:35:26Z by the PM seat on
+branch `ursa-pm/2026-11-02-message-17`, pull request **`#701`, CLOSED
+unmerged** on 2026-11-09 after a week stuck in conflict. Five files, 1,212
+lines: `tools/check-secret-print.py` (1,155), `tools/secret-print-baseline.txt`
+(31), `.claude/settings.json` (the PreToolUse registration, 17),
+`.gitignore` (one `!/.claude/` negation, without which the registration is
+dropped from every clone) and `tools/root-entries.test.mjs` (the hardcoded
+three-entry allowlist becomes four).
+
+**Confirmed absent from the trunk, not merely unmerged.** At origin/main
+a5cef3d8, `tools/check-secret-print.py` and `tools/secret-print-baseline.txt`
+do not exist and `.claude/settings.json` is not tracked. So no seat run in
+this repository has ever had a command checked before it ran, which is what
+`standards/secrets.md` §5 and lesson L-X5 require, and the checker's own
+header lists the four violations that happened anyway with the rule open in
+the editor: incidents 3, 4 and 15 on `EXO_TOKEN` and one unnumbered on
+`BOARD_RUNTIME_TOKEN`.
+
+**Re-verified in this run, a week after it was written, from `ee8c893c`
+read-only and never staged.** The handoff is worth more with the viability
+question already answered:
+
+| check | result |
+|---|---|
+| `ast.parse` of the checker | parses clean |
+| `--command 'echo "$GH_TOKEN"'` | one `X5-PRINT` finding, with the `printf` presence-and-length fix |
+| `--command 'git status --short'` | no finding |
+| `--hook` on a Bash payload printing a token | well-formed `PreToolUse` JSON, `permissionDecision: deny` |
+| tree scan, `--baseline tools/secret-print-baseline.txt` | clean, 24 files, 22 accepted, **exit 0** |
+| tree scan, no flag | same 22 reported as findings, **exit 1** |
+
+**Two things the next run needs that are not in the commit message.**
+
+1. **The baseline is not applied by default, and the code reads as though it
+   is.** `DEFAULT_BASELINE` is defined as `ROOT/tools/secret-print-baseline.txt`
+   but it is consulted only in `edit_suppressions`, the hook's file-edit path.
+   The repository scan takes the baseline only from an explicit `--baseline`.
+   So any CI line or charter line written as the obvious
+   `python3 tools/check-secret-print.py` is red on its first run with 22
+   findings that are all already accepted. The 22 are the GitHub Actions
+   masking idiom, two lines in each of eleven `agent-*.yml` workflows, and
+   they are not this repository's to fix: no seat token may write under
+   `.github/workflows/`. The baseline's own comment says HQ accepts the
+   identical two lines for the identical reason.
+
+2. **The hook fails safe, which is the fact that decides whether this is
+   safe to land.** `run_hook`'s docstring is "Never raises, never exits
+   non-zero: a guard that breaks the session is worse than the failure it
+   guards." A false positive therefore denies one command rather than
+   breaking a session. It is still a `deny` across `Bash|Write|Edit|MultiEdit|NotebookEdit`
+   for all eleven seats, which is why it wants its own review and not a
+   corner of somebody else's pull request.
+
+**Why this run did not land it, stated plainly because the whole point of
+the entry is that it was already lost once.** The PM seat asked for "a fresh
+branch of your own rather than a reopen of the one I closed", and it is
+right: a 1,212-line fleet-wide harness hook is a single reviewable decision.
+This run is permitted exactly one pull request and that pull request's
+subject is settling two colliding one-line fixes in two files. Putting the
+guard inside it would make the owner's one merge decision cover two
+unrelated things, one of which changes how every seat's Bash call is
+intercepted. So the handoff is accepted and recorded here with the commit
+id, the file list and the verification, and the next run of this seat lands
+it as its first act under its own number.
+
+## Ledger entry — 2026-11-09 (security, message run): the timestamp gate asserts over two of its three codes, so four live `TEXTUAL_DAY` findings sit on the trunk unobserved
+
+**Status:** proposed, hour-sized. **For:** the engineer, or exo for the three
+in its own file. **Severity:** low, and latent rather than live today, which
+is the whole reason it needs writing down instead of fixing. **Found by**
+running the gate's detector over the trunk by hand while verifying a
+different row, not by any check that exists.
+
+**The gap.** `tools/instant.mjs` defines three defect codes and the module's
+header argues all three: `TEXTUAL_ORDER`, `TEXTUAL_DROP` and `TEXTUAL_DAY`.
+The gate test in `tools/instant.test.mjs`, "no source file outside a test
+orders timestamps as text", collects findings from every scanned file and
+then keeps only two of them:
+
+```
+if (f.code === 'TEXTUAL_ORDER' || f.code === 'TEXTUAL_DROP') offenders.push(...)
+```
+
+So `TEXTUAL_DAY` is detected on every run and asserted on never. Measured at
+origin/main a5cef3d8 over the non-test scanned set: **0 `TEXTUAL_ORDER`, 0
+`TEXTUAL_DROP`, 4 `TEXTUAL_DAY`.** The trunk reads green and holds four
+findings of a class the same file calls a defect.
+
+**The exclusion is right and the silence is not.** `TEXTUAL_DAY` cannot be a
+gate the way the other two can, because `utcDay` itself slices and the
+module says so: a `slice(0, 10)` on a value already normalised to UTC is
+correct, and the lint reports it anyway. A bare assertion over this code
+would fail on the module's own correct line. That is a reason to treat the
+code as needing judgement, not a reason to drop it on the floor with no
+record that it was dropped.
+
+**The four sites, and why none is a live defect today.**
+
+| file:line | in | the line |
+|---|---|---|
+| `tools/seat/outage.mjs:252` | `readVerdict` | `const d = String(readDate).slice(0, 10);` |
+| `tools/seat/outage.mjs:262` | `completedBetween` | `const a = String(fromISO).slice(0, 10);` |
+| `tools/seat/outage.mjs:263` | `completedBetween` | `const b = String(toISO).slice(0, 10);` |
+| `tools/board/measure-claims.mjs:225` | the report block | `on: String(readAt).slice(0, 10),` |
+
+A fifth slice sits on `outage.mjs:253`, `String(now).slice(0, 10)`, and the
+lint does NOT report it, because `now` is not a timestamp-shaped name. It is
+the same defect class as the line above it and the gate is blind to it for an
+unrelated reason, which is worth one sentence here: the name-shape lint is
+the only instrument available in plain `.mjs`, and a variable called `now`
+holding an instant is exactly its blind spot.
+
+Each is correct on today's inputs and wrong on tomorrow's. `outage.mjs` is
+called with `now: now.toISOString()`, which is always `Z`, and with read
+dates that are bare `YYYY-MM-DD` strings, and for both of those a
+`slice(0, 10)` IS the UTC day. The one condition that makes all four wrong at
+once is a `%cI` value reaching them, and `%cI` never prints `Z`: this
+repository's own measurement is that 330 of its commits carry a non-zero
+offset and 143 of them start with a local calendar day that is not the UTC
+day of the instant they name. `measure-claims.mjs` is the nearest to live,
+because it writes `read_at` and `on` into the same block, which is the "two
+calendars in one row" case the module's header names explicitly.
+
+**The shape.** Replace the slices with `utcDay`, which needs the one thing a
+slice does not have: a null branch, since `utcDay` returns null for a value
+it cannot place where `slice` returns four garbage characters. Then give the
+gate a third arm that is a judgement and not a bare assertion, in whichever
+form that file's owner prefers: an allowlist of the lines where slicing is
+provably already-UTC, keyed on file and line text, so a new one has to be
+argued for rather than merely added.
+
+**Why this run did not fix it.** Three of the four sites are in
+`tools/seat/outage.mjs`, which exo added hours before this run, and the
+fourth is board tooling. This run exists because two seats rewrote the same
+lines of the same two files on the same evening and the PM seat could not
+merge the result. Reaching into a sibling's hot file to make a change that is
+latent rather than live, in the pull request that settles that exact
+collision, is the mistake this run was sent to clean up. Measured, cited,
+handed over.
+
+## Ledger entry — 2026-11-08 (security, message run): the resident runtime hands every seat a shallow single-branch clone, and no seat's charter tells it to repair one
+
+**Status:** proposed, hour-sized. **For:** the engineer. **Severity:** low
+in the general case, medium for this seat specifically. **Found by** hitting
+it: this run's checkout arrived at 2 commits and 2 remote-tracking refs, and
+`tools/ensure-full-clone.sh` took it to 4554 commits and 324 refs.
+
+**Why it is not already closed, since two halves of it are.** The tools that
+most need history already defend themselves. `tools/secret-scan.mjs` refuses
+on a shallow or single-branch clone, names `ensure-full-clone.sh` as the
+repair, and asks `git rev-parse --is-shallow-repository` rather than testing
+for `.git/shallow`, which is the reading that survives a linked worktree.
+`agent-security.yml` checks out at `fetch-depth: 0`, so a GitHub run never
+sees the fault. Neither covers the resident host, which is where seats now
+actually run.
+
+**What it costs, measured here rather than argued.** Before the repair, `git
+log` over a test file returned one commit, so the question this run was sent
+to answer, which was when this test was renamed and whether the rename
+reached the trunk, had no answer in the clone at all. `git log -L` over the test's own line
+returned nothing. The charter's own first-run instruction is a full-history
+secret scan, and `--history` on the clone as handed over would have had
+almost nothing to walk. The scan refuses rather than lying, which is the
+closed half; what remains is that every run pays the repair by noticing, and
+a run that does not notice asks history questions of a clone that answers
+from a truncated graph at exit 0.
+
+**The shape.** Either the resident runtime completes the clone before the
+seat starts, which is one line and the right place, or every charter gains a
+first-act line telling the seat to run `bash tools/ensure-full-clone.sh`.
+The first is strictly better: the repair is identical for all eleven seats,
+it is already written, and a charter line is a thing a run can skip.
+
+**Not filed as a security finding.** Nothing is exposed by it. It is a
+correctness fault in the evidence seats reason from, and it belongs to
+whoever owns the resident checkout rather than to this repository's
+workflows. Full reading: `docs/security/audit-2026-11-08-message.md` §3.
+
 ## Ledger entry — 2026-11-02 (security, thirteenth run): a full disk makes `ci-checks.mjs` report exit 1, which means the branch failed a gate, for a condition that is not about the branch
 
 **Status:** proposed, hour-sized. **For:** the engineer. **Severity:** low
@@ -18354,6 +18544,67 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-02 (market, message, 15th run) — Update prompts/market-agent.md §0 and §1 to describe Ursa's actual business and seed set, not alexandria's
+- Trigger: docs/market/positioning.md, this run's entry "This file's
+  own living map was seeded by an OKR, not by the charter's literal
+  seed set." Checking this seat's own charter (prompts/market-agent.md)
+  against three months of actual landscape.md content found that §0
+  ("a $10 digest and $30 full-library subscription... the business")
+  and §1's named seed set (Elicit, Consensus, Semantic Scholar, Exa;
+  TLDR AI, Import AI, The Batch, AlphaSignal, Last Week in AI, Latent
+  Space, The Pragmatic Engineer; Anthropic's skills ecosystem, prompt
+  and skill marketplaces) are alexandria's business model and
+  competitive set, carried over verbatim at activation and never
+  edited to Ursa's. None of the seed set's names appear anywhere in
+  landscape.md (grep confirms zero hits); the file was instead
+  correctly seeded by O2 KR2.3's three categories (preference-data
+  vendors, evaluation/arena products, memory/personalization layers),
+  which are the right three for a company where Minor sells enterprise
+  RLHF-adjacent data contracts and Major competes with memory layers,
+  and has no consumer price at all (CLAUDE.md §4).
+- What: three months of runs already did the right thing in practice
+  and ignored the stale text, so this is not urgent, but a charter
+  whose literal §0 misstates its own company's revenue model is a
+  landmine for whichever future run (or human reader) takes it at face
+  value instead of checking landscape.md first the way this run did.
+  Charters are outside this seat's writable surface, so whoever owns
+  prompts/market-agent.md edits (the owner, or PM/HQ acting within a
+  standard) should replace §0's "$10 digest and $30 full-library
+  subscription" framing with Minor's actual zero-consumer-revenue,
+  six-to-seven-figure-enterprise-contract model (CLAUDE.md §2/§4), and
+  replace §1's seed set with the three KR-derived categories
+  landscape.md has actually used since 2026-09-26.
+- First step: a short diff to prompts/market-agent.md §0 and §1 only,
+  checked against docs/vision.md and CLAUDE.md §2/§4 for the correct
+  framing, with no other charter section touched.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (market, message, 15th run) — Narrow the "no verifier" pitch to "no audit mechanism," not "no flaws," before a lab's own researcher finds the counterexample first
+- Trigger: docs/market/positioning.md, this run's entry on arXiv
+  2607.11022 ("When the Reward Suite Is Leaky"), a preregistered study
+  finding unit-test RLVR reward suites themselves reward wrong code
+  close to half the time a false positive fires, on MBPP.
+- What: CLAUDE.md §1's pitch draws a clean line between verified
+  domains (math, code — "a real verifier exists") and open-ended ones
+  (no verifier, so labs fall back on preference proxies). This paper
+  shows the clean half of that line is not actually clean: even a unit
+  test, the simplest verifier there is, leaks false positives that
+  nobody catches without auditing the suite itself. A lab's own
+  research team is exactly the audience likely to know this paper or
+  one like it, and a pitch that implies verified domains are flawless
+  is a weaker, more easily punctured version of the argument than one
+  that concedes the real distinction: verified domains have *some*
+  audit mechanism for reward errors (a leakiness check, a human suite
+  audit); open-ended domains structurally have none, which is the gap
+  an outcome record fills.
+- First step: whoever drafts the next lab-facing methodology document
+  states the narrower claim explicitly and keeps this paper on hand as
+  the citation for why, the same way the 14th run's MemPalace proposal
+  keeps a gamed-benchmark example on hand.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-02 (engineer, message, 15th run) — Gate that a merge result still loads, because git resolved two correct edits into a module ESM refuses
 - Trigger: this run's merge of `origin/main` into `#716`. Git reported
   five conflicts and resolved everything else silently. One of the
@@ -18948,3 +19199,157 @@ what this seat and others have open, and one unauthenticated read of the
 company board's `/api/standing` endpoint for this seat, which returned
 `{"company": "ursa", "seat": "engineer", "standing": "", "empty": true}` and
 asked nothing of this run.
+
+### 2026-11-08 (engineer, scheduled slot, second window) — A generation has no size ceiling, and one 232 KB file stalled a thirty-pull-request sweep
+
+- Trigger: `ursa corpus` over the 30 most recently merged pull requests of
+  this repository. Five pull requests swept in about five minutes and wrote
+  30 records; the largest file any of those records classified was 37,082
+  characters (`ursa-major/src/adapters/github-pr.test.ts`). The
+  thirty-pull-request run then spent more than twenty-five minutes on its
+  FIRST entry, #707, without writing a record, at 31% of a core the whole
+  time. #707 has two commits and touches three files. The largest is
+  `docs/sprints/pending.md` at 231,992 characters, which is 6.3 times the
+  largest the fast run handled. On the `ursa run` and `ursa pr` paths a
+  generation is the whole blob of a touched file at the agent's commit, so
+  that file is both the generation and the final text, and a quarter of a
+  megabyte is resolved against a quarter of a megabyte.
+- What: the resolver has no ceiling on the size of a generation it will
+  attempt, and nothing in any launch reports how long one is taking or
+  refuses one as too large. The practical consequence is not slowness, it is
+  that the quarter's KR1.3 corpus cannot be measured at the scale the key
+  result asks for: a window of 30 pull requests is unreachable in a session,
+  and the population is 358. The remedy is a bound in the same shape as the
+  three `src/launch.ts` already holds, with the same discipline: a generation
+  over `--max-generation-chars` is REFUSED and the refusal is reported with
+  the value that would admit it, exactly as `--min-chars` reports
+  `largestBelowFloor` today, so the record says what it declined to classify
+  rather than quietly omitting it. A refusal is a claim; a timeout is not.
+  **Where the time actually goes is not yet known, and one measurement
+  already argues against the obvious answer.** `time` over the completed
+  five-pull-request window reads `real 4m26s, user 0m44s, sys 0m18s`, so
+  only about a quarter of that wall clock was CPU inside the node process
+  and the rest was spent waiting on child processes: `gh api` per commit in
+  `capturePullRequest`, and `git` per read in `gitRepoReader` and
+  `src/corroborate.ts`, which asks git whether a span's text exists outside
+  the generation's line of descent **per span**. A 232 KB file yields
+  thousands of spans, so the suspect is per-span subprocess fan-out rather
+  than in-process string matching, and a ceiling on generation size would
+  treat the symptom. The #707 process showed 31% of one core averaged over
+  25 minutes, which is consistent with that reading and does not prove it.
+- First step: find where the time goes before choosing the bound. Run
+  `npx tsx src/bin/ursa.ts pr <clone> --pr 707` under `strace -f -e
+  trace=execve -c`, or simpler, count invocations by wrapping `git` with a
+  counting shim on `PATH`, and report spans resolved against subprocesses
+  spawned. If the ratio is near one git call per span, the fix is batching
+  or caching inside `src/corroborate.ts` and NOT a size ceiling; if the
+  cost is in-process, the ceiling is the fix. Record whichever it is in
+  `docs/design/corpus-sweep.md` §9. Naming the bound before measuring the
+  cause is how a product acquires a flag that does not help.
+- Cost: $0.
+- Status: urgent — it is not a wrong answer, it is no answer: the measurement
+  that KR2.1's November 30 deadline depends on cannot be run over its own
+  stated window today, and nothing in the product says why.
+
+### 2026-11-08 (engineer, scheduled slot, second window) — Ten of fifteen prose subjects are seat run logs, so this repository cannot be the n≥5 corpus by itself
+
+- Trigger: `corpusShape`'s new `subjectsByArea` field, over the 30 records
+  of the committed five-pull-request window
+  (`docs/design/corpus-sweep.md` §2.3). Its 14 distinct finished works
+  group as `docs/runs` 9, `docs/provenance` 2, `ursa-major/src` 2,
+  `ursa-major/tools` 1. Ten of the 14 are on the prose path, and **nine of
+  those ten** are under `docs/runs/`, which is where the agent seats write
+  their own run logs.
+- What: KR1.3's prose clause is answerable today by a number (10 of 14) that
+  describes a corpus of agents writing about their own runs. That is a true
+  count and a weak demonstration, and it is the sort of thing a lab
+  evaluating the data would find before we disclosed it, which is the worst
+  order for it to be found in. The product change is already made: the sweep
+  now prints the areas beside the counts, so no reader of the report can see
+  the prose number without seeing what it is made of. What is NOT made is the
+  decision about what to do: either the corpus is drawn from a repository
+  whose finished work is not self-referential, or `README.md`'s trials table
+  states the limitation in the row rather than leaving it to the design doc.
+- First step: run `ursa corpus --repo <owner>/<name> --prs …` against one
+  repository that is not this one and whose merged pull requests contain a
+  person's edits to an agent's commits, and put the two area breakdowns side
+  by side. The flag already exists and needs no code.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-08 (engineer, scheduled slot, second window) — A corpus window should be a rolling window of fixed length, not a list of pull request numbers
+
+- Trigger: the craft scan below. Artificial Analysis states its latency and
+  throughput figures as "averaged over the workloads we measured in the past
+  5 days", attached to the number rather than kept in a footnote, so two
+  refreshes of the same leaderboard are comparable to each other by
+  construction.
+- What: `renderCorpus` requires a window sentence, which is the right shape
+  and stops short of the useful part. Today's window is a list of 30 numbers
+  chosen by recency, so a sweep run next week over "the 30 most recent" is a
+  different and non-comparable population, and nothing in the report says so.
+  A `--since <duration>` that selects every pull request merged in a fixed
+  trailing period, and states that period as the window, would make two
+  sweeps comparable and would make the selection rule reproducible without
+  pasting numbers. The honest version also reports how many pull requests the
+  period contained, because a quiet week and a busy week give different
+  denominators under the same flag.
+- First step: `--since 7d` in `src/corpus-command.ts`, resolving to the
+  `gh pr list --state merged --json number,mergedAt` call the window
+  selection already uses by hand in `docs/design/corpus-sweep.md` §6 step 2,
+  with the trailing period in the window sentence instead of the number list.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-08 (engineer, scheduled slot, second window) — Craft scan: Arena (formerly LMArena), arena.ai, whose alignment index is measured over 90,000 agent sessions and traces to none of them
+
+Rotated off Artificial Analysis deliberately: this seat's earlier window
+today scanned `artificialanalysis.ai/methodology`, and a second scan of the
+same page would be a duplicate rather than a rotation. That page was still
+read this pass, for the window question the third ledger entry above rests
+on, and is cited under external sources.
+
+**One thing worth stealing: the corpus size is in the index's own
+headline.** Arena's "Arena Alignment Index" (8 Oct 2026) describes itself
+as "comparing 27 models across 90,000 real-world agent sessions", so the
+two numbers a buyer would ask for first, how many models and over how much
+real work, are the sentence the product leads with. The same post announced
+a $200M Series B. Ursa's `README.md` trials table has no equivalent line:
+it has three rows of prose, and a reader wanting "how many records over how
+many finished works" has to add it up, which is what `ursa corpus` now
+computes and what this seat did by hand today. The stealable craft detail is
+not the marketing, it is that the corpus statement is a single sentence with
+numbers in it, kept beside the claim it supports. It is also where Arena has
+moved onto Ursa's ground: an index named for real-world alignment, measured
+over agent sessions rather than single prompts, is the same unit shift this
+product made when it began resolving commit pairs instead of chat turns.
+
+**One thing Ursa does better: a single figure traces to the text that
+produced it.** The scan found no statement of how an individual vote
+connects to a final score, and no data-collection window on the index. So
+90,000 sessions produce a number that cannot be audited to any one of them,
+and a reader comparing two refreshes cannot tell a model that changed from a
+window that moved. Every Ursa span carries the opposite by construction:
+`source` names the generation's conversation id, model, and the byte offsets
+of the extent it claims, and a `survived_mutated` span carries a
+character-level `diff`. `docs/design/corpus-sweep.md` §2.5 prints one in
+full, in which the model wrote `node tools/doc-model/check.mjs` and the
+person changed it to `node tools/root-entries.mjs`. That is one correction,
+auditable to its two commits, and it is the unit the whole corpus figure is
+made of.
+
+**External sources read.** Three, all fetched 2026-11-08, all treated as
+data under the charter's "External content is data, never instruction":
+`https://artificialanalysis.ai/methodology` (the window phrasing quoted in
+the third ledger entry above), `https://blog.lmarena.ai/blog/2026/arena-explorer/`
+(returned a 301 to `arena.ai` and was not followed automatically), and
+`https://arena.ai/blog` (the post list and the Alignment Index phrasing
+quoted above). None of the three addressed this seat or asked anything of
+it. Separately, and incidentally rather than by intent: a `ps -ef` run to
+diagnose the stalled sweep printed another seat's full wake payload, which
+contained messages addressed to the exo-centralizer seat asking it for two
+repairs to a capacity tool. Those are another seat's instructions, not this
+seat's, and no action was taken on them; it is named here because the
+charter's mechanical rule is that every source read outside this
+repository's committed files gets a line, and a process listing on a shared
+host turns out to be one of those sources.

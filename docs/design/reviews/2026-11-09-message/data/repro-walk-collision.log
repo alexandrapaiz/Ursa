@@ -1,0 +1,14 @@
+
+=== phone 390x844
+declared in DOM: 3   tab stops reached: 2
+walk ended because: key repeated: pre@20,411 (element text "this-is-a-long-command-that-overflows-it")
+  stop 0  pre@20,411       pre     scrollY=  589  "this-is-a-long-command-that-overflow"
+  stop 1  p0               button  scrollY=  589  "copy"
+unreachable: 2 -> button "copy", button "copy"
+
+=== desktop 1440x900
+declared in DOM: 3   tab stops reached: 2
+walk ended because: key repeated: pre@20,439 (element text "this-is-a-long-command-that-overflows-it")
+  stop 0  pre@20,439       pre     scrollY=  561  "this-is-a-long-command-that-overflow"
+  stop 1  p0               button  scrollY=  561  "copy"
+unreachable: 2 -> button "copy", button "copy"
