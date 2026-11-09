@@ -249,6 +249,12 @@ regex wants, and left `api.py` re-exporting it as
 board carried as roughly fifteen "Deployed HQ main \<sha\> to the host"
 notes.
 
+**This run's own two observations pin the deploy.** The standalone suite run
+finished at roughly 08:54Z and reported 1,719 of 1,720 passing with no
+failures. The gate list ran after 09:02:28Z and reported this case failing.
+Same tree, same command underneath, opposite colours, with the runtime's
+mtime between them.
+
 So a deploy no branch here caused turned a gate red, and the colour it
 showed was `tooling-suites exit 1`, which reads as a defect in the branch
 under test. Same class as F119, F120 and F123: an instrument reporting a
