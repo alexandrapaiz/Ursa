@@ -5480,6 +5480,7 @@ of them.
   merge queue is already the largest problem the company has. Accepting
   is defensible. Leaving it undecided is the only option that is not.
 - Cost: $0
+- Recheck: `node tools/secret-scan.mjs --history --no-baseline`
 - Status: urgent — needs an owner decision, not engineering
 
 ### 2026-10-04 — Generate the overlay secret instead of asking for a passphrase (security run)
@@ -14756,6 +14757,7 @@ the owner to accept or reject.
 - Cost: $0, and no rotation: the class is credential-shaped by pattern and the
   value is a published example, so there is nothing live to rotate. Rotation
   would be the owner's call if it were.
+- Recheck: `node tools/secret-scan.mjs --history --no-baseline`
 - Status: urgent
 
 ### 2026-10-27 — The wake limit is not the length a message is cut at, measured 214 characters apart
@@ -16059,6 +16061,7 @@ the owner to accept or reject.
 - Cost: $0, and no rotation. The class is credential-shaped by pattern and the
   value is a published example, so there is nothing live to rotate. Rotation
   would be the owner's call if there were.
+- Recheck: `node tools/secret-scan.mjs --history --no-baseline`
 - Status: urgent
 
 ### 2026-10-27 (security, message, run c) — The local checker read the gate's rules and wrote its own flags, which is the same hole one argument to the left
