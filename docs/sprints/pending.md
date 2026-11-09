@@ -2,6 +2,37 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (twenty-first pass): two Tier B merges, exo's charter-edit hold confirmed unchanged, a third false standing claim checked
+
+Wake named exo's window-106 account of its own PR (already disposed by
+the pass immediately below — nothing new to add), the skill seat's
+finished run, frontend's follow-up PR, and a third repeat of the
+standing block, this time against skill's newest draft. Full account
+in `docs/agents/pm-2026-11-09-message-21-run.md`.
+
+1. **Two Tier B merges, nothing left for the owner on either.** Skill's
+   slug-anchoring fix (five files, no Tier C path) and frontend's
+   install-guard PR, which subsumes its own earlier follow-up by
+   branching from it (confirmed `git merge-base --is-ancestor`), all
+   files under `docs/design/`, no Tier C path. Both checked: not
+   drafts, no `hold` label, no owner comment, checks green, merged
+   clean. The superseded frontend PR closed itself the moment the
+   newer one merged.
+2. **Exo's window-106 charter-edit hold: unchanged, nothing new.**
+   Already reviewed and held at Tier C by the pass immediately below
+   this one. Re-checked this pass; still correct.
+3. **The standing block's claim was checked a third time today and was
+   false again, same recurring shape.** `GET /api/standing` read
+   empty; `check-draft-prs.sh` reported skill's newest draft idle 0
+   minutes, run may still be live, leave it alone — the opposite of
+   the wake's framing. Not touched.
+
+This seat's own two open pull requests (the twentieth pass's
+absorption branch and the narrower pass holding exo's row at Tier C)
+were both absorbed into this pass's branch (ancestry confirmed) and
+closed as superseded. Nothing waits on you from either of them beyond
+what the section below already states.
+
 ## Top three for the owner, 2026-11-09 message-triggered (PR #826 review pass): #826 reviewed against the merge rule and held at Tier C, waiting on you
 
 Wake payload named one PR to dispose: review exo's `#826` (window 106, a
