@@ -3002,3 +3002,142 @@ applying. A continuous ramp expressing a real design intent is better than a
 discontinuity hiding a defect. The third option, giving the header the body's
 measure so the two always share one edge, would change every page at every
 width and belongs to the owner, like L70's column.
+
+## L72 — Padding cannot separate two inline boxes, because each one paints across its own
+
+**fixed**, 2026-11-09 (run 2026-11-09-message-x).
+`reviews/2026-11-09-message-x/data/diff-gap-before.txt` and `diff-gap-after.txt`.
+
+The record viewer's inspector is where this product's central claim is
+rendered. The mutation is the correction, expressed as an edit rather than
+as a complaint, and the diff is how a reader sees that. On the fixture's
+one mutated span that diff read `and nonot by any`.
+
+A previous run had seen the same string and written a rule for it:
+
+```css
+/* A word diff puts a removal and its replacement side by side with no
+   separator between them … A tenth of an em on each side is the smallest
+   gap that separates the struck words from the kept ones */
+.rec-diff ins,
+.rec-diff del { padding: 0 0.1em; }
+```
+
+The comment names the exact string it was written for, and the string was
+still on the page three weeks later, because padding is inside the inline
+box and an inline box paints its `text-decoration` and its
+`background-color` across its own padding. Measured at 1440: the `del` ran
+to 975.81 and the `ins` began at 975.81. **A box gap of exactly 0.00px.**
+What the 0.1em bought instead was 1.216px of extra struck paint and 1.216px
+of extra highlight on each side, so the two runs did not merely touch, they
+each grew toward the other.
+
+This is the shape this repository keeps finding under other names: a guard
+that is silently inert (L45), a check whose failure mode is to measure
+something else, a repair whose own comment is the only evidence it worked.
+What is specific to this one is that the evidence was a screenshot anybody
+could have taken, of a string the comment itself quotes.
+
+**The repair, in two halves, because the CSS alone does not do it.**
+
+`margin` rather than `padding`, which is outside the box, so neither the
+strike nor the highlight reaches it. That alone takes the gap from 0.00px
+to 2.41px, and 2.41px is a third of this font's 7.28px advance and still
+read as one word at 4x magnification. So the gap is also spent where it is
+needed rather than everywhere:
+
+```css
+.rec-diff del + ins,
+.rec-diff ins + del { margin-left: 0.5em; }
+```
+
+A removal and the insertion that replaces it are the one adjacency in a
+word diff with no whitespace on either side of it in either version of the
+text. The fixture's is `itself, ` + del `and no` + ins `not by any` +
+` human grader`: the space before `and` and the space after `any` both
+belong to the kept runs. `del + ins` goes 0.00px to **7.28px**, exactly one
+character advance, and no comma anywhere else in the sentence moves.
+
+**The second half is in the component and could not be done in CSS.** A
+word diff puts the space between two words inside one of the runs. The
+fixture's removal is `" is involved at any point"`, leading space included,
+and `text-decoration: line-through` drawn through that space met the `r` of
+`grader`, so the two read as one hyphenated word. `record-inspector.tsx`
+now splits boundary whitespace out of an `ins` or `del` run and emits it as
+plain text. The run's own value is untouched, so nothing about what was
+added or removed is restated by the renderer.
+
+**Containment.** All fifteen page frames are byte-identical before and
+after (`data/frame-diff-pages.txt`). Only the inspector's open state moves.
+
+### The surface this was found on had never been driven
+
+The inspector renders only when a passage is selected, the selection lives
+in React state in `record-view.tsx`, and nothing puts it in the address. So
+no instrument in the kit had ever reached it. It was photographed once, at
+desktop only, on 2026-10-18, and measured by nothing, ever.
+
+`data/state-span-selected.mjs` is the drive. On its first outing
+`measure-hit-areas.mjs` reported `button.rec-action "See it inside the
+generation →"` **SHORT by 26**, an 18px box against the 44px floor, at all
+three viewports. It is the inspector's only control and the only standalone
+`.rec-action` on this site without `.rec-hit`, which every other one has
+carried since 2026-10-24.
+
+Six hit-area sweeps had been clean over this page. None of them was wrong.
+Each measured a page from which this control was absent and reported a
+floor met over a denominator that did not contain it. **The control was not
+missed; it was out of frame.** That is the README's denominator warning
+(L19, L23) arriving through the one door it did not name: not a zero count
+over a zero denominator, but a full count over a complete-looking page in
+one of its two states.
+
+Fixed with `rec-hit` and `mt-4`, the remedy the 44px floor block already
+prescribes for the three form buttons, since the overlay reaches 13px past
+the box and a 12px gap does not hold it off the line above.
+`data/jump-clearance.txt` reads the real rects: overlay 44px, clearance
+6.71px above and 2.96px below, identical at all three viewports. After:
+0 short of 12 standalone, over the same 12 and the same 33 targets seen.
+
+**What this asks of the next run.** Every page on this site that holds
+state has states no instrument has entered. `/record` has a loaded set view
+and a loaded record; `/record/at` has an opened record and four error
+states; this page has a selected span and an expanded generation. Driving
+them is cheap now that `--state` exists and one worked module is committed.
+Carded.
+
+## L73 — The grid measurement in front of the owner counted four of this site's five surfaces
+
+**observed, not changed**, 2026-11-09 (run 2026-11-09-message-x).
+`reviews/2026-11-09-message-x/data/grid-five.txt`.
+
+L70 is a measurement offered to the owner, and its headline is that **the
+home page is the only page that leaves the site's one-column grid**. Board
+card `847b443e` carries that sentence and is in Review.
+
+The script that produced it measures `home`, `set`, `record` and `address`.
+The site has a fifth rendered surface, and this seat's own `shoot.mjs` has
+carried it in its default page list the whole time: the not-found page,
+which the kit reviews like any other page and photographs at all three
+viewports every run.
+
+Measured with the same script and the fifth path added, at 1440:
+
+| surface | left | right |
+|---|---|---|
+| home, hero | 96 | 758 |
+| home, sections | 416 | 1024 |
+| set, record, address | 240 | 1200 |
+| not-found | 96 | 800 |
+
+So there are **three** left edges at desktop and not two, and the 404 sits
+on the first of them with the home page's hero.
+
+**Nothing here is a defect and nothing is changed.** The 404's measure is
+deliberate and `site-footer.tsx` says so in prose that predates this run:
+`"page"` is `the page's own left edge. The 404 needs this: it has no centred
+column for a footer to agree with.` This entry exists because the owner is
+being asked to pick a column, and the sentence she was handed says three of
+four pages agree. Four of five do not agree; three of five do, one is the
+open question, and one is a third convention already argued for in the
+code. Whichever column she picks, that is the shape of what is left.

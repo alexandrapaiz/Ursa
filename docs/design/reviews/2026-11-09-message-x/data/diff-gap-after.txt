@@ -1,0 +1,18 @@
+run geometry, in document order
+  span      873     1160  pad 0px/0px  margin 0px/0px  "Provenance is established by the artifact "
+  ins     874.2    916.2  pad 0px/0px  margin 1.216px/1.216px  "itself"
+  span   917.41   931.41  pad 0px/0px  margin 0px/0px  ", "
+  del    932.61   974.61  pad 0px/0px  margin 1.216px/1.216px  "and no"
+  ins    981.89  1051.89  pad 0px/0px  margin 6.08px/1.216px  "not by any"
+  span  1053.09  1144.09  pad 0px/0px  margin 0px/0px  " human grader"
+  span  1144.09  1151.09  pad 0px/0px  margin 0px/0px  " "
+  del       873   1166.3  pad 0px/0px  margin 1.216px/1.216px  "is involved at any point"
+  span   1021.2   1028.2  pad 0px/0px  margin 0px/0px  "."
+
+gap between consecutive runs on the same line
+  ins->span  box gap 1.21px   "itself" | ", "
+  span->del  box gap 1.20px   ", " | "and no"
+  del->ins  box gap 7.28px   "and no" | "not by any"
+  ins->span  box gap 1.20px   "not by any" | " human grader"
+  span->span  box gap 0.00px   " human grader" | " "
+  span->del  box gap -278.09px   " " | "is involved at any point"

@@ -765,10 +765,36 @@ html {
    rendered as "and nonot by any", which a reader has to decode rather
    than read. A tenth of an em on each side is the smallest gap that
    separates the struck words from the kept ones; any more and the
-   sentence stops being a sentence. */
+   sentence stops being a sentence.
+
+   `margin` and not `padding`, which is the 2026-11-09 repair and the
+   whole of it. Padding is inside the inline box, and an inline box paints
+   its `text-decoration` and its `background-color` across its own padding,
+   so the rule above bought no separation at all: measured at 1440 the
+   `del` ran to 975.81 and the `ins` began at 975.81, a box gap of exactly
+   0.00px, and what the padding did instead was make each run 2.43px wider
+   in struck and highlighted paint than its own glyphs. The line still read
+   "and nonot by any" for three weeks under a comment that said it did not.
+   A margin is outside the box, so neither the strike nor the highlight
+   reaches it, and the same 0.1em now separates the two runs by 2.43px.
+   Measured before and after in reviews/2026-11-09-message-x/data/. L72. */
 .rec-diff ins,
 .rec-diff del {
-  padding: 0 0.1em;
+  margin: 0 0.1em;
+}
+
+/* And the gap the 0.1em was reaching for, put where it is actually needed.
+   A removal and the insertion that replaces it are the one boundary in a
+   word diff with no whitespace on either side of it, in either version of
+   the text: the fixture's reads "itself, " + del "and no" + ins "not by
+   any" + " human grader", so the space before "and" and the space after
+   "any" both belong to the kept runs. 0.2em of margin between them is a
+   third of this font's 7.3px advance and still read as one word at 4x.
+   Half an em does not, and it is spent only here, so no comma anywhere
+   else in the sentence is pushed off its word. */
+.rec-diff del + ins,
+.rec-diff ins + del {
+  margin-left: 0.5em;
 }
 
 /* A command is shown the way a terminal would show it: lines break

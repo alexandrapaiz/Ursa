@@ -1,0 +1,36 @@
+shoot              live   exit=0         pass=true abstains=false
+shoot              dead   exit=1         pass=false abstains=false
+shoot              wrong  exit=0         pass=true abstains=false
+measure-contrast   live   exit=0         pass=true abstains=true
+measure-contrast   dead   exit=1         pass=false abstains=false
+measure-contrast   wrong  exit=0         pass=true abstains=true
+measure-focus      live   exit=1         pass=true abstains=false
+measure-focus      dead   exit=1         pass=false abstains=false
+measure-focus      wrong  exit=1         pass=true abstains=false
+measure-hit-areas  live   exit=0         pass=true abstains=false
+measure-hit-areas  dead   exit=1         pass=false abstains=false
+measure-hit-areas  wrong  exit=0         pass=true abstains=false
+measure-narrow     live   exit=0         pass=true abstains=false
+measure-narrow     dead   exit=2         pass=false abstains=true
+measure-narrow     wrong  exit=0         pass=true abstains=false
+verify-hover       live   exit=1         pass=false abstains=false
+verify-hover       dead   exit=1         pass=false abstains=false
+verify-hover       wrong  exit=1         pass=false abstains=false
+
+# The first pass of the control, run 2026-11-09 before any repair, kept
+# verbatim. Two of its cells are the harness's own fault and not the
+# instruments': measure-focus crashed EISDIR after printing a complete
+# headline because this harness handed it a directory where it wants a
+# file, and verify-hover timed out on a form whose submit button was still
+# disabled on a cold dev server. Both are in the LIVE column, which is the
+# reference, so the reading that survives is the `wrong` column:
+#
+#   shoot            wrong  exit 0, passing headline
+#   measure-contrast wrong  exit 0, passing headline
+#   measure-focus    wrong  exit 1 (its own EISDIR), passing headline
+#   measure-hit-areas wrong exit 0, passing headline
+#   measure-narrow   wrong  exit 0, passing headline
+#
+# Five of six instruments printed a passing headline over pages that
+# answered HTTP 404, and four of them did it at exit 0. Compare
+# do-nothing.txt in this directory for the same six after the repair.
