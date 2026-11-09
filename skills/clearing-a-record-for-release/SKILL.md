@@ -133,13 +133,13 @@ evidence:
     source: docs/design/consent-and-erasure.md:549-571
   - ref: E37
     what: the ledger finding that the publish disclosure claims the text was already public and never checks whether the repository is, and that an unstated visibility must print the private sentence
-    source: docs/ideas.md:9155-9158
+    source: docs/ideas.md:9274-9277
   - ref: E38
     what: the ledger finding that nothing tells a publisher what of theirs is live right now and nothing takes one record back down between publishes
-    source: docs/ideas.md:9162-9165
+    source: docs/ideas.md:9281-9284
   - ref: E39
     what: the ledger finding that a republish leaves the pages it no longer lists, so an erased record stays readable at an address somebody already has
-    source: docs/ideas.md:9175-9178
+    source: docs/ideas.md:9294-9297
   - ref: E40
     what: the five poisoned payloads the audit is asserted to catch, including the whole record passed off as a batch, which is the failure mode that existed before the module
     source: ursa-major/src/disclosure.test.ts:256-310

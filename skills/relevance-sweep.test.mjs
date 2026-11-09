@@ -8,16 +8,16 @@
 // a real library in a temp directory rather than described.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, copyFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync, readFileSync, copyFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { fixtureDir } from './tmp-fixture.mjs'
 
 const here = (f) => new URL(f, import.meta.url).pathname
 
 /** A two-ref library: E1's claim is checkable from its range, E2's is not. */
 function library({ audit } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'relevance-sweep-'))
+  const dir = fixtureDir('relevance-sweep-')
   mkdirSync(join(dir, 'src'), { recursive: true })
   mkdirSync(join(dir, 'skills', 'alpha'), { recursive: true })
   for (const f of ['relevance-sweep.mjs', 'source-line.mjs', 'citing-files.mjs'])
@@ -496,7 +496,7 @@ supersedes: []`))
 
 /** A library whose three refs are a measured zero, a measured one, and no comparand. */
 function scales() {
-  const dir = mkdtempSync(join(tmpdir(), 'relevance-sweep-scales-'))
+  const dir = fixtureDir('relevance-sweep-scales-')
   mkdirSync(join(dir, 'src'), { recursive: true })
   mkdirSync(join(dir, 'skills', 'alpha'), { recursive: true })
   for (const f of ['relevance-sweep.mjs', 'source-line.mjs', 'citing-files.mjs'])

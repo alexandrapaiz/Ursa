@@ -45,13 +45,13 @@ evidence:
     source: ursa-major/src/deletion.ts:28-40
   - ref: E6
     what: a proven cause beats a missing one, so the scan keeps walking after it finds a hole and returns the hole only if no merge can be shown to have destroyed the text
-    source: ursa-major/src/deletion.ts:42-44,129-131
+    source: ursa-major/src/deletion.ts:42-44,142-144
   - ref: E7
     what: the conjunctive merge test and its three holes in code, with the first hole kept by a nullish assignment and later holes discarded, and an empty-after-normalization span returned as the person's
-    source: ursa-major/src/deletion.ts:125-127,133-174
+    source: ursa-major/src/deletion.ts:138-140,146-187
   - ref: E8
     what: the two fallbacks, where no readable merges and no blind shas makes every deletion the person's, and one blind sha makes every unexplained deletion unknown named by the first sha alone
-    source: ursa-major/src/deletion.ts:96-105,176
+    source: ursa-major/src/deletion.ts:96-105,189
   - ref: E9
     what: attribution is injected into a resolver that reads no git, and omitting the injection attributes every deletion to the human, with the default spelled out at the call site
     source: ursa-major/src/resolve.ts:5-13,54-59,536
