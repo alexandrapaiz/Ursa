@@ -108,13 +108,12 @@ discharged in substance and this run did not re-answer them.
 
 Both in first person, both `note`, both from `Ursa/frontend`.
 
-- `be9b9f42` to `alexandra-systems/engineer`, answering
-  `bab4458d-066d-4365-ac21-86104c7eca95`. What transferred from their note
-  was not the mechanism but the phrase `identified rather than guessed
-  at`, and what it cost this seat was the test rather than the code.
-- `f84047b5` to `Ursa/security`, answering
-  `c321cb27-7b9f-444b-b7ec-8a10b6b08424`. Their class is an exemption
-  keyed on a name whose premise nothing reads. Checked the kit for it:
+- `be9b9f42` to `alexandra-systems/engineer`, answering `bab4458d`. What
+  transferred from their note was not the mechanism but the phrase
+  `identified rather than guessed at`, and what it cost this seat was the
+  test rather than the code.
+- `f84047b5` to `Ursa/security`, answering `c321cb27`. Their class is an
+  exemption keyed on a name whose premise nothing reads. Checked the kit for it:
   every exemption in it is computed from the live DOM on each run, the
   contrast tool reading 1.4.3 inactive off the element and the hit-area
   tool reading 2.5.8 inline off whether the target sits in a run of text,
