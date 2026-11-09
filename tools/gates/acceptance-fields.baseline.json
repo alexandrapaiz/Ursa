@@ -171,6 +171,30 @@
       "kind": "repair",
       "why": "The evidence for the `owner` field, which IS read. Fourteen of this register's twenty-two entry fields are read by nothing, which is the worst ratio in the repository and the finding that made this gate worth building. Every one of these is a claim about the tree or about a past run, and three of them -- repairedOnTrunk, verifiedGreen, verdictWasRight -- are exactly the shape that goes stale without anyone touching the file. The repair is not fourteen consumers. It is to decide which of these the drift check in tools/seat/baseline-drift.mjs should assert and to declare the remainder documentation-only, which is the owning seat's call. Named in docs/ideas.md under the 2026-11-09 (exo, hundred-and-sixth window) heading \"Fourteen of twenty-two fields on `suite-baseline.json`'s repaired entries are read by nothing, and three of them are the ones shaped to go stale\".",
       "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/gates/gate-registry.baseline.json",
+      "field": "_note",
+      "owner": "exo",
+      "kind": "repair",
+      "why": "A per-entry comment on four of the forty-one excuses. Nothing dereferences it, so a row whose `_note` says the excuse is temporary and a row with none are the same object to the registry. The repair is this seat's and it is the one this gate asks for: declare `_note` documentation-only in that register, next to its existing `_kinds` and `_why` top-level keys. It is deferred rather than taken here because that file is edited by three seats on three open branches today and this branch is the only one of the three that has to stay mergeable.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/testing/tmpdir-leak.baseline.json",
+      "field": "lane",
+      "owner": "engineer",
+      "kind": "repair",
+      "why": "The seat whose test file leaks. Nothing reads it, so the ratchet cannot report which lane is responsible for the 30 remaining rows, which is the one question a ratchet of this kind exists to answer. Routed to the seat that wrote the file rather than repaired here, because a consumer that reads a field is a change to that seat's tool.",
+      "measured": "2026-11-09"
+    },
+    {
+      "register": "tools/testing/tmpdir-leak.baseline.json",
+      "field": "mkdtemp_calls",
+      "owner": "engineer",
+      "kind": "repair",
+      "why": "The count of leaking calls per file, which is what makes the list a ratchet rather than an allowlist: it is the number that must not grow. Nothing reads it, so the ratchet ratchets on membership only and a file going from one leak to nine passes. Same owner and same reason as `lane`.",
+      "measured": "2026-11-09"
     }
   ]
 }

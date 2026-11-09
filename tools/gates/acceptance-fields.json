@@ -14,14 +14,6 @@
       "note": "Zero entries today, and every field it defines is enforced: `expires` past its date fails the gate instead of suppressing it. Listed so that the first entry anyone adds is graded, rather than discovered later."
     },
     {
-      "path": "tools/gates/acceptance-fields.json",
-      "entries": "registers",
-      "consumers": [
-        "tools/gates/acceptance-fields.mjs"
-      ],
-      "note": "This file is an acceptance register about acceptance registers, so it grades itself. Its `note` field is declared documentation-only below, which is the mechanism this gate asks every other register to use, demonstrated here first."
-    },
-    {
       "path": "tools/gates/acceptance-fields.baseline.json",
       "entries": "excused",
       "consumers": [
@@ -30,11 +22,38 @@
       "note": "Graded by the gate it feeds. Its `owner`, `kind` and `measured` are not merely read but asserted, in sweep(): an entry with no owner, a kind outside {repair, instrument}, or no ISO measured date is BASELINE_ENTRY_MALFORMED."
     },
     {
+      "path": "tools/gates/acceptance-fields.json",
+      "entries": "registers",
+      "consumers": [
+        "tools/gates/acceptance-fields.mjs"
+      ],
+      "note": "This file is an acceptance register about acceptance registers, so it grades itself. Its `note` field is declared documentation-only below, which is the mechanism this gate asks every other register to use, demonstrated here first."
+    },
+    {
       "path": "tools/gates/code-census.baseline.json",
       "entries": "excused",
       "consumers": [
         "tools/gates/code-census.mjs"
       ]
+    },
+    {
+      "path": "tools/gates/fetch-exec.baseline.json",
+      "entries": "entries",
+      "consumers": [
+        "tools/gates/fetch-exec.mjs"
+      ],
+      "note": "Classified by this seat on the forward merge that first put this gate and this register in one tree. Neither branch held both: the gate is new on Ursa#826 and this register is new on the trunk, so the finding exists in the merge and in neither parent."
+    },
+    {
+      "path": "tools/gates/gate-registry.baseline.json",
+      "entries": "entries",
+      "consumers": [
+        "tools/gates/gate-registry.mjs",
+        "tools/gates/excuse-control.mjs",
+        "tools/gates/fetch-exec.mjs",
+        "scripts/ci-checks.mjs"
+      ],
+      "note": "Same merge, same reason. Its `kind`, `why` and `control` are asserted rather than merely read by the registry's own excuse control, which is why it is a register here and not data."
     },
     {
       "path": "tools/gates/import-effects.baseline.json",
@@ -95,6 +114,14 @@
         "tools/secret-scan-baseline.mjs",
         "tools/secret-scan-verdict.mjs"
       ]
+    },
+    {
+      "path": "tools/testing/tmpdir-leak.baseline.json",
+      "entries": "leaking",
+      "consumers": [
+        "tools/testing/tmpdir-leak.mjs"
+      ],
+      "note": "Same merge. The entry array is under `leaking` rather than `excused`, which is why the discovery pass found it and no name-based filter would have."
     }
   ],
   "data": [],
