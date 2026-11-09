@@ -157,9 +157,19 @@ test('a specimen declaration that covers nothing is stale too', () => {
 
 test('a marker in an undeclared file is undecided, which is the silent case', () => {
   const dir = instance()
-  // Drop the real specimen declaration. The ten marker suppressions in the
-  // vendored suite are then suppressed by something nothing has argued for,
-  // which is exactly what this gate exists to refuse.
+  // Drop every specimen declaration. All marker suppressions are then
+  // suppressed by something nothing has argued for, which is exactly what
+  // this gate exists to refuse.
+  //
+  // Asserted against the report's own `suppressed_by_marker` rather than
+  // against a literal count and a literal path. It was `10` and
+  // `tools/tests/test_secret_print.py` until 2026-11-09, which made this
+  // test a census of the tree on the day it was written: declaring a second
+  // specimen file correctly, which is the supported way to use this
+  // mechanism, took the count to 11 and failed the gate's own suite. A test
+  // that breaks when the rule is obeyed is testing the wrong thing. The rule
+  // is "a marker outside a declared file is undecided", so the set of
+  // undecided problems has to be exactly the set of marker suppressions.
   writeBaseline(dir, baselineOf(dir)
     .split('\n')
     .filter((l) => !l.startsWith('# specimen-file:'))
@@ -167,9 +177,10 @@ test('a marker in an undeclared file is undecided, which is the silent case', ()
   const { code, report } = json(dir)
   assert.equal(code, 1)
   const undecided = report.problems.filter((x) => x.kind === 'undecided')
-  assert.equal(undecided.length, 10, 'all ten marker suppressions go red')
+  assert.ok(report.suppressed_by_marker > 0, 'there is a marker to be undecided about')
+  assert.equal(undecided.length, report.suppressed_by_marker,
+    'every marker suppression goes red once no file is declared')
   for (const p of undecided) {
-    assert.match(p.where, /tools\/tests\/test_secret_print\.py/)
     assert.match(p.why, /declare the file/)
   }
 })

@@ -143,6 +143,30 @@ that lies about the code, and the lie was load-bearing: it told the next run
 the wrapper was temporary and that no one needed to look. Replaced with the
 measured state and a pointer to the gate that now notices.
 
+## F98 — the exemptions gate's own test was a census of the tree, so obeying the rule broke it
+
+**Low, and this run caused it. Fixed in this run.**
+
+Declaring the new specimen file is the supported way to use the marker
+mechanism, and doing it correctly turned `tooling-suites` red.
+`tools/secret-print-exemptions.test.mjs` asserted that dropping every
+specimen declaration yields exactly `10` undecided problems, each one in
+`tools/tests/test_secret_print.py`. Both literals were true on the day they
+were written and both were facts about the tree rather than about the rule.
+A second declared specimen file took the count to 11 and added a second path.
+
+A test that breaks when the rule it guards is obeyed is testing the wrong
+thing, so it now asserts the rule: the set of undecided problems equals the
+report's own `suppressed_by_marker`, with a positive-count guard so it cannot
+pass vacuously, and the per-problem assertion keeps the `why` and drops the
+path. This is the same correction this seat took from the exo seat last week
+about line numbers, one level up: key on the claim, not on where the claim
+currently sits.
+
+Recorded rather than quietly repaired, because the first full gate run on
+this branch went red on it and the honest record is that the run's own change
+caused that.
+
 ## F97 — one false positive, recorded and deliberately not fixed
 
 **Low. Reported upstream as a documentation gap.**
