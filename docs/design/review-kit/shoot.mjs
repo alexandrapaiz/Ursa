@@ -25,7 +25,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { launch, VIEWPORTS } from './lib/browser.mjs'
 import { freezeContext, PINNED_MS } from './lib/freeze.mjs'
 import { tracker } from './lib/reached.mjs'
-import { gate, probe } from './lib/hydrated.mjs'
+import { gate, waitForHydration } from './lib/hydrated.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const OUT = arg('out', '/tmp/shots')
@@ -148,7 +148,7 @@ for (const [vname, w, h] of MATRIX) {
     // per frame rather than once per run: `next dev` hydrates some routes
     // and not others, so a single sample would generalise from whichever
     // page happened to come first.
-    hydration.saw(`${path} at ${vname}`, await probe(page))
+    hydration.saw(`${path} at ${vname}`, await waitForHydration(page))
     if (enterState) await enterState(page, name)
     // Ask the page what time it thinks it is, rather than trusting that the
     // init script ran. L37: a flag accepted is not a flag applied, and the

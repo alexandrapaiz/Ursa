@@ -124,3 +124,28 @@ export function gate({ label = 'page' } = {}) {
 export async function probe(page) {
   return page.evaluate(PROBE)
 }
+
+// Hydration is a RACE and not only a server setting, which this run learned
+// from its own gate: with the gate reporting and not waiting, 1 of 15 frames
+// off the PRODUCTION build caught the home page at desktop with 2 of 102
+// elements fibered. A tool that merely reports that has correctly refused to
+// claim anything about a frame it did not have to take badly.
+//
+// So wait first, then ask, and let the refusal mean what it should: not
+// `hydration had not finished when I looked`, but `it never arrived`. The
+// wait is bounded because an unbounded one turns a dead dev server into a
+// hang, and a hang is the one failure that reports nothing at all.
+//
+// Returns the final reading either way, so the caller still records what it
+// saw and the gate still decides. This never throws: a page with no client
+// runtime returns immediately and is not waited on, which is the same
+// narrowness the gate applies.
+export async function waitForHydration(page, { timeoutMs = 10000, intervalMs = 100 } = {}) {
+  const deadline = Date.now() + timeoutMs
+  let read = await probe(page)
+  while (read.runtime && !read.body && Date.now() < deadline) {
+    await page.waitForTimeout(intervalMs)
+    read = await probe(page)
+  }
+  return read
+}

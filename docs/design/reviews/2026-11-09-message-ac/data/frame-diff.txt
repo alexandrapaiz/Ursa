@@ -1,0 +1,4 @@
+home-desktop.png                      1310196 px   31.374%  rows 0-2466, cols 0-1439  (same size)
+record-at-desktop.png                       0 px    0.000%  identical  (same size)
+record-desktop.png                          0 px    0.000%  identical  (same size)
+record-mini-fixture-desktop.png             0 px    0.000%  identical  (same size)
