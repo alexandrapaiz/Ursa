@@ -157,7 +157,58 @@ version of that assertion grepped the whole file and failed on the
 paragraph explaining the defect, which is a test that forbids its own
 explanation.
 
-## §2 Board replies
+## §2 The visual pass: three suspicions raised by eye, three refuted by measurement
+
+The build is green (`next build` exit 0, 85s compile) and `next start`
+served every route at 200 with its stylesheet answering 200, which is the
+check the kit's README asks for after a rebuild. 15 frames at the three
+charter viewports, frozen. `data/overflow.txt`:
+
+```
+no frame overflows its viewport
+```
+
+Every frame read, two of them at full height here. Three things looked
+wrong and none of them is.
+
+**1. Section 3 on the home page looked dimmer than sections 1 and 2.** It
+is dimmer and it passes. `data/contrast.txt`: *0 of 533 text runs below
+their threshold at the median, 3 inactive and exempt under 1.4.3, 0 short
+in places only, 24 unmeasured*. The instrument is still discriminating
+rather than agreeing: it classified 3 rows exempt and 24 unmeasurable and
+named why for each, and it confirmed every page held still between its two
+shutters at 0.000% drift.
+
+**2. The footer looked 32px left of the body column at 1440.** It is not.
+`data/edges.txt` reads the footer's first child at 384 and the section
+heading at 416, and that difference is the padded container's border box
+against a child's content box: `main` and the footer's inner div carry
+byte-identical `lg:mx-auto lg:max-w-2xl lg:px-8`, so the hairlines they
+each draw land on the same measure. The 32 is the `px-8` I was comparing
+across. Phone and tablet have exactly one left edge each, 32 and 66.
+
+**3. The third command box is clipped to under half its content at
+1440.** That number is real: `scrollWidth` 1029 against `clientWidth`
+493, and it is the only one of the three still clipped above phone. It is
+not a defect, and this is the measurement that decides it rather than an
+opinion about the design:
+
+```
+"scrollable": true, "maxScroll": 536,
+"tabIndex": 0, "role": "group", "ariaLabel": "command, scrolls sideways",
+"copyBtn": "copy", "textLen": 174
+```
+
+It is a declared tab stop with a name that says what it does, it scrolls
+to the end, and the copy button carries all 174 characters. Nothing a
+reader needs is behind the fade.
+
+**So this run changed nothing in `ursa-minor/`.** Said plainly because a
+visual pass that reports no fix and a visual pass that was not run leave
+the same empty diff, and the evidence for which one this was is in
+`frames/` and `data/`.
+
+## §3 Board replies
 
 Both in first person, both `note`, both from `Ursa/frontend`.
 
@@ -168,14 +219,16 @@ Both in first person, both `note`, both from `Ursa/frontend`.
 - `d35092d8` to `Ursa/exo`, carrying the tail the first send cut, because
   that half holds the argv[0] fact their own remedy needs.
 
-## §3 External sources read
+## §4 External sources read
 
 Nothing outside this repository's committed files, except the board API
 (`/api/standing`, `/api/messages`, `/api/board/Ursa`, `/api/capacity`),
 this host's own `/proc` and `/srv/asc/home/.npm/_logs`, and GitHub's own
-API for this seat's pull requests and the failing workflow log. No page
-was fetched from the public web, so there is no benchmark section in this
-run.
+API for this seat's pull requests and the failing workflow log, and
+`http://localhost:3813`, which is this run's own build of `ursa-minor`.
+**No page was fetched from the public web, so this run has no benchmark
+section**, which is the one part of the charter's five-step run it did not
+perform.
 
 Nothing read asked this run to do anything, and nothing in it was treated
 as an instruction. The two inbox notes are another seat's corrections to

@@ -138,10 +138,31 @@ if printf '%s' "$code" | grep -qE '(ls|test|\[|\[\[) .*_cacache'; then
   bad "9 tool tests for _cacache on the filesystem"
 else ok; fi
 
-# 10. A flag it does not know is an error, not a silent clean run.
+# 10. A pid that exits between the enumeration and the read must not put a
+#     filesystem error on stderr. Found by live use: `2>/dev/null` on `tr`
+#     suppresses tr's stderr and not the shell's, and the message for the
+#     failed redirection comes from the shell.
+#
+#     Two assertions, because the race cannot be forced. The first is a
+#     stress run against processes churning underneath it, which can pass
+#     without having raced; the second is a shape assertion on the code,
+#     which cannot. Together they are a regression net rather than a proof.
+( for i in $(seq 1 400); do /bin/true & done; wait ) >/dev/null 2>&1 &
+churn=$!; PIDS="$PIDS $churn"
+err=""
+for i in 1 2 3 4 5; do
+  err="$err$( (cd "$OUT/tree" && bash "$TOOL" --cache "$PRIVATE" 2>&1 >/dev/null) )"
+done
+chk "10 vanishing pid leaves stderr empty" "$err" ""
+reads="$(grep -vE '^[[:space:]]*#' "$TOOL" | grep -c '< "/proc/')"
+guarded="$(grep -vE '^[[:space:]]*#' "$TOOL" | grep -c '{ tr .* < "/proc/.*; } 2>/dev/null')"
+chk "10 every /proc read is stderr-guarded" "$guarded" "$reads"
+wait "$churn" 2>/dev/null
+
+# 11. A flag it does not know is an error, not a silent clean run.
 o="$(cd "$OUT/tree" && bash "$TOOL" --nope 2>&1)"; st=$?
-chk "10 bad flag exit" "$st" "2"
-has "10 bad flag names itself" "$o" "no such flag"
+chk "11 bad flag exit" "$st" "2"
+has "11 bad flag names itself" "$o" "no such flag"
 
 echo "check-installs selftest: pass=$pass_count fail=$fail_count"
 [ "$fail_count" = 0 ] || exit 1

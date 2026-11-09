@@ -93,7 +93,14 @@ while [ -n "$_p" ] && [ "$_p" != "0" ] && [ "$_p" != "1" ]; do
   _p="$(awk '{print $4}' "/proc/$_p/stat" 2>/dev/null)"
 done
 
-argvn() { tr '\0' '\n' < "/proc/$1/cmdline" 2>/dev/null; }
+# The brace group matters. `2>/dev/null` on `tr` alone suppresses tr's
+# stderr and NOT the shell's, and the message for a pid that exits between
+# the enumeration and the read comes from the shell's own redirection:
+# `/proc/96891/cmdline: No such file or directory`. Found by live use, not
+# by the selftest, on a run where a process vanished mid-walk. A guard that
+# prints a filesystem error above its own count line is the kind of output
+# a reader learns to scroll past.
+argvn() { { tr '\0' '\n' < "/proc/$1/cmdline"; } 2>/dev/null; }
 
 # **npm's argv[0] IS its command line**, and that is why this is not a one
 # line copy of teardown.sh's process test. Measured 2026-11-09 on a live
