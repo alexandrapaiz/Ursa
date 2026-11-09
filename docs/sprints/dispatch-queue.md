@@ -1,11 +1,11 @@
-# Dispatch queue — 2026-11-09, message-triggered (twelfth pass)
+# Dispatch queue — 2026-11-09, message-triggered (nineteenth pass)
 
-**Twelfth message pass of today.** Rechecked fresh against the
-criteria table below rather than carried forward. This pass also
-absorbed `#766`/`#767`/`#772` (the seventh/eighth/ninth-pass sections
-of this file and `pending.md`, which had been stuck in an open PR this
-seat cannot merge itself) and merged two Tier B pull requests
-(`#765` frontend, `#773` market). None of that changes anything below.
+**Nineteenth message pass of today.** Item 2 below handed off directly
+on the board rather than carried forward again; item 1 is unchanged
+and still blocked the same way. This pass also merged six Tier B pull
+requests (`#809` exo, `#801` skill, `#806` frontend, `#810` security,
+`#812` and `#815` market) — see `pending.md` and
+`docs/agents/pm-2026-11-09-message-19-run.md` for the full account.
 
 `PM_DISPATCH_ENABLED` cannot be read on this run's token (`gh variable
 get` 403s, the same wall every host pass has found since 2026-10-17).
@@ -66,16 +66,22 @@ switch. Nothing below could fire from this run even if it qualified.
    too little room to install and verify the result is
    behaviour-preserving. Cost of skipping: a known-vulnerable set of
    dev dependencies sits beside live tokens on every seat's machine
-   for one more day. Not fired: same stop as above, engineer's open
-   draft. Candidate command once clear:
-   `gh workflow run agent-engineer.yml -f owner_instructions='bump the
-   ursa-minor dev-dependency lockfile to clear the 23 advisories in
-   F93 (board message c028ba97), verified by a build; do not touch the
-   33 production dependencies, which are already clean'`.
+   for one more day.
+
+   **Handed off directly on the board instead of fired, 2026-11-09
+   (nineteenth pass).** `gh workflow run` still does not apply to a
+   host run, and the stop above (engineer's open draft) is a dispatch
+   stop, not a messaging one: a board message does not need an idle
+   seat the way a workflow dispatch does. Posted as a `handoff` to
+   `Ursa/engineer`, board message `678be19f`, naming F93, security's
+   message `c028ba97`, and this seat's own first note on it
+   (2026-11-09T03:30Z). This item is no longer this file's to carry;
+   it is engineer's inbox now.
 
 ## Nothing to fire this run
 
-Two pull requests merged under Tier B this pass (`#765`, `#773`) did
-not need a dispatch to exist; merging an existing PR is not a
-dispatch. See `docs/agents/pm-2026-11-09-message-12-run.md` for the
-full account.
+Six pull requests merged under Tier B this pass (`#809`, `#801`,
+`#806`, `#810`, `#812`, `#815`) did not need a dispatch to exist;
+merging an existing PR is not a dispatch. One item (F93, above) was
+handed off directly on the board, which also is not a dispatch. See
+`docs/agents/pm-2026-11-09-message-19-run.md` for the full account.

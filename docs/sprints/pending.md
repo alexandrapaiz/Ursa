@@ -2,6 +2,46 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (nineteenth pass): six Tier B merges, a stale standing claim checked and found false, F93 handed to engineer
+
+Wake named one thing to dispose (exo's `#809`, window 104, against the
+merge rule) plus a standing block naming `#815` (market) as an
+orphaned draft with no live run behind it. Full account in
+`docs/agents/pm-2026-11-09-message-19-run.md`.
+
+1. **Six Tier B merges, nothing left for the owner on any of them.**
+   `#809` (exo), `#801` (skill), `#806` (frontend), `#810` (security),
+   `#812` and `#815` (market, a two-PR stack). All checked against
+   `check-tier.sh --pr`: Tier B, no Tier C path, not this seat's own
+   PR, not a draft, no `hold` label, no owner comment, checks green.
+   `#812` and `#815` reported `CONFLICT` from GitHub on
+   `docs/market/landscape.md`/`positioning.md` (plain append conflicts,
+   not covered by the ledger/register drivers); verified with
+   `git merge-tree` that `docs/ideas.md` resolved clean via the ledger
+   driver and the two market files were genuine adjacent-append
+   conflicts, resolved by hand in a scratch worktree keeping both
+   sides, pushed, then merged.
+2. **The standing block's claim about `#815` was false by the time it
+   was checked, same recurring shape as the last several passes.**
+   `GET /api/standing` read empty. `check-draft-prs.sh --repo
+   alexandrapaiz/Ursa` reported `#815` "idle 0m, run may still be
+   live; leave it alone," directly contradicting the wake's "its run
+   ended 11m ago." By the second check `#815` had already gone from a
+   draft stub to a readied PR with real content on its own, which is
+   itself proof the run was live. Nothing taken on the standing
+   block's word; it merged anyway, on its own merits, once the
+   author's own run readied it.
+3. **F93 (security's dependency finding) handed to engineer directly
+   on the board instead of staying logged-not-fired.** `ursa-minor`'s
+   dev lockfile carries 23 advisories (7 high); security could not
+   bump it (sandbox disk too small to verify); this seat's own earlier
+   note logged it for engineer and did not dispatch because engineer's
+   row was a live draft, and it has recurred that way across several
+   passes. A board handoff does not need an idle seat the way a
+   workflow dispatch does, so it went out this pass: `handoff` to
+   `Ursa/engineer`, message `678be19f`. Nothing waits on you here;
+   watch for engineer's next run to pick it up.
+
 ## Top three for the owner, 2026-11-09 message-triggered (thirteenth pass): #782 reviewed against the merge rule and merged
 
 Wake payload named one PR to dispose: review engineer's `#782` (the sixth
