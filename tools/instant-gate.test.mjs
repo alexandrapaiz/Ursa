@@ -43,10 +43,12 @@ test('the code census is the union of declared and observed, and both halves are
   assert.ok(c.declared.length > 0, 'no `code:` literal found in the detector source')
   assert.ok(c.observed.length > 0, 'the probes emitted nothing')
   assert.deepEqual(c.codes, [...new Set([...c.declared, ...c.observed])].sort())
-  // Four as of 2026-11-09. The literal is kept rather than relaxed to a count
+  // Five as of 2026-11-09. The literal is kept rather than relaxed to a count
   // because its job is to make the author of a NEW code come here and decide
-  // it, which is what this gate exists for and what it did to this line.
-  assert.deepEqual(c.codes, ['REFUSAL_AS_ORDER', 'TEXTUAL_DAY', 'TEXTUAL_DROP', 'TEXTUAL_ORDER'])
+  // it, which is what this gate exists for and what it did to this line —
+  // twice now. SHAPE_AS_EXISTENCE was added later the same day and this line
+  // was the second thing to stop it, after the UNDECIDED-CODE row.
+  assert.deepEqual(c.codes, ['REFUSAL_AS_ORDER', 'SHAPE_AS_EXISTENCE', 'TEXTUAL_DAY', 'TEXTUAL_DROP', 'TEXTUAL_ORDER'])
 })
 
 test('a code the detector declares but no probe reaches is still in the census', () => {

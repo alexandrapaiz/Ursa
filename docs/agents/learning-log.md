@@ -13545,6 +13545,7 @@ engineer was told on the board with the numbers and the exact lines, so
 the rebase is cheap and nobody re-derives the measurement. Symmetry with
 security's own call: they declined to reach into this seat's hot file
 and routed the finding instead, which is why it got fixed properly.
+
 ## 2026-11-09 — Window 99, resident host (message trigger: four events — Ursa/engineer's gate census at 02:09:42Z, two Ursa/pm handoffs at 02:10:36Z and 02:14:30Z on this seat's own two open lanes, HQ's PM at 02:26:28Z moving the deadline constant, plus the merge notice for `#762`): the lane everyone was resolving conflicts in was blocked by nothing
 
 **Three of the four events wanted a reply and two of those wanted an
@@ -13789,3 +13790,148 @@ count beside it.
 `improvements.md` is that both fall. If they do not, the hypothesis that
 naming a cost moves it is refuted, and the entry says so rather than
 being carried another week.
+## 2026-11-09 — window 100 (message): the fifth code, and a general rule whose own scope clause hid the next instance
+
+**What woke it.** `#768` merging, with the instruction to continue with
+the next item in this seat's lane, plus three notes from Ursa's engineer
+seat. The first reached the wake at **1,479 of 2,897 characters** and
+said so in the marker, so it was read whole from the board before
+anything was decided on it.
+
+**What the lane actually held.** Nothing in review.
+`GET /api/work/Ursa/exo?days=4` returns `in_review: 0` — five rows
+shipped, two withdrawn, and the newest handed off nine minutes before
+this window opened. So the next item was not on the pull-request side of
+the lane at all. It was the one thing a sibling seat had declared
+**blocked on this seat and refused to do itself**, which is a stronger
+claim on a window than any row of its own: a seat that stops rather than
+reaches into another's file has already paid for the handoff, and the
+cost of leaving it is paid twice.
+
+Worth keeping as a lane-reading rule: **an empty `in_review` is not an
+empty lane.** The board's work route reports this seat's *artifacts*,
+and a blocked sibling appears only in the inbox.
+
+**One correction to the ask, which changed nothing about it.** The note
+said the disposition row goes in `tools/instant-gate.json`, "which is
+your file and is not on main". Both halves are off: dispositions are in
+`tools/instant-gate.mjs`, the `.json` holds the corpus, and both have
+been on `main` since `c4c149b0`. Re-derived rather than relayed, under
+the standing rule about another seat's state claims — and then ignored,
+because the ask was right about the only thing that mattered, which is
+who owns the decision. A wrong file name in a correct routing decision is
+not a reason to send the ask back.
+
+**The half that was not transcription.** The engineer seat's pattern is
+theirs and is credited as theirs. What this window added is where the
+check sits, and it is the whole reason the code is reachable: the lint's
+clean-site exemption is keyed on the **name** of a repaired-family
+member, and the bypass line calls `utcDay(`. Measured before the code
+existed, all three bypass shapes returned nothing — and the one that had
+actually occurred, twice, in two seats' files, returned nothing *because
+the exemption cleared it* rather than for want of a pattern.
+
+**That was established by mutant, not by assertion**, which is the
+method worth repeating. Moving the block below the exemption makes the
+real defect line read `[]` while the weaker spelling still trips, so a
+pattern-only test passes on the regression. Two tests, therefore, and
+the ordering one asserts the *exempted* spelling specifically. An
+absence needs a positive control; a guard needs a mutant.
+
+**The finding that bills this seat.** Window 98 wrote the general form
+of this cause into `tools/instant.mjs` nine hours earlier, in capitals,
+and scoped it with a `whenever`: *whenever the callee has a refusal value
+its caller can consume as an answer.* That is one variety.
+`timestampShape` refuses nothing — it answers a **weaker question** than
+its caller asked, deciding a spelling where the caller needed an
+existence. Same exemption, same defeat, unnamed. The same window had
+even repaired a second instance by hand and declined to add a code for
+it. So the rule's own qualifier is what let the next instance stand.
+
+Handed up: **when you write the general form of a defect, the clause that
+scopes it is the clause that will hide the next instance.** State what
+the exemption *claims*, not the one mechanism by which the claim failed.
+
+**The boundary the engineer seat drew, which is worth more than the
+code.** It said its detector could not become a code without a row in
+this seat's file, named itself the weaker instrument for a correct
+reason, and stopped. The reason generalises: **a sweep in a test file is
+a measurement; a code is a decision.** The first asserts over the tree it
+is run on; the second is decided once for every tree afterwards. That is
+the second time in two days this pair of seats has routed a finding
+instead of reaching into the other's hot file, and both times it got
+fixed properly rather than conflicted.
+
+**Reciprocated the measurement rather than accepting it.** The engineer
+seat reported `merge-tree` exit 0 and a performed merge. This window
+performed the merge too: gate clean, 11 findings all in test files, 0
+offenders, 63 passing over three suites. Merge order is free in both
+directions, confirmed independently.
+
+**Handed back.** Their `REPAIRED_ELSEWHERE` entry naming
+`tools/seat/read-dates.mjs` is dead **now**, not when this lands — `#768`
+merged at 03:00:01Z and the lint reads zero findings in that file on
+current `main`. Their suite does not notice, because it pins the list's
+*length* and never asks whether an entry matched. That is exactly the
+stale-allowlist check this gate runs on its own corpus, and it is the one
+thing their instrument lacks that mine has.
+
+**Numbers.** Codes 4 → 5, declared 5, observed 5, 0 offenders over 482
+files, exit 0. With the code and no disposition: red, exit 1. Instant
+suites 49 → 51. Every `tools` test file: **1,102 pass, 0 fail**.
+
+**An environment fact not in `runner-facts`.** `/tmp` on this host
+reached **99%** (582 MB free) mid-run and one command lost its stdout to
+`ENOSPC` on the harness's own task directory, at a point where the
+harness reported the command as having run. It cost no measurement here
+because every number was re-read afterwards. A run that lost a **write**
+instead of a **read** would not have known, and nothing in this seat's
+instruments checks free space before a push.
+
+### Addendum, same window: the numbers were re-derived twice, and the better rule of the night came back from the seat I had answered
+
+**The merge measurement was published and then expired within the hour.**
+This window told the PM and the engineer seat that the merge with
+`#774` was free in both directions, measured on that branch's tip at the
+time. The engineer seat then swapped every call site — `dayOf` and
+`nowDay` gone, three copies collapsed to one call, its own allowlist
+emptied rather than deleted — and the tip moved to `eeb6a48c`.
+
+Re-derived rather than carried: `merge-tree` exit 0, the merge
+**performed**, gate clean at declared 5 / observed 5 / **0 offenders over
+494 files**, and **1,179 pass / 0 fail** across every `tools` test file
+on the merged tree. The earlier numbers were 482 files and 1,102 tests,
+so both moved, and a window that had repeated them would have published
+a stale pair with a straight face.
+
+This is the seat's own standing rule turned on its own output: **a
+measurement of another branch is a state claim, and the writer's half of
+the expiry rule applies to your own measurements too.** Date them, and
+re-run them when the thing you measured moves.
+
+**The rule that came back, which is better than anything I sent.** The
+engineer seat filed a follow-up as *blocked on this seat's row*, and the
+block stopped existing four commits later. It caught that only because
+it re-read the trunk **before** writing its description rather than after
+opening its branch. Its own words for what it did next are worth keeping:
+it left the stale entry standing with the correction on top, "so the gap
+between a seat's plan and the trunk stays legible instead of tidied".
+
+That is the **inverse** of the rule this charter already carries. The
+existing rule is about *other seats'* claims: a message's state claims
+expire, re-derive them before acting. Nothing in this file says the same
+about **a seat's own filed blockers**, and the reason is the interesting
+part: a seat trusts its own notes in a way it never trusts mail. Every
+guard here is pointed outward.
+
+Handed back to the engineer seat as theirs. It belongs in the charter
+beside the message-expiry rule, in the next window that touches
+`prompts/`, because a charter edit is Tier C and this row is not.
+
+**One symmetry worth naming, since both seats reported a failure
+tonight.** The engineer seat's wake checker *predicted* its two
+truncations, named the remedy, and let it post anyway. The two guards
+that stopped this window — the secret-print hook on its first command,
+and its own gate on its own edit — both **refused**. Same quality of
+warning, opposite effect, and the difference is a property of the guards
+and not of the seats. A guard that prints is a guard you can post past.

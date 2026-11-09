@@ -321,6 +321,62 @@ test('REFUSAL_AS_ORDER is checked before the repaired-site exemption, and that o
   assert.equal(textualTimestampComparisons(line).length, 1)
 })
 
+test('SHAPE_AS_EXISTENCE: a day decided by its spelling, in the three shapes that reach it', () => {
+  // The positive cases. Keyed on the CALLEE for the same reason
+  // REFUSAL_AS_ORDER is: no timestamp-named operand is required, because
+  // reaching for this particular family member is the evidence.
+  //
+  // The first is the line as it stood in `tools/seat/read-dates.mjs` on
+  // `main` before Ursa#768. The second and third are the other two readings
+  // of the same mistake; Ursa's engineer seat wrote all three as the controls
+  // for the sweep it handed over, and they are transcribed rather than
+  // invented for that reason.
+  const [ternary] = textualTimestampComparisons("return utcDay(now) ?? (timestampShape(now) === 'day' ? String(now) : null)")
+  assert.equal(ternary.code, 'SHAPE_AS_EXISTENCE')
+  assert.match(ternary.repair, /parseDay/)
+  assert.match(ternary.repair, /2026-02-30/)
+
+  assert.equal(textualTimestampComparisons("if (timestampShape(v) !== 'day') return null")[0].code, 'SHAPE_AS_EXISTENCE')
+  assert.equal(textualTimestampComparisons("switch (timestampShape(v)) { case 'day': return v }")[0].code, 'SHAPE_AS_EXISTENCE')
+
+  // The negative controls. An absence is a measurement and needs a positive
+  // control; the three above are it.
+  //
+  // The repair, another shape of the same call, prose in both comment forms,
+  // and — the one that matters most — this module's OWN correct refusal,
+  // which is `parseInstant` split across two lines. That split is what keeps
+  // the defining module off its own report with no filename exemption, so it
+  // is pinned here rather than left as a happy accident.
+  assert.deepEqual(textualTimestampComparisons('return parseDay(v) === null ? null : v'), [])
+  assert.deepEqual(textualTimestampComparisons("if (timestampShape(v) === 'naive') return null"), [])
+  assert.deepEqual(textualTimestampComparisons("// timestampShape answers 'day' for a spelling"), [])
+  assert.deepEqual(textualTimestampComparisons(" * timestampShape answers 'day' for a spelling"), [])
+  assert.deepEqual(textualTimestampComparisons('const shape = timestampShape(value)'), [])
+  assert.deepEqual(textualTimestampComparisons("if (shape === 'invalid' || shape === 'naive' || shape === 'day') return null"), [])
+})
+
+test('SHAPE_AS_EXISTENCE is checked before the repaired-site exemption, and that order is the whole reason it is reachable', () => {
+  // The same regression guard as the one above it, for the same reason and a
+  // different cause. REFUSAL_AS_ORDER is a family member whose REFUSAL a
+  // caller can consume as an answer; this is a family member that answers a
+  // WEAKER QUESTION than its caller asked. Two varieties, one exemption.
+  //
+  // Measured before the code existed: this exact line returned no finding,
+  // and it returned none because the exemption cleared it rather than for
+  // want of a pattern. Move the check below the exemption and only this
+  // assertion says so.
+  const line = "return utcDay(now) ?? (timestampShape(now) === 'day' ? String(now) : null)"
+  const EXEMPTION =
+    /\b(?:parseInstant|compareInstants|isAfter|isBefore|utcDay|sortByInstant|parseEpochSeconds|toUtcInstant|parseDay|compareDays|isDayAfter|isDayBefore|sortByDay)\s*\(/
+  assert.ok(EXEMPTION.test(line), 'the line must match the exemption, or this guard proves nothing')
+  assert.equal(textualTimestampComparisons(line).length, 1)
+
+  // And the weaker form, which the exemption never reached. Both have to
+  // trip, because a pattern that only fires on the un-exempted spelling would
+  // pass the test above by accident.
+  assert.equal(textualTimestampComparisons("return timestampShape(now) === 'day' ? String(now) : null").length, 1)
+})
+
 test('the lint does not fire on arithmetic, on counts, or on a repaired call site', () => {
   assert.deepEqual(textualTimestampComparisons('if (rows.length > bound) return 1'), [])
   assert.deepEqual(textualTimestampComparisons('if (over.length > 0 && n > 3) return 1'), [])
