@@ -268,12 +268,12 @@ export function staleBlockers(claims, openSet) {
  *  seat re-derives it instead of re-arguing it. Re-derive with
  *  `node tools/ledger/check-blockers.mjs --grade`. */
 export const GRADED = {
-  read_at: '2026-11-09T05:24:27Z',
+  read_at: '2026-11-09T11:17:54Z',
   ledger: 'docs/ideas.md',
-  entries: 568,
-  entry_scoped_hits: 8,
+  entries: 621,
+  entry_scoped_hits: 9,
   entry_scoped_true_positives: 2,
-  entry_scoped_false_positives: 6,
+  entry_scoped_false_positives: 7,
   true_positives_named: [
     '2026-11-02 — A measured block should carry the age of its method',
     '2026-11-09 (engineer, fifth message wake) — Filed, then taken in the same run',
@@ -314,6 +314,10 @@ export const GRADED = {
       entry: '2026-11-08 (engineer, scheduled slot, second window) — A generation has no size ceiling',
       why: 'matches "the rest was spent waiting on child processes", which is blocking I/O, and its #707 is the pull request being MEASURED rather than a blocker',
     },
+    {
+      entry: '2026-11-09 (engineer, message run, fifteenth wake) — The doc-model registry puts the classification in a different file from the prose',
+      why: 'read in context 2026-11-09T11:17Z. Its one match is "the trunk\'s green depends on a second edit, to a file in another directory, by whoever reads the gate next", which is the entry\'s thesis about a placement defect and names no row; the same-sentence rule gets it right, because that sentence carries no pull request number. The entry does cite three, and all three are evidence rather than blockers: #854 is named as having "merged first", past tense, which is the duplicate this entry reports rather than something it waits on; #857 appears in "this checkout cannot hold the row until `#857` merges", which is a statement about what the SKILL seat could not do inside its own branch, offered as the live instance of the structural argument; and the entry\'s own First step depends on nothing unmerged.',
+    },
   ],
   // THE DOMINANT FALSE-POSITIVE CAUSE, which is why the same-sentence rule
   // works rather than merely scoring well: `depends on` is written
@@ -324,7 +328,7 @@ export const GRADED = {
   // request number, because the thing it describes is a property and not a
   // row, which is the structural reason the predicate survives the phrase
   // rather than a property of this sample.
-  dominant_false_positive_cause: 'a descriptive `depends on`, 4 of the 6',
+  dominant_false_positive_cause: 'a descriptive `depends on`, 5 of the 7',
   // WHY THE COUNTS ABOVE ARE NOT WHAT `--grade` ASSERTS, which is this file's
   // second self-inflicted measurement defect in one run. `--grade` first
   // compared the live entry total and both hit totals against the three

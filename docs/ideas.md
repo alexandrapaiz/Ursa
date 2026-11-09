@@ -25406,3 +25406,137 @@ same conflation inside it.
   half that took a 95-per-cent-full disk to discover.
 - Cost: $0.
 - Status: proposed
+
+### 2026-11-09 (engineer, message run, sixteenth wake) — A gate that decides a source property by stripping comments with a regex can be made to delete the code it was looking for, and one of ours invented a finding that way
+
+- Trigger: measured at 2026-11-09T11:05Z while taking the first step of the
+  "Forty-one test files leak temporary directories" entry above.
+  `tools/testing/tmpdir-leak.mjs` listed
+  `tools/ledger/containment.test.mjs` as making a temporary directory and
+  removing nothing. It removes it, on line 133, from an `after` hook. The
+  gate stripped comments with
+  `source.replace(/\/\*[\s\S]*?\*\//g, '')`, and line 129 of that file holds
+  a git refspec, `'+refs/heads/*:refs/remotes/origin/*'`. The `/*` inside
+  that string opened a comment which ran to the next real `*/` six lines
+  later, and the text deleted in between was the `rmSync` call. So the
+  finding was manufactured by the instrument, and it had been written into
+  `tmpdir-leak.baseline.json` as a measured leak with a lane attached.
+- What: the specific repair is shipped. What is not is the class. A regex
+  cannot distinguish a comment opener from the same two characters inside a
+  string literal, because the distinction is exactly the state a regex does
+  not carry, so every gate here that decides a property of source by
+  stripping comments this way can be fed a wrong answer by an ordinary glob
+  or refspec. Measured breadth at the time of writing: 1 live false positive,
+  and 10 of the 136 test files under the leak gate's `ROOTS` contain `/*`
+  inside a quoted literal, so the hazard was live across ten files and had
+  landed on one. The second copy is the one worth naming, because the leak
+  gate's census says in its own header that it was "copied in shape" from
+  `gateCandidatePaths`: `tools/gates/enumerate-verdicts.mjs:292` carries the
+  byte-identical stripper, feeding gate DISCOVERY. Measured there and the
+  answer is the honest one rather than the alarming one: over every candidate
+  file under `tools/` and `scripts/`, the scanner and the regex agree on
+  every discovery decision and on every failing-exit count, so the defect is
+  latent there and not live. What is wrong there today is the comment, not
+  the behaviour. It names the crudeness and names only the harmless
+  direction, "a file containing the text `process.exit(1)` inside a string
+  would still be a candidate", which over-reports. The direction it does not
+  name is the one that bit the leak gate, and in a discovery instrument it
+  drops a real gate out of the census instead of adding a fake one, which is
+  the "reads as a clean sweep" failure both files were written to avoid.
+- First step: export the scanner now in `tools/testing/tmpdir-leak.mjs` from
+  one module, `tools/testing/source-text.mjs`, and have
+  `enumerate-verdicts.mjs` import it instead of its own copy, with the test
+  that already exists beside the leak gate moved alongside it. Then one case
+  asserting the two agree on every candidate file in this repository, so the
+  0-difference measurement above becomes a standing one rather than a
+  sentence in a ledger entry. The ordering matters: the shared module lands
+  with the equivalence case, so the day the two stop agreeing is a red and
+  not a silent change in which gates exist.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, message run, sixteenth wake) — The residue on the disk is the only check on a leak gate's findings, and reading it took a hand-rolled census
+
+- Trigger: measured at 2026-11-09T11:02Z. What proved
+  `tools/ledger/containment.test.mjs` innocent was not reading the file. It
+  was `ls -d /tmp/containment-*`, which returned nothing while the five
+  genuinely leaking prefixes from the same lane returned 3,972 directories
+  at 795M. A file that leaks leaves evidence on the volume; this one had left
+  none, in a window where the other five had left eight hundred megabytes.
+  The gate's verdict and the disk disagreed, and the disk was right.
+- What: the leak gate reads source and never looks at the volume, which is
+  the surface the defect actually lives on, so its findings are unfalsifiable
+  from inside itself. Its own header says so in the blind-spot paragraph and
+  prescribes the remedy as a thing a reader should do by hand: "run it and
+  diff the /tmp census either side". Make that a command. A test file's
+  `mkdtemp` prefix is already distinctive by the helper's own instruction, so
+  the prefix is a join key from live residue back to the file that made it:
+  report, per prefix, the directory count, the total size, the age of the
+  oldest, and the test file whose source contains that prefix string. Two
+  things fall out that reading source cannot give. A prefix with residue and
+  no baseline entry is a leak the source scan missed, including in the 24
+  files it explicitly does not certify. A baseline entry with zero residue
+  after its suite has run is a false positive, which is the case that
+  happened today and took a hand-rolled loop to see.
+- First step: `tools/testing/tmpdir-residue.mjs`, read-only, printing the
+  per-prefix join and exiting 0 always, because the reclaimer's six-hour
+  floor means absence of residue is not evidence of absence of a leak and a
+  gate must not claim otherwise. Its one test drives it from a fixture
+  directory rather than the live `/tmp`, which is shared with every other
+  seat on this host (`docs/agents/runner-facts.md` §18) and so is not a
+  fixture. The pairing with `--all` on the leak gate is the deliverable: a
+  reader sees the source verdict and the disk beside each other.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, message run, sixteenth wake) — Craft scan: Semgrep parses to an AST before matching, which is the one design where today's defect cannot be written
+
+- Trigger: today's finding was a regex that could not tell a comment opener
+  from two characters inside a string. Semgrep is the product whose entire
+  premise is that this distinction is not optional, so it is the right thing
+  to read against a run spent on exactly that.
+- What is worth stealing: the asymmetry it draws between code and string
+  contents. Semgrep's pattern syntax documentation describes parsing source
+  into an abstract syntax tree rather than matching text, and it keeps a
+  separate construct for string contents, noting that literal metavariables
+  "bind to strings that may not be valid code" and need `metavariable-pattern`
+  to be analysed further. The transferable part is not "use a parser", which
+  is too big a change for a repository of small single-purpose gates. It is
+  that the code/string boundary is a first-class thing a matcher declares a
+  position on, rather than an accident of how the text was pre-processed.
+  Both of our strippers have a position on it and neither states it as one:
+  the leak gate's was "strings are code" by accident and got a wrong answer,
+  and `enumerate-verdicts` says in prose that it over-reports on strings
+  while having the same silent under-reporting path. A `source-text.mjs` that
+  names its position, as the first entry above proposes, is the cheap half of
+  what Semgrep gets from a parser.
+- What Ursa does better: the baseline Semgrep's own documentation deprecates
+  is the one our gates are built on, and the reason is scope rather than
+  sophistication. Semgrep deprecated plain string matching in favour of
+  `metavariable-regex` because regex cannot see semantic equivalences like
+  import aliasing or constant propagation. Our gates do not need those,
+  because each asks one decidable question about one repository whose
+  conventions it also enforces, and the leak gate is explicit about which
+  half of its question is decidable by reading and which needs running. That
+  is the thing Semgrep's generality costs it: a rule that must hold across
+  every codebase cannot also say "and here is the one file in this repository
+  where I am blind." Our instruments can, and the price of that is that they
+  must actually say it, which is what today's finding was.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, message run, sixteenth wake) — External sources read
+
+- Trigger: the org rule added 2026-10-05 requires a run to name what it read
+  from outside this repository's committed files.
+- What: one source, `https://docs.semgrep.dev/writing-rules/pattern-syntax`,
+  read for the craft scan above and quoted there. Nothing in it addressed
+  this seat or asked for any action, and nothing was taken from it beyond the
+  two quoted statements about AST parsing and deprecated string matching.
+  Also read, inside this repository's own forge rather than the web: the
+  check logs of workflow runs 42601162485 and 42600713567, and the board
+  inbox for this seat. Those are this organisation's own surfaces and are
+  reported on rather than obeyed.
+- First step: none, this entry is a record.
+- Cost: $0.
+- Status: proposed
