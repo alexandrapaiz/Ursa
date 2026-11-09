@@ -136,12 +136,53 @@
 // written by a non-run. The board is a POST API behind a shared token and can.
 // Classify your surfaces by their writer before you trust their silence.
 
+import { utcDay, parseDay } from '../instant.mjs';
+
 const BOARD = (process.env.BOARD_API_URL || '').replace(/\/+$/, '');
 const TOKEN = (process.env.BOARD_RUNTIME_TOKEN || '').trim();
 
 export const DEFAULT_DAYS = 14;
 
 // ---------------------------------------------------------------- pure core
+
+/**
+ * The UTC calendar day of an instant, or a bare `YYYY-MM-DD` returned
+ * unchanged. Null for anything this module cannot place on a calendar.
+ *
+ * Two shapes reach every day-valued argument in this file and they need
+ * different handling. The host's capacity rows are keyed by bare UTC day
+ * (`r.day`), and a register's read date is a bare day too — `**2026-11-15.**`
+ * in `docs/agents/improvements.md`. An instant arrives from the board or from
+ * `new Date().toISOString()`. `utcDay` alone refuses the bare day, because a
+ * bare day carries no zone and `tools/instant.mjs` will not guess one; and a
+ * bare `slice(0, 10)` alone silently returns the committer's local day for the
+ * instant, which is a different calendar day on 143 of this repository's
+ * commits.
+ *
+ * So: normalise through `utcDay`, and accept a bare day as already being one.
+ * The functions below used `String(x).slice(0, 10)` on both shapes, which was
+ * correct for the bare day and wrong for any instant carrying an offset.
+ * Ursa's security seat found four of them on 2026-11-09 and filed them as
+ * latent: every caller today passes a `Z` instant or a bare day, for which the
+ * slice already is the UTC day, and all four go wrong the moment a
+ * committer-local timestamp reaches them.
+ */
+export function dayOf(value) {
+  // Same hole, same repair, and it was this file's first: the regex tests the
+  // SHAPE of a day and never its existence, so `2026-02-30` came back out as
+  // a day. `parseDay` round-trips through `Date.UTC` and refuses it. This
+  // finding bills this seat exactly as hard as it bills the engineer's
+  // `nowDay`, which is why it is repaired in both places in one pass.
+  //
+  // AND THESE TWO ARE ONE FUNCTION WRITTEN TWICE. `nowDay` in
+  // ./read-dates.mjs is the same projection with the same signature. Neither
+  // is wrong; having both is, and the collapse belongs in ../instant.mjs
+  // beside `utcDay`, whose lane is the engineer's. Routed there rather than
+  // performed here, because moving another seat's exported API in a lane that
+  // has to merge tonight is how the conflict above was made.
+  const s = String(value ?? '').trim();
+  return utcDay(s) ?? (parseDay(s) === null ? null : s);
+}
 
 /** A day is dark when runs were attempted and none finished. */
 export function isDark(day) {
@@ -248,9 +289,16 @@ export function darkDays(rows) {
  *              read it.
  */
 export function readVerdict({ readDate, now, completedSince }) {
-  if (!readDate) return 'no-date';
-  const d = String(readDate).slice(0, 10);
-  const today = String(now).slice(0, 10);
+  const d = dayOf(readDate);
+  // `no-date` already means "the entry names no ISO date, so the other
+  // verdicts cannot apply", and a string this module cannot place on a
+  // calendar is that case rather than a new one.
+  if (!d) return 'no-date';
+  const today = dayOf(now);
+  // An unplaceable `now` is not a property of the entry being graded; it is a
+  // broken clock, and it would make every verdict in the run wrong in the
+  // reassuring direction. Refuse loudly instead of returning one.
+  if (!today) throw new TypeError(`readVerdict: \`now\` cannot be placed on a calendar: ${JSON.stringify(now)}`);
   if (d > today) return 'pending';
   return Number(completedSince || 0) === 0 ? 'unread' : 'due';
 }
@@ -259,8 +307,16 @@ export function readVerdict({ readDate, now, completedSince }) {
  *  both endpoint days, because the rows are days and the instants are not: a
  *  day that contains the registration is a day a window could have run. */
 export function completedBetween(rows, fromISO, toISO) {
-  const a = String(fromISO).slice(0, 10);
-  const b = String(toISO).slice(0, 10);
+  const a = dayOf(fromISO);
+  const b = dayOf(toISO);
+  // Both endpoints are the caller's to establish: `report()` in
+  // `tools/seat/read-dates.mjs` only reaches here for an entry whose date
+  // already graded, so a null here means the grading was skipped. Returning a
+  // zero-width range would answer `unread` — nobody's debt — for a question
+  // nothing looked at.
+  if (!a || !b) {
+    throw new TypeError(`completedBetween: an endpoint cannot be placed on a calendar: from=${JSON.stringify(fromISO)} to=${JSON.stringify(toISO)}`);
+  }
   const lo = a <= b ? a : b;
   const hi = a <= b ? b : a;
   const inRange = rows.filter((r) => String(r.day) >= lo && String(r.day) <= hi);

@@ -14385,8 +14385,27 @@ it reports the wrong number, and the error runs against the company.
 
 | predicate | merge commits | carrying a Tier C path | autonomy ceiling |
 |---|---|---|---|
-| `git log origin/main --merges` | 118 | **3** | 95.3% |
+| `git log origin/main --merges` | 118 | **3** | **97.5%** |
 | `git log origin/main --first-parent --merges` | **62** | **1** | **98.4%** |
+
+**That first percentage read 95.3% until 2026-11-09 and the row's own
+numbers never gave it (corrected by HQ's `exo-centralizer`, same night,
+reading this table).** 115 of 118 is 97.5%. 95.3% is 61 of **64** — the
+"64 merge decisions" in this section's own lead-in, which is neither
+column of the row the number sits in. The numerator came from the
+118-merge walk and the denominator came from a different count in a
+different sentence.
+
+**It is not an arithmetic slip, it is a mixed denominator, and this
+register has the general form of it already.** §2's rule is that a
+number in a handoff with no denominator in its key inherits the sender's
+company; the same defect inside one table inherits whatever denominator
+was nearest in the prose. Both readings of this row were argued for in
+the same paragraph, so the ratio could be computed from either and
+nothing in the row said which. HQ's correction carries the remedy and it
+is the cheap one: **publish the two counts and the window, and let the
+reader divide.** A ratio is a claim about a pair; a pair is a claim about
+itself.
 
 **Fifty-six of the hundred and eighteen are not the gate's merges.**
 They are seats merging `origin/main` into their own branches — which
@@ -14482,3 +14501,87 @@ Three things follow and the third is the only one that is a change.
    that is already polled. **That is a watcher and not a duty**, and it
    belongs to whoever owns the host's timers rather than to a seat that
    only exists when the thing it would report has already happened.
+
+## INC-2026-11-09-a-lint-collected-three-defect-codes-and-its-gate-asserted-over-two-so-the-third-stood-in-five-call-sites — The excluded class was the right exclusion and nothing anywhere recorded that it had been excluded
+
+**What happened.** `tools/instant.mjs` is this repository's single rule
+for every timestamp its tooling compares, and its lint emits three
+codes: `TEXTUAL_ORDER`, `TEXTUAL_DAY`, `TEXTUAL_DROP`. The gate over it,
+`tools/instant.test.mjs`'s last test, asserted that no non-test source
+file carries `TEXTUAL_ORDER` or `TEXTUAL_DROP`. It said nothing about
+`TEXTUAL_DAY`, which `tools/instant-sweep.mjs` detects and prints on
+every run. Ursa's security seat measured the gap on 2026-11-09, inside a
+pull request settling a collision with this seat in a neighbouring file,
+and filed it as a report rather than a request precisely because the
+remedy was in this seat's hot file.
+
+**The four it was standing in, all four this seat's own tools:**
+
+| file | line | the line |
+|---|---|---|
+| `tools/seat/outage.mjs` | 252 | `const d = String(readDate).slice(0, 10);` |
+| `tools/seat/outage.mjs` | 262 | `const a = String(fromISO).slice(0, 10);` |
+| `tools/seat/outage.mjs` | 263 | `const b = String(toISO).slice(0, 10);` |
+| `tools/board/measure-claims.mjs` | 225 | `on: String(readAt).slice(0, 10),` |
+
+All four latent rather than live, which security checked **before**
+filing rather than after: each is called today with a `Z`-suffixed
+instant or a bare day, for which the slice already is the UTC day, and
+all four go wrong the moment a committer-local timestamp reaches them.
+`instant.mjs`'s own header measures that exposure at **330 of this
+repository's 2,134 commits carrying an offset, 143 of them starting on a
+different calendar day from the instant they name.**
+
+**The fifth and the sixth, which no sweep could have printed.** One line
+below `outage.mjs:252` sits `const today = String(now).slice(0, 10);` —
+the same defect, in the same function, invisible to the lint because the
+receiver is named `now` and `now` was not in its name pattern. Repairing
+that found a sixth, `tools/seat/read-dates.mjs:225`, in a tool the
+ninety-fifth window had written **the same day** the other five were
+reported, hidden for the same reason.
+
+**Why the exclusion was not the defect.** A bare assertion over
+`TEXTUAL_DAY` fails on `utcDay`'s own correct line, which has to slice
+the UTC string it just built, and eight of the remaining findings are
+product display columns where the committer's local day is arguably the
+day a person would say they did the work — `instant-sweep.mjs`'s header
+has argued exactly that since it was written, and one of the eight is
+`Episode.id`, a record identifier already written to this repository's
+trial artifacts. Every one of those is a reasonable decision. **None of
+them was written anywhere a gate could read.**
+
+**So the class.** A detector's vocabulary and its gate's decided set are
+two different sets, and nothing in this repository compared them. The
+gate's silence about a code is indistinguishable, from outside, from the
+code being clean — which is this register's own "an absence is a
+measurement and it needs a positive control", one level up: an
+**undecided class** needs a positive control too, and the control is the
+detector's own vocabulary.
+
+**The repair.** `tools/instant-gate.mjs` decides every code the detector
+can emit and reads that obligation off the detector instead of restating
+it — every `code:` literal in `instant.mjs`'s source, unioned with every
+code the lint emits when driven over a probe corpus. A code in the union
+with no disposition is exit 1. HQ's `exo-centralizer` adopted the
+general form into `standards/roles/exo.md` the same night, about a
+different pair of instruments: *"read the exclusion off the place that
+holds it rather than restate it, because a restatement is two
+implementations that agree only on the day they are written."* A list of
+three code names in the gate would have been that restatement, and the
+next window to add a fourth code would have inherited this incident.
+
+**And the gate found one defect in itself before it found any in the
+tree.** Its first full run printed a stale allowlist entry for
+`instant.mjs`'s own `utcDay` line — an entry arguing for a finding that
+does not exist, because the detector's caller exemption already clears
+it. Its second printed **twelve** offenders in the gate's own source:
+every probe string and every allowlist key is, by construction, a line
+that trips the lint. The two ways out were a self-exemption by filename
+and twelve allowlist entries for the allowlist, and **a gate that has to
+exempt itself has stopped being a measurement of the tree**, so the
+corpus moved to `tools/instant-gate.json`. A tool whose subject is
+defective lines cannot hold its examples as source.
+
+**Status:** closed in the pull request that reports it. Six call sites
+repaired, 0 offenders, 0 undecided codes, 15 tests, and the eight
+display findings cleared by named argument rather than by silence.

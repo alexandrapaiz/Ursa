@@ -70,7 +70,7 @@ import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { readVerdict, completedBetween, capacityDays } from './outage.mjs'
-import { sortByDay, isDayAfter, utcDay, timestampShape } from '../instant.mjs'
+import { sortByDay, isDayAfter, utcDay, parseDay } from '../instant.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 export const REPO_ROOT = resolve(HERE, '..', '..')
@@ -236,7 +236,21 @@ export function readDateField (entry) {
  * it.
  */
 export function nowDay (now) {
-  return utcDay(now) ?? (timestampShape(now) === 'day' ? String(now) : null)
+  // GATED ON `parseDay` AND NOT ON `timestampShape`, which is the correction
+  // this lane made to the merged version (exo, 2026-11-09). `timestampShape`
+  // decides a SHAPE: its `BARE_DAY` is `/^\d{4}-\d{2}-\d{2}$/` and it
+  // answers `'day'` for `'2026-02-30'` and for `'2026-13-99'`. Existence is
+  // decided by `parseDay`, which round-trips through `Date.UTC` precisely so
+  // that a day the calendar does not have is refused. Built on the shape
+  // predicate, this function handed a non-existent day straight through as
+  // `now`, every later `compareDays` against it answered `null`, every
+  // `isDayAfter` answered `false`, and the register graded `due`.
+  //
+  // The general shape, which is this seat's half to carry: REACHING FOR A
+  // MEMBER OF THE REPAIRED FAMILY IS NOT THE SAME AS BEING REPAIRED. The
+  // family added an existence check and this call bypassed it by picking the
+  // one member that does not perform it.
+  return utcDay(now) ?? (parseDay(now) === null ? null : String(now))
 }
 
 /**
@@ -252,7 +266,31 @@ export function gradeEntry (entry, { now, completedSince = null }) {
   if (!field.date) {
     return { ...entry, ...field, verdict: NO_DATE, why: field.label ? FIELD_NO_ISO : NO_FIELD, completedSince: null }
   }
-  const future = isDayAfter(field.date, nowDay(now))
+  // CONFLICT RESOLVED HERE, and the resolution is neither side whole.
+  //
+  // Two lanes repaired this one line on 2026-11-09. The engineer's landed in
+  // #758 and reads `isDayAfter(field.date, nowDay(now))`; this seat's lane
+  // read `field.date > dayOf(now)` and threw when `now` could not be placed.
+  // The engineer's note asked for the opposite resolution — "keep your dayOf,
+  // drop my nowDay" — and by the time it was read its own premise had
+  // expired, because #758 merged first and `nowDay` is exported and tested on
+  // the trunk. So the merged function stays and the deleted half comes back:
+  // the REFUSAL AT THE CALL SITE, which is the one thing the trunk lost.
+  //
+  // WHY THE REFUSAL IS NOT OPTIONAL. `isDayAfter` answers `false` for "I will
+  // not place this", documented in `tools/instant.mjs` as "absent, not true".
+  // That is the right convention for that module and it is a verdict here:
+  // `future = false` sends an entry down the graded branch, and `readVerdict`
+  // answers `due`. Measured on the trunk, `--now 'not a time'` grades an
+  // entry whose read date is 2026-12-25 as `due`. `due` is the accusing
+  // verdict — it says a seat owes a reading it has not taken — so an
+  // unplaceable `now` manufactures debt against every dated entry in the
+  // register and exits 0. The count this seat publishes to HQ is that number.
+  const today = nowDay(now)
+  if (today === null) {
+    throw new TypeError(`gradeEntry: \`now\` cannot be placed on a calendar: ${JSON.stringify(now)}. Every verdict below this line is a claim about a date relative to today, so there is no honest grade to return`)
+  }
+  const future = isDayAfter(field.date, today)
   if (!future && completedSince === null) {
     return { ...entry, ...field, verdict: null, why: 'ungradeable: no run rows, so `due` and `unread` are indistinguishable', completedSince: null }
   }

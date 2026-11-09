@@ -2,7 +2,9 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
-import { partition } from './instant-sweep.mjs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { decide } from './instant-gate.mjs'
 import {
   timestampShape, parseInstant, parseEpochSeconds, toUtcInstant,
   compareInstants, isAfter, isBefore, utcDay, sortByInstant,
@@ -358,25 +360,30 @@ test('the at alternative is deliberately NOT narrowed, and this pins the measure
   }
 })
 
-test('no source file outside a test orders timestamps as text', () => {
-  // The gate, and the reason this file imports git. TEXTUAL_ORDER is wrong
-  // wherever it appears; the remaining instances in this repository are all
-  // inside test files that demonstrate the inversion on purpose, and each one
-  // sits next to the instant-aware assertion that contradicts it.
+test('no source file outside a test violates ANY code the lint can emit', () => {
+  // The gate, and the reason this file imports git. It used to assert over
+  // TEXTUAL_ORDER and TEXTUAL_DROP and say nothing about TEXTUAL_DAY, which
+  // the lint detects on every run: Ursa's security seat found four instances
+  // of it standing in non-test source on the trunk on 2026-11-09 for exactly
+  // that reason, and a class a file calls a defect was being dropped on the
+  // floor with no record that it was.
+  //
+  // The decision lives once, in tools/instant-gate.mjs, which reads the set
+  // of codes it owes a disposition off this module's own source instead of
+  // restating it. Two implementations of one obligation agree only on the day
+  // they are written, so this test drives that one rather than keeping a
+  // narrower copy of it alive beside it.
   const files = execFileSync('git', ['ls-files', '-z', '*.mjs', '*.js', '*.cjs', '*.ts', '*.tsx'], { encoding: 'utf8' })
     .split('\0').filter(Boolean)
-  const { scanned } = partition(files)
-  const offenders = []
-  for (const file of scanned) {
-    if (/\.test\.(mjs|js|ts|tsx)$/.test(file)) continue
-    let source
-    try { source = readFileSync(file, 'utf8') } catch { continue }
-    for (const f of textualTimestampComparisons(source)) {
-      if (f.code === 'TEXTUAL_ORDER' || f.code === 'TEXTUAL_DROP') offenders.push(`${file}:${f.line} ${f.code} ${f.text}`)
-    }
-  }
-  assert.deepEqual(offenders, [])
+  const here = dirname(fileURLToPath(import.meta.url))
+  const r = decide({
+    files,
+    read: (f) => readFileSync(resolve(here, '..', f), 'utf8'),
+    detectorSource: readFileSync(resolve(here, 'instant.mjs'), 'utf8')
+  })
+  assert.deepEqual(r.offenders.map((f) => `${f.file}:${f.line} ${f.code} ${f.text}`), [])
+  assert.deepEqual(r.undecided, [], 'the lint can emit a code the gate has no disposition for')
   // A positive control, so a sweep that silently read nothing cannot pass
   // this test: the tree is not empty and the lint is reachable.
-  assert.ok(scanned.length > 300, `only ${scanned.length} files scanned`)
+  assert.ok(r.scanned > 300, `only ${r.scanned} files scanned`)
 })
