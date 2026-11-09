@@ -2,6 +2,144 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (security, message run 7): the CI row's job is finished and `main` fails three of its own gates, so applying it hands the owner a red default branch
+
+**Status:** proposed, half-day-sized. **For:** the engineer and exo lanes,
+with three lines that are the owner's. **Found by** taking the board row
+"Every test and gate we have built runs before a change can reach the
+default branch" and asking the one question nobody had asked of it:
+whether the job it installs passes on `main` as it stands.
+
+- Trigger: `scripts/ci-checks.mjs` and PWC-15 are both finished work. The
+  row's artifact is not the gap. Running the job's own checks against the
+  trunk is, and it had never been done.
+- What: `node tools/ledger/check.mjs` exits 1 on `main` today, with 21
+  seat-held and 8 owner-held violations in 584 blocks.
+  `scripts/ci-checks.mjs` declares `ledger-contract` with
+  `passExit: [0, 2]`, which is the correct policy and does not reach
+  exit 1, so the check reports red and is right to. Two further suites
+  are red for the same underlying defects:
+  `tools/doc-model/check.test.mjs:110` on three `UNREGISTERED_SITE`
+  findings and `tools/ledger/check.test.mjs:43` on the 21. The tolerance
+  was exact when it was written: at PWC-15's own commit `f2ea8336`
+  (2026-11-02T02:14Z) the same command exits 2 with precisely the two
+  owner-held violations the entry claims. The first seat-held violation
+  landed at 2026-11-02T05:52Z in `ea817aa3`, three hours and thirty-eight
+  minutes later, and nothing has re-read the number in the seven days
+  since, because a gate's tolerance list is a measurement of the tree
+  stored as a literal.
+- First step: clear the 21, which are twelve blocks in `docs/ideas.md`,
+  all dated 2026-11-02, from the engineer and exo lanes. Detection is
+  `^-\s+<Field>:` in `tools/ledger/block-kinds.mjs`, a literal colon,
+  and docs/standards/pm.md §4's template is the colon form, so the gate
+  is right in every case. Three kinds, and the classification is the part
+  that was missing. Sixteen are punctuation only, the field present and
+  ending in a period or a comma: `- What. Every one of the 109 closed and
+  unmerged rows was tested for`, `- First step, in the lanes that write
+  these comments and so`. Two extend the field name before the colon:
+  `- What was measured, against the forge rather than by preference` and
+  `- First step for whoever takes it: count the sites before`. Three are
+  genuinely absent, with no line to re-punctuate, and need their lane to
+  write one: `- First step` is missing outright from "The ninth guard
+  earns its keep", "The amendment parser read the first amending clause in
+  a note and dropped the rest", and "The lock this run shipped needed its
+  first refresh nineteen minutes after it was written". The security run
+  that found this repaired none of them deliberately: the third kind
+  cannot be repaired without authoring another lane's day-sized
+  commitment, and with those three open the other eighteen would have
+  converted two seats' prose for no change in the verdict.
+- Owner: the engineer or exo lane for the 21 and the three
+  `UNREGISTERED_SITE` sites; the owner for the three `CLOSURE_STATUS`
+  statuses, which pm.md §4 gives only her.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (security, message run 7): a self-check asserts a list is empty while every finding it receives is one only the owner may clear
+
+**Status:** proposed, hour-sized, and the hour is the argument rather than
+the edit. **For:** the lane that owns `tools/ledger/check-closures.mjs`.
+
+- Trigger: the same sweep as the entry above. This is the one red in the
+  set that no amount of lane work can clear.
+- What: `tools/ledger/check-closures.test.mjs:194` asserts the gate's
+  findings list is empty against the real repository. The three findings
+  it receives each end, in the gate's own words, "Held by the owner:
+  pm.md §4 gives only her the move out of 'proposed'". So the suite is
+  red, no seat may legally repair it, and the only act that clears it is
+  the owner moving three statuses. PWC-15 argues this exact point one
+  layer up, in the third of its three properties, and
+  `scripts/ci-checks.mjs` carries that argument forward as
+  `passExit: [0, 2]`. The gate step was given the reasoning and the unit
+  suite was not, so the shape the design explicitly routed around is
+  already inside the thing it would run.
+- First step: decide what the assertion should be, which is a judgement
+  and not a mechanical fix. The shape that matches the gate step is to
+  assert no SEAT-held finding and to report the owner-held remainder
+  without failing, the same split `contract-verdict.mjs` already makes
+  between its exit 1 and exit 2 branches. Then check the sibling
+  self-checks for the same shape before assuming this is the only one.
+- Owner: the lane that owns the closures gate.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (security, message run 7): a 20-case suite takes four and a half minutes and spawns a subprocess no test runner can interrupt
+
+**Status:** proposed, hour-sized. **For:** this seat's next run that
+touches the guard, or the engineer if it reaches that lane first.
+
+- Trigger: running the CI row's own unit step over all 72 suites. The
+  aggregate stopped producing output, and the suite still alive after
+  three minutes was this one.
+- What: `tools/secret-print-exemptions.test.mjs`, shipped by this seat
+  tonight in `#764`, measures 20 pass, 0 fail, 267.2 seconds run alone.
+  Its helper `cpSync`s the whole `tools/` tree and `.github/workflows/`
+  into a fresh temporary directory and spawns
+  `python3 tools/secret-print-exemptions.py` over the copy once per case,
+  with `maxBuffer` set and no `timeout`. The audit of this seat's run 6
+  records the suite as "20 pass, 0 fail", which is true, and is why the
+  cost stayed invisible: a per-suite run reports the verdict and not the
+  duration. Under the job the CI row installs this matters twice, because
+  the queued workflow declares no `timeout-minutes` and so inherits the
+  360-minute default, and a `spawnSync` with no `timeout` cannot be
+  interrupted by the test runner that owns the case. A suite that hangs
+  rather than merely runs long holds the job to the cap and reports
+  nothing about the branch.
+- First step: give the helper a `timeout` and build the tree copy once
+  per suite rather than once per case, which is the cost rather than the
+  bound. Both are small. Neither was done in the run that found it,
+  because a `timeout` turns "pass late" into "fail" on a slow runner and
+  choosing that bound is a CI-budget decision that should land with the
+  job, not before it.
+- Owner: this seat or the engineer.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (security, message run 7): a gate reads an unrecognised flag as a filename and dies with a stack trace
+
+**Status:** proposed, minutes-sized. **For:** the lane already carrying
+the sibling row on unknown flags.
+
+- Trigger: reaching for `--help` on `tools/ledger/check.mjs` while
+  measuring the CI row's gate steps.
+- What: `node tools/ledger/check.mjs --help` neither prints usage nor
+  refuses. The argument is passed to `readFileSync`, and the process dies
+  with an unhandled `ENOENT` naming `node:fs:440`. This is adjacent to the
+  standing row "All four of the library's older guards still accept an
+  unknown flag and run their default mode" (2026-11-02, `proposed`) and is
+  a different shape: that row is about a flag being silently ignored while
+  the tool answers green, and this one crashes, so the caller does learn
+  something went wrong and learns it in the least useful available form.
+  `scripts/ci-checks.mjs` already does it correctly, printing
+  `ci-checks: unknown argument: --help`.
+- First step: refuse an unrecognised leading `-` argument with the form
+  `ci-checks.mjs` uses, naming the flag, before the path is read. The
+  blast-radius caution on the sibling row does not apply here: nothing
+  calls this gate with a flag today, because any flag it is given is read
+  as a path and crashes.
+- Owner: the engineer, or this seat's next run in the ledger library.
+- Cost: $0
+- Status: proposed
+
 ## Ledger entry — 2026-11-09 (engineer, sixth wake): fifteen of sixteen gates in this tree compare a detector's vocabulary against nothing, and the one that does was six codes short
 
 **Status:** proposed, half-day-sized. **For:** the engineer.
