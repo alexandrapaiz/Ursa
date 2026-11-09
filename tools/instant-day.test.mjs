@@ -37,14 +37,19 @@ const OFFSET = '2026-11-08T23:00:00-05:00'  // the same instant, a day earlier a
 // if one of them changes, this file is where the divergence shows up.
 
 /** `nowDay`, as it merged to `main` in Ursa#758. Gated on `timestampShape`,
- *  which decides a spelling and not an existence. */
+ *  which decides a spelling and not an existence. DELETED from
+ *  `tools/seat/read-dates.mjs` by this change; transcribed here so the
+ *  collapse stays measured against what it replaced. */
 const TRUNK_NOW_DAY = (now) => utcDay(now) ?? (timestampShape(now) === 'day' ? String(now) : null)
 
-/** `nowDay`, as the ExO seat repaired it in Ursa#768: `parseDay` instead. */
+/** `nowDay`, as the ExO seat repaired it in Ursa#768: `parseDay` instead.
+ *  Also deleted by this change; it is the copy `calendarDay` agrees with
+ *  everywhere. */
 const REPAIRED_NOW_DAY = (now) => utcDay(now) ?? (parseDay(now) === null ? null : String(now))
 
 /** `dayOf`, from `tools/seat/outage.mjs` in Ursa#768. Same job, written
- *  separately, and it trims. */
+ *  separately, and it trims. Deleted by this change too, so all three
+ *  expressions below are history and this is the only place they survive. */
 const DAY_OF = (value) => {
   const s = String(value ?? '').trim()
   return utcDay(s) ?? (parseDay(s) === null ? null : s)
@@ -217,21 +222,21 @@ test('a string spelling an instant before the floor is still accepted, because t
 // seats' files. A rule nobody can grep for is not enforced, which is this
 // module's own sentence about its own lint.
 
-/** Files whose offending line is already repaired in an open pull request, so
- *  the sweep names them instead of going red on work that is done and
- *  unmerged. Keyed by FILE and not by line: the line number in the repair is
- *  not the line number here, and a line-keyed entry would have to be edited
- *  twice. Each entry carries the pull request that removes it. */
-const REPAIRED_ELSEWHERE = [
-  {
-    file: 'tools/seat/read-dates.mjs',
-    // `nowDay` gates on `timestampShape` on `main` and on `parseDay` in
-    // Ursa#768. When #768 merges this entry becomes removable and the sweep
-    // finds nothing; the follow-up that swaps both call sites to
-    // `calendarDay` is the pull request that deletes it.
-    why: 'repaired in Ursa#768 (ExO), open and mergeable as of 2026-11-09'
-  }
-]
+/** Files the sweep excuses, with the reason beside each one.
+ *
+ *  EMPTY, AND IT IS EMPTY RATHER THAN ABSENT. It held one entry for part of
+ *  this run — `tools/seat/read-dates.mjs`, whose `nowDay` gated on
+ *  `timestampShape` — because the pull request repairing that line was open
+ *  and this branch could not take it. That pull request merged mid-run, the
+ *  call site is `calendarDay` now, and the entry was deleted rather than left
+ *  to rot.
+ *
+ *  The shape is kept for the next excusable file, and the rules it was written
+ *  under are kept with it: keyed by FILE and never by line, because a line
+ *  number in another branch is not a line number here; a reason long enough to
+ *  name the pull request that removes the entry; and the length asserted
+ *  below, so an append is an edit a reviewer sees rather than a quiet one. */
+const REPAIRED_ELSEWHERE = []
 
 /** The bypass, as a line pattern. Comments are stripped first, because prose
  *  about this function reads exactly like a call to it. */
@@ -281,9 +286,11 @@ test('no source outside tools/instant.mjs decides a day by its spelling', () => 
     }
   }
   assert.deepEqual(offenders, [], 'use calendarDay(value), or parseDay(value) when you want the milliseconds')
-  // The allowlist is pinned at its size, so a second excused file needs an
-  // edit here and a reason beside it rather than a quiet append.
-  assert.equal(REPAIRED_ELSEWHERE.length, 1)
+  // The allowlist is pinned at its size, so an excused file needs an edit here
+  // and a reason beside it rather than a quiet append. Zero today: the one
+  // entry it carried was deleted when the pull request repairing its file
+  // merged, mid-run.
+  assert.equal(REPAIRED_ELSEWHERE.length, 0)
   for (const e of REPAIRED_ELSEWHERE) assert.ok(e.why.length > 20, `${e.file} needs a reason`)
   // A positive control, so a sweep that silently read nothing cannot pass.
   assert.ok(scanned > 300, `only ${scanned} files scanned`)

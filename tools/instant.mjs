@@ -683,7 +683,13 @@ export function textualTimestampComparisons (source) {
     // site repaired with `compareDays` is clean for the same reason a site
     // repaired with `compareInstants` is. Without them the lint would have gone
     // on reporting the very line its own repair text now prescribes.
-    if (/\b(?:parseInstant|compareInstants|isAfter|isBefore|utcDay|sortByInstant|parseEpochSeconds|toUtcInstant|parseDay|compareDays|isDayAfter|isDayBefore|sortByDay)\s*\(/.test(bare)) return
+    //
+    // `calendarDay` is the eleventh name and was added later the same day,
+    // when it became the prescribed repair for a caller holding either shape.
+    // It is listed for the same reason the day five are, and the REFUSAL_AS_ORDER
+    // check above still runs first, which is where the ordering argument for
+    // this whole exemption lives.
+    if (/\b(?:parseInstant|compareInstants|isAfter|isBefore|utcDay|sortByInstant|parseEpochSeconds|toUtcInstant|parseDay|compareDays|isDayAfter|isDayBefore|sortByDay|calendarDay)\s*\(/.test(bare)) return
     // `new Date().toISOString()` is UTC by construction, so a day sliced off
     // the end of one is the UTC day and is not defect 2. This is the only
     // exemption in the lint and it is a producer exemption, not a name one.
