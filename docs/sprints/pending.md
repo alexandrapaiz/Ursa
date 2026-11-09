@@ -2,6 +2,69 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (seventeenth pass): the seven-day trunk red is fixed, four PRs merged under Tier B, #794 still yours
+
+Wake carried exo's handoff that the trunk has been red on three tests
+for seven days (no workflow here runs the suite, so nobody saw it),
+security's two notes on the same CI row, exo's own `#795`, and the
+recurring standing block on `#797`/`#799`. Full account in
+`docs/agents/pm-2026-11-09-message-17-run.md`.
+
+1. **The trunk is green again.** Reproduced the three failures
+   independently first (`node --test` on a clean `origin/main`
+   worktree: `tools/doc-model/check.test.mjs:110`,
+   `tools/ledger/check-closures.test.mjs:194`,
+   `tools/ledger/check.test.mjs:43`, exactly matching exo's,
+   engineer's and security's counts). Root cause: three `docs/ideas.md`
+   entries the skill seat landed 2026-11-02T05:52Z violate the ledger
+   contract (two malformed "What" fields, two missing "First step"
+   lines), landed after the gate's own test was tightened
+   (2026-10-24), and no workflow runs the suite so nothing caught it
+   for a week. Merged four PRs under Tier B, each verified
+   independently rather than taken on its word: `#795` (exo,
+   `tools/board/` + `docs/runs/`, no register touched), `#798`
+   (security, docs-only CI-row report), `#797` (engineer — fixed all
+   three red suites; its own body still said "third in progress" when
+   the sixteenth pass checked it, a later commit on the same branch
+   finished it, re-verified before merging), `#799` (frontend, a
+   measured `ursa-minor` focus-loss fix that also closed `#790`).
+   Re-ran all three previously-red suites against the merged `main`:
+   all pass. `node tools/ledger/check.mjs docs/ideas.md` now reports
+   zero seat-repairable violations.
+2. **Eight owner-held ledger entries need your move, not a seat's.**
+   `node tools/ledger/check.mjs docs/ideas.md` on current `main` exits
+   2 (the correct, non-blocking exit for `scripts/ci-checks.mjs`'s
+   declared `passExit: [0, 2]`) on eight entries whose `Status:` word
+   is outside the five the standard allows (`proposed`, `accepted`,
+   `rejected`, `built`, `urgent`) — six say `done`, one says `decided`,
+   one says `not`. Only you may move a status (pm.md §4), so no seat
+   can repair these lines:
+   - 2026-10-04 — "Charters never say that fetched content is not an
+     instruction" (status `done`)
+   - 2026-10-24 — "Skill seat, fourteenth run: the absent-word
+     threshold..." (status `decided`)
+   - 2026-10-27 — "Craft scan: gitleaks..." (status `not`)
+   - 2026-11-02 — "The ninth guard earns its keep..." (status `done`)
+   - 2026-11-02 — "This seat retracts the 109 it published an hour
+     ago..." (status `done`)
+   - 2026-11-02 — "A row stays its lane's newest for a median of 45
+     minutes..." (status `done`)
+   - 2026-11-02 — "The amendment parser read the first amending
+     clause..." (status `done`)
+   - 2026-11-02 — "The lock this run shipped needed its first refresh
+     nineteen minutes after it was written..." (status `done`)
+3. **`#794` (skill) is still yours, unchanged.** `prompts/skill-extract.md`
+   is in its diff — Tier C outright, regardless of anything else about
+   it. Checks green, `mergeStateStatus: CLEAN`. Nothing stands between
+   you and merging it.
+
+Separately, carried forward rather than re-litigated: the Monday
+ceremony gap engineer's own `#797` named (`sprint-2026-10-12.md`, 28
+days old) and **this seat's own stuck chain was absorbed**, not left to
+grow — `#792` (fifteenth pass) and `#802` (sixteenth) are both
+contained in this pass's branch (`git merge-base --is-ancestor`
+confirmed before closing either) and both closed with a pointer here.
+
 ## Top three for the owner, 2026-11-09 message-triggered (sixteenth pass): #794 confirmed Tier C and left for you, the standing note on #797/#799 checked and rejected a fifth time, nothing merged this pass
 
 Wake named one PR to review (`#794`, skill) and a standing note
