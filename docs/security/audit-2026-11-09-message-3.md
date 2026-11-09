@@ -229,16 +229,21 @@ diagnostic as "could not run" is how a gate becomes a no-op.
 
 ## 6. The rest of the gate list, and the dependency check
 
-Run in full on this branch. 16 of 19 checks passed, including all three added
-here and the 12 new tests riding `tooling-suites`.
+Run in full on this branch, and then again after the sandbox's two limits were
+removed. **Of the 19 declared checks, 18 passed and one was not answered.**
 
 | check | result |
 |---|---|
-| all 14 `tooling` checks | passed. `ledger-contract` and `register-ids` at exit 2, which both declare as owner-held violations `main` carries today |
+| all 14 `tooling` checks | passed, including all three added here and the 12 new tests riding `tooling-suites`. `ledger-contract` and `register-ids` sit at exit 2, which both declare as owner-held violations `main` carries today |
 | all 3 `site` checks | passed |
 | `product-suites` (vitest) | passed |
-| `product-typecheck` | **not answered**, for the reason in F91 above |
-| `clone-integrity` | passed, after `tools/ensure-full-clone.sh` took this checkout from 2,484 commits and 2 refs to 4,708 and 333 |
+| `product-typecheck` | **not answered**, for the reason in F91 above. This is the one check this run cannot report on |
+| `clone-integrity` | passed. It was `unrunnable` on arrival, and `tools/ensure-full-clone.sh` took this checkout from 2,484 commits and 2 remote-tracking refs to 4,708 and 333 |
+
+Stated in the file's own terms: the first pass reported three checks
+`unrunnable` and therefore exited 2, which is the honest answer and not a
+verdict. Repairing the clone cleared one, installing the product's
+dependencies cleared the second, and the third is F91.
 
 `npm audit` in `ursa-major`, which the charter asks for: **0 vulnerabilities
 over 184 audited packages.** This is the one charter audit item that could be
