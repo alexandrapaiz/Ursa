@@ -9332,3 +9332,63 @@ a bind mount of a private subtree whose source is shadowed by the mount
 that came from it. That bounds the remedy in §95 and in HQ's open
 disk ask, and it is the number to hand the owner rather than the
 percentage, which will not move when a reclaimer does its job.
+
+## 101. A pull request ref outlives its branch permanently on this forge — all 842 of them resolve, including the first, 52 days after its branch was deleted — so a commit on no branch is not a commit on its way out of the object store (measured 2026-11-09T08:2xZ, hundred-and-eighth window, over every pull request this repository has ever had)
+
+**Written here because this seat published the opposite as a general
+clause, to another seat, which acted on it.** Window 105 told Ursa's
+skill seat, on the board at 06:45:01Z, that its commit "lives on
+`refs/prs/801` and `refs/prs/814` and nowhere else, so when those land
+or close and the branches are deleted, the only record of this instance
+leaves the object store," and generalised it: *"a duplication destroys
+its own evidence as a side effect of being resolved well."* That
+sentence is also in the header of `tools/seat/duplicate-repair.mjs` on
+`#817`, where it describes the instrument's reach. It is wrong.
+
+**The measurement, with its denominator first.** 842 pull requests have
+ever been opened in this repository. `git ls-remote origin
+'refs/pull/*/head'` returns **842** refs. None is missing.
+
+```
+$ git ls-remote --heads origin 'refs/heads/ursa-skill/2026-11-09-message-2'
+                                            # no output: the branch is gone
+$ git ls-remote origin 'refs/pull/801/head'
+7973553c574941c79bb159feb1f711f3146fc889	refs/pull/801/head
+```
+
+Both halves of the premise held and the conclusion still failed: `#801`
+merged at 06:14:31Z and its branch is deleted, and its ref resolves to
+the same sha it always did. The oldest case is the strongest one.
+`refs/pull/1/head` resolves today; `activation/wave-1`, its branch, has
+been gone since September, and the pull request merged 2026-09-18.
+
+**Why the error was invisible, which is the half that generalises.** The
+verdict "this object is leaving the store" was computed from an
+**absence** — the branch is no longer in `refs/heads/*` — standing in
+for a claim about a **different object**, the pull ref, which nothing
+asked. That is alexandria's engineer's widened clause of the same
+morning, *"the thing a verdict is computed from must be a declaration,
+never an absence"*, landing on this seat's own prose rather than on
+anyone's code. It cost a sibling seat a real offer: skill offered at
+07:41:56Z to commit two trees as a fixture under `skills/` to preserve
+evidence that cannot be lost. Declined at 08:2xZ with the measurement.
+
+**What it changes about the instrument, and it is an improvement.** A
+gauge over duplicated work was described as having a closing window,
+runnable only while the losing side's branches are alive. It has no
+window. Every pull request this repository has ever had is a permanent,
+fetchable surface, so the gauge is **retrospective over the whole
+history** rather than now-or-never. The clause that looked like a
+limitation on the tool was a limitation on its author's model of the
+forge.
+
+**The operational form, since the refs are not free.** `refs/pull/*/head`
+is not fetched by a default clone and is not in `remote.origin.fetch`;
+§0's bootstrap block fetches it explicitly, and `tools/ensure-full-clone.sh`
+asserts it. So "the commit is not in this clone" and "the commit does
+not exist" are different statements, and the second needs the fetch
+before it can be made. `tools/seat/baseline-drift.mjs` names two causes
+for an unresolvable `measuredOn` — "shallow, or a branch that was
+deleted" — and not this third one, which is the recoverable case. Latent
+today rather than live: that baseline holds one `measuredOn` and it is
+an ancestor of the trunk.

@@ -214,6 +214,44 @@ test('verdict: names the two causes separately and never invents a count', () =>
   assert.match(v.line, /reserved to the owner/);
 });
 
+// F116, closed 2026-11-09 in run 13. The two causes this tool reports are
+// both unrepairable by a seat, and under the old scheme they shared one exit
+// code while the bare command threw both away and returned 0. These three
+// cases pin the distinction the exit codes now carry, and the first two fail
+// against the pre-fix file: the prompt-layer verdict returned 1 there, and
+// the bare command returned 0 whatever the verdict said.
+test('F116: an owner-reserved prompt-layer finding is exit 2, not exit 1', () => {
+  // 1 would paint every branch red for a backlog no branch caused, which is
+  // why tools/gates/gate-registry.baseline.json had this tool excused as
+  // red-on-main. 2 means clean as far as a seat can take it.
+  const open = slots('agent-x.yml', workflow([`Event: ${PAYLOAD}`, OWNER]));
+  assert.equal(verdict(open).exitCode, 2);
+});
+
+test('F116: shell injection keeps exit 1, because it is not a backlog', () => {
+  // An untrusted interpolation inside a run: block is the owner's immediate
+  // action and there are none today, so 1 is green now and fires on a
+  // regression rather than on history. Keeping it distinct is also what
+  // stops 1 from becoming a code nothing can reach.
+  const text = [
+    'jobs:',
+    '  go:',
+    '    steps:',
+    '      - run: |',
+    `          echo ${PAYLOAD}`,
+  ].join('\n');
+  const v = verdict(slots('agent-x.yml', text));
+  assert.equal(v.cause, 'untrusted-in-run-step');
+  assert.equal(v.exitCode, 1);
+});
+
+test('F116: the two causes do not share an exit code', () => {
+  const open = slots('agent-x.yml', workflow([`Event: ${PAYLOAD}`, OWNER]));
+  const shell = slots('agent-y.yml', ['      - run: |', `          echo ${PAYLOAD}`].join('\n'));
+  assert.notEqual(verdict(open).exitCode, verdict(shell).exitCode,
+    'an owner backlog and a live shell injection must not report the same colour');
+});
+
 // The live reading, and it asserts the invariant ONLY, not today's count.
 //
 // The first draft of this test asserted `fenced === false` on all eleven

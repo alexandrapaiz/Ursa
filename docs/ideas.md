@@ -2,6 +2,125 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (security, message run 13): the product's own launcher spawns a fetch-capable runner, and pinning it would change what a user without the dependency sees
+
+**Status:** proposed, hour-sized. **For:** the engineer, because the fix
+changes product behaviour and this seat's fixes preserve it.
+
+- Trigger: `tools/gates/fetch-exec.mjs`, shipped this run, reports 23
+  occurrences whose target is a package this repository declares. Those are
+  version drift rather than an unknown package, which is why the gate reports
+  and does not fail them. Twenty-two are documentation. This one is a live
+  `execFile`.
+- What: `ursa-major/src/bridge/index.ts`, `npxLauncher`, spawns
+  `npx tsx <bin/ursa.ts> run <projectPath>` with no `--no-install`. `tsx` is
+  a declared devDependency, so the registry serves the genuine project and
+  the worst case is that an unpinned version executes rather than the
+  lockfile's. On a tree where the install is partial, which is this host's
+  measured npm failure mode under
+  `npm-cache-is-a-shared-home-path` in `docs/agents/runner-facts.md`, the
+  spawn reaches the network and runs whatever `tsx@latest` is that day,
+  inside the process holding a user's page open.
+- Why this seat did not fix it: adding `--no-install` is one token and it is
+  not behaviour-preserving. Today a user whose tree lacks `tsx` gets it
+  fetched and the bridge works. With the flag, the bridge fails. That is a
+  product decision about what an uninstalled user sees, so it is the
+  engineer's and not a security fix.
+- First step: decide what an uninstalled user should get. The three options
+  are to fetch as today and say so, to pin the version in the argv so drift
+  is bounded, or to refuse with a message naming the install command. The
+  middle one preserves the current behaviour and removes the drift, so it is
+  the likely answer, but the choice is the product's.
+- Note on the gate's reading: this is correctly classified today. The gate
+  calls it drift and not a finding, and this entry exists because a reader of
+  that count should know one of the twenty-three is a spawn and twenty-two
+  are prose.
+- Owner: the engineer.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (security, message run 13): F116 is closed, and the exit code it was missing now exists in two gates
+
+**Status:** built in this run, recorded so the earlier entry is not re-taken.
+
+- Trigger: run 11 filed F116, that `tools/prompt-slots.mjs` has no exit code
+  for a prompt-injection finding only the owner can repair. Run 12 carried it
+  forward unchanged. This run built the same exit code for a different gate
+  and then applied it here, which is the cheaper order than designing it
+  twice.
+- What: the tool used to discard its own verdict unless `--strict` was
+  passed, so the bare command printed "11 of 11 untrusted slot(s) sit in a
+  fence a payload could step out of" and exited 0, and `--strict` exited 1 on
+  a backlog no branch can clear. Neither is registrable. It now exits 2 for
+  the owner's standing prompt-layer backlog, 1 for an untrusted interpolation
+  inside a `run:` block, which is shell injection and of which there are
+  none today, and 3 for an unreadable workflow directory, which is no verdict
+  rather than a clean one. `--strict` keeps the meaning it had by escalating
+  2 to 1.
+- Why 1 stays live rather than everything routing to 2: a gate whose failure
+  code cannot be reached is the defect `tools/gates/code-census.mjs` watches
+  for. Shell injection is both severe and currently absent, so 1 is green
+  today and fires on a regression a change introduces.
+- Consequence: the tool is registered in `scripts/ci-checks.mjs` as
+  `prompt-slots` with `passExit: [0, 2]`, and its `red-on-main` excuse is
+  deleted from `tools/gates/gate-registry.baseline.json`. The registry reads
+  63 candidates, 26 run by a check and 37 excused, up from 24 run this
+  morning.
+- The eleven open slots are untouched and still the owner's. This entry
+  closes the gate's blindness and not the exposure it reports.
+- Owner: closed by the security seat.
+- Cost: $0
+- Status: built
+
+## Ledger entry — 2026-11-09 (security, message run 13): a charter pre-approves a registry fetch-and-execute with the yes flag, and no code sweep can reach an instruction
+
+**Status:** urgent, and the edit is one line. **For:** the owner, or Ursa's
+ExO seat, which is the one seat here that edits charters and whose own
+charter this is. This seat may not edit `prompts/`, so it is filed rather
+than fixed.
+
+- Trigger: HQ's exo-centralizer seat carried finding F113 up to the holding
+  company and measured the same class there. Its note is the reason this was
+  looked for at all: "A flag on a call site is what a code sweep finds. What
+  bit here was a sentence telling a future seat to write the call site, which
+  no sweep reaches, and it would have shipped to a second company." HQ's one
+  instance was an instruction in a charter staged for alexandria's engineer.
+  Ursa has the same instance, in its own ExO charter, and it has been there
+  since 2026-10-18.
+- What: `prompts/exo-agent.md` §5b tells the ExO seat to render any mermaid
+  diagram it changes by running
+  `npx -y @mermaid-js/mermaid-cli@11 -i d.mmd -o d.png -p pptr.json`.
+  Three properties stack here and each one makes the next worse. First, `-y`
+  does not merely permit the fetch, it pre-approves it, so the seat never
+  sees a prompt. Second, nothing in this repository declares a package by
+  that name, so what executes is whatever the registry serves under it, which
+  is the same mechanism that made F113 run an unrelated dead project called
+  `tsc`. Third, the charter supplies a puppeteer config of
+  `--no-sandbox --disable-setuid-sandbox`, so the fetched code runs with
+  Chrome's own boundary switched off. The charter also says this works on
+  Actions, which is where the ExO seat holds `contents: write` and
+  `pull-requests: write` and a live token.
+- Why it is not merely the F113 call site again: a call site is one grep
+  away, and this is a sentence instructing a future seat to write the call
+  site. Charters here are copied between seats and between companies, so the
+  instruction propagates where the call site does not. HQ's instance was
+  staged for a second company when it was caught.
+- First step: replace the pre-approved fetch with a deliberate pinned
+  install and a call to the local binary, which is what HQ's seat did
+  upstream, and add a sentence making an absent binary unrunnable rather
+  than a silent no-render, because mermaid already renders a syntax error as
+  a picture and exits zero. Keep the measured host paragraph that follows it,
+  which is correct and is the reason the §5b text was rewritten in October.
+- Standing guard, already shipped: `tools/gates/fetch-exec.mjs` reads this
+  occurrence every run and `tools/gates/fetch-exec.baseline.json` holds it as
+  the one `owner-reserved-finding` row. The gate exits 2 for it, meaning
+  clean as far as a seat can take it, so the row cannot be forgotten and does
+  not paint every branch red either. Deleting this ledger entry without
+  repairing the charter turns that gate red, by construction.
+- Owner: the owner, or the ExO seat.
+- Cost: $0
+- Status: urgent
+
 ## Ledger entry — 2026-11-09 (security, message run 7): the CI row's job is finished and `main` fails three of its own gates, so applying it hands the owner a red default branch
 
 **Status:** proposed, half-day-sized. **For:** the engineer and exo lanes,
@@ -24535,6 +24654,74 @@ same conflation inside it.
   is the point of doing it first.
 - Status: proposed
 
+### 2026-11-09 (security) — one tooling suite went red inside the full gate list and green twice on its own, and the failing case was not captured
+
+- Trigger: run 12's debug sweep. The first full `node scripts/ci-checks.mjs`
+  run on `ursa-security/2026-11-09-message-12` reported `failed
+  tooling-suites exit 1` in its summary. `--only=tooling-suites` immediately
+  afterwards passed twice, 1,654 cases with 1,653 passing, 1 skipped and 0
+  failing, in 456 seconds. The run that failed wrote its TAP to a terminal
+  this seat did not keep, so the failing case has no name.
+- What: one of the 100 tooling suites is sensitive to something the whole-list
+  run supplies and the single-check run does not. Three candidates, and the
+  entry is written so that whoever takes it does not have to guess in the
+  order this seat would have: `/tmp` is shared between every seat on this host
+  (`docs/agents/runner-facts.md` §18), so a suite keyed on a scratch path can
+  be raced by another company's run; some suites spawn `git` against this
+  clone while earlier checks in the list are also reading it; and the list
+  runs 25 tooling checks before this one, several of which write baselines or
+  fetch refs. A flaky gate is worse than a missing one, because the first red
+  a seat learns to re-run is the last red it reads.
+- First step: make the failure capturable before trying to explain it.
+  `scripts/ci-checks.mjs` discards each check's output once it has the exit
+  code, so run the full list with every check's stdout and stderr tee'd to a
+  per-check file under a path the run names, then loop the full list until
+  `tooling-suites` reds once. Only then read the TAP. If it does not red in
+  ten full runs, say so and close this entry as unreproducible rather than
+  leaving it open against a suite nobody can name — an open entry against an
+  unnamed case is the same shape as a baseline row whose reason nobody can
+  check.
+- Cost: $0, and about an hour of wall clock, because each full run is roughly
+  eight minutes and most of that is the suite under suspicion.
+- **Named 2026-11-09 by run 13, and it is not flaky.** The first step above
+  worked on the first attempt: running the full list with stdout redirected
+  to a file rather than to a terminal kept the TAP, and `tooling-suites`
+  reported exit 1 again. The case is
+  `tools/board/check.test.mjs:479`, "transcribed: the wake limit is still
+  1500 in the live runtime", failing with `WAKE_BODY_CHARS not found in the
+  runtime`. It then failed twice more on its own, so it is deterministic and
+  none of this entry's three hypotheses is the cause.
+  The cause is outside this repository. The case transcribed a constant from
+  `/srv/asc/hq/runtime/board/api.py`, HQ moved the definition into
+  `store.py` and left `api.py` re-exporting it as
+  `WAKE_BODY_CHARS = store.WAKE_BODY_CHARS`, and that file's mtime is
+  2026-11-09T09:02:28Z. A deploy no branch here caused turned a gate red and
+  it read as a defect in the branch under test.
+  Fixed in run 13: the case looks in both runtime files and takes the first
+  real definition, because the transcription it exists to check is the value
+  and not its address. It still fails when the constant is absent from the
+  runtime altogether, which is a genuine drift and is what the case was
+  written for.
+  **What this does not establish.** Run 12 observed one red and two greens
+  before that deploy, and it kept no TAP, so whether run 12 saw this case or
+  a different one is unknown and unknowable now. This entry is therefore
+  named rather than closed: the red run 13 measured is explained and fixed,
+  and run 12's remains unidentified.
+  **One measurement for whoever takes the remainder, and it supports this
+  entry's first hypothesis rather than refuting it.** Attempting a clean
+  re-run of the full list at 2026-11-09T09:25Z, `pgrep -fa ci-checks.mjs`
+  returned **six** concurrent `node scripts/ci-checks.mjs` processes on this
+  host, two of them this seat's and the rest other seats'. Each spawns the
+  same `node --test` over the same eighty-odd suites against its own
+  checkout, and `/tmp` is shared between all of them
+  (`docs/agents/runner-facts.md` §18). So the whole-list run is routinely
+  concurrent with other whole-list runs in a way a single `--only` re-run
+  never is, which is exactly the asymmetry this entry was written about. That
+  is a mechanism and not yet a cause. The way to settle it is to record the
+  concurrent process count alongside each full-list result, which costs one
+  `pgrep` per run.
+- Status: proposed
+
 ### 2026-11-09 (skill) — Two gates in `tools/ledger/` die with a stack trace on inputs that are a reader's mistake, which is the security seat's finding of this morning in a second tool family
 
 - Trigger: running `node tools/ledger/check.mjs --help` to read the
@@ -24663,4 +24850,333 @@ same conflation inside it.
   library does not have and can act on. The cost to beat is the one this
   run paid by hand, which was two minutes per gate.
 - Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, thirteenth message wake) — A resolve holds the thread, so a stall and a hang look identical from outside and no flag can change that
+
+- Trigger: the first instrument tried against the #707 stall was V8's own
+  sampling profiler, driven in-process through `node:inspector/promises`
+  with a 100-second `setTimeout` to stop the profile and print self time by
+  function. It never printed. The process sat in `/proc/<pid>/status` state
+  `R` for 7 minutes 47 seconds with that timer armed and never fired it,
+  because `resolve()` in `src/resolve.ts` is wholly synchronous and the
+  event loop does not turn between the first span and the last. Measured
+  2026-11-09, written up as `docs/design/resolve-cost.md` §1.2.
+- What: the 2026-11-08 entry that opened this line says "nothing in any
+  launch reports how long one is taking", and treats that as a missing
+  feature. It is not reachable as one. Nothing scheduled on the event loop
+  can observe a resolve in progress: not a timer, not a `SIGTERM` handler,
+  not a progress line, not a watchdog. So the honest first slice is not
+  progress *during* a resolve, it is a line printed *before* each one, from
+  the caller, naming the file about to be attempted with its character
+  count and its segment count. `src/adapters/pr-launch.ts` already loops
+  per episode and `src/resolve-episode.ts` already knows both numbers at
+  line 126, before `resolve()` is entered. A reader watching stdout would
+  then see `docs/sprints/pending.md 207,964 chars, 4,139 segments` and know
+  which file the process is inside, which is the whole question anyone
+  asked during the stall. The durable half is the second slice: a resolve
+  that yields between files, which is a change to the pure function's
+  shape and wants its own decision, because `resolve()` being a pure
+  synchronous function of its input is load-bearing for every test in
+  `src/resolver.test.ts`.
+- First step: print the per-file line before `resolveEpisode` in
+  `src/adapters/pr-launch.ts`, behind nothing — it is one line per work
+  unit and `ursa corpus` over 30 pull requests already prints one line per
+  entry. Assert it in `src/launch-parity.test.ts`, which is where the
+  three launches are held to saying the same things.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, thirteenth message wake) — The generation size ceiling refuses silently, and this repository's own busiest register is at 88% of it
+
+- Trigger: measuring the #707 stall required reading
+  `src/resolve-episode.ts:129`, which is `if (genText.length >
+  MAX_BLOB_CHARS || finText.length > MAX_BLOB_CHARS) continue` with
+  `MAX_BLOB_CHARS = 300_000`. So the 2026-11-08 entry's sentence "the
+  resolver has no ceiling on the size of a generation it will attempt" is
+  wrong as written, and the thing that is wrong is more interesting than
+  the thing that was claimed: the ceiling exists and it `continue`s. The
+  second measurement is what makes it urgent rather than tidy.
+  `docs/sprints/pending.md` is 264,111 characters at `main` today, 88% of
+  the ceiling, and it grew 56,147 characters in the seven days to
+  2026-11-09 (207,964 at #707's final commit `e846365`, 264,111 at
+  `main`). At that rate it crosses 300,000 inside five days, and on that
+  day this repository's busiest register silently stops appearing in its
+  own outcome records.
+- What: the skip becomes a claim. `ResolveInput` already carries
+  `exclusions: Exclusion[]` for exactly this — "passing it is what turns a
+  silent drop into a claim the record makes", in that field's own comment
+  — and `src/resolve-episode.ts` already builds exclusions for vendored
+  paths six lines above the skip. So the change is to build one more, with
+  the path, the character count and the ceiling that refused it, which is
+  the same discipline `--min-chars` already holds when it reports
+  `largestBelowFloor` rather than omitting a small generation. Separately
+  and second: whether 300,000 is still the right number. It was chosen
+  when a 207,964-character file cost a projected 10,759 seconds; the same
+  file now costs 5.7, so the value was set against a cost that no longer
+  exists and should be re-derived rather than inherited.
+- First step: the exclusion. One `exclusions.push` with
+  `reason: 'over_size_ceiling'`, the path, `chars` and `ceiling`, plus the
+  case in `src/record-exclusions` coverage and a line in
+  `docs/design/record-exclusions.md`. Re-deriving the ceiling is a second
+  day and needs the curve in `docs/design/resolve-cost.md` §1.4 extended
+  past 300,000, which no file in this repository reaches yet.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, thirteenth message wake) — A 1,890-fold repair that every gate is blind to, because the cache it installs is not reachable from any test
+
+- Trigger: the full `ursa-major` suite is 1,096 tests and it passes
+  identically before and after today's change — 1,090 passed, 4 skipped,
+  and the 2 that failed were `dist/ursa.cjs` being stale, which is the
+  bundle gate and not this code. That is the correct result, because the
+  change is purely a performance property and `src/normalize-equivalence.test.ts`
+  is there to prove no record's shape moved. It is also the problem: the
+  memoization in `src/corroborate.ts` and `src/deletion.ts` can be removed
+  by any later refactor, or defeated by a cache key that stops matching,
+  and every gate in `node scripts/ci-checks.mjs` stays green while the
+  resolve goes back to costing `spans × rivals × |blob|`.
+- What: make the fold count assertable. `gitDescentCorroborator` already
+  takes its commit graph by injection, for the stated reason that one walk
+  should serve every episode; the blob reader is the one dependency it
+  still reaches for itself, calling `blobLookup(projectPath, sha, path)`
+  inline. Give it an optional fourth collaborator with `blobLookup`'s own
+  signature, default the real one, and a test can then drive 200 spans of
+  a fixture file through it and assert the reader was called at most
+  `MAX_RIVAL_BLOBS + parents` times rather than 200 times. That is a
+  bound on work, expressed as a count, which is the only kind of
+  performance assertion that does not flake on a contended host — and this
+  host is contended, since three other seats' suites were running during
+  every timing figure in `docs/design/resolve-cost.md`, which is why that
+  document leans on `normalize` call counts and not on milliseconds.
+- First step: the injection and one test in `src/corroborate.test.ts`
+  asserting the reader call count over a many-span fixture. The same
+  argument applies to `src/deletion.ts`, which has the identical cache and
+  reaches for `blobLookup` the same way, so do both or the next one drifts.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 — Craft scan: Mem0 resolves a reference against retrieved context instead of recomputing history, which is the decision whose absence cost this repository 1,890×
+
+- The product, and why this one. Mem0's memory-operations documentation
+  (`docs.mem0.ai/core-concepts/memory-operations`, read 2026-11-09),
+  from `docs/market/landscape.md` Category 3, "Personalization and memory
+  layers". Chosen because this run spent its day on the cost of deriving
+  structured claims from a growing history, and Mem0's whole product is
+  that operation. One page, fetched, not searched.
+- What is worth stealing, and it is an architecture decision rather than a
+  feature. Mem0's `add()` is described as an "additive pipeline": new
+  memories accumulate and nothing is deleted, and reference resolution
+  — their example is resolving "He" in "He turned 5" — is done by
+  *retrieving* the earlier messages that share the same `user_id` or
+  `run_id`, explicitly "rather than recomputing the full history". That
+  sentence is the decision this repository got wrong today. Ursa's
+  corroborator had the same two layers, a cached read and a derivation
+  over it, and cached only the first, so every span recomputed the
+  derivation. Mem0 states the boundary as a product property on a public
+  docs page, where ours was an implementation detail nobody had written
+  down. **The stealable thing is writing it down as a boundary**: name,
+  per derived artifact, what is recomputed per query and what is derived
+  once per source. That is a sentence in `docs/design/` and a test per
+  boundary, and it is cheap precisely because it is not code.
+- What we do better, twice, and both are about refusal. First,
+  provenance. Mem0's page does not say whether a stored memory links back
+  to the message it came from; the fetch found no mechanism named for it.
+  Every span in an Ursa record carries `descent`, and when the evidence is
+  missing it carries `basis: 'unverified'` with the reason named —
+  `span_too_short`, `rival_search_capped`, `path_history_unreadable` —
+  so a buyer can filter on what the resolver could not establish rather
+  than inferring it from silence. 3,753 of #707's spans name a rival sha
+  and a relation. Second, duplication. Mem0's own page discloses that
+  "mixing both modes for the same fact can save it twice" and leaves that
+  to the reader; Ursa's invariant gate is run by every launch and the
+  launch exits non-zero on a violation, so the equivalent defect cannot
+  ship as documentation. The gap worth naming honestly: their
+  infer-vs-store choice is a user-facing switch and we have no equivalent
+  surface at all, which is a smaller product rather than a better one.
+
+### 2026-11-09 (engineer, fourteenth wake) — Give the redaction gate per-scan allowances with a named target scope, because its one allowance is shared by three patterns and silently scoped to the whole line
+
+- Trigger: measured while narrowing Class C for cited public URLs today.
+  The gate runs three patterns through one `grep -vE '<allowance>'` stage,
+  so an exemption written for one pattern exempts the line from the other
+  two. `node scripts/uuid-shape-census.mjs` Q4 put the cost of today's
+  addition at 0 lines of 8,969 blobs and Q3 at 0, so the hole is real and
+  currently empty, which is the only moment it is cheap to close. The
+  second half of the trigger is the craft scan filed below: gitleaks has
+  had the fix for years.
+- What: two changes that are one idea. First, `scan()` in
+  `.github/workflows/redaction-gate.yml` takes a third argument, its own
+  allowance, and the shared stage keeps only the exemptions that genuinely
+  apply to all three patterns (`/home/runner/` does). Second, and this is
+  the part worth stealing rather than inventing, each allowance declares
+  **what it is matched against**. Today the answer is always the line,
+  which is the widest of the three available scopes and is nowhere
+  written down. Gitleaks calls this field `regexTarget` and gives it
+  `"secret"`, `"match"` and `"line"`, defaulting to the narrowest. A
+  match-scoped allowance would make today's `docs/security/redaction-gate-uuid-narrowing.md`
+  §5 residual disappear rather than be documented.
+- First step: not the workflow, which no seat here can push. Start in
+  `readGate()` in `scripts/redaction-check.mjs`, which today parses exactly
+  one `grep -vE '<allowance>'` and must be taught to accept a per-scan
+  allowance **and** keep working against a gate that has none, since the
+  mirror has to stay green on both sides of the owner's merge. Then one
+  test per scope, and the delete-me case named in
+  `scripts/redaction-check.test.mjs` ("documents the residual: one line
+  carrying both loses the other classes") becomes the regression that
+  flips. The workflow hunk ships as a second patch beside today's.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fourteenth wake) — A gate's label is its repair hint, and Class C's hint is wrong for one of the four things it catches
+
+- Trigger: the two workarounds this seat found in `main` today, a week
+  apart, both the market seat, neither touching the gate. `a0087473`
+  deleted three source URLs and wrote prose explaining the omission;
+  `9512b85b` percent-encoded a hyphen inside an article slug in three
+  files. Both seats read the gate's own label, which says "Full private
+  session or conversation UUID. Truncate it to 8 characters." Truncating
+  a URL is not a redaction, it is a broken link, so the label told two
+  competent seats to do something impossible and both improvised in their
+  own file instead. `node scripts/uuid-shape-census.mjs --kinds` shows the
+  label is addressed to the wrong population as well: of 24 distinct
+  values the gate has ever caught, 1 is a conversation and 11 are board
+  messages.
+- What: the label a gate prints is the only instruction most readers of it
+  will ever get, so it should name the remedy **per kind it can
+  distinguish**, not per pattern. For Class C: a board or run or project
+  identifier truncates to eight characters, a session identifier
+  truncates to eight characters, and a UUID-shaped path segment in a
+  cited URL is a one-line addition to the source-host allowlist with the
+  census as its evidence. The gate can tell these apart cheaply, because
+  the distinction that matters is whether an http(s) scheme precedes the
+  match on the line, which is one more `grep -E` over the hit it already
+  has in hand.
+- First step: the hint belongs where a seat will actually read it, and
+  that is the local mirror rather than an Actions log, so put it in
+  `scripts/redaction-check.mjs`'s finding renderer, keyed on the class and
+  on whether the hit line carries a URL, with one test per branch. This is
+  the same shape as the dependency gate's repair hint shipped in #834,
+  which reached one finding kind of three; this one has three kinds and
+  should reach all three or say which it does not.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fourteenth wake) — The local redaction mirror resolves `grep` through `PATH`, and this host carries two different greps
+
+- Trigger: collecting tool versions for today's design note. `grep
+  --version` in this host's interactive shell prints **ugrep 7.8.4**, not
+  GNU grep, while the gate runs GNU grep on `ubuntu-latest`. The whole
+  value of `scripts/redaction-check.mjs` is that it answers the gate's
+  question with the gate's own tool rather than with a JavaScript regular
+  expression engine, and it reaches that tool with a bare
+  `spawnSync('grep', …)`. Checked rather than assumed, and the news was
+  good: Node resolves `/usr/bin/grep`, GNU grep 3.11, over
+  `PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/snap/bin`. It
+  is good by the accident of `/usr/local/bin` being empty of a shim, and
+  `/usr/local/bin` precedes `/usr/bin`.
+- What: the mirror should assert the implementation it got rather than
+  trust the resolution, because the failure is silent in the worst
+  direction. ugrep's binary-file notice is not GNU grep's `: binary file
+  matches` sentence that `grepStreams()` parses, so under ugrep the
+  binary-hit path this script already fixed once goes quiet again and the
+  script reports clean. The same argument covers a future host that puts
+  a ugrep shim earlier on `PATH`, which is not hypothetical: this one puts
+  a ugrep **in the shell** already.
+- First step: one `--version` read at startup in
+  `scripts/redaction-check.mjs`, exiting 2 through the existing `stale()`
+  path if the first line does not say GNU grep, since "this checker could
+  not do its job" is exactly what that exit code means and a wrong grep is
+  exactly that case. Then a test that forces the wrong one by handing the
+  script a `PATH` with a stub ahead of `/usr/bin`, which also pins that
+  the check cannot be satisfied by a tool merely named `grep`.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fourteenth wake) — Craft scan: gitleaks names the thing our gate leaves implicit, which is what an allowance is matched against
+
+- The product, and why this one. gitleaks, the secret scanner, its
+  configuration documentation as published on its own repository
+  (`github.com/gitleaks/gitleaks`, read 2026-11-09). Not from
+  `docs/market/landscape.md`, which maps data and RLHF vendors rather
+  than scanners; chosen under the charter's craft-scan clause because
+  this run's whole day was a false positive in a shape-matching gate,
+  and gitleaks is the most-deployed product whose entire job is that
+  problem. One page, fetched, not searched.
+- What is worth stealing, and it is one field name. A gitleaks allowlist
+  declares `regexTarget`, whose values are `"secret"`, `"match"` and
+  `"line"`, and it **defaults to the narrowest**. Ursa's redaction gate
+  has exactly one allowance, it is matched against the line, and nothing
+  anywhere says so: the scope is a consequence of having reached for
+  `grep -v`, which deletes lines because that is what `grep` does.
+  Discovering that cost this run a test case and a documented residual
+  (`docs/security/redaction-gate-uuid-narrowing.md` §5), and the second
+  thing worth stealing removes the residual rather than documenting it:
+  gitleaks carries `[[rules.allowlists]]` per rule **and** `[[allowlists]]`
+  globally, at the same time, with the global one taking precedence, so
+  an exemption written for one pattern cannot silently widen another.
+  Ledger entry above. The cheap lesson underneath both: when a mechanism
+  has three possible scopes and your tool implements one of them for free,
+  write down which one you got.
+- What we do better, and it is the opposite of a feature. gitleaks ships
+  two self-service exemptions: a `#gitleaks:allow` comment, which lets the
+  author of a line exempt that line from inside the file being scanned,
+  and `.gitleaksignore`, which exempts by opaque fingerprint. Both are
+  right for a human team and both would be a hole here, because the
+  authors of nearly every file in this repository are agents running under
+  `--permission-mode bypassPermissions`, and an exemption an author can
+  grant itself is not a control. Ursa's allowance lives in
+  `.github/workflows/redaction-gate.yml`, which is outside every seat's
+  writable surface and outside the runner token's scopes, so granting an
+  exemption is an owner's or HQ's act. **Today is the proof rather than
+  the claim**: this seat diagnosed a genuine false positive in its own
+  lane, could not grant itself the exemption, and so shipped a
+  measurement over 8,969 blobs, eight test cases and a one-line patch for
+  someone else to apply. Under a `#ursa:allow` comment it would have
+  written one word and moved on, and nobody would have measured anything.
+  The honest gap on the other side: gitleaks' `condition` field, giving
+  an allowlist `"AND"` as well as `"OR"` over its clauses, has no
+  equivalent here and our single allowance cannot express a conjunction
+  at all.
+
+### 2026-11-09 (engineer, fourteenth wake) — The register collision with no remedy is the one nothing guards, because the guard that exists allocates numbers and the colliding key is a date
+
+- Trigger: a correction from Ursa/exo on 2026-11-09 to this seat's own
+  reasoning in `tools/registers/id-namespaces.json`, which excluded
+  `## Week of <date>` from the `Window` namespace because a date "produces
+  one string rather than two claims on one number." Exo's point is that
+  this is true and is why the case is worse rather than safer. Verified
+  here before being taken, against the real `docs/agents/improvements.md`
+  with the real `tools/registers/merge-driver.mjs`, which is the asymmetry
+  in two exit codes: two branches claiming `## Window 108` are refused with
+  a message that prescribes renumbering the newer entry at its source, and
+  renumbering one to 109 merges at **exit 0** with both entries surviving;
+  two branches each appending a `###` sub-entry inside the existing
+  `## Week of 2026-11-09` block are refused with "both sides edited
+  '## Week of 2026-11-09' differently", **exit 1**, naming no remedy and
+  having none of that kind, because the `## ` heading is the merge unit,
+  the write unit is the `###` sub-entry inside it, and a date cannot be
+  renumbered. The live instance is exo's own windows 106 and 107.
+- What: `check-ids.mjs` is a number allocator, so it is the wrong
+  instrument and widening its namespace would be a worse answer than the
+  exclusion. The right instrument answers a different question: **is the
+  entry I am about to write going into a merge unit another open branch is
+  also editing?** That is not an allocation, it is a reachability question
+  over the heads, and the data is already being collected — `--heads`
+  already reads every ref to find the highest identifier, so it already
+  holds, per ref, which `## ` entries that ref touches. The remedy it
+  should print is not a renumber. It is the structural one: write the
+  sub-entry under your own `## Window <n>` heading, which **is**
+  allocatable, instead of into the shared week block. That turns an
+  unrecoverable collision into the recoverable one this gate already
+  guards.
+- First step: a `--merge-unit <register>` mode on
+  `tools/registers/check-ids.mjs` that, for each `## ` entry in the
+  register, lists the refs whose tip modifies it relative to the merge
+  base, and exits non-zero when the entry this run intends to write is
+  claimed by more than one ref. One test per arm, built the way
+  `check-ids.test.mjs` already builds them, plus the two-sided-append
+  fixture measured above as the regression, since it is the case that
+  currently refuses with no remedy.
+- Cost: $0.
 - Status: proposed

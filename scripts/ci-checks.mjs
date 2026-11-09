@@ -338,6 +338,73 @@ export const CHECKS = [
     passExit: [0],
   },
   {
+    id: 'prompt-slots',
+    scope: 'tooling',
+    title: 'Prompt slots (untrusted event text cannot step out of its fence)',
+    argv: () => ['node', 'tools/prompt-slots.mjs'],
+    // Registered 2026-11-09 by security run 13, closing F116. It was excused
+    // as red-on-main until today for a real reason: every finding it reports
+    // is in .github/workflows/, which no seat here may edit, and the tool had
+    // no exit code for that, so registering it meant either a permanent red
+    // or a green tick next to eleven open slots.
+    //
+    // It has one now. 2 is the owner's standing prompt-layer backlog, which
+    // is what `main` carries. 1 is an untrusted interpolation inside a
+    // `run:` block, which is shell injection rather than a prompt-layer
+    // finding, and there are none today, so that code is green now and fires
+    // on a regression a change introduces. 3 is an unreadable workflow
+    // directory, which is no verdict at all and so is not tolerated here.
+    passExit: [0, 2],
+  },
+  {
+    id: 'fetch-exec',
+    scope: 'tooling',
+    title: 'Fetch-and-execute census (every registry fetch is deliberate or declared)',
+    argv: () => ['node', 'tools/gates/fetch-exec.mjs'],
+    // Added 2026-11-09 by security run 13, generalising F113. That finding
+    // was a flag on one call site in THIS file, and the test that closed it
+    // asserts over this file's own CHECKS array, so it could see neither the
+    // second call site in tools/stack/integrate.sh (F122) nor the surface
+    // that actually matters, which is a charter sentence telling a future
+    // seat to write a call site. HQ's exo-centralizer seat measured that
+    // class upstream and its note is why the gate reads instructions as well
+    // as code.
+    //
+    // 2 is tolerated on exactly the ground `ledger-contract` and
+    // `register-ids` tolerate it: the one finding left on `main` is in
+    // prompts/, which no seat here may edit, and a job that goes red on a
+    // line no branch can turn green is one every seat learns to ignore. The
+    // gate separates that from a seat-repairable finding, which is 1, so
+    // tolerating 2 does not tolerate a new one. tools/prompt-slots.mjs is
+    // registered red-on-main for lacking this exact distinction.
+    passExit: [0, 2],
+  },
+  {
+    id: 'excuse-control',
+    scope: 'tooling',
+    title: 'Excused gates: the reason is executed, not read',
+    // The layer above `gate-registry`. That gate requires every unreached
+    // candidate to carry a reason under one of ten kinds; this one EXECUTES
+    // the reason for the largest kind. `needs-token` claims the file answers
+    // nothing without a credential, so the control is to run it with the
+    // credential removed and require that it does not report clean.
+    //
+    // Two of the fourteen were false when this was added, in the two ways a
+    // claim of that shape can be false: `tools/board/bypass.mjs --audit`
+    // exited 0 over a window that answered 401, and
+    // `tools/stack/repair-pending.mjs` exited 1, its own code for a finding
+    // about the queue, from an uncaught `gh` failure. Both are fixed in the
+    // same pull request, so this arrives green rather than as a red gate
+    // every seat learns to ignore.
+    //
+    // Runs here and not on a schedule because its subject is this tree and
+    // its environment is the one a pull request gate actually gets: it
+    // REMOVES the credentials, so it needs none, and on a runner with no
+    // network every row still refuses.
+    argv: () => ['node', 'tools/gates/excuse-control.mjs', '--gate'],
+    passExit: [0],
+  },
+  {
     id: 'ledger-attributes',
     scope: 'tooling',
     title: 'Merge attribute declarations',
