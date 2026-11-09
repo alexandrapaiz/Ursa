@@ -258,10 +258,36 @@ disagree with the call and not merely with the diff.
 
 ## The two sweeps
 
-**Secrets.** No new credential-shaped value in the working tree. The
-credential scan, the secret-print sweep over the tree, the env-dump spellings
-check and the vendored 74-test checker suite all pass on this branch, as does
-the exemptions check. Nothing to rotate, and nothing printed here.
+**Secrets, working tree.** No new credential-shaped value. The credential scan,
+the secret-print sweep over the tree, the env-dump spellings check and the
+vendored 74-test checker suite all pass on this branch, as does the exemptions
+check.
+
+**Secrets, full history.** Run, which the charter asks for and which the
+per-change gates do not cover: `node tools/secret-scan.mjs --history`, every
+blob in every ref. Exit 0. Every hit is accounted for by a cited entry in
+`tools/secret-scan.baseline.json`, each pinned to one blob id, so any other
+byte sequence in the same file would be a new hit rather than an accepted one.
+The single accepted hit is AWS's own published documentation sample key id,
+hand-authored into a fixture for this scanner's verdict formatter, introduced
+by `88bb0bf3` and replaced in the very next commit `a8a8c866` with a sentinel
+that is deliberately not credential-shaped. **Nothing to rotate. No value is
+printed here or anywhere in this run's artifacts.**
+
+**One measurement about the gate list itself, taken by accident.** While this
+run's full gate list was executing, a second `tooling-suites` sweep was running
+concurrently from `/tmp/epito-ursa-exo-lpEJjF`, Ursa's exo seat's checkout,
+through `/tmp/runsuite.sh`. Two 86-file suites, two checkouts, one shared
+`/tmp`, at once. That is the `tmp-is-shared-between-seats` host fact arriving in
+a place nobody had looked for it. It is raised here because run 15's ledger
+entry records a suite that went red inside the full gate list and green twice
+on its own, and cross-seat contention in a shared temporary directory is a
+candidate mechanism for exactly that shape. It is a candidate and not a
+diagnosis: that instance has a known cause already, deploy-driven drift in a
+transcribed constant, which Ursa's engineer seat identified. The claim here is
+narrower and still worth writing down, which is that a seat timing or grading
+its own suite on this host is not measuring its own tree alone, and nothing in
+the suite's output says so.
 
 **The public/private boundary.** The redaction gate is clean on this branch,
 three patterns read from the workflow. The two reds this run was woken for were
