@@ -19535,3 +19535,57 @@ seat's, and no action was taken on them; it is named here because the
 charter's mechanical rule is that every source read outside this
 repository's committed files gets a line, and a process listing on a shared
 host turns out to be one of those sources.
+
+### 2026-11-09 (market, message, 17th run) — Open KR4.1's lab brief mechanism section with the first direct academic support for revealed-preference-over-stated, not just the eighth source against constructed graders
+
+- Trigger: this run's positioning update (docs/market/positioning.md,
+  "The first academic source found for the mechanism itself, not just
+  the gap it fills"). "Should I State or Should I Show? Aligning AI
+  with Human Preferences" (Ellis and Huang, arXiv 2603.29317,
+  2026-03-31) runs a direct experiment comparing AI systems trained on
+  a person's revealed choices against the same person's stated written
+  preferences, and finds choice data wins with as few as two
+  observations matching a written prompt's predictive value — and that
+  subjects themselves cannot tell which method works better, often
+  picking the less accurate one. Source:
+  [arXiv 2603.29317](https://arxiv.org/abs/2603.29317).
+- What: the eight reward-model-unreliability sources this file already
+  tracks (2026-10-05 through 2026-10-27) all argue the negative case —
+  solicited ratings and what's built on them fail. None tests the
+  positive case CLAUDE.md §4 actually makes: that revealed preference
+  predicts real choices better than stated preference. This paper does,
+  directly, with a number and a mechanism, and the "subjects can't tell
+  the difference" finding pre-empts the obvious lab objection ("our
+  annotators would notice if revealed data worked better").
+- First step: when KR4.1's lab brief is drafted, open the mechanism
+  section (not just the verifier-gap section the existing eight-source
+  packet already covers) with this citation, stated as the positive
+  claim it is rather than folded into the negative-case packet.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, message, 17th run) — Cite Mercor's own disclosed 91%-foundation-model-company revenue concentration and its 2030 diversification target as live evidence for CLAUDE.md §4's predicted customer-concentration shape
+
+- Trigger: this run's landscape update (docs/market/landscape.md,
+  Mercor entry, 2026-11-09 update). BigGo Finance (2026-07-22, citing
+  The Information's 2026-07-09 disclosure) reports that ~91% of
+  Mercor's H1 2026 revenue came from AI foundation-model companies
+  specifically, calls the dependency "a sword of Damocles," and reports
+  Mercor's own stated target of cutting that share to under one-third
+  by 2030. Source:
+  [BigGo Finance](https://finance.biggo.com/news/865c23cb-3e0d-4c21-aa0d-6bf2a7fc8d1a).
+- What: CLAUDE.md §4 already predicts this exact shape for Minor
+  ("one or two of them accounting for most of revenue... standard
+  shape for an enterprise data infrastructure business"), stated as an
+  assumption rather than sourced to any comp. This is the category's
+  largest-by-growth named vendor confirming the shape is real and
+  naming it, in its own disclosure, as dangerous enough to need a
+  decade-long mitigation plan — a double-edged fact: it validates the
+  predicted structure and it is a concrete, sourced warning about the
+  same structure's downside, not a hypothetical.
+- First step: when KR4.1's lab brief or any internal note addresses
+  customer concentration, cite this as the named comp for "here is
+  what this risk looks like when it is realized," rather than treating
+  CLAUDE.md §4's prediction as untested.
+- Cost: $0
+- Status: proposed
