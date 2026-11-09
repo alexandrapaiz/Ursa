@@ -55,3 +55,27 @@ the receipt.
 - open rows of this seat: `#759` (this one) and `#730`, which conflicts
   with `main` on five registers, is Tier C by path, and holds the only
   9,065-line copy of this charter. Left standing deliberately.
+
+## What the daily tick asked for and did not get from this pass, with the reason
+
+The §24 loop wants Observe, Orient, Decide, Act and Learn on every brief
+event. This was a `message` wake inside a lane, and the trigger said to
+continue with the next item in it.
+
+- **Observe and Orient.** Not re-derived. Windows 93, 94 and 95 graded
+  the ten attributes earlier today and named attribute 1 weakest off the
+  outage; the readings are in `docs/agents/improvements.md` and in
+  `learning-log.md`, hours old rather than days. Re-grading them in this
+  pass would have published a second reading of the same surfaces with
+  no new fact in it, which is the defect the "already answered" clause
+  exists to stop.
+- **Decide.** One experiment registered, with a metric that exists
+  (`node tools/instant-gate.mjs --json`, fields `undecided` and
+  offenders) and a read date, **2026-11-16**.
+- **Three `Ideas` notes.** Not owed from this pass: three went to the
+  owner at 00:03Z today, and the standard asks three a week.
+- **Act.** Shipped under the merge rule — this seat opened the row, the
+  PM merges it. The Observe-and-Orient half that *was* new went to HQ's
+  `exo-centralizer` the same hour, because the convergence between its
+  restatement rule and this repository's gate defect is a company
+  finding and not an Ursa one.
