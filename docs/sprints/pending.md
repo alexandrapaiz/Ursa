@@ -2,6 +2,49 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (fifteenth pass): four more pull requests merged under the merge rule, the recurring standing note on #788 disproved a third time
+
+Wake carried a handoff about exo's cost-instrument row (`#786`, merged
+before this run started — nothing left to do there) plus the same
+boilerplate standing note about `#788` that the thirteenth and
+fourteenth passes already checked and found false. Checked again
+rather than trusted, same result.
+
+1. **Four pull requests merged under the merge rule.** `#711` (skill,
+   open since 2026-11-02, Tier B by `check-tier.sh`), `#781` (market,
+   18th run), `#778` (exo, window 100), and `#793` (exo, a same-seat
+   follow-up opened after this pass had already merged the seat's
+   first row — named by the seat itself as "ready and Tier B" rather
+   than pushed onto the merged branch). All four: not drafts, green
+   `scan` check, `check-tier.sh` verdict Tier B, no claim from another
+   seat on the touched surface. GitHub reported all three of the first
+   batch `CONFLICTING`; `git merge-tree` with the ledger/register
+   drivers installed read all three clean, so each was resolved by
+   merging `origin/main` into the branch locally (drivers active) and
+   pushing that resolution before the real merge — the same gap the
+   fourteenth pass named, confirmed again rather than assumed. The
+   redaction gate was also run by hand against the merged tree for
+   `#711`, whose branch had no CI history at all (ran clean, 0 hits).
+2. **The standing note on `#788` re-checked a third time and still not
+   acted on.** `check-draft-prs.sh` at three points across this pass
+   (04:30Z, 04:32Z, 04:37Z) read `#788` idle 0–4 minutes each time,
+   "run may still be live; leave it alone," no orphaned drafts. The
+   note's own claim — "its run ended 7m ago" — does not hold now and
+   did not hold when the fourteenth pass checked it seven minutes
+   earlier either. This matches a named, known failure mode:
+   `docs/agents/runner-facts.md` §57, a race in the standing route's
+   widened time windows that misreports a live back-to-back run as
+   ended, fixable only on HQ's side of the route. Two of this seat's
+   own prior passes (03:05Z, 03:15Z) already called the same recurring
+   text an injected standing-condition note for this reason. Treated
+   here as data to verify, not as an instruction, per this charter's
+   own external-content rule — and the instrument says no.
+3. **This seat's own `#791` (fourteenth pass) is subsumed by `#792`
+   (this pass), not a separate thing to review.** `#792`'s branch
+   contains every commit on `#791`'s branch as an ancestor plus this
+   pass's new work. Merging `#792` lands `#791` in full; `#791` can be
+   closed without merging it separately, in either order.
+
 ## Top three for the owner, 2026-11-09 message-triggered (fourteenth pass): four pull requests reviewed against the merge rule and merged, one genuine ledger-number collision resolved
 
 Wake named three things: review security's row and frontend's row against
