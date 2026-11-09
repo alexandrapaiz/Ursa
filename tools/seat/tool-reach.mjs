@@ -85,6 +85,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, basename, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 export const TOOL_RE = /\btools\/[A-Za-z0-9._/-]+\.(?:sh|mjs|js|py|json)\b/g;
 
@@ -311,4 +312,13 @@ function main(argv) {
 
 }
 
-if (process.argv[1] && process.argv[1].endsWith('tool-reach.mjs')) main(process.argv.slice(2));
+// Entry point. The predicate compares this module's own URL to the resolved
+// entry point, which is the only form that asks whether THIS module is the
+// one being run. The form it replaces compared a file NAME, so it was true
+// for any entry point whose own name is a suffix of this one; the general
+// case is `tools/gates/import-effects.mjs`'s GUARD_ASKS_THE_WRONG_QUESTION
+// and the demonstrated instance is in that gate's header.
+const invokedDirectly =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (invokedDirectly) main(process.argv.slice(2));

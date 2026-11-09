@@ -58,6 +58,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 
 const git = (dir, args, opts = {}) =>
@@ -355,7 +356,16 @@ function main(argv) {
   return result.findings.some((f) => f.className === 'needs-human') ? 1 : 0;
 }
 
-if (process.argv[1] && process.argv[1].endsWith('pairwise.mjs')) {
+// Entry point. The predicate compares this module's own URL to the resolved
+// entry point, which is the only form that asks whether THIS module is the
+// one being run. The form it replaces compared a file NAME, so it was true
+// for any entry point whose own name is a suffix of this one; the general
+// case is `tools/gates/import-effects.mjs`'s GUARD_ASKS_THE_WRONG_QUESTION
+// and the demonstrated instance is in that gate's header.
+const invokedDirectly =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (invokedDirectly) {
   try {
     process.exit(main(process.argv.slice(2)));
   } catch (err) {

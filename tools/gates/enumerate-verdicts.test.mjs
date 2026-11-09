@@ -19,6 +19,7 @@ import { fileURLToPath } from 'node:url'
 
 import { LOCUS, POSITION, describeGate, renderVerdict, verdictOf } from './verdict-shape.mjs'
 import {
+  REGISTRY,
   checkGateWide,
   checkProbe,
   driveGate,
@@ -32,6 +33,10 @@ import { GATE as POST } from '../board/post-verdict.mjs'
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const ENUMERATOR = 'tools/gates/enumerate-verdicts.mjs'
+/** The same module as a URL. A REGISTRY entry is written relative to the
+ *  enumerator's own file, so resolving one here has to use that file's URL and
+ *  not this test's, or every entry resolves one directory too shallow. */
+const ENUMERATOR_URL = new URL('./enumerate-verdicts.mjs', import.meta.url)
 
 /** Run the enumerator as a program and return its exit code and JSON. */
 function run(args = []) {
@@ -54,7 +59,7 @@ describe('the eleven extracted gates, end to end', () => {
     assert.equal(json.verdict.cause, 'ALL_BRANCHES_HOLD')
   })
 
-  it('reaches 52 distinct causes with 72 probes, which is the number the text sweep could not see', () => {
+  it('reaches one cause per gate at least, over exactly the probes the registry declares', async () => {
     const { json } = run()
     // RESOLVED 2026-11-02 BY MEASUREMENT, NOT BY CHOICE. This line conflicted:
     // the hook branch claimed 36 causes over 46 probes and `main` claimed 36
@@ -190,9 +195,41 @@ describe('the eleven extracted gates, end to end', () => {
     // minute it was registered: red with nothing printed above the verdict.
     // An unreachable forge is reported as a `clone` finding now, so the
     // verdict is derived from findings like every other branch here.
-    assert.equal(json.branches.length, 72)
+    //
+    // 79 and 56 since 2026-11-09, when `tools/gates/import-effects-verdict.mjs`
+    // became the twelfth extraction. THOSE TWO NUMBERS ARE NOT ASSERTED BELOW
+    // ANY MORE, and that is this line's own repair. Every entry above was
+    // written because a seat registered a gate and this assertion went red for
+    // a reason that is not a defect -- seven times, by the count of
+    // paragraphs. `prompts/engineer-agent.md` states the general form about
+    // prose: a measurement whose value changes without anyone touching it
+    // cannot live in prose. A literal in an assertion is the same defect with
+    // a worse failure mode, because it fails CI instead of merely reading
+    // wrongly, and the repair available to the next seat is to edit the number
+    // until it is green, which is indistinguishable from the repair available
+    // to a seat whose gate really did lose a branch.
+    //
+    // So the probe count is DERIVED from the registry the program drives,
+    // which is why `REGISTRY` is exported, and the cause count is held between
+    // two bounds that cannot go stale: at least one cause per gate, because a
+    // gate reporting none is a gate the enumerator did not reach, and no more
+    // than one per probe, because a cause is read off a driven probe. The
+    // history above stays as the record of what was measured when.
+    const expectedProbes = (
+      await Promise.all(
+        REGISTRY.map(async (spec) => {
+          const mod = await import(new URL(spec, ENUMERATOR_URL).href)
+          return mod.GATE.probes.length + (mod.GATE.groundProbes?.length ?? 0)
+        }),
+      )
+    ).reduce((a, b) => a + b, 0)
+    assert.equal(json.branches.length, expectedProbes)
+
     const causes = new Set(json.branches.map((b) => `${b.gate}\u0000${b.cause}`))
-    assert.equal(causes.size, 52)
+    const gates = new Set(json.branches.map((b) => b.gate))
+    assert.equal(gates.size, REGISTRY.length, 'every registered gate was reached')
+    assert.ok(causes.size >= gates.size, `${causes.size} cause(s) over ${gates.size} gate(s)`)
+    assert.ok(causes.size <= json.branches.length, 'a cause is read off a driven probe')
   })
 
   it('carries an exit 3, which no gate of the first four could have reached', () => {

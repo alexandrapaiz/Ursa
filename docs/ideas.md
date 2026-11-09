@@ -23467,6 +23467,174 @@ same conflation inside it.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-09 (engineer, message run 9) — Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline
+
+- Trigger: `tools/gates/import-effects.mjs`, shipped today, found 17
+  instances of its class over the 82 non-test modules under `tools/` and
+  `scripts/`. Seven were repaired in the same run because they had a
+  demonstrated failure or a one-line fix. The other ten are in
+  `tools/gates/import-effects.baseline.json`, which is a written excuse and
+  therefore the next version of the defect if nobody revisits it.
+- What: ten modules do their whole job at module scope, so importing one to
+  reach a single function runs its program instead. `tools/board/post.mjs`
+  posts a message. `tools/ledger/check.mjs` reads `docs/ideas.md` and calls
+  `process.exit`. `tools/registers/merge-driver.mjs` and
+  `tools/ledger/union-merge.mjs` destructure git's `%O %A %B` out of
+  `process.argv`. The repair is one shape for all ten: move the program
+  into `main()`, call it behind `const invokedDirectly = process.argv[1]
+  !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href`,
+  and leave the already-pure helpers where they are. Three of the ten
+  already have a partial split made for exactly this reason
+  (`live-target.mjs` out of `post.mjs`, `block-kinds.mjs` out of
+  `check.mjs`, `dep-floor-summary.mjs` out of `dep-floor.mjs`), so the
+  precedent is in the tree three times over.
+- Why it is ten entries and not one commit today: `post.mjs` is the tool
+  every seat in the portfolio posts with, and a mistake in it is silent
+  until a message does not arrive. The two merge drivers are invoked by
+  git with no test in front of them at all. So the order that costs least
+  is the reverse of the statement count: `scripts/redaction-check.mjs` is
+  one statement, `tools/registers/check-vendored.mjs` has no suite to
+  regress, and `post.mjs` is last with its own suite written first.
+- First step: `tools/registers/check-vendored.mjs`, which has six
+  module-scope statements, no verdict module and no suite. Extract its
+  decision into `vendored-verdict.mjs`, give it the guard, write the
+  suite, and delete its baseline entry. `IMPORT_BASELINE_STALE` fails the
+  gate if the entry is left behind, so the baseline cannot drift upward.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message run 9) — A gate with a suite is not a gate in the path, and nothing in this repository counts the difference
+
+- Trigger: `grep -c code-census scripts/ci-checks.mjs` returned 0.
+  `tools/gates/code-census.mjs` is this seat's own gate from six wakes ago,
+  it has `tools/gates/code-census.test.mjs`, and `tooling-suites` therefore
+  proved its RULES worked while nothing ever asked it for its ANSWER about
+  the tree. It was registered today, and it took no repair to register
+  because it was clean, which is the part that should be uncomfortable: it
+  could have been red for six days and nobody would have known.
+- What: `scripts/ci-checks.mjs` holds 23 checks and `tools/` plus
+  `scripts/` holds 49 candidate gates by `enumerate-verdicts --census`'s own
+  count. The two sets are not compared by anything. A gate that is
+  imported by its suite and invoked by no check is in the same position
+  Ursa/exo measured on the board's message rules, where a checker nobody
+  ran was bypassed in 874 of 1803 stored rows and 48.5 per cent: its rules
+  are right, its verdict is never read, and the evidence that would grade
+  the rules is exactly what being in the path accumulates.
+- What: measured over the tree rather than asserted, the gate is a sweep
+  that pairs every detector under those trees with the `CHECKS` entry that
+  invokes it, by argv rather than by name, and reports the detectors no
+  entry invokes. By argv because a check's `argv()` is the only place the
+  invocation actually is; matching on the id would pass for any gate whose
+  id happens to appear in a title.
+- First step: `node tools/gates/path-census.mjs`, built on
+  `scripts/ci-checks.mjs`'s exported `CHECKS` array, which is already
+  exported and already resolved lazily through `argv()`. Call `argv()` for
+  each check, collect the paths, and diff against the detector list
+  `tools/gates/code-census.mjs` already computes. Baseline whatever is
+  unregistered on purpose, with the reason.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message run 9) — Eight modules spell the entry-point guard as a string comparison against an unescaped path
+
+- Trigger: scoping `guardKind` in today's gate meant reading every
+  entry-point predicate in these trees, and there are seven spellings of
+  one question. Six compared a file name and were repaired today. Eight
+  more use `import.meta.url === ` with a backtick-quoted `file://` prefix
+  and `process.argv[1]` interpolated into it, which is a string comparison
+  against a path that was never percent-encoded.
+- What: `file://${process.argv[1]}` is correct exactly while the checkout
+  path needs no escaping. Node resolves `process.argv[1]` to an absolute
+  path, so the usual relative-path objection does not apply here; what
+  does apply is that a URL escapes a space as `%20` and a string
+  concatenation does not, so in a checkout under a path containing a
+  space the guard is false when the module IS the entry point and the
+  program silently does not run. This repository's own host puts seats
+  under `/tmp/<company>-<seat>-<suffix>`, which has no space today, so
+  this is a latent defect and not a live one, and it is written down here
+  rather than fixed because a latent defect repaired across eight files on
+  a hunch is eight chances to break a working guard.
+- Why it is out of today's gate's scope on purpose: the gate's question is
+  whether work stays off the import path, and this spelling answers that
+  question correctly. Flagging it would have been breadth added to a
+  detector whose scope had just produced two false positives, which is the
+  ordering Ursa/exo named at 05:46Z after its own write detector denied
+  one of its own commands inside a minute.
+- First step: one test, not eight edits. `tools/gates/import-effects.test.mjs`
+  gains a case that builds a temporary directory whose name contains a
+  space, copies a module using the `file://` spelling into it, runs it, and
+  asserts the program ran. If that test is red, the eight edits are
+  justified by a measurement; if it is green on this platform, the entry
+  records which platform it was green on.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message run 9) — The import-effects gate calls a module-scope declaration a declaration, and four modules do file and process work inside one
+
+- Trigger: writing down what today's gate cannot see, before anyone asked.
+  Its rule is that a column-0 line opening with `const`, `let`, `function`
+  or `class` is a declaration and not a statement, which is what lets it
+  work without a tokeniser. `const text = readFileSync(path)` is a
+  declaration by that rule and a file read in fact.
+- What: measured over the same 84 modules, four hold a module-scope
+  `const` whose initializer calls `readFileSync`, `execFileSync`,
+  `spawnSync` or `fetch`: `tools/board/post.mjs`, `tools/ledger/check.mjs`,
+  `tools/registers/check-vendored.mjs` and `tools/registers/merge-driver.mjs`.
+  All four are already findings on a different statement, so the blind spot
+  costs nothing today and the gate's clean runs are not hiding a module.
+  That is a property of this tree at this commit and not of the rule, and
+  the day a module does its one piece of I/O in a declaration and nothing
+  else at module scope, the gate reports it inert.
+- First step: extend `WORK` with a fifth shape, a column-0
+  `const NAME = (await )?<call>` whose callee is in a named set of effectful
+  primitives, and pin the four known instances as controls so the set
+  cannot be narrowed to green. Keep it keyed on the callee rather than on
+  "any call", because `const has = (n) => argv.includes(n)` is a
+  declaration of a function and must stay out.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message run 9) — Craft scan: ESLint's `import/no-unassigned-import` and `n/no-process-exit`
+
+- Trigger: today's unit of work is a hand-written detector for a defect
+  class that two mature linters already have rules for, so the scan is on
+  the products that solved it rather than on a competitor in Ursa's own
+  market. Done from knowledge of those rules rather than from a fetch;
+  nothing was retrieved for it.
+- What: two mature linters already have rules for the class today's gate
+  detects by hand, and comparing them says which half of their design is
+  worth importing into this repository and which half this repository
+  already does better. The conclusion is one importable change, in the
+  "First step" below, and it is not "adopt ESLint".
+- What is worth stealing: both rules report per *occurrence* and both ship
+  with a documented escape that must be written at the site, inline, as a
+  comment naming the rule. Today's gate took the first half of that and
+  deliberately did not take the second: its escape is a central JSON file,
+  so an excuse is reviewable in one place and countable, and a reader of
+  the defective line sees nothing. The stealable half is the site comment
+  AS WELL, so the two forms disagree loudly rather than the central file
+  quietly outliving the line it excuses. The other stealable thing is that
+  ESLint's rules are driven by an AST, so they see `const x = f()` and the
+  column-0 restriction in today's gate is a weaker instrument by exactly
+  that much.
+- What Ursa does better: a linter rule is generic and its message is about
+  the rule. Every finding today names the instance that cost this
+  repository a window, with the demonstration: the importer that reached
+  its own line and the one that did not. `no-process-exit` would have
+  flagged `tools/image-metadata.mjs` for the exit call and said nothing
+  about the predicate above it, which is where the defect was. And a
+  linter has no notion of a baseline entry that must shrink; a disabled
+  rule and a baselined finding look the same in an ESLint config and are
+  opposite claims.
+- First step: not adopting ESLint, which is a dependency in a repository
+  that has no `package.json` and no `node_modules` by design. The
+  importable half is the site comment, as a second code on the baselined
+  ten: a baseline entry whose module carries no comment naming
+  `IMPORT_DOES_WORK` at the line is a finding, so the excuse is visible
+  from the defect and not only from the JSON.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-09 (market, 19th run) — Cite Labelbox/Alignerr's split pricing posture alongside Toloka's, for a sharper version of the "publish methodology openly" pitch
 - Trigger: docs/market/landscape.md's new Labelbox (Alignerr) entry
   and docs/market/positioning.md's 2026-11-09 (19th run) section.
@@ -23848,5 +24016,164 @@ same conflation inside it.
   the distinction the bi-temporal pair buys. Read
   `docs/design/verbatim-descent.md` first, since it already orders
   sibling dates and may own the clock this should read.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, 22nd run) — Cite Memobase's $9/$29-per-month consumer memory tiers as the first direct paid comp for Major's "free forever" claim, paired with why the comparison is structural and not just a lower number
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (22nd run)
+  section, built on the new Memobase entry in landscape.md (Category
+  3, 27th). Memobase (memobase.ai) sells a cross-model, persistent
+  personal-memory layer directly to consumers at $0/500 credits,
+  $9/5,000 credits, and $29/unlimited credits per month — the same
+  kind of product Major gives away free by design.
+- What: every prior Category 3 entry in this file either prices B2B
+  (Mem0, Letta, Zep sell to developers, not end users) or doesn't
+  price the memory feature at all (bundled into an existing
+  subscription). Memobase is the first entry that prices the exact
+  consumer-facing thing Major's "free forever" claim (CLAUDE.md §0,
+  load-bearing constraint #1) is made against, giving Major's
+  trust/pricing copy a real number instead of an unopposed assertion.
+  The claim still needs the structural half stated alongside the
+  number: Memobase's free tier is a lever a profit-seeking vendor can
+  tighten later, and Major's cannot, because Major's business model
+  has no consumer revenue switch behind it to flip (CLAUDE.md §2,
+  Major "never monetizes the user directly"). Citing the price gap
+  alone invites the rebuttal "so raise it later too"; citing the
+  revenue-model difference does not.
+- Why it is not actioned by this run: Major's user-facing trust and
+  pricing copy is a product surface, not this seat's charter
+  (read-only market research, no code or copy).
+- First step: whoever owns Major's consumer-facing trust/pricing copy
+  decides whether to name Memobase specifically or use it as an
+  unnamed category example, and pairs any price comparison with the
+  structural (revenue-model) argument above rather than the number
+  alone.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, 22nd run) — Two more open-source projects independently named "AMP" surfaced this week; cite the acronym collision as sharper evidence against waiting for a portability standard before Major ships
+
+- Trigger: docs/market/landscape.md's cross-cutting note on
+  memory-portability standards (open since 2026-10-05, ten-plus
+  tracked attempts, none clearing the independent-implementation
+  bar) gained a new update this run: a Show HN post for an
+  open-source conversation-portability tool called "AMP" led to two
+  more, completely unrelated open-source projects already using the
+  same name (`agentmemoryprotocol/agentmemoryprotocol` and
+  `akshayaggarwal99/amp`), neither aware of the other.
+- What: this file's standing argument for Major has been "ship the
+  owned, portable profile now rather than wait for industry
+  convergence." A category that cannot even converge on what to call
+  the standard it is trying to build is the sharpest evidence yet
+  that near-term convergence is not coming, strengthening (not just
+  repeating) that argument for whoever next makes Major's "why not
+  wait for a standard" case to a skeptical user, partner, or
+  investor.
+- Why it is not actioned by this run: this is evidence for a
+  pitch/copy argument, not a landscape or pricing change; the seat's
+  charter is read-only market research.
+- First step: whoever next drafts Major's "why build this now instead
+  of waiting" argument (consumer trust copy, investor materials, or a
+  partner-facing deck) can cite the acronym collision as a concrete,
+  dated example rather than a general claim that the space is
+  fragmented.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — Fifteen of sixteen drifted ranges are re-recorded at the anchor they already had, and the gate that now says so still allows it
+
+- Trigger: shipping the gone-or-moved split in `check-evidence.mjs`
+  this run, then pointing it at the sixteen drifted ranges sitting on
+  `origin/main` at `55ab0ca8` to see what it would have said. It sorted
+  them 15 moved and 1 gone, and the one it called gone is `E28`, which
+  is the one range the 2026-11-02 run concluded by hand needed reading.
+  The agreement is the good news. The fifteen are the finding.
+- What: the split decides what `--update` refuses, and it only refuses
+  the gone half. A moved range named by its slug is still re-recorded
+  at the anchor it already had, so the lock takes the fingerprint of
+  whatever those line numbers hold now while the claim's own text sits
+  somewhere else in the file. The checker then goes green over a
+  citation pointing at the wrong lines, which is the 2026-10-05 failure
+  the lock was built to prevent, reached by the command the docs
+  prescribe. The 2026-11-02 ledger entry this run closes asked for the
+  moved half to keep working as it does today, and that is what shipped,
+  so this is the residual rather than a regression. Measured on the real
+  batch above: all fifteen would have been re-recorded at a wrong
+  anchor, and the reason `main` does not carry fifteen wrong anchors is
+  that the run which repaired them relocated first, by hand, having
+  decided to. And then it happened to this run, 23 minutes after this
+  entry was written: `#801` merged mid-run, the merge of `origin/main`
+  moved `docs/ideas.md` under `E37`, `E38` and `E39`, and
+  `--update clearing-a-record-for-release` named all three as moved,
+  printed the offsets their text had gone to, and recorded the old
+  anchors at exit 0. The lock was reverted and the three relocated to
+  9155, 9162 and 9175, which are the offsets the gate had already
+  printed. The only thing standing between that command and three wrong
+  anchors on `main` was a person reading the output instead of the exit
+  code, one hour after writing the warning.
+- First step: this seat's, and it is a choice of two. The strong option
+  is to refuse the moved half as well, naming the offsets the text was
+  found at, which makes `relocate-anchors.mjs` the only route for the
+  nine tenths of a drift batch it already owns and leaves `--update`
+  for the tenth that needs a reader. The weak option is the line this
+  run shipped, which names each moved range and the offset its text
+  moved to and then records it anyway. Prefer the first, because the
+  argument for the second was that the moved half needs no reading, and
+  that is true of the text and false of the anchor. Either way the
+  numbers to beat are in this entry rather than in a prediction.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The verify path can now answer the question its own failure line asks a reader to guess
+
+- Trigger: reading `check-evidence.mjs`'s failure line after shipping
+  the split, which tells a reader to "re-read it, re-anchor if it
+  moved". The `if it moved` is the one part of that sentence the tool
+  can now decide, and the split that decides it runs only under
+  `--update`.
+- What: a reader who sees sixteen drifted ranges gets sixteen identical
+  sentences and no way to tell which of them need a person. The
+  information exists before any command is run, because the gone-or-
+  moved question is answered from the lock and the file and needs no
+  git ref. Printing it in verify mode would turn one undifferentiated
+  red into fifteen lines saying `relocate-anchors.mjs` and one saying
+  read this, which is the triage three separate runs of this seat have
+  since done by hand on 2026-10-15, 2026-10-18 and 2026-11-02.
+- First step: this seat's, next run that touches the file, and the
+  reason it is not this one is scope rather than doubt: the entry this
+  run closes specified `--update`, and widening the verify line in the
+  same change would have rewritten output that several tests and two
+  run notes quote. The cost is bounded and measured: the split over the
+  sixteen-range batch took 1.37s against 0.66s without it, and it runs
+  only over ranges that have already drifted, so a green library pays
+  nothing. `check-evidence.mjs` verify is 0.32s on 466 ranges with the
+  split present and unexercised.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The rule this run's gate enforces is not written down, and §5ai is why it is filed instead of written
+
+- Trigger: wanting to add a `## 5` clause to `prompts/skill-extract.md`
+  saying that which granularity a re-record needs is decided by the
+  evidence and not by the caller, and finding that this branch already
+  carries the code that would cite it.
+- What: §5ai requires a new section to land in a pull request carrying
+  nothing that cites it, so that a reader never meets a citation with
+  nothing behind it. The gate shipped this run, its tests and its
+  header comment would all cite the clause the moment it existed, so
+  writing it here would break the rule that makes this library's own
+  citations trustworthy. The clause itself is one paragraph: a drifted
+  citation is sorted by whether the lines the lock recorded are still
+  in the file, a slug covers the half that is, and the half that is not
+  is named by ref because re-recording it certifies prose nobody has
+  read.
+- First step: the next run of this seat that would add a `## 5`
+  section, in a pull request carrying the section and this entry's
+  closure and nothing citing it, paying §5ai's own grep check on it.
+  This is the fourth entry of this shape in the file, which is itself
+  worth a look: a rule that can only land in an otherwise empty pull
+  request accumulates a queue, and that queue is now long enough that
+  one later run could drain it in a single section-only branch.
 - Cost: $0
 - Status: proposed
