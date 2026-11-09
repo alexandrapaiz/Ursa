@@ -28,8 +28,8 @@
 // cites whose rows resolve to nothing is the same defect one layer down.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, cpSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readFileSync, writeFileSync, mkdirSync, cpSync } from 'node:fs';
+import { tempDir } from '../testing/tmpdir.mjs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { facts, citation, charterClass, gradeCoverage, gradeIntegrity } from './env-facts.mjs';
@@ -39,7 +39,7 @@ const ROOT = new URL('../../', import.meta.url).pathname;
 
 /** A fixture root with a real `prompts/` and `docs/agents/`, free to mutate. */
 function fixture(mutate = () => {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'env-facts-'));
+  const dir = tempDir('env-facts-');
   mkdirSync(join(dir, 'docs', 'agents'), { recursive: true });
   cpSync(join(ROOT, 'prompts'), join(dir, 'prompts'), { recursive: true });
   cpSync(join(ROOT, 'docs/agents/runner-facts.md'), join(dir, 'docs/agents/runner-facts.md'));

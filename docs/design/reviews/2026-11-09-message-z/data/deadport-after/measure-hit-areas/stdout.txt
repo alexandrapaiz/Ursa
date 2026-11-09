@@ -1,0 +1,8 @@
+
+NOT MEASURED: 3 of 3 page loads did not reach their subject, so this run makes no claim about them.
+  / -> COULD NOT LOAD: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4599/
+  / -> COULD NOT LOAD: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4599/
+  / -> COULD NOT LOAD: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4599/
+
+no claim about hit areas: the pages above were not reached.
+

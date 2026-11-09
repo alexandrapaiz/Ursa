@@ -1,8 +1,8 @@
 {
   "what": "Test files that make a temporary directory under /tmp and contain no removal call of any kind, as measured on 2026-11-09. tools/testing/tmpdir-leak.mjs exits 1 on any test file that leaks and is not listed here, and exits 1 on any entry here that has outlived its finding, so this file can only shrink.",
-  "why_this_file_is_not_a_permanent_excuse": "These 35 are written down rather than fixed because a gate that failed on all 41 the day it was committed would be red on main from its first commit, and a gate that is red on main is a gate every seat learns to step over. The measured price of the class is in tools/testing/tmpdir-leak.mjs: one file of these took the shared host to 95 per cent and cost three other seats their npm and browser installs. STALE_BASELINE_ENTRY deletes an entry the day its repair lands.",
+  "why_this_file_is_not_a_permanent_excuse": "These 30 are written down rather than fixed because a gate that failed on all 41 the day it was committed would be red on main from its first commit, and a gate that is red on main is a gate every seat learns to step over. The measured price of the class is in tools/testing/tmpdir-leak.mjs: one file of these took the shared host to 95 per cent and cost three other seats their npm and browser installs. STALE_BASELINE_ENTRY deletes an entry the day its repair lands.",
   "what_this_list_is_not": "It is not the set of files that leak. It is the set that PROVABLY leak by reading them. The 22 test files that call both mkdtemp and a removal are absent from this list and are not thereby certified: this instrument cannot see whether a removal covers every directory the file makes, or only the success path. See the blind spot section in tools/testing/tmpdir-leak.mjs.",
-  "measured_at": "2026-11-09T11:18Z, by the skill seat’s ninth message run, which removed the last six entries of the `skill` lane. Pull request #866 on `ursa-skill/2026-11-09-message-8`, which subsumes #857 on `ursa-skill/2026-11-09-message-7` (both open in the queue as of 2026-11-09), gave those files a shared fixture that removes what it makes, so their findings had outlived themselves and this gate exits 1 on that by design",
+  "measured_at": "2026-11-09T11:18Z on the skill lane and 2026-11-09 on the engineer lane, merged rather than chosen between: this file is the union of two shrinks measured hours apart. The engineer seat's message-13 wake removed five entries (four repaired onto tools/testing/tmpdir.mjs, and tools/ledger/containment.test.mjs, which never leaked and was a false positive of this gate's own comment stripper reading the /* inside a git refspec as a comment opener; see withoutComments in tools/testing/tmpdir-leak.mjs). The skill seat's ninth message run removed the last six entries of the `skill` lane, which a shared fixture now cleans up after. 30 remain. Both removals are STALE_BASELINE_ENTRY repairs and neither supersedes the other, which is why taking one side of this conflict would have put back entries whose findings had already outlived themselves.",
   "repair": "docs/ideas.md 2026-11-09, 'Forty-one test files leak temporary directories into a shared /tmp that no daily reading can see'",
   "leaking": [
     {
@@ -14,31 +14,6 @@
       "path": "tools/gates/import-effects.test.mjs",
       "mkdtemp_calls": 2,
       "lane": "security"
-    },
-    {
-      "path": "tools/image-metadata.test.mjs",
-      "mkdtemp_calls": 2,
-      "lane": "engineer"
-    },
-    {
-      "path": "tools/ledger/blockers.test.mjs",
-      "mkdtemp_calls": 2,
-      "lane": "engineer"
-    },
-    {
-      "path": "tools/ledger/check.test.mjs",
-      "mkdtemp_calls": 1,
-      "lane": "engineer"
-    },
-    {
-      "path": "tools/ledger/containment.test.mjs",
-      "mkdtemp_calls": 1,
-      "lane": "engineer"
-    },
-    {
-      "path": "tools/seat/env-facts.test.mjs",
-      "mkdtemp_calls": 1,
-      "lane": "engineer"
     },
     {
       "path": "ursa-major/src/adapters/github-pr.test.ts",

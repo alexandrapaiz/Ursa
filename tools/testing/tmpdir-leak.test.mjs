@@ -10,8 +10,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { tempDir, removeAll, outstandingDirs } from './tmpdir.mjs';
-import { census, decide, TEST_FILE, MAKES, REMOVES } from './tmpdir-leak.mjs';
+import { census, decide, withoutComments, ROOTS, TEST_FILE, MAKES, REMOVES } from './tmpdir-leak.mjs';
 
 const REPO_ROOT = new URL('../..', import.meta.url).pathname.replace(/\/$/, '');
 
@@ -159,4 +160,65 @@ test('measured: a commented-out mkdtemp is not a leak, because comments are stri
   const rows = census();
   const self = rows.find((r) => r.path === 'tools/testing/tmpdir-leak.test.mjs');
   if (self) assert.equal(self.removes, true, 'this file uses the helper, so it removes something');
+});
+
+// The four cases below are the repair of a false positive this gate produced
+// on the day it was written, and they are the regression guard for it. The
+// defect: withoutComments was two `replace` calls, and a regex cannot tell a
+// comment opener from the same two characters inside a string.
+
+test('measured: a /* inside a string literal does not open a comment', () => {
+  // The exact shape that produced the false positive, reduced. The refspec is
+  // the one in tools/ledger/containment.test.mjs line 129, and the `*/` that
+  // closed the comment the old stripper opened was a doc comment six lines
+  // further down, so the file's real cleanup was deleted in between.
+  const source = [
+    "git('fetch', '+refs/heads/*:refs/remotes/origin/*')",
+    '',
+    '/** A doc comment, whose closing marker ended the comment that string opened. */',
+    'after(() => rmSync(ROOT, { recursive: true, force: true }))',
+  ].join('\n');
+  const code = withoutComments(source);
+  assert.match(code, /rmSync\s*\(/, 'the real cleanup call must survive the strip');
+  assert.ok(!code.includes('A doc comment'), 'the real doc comment must still be stripped');
+});
+
+test('measured: comments are still removed, which is the function\'s actual job', () => {
+  assert.ok(!withoutComments('a\n// rmSync(x)\nb').includes('rmSync'));
+  assert.ok(!withoutComments('a/* rmSync(x) */b').includes('rmSync'));
+  // A line comment ends at its newline and takes nothing on the next line.
+  assert.match(withoutComments('// note\nrmSync(y)'), /rmSync\s*\(/);
+  // Both quote forms and a template literal, since all three appear here.
+  for (const q of ['"', "'", '`']) {
+    assert.match(withoutComments(`const s = ${q}a/*b${q}; rmSync(y)`), /rmSync\s*\(/, q);
+  }
+});
+
+test('measured: the file that was the false positive reads as removing', () => {
+  // Named rather than reduced, because the reduced case above would pass
+  // against a stripper that got this file wrong for some other reason.
+  const rows = census();
+  assert.notEqual(rows, null, 'the census must be available in a git checkout');
+  const row = rows.find((r) => r.path === 'tools/ledger/containment.test.mjs');
+  if (!row) return; // it may leave the census if it ever drops its own mkdtemp
+  assert.equal(row.removes, true,
+    'containment.test.mjs removes its one directory from an after() hook');
+});
+
+test('measured: no test file is dropped from the census by comment stripping', () => {
+  // The direction that would hide a leak instead of inventing one, and the
+  // reason this case exists rather than a sentence claiming it cannot happen:
+  // a swallowed `mkdtemp` removes the file from the census silently, where a
+  // swallowed `rmSync` at least shows up as a finding somebody reads.
+  const rows = census();
+  assert.notEqual(rows, null);
+  const counted = new Set(rows.map((r) => r.path));
+  const dropped = [];
+  for (const path of execFileSync('git', ['ls-files', ...ROOTS], { encoding: 'utf8' })
+    .split('\n').filter((p) => p && TEST_FILE.test(p))) {
+    if (counted.has(path)) continue;
+    if (/\bmkdtemp(Sync)?\s*\(/.test(readFileSync(path, 'utf8'))) dropped.push(path);
+  }
+  assert.deepEqual(dropped, [],
+    'these files call mkdtemp in real code and the census does not see them');
 });

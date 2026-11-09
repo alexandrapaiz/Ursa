@@ -1,0 +1,6 @@
+home/phone: 2 focusable in the DOM                   2 tab stops     0 unreachable  3.8s
+set/phone: 2 focusable in the DOM                    2 tab stops     0 unreachable  4.3s
+home/tablet: 2 focusable in the DOM                  2 tab stops     0 unreachable  3.4s
+set/tablet: 2 focusable in the DOM                   2 tab stops     0 unreachable  3.4s
+home/desktop: 2 focusable in the DOM                 2 tab stops     0 unreachable  3.9s
+set/desktop: 2 focusable in the DOM                  2 tab stops     0 unreachable  3.5s

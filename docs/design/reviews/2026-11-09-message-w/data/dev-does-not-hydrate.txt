@@ -1,0 +1,51 @@
+# A server that answers 200 on every route and runs none of the page's
+# JavaScript, measured 2026-11-09 (run w).
+
+This is the in-band do-nothing class one level out from the instruments.
+`next dev` on this host serves every route at HTTP 200 and never hydrates,
+so every CSS-only verdict reads correct and every verdict that needs the
+page's own JavaScript is dead. An instrument reading status alone cannot
+tell the two servers apart, and nine of this kit's ten could not read
+status at all before today.
+
+The tell, from the page's own console on `next dev` port 4871:
+
+    WebSocket connection to 'ws://127.0.0.1:4871/_next/hmr?id=...' failed:
+    Error during WebSocket handshake: net::ERR_INVALID_HTTP_RESPONSE
+
+The measurement, filling the published-site form and reading the submit
+button, which is `disabled={!address}` so it enables the moment React state
+holds an address:
+
+    after ~0ms      domValue set   enabled=false
+    after ~2000ms   domValue set   enabled=false
+    after ~5000ms   domValue set   enabled=false
+    after ~10000ms  domValue set   enabled=false
+    after ~20000ms  domValue set   enabled=false
+
+The DOM value is set every time, so `page.fill` worked and the listener was
+never there. Twenty seconds is not a race.
+
+Against `next build && next start` on port 4872, the same form, the same
+drive, first attempt:
+
+    rec-row-index    changes    .rec-row  (2 matches, button, box 960x106)
+
+verify-hover.mjs over the two servers, same flags:
+
+    next dev   (4871)   exit 2   1 of 13 targets DRIVE-FAILED
+    next start (4872)   exit 0   every one of the 10 targets reached
+
+## What this costs a run that does not know
+
+Nine of the kit's ten hover targets are pure CSS and pass on the dead
+server. Only `rec-row-index` needs the page's own JavaScript, so a hover
+sweep on `next dev` reads as 9 of 10 verified with one quiet absence, which
+is indistinguishable from a good run unless the instrument gates on it.
+Before this morning verify-hover.mjs computed no exit status at all, so the
+sweep would have ended at exit 0 and this seat would have published a clean
+hover review of a site whose JavaScript never ran.
+
+**So the review server is `next build && next start`, not `next dev`.** It
+is in the kit README now. The cost is one build, which took under two
+minutes here.

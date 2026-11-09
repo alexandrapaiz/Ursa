@@ -1,0 +1,12 @@
+
+NOT MEASURED: 6 of 6 page loads answered 400 or worse and were not declared, so this run makes no claim about them.
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+Declare an intentionally-absent path with --expect-404 <paths> if that status is the subject.
+
+no claim about hit areas: the pages above were not reached.
+

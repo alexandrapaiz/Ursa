@@ -1,0 +1,8 @@
+
+
+NOT MEASURED: 3 of 3 frame loads did not reach their subject, so this run makes no claim about them.
+  home=/ -> COULD NOT LOAD: page.goto: Protocol error (Page.navigate): Cannot navigate to invalid URL
+  home=/ -> COULD NOT LOAD: page.goto: Protocol error (Page.navigate): Cannot navigate to invalid URL
+  home=/ -> COULD NOT LOAD: page.goto: Protocol error (Page.navigate): Cannot navigate to invalid URL
+
+no claim about overflow: see above.

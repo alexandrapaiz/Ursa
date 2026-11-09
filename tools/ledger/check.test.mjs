@@ -7,8 +7,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { writeFileSync } from 'node:fs';
+import { tempDir } from '../testing/tmpdir.mjs';
 import { join } from 'node:path';
 
 const CHECK = new URL('./check.mjs', import.meta.url).pathname;
@@ -22,7 +22,7 @@ function check(file) {
 }
 
 function run(contents) {
-  const dir = mkdtempSync(join(tmpdir(), 'ledger-check-'));
+  const dir = tempDir('ledger-check-');
   const file = join(dir, 'ideas.md');
   writeFileSync(file, contents);
   return check(file);

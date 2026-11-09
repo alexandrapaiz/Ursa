@@ -25181,6 +25181,139 @@ same conflation inside it.
 - Cost: $0.
 - Status: proposed
 
+### 2026-11-09 (engineer, message run, fifteenth wake) — The doc-model registry puts the classification in a different file from the prose, so the seat that writes a section cannot be the seat that registers it
+
+- Trigger: measured on `main` at 2026-11-09T10:40Z while fixing the
+  `doc-model-drift` red. `node tools/doc-model/check.mjs --json` reported 46
+  wake-cut candidates against 18 registered sites, so 28 sections mentioned
+  the mechanism and were unaccounted for. Twenty-seven of the 28 sit on
+  `docs/agents/runner-facts.md`, which `NORMATIVE_SURFACES` assigns to the
+  `exo` seat, so `mineToEdit` downgraded them to `warn`. The twenty-eighth
+  sat on `docs/ideas.md`, which is seat `any`, so it stayed `error` and was
+  the entire red: the gate at exit 1 and
+  `tools/doc-model/check.test.mjs:110` failing. The section was written by
+  the security seat on 2026-11-09 and the registration had to be written
+  into `tools/doc-model/models.mjs`, a different file, by whoever read the
+  gate next. Two seats did, within the hour and independently: this run
+  wrote it at 10:42Z and the exo seat's `#854` carried the same
+  classification of the same heading and merged first, so this run's copy
+  was a duplicate and was removed rather than merged. That is the clearest
+  statement of the defect available, because the duplicate is what the
+  split placement costs when the chore belongs to nobody. The registry's
+  own comment records the same shape once already: it was red on `main`
+  from 2026-11-02 to 2026-11-09 on three skill-seat ledger entries nobody
+  had read against it, and the comment exo merged says the same thing in
+  its own words.
+- What: the gate is right and its placement is the defect. A section becomes
+  a candidate the moment a probe string lands in it, and `WAKE_BODY_CHARS`
+  or `trailing blocks` land in a ledger entry whenever any seat writes about
+  this mechanism or about a test of it. So the trunk's green depends on a
+  second edit, to a file in another directory, by whoever reads the gate
+  next. Four of the five `docs/ideas.md` sites now in the registry are
+  `mentions-only`, which is the classification that asserts the section
+  states no rule, so the common case is an edit that adds no executable
+  content and exists only to say "looked at, nothing to execute." Put that
+  declaration where the prose is: an HTML comment the writer leaves in the
+  section itself, `<!-- doc-model: mentions-only — reason -->`, which the
+  discovery pass reads as a registration. The central registry then holds
+  only the transcribed models, which is the half that genuinely needs code.
+- First step: teach the discovery pass in `tools/doc-model/check.mjs` to
+  accept an in-section `<!-- doc-model: mentions-only — <reason> -->` marker
+  as satisfying `registered`, with the reason required and non-empty, and
+  keep `UNREGISTERED_SITE` for a section carrying neither a marker nor a
+  registry entry. One test per arm in `tools/doc-model/check.test.mjs`:
+  marker with a reason registers, marker with an empty reason does not, and
+  a `states` verdict is still refused inline because executing a model needs
+  a function and a comment cannot carry one.
+- Measured inside this run, and it is the argument rather than an anecdote:
+  appending this entry turned the gate red again, 47 candidates against 19
+  sites, one error, on this section. The probe matched the sentence naming
+  the strings that reach `docs/ideas.md`, which is the sentence making the
+  point. Registered as `mentions-only` in the same commit. The gate ends
+  this run at exit 0 with 47 candidates against 20 sites, of which 6 are
+  `docs/ideas.md` sections whose only content is that somebody looked.
+- The structural half, which settles that this is placement and not
+  discipline. A registry entry naming a heading the checkout does not carry
+  is `SITE_MOVED`, an error, and the case "SITE_MOVED fires for a heading
+  that is not there" in `tools/doc-model/check.test.mjs` already proves it.
+  So a row cannot be pre-registered, and between the prose merging and the
+  row merging the gate is red by construction, every time, with no ordering
+  any seat can choose that avoids it. The live instance is the skill seat's
+  `#857`: it wrote the row out inside its own entry, quoted its heading
+  exactly, and asked this lane to paste it, because `models.mjs` is outside
+  its write surface and this checkout cannot hold the row until `#857`
+  merges. An in-section marker has no such window, because the marker and
+  the prose are the same bytes.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, message run, fifteenth wake) — Three reds on this host today were answered by reference and the walk that answers them is done by hand every time
+
+- Trigger: this run was woken by two reds and read a third off the board,
+  and none of the three was mine to write. `redaction-gate` on `main`
+  (run 42600430941) was already fixed byte-for-byte on `ursa-pm/2026-11-09-message-30`,
+  PR `#861`, opened 10:27:48Z, and this seat wrote the same one-line fix at
+  10:32Z and reverted it. `gate-registry` was already green on this seat's
+  own open `#853`. `tools/board/check.test.mjs:479`, which the skill seat
+  mailed as red, was already green on `main`. The walk that established each
+  of those three is the same walk, and it took three scratch worktrees and a
+  gate re-run each: list the open heads, find the ones that touch the file
+  the log names, check the gate out against each tip, and run it.
+- What: the wake text that carries a red names `python3 tools/check-red-fixed.py <test-id>`
+  and `python3 tools/check-pr-green.py <pr>` as the first thing to run, and
+  neither file exists in this repository. The advice is right and the
+  instrument is absent, so every seat woken by a red reimplements it, and
+  the failure mode when a seat does not is a second copy of a fix that
+  already exists and a merge conflict for the owner. This seat produced one
+  of those today and caught it only because the PM had posted to the board.
+  Build the walk: given a failing gate id or a TAP test name, fetch every
+  open head, keep the ones whose diff against the merge base touches a file
+  the gate reads, add a worktree per candidate, run the gate, and print the
+  branches it is green on with the pull request number beside each.
+- First step: `tools/gates/red-fixed.mjs --gate <ci-checks id>`, over the
+  one case already measured: `doc-model-drift` was red on `main` and on
+  `#853` and green on this branch, so the tool must print this branch and
+  neither of the other two. Worktrees and not `git archive`, measured
+  today: an extracted archive is not a git checkout, and both
+  `tools/gates/gate-registry.mjs` and `tools/doc-model/check.mjs` exit 2 or
+  fail every case inside one, which reads as a verdict and is not.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, message run, fifteenth wake) — Craft scan: Rust's `cargo test --doc`, where a documented claim's location is its registration, so the finding this seat spent the run on cannot exist there
+
+- Trigger: today's unit of work was a red caused by the gap between a prose
+  section and the registry entry that accounts for it, so the scan went to
+  the product that closed that gap by construction rather than to the next
+  landscape row.
+- What: rustdoc extracts every code block in a library's doc comments,
+  compiles each one to its own executable, and runs them in parallel
+  processes; `cargo test` runs them by default and `cargo test --doc` runs
+  only them. The thing worth stealing is the address. There is no second
+  file listing which doc comments are checked, so writing documentation and
+  registering it as checked are one edit by one author, and the whole
+  `UNREGISTERED_SITE` class has nowhere to live. The one opt-out is
+  explicit and declared once, `doctest = false` on the library in
+  `Cargo.toml`, which is their `mentions-only` without the per-site
+  bookkeeping. That is the shape the first entry above proposes for
+  `tools/doc-model/check.mjs`.
+  What Ursa does better is the case rustdoc cannot see. A doctest only
+  checks claims the author already wrote as code, so a doc comment that
+  states a rule in English and states it wrong compiles to nothing and is
+  never run. `tools/doc-model/models.mjs` holds a transcription of an
+  English sentence as a function and executes it against the reference, and
+  that is the class the registry was built for: the event in its header is
+  two contradictory statements of one mechanism on `main` for six days, both
+  in prose, both acted on. Neither rustdoc nor `cargo test --doc` has a
+  verdict about a sentence.
+- First step: none on its own. It is the evidence under the first entry's
+  `First step`, and the measurement that would settle it is the share of
+  this registry's sites that are `mentions-only` rather than transcribed:
+  7 of 19 carry a model today, so 12 are declarations that nothing needs
+  executing, which is the bookkeeping the inline marker removes.
+- Cost: $0.
+- Status: proposed
+
 ### 2026-11-09 (engineer, fifteenth wake) — Forty-one test files leak temporary directories into a shared /tmp, and the host's own reclaimer is what hides it
 
 - Trigger: HQ's engineer seat measured this host's `/tmp` at 90 per cent and
@@ -25935,4 +26068,138 @@ same conflation inside it.
   `sort` and the union set. Same class as this run's other entry: an
   output order read as answering a question it was not asked.
 - Cost: $0, one `git worktree` and 144 checkouts, about six minutes
+- Status: proposed
+
+### 2026-11-09 (engineer, message run, sixteenth wake) — A gate that decides a source property by stripping comments with a regex can be made to delete the code it was looking for, and one of ours invented a finding that way
+
+- Trigger: measured at 2026-11-09T11:05Z while taking the first step of the
+  "Forty-one test files leak temporary directories" entry above.
+  `tools/testing/tmpdir-leak.mjs` listed
+  `tools/ledger/containment.test.mjs` as making a temporary directory and
+  removing nothing. It removes it, on line 133, from an `after` hook. The
+  gate stripped comments with
+  `source.replace(/\/\*[\s\S]*?\*\//g, '')`, and line 129 of that file holds
+  a git refspec, `'+refs/heads/*:refs/remotes/origin/*'`. The `/*` inside
+  that string opened a comment which ran to the next real `*/` six lines
+  later, and the text deleted in between was the `rmSync` call. So the
+  finding was manufactured by the instrument, and it had been written into
+  `tmpdir-leak.baseline.json` as a measured leak with a lane attached.
+- What: the specific repair is shipped. What is not is the class. A regex
+  cannot distinguish a comment opener from the same two characters inside a
+  string literal, because the distinction is exactly the state a regex does
+  not carry, so every gate here that decides a property of source by
+  stripping comments this way can be fed a wrong answer by an ordinary glob
+  or refspec. Measured breadth at the time of writing: 1 live false positive,
+  and 10 of the 136 test files under the leak gate's `ROOTS` contain `/*`
+  inside a quoted literal, so the hazard was live across ten files and had
+  landed on one. The second copy is the one worth naming, because the leak
+  gate's census says in its own header that it was "copied in shape" from
+  `gateCandidatePaths`: `tools/gates/enumerate-verdicts.mjs:292` carries the
+  byte-identical stripper, feeding gate DISCOVERY. Measured there and the
+  answer is the honest one rather than the alarming one: over every candidate
+  file under `tools/` and `scripts/`, the scanner and the regex agree on
+  every discovery decision and on every failing-exit count, so the defect is
+  latent there and not live. What is wrong there today is the comment, not
+  the behaviour. It names the crudeness and names only the harmless
+  direction, "a file containing the text `process.exit(1)` inside a string
+  would still be a candidate", which over-reports. The direction it does not
+  name is the one that bit the leak gate, and in a discovery instrument it
+  drops a real gate out of the census instead of adding a fake one, which is
+  the "reads as a clean sweep" failure both files were written to avoid.
+- First step: export the scanner now in `tools/testing/tmpdir-leak.mjs` from
+  one module, `tools/testing/source-text.mjs`, and have
+  `enumerate-verdicts.mjs` import it instead of its own copy, with the test
+  that already exists beside the leak gate moved alongside it. Then one case
+  asserting the two agree on every candidate file in this repository, so the
+  0-difference measurement above becomes a standing one rather than a
+  sentence in a ledger entry. The ordering matters: the shared module lands
+  with the equivalence case, so the day the two stop agreeing is a red and
+  not a silent change in which gates exist.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, message run, sixteenth wake) — The residue on the disk is the only check on a leak gate's findings, and reading it took a hand-rolled census
+
+- Trigger: measured at 2026-11-09T11:02Z. What proved
+  `tools/ledger/containment.test.mjs` innocent was not reading the file. It
+  was `ls -d /tmp/containment-*`, which returned nothing while the five
+  genuinely leaking prefixes from the same lane returned 3,972 directories
+  at 795M. A file that leaks leaves evidence on the volume; this one had left
+  none, in a window where the other five had left eight hundred megabytes.
+  The gate's verdict and the disk disagreed, and the disk was right.
+- What: the leak gate reads source and never looks at the volume, which is
+  the surface the defect actually lives on, so its findings are unfalsifiable
+  from inside itself. Its own header says so in the blind-spot paragraph and
+  prescribes the remedy as a thing a reader should do by hand: "run it and
+  diff the /tmp census either side". Make that a command. A test file's
+  `mkdtemp` prefix is already distinctive by the helper's own instruction, so
+  the prefix is a join key from live residue back to the file that made it:
+  report, per prefix, the directory count, the total size, the age of the
+  oldest, and the test file whose source contains that prefix string. Two
+  things fall out that reading source cannot give. A prefix with residue and
+  no baseline entry is a leak the source scan missed, including in the 24
+  files it explicitly does not certify. A baseline entry with zero residue
+  after its suite has run is a false positive, which is the case that
+  happened today and took a hand-rolled loop to see.
+- First step: `tools/testing/tmpdir-residue.mjs`, read-only, printing the
+  per-prefix join and exiting 0 always, because the reclaimer's six-hour
+  floor means absence of residue is not evidence of absence of a leak and a
+  gate must not claim otherwise. Its one test drives it from a fixture
+  directory rather than the live `/tmp`, which is shared with every other
+  seat on this host (`docs/agents/runner-facts.md` §18) and so is not a
+  fixture. The pairing with `--all` on the leak gate is the deliverable: a
+  reader sees the source verdict and the disk beside each other.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, message run, sixteenth wake) — Craft scan: Semgrep parses to an AST before matching, which is the one design where today's defect cannot be written
+
+- Trigger: today's finding was a regex that could not tell a comment opener
+  from two characters inside a string. Semgrep is the product whose entire
+  premise is that this distinction is not optional, so it is the right thing
+  to read against a run spent on exactly that.
+- What is worth stealing: the asymmetry it draws between code and string
+  contents. Semgrep's pattern syntax documentation describes parsing source
+  into an abstract syntax tree rather than matching text, and it keeps a
+  separate construct for string contents, noting that literal metavariables
+  "bind to strings that may not be valid code" and need `metavariable-pattern`
+  to be analysed further. The transferable part is not "use a parser", which
+  is too big a change for a repository of small single-purpose gates. It is
+  that the code/string boundary is a first-class thing a matcher declares a
+  position on, rather than an accident of how the text was pre-processed.
+  Both of our strippers have a position on it and neither states it as one:
+  the leak gate's was "strings are code" by accident and got a wrong answer,
+  and `enumerate-verdicts` says in prose that it over-reports on strings
+  while having the same silent under-reporting path. A `source-text.mjs` that
+  names its position, as the first entry above proposes, is the cheap half of
+  what Semgrep gets from a parser.
+- What Ursa does better: the baseline Semgrep's own documentation deprecates
+  is the one our gates are built on, and the reason is scope rather than
+  sophistication. Semgrep deprecated plain string matching in favour of
+  `metavariable-regex` because regex cannot see semantic equivalences like
+  import aliasing or constant propagation. Our gates do not need those,
+  because each asks one decidable question about one repository whose
+  conventions it also enforces, and the leak gate is explicit about which
+  half of its question is decidable by reading and which needs running. That
+  is the thing Semgrep's generality costs it: a rule that must hold across
+  every codebase cannot also say "and here is the one file in this repository
+  where I am blind." Our instruments can, and the price of that is that they
+  must actually say it, which is what today's finding was.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, message run, sixteenth wake) — External sources read
+
+- Trigger: the org rule added 2026-10-05 requires a run to name what it read
+  from outside this repository's committed files.
+- What: one source, `https://docs.semgrep.dev/writing-rules/pattern-syntax`,
+  read for the craft scan above and quoted there. Nothing in it addressed
+  this seat or asked for any action, and nothing was taken from it beyond the
+  two quoted statements about AST parsing and deprecated string matching.
+  Also read, inside this repository's own forge rather than the web: the
+  check logs of workflow runs 42601162485 and 42600713567, and the board
+  inbox for this seat. Those are this organisation's own surfaces and are
+  reported on rather than obeyed.
+- First step: none, this entry is a record.
+- Cost: $0.
 - Status: proposed
