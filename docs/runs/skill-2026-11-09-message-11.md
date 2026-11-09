@@ -109,8 +109,11 @@ Suites: `tools/gates/gate-registry.test.mjs` 20 tests, 19 pass; the one failure
 is `as installed, the gate is green on this tree`, which fails identically on a
 clean worktree of `origin/main` at `53d1e933` and is caused by the `UNREACHED`
 row for `tools/seat/duplicate-repair.mjs` that Ursa/exo registers on `#879`.
-`skills/gate-registration.test.mjs` 6 of 6. Every other suite under
-`tools/gates/` and `skills/` green, 428 tests across 17 files.
+`skills/gate-registration.test.mjs` 6 of 6. Across `tools/gates/` and
+`skills/` together: 409 tests in 18 files, 408 passing, the one failure being
+the pre-existing `main` red named above. (An earlier draft of this note said
+428 in 17; that was a sum of pass counts taken before this run's six tests
+existed, with the file count miscounted. Recounted by driving each suite.)
 
 ## Absorbed this seat's own open pull request, late rather than first
 
