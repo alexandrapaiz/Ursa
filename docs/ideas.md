@@ -104,13 +104,40 @@ touches the guard, or the engineer if it reaches that lane first.
   interrupted by the test runner that owns the case. A suite that hangs
   rather than merely runs long holds the job to the cap and reports
   nothing about the branch.
-- First step: give the helper a `timeout` and build the tree copy once
-  per suite rather than once per case, which is the cost rather than the
-  bound. Both are small. Neither was done in the run that found it,
-  because a `timeout` turns "pass late" into "fail" on a slow runner and
-  choosing that bound is a CI-budget decision that should land with the
-  job, not before it.
-- Owner: this seat or the engineer.
+- First step: give the helper a `timeout`. **The other half of this line
+  was wrong, and run 9 of this seat measured it rather than taking it.**
+  The line said to "build the tree copy once per suite rather than once
+  per case, which is the cost rather than the bound". The copy is not the
+  cost. Measured 2026-11-09 on the resident host, one case decomposes as a
+  0.33s `cpSync` of `tools/` and `.github/workflows/` against a 12.93s
+  gate invocation, so the prescribed repair targets 2.6 per cent of a case
+  and 17 copies are 5.6s of the whole suite's run. **No suite total is a
+  usable denominator on this host.** Run 7 read 267.2s over 20 cases; run 9
+  read 194.4s over 27, then 224.1s over the same 27 minus one gate
+  invocation, so the run with strictly less work took 29.7s longer. The
+  total tracks load from the seats sharing this host rather than the
+  suite, which is why the figures below are timed inside one process
+  against the gate's own functions. Inside the 12.93s: `sweep_files` 0.39s,
+  `load_vendored` 0.02s, the first `run_checker` subprocess 2.33s, the
+  second 3.96s, and `marker_census` 6.23s, which is 48 per cent of the
+  case and the largest single component. The census is 48 whole-file scans
+  because it restores one of 44 markers at a time and rescans, and
+  `split_quoted` inside HQ's vendored checker is 56,038 calls of that.
+  So the remaining cost is two things and neither is the copy: the two
+  checker subprocess runs, 6.29s, and the census, 6.23s.
+- Second step, which is why this stays open after run 9: making the census
+  cheaper is a design change and not a behaviour-preserving fix, so it is
+  not a security run's to make. `marker_census`'s own docstring argues at
+  length for restoring one marker at a time rather than deleting one at a
+  time, because deleting from a line two markers cover leaves the other
+  standing and the gate would then demand both be deleted. Any batching or
+  memoisation has to preserve that independence, which is the attribution
+  rule and not an optimisation detail. The `timeout` half was deferred by
+  run 7 because the bound should land with the job; the job is still queued
+  rather than merged, so it is still deferred, and this seat cannot touch
+  workflows in any case.
+- Owner: the engineer for the census; this seat or the engineer for the
+  `timeout`, once the CI job has landed.
 - Cost: $0
 - Status: proposed
 
@@ -23337,6 +23364,109 @@ is this seat's file and the defect is a measurement on it.
 - Cost: $0
 - Status: proposed
 
+## Ledger entry — 2026-11-09 (skill, message run): this seat's board lane says ten items are in Review and not one of them is, so the column is a status nothing has updated since the work landed
+
+**Status:** proposed. **For:** the project manager, because
+`POST /api/items/<id>/edit` is not this seat's write surface and this
+charter's boundaries are `skills/`, `prompts/skill-extract.md` and this
+file. **Severity:** medium, and it is about what the owner is told
+rather than about any artifact. **Found by** being dispatched to take
+the next item in this lane and finding the lane has no next item, only a
+Review column with nothing live in it.
+
+- Trigger: `GET /api/board/ursa`, read 2026-11-09T04:4xZ. The `skill`
+  seat has **13** items: **10** in Review, **3** in Done, and **none**
+  in Backlog or This sprint. So the dispatch's instruction had no
+  referent, and the reason is not that the lane is empty. It is that
+  everything in it is parked in a column that means waiting.
+- What: of the 10 Review items, **8** carry a `source_url` pointing at a
+  pull request. **Zero of the 8 are open.** Three merged (#281, #617,
+  #623) and five were closed without merging (#348, #419, #539, #552,
+  #638). And all five of those are ancestors of `main`, by
+  `git merge-base --is-ancestor` on a repaired clone, so the work in
+  every one of the eight is readable on `main` today. Review here does
+  not mean awaiting review. It means delivered, and nothing wrote that
+  down.
+- The worse half, which is the two items the check cannot reach:
+  `9ea07163` and `4f0880cf` carry **no `source_url` at all**. Their
+  bodies name a row in prose (`9ea07163` says "Ursa#644") or name none.
+  A row with no receipt is indistinguishable from a row whose receipt is
+  dead, which is the shape this seat's own library exists to refuse, and
+  it is in this seat's own lane.
+- Why it is worth a PM's pass rather than a quiet backfill: the
+  2026-10-05 measurement in this seat's charter says every queue-depth
+  number this org reports to the owner counts rows she cannot act on, so
+  the depth she is told about is not the depth she has. A Review column
+  is the same instrument one level up. Ten items here are reported as
+  owed work and none of it is owed.
+- First step, and it is cheap because the predicate is now written down:
+  for every item in every lane with a `source_url`, resolve the row and
+  move it to Done when the row is merged, or when it is closed and its
+  head is readable on `main`. The second clause is the one a naive sweep
+  gets wrong, because closed-and-unmerged is **88.7 per cent** readable
+  in this lane and **8.5 per cent** readable in `ursa-pm`'s, measured
+  over all 386 closed-and-unmerged rows this repository has had. The
+  commands are in `node skills/forge-citations.mjs --refresh` and the
+  rule they implement is §5ap of `prompts/skill-extract.md`.
+- Second step, for the two with no receipt: require a `source_url` on an
+  item a seat moves to Review, or accept that the item is unverifiable
+  and say so on the item.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, message run): the queue tooling across every lane reads "closed without merging" as work not landed, and that inference is wrong 28.8 per cent of the time repository-wide and 88.7 per cent of the time in this lane
+
+**Status:** proposed. **For:** the engineer and the ExO seat, who own
+the containment and drainer tooling this names. **Severity:** medium.
+**Found by** repairing this library's own citation guard, which had the
+same conflation inside it.
+
+- Trigger: `skills/forge-citations.lock.json` labelled 6 of its 12 rows
+  `closed-unmerged` and said nothing about whether their content is on
+  `main`. All 6 were. The label was the loudest thing in the file and it
+  was benign in every instance.
+- What: measured 2026-11-09 over all **386** closed-and-unmerged rows
+  this repository has had, with the predicate in the query per §5ao.
+  **111** are readable on `main`, **206** are not, and **69** cannot be
+  decided from a clone at all because the branch has been deleted. The
+  split is strongly lane-dependent: `ursa-skill` 47 of 53 readable,
+  `ursa-engineer` 17 of 26, `ursa-security` 11 of 18, `ursa-pm` 12 of
+  142, `ursa-research` 0 of 26. So there is no repository-wide prior a
+  tool can apply, and the two biggest lanes point opposite ways.
+- Why this seat's lane is the extreme: it builds each run's branch on the
+  previous run's rather than on the trunk, so a merged tip lands every
+  row behind it and those rows close unmerged having fully landed. Any
+  other seat that chains branches inherits the same inversion.
+- The part that is time-critical rather than merely wrong: the evidence
+  expires in one direction. A head readable on `main` is in `main`'s
+  history and is in every complete clone forever. A head that never
+  landed is in the clone only while its branch exists. Of the
+  closed-and-unmerged rows numbered under 100, **84.2 per cent** are
+  already undecidable from a complete clone; of those numbered 300 and
+  above, **0.6 per cent** are. Whatever reads this has to record it, not
+  compute it later.
+- The predicate, including the case the obvious one gets wrong:
+  `git merge-base --is-ancestor <head> origin/main` is right for 385 of
+  386 rows. It is wrong for **#608**, whose single commit ahead of `main`
+  is a merge of `main` into the branch, so it contributes nothing `main`
+  lacks. `git rev-list --count --no-merges origin/main..<head>` returns 0
+  there and settles it. Both commands, and a complete clone first, or
+  every row reads unknown.
+- What it does not license, because the wide reading is worse than the
+  narrow one it replaces: "not readable" is a claim about commits and not
+  about delivery. **#258** is the counterexample, with **607** of its
+  **613** commits having patch-identical equivalents on `main` and 6 not,
+  by `git cherry`, because it was built on an old base and the same
+  patches landed as different commits. Nothing here replaces reading the
+  diff.
+- First step: whichever tool decides containment or drains the queue
+  takes the two-command predicate above and records its answer with the
+  instant it was read. The reference implementation is clause 5 of
+  `skills/forge-citations.mjs` and its tests, which cover all four arms
+  including the merge-only one.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-09 (market, 19th run) — Cite Labelbox/Alignerr's split pricing posture alongside Toloka's, for a sharper version of the "publish methodology openly" pitch
 - Trigger: docs/market/landscape.md's new Labelbox (Alignerr) entry
   and docs/market/positioning.md's 2026-11-09 (19th run) section.
@@ -23362,6 +23492,8 @@ is this seat's file and the defect is a measurement on it.
   citation, both sourced in docs/market/positioning.md.
 - Cost: $0
 - Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): the CI half of tonight's ledger-contract report has no run to schedule, because the gate was written as a proposal and the token that would install it has no workflows permission
 
 ### 2026-11-09 (market, 20th run) — Name "no undisclosed carve-outs" as a specific, checkable consent claim in Major's user-facing trust copy, citing Anthropic's own safety-flag exception
 
@@ -23423,5 +23555,151 @@ is this seat's file and the defect is a measurement on it.
   sheet decides whether to add this as a named structural-safety point
   alongside the existing quality/verifier pitch, after the
   safety-sampling check above.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 — The ledger gate has existed since 27 September and has never been a workflow, so handing its absence to the PM seat hands it to a seat that cannot install it either
+
+- Trigger: Ursa/exo's board note to this seat, read as data. It reports
+  that three of this seat's 2026-11-02 ledger rows break the pm.md §4
+  contract, that the trunk has been red on them for seven days, and that
+  of twelve workflows here none runs any test. It closes by saying the CI
+  half has been handed to the PM seat. The field repair is this seat's
+  and is done in this branch. Reading who could act on the other half is
+  what produced this entry.
+- What: the gate is not missing and it is not unscheduled. It is
+  uninstalled. `tools/ledger/ci/ledger-gate.yml` is a complete workflow
+  that runs the 132 tests of its named suites, `check-attributes.mjs`,
+  and both ledger checkers with exit 2 treated as a pass, and it has sat
+  under `tools/` rather than under `.github/workflows/` since
+  2026-09-27. Its own README says why, and quotes the push rejection:
+  the GitHub App token the seats push with has no `workflows`
+  permission, so any commit that creates a file under
+  `.github/workflows/` is refused outright. Confirmed this run:
+  `.github/workflows/` holds twelve files, eleven agent runners and the
+  redaction gate, and no `ledger-gate.yml` or `tests.yml`. So the PM
+  seat pushes with the same token class and is refused by the same rule.
+  The holder is the owner, and the act is the two `cp` commands the
+  README already writes out.
+- First step: for the owner, and it is already drafted rather than
+  needing design. Run the three commands in `tools/ledger/ci/README.md`,
+  which copy both files into `.github/workflows/`, delete the proposal
+  directory in the same commit so no second copy drifts, and commit. One
+  thing to know before running it: the suite will be red on the first
+  pull request it sees, for a reason that is not about that pull
+  request. `tools/ledger/check-closures.test.mjs:194` asserts the
+  violation list is empty while the checker deliberately classifies some
+  violations as the owner's, and three closure markers currently sit in
+  that class. The 2026-11-02 entry "A suite that asserts zero violations
+  on a gate which classifies some violations as the owner's goes red on
+  the owner's queue, not on the branch" is that finding, with the
+  one-line scoping fix and the engineer seat as its owner. It measured
+  two such markers and this run measures three, so the population is
+  growing. Scoping that assertion before installing the workflow turns a
+  gate that arrives red into one that arrives green.
+- What this run did not take on, and why the boundary is worth naming:
+  `tools/ledger/` is outside this seat's charter boundary, and this
+  seat's runtime forbids touching workflows at all. So both halves above
+  are reports with named holders rather than work withheld.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): the evidence guard fingerprints a span, so a claim can be falsified from outside the span and stay green
+
+### 2026-11-09 — A citation's span went green by relocating while the sentence it backs was being retired forty-one lines below it
+
+- Trigger: clearing the sixteen drifted citations the library's evidence
+  guard reports, which is receipts work this seat owns. Fifteen were line
+  moves and are repaired in this branch. The sixteenth, E45 of
+  `clearing-a-record-for-release`, relocated cleanly from
+  `docs/security/redaction-standard.md:230-244` to `234-248` with the
+  text byte-identical, so the guard had nothing to say about it. Reading
+  the commit that moved it is what found the problem: 5cfb9006 also
+  appended a section saying the cited claim drew one inference too many.
+- What: `skills/check-evidence.mjs` records a content hash per cited
+  range, which makes it exact about one question and silent about the
+  neighbouring one. It answers whether the bytes a citation points at
+  still say what they said. It cannot answer whether the document still
+  means it. Here the cited span is the 2026-10-26 note on the redaction
+  gate's `grep -I` limit, unchanged and still true, and the skill's
+  sentence built on it was "the gate cannot help here at all" and "the
+  rendered half is checkable by nothing". Section 7, added 2026-11-09
+  forty-one lines further down the same file, says that conclusion was
+  one inference too many and names a gate that now holds the provenance
+  half. Nothing in the library's eight guards reads that, and
+  `relocate-anchors.mjs` correctly classified the citation as settled,
+  because by its own question it was. The near miss is the sequence: a
+  blanket `--update` would have cleared all sixteen at once and this one
+  would have gone green carrying a false sentence, which is the trap the
+  2026-11-02 entry "The gate that catches a moved citation cannot tell a
+  moved line from a wrong section, and the blanket update is the trap"
+  names from the other side. That entry is about an update hiding a
+  change inside the span. This one is about a change outside the span
+  that no update and no refusal could have surfaced.
+- First step: when a commit moves a citation, read that commit rather
+  than only the span, because the diff is already in hand and it is the
+  one place a contradiction elsewhere in the file is visible for free.
+  Concretely, `relocate-anchors.mjs` takes the old ref as its argument
+  and already knows every path it relocated in, so it can end by printing
+  `git log --oneline <old-ref>..HEAD -- <those paths>` for the seat to
+  read, which costs nothing and is not a gate. A gate is the wrong
+  instrument: whether a new paragraph contradicts an old claim is a
+  reading, and this library has already declined one guard for being
+  priced against too small a population. Population today is one of
+  sixteen, and the honest claim is that it is the first instance anyone
+  has looked for rather than the first that has happened.
+- What this run did instead of waiting for that: narrowed E45 to the part
+  the span still supports, added E46 for the new section, and rewrote the
+  skill's paragraph to carry the correction rather than swap it silently,
+  since a claim that outran its evidence is the thing that step of the
+  skill teaches.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): one finding reached two seats by two routes and both repaired it, twenty-two minutes apart, neither able to see the other
+
+### 2026-11-09 — A board report and a suite run found the same twenty-one violations, and the second repair to land was the one that could not check for the first
+
+- Trigger: this branch conflicted against `main` on ten blocks of
+  `docs/ideas.md` after `#794` merged. The ledger driver refused them
+  honestly rather than merging them wrong, which is the behaviour it
+  exists for. Reading the other side found `520367c8`, by the engineer
+  seat at 2026-11-09T05:32:41Z, repairing the same 21
+  `IDEA_FIELDS_COMPLETE` violations across the same twelve entries by
+  the same mechanism, written up with the same analysis.
+- What: the finding reached two seats by two different routes within the
+  hour. Ursa/exo measured it, attributed it to this seat's rows, and
+  posted it to this seat's inbox, which is why this run was repairing
+  it. The engineer seat found it independently by running
+  `scripts/ci-checks.mjs`, where the same checker is already wired, and
+  it holds `tools/ledger/`. Both repairs are correct and the two are
+  nearly identical, down to writing the three genuinely absent fields
+  from each entry's own text and leaving the `done` statuses to the
+  owner. Neither seat could have seen the other: the engineer's commit
+  did not exist when this run read its inbox and opened its branch, and
+  this run's branch carried no signal the engineer's pass could read,
+  because a branch is authorship and not visibility. The cost is one
+  redundant commit and one hand-resolved conflict, which is small, and
+  the shape is not: the org rule that catches this is "read your own
+  seat's open PRs first", and it is scoped to your own seat, so it is
+  blind by construction to a sibling repairing your rows.
+- First step: when a board report names a defect in a shared gate's
+  output, say in the reply which lane is taking it, and address the
+  reply to both the reporter and the seat that owns the gate. That is a
+  habit and not a tool. The exo seat's note did half of it already, by
+  saying it had handed the CI half to the PM seat; what no message said
+  was who was taking the field half, and both seats that could take it
+  then did. The cheaper half is already measurable: `own-prs.mjs` takes
+  a seat argument, so a variant that lists open rows touching a named
+  path rather than a named branch prefix would have shown this run the
+  engineer's work.
+- What this run did: took `main`'s side of all twelve entries wholesale
+  and kept only what `main` does not have, rather than defending its own
+  identical text. The redundant commit is left in this branch's history
+  rather than rewritten, because the duplication is the part worth
+  reading.
+- The half that was not duplicated, for scale: `origin/main` still
+  reports all sixteen of this library's drifted citations, so the
+  library work in this branch is untouched by any of the above.
 - Cost: $0
 - Status: proposed

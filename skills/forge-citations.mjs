@@ -49,6 +49,60 @@
 //   4. and it prints the lock's age beside the measured interval over which a
 //      disposition decays, because an unrefreshed lock and a fresh one are the
 //      same file otherwise.
+//   5. every row carries its head sha and whether that head is readable on
+//      `main`, and the clone re-derives the second from the first and fails when
+//      the two disagree.
+//
+// CLAUSE 5 WAS ADDED 2026-11-09, and the reason it is a clause and not a
+// cosmetic field is that the three dispositions of clause 1 do not answer the
+// question a reader of a citation actually has. §5am settled that a row number
+// carries three claims and made the citation say which. None of the three is
+// *can I read this change in the tree I am standing in*, which is the only one
+// that decides whether following the citation works. Measured over all 386
+// closed-and-unmerged rows this repository has had, read 2026-11-09:
+//
+//   readable on main       111   28.8%
+//   not readable           206   53.4%
+//   branch gone, so the
+//   question is undecidable 69   17.9%
+//
+// So `closed-unmerged` is a label over a population that splits roughly three
+// to one against the reader, and guessing is wrong 71 per cent of the time.
+// Inside this library's own lane the prior is inverted: of 53 closed-unmerged
+// `ursa-skill` rows, 47 are ancestors of `main`, because this seat chains each
+// run's branch onto the last, so when a tip merges every row behind it lands
+// without ever being merged itself. A reader who learns the repository's prior
+// and applies it here is wrong 89 per cent of the time, which is why the field
+// is measured per row and never inferred from the disposition.
+//
+// All twelve rows this library cites today are readable on `main`, the six
+// labelled `closed-unmerged` included. The label said nothing of the kind.
+//
+// WHY IT IS LOCKED RATHER THAN DERIVED, since unlike a forge disposition this
+// one is a git question and this guard already asks git questions. Because the
+// evidence expires, in one direction only. A landed head is in `main`'s history
+// and is therefore in every complete clone forever. An unlanded head is in the
+// clone only while its branch exists, and branches here are deleted with age:
+// of the closed-unmerged rows numbered under 100, 84.2 per cent are already
+// undecidable from a clone; of those numbered 300 and above, 0.6 per cent are.
+// The answer is available now and will not be later, which is the definition of
+// a thing that belongs in a dated snapshot.
+//
+// AND THE OBVIOUS TEST IS WRONG ONCE IN 386, which is worth the extra command
+// because the one case is in this lane. `git merge-base --is-ancestor` reports
+// #608 as not readable on `main`. It has exactly one commit ahead of `main` and
+// that commit is a merge of `main` into the branch, so it contributes nothing
+// `main` lacks and the honest answer is yes. The predicate that gets it right
+// is `git rev-list --count --no-merges main..<head>`, which is 0 there. One row
+// in 386 is a rate, not a corner: say it is rare, keep the second command.
+//
+// WHAT CLAUSE 5 STILL CANNOT TELL YOU, stated because the opposite reading is
+// the laundering §5am's own remedy exists to stop. `no` means this exact
+// commit is not in your tree. It does not mean the work was lost. #258 is a
+// fair example: 607 of its 613 commits have patch-identical equivalents on
+// `main` and 6 do not, so the honest claim is about commits and not about
+// delivery. A reader who wants delivery has to read the diff, and no field
+// here replaces that.
 //
 // That fourth one is the reason this guard does not fail on age. The decay
 // interval here was measured across all 700 rows: a row stays the newest row in
@@ -159,14 +213,44 @@ export function cloneDepth(cwd = ROOT) {
  *  age and nothing else depends on it. */
 export const DECAY_MEDIAN_MINUTES = 45
 
-const REQUIRED = ['number', 'lane', 'branch', 'disposition']
+const REQUIRED = ['number', 'lane', 'branch', 'disposition', 'head', 'readable_on_main']
 const DISPOSITIONS = new Set(['merged', 'closed-unmerged', 'open'])
 
-export function check({ root = ROOT, lockPath = LOCK, cwd = ROOT } = {}) {
+/** Clause 5's three answers. `unknown-offline` is a real answer and not a gap:
+ *  it is what a complete clone says when the row's branch has been deleted and
+ *  the row never landed, and 69 of this repository's 386 closed-unmerged rows
+ *  are already in that state. */
+export const READABLE_ON_MAIN = new Set(['yes', 'no', 'unknown-offline'])
+
+/** The ref a reader of a citation is standing on. §5am measured its ancestry
+ *  against `this branch's head`, which is the one ref no reader has. */
+export const BASE = 'origin/main'
+
+/** Is `sha` readable on `base` from this clone, and by which of the two tests?
+ *  Returns one of READABLE_ON_MAIN plus the reason, so the caller can report
+ *  the merge-only case rather than silently folding it into `yes`. */
+export function readableOnMain(sha, { cwd = ROOT, base = BASE } = {}) {
+  if (!sha || !resolves(sha, cwd)) return { verdict: 'unknown-offline', why: 'does not resolve in this clone' }
+  const git = (args) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim()
+  let baseOk = true
+  try { git(['rev-parse', '--verify', `${base}^{commit}`]) } catch { baseOk = false }
+  if (!baseOk) return { verdict: 'unknown-offline', why: `${base} does not resolve in this clone` }
+  try {
+    execFileSync('git', ['merge-base', '--is-ancestor', sha, base], { cwd, stdio: 'ignore' })
+    return { verdict: 'yes', why: `ancestor of ${base}` }
+  } catch { /* not an ancestor; the merge-only case is still open */ }
+  const ahead = Number(git(['rev-list', '--count', '--no-merges', `${base}..${sha}`]))
+  if (ahead === 0) return { verdict: 'yes', why: `no non-merge commit ahead of ${base}` }
+  return { verdict: 'no', why: `${ahead} non-merge commit${ahead === 1 ? '' : 's'} ahead of ${base}` }
+}
+
+export function check({ root = ROOT, lockPath = LOCK, cwd = ROOT, base = BASE } = {}) {
   const { lock, rows, fixtures } = readLock(lockPath)
   const seen = mentions(root)
   const failures = []
   const unverifiable = []
+  const mergeOnly = []
+  const clone = cloneDepth(cwd)
 
   const cited = new Map()
   for (const m of seen) {
@@ -200,6 +284,42 @@ export function check({ root = ROOT, lockPath = LOCK, cwd = ROOT } = {}) {
     }
     if (row.disposition !== 'merged' && row.merge_commit) {
       failures.push(`#${number} is ${row.disposition} and carries a merge commit, which cannot both be true`)
+    }
+
+    // Clause 5. The lock states the answer and the clone re-derives it, so a
+    // disagreement is a failure rather than a preference. Three of the four
+    // disagreements are decidable here; the fourth is the honest unknown.
+    if (row.readable_on_main && !READABLE_ON_MAIN.has(row.readable_on_main)) {
+      failures.push(`#${number} has readable_on_main "${row.readable_on_main}", which is not one of ${
+        [...READABLE_ON_MAIN].join(', ')}`)
+    } else if (row.head && row.readable_on_main) {
+      const got = readableOnMain(row.head, { cwd, base })
+      if (got.verdict === 'unknown-offline' && row.readable_on_main === 'yes') {
+        // Asymmetric on purpose, and this is the one arm that is provable. A
+        // head readable on main is in main's history, so a complete clone
+        // cannot fail to hold it. In a complete clone this is a wrong lock.
+        //
+        // `complete` is the narrow reading, and the first draft of this clause
+        // had the wide one. `cloneDepth` reports `shallow: false` for a
+        // directory that is not a git repository at all, because the question
+        // it asks fails and the failure reads as the negative answer. So a
+        // tree with no `.git` was being told its lock was impossible, which is
+        // this library's own §5v: the guard answered from the wrong frame. A
+        // clone is complete when it says it is not shallow AND it can count
+        // its commits; `commits: null` is git declining to answer.
+        const complete = clone.shallow === false && clone.commits > 0
+        const msg = `#${number} is locked readable on main and its head ${
+          row.head.slice(0, 8)} ${got.why}, which a complete clone cannot be`
+        if (complete) failures.push(msg)
+        else unverifiable.push(`${msg} (this clone cannot answer that, so it is not evidence)`)
+      } else if (got.verdict === 'unknown-offline') {
+        unverifiable.push(`#${number} readable_on_main="${row.readable_on_main}" cannot be rechecked: ${got.why}`)
+      } else if (got.verdict !== row.readable_on_main) {
+        failures.push(`#${number} is locked readable_on_main="${row.readable_on_main}" and this clone says "${
+          got.verdict}" (${got.why})`)
+      } else if (got.why.startsWith('no non-merge')) {
+        mergeOnly.push(`#${number} ${row.head.slice(0, 8)} is readable on main only because ${got.why}`)
+      }
     }
   }
 
@@ -250,8 +370,9 @@ export function check({ root = ROOT, lockPath = LOCK, cwd = ROOT } = {}) {
 
   return {
     lock, rows, fixtures, mentions: seen, cited, failures, unverifiable, orphans, narrowed, ageMinutes,
+    mergeOnly,
     fixtureMentions: seen.filter((m) => fixtures.has(m.number)).length,
-    clone: cloneDepth(cwd),
+    clone,
   }
 }
 
@@ -278,6 +399,24 @@ export function refreshPlan(lockPath = LOCK) {
     'Both of these reads are capped, and neither surface says so. A read whose row',
     'count equals its cap did not finish, so it is a subset and not an answer: widen',
     'the cap or narrow the window and run it again before writing anything down.',
+    '',
+    'Clause 5 is a git question and not a forge one, so it is re-derived rather than',
+    'looked up, and it needs a COMPLETE clone: run `bash tools/ensure-full-clone.sh`',
+    'first or every row reads `unknown-offline`. Both commands are needed, because',
+    'the first is wrong for a row whose only commit ahead is a merge of main:',
+    '',
+    `  for n in ${numbers}; do`,
+    '    sha=$(gh pr view $n --json headRefOid --jq .headRefOid)',
+    '    if ! git cat-file -e "$sha^{commit}" 2>/dev/null; then echo "$n unknown-offline"',
+    '    elif git merge-base --is-ancestor "$sha" origin/main; then echo "$n yes"',
+    '    elif [ "$(git rev-list --count --no-merges origin/main..$sha)" = 0 ]; then echo "$n yes"',
+    '    else echo "$n no"; fi',
+    '  done',
+    '',
+    'Write the sha into `head` and the verdict into `readable_on_main`. Take this at',
+    'the same instant as the dispositions above: for a row that never landed, the',
+    'answer exists only while its branch does, and it is already gone for 17.9 per',
+    'cent of this repository\'s closed-and-unmerged rows.',
   ].join('\n')
 }
 
@@ -308,6 +447,18 @@ if (run) {
   console.log(`${merged.filter((x) => resolves(x.merge_commit)).length} of ${
     merged.length} merge commits resolve in this clone (${
     r.clone.shallow ? 'shallow' : `complete, ${r.clone.commits} commits`}).`)
+  const byReach = (v) => [...r.rows.values()].filter((x) => x.readable_on_main === v).length
+  console.log(`Readable on ${BASE}: ${['yes', 'no', 'unknown-offline'].map(
+    (v) => `${byReach(v)} ${v}`).join(', ')}. This is clause 5 and it is not the`)
+  console.log(`disposition restated: ${[...r.rows.values()].filter(
+    (x) => x.disposition === 'closed-unmerged' && x.readable_on_main === 'yes').length} of the ${
+    [...r.rows.values()].filter((x) => x.disposition === 'closed-unmerged').length} closed-and-unmerged rows here are`)
+  console.log(`readable anyway, because this seat chains its branches and a merged tip lands`)
+  console.log(`every row behind it. Repository-wide the same split runs the other way.`)
+  if (r.mergeOnly.length) {
+    console.log(`\n${r.mergeOnly.length} row${r.mergeOnly.length === 1 ? ' is' : 's are'} the case \`--is-ancestor\` alone gets wrong:`)
+    for (const m of r.mergeOnly) console.log(`  ${m}`)
+  }
   if (r.ageMinutes !== null) {
     console.log(`\nThe lock was read ${r.ageMinutes} minutes ago. A row stays the newest row in its`)
     console.log(`own lane for a median of ${DECAY_MEDIAN_MINUTES} minutes, so a lock older than that is`)
@@ -336,5 +487,6 @@ if (run) {
     for (const f of r.failures) console.log(`  ${f}`)
     process.exit(1)
   }
-  console.log(`\nEvery pull request this library cites is locked with a disposition, a date and a lane.`)
+  console.log(`\nEvery pull request this library cites is locked with a disposition, a date, a lane,`)
+  console.log(`and whether a reader standing on ${BASE} can read what it changed.`)
 }
