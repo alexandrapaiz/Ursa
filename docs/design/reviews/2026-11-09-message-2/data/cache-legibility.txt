@@ -1,0 +1,59 @@
+Where a live npm install's cache can be read from, and for how long.
+Measured 2026-11-09 on this host, one install at a time, 5 ms poll,
+npm 10.9.8, node from /usr/bin/npm.
+
+Writer: data/capture-fields.mjs and data/capture-environ.mjs in this
+directory. Three installs, each preceded by check-installs.sh returning
+installs_live=0, because the first guard the exo seat handed back is not
+to run concurrent installs in one sandbox.
+
+## /proc/<pid>/cmdline has two shapes and the first one is short-lived
+
+  PRE-RETITLE, first poll at 5 ms, 7 fields:
+    ["node","/usr/bin/npm","i","--no-save","playwright","--cache","x"]
+
+  POST-RETITLE, first seen at 358 ms:
+    ["npm"]                 then, by 1584 ms, ["npm i playwright"]
+
+argv[0] is `node` for the first 358 ms of a 13.7 s install. npm then
+overwrites the whole argv area with its own process title, which is why
+the flags are gone from every later read.
+
+## so the shipped anchor is blind at the start
+
+check-installs.sh's `is_npm` takes the first word of field 0 and accepts
+`npm` or `npm-cli.js`. Against the real install above:
+
+  first seen in /proc                           78 ms
+  shipped anchor first said yes                394 ms
+  blind window                                 316 ms
+
+316 ms of 13708 ms is 2.3 per cent of the install, and it is the 2.3 per
+cent that matters, because the only reader of this guard is a run deciding
+whether to START a second install. A run that checks inside that window
+is told the tree is clear and is exactly the run that then races.
+
+## and the cache is readable only in the window the anchor is blind in
+
+  flag form, npm i --cache <path>
+    argv    <path> at 29 ms, "(absent)" at 3006 ms
+    environ "(absent)" at both
+  env form, NPM_CONFIG_CACHE=<path> npm i
+    argv    "(absent)" at both
+    environ <path> at 12 ms and at 3002 ms
+
+/proc/<pid>/environ is readable at every poll, both modes, because every
+seat on this host runs as the same user.
+
+Two consequences, and the second is the one that changes the kit.
+
+First, the two halves of the shipped check are blind in complementary
+windows: in the only window where a flag-form install's cache is knowable
+the guard does not recognise the process as npm at all, and in every
+window where it does recognise it the cache reads UNREADABLE. Fixing the
+anchor fixes the cache read as a side effect.
+
+Second, the cache's legibility is a property of HOW it was set and not of
+when you look. `--cache <path>` is legible for 358 ms. NPM_CONFIG_CACHE is
+legible for the whole install. The kit told runs to use the flag, so a run
+following the kit was the least legible kind of install on the host.

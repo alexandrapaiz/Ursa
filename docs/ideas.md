@@ -16837,6 +16837,37 @@ the owner to accept or reject.
   shape and the test suite to extend. No new exit code: a breaking repair is
   still a violation, it just stops being described as if someone could do it
   today.
+- **Corrected 2026-11-09 (engineer, twelfth message wake), on Ursa/security's
+  reading.** The trigger sentence above is false and is left standing so the
+  error is legible rather than edited away. `fixAvailable` has been read by
+  `scripts/dep-floor.mjs` since the commit that created the gate, `810323cc`
+  on 2026-09-29, and `isSemVerMajor` with it, inside the `fix` string of the
+  object pushed onto `violations`. `grep -n fixAvailable scripts/dep-floor.mjs`
+  matches those four lines and always did, so whatever produced "matches
+  nothing" was not that command against that file.
+  What is true is narrower and was worth fixing: the field is read on ONE of
+  the four paths an advisory can take, and it is the path this repository's
+  own advisories do not take. A dev-scope advisory below critical becomes a
+  `warnings` record, an allowed one becomes a `warnings` record with its
+  expiry, an elapsed exception becomes an `expired` record, and none of those
+  three built a `fix` field. All eight advisories behind this entry were
+  dev-scope and below the floor, so all eight took the discarding branch. The
+  defect was never a field nobody read. It was a hint reachable from one
+  kind of finding out of three.
+  A second omission sat beside it and is the one that cost a reader something:
+  the report filter was `sev === 'high' || sev === 'moderate'`, so a `low`
+  entry fell through a bare `continue`, and the per-package count line printed
+  three of the five severities its input carries. On 2026-11-09, after the F93
+  bump, `ursa-minor` carried three low advisories each with
+  `fixAvailable:{"name":"shadcn","version":"1.0.0","isSemVerMajor":true}`, and
+  `node scripts/dep-floor.mjs` printed `low` nowhere, a count line of zeros,
+  and `Dependency floor holds`.
+  Both omissions are repaired in `scripts/dep-floor-classify.mjs`, with the
+  classification made total and tested. **The proposal in `First step` above
+  is NOT built**: `summaryLine()` is untouched, no verdict line splits on
+  breaking-versus-in-range, and this entry's status stays the owner's to move.
+  What shipped is the existing behaviour made honest, which is a break-fix and
+  not this entry.
 - Cost: $0
 - Status: proposed
 
@@ -23872,6 +23903,153 @@ same conflation inside it.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-09 (engineer, tenth message wake) — Gate that a lockfile change moved no production entry, because `npm audit fix` moves them silently
+- Trigger: measured in this run, fixing F93. `npm audit fix
+  --package-lock-only` cleared 20 of `ursa-minor`'s 23
+  development-only advisories and, in the same pass, raised two
+  **production** transitives of `next`: `caniuse-lite` 1.0.30001806 to
+  1.0.30001823 and `baseline-browser-mapping` 2.11.10 to 2.11.35. The
+  chain is three links long and none of it is in npm's output: the
+  `shadcn` bump needed `browserslist` 4.29.5, and the new
+  `browserslist` asks for data tables newer than the ones `next`
+  resolved, so npm raised the hoisted copies that both share. The only
+  reason this run caught it is that the handoff carried an explicit
+  "do not touch the 33 production dependencies" constraint, which made
+  this run write a throwaway classifier to check. A seat without that
+  sentence in its instructions would have shipped it.
+- What: promote the classifier. It is twenty lines: read
+  `package-lock.json`, label every entry `prod`, `dev`, `optional` or
+  `devOptional` from npm's own flags, and print `version`, `resolved`
+  and `integrity` per entry. The gate is then a diff of that table
+  against the same table computed from a git ref, and it fails when any
+  `prod` or `devOptional` row changes while the change was described as
+  development-only. `scripts/dep-floor.mjs` is the natural home: it
+  already runs `npm audit` twice per package precisely to separate the
+  two scopes, so it already holds the concept and the discovery walk,
+  and it is missing only the lockfile-diff half. The distinction this
+  would enforce is the one `docs/design/dependency-floor.md` §2 calls
+  "the idea the gate turns on", which is currently enforced for
+  advisories and not for the bumps that fix them.
+- First step: `tools/deps/lock-classes.mjs <lockfile>` printing the
+  table, plus `--against <git-ref>` printing the diff and exiting 1 on
+  any production-row change, with a test over this run's own three
+  lockfile states (main's, the one `npm audit fix` produced, and the
+  repaired one) since all three are reproducible from this branch.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, tenth message wake) — Drop `shadcn` from `ursa-minor`'s devDependencies, because it is the sole source of the only advisories left and no bump can clear them
+- Trigger: after this run's bump, `ursa-minor` has three advisories
+  left, all low, and all three are one root cause: `deepmerge`'s
+  prototype-poisoning advisory, whose vulnerable range is `>=4.2.0`
+  with no fixed release published in any direction. `npm audit`'s only
+  offered remedy is `shadcn@1.0.0`, three major versions below the
+  `^4.21.0` the manifest declares. So the residue is not a bump this
+  seat declined to make; it is a package choice.
+- What: `shadcn` is a scaffolding command-line tool. No file under
+  `ursa-minor/app/`, `components/` or `lib/` imports it, which
+  `docs/design/dependency-floor.md` §2 established independently, and
+  its normal invocation is `npx shadcn@latest add <component>`, which
+  needs no manifest entry at all. Removing it takes the `deepmerge`
+  cluster, and with it the last advisory in this product, plus roughly
+  300 of the 555 development packages, plus the `@modelcontextprotocol/sdk`,
+  `hono`, `undici` and `systeminformation` subtrees that produced five
+  of the seven high-severity advisories this run just fixed by bumping
+  rather than by removing. `components.json` stays, because that is
+  what `npx shadcn` reads. The same package is already on file as the
+  one that put six advisories into the **production** tree once, by
+  having been listed under `dependencies`; this is the second time it
+  is the whole finding.
+- First step: `cd ursa-minor && npm uninstall shadcn`, then
+  `npm ci && npm run build && npx tsc --noEmit && npm run lint` to show
+  nothing imported it, then `npm audit --package-lock-only` to show
+  zero. One command and one verification, and the reason it is a ledger
+  entry rather than part of this run is that removing a declared
+  dependency is a product decision and the handoff asked for a lockfile
+  bump.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, tenth message wake) — `npm audit`'s offered fix can be a downgrade, and nothing here reads the field that says so
+- Trigger: eight of F93's 23 advisories trace to `minimatch`'s
+  globparts amplification, and for all eight `npm audit` reported
+  `fixAvailable` as `{ name: "eslint-config-next", version: "15.5.29",
+  isSemVerMajor: true }`. `ursa-minor`'s manifest pins
+  `eslint-config-next` at `16.4.0`, beside `next` `16.4.3`. The offered
+  "fix" was a major-version **downgrade** of the lint config away from
+  the framework it configures, and the word npm prints for it in the
+  human-readable output is the same word it prints for a forward patch:
+  "To address all issues (including breaking changes), run `npm audit
+  fix --force`". Taking it would have reported 23 advisories cleared
+  and silently moved the product backwards.
+- What: `scripts/dep-floor.mjs` reads `metadata.vulnerabilities` and
+  the `vulnerabilities` map and does not read `fixAvailable` at all, so
+  nothing in this repository can distinguish "a fix exists" from "a
+  fix exists and it is a retreat". Make the gate classify every row it
+  reports into three: no fix available, a forward fix inside the
+  declared range, and a fix that is a downgrade or a semver-major
+  relative to what the manifest declares. The third class is the one a
+  human must see, because it is the one an automated remedy gets wrong,
+  and it is invisible today. The declared range is in the manifest the
+  gate already loads, so the comparison needs no new input.
+- First step: add a `fixDirection` field to the gate's per-package
+  report, computed by comparing `fixAvailable.version` against the
+  range `package.json` declares for that name, with a test case built
+  from the `eslint-config-next` row in this run's own `before.json`,
+  which is reproducible from `git show HEAD~2:ursa-minor/package-lock.json`.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, tenth message wake) — Craft scan: Graphiti, the engine under Zep, which puts two separate clocks on every fact and settles contradictions with a judge
+- Trigger: the craft scan's rotation through `docs/market/landscape.md`,
+  Category 3, the Zep entry. Read against this product's own time
+  dimension, which `CLAUDE.md` §1 calls "not just what survived but
+  how long" and which `ursa-minor`'s `src/lifespan.ts` implements.
+- What: one scan, two halves, and the stealable half is a field this
+  product's record does not have. Both halves are below.
+- The thing worth stealing: **two clocks per fact, not one.**
+  `graphiti_core/edges.py` gives every `EntityEdge` four timestamps,
+  and they are two pairs with different jobs. `valid_at` and
+  `invalid_at` are world time, when the fact started and stopped being
+  true, and the field's own comment draws a line this seat has not
+  drawn anywhere: "datetime of when the fact stopped being true; soft
+  deadlines are not invalid_at". `created_at` and `expired_at` are
+  observation time, when the system learned the fact and when the
+  system learned it was over. Ursa's span fates carry one axis. A
+  `decayed` span says the text is gone; a `durable` span says it is
+  still there at the newest commit this run could read; and `untested`
+  says nothing came after it. That third value is the right instinct
+  and it is coarse, because it collapses two different records: a span
+  nobody has looked at since, and a span that was looked at and held.
+  With both axes, `durable` would carry the instant the survival was
+  last observed, and a buyer could tell a six-month-old survival claim
+  from one checked this morning, off the record and with no clone in
+  hand. The portfolio already learned the general form of this twice —
+  `runner-facts.md` §12 on never writing a time you did not read, and
+  §59 on authorship not being visibility — so the generalization is
+  on file and the data artifact does not implement it.
+- The thing Ursa does better: **what invalidates a fact.** Graphiti
+  decides that a new fact contradicts an old one by asking a language
+  model, so its `invalid_at` is a judgement about text, and its
+  accuracy is the judge's accuracy. Ursa's equivalent is not a
+  judgement. A span is gone because the characters are not in the file
+  at commit N, and `src/deletion.ts` goes further and says *who* did
+  it: the person, who read it and did not keep it, a merge commit,
+  which overwrote it mechanically and carries no correction signal, or
+  nothing nameable when the clone cannot read the boundary that would
+  settle it. That is the same object with no grader in it, which is the
+  whole claim in `CLAUDE.md` §1, and it holds up well against the
+  product in this category that has thought hardest about time.
+- First step: add an observation-time field to the lifespan fate in
+  `ursa-minor/src/lifespan.ts` — the commit and author date the fate
+  was last checked against, not a run timestamp — and split `untested`
+  into "nothing came after it" and "checked and still there", which is
+  the distinction the bi-temporal pair buys. Read
+  `docs/design/verbatim-descent.md` first, since it already orders
+  sibling dates and may own the clock this should read.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-09 (market, 22nd run) — Cite Memobase's $9/$29-per-month consumer memory tiers as the first direct paid comp for Major's "free forever" claim, paired with why the comparison is structural and not just a lower number
 
 - Trigger: docs/market/positioning.md's new 2026-11-09 (22nd run)
@@ -24031,6 +24209,268 @@ same conflation inside it.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-09 (engineer, message, eleventh wake) — Read every pair of manifests that describe one set of things against each other
+
+- Trigger: this run. `tools/registers/id-namespaces.json` and
+  `tools/registers/registers.json` both enumerate this repository's
+  append-only registers, from different angles, and nothing read one
+  against the other. The result was that two registers whose own
+  `why_identifier` fields in `registers.json` describe an identifier race
+  in the exact words the identifier gate exists for were absent from the
+  gate's manifest, and the absence was indistinguishable from a decision,
+  because that manifest reasons explicitly about two exclusions and simply
+  did not mention these. Ursa's exo seat found both by hand.
+- What: this repository runs on declarative manifests, and several pairs of
+  them describe overlapping sets with no assertion tying them together.
+  Known candidates, each a pair where one file can gain a member without
+  the other noticing: `registers.json` against `id-namespaces.json` (closed
+  this run), `prod-closure.json`'s workspace keys against the tracked
+  `package-lock.json` files, `tools/registers/vendored.json` against the
+  files that actually carry a vendored header, `tools/seat/branch-patterns.json`
+  against the seat list the roster carries, and `scripts/ci-checks.mjs`'s
+  check list against the gates that exist under `tools/`. The last of those
+  is the one with a measured cost already on file: the security seat added
+  `register-ids` on 2026-11-02 precisely because two gates existed in
+  `tools/registers/` and were named in no gate list, so nothing ran them.
+  The unit of work is one coverage assertion per pair, total rather than
+  heuristic, each failing with the name of the unaccounted-for member.
+- First step: enumerate every JSON manifest under `tools/` and `scripts/`
+  with `grep -l '"'"'comment"'"'' tools/**/*.json`, and for each one write down
+  in a table what set it claims to enumerate and what other file would
+  know if it were incomplete. Pairs where the answer is "nothing" are the
+  work; pairs where the answer is a file are a one-test fix each.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message, eleventh wake) — Find the tests whose fixture is built by the same rule as the code under test
+
+- Trigger: this run, in `tools/registers/id-verdict.test.mjs`. A test named
+  "every define pattern finds its own namespace prefix and nothing else"
+  built its own sample as `## ${ns.name}-${padded} — a heading` and then
+  asserted the pattern matched it. That assertion can only pass for a
+  namespace spelled `NAME-<digits>`, which was every namespace that
+  existed, so the test certified the four that were and was unreachable
+  for the two that were missing. It looked like a check on the manifest and
+  was a restatement of the convention the code already assumed. It is now
+  asserted against a heading copied out of the register.
+- What: sweep the suites under `tools/` and `scripts/` for assertions whose
+  expected value is computed by the same expression the code under test
+  uses, rather than written as a literal or read from the repository. This
+  repository already knows the remedy and states it in
+  `id-verdict.test.mjs`'s own header: "a test that rebuilt it from the
+  module's own template would pass on any reword", which is why the verdict
+  lines there are hand-written literals. The gap is that the rule was
+  applied to the verdict lines and not to the fixtures. A mechanical
+  starting signal is cheap: in a test file, any `${...}` interpolation
+  inside an `assert.*` expected argument that references a field of the
+  object under test is a candidate.
+- First step: grep the suites for `assert.equal(` and `assert.match(` whose
+  expected side contains a template literal interpolating a property of the
+  subject, triage the hits by hand into "pins a literal", "reads the
+  repository" and "recomputes the rule", and fix the third class in the
+  file with the most hits.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message, eleventh wake) — Refuse to ready a pull request whose own branch is red
+
+- Trigger: this run, measured on this seat's own #823. That pull request
+  was readied and sitting in the owner's merge queue, and
+  `node --test tools/registers/closure-verdict.test.mjs` fails on its head
+  while passing on `main`: it moved `ursa-minor`'s dev-only closure from
+  611 entries to 558 and left `tools/registers/prod-closure.json` pinned at
+  611. Two declared checks go red on it, `tooling-suites` and
+  `register-closure`, and the repair was one number that the gate's own
+  `--write` flag regenerates. So the gate existed, ran offline in seconds,
+  named the number, and no one asked it before readying.
+- What: a seat-side tool that stands between the work and `gh pr ready`.
+  `node tools/seat/ready-check.mjs <number>` runs `node
+  scripts/ci-checks.mjs` over the working tree, and on a red check prints
+  the check id, the failing assertion and the repair command, exiting
+  non-zero so the readying step cannot be the next thing that happens. The
+  existing `passExit` semantics carry over unchanged, so an owner-held
+  exit 2 is not a block. This is deliberately not a workflow change, which
+  this seat may not make: it is a command a charter can name in the same
+  place it already names `gh pr ready`.
+- First step: write the tool as a thin wrapper that shells `scripts/ci-checks.mjs`
+  and re-renders its summary as a readying verdict, with a test that drives
+  it against a fixture tree carrying one deliberately stale pin. Then
+  propose the charter line separately, since charter edits are the owner's
+  merge and never this seat's daily pull request.
+- Cost: $0
+- Status: proposed
+
+- 2026-11-09 (engineer, message, eleventh wake) — Craft scan, Snorkel AI,
+  taken from `docs/market/landscape.md`'s own entry for it, which is that
+  file's newest Category 1 addition. **Nothing was fetched this run**; the
+  product knowledge below is this seat's own, and the entry is a committed
+  file. **Worth stealing:** Snorkel's original technical contribution is
+  weak supervision, where you declare several noisy labeling functions over
+  the same data and then estimate each function's accuracy from where the
+  functions agree and disagree, rather than trusting any one of them.
+  Ursa's span classifier assigns `survived_verbatim`, `survived_mutated`,
+  `generated_deleted` and `no_generation_provenance` from a set of
+  heuristics, and the fourth is both the most valuable category and the one
+  computed as a residual, meaning it inherits every other heuristic's
+  misses with no way to say how confident it is. Treating each provenance
+  heuristic as a labeling function with an estimated accuracy would let the
+  most commercially important category carry a confidence rather than be
+  whatever is left over. **What Ursa does better:** Snorkel's label is
+  still produced by a function someone wrote against a specification, which
+  is why it needs an accuracy model at all. Ursa's label is produced by the
+  artifact, so "the finished work kept this span" is not an estimate of a
+  judgement and needs no agreement model to be trusted. The landscape
+  entry's own weakness line says the same thing from the market side: work
+  performed on request against a specification, with no
+  generation-to-outcome join.
+
+### 2026-11-09 (engineer, twelfth message wake) — The dependency gate's own printed output is asserted by nothing, so its numbers can disagree with the tool they summarise
+
+- Trigger: this run's repair. Before the change, `node scripts/dep-floor.mjs`
+  printed `ursa-minor (ursa-minor-site): all critical=0 high=0 moderate=0` and
+  `Dependency floor holds`, while `npm audit --json` in that directory in the
+  same minute returned
+  `{"info":0,"low":3,"moderate":0,"high":0,"critical":0,"total":3}`. Two
+  numbers about one tree, read from the same process, disagreeing. The
+  classification branches were fixed and tested this run, so the *decisions*
+  are now covered. The *rendering* is not: the loop that prints the count
+  line, the `FAIL` lines, the `warn` lines and the GitHub `::error::`
+  annotations still lives at module scope in a script that shells out to the
+  network before it can be reached, so no test has ever read a line it prints.
+- What: the gate has two halves and this run only closed one. Give the
+  rendering half the same treatment: a pure `report({packages, violations,
+  expired, warnings, annotate})` that returns an array of lines instead of
+  calling `console.log`, with `dep-floor.mjs` printing what it returns. Then
+  assert the one property that would have caught this class without anybody
+  guessing at it — a **reconciliation**: for each package, the severities the
+  count line prints equal `metadata.vulnerabilities` key for key, and every
+  entry in the audit's `vulnerabilities` object appears on exactly one
+  rendered line. Drive it from a captured real `npm audit --json` payload
+  committed as a fixture, so the assertion runs offline in under a second and
+  the gate stops being a tool whose output only a network run can see. The
+  fixture is also the first thing this repository would have to replay against
+  a future npm whose schema moved, which is the risk the 2026-11-01 craft scan
+  on this same output contract named and nothing acted on.
+- First step: capture `npm audit --json` from `ursa-minor` into
+  `scripts/fixtures/npm-audit-ursa-minor-2026-11-09.json`, extract the
+  `else` branch of `dep-floor.mjs` into `reportLines()` in
+  `scripts/dep-floor-classify.mjs` beside the classifier it already feeds,
+  and add the reconciliation assertion to
+  `scripts/dep-floor-classify.test.mjs`. One day, no new files beyond the
+  fixture.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, twelfth message wake) — A seat citing another seat's tool cannot tell whether it can import it, and both seats paid for that in one window
+
+- Trigger: Ursa/security corrected this seat with the host fact
+  `authorship-is-not-visibility`, correctly, in the same window in which its
+  own gate list became the next thing that rule applied to.
+  `tools/gates/gate-registry.mjs` and the `gateCandidatePaths` export its
+  census depends on exist on `origin/ursa-security/2026-11-09-message-11` and
+  on no other ref, confirmed by `git branch -r --contains b8296e0b`. This run
+  had to read both with `git show` from that branch instead of importing them,
+  and `git merge-base --is-ancestor b8296e0b origin/main` answered `NOT ON
+  MAIN`. Two seats, one window, the same rule, neither repair visible to the
+  other.
+- What: the rule is known and written in `node tools/seat/env-facts.mjs`, and
+  knowing it does not answer the question a seat actually has, which is "can I
+  build on this today". That question is mechanical and nobody has made it one
+  command. A `node tools/seat/visibility.mjs <path>...` that, per path, prints
+  whether `origin/main` carries it, which remote refs do, and which open pull
+  request each of those refs belongs to, with a verdict of `importable`,
+  `branch-only` or `absent`. Exit non-zero only on `absent`, since
+  `branch-only` is a true state of the world and not a defect. The value is
+  not the git plumbing, which is three commands. It is that the answer arrives
+  before a seat writes a paragraph deferring to a tool it could have read, or
+  spends a window rebuilding one it could have cherry-picked. Note the
+  prerequisite from the host facts: every one of those commands answers
+  wrongly on the clone this host hands a seat, so the tool runs
+  `tools/ensure-full-clone.sh`'s check first and refuses rather than reporting
+  `absent` for a ref it simply cannot see.
+- First step: `tools/seat/visibility.mjs` plus its test, keyed on
+  `git cat-file -e origin/main:<path>` for the main answer and
+  `git ls-remote --heads` joined to `gh pr list --json headRefName` for the
+  branch answer, with the shallow-clone refusal first. One day.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, twelfth message wake) — A field present on one of a tool's finding kinds and absent on its siblings is a defect class this repository has now hit twice
+
+- Trigger: Ursa/security's framing of this run's bug, which is sharper than
+  the bug. The remediation hint in `scripts/dep-floor.mjs` was not a field
+  nobody read. It was a field read on one of the four paths an advisory can
+  take, and the three paths without it are the three this repository's own
+  advisories actually use. So the gate was correct about the case it was
+  tested on and silent about every case it meets. The same shape is already
+  recorded one layer up in `scripts/dep-floor-summary.mjs`'s header, where one
+  message served two conditions with different owners, and in
+  `docs/design/verdict-lines.md` §1.
+- What: make the shape findable instead of waiting for a third instance. A
+  census over this repository's verdict-producing tools that, for each tool
+  pushing records into two or more sibling output arrays, compares the key
+  sets of the records it builds and reports any key present on some kinds and
+  absent on others with nothing declaring the difference. The honest version
+  is static and conservative: read the object literals passed to `.push()` on
+  arrays declared in the same module, which is exactly the shape
+  `dep-floor.mjs` had and which `tools/gates/code-census.mjs` already
+  demonstrates is tractable by reading sources rather than running them. A
+  declared difference is legitimate and common, so the output is a baseline
+  file with a written reason per entry, the pattern
+  `tools/gates/import-effects.baseline.json` already uses, rather than a
+  demand that every kind carry every field.
+- First step: run the detector as a one-off read over `tools/` and `scripts/`
+  and count the instances before building the gate, because a census whose
+  population turns out to be one instance is a finding and not a gate. If the
+  count is above three, build it as `tools/gates/record-shape.mjs` with its
+  baseline. The measurement is half a day and gates the rest.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 — Craft scan: `npm audit`'s human renderer answers "whose repair is this" in two lines, and our gate that parses the same data answered it in none
+
+- Product scanned: the npm CLI's own `audit` reporter, version 10.9.8, run
+  first-hand in this sandbox against `ursa-minor`. Chosen because this run
+  spent its day inside `npm audit --json`, and the JSON contract was last
+  run's scan while the thing npm *shows a human* was not. No web page, no
+  search, no vendor documentation. The comparison is two renderers over one
+  byte-identical input.
+- What is worth stealing. npm spends two of its sixteen output lines on the
+  question of who can act, and spends them before it spends any on severity:
+
+  ```
+  fix available via `npm audit fix --force`
+  Will install shadcn@1.0.0, which is a breaking change
+  ```
+
+  Both facts are in the JSON as `fixAvailable.name`, `.version` and
+  `.isSemVerMajor`. Our gate parsed all three and, until this run, rendered
+  them on one of its four paths. npm also puts the *dependency chain* in the
+  output, indented, so a reader sees that `shadcn` is the direct dependency
+  and `deepmerge` and `@shadcn/registry` are consequences of it. That is the
+  difference between three advisories and one decision, and it is the single
+  most useful thing in npm's output that ours does not have: we print three
+  `warn` lines with the same `Fix:` phrase on each, where npm prints one tree
+  with one repair at its root. `vuln.effects` and `vuln.via` carry the edges
+  needed to group them, and we already read `via` for the GHSA ids and throw
+  the structure away. Candidate ledger entry once the rendering half of the
+  gate is testable, which is this day's first entry above.
+- What we do better, and it is not cosmetic. npm's reporter has no floor. It
+  prints `3 low severity vulnerabilities` and a `--force` command, and the
+  decision about whether that blocks anything is left entirely to the reader,
+  which is why `npm audit` cannot be a gate without a wrapper. Ours encodes
+  the decision — critical anywhere and high in production fail, everything
+  else is reported — and crucially encodes who may *accept* an exception, in
+  `dep-floor.allow.json`, with an expiry on every entry so an accepted risk
+  comes back and asks again. npm has `--audit-level`, which is a threshold and
+  not a policy: it cannot express "high is fatal in production and reportable
+  in a dev tree", which is the distinction our entire floor rests on, and it
+  has no concept of an owner-approved exception at all, let alone one that
+  expires. npm also reports a `--force` repair as if the reader were empowered
+  to run it; our seat charters are explicit that a semver-major dependency
+  decision is not a seat's to take, which is exactly why `(semver-major)`
+  belongs in the rendered hint rather than being collapsed into "a fix exists".
+
 ### 2026-11-09 (security) — the prompt-injection gate has no exit code for a finding only the owner can repair
 
 - Trigger: registering every unreached gate in `scripts/ci-checks.mjs` this
@@ -24124,4 +24564,134 @@ same conflation inside it.
   check.
 - Cost: $0, and about an hour of wall clock, because each full run is roughly
   eight minutes and most of that is the suite under suspicion.
+- Status: proposed
+
+### 2026-11-09 (skill) — Two gates in `tools/ledger/` die with a stack trace on inputs that are a reader's mistake, which is the security seat's finding of this morning in a second tool family
+
+- Trigger: running `node tools/ledger/check.mjs --help` to read the
+  ledger contract before filing an entry, and running
+  `node tools/ledger/check-closures.mjs` while a tracked file was
+  deleted from the working tree but the deletion was not yet staged.
+  Both printed a Node stack trace and exited non-zero.
+- What: `check.mjs --help` reads `--help` as a path and dies at
+  `readFileSync` with `ENOENT: no such file or directory, open
+  '--help'`, which is byte-for-byte the shape named in this file's own
+  2026-11-09 security entry "a gate reads an unrecognised flag as a
+  filename and dies with a stack trace", in a different tool. The
+  second is a different cause with the same presentation:
+  `check-closures.mjs` walks `git ls-files` and opens each path, so a
+  tracked file missing from the working tree ends the run at
+  `checkRepository` line 277 rather than being reported. A deleted file
+  is an ordinary state of a working tree mid-run, and this seat hit it
+  by removing a placeholder run note it had just renamed. The cost is
+  small each time and it is paid in the same place every time, which is
+  a reader who cannot tell a gate's finding from a gate's crash. Ursa's
+  exo seat put the general form of this on the board this morning:
+  reaching for a member of the repaired family is not the same as being
+  repaired, so a fix landed in one gate says nothing about the next.
+- First step: not this seat's, because `tools/ledger/` is outside this
+  charter's write surface, and filed rather than routed as an ask
+  because the owning seat already holds the first instance and this is
+  evidence for its generality rather than a second task. Two lines
+  each: `check.mjs` refuses an argument beginning with `--` that it does
+  not recognise, and `check-closures.mjs` skips a path `git ls-files`
+  names and the tree does not carry, reporting the count it skipped.
+  Owner: the engineer seat, or the security seat's next run on the
+  2026-11-09 entry above, whichever reaches `tools/ledger/` first.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — §5g tells a reader to re-record a drifted range by skill slug, which the gate now refuses, and the tier mechanism is why this is filed instead of edited
+
+- Trigger: shipping the rule that a skill slug is not a name for a
+  drifted range, then grepping `prompts/skill-extract.md` for what it
+  says about `--update`. §5g clause 3 reads "It also has to name what it
+  is re-recording now, by skill slug or by lock key", in a numbered list
+  whose subject is drift repair.
+- What: that sentence is now false for the case the list is about. A
+  reader who follows it runs `--update <slug>` over a drifted range and
+  gets exit 2. The gate's own message names the right repair, so the
+  cost is bounded at one refused command and a reader's confidence in
+  the document, which for a library whose stated differentiator is that
+  every claim traces is not nothing. This is not a §5ai case: nothing
+  new is being cited and no section is being added, so the rule about
+  ordering does not reach it. What reaches it is the tier mechanism.
+  `docs/standards/pm.md` §10 makes `prompts/` Tier C, and Tier B
+  condition 4 refuses a PM merge when any path in the diff is Tier C, so
+  one corrected sentence would move this run's gate, tests and lock from
+  a merge the PM can take to one only the owner can.
+- First step: one sentence in §5g clause 3, saying a slug covers a range
+  the lock has never recorded and a drifted range is named by ref or
+  followed with `relocate-anchors.mjs`. It belongs in the same
+  prompt-only branch as the four §5ai-held entries this file already
+  carries, which makes five, and this is the one of the five that is
+  held by the tier rather than by §5ai, so a later run that drains the
+  queue should not expect one rule to explain all five. Owner: the next
+  run of this seat that opens a branch touching only
+  `prompts/skill-extract.md`.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The lock's own hash locates a moved range, so the mechanical repair needs no ref either
+
+- Trigger: shipping the verify half of the gone-or-moved split this run
+  and then reading the one command it prescribes. `findableAt` answers
+  "did this move, and to where" from the lock and the working file, with
+  no git ref, which is the whole reason it can run inside a guard that
+  takes none. `skills/relocate-anchors.mjs`, which the new trailer names
+  as the repair, recovers the as-cited lines from `<old-ref>` and refuses
+  at exit 2 without a readable one.
+- What: the ref is doing two jobs in that tool and only one of them is
+  load-bearing. It proves the recorded fingerprint belongs to that tree,
+  which is a real guarantee and worth keeping. It also supplies the text
+  to search for, which the lock's hash already supplies: a hash is enough
+  to search for when you are willing to hash every window, and this run
+  made the library willing. So for every range where hashing the windows
+  finds exactly one match, the relocation is proven by the hash itself
+  and the ref adds nothing to that range's answer. The measured size of
+  that set is not small: on the 49-range batch this run produced in
+  `ursa-major/src/types.ts`, the split found all 49 at exactly one offset
+  each. Verify can therefore now hand a reader a correct triage in a
+  clone where the repair it names refuses, which is a narrower version of
+  the shape `#820` removed from `--update`, where a tool printed a
+  command the next gate would reject.
+- First step: this seat's, and it is one flag rather than a rewrite:
+  `relocate-anchors.mjs` with no ref relocates exactly the ranges whose
+  recorded hash matches one window and nothing else, reporting the
+  ambiguous and the gone under the two headings it already has, and the
+  ref path stays the default because it is the stronger check. The thing
+  to measure before writing it is the one number that decides whether it
+  is worth a flag: over a real drift batch, how many ranges the ref-free
+  pass resolves that the ref pass does not, which is zero on a complete
+  clone and everything on a shallow one.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — A test of this run's own change passed with the thing it tested deliberately broken
+
+- Trigger: this run memoized the window search per `(path, height)` and
+  wrote a test for the one way that can go wrong, a key that collides
+  across heights and hands a range another height's offsets. Then broke
+  the key on purpose to watch the test fail. It passed.
+- What: the fixture had one moved range and one gone range in one file.
+  The range handed the wrong index finds nothing there, so it reports
+  gone, and the one that got the wrong index was the one whose honest
+  answer was already gone. The wrong answer and the right answer were the
+  same string. The repair was to make both ranges move, which is the case
+  where a collision produces a verdict that differs from the truth, and
+  that version does fail on the broken key. The general shape is a test
+  that cannot fail, and nothing in this library measures how many of its
+  own tests are in that state. The suites are large enough now for the
+  question to be real: 218 tests across eight files under `skills/`, all
+  green, and this run has one measured instance of a test that was green
+  for the wrong reason and was caught only because its author went
+  looking by hand.
+- First step: this seat's, next run, and it is bounded by being a survey
+  rather than a framework. For each gate under `skills/`, invert or
+  blank one decision line, run that gate's own suite, and record which
+  suites notice. One pass, one table, no tooling committed; a count of
+  gates whose suite stays green under a broken decision is a number this
+  library does not have and can act on. The cost to beat is the one this
+  run paid by hand, which was two minutes per gate.
+- Cost: $0
 - Status: proposed

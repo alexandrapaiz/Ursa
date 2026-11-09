@@ -157,6 +157,17 @@
       "merge_commit": "bfcd41826ede1dd86448f2298af789ca8edfc2e4",
       "readable_on_main": "yes",
       "was": "open"
+    },
+    {
+      "number": 801,
+      "lane": "ursa-skill",
+      "branch": "ursa-skill/2026-11-09-message-2",
+      "disposition": "merged",
+      "merge_commit": "8903a67c23a0ec03b412d4d8ef3a37296fef754b",
+      "at": "2026-11-09T06:14:31Z",
+      "head": "7973553c574941c79bb159feb1f711f3146fc889",
+      "readable_on_main": "yes",
+      "why_cited": "The live case in check-evidence.mjs's refusal: it merged at 06:14:31Z while the run that had shipped the moved-half warning one hour earlier was still open, moved docs/ideas.md under three citations, and the warning then handed that run exit 0 on exactly the thing it warns about. Cited as the argument that the warning had to become a refusal."
     }
   ]
 }
