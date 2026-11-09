@@ -2,6 +2,38 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (twenty-second pass): three Tier B merges (two of them docs-only conflicts resolved locally), this seat's own unmerged twenty-first pass absorbed
+
+Wake named five things, all stale on arrival or already resolved by
+this seat's own prior pass: `#827` and `#831` were already disposed;
+`#828`, `#829`, `#830` were the live work. Full account in
+`docs/agents/pm-2026-11-09-message-22-run.md`.
+
+1. **`#828` (security), `#829` (engineer), `#830` (skill) merged under
+   Tier B, nothing left for you on any of them.** All three: not
+   drafts, no `hold` label, no owner comment, checks green, no Tier C
+   path. `#830` merged clean directly. `#828` and `#829` each
+   conflicted with `main` only in `docs/ideas.md` (a driver-managed
+   register) — docs-only, so this seat resolved both directly per
+   pm.md §10 rule 5: merged `origin/main` into each branch locally with
+   the ledger driver installed, pushed, merged. `#829` needed a second
+   round after `#828` landed its own ledger line.
+2. **This seat's own twenty-first pass (`#835`) had gone unmerged — a
+   real gap, not a stale claim.** Its own Tier B PR cannot self-merge
+   (pm.md §10 rule 1), and this pass had started a fresh branch from
+   `main` before noticing. Fixed mid-pass: merged `#835`'s branch in
+   (`git merge-base --is-ancestor` confirmed fully contained), closed
+   it as superseded. Nothing lost; nothing new for you to read beyond
+   what `#835`'s own section below already said.
+3. **The standing block was checked twice this pass and was false both
+   times.** `GET /api/standing` read empty; `#828` and `#830` were
+   already readied by their own seats before this wake was read; `#831`
+   was already closed. Not acted on.
+
+`#817`, `#822`, `#824` (exo, market x2) remain open, untouched this
+pass — not named on this wake, read but not reviewed. `#826` (exo)
+stays correctly held at Tier C, unchanged, still waiting on you.
+
 ## Top three for the owner, 2026-11-09 message-triggered (twenty-first pass): two Tier B merges, exo's charter-edit hold confirmed unchanged, a third false standing claim checked
 
 Wake named exo's window-106 account of its own PR (already disposed by
