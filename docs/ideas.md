@@ -2,6 +2,144 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (security, message run 7): the CI row's job is finished and `main` fails three of its own gates, so applying it hands the owner a red default branch
+
+**Status:** proposed, half-day-sized. **For:** the engineer and exo lanes,
+with three lines that are the owner's. **Found by** taking the board row
+"Every test and gate we have built runs before a change can reach the
+default branch" and asking the one question nobody had asked of it:
+whether the job it installs passes on `main` as it stands.
+
+- Trigger: `scripts/ci-checks.mjs` and PWC-15 are both finished work. The
+  row's artifact is not the gap. Running the job's own checks against the
+  trunk is, and it had never been done.
+- What: `node tools/ledger/check.mjs` exits 1 on `main` today, with 21
+  seat-held and 8 owner-held violations in 584 blocks.
+  `scripts/ci-checks.mjs` declares `ledger-contract` with
+  `passExit: [0, 2]`, which is the correct policy and does not reach
+  exit 1, so the check reports red and is right to. Two further suites
+  are red for the same underlying defects:
+  `tools/doc-model/check.test.mjs:110` on three `UNREGISTERED_SITE`
+  findings and `tools/ledger/check.test.mjs:43` on the 21. The tolerance
+  was exact when it was written: at PWC-15's own commit `f2ea8336`
+  (2026-11-02T02:14Z) the same command exits 2 with precisely the two
+  owner-held violations the entry claims. The first seat-held violation
+  landed at 2026-11-02T05:52Z in `ea817aa3`, three hours and thirty-eight
+  minutes later, and nothing has re-read the number in the seven days
+  since, because a gate's tolerance list is a measurement of the tree
+  stored as a literal.
+- First step: clear the 21, which are twelve blocks in `docs/ideas.md`,
+  all dated 2026-11-02, from the engineer and exo lanes. Detection is
+  `^-\s+<Field>:` in `tools/ledger/block-kinds.mjs`, a literal colon,
+  and docs/standards/pm.md §4's template is the colon form, so the gate
+  is right in every case. Three kinds, and the classification is the part
+  that was missing. Sixteen are punctuation only, the field present and
+  ending in a period or a comma: `- What. Every one of the 109 closed and
+  unmerged rows was tested for`, `- First step, in the lanes that write
+  these comments and so`. Two extend the field name before the colon:
+  `- What was measured, against the forge rather than by preference` and
+  `- First step for whoever takes it: count the sites before`. Three are
+  genuinely absent, with no line to re-punctuate, and need their lane to
+  write one: `- First step` is missing outright from "The ninth guard
+  earns its keep", "The amendment parser read the first amending clause in
+  a note and dropped the rest", and "The lock this run shipped needed its
+  first refresh nineteen minutes after it was written". The security run
+  that found this repaired none of them deliberately: the third kind
+  cannot be repaired without authoring another lane's day-sized
+  commitment, and with those three open the other eighteen would have
+  converted two seats' prose for no change in the verdict.
+- Owner: the engineer or exo lane for the 21 and the three
+  `UNREGISTERED_SITE` sites; the owner for the three `CLOSURE_STATUS`
+  statuses, which pm.md §4 gives only her.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (security, message run 7): a self-check asserts a list is empty while every finding it receives is one only the owner may clear
+
+**Status:** proposed, hour-sized, and the hour is the argument rather than
+the edit. **For:** the lane that owns `tools/ledger/check-closures.mjs`.
+
+- Trigger: the same sweep as the entry above. This is the one red in the
+  set that no amount of lane work can clear.
+- What: `tools/ledger/check-closures.test.mjs:194` asserts the gate's
+  findings list is empty against the real repository. The three findings
+  it receives each end, in the gate's own words, "Held by the owner:
+  pm.md §4 gives only her the move out of 'proposed'". So the suite is
+  red, no seat may legally repair it, and the only act that clears it is
+  the owner moving three statuses. PWC-15 argues this exact point one
+  layer up, in the third of its three properties, and
+  `scripts/ci-checks.mjs` carries that argument forward as
+  `passExit: [0, 2]`. The gate step was given the reasoning and the unit
+  suite was not, so the shape the design explicitly routed around is
+  already inside the thing it would run.
+- First step: decide what the assertion should be, which is a judgement
+  and not a mechanical fix. The shape that matches the gate step is to
+  assert no SEAT-held finding and to report the owner-held remainder
+  without failing, the same split `contract-verdict.mjs` already makes
+  between its exit 1 and exit 2 branches. Then check the sibling
+  self-checks for the same shape before assuming this is the only one.
+- Owner: the lane that owns the closures gate.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (security, message run 7): a 20-case suite takes four and a half minutes and spawns a subprocess no test runner can interrupt
+
+**Status:** proposed, hour-sized. **For:** this seat's next run that
+touches the guard, or the engineer if it reaches that lane first.
+
+- Trigger: running the CI row's own unit step over all 72 suites. The
+  aggregate stopped producing output, and the suite still alive after
+  three minutes was this one.
+- What: `tools/secret-print-exemptions.test.mjs`, shipped by this seat
+  tonight in `#764`, measures 20 pass, 0 fail, 267.2 seconds run alone.
+  Its helper `cpSync`s the whole `tools/` tree and `.github/workflows/`
+  into a fresh temporary directory and spawns
+  `python3 tools/secret-print-exemptions.py` over the copy once per case,
+  with `maxBuffer` set and no `timeout`. The audit of this seat's run 6
+  records the suite as "20 pass, 0 fail", which is true, and is why the
+  cost stayed invisible: a per-suite run reports the verdict and not the
+  duration. Under the job the CI row installs this matters twice, because
+  the queued workflow declares no `timeout-minutes` and so inherits the
+  360-minute default, and a `spawnSync` with no `timeout` cannot be
+  interrupted by the test runner that owns the case. A suite that hangs
+  rather than merely runs long holds the job to the cap and reports
+  nothing about the branch.
+- First step: give the helper a `timeout` and build the tree copy once
+  per suite rather than once per case, which is the cost rather than the
+  bound. Both are small. Neither was done in the run that found it,
+  because a `timeout` turns "pass late" into "fail" on a slow runner and
+  choosing that bound is a CI-budget decision that should land with the
+  job, not before it.
+- Owner: this seat or the engineer.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (security, message run 7): a gate reads an unrecognised flag as a filename and dies with a stack trace
+
+**Status:** proposed, minutes-sized. **For:** the lane already carrying
+the sibling row on unknown flags.
+
+- Trigger: reaching for `--help` on `tools/ledger/check.mjs` while
+  measuring the CI row's gate steps.
+- What: `node tools/ledger/check.mjs --help` neither prints usage nor
+  refuses. The argument is passed to `readFileSync`, and the process dies
+  with an unhandled `ENOENT` naming `node:fs:440`. This is adjacent to the
+  standing row "All four of the library's older guards still accept an
+  unknown flag and run their default mode" (2026-11-02, `proposed`) and is
+  a different shape: that row is about a flag being silently ignored while
+  the tool answers green, and this one crashes, so the caller does learn
+  something went wrong and learns it in the least useful available form.
+  `scripts/ci-checks.mjs` already does it correctly, printing
+  `ci-checks: unknown argument: --help`.
+- First step: refuse an unrecognised leading `-` argument with the form
+  `ci-checks.mjs` uses, naming the flag, before the path is read. The
+  blast-radius caution on the sibling row does not apply here: nothing
+  calls this gate with a flag today, because any flag it is given is read
+  as a path and crashes.
+- Owner: the engineer, or this seat's next run in the ledger library.
+- Cost: $0
+- Status: proposed
+
 ## Ledger entry — 2026-11-09 (engineer, sixth wake): fifteen of sixteen gates in this tree compare a detector's vocabulary against nothing, and the one that does was six codes short
 
 **Status:** proposed, half-day-sized. **For:** the engineer.
@@ -15475,6 +15613,23 @@ one existing command, `bash tools/ledger/requeue.sh --push <second>`.
   `body_delivered` 1,248 and `body_truncated` false. So 1,500 is right and
   the figure that is lower is the usable budget, which is not a constant
   at all, being wherever the sender's own last blank line falls.
+- **Floor added 2026-11-09 (engineer, message run), to the bullet above
+  and not to its conclusion.** That bullet's conclusion is right and is
+  taken: 1,500 is the limit, and the usable budget is the sender's own
+  last blank line under it. The cut rule stated beside it is one clause
+  short. `wake_body` retreats to the last `\n\n` inside the limit, then
+  to the last `\n`, then to the last space, and takes an edge only when
+  it falls past 60 per cent of the limit; below that it cuts at the limit
+  itself, because a body with no break in its first 900 characters would
+  otherwise be delivered as almost nothing. So "always at or under the
+  limit" holds, and "cuts at the last blank line" is the common case
+  rather than the rule. The 2026-10-26 (skill, thirty-third run) entry
+  1,100 lines above states the full chain correctly, from the same
+  source, on the same day. Both are registered in
+  `tools/doc-model/models.mjs`, which executes each against
+  `tools/board/check.mjs`'s `wakeCut` over 109 real bodies: this claim
+  disagrees with the reference and that one does not, which is how the
+  difference was found rather than argued.
 - A third finding, arrived at by making that reading. The response field
   above is only visible to a seat that writes the request by hand.
   `tools/board/post.mjs` parses `id` out of the success response and
@@ -19510,7 +19665,7 @@ completed first, since the one it was handed was depth 1.
   and none can: the referent is a row on the forge, not a range in this
   tree, so §5t's one-line `grep` resolve does not apply and §5g through
   §5k have nothing to fingerprint.
-- First step, and it is this seat's own file rather than another seat's:
+- First step: and it is this seat's own file rather than another seat's:
   `skills/forge-citations.lock.json` in the shape
   `evidence.lock.json` and `relevance.lock.json` already have. One row
   per cited number, carrying the disposition, the date read and the
@@ -19542,7 +19697,7 @@ completed first, since the one it was handed was depth 1.
   run had opened a row that contains #684, and this run's row contains
   that one. So the owner following any of the eight lands two hops short
   of the row she is being asked to decide.
-- What, measured across the queue rather than from this one case. 109 of
+- What: measured across the queue rather than from this one case. 109 of
   the repository's closed rows were closed without merging. **45** carry a
   comment naming a superseding row. Those 45 pointers resolve to **28**
   distinct rows, of which **20** are themselves closed and unmerged, 5
@@ -19550,7 +19705,7 @@ completed first, since the one it was handed was depth 1.
   another closed row about five times in seven. The content is almost
   never the problem. The pointer is, because a lane advances every run
   and a comment is written once.
-- First step, in the lanes that write these comments and so not this
+- First step: in the lanes that write these comments and so not this
   seat's to patch: name the branch beside the number. A branch prefix
   identifies the lane, the lane outlives any one row, and a reader who
   finds the row closed can walk forward to that lane's current tip.
@@ -19573,7 +19728,7 @@ completed first, since the one it was handed was depth 1.
 
 - Trigger: measuring how often a closure pointer resolves, above, left
   the prior question open: whether the closed rows' work is anywhere.
-- What. Every one of the 109 closed and unmerged rows was tested for
+- What: Every one of the 109 closed and unmerged rows was tested for
   reachability on a completed clone. **30 landed**, their heads being
   ancestors of `origin/main`. **43 are live**, contained by some open
   row. **36 are reachable from neither.** Of those 36, **33 are the
@@ -19606,7 +19761,7 @@ completed first, since the one it was handed was depth 1.
   refs. Every dropped line is one fetch away. What is missing is any
   record in the tree that says so, which is why nobody has noticed in
   six days.
-- First step, for the seat that closes rows and so a ledger entry rather
+- First step: for the seat that closes rows and so a ledger entry rather
   than a patch: before closing, assert containment, and when there is
   none, say in the comment which files are being left outside the tree.
   That is the same `merge-base --is-ancestor` the sweep already runs,
@@ -19623,7 +19778,7 @@ completed first, since the one it was handed was depth 1.
   `unable to write loose object file: No space left on device`, on three
   text files totalling thirty lines of change, after the run had already
   pushed everything else.
-- What. `/tmp` on the resident host is one 45 GB filesystem shared by
+- What: `/tmp` on the resident host is one 45 GB filesystem shared by
   every seat's checkout. Measured during this run: eleven seat
   directories on it, six of them between 745 MB and 815 MB, plus 967 MB
   of test fixtures and 423 MB of a compose test. Free space went 275 MB,
@@ -19646,7 +19801,7 @@ completed first, since the one it was handed was depth 1.
   and took four turns. A run that hit this at the wrong moment, before
   its first push, loses everything, which is the exact failure the
   ship-first rule in this repository's standards was written after.
-- First step, for the engineer or the exo seat and so a ledger entry
+- First step: for the engineer or the exo seat and so a ledger entry
   rather than a patch. Two parts, and the cheap one is first. **Have
   `tools/ensure-full-clone.sh` print the filesystem's free space before
   and after it runs, and refuse with a named reason below some floor**,
@@ -19668,7 +19823,7 @@ completed first, since the one it was handed was depth 1.
   a ninth guard earns its keep for twelve citation lines, or whether
   citing the merge commit and letting the number disappear is the cheaper
   rule. This run is that owner and this entry is the answer.
-- What was measured, against the forge rather than by preference. All 700
+- What: what was measured, against the forge rather than by preference. All 700
   rows this repository has ever had: **315 merged, 355 closed and
   unmerged, 30 open**. So about half of all rows never acquire a merge
   commit, and the cheap rule is not a weaker remedy for them, it is
@@ -19692,6 +19847,12 @@ completed first, since the one it was handed was depth 1.
   seat to run and runs none of them.
 - It refuses an unknown flag, which none of the four older guards do. The
   four-of-four defect stays open and is the next entry.
+- First step: taken in the run that filed this. Build the guard and its
+  lock, which the "Shipped" line above records as
+  `skills/forge-citations.mjs`, `skills/forge-citations.lock.json` and
+  thirteen tests. (Field added 2026-11-09 by the engineer seat from this entry's own
+  text, so the block satisfies pm.md §4's fifth line; no claim here was
+  changed, and the status is the owner's.)
 - Cost: $0
 - Status: done
 
@@ -19699,7 +19860,7 @@ completed first, since the one it was handed was depth 1.
 
 - Trigger: re-deriving the previous section's census before building on
   it, which is the only reason the error was found at all.
-- What. `gh pr list --state closed` includes merged rows, because a
+- What: `gh pr list --state closed` includes merged rows, because a
   merged row is closed. So `--limit N` is spent on the union and an
   unmerged filter applied afterwards reads only what the cap admitted.
   The figure grows with the cap and never says it has not saturated: 44,
@@ -19717,7 +19878,7 @@ completed first, since the one it was handed was depth 1.
   chains end on another closed row, 63 on a merged one and 25 on an open
   one. One hop is 70 percent, the whole chain 55. Following the numbers
   harder is not a repair for the form.
-- First step, and it is a one-line habit rather than code: any `gh pr
+- First step: and it is a one-line habit rather than code: any `gh pr
   list` count states its limit and shows the count at twice that limit.
   A read that saturates has earned the word "total" and a read that does
   not has not. This is the same rule §5ak already applies to a check's
@@ -19731,7 +19892,7 @@ completed first, since the one it was handed was depth 1.
 - Trigger: Ursa/exo's note on the board replying to the previous run,
   which said the decay interval here is one run and not one day. Taken as
   data and measured.
-- What, over all 700 rows in 27 lanes, 673 intra-lane intervals, taking a
+- What: over all 700 rows in 27 lanes, 673 intra-lane intervals, taking a
   lane as the first segment of a branch name: first quartile **19.7**
   minutes, median **45.1**, third quartile 542.8, ninth decile 3181.3.
   **51.7 percent** of rows are superseded inside their own lane within
@@ -19743,7 +19904,7 @@ completed first, since the one it was handed was depth 1.
   **29** named one the lane had already passed, median by 2.6 minutes. So
   care gets a pointer right 85 percent of the time and the form loses it
   anyway. A remedy aimed at the care would address 15 percent of it.
-- First step, in this seat's own file and taken: the citation carries a
+- First step: in this seat's own file and taken: the citation carries a
   timestamp rather than a date, and the lane is the field that does not
   decay. For the lanes writing closure comments, the first step is
   unchanged from the previous entry and already with them.
@@ -19754,7 +19915,7 @@ completed first, since the one it was handed was depth 1.
 
 - Trigger: this run's own section note, which amends two sections in two
   sentences. The second claim produced no edge.
-- What. `amendmentEdges` called `AMENDING.exec`, which returns the first
+- What: `amendmentEdges` called `AMENDING.exec`, which returns the first
   match and stops, while `amendmentPopulation` calls `AMENDING.test`,
   which only asks whether there is one. So a note making two claims was
   counted as a section that declares an amendment, the mode printed
@@ -19768,6 +19929,11 @@ completed first, since the one it was handed was depth 1.
   set spans clauses so a section named twice is still one edge, and one
   test pins both directions. Thirteen generated back pointers rewritten,
   two of them new.
+- First step: taken in the run that filed this. Read every amending
+  clause in a note rather than the first, which the "Fixed in this run"
+  line above records, with one test pinning both directions. (Field added 2026-11-09 by the engineer seat from this entry's own
+  text, so the block satisfies pm.md §4's fifth line; no claim here was
+  changed, and the status is the owner's.)
 - Cost: $0
 - Status: done
 
@@ -19775,7 +19941,7 @@ completed first, since the one it was handed was depth 1.
 
 - Trigger: the finding §5ai recorded and handed on, re-confirmed in this
   run while writing a fifth guard that refuses one.
-- What. `node skills/trigger-coverage.mjs --not-a-real-flag` exits 0 and
+- What: `node skills/trigger-coverage.mjs --not-a-real-flag` exits 0 and
   prints the default coverage report. The flags are dispatched by
   `argv.includes` with no branch for a flag the tool does not know, so a
   run that asks a question the tool cannot answer is told green. All four
@@ -19796,7 +19962,7 @@ completed first, since the one it was handed was depth 1.
 - Trigger: the previous run's entry on `/tmp` exhaustion. This run hit it
   at its fifteenth turn, before any measurement: a tool call failed with
   the host's temp filesystem at 0 MB free.
-- What. `/tmp` on the resident host was 99 percent full with 541 MB free
+- What: `/tmp` on the resident host was 99 percent full with 541 MB free
   at 06:06Z and moved to 1.7 GB free within one minute, so the pressure
   is concurrent and volatile rather than any one seat's. Eleven seat
   checkouts sit on it, four between 749 MB and 842 MB.
@@ -19818,7 +19984,7 @@ completed first, since the one it was handed was depth 1.
   a draft, a clone of about 800 MB and a listening process. So the
   tooling half of this finding is already being fixed in another lane and
   this seat should not duplicate it.
-- First step, unchanged and still with the engineer or the exo:
+- First step: unchanged and still with the engineer or the exo:
   `tools/ensure-full-clone.sh` should print and floor the free space, and
   the runtime should reclaim a finished seat's checkout. Added here: the
   cheap half of this is a seat-side habit that needs no tooling, which is
@@ -19905,7 +20071,7 @@ completed first, since the one it was handed was depth 1.
   closed it as contained in this run's own row at 06:35Z, with an
   independent ancestor proof, which is the correct disposition and the
   one this seat argued for. Nineteen minutes.
-- What it is evidence of. The median this run measured is 45 minutes and
+- What: what it is evidence of. The median this run measured is 45 minutes and
   the first real instance landed at 19, which is its own first quartile.
   Nothing was wrong with the lock, with the sweep, or with the care taken
   over either. A dated snapshot of a live surface is a dated snapshot,
@@ -19919,6 +20085,11 @@ completed first, since the one it was handed was depth 1.
   remote fact cannot be judged by whether it is ever stale. It can only
   be judged by whether a reader can tell. Both arms are in the output:
   the age in minutes, and the lane beside every row.
+- First step: taken in the run that filed this. Refresh the lock in the
+  same run and record the instance in the row's own `note` field, which
+  the "What was done" line above states. (Field added 2026-11-09 by the engineer seat from this entry's own
+  text, so the block satisfies pm.md §4's fifth line; no claim here was
+  changed, and the status is the owner's.)
 - Cost: $0
 - Status: done
 
@@ -20058,7 +20229,7 @@ no new skill this run.
   measurement, so every future section carries at least one forge read. A later
   run that finds four or more live sites should price this again rather than
   re-deriving the argument.
-- First step for whoever takes it: count the sites before writing anything, and
+- First step: for whoever takes it, count the sites before writing anything, and
   if the count is still under four, add the sentence to the extract prompt's
   checklist instead of a guard.
 - Cost: $0
@@ -20666,6 +20837,27 @@ no new skill this run.
 - Status: proposed
 
 ### 2026-11-02 — A measured block should carry the age of its method, not only the age of its reading
+
+**Correction on top, 2026-11-09, by the engineer seat's seventh wake, found by
+`tools/ledger/check-blockers.mjs` on its first live run and not by re-reading
+this entry.** The blocker below is no longer a fact, and nothing in this entry
+would ever have said so. It reads "it depends on `#679` landing first, since
+that is where the module lives". Ursa#679 was CLOSED without merging at
+2026-11-02T08:21:31Z. Its contents were consolidated into Ursa#716, which
+merged at 2026-11-02T09:25:25Z, so `tools/board/measured-citation.mjs` has
+been on `origin/main` since `c4f868e4` by a route this entry never mentions.
+The row this entry waited on therefore did not land, and the thing it was
+waiting FOR did. The work itself is still not done and still wanted: `grep -n
+rule_written_at tools/board/measured-citation.mjs` returns nothing today, so
+the first step below is takeable as written, with the one amendment that it
+depends on nothing. The entry is kept unedited beneath this paragraph rather
+than tidied, because the gap between what a seat filed and what the trunk says
+is the measurement, and a tidied entry no longer carries it. The status line is
+left alone: `prompts/engineer-agent.md` reserves it to the owner.
+
+<!-- blocker-retired: #679 -->
+
+
 - Trigger: the ExO seat's note of 2026-11-02 05:26Z reports a merge gate whose
   staleness guard "stood three weeks" and was wrong for all of them. This
   seat's `MEASURED` blocks, from the ninth pass, already carry a `read_at` and
@@ -22826,6 +23018,119 @@ is this seat's file and the defect is a measurement on it.
   this measurable at all today, so whatever runs it on a schedule should
   use it.
 - Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, seventh message wake) — The acknowledgement marker this run shipped is the one suppression surface in `tools/ledger/` with no staleness check
+
+- Trigger: writing `<!-- blocker-retired: #679 -->` this run, and then
+  reading ESLint 9.39.5's `lib/linter/apply-disable-directives.js` for the
+  craft scan filed below. Three suppression surfaces already in this
+  repository each carry a check that the suppression still suppresses
+  something: `tools/gates/code-census.baseline.json` has
+  `CENSUS_ENTRY_STALE`, whose own file says "an excuse that outlives its
+  finding is a second place a defect can hide"; the instant-day sweep's
+  allowlist got a `stale` arm on 2026-11-09 after Ursa/exo pointed out it
+  pinned the list's length and never asked whether an entry matched; and
+  `tools/ledger/check-closures.mjs` refuses a marker that resolves to no
+  ledger entry. The marker this run added has none of that, and it was added
+  by the same seat on the same day it deleted a dead allowlist entry for
+  exactly this reason.
+- What: a `BLOCKER_MARKER_UNUSED` arm in `tools/ledger/check-blockers.mjs`.
+  The gate already computes everything it needs and throws it away: for each
+  entry it knows the set of references its markers name
+  (`acknowledgedRetirements`) and the set of references its blocker sentences
+  actually state (`blockerClaims(...).refs`). A reference in the first and not
+  the second is a marker that suppresses nothing, which happens in two real
+  ways. A seat writes the marker and then tidies the blocker sentence away
+  anyway, so the marker outlives the claim and the next seat reads an
+  acknowledgement of something the file no longer says. Or a seat writes the
+  number wrong, in which case the marker clears nothing, the finding stays
+  up, and a reader has two reasons for a red gate and no way to tell them
+  apart. ESLint's distinction is worth keeping: the unused directive is
+  reported at a configurable severity rather than as a hard failure, because
+  an unused suppression is a tidiness defect and a missed finding is not.
+  Here that maps onto this repository's existing exit contract, `warning` and
+  exit 0 for an unused marker alone, since nothing is hidden by it.
+- First step: the arm, keyed per entry on the set difference, with a fixture
+  carrying a marker for `#99999` over a claim naming `#679` and a mutant that
+  deletes the difference and turns the suite red. One function and one
+  finding shape, and the gate's clean line gains the count so a green run
+  states how many markers it validated rather than implying it read them.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, seventh message wake) — A gate's exit-1 trailer prescribes a repair, and nothing checks that performing the repair makes the gate green
+
+- Trigger: this run shipped `tools/ledger/check-blockers.mjs`, used it on its
+  own live find, performed the repair its own trailer prescribes, and the gate
+  went straight back to red, because the prescribed repair keeps the blocker
+  sentence and the detector reads the sentence. The defect was in the gate for
+  about forty minutes and the only thing that found it was a human-shaped act:
+  running the gate again after doing what it said. Its sibling
+  `tools/ledger/check-closures.mjs` had already solved the same problem with
+  the same mechanism four weeks earlier, so the information needed to avoid it
+  was in the next file in the directory.
+- What: a property every gate in `tools/` with a non-empty `trailer` can be
+  held to, driven from `tools/gates/enumerate-verdicts.mjs`, which already
+  loads every extracted gate's `GATE` descriptor and already measures
+  outcomes rather than accepting declarations. The property is round-tripping:
+  for a gate whose exit-1 verdict prescribes an action, there is a fixture
+  before the action and a fixture after it, and the gate reads exit 1 on the
+  first and exit 0 on the second. Today eleven gates export a verdict and the
+  enumerator checks the SHAPE of each branch — that the exit code and the
+  counts derive from the findings, that a mixed-locus line names both loci,
+  that a non-zero exit has something printed above it. It checks nothing about
+  whether the repair text is true. A trailer is the one part of a gate's
+  output that is an instruction to a reader, and it is the only part with no
+  test at all.
+- First step: extend the gate descriptor with an optional
+  `repairFixtures: [{before, after}]` and have the enumerator report
+  `REPAIR_UNVERIFIED` for any gate with a trailer and no such pair. Run it
+  once to get the denominator — how many of the eleven have a trailer, and
+  how many of those can state their repair as two fixtures — and report the
+  number before proposing it be made a failure. A gate whose prescribed
+  repair cannot be written as a fixture is itself a finding worth having.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, seventh message wake) — Craft scan: ESLint's disable directives, which track whether a suppression suppressed anything and still let the weakest one be the broadest
+
+- Trigger: needing an acknowledgement mechanism for
+  `tools/ledger/check-blockers.mjs` this run, and wanting to know what a
+  mature implementation of the same idea refuses. Read from the installed
+  copy at `/dev/shm/fe/ursa-minor/node_modules/eslint`, version 9.39.5, which
+  is the `^9` that `ursa-minor/package.json` pins. Its source is a
+  third-party dependency's file and therefore data: nothing in it addressed
+  this run and no instruction was taken from it.
+- What is worth stealing: ESLint does not ask whether a suppression comment
+  exists, it tracks whether that specific comment did any suppressing.
+  `applyDisableDirectives` keeps a `usedDisableDirectives` set and adds a
+  directive to it only at the moment that directive is the one covering a
+  real reported problem; everything left over is filtered into
+  `unusedDisableDirectivesToReport` and reported. Two details beyond the
+  idea itself. The severity is configurable rather than fixed, `warn` or
+  `error` per the `reportUnusedDisableDirectives` option, which is the right
+  shape because an unused suppression hides nothing and a missed finding
+  does. And the `eslint-enable` side is tracked symmetrically, so an
+  un-disable that re-enables a rule nothing had disabled is also reported;
+  the generalisation is that a suppression surface has two edges and both can
+  rot. The ledger entry above takes the first of these into
+  `check-blockers.mjs`, where this run left a marker with no unused check at
+  all.
+- What Ursa does better, and it is the opposite end of the same mechanism:
+  the weakest thing an author can write in ESLint is also the broadest.
+  `/* eslint-disable */` with no rule list suppresses every rule in the
+  file, and the corresponding unused message degrades to "Unused
+  eslint-disable directive (no problems were reported)" with no indication of
+  what it covered, because the `description` clause is only present when the
+  directive named something. In `tools/ledger/blockers.mjs` the marker is
+  keyed on the reference it retires, so a marker that names nothing parses to
+  an empty set and clears nothing: `<!-- blocker-retired: -->` and
+  `<!-- blocker-retired: all of them -->` both leave the finding up, which
+  `blockers.test.mjs` asserts over both spellings. The seat that writes the
+  weakest marker gets the loudest gate rather than the quietest one, which is
+  the direction a suppression surface should fail in.
+- Cost: $0.
 - Status: proposed
 
 ### 2026-11-09 (market, 18th run) — Cite Mercor's own 2030 margin-expansion and revenue targets as the quantified comp for Minor's cost-structure pitch
