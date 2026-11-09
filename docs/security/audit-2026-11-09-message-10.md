@@ -111,8 +111,17 @@ than assumed because the probe writes into the working tree.
   successfully. The only workflow that fires on pull requests here is
   `redaction-gate`.
 - **Internal doc links.** 554 markdown files, 0 broken relative links.
-- **Repository check suite.** `node scripts/ci-checks.mjs`, result recorded
+- **Repository check suite.** `node scripts/ci-checks.mjs`: 21 checks, **19
+  passed, 2 unrunnable, 0 failed.** The two unrunnable are
+  `product-typecheck` and `product-suites`, both for an absent
+  `ursa-major/node_modules`; this run installed it and re-ran them, recorded
   below.
+
+  Worth naming as a change rather than a pass: run 8's audit recorded
+  `tooling-suites` and `ledger-contract` failing on `main`, measured and
+  routed by run 7 as F105 through F107 and F109. Both pass now. The suite's
+  own exit status is still 2, because an unrunnable check means the run is
+  not a verdict on the branch, which is the right refusal and not a failure.
 
 ## Security audit
 
@@ -125,9 +134,8 @@ than assumed because the probe writes into the working tree.
   of this seat's run 4 today rather than this run's ground; that run found
   the charter's `npm audit` item had only ever been answered in `ursa-major`,
   measured all three with `--package-lock-only`, and logged the schedule ask
-  in `docs/ideas.md` as a `proposed` entry. This run installed and re-ran it,
-  so the numbers are an independent confirmation of that entry and not a new
-  finding:
+  in `docs/ideas.md` as a `proposed` entry. This run re-ran it, so the
+  numbers are a confirmation of that entry and not a new finding:
 
   | package | all severities | production only |
   |---|---|---|
@@ -135,9 +143,11 @@ than assumed because the probe writes into the working tree.
   | `ursa-major/overlay` | 0 | 0 |
   | `ursa-minor` | 23 (1 low, 15 moderate, 7 high) | **0** |
 
-  Those are F93's figures exactly, 23 and 7 and 0, reached this time from an
-  installed tree rather than from the lockfile alone. `ursa-minor`'s count
-  has grown from the nine recorded on 2026-10-17 and the production surface
+  Those are F93's figures exactly, 23 and 7 and 0. Reached the same way, and
+  worth saying so rather than claiming a stronger method: neither product has
+  a `node_modules` in this sandbox, so `npm audit` resolved from the
+  lockfiles, which is what F93 did. A confirmation by the same instrument is
+  weaker than a second instrument would be. `ursa-minor`'s count has grown from the nine recorded on 2026-10-17 and the production surface
   is still zero: every one of the 23 is reachable only through a development
   dependency, `eslint-config-next`, `shadcn` and `@modelcontextprotocol/sdk`
   among them. Not fixed here. `npm audit fix`
