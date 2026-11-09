@@ -183,10 +183,32 @@ const fixtures = {
            font: 12px/22px monospace; margin: 0 }
      button { margin: 12px 0 0 0 }`,
   ),
+
+  // 12: the walk has to start at the top of the DOCUMENT, not wherever the
+  // `--state` drive left the focus. Five controls in a row; the state
+  // module below clicks the fourth, which is what a real drive does when
+  // it presses a button to make a surface exist.
+  //
+  // `blur()` clears the focused element and does NOT move the sequential
+  // focus navigation starting point, which is the thing Tab consults. So
+  // on the code of 2026-11-09 the walk began at control four, reached two
+  // stops, and reported the three controls above it as controls the
+  // keyboard cannot reach. Measured first on the real set view, where it
+  // found 3 stops of 11 and five false unreachables.
+  'after-drive.html': page(
+    [1, 2, 3, 4, 5].map((n) => `<button type="button" id="c${n}">control ${n}</button>`).join(''),
+  ),
 }
 for (const [name, html] of Object.entries(fixtures)) writeFileSync(resolve(dir, name), html)
 
-const run = (file) => {
+// The drive for 12, written beside the fixtures for the same reason they
+// are written rather than committed: it is an input to the tool under test.
+writeFileSync(
+  resolve(dir, 'drive-click-fourth.mjs'),
+  "export default async function drive(page) { await page.click('#c4') }\n",
+)
+
+const run = (file, state = null) => {
   const json = resolve(dir, `${file}.json`)
   let status = 0
   try {
@@ -198,6 +220,7 @@ const run = (file) => {
         '--pages', `fx=/${file}`,
         '--viewports', 'one=800x600',
         '--json', json,
+        ...(state ? ['--state', resolve(dir, state)] : []),
       ],
       { stdio: ['ignore', 'pipe', 'pipe'] },
     )
@@ -301,6 +324,31 @@ ok(
   new Set(pres.map((x) => x.stop)).size === 3,
   pres.map((x) => x.stop),
 )
+
+console.log('')
+
+console.log('after-drive.html')
+const ad = run('after-drive.html', 'drive-click-fourth.mjs')
+const adn = ad.pageNotes[0]
+
+ok('12. the DOM offers five controls', adn.declared === 5, adn.declared)
+ok(
+  '12. the walk starts at the top of the document, not where the drive left focus',
+  adn.stops === 5,
+  adn.stops,
+)
+ok(
+  '12. so nothing above the clicked control reads as unreachable',
+  adn.unreachable.length === 0,
+  adn.unreachable.map((u) => u.text),
+)
+ok(
+  '12. and the first stop is the first control, in document order',
+  ad.rows[0]?.text === 'control 1',
+  ad.rows[0]?.text,
+)
+
+console.log('')
 
 console.log(failed === 0 ? `all assertions hold (fixtures in ${dir})` : `${failed} assertion(s) failed`)
 process.exit(failed === 0 ? 0 : 1)
