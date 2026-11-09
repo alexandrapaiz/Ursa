@@ -8,6 +8,49 @@ for why).** Nothing open was dropped in the move; still-open items are
 carried forward in this file's own current entries, not left only in the
 archive.
 
+## Top three for the owner, 2026-11-09 Monday ceremony (cron-triggered): the four-Monday ceremony gap closes, sprint-2026-10-12 retro says 3/3 shipped, sprint-2026-11-09 opens with two items
+
+The host's own `ursa-pm` cron slot fired on a Monday for the first
+time in four weeks (trigger: `cron`, not a message dispatch), and this
+run treated that as `pm.md` §11.1's ceremony-cron slot and ran all
+three ceremonies, per the gap `docs/decisions.md` recorded at pass
+twenty-five. Full account in this PR's description (`#871`).
+
+1. **The retro on `sprint-2026-10-12.md`: 3 of 3 items shipped, inside
+   the sprint week, on green CI.** What was missing for four Mondays
+   was never engineering output — 165 PRs merged across all seats in
+   the last 7 days alone — it was a ceremony run identifying itself as
+   one. `docs/sprints/pending.md` itself had grown past 5,200 lines
+   across thirty-plus passes with no ceremony to close against;
+   archived everything before 2026-10-27 into
+   `docs/sprints/pending-archive-2026-11-09.md` this pass (nothing
+   open was dropped — every PR number in the archived portion is long
+   since resolved, confirmed against today's 21 open PRs).
+2. **Backlog grooming found the ledger's own `proposed` backlog grew
+   roughly tenfold (30 to 325 entries two weeks or older) across the
+   same gap.** Two near-duplicate proposals that would fix exactly
+   this ("The ledger wants to be a directory," 2026-09-27, 43 days
+   old; "The idea ledger should be a directory, not one file,"
+   2026-09-30, 40 days old) are still unruled — recommending a verdict
+   on these two first, a third grooming note running now. Full
+   categorized breakdown in this PR's description.
+3. **`sprint-2026-11-09.md` opened: two items, both engineer, both
+   tied to a dated or already-written ledger entry rather than
+   invented.** Item 1 is the `urgent` entry filed yesterday
+   (2026-11-08) naming a live blocker on the November 30 KR2.1
+   deadline — the corpus sweep cannot run over its own stated 30-PR
+   window today. Item 2 closes the last open sub-step of the ledger's
+   only `accepted` entry (dogfooding `get_briefing`, open since
+   2026-09-19). A milestone (`Sprint 2026-11-09 — The sweep gets an
+   answer, and the briefing gets used`, due 2026-11-16) is attached.
+
+**Also found, named rather than acted on:** research has produced no
+pull request, merged or open, since PR #263 (2026-10-23) — about five
+missed Tue/Fri slots. No `pm.md` §11.3 row fires cleanly on a quiet
+cadence with no sprint item assigned and no failed run to diagnose, so
+this is flagged in `docs/agents/org-chart.md` and the dispatch queue
+rather than dispatched on an invented judgment.
+
 ## Top three for the owner, 2026-11-09 message-triggered (thirty-second pass): the frontend report read, nothing of mine to merge because a live run already owns the only red check, the standing note false a sixth time and for the first time not even a draft
 
 The wake named the frontend seat's finished run and `#858`, plus the
