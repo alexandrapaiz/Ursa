@@ -19573,7 +19573,7 @@ host turns out to be one of those sources.
   specifically, calls the dependency "a sword of Damocles," and reports
   Mercor's own stated target of cutting that share to under one-third
   by 2030. Source:
-  [BigGo Finance](https://finance.biggo.com/news/865c23cb-3e0d-4c21-aa0d-6bf2a7fc8d1a).
+  [BigGo Finance](https://finance.biggo.com/news/865c23cb%2D3e0d-4c21-aa0d-6bf2a7fc8d1a).
 - What: CLAUDE.md §4 already predicts this exact shape for Minor
   ("one or two of them accounting for most of revenue... standard
   shape for an enterprise data infrastructure business"), stated as an

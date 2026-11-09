@@ -358,7 +358,7 @@ hypothetical a smaller or newer vendor could dismiss. Positioning
 consequence in docs/market/positioning.md. Last observed 2026-11-09:
 [BigGo Finance: AI Data Factory Mercor's H1 Revenue Surges Past $615
 Million, With 90% Fueled by OpenAI and Other
-Giants](https://finance.biggo.com/news/865c23cb-3e0d-4c21-aa0d-6bf2a7fc8d1a).
+Giants](https://finance.biggo.com/news/865c23cb%2D3e0d-4c21-aa0d-6bf2a7fc8d1a).
 
 ### Prolific
 
