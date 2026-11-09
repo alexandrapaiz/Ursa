@@ -1,0 +1,141 @@
+{
+  "what": "Every acceptance register in this repository, with the consumers that read it. tools/gates/acceptance-fields.mjs discovers candidates dynamically -- any JSON file git tracks under tools/ or scripts/, or at the repository root, whose top level holds a non-empty array of entry objects -- and exits 1 on any candidate this file does not classify. So a register cannot appear in silence, and a register's fields cannot grow a reason nothing reads.",
+  "why_the_consumers_are_listed_rather_than_searched_for": "A field counts as read when a consumer dereferences it, so the answer depends on which files are consumers. Searching the whole tree for `.why` would find every unrelated object with a `why` on it and grade every register clean. Naming the consumers makes that choice reviewable, and CONSUMER_MISSING fires if one of these paths leaves the tree, because then every field of that register would read as unread for a reason about this file rather than about the register.",
+  "declares": "A register may declare a field documentation-only by listing it under `_documentation_only` as `{ \"field\": \"the reason\" }`. tools/secret-scan.baseline.json already does this in prose -- `where` is documentation only, because the scanner reports the first path a blob is reachable at and that is a function of history -- which is the form this gate asks every register to put in a key its tool can read. The declaration is the OWNING seat's to write, which is why nothing here adds one on another seat's behalf.",
+  "measured_at": "2026-11-09, origin/main f7b89ff, by Ursa's exo seat in the hundred-and-sixth window",
+  "registers": [
+    {
+      "path": "dep-floor.allow.json",
+      "entries": "exceptions",
+      "consumers": [
+        "scripts/dep-floor.mjs",
+        "scripts/dep-floor-summary.mjs"
+      ],
+      "note": "Zero entries today, and every field it defines is enforced: `expires` past its date fails the gate instead of suppressing it. Listed so that the first entry anyone adds is graded, rather than discovered later."
+    },
+    {
+      "path": "tools/gates/acceptance-fields.baseline.json",
+      "entries": "excused",
+      "consumers": [
+        "tools/gates/acceptance-fields.mjs"
+      ],
+      "note": "Graded by the gate it feeds. Its `owner`, `kind` and `measured` are not merely read but asserted, in sweep(): an entry with no owner, a kind outside {repair, instrument}, or no ISO measured date is BASELINE_ENTRY_MALFORMED."
+    },
+    {
+      "path": "tools/gates/acceptance-fields.json",
+      "entries": "registers",
+      "consumers": [
+        "tools/gates/acceptance-fields.mjs"
+      ],
+      "note": "This file is an acceptance register about acceptance registers, so it grades itself. Its `note` field is declared documentation-only below, which is the mechanism this gate asks every other register to use, demonstrated here first."
+    },
+    {
+      "path": "tools/gates/code-census.baseline.json",
+      "entries": "excused",
+      "consumers": [
+        "tools/gates/code-census.mjs"
+      ]
+    },
+    {
+      "path": "tools/gates/fetch-exec.baseline.json",
+      "entries": "entries",
+      "consumers": [
+        "tools/gates/fetch-exec.mjs"
+      ],
+      "note": "Classified by this seat on the forward merge that first put this gate and this register in one tree. Neither branch held both: the gate is new on Ursa#826 and this register is new on the trunk, so the finding exists in the merge and in neither parent."
+    },
+    {
+      "path": "tools/gates/gate-registry.baseline.json",
+      "entries": "entries",
+      "consumers": [
+        "tools/gates/gate-registry.mjs",
+        "tools/gates/excuse-control.mjs",
+        "tools/gates/fetch-exec.mjs",
+        "scripts/ci-checks.mjs"
+      ],
+      "note": "Same merge, same reason. Its `kind`, `why` and `control` are asserted rather than merely read by the registry's own excuse control, which is why it is a register here and not data."
+    },
+    {
+      "path": "tools/gates/import-effects.baseline.json",
+      "entries": "excused",
+      "consumers": [
+        "tools/gates/import-effects.mjs",
+        "tools/gates/import-effects-verdict.mjs"
+      ]
+    },
+    {
+      "path": "tools/instant-gate.json",
+      "entries": "allowlist",
+      "consumers": [
+        "tools/instant-gate.mjs",
+        "tools/instant.mjs"
+      ]
+    },
+    {
+      "path": "tools/registers/id-namespaces.json",
+      "entries": "namespaces",
+      "consumers": [
+        "tools/registers/check-ids.mjs",
+        "tools/registers/id-verdict.mjs"
+      ]
+    },
+    {
+      "path": "tools/registers/registers.json",
+      "entries": "registers",
+      "consumers": [
+        "tools/ledger/ledger.mjs",
+        "tools/registers/merge-driver.mjs",
+        "tools/registers/check-ids.mjs"
+      ]
+    },
+    {
+      "path": "tools/seat/env-facts.json",
+      "entries": "facts",
+      "consumers": [
+        "tools/seat/env-facts.mjs"
+      ]
+    },
+    {
+      "path": "tools/seat/suite-baseline.json",
+      "entries": [
+        "red",
+        "repaired"
+      ],
+      "consumers": [
+        "tools/seat/suite-baseline.mjs",
+        "tools/seat/baseline-drift.mjs"
+      ]
+    },
+    {
+      "path": "tools/secret-scan.baseline.json",
+      "entries": "accepted",
+      "consumers": [
+        "tools/secret-scan.mjs",
+        "tools/secret-scan-baseline.mjs",
+        "tools/secret-scan-verdict.mjs"
+      ]
+    },
+    {
+      "path": "tools/testing/tmpdir-leak.baseline.json",
+      "entries": "leaking",
+      "consumers": [
+        "tools/testing/tmpdir-leak.mjs"
+      ],
+      "note": "Same merge. The entry array is under `leaking` rather than `excused`, which is why the discovery pass found it and no name-based filter would have."
+    }
+  ],
+  "data": [],
+  "out_of_scope": [
+    {
+      "path": "docs/**",
+      "why": "The design reviews hold dozens of measurement dumps -- hit areas, focus rows, contrast samples -- which are records of what was observed and nobody's accepted risk. Including them would turn this manifest into a list of things to ignore, which is the defect it exists to prevent, one level up."
+    },
+    {
+      "path": "tools/secret-print-tests.py EXPECTED_ABSENT_FIXTURES",
+      "why": "The only register here whose reason is EXECUTED rather than read: each entry declares a `stand_in`, and the runner materialises the fixture, re-runs that one test and absorbs the failure only if it goes green. It is Python, and tools/secret-print-exemptions.py is the tool that grades it. Named rather than omitted, because it is the standard the registers above are being measured against."
+    }
+  ],
+  "_documentation_only": {
+    "note": "Prose for a human reading this manifest. It carries no claim a tool could check: a register's consumers are the checkable part and they are in `consumers`. Declared here rather than baselined, because declaring it is the correct end state and this is the one register whose owner is the seat writing the gate."
+  }
+}

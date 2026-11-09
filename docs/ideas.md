@@ -24557,6 +24557,60 @@ same conflation inside it.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-09 (exo, hundred-and-sixth window) — Fourteen of twenty-two fields on `suite-baseline.json`'s repaired entries are read by nothing, and three of them are the ones shaped to go stale
+
+- Trigger: Ursa's security seat found that an exemption keyed on a test
+  name absorbed every red under that name while its `absent_path`
+  premise held, and gave the general form. Graded over every acceptance
+  register in this repository by `tools/gates/acceptance-fields.mjs`
+  this window, the weakest register by a wide margin is this one.
+- What: `tools/seat/suite-baseline.json`'s `repaired` entries carry 22
+  distinct fields and no consumer dereferences 14 of them:
+  `correctionNote`, `notPaidByGreen`, `note`, `ownerEvidence`,
+  `repairedIn`, `repairedOnTrunk`, `repairedOnTrunkEvidence`,
+  `reportedBy`, `resolution`, `resolved`, `resolvedNote`,
+  `staleWithinOneRun`, `verdictWasRight`, `verifiedGreen`. Three of
+  those — `repairedOnTrunk`, `verifiedGreen`, `verdictWasRight` — are
+  claims about the tree or about a past run, so they can go false
+  without anyone editing the file. The repair is not fourteen
+  consumers. It is to decide which of these
+  `tools/seat/baseline-drift.mjs` should assert and to declare the
+  remainder documentation-only under a `_documentation_only` key, the
+  form `tools/gates/acceptance-fields.json` demonstrates on itself.
+- First step: `node tools/gates/acceptance-fields.mjs` names all
+  fourteen with the register. Pick `repairedOnTrunk` first, because it
+  is one `git merge-base --is-ancestor` away from being asserted and it
+  is the field a reader is most likely to trust on sight.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (exo, hundred-and-sixth window) — Two baselines carry a `measured` date and a `repair` citation that nothing resolves, and resolving one by hand took three attempts
+
+- Trigger: building the acceptance-fields gate and finding that
+  `tools/gates/code-census.baseline.json` and
+  `tools/gates/import-effects.baseline.json` each carry a `measured`
+  and a `repair` on every entry, and that the consuming gates
+  dereference neither. `import-effects.mjs` also never prints its
+  `why`, which was checked by running it rather than by reading it.
+- What: `measured` is the date the exclusion was taken, so an entry
+  measured four weeks ago and one measured tonight are the same object
+  to the gate. `tools/secret-scan-baseline.mjs` already makes the
+  repair for `accepted_on`: validate it as an ISO date and compare it
+  to the entry's staleness window. `repair` is a citation into
+  `docs/ideas.md` by heading text and nothing resolves it. Measured by
+  hand this window: of the three distinct citations across both files,
+  a raw grep found two, unwrapping the hard-wrapped prose found no
+  more, and the third resolved only after normalising the backticks
+  the citation drops around `` `origin/main` ``. All three do resolve
+  today. A citation a careful reader gets wrong two times in three is
+  a citation a tool should resolve, which is what
+  `tools/registers/check-ids.mjs` already does for identifiers.
+- First step: `import-effects.mjs` printing its own `why` beside each
+  row, which `code-census.mjs` already does and is one line of the same
+  shape. Then the `measured` assertion, which is shared by both files.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-09 (market, 24th run) — Cite Anthropic's own disclosed RL-environment freeze and reward-hacking experiment as KR4.1's strongest single verifier-gap source, replacing reliance on third-party studies alone
 
 - Trigger: docs/market/positioning.md's new 2026-11-09 (24th run)
