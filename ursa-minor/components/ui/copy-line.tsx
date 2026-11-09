@@ -32,6 +32,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
  */
 export function CopyLine({ command, label }: { command: string; label?: string }) {
   const [state, setState] = useState<"idle" | "copied" | "refused">("idle");
+  const [scrolls, setScrolls] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pre = useRef<HTMLPreElement>(null);
 
@@ -63,6 +64,10 @@ export function CopyLine({ command, label }: { command: string; label?: string }
       // absent rather than decorative.
       el.style.setProperty("--fade-l", clamp(x));
       el.style.setProperty("--fade-r", clamp(max - x));
+      // The same `max` decides whether this box is a keyboard stop. See the
+      // note on tabIndex below for why that is ours to declare and not the
+      // browser's to infer.
+      setScrolls(max > 1);
     };
     const schedule = () => void (frame ||= requestAnimationFrame(measure));
 
@@ -103,12 +108,48 @@ export function CopyLine({ command, label }: { command: string; label?: string }
           one element on the page that has a fixed length and cannot be
           reflowed. */}
       <div className="flex flex-col items-start gap-3 border border-[var(--line)] p-4 sm:flex-row sm:items-start sm:gap-4 sm:p-5">
-        <pre
-          ref={pre}
-          className="rec-cmd w-full min-w-0 sm:flex-1 font-mono text-[0.72rem] leading-[1.8] text-[var(--star)] sm:text-[0.76rem]"
-        >
-          {command}
-        </pre>
+        {/* The frame carries no mask, and that is its whole job. The focus
+            ring is an outline 3px outside its control, and a mask clips
+            everything its element paints, the outline included. Measured
+            2026-11-09 at 390, with the command box focused from the
+            keyboard: 0 indicator pixels as shipped, 694 with the mask
+            removed, and 694 again with the ring moved onto an unmasked
+            frame around the box. Same number, so the ring lands in exactly
+            the geometry the design asks for and the fade keeps working.
+            The rule is `.rec-cmd-frame:has()` in globals.css.
+
+            The flex classes live here rather than on the `<pre>` because
+            this element is now the flex child. */}
+        <div className="rec-cmd-frame w-full min-w-0 sm:flex-1">
+          <pre
+            ref={pre}
+            /* A scroll container is a keyboard stop, and until now nothing
+               here said so. Chromium puts an overflowing element in the tab
+               ring on its own, which is right, and it was doing it to these
+               three boxes while `.tabIndex` read -1: so which commands were
+               controls was a fact about the window width and the browser
+               version, and not about this component. Firefox and Safari have
+               not shipped that behaviour, so there a keyboard could not
+               reach the hidden 737px of the Action's curl line at all.
+
+               Declared only when the box actually scrolls, because a
+               command that fits is not a thing to land on, and `undefined`
+               rather than -1 so this never takes a stop away from a browser
+               that was already offering one. */
+            tabIndex={scrolls ? 0 : undefined}
+            /* `group` and not the implicit role, because a `<pre>` computes
+               as `generic` and a generic element cannot be named: asked over
+               CDP on 2026-11-09, Chromium answered role `generic`, name ""
+               at all three of these stops. So a keyboard arrived somewhere
+               the page would not name, and an aria-label alone would have
+               been dropped. */
+            role={scrolls ? "group" : undefined}
+            aria-label={scrolls ? "command, scrolls sideways" : undefined}
+            className="rec-cmd w-full font-mono text-[0.72rem] leading-[1.8] text-[var(--star)] sm:text-[0.76rem]"
+          >
+            {command}
+          </pre>
+        </div>
         <button
           type="button"
           onClick={() => void copy()}
