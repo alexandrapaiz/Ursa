@@ -361,7 +361,7 @@ function SiteSet({
         {index.records.map((s, i) => {
           const shares = sharesOf(s);
           return (
-            <li key={s.id} className={`py-7 ${i > 0 ? "border-t border-[var(--line)]" : ""}`}>
+            <li key={s.id} className={`rec-item py-7 ${i > 0 ? "border-t border-[var(--line)]" : ""}`}>
               {/* The padding is the item's rather than the button's, so
                   that the address line below can sit inside the same
                   block without stacking two paddings between rows. An

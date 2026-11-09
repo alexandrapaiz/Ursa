@@ -25,7 +25,21 @@ from PIL import Image, ImageChops
 
 A = sys.argv[1] if len(sys.argv) > 1 else "before"
 B = sys.argv[2] if len(sys.argv) > 2 else "after"
-OUT = sys.argv[3] if len(sys.argv) > 3 else "data/frame-diff.txt"
+# The default is beside the frames being compared, NOT relative to the
+# cwd. It used to be the literal "data/frame-diff.txt", which is a
+# relative path, so a run started from the repository root wrote
+# `data/frame-diff.txt` AT the repository root and created a `data/`
+# directory there whose only contents were this file. It is committed from
+# 2026-10-26d and again from the run before it, and this run reproduced it
+# a third time, which is how it was found. L46 named the class and the
+# repair applied here then was a `print` of the destination; a run reading
+# its own output after the write is not a run that stopped writing it.
+#
+# A diff describes a pair of frame directories, so it belongs with them.
+# That also makes it land inside `$FE_RUN` without the caller passing
+# anything, which is where everything a run writes is supposed to go.
+OUT = sys.argv[3] if len(sys.argv) > 3 else os.path.join(
+    os.path.dirname(os.path.abspath(A)) or ".", "frame-diff.txt")
 
 rows = []
 for name in sorted(n for n in os.listdir(A) if n.endswith(".png")):
@@ -49,9 +63,7 @@ for name in sorted(n for n in os.listdir(A) if n.endswith(".png")):
 text = "\n".join(rows) + "\n"
 os.makedirs(os.path.dirname(OUT) or ".", exist_ok=True)
 open(OUT, "w").write(text)
-# Say where it went. The default is relative to the cwd, so a run started
-# from the repository root writes `data/frame-diff.txt` AT the repository
-# root, and one such file is committed there from 2026-10-26d. Silence is
-# what let that happen twice; see L46.
-print("wrote " + OUT)
+# Say where it went, absolutely. A relative path printed back to a run
+# that is standing somewhere unexpected is the same silence as no path.
+print("wrote " + os.path.abspath(OUT))
 print(text)
