@@ -130,7 +130,11 @@ all and moved to its declared 3 on the strength of the receipt alone.
 the throw and refuses at 2. The alternative was to return a reading of status
 0 and let the loop continue, and that is the worse bug: every filter would
 then be graded against a baseline of no rows and a table printed, which is the
-green-on-nothing its own INERT verdict exists to catch one layer down.
+green-on-nothing its own INERT verdict exists to catch one layer down. The
+handler sits at the entry-point guard rather than around the probe loop, so
+the loop keeps its own indentation and the diff for this file is the handler
+instead of forty reindented lines. `tools/gates/import-effects.mjs` still
+exits 0 over it, and importing the module still runs no probe.
 
 `page.mjs` and `measure-claims.mjs` both ended `coverage.complete ? 0 : 1`,
 which can only ever reach the first of the two codes each of them declares.

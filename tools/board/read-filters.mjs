@@ -459,7 +459,6 @@ async function main() {
   const only = flag('--route');
   const out = [];
 
-  try {
   for (const [name, spec] of Object.entries(ROUTES)) {
     if (only && only !== name) continue;
     const prefix = spec.base ? `?${spec.base}&limit=500` : `?${spec.window}&limit=500`;
@@ -498,19 +497,6 @@ async function main() {
       out.push({ route: name, path: spec.path, param: `${param} (casing)`, ...v });
     }
   }
-  } catch (error) {
-    // Exit 2, the code line 11 of this file already reserves for having no
-    // board to measure, and the same three lines the `liveTargetFault` branch
-    // prints. The difference between the two branches is only WHEN the fault
-    // became knowable, which is not a difference a reader acts on.
-    if (!error?.boardReach) throw error;
-    const fault = error.boardReach;
-    console.error(`${fault.code}: ${fault.line}`);
-    console.error(`  repair: ${fault.repair}`);
-    console.error(`  ${out.length} filter(s) were measured before the read failed, and no verdict is published from a partial sweep.`);
-    process.exit(2);
-  }
-
   if (has('--json')) {
     console.log(JSON.stringify({ measured_at: new Date().toISOString(), filters: out }, null, 2));
   } else {
@@ -537,4 +523,26 @@ async function main() {
 }
 
 // Importable for the tests without running the probes.
-if (import.meta.url === `file://${process.argv[1]}`) await main();
+//
+// THE REACH CATCH IS HERE AND NOT AROUND THE PROBE LOOP, so that the loop
+// keeps its own indentation and this file's diff for F132 is the handler
+// rather than forty reindented lines. It makes no behavioural difference:
+// `read` tags the only throw either site would see, every probe is awaited
+// inside `main`, and `main` has no caller but this line.
+//
+// Exit 2 is the code line 11 of this file already reserves for having no board
+// to measure, and the three lines printed are the `liveTargetFault` branch's.
+// The only difference between the two branches is WHEN the fault became
+// knowable, and that is not a difference a reader acts on.
+if (import.meta.url === `file://${process.argv[1]}`) {
+  try {
+    await main();
+  } catch (error) {
+    if (!error?.boardReach) throw error;
+    const fault = error.boardReach;
+    console.error(`${fault.code}: ${fault.line}`);
+    console.error(`  repair: ${fault.repair}`);
+    console.error('  No filter was measured to a verdict, and none is published from a partial sweep.');
+    process.exit(2);
+  }
+}
