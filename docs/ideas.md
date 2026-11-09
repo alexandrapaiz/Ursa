@@ -19500,7 +19500,7 @@ completed first, since the one it was handed was depth 1.
   and none can: the referent is a row on the forge, not a range in this
   tree, so §5t's one-line `grep` resolve does not apply and §5g through
   §5k have nothing to fingerprint.
-- First step, and it is this seat's own file rather than another seat's:
+- First step: this seat's own file rather than another seat's.
   `skills/forge-citations.lock.json` in the shape
   `evidence.lock.json` and `relevance.lock.json` already have. One row
   per cited number, carrying the disposition, the date read and the
@@ -19532,7 +19532,7 @@ completed first, since the one it was handed was depth 1.
   run had opened a row that contains #684, and this run's row contains
   that one. So the owner following any of the eight lands two hops short
   of the row she is being asked to decide.
-- What, measured across the queue rather than from this one case. 109 of
+- What: measured across the queue rather than from this one case. 109 of
   the repository's closed rows were closed without merging. **45** carry a
   comment naming a superseding row. Those 45 pointers resolve to **28**
   distinct rows, of which **20** are themselves closed and unmerged, 5
@@ -19540,8 +19540,8 @@ completed first, since the one it was handed was depth 1.
   another closed row about five times in seven. The content is almost
   never the problem. The pointer is, because a lane advances every run
   and a comment is written once.
-- First step, in the lanes that write these comments and so not this
-  seat's to patch: name the branch beside the number. A branch prefix
+- First step: in the lanes that write these comments and so not this
+  seat's to patch, name the branch beside the number. A branch prefix
   identifies the lane, the lane outlives any one row, and a reader who
   finds the row closed can walk forward to that lane's current tip.
   The case for making it a field rather than a habit arrived during this
@@ -19563,7 +19563,7 @@ completed first, since the one it was handed was depth 1.
 
 - Trigger: measuring how often a closure pointer resolves, above, left
   the prior question open: whether the closed rows' work is anywhere.
-- What. Every one of the 109 closed and unmerged rows was tested for
+- What: every one of the 109 closed and unmerged rows was tested for
   reachability on a completed clone. **30 landed**, their heads being
   ancestors of `origin/main`. **43 are live**, contained by some open
   row. **36 are reachable from neither.** Of those 36, **33 are the
@@ -19596,8 +19596,8 @@ completed first, since the one it was handed was depth 1.
   refs. Every dropped line is one fetch away. What is missing is any
   record in the tree that says so, which is why nobody has noticed in
   six days.
-- First step, for the seat that closes rows and so a ledger entry rather
-  than a patch: before closing, assert containment, and when there is
+- First step: for the seat that closes rows and so a ledger entry rather
+  than a patch. Before closing, assert containment, and when there is
   none, say in the comment which files are being left outside the tree.
   That is the same `merge-base --is-ancestor` the sweep already runs,
   used as a precondition instead of as a decoration, plus
@@ -19613,7 +19613,7 @@ completed first, since the one it was handed was depth 1.
   `unable to write loose object file: No space left on device`, on three
   text files totalling thirty lines of change, after the run had already
   pushed everything else.
-- What. `/tmp` on the resident host is one 45 GB filesystem shared by
+- What: `/tmp` on the resident host is one 45 GB filesystem shared by
   every seat's checkout. Measured during this run: eleven seat
   directories on it, six of them between 745 MB and 815 MB, plus 967 MB
   of test fixtures and 423 MB of a compose test. Free space went 275 MB,
@@ -19636,7 +19636,7 @@ completed first, since the one it was handed was depth 1.
   and took four turns. A run that hit this at the wrong moment, before
   its first push, loses everything, which is the exact failure the
   ship-first rule in this repository's standards was written after.
-- First step, for the engineer or the exo seat and so a ledger entry
+- First step: for the engineer or the exo seat and so a ledger entry
   rather than a patch. Two parts, and the cheap one is first. **Have
   `tools/ensure-full-clone.sh` print the filesystem's free space before
   and after it runs, and refuse with a named reason below some floor**,
@@ -19658,7 +19658,7 @@ completed first, since the one it was handed was depth 1.
   a ninth guard earns its keep for twelve citation lines, or whether
   citing the merge commit and letting the number disappear is the cheaper
   rule. This run is that owner and this entry is the answer.
-- What was measured, against the forge rather than by preference. All 700
+- What: measured against the forge rather than by preference. All 700
   rows this repository has ever had: **315 merged, 355 closed and
   unmerged, 30 open**. So about half of all rows never acquire a merge
   commit, and the cheap rule is not a weaker remedy for them, it is
@@ -19671,7 +19671,8 @@ completed first, since the one it was handed was depth 1.
   population it will ever police, and the growth is by construction: two
   of this file's own methodology sections now require a run to name the
   pull request it argues from.
-- Shipped: `skills/forge-citations.mjs`,
+- First step: taken in this run, which shipped
+  `skills/forge-citations.mjs`,
   `skills/forge-citations.lock.json` and thirteen tests. The check never
   touches the network. A merged row must carry a merge commit and the sha
   is verified in this clone, which is the one form of this citation that
@@ -19689,7 +19690,7 @@ completed first, since the one it was handed was depth 1.
 
 - Trigger: re-deriving the previous section's census before building on
   it, which is the only reason the error was found at all.
-- What. `gh pr list --state closed` includes merged rows, because a
+- What: `gh pr list --state closed` includes merged rows, because a
   merged row is closed. So `--limit N` is spent on the union and an
   unmerged filter applied afterwards reads only what the cap admitted.
   The figure grows with the cap and never says it has not saturated: 44,
@@ -19707,8 +19708,8 @@ completed first, since the one it was handed was depth 1.
   chains end on another closed row, 63 on a merged one and 25 on an open
   one. One hop is 70 percent, the whole chain 55. Following the numbers
   harder is not a repair for the form.
-- First step, and it is a one-line habit rather than code: any `gh pr
-  list` count states its limit and shows the count at twice that limit.
+- First step: a one-line habit rather than code. Any `gh pr list` count
+  states its limit and shows the count at twice that limit.
   A read that saturates has earned the word "total" and a read that does
   not has not. This is the same rule §5ak already applies to a check's
   printed population, arriving from the read side.
@@ -19721,8 +19722,8 @@ completed first, since the one it was handed was depth 1.
 - Trigger: Ursa/exo's note on the board replying to the previous run,
   which said the decay interval here is one run and not one day. Taken as
   data and measured.
-- What, over all 700 rows in 27 lanes, 673 intra-lane intervals, taking a
-  lane as the first segment of a branch name: first quartile **19.7**
+- What: over all 700 rows in 27 lanes, 673 intra-lane intervals, taking a
+  lane as the first segment of a branch name, first quartile **19.7**
   minutes, median **45.1**, third quartile 542.8, ninth decile 3181.3.
   **51.7 percent** of rows are superseded inside their own lane within
   the hour, 86.5 percent within a day. The exo seat is right in kind and
@@ -19733,7 +19734,7 @@ completed first, since the one it was handed was depth 1.
   **29** named one the lane had already passed, median by 2.6 minutes. So
   care gets a pointer right 85 percent of the time and the form loses it
   anyway. A remedy aimed at the care would address 15 percent of it.
-- First step, in this seat's own file and taken: the citation carries a
+- First step: in this seat's own file and taken, the citation carries a
   timestamp rather than a date, and the lane is the field that does not
   decay. For the lanes writing closure comments, the first step is
   unchanged from the previous entry and already with them.
@@ -19744,7 +19745,7 @@ completed first, since the one it was handed was depth 1.
 
 - Trigger: this run's own section note, which amends two sections in two
   sentences. The second claim produced no edge.
-- What. `amendmentEdges` called `AMENDING.exec`, which returns the first
+- What: `amendmentEdges` called `AMENDING.exec`, which returns the first
   match and stops, while `amendmentPopulation` calls `AMENDING.test`,
   which only asks whether there is one. So a note making two claims was
   counted as a section that declares an amendment, the mode printed
@@ -19754,10 +19755,10 @@ completed first, since the one it was handed was depth 1.
   of the verb; this is a second use of the verb, and the reason the
   earlier repair did not cover it is that widening a pattern does not
   change how many times it is read.
-- Fixed in this run: every amending clause in a note is read, the `seen`
-  set spans clauses so a section named twice is still one edge, and one
-  test pins both directions. Thirteen generated back pointers rewritten,
-  two of them new.
+- First step: taken in this run. Every amending clause in a note is read,
+  the `seen` set spans clauses so a section named twice is still one edge,
+  and one test pins both directions. Thirteen generated back pointers
+  rewritten, two of them new.
 - Cost: $0
 - Status: done
 
@@ -19765,7 +19766,7 @@ completed first, since the one it was handed was depth 1.
 
 - Trigger: the finding §5ai recorded and handed on, re-confirmed in this
   run while writing a fifth guard that refuses one.
-- What. `node skills/trigger-coverage.mjs --not-a-real-flag` exits 0 and
+- What: `node skills/trigger-coverage.mjs --not-a-real-flag` exits 0 and
   prints the default coverage report. The flags are dispatched by
   `argv.includes` with no branch for a flag the tool does not know, so a
   run that asks a question the tool cannot answer is told green. All four
@@ -19786,7 +19787,7 @@ completed first, since the one it was handed was depth 1.
 - Trigger: the previous run's entry on `/tmp` exhaustion. This run hit it
   at its fifteenth turn, before any measurement: a tool call failed with
   the host's temp filesystem at 0 MB free.
-- What. `/tmp` on the resident host was 99 percent full with 541 MB free
+- What: `/tmp` on the resident host was 99 percent full with 541 MB free
   at 06:06Z and moved to 1.7 GB free within one minute, so the pressure
   is concurrent and volatile rather than any one seat's. Eleven seat
   checkouts sit on it, four between 749 MB and 842 MB.
@@ -19808,7 +19809,7 @@ completed first, since the one it was handed was depth 1.
   a draft, a clone of about 800 MB and a listening process. So the
   tooling half of this finding is already being fixed in another lane and
   this seat should not duplicate it.
-- First step, unchanged and still with the engineer or the exo:
+- First step: unchanged and still with the engineer or the exo.
   `tools/ensure-full-clone.sh` should print and floor the free space, and
   the runtime should reclaim a finished seat's checkout. Added here: the
   cheap half of this is a seat-side habit that needs no tooling, which is
@@ -19895,16 +19896,17 @@ completed first, since the one it was handed was depth 1.
   closed it as contained in this run's own row at 06:35Z, with an
   independent ancestor proof, which is the correct disposition and the
   one this seat argued for. Nineteen minutes.
-- What it is evidence of. The median this run measured is 45 minutes and
+- What: taken as evidence of the decay interval. The median this run
+  measured is 45 minutes and
   the first real instance landed at 19, which is its own first quartile.
   Nothing was wrong with the lock, with the sweep, or with the care taken
   over either. A dated snapshot of a live surface is a dated snapshot,
   and the value of writing it down is not that it stays true, it is that
   the file says when it was read and the check prints how long ago that
   was.
-- What was done: refreshed in the same run, with the instance recorded in
-  the row's own `note` field rather than in prose somewhere else, so the
-  next reader of that row sees why it moved.
+- First step: taken in this run. The lock was refreshed in the same pass,
+  with the instance recorded in the row's own `note` field rather than in
+  prose somewhere else, so the next reader of that row sees why it moved.
 - The generalisation, which is the part worth keeping. A guard over a
   remote fact cannot be judged by whether it is ever stale. It can only
   be judged by whether a reader can tell. Both arms are in the output:
@@ -20048,9 +20050,9 @@ no new skill this run.
   measurement, so every future section carries at least one forge read. A later
   run that finds four or more live sites should price this again rather than
   re-deriving the argument.
-- First step for whoever takes it: count the sites before writing anything, and
-  if the count is still under four, add the sentence to the extract prompt's
-  checklist instead of a guard.
+- First step: for whoever takes it, count the sites before writing anything,
+  and if the count is still under four, add the sentence to the extract
+  prompt's checklist instead of a guard.
 - Cost: $0
 - Status: proposed
 
