@@ -23,7 +23,8 @@
     "if (a.createdAt < b.createdAt) { return -1 }",
     "rows.sort((a, b) => a.date.localeCompare(b.date))",
     "const day = row.mainDate.slice(0, 10)",
-    "const at = row.generatedAt.slice(0, 19) + 'Z'"
+    "const at = row.generatedAt.slice(0, 19) + 'Z'",
+    "rows.sort((a, b) => compareDays(a.date, b.date))"
   ],
   "allowlist": [
     {

@@ -254,10 +254,67 @@ test('the shape that defeats evidence-based narrowing, as code rather than as a 
 test('a site repaired with the day family is clean, which is what makes the repair followable', () => {
   // If this fails, the lint reports the exact line its own repair text
   // prescribes, and the only way to obey it is to suppress the lint.
-  assert.deepEqual(textualTimestampComparisons('rows.sort((a, b) => compareDays(a.date, b.date))'), [])
+  //
+  // ONE ASSERTION WAS DELETED FROM THIS TEST (exo, 2026-11-09), and the
+  // reason is the reason the test exists pointed the other way. It pinned
+  // `rows.sort((a, b) => compareDays(a.date, b.date))` CLEAN, as a repaired
+  // site. It is not a repaired site. `compareDays` answers null for a value
+  // it will not place and `Array.prototype.sort` coerces null to 0, so that
+  // line sorts nothing and raises nothing — which this module's own docblocks
+  // state twice, as the stated reason `sortByDay` exists. The pin made the
+  // hazard permanently invisible to the lint, so it now lives below as a
+  // REFUSAL_AS_ORDER assertion instead.
   assert.deepEqual(textualTimestampComparisons('const asc = sortByDay(rows, (r) => r.date)'), [])
   assert.deepEqual(textualTimestampComparisons('if (isDayAfter(entry.date, now.date)) return'), [])
   assert.deepEqual(textualTimestampComparisons('const ms = parseDay(field.date)'), [])
+  // And the comparator on its own line stays clean, because there the null is
+  // a value the author can read. The hazard is the sort callback, not the
+  // function.
+  assert.deepEqual(textualTimestampComparisons('const c = compareDays(a, b)'), [])
+  assert.deepEqual(textualTimestampComparisons('const c = compareInstants(a.createdAt, b.createdAt)'), [])
+})
+
+test('REFUSAL_AS_ORDER: a null-returning comparator inside a sort callback, which the repaired-site exemption used to clear', () => {
+  // The positive case. Note it carries no timestamp-named operand
+  // requirement: this code is keyed on the CALLEE, because a comparator that
+  // can refuse is evidence on its own.
+  const [day] = textualTimestampComparisons('rows.sort((a, b) => compareDays(a.date, b.date))')
+  assert.equal(day.code, 'REFUSAL_AS_ORDER')
+  assert.match(day.repair, /sortByDay\(rows, key\)/)
+  assert.match(day.repair, /coerces null to 0/)
+
+  const [inst] = textualTimestampComparisons('items.sort((x, y) => compareInstants(x.at, y.at))')
+  assert.equal(inst.code, 'REFUSAL_AS_ORDER')
+  assert.match(inst.repair, /sortByInstant\(rows, key\)/)
+
+  // Indented and trailing-comma'd, which is how the one real instance in this
+  // repository was written.
+  assert.equal(
+    textualTimestampComparisons('      .sort((a, b) => compareDays(a.date, b.date)),')[0].code,
+    'REFUSAL_AS_ORDER'
+  )
+
+  // The negative controls. An absence is a measurement and it needs a
+  // positive control; the three above are it.
+  assert.deepEqual(textualTimestampComparisons('rows.sort((a, b) => a.n - b.n)'), [])
+  assert.deepEqual(textualTimestampComparisons('rows.sort((a, b) => a.i - b.i)'), [])
+  // `sortByDay` is the repair, so it is clean inside a sort-shaped line too.
+  assert.deepEqual(textualTimestampComparisons('const out = sortByDay(rows, (r) => r.date)'), [])
+})
+
+test('REFUSAL_AS_ORDER is checked before the repaired-site exemption, and that order is the defect it closes', () => {
+  // This is the regression guard for the ORDERING and not for the pattern. If
+  // somebody moves the new check below the family-name exemption, the
+  // exemption clears the line and this assertion is the only thing that says
+  // so. Both the ordering and the pattern have to be wrong for the test above
+  // to pass while this one fails, which is why it is written separately.
+  const line = 'rows.sort((a, b) => compareDays(a.date, b.date))'
+  const EXEMPTION =
+    /\b(?:parseInstant|compareInstants|isAfter|isBefore|utcDay|sortByInstant|parseEpochSeconds|toUtcInstant|parseDay|compareDays|isDayAfter|isDayBefore|sortByDay)\s*\(/
+  // The line DOES match the exemption. That is the point: it is cleared by it
+  // unless something runs first.
+  assert.ok(EXEMPTION.test(line))
+  assert.equal(textualTimestampComparisons(line).length, 1)
 })
 
 test('the lint does not fire on arithmetic, on counts, or on a repaired call site', () => {

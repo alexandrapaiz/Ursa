@@ -124,6 +124,21 @@ export const DISPOSITIONS = {
     forbidden: true,
     allowlisted: true,
     why: 'the committer local day is not the UTC day on 143 of this repository 2,134 commits; display columns that mean the local day are argued for by name in the corpus file'
+  },
+  // Added 2026-11-09 by the seat that wrote this gate's undecided-code check,
+  // whose first act on the next run was to trip it. The check earned its keep
+  // on its own author, which is the only test of a guard that counts.
+  //
+  // `allowlisted: false`, and the reason is stronger than for the other
+  // three. There is no argued-for case: a comparator inside a sort callback
+  // has no reading under which it is correct, because the refusal it returns
+  // is indistinguishable from "these two rows are equal". The repair
+  // (`sortByDay` / `sortByInstant`) is a drop-in with the same signature, so
+  // a site that wanted this shape wanted the repair.
+  REFUSAL_AS_ORDER: {
+    forbidden: true,
+    allowlisted: false,
+    why: 'compareDays and compareInstants answer null for a value they will not place; Array.prototype.sort coerces null to 0, so a refused row reads as equal and the array comes back in input order with no error. The hazard is documented twice in tools/instant.mjs as the stated reason sortByDay and sortByInstant exist, and the lint repaired-site exemption cleared it until this code was added'
   }
 }
 

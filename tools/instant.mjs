@@ -454,14 +454,20 @@ const TIMESTAMP_NAME =
  * timestamp, as text. Returns `{code, line, text, repair}` in the same shape
  * `tools/board/check.mjs` already prints, one per finding.
  *
- * Three codes, matching the three defects in this file's header:
+ * Four codes. Three match the defects in this file's header; the fourth is a
+ * misuse of this file's own repair rather than a defect it replaced:
  *
- *   TEXTUAL_ORDER   a relational operator or `localeCompare` between two
- *                   timestamp-named operands. Its repair names both the
- *                   instant functions and the day functions, because the
- *                   lint cannot see which the field holds; see below.
- *   TEXTUAL_DAY     `slice(0, 10)` or `substring(0, 10)` on one
- *   TEXTUAL_DROP    `slice(0, 19)` immediately re-suffixed with a zone
+ *   TEXTUAL_ORDER     a relational operator or `localeCompare` between two
+ *                     timestamp-named operands. Its repair names both the
+ *                     instant functions and the day functions, because the
+ *                     lint cannot see which the field holds; see below.
+ *   TEXTUAL_DAY       `slice(0, 10)` or `substring(0, 10)` on one
+ *   TEXTUAL_DROP      `slice(0, 19)` immediately re-suffixed with a zone
+ *   REFUSAL_AS_ORDER  `compareDays` or `compareInstants` inside a `.sort(`
+ *                     callback. Not name-shaped: it needs no timestamp name,
+ *                     because the callee IS the evidence. Checked before the
+ *                     repaired-site exemption, which would otherwise clear
+ *                     it — see the comment at that line.
  *
  * A line carrying `instant.mjs`-sourced calls is not a finding, which is how
  * the repaired call sites stay clean without an inline suppression comment.
@@ -513,6 +519,39 @@ export function textualTimestampComparisons (source) {
     // cleared, no finding lost, measured over all 465 tracked sources.
     if (/^\s*\*/.test(text)) return
     const bare = text.replace(/\/\/.*$/, '')
+    // REFUSAL_AS_ORDER IS CHECKED BEFORE THE REPAIRED-SITE SKIP BELOW, AND
+    // THAT ORDER IS THE WHOLE FINDING (exo, 2026-11-09).
+    //
+    // The skip below clears any line that calls one of the ten family
+    // functions, on the reasoning that such a line is repaired. Two of the
+    // ten — `compareDays` and `compareInstants` — answer `null` for a value
+    // they will not place, and `Array.prototype.sort` coerces `null` to `0`,
+    // which reads as "equal". So a comparator that refuses every row produces
+    // an unsorted array and raises nothing. That hazard is written out twice
+    // in this module's own docblocks, as the stated reason `sortByDay` and
+    // `sortByInstant` exist — and the skip below granted it immunity,
+    // because the skip is keyed on the NAME of the fix.
+    //
+    // The general shape, which is the part that outlives this pattern: A
+    // LINT'S CLEAN-SITE EXEMPTION IS A CLAIM THAT THE FIX CANNOT BE MISUSED.
+    // Key it on the call's shape, never on the callee's name, whenever the
+    // callee has a refusal value its caller can consume as an answer. The
+    // same shape, found in the same pass, is `nowDay` in
+    // tools/seat/read-dates.mjs: it reached for `timestampShape` — the one
+    // day predicate in this module that decides a shape and not an existence
+    // — and so bypassed `parseDay`, the member added to refuse `2026-02-30`.
+    // Two instances, one cause: reaching for a member of the repaired family
+    // is not the same as being repaired.
+    const refused = /\.sort\s*\([\s\S]*?\b(compareDays|compareInstants)\s*\(/.exec(bare)
+    if (refused) {
+      out.push({
+        code: 'REFUSAL_AS_ORDER',
+        line,
+        text: text.trim(),
+        repair: `${refused[1]} answers null for a value it will not place, and Array.prototype.sort coerces null to 0, so a refused row reads as equal and the array comes back in input order with no error. Use ${refused[1] === 'compareDays' ? 'sortByDay(rows, key)' : 'sortByInstant(rows, key)'}, which keeps unplaceable rows and sorts them last; use the comparator only where you can read the null`
+      })
+      return
+    }
     // The day five are listed beside the instant five as of 2026-11-09, so a
     // site repaired with `compareDays` is clean for the same reason a site
     // repaired with `compareInstants` is. Without them the lint would have gone
