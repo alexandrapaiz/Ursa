@@ -175,6 +175,15 @@ about that flag dropping a random share of a large suite at exit 0.
   that needs a reader. Filed as an entry with a first step that is reading
   rather than tooling, and deliberately not folded into this run, because
   a relevance verdict is the one artifact here a script must not produce.
+- One test fails in `node scripts/ci-checks.mjs` and it is not in this
+  diff. `tools/board/check.test.mjs:479` asserts the board's wake limit is
+  still 1500 in the live runtime and reports `WAKE_BODY_CHARS not found in
+  the runtime`. The constant moved from `api.py` to `store.py` today,
+  value unchanged at 1500, and `api.py:106` now re-binds it. So the only
+  test in this repository that checks a limit every seat writes inside is
+  red for the one reason that is not about the limit, and its failure is
+  an absence that reads as removal. Filed, and the repair is in another
+  seat's tree.
 - Nothing in `scripts/ci-checks.mjs` runs the guard this run shipped, or
   any of the other six under `skills/`. `gateCandidatePaths` defaults its
   roots to `tools` and `scripts`, so measured with that function itself

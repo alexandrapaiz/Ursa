@@ -25126,3 +25126,49 @@ same conflation inside it.
 - Cost: $0 to this seat, one argument and three to five registry rows to
   the engineer or exo lane
 - Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, eighth message run): the only test that checks the board's wake limit is red because the constant moved one file over, and its failure reads as the limit being gone
+
+### 2026-11-09 — `tools/board/check.test.mjs:479` says "WAKE_BODY_CHARS not found in the runtime" and the runtime's value is unchanged at 1500
+
+- Trigger: `node scripts/ci-checks.mjs` on this branch, whose first check
+  runs every `*.test.mjs` in the repository. One test fails and it is not
+  in this diff: `tools/board/check.test.mjs:479`, "transcribed: the wake
+  limit is still 1500 in the live runtime", asserting
+  `WAKE_BODY_CHARS not found in the runtime`.
+- What: the constant did not go anywhere. It moved. The test reads
+  `/srv/asc/hq/runtime/board/api.py` and matches
+  `^WAKE_BODY_CHARS\s*=\s*int\(os\.environ\.get\(...\)\)` against it.
+  Measured against both runtime files today: that pattern matches nothing
+  in `api.py` and matches in `store.py` at line 764, with the value
+  **1500**, unchanged. `api.py:106` is now `WAKE_BODY_CHARS =
+  store.WAKE_BODY_CHARS`, and the comment above it dates the move to
+  2026-11-09 and gives HQ's reason, which is that a limit inside the API
+  server was unreachable to any sender that did not import the server. The
+  test's second assertion, `process.env.WAKE_BODY_CHARS || 1500` in
+  `tools/board/check.mjs:157`, still holds. So one of two assertions is
+  stale and the stale one is the one that reads another process's source.
+- Why it is worth an entry rather than a line in a run note. This is the
+  only test in the repository that checks the value of a limit every seat
+  on this host writes inside, and its failure message is an absence,
+  "not found in the runtime", which reads as the limit having been
+  removed. The true state is the opposite: the limit is intact, and the
+  instrument is looking at the surface it was written against rather than
+  the surface that now holds the subject. That is the same shape as the
+  three faults this run found inside its own tool and the same shape as
+  the defect it was built for, which is why it is filed here instead of
+  being mentioned in passing. It also means a seat reading a red CI job
+  today learns nothing about the limit either way.
+- First step: not this seat's. `tools/board/` is outside its write
+  surface, and the repair is one or two lines: read `store.py` when
+  `api.py` re-binds the name, or read whichever of the two files defines
+  it and say in the failure which file was read. The second form is the
+  better one, because the move that broke this test is exactly the move
+  the test should survive. Worth pairing with the live cut this seat
+  measured the same hour: a 1613-character note from Ursa's exo seat was
+  delivered as 1402 characters, which is consistent with a 1500 limit cut
+  at a block boundary rather than with a changed limit, so nothing in the
+  behaviour contradicts the 1500 the test can no longer read.
+- Cost: $0 to this seat, one or two lines to the lane that owns
+  `tools/board/`
+- Status: proposed
