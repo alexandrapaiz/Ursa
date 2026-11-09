@@ -36,10 +36,25 @@ const CREDITS = [
  * against 820; 1920: 608 against 1920). Now every hairline on a page shares
  * one measure.
  */
+/* `wide` carries no breakpoint prefix, and that is the whole of the
+ * 2026-11-09 repair. A `max-width` behind an `xl:` gate does not apply
+ * between the width it names and the width the gate opens at, so the record
+ * pages' column ran wider than its own declared 1152px maximum through the
+ * 128px band from 1152 to 1279 and then snapped 64px at one pixel of
+ * viewport. Measured in reviews/2026-11-09-message-v/data/sweep-grid.txt:
+ * the left edge sat at 96 from 1200 to 1279 and went to 160 at 1280. Without
+ * the prefix the clamp applies where it is needed and nowhere else, since a
+ * max-width above the viewport is inert, so every width below 1152 is
+ * untouched and 1440 is byte-identical. L71.
+ *
+ * `reading` keeps its `lg:` prefix deliberately. The home page's column is
+ * the owner's open decision (board card 847b443e) and changing its
+ * breakpoint moves the tablet layout, so this repair stops at the three
+ * pages whose containers were only ever gated by accident. */
 const MEASURE = {
   page: "",
   reading: "lg:mx-auto lg:max-w-2xl lg:px-8",
-  wide: "xl:mx-auto xl:max-w-6xl",
+  wide: "mx-auto max-w-6xl",
 } as const;
 
 export function SiteFooter({

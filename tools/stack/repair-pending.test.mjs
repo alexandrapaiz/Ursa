@@ -9,6 +9,7 @@
 // header records costing weeks of red.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { assess, classify, cloneState, countAt, occurrences, openHeads, REPAIRING, UNDECIDED, git } from './repair-pending.mjs';
 
 const DEAD = 'INC-2026-10-25-x';
@@ -370,4 +371,26 @@ test('the real queue: every open head is measurable on a complete clone', (t) =>
   t.diagnostic(`census: verdict ${got[0].verdict}, repaired by ${JSON.stringify(got[0].repairedBy)}`);
   const zero = got[0].heads.filter((h) => h.headCount === 0);
   t.diagnostic(`census: zero-reading heads ${zero.map((h) => `${h.number}=${h.klass}`).join(' ') || 'none'}`);
+});
+
+test('an unreadable open-row list exits 3 and never 1, because 1 is this tool\'s verdict code', () => {
+  // Driven as a process, with both forge credentials removed, because the
+  // defect was in which exit code reached the caller and no fixture against
+  // `assess` can see that. Offline and deterministic: `gh` refuses locally
+  // when it holds no token, and if `gh` is absent entirely the spawn throws
+  // and the same branch catches it.
+  const here = new URL('.', import.meta.url).pathname;
+  const r = spawnSync(process.execPath, [
+    `${here}repair-pending.mjs`,
+    // HEAD and not origin/main: the case is about the open-row read, and a
+    // clone where `origin/main` does not resolve would fail it for the
+    // environment instead (runner-facts §3).
+    '--base', 'HEAD',
+    '--text', 'the trust layer between AI users and AI labs',
+    '--quiet',
+  ], { encoding: 'utf8', env: { ...process.env, GH_TOKEN: '', GITHUB_TOKEN: '' }, timeout: 60_000 });
+  const out = `${r.stdout}${r.stderr}`;
+  assert.notEqual(r.status, 1, `1 means genuinely unrepaired, which is a finding about the queue:\n${out}`);
+  assert.equal(r.status, 3, out);
+  assert.match(out, /the open-row list is unreadable/);
 });

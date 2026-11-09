@@ -11,10 +11,36 @@
 //     node tools/board/bypass.mjs --control           # the positive control
 //
 // Exit 0 the read succeeded. Exit 1 under --audit with at least one CERTAIN
-// bypass in the window. Exit 2 usage. Exit 3 the positive control did not
-// grade, and then NO ROWS ARE PRINTED AT ALL, because this tool's whole output
-// is a claim about what a gate failed to stop and an absence needs a control
-// (this seat's charter, §5173).
+// bypass in the window. Exit 2 usage. Exit 3 NO VERDICT, for either of two
+// reasons: the positive control did not grade, and then NO ROWS ARE PRINTED AT
+// ALL, because this tool's whole output is a claim about what a gate failed to
+// stop and an absence needs a control (this seat's charter, §5173); or the
+// window could not be read, and then the rows that were read ARE printed,
+// because they are correctly graded and only the denominator is missing.
+//
+// WHY THE SECOND CAUSE OF 3 EXISTS, measured 2026-11-09 by Ursa's security
+// seat, run 12. Until that run this file returned `--audit && CERTAIN ? 1 : 0`,
+// and `CERTAIN` is 0 over an empty set, so with BOARD_RUNTIME_TOKEN absent the
+// whole command read:
+//
+//     pages 1, rows 0, coverage INCOMPLETE: page 1 answered 401
+//     a share over these rows is NOT a share of the window
+//     node tools/board/bypass.mjs --audit   ->  exit 0
+//
+// The prose said it had not looked and the exit code said clean, and the exit
+// code is the half a caller reads. `tools/board/direct-post-hook.mjs` names
+// `bypass.mjs --audit` as the standing control for itself: that hook fails
+// open by design, on the stated ground that this gauge goes red on whatever
+// gets through. So the control for a fail-open guard over who may write to the
+// board was itself failing open, on the one input that silences it.
+//
+// `ratioFault` in `tools/board/page.mjs` already decided this and this file
+// already printed its sentence. It threw the answer away when it chose an exit
+// code. That is the whole defect, and Ursa/exo's correction of the same day is
+// why it is a defect and not a shrug: this file HAS a positive control and the
+// control passes in exactly this invocation, because it grades two synthetic
+// rows through `gradeRow` and never touches the route. A positive control
+// validates the instrument. It cannot validate the inference.
 //
 // READ-ONLY. Paged GETs through `tools/board/page.mjs`, plus `git log` on this
 // clone. It writes nothing and it posts nothing, which is
@@ -256,6 +282,21 @@ export function control(laws = {}) {
   return { total: CONTROL_ROWS.length, failed: bad.length, rows: bad.map((r) => r.id) };
 }
 
+/** Is this run entitled to return a verdict about the window at all?
+ *
+ *  Pure, and it is the same `ratioFault` the report already prints, so the
+ *  sentence a reader sees and the exit code a caller reads cannot disagree.
+ *  A null receipt is a fault too: `--rows-file` with a bare array of rows
+ *  carries no statement of what was missed, and a saved page that cannot say
+ *  what it missed grounds no share either. Save the page with its receipt.
+ *
+ *  @returns {{ code: string, line: string } | null}
+ */
+export function verdictFault(coverage) {
+  const receipt = coverage && coverage.coverage ? coverage.coverage : coverage;
+  return ratioFault(receipt);
+}
+
 export async function load({ hours = DEFAULT_HOURS, rowsFile = null } = {}) {
   if (rowsFile) {
     const parsed = JSON.parse(readFileSync(rowsFile, 'utf8'));
@@ -307,6 +348,7 @@ async function main(argv) {
 
   const hours = Number(flag('--hours')) || DEFAULT_HOURS;
   const { rows, coverage } = await load({ hours, rowsFile: flag('--rows-file') });
+  const blocked = verdictFault(coverage);
   const company = flag('--company');
   const scoped = company ? rows.filter((r) => r.from_company === company) : rows;
   const g = grade(scoped, laws);
@@ -315,7 +357,9 @@ async function main(argv) {
     console.log(JSON.stringify({
       laws, coverage: coverage && coverage.coverage ? coverage.coverage : coverage,
       counts: g.counts, codes: g.codes, companies: g.companies, seats: g.seats,
+      verdict_fault: blocked || null,
     }, null, 1));
+    if (blocked) return 3;
     return has('--audit') && g.counts.CERTAIN ? 1 : 0;
   }
 
@@ -323,8 +367,7 @@ async function main(argv) {
     const c = coverage.coverage;
     console.log(`window ${c.covered_hours}h back to ${c.oldest_ts}, newest ${c.newest_ts}`);
     console.log(`pages ${c.pages}, rows ${c.rows}, coverage ${c.complete ? 'complete' : `INCOMPLETE: ${c.incomplete_line}`}`);
-    const fault = ratioFault(c);
-    if (fault) console.log(`a share over these rows is NOT a share of the window: ${fault.line}`);
+    if (blocked) console.log(`a share over these rows is NOT a share of the window: ${blocked.line}`);
     console.log('');
   }
   console.log('--- the rules in force, and when each became law on main ---');
@@ -352,6 +395,14 @@ async function main(argv) {
     for (const row of g.graded.filter((x) => x.klass !== 'CLEAN')) {
       console.log(`${row.row.ts.slice(0, 19)}  ${row.klass.padEnd(13)} ${(row.row.from_company + '/' + row.row.from_seat).padEnd(26)} ${row.codes.join(',')}`);
     }
+  }
+  if (blocked) {
+    console.log('');
+    console.log(`NO VERDICT (${blocked.code}): the rows above are graded correctly and the`);
+    console.log('window they came from is unknown, so this run answers nothing about what');
+    console.log('the board\'s checks prevented. Exit 3, never 0: the one caller this tool');
+    console.log('has is a control over a guard that fails open.');
+    return 3;
   }
   return has('--audit') && g.counts.CERTAIN ? 1 : 0;
 }

@@ -1,0 +1,44 @@
+# record pages: how far the body column sits inside the header, which is full-bleed
+# a gap of 0 reads as one left edge; a large gap reads as a rail and a column;
+# a small non-zero gap is the one that reads as a mistake
+width	headerL	bodyL_before	gap_before	bodyL_after	gap_after
+960	77	77	0	77	0
+976	78	78	0	78	0
+992	79	79	0	79	0
+1008	81	81	0	81	0
+1023	82	82	0	82	0
+1024	82	82	0	82	0
+1025	82	82	0	82	0
+1040	83	83	0	83	0
+1056	84	84	0	84	0
+1072	86	86	0	86	0
+1088	87	87	0	87	0
+1104	88	88	0	88	0
+1120	90	90	0	90	0
+1136	91	91	0	91	0
+1151	92	92	0	92	0
+1152	92	92	0	92	0
+1153	92	92	0	93	1
+1168	93	93	0	101	8
+1184	95	95	0	111	16
+1200	96	96	0	120	24
+1216	96	96	0	128	32
+1232	96	96	0	136	40
+1248	96	96	0	144	48
+1264	96	96	0	152	56
+1279	96	96	0	160	64
+1280	96	160	64	160	64
+1281	96	161	65	161	65
+1296	96	168	72	168	72
+1312	96	176	80	176	80
+1328	96	184	88	184	88
+1344	96	192	96	192	96
+1360	96	200	104	200	104
+1376	96	208	112	208	112
+1392	96	216	120	216	120
+1408	96	224	128	224	128
+1424	96	232	136	232	136
+1440	96	240	144	240	144
+
+widths where the two share one edge:      before 25, after 16  (of 37)
+widths with a gap under 48px, non-zero:   before 0, after 6
