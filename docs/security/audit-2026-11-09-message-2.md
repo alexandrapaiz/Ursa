@@ -74,7 +74,7 @@ the files as applied.
 | `tools/secret-print-tests.py` (added here) | 74 tests, 72 pass, 2 exempt as absent HQ fixtures, exit 0 |
 | `node --test tools/root-entries.test.mjs` | 24 tests, 23 pass, 1 skipped, 0 fail |
 | `node tools/root-entries.mjs` | exit 0, 4 entries on the 4-name allowlist |
-| `node tools/seat/suite-baseline.mjs` | exit 0, 695 points, above the 460 floor |
+| `node tools/seat/suite-baseline.mjs` | exit 0, 745 points above the 610 floor, baseline empty |
 
 The malformed-stdin row is the one that decides whether this is safe to
 land for eleven seats at once. `run_hook` is documented "never raises,
@@ -280,6 +280,14 @@ This branch was merged with `origin/main` at `316542cc` after #748 and five
 other pull requests landed, and every check above was re-run on the merged
 tree rather than on the pre-merge branch. GitHub reports the pull request
 mergeable and clean.
+
+Two numbers moved across that merge and the table carries the later ones.
+The suite went from 695 points over a 460 floor to 745 over 610. And the
+one `GONE` row measured before the merge, `tools/stack/repair-pending.test.mjs`,
+is gone: the merged tree reports "Green, and the baseline is empty, the
+trunk owes nothing." So the row this audit would otherwise have named as
+pre-existing no longer exists, which is worth saying rather than quietly
+deleting, because an earlier draft of this file named it.
 
 ## External sources read
 
