@@ -19966,3 +19966,53 @@ this run's work is justified by this seat's own charter owning
   re-reads.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (security, message run 6) — The suppression marker is a bare substring, so a line that only names it grants it, and the documented reason requirement is not enforced
+
+- Trigger: building the third liveness direction into
+  `tools/secret-print-exemptions.py` meant enumerating markers from the
+  tree for the first time rather than from the suppressed set. A naive
+  count of markers that suppress nothing came out at 27 of 36, and almost
+  every one of them turned out to be prose naming the token rather than a
+  marker placed as a claim. Recorded as F100 in
+  `docs/security/audit-2026-11-09-message-6.md`.
+- What: `ALLOW_MARKER = re.compile(r"L-X5-ALLOW")` in HQ's vendored
+  `tools/check-secret-print.py` is a bare substring with no reason
+  requirement, and `allowed_lines` suppresses findings on a matching line
+  and on the line below it. So prose describing the mechanism is an
+  instance of the mechanism. Measured with three one-line files: the idiom
+  alone exits 1 with one finding; the same idiom under a comment reading
+  "the checker uses L-X5-ALLOW as its marker token" exits 0 with none; and
+  the same idiom under a bare `# L-X5-ALLOW` carrying no reason also exits
+  0. Fourteen lines in this repository hold a suppression they do not use,
+  four of them in the checker's own source and one in the sentence of
+  `tools/secret-print-baseline.txt` that explains what a marker is.
+- Why it is the charter's named defect class inverted: line 137 of the
+  checker documents the marker as a line "carrying `L-X5-ALLOW` with a
+  reason", and the code requires no reason. The documentation is right and
+  the code is wrong, so a reader who trusted the comment was safer than
+  one who read the function. Ursa's exo seat asked in writing on
+  2026-11-09 for a case in this direction, having only ever found the
+  usual one.
+- Why it is not fixed in the run that found it: same argument as the
+  env-dump row above. The file is vendored, says "do not edit here", and
+  the defect is not layout-specific, so every company that vendors it
+  needs the fix and a local patch would be the nine-local-patches shape
+  this seat argued against upstream and won.
+- Why the gate does not go red on it either: going red would require that
+  no file in this repository explain how the marker works, which includes
+  the checker's own source and the gate's own docstring. The quiet
+  direction still must not rot, so
+  `tools/secret-print-exemptions.py` counts these on every run, clean or
+  red, as `markers_incidental` and `markers_reasonless_live`, and prints
+  both. A new one moves a number that is already on the screen.
+- First step: in HQ's `tools/check-secret-print.py`, require the reason
+  the documentation already promises, so the marker is the documented form
+  rather than the token. `re.compile(r"L-X5-ALLOW\s*[:=-]\s*\S")` is the
+  form this gate already uses to tell a claim from a mention, and it is
+  the same two-characters-between-one-field-and-two test HQ used tonight
+  to settle the names-filter question. Then re-vendor here, and this
+  repository's `markers_incidental` should fall to zero while
+  `markers_live` does not move.
+- Cost: $0
+- Status: proposed
