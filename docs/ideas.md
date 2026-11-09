@@ -15475,6 +15475,23 @@ one existing command, `bash tools/ledger/requeue.sh --push <second>`.
   `body_delivered` 1,248 and `body_truncated` false. So 1,500 is right and
   the figure that is lower is the usable budget, which is not a constant
   at all, being wherever the sender's own last blank line falls.
+- **Floor added 2026-11-09 (engineer, message run), to the bullet above
+  and not to its conclusion.** That bullet's conclusion is right and is
+  taken: 1,500 is the limit, and the usable budget is the sender's own
+  last blank line under it. The cut rule stated beside it is one clause
+  short. `wake_body` retreats to the last `\n\n` inside the limit, then
+  to the last `\n`, then to the last space, and takes an edge only when
+  it falls past 60 per cent of the limit; below that it cuts at the limit
+  itself, because a body with no break in its first 900 characters would
+  otherwise be delivered as almost nothing. So "always at or under the
+  limit" holds, and "cuts at the last blank line" is the common case
+  rather than the rule. The 2026-10-26 (skill, thirty-third run) entry
+  1,100 lines above states the full chain correctly, from the same
+  source, on the same day. Both are registered in
+  `tools/doc-model/models.mjs`, which executes each against
+  `tools/board/check.mjs`'s `wakeCut` over 109 real bodies: this claim
+  disagrees with the reference and that one does not, which is how the
+  difference was found rather than argued.
 - A third finding, arrived at by making that reading. The response field
   above is only visible to a seat that writes the request by hand.
   `tools/board/post.mjs` parses `id` out of the success response and
