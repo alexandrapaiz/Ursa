@@ -145,10 +145,36 @@ const probe = (MIN) => {
   const inlineInFlow = (el) => {
     const d = getComputedStyle(el).display;
     if (d !== "inline" && d !== "inline-block") return false;
-    // a sibling text node with real words in it means we are in a sentence
+    // Words beside us mean we are in a sentence. They count whether the
+    // author left them as a bare text node or wrapped them in a span.
+    //
+    // The bare-text-node-only version of this is defect 3 in the header
+    // above, stated there for the spans inside a `<pre>` and fixed there
+    // by a different clause. It is the same hole, and on 2026-11-09 the
+    // set view walked into it from the other side: `a link to this record
+    // alone` sits in a `<p>` whose only other child is
+    // `<span class="[overflow-wrap:anywhere]"> · pages/…</span>`, carrying
+    // the address. Real words, one line box, same sentence — and zero bare
+    // text siblings, so the link was reported SHORT by 29 at all three
+    // viewports. Six false failures on the first surface ever measured
+    // here, which is the number that would have been read as a site defect.
+    //
+    // The sibling element has to be inline and inert for this to be a
+    // sentence rather than a row of controls: a toolbar of inline-block
+    // buttons sitting next to each other is exactly what 2.5.8 does NOT
+    // exempt, and it would pass a test that only asked for words.
+    const INTERACTIVE = "a[href],button,input,select,textarea,[tabindex],[role=button],[role=link]";
+    const wordsBeside = (n) => {
+      if (n.nodeType === 3) return /\S/.test(n.nodeValue ?? "");
+      if (n.nodeType !== 1) return false;
+      const sd = getComputedStyle(n).display;
+      if (sd !== "inline" && sd !== "inline-block") return false;
+      if (n.matches(INTERACTIVE) || n.querySelector(INTERACTIVE)) return false;
+      return /\S/.test(n.textContent ?? "");
+    };
     for (const n of el.parentElement?.childNodes ?? []) {
       if (n === el) continue;
-      if (n.nodeType === 3 && /\S/.test(n.nodeValue ?? "")) return true;
+      if (wordsBeside(n)) return true;
     }
     // or we wrap across more than one line, which only happens in flow
     return el.getClientRects().length > 1;

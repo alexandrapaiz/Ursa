@@ -398,13 +398,41 @@ function SiteSet({
                     ))}
                 </span>
 
+                {/* The swatch, which this legend did not carry and the
+                    record view's own legend has carried since it was
+                    written. Measured on the shipped frame, 2026-11-09, by
+                    sampling the bar's pixel rows at 1440: the three marks
+                    are --polar filling all 6px, --polar filling 4px with a
+                    2px foot of --night, and rgba(232,237,247,0.45) filling
+                    6px. Two of the three are the same colour and differ
+                    only by that foot, so with no swatch beside the words
+                    the only thing joining a percentage to a segment is
+                    that both lists happen to run in the same order. At 390
+                    even that is gone: the bar stays horizontal and the
+                    legend stacks into a column, so nothing in the frame
+                    pairs them at all.
+
+                    Nothing new is invented here. It is `rec-swatch` and
+                    `rec-seg-*`, the same two classes the bar above already
+                    uses, and the same `mt-[0.3em]` nudge RecordSummary
+                    uses, because a 0.5rem block with no text in it takes
+                    its baseline from its bottom edge. `rec-swatch` already
+                    scales the edited mark's foot to a third of its height
+                    for exactly this size. */}
                 <span className="mt-4 flex flex-wrap gap-x-8 gap-y-2 font-mono text-[0.68rem] tracking-[0.04em]">
                   {SPAN_CLASSES.map((c) => {
                     const x = shares.find((y) => y.cls === c);
                     return (
-                      <span key={c} className="text-[var(--dim)]">
-                        <span className="text-[var(--star)]">{(x?.pct ?? 0).toFixed(1)}%</span>{" "}
-                        {CLASS_COPY[c].label}
+                      <span key={c} className="flex items-baseline gap-2 text-[var(--dim)]">
+                        <span aria-hidden="true" className={`rec-swatch rec-seg-${c} mt-[0.3em]`} />
+                        {/* the figure and its words stay in one child, so
+                            the row has two flex items and not three and
+                            the space between them is the text space it
+                            already was rather than gap-2 */}
+                        <span>
+                          <span className="text-[var(--star)]">{(x?.pct ?? 0).toFixed(1)}%</span>{" "}
+                          {CLASS_COPY[c].label}
+                        </span>
                       </span>
                     );
                   })}

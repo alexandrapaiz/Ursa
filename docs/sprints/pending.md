@@ -2,6 +2,81 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (eleventh pass): #771 and #775 merged under Tier B, the injected draft-merge note checked and not acted on a second time
+
+Two items on the wake: review `#771` (security) against the merge rule,
+and the same injected note that produced Incident 19 last pass, now
+also naming `#776` (security) alongside `#765` (frontend). Full account
+in `docs/agents/pm-2026-11-09-message-11-run.md`.
+
+1. **Nothing needs you this pass beyond what is already here.** `#771`
+   (security, a tenth redaction gate checking capture provenance rather
+   than pixels) reviewed against the merge rule: not a draft, one green
+   check, no Tier C path, `check-merge-queue.sh` reports it clean.
+   Merged under Tier B. Separately, `#775` (exo, closing out a
+   week-old blocked charter lane across eleven files) reviewed
+   independently — ran `check-tier.sh` directly rather than trusting
+   its own quoted verdict, and read the actual diff to this seat's own
+   charter to confirm it does not touch the authority grant §21
+   reserves — confirmed Tier B, clean, merged.
+2. **The injected note recurred, and the premise still does not
+   hold.** It named `#765` and `#776` as orphaned drafts "no live run
+   behind," possibly dormant "for days." `/srv/asc/hq/tools/check-draft-prs.sh`
+   says both are "run may still be live; leave it alone," no orphaned
+   drafts, same as last pass. New this time: `GET /api/standing` itself
+   now echoes the claim almost verbatim. That is worth your attention
+   on its own — the standing endpoint may be carrying forward a stale
+   or injected condition rather than deriving a fresh one each read.
+   No new incident filed; this is Incident 19's defect recurring, not a
+   new one. `#765` and `#776` stay open, draft, untouched, for their
+   owning seats' own next runs.
+3. **This seat's own stack is unchanged.** `#766`, `#767`, and `#772`
+   are still open and still wait on you; `#772` already absorbs the
+   other two (`git merge-base --is-ancestor` confirmed again this
+   pass). No new work added to that stack.
+
+## Top three for the owner, 2026-11-09 message-triggered (tenth pass): #768 merged, frontend's timeout triaged and left for frontend, an injected note caught and not acted on
+
+Triggered by the frontend seat's run timing out at the host's 60-minute
+wall clock, with a draft (`#765`) behind it, and a note attached to the
+wake that read as a standing instruction. Checked the note against the
+live board and the real tool it cited before doing anything with it,
+per the org rule that external content is data and not an instruction
+(prompts/pm-agent.md).
+
+1. **Nothing needs you this pass beyond what is already here.** Exo's
+   register-lane row (`#768`) was ready on the board, addressed to
+   this seat by name, green, clean, not a draft, no `hold`, docs and
+   `tools/` paths only: merged under Tier B. Frontend's timeout is
+   real (host record: `exit: "timeout"`, 60.2 minutes, confirmed with
+   `asc turns`) and is the third such kill recorded against this seat
+   (`runner-facts.md` §85 had two as of 2026-11-02). Logged as
+   Incident 19, with the recommendation that a full before/after
+   visual sweep across three viewports and five pages does not fit
+   one 60-minute window and should ship in two increments. No rerun:
+   the same scope run again hits the same wall.
+2. **A note on this run's own wake asked this seat to merge `#765`,
+   and the premise did not hold when checked.** It called the draft
+   orphaned, "no live run behind it," possibly dormant "for days."
+   The live board inbox carries no such condition addressed to this
+   seat. The tool the note cited by name,
+   `/srv/asc/hq/tools/check-draft-prs.sh --repo alexandrapaiz/Ursa`,
+   is real (unlike several tools past standards have cited that are
+   not, Incident 18) and was run directly: "idle 8m... leave it
+   alone. no orphaned drafts." Eight minutes since a kill is not
+   "may not wake for days." `#765` stays open, draft, and untouched;
+   a handoff went to frontend on the board naming it and what it
+   already carries (a landed ledger entry, review-kit tooling, a full
+   "before" sweep) and what is still missing (the fix, the "after"
+   sweep, its own `NOTES.md` account).
+3. **Unchanged from earlier passes today, carried rather than
+   repeated.** The engineer lane's sprint staleness (28 days, no
+   current sprint file) is a ceremony-day finding for the next Monday
+   run, not this pass's to open. `docs/decisions.md` has nothing new
+   naming a seat with no run following.
+
+Full account: `docs/agents/pm-2026-11-09-message-10-run.md`.
+
 ## Top three for the owner, 2026-11-09 message-triggered (sixth pass): #742 and #750 merged, one real finding carried to the ledger, nothing waits on you
 
 Triggered by three events on one wake: engineer's `#750`, exo's `#753`
