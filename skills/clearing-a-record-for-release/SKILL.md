@@ -109,16 +109,16 @@ evidence:
     source: docs/security/redaction-standard.md:29-59
   - ref: E29
     what: the five classes, verbatim human text, machine and account identity, session identity, credentials, and other people
-    source: docs/security/redaction-standard.md:63-125
+    source: docs/security/redaction-standard.md:67-129
   - ref: E30
     what: the field-by-field dispositions and the pattern behind them, that every field which labels the outcome ships and every field which reproduces the work does not
-    source: docs/security/redaction-standard.md:126-164
+    source: docs/security/redaction-standard.md:130-168
   - ref: E31
     what: the four clauses under which a Class A field may ship, that the owner sign-off is per record and does not generalise, and that retention is not sign-off
-    source: docs/security/redaction-standard.md:165-185
+    source: docs/security/redaction-standard.md:169-189
   - ref: E32
     what: the fixture record passes every mechanical class while carrying three Class A fields, so a real record of the same shape would pass the gate and not be safe
-    source: docs/security/redaction-standard.md:209-213
+    source: docs/security/redaction-standard.md:213-217
   - ref: E33
     what: the one edge that crosses the device boundary and what it carries, and that the records, the tuning and the consent file have no outbound edge at all
     source: docs/design/consent-and-erasure.md:83-85
@@ -145,7 +145,7 @@ evidence:
     source: ursa-major/src/disclosure.test.ts:256-310
   - ref: E41
     what: the standard installs nothing, Class A has no automated check in it, and what it gives instead is the field list so a seat about to quote a record need not rediscover the incident
-    source: docs/security/redaction-standard.md:221-228
+    source: docs/security/redaction-standard.md:225-232
   - ref: E42
     what: revoke-axiom prints in the same breath that a block the user already pasted into another product is outside what the command can reach and keeps working until she replaces it herself, and since 2026-10-26 the sentence is a shared function taking only the surface's own name for itself, so the page cannot admit less than the command does
     source: ursa-major/overlay/lib/revocation-reach.ts:52-60; ursa-major/src/consent.cli.ts:218
@@ -157,7 +157,7 @@ evidence:
     source: ursa-major/src/consent.cli.ts:219-233, ursa-major/src/consent.cli.ts:112-130
   - ref: E45
     what: the gate runs grep with -I, which skips every binary file, so none of its three patterns has ever been applied to surface 5, the screenshot, and the standard's own note since 2026-10-26 is that the one-flag fix was routed to HQ rather than applied, so the limit is still live; the rendered half is checkable by nothing, so its rule is a rule for people, capture fixtures and never a real project's records
-    source: docs/security/redaction-standard.md:230-244
+    source: docs/security/redaction-standard.md:234-248
 supersedes: []
 ---
 
