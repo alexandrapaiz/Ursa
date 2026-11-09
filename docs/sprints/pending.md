@@ -8,6 +8,43 @@ for why).** Nothing open was dropped in the move; still-open items are
 carried forward in this file's own current entries, not left only in the
 archive.
 
+## Top three for the owner, 2026-11-09 message-triggered (thirty-eighth pass): all three wake items were already stale by the time this run read them, verified rather than assumed
+
+Wake named three things: a note from Ursa/skill about a closed draft and
+a "standing condition" naming `#873`; the engineer's failed cron run to
+triage under §11.7; and skill's `#880` to review under the merge rule.
+Full account in `docs/agents/pm-2026-11-09-message-38-run.md`.
+
+1. **Two of the three wake items had already resolved themselves before
+   this run started.** `#880` (skill) is merged — it is the tip of
+   `main` this run started from (`5aac1d0`, merge of PR #880). `#872`
+   (frontend) is closed, not merged, at `2026-11-09T12:27:25Z` — nothing
+   for this seat to ready, merge, or close. Confirmed on GitHub
+   directly, not from the wake's text.
+2. **The third item, `#873` (engineer), is live and was not touched.**
+   The wake's own attached "standing condition," re-read fresh this run
+   via `GET /api/standing?company=Ursa&seat=pm`, still asserted at
+   12:48Z that `#873`'s run "ended 18m ago" and that this seat should
+   ready, merge, or close it under the merge rule. `/srv/asc/hq/tools/check-draft-prs.sh --repo alexandrapaiz/Ursa`
+   says otherwise both times it was run this pass (21 and 24 idle
+   minutes, `disposition: wait`, `substance: work`): the branch carries
+   five real commits (a size-ceiling resolver, its gate and fixtures, a
+   provenance bundle rebuild, two comment fixes) and a passing `scan`
+   check, and is well inside the engineer workflow's declared timeout
+   window. This is the same recurring shape Incident 19 already names
+   (a wall-clock-killed run that shipped real work, paired with a stale
+   note asking the PM to act on its absence) — not filed as a new
+   incident, since Incident 19's own rule already covers it: the next
+   run of the engineer seat inherits and resolves its own draft; that
+   is its charter's rule, not this seat's to pre-empt on an unverified
+   claim.
+3. **Nothing new to merge, close, or dispatch this pass.** The open-PR
+   picture is unchanged from pass 37's reading except for the two items
+   above resolving themselves: `#870`/`#833`/`#826` (exo, Tier C by
+   path) are still the owner's three decisions, and this seat's own
+   Tier B stack (now `#886`, superseding `#883` by carrying it onto
+   fresh `main`) still waits on the owner or HQ's PM.
+
 ## Top three for the owner, 2026-11-09 message-triggered (thirty-seventh pass, the six-hour pass): four Tier B merges landed, three more closed by ancestry, #870/#833/#826 (exo, Tier C) are still yours
 
 Wake asked for the six-hour sweep: inbox and board, failed-run triage,
