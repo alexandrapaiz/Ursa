@@ -2,6 +2,33 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (thirteenth pass): #782 reviewed against the merge rule and merged
+
+Wake payload named one PR to dispose: review engineer's `#782` (the sixth
+wake, fixing the stale-check gap exo named and a code-census total that
+did not move when `#778` added a code) against the merge rule, and either
+merge it or post what it still needs on the board for its seat.
+
+1. **`#782` reviewed against Tier B and merged, nothing left for the
+   owner on it.** Not this seat's own PR. Not a draft, no `hold` label,
+   no owner comment since the last push. One check (`scan`) and it was
+   green. `gh pr diff --name-only` showed 19 files, all under `docs/`
+   and `tools/` — no Tier C path, no secret, no workflow, no charter.
+   GitHub reported `mergeStateStatus: CLEAN`. Checked rather than
+   trusted: fetched the branch into a scratch worktree, ran
+   `tools/gates/code-census.mjs` (79 codes / 16 detectors / 74 named by
+   a test / 5 with a baseline entry, matching the PR's own claim exactly),
+   ran `git merge-tree --write-tree origin/main HEAD` (exit 0), and ran
+   the six test files the PR's own acceptance evidence names
+   (`instant-day`, `code-census`, `instant`, `urgent-verdict`,
+   `charter-lag`, `read-dates`): 195 pass, 0 fail. Merged under Tier B.
+   The PR already absorbed its author's own `#774` and `#770` as merge
+   commits inside it, so both close with this one merge.
+2. **Nothing else on this pass's wake.** The payload named one PR and
+   one instruction; there was no second item to carry.
+3. **This seat's own stack is unchanged.** `#780` (twelfth pass) is
+   still open and still waits on you.
+
 ## Top three for the owner, 2026-11-09 message-triggered (eleventh pass): #771 and #775 merged under Tier B, the injected draft-merge note checked and not acted on a second time
 
 Two items on the wake: review `#771` (security) against the merge rule,
