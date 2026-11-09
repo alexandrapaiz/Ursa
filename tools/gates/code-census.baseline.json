@@ -1,0 +1,42 @@
+{
+  "what": "Defect codes a detector under tools/ or scripts/ can emit that no test file names, each with the reason it is not asserted today. tools/gates/code-census.mjs exits 1 on any code that is neither asserted nor listed here, and exits 1 on any entry here that has outlived its finding, so this file can only shrink.",
+  "why_this_file_is_not_a_permanent_excuse": "An exclusion nobody wrote down is indistinguishable from an exclusion nobody noticed, which is Ursa/exo's finding of 2026-11-09 and the reason the census exists. An exclusion that IS written down but never revisited is the next version of the same defect. So every entry below names the ledger entry that proposes its repair, and BASELINE_ENTRY_STALE deletes the entry the day the repair lands.",
+  "measured_at": "2026-11-09, origin/main 316542cc, by the engineer seat's third message wake",
+  "excused": [
+    {
+      "code": "HEADS_UNFETCHABLE",
+      "detector": "tools/registers/check-ids.mjs",
+      "why": "reachable only in the gate's default mode, where REPO_ROOT is this repository and the head set comes from `git fetch origin +refs/pull/*/head:refs/prs/*`. The `--repo <dir>` escape hatch that makes the scan rules testable skips this branch by design, because `gh` would speak about the wrong checkout. So no fixture can reach it without an injectable head-set source.",
+      "repair": "docs/ideas.md 2026-11-09, 'Three ground faults in the identifier gate are unreachable from any fixture, because the escape hatch that makes the scan testable turns them off'",
+      "measured": "2026-11-09"
+    },
+    {
+      "code": "OPEN_SET_UNKNOWN",
+      "detector": "tools/registers/check-ids.mjs",
+      "why": "same branch as HEADS_UNFETCHABLE: it fires when `gh pr list` fails, which the gate only asks in default mode. A fixture run passes --repo and takes the `for-each-ref refs/prs/` path instead, where this code cannot fire.",
+      "repair": "docs/ideas.md 2026-11-09, 'Three ground faults in the identifier gate are unreachable from any fixture, because the escape hatch that makes the scan testable turns them off'",
+      "measured": "2026-11-09"
+    },
+    {
+      "code": "HEAD_UNREADABLE",
+      "detector": "tools/registers/check-ids.mjs",
+      "why": "fires when the forge names an open pull request whose head has no ref in this clone. Driving it needs the forge's answer and the clone's refs to disagree, and in --repo mode the numbers are READ FROM the refs, so the two cannot disagree by construction.",
+      "repair": "docs/ideas.md 2026-11-09, 'Three ground faults in the identifier gate are unreachable from any fixture, because the escape hatch that makes the scan testable turns them off'",
+      "measured": "2026-11-09"
+    },
+    {
+      "code": "UNMERGED_REFERENCE",
+      "detector": "tools/doc-model/check.mjs",
+      "why": "its condition is a fact about origin/main: the mechanism's reference file is absent there while prose about the mechanism is present. `auditMechanism` reads that through `onMain`, which shells out to git against this checkout, so a synthetic mechanism cannot put a file on origin/main to make the predicate true or false.",
+      "repair": "docs/ideas.md 2026-11-09, 'Two doc-model codes are facts about origin/main, so the gate needs its git reads passed in before either can be asserted'",
+      "measured": "2026-11-09"
+    },
+    {
+      "code": "CORRECTION_UNMERGED",
+      "detector": "tools/doc-model/check.mjs",
+      "why": "same cause as UNMERGED_REFERENCE and one step worse: it needs a refuted claim here AND its correction written on origin/<branch>, read with `revSectionHasMark`. `revSectionHasMark` is exported and separately tested; the finding that composes it with the site walk is not reachable without an injectable ref reader.",
+      "repair": "docs/ideas.md 2026-11-09, 'Two doc-model codes are facts about origin/main, so the gate needs its git reads passed in before either can be asserted'",
+      "measured": "2026-11-09"
+    }
+  ]
+}
