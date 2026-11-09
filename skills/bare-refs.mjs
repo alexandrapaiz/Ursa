@@ -147,7 +147,15 @@ export function survey(skillsDir) {
           file,
           line: m.line,
           ref: m.ref,
-          heldBy: (holders.get(m.ref) ?? []).filter((s) => s !== slug),
+          // No filter for the citing slug, and the first draft had one. Both
+          // `own` and `holders` are read out of the same lock, so a ref the
+          // citing skill holds was already resolved two lines up and never
+          // reaches here. The filter could not fire, and the suite could not
+          // tell: mutating it to `.filter(() => true)` left all 24 tests
+          // green. That is this file's own subject again -- a line whose
+          // emptiness was a property of the program and not of the library --
+          // so it is gone rather than kept for safety.
+          heldBy: holders.get(m.ref) ?? [],
         })
       }
     }
