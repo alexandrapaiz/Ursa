@@ -166,3 +166,88 @@ seat's.
   host wall attempting both sweeps, the fix and the polish in one hour.
   This run deliberately shipped a narrower thing and resolved its draft
   in the first ten minutes instead.
+
+## 5. Verifying the fix, and the two things that stopped me verifying it the right way
+
+A fix is done when the new screenshot shows it done. This one is shown
+done against the real CSS in a fixture rather than against the real page,
+and the reason is worth more than the frames are.
+
+### 5.1 The site could not be built on this host
+
+`npm install` in `ursa-minor/` died with `ENOSPC`. The volume `/tmp` and
+`/srv/asc` share is 45G, it was at 100% with 4.4M free when this run
+started, and about twenty seats' checkouts are on it. Freeing everything
+this run owned brought it to 664M, and a clean `node_modules` for the
+site needs more than that: the attempt consumed all of it and left the
+tree half-unpacked, which is L51's failure mode arriving by a different
+road. So there is no `next build`, no server, and no frame of the real
+`/record` page from this run.
+
+Two things found on the way, both of them the review kit's own
+documented traps, met live:
+
+**A server from a dead run was still holding the tree open.** `npm exec
+next start -p 4983`, started 02:13:15, still up at 03:17 — an orphan of
+the 01:53Z run that the host killed at 02:54. It is why the first
+`rm -rf node_modules` reported "Directory not empty" on three paths. The
+README's own paragraph about three servers left pointed at deleted
+directories six and seven hours later describes exactly this, and the
+collection it asks for is what this run did.
+
+**`pgrep -f` matched my own command line.** After killing it,
+`pgrep -c -f "next start -p 4983"` answered 2, and both matches were the
+shells running that very command. The server was already gone. This is
+L57, verbatim, and the only reason it cost nothing is that the README
+says to print the matches rather than trust the count.
+
+### 5.2 A third trap, which is new and belongs in the kit
+
+Chromium then refused to start six times, one missing shared library per
+attempt. On the fourth attempt I filtered the output with
+`grep -oE "...|shot"` and it printed `shot`, so I recorded a success. It
+had matched the word inside `screenshot` in the error text. Nothing was
+written and the directory was empty, which is the only reason it was
+caught.
+
+That is the README's own rule about a check whose failure mode is to
+measure something else, in a new place: **a success token that is a
+substring of a word the failure path prints is not a test.** The fix is
+to assert on the artifact. The directory listing is what settled it both
+times.
+
+The six libraries are now in `CHROMIUM_LIBS` in `lib/browser.mjs`:
+`libavahi-common3`, `libavahi-client3`, `libxcb-render0`, `libthai0`,
+`libdatrie1`, `libgraphite2-3`. None is reachable from any name already
+in that list, because `apt-get download` resolves no dependencies, so the
+list has to name every transitive leaf itself. That is now said in the
+comment above it, since the old comment said "what `ldd` surfaced" and
+`ldd` is what cannot see them.
+
+### 5.3 What the frames do and do not prove
+
+`after/fixture/legend.html` carries the legend markup twice, before and
+after, over `after/fixture/rec.css`, which is lines 881 to 920 of
+`ursa-minor/app/globals.css` copied verbatim. The five custom properties
+are copied from lines 146 to 156. Shot at 390 and 1440 with the kit's own
+launcher.
+
+Measured off `legend-after-phone.png`, the three marks in the legend's
+left band:
+
+| swatch | height | colour |
+|---|---|---|
+| `survived_verbatim` | 8px | rgb(168,199,250) |
+| `survived_mutated` | 6px | rgb(168,199,250) |
+| `no_generation_provenance` | 8px | rgb(106,108,115) |
+
+Three distinguishable marks, mirroring the bar's own 6px, 4px and 6px at
+half scale, which is what `rec-swatch`'s `inset 0 -0.17rem` exists to do.
+The baseline nudge holds: each swatch sits on the line of its figure.
+
+**This proves the CSS and the mark geometry. It does not prove the
+component.** The fixture hand-writes the Tailwind utilities the component
+gets from Tailwind, so it cannot show that the real build emits the same
+`flex items-baseline gap-2`, and it renders no React. A frame of the real
+`/record` set view is still owed, and is the first thing to take on a run
+that has disk.

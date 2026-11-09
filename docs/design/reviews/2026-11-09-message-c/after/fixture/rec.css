@@ -1,0 +1,40 @@
+.rec-bar {
+  display: flex;
+  height: 6px;
+  gap: 1px;
+  background: var(--line);
+}
+
+.rec-seg {
+  display: block;
+  height: 100%;
+}
+
+.rec-seg-survived_verbatim {
+  background: var(--polar);
+}
+
+.rec-seg-survived_mutated {
+  background: var(--polar);
+  box-shadow: inset 0 -2px 0 var(--night);
+}
+
+.rec-seg-no_generation_provenance {
+  background: rgba(232, 237, 247, 0.45);
+}
+
+/* The legend's swatch, which has to carry the same three marks at
+   0.5rem square. The 2px foot would be half the swatch, so the edited
+   segment's device is scaled with it: a third of its height, which is
+   the same proportion the bar gives it. */
+.rec-swatch {
+  display: block;
+  height: 0.5rem;
+  width: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.rec-swatch.rec-seg-survived_mutated {
+  box-shadow: inset 0 -0.17rem 0 var(--night);
+}
+
