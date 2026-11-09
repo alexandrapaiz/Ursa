@@ -152,23 +152,47 @@ interface Manifest {
   /** Prose for a reader; ignored by every program. */
   comment: string[]
   namespaces: Namespace[]
+  /** Every register in tools/registers/registers.json that allocates no
+   *  identifier this repository can repair, each with the reason. Read by no
+   *  program; read against registers.json by
+   *  tools/registers/id-verdict.test.mjs, which fails if a path declared
+   *  there is in neither list. Added 2026-11-09; see §12. */
+  excluded: Array<{ register: string; why: string }>
 }
 
 interface Namespace {
-  /** The identifier prefix, without the trailing hyphen. "ADR", "PWC-ENG". */
+  /** A label for the namespace, used by `--next <name>` and in the
+   *  NAMESPACE_UNKNOWN message. It was also the identifier prefix for all
+   *  four namespaces that existed before 2026-11-09, which is why the
+   *  allocator read it as one; `spell` is now the only thing that decides how
+   *  an identifier is written. "ADR", "PWC-ENG", "Window", "RunnerFact". */
   name: string
   /** Repository-relative path of the file whose headings define this namespace. */
   register: string
   /** Zero-padding width of the numeral, so the allocator prints ADR-007 and PWC-15. */
   pad: number
+  /** How an allocated number is written into a heading. Exactly one `{n}`,
+   *  standing for the number padded to `pad`; everything else is literal.
+   *  "ADR-{n}", "Window {n}", "{n}". Validated, because zero `{n}` makes the
+   *  allocator print one identifier forever and two makes it leave a literal
+   *  `{n}` in a heading a seat pastes. Added 2026-11-09; see §12. */
+  spell: string
   /** Anchored RegExp source, multiline. Capture 1 is the whole identifier,
    *  capture 2 is its number. Anchoring is validated, not assumed. */
   define: string
+  /** A heading this register really carries, or a prefix of one. The
+   *  validator refuses the manifest unless `define` matches it and
+   *  `spell(pad, capture 2)` reproduces capture 1 exactly, which is the only
+   *  check that reads `define`, `spell` and `pad` against each other. Added
+   *  2026-11-09; see §12. */
+  example: string
   /** Who repairs a collision here. A locus from tools/gates/verdict-shape.mjs. */
   repair: 'seat' | 'owner'
   /** Why this namespace exists. Absence is a fault, not a default. */
   why: string
-  /** Identifiers that must never be defined again, each with its reason. */
+  /** Identifiers that must never be defined again, each with its reason.
+   *  Each `id` is validated against this namespace's `spell`, not against
+   *  `${name}-`. */
   burned: Array<{ id: string; why: string }>
 }
 
@@ -198,6 +222,20 @@ interface Census {
 export function manifestFault(
   manifest: Manifest | Error | undefined | unknown,
 ): { code: string; detail: string } | null
+
+/** Write a number as this namespace's register spells it. Added 2026-11-09;
+ *  it is the function that replaced `${ns.name}-${padded}` at the allocator's
+ *  one print site. */
+export function spellId(ns: Pick<Namespace, 'spell' | 'pad'>, n: number): string
+
+/** The inverse, used by the burn-list validator and by nothing that reads a
+ *  ref. The two faults are kept apart because their repairs differ: 'SHAPE'
+ *  is an identifier filed against the wrong namespace, 'NUMBER' is a typo in
+ *  the right one. Added 2026-11-09. */
+export function unspellId(
+  ns: Pick<Namespace, 'spell' | 'pad'>,
+  id: string,
+): { n: number } | { fault: 'SHAPE' | 'NUMBER' }
 
 /** The one sentence the gate prints last, plus the exit code that agrees. */
 export function verdict(findings: Finding[], seen?: Census): Verdict
@@ -235,20 +273,23 @@ true.
 The gate writes nothing except the file `--json` names. It has no state, no
 cache and no lock, so two runs in one clone cannot interfere.
 
-### 6.2 A real example payload
+### 6.2 Real example payloads
 
-This is the committed `ADR` namespace, copied out of
-`tools/registers/id-namespaces.json` at this commit, unedited:
+Two, because one namespace can no longer show the whole shape. This is the
+committed `ADR` namespace, copied out of `tools/registers/id-namespaces.json`
+at this commit, unedited:
 
 ```json
 {
   "name": "ADR",
-  "register": "docs/decisions.md",
   "pad": 3,
+  "register": "docs/decisions.md",
   "define": "^## (ADR-(\\d+)) \\u2014 (.+)$",
   "repair": "owner",
   "why": "Architecture decisions, numbered in date order per the convention the file follows everywhere else. Cited as a resolvable number by docs/agents/org-chart.md, docs/backlog.md, docs/decisions.md itself and skills/running-an-outcome-record-trial/SKILL.md. Eleven files under .github/workflows/ also cite ADR numbers and say they are in docs/decisions.md. Eleven distinct numbers appear there and ten of them resolve to nothing in this register (ADR-11, ADR-12, ADR-14, ADR-17, ADR-20, ADR-22, ADR-23, ADR-24, ADR-037, ADR-049, all of them HQ's numbering); only ADR-002 resolves. That is the security seat's PWC-9 and not this namespace's defect.",
-  "burned": []
+  "burned": [],
+  "spell": "ADR-{n}",
+  "example": "## ADR-002 — Activation wave 1: okr, pm, exo (2026-09-18)"
 }
 ```
 
@@ -258,20 +299,61 @@ character. `repair` is `owner` because renumbering an accepted architecture
 decision record edits the owner's own decision record, which
 `prompts/engineer-agent.md` puts outside this seat's reach.
 
-### 6.3 The output, verbatim, from `origin/main` at `1be81d0`
+And this is `RunnerFact`, added 2026-11-09, which is the namespace that could
+not be expressed at all before `spell` existed, because its register spells
+its identifiers as bare numbers rather than as `NAME-<digits>`:
+
+```json
+{
+  "name": "RunnerFact",
+  "pad": 1,
+  "register": "docs/agents/runner-facts.md",
+  "define": "^## ((\\d+)[a-z]?)\\. .+$",
+  "spell": "{n}",
+  "example": "## 94. The register merge drivers are per-clone and neither install script runs itself",
+  "repair": "seat",
+  "why": "The numbered sections of the runner-facts register, cited across this repository as section numbers and surfaced by `node tools/seat/env-facts.mjs` as '§3, §9'. The number is allocated by reading the tail, and registers.json's own entry for this register states the measured race: 'Window 41 wrote section 21 and window 42 wrote section 22 within an hour; two concurrent windows would both have written 22', after which 'a cross-reference in another register silently stops resolving'. The namespace name is a label rather than a prefix, because this register spells its identifiers as a bare number; that is why `spell` exists. The letter-suffixed sections (1b, 1c) are deliberately distinct identifiers that share a number: the suffix is how a section is inserted next to a related one without renumbering the file, so `define` captures `1b` as the identifier and `1` as the number it allocates from. Added 2026-11-09 by the engineer seat, same trigger as Window above.",
+  "burned": []
+}
+```
+
+Read the two side by side and the division of labour is visible. `name` is a
+label the `--next` flag takes and nothing else; `spell` is the only thing that
+decides how an identifier is written; `example` is the line that holds `define`,
+`spell` and `pad` to the same convention. In `ADR` all three happen to agree
+with `name`, which is why `name` could stand in for `spell` for as long as
+every namespace looked like `ADR`.
+
+### 6.3 The output, verbatim, measured 2026-11-09T07:15:57Z on this branch over `origin/main` at `f7b89ff8`
 
 ```
-$ node tools/registers/check-ids.mjs
+$ node tools/registers/check-ids.mjs --base HEAD
   ADR-005: 2 distinct definition(s), 2 occurrence(s). Repair held by the owner.
-      docs/decisions.md:84 (origin/main) ## ADR-005 — Every seat but sales is active (2026-09-24)
-      docs/decisions.md:100 (origin/main) ## ADR-005 — Linear is the board of record; builders build from it (2026-09-23)
+      docs/decisions.md:84 (HEAD) ## ADR-005 — Every seat but sales is active (2026-09-24)
+      docs/decisions.md:100 (HEAD) ## ADR-005 — Linear is the board of record; builders build from it (2026-09-23)
   ADR-006: 2 distinct definition(s), 2 occurrence(s). Repair held by the owner.
-      docs/decisions.md:92 (origin/main) ## ADR-006 — Ursa is a subcompany of Alexandra Systems Company; HQ's reach is legitimate (2026-09-24)
-      docs/decisions.md:172 (origin/main) ## ADR-006 — Linear abandoned; secrets move to Infisical (2026-09-25)
-Register identifiers: 24 identifier(s) in 4 namespace(s) across 1 ref(s), from origin/main, clean as far as a seat can take it. 2 collision(s) above need the owner, not a seat. Exit 2.
+      docs/decisions.md:92 (HEAD) ## ADR-006 — Ursa is a subcompany of Alexandra Systems Company; HQ's reach is legitimate (2026-09-24)
+      docs/decisions.md:172 (HEAD) ## ADR-006 — Linear abandoned; secrets move to Infisical (2026-09-25)
+Register identifiers: 148 identifier(s) in 6 namespace(s) across 1 ref(s), from HEAD, clean as far as a seat can take it. 2 collision(s) above need the owner, not a seat. Exit 2.
 $ echo $?
 2
 ```
+
+The two ADR collisions are the same two this document was written for and they
+are unchanged. What changed is the census: 24 identifiers in 4 namespaces when
+this document was written, 148 in 6 now, because the two namespaces added on
+2026-11-09 cover 100 numbered sections and 24 window deltas that the gate had
+never read. Both are clean, which is the point worth stating plainly: the
+addition found no collision to repair and the gate it extends was green over
+them the day it landed. The exposure it closes is the next pair of concurrent
+windows, and one such pair has already happened — two windows of the exo seat
+both claimed 103 and were repaired by renumbering on the merge.
+
+Across `origin/main` and every open pull request head the same run reads 150
+identifiers in 6 namespaces across 13 refs, still with the same two findings.
+The two extra identifiers are a `RunnerFact` section and a `Window` delta that
+exist only on an open head, which is exactly the population a single-ref scan
+cannot see and the reason `--heads` exists.
 
 ## 7. Exact commands
 
