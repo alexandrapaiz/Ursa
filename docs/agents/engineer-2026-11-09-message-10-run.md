@@ -226,6 +226,61 @@ npm audit --package-lock-only --json > after.json
 npm audit --package-lock-only --omit=dev
 ```
 
+## 6b. The verification, with its results
+
+Every line below was run in `ursa-minor/` on this branch's lockfile,
+after `npm ci` installed it from scratch. This is the half of F93 the
+security seat could not reach, and the reason its finding was handed
+over rather than fixed.
+
+| command | result |
+|---|---|
+| `npm ci` | exit 0. `added 548 packages, and audited 549 packages in 3m`. 28 executables under `node_modules/.bin`, 710 MB on disk |
+| `npx tsc --noEmit` | exit 0, no diagnostics |
+| `npm run lint` (`eslint` 9, flat config) | exit 0. One pre-existing warning, `'_full' is defined but never used` at `components/ui/pixel-sky.tsx:127:21`, from `@typescript-eslint/no-unused-vars` in a file this branch does not touch. **That rule firing is the evidence for §3:** `no-unused-vars` is a type-aware rule, so reaching it means `@typescript-eslint/typescript-estree` parsed the project with the forced `minimatch` 11.0.5 under it and resolved the `tsconfig.json` globs it was given |
+| `npm run build` (`next build`, Turbopack) | exit 0. `Compiled successfully in 28.4s`, TypeScript in 26.9s, 6 of 6 static pages generated, and all six routes present: `/`, `/_not-found`, `/record`, `/record/[id]` with `/record/mini-fixture` prerendered, and the dynamic `/record/at/[[...address]]` |
+| `npm run check:example-record` | exit 0. `bytes: identical (sha256 47e59f28a002, 8819 bytes)`, and the eliciting rule `agrees with ursa-major on all 2 generations of the fixture` |
+| `npm run check:index-contract` | exit 0. `the viewer reads the published index as its contract says it does.` |
+| `npm run check:address` | exit 0. `the viewer resolves a record address as the grammar says it does.` |
+| `npm audit` over the installed tree, both scopes | `{"low":3,"moderate":0,"high":0,"critical":0,"total":3}` for everything, and `found 0 vulnerabilities` under `--omit=dev` |
+| `node scripts/dep-floor.mjs` from the repository root | exit 0, and the line this run moved is the third: `ursa-minor (ursa-minor-site): all critical=0 high=0 moderate=0 \| production critical=0 high=0 moderate=0`. Before this branch the same gate's `all` scope read `high=7 moderate=15` as warnings. `ursa-major` and `ursa-major/overlay` were already all-zero and are untouched |
+| `node tools/ledger/check.mjs` | 607 blocks, `clean as far as a seat can take it`. The 8 reported violations are pre-existing `STATUS_ALLOWED` rows the checker's own message says only the owner can repair |
+
+Two notes on the environment, because both are facts about this host
+rather than about this product.
+
+**The install was given its own npm cache.** `npm config get cache`
+resolves under `/srv/asc/home`, the shared home every seat on this host
+runs as, so a concurrent seat's install and this one would otherwise
+share a `_cacache` (`docs/agents/runner-facts.md` §97). This run set
+`NPM_CONFIG_CACHE` to a scratch path, ran its installs strictly one at
+a time, and deleted the 414 MB cache directory once `npm ci` finished,
+which is what gave the build its headroom. Another seat was installing
+in the same window; nothing in this run failed.
+
+**The disk was the binding constraint and it held.** `/tmp` went from
+3.9 GB free at the start to 1.6 GB at the tightest point, immediately
+after `npm ci` wrote 710 MB of `node_modules` beside a 414 MB cache.
+That is approximately the 1.6 GB the security seat reported having when
+it declined to install, so the constraint it named was real and the
+margin was narrow rather than imagined.
+
+**One incidental observation, not fixed here.** Something in this
+host's resident runtime ran `npm audit` and then `npm i
+--package-lock-only` in the repository root during this run, at
+2026-11-09T06:47:17Z and 06:47:20Z by the npm debug logs' own names.
+The root has no `package.json`, so the first failed `ENOLOCK` and the
+second failed `ENOENT` — after writing a 105-byte
+`package-lock.json` with an empty `packages` map into the root. It is
+not in this branch; it was deleted. It is harmless to
+`scripts/dep-floor.mjs`, whose discovery rule requires both a
+`package.json` and a lockfile in the same directory, and the root has
+only the latter. It is named here because an untracked lockfile in the
+root of a repository eleven seats commit from is the kind of file one
+of them eventually `git add -A`s, and because nothing in
+`.claude/settings.json` in this repository runs npm, so the invocation
+came from outside it.
+
 ## 7. Tooling
 
 | tool | version | job here | why it, over what else |
