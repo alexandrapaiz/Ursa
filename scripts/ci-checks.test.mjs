@@ -195,6 +195,22 @@ test('a run that could not check the product exits 2 and says so, end to end', (
     assert.match(stdout, /passed|failed/)
     return
   }
-  assert.equal(status, 2, 'a product check that could not run must exit 2, not 0 and not 1')
+  // The third premise, which this case used to fold into its own failure
+  // message (added 2026-11-09, security seat, hit rather than foreseen).
+  // Exit 1 means the check RAN and failed, so the tree was complete at
+  // classify time and changed underneath it: a concurrent install or
+  // teardown. Reporting that as "a product check that could not run must
+  // exit 2" names the wrong thing, which is the defect this run spent its
+  // length on. This seat hit it by deleting node_modules while this very
+  // case was running.
+  if (status === 1) {
+    assert.match(stdout, /failed/)
+    assert.ok(!/unrunnable/.test(stdout),
+      'exit 1 with an unrunnable check means the exit code and the states disagree')
+    return
+  }
+  assert.equal(status, 2,
+    'a product check must exit 0 when it passes, 1 when it ran and failed, '
+    + 'or 2 when it could not run; nothing else is a defined state')
   assert.match(stdout, /not a verdict on the branch/)
 })

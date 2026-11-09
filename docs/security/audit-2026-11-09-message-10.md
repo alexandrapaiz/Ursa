@@ -133,6 +133,24 @@ caller that forgets the argument gets `unrunnable`. Defaulting the other way
 would make a forgotten argument read as a passing check, and that is the
 bias this whole audit is about.
 
+**Demonstrated again afterwards, on a state nobody contrived.** Reclaiming
+disk at the end of this run, `rm -rf ursa-major/node_modules` left the
+directory in place and empty: 28 KB, zero entries, no `.bin`. That is the
+partial tree exactly, arrived at by ordinary cleanup rather than by a race.
+The old guard would have called it runnable. The new one reports
+
+```
+unrunnable product-suites   ursa-major/node_modules/.bin/vitest is absent, so this
+check cannot run. The directory exists, so the install is partial rather than
+missing
+```
+
+and on that same tree `npx --no-install vitest run` answers `npx canceled due
+to missing packages and no YES option: ["vitest@5.1.0"]`. So the fetch is
+confirmed for the second check as well as the first, and it names a version
+drift on top of the download: the registry would have served `vitest@5.1.0`
+where this project's lockfile pins 5.0.5.
+
 Severity: high as a class, low as an incident. Nothing malicious was served,
 and `tsc@2.0.4` is a long-dead real package rather than a typosquat. But a
 gate that executes registry code on a condition nobody declared is the kind
@@ -142,7 +160,17 @@ accident this run caused itself.
 Two cases added to `scripts/ci-checks.test.mjs`: one asserting a
 package-present-binary-absent tree is `unrunnable`, and one asserting that
 every `npx` check carries `--no-install` and declares a `needsBin`, so the
-next check added with `npx` cannot quietly reopen this.
+next check added with `npx` cannot quietly reopen this. 14 of 14 pass.
+
+One more small repair fell out of the same hour, and it is worth naming
+because it was hit rather than foreseen. The end-to-end case in that file
+enumerated two premises, exit 0 for an installed tree and exit 2 for an
+absent one, and folded everything else into the message *a product check
+that could not run must exit 2*. Deleting `node_modules` while that case was
+running produced exit 1, which means the check **ran** and failed because
+the tree changed underneath it. The case now names that third state instead
+of mis-describing it, which is the same defect as F111 and F113 in a third
+place: an instrument reporting a cause it did not establish.
 
 ### The gate reads the new direction too
 
