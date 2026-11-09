@@ -83,7 +83,7 @@
 // mistaken for a different exit code, so the half that fails is exact and the
 // half that is lexical is advisory.
 
-import { execFileSync, spawnSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
@@ -249,12 +249,39 @@ export function grade({ present1, present2, absent, paths, basename = '' }) {
  *  tool means this one cannot disagree with the registry about what a gate is.
  *  If it cannot be driven, this tool exits 2 and reports nothing. */
 export function candidates() {
-  const out = execFileSync('node', [join(REPO_ROOT, 'tools/gates/gate-registry.mjs'), '--json'], {
+  // `spawnSync` and not `execFileSync`, and the codes are read rather than
+  // their sign. The registry documents three: 0 every candidate is reached or
+  // excused, 1 a candidate is reached by nothing, 2 the facts could not be
+  // established. Only 2 means there is no row set. 1 means the row set is
+  // complete AND the registry has something to say about it.
+  //
+  // This was `execFileSync`, which throws on any non-zero, so from the moment
+  // any sibling seat merged an unregistered gate onto `main` this tool printed
+  // REGISTRY_UNDRIVABLE and exited 2 -- over a subprocess that had just
+  // written the complete, valid row set to stdout. Measured on 2026-11-09 at
+  // 11:0xZ: `scripts/uuid-shape-census.mjs` arrived UNREACHED, the registry
+  // exited 1 with 65 rows in `--json`, and both differentials went dark.
+  //
+  // This is the charter's own rule -- "an exit code with more than two
+  // meanings cannot be read as a boolean; name the code, not its sign" --
+  // firing on the tool that was written to catch exactly this family, one
+  // window after it shipped. The failure direction was honest, which is why it
+  // survived a suite: it exits 2 and claims nothing. It was still blind, and it
+  // went blind precisely when its dependency had a finding.
+  const r = spawnSync('node', [join(REPO_ROOT, 'tools/gates/gate-registry.mjs'), '--json'], {
     cwd: REPO_ROOT,
     encoding: 'utf8',
     maxBuffer: 16 * 1024 * 1024,
   })
-  return JSON.parse(out).rows
+  if (r.error) throw r.error
+  if (r.signal) throw new Error(`gate-registry.mjs was killed by ${r.signal}`)
+  if (![0, 1].includes(r.status)) {
+    throw new Error(
+      `gate-registry.mjs exited ${r.status}, which is not one of its two row-set-bearing codes `
+      + `(0 clean, 1 findings): ${String(r.stderr || '').split('\n')[0]}`,
+    )
+  }
+  return JSON.parse(r.stdout).rows
     // This file is itself a candidate the registry tracks, and driving it
     // would drive every other candidate again inside one arm: 62 nested
     // subprocesses that the arm timeout then kills, leaving the row
