@@ -1,0 +1,24 @@
+  base http://127.0.0.1:4871   widths 320, 360, 375, 390   height 844
+
+  width page    content box     verdict                           where
+  320   home    320 at 0        fits                              
+  320   set     320 at 0        fits                              
+  360   home    360 at 0        fits                              
+  360   set     360 at 0        fits                              
+  375   home    375 at 0        fits                              
+  375   set     375 at 0        fits                              
+  390   home    390 at 0        fits                              
+  390   set     390 at 0        fits                              
+
+  NOT MEASURED: 8 of 8 page-by-width cells could not be loaded or never came to rest, so this run makes no claim about them.
+
+NOT MEASURED: 8 of 8 cell loads answered 400 or worse and were not declared, so this run makes no claim about them.
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+  /no-such-route-9d1f -> HTTP 404
+Declare an intentionally-absent path with --expect-404 <paths> if that status is the subject.

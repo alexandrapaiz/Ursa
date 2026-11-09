@@ -1,0 +1,3 @@
+record-mini-fixture-desktop.png         47363 px    1.453%  rows 1232-2181, cols 239-1199  (1440x2263 -> 1440x2267)
+record-mini-fixture-phone.png           47277 px    3.928%  rows 1898-3004, cols 31-357  (390x3086 -> 390x3090)
+record-mini-fixture-tablet.png          52130 px    2.588%  rows 1467-2374, cols 65-753  (820x2456 -> 820x2460)

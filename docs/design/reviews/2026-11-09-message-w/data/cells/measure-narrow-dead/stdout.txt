@@ -1,0 +1,15 @@
+  base http://127.0.0.1:4999   widths 320, 360, 375, 390   height 844
+
+  width page    content box     verdict                           where
+
+  NOT MEASURED: 8 of 8 page-by-width cells could not be loaded or never came to rest, so this run makes no claim about them.
+
+  COULD NOT LOAD
+  320 home (/): page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/
+  320 set (/record): page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/record
+  360 home (/): page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/
+  360 set (/record): page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/record
+  375 home (/): page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/
+  375 set (/record): page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/record
+  390 home (/): page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/
+  390 set (/record): page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/record

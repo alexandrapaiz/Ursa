@@ -1,0 +1,24 @@
+base http://127.0.0.1:4599
+viewports phone 390x844, tablet 820x1180, desktop 1440x900
+floors: 3:1 on the indicator, 60% of its pixels
+
+## Reach: what the DOM offers against what Tab finds
+
+| page | viewport | focusable in DOM | tab stops | unreachable | sec |
+|---|---|---|---|---|---|
+
+## The indicator, photographed at every stop
+
+| page | viewport | stop | control | box | indicator px | clearing px | share >=3:1 | ring 1px | median | min | area/2.4.11 | verdict |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+
+## Headline
+
+NOT MEASURED: 3 of 3 page loads did not reach their subject, so this run makes no claim about tab stops on them.
+
+By verdict: .
+
+NOT MEASURED: 3 of 3 page loads did not reach their subject, so this run makes no claim about them.
+  / -> COULD NOT LOAD: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4599/
+  / -> COULD NOT LOAD: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4599/
+  / -> COULD NOT LOAD: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4599/

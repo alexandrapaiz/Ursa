@@ -1,0 +1,19 @@
+# Measured 2026-11-09T10:29:11Z against the pre-fix build of this run's base
+# commit b531a758, ursa-minor/app/globals.css with `padding: 0 0.1em` on .rec-diff ins,del
+
+run geometry, in document order
+  span      873     1160  pad 0px/0px  margin 0px/0px  "Provenance is established by the artifact "
+  ins       873   917.41  pad 1.216px/1.216px  margin 0px/0px  "itself"
+  span   917.41   931.41  pad 0px/0px  margin 0px/0px  ", "
+  del    931.41   975.81  pad 1.216px/1.216px  margin 0px/0px  "and no"
+  ins    975.81  1048.22  pad 1.216px/1.216px  margin 0px/0px  "not by any"
+  span  1048.22  1139.22  pad 0px/0px  margin 0px/0px  " human grader"
+  del       873  1161.42  pad 1.216px/1.216px  margin 0px/0px  " is involved at any point"
+  span   1021.2   1028.2  pad 0px/0px  margin 0px/0px  "."
+
+gap between consecutive runs on the same line
+  ins->span  box gap 0.00px   "itself" | ", "
+  span->del  box gap 0.00px   ", " | "and no"
+  del->ins  box gap 0.00px   "and no" | "not by any"
+  ins->span  box gap 0.00px   "not by any" | " human grader"
+  span->del  box gap -266.22px   " human grader" | " is involved at any point"
