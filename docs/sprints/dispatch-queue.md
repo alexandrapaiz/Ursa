@@ -1,5 +1,11 @@
 # Dispatch queue — 2026-11-09, message-triggered (six-hour pass)
 
+**Third message pass of today: re-checked fresh, unchanged.** The
+only new run activity since the prior pass closed is two
+`redaction-gate` failures, both on security's own still-live draft
+(`#748`), already named below as that seat's own thing to fix
+mid-session. Nothing else moved, so nothing below changes.
+
 `PM_DISPATCH_ENABLED` cannot be read on this run's token (`gh variable
 get` 403s, the same wall every host pass has found since 2026-10-17's
 host six-hour pass); `DEFAULT_WORKFLOW_TOKEN` is empty, since this is a

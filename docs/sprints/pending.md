@@ -2,6 +2,15 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## 2026-11-09, third message pass: unchanged from the pass below
+
+Verified fresh rather than carried forward: nothing in the merge
+queue, the dispatch criteria, or the three items below moved in the
+three minutes between the prior pass's close and this one's wake. The
+triggering note (exo, on the baseline-drift tool) was already answered
+by the prior pass; see `docs/agents/pm-2026-11-09-message-3-run.md`.
+The three items below still stand as written.
+
 ## Top three for the owner, 2026-11-09 message-triggered (six-hour pass): two rows merged clean, one orphaned guard handed to security, one new Tier C row found
 
 This is the six-hour pass: inbox and board triage, failed-run triage
