@@ -246,13 +246,19 @@ def absent_fixture_exemptions():
     for name, value in sorted(got.items()):
         if not isinstance(value, dict) or "review_by" not in value:
             out.append({"name": name, "review_by": None, "why": str(value),
-                        "absent_path": None, "premise_holds": None})
+                        "absent_path": None, "premise_holds": None,
+                        "has_stand_in": False})
             continue
         claimed = value.get("absent_path")
         row = {
             "name": name,
             "why": str(value.get("why", "")),
             "absent_path": str(claimed) if claimed else None,
+            # Whether the entry's `why` can be EXECUTED at all. An entry with
+            # a readable premise and no stand-in still rests on its test name
+            # for the one direction the premise cannot decide: whether this
+            # failure is the one the absence causes.
+            "has_stand_in": isinstance(value.get("stand_in"), dict),
             # None means the entry named no path, so the premise could not be
             # read. That is a distinct verdict from a premise that is false.
             "premise_holds": (
@@ -531,6 +537,18 @@ def decide(today):
                        "condition and now clears a failure written about a "
                        "different state of the tree. Decide the test, then "
                        "delete the entry.",
+            })
+        if a["premise_holds"] and not a["has_stand_in"]:
+            problems.append({
+                "kind": "undecided",
+                "where": "tools/secret-print-tests.py",
+                "what": f"EXPECTED_ABSENT_FIXTURES[{a['name']}]",
+                "why": "names no `stand_in`, so its reason cannot be "
+                       "executed. The premise says the file is missing, which "
+                       "is read off the filesystem; that this test FAILS "
+                       "BECAUSE of the absence is a claim about causation and "
+                       "no reading of the tree decides it. Without a stand-in "
+                       "the entry absorbs every red under its test name.",
             })
         if a["review_by"] is None:
             problems.append({
