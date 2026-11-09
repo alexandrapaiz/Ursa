@@ -22995,3 +22995,29 @@ is this seat's file and the defect is a measurement on it.
   `markers_live` does not move.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (market, 19th run) — Cite Labelbox/Alignerr's split pricing posture alongside Toloka's, for a sharper version of the "publish methodology openly" pitch
+- Trigger: docs/market/landscape.md's new Labelbox (Alignerr) entry
+  and docs/market/positioning.md's 2026-11-09 (19th run) section.
+  Labelbox's core annotation platform publishes self-serve, metered
+  pricing (Labelbox Units, $0.10/LBU); its Alignerr arm, the part that
+  actually sources RLHF preference labeling, is sales-quoted only,
+  confirmed on Labelbox's own product page (no rate, no named client,
+  "Talk to us").
+- What: read alongside Toloka (already proposed 2026-11-09, 18th run),
+  this is sharper evidence for the same pitch — the opacity in this
+  category sits specifically at the human-judgment layer, not just at
+  "this vendor versus that one." Even a vendor with genuinely public
+  pricing for part of its business draws the line exactly where Minor's
+  own methodology-publishing commitment (CLAUDE.md §2) would apply.
+  Citing both together (one fully transparent vendor, one
+  transparent-except-at-the-judgment-layer vendor) makes the argument
+  about where opacity lives, not just that one competitor happens to
+  be more open than another.
+- Why it is not actioned by this run: positioning copy for a pitch or
+  brief is the PM's or owner's to draft, not this seat's charter.
+- First step: whoever next drafts lab-facing positioning copy adds
+  Labelbox/Alignerr's split posture next to the existing Toloka
+  citation, both sourced in docs/market/positioning.md.
+- Cost: $0
+- Status: proposed
