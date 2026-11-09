@@ -220,6 +220,17 @@ than assumed because the probe writes into the working tree.
   ran against a half-populated tree. The product failure was a race. What the
   race exposed was not.
 
+  **How that 21 is assembled, because the number on its own would overclaim.**
+  It is not one green run. The 19 came from a full sweep taken before this
+  run edited `scripts/ci-checks.mjs`, and the 2 from a later targeted run
+  after the install. The part that those edits could have invalidated is
+  `tooling-suites`, which was re-run on the final tree and recorded below.
+  A reader who wants a single green run of all 21 does not have one here;
+  what they have is every check green at some point on this branch, with the
+  affected one re-measured after the last edit. That distinction is the same
+  one F111 is about, so it would be poor form to blur it in the sentence
+  reporting F111.
+
   Worth naming as a change rather than a pass: run 8's audit recorded
   `tooling-suites` and `ledger-contract` failing on `main`, measured and
   routed by run 7 as F105 through F107 and F109. Both pass now. The suite's
