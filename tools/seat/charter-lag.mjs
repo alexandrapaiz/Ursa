@@ -77,6 +77,7 @@
 // looking for one.
 import { execFileSync } from 'node:child_process'
 import { readdirSync } from 'node:fs'
+import { calendarDay } from '../instant.mjs'
 
 const MS_PER_DAY = 86400000
 
@@ -161,9 +162,26 @@ export function instant (iso) {
 // text and the 2nd in UTC. 330 of this repository's 2,134 commits carry a
 // non-zero offset and 143 of them land on a different UTC day than their
 // own leading ten characters, so slicing is right by luck per row.
-export function utcDay (iso) {
-  const ms = instant(iso)
-  return ms === null ? '?' : new Date(ms).toISOString().slice(0, 10)
+//
+// RENAMED FROM `utcDay` AND DELEGATED, 2026-11-09. It was the THIRD copy of a
+// projection `tools/instant.mjs` owns, and it was the worst-named of the
+// three, because `tools/instant.mjs` exports a different function under that
+// exact name with a different refusal value: this one answered `'?'` and that
+// one answers `null`. One name, two functions, and the only way to know which
+// you had was the import line. `dayCell` says what it is for instead, which is
+// one cell of `formatTable` below, and `'?'` is a rendering decision that
+// belongs at the renderer rather than inside a date function.
+//
+// The delegation also narrows it, in the one direction worth narrowing. The
+// local `instant` below is `Date.parse`, which reads a zoneless
+// `2026-11-02T04:34:57` in the RUNNER's timezone and answers a day that
+// depends on where the process ran; `calendarDay` refuses it and this cell
+// prints `?`. No producer feeding this table emits that shape today — every
+// `mainDate` comes from `git log` or from `gh`, both zone-bearing — so the
+// change is latent on the real inputs and is a refusal rather than a guess on
+// the one that is not.
+export function dayCell (iso) {
+  return calendarDay(iso) ?? '?'
 }
 
 // Every open copy of one charter, newest first, normalised from either shape
@@ -325,7 +343,7 @@ export function formatTable (rows) {
   const head = ['seat', 'charter on main', 'lag', 'lines', 'copies', 'deepest', 'q.lines', 'pending', 'sel.loss', 'stale runs']
   const body = rows.map((r) => [
     r.seat,
-    utcDay(r.mainDate),
+    dayCell(r.mainDate),
     r.lagDays === null ? '?' : `${r.lagDays}d`,
     String(r.mainLines),
     String(r.queueCopies ?? 0),

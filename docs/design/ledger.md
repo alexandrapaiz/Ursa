@@ -2304,7 +2304,54 @@ route removes a card, so a card that should never have existed can be
 rewritten into something true but cannot be taken away, and the two the
 last run created are now two true cards rather than two junk ones.
 
-## L63 — Deleting a server's directory does not stop the server, and it removes the only record of whose server it was
+## L63 — Two renderings of one object, one with a key and one without
+
+**measured**, 2026-11-09, off the shipped frames in
+`docs/design/reviews/2026-11-09-message-c/`, by sampling the provenance
+bar's own pixel rows rather than reading the stylesheet.
+
+The set view draws a 6px provenance bar per record card and prints three
+figures under it. The bar's three marks are `--polar` filling all 6px,
+`--polar` filling 4px over a 2px foot of `--night`, and rgb(116,121,134)
+filling all 6px. **Two of the three are the same colour** and differ only
+by that foot. The legend carried no swatch, so nothing in the frame
+joined a figure to a segment except the fact that both lists happened to
+run in the same order.
+
+At 390 even that is gone. The bar stays horizontal and the legend stacks
+into a column, so the one correspondence the desktop frame had is
+removed outright. That is the viewport where the omission is total, and
+it is the charter's narrowest review viewport.
+
+**The remedy was already in the repository.**
+`components/record/record-summary.tsx` has put
+`<span class="rec-swatch rec-seg-{c}">` before each label since it was
+written, and `globals.css` already scales the edited mark's foot to a
+third of its height at 0.5rem for exactly that size. The record view and
+the set view draw the same bar from the same three classes. One had the
+key and one did not. No new class, no new value and no new colour was
+needed, and none was introduced.
+
+**The shape worth carrying, because it is not about this bar.** A design
+system makes a component's *parts* reusable and does nothing at all to
+make its *obligations* travel with it. `rec-bar` was reused; the rule
+that a bar needs a key was not, because that rule lived in the other
+file's markup rather than anywhere a second author would meet it. So the
+second rendering was not a mistake anybody made. It was a thing nobody
+was asked.
+
+The check this suggests is cheap and this seat should run it: when one
+page reuses a component class another page already uses, diff the two
+call sites and ask what the older one carries that the newer one does
+not. Here the diff was one span.
+
+**What this did not turn out to be.** The bar's track is 1.7% unfilled,
+and 40.4 + 23.6 + 34.1 is 98.1. That is deliberate and the page says so
+directly underneath: the shares divide the whole finished work rather
+than the classified part of it. Which sharpens the entry rather than
+softening it. The thing that needed no key got a sentence of prose; the
+thing that needed one got nothing.
+## L64 — Deleting a server's directory does not stop the server, and it removes the only record of whose server it was
 
 **measured**, 2026-11-09 (run k), `reviews/2026-11-09-k/NOTES.md` §1.
 
