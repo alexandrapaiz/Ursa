@@ -44,6 +44,20 @@
 // between the two properties is in `docs/ideas.md` as its own entry rather
 // than left for a reader to notice.
 //
+// A CODE NAME IS NOT NAMESPACED, AND THIS FILE PAID FOR THAT ON ITS FIRST RUN.
+// "Named by a test" matches the code name anywhere in any test file under
+// these trees, so two detectors using one name share each other's assertions.
+// The first draft called its own stale-baseline code `BASELINE_ENTRY_STALE`,
+// which is also a verdict cause in `tools/secret-scan-verdict.mjs`, and
+// `tools/secret-scan-verdict.test.mjs` asserts it. So this gate reported its
+// own untested code as decided, by a test of a different gate. It is
+// `CENSUS_ENTRY_STALE` now. Measured over the trees afterwards: exactly one
+// name is emitted by two detectors, `SENDER_COMPANY_SPELLING` in
+// `tools/board/post.mjs` and `tools/board/post-verdict.mjs`, where it is one
+// fault reported at two layers and the sharing is correct. The general repair
+// is to key the decision on the pair (detector, code), which needs a test to
+// say which detector it is asserting about; that is a ledger entry.
+//
 // THE OBLIGATION IS READ OFF THE DETECTORS, NEVER LISTED HERE, which is HQ's
 // rule as adopted into `standards/roles/exo.md` on 2026-11-09: read the
 // exclusion off the place that holds it, because a restatement is two
@@ -394,7 +408,7 @@ export function findingsOf(c) {
   for (const s of c.stale) {
     findings.push({
       locus: LOCUS.COMMITTED,
-      rule: 'BASELINE_ENTRY_STALE',
+      rule: 'CENSUS_ENTRY_STALE',
       message:
         `${BASELINE_PATH} excuses ${s.code}, which ${s.cause}. An excuse that outlives its ` +
         'finding is a second place a defect can hide. Delete the entry.',
