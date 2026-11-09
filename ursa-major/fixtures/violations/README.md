@@ -1,8 +1,8 @@
-# fixtures/violations — twenty-three records the gate must refuse
+# fixtures/violations — twenty-four records the gate must refuse
 
 Every other fixture in this repository is a record the resolver got
-right. This directory holds the opposite: twenty-four committed
-`OutcomeRecord` files, one clean base and twenty-three counterexamples,
+right. This directory holds the opposite: twenty-five committed
+`OutcomeRecord` files, one clean base and twenty-four counterexamples,
 each one the base plus a single named edit that violates exactly the
 bound it is named after.
 
@@ -84,7 +84,7 @@ are byte-reproducible" below.
 
 ## Two bounds are backstops, not independent statements
 
-Nineteen of the twenty-three fixtures fire exactly one violation, and
+Twenty of the twenty-four fixtures fire exactly one violation, and
 four fire two or three. Two of the eighteen bounds cannot be broken
 alone, as a matter of arithmetic rather than of how hard anyone tried:
 
@@ -102,7 +102,7 @@ alone, as a matter of arithmetic rather than of how hard anyone tried:
 
 Both are real guards against their neighbours being wrong. Neither is a
 statement a record can break on its own, and
-`src/invariants.violations.test.ts` asserts that count — nineteen
+`src/invariants.violations.test.ts` asserts that count — twenty
 single-bound fixtures, three pairs and one triple — so a future edit to
 `src/invariants.ts` that makes either one independently reachable fails
 the suite and gets the note corrected.
@@ -117,7 +117,7 @@ removal of a whole file from every figure in the record — and a fixture
 firing only one of them would assert that the two levels share a check
 when they do not.
 
-## Twenty-three fixtures, eighteen bounds
+## Twenty-four fixtures, eighteen bounds
 
 There is normally one fixture per bound, and the suite checks that every
 declared bound is fired by some fixture. Three bounds have more than

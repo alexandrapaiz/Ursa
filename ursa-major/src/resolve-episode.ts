@@ -126,7 +126,39 @@ export function resolveEpisode(
     const genText = blobAt(projectPath, ep.generatedSha, path)
     const finText = blobAt(projectPath, ep.finalSha, path)
     if (genText === null || finText === null) continue
-    if (genText.length > MAX_BLOB_CHARS || finText.length > MAX_BLOB_CHARS) continue
+    // The size refusal, turned from a silent `continue` into a claim, for the
+    // same reason the import refusal above is a claim and not a drop. Until
+    // 2026-11-09 this line read `continue` alone, so a path over the ceiling
+    // produced no span, no `perFile` row and no sentence anywhere, and a
+    // record over an episode that touched one was byte-indistinguishable from
+    // a record over an episode that did not. The cost was not hypothetical:
+    // ten paths at this repository's own `main` were over the ceiling that
+    // day, eight of them paths this check would reach, the largest being
+    // `docs/ideas.md` at 1,671,449 characters, 5.57 times it.
+    //
+    // `relation: 'refused'` rather than one of the three import relations,
+    // and `sha` the episode's own final commit rather than a rival: there is
+    // no commit outside this generation's descent involved in the decision at
+    // all. See `ExclusionReason`'s `over_size_ceiling` in src/types.ts.
+    if (genText.length > MAX_BLOB_CHARS || finText.length > MAX_BLOB_CHARS) {
+      exclusions.push({
+        path,
+        reason: 'over_size_ceiling',
+        sha: ep.finalSha.slice(0, 9),
+        // The subject is looked up in the graph the caller already walked
+        // rather than shelled out for. Empty when the final commit is not in
+        // this clone's graph, which `Exclusion.subject` permits and
+        // `EXCLUSION_NOT_CLASSIFIED` does not check: an unreadable subject
+        // costs the record a sentence, not a number, and the two numbers the
+        // refusal rests on were read before this line.
+        subject: graph.find((c) => c.sha === ep.finalSha)?.subject ?? '',
+        relation: 'refused',
+        chars: finText.length,
+        ceiling: MAX_BLOB_CHARS,
+        generatedChars: genText.length,
+      })
+      continue
+    }
     turn++
     files.push({ path, text: finText })
     generations.push({
@@ -161,11 +193,14 @@ export function resolveEpisode(
   // finished file came from. A record that claims nothing is still a record
   // that explains itself, which is the auditable thing; an absence is not.
   //
-  // Only when there is evidence. An episode that resolved to nothing for
-  // any other reason — an unreadable blob, a file over MAX_BLOB_CHARS, a
-  // path with no generation side — still returns null, because a record
-  // saying nothing for no stated reason is worse than the absence it
-  // replaces.
+  // Only when there is evidence, and as of 2026-11-09 the size ceiling is
+  // evidence too: an episode whose every resolvable path was over
+  // MAX_BLOB_CHARS now returns a record carrying one `over_size_ceiling`
+  // exclusion per path instead of null, because the refusal is stated and a
+  // stated refusal is the auditable thing. An episode that resolved to
+  // nothing for a reason nobody can state — an unreadable blob, a path with
+  // no generation side — still returns null, because a record saying nothing
+  // for no stated reason is worse than the absence it replaces.
   if (files.length === 0 || generations.length === 0) {
     if (exclusions.length === 0) return null
     return resolve({

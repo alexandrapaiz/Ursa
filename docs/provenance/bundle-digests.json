@@ -729,6 +729,32 @@
           "subject": "corpus: report what the finished works ARE, by area"
         }
       ]
+    },
+    {
+      "digest": "1eeed7a142638b4a",
+      "sha256": "1eeed7a142638b4a116847816c989f26625454c3109d7fadc81fd462a6b7b408",
+      "blob": "f3546eb333bb70c8bc7566be1f85534a3e9c290d",
+      "bytes": 347451,
+      "introducedBy": [
+        {
+          "commit": "3ecdece965cffd2e56f482f07e78eba5a906ecb0",
+          "date": "2026-11-09T08:45:17.000Z",
+          "subject": "Rebuild dist/ursa.cjs for the normalize split"
+        }
+      ]
+    },
+    {
+      "digest": "1bda592df4a58670",
+      "sha256": "1bda592df4a58670dcc48a58b9454c996b47e57787e8580577bea300f7ec7991",
+      "blob": "2bea5a6d922701f5b29b30be0104b8f36f85cddf",
+      "bytes": 351813,
+      "introducedBy": [
+        {
+          "commit": "968a22756458cfa10737c856662502aaa993e0b8",
+          "date": "2026-11-09T12:09:56.000Z",
+          "subject": "gate, fixture and counts for the stated size refusal"
+        }
+      ]
     }
   ]
 }

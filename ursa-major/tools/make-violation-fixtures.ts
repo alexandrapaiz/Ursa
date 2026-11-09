@@ -472,6 +472,25 @@ const CASES: Case[] = [
     },
   },
   {
+    slug: 'exclusion-not-classified-false-refusal',
+    codes: ['EXCLUSION_NOT_CLASSIFIED'],
+    edit: 'the base\'s `imported_whole` exclusion replaced with an `over_size_ceiling` refusal of the same path and the same 199 characters, stating `ceiling: 300000` and `generatedChars: 180`',
+    consequence:
+      'the record drops a whole file out of every figure it reports and gives a reason that cannot have happened. `over_size_ceiling` says the resolver declined to read a blob because it was longer than the ceiling the record names, and both of the sizes the record states are three orders of magnitude under that ceiling. This is the fourth clause\'s whole point and it is a different kind of clause from the three above it. Those police an exclusion that makes a claim ABOUT a commit, and a reader checks them by looking the commit up; a size refusal names no commit outside the generation\'s descent and claims nothing about the one it does name, so the only thing anybody can check is the arithmetic, and the arithmetic has to be in the record for them to check it. A refusal whose numbers are not in the record is indistinguishable from a file the resolver simply lost, which is the state this reason was added on 2026-11-09 to end: for fifty-one days, from `MAX_BLOB_CHARS` arriving with M0 on 2026-09-19 to this fixture, the ceiling was a bare `continue` and ten paths at this repository\'s own `main` were over it, eight of them paths the resolver would otherwise have read, the largest being `docs/ideas.md` at 1,671,449 characters, 5.57 times it.',
+    break: (r) => {
+      r.exclusions![0] = {
+        path: EXCLUDED.path,
+        reason: 'over_size_ceiling',
+        sha: EXCLUDED.sha,
+        subject: EXCLUDED.subject,
+        relation: 'refused',
+        chars: EXCLUDED.chars,
+        ceiling: 300_000,
+        generatedChars: 180,
+      }
+    },
+  },
+  {
     slug: 'gate-identified',
     codes: ['GATE_IDENTIFIED'],
     edit: '`task.gatedBy.codes` with `RIVAL_NOT_AFTER_FINAL` spliced out of it, `boundsDigest` left alone',

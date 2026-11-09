@@ -17,7 +17,7 @@ it becomes a commit in a public repository, with a date and a size.
 Every row is derived. Nothing in this file is typed by hand, and
 `npm test` fails if it stops matching the repository's history.
 
-Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 56.
+Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 58.
 
 | `task.resolvedBy.digest` | Introduced by | Committed (UTC) | Bytes | What changed |
 |---|---|---|---|---|
@@ -77,6 +77,8 @@ Artifact indexed: `ursa-major/dist/ursa.cjs`. Versions: 56.
 | `a77afc742812d2d3` | `f8bb31c` | 2026-11-02 07:52:37 | 334,215 | consolidation: rebuild the bundle, and three reds the five rows left behind |
 | `ce97b01dedd9072e` | `68bb87b` | 2026-11-08 23:48:57 | 346,052 | ursa corpus: read many pull requests as one corpus |
 | `352f9a4e7529fd74` | `b25c220` | 2026-11-08 23:58:58 | 346,773 | corpus: report what the finished works ARE, by area |
+| `1eeed7a142638b4a` | `3ecdece` | 2026-11-09 08:45:17 | 347,451 | Rebuild dist/ursa.cjs for the normalize split |
+| `1bda592df4a58670` | `968a227` | 2026-11-09 12:09:56 | 351,813 | gate, fixture and counts for the stated size refusal |
 
 ## Reading a row
 
@@ -89,7 +91,7 @@ cd ursa-major && npx tsx tools/make-bundle-digest-index.ts --lookup d32543070474
 Or read the bundle itself, byte for byte, out of the commit the row names:
 
 ```
-git cat-file blob bc088a59eeca6d9bd3368d559c7405aa22b155a1 | sha256sum
+git cat-file blob 2bea5a6d922701f5b29b30be0104b8f36f85cddf | sha256sum
 ```
 
 ## What "introduced by" means, exactly

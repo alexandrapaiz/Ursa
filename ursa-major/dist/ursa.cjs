@@ -1678,6 +1678,40 @@ function checkRecord(record) {
         `chars=${x.chars}, sha=${x.sha ? x.sha : "(empty)"}; stats.finalChars is ${record.stats.finalChars}, which this entry cannot be added back to`
       );
     }
+    const sized = x.reason === "over_size_ceiling";
+    const ceiling = x.ceiling;
+    const genChars = x.generatedChars;
+    if (sized !== (x.relation === "refused")) {
+      push(
+        "EXCLUSION_NOT_CLASSIFIED",
+        at,
+        `reason ${x.reason} with relation ${x.relation}: a refusal and an import are wearing each other's clothes. over_size_ceiling is the resolver declining a path on its own account and names no commit outside the generation's descent, so it is the one reason that carries relation refused and the only one that may`
+      );
+    }
+    if (!sized && (ceiling !== void 0 || genChars !== void 0)) {
+      push(
+        "EXCLUSION_NOT_CLASSIFIED",
+        at,
+        `excluded as ${x.reason} while carrying ${ceiling !== void 0 ? "ceiling" : ""}${ceiling !== void 0 && genChars !== void 0 ? " and " : ""}${genChars !== void 0 ? "generatedChars" : ""}, which only a size refusal may state; on an import these fields claim a refusal the run never made`
+      );
+    }
+    if (sized) {
+      const limit = typeof ceiling === "number" && Number.isFinite(ceiling) && ceiling > 0 ? ceiling : null;
+      const gen2 = typeof genChars === "number" && Number.isFinite(genChars) && genChars >= 0 ? genChars : null;
+      if (limit === null || gen2 === null) {
+        push(
+          "EXCLUSION_NOT_CLASSIFIED",
+          at,
+          `excluded as over_size_ceiling with ceiling=${quoted(ceiling)} and generatedChars=${quoted(genChars)}; a stated refusal has to be re-derivable from the record, and ${limit === null ? "no positive ceiling" : "no generated size"} is readable here`
+        );
+      } else if (x.chars <= limit && gen2 <= limit) {
+        push(
+          "EXCLUSION_NOT_CLASSIFIED",
+          at,
+          `excluded as over_size_ceiling at ${limit.toLocaleString()} characters while the finished blob is ${x.chars.toLocaleString()} and the generated blob is ${gen2.toLocaleString()}, so neither side exceeds the ceiling the record names and this file left every figure on a refusal that cannot have happened`
+        );
+      }
+    }
     const date = x.date;
     if (date === void 0) continue;
     const ms = typeof date === "string" ? Date.parse(date) : Number.NaN;
@@ -1849,7 +1883,7 @@ var init_invariants = __esm({
       PCT_DENOMINATORS_ORDERED: "a class's share of the finished work is never larger than its share of the classified part: byClass[c].pctOfFinal <= byClass[c].pct. The two fields differ only in denominator \u2014 coveredChars for pct, finalChars for pctOfFinal \u2014 and COVERED_BOUNDED already holds coveredChars <= finalChars, so the bound is the same-set statement that the wider denominator produced the smaller number. It fires when the two are computed from each other's denominator, which is the one way a reader could be handed the flattering figure under the honest field's name.",
       PERFILE_ENUMERATES_PATHS: "the paths in stats.perFile are exactly the paths in files[] together with the paths in exclusions[], each appearing once. perFile is the array a consuming pipeline iterates, so a path the run read and this array omits is a gap no iteration can see; a path here that the record does not carry under either key is a row pointing at nothing. Exact equality rather than containment in one direction, because both failures are silent in the same way.",
       SIGNAL_QUOTE_GROUNDED: "every QuoteRef a signal carries names raw text that exists in this record, the excerpt appears in that text under excerpt()'s whitespace normalization, and the same excerpt appears in the signal's own prose field. A signal may legitimately carry no QuoteRef at all (a distilled spec quotes nobody); what it may not do is carry one that does not hold.",
-      EXCLUSION_NOT_CLASSIFIED: "no path the record excludes appears among its classified files; every exclusion names a commit and a positive character count; and an exclusion that states its commit's author date states one that can be ordered, with a `sibling` exclusion's date no later than the record's own `task.generatedAt`. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved \u2014 `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently. The third is `RIVAL_NOT_AFTER_FINAL` one level up, added 2026-10-15, and it is the more expensive of the two to get wrong: a span-level mistake moves one span, while an exclusion drops a whole file out of every figure in the record, and on this repository's own history one exclusion removed 60,616 characters, 84.7% of that run's headline survival figure. A `sibling` exclusion asserts the finished file is byte-identical to a copy on a branch that is neither an ancestor nor a descendant of the generation; if that branch's commit was authored after the work closed then the copy is a copy OF this work rather than a source for it, the refusal is backwards, and the record drops a file the person did write. `pre_existing` and `declared` are exempt from the ordering and reported without a time check, for the reasons `RIVAL_NOT_AFTER_FINAL` exempts the relations the graph vouches for: a `pre_existing` match is an ancestor of the generation whatever a rebase did to its author date, and a `declared` import names a commit in ANOTHER repository, whose clock is not comparable to this one's. An unreadable date fails on every relation including the exempt ones, because a field that reads as provenance everywhere it is printed may not state a time nothing can order, and omitting it was always allowed. An ABSENT date is legal and unchecked: every record written before 2026-10-15 has exclusions with no date, and `vendoredPaths` in src/vendored.ts omits the field rather than writing an empty string when a clone cannot answer.",
+      EXCLUSION_NOT_CLASSIFIED: "no path the record excludes appears among its classified files; every exclusion names a commit and a positive character count; and an exclusion that states its commit's author date states one that can be ordered, with a `sibling` exclusion's date no later than the record's own `task.generatedAt`. The first clause is the same-set arithmetic this module exists for: `exclusions` and `files` partition the paths the run was willing to read, so a path in both means the refusal was computed and then not applied, and the record simultaneously claims the file is an import and sells labels over its spans. The second catches an exclusion that cannot be reconciled against the figures it moved \u2014 `stats.finalChars` plus the excluded characters is the size of every path the run read, and an entry with no number or no commit breaks that sum silently. The third is `RIVAL_NOT_AFTER_FINAL` one level up, added 2026-10-15, and it is the more expensive of the two to get wrong: a span-level mistake moves one span, while an exclusion drops a whole file out of every figure in the record, and on this repository's own history one exclusion removed 60,616 characters, 84.7% of that run's headline survival figure. A `sibling` exclusion asserts the finished file is byte-identical to a copy on a branch that is neither an ancestor nor a descendant of the generation; if that branch's commit was authored after the work closed then the copy is a copy OF this work rather than a source for it, the refusal is backwards, and the record drops a file the person did write. `pre_existing` and `declared` are exempt from the ordering and reported without a time check, for the reasons `RIVAL_NOT_AFTER_FINAL` exempts the relations the graph vouches for: a `pre_existing` match is an ancestor of the generation whatever a rebase did to its author date, and a `declared` import names a commit in ANOTHER repository, whose clock is not comparable to this one's. An unreadable date fails on every relation including the exempt ones, because a field that reads as provenance everywhere it is printed may not state a time nothing can order, and omitting it was always allowed. An ABSENT date is legal and unchecked: every record written before 2026-10-15 has exclusions with no date, and `vendoredPaths` in src/vendored.ts omits the field rather than writing an empty string when a clone cannot answer. A fourth clause, added 2026-11-09 with the `over_size_ceiling` reason: a refusal and an import may not wear each other's clothes, and a stated refusal must be re-derivable from the record alone. `reason: 'over_size_ceiling'` carries `relation: 'refused'` and no other relation carries it; that reason carries a positive `ceiling` and a `generatedChars`, and at least one of `chars` and `generatedChars` is strictly greater than `ceiling`; and no other reason carries `ceiling` or `generatedChars` at all. The re-derivation clause is the one with teeth beyond shape. The other three reasons point at a commit to make a claim ABOUT that commit, and a reader checks them by looking the commit up; this one is a claim about what the build was willing to read, so the only thing a reader can check is the arithmetic, and an exclusion stating a ceiling that neither of its two sizes exceeds is a file dropped from every figure in the record on a refusal that cannot have happened. `generatedChars` is required and not inferred for the asymmetric case: a path is refused if EITHER blob is over, so an agent that wrote 400,000 characters the person then cut to 200 produces `chars: 200` with the ceiling honestly exceeded on the other side, and a bound reading `chars` alone would report that honest record as the false one.",
       DESCENT_CHECKED_UNIFORMLY: "if any span in the record carries a descent verdict, every survived_mutated span carries one; no span still labelled survived_mutated carries a `rival` verdict; and no span still labelled survived_verbatim carries a `prior_revision` rival verdict. The first clause catches a corroborator wired for some files and not others, which would leave part of the record's mutation labels unguarded while the record as a whole looks checked. The second catches the demotion being computed and then not applied, which is the only way a span can both name the rival that disproves its descent and keep the diff that asserts it. The third is the same failure on the survival label, added 2026-10-14: a verbatim span whose text the generation's own PARENT already held is not text a model wrote, since a generation on the `ursa run` path is the whole blob of the touched file and contains everything the file already had. Only `prior_revision` fires, because it is the only relation that dates the text earlier than the generation; `sibling`, `merged_in` and the older-ancestor `pre_existing` say the text exists elsewhere too, which is not the same claim.",
       RESOLVER_IDENTIFIED: "if a record names the resolver that made its claims, the name is one a reader can look up. A `git_commit` basis carries a `commit` of 7 to 40 lowercase hexadecimal characters (the shape `git rev-parse --short HEAD` emits) and a `dirty` boolean saying whether the tree that ran had uncommitted changes; a `bundle_digest` basis carries a `digest` of exactly 16 lowercase hexadecimal characters (the SHA-256 prefix `npm run bundle:check` compares against); and no third basis exists. An ABSENT `task.resolvedBy` is legal and unchecked, because absence is a true claim \u2014 it says nobody could establish which code ran, which is a different statement from naming code, and every record this project wrote before 2026-10-12 makes it. This is a shape bound and not an arithmetic one, in register with the second clause of EXCLUSION_NOT_CLASSIFIED: both ask whether a commit the record names is a commit at all, because a pointer that cannot be followed is indistinguishable from provenance until someone tries to follow it.",
       RIVAL_NOT_AFTER_FINAL: "if a descent verdict names a `sibling` rival and states that commit's author date, the date is not later than the record's own `task.generatedAt`; and any rival's stated date, whatever the relation, is one `Date.parse` can read. `sibling` is the relation whose claim rests on a clock: it says the text was on a branch the person MAY have merged or checked out, and nothing in the commit graph places that branch inside the work, so a commit authored after the work finished cannot be where the text came from. The other three relations are exempt by name and reported without a time check, because the graph vouches for them \u2014 `prior_revision` and `pre_existing` are ancestors of the generation, `merged_in` is an ancestor of the episode's final commit \u2014 and a rebase or a wrong machine clock can put a late author date on any of them without touching the claim. Exempting them is what makes this an invariant rather than a measurement under this module's second rule: while `merged_in` was folded into `sibling` (before 2026-10-15) no bound could police a sibling's date without also firing on records whose evidence had already been proven by the graph. An ABSENT date is legal and unchecked, because every record written before 2026-10-15 carries rivals with no date and because `prior_revision` reads the parent off an in-memory commit graph a narrowed caller can hold without dates \u2014 the same absent-is-a-true-claim rule `RESOLVER_IDENTIFIED` follows. On the git path `task.generatedAt` is the episode's closing commit date (`ep.closedAt` in src/resolve-episode.ts), which is exactly the horizon `authoredAfterHorizon` in src/corroborate.ts bounds the search by, so this bound is that resolver-side rule restated over the record alone and a record that fails it is a record the resolver would not have written.",
@@ -3417,7 +3451,25 @@ function resolveEpisode(projectPath, ep, commits) {
     const genText = blobAt(projectPath, ep.generatedSha, path);
     const finText = blobAt(projectPath, ep.finalSha, path);
     if (genText === null || finText === null) continue;
-    if (genText.length > MAX_BLOB_CHARS2 || finText.length > MAX_BLOB_CHARS2) continue;
+    if (genText.length > MAX_BLOB_CHARS2 || finText.length > MAX_BLOB_CHARS2) {
+      exclusions.push({
+        path,
+        reason: "over_size_ceiling",
+        sha: ep.finalSha.slice(0, 9),
+        // The subject is looked up in the graph the caller already walked
+        // rather than shelled out for. Empty when the final commit is not in
+        // this clone's graph, which `Exclusion.subject` permits and
+        // `EXCLUSION_NOT_CLASSIFIED` does not check: an unreadable subject
+        // costs the record a sentence, not a number, and the two numbers the
+        // refusal rests on were read before this line.
+        subject: graph.find((c) => c.sha === ep.finalSha)?.subject ?? "",
+        relation: "refused",
+        chars: finText.length,
+        ceiling: MAX_BLOB_CHARS2,
+        generatedChars: genText.length
+      });
+      continue;
+    }
     turn++;
     files.push({ path, text: finText });
     generations.push({
@@ -7947,7 +7999,7 @@ function renderRunSummary(records, episodes, diagnostics, droppedUnits) {
           `${d.unresolvable} resolved to nothing this run could stand behind, meaning no file in ${unOne ? "it" : "them"} had a readable version at both commits of the pair and nothing arrived whole from elsewhere either, so there was no refusal to state instead.`
         );
         lines.push(
-          `No flag changes that one. The usual causes are a generated file your edit deleted outright, a commit this clone does not have the blobs for, and a file over the ${MAX_BLOB_CHARS2.toLocaleString()}-character ceiling the resolver reads up to. If the clone is shallow, run git fetch and ursa run again.`
+          `No flag changes that one. The usual causes are a generated file your edit deleted outright and a commit this clone does not have the blobs for. If the clone is shallow, run git fetch and ursa run again. A file over the ${MAX_BLOB_CHARS2.toLocaleString()}-character ceiling the resolver reads up to is no longer one of the causes: since 2026-11-09 it states itself as an over_size_ceiling exclusion in the record, so the work unit is counted here only when nothing at all could be stated about it.`
         );
       }
     }
