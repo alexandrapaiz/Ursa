@@ -77,6 +77,11 @@
       "why": "The second axis of the same differential, with the same cost shape: three subprocesses per candidate over every candidate here, plus two git worktrees of HEAD. One pass is minutes of wall clock. Its rules are asserted in tools/gates/empty-premise.test.mjs, which tooling-suites runs, and its ANSWER about the tree belongs on the same schedule as tools/gates/premise-differential.mjs. Registered schedule-only for the same reason and by the same argument."
     },
     {
+      "path": "tools/gates/inherited-finding.mjs",
+      "kind": "schedule-only",
+      "why": "The fourth axis of the same family and the most expensive to run per pass: two git worktrees plus three runs of every gate in tools/gates/inherited-finding.json, one of which spawns the rest. Registered schedule-only by the same argument as its two siblings. The cost argument is the whole of it and not the whole story -- unlike them, this one answers a question that is only live while a branch is open, so the place it belongs is a pre-push or pull-request hook rather than a nightly sweep, and this repository may not write under .github/workflows/ (Ursa incident 5). That ask is queued in docs/agents/pending-workflow-changes-exo.md rather than left implicit here. Its rules are asserted in tools/gates/inherited-finding.test.mjs, which tooling-suites runs, and its own positive control is `--self-test`."
+    },
+    {
       "path": "tools/gates/premise-differential.mjs",
       "kind": "schedule-only",
       "why": "Three subprocesses per candidate over every candidate in this file, so one pass is minutes of wall clock and it spawns every other gate here. A per-change gate is the wrong place for it. Its rules are asserted in tools/gates/premise-differential.test.mjs, which tooling-suites runs, and its ANSWER about the tree belongs on a schedule beside tools/ledger/ci/ledger-gate.yml."
@@ -162,6 +167,11 @@
       "path": "tools/seat/draft-fault.mjs",
       "kind": "needs-token",
       "why": "It asks whether anything licenses a reader to treat somebody else's draft pull request as abandoned, which is a question about live drafts."
+    },
+    {
+      "path": "tools/seat/duplicate-repair.mjs",
+      "kind": "schedule-only",
+      "why": "Measured rather than guessed, and the first guess was wrong in both halves. With BOARD_API_URL and BOARD_RUNTIME_TOKEN removed it runs for 76 seconds and exits 0, falling back to its graph half: so it does not need a credential to answer, and `needs-token` was a false excuse. 76s is also over tools/gates/excuse-control.mjs's 60-second control, which reported the row `unmeasured` and went red rather than accepting it -- an unmeasured excuse is not a pass. Cost is the real constraint and a pull-request gate is the wrong place for a 76-second graph walk over every ref. Its rules are asserted in tools/seat/duplicate-repair.test.mjs and its positive control is `--control`. This seat wrote the file on 2026-11-09 and did not register it, which left tools/gates/gate-registry.mjs red on main for the rest of the day; the registry's header says four of its entries record that same history, and this is the fifth."
     },
     {
       "path": "tools/seat/outage.mjs",

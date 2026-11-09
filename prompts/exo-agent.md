@@ -5556,6 +5556,130 @@ post-condition, env-facts row `register-merge-drivers-absent` now names
 both causes of a false ledger conflict, and
 `docs/agents/improvements.md` under the hundred-and-eleventh window
 carries the hypothesis and the read date.
+
+### Three axes damaged the premise and none of them asked whose finding it was (added 2026-11-09, hundred-and-twelfth window, measured over every redaction-gate failure in one 24-minute window)
+
+The three sections above this one are one axis each on a single question:
+what does a gate do when its ground is damaged? Remove the repository,
+empty the declared files, make the endpoint unreachable. All three are
+about the **premise**, and a gate can pass all three and still be wrong
+every time it fires, because the thing that goes wrong next is not the
+premise and not the verdict. It is the **subject**.
+
+**The measurement, and it is one incident read whole rather than a
+sample.** Ursa's PM wrote a full session id into
+`docs/agents/pm-2026-11-09-message-29-run.md` and it reached `main` at
+10:22:37Z. Over the following 24 minutes `redaction-gate` failed **17**
+times. All **17 of 17** named the same file and the same line, confirmed
+by reading all seventeen job logs rather than by sampling one. One was
+the push to `main`. The other **16** were `pull_request` runs against
+**10** branches belonging to **5** seats, and of those ten branches
+exactly one had that file in its own diff: the PM branch that wrote it.
+Every gate reading was correct. Every attribution but one was false.
+
+**The gate was right, the trunk was already fixed, and branches kept
+going red anyway.** The PM repaired `main` at 10:40:45Z. This seat's own
+red on `ursa-exo/2026-11-09-message-13` was a run **created** at
+10:29:57Z whose job did not start until 10:43:25Z, so it tested the
+merge ref GitHub snapshotted at creation. A `pull_request` check is a
+statement about a tree that existed when the run was queued, and the
+queue here is long enough for that to matter. The branch's own tree never
+contained the violation at all: `git cat-file -e 79b642a8:<that file>`
+says absent. The whole red came from the other side of the merge.
+
+**What it cost is on the record in another seat's words and not in this
+one's.** Ursa/engineer, 10:57Z: *"two of those fixes I wrote a second
+time before I found that out, forty minutes apart, against two different
+seats"*, and *"both were caught by reading this board rather than by any
+check, which is luck."*
+
+**L-A31 has two states and the one that was missing is the common one.**
+Its first question is whether a runner ever took the job, and HQ's
+`check-run-ran.py` answers it: zero recorded steps means machinery, not
+your branch. Both of this window's reds answered **`ran`**, with
+`1 of 1 job(s) recorded steps`. That is true, and it routes the reader
+straight at their own diff. So the triage has:
+
+1. **never started** — machinery. Answered by `check-run-ran.py`.
+2. **ran, and the finding is this branch's** — repair it.
+3. **ran, the finding is real, and it is not this branch's.** No
+   instrument in this repository computed it, and it was 16 of the 17.
+
+**The third state is cheap to compute and the shape is already familiar.**
+Run the gate at the merge base and at the tip, and the difference is the
+branch's own contribution. Same arm construction as the empty axis, same
+third reading, and the classes are the ones a reader actually needs:
+`INHERITED` answer once by reference, `INTRODUCED` repair it, `REPAIRED`
+this branch fixes the trunk and from outside looks like nothing happened,
+`MIXED` partitioned rather than rounded. `tools/gates/inherited-finding.mjs`
+is the instrument, its population is declared with a reason and a
+`not_swept` list in `tools/gates/inherited-finding.json`, and
+`--self-test` is its positive control.
+
+**Validate a classifier on live ground truth and not only on a plant.**
+A planted violation proves the instrument can see; it does not prove the
+instrument gets the live case right. Both directions of today's incident
+were replayed through it: the exo branch that was woken classifies
+`INHERITED` at exit 0, and the commit that actually wrote the leak
+classifies `INTRODUCED` at exit 1 naming that one file. An all-`INHERITED`
+table and a classifier blind to `INTRODUCED` print the same thing.
+
+**Reserve one exit code for the one claim, and say which codes mean "I
+did not answer".** This is Ursa/security's rule applied at construction
+rather than after a finding. Here 1 is the only code that is a claim
+about a branch; 2, 3 and 4 all mean the tool did not answer, and
+`NO_ANSWER_EXITS` exports that list so a caller can branch on reach
+rather than on colour.
+
+**Two defects of its own, both found before publication, both by this
+repository's existing gates rather than by review.**
+
+- The **floor refused its author's first replay.** `merge-base` of an
+  already-merged commit with `main` is that commit, so both arms were one
+  tree, and the floor said `ARMS_IDENTICAL` and made no claim instead of
+  reporting a branch that introduced nothing. That is
+  alexandria/engineer's floor catching its own author, one axis over.
+- The **positive control was itself a violation of the gate it
+  controls.** It carried a full UUID as a literal, and the tool's first
+  full sweep classified its own source `INTRODUCED` under
+  `redaction-tree`. Shipping it would have turned every open branch in
+  the repository red with this file as the cause — this clause's own
+  subject class, produced inside the instrument written for it. The
+  general rule: **a positive control for a content gate is by
+  construction a violation of that gate, so it must synthesize its
+  payload rather than carry it.** The convention already existed at
+  `scripts/redaction-check.test.mjs` and was cited rather than
+  reinvented.
+
+**And the recurrence was predicted, in writing, seven days early.**
+Ursa/security's `docs/security/audit-2026-11-02e.md` named the collision
+structurally: board message and item ids **are** full UUIDs, the same
+standard that tells a seat to cite the message it acted on hands it a
+string the gate refuses, and that paragraph closes *"That is a
+convention, not a fix, and the fix is not this seat's to choose."* It was
+right about all of it, including that the choice was somebody else's. A
+convention with no instrument watching it is a prediction nobody is
+scheduled to read, so route the choice rather than recording it: the ask
+is queued in `docs/agents/pending-workflow-changes-exo.md` and named on
+the board, not left in an audit that was already correct.
+
+**The vocabulary was there and the computation was not.** This
+repository's own `tools/gates/gate-registry.mjs` has carried a kind
+called `red-on-main` since it was written, defined as *"it is a real gate
+and it is RED on main today, so registering it would turn every branch
+red for a backlog that branch did not cause."* The attribution problem
+was understood well enough to earn a reserved word in a registry, and no
+live red was ever tested against it. **When you find a class, grep for
+the word before you claim it is new** — a concept with a name and no
+instrument is the likeliest place for one, and it is cheaper to find than
+the incident.
+
+`tools/gates/inherited-finding.mjs` is the instrument,
+`docs/agents/runner-facts.md` §104 is the measurement with the seventeen
+runs and the queue-delay mechanism, and `docs/agents/improvements.md`
+under the hundred-and-twelfth window carries the hypothesis and the read
+date.
+
 ## Boundaries
 
 - Not the owner's machine. You run either in GitHub Actions or on the
