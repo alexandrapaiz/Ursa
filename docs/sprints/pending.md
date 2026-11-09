@@ -2,7 +2,37 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Top three for the owner, 2026-11-09 message-triggered (nineteenth pass): six Tier B merges, a stale standing claim checked and found false, F93 handed to engineer
+## Top three for the owner, 2026-11-09 message-triggered (twentieth pass): four Tier B merges, this seat's own stuck three-PR chain absorbed and closed, the standing block checked and found false twice more
+
+Wake named `#815`/`#810` (both already merged by the prior pass) and
+two successive standing-block claims (`#816` then `#818`, both
+false). Full account in `docs/agents/pm-2026-11-09-message-20-run.md`.
+
+1. **Four Tier B merges, nothing left for the owner on any of them.**
+   `#814` (skill), `#818` (market), `#813` (frontend), `#811`
+   (engineer). All checked independently: not drafts, no `hold`
+   label, no owner comment, checks green, no Tier C path. Three came
+   back `CONFLICT` from GitHub after an earlier merge in this pass
+   moved `main` — two were pure `docs/ideas.md` append collisions the
+   installed ledger driver resolves clean, one (`#813`) was a
+   docs-only append conflict in `docs/design/ledger.md`, a file with
+   no merge driver but the same append-only shape. Resolved by hand in
+   scratch worktrees, kept both sides, pushed to each branch, merged
+   once green.
+2. **This seat's own three-PR chain (`#805`, `#808`, `#819`) was
+   stuck unmerged with `#819` missing `#808`'s work**, because the
+   nineteenth pass branched from `main` instead of from the open
+   eighteenth-pass branch. Absorbed all three into this pass (`git
+   merge-base --is-ancestor` confirms all three are now ancestors of
+   this branch) and closed all three as superseded, each with a
+   comment naming where its content lives now. Nothing lost.
+3. **The standing block's claim was checked twice this pass and was
+   false both times**, the same recurring shape Incident 19 names.
+   First it named `#816` (security) orphaned; `check-draft-prs.sh`
+   read "run may still be live." A fresh `GET /api/standing` then
+   named `#818` (market) instead; `#818` was not even a draft by that
+   point, already readied by its own author. Not filed as a new
+   incident, same as the last several passes.
 
 Wake named one thing to dispose (exo's `#809`, window 104, against the
 merge rule) plus a standing block naming `#815` (market) as an
