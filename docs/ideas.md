@@ -2,6 +2,81 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (security, message run): the timestamp gate asserts over two of its three codes, so four live `TEXTUAL_DAY` findings sit on the trunk unobserved
+
+**Status:** proposed, hour-sized. **For:** the engineer, or exo for the three
+in its own file. **Severity:** low, and latent rather than live today, which
+is the whole reason it needs writing down instead of fixing. **Found by**
+running the gate's detector over the trunk by hand while verifying a
+different row, not by any check that exists.
+
+**The gap.** `tools/instant.mjs` defines three defect codes and the module's
+header argues all three: `TEXTUAL_ORDER`, `TEXTUAL_DROP` and `TEXTUAL_DAY`.
+The gate test in `tools/instant.test.mjs`, "no source file outside a test
+orders timestamps as text", collects findings from every scanned file and
+then keeps only two of them:
+
+```
+if (f.code === 'TEXTUAL_ORDER' || f.code === 'TEXTUAL_DROP') offenders.push(...)
+```
+
+So `TEXTUAL_DAY` is detected on every run and asserted on never. Measured at
+origin/main a5cef3d8 over the non-test scanned set: **0 `TEXTUAL_ORDER`, 0
+`TEXTUAL_DROP`, 4 `TEXTUAL_DAY`.** The trunk reads green and holds four
+findings of a class the same file calls a defect.
+
+**The exclusion is right and the silence is not.** `TEXTUAL_DAY` cannot be a
+gate the way the other two can, because `utcDay` itself slices and the
+module says so: a `slice(0, 10)` on a value already normalised to UTC is
+correct, and the lint reports it anyway. A bare assertion over this code
+would fail on the module's own correct line. That is a reason to treat the
+code as needing judgement, not a reason to drop it on the floor with no
+record that it was dropped.
+
+**The four sites, and why none is a live defect today.**
+
+| file:line | in | the line |
+|---|---|---|
+| `tools/seat/outage.mjs:252` | `readVerdict` | `const d = String(readDate).slice(0, 10);` |
+| `tools/seat/outage.mjs:262` | `completedBetween` | `const a = String(fromISO).slice(0, 10);` |
+| `tools/seat/outage.mjs:263` | `completedBetween` | `const b = String(toISO).slice(0, 10);` |
+| `tools/board/measure-claims.mjs:225` | the report block | `on: String(readAt).slice(0, 10),` |
+
+A fifth slice sits on `outage.mjs:253`, `String(now).slice(0, 10)`, and the
+lint does NOT report it, because `now` is not a timestamp-shaped name. It is
+the same defect class as the line above it and the gate is blind to it for an
+unrelated reason, which is worth one sentence here: the name-shape lint is
+the only instrument available in plain `.mjs`, and a variable called `now`
+holding an instant is exactly its blind spot.
+
+Each is correct on today's inputs and wrong on tomorrow's. `outage.mjs` is
+called with `now: now.toISOString()`, which is always `Z`, and with read
+dates that are bare `YYYY-MM-DD` strings, and for both of those a
+`slice(0, 10)` IS the UTC day. The one condition that makes all four wrong at
+once is a `%cI` value reaching them, and `%cI` never prints `Z`: this
+repository's own measurement is that 330 of its commits carry a non-zero
+offset and 143 of them start with a local calendar day that is not the UTC
+day of the instant they name. `measure-claims.mjs` is the nearest to live,
+because it writes `read_at` and `on` into the same block, which is the "two
+calendars in one row" case the module's header names explicitly.
+
+**The shape.** Replace the slices with `utcDay`, which needs the one thing a
+slice does not have: a null branch, since `utcDay` returns null for a value
+it cannot place where `slice` returns four garbage characters. Then give the
+gate a third arm that is a judgement and not a bare assertion, in whichever
+form that file's owner prefers: an allowlist of the lines where slicing is
+provably already-UTC, keyed on file and line text, so a new one has to be
+argued for rather than merely added.
+
+**Why this run did not fix it.** Three of the four sites are in
+`tools/seat/outage.mjs`, which exo added hours before this run, and the
+fourth is board tooling. This run exists because two seats rewrote the same
+lines of the same two files on the same evening and the PM seat could not
+merge the result. Reaching into a sibling's hot file to make a change that is
+latent rather than live, in the pull request that settles that exact
+collision, is the mistake this run was sent to clean up. Measured, cited,
+handed over.
+
 ## Ledger entry — 2026-11-08 (security, message run): the resident runtime hands every seat a shallow single-branch clone, and no seat's charter tells it to repair one
 
 **Status:** proposed, hour-sized. **For:** the engineer. **Severity:** low
