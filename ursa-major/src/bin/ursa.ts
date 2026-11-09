@@ -486,16 +486,26 @@ export async function main(argv: string[]): Promise<number> {
       // which is also how `src/adapters/pr-launch.test.ts` drives it.
       pr: { type: 'string' },
       snapshot: { type: 'string' },
+      // `ursa corpus`. `--prs` is a comma-separated list with inclusive
+      // `A-B` ranges, parsed by `parsePrList` in src/corpus-command.ts;
+      // `--window` overrides the sentence the report states its own
+      // measurement window in, for a sweep whose selection rule is
+      // narrower than "these numbers" (a sampled range, one month).
+      prs: { type: 'string' },
+      window: { type: 'string' },
     },
   })
   const [cmd, project] = positionals
-  if ((cmd !== 'run' && cmd !== 'pr' && cmd !== 'bridge' && cmd !== 'serve' && cmd !== 'ci' && cmd !== 'publish' && cmd !== 'address') || !project) {
+  if ((cmd !== 'run' && cmd !== 'pr' && cmd !== 'corpus' && cmd !== 'bridge' && cmd !== 'serve' && cmd !== 'ci' && cmd !== 'publish' && cmd !== 'address') || !project) {
     console.error('Usage: ursa run <projectPath> [--limit N] [--min-chars N]')
     console.error('         pairing bounds: [--max-pair-distance N] [--max-pair-age-hours N] [--max-interposed-generations N]')
     console.error('         who is an agent: [--agent-identity <name-or-email-substring>] (repeatable)')
     console.error('       ursa pr <projectPath> --pr N [--repo owner/name] [--snapshot f.json] [--min-chars N]')
     console.error("         resolves ONE pull request instead of the default branch's commit pairs, which is the")
     console.error('         only path that finds anything on a repository whose every commit is an agent\'s')
+    console.error('       ursa corpus <projectPath> --prs 645,647,700-710 [--repo owner/name] [--min-chars N] [--window "one sentence"]')
+    console.error('         runs the pull-request launch over MANY pull requests and reports them as one corpus:')
+    console.error("         totals, how many distinct finished works they cover, and how many carry a correction")
     console.error('       ursa bridge <projectPath> [--sync-url URL] [--session FILE] [--interval MS] [--port N]')
     console.error('       ursa serve <projectPath> [--port N]')
     console.error("         serves this project's .ursa/ store read-only on loopback for a local page; no passphrase, no sync, no model")
@@ -518,6 +528,27 @@ export async function main(argv: string[]): Promise<number> {
       // that is always present and always right.
       pages: values.pages ?? process.env.GITHUB_REPOSITORY ?? null,
       check: values.check === true,
+    })
+  }
+  if (cmd === 'corpus') {
+    // The sweep. Not a fourth launch: every entry goes through
+    // `runPullRequestLaunch`, which is the function that asks the three
+    // decisions `src/launch.ts` holds. See the header of
+    // src/corpus-command.ts for why a sweep that resolved episodes itself
+    // would be drift 12.
+    const { parsePrList, runCorpusCommand } = await import('../corpus-command')
+    if (!values.prs) {
+      console.error('ursa corpus needs --prs N,N,N (ranges allowed: 700-710)')
+      return 2
+    }
+    const parsed = parsePrList(values.prs)
+    if ('error' in parsed) { console.error(`ursa corpus: ${parsed.error}`); return 2 }
+    return runCorpusCommand({
+      projectPath: absPath(project),
+      prs: parsed.prs,
+      repo: values.repo ?? process.env.GITHUB_REPOSITORY ?? null,
+      minChars: values['min-chars'] ? Number(values['min-chars']) : undefined,
+      window: values.window ?? undefined,
     })
   }
   if (cmd === 'pr') {
