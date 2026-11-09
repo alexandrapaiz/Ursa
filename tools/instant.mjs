@@ -226,6 +226,27 @@ export function sortByInstant (rows, key) {
  * run as two genuine findings, so a window had three offenders to hand-clear
  * and no way to tell which were real except by reading the detector.
  *
+ * AND `now` IS THE THIRD MEMBER OF THAT FAMILY, ADDED 2026-11-09 BY THE ExO
+ * SEAT AFTER URSA'S SECURITY SEAT FOUND THE SITE IT HIDES. `now` holds an
+ * instant in every use of it in this repository and the pattern did not name
+ * it, so `String(now).slice(0, 10)` was invisible to the lint while the line
+ * immediately above it — the same slice on a variable called `readDate` — was
+ * a finding. One defect, two lines, one reported.
+ *
+ * Measured before it was added, both ways round, over this repository's
+ * tracked source: **6 of 15,414 distinct identifiers** match the alternative
+ * (`now`, `Now`, `conflictedNow`, `versionsNow`, `verbatimCharsNow`,
+ * `verbatimSpansNow`) and the alternative yields **2 new findings and loses
+ * none**. Both new findings are genuine: `tools/seat/outage.mjs` and
+ * `tools/seat/read-dates.mjs`, the two call sites repaired in the same pull
+ * request.
+ *
+ * `\bnow` and not `[Nn]ow`, for the `update`-ends-in-`date` reason one
+ * paragraph up and it bites harder here: **`know` ends in `now`**, and so do
+ * `known` and `knows` with the trailing-boundary rule relaxed. The
+ * word-boundary form rejects all three for the same reason `\bdate` rejects
+ * `update`.
+ *
  * The `at` alternative was measured in the same pass and is **left alone**:
  * all **57** of its matches are `createdAt`/`_at`-shaped and none is a plain
  * English word, so `format`, `concat`, `float` and `stat` are reached only
@@ -234,7 +255,7 @@ export function sortByInstant (rows, key) {
  * made.
  */
 const TIMESTAMP_NAME =
-  /(?:^|[^A-Za-z0-9_$])(?:[A-Za-z_$][A-Za-z0-9_$]*)?(?:Date|\bdate|_date|At|_at|[Tt]ime|[Tt]imestamp|[Ii]so|ISO|Ts|\bts|_ts)(?![A-Za-z0-9_$])/
+  /(?:^|[^A-Za-z0-9_$])(?:[A-Za-z_$][A-Za-z0-9_$]*)?(?:Date|\bdate|_date|At|_at|[Tt]ime|[Tt]imestamp|[Ii]so|ISO|Ts|\bts|_ts|\bnow|Now|_now)(?![A-Za-z0-9_$])/
 
 /**
  * Source lines that compare, sort or slice something whose name says it is a
@@ -256,6 +277,14 @@ export function textualTimestampComparisons (source) {
   const lines = source.split('\n')
   lines.forEach((text, i) => {
     const line = i + 1
+    // A block comment's continuation line is prose, and prose about
+    // timestamps reads exactly like code that mishandles them. Adding `now`
+    // to the name pattern above made that concrete: it reported
+    // `tools/board/page.mjs:90`, a JSDoc line describing the board's
+    // `before_hours` filter as `ts < now - B hours`, as a timestamp ordered
+    // as text. The `//` strip below never reached it. One line of prose
+    // cleared, no finding lost, measured over all 465 tracked sources.
+    if (/^\s*\*/.test(text)) return
     const bare = text.replace(/\/\/.*$/, '')
     if (/\b(?:parseInstant|compareInstants|isAfter|isBefore|utcDay|sortByInstant|parseEpochSeconds|toUtcInstant)\s*\(/.test(bare)) return
     // `new Date().toISOString()` is UTC by construction, so a day sliced off

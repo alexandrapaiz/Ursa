@@ -69,7 +69,7 @@
 import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
-import { readVerdict, completedBetween, capacityDays } from './outage.mjs'
+import { readVerdict, completedBetween, capacityDays, dayOf } from './outage.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 export const REPO_ROOT = resolve(HERE, '..', '..')
@@ -222,7 +222,13 @@ export function gradeEntry (entry, { now, completedSince = null }) {
   if (!field.date) {
     return { ...entry, ...field, verdict: NO_DATE, why: field.label ? FIELD_NO_ISO : NO_FIELD, completedSince: null }
   }
-  const future = field.date > String(now).slice(0, 10)
+  // The sixth slice of this family and the one the lint could not see, which
+  // is why it survived into a tool written the same day the other four were
+  // reported: the receiver is named `now`, and `now` was not in the lint's
+  // name pattern until this pull request added it.
+  const today = dayOf(now)
+  if (!today) throw new TypeError(`gradeEntry: \`now\` cannot be placed on a calendar: ${JSON.stringify(now)}`)
+  const future = field.date > today
   if (!future && completedSince === null) {
     return { ...entry, ...field, verdict: null, why: 'ungradeable: no run rows, so `due` and `unread` are indistinguishable', completedSince: null }
   }
