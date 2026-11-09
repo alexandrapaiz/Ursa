@@ -1,64 +1,54 @@
-# Dispatch queue — 2026-11-09, message-triggered (twenty-third pass)
+# Dispatch queue — 2026-11-09, message-triggered (twenty-fifth pass)
 
-**Twenty-third message pass of today.** This pass merged one pull
-request (`#834`, engineer) under Tier B after resolving a docs-only
-conflict against `main` locally, confirmed the other four items named
-on this wake were already stale (three already merged, one already
-closed), and handed the next engineer-lane item to that seat's own
-open stub on the board rather than through a workflow dispatch. See
-`pending.md` and `docs/agents/pm-2026-11-09-message-23-run.md` for the
-full account.
+Rechecked fresh against the criteria table below rather than carried
+forward, per every prior pass's own practice.
 
-`gh run list --limit 30` shows no non-success run. `PM_DISPATCH_ENABLED`
-is unset in this run's environment, so nothing below could fire from
-this run regardless of the criteria table (host run, not a GitHub
-Actions run — `gh workflow run agent-<seat>.yml`, pm.md §11.5, does not
-apply here).
+`PM_DISPATCH_ENABLED` is unset in this run's environment, so nothing
+below could fire even if it qualified (pm.md §11.5). This is logged
+as queue information for the owner, not as a plan this run executes.
 
 ## Checked against the criteria table (pm.md §11.3) and Ursa's own three (§0b)
 
-- **A seat run failed in the last 24h, diagnosable from its log:**
-  none, per the read above.
+- **A seat run failed in the last 24h, diagnosable from its log:** one
+  — `ursa-engineer`, `2026-11-09T07-52-20-692Z-message`, `exit=timeout`
+  after 60 minutes. Diagnosed and triaged in this pass's own PR and in
+  `docs/sprints/pending.md`'s top entry: the run shipped a complete,
+  valuable unit of work before timing out, a follow-up run started two
+  seconds later and is still live, and three of the four most recent
+  engineer runs today exited 0. Not a pattern, not a defect. No
+  dispatch; nothing to rerun that is not already running.
 - **A seat's open draft has failing CI, or a review comment unanswered
-  >24h:** open drafts at the time of this check (`#836` frontend,
-  `#837` security, `#838` skill, `#840` engineer, `#841` this pass's
-  own) are all under an hour old; none has a review comment. None
-  qualifies.
+  >24h:** `#840` (engineer), `#844` (security), `#845` (skill), `#846`
+  (exo), `#848` (frontend) are open or draft. `/srv/asc/hq/tools/check-draft-prs.sh
+  --repo alexandrapaiz/Ursa` reports every one "idle 3-10m, run may
+  still be live; leave it alone. no orphaned drafts." None qualify.
 - **A sprint item due this week with no run from its owning seat:**
-  unchanged — the newest sprint file is `sprint-2026-10-12.md`, 28
-  days old, a ceremony-grooming finding already carried in
-  `pending.md`, not this message-triggered pass's to open. Today is
-  Monday; this run's own trigger is `message`, not the ceremony
-  workflow, so opening it is not this pass's to do either.
-- **A seat has two or more open PRs on one scope, none merged:** none
-  observed this pass. Engineer's prior two-row shape (`#834`, `#840`)
-  resolved itself when `#834` merged.
+  there is no current sprint item — the newest sprint file is
+  `sprint-2026-10-12.md`, 28 days old. This is the ceremony gap, now
+  escalated in `docs/decisions.md` rather than logged here again.
+- **A seat has two or more open PRs on one scope, none merged:**
+  market holds `#824` and `#822`, both open. Checked whether they
+  share a scope before counting it as a hit: `#824` is a market brief
+  entry (Anthropic reward-hacking disclosure, Turing entry) and `#822`
+  is a different brief entry (Cocient, verifier-gap hedge) — two
+  different ledger entries in the same file, not one stuck scope. Not
+  a hit.
 - **A ruling or ADR merged since the last run names a seat with no run
-  following:** nothing new in `docs/decisions.md` since the last
-  pass's own check.
-- **A milestone due within three days with open items:** none.
+  following:** nothing merged to `docs/decisions.md` since the last
+  pass before this one's own addition.
+- **A milestone due within three days with open items:** none found.
 - **Ursa's own three (§0b):** no tuning or trial run with unrecorded
   ledger results; no failing check on an open Minor-site or
-  Major-resolver PR (none open); no ADR naming an experiment with no
-  run started within two days.
+  Major-resolver PR (`#843`'s own check was green before it merged);
+  no ADR naming an experiment with no run started within two days.
 
-## Handed on the board instead of fired, because dispatch cannot fire from this run anyway
+## Logged, not fired
 
-1. **The redaction-gate's UUID pattern fix, handed to engineer's own
-   open stub (`#840`).** Logged across several prior passes as a
-   candidate for engineer and never fired, because engineer's lane was
-   occupied every time this pass checked. `#840` is now a genuine open
-   stub ("read the board for the next item"), so this pass posted a
-   board handoff (id `3b594ac0`) naming the fix, the prior workaround
-   (`#773`), and the reason it likely needs owner or HQ review once
-   opened (the pattern lives in `.github/workflows/redaction-gate.yml`,
-   outside a routine Tier B path). Not a workflow dispatch; a board
-   message, which this environment's seats act on directly (pm.md
-   §15, §17).
+Nothing new to log this pass beyond what `docs/sprints/pending.md`
+already carries (the redaction-gate UUID pattern, which engineer's own
+live run is already working as its next unit, per its own run note).
 
-## Nothing else to fire this run
+## Dispatched by the PM
 
-One pull request merged under Tier B this pass did not need a dispatch
-to exist; merging an existing PR is not a dispatch. Confirming four
-already-stale wake items is also not a dispatch. See
-`docs/agents/pm-2026-11-09-message-23-run.md` for the full account.
+None this pass. `PM_DISPATCH_ENABLED` unset, and the criteria table
+above found nothing that would have qualified regardless.

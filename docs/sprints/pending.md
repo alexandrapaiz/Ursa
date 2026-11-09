@@ -2,6 +2,83 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (twenty-fifth pass): #843 reviewed and merged, #840's timeout traced to a live follow-up run already in flight, this seat's own stuck #841/#847 pair absorbed, a four-Monday ceremony gap escalated to the ledger
+
+Four things on the wake: exo's finished run (naming its own merged
+`#842`), the engineer seat's run reported as failed with a timeout,
+frontend's `#843` opened for review, and the recurring standing block
+naming this seat's own `#847` and two other seats' PRs as orphaned
+drafts. Full account in `docs/agents/pm-2026-11-09-message-25-run.md`.
+
+1. **`#843` (frontend, the record pages' max-width breakpoint fix)
+   reviewed against Tier B and merged, nothing left for you.** Not a
+   draft, no `hold` label, no comment, one check (`scan`) green,
+   `mergeStateStatus: CLEAN` confirmed independently with
+   `git merge-tree --write-tree origin/main <head>` (exit 0) rather
+   than trusted from GitHub's cached field. Diff is `ursa-minor/`
+   product code plus `docs/design/` evidence — no Tier C path. `#843`
+   itself subsumes `#836` (its branch confirmed an ancestor by
+   `git merge-base --is-ancestor`); GitHub auto-closed `#836` as merged
+   the moment `#843` landed, so there was nothing left to close by
+   hand.
+2. **`#840` (engineer)'s "failed, hit its timeout" is accurate but
+   stale by the time this pass read it, and the standing block's claim
+   that it is an orphan does not hold.** The host's own run log
+   (`/srv/asc/state/.epito/logs/ursa-engineer/2026-11-09T07-52-20-692Z-message.log`)
+   confirms `exit=timeout` after a full 60 minutes, but the branch's
+   own commit history shows that run had already shipped one complete,
+   valuable unit of work before the clock ran out (a real measured fix
+   to a resolve-cost regression in `ursa-major/src/normalize.ts`, with
+   tests and a design note) and only started a second, unfinished one
+   (a redaction-gate false-positive) in its last two minutes. A second
+   run started two seconds after the first one's log closed
+   (`2026-11-09T08-52-28-273Z-message.log`) and is still live as of this
+   write-up (header-only log, no exit line, well inside the 120-minute
+   liveness window). `/srv/asc/hq/tools/check-draft-prs.sh --repo
+   alexandrapaiz/Ursa` independently confirms: "idle 5m, run may still
+   be live; leave it alone." Three of the four most recent engineer
+   runs today exited 0; this is one timeout, not a pattern, so no
+   incident entry and no rerun — one already happened on its own.
+   Left `#840` untouched.
+3. **`#842` was already merged by this seat's own prior pass (`#847`)
+   before this wake was read.** Nothing to do on it. The standing
+   block's claim that `#847` itself is an orphaned draft does not
+   hold either: `gh pr view 847` reads `isDraft: false` live, same as
+   `#843`. Only `#840`'s draft claim was real; the other two names in
+   the same standing paragraph were stale.
+4. **This seat's own stuck pair, `#841` (23rd) and `#847` (24th), is
+   resolved by absorption, not by picking one.** Both were open
+   simultaneously and genuinely conflicted on this file
+   (`docs/sprints/pending.md` has no entry-aware merge driver, unlike
+   `docs/ideas.md` and the registers — confirmed by `git merge-tree`
+   in both directions before trusting either PR's own claim of a clean
+   check, which turned out to be checked against a different state of
+   the other branch). Merged both into this branch
+   (`git merge-base --is-ancestor` confirms both fully contained),
+   keeping both sections above, newest first, nothing dropped. **`#841`
+   and `#847` can both be closed as superseded once this PR merges** —
+   naming the order here so you do not learn it from a failed merge.
+5. **The sprint-ceremony gap this file has carried since the eighth
+   pass crossed the "two consecutive misses" line this file itself set,
+   and is now escalated to `docs/decisions.md` rather than carried
+   again.** `sprint-2026-10-12.md` is still the newest sprint file on
+   `main`; four Mondays (10-19, 10-26, 11-02, 11-09) have now passed
+   with no ceremony PR, confirmed against the host's own cron record
+   (`python3 /srv/asc/hq/tools/check-cron-fired.py --days 28`: the
+   daily `ursa-pm` slot shows `MISSED` for nine straight days before
+   the recorder itself went dark). Full finding and a proposed 48-hour
+   silence-rule fix are in `docs/decisions.md`'s newest entry.
+
+**Nothing to hand to an idle seat this pass.** Checked rather than
+assumed: every one of the nine active seats has an open PR right now
+(engineer `#840` live, security `#844`, skill `#845`, exo `#846`,
+market `#824`/`#822`, frontend `#848` just opened). Dispatching into
+any of them would hit `pm.md` §11.3's own stop ("two or more open PRs
+on one scope" / "never a seat with an open PR unless told to build on
+it"), so this pass says so on the board instead of manufacturing a
+handoff. Fresh dispatch-queue check in
+`docs/sprints/dispatch-queue.md`.
+
 ## Top three for the owner, 2026-11-09 message-triggered (twenty-fourth pass): exo's window 108 pull request (#842) reviewed against the merge rule and merged
 
 Wake payload named one PR to dispose: review exo's `#842` (window
