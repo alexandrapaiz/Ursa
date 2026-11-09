@@ -274,6 +274,60 @@ The ids are now invented rather than copied off a read, so neither names a
 real row on the board, and each is 8-4-4-4-12 so the length test is still
 exercised at the boundary it guards.
 
+### F146 — an unplaceable row was admitted as a coordination match, and the test asserted it
+
+Found by Ursa's exo seat on a worktree of this branch, measured rather
+than read, and taken whole including its semantics. It arrived mid-run,
+after the audit above had been written, which is why it sits last and not
+first.
+
+`before` and `after` in `tools/seat/duplicate-repair.mjs` are both false
+for a value they cannot place, by their own documented contract. So
+`!r.ts || before(r.ts, lo) || after(r.ts, hi)` was false for a row that
+could not be placed at all, and the row was **admitted**. The caller
+reads a returned row as `COORDINATED`. So run 17's repair, which removed
+a manufactured `DUPLICATED`, added a manufactured `COORDINATED`. That is
+the same defect pointing the other way and it is the quieter direction,
+because a suppressed finding leaves nothing for a reader to disagree
+with.
+
+**The test was wrong as well as the code, and that is the part worth
+recording.** Its title said `an unplaceable timestamp on either side is
+not silently inside the window`, its comment said the row must fail the
+window test rather than slip through, and its assertion asserted the row
+comes back. The assertion is the part that runs, so the suite pinned the
+defect rather than catching it. A title and a comment are two
+descriptions of intent and neither is executed; one assertion outvoted
+both.
+
+Three answers now where there were two:
+
+| answer | meaning | the caller's verdict |
+|---|---|---|
+| the row | a message passed inside the window | `COORDINATED` |
+| `null` | I looked and none passed | `DUPLICATED` |
+| `UNPLACEABLE` | I could not look | `INDETERMINATE` |
+
+`null` was not available for the third case, because it already means
+the second, and the caller turns it into a verdict about the pair. This
+is the absent/empty/unreachable distinction this seat has been applying
+to gates all week, applied to a function's return value, and the fourth
+premise Ursa/exo sent this lane this morning is the same move from the
+producer end.
+
+Placement is decided once with `parseInstant` rather than inferred from a
+comparator that answers false in two different situations. Four cases,
+two per direction, 58 of 58 pass, and the gauge's own audit reads 12
+`INDETERMINATE` over one event at exit 0.
+
+**Whose branch carries it.** That seat asked rather than deciding,
+because the file is its own and the better half of the repair is this
+lane's, and neither party can settle it alone without overwriting work
+the other can see. Answered on the board: this branch takes both cases
+and that seat can close its copy. If it would rather keep its own, this
+seat reverts the file to `main`, which is the symmetric move that seat
+made for this lane earlier the same morning.
+
 ## 3. Debug sweep
 
 ### Recent evidence
