@@ -2926,3 +2926,79 @@ measurement, which did not exist before, and one observation: whichever
 column the owner wants, the two breakpoints should probably be the same
 one, because the 1024-to-1280 band is a width nobody chose and both pages
 pass through it.
+
+## L71 — A max-width behind a breakpoint prefix does not apply between the two, and the band in between is the only place it matters
+
+**fixed**, 2026-11-09 (run 2026-11-09-message-v).
+`reviews/2026-11-09-message-v/data/sweep-grid.txt` and `sweep-grid-after.txt`.
+
+L70 offered the measurement and left the column choice to the owner, with
+one observation attached: the two breakpoints should probably become the
+same one, because the band between them is a width nobody chose. This run
+took that card and found the observation understated. The band is not
+merely unchosen. Inside it the record pages' column was **wider than the
+maximum the markup declares for it**, and `max-w-6xl` is the thing that
+declares it.
+
+`xl:max-w-6xl` names a 1152px column and gates it behind the 1280px
+breakpoint. A `max-width` is inert whenever it exceeds the space available,
+so the prefix buys nothing below 1152 and the only widths it changes are
+1152 to 1279, which are exactly the widths where the clamp was needed and
+absent. At 1200 the column ran 1008px wide against a declared maximum of
+1152 minus its padding, 960.
+
+**The sweep that found it.** The three charter viewports cannot see this:
+820 is below both breakpoints and 1440 is above both, so the band had never
+been photographed or measured. 960 to 1440 in 16px steps, plus the four
+breakpoints probed at single-pixel resolution, four pages. A left edge that
+moves further than the viewport moved is a discontinuity:
+
+| page | at | viewport | left edge |
+|---|---|---|---|
+| home | 1023 to 1024 | +1px | **+126px** |
+| set | 1279 to 1280 | +1px | +64px |
+| record | 1279 to 1280 | +1px | +64px |
+| address | 1279 to 1280 | +1px | +64px |
+
+**The repair is the prefix and nothing else.** `xl:mx-auto xl:max-w-6xl`
+became `mx-auto max-w-6xl` on the three record pages and in the footer's
+`wide` measure. No measure width changed, so the owner's open decision from
+L70 is still open and still has the same two options. Three of the four
+discontinuities are gone and the record pages' column is now continuous
+from 960 to 1440.
+
+**The evidence that the fix is confined to the band.** `diff-frames.py`
+over six viewports times three pages: phone 390, tablet 820, desktop 1440
+and 1152 are **0px, identical** on every page, and only 1200 and 1279 move,
+and only on the two record pages. A change invisible at every width anyone
+has ever reviewed is the shape this repair should have, and it is reported
+as a measurement rather than as an intention.
+
+**What it also does to L70's number.** The home-to-record divergence is 176px
+by design above both breakpoints. Before, it drifted from 126 to 240 across
+1024 to 1279 and only settled at 1280. Now it reaches 176 at 1200 and holds.
+
+### The cost, which this run went looking for and found
+
+`data/header-offset.txt`. `site-header.tsx` carries page padding and no
+max-width, so the wordmark sits on the page edge while the body column may
+be centred: at 1440 the body sits 144px inside the header, which reads as a
+rail and a column and is the design. The gap has to get from 0 to 144
+somehow, and this change decides how.
+
+| | widths sharing one left edge | widths with a gap under 48px, non-zero |
+|---|---|---|
+| before | 25 of 37 | **0** |
+| after | 16 of 37 | **6** |
+
+Before, the gap was 0 up to 1279 and 64 at 1280. Now it ramps 1, 8, 16, 24,
+32, 40, 48, 56, 64 across 1153 to 1279. **A small non-zero stagger is the
+one that reads as a mistake**, and six sampled widths now have one where
+none did before. This is named rather than buried because it is the part of
+the change a reviewer might want reversed. The judgement for keeping it:
+the thing it replaces is a 64px jump at one pixel of viewport, which is
+visible as a snap while resizing and is the symptom of a clamp that was not
+applying. A continuous ramp expressing a real design intent is better than a
+discontinuity hiding a defect. The third option, giving the header the body's
+measure so the two always share one edge, would change every page at every
+width and belongs to the owner, like L70's column.
