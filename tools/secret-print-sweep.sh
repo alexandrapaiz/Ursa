@@ -22,6 +22,23 @@
 # accepted GitHub Actions masking lines as findings and exits 1. That is
 # upstream behaviour and is not worked around here beyond passing the flag.
 #
+# WHEN THIS SCRIPT CAN BE DELETED, written here because this is the file
+# somebody will be reading when the condition arrives. Both defects above
+# were reported upstream and HQ's engineer fixed both on 2026-11-09: a
+# missing scan root is now named on stderr and in the JSON as
+# `skipped_roots`, a scan where none of the roots exist is a new exit 3
+# instead of exit 0, and the default baseline now applies to the repository
+# scan and not only to the hook, with `--no-baseline` to ask for the raw set.
+# So the bare command will do what its name says. That fix is in an OPEN
+# pull request at HQ as this is written, not on HQ's main and not re-vendored
+# here, so the wrapper stays until the re-vendor actually lands. What makes
+# it droppable then is not the exit codes, it is the roots: HQ deliberately
+# did not change them, because an explicit file list is the answer this tool
+# has always supported and a second configuration surface for scan scope is
+# worse than this script. So the half of this file that survives any
+# re-vendor is the `find` below; the two paragraphs above it are the part
+# that becomes history.
+#
 # Exit status is the checker's own: 0 clean, 1 findings, 2 refused.
 set -euo pipefail
 
@@ -41,6 +58,17 @@ if [ "${#files[@]}" -eq 0 ]; then
   echo "secret-print-sweep: found no files to scan, which is a bug in this" \
        "script and not a clean result" >&2
   exit 2
+fi
+
+# `--print-files` emits the list and scans nothing, so another tool can run
+# the checker over the IDENTICAL set rather than re-deriving it. The whole
+# point of this script is that Ursa's layout is written down once;
+# `tools/secret-print-exemptions.py` needs the same list to run the checker
+# twice with suppression on and off, and a second copy of the `find` above
+# would be two implementations that agree only on the day they are written.
+if [ "${1:-}" = "--print-files" ]; then
+  printf '%s\0' "${files[@]}"
+  exit 0
 fi
 
 exec python3 tools/check-secret-print.py \
