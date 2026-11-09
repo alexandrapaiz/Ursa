@@ -42,19 +42,21 @@
 // of this file's precision. A dependency phrase anywhere in an entry and a
 // `#number` anywhere in the same entry co-occur for reasons that have nothing
 // to do with each other. Graded over all 509 entries, that entry-scoped form
-// returns 4 hits and 2 of them are wrong: the 2026-09-27 directory entry,
-// whose numbers are ADR references and whose blocker is five pull requests it
-// does not name, and the 2026-11-08 generation-ceiling entry, which matches
-// on "the rest was spent waiting on child processes" and whose `#707` is the
-// pull request being MEASURED rather than a blocker. Requiring both in one
-// sentence returns 1 hit, and it is a true positive. See `GRADED`.
+// returns 7 hits and 5 of them are wrong. Requiring both in one sentence
+// returns 1 hit, and it is a true positive. The numbers, each false positive
+// by name, and the one phrase that causes four of the five are in `GRADED`
+// below; re-derive them with `node tools/ledger/check-blockers.mjs --grade`,
+// which exits 1 when the ledger has moved under them.
 //
-// WHY `waiting on` IS NOT IN THE PHRASE LIST. It is the phrase that produced
-// the false positive above, and it is the one dependency word in this house's
-// vocabulary that is also how a seat describes blocking I/O. Dropping it
-// costs nothing measurable here: with the same-sentence rule in force, its
-// presence and absence both return the same single hit, so the list is
-// narrowed on the strength of the entry-scoped grading rather than on taste.
+// WHY `waiting on` IS NOT IN THE PHRASE LIST. It is the one dependency word in
+// this house's vocabulary that is also how a seat describes blocking I/O, and
+// it produced one of the five. Dropping it costs nothing measurable here:
+// with the same-sentence rule in force, its presence and absence both return
+// the same single hit, so the list is narrowed on the strength of the
+// entry-scoped grading rather than on taste. `depends on` stays despite
+// causing four of the five, because it is also the phrase the one true
+// positive is written with, and the same-sentence rule is what separates its
+// two uses.
 
 /** The phrases a seat on this board actually writes when it states that work
  *  is held up by something nameable, taken from `docs/ideas.md`'s own
@@ -125,6 +127,20 @@ export function declaredStatus(body) {
   return m ? m[1].trim() : null
 }
 
+/** A ledger sentence without the bullet and field label it opens with.
+ *
+ *  Every blocker in this file lives inside a `- First step:` or `- Status:`
+ *  bullet, so the first sentence of each one carries that prefix, and a
+ *  finding that quotes it reads as though the gate could not tell prose from
+ *  structure. Stripped here rather than in `sentences`, which stays a plain
+ *  splitter so the same-sentence grading is reproducible from its name.
+ *  @param {string} sentence @returns {string} */
+export function withoutListPrefix(sentence) {
+  return String(sentence || '')
+    .replace(/^[-*]\s+(?:[A-Z][A-Za-z ]{1,20}:\s*)?/, '')
+    .trim()
+}
+
 /** Every sentence in a ledger that states a blocker AND names the pull
  *  request it is blocked on, which is the only blocker shape a program can
  *  resolve. A blocker naming an owner action, a permission or an unnamed set
@@ -144,7 +160,7 @@ export function blockerClaims(source) {
         number: Number(m[2]),
       }))
       if (refs.length === 0) continue
-      out.push({ title: entry.title, status, sentence, refs })
+      out.push({ title: entry.title, status, sentence: withoutListPrefix(sentence), refs })
     }
   }
   return out
@@ -191,28 +207,60 @@ export function staleBlockers(claims, openSet) {
  *  seat re-derives it instead of re-arguing it. Re-derive with
  *  `node tools/ledger/check-blockers.mjs --grade`. */
 export const GRADED = {
-  read_at: '2026-11-09T04:30:00Z',
+  read_at: '2026-11-09T04:21:13Z',
   ledger: 'docs/ideas.md',
   entries: 509,
-  entry_scoped_hits: 4,
-  entry_scoped_false_positives: 2,
+  entry_scoped_hits: 7,
+  entry_scoped_true_positives: 2,
+  entry_scoped_false_positives: 5,
   same_sentence_hits: 1,
   same_sentence_false_positives: 0,
+  // THESE NUMBERS WERE 4 AND 2 FOR THE FIRST HOUR OF THIS FILE'S LIFE, and
+  // `--grade` is what found them wrong, on its first live run, against the
+  // file it was written beside. The published 4 came from a probe whose
+  // dependency phrase was `depends on \`?#`, which requires the reference to
+  // sit immediately after the phrase and so had already half-applied the
+  // same-sentence rule it was supposed to be the control for. A control that
+  // carries the treatment measures nothing. The honest entry-scoped number
+  // over the broad phrase list is 7, and the case for the same-sentence rule
+  // is stronger at 1-of-7 than it was at the 2-of-4 this file first claimed.
   false_positives_named: [
     {
       entry: '2026-09-27 — The ledger wants to be a directory',
-      why: 'its numbers are ADR references and its real blocker is "the five blocked pull requests", which names a count and no numbers',
+      why: 'its blocker is real and unresolvable: "the five blocked pull requests" names a count and no numbers. The 13, 14, 16, 18 and 21 in it are ADR references.',
+    },
+    {
+      entry: "2026-10-03 — The landing is the product's own best trial",
+      why: 'a descriptive `depends on`, and its numbers are version and page references',
+    },
+    {
+      entry: '2026-10-04 — The clone the capture needs, fetched by the capture',
+      why: 'matches "changes what a label depends on", which states a property of a label and not a blocker',
+    },
+    {
+      entry: '2026-11-09 — `parseDay` picks midnight UTC',
+      why: 'matches "cheapest before anyone depends on it", which is an argument for doing the work now rather than a reason it is held up',
     },
     {
       entry: '2026-11-08 (engineer, scheduled slot, second window) — A generation has no size ceiling',
-      why: 'matches "the rest was spent waiting on child processes", which is blocking I/O and not a blocker, and its #707 is the pull request being measured',
+      why: 'matches "the rest was spent waiting on child processes", which is blocking I/O, and its #707 is the pull request being MEASURED rather than a blocker',
     },
   ],
-  // Stated rather than claimed as zero: the same-sentence rule misses the
-  // 2026-11-09 entry that names Ursa#768, because the phrase and the number
-  // are in different sentences there. That entry already carries its own
+  // THE DOMINANT FALSE-POSITIVE CAUSE, which is why the same-sentence rule
+  // works rather than merely scoring well: `depends on` is written
+  // descriptively in this ledger far more often than as a blocker — what a
+  // label depends on, what a resolver's output depends on, what is cheapest
+  // before anyone depends on it. Four of the five above are that one phrase.
+  // A descriptive `depends on` almost never shares a sentence with a pull
+  // request number, because the thing it describes is a property and not a
+  // row, which is the structural reason the predicate survives the phrase
+  // rather than a property of this sample.
+  dominant_false_positive_cause: 'a descriptive `depends on`, 4 of the 5',
+  // The one true positive the same-sentence rule misses, stated rather than
+  // claimed as zero: the 2026-11-09 entry that names Ursa#768 puts the phrase
+  // and the number in different sentences. That entry already carries its own
   // correction on top, so a gate firing on it today would be wrong, and the
   // rule gets the right answer on it for a reason unrelated to why it is
   // right. That is luck, not a property.
-  known_miss: '2026-11-09 — Filed, then taken in the same run: phrase and number in different sentences',
+  known_miss: '2026-11-09 — Filed, then taken in the same run: phrase and number in different sentences, and already repaired in place',
 }
