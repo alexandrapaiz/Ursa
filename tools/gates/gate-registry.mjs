@@ -11,7 +11,9 @@
 // by nothing and excused by nothing, or a baseline entry has outlived its
 // reason, or a registered check names a file this tree does not have. Exit 2
 // the facts could not be established, meaning not a git checkout, or the
-// candidate sweep matched nothing, which must not read like a clean sweep.
+// candidate sweep matched nothing, which must not read like a clean sweep, or
+// (F141) every finding this run has is a baseline entry whose file is tracked
+// with no committed blob, which this gate cannot read and so cannot judge.
 //
 // WHY THIS FILE EXISTS. The board item behind `scripts/ci-checks.mjs` asks
 // that every test and gate we have built run before a change can reach the
@@ -158,10 +160,16 @@ export function registeredPaths(checks) {
  *
  *  Pure, so the suite can assert each class without a git checkout or a
  *  subprocess. `candidates` is the discovered set, `registered` is the map
- *  above, `baseline` is the parsed file, and `exists` answers whether a path
- *  is in the tree.
+ *  above, `baseline` is the parsed file, `exists` answers whether a path is
+ *  tracked, and `committed` answers whether it has a blob in `HEAD`.
+ *
+ *  `committed` defaults to agreeing with `exists`, which is what a caller
+ *  that cannot ask the object store should assume, and it is the pre-F141
+ *  behaviour for every caller that does not pass it.
  */
-export function decide({ candidates, registered, baseline, exists, checkIds, ledgerHeadings = [] }) {
+export function decide({
+  candidates, registered, baseline, exists, committed = exists, checkIds, ledgerHeadings = [],
+}) {
   const byPath = new Map((baseline.entries ?? []).map((e) => [e.path, e]))
   const rows = []
   const problems = []
@@ -236,6 +244,31 @@ export function decide({ candidates, registered, baseline, exists, checkIds, led
   const discovered = new Set(candidates.map((c) => c.path))
   for (const entry of baseline.entries ?? []) {
     if (discovered.has(entry.path)) continue
+    // THREE STATES, NOT TWO (F141, 2026-11-09, found by Ursa's exo seat and
+    // handed here after it retracted a larger claim about the enumerator).
+    // `gateCandidatePaths` reads each candidate's source out of the object
+    // store, so a file that is tracked and has no blob in `HEAD` is invisible
+    // to it, on purpose and documented there. This loop then saw a baseline
+    // row whose path was not discovered and concluded the row decides
+    // nothing. It does not: it decides something the sweep could not yet look
+    // at. An author adding a tool and its excuse in one change is exactly the
+    // reader who gets that message, at the one moment the premise is a
+    // transient state of their own index, and the instruction they are given
+    // is to delete the row they just wrote.
+    //
+    // So the deleted-it instruction now requires both halves of its premise,
+    // and the third state carries the opposite instruction.
+    if (exists(entry.path) && !committed(entry.path)) {
+      problems.push({
+        kind: 'pending-entry',
+        path: entry.path,
+        why: `${entry.path} is excused by the baseline and is tracked with no committed blob, `
+          + 'so the candidate sweep reads its source out of the object store and finds nothing '
+          + 'there. This is not a finding about the entry: it is this gate being unable to look '
+          + 'at the file the entry is about. Commit it, then run this gate again',
+      })
+      continue
+    }
     problems.push({
       kind: 'stale-entry',
       path: entry.path,
@@ -281,12 +314,64 @@ export function verdict({ rows, problems, candidates }) {
   const byKind = {}
   for (const p of problems) byKind[p.kind] = (byKind[p.kind] ?? 0) + 1
   const named = Object.entries(byKind).map(([k, n]) => `${n} ${k}`).join(', ')
+
+  // F141: a `pending-entry` is not a finding about this branch, so it must not
+  // be aggregated with the ones that are. Exit 1 here means at least one gate
+  // we built is reached by nothing, which is a claim about the tree. Exit 2 is
+  // already this file's "the facts could not be established", and that is
+  // precisely what a tracked file with no committed blob leaves this gate in.
+  // Mixed is exit 1: a real finding outranks a refusal about one row, because
+  // the finding is established and the branch owes it.
+  if (problems.every((p) => p.kind === 'pending-entry')) {
+    return {
+      exitCode: 2,
+      cause: 'entries-pending',
+      line: `gate-registry: NO VERDICT (exit 2). ${candidates} gate candidate(s) and `
+        + `${problems.length} baseline entry/entries whose file is tracked with no committed `
+        + 'blob, so this gate could not look at them. Commit them and run it again. Nothing '
+        + 'above is a finding about this branch.',
+    }
+  }
   return {
     exitCode: 1,
     cause: 'registry-incomplete',
     line: `gate-registry: ${candidates} gate candidate(s) and ${problems.length} finding(s): `
       + `${named}. A gate reached by nothing is a gate we did not build.`,
   }
+}
+
+// Whether `path` has a blob in `HEAD`, which is the question
+// `gateCandidatePaths` actually asks of every candidate: it reads the source
+// with `git show HEAD:<path>` and skips the file when that fails. F141's third
+// state needs the same question asked of a baseline row's path, and asked the
+// same way, or the two could disagree.
+//
+// A repository with no commits at all has no `HEAD`, and there `cat-file`
+// fails for every path. Treated as committed in that case rather than as
+// pending for all of them, because `gateCandidatePaths` would then have
+// returned an empty set and `verdict` already refuses on that with
+// `no-candidates`, which is the better message for it.
+function committedInHead(path) {
+  try {
+    execFileSync('git', ['-C', REPO_ROOT, 'cat-file', '-e', `HEAD:${path}`],
+      { stdio: ['ignore', 'ignore', 'ignore'] })
+    return true
+  } catch {
+    return !headExists()
+  }
+}
+
+let headCache = null
+function headExists() {
+  if (headCache !== null) return headCache
+  try {
+    execFileSync('git', ['-C', REPO_ROOT, 'rev-parse', '--verify', 'HEAD'],
+      { stdio: ['ignore', 'ignore', 'ignore'] })
+    headCache = true
+  } catch {
+    headCache = false
+  }
+  return headCache
 }
 
 function main(argv) {
@@ -339,6 +424,7 @@ function main(argv) {
     registered: registeredPaths(checks),
     baseline,
     exists: (p) => tracked.has(p),
+    committed: (p) => committedInHead(p),
     checkIds: checks.map((c) => c.id),
     ledgerHeadings,
   })

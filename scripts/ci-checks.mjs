@@ -383,6 +383,15 @@ export const CHECKS = [
     // makes 61, because the registry is a candidate for its own sweep.
     argv: () => ['node', 'tools/gates/gate-registry.mjs'],
     passExit: [0],
+    // F141, 2026-11-09. That gate's exit 2 has meant "the facts could not be
+    // established" since it was written, and it has three such paths: not a
+    // git checkout, a candidate sweep that matched nothing, and an unreadable
+    // docs/ideas.md. F141 adds a fourth, a baseline row whose file is tracked
+    // with no committed blob. With `passExit: [0]` and no refusal code, all
+    // four read here as `failed`, which is F138 again in the registration of
+    // the gate that found F138's own class. Declared rather than added to
+    // passExit: a refusal is not a pass.
+    noVerdict: [2],
   },
   {
     id: 'prompt-slots',

@@ -123,6 +123,76 @@ test('an entry that is no longer a candidate is stale, and says which way', () =
   assert.match(stillThere.problems[0].why, /no longer a gate candidate/)
 })
 
+test('F141: an entry whose file is tracked and not committed is pending, not stale', () => {
+  const row = { path: 'tools/just-written.mjs', kind: 'not-a-gate', why: 'a reason long enough to pass' }
+  const base = { candidates: [], baseline: { entries: [row] } }
+
+  // The case that was wrong: the author staged the tool and its excuse in one
+  // change, so the path is tracked, the object store has no blob for it, and
+  // `gateCandidatePaths` therefore did not discover it.
+  const pending = decide(args({ ...base, exists: () => true, committed: () => false }))
+  assert.equal(pending.problems.length, 1)
+  assert.equal(pending.problems[0].kind, 'pending-entry')
+  assert.match(pending.problems[0].why, /Commit it/)
+  assert.doesNotMatch(pending.problems[0].why, /Delete it/)
+
+  // Tracked and committed is the real stale case and keeps its instruction.
+  const stale = decide(args({ ...base, exists: () => true, committed: () => true }))
+  assert.equal(stale.problems[0].kind, 'stale-entry')
+  assert.match(stale.problems[0].why, /no longer a gate candidate/)
+
+  // Not tracked at all is stale whatever the object store says, and the
+  // `committed` default must not turn this one into a pending row.
+  const absent = decide(args({ ...base, exists: () => false }))
+  assert.equal(absent.problems[0].kind, 'stale-entry')
+  assert.match(absent.problems[0].why, /is not in this tree/)
+})
+
+test('F141: pending alone is exit 2, and pending beside a real finding is exit 1', () => {
+  const pendingOnly = verdict({
+    rows: [],
+    problems: [{ kind: 'pending-entry', path: 'tools/a.mjs', why: 'x' }],
+    candidates: 61,
+  })
+  assert.equal(pendingOnly.exitCode, 2)
+  assert.equal(pendingOnly.cause, 'entries-pending')
+  assert.match(pendingOnly.line, /NO VERDICT/)
+  assert.match(pendingOnly.line, /Nothing above is a finding about this branch/)
+
+  // Mixed must not downgrade a finding the branch owes into a refusal.
+  const mixed = verdict({
+    rows: [],
+    problems: [
+      { kind: 'pending-entry', path: 'tools/a.mjs', why: 'x' },
+      { kind: 'unreached', path: 'tools/b.mjs', why: 'y' },
+    ],
+    candidates: 61,
+  })
+  assert.equal(mixed.exitCode, 1)
+  assert.equal(mixed.cause, 'registry-incomplete')
+
+  // And a clean run is still 0, so the new arm did not widen the refusal.
+  assert.equal(verdict({ rows: [], problems: [], candidates: 61 }).exitCode, 0)
+})
+
+test('F141: gate-registry declares exit 2 as a refusal in scripts/ci-checks.mjs', () => {
+  // The second instance of F138 in this seat's own registration. This file's
+  // exit 2 has meant "the facts could not be established" since it was
+  // written -- not a git checkout, or a candidate sweep that matched nothing
+  // -- and the check that runs it declared `passExit: [0]` and no refusal
+  // code, so all of those read as a failing branch.
+  const out = execFileSync(process.execPath, ['-e',
+    `import(${JSON.stringify(new URL('../../scripts/ci-checks.mjs', import.meta.url).href)})`
+    + '.then((m) => { const c = m.CHECKS.find((c) => c.id === "gate-registry");'
+    + ' console.log(JSON.stringify({ passExit: c.passExit, noVerdict: c.noVerdict })) })',
+  ], { encoding: 'utf8', cwd: ROOT })
+  const c = JSON.parse(out)
+  assert.ok(c.noVerdict?.includes(2),
+    'gate-registry exits 2 to refuse, so its check must declare 2 in noVerdict')
+  assert.ok(!c.passExit.includes(2),
+    'declaring 2 in both would make the pass unreachable; stateFor reads noVerdict first')
+})
+
 test('a check that invokes a file this tree does not have is a finding', () => {
   const { problems } = decide(args({
     candidates: [],
