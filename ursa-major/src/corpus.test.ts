@@ -207,9 +207,11 @@ describe('groupByArea (what the corpus is OF)', () => {
   })
 
   it('reproduces the 2026-11-08 sweep\'s own finding, which is the reason it exists', () => {
-    // The real 15 subjects, measured. Ten of them are seat run logs, so a
-    // reader told only "10 of 15 are prose" would read a corpus of real prose
-    // work where the truth is agents writing about their own runs.
+    // The real 14 subjects of the committed measurement, which is the
+    // five-pull-request window in docs/design/corpus-sweep.md §2.3. Nine of
+    // them are seat run logs under docs/runs/, so a reader told only "10 of
+    // 14 subjects are on the prose path" would read a corpus of real prose
+    // work where the truth is mostly agents writing about their own runs.
     const measured = [
       'docs/provenance/bundle-digests.json',
       'docs/provenance/bundle-digests.md',
@@ -220,19 +222,22 @@ describe('groupByArea (what the corpus is OF)', () => {
       'docs/runs/engineer-2026-11-02-message-14.md',
       'docs/runs/engineer-2026-11-02-message-15.md',
       'docs/runs/engineer-2026-11-02-message-16.md',
-      'docs/runs/engineer-2026-11-02-message-4.md',
       'docs/runs/engineer-2026-11-02-message-7.md',
       'docs/runs/engineer-2026-11-02-message-9.md',
       'ursa-major/src/adapters/github-pr.test.ts',
       'ursa-major/src/adapters/github-pr.ts',
       'ursa-major/tools/bundle-digest-index.ts',
     ]
+    expect(measured).toHaveLength(14)
     expect(groupByArea(measured)).toEqual([
-      { area: 'docs/runs', subjects: 10 },
+      { area: 'docs/runs', subjects: 9 },
       { area: 'docs/provenance', subjects: 2 },
       { area: 'ursa-major/src', subjects: 2 },
       { area: 'ursa-major/tools', subjects: 1 },
     ])
+    // The clause the grouping exists to qualify: 10 of 14 are prose, and 9
+    // of those 10 are run logs.
+    expect(measured.filter((p) => surfaceOf(p) === 'prose')).toHaveLength(10)
   })
 })
 

@@ -18818,8 +18818,8 @@ evidence of what other seats have open.
   `docs/sprints/pending.md` at 231,992 characters, which is 6.3 times the
   largest the fast run handled. On the `ursa run` and `ursa pr` paths a
   generation is the whole blob of a touched file at the agent's commit, so
-  that file is both the generation and the final text, and the span matcher
-  is run over a quarter of a megabyte against a quarter of a megabyte.
+  that file is both the generation and the final text, and a quarter of a
+  megabyte is resolved against a quarter of a megabyte.
 - What: the resolver has no ceiling on the size of a generation it will
   attempt, and nothing in any launch reports how long one is taking or
   refuses one as too large. The practical consequence is not slowness, it is
@@ -18831,13 +18831,27 @@ evidence of what other seats have open.
   the value that would admit it, exactly as `--min-chars` reports
   `largestBelowFloor` today, so the record says what it declined to classify
   rather than quietly omitting it. A refusal is a claim; a timeout is not.
-- First step: time one pull request against one file size, so the curve is
-  measured rather than assumed. `npx tsx src/bin/ursa.ts pr <clone> --pr 707`
-  with a wall clock, then again against a pull request whose largest file is
-  about 37,000 characters, and record both in
-  `docs/design/corpus-sweep.md` §9. If the cost is superlinear, the ceiling
-  is the fix; if it is linear and simply large, the fix is progress output
-  and not a bound.
+  **Where the time actually goes is not yet known, and one measurement
+  already argues against the obvious answer.** `time` over the completed
+  five-pull-request window reads `real 4m26s, user 0m44s, sys 0m18s`, so
+  only about a quarter of that wall clock was CPU inside the node process
+  and the rest was spent waiting on child processes: `gh api` per commit in
+  `capturePullRequest`, and `git` per read in `gitRepoReader` and
+  `src/corroborate.ts`, which asks git whether a span's text exists outside
+  the generation's line of descent **per span**. A 232 KB file yields
+  thousands of spans, so the suspect is per-span subprocess fan-out rather
+  than in-process string matching, and a ceiling on generation size would
+  treat the symptom. The #707 process showed 31% of one core averaged over
+  25 minutes, which is consistent with that reading and does not prove it.
+- First step: find where the time goes before choosing the bound. Run
+  `npx tsx src/bin/ursa.ts pr <clone> --pr 707` under `strace -f -e
+  trace=execve -c`, or simpler, count invocations by wrapping `git` with a
+  counting shim on `PATH`, and report spans resolved against subprocesses
+  spawned. If the ratio is near one git call per span, the fix is batching
+  or caching inside `src/corroborate.ts` and NOT a size ceiling; if the
+  cost is in-process, the ceiling is the fix. Record whichever it is in
+  `docs/design/corpus-sweep.md` §9. Naming the bound before measuring the
+  cause is how a product acquires a flag that does not help.
 - Cost: $0.
 - Status: urgent — it is not a wrong answer, it is no answer: the measurement
   that KR2.1's November 30 deadline depends on cannot be run over its own
@@ -18846,11 +18860,13 @@ evidence of what other seats have open.
 ### 2026-11-08 (engineer, scheduled slot, second window) — Ten of fifteen prose subjects are seat run logs, so this repository cannot be the n≥5 corpus by itself
 
 - Trigger: `corpusShape`'s new `subjectsByArea` field, over the 30 records
-  the first sweep wrote. The 15 distinct finished works group as
-  `docs/runs` 10, `docs/provenance` 2, `ursa-major/src` 2,
-  `ursa-major/tools` 1. Ten of the twelve prose subjects are under
-  `docs/runs/`, which is where the agent seats write their own run logs.
-- What: KR1.3's prose clause is answerable today by a number (10 of 15) that
+  of the committed five-pull-request window
+  (`docs/design/corpus-sweep.md` §2.3). Its 14 distinct finished works
+  group as `docs/runs` 9, `docs/provenance` 2, `ursa-major/src` 2,
+  `ursa-major/tools` 1. Ten of the 14 are on the prose path, and **nine of
+  those ten** are under `docs/runs/`, which is where the agent seats write
+  their own run logs.
+- What: KR1.3's prose clause is answerable today by a number (10 of 14) that
   describes a corpus of agents writing about their own runs. That is a true
   count and a weak demonstration, and it is the sort of thing a lab
   evaluating the data would find before we disclosed it, which is the worst

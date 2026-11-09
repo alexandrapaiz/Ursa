@@ -60,7 +60,7 @@ there was no sweep.
 
 ### 2.1 The window
 
-The measurement below is over **the 30 most recently merged pull requests
+The window ATTEMPTED was **the 30 most recently merged pull requests
 of `alexandrapaiz/Ursa`**, merged between `2026-11-02T06:47:41Z` (#707)
 and `2026-11-08T23:47:12Z` (#743). The window is stated because a corpus
 figure with no stated window is a defect this repository has already
@@ -77,27 +77,27 @@ gh pr list --state merged --limit 30 --json number,mergedAt \
   --jq 'sort_by(.mergedAt) | [.[].number] | join(",")'
 ```
 
-### 2.2 The figures
+### 2.2 Which of the two runs below is the measurement
 
-See §2.4 for the full table as the command printed it. The summary:
+Two sweeps were run. **The five-pull-request run in §2.3 is the completed
+measurement and every figure in this document comes from it.** The
+thirty-pull-request run in §2.4 did not finish, and why it did not is the
+sharpest finding of the day; it is reported as a finding and not as a
+figure. Nothing below averages the two or quotes a partial total from the
+second, because a corpus figure drawn from an unfinished sweep has no
+window.
 
-| Quantity | Value | What it means |
-|---|---|---|
-| Pull requests swept | 30 | the window in §2.1 |
-| Pull requests with at least one record | *see §2.4* | a pull request with no agent-commit-then-edit pair inside it yields none, which is a true fact about that pull request |
-| Work units found | *see §2.4* | one generation commit paired with the commit that edited it |
-| Records written | *see §2.4* | work units that cleared the `--min-chars` floor and resolved to something |
-| Distinct finished works | *see §2.4* | distinct file paths across every record, which is KR1.3's unit |
-| Of those, on the prose path | *see §2.4* | extension in `.md`, `.txt`, `.tex`, quoted from KR1.3 |
-| Records carrying a correction | *see §2.4* | an edited span, or a signal derived from one. Not in KR1.3, and the reason the corpus exists |
+### 2.3 The completed measurement: five pull requests
 
-### 2.3 The five-pull-request validation run, kept because it is the smaller case
-
-Run first, to check the command before paying for thirty captures:
+Run first to check the command before paying for thirty captures, then run
+again from an empty `.ursa/` after the area breakdown was added, so the
+output below is the current command's and not an earlier build's. Both runs
+produced identical counts.
 
 ```
-$ npx tsx src/bin/ursa.ts corpus <path-to-clone> --prs 736,737,738,731,732
-Corpus: 5 pull request(s) of alexandrapaiz/Ursa, resolved through the pull-request launch on 2026-11-08: #731, #732, #736, #737, #738
+$ npx tsx src/bin/ursa.ts corpus <path-to-clone> --prs 736,737,738,731,732 \
+    --window "5 pull requests of alexandrapaiz/Ursa chosen as the five most recently merged at 2026-11-08T23:40Z, resolved through the pull-request launch on 2026-11-08"
+Corpus: 5 pull requests of alexandrapaiz/Ursa chosen as the five most recently merged at 2026-11-08T23:40Z, resolved through the pull-request launch on 2026-11-08
 
 | source | work units | records | verbatim | edited | person dropped | refused |
 |---|---|---|---|---|---|---|
@@ -116,7 +116,14 @@ Against KR1.3 (docs/okrs/2026-q4.md), measured, not scored:
   "five or more completed outcome records on distinct real finished works": 14 distinct finished work(s) across 30 record(s).
   "at least two use the prose path (.md/.txt/.tex)": 10 of those 14.
   "at least one joins generations from more than one source": 0 record(s). A pull-request record carries no conversations, so zero here is a fact about this path and not a missing measurement.
+  What those 14 finished work(s) ARE, by area, because the size of a corpus and its subject are different facts: docs/runs 9, docs/provenance 2, ursa-major/src 2, ursa-major/tools 1.
   Not in KR1.3, and the reason the corpus exists: 9 of 30 record(s) carry a correction, meaning an edited span or a signal derived from one.
+
+Records: /tmp/epito-ursa-engineer-xSfC5I/.ursa/records/
+
+real	4m26.223s
+user	0m44.617s
+sys	0m18.582s
 ```
 
 **Three things in that output are the finding, and the third is the one
@@ -138,12 +145,82 @@ that matters.**
    one. That is 0.6% of the classified text, which is small and is
    exactly the shape `CLAUDE.md` §1 predicts: the edit is the correction,
    and corrections are rare and dense rather than common and diffuse.
+4. **What the 14 finished works ARE is a weaker result than how many
+   there are.** They group as `docs/runs` 9, `docs/provenance` 2,
+   `ursa-major/src` 2, `ursa-major/tools` 1. Ten of the 14 are on the
+   prose path and **nine of those ten are seat run logs**, which is
+   agents writing about their own runs rather than a person's prose work.
+   KR1.3's prose clause is answerable by that number and should not be
+   answered by it quietly, so `renderCorpus` prints the areas on the same
+   line as the count and `src/corpus.test.ts` holds the real 14 paths as
+   a case. The disposition is in `docs/ideas.md` as a proposal; it is a
+   product decision about what corpus to draw, not a defect to repair.
 
-### 2.4 The thirty-pull-request run
+### 2.4 The thirty-pull-request run did not finish, and that is the finding
 
-```
-CORPUS_30_OUTPUT
-```
+The sweep of the §2.1 window was started at 23:52Z and was still inside
+its **first** entry, #707, thirty-five minutes later, at 31% of one core
+the whole time, with no record written. It reached no second pull request.
+
+The cause is measurable and is not the number of pull requests:
+
+| | the five-pull-request run (§2.3) | #707, alone |
+|---|---|---|
+| Wall clock | about 5 minutes for all five | over 35 minutes, unfinished |
+| Records written | 30 | 0 |
+| Commits in the pull request | up to 45 work units found | 2 commits, 3 files |
+| Largest file classified | 37,082 characters (`ursa-major/src/adapters/github-pr.test.ts`) | `docs/sprints/pending.md`, 231,992 characters |
+
+On this path a generation is the whole blob of a touched file at the
+agent's commit (`src/adapters/pr-launch.ts`), so for `pending.md` the
+generation and the final text are both a quarter of a megabyte. The
+five-pull-request run never met a file above 37 KB. The ratio of the two
+largest files is 6.3 and the ratio of the two wall clocks is at least 42,
+so the cost scales with file size rather than with pull request count.
+
+**Where the time goes is a separate question, and the one measurement
+taken argues against the obvious answer.** `time` over the completed
+five-pull-request run reads `real 4m26s, user 0m44s, sys 0m18s`, so about
+a quarter of that wall clock was CPU inside the node process and the rest
+was spent waiting on child processes: `gh api` once per commit in
+`capturePullRequest`, and `git` once per read in `gitRepoReader` and in
+`src/corroborate.ts`, which asks git whether a span's text exists outside
+the generation's line of descent **per span**. A 232 KB file yields
+thousands of spans. So the suspect is per-span subprocess fan-out rather
+than in-process string matching, and if that is right then a ceiling on
+generation size would treat the symptom while the fix belongs in
+`src/corroborate.ts`. The #707 process showed 31% of one core averaged
+over 25 minutes, which is consistent with that reading and does not prove
+it. **This document therefore names no remedy.** Measuring where the time
+goes is the first step of the ledger entry, and the entry says in writing
+that naming the bound before measuring the cause is how a product
+acquires a flag that does not help.
+
+**Why this is a product defect and not a slow afternoon.** Three
+properties the product already holds elsewhere are absent here:
+
+1. **No bound in either direction but one.** `src/launch.ts` holds three
+   decisions for every launch, and one of them, `--min-chars`, is a size
+   bound: a generation too *small* is refused and the refusal is reported
+   with the value that would admit it. There is no bound at the other
+   end, so a generation whose resolve will not finish is not refused, it
+   is attempted. Whether the right bound is on generation size or on the
+   per-span work behind it is the open question above.
+2. **No report.** A run that attempts it says nothing while it does.
+   `renderPullRequestSummary` prints after the launch returns, so a
+   caller watching a terminal cannot distinguish a long resolve from a
+   hang, which is exactly the state this run spent thirty-five minutes
+   in. The progress line `ursa corpus` prints per entry is this change's
+   partial answer and it is per pull request, not per file.
+3. **No claim either way.** A refusal is a statement a buyer can audit:
+   `record-exclusions.md` exists because a run that declines to classify
+   something must say so in the record. A timeout states nothing at all.
+
+It is filed in `docs/ideas.md` as of 2026-11-08 with status `urgent`,
+under "A generation has no size ceiling, and one 232 KB file stalled a
+thirty-pull-request sweep", because it is not a wrong answer, it is no
+answer, and the measurement KR2.1's 2026-11-30 deadline depends on cannot
+be run over its own stated window until it is fixed.
 
 ### 2.5 One real correction, in full
 
@@ -525,12 +602,13 @@ recognises them.
 
 ## 9. What this opens, not taken here
 
-1. **The window is a recency window, so the figures describe this
-   repository now.** Whether the correction rate in §2.4 holds over all
-   358 merged pull requests is a different measurement, and a cheap one
-   to add: `--prs 1-743` is already typable, and the only reason not to
-   run it is the `gh api` cost in §7. A sampled window would answer it
-   for roughly a tenth of the calls.
+1. **The committed window is five pull requests, chosen by recency.** The
+   30-pull-request window was attempted and did not finish (§2.4), so
+   whether the 0.6% edited share and the 9-of-30 correction rate hold
+   over a larger population is unmeasured. It is not merely a matter of
+   typing a longer `--prs`: until the §2.4 defect is understood, a longer
+   list buys a longer stall. The ordering is therefore fixed — measure
+   where the resolve time goes, then widen the window.
 2. **The corpus is of one repository.** KR1.3's words are "distinct real
    finished works", and 14 distinct files inside one repository is a
    defensible reading of that phrase and not the only one. A corpus over

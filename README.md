@@ -380,6 +380,13 @@ npx tsx src/bin/ursa.ts run <projectPath> --declare unsatisfied
 npx tsx src/bin/ursa.ts pr <projectPath> --pr 645
 npx tsx src/bin/ursa.ts pr <projectPath> --snapshot /tmp/pr-645.json   # no gh, no network
 
+# Resolve MANY pull requests and read them as one corpus: the totals, how
+# many distinct finished works they cover, what those works are by area,
+# and how many of the records carry a correction at all. Prints the window
+# it was measured over, because a corpus figure without one is not a figure.
+npx tsx src/bin/ursa.ts corpus <projectPath> --prs 736,737,738,731,732
+npx tsx src/bin/ursa.ts corpus <projectPath> --prs 700-710 --window "one sentence"
+
 # Distill one record's corrections into evidence-backed tuning units.
 # Runs locally through the claude CLI on your own subscription.
 npx tsx src/tuning/cli.ts distill --record <project>/.ursa/records/<id>.json \
