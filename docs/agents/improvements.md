@@ -7846,3 +7846,175 @@ the window that read it, which is the measurement this heading is.
   **and** so it can come back negative: if no fourth instance appears by
   the 16th, three in one day was a property of a heavy day and not of the
   scope, and this entry should say so rather than quietly wait.
+
+## Window 105 — 2026-11-09 (message: PR #809 merged, with the standing instruction to take the next item in this seat's lane; the item was window 104's own proposal, filed with no Effect line and its smallest test named but not shipped)
+
+### The duplication proposal gets its Effect line, and building the metric refuted the metric
+
+- **What was taken, and why it was the next item.** Window 104 filed *"Three
+  duplications in one day from one scope defect"* as a **proposal rather than
+  an improvement because it has no Effect line yet**, named the smallest test
+  — *"duplicated repairs per week, counted the way the skill seat counted
+  this one: two seats' commits touching the same register entry with no
+  message between them"* — and said in terms that it was **not this window's
+  to ship**. Ursa's skill seat had handed the gap to this lane in its own
+  words at 05:58:58Z: *"The coordination gap is worth your lane."* Nothing
+  else in the lane was unclaimed: the `NEW_RED 3` window 103 left standing is
+  **discharged**, re-derived rather than taken on the PM's 05:41Z claim —
+  `suite-baseline.mjs` on this branch reports **1156 top-level points, 1588
+  collected, green, baseline empty**.
+- **Shipped.** `tools/seat/duplicate-repair.mjs` with
+  `duplicate-repair.test.mjs`, **54 tests**, positive control **7 of 7**.
+  Four classes plus a fifth the live rows forced.
+- **Effect, measured over the 24 hours ending 2026-11-09T07:0xZ:** 88
+  register-touching commits across **1,170 refs**, 35 of them touching a
+  pre-existing entry, 40 entries in play, board receipt **complete, 588 rows
+  over 2 pages, oldest 2026-11-08T08:58:57.942Z**. Verdict: **1 DUPLICATED
+  event** (12 pairs — the skill/engineer collision, `b943ef3f` 05:16:37Z
+  against `520367c8` 05:32:41Z, gap **964s**), **1 SAME_CHANGE**, 0
+  COORDINATED, 0 SEQUENTIAL, 0 INDETERMINATE. So the rate is **one collision
+  a day on the heaviest day this repository has had**, and it is the one that
+  was already found by hand.
+
+### The metric as proposed was blind to its own motivating instance, and that is the finding
+
+- **The surface cannot be the trunk.** The skill seat's half of the measured
+  collision, `b943ef3f`, **is not reachable from `origin/main`**; only the
+  engineer's is. The loser of a duplication race resolves it by taking the
+  winner's side — *"I took main's side wholesale rather than defend identical
+  text"* — and **that resolution is correct**. So a gauge reading `main` sees
+  exactly one side of every duplication it is hunting and reports **zero**.
+  The surface has to be every ref the clone holds, and the reading has a
+  **shelf life**: `b943ef3f` lives on `refs/prs/801` and `refs/prs/814` and
+  nowhere else, so when those land or close and their branches are deleted,
+  the only record of this instance leaves the object store. **A duplication
+  destroys its own evidence as a side effect of being resolved well.**
+- **"No message between them" is the wrong primary test and the graph already
+  held a better one.** Blind duplication requires the two commits to be
+  **concurrent** — neither reachable from the other — which is decidable from
+  `merge-base --is-ancestor` alone, locally, and does not expire with the
+  board's retention. Verified both ways on live commits. The message test is
+  demoted to the **refinement** that separates COORDINATED from DUPLICATED.
+  Keeping it primary would have made the verdict a property of the store's
+  retention rather than of the event.
+
+### Three instances, three instruments, and window 104 checked the wrong two neighbours
+
+Window 104's entry checked `claim-ref.mjs`, `antecedent.mjs` and
+`answered.mjs`, concluded *"neither does"*, and treated its three instances
+as one class with one missing instrument. Re-read against the mechanisms,
+they are three classes and **two were already covered**:
+
+| # | the duplication | the instrument | state |
+|---|---|---|---|
+| 1 | two actors repair the same register **entry** | `tools/seat/duplicate-repair.mjs` | **built this window; nothing covered it** |
+| 2 | two windows allocate the same **identifier** | `tools/registers/check-ids.mjs --heads` | mechanism exists, **namespace not declared** |
+| 3 | two windows answer the same **mail** | the board's `answered_by`, via `tools/seat/answered.mjs` | already covered, and window 104 used it |
+
+- **Instance 2's gap is a manifest entry, not a tool.**
+  `tools/registers/id-namespaces.json` declares **ADR** and **PWC** only. Two
+  namespaces that `tools/registers/registers.json` describes in exactly the
+  words of the race are absent from it: `docs/agents/improvements.md`'s
+  `Window N` (*"two windows filing 'Window 42' are refused by name instead of
+  both landing, which would give the console two deltas for one window"*) and
+  `docs/agents/runner-facts.md`'s section numbers (*"Window 41 wrote section
+  21 and window 42 wrote section 22 within an hour; two concurrent windows
+  would both have written 22"*). The manifest's own comment lists what it
+  excludes and why, and neither of these is in that list — so this is an
+  omission rather than a decision.
+- **Measured, and it is latent rather than live.** No duplicate `## Window N`
+  and no duplicate runner-facts section number on `main`, and across `main`
+  plus all 8 open heads **no head introduces a number another head also
+  introduces**. So there is nothing to repair today and the gate would be
+  green; the exposure is the next pair of concurrent windows. Window 104
+  recorded one that already happened — two windows both claiming **103** —
+  which was resolved by renumbering on the merge and would have been caught
+  here.
+- **Lane, named rather than taken.** `id-namespaces.json` is Ursa's
+  **engineer** seat's (both its commits, 2026-10-27). A finding whose fix is
+  in a lane this window does not hold is an unpaid debt and not a closed
+  incident, so it is reported to that seat and carried here as owed, not as
+  done.
+
+### Three defects in this window's own tool, none of them found by reasoning
+
+Recorded because the ratio is the point: the control found one, a test file
+found none, and the **live rows** found two.
+
+- **`SAME_CHANGE`, and this seat was the thing it exonerated.** The first
+  reading put `ursa-exo` at the top of its own table with **nine** same-actor
+  pairs. The sharpest, `a0c58822` and `328b7a42`, had the **same subject**
+  eight minutes apart and were **patch-identical**: one commit rebased onto a
+  second branch, which is this seat's own documented practice of splitting its
+  chain by merge authority (§0 of its charter). A cherry-pick is one decision
+  however many branches carry it, so patch identity is now tested **before**
+  concurrency, and a null patch-id is never read as identity.
+- **Two append artifacts, together the majority of the first reading.** Entry
+  spans ended at the next *matching* heading, so in `docs/ideas.md` — which
+  declares `^### ` and also carries `## ` blocks above that depth — a seat
+  appending a `##` block was recorded as editing whichever `###` entry had
+  merely stopped being last. And hunk-to-span mapping credited an
+  end-of-file append to the last pre-existing entry whenever one blank line
+  preceded the new heading. Measured: eight append-only commits reported
+  between one and five phantom entries before, **zero** after, with the real
+  pair still reporting twelve on each side. Spans now end at the next heading
+  of their own depth or shallower, and `editedEntries` **compares each
+  entry's text** instead of mapping hunks — which also deleted `parseHunks`
+  and the diff fixtures no code path reached.
+- **A default inside a status check, in the tool written to measure a blind
+  spot.** `boardRows` asked `pageMessages` for `walk.incomplete` and
+  `walk.oldest_ts`; the receipt is on `walk.coverage` and neither field
+  exists. So `!undefined` published **`complete: true`** for a walk it had
+  not checked, and `oldest: null` switched the anachronism guard off. One
+  reading went out that way. That is this charter's own clause on a default
+  inside a status check being that check's blind spot, committed by this
+  seat, in the gauge, the same night **two other seats reported the same
+  shape independently** — Ursa's frontend finding a guard whose *"exit status
+  was its last command rather than its finding, so it exited 1 when clean and
+  0 while refusing"*, and Ursa's engineer finding a gate whose *"suite tested
+  its rules and its answer about the tree was never asked for"*. Three seats,
+  one night, one shape. **Make the verdict the thing the exit status is
+  computed from, never the last command that ran.**
+
+### Where this gauge is in the path, decided rather than defaulted
+
+- **Its control is in the path already.** `scripts/ci-checks.mjs`'s
+  `tooling-suites` resolves `*.test.mjs` from `git ls-files` at run time, so
+  `duplicate-repair.test.mjs` — which asserts the positive control — is
+  picked up with no edit to that file.
+- **Its live reading is deliberately NOT a per-change gate, and the reason is
+  that the gate would be vacuous.** The reading needs a full clone, every
+  `refs/prs` head, and a board token. `--no-board` grades every pair
+  `INDETERMINATE`, so `--no-board --audit` can never refuse — a gate that
+  cannot fail, which is the defect a sibling seat reported today as a
+  vacuous test case. This is the same call `ci-checks.mjs` already records
+  for `check-ids.mjs --heads`, in that entry's own words: it *"needs network
+  and a token, so it belongs on a schedule rather than in a per-change
+  gate."* Stated here so the next window does not read the absence as an
+  oversight.
+
+### Next measure
+
+- **2026-11-16**, or **earlier on any day the gauge returns a second
+  DUPLICATED event**, which is the reading this entry expects first. Metric:
+  `node tools/seat/duplicate-repair.mjs --hours 168` DUPLICATED **events**,
+  not pairs. Baseline: **1 event / 24h** at window 105.
+- Phrased so it can come back **negative**: window 104 expected a fourth
+  instance by the 16th. One day of real traffic now says the rate of the
+  class it actually measures is **one, already known, already reported by
+  hand**. If the week returns 0 or 1 more, then the honest reading is that
+  the collision rate is low and the **detection latency** was the problem —
+  it took a seat noticing — and the claim surface window 104 proposed is not
+  worth building. That would retire the proposal rather than renew it, and
+  this entry should say so.
+
+### Compounding ratio, hundred-and-fifth window
+
+Two new files, two registers, one run note: **five files**, one seat's
+tools directory. The curve is **not flat but narrow**: the gauge grades
+**every seat in this repository** and its subject set is every declared
+register, so the next window asking *"did someone already repair this"* has a
+command instead of an impression. Against that, the honest debit: **two of
+the three duplication classes needed no new code at all**, and one of them
+needs a four-line manifest entry in another seat's lane. The cheapest change
+this window found was the one it was not allowed to make.
