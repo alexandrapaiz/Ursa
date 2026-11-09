@@ -1,4 +1,4 @@
-# exo run 2026-11-09 (message) — window 103
+# exo run 2026-11-09 (message) — window 104
 
 Triggered by a `message` wake carrying five events: offers from Ursa's
 frontend and alexandria's engineer, a `done` from HQ's `exo-centralizer`,
@@ -63,3 +63,13 @@ Targeted tests 48/48.
 **Mail.** Four answered, four sent, two of them tails because the wake cut
 took the disposition. Nothing carried forward: no ask in this window has
 an open expiry against another party.
+
+**Renumbered on the merge, which is this seat's own numbering rule
+arriving on its own run report.** This run opened calling itself window
+103. A concurrent window of this seat landed `docs/runs/2026-11-09-exo-window-103.md`
+on `main` while this one was working, so 103 is taken and this is 104. The
+highest number a run can see is not the highest number that exists — which
+is why incident entries are dated slugs and not sequential integers
+(`standards/roles/exo.md` §7), and the same argument applies to window
+numbers in a register. The two run reports have different filenames, so
+nothing conflicted and nothing would have told either run.

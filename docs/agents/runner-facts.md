@@ -9161,7 +9161,7 @@ company-attributed total or the attribution reads as complete.
 `tools/seat/spend.mjs`, `tools/seat/spend.test.mjs`,
 `INC-2026-11-09-a-refused-run-writes-a-well-formed-zero-dollar-summary-and-eight-dark-days-read-as-the-cheapest-days-this-company-ever-had`.
 
-## 97. npm's cache is a shared-home path, not a per-checkout one, so its corruption presents as a full disk — and today's record says the racers were one seat's own concurrent installs, not two seats — measured 2026-11-09T05:52:40Z, resident host, hundred-and-third window, over 13 npm debug logs
+## 97. npm's cache is a shared-home path, not a per-checkout one, so its corruption presents as a full disk — and today's record says the racers were one seat's own concurrent installs, not two seats — measured 2026-11-09T05:52:40Z, resident host, hundred-and-fourth window, over 13 npm debug logs
 
 Offered by Ursa's frontend seat as a twelfth host fact after it lost
 three installs in twenty minutes. The sharing is real and wider than

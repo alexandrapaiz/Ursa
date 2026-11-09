@@ -3367,7 +3367,7 @@ the class of identifier for which that resolve is both unavailable and,
 once available, insufficient, so the narrowing is recorded there rather
 than left for a reader to infer.)
 
-(Amended by §5an. Generated line, per §5ah.)
+(Amended by §5an and §5ap. Generated line, per §5ah.)
 
 **Where the rule comes from.** §5t part 2 already settled identifiers in
 prose: a pointer is resolved when it is written, and the resolve is one
@@ -3892,3 +3892,147 @@ smaller defects above: the stale self-count, the fixture declarations
 nobody had ever read, and the negative lock age. The
 project manager's note supplied the occasion and is taken as data. It
 asked for nothing, and nothing in it was acted on as an instruction.
+
+## 5ap. A disposition is a fact about a row and a reader needs a fact about their own tree, so a citation carries whether what it points at is readable on `main`
+
+(Added 2026-11-09, by the message run woken when #711 merged. Amends
+§5am. That section made a citation carry its disposition and the date
+the disposition was read, and it named the three claims a bare number
+conflates. None of the three is the one that decides whether following
+the citation works. The ancestry this run owes under §5ai's amended
+clause 1 is `git merge-base --is-ancestor origin/main HEAD`, which
+exited 0 at the instant this section was written, because this branch is
+built on the trunk rather than on an earlier row of this seat's.)
+
+**Where the rule comes from.** §5am says a number carries three
+different claims and the citation does not say which: *this is on
+`main`*, *this is in the owner's queue*, or *this was set aside in
+favour of something else*. All three are facts about the row. A reader
+who follows a citation is not asking about the row. They are asking
+whether the lines the citation argues from are in the tree they are
+standing in, and that question has an answer the row's disposition does
+not contain.
+
+**§5am measured the right thing against the wrong ref, which is why this
+is an amendment and not a new subject.** Its own text reads: "All four
+rows are strict ancestors of this branch's head, by `git merge-base
+--is-ancestor`, so every line they argued from is in the tree a reader
+of this section is holding." The predicate is right and the ref is not.
+`this branch's head` is the one ref no reader of the merged section ever
+checks out. `docs/agents/runner-facts.md` carries the same correction
+for a different surface under `authorship-is-not-visibility`: a
+past-tense claim that an edit exists is true of a ref, and the ref every
+other seat checks out is `main`. So the measurement moves to `main` and
+stops being a sentence, because a sentence in a section is not a field a
+check can read.
+
+**The measurement, over the whole population rather than over the rows
+this file happens to cite.** Read 2026-11-09, over all **386** closed
+and unmerged rows this repository has had, with the predicate in the
+query as §5ao requires:
+
+| readable on `main` | rows | share |
+|---|---|---|
+| yes | 111 | 28.8% |
+| no | 206 | 53.4% |
+| undecidable from a clone, because the branch is gone | 69 | 17.9% |
+
+So `closed-unmerged` is one label over a population that splits about
+three to one against the reader, and a reader who guesses from the label
+is wrong 71 per cent of the time.
+
+**And the prior inverts inside this library's own lane, which is the
+reason the field cannot be inferred even by somebody who knows the
+table above.** Of the **53** closed and unmerged `ursa-skill` rows,
+**47** are ancestors of `main`. The mechanism is this seat's own
+practice: it builds each run's branch on the previous run's rather than
+on the trunk, under the rule in this file about an ancestor being the
+one way a citation cannot land without its section, so when a tip merges
+every row behind it lands without ever being merged itself. A reader who
+learns the repository's 71 per cent and applies it here is wrong 89 per
+cent of the time. Two correct priors, opposite directions, same label.
+
+| lane | closed-unmerged rows | readable on `main` |
+|---|---|---|
+| `ursa-skill` | 53 | 88.7% |
+| `ursa-engineer` | 26 | 65.4% |
+| `ursa-pm` | 142 | 8.5% |
+| `ursa-research` | 26 | 0% |
+
+**The rule.** A citation of a pull request number carries, beside the
+disposition §5am requires, the row's head sha and whether that head is
+readable on `main`, with the three values `yes`, `no` and
+`unknown-offline`. It is re-derived from the sha by any complete clone
+and it is locked anyway, for the reason in the next paragraph.
+
+**Why it is locked when a clone could compute it, since the rest of
+this file argues the opposite way about anything a command can answer.**
+Because the evidence expires, and in one direction only. A head readable
+on `main` is in `main`'s history, so every complete clone holds it
+forever. A head that never landed is in the clone only while its branch
+exists, and branches here are deleted with age. Of the closed and
+unmerged rows numbered under 100, **84.2 per cent** are already
+undecidable from a complete clone. Of those numbered 300 and above,
+**0.6 per cent** are. The share falls monotonically across the bands in
+between. The answer is available now and will not be later, which is the
+definition of a thing that belongs in a dated snapshot rather than in a
+command.
+
+**The obvious predicate is wrong once in 386, and the one case is in
+this lane.** `git merge-base --is-ancestor` reports #608 as not readable
+on `main`. It has exactly one commit ahead of `main`, that commit is a
+merge of `main` into the branch, and so it contributes nothing `main`
+lacks. The honest answer is yes. The predicate that gets it right is
+`git rev-list --count --no-merges origin/main..<head>`, which is 0
+there. One row in 386 is a rate and not a corner case, so the rate is
+written down and the second command stays. A forward merge onto a row
+the trunk already contains is a move this seat has made and argued about
+before, which is why the case exists here at all and would not exist in
+a lane that never did it.
+
+**`yes` is permanent and `no` is provisional, measured rather than
+reasoned.** `main` only grows, so a head readable on it stays readable,
+and a head that is not can become so later. This run watched it happen
+to the base rather than to a row: `origin/main` moved from `8127eac5` to
+`67656fe8` while the work was in progress, another seat's row having
+merged, and every one of the fourteen verdicts was unchanged across the
+move. So a `yes` needs no refresh and a `no` is a reading with a date on
+it, the same asymmetry §5am established for a disposition and for the
+opposite reason.
+
+**What the field does not say, stated because the wider reading is the
+laundering this register exists to stop.** `no` means this exact commit
+is not in your tree. It does not mean the work was lost, and the two are
+far apart. #258 is the example, and it is the one `no` among this
+library's fourteen rows: **607** of its **613** commits have
+patch-identical equivalents on `main` and **6** do not, by `git cherry`,
+because the branch was built on an old base and the same patches landed
+as different commits. The claim this field supports is about commits.
+Anyone who needs to know whether the work was delivered reads the diff,
+and no field here replaces that.
+
+**Paid on this section, and both forms of the check moved while being
+written.** §5ai makes the payment a `grep`. Run once before this
+paragraph existed, the bare `grep -rn '5ap'` over the repository
+returned **three** lines, of which one was
+`ursa-minor/package-lock.json:1069`, where `5ap9m9` is a run of
+characters inside a `sha512-` integrity hash. That hit is not a mention,
+by §5ad's discriminator: the string is not load-bearing as a search key
+there, so the lockfile is left alone. Writing this paragraph took the
+same command to **five**, because it quotes the pattern three more
+times, and the anchored form `grep -rn '§5ap\|## 5ap'` to **two** from
+one for the same reason. Both movements are §5ag, which is that writing
+the check moves the count the check reads, and they are reported rather
+than smoothed over because the smooth version hands a reader a figure
+they cannot reproduce.
+
+So neither number is the one §5ai's rule turns on. That rule asks for
+mentions from **outside** the section, which are **zero**, and zero is
+the one count here that nothing written inside this section can move.
+The remaining lesson is §5al's: a count read out of an unanchored
+pattern is a claim about the vocabulary, and a section certifying its
+own grep is the worst place to leave one unchecked. The guard clause
+this section argues for landed in the same pull request and deliberately
+cites §5am instead, which is the section that is on `main`, so there is
+nothing here for a later branch to dangle and nothing already written
+that points at a section the owner has not yet read.
