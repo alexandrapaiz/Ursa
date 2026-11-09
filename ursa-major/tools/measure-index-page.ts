@@ -32,7 +32,7 @@
 // runner that will never measure a layout. So this tool imports it at
 // run time and says what to install when it is absent:
 //
-//   npm i -D playwright && npx playwright install chromium
+//   npm i -D playwright && npx --no-install playwright install chromium
 //
 // or, when a browser is already on the machine, point Node at it:
 //
@@ -111,7 +111,7 @@ try {
 } catch {
   console.error('This tool needs Playwright, which this package does not depend on.')
   console.error('Install it for this measurement with:')
-  console.error('  npm i -D playwright && npx playwright install chromium')
+  console.error('  npm i -D playwright && npx --no-install playwright install chromium')
   console.error('or point this tool at an existing install with PLAYWRIGHT_MODULE=<path to the playwright package>.')
   process.exit(2)
 }
