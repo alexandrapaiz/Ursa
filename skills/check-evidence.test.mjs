@@ -509,3 +509,76 @@ test('a citation with no recorded fingerprint is not a --base finding', () => {
   assert.equal(there.status, 0)
   assert.match(there.out, /evidence check OK in trunk/)
 })
+
+// The verify half of the same split, added 2026-11-09 (fifth message wake),
+// closing the ledger entry "The verify path can now answer the question its own
+// failure line asks a reader to guess". Until this change the failure line told
+// the reader to "re-anchor if it moved", which is the one clause of the sentence
+// the tool can decide, and the `--update` branch one if away was already
+// deciding it. What the tests below pin is the division of labour: verify says
+// which repair each range wants, and it still refuses nothing, promotes nothing
+// and counts the same.
+
+test('a moved range and a gone range verify as two different findings', () => {
+  const { dir } = library(['alpha'], ['beta'])
+  const out = run(dir)
+  assert.equal(out.status, 1)
+  assert.match(out.out, /evidence check FAILED \(2, 2 of them drifted\)/)
+  // The gone one: the lines it recorded are nowhere, so a person owes a read,
+  // and the name it prints is the narrower scope that read licenses.
+  const gone = out.out.split('\n').find((l) => l.includes('alpha E1'))
+  assert.match(gone, /nowhere else in the file/)
+  assert.match(gone, /--update alpha\/E1\b/)
+  assert.doesNotMatch(gone, /relocate-anchors/)
+  // The moved one: the offset its text went to, which is the thing that makes
+  // the line actionable, and no reading owed.
+  const moved = out.out.split('\n').find((l) => l.includes('beta E1'))
+  assert.match(moved, /now at src\/beta\.ts:2/)
+  assert.match(moved, /moved, not rewritten/)
+  assert.doesNotMatch(moved, /re-read/)
+})
+
+test('the mechanical share is named once, and it is not counted as a finding', () => {
+  // The count in the FAILED line is the number of problems, and a reader who
+  // compares it against the lines below it is right to. So the one command that
+  // repairs the moved half is printed after them and outside the count.
+  const { dir } = library([], ['alpha', 'beta'])
+  const out = run(dir)
+  assert.equal(out.status, 1)
+  assert.match(out.out, /evidence check FAILED \(2, 2 of them drifted\)/)
+  assert.match(out.out, /2 of the above only moved/)
+  assert.match(out.out, /node skills\/relocate-anchors\.mjs <old-ref>/)
+  assert.equal(out.out.match(/relocate-anchors/g).length, 1, 'named once, not per range')
+})
+
+test('a batch with nothing moved does not name the relocate tool at all', () => {
+  // The negative control for the line above. A tool that prints its mechanical
+  // repair whatever it found is a tool whose triage a reader learns to skip.
+  const { dir } = library(['alpha', 'beta'])
+  const out = run(dir)
+  assert.equal(out.status, 1)
+  assert.doesNotMatch(out.out, /relocate-anchors/)
+  assert.doesNotMatch(out.out, /only moved/)
+})
+
+test('a green library says nothing about drift, and the split never runs', () => {
+  const { dir } = library()
+  const out = run(dir)
+  assert.equal(out.status, 0)
+  assert.match(out.out, /evidence check OK/)
+  assert.doesNotMatch(out.out, /moved|nowhere else/)
+})
+
+test('the --base finding is not re-worded by the split, because it is a different finding', () => {
+  // Under `--base` a drift means the citation is newer than that tree and the
+  // fix is owed before the merge. Sorting it by where the text sits in a file
+  // nobody checked out would be an offset into the wrong file, so the split
+  // stays out of this arm and the sentence that was there is untouched.
+  const { dir } = committed()
+  driftAfterCommit(dir, 'alpha')
+  run(dir, '--update', 'alpha/E1')
+  const there = run(dir, '--base', 'trunk')
+  assert.equal(there.status, 1)
+  assert.match(there.out, /resolves in this checkout and not in the base tree/)
+  assert.doesNotMatch(there.out, /only moved|nowhere else in the file/)
+})
