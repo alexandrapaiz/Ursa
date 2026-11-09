@@ -3141,3 +3141,98 @@ being asked to pick a column, and the sentence she was handed says three of
 four pages agree. Four of five do not agree; three of five do, one is the
 open question, and one is a third convention already argued for in the
 code. Whichever column she picks, that is the shape of what is left.
+
+## L74 — Empty stdout and say-it-on-stdout are the same rule, and the channel kind is what picks between them
+
+**measured**, 2026-11-09 (run `2026-11-09-message-z`).
+`reviews/2026-11-09-message-z/data/deadport/` and `deadport-after/`,
+one directory per tool, both columns, stdout and stderr kept apart.
+
+L69 left a claim open. It said the four tools that exit non-zero at a dead
+port are right **by accident**, and that `measure-narrow.mjs` was one `try`
+away from the same defect. This run measured the claim on today's code and
+then closed it.
+
+**Before.** Five of six browser-driving tools, against a dead port:
+
+| tool | exit | stdout | stderr |
+|---|---|---|---|
+| `shoot.mjs` | 1 | **0 bytes** | node stack trace |
+| `measure-contrast.mjs` | 1 | **0 bytes** | node stack trace |
+| `measure-hit-areas.mjs` | 1 | **0 bytes** | node stack trace |
+| `measure-focus.mjs` | 1 | **0 bytes** | node stack trace |
+| `verify-hover.mjs` | 1 | **0 bytes** | node stack trace |
+| `measure-narrow.mjs` | 2 | the refusal, in words | — |
+
+**After.** All six exit 2 and print the refusal on stdout.
+
+### The part that is new, and it came from two seats disagreeing
+
+Ursa's exo seat sent the case for printing an absence **on stdout**: its
+register allocator emitted git's own correct `fatal:` on stderr and
+`Window 1` at exit 0 on stdout, and `--next` exists to be read as
+`$(... --next Window --heads)`. The warning was present, correct, and on
+the one channel the consumer does not read.
+
+Ursa's security seat sent the opposite-looking requirement, from three
+gates it repaired the same window: a refusal is exit 3 **and an empty
+stdout**, because a reader and a CI log both scan stdout for the verdict
+line, so a refusal that prints a sentence there has put something in the
+slot a verdict occupies.
+
+Both are right, about different consumers, and the thing that decides is
+not the gate's preference but **how the caller consumes the channel**.
+
+- **stdout as a value channel** — substituted, `$(cmd)`. Every byte is
+  taken as the value, so the only safe refusal is to print nothing. Exo's
+  allocator is this kind.
+- **stdout as a report channel** — read by a person, scanned by a CI log
+  for a headline. Nothing is read as a value, and silence is
+  indistinguishable from a tool that did not run. This kit is this kind.
+
+What generalises across both is neither rule as stated. It is: **the
+verdict slot must carry the refusal, and never a number computed over
+nothing.** Empty stdout guarantees that for a value channel. A refusal
+headline guarantees it for a report channel. `measure-narrow.mjs` already
+had the second form, which is why it was the one tool that read correctly.
+
+The corollary is the thing to check for, because it is invisible: the
+dangerous value is the one **inside the legal range of the real answer**.
+`0 of 0 text runs below their threshold` is a true sentence, a passing
+headline, and a claim about nothing. `lib/reached.mjs` grew
+`nothingReached()` and `refused()` for exactly that slot.
+
+### The exit code, and why this kit keeps 2 where the board tools use 3
+
+Security's house code for a no-verdict is **3**, in `tools/board/bypass.mjs`,
+`post-verdict.mjs` and `tools/seat/spend.mjs`, and its reason is sound:
+those gates already spend 1 and 2 on findings, so a premise failure was
+wearing whichever was free.
+
+That collision does not exist here, and adopting 3 for symmetry would
+create one. In this kit a verdict about the **site** is exit 0 however bad
+it is, because the selftests read findings out of JSON and treat non-zero
+as a broken instrument; `measure-focus.mjs` is the one tool that spends 1,
+on its own findings. So 2 is free, it is already `UNREACHED` in
+`lib/reached.mjs` with its reasoning written beside it, and two tools and
+their selftests already use it. Moving to 3 would leave
+`check-redaction.mjs`'s "cannot parse the gate" on 2 and the dead port on
+3, which is two no-verdict codes where there was one.
+
+The divergence is deliberate and named rather than silent. Same meaning,
+different number, because the number was chosen against a different set of
+occupied codes.
+
+### The trap, which security named before this run walked into it
+
+A refusal scoped one call too wide converts a finding into a non-answer.
+So `reach.visit()` wraps the **one** navigation that establishes the
+premise and nothing below it. Checked rather than asserted: after the
+repair the live site still reports 533 text runs, 80 tab stops, 48
+standalone controls, 16 narrow cells and 15 frames, every number identical
+to the run before it. `check-reached.mjs` holds the line as an expectation
+of its own — one subject reached out of two must still print the headline.
+
+`verify-hover.mjs` carried the uncovered arm: a harness probe navigating
+before the target loop that held the tracker. One premise was guarded and
+the earlier one was not, which is the shape of exo's note one level in.
