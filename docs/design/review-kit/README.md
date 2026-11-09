@@ -32,6 +32,22 @@ cd -
 bash docs/design/review-kit/teardown.sh            # --dry-run to look first
 ```
 
+**A free branch name is not a free review directory.** The runtime names
+your branch after the trigger and tells you to append a suffix if the
+branch exists. The review directory under `../reviews/` takes the same
+name and has to be checked separately, because a merged branch is deleted
+and its directory is not: on 2026-11-09 the branch
+`ursa-frontend/2026-11-09-message` was free, `reviews/2026-11-09-message/`
+was not, and opening the run's `NOTES.md` there replaced a previous run's
+278-line one with three lines. Nothing failed and nothing conflicted; the
+merge took one side and the loss would have reached `main` as a clean
+diff. Check `ls ../reviews/` before you write the first file, not
+`gh pr list`:
+
+```bash
+ls -d docs/design/reviews/<trigger>* 2>/dev/null   # pick the first free suffix
+```
+
 **Run the teardown even if you wrote nothing**, because the server is the
 half that outlives the directory. `rm -rf "$FE_RUN"` was this step for a
 week and it is not sufficient on its own: deleting a server's working
