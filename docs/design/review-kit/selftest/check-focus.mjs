@@ -61,6 +61,11 @@
  * 10. Exit status is 1 when something is below a floor and 0 when
  *     nothing is, since the caller in a review script reads that and not
  *     the prose.
+ * 11. A tall page whose undeclared stops all land at the same viewport
+ *     coordinate is walked to the end, rather than stopping at the second
+ *     one and reporting everything behind it as unreachable. This is the
+ *     assertion for L61, and it fails on the code of 2026-11-02: that walk
+ *     reported two of this fixture's six stops and two false unreachables.
  */
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
@@ -148,6 +153,36 @@ const fixtures = {
       requestAnimationFrame(tick)
     </script></body>`,
   ),
+  // 11: the tall page. Three scrollable <pre> blocks, which Chromium makes
+  // keyboard-focusable and the enumeration does not declare, each followed
+  // by a button that it does. Tab scrolls a stop into view, so all three
+  // pres land at the same VIEWPORT coordinate while sitting 1000px apart in
+  // the document: at 800x600 every one of them arrives at 20,289.
+  //
+  // Until 2026-11-09 the walk identified an undeclared stop by exactly that
+  // coordinate, so the second pre read as the first returning, the walk
+  // called the ring closed after two stops, and the two buttons behind it
+  // were reported as controls the keyboard cannot reach. All three buttons
+  // are reachable by Tab and always were. The absolute integer tops are
+  // what make the collision exact rather than within a pixel, which is the
+  // difference between a fixture that fails on the old code every time and
+  // one that fails on it sometimes.
+  'tall.html': page(
+    [1, 2, 3]
+      .map(
+        (n) => `<div class="block b${n}">
+         <pre>this-is-a-long-command-that-overflows-its-box-number-${n} --flags</pre>
+         <button type="button">copy ${n}</button>
+       </div>`,
+      )
+      .join(''),
+    `body { height: 4000px; position: relative }
+     .block { position: absolute; left: 20px; width: 240px }
+     .b1 { top: 1000px } .b2 { top: 2000px } .b3 { top: 3000px }
+     pre { width: 200px; height: 22px; overflow-x: auto; white-space: pre;
+           font: 12px/22px monospace; margin: 0 }
+     button { margin: 12px 0 0 0 }`,
+  ),
 }
 for (const [name, html] of Object.entries(fixtures)) writeFileSync(resolve(dir, name), html)
 
@@ -233,5 +268,39 @@ ok('9. a moving neighbourhood is UNSTABLE, not a ratio', drifty?.verdict === 'UN
 ok('9. and it carries no share', drifty?.share === undefined, drifty?.share)
 
 console.log('')
+
+console.log('tall.html')
+const tall = run('tall.html')
+const tn2 = tall.pageNotes[0]
+const pres = tall.rows.filter((x) => x.tag === 'pre')
+const copies = tall.rows.filter((x) => x.tag === 'button')
+
+ok('11. the DOM offers three buttons', tn2.declared === 3, tn2.declared)
+ok(
+  '11. the walk runs to the end of the page, six stops',
+  tn2.stops === 6,
+  tn2.stops,
+)
+ok(
+  '11. and no button is reported unreachable',
+  tn2.unreachable.length === 0,
+  tn2.unreachable.map((u) => u.text),
+)
+ok(
+  '11. all three undeclared pre stops get a row, not one',
+  pres.length === 3 && pres.every((x) => x.verdict === 'UNDECLARED'),
+  pres.map((x) => x.verdict),
+)
+ok(
+  '11. all three buttons are photographed and ringed',
+  copies.length === 3 && copies.every((x) => x.verdict === 'ok'),
+  copies.map((x) => [x.text, x.verdict]),
+)
+ok(
+  '11. the three stops that collided are three identities',
+  new Set(pres.map((x) => x.stop)).size === 3,
+  pres.map((x) => x.stop),
+)
+
 console.log(failed === 0 ? `all assertions hold (fixtures in ${dir})` : `${failed} assertion(s) failed`)
 process.exit(failed === 0 ? 0 : 1)
