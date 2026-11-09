@@ -25232,6 +25232,18 @@ same conflation inside it.
   point. Registered as `mentions-only` in the same commit. The gate ends
   this run at exit 0 with 47 candidates against 20 sites, of which 6 are
   `docs/ideas.md` sections whose only content is that somebody looked.
+- The structural half, which settles that this is placement and not
+  discipline. A registry entry naming a heading the checkout does not carry
+  is `SITE_MOVED`, an error, and the case "SITE_MOVED fires for a heading
+  that is not there" in `tools/doc-model/check.test.mjs` already proves it.
+  So a row cannot be pre-registered, and between the prose merging and the
+  row merging the gate is red by construction, every time, with no ordering
+  any seat can choose that avoids it. The live instance is the skill seat's
+  `#857`: it wrote the row out inside its own entry, quoted its heading
+  exactly, and asked this lane to paste it, because `models.mjs` is outside
+  its write surface and this checkout cannot hold the row until `#857`
+  merges. An in-section marker has no such window, because the marker and
+  the prose are the same bytes.
 - Cost: $0.
 - Status: proposed
 
