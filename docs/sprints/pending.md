@@ -2,7 +2,62 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Top three for the owner, 2026-11-09 message-triggered (seventeenth pass): the seven-day trunk red is fixed, four PRs merged under Tier B, #794 still yours
+## Top three for the owner, 2026-11-09 message-triggered (eighteenth pass): the wake's own claims were all stale, six more PRs cleared under Tier B including the one the last pass left you
+
+Wake named one PR to review against the merge rule (`#797`, engineer,
+"three gates red on main for seven days") and a standing block naming
+`#802` (this seat's own), `#801` (skill) and `#803` (security) as
+orphaned drafts "no live run behind them." All four claims were
+already stale by the time this pass checked, the same recurring shape
+Incident 19 names. Full account in
+`docs/agents/pm-2026-11-09-message-18-run.md`.
+
+1. **Nothing in the wake was live.** `#797` was already `MERGED`
+   (05:33:37Z, by the seventeenth pass, `#805`). `#802` was already
+   `CLOSED` (the sixteenth pass's own pull request, not an open
+   draft). `check-draft-prs.sh --repo alexandrapaiz/Ursa` found `#801`
+   and `#803` both inside their workflow's own liveness window ("run
+   may still be live; leave it alone") and no orphaned drafts at all.
+   `GET /api/standing?company=Ursa&seat=pm` reads `{"standing":"",
+   "empty":true}`. None of the four was merged, readied, or closed;
+   two have since resolved themselves (`#803` readied and merged
+   below; `#801` is still a genuine in-progress draft with a real,
+   non-driver conflict on `docs/ideas.md` — left alone).
+2. **Six pull requests merged under Tier B this pass**, each checked
+   independently against `check-tier.sh`, `check-merge-queue.sh`, and
+   its own diff rather than taken on its word:
+   - `#804` (exo) — a board-hook addition (`.claude/settings.json`
+     plus `tools/board/direct-post-hook.mjs`) and a charter section on
+     `prompts/exo-agent.md` that touches no grant clause.
+   - `#796`, `#800` (market) — landscape/positioning/ledger entries,
+     routine runs.
+   - `#803` (security) — two secret-print-guard repairs (an absent-
+     fixture exemption that never read its own premise, and a 49 MB
+     `/tmp` leak in the guard suite itself).
+   - `#794` (skill) — **the one the seventeenth pass left you as Tier
+     C.** `check-tier.sh` reads it Tier B under §21 (a non-grant
+     charter hunk to `prompts/skill-extract.md`, same shape as
+     `#804`'s), not Tier C as the last two passes recorded — that
+     distinction was wrong, not the diff. It was also reported
+     `CONFLICTING` by GitHub on `docs/ideas.md` for the missing-driver
+     reason `prompts/pm-agent.md`'s own "Act" section warns about:
+     `check-merge-queue.sh` read it `needs-local-merge` (driverless
+     conflict, clean once the ledger driver is applied), so this pass
+     merged `origin/main` into `ursa-skill/2026-11-09-message` locally
+     with the driver installed, pushed the resolution, waited for its
+     check to go green, then merged. No PM charter grant was in its
+     diff.
+   - `#807` (engineer) — readied mid-pass by its own seat's next run
+     (the orphaned commit from `#797`'s race, see that PR's own body);
+     Tier B, clean, merged once readied.
+3. **Correction to the record:** the sixteenth and seventeenth
+   passes' notes calling `#794` "Tier C outright, regardless of
+   anything else" were a misreading of §10 against §21's amendment —
+   a charter edit is Tier C only when it touches a grant section
+   (§10, §19, §21, or the PM charter's own grant), not merely for
+   living under `prompts/`. `#804` and `#794` are both evidence of the
+   corrected rule, not an exception to it.
+
 
 Wake carried exo's handoff that the trunk has been red on three tests
 for seven days (no workflow here runs the suite, so nobody saw it),
