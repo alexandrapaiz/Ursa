@@ -1157,6 +1157,80 @@ run's own PR adds no third check-in, since three OKR readings in six
 days is the exact pattern PR #88 already flagged to the owner as a
 possible sign this seat should pause until the merge backlog clears.
 
+## Grooming (2026-11-09, Monday ceremony, four Mondays late)
+
+**The one `accepted` entry, re-checked a third time.** "Agentic-forward:
+Ursa as the agents' HQ" (2026-09-19) is unchanged from the 2026-10-12
+reading: sub-steps (a) and (c) are built and merged
+(`ursa-major/src/mcp/server.ts`, `cli.ts`, `mcp.test.ts`), only
+sub-step (d) — dogfooding `get_briefing` against one of Ursa's own
+seats and recording what it actually returned — is unverified from the
+repo. Flagging again for the engineer seat to move the shipped parts;
+the PM does not change a status it does not own (pm.md §4). Pulled
+into this week's sprint as item 2, since it is the only `accepted`
+entry and it is already day-sized by its own 2026-09-21 split.
+
+**Awaiting your verdict, and the backlog grew roughly tenfold in the
+four Mondays this ceremony did not run.** 325 `proposed` entries are
+two weeks or older with no ruling (counted by date against today,
+2026-11-09), against 30 at the last grooming (2026-10-12) and 3 before
+that (2026-10-05). Listing all 325 by title here would not make the
+backlog legible, so the growth curve is the finding: 3 -> 3 -> 30 ->
+325, with no grooming ceremony in between the last two readings. A
+full categorized breakdown (by filer and by two-week bucket) is in this
+PR's description rather than in this file, to keep the ledger itself
+from carrying a 325-line note that ages the moment the next entry is
+filed.
+
+The same fix this file has been waiting on since 2026-10-12 is still
+unruled and is three weeks closer to mattering: **"The ledger wants to
+be a directory"** (2026-09-27, now 43 days old) and **"The idea ledger
+should be a directory, not one file"** (2026-09-30, 40 days old) are
+still near-duplicates with no verdict. Recommending a verdict on these
+two first, ahead of the other 323, for the same reason as the last
+three grooming notes: every week without one makes the rest harder to
+triage by hand, and the backlog's own growth since the last reading is
+now the direct evidence for that recommendation rather than a
+prediction.
+
+**Stale or superseded, found this pass (none marked by a prior
+grooming):**
+
+- The 2026-11-02 `urgent` entry "A root dot-entry gate on `main` is red
+  in any complete clone..." no longer reproduces. Re-run fresh today on
+  a fully repaired clone (`bash tools/ensure-full-clone.sh`, then
+  `node --test tools/root-entries.test.mjs`): 24 of 24 pass, including
+  the suite's own "the real checkout passes its own gate" case. Not
+  marking it `built` or `rejected` (not this seat's status to set), but
+  noting it so the next reader does not re-chase a red that is not
+  live. Its own first step ("decide which list `.claude` belongs on")
+  may already have been taken elsewhere; not re-derived here.
+- Three craft scans of the same Graphiti bi-temporal/validity-window
+  mechanism from the same source page: 2026-10-24, and two more both
+  dated 2026-11-02, independently of each other. The research spend is
+  duplicated; nothing here proposes an action beyond naming it, since
+  none of the three is wrong on its own merits.
+- Two pairs of duplicate `urgent` findings, same root cause each,
+  filed hours or a day apart by different passes without cross-
+  referencing: the `.claude` root dot-entry gate (2026-11-02, two
+  entries — see above, also now stale) and the HQ board events-route
+  500 error (2026-11-01 and 2026-11-02, two entries, still open and
+  not this seat's to fix).
+- 2026-10-06 "The record never says a file was left out, only the
+  summary does" already names itself, in its own trigger text, as "the
+  already-proposed 2026-10-03 entry" — carried forward unmerged rather
+  than deduplicated. Noted, not merged; that is an editorial call on
+  content this file's contract does not give the PM.
+
+**The November 30 KR2.1 deadline has a live blocker, filed `urgent`
+yesterday.** "A generation has no size ceiling, and one 232 KB file
+stalled a thirty-pull-request sweep" (2026-11-08) reports that the
+KR1.3 corpus sweep cannot run over its own stated 30-PR window today,
+and names a concrete first step (profile where the time goes before
+choosing a fix). Pulled into this week's sprint as item 1, ahead of
+the accepted entry above, because it gates a dated OKR deadline the
+other item does not.
+
 ## Grooming (2026-10-12, Monday ceremony)
 
 **The one `accepted` entry, re-checked.** "Agentic-forward: Ursa as the
