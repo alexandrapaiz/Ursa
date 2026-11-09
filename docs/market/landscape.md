@@ -984,6 +984,148 @@ with no clear RLHF/preference-data product and no public pricing —
 not a Category 1 fit. Snorkel AI, Sama, iMerit, and Appen remain
 unchecked leads for a future run with capacity to spare.
 
+### Snorkel AI
+
+What it is: a data-labeling-automation vendor (originally a Stanford
+research project, "weak supervision") that has shifted business model
+to "data-as-a-service" — delivering completed, labeled datasets and RL
+environments directly, built on a hybrid of synthetic data generation
+and subject-matter-expert review, rather than selling the labeling
+software alone. New entry, picked up from the same 18th-run
+unchecked-lead list as Labelbox (Appen, Snorkel AI, Sama, iMerit) —
+and a correction to this file's own record: the 2026-10-26
+cross-cutting note (above) already asserted Snorkel AI was "already
+tracked above" in this category; it was not, and had no dedicated
+entry until this run. Who it serves: not named in sources checked this
+run — no specific frontier lab or enterprise customer identified by
+name, an unusually thin disclosure even against this category's
+standing opacity norm. Pricing: enterprise sales-only, six-figure
+annual contracts per secondary pricing-guide sources (not Snorkel's
+own published figures — no rate card found), consistent with every
+other entry in this category except Toloka. Funding: a $350M Series E
+(2026-09-22, led by Insight Partners and S32, with Addition,
+Lightspeed, Greylock, GV, and Wells Fargo participating) at a $3.5B
+valuation — TechCrunch reports this as roughly triple Snorkel's prior
+valuation, attributed in the same reporting to "AI labs' insatiable
+appetite for high-end training data" rather than to any named deal.
+Strengths: the funding scale is itself a demand signal for this
+category as a whole (money moving toward human-plus-synthetic hybrid
+data production), read alongside Mercor's and Handshake's own
+valuation jumps already on file. Weakness against Ursa: identical
+structural gap to the rest of Category 1 — labeling and dataset
+construction performed on request against a specification, not
+derived from real work a person was doing anyway for its own sake, no
+generation-to-outcome join. Positioning consequence in
+docs/market/positioning.md. Last observed 2026-11-09: [TechCrunch:
+Snorkel AI triples valuation to $3.5B as demand for AI training data
+booms](https://techcrunch.com/2026/09/22/snorkel-ai-triples-valuation-to-3-5b-as-demand-for-ai-training-data-booms/).
+
+### Appen
+
+What it is: a 20-plus-year incumbent in crowdsourced data annotation
+and linguistic/search-quality labeling (ASX: APX), repositioning
+around generative AI and RLHF work after losing its anchor Google
+contract, worth roughly 26% of FY2023 revenue, in January 2024. New
+entry, the first of three Category 1 leads this run closes from the
+18th run's named unchecked list (Appen, Sama, iMerit; Labelbox and
+Snorkel AI were closed in the 19th and 20th runs, Defined.ai rejected
+in the 19th). Who it serves: the company's own H1 FY26 results
+attribute its fastest growth to Appen China's relationships with
+Chinese large-language-model developers buying annotated and
+human-evaluated training data; no individual lab or enterprise
+customer is named in any source checked this run. Pricing: not
+disclosed, consistent with the rest of this category. Financials, all
+USD (confirmed as Appen's own reporting currency in its 2025 annual
+report): H1 FY26 revenue of $119.9M, up 17% year over year on 80%
+growth in Appen China; the FY25 full year showed the same split
+widening, Appen China up 75% to $102.9M against Appen Global down 21%
+to $127.9M, and generative AI work reaching 44.1% of Q4 revenue, up
+from 34.8% a year earlier; the company reaffirms FY26 group guidance
+of $270-300M. Strengths: the only entry in this category with real,
+audited, publicly disclosed financials rather than a funding-round
+press release or a vendor's own self-reported scale claim, and a
+generative-AI revenue mix that is climbing rather than flat. Weakness
+against Ursa: the usual structural gap (solicited labeling against a
+specification, not derived from real work a person was doing anyway,
+no generation-to-outcome join) plus a second one unique to this entry.
+A vendor-comparison source states plainly that Appen "never really
+owned" the frontier-RLHF segment and "a new generation of specialists
+has taken it," naming this file's own fast movers (Surge, Mercor,
+Scale) as the displacers. This is the clearest sourced "who is winning
+and who is losing inside Category 1" claim this file has found in one
+place. Last observed 2026-11-09: [Appen H1 FY2026 earnings call
+transcript](https://finance.yahoo.com/quote/APPEF/earnings/APPEF-H1-2026-earnings_call-608563.html),
+[Kalkine: Appen shares rise as China AI data growth drives Q2 FY26
+update](https://kalkine.com.au/news/technology/appen-asxapx-shares-rise-1029-as-china-ai-data-growth-drives-q2-fy26-update),
+[neuralchainai.com: Top Appen Alternatives &
+Competitors](https://neuralchainai.com/blog/top-appen-alternatives-competitors/)
+(source of the "never really owned this segment" quote).
+
+### Sama
+
+What it is: a B Corp-certified data-annotation vendor (delivery
+centers in Kenya, Uganda, and India) staffed by employed workers
+rather than gig contractors, offering RLHF, DPO, hallucination
+reduction, and multimodal-consistency evaluation alongside its older
+computer-vision annotation business. New entry, the second of this
+run's three leads closed. Who it serves: the most enterprise-
+diversified client list disclosed by any entry in this category.
+Google, Microsoft, Nvidia, GM, Ford, and Walmart are named on Sama's
+own site, a mix of AI labs and non-AI Fortune 500 buyers rather than
+frontier labs alone. Pricing: not disclosed. Strengths: the
+employed-not-gig staffing model and 2025 B Corp recertification are a
+specific, checkable ethical-sourcing claim none of this category's
+gig-marketplace entries can make in the same form. Weakness against
+Ursa: the same structural gap as the rest of Category 1, plus a
+historical labor-conditions finding sharper than anything else on
+file here. A 2023 TIME investigation found Sama's Kenyan workers, paid
+as little as $1.32 an hour, were tasked with labeling graphic
+descriptions of child sexual abuse, torture, and murder to build
+ChatGPT's safety filters; workers reported lasting psychological
+trauma, and Sama itself canceled the OpenAI contract eight months
+early, in February 2022, partly over the severity of the work. This
+is an older event, not this week's news, but it is the most direct
+documented case this file has of the human cost solicited preference-
+and-safety labeling can carry when the content being labeled is
+harmful rather than merely subjective, a different axis from the
+pay-withheld and breach-exposure risks already on file for Handshake
+AI and Mercor. Last observed 2026-11-09: [Sama primary
+services](https://www.sama.com/primary-services), [TIME: OpenAI used
+Kenyan workers on less than $2 per
+hour](https://time.com/6247678/openai-chatgpt-kenya-workers/), cross-
+checked against [Wikipedia: Sama
+(company)](https://en.wikipedia.org/wiki/Sama_(company)) for the
+contract-cancellation date.
+
+### iMerit
+
+What it is: a data-annotation vendor specializing in regulated,
+credentialed-judgment domains (computer vision, healthcare imaging,
+autonomous systems, geospatial data) rather than general-purpose crowd
+labeling, now extending into RLHF, chain-of-thought reasoning, and
+red-teaming for large model developers. New entry, the last of this
+run's three leads and the final name on the 18th run's original
+unchecked list (Appen, Labelbox, Snorkel AI, Sama, iMerit, Defined.ai,
+all now checked across the 19th run through this one). Who it serves:
+not named in any source checked this run; a vendor-comparison guide
+places iMerit in a "platform-led labelling" lane distinct from the
+frontier-RLHF lane Surge, Mercor, and Scale occupy, calling it "best
+for domain-specific labelling, particularly medical and financial
+services." Pricing: not disclosed. Strengths: the regulated-domain
+specialization is a genuine niche the rest of Category 1 does not
+claim directly; the same comparison source credits iMerit with
+structural RLHF infrastructure built before 2024, "to a lesser
+degree" than Scale, Surge, and Invisible Technologies. Weakness
+against Ursa: the same structural gap as the rest of the category,
+and the thinnest public footprint of the three names closed this run,
+no funding event, no named customer, no independent traction number
+found in any source checked. Last observed 2026-11-09: [iMerit: AI
+data annotation & model fine-tuning solutions](https://imerit.ai/),
+[wetheflywheel.com: AI training data providers 2026
+guide](https://wetheflywheel.com/en/guides/ai-training-data-providers-2026/)
+(source of the "platform-led labelling" and "to a lesser degree"
+framing).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -2387,4 +2529,30 @@ moment](https://www.lorekit.io/blog/open-agent-memory-format).
   specific claim found traces to a now-410-Gone source and a
   roundup article that does not mention the product at all, so the
   entry's "no independent traction numbers" line still holds.
+  Positioning consequence in docs/market/positioning.md.
+- 2026-11-09 (message, 20th run) — added Snorkel AI (Category 1, 23rd
+  entry), the last of the 18th run's named leads that was genuinely
+  unchecked: a 2026-10-26 cross-cutting note had already asserted
+  Snorkel AI was "tracked above" in this category, and it was not,
+  until this run gave it a dedicated entry. Its $350M Series E
+  (2026-09-22, Insight Partners/S32-led) at a $3.5B valuation, reported
+  as roughly triple its prior mark and attributed to labs' demand for
+  training data, is this file's clearest funding-scale demand signal
+  for the category since Mercor's and Handshake's own valuation jumps.
+  Pricing and customers remain undisclosed, consistent with every
+  entry in this category except Toloka.
+- 2026-11-09 (message, 21st run) — closed the last three names on the
+  18th run's original unchecked-lead list, added Appen, Sama, and
+  iMerit (Category 1, now 24th, 25th, and 26th entries). Appen is this
+  file's first entry with real audited public financials and a
+  sourced claim that it "never really owned" the frontier-RLHF segment
+  its own faster-growing peers in this category now occupy. Sama adds
+  the most enterprise-diversified named client list in Category 1
+  (Google, Microsoft, Nvidia, GM, Ford, Walmart) alongside a 2023 TIME
+  investigation into traumatic content-labeling conditions among its
+  Kenyan workforce, a labor-conditions finding on a different axis
+  (harm to the labeler, not pay or breach) than Handshake's or
+  Mercor's. iMerit is the thinnest of the three, a regulated-domain
+  niche (healthcare, autonomous systems) with no funding event or
+  named customer found. No new Category 2 or 3 entries this run.
   Positioning consequence in docs/market/positioning.md.

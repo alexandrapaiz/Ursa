@@ -106,19 +106,19 @@ evidence:
     source: docs/security/redaction-standard.md:11-27
   - ref: E28
     what: the five surfaces a record reaches the public through, that the viewer is a second full copy of the sensitive fields rather than a rendering of the safe ones, that a screenshot of any surface carries that surface's text as pixels, and that redaction happens before entry rather than at rendering, so redacting at capture time is the same mistake
-    source: docs/security/redaction-standard.md:29-59
+    source: docs/security/redaction-standard.md:29-63
   - ref: E29
     what: the five classes, verbatim human text, machine and account identity, session identity, credentials, and other people
-    source: docs/security/redaction-standard.md:63-125
+    source: docs/security/redaction-standard.md:67-129
   - ref: E30
     what: the field-by-field dispositions and the pattern behind them, that every field which labels the outcome ships and every field which reproduces the work does not
-    source: docs/security/redaction-standard.md:126-164
+    source: docs/security/redaction-standard.md:130-168
   - ref: E31
     what: the four clauses under which a Class A field may ship, that the owner sign-off is per record and does not generalise, and that retention is not sign-off
-    source: docs/security/redaction-standard.md:165-185
+    source: docs/security/redaction-standard.md:169-189
   - ref: E32
     what: the fixture record passes every mechanical class while carrying three Class A fields, so a real record of the same shape would pass the gate and not be safe
-    source: docs/security/redaction-standard.md:209-213
+    source: docs/security/redaction-standard.md:213-217
   - ref: E33
     what: the one edge that crosses the device boundary and what it carries, and that the records, the tuning and the consent file have no outbound edge at all
     source: docs/design/consent-and-erasure.md:83-85
@@ -133,19 +133,19 @@ evidence:
     source: docs/design/consent-and-erasure.md:549-571
   - ref: E37
     what: the ledger finding that the publish disclosure claims the text was already public and never checks whether the repository is, and that an unstated visibility must print the private sentence
-    source: docs/ideas.md:8418-8421
+    source: docs/ideas.md:9128-9131
   - ref: E38
     what: the ledger finding that nothing tells a publisher what of theirs is live right now and nothing takes one record back down between publishes
-    source: docs/ideas.md:8425-8428
+    source: docs/ideas.md:9135-9138
   - ref: E39
     what: the ledger finding that a republish leaves the pages it no longer lists, so an erased record stays readable at an address somebody already has
-    source: docs/ideas.md:8438-8441
+    source: docs/ideas.md:9148-9151
   - ref: E40
     what: the five poisoned payloads the audit is asserted to catch, including the whole record passed off as a batch, which is the failure mode that existed before the module
     source: ursa-major/src/disclosure.test.ts:256-310
   - ref: E41
     what: the standard installs nothing, Class A has no automated check in it, and what it gives instead is the field list so a seat about to quote a record need not rediscover the incident
-    source: docs/security/redaction-standard.md:221-228
+    source: docs/security/redaction-standard.md:225-232
   - ref: E42
     what: revoke-axiom prints in the same breath that a block the user already pasted into another product is outside what the command can reach and keeps working until she replaces it herself, and since 2026-10-26 the sentence is a shared function taking only the surface's own name for itself, so the page cannot admit less than the command does
     source: ursa-major/overlay/lib/revocation-reach.ts:52-60; ursa-major/src/consent.cli.ts:218
@@ -156,8 +156,11 @@ evidence:
     what: both revoke-axiom and consent show report the axioms that still say nearly the same thing as the revoked one and were deliberately left alone, show covering revocations already made and revoke-axiom covering the one just made
     source: ursa-major/src/consent.cli.ts:219-233, ursa-major/src/consent.cli.ts:112-130
   - ref: E45
-    what: the gate runs grep with -I, which skips every binary file, so none of its three patterns has ever been applied to surface 5, the screenshot, and the standard's own note since 2026-10-26 is that the one-flag fix was routed to HQ rather than applied, so the limit is still live; the rendered half is checkable by nothing, so its rule is a rule for people, capture fixtures and never a real project's records
-    source: docs/security/redaction-standard.md:230-244
+    what: the redaction gate runs grep with -I, which skips every binary file, so none of its three patterns has ever been applied to surface 5, the screenshot, and the standard's own note since 2026-10-26 is that the one-flag fix was routed to HQ rather than applied, so that limit is still live
+    source: docs/security/redaction-standard.md:234-248
+  - ref: E46
+    what: that the earlier conclusion drew one inference too many, because what a capture depicts is pixels and which store it was rendering is written down, so provenance is checkable; that capture-provenance.mjs runs in ci-checks.mjs reading committed text and never a pixel, firing only where a directory both renders a record surface and names no store; and that a green run means the question was answered rather than that the answer is true
+    source: docs/security/redaction-standard.md:250-287
 supersedes: []
 ---
 
@@ -387,14 +390,23 @@ viewer embeds and the pixels hold it exactly as the HTML did [E28]. Two
 things follow, and the second is the one that catches a careful seat.
 Redacting at the moment of capture is the same mistake as redacting at
 the moment of rendering, because the unredacted page had to exist to be
-photographed [E28]. And the gate cannot help here at all: it runs `grep`
+photographed [E28]. What a gate can do about it was overstated here
+until 2026-11-09, and the correction is worth carrying rather than
+quietly swapping, because the shape of the error is the one this step
+exists to teach. The redaction gate cannot read an image: it runs `grep`
 with `-I`, which skips every binary file, so not one of its three
-patterns has ever been applied to an image, and the half that is drawn
-into the picture is checkable by nothing [E45]. So the rule for this
-surface is a rule for people rather than a gate, which is to capture
-fixtures and never a real project's records, and if a point genuinely
-needs real data to land, that is the owner's decision and not a
-judgement call at capture time [E45].
+patterns has ever been applied to a capture [E45]. The conclusion drawn
+from that was that the surface is checkable by nothing, and it drew one
+inference too many. What a capture *depicts* is pixels and unreadable.
+Which store it was rendering is written down, in the directory beside
+it, and that is checkable [E46]. `capture-provenance` now holds exactly
+that half, firing only where a directory both renders a record surface
+and names no store, and a green run from it means the question was
+answered rather than that the answer is true [E46]. So the rule that
+stays a rule for people is the narrow one, which is to capture fixtures
+and never a real project's records, and if a point genuinely needs real
+data to land, that is the owner's decision and not a judgement call at
+capture time.
 
 Output: a passage, plus a written note of which clause it went out
 under.
