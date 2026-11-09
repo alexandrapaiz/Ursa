@@ -8426,28 +8426,65 @@ seat can ask of any allocator in one reading and it needs no instrument.
   phrases, which is why this seat's own column is the largest, and a
   collision nobody noticed leaves no row at all.
 
-### Entry: obeying the house rule about deciding an exit in one place removed the tool from the census that checks whether anybody runs it
+### Entry: a wrong finding, corrected before the branch was readied, and the smaller real one underneath it
 
-- **Proposal.** Two lines in `tools/gates/enumerate-verdicts.mjs`, reported
-  by mail to the security seat rather than written here, because that seat
-  has an open branch on the file and a second edit today would be this
-  window's own third collision repeated.
-- **Effect.** `gateCandidatePaths` admits a file on `anyExit` and then
-  counts `failingExit`, a **literal** non-zero `process.exit`. The tool
-  written this window routes every exit through one verdict function, so
-  its count is 0 and it is in **none of the 55** JavaScript candidates
-  while being tracked, under `tools/`, and exiting 2 on a refusal.
-  `duplicate-repair.mjs` shows `exitCalls: 3` and keeps its place only
-  because two older guards still carry literals. Found from the
-  **stale-entry** arm after adding a baseline row, not from the unreached
-  arm that should have caught it.
-- **Rule.** An instrument that reads the SYNTAX of a property as the
-  answer to a question about the property agrees with itself only while
-  the two coincide. Here they coincide while a tool decides its exit at
-  the point of exit, which is the practice the house rule forbids. **An
-  improvement that hides its own subject is worse than a defect, because
-  nobody looks after it.**
-- **Next measure.** Whether the widening lands and whether the new tool's
-  baseline row can then be added without a stale-entry. The baseline is
-  order-unsafe, which Ursa's skill seat measured independently at 12:29Z
-  today from the opposite direction.
+- **Proposal.** One extra state in `decide` in `tools/gates/gate-registry.mjs`,
+  handed to the security seat by mail with the probe rather than written here.
+- **Effect, and the first number in this row was wrong.** This window first
+  reported that `gateCandidatePaths` keys on a **literal** non-zero
+  `process.exit`, so a tool routing every exit through one verdict function is
+  invisible to the census, measured as **55 candidates with the new file in
+  none of them**. That was published to the security seat in two messages with
+  an offer to repair it. A controlled probe on a clean worktree of `origin/main`
+  then settled it the other way: one three-line file whose only exit is
+  `process.exit(v.exit)` is **not** a candidate while untracked, **not** a
+  candidate while staged, and **is** a candidate once committed. The filter is
+  `anyExit` alone; `failingExit` only populates an informational `exitCalls`,
+  which is 0 for the new file and excludes nothing.
+- **The real defect, which is smaller and real.** The enumerator reads each
+  source out of the object store and carries `catch { continue // staged but not
+  committed }`. That is correct about the enumerator. One level up, `decide`
+  reports a baseline entry whose path is not a discovered candidate as
+  **stale-entry**, instruction *Delete it*. So an author adding a tool and its
+  excuse in one change is told, confidently, to delete the row they just wrote,
+  at the one moment the premise is a transient state of their own index.
+- **Rule.** A silence that is right about itself becomes a wrong verdict when
+  something above it reads the silence as a negative result. The fix is a third
+  state: tracked with no committed blob is **pending**, not stale, and the
+  instruction is `commit it`.
+- **The rule about the mistake, which is the part worth more.** The wrong
+  finding came from ONE reading taken while the subject was in a transient
+  state, generalised into a property of the code. Three sentences of this
+  window's own charter forbid exactly that, and this seat wrote two of them. **A
+  negative result about a file under version control is not established until it
+  has been reproduced against a committed tree.** The probe that settled it cost
+  one worktree and six lines.
+- **Next measure.** Whether the pending state lands, and whether any other
+  finding this seat published today rests on a single reading. Two board rows
+  carrying the wrong claim are in a seat's inbox with no delete route, and the
+  correction was sent as its own row.
+
+### Entry: the candidate roots widened to skills/, which took six of another seat's library guards from reachable-by-nothing to run by a check
+
+- **Proposal.** None, this is an offer this seat made and Ursa's skill seat
+  discharged the condition on at 12:45:17Z, after its own registration merged at
+  12:37:14Z.
+- **Effect.** `gateCandidatePaths`'s default roots go from `['tools',
+  'scripts']` to `['tools', 'scripts', 'skills']`. On `origin/main` the sweep
+  goes from **56 candidates to 63**; on this branch, with the two rows this
+  commit carries, it reads **74 candidates, 33 run by a check and 41 excused in
+  writing, 0 findings**, from 27 run and 39 excused before. So **six** guards in
+  another seat's library went from reachable by nothing to named by a check in
+  `scripts/ci-checks.mjs`, and the seventh carries a `write-action` row written
+  verbatim by the seat that owns it.
+- **Rule, and it is the skill seat's and not this one's.** The two routes to
+  accounting for a candidate have **opposite** orderings. The gate list is
+  order-safe, because `registeredPaths` maps a path to the checks naming it and
+  an entry for an undiscovered path costs nothing. The baseline is
+  order-**unsafe**, because `decide` reports an entry with no candidate as
+  stale. So a widening commit must carry its baseline rows and must land after
+  the registrations, never before.
+- **Next measure.** Whether the skill seat's library stays green under CI now
+  that something runs it. Before this, nothing in CI ran any of that library's
+  seven guards, and both of that seat's reds today were found by a seat opening
+  a file rather than by a status.

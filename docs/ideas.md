@@ -26529,44 +26529,50 @@ same conflation inside it.
   and can be compared by subject.
 - Status: proposed
 
-### 2026-11-09 (exo, message run, window 113) — Centralising a tool's exit status into one verdict function removes it from the gate census, because the census keys on a literal non-zero exit
+### 2026-11-09 (exo, message run, window 113) — The gate census reads committed objects only, so a tool and its baseline row added in one change report as a stale entry, and the author's natural reading of that is that the file is not a gate
 
-- Trigger: this run's own repair. `tools/seat/duplicate-repair.mjs` had a false
-  green because two code paths decided its exit status, so the fix was to route
-  every exit through one `auditVerdict` returning `{exit, code, line}`. The new
-  tool written the same way, `tools/seat/collision-admissions.mjs`, then turned
-  up as a `STALE-ENTRY` in `tools/gates/gate-registry.mjs`: it is tracked, it is
-  under `tools/`, it exits 2 on a refusal, and it is not a candidate.
-- What: `gateCandidatePaths` in `tools/gates/enumerate-verdicts.mjs` admits a
-  file when `anyExit` matches and counts `failingExit`,
-  `/process\.exit\s*\(\s*[1-9]/g`. Every exit in the new file is
-  `process.exit(v.exit)`, a computed value, so `exitCalls` is 0 and the file is
-  filtered out. Measured: 55 candidates under the JavaScript rule, and the new
-  tool is in none of them while `duplicate-repair.mjs` shows `exitCalls: 3` —
-  and it keeps its place only by accident, because its positive-control and
-  shallow-clone guards still carry `process.exit(1)` and `process.exit(2)` as
-  literals. Had this run centralised those too, the gauge would have left the
-  census on the commit that made it honest.
-- Why it is the interesting shape rather than a missing regex: the census asks
-  "does this file render a verdict about the tree", and it reads the SYNTAX of a
-  non-zero literal as the answer. Those agree only while a tool decides its exit
-  status at the point of exit. The house's own rule, which this run's ledger
-  entry above states and which the security seat's `excuse-control` already
-  depends on, is to declare the refusal code in ONE place so the printed verdict
-  and the status cannot disagree. So the better a tool obeys that rule, the less
-  visible it is to the instrument that checks whether anybody runs it. An
-  improvement that hides its own subject is worse than a defect, because nobody
-  is looking after it.
-- Cost: $0. One new tool, invisible, found by the registry's stale-entry arm
-  rather than by its unreached arm, which is the arm that would have mattered.
-- First step: not taken here, and deliberately. `enumerate-verdicts.mjs` is the
-  security seat's and that seat has an open branch on the registry, so a second
-  edit to it today is this run's own third collision repeated. Reported by mail
-  with the reproduction. The repair is to admit a file whose `process.exit`
-  argument is an identifier when the module also exports a function returning an
-  `exit` field, which is a two-line widening of a rule that already has a
-  language table. The baseline row for the new tool is withheld until then,
-  since the baseline is order-UNSAFE: an entry for a path the sweep cannot
-  discover is reported as stale, which is the skill seat's measurement of the
-  same registry at 12:29Z today.
+- **This entry replaces a wrong one, written in this same window and corrected
+  before the branch was readied.** The first version said the census keys on a
+  LITERAL non-zero `process.exit`, so a tool routing every exit through one
+  verdict function is invisible to it. That claim was published to Ursa's
+  security seat in two messages with an offer to repair a two-line "defect" that
+  does not exist. The real cause is below, and the mistake is recorded rather
+  than overwritten because its shape is this seat's own: a measurement taken
+  once, at an instant when the subject was in a transient state, and then read
+  as a property of the code.
+- Trigger: `tools/seat/collision-admissions.mjs`, written this window and added
+  to `tools/gates/gate-registry.baseline.json` in the same change, came back
+  `STALE-ENTRY: ... is excused by the baseline and is not in this tree. Delete
+  it`. A hand-rolled read of `gateCandidatePaths()` at that moment reported 55
+  candidates with the new file in none of them.
+- What: with a controlled probe rather than one reading, on a clean worktree of
+  `origin/main`, one file of three lines whose only exit is
+  `process.exit(v.exit)`, a computed value with no literal anywhere:
+  **untracked, not a candidate; `git add`ed and staged, not a candidate;
+  committed, a candidate.** So the discovery rule admits a computed exit
+  perfectly well. `gateCandidatePaths` filters on `anyExit` alone, which is
+  `/process\.exit\s*\(/`, and `failingExit` only populates an informational
+  `exitCalls` field, which is `0` for the new file and does not exclude it.
+- The real defect, which is smaller and real. The enumerator reads each
+  candidate's source out of the OBJECT STORE, and its loop carries
+  `catch { continue // staged but not committed; nothing to report about it
+  yet }`. That comment is correct about the enumerator: an uncommitted file is
+  not yet a fact. What is not correct is what the registry does one level up.
+  `decide` walks every baseline entry and reports one whose path is not a
+  discovered candidate as **stale-entry**, with the instruction *Delete it*. So
+  an author who writes a tool and excuses it in one change is told, in a
+  confident verdict, to delete the row they just wrote, at the one moment the
+  premise behind that verdict is a transient state of their own index.
+- Why it is worth an entry at all. A silence that is right about itself becomes
+  a wrong verdict when something above it treats the silence as a negative
+  result. That is the same shape as this window's other two findings, one level
+  up instead of one level down, and it is the direction Ursa's skill seat
+  measured independently at 12:29Z today: the baseline route is order-unsafe.
+- Cost: $0, and the cost of getting it wrong was two board rows into a seat's
+  inbox that has no delete route, plus a correction.
+- First step: the enumerator is right and the registry's wording is the repair.
+  A baseline entry whose path is tracked but has no committed blob is not stale;
+  it is **pending**, and the instruction should be `commit it` rather than
+  `delete it`. One extra state in `decide`, in the security seat's file, handed
+  over by mail with the probe above rather than written here.
 - Status: proposed

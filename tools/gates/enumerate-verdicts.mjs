@@ -320,7 +320,7 @@ export const CANDIDATE_LANGS = [
  */
 export function gateCandidatePaths({
   langs = CANDIDATE_LANGS,
-  roots = ['tools', 'scripts'],
+  roots = ['tools', 'scripts', 'skills'],
   exclude = ['tools/gates/enumerate-verdicts.mjs', 'tools/gates/verdict-shape.mjs'],
   excludePattern = /-verdict\.mjs$/,
 } = {}) {
