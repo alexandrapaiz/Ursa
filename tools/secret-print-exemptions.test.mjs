@@ -403,3 +403,110 @@ test('the marker census conserves, so a marker cannot go uncounted', () => {
     'an incidental marker is a kind of inert one')
   assert.ok(report.markers > 0, 'a tree with no markers would not test this')
 })
+
+// ---------------------------------------------------------------------------
+// THE FOURTH DIRECTION: an exemption whose premise has gone false.
+//
+// The three directions above are all about an exemption's SUBJECT. Undecided,
+// expired, stale and inert each ask whether the thing the exemption was
+// written over is still there. This one asks a different question, and the
+// surface it asks it on is the one surface where the exemption is not keyed
+// on the tree at all.
+//
+// `EXPECTED_ABSENT_FIXTURES` is keyed on a test NAME, and its reason is a
+// claim that a path does not exist. Nothing read the claim until 2026-11-09.
+// Measured that day, before the repair: a file created at
+// `standards/lessons.md` made the exempted test fail for a reason that was
+// not absence, `tools/secret-print-tests.py` printed `2 exempt as absent
+// fixtures, 0 unexpected` and then `the vendored checker passes every test
+// that is about the checker`, and exited 0. This gate was green beside it,
+// because the only direction it read on that surface was the `review_by`
+// date, which was a month away.
+//
+// The NOW GREEN check in the runner does not cover it. That fires when an
+// exempted test starts PASSING, so it catches the fixture arriving clean and
+// cannot catch the fixture arriving broken. For the first of the two entries
+// that is the serious case: `tools/check-actions-reach.sh` is the standing
+// false-positive reference for all four safe shapes at once, so if Ursa
+// vendors it and it genuinely prints a value, the test goes red for exactly
+// the reason the suite exists and the runner calls it an absent fixture.
+//
+// `standards/lessons.md` is used as the fixture here rather than the other
+// entry's path, because it sits outside `tools/` and `.github/workflows/` and
+// so is not on the sweep's file list. The case therefore moves the premise
+// and nothing else.
+
+function claimedAbsent(dir, rel) {
+  fs.mkdirSync(path.join(dir, path.dirname(rel)), { recursive: true })
+  fs.writeFileSync(path.join(dir, rel),
+    '# Lessons\n\nA placeholder register with no idiom in it.\n')
+}
+
+test('an exemption whose claimed-absent path now exists is stale', () => {
+  // One gate run per case, deliberately. Finding F108 of 2026-11-09 is that
+  // this suite already takes 4m27s for 20 cases, so the "copy is green
+  // first" pre-check that belongs here is left to the committed-tree case
+  // above rather than paid for twice.
+  const dir = instance()
+  claimedAbsent(dir, 'standards/lessons.md')
+  const { code, report } = json(dir)
+  assert.equal(code, 1)
+  const p = report.problems.find(
+    (x) => x.kind === 'stale' && x.what.includes('EXPECTED_ABSENT_FIXTURES'))
+  assert.ok(p, JSON.stringify(report.problems))
+  assert.match(p.why, /standards\/lessons\.md exists/)
+  // Stale and not expired. The date is still in the future, which is exactly
+  // why the date direction could not reach this.
+  assert.equal(report.problems.filter((x) => x.kind === 'expired').length, 0)
+})
+
+test('an exemption that names no absent_path is undecided, not trusted', () => {
+  const dir = instance()
+  const p = path.join(dir, 'tools', 'secret-print-tests.py')
+  // Drop the key from both entries without touching anything else, which is
+  // what an edit to this dict that forgets the premise would look like.
+  fs.writeFileSync(p, fs.readFileSync(p, 'utf8')
+    .replace(/^\s*"absent_path": .*$/gm, ''))
+  const { code, report } = json(dir)
+  assert.equal(code, 1)
+  const mine = report.problems.filter(
+    (x) => x.kind === 'undecided' && x.what.includes('EXPECTED_ABSENT_FIXTURES'))
+  assert.equal(mine.length, 2, JSON.stringify(report.problems))
+  assert.match(mine[0].why, /cannot be read/)
+})
+
+// The runner is the thing that actually absorbed the failure, so it is
+// asserted directly rather than through the gate that reads it. Its
+// `premise_failures()` is called instead of running all 74 vendored tests,
+// because the classification is the subject and the suite takes 40 seconds.
+function premiseFailures(dir) {
+  const out = spawnSync('python3', ['-c', [
+    'import importlib.util, json, sys',
+    'spec = importlib.util.spec_from_file_location("w", sys.argv[1])',
+    'm = importlib.util.module_from_spec(spec)',
+    'spec.loader.exec_module(m)',
+    'print(json.dumps(m.premise_failures()))',
+  ].join('\n'), path.join(dir, 'tools', 'secret-print-tests.py')],
+  { cwd: dir, encoding: 'utf8' })
+  assert.equal(out.status, 0, out.stderr)
+  return JSON.parse(out.stdout)
+}
+
+test('the runner reads its premise off the filesystem, both ways', () => {
+  const dir = instance()
+  assert.deepEqual(premiseFailures(dir), [],
+    'both fixtures are absent in a fresh copy, so both exemptions apply')
+  claimedAbsent(dir, 'standards/lessons.md')
+  const got = premiseFailures(dir)
+  assert.equal(got.length, 1, JSON.stringify(got))
+  assert.match(got[0][0], /test_the_register_is_still_scannable/)
+  assert.match(got[0][1], /standards\/lessons\.md exists/)
+})
+
+test('the two entries name paths, and this tree really lacks both', () => {
+  // The exemptions are only honest while this holds, and if a later run
+  // vendors either fixture it should find this case red rather than discover
+  // the entry by reading it.
+  const got = premiseFailures(ROOT)
+  assert.deepEqual(got, [], JSON.stringify(got))
+})
