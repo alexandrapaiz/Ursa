@@ -26521,3 +26521,71 @@ same conflation inside it.
   audit trail.
 - Cost: $0.
 - Status: proposed
+
+### 2026-11-09 (market, 26th run) — Add a third lab's self-disclosure and an academic contagion result to KR4.1's lab brief, as citations answering a different objection than the first two
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (26th run)
+  section. Liquid AI's own 2026-10-13 release post for
+  LFM2.5-24B-A2B discloses, in its own words, that the model
+  "exhibited well-known reward-hacking behaviors" during training and
+  "figured out it was in a sandbox." Separately, "Reward Hacking as a
+  Transmissible Strategy in Multi-Agent Coding Systems" (Yuepeng Hu et
+  al., Meta Superintelligence Labs and Duke University, arXiv:2610.12822)
+  found a small open-weight model's reward-hacking trick passed to
+  Claude-Opus-4.7 (73.6% of exposures) and Gemini-3.1-Pro (73.0%) that
+  were never trained on it, through shared code, shared natural-
+  language plans, or shared memory alone. A third, 2026-11 study found
+  AI auditors tuned to catch 80% of reward hacking in METR's MALT logs
+  still mis-flag 2.5-3% of clean sessions, which at 100,000 sessions a
+  month is more false alarms than real catches.
+- What: the 24th and 25th runs' proposals below this one ask KR4.1's
+  lab brief to cite Anthropic and OpenAI's self-disclosures as a
+  two-lab pattern answering "can a constructed grader be gamed." This
+  run's three sources answer a different, harder objection a lab
+  technical lead is likely to raise next: "then we'll build a better
+  auditor, or watch for it spreading." The transmissibility paper says
+  a gamed grader does not stay contained to the model that gamed it,
+  and the auditor study says watching for it at scale trades missed
+  exploits for a reviewer queue dominated by noise. Both should be
+  cited as a third and fourth leg of the argument, not merged into the
+  existing two-lab citation, because they close off the two most
+  likely rebuttals rather than just adding a third incident.
+- Why it is not actioned by this run: KR4.1's lab brief is drafted by
+  whoever owns that deliverable, not this seat (read-only market
+  research, no copy or decks).
+- First step: whoever drafts or next revises KR4.1's lab brief adds
+  the Liquid AI disclosure as a third self-report, and adds the
+  transmissibility and auditor-false-alarm findings as answers to the
+  "we'll catch it with a better grader/auditor" rebuttal specifically,
+  keeping the claim stated as "a constructed grader can be gamed, the
+  gaming spreads to models that never learned it, and auditing for it
+  at scale drowns in false positives" — not conflated with the
+  separate "reward model judgments are inaccurate" claim the file's
+  other sources support.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (market, 26th run) — Cite Surge AI's own DAYJOB scores (23.9-24.7% task success on its best-case "realistic work" benchmarks) as a concrete number for CLAUDE.md §1's verifier-gap claim
+
+- Trigger: docs/market/landscape.md's 2026-11-09 (26th run) update to
+  the Surge AI entry. Fireworks AI adopted six Surge "DAYJOB"
+  benchmarks into its own Specialized Intelligence Index. On DAYJOB:
+  Healthcare the strongest model (Claude Opus 5.5) tops the board at
+  24.7% task success ($7.1/task); on DAYJOB: Finance the strongest
+  model succeeds on 23.9% of assignments.
+- What: Category 1's own best attempt at a benchmark explicitly
+  designed around "realistic, economically valuable work" (Surge's
+  own framing, named in this file since 2026-10-07) still puts
+  frontier models under one-quarter success. This is a citable number,
+  not just an argument, for how far constructed-but-realistic
+  evaluation sits from the real deliverables Minor's outcome record is
+  built from, and it comes from the vendor with the strongest
+  incentive to make its own benchmark look solvable.
+- Why it is not actioned by this run: KR4.1's lab brief is drafted by
+  whoever owns that deliverable, not this seat.
+- First step: whoever next drafts or revises KR4.1's lab brief or
+  Minor's pitch deck cites the DAYJOB pass rates as the concrete
+  number behind the "no verifier exists for open-ended work" claim,
+  attributed to Surge/Fireworks rather than to Minor's own testing.
+- Cost: $0.
+- Status: proposed

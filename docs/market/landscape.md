@@ -125,6 +125,30 @@ has a provenance axis too" entry for the dated follow-up. Last
 observed 2026-10-27: [Townhall: New report scrutinizes US AI data
 sales to China](https://townhall.com/news/tayte-christensen/2026/10/26/new-report-scrutinizes-us-ai-data-sales-to-china-n2685323).
 
+Update 2026-11-09 (message, 26th run): third-party validation of the
+2026-10-07 DAYJOB finding, plus the first concrete scores this file
+has recorded for it. Fireworks AI added six Surge benchmarks (DAYJOB:
+Healthcare, Finance, Tax, Accounting, Data Science, plus "sudo L7")
+to its own "Specialized Intelligence Index," an external, standardized
+leaderboard — a different company choosing to host Surge's
+constructed-realism benchmarks rather than Surge hosting them alone,
+which is the same convergence the 2026-10-07 entry already named,
+now with a second vendor's endorsement. The scores themselves
+undercut any read of this as solved territory: on DAYJOB: Healthcare
+the strongest model (Claude Opus 5.5) tops the board at a 24.7%
+task-success rate ($7.1/task), and on DAYJOB: Finance the strongest
+model succeeds on 23.9% of assignments. So what: even Category 1's
+own best attempt at a "realistic, economically valuable work"
+benchmark puts frontier models under one-quarter success, which is
+the gap CLAUDE.md §1 names stated as a number rather than an
+argument — and it is still a constructed, graded task set scored
+against Surge's own rubric, not a real deliverable's own outcome.
+Last observed 2026-11-09: [Surge AI: Six Surge Benchmarks Join the
+Fireworks Specialized Intelligence
+Index](https://surgehq.ai/blog/fireworks-specialized-intelligence-index),
+[Fireworks: DAYJOB: Healthcare
+leaderboard](https://fireworks.ai/specialized-intelligence-index/benchmarks/healthcare/dayjob-healthcare).
+
 ### Scale AI (incl. Outlier)
 
 What it is: the largest commercial RLHF/data-labeling platform,
