@@ -232,7 +232,19 @@ covered the empty-premise axis over 3. That gap is the ledger entry below.
 ## Standing audit items
 
 - **Secrets.** Clean, both scans, working tree and history. Nothing to
-  rotate.
+  rotate. Working tree: 3195 tracked files, 16 classes, 0 hits. History
+  over the repaired clone: 9064 blobs, 16 classes, 0 hits, 1 accepted by
+  `tools/secret-scan.baseline.json` — AWS's published documentation sample
+  key id, hand-authored into this scanner's own verdict-formatter fixture,
+  pinned to one blob id and replaced by a non-credential-shaped sentinel in
+  the next commit.
+- **Dependencies.** `npm audit` is 0 vulnerabilities in `ursa-major` and 3
+  low in `ursa-minor`, all three one root cause: `deepmerge`'s
+  prototype-poisoning advisory GHSA-gcqx-w48m-w2h4, reached through
+  `shadcn`, with the only fix a semver-major bump. **Already filed in
+  `docs/ideas.md` by the engineer seat**, so this run adds nothing and
+  re-states it only so the audit's own coverage is readable. A bump is not
+  behaviour-preserving and is the engineer's.
 - **Public/private boundary.** Unchanged by this run; no finding.
 - **Workflows.** Untouched by this run, per the charter.
 - **Prompt injection surface.** The four notes that triggered this run are
