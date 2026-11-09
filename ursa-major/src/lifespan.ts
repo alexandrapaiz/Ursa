@@ -30,7 +30,7 @@
 // numbers the labels came from.
 
 import { execFileSync } from 'node:child_process'
-import { normalize } from './normalize'
+import { normText } from './normalize'
 import { containment, tokens, THETA_HIGH } from './match'
 import { segment, modeForPath } from './segment'
 import type { FinalSpan, OutcomeRecord, SpanLifespan, Durability } from './types'
@@ -391,7 +391,7 @@ export function traceFile(
   const live: Unit[] = []
   for (const span of spans) {
     const units: Unit[] = segment(span.text, mode)
-      .map((u) => ({ span, norm: normalize(u.text).norm, chars: u.text.length, diedAt: null as FileRevision | null }))
+      .map((u) => ({ span, norm: normText(u.text), chars: u.text.length, diedAt: null as FileRevision | null }))
       .filter((u) => u.norm.length >= MIN_TRACEABLE_LEN)
     unitsBySpan.set(span, units)
     span.lifespan = {
@@ -432,7 +432,11 @@ export function traceFile(
     // `rev.path` rather than `path` is what makes that true: a revision
     // that only moved the file reads its content at the new path and
     // reports no death at all (see revisionsAfter).
-    const fileNorm = text === null || text.length > MAX_BLOB_CHARS ? '' : normalize(text).norm
+    // `normText` and not `normalize`: this is a whole file blob, read once
+    // per revision of the walk, and nothing here points back into it. The
+    // offset map for a 200,000-character blob is a 200,000-element array
+    // built one push at a time and discarded on the next revision.
+    const fileNorm = text === null || text.length > MAX_BLOB_CHARS ? '' : normText(text)
     const fileTokens = new Set(tokens(fileNorm))
     const revMs = Date.parse(rev.at)
     const touchedSpans = new Set<FinalSpan>()
