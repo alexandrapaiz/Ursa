@@ -116,6 +116,10 @@ const fresh = {}
 let checked = 0
 let stale = 0
 const problems = []
+// Lines the failure report prints after the problems, for things that are a
+// repair rather than a finding. Kept apart from `problems` because that array's
+// length is the count the FAILED line publishes.
+const notes = []
 // Ranges whose recorded fingerprint no longer matches the tree. Collected in
 // update mode too, because the whole point of the refusal is that the run
 // which is about to re-record them has not read them.
@@ -187,14 +191,30 @@ const fingerprint = (lines, from, to) =>
 // is not guarded for here: measured 2026-11-09 over all 466 rows of the lock,
 // the count of such ranges is zero. If one appears, the citation is the defect.
 const trimmedLines = new Map()
+// Keyed `height path`, because a path can contain a space and a height cannot.
+const windowsAt = new Map()
 const findableAt = (path, lines, height, want) => {
   if (height < 1 || height > lines.length) return []
   if (!trimmedLines.has(path)) trimmedLines.set(path, lines.map((l) => l.trim()))
   const trimmed = trimmedLines.get(path)
-  const at = []
-  for (let i = 0; i + height <= trimmed.length; i++)
-    if (hashLines(trimmed.slice(i, i + height)) === want) at.push(i + 1)
-  return at
+  // One pass per (path, height) rather than one per range, because a drift
+  // batch is many ranges over few files and the same window height recurs:
+  // measured 2026-11-09 on the real lock, 466 ranges are 326 distinct
+  // (path, height) pairs, and the 49 ranges into ursa-major/src/types.ts are
+  // 27 heights. The pass costs the same whether it is looking for one hash or
+  // all of them, so it records every window it hashes and the lookup is then
+  // free for every later range of that height.
+  const bucket = `${height} ${path}`
+  if (!windowsAt.has(bucket)) {
+    const index = new Map()
+    for (let i = 0; i + height <= trimmed.length; i++) {
+      const h = hashLines(trimmed.slice(i, i + height))
+      if (index.has(h)) index.get(h).push(i + 1)
+      else index.set(h, [i + 1])
+    }
+    windowsAt.set(bucket, index)
+  }
+  return windowsAt.get(bucket).get(want) ?? []
 }
 
 // A directory under skills/ that this loop's own `continue` would skip. It is
@@ -262,9 +282,11 @@ for (const entry of readdirSync(skillsDir)) {
         fresh[key] = fp
         // The range is carried along with the key because the gone-or-moved
         // split below needs the window height and the file's lines, and this
-        // is the one place that already has both.
+        // is the one place that already has both. `part` comes too, because
+        // from 2026-11-09 the verify report is also built out of these records
+        // and its lines are addressed the way every other problem line is.
         if (key in lock && lock[key] !== fp)
-          drifted.push({ entry, ref, key, path, from, to, body })
+          drifted.push({ entry, ref, key, path, part, from, to, body })
         if (update) continue
         if (!(key in lock)) {
           // Under `--base` this is not an authoring debt, it is the citation
@@ -279,9 +301,14 @@ for (const entry of readdirSync(skillsDir)) {
           // another tree it means this receipt holds here and will not hold
           // once that tree arrives, so the fix is owed before the merge and
           // re-recording against a tree nobody has is not it.
-          problems.push(base === null
-            ? `${entry} ${ref}: ${path}:${part} has changed since it was cited — the claim may no longer hold (re-read it, re-anchor if it moved, then --update)`
-            : `${entry} ${ref}: ${path}:${part} resolves in this checkout and not in the base tree — a reader with that tree follows this citation to other lines, so re-anchor and re-read it when that tree arrives`)
+          //
+          // Only the second one is worded here. The first is worded after the
+          // loop, out of the `drifted` record this iteration just pushed,
+          // because the repair it should name is decided by a search this
+          // iteration cannot afford to run for every range. The two are the
+          // same condition, so every drift counted here has a record there.
+          if (base !== null)
+            problems.push(`${entry} ${ref}: ${path}:${part} resolves in this checkout and not in the base tree — a reader with that tree follows this citation to other lines, so re-anchor and re-read it when that tree arrives`)
         }
       }
     }
@@ -429,6 +456,60 @@ if (update) {
   process.exit(problems.length ? 1 : 0)
 }
 
+// The verify half of the gone-or-moved split, which until 2026-11-09 was a
+// sentence telling the reader to decide it: "re-read it, re-anchor if it
+// moved". The `if it moved` is the one clause of that sentence this tool can
+// answer, because the question is asked of the lock and the file and needs no
+// git ref, and the answer was already being computed one branch away under
+// `--update`. A reader looking at sixteen drifted ranges got sixteen identical
+// sentences and no way to tell which of them needed a person; the triage was
+// then done by hand, by three separate runs of this seat, on 2026-10-15,
+// 2026-10-18 and 2026-11-02. See the 2026-11-09 ledger entry "The verify path
+// can now answer the question its own failure line asks a reader to guess".
+//
+// Two things this deliberately does not do.
+//
+// It does not run under `--base`. A drift against another tree is a different
+// finding with a different repair — the citation is newer than that tree and
+// the fix is owed before the merge — and the offsets found in the base tree's
+// copy of the file would be offsets in a file nobody here has checked out.
+//
+// It does not refuse, promote or reorder anything. The exit status, the count
+// in the FAILED line and the one-line-per-range shape are unchanged, so a
+// reader or a transcript that already knows this output still recognises it.
+// All that changes is which repair each line names.
+//
+// What it costs, measured 2026-11-09: the search runs only over ranges that
+// have already drifted, so a green library pays nothing, and verify over the
+// real library's 466 ranges is 0.32s with the split present and unexercised.
+// Over the sixteen-range batch that produced the finding it is 1.37s against
+// 0.66s, which is the whole bill and it falls on a command already exiting 1.
+if (!update && base === null && drifted.length) {
+  const sorted = drifted.map((d) =>
+    ({ ...d, found: findableAt(d.path, d.body, d.to - d.from + 1, lock[d.key]) }))
+  for (const d of sorted) {
+    const where = `${d.entry} ${d.ref}: ${d.path}:${d.part}`
+    problems.push(d.found.length
+      ? `${where} has changed since it was cited, and the lines it recorded are now at ${d.path}:${d.found.join(' or ')} — moved, not rewritten`
+      : `${where} has changed since it was cited and those lines are nowhere else in the file — the range covers prose nobody has read, so re-read it against the lines it covers now, then --update ${d.entry}/${d.ref}`)
+  }
+  // The reason the moved half needs no reading is said once and not on every
+  // line, which is the difference between a triage and a wall: measured on a
+  // real 49-range batch, the per-line version repeated one sentence 49 times
+  // and the offset, which is the only thing that varies, was at the end of it.
+  // The gone half keeps its full sentence on each line, because those are the
+  // rare ones and each is addressed to a person about to read that range.
+  //
+  // It goes in `notes` and not in `problems`, because `problems.length` is the
+  // number the FAILED line publishes and a repair is not a finding.
+  const movedAway = sorted.filter((d) => d.found.length)
+  if (movedAway.length) {
+    notes.push(`${movedAway.length} of the above only moved: the line number went stale and the text did not, so no`)
+    notes.push(`reading is owed on them. Follow the text rather than re-recording the anchor:`)
+    notes.push(`  node skills/relocate-anchors.mjs <old-ref>`)
+  }
+}
+
 // A key in the lock that no citation claims any more is a citation that was
 // moved or dropped. Not a failure, but worth saying, so the lock does not
 // quietly accumulate.
@@ -441,6 +522,8 @@ const orphans = Object.keys(lock).filter((k) => !(k in fresh))
 if (problems.length) {
   console.error(`evidence check FAILED${inTree} (${problems.length}${stale ? `, ${stale} of them drifted` : ''})`)
   for (const p of problems) console.error('  ' + p)
+  if (notes.length) console.error('')
+  for (const n of notes) console.error('  ' + n)
   process.exit(1)
 }
 console.log(`evidence check OK${inTree}: ${checked} sources resolved, ${Object.keys(fresh).length} ranges fingerprinted`)
