@@ -106,6 +106,33 @@ export const ALT_LABELS = [
 ]
 const KNOWN = new Set([HOUSE_LABEL, ...ALT_LABELS])
 
+/**
+ * Ascending by UTC calendar day, for `YYYY-MM-DD` and nothing else.
+ *
+ * WHY THIS IS NOT `compareInstants`, which is what this repository's own lint
+ * prescribes. `tools/instant.mjs` is about INSTANTS, and it says so: its
+ * `timestampShape` classifies "a bare day" as `invalid`, so `parseInstant`
+ * returns null for one, and `compareInstants('2026-11-09', '2026-11-15')`
+ * therefore answers **null** rather than -1. `isAfter` and `isBefore` answer
+ * `false` both ways. The register's read-date field holds a bare day — it
+ * names a calendar day with no zone, by the format HQ's console parses — so
+ * every repair the lint names is unavailable for this value class.
+ *
+ * Text order IS day order for a zero-padded `YYYY-MM-DD`, which is why
+ * `outage.mjs` compares `r.day` as text throughout and the lint passes it:
+ * `TIMESTAMP_NAME` matches `date` and not `day`. That distinction is load
+ * bearing rather than lucky, and this function is the honest version of it —
+ * it refuses anything that is not a bare day, so it cannot be reached for by
+ * a caller holding an instant, which is the case the lint exists to catch.
+ */
+const BARE_DAY = /^\d{4}-\d{2}-\d{2}$/
+export function compareDays (a, b) {
+  if (!BARE_DAY.test(a) || !BARE_DAY.test(b)) {
+    throw new TypeError(`compareDays takes YYYY-MM-DD, not ${JSON.stringify(a)} / ${JSON.stringify(b)}; use compareInstants from tools/instant.mjs for an instant`)
+  }
+  return a === b ? 0 : (a < b ? -1 : 1)
+}
+
 /** Every `### ` entry in a register, heading and body, in file order. */
 export function splitEntries (text) {
   const lines = String(text ?? '').split('\n')
@@ -264,7 +291,7 @@ export function report ({ text, now, rows = null }) {
     verdicts: [...byVerdict.entries()].map(([verdict, n]) => ({ verdict, n })),
     dates: [...byDate.entries()]
       .map(([k, n]) => { const [date, verdict] = k.split('\u0000'); return { date, verdict: verdict === 'null' ? null : verdict, n } })
-      .sort((a, b) => a.date.localeCompare(b.date)),
+      .sort((a, b) => compareDays(a.date, b.date)),
     due: graded.filter((g) => g.verdict === DUE)
   }
 }

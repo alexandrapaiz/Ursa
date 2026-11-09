@@ -25,9 +25,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
+import { compareInstants, isAfter, isBefore } from '../instant.mjs'
 import {
   splitEntries, labelAtHead, readDateField, gradeEntry, labelCensus, report,
-  REGISTER_PATH, HOUSE_LABEL, ALT_LABELS, VERDICTS, NO_FIELD, FIELD_NO_ISO
+  REGISTER_PATH, HOUSE_LABEL, ALT_LABELS, VERDICTS, NO_FIELD, FIELD_NO_ISO, compareDays
 } from './read-dates.mjs'
 
 // The capacity rows this organization actually had, which is outage.test.mjs's
@@ -227,4 +228,23 @@ test('live: the label census sums to the entry count, which is what makes it a c
   assert.equal(census.reduce((n, l) => n + l.n, 0), es.length)
   const known = new Set([HOUSE_LABEL, ...ALT_LABELS, NO_FIELD])
   for (const l of census) assert.ok(known.has(l.label), `${l.label} is not a declared label`)
+})
+
+test('control: compareDays orders days and REFUSES an instant, which compareInstants cannot do for a day', () => {
+  // The repository's lint forbids ordering a `date`-named value as text and
+  // names `isAfter/isBefore/compareInstants` as the repair. All three are
+  // unavailable for a bare day: `timestampShape` calls one `invalid`, so
+  // `compareInstants` answers null and both predicates answer false. Pinned
+  // here, because the day this stops being true is the day this function
+  // should be deleted rather than kept out of habit.
+  assert.equal(compareInstants('2026-11-09', '2026-11-15'), null)
+  assert.equal(isAfter('2026-11-15', '2026-11-09'), false)
+  assert.equal(isBefore('2026-11-09', '2026-11-15'), false)
+  assert.equal(compareDays('2026-11-09', '2026-11-15'), -1)
+  assert.equal(compareDays('2026-11-15', '2026-11-09'), 1)
+  assert.equal(compareDays('2026-11-09', '2026-11-09'), 0)
+  // And the control: text order is exact for a padded day and NOT for an
+  // instant, so a caller holding one is refused instead of quietly served.
+  assert.throws(() => compareDays('2026-11-09T00:48Z', '2026-11-15'), /YYYY-MM-DD/)
+  assert.throws(() => compareDays('2026-11-9', '2026-11-15'), /YYYY-MM-DD/)
 })
