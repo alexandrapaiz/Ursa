@@ -2244,3 +2244,62 @@ reported two and there are three at 390. Whether those blocks should
 carry an accessible name is still the product question run h said it was.
 The sweep after the fix reads 86 tab stops across five pages and three
 viewports, 0 below a floor, 0 unreachable, 0 unstable.
+
+## L62 — A board card can be rewritten, and the run that said it could not had asked the wrong three verbs
+
+**measured**, 2026-11-09, against the live board at
+`board.libraryofalexandria.dev` with this seat's own runtime token, and
+against the source it runs, `/srv/asc/hq/runtime/board/api.py` and
+`store.py` on the resident host.
+
+The previous run of this seat closed its notes with a lesson for whoever
+wrote the next card: keep every block under 420 characters, "and know
+that a board write is final the moment it returns 201." It had found
+that `/api/items/<id>` answers 501 to `PATCH`, `PUT` and `DELETE` alike,
+and it concluded from those three refusals that a card's prose is
+immutable. It then left two cards it called unfixable, one carrying the
+body `test` and one titled `probe why the body was refused`, on a board
+the owner reads.
+
+**The conclusion does not follow from the measurement.** Three verbs
+were asked of one path. The route that rewrites a card is a fourth verb
+on a different path, and it is the first thing the API's own module
+docstring lists after the two reads:
+
+```
+POST /api/items/<id>/edit     {company, seat, title?, body?, source_url?}
+```
+
+`ITEM_ROUTE` in `api.py` is
+`^/api/items/([0-9a-fA-F-]{36})/(move|comments|edit)/?$`, so `edit`,
+`move` and `comments` are siblings. The run had already used `move` and
+`comments` that same hour. It reached for the REST verbs on the bare
+path, got three refusals in a row, and generalised from them instead of
+reading the list of actions it was already using two of.
+
+**What it costs to check, measured.** Two `POST`s, both `201`:
+
+| card | what it carried | what it carries now |
+|---|---|---|
+| the install-command card in Review | body `test` | the three paragraphs of prose the run meant to write |
+| the probe card parked in Done | title `probe why the body was refused` | a sentence naming what the card holds |
+
+So nothing was lost and nothing was permanent. `store.edit_item` applies
+the same `prose_violation` the create path applies, which is where the
+420-character block rule lives, so the half of the lesson about block
+length is right and worth keeping. Only the finality clause was wrong.
+
+**The shape of the defect, which is the part worth carrying.** A refusal
+tells you about the thing you asked, and nothing about the things you did
+not ask. Three refusals that share a path share whatever is wrong with
+that path, so they are one observation and not three, and treating them
+as three is what made the conclusion feel measured. The cheap control
+was available and unused: the run had the route table open, because it
+was already calling two routes out of it.
+
+What this seat owes the board is therefore narrower than the last run
+said. A card's **words** are editable by the seat that owns them. Its
+**column** moves with `move`. What genuinely has no door is deletion: no
+route removes a card, so a card that should never have existed can be
+rewritten into something true but cannot be taken away, and the two the
+last run created are now two true cards rather than two junk ones.
