@@ -70,7 +70,7 @@ import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { readVerdict, completedBetween, capacityDays } from './outage.mjs'
-import { sortByDay, isDayAfter, utcDay, parseDay } from '../instant.mjs'
+import { sortByDay, isDayAfter, calendarDay } from '../instant.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 export const REPO_ROOT = resolve(HERE, '..', '..')
@@ -269,44 +269,26 @@ export function readDateField (entry) {
   return found ?? { label: null, canonical: false, date: null }
 }
 
-/**
- * The calendar day `now` falls in, as a bare day, for comparison against a
- * read date. Null when `now` places itself nowhere.
- *
- * WHY THIS IS NOT `String(now).slice(0, 10)`, which is the line it replaces.
- * `now` is `new Date().toISOString()` by default, which is `Z`-suffixed, and
- * for that value the slice and this function agree. They stop agreeing the
- * moment anybody passes `--now` a value carrying an offset: the slice returns
- * the first ten characters, which is the day in the OFFSET's calendar, while
- * the read dates it is compared against are UTC days. `--now
- * 2026-11-09T20:00:00-05:00` is 2026-11-10 in UTC, so the slice answered
- * 2026-11-09 and an entry read on 2026-11-10 was graded as a future read.
- * That is `tools/instant.mjs`'s defect 2, in a file written the same night its
- * lint was being discussed, and the lint does not report it: the sliced
- * receiver is `String(now)`, which its name pattern does not match.
- *
- * BOTH FORMS ARE ACCEPTED because `--now` takes either and always has. An
- * instant is projected with `utcDay`; a bare day is already the answer and is
- * returned unchanged rather than being pushed through a function that refuses
- * it.
- */
-export function nowDay (now) {
-  // GATED ON `parseDay` AND NOT ON `timestampShape`, which is the correction
-  // this lane made to the merged version (exo, 2026-11-09). `timestampShape`
-  // decides a SHAPE: its `BARE_DAY` is `/^\d{4}-\d{2}-\d{2}$/` and it
-  // answers `'day'` for `'2026-02-30'` and for `'2026-13-99'`. Existence is
-  // decided by `parseDay`, which round-trips through `Date.UTC` precisely so
-  // that a day the calendar does not have is refused. Built on the shape
-  // predicate, this function handed a non-existent day straight through as
-  // `now`, every later `compareDays` against it answered `null`, every
-  // `isDayAfter` answered `false`, and the register graded `due`.
-  //
-  // The general shape, which is this seat's half to carry: REACHING FOR A
-  // MEMBER OF THE REPAIRED FAMILY IS NOT THE SAME AS BEING REPAIRED. The
-  // family added an existence check and this call bypassed it by picking the
-  // one member that does not perform it.
-  return utcDay(now) ?? (parseDay(now) === null ? null : String(now))
-}
+// THE DAY PROJECTION IS `calendarDay` IN `../instant.mjs`, AND `nowDay` IS
+// GONE (engineer, 2026-11-09, completing the collapse the ExO seat routed to
+// this seat's lane by board note the same night).
+//
+// What `nowDay` was for, kept because it is a fact about THIS tool's input
+// rather than about the projection. `--now` has always taken either a bare day
+// or an instant, and the line it replaced was `String(now).slice(0, 10)`. For
+// the default value, `new Date().toISOString()`, the slice and the projection
+// agree, which is why the defect was invisible: they stop agreeing the moment
+// anybody passes `--now` a value carrying an offset. `--now
+// 2026-11-09T20:00:00-05:00` is 2026-11-10 in UTC, so the slice answered
+// 2026-11-09 and an entry read on 2026-11-10 was graded as a future read.
+//
+// Three facts about the projection itself now live once, in `calendarDay`'s
+// docblock, instead of three times here and in two other files. It is gated on
+// `parseDay` and never on `timestampShape`, so `2026-02-30` is refused rather
+// than handed through as today; it reads a bare day as already being the
+// answer; and it refuses a number, which the version that merged in #758
+// answered `1970-01-01` for because `toUtcInstant` read any number as epoch
+// milliseconds and documented it nowhere.
 
 /**
  * Grade one entry. `completedSince` is the number of runs that completed
@@ -342,16 +324,16 @@ export function gradeEntry (entry, { now, completedSince = null }) {
   if (!field.date) {
     return { ...entry, ...field, verdict: NO_DATE, why: field.label ? FIELD_NO_ISO : NO_FIELD, completedSince: null, read: record }
   }
-  // CONFLICT RESOLVED HERE, and the resolution is neither side whole.
+  // CONFLICT RESOLVED HERE, and the resolution is neither side whole. This
+  // one line was repaired by two lanes on 2026-11-09 and then collapsed by a
+  // third pass the same night; what the history is worth keeping for is the
+  // reason the refusal below is not optional.
   //
-  // Two lanes repaired this one line on 2026-11-09. The engineer's landed in
-  // #758 and reads `isDayAfter(field.date, nowDay(now))`; this seat's lane
-  // read `field.date > dayOf(now)` and threw when `now` could not be placed.
-  // The engineer's note asked for the opposite resolution — "keep your dayOf,
-  // drop my nowDay" — and by the time it was read its own premise had
-  // expired, because #758 merged first and `nowDay` is exported and tested on
-  // the trunk. So the merged function stays and the deleted half comes back:
-  // the REFUSAL AT THE CALL SITE, which is the one thing the trunk lost.
+  // The engineer's half landed in #758 as `isDayAfter(field.date, nowDay(now))`
+  // and this seat's lane read `field.date > dayOf(now)` and threw when `now`
+  // could not be placed. Each lane deleted the other's half. The projection is
+  // one function in `../instant.mjs` now, called `calendarDay`, and the
+  // refusal below is the half the trunk had lost.
   //
   // WHY THE REFUSAL IS NOT OPTIONAL. `isDayAfter` answers `false` for "I will
   // not place this", documented in `tools/instant.mjs` as "absent, not true".
@@ -362,7 +344,7 @@ export function gradeEntry (entry, { now, completedSince = null }) {
   // verdict — it says a seat owes a reading it has not taken — so an
   // unplaceable `now` manufactures debt against every dated entry in the
   // register and exits 0. The count this seat publishes to HQ is that number.
-  const today = nowDay(now)
+  const today = calendarDay(now)
   if (today === null) {
     throw new TypeError(`gradeEntry: \`now\` cannot be placed on a calendar: ${JSON.stringify(now)}. Every verdict below this line is a claim about a date relative to today, so there is no honest grade to return`)
   }
