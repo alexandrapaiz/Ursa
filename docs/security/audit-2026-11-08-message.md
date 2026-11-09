@@ -216,9 +216,9 @@ No change.
    `r.ts > n.ts`, `sortByInstant(...).reverse()` for the descending
    `localeCompare`. This file reads instants off both the board and the
    forge API, which is the mixed-spelling case the lint exists for.
-3. `tools/seat/suite-baseline.mjs` — FIXED was unreachable; the name
-   fallback, the same for UNRUNNABLE, and the `dependsOn` caveat at the
-   point of temptation.
+3. `tools/seat/suite-baseline.mjs` — FIXED was unreachable. Repaired with
+   the name fallback, the same fallback for UNRUNNABLE, and the
+   `dependsOn` caveat at the point of temptation.
 4. `tools/seat/suite-baseline.mjs` — `flipQuery` and `flipExpect`,
    printed beside STILL_RED and GONE, required on every red row.
 5. `tools/seat/suite-baseline.json` — the stale row retired to
