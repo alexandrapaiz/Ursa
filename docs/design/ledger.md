@@ -3236,3 +3236,154 @@ of its own — one subject reached out of two must still print the headline.
 `verify-hover.mjs` carried the uncovered arm: a harness probe navigating
 before the target loop that held the tracker. One premise was guarded and
 the earlier one was not, which is the shape of exo's note one level in.
+
+## L75 — An instrument that cannot enter a state measures the page in its other state, and the hole that hid here was a field's own value
+
+**measured**, 2026-11-09 (run `2026-11-09-message-ab`).
+`reviews/2026-11-09-message-ab/data/contrast-*/`, one directory per
+driven state, and `probe-two-shutters.txt` for the hypothesis that was
+wrong before the one that was right.
+
+The previous run of this seat found a control that six clean hit-area
+sweeps had never seen, and named the reason exactly: the control was not
+missed, it was **out of frame**. This entry is the next layer of the same
+fault, and it is worth separating from it, because here the tool could
+not be pointed at the frame at all.
+
+`--state <module.mjs>` has existed since 2026-10-26. On 2026-11-09 four of
+the kit's page-measuring tools carried it and one did not:
+
+| tool | `--state` before today |
+|---|---|
+| `shoot.mjs` | yes, since 2026-10-26 |
+| `measure-hit-areas.mjs` | yes, since 2026-10-26 |
+| `measure-narrow.mjs` | yes, since 2026-10-26b |
+| `measure-focus.mjs` | yes, since 2026-11-02f |
+| `measure-contrast.mjs` | **no** |
+
+So every driven state on this site had a frame, a narrow sweep, a hit
+area and a tab ring, and none of them had a contrast number, and none
+could get one. The inspector's selected panel was photographed on
+2026-10-18 and its ratios were measured by nothing. The four refusal
+states of `/record/at` had been entered by no instrument at all.
+
+### The second defect, which the first one was hiding
+
+The flag is nine lines. What it bought in its first outing is the thing
+worth writing down.
+
+This tool photographs the page twice, once as it is and once in a second
+context whose init script paints every glyph transparent, and it refuses
+to answer for a page whose frame **outside every collected text box**
+moved between the two. Driven into `/record/at`'s refusals it refused
+immediately:
+
+| state | phone | tablet | desktop | limit |
+|---|---|---|---|---|
+| the parser refused (23-char address typed) | 0.160% | 0.160% | under | 0.2% |
+| the host answered 404 (62-char) | **0.31%** | **0.28%** | under | 0.2% |
+| the answer was not a record (62-char) | **0.31%** | **0.28%** | under | 0.2% |
+| the browser could not read the host (56-char) | **0.28%** | **0.25%** | under | 0.2% |
+
+The first hypothesis was the field's horizontal scroll, since the two
+viewports that moved are the two where the typed address does not fit.
+It is in `probe-two-shutters.txt` and it is **wrong**: `scrollLeft`,
+caret, document height and focus are identical on both pages at all three
+viewports. A no-op drive was then clean at 0.000%, which cleared the
+machinery and the timing.
+
+The cause is in `COLLECT`. It walks text nodes, and it has a second pass
+for placeholders, which are not text nodes, opening `if (el.value)
+continue`. That line is right about a placeholder and it left **a field's
+value collected by nothing at all.** Pixels in no collected box are
+outside the drift mask, so the backdrop frame hides them and the
+comparison reads them as the page having moved. That is why the number
+tracked the length of the typed address, and why desktop stayed under the
+limit on the same glyphs: a larger frame, the same numerator.
+
+Collected now, in the field's own `-webkit-text-fill-color` or `color`,
+with the covered placeholder suppressed. Every driven state is back to
+**0.000%** drift, and the value is measured rather than merely not
+counted: 17.55:1 at all three viewports on `/record/at`.
+
+**The general form.** A missing collection does not present as a missing
+row. It presents as the instrument's own self-check firing, because
+anything the tool does not know about is in the residual that the
+self-check is made of. Read a refusal as a question about the tool's
+model of the page, not only about the page.
+
+**And the reason it survived.** No page this tool ever photographed had
+anything in a field, because entering that state is exactly what it could
+not do. The two defects were each other's cover.
+
+## L76 — Proposal: the removal paints eight pixels of strike past its last glyph where the line wraps, and the remedy that worked in the inspector does not transfer
+
+**measured**, 2026-11-09 (run `2026-11-09-message-ab`).
+`reviews/2026-11-09-message-ab/data/struck-trailing.txt`, every
+multi-line run in the expanded generation panel and the document, at
+1440. The crop that triggered it is
+`data/crops/expanded-desktop-2x.png`.
+
+Eight runs, four of them two lines. Every multi-line run paints **8.00px**
+past its own last glyph on the line that wraps, which is the trailing
+space inside the inline box. For seven of the eight that 8px carries a
+background highlight only, and it is invisible against this palette. The
+eighth has `text-decoration-line: line-through`, so the strike is drawn
+through it, and the removal ends in a short rule hanging in empty space.
+
+This is L72's property, one component over: an inline box paints its
+decoration and its background across its own trailing space. The remedy
+there was to move the space out of the `del`, in the component that
+builds the diff.
+
+**That remedy must not be copied here, and the reason is the product.**
+These spans are not a diff this site computes. They are the record's own
+span classification, addressed by character offsets into the finished
+work, and the inspector resolves a selection back through those offsets.
+Trimming a space out of a rendered span to tidy a decoration would edit
+the thing the offsets index. The artifact is the claim; the rendering is
+downstream of it.
+
+So this is raised and not fixed. The three candidates, for the owner:
+
+1. Leave it. One struck run in one panel, 8px, visible at 2x.
+2. Draw the removal's strike as a background rather than a decoration,
+   inset by the trailing advance. CSS only, no change to any offset, and
+   it adds a rule the ban list would have to be checked against.
+3. Render the trailing space as a sibling of the span rather than its
+   last character, which keeps the offsets intact and splits the element
+   the inspector's click handler is attached to.
+
+This seat's judgement is (1) until the owner says otherwise, because the
+cost is 8px at a wrap and every other option touches either the offsets
+or the identity.
+
+## L77 — Proposal: a record opened at its address shows the same address twice, forty pixels apart, and the second copy is larger on a phone
+
+**measured**, 2026-11-09 (run `2026-11-09-message-ab`).
+`reviews/2026-11-09-message-ab/data/address-twice.txt`, all three
+viewports.
+
+When a record opens, `RecordAtAddress` writes the canonical address into
+the field, because that is what a person copies out of it, and
+`OpenedAtAddress` prints the canonical address again as the record's
+identity. The two strings are byte-identical, by construction: both are
+`formatRecordAddress(address)`.
+
+| viewport | gap | field | echo |
+|---|---|---|---|
+| phone | 72.80px | 11.52px Geist Mono | 12.16px Geist Mono |
+| tablet | 40.00px | 12.16px | 12.16px |
+| desktop | 40.00px | 12.16px | 12.16px |
+
+Both justifications are good on their own and they were written for
+different jobs. Held together on one screen, the page whose whole
+argument is that an address is exact prints the same address twice in the
+same typeface, and on a phone prints the second one **larger**, which is
+the one viewport where a reader is most likely to read them as two
+different values.
+
+Not changed here. Which copy is load-bearing is a product decision: the
+field is a control a reader edits and the line is the record's identity,
+and removing either costs something real. Raised with the numbers so the
+owner is choosing rather than inheriting.

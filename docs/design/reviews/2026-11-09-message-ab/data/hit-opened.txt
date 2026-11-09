@@ -1,0 +1,58 @@
+
+=== phone 390x844 · at /record/at · state docs/design/reviews/2026-11-09-message-ab/data/state-at-opened.mjs ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  326x26.3      326x45       1      ok                input.w-full ""
+  115.1x16.8    116x44       1      ok                button.rec-action "read the record"
+  148.7x14      149x15       1      inline, exempt    a.rec-action "the bytes themselves"
+  312.3x34.7    142x15       2      inline, exempt    a.rec-action "the site’s own page for it"
+  189x17.9      190x19       1      document, exempt  span.sp "# Field Notes on Provenance"
+  287x41        288x19       2      document, exempt  span.sp "The resolver joins finished work back to"
+  287x64.1      78x19        3      document, exempt  span.sp "Provenance is established by the artifac"
+  266x64.1      92x19        3      document, exempt  span.sp "I wrote this closing sentence entirely o"
+  273x64.1      56x19        3      document, exempt  span.sp "Outcome records give labs a verifier for"
+  326x38.5      326x44       1      ok                button.rec-action "01-claude · turn 1 · claude-opus-563.2% "
+  326x38.5      326x44       1      ok                button.rec-action "02-chatgpt · turn 1 · gpt-5100.0% surviv"
+  274.4x17      274x18       1      inline, exempt    a.rec-action "Opening the same record through its site"
+  -> 0 of 5 standalone controls under 44px tall (3 inline, exempt; 5 document spans, 0 not covering their own line)
+
+=== tablet 820x1180 · at /record/at · state docs/design/reviews/2026-11-09-message-ab/data/state-at-opened.mjs ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  553.7x27.2    554x45       1      ok                input.w-full ""
+  115.1x16.8    116x44       1      ok                button.rec-action "read the record"
+  148.7x14      148x15       1      inline, exempt    a.rec-action "the bytes themselves"
+  669.2x34.7    172x15       2      inline, exempt    a.rec-action "the site’s own page for it"
+  216x19        216x20       1      document, exempt  span.sp "# Field Notes on Provenance"
+  560x19        560x20       1      document, exempt  span.sp "The resolver joins finished work back to"
+  592x19        592x20       1      document, exempt  span.sp "Provenance is established by the artifac"
+  624x43.3      16x20        2      document, exempt  span.sp "I wrote this closing sentence entirely o"
+  456x19        456x20       1      document, exempt  span.sp "Outcome records give labs a verifier for"
+  688.8x17.3    599x44       1      ok                button.rec-action "01-claude · turn 1 · claude-opus-563.2% "
+  688.8x17.3    599x44       1      ok                button.rec-action "02-chatgpt · turn 1 · gpt-5100.0% surviv"
+  274.4x17      275x18       1      inline, exempt    a.rec-action "Opening the same record through its site"
+  -> 0 of 5 standalone controls under 44px tall (3 inline, exempt; 5 document spans, 0 not covering their own line)
+
+=== desktop 1440x900 · at /record/at · state docs/design/reviews/2026-11-09-message-ab/data/state-at-opened.mjs ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  824.9x27.2    599x45       1      ok                input.w-full ""
+  115.1x16.8    116x44       1      ok                button.rec-action "read the record"
+  148.7x14      149x15       1      inline, exempt    a.rec-action "the bytes themselves"
+  193.3x14      195x15       1      inline, exempt    a.rec-action "the site’s own page for it"
+  216x19        216x20       1      document, exempt  span.sp "# Field Notes on Provenance"
+  504x43.3      504x20       2      document, exempt  span.sp "The resolver joins finished work back to"
+  520x43.3      456x20       2      document, exempt  span.sp "Provenance is established by the artifac"
+  504x43.3      360x20       2      document, exempt  span.sp "I wrote this closing sentence entirely o"
+  512x43.3      224x20       2      document, exempt  span.sp "Outcome records give labs a verifier for"
+  960x17.3      599x44       1      ok                button.rec-action "01-claude · turn 1 · claude-opus-563.2% "
+  960x17.3      599x44       1      ok                button.rec-action "02-chatgpt · turn 1 · gpt-5100.0% surviv"
+  274.4x17      275x18       1      inline, exempt    a.rec-action "Opening the same record through its site"
+  -> 0 of 5 standalone controls under 44px tall (3 inline, exempt; 5 document spans, 0 not covering their own line)
+
+=== total across every page and viewport ===
+  0 short of 15 standalone, 9 inline and exempt by 2.5.8, 15 document spans (0 not covering their own line), 39 targets seen
+  the floor reached no control on: no page — every page here had at least one standalone control
+  document spans are: span.sp, on at
+
+every one of the 3 page loads this run measured was reached: /record/at 200, /record/at 200, /record/at 200.

@@ -121,3 +121,43 @@ export async function couldNotRead(page) {
   await interceptRemote(page, (route) => route.abort('connectionrefused'))
   await submitAddress(page, 'pages/alexandrapaiz/ursa-records/ursa-2026-10-18-abc1234')
 }
+
+/**
+ * And the fifth state on this page, which is not a refusal: a record OPEN at
+ * its address.
+ *
+ * This is the surface `/record/at` exists for, and no instrument had entered
+ * it either. It draws text nothing else on the site draws: the canonical
+ * address echoed back, the byte count and host line, the integrity sentence,
+ * and a sha256 in 10.5px monospace, all of it under an argument about exactness.
+ *
+ * The record served is this repository's own `public/records/mini-fixture.json`,
+ * read off the dev server and handed back as the remote host's answer, so the
+ * bytes are the ones `/record/mini-fixture` already renders and still nothing
+ * leaves this machine.
+ */
+export async function openedAtAddress(page, base = 'http://localhost:3310') {
+  const body = await (await fetch(`${base}/records/mini-fixture.json`)).text()
+  await interceptRemote(page, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'access-control-allow-origin': '*' },
+      body,
+    }),
+  )
+  await page.waitForSelector(FIELD, { timeout: 15000 })
+  await page.focus(FIELD)
+  await page.fill(FIELD, 'pages/alexandrapaiz/ursa-records/ursa-2026-10-18-abc1234')
+  await page.waitForFunction(
+    (sel) => { const b = document.querySelector(sel); return Boolean(b) && !b.disabled },
+    SUBMIT,
+    { timeout: 15000 },
+  )
+  await page.click(SUBMIT)
+  // Gate on the integrity line, which only the opened state draws.
+  await page.waitForFunction(
+    () => document.body.textContent.includes('sha256'),
+    { timeout: 20000 },
+  )
+}
