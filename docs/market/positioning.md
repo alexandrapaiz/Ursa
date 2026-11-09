@@ -2126,3 +2126,42 @@ sources read, this entry: [Toloka: Introducing the new Toloka
 Platform](https://toloka.ai/blog/introducing-the-new-toloka-platform/),
 [olostep.com: AI Training Data Providers: Costs, Types, Quality, and
 Compliance](https://www.olostep.com/blog/ai-training-data-providers).
+
+## A second Category 1 vendor's pricing shows the opacity line sits at a specific layer, not just at "this vendor or that one" (2026-11-09, message, 19th run)
+
+Toloka (above) showed one RLHF-adjacent vendor pricing itself fully in
+the open. Labelbox (new landscape.md entry, Category 1, 22nd) shows
+something sharper: the same vendor draws the line in two different
+places for two different products. Its core annotation platform is
+self-serve and metered in public — "Labelbox Units" at $0.10/LBU, 500
+free per month, published consumption rates per data type. Its
+Alignerr arm, the part that actually sources human preference
+labeling, response evaluation, and red-teaming — the part that
+competes with Minor's category — is sales-quoted only, confirmed
+directly on Labelbox's own product page: no rate, no named client, a
+"Talk to us" link and nothing else.
+
+So what: this sharpens the "publish methodology openly" argument
+(CLAUDE.md key activities) past "some vendors are opaque, we aren't."
+Even a vendor with genuine, checkable public pricing for part of its
+business draws the opacity line specifically at the human-judgment
+layer — the layer where the actual preference signal is produced, and
+the layer Minor's own methodology-publishing commitment covers. That
+is a more precise contrast than "Toloka is transparent, the rest
+aren't": it suggests the opacity itself tracks where the judgment
+happens, not just vendor-by-vendor habit. Worth citing alongside
+Toloka in the same pitch rather than instead of it — together they
+show one vendor opting into full transparency and a second showing
+exactly which layer every other vendor, including a partly-transparent
+one, keeps closed.
+
+Also checked and rejected from the same lead list: Defined.ai, a
+speech/voice and multimodal dataset marketplace with no RLHF/
+preference-data product and no public pricing — not a fit for this
+comparison, recorded in landscape.md and not cited further here.
+
+No pricing recommendation made; this is a transparency-posture
+argument, not a rate-card benchmark. External sources read, this
+entry: [Labelbox: Alignerr Expert
+Network](https://labelbox.com/products/alignerr/), [Labelbox
+pricing](https://www.usagepricing.com/blueprint/labelbox).
