@@ -24947,3 +24947,128 @@ same conflation inside it.
   instances and collision is the arm with the argument.
 - Cost: $0
 - Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, eighth message run): the library's own evidence identifiers were the one citation form no guard read, and the four that dangle carried a false claim about a sibling
+
+### 2026-11-09 — A bare `E<n>` in prose has no tag, no range and no lock row, so the second surface that resolves it is the lock and nothing was cross-tabulating the two
+
+- Trigger: a note from Ursa's exo seat, 2026-11-09T09:52Z, corroborating
+  this seat's run-note namespace measurement off an independent surface and
+  sharpening the claim it was offered into. Its sentence is the general
+  rule: a namespace whose gaps are facts cannot be graded from one surface
+  at all, because one surface cannot separate nothing happened from
+  something happened and wrote elsewhere. That is a statement about
+  instruments and not about window numbers, so this run asked which
+  namespace in this library is graded from one surface.
+- What: the answer was the library's own evidence identifiers.
+  `check-evidence.mjs` reads citation tags, `[E3]` and `[E3, E7]`, and the
+  tag is the entrance to the whole apparatus: a tag names a ref, the ref
+  names a range, the range is fingerprinted. A bare `E33` in a sentence is
+  on none of that path. `refsIn` skips it because it is not a tag,
+  `declaredRefs` does not know it because it is not frontmatter, and it has
+  no range so it has no lock row. `prompts/skill-extract.md` §5t part 1
+  named this exact costume for register identifiers coming from outside the
+  library, and the library's own namespace is the same costume one
+  directory closer. `skills/bare-refs.mjs` is the cross-tabulation, prose
+  against `evidence.lock.json`, with 24 tests in
+  `skills/bare-refs.test.mjs` and one positive control per cell. Over the
+  library: 11 skills, 22 markdown bodies, 651 tag citations, 13 bare
+  mentions, 9 of them resolving to a ref of the skill that wrote them and
+  **4 that do not**, all four on one line of
+  `auditing-an-untraced-share/TRIGGER-TEST.md`, each held by three other
+  skills.
+- What the four were carrying, which is why this is a finding and not
+  hygiene: the sentence claimed that four of a sibling's refs "already cite
+  the same schema lines" as four of this skill's. Resolved against the
+  lock, three of the four overlap this skill's ranges and the fourth,
+  `ursa-major/src/types.ts:772-775`, is cited by no ref of this skill at
+  all, so the correspondence is three to four. The sentence also did not
+  name the sibling, and the lowest of the four identifiers is a different
+  range in three skills of this library, so the claim was unresolvable from
+  the file that made it and wrong where it did resolve. Repaired in the
+  same run by naming the sibling by slug and its refs by range.
+- First step: done, and the one thing left open is the exemption. §5aa's
+  discriminator is whether a mention asserts the name resolves, and no
+  typographic signal in this library tracks it: of the two mentions sitting
+  inside a markdown code span, one asserts resolution
+  (`attributing-a-deleted-span/SKILL.md`, "`E3` says
+  `unreadable_merge_commit` is fixed by fetching the base ref") and one
+  does not. A code-span exemption would therefore be wrong in half of the
+  only corpus there is, so the guard has none and this run rephrased its
+  own exempt mention instead. A later run that meets an exempt mention it
+  cannot rephrase should declare the exemption rather than infer it.
+- Cost: $0, in `skills/bare-refs.mjs`, `skills/bare-refs.test.mjs` and
+  `skills/auditing-an-untraced-share/TRIGGER-TEST.md`
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, eighth message run): the two-surface rule belongs in the extract prompt, and it cannot land on the branch that carries its first guard
+
+### 2026-11-09 — A claim read out of an absence is ungradeable from one surface, and this library has no section saying so
+
+- Trigger: the same note. Three sections of `prompts/skill-extract.md` are
+  already in this family and none of them states the general rule. §5ak
+  says a check prints the size of the population it examined, because a
+  check that read none of it and a check that found nothing in it print the
+  same thing. §5al says a verdict read out of a pattern's silence is a
+  claim about the vocabulary. §5s says a guard that skips its subject
+  reports on the subject it has left. All three are the instrument's own
+  silence. The case none of them covers is the one where the absence is the
+  finding rather than the instrument's state.
+- What: the rule the section would state. When what a run reports is an
+  absence, one surface cannot grade it, because nothing happened and
+  something happened and wrote elsewhere are indistinguishable from inside
+  the surface that is missing the thing. So the report carries a second
+  surface keyed on the same identifier, and publishes the full
+  cross-tabulation rather than the absences from one. Neither surface has
+  to be complete, only independent, and the measurement behind that clause
+  is the exo seat's: over the 39 window slots of 70..108, run-note
+  filenames covered 30 and `## Window <n>` headings in `improvements.md`
+  covered 7, and the cross-tabulation still split this seat's ten absences
+  nine to one. Nine look like killed runs. Window 93 filed its delta and
+  wrote no run note, which is what a killed run does not look like.
+  Measured in this lane the same hour: the same cross-tabulation over this
+  library's evidence identifiers found 4 dangling mentions that the prose
+  surface alone reports as ordinary pointers, and `skills/bare-refs.mjs`
+  is the first guard in the library that reads two surfaces for one
+  identifier on purpose.
+- First step: not this run's, and the reason is a rule rather than a
+  budget. §5ai says a run that needs a new section writes it in a pull
+  request that carries nothing citing it, and `docs/standards/pm.md` §10
+  makes `prompts/` Tier C, so adding the section to this branch would
+  carry this run's guard and the two pull requests it already subsumes
+  into a Tier C queue behind one file. The section is the next run's, on
+  its own branch, citing nothing. It should also say whether §5t part 1
+  reaches the library's own `E<n>` namespace, which the guard shipped here
+  assumes and no section states.
+- Cost: $0, one section of `prompts/skill-extract.md` on a branch of its
+  own
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, eighth message run): two relevance verdicts and one unread ref are red on `main`, from a merge into a file this seat does not own
+
+### 2026-11-09 — `clearing-a-record-for-release` E28 and E45 were read against a security standard that has changed under them
+
+- Trigger: `node skills/relevance-sweep.mjs` on this branch, which reports
+  316 of 318 verdicts bound to what was read and names the other two. Both
+  cite `docs/security/redaction-standard.md`, E28 at 29-63 and E45 at
+  234-248, and both verdicts are dated 2026-10-27.
+- What: the staleness is not this branch's. `git diff origin/main HEAD` is
+  empty for both `docs/security/redaction-standard.md` and
+  `skills/relevance.lock.json`, so the sweep reads the same two red rows on
+  the default branch, and it has since the security seat's later runs
+  edited that standard. E46 is additionally unread, with no verdict row in
+  `skills/relevance-audit.md` at all. This is §5j and §5o working as
+  designed rather than a defect in them: a verdict is bound to the text it
+  was read against and says so when that text moves. What it means is that
+  this seat's standing claim, library green against `main`, is false on
+  `main` today in the one guard that needs a reader.
+- First step: this seat's, next run, and it is reading rather than tooling.
+  Re-read 29-63 and 234-248 as they now stand, re-judge the two verdicts
+  against the citing passages the sweep gathers, give E46 its first row,
+  then `--record` in the same commit so the diff shows a person decided.
+  It is deliberately not folded into this run, because a relevance verdict
+  is the one artifact in this library that a script must not produce and
+  this run's unit of work was already spent.
+- Cost: $0, in `skills/relevance-audit.md` and
+  `skills/relevance.lock.json`
+- Status: proposed
