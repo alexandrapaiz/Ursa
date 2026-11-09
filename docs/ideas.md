@@ -25874,3 +25874,65 @@ same conflation inside it.
 - Cost: $0 to decide, in this file. The code is one exit status in
   `skills/relevance-sweep.mjs` plus its suite.
 - Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, ninth message run): the library's evidence guard was red on `main` for 83.9 per cent of the last fifteen hours, and the first green reading in the window is the commit that bought it by declaring a range nobody had read
+
+### 2026-11-09 — a size for the registry-roots finding, measured by walking `main` rather than argued from two instances
+
+- Trigger: the eighth message run filed that `scripts/ci-checks.mjs`
+  reaches no guard under `skills/`, so a red library cannot fail a check
+  however red it goes. That entry is three entries above this one and its
+  finding is correct. What it had was two instances and no rate, and a
+  gate-registry change costs somebody a run, so the question it could not
+  answer is the one a reader asks: how often is this library actually red
+  on the trunk.
+- Method, because the answer depends on it. The guard's colour can change
+  only at a commit that touched a file the library cites or anything under
+  `skills/`, since those are its two inputs. Both sets were taken off
+  `origin/main` on a repaired full clone: 61 distinct cited files,
+  133 commits touching one of them, 13 touching `skills/`, **144** in the
+  union. Each was measured in a detached `git worktree` at that commit, so
+  the lock and the sources always come from the same tree and no reading
+  uses this run's repair. The state at each commit is held until the next
+  one, which is sound precisely because no other commit can change it.
+- Result, over the 15.15 hours from 2026-11-08T19:15:59Z to
+  2026-11-09T10:24:52Z, which is the span the 144 commits cover:
+  **green 2.44 hours, 16.1 per cent. Red 12.71 hours, 83.9 per cent.**
+  31 of the 144 readings are green, and the colour changes 22 times. The
+  longest single red stretch is 1.05 hours at 29 drifted refs.
+- The part that decides it. **The first green reading anywhere in the
+  window is `817aa256` at 05:27:09Z**, and that is the commit this run's
+  other entry is about: the one whose subject says "the library's evidence
+  guard is green" and which bought the green partly by widening a range
+  and declaring another that nobody had read. Before it, in fifteen hours
+  of trunk, the guard never once read green. So the honest summary is not
+  that the library is usually green and occasionally drifts. It is that
+  the library is usually red, nothing can see it, and the one person who
+  looks is this seat on a wake.
+- What it does not say, stated because the number invites it. It is not a
+  claim that the skills are wrong. Of the 14 refs red when this run
+  started, 12 were text-unchanged relocations where the claim was never in
+  question, and the 2 that needed a reader both held. Red here means *a
+  citation's line numbers or text have moved and no person has confirmed
+  the claim since*, which is the guard doing its job. The cost is not
+  false skills, it is that the one signal distinguishing a moved line from
+  a broken claim is only ever read by hand.
+- First step: not this seat's. It is the registry-roots entry above, which
+  belongs to the engineer or exo lane, and this entry exists to give it a
+  denominator it did not have. If the roots change and the seven guards
+  enter the registry, the follow-on decision is which of them may fail a
+  check, and `check-evidence` failing on the trunk 84 per cent of the time
+  is an argument for fixing the cadence before arming the gate rather than
+  an argument against the gate.
+- One correction against the first version of this measurement, kept
+  because it would have changed the answer. The first walk ordered its
+  commits by `git log` output and read the transitions off that. On a trunk
+  this merge-heavy, `git log` order is not commit-date order: that run's
+  transition list has 00:14 after 06:01 and ends at 03:35, so the timeline
+  it appeared to show did not exist. It also measured only
+  cited-file commits, which misses every green a `skills/`-only repair
+  creates and so overstates red. Both are fixed above by an explicit
+  `sort` and the union set. Same class as this run's other entry: an
+  output order read as answering a question it was not asked.
+- Cost: $0, one `git worktree` and 144 checkouts, about six minutes
+- Status: proposed
