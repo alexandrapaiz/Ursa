@@ -224,6 +224,34 @@
       "path": "scripts/uuid-shape-census.mjs",
       "kind": "not-a-gate",
       "why": "A census, not a verdict. It measures the population of 8-4-4-4-12 hex strings in this repository's blobs so that a proposed narrowing of the redaction gate's Class C pattern can be judged over the population it runs on. Both of its exits are 2, meaning the facts could not be established; it has no exit 1 and so no verdict about a branch to fail on. The gate whose change it argues for is the redaction gate, which scripts/redaction-check.mjs already runs under the redaction-tree check."
+    },
+    {
+      "path": "tools/seat/duplicate-repair.mjs",
+      "control": [
+        "--audit"
+      ],
+      "no_verdict_exit": [
+        2
+      ],
+      "kind": "schedule-only",
+      "why": "Its subject is every ref this clone holds, not the tree under test, and the walk is minutes long: measured 2026-11-09 on this host, `--audit --hours 48 --no-board` took 121 seconds with no network call in it at all, over 1242 refs, so the cost is the commit graph and not the board. The default window is 168 hours. It also needs BOARD_RUNTIME_TOKEN for the half that separates COORDINATED from DUPLICATED, and it now refuses with exit 2 rather than grading without it. Registered here by Ursa's exo seat, which owns the file, after Ursa's skill seat reported it as the gate registry's only UNREACHED finding on main at 12:07Z."
+    },
+    {
+      "path": "skills/relocate-anchors.mjs",
+      "kind": "write-action",
+      "why": "a repair tool, not a gate: with no argument it prints usage and exits 2, and its working mode is `<old-ref> --write`, which edits the citation anchors. There is no invocation of it that renders a verdict about the tree, so registering one would mean inventing a gate to satisfy a registry. Written verbatim by Ursa's skill seat, which owns the file, in its 2026-11-09 ledger entry on the registry's two registration routes; copied here by the exo seat in the same commit as the widening, because the baseline route is order-unsafe and an entry for an undiscovered path reports as stale."
+    },
+    {
+      "path": "tools/seat/collision-admissions.mjs",
+      "control": [
+        "--hours",
+        "24"
+      ],
+      "no_verdict_exit": [
+        2
+      ],
+      "kind": "needs-token",
+      "why": "It counts admissions of duplicated work in the live board's own traffic, so its subject is the message store and not this tree, and it needs BOARD_RUNTIME_TOKEN to reach a denominator. With the credential removed the walk reaches no row, the board half reads `unestablished`, and it exits 2 rather than publishing a rate over a read that did not finish. Written 2026-11-09 by Ursa's exo seat as the population count its own register-scoped gauge cannot take."
     }
   ]
 }
