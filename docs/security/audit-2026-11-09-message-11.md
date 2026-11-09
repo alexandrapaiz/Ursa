@@ -157,6 +157,35 @@ These two are why the baseline needed a `red-on-main` kind at all. Filed as one
 are before touching either gate, because the two numbers may not be the same
 kind of thing, and a repair chosen before that measurement would be a guess.
 
+## F118 — 278 lines of committed work are absent from `main` right now, and the repair is open
+
+Debug sweep, reading recently merged diffs. Ursa/frontend reported this on the
+board against its own merged row, and the useful thing this seat can add is
+that it is still true of `main` at the time of writing, measured rather than
+taken from the note.
+
+`docs/design/reviews/2026-11-09-message/NOTES.md` was 278 lines at
+`cebf0f8d^1`. It is 183 lines on `origin/main` now, and the first heading of
+the 278-line version appears **0** times in it, so the file was replaced and
+not appended to. The 278-line version is present on the branch behind the open
+follow-up, which is ready and not a draft.
+
+The cause is worth more than the instance and the frontend seat stated it: the
+runtime names a branch after the trigger, and a charter says to append a suffix
+if the branch exists. A merged branch is deleted and a merged directory is not,
+so the two names come apart exactly when a previous run succeeded, and the
+check a charter gives is about the one of the two that gets deleted. Nothing
+reported it: no conflict when `main` was merged back, no gate, and the diff
+read as an ordinary addition.
+
+**The owner's action is to merge that follow-up.** This seat did not restore
+the file, because a second restore of the same bytes from a different branch is
+two repairs for the owner to reconcile instead of one to merge. What this seat
+can say is that the loss is live, which the note alone did not establish.
+
+Severity: moderate, and recoverable. No secret, no user data, and the bytes
+exist on a pushed branch.
+
 ## A correction to the note this run was woken with
 
 Ursa/engineer wrote that F93 is "fixed and build-verified" and that this seat
@@ -190,9 +219,19 @@ warning path is the part that entry does not mention.
   window over 8,601 blobs with no finding; this branch adds to that tree only
   commits whose blobs the working-tree scan covers.
 - **Dependencies.** `npm audit --package-lock-only` reads 0 advisories at every
-  severity in `ursa-major` and `ursa-major/overlay`, with no advisory offering
-  only a semver-major fix and none with no published fix. `ursa-minor` is the
-  package F93 is about and `#823` is where its number moves.
+  severity in `ursa-major` and `ursa-major/overlay`. `ursa-minor` on `main`'s
+  lockfile reads 23: 0 critical, 7 high, 15 moderate, 1 low, and **0 at every
+  severity with `--omit=dev`**. So the floor in `scripts/dep-floor.mjs` holds,
+  because all seven high are dev-scope: the `shadcn` chain,
+  `@modelcontextprotocol/sdk`, `body-parser`, `systeminformation`, `undici` and
+  `zod`. F93 is the 23 and `#823` is where that number moves.
+  **Six** of the 23 carry `fixAvailable.isSemVerMajor`, all six the same
+  downgrade of `eslint-config-next` to 15.5.29, where Ursa/engineer's note
+  reports eight. Both can be right and the method is the difference: this is
+  `main`'s lockfile read with `--package-lock-only` and no install, and theirs
+  is an installed tree after `npm audit fix` had already moved packages. The
+  number is quoted here with its method attached rather than reconciled,
+  because reconciling it would need the install this box could not hold.
 - **The gate list, run.** `node scripts/ci-checks.mjs` with the two product
   checks and the suite sweep skipped: 27 of 30 checks passed, 0 failed. The
   suite sweep run on its own: 100 suites, 1623 tests, 1622 pass, 0 fail, and
