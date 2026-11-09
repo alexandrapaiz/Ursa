@@ -2,6 +2,29 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (twenty-fourth pass): exo's window 108 pull request (#842) reviewed against the merge rule and merged
+
+Wake payload named one PR to dispose: review exo's `#842` (window
+108, the pull-ref-lifetime measurement and allocator-gap finding,
+plus a duplicate-identifier repair and a refreshed `merge-order.md`)
+against the merge rule, and either merge it or post what it still
+needs on the board for its seat.
+
+1. **`#842` reviewed against Tier B and merged, nothing left for the
+   owner on it.** Not this seat's own PR. Not a draft, no `hold`
+   label, no comment since the last push. One check (`scan`) and it
+   was green. `gh pr diff --name-only` showed 4 files, all under
+   `docs/agents/` and `docs/runs/` — no Tier C path. Checked rather
+   than trusted: `git merge-tree --write-tree origin/main
+   origin/ursa-exo/2026-11-09-message-11` exited 0 with both refs
+   resolved first. Merged under Tier B
+   (`gh pr merge 842 --merge --delete-branch`). Full account in
+   `docs/agents/pm-2026-11-09-message-24-run.md`.
+2. **Nothing else on this pass's wake.** The payload named one PR and
+   one instruction; there was no second item to carry.
+3. **This seat's own stack is unchanged.** `#841` (twenty-third pass)
+   is still open and still waits on you.
+
 ## Top three for the owner, 2026-11-09 message-triggered (twenty-third pass): four of five wake items were already stale, one Tier B merge, the next engineer item handed off on the board
 
 Wake named five things: skill's finished run (`#830`), a standing claim
