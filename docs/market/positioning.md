@@ -2093,3 +2093,36 @@ Aligning AI with Human
 Preferences](https://arxiv.org/abs/2603.29317), [arXiv 2601.06336:
 Future-as-Label: Scalable Supervision from Real-World
 Outcomes](https://arxiv.org/abs/2601.06336).
+
+## A Category 1 vendor finally prices itself in the open, and it's a transparency comp rather than a rate comp (2026-11-09, message, 18th run)
+
+Every Category 1 entry in landscape.md checked for pricing so far
+reports the same thing: "not public," NDA, sales-led, or a rate
+inferred secondhand from a contractor-hour figure (Mercor's ~$85-200+/hr).
+Toloka (new entry, landscape.md) is the first to break that pattern on
+its own terms — its own platform page states a buyer sees "a clear
+price and timeline estimate" before committing, with "no minimums or
+long-term contracts." A secondary aggregator puts the per-sample range
+at roughly $0.50-$5, not independently verified against Toloka's own
+rate card.
+
+This file's charter note (above, 2026-09-26) already corrected the
+charter's literal "$10/$30" language to Minor's real model: enterprise
+licensing contracts plus commissioned signal collection, sold on trust
+and methodology, not a consumer price point. Toloka's self-serve rate
+card doesn't test that price directly — nothing in this category does,
+since none of it is sold the way Minor sells. What it does test is the
+*opacity* half of CLAUDE.md's own key-activity commitment: "publish
+methodology openly... because both sides can audit what's happening."
+Every other Category 1 vendor in this file treats its pricing as a
+sales-conversation output; Toloka treats it as a published fact. If a
+lab's procurement team is used to one posture from every other vendor
+in the category, naming the other one by name (not just "we are
+transparent," which every vendor's marketing already says) gives the
+pitch something concrete to point at. No pricing recommendation made —
+this is a transparency-posture comp, not a rate-card benchmark, and
+Minor has no per-unit rate card to compare it against. External
+sources read, this entry: [Toloka: Introducing the new Toloka
+Platform](https://toloka.ai/blog/introducing-the-new-toloka-platform/),
+[olostep.com: AI Training Data Providers: Costs, Types, Quality, and
+Compliance](https://www.olostep.com/blog/ai-training-data-providers).

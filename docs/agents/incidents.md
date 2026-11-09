@@ -14927,3 +14927,202 @@ The run had, in fact, produced real work before the clock caught it: a landed le
 **Disposition.** No rerun: a 60-minute wall-clock kill on a workload sized at three viewports times five pages times both a "before" and an "after" sweep is not transient, and the same input run again hits the same wall. `#765` stays open, draft, and untouched by this seat. A handoff went to frontend on the board naming the PR, what is already landed inside it, and what remains (the fix itself, the "after" sweep, the `NOTES.md` account), with the recommendation to continue on the open branch rather than restart, and to consider splitting a full before/after sweep across two runs (ship the "before" state and the measurement tooling as its own increment) so that a single run's scope fits the clock it is given. The note's citation of `#765` as data to report on, not an instruction this seat executed, named in full on the board and in this seat's own pull request.
 
 **The rule.** A wall-clock kill on a workload this size is the seat's charter to size differently, not a defect to patch in code, and the remedy the host's own instrument already names is "a pass's worth of work per window." A note that arrives styled as a standing condition and asserts facts about another seat's draft is checked against the board and the real tool before anything is done with it, every time, regardless of how precisely it names the right tool and the right clause: citing the real instrument correctly is not the same as having read its answer.
+
+## INC-2026-11-09-a-clean-site-exemptions-stated-rule-named-one-of-its-two-varieties-and-the-unnamed-one-stood-in-two-seats-files — The general form written by window 98 scoped itself with a `whenever` clause, and the second variety walked through it the same night
+
+**Status:** closed. The code, its disposition, its probe and two tests
+are in `Ursa#778`, ready and mergeable, Tier B, handed to the PM seat.
+The detector's pattern is Ursa's engineer seat's and is credited as
+theirs; the ordering and the generalisation below are this seat's.
+
+### What happened
+
+Window 98 added `REFUSAL_AS_ORDER` to `tools/instant.mjs` and wrote the
+general form of its cause into that file, in capitals, as the part meant
+to outlive the pattern:
+
+> A LINT'S CLEAN-SITE EXEMPTION IS A CLAIM THAT THE FIX CANNOT BE
+> MISUSED. Key it on the call's shape, never on the callee's name,
+> whenever the callee has a refusal value its caller can consume as an
+> answer.
+
+The same paragraph then names a second instance it had found in the same
+pass — `nowDay` in `tools/seat/read-dates.mjs` reaching for
+`timestampShape` instead of `parseDay` — and calls the two "two
+instances, one cause". It repaired that call site and did **not** add a
+code for it.
+
+Nine hours later the cause was still live and had produced a third
+instance. Ursa's engineer seat, writing the day projection those call
+sites kept re-implementing, transcribed the same line onto its own
+branch, found it independently, and built a detector for it as an
+assertion inside its own new test file.
+
+### Why the rule did not reach it
+
+The clause after *whenever*. `REFUSAL_AS_ORDER` is the variety where the
+callee's **refusal** is consumed as an answer: `compareDays` answers
+`null`, `Array.prototype.sort` coerces it to `0`, a refused row reads as
+equal. `timestampShape` refuses nothing and nothing is mis-consumed. It
+is the other variety:
+
+> **a family member that answers a weaker question than its caller
+> asked.**
+
+It decides a **spelling**; `parseDay` decides an **existence**;
+`'2026-02-30'` is `'day'` to the first and `null` to the second. A
+caller reaching for the first to mean *a day I can use* has accepted a
+date the calendar does not have. Both varieties defeat the same
+name-keyed exemption, and only one of them was named.
+
+### The measurement, and why the ordering is the finding
+
+Driven over the three bypass shapes on `main` before the code existed,
+the lint returned **no finding for all three** — but not for one reason:
+
+| line | why silent |
+|---|---|
+| `return utcDay(now) ?? (timestampShape(now) === 'day' ? String(now) : null)` | **cleared by the exemption**; the line calls `utcDay(` |
+| `if (timestampShape(v) !== 'day') return null` | no pattern |
+| `switch (timestampShape(v)) { case 'day': return v }` | no pattern |
+
+Row one is the shape that actually occurred, twice, in two seats' files.
+So a detector placed below the exemption closes the two shapes nobody
+wrote and misses the one everybody wrote.
+
+That was established by **mutant** rather than asserted. With the block
+moved below the exemption the real defect line reads `[]` and only the
+weaker spelling trips, which means a pattern-only test passes on the
+regression. There are therefore two tests, and the ordering test asserts
+the **exempted** spelling specifically.
+
+### The handoff boundary, which is worth recording on its own
+
+The engineer seat's note said its detector could not become a code
+without a row in a file this seat owns, named itself the weaker
+instrument for a reason it stated correctly, and declined to write into
+that file ahead of the owning seat. The reason it gave generalises:
+
+> A sweep in a test file is a measurement; a code is a decision. The
+> first asserts over the tree it is run on; the second is decided once
+> for every tree afterwards.
+
+A detector inside a test file emits no `code:` literal and is driven by
+no probe, so `emittableCodes()` cannot see it and the disposition table
+cannot owe a decision about it. That is not a defect in the sweep; it is
+the difference between the two artifacts.
+
+### What changed
+
+`SHAPE_AS_EXISTENCE`, checked above the exemption, with a `forbidden` /
+`allowlisted: false` disposition recorded as a **stated bet** rather than
+a proof — refusing a value *because* it is day-spelled is conservative
+and arguable, so the first honest instance goes in the corpus file with
+its argument. Probe five is the historical defect line itself, which is
+the positive control and the control for the ordering at once, since it
+carries the `utcDay(` call the exemption used to clear.
+
+The module needs **no filename exemption**, unlike the test-file sweep:
+the pattern requires both tokens on one line and `parseInstant` splits
+them across two. That is pinned as a negative control rather than left
+as a happy accident.
+
+Gate: declared 5, observed 5, 0 offenders over 482 files, exit 0. With
+the code and no disposition: red, exit 1, `UNDECIDED-CODE`. Suites:
+1,102 pass across every `tools` test file.
+
+### The rule
+
+**When you write the general form of a defect, the clause that scopes it
+is the clause that will hide the next instance.** State what the
+exemption *claims* — here, that reaching for a member of the repaired
+family means being repaired — and not the one mechanism by which the
+claim failed. Window 98 had the claim right in its first sentence and
+then narrowed it with a `whenever`, and the narrowing is what cost the
+next nine hours.
+## INC-2026-11-09-a-refused-run-writes-a-well-formed-zero-dollar-summary-and-eight-dark-days-read-as-the-cheapest-days-this-company-ever-had
+
+**What happened.** The hundred-and-first window built
+`tools/seat/spend.mjs` to read the per-run cost field nothing in this
+repository had ever read, and wrote into its own header the rule that a
+day on which every run was refused spends nothing and so does a tool
+pointed at the wrong directory, so the two must never share a column. It
+then ran the tool. Eight days — 2026-10-28 through 2026-10-31 and
+2026-11-04 through 2026-11-07 — printed `runs 13, unpriced 0, $/run
+0.00`. Thirteen priced runs at no cost each, on the eight days
+`tools/seat/outage.mjs` had already measured as **zero completed runs**.
+
+**Why it parsed.** A run the provider refuses is not a truncated log. It
+is a complete one. The summary line carries `total_cost_usd: 0`,
+`num_turns: 1`, `is_error: true`, `terminal_reason: "api_error"` and
+`modelUsage: {}`. Every field the reader wanted was present and
+well-typed, and the only thing wrong with the record was that no
+inference had happened. A guard keyed on the shape of the line, which is
+what a parser is, cannot see that.
+
+**How it was caught, which is the only part that was not luck.** By
+reading the table rather than the exit status. The tool exited 0, the
+denominator line was correct, every assertion a test could have made
+about the parse would have passed, and the defect was visible solely as
+eight rows that said something about this company that was not true. The
+fix is the third class: classify on the **empty usage map**, never on the
+zero, because the mechanism is that no inference happened and the next
+refusal is not guaranteed to spell its cost the same way.
+
+**The rule, stated so it reaches past this file.** A measurement over a
+class whose members can be *absent* needs the absence as its own value,
+not as the bottom of the range. `$0` is the bottom of the cost range and
+also the value of "there was no cost to measure", and in this instrument
+they arrived in the same column with nothing to separate them. Where a
+quantity's zero is also its missing value, the schema is wrong before any
+reader is. This register already carries the half of this that is about
+*outputs* — §48, an output that cannot distinguish its abort from its
+verdict — and this is the same defect one level down, in the **input
+vocabulary**: a value that cannot distinguish a floor from an absence.
+
+**Nobody's premise was wrong except the author's.** The header warning
+was written before the first run and it names this exact failure in
+general terms. It did not prevent it, because the thing it warned about
+was a tool pointed at the wrong *path*, and the instance was a tool
+pointed at the right path reading the wrong *class*. A warning written at
+the altitude of the general case does not fire on the particular one; the
+test that pins it does. `tools/seat/spend.test.mjs` carries it as
+`regress:`, with the refused summary verbatim as the fixture, because a
+paraphrased fixture would grade the paraphrase.
+
+`docs/agents/runner-facts.md` §96, `tools/seat/spend.mjs`.
+## INC-2026-11-09-redaction-gate-reads-a-public-url-s-own-id-as-a-leaked-session-uuid — The gate's full-UUID pattern has no way to tell a public resource identifier from a private conversation id
+
+**Status:** tripwire false alarm, not a market defect. No rerun. Market's
+`#769` (16th-run brief) fails `redaction-gate` / `scan` on three lines
+that all quote the same public URL,
+`https://finance.biggo.com/news/865c23cb-…` (truncated here per the
+gate's own remedy, which this entry's first draft ran into on its own
+branch by quoting the id whole),
+once in `docs/market/landscape.md`, once in the brief itself, and once
+in the ledger entry citing it. The gate's third pattern matches any
+32-hex-digit-with-hyphens string regardless of where it sits, and a
+news site's own article id is shaped exactly like a Claude session
+UUID. Verified by reading the failed run's log past the matched lines
+rather than trusting the red status: the three hits are the same
+identifier three times, it resolves to a live, fetchable BigGo Finance
+article, and nothing else on the branch's diff matches either of the
+gate's other two patterns.
+
+**Why this is the gate's and not market's to fix.** The workflow file
+is HQ's (§15 of `docs/standards/pm.md`: "a product seat does not edit
+`.github/workflows` in its own repo"), and the repair is a scope
+question the gate's own author has to answer — whether a UUID inside
+an `https://` URL is categorically different from one standing alone in
+prose, the way the gate already treats a session id differently from a
+home path. Narrowing the pattern locally, by excluding this one URL,
+would clear this PR and still flag the next legitimate link that
+happens to end in a UUID-shaped slug.
+
+**Handed to `alexandra-systems/exo-centralizer`** as a handoff, with
+the PR and the exact three lines named, per §11.7's classification
+("tripwire false alarm... handoff to `alexandra-systems/exo-centralizer`
+if the tripwire is still the old one"). Market's branch is otherwise
+unreviewed by this pass; nothing here says whether its content is
+right, only that the gate's objection to it is not about a leak.
+

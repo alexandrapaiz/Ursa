@@ -139,6 +139,41 @@ const missing = (what, text) => {
   return { tokens, miss }
 }
 
+// NO COMPARAND IS NOT A MEASURED ZERO, and until 2026-10-26 this file said it
+// was. The ratio below used to read `tokens.length ? miss.length /
+// tokens.length : 0`, so a ref whose `what` field yields no content word at
+// all -- every word under four letters, or every word in STOP, or a `what`
+// that is empty -- came out at 0.000, which on this scale is the best score in
+// the library. All three readers of the number then agreed with each other and
+// all three were wrong: the queue sorts descending and put it last, so the
+// least defended ref in the library was the last one anybody would read;
+// `--signal` printed `0.000  0/0` beside the refs a reader had confirmed; and
+// the min/med/max table took the 0 into the distribution the WORDLESS
+// threshold was argued from, so an unmeasurable ref was evidence about a gate
+// it was never measured by.
+//
+// The fault is one missing input folded into a measurement, which is the shape
+// Ursa's exo seat named to this seat on 2026-10-26 in its own lane: a count
+// with no base and a count whose base predates the file both came back
+// missing, and folding them gave one false positive and one false negative off
+// the same cause. Mine folds in one direction only, toward safe, which is why
+// no run has ever noticed it.
+//
+// So the ratio is `null` when there is nothing to divide, and `null` has its
+// own name and no class. It is not a low score and not a high one. The
+// reading is that nothing mechanical measured this ref, and the refs in that
+// state are listed apart with their own instruction, exactly as the
+// unrangeable refs already are at the other end of the same scale. The one
+// line below this file already got right is `density`, which returns Infinity
+// for the same shape of missing denominator rather than a number; these two
+// expressions are siblings and only one of them used to be honest.
+//
+// Measured on this library the day the fix landed: 292 refs, none of them in
+// this state, so this is a latent fault and not a live misreading. It is
+// reachable from a `what` field a gate would pass, because `check-evidence.mjs`
+// never reads the `what` field's content at all.
+const ratio = (miss, tokens) => (tokens.length ? miss.length / tokens.length : null)
+
 // Signal 2. Conjuncts in the `what` field per cited line. The failure this
 // sweep hunts arrives as a range that is too narrow for the claim standing on
 // it, so a `what` that makes four assertions over two lines is worth reading
@@ -203,7 +238,7 @@ for (const entry of readdirSync(skillsDir)) {
       // of either file, so none of its words can appear in either range and no
       // widening will ever lower its ratio.
       files: new Set(blocks.map((b) => b.path)).size,
-      missRate: tokens.length ? miss.length / tokens.length : 0,
+      missRate: ratio(miss, tokens),
       miss, tokens,
       density: lineCount ? conjuncts(what) / lineCount : Infinity,
       conjuncts: conjuncts(what),
@@ -405,26 +440,43 @@ if (flags.includes('--signal')) {
     key: `${r.entry}/${r.ref}`,
     verdict: audited.get(`${r.entry}/${r.ref}`)?.verdict ?? 'unread',
     r,
-  })).sort((a, b) => b.r.missRate - a.r.missRate)
+  // An unmeasurable ratio sorts to the top rather than to either end of the
+  // scale, because its place on the scale is the question and not the answer.
+  })).sort((a, b) => (a.r.missRate === null ? -1 : b.r.missRate === null ? 1 : 0)
+    || b.r.missRate - a.r.missRate)
   console.log(`  ratio  absent   lines  verdict      ref`)
   for (const { key, verdict, r } of rows) {
     // Three decimals, not two: adding-a-bound/E12 is 11/13, which prints as
     // 0.85 at two and sits below the 0.85 line it would be read against.
-    console.log(`  ${r.missRate.toFixed(3)}  ${
+    console.log(`  ${r.missRate === null ? '    - ' : r.missRate.toFixed(3)}  ${
       `${r.miss.length}/${r.tokens.length}`.padStart(6)}  ${
       String(r.lineCount).padStart(5)}  ${verdict.padEnd(11)}  ${key}${
-      r.unrangeable ? '   (no line range)' : ''}`)
+      r.unrangeable ? '   (no line range)' : ''}${
+      r.missRate === null ? '   (no word to measure)' : ''}`)
   }
   // Grouped by verdict, because the question is whether the ratio separates
-  // them, and a sorted list of 184 rows does not answer that by itself.
+  // them, and a sorted list of 184 rows does not answer that by itself. The
+  // unmeasurable rows are counted out of every column here and said aloud
+  // underneath, because this table is the evidence the WORDLESS threshold is
+  // argued from and a ref that was never measured is not evidence about it.
   const by = {}
-  for (const { verdict, r } of rows) (by[verdict] ??= []).push(r.missRate)
+  for (const { verdict, r } of rows) if (r.missRate !== null) (by[verdict] ??= []).push(r.missRate)
   console.log(`\n  verdict      n    min    med    max`)
   for (const [v, xs] of Object.entries(by).sort()) {
     const sorted = [...xs].sort((a, b) => a - b)
     const med = sorted[Math.floor(sorted.length / 2)]
     console.log(`  ${v.padEnd(11)}${String(xs.length).padStart(3)}  ${
       sorted[0].toFixed(3)}  ${med.toFixed(3)}  ${sorted[sorted.length - 1].toFixed(3)}`)
+  }
+  // Said on both branches, because "none" is the answer a reader wants and an
+  // absent line is not it.
+  const unmeasured = rows.filter(({ r }) => r.missRate === null)
+  if (unmeasured.length) {
+    console.log(`\n${unmeasured.length} ref${unmeasured.length === 1 ? ' is' : 's are'} left out of that table: the \`what\` field carries no`)
+    console.log(`content word, so there is nothing to divide. That is not a ratio of zero:`)
+    for (const { key, r } of unmeasured) console.log(`     -   ${r.what || '(empty)'}   ${key}`)
+  } else {
+    console.log(`\nEvery ref above has at least one content word to measure, so the table omits none.`)
   }
   // The reading instruction the measurement earned, printed rather than
   // enforced. See the comment above this block for why it is not an exit
@@ -495,11 +547,17 @@ if (flags.includes('--audited')) {
 }
 
 const unrangeable = refs.filter((r) => r.unrangeable)
-const queue = refs.filter((r) => !audited.has(`${r.entry}/${r.ref}`) && !r.unrangeable)
+// Unmeasurable and unrangeable are two different absences and a ref can carry
+// both. Unrangeable wins the classification, because a ref with no cited lines
+// cannot be read against them whatever its `what` field says, and a reader
+// sent to check a section name is doing the right work either way.
+const unmeasurable = refs.filter((r) => r.missRate === null && !r.unrangeable)
+const queue = refs.filter((r) => !audited.has(`${r.entry}/${r.ref}`) && !r.unrangeable
+  && r.missRate !== null)
   .sort((a, b) => b.missRate - a.missRate || b.density - a.density)
 const bySkill = {}
 for (const r of refs) bySkill[r.entry] = (bySkill[r.entry] ?? 0) + 1
-console.log(`relevance sweep: ${refs.length} refs, ${audited.size} read, ${queue.length} unread with a line range`)
+console.log(`relevance sweep: ${refs.length} refs, ${audited.size} read, ${queue.length} unread with a line range and a measurable claim`)
 for (const [k, v] of Object.entries(bySkill)) console.log(`  ${String(v).padStart(3)}  ${k}`)
 console.log(`\nThe order is two mechanical signals, not a verdict. Read top-down.\n`)
 console.log(`  miss  dens  lines  ref`)
@@ -520,6 +578,24 @@ if (unread.length) {
   console.log(`\n${unread.length} unread refs cite a document and a section name rather than lines.`)
   console.log(`No fingerprint exists for them, so nothing mechanical defends them at all:`)
   for (const r of unread) console.log(`         ${r.sourceLine}   (${r.entry}/${r.ref})`)
+}
+
+// The other end of the same scale, and listed apart for the same reason the
+// block above is. An unrangeable ref misses 100 percent of its words by
+// construction; one whose `what` field has no content word misses none of them
+// by construction. Both numbers are artifacts of an absent input rather than
+// readings of a citation, and the old code put the second one at the bottom of
+// the queue above, where it read as the best defended ref in the library. It
+// has no place on that scale at all. The reading it needs is a different
+// question again: not whether the lines support the sentence, but whether the
+// `what` field says anything a reader could hold the lines against.
+const unmeasuredUnread = unmeasurable.filter((r) => !audited.has(`${r.entry}/${r.ref}`))
+if (unmeasuredUnread.length) {
+  console.log(`\n${unmeasuredUnread.length} unread ref${
+    unmeasuredUnread.length === 1 ? ' has' : 's have'} a \`what\` field with no content word in it,`)
+  console.log(`so the absent-word signal has nothing to divide and cannot rank ${
+    unmeasuredUnread.length === 1 ? 'it' : 'them'}. Read the claim first:`)
+  for (const r of unmeasuredUnread) console.log(`         ${r.what}   (${r.entry}/${r.ref})`)
 }
 
 // Counted apart from the block above, and the reason is the whole point of it.

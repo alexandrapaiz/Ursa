@@ -1,0 +1,115 @@
+{
+  "note": "One row per pull request number this library cites. The forge is outside this tree, so a number's disposition cannot be checked from a clone; this file is the dated snapshot that makes the check offline, and `node skills/forge-citations.mjs --refresh` prints the commands that re-take it. See the methodology section on what a pull request citation owes.",
+  "repository": "alexandrapaiz/Ursa",
+  "read_at": "2026-11-02T07:05Z",
+  "fixtures": [
+    {
+      "number": 618,
+      "why": "Not a citation. A fixture string in skills/grep-dialect.mjs and its test, chosen because an apostrophe after a code span is the case that parser gets wrong, plus the methodology section's own description of this exemption. Its correctness does not depend on the row resolving.",
+      "mentions": 8
+    },
+    {
+      "number": 777,
+      "why": "Not a citation. Row 777 is the literal used by the test that proves the fixture mention count is itself checked, in skills/forge-citations.test.mjs, and its correctness depends on the number being a fixture rather than a lock row. Same class as the negative-case number above: what is exempt is the mention and not the row.",
+      "mentions": 2
+    },
+    {
+      "number": 999,
+      "why": "Not a citation, and it is the one mention in this library whose correctness depends on the number NOT being lockable: it is the negative case in skills/forge-citations.test.mjs that proves an uncovered citation fails. Exempt under the rule that a cap on mentions is a cap on measurement, which already named this exact class. It stays exempt if the forge ever issues row 999, because what is exempt is the mention and not the row.",
+      "mentions": 4
+    }
+  ],
+  "rows": [
+    {
+      "number": 281,
+      "lane": "ursa-skill",
+      "branch": "ursa-skill/2026-10-23-message-c",
+      "disposition": "merged",
+      "merge_commit": "1b097a05ea7efe55de49fa9c315024dc88c3acd7",
+      "at": "2026-10-23T23:58:14Z"
+    },
+    {
+      "number": 413,
+      "lane": "ursa-engineer",
+      "branch": "ursa-engineer/2026-10-25-hook",
+      "disposition": "merged",
+      "merge_commit": "e3f14d9050c35dcece69bd5748632aa6e3ca5e03",
+      "at": "2026-10-25T03:00:43Z"
+    },
+    {
+      "number": 477,
+      "lane": "ursa-skill",
+      "branch": "ursa-skill/2026-10-26-message-c",
+      "disposition": "merged",
+      "merge_commit": "a55b8c676763f8fdf124db484bf77520e437907c",
+      "at": "2026-10-26T09:08:24Z"
+    },
+    {
+      "number": 540,
+      "lane": "ursa-engineer",
+      "branch": "ursa-engineer/2026-10-26-message-9",
+      "disposition": "merged",
+      "merge_commit": "2cbffd2c920587dcd462f41d1089bd4c304d2b21",
+      "at": "2026-10-26T20:19:34Z"
+    },
+    {
+      "number": 601,
+      "lane": "ursa-skill",
+      "branch": "ursa-skill/2026-10-27-hook-2",
+      "disposition": "closed-unmerged",
+      "at": "2026-11-02T04:36:42Z"
+    },
+    {
+      "number": 633,
+      "lane": "ursa-skill",
+      "branch": "ursa-skill/2026-11-02-message-2",
+      "disposition": "closed-unmerged",
+      "at": "2026-11-02T05:08:21Z"
+    },
+    {
+      "number": 638,
+      "lane": "ursa-skill",
+      "branch": "ursa-skill/2026-11-02-message-3",
+      "disposition": "closed-unmerged",
+      "at": "2026-11-02T05:08:25Z"
+    },
+    {
+      "number": 646,
+      "lane": "ursa-skill",
+      "branch": "ursa-skill/2026-11-02-message-4",
+      "disposition": "closed-unmerged",
+      "at": "2026-11-02T05:08:31Z"
+    },
+    {
+      "number": 684,
+      "lane": "ursa-skill",
+      "branch": "ursa-skill/2026-11-02-message-10",
+      "disposition": "closed-unmerged",
+      "at": "2026-11-02T05:41:23Z"
+    },
+    {
+      "number": 689,
+      "lane": "ursa-skill",
+      "branch": "ursa-skill/2026-11-02-message-11",
+      "disposition": "closed-unmerged",
+      "at": "2026-11-02T06:35:17Z",
+      "note": "Read as open at 06:16Z and closed as contained in #700 at 06:35Z, nineteen minutes later, by the project manager's sweep with its own ancestor proof. The first refresh this lock ever needed, inside the 45-minute median this run measured, and the reason the disposition is a dated field rather than a fact."
+    },
+    {
+      "number": 700,
+      "lane": "ursa-skill",
+      "branch": "ursa-skill/2026-11-02-message-13",
+      "disposition": "open",
+      "at": "2026-11-02T06:37:42Z",
+      "note": "The row that added the cap-before-filter section. Cited by the next section as the ancestor this branch contains, which is how the ordering clause is paid from an open stack rather than from a merged trunk."
+    },
+    {
+      "number": 711,
+      "lane": "ursa-skill",
+      "branch": "ursa-skill/2026-11-02-message-14",
+      "disposition": "open",
+      "at": "2026-11-02T07:00:00Z",
+      "note": "This run's own row, read as open from inside the run that opened it, which is the one disposition in this lock that needs no forge call to be true."
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+<!doctype html><meta charset="utf-8">
+<title>provenance legend, before and after</title>
+<style>
+  /* the five variables the bar and its legend read, copied from
+     ursa-minor/app/globals.css lines 146-156 */
+  :root{--night:#020308;--star:#e8edf7;--dim:#707fa0;--polar:#a8c7fa;--line:#141b2b}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--night);
+    font:400 16px/1.5 ui-sans-serif,system-ui,sans-serif;color:var(--star)}
+  .page{padding:32px}
+  h2{margin:0 0 10px;font:400 .68rem/1.4 ui-monospace,monospace;
+     letter-spacing:.28em;text-transform:uppercase;color:var(--dim)}
+  .card{margin:0 0 44px}
+  /* the tailwind utilities the component uses, written out, because this
+     fixture has no tailwind: mt-4, flex, flex-wrap, gap-x-8, gap-y-2,
+     font-mono, text-[0.68rem], tracking-[0.04em], items-baseline, gap-2 */
+  .legend{margin-top:16px;display:flex;flex-wrap:wrap;
+    column-gap:32px;row-gap:8px;
+    font:400 .68rem/1.5 ui-monospace,monospace;letter-spacing:.04em}
+  .entry{color:var(--dim)}
+  .entry .fig{color:var(--star)}
+  .after .entry{display:flex;align-items:baseline;gap:.5rem}
+  .after .rec-swatch{margin-top:.3em}
+  .bar{margin-top:16px;display:block}
+</style>
+<link rel="stylesheet" href="rec.css">
+<div class="page">
+
+  <div class="card" id="before">
+    <h2>before &mdash; the legend as shipped</h2>
+    <span class="rec-bar bar" role="presentation">
+      <span class="rec-seg rec-seg-survived_verbatim" style="width:40.4%"></span>
+      <span class="rec-seg rec-seg-survived_mutated" style="width:23.6%"></span>
+      <span class="rec-seg rec-seg-no_generation_provenance" style="width:34.1%"></span>
+    </span>
+    <span class="legend">
+      <span class="entry"><span class="fig">40.4%</span> survived verbatim</span>
+      <span class="entry"><span class="fig">23.6%</span> survived mutated</span>
+      <span class="entry"><span class="fig">34.1%</span> no generation provenance</span>
+    </span>
+  </div>
+
+  <div class="card after" id="after">
+    <h2>after &mdash; the same swatch the record view already carries</h2>
+    <span class="rec-bar bar" role="presentation">
+      <span class="rec-seg rec-seg-survived_verbatim" style="width:40.4%"></span>
+      <span class="rec-seg rec-seg-survived_mutated" style="width:23.6%"></span>
+      <span class="rec-seg rec-seg-no_generation_provenance" style="width:34.1%"></span>
+    </span>
+    <span class="legend">
+      <span class="entry"><span aria-hidden="true" class="rec-swatch rec-seg-survived_verbatim"></span><span><span class="fig">40.4%</span> survived verbatim</span></span>
+      <span class="entry"><span aria-hidden="true" class="rec-swatch rec-seg-survived_mutated"></span><span><span class="fig">23.6%</span> survived mutated</span></span>
+      <span class="entry"><span aria-hidden="true" class="rec-swatch rec-seg-no_generation_provenance"></span><span><span class="fig">34.1%</span> no generation provenance</span></span>
+    </span>
+  </div>
+
+</div>
