@@ -60,7 +60,19 @@ const CENSUS_ONLY = process.argv.includes('--census')
 
 /** Gates that export a verdict module. Grows as gates are extracted; the
  *  census below reports the remainder on every run so it cannot be forgotten. */
-const REGISTRY = [
+/** The gates whose verdicts this enumerator drives.
+ *
+ *  EXPORTED SO THE SUITE DERIVES ITS COUNTS INSTEAD OF PINNING THEM. Before
+ *  2026-11-09 the suite asserted `branches.length === 72` as a literal, and
+ *  that number grows whenever ANY seat registers a gate here: registering
+ *  `import-effects-verdict.mjs` took it to 79 and turned the suite red for a
+ *  reason that is not a defect. `prompts/engineer-agent.md` states the general
+ *  form -- a measurement whose value changes without anyone touching it cannot
+ *  live in prose -- and a literal in an assertion is the same thing with a
+ *  worse failure mode, because it fails in CI rather than merely reading
+ *  wrongly. The suite now sums the registry's own probes, so the two cannot
+ *  disagree. */
+export const REGISTRY = [
   './../ledger/closures-verdict.mjs',
   './../ledger/contract-verdict.mjs',
   './../ledger/attributes-verdict.mjs',
