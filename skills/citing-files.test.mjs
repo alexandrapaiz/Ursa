@@ -14,9 +14,9 @@
 // inversion was.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { fixtureDir } from './tmp-fixture.mjs'
 import {
   stripFrontmatter, declaredRefs, refsIn, citingTexts, strayCitations,
 } from './citing-files.mjs'
@@ -38,7 +38,7 @@ const FM = [
 /** A skill directory holding whatever each entry describes. A value that is an
  *  object is a subdirectory, so a nested tree is one literal. */
 function skillDir(tree) {
-  const dir = mkdtempSync(join(tmpdir(), 'citing-files-'))
+  const dir = fixtureDir('citing-files-')
   const write = (at, node) => {
     for (const [name, body] of Object.entries(node)) {
       if (typeof body === 'object') { mkdirSync(join(at, name), { recursive: true }); write(join(at, name), body) }

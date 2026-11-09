@@ -11,11 +11,11 @@
 // round-trip are exercised rather than described.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, copyFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync, readFileSync, copyFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { fixtureDir } from './tmp-fixture.mjs'
 
 /** The fingerprint the real script writes: the cited lines trimmed, hashed. */
 const hash = (text) => createHash('sha256').update(text).digest('hex').slice(0, 16)
@@ -38,7 +38,7 @@ const IMPORTS = ['source-line.mjs', 'citing-files.mjs', 'library-dirs.mjs']
  *  the lock and the gate below has to tell them apart, so a fixture that can
  *  only produce one of them cannot test the thing. */
 function library(drift = [], shift = []) {
-  const dir = mkdtempSync(join(tmpdir(), 'check-evidence-'))
+  const dir = fixtureDir('check-evidence-')
   mkdirSync(join(dir, 'src'), { recursive: true })
   mkdirSync(join(dir, 'skills'), { recursive: true })
   copyFileSync(CHECKER, join(dir, 'skills', 'check-evidence.mjs'))
@@ -596,7 +596,7 @@ test('two ranges of different heights in one file get their own offsets', () => 
   // `path`, because the one that got the wrong index was the one whose honest
   // answer was already "gone". Verified 2026-11-09 by breaking the key: this
   // version fails and that one did not.
-  const dir = mkdtempSync(join(tmpdir(), 'check-evidence-'))
+  const dir = fixtureDir('check-evidence-')
   mkdirSync(join(dir, 'src'), { recursive: true })
   mkdirSync(join(dir, 'skills', 'alpha'), { recursive: true })
   copyFileSync(CHECKER, join(dir, 'skills', 'check-evidence.mjs'))
