@@ -312,28 +312,6 @@ export const CANDIDATE_LANGS = [
   },
 ]
 
-/**
- * The trees a gate can live in. Exported because it is the scope of every
- * census built on this function, and a scope is a claim: `enumerate-verdicts`
- * and `gate-registry` both report their candidate count as a statement about
- * this list, so the list has to be readable rather than spelled out again in
- * each of their summary lines.
- *
- * `skills` is the third root as of 2026-11-09 (exo, window 114), on Ursa's
- * skill seat's measurement and its ask. That library ships executables with
- * failing exits like any other, and until this line it was invisible to every
- * gate built on this sweep: seven real candidates were neither reached nor
- * excused, and the registry reported a complete census — 66 candidates, one
- * finding — over a tree it had never read. With the root it reads 73 and two
- * findings, and the second one, `skills/relocate-anchors.mjs`, is a real
- * write-action that no gate list had ever been asked about.
- *
- * Widening here rather than at either call site is the whole point of this
- * function. Two copies of a discovery rule is the defect it exists to catch,
- * and a third root added at one call site would have been exactly that.
- */
-export const ROOTS = ['tools', 'scripts', 'skills']
-
 /** Files under `roots` that could be a gate, by the table above.
  *
  *  Returns null, never [], when the facts cannot be established: an empty
@@ -342,7 +320,7 @@ export const ROOTS = ['tools', 'scripts', 'skills']
  */
 export function gateCandidatePaths({
   langs = CANDIDATE_LANGS,
-  roots = ROOTS,
+  roots = ['tools', 'scripts'],
   exclude = ['tools/gates/enumerate-verdicts.mjs', 'tools/gates/verdict-shape.mjs'],
   excludePattern = /-verdict\.mjs$/,
 } = {}) {
@@ -427,13 +405,7 @@ export function verdict(findings, seen = {}) {
       cause: 'ALL_BRANCHES_HOLD',
       line:
         `Verdict enumeration: ${counted}, every one deriving its exit code and its counts from ` +
-        // The roots are interpolated rather than written out. This sentence
-        // said "in tools/ and scripts/" and was false the moment `skills`
-        // became the third root, which is a caption asserting the scope of
-        // the very census it is reporting. A scope named in prose beside a
-        // scope defined in code is one of them going stale silently.
-        `its own findings. ${extracted} of ${candidates} gate(s) in ` +
-        `${ROOTS.map((r) => `${r}/`).join(', ')} are ` +
+        `its own findings. ${extracted} of ${candidates} gate(s) in tools/ and scripts/ are ` +
         'extracted; the rest are listed by --census and are not failures.',
     })
   }

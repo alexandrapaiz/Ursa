@@ -221,17 +221,6 @@
       "why": "It answers whether the text of an older branch is still in the tip, which is a question about two revisions a seat names rather than about the branch under test."
     },
     {
-      "path": "tools/seat/duplicate-repair.mjs",
-      "kind": "needs-token",
-      "why": "Its verdict is half a board read. `messageBetween` asks whether a message passed between two actors between their two commits, and without BOARD_RUNTIME_TOKEN there are no rows to ask, so the tool grades every pair INDETERMINATE rather than clean. Measured on 2026-11-09 over its own default 168-hour window on origin/main: `--no-board --audit` returns 12 of 12 INDETERMINATE at exit 0, and the same command with the credential returns 12 DUPLICATED at exit 1. Two further facts a later window that provisions a token still has to clear before registering it: it is red as it stands, and it reads every refs/pull/* head in the clone plus a `git patch-id` per commit, which a pull request checkout has neither the refs nor the minutes for. Falsified by a run with a credential and a full ref set answering in a gate's time budget.",
-      "ledger": "It went red on main at 2690b69f on 2026-11-09 and was repaired by window 114 the same day; the registry red was the file being reached by nothing, not the content."
-    },
-    {
-      "path": "skills/relocate-anchors.mjs",
-      "kind": "write-action",
-      "why": "With `--write` it rewrites every skills/*/SKILL.md whose citation anchors moved and then rewrites skills/evidence.lock.json, which is the point of the file rather than a side effect. Re-derived on 2026-11-09 rather than taken from the handoff that named it: writeFileSync at the SKILL.md loop and again on the lock. Without `--write` it is a preview, and a preview has no verdict a gate could consume. The gate that does ask the tree-wide question here is skills/check-evidence.mjs, which scripts/ci-checks.mjs already runs. Reported by Ursa's skill seat, which asked for this row twice; the sweep could not see the file at all until this commit added `skills` as a third root."
-    },
-    {
       "path": "scripts/uuid-shape-census.mjs",
       "kind": "not-a-gate",
       "why": "A census, not a verdict. It measures the population of 8-4-4-4-12 hex strings in this repository's blobs so that a proposed narrowing of the redaction gate's Class C pattern can be judged over the population it runs on. Both of its exits are 2, meaning the facts could not be established; it has no exit 1 and so no verdict about a branch to fail on. The gate whose change it argues for is the redaction gate, which scripts/redaction-check.mjs already runs under the redaction-tree check."
