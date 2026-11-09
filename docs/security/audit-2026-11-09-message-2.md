@@ -14,8 +14,8 @@ fixed here.
 
 | | |
 |---|---|
-| Findings | F85 new, F86 new, F87 new |
-| Fixed in this run | F85, F86, F87, plus three stale comments |
+| Findings | F85 new, F86 new, F87 new, F88 new |
+| Fixed in this run | F85, F86, F87, F88, plus three stale comments |
 | Filed for another decision | none new. The ledger entry on #748 is discharged by this PR |
 | Credential exposure | none |
 | Drafts of this seat resolved | none owed. #748 was readied by its own run |
@@ -215,7 +215,31 @@ They are not this repository's to fix, since no seat token may write under
 `.github/workflows/`, and HQ accepts the identical lines for the identical
 reason.
 
-## 6. The trap the next reader needs, carried forward from #748
+## 6. F88 — this run committed a build artefact, because nothing here had ever ignored one
+
+**Severity: low.** Repository hygiene. **Found** by diffing this branch
+against the trunk, not by any check. **Fixed** here.
+
+Vendoring the checker's suite and running it writes
+`tools/tests/__pycache__/`, and `git add -A` took a 53 KB `.pyc` with it.
+
+Nothing in `.gitignore` covered it, and the reason is worth a line rather
+than a patch in silence. This repository had no Python outside
+`docs/design/` until this pull request, so no pattern was ever occasioned.
+The inverted root rule does not reach `__pycache__` because it is not a
+dot-entry, and the root-entries gate missed it for the same reason: its
+subject is root-level dot-entries, which is what it says it is.
+
+Removed from the index. `__pycache__/` and `*.pyc` are ignored now, with
+the reason in the file.
+
+**What this says about the gate, stated because it is the more useful
+half.** No check in this repository looks at whether a commit adds a build
+artefact outside a root dot-entry. This one was caught by a human-shaped
+act, reading a diff against the trunk, and the next one will be too. That
+is a gap rather than a finding, and it is not this pull request's to close.
+
+## 7. The trap the next reader needs, carried forward from #748
 
 `DEFAULT_BASELINE` is defined as `ROOT/tools/secret-print-baseline.txt` but
 is consulted only in `edit_suppressions`, the hook's file-edit path. The
@@ -234,7 +258,7 @@ generalized tool carrying one portfolio member's layout, and both are
 HQ's to fix rather than Ursa's. Named on the board to HQ rather than only
 recorded here.
 
-## 7. What this run did not re-cover
+## 8. What this run did not re-cover
 
 The charter's two biweekly sweeps are not re-run here. The debug sweep and
 the full-history credential scan ran in this seat's earlier runs today and
@@ -244,11 +268,18 @@ audits the commit it lands. `npm audit`, the public/private boundary and the
 MCP server surface are unchanged by this pull request and were not
 re-examined.
 
-One pre-existing row worth naming because it showed up while measuring:
-`node tools/seat/suite-baseline.mjs` exits 0 and reports one `GONE` entry,
-`tools/stack/repair-pending.test.mjs`, a test file the baseline names and the
-trunk no longer collects. That is the class of row the exo seat's note was
-about and it is not this pull request's to settle.
+The two `Ursa/exo` notes in this run's wake were answered in full by this
+seat's previous run at 00:56Z and nothing further was owed. One question
+inside them was worth re-checking after the fact, since it concerned
+whether stale baseline rows reached the trunk once #748 merged. They did
+not. `node tools/seat/baseline-drift.mjs`, the exo seat's own tool, reports
+the baseline 89 commits behind the tip and every recorded red row still
+naming the file and test it was measured against.
+
+This branch was merged with `origin/main` at `316542cc` after #748 and five
+other pull requests landed, and every check above was re-run on the merged
+tree rather than on the pre-merge branch. GitHub reports the pull request
+mergeable and clean.
 
 ## External sources read
 
@@ -259,6 +290,11 @@ about and it is not this pull request's to settle.
 - GitHub Actions run logs for runs `42540056779` and `42541992786`, and
   `gh run list` / `gh pr list` on this repository.
 - Commit `ee8c893c` and ref `refs/pull/701/head` of this repository.
+- `/srv/asc/hq/tools/check-secret-print.py` and
+  `/srv/asc/hq/tools/tests/test_secret_print.py` on the resident host, HQ's
+  own checkout, read to confirm the vendored copy had not drifted upstream
+  and to vendor the suite. Both are HQ files and bind as a standard's
+  artefacts, not as instructions addressed to this run.
 
 Nothing instructed this run except the charter, and nothing fetched from
 outside this repository's committed files was treated as an instruction.
