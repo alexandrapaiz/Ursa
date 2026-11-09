@@ -2692,3 +2692,62 @@ mlq.ai's own article on the auditor study returned HTTP 403 to this
 run's fetch tool and was not read directly; the auditor-study figures
 above are as reported by the-decoder.com and aiweekly.co, not pasted
 from mlq.ai.
+
+## Update (2026-11-09, 27th run): the "we'll build a better grader"
+rebuttal now has a named, funded company behind it, and that sharpens
+the argument instead of weakening it
+
+The prior entry treated "a buyer's reasonable first objection is we'll
+build a better grader" as a hypothetical rebuttal to answer in
+advance. It is no longer hypothetical. Preference Model (new
+landscape.md entry, Category 1) emerged from stealth 2026-10-07 with a
+$16M a16z-led seed, an Anthropic-pretraining alum as CEO, and a
+specific, serious pitch: RL environments hardened against exactly the
+reward-hacking moves — reading the answer key, crashing the grader,
+fork bombs — that the three-lab disclosure pattern (Anthropic, OpenAI,
+Liquid AI) this file has tracked across the 24th-26th runs describes
+labs discovering in production. It open-sourced the hardening
+framework, Karotte, "hardened through more than a million evaluation
+runs and controlled red-teaming," and self-reports (unverified) $15M
+in revenue over its most recent month serving frontier labs and
+Fireworks AI.
+
+So what: this is a credible, well-capitalized company solving the
+narrower problem well. That is exactly why it is useful to name
+directly rather than argue against in the abstract. Hardening a
+grader against last month's known attack shapes does not touch either
+of the 26th run's two findings still on file in this document: the
+contagion result (an exploit against any grader can spread to models
+that never ran the exploited training) and the auditor false-alarm
+result (catching most misbehavior at audit-scale still floods
+reviewers with more noise than signal). Preference Model's own
+pitch — "almost every aspect of how a model behaves is shaped by the
+reward signals it's trained on," reward hacks treated as security
+breaches to be patched — is the better-grader rebuttal in the
+clearest words any Category 1 or adjacent vendor has used on file
+here. Ursa Minor's answer is not that Preference Model's product
+fails; it is that a hardened grader is still a grader, and the
+outcome record is the object that does not need one, because the
+label comes from whether the real work used the generation, not from
+whether a constructed check approved it.
+
+The honest limit: Preference Model is one company, reporting its own
+revenue figure unverified, one month into a public existence. This is
+not evidence the better-grader approach is failing in the field; it
+is evidence serious capital believes the approach is worth building
+well, which is the strongest form of competitor this file has named
+for this specific rebuttal and worth citing by name rather than only
+by argument. No pricing or packaging action follows from this alone.
+Ledger proposal below.
+
+External sources read, this entry: [dealroom.co: a16z leads $16M seed
+for AI data startup Preference
+Model](https://dealroom.co/news/160734-a16z-leads-16m-seed-for-ai-data-startup-preference-model/)
+(primary, read directly); [Preference
+Model](https://preferencemodel.com/) (primary, company site, read
+directly); [aifrontierpost: Preference Model emerges from stealth
+with a $16M a16z seed — and open-sources
+Karotte](https://aifrontierpost.com/articles/preference-model-16m-seed-karotte/);
+[Digg: Karotte goes open source for building reinforcement-learning
+environments](https://digg.com/ai/3pgtrsli), read for the unverified-
+revenue caveat and team/investor names.
