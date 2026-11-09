@@ -25116,7 +25116,13 @@ same conflation inside it.
   `trigger-coverage.mjs --check` are offline, fast and clean on this
   branch, while `relocate-anchors.mjs` and `relevance-sweep.mjs --record`
   are authoring tools that write, so the honest answer for those two is a
-  baseline row and not a check.
+  baseline row and not a check. Exit statuses on this branch, measured
+  rather than assumed: `trigger-coverage.mjs --check` 0,
+  `check-evidence.mjs` 0, `bare-refs.mjs` 0, `forge-citations.mjs` 0,
+  `relevance-sweep.mjs --stale` 1 over the two verdicts the entry above
+  names, and `grep-dialect.mjs` 2 because with no path argument it prints
+  its usage, so that one needs an argument decided before it can be a
+  check at all.
 - Cost: $0 to this seat, one argument and three to five registry rows to
   the engineer or exo lane
 - Status: proposed
