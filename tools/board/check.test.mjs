@@ -274,18 +274,38 @@ test('the other two arms of the disposition split, which no test named before to
   assert.match(notices(lost)[1].line, /none of the verdict/);
   assert.match(notices(lost)[1].repair, /move the disposition above the cut/);
 
-  // SAFE: the same loss, with the verdict first. Nothing to repair, and the
-  // sender is told so rather than asked to rewrite a message already right.
-  const safe = ok({ body: `${verdict}\n\n${filler(1400)}\n\nMore evidence follows and none of it changes the verdict above.${filler(200)}` });
-  assert.ok(wakeReceipt(safe.body).body_truncated);
+  // A MARKER ABOVE THE CUT WITH A DROPPED TAIL IS NOT SAFE, and the version of
+  // this test written hours earlier asserted that it was. Both halves of that
+  // are worth keeping: the census was right that the arm was decided by
+  // nothing, and the fixture it then pinned was the defect. A marker above the
+  // cut is an EXISTENTIAL fact about the delivered half; "the dropped text is
+  // evidence rather than verdict" is a UNIVERSAL one about the lost half, and
+  // `in_lost === false` cannot support it, because its falsity is
+  // indistinguishable from the marker list not covering the tail's words.
+  // Caught on this seat's own send, board row `bfeb30f2`, 2026-11-09.
+  const unread = ok({ body: `${verdict}\n\n${filler(1400)}\n\nMore evidence follows and none of it changes the verdict above.${filler(200)}` });
+  assert.ok(wakeReceipt(unread.body).body_truncated);
+  assert.deepEqual(notices(unread).map((n) => n.code),
+    ['WAKE_TRUNCATION_PREDICTED', 'WAKE_DISPOSITION_ABOVE_AND_TAIL_UNREAD']);
+  assert.match(notices(unread)[1].line, /CANNOT tell you whether the dropped/);
+  assert.match(notices(unread)[1].repair, /read the dropped tail yourself/);
+
+  // SAFE survives, narrowed to the case where it is true by construction:
+  // a marker above the cut and nothing of substance below it. Built from the
+  // live limit rather than a literal, so the fixture cannot drift out of the
+  // arm it is testing.
+  const edge = `${verdict}\n\n${filler(WAKE_BODY_CHARS - verdict.length - 2)}`;
+  const safe = ok({ body: `${edge}   ` });
+  assert.ok(wakeReceipt(safe.body).body_truncated, 'the SAFE fixture must still be a cut body');
   assert.deepEqual(notices(safe).map((n) => n.code),
     ['WAKE_TRUNCATION_PREDICTED', 'WAKE_DISPOSITION_SAFE']);
   assert.match(notices(safe)[1].repair, /nothing to do/);
 
-  // And all three arms are reachable, so the split is a split.
+  // And all four arms are reachable, so the split is a split.
   assert.deepEqual(
-    [lost, safe, ok({ body: LONG_BODY })].map((m) => notices(m)[1].code),
-    ['WAKE_DISPOSITION_LOST', 'WAKE_DISPOSITION_SAFE', 'WAKE_DISPOSITION_UNKNOWN'],
+    [lost, unread, safe, ok({ body: LONG_BODY })].map((m) => notices(m)[1].code),
+    ['WAKE_DISPOSITION_LOST', 'WAKE_DISPOSITION_ABOVE_AND_TAIL_UNREAD',
+      'WAKE_DISPOSITION_SAFE', 'WAKE_DISPOSITION_UNKNOWN'],
   );
 });
 

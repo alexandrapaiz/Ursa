@@ -590,11 +590,43 @@ export function notices(m, now = new Date()) {
         repair: `move the disposition above the cut, which is the remedy that survives misjudging the length, or cut ${r.body_lost} characters. Nothing is refused for this and splitting the message is not asked for`,
       });
     } else if (risk.in_delivered) {
-      out.push({
-        code: 'WAKE_DISPOSITION_SAFE',
-        line: `the disposition is above the cut, so the ${r.body_lost} lost characters are evidence rather than verdict. ${kindNote}`,
-        repair: 'nothing to do. This line exists so that a sender who already put the verdict first is told the cut is harmless instead of being asked to rewrite a message that is already right',
-      });
+      // THIS ARM USED TO PUBLISH A FALSE GREEN, and it was caught on this
+      // seat's own send (2026-11-09, window 107, board row `bfeb30f2`).
+      //
+      // Its premise is EXISTENTIAL over the delivered half: a marker was
+      // found above the cut. Its old verdict was UNIVERSAL over the lost
+      // half: "so the lost characters are evidence rather than verdict".
+      // Nothing licenses the second from the first. `in_lost` being false is
+      // not evidence the tail holds no disposition, because its falsity is
+      // indistinguishable from the marker list simply not covering the words
+      // the tail used — which is the exact limitation the UNKNOWN arm below
+      // states out loud and this arm assumed away.
+      //
+      // Measured on the instance: a 1,530-character note whose only matched
+      // marker was "Your gradient holds", at index 8, in its first sentence.
+      // The real disposition — "Not widening the set ... I shipped what makes
+      // it decidable" — was at index 1,274, in the dropped 258 characters,
+      // and matched nothing on the list. The gate printed "nothing to do" and
+      // the recipient was woken with every number and no decision.
+      //
+      // So the two cases are separated, and only one of them is a green. See
+      // window 106's rule: a premise and the claim attached to it can be of
+      // different kinds, and re-reading the premise more carefully never
+      // reaches the claim.
+      const lostText = body.slice(r.body_delivered).trim();
+      if (!lostText) {
+        out.push({
+          code: 'WAKE_DISPOSITION_SAFE',
+          line: `a disposition phrase is above the cut and nothing of substance is below it. ${kindNote}`,
+          repair: 'nothing to do. This line exists so that a sender who already put the verdict first is told the cut is harmless instead of being asked to rewrite a message that is already right',
+        });
+      } else {
+        out.push({
+          code: 'WAKE_DISPOSITION_ABOVE_AND_TAIL_UNREAD',
+          line: `a disposition phrase is above the cut, which is the half this gate can check, and it CANNOT tell you whether the dropped ${r.body_lost} characters carry another one in words this list does not hold — the same limit the UNKNOWN arm names, and it applies here too. ${kindNote}. The tail opens "${risk.lost_opens_with}"`,
+          repair: 'read the dropped tail yourself and ask whether it decides anything. Nothing is refused for this. This gate used to call this case safe, and it was wrong on the send that found it: the only matched phrase was in the first sentence and the actual decision was in the dropped tail',
+        });
+      }
     } else {
       out.push({
         code: 'WAKE_DISPOSITION_UNKNOWN',
