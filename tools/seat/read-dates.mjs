@@ -296,6 +296,31 @@ export function report ({ text, now, rows = null }) {
   }
 }
 
+/**
+ * The gate's exit code, as a pure function so the suite can assert every
+ * branch without a register in the shape that branch needs.
+ *
+ *   3  the gate's question was not answered. Three cases, and all three
+ *      exited 0 in this tool's first version, which is the whole reason this
+ *      is a function: no run rows, so `due` and `unread` are
+ *      indistinguishable; `--offline`, which is a parse and not a grading;
+ *      and a register in which NOTHING carries a date, where green means the
+ *      file had no read dates rather than no debts.
+ *   1  some entry is `due`. A verdict is owed.
+ *   0  every dated entry is `pending`, and there was at least one.
+ *
+ * The third case is the one worth naming. `--gate` over README.md exited 0:
+ * one `###` entry, no read-date field, nothing graded, gate green. A gate
+ * that passes over a file it could not grade is worse than one that fails,
+ * because it reads as a clean register.
+ */
+export function gateExitCode ({ report: r, rows, offline }) {
+  if (offline) return 3
+  if (!rows) return 3
+  if (r.counts.dated === 0) return 3
+  return r.due.length > 0 ? 1 : 0
+}
+
 function usage (code) {
   process.stderr.write(`usage: node tools/seat/read-dates.mjs [--file F] [--json] [--due]
                                     [--labels] [--gate] [--offline]
@@ -394,8 +419,12 @@ async function main (argv) {
   // run truncated at line 527 for exactly that reason. Set the code and let
   // node drain.
   if (opt.gate) {
-    if (!opt.offline && !rows) { process.exitCode = 3; return }
-    if (r.due.length > 0) { process.exitCode = 1; return }
+    const code = gateExitCode({ report: r, rows, offline: opt.offline })
+    if (code === 3) {
+      process.stderr.write(`read-dates: --gate established nothing (${opt.offline ? '--offline' : (!rows ? 'no run rows' : 'no dated entries in ' + opt.file)}); not a verdict\n`)
+    }
+    process.exitCode = code
+    return
   }
   process.exitCode = 0
 }

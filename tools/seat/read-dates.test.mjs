@@ -28,7 +28,7 @@ import { readFileSync } from 'node:fs'
 import { compareInstants, isAfter, isBefore } from '../instant.mjs'
 import {
   splitEntries, labelAtHead, readDateField, gradeEntry, labelCensus, report,
-  REGISTER_PATH, HOUSE_LABEL, ALT_LABELS, VERDICTS, NO_FIELD, FIELD_NO_ISO, compareDays
+  REGISTER_PATH, HOUSE_LABEL, ALT_LABELS, VERDICTS, NO_FIELD, FIELD_NO_ISO, compareDays, gateExitCode
 } from './read-dates.mjs'
 
 // The capacity rows this organization actually had, which is outage.test.mjs's
@@ -247,4 +247,23 @@ test('control: compareDays orders days and REFUSES an instant, which compareInst
   // instant, so a caller holding one is refused instead of quietly served.
   assert.throws(() => compareDays('2026-11-09T00:48Z', '2026-11-15'), /YYYY-MM-DD/)
   assert.throws(() => compareDays('2026-11-9', '2026-11-15'), /YYYY-MM-DD/)
+})
+
+test('control: the gate exits 3 on all three ways of establishing nothing, and 0 only over a real reading', () => {
+  // Every one of these exited 0 in this tool's first version. A gate that
+  // passes over a question it did not answer is the failure mode this
+  // directory's rule is about: the reassuring verdict and the real one have
+  // the same shape, and only one of them is good news.
+  const pendingOnly = report({ text: '### a\n- **Next measure.** 2026-11-15.\n', now: NOW, rows: ROWS })
+  const dueOne = report({ text: '### a\n- **Next measure.** 2026-11-03.\n', now: NOW, rows: ROWS })
+  const undated = report({ text: '### a\n- **Effect.** it held.\n', now: NOW, rows: ROWS })
+
+  assert.equal(gateExitCode({ report: pendingOnly, rows: ROWS, offline: false }), 0, 'a real reading with nothing due')
+  assert.equal(gateExitCode({ report: dueOne, rows: ROWS, offline: false }), 1, 'a verdict is owed')
+  assert.equal(gateExitCode({ report: undated, rows: ROWS, offline: false }), 3, 'nothing in the file carries a date')
+  assert.equal(gateExitCode({ report: pendingOnly, rows: null, offline: false }), 3, 'no run rows')
+  assert.equal(gateExitCode({ report: pendingOnly, rows: ROWS, offline: true }), 3, '--offline is a parse, not a grading')
+  // And the control on the control: the only input that yields 0 is the one
+  // where a dated entry was actually graded, so a gate stuck at 0 fails here.
+  assert.notEqual(gateExitCode({ report: undated, rows: ROWS, offline: false }), 0)
 })
