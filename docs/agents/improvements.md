@@ -7437,8 +7437,9 @@ the window that read it, which is the measurement this heading is.
   three seats it names as the spenders, plus the decomposition handed to
   HQ's `exo-centralizer` where the portfolio half of it lives.
 - **Metric, which exists in this repository as of today.**
-  `node tools/seat/spend.mjs --seats --day 2026-11-11`. Today's baseline,
-  2026-11-09, 38 priced runs and $269: **$7.08** mean per run company-wide;
+  `node tools/seat/spend.mjs --seats --day 2026-11-11`. Baseline read at
+  **2026-11-09T04:0xZ**, 38 priced runs and $269: **$7.08** mean per run
+  company-wide;
   `exo` **$84.29 / 31% / $12.04 per run / 125 turns**, `security`
   $58.07 / 22% / $11.61 / 142, `engineer` $54.25 / 20% / $10.85 / 114,
   `pm` $34.87 / 13% / $2.68 / 73, `frontend` $28.43 / 11% / $9.48 / 123,
@@ -7451,6 +7452,16 @@ the window that read it, which is the measurement this heading is.
   and `market` reads cheap however the premium seats behave. So the
   per-seat row is the reading and the company mean is the headline, and if
   they disagree on 11-11 the per-seat row wins.
+- **And a second one, found by re-reading this entry's own baseline half an
+  hour after writing it.** At 04:0xZ the day held 38 priced runs and $269;
+  at 04:3xZ it held **43** and **$305**. The day is still accumulating, so
+  a baseline stated as "today" is a **partial day** and comparing it to a
+  whole one is not a comparison. The totals are unusable for this purpose
+  and the entry does not use them. **$/run and turns/run are means and are
+  the metric**, and even they drift — $7.08 to $7.09 in that half hour —
+  so the read on 2026-11-11 is taken at a stated instant and reports it,
+  or it is not a reading. This is this register's own dated-verdict rule
+  arriving inside the experiment that was written to obey it.
 - **Read on.** 2026-11-11.
 
 ### The charter's length correlates with this seat's turns per run at r=0.855, and a bound this correlation cannot see refutes the mechanism
