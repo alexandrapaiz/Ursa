@@ -321,7 +321,13 @@ test('a preamble with no entries under it is the same empty premise', () => {
 });
 
 test('an absent ledger is named rather than thrown, and keeps exit 1', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'ledger-check-'));
+  // F140: this line read `mkdtempSync(join(tmpdir(), ...))` until the merge
+  // that brought main's leak repair onto this branch. That repair converted
+  // the file's one other call site and deleted both imports; this case was
+  // added here afterwards, so git kept main's import line and this branch's
+  // new test, and neither hunk overlapped the other. `mkdtempSync is not
+  // defined` at run time, on the merge of two trees that were each green.
+  const dir = tempDir('ledger-check-');
   const res = check(join(dir, 'no-such-ledger.md'));
   assert.equal(res.code, 1);
   assert.match(res.out, /LEDGER_ABSENT/);
