@@ -235,7 +235,7 @@ const REPAIRED_ELSEWHERE = [
 
 /** The bypass, as a line pattern. Comments are stripped first, because prose
  *  about this function reads exactly like a call to it. */
-export function shapeAsExistence (source) {
+function shapeAsExistence (source) {
   const out = []
   source.split('\n').forEach((text, i) => {
     if (/^\s*\*/.test(text)) return
