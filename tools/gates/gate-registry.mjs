@@ -158,13 +158,47 @@ export function registeredPaths(checks) {
  *
  *  Pure, so the suite can assert each class without a git checkout or a
  *  subprocess. `candidates` is the discovered set, `registered` is the map
- *  above, `baseline` is the parsed file, and `exists` answers whether a path
- *  is in the tree.
+ *  above, `baseline` is the parsed file.
+ *
+ *  WHY `locate` RETURNS THREE WORDS AND NOT A BOOLEAN. It did return a
+ *  boolean, named `exists`, and the boolean was the defect. Two of this
+ *  function's arms ask "is this path in the tree", and the question has a
+ *  third answer: the path is on disk and the sweep that finds candidates
+ *  cannot see it yet, because discovery reads `HEAD` and a file being written
+ *  is not at `HEAD` yet. Both arms used to call that case gone, and the
+ *  sentence they printed told the reader to delete the row -- at the one
+ *  moment deleting it is wrong. Measured on a clean worktree of
+ *  `53d1e933` on 2026-11-09, with a three-line file whose only exit is
+ *  `process.exit(v.exit)` and a baseline row naming it:
+ *
+ *    untracked  STALE-ENTRY "is not in this tree. Delete it"  and the file is
+ *               on disk, so the sentence is false and not merely unhelpful
+ *    staged     STALE-ENTRY "is no longer a gate candidate"   and it has never
+ *               been one, so "no longer" is false too
+ *    committed  clean, and the candidate count goes 66 to 67
+ *
+ *  The same probe on the gate-list arm fires MISSING-TARGET while the file is
+ *  untracked and goes quiet at `git add`, because the old `exists` read the
+ *  INDEX while discovery read `HEAD`. So the two arms cleared at two different
+ *  instants and neither cleared when the file was written. Ursa/exo lost a
+ *  correct baseline row to the staged case within an hour of writing the tool
+ *  it described, which is the cost this third state exists to stop paying.
+ *
+ *  `locate(path)` returns `'committed'`, `'uncommitted'` or `'absent'`, and
+ *  `uncommitted` is reported as `pending` rather than as a problem: it is
+ *  unreachable in CI, where the tree under test is always committed, so it
+ *  cannot hide a real stale row from the only reader that blocks a merge.
  */
-export function decide({ candidates, registered, baseline, exists, checkIds, ledgerHeadings = [] }) {
+export function decide({ candidates, registered, baseline, locate, checkIds, ledgerHeadings = [] }) {
+  if (typeof locate !== 'function') {
+    throw new TypeError('decide() needs locate(path) -> committed|uncommitted|absent. It took a '
+      + 'boolean `exists` until 2026-11-09, and the two cases that boolean merged are the '
+      + 'reason this throws instead of defaulting.')
+  }
   const byPath = new Map((baseline.entries ?? []).map((e) => [e.path, e]))
   const rows = []
   const problems = []
+  const pending = []
 
   for (const c of candidates) {
     const checks = registered.get(c.path) ?? []
@@ -236,18 +270,40 @@ export function decide({ candidates, registered, baseline, exists, checkIds, led
   const discovered = new Set(candidates.map((c) => c.path))
   for (const entry of baseline.entries ?? []) {
     if (discovered.has(entry.path)) continue
+    const where = locate(entry.path)
+    if (where === 'uncommitted') {
+      pending.push({
+        kind: 'pending-entry',
+        path: entry.path,
+        why: `${entry.path} is excused by the baseline and is on disk but not committed, so the `
+          + 'candidate sweep cannot see it yet: discovery reads HEAD. Commit the file and this '
+          + 'entry goes live. Do NOT delete the entry',
+      })
+      continue
+    }
     problems.push({
       kind: 'stale-entry',
       path: entry.path,
-      why: exists(entry.path)
-        ? `${entry.path} is excused by the baseline and is no longer a gate candidate, so `
-          + 'the entry decides nothing. Delete it'
+      why: where === 'committed'
+        ? `${entry.path} is excused by the baseline, is committed, and is no longer a gate `
+          + 'candidate, so the entry decides nothing. Delete it'
         : `${entry.path} is excused by the baseline and is not in this tree. Delete it`,
     })
   }
 
   for (const [path, checks] of registered) {
-    if (exists(path)) continue
+    const where = locate(path)
+    if (where === 'committed') continue
+    if (where === 'uncommitted') {
+      pending.push({
+        kind: 'pending-target',
+        path,
+        why: `check(s) ${checks.join(', ')} in scripts/ci-checks.mjs invoke ${path}, which is on `
+          + 'disk but not committed. The check is right and the commit has not happened yet. Do '
+          + 'NOT delete the check',
+      })
+      continue
+    }
     problems.push({
       kind: 'missing-target',
       path,
@@ -256,10 +312,19 @@ export function decide({ candidates, registered, baseline, exists, checkIds, led
     })
   }
 
-  return { rows, problems }
+  return { rows, problems, pending }
 }
 
-export function verdict({ rows, problems, candidates }) {
+/** `pending` never moves the exit code, and it is in the summary line anyway.
+ *
+ *  A pending row means a file is written and not yet committed, which is a
+ *  state of the author's working tree and not of this repository. CI tests a
+ *  committed tree, so the count is 0 there by construction; the line carries
+ *  it so that the local reader who is mid-write is told why a row they just
+ *  added is not doing anything yet, instead of reading a clean sweep and
+ *  concluding the row works.
+ */
+export function verdict({ rows, problems, candidates, pending = [] }) {
   if (candidates === 0) {
     return {
       exitCode: 2,
@@ -269,13 +334,17 @@ export function verdict({ rows, problems, candidates }) {
     }
   }
   const counts = { registered: 0, excused: 0, unreached: 0, undecided: 0 }
-  for (const r of rows) counts[r.state] += 1
+  // `?? 0` and not `+= 1`: a row state this function has no counter for used to
+  // make the summary line read `NaN excused`, which is a number a reader
+  // believes. Adding a state to `decide` is exactly how that would happen.
+  for (const r of rows) counts[r.state] = (counts[r.state] ?? 0) + 1
+  const waiting = pending.length > 0 ? ` ${pending.length} row(s) pending a commit.` : ''
   if (problems.length === 0) {
     return {
       exitCode: 0,
       cause: 'every-gate-reached-or-excused',
       line: `gate-registry: ${candidates} gate candidate(s), ${counts.registered} run by a `
-        + `check in scripts/ci-checks.mjs and ${counts.excused} excused in writing.`,
+        + `check in scripts/ci-checks.mjs and ${counts.excused} excused in writing.${waiting}`,
     }
   }
   const byKind = {}
@@ -285,7 +354,7 @@ export function verdict({ rows, problems, candidates }) {
     exitCode: 1,
     cause: 'registry-incomplete',
     line: `gate-registry: ${candidates} gate candidate(s) and ${problems.length} finding(s): `
-      + `${named}. A gate reached by nothing is a gate we did not build.`,
+      + `${named}. A gate reached by nothing is a gate we did not build.${waiting}`,
   }
 }
 
@@ -319,10 +388,26 @@ function main(argv) {
     }
   }
 
-  const tracked = new Set(
+  // THREE SETS AND NOT ONE. `ls-files` is the INDEX and `ls-tree HEAD` is the
+  // commit, and `gateCandidatePaths` discovers off `git show HEAD:`, so the
+  // index is the wrong authority for "the sweep can see this". Reading both,
+  // plus the disk, is what lets `locate` tell a file being written from a file
+  // that is gone. The disk read is last because it is the only one that can be
+  // true for a path git has never heard of.
+  const atHead = new Set(
+    execFileSync('git', ['-C', REPO_ROOT, 'ls-tree', '-r', '--name-only', 'HEAD'],
+      { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
+      .split('\n').filter(Boolean),
+  )
+  const inIndex = new Set(
     execFileSync('git', ['-C', REPO_ROOT, 'ls-files'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
       .split('\n').filter(Boolean),
   )
+  const locate = (p) => {
+    if (atHead.has(p)) return 'committed'
+    if (inIndex.has(p) || existsSync(join(REPO_ROOT, p))) return 'uncommitted'
+    return 'absent'
+  }
 
   let ledgerHeadings = []
   try {
@@ -334,18 +419,18 @@ function main(argv) {
     return 2
   }
 
-  const { rows, problems } = decide({
+  const { rows, problems, pending } = decide({
     candidates,
     registered: registeredPaths(checks),
     baseline,
-    exists: (p) => tracked.has(p),
+    locate,
     checkIds: checks.map((c) => c.id),
     ledgerHeadings,
   })
-  const v = verdict({ rows, problems, candidates: candidates.length })
+  const v = verdict({ rows, problems, candidates: candidates.length, pending })
 
   if (json) {
-    console.log(JSON.stringify({ rows, problems, verdict: v }, null, 2))
+    console.log(JSON.stringify({ rows, problems, pending, verdict: v }, null, 2))
     return v.exitCode
   }
 
@@ -361,7 +446,14 @@ function main(argv) {
     const line = `${p.kind.toUpperCase()}: ${p.path}: ${p.why}`
     console.log(process.env.GITHUB_ACTIONS === 'true' ? `::error::${line}` : line)
   }
-  if (problems.length > 0) console.log('')
+  // `::notice::` and not `::error::`: a pending row is not a finding and must
+  // not annotate a pull request as one. It is 0 on any committed tree anyway,
+  // so this branch is for the author's own terminal.
+  for (const p of pending) {
+    const line = `${p.kind.toUpperCase()}: ${p.path}: ${p.why}`
+    console.log(process.env.GITHUB_ACTIONS === 'true' ? `::notice::${line}` : line)
+  }
+  if (problems.length > 0 || pending.length > 0) console.log('')
   console.log(v.line)
   return v.exitCode
 }

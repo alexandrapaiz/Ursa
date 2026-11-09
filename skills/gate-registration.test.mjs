@@ -40,6 +40,27 @@
 // reason `skills/relocate-anchors.mjs` is excused in THIS file and not in the
 // baseline, and a reader who did not know it would move the row and be right
 // to think they were tidying up.
+//
+// A CORRECTION TO THE PARAGRAPH ABOVE, measured 2026-11-09 after it was
+// written. "Order-safe" was too strong a word for the gate-list route, because
+// the widening is not the only instant either route is racing. Both routes are
+// also racing the COMMIT, and they clear it at two different moments:
+//
+//   - the gate-list route's `missing-target` arm asked the INDEX, so it fired
+//     on an untracked file and went quiet at `git add`
+//   - the baseline route's `stale-entry` arm asks `HEAD`, because that is where
+//     `gateCandidatePaths` discovers, so it fired until `git commit`
+//
+// So neither route was safe from the moment a gate was written, and both of
+// their sentences said "Delete it" about a file that was being created. Ursa/exo
+// deleted a correct baseline row to the staged case on 2026-11-09. The repair
+// is a third state in `decide()`, `pending`, which both arms now return
+// instead of a finding, and which is unreachable in CI because the tree under
+// test there is always committed. The test named "a library row written before
+// the commit is pending" below is this library's half of that, and it is
+// separate from the widening test because the two axes are independent: a path
+// can be invisible for being uncommitted, for being outside the swept roots, or
+// for both.
 
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
@@ -151,7 +172,7 @@ test('the baseline route cannot be taken before the root widens, and the gate-li
   const candidates = [{ path: 'tools/example.mjs', lang: 'javascript', exitCalls: 1 }]
   const shared = {
     candidates,
-    exists: () => true,
+    locate: () => 'committed',
     checkIds: ['example'],
     ledgerHeadings: [],
   }
@@ -185,6 +206,32 @@ test('the baseline route cannot be taken before the root widens, and the gate-li
     viaGateList.problems, [],
     'naming a skills/ path in the gate list before the sweep can see it must cost nothing',
   )
+})
+
+test('a library row written before the commit is pending, so the row survives', () => {
+  // The second axis, on this library's own case. A seat writing a new guard
+  // under skills/ and its baseline row in the same working tree used to be told
+  // to delete the row, by a sentence that was false in both directions: the
+  // file is on disk, and it has never been a candidate so it cannot be "no
+  // longer" one. The row has to survive the author's own next read of the gate,
+  // or the convention in EXPECTED_ABSENT_FIXTURES above cannot be followed.
+  const { problems, pending } = decide({
+    candidates: [{ path: 'tools/example.mjs', lang: 'javascript', exitCalls: 1 }],
+    registered: new Map([['tools/example.mjs', ['example']]]),
+    locate: (path) => (path === 'skills/not-yet-committed.mjs' ? 'uncommitted' : 'committed'),
+    checkIds: ['example'],
+    ledgerHeadings: [],
+    baseline: {
+      entries: [{
+        path: 'skills/not-yet-committed.mjs',
+        kind: 'write-action',
+        why: 'a reason comfortably past the twenty-character floor the registry enforces',
+      }],
+    },
+  })
+  assert.deepEqual(problems, [], 'a guard being written must not make its own excuse a finding')
+  assert.deepEqual(pending.map((p) => p.kind), ['pending-entry'])
+  assert.match(pending[0].why, /Do NOT delete the entry/)
 })
 
 test('every library path the gate list names is a file, and is one of these candidates', () => {
