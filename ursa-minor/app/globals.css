@@ -1185,6 +1185,89 @@ p .rec-action {
   }
 }
 
+/*
+ * The row's own wash, which the benchmark that prescribed it predates by
+ * six weeks.
+ *
+ * The "hover craft" note further up this file is the 2026-09-24 reading of
+ * Linear, Vercel and Elicit, and the one sentence in it about a row says
+ * Linear washes a hovered row with rgba(255,255,255,0.03) over 160ms. That
+ * reading was translated into `.quiet-link`, which is a 230x47 button, and
+ * the site's only actual row never got it.
+ *
+ * Measured 2026-11-09 (run k) with `verify-hover.mjs` and `diff-frames.py`
+ * at 1440: the whole hover response of `.rec-row`, a 960x106 button and the
+ * primary control of the set view, was 218 pixels, 0.177 per cent of its
+ * own box, confined to one pixel row and 217 of its 960 columns. That is
+ * the id's underline and nothing else. For scale, in the same sweep
+ * `.quiet-link` moved 65.6 per cent of its box and a 216x19 inline span
+ * moved 43.7. The largest control on the site had the smallest hover on
+ * it, by two orders of magnitude.
+ *
+ * Light and not movement, which is the benchmark's actual finding: all
+ * three sites animate light or colour rather than moving the control. So
+ * no lift and no spring here. `--spring-lift` stays on the two box-shaped
+ * buttons it was measured for, because a third motion character is a third
+ * identity and the same benchmark found thirteen groups of same-shaped
+ * controls across six products with not one giving its members different
+ * physics.
+ *
+ * 0.03 is Linear's own figure rather than `.quiet-link`'s 0.06. The row is
+ * roughly nine times the area of that button, and a wash reads by total
+ * light rather than by alpha.
+ *
+ * On the item and not on the button, because the item carries the padding
+ * (see the note on the markup) and a wash on the button alone would be a
+ * band floating inside the row with the padding dark above and below it.
+ * Keyed off the button's hover rather than the item's, so the wash answers
+ * the row's control and not the address link that sits beside it. The item
+ * is geometrically untouched: no padding and no margin move, so nothing
+ * about the row at rest changes, including the width of its hairline.
+ *
+ * The asymmetry is this file's established one, 160ms in and 260ms out, the
+ * wash answering immediately and taking longer to fade.
+ */
+.rec-item {
+  background-color: rgba(232, 237, 247, 0);
+  transition: background-color 260ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* `:has()` is guarded the way `linear()` is above: a browser without it
+   never enters the block and the row keeps the underline-only hover that
+   shipped before today, rather than losing the hover to an invalid
+   selector. */
+@supports selector(:has(*)) {
+  @media (hover: hover) {
+    .rec-item:has(.rec-row:hover:not(:disabled)) {
+      background-color: rgba(232, 237, 247, 0.03);
+      transition-duration: 160ms;
+    }
+  }
+
+  /* Touch has no hover at all, so the press is the only thing that can
+     answer the finger. Same state, same reason `.rec-row-id`'s `:active`
+     is outside the `(hover: hover)` block. */
+  .rec-item:has(.rec-row:active:not(:disabled)) {
+    background-color: rgba(232, 237, 247, 0.03);
+    transition-duration: 160ms;
+  }
+}
+
+/* The hovered and pressed states each set their own duration for the
+   asymmetry above, and both selectors outrank a bare `.rec-item`, so a
+   reduced-motion block written against `.rec-item` alone is overridden in
+   exactly the state that moves. Caught by `check-row-wash.mjs`, which read
+   0.16s here while the rule above it said 1ms. `.rec-row-id` does not have
+   this problem because its hover rule sets a colour and never a duration,
+   which is why copying its shape was not enough. */
+@media (prefers-reduced-motion: reduce) {
+  .rec-item,
+  .rec-item:has(.rec-row:hover:not(:disabled)),
+  .rec-item:has(.rec-row:active:not(:disabled)) {
+    transition-duration: 1ms;
+  }
+}
+
 /* ---------- the measure ----------
 
    The measure is a property of the type, not of the column, and until
