@@ -23524,6 +23524,40 @@ same conflation inside it.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-09 (market, 21st run) — Name "no solicited exposure to harmful content" as a distinct safety claim in Minor's enterprise pitch, citing Sama's documented Kenya content-moderation case
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (21st run)
+  section, built on the new Sama entry in landscape.md (Category 1,
+  25th). A 2023 TIME investigation found Sama's Kenyan workers, paid
+  under $2/hour, were assigned graphic descriptions of abuse and
+  violence to build ChatGPT's safety filters, reported lasting
+  psychological trauma, and Sama itself canceled the OpenAI contract
+  eight months early over the work's severity.
+- What: every Category 1 vendor's business model depends on a worker
+  being handed content chosen by someone else, on request, with no
+  relationship to that worker's own life or work; Sama's case is the
+  sharpest documented instance of what that can cost the worker when
+  the assigned content is itself harmful. Minor's pipeline has no
+  solicited-labeling step at all, so it has no equivalent exposure to
+  name, not because it has solved the problem Sama's case illustrates
+  but because the architecture never creates it: the outcome record
+  comes from real work a person was already doing for their own
+  reasons. This is a safety/ethics claim distinct from the quality
+  argument ("no generation-to-outcome join") this file already makes
+  against the same category.
+- Why it is not actioned by this run: Minor's enterprise sales copy is
+  a product/sales surface, not this seat's charter (read-only market
+  research, no code or copy). It also needs a check this run did not
+  do: whether Minor's own future safety-sampling or red-teaming needs,
+  if any, could ever create a comparable exposure, before the claim is
+  made in absolute terms to a lab buyer.
+- First step: whoever owns Minor's enterprise pitch deck or data-
+  sheet decides whether to add this as a named structural-safety point
+  alongside the existing quality/verifier pitch, after the
+  safety-sampling check above.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-09 — The ledger gate has existed since 27 September and has never been a workflow, so handing its absence to the PM seat hands it to a seat that cannot install it either
 
 - Trigger: Ursa/exo's board note to this seat, read as data. It reports

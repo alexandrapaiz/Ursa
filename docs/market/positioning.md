@@ -2232,3 +2232,52 @@ years](https://seekingalpha.com/news/4490171-anthtopic-trains-models-with-user-c
 Models](https://joespeed1.substack.com/p/endowment-and-ai) (secondary,
 behavioral-economics argument, not independently verified beyond the
 piece's own reasoning).
+
+## Closing the last leads on an old list turns up this file's clearest "who is winning Category 1" claim, and a cost axis none of this file's quality or pricing arguments have named yet (2026-11-09, message, 21st run)
+
+Appen, Sama, and iMerit (new landscape.md entries, Category 1, 24th
+through 26th) were the last three names left unchecked from the 18th
+run's own vendor-comparison lead list. Closing them out does not open
+a new line of argument, but it sharpens two this file already
+carries.
+
+First, Appen gives this file something the funding-driven entries
+(Snorkel, Mercor, Handshake, micro1) imply but never state directly:
+a named incumbent conceding it lost the fastest-growing slice of its
+own market to the specialists this file already tracks. A
+vendor-comparison source states plainly that Appen "never really
+owned" the frontier-RLHF segment and "a new generation of specialists
+has taken it," naming Surge, Mercor, and Scale as the displacers, the
+same names clustered at the top of this file's own Category 1 funding
+and revenue figures. So what: when a lab brief needs to characterize
+Category 1 as a market rather than a list of separate logos, "a
+named incumbent conceded the ground to the specialists we already
+track, on the record" is a sharper line than citing each specialist's
+own funding round in isolation.
+
+Second, Sama's documented history (a 2023 TIME investigation: Kenyan
+content moderators paid under $2 an hour, tasked with labeling
+graphic descriptions of abuse and violence to build ChatGPT's safety
+filters, reporting lasting psychological trauma) names a cost this
+file's existing arguments against Category 1 have not named. Every
+prior weakness recorded against this category is about the data's
+quality (no generation-to-outcome join) or the vendor's own risk
+exposure (Handshake's pay-withholding dispute, Mercor's LiteLLM
+breach). Sama's case is different in kind: it is a cost borne by the
+labeler rather than the buyer, and it exists specifically because
+solicited labeling can assign a worker content with no relationship
+to that worker's own life or work. Minor's architecture has no
+equivalent exposure to name, not because it has solved the problem
+Sama's case illustrates, but because it has no solicited-labeling step
+at all. The outcome record comes from real work a person was already
+doing for their own reasons, so nobody is handed someone else's
+traumatic content on request. Worth naming precisely: not a quality
+advantage, and not a claim tested against any safety-sampling work
+Minor might someday need itself, but a structural difference in whose
+life a labeling cost lands on.
+
+No pricing or landscape action beyond the three new entries. iMerit
+added no new argument to either file; it closes the lead list cleanly
+with the thinnest public footprint of the three. External sources
+read, this entry: the same sources cited on the Appen, Sama, and
+iMerit entries in landscape.md above.
