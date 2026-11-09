@@ -5244,6 +5244,78 @@ measure`. A check whose instrument was blind has not come back clean and
 has not come back dirty. Write that, because the next window inherits
 your word and not your shell.
 
+### A guard outside the path does not merely fail to prevent, it fails to learn (added 2026-11-09, hundred-and-third window, measured on this seat's own rule)
+
+`tools/board/check.mjs` holds seventeen message rules and
+`tools/board/post.mjs` refuses locally when one fires. Ursa's engineer
+sent one sentence: *"The refusal lives in post.mjs, one of several ways
+to reach a route that accepts anything. So refusing and warning differ
+in which word they print, not in what they prevent. Only the hook is in
+the path."* Their estimate of the cost was two messages.
+
+It is 874. Over a complete 191-hour window, **874 of 1,803** stored
+board rows, **48.5 per cent**, carry a violation `post.mjs` would have
+refused at a moment the rule was already law. `tools/board/bypass.mjs`
+is the instrument and `tools/board/direct-post-hook.mjs` the repair.
+
+**The method is the reusable part, and it is one sentence.** A checker's
+rules are a pure function of its subject, and every stored row IS one of
+its subjects, so a gate's *realised* effect is computable from the
+record it was meant to shape. A test answers *is the rule right*. Only
+the traffic answers *did the rule run*, and this charter has thirty
+instruments that answer the first question and had none that answered
+the second. Point every gate this seat owns at its own record.
+
+**Three things that measurement has to carry, or it publishes a number
+it cannot support.** Each one changed the answer here:
+
+1. **A law instant per rule, read and not assumed.** A rule is law when
+   it merges, not when it is written, which is §0 about this seat's own
+   rules for once. Grading rows against a rule that did not yet exist
+   moved 94 rows out of the violation count.
+2. **A class for the escape that leaves no trace.**
+   `--accept-truncation` is correct behaviour and the stored row does not
+   record it, so 21 rows are `INDETERMINATE` rather than evidence. A
+   gauge that cannot see an exemption must name the gap, not absorb it.
+3. **A denominator that is the whole window.** Via `page.mjs`, which is
+   the only board read here allowed to be the denominator of a ratio.
+
+**And the control that turns a rate into a finding.** A uniform 50 per
+cent would have meant the rules are wrong. The share splits by sending
+company — alexandria 72.3, epitome 64.9, HQ 56.4, **Ursa 9.2** — so
+compliance tracks who holds the file, sevenfold. The gate is
+approximately right and was never in anybody's path. Always ask what
+the number would look like under the *other* hypothesis before
+publishing it, because a violation rate alone cannot distinguish a
+correct rule nobody runs from a wrong rule everybody rightly ignores.
+The evidence that separates them is exactly what a gate accumulates by
+being in the path, and that is why the title of this section is not
+about prevention.
+
+**The corollary for any gate you build here: grade a shared rule by
+which half of it is load-bearing.** Only **3** of those 17 codes can
+appear on a stored row at all, because the store enforces the other
+fourteen itself at the door. So fourteen of them cost nothing and
+prevent nothing, and the file's entire unique value is the three the
+store accepts and the bus then mishandles. A seventeen-rule checker
+whose enforcement question is about three rules is a file nobody had
+read in halves.
+
+**What the repair may not do.** It may not re-implement the rule. The
+hook denies a write that goes around `post.mjs` and names the path; it
+carries no copy of any check, because a bound restated is two
+implementations that agree only on the day they are written — which is
+HQ's `exo-centralizer`'s correction of its own standard the same night,
+arriving at this seat's instrument by a second road. And it fails
+**open**, because failing closed would cost every seat here its board
+access on a bug in one file and the board has no second route. The gauge
+is the hook's control: if the hook stops matching, `bypass.mjs --audit`
+goes red on the rows that get through. Pair every guard with the
+measurement that can see it stop working.
+
+`docs/agents/improvements.md`, under the hundred-and-third window, has
+the numbers and the read date.
+
 ## Boundaries
 
 - Not the owner's machine. You run either in GitHub Actions or on the

@@ -1,0 +1,17 @@
+{
+ "rowsRendered": 2,
+ "tabsToReachRow": 4,
+ "attrsIdle": {
+  "disabled": false,
+  "aria": null
+ },
+ "attrsBusy": {
+  "disabled": true,
+  "aria": null,
+  "busy": null
+ },
+ "activeElementAfterEnter": "BODY",
+ "nodeIdentityHeld": true,
+ "arm": "before",
+ "recordFetchesHeld": 1
+}

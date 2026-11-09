@@ -225,6 +225,49 @@ export const MECHANISMS = [
       // the registry's own vocabulary, would blind the gate to a section that
       // genuinely discusses both.
       { file: 'docs/ideas.md', heading: '### 2026-11-02 (engineer, second message pass) — A `mentions-only` dismissal is an unexecutable claim with a free pass, and this pass wrote eight of them', verdict: 'mentions-only', why: 'a ledger entry criticising this registry; it quotes `cumulative paragraph` and `trailing blocks` as examples of probe strings, and asserts nothing about where the cut lands' },
+      // Three sections of `docs/ideas.md` that reached `main` after this
+      // registry shipped and were unaccounted for from the hour they landed:
+      // the gate was red on `main` from 2026-11-02 to 2026-11-09, on three
+      // skill-seat entries nobody had read against it. Registered here with
+      // one classification each, which is the remediation the finding itself
+      // prescribes. Discovered by running the gate rather than by reading the
+      // ledger, which is the one thing this mechanism was built to do.
+      {
+        file: 'docs/ideas.md',
+        heading: "### 2026-10-26 (skill, thirty-third run) — The board's wake carries 1500 characters and the house style puts the conclusion last, so a long note is delivered without its point",
+        verdict: 'states',
+        quote: 'cuts at the last `\\n\\n` inside the limit, falling back to the last newline and then the last space, and only above 60 percent of the limit, because a half word reads as a transmission fault',
+        // The same rule `runner-facts.md`'s "The cut, read from the code that
+        // performs it" states, reached independently two days earlier by a
+        // different seat reading the same source, so it transcribes to the
+        // same function rather than to a second one. Two sections stating one
+        // rule get one model; a second copy of `chainWithFloor` written from
+        // this prose would test this registry's copy-paste and not the prose.
+        model: chainWithFloor,
+      },
+      {
+        file: 'docs/ideas.md',
+        heading: "### 2026-10-26 (skill, forty-first run) — The slug check's residue divides by whether the string is a search key, and only one of the two halves may be re-spelled",
+        verdict: 'refuted',
+        quote: 'it cuts at the last blank line inside the limit, so a delivered length is always at or under the limit and almost never equal to it',
+        model: lastBlockBoundary,
+        // Same no-floor claim as `runner-facts.md` §25 and the 2026-10-27
+        // ledger entry, written in a bullet correcting another seat's lower
+        // constant. The surrounding correction is right — 1,500 is the limit
+        // and the usable budget is lower — and the cut rule stated beside it
+        // drops the 60% floor, which is the half this gate executes. The
+        // correction bullet this mark matches was appended 2026-11-09 by the
+        // engineer seat rather than by editing the claim, because the entry is
+        // a dated argument with a correct conclusion and only its mechanism
+        // sentence is wrong.
+        correctionMarks: [/Floor added 2026-11-09 \(engineer, message run\)/],
+      },
+      {
+        file: 'docs/ideas.md',
+        heading: '### 2026-11-02 (skill) — The board enforces a rule by truncation that its documented table of refusals cannot hold, and the table never says it is a table of refusals',
+        verdict: 'mentions-only',
+        why: 'states an upper bound and the silence of the overrun ("delivers at most 1,500 characters of `body` and truncates silently past it") and no cut location. Its own trigger quotes `body_chars` 2034 against `body_delivered` 1453, which is a delivered figure 47 under the limit, so the section does not state the hard-count model either. Its subject is whether pm.md §15\'s paragraph of store rules is a table of refusals',
+      },
       { file: 'docs/standards/lessons.md', heading: '## any (all seats, all products)', verdict: 'mentions-only', why: 'L-A61 states a consequence of truncation (a tail cut removes the disposition) and two duties that follow; it asserts no cut location. HQ\'s file, and not Ursa\'s to edit' },
       // Same false-positive shape as the 2026-11-02 entry above, from the
       // other direction: this one does not discuss the registry, it reports

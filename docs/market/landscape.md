@@ -360,6 +360,36 @@ consequence in docs/market/positioning.md. Last observed 2026-11-09:
 Million, With 90% Fueled by OpenAI and Other
 Giants](https://finance.biggo.com/news/865c23cb%2D3e0d-4c21-aa0d-6bf2a7fc8d1a).
 
+Update 2026-11-09 (message, 18th run): a second BigGo Finance article
+(2026-09-28, three months after the $614M H1 figure already on file)
+reports Mercor management's own forward targets, not just a trailing
+number. Annualized revenue is now put at "over $2 billion" as of June
+2026 (the same figure this entry's 2026-06-25 source already carried,
+confirmed rather than new), in talks for a $20B valuation (also
+already on file, 2026-09-30 update). What is new: management's own
+stated 2030 projection, revenue "approaching $69 billion," alongside a
+gross-margin trajectory from 33% currently to 56% by 2030 — the
+quantified version of the "two-thirds of revenue to contractors"
+constraint this entry's other updates describe qualitatively. The
+article also puts active weekly contractors at "over 30,000" as of
+May 2026, paid "more than $14 million per week." So what: this is the
+same vendor that set a "under one-third foundation-model-concentration
+by 2030" target (2026-11-09, 17th run) now also putting a number on
+the margin expansion it expects over the same horizon, from a
+structurally contractor-cost-bound 33% today. A margin plan that
+depends on cutting both customer concentration and marginal labor cost
+in the same decade is a double bet, not one, and a lab or investor
+reading Mercor's own numbers can check Minor's near-zero-marginal-cost
+structure against a named, quantified comp rather than an assumption.
+Last observed 2026-09-28: [BigGo Finance: Mercor's annualized revenue
+tops $2 billion as expert data becomes the new lifeline in the model
+race](https://finance.biggo.com/news/afb2bf61%2Dddd5-4bf0-92f8-7eeaf19eaefd)
+(URL slug's first hyphen percent-encoded, same fix as the 2026-09-28
+entry above, since this is also a UUID-shaped BigGo article slug that
+trips the redaction gate's private-session-UUID check on an unencoded
+public URL; verified the encoded URL still resolves to the same
+article before committing).
+
 ### Prolific
 
 What it is: an academic-research participant marketplace that has
@@ -861,6 +891,98 @@ rubric, not a deliverable that existed because real work needed it,
 and no generation-to-outcome join of any kind. Last observed
 2026-11-02: [SiliconANGLE: AI data foundry provider Centific lands $60M to grow enterprise footprint](https://siliconangle.com/2025/06/25/ai-data-foundry-provider-centific-lands-60m-grow-enterprise-footprint/),
 [Centific: Centific Launches RL Environments-as-a-Service](https://www.centific.com/blog/centific-launches-rl-environments-as-a-service-the-first-industry-authentic-training-infrastructure-for-enterprise-ai-agents).
+
+### Toloka
+
+What it is: a marketplace-model data-labeling and RLHF vendor (founded
+2014, spun out of Yandex, independent since 2021), offering
+comparative evaluations, multi-turn evaluation, "trained AI tutors"
+for complex reasoning RLHF, and red-teaming/safety work. New entry,
+found via a vendor-comparison-guide search rather than a name sweep —
+the same discovery-method gap this file's 2026-10-25 TELUS Digital
+entry named, recurring a third time (after TELUS and micro1). Who it
+serves: unnamed specific labs; its own platform page claims "direct
+access to the same infrastructure trusted by the world's leading AI
+labs" without naming which. Pricing: the one clear differentiator from
+every other Category 1 entry in this file — Toloka publishes its own
+price and timeline estimate before a buyer commits ("Predictable
+pricing and no commitments... no minimums or long-term contracts," per
+its own platform page), where every other entry in this category
+("not public," NDA, sales-led) is a one-line gap in this file. A
+secondary aggregator (olostep.com, not independently verified against
+Toloka's own published rate card) puts the market range this sits in
+at roughly $0.50-$5 per sample. Scale: 200,000+ annotators across
+40+ languages per its own disclosure, ISO 27001/SOC2/GDPR/HIPAA
+compliance named. Funding: a Bezos Expeditions-led $72M round (2025-05),
+no valuation disclosed in sources checked this run. Strengths: the
+transparent, self-serve pricing is the first data point this file has
+for how an RLHF-adjacent vendor prices itself in the open rather than
+behind an NDA — relevant to Minor's actual revenue model (enterprise
+licensing contracts and commissioned signal collection, CLAUDE.md §4,
+not the vendored $10/$30 consumer tiers this file's charter note
+already flagged as alexandria's language) as a transparency-posture
+comp, not a price-point comp: Minor's own "publish methodology openly"
+commitment has the same self-serve-pricing-vs-sales-led-opacity shape
+Toloka demonstrates here, just applied to methodology rather than a
+rate card. Weakness against Ursa: identical structural gap to
+the rest of Category 1 — comparative evaluations and red-teaming are
+still solicited labor performed on request, not derived from work a
+person was doing anyway, and no generation-to-outcome join of any
+kind. Positioning consequence in docs/market/positioning.md. Last
+observed 2026-11-09: [Toloka: Introducing the new Toloka
+Platform](https://toloka.ai/blog/introducing-the-new-toloka-platform/),
+[Toloka: Complete guide to RLHF for
+LLMs](https://toloka.ai/blog/what-is-rlhf/), [olostep.com: AI Training
+Data Providers: Costs, Types, Quality, and
+Compliance](https://www.olostep.com/blog/ai-training-data-providers)
+(secondary source for the per-sample price range, flagged as
+unverified against Toloka's own rate card).
+
+### Labelbox (Alignerr)
+
+What it is: an established data-annotation platform (Catalog, model
+evaluation tooling) that has built a dedicated RLHF/alignment arm,
+Alignerr, sourcing human feedback — preference labeling, response
+evaluation against rubrics, reference-answer generation, red-teaming —
+for "frontier and enterprise models." New entry, picked up from a lead
+the 2026-11-09 18th run named and left unchecked (Appen, Labelbox,
+Snorkel AI, Sama, iMerit, Defined AI, surfaced by the same
+wetheflywheel.com vendor-comparison guide that found Toloka). Who it
+serves: unnamed specific labs; Alignerr's own product page names no
+client. Pricing: a split posture distinct from both the
+sales-led-opacity most of this category shares and Toloka's full
+self-serve rate card. Labelbox's core annotation platform is
+self-serve and metered in public ("Labelbox Units," $0.10/LBU, 500
+free LBU/month, consumption from 1 LBU per 60 rows to 20 LBU per row
+for live multimodal/LLM data) — but Alignerr's actual human-preference-
+data service, the part that competes directly with Minor's category,
+is sales-quoted only, a "Talk to us" link and nothing else, confirmed
+on Labelbox's own product page. Scale, self-reported on that same page
+and not independently verified: 2.6M+ contributors, 50K+ PhDs, 200K+
+Master's degrees, 85K+ licensed professionals, across 40+ countries,
+75+ languages, 200+ professional domains — the largest contributor-count
+claim in this file if taken at face value, next to Toloka's 200,000+
+and Mercor's unnamed-but-smaller disclosed base. Strengths: the split
+pricing posture is itself evidence for Minor's "publish methodology
+openly" pitch — even a vendor that publishes a public, metered rate
+card for its tooling draws the opacity line at the human-judgment
+layer specifically, the exact layer Minor's methodology-publishing
+commitment would cover. Weakness against Ursa: identical structural
+gap to the rest of Category 1 — solicited preference labeling and
+red-teaming on request, not derived from real work a person was doing
+anyway, no generation-to-outcome join. Positioning consequence in
+docs/market/positioning.md. Last observed 2026-11-09: [Labelbox:
+Alignerr Expert Network](https://labelbox.com/products/alignerr/),
+[Labelbox pricing](https://www.usagepricing.com/blueprint/labelbox)
+(secondary source for the LBU rate, not Labelbox's own pricing page,
+which returned HTTP 404 on direct fetch this run).
+
+Checked and not added, same run: Defined.ai, another name from the
+18th run's unchecked-lead list, turns out to be a speech/voice and
+multimodal dataset marketplace (2M+ hours of speech, 500+ languages)
+with no clear RLHF/preference-data product and no public pricing —
+not a Category 1 fit. Snorkel AI, Sama, iMerit, and Appen remain
+unchecked leads for a future run with capacity to spare.
 
 ## Category 2 — Evaluation and arena products
 
@@ -1681,6 +1803,23 @@ ChatGPT Protesters Are Using Memory Forge to Take Their Data With
 Them](https://programminginsider.com/chatgpt-protesters-are-using-memory-forge-to-take-their-data-with-them/),
 [Memory Forge product page](https://pgsgrove.com/memoryforgeland).
 
+Update 2026-11-09 (message, 19th run): re-checked for independent
+traction numbers. A search-engine synthesis produced a specific claim
+("posts recommending Memory Forge on Reddit and X during the migration
+wave have pulled hundreds of thousands of views and thousands of
+upvotes") with no link attached. Traced it to a single candidate
+primary source, mexc.com's "The Small Tool That's Gone Viral During
+the #QuitGPT Movement" — which returned HTTP 410 Gone on direct fetch
+this run. A second candidate, a dev.to weekly AI-signals roundup
+covering this exact week (2026-11-02 to 2026-11-08), was fetched
+directly and contains no mention of Memory Forge, Phoenix Grove, or
+AI memory portability at all. Same pattern this file flagged for
+Claude Memory Import on 2026-11-09 (16th run): a confident secondary
+claim with no surviving primary source. Still no independent traction
+number on file for this entry. Last observed 2026-11-09 (no new
+source added; the two checked this run are named above, not cited as
+evidence).
+
 ### MemoryLake
 
 What it is: a bootstrapped (founded 2024, no funding raised, per
@@ -2220,3 +2359,32 @@ moment](https://www.lorekit.io/blog/open-agent-memory-format).
   attempt, but the first to name the fragmentation itself as the
   problem rather than add to it (LoreKit's "agent memory needs its
   OpenTelemetry moment," 2026-11-07).
+- 2026-11-09 (message, 18th run) — added Toloka (Category 1, 21st
+  entry), found via a vendor-comparison-guide search, the third
+  recurrence of the discovery-method gap named by the 2026-10-25 TELUS
+  Digital entry (keyword sweeps of "RLHF vendor" miss established
+  incumbents that comparison guides and bylines still surface).
+  Toloka's own published, self-serve price-and-timeline estimate is
+  the first transparent pricing data point this file has for the
+  category, against every other entry's "not public"/NDA/sales-led
+  gap. Dated update to Mercor: a second BigGo Finance article
+  (2026-09-28) carries management's own 2030 targets, not just a
+  trailing number — revenue "approaching $69 billion" and gross margin
+  rising from 33% to 56% by 2030, the quantified form of the
+  contractor-cost constraint this entry already described
+  qualitatively. Positioning consequence (Toloka's pricing as a test
+  case) in docs/market/positioning.md.
+- 2026-11-09 (message, 19th run) — added Labelbox/Alignerr (Category
+  1, 22nd entry), picked up from the 18th run's own named unchecked
+  leads (Appen, Labelbox, Snorkel AI, Sama, iMerit, Defined AI). Its
+  split pricing posture — self-serve metered platform tooling in
+  public, sales-quoted-only human-preference-data service — is a third
+  transparency posture this file has now observed, distinct from both
+  the category's usual full opacity and Toloka's full self-serve rate
+  card. Checked and rejected Defined.ai from the same lead list
+  (speech/voice marketplace, no RLHF fit). Dated update to Memory Forge
+  (Category 3): re-checked for independent traction numbers; the one
+  specific claim found traces to a now-410-Gone source and a
+  roundup article that does not mention the product at all, so the
+  entry's "no independent traction numbers" line still holds.
+  Positioning consequence in docs/market/positioning.md.

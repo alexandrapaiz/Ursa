@@ -1,0 +1,28 @@
+[
+ {
+  "mode": "before",
+  "activeElementAfterEnter": "BODY",
+  "nodeIdentityHeld": true,
+  "activeElementAfterFetchSettles": "BODY",
+  "tabsBackToRow": 7,
+  "reachedAgain": true,
+  "frames": [
+   "before/row-focused.png",
+   "before/row-activated.png",
+   "before/row-rest.png"
+  ]
+ },
+ {
+  "mode": "after",
+  "activeElementAfterEnter": "button[row 1].rec-row",
+  "nodeIdentityHeld": true,
+  "activeElementAfterFetchSettles": "button[row 1].rec-row",
+  "tabsBackToRow": 0,
+  "reachedAgain": true,
+  "frames": [
+   "after/row-focused.png",
+   "after/row-activated.png",
+   "after/row-rest.png"
+  ]
+ }
+]
