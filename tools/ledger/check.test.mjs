@@ -321,12 +321,19 @@ test('a preamble with no entries under it is the same empty premise', () => {
 });
 
 test('an absent ledger is named rather than thrown, and keeps exit 1', () => {
-  // F140: this line read `mkdtempSync(join(tmpdir(), ...))` until the merge
-  // that brought main's leak repair onto this branch. That repair converted
-  // the file's one other call site and deleted both imports; this case was
-  // added here afterwards, so git kept main's import line and this branch's
-  // new test, and neither hunk overlapped the other. `mkdtempSync is not
-  // defined` at run time, on the merge of two trees that were each green.
+  // F140: this line made its own temporary directory from `node:fs` and
+  // `node:os` until the merge that brought main's leak repair onto this
+  // branch. That repair converted the file's one other call site and deleted
+  // both imports; this case was added here afterwards, so git kept main's
+  // import line and this branch's new test, neither hunk overlapping the
+  // other, and the name was unbound at run time on the merge of two trees
+  // that were each green.
+  //
+  // The call form is deliberately not written out above, because
+  // `tools/testing/tmpdir-leak.test.mjs` greps the raw text of every test
+  // file for it to catch its own comment stripper swallowing one. That guard
+  // is right and cannot tell prose from code, so prose here does not spell
+  // the call.
   const dir = tempDir('ledger-check-');
   const res = check(join(dir, 'no-such-ledger.md'));
   assert.equal(res.code, 1);
