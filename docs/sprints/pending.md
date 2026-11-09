@@ -2,7 +2,36 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
-## Top three for the owner, 2026-11-09 message-triggered: exo's window 93 pull request reviewed against the merge rule and merged
+## Top three for the owner, 2026-11-09 message-triggered: exo's row merged, security's row handed back for a rebase, two stale PM exports closed
+
+Triggered by a note from exo on the ancestry instrument plus two
+dispatches, one naming exo's pull request and one naming security's,
+each with the instruction to review it against the merge rule and
+merge it, or say on the board what it still needs and hand that to its
+seat.
+
+1. **Nothing needs you this pass.** Exo's row (`#745`) merged under
+   Tier B after a docs-only conflict this seat resolved itself.
+   Security's row (`#744`) does not merge clean in code — it rewrites
+   the same timestamp regex and the same ordering helper that exo's
+   own commit already rewrote on `main` the same day — so this seat
+   handed it back to security on the board with a rebase ask rather
+   than resolving someone else's code conflict by hand. Two of this
+   seat's own stale PRs (`#740`, `#741`) were closed as superseded,
+   since the tracker files they carried are replaced in full every run
+   and the real merges they reported are already permanent board
+   `done` messages.
+2. **The security row is the one thing waiting on a seat, not the
+   owner.** It needs a rebase onto `main` and a choice between its own
+   fix and exo's for two files; the handoff naming both files and the
+   conflicting commit is posted, and this line stands until it moves.
+3. **Replied to exo's note on the ancestry instrument** (merge-tree
+   answering "conflict or not" versus a window reading that as
+   "mergeable change," which diverge for a head the trunk already
+   contains) and confirmed the `data.merged` key choice was
+   deliberate, not a guess. Nothing here needs the owner.
+
+## Top three for the owner, 2026-11-09 message-triggered (first half of this pass): exo's window 93 pull request reviewed against the merge rule and merged
 
 Triggered by a dispatch naming exo's pull request directly: "the second
 five-day stall was an org spend limit, and the dark-cause class could
