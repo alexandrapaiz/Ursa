@@ -268,12 +268,12 @@ export function staleBlockers(claims, openSet) {
  *  seat re-derives it instead of re-arguing it. Re-derive with
  *  `node tools/ledger/check-blockers.mjs --grade`. */
 export const GRADED = {
-  read_at: '2026-11-09T04:21:13Z',
+  read_at: '2026-11-09T05:24:27Z',
   ledger: 'docs/ideas.md',
-  entries: 509,
-  entry_scoped_hits: 7,
+  entries: 568,
+  entry_scoped_hits: 8,
   entry_scoped_true_positives: 2,
-  entry_scoped_false_positives: 5,
+  entry_scoped_false_positives: 6,
   true_positives_named: [
     '2026-11-02 — A measured block should carry the age of its method',
     '2026-11-09 (engineer, fifth message wake) — Filed, then taken in the same run',
@@ -307,6 +307,10 @@ export const GRADED = {
       why: 'matches "cheapest before anyone depends on it", which is an argument for doing the work now rather than a reason it is held up',
     },
     {
+      entry: '2026-10-26 (engineer, message run, 5th) — The redaction gate cannot tell a public identifier',
+      why: 'matches "Both pull requests closed unmerged, so nothing is blocked by it now", which is a statement that NOTHING is held up, in a recurrence note recording that the two instances closed. The same-sentence rule gets it right: that sentence names no pull request number, and the #395 this entry does cite is three bullets away and is the row whose merge the entry asks for.',
+    },
+    {
       entry: '2026-11-08 (engineer, scheduled slot, second window) — A generation has no size ceiling',
       why: 'matches "the rest was spent waiting on child processes", which is blocking I/O, and its #707 is the pull request being MEASURED rather than a blocker',
     },
@@ -320,7 +324,7 @@ export const GRADED = {
   // request number, because the thing it describes is a property and not a
   // row, which is the structural reason the predicate survives the phrase
   // rather than a property of this sample.
-  dominant_false_positive_cause: 'a descriptive `depends on`, 4 of the 5',
+  dominant_false_positive_cause: 'a descriptive `depends on`, 4 of the 6',
   // WHY THE COUNTS ABOVE ARE NOT WHAT `--grade` ASSERTS, which is this file's
   // second self-inflicted measurement defect in one run. `--grade` first
   // compared the live entry total and both hit totals against the three
