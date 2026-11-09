@@ -82,6 +82,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHECKER = os.path.join(ROOT, "tools", "check-secret-print.py")
@@ -91,6 +92,19 @@ TEST_RUNNER = os.path.join(ROOT, "tools", "secret-print-tests.py")
 
 REVIEW_BY = re.compile(r"^#\s*review-by:\s*(\d{4})-(\d{2})-(\d{2})\s*$")
 SPECIMEN = re.compile(r"^#\s*specimen-file:\s*(?P<path>[^|]+?)\s*\|\s*(?P<why>.+?)\s*$")
+
+# A marker that CLAIMS, as against a line that merely names the token. The
+# vendored checker's own test is `re.compile(r"L-X5-ALLOW")`, a bare substring
+# with no reason requirement, so the two are the same line to it and this is
+# the only place the difference is drawn. Measured 2026-11-09: a comment
+# reading "the checker uses L-X5-ALLOW as its marker token" suppresses a real
+# finding on the line below it, and a bare `# L-X5-ALLOW` with no reason
+# suppresses too, though line 137 of the checker documents the marker as
+# carrying "a reason". Both are reported upstream; neither is this
+# repository's to patch, and this gate has to classify what the checker
+# actually honours rather than what its documentation describes.
+MARKER_REASON = re.compile(r"L-X5-ALLOW\s*[:=-]\s*\S")
+NEUTRAL = "X5-MARKER-REMOVED"
 
 
 class CannotRun(Exception):
@@ -214,6 +228,109 @@ def absent_fixture_exemptions():
     return out
 
 
+def marker_census(checker, files):
+    """Every line the checker treats as a marker, and whether it suppresses.
+
+    THE THIRD DIRECTION, AND WHY IT WAS THE ONE MISSING
+
+    A suppression is a claim about the tree, and a claim fails in three
+    directions, not two. This gate already ran the other two: a declaration
+    covering nothing is `stale`, and a suppression nothing declared is
+    `undecided`. Both of those are reached by walking the SUPPRESSED SET, and
+    that is exactly why the third was invisible. A marker that suppresses
+    nothing produces no suppressed finding, so no walk of that set can ever
+    arrive at it. It had to be enumerated from the tree instead.
+
+    Ursa's exo seat named the shape on 2026-11-09, having hit all three in its
+    own gate as three separate accidents: "an input claiming too much goes red
+    loudly; an input claiming nothing goes quiet, and the quiet direction
+    rots." The cost here is not hypothetical. The run before this one wrote
+    five inline markers, found that one of them suppressed anything, and
+    removed the other four by hand. Nothing would have reported them.
+
+    WHY AN INERT MARKER IS A DEFECT AND NOT UNTIDINESS
+
+    It is a standing permission with nothing under it. The line it was written
+    for is gone, the marker is not, and the next finding written on or under
+    it is cleared by a reason composed about something else. That is the
+    identical argument this file already makes for a stale baseline entry, in
+    the one surface where it never looked.
+
+    HOW A MARKER IS ATTRIBUTED, WHICH IS THE DESIGN DECISION
+
+    Not by re-deriving the coverage rule. `allowed_lines` covers the marker
+    line, the line below it, and the fenced block the marker opens, and it has
+    already been widened once; a copy of it here would be a second thing to
+    re-vendor and would disagree silently. So each marker is attributed by
+    asking the checker directly: neutralise every marker token in the file,
+    scan that, then restore ONE marker and scan again. The marker is live if
+    restoring it removes a finding.
+
+    Restoring one at a time rather than deleting one at a time is deliberate.
+    Deleting one marker from a line that two markers cover leaves the other
+    one standing, so both would read as suppressing nothing and the gate would
+    demand that both be deleted. Adding one at a time makes each verdict
+    independent of every other marker in the file.
+    """
+    out = []
+    for path in files:
+        try:
+            with open(path, "r", encoding="utf-8", errors="replace") as fh:
+                text = fh.read()
+        except OSError:
+            # A file the sweep listed and this cannot read is the checker's
+            # own problem to report, not a marker verdict to invent.
+            continue
+        lines = text.splitlines()
+        marked = [i for i, line in enumerate(lines, start=1)
+                  if checker.ALLOW_MARKER.search(line)]
+        if not marked:
+            continue
+
+        blanked = [checker.ALLOW_MARKER.sub(NEUTRAL, line) for line in lines]
+        suffix = os.path.splitext(path)[1]
+        base = _scan_variant(checker, blanked, suffix)
+        if base is None:
+            continue
+
+        for i in marked:
+            one = list(blanked)
+            one[i - 1] = lines[i - 1]
+            got = _scan_variant(checker, one, suffix)
+            if got is None:
+                continue
+            live = bool(base - got)
+            out.append({
+                "path": os.path.relpath(os.path.abspath(path), ROOT),
+                "lineno": i,
+                "live": live,
+                "has_reason": bool(MARKER_REASON.search(lines[i - 1])),
+                "suppresses": len(base - got),
+            })
+    return out
+
+
+def _scan_variant(checker, lines, suffix):
+    """Findings for one variant of a file's text, as line/code pairs.
+
+    Written through a real file with the original suffix rather than by
+    calling `scan_text` directly, so the composition under test is the
+    checker's own `scan_file`: it is the function that decides what
+    `honour_allow` means, and a suffix is carried because this guard reads
+    some suffixes differently from others."""
+    fd, tmp = tempfile.mkstemp(suffix=suffix or ".txt",
+                               prefix="secret-print-marker-")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write("\n".join(lines) + "\n")
+        got = checker.scan_file(tmp, honour_allow=True)
+        if got is None:
+            return None
+        return {(f.line_no, f.code) for f in got}
+    finally:
+        os.unlink(tmp)
+
+
 def decide(today):
     checker = load_vendored(CHECKER, "_ursa_check_secret_print")
     files = sweep_files()
@@ -313,6 +430,46 @@ def decide(today):
                        f"{os.path.relpath(BASELINE, ROOT)}.",
             })
 
+    # The third direction. Outside a declared specimen file every marker
+    # earns its own place and names its own reason; inside one the declaration
+    # stands in for both, and that declaration has its own liveness check
+    # eleven lines up. Scoping it this way is not a softening: a specimen file
+    # is one whose SUBJECT is defective lines, so a blanket of markers over
+    # fixtures is the correct state of it, and 19 of the 29 markers in HQ's
+    # vendored suite suppress nothing for that reason alone. A gate that
+    # demanded each one be deleted would be demanding edits to a file whose
+    # first line reads "do not edit here".
+    # Only one verdict comes out of the census, and the scoping below is why.
+    # In an UNDECLARED file a marker that suppresses is already `undecided`
+    # eleven lines up, so the only state that surface cannot already see is
+    # the marker suppressing nothing. In a DECLARED one, blanket marking is
+    # the point. So there is exactly one new red here and the rest of the
+    # census is counted instead.
+    #
+    # A reasonless marker was a second verdict here until its own test killed
+    # it. Live-and-reasonless is unreachable outside a declared file because
+    # `undecided` fires first, and inside one it would be a red this
+    # repository could not clear, since the file carrying the markers is HQ's
+    # and its first line reads "do not edit here". The documented contract
+    # does say a marker carries a reason and the checker does not enforce it;
+    # that gap is reported upstream and counted below, which is the most a
+    # gate can honestly do about somebody else's file.
+    markers = marker_census(checker, files)
+    for m in markers:
+        if m["path"] in declared:
+            continue
+        if not m["live"] and m["has_reason"]:
+            problems.append({
+                "kind": "inert",
+                "where": f"{m['path']}:{m['lineno']}",
+                "what": "L-X5-ALLOW suppressing nothing",
+                "why": "suppresses no finding, so it is a standing permission "
+                       "with nothing under it: the next finding written on or "
+                       "under this line is cleared by a reason composed about "
+                       "a different one. Delete the marker, or declare the "
+                       "file a specimen if its subject really is such lines.",
+            })
+
     for a in absent_fixture_exemptions():
         if a["review_by"] is None:
             problems.append({
@@ -340,6 +497,24 @@ def decide(today):
         "suppressed": len(suppressed),
         "suppressed_by_baseline": len(by_baseline),
         "suppressed_by_marker": len(by_marker),
+        "markers": len(markers),
+        "markers_live": sum(1 for m in markers if m["live"]),
+        "markers_inert": sum(1 for m in markers if not m["live"]),
+        # Lines that name the token without claiming anything with it, and so
+        # hold a suppression they do not use. Counted and never red: the
+        # repair is to narrow the checker's bare-substring test upstream, and
+        # a gate that went red on these would be requiring that no file in
+        # this repository describe how the marker works, which includes the
+        # checker's own source and this gate's own docstring.
+        "markers_incidental": sum(
+            1 for m in markers
+            if not m["live"] and not m["has_reason"]),
+        # Suppressing, and naming no reason while doing it. The checker
+        # documents the marker as carrying a reason and honours one without,
+        # so this is the distance between the two, counted rather than gated
+        # for the reason given in `decide`.
+        "markers_reasonless_live": sum(
+            1 for m in markers if m["live"] and not m["has_reason"]),
         "baseline_entries": len(dated) + len(undated),
         "specimen_files": sorted(declared),
         "problems": problems,
@@ -399,11 +574,26 @@ def main(argv):
              f"{report['baseline_entries']} baseline entr(ies), "
              f"{report['suppressed_by_marker']} by markers in "
              f"{len(report['specimen_files'])} declared specimen file(s)")
+    # Printed on every run, including a clean one. An incidental marker is
+    # not a defect this repository can fix and it is not nothing either: it is
+    # a line holding a suppression it never uses, and the count moving is the
+    # only signal that one was added.
+    census = (f"{report['markers']} marker line(s): "
+              f"{report['markers_live']} suppressing, "
+              f"{report['markers_inert']} not, of which "
+              f"{report['markers_incidental']} name the token without "
+              f"claiming anything by it (the checker's marker test is a bare "
+              f"substring, so those hold a suppression they do not use; "
+              f"narrowing it is upstream's), "
+              f"{report['markers_reasonless_live']} suppressing with no "
+              f"reason written on them")
     if report["problems"]:
-        print(f"{len(report['problems'])} undecided, expired or stale "
-              f"exemption(s). {scope}.")
+        print(f"{len(report['problems'])} undecided, expired, stale or "
+              f"inert exemption(s). {scope}.")
+        print(census)
         return 1
     print(f"every exemption is decided and in date ({scope})")
+    print(census)
     return 0
 
 
