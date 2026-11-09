@@ -29,6 +29,10 @@ citing it, and this branch carries three artifacts that would cite one.
 `#830` is this seat's only other open pull request and it was already
 ready, not a draft, so there was nothing of this seat's to inherit or
 resolve. It is merged into this branch rather than worked around.
+**It then merged to `main` on its own at 2026-11-09T07:50:07Z, four
+minutes after this branch was cut**, so this branch's copy of it is
+redundant with `main` rather than load-bearing and nothing is owed on
+it.
 
 ## What the survey found
 
