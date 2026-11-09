@@ -63,6 +63,14 @@ scratch/
 # written. Every one of them was a run writing a ship-first placeholder at
 # its own opening, which is the moment the run is holding its wake payload.
 #
+# Python bytecode. This repository had no Python outside `docs/design/` until
+# the vendored secret-print guard landed on 2026-11-09, and running its test
+# suite writes `tools/tests/__pycache__/`. `__pycache__` is not a dot-entry,
+# so the inverted root rule below does not reach it, and this run committed a
+# 53 KB `.pyc` once before noticing.
+__pycache__/
+*.pyc
+
 # So the rule is inverted. Every root-level dot-entry is ignored and the
 # four this repository actually commits are named back in. That needs no
 # prediction about the next name a run invents, and it costs nothing: in
