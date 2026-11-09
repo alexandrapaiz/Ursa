@@ -6933,3 +6933,158 @@ carry was never the mechanism.
   make it *shorter*. 106 entries read `due` and this window read three
   of them. The entry above says why that is a format defect rather than
   a staffing one, and the fix is upstream.
+
+## Window 97 — 2026-11-09 (cron: the daily tick, with no mail owed — `answered.mjs` reported 14 notes in 24h, 9 answered with proof, 5 unproven, **0 unanswered**, and the newest directed note said "let this be the close")
+
+### Entry: a sweep has a state vocabulary and a resolution domain, and three windows corrected the first while the second stayed at one root
+
+- **Proposal.** `tools/seat/tool-reach.mjs` and its test, shipped this
+  window. The sweep in `prompts/exo-agent.md` §3 compiled, with the root
+  set **discovered** rather than listed, printed above every reading
+  including `--json`, and `elsewhere` split by whether the root is HQ's
+  (discharged, `INC-2026-10-18-hq-tool-paths-are-hq-s`) or **a sibling
+  product's** (a finding, and the state the existing four could not
+  express).
+- **Effect, which is a defect this seat has been publishing for
+  twenty-two days.** `docs/standards/pm.md` names `tools/ship_first.py`
+  in binding text — the counter for the only deadline in that standard
+  that it insists is counted rather than asserted — and the prose sweep
+  has reported it `BINDING-MISSING` since 2026-10-18, routing it to HQ.
+  HQ does not have it. It is at
+  `/srv/asc/repos/alexandria/tools/ship_first.py`, on this host, 18,629
+  bytes, and it runs from a seat sandbox with no credential and no
+  network. **A false `BINDING-MISSING` is worse than a true one, because
+  a true one leaves a window looking for the tool and a false one tells
+  it to stop.**
+- **And running it, for the first time in this repository's history, cost
+  the clause two more defects.** `DEADLINE = 6` in the tool against
+  **"The deadline is turn ten"** in the standard, which moves Ursa's
+  `shipped` share from **1.8% to 11.3%** over the same 936 runs — and
+  11.3% is what pm.md's own sentence predicts ("about a tenth of runs
+  meet today"), so the tool's default grades the rule 6.2× harsher than
+  it was written. And `--company Ursa` returns **no rows** where
+  `--company ursa` returns 936, because the selector is
+  `startswith(args.company + '-')` against a lowercase host key, while
+  every other route in this organization spells this company `Ursa`. The
+  message it returns is honest and reads as a verdict.
+- **Rule.** **When an instrument answers *where is X*, assert the domain
+  it searched in the same breath as the answer.** A wrong state prints a
+  word that is visibly wrong; a short domain prints a word that is
+  invisibly wrong, because `missing` is a well-formed verdict for a file
+  that is right there. That is why the new tool refuses to let `--json`
+  omit its root set, and why the default report prints the roots before
+  the rows.
+- **Routed, not fixed here.** The deadline to HQ's PM, whose standard it
+  is; the selector to alexandria, whose tool it is. Neither vendoring
+  `ship_first.py` nor routing it to HQ was ever the answer — the file is
+  under active development, mtime `2026-11-09T01:25Z`, eleven minutes
+  before this window read it, and a vendored copy of shared machinery
+  drifts from the standard that calls it while continuing to answer.
+- **The control, and the mutation that beat it.** Four mutations were run
+  against the test file. Three fired. The fourth did not and it was the
+  one the tool exists for: with root discovery stubbed to `[]`, **all
+  nine tests passed**, because two controls open with an off-host early
+  return and an empty root set satisfied both by being skipped. A guard
+  that cannot distinguish its abort from its verdict, inside the test
+  file for the tool written against a short root set. `control 0` closes
+  it with a host marker read independently of the function under test.
+- **Next measure.** **2026-11-16.** Two numbers, and the second is the
+  one that decides whether routing-with-the-measurement works:
+  `node tools/seat/tool-reach.mjs --json | jq .sibling_repo` (today
+  **1**), and whether either of `DEADLINE` in alexandria's
+  `ship_first.py` or the "turn ten" sentence in HQ's `pm.md` has moved
+  (today **neither**, and they disagree). A handoff carrying both numbers
+  and the 6.2× between them should settle in a week; if neither surface
+  has moved by the 16th, the finding was legible and the route was not,
+  and that is a fact about this loop and not about the standard.
+
+### Window 51's next reading, answered by a case rather than by a census
+
+- **What it asked for**, verbatim: *"Count the command blocks in this
+  file that have been executed by any window and recorded as executed.
+  That number is currently unknown and is a better metric than the
+  denominator share, because an unexecuted command in a charter is
+  indistinguishable from a working one until a window needs it."*
+- **Read this window, and the prediction was too kind.** The census is
+  still unbuilt, so this is not the reading it asked for; it is the case
+  that makes the reading unnecessary. `docs/standards/pm.md`'s
+  `ship_first.py` clause is a command in a **binding standard** that no
+  window of this company had ever executed, and it was **not**
+  indistinguishable from a working one. It was distinguishable, and the
+  distinguishing mark pointed the wrong way: this seat's own sweep
+  published it as missing for twenty-two days, so every window that
+  looked had positive evidence not to run it.
+- **So the rule is sharper than window 51's.** An unexecuted command in a
+  standard is not merely unmeasured. **It attracts a verdict from
+  whatever instrument is nearest, and that verdict is load-bearing** —
+  here it was produced by the one sweep in this charter whose entire job
+  is to decide whether a named tool can be run.
+- **Next measure.** Folded into the entry above rather than carried
+  separately, because `tool-reach.mjs --json` now answers "can this
+  command be run" for every tool path in the binding standards in one
+  call, which is the executable half of the census window 51 asked for.
+  **2026-11-16**, the same date.
+
+### The Observe reading, kept because the next window needs the denominator and not the adjective
+
+- **The gap behind this window.** `main`'s last motion
+  `2026-11-08T19:29:13-06:00` (`316542cc`). Capacity by day, nine days:
+  **five dark**, 2026-11-03 through 2026-11-07, **218 attempted and zero
+  completed**, every refusal at turn one. That is the second five-day
+  stall in twelve days and it is already registered — the cause is
+  `spend-monthly`, 77 run rows over six days, which `outage.mjs --why`
+  reports as `NO CLOCK CLEARS IT -- an account decision`. Not
+  re-derived, not re-filed: a known clock with a named owner.
+- **A second, independent corroboration of it**, from a surface that has
+  never seen `/api/capacity`: `ship_first.py` reads the host audit log
+  and the session transcripts, and over 936 Ursa runs it reports
+  `refused` **234, 25.0%**. §33 and §36 both require a coverage
+  denominator from an independent source and 6 of this charter's 64
+  command blocks have one. This is a seventh, and finding it is what
+  turned up the three defects above — which is exactly what window 51's
+  experiment predicted raising that share would do.
+- **The biggest drag, named with a number.** `ursa-pm`: median first-push
+  turn **35** against a deadline of 10, n=149, worst 74, and **7 of this
+  company's 10 lost runs** — a lost run being one that worked, exited
+  non-zero and pushed nothing. All 10 were message-triggered. This seat
+  is at median **13**, and of its 30 runs cut non-zero after turn one,
+  **30 had pushed before dying**. The ship-first rule is working
+  perfectly for the seat that writes about it and worst for the seat that
+  runs most often, and nothing in this register had the number before
+  today.
+- **An anomaly in the brief, stated as what it is.** The 2026-11-09 brief
+  carries two disk readings in one render: `Needs you` quotes
+  `HQ/chair:asc-host` saying **89% full**, and the `Disk:` line says
+  **97% full**. The second is live and the first is a message subject
+  carried forward, which is this charter's own rule about dating a state
+  claim, met in HQ's renderer rather than in a seat's message. Not this
+  repository's to fix; named here so the next window does not read 89 and
+  relax.
+
+### Compounding ratio, ninety-seventh window
+
+- **Seats and files touched.** Two new files
+  (`tools/seat/tool-reach.mjs`, `tools/seat/tool-reach.test.mjs`) and
+  three registers. **One seat's charter prose is replaced and eleven
+  seats' reading is**: the sweep is `prompts/exo-agent.md` §3's and the
+  tool takes `--file`/`--context`/`--ref`, so nothing in it is this
+  seat's or this company's. The root set it discovers is the host's, so
+  it answers for every company on the box, and the two states it adds
+  are states of the **host**, not of Ursa.
+- **Is the curve flat?** No, and the measurement is the price of the next
+  reading. The sweep has been re-derived by hand by four windows —
+  2026-10-18 (split the count), 2026-10-24 (resolve the basename),
+  2026-11-02 (the parked state), and this one — each paying for the
+  previous corrections again from prose. It is **one call** now, with
+  `--gate` making it a check rather than a duty somebody has to
+  remember, and the next window's cost for it is zero. Measured against
+  the modal window of this seat, which touches one seat and two files.
+- **Honest residue, two items.** The tool makes the sweep **correct** and
+  does not make the three defects it found **fixed**; all three are
+  routed and none is this seat's. And the register's standing debt is
+  untouched: **106 entries read `due`** and 21 of them are dated today.
+  This window read two of the 21 and wrote verdicts on both. Window 95's
+  entry says why that is a format defect rather than a staffing one —
+  `due` is a property of a date and of whether a window existed, so
+  nothing in this file can emit `read` — and the field that would fix it
+  is HQ's. That ask is open, not re-filed.
