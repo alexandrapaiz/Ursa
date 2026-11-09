@@ -26534,3 +26534,118 @@ same conflation inside it.
 - First step: none, this entry is a record.
 - Cost: $0.
 - Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, thirteenth message run): two open branches give `decide()` mutually exclusive signatures, and whichever merges second kills every caller of the other in the call
+
+### 2026-11-09 — `tools/gates/gate-registry.mjs` is being rewritten twice at once, and the two rewrites disagree about what argument answers "is this path in the tree"
+
+- Trigger: Ursa/security wrote to this seat offering to put a comment in
+  `skills/gate-registration.test.mjs` into the past tense. Checking whether
+  the comment was actually going to become false meant merging that seat's
+  branch into this one, and the merge conflicted in a file neither seat's
+  note had mentioned.
+- What: `decide()` has two incompatible signatures on two open pull
+  requests, and the incompatibility is in the argument both rewrites
+  needed to change.
+  - `ursa-skill/2026-11-09-message-11` (#887, ready) **replaces** the
+    boolean `exists` with `locate(path) -> 'committed' | 'uncommitted' |
+    'absent'`, adds an `authoring` flag, and returns a softened `pending`
+    array. It `throw`s a `TypeError` when `locate` is absent, on purpose,
+    so no caller can silently keep the two-valued question.
+  - `ursa-security/2026-11-09-message-18` (#888, draft) **keeps** `exists`,
+    adds `committed = exists` and `roots = CANDIDATE_ROOTS`, and adds two
+    problem kinds, `pending-entry` and `out-of-scope-entry`, collected in
+    `UNSWEPT_KINDS` and resolved to exit 2 rather than exit 1.
+  - Measured: `git merge` of the two conflicts in
+    `tools/gates/gate-registry.mjs` at four hunks, and separately in
+    `tools/gates/gate-registry.test.mjs` and `docs/ideas.md`. Running this
+    library's suite against #888's tip with #887's fixtures dies at
+    `exists is not a function` rather than failing an assertion, which is
+    the shape to expect for every other caller too.
+- Why this is worth an entry rather than a conflict marker: the two
+  repairs are **complementary, not duplicative**, so the resolution is not
+  "pick one". #887 repairs the commit axis only, and leaves a baseline row
+  for a path outside the swept roots saying "Delete it". #888 repairs both
+  axes, and has no equivalent of #887's `authoring` gate, which exists
+  because softening a finding is only safe if the reader that blocks a
+  merge can never see the soft form. The union is better than either, and
+  the union is what nobody is positioned to write: `tools/gates/` is
+  outside this seat's write surface, and the two authors each have a
+  readied or drafted branch on it.
+- A second, smaller finding inside #888, from the same measurement. The
+  baseline loop tests the roots axis **before** the commit axis, so for a
+  path under `skills/` while the roots are still `['tools', 'scripts']` the
+  out-of-scope arm shadows the pending arm. A seat writing a new library
+  guard and its baseline row in one working tree is therefore told to widen
+  the sweep's roots, "which is Ursa/exo's call", when the thing it actually
+  needs to do is commit the file. The remedy named is the wrong remedy, and
+  it is unreachable advice for the author. Swapping the two arms fixes it,
+  and `skills/` is the only root for which the two can both apply, which is
+  why this library is where it shows up.
+- First step: not this seat's. The owner is about to merge two branches
+  that cannot both apply, and the cheap version is to merge #879's widening
+  first, then have one of exo or security write the union onto one branch,
+  keeping #888's `roots` axis and #887's `authoring` gate, with the two
+  baseline arms in the other order.
+- Cost: $0 to this seat, one merge decision plus roughly a half-file
+  rewrite to whichever of the exo or security lanes takes it
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, thirteenth message run): a test that asserts a symptom's name has its verdict decided by merge order, and this library had one
+
+### 2026-11-09 — one assertion, three configurations, three different answers, and the green one is the configuration where the asserted property no longer exists
+
+- Trigger: Ursa/security's note said this library's suite "asserts
+  UNREGISTRABLE's coverage rather than the asymmetry, which means nothing
+  will catch the drift", and offered four lines of past tense. Both halves
+  of that premise are wrong, and checking why produced a defect class worth
+  recording.
+- What: `skills/gate-registration.test.mjs` asserted
+  `viaBaseline.problems.map((p) => p.kind)` deep-equal `['stale-entry']`.
+  That literal is a function of a roots default that lives on a third
+  seat's branch. Measured one configuration at a time, with the suite
+  byte-identical in all three:
+
+  | tree | kind returned | suite |
+  |---|---|---|
+  | #887 alone | `stale-entry` | green |
+  | #888 alone | `out-of-scope-entry` | **red** |
+  | #888 + #879's widening | `stale-entry` | green again |
+
+  So security's worry was right about the risk and wrong about the
+  mechanism twice over. The suite was not green and blind, it was already
+  red against that seat's own tip the day the note was written, and a dated
+  past tense would have left the red in place. And the way it fails to
+  catch the drift is the third row: with `skills` in the roots the excused
+  path is a discovered candidate, the new arm never runs, and the old
+  literal matches again, so the test passes in the one configuration where
+  the thing it was written to assert has ceased to exist.
+- Why the class generalises past this file: the test was not wrong about
+  the registry. It was wrong about what a test may name. A problem kind is
+  a symptom's spelling, and both of the seats repairing the registry
+  renamed it, correctly, as part of repairing it. An assertion on that
+  spelling cannot distinguish "the behaviour regressed" from "the
+  behaviour was fixed and the label moved" from "the precondition is gone",
+  and here all three readings were live at once in one repository on one
+  day. The repair is to assert the property that survives the rename: that
+  an excuse for a path the gate never looked at is refused rather than
+  silently honoured, and that the refusal never tells the author to delete
+  a row that is correct and merely early.
+- The sharp edge found while writing the repair, because it nearly
+  reproduced the defect in the other direction. A first draft forbade the
+  word "delete" in the refusal's sentence, and that draft was red against
+  #888 on a **correct** sentence: #888 offers "or delete the row if the
+  file is genuinely not a gate candidate", a hedged alternative with its
+  condition attached. What was wrong on `main` is the bare imperative, "so
+  the entry decides nothing. Delete it". The assertion now matches
+  `/[.;]\s*Delete it\b/` and not the word, which is the difference between
+  guarding a behaviour and guarding a turn of phrase.
+- First step: done, in this seat's own lane and this run. The suite now
+  branches on whether the live sweep reaches this library, asked
+  behaviourally through `gateCandidatePaths` rather than by importing a
+  roots constant that is a named export on one branch and a parameter
+  default on another. Verified green on #887, on #888, on #888 plus the
+  widening, and on #887 plus the widening, and red on `main`, which is the
+  tree that still carries the defect sentence.
+- Cost: $0, one test rewritten and a header correction
+- Status: built
