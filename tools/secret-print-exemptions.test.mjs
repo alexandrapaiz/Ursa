@@ -27,18 +27,58 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const GATE = 'tools/secret-print-exemptions.py'
 const BASELINE = 'tools/secret-print-baseline.txt'
 
-function run(root, args = []) {
-  const out = spawnSync('python3', [path.join(root, GATE), ...args], {
+// `spawnSync` reports two classes of outcome through two different channels,
+// and only one of them is an exit status. A process that RAN and refused sets
+// `status` to 2, which is the channel every case below reads. A process that
+// never ran, or that was killed, sets `status` to null and puts the cause in
+// `error`: ENOENT when `python3` is not on the path, ENOBUFS when the gate's
+// output passes `maxBuffer`, and a signal name when something killed it.
+//
+// Added 2026-11-09 by Ursa's security seat, measured. This helper read only
+// `status`, so the whole second channel was dropped, and the drop landed
+// inside the one guard written to catch it: `json()`'s
+// `assert.notEqual(got.code, 2, 'gate could not run')` compares null against
+// 2, which passes. The case then reached `JSON.parse('')` and the suite's
+// report for an absent interpreter was `Unexpected end of JSON input`. The
+// interpolated `got.stderr` was `undefined` in that case too, so even had
+// the guard fired it would have named nothing.
+//
+// Why that is a security defect and not a tidiness one. This suite is the
+// only thing asserting that `tools/secret-print-exemptions.py` makes a
+// secret-print exemption come due. An environment where it cannot run must
+// say so in those words, because a guard suite that fails with a JSON parse
+// error reads as a broken test, and the ordinary response to a broken test
+// nobody can reproduce is to skip it — which retires the staleness gate over
+// every secret-print exemption without one line saying that is what happened.
+// Finding F110 of the run before this one was the same shape one layer down:
+// an exemption whose premise nothing read.
+//
+// The vendored side already does this correctly, which is what made the
+// omission visible. `run_checker` in the gate itself raises `CannotRun` on
+// both a refusing exit status and an unparseable document. Only the
+// JavaScript helper trusted the status alone.
+function run(root, args = [], opts = {}) {
+  const interpreter = opts.interpreter || 'python3'
+  const out = spawnSync(interpreter, [path.join(root, GATE), ...args], {
     cwd: root,
     encoding: 'utf8',
-    maxBuffer: 32 * 1024 * 1024,
+    maxBuffer: opts.maxBuffer || 32 * 1024 * 1024,
   })
+  if (out.error || out.status === null) {
+    const why = out.error ? `${out.error.code || out.error.name}: ${out.error.message}`
+      : `killed by ${out.signal}`
+    throw new Error(
+      `the gate could not run (${interpreter} ${GATE}): ${why}. `
+      + 'This is not a verdict about the exemptions; it is the suite being '
+      + 'unable to ask. Do not skip or exempt this case on it.',
+    )
+  }
   return { code: out.status, stdout: out.stdout || '', stderr: out.stderr || '' }
 }
 
-function json(root, args = []) {
-  const got = run(root, ['--json', ...args])
-  assert.notEqual(got.code, 2, `gate could not run: ${got.stderr}`)
+function json(root, args = [], opts = {}) {
+  const got = run(root, ['--json', ...args], opts)
+  assert.notEqual(got.code, 2, `gate refused to run: ${got.stderr}`)
   return { ...got, report: JSON.parse(got.stdout) }
 }
 
@@ -543,4 +583,52 @@ test('the two entries name paths, and this tree really lacks both', () => {
   // the entry by reading it.
   const got = premiseFailures(ROOT)
   assert.deepEqual(got, [], JSON.stringify(got))
+})
+
+// THE SUITE'S OWN INABILITY TO RUN, ASSERTED RATHER THAN RECOMMENDED
+//
+// Three cases, added 2026-11-09 by Ursa's security seat. Each drives `run()`
+// into one of `spawnSync`'s non-status outcomes and asserts the suite says
+// which one, in words naming the gate. The third is the one that was leaking:
+// it goes through `json()`, which is where the old guard lived.
+
+test('an interpreter that is not there is named, not parsed as a verdict', () => {
+  assert.throws(
+    () => run(ROOT, [], { interpreter: 'python3-not-installed-here' }),
+    (err) => {
+      assert.match(err.message, /could not run/)
+      assert.match(err.message, /ENOENT/)
+      assert.match(err.message, /secret-print-exemptions\.py/)
+      assert.ok(!/Unexpected end of JSON/.test(err.message),
+        'the old report for this case was a JSON parse error')
+      return true
+    },
+  )
+})
+
+test('output past maxBuffer is a refusal to answer, not a truncated answer', () => {
+  // The gate prints a multi-line verdict, so 8 bytes cannot hold it. ENOBUFS
+  // leaves `stdout` populated but cut, which is the dangerous shape: the
+  // bytes look like an answer.
+  assert.throws(
+    () => run(ROOT, [], { maxBuffer: 8 }),
+    (err) => {
+      assert.match(err.message, /could not run/)
+      assert.match(err.message, /ENOBUFS/)
+      return true
+    },
+  )
+})
+
+test('the json path refuses too, which is where the old guard let it through', () => {
+  // `assert.notEqual(got.code, 2)` was the guard, and a process that never
+  // ran has `code === null`, so it passed on every one of these inputs.
+  assert.throws(
+    () => json(ROOT, [], { interpreter: 'python3-not-installed-here' }),
+    /could not run/,
+  )
+  // The healthy path is NOT re-asserted here. `json(ROOT)` is the suite's
+  // first case already, and a second copy would cost a full 12.93s gate
+  // invocation to learn nothing. Run 8 dropped a redundant pre-check for the
+  // same reason, and F114 of run 9 is the measurement that reason rests on.
 })

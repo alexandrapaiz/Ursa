@@ -104,13 +104,40 @@ touches the guard, or the engineer if it reaches that lane first.
   interrupted by the test runner that owns the case. A suite that hangs
   rather than merely runs long holds the job to the cap and reports
   nothing about the branch.
-- First step: give the helper a `timeout` and build the tree copy once
-  per suite rather than once per case, which is the cost rather than the
-  bound. Both are small. Neither was done in the run that found it,
-  because a `timeout` turns "pass late" into "fail" on a slow runner and
-  choosing that bound is a CI-budget decision that should land with the
-  job, not before it.
-- Owner: this seat or the engineer.
+- First step: give the helper a `timeout`. **The other half of this line
+  was wrong, and run 9 of this seat measured it rather than taking it.**
+  The line said to "build the tree copy once per suite rather than once
+  per case, which is the cost rather than the bound". The copy is not the
+  cost. Measured 2026-11-09 on the resident host, one case decomposes as a
+  0.33s `cpSync` of `tools/` and `.github/workflows/` against a 12.93s
+  gate invocation, so the prescribed repair targets 2.6 per cent of a case
+  and 17 copies are 5.6s of the whole suite's run. **No suite total is a
+  usable denominator on this host.** Run 7 read 267.2s over 20 cases; run 9
+  read 194.4s over 27, then 224.1s over the same 27 minus one gate
+  invocation, so the run with strictly less work took 29.7s longer. The
+  total tracks load from the seats sharing this host rather than the
+  suite, which is why the figures below are timed inside one process
+  against the gate's own functions. Inside the 12.93s: `sweep_files` 0.39s,
+  `load_vendored` 0.02s, the first `run_checker` subprocess 2.33s, the
+  second 3.96s, and `marker_census` 6.23s, which is 48 per cent of the
+  case and the largest single component. The census is 48 whole-file scans
+  because it restores one of 44 markers at a time and rescans, and
+  `split_quoted` inside HQ's vendored checker is 56,038 calls of that.
+  So the remaining cost is two things and neither is the copy: the two
+  checker subprocess runs, 6.29s, and the census, 6.23s.
+- Second step, which is why this stays open after run 9: making the census
+  cheaper is a design change and not a behaviour-preserving fix, so it is
+  not a security run's to make. `marker_census`'s own docstring argues at
+  length for restoring one marker at a time rather than deleting one at a
+  time, because deleting from a line two markers cover leaves the other
+  standing and the gate would then demand both be deleted. Any batching or
+  memoisation has to preserve that independence, which is the attribution
+  rule and not an optimisation detail. The `timeout` half was deferred by
+  run 7 because the bound should land with the job; the job is still queued
+  rather than merged, so it is still deferred, and this seat cannot touch
+  workflows in any case.
+- Owner: the engineer for the census; this seat or the engineer for the
+  `timeout`, once the CI job has landed.
 - Cost: $0
 - Status: proposed
 
@@ -23467,6 +23494,69 @@ same conflation inside it.
 - Status: proposed
 
 ## Ledger entry — 2026-11-09 (skill, second message run): the CI half of tonight's ledger-contract report has no run to schedule, because the gate was written as a proposal and the token that would install it has no workflows permission
+
+### 2026-11-09 (market, 20th run) — Name "no undisclosed carve-outs" as a specific, checkable consent claim in Major's user-facing trust copy, citing Anthropic's own safety-flag exception
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (20th run)
+  section. Anthropic told Claude users an opt-out from training-data
+  use meant their conversations stayed out of future models, then its
+  2026-06-08 privacy policy added an undisclosed carve-out: safety-
+  flagged conversations are used regardless of a user's stated
+  preference, with no disclosed trigger and no notification when it
+  happens.
+- What: CLAUDE.md's load-bearing constraint #2 ("no dark patterns: the
+  user can always see, edit, revoke, and delete") is currently a
+  general promise. This is a dated, sourced, named example of the
+  market's most safety-focused lab failing to keep that exact promise
+  cleanly, for a defensible-sounding reason rather than a cynical one.
+  "What you revoke is actually gone, with no undisclosed exceptions"
+  is a sharper, more specific, and more checkable claim than "we
+  respect your privacy," and this gives Major's trust copy a concrete
+  contrast to point at rather than a general virtue to assert.
+- Why it is not actioned by this run: user-facing trust/consent copy
+  is Major's product surface, not this seat's charter (read-only
+  market research, no code or copy).
+- First step: whoever owns Major's consent-architecture pages adds a
+  specific, auditable statement (e.g. "no exceptions, including for
+  safety review" or the honest narrower version if one is needed)
+  next to the existing opt-in/edit/revoke/delete promise, sourced
+  against the Anthropic case in docs/market/positioning.md.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, 21st run) — Name "no solicited exposure to harmful content" as a distinct safety claim in Minor's enterprise pitch, citing Sama's documented Kenya content-moderation case
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (21st run)
+  section, built on the new Sama entry in landscape.md (Category 1,
+  25th). A 2023 TIME investigation found Sama's Kenyan workers, paid
+  under $2/hour, were assigned graphic descriptions of abuse and
+  violence to build ChatGPT's safety filters, reported lasting
+  psychological trauma, and Sama itself canceled the OpenAI contract
+  eight months early over the work's severity.
+- What: every Category 1 vendor's business model depends on a worker
+  being handed content chosen by someone else, on request, with no
+  relationship to that worker's own life or work; Sama's case is the
+  sharpest documented instance of what that can cost the worker when
+  the assigned content is itself harmful. Minor's pipeline has no
+  solicited-labeling step at all, so it has no equivalent exposure to
+  name, not because it has solved the problem Sama's case illustrates
+  but because the architecture never creates it: the outcome record
+  comes from real work a person was already doing for their own
+  reasons. This is a safety/ethics claim distinct from the quality
+  argument ("no generation-to-outcome join") this file already makes
+  against the same category.
+- Why it is not actioned by this run: Minor's enterprise sales copy is
+  a product/sales surface, not this seat's charter (read-only market
+  research, no code or copy). It also needs a check this run did not
+  do: whether Minor's own future safety-sampling or red-teaming needs,
+  if any, could ever create a comparable exposure, before the claim is
+  made in absolute terms to a lab buyer.
+- First step: whoever owns Minor's enterprise pitch deck or data-
+  sheet decides whether to add this as a named structural-safety point
+  alongside the existing quality/verifier pitch, after the
+  safety-sampling check above.
+- Cost: $0
+- Status: proposed
 
 ### 2026-11-09 — The ledger gate has existed since 27 September and has never been a workflow, so handing its absence to the PM seat hands it to a seat that cannot install it either
 
