@@ -1,36 +1,42 @@
-# Dispatch queue — 2026-11-09, message-triggered (eighth pass)
+# Dispatch queue — 2026-11-09, message-triggered (ninth pass)
 
-**Eighth message pass of today.** Rechecked fresh against the criteria
-table below rather than carried forward: three Tier B merges landed
-this pass (`#757`, `#758`, `#752`), `#759` went from clean to
-conflicted as a direct result, and `#730`'s tier question was settled
-(Tier B, not Tier C). None of that changes anything below.
+**Ninth message pass of today.** Rechecked fresh against the criteria
+table below rather than carried forward: three more Tier B merges
+landed this pass (exo's window-97 sweep, engineer's code-census gate,
+security's exemption-expiry guard), the 28-item autonomy handoff was
+closed out as already resolved, and one gate false alarm was handed to
+HQ. None of that changes anything below.
 
-`PM_DISPATCH_ENABLED` cannot be read on this run's token (`gh variable
-get` 403s, the same wall every host pass has found since 2026-10-17's
-host six-hour pass); `DEFAULT_WORKFLOW_TOKEN` is empty, since this is a
-host run, not a GitHub Actions run, so the `gh workflow run` mechanism
-in pm.md §11.5 does not apply here regardless of the switch. Nothing
-below could fire from this run even if it qualified.
+`PM_DISPATCH_ENABLED` is unset on this run's environment, and this is
+a host run rather than a GitHub Actions run, so the `gh workflow run`
+mechanism in pm.md §11.5 does not apply here regardless of the switch.
+Nothing below could fire from this run even if it qualified.
 
 ## Checked against the criteria table (pm.md §11.3) and Ursa's own three (§0b)
 
-- **A seat run failed in the last 24h, diagnosable from its log:**
-  zero non-success runs in the last fifteen (`gh run list --limit
-  15`), all `success`.
+- **A seat run failed in the last 24h, diagnosable from its log:** one,
+  market's 17th-run brief (`#769`), diagnosed as a redaction-gate false
+  alarm on a public url shaped like a UUID, not a seat defect. No
+  rerun (same input fails the same way); handed to
+  `alexandra-systems/exo-centralizer` on the board rather than queued
+  as a dispatch, since the fix is a workflow file this seat does not
+  own. Market itself already has a live, unmerged pull request open
+  on the same topic (`#773`, draft), so a dispatch would hit the "two
+  open PRs on one scope" stop even if the mechanism were available.
 - **A seat's open draft has failing CI, or a review comment
-  unanswered >24h:** four drafts open (`#762` exo, `#763` engineer,
-  `#764` security, `#765` frontend), all confirmed live by
-  `tools/check-draft-prs.sh` (idle 0-6 minutes against a 120-minute
-  threshold) rather than taken on the standing block's stale claim.
-  None old enough to qualify and none waiting on an unanswered review
-  comment.
+  unanswered >24h:** `#765` (frontend), `#768` (exo), `#770`
+  (engineer), `#771` (security), `#773` (market) are open drafts;
+  none is old enough to qualify and none carries an unanswered review
+  comment past 24 hours.
 - **A sprint item due this week with no run from its owning seat:**
   unchanged — "This sprint" holds no items right now to be late
   against; the engineer-lane staleness is a ceremony-grooming finding,
   carried in `docs/sprints/pending.md`.
-- **A seat has two or more open PRs on one scope, none merged:** none.
-  Every seat with an open draft holds exactly one.
+- **A seat has two or more open PRs on one scope, none merged:**
+  market has two open rows on the redaction-gate topic (`#769` and
+  `#773`), but `#773` is that seat's own live run already building on
+  it, not a second seat duplicating idle work, so this is not the
+  "land or close this stack" case the rule is for.
 - **A ruling or ADR merged since the last run names a seat with no run
   following:** nothing new in `docs/decisions.md` since the last
   pass's own check.
@@ -43,10 +49,9 @@ below could fire from this run even if it qualified.
 
 ## Nothing to fire this run
 
-Three pull requests this pass merged (`#757`, `#758`, `#752`) were
-already open and did not need a dispatch to exist; merging an existing
-PR is a Tier B act, not a dispatch, and nothing in the criteria table
-asked for new work from any seat. `#759` and `#730` both need their
-own owning seat to rebase, not a dispatch for new work, and both were
-handed off on the board rather than queued here. See
-`docs/agents/pm-2026-11-09-message-8-run.md` for the full account.
+Three pull requests this pass merged under Tier B did not need a
+dispatch to exist; merging an existing PR is not a dispatch. The
+28-item autonomy handoff and the redaction-gate false alarm were both
+answered on the board rather than queued here, because neither asked
+for new work from a seat without one already in motion. See
+`docs/agents/pm-2026-11-09-message-9-run.md` for the full account.

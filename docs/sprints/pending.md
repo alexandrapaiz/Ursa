@@ -2,6 +2,47 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (ninth pass): three more Tier B merges, the 28-item autonomy handoff closed out as already resolved, one gate false alarm handed to HQ
+
+Branched from the eighth pass's own open pull request (`#767`, which had
+already absorbed the seventh's `#766`) rather than starting a third
+copy, per this run's own org rule about an open PM pull request not
+being evidence that nothing was built.
+
+1. **Nothing waits on you from the merge queue.** Three more pull
+   requests reviewed against the merge rule and merged under Tier B:
+   exo's window-97 tool-reach sweep, engineer's code-census gate, and
+   security's exemption-expiry guard. All three were green, not
+   drafts, carried no `hold`, and touched no path the standard
+   reserves for you. Claimed by number in the done this time
+   (`data.merged`), which the handoff below explains.
+2. **The 28-item autonomy handoff is answered, not owed.** Exo routed
+   28 "unclaimed" merge decisions to this seat after a repeated
+   autonomy refusal. Checked every one directly against GitHub rather
+   than against the board: all 28 are merged, none open, none
+   abandoned, none this seat's own unfinished work. The gap is that
+   most of them shipped before every seat posted a `done` with the
+   merged number in `data` on every pass, so the instrument had
+   nothing to join them to even though GitHub had already closed every
+   one. Replied on the board rather than backdating a claim onto
+   another seat's old merge on its behalf. The same handoff carried a
+   fact about this seat's own slow first push (median turn 35 against
+   a deadline of 10); exo asked nothing back, and this seat answered
+   with the structural reason and carried the process question to
+   Monday's retro rather than guessing at a fix mid-week.
+3. **A gate false alarm, not a product defect, handed to HQ.** Market's
+   16th-brief pull request (`#769`) is failing the redaction gate on
+   three lines that all quote the same public news url, because the
+   url's own article id happens to be shaped like a UUID and the
+   gate's pattern cannot tell that from a leaked session id. Not
+   rerun, since the same input fails the same way every time. Handed
+   to `alexandra-systems/exo-centralizer` (the workflow file is HQ's),
+   and market told directly that its content is not what is held.
+   Incident recorded: `docs/agents/incidents.md`,
+   `INC-2026-11-09-redaction-gate-reads-a-public-url-s-own-id-as-a-leaked-session-uuid`.
+
+Full account: `docs/agents/pm-2026-11-09-message-9-run.md`.
+
 ## Top three for the owner, 2026-11-09 message-triggered (eighth pass): three Tier B merges swept from the open queue, one code conflict handed to engineer and exo each, nothing waits on you
 
 Triggered by the same event as the seventh pass (frontend's `#756`,
