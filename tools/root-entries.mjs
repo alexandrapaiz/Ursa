@@ -88,6 +88,16 @@ function git(args, { allowFail = false } = {}) {
  * so this returns null when `/.*` is absent: there is no allowlist to speak of
  * and the caller must refuse rather than compare against nothing.
  *
+ * A negation naming a path *inside* a directory is not a root entry and does
+ * not join this list. `.claude/` needs that spelling: the directory is
+ * negated so one file can be tracked there, then re-ignored with
+ * `/.claude/*` and the single file named back in with
+ * `!/.claude/settings.json`, which keeps the harness's session transcripts
+ * and local permission overrides out of the repository. Before this filter
+ * the nested negation became a fifth "root entry" called
+ * `.claude/settings.json`, which the gate would then have reported as an
+ * allowlisted root entry that no tree can ever contain.
+ *
  * @param {string} text the contents of the root `.gitignore`.
  * @returns {string[] | null}
  */
@@ -97,7 +107,7 @@ export function allowlistFrom(text) {
   return lines
     .filter((l) => l.startsWith('!/'))
     .map((l) => l.slice(2).replace(/\/$/, ''))
-    .filter((n) => n !== '')
+    .filter((n) => n !== '' && !n.includes('/'))
 }
 
 /** The first path segment of every tracked file, kept when it is a dot-entry.

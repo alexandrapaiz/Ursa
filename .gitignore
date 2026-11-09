@@ -78,3 +78,14 @@ scratch/
 !/.gitattributes
 !/.github/
 !/.claude/
+
+# `.claude/` is negated above so one tracked file can live there: the
+# PreToolUse registration in `.claude/settings.json`, which is the whole
+# reason the secret-print guard runs at all. The negation on its own
+# un-ignores the entire directory, and the harness writes session
+# transcripts, prompt history and local permission overrides into it. So
+# the directory is re-ignored here and the one tracked file named back in,
+# which is the same inverted rule this file argues for above, applied one
+# level down.
+/.claude/*
+!/.claude/settings.json

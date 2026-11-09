@@ -159,8 +159,45 @@ describe('allowlistFrom reads .gitignore and refuses to invent an allowlist', ()
     assert.deepEqual(allowlistFrom('/.*\n!/.github/\n'), ['.github'])
   })
 
-  test("the repository's own .gitignore yields exactly the three it commits", () => {
+  test("the repository's own .gitignore yields exactly the four it commits", () => {
     assert.deepEqual(allowlistFrom(readFileSync(join(REPO, '.gitignore'), 'utf8')), ALLOWLIST)
+  })
+
+  // The next two pin the `.claude/` spelling, which is the only negation here
+  // that exists to track one file rather than a whole entry, and which had
+  // nothing asserting it before 2026-11-09.
+  test('a negation naming a path inside a directory is not a root entry', () => {
+    assert.deepEqual(
+      allowlistFrom('/.*\n!/.claude/\n/.claude/*\n!/.claude/settings.json\n'),
+      ['.claude'],
+    )
+  })
+
+  test('re-ignoring a negated directory does not remove it from the allowlist', () => {
+    // `/.claude/*` is not a negation, so it must not subtract `.claude`: the
+    // entry is still committed, and the gate still has to know that.
+    assert.ok(allowlistFrom('/.*\n!/.claude/\n/.claude/*\n').includes('.claude'))
+  })
+})
+
+describe('the .claude/ carve-out tracks one file and keeps the session out', () => {
+  // The guard's PreToolUse registration has to be tracked or every clone
+  // drops it. Everything else the harness writes under `.claude/` is private
+  // session state, and the redaction gate exists because one of those paths
+  // reached a committed file before. So this asserts both halves against the
+  // real `.gitignore` rather than a fixture.
+  test('settings.json is trackable and the private siblings are not', () => {
+    assert.equal(ignores(REPO, '.claude/settings.json'), false,
+      'the hook registration is ignored, so no clone would run the guard')
+    for (const p of [
+      '.claude/settings.local.json',
+      '.claude/history.jsonl',
+      '.claude/todos/one.json',
+      '.claude/projects/-Users-you-Desktop/session.jsonl',
+      '.claude/shell-snapshots/snapshot.sh',
+    ]) {
+      assert.equal(ignores(REPO, p), true, `${p} is not ignored, so a run could commit it`)
+    }
   })
 })
 
