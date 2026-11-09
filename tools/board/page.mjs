@@ -67,7 +67,7 @@
 // the oldest row the last page returned, so the page width is set by the
 // board's own density rather than by this file's belief about it. Nine calls
 // read the whole store where the slice pager would have spent sixty.
-import { liveTargetFault } from './live-target.mjs';
+import { liveTargetFault, reachFault } from './live-target.mjs';
 
 /** The board's hard ceiling on one message read, `limit` in the response.
  *  Asking for more is not an error and not honoured: `api.py` clamps it. */
@@ -213,7 +213,26 @@ export async function pageMessages({
   let overlapSeconds = OVERLAP_SECONDS;
 
   while (pages.length < maxPages) {
-    const page = await fetchPage({ sinceHours: hours, beforeHours: before, limit: PAGE_CEILING, extra });
+    // CAUGHT HERE AND NOT AT THE FETCH, for the same reason `fetchPage` is
+    // injected: the walk is what every caller consumes, so a fetcher that
+    // throws has to arrive in the receipt rather than past it. A real
+    // `fetchMessagePage` throwing `TypeError: fetch failed` and a test's
+    // fetcher throwing on purpose then take one path, and the branch is
+    // reachable from `node --test` with no board.
+    //
+    // A throw is the same event as the `status >= 400` branch below with the
+    // status missing, so it gets its own reason rather than borrowing that
+    // one: 400 means the board answered and refused, and this means it did not
+    // answer. Only the second one has its repair outside this repository.
+    let page;
+    try {
+      page = await fetchPage({ sinceHours: hours, beforeHours: before, limit: PAGE_CEILING, extra });
+    } catch (error) {
+      const fault = reachFault(error);
+      incomplete = { reason: 'NO_REACH', code: 'COVERAGE_NO_REACH', line: `page ${pages.length + 1} ${fault.line}` };
+      pages.push({ before_hours: +before.toFixed(4), status: 0, rows: 0, saturated: false, new_rows: 0 });
+      break;
+    }
     const sizeBefore = byId.size;
     if (page.status >= 400) {
       incomplete = { reason: 'READ_FAILED', code: 'COVERAGE_READ_FAILED', line: `page ${pages.length + 1} answered ${page.status}${page.error ? `: ${page.error}` : ''}` };
