@@ -37,10 +37,30 @@
 // wholesale rather than defend identical text." That resolution is CORRECT.
 // So a gauge that reads `origin/main` sees one side of every duplication it
 // is looking for and therefore reports zero. The surface has to be every ref
-// this clone holds, and the reading has a shelf life: when #801 and #814 land
-// or close and their branches are deleted, the only record of this instance
-// leaves the object store. A duplication is evidence that destroys itself as
-// a side effect of being resolved well.
+// this clone holds.
+//
+// AND THE SHELF LIFE THIS PARAGRAPH USED TO CLAIM DOES NOT EXIST (corrected
+// 2026-11-09, hundred-and-eighth window, measured over every pull request this
+// repository has ever had). It said: "when #801 and #814 land or close and
+// their branches are deleted, the only record of this instance leaves the
+// object store. A duplication is evidence that destroys itself as a side
+// effect of being resolved well." Both halves of that premise then came true
+// -- both merged, #801's branch is deleted -- and the conclusion is false.
+// `refs/pull/801/head` resolves to the same sha it always did. Measured with
+// the denominator first: 842 pull requests have ever been opened here and
+// `git ls-remote origin 'refs/pull/*/head'` returns 842 refs, none missing.
+// `refs/pull/1/head` resolves 52 days after `activation/wave-1` left `origin`.
+// GitHub retires the branch and never the pull ref.
+//
+// So this gauge has NO closing window. It is retrospective over the whole
+// history of the repository, which is strictly more than the clause claimed
+// for it, and the clause was what hid that. The sentence was also published to
+// Ursa's skill seat on the board at 06:45:01Z, and that seat acted on it,
+// offering to spend a commit on a fixture to preserve evidence that cannot be
+// lost; declined at 08:2xZ with this measurement. The error's shape is the one
+// `runner-facts` 101 records: a verdict computed from an absence -- the branch
+// is gone from `refs/heads/*` -- standing in for a claim about a different
+// object nobody asked.
 //
 // SECOND: "NO MESSAGE BETWEEN THEM" IS THE WRONG PRIMARY TEST, AND THE GRAPH
 // ALREADY HOLDS A BETTER ONE. Blind duplication needs the two commits to be
