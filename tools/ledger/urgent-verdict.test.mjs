@@ -18,10 +18,13 @@ import {
   SCRIPT_SHAPE,
   basisTally,
   classifyEntry,
+  cloneLines,
   daysBetween,
   declarationsIn,
+  locatorsIn,
   normalizeOutcome,
   parseDeclaration,
+  pathToken,
   pathsIn,
   probePlan,
   probesIn,
@@ -500,5 +503,222 @@ describe('exit 0 with a skipped subtest is not a clear', () => {
   it('normalizeOutcome keeps incomplete distinct from a refusal', () => {
     assert.equal(normalizeOutcome('incomplete'), 'incomplete')
     assert.equal(normalizeOutcome('skipped'), 'cannot-answer')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The source locator, added 2026-11-09.
+//
+// WHY IT NEEDED A TEST BLOCK OF ITS OWN. The defect it fixes is the reverse of
+// every other defect in this file: not a tool that accepted too much, a tool
+// that accepted too little, and specifically that accepted LESS the more
+// precisely an entry cited its subject. So the cases below pin both directions
+// at once. A locator is stripped, and nothing else is, and the stripping is
+// not allowed to widen any allowlist by one character: `probesIn` is still
+// `PROBE_SHAPE` plus `isTracked` and a locator cannot smuggle a path past it.
+
+describe('pathToken: a locator is stripped from a path and kept', () => {
+  it('strips a trailing line number and reports it', () => {
+    assert.deepEqual(pathToken('tools/root-entries.test.mjs:324'), {
+      path: 'tools/root-entries.test.mjs',
+      locator: '324',
+    })
+  })
+
+  it('strips the line-and-column form tsc and eslint print', () => {
+    assert.deepEqual(pathToken('tools/root-entries.test.mjs:324:11'), {
+      path: 'tools/root-entries.test.mjs',
+      locator: '324:11',
+    })
+  })
+
+  it('does not strip a trailing word, because `tools/x.mjs:main` is no tool\'s output', () => {
+    assert.equal(pathToken('tools/root-entries.test.mjs:main'), null)
+  })
+
+  it('reports no locator for a bare path', () => {
+    assert.deepEqual(pathToken('tools/root-entries.test.mjs'), {
+      path: 'tools/root-entries.test.mjs',
+      locator: null,
+    })
+  })
+
+  it('still refuses a bare word and an untracked top-level root, locator or not', () => {
+    assert.equal(pathToken('main:12'), null)
+    assert.equal(pathToken('node_modules/foo.mjs:12'), null)
+  })
+
+  it('is NOT where a traversal is refused, and a locator does not move that guard', () => {
+    // `PATH_TOKEN` has always admitted `..`; the traversal refusal is
+    // `PROBE_SHAPE`'s and `SCRIPT_SHAPE`'s `SEGMENT` rule, which is the layer
+    // that decides what runs. This case exists so that a future reader who
+    // finds a traversal coming out of `pathsIn` knows it is by design and
+    // where the guard actually is, and so that the locator strip is pinned as
+    // not having loosened it. The first assertion is the one that matters.
+    assert.deepEqual(probesIn('`tools/../../etc/passwd.test.mjs:12`', () => true), [])
+    assert.deepEqual(pathToken('tools/../../etc/passwd:12'), {
+      path: 'tools/../../etc/passwd',
+      locator: '12',
+    })
+  })
+
+  it('accepts the known false positive on purpose: a prose suffix reads as a locator', () => {
+    // Pinned rather than defended against. Stripping only ever widens what is
+    // offered to the allowlists, which are unchanged, so the worst case is a
+    // locator printed as context next to a path that really is tracked.
+    assert.deepEqual(pathToken('docs/vision.md:2026'), { path: 'docs/vision.md', locator: '2026' })
+  })
+})
+
+describe('pathsIn and locatorsIn over a locator', () => {
+  const text = '- Trigger: `tools/root-entries.test.mjs:324` is red, see also `docs/ideas.md`'
+
+  it('the path is found, which before this it was not', () => {
+    assert.deepEqual(pathsIn(text), ['tools/root-entries.test.mjs', 'docs/ideas.md'])
+  })
+
+  it('the locator is reported separately, once per path, and only where there is one', () => {
+    assert.deepEqual(locatorsIn(text), [
+      { path: 'tools/root-entries.test.mjs', locator: '324' },
+    ])
+  })
+
+  it('first locator wins when an entry cites the same file twice', () => {
+    assert.deepEqual(
+      locatorsIn('`tools/root-entries.test.mjs:324` and `tools/root-entries.test.mjs:9`'),
+      [{ path: 'tools/root-entries.test.mjs', locator: '324' }],
+    )
+  })
+
+  it('the entry that this was found on becomes measurable, and the allowlist is unchanged', () => {
+    // The live case: the most precisely cited urgent entry in the ledger.
+    const e = entry('- Trigger: the failing case is `tools/root-entries.test.mjs:324`')
+    assert.deepEqual(probesIn(e.text, isTracked), ['tools/root-entries.test.mjs'])
+    assert.equal(probePlan(e.text, isTracked).basis, 'inferred')
+    // And a locator does not get an untracked or wrongly-shaped path executed.
+    assert.deepEqual(probesIn('`tools/root-entries.mjs:324`', isTracked), [])
+    assert.deepEqual(probesIn('`tools/nope.test.mjs:324`', isTracked), [])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The clone, added 2026-11-09.
+//
+// WHY THIS IS A SEPARATE AXIS FROM THE DISPOSITION, and why the test says so:
+// run over the same ledger at the same commit on 2026-11-09, this tool
+// reported 0 entries still failing in the shallow single-branch clone every
+// seat on this host is handed and 3 after `bash tools/ensure-full-clone.sh`.
+// Zero is the dangerous direction. The three cases that matter are therefore
+// not three dispositions, they are three things the output must say about
+// WHERE it measured, and the one that is easy to get wrong is `complete`: in a
+// complete clone `tools/stack/repair-pending.test.mjs` still skips a subtest,
+// so a reader sent to complete their clone would be sent to run a command that
+// cannot help them.
+
+describe('a non-answer names the clone as the first thing to rule out', () => {
+  const withClone = (clone, outcome = 'cannot-answer') => classifyEntry(
+    entry('- Recheck: `node tools/secret-scan.mjs --history`'),
+    { probeResults: new Map([['node tools/secret-scan.mjs --history', outcome]]), isTracked, today: TODAY, clone },
+  )
+
+  it('an incomplete clone is named with the command that repairs it', () => {
+    assert.match(withClone('incomplete').why, /this clone is incomplete, so start with `bash tools\/ensure-full-clone\.sh`/)
+  })
+
+  it('a complete clone says completing it is NOT the repair, so nobody is sent to run it', () => {
+    const why = withClone('complete').why
+    assert.match(why, /this clone is already complete, so completing it is not the repair/)
+    assert.doesNotMatch(why, /start with/)
+  })
+
+  it('an unmeasured clone says it is unmeasured rather than picking one of the two', () => {
+    assert.match(withClone('unknown').why, /did not establish whether this clone is complete/)
+  })
+
+  it('defaults to unknown, so a caller that never measured is reported as never having measured', () => {
+    assert.match(
+      classifyEntry(
+        entry('- Recheck: `node tools/secret-scan.mjs --history`'),
+        ev(new Map([['node tools/secret-scan.mjs --history', 'cannot-answer']])),
+      ).why,
+      /did not establish whether this clone is complete/,
+    )
+  })
+
+  it('reaches a skipped subtest too, which is the same mistake one layer down', () => {
+    assert.match(withClone('incomplete', 'incomplete').why, /start with `bash tools\/ensure-full-clone\.sh`/)
+    assert.match(withClone('complete', 'incomplete').why, /completing it is not the repair/)
+  })
+
+  it('does not reach a clean pass or a real failure, which the clone does not explain', () => {
+    assert.doesNotMatch(withClone('incomplete', true).why, /ensure-full-clone/)
+    assert.doesNotMatch(withClone('incomplete', false).why, /ensure-full-clone/)
+  })
+})
+
+describe('cloneLines: the report says what its counts are a measurement of', () => {
+  it('an incomplete clone marks every count provisional and gives the repair', () => {
+    const lines = cloneLines('incomplete', ['depth: .git/shallow is present']).join('\n')
+    assert.match(lines, /INCOMPLETE clone/)
+    assert.match(lines, /describes this checkout and not this repository/)
+    assert.match(lines, /bash tools\/ensure-full-clone\.sh/)
+    assert.match(lines, /0 entries still failing and 18 with no measurement/)
+    assert.match(lines, /3 still failing and 13 with no measurement/)
+    assert.match(lines, /clone: depth: \.git\/shallow is present/)
+  })
+
+  it('a complete clone says so, because the affirmative is what a reader needs stated', () => {
+    const lines = cloneLines('complete').join('\n')
+    assert.match(lines, /COMPLETE clone/)
+    assert.match(lines, /measurement of this repository and not only of this checkout/)
+  })
+
+  it('an unmeasured clone refuses to let any count be quoted', () => {
+    const lines = cloneLines('unknown', ['no origin remote']).join('\n')
+    assert.match(lines, /could not establish whether this clone is complete/)
+    assert.match(lines, /no count above should be quoted as a fact about this repository/)
+    assert.match(lines, /clone: no origin remote/)
+  })
+
+  it('is always one of the three and never silent, whatever it is handed', () => {
+    for (const c of ['complete', 'incomplete', 'unknown', undefined]) {
+      assert.ok(cloneLines(c).length >= 1, String(c))
+    }
+  })
+})
+
+describe('report carries the clone and the locator', () => {
+  const refused = classifyEntry(
+    entry('- Recheck: `node tools/secret-scan.mjs --history`\n- What: `tools/root-entries.test.mjs:324`'),
+    { probeResults: new Map([['node tools/secret-scan.mjs --history', 'cannot-answer']]), isTracked, today: TODAY, clone: 'incomplete' },
+  )
+
+  it('the clone sentence is the last thing printed, after the counts it qualifies', () => {
+    const lines = report([refused], { ledgerPath: 'docs/ideas.md', today: TODAY, clone: 'incomplete', cloneWhy: ['depth: .git/shallow is present'] })
+    assert.match(lines.at(-1), /clone: depth: \.git\/shallow is present/)
+    assert.ok(lines.some((l) => /INCOMPLETE clone/.test(l)), lines.join('\n'))
+  })
+
+  it('defaults to saying it did not establish the clone, never to saying it was fine', () => {
+    const lines = report([refused], { ledgerPath: 'docs/ideas.md', today: TODAY }).join('\n')
+    assert.match(lines, /could not establish whether this clone is complete/)
+    assert.doesNotMatch(lines, /COMPLETE clone/)
+  })
+
+  it('prints the locator the entry wrote, as context on an entry that is not cleared', () => {
+    const lines = report([refused], { ledgerPath: 'docs/ideas.md', today: TODAY }).join('\n')
+    assert.match(lines, /the entry points at tools\/root-entries\.test\.mjs:324, which is where its author was looking/)
+  })
+
+  it('does not print the locator on a cleared entry, where the line it points at now passes', () => {
+    const cleared = classifyEntry(
+      entry('- What: `tools/root-entries.test.mjs:324`'),
+      ev(new Map([['tools/root-entries.test.mjs', true]])),
+    )
+    assert.equal(cleared.disposition, 'symptom-cleared')
+    assert.doesNotMatch(
+      report([cleared], { ledgerPath: 'docs/ideas.md', today: TODAY }).join('\n'),
+      /the entry points at/,
+    )
   })
 })

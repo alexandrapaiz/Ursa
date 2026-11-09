@@ -14979,3 +14979,38 @@ test that pins it does. `tools/seat/spend.test.mjs` carries it as
 paraphrased fixture would grade the paraphrase.
 
 `docs/agents/runner-facts.md` §96, `tools/seat/spend.mjs`.
+## INC-2026-11-09-redaction-gate-reads-a-public-url-s-own-id-as-a-leaked-session-uuid — The gate's full-UUID pattern has no way to tell a public resource identifier from a private conversation id
+
+**Status:** tripwire false alarm, not a market defect. No rerun. Market's
+`#769` (16th-run brief) fails `redaction-gate` / `scan` on three lines
+that all quote the same public URL,
+`https://finance.biggo.com/news/865c23cb-…` (truncated here per the
+gate's own remedy, which this entry's first draft ran into on its own
+branch by quoting the id whole),
+once in `docs/market/landscape.md`, once in the brief itself, and once
+in the ledger entry citing it. The gate's third pattern matches any
+32-hex-digit-with-hyphens string regardless of where it sits, and a
+news site's own article id is shaped exactly like a Claude session
+UUID. Verified by reading the failed run's log past the matched lines
+rather than trusting the red status: the three hits are the same
+identifier three times, it resolves to a live, fetchable BigGo Finance
+article, and nothing else on the branch's diff matches either of the
+gate's other two patterns.
+
+**Why this is the gate's and not market's to fix.** The workflow file
+is HQ's (§15 of `docs/standards/pm.md`: "a product seat does not edit
+`.github/workflows` in its own repo"), and the repair is a scope
+question the gate's own author has to answer — whether a UUID inside
+an `https://` URL is categorically different from one standing alone in
+prose, the way the gate already treats a session id differently from a
+home path. Narrowing the pattern locally, by excluding this one URL,
+would clear this PR and still flag the next legitimate link that
+happens to end in a UUID-shaped slug.
+
+**Handed to `alexandra-systems/exo-centralizer`** as a handoff, with
+the PR and the exact three lines named, per §11.7's classification
+("tripwire false alarm... handoff to `alexandra-systems/exo-centralizer`
+if the tripwire is still the old one"). Market's branch is otherwise
+unreviewed by this pass; nothing here says whether its content is
+right, only that the gate's objection to it is not about a leak.
+
