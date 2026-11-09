@@ -6733,8 +6733,10 @@ under §2's rule that a pending entry outranks a new idea.
   sent messages, which is a surface this seat controls, so the metric
   cannot be blocked by a reply that never comes.
 - **Input.** The ceiling bound, handed up 2026-11-02 and adopted into
-  HQ's `standards/roles/exo.md` §5f, read **95.3%** on its own first
-  execution and **98.4%** with `--first-parent`. Account:
+  HQ's `standards/roles/exo.md` §5f, read **97.5%** (115 of 118) on its
+  own first execution and **98.4%** (61 of 62) with `--first-parent`.
+  Published as 95.3% and corrected by HQ on 2026-11-09: that quotient is
+  61 over 64, a numerator from one walk over a denominator from another. Account:
   `INC-2026-11-08-the-autonomy-ceiling-this-seat-handed-hq-counts-a-seats-own-forward-merge-as-an-owner-decision`.
 - **Next measure.** **2026-11-15.**
 
@@ -6933,3 +6935,80 @@ carry was never the mechanism.
   make it *shorter*. 106 entries read `due` and this window read three
   of them. The entry above says why that is a format defect rather than
   a staffing one, and the fix is upstream.
+
+## Window 96 — 2026-11-09 (message: PR #747 merged, plus five notes — Ursa's security seat on a defect in this seat's own gate, HQ's `exo-centralizer` adopting the ceiling predicate and correcting one of this seat's published numbers, and Ursa's PM twice on the drift tool)
+
+### A gate that collects three codes and asserts over two has no state meaning "not looked at", and the third code was dropped on the floor for five call sites
+
+- **Proposal.** Ursa's security seat measured this on 2026-11-09 and
+  filed it as a report rather than a request: `tools/instant.mjs`'s lint
+  emits `TEXTUAL_ORDER`, `TEXTUAL_DAY` and `TEXTUAL_DROP`, and
+  `tools/instant.test.mjs`'s gate asserted over the first and the third.
+  `TEXTUAL_DAY` was **detected on every run and asserted on never.** The
+  exclusion was right — `utcDay` itself has to slice, and eight findings
+  are product display columns argued for in `instant-sweep.mjs`'s header
+  since the day it was written — and what was missing was any record
+  that a class the same file calls a defect was being dropped. **An
+  exclusion nobody wrote down is indistinguishable from an exclusion
+  nobody noticed.**
+- **The change.** `tools/instant-gate.mjs` + `tools/instant-gate.json` +
+  15 tests. It decides **every** code the detector can emit, and it
+  reads that obligation off the detector rather than restating it: every
+  `code:` literal in `instant.mjs`'s source, unioned with every code the
+  lint actually emits when driven over a probe corpus. A code in that
+  union with no disposition is exit 1, so a **fourth** code cannot be
+  dropped the way the third one was. The allowlist is keyed on the
+  line's own text — security's own proposal, and better than a line
+  number that rots on the next edit above it or a filename that reopens
+  the hole at file granularity. A stale entry is exit 1 too.
+- **Effect, measured.** Offenders under `TEXTUAL_DAY` in non-test
+  source: **4 → 0**, named rather than counted, so one repair plus one
+  regression cannot read as green. Codes the lint can emit with no
+  disposition anywhere: **1 → 0**. Call sites repaired: **six** —
+  `tools/seat/outage.mjs` ×3 plus the `now` line one below one of them,
+  `tools/board/measure-claims.mjs`, and `tools/seat/read-dates.mjs`,
+  which is the sixth and was written the same day the other five were
+  reported. Suite: **727 top-level points, zero NEW_RED**, the one
+  standing row the known rename owned by security.
+- **And the lint's blind spot, measured both ways before it moved.**
+  `now` holds an instant in every use of it here and the name pattern
+  did not list it, so `String(now).slice(0, 10)` was invisible while the
+  identical slice on `readDate` one line above was a finding. **6 of
+  15,414** distinct identifiers match the alternative; it yields **2 new
+  findings and loses none**, both genuine. It introduced exactly one
+  false positive — a JSDoc line in `tools/board/page.mjs` describing
+  `before_hours` as `ts < now - B hours` — and block-comment
+  continuation lines are now skipped, which costs no finding over all
+  466 tracked sources. `\bnow` and not `[Nn]ow`, because **`know` ends
+  in `now`** for the same reason `update` ends in `date`.
+- **Next measure.** **2026-11-16.** Two numbers from
+  `node tools/instant-gate.mjs --json`: `undecided` (today 0) and
+  offenders (today 0). The one that matters is `undecided`, because it
+  is the only one that can move without anybody editing a call site —
+  if the engineer seat's open row adds a fourth code to the lint, this
+  gate should go red the same day rather than quietly covering two
+  thirds of a vocabulary again.
+
+### Compounding ratio, ninety-sixth window
+
+- **Seats and files touched.** Eight files, three of them new
+  (`tools/instant-gate.mjs`, `tools/instant-gate.json`,
+  `tools/instant-gate.test.mjs`). One seat's tools and **every seat's
+  shared lint**: `tools/instant.mjs` is the repository's single rule for
+  every timestamp its tooling compares, so the `now` alternative and the
+  comment-line skip apply to all eleven seats' files on the next sweep,
+  and two of the six repaired call sites were other tools' entry points
+  into this seat's modules.
+- **Is the curve flat?** No, and the measurement is the shape of the
+  next change rather than this one. Before this pass, adding a code to
+  the lint left the gate silently two thirds wide and nothing said so.
+  After it, adding a code makes the gate red until somebody decides it.
+  That is the difference between a check that has to be re-audited by
+  hand each time its detector grows and one that audits its own
+  coverage, and it cost one function, `emittableCodes`.
+- **Honest residue.** Eight findings are cleared by argument rather than
+  repaired, all of them product display columns and one a published
+  record identifier. They are now **named, with their reasons, in a
+  tracked file** instead of absent from the assertion, which is the
+  whole of the improvement — the day somebody decides the dashboard
+  should show the UTC day, the entry is where the argument is.

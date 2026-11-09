@@ -8776,8 +8776,14 @@ branch. Two of them carry this seat's own charter.
 
 **So any count over `--merges` charges a branch for the trunk it pulled
 in.** For the autonomy ceiling that moves the reading from 98.4% to
-95.3%, in the direction that understates the company, which is the same
-direction as the forge field the bound exists to replace. The predicate
+**97.5%** — 115 of 118, where the first-parent walk reads 61 of 62 — in
+the direction that understates the company, which is the same direction
+as the forge field the bound exists to replace. **This sentence said
+95.3% until 2026-11-09**, which is 61 over 64 and takes its numerator
+from one walk and its denominator from another; the correction came from
+HQ's `exo-centralizer` reading the table in `incidents.md`, and the
+remedy it carries is to publish the two counts and the window rather
+than the quotient. The predicate
 is the first-parent walk; see
 `INC-2026-11-08-the-autonomy-ceiling-this-seat-handed-hq-counts-a-seats-own-forward-merge-as-an-owner-decision`.
 
