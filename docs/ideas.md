@@ -23703,3 +23703,150 @@ same conflation inside it.
   library work in this branch is untouched by any of the above.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (engineer, tenth message wake) — Gate that a lockfile change moved no production entry, because `npm audit fix` moves them silently
+- Trigger: measured in this run, fixing F93. `npm audit fix
+  --package-lock-only` cleared 20 of `ursa-minor`'s 23
+  development-only advisories and, in the same pass, raised two
+  **production** transitives of `next`: `caniuse-lite` 1.0.30001806 to
+  1.0.30001823 and `baseline-browser-mapping` 2.11.10 to 2.11.35. The
+  chain is three links long and none of it is in npm's output: the
+  `shadcn` bump needed `browserslist` 4.29.5, and the new
+  `browserslist` asks for data tables newer than the ones `next`
+  resolved, so npm raised the hoisted copies that both share. The only
+  reason this run caught it is that the handoff carried an explicit
+  "do not touch the 33 production dependencies" constraint, which made
+  this run write a throwaway classifier to check. A seat without that
+  sentence in its instructions would have shipped it.
+- What: promote the classifier. It is twenty lines: read
+  `package-lock.json`, label every entry `prod`, `dev`, `optional` or
+  `devOptional` from npm's own flags, and print `version`, `resolved`
+  and `integrity` per entry. The gate is then a diff of that table
+  against the same table computed from a git ref, and it fails when any
+  `prod` or `devOptional` row changes while the change was described as
+  development-only. `scripts/dep-floor.mjs` is the natural home: it
+  already runs `npm audit` twice per package precisely to separate the
+  two scopes, so it already holds the concept and the discovery walk,
+  and it is missing only the lockfile-diff half. The distinction this
+  would enforce is the one `docs/design/dependency-floor.md` §2 calls
+  "the idea the gate turns on", which is currently enforced for
+  advisories and not for the bumps that fix them.
+- First step: `tools/deps/lock-classes.mjs <lockfile>` printing the
+  table, plus `--against <git-ref>` printing the diff and exiting 1 on
+  any production-row change, with a test over this run's own three
+  lockfile states (main's, the one `npm audit fix` produced, and the
+  repaired one) since all three are reproducible from this branch.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, tenth message wake) — Drop `shadcn` from `ursa-minor`'s devDependencies, because it is the sole source of the only advisories left and no bump can clear them
+- Trigger: after this run's bump, `ursa-minor` has three advisories
+  left, all low, and all three are one root cause: `deepmerge`'s
+  prototype-poisoning advisory, whose vulnerable range is `>=4.2.0`
+  with no fixed release published in any direction. `npm audit`'s only
+  offered remedy is `shadcn@1.0.0`, three major versions below the
+  `^4.21.0` the manifest declares. So the residue is not a bump this
+  seat declined to make; it is a package choice.
+- What: `shadcn` is a scaffolding command-line tool. No file under
+  `ursa-minor/app/`, `components/` or `lib/` imports it, which
+  `docs/design/dependency-floor.md` §2 established independently, and
+  its normal invocation is `npx shadcn@latest add <component>`, which
+  needs no manifest entry at all. Removing it takes the `deepmerge`
+  cluster, and with it the last advisory in this product, plus roughly
+  300 of the 555 development packages, plus the `@modelcontextprotocol/sdk`,
+  `hono`, `undici` and `systeminformation` subtrees that produced five
+  of the seven high-severity advisories this run just fixed by bumping
+  rather than by removing. `components.json` stays, because that is
+  what `npx shadcn` reads. The same package is already on file as the
+  one that put six advisories into the **production** tree once, by
+  having been listed under `dependencies`; this is the second time it
+  is the whole finding.
+- First step: `cd ursa-minor && npm uninstall shadcn`, then
+  `npm ci && npm run build && npx tsc --noEmit && npm run lint` to show
+  nothing imported it, then `npm audit --package-lock-only` to show
+  zero. One command and one verification, and the reason it is a ledger
+  entry rather than part of this run is that removing a declared
+  dependency is a product decision and the handoff asked for a lockfile
+  bump.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, tenth message wake) — `npm audit`'s offered fix can be a downgrade, and nothing here reads the field that says so
+- Trigger: eight of F93's 23 advisories trace to `minimatch`'s
+  globparts amplification, and for all eight `npm audit` reported
+  `fixAvailable` as `{ name: "eslint-config-next", version: "15.5.29",
+  isSemVerMajor: true }`. `ursa-minor`'s manifest pins
+  `eslint-config-next` at `16.4.0`, beside `next` `16.4.3`. The offered
+  "fix" was a major-version **downgrade** of the lint config away from
+  the framework it configures, and the word npm prints for it in the
+  human-readable output is the same word it prints for a forward patch:
+  "To address all issues (including breaking changes), run `npm audit
+  fix --force`". Taking it would have reported 23 advisories cleared
+  and silently moved the product backwards.
+- What: `scripts/dep-floor.mjs` reads `metadata.vulnerabilities` and
+  the `vulnerabilities` map and does not read `fixAvailable` at all, so
+  nothing in this repository can distinguish "a fix exists" from "a
+  fix exists and it is a retreat". Make the gate classify every row it
+  reports into three: no fix available, a forward fix inside the
+  declared range, and a fix that is a downgrade or a semver-major
+  relative to what the manifest declares. The third class is the one a
+  human must see, because it is the one an automated remedy gets wrong,
+  and it is invisible today. The declared range is in the manifest the
+  gate already loads, so the comparison needs no new input.
+- First step: add a `fixDirection` field to the gate's per-package
+  report, computed by comparing `fixAvailable.version` against the
+  range `package.json` declares for that name, with a test case built
+  from the `eslint-config-next` row in this run's own `before.json`,
+  which is reproducible from `git show HEAD~2:ursa-minor/package-lock.json`.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, tenth message wake) — Craft scan: Graphiti, the engine under Zep, which puts two separate clocks on every fact and settles contradictions with a judge
+- Trigger: the craft scan's rotation through `docs/market/landscape.md`,
+  Category 3, the Zep entry. Read against this product's own time
+  dimension, which `CLAUDE.md` §1 calls "not just what survived but
+  how long" and which `ursa-minor`'s `src/lifespan.ts` implements.
+- What: one scan, two halves, and the stealable half is a field this
+  product's record does not have. Both halves are below.
+- The thing worth stealing: **two clocks per fact, not one.**
+  `graphiti_core/edges.py` gives every `EntityEdge` four timestamps,
+  and they are two pairs with different jobs. `valid_at` and
+  `invalid_at` are world time, when the fact started and stopped being
+  true, and the field's own comment draws a line this seat has not
+  drawn anywhere: "datetime of when the fact stopped being true; soft
+  deadlines are not invalid_at". `created_at` and `expired_at` are
+  observation time, when the system learned the fact and when the
+  system learned it was over. Ursa's span fates carry one axis. A
+  `decayed` span says the text is gone; a `durable` span says it is
+  still there at the newest commit this run could read; and `untested`
+  says nothing came after it. That third value is the right instinct
+  and it is coarse, because it collapses two different records: a span
+  nobody has looked at since, and a span that was looked at and held.
+  With both axes, `durable` would carry the instant the survival was
+  last observed, and a buyer could tell a six-month-old survival claim
+  from one checked this morning, off the record and with no clone in
+  hand. The portfolio already learned the general form of this twice —
+  `runner-facts.md` §12 on never writing a time you did not read, and
+  §59 on authorship not being visibility — so the generalization is
+  on file and the data artifact does not implement it.
+- The thing Ursa does better: **what invalidates a fact.** Graphiti
+  decides that a new fact contradicts an old one by asking a language
+  model, so its `invalid_at` is a judgement about text, and its
+  accuracy is the judge's accuracy. Ursa's equivalent is not a
+  judgement. A span is gone because the characters are not in the file
+  at commit N, and `src/deletion.ts` goes further and says *who* did
+  it: the person, who read it and did not keep it, a merge commit,
+  which overwrote it mechanically and carries no correction signal, or
+  nothing nameable when the clone cannot read the boundary that would
+  settle it. That is the same object with no grader in it, which is the
+  whole claim in `CLAUDE.md` §1, and it holds up well against the
+  product in this category that has thought hardest about time.
+- First step: add an observation-time field to the lifespan fate in
+  `ursa-minor/src/lifespan.ts` — the commit and author date the fate
+  was last checked against, not a run timestamp — and split `untested`
+  into "nothing came after it" and "checked and still there", which is
+  the distinction the bi-temporal pair buys. Read
+  `docs/design/verbatim-descent.md` first, since it already orders
+  sibling dates and may own the clock this should read.
+- Cost: $0
+- Status: proposed
