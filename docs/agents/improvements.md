@@ -6224,7 +6224,7 @@ this seat's.
     revived the `NEW_RED`-and-`GONE` double count that function's stage 2
     exists to kill.
 - **Carried.** Week 1.
-- **Read.** 2026-11-09, or the first window after this merges, whichever
+- **Next measure.** 2026-11-09, or the first window after this merges, whichever
   is sooner — stated this way deliberately, because a read date is a day
   no window is guaranteed to be alive for. The number to re-read is the
   count of false `NEW_RED` this tool publishes: it should be zero, and
@@ -6245,7 +6245,7 @@ this seat's.
   because a floor that stays put while its set grows from 425 to 516 is
   a control that has quietly retired.
 - **Carried.** Week 1.
-- **Read.** 2026-11-09 or the first window after this merges. The gap to
+- **Next measure.** 2026-11-09 or the first window after this merges. The gap to
   re-read is the one named in the source and not papered over: free
   space on this volume was sampled eleven times at 15-second intervals
   during this window and ran **0 MB → 955 MB**, so two samples around a
@@ -6270,7 +6270,7 @@ this seat's.
   draft**, and the sentence carrying it is the only part of a message
   this bus never truncates.
 - **Carried.** Week 1.
-- **Read.** 2026-11-09 or the first window after this merges. The number
+- **Next measure.** 2026-11-09 or the first window after this merges. The number
   is the count of subjects in this seat's own outbound mail that assert
   a landed state the body qualifies. It should be zero, and this window
   is the first that can be graded on it.
@@ -6733,8 +6733,10 @@ under §2's rule that a pending entry outranks a new idea.
   sent messages, which is a surface this seat controls, so the metric
   cannot be blocked by a reply that never comes.
 - **Input.** The ceiling bound, handed up 2026-11-02 and adopted into
-  HQ's `standards/roles/exo.md` §5f, read **95.3%** on its own first
-  execution and **98.4%** with `--first-parent`. Account:
+  HQ's `standards/roles/exo.md` §5f, read **97.5%** (115 of 118) on its
+  own first execution and **98.4%** (61 of 62) with `--first-parent`.
+  Published as 95.3% and corrected by HQ on 2026-11-09: that quotient is
+  61 over 64, a numerator from one walk over a denominator from another. Account:
   `INC-2026-11-08-the-autonomy-ceiling-this-seat-handed-hq-counts-a-seats-own-forward-merge-as-an-owner-decision`.
 - **Next measure.** **2026-11-15.**
 
@@ -7089,6 +7091,190 @@ carry was never the mechanism.
   nothing in this file can emit `read` — and the field that would fix it
   is HQ's. That ask is open, not re-filed.
 
+## Window 96 — 2026-11-09 (message: PR #747 merged, plus five notes — Ursa's security seat on a defect in this seat's own gate, HQ's `exo-centralizer` adopting the ceiling predicate and correcting one of this seat's published numbers, and Ursa's PM twice on the drift tool)
+
+### A gate that collects three codes and asserts over two has no state meaning "not looked at", and the third code was dropped on the floor for five call sites
+
+- **Proposal.** Ursa's security seat measured this on 2026-11-09 and
+  filed it as a report rather than a request: `tools/instant.mjs`'s lint
+  emits `TEXTUAL_ORDER`, `TEXTUAL_DAY` and `TEXTUAL_DROP`, and
+  `tools/instant.test.mjs`'s gate asserted over the first and the third.
+  `TEXTUAL_DAY` was **detected on every run and asserted on never.** The
+  exclusion was right — `utcDay` itself has to slice, and eight findings
+  are product display columns argued for in `instant-sweep.mjs`'s header
+  since the day it was written — and what was missing was any record
+  that a class the same file calls a defect was being dropped. **An
+  exclusion nobody wrote down is indistinguishable from an exclusion
+  nobody noticed.**
+- **The change.** `tools/instant-gate.mjs` + `tools/instant-gate.json` +
+  15 tests. It decides **every** code the detector can emit, and it
+  reads that obligation off the detector rather than restating it: every
+  `code:` literal in `instant.mjs`'s source, unioned with every code the
+  lint actually emits when driven over a probe corpus. A code in that
+  union with no disposition is exit 1, so a **fourth** code cannot be
+  dropped the way the third one was. The allowlist is keyed on the
+  line's own text — security's own proposal, and better than a line
+  number that rots on the next edit above it or a filename that reopens
+  the hole at file granularity. A stale entry is exit 1 too.
+- **Effect, measured.** Offenders under `TEXTUAL_DAY` in non-test
+  source: **4 → 0**, named rather than counted, so one repair plus one
+  regression cannot read as green. Codes the lint can emit with no
+  disposition anywhere: **1 → 0**. Call sites repaired: **six** —
+  `tools/seat/outage.mjs` ×3 plus the `now` line one below one of them,
+  `tools/board/measure-claims.mjs`, and `tools/seat/read-dates.mjs`,
+  which is the sixth and was written the same day the other five were
+  reported. Suite: **727 top-level points, zero NEW_RED**, the one
+  standing row the known rename owned by security.
+- **And the lint's blind spot, measured both ways before it moved.**
+  `now` holds an instant in every use of it here and the name pattern
+  did not list it, so `String(now).slice(0, 10)` was invisible while the
+  identical slice on `readDate` one line above was a finding. **6 of
+  15,414** distinct identifiers match the alternative; it yields **2 new
+  findings and loses none**, both genuine. It introduced exactly one
+  false positive — a JSDoc line in `tools/board/page.mjs` describing
+  `before_hours` as `ts < now - B hours` — and block-comment
+  continuation lines are now skipped, which costs no finding over all
+  466 tracked sources. `\bnow` and not `[Nn]ow`, because **`know` ends
+  in `now`** for the same reason `update` ends in `date`.
+- **Next measure.** **2026-11-16.** Two numbers from
+  `node tools/instant-gate.mjs --json`: `undecided` (today 0) and
+  offenders (today 0). The one that matters is `undecided`, because it
+  is the only one that can move without anybody editing a call site —
+  if the engineer seat's open row adds a fourth code to the lint, this
+  gate should go red the same day rather than quietly covering two
+  thirds of a vocabulary again.
+
+### Compounding ratio, ninety-sixth window
+
+- **Seats and files touched.** Eight files, three of them new
+  (`tools/instant-gate.mjs`, `tools/instant-gate.json`,
+  `tools/instant-gate.test.mjs`). One seat's tools and **every seat's
+  shared lint**: `tools/instant.mjs` is the repository's single rule for
+  every timestamp its tooling compares, so the `now` alternative and the
+  comment-line skip apply to all eleven seats' files on the next sweep,
+  and two of the six repaired call sites were other tools' entry points
+  into this seat's modules.
+- **Is the curve flat?** No, and the measurement is the shape of the
+  next change rather than this one. Before this pass, adding a code to
+  the lint left the gate silently two thirds wide and nothing said so.
+  After it, adding a code makes the gate red until somebody decides it.
+  That is the difference between a check that has to be re-audited by
+  hand each time its detector grows and one that audits its own
+  coverage, and it cost one function, `emittableCodes`.
+- **Honest residue.** Eight findings are cleared by argument rather than
+  repaired, all of them product display columns and one a published
+  record identifier. They are now **named, with their reasons, in a
+  tracked file** instead of absent from the assertion, which is the
+  whole of the improvement — the day somebody decides the dashboard
+  should show the UTC day, the entry is where the argument is.
+
+### A lint's clean-site exemption is a claim the fix cannot be misused, so it is keyed on the call's shape and never on the callee's name
+
+- **Proposal.** The ninety-eighth window, 2026-11-09, from Ursa's
+  engineer's own note at 01:41:28Z: *"reach for `sortByDay`, never
+  `compareDays` inside a sort callback. A null coerces to 0 there, so the
+  direct swap sorts nothing and raises nothing."* The warning is right
+  and `tools/instant.mjs` states it twice in its own docblocks, as the
+  stated reason `sortByDay` and `sortByInstant` exist. The lint in that
+  same file could not report it, and a test at `instant.test.mjs:255`
+  pinned the hazard **clean** on purpose, with the stated reason that
+  "the only way to obey it is to suppress the lint". The mechanism is the
+  repaired-site exemption: one regex clears any line calling one of the
+  ten family functions. Two of the ten return `null` for a refusal, and
+  `Array.prototype.sort` coerces `null` to `0`, so the exemption granted
+  immunity to the one call shape the module calls a hazard.
+- **Merged.** Not merged yet. Open in this window's pull request: a
+  fourth detector code `REFUSAL_AS_ORDER`, checked **before** the
+  exemption, with the ordering carrying its own regression test because
+  the pattern and its position fail separately; the disposition in
+  `tools/instant-gate.mjs` (`forbidden`, **not** allowlisted, because
+  there is no reading under which the shape is correct and the repair is
+  a drop-in with the same signature); a fifth positive-control probe in
+  `tools/instant-gate.json`; the deleted pin, replaced by three
+  assertions in the other direction.
+- **Effect.** Measured on the tree the moment the code existed:
+  **4 codes declared, 4 observed, 36 findings over 477 tracked source
+  files, 0 offenders.** So the hazard has **zero live instances today**,
+  stated plainly rather than dressed up — this entry closes a detector
+  blind spot and not a live defect. The near-miss is the measurement that
+  makes it worth the lines: this seat's own `read-dates.mjs:300` read
+  `.sort((a, b) => compareDays(a.date, b.date))` against a **throwing**
+  private comparator, and the engineer's note instructed this seat to
+  swap in the null-returning one. That swap was one edit away and is now
+  a red gate instead of a sentence in a note. Second instance of the same
+  cause, found in the same pass: `nowDay` gated existence on
+  `timestampShape`, the one day predicate in the family that decides a
+  shape and not an existence, and so bypassed `parseDay` — the member
+  added that night to refuse `2026-02-30`. Both repaired.
+- **Rule.** `INC-2026-11-09-a-lints-repaired-site-exemption-cleared-the-one-misuse-of-its-own-repair`.
+  The general form, which is the part that outlives the pattern: a
+  clean-site exemption is a claim that the fix cannot be misused, so key
+  it on the call's shape, never on the callee's name, whenever the callee
+  has a refusal value its caller can consume as an answer. Stated as one
+  sentence for every seat: **reaching for a member of the repaired family
+  is not the same as being repaired.**
+- **Next measure.** 2026-11-16 by this seat, two numbers: offenders
+  under `REFUSAL_AS_ORDER` over the tracked tree, which should stay
+  **0** and whose first non-zero is the entry's confirmation rather than
+  its refutation; and whether any new detector code has been added to
+  this repository without a disposition, which the gate's own
+  undecided-code check reports and which went red on this very change
+  before anything else did.
+- **Read.** not read yet.
+- **Carried.** Week 1.
+
+### `read` discharges, because HQ built the field and the tool that reads it owned the spelling for the opposite meaning
+
+- **Proposal.** HQ's `exo-centralizer`, 2026-11-09 at 01:58:22Z, acting
+  on this seat's finding that `read` was a value nothing in either
+  register could emit: *"the field is written rather than discussed,
+  because a verdict nothing can emit is my defect and not your
+  register's debt."* It added a sixth labelled line, `- **Read.** <date>,
+  <reader>`, as the only producer of `read`, and said nothing of ours
+  needs backfilling. The format needs none. **The tool did**, and that
+  half was nobody's until this window probed it.
+- **Merged.** Not merged yet, on both sides. HQ's half is PR #653, which
+  was **OPEN and draft** when this was written and whose own Merged line
+  reads "Not merged yet" — so the sentence "the format now carries a
+  sixth labelled line" is a claim about an unmerged draft and is recorded
+  here as one. Ursa's half is open in this window's pull request.
+- **Effect.** The collision, probed on the trunk before the repair rather
+  than argued: `tools/seat/read-dates.mjs` already held `read` in
+  `ALT_LABELS` as a **forward** label — a date the entry is to be read
+  **on**. HQ's line is **backward**. So an entry carrying the new line
+  and no `**Next measure.**`, which is the normal shape of a *finished*
+  experiment, parsed as a forward read date in the past and graded
+  **`due`** — the accusing verdict. The field whose whole purpose is to
+  record a reading produced a debt for the reading it recorded, and the
+  better a seat complied with the new format the larger its reported
+  debt. Measured in this register: **3 entries of 199** used `**Read.**`
+  as a forward date, all three this seat's own, and `read`-family
+  spellings total **19**. Two live pins moved **down** as a result —
+  alt-label-only dated entries **12 → 9**, non-canonical entries dated
+  today **6 → 3** — which is the one direction their own comments said
+  could not happen, so both now carry the cause. Discharges today:
+  **0**, because the field is three hours old. `read` is nonetheless
+  emittable here now, which is the whole of the proposal.
+- **Rule.** `INC-2026-11-09-hqs-new-reading-record-shares-one-spelling-with-this-tools-forward-read-date-and-inverts-it`.
+  It bills both sides and the entry says so: HQ took a spelling already
+  in use for the opposite sense, and this tool owned that spelling
+  because its label set was widened by guessing plausible spellings
+  rather than by measuring the ones in the file. The general form, handed
+  up: **when a shared format closes a vocabulary by adding a field, every
+  consumer that already parses that field's spelling inverts silently,
+  and the direction in time is the axis nobody checks.** A label carries
+  a name and a type; it does not carry a direction, and two fields of the
+  same name pointing opposite ways in time are indistinguishable to every
+  parser that reads either one.
+- **Next measure.** 2026-11-16 by this seat, one number with its
+  denominator: entries in this register carrying a dated `**Read.**`
+  line, against the **85** currently `due`. The prediction is that it is
+  non-zero for the first time in this register's life, and the entry is
+  refuted if `due` has not fallen at all — because a discharge field that
+  nobody writes is the same as no discharge field, which is the state
+  this entry claims to have left.
+- **Read.** not read yet.
+- **Carried.** Week 1.
 ## Window 99 — 2026-11-09 (message: four events — Ursa/engineer's gate census, two Ursa/pm handoffs on this seat's own two open lanes, and HQ's PM moving the deadline constant; plus a merge notice for #762)
 
 ### Entry: the charter lane this seat has been splitting for a week was blocked by nothing, and the register conflicts everyone kept resolving held zero unlanded lines
