@@ -546,10 +546,15 @@ node --test skills/relevance-sweep.test.mjs
 node --test skills/trigger-coverage.test.mjs
 node --test skills/library-dirs.test.mjs
 node --test skills/grep-dialect.test.mjs
+node --test skills/citing-files.test.mjs
+node --test skills/forge-citations.test.mjs
+node --test skills/tmp-fixture.test.mjs
+node --test skills/bare-refs.test.mjs
 ```
 
-177 tests as of 2026-11-02, which is a dated measurement rather than a
-claim about the suite, for the reason `prompts/skill-extract.md` §5ag
+Eleven suites and 287 tests as of 2026-11-09, which is a dated measurement
+rather than a claim about the suite, for the reason
+`prompts/skill-extract.md` §5ag
 gives about a count with no date on it. The 131 it said on 2026-10-27
 was exact for that date, re-derived here rather than taken on trust, and
 the 46 since are `grep-dialect`'s thirty-two, twelve added to
@@ -684,6 +689,49 @@ the claim into a file a reader would look in. `skills/citing-files.mjs` is the
 one place that answers which files count, shared for the reason
 `source-line.mjs` is shared: two tools disagreeing about scope leave a ref
 half-defended and neither says so. `prompts/skill-extract.md` §5p.
+
+**An identifier written without its brackets is not a receipt and was
+read by nothing.** A bare `E33` in a sentence is on none of the path a tag
+opens: `refsIn` skips it because it is not a tag, `declaredRefs` does not
+know it because it is not frontmatter, and it names no range so it has no
+lock row. `prompts/skill-extract.md` §5t part 1 named that costume for
+register identifiers arriving from outside the library, and this library's
+own namespace is the same costume one directory closer.
+
+```
+node skills/bare-refs.mjs             exit 1 if a bare mention names no ref of its own skill
+node skills/bare-refs.mjs --dir <path>  ... over another skills/ tree
+```
+
+What makes the question answerable is a second surface keyed on the same
+identifier, and `skills/evidence.lock.json` is one: its keys are
+`<slug>/E<n>/<path>:<range>`, so it says which skills hold an identifier
+and what each one points at. The guard cross-tabulates the two, which is
+what turns "there is an `E33` here" into "`E33` is not a ref of this skill
+and three other skills hold one". A mention that resolves in its own skill
+passes, because §5t part 2 says an identifier in prose is a pointer and is
+legitimate once resolved, and it is counted and printed rather than waved
+through, because §5ak says a check that read none of its population and a
+check that found nothing in it print the same thing.
+
+Where it came from, and the measurement it was built on. Ursa's exo seat
+put the general rule on the board on 2026-11-09, about a different
+namespace: a namespace whose gaps are facts cannot be graded from one
+surface at all, because one surface cannot separate nothing happened from
+something happened and wrote elsewhere. Two surfaces keyed on one number
+is the cheapest thing that can, and neither has to be complete, only
+independent. Run here the same day, over 11 skills and 22 markdown bodies
+carrying 651 tag citations, it found 13 bare mentions. Nine resolved. Four
+did not. Every number in this paragraph is what the guard printed on
+2026-11-09 and not a claim about the library now, which is why the command
+above stands beside them: §5af found two of five such counts already wrong
+by the time anyone read them. The four were all on one line of
+`auditing-an-untraced-share/TRIGGER-TEST.md`,
+and they were carrying a claim that three of a sibling's four refs cite
+the same schema lines as this skill's and the fourth cites a range no ref
+of this skill cites at all. From the prose surface alone, all four read as
+ordinary pointers. The repair is in that file and the rule the extract
+prompt still lacks is an open ledger entry.
 
 ## Which directories count
 

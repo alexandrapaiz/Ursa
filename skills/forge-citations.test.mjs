@@ -6,15 +6,15 @@
 // would have caught the defect it was written for.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { fixtureDir } from './tmp-fixture.mjs'
 import { execFileSync } from 'node:child_process'
 import { check, mentions, refreshPlan, resolves, readableOnMain, DECAY_MEDIAN_MINUTES, READABLE_ON_MAIN } from './forge-citations.mjs'
 
 /** A tree in the shape the real scope has: a skills/ directory and the prompt. */
 function tree(files) {
-  const root = mkdtempSync(join(tmpdir(), 'forge-citations-'))
+  const root = fixtureDir('forge-citations-')
   mkdirSync(join(root, 'skills'), { recursive: true })
   mkdirSync(join(root, 'prompts'), { recursive: true })
   for (const [path, body] of Object.entries(files)) {
@@ -54,7 +54,7 @@ const CLOSED = {
  *  Clause 5's whole claim is about the difference between the last two, and
  *  that difference cannot be staged with fixture strings. */
 function repoWithThreeBranches() {
-  const root = mkdtempSync(join(tmpdir(), 'forge-clause5-'))
+  const root = fixtureDir('forge-clause5-')
   const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim()
   git('init', '-q', '-b', 'main')
   git('config', 'user.email', 't@example.invalid')

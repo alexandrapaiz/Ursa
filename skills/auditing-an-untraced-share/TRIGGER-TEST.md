@@ -116,13 +116,32 @@ their no-provenance shares in the same table?"**
 
 Should not fire, and this is the hardest boundary in the library, for a
 reason this test did not know when it was drafted and found with
-`node skills/relevance-sweep.mjs`. The sibling's own trigger says
-"no-provenance shares" in so many words, and its E33, E34, E35 and E37
-already cite the same schema lines this skill's E3, E4, E17 and E18 do.
+`node skills/relevance-sweep.mjs`. The sibling is
+`quoting-a-number-from-an-outcome-record`, whose own trigger says
+"no-provenance shares" in so many words, and three of its refs cite the
+same schema this skill's do: `src/types.ts:483-499` and `501-516`
+against this skill's E3 at `484-501` and E4 at `502-516`, and `712-741`
+against the pair E17 at `712-733` and E18 at `734-741`, which it covers
+exactly. A fourth of that skill's refs is `src/types.ts:772-775`, the
+optional demotion-fate field, and no ref of this skill cites a range
+covering it.
+
 The overlap is real and it is not a boundary: that skill's step 4 and
 judgment item 11 already rule on the DF-cutoff route and on the absent
 optional field, which is why step 0 of this skill defers both instead of
 restating them.
+
+**Ours:** the three paragraph-lines above are a repair, and the shape of
+what they replace is worth keeping. The first draft named those four refs
+by their identifiers in the other skill and said all four cite the same
+schema lines as four of this skill's. Three of them overlap and the
+fourth has no counterpart here, so the correspondence is three to four,
+and the draft was readable as a correct sentence because nothing could
+resolve it. The lowest of those four identifiers names a different range
+in three skills of this library, which is `prompts/skill-extract.md` §5t
+part 1 stated backwards: an identifier in a sentence has no fingerprint
+behind it and here it did not even have a referent.
+`node skills/bare-refs.mjs` is the check that now reads this file.
 
 So the division is narrower than "composition versus denominator". That
 skill rules on one of the seven routes and on what may be written down.

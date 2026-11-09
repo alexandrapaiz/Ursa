@@ -30,9 +30,9 @@
 // reach rather than reporting agreement it did not measure.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { fixtureDir } from './tmp-fixture.mjs'
 import {
   findingsInText, scan, report, summarise, isCallSite, surfacesForText, quotedSpans,
   needleAt, declaresCorpus, waiverOn, CORPUS_HEADER_LINES, CORPUS_MARK, WAIVER_MARK,
@@ -86,7 +86,7 @@ test('both classes on one line are both reported, in line order', () => {
 })
 
 test('scan walks a tree, skips .git, and reads only text extensions', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'grep-dialect-'))
+  const dir = fixtureDir('grep-dialect-')
   mkdirSync(join(dir, '.git'), { recursive: true })
   mkdirSync(join(dir, 'nested'), { recursive: true })
   writeFileSync(join(dir, '.git', 'hook.sh'), "grep -qv x f\n")

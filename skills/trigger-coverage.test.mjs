@@ -963,3 +963,385 @@ test('the amendment explanation names the repair and distinguishes the ones --wr
   assert.doesNotMatch(unreadPointer, /edge of its own vocabulary/)
   assert.deepEqual(explainAmendments([]), [])
 })
+
+// ---------------------------------------------------------------------------
+// The program, run as a program.
+//
+// Everything above imports the module and exercises what it exports. The
+// mutation survey in skills/mutation-audit.md measured what that leaves
+// undefended and the answer was not a low rate: of the sites inside
+// `amendmentsMode` and `main`, the two functions nothing above calls, **zero**
+// were killed. The cause was one command, `grep -c 'execFileSync\|spawnSync'`
+// over this file, which returned 0. So every decision about which defect the
+// gate reports, which report wins when two fire at once, and what exit status
+// it returns was a decision no test could see.
+//
+// The shape is `check-evidence.test.mjs`'s, one directory over: copy the gate
+// and its imports into a temporary library, build a small library beside it,
+// run the real script with `execFileSync` and assert on exit status and output.
+//
+// Why these fixtures and not more of them. The five guards at the bottom of
+// `main` are a precedence ladder — amendments, then spec counts, then body
+// counts, then areas, then stated counts, each written `if (X.length &&
+// !shape)` — and a ladder is not tested by one rung. `&&` to `||` is caught by
+// the green library, because with no defects at all `!shape` is true and every
+// rung fires. Dropping the `!` is caught only by a library carrying that one
+// rung's defect and no shape defect, which is one fixture per rung. The
+// precedence itself, that a shape defect suppresses all five, is its own
+// fixture.
+import { mkdirSync, writeFileSync, copyFileSync, readFileSync, rmSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { join } from 'node:path'
+import { fixtureDir } from './tmp-fixture.mjs'
+
+const GATE = new URL('trigger-coverage.mjs', import.meta.url).pathname
+// The gate imports these two. Adding a third and forgetting this line makes
+// every test below fail at exit 1 with a module resolution error, which reads
+// exactly like the gate reporting a defect; check-evidence.test.mjs carries the
+// same warning for the same reason.
+const GATE_IMPORTS = ['library-dirs.mjs', 'citing-files.mjs']
+  .map((f) => new URL(f, import.meta.url).pathname)
+
+const ALPHA_TRIGGER = 'resolve the alpha thing now'
+const BETA_TRIGGER = 'resolve the beta thing now'
+
+const skillFile = (slug, body = 'A claim [E1].') => `---
+name: ${slug}
+description: Fixture skill ${slug}.
+evidence:
+  - ref: E1
+    what: a fixture line
+    source: src/${slug}.ts:1
+---
+
+${body}
+`
+
+/** One TRIGGER-TEST.md. `counts` overrides what the block declares, so a
+ *  fixture can state a number the library disagrees with; `names` is the slug
+ *  the near miss's prose points at, and omitting it leaves coverage resting on
+ *  resemblance alone, which is the `similarity` arm. */
+function triggerFile(slug, { fire, miss, names, counts = {} }) {
+  const declared = { prompts: 2, 'should-fire': 1, 'near-misses': 1, neighbours: 1, ...counts }
+  const block = Object.entries(declared).map(([k, v]) => `${k}: ${v}`).join('\n')
+  return `# Trigger test — ${slug}
+
+\`\`\`counts
+${block}
+\`\`\`
+
+## should fire
+
+**1. "${fire}"**
+
+Its reasoning.
+
+## should not fire
+
+**2. "${miss}"**
+
+${names ? `This is \`${names}\`'s own trigger.` : 'It asks for different work.'}
+`
+}
+
+/**
+ * A two-skill library in a temporary directory, with the real gate copied in
+ * beside it so `SKILLS_DIR` resolves to the fixture.
+ *
+ * Defaults are green: both skills quote the sibling's trigger verbatim and name
+ * its slug, so every pair is covered by both signals and every count agrees.
+ * Each option turns exactly one thing red.
+ */
+function library(opts = {}) {
+  const dir = fixtureDir('trigger-coverage-')
+  mkdirSync(join(dir, 'skills'), { recursive: true })
+  mkdirSync(join(dir, 'prompts'), { recursive: true })
+  copyFileSync(GATE, join(dir, 'skills', 'trigger-coverage.mjs'))
+  for (const f of GATE_IMPORTS) copyFileSync(f, join(dir, 'skills', f.split('/').pop()))
+
+  const bodies = opts.bodies ?? {}
+  for (const slug of ['alpha', 'beta']) {
+    mkdirSync(join(dir, 'skills', slug), { recursive: true })
+    writeFileSync(join(dir, 'skills', slug, 'SKILL.md'), skillFile(slug, bodies[slug]))
+  }
+  if (!(opts.drop ?? []).includes('alpha'))
+    writeFileSync(join(dir, 'skills', 'alpha', 'TRIGGER-TEST.md'), triggerFile('alpha', {
+      fire: ALPHA_TRIGGER,
+      miss: opts.alphaGap || opts.alphaArguedOnly ? 'something else entirely' : BETA_TRIGGER,
+      names: opts.alphaGap || opts.similarityOnly ? null : 'beta',
+      counts: (opts.counts ?? {}).alpha ?? {},
+    }))
+  if (!(opts.drop ?? []).includes('beta'))
+    writeFileSync(join(dir, 'skills', 'beta', 'TRIGGER-TEST.md'), triggerFile('beta', {
+      fire: BETA_TRIGGER,
+      miss: opts.betaGap ? 'something else entirely' : ALPHA_TRIGGER,
+      names: opts.betaGap ? null : 'alpha',
+      counts: (opts.counts ?? {}).beta ?? {},
+    }))
+  for (const extra of opts.extraDirs ?? []) mkdirSync(join(dir, 'skills', extra), { recursive: true })
+
+  const rows = opts.rows ?? [['alpha', 'alpha', 1], ['beta', 'beta', 1]]
+  const block = opts.indexCounts === null ? ''
+    : '```counts\n' + Object.entries(opts.indexCounts ?? { skills: 2 })
+      .map(([k, v]) => `${k}: ${v}`).join('\n') + '\n```\n\n'
+  const areas = opts.areas
+    ? `## ${opts.areas.heading} areas, and the edges between them\n\n` +
+      Array.from({ length: opts.areas.labels }, (_, i) =>
+        `**The ${'abcdefgh'[i]} area.** One area of this fixture.`).join('\n\n') + '\n\n'
+    : ''
+  writeFileSync(join(dir, 'skills', 'README.md'), `# skills/
+
+${block}${areas}## The library
+
+| Skill | What it decides | Refs | Status |
+|---|---|---|---|
+${rows.map(([label, target, refs]) =>
+  `| [${label}](${target}/SKILL.md) | the ${label} thing | ${refs} | draft |`).join('\n')}
+`)
+  writeFileSync(join(dir, 'prompts', 'skill-extract.md'), opts.spec ?? `# The extract prompt
+
+## 5. A section
+
+Its body.
+`)
+  return dir
+}
+
+const run = (dir, ...args) => {
+  try {
+    return { status: 0, out: execFileSync(process.execPath,
+      [join(dir, 'skills', 'trigger-coverage.mjs'), ...args], { cwd: dir, encoding: 'utf8' }) }
+  } catch (e) {
+    return { status: e.status, out: (e.stdout ?? '') + (e.stderr ?? '') }
+  }
+}
+
+test('a green library exits 0 and says so, which is the case every rung of the ladder can break', () => {
+  const r = run(library())
+  assert.equal(r.status, 0, r.out)
+  assert.match(r.out, /every skill meets §5c/)
+  // Each of these is a line the gate must NOT print on a library with nothing
+  // wrong, and each is one mutant's whole observable effect. `&&` to `||` in
+  // any of the five bottom guards prints the guard's own summary here, because
+  // with no shape defect `!shape` is true on its own.
+  assert.match(r.out, /2 carry the sibling's own trigger prompt, which is what §5c asks \(100%\)/)
+  assert.match(r.out, /0 argue the boundary in prose without it/)
+  assert.match(r.out, /0 untested/)
+  assert.doesNotMatch(r.out, /no TRIGGER-TEST\.md/)
+  assert.doesNotMatch(r.out, /untested:/)
+  assert.doesNotMatch(r.out, /argued but not with the sibling's own prompt/)
+  assert.doesNotMatch(r.out, /library-shape defect/)
+  assert.doesNotMatch(r.out, /stated count/)
+  assert.doesNotMatch(r.out, /disagree/)
+  assert.doesNotMatch(r.out, /counts the library/)
+  assert.doesNotMatch(r.out, /area count/)
+  assert.doesNotMatch(r.out, /name .*amendments/)
+  for (const slug of ['alpha', 'beta'])
+    assert.match(r.out, new RegExp(`^  ${slug}\\n    1 should fire, 1 near misses, 1/1 sibling boundaries covered$`, 'm'))
+})
+
+test('the gate runs when invoked, which is the entry guard and not a detail', () => {
+  // `import.meta.url === file://${process.argv[1]}` is the one site here whose
+  // failure mode is silence: inverted, the program loads, calls nothing, and
+  // exits 0 with no output, which every status assertion above would pass.
+  const r = run(library())
+  assert.notEqual(r.out.trim(), '', 'the program printed nothing, so main never ran')
+})
+
+test('a §5c gap is a report without --check and an exit status with it', () => {
+  // The bottom guard, `gaps.length === 0 && missingTrigger.length === 0`, is
+  // three sites in one line and the `&&` is the one a green library cannot
+  // reach: with no gaps both halves are true and `||` agrees. Here the left
+  // half is false and the right is true, so `||` enters the clean branch and
+  // declares a library with an untested boundary compliant.
+  const dir = library({ betaGap: true })
+  const open = run(dir)
+  assert.equal(open.status, 0, open.out)
+  assert.doesNotMatch(open.out, /every skill meets §5c/)
+  assert.match(open.out, /1 untested/)
+  assert.match(open.out, /§5c asks one near miss per adjacent skill/)
+  assert.equal(run(dir, '--check').status, 1, 'with --check a gap is an exit status')
+})
+
+test('each skill is scored on its own pairs, which asymmetric coverage is the only way to see', () => {
+  // `pairs.filter((p) => p.skill === s.slug)` inverted hands every skill its
+  // siblings' pairs. In a symmetric library that is invisible, because both
+  // skills score the same either way. Here alpha covers beta and beta does
+  // not cover alpha, so the two blocks differ and the swap shows up in both.
+  const r = run(library({ betaGap: true }))
+  assert.match(r.out, /^ {2}alpha\n {4}1 should fire, 1 near misses, 1\/1 sibling boundaries covered$/m)
+  assert.match(r.out, /^! beta\n {4}1 should fire, 1 near misses, 0\/1 sibling boundaries covered\n {4}untested: alpha$/m)
+})
+
+test('a boundary argued in prose without the sibling\'s words is its own third state', () => {
+  // Three states and not two, which is the comment in `main` above the
+  // classification. `declared` alone is the one that reads as covered in the
+  // per-skill block and is not what §5c asks for, so it carries the `~` flag
+  // and its own line, and `--pairs` marks it as paraphrased.
+  const dir = library({ alphaArguedOnly: true })
+  const plain = run(dir)
+  assert.equal(plain.status, 0, plain.out)
+  assert.match(plain.out, /^~ alpha$/m)
+  assert.match(plain.out, /argued but not with the sibling's own prompt: beta \(near miss 2, 0\.00\)/)
+  assert.match(plain.out, /1 carry the sibling's own trigger prompt, which is what §5c asks \(50%\)/)
+  assert.match(plain.out, /1 argue the boundary in prose without it/)
+  assert.match(plain.out, /0 untested/)
+  const pairs = run(dir, '--pairs')
+  assert.match(pairs.out, /declared\s+alpha <- beta\s+\[declared in near miss 2, paraphrased\]/)
+  assert.doesNotMatch(pairs.out, /both\s+alpha <- beta/)
+})
+
+test('a near miss that quotes the sibling without naming it still counts, and --pairs says which signal', () => {
+  // The `similarity` arm. It is a separate value from `both` and the counting
+  // line adds the two, so the second half of `p.via === 'both' || p.via ===
+  // 'similarity'` is only observable where one pair has each.
+  const r = run(library({ similarityOnly: true }), '--pairs')
+  assert.equal(r.status, 0, r.out)
+  assert.match(r.out, /similarity alpha <- beta/)
+  assert.match(r.out, /both\s+beta <- alpha/)
+  assert.match(r.out, /2 carry the sibling's own trigger prompt, which is what §5c asks \(100%\)/)
+})
+
+test('a skill with no trigger test is listed rather than scored', () => {
+  const r = run(library({ drop: ['beta'] }))
+  assert.match(r.out, /^no TRIGGER-TEST\.md: beta$/m)
+  assert.match(r.out, /A skill with no TRIGGER-TEST\.md has no boundary to measure/)
+  // Inverting `s.trigger === null` reports every skill that has one, so the
+  // assertion that matters is which slug is named and not that a line exists.
+  assert.doesNotMatch(r.out, /^no TRIGGER-TEST\.md: alpha$/m)
+})
+
+// --- the precedence ladder at the bottom of main ------------------------------
+//
+// Five guards, each `if (X.length && !shape)`, then the shape report, then the
+// §5c verdict. One fixture per rung, carrying that rung's defect and no shape
+// defect, because that is the only state where dropping the `!` changes the
+// exit status: the rung is skipped, nothing below it fires, and a library with
+// a real defect exits 0.
+
+test('a stale count in a trigger test exits 1 and names the file it is stated in', () => {
+  const r = run(library({ counts: { alpha: { prompts: 9 } } }))
+  assert.equal(r.status, 1, r.out)
+  assert.match(r.out, /^skills\/alpha\/TRIGGER-TEST\.md says prompts 9, the library says 2$/m)
+  assert.match(r.out, /1 stated count disagrees with the library/)
+})
+
+test('the index states counts for two different subjects, and each prints its own location', () => {
+  // `d.file !== 'skills/README.md' ? d.file : d.slug === 'the library' ? ...`
+  // is one expression deciding between three locations, and a fixture that
+  // only ever hits one of them grades none of it. The index is one file
+  // holding many rows, so its path alone does not say which row is wrong.
+  const refs = run(library({ rows: [['alpha', 'alpha', 7], ['beta', 'beta', 1]] }))
+  assert.equal(refs.status, 1, refs.out)
+  assert.match(refs.out, /^skills\/README\.md row alpha says refs 7, the library says 1$/m)
+
+  const block = run(library({ indexCounts: null }))
+  assert.equal(block.status, 1, block.out)
+  assert.match(block.out,
+    /^skills\/README\.md counts block declares no counts block, so nothing checks what it says about itself$/m)
+  // The other arm of `d.key === 'counts block'` is the "says X, the library
+  // says Y" sentence, which is false of a block that does not exist.
+  assert.doesNotMatch(block.out, /says counts block/)
+})
+
+test('an area count that disagrees and an ordinal that cannot be read are different findings', () => {
+  const wrong = run(library({ areas: { heading: 'Nine', labels: 2 } }))
+  assert.equal(wrong.status, 1, wrong.out)
+  assert.match(wrong.out, /^skills\/README\.md:\d+ says "## Nine areas", the labelled areas number 2$/m)
+  assert.doesNotMatch(wrong.out, /cannot read that ordinal/)
+
+  const unreadable = run(library({ areas: { heading: 'Umpteen', labels: 2 } }))
+  assert.equal(unreadable.status, 1, unreadable.out)
+  assert.match(unreadable.out,
+    /^skills\/README\.md:\d+ says "## Umpteen areas" and this guard cannot read that ordinal, so the 2 labelled areas below it are unchecked$/m)
+  assert.doesNotMatch(unreadable.out, /the labelled areas number/)
+})
+
+test('a skill body that counts the library exits 1', () => {
+  const r = run(library({ bodies: { alpha: 'This skill sits across two skills.' } }))
+  assert.equal(r.status, 1, r.out)
+  assert.match(r.out, /^skills\/alpha\/SKILL\.md:\d+ counts the library instead of naming it \(two\)/m)
+  assert.match(r.out, /1 skill body paragraph counts the library/)
+})
+
+test('a neighbour count in the spec file that disagrees with the library exits 1', () => {
+  const r = run(library({ spec: '# The extract prompt\n\n## 5. A section\n\n' +
+    '`alpha` has two neighbours, so the budget is two.\n' }))
+  assert.equal(r.status, 1, r.out)
+  assert.match(r.out, /^prompts\/skill-extract\.md:\d+ says "`alpha` has two neighbours", the library says 1$/m)
+  assert.match(r.out, /1 neighbour count in prompts\/skill-extract\.md disagrees with the library/)
+})
+
+const AMENDED_SPEC = '# The extract prompt\n\n## 5. A section\n\nIts body.\n\n' +
+  '## 5b. A later one\n\n(Added 2026-11-09, amending §5.)\n\nIts body.\n'
+
+test('an amended section that does not name its amendments exits 1', () => {
+  const r = run(library({ spec: AMENDED_SPEC }))
+  assert.equal(r.status, 1, r.out)
+  assert.match(r.out, /^prompts\/skill-extract\.md:\d+ missing: §5 is amended by §5b/m)
+  assert.match(r.out, /1 amended section in prompts\/skill-extract\.md does not name its amendments/)
+})
+
+test('a library-shape defect suppresses all five, which is what the && !shape guards are for', () => {
+  // The precedence, stated as an exit path rather than as an ordering. A
+  // directory with no SKILL.md is unguarded rather than merely unlisted, so it
+  // is the repair to make first, and a stale count printed with its own
+  // explanation underneath would bury it. Both findings are still listed; only
+  // the explanation and the return belong to the shape defect.
+  const r = run(library({ extraDirs: ['gamma'], counts: { alpha: { prompts: 9 } } }))
+  assert.equal(r.status, 1, r.out)
+  assert.match(r.out, /^no SKILL\.md: gamma — nothing in this library reads this directory$/m)
+  assert.match(r.out, /^skills\/alpha\/TRIGGER-TEST\.md says prompts 9, the library says 2$/m)
+  assert.match(r.out, /1 library-shape defect: 1 unread, 0 unlisted, 0 dangling index rows, 0 mislabelled/)
+  assert.match(r.out, /Repair this one first/)
+  assert.doesNotMatch(r.out, /1 stated count disagrees with the library/)
+  assert.doesNotMatch(r.out, /the repair is to copy\s*\n?them in/)
+})
+
+// --- --amendments, which is its own mode and reads no library ----------------
+
+test('--amendments prints the graph and clears a spec with nothing to repair', () => {
+  const r = run(library(), '--amendments')
+  assert.equal(r.status, 0, r.out)
+  assert.match(r.out, /^amendment graph over 1 sections, 0 of them carrying a dated note, 0 of those declaring an amendment, 0 edges:$/m)
+  assert.match(r.out, /every amended section names its amendments/)
+  // The clean verdict names the vocabulary it searched with, because an
+  // absence is a fact about a vocabulary until the vocabulary is printed.
+  assert.match(r.out, /read with 3 inflections of "amend"/)
+  // And it reads no library at all, which is why it is a mode and not a flag.
+  assert.doesNotMatch(r.out, /sibling boundaries covered/)
+})
+
+test('--amendments reports the edge and the section that does not carry it', () => {
+  const r = run(library({ spec: AMENDED_SPEC }), '--amendments')
+  assert.equal(r.status, 1, r.out)
+  assert.match(r.out, /^ {2}§5b:\d+ amends §5$/m)
+  assert.match(r.out, /missing: §5 is amended by §5b/)
+  assert.match(r.out, /--amendments --write/)
+})
+
+test('--amendments --write writes the back pointer and grades what it wrote', () => {
+  // Two sites in one line. `if (text !== specText) writeFileSync(...)`
+  // inverted writes when there is nothing to write and skips when there is,
+  // so the assertion has to be on the file and not on the exit status. And
+  // the defects below are re-read from the written text rather than the
+  // loaded text, which is why a clean --write exits 0 instead of printing the
+  // seven failures it has just repaired.
+  const dir = library({ spec: AMENDED_SPEC })
+  const r = run(dir, '--amendments', '--write')
+  assert.equal(r.status, 0, r.out)
+  const after = readFileSync(join(dir, 'prompts', 'skill-extract.md'), 'utf8')
+  assert.match(after, /^## 5\. A section\n\n\(Amended by §5b\. Generated line, per §5ah\.\)\n\nIts body\.$/m)
+  assert.match(r.out, /1 section carry a generated back pointer, written/)
+  assert.match(r.out, /every amended section names its amendments/)
+  assert.doesNotMatch(r.out, /missing: §5 is amended by/)
+})
+
+test('--amendments says so when the spec is not in the clone, rather than printing an empty graph', () => {
+  const dir = library()
+  rmSync(join(dir, 'prompts', 'skill-extract.md'))
+  const r = run(dir, '--amendments')
+  assert.equal(r.status, 1, r.out)
+  assert.match(r.out, /^prompts\/skill-extract\.md is not readable from this clone, so there is no graph to print$/m)
+  assert.doesNotMatch(r.out, /amendment graph over/)
+})
