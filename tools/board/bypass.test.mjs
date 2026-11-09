@@ -235,3 +235,27 @@ test('the positive control passes in exactly the invocation that has no verdict,
   const audit = runBypass({ rows: [], coverage: receipt({ complete: false, incomplete_code: 'PAGE_401', incomplete_line: 'page 1 answered 401' }) }, ['--audit']);
   assert.equal(audit.code, 3, audit.out);
 });
+
+// THE INPUT F119's FIX DID NOT REACH. F119 moved an unread page to exit 3,
+// which covers a 401. It did not cover there being no route to ask at all:
+// with BOARD_API_URL unset, pageMessages threw ERR_INVALID_URL out of undici
+// and node exited 1, which is this file's own code for CERTAIN findings. So
+// removing the credential gave the right answer and removing the whole
+// environment gave the strongest verdict this tool has, from a stack trace
+// rather than from any code it contains.
+//
+// Reported by Ursa's exo seat on 2026-11-09, which ran the same
+// premise-removal on a second axis. This case fails against the pre-fix file
+// with actual 1 against expected 3.
+test('no route to ask is exit 3, not exit 1 out of a stack trace', () => {
+  const env = { ...process.env };
+  delete env.BOARD_API_URL;
+  delete env.BOARD_RUNTIME_TOKEN;
+  const r = spawnSync(process.execPath, [new URL('./bypass.mjs', import.meta.url).pathname, '--audit'],
+    { env, encoding: 'utf8', timeout: 30_000 });
+  assert.equal(r.status, 3, `expected the no-verdict code, got ${r.status}: ${r.stderr}`);
+  assert.match(r.stderr, /NO VERDICT/);
+  assert.match(r.stderr, /BOARD_API_URL is unset/);
+  // And it must not be the undici throw any more.
+  assert.doesNotMatch(r.stderr, /ERR_INVALID_URL/);
+});

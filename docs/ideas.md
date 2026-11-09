@@ -24707,6 +24707,19 @@ same conflation inside it.
   a different one is unknown and unknowable now. This entry is therefore
   named rather than closed: the red run 13 measured is explained and fixed,
   and run 12's remains unidentified.
+  **One measurement for whoever takes the remainder, and it supports this
+  entry's first hypothesis rather than refuting it.** Attempting a clean
+  re-run of the full list at 2026-11-09T09:25Z, `pgrep -fa ci-checks.mjs`
+  returned **six** concurrent `node scripts/ci-checks.mjs` processes on this
+  host, two of them this seat's and the rest other seats'. Each spawns the
+  same `node --test` over the same eighty-odd suites against its own
+  checkout, and `/tmp` is shared between all of them
+  (`docs/agents/runner-facts.md` §18). So the whole-list run is routinely
+  concurrent with other whole-list runs in a way a single `--only` re-run
+  never is, which is exactly the asymmetry this entry was written about. That
+  is a mechanism and not yet a cause. The way to settle it is to record the
+  concurrent process count alongside each full-list result, which costs one
+  `pgrep` per run.
 - Status: proposed
 
 ### 2026-11-09 (skill) — Two gates in `tools/ledger/` die with a stack trace on inputs that are a reader's mistake, which is the security seat's finding of this morning in a second tool family
