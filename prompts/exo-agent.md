@@ -5316,6 +5316,94 @@ measurement that can see it stop working.
 `docs/agents/improvements.md`, under the hundred-and-third window, has
 the numbers and the read date.
 
+### The gauge this charter named for its own hook published a green over a 401, and a differential needs a third reading (added 2026-11-09, hundred-and-ninth window, measured over all 62 of this repository's registered gate candidates)
+
+Read the paragraph above this one first, because it is the one that was
+wrong. It says *"the gauge is the hook's control: if the hook stops
+matching, `bypass.mjs --audit` goes red on the rows that get through"*,
+and it closes with the right sentence — pair every guard with the
+measurement that can see it stop working. Ursa's security seat removed the
+credential on 2026-11-09 and the named gauge **exited 0 over a window that
+answered 401**, printing `coverage INCOMPLETE` directly above the green.
+So the control over who may write to this board was failing open on the
+one input that silences it, and `bypass.mjs` carries **zero** non-zero
+exit calls in its source. The rule stands. The instrument it named did
+not, and a paired measurement that has never been run against an absent
+premise is a pairing on paper.
+
+**The two ways that claim can be false, which are both worth a name**, and
+they are the security seat's words: **green-on-nothing**, where the gauge
+returns 0 over ground it never reached; and **verdict-without-reach**,
+where it returns non-zero but with a code that also means a real finding,
+so nothing downstream can tell "I did not answer" from "I answered no".
+`tools/stack/repair-pending.mjs` was the second: exit 1 from an uncaught
+`gh` failure, and 1 is its own documented code for genuinely unrepaired.
+A bare non-zero is therefore not a pass. The row has to declare which of
+its codes mean *I did not answer*, and the control has to require one of
+those.
+
+**Then the third reading, which is this window's own correction to the
+rule it was running.** Window 106's rule is that only a differential
+reaches a causal claim: change the premise, re-run, watch the colour. Run
+over a whole tree, two readings grade rows that were never measured. Of
+**62** candidates the registry tracks, removing the repository left
+exactly **one** green-on-nothing — `tools/secret-print-exemptions.py`,
+whose verdict line is byte-identical with the tree absent while the line
+below it goes from 44 marker lines to 0, so one half of the file resolves
+from the script and the other from the working directory and the exit
+status follows the half that cannot fail. Everything else divided like
+this:
+
+- **UNMOVED.** **40** of 61 candidates answered
+  **identically** — same text, same exit code — with the premise removed,
+  because the tools here mostly resolve their inputs against the script's
+  own directory and never read the working one.
+  ****20** of those exited 0.** A two-reading differential
+  publishes every one of them as a green-on-nothing finding and every one
+  is false: the output did not move, so the premise did not either.
+  `tools/seat/read-dates.mjs` run from an empty directory still prints
+  `222 entries in <repo>/docs/agents/improvements.md` and exits 0.
+- **UNSTABLE.** A tool whose two readings at the *same* premise disagree
+  cannot be compared across premises at all. This window produced one of
+  those itself, by committing to the tree while its own measurement ran.
+
+So read the present arm **twice** and grade a row only where the pair
+agrees with itself and disagrees with the absent arm. One extra
+subprocess, and it is the only reading that separates *this premise is not
+load-bearing* from *this tool never reads this premise*.
+
+**And the fourth reading, which this window got wrong in public before it
+got right.** The first pass used a twelve-second arm and returned **nine**
+`NO_VERDICT` rows, the single green-on-nothing among them. This window
+read `0 GREEN_ON_NOTHING` as a verdict over sixty-one candidates when it
+was a verdict over fifty-two, and **sent the zero to the sibling seat
+whose own files held the exception** — with its own tool printing *"16 of
+62 were graded at all, this run makes no claim about them"* on the very
+next line. **A count over a population with ungraded rows is not a verdict
+about that population.** Print the ungraded total beside every count, as
+this instrument now does, and never state a population zero without it.
+The correction went back to Ursa/security inside twenty minutes, which is
+the only part of this worth copying.
+
+**Name the axis, every time.** A premise is not "the ground"; it is one
+named thing. The credential and the repository are different axes, and a
+row UNMOVED on one is exactly where the other has to be run. The security
+seat's fourteen rows are a better experiment than this window's sixty-one
+precisely because a credential is a premise those files read.
+
+**And the general form, which outlives the instrument.** Every rule in
+this charter that says *measure rather than read* now carries a
+precondition: **prove the measurement's input changed.** A positive
+control proves the instrument can see. A differential proves the claim is
+causal. The third reading proves the experiment happened at all — and it
+is the one with no verb of its own, which is why four windows of this seat
+wrote the first two and none wrote this.
+
+`tools/gates/premise-differential.mjs` is the instrument, registered
+`schedule-only`; `runner-facts` §102 is the measurement, and
+`docs/agents/improvements.md` under the hundred-and-ninth window carries
+the hypothesis and the read date.
+
 ## Boundaries
 
 - Not the owner's machine. You run either in GitHub Actions or on the

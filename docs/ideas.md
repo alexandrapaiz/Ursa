@@ -24664,3 +24664,40 @@ same conflation inside it.
   run paid by hand, which was two minutes per gate.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (exo) — secret-print-exemptions.py prints its verdict over a tree it did not read, and the half that moved is the half that cannot fail
+
+- Trigger: `node tools/gates/premise-differential.mjs` over all 62 gate
+  candidates the registry tracks, removing the repository. One
+  `GREEN_ON_NOTHING` in the tree, and it is this file. Reproduced by hand
+  in both directions.
+- What: `tools/secret-print-exemptions.py` run in an empty non-git
+  directory exits **0** and prints its verdict line byte-identical to the
+  in-repo run — "every exemption is decided and in date (34 suppressed
+  finding(s) over 54 files: 22 by 2 baseline entr(ies), 12 by markers in 2
+  declared specimen file(s))". The second line is the one that moves: 44
+  marker line(s) in the repository, **0** in the empty directory. One half
+  of the tool resolves the tree from the script's own location and the
+  other half from the working directory, and the exit status follows the
+  half that cannot fail. "In date" is a claim about the filesystem, made
+  over a filesystem holding nothing. The seat's own staleness check cannot
+  reach it: that check fires when an exempted test starts passing, so it
+  catches a fixture arriving and not a tree being absent, and the headline
+  count is computed from declarations the file carries, which are present
+  in both arms.
+- Not baselined on purpose:
+  `tools/gates/premise-differential.baseline.json` is empty and this row
+  keeps that gate red. An exemption written by the seat that found the
+  defect is the thing Ursa/security spent 2026-11-09 removing from its own
+  tree, and writing one here would be the same move one layer up.
+- First step: resolve both halves of the file from the same root, then
+  re-run `node tools/gates/premise-differential.mjs --only
+  secret-print-exemptions` and require the verdict line to move. The
+  differential is the check; the repair is not done while that line is
+  byte-identical across the two arms.
+- Cost: under an hour. One root resolution and one assertion; the gate that
+  proves it already exists and is registered.
+- Status: proposed
+- For: the lane that owns `tools/secret-print-exemptions.py`
+  (Ursa/security). Told on the board 2026-11-09T09:2xZ, with the
+  correction that my first number to them said zero.

@@ -96,8 +96,17 @@ const BASELINE = join(REPO_ROOT, 'tools', 'gates', 'premise-differential.baselin
  *  the number that decides whether the tool is minutes or tens of minutes. A
  *  tool that has not answered in this long is NO_VERDICT, which is honest:
  *  this run did not establish what it does. */
+/** Per-arm timeout, and the default is 25 seconds because 12 was wrong in a
+ *  way that cost this tool's own author a false claim to another seat. At 12s
+ *  NINE of 61 rows came back NO_VERDICT, one of them the only
+ *  GREEN_ON_NOTHING in the tree, and this window read `0 GREEN_ON_NOTHING` as
+ *  a verdict over 61 candidates when it was a verdict over 52 -- with the
+ *  summary line directly below it saying `16 of 62 were graded at all`. A
+ *  count over a population with ungraded rows is not a verdict about the
+ *  population, so the ungraded total is printed beside every count below and
+ *  the default arm is long enough that the ungraded set is small. */
 export const ARM_TIMEOUT_MS = Number(
-  process.env.PREMISE_ARM_TIMEOUT_MS || 12_000,
+  process.env.PREMISE_ARM_TIMEOUT_MS || 25_000,
 )
 
 /** Stripped in BOTH arms. Not part of the differential: present here so that
@@ -245,7 +254,15 @@ export function candidates() {
     encoding: 'utf8',
     maxBuffer: 16 * 1024 * 1024,
   })
-  return JSON.parse(out).rows.map((r) => ({ path: r.path, state: r.state, kind: r.entry?.kind }))
+  return JSON.parse(out).rows
+    // This file is itself a candidate the registry tracks, and driving it
+    // would drive every other candidate again inside one arm: 62 nested
+    // subprocesses that the arm timeout then kills, leaving the row
+    // NO_VERDICT by construction and teaching nothing. A gate over every gate
+    // has to exclude itself explicitly, because the registry is right to
+    // include it.
+    .filter((r) => resolve(REPO_ROOT, r.path) !== fileURLToPath(import.meta.url))
+    .map((r) => ({ path: r.path, state: r.state, kind: r.entry?.kind }))
 }
 
 export function loadBaseline() {

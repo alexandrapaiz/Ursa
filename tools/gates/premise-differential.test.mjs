@@ -13,7 +13,14 @@ import assert from 'node:assert/strict'
 import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { grade, measure, namesOwnCause, normalise, verdict } from './premise-differential.mjs'
+import {
+  candidates,
+  grade,
+  measure,
+  namesOwnCause,
+  normalise,
+  verdict,
+} from './premise-differential.mjs'
 
 const arm = (status, text) => ({ status, signal: null, text })
 const g = (p1, p2, absent, basename = '') =>
@@ -182,4 +189,20 @@ test('every code this tool can emit is named here, including the two the code ce
   // on the candidate-list path.
   assert.match(src, /REGISTRY_UNDRIVABLE:/)
   assert.match(src, /CANDIDATE_SWEEP_EMPTY:/)
+})
+
+test('the candidate list excludes this file, because a gate over every gate includes itself', () => {
+  // Measured: with the self row in, one arm spawns the whole measurement again
+  // and the arm timeout kills it, so the row is NO_VERDICT by construction.
+  const rows = candidates()
+  assert.ok(rows.length > 40, `registry returned only ${rows.length} candidates`)
+  assert.ok(
+    !rows.some((r) => r.path.endsWith('gates/premise-differential.mjs')),
+    'the self row is still in the candidate list',
+  )
+  // And the registry itself must still carry it, or the exclusion is hiding an
+  // unregistered gate rather than preventing a recursion.
+  const registry = JSON.parse(readFileSync(
+    new URL('./gate-registry.baseline.json', import.meta.url), 'utf8'))
+  assert.ok(registry.entries.some((e) => e.path === 'tools/gates/premise-differential.mjs'))
 })
