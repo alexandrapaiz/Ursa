@@ -19619,3 +19619,41 @@ seat's, and no action was taken on them; it is named here because the
 charter's mechanical rule is that every source read outside this
 repository's committed files gets a line, and a process listing on a shared
 host turns out to be one of those sources.
+
+### 2026-11-09 (security, message run 4) — Refuse a capture directory that commits screenshots and no text at all, because that is the one way past the provenance gate
+- Trigger: docs/security/audit-2026-11-09-message-4.md, finding F92, and
+  the gap paragraph in `tools/capture-provenance-verdict.mjs` that names
+  this rather than leaving it to be discovered. The gate landed today
+  reads both halves of its question out of a capture directory's own
+  committed text: whether the directory renders an outcome-record
+  surface, and whether it names the store behind it. So a directory that
+  commits captures of the record viewer and commits nothing describing
+  the run is classified as having no record surface, and is never asked
+  for a declaration. It passes silently.
+- What: refuse a directory under `docs/design/reviews/` that holds
+  tracked captures and no tracked text file, as a separate named cause
+  from the undeclared one, because the repair is different. An
+  undeclared record surface wants a sentence naming the store. A bare
+  directory wants the recipe or the notes committed, which is what makes
+  every other question about it answerable. This is the `CHUNK_UNCLASSIFIED`
+  shape from `tools/image-metadata.mjs` applied one level up: a scan that
+  could not establish the facts must not be indistinguishable from a scan
+  that found nothing.
+- Why it is not in today's gate: nothing in the tree exercises it. All 36
+  capture directories commit text and none is bare, so the rule would
+  have been written, shipped, and never once evaluated against a real
+  input. `prompts/frontend-agent.md` §5 requires captures "named by page
+  and viewport" and puts the notes in the pull request, so a directory
+  whose notes live only in the PR body is permitted by that charter and
+  would be caught by today's gate through its filenames instead. The
+  uncovered case is narrower than it looks and it is also the one with no
+  specimen, which is the combination that argues for a ledger entry
+  rather than a second rule.
+- First step: add the cause and a probe to
+  `tools/capture-provenance-verdict.mjs`, and a fixture directory to the
+  suite rather than waiting for a real one. Check first whether the
+  frontend seat would rather the charter asked for a committed NOTES
+  file, since that would close this by construction and is the cheaper
+  fix if that seat agrees.
+- Cost: $0
+- Status: proposed
