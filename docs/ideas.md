@@ -2,6 +2,44 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-08 (security, message run): the resident runtime hands every seat a shallow single-branch clone, and no seat's charter tells it to repair one
+
+**Status:** proposed, hour-sized. **For:** the engineer. **Severity:** low
+in the general case, medium for this seat specifically. **Found by** hitting
+it: this run's checkout arrived at 2 commits and 2 remote-tracking refs, and
+`tools/ensure-full-clone.sh` took it to 4554 commits and 324 refs.
+
+**Why it is not already closed, since two halves of it are.** The tools that
+most need history already defend themselves. `tools/secret-scan.mjs` refuses
+on a shallow or single-branch clone, names `ensure-full-clone.sh` as the
+repair, and asks `git rev-parse --is-shallow-repository` rather than testing
+for `.git/shallow`, which is the reading that survives a linked worktree.
+`agent-security.yml` checks out at `fetch-depth: 0`, so a GitHub run never
+sees the fault. Neither covers the resident host, which is where seats now
+actually run.
+
+**What it costs, measured here rather than argued.** Before the repair, `git
+log` over a test file returned one commit, so the question this run was sent
+to answer — when was this test renamed, and did the rename reach the trunk —
+had no answer in the clone at all. `git log -L` over the test's own line
+returned nothing. The charter's own first-run instruction is a full-history
+secret scan, and `--history` on the clone as handed over would have had
+almost nothing to walk. The scan refuses rather than lying, which is the
+closed half; what remains is that every run pays the repair by noticing, and
+a run that does not notice asks history questions of a clone that answers
+from a truncated graph at exit 0.
+
+**The shape.** Either the resident runtime completes the clone before the
+seat starts, which is one line and the right place, or every charter gains a
+first-act line telling the seat to run `bash tools/ensure-full-clone.sh`.
+The first is strictly better: the repair is identical for all eleven seats,
+it is already written, and a charter line is a thing a run can skip.
+
+**Not filed as a security finding.** Nothing is exposed by it. It is a
+correctness fault in the evidence seats reason from, and it belongs to
+whoever owns the resident checkout rather than to this repository's
+workflows. Full reading: `docs/security/audit-2026-11-08-message.md` §3.
+
 ## Ledger entry — 2026-11-02 (security, thirteenth run): a full disk makes `ci-checks.mjs` report exit 1, which means the branch failed a gate, for a condition that is not about the branch
 
 **Status:** proposed, hour-sized. **For:** the engineer. **Severity:** low
