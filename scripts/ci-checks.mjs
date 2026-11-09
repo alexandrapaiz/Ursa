@@ -78,7 +78,14 @@ export const CHECKS = [
     title: 'Product typecheck (ursa-major)',
     cwd: 'ursa-major',
     needsNodeModules: 'ursa-major',
-    argv: () => ['npx', 'tsc', '--noEmit'],
+    // The binary, not just the directory. See needsBin below.
+    needsBin: 'tsc',
+    // `--no-install` is load-bearing and not tidiness: without it a missing
+    // local binary makes npx FETCH AND RUN a package of that name from the
+    // public registry. Measured 2026-11-09, in this check: it printed
+    // `the following package was not found and will be installed: tsc@2.0.4`
+    // and executed it.
+    argv: () => ['npx', '--no-install', 'tsc', '--noEmit'],
     passExit: [0],
   },
   {
@@ -87,7 +94,8 @@ export const CHECKS = [
     title: 'Product unit suites (ursa-major, vitest)',
     cwd: 'ursa-major',
     needsNodeModules: 'ursa-major',
-    argv: () => ['npx', 'vitest', 'run'],
+    needsBin: 'vitest',
+    argv: () => ['npx', '--no-install', 'vitest', 'run'],
     passExit: [0],
   },
   {
@@ -342,7 +350,11 @@ export function toolingSuites() {
 // A check whose dependencies are absent is unrunnable, not passing. Kept as
 // a pure function so the test suite can assert the classification without
 // executing anything.
-export function classify(check, { installedPackages, skip, shallow }) {
+// `installedBins` defaults to none rather than to all. A caller that forgets
+// it gets `unrunnable`, which is red; defaulting the other way would make a
+// forgotten argument read as a passing check, and the bias has to run toward
+// the refusal here for the same reason it does in the npx call above.
+export function classify(check, { installedPackages, installedBins = [], skip, shallow }) {
   if (skip.includes(check.id)) return { state: 'skipped', why: 'named in --skip' }
   if (check.needsFullClone && shallow) {
     return {
@@ -356,6 +368,27 @@ export function classify(check, { installedPackages, skip, shallow }) {
       state: 'unrunnable',
       why: `${check.needsNodeModules}/node_modules is absent, so this check cannot run; `
         + `run \`npm ci\` in ${check.needsNodeModules} first, or pass --skip=${check.id} to record it as unchecked`,
+    }
+  }
+  // The directory is not the condition. A tree where `node_modules/` exists
+  // and the binary does not passes the test above, and then the check runs
+  // `npx <tool>`, which without `--no-install` FETCHES AND EXECUTES a
+  // registry package of that name. That tree is not hypothetical: it is the
+  // documented npm failure mode on this host, `exit 0 with no
+  // node_modules/.bin` (node tools/seat/env-facts.mjs,
+  // npm-cache-is-a-shared-home-path), and this run hit it while an install
+  // was still in flight. So the condition is read off the binary the check
+  // actually needs. Same correction as the one made to
+  // EXPECTED_ABSENT_FIXTURES today: a condition keyed on a name near the
+  // thing, rather than on the thing.
+  if (check.needsBin && !installedBins.includes(`${check.needsNodeModules}/${check.needsBin}`)) {
+    return {
+      state: 'unrunnable',
+      why: `${check.needsNodeModules}/node_modules/.bin/${check.needsBin} is absent, so this `
+        + 'check cannot run. The directory exists, so the install is partial rather than '
+        + `missing; re-run \`npm ci\` in ${check.needsNodeModules}, or pass --skip=${check.id} `
+        + 'to record it as unchecked. It is reported unrunnable rather than attempted because '
+        + `\`npx ${check.needsBin}\` on a tree without it resolves against the public registry`,
     }
   }
   return { state: 'runnable', why: '' }
@@ -389,6 +422,16 @@ function installedPackages() {
   return ['ursa-major', 'ursa-minor'].filter((p) => existsSync(path.join(ROOT, p, 'node_modules')))
 }
 
+// Which declared binaries actually exist, as `<package>/<bin>`. Read off the
+// filesystem here, so `classify` stays a pure function of what it is handed
+// and its suite does not depend on whether this sandbox happens to have run
+// `npm ci`.
+function installedBins() {
+  return CHECKS.filter((c) => c.needsBin).map((c) => `${c.needsNodeModules}/${c.needsBin}`)
+    .filter((k) => existsSync(path.join(ROOT, k.split('/')[0], 'node_modules', '.bin',
+      k.split('/')[1])))
+}
+
 function isShallow() {
   const out = spawnSync('git', ['rev-parse', '--is-shallow-repository'], { cwd: ROOT, encoding: 'utf8' })
   return out.stdout.trim() === 'true'
@@ -415,11 +458,14 @@ function main(argv) {
   }
 
   const installed = installedPackages()
+  const bins = installedBins()
   const shallow = isShallow()
   const results = []
 
   for (const check of selected) {
-    const { state, why } = classify(check, { installedPackages: installed, skip: opts.skip, shallow })
+    const { state, why } = classify(check, {
+      installedPackages: installed, installedBins: bins, skip: opts.skip, shallow,
+    })
     if (state !== 'runnable') {
       process.stdout.write(`\n=== ${check.title} [${state}] ===\n${why}\n`)
       results.push({ ...check, state, why, exit: null })
