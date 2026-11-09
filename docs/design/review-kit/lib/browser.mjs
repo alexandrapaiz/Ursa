@@ -52,14 +52,29 @@ async function loadChromium() {
   return mod.chromium ?? mod.default?.chromium
 }
 
-// What was actually missing on the two hosts that failed, in the order
-// `ldd` surfaced them. `ldd` only reports what it can reach, so a second
-// pass finds more; this is both passes' worth.
+// What was actually missing on the hosts that failed, in the order the
+// launch surfaced them. `ldd` only reports what it can reach, so a second
+// pass finds more; this is every pass's worth.
+//
+// The list is written as leaves-of-the-tree rather than as the packages a
+// person would name, because `apt-get download` fetches ONE package and
+// resolves no dependencies at all. So naming `libcups2t64` gets you cups
+// and not avahi, and naming `libpango-1.0-0` gets you pango and not thai,
+// datrie or graphite2. Every transitive leaf has to be named here itself.
+//
+// The six on the second line below were added 2026-11-09 (run c), which
+// is what the previous fourteen cost that morning: chromium refused to
+// start six times in a row, one library per attempt, each failure looking
+// exactly like the last. The order they appeared in was libavahi-common3,
+// libxcb-render0, libthai0, libdatrie1, libgraphite2-3, and none of them
+// is reachable from any name already in this list.
 export const CHROMIUM_LIBS = [
   'libatk1.0-0t64', 'libatk-bridge2.0-0t64', 'libatspi2.0-0t64',
   'libxcomposite1', 'libxdamage1', 'libxfixes3', 'libxrandr2',
   'libxi6', 'libxrender1', 'libasound2t64', 'libgbm1', 'libcups2t64',
   'libpango-1.0-0', 'libcairo2', 'libnss3',
+  'libavahi-common3', 'libavahi-client3', 'libxcb-render0', 'libthai0',
+  'libdatrie1', 'libgraphite2-3',
 ]
 
 const PREFIX = process.env.PW_LIB_PREFIX || '/tmp/pwlibs'
