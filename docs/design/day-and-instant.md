@@ -78,7 +78,7 @@ the data that crosses it, as a type or a literal string form.
 - `tools/seat/outage.mjs` — the dark-day reporter. The call site that compares
   days as text and is reported by nothing.
 - `tools/seat/suite-baseline.mjs` — the repository's suite runner, which
-  collects `tools/instant.test.mjs` among 704 top-level points.
+  collects `tools/instant.test.mjs` among 754 top-level points.
 
 **Edges.**
 
@@ -90,8 +90,8 @@ the data that crosses it, as a type or a literal string form.
 | `docs/agents/improvements.md` | `tools/seat/read-dates.mjs` | Markdown text; the extracted field is a `string` of the form `2026-10-26` |
 | `tools/seat/read-dates.mjs` | `tools/instant.mjs` | that `2026-10-26` string, as the `a` and `b` arguments to `compareDays`, or as `key(row)` under `sortByDay` |
 | `tools/instant.mjs` (lint) | `tools/instant-sweep.mjs` | `Array<{code: 'TEXTUAL_ORDER' \| 'TEXTUAL_DAY' \| 'TEXTUAL_DROP', line: number, text: string, repair: string}>` |
-| `git ls-files` | `tools/instant-sweep.mjs` | newline-delimited repository-relative paths, 463 of them at this commit |
-| `tools/instant-sweep.mjs` | stdout | the findings table, then the line `34 findings in 11 of 463 tracked source files scanned` |
+| `git ls-files` | `tools/instant-sweep.mjs` | newline-delimited repository-relative paths, 470 of them at this commit |
+| `tools/instant-sweep.mjs` | stdout | the findings table, then the line `34 findings in 11 of 470 tracked source files scanned` |
 | `tools/instant.mjs` and `tools/instant-sweep.mjs` | `tools/instant.test.mjs` | the exported functions, as ES module bindings |
 | `tools/instant.test.mjs` | `tools/seat/suite-baseline.mjs` | TAP 13 on stdout, 31 of the suite's top-level points |
 
@@ -186,8 +186,8 @@ denominator block. Real payload, from the run on this branch:
 tools/seat/outage.mjs:252  TEXTUAL_DAY  const d = String(readDate).slice(0, 10);
 ursa-major/src/parse.ts:175  TEXTUAL_DAY  date: firstTs?.slice(0, 10),
 
-read at 2026-11-09T01:20:16.868Z
-34 findings in 11 of 463 tracked source files scanned
+read at 2026-11-09T01:33:55.265Z
+34 findings in 11 of 470 tracked source files scanned
 1 files skipped (build output; the source it came from is scanned)
 TEXTUAL_DAY 18, TEXTUAL_ORDER 15, TEXTUAL_DROP 1
 ```
@@ -256,8 +256,8 @@ grep -nE "String\((\w+\.)?day[s]?\)|\[\.\.\.[a-z]+\.days\]\.sort\(\)|\.day\)\.so
 ```
 
 Outputs observed on this branch: `# pass 31 / # fail 0 / # skipped 0`;
-`34 findings in 11 of 463`; `15`; `suite-baseline.mjs` exit 0 with
-`704 top-level points, 1091 collected`; `null false false`;
+`34 findings in 11 of 470`; `15`; `suite-baseline.mjs` exit 0 with
+`754 top-level points, 1164 collected`; `null false false`;
 `2026-03-02T00:00:00.000Z`; seven matching lines.
 
 ---
@@ -269,7 +269,7 @@ Outputs observed on this branch: `# pass 31 / # fail 0 / # skipped 0`;
 | Node.js | v22.23.2 (the runtime in this sandbox) | Runs the module, the sweep and the tests. Supplies `Date.UTC`, which `parseDay` round-trips through. | Already the runtime of every tool under `tools/`. No alternative was considered, because introducing a second runtime for one module would make the lint unrunnable from the sweep that imports it. |
 | `node:test` | bundled with Node v22.23.2 | The 31 points in `tools/instant.test.mjs`. | Chosen over Vitest and Jest because it needs no dependency and no config, and because `tools/seat/suite-baseline.mjs` already collects TAP 13 from `node --test` across the repository's suites. Adding a framework would mean teaching the baseline a second output format. |
 | `node:assert/strict` | bundled with Node v22.23.2 | Every assertion. `assert.equal` under `strict` is `===`, which matters for the `null` versus `false` distinction that §1 turns on. | Chosen over the loose `node:assert` precisely because `assert.equal(null, false)` passes under loose and fails under strict, and that is the exact confusion this design exists to remove. |
-| `git` | 2.43.0 | Produces `%cI` and `%ct`, the instant spellings in §2. Also supplies `git ls-files`, the sweep's 463-file denominator. | Not a choice: it is the repository's version control. Named here because its `%cI` output is one of the two producers whose disagreement `tools/instant.mjs` exists to reconcile. |
+| `git` | 2.43.0 | Produces `%cI` and `%ct`, the instant spellings in §2. Also supplies `git ls-files`, the sweep's 470-file denominator. | Not a choice: it is the repository's version control. Named here because its `%cI` output is one of the two producers whose disagreement `tools/instant.mjs` exists to reconcile. |
 | `gh` | 2.101.0 (2026-09-15) | Produces the `Z`-suffixed instant spelling, and opens the pull request this document lands in. | The GitHub REST API over raw `curl` because `gh api` carries the run's token without the tool handling it, which keeps the seat inside its secrets boundary. |
 | `tools/instant-sweep.mjs` | in-repository, no version | Runs the lint over the whole tracked corpus and prints denominators. | The measurement instrument for the claim "findings outside test fixtures did not move". A per-file `node --test` run cannot make that claim, because it has no denominator. |
 
@@ -336,11 +336,55 @@ evidence-based narrowing, as code rather than as a comment*.
 
 ---
 
+## 7a. The call site, migrated in the same change
+
+`tools/seat/read-dates.mjs` landed on `main` at 01:24Z on 2026-11-09, during
+this run, carrying the private `compareDays` its author described on the board.
+That function is now deleted and the file imports the shared one. Three changes,
+and the second and third are repairs rather than swaps:
+
+1. **The ordering call site** became `sortByDay(rows, (r) => r.date)` rather
+   than `.sort((a, b) => compareDays(a.date, b.date))`. Required, not
+   cosmetic: the shared `compareDays` returns `null` where the private one
+   threw, and a `null` handed to `Array.prototype.sort` coerces to `0`, so the
+   direct swap would have produced a silently unsorted array.
+2. **A day that does not exist is now refused.** The private `BARE_DAY` regex
+   accepted `2026-02-30` and sorted it between February 29 and March 1.
+3. **`const future = field.date > String(now).slice(0, 10)` became
+   `isDayAfter(field.date, nowDay(now))`.** This was a live defect, not a
+   style repair, and the lint did not report it because the sliced receiver is
+   `String(now)`, which `TIMESTAMP_NAME` does not match. `now` defaults to
+   `new Date().toISOString()`, for which the slice is correct. It is wrong for
+   any `--now` carrying an offset: `--now 2026-11-09T20:00:00-05:00` is
+   `2026-11-10` in UTC, the slice answered `2026-11-09`, and an entry read on
+   the 10th was graded as read in the future. Pinned in
+   `tools/seat/read-dates.test.mjs` as *a future read date is decided on the
+   UTC day, not on the first ten characters of --now*.
+
+`nowDay` is exported from `tools/seat/read-dates.mjs` rather than added to
+`tools/instant.mjs`, because accepting either an instant or a day is this
+tool's CLI contract and not a property of the value classes:
+
+```ts
+function nowDay(now: unknown): string | null
+```
+
+Evidence: `node --test tools/seat/read-dates.test.mjs` reports
+`# pass 17 / # fail 0 / # skipped 0`, up from 16 before the migration, and
+`node tools/seat/read-dates.mjs --offline` exits 0 over the live register's 197
+entries.
+
+---
+
 ## 8. Rollback
 
-`git revert` the single commit that touches `tools/instant.mjs` and
-`tools/instant.test.mjs`. Nothing else in the repository imports the five new
-functions at this commit, no file on disk was written or migrated, and the
+`git revert` the two commits on this branch that touch code: the one adding the
+day family to `tools/instant.mjs` and `tools/instant.test.mjs`, and the one
+migrating `tools/seat/read-dates.mjs` and its test onto it. Revert them in that
+order, newest first, or the migrated call site is left importing functions that
+no longer exist. Reverting only the second is also safe and leaves the day
+family in place with no caller. Nothing else in the repository imports the five
+new functions at this commit, no file on disk was written or migrated, and the
 instant group's behaviour is unchanged, so a revert cannot strand a caller. The
 only consequence of reverting is that `tools/seat/read-dates.mjs`'s private
 `compareDays` becomes load-bearing again and the lint's repair line goes back

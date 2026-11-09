@@ -70,6 +70,7 @@ import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { readVerdict, completedBetween, capacityDays } from './outage.mjs'
+import { sortByDay, isDayAfter, utcDay, timestampShape } from '../instant.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 export const REPO_ROOT = resolve(HERE, '..', '..')
@@ -106,32 +107,36 @@ export const ALT_LABELS = [
 ]
 const KNOWN = new Set([HOUSE_LABEL, ...ALT_LABELS])
 
-/**
- * Ascending by UTC calendar day, for `YYYY-MM-DD` and nothing else.
- *
- * WHY THIS IS NOT `compareInstants`, which is what this repository's own lint
- * prescribes. `tools/instant.mjs` is about INSTANTS, and it says so: its
- * `timestampShape` classifies "a bare day" as `invalid`, so `parseInstant`
- * returns null for one, and `compareInstants('2026-11-09', '2026-11-15')`
- * therefore answers **null** rather than -1. `isAfter` and `isBefore` answer
- * `false` both ways. The register's read-date field holds a bare day — it
- * names a calendar day with no zone, by the format HQ's console parses — so
- * every repair the lint names is unavailable for this value class.
- *
- * Text order IS day order for a zero-padded `YYYY-MM-DD`, which is why
- * `outage.mjs` compares `r.day` as text throughout and the lint passes it:
- * `TIMESTAMP_NAME` matches `date` and not `day`. That distinction is load
- * bearing rather than lucky, and this function is the honest version of it —
- * it refuses anything that is not a bare day, so it cannot be reached for by
- * a caller holding an instant, which is the case the lint exists to catch.
- */
-const BARE_DAY = /^\d{4}-\d{2}-\d{2}$/
-export function compareDays (a, b) {
-  if (!BARE_DAY.test(a) || !BARE_DAY.test(b)) {
-    throw new TypeError(`compareDays takes YYYY-MM-DD, not ${JSON.stringify(a)} / ${JSON.stringify(b)}; use compareInstants from tools/instant.mjs for an instant`)
-  }
-  return a === b ? 0 : (a < b ? -1 : 1)
-}
+// ORDERING READ DATES: `sortByDay` from `tools/instant.mjs`, imported above.
+//
+// This file used to carry a private `compareDays` here, written on 2026-11-09
+// because `tools/instant.mjs` had no day comparator and the lint's repair line
+// named three instant functions that all refuse a bare day. That module now
+// has the day family — `parseDay`, `compareDays`, `isDayAfter`, `isDayBefore`,
+// `sortByDay` — so the private one is deleted rather than kept out of habit,
+// which is what this seat's note asked for and what the ExO seat said it
+// wanted.
+//
+// TWO DIFFERENCES FROM THE VERSION THAT WAS HERE, both deliberate and both
+// the shared module's call rather than this file's:
+//
+//   1. It returns null where this one threw a TypeError. Every refusal in
+//      `tools/instant.mjs` is a null or a false, so one function exiting by
+//      exception would mean a caller cannot route the group uniformly. The
+//      pointer the throw carried is not lost: the lint's `TEXTUAL_ORDER`
+//      repair text now names which repair applies to which shape.
+//   2. It refuses a day that does not exist. `2026-02-30` passed the old
+//      `BARE_DAY` regex and sorted between February 29 and March 1;
+//      `parseDay` round-trips through `Date.UTC` and refuses it, because
+//      `Date.parse('2026-02-30')` answers 1772409600000 and rolls the value
+//      silently to March 2.
+//
+// AND THE SORT USES `sortByDay` RATHER THAN `compareDays`, which matters
+// precisely because of difference 1. A comparator that returns null, handed
+// to `Array.prototype.sort`, has its null coerced to 0 and reads as "equal",
+// so an unplaceable row would leave the array silently unsorted with no error
+// raised. `sortByDay` keeps unplaceable rows and sorts them last in input
+// order, which is visible in the output instead.
 
 /** Every `### ` entry in a register, heading and body, in file order. */
 export function splitEntries (text) {
@@ -210,6 +215,31 @@ export function readDateField (entry) {
 }
 
 /**
+ * The calendar day `now` falls in, as a bare day, for comparison against a
+ * read date. Null when `now` places itself nowhere.
+ *
+ * WHY THIS IS NOT `String(now).slice(0, 10)`, which is the line it replaces.
+ * `now` is `new Date().toISOString()` by default, which is `Z`-suffixed, and
+ * for that value the slice and this function agree. They stop agreeing the
+ * moment anybody passes `--now` a value carrying an offset: the slice returns
+ * the first ten characters, which is the day in the OFFSET's calendar, while
+ * the read dates it is compared against are UTC days. `--now
+ * 2026-11-09T20:00:00-05:00` is 2026-11-10 in UTC, so the slice answered
+ * 2026-11-09 and an entry read on 2026-11-10 was graded as a future read.
+ * That is `tools/instant.mjs`'s defect 2, in a file written the same night its
+ * lint was being discussed, and the lint does not report it: the sliced
+ * receiver is `String(now)`, which its name pattern does not match.
+ *
+ * BOTH FORMS ARE ACCEPTED because `--now` takes either and always has. An
+ * instant is projected with `utcDay`; a bare day is already the answer and is
+ * returned unchanged rather than being pushed through a function that refuses
+ * it.
+ */
+export function nowDay (now) {
+  return utcDay(now) ?? (timestampShape(now) === 'day' ? String(now) : null)
+}
+
+/**
  * Grade one entry. `completedSince` is the number of runs that completed
  * between the read date and `now`; `null` means the run rows were not read, in
  * which case a past date is NOT graded at all. That refusal is the point: with
@@ -222,7 +252,7 @@ export function gradeEntry (entry, { now, completedSince = null }) {
   if (!field.date) {
     return { ...entry, ...field, verdict: NO_DATE, why: field.label ? FIELD_NO_ISO : NO_FIELD, completedSince: null }
   }
-  const future = field.date > String(now).slice(0, 10)
+  const future = isDayAfter(field.date, nowDay(now))
   if (!future && completedSince === null) {
     return { ...entry, ...field, verdict: null, why: 'ungradeable: no run rows, so `due` and `unread` are indistinguishable', completedSince: null }
   }
@@ -289,9 +319,11 @@ export function report ({ text, now, rows = null }) {
       ungradeable_no_rows: graded.filter((g) => g.verdict === null).length
     },
     verdicts: [...byVerdict.entries()].map(([verdict, n]) => ({ verdict, n })),
-    dates: [...byDate.entries()]
-      .map(([k, n]) => { const [date, verdict] = k.split('\u0000'); return { date, verdict: verdict === 'null' ? null : verdict, n } })
-      .sort((a, b) => compareDays(a.date, b.date)),
+    dates: sortByDay(
+      [...byDate.entries()]
+        .map(([k, n]) => { const [date, verdict] = k.split('\u0000'); return { date, verdict: verdict === 'null' ? null : verdict, n } }),
+      (r) => r.date
+    ),
     due: graded.filter((g) => g.verdict === DUE)
   }
 }
