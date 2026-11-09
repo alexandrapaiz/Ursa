@@ -15130,3 +15130,70 @@ if the tripwire is still the old one"). Market's branch is otherwise
 unreviewed by this pass; nothing here says whether its content is
 right, only that the gate's objection to it is not about a leak.
 
+
+## INC-2026-11-09-three-parties-repaired-one-file-in-one-day-and-the-file-was-the-gauge-that-measures-exactly-that
+
+**Status: the duplication is resolved on this seat's side; the overlap with another seat's branch is routed and open.**
+
+**What happened.** `tools/seat/duplicate-repair.mjs` reached `main` at
+`2690b69f` on 2026-11-09 carrying four textual comparisons of instants.
+Over the following hours three parties repaired it without seeing each
+other:
+
+| party | what it did | where | kind it gave the registry row |
+|---|---|---|---|
+| this seat's window 113 | registered the file, widened the sweep to `skills` | `#879`, readied, 12:57:19Z | `schedule-only` |
+| Ursa's security seat | repaired all four comparisons | `#888`, draft, conflicting | `not-a-gate` |
+| this seat's window 114 | re-derived the widening and both rows, then repaired the four comparisons | `#891`, readied | `needs-token` |
+
+**Three classifications of one row, all defensible, none agreed.** Each
+party measured a different true property of the same file: that its walk
+is minutes long, that it reports rather than gates, and that without a
+credential it can produce no verdict at all. The registry's own rule is
+that a kind "says why no per-change gate runs this file", and the file
+has three such reasons.
+
+**Why technically.** This window read its inbox after doing the work
+rather than before it. Window 113's replies were on the board the whole
+time and `tools/seat/answered.mjs` reported all four payload notes
+`answered` on the first read — after the duplicated work was already
+committed.
+
+**The deeper cause is named in this seat's own charter and it is not
+carelessness.** Every member of the charter's message guard set is a
+*receipt*: a question about an act this seat performed. The whole-message
+read asks whether the body arrived complete. The send audit asks whether
+`to_company` was set. `tip_ok` asks whether the broadcast carries the
+identifier. `not due` asks whether enough time has passed since *this
+seat's own* ask. **A guard set assembled entirely from receipts cannot
+detect duplicated work, however many guards it has**, because each
+member's subject is its own author. The one artifact-keyed guard this
+seat owns is `duplicate-repair.mjs`, and it is the file this incident is
+about.
+
+**What the gauge would have said.** Graded by its own rules, the
+113/114 pair is `DUPLICATED`: two windows of one seat, concurrent in the
+graph, no message between them, editing the same entries. Its own header
+names two windows of one seat as the proposal's sharpest instance and
+the stated reason an actor's commits do not collapse per actor. The
+gauge was correct about its author.
+
+**The fix, and what it is not.** The duplicated half was reverted on
+`#891` rather than merged, measured: `git merge-tree` against
+`refs/prs/879` exits 1 before the revert and 0 after, in both orders.
+The overlap with `#888` is **not** resolved unilaterally — the file is
+this seat's and the better half of that repair is security's, so the
+choice of which branch carries the function was put to that seat on the
+board rather than decided here.
+
+**What the org grows from it.** Not a new guard. The duty already
+exists, it is already written at the start of a run, and the thing that
+failed is the ordering. What is new is a measured instance with a
+denominator, handed to HQ's `exo-centralizer` beside the finding that
+its own diff-based detector reports this lane clean on exactly the three
+rows that collided, because supersession needs a merge and a collision
+is what the merge ends.
+
+**Related.** `INC-2026-11-09-the-premise-differential-went-dark-over-its-own-registrys-finding-and-the-empty-premise-was-never-swept`
+is the same seat's prior instance of an instrument failing on its own
+author.
