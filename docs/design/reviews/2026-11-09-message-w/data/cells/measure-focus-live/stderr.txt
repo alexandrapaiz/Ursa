@@ -1,0 +1,20 @@
+/phone: 5 focusable in the DOM                       8 tab stops     0 unreachable  7.5s
+/recor/phone: 6 focusable in the DOM                 6 tab stops     0 unreachable  7.8s
+/tablet: 5 focusable in the DOM                      6 tab stops     0 unreachable  6.8s
+/recor/tablet: 6 focusable in the DOM                6 tab stops     0 unreachable  7.6s
+/desktop: 5 focusable in the DOM                     6 tab stops     0 unreachable  7.3s
+/recor/desktop: 6 focusable in the DOM               6 tab stops     0 unreachable  6.7s
+node:fs:2430
+    return binding.writeFileUtf8(
+                   ^
+
+Error: EISDIR: illegal operation on a directory, open 'docs/design/reviews/2026-11-09-message-w/data/cells/measure-focus-live'
+    at writeFileSync (node:fs:2430:20)
+    at file:///tmp/epito-ursa-frontend-JKpAec/docs/design/review-kit/measure-focus.mjs:721:10 {
+  errno: -21,
+  code: 'EISDIR',
+  syscall: 'open',
+  path: 'docs/design/reviews/2026-11-09-message-w/data/cells/measure-focus-live'
+}
+
+Node.js v22.23.2

@@ -1,0 +1,169 @@
+{
+  "live": "http://127.0.0.1:4871",
+  "dead": "http://127.0.0.1:4999",
+  "gone": "/no-such-route-9d1f",
+  "rows": [
+    {
+      "tool": "shoot",
+      "col": "live",
+      "code": 0,
+      "seconds": 21,
+      "claims_pass": true,
+      "abstains": false,
+      "head": "no frame overflows its viewport"
+    },
+    {
+      "tool": "shoot",
+      "col": "dead",
+      "code": 1,
+      "seconds": 3,
+      "claims_pass": false,
+      "abstains": false,
+      "head": "node:internal/modules/run_main:123"
+    },
+    {
+      "tool": "shoot",
+      "col": "wrong",
+      "code": 0,
+      "seconds": 21,
+      "claims_pass": true,
+      "abstains": false,
+      "head": "no frame overflows its viewport"
+    },
+    {
+      "tool": "measure-contrast",
+      "col": "live",
+      "code": 0,
+      "seconds": 54,
+      "claims_pass": true,
+      "abstains": true,
+      "head": "record/desktop               span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED"
+    },
+    {
+      "tool": "measure-contrast",
+      "col": "dead",
+      "code": 1,
+      "seconds": 8,
+      "claims_pass": false,
+      "abstains": false,
+      "head": "[   0.0s] writing to docs/design/reviews/2026-11-09-message-w/data/cells/measure-contrast-dead/contrast.txt, 2 page(s) a"
+    },
+    {
+      "tool": "measure-contrast",
+      "col": "wrong",
+      "code": 0,
+      "seconds": 47,
+      "claims_pass": true,
+      "abstains": true,
+      "head": "no-such-route-9d1f/desktop   span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED"
+    },
+    {
+      "tool": "measure-focus",
+      "col": "live",
+      "code": 1,
+      "seconds": 48,
+      "claims_pass": true,
+      "abstains": false,
+      "head": "The 2.4.11 area column is reported and never failed on: median 0.54 of the 2px-perimeter minimum, across 33 stops. The r"
+    },
+    {
+      "tool": "measure-focus",
+      "col": "dead",
+      "code": 1,
+      "seconds": 4,
+      "claims_pass": false,
+      "abstains": false,
+      "head": "node:internal/modules/run_main:123"
+    },
+    {
+      "tool": "measure-focus",
+      "col": "wrong",
+      "code": 1,
+      "seconds": 27,
+      "claims_pass": true,
+      "abstains": false,
+      "head": "The 2.4.11 area column is reported and never failed on: median 10.03 of the 2px-perimeter minimum, across 12 stops. The "
+    },
+    {
+      "tool": "measure-hit-areas",
+      "col": "live",
+      "code": 0,
+      "seconds": 13,
+      "claims_pass": true,
+      "abstains": false,
+      "head": "  document spans are: none, on no page"
+    },
+    {
+      "tool": "measure-hit-areas",
+      "col": "dead",
+      "code": 1,
+      "seconds": 3,
+      "claims_pass": false,
+      "abstains": false,
+      "head": "node:internal/modules/run_main:123"
+    },
+    {
+      "tool": "measure-hit-areas",
+      "col": "wrong",
+      "code": 0,
+      "seconds": 13,
+      "claims_pass": true,
+      "abstains": false,
+      "head": "  document spans are: none, on no page"
+    },
+    {
+      "tool": "measure-narrow",
+      "col": "live",
+      "code": 0,
+      "seconds": 17,
+      "claims_pass": true,
+      "abstains": false,
+      "head": "  0 of 8 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose a"
+    },
+    {
+      "tool": "measure-narrow",
+      "col": "dead",
+      "code": 2,
+      "seconds": 4,
+      "claims_pass": false,
+      "abstains": true,
+      "head": "  390 set (/record): page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/record"
+    },
+    {
+      "tool": "measure-narrow",
+      "col": "wrong",
+      "code": 0,
+      "seconds": 23,
+      "claims_pass": true,
+      "abstains": false,
+      "head": "  0 of 8 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose a"
+    },
+    {
+      "tool": "verify-hover",
+      "col": "live",
+      "code": 1,
+      "seconds": 60,
+      "claims_pass": false,
+      "abstains": false,
+      "head": "node:internal/modules/run_main:123"
+    },
+    {
+      "tool": "verify-hover",
+      "col": "dead",
+      "code": 1,
+      "seconds": 4,
+      "claims_pass": false,
+      "abstains": false,
+      "head": "node:internal/modules/run_main:123"
+    },
+    {
+      "tool": "verify-hover",
+      "col": "wrong",
+      "code": 1,
+      "seconds": 59,
+      "claims_pass": false,
+      "abstains": false,
+      "head": "node:internal/modules/run_main:123"
+    }
+  ]
+}

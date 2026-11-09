@@ -1,0 +1,72 @@
+
+=== phone 390x844 · home / ===
+  box WxH       hit WxH      lines  verdict           control
+  162.9x47.3    164x48       1      ok                button.cta "Get Polaris"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  115.7x17      116x18       1      inline, exempt    a.rec-action "the record viewer"
+  278.3x42.8    10x18        2      inline, exempt    a.rec-action "a published record"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  -> 0 of 4 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== phone 390x844 · set /record ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  114x17        115x18       2      inline, exempt    a.rec-action "mini-fixture →"
+  168.8x17      169x18       1      inline, exempt    a.rec-action "read it at its own address"
+  326x26.3      326x45       1      ok                input.w-full ""
+  99.8x16.8     101x44       1      ok                button.rec-action "read the site"
+  1x1           183x48       1      ok                input.sr-only ""
+  326x26.3      326x45       1      ok                input.w-full ""
+  53.7x16.8     55x44        1      ok                button.rec-action "read it"
+  -> 0 of 6 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== tablet 820x1180 · home / ===
+  box WxH       hit WxH      lines  verdict           control
+  162.9x47.3    164x48       1      ok                button.cta "Get Polaris"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  541.3x42.8    22x18        2      inline, exempt    a.rec-action "the record viewer"
+  556.1x42.8    10x18        2      inline, exempt    a.rec-action "a published record"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  -> 0 of 4 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== tablet 820x1180 · set /record ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  114x17        115x18       2      inline, exempt    a.rec-action "mini-fixture →"
+  168.8x17      169x18       1      inline, exempt    a.rec-action "read it at its own address"
+  569.1x27.2    570x45       1      ok                input.w-full ""
+  99.8x16.8     100x44       1      ok                button.rec-action "read the site"
+  1x1           183x48       1      ok                input.sr-only ""
+  401.2x27.2    402x45       1      ok                input.w-full ""
+  53.7x16.8     54x44        1      ok                button.rec-action "read it"
+  -> 0 of 6 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== desktop 1440x900 · home / ===
+  box WxH       hit WxH      lines  verdict           control
+  162.9x47.3    164x48       1      ok                button.cta "Get Polaris"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  541.3x42.8    22x18        2      inline, exempt    a.rec-action "the record viewer"
+  556.1x42.8    10x18        2      inline, exempt    a.rec-action "a published record"
+  57.2x28.9     58x44        1      ok                button.cta "copy"
+  -> 0 of 4 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== desktop 1440x900 · set /record ===
+  box WxH       hit WxH      lines  verdict           control
+  134.5x24      141x44       1      ok                a.mark-link "Ursa Minor"
+  114x17        115x18       2      inline, exempt    a.rec-action "mini-fixture →"
+  168.8x17      169x18       1      inline, exempt    a.rec-action "read it at its own address"
+  840.3x27.2    599x45       1      ok                input.w-full ""
+  99.8x16.8     100x44       1      ok                button.rec-action "read the site"
+  1x1           183x48       1      ok                input.sr-only ""
+  672.3x27.2    599x45       1      ok                input.w-full ""
+  53.7x16.8     54x44        1      ok                button.rec-action "read it"
+  -> 0 of 6 standalone controls under 44px tall (2 inline, exempt; 0 document spans, 0 not covering their own line)
+
+=== total across every page and viewport ===
+  0 short of 30 standalone, 12 inline and exempt by 2.5.8, 0 document spans (0 not covering their own line), 42 targets seen
+  the floor reached no control on: no page — every page here had at least one standalone control
+  document spans are: none, on no page
+

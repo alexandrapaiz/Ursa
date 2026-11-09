@@ -126,6 +126,7 @@ import { launch, VIEWPORTS } from './lib/browser.mjs'
 import { freezeContext } from './lib/freeze.mjs'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { tracker } from './lib/reached.mjs'
 
 const arg = (n, d) => {
   const i = process.argv.indexOf(`--${n}`)
@@ -178,6 +179,11 @@ const PAGES = arg(
     const i = p.indexOf('=')
     return [p.slice(0, i), p.slice(i + 1)]
   })
+// The not-found page is in the default list on purpose and its status is
+// the subject, so it is declared. A caller passing its own `--pages`
+// declares its own with `--expect-404`.
+const EXPECT_404 = arg('expect-404', PAGES.some(([, p]) => p === '/this-page-does-not-exist') ? '/this-page-does-not-exist' : '').split(',').filter(Boolean)
+const reach = tracker({ expect404: EXPECT_404, label: 'page' })
 
 const enterState = STATE
   ? (await import(new URL(STATE, `file://${process.cwd()}/`).href)).default
@@ -345,7 +351,7 @@ for (const [vpName, width, height] of VPS) {
     // lib/freeze.mjs and L59.
     if (!LIVE) await freezeContext(ctx, { scroll: true })
     const page = await ctx.newPage()
-    await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle', timeout: 30000 })
+    reach.saw(path, await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle', timeout: 30000 }))
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
     if (enterState) await enterState(page, `${pageName}-${vpName}`)
     // The sky is a canvas with a requestAnimationFrame loop. freezeContext
@@ -716,10 +722,18 @@ if (withArea.length) {
   )
 }
 
+// In words as well as in the status, and inside `text` so it reaches the
+// committed file and not only this session's stdout.
+L.push(...reach.lines())
 const text = L.join('\n')
 console.log(text)
 if (OUT) writeFileSync(OUT, `${text}\n`)
-if (JSON_OUT) writeFileSync(JSON_OUT, `${JSON.stringify({ base: BASE, rows, pageNotes }, null, 1)}\n`)
+if (JSON_OUT) writeFileSync(JSON_OUT, `${JSON.stringify({ base: BASE, rows, pageNotes, reached: reach.rows() }, null, 1)}\n`)
 
+// Absence before findings, because a finding counted over pages that were
+// never reached is not a finding. Added 2026-11-09 (run w): until then a
+// matrix of not-found pages walked, measured and printed its headline at
+// the same status as the real site.
+if (reach.code()) process.exit(reach.code())
 if (pageNotes.some((p) => p.note)) process.exit(2)
 process.exit(bad.length || unreachableTotal ? 1 : 0)

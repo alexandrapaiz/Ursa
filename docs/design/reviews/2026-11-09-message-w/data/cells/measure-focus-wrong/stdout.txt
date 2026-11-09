@@ -1,0 +1,39 @@
+base http://127.0.0.1:4871
+viewports phone 390x844, tablet 820x1180, desktop 1440x900
+floors: 3:1 on the indicator, 60% of its pixels
+
+## Reach: what the DOM offers against what Tab finds
+
+| page | viewport | focusable in DOM | tab stops | unreachable | sec |
+|---|---|---|---|---|---|
+| /no-such-route-9d1 | phone | 2 | 2 | 0 | 4.3 |
+| /no-such-route-9d1 | phone | 2 | 2 | 0 | 3.2 |
+| /no-such-route-9d1 | tablet | 2 | 2 | 0 | 4.7 |
+| /no-such-route-9d1 | tablet | 2 | 2 | 0 | 4.3 |
+| /no-such-route-9d1 | desktop | 2 | 2 | 0 | 4.2 |
+| /no-such-route-9d1 | desktop | 2 | 2 | 0 | 3.9 |
+
+## The indicator, photographed at every stop
+
+| page | viewport | stop | control | box | indicator px | clearing px | share >=3:1 | ring 1px | median | min | area/2.4.11 | verdict |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| /no-such-route-9d1 | phone | 0 | a "Ursa Minor" | 135x24 | 346 | 346 | 100% | 1.08 | 11.99 | 11.99 | 0.53 | ok |
+| /no-such-route-9d1 | phone | 1 | a "Back to Ursa Minor" | 230x47 | 11319 | 582 | 5% | 1.04 | 1.09 | 1.00 | 10.07 | COMPOSITE |
+| /no-such-route-9d1 | phone | 0 | a "Ursa Minor" | 135x24 | 346 | 346 | 100% | 1.08 | 11.99 | 11.99 | 0.53 | ok |
+| /no-such-route-9d1 | phone | 1 | a "Back to Ursa Minor" | 230x47 | 11319 | 582 | 5% | 1.04 | 1.09 | 1.00 | 10.07 | COMPOSITE |
+| /no-such-route-9d1 | tablet | 0 | a "Ursa Minor" | 135x24 | 344 | 344 | 100% | 1.07 | 11.99 | 11.99 | 0.53 | ok |
+| /no-such-route-9d1 | tablet | 1 | a "Back to Ursa Minor" | 230x47 | 11270 | 580 | 5% | 1.04 | 1.09 | 1.00 | 10.03 | COMPOSITE |
+| /no-such-route-9d1 | tablet | 0 | a "Ursa Minor" | 135x24 | 344 | 344 | 100% | 1.07 | 11.99 | 11.99 | 0.53 | ok |
+| /no-such-route-9d1 | tablet | 1 | a "Back to Ursa Minor" | 230x47 | 11270 | 580 | 5% | 1.04 | 1.09 | 1.00 | 10.03 | COMPOSITE |
+| /no-such-route-9d1 | desktop | 0 | a "Ursa Minor" | 135x24 | 346 | 346 | 100% | 1.08 | 11.99 | 11.99 | 0.53 | ok |
+| /no-such-route-9d1 | desktop | 1 | a "Back to Ursa Minor" | 230x47 | 11319 | 582 | 5% | 1.04 | 1.09 | 1.00 | 10.07 | COMPOSITE |
+| /no-such-route-9d1 | desktop | 0 | a "Ursa Minor" | 135x24 | 346 | 346 | 100% | 1.08 | 11.99 | 11.99 | 0.53 | ok |
+| /no-such-route-9d1 | desktop | 1 | a "Back to Ursa Minor" | 230x47 | 11319 | 582 | 5% | 1.04 | 1.09 | 1.00 | 10.07 | COMPOSITE |
+
+## Headline
+
+0 of 12 tab stops below a floor, 0 controls the keyboard cannot reach, 0 unstable.
+
+By verdict: 6 ok, 6 COMPOSITE.
+
+The 2.4.11 area column is reported and never failed on: median 10.03 of the 2px-perimeter minimum, across 12 stops. The ring's weight is identity and a change to it is the owner's.

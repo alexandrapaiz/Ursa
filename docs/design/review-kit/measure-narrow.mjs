@@ -141,6 +141,7 @@
  */
 import { launch } from "./lib/browser.mjs";
 import { writeFileSync } from "node:fs";
+import { tracker } from "./lib/reached.mjs";
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1]; };
 const BASE = arg("base", process.env.URSA_BASE ?? "http://127.0.0.1:4953");
@@ -173,6 +174,19 @@ const PAGES = arg(
 )
   .split(",")
   .map((p) => { const i = p.indexOf("="); return [p.slice(0, i), p.slice(i + 1)]; });
+
+// Added 2026-11-09 (run w), because the repair this file documents at its
+// own tail covered the LOUD absence only. A dead port makes `goto` throw
+// and the catch below records a failure. A server that is UP while the
+// path is wrong returns 404, Next renders its not-found page, every cell
+// loads, settles and fits, and this instrument reported `0 of 20 cells
+// put content out of reach` at exit 0 over a matrix of not-found pages.
+// Measured in ../reviews/2026-11-09-message-w/data/do-nothing.txt.
+const EXPECT_404 = arg(
+  "expect-404",
+  PAGES.some(([, p]) => p === "/this-page-does-not-exist") ? "/this-page-does-not-exist" : "",
+).split(",").filter(Boolean);
+const reach = tracker({ expect404: EXPECT_404, label: "cell" });
 
 // The page column is as wide as the widest name in this run plus a space,
 // never a number somebody guessed. It was 10, and `--pages panel-synced=/`
@@ -332,7 +346,7 @@ for (const w of WIDTHS) {
   const page = await ctx.newPage();
   for (const [label, path] of PAGES) {
     try {
-      await page.goto(BASE + path, { waitUntil: "networkidle", timeout: 45000 });
+      reach.saw(path, await page.goto(BASE + path, { waitUntil: "networkidle", timeout: 45000 }));
       if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 });
       if (enterState) await enterState(page, label);
       const m = await settle(page);
@@ -383,12 +397,15 @@ const out = [
   // The headline names its own denominator, because L23 measured that a
   // denominator of zero reads exactly like a pass, and it refuses to
   // report a pass while any cell is unmeasured.
-  failures.length || unsettled.length
-    ? `  NOT MEASURED: ${failures.length + unsettled.length} of ${cells} page-by-width cells could not be loaded or never came to rest, so this run makes no claim about them.`
+  failures.length || unsettled.length || reach.code()
+    ? `  NOT MEASURED: ${failures.length + unsettled.length || reach.unreached().length} of ${cells} page-by-width cells could not be loaded or never came to rest, so this run makes no claim about them.`
     : `  ${clipped.length} of ${cells} page-by-width cells put content out of reach; ${over.length} overflow reachably; ` +
       `${json.filter((r) => r.bleedCount > 0).length} carry decoration that bleeds on purpose and is not counted.`,
   ...(failures.length ? ["", "  COULD NOT LOAD", ...failures] : []),
   ...(unsettled.length ? ["", "  NEVER CAME TO REST", ...unsettled] : []),
+  // In words as well as in the status, because a status is a single value
+  // every wrapper may replace and a printed line is forwarded by default.
+  ...reach.lines(),
 ].join("\n");
 
 console.log(out);
@@ -427,4 +444,8 @@ if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(json, null, 2) + "\n");
 // make, because a caller cannot tell "measured, nothing out of reach" from
 // "measured nothing" by reading the exit status alone. That is the whole
 // defect, and it is the half this file can answer on its own.
-if (failures.length || unsettled.length) process.exitCode = 2;
+//
+// Widened 2026-11-09 (run w) to the quiet absence: a path that answers 400
+// or worse without having been declared. The loud case and the quiet case
+// are the same verdict about the instrument and take the same status.
+if (failures.length || unsettled.length || reach.code()) process.exitCode = 2;

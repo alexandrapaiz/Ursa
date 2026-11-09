@@ -34,6 +34,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { launch } from './lib/browser.mjs'
 import { freezeContext } from './lib/freeze.mjs'
 import { drive as drivePanelPayload } from './state/panel-payload.mjs'
+import { tracker } from './lib/reached.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const BASE = arg('base', 'http://127.0.0.1:4488')
@@ -147,6 +148,11 @@ const readTree = (el, props) => {
 mkdirSync(`${OUT}/rest`, { recursive: true })
 mkdirSync(`${OUT}/hover`, { recursive: true })
 
+// `/this-page-does-not-exist` is two of this file's own targets, because
+// the not-found page carries the quiet-link and mark-link treatments and
+// is reviewed like any other page, so its status is the subject.
+const reach = tracker({ expect404: ['/this-page-does-not-exist'], label: 'target load' })
+
 const browser = await launch()
 const lines = []
 const rows = []
@@ -191,7 +197,7 @@ for (const t of TARGETS) {
   const ctx = await browser.newContext({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1, reducedMotion: 'no-preference' })
   await freezeContext(ctx)
   const page = await ctx.newPage()
-  await page.goto(url, { waitUntil: 'networkidle' })
+  reach.saw(t.path, await page.goto(url, { waitUntil: 'networkidle' }))
   if (t.drive) await t.drive(page, origin)
 
   // A page that fetches its own data is a race against a fixed settle, and
@@ -293,8 +299,42 @@ lines.push('style moved. Whether a reader can see it moving is the pixel count f
 lines.push(`  python3 diff-frames.py ${OUT}/rest ${OUT}/hover`)
 lines.push('and a hover worth fewer pixels than the hairline it draws is a finding.')
 
+// WHAT THIS FILE DID NOT DO UNTIL 2026-11-09 (run w). It computed no exit
+// status at all. It ended on `await browser.close()`, so a run in which
+// every target printed MISSING left the same zero as a run in which every
+// hover was verified, and the enumerated list whose whole point is that an
+// absence shows was showing it in one channel only.
+//
+// That is the shape Ursa's exo seat generalised the same day: the
+// do-nothing value is inside the legal range of the real answer and sits at
+// the reassuring end of it. This instrument's do-nothing value was the best
+// value it could return.
+//
+// Three categories, and they are not the same verdict:
+//
+//   MISSING / MISSING? / GATE-TIMEOUT   the target was asked for and
+//       nothing is known about it. Blindness. Exit 2.
+//   NOT-REACHED                         a flag this invocation did not
+//       pass. Nothing was asked of that surface, so this is scope and not
+//       blindness. Reported with the flag that would reach it, never gated
+//       on, because gating would make every ordinary run of this file fail.
+//   NO-CHANGE / by-design-disabled      a verdict about the SITE, which
+//       the reader of the table makes. Exit 0 however bad it is.
+const blind = rows.filter((r) => ['missing', 'missing?', 'gate-timeout'].includes(r.verdict))
+const scoped = rows.filter((r) => r.verdict === 'not-reached')
+lines.push('')
+if (blind.length) {
+  lines.push(`NOT MEASURED: ${blind.length} of ${rows.length} targets were asked for and nothing is known about them, so this run makes no claim about those hovers.`)
+  for (const r of blind) lines.push(`  ${r.label} (${r.sel} on ${r.path}): ${r.verdict}`)
+} else {
+  lines.push(`every one of the ${rows.length - scoped.length} targets this run asked for was reached.`)
+}
+if (scoped.length) lines.push(`${scoped.length} target(s) were not asked for at all: ${scoped.map((r) => `${r.label} needs ${r.reason.replace(/^no /, '')}`).join(', ')}. That is this invocation's scope and not a finding.`)
+lines.push(...reach.lines())
+
 const text = lines.join('\n') + '\n'
 writeFileSync(`${OUT}/states.txt`, text)
-writeFileSync(`${OUT}/states.json`, JSON.stringify({ base: BASE, harness: hoverMedia, settleMs: SETTLE, rows }, null, 2) + '\n')
+writeFileSync(`${OUT}/states.json`, JSON.stringify({ base: BASE, harness: hoverMedia, settleMs: SETTLE, blind: blind.length, scoped: scoped.length, reached: reach.rows(), rows }, null, 2) + '\n')
 console.log(text)
 await browser.close()
+if (blind.length || reach.code()) process.exit(2)

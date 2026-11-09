@@ -1,0 +1,29 @@
+# what each kit instrument returns when it does nothing
+# live=http://127.0.0.1:4871  dead=http://127.0.0.1:4999  wrong=http://127.0.0.1:4871/no-such-route-9d1f
+
+instrument         column  exit      claims-pass  abstains  last line
+shoot              live    0         true         false     no frame overflows its viewport
+shoot              dead    1         false        false     node:internal/modules/run_main:123
+shoot              wrong   0         true         false     no frame overflows its viewport
+measure-contrast   live    0         true         true      record/desktop               span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED
+measure-contrast   dead    1         false        false     [   0.0s] writing to docs/design/reviews/2026-11-09-message-w/data/cells/measure-contrast-dead/contrast.txt, 2 page(s) a
+measure-contrast   wrong   0         true         true      no-such-route-9d1f/desktop   span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED
+measure-focus      live    1         true         false     The 2.4.11 area column is reported and never failed on: median 0.54 of the 2px-perimeter minimum, across 33 stops. The r
+measure-focus      dead    1         false        false     node:internal/modules/run_main:123
+measure-focus      wrong   1         true         false     The 2.4.11 area column is reported and never failed on: median 10.03 of the 2px-perimeter minimum, across 12 stops. The 
+measure-hit-areas  live    0         true         false       document spans are: none, on no page
+measure-hit-areas  dead    1         false        false     node:internal/modules/run_main:123
+measure-hit-areas  wrong   0         true         false       document spans are: none, on no page
+measure-narrow     live    0         true         false       0 of 8 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose a
+measure-narrow     dead    2         false        true        390 set (/record): page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4999/record
+measure-narrow     wrong   0         true         false       0 of 8 page-by-width cells put content out of reach; 0 overflow reachably; 0 carry decoration that bleeds on purpose a
+verify-hover       live    1         false        false     node:internal/modules/run_main:123
+verify-hover       dead    1         false        false     node:internal/modules/run_main:123
+verify-hover       wrong   1         false        false     node:internal/modules/run_main:123
+
+5 of 12 absence cells are IN BAND: the instrument did nothing and said so with a value a caller reads as success.
+  shoot wrong: exit 0, and prints a passing headline
+  measure-contrast wrong: exit 0, and prints a passing headline
+  measure-focus wrong: exit 1, and prints a passing headline
+  measure-hit-areas wrong: exit 0, and prints a passing headline
+  measure-narrow wrong: exit 0, and prints a passing headline
