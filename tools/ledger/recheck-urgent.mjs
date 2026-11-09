@@ -18,11 +18,20 @@
 // --no-run reports the extraction without executing any probe, so a reader can
 // see which entries are checkable at all without paying for the test runs.
 // Under it every entry classifies `unverifiable`, which is honest: nothing ran.
+//
+// An entry may name the command that decides it, which this tool then runs in
+// preference to anything it could infer from the entry's prose:
+//
+//   - Recheck: `node tools/secret-scan.mjs --history`
+//
+// The grammar that line must satisfy, and the reason it is narrower than a
+// shell command rather than wider, is in `./urgent-verdict.mjs`. A declaration
+// that fails it is printed as refused with its reason, never dropped.
 import { readFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { parseLedger } from './ledger.mjs'
 import { statusOf } from './block-kinds.mjs'
-import { classifyEntry, probesIn, report } from './urgent-verdict.mjs'
+import { classifyEntry, probePlan, report } from './urgent-verdict.mjs'
 
 const args = process.argv.slice(2)
 const noRun = args.includes('--no-run')
@@ -49,19 +58,45 @@ function trackedPaths() {
 }
 
 /**
- * Run one probe. `node --test <path>` with the argument vector passed
- * directly, never through a shell, because the path came out of a prose file.
- * @param {string} path a path already matched against urgent-verdict's
- *   PROBE_SHAPE allowlist and confirmed tracked
- * @returns {boolean} whether it exited 0
+ * Run one probe. The argument vector is passed to `spawnSync` directly and
+ * never through a shell, because every token in it came out of a prose file.
+ * Two vector shapes reach here and both are built by `probePlan`, not here:
+ * `['--test', '<a tracked .test.mjs under tools>']` for a probe this tool
+ * inferred from a path the entry mentioned, and `['<a tracked .mjs under tools
+ * or scripts>', '--bare-flag', ...]` for the command the entry declared on a
+ * `- Recheck:` line. Nothing else is accepted by either allowlist, so this function does no
+ * validation of its own and must not start doing any: a check here would be a
+ * second, weaker copy of a rule that belongs in one place.
+ *
+ * Exit 2 is reported as `'cannot-answer'` and never as a failure. That is this
+ * repository's own convention for a gate that could not do its job, and here it
+ * is load-bearing: `node tools/secret-scan.mjs --history` exits 2 in the
+ * shallow single-branch clone every seat is handed, so reading non-zero as "the
+ * urgent condition still holds" would turn a refusal into a finding. A spawn
+ * that never started (`out.status === null`, which is what a timeout or a
+ * missing interpreter looks like) is the same answer for the same reason.
+ *
+ * A `node --test` suite that SKIPS a subtest still exits 0, so for an inferred
+ * probe the exit code alone cannot tell a pass from a measurement that did not
+ * happen. `tools/root-entries.test.mjs` skips its central assertion on a
+ * shallow clone, on purpose and with a message saying the claim is unmeasured,
+ * and the shallow clone is what every seat is handed. So the TAP summary is
+ * read too, and exit 0 with a non-zero skip count is `'incomplete'`. The skip
+ * count is returned alongside so the report can print the one number a reader
+ * needs to go and look.
+ * @param {string[]} argv what follows the interpreter
+ * @returns {{ outcome: true | false | 'cannot-answer' | 'incomplete', skipped: number }}
  */
-function runProbe(path) {
-  const out = spawnSync(process.execPath, ['--test', path], {
+function runProbe(argv) {
+  const out = spawnSync(process.execPath, argv, {
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
     timeout: 300_000,
   })
-  return out.status === 0
+  const skipped = Number(/^# skipped (\d+)$/m.exec(out.stdout ?? '')?.[1] ?? 0)
+  if (out.status === 2 || out.status === null) return { outcome: 'cannot-answer', skipped }
+  if (out.status !== 0) return { outcome: false, skipped }
+  return { outcome: skipped > 0 ? 'incomplete' : true, skipped }
 }
 
 let source
@@ -95,19 +130,35 @@ function headingDate(text) {
   return text.match(/^###\s+(\d{4}-\d{2}-\d{2})/)?.[1] ?? null
 }
 
-/** @type {Map<string, boolean>} */
+/** Keyed on the probe's identity string, which is the test path for an
+ *  inferred probe and the whole command line for a declared one, so two
+ *  entries that declare the same command pay for it once. */
+/** @type {Map<string, true | false | 'cannot-answer' | 'incomplete'>} */
 const probeResults = new Map()
+/** @type {Array<{ key: string, skipped: number }>} */
+const skipping = []
 if (!noRun) {
-  const wanted = new Set()
-  for (const e of urgent) for (const p of probesIn(e.text, isTracked)) wanted.add(p)
-  for (const p of [...wanted].sort()) {
-    process.stderr.write(`recheck-urgent: running ${p}\n`)
-    probeResults.set(p, runProbe(p))
+  /** @type {Map<string, string[]>} identity -> argv */
+  const wanted = new Map()
+  for (const e of urgent) {
+    for (const probe of probePlan(e.text, isTracked).probes) wanted.set(probe.path, probe.argv)
+  }
+  for (const key of [...wanted.keys()].sort()) {
+    process.stderr.write(`recheck-urgent: running ${key}\n`)
+    const { outcome, skipped } = runProbe(wanted.get(key))
+    probeResults.set(key, outcome)
+    if (skipped > 0) skipping.push({ key, skipped })
   }
 }
 
 const verdicts = urgent.map((e) => classifyEntry(e, { probeResults, isTracked, today }))
 for (const line of report(verdicts, { ledgerPath, today })) console.log(line)
+// The skip counts, printed on stdout with the report rather than left on
+// stderr, because they are the reason an entry above reads `incomplete` and a
+// reader who cannot see them has to take the word `incomplete` on trust.
+for (const { key, skipped } of skipping) {
+  console.log(`measurement note: \`${key}\` exited 0 with ${skipped} skipped subtest(s), so its zero is not a measurement of everything it asserts.`)
+}
 if (noRun) {
   console.log('--no-run was passed, so no probe was executed and every entry above is unverified by construction.')
 }

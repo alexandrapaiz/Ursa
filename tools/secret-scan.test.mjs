@@ -19,7 +19,7 @@
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync, unlinkSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, unlinkSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -367,5 +367,59 @@ describe('a credential this tool already detected is never reported clean', () =
     const r = run(ROOT, '--json');
     const out = JSON.parse(r.stdout);
     assert.equal(typeof out.skipped_unreadable, 'number');
+  });
+});
+
+// Found 2026-11-09 by following this scanner's own remediation advice. Every
+// accepted-hit verdict it prints ends `Re-run with --no-baseline to see the
+// raw set.`, the usage block at the top of tools/secret-scan.mjs lists
+// `--no-baseline`, docs/design/credential-baseline.md prints the literal
+// command, and `has('no-baseline')` reads it correctly — but `no-baseline` was
+// absent from KNOWN_FLAGS, and the unknown-argument refusal runs first and
+// exits 2. So the escape hatch three documents promise had never been
+// reachable. The instance is fixed; this is the property, so the next flag
+// cannot drift the same way.
+describe('every flag this scanner documents or advises is a flag it accepts', () => {
+  const SOURCE = readFileSync(TOOL, 'utf8');
+  const ADVICE = readFileSync(join(dirname(TOOL), 'secret-scan-verdict.mjs'), 'utf8');
+
+  /** The array literal, read from source rather than imported, because
+   *  tools/secret-scan.mjs is a script with top-level effects and exports
+   *  nothing. */
+  function knownFlags() {
+    const m = SOURCE.match(/const KNOWN_FLAGS = \[([^\]]*)\]/);
+    assert.ok(m, 'KNOWN_FLAGS must stay a plain array literal for this test to read it');
+    return m[1].split(',').map((s) => s.trim().replace(/^'|'$/g, '')).filter(Boolean);
+  }
+
+  /** `--flag` tokens inside a comment or string, with any `=value` stripped. */
+  function flagsIn(text) {
+    return [...new Set([...text.matchAll(/--([a-z][a-z0-9-]*)/g)].map((m) => m[1]))];
+  }
+
+  test('--no-baseline is accepted rather than refused as unknown', () => {
+    const r = run(ROOT, '--no-baseline');
+    assert.notEqual(r.code, 2, `${r.stdout}${r.stderr}`);
+    assert.doesNotMatch(`${r.stdout}${r.stderr}`, /does not know/);
+  });
+
+  test('the usage block promises nothing the argument check refuses', () => {
+    const usage = SOURCE.slice(SOURCE.indexOf('// Usage:')).split('\n//\n')[0];
+    const known = knownFlags();
+    for (const f of flagsIn(usage)) {
+      assert.ok(known.includes(f), `the usage block documents --${f}, which KNOWN_FLAGS omits`);
+    }
+  });
+
+  test('the remediation sentences it prints name nothing the argument check refuses', () => {
+    const known = knownFlags();
+    // Only this scanner's own advice strings. `scripts/redaction-check.mjs` is
+    // a sibling tool with a different flag surface, and the verdict module
+    // names it by path, never by flag.
+    for (const [, body] of ADVICE.matchAll(/'([^']*--[a-z][a-z0-9-]*[^']*)'/g)) {
+      for (const f of flagsIn(body)) {
+        assert.ok(known.includes(f), `an advice string says --${f}, which KNOWN_FLAGS omits: ${body}`);
+      }
+    }
   });
 });
