@@ -139,6 +139,32 @@ export const DISPOSITIONS = {
     forbidden: true,
     allowlisted: false,
     why: 'compareDays and compareInstants answer null for a value they will not place; Array.prototype.sort coerces null to 0, so a refused row reads as equal and the array comes back in input order with no error. The hazard is documented twice in tools/instant.mjs as the stated reason sortByDay and sortByInstant exist, and the lint repaired-site exemption cleared it until this code was added'
+  },
+  // Added 2026-11-09 by this seat, on a measurement Ursa's engineer seat
+  // handed over rather than landed. It built the detector as an assertion
+  // inside its own new test file, and a detector in a test file emits no
+  // `code:` literal and is driven by no probe, so `emittableCodes()` below
+  // cannot see it and this table cannot owe a decision about it. The engineer
+  // seat said exactly that itself, called its own instrument the weaker one,
+  // and declined to write into this file ahead of the seat that owns it.
+  //
+  // The difference is worth stating because it is the general case: a test
+  // asserts over the tree it is run on, and a disposition is decided once
+  // here for every tree afterwards. A sweep in a test file is a measurement;
+  // a code is a decision.
+  //
+  // `allowlisted: false`, and unlike REFUSAL_AS_ORDER above it this is a
+  // STANDING BET rather than a proof. There is an arguable case — refusing a
+  // value BECAUSE it is day-spelled is conservative, and this module's own
+  // `parseInstant` does it over two lines — so the first honest instance goes
+  // in the corpus file with its argument and this flips to `allowlisted:
+  // true`. It starts false because today's tree has no instance to argue
+  // about: measured at this commit, one finding, in a test file, zero
+  // offenders.
+  SHAPE_AS_EXISTENCE: {
+    forbidden: true,
+    allowlisted: false,
+    why: 'timestampShape decides a SPELLING and parseDay decides an EXISTENCE, and they disagree about the days the calendar does not have: 2026-02-30 is day-shaped to the first and null to the second. A caller comparing that shape against the day string to mean "this is a day I can use" has accepted a date that does not exist. Two seats wrote that line in one night, in tools/seat/read-dates.mjs and in the transcription of it on the engineer lane, which is why it is a code and not a review note'
   }
 }
 

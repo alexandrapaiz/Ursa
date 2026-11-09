@@ -217,10 +217,25 @@ def read_directives(path):
 def absent_fixture_exemptions():
     """The third exemption surface in this guard, read off the module that
     holds it. `tools/secret-print-tests.py` exempts two vendored tests that
-    assert against HQ's directory layout. That exemption already fails when
-    it stops being needed, which is the staleness half; what it lacked was
-    the date, because "Ursa does not have HQ's file" is a decision Ursa can
-    revisit and not a fact about the world."""
+    assert against HQ's directory layout.
+
+    All three directions are read here now, the same three the rest of this
+    file reads over baseline entries and markers.
+
+    The staleness half looked covered. That runner fails when an exempted test
+    starts PASSING, so the fixture arriving clean is caught. The date was
+    added because "Ursa does not have HQ's file" is a decision Ursa can
+    revisit and not a fact about the world.
+
+    What neither reached was the premise. The entry is keyed on a test NAME,
+    and its reason is a claim that a path does not exist. Measured 2026-11-09:
+    with a file created at `standards/lessons.md`, the exempted test failed
+    for a reason that was not absence, the runner called it an absent fixture
+    and exited 0, and this gate was green beside it because the date was
+    months away. So the exemption cleared a failure written about a different
+    state of the tree, which is this file's own `stale` argument arriving in
+    the surface it had not been pointed at. Each entry now names its
+    `absent_path` and the premise is read off the filesystem."""
     mod = load_vendored(TEST_RUNNER, "_ursa_secret_print_tests")
     got = getattr(mod, "EXPECTED_ABSENT_FIXTURES", None)
     if not isinstance(got, dict):
@@ -230,17 +245,26 @@ def absent_fixture_exemptions():
     out = []
     for name, value in sorted(got.items()):
         if not isinstance(value, dict) or "review_by" not in value:
-            out.append({"name": name, "review_by": None, "why": str(value)})
+            out.append({"name": name, "review_by": None, "why": str(value),
+                        "absent_path": None, "premise_holds": None})
             continue
+        claimed = value.get("absent_path")
+        row = {
+            "name": name,
+            "why": str(value.get("why", "")),
+            "absent_path": str(claimed) if claimed else None,
+            # None means the entry named no path, so the premise could not be
+            # read. That is a distinct verdict from a premise that is false.
+            "premise_holds": (
+                None if not claimed
+                else not os.path.exists(os.path.join(ROOT, str(claimed)))),
+        }
         try:
             y, m, d = (int(p) for p in str(value["review_by"]).split("-"))
-            when = datetime.date(y, m, d)
+            row["review_by"] = datetime.date(y, m, d)
         except (ValueError, TypeError):
-            out.append({"name": name, "review_by": None,
-                        "why": str(value.get("why", ""))})
-            continue
-        out.append({"name": name, "review_by": when,
-                    "why": str(value.get("why", ""))})
+            row["review_by"] = None
+        out.append(row)
     return out
 
 
@@ -487,6 +511,27 @@ def decide(today):
             })
 
     for a in absent_fixture_exemptions():
+        if a["premise_holds"] is None:
+            problems.append({
+                "kind": "undecided",
+                "where": "tools/secret-print-tests.py",
+                "what": f"EXPECTED_ABSENT_FIXTURES[{a['name']}]",
+                "why": "names no `absent_path`, so the condition this "
+                       "exemption was accepted under cannot be read and the "
+                       "entry suppresses a test failure on a claim nothing "
+                       "checks",
+            })
+        elif not a["premise_holds"]:
+            problems.append({
+                "kind": "stale",
+                "where": "tools/secret-print-tests.py",
+                "what": f"EXPECTED_ABSENT_FIXTURES[{a['name']}]",
+                "why": f"{a['absent_path']} exists, so this is no longer an "
+                       "absent fixture. The exemption has outlived its "
+                       "condition and now clears a failure written about a "
+                       "different state of the tree. Decide the test, then "
+                       "delete the entry.",
+            })
         if a["review_by"] is None:
             problems.append({
                 "kind": "undecided",

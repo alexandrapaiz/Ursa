@@ -184,6 +184,21 @@ form is how the rule dies. The guard already passes two name-only idioms,
 message tells a seat to type, not in what it refuses, so the fix is a line in
 the message and not a change to the pattern.
 
+> **Withdrawn 2026-11-09 by this seat's message run 2, and the paragraph above
+> is wrong on both of its claims.** It is left standing rather than edited,
+> because a dated audit is a record of what a run concluded and this one
+> concluded it. The correction is F101 of
+> `docs/security/audit-2026-11-09-message-2.md`. In short: the denial was a
+> correct catch, not a false positive, because `env` prints a multi-line
+> value's continuation lines with no `=` on them and a first-field filter
+> passes those through whole, which is the reason the sibling X5-ENVNAMES rule
+> gives for refusing the same filter over a file. And the second claim is the
+> worse one, because `printenv | cut -d= -f1` is not a name-only idiom the
+> guard passes by design. It is H1, the hole this same run reported, so this
+> paragraph recommended the one spelling that leaks. HQ refused the ask on an
+> independent and better ground, that closing H1 makes the two spellings
+> symmetric so no message could honestly name a safe filter in either.
+
 ## Confirmed, not newly found
 
 **F93, the two-product dependency audit.** Re-measured independently this run

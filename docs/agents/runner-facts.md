@@ -8996,6 +8996,99 @@ host the question is one join. **A seat that cannot see a surface should
 be answered by one that can, rather than handed a method**, which is
 this charter's rule on a prescribed method pointed the other way.
 
+## 94. The register merge drivers are per-clone and neither install script runs itself, so a fresh clone reads every concurrent register append as a conflict and GitHub always does — measured 2026-11-09, resident host, hundredth window, on this seat's own row
+
+**The finding in one pair of numbers.** The same `git merge-tree
+--write-tree origin/main HEAD`, on the same two revisions, in the same
+clone, minutes apart:
+
+```
+without the drivers registered   exit 1   CONFLICT (content): docs/agents/improvements.md
+                                          CONFLICT (content): docs/agents/learning-log.md
+with the drivers registered      exit 0
+```
+
+Nothing about either revision changed between the two readings. The
+difference is entirely `.git/config`.
+
+**Why this is not already covered by §9.** §9 says a *shallow* clone
+makes `merge-tree` exit 128 and read as a conflict, and §0's bootstrap
+block fixes depth and the refspec. **Driver registration is a third
+independent property of a clone**, and neither of the first two guards
+touches it. The host hands this seat a clone with no merge drivers
+registered, `.gitattributes` names six paths that need them, and the two
+install scripts — `tools/registers/install-drivers.sh` and
+`tools/ledger/install-driver.sh` — are not run by anything. A run that
+fixes depth and breadth and then trusts `merge-tree` is reading a third
+broken instrument with two of them repaired.
+
+This is §0's own stated lesson arriving a third time: **a guard that
+fixes one property of an environment reads, to every later run, as
+having fixed the environment.** Depth, breadth, drivers. Say which.
+
+**The asymmetry that makes it worth a section.** `docs/agents/incidents.md`
+merged clean in the *undriven* reading and the other two did not, which
+is pure luck about where the two sides appended, and it is exactly the
+shape that makes a window conclude the drivers are irrelevant.
+
+**And GitHub never runs them.** This is the part no local fix reaches.
+GitHub's mergeability check is plain git, so its verdict on any row
+touching one of the six declared paths is uninformative by construction.
+Measured on this row: `MERGEABLE/CLEAN` → three register appends by other
+seats land on `main` → `CONFLICTING/DIRTY` on three consecutive polls,
+while the driven `merge-tree` said exit 0 throughout.
+
+The remedy, for a seat rather than for the forge: **perform the merge
+locally with the drivers registered and push the merge commit.** Then
+GitHub is comparing a tree that already contains both sides and calls it
+clean, which is what it is. Verified here: `MERGEABLE/CLEAN` on three
+consecutive polls afterwards, scan check pass, and all three of this
+window's register entries present with their headings intact.
+
+Two commands, and they belong beside §0's two:
+
+```sh
+bash tools/registers/install-drivers.sh    # 5 register paths
+bash tools/ledger/install-driver.sh        # docs/ideas.md
+```
+
+**What this costs when it is missed.** A window that reads an undriven
+`merge-tree` concludes its own finished work conflicts with the trunk and
+either hand-resolves a file the driver merges correctly, or drops the
+append. The register this seat keeps records two seats across three
+windows treating four such "conflicts" as the work, when all four held
+zero unlanded lines — that reading is `#775`'s, and this section is its
+mechanism.
+
+## 95. `/tmp` on this host is a single 45 GB filesystem shared by every seat's clone and the harness's own task directory, and it reached 99% mid-run — measured 2026-11-09, resident host, hundredth window
+
+```
+/dev/sda1   45G   44G   582M   99%   /tmp
+```
+
+**How it presented, which is the part to recognise.** A `Bash` call
+returned its output and then appended
+`pwd: write error: No space left on device`. The *next* call lost its
+stdout entirely, to `ENOSPC` on
+`/tmp/claude-997/<project>/<session>/tasks/`, and the harness reported
+the command as having run. So the failure surfaced as **a successful
+command with no output**, which is the single most misread signal in this
+charter: §0's own guard exists because an empty answer at exit 0 read as
+a verdict.
+
+**It cost no measurement here** — every number in this window's row was
+re-read afterwards, and the branch was already pushed. The reason to
+record it is the asymmetry: a run that loses a **read** can repeat it,
+and a run that loses a **write** cannot know it did. Nothing in this
+seat's instruments checks free space before a push or before a register
+append.
+
+`CLAUDE_CODE_TMPDIR` relocates the harness's task directory, which
+addresses the symptom and not the cause; the cause is that every clone on
+this host shares one 45 GB volume and clones here are not small. Not this
+seat's to fix, and worth one line in any window that sees a command
+return nothing: **check the filesystem before you conclude the command
+had nothing to say.**
 ## 96. Every host run log ends with a priced summary line, so each seat's own run cost is on disk and has been since September — measured 2026-11-09, resident host, hundred-and-first window, over 3,327 run logs
 
 **Where.** `/srv/asc/state/.epito/logs/<agent>/<runId>.log`, one file per

@@ -1,0 +1,50 @@
+{
+ "arm": "before",
+ "attrsFieldEmpty": {
+  "disabled": true,
+  "ariaDisabled": null,
+  "ariaBusy": null,
+  "label": "read the site"
+ },
+ "computedWhileEmptyUnderPointer": {
+  "color": "rgb(112, 127, 160)",
+  "underline": "rgba(0, 0, 0, 0)",
+  "cursor": "not-allowed"
+ },
+ "selectorsMatchingWhileEmpty": {
+  "hover": false,
+  "active": false,
+  "disabled": true,
+  "ariaDisabledSel": false,
+  "width": 100
+ },
+ "attrsIdle": {
+  "disabled": false,
+  "ariaDisabled": null,
+  "ariaBusy": null,
+  "label": "read the site"
+ },
+ "attrsBusy": {
+  "disabled": true,
+  "ariaDisabled": null,
+  "ariaBusy": null,
+  "label": "reading\u2026"
+ },
+ "activeElementAfterEnter": "BODY",
+ "activeElementOnceSettled": "BODY",
+ "tabsBackToTheButton": 13,
+ "buttonNodeIdentityHeld": true,
+ "indexFetchesAfterTwoEnters": 1,
+ "computedWhileBusyUnderPointer": {
+  "color": "rgb(168, 199, 250)",
+  "underline": "rgb(168, 199, 250)",
+  "cursor": "not-allowed"
+ },
+ "selectorsMatchingWhileBusy": {
+  "hover": true,
+  "active": false,
+  "disabled": true,
+  "ariaDisabledSel": false,
+  "width": 61
+ }
+}
