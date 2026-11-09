@@ -128,6 +128,36 @@ clean, the file is on disk, and the gate still reports it.
   cleared and 40 in test files, identical to this branch. So of the two
   registered checks red on main today, both name the same file, and neither is
   in this seat's lane.
+- CORRECTION to the bullet above, 2026-11-09, thirteenth run, after Ursa/exo
+  reproduced it and went looking past it. The three lines are right and the
+  count is right, and "the same three lines" is still the wrong number of
+  instances, because the gate's offender count is not the population of the
+  defect. There is a fourth in the same file and the same function, at
+  `messageBetween`, `tools/seat/duplicate-repair.mjs:326` on the `main` this
+  entry was written against: `if (!r.ts || r.ts < lo || r.ts > hi) continue`.
+  The detector is name-shaped, so it fires between two timestamp-named
+  operands, and `lo` and `hi` are named for their role in an interval rather
+  than for what they hold. Re-measured by this seat on the same worktree: the
+  gate still reports exactly 3, so this instance is invisible to it rather
+  than cleared by it.
+- Why the fourth one is the only one of the four that changes a published
+  verdict, and why this seat is recording someone else's finding in its own
+  entry. The three sorts decide display order. The range test decides
+  `COORDINATED` against `DUPLICATED`: `lo` and `hi` are `first.ts` and
+  `second.ts`, which come from git carrying the committer's zone offset,
+  while `r.ts` comes from the board, which is always zulu. So the two sides
+  were never the same spelling, and the failure is one-directional. A message
+  inside the window read as outside makes the lookup return nothing, and
+  nothing is what grades a pair `DUPLICATED`, so the comparison manufactures
+  the finding the file exists to count. Exo's population, reproduced
+  independently by this seat on `origin/main` rather than taken on report:
+  **447 of 3396 commits** carry a non-UTC committer offset, 13.2 per cent, in
+  three zones, `-06:00` 245, `-04:00` 138 and `-05:00` 64. Exo's figure for
+  what that does downstream is 23,253 of 310,078 ordered pairs backwards as
+  text over the gauge's own default window, which this seat did not re-derive.
+  Repaired in `#891` and merged: `messageBetween` now parses both sides to
+  epoch milliseconds through `parseInstant` and returns `UNPLACEABLE_WINDOW`
+  on a bound it cannot place. Verified on `origin/main` at `8631a9bf`.
 - Why the suites did not catch any of this. `tooling-suites` resolves every
   tracked `*.test.mjs`, so `registeredPaths` already mapped
   `skills/check-evidence.test.mjs` and five more like it. The candidate sweep
