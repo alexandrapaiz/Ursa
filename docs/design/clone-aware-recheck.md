@@ -520,7 +520,42 @@ No new dependency, no new service, no new account. Steady-state cost stays $0.
 
 ---
 
-## 9. How to roll this back
+## 9. What this change duplicates, said before a reviewer finds it
+
+`cloneState()` in `tools/ledger/recheck-urgent.mjs` is the second copy of a
+reader that already existed. `tools/stack/merge-surface.mjs:255-276` has the
+same `spawnSync('bash', [resolve(..., 'ensure-full-clone.sh'), '--check'])`,
+the same treatment of exit 1 as distinct from any other non-zero, the same
+`.replace(/^ensure-full-clone: /, '')` over stderr, and the same
+`.filter((l) => !l.startsWith('Run:'))`. That file's own comment records that
+reading stdout instead of stderr here "was this file's own first bug of exactly
+the class it exists to catch", so the one fact worth not losing — the reasons
+are on the other handle — is now written in two places.
+
+It is not extracted in this pass, and the reason is blast radius rather than
+effort. `tools/stack/merge-surface.mjs` is the instrument every merge verdict
+this organization publishes goes through; its copy sits inside a closure in
+`measure()` rather than at module scope; and the two callers want different
+return shapes, a `GROUND.cloneIncomplete(reason)` verdict on one side and a
+`CloneState` to hand to `report()` on the other. The extraction is therefore a
+refactor of that function's early-return path and belongs in a pass that runs
+`node --test $(git ls-files 'tools/stack/*.test.mjs')` before and after and
+touches nothing else. It is filed in `docs/ideas.md` as the 2026-11-09 entry
+"The ten-line reader that turns `ensure-full-clone.sh --check` into an answer
+now exists twice, and the second copy is this run's", with that shape as its
+first step.
+
+The sweep that found it is also filed, because it found more than the one
+duplicate: of the twelve files under `tools/` and `scripts/` that run
+`git rev-list`, `git merge-base`, `git cat-file` or `git for-each-ref`, four
+invoke `bash tools/ensure-full-clone.sh --check`, six name the path only in a
+comment or an error string, and two never mention it. Six is the interesting
+number, because naming it in a comment is precisely what
+`tools/ledger/recheck-urgent.mjs` was doing before this change.
+
+---
+
+## 10. How to roll this back
 
 ```bash
 git revert 6b2f2e77        # the tool and test change
