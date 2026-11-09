@@ -199,6 +199,23 @@ repository.
 history, per the scan above. No subscriber or private evidence surface exists
 in this repository to leak.
 
+**Internal doc links and referenced files.** The charter asks for this and no
+gate in the suite covers it, so it was run by hand. **147 local markdown links
+across `docs/` resolve, 0 broken.** Backticked repository paths are noisier and
+needed a denominator before they meant anything: 2,869 in live documents and
+3,843 more in dated records, which are excluded because a path that was real
+when a record was written is a record rather than a defect. Of the live ones,
+79 name a file that is absent, and every one checked falls into three classes
+that are not defects. Most are in `docs/design/`, naming the tool the design
+proposes to build. Some are in `docs/standards/`, which is HQ's file synced
+here and names HQ's own tools, which this repository does not vendor. One is a
+`..` traversal written deliberately as a test case, with the guard's real
+location named beside it. And the one in this seat's own lane,
+`docs/security/audit-2026-09-27.md`, is referenced three times and absent,
+which the referring document already says in its own second paragraph: the
+file exists only on the branch of `#28`, which never merged. Nothing new, and
+nothing to fix.
+
 **Workflows.** Twelve, eleven seat runners and the redaction gate. Every one
 carries an explicit `permissions:` block. No `pull_request_target`. The gate
 that runs on pull requests holds `contents: read` and nothing else. Three
