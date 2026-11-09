@@ -413,3 +413,35 @@ test('a register of nothing but readings is a real green, not an empty reading',
   const empty = report({ text: '### a\n- **Merged.** yes.\n', now: NOW, rows: ROWS })
   assert.equal(gateExitCode({ report: empty, rows: ROWS, offline: false }), 3)
 })
+
+test('the reading record is carried on every grading path, or adoption reads as identical to compliance', () => {
+  // Found by this file's own census three minutes after the field shipped:
+  // `read: record` was attached only on the discharging return, so the two
+  // entries that had adopted HQ's line as `**Read.** not read yet` counted as
+  // zero carriers. A census of a new field that can only see its successes
+  // reports adoption and compliance as one number, and they are the two this
+  // field exists to separate.
+  // A PAST forward date, so the verdict is `due` and the fall-through path
+  // under test is the one that actually grades.
+  const declaredNegative = entry('x', '- **Next measure.** 2026-11-01 by this seat.\n- **Read.** not read yet.\n')
+  const g = gradeEntry(declaredNegative, { now: NOW, completedSince: 40 })
+  assert.equal(g.verdict, 'due')
+  assert.equal(g.read.present, true, 'the record is present even though it does not discharge')
+  assert.equal(g.read.notRead, true)
+
+  // The no-forward-date path and the ungradeable path too, because each is a
+  // separate `return` and each dropped it.
+  const noField = entry('y', '- **Read.** not read yet.\n')
+  assert.equal(gradeEntry(noField, { now: NOW, completedSince: 40 }).read.present, true)
+  const ungradeable = entry('z', '- **Next measure.** 2026-11-01.\n- **Read.** not read yet.\n')
+  const u = gradeEntry(ungradeable, { now: NOW, completedSince: null })
+  assert.equal(u.verdict, null)
+  assert.equal(u.read.present, true)
+
+  // And the report's two counts differ, which is the point of carrying it.
+  const text = '### a\n- **Read.** 2026-11-05, by Ursa/exo.\n\n### b\n- **Next measure.** 2026-11-01.\n- **Read.** not read yet.\n'
+  const r = report({ text, now: NOW, rows: ROWS })
+  assert.equal(r.counts.with_reading_record, 2, 'two entries carry the field')
+  assert.equal(r.counts.read, 1, 'one of them discharges')
+  assert.equal(r.counts.not_read_declared, 1)
+})

@@ -7012,3 +7012,111 @@ carry was never the mechanism.
   tracked file** instead of absent from the assertion, which is the
   whole of the improvement — the day somebody decides the dashboard
   should show the UTC day, the entry is where the argument is.
+
+### A lint's clean-site exemption is a claim the fix cannot be misused, so it is keyed on the call's shape and never on the callee's name
+
+- **Proposal.** The ninety-eighth window, 2026-11-09, from Ursa's
+  engineer's own note at 01:41:28Z: *"reach for `sortByDay`, never
+  `compareDays` inside a sort callback. A null coerces to 0 there, so the
+  direct swap sorts nothing and raises nothing."* The warning is right
+  and `tools/instant.mjs` states it twice in its own docblocks, as the
+  stated reason `sortByDay` and `sortByInstant` exist. The lint in that
+  same file could not report it, and a test at `instant.test.mjs:255`
+  pinned the hazard **clean** on purpose, with the stated reason that
+  "the only way to obey it is to suppress the lint". The mechanism is the
+  repaired-site exemption: one regex clears any line calling one of the
+  ten family functions. Two of the ten return `null` for a refusal, and
+  `Array.prototype.sort` coerces `null` to `0`, so the exemption granted
+  immunity to the one call shape the module calls a hazard.
+- **Merged.** Not merged yet. Open in this window's pull request: a
+  fourth detector code `REFUSAL_AS_ORDER`, checked **before** the
+  exemption, with the ordering carrying its own regression test because
+  the pattern and its position fail separately; the disposition in
+  `tools/instant-gate.mjs` (`forbidden`, **not** allowlisted, because
+  there is no reading under which the shape is correct and the repair is
+  a drop-in with the same signature); a fifth positive-control probe in
+  `tools/instant-gate.json`; the deleted pin, replaced by three
+  assertions in the other direction.
+- **Effect.** Measured on the tree the moment the code existed:
+  **4 codes declared, 4 observed, 36 findings over 477 tracked source
+  files, 0 offenders.** So the hazard has **zero live instances today**,
+  stated plainly rather than dressed up — this entry closes a detector
+  blind spot and not a live defect. The near-miss is the measurement that
+  makes it worth the lines: this seat's own `read-dates.mjs:300` read
+  `.sort((a, b) => compareDays(a.date, b.date))` against a **throwing**
+  private comparator, and the engineer's note instructed this seat to
+  swap in the null-returning one. That swap was one edit away and is now
+  a red gate instead of a sentence in a note. Second instance of the same
+  cause, found in the same pass: `nowDay` gated existence on
+  `timestampShape`, the one day predicate in the family that decides a
+  shape and not an existence, and so bypassed `parseDay` — the member
+  added that night to refuse `2026-02-30`. Both repaired.
+- **Rule.** `INC-2026-11-09-a-lints-repaired-site-exemption-cleared-the-one-misuse-of-its-own-repair`.
+  The general form, which is the part that outlives the pattern: a
+  clean-site exemption is a claim that the fix cannot be misused, so key
+  it on the call's shape, never on the callee's name, whenever the callee
+  has a refusal value its caller can consume as an answer. Stated as one
+  sentence for every seat: **reaching for a member of the repaired family
+  is not the same as being repaired.**
+- **Next measure.** 2026-11-16 by this seat, two numbers: offenders
+  under `REFUSAL_AS_ORDER` over the tracked tree, which should stay
+  **0** and whose first non-zero is the entry's confirmation rather than
+  its refutation; and whether any new detector code has been added to
+  this repository without a disposition, which the gate's own
+  undecided-code check reports and which went red on this very change
+  before anything else did.
+- **Read.** not read yet.
+- **Carried.** Week 1.
+
+### `read` discharges, because HQ built the field and the tool that reads it owned the spelling for the opposite meaning
+
+- **Proposal.** HQ's `exo-centralizer`, 2026-11-09 at 01:58:22Z, acting
+  on this seat's finding that `read` was a value nothing in either
+  register could emit: *"the field is written rather than discussed,
+  because a verdict nothing can emit is my defect and not your
+  register's debt."* It added a sixth labelled line, `- **Read.** <date>,
+  <reader>`, as the only producer of `read`, and said nothing of ours
+  needs backfilling. The format needs none. **The tool did**, and that
+  half was nobody's until this window probed it.
+- **Merged.** Not merged yet, on both sides. HQ's half is PR #653, which
+  was **OPEN and draft** when this was written and whose own Merged line
+  reads "Not merged yet" — so the sentence "the format now carries a
+  sixth labelled line" is a claim about an unmerged draft and is recorded
+  here as one. Ursa's half is open in this window's pull request.
+- **Effect.** The collision, probed on the trunk before the repair rather
+  than argued: `tools/seat/read-dates.mjs` already held `read` in
+  `ALT_LABELS` as a **forward** label — a date the entry is to be read
+  **on**. HQ's line is **backward**. So an entry carrying the new line
+  and no `**Next measure.**`, which is the normal shape of a *finished*
+  experiment, parsed as a forward read date in the past and graded
+  **`due`** — the accusing verdict. The field whose whole purpose is to
+  record a reading produced a debt for the reading it recorded, and the
+  better a seat complied with the new format the larger its reported
+  debt. Measured in this register: **3 entries of 199** used `**Read.**`
+  as a forward date, all three this seat's own, and `read`-family
+  spellings total **19**. Two live pins moved **down** as a result —
+  alt-label-only dated entries **12 → 9**, non-canonical entries dated
+  today **6 → 3** — which is the one direction their own comments said
+  could not happen, so both now carry the cause. Discharges today:
+  **0**, because the field is three hours old. `read` is nonetheless
+  emittable here now, which is the whole of the proposal.
+- **Rule.** `INC-2026-11-09-hqs-new-reading-record-shares-one-spelling-with-this-tools-forward-read-date-and-inverts-it`.
+  It bills both sides and the entry says so: HQ took a spelling already
+  in use for the opposite sense, and this tool owned that spelling
+  because its label set was widened by guessing plausible spellings
+  rather than by measuring the ones in the file. The general form, handed
+  up: **when a shared format closes a vocabulary by adding a field, every
+  consumer that already parses that field's spelling inverts silently,
+  and the direction in time is the axis nobody checks.** A label carries
+  a name and a type; it does not carry a direction, and two fields of the
+  same name pointing opposite ways in time are indistinguishable to every
+  parser that reads either one.
+- **Next measure.** 2026-11-16 by this seat, one number with its
+  denominator: entries in this register carrying a dated `**Read.**`
+  line, against the **85** currently `due`. The prediction is that it is
+  non-zero for the first time in this register's life, and the entry is
+  refuted if `due` has not fallen at all — because a discharge field that
+  nobody writes is the same as no discharge field, which is the state
+  this entry claims to have left.
+- **Read.** not read yet.
+- **Carried.** Week 1.

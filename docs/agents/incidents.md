@@ -14585,3 +14585,148 @@ defective lines cannot hold its examples as source.
 **Status:** closed in the pull request that reports it. Six call sites
 repaired, 0 offenders, 0 undecided codes, 15 tests, and the eight
 display findings cleared by named argument rather than by silence.
+
+## INC-2026-11-09-a-lints-repaired-site-exemption-cleared-the-one-misuse-of-its-own-repair
+
+**What happened.** `tools/instant.mjs`'s lint clears any source line that
+calls one of its ten family functions, on the reasoning that such a line
+is a repaired call site. Two of the ten — `compareDays` and
+`compareInstants` — answer `null` for a value they will not place, and
+`Array.prototype.sort` coerces `null` to `0`, which reads as "these rows
+are equal". So `rows.sort((a, b) => compareDays(a.date, b.date))` leaves
+the array in input order and raises nothing, and the exemption cleared
+it. A test at `instant.test.mjs:255` pinned that line **clean on
+purpose**, with the stated reason that "the only way to obey it is to
+suppress the lint" — so the hazard was permanently invisible to the one
+instrument built to find it.
+
+**How it was found.** Ursa's engineer wrote it to this seat in prose, at
+01:41:28Z: *"reach for `sortByDay`, never `compareDays` inside a sort
+callback. A null coerces to 0 there, so the direct swap sorts nothing and
+raises nothing."* They were right, they had already written it into the
+module's docblocks twice, and neither place could stop anyone. Nothing
+measured the gap between what the module documented and what its lint
+could see.
+
+**Live instances: zero**, over 477 tracked source files, and that is
+written here rather than smoothed over. The near-miss is what justifies
+the entry: this seat's own `read-dates.mjs:300` was
+`.sort((a, b) => compareDays(a.date, b.date))` against a **throwing**
+private comparator, and the engineer's note instructed this seat to
+replace it with the null-returning one. One edit from live.
+
+**Second instance, same cause, same pass.** `nowDay` gated day-existence
+on `timestampShape`, whose `BARE_DAY` is `/^\d{4}-\d{2}-\d{2}$/` and
+which answers `'day'` for `2026-02-30` and `2026-13-99`. Existence is
+decided by `parseDay`, added that same night for exactly that reason and
+not reached. `dayOf` in `tools/seat/outage.mjs` had the identical hole,
+written by this seat, so the finding bills both authors.
+
+**Repair.** A fourth detector code `REFUSAL_AS_ORDER`, checked **before**
+the exemption, keyed on the callee rather than on a timestamp name
+because a comparator that can refuse is evidence on its own. Its
+position carries a separate regression test, because the pattern and its
+ordering fail independently and a later edit that moves it below the
+exemption would otherwise be silent. `forbidden` and not allowlisted in
+`tools/instant-gate.mjs`. Both existence holes gated on `parseDay`.
+
+**The rule.** A lint's clean-site exemption is a claim that the fix
+cannot be misused. Key it on the **call's shape**, never on the
+**callee's name**, whenever the callee has a refusal value its caller can
+consume as an answer. For every seat, in one sentence: **reaching for a
+member of the repaired family is not the same as being repaired.**
+
+**And the guard that worked.** The gate's undecided-code check — written
+by this seat's own window 96, four hours earlier, after finding a lint
+that emitted three codes while its gate decided two — went red on this
+new code before any other test did. A guard whose first catch is its
+author's next change is the only kind with evidence behind it.
+
+## INC-2026-11-09-hqs-new-reading-record-shares-one-spelling-with-this-tools-forward-read-date-and-inverts-it
+
+**What happened.** HQ's `exo-centralizer` added a sixth labelled line to
+the improvements-register format — `- **Read.** <date>, <reader>` — as a
+**backward** record of a reading taken, and the only producer of the
+`read` verdict. `tools/seat/read-dates.mjs` already held `read` in its
+`ALT_LABELS` as a **forward** label: a date the entry is to be read
+**on**. One spelling, two directions in time.
+
+**The measured consequence**, probed on the trunk before the repair. An
+entry carrying HQ's new line and no `**Next measure.**` — which is the
+normal shape of a **finished** experiment — parsed as a forward read date
+of `2026-11-09`, found it in the past, and graded **`due`**. `due` is
+the accusing verdict: it says a seat owes a reading it has not taken. So
+the field whose entire purpose is to record a reading produced a debt for
+the reading it recorded, and **the better a seat complied with the new
+format the larger its reported debt.**
+
+**Scope here.** 201 entries; **3** used `**Read.**` as a forward date,
+all three this seat's own, written by its eighty-ninth window and
+specifically praised in the centralizer's note as the error it had
+avoided. 19 entries use some `read`-family spelling.
+
+**It bills both sides, and the entry says which half is whose.** HQ took
+a spelling already in use for the opposite sense — its own diff counts
+three such entries at HQ. This tool owned that spelling because its
+label set was widened by **guessing plausible spellings** rather than by
+measuring the ones in the file, which is the same defect its own header
+records having made once already with a prefix match.
+
+**Repair.** `READING_RECORD_LABEL` split out of `ALT_LABELS`;
+`readDateField` skips it; a new `readingRecord()` reads date, reader and
+the declared negative, with HQ's asymmetry honoured — every negative
+phrasing loses, because a false `read` invents a reading nobody took.
+`read` joins the closed vocabulary and **discharges**, which closes the
+standing finding in that file's own header: *"`due` here never discharges
+and the count only grows."* A `**Read.**` line with no ISO date is
+`no-date`, not a discharge. The three forward lines are re-spelled to the
+house label. Two live pins moved **down**, the one direction their own
+comments said could not happen, and both now carry the cause.
+
+**A defect inside the repair, found by the repair's own census three
+minutes later.** The record was attached only to the discharging return,
+so two entries that had adopted the field as `**Read.** not read yet`
+counted as zero carriers. **A census of a new field that can only see its
+successes reports adoption and compliance as one number**, and those are
+the two the field exists to separate. Pinned on all four return paths.
+
+**The rule, handed up.** When a shared format closes a vocabulary by
+adding a field, every consumer that already parses that field's spelling
+inverts silently. A label carries a name and a type; it does not carry a
+**direction**, and two fields of one name pointing opposite ways in time
+are indistinguishable to every parser that reads either. So a seat that
+adds a labelled line to a shared format names the consumers that already
+match the spelling, and the direction in time is the axis to check first.
+
+## INC-2026-11-09-a-merge-order-request-was-addressed-to-the-two-seats-that-have-no-merge-authority
+
+**What happened.** Ursa's engineer and this seat both repaired the same
+`const future = ...` line in `gradeEntry` on 2026-11-09. The engineer's
+note asked this seat, at 01:41:28Z, to *"merge yours first, keep your
+`dayOf`, drop my `nowDay`."* Neither seat merges anything in this
+repository; the owner does, and the PM routes. By the time the excerpt
+woke this window, #758 had already merged, `nowDay` was exported and
+tested on the trunk, and **PR #759 was `CONFLICTING` and unmergeable** —
+a dead row in the queue the owner could not act on.
+
+**Nobody misbehaved.** The engineer measured, repaired, wrote the warning
+that found two further defects in this window, and told the other author
+first. The instruction was simply addressed to a party that could not
+execute it, and its premise expired between being written and being read.
+
+**The rule, which this charter already states in the general and had not
+applied to merge order.** Every one of this organization's delivery
+defects is a duty legible to the wrong party. A merge-order request is a
+duty for whoever merges, so it goes to the PM or the owner; what goes to
+the other author is the **content** of the resolution, which is what this
+seat could and did act on. Said positively: when two seats repair one
+line, the note between them says *how* to resolve it, never *in which
+order to merge it*, because the ordering is not either seat's to grant
+and a resolution written against an assumed order is unexecutable the
+moment the order differs.
+
+**Resolved**, in this window, against re-derived state and not against
+the instruction: the merged `nowDay` stays, the deleted call-site refusal
+comes back, and the duplicate `nowDay`/`dayOf` collapse is routed to the
+engineer rather than performed in another seat's module on a lane that
+has to merge tonight.

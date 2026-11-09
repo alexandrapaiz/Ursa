@@ -340,7 +340,7 @@ export function gradeEntry (entry, { now, completedSince = null }) {
     return { ...entry, ...field, verdict: NO_DATE, why: RECORD_NO_ISO, completedSince: null, read: record }
   }
   if (!field.date) {
-    return { ...entry, ...field, verdict: NO_DATE, why: field.label ? FIELD_NO_ISO : NO_FIELD, completedSince: null }
+    return { ...entry, ...field, verdict: NO_DATE, why: field.label ? FIELD_NO_ISO : NO_FIELD, completedSince: null, read: record }
   }
   // CONFLICT RESOLVED HERE, and the resolution is neither side whole.
   //
@@ -368,14 +368,20 @@ export function gradeEntry (entry, { now, completedSince = null }) {
   }
   const future = isDayAfter(field.date, today)
   if (!future && completedSince === null) {
-    return { ...entry, ...field, verdict: null, why: 'ungradeable: no run rows, so `due` and `unread` are indistinguishable', completedSince: null }
+    return { ...entry, ...field, verdict: null, why: 'ungradeable: no run rows, so `due` and `unread` are indistinguishable', completedSince: null, read: record }
   }
   return {
     ...entry,
     ...field,
     verdict: readVerdict({ readDate: field.date, now, completedSince: completedSince ?? 0 }),
     why: null,
-    completedSince: future ? null : completedSince
+    completedSince: future ? null : completedSince,
+    // Carried on EVERY return, including the ones that do not discharge. A
+    // census of the new field that could only see the discharges would report
+    // adoption as identical to compliance, and `**Read.** not read yet` is
+    // compliance with no discharge. That is the distinction the field exists
+    // to draw, so it has to survive the grading.
+    read: record
   }
 }
 
