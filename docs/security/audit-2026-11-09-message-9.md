@@ -91,8 +91,8 @@ healthy path is asserted unchanged in the same case: same exit status, same
 document.
 
 `scripts/ci-checks.mjs` picks the file up by name under `tooling-suites`, so
-this is asserted rather than recommended. The suite is 27 of 27 green in
-194.4 s.
+this is asserted rather than recommended. The suite is 27 of 27 green,
+verified on the tree as committed.
 
 **What the three cases cost, stated because F114 below is about this suite's
 cost.** Two are free: a failed spawn returns immediately. The `ENOBUFS` case
@@ -133,12 +133,16 @@ This run measured that before doing it.
 So the prescribed repair targets 2.6 per cent of a case. Seventeen copies are
 5.6 s of the whole suite's run.
 
-**A note on the denominator, because this run measured a different one.**
-Run 7 recorded this suite at 267.2 s over 20 cases. This run measures it at
-194.4 s over 27, on the same host and with 7 more cases, so the earlier total
-is not reproducible here and neither total is cited as the per-case cost. The
-decomposition below is timed directly against the gate's own functions and
-does not rest on either figure.
+**A note on the denominator, because no total here is stable.** Run 7
+recorded this suite at 267.2 s over 20 cases. This run measured it twice:
+194.4 s with 27 cases, then 224.1 s with the same 27 cases minus one gate
+invocation. **The run with strictly less work took 29.7 s longer.** So on
+this host the total is dominated by load from the other seats sharing it,
+not by what the suite does, and a suite total is not an instrument for this
+question at all. That is the stronger form of the same error run 7 made: it
+read a cost off one total and attributed it to the one component it could
+see. The decomposition below is timed against the gate's own functions,
+within a single process, and does not rest on any total.
 
 Inside the 12.93 s:
 
