@@ -86,7 +86,7 @@
 // habit. There is no search for a window here: the tool abstains when the
 // declared one does not work, and an adaptive window is filed as a ledger
 // entry rather than written in a security run.
-import { liveTargetFault } from './live-target.mjs';
+import { liveTargetFault, reachFault } from './live-target.mjs';
 
 /** The routes this tool knows how to probe, and what it counts in each. */
 export const ROUTES = {
@@ -372,9 +372,22 @@ const has = (n) => argv.includes(n);
 const base = (process.env.BOARD_API_URL || '').replace(/\/$/, '');
 const token = process.env.BOARD_RUNTIME_TOKEN;
 
-/** One GET, reduced to the four things a verdict needs. */
+/** One GET, reduced to the four things a verdict needs.
+ *
+ *  A THROW IS TAGGED AND RE-THROWN, not turned into a reading. The temptation
+ *  is to return `{status: 0, count: 0, rows: []}` and let the loop carry on,
+ *  and that is the worse of the two bugs: `verdict` would then grade every
+ *  filter against a baseline of nothing and print a table, and a filter graded
+ *  from no rows is the green-on-nothing this file's own INERT verdict exists
+ *  to catch one layer down. So an unreachable board ends the run instead, at
+ *  the exit code this file's header already reserves for it. */
 async function read(path, rowsKey) {
-  const res = await fetch(base + path, { headers: { Authorization: `Bearer ${token}` } });
+  let res;
+  try {
+    res = await fetch(base + path, { headers: { Authorization: `Bearer ${token}` } });
+  } catch (error) {
+    throw Object.assign(new Error('board unreachable'), { boardReach: reachFault(error) });
+  }
   const text = await res.text();
   let body = {};
   try { body = JSON.parse(text); } catch { body = { error: text.slice(0, 200) }; }
@@ -446,6 +459,7 @@ async function main() {
   const only = flag('--route');
   const out = [];
 
+  try {
   for (const [name, spec] of Object.entries(ROUTES)) {
     if (only && only !== name) continue;
     const prefix = spec.base ? `?${spec.base}&limit=500` : `?${spec.window}&limit=500`;
@@ -483,6 +497,18 @@ async function main() {
         : casingVerdict({ count: u.count, spellings: spell(u) }, { count: l.count, spellings: spell(l) });
       out.push({ route: name, path: spec.path, param: `${param} (casing)`, ...v });
     }
+  }
+  } catch (error) {
+    // Exit 2, the code line 11 of this file already reserves for having no
+    // board to measure, and the same three lines the `liveTargetFault` branch
+    // prints. The difference between the two branches is only WHEN the fault
+    // became knowable, which is not a difference a reader acts on.
+    if (!error?.boardReach) throw error;
+    const fault = error.boardReach;
+    console.error(`${fault.code}: ${fault.line}`);
+    console.error(`  repair: ${fault.repair}`);
+    console.error(`  ${out.length} filter(s) were measured before the read failed, and no verdict is published from a partial sweep.`);
+    process.exit(2);
   }
 
   if (has('--json')) {

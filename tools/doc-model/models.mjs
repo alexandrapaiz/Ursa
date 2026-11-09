@@ -225,6 +225,12 @@ export const MECHANISMS = [
       // the registry's own vocabulary, would blind the gate to a section that
       // genuinely discusses both.
       { file: 'docs/ideas.md', heading: '### 2026-11-02 (engineer, second message pass) — A `mentions-only` dismissal is an unexecutable claim with a free pass, and this pass wrote eight of them', verdict: 'mentions-only', why: 'a ledger entry criticising this registry; it quotes `cumulative paragraph` and `trailing blocks` as examples of probe strings, and asserts nothing about where the cut lands' },
+      // A fourth, from the same cause one week on: this seat's own run 12
+      // entry reached `main` unaccounted for, and the gate was an ERROR on it
+      // rather than a warning because `docs/ideas.md` is a surface this seat
+      // may edit. Registered 2026-11-09 by run 14, which found it by running
+      // the gate rather than by reading the ledger.
+      { file: 'docs/ideas.md', heading: '### 2026-11-09 (security) \u2014 one tooling suite went red inside the full gate list and green twice on its own, and the failing case was not captured', verdict: 'mentions-only', why: 'a ledger entry about a flaky tooling suite. The only wake-cut text in it is the NAME of a case it quotes as having failed, `transcribed: the wake limit is still 1500 in the live runtime`, which it cites as evidence that the suite reads a live file. It asserts nothing about where the cut lands.' },
       // Three sections of `docs/ideas.md` that reached `main` after this
       // registry shipped and were unaccounted for from the hour they landed:
       // the gate was red on `main` from 2026-11-02 to 2026-11-09, on three

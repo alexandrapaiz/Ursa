@@ -89,7 +89,7 @@
 import { utcDay } from '../instant.mjs';
 import { liveTargetFault } from './live-target.mjs';
 import { blockFaults } from './measured-citation.mjs';
-import { pageMessages, ratioFault } from './page.mjs';
+import { pageMessages, ratioFault, coverageExit } from './page.mjs';
 import { unreffedClaims, pathClaims, isStateClaim, refsIn } from './claim-ref.mjs';
 import { wakeReceipt, WAKE_BODY_CHARS } from './check.mjs';
 import { dispositionRisk } from './disposition.mjs';
@@ -341,5 +341,5 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
   // Exit 1 and not 0: a run that quotes this table in a message should have to
   // notice that the window was not covered, and a shell that checks the status
   // is the only reader guaranteed to.
-  process.exit(coverage.complete ? 0 : 1);
+  process.exit(coverageExit(coverage));
 }

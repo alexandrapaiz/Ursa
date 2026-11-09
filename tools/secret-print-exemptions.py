@@ -320,13 +320,26 @@ def marker_census(checker, files):
     """
     out = []
     for path in files:
+        # Against ROOT, not against the working directory. The sweep printed
+        # these paths while running `cwd=ROOT` and the checker reads them the
+        # same way, so this is the one consumer that had to agree and did not.
+        # See F126: resolving them here against the process cwd made this
+        # whole census silently empty from any directory but the repo root,
+        # while the verdict line above it, which does run against ROOT, went
+        # on printing green.
         try:
-            with open(path, "r", encoding="utf-8", errors="replace") as fh:
+            with open(os.path.join(ROOT, path), "r", encoding="utf-8",
+                      errors="replace") as fh:
                 text = fh.read()
-        except OSError:
-            # A file the sweep listed and this cannot read is the checker's
-            # own problem to report, not a marker verdict to invent.
-            continue
+        except OSError as exc:
+            # A file the sweep listed a moment ago and this cannot read is a
+            # premise that moved under the tool, not a marker verdict to
+            # invent and not a file to skip. `CannotRun` is exit 2, which is
+            # this gate's code for "no answer", distinct from 1 for findings.
+            raise CannotRun(
+                f"the sweep listed {path} and it cannot be read here "
+                f"({exc.strerror or exc}), so the marker census would be "
+                f"silently short by at least one file")
         lines = text.splitlines()
         marked = [i for i, line in enumerate(lines, start=1)
                   if checker.ALLOW_MARKER.search(line)]
@@ -347,7 +360,11 @@ def marker_census(checker, files):
                 continue
             live = bool(base - got)
             out.append({
-                "path": os.path.relpath(os.path.abspath(path), ROOT),
+                # `abspath` here resolved against the process cwd while the
+                # `relpath` was taken against ROOT, so the pair only agreed
+                # when the two happened to be the same directory. The sweep
+                # already hands these out ROOT-relative.
+                "path": os.path.relpath(os.path.join(ROOT, path), ROOT),
                 "lineno": i,
                 "live": live,
                 "has_reason": bool(MARKER_REASON.search(lines[i - 1])),
