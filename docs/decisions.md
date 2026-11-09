@@ -562,3 +562,25 @@ separate things are broken and only one is this seat's to fix:
 
 Logged in `docs/sprints/pending.md` under this pass's own entry as well,
 so the owner sees it in both the ledger and the queue.
+
+## Finding — the four-Monday ceremony gap closed on its own scheduled path, not on the safety net proposed to fix it (recorded 2026-11-09, pm, cron-triggered)
+
+The previous finding (pass twenty-five, same day) asked two questions
+and proposed a safety net for the second while leaving both to the
+owner or HQ. This run answers neither question directly, but reports
+a fact that bears on both: the host's `ursa-pm` cron slot fired on
+2026-11-09, a Monday, and this run (trigger: `cron`, confirmed from
+this run's own invocation rather than inferred) read `pm.md` §11.1's
+"Monday, or a dispatch that says so" as naming itself, and ran all
+three ceremonies. `sprint-2026-10-12.md` got its retrospective
+(3 of 3 items shipped), `docs/ideas.md` got its grooming (the
+`proposed` backlog grew from 30 to 325 across the gap), and
+`sprint-2026-11-09.md` opened with two items.
+
+This is evidence for, not against, adopting pass twenty-five's safety
+net: a cron slot firing correctly today is not proof it will fire
+correctly next Monday, and the 48-hour window pass twenty-five opened
+has not yet closed as of this run. Whether to adopt the proposed
+standard change is still the owner's or HQ's call, per pm.md §18
+("never edit charters yourself"); this entry only closes the loop on
+whether today's specific gap is closed, which it is.

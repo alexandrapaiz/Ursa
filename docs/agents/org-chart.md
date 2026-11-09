@@ -1,5 +1,58 @@
 # Org Chart — Ursa
 
+## Refreshed 2026-11-09 (PM Monday ceremony)
+
+**The merge crisis the rest of this file documents is resolved and the
+numbers below are historical.** Measured fresh rather than carried: 21
+open pull requests today (`gh pr list --state open`), against the
+52-80-65 escalation the 2026-10-04 table below tracked, and 165 PRs
+merged across all building seats in the seven days ending today (`gh
+pr list --state merged` filtered on `mergedAt`). Every one of the
+21 open PRs is the newest link of a clean single-seat stack (checked
+with `git merge-base --is-ancestor` on each seat's own chain, not
+assumed), not an independent pile of duplicate builds, so none of them
+is the row-4 "two or more open PRs, none merged" dispatch case in
+`docs/standards/pm.md` §11.3 — they are waiting on a merger, same
+shape as this seat's own open PRs today.
+
+| Seat | PRs merged, last 7 days | Open now |
+|---|---|---|
+| security | 31 | 3 |
+| pm | 31 | 3 (2 ready, this run's own draft) |
+| engineer | 29 | 2 |
+| exo | 28 | 5 |
+| frontend | 19 | 2 |
+| market | 17 | 2 |
+| skill | 8 | 4 |
+| finance | recent (PR #614, Nov check-in) | 0 |
+| okr | recent (PR #613, Nov check-in) | 0 |
+| research | **none since PR #263, merged 2026-10-23** | 0 |
+| sales | dormant, no PR since #49 (2026-09-30, owner dispatch) | 0 |
+
+**Research is the one real gap this refresh found.** Cadence is Tue
+and Fri. Its last merge was PR #263 (2026-10-23) and its last attempt
+of any kind was PR #355 (`ursa-research/2026-10-24-message-12`),
+closed unmerged the same day, confirmed by branch-name search across
+all 871 PRs this repo has ever opened — nothing matching `research` in
+a branch name appears among the 400 most recent. That is roughly five
+missed Tue/Fri slots (10-24, 10-28, 10-31, 11-04, 11-07) with no
+visible output, merged or open. No `docs/standards/pm.md` §11.3 row
+fires cleanly on it (no failed run in the last 24h to diagnose, no
+sprint item currently assigns research work, no open draft of its own
+with stale CI), so this is named rather than dispatched: the owner or
+HQ's centralizer is better placed to tell a quiet cadence from a
+broken one than a judgment this seat would otherwise have to invent.
+
+**Everything else below this point, down to "Historical: governance-
+cycle tracker," describes 2026-09-24 through 2026-10-04 and is kept
+for the audit trail, not as current state.** The seat table's cadence
+column was already marked stale on 2026-10-18 (below) because the
+host manifest, not this repository, is the source of truth for
+cadence; that remains true today, and this refresh did not re-chase
+the manifest for the same reason the 2026-10-18 note gives.
+
+## Original refresh, 2026-10-04 (historical — see above for current state)
+
 **Refreshed 2026-10-04** by the ExO Sunday run (previous refreshes
 2026-09-27 and 2026-09-30, both in PRs that have still not merged, which
 is Ursa incident 9), against `gh run list
