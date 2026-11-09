@@ -146,11 +146,23 @@ charter-named or tool-named path under `/tmp` is not this run's path.
 `try` so a disk fault in teardown cannot be reported as a test failure, and
 the prefix now carries the pid.
 
-Verified at 05:41Z. Running the four new cases creates three instances and
-leaves zero. The three `ursa-exempt-` directories present afterwards all
-lack a pid segment, so they belong to runs executing the unfixed code, which
-is a second measurement of the shared-prefix hazard rather than a leak by
-this one.
+Verified at 05:50Z over the whole suite, 24 of 24 green in 255s. It creates
+17 instances and `ls -d /tmp/ursa-exempt-*-*`, which is the pid-prefixed
+form, matches none afterwards.
+
+The count is stated that way because the first attempt at it was wrong and
+read as a leak. `ls -d /tmp/ursa-exempt-[0-9]*` returned 12, which looked
+like 12 of 17 surviving. Those 12 are the OLD prefix with a `mkdtemp`
+suffix that happens to begin with a digit, so the glob written to find this
+run's instances was matching other runs' instead. Worth recording as a
+finding's own small instance of the thing the finding is about: a probe keyed
+on a prefix cannot tell whose directory it found.
+
+The shared half is measured rather than argued. At 05:50Z there are 55
+`ursa-exempt-` directories on this host, about 160 MB, none of them
+pid-prefixed and so none of them from code carrying this fix, on a
+filesystem at 98 per cent. Twelve of those were created between 05:38Z and
+05:44Z, which is inside this run's window and not by this run.
 
 ## F111 — `tools/doc-model/check.mjs` is run by no gate, and it is not green
 
