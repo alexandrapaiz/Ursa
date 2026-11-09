@@ -231,6 +231,17 @@ export const CHECKS = [
     passExit: [0],
   },
   {
+    id: 'capture-provenance',
+    scope: 'tooling',
+    title: 'Capture provenance (record surfaces name their store)',
+    // Reads committed text, never a pixel and never a chunk, so it composes
+    // with `image-metadata` rather than overlapping it. The question is which
+    // store a screenshot was rendering, which is the only part of redaction
+    // standard surface 5 that a gate can answer at all.
+    argv: () => ['node', 'tools/capture-provenance.mjs'],
+    passExit: [0],
+  },
+  {
     id: 'board-message-rules',
     scope: 'tooling',
     title: 'Board message rules',
