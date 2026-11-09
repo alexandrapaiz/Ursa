@@ -16,13 +16,25 @@ will ever touch, and point `PW_ROOT` at it:
 export FE_RUN="$PWD/.fe-run-<id>"
 mkdir -p "$FE_RUN/pw"
 
+# The cache as a VARIABLE and not as a --cache flag, and it is exported once
+# here so every npm this run issues inherits it. Two reasons, and the second
+# is the one that is not obvious. First, it covers `npx` and anything npm
+# shells out to, which a flag on one command does not. Second, it is the only
+# form in which the check below can SEE this run's installs: npm overwrites
+# its own argv about 358 ms in and the flags are gone from /proc after that,
+# while /proc/<pid>/environ keeps the variable for the whole install.
+# Measured both ways in ../reviews/2026-11-09-message-2/data/.
+export NPM_CONFIG_CACHE="$FE_RUN/npm-cache"
+
 # BEFORE any npm, and before every later one: would it race one already
 # running, in this tree, elsewhere in this checkout, or on this cache?
-# Exits 3 if so, and prints a count line either way.
-bash docs/design/review-kit/check-installs.sh --cache "$FE_RUN/npm-cache" || exit 3
+# Exits 3 if so, and prints a count line either way. ONE INSTALL AT A TIME
+# is the point of it; the private cache is a second guard for a different
+# case. Do not background an install and start another.
+bash docs/design/review-kit/check-installs.sh || exit 3
 
 cd "$FE_RUN/pw" \
-  && npm i --no-save playwright --cache "$FE_RUN/npm-cache" \
+  && npm i --no-save playwright \
   && npx playwright install chromium
 export PW_ROOT="$FE_RUN/pw/node_modules"
 cd -
@@ -93,6 +105,41 @@ seat's agent process whose prompt quotes a board message about npm; it
 was keyed on `$PWD`, so it missed the install six directories away
 sharing the same cache; and it exited 1 when clean and 0 while refusing,
 so nothing could gate on it. L68.
+
+**The repair of 2026-11-09 (run 2), and the honest size of it.** The
+version above anchored on field 0 of `/proc/<pid>/cmdline` alone, and a
+5 ms poll on a real install showed that is one of THREE shapes npm
+presents: for the first 358 ms /proc holds the seven fields the kernel was
+handed, `node /usr/bin/npm i --no-save playwright --cache x`, with argv[0]
+`node`. The anchor said yes 316 ms after the process appeared. So the guard
+read clean exactly while an install was beginning, which is the same shape
+as the `_cacache` detection line it replaced, and the exo seat's correction
+on that one is why this was gone looking for.
+
+The window is narrow and it does not explain the incident: the three
+concurrent installs of that morning started 33 s and 78 s apart, so none of
+them was inside another's 358 ms. What the run actually bought is three
+other things, and they are worth more than the window.
+
+- The cache a live install is using went from `UNREADABLE` to a path, by
+  reading `/proc/<pid>/environ` as well as the argv. Confirmed end to end
+  against a real install in `data/endtoend-env.txt`: three paired readings,
+  the old tool saying `cache=UNREADABLE` each time and the new one naming
+  the path and adding `same-cache`, which is a refusal reason the old one
+  could not produce.
+- The `--cache` flag became `NPM_CONFIG_CACHE` in the block above, because
+  legibility turns out to be a property of how the cache was SET and not of
+  when you look. The flag is readable for 358 ms; the variable is readable
+  for the whole install.
+- The guard's own latency, 0.9 to 1.7 s and up to 3.6 s under load, down to
+  0.31 to 0.61 s, by reading each `cmdline` with a NUL `mapfile` in the
+  shell instead of a subshell and a `tr` per pid, of which /proc here held
+  312. This is the one that matters most for a check a run is told to make
+  immediately before it installs, and it is also why the end-to-end
+  CANNOT see the 358 ms window: a scan costs longer than the window lasts,
+  so the unit cases against a real process in that argv shape are the
+  evidence for that half, and `data/endtoend-flag.txt` is the run that
+  tried and is reported as not discriminating.
 
 **The question it needs to answer is not the one L51 asks.** L51 is two
 installs in one `node_modules`. The resource that actually failed on
