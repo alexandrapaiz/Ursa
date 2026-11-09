@@ -283,7 +283,13 @@ export async function runGateInArm(armPath, id) {
  *  That is not treated as agreement -- see UNATTRIBUTABLE in classify(). */
 export function findingKeys(text, armPath) {
   const keys = new Set()
-  const re = /^[\s>*-]*(?:\.\/)?((?:docs|tools|scripts|prompts|ursa-major|ursa-minor|\.github)\/[A-Za-z0-9._/-]+?)(?::\d+)?\s*$/
+  // `\.?\/` and not `\.\/`: stripping the arm prefix off an absolute path
+  // leaves a LEADING SLASH, so a gate that reports absolute paths produced an
+  // empty key set here and the row fell to UNATTRIBUTABLE instead of being
+  // partitioned. Found by the arm-prefix test below rather than by a sweep,
+  // which is why that test asserts the two arms agree rather than asserting
+  // one of them.
+  const re = /^[\s>*-]*(?:\.?\/)?((?:docs|tools|scripts|prompts|ursa-major|ursa-minor|\.github)\/[A-Za-z0-9._/-]+?)(?::\d+)?\s*$/
   for (const line of text.replaceAll(armPath, '').split('\n')) {
     const m = re.exec(line)
     if (m) keys.add(m[1])
