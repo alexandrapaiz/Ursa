@@ -287,3 +287,33 @@ test('a spent correctedIn pointer is reported rather than left to rot', async ()
   }));
   assert.ok(r.findings.some((f) => f.code === 'POINTER_SPENT'), 'no POINTER_SPENT');
 });
+
+test('no section is registered twice, because two rows for one heading break the count above', () => {
+  // Found 2026-11-09 by the security seat, from a real instance that cost a
+  // red nobody could localise. Ursa's exo seat registered one `docs/ideas.md`
+  // section at 10:20:45Z and this seat's run 15 registered the same section
+  // fifteen minutes later, neither able to see the other. The two rows reached
+  // one file from opposite sides of a merge, in different spellings at
+  // different offsets, so git had no reason to report a conflict and kept
+  // both.
+  //
+  // The damage is in the test above this one, not here. `registered` is a Set
+  // keyed on `file:line`, so two rows resolving to the same line add 2 to
+  // `sites` while consuming 1 candidate, and the equality between
+  // UNREGISTERED_SITE findings and `candidates - sites` fails by exactly one.
+  // `main` was green and the branch was green, and only their merge was red,
+  // which is the hardest place to look. This case names the cause directly so
+  // the next instance costs one line of output instead of a bisection.
+  for (const mech of MECHANISMS) {
+    const seen = new Map();
+    for (const s of mech.sites) {
+      if (!s.file || !s.heading) continue;
+      const key = `${s.file}||${s.heading}`;
+      seen.set(key, (seen.get(key) ?? 0) + 1);
+    }
+    const dupes = [...seen.entries()].filter(([, n]) => n > 1).map(([k, n]) => `${n}x ${k}`);
+    assert.deepEqual(dupes, [],
+      `mechanism \`${mech.id}\` registers the same section more than once. Keep one row and `
+      + 'delete the rest; a duplicate makes the candidate accounting above fail by one per copy.');
+  }
+});

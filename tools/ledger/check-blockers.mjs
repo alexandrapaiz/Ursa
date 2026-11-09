@@ -31,10 +31,10 @@
 // through `--open`. Importing this file does nothing.
 
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 
 import { LOCUS } from '../gates/verdict-shape.mjs'
+import { readGround, requireEntries } from './ground.mjs'
 import {
   GRADED,
   UNRESOLVABLE_SHAPES,
@@ -121,8 +121,13 @@ if (invokedDirectly) {
     // them, because a measurement whose value changes without anyone touching
     // it cannot live in prose — which is `prompts/engineer-agent.md`'s own
     // finding about the branch-pattern count, applied to this file.
-    const source = readFileSync(flag('--grade') ?? 'docs/ideas.md', 'utf8')
+    const gradePath = flag('--grade') ?? 'docs/ideas.md'
+    const source = readGround(
+      'check-blockers --grade', gradePath,
+      'the ledger the two published numbers are re-derived from')
     const all = entries(source)
+    requireEntries(
+      'check-blockers --grade', all.length, 'ledger entr(ies)', gradePath)
     const sameSentence = blockerClaims(source)
     const entryScoped = all.filter(
       (e) =>
@@ -164,7 +169,20 @@ if (invokedDirectly) {
     (a, i) => !a.startsWith('-') && !(i > 0 && VALUED.has(argv[i - 1])),
   )
   const ledgerPath = positional[0] ?? 'docs/ideas.md'
-  const source = readFileSync(ledgerPath, 'utf8')
+  // F128, 2026-11-09. This was a bare `readFileSync`, so an absent ledger
+  // threw out of `node:fs:440` at exit 1, which is also this gate's code for
+  // an unclassified blocker shape. The comment four lines above already
+  // records this gate dying on ENOENT once before, from a mis-parsed
+  // positional; what was missing was a refusal rather than a throw.
+  const source = readGround(
+    'check-blockers', ledgerPath,
+    'the ledger whose blocker claims this gate resolves')
+  // And zero entries is a premise failure and not a clean tree, for the
+  // reason in ./ground.mjs: `0 resolvable blocker claim(s) across 0
+  // entr(ies)` is vacuously true and reads like a run that checked 602.
+  requireEntries(
+    'check-blockers', entries(source).length,
+    'ledger entr(ies)', ledgerPath)
   const claims = blockerClaims(source)
 
   // `--open` is the fixture path: it supplies the open set directly so the

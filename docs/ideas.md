@@ -2,6 +2,257 @@
 
 Contract in docs/standards/pm.md §4.
 
+### 2026-11-09 — Two seats built two instruments for one question in one window, and neither branch can see the other
+- Status: proposed
+- Cost: $0 and one conversation, or an afternoon if the answer is to merge
+  them. It is not one seat's call, which is why it is filed rather than done.
+
+- Trigger: Ursa's exo seat and this seat each repaired the same class on
+  2026-11-09 — a gate whose subject is not the branch its red is read
+  against — and each built a tool for it. `tools/gates/inherited-finding.mjs`
+  on `ursa-exo/2026-11-09-message-15` runs a whole declared gate at the merge
+  base and at the tip, and claims the branch only at exit 1.
+  `tools/gates/hit-attribution.mjs` on `ursa-security/2026-11-09-message`
+  labels each individual hit with the side of the merge it came from and
+  changes no exit code at all.
+- What: two instruments, one question, two granularities, both unmerged, and
+  neither visible to the other while both were written. That may well be the
+  right answer: a per-hit label and a per-gate differential are different
+  products and a reader wants both. What is certainly wrong is deciding it at
+  the merge, by whichever lands second noticing.
+- Measured, 2026-11-09: `git ls-tree origin/main` finds neither file, so both
+  exist only on branches. This is the shape of F136 in
+  `docs/security/audit-2026-11-09-message-16.md`, where two seats registered
+  one section from opposite sides of a merge in different spellings, git had
+  no reason to report a conflict, and the duplicate was red only on the
+  merge of two green trees.
+- First step: one of the two seats reads the other's file before either
+  merges, and the answer is recorded as one sentence in whichever file
+  survives: either the per-gate tool calls the per-hit labeller, or the two
+  state in their headers what each is for and that the other exists. Said to
+  the exo seat on the board on 2026-11-09 rather than left for the merge.
+- Related: `[[docs/agents/runner-facts.md]]`'s `authorship-is-not-visibility`
+  is the mechanism. Both seats were reading `main` and both were right about
+  what they could see.
+
+### 2026-11-09 — A consumer that re-encodes a gate's verdict can have no slot for a refusal, and then the refusal dies in the translation
+- Status: built
+- Cost: $0, one commit. Fixed in this run; filed because the class is wider
+  than the one instance and the next instance will not be in this file.
+
+- Trigger: run 16 of this seat gave three ledger gates a GROUND verdict at
+  exit 3, "I could not establish the facts". `scripts/ci-checks.mjs` runs
+  those gates and had no word for it, so a refusal was reported as a failing
+  branch. F138 in `docs/security/audit-2026-11-09-message-17.md`.
+- Measured, 2026-11-09, in a worktree with `tools/ledger/drivers.json`
+  removed: the gate printed `check-attributes: NO VERDICT (exit 3)` on
+  stderr, the job log carried it verbatim under `stdio: 'inherit'`, and the
+  summary printed `failed ledger-attributes exit 3` at aggregate exit 1.
+  Exit 1 from that file means at least one check ran and failed.
+- What: a consumer that translates a gate's result into its own vocabulary
+  loses any verdict that vocabulary has no word for, however correctly the
+  gate printed it. Ursa's frontend seat sent this lane the neighbouring
+  half the same day, that whether a refusal belongs on stdout or stderr is
+  decided by the channel kind — a value channel read through `$(cmd)` needs
+  stdout empty, a report channel needs a headline. Both of those are about
+  forwarding. A consumer that re-encodes a result into its own vocabulary is
+  a third kind, and for it neither stream is the remedy. It needs a slot, or
+  the refusal is lost however correctly it was printed.
+- First step: done for this consumer, a per-check `noVerdict` list with
+  `no-verdict` outranking `failed`, held by four cases of which one is the
+  invariant rather than the literals. The step not taken is the census:
+  anything in this repository that reads another tool's exit code and
+  reports its own. `tools/seat/`'s wrappers, the board's verdict posters,
+  and any workflow step mapping a step outcome onto a status.
+- Related: `[[tools/ledger/ground.mjs]]`'s header now carries the
+  three-consumer statement, and the frontend seat's divergence on the exit
+  code with its reason.
+
+### 2026-11-09 — The redaction gate grades the merge, so a leak on main reds whichever branch opens a pull request next
+- Status: proposed
+- Cost: $0, an afternoon, and it is **HQ's**, not a seat's.
+  `.github/workflows/redaction-gate.yml` is HQ's under docs/standards/pm.md
+  §15. Filed here so Ursa has the measurement; the edit belongs upstream.
+
+- Trigger: this run's own pull request went red twice on a file that is in
+  none of its commits. Security run 15, F133 in
+  `docs/security/audit-2026-11-09-message-15.md`, where the timeline is
+  tabulated instant by instant.
+- What: the workflow triggers on `pull_request`, and for that event the
+  runner checks out a merge of the head with the base. The gate's subject is
+  therefore `head + main`, while every reader of the result treats a red as a
+  fact about the head. The failure message names the path and the line and
+  says nothing about which side of the merge produced it, so a leak committed
+  to `main` reds the next branch to open a pull request, and the branch can
+  neither have caused it nor clear it.
+- Measured, 2026-11-09. A full private session identifier reached `main` at
+  10:21:14Z in another seat's run note. This seat's pull request failed at
+  10:32:36Z and again at 10:37:40Z naming that file.
+  `git cat-file -e HEAD:<path>` fails on this branch and
+  `git log HEAD -- <path>` is empty, so the file is in none of its commits.
+  The truncation merged to `main` at 10:40:45Z and the same branch passed at
+  10:45:09Z with no commit of its own touching the path.
+- What it cost: the PM seat's pass 29 note records triaging this seat's failed
+  run under §11.7. Two seats' attention for a third seat's commit.
+- First step: the information is already in the job. `git diff --name-only
+  origin/main...HEAD` partitions the hits into introduced and inherited. Fail
+  on the introduced ones and report the inherited ones as the base's, naming
+  the base. `tools/doc-model/check.mjs` already does exactly this one axis
+  over, downgrading a finding on another seat's surface to a warning and
+  mailing it to that seat rather than failing this branch's exit code.
+- Related and not the same: the truncation repaired the tree and not the
+  history, and the history of a public repository is public. That half is the
+  owner's call, not a seat's, and it is named in the audit rather than filed
+  as work.
+
+### 2026-11-09 — The unreachable premise is a third reading, and it is the one that tells a gate its subject is foreign
+- Status: proposed
+- Cost: $0, day-sized. For whoever holds `tools/gates/excuse-control.mjs`,
+  which is this seat today, or the engineer if the arm lands beside
+  `tools/gates/premise-differential.mjs` instead.
+
+- Trigger: HQ's exo-centralizer filed the general half of a finding in this
+  lane on 2026-11-09. Any gate whose subject lies outside its own repository
+  has two owners and one exit code, so either the failure message says so or
+  the red is attributed to the wrong branch by default. Run 15 measured the
+  instance set here and repaired it as F132.
+- What: `excuse-control.mjs` grades its fourteen `needs-token` rows on one
+  premise, the credential removed, and requires that the gate not report
+  clean. Removing a thing this process holds is the only premise either sweep
+  so far has supplied: run 12 removed the credential and Ursa's exo seat
+  removed the repository. The third premise is not a removal. **The
+  environment is complete and the endpoint does not answer.** It is the only
+  premise under which a gate discovers that its subject is somebody else's,
+  and it found four rows exiting 1 from an unhandled undici rejection in a
+  file where 1 means a certain finding about this repository.
+- The excuse this retires. `excuse-control.mjs`'s own table gives "the
+  control is to run it with the network removed, which this sweep cannot do
+  from inside the sandbox it is running in" as the reason its `needs-network`
+  kind has no executed control. A loopback port that refuses is that control
+  and needs nothing taken away. Measured: `127.0.0.1:45999` answers
+  `ECONNREFUSED` from inside this sandbox. Do not use port 1, which is on
+  undici's blocked list and throws `bad port` before it dials, so it measures
+  the blocklist rather than reach.
+- Why the arm can now assert rather than report. The sweep's existing
+  wording check is deliberately not gated, because with the board down the
+  same files refuse for lack of reach and an assertion on the words would go
+  red for a correct tree. Separating the premises removes that confound: each
+  arm has its own expectation, and with F132's four repaired the unreachable
+  arm is clean, so it can be held to.
+- The second half, and why this is day-sized. `needs-token` is one kind
+  covering two different credentials. Four of the fourteen rows answered at
+  exit 0 under this premise because they read the forge and not the board, and
+  that is correct for them, but the baseline cannot say which four. The arm
+  has to split the kind before it can grade it, or it will report four
+  correct rows as having failed to refuse.
+- First step: `excuse-control.mjs --unreachable`, one arm, keyed on a
+  refusing loopback port, printing per row the exit code and whether the
+  output names the reach. Print the ungraded count beside every total.
+
+### 2026-11-09 — The locus enum cannot say that a repair is in another repository, so the nearest value points at this branch
+- Status: proposed
+- Cost: $0, half a day. For whoever holds `tools/gates/verdict-shape.mjs` and
+  `tools/gates/enumerate-verdicts.mjs`, the engineer or Ursa's ExO seat.
+
+- Trigger: the general form of HQ's exo-centralizer's filing, stated in this
+  repository's own vocabulary rather than in prose about it.
+- What: `verdict-shape.mjs` exports five loci, READER, COMMITTED, CLONE, SEAT
+  and OWNER, and `MIXED_LOCI_NAMED` in `enumerate-verdicts.mjs` already
+  enforces that a verdict spanning more than one of them names each in its
+  own sentence. The machinery to make a gate say who holds the repair is
+  therefore already built and already gated. None of the five values can say
+  the holder is outside this repository. A gate with a foreign subject has two
+  options and both are wrong: pick the nearest value, which is COMMITTED and
+  sends the reader to this branch, or carry no locus and be reported
+  ACTOR_UNMEASURABLE, which is the state that check calls "a finding it cannot
+  place".
+- The evidence that the vocabulary is missing rather than unnecessary.
+  `tools/seat/tool-reach.mjs` prints a `sibling-repo` category of its own,
+  outside the enum, because it needed the distinction and the enum did not
+  have it. `tools/doc-model/check.mjs` carries a whole downgrade mechanism for
+  surfaces belonging to another *seat* and mails the finding to that seat; 28
+  of its findings took that path this run. Another seat has a path and another
+  repository does not.
+- Why this is an entry and not a fix in a security run. Adding a sixth locus
+  changes what `MIXED_LOCI_NAMED` requires of every gate that declares one, so
+  it is a change to a gate's contract rather than to a defective message, and
+  the charter puts that with the engineer.
+- First step: `LOCUS.FOREIGN`, with its noun pattern required to name the
+  holding repository rather than the condition, and `F132`'s
+  `BOARD_UNREACHABLE` as its first declared user, since that fault already
+  states in prose the thing the locus would state in the type.
+
+### 2026-11-09 — A gate's premise can be empty as well as absent, and the empty one is the dangerous axis
+- Status: proposed
+- Cost: $0, day-sized. For whoever holds
+  `tools/gates/premise-differential.mjs`, the engineer or Ursa's ExO seat.
+
+- Trigger: Ursa's exo seat ran a premise-removal over all 62 gate-registry
+  candidates on two axes, the credential and the repository, and sent this
+  lane the rows. Run 14 took three of them and found, while repairing them,
+  that *absent* and *empty* are two different axes and only one had been
+  swept.
+- What: the difference is the whole entry. An absent premise
+  makes a gate crash, and a crash gets looked at. An empty premise makes a
+  gate print a sentence that is vacuously true, and nobody looks at a
+  sentence they already expected to read. Measured this run:
+  `check-closures.mjs` over a zero-byte `docs/ideas.md` printed `0 closure
+  marker(s) in 0 document(s) ... all resolved and all closed. Exit 0.`, and
+  `scripts/ci-checks.mjs` registers it at `passExit: [0, 2]`. The gate that
+  catches a false closure claim passed CI while checking nothing.
+- What this run covered: three gates, by hand, with the refusal shared in
+  `tools/ledger/ground.mjs` at exit 3. What it did not: the other 59
+  candidates on this axis.
+- The design decision the tool has to make, which is why this is day-sized
+  and not an afternoon. Zero is not automatically a fault. `check-attributes`
+  over a tree with no merge-attribute declarations prints `0 declarations
+  over 0 drivers` at exit 0 and that is correct, because a repository may
+  genuinely use no merge drivers, where `docs/ideas.md` may not genuinely
+  hold zero entries. So the empty arm cannot assert "refuse on zero". It
+  asserts the weaker and checkable thing: a gate either refuses on an empty
+  premise, or says in writing that empty is a real state of its subject.
+  That turns a judgement into a declaration a gate can be held to.
+- First step: a third reading in `tools/gates/premise-differential.mjs` —
+  present, absent, empty — over the registry's candidate list, with the
+  empty arm reporting per candidate which of the two answers it gave. Exo's
+  own correction to this lane applies to the tool: print the ungraded count
+  beside every total, because a count over a population with ungraded rows
+  is not a verdict about that population.
+- Evidence: `docs/security/audit-2026-11-09-message-14.md`, findings F126
+  through F128.
+
+### 2026-11-09 — Twenty-seven ledger entries written today sit at a heading level the ledger's own parser does not read
+- Status: proposed
+- Cost: $0, hour-sized for the headings and a judgement call for the merge
+  identity. For the owner or the PM seat, because it rewrites other seats'
+  entries in the busiest register this repository has.
+- Trigger: run 14 of the security seat wrote its own entry in the form the
+  27 entries above it use, `## Ledger entry — <date> (<seat>, <run>): ...`,
+  and then found that `tools/ledger/ledger.mjs` keys an entry on
+  `/^###\s+/`. So none of them is an entry to any ledger gate.
+- What: `docs/standards/pm.md` §4 states the form as
+  `### YYYY-MM-DD — Idea name`. 602 entries use it. 27 do not, 24 of those
+  carry a `Status:`, and every one of the 27 was written on 2026-11-09, so
+  this is a same-day drift across several seats rather than old debt.
+  Measured: putting `**Status:** banana-not-a-status` on one of the 27
+  produces zero findings from `tools/ledger/check.mjs`, which goes on
+  printing the same 8 owner-held violations and the same block count. The
+  status vocabulary the owner alone may move is unenforced on 24 entries,
+  and `check-closures.mjs` builds its index from the same parser, so a
+  closure marker naming one of them can never resolve.
+- Why the security seat filed this instead of fixing it: `docs/ideas.md`
+  merges through `merge=ledger`, and `tools/ledger/union-merge.mjs` keys a
+  block on its heading. Rewriting 27 headings changes block identity for
+  every open pull request that touches the ledger, which is a merge decision
+  and not a safe behaviour-preserving edit. The seat fixed only its own
+  entry, which is above this one in the contract form.
+- First step: decide whether the 27 are converted or whether §4 is widened
+  to admit the second form. If converted, do it in one pull request with no
+  other ledger change in it, so the identity change lands once. If widened,
+  `ENTRY_HEADING` and the merge driver both have to learn the second form,
+  and the drift becomes a parser change rather than a cleanup.
+- Evidence: `docs/security/audit-2026-11-09-message-14.md`, finding F129.
+
 ## Ledger entry — 2026-11-09 (security, message run 13): the product's own launcher spawns a fetch-capable runner, and pinning it would change what a user without the dependency sees
 
 **Status:** proposed, hour-sized. **For:** the engineer, because the fix
@@ -25405,6 +25656,79 @@ same conflation inside it.
   The policy is the easy half. Knowing which files are outside it is the
   half that took a 95-per-cent-full disk to discover.
 - Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (security, sixteenth run) — The attribution note this run shipped has no locus to carry, and the enum change is already filed
+
+- Trigger: wiring `tools/gates/hit-attribution.mjs` into
+  `scripts/redaction-check.mjs` this run. The line it prints locates a repair
+  outside the branch under test, which is a claim
+  `tools/gates/verdict-shape.mjs` has no vocabulary for: its five loci are
+  READER, COMMITTED, CLONE, SEAT and OWNER, and the nearest of them, COMMITTED,
+  points the reader at this branch, which is the error the line exists to
+  prevent.
+- What: run 15 filed the enum change itself, as "a locus for a repair in
+  another repository", and this entry is the follow-on rather than a second
+  copy of it, because the two are a day's work in sequence and not in
+  parallel. Once that locus exists, `attributionLines()` should emit it, and
+  `MIXED_LOCI_NAMED` in `tools/gates/enumerate-verdicts.mjs` can then assert
+  that a gate whose finding is inherited names the foreign locus, instead of
+  the note being a string nothing grades. The reason to do it in that order is
+  that adding a locus changes what that gate requires of every gate declaring
+  one, and the attribution module is the first caller that would need it, so
+  it is the cheapest proof the new locus is the right shape before eleven
+  other gates depend on it. The same gap is visible one layer down in
+  `tools/gates/gate-registry.baseline.json`, where this run had to register
+  `tools/seat/duplicate-repair.mjs` as `not-a-gate` while writing in the row
+  that `not-a-gate` is only the nearest kind available, there being none for a
+  file whose verdict is real and whose subject is not the branch.
+- First step: add the locus to `verdict-shape.mjs` with no caller, and emit it
+  from `attributionLines()` alone, so exactly one gate declares it and the
+  blast radius of getting its name wrong is one file.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (security, sixteenth run) — A pull request whose tip no workflow ran is indistinguishable from one no gate watches
+
+- Trigger: confirming the two red-workflow events this run was woken for,
+  under L-A31, before repairing anything. Both were already fixed by a later
+  commit of this seat's own, which is what L-A31 predicts. The thing that was
+  not expected was in the same output.
+- What: `#859`'s `redaction-gate` ran on `89ccc558` (red, 10:32:36Z),
+  `7548def2` (red, 10:37:40Z) and `c5e1fecb` (green, 10:45:09Z). The tip of
+  that branch is `762d2e7a`, seven commits and sixteen minutes later, and no
+  workflow ran on it at all. `gh pr checks 859` therefore prints `no checks
+  reported on the 'ursa-security/2026-11-09-message-15' branch`, which is
+  byte-for-byte what it prints for a branch no gate has ever been pointed at.
+  Other seats' branches got a run for every push through the same window, at
+  10:47Z, 10:50Z, 10:51Z and on, so the queue was not stalled and this is not
+  a general outage. The consequence is specific: an untested tip and an
+  unguarded one read identically, and the owner merges on that reading, so a
+  branch can be merged on the strength of a green that was about a commit
+  seven commits behind what is being merged. This is adjacent to the finding
+  this run fixed and not the same one. There the gate's subject was wider than
+  the branch; here the gate's subject is a commit nobody is looking at.
+- Second instance, on this seat's own branch, while the entry was being
+  written. `ursa-security/2026-11-09-message-16` got runs on four pushes and
+  then none on the next four commits, `acdd9b05`, `1875f507`, `f5d0c668` and
+  `5bbd6abc`, pushed between 11:40Z and 11:47Z. `check-runs` reports
+  `total_count` 0 for every one of the four. Over the same minutes other
+  seats' branches got a run each at 11:47Z, 11:49Z, 11:54Z and 11:56Z, and the
+  repository had 0 runs queued or in progress, so this is neither a stalled
+  queue nor a general outage. Two instances, same seat, same window, same
+  shape: a branch is served for a while and then stops being served.
+- One hypothesis is already dead, which is worth recording so nobody spends
+  a window on it. It is not draft status. `#859` was still a draft when it was
+  served at 10:32:36Z, 10:37:40Z and 10:45:09Z, so `pull_request` events
+  plainly do fire for drafts in this repository.
+- First step: count it over the queue rather than argue from two instances.
+  For every open pull request, join its `headRefOid` against the workflow runs
+  on its branch and report the rows whose tip has no run, with the distance in
+  commits between the tip and the newest commit that does. Two instances from
+  one seat cannot say whether this correlates with push rate, with pushes
+  inside one window, or with something about this seat's branches
+  specifically, and the count is what separates those.
+- Cost: $0
 - Status: proposed
 
 ### 2026-11-09 (engineer, message run, sixteenth wake) — A gate that decides a source property by stripping comments with a regex can be made to delete the code it was looking for, and one of ours invented a finding that way

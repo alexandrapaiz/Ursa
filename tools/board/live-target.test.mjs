@@ -6,7 +6,7 @@
 // described falsely is now described truly.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { liveTargetFault, maskUserinfo } from './live-target.mjs'
+import { liveTargetFault, maskUserinfo, reachFault } from './live-target.mjs'
 
 test('both variables present and the url has a scheme: no fault', () => {
   assert.equal(liveTargetFault({ apiUrl: 'https://board.example/', token: 'tok' }), null)
@@ -76,4 +76,59 @@ test('an at sign inside the path is not userinfo either', () => {
 test('a value with no userinfo is returned unchanged, which is the live case', () => {
   assert.equal(maskUserinfo('board.example/api'), 'board.example/api')
   assert.equal(maskUserinfo(''), '')
+})
+
+// F132, audit 2026-11-09 run 15. The companion to every case above: those
+// grade a value in hand, these grade a throw. The distinction is load-bearing
+// because the two halves have different repairs and only one of them is in
+// this repository.
+test('a refused connection is a GROUND fault that says so, not a finding', () => {
+  const f = reachFault(Object.assign(new TypeError('fetch failed'), {
+    cause: { code: 'ECONNREFUSED', message: 'connect ECONNREFUSED 127.0.0.1:45999' },
+  }))
+  assert.equal(f.code, 'BOARD_UNREACHABLE')
+  assert.match(f.line, /ECONNREFUSED/)
+  // The sentence a reader acts on has to deny the attribution outright, because
+  // the exit code this fault routes to is one a reader has learned to read as a
+  // verdict about the branch.
+  assert.match(f.line, /not a verdict about the repository/)
+  assert.match(f.repair, /not in this repository/)
+})
+
+// undici refuses a request to a port on its blocked list before it dials, with
+// `bad port` and no code at all. Kept as its own case because this is the shape
+// the measurement that found F132 actually produced, and a classifier that only
+// handles the coded shape would have reported nothing for it.
+test('a throw with no code on its cause still classifies', () => {
+  const f = reachFault(Object.assign(new TypeError('fetch failed'), {
+    cause: new Error('bad port'),
+  }))
+  assert.equal(f.code, 'BOARD_UNREACHABLE')
+  assert.match(f.line, /bad port/)
+  assert.doesNotMatch(f.line, /\(\)/)
+})
+
+// The one condition `liveTargetFault` is supposed to have caught before the
+// call. Arriving here means the guard was skipped, so the repair named is the
+// guard and not the network: a reader sent to check whether the board is up,
+// over a variable that was never a URL, looks in the wrong place for as long as
+// it takes to notice.
+test('an unparseable URL arriving in the catch is named as the guard being skipped', () => {
+  const f = reachFault(Object.assign(new TypeError('Failed to parse URL'), {
+    cause: { code: 'ERR_INVALID_URL', message: 'Invalid URL' },
+  }))
+  assert.equal(f.code, 'BOARD_URL_UNUSABLE')
+  assert.match(f.repair, /liveTargetFault before the request/)
+})
+
+test('userinfo in a thrown message is masked on the way out', () => {
+  const f = reachFault(Object.assign(new TypeError('fetch failed'), {
+    cause: { code: 'ENOTFOUND', message: 'deploy:hunter2hunter2@board.example' },
+  }))
+  assert.doesNotMatch(f.line, /hunter2hunter2/)
+})
+
+test('a thrown non-error does not crash the classifier', () => {
+  assert.equal(reachFault(undefined).code, 'BOARD_UNREACHABLE')
+  assert.equal(reachFault('nope').code, 'BOARD_UNREACHABLE')
 })

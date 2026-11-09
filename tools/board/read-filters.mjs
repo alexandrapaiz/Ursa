@@ -86,7 +86,7 @@
 // habit. There is no search for a window here: the tool abstains when the
 // declared one does not work, and an adaptive window is filed as a ledger
 // entry rather than written in a security run.
-import { liveTargetFault } from './live-target.mjs';
+import { liveTargetFault, reachFault } from './live-target.mjs';
 
 /** The routes this tool knows how to probe, and what it counts in each. */
 export const ROUTES = {
@@ -372,9 +372,22 @@ const has = (n) => argv.includes(n);
 const base = (process.env.BOARD_API_URL || '').replace(/\/$/, '');
 const token = process.env.BOARD_RUNTIME_TOKEN;
 
-/** One GET, reduced to the four things a verdict needs. */
+/** One GET, reduced to the four things a verdict needs.
+ *
+ *  A THROW IS TAGGED AND RE-THROWN, not turned into a reading. The temptation
+ *  is to return `{status: 0, count: 0, rows: []}` and let the loop carry on,
+ *  and that is the worse of the two bugs: `verdict` would then grade every
+ *  filter against a baseline of nothing and print a table, and a filter graded
+ *  from no rows is the green-on-nothing this file's own INERT verdict exists
+ *  to catch one layer down. So an unreachable board ends the run instead, at
+ *  the exit code this file's header already reserves for it. */
 async function read(path, rowsKey) {
-  const res = await fetch(base + path, { headers: { Authorization: `Bearer ${token}` } });
+  let res;
+  try {
+    res = await fetch(base + path, { headers: { Authorization: `Bearer ${token}` } });
+  } catch (error) {
+    throw Object.assign(new Error('board unreachable'), { boardReach: reachFault(error) });
+  }
   const text = await res.text();
   let body = {};
   try { body = JSON.parse(text); } catch { body = { error: text.slice(0, 200) }; }
@@ -484,7 +497,6 @@ async function main() {
       out.push({ route: name, path: spec.path, param: `${param} (casing)`, ...v });
     }
   }
-
   if (has('--json')) {
     console.log(JSON.stringify({ measured_at: new Date().toISOString(), filters: out }, null, 2));
   } else {
@@ -511,4 +523,26 @@ async function main() {
 }
 
 // Importable for the tests without running the probes.
-if (import.meta.url === `file://${process.argv[1]}`) await main();
+//
+// THE REACH CATCH IS HERE AND NOT AROUND THE PROBE LOOP, so that the loop
+// keeps its own indentation and this file's diff for F132 is the handler
+// rather than forty reindented lines. It makes no behavioural difference:
+// `read` tags the only throw either site would see, every probe is awaited
+// inside `main`, and `main` has no caller but this line.
+//
+// Exit 2 is the code line 11 of this file already reserves for having no board
+// to measure, and the three lines printed are the `liveTargetFault` branch's.
+// The only difference between the two branches is WHEN the fault became
+// knowable, and that is not a difference a reader acts on.
+if (import.meta.url === `file://${process.argv[1]}`) {
+  try {
+    await main();
+  } catch (error) {
+    if (!error?.boardReach) throw error;
+    const fault = error.boardReach;
+    console.error(`${fault.code}: ${fault.line}`);
+    console.error(`  repair: ${fault.repair}`);
+    console.error('  No filter was measured to a verdict, and none is published from a partial sweep.');
+    process.exit(2);
+  }
+}

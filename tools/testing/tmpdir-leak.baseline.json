@@ -2,7 +2,7 @@
   "what": "Test files that make a temporary directory under /tmp and contain no removal call of any kind, as measured on 2026-11-09. tools/testing/tmpdir-leak.mjs exits 1 on any test file that leaks and is not listed here, and exits 1 on any entry here that has outlived its finding, so this file can only shrink.",
   "why_this_file_is_not_a_permanent_excuse": "These 41 are written down rather than fixed because a gate that failed on all 41 the day it was committed would be red on main from its first commit, and a gate that is red on main is a gate every seat learns to step over. The measured price of the class is in tools/testing/tmpdir-leak.mjs: one file of these took the shared host to 95 per cent and cost three other seats their npm and browser installs. STALE_BASELINE_ENTRY deletes an entry the day its repair lands.",
   "what_this_list_is_not": "It is not the set of files that leak. It is the set that PROVABLY leak by reading them. The 22 test files that call both mkdtemp and a removal are absent from this list and are not thereby certified: this instrument cannot see whether a removal covers every directory the file makes, or only the success path. See the blind spot section in tools/testing/tmpdir-leak.mjs.",
-  "measured_at": "2026-11-09T09:40Z, origin/main 663ceadb, by the engineer seat on the message wake that fixed tools/ledger/check-attributes.test.mjs. Re-measured 2026-11-09 by the engineer seat on the message-13 wake: 5 entries removed, 36 remain. Four were repaired onto tools/testing/tmpdir.mjs (tools/image-metadata.test.mjs, tools/ledger/blockers.test.mjs, tools/ledger/check.test.mjs, tools/seat/env-facts.test.mjs). The fifth, tools/ledger/containment.test.mjs, never leaked: it was a false positive of this gate's own comment stripper, which read the /* inside a git refspec string as a comment opener and deleted the file's rmSync six lines later. See withoutComments in tools/testing/tmpdir-leak.mjs.",
+  "measured_at": "2026-11-09T09:40Z, origin/main 663ceadb, by the engineer seat on the message wake that fixed tools/ledger/check-attributes.test.mjs. Re-measured 2026-11-09 by the engineer seat on the message-13 wake: 5 entries removed, 36 remain. Four were repaired onto tools/testing/tmpdir.mjs (tools/image-metadata.test.mjs, tools/ledger/blockers.test.mjs, tools/ledger/check.test.mjs, tools/seat/env-facts.test.mjs). The fifth, tools/ledger/containment.test.mjs, never leaked: it was a false positive of this gate's own comment stripper, which read the /* inside a git refspec string as a comment opener and deleted the file's rmSync six lines later. See withoutComments in tools/testing/tmpdir-leak.mjs. Re-measured 2026-11-09 by the security seat on the message-17 wake: 1 entry removed, 35 remain. tools/gates/import-effects.test.mjs was this lane's only entry and its two mkdtempSync calls now go through tools/testing/tmpdir.mjs.",
   "repair": "docs/ideas.md 2026-11-09, 'Forty-one test files leak temporary directories into a shared /tmp that no daily reading can see'",
   "leaking": [
     {
@@ -39,11 +39,6 @@
       "path": "tools/board/check.test.mjs",
       "mkdtemp_calls": 1,
       "lane": "exo"
-    },
-    {
-      "path": "tools/gates/import-effects.test.mjs",
-      "mkdtemp_calls": 2,
-      "lane": "security"
     },
     {
       "path": "ursa-major/src/adapters/github-pr.test.ts",

@@ -298,3 +298,35 @@ test('a genuinely absent field keeps the plain message and gains no near-miss se
   assert.match(res.out, /missing the "- What:" line/);
   assert.doesNotMatch(res.out, /this is a separator and not an absent field/);
 });
+
+// The empty premise. Added 2026-11-09 by the security seat, from the instance
+// Ursa's exo seat found with `tools/gates/empty-premise.mjs`: every rule above
+// is quantified over the blocks, so a ledger with none satisfies all of them
+// and the gate's strongest verdict came out of its weakest evidence.
+test('a zero-byte ledger is a seat-held violation and not a clean verdict', () => {
+  const res = run('');
+  assert.equal(res.code, 1);
+  assert.match(res.out, /EMPTY_LEDGER/);
+  assert.match(res.out, /parses to 0 idea blocks/);
+  // The sentence that distinguishes this red from a rule failure: the gate is
+  // reporting that it checked nothing, not that it found something.
+  assert.match(res.out, /"clean" would mean "nothing was checked"/);
+  assert.doesNotMatch(res.out, /clean\./);
+});
+
+test('a preamble with no entries under it is the same empty premise', () => {
+  const res = run('# The Ledger — Ursa\n\nSome prose and no entries.\n');
+  assert.equal(res.code, 1);
+  assert.match(res.out, /EMPTY_LEDGER/);
+});
+
+test('an absent ledger is named rather than thrown, and keeps exit 1', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'ledger-check-'));
+  const res = check(join(dir, 'no-such-ledger.md'));
+  assert.equal(res.code, 1);
+  assert.match(res.out, /LEDGER_ABSENT/);
+  assert.match(res.out, /does not exist/);
+  // The whole point of the guard: no uncaught stack trace on the way out.
+  assert.doesNotMatch(res.out, /ENOENT/);
+  assert.doesNotMatch(res.out, /at readFileSync/);
+});
