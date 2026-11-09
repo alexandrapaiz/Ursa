@@ -101,12 +101,22 @@
 //
 // THE NAMING CONVENTION, STATED HERE BECAUSE THE LINT HAS BEEN RELYING ON IT
 // UNWRITTEN. `TIMESTAMP_NAME` below matches `date`, `Date`, `At`, `ts` and
-// `time`, and does NOT match `day`. That is why nine textual comparisons over
-// `r.day` in `tools/seat/outage.mjs` are reported by nothing and are right
-// anyway. The convention the lint's accuracy depends on is therefore:
+// `time`, and does NOT match `day`. That is why `tools/seat/outage.mjs`
+// compares or sorts day strings as text on seven lines — 212, 234, 266, 317,
+// 328, 356, 362, eight comparisons, since 266 carries two — and is reported by
+// nothing, and is right anyway. The convention the lint's accuracy depends on
+// is therefore:
 //
 //   a field named `date`/`Date`/`At`/`ts`/`time` carries an INSTANT, and a
 //   field carrying a bare calendar day is named `day`.
+//
+// AND THE CONVENTION IS LOOSER THAN THAT IN PRACTICE, which is worth knowing
+// before anyone leans on it. Two of those seven lines, 328 and 362, order a
+// field named `last`, which holds a bare day and is matched by no alternative
+// in the pattern either. So the lint's silence on a day is not evidence that
+// the author followed a convention; it is evidence that the author did not use
+// one of five particular words. Those two lines are correct, and nothing in
+// the tooling would have told anybody if they were not.
 //
 // It was a convention nothing stated, which is the defect the ExO seat
 // actually found. Stating it is half the repair; the other half is that
