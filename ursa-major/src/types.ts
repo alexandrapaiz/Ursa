@@ -1062,6 +1062,34 @@ export type ExclusionReason =
    * would be the same defect as reading a similarity score as descent.
    */
   | 'declared_import'
+  /**
+   * One of the two blobs this path would have been resolved from — the
+   * generation's or the finished one's — is longer than `MAX_BLOB_CHARS` in
+   * src/resolve-episode.ts, so the resolver declined to classify the path at
+   * all. Nobody in this episode is being credited or discredited; the
+   * refusal is the resolver's, about its own cost, and the record says so.
+   *
+   * The other two reasons are claims about where content came from. This one
+   * is a claim about what this build was willing to read, which is why it
+   * carries `ceiling` and `generatedChars` and why its `relation` is
+   * `refused` rather than any of the three import relations: there is no
+   * commit outside the generation's descent to stand in any relation to, and
+   * writing `declared` here would assert that a committing party called this
+   * path an import.
+   *
+   * Why the reason exists at all, rather than the skip staying a `continue`.
+   * Between 2026-09-18 and 2026-11-09 the ceiling was silent: a path over it
+   * left no row, no exclusion and no sentence, so a record over an episode
+   * that touched one was indistinguishable from a record over an episode
+   * that did not. On 2026-11-09 ten paths at this repository's own `main`
+   * were over the ceiling, `docs/ideas.md` at 1,674,304 characters being 5.6
+   * times it, which means the ledger this organization keeps its own ideas
+   * in had never once appeared in an outcome record and nothing anywhere
+   * said so. A refusal is a claim; a silent skip is an absence, and
+   * `src/apparatus.ts` states the rule this follows — the honest claim is
+   * "this path was declined", never "nobody asked".
+   */
+  | 'over_size_ceiling'
 
 export interface Exclusion {
   /** repo-relative path, spelled as `Episode.touchedFiles` spells it */
@@ -1070,8 +1098,15 @@ export interface Exclusion {
   /**
    * Short sha of the commit the exclusion rests on: the one outside the
    * generation's descent holding the identical blob when `reason` is
-   * `imported_whole`, and the declaring commit itself when it is
-   * `declared_import`.
+   * `imported_whole`, the declaring commit itself when it is
+   * `declared_import`, and the episode's own final commit — the one whose
+   * blob was measured against the ceiling — when it is `over_size_ceiling`.
+   *
+   * On `over_size_ceiling` this is deliberately not evidence of anything
+   * except which blob was measured. The first two reasons point at a commit
+   * to make a claim about that commit; this one points at a commit so a
+   * reader can run `git cat-file -s <sha>:<path>` and get the same number
+   * the record states.
    */
   sha: string
   /** that commit's subject line, so the record names the import in the author's own words */
@@ -1086,8 +1121,21 @@ export interface Exclusion {
    * declared the path an import in its trailer. The first two always carry
    * `reason: 'imported_whole'` and the third always carries
    * `reason: 'declared_import'`.
+   *
+   * `refused` is the fourth and it is the absence of a relation rather than
+   * a fourth kind of one: it says this exclusion rests on no commit outside
+   * the generation's descent, because the resolver declined the path on its
+   * own account. It always carries `reason: 'over_size_ceiling'`, and that
+   * reason never carries any of the other three. The pairing is both ways
+   * round and `EXCLUSION_NOT_CLASSIFIED` checks it both ways round, because
+   * a refusal wearing an import's relation would claim a byte-identity or a
+   * trailer that was never read, and an import wearing `refused` would drop
+   * a file from every figure with no evidence named at all. Note that
+   * `VendoredPath.relation` in src/vendored.ts is a separate three-value
+   * union and deliberately gains no fourth member: a vendored path is the
+   * output of a blob search, and the size refusal never runs one.
    */
-  relation: 'pre_existing' | 'sibling' | 'declared'
+  relation: 'pre_existing' | 'sibling' | 'declared' | 'refused'
   /**
    * Characters of the finished file at the episode's final commit, which is
    * exactly what left this record's figures by being excluded. Stated here so
@@ -1098,6 +1146,41 @@ export interface Exclusion {
    * it moved is a field that drifts.
    */
   chars: number
+  /**
+   * The ceiling in force when `reason` is `over_size_ceiling`:
+   * `MAX_BLOB_CHARS` in src/resolve-episode.ts, 300,000 as of 2026-11-09.
+   *
+   * Written into the record rather than left for the reader to look up,
+   * because the number is a property of the build that wrote the record and
+   * not of the project. A record stating only "too large" is unreadable the
+   * day the constant moves: a buyer holding two records cannot tell a path
+   * that grew from a ceiling that fell. Stating it makes the refusal
+   * re-derivable — `chars > ceiling || generatedChars > ceiling` is the whole
+   * decision, and `EXCLUSION_NOT_CLASSIFIED` re-runs exactly that.
+   *
+   * ABSENT on every other reason, and absent is the only legal value there:
+   * an import exclusion that stated a ceiling would be claiming a refusal it
+   * did not make.
+   */
+  ceiling?: number
+  /**
+   * Characters of the blob at the episode's GENERATION commit for this path,
+   * when `reason` is `over_size_ceiling`. The other side of the comparison
+   * `chars` is one half of.
+   *
+   * Both sides are needed and neither implies the other. The ceiling is
+   * checked against each blob separately
+   * (src/resolve-episode.ts), so a path can be refused because the agent
+   * wrote something enormous that the person then cut to nothing — then
+   * `generatedChars` is over and `chars` is small — or because the finished
+   * file is enormous however little the generation held. A record carrying
+   * only `chars` would read as a false refusal in the first case, which is
+   * the state `EXCLUSION_NOT_CLASSIFIED` would otherwise flag on an honest
+   * record.
+   *
+   * ABSENT on every other reason, for the reason `ceiling` is.
+   */
+  generatedChars?: number
   /**
    * Author date of `sha`, strict ISO 8601 with the author's own UTC offset
    * (`%aI`), as `DescentEvidence`'s `rival` variant carries it one level

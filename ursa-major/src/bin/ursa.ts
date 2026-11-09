@@ -152,7 +152,7 @@ export function renderRunSummary(
           `${d.unresolvable} resolved to nothing this run could stand behind, meaning no file in ${unOne ? 'it' : 'them'} had a readable version at both commits of the pair and nothing arrived whole from elsewhere either, so there was no refusal to state instead.`,
         )
         lines.push(
-          `No flag changes that one. The usual causes are a generated file your edit deleted outright, a commit this clone does not have the blobs for, and a file over the ${MAX_BLOB_CHARS.toLocaleString()}-character ceiling the resolver reads up to. If the clone is shallow, run git fetch and ursa run again.`,
+          `No flag changes that one. The usual causes are a generated file your edit deleted outright and a commit this clone does not have the blobs for. If the clone is shallow, run git fetch and ursa run again. A file over the ${MAX_BLOB_CHARS.toLocaleString()}-character ceiling the resolver reads up to is no longer one of the causes: since 2026-11-09 it states itself as an over_size_ceiling exclusion in the record, so the work unit is counted here only when nothing at all could be stated about it.`,
         )
       }
     }
