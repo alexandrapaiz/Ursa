@@ -107,7 +107,7 @@ export const KINDS = {
   'needs-token': 'needs a credential a pull request gate is not given',
   'write-action': 'changes the repository when run, which a gate must never do',
   'merge-driver': 'invoked by git during a merge, not by a gate list',
-  'the-runner': 'is the gate list itself',
+  'the-runner': 'is the gate list itself, and a list cannot be one of its own entries',
   'schedule-only': 'its work is minutes long, so a per-change gate is the wrong place for it',
   'host-dependent': 'its verdict is about the host it runs on rather than about the branch, '
     + 'so two runners would answer differently about an unchanged tree',
