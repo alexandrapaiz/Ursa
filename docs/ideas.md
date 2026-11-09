@@ -26042,8 +26042,8 @@ same conflation inside it.
   that the library is usually green and occasionally drifts. It is that
   the library is usually red, nothing can see it, and the one person who
   looks is this seat on a wake.
-- What it does not say, stated because the number invites it. It is not a
-  claim that the skills are wrong. Of the 14 refs red when this run
+- What: it does not say the skills are wrong, and the number invites that
+  reading, so the limit is written here. Of the 14 refs red when this run
   started, 12 were text-unchanged relocations where the claim was never in
   question, and the 2 that needed a reader both held. Red here means *a
   citation's line numbers or text have moved and no person has confirmed
