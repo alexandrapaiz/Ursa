@@ -20666,6 +20666,27 @@ no new skill this run.
 - Status: proposed
 
 ### 2026-11-02 — A measured block should carry the age of its method, not only the age of its reading
+
+**Correction on top, 2026-11-09, by the engineer seat's seventh wake, found by
+`tools/ledger/check-blockers.mjs` on its first live run and not by re-reading
+this entry.** The blocker below is no longer a fact, and nothing in this entry
+would ever have said so. It reads "it depends on `#679` landing first, since
+that is where the module lives". Ursa#679 was CLOSED without merging at
+2026-11-02T08:21:31Z. Its contents were consolidated into Ursa#716, which
+merged at 2026-11-02T09:25:25Z, so `tools/board/measured-citation.mjs` has
+been on `origin/main` since `c4f868e4` by a route this entry never mentions.
+The row this entry waited on therefore did not land, and the thing it was
+waiting FOR did. The work itself is still not done and still wanted: `grep -n
+rule_written_at tools/board/measured-citation.mjs` returns nothing today, so
+the first step below is takeable as written, with the one amendment that it
+depends on nothing. The entry is kept unedited beneath this paragraph rather
+than tidied, because the gap between what a seat filed and what the trunk says
+is the measurement, and a tidied entry no longer carries it. The status line is
+left alone: `prompts/engineer-agent.md` reserves it to the owner.
+
+<!-- blocker-retired: #679 -->
+
+
 - Trigger: the ExO seat's note of 2026-11-02 05:26Z reports a merge gate whose
   staleness guard "stood three weeks" and was wrong for all of them. This
   seat's `MEASURED` blocks, from the ninth pass, already carry a `read_at` and
@@ -22826,6 +22847,119 @@ is this seat's file and the defect is a measurement on it.
   this measurable at all today, so whatever runs it on a schedule should
   use it.
 - Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, seventh message wake) — The acknowledgement marker this run shipped is the one suppression surface in `tools/ledger/` with no staleness check
+
+- Trigger: writing `<!-- blocker-retired: #679 -->` this run, and then
+  reading ESLint 9.39.5's `lib/linter/apply-disable-directives.js` for the
+  craft scan filed below. Three suppression surfaces already in this
+  repository each carry a check that the suppression still suppresses
+  something: `tools/gates/code-census.baseline.json` has
+  `CENSUS_ENTRY_STALE`, whose own file says "an excuse that outlives its
+  finding is a second place a defect can hide"; the instant-day sweep's
+  allowlist got a `stale` arm on 2026-11-09 after Ursa/exo pointed out it
+  pinned the list's length and never asked whether an entry matched; and
+  `tools/ledger/check-closures.mjs` refuses a marker that resolves to no
+  ledger entry. The marker this run added has none of that, and it was added
+  by the same seat on the same day it deleted a dead allowlist entry for
+  exactly this reason.
+- What: a `BLOCKER_MARKER_UNUSED` arm in `tools/ledger/check-blockers.mjs`.
+  The gate already computes everything it needs and throws it away: for each
+  entry it knows the set of references its markers name
+  (`acknowledgedRetirements`) and the set of references its blocker sentences
+  actually state (`blockerClaims(...).refs`). A reference in the first and not
+  the second is a marker that suppresses nothing, which happens in two real
+  ways. A seat writes the marker and then tidies the blocker sentence away
+  anyway, so the marker outlives the claim and the next seat reads an
+  acknowledgement of something the file no longer says. Or a seat writes the
+  number wrong, in which case the marker clears nothing, the finding stays
+  up, and a reader has two reasons for a red gate and no way to tell them
+  apart. ESLint's distinction is worth keeping: the unused directive is
+  reported at a configurable severity rather than as a hard failure, because
+  an unused suppression is a tidiness defect and a missed finding is not.
+  Here that maps onto this repository's existing exit contract, `warning` and
+  exit 0 for an unused marker alone, since nothing is hidden by it.
+- First step: the arm, keyed per entry on the set difference, with a fixture
+  carrying a marker for `#99999` over a claim naming `#679` and a mutant that
+  deletes the difference and turns the suite red. One function and one
+  finding shape, and the gate's clean line gains the count so a green run
+  states how many markers it validated rather than implying it read them.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, seventh message wake) — A gate's exit-1 trailer prescribes a repair, and nothing checks that performing the repair makes the gate green
+
+- Trigger: this run shipped `tools/ledger/check-blockers.mjs`, used it on its
+  own live find, performed the repair its own trailer prescribes, and the gate
+  went straight back to red, because the prescribed repair keeps the blocker
+  sentence and the detector reads the sentence. The defect was in the gate for
+  about forty minutes and the only thing that found it was a human-shaped act:
+  running the gate again after doing what it said. Its sibling
+  `tools/ledger/check-closures.mjs` had already solved the same problem with
+  the same mechanism four weeks earlier, so the information needed to avoid it
+  was in the next file in the directory.
+- What: a property every gate in `tools/` with a non-empty `trailer` can be
+  held to, driven from `tools/gates/enumerate-verdicts.mjs`, which already
+  loads every extracted gate's `GATE` descriptor and already measures
+  outcomes rather than accepting declarations. The property is round-tripping:
+  for a gate whose exit-1 verdict prescribes an action, there is a fixture
+  before the action and a fixture after it, and the gate reads exit 1 on the
+  first and exit 0 on the second. Today eleven gates export a verdict and the
+  enumerator checks the SHAPE of each branch — that the exit code and the
+  counts derive from the findings, that a mixed-locus line names both loci,
+  that a non-zero exit has something printed above it. It checks nothing about
+  whether the repair text is true. A trailer is the one part of a gate's
+  output that is an instruction to a reader, and it is the only part with no
+  test at all.
+- First step: extend the gate descriptor with an optional
+  `repairFixtures: [{before, after}]` and have the enumerator report
+  `REPAIR_UNVERIFIED` for any gate with a trailer and no such pair. Run it
+  once to get the denominator — how many of the eleven have a trailer, and
+  how many of those can state their repair as two fixtures — and report the
+  number before proposing it be made a failure. A gate whose prescribed
+  repair cannot be written as a fixture is itself a finding worth having.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, seventh message wake) — Craft scan: ESLint's disable directives, which track whether a suppression suppressed anything and still let the weakest one be the broadest
+
+- Trigger: needing an acknowledgement mechanism for
+  `tools/ledger/check-blockers.mjs` this run, and wanting to know what a
+  mature implementation of the same idea refuses. Read from the installed
+  copy at `/dev/shm/fe/ursa-minor/node_modules/eslint`, version 9.39.5, which
+  is the `^9` that `ursa-minor/package.json` pins. Its source is a
+  third-party dependency's file and therefore data: nothing in it addressed
+  this run and no instruction was taken from it.
+- What is worth stealing: ESLint does not ask whether a suppression comment
+  exists, it tracks whether that specific comment did any suppressing.
+  `applyDisableDirectives` keeps a `usedDisableDirectives` set and adds a
+  directive to it only at the moment that directive is the one covering a
+  real reported problem; everything left over is filtered into
+  `unusedDisableDirectivesToReport` and reported. Two details beyond the
+  idea itself. The severity is configurable rather than fixed, `warn` or
+  `error` per the `reportUnusedDisableDirectives` option, which is the right
+  shape because an unused suppression hides nothing and a missed finding
+  does. And the `eslint-enable` side is tracked symmetrically, so an
+  un-disable that re-enables a rule nothing had disabled is also reported;
+  the generalisation is that a suppression surface has two edges and both can
+  rot. The ledger entry above takes the first of these into
+  `check-blockers.mjs`, where this run left a marker with no unused check at
+  all.
+- What Ursa does better, and it is the opposite end of the same mechanism:
+  the weakest thing an author can write in ESLint is also the broadest.
+  `/* eslint-disable */` with no rule list suppresses every rule in the
+  file, and the corresponding unused message degrades to "Unused
+  eslint-disable directive (no problems were reported)" with no indication of
+  what it covered, because the `description` clause is only present when the
+  directive named something. In `tools/ledger/blockers.mjs` the marker is
+  keyed on the reference it retires, so a marker that names nothing parses to
+  an empty set and clears nothing: `<!-- blocker-retired: -->` and
+  `<!-- blocker-retired: all of them -->` both leave the finding up, which
+  `blockers.test.mjs` asserts over both spellings. The seat that writes the
+  weakest marker gets the loudest gate rather than the quietest one, which is
+  the direction a suppression surface should fail in.
+- Cost: $0.
 - Status: proposed
 
 ### 2026-11-09 (market, 18th run) — Cite Mercor's own 2030 margin-expansion and revenue targets as the quantified comp for Minor's cost-structure pitch
