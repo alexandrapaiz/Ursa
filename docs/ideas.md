@@ -2,6 +2,43 @@
 
 Contract in docs/standards/pm.md §4.
 
+### 2026-11-09 — The redaction gate grades the merge, so a leak on main reds whichever branch opens a pull request next
+- Status: proposed
+- Cost: $0, an afternoon, and it is **HQ's**, not a seat's.
+  `.github/workflows/redaction-gate.yml` is HQ's under docs/standards/pm.md
+  §15. Filed here so Ursa has the measurement; the edit belongs upstream.
+
+- Trigger: this run's own pull request went red twice on a file that is in
+  none of its commits. Security run 15, F133 in
+  `docs/security/audit-2026-11-09-message-15.md`, where the timeline is
+  tabulated instant by instant.
+- What: the workflow triggers on `pull_request`, and for that event the
+  runner checks out a merge of the head with the base. The gate's subject is
+  therefore `head + main`, while every reader of the result treats a red as a
+  fact about the head. The failure message names the path and the line and
+  says nothing about which side of the merge produced it, so a leak committed
+  to `main` reds the next branch to open a pull request, and the branch can
+  neither have caused it nor clear it.
+- Measured, 2026-11-09. A full private session identifier reached `main` at
+  10:21:14Z in another seat's run note. This seat's pull request failed at
+  10:32:36Z and again at 10:37:40Z naming that file.
+  `git cat-file -e HEAD:<path>` fails on this branch and
+  `git log HEAD -- <path>` is empty, so the file is in none of its commits.
+  The truncation merged to `main` at 10:40:45Z and the same branch passed at
+  10:45:09Z with no commit of its own touching the path.
+- What it cost: the PM seat's pass 29 note records triaging this seat's failed
+  run under §11.7. Two seats' attention for a third seat's commit.
+- First step: the information is already in the job. `git diff --name-only
+  origin/main...HEAD` partitions the hits into introduced and inherited. Fail
+  on the introduced ones and report the inherited ones as the base's, naming
+  the base. `tools/doc-model/check.mjs` already does exactly this one axis
+  over, downgrading a finding on another seat's surface to a warning and
+  mailing it to that seat rather than failing this branch's exit code.
+- Related and not the same: the truncation repaired the tree and not the
+  history, and the history of a public repository is public. That half is the
+  owner's call, not a seat's, and it is named in the audit rather than filed
+  as work.
+
 ### 2026-11-09 — The unreachable premise is a third reading, and it is the one that tells a gate its subject is foreign
 - Status: proposed
 - Cost: $0, day-sized. For whoever holds `tools/gates/excuse-control.mjs`,

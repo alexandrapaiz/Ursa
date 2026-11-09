@@ -5,8 +5,9 @@ of this seat's `#851`, and a note from Ursa's exo seat. A third was waiting on
 the board, from HQ's exo-centralizer, filing a general finding in this seat's
 name. This run took that filing.
 
-**Nothing severe. No secret found, nothing to rotate.** One finding, fixed
-across four files. Two ledger entries. One inherited draft resolved.
+**Nothing severe. No secret found, nothing to rotate.** Two findings. F132
+fixed across four files. F133 filed, because the file it is in belongs to HQ.
+Three ledger entries. One inherited draft resolved.
 
 ## What this run inherited, before anything else
 
@@ -163,6 +164,68 @@ events cannot collapse into one later. Against the pre-fix sources both files
 fail, though they fail at import rather than on an assertion, because the
 exports they read do not exist there. The behavioural claim rests on the CLI
 measurement in the table above and not on those two cases.
+
+## F133 — the redaction gate grades the merge, so a base-branch leak reds the branch under test
+
+**Filed, not fixed.** `.github/workflows/redaction-gate.yml` is HQ's under
+`docs/standards/pm.md` §15, so the repair is not this seat's to make.
+
+This one was not looked for. It arrived as two red checks on this run's own
+pull request, which is the best kind of instance, because the gate that
+misattributes did it to the run auditing misattribution while it was working.
+
+**The timeline, every instant read rather than inferred.**
+
+| instant | event |
+|---|---|
+| 10:21:14Z | the PM seat's pass 29 commits a full private session identifier into `docs/agents/pm-2026-11-09-message-29-run.md`, and it reaches `main` |
+| 10:32:36Z | `#859`'s redaction gate fails on `89ccc558`, naming that file |
+| 10:37:40Z | it fails again on `7548def2`, naming the same file |
+| before 10:40 | the PM seat's pass 29 note records triaging "security's failed run under §11.7" |
+| 10:40:45Z | the PM seat's truncation merges to `main` as `#861` |
+| 10:45:09Z | `#859`'s gate passes on `c5e1fecb`, with no commit of this branch having touched that path |
+
+**The file is absent from every commit of this branch.**
+`git cat-file -e HEAD:docs/agents/pm-2026-11-09-message-29-run.md` fails and
+`git log HEAD -- <that path>` is empty. The branch was never able to cause the
+red and was never able to clear it.
+
+**The mechanism.** The workflow triggers on `pull_request`, and for that event
+GitHub checks out a merge of the head with the base. So the gate's subject is
+`head + main`, while every reader of the result, the PM seat's triage included,
+treats a red as a fact about the head. The gate's own failure message names the
+path and the line and says nothing about which side of the merge it came from,
+and `git grep -rn` over a merged checkout cannot tell them apart.
+
+That is precisely the sentence HQ's exo-centralizer filed in this lane, and
+this is its second instance in this report: a gate whose subject lies outside
+the branch under test has two owners and one exit code, so the red is
+attributed to the wrong branch by default. F132 is the version where the
+foreign subject is a running service. F133 is the version where it is the base
+branch, which is the commoner one, because every pull request check in this
+repository has it.
+
+**What it cost, in this window.** Another seat spent part of a pass triaging a
+red on this seat's branch that this seat could not have caused or fixed. Two
+seats' time for one seat's commit, and the one seat was neither of them.
+
+**The repair shape, for whoever holds the workflow.** The information needed is
+already in the job: `git diff --name-only origin/main...HEAD` partitions the
+hits into the ones the pull request introduced and the ones it inherited. The
+gate can then fail on the first and report the second as the base's, naming the
+base. That is the same discipline `tools/doc-model/check.mjs` already applies
+one axis over, where a finding on a surface belonging to another seat is
+downgraded to a warning and mailed to that seat rather than failing this
+branch's exit code.
+
+**One thing this does not fix, and it is the reason the finding is worth
+filing rather than shrugging at.** Truncating the identifier repaired the tree.
+It did not repair the history, and the history of a public repository is
+public. The blob carrying the untruncated value is still reachable on `main`,
+at the commit named in the table above. No value is reproduced in this report.
+This is a private session identifier and not a credential, so there is nothing
+to rotate and it is not marked urgent, but it is the owner's to decide whether
+a history rewrite is warranted, and a seat cannot make that call.
 
 ## What this run did not establish, and one thing it first got wrong
 
