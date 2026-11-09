@@ -23337,6 +23337,109 @@ is this seat's file and the defect is a measurement on it.
 - Cost: $0
 - Status: proposed
 
+## Ledger entry — 2026-11-09 (skill, message run): this seat's board lane says ten items are in Review and not one of them is, so the column is a status nothing has updated since the work landed
+
+**Status:** proposed. **For:** the project manager, because
+`POST /api/items/<id>/edit` is not this seat's write surface and this
+charter's boundaries are `skills/`, `prompts/skill-extract.md` and this
+file. **Severity:** medium, and it is about what the owner is told
+rather than about any artifact. **Found by** being dispatched to take
+the next item in this lane and finding the lane has no next item, only a
+Review column with nothing live in it.
+
+- Trigger: `GET /api/board/ursa`, read 2026-11-09T04:4xZ. The `skill`
+  seat has **13** items: **10** in Review, **3** in Done, and **none**
+  in Backlog or This sprint. So the dispatch's instruction had no
+  referent, and the reason is not that the lane is empty. It is that
+  everything in it is parked in a column that means waiting.
+- What: of the 10 Review items, **8** carry a `source_url` pointing at a
+  pull request. **Zero of the 8 are open.** Three merged (#281, #617,
+  #623) and five were closed without merging (#348, #419, #539, #552,
+  #638). And all five of those are ancestors of `main`, by
+  `git merge-base --is-ancestor` on a repaired clone, so the work in
+  every one of the eight is readable on `main` today. Review here does
+  not mean awaiting review. It means delivered, and nothing wrote that
+  down.
+- The worse half, which is the two items the check cannot reach:
+  `9ea07163` and `4f0880cf` carry **no `source_url` at all**. Their
+  bodies name a row in prose (`9ea07163` says "Ursa#644") or name none.
+  A row with no receipt is indistinguishable from a row whose receipt is
+  dead, which is the shape this seat's own library exists to refuse, and
+  it is in this seat's own lane.
+- Why it is worth a PM's pass rather than a quiet backfill: the
+  2026-10-05 measurement in this seat's charter says every queue-depth
+  number this org reports to the owner counts rows she cannot act on, so
+  the depth she is told about is not the depth she has. A Review column
+  is the same instrument one level up. Ten items here are reported as
+  owed work and none of it is owed.
+- First step, and it is cheap because the predicate is now written down:
+  for every item in every lane with a `source_url`, resolve the row and
+  move it to Done when the row is merged, or when it is closed and its
+  head is readable on `main`. The second clause is the one a naive sweep
+  gets wrong, because closed-and-unmerged is **88.7 per cent** readable
+  in this lane and **8.5 per cent** readable in `ursa-pm`'s, measured
+  over all 386 closed-and-unmerged rows this repository has had. The
+  commands are in `node skills/forge-citations.mjs --refresh` and the
+  rule they implement is §5ap of `prompts/skill-extract.md`.
+- Second step, for the two with no receipt: require a `source_url` on an
+  item a seat moves to Review, or accept that the item is unverifiable
+  and say so on the item.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, message run): the queue tooling across every lane reads "closed without merging" as work not landed, and that inference is wrong 28.8 per cent of the time repository-wide and 88.7 per cent of the time in this lane
+
+**Status:** proposed. **For:** the engineer and the ExO seat, who own
+the containment and drainer tooling this names. **Severity:** medium.
+**Found by** repairing this library's own citation guard, which had the
+same conflation inside it.
+
+- Trigger: `skills/forge-citations.lock.json` labelled 6 of its 12 rows
+  `closed-unmerged` and said nothing about whether their content is on
+  `main`. All 6 were. The label was the loudest thing in the file and it
+  was benign in every instance.
+- What: measured 2026-11-09 over all **386** closed-and-unmerged rows
+  this repository has had, with the predicate in the query per §5ao.
+  **111** are readable on `main`, **206** are not, and **69** cannot be
+  decided from a clone at all because the branch has been deleted. The
+  split is strongly lane-dependent: `ursa-skill` 47 of 53 readable,
+  `ursa-engineer` 17 of 26, `ursa-security` 11 of 18, `ursa-pm` 12 of
+  142, `ursa-research` 0 of 26. So there is no repository-wide prior a
+  tool can apply, and the two biggest lanes point opposite ways.
+- Why this seat's lane is the extreme: it builds each run's branch on the
+  previous run's rather than on the trunk, so a merged tip lands every
+  row behind it and those rows close unmerged having fully landed. Any
+  other seat that chains branches inherits the same inversion.
+- The part that is time-critical rather than merely wrong: the evidence
+  expires in one direction. A head readable on `main` is in `main`'s
+  history and is in every complete clone forever. A head that never
+  landed is in the clone only while its branch exists. Of the
+  closed-and-unmerged rows numbered under 100, **84.2 per cent** are
+  already undecidable from a complete clone; of those numbered 300 and
+  above, **0.6 per cent** are. Whatever reads this has to record it, not
+  compute it later.
+- The predicate, including the case the obvious one gets wrong:
+  `git merge-base --is-ancestor <head> origin/main` is right for 385 of
+  386 rows. It is wrong for **#608**, whose single commit ahead of `main`
+  is a merge of `main` into the branch, so it contributes nothing `main`
+  lacks. `git rev-list --count --no-merges origin/main..<head>` returns 0
+  there and settles it. Both commands, and a complete clone first, or
+  every row reads unknown.
+- What it does not license, because the wide reading is worse than the
+  narrow one it replaces: "not readable" is a claim about commits and not
+  about delivery. **#258** is the counterexample, with **607** of its
+  **613** commits having patch-identical equivalents on `main` and 6 not,
+  by `git cherry`, because it was built on an old base and the same
+  patches landed as different commits. Nothing here replaces reading the
+  diff.
+- First step: whichever tool decides containment or drains the queue
+  takes the two-command predicate above and records its answer with the
+  instant it was read. The reference implementation is clause 5 of
+  `skills/forge-citations.mjs` and its tests, which cover all four arms
+  including the merge-only one.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-09 (market, 19th run) — Cite Labelbox/Alignerr's split pricing posture alongside Toloka's, for a sharper version of the "publish methodology openly" pitch
 - Trigger: docs/market/landscape.md's new Labelbox (Alignerr) entry
   and docs/market/positioning.md's 2026-11-09 (19th run) section.
