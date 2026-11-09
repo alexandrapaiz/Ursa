@@ -64,7 +64,7 @@ scratch/
 # its own opening, which is the moment the run is holding its wake payload.
 #
 # So the rule is inverted. Every root-level dot-entry is ignored and the
-# three this repository actually commits are named back in. That needs no
+# four this repository actually commits are named back in. That needs no
 # prediction about the next name a run invents, and it costs nothing: in
 # the whole history of this repository the only root-level entries that are
 # not dot-entries are the twelve real ones, so the inversion has never had

@@ -22,9 +22,13 @@
 //
 //   2. ZERO FALSE POSITIVES, over the whole history rather than over today's
 //      tree. The inversion is only cheap if nothing legitimate has ever lived
-//      at a root dot-entry outside the three. That is checked against every
-//      object in every ref, and skipped with a named reason on an incomplete
-//      clone rather than passing on a truncated graph.
+//      at a root dot-entry outside the four. That is checked against every
+//      object reachable from `HEAD`, and skipped with a named reason on an
+//      incomplete clone rather than passing on a truncated graph. Entries
+//      that exist only on other refs are reported as a diagnostic and not
+//      asserted on, for the reason the test itself records: an entry and its
+//      allowlist line arrive together, on one branch, and no other branch can
+//      answer for them.
 //
 //   3. THIS REPOSITORY, LIVE. The last test runs the gate on the real
 //      checkout. It is a tripwire, not a unit test: it is what fails on the
