@@ -219,6 +219,10 @@ test('a library row written before the commit is pending, so the row survives', 
     candidates: [{ path: 'tools/example.mjs', lang: 'javascript', exitCalls: 1 }],
     registered: new Map([['tools/example.mjs', ['example']]]),
     locate: (path) => (path === 'skills/not-yet-committed.mjs' ? 'uncommitted' : 'committed'),
+    // The author's working tree, which is the only place this state exists:
+    // `decide()` will not soften a finding on a clean tree, because that is
+    // what every runner checks out.
+    authoring: true,
     checkIds: ['example'],
     ledgerHeadings: [],
     baseline: {

@@ -185,11 +185,25 @@ export function registeredPaths(checks) {
  *  it described, which is the cost this third state exists to stop paying.
  *
  *  `locate(path)` returns `'committed'`, `'uncommitted'` or `'absent'`, and
- *  `uncommitted` is reported as `pending` rather than as a problem: it is
- *  unreachable in CI, where the tree under test is always committed, so it
- *  cannot hide a real stale row from the only reader that blocks a merge.
+ *  `uncommitted` is reported as `pending` rather than as a problem.
+ *
+ *  WHY `authoring` IS A SECOND ARGUMENT AND NOT A THIRD RETURN OF `locate`.
+ *  Softening a finding is only safe if the reader that blocks a merge can
+ *  never see the soft form. "CI's tree is always committed" was the first
+ *  version of that argument, and it is an assumption. The fact underneath it
+ *  is that being mid-write implies a DIRTY tree, so `main` passes
+ *  `authoring: <the tree has uncommitted changes>` and this function only
+ *  softens when that holds. On a clean tree -- which is what any runner
+ *  checks out -- an uncommitted path is still a finding.
+ *
+ *  It is a separate argument because `locate` answers a question about git and
+ *  `authoring` answers one about the run, and folding the second into the
+ *  first would make `locate` return `'committed'` for a file that is not,
+ *  which is the class of false sentence this whole change is removing.
  */
-export function decide({ candidates, registered, baseline, locate, checkIds, ledgerHeadings = [] }) {
+export function decide({
+  candidates, registered, baseline, locate, checkIds, ledgerHeadings = [], authoring = false,
+}) {
   if (typeof locate !== 'function') {
     throw new TypeError('decide() needs locate(path) -> committed|uncommitted|absent. It took a '
       + 'boolean `exists` until 2026-11-09, and the two cases that boolean merged are the '
@@ -271,7 +285,7 @@ export function decide({ candidates, registered, baseline, locate, checkIds, led
   for (const entry of baseline.entries ?? []) {
     if (discovered.has(entry.path)) continue
     const where = locate(entry.path)
-    if (where === 'uncommitted') {
+    if (where === 'uncommitted' && authoring) {
       pending.push({
         kind: 'pending-entry',
         path: entry.path,
@@ -287,14 +301,22 @@ export function decide({ candidates, registered, baseline, locate, checkIds, led
       why: where === 'committed'
         ? `${entry.path} is excused by the baseline, is committed, and is no longer a gate `
           + 'candidate, so the entry decides nothing. Delete it'
-        : `${entry.path} is excused by the baseline and is not in this tree. Delete it`,
+        : where === 'uncommitted'
+          // Reached on a clean tree, where nothing is being written, so the
+          // path is present and not at HEAD for some reason other than
+          // authoring. Both repairs are named because this says which two
+          // things disagree rather than guessing which one is wrong.
+          ? `${entry.path} is excused by the baseline and is present but not at HEAD, on a tree `
+            + 'with no uncommitted changes. The row and the file it names did not land together. '
+            + 'Commit the file, or delete the row'
+          : `${entry.path} is excused by the baseline and is not in this tree. Delete it`,
     })
   }
 
   for (const [path, checks] of registered) {
     const where = locate(path)
     if (where === 'committed') continue
-    if (where === 'uncommitted') {
+    if (where === 'uncommitted' && authoring) {
       pending.push({
         kind: 'pending-target',
         path,
@@ -308,7 +330,10 @@ export function decide({ candidates, registered, baseline, locate, checkIds, led
       kind: 'missing-target',
       path,
       why: `check(s) ${checks.join(', ')} in scripts/ci-checks.mjs invoke ${path}, which is `
-        + 'not in this tree, so that check cannot be what it says it is',
+        + (where === 'uncommitted'
+          ? 'present but not at HEAD on a tree with no uncommitted changes, so that check cannot '
+            + 'be what it says it is on any other checkout of this commit'
+          : 'not in this tree, so that check cannot be what it says it is'),
     })
   }
 
@@ -408,6 +433,13 @@ function main(argv) {
     if (inIndex.has(p) || existsSync(join(REPO_ROOT, p))) return 'uncommitted'
     return 'absent'
   }
+  // A clean tree has nothing being written in it, so `pending` is not a state
+  // it can be in. This is the read that makes the paragraph in `decide`'s
+  // docblock true rather than hopeful, and it asks git rather than a vendor's
+  // environment variable so that it holds on any runner.
+  const authoring = execFileSync('git',
+    ['-C', REPO_ROOT, 'status', '--porcelain', '--untracked-files=all'],
+    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }).trim().length > 0
 
   let ledgerHeadings = []
   try {
@@ -426,6 +458,7 @@ function main(argv) {
     locate,
     checkIds: checks.map((c) => c.id),
     ledgerHeadings,
+    authoring,
   })
   const v = verdict({ rows, problems, candidates: candidates.length, pending })
 

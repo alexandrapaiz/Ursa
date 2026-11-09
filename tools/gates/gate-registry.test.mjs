@@ -135,6 +135,7 @@ test('a baseline row for a file on disk and not committed is pending, not stale'
     candidates: [],
     baseline: { entries: [entry] },
     locate: () => 'uncommitted',
+    authoring: true,
   }))
   assert.deepEqual(problems, [], 'an uncommitted file must not make the row a finding')
   assert.equal(pending.length, 1)
@@ -151,12 +152,45 @@ test('a check naming a file on disk and not committed is pending, not missing', 
     candidates: [],
     registered: new Map([['tools/being-written.mjs', ['some-check']]]),
     locate: () => 'uncommitted',
+    authoring: true,
   }))
   assert.deepEqual(problems, [])
   assert.equal(pending.length, 1)
   assert.equal(pending[0].kind, 'pending-target')
   assert.match(pending[0].why, /some-check/)
   assert.match(pending[0].why, /Do NOT delete the check/)
+})
+
+// AND THE SAME TWO CASES ON A CLEAN TREE, which is what every runner checks
+// out. `pending` is a courtesy to the author's own terminal, so it is gated on
+// the tree having uncommitted changes. Without these two the change would be a
+// hole in the gate rather than a repair to it: a row that landed without its
+// file would go quiet on the one reader that blocks a merge.
+test('on a clean tree an uncommitted path is still a finding, with its own sentence', () => {
+  const entry = { path: 'tools/landed-alone.mjs', kind: 'not-a-gate', why: 'a reason long enough to pass' }
+  const row = decide(args({
+    candidates: [],
+    baseline: { entries: [entry] },
+    locate: () => 'uncommitted',
+    authoring: false,
+  }))
+  assert.deepEqual(row.pending, [])
+  assert.equal(row.problems[0].kind, 'stale-entry')
+  assert.match(row.problems[0].why, /not at HEAD/)
+  // It must not claim the file is committed, which is the false sentence this
+  // change exists to remove, and it must not guess which of the two is wrong.
+  assert.doesNotMatch(row.problems[0].why, /is committed/)
+  assert.match(row.problems[0].why, /Commit the file, or delete the row/)
+
+  const target = decide(args({
+    candidates: [],
+    registered: new Map([['tools/landed-alone.mjs', ['some-check']]]),
+    locate: () => 'uncommitted',
+    authoring: false,
+  }))
+  assert.deepEqual(target.pending, [])
+  assert.equal(target.problems[0].kind, 'missing-target')
+  assert.match(target.problems[0].why, /not at HEAD/)
 })
 
 test('pending never moves the exit code, and is still in the line', () => {
