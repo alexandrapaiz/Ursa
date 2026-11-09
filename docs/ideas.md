@@ -24177,3 +24177,118 @@ same conflation inside it.
   one later run could drain it in a single section-only branch.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (engineer, message, eleventh wake) — Read every pair of manifests that describe one set of things against each other
+
+- Trigger: this run. `tools/registers/id-namespaces.json` and
+  `tools/registers/registers.json` both enumerate this repository's
+  append-only registers, from different angles, and nothing read one
+  against the other. The result was that two registers whose own
+  `why_identifier` fields in `registers.json` describe an identifier race
+  in the exact words the identifier gate exists for were absent from the
+  gate's manifest, and the absence was indistinguishable from a decision,
+  because that manifest reasons explicitly about two exclusions and simply
+  did not mention these. Ursa's exo seat found both by hand.
+- What: this repository runs on declarative manifests, and several pairs of
+  them describe overlapping sets with no assertion tying them together.
+  Known candidates, each a pair where one file can gain a member without
+  the other noticing: `registers.json` against `id-namespaces.json` (closed
+  this run), `prod-closure.json`'s workspace keys against the tracked
+  `package-lock.json` files, `tools/registers/vendored.json` against the
+  files that actually carry a vendored header, `tools/seat/branch-patterns.json`
+  against the seat list the roster carries, and `scripts/ci-checks.mjs`'s
+  check list against the gates that exist under `tools/`. The last of those
+  is the one with a measured cost already on file: the security seat added
+  `register-ids` on 2026-11-02 precisely because two gates existed in
+  `tools/registers/` and were named in no gate list, so nothing ran them.
+  The unit of work is one coverage assertion per pair, total rather than
+  heuristic, each failing with the name of the unaccounted-for member.
+- First step: enumerate every JSON manifest under `tools/` and `scripts/`
+  with `grep -l '"'"'comment"'"'' tools/**/*.json`, and for each one write down
+  in a table what set it claims to enumerate and what other file would
+  know if it were incomplete. Pairs where the answer is "nothing" are the
+  work; pairs where the answer is a file are a one-test fix each.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message, eleventh wake) — Find the tests whose fixture is built by the same rule as the code under test
+
+- Trigger: this run, in `tools/registers/id-verdict.test.mjs`. A test named
+  "every define pattern finds its own namespace prefix and nothing else"
+  built its own sample as `## ${ns.name}-${padded} — a heading` and then
+  asserted the pattern matched it. That assertion can only pass for a
+  namespace spelled `NAME-<digits>`, which was every namespace that
+  existed, so the test certified the four that were and was unreachable
+  for the two that were missing. It looked like a check on the manifest and
+  was a restatement of the convention the code already assumed. It is now
+  asserted against a heading copied out of the register.
+- What: sweep the suites under `tools/` and `scripts/` for assertions whose
+  expected value is computed by the same expression the code under test
+  uses, rather than written as a literal or read from the repository. This
+  repository already knows the remedy and states it in
+  `id-verdict.test.mjs`'s own header: "a test that rebuilt it from the
+  module's own template would pass on any reword", which is why the verdict
+  lines there are hand-written literals. The gap is that the rule was
+  applied to the verdict lines and not to the fixtures. A mechanical
+  starting signal is cheap: in a test file, any `${...}` interpolation
+  inside an `assert.*` expected argument that references a field of the
+  object under test is a candidate.
+- First step: grep the suites for `assert.equal(` and `assert.match(` whose
+  expected side contains a template literal interpolating a property of the
+  subject, triage the hits by hand into "pins a literal", "reads the
+  repository" and "recomputes the rule", and fix the third class in the
+  file with the most hits.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message, eleventh wake) — Refuse to ready a pull request whose own branch is red
+
+- Trigger: this run, measured on this seat's own #823. That pull request
+  was readied and sitting in the owner's merge queue, and
+  `node --test tools/registers/closure-verdict.test.mjs` fails on its head
+  while passing on `main`: it moved `ursa-minor`'s dev-only closure from
+  611 entries to 558 and left `tools/registers/prod-closure.json` pinned at
+  611. Two declared checks go red on it, `tooling-suites` and
+  `register-closure`, and the repair was one number that the gate's own
+  `--write` flag regenerates. So the gate existed, ran offline in seconds,
+  named the number, and no one asked it before readying.
+- What: a seat-side tool that stands between the work and `gh pr ready`.
+  `node tools/seat/ready-check.mjs <number>` runs `node
+  scripts/ci-checks.mjs` over the working tree, and on a red check prints
+  the check id, the failing assertion and the repair command, exiting
+  non-zero so the readying step cannot be the next thing that happens. The
+  existing `passExit` semantics carry over unchanged, so an owner-held
+  exit 2 is not a block. This is deliberately not a workflow change, which
+  this seat may not make: it is a command a charter can name in the same
+  place it already names `gh pr ready`.
+- First step: write the tool as a thin wrapper that shells `scripts/ci-checks.mjs`
+  and re-renders its summary as a readying verdict, with a test that drives
+  it against a fixture tree carrying one deliberately stale pin. Then
+  propose the charter line separately, since charter edits are the owner's
+  merge and never this seat's daily pull request.
+- Cost: $0
+- Status: proposed
+
+- 2026-11-09 (engineer, message, eleventh wake) — Craft scan, Snorkel AI,
+  taken from `docs/market/landscape.md`'s own entry for it, which is that
+  file's newest Category 1 addition. **Nothing was fetched this run**; the
+  product knowledge below is this seat's own, and the entry is a committed
+  file. **Worth stealing:** Snorkel's original technical contribution is
+  weak supervision, where you declare several noisy labeling functions over
+  the same data and then estimate each function's accuracy from where the
+  functions agree and disagree, rather than trusting any one of them.
+  Ursa's span classifier assigns `survived_verbatim`, `survived_mutated`,
+  `generated_deleted` and `no_generation_provenance` from a set of
+  heuristics, and the fourth is both the most valuable category and the one
+  computed as a residual, meaning it inherits every other heuristic's
+  misses with no way to say how confident it is. Treating each provenance
+  heuristic as a labeling function with an estimated accuracy would let the
+  most commercially important category carry a confidence rather than be
+  whatever is left over. **What Ursa does better:** Snorkel's label is
+  still produced by a function someone wrote against a specification, which
+  is why it needs an accuracy model at all. Ursa's label is produced by the
+  artifact, so "the finished work kept this span" is not an estimate of a
+  judgement and needs no agreement model to be trusted. The landscape
+  entry's own weakness line says the same thing from the market side: work
+  performed on request against a specification, with no
+  generation-to-outcome join.
