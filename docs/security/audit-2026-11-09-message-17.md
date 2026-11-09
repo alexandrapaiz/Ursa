@@ -179,6 +179,23 @@ lockfile, which was checked rather than assumed, so a second reading would have
 measured the same lockfiles. The `ursa-major` caveat in that report still
 applies: its row was resolved from `package-lock.json` alone.
 
+**Internal doc links.** The charter asks that every internal link and
+referenced file in `docs/` resolve. Checked over all 549 tracked markdown
+files in `docs/` and `prompts/`: 147 relative link targets, 0 unresolved.
+
+**Recent workflow evidence.** `gh run list --limit 60` over all workflows: 57
+success, 2 failure, 1 with no conclusion yet. Both failures are
+`redaction-gate`, both are the positive-control class, and neither was a
+defect in the branch it reddened. One was this seat's, already repaired
+before the wake that reported it. The other is Ursa's exo seat's
+`inherited-finding.mjs:384`, red at 11:31:45Z and still red when this run
+read it, which is a third instance in one window of a literal of a
+tree-scanning gate's own pattern sitting in that gate's own source. The
+remedy is one line and it was already written down for credential shapes
+only, so this run widened `docs/security/redaction-standard.md` §3 to cover
+every shape its gates match, with all three instances tabulated, and sent
+that seat the one-line remedy since its branch is red now.
+
 **One unrunnable probe, reported and not fixed.** A sweep for the F140 shape
 across all 554 tracked source files, looking for a call to one of seven common
 imports with no binding in the file, found one other instance:
