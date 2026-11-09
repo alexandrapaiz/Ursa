@@ -133,7 +133,24 @@ console.log('# lib/verdict.mjs, premise states\n')
   check('both fail: reach reports first', v.premise, 'reached')
 }
 
-// 9. hydrate:false leaves the premise unacquired rather than silently passed.
+// 9. One load read twice is one load. A caller that navigates through
+// `visit` and then waits for its own selector asks the gate a second time
+// about the same navigation; counting both inflates the denominator of the
+// line the gate prints, which is this run's own fault found by reading its
+// own output. Measured: `measure-contrast.mjs` reported "every one of the 30
+// page loads" over fifteen navigations.
+{
+  const g = premises()
+  g.reach.saw('/a', resp(200))
+  g.hydration.saw('/a', { runtime: true, body: false, fibers: 2, els: 102 })
+  g.hydration.resaw('/a', { runtime: true, body: true, fibers: 90, els: 102 })
+  check('read twice: one row, not two', g.hydration.rows().length, 1)
+  check('read twice: the later reading wins', g.hydration.dead().length, 0)
+  const v = g.decide({ headline: 'z', siteCode: 0 })
+  check('read twice: not a refusal', v.code, 0)
+}
+
+// 10. hydrate:false leaves the premise unacquired rather than silently passed.
 {
   const g = premises({ hydrate: false })
   g.reach.saw('about:blank', resp(200))

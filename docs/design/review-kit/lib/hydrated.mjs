@@ -80,6 +80,20 @@ export function gate({ label = 'page' } = {}) {
       seen.push({ path: String(path), ...(read || {}) })
       return read
     },
+    // The SAME load, read again after the caller did more waiting. Replaces
+    // the row rather than adding one, because two readings of one navigation
+    // are one load and a denominator that counts them twice is the fault this
+    // gate exists to catch, one level in. Found 2026-11-09 (run ad) by
+    // reading the line this file prints: `measure-contrast.mjs`, wired to ask
+    // once in `visit` and again after `--until`, reported "every one of the
+    // 30 page loads" over fifteen navigations.
+    resaw(path, read) {
+      const key = String(path)
+      for (let i = seen.length - 1; i >= 0; i--) {
+        if (seen[i].path === key) { seen[i] = { path: key, ...(read || {}) }; return read }
+      }
+      return this.saw(path, read)
+    },
     // A page that shipped a runtime and did not run it. A page with no
     // runtime is not in this set, and neither is one that was never reached
     // at all, which is `lib/reached.mjs`'s question and not this one.

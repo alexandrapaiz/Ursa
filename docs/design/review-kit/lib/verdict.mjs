@@ -90,7 +90,11 @@ export function premises({ expect404 = [], label = 'page', hydrate = true } = {}
     // caller's own settling, never before it.
     async probed(page, path) {
       if (!hydrate) return null
-      return hydration.saw(path, await waitForHydration(page))
+      // `resaw`, not `saw`: a caller that navigated through `visit` above and
+      // then waited for its own selector is reading ONE load a second time,
+      // and counting it twice inflates the denominator of the line this gate
+      // prints. That is the same fault the gate catches, applied to the gate.
+      return hydration.resaw(path, await waitForHydration(page))
     },
     lines() {
       return parts.flatMap((p) => p.g.lines())
