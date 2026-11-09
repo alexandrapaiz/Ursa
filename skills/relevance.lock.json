@@ -435,8 +435,8 @@
   },
   "attributing-a-deleted-span/E7": {
     "verdict": "supports",
-    "read": "2026-10-26",
-    "lines": "278370f30325e13e",
+    "read": "2026-11-09",
+    "lines": "db6fc05fd849d869",
     "what": "a877678a268fd964",
     "passages": "05ffa0a2baa3276c"
   },
@@ -862,8 +862,8 @@
   },
   "auditing-a-durability-walk/E9": {
     "verdict": "supports",
-    "read": "2026-10-26",
-    "lines": "4c15c3ec2289c108",
+    "read": "2026-11-09",
+    "lines": "70a0a88ba64585fc",
     "what": "6b74c7b441de6a81",
     "passages": "9f1908890865a0f4"
   },

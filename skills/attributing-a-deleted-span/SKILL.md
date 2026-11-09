@@ -48,7 +48,7 @@ evidence:
     source: ursa-major/src/deletion.ts:42-44,142-144
   - ref: E7
     what: the conjunctive merge test and its three holes in code, with the first hole kept by a nullish assignment and later holes discarded, and an empty-after-normalization span returned as the person's
-    source: ursa-major/src/deletion.ts:125-127,146-187
+    source: ursa-major/src/deletion.ts:138-140,146-187
   - ref: E8
     what: the two fallbacks, where no readable merges and no blind shas makes every deletion the person's, and one blind sha makes every unexplained deletion unknown named by the first sha alone
     source: ursa-major/src/deletion.ts:96-105,189
