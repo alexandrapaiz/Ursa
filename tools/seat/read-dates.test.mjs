@@ -25,11 +25,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { compareInstants, isAfter, isBefore, compareDays, parseDay } from '../instant.mjs'
+import { compareInstants, isAfter, isBefore, compareDays, parseDay, calendarDay } from '../instant.mjs'
 import {
   splitEntries, labelAtHead, readDateField, gradeEntry, labelCensus, report,
   REGISTER_PATH, HOUSE_LABEL, ALT_LABELS, VERDICTS, NO_FIELD, FIELD_NO_ISO, gateExitCode,
-  nowDay, readingRecord, READING_RECORD_LABEL, NOT_READ_PHRASES, RECORD_NO_ISO, READ
+  readingRecord, READING_RECORD_LABEL, NOT_READ_PHRASES, RECORD_NO_ISO, READ
 } from './read-dates.mjs'
 
 // The capacity rows this organization actually had, which is outage.test.mjs's
@@ -258,11 +258,11 @@ test('live: the label census sums to the entry count, which is what makes it a c
 test('a future read date is decided on the UTC day, not on the first ten characters of --now', () => {
   // The line this replaces was `field.date > String(now).slice(0, 10)`. For a
   // Z-suffixed `now` the two agree, which is why the defect was invisible.
-  assert.equal(nowDay('2026-11-09T04:34:57Z'), '2026-11-09')
+  assert.equal(calendarDay('2026-11-09T04:34:57Z'), '2026-11-09')
   // They disagree whenever `--now` carries an offset. This instant is
   // 2026-11-10T01:00:00Z, so the UTC day is the 10th and the slice said the 9th.
   assert.equal('2026-11-09T20:00:00-05:00'.slice(0, 10), '2026-11-09')
-  assert.equal(nowDay('2026-11-09T20:00:00-05:00'), '2026-11-10')
+  assert.equal(calendarDay('2026-11-09T20:00:00-05:00'), '2026-11-10')
   // So an entry read on the 10th is no longer graded as read in the future.
   const entry = { heading: 'x', body: '- **Read on 2026-11-10**, in this window.\n' }
   const graded = gradeEntry(entry, { now: '2026-11-09T20:00:00-05:00', completedSince: 0 })
@@ -270,9 +270,18 @@ test('a future read date is decided on the UTC day, not on the first ten charact
   assert.notEqual(graded.verdict, null)
   // --now also accepts a bare day, which it always has, and that form is
   // returned unchanged rather than pushed through a function that refuses it.
-  assert.equal(nowDay('2026-11-09'), '2026-11-09')
-  assert.equal(nowDay('not a time'), null)
-  assert.equal(nowDay(null), null)
+  assert.equal(calendarDay('2026-11-09'), '2026-11-09')
+  assert.equal(calendarDay('not a time'), null)
+  assert.equal(calendarDay(null), null)
+  // ASSERTED ON `calendarDay` AND NOT ON `nowDay`, WHICH NO LONGER EXISTS
+  // (2026-11-09). `nowDay` here and `dayOf` in ./outage.mjs were one function
+  // written twice, and `tools/seat/charter-lag.mjs` held a third copy; all
+  // three are one call into `tools/instant.mjs` now. These five assertions are
+  // kept at this call site rather than deleted as duplicates of
+  // `tools/instant-day.test.mjs`, because what they pin is this TOOL's
+  // contract — that `--now` takes either shape — and that contract would
+  // survive the projection being swapped for another one.
+  assert.equal(calendarDay('2026-02-30'), null)
 })
 
 test('control: the day comparator orders days and REFUSES an instant, which compareInstants cannot do for a day', () => {

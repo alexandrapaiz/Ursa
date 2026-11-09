@@ -141,23 +141,70 @@ const CODE_SHAPE = /^[A-Z][A-Z0-9_]{2,}$/
  * when they can be read and `null` when they cannot.
  *
  * Tokenises rather than pattern-matches, for the three reasons in the header.
- * The state machine is the minimum that gets those three right: comments,
- * single and double quoted strings, and template literals. It does NOT
- * understand regex literals containing quote characters, which is the one
- * known gap; a regex like `/'/` would desynchronise the string state. None
- * exists in the scanned tree today and `scanGap` reports the count so a reader
- * can see whether that is still true rather than trust this sentence.
+ * The state machine handles comments, single and double quoted strings,
+ * template literals, AND regex literals.
+ *
+ * THE REGEX GAP WAS REAL, IT WAS OPEN, AND THE SENTENCE THAT SAID OTHERWISE
+ * CITED AN INSTRUMENT THAT DOES NOT EXIST. This docblock used to read: "It
+ * does NOT understand regex literals containing quote characters, which is the
+ * one known gap... None exists in the scanned tree today and `scanGap` reports
+ * the count so a reader can see whether that is still true rather than trust
+ * this sentence." Three things were wrong with it, measured 2026-11-09 by the
+ * engineer seat at `origin/main` 511a973f:
+ *
+ *  1. `scanGap` is not a symbol in this file, or in this repository. It
+ *     appeared exactly once, in that sentence, promising a reader a number
+ *     they could go and read. The number that was exported is
+ *     `regexLiterals`, and it counts every `/` CHARACTER in the source: 653
+ *     across the scanned tree. A count of slashes cannot distinguish a tree
+ *     with the gap from a tree without it, so even read correctly it could not
+ *     answer the question the sentence sent a reader to it with. No CLI mode
+ *     printed it either.
+ *
+ *  2. Two instances existed in the scanned tree on the day the sentence was
+ *     written. `tools/instant.mjs:709` is
+ *     `/([A-Za-z_$][A-Za-z0-9_$.?!\[\]'"()]*?)...` — a character class holding
+ *     both quote marks — and `tools/ledger/check-closures.mjs:144` is
+ *     `/^\s*(```|~~~)/`, three backticks, of which the scanner paired two and
+ *     opened a template on the third.
+ *
+ *  3. The cost was 6 of 63 single-line emission sites, silently. Everything
+ *     after the desync point in those two files was read inside a phantom
+ *     string: `TEXTUAL_DAY` and both `TEXTUAL_ORDER` sites in the lint, and all
+ *     three of `CLOSURE_RESOLVES`, `CLOSURE_STATUS` and `CLOSURE_SYNTAX` in the
+ *     closure checker, which this census therefore reported nothing about while
+ *     printing that no code is emitted with nothing watching it. WHICH codes
+ *     survived depended on where the next quote fell, so the vocabulary moved
+ *     under an unrelated edit: the same census read `TEXTUAL_DROP` for
+ *     `tools/instant.mjs` on one tree and `TEXTUAL_DAY` on another, 73 rows
+ *     both times.
+ *
+ * So regex literals are skipped now, and `unaccounted` is the check that would
+ * have caught the sentence being false: it is the file's own stated principle —
+ * a site whose code cannot be read is a finding and not a skip — applied to the
+ * scanner itself rather than only to the values it reads. A `/` is read as a
+ * regex opener when the previous significant token cannot end an expression,
+ * and a candidate regex containing a raw newline is re-read as division,
+ * because a regex literal cannot contain one. That bail is what keeps a
+ * misread division from swallowing the rest of the file, which is the failure
+ * this repair exists to stop.
  *
  * @param {string} source
- * @returns {{sites: Array<{line: number, prop: string, value: string, codes: string[] | null}>, regexLiterals: number}}
+ * @returns {{sites: Array<{line: number, prop: string, value: string, codes: string[] | null}>, regexLiterals: number, regexSkipped: number, unaccounted: Array<{line: number, text: string}>}}
  */
 export function emissionSites(source) {
   const sites = []
   let regexLiterals = 0
+  let regexSkipped = 0
   let i = 0
   let line = 1
   const n = source.length
   const isWord = (c) => c !== undefined && /[\w$]/.test(c)
+  // The last token that was not whitespace, a comment or a newline. A `/`
+  // after something that can END an expression is division; after anything
+  // else it opens a regex literal. `prev` holds either one character or a
+  // whole identifier, because the keyword cases need the word.
+  let prev = ''
 
   while (i < n) {
     const c = source[i]
@@ -201,15 +248,98 @@ export function emissionSites(source) {
         sites.push({ line, prop: word, value, kind: read.kind, codes: read.codes })
         line += countNewlines(source, k + 1, end)
         i = end
+        prev = ','
         continue
       }
+      prev = word
       i = j
       continue
     }
-    if (c === '/') regexLiterals += 1 // counted, never parsed; see the doc comment
+    if (c === '/') {
+      regexLiterals += 1
+      if (startsRegex(prev)) {
+        const stop = skipRegex(source, i)
+        if (stop > i + 1) {
+          regexSkipped += 1
+          i = stop
+          prev = '/'
+          continue
+        }
+      }
+    }
+    if (!/\s/.test(c)) prev = c
     i += 1
   }
-  return { sites, regexLiterals }
+  return { sites, regexLiterals, regexSkipped, unaccounted: unaccountedIn(source, sites) }
+}
+
+/** Can a `/` here open a regex literal? True when the previous significant
+ *  token cannot end an expression, which is the whole of the division/regex
+ *  ambiguity. The keyword list is the set this tree actually uses before a
+ *  regex; a keyword missing from it degrades to reading a regex as division,
+ *  and `unaccounted` is the check that catches the consequence. */
+function startsRegex(prev) {
+  if (prev === '') return true
+  if (/^[\w$]+$/.test(prev)) {
+    return KEYWORDS_BEFORE_REGEX.has(prev)
+  }
+  // `)` and `]` end an expression, so `/` after them is division. Every other
+  // punctuation mark is an operator or an opener.
+  return !')]'.includes(prev)
+}
+
+const KEYWORDS_BEFORE_REGEX = new Set([
+  'return', 'typeof', 'case', 'in', 'of', 'new', 'delete', 'void', 'do',
+  'else', 'instanceof', 'yield', 'await', 'throw'
+])
+
+/** Past a regex literal, honouring escapes and character classes. Returns
+ *  `start + 1` — a refusal — when the candidate runs to a raw newline, because
+ *  a regex literal cannot contain one, so this `/` was division after all.
+ *  That refusal is the load-bearing part: a division read as a regex would
+ *  otherwise swallow source to the end of the next `/`. */
+function skipRegex(s, start) {
+  let p = start + 1
+  let inClass = false
+  while (p < s.length) {
+    const c = s[p]
+    if (c === '\\') { p += 2; continue }
+    if (c === '\n') return start + 1
+    if (c === '[') { inClass = true; p += 1; continue }
+    if (c === ']') { inClass = false; p += 1; continue }
+    if (c === '/' && !inClass) {
+      p += 1
+      while (p < s.length && /[a-z]/.test(s[p])) p += 1
+      return p
+    }
+    p += 1
+  }
+  return start + 1
+}
+
+/** A whole-line assignment of a code literal to one of `CODE_PROPS`, built
+ *  from the two authorities rather than restating either, which is this file's
+ *  own rule about reading an obligation off the place that holds it. */
+const CODE_LINE = new RegExp(
+  `^\\s*(?:${[...CODE_PROPS].join('|')})\\s*:\\s*['"]${CODE_SHAPE.source.replace(/^\^|\$$/g, '')}['"]\\s*,?\\s*$`
+)
+
+/** Emission sites a LINE-ORIENTED reading can see and the character scanner
+ *  did not report. Zero on a synchronised scan. Non-zero means the scanner
+ *  lost its place, which is the fault that cost this census 6 of 63 sites
+ *  while exiting 0; see this file's `emissionSites` docblock. The shape is
+ *  deliberately narrow — the property, a colon, one quoted code literal, end
+ *  of line — so it cannot match prose in a comment, whose lines begin with
+ *  `*` or `//`. */
+function unaccountedIn(source, sites) {
+  const reported = new Set(sites.map((s) => s.line))
+  const out = []
+  source.split('\n').forEach((text, idx) => {
+    if (!CODE_LINE.test(text)) return
+    if (reported.has(idx + 1)) return
+    out.push({ line: idx + 1, text: text.trim() })
+  })
+  return out
 }
 
 function countNewlines(s, from, to) {
@@ -322,12 +452,16 @@ export function census(detectors, tests, baseline) {
   const codes = new Map() // code -> {code, detector, line}
   const constructed = []
   const forwarded = []
+  const unaccounted = []
   let sites = 0
   let regexLiterals = 0
+  let regexSkipped = 0
 
   for (const [path, source] of Object.entries(detectors)) {
     const scan = emissionSites(source)
     regexLiterals += scan.regexLiterals
+    regexSkipped += scan.regexSkipped
+    for (const u of scan.unaccounted) unaccounted.push({ detector: path, ...u })
     for (const site of scan.sites) {
       sites += 1
       if (site.kind === 'forwarded') {
@@ -378,12 +512,27 @@ export function census(detectors, tests, baseline) {
     }
   }
 
-  return { rows, constructed, forwarded, stale, sites, regexLiterals }
+  return { rows, constructed, forwarded, unaccounted, stale, sites, regexLiterals, regexSkipped }
 }
 
 /** @param {ReturnType<typeof census>} c */
 export function findingsOf(c) {
   const findings = []
+  // FIRST, because every other finding here is computed over a vocabulary this
+  // one says is incomplete. An unaccounted site means the scanner lost its
+  // place, so the codes after it in that file were never read at all and the
+  // undecided check below ran over a set that silently excludes them.
+  for (const u of c.unaccounted) {
+    findings.push({
+      locus: LOCUS.COMMITTED,
+      rule: 'CODE_SITE_UNACCOUNTED',
+      message:
+        `${u.detector}:${u.line}: a line-oriented reading sees an emission site here ` +
+        `(${JSON.stringify(u.text.slice(0, 80))}) and this census's character scanner reported ` +
+        'none, so the scanner lost its place earlier in the file and every code after that point ' +
+        'is outside the vocabulary below. Fix the tokeniser, not this line.',
+    })
+  }
   for (const u of c.constructed) {
     findings.push({
       locus: LOCUS.COMMITTED,
