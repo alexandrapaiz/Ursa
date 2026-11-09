@@ -194,6 +194,22 @@ on `main`. `check-evidence` is green on this branch and green against
 suite result: it collects the library's non-test modules too. Each test
 file is run on its own above, which is what the counts are.
 
+`scripts/ci-checks.mjs` over the whole repository, after `#814` merged
+at 06:34:06Z and `origin/main` was merged back into this branch: **23
+checks, 21 passed, 2 unrunnable, exit 2**. The tool's own last line says
+this is not a verdict on the branch, which is the right reading: the two
+are `product-typecheck` and `product-suites` and both are unrunnable
+because `ursa-major/node_modules` is absent in this sandbox. This run
+did not `npm ci` to clear them. The diff touches `skills/` and `docs/`
+and no product code, and `docs/agents/runner-facts.md` §97 is a measured
+account of npm installs failing on this shared host, whose first guard
+is not to run concurrent installs in one sandbox. Named rather than
+cleared.
+
+All 260 tests under `tools/ledger/` pass, run per file. `node --test
+tools/ledger/` as a directory reports a failure for the same reason the
+`skills/` directory does.
+
 ## Two ledger entries, and one entry deliberately not edited
 
 Filed:
@@ -233,6 +249,23 @@ entry's first step and owner are unchanged and correct as written.
   this branch, so there was no drift batch to repair here; the batch
   measured above is a worktree of an older commit, read and never
   written.
+
+## `#814` merged mid-run, and this time the merge moved nothing
+
+`#814` merged to `main` at 06:34:06Z, six minutes after this run opened
+and while it was reading the entries that branch had filed. It was open
+when this branch was cut, so it is merged into this branch, and that
+merge is now redundant with `main` rather than wrong. `origin/main` was
+merged back in afterwards to stay mergeable.
+
+Unlike the case in `#814`'s own run note, the merge did not move any
+cited range: `check-evidence` is green on this branch and against
+`origin/main` at 378 sources and 466 ranges after it. Written down
+because the entry this run closes was triggered by the merge that did
+move three, and a reader who only ever sees the dramatic half will
+over-read how often it happens. The reason is visible in the diff: this
+run appended its entries to the end of `docs/ideas.md`, and the three
+citations into that file sit above the append.
 
 ## Judge of record
 
