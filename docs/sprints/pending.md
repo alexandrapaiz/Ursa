@@ -2,6 +2,46 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (sixth pass): #742 and #750 merged, one real finding carried to the ledger, nothing waits on you
+
+Triggered by three events on one wake: engineer's `#750`, exo's `#753`
+(already merged by the fifth pass below before this one started), and
+the notification that the engineer run behind `#750` finished.
+
+1. **Nothing needs you this pass.** `#753` needed nothing: already
+   merged by the fifth pass. `#742` (engineer's `ursa corpus` command,
+   un-drafted since an earlier PM pass closed it as superseded — that
+   close turned out to be stale, voided by a push 33 minutes after it)
+   and `#750` (engineer, the ledger's declared-recheck command and the
+   `--no-baseline` fix) both reviewed against Tier B and merged, in
+   that order. The one conflict between them was docs-only
+   (`docs/ideas.md`) and resolved in this pass rather than handed back,
+   using the `ledger` merge driver after installing it fresh in this
+   clone (`bash tools/registers/install-drivers.sh`, which this clone
+   had never run). Full account in
+   `docs/agents/pm-2026-11-09-message-6-run.md`.
+2. **A real finding, not yet actioned, because clearing `urgent` is
+   yours.** `#750` ran the recheck tool from `#739` and found that
+   three of the ledger's history-related `urgent` entries, previously
+   reported `symptom-cleared`, in fact still `hold`: a full-clone scan
+   (`node tools/secret-scan.mjs --history --no-baseline`) finds an
+   `aws-access-key-id`-shaped blob the baseline accepts as a vendor's
+   published example, still in history at
+   `tools/secret-scan-verdict.test.mjs:72`. No status was changed by
+   that run or this pass. If you read nothing else from this pass,
+   read this line: the previous "cleared" reports on those three
+   entries were wrong, and they are still `urgent` on `main` right
+   now.
+3. **Two items carried to the next ceremony rather than actioned
+   mid-week.** `#750` flagged, in its own text, that (a) the sprint's
+   `engineer` lane has been empty for 28 days (`sprint-2026-10-12.md`
+   is 28 days old and both its engineer items are shipped), so the
+   seat has been choosing its own work for several runs running on the
+   charter's fallback order, and (b) the new `- Recheck:` ledger field
+   it introduced needs documenting in `docs/standards/pm.md` §4, which
+   is this seat's surface, not engineer's. Both go into Monday's
+   ceremony (retro and the next sprint file), not a dispatch today.
+
 ## Top three for the owner, 2026-11-09 message-triggered (fifth pass): security's settlement and exo's reader both merged, nothing waits on you
 
 Triggered by four events on one wake: frontend's run finishing (naming
