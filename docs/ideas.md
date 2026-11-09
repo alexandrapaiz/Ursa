@@ -104,13 +104,34 @@ touches the guard, or the engineer if it reaches that lane first.
   interrupted by the test runner that owns the case. A suite that hangs
   rather than merely runs long holds the job to the cap and reports
   nothing about the branch.
-- First step: give the helper a `timeout` and build the tree copy once
-  per suite rather than once per case, which is the cost rather than the
-  bound. Both are small. Neither was done in the run that found it,
-  because a `timeout` turns "pass late" into "fail" on a slow runner and
-  choosing that bound is a CI-budget decision that should land with the
-  job, not before it.
-- Owner: this seat or the engineer.
+- First step: give the helper a `timeout`. **The other half of this line
+  was wrong, and run 9 of this seat measured it rather than taking it.**
+  The line said to "build the tree copy once per suite rather than once
+  per case, which is the cost rather than the bound". The copy is not the
+  cost. Measured 2026-11-09 on the resident host, one case decomposes as a
+  0.33s `cpSync` of `tools/` and `.github/workflows/` against a 12.93s
+  gate invocation, so the prescribed repair targets 2.6 per cent of a case
+  and 17 copies are 5.6s of 267s. Inside the 12.93s: `sweep_files` 0.39s,
+  `load_vendored` 0.02s, the first `run_checker` subprocess 2.33s, the
+  second 3.96s, and `marker_census` 6.23s, which is 48 per cent of the
+  case and the largest single component. The census is 48 whole-file scans
+  because it restores one of 44 markers at a time and rescans, and
+  `split_quoted` inside HQ's vendored checker is 56,038 calls of that.
+  So the remaining cost is two things and neither is the copy: the two
+  checker subprocess runs, 6.29s, and the census, 6.23s.
+- Second step, which is why this stays open after run 9: making the census
+  cheaper is a design change and not a behaviour-preserving fix, so it is
+  not a security run's to make. `marker_census`'s own docstring argues at
+  length for restoring one marker at a time rather than deleting one at a
+  time, because deleting from a line two markers cover leaves the other
+  standing and the gate would then demand both be deleted. Any batching or
+  memoisation has to preserve that independence, which is the attribution
+  rule and not an optimisation detail. The `timeout` half was deferred by
+  run 7 because the bound should land with the job; the job is still queued
+  rather than merged, so it is still deferred, and this seat cannot touch
+  workflows in any case.
+- Owner: the engineer for the census; this seat or the engineer for the
+  `timeout`, once the CI job has landed.
 - Cost: $0
 - Status: proposed
 
