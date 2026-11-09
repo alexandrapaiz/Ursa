@@ -265,6 +265,31 @@ export function concurrent(a, b, { run = git } = {}) {
   return !ancestor(a, b) && !ancestor(b, a);
 }
 
+/** `git patch-id --stable` for one commit, or null if it cannot be taken.
+ *
+ *  WHY THIS IS HERE, and it was found by reading the rows rather than by
+ *  reasoning about them. The first live reading of this gauge put this seat
+ *  at the top of its own table with nine same-actor pairs, and the sharpest
+ *  of them was `a0c58822` and `328b7a42`: the same subject line, eight
+ *  minutes apart, both `ursa-exo`, concurrent in the graph — and
+ *  patch-IDENTICAL. That is not two decisions. It is ONE commit rebased onto
+ *  a second branch, which is this seat's own documented practice: it splits
+ *  its chain by merge authority into a register lane and a charter lane, so
+ *  it lands the same change twice by construction (§0 of its charter says
+ *  so). A cherry-pick is one decision however many branches carry it, and
+ *  that is true across actors too — a seat taking a sibling's commit
+ *  verbatim is coordination, not collision. So this test runs BEFORE
+ *  concurrency and not after it. */
+export function patchId(sha, { run = git } = {}) {
+  try {
+    const out = execFileSync('sh', ['-c', `git show ${sha} | git patch-id --stable`], {
+      encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    const id = out.trim().split(/\s+/)[0];
+    return id || null;
+  } catch { return null; }
+}
+
 /** Did any board message pass between two actors inside [lo, hi]? */
 export function messageBetween(rows, actorA, actorB, lo, hi) {
   const seat = (s) => String(s || '').replace(/^ursa-/, '');
@@ -280,7 +305,15 @@ export function messageBetween(rows, actorA, actorB, lo, hi) {
 }
 
 /** Group commits into (register, entry) buckets and grade each actor pair. */
-export function grade(commits, edits, { rows = null, coverage = null, run = git } = {}) {
+export function grade(commits, edits, { rows = null, coverage = null, run = git, patchOf = patchId } = {}) {
+  // Memoised: a commit appears in as many buckets as it has entries, and the
+  // measured instance has twelve, so an un-cached patch-id would pipe the
+  // same diff through `patch-id` twelve times.
+  const pidCache = new Map();
+  const pid = (sha) => {
+    if (!pidCache.has(sha)) pidCache.set(sha, patchOf(sha, { run }));
+    return pidCache.get(sha);
+  };
   // edits: Map sha -> [{ path, id }]
   const buckets = new Map();
   for (const c of commits) {
@@ -311,10 +344,17 @@ export function grade(commits, edits, { rows = null, coverage = null, run = git 
       for (let j = i + 1; j < actors.length; j += 1) {
         const first = actors[i];
         const second = actors[j];
-        const conc = concurrent(first.sha, second.sha, { run });
         let klass;
         let msg = null;
-        if (!conc) {
+        // Patch identity first. One change on two branches is one decision,
+        // and no amount of graph concurrency makes it two.
+        const pidA = pid(first.sha);
+        const pidB = pid(second.sha);
+        const samePatch = pidA !== null && pidA === pidB;
+        const conc = samePatch ? false : concurrent(first.sha, second.sha, { run });
+        if (samePatch) {
+          klass = 'SAME_CHANGE';
+        } else if (!conc) {
           klass = 'SEQUENTIAL';
         } else if (!rows) {
           klass = 'INDETERMINATE';
@@ -329,6 +369,7 @@ export function grade(commits, edits, { rows = null, coverage = null, run = git 
           entry: b.id,
           klass,
           same_actor: first.actor === second.actor,
+          same_patch: samePatch,
           first: { sha: first.sha.slice(0, 8), ts: first.ts, actor: first.actor, subject: first.subject },
           second: { sha: second.sha.slice(0, 8), ts: second.ts, actor: second.actor, subject: second.subject },
           gap_seconds: Math.round((new Date(second.ts) - new Date(first.ts)) / 1000),
@@ -339,9 +380,44 @@ export function grade(commits, edits, { rows = null, coverage = null, run = git 
   }
   pairs.sort((a, b) => (a.first.ts < b.first.ts ? 1 : -1));
 
-  const counts = { DUPLICATED: 0, COORDINATED: 0, SEQUENTIAL: 0, INDETERMINATE: 0 };
+  const counts = { DUPLICATED: 0, COORDINATED: 0, SAME_CHANGE: 0, SEQUENTIAL: 0, INDETERMINATE: 0 };
   for (const p of pairs) counts[p.klass] += 1;
-  return { pairs, counts, entries: buckets.size };
+
+  // TWO UNITS, AND REPORTING ONLY THE FIRST IS HOW THIS GAUGE WOULD LIE.
+  // The measured instance is ONE collision between two runs that happened to
+  // span twelve entries, so it contributes twelve pairs. "38 duplicated
+  // repairs in a day" and "4 collisions in a day" are the same reading and
+  // only the second is a rate anybody can act on. An EVENT is a distinct
+  // (earlier commit, later commit) pair; the entries it spans are its width.
+  const events = new Map();
+  for (const p of pairs) {
+    const key = `${p.first.sha}\u0000${p.second.sha}`;
+    if (!events.has(key)) {
+      events.set(key, {
+        klass: p.klass,
+        same_actor: p.same_actor,
+        first: p.first,
+        second: p.second,
+        gap_seconds: p.gap_seconds,
+        registers: new Set(),
+        entries: 0,
+        message: p.message,
+      });
+    }
+    const e = events.get(key);
+    e.registers.add(p.path);
+    e.entries += 1;
+    // A commit pair spanning several entries can in principle be graded
+    // differently per entry only through the message test, which is keyed on
+    // the pair's own interval and therefore constant across its entries. If
+    // that ever stops being true, the worse verdict is the event's.
+    if (p.klass === 'DUPLICATED') e.klass = 'DUPLICATED';
+  }
+  const eventList = [...events.values()].map((e) => ({ ...e, registers: [...e.registers] }));
+  const eventCounts = { DUPLICATED: 0, COORDINATED: 0, SAME_CHANGE: 0, SEQUENTIAL: 0, INDETERMINATE: 0 };
+  for (const e of eventList) eventCounts[e.klass] += 1;
+
+  return { pairs, counts, events: eventList, event_counts: eventCounts, entries: buckets.size };
 }
 
 // THE POSITIVE CONTROL. A gauge whose subject is "did two actors collide"
@@ -360,6 +436,8 @@ export const CONTROL = {
     { sha: 'cc0sequential2', ts: '2099-01-03T00:10:00Z', actor: 'ursa-f', subject: 'second half' },
     { sha: 'cc0sameseat1', ts: '2099-01-04T00:00:00Z', actor: 'ursa-g', subject: 'window one' },
     { sha: 'cc0sameseat2', ts: '2099-01-04T00:10:00Z', actor: 'ursa-g', subject: 'window two' },
+    { sha: 'cc0samechange1', ts: '2099-01-05T00:00:00Z', actor: 'ursa-h', subject: 'the register lane' },
+    { sha: 'cc0samechange2', ts: '2099-01-05T00:10:00Z', actor: 'ursa-h', subject: 'the charter lane' },
   ],
   edits: new Map([
     ['cc0duplicated1', [{ path: 'control.md', id: 'E-DUP' }]],
@@ -370,6 +448,8 @@ export const CONTROL = {
     ['cc0sequential2', [{ path: 'control.md', id: 'E-SEQ' }]],
     ['cc0sameseat1', [{ path: 'control.md', id: 'E-SAME' }]],
     ['cc0sameseat2', [{ path: 'control.md', id: 'E-SAME' }]],
+    ['cc0samechange1', [{ path: 'control.md', id: 'E-PATCH' }]],
+    ['cc0samechange2', [{ path: 'control.md', id: 'E-PATCH' }]],
   ]),
   rows: [{
     ts: '2099-01-02T00:05:00Z',
@@ -377,6 +457,10 @@ export const CONTROL = {
     to_seat: 'd',
     subject: 'a control message that makes one pair COORDINATED',
   }],
+  // The two patch-identical commits, and everything else distinct. Injected
+  // rather than taken from git, so the control stays pure and the SAME_CHANGE
+  // branch is exercised without a repository.
+  patchOf: (sha) => (sha.startsWith('cc0samechange') ? 'IDENTICAL-PATCH' : `p-${sha}`),
   // `cc0sequential1` is an ancestor of `cc0sequential2` and nothing else is
   // an ancestor of anything, which is the one graph fact the control injects.
   run: (args) => {
@@ -392,6 +476,7 @@ export const CONTROL = {
     'control.md\u0000E-COORD': 'COORDINATED',
     'control.md\u0000E-SEQ': 'SEQUENTIAL',
     'control.md\u0000E-SAME': 'DUPLICATED',
+    'control.md\u0000E-PATCH': 'SAME_CHANGE',
   },
 };
 
@@ -400,6 +485,7 @@ export function runControl() {
   const { pairs } = grade(CONTROL.commits, CONTROL.edits, {
     rows: CONTROL.rows,
     run: CONTROL.run,
+    patchOf: CONTROL.patchOf,
   });
   const failures = [];
   for (const [key, want] of Object.entries(CONTROL.want)) {
@@ -507,8 +593,10 @@ async function main() {
       commits_scanned: commits.length,
       commits_touching_an_old_entry: edits.size,
       entries: g.entries,
-      board: { complete: board.complete, oldest: board.oldest, rows: board.rows ? board.rows.length : 0, note: board.note },
+      board: { complete: board.complete, oldest: board.oldest, pages: board.pages ?? null, rows: board.rows ? board.rows.length : 0, note: board.note },
+      event_counts: g.event_counts,
       counts: g.counts,
+      events: g.events,
       pairs: g.pairs,
     }, null, 2));
   } else {
@@ -518,23 +606,28 @@ async function main() {
     console.log(`window ${hours}h  refs ${refCount}  registers ${regs.length}  `
       + `commits ${commits.length} (${edits.size} touched a pre-existing entry)  `
       + `entries ${g.entries}`);
-    console.log(`board: ${board.rows ? `${board.rows.length} rows, ${board.complete ? 'complete' : 'INCOMPLETE'}, oldest ${board.oldest}` : board.note}`);
-    console.log(`counts: ${Object.entries(g.counts).map(([k, v]) => `${k} ${v}`).join('  ')}`);
-    for (const p of g.pairs) {
-      if (p.klass === 'SEQUENTIAL') continue;
-      console.log(`\n${p.klass}${p.same_actor ? ' (SAME ACTOR, two windows)' : ''}  ${p.path}`);
-      console.log(`  entry  ${p.entry.slice(0, 100)}`);
-      console.log(`  ${p.first.sha} ${p.first.ts} ${p.first.actor}`);
-      console.log(`  ${p.second.sha} ${p.second.ts} ${p.second.actor}   gap ${p.gap_seconds}s`);
-      if (p.message) console.log(`  message  ${p.message.ts}  ${p.message.subject.slice(0, 80)}`);
+    console.log(`board: ${board.rows ? `${board.rows.length} rows over ${board.pages} page(s), ${board.complete ? 'complete' : 'INCOMPLETE'}, oldest ${board.oldest}` : board.note}`);
+    if (board.note && board.rows) console.log(`  ${board.note}`);
+    console.log(`events: ${Object.entries(g.event_counts).map(([k, v]) => `${k} ${v}`).join('  ')}`);
+    console.log(`pairs : ${Object.entries(g.counts).map(([k, v]) => `${k} ${v}`).join('  ')}`
+      + '   (an event is one commit pair; pairs count the entries it spans)');
+    for (const e of g.events) {
+      if (e.klass === 'SEQUENTIAL' || e.klass === 'SAME_CHANGE') continue;
+      console.log(`\n${e.klass}${e.same_actor ? ' (SAME ACTOR, two windows)' : ''}  ${e.entries} entr${e.entries === 1 ? 'y' : 'ies'} in ${e.registers.join(', ')}`);
+      console.log(`  ${e.first.sha} ${e.first.ts} ${e.first.actor}  ${e.first.subject.slice(0, 72)}`);
+      console.log(`  ${e.second.sha} ${e.second.ts} ${e.second.actor}  ${e.second.subject.slice(0, 72)}`);
+      console.log(`  gap ${e.gap_seconds}s`);
+      if (e.message) console.log(`  message  ${e.message.ts}  ${e.message.subject.slice(0, 80)}`);
     }
-    if (!g.pairs.some((p) => p.klass !== 'SEQUENTIAL')) {
+    if (!g.events.some((e) => e.klass !== 'SEQUENTIAL' && e.klass !== 'SAME_CHANGE')) {
       console.log('\nNo concurrent same-entry pair in this window. The control passed, '
         + 'so this is a reading and not a silence.');
     }
   }
 
-  if (process.argv.includes('--audit') && g.counts.DUPLICATED > 0) process.exit(1);
+  // Keyed on events, not pairs: a gate whose threshold moves with how many
+  // entries a collision happened to span is a gate on entry width.
+  if (process.argv.includes('--audit') && g.event_counts.DUPLICATED > 0) process.exit(1);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

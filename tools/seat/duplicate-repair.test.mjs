@@ -9,6 +9,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { execSync } from 'node:child_process';
 import {
   registers,
   entrySpans,
@@ -19,6 +20,7 @@ import {
   concurrent,
   messageBetween,
   grade,
+  patchId,
   runControl,
   NON_SEAT_AUTHORS,
 } from './duplicate-repair.mjs';
@@ -452,4 +454,141 @@ test('the identifier patterns this repository declares capture a group', () => {
     if (!r.identifier) continue;
     assert.match(r.identifier, /\(/, `${r.path} identifier has no group`);
   }
+});
+
+// ------------------------------------------------------------ the event roll-up
+
+test('one commit pair spanning three entries is three pairs and ONE event', () => {
+  // The unit that makes the number actionable. The measured instance is one
+  // collision between two runs across twelve entries; reporting it as twelve
+  // duplicated repairs a day overstates the rate by its entry width.
+  const commits = [C('a', '2026-11-09T05:00:00Z', 'ursa-skill'), C('b', '2026-11-09T05:10:00Z', 'ursa-engineer')];
+  const three = ['E1', 'E2', 'E3'].map((id) => ({ path: 'r.md', id }));
+  const edits = new Map([['a', three], ['b', three]]);
+  const g = grade(commits, edits, { rows: [], run: () => { throw new Error('no'); } });
+  assert.equal(g.counts.DUPLICATED, 3);
+  assert.equal(g.event_counts.DUPLICATED, 1);
+  assert.equal(g.events[0].entries, 3);
+  assert.deepEqual(g.events[0].registers, ['r.md']);
+});
+
+test('an event records every register it spans', () => {
+  const commits = [C('a', '2026-11-09T05:00:00Z', 'ursa-skill'), C('b', '2026-11-09T05:10:00Z', 'ursa-engineer')];
+  const edits = new Map([
+    ['a', [{ path: 'x.md', id: 'E' }, { path: 'y.md', id: 'F' }]],
+    ['b', [{ path: 'x.md', id: 'E' }, { path: 'y.md', id: 'F' }]],
+  ]);
+  const g = grade(commits, edits, { rows: [], run: () => { throw new Error('no'); } });
+  assert.equal(g.event_counts.DUPLICATED, 1);
+  assert.deepEqual(g.events[0].registers.sort(), ['x.md', 'y.md']);
+  assert.equal(g.events[0].entries, 2);
+});
+
+test('two separate collisions are two events', () => {
+  const commits = [
+    C('a', '2026-11-09T05:00:00Z', 'ursa-skill'),
+    C('b', '2026-11-09T05:10:00Z', 'ursa-engineer'),
+    C('c', '2026-11-09T06:00:00Z', 'ursa-pm'),
+    C('d', '2026-11-09T06:10:00Z', 'ursa-frontend'),
+  ];
+  const edits = new Map([
+    ['a', [{ path: 'r.md', id: 'E1' }]], ['b', [{ path: 'r.md', id: 'E1' }]],
+    ['c', [{ path: 'r.md', id: 'E2' }]], ['d', [{ path: 'r.md', id: 'E2' }]],
+  ]);
+  const g = grade(commits, edits, { rows: [], run: () => { throw new Error('no'); } });
+  assert.equal(g.event_counts.DUPLICATED, 2);
+});
+
+test('event counts never exceed pair counts', () => {
+  const commits = [C('a', '2026-11-09T05:00:00Z', 'ursa-a'), C('b', '2026-11-09T05:10:00Z', 'ursa-b')];
+  const two = ['E1', 'E2'].map((id) => ({ path: 'r.md', id }));
+  const g = grade(commits, new Map([['a', two], ['b', two]]), { rows: [], run: () => { throw new Error('no'); } });
+  for (const k of Object.keys(g.event_counts)) assert.ok(g.event_counts[k] <= g.counts[k], k);
+});
+
+// ------------------------------------------------------- patch identity
+
+test('patch-identical commits grade SAME_CHANGE, not DUPLICATED', () => {
+  // One commit rebased onto a second branch. This seat splits its chain by
+  // merge authority and so lands the same change twice by construction, and
+  // the first live reading of this gauge charged it nine times for doing it.
+  const commits = [C('a', '2026-11-09T04:31:49Z', 'ursa-exo'), C('b', '2026-11-09T04:39:33Z', 'ursa-exo')];
+  const edits = new Map([['a', [{ path: 'r.md', id: 'E' }]], ['b', [{ path: 'r.md', id: 'E' }]]]);
+  const g = grade(commits, edits, {
+    rows: [], run: () => { throw new Error('no'); }, patchOf: () => 'SAME',
+  });
+  assert.equal(g.counts.SAME_CHANGE, 1);
+  assert.equal(g.counts.DUPLICATED, 0);
+  assert.equal(g.pairs[0].same_patch, true);
+});
+
+test('patch identity is checked BEFORE concurrency, so the graph cannot override it', () => {
+  // A cherry-pick is concurrent in the graph by construction. If concurrency
+  // were tested first, every cherry-pick would be a duplication.
+  const commits = [C('a', '2026-11-09T05:00:00Z', 'ursa-a'), C('b', '2026-11-09T05:10:00Z', 'ursa-b')];
+  const edits = new Map([['a', [{ path: 'r.md', id: 'E' }]], ['b', [{ path: 'r.md', id: 'E' }]]]);
+  const g = grade(commits, edits, {
+    rows: [],
+    run: () => { throw new Error('never an ancestor, so concurrent'); },
+    patchOf: () => 'SAME',
+  });
+  assert.equal(g.pairs[0].klass, 'SAME_CHANGE');
+});
+
+test('a cross-actor cherry-pick is SAME_CHANGE too, because taking a sibling\'s commit is coordination', () => {
+  const commits = [C('a', '2026-11-09T05:00:00Z', 'ursa-skill'), C('b', '2026-11-09T05:10:00Z', 'ursa-engineer')];
+  const edits = new Map([['a', [{ path: 'r.md', id: 'E' }]], ['b', [{ path: 'r.md', id: 'E' }]]]);
+  const g = grade(commits, edits, { rows: [], run: () => { throw new Error('no'); }, patchOf: () => 'SAME' });
+  assert.equal(g.counts.SAME_CHANGE, 1);
+  assert.equal(g.pairs[0].same_actor, false);
+});
+
+test('different patch-ids leave the verdict to concurrency', () => {
+  const commits = [C('a', '2026-11-09T05:00:00Z', 'ursa-a'), C('b', '2026-11-09T05:10:00Z', 'ursa-b')];
+  const edits = new Map([['a', [{ path: 'r.md', id: 'E' }]], ['b', [{ path: 'r.md', id: 'E' }]]]);
+  const g = grade(commits, edits, {
+    rows: [], run: () => { throw new Error('no'); }, patchOf: (s) => `p-${s}`,
+  });
+  assert.equal(g.pairs[0].klass, 'DUPLICATED');
+  assert.equal(g.pairs[0].same_patch, false);
+});
+
+test('an UNTAKEABLE patch-id (null) is never read as identity', () => {
+  // Two nulls compare equal in JavaScript. A pair of commits whose patch-id
+  // could not be taken must not therefore become one change — that would turn
+  // every failure of the instrument into a clean verdict, which is this
+  // charter's own rule about an output that cannot distinguish its abort
+  // from its answer.
+  const commits = [C('a', '2026-11-09T05:00:00Z', 'ursa-a'), C('b', '2026-11-09T05:10:00Z', 'ursa-b')];
+  const edits = new Map([['a', [{ path: 'r.md', id: 'E' }]], ['b', [{ path: 'r.md', id: 'E' }]]]);
+  const g = grade(commits, edits, {
+    rows: [], run: () => { throw new Error('no'); }, patchOf: () => null,
+  });
+  assert.equal(g.counts.SAME_CHANGE, 0);
+  assert.equal(g.pairs[0].klass, 'DUPLICATED');
+});
+
+test('patchOf is called once per commit however many entries it spans', () => {
+  const commits = [C('a', '2026-11-09T05:00:00Z', 'ursa-a'), C('b', '2026-11-09T05:10:00Z', 'ursa-b')];
+  const twelve = Array.from({ length: 12 }, (_, i) => ({ path: 'r.md', id: `E${i}` }));
+  const calls = [];
+  grade(commits, new Map([['a', twelve], ['b', twelve]]), {
+    rows: [],
+    run: () => { throw new Error('no'); },
+    patchOf: (s) => { calls.push(s); return `p-${s}`; },
+  });
+  assert.deepEqual(calls.sort(), ['a', 'b']);
+});
+
+test('patchId on this repository returns a stable hex id for a real commit', () => {
+  // The one test that touches the clone, because the shell pipeline in
+  // patchId is the part no stub covers.
+  const head = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+  const id = patchId(head);
+  assert.match(id || '', /^[0-9a-f]{40}$/, `got ${id}`);
+  assert.equal(patchId(head), id);
+});
+
+test('patchId returns null rather than throwing on a commit that does not exist', () => {
+  assert.equal(patchId('0000000000000000000000000000000000000000'), null);
 });
