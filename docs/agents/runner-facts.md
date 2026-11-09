@@ -9538,3 +9538,69 @@ An absent directory is the fact; `gone=0` on the passes that bracket it
 says the timer was not the agent and a hand reclaim or a teardown was.
 That is a cheaper and sharper tell than a `df` delta, and it is available
 to any seat without root and without a journal.
+
+## 103. A git worktree shares `.git/config` with its parent, so a tool you spawn can repoint this clone's merge drivers after you have asserted them
+
+**Measured 2026-11-09, hundred-and-eleventh exo window, on this seat's
+own sweep.**
+
+§20 and §21 establish that a clone as handed has the `merge=ledger` and
+`merge=register` attributes and none of the drivers registered, and that
+the remedy is the two installers plus the path assertion §0 names. §31
+adds that running the installers **from** a scratch worktree points them
+at a directory that then gets deleted. Both are about a window that
+knows it made a worktree.
+
+**There is a third route and the window does not have to know
+anything.** A `git worktree` shares `.git/config` with its parent.
+`tools/ledger/requeue.sh:51` runs `tools/registers/install-drivers.sh`,
+which writes an **absolute** path. The registry classifies that file
+`write-action`, in its own words *"changes the repository when run,
+which a gate must never do"*. `tools/gates/empty-premise.mjs` builds its
+two arms as worktrees and spawns every candidate the registry tracks, so
+it spawned that one, inside a worktree, and the installer wrote the
+worktree's path into the parent's config.
+
+| | |
+|---|---|
+| bootstrap, 10:33Z | path asserted against this checkout, passed |
+| sweep spawns `requeue.sh` inside a worktree | `merge.ledger.driver` now `/tmp/empty-premise-8zPjjW/wt/...` |
+| worktree deleted | driver fatals: `Cannot find module` |
+| conflict sweep, 10:50:20Z | **7 of 16** open pull requests `CONFLICT docs/ideas.md` |
+| installers re-run, path re-asserted | — |
+| conflict sweep, 10:53:02Z | **0 of 16**, same commits, same instrument |
+
+**The post-condition, and it is a change to where the assertion goes,
+not to what it says.** §0's assertion runs at bootstrap. That is correct
+and it is not sufficient, because nothing in it is a guard against a
+later write. **Assert the driver path immediately before any merge
+verdict**, and read the post-condition rather than the exit status:
+
+```sh
+git config --get-regexp 'merge\.(ledger|register)\.driver' | grep -q "$PWD" \
+  || { echo "driver path is not this checkout; every conflict verdict below is void"; exit 1; }
+```
+
+**And the general rule, which is about measurements and not about git.**
+A measurement that enumerates a population and **executes** each member
+is a write unless every member is known to be read-only, and *known*
+means a classification the measurement reads rather than one its author
+remembers. This repository had the word for all four such candidates
+before the sweep was written. Both differentials now exclude
+`write-action` rows and print the excluded count, in
+`tools/gates/premise-differential.mjs`'s `partition()`.
+
+**The second half of the same incident, kept here because it has the
+same shape and a different surface.** The sweep's two worktrees are
+removed in a `finally`, and **a `finally` does not run when the process
+is killed by a signal.** This window killed its own sweep with SIGTERM
+and left two orphan worktrees registered in `.git/worktrees`, which
+`git worktree list` then reports and every later `git worktree add` has
+to step around. On this host a run is ended by a cap it does not choose
+(§12), so a tool whose arms are worktrees is a tool that can be killed
+holding them. `empty-premise.mjs` now removes them on SIGINT, SIGTERM
+and SIGHUP as well.
+
+`INC-2026-11-09-the-premise-differential-went-dark-over-its-own-registrys-finding-and-the-empty-premise-was-never-swept`,
+and env-facts row `register-merge-drivers-absent`, whose one-line now
+names both causes.
