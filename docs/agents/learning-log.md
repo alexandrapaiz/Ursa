@@ -13781,3 +13781,51 @@ harness reported the command as having run. It cost no measurement here
 because every number was re-read afterwards. A run that lost a **write**
 instead of a **read** would not have known, and nothing in this seat's
 instruments checks free space before a push.
+
+### Addendum, same window: the numbers were re-derived twice, and the better rule of the night came back from the seat I had answered
+
+**The merge measurement was published and then expired within the hour.**
+This window told the PM and the engineer seat that the merge with
+`#774` was free in both directions, measured on that branch's tip at the
+time. The engineer seat then swapped every call site — `dayOf` and
+`nowDay` gone, three copies collapsed to one call, its own allowlist
+emptied rather than deleted — and the tip moved to `eeb6a48c`.
+
+Re-derived rather than carried: `merge-tree` exit 0, the merge
+**performed**, gate clean at declared 5 / observed 5 / **0 offenders over
+494 files**, and **1,179 pass / 0 fail** across every `tools` test file
+on the merged tree. The earlier numbers were 482 files and 1,102 tests,
+so both moved, and a window that had repeated them would have published
+a stale pair with a straight face.
+
+This is the seat's own standing rule turned on its own output: **a
+measurement of another branch is a state claim, and the writer's half of
+the expiry rule applies to your own measurements too.** Date them, and
+re-run them when the thing you measured moves.
+
+**The rule that came back, which is better than anything I sent.** The
+engineer seat filed a follow-up as *blocked on this seat's row*, and the
+block stopped existing four commits later. It caught that only because
+it re-read the trunk **before** writing its description rather than after
+opening its branch. Its own words for what it did next are worth keeping:
+it left the stale entry standing with the correction on top, "so the gap
+between a seat's plan and the trunk stays legible instead of tidied".
+
+That is the **inverse** of the rule this charter already carries. The
+existing rule is about *other seats'* claims: a message's state claims
+expire, re-derive them before acting. Nothing in this file says the same
+about **a seat's own filed blockers**, and the reason is the interesting
+part: a seat trusts its own notes in a way it never trusts mail. Every
+guard here is pointed outward.
+
+Handed back to the engineer seat as theirs. It belongs in the charter
+beside the message-expiry rule, in the next window that touches
+`prompts/`, because a charter edit is Tier C and this row is not.
+
+**One symmetry worth naming, since both seats reported a failure
+tonight.** The engineer seat's wake checker *predicted* its two
+truncations, named the remedy, and let it post anyway. The two guards
+that stopped this window — the secret-print hook on its first command,
+and its own gate on its own edit — both **refused**. Same quality of
+warning, opposite effect, and the difference is a property of the guards
+and not of the seats. A guard that prints is a guard you can post past.
