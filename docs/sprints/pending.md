@@ -2,6 +2,67 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (fortieth pass): five Tier B merges including a GitHub-reported conflict that was a false positive, #877 handed back to security for a real one, the #873 standing note false an eighth time
+
+Wake named the skill seat's finished run (`#887`) and a repeated standing
+note about `#873`, now worded as "its run ended 66m ago" instead of an
+age in minutes. Full account in `docs/agents/pm-2026-11-09-message-40-run.md`.
+
+1. **Five Tier B merges landed clean this pass: `#887` (skill), `#889`
+   (market), `#891` (exo), `#882` (frontend), `#879` (exo).** Each
+   checked against the six-point rule in `pm.md` §10 before merging:
+   not a draft, no hold label, no owner comment, checks green,
+   `mergeStateStatus: CLEAN`, no Tier C path, not this seat's own PR.
+   `#887`'s own body documented absorbing `#885` by re-applying its
+   commit on top after a ledger-preamble conflict; confirmed with
+   `git merge-base --is-ancestor refs/prs/885 refs/prs/887` before
+   trusting that claim, and GitHub auto-marked `#885` merged the
+   instant `#887` landed. `#879` is the interesting one: GitHub
+   reported it `CONFLICTING` after `#891` merged (both touch
+   `tools/seat/duplicate-repair.mjs`), but a real merge in a scratch
+   worktree with both local drivers installed went clean, because the
+   only disputed block was `docs/ideas.md`'s preamble, which the
+   `ledger` driver resolves and GitHub's own merge check does not know
+   about. Pushed that resolved merge commit onto `#879`'s own branch
+   rather than merging around the forge, waited for its check to go
+   green, then merged normally. This is exactly the measured case in
+   `prompts/pm-agent.md`'s "Act" section: a merge driver that is not
+   installed on GitHub's side is not a conflict.
+2. **`#877` (security, carries `#859` by ancestry) has a real conflict
+   against the two exo merges above, and this pass did not resolve
+   it.** Same scratch-worktree test as `#879`, different answer: the
+   `ledger` driver itself refuses `docs/ideas.md`'s preamble (edited on
+   both sides, not a clean append), and `tools/seat/duplicate-repair.mjs`,
+   its test file, and two baseline JSON files all carry genuine content
+   conflicts a driver cannot resolve. Per §10 criterion 5 ("a conflict
+   is not the PM's to resolve in code... docs-only conflicts the PM may
+   resolve"), this one is not docs-only, so it was handed back: a
+   `handoff` to `Ursa/security` on the board (id `bf907350`) naming the
+   PR, what it carries, and what conflicts, asking for a rebase. Left
+   `#877`/`#859` open and off this pass's merge list.
+3. **The `#873` standing note checked again, found false an eighth
+   time, under a third wording.** This wake's copy dropped the
+   age-in-minutes framing for a specific claim, "its run ended 66m
+   ago." `check-draft-prs.sh --repo alexandrapaiz/Ursa --json` reports
+   `#873` idle 74 minutes, `state: "live"`, `disposition: "wait"`,
+   inside the tool's own 120-minute window — a live, waiting draft,
+   not an ended run, and not 66 minutes either. Added as Incident 19's
+   eighth occurrence. Left `#873` untouched, for the engineer seat's
+   own next run to resolve under its own charter.
+
+**Also carried, not new.** The sprint-ceremony gap stands:
+`sprint-2026-10-12.md` is still the newest sprint file on `main`, now
+28 days old. Pass 25's 48-hour silence clock on opening the ceremony
+from a message-triggered run was posted 2026-11-09T09:10:51Z; as of
+this pass (13:4xZ) roughly 4.6 hours have elapsed, not 48, so this
+pass is still not the one that opens it. The three exo PRs that are
+genuinely Tier C by path (`#826`, `#833`, `#870`, all touching
+`prompts/exo-agent.md`) are unchanged and still the owner's. This
+seat's own Tier B backlog is now eight open PRs (`#874`, `#876`,
+`#878`, `#881`, `#883`, `#886`, `#890`, plus this pass's `#896` once
+readied), none of them mine to merge under §10; they wait on the
+owner or HQ's PM.
+
 ## Top three for the owner, 2026-11-09 message-triggered (thirty-ninth pass): #884 merged under Tier B, the #873 standing note false a seventh time (now stacked three copies deep in one wake), the ceremony clock still running
 
 Wake named three merge-event notifications (two prior `pm` self-merges
