@@ -2,6 +2,70 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (PR #826 review pass): #826 reviewed against the merge rule and held at Tier C, waiting on you
+
+Wake payload named one PR to dispose: review exo's `#826` (window 106, a
+new gate grading every acceptance-register field by whether anything
+dereferences it, plus a charter section on positive controls vs.
+differentials) against the merge rule, and either merge it or post what
+it still needs on the board for its seat.
+
+1. **`#826` reviewed against Tier B and held at Tier C — waits on you,
+   not on exo.** Not this seat's own PR. Not a draft, no `hold` label,
+   no owner comment. One check (`scan`), green.
+   `gh pr diff --name-only` lists 12 files; 11 are tools, docs and
+   registers (a new gate, `tools/gates/acceptance-fields.mjs`, its
+   verdict, manifest, baseline and 28-case suite; two `docs/ideas.md`
+   entries; `docs/agents/improvements.md`; a run report; one line in
+   `enumerate-verdicts.mjs`; `scripts/ci-checks.mjs`). The twelfth,
+   `prompts/exo-agent.md`, is a charter file, and an edit to a seat's
+   own charter is Tier C by path alone (docs/standards/pm.md §10; exo's
+   own charter already states this exact reading at
+   `prompts/exo-agent.md:7125`, from an earlier window: "an edit to
+   this seat's own charter is Tier C by itself"). So the hold is on
+   file 1 of 12, not on content, and exo's own board
+   notes already named this correctly before this pass read them
+   (`Ursa#826 ready and mergeable, Tier C by path on one charter
+   section`). Nothing is owed back to exo; the PR is scoped, green and
+   honestly reported. Posted the same verdict on the board (note to
+   `exo`, id `711daa44`) and as a PR comment on `#826`.
+2. **No ordering question.** No other open PR touches
+   `prompts/exo-agent.md`, so there is nothing to sequence this charter
+   merge against.
+3. **Correction to a stale claim this tracker had carried forward.**
+   `#780` was listed in prior passes as "still open and waits on you."
+   Checked directly this pass (`gh pr view 780 --json state`): it is
+   `MERGED`, not open. Dropped from this list; it owes nothing further.
+   `#821` (this seat's own Tier B work, absorbing three earlier
+   passes) is genuinely still open, not a draft, and waits on you or
+   HQ's PM to merge since a PM's own PR cannot self-merge.
+
+## Top three for the owner, 2026-11-09 message-triggered (twenty-first pass): #820 (skill) and #827 (frontend, subsuming #825) merged under Tier B, a third standing-block claim against #830 checked and found false
+
+Wake named three PRs and a standing block: exo's own account of `#826`
+(already fully disposed by the pass above — nothing new to add), the
+skill seat's finished run (`#820`), frontend's `#827`, and a repeated
+standing claim that `#830` (skill) is an orphaned draft. Full account in
+`docs/agents/pm-2026-11-09-message-21-run.md`.
+
+1. **Two Tier B merges, nothing left for the owner on either.** `#820`
+   (skill: skill-slug anchoring, five files, no Tier C path) and `#827`
+   (frontend: subsumes `#825` by branching from it — confirmed
+   `git merge-base --is-ancestor` — all files under `docs/design/`, no
+   Tier C path). Both checked: not drafts, no `hold` label, no owner
+   comment, checks green, merged clean. `#825` closed itself the moment
+   `#827` merged, since GitHub recognized its commits had landed; no
+   separate close was needed.
+2. **The standing block's claim against `#830` was checked and was
+   false, the same recurring shape as the last several passes.**
+   `GET /api/standing?company=ursa&seat=pm` read empty, and
+   `check-draft-prs.sh --repo alexandrapaiz/Ursa` reported `#830` "idle
+   0m; run may still be live; leave it alone" — the opposite of "its
+   run ended 3m ago." Not touched.
+3. **`#826` (exo): nothing new.** Already reviewed and held at Tier C
+   by the pass immediately above this one (`#832`); this pass's own
+   copy of that event added no new fact.
+
 ## Top three for the owner, 2026-11-09 message-triggered (twentieth pass): four Tier B merges, this seat's own stuck three-PR chain absorbed and closed, the standing block checked and found false twice more
 
 Wake named `#815`/`#810` (both already merged by the prior pass) and
