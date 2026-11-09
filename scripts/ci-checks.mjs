@@ -201,9 +201,41 @@ export const CHECKS = [
     // and a missing root is skipped in silence, so the bare command reads
     // as repository-wide while covering 24 files. The sweep builds Ursa's
     // list and passes the baseline. Both of those are upstream defects this
-    // seat reported; HQ has fixed them in a pull request of its own, and
-    // the wrapper comes out at the next re-vendor rather than now.
+    // seat reported, and HQ built the fix for both in the shared file with
+    // five tests.
+    //
+    // Corrected 2026-11-09, because the sentence here said the fix was in a
+    // pull request of HQ's and that the wrapper comes out at the next
+    // re-vendor. That pull request (alexandra-systems#653) was closed while
+    // still a draft, so HQ main's newest commit touching the checker is
+    // still 08ba7f53, the one this repository vendored from, and both
+    // defects are live here. Measured, not assumed: the bare command exits 1
+    // on 68 lines of findings this repository's own baseline already
+    // accepts, and names none of its three missing roots. The wrapper stays
+    // until a re-vendor from HQ main actually carries the fix, which
+    // `secret-print-dump-holes` below is what notices.
     argv: () => ['bash', 'tools/secret-print-sweep.sh'],
+    passExit: [0],
+  },
+  {
+    id: 'secret-print-dump-holes',
+    scope: 'tooling',
+    title: 'Env-dump spellings the vendored checker misses',
+    // Added 2026-11-09. The checker's X5-ENVDUMP arm is the one rule in that
+    // file with L-X5's four recorded incidents behind it, and it catches the
+    // dump spelled `env | ...` while missing it spelled `printenv | ...`,
+    // `env > file`, or `declare -p | ...`. The fix belongs in the shared
+    // file and not here, which is this seat's own argument and is why
+    // nothing in `tools/check-secret-print.py` is edited by this branch.
+    //
+    // What this check is for is the other half. The two layout defects this
+    // seat reported upstream were acknowledged, built, and then lost when
+    // their pull request was closed as a draft, and no file here would ever
+    // have said so. So each miss is pinned as a row, with four caught
+    // controls beside it, and the check fails in both directions: a miss
+    // that starts being caught means re-vendor and delete the row, and a
+    // control that starts being missed means a re-vendor dropped a rule.
+    argv: () => ['python3', 'tools/secret-print-dump-holes.py'],
     passExit: [0],
   },
   {
