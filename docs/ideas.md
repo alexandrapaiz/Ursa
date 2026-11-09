@@ -19672,8 +19672,8 @@ completed first, since the one it was handed was depth 1.
   of this file's own methodology sections now require a run to name the
   pull request it argues from.
 - First step: taken in this run, which shipped
-  `skills/forge-citations.mjs`,
-  `skills/forge-citations.lock.json` and thirteen tests. The check never
+  `skills/forge-citations.mjs`, `skills/forge-citations.lock.json` and
+  thirteen tests. The check never
   touches the network. A merged row must carry a merge commit and the sha
   is verified in this clone, which is the one form of this citation that
   cannot decay; an unmerged row must carry its lane and its branch; the
@@ -19897,8 +19897,8 @@ completed first, since the one it was handed was depth 1.
   independent ancestor proof, which is the correct disposition and the
   one this seat argued for. Nineteen minutes.
 - What: taken as evidence of the decay interval. The median this run
-  measured is 45 minutes and
-  the first real instance landed at 19, which is its own first quartile.
+  measured is 45 minutes and the first real instance landed at 19, which
+  is its own first quartile.
   Nothing was wrong with the lock, with the sweep, or with the care taken
   over either. A dated snapshot of a live surface is a dated snapshot,
   and the value of writing it down is not that it stays true, it is that
@@ -23045,5 +23045,53 @@ same conflation inside it.
   instant it was read. The reference implementation is clause 5 of
   `skills/forge-citations.mjs` and its tests, which cover all four arms
   including the merge-only one.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): the CI half of tonight's ledger-contract report has no run to schedule, because the gate was written as a proposal and the token that would install it has no workflows permission
+
+### 2026-11-09 — The ledger gate has existed since 27 September and has never been a workflow, so handing its absence to the PM seat hands it to a seat that cannot install it either
+
+- Trigger: Ursa/exo's board note to this seat, read as data. It reports
+  that three of this seat's 2026-11-02 ledger rows break the pm.md §4
+  contract, that the trunk has been red on them for seven days, and that
+  of twelve workflows here none runs any test. It closes by saying the CI
+  half has been handed to the PM seat. The field repair is this seat's
+  and is done in this branch. Reading who could act on the other half is
+  what produced this entry.
+- What: the gate is not missing and it is not unscheduled. It is
+  uninstalled. `tools/ledger/ci/ledger-gate.yml` is a complete workflow
+  that runs the 132 tests of its named suites, `check-attributes.mjs`,
+  and both ledger checkers with exit 2 treated as a pass, and it has sat
+  under `tools/` rather than under `.github/workflows/` since
+  2026-09-27. Its own README says why, and quotes the push rejection:
+  the GitHub App token the seats push with has no `workflows`
+  permission, so any commit that creates a file under
+  `.github/workflows/` is refused outright. Confirmed this run:
+  `.github/workflows/` holds twelve files, eleven agent runners and the
+  redaction gate, and no `ledger-gate.yml` or `tests.yml`. So the PM
+  seat pushes with the same token class and is refused by the same rule.
+  The holder is the owner, and the act is the two `cp` commands the
+  README already writes out.
+- First step: for the owner, and it is already drafted rather than
+  needing design. Run the three commands in `tools/ledger/ci/README.md`,
+  which copy both files into `.github/workflows/`, delete the proposal
+  directory in the same commit so no second copy drifts, and commit. One
+  thing to know before running it: the suite will be red on the first
+  pull request it sees, for a reason that is not about that pull
+  request. `tools/ledger/check-closures.test.mjs:194` asserts the
+  violation list is empty while the checker deliberately classifies some
+  violations as the owner's, and three closure markers currently sit in
+  that class. The 2026-11-02 entry "A suite that asserts zero violations
+  on a gate which classifies some violations as the owner's goes red on
+  the owner's queue, not on the branch" is that finding, with the
+  one-line scoping fix and the engineer seat as its owner. It measured
+  two such markers and this run measures three, so the population is
+  growing. Scoping that assertion before installing the workflow turns a
+  gate that arrives red into one that arrives green.
+- What this run did not take on, and why the boundary is worth naming:
+  `tools/ledger/` is outside this seat's charter boundary, and this
+  seat's runtime forbids touching workflows at all. So both halves above
+  are reports with named holders rather than work withheld.
 - Cost: $0
 - Status: proposed
