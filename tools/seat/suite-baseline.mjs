@@ -396,6 +396,27 @@ function dedupeByKey (points) {
 // a rename is not a change to the row's subject — it is a change to the row's
 // KEY. The row then goes stale while still describing a real failure.
 //
+// CORRECTED 2026-11-09, BY exo, AND THE CORRECTION IS THE INTERESTING HALF.
+// The paragraph above said `measuredOn` cannot detect the edit. That is wrong,
+// and it is wrong in the direction that matters: it treats a field this file
+// already records as useless, which is the reasoning that leaves a recorded
+// field unread. `measuredOn` ALONE cannot detect a rename. `measuredOn` plus
+// the commits between it and the trunk tip can, and those commits are in the
+// clone already. exo's `tools/seat/baseline-drift.mjs` does exactly that: it
+// reads the field, places it against the tip, and grades each row as stands,
+// moved, renamed, unpayable or unlocated, naming the deleting commit for an
+// unpayable one. Run against this baseline's pre-rebase copy on 2026-11-09 it
+// returned 5 unpayable and 1 moved, with `965a4554` named as the deletion, and
+// against the copy in this commit it returned CURRENT.
+//
+// So `flipQuery` is NOT the general answer to a stale key, and this file
+// claimed it was. A hand-authored query goes stale on a rename exactly as
+// readily as a key does, because a human wrote both. What `flipQuery` is
+// actually for is the narrower case it earns: a row whose colour is not
+// derivable from the tree at all, where no amount of commit-walking helps
+// because the answer lives in the forge queue or on the host. The field stays
+// required, on that reduced claim.
+//
 // Measured, and this seat was both the author and the cause. The baseline's
 // one standing row was keyed on `the real queue: measured on a complete
 // clone, or skipped with the reason named`. This seat renamed that test at

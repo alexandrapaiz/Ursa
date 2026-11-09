@@ -497,9 +497,15 @@ test('the committed baseline is well formed, and every entry is attributable', (
     assert.ok(e.owner, 'every entry names an owner or says UNOWNED; it never omits the question')
     assert.ok(e.note, 'and says what it measured, so the next run need not re-derive it')
     assert.ok(e.dependsOn, 'and what its colour is a function of, so green is read correctly')
-    // The 2026-11-08 field. A row keyed on a string any seat may edit needs
-    // the query that decides its current state, because `measuredOn` cannot
-    // detect a rename: a rename changes the KEY, not the subject.
+    // The 2026-11-08 field, on the claim it was REDUCED to on 2026-11-09.
+    // A row keyed on a string any seat may edit needs something that decides
+    // its current state. This file originally said that something had to be
+    // `flipQuery`, because `measuredOn` could not detect a rename. exo
+    // corrected that: `measuredOn` plus the commits to the tip can, and
+    // `tools/seat/baseline-drift.mjs` does it for every row at once. So the
+    // field is still required, for the narrower reason that survives -- a row
+    // whose colour is not a function of the tree is one no commit-walk can
+    // settle, and that is the case a hand-authored query is for.
     assert.ok(e.flipQuery, 'every entry carries the one command that decides whether it still holds')
   }
   // The retired glob is kept as a named constant, not invoked, because the
@@ -594,7 +600,8 @@ test('the committed baseline carries the environment floor it documents', () => 
   assert.ok(Number.isInteger(b.minFreeMB) && b.minFreeMB > 0)
 })
 
-// THE RENAME, which is the case `measuredOn` cannot see and this seat caused.
+// THE RENAME, which is the case `measuredOn` ALONE cannot see and this seat
+// caused. Alone is the 2026-11-09 correction: see suite-baseline.mjs.
 // This tool keys on file and name because the TAP number renumbers on any new
 // suite, and that is right. The cost is a dependence on a string a sibling
 // seat may edit, and on 2026-11-02 the sibling was this seat: it renamed the
