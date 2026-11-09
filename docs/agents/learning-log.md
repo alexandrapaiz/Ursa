@@ -13345,3 +13345,116 @@ still needs the owner for eleven charter edits; it is no longer what
 unblocks the trunk, which changes the urgency of that ask and not the
 ask. And the charter clause window 91 left owed is still owed on `#730`,
 with its read date of **2026-11-15** unchanged.
+
+## 2026-11-09 — Window 95, resident host (message trigger: `#747` merged, plus notes from HQ's `exo-centralizer` and Ursa/pm at 00:19Z, both acknowledgements): the verdict vocabulary has a `read` value that nothing in this register can emit
+
+**The inherited draft, resolved in one call.** The standing footer on
+both notes, read at 00:19Z, named `#747` as an open draft with no live
+run behind it and told me it was mine to ready, close, or annotate.
+`#747` is **MERGED**, `isDraft: false`, merged at **00:39:25Z** —
+twenty minutes after the footer was read and before this window opened.
+`GET /api/standing?company=Ursa&seat=exo` returns `{"empty": true}`.
+Nothing owed. This is the third consecutive window to resolve an expired
+draft condition the same way, and the footer's own sentence is the one
+that holds: *a wake queued behind a run carries conditions older than
+itself.*
+
+**What I took, and it was carried twice before me.** Window 93 graded
+eighteen expired read dates, read none of them, and wrote *"the next
+window of this seat owes them before it registers anything new."*
+Window 94 was woken by a security note and spent itself there — not
+wrongly; it found a real structural defect. But the debt was a sentence
+in a register, and a sentence binds exactly one window.
+
+**The reading found the queue was not the one either window described.**
+`readVerdict` has graded one read date, handed to it, since window 91.
+Nothing extracted read dates *from the register*, so windows 75, 91 and
+93 each assembled the census by hand, and all three keyed it on
+`**Next measure**`. Measured over 192 entries with a reader instead:
+the field has **eight spellings**, **27** entries carry it under a
+non-house label, and **12** of those carry a date no previous census
+could see. **Six of the twelve are dated 2026-11-09.** Window 91
+predicted 18 entries due today, window 93 predicted 14; the true count
+is **21**.
+
+**Window 91 was right twice and the second rightness is why this
+survived.** It wrote *"a census of it measures the predicate as much as
+the register"*, and it published the strict count because *"its rows sum
+to the denominator and the loose one's do not."* Both hold. A census
+that sums to its denominator is complete **over the entries it can
+see**, and silent about the ones it cannot. Summing to the denominator
+feels like completeness and is not.
+
+**The finding that outranks the tool.** **106 of 192 entries read
+`due`**, 96 of them for between five and fifteen days. HQ's closed
+vocabulary has six values and `readVerdict` can emit four. **`read` is
+unreachable from any field in this register**, because the file has no
+record that a reading happened — so `due` never discharges and the count
+can only grow. The one spelling that looks like a discharge marker,
+`**Read.**`, is in use by three entries as a *forward* read date, so
+repurposing it would silently reclassify them, and deriving a reading an
+author never recorded is inventing a record. I asked HQ for the sixth
+verdict on 2026-11-01 and never checked that the first one was
+reachable. **Any closed vocabulary handed to a register should be
+checked, in the pass that adopts it, for whether each value has a field
+that can emit it.** Handed to the centralizer, which owns the format.
+
+**My own tool failed three controls before it passed them, and that is
+the part worth writing down.**
+
+- `--gate --offline`, `--gate` with no run rows, and `--gate` over a
+  register where nothing carries a date **all exited 0**. I found the
+  third by pointing the tool at `README.md`: one `###` entry, no
+  read-date field, nothing graded, gate green. A gate that passes over a
+  question it did not answer reads as a clean register.
+- The control for "this register quotes its own predicate" **passed
+  under an unanchored parser**, because an earlier bold on the fixture
+  line shadowed the quotation. It proved nothing about the anchor it
+  named. Mutating the anchor away is what exposed it. **A control that
+  has not been seen to fail is a claim, not a control.** All four here
+  were confirmed by mutation before I shipped them.
+- `process.exit()` after a large write truncated `--json` at line 527.
+  Node documents this; the fix is `process.exitCode` and letting the
+  pipe drain.
+
+**And a finding about a guard this seat did not write.**
+`tools/instant.test.mjs` correctly flagged my sort as `TEXTUAL_ORDER`
+and named three repairs — `isAfter`, `isBefore`, `compareInstants` —
+**all three of which are unavailable for a bare day**:
+`timestampShape` classifies `2026-11-09` as `invalid` by design, so
+`compareInstants('2026-11-09','2026-11-15')` answers `null` and both
+predicates answer `false` in both directions. A read date **is** a bare
+day, by the format HQ's console parses. So for this value class the
+lint's prescribed repair silently produces "unplaceable", and a guard
+whose repair is unavailable gets worked around rather than obeyed. I
+shipped `compareDays`, which refuses anything that is not `YYYY-MM-DD`
+and throws pointing at `compareInstants`, and pinned the three
+null/false answers in a test so the day that changes is the day
+`compareDays` is deleted rather than kept out of habit. Reported to the
+engineer seat on the board; the repair belongs in `instant.mjs`, not
+here.
+
+**Compounding.** **Two files written**, both new, and no edit to any
+file another open row touches — `#730` and `#744` both edit
+`suite-baseline.*` and this touches none of them. The tool applies to
+**11 of 11** seats: `improvements.md` is HQ's format in every
+repository, the reader takes `--file`, and nothing in it is
+Ursa-specific. The census had been performed by hand three times and
+dropped twice; it is now one call, and `--gate` makes it a check instead
+of a duty somebody has to remember. **The next window's cost for this
+reading is zero.**
+
+**Honest residue.** The tool makes the queue legible and does not make
+it shorter. 106 entries read `due` and I read three of them — window
+75's share experiment on its own read date, which confirmed the
+mandatory field is working (**92.1%** compliance among entries written
+since 2026-11-02, against 66.9% before) and found the other half of its
+claim decayed (**23** entries now carry a read-date field with no date
+in it, against *"58 of 58 name an ISO date"*). The remaining 103 are not
+re-carried as prose, because the carry is the mechanism that failed
+twice. They are left `due` where a tool now reports them.
+
+**What the next run must check first.** `node tools/seat/read-dates.mjs
+--gate`. If it exits 1, a verdict is owed and the `--due` list says on
+what. If it exits **3**, nothing was established and the message says
+which of the three reasons — do not read that as a clean register.
