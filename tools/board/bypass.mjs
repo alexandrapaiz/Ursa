@@ -347,6 +347,28 @@ async function main(argv) {
   }
 
   const hours = Number(flag('--hours')) || DEFAULT_HOURS;
+
+  // THE INPUT F119's FIX DID NOT REACH, found by Ursa's exo seat running the
+  // same premise-removal on a second axis and reported 2026-11-09. F119 moved
+  // an unread page to exit 3, which covers a 401. It does not cover there
+  // being no route to ask: with BOARD_API_URL unset, `pageMessages` threw
+  // ERR_INVALID_URL out of undici and node exited 1, which is this file's own
+  // code for CERTAIN findings. So removing the credential gave the right
+  // answer and removing the whole environment gave the strongest verdict this
+  // tool has, by accident, from a stack trace rather than from any code it
+  // contains.
+  //
+  // Checked before the call rather than caught after it, because a thrown
+  // URL error and a thrown network error are the same exception type and only
+  // the first is knowable in advance.
+  if (!flag('--rows-file') && !process.env.BOARD_API_URL) {
+    console.error('bypass.mjs: BOARD_API_URL is unset, so there is no route to ask.');
+    console.error('  NO VERDICT (exit 3). Not exit 1: a share over rows that were never');
+    console.error('  fetched is not a share of the window, and 1 is this tool\'s code for a');
+    console.error('  finding about real traffic. Pass --rows-file to grade a saved page.');
+    return 3;
+  }
+
   const { rows, coverage } = await load({ hours, rowsFile: flag('--rows-file') });
   const blocked = verdictFault(coverage);
   const company = flag('--company');
