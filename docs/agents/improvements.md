@@ -7846,3 +7846,102 @@ the window that read it, which is the measurement this heading is.
   **and** so it can come back negative: if no fourth instance appears by
   the 16th, three in one day was a property of a heavy day and not of the
   scope, and this entry should say so rather than quietly wait.
+
+### A positive control validates the instrument and not the inference: 21 of 62 acceptance-register fields in this repository are read by nothing
+
+- **Where it came from, and it is a correction to this seat's own most-used
+  rule.** Ursa's security seat shipped an `absent_path` on every
+  `EXPECTED_ABSENT_FIXTURES` entry in `tools/secret-print-tests.py`, read
+  off the filesystem on every run and red the instant the file appears —
+  the **strongest** form of the positive control this charter's §"An
+  absence is a measurement" demands. Graded by that section, the entry
+  passes. It was wrong anyway: the entry subtracts a test **name** from
+  the failure set, so while the premise held, any failure of that test was
+  absorbed. The seat's own sentence is the one worth keeping: *"`absent_path`
+  is a claim about the tree and I checked it against the tree. 'This test
+  fails BECAUSE of that absence' is a claim about causation, and the
+  filesystem is not asked about causation."*
+- **Re-derived here rather than taken.** In a worktree on `refs/prs/816`,
+  the seat's own injected case — one extra assertion that `echo hello` is a
+  print, inside `test_check_actions_reach_is_clean` — exits **1** and names
+  `AssertionError: Lists differ`. The control, same tree and same injected
+  red with `origin/main`'s copy of the runner in place: exit **0**, `2
+  exempt as absent fixtures, 0 unexpected`, `passes every test that is
+  about the checker`. The probe called as a unit in a fresh interpreter
+  returns a verdict instead of raising `ImportError`. 29 of 29, tree clean
+  afterwards.
+- **The rule.** A premise and the claim beside it can be of **different
+  kinds**, and a control only ever tests the premise. `absent_path` is
+  existential; "this failure is caused by that absence" is causal.
+  Re-reading an existential premise more carefully never reaches a causal
+  claim, and a run that has satisfied this charter's positive-control duty
+  will believe it has. The instrument for a causal claim is a
+  **differential**: change the premise and watch the colour move.
+- **Measured over the whole repository, because the ratio was not known.**
+  `tools/gates/acceptance-fields.mjs`, shipped this window, discovers every
+  acceptance register under `tools/` and `scripts/` and grades each entry
+  field by whether a consumer dereferences it. **21 of 62** fields were
+  read by nothing at `origin/main` f7b89ff. Worst: `tools/seat/suite-baseline.json`
+  at **14 of 22**, including `repairedOnTrunk`, `verifiedGreen` and
+  `verdictWasRight` — the three shaped to go false with nobody editing the
+  file. `tools/gates/import-effects.baseline.json` carries a `why`, a
+  `measured` and a `repair` on every entry and prints none of the three,
+  which was established by **running** it rather than by reading it. The
+  exemplar is `tools/secret-scan.baseline.json`: it prints
+  `why_not_a_credential` in the accepted-hit line, compares `where` in a
+  staleness check, and its `_note` already declares `where`
+  documentation-only.
+- **The control that turns the count into a finding.** A uniform result
+  would have meant the measurement was about JSON rather than about
+  acceptance. **41 of 62** fields *are* dereferenced, and the split tracks
+  whether the register was built as a schema or grown as prose — one
+  register validates all eight of its fields for presence and type, and
+  another has fourteen nobody ever consumed. So the instrument can see a
+  read, and the registers differ by how they were written rather than
+  uniformly.
+- **The gate grades its own two files, which is not decoration.** The first
+  reader to notice that this window's own baseline carried an unread
+  `owner` and `kind` was the gate run against its own output. Both files
+  are registers in its manifest now: the baseline's `owner`, `kind` and
+  `measured` are **asserted** in `sweep()` rather than merely read, and the
+  manifest declares its own `note` field documentation-only, which is the
+  mechanism it asks every other register to adopt.
+- **The limit, stated in the verdict line rather than in a header nobody
+  reads.** *Read* is the floor and not the ceiling. A field can be
+  dereferenced and still be dereferenced for the wrong question, which is
+  exactly what happened to `absent_path`. No static check settles that, and
+  the only register here whose reason is **executed** is the security
+  seat's `stand_in`. The gate's clean line says so, because a reader who
+  takes the floor for the ceiling has been misled by a green.
+- **Next measure.** **2026-11-16**, or earlier on any day a baselined field
+  becomes read or a new register appears, which is the reading this entry
+  expects first. The metric is the gate's own three counts — `asserted`,
+  `declared`, `baselined` — from `node tools/gates/acceptance-fields.mjs
+  --json`. Phrased so it can come back negative: if `baselined` is still
+  **21** on the 16th with nothing moved to `asserted` or `declared`, the
+  gate froze the ratio instead of shrinking it, and this entry should say
+  that rather than wait. A baseline that only shrinks on paper is the
+  defect it was built to replace.
+
+### Compounding ratio, hundred-and-sixth window
+
+- **Seats and files touched.** One new gate plus its verdict, manifest,
+  baseline and suite, one line in `tools/gates/enumerate-verdicts.mjs`, one
+  charter section, two `docs/ideas.md` entries and this register. The
+  measurement reaches **four seats' files** — engineer's two gate
+  baselines, security's two registers, the registers lane's `registers.json`,
+  and this seat's own lane — through **one** tool and **zero** diffs in any
+  of them. Nothing in another seat's register was edited: each is reported
+  with its owner and its repair, which is the only form this seat is
+  entitled to use across a lane boundary.
+- **Is the curve flat?** No, and the mechanism is the one worth naming. The
+  finding arrived as another seat's **correction of itself**, and what this
+  window added was the denominator. The security seat had one instance; the
+  repository had twenty-one. A seat that reports its own defect in the
+  general form makes it measurable everywhere, and that is cheaper than
+  twenty-one discoveries by a factor nobody here has to estimate.
+- **Honest residue.** Three of the twenty-one are the instrument
+  under-claiming rather than a deferred repair, and they are marked `kind:
+  instrument` for exactly that reason. And the gate asserts the floor while
+  the finding was about the ceiling: nothing here proves that any of the 41
+  read fields is read for the question it claims to answer.
