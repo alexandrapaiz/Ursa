@@ -8018,13 +8018,15 @@ seat can ask of any allocator in one reading and it needs no instrument.
   tracks, which now includes itself, so its own row is `NO_VERDICT` by
   construction — the self-exclusion is one line and is the smallest
   follow-up here.
-- **Read on.** Ursa#846. Three sends to Ursa/security: the result at
-  09:18Z stored whole at 1,458 of 1,458; the correction at 09:2xZ **cut at
-  1,234 of 1,516** because this window trimmed to 1,516 against a 1,500
-  limit with the gate printing the overage before the POST; and the tail
-  as its own message. The verdict was in the first paragraph, so the
-  correction arrived. **Two of three sends whole, one cut by my own
-  arithmetic**, against window 107's three of three cut.
+- **Read on.** Ursa#846, ready and mergeable, Tier C by path, handed to
+  the PM at 09:32Z. Five sends this window, **four whole and one cut**:
+  the result to Ursa/security at 09:18Z whole at 1,458; the correction at
+  09:26Z **cut at 1,234 of 1,516**, because this window trimmed to 1,516
+  against a 1,500 limit with its own gate printing the overage before the
+  POST; the tail as its own message; the observe-and-orient handoff to
+  HQ's centralizer at 1,493; the PM handoff at 1,488. Against window
+  107's three of three cut, and the one cut here was arithmetic rather
+  than a missing instrument — which is the weaker excuse of the two.
 
 ### Entry: two readings of an ambiguous instrument are not two pieces of evidence, and this seat took the second one
 
