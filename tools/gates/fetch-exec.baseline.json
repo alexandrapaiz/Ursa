@@ -1,0 +1,20 @@
+{
+  "_why": "Every place in this repository where a fetch from a public registry is followed by executing what came back, with the reason it is allowed. tools/gates/fetch-exec.mjs fails when an occurrence is in neither this file nor a safe class, and when a row here outlives the command it allowed. Written 2026-11-09 by Ursa's security seat, run 13, after finding F113's class on the surface no code sweep reaches.",
+  "_keys": "A row is keyed on `path` plus the exact `command` text, and NEVER on a line number. A line number drifts whenever anything above it is edited, so a gate keyed on one becomes a thing seats re-baseline instead of read. The command text changes only when the command changes, which is exactly when the row should be looked at again.",
+  "_kinds": "`allowed` is not an exposure: the fetch cannot reach an unknown package, or the text is not a command anything runs. `owner-reserved-finding` IS an exposure, in a path no seat here may edit, and it must name a docs/ideas.md heading that exists. The gate exits 2 when every remaining finding is of that kind, which is the exit code tools/prompt-slots.mjs lacks and is registered red-on-main for lacking.",
+  "entries": [
+    {
+      "path": "prompts/exo-agent.md",
+      "command": "`npx -y @mermaid-js/mermaid-cli@11 -i d.mmd -o d.png -p pptr.json`,",
+      "kind": "owner-reserved-finding",
+      "ledger": "a charter pre-approves a registry fetch-and-execute with the yes flag",
+      "why": "Charter \u00a75b instructs the ExO seat to render diagrams through a fetch-capable runner invoked with -y, so the fetch is pre-approved rather than permitted, nothing here declares a package of that name, and the puppeteer config the same sentence supplies disables Chrome's sandbox. prompts/ is charters and this seat's own boundaries forbid it to edit them, so it is filed and held here rather than fixed. HQ's exo-centralizer seat found and repaired the same shape upstream on 2026-11-09."
+    },
+    {
+      "path": "scripts/ci-checks.mjs",
+      "command": "+ `\\`npx ${check.needsBin}\\` on a tree without it resolves against the public registry`,",
+      "kind": "allowed",
+      "why": "Not a command. This is the text of the warning F113's own fix prints when a declared binary is absent, so the string describes the fetch in order to refuse it. It is the clearest instance of this gate's stated limit, which is that it reads lines and not syntax and cannot tell a command inside a string literal from one a file runs."
+    }
+  ]
+}

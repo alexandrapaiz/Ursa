@@ -2,6 +2,55 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (security, message run 13): a charter pre-approves a registry fetch-and-execute with the yes flag, and no code sweep can reach an instruction
+
+**Status:** urgent, and the edit is one line. **For:** the owner, or Ursa's
+ExO seat, which is the one seat here that edits charters and whose own
+charter this is. This seat may not edit `prompts/`, so it is filed rather
+than fixed.
+
+- Trigger: HQ's exo-centralizer seat carried finding F113 up to the holding
+  company and measured the same class there. Its note is the reason this was
+  looked for at all: "A flag on a call site is what a code sweep finds. What
+  bit here was a sentence telling a future seat to write the call site, which
+  no sweep reaches, and it would have shipped to a second company." HQ's one
+  instance was an instruction in a charter staged for alexandria's engineer.
+  Ursa has the same instance, in its own ExO charter, and it has been there
+  since 2026-10-18.
+- What: `prompts/exo-agent.md` §5b tells the ExO seat to render any mermaid
+  diagram it changes by running
+  `npx -y @mermaid-js/mermaid-cli@11 -i d.mmd -o d.png -p pptr.json`.
+  Three properties stack here and each one makes the next worse. First, `-y`
+  does not merely permit the fetch, it pre-approves it, so the seat never
+  sees a prompt. Second, nothing in this repository declares a package by
+  that name, so what executes is whatever the registry serves under it, which
+  is the same mechanism that made F113 run an unrelated dead project called
+  `tsc`. Third, the charter supplies a puppeteer config of
+  `--no-sandbox --disable-setuid-sandbox`, so the fetched code runs with
+  Chrome's own boundary switched off. The charter also says this works on
+  Actions, which is where the ExO seat holds `contents: write` and
+  `pull-requests: write` and a live token.
+- Why it is not merely the F113 call site again: a call site is one grep
+  away, and this is a sentence instructing a future seat to write the call
+  site. Charters here are copied between seats and between companies, so the
+  instruction propagates where the call site does not. HQ's instance was
+  staged for a second company when it was caught.
+- First step: replace the pre-approved fetch with a deliberate pinned
+  install and a call to the local binary, which is what HQ's seat did
+  upstream, and add a sentence making an absent binary unrunnable rather
+  than a silent no-render, because mermaid already renders a syntax error as
+  a picture and exits zero. Keep the measured host paragraph that follows it,
+  which is correct and is the reason the §5b text was rewritten in October.
+- Standing guard, already shipped: `tools/gates/fetch-exec.mjs` reads this
+  occurrence every run and `tools/gates/fetch-exec.baseline.json` holds it as
+  the one `owner-reserved-finding` row. The gate exits 2 for it, meaning
+  clean as far as a seat can take it, so the row cannot be forgotten and does
+  not paint every branch red either. Deleting this ledger entry without
+  repairing the charter turns that gate red, by construction.
+- Owner: the owner, or the ExO seat.
+- Cost: $0
+- Status: urgent
+
 ## Ledger entry — 2026-11-09 (security, message run 7): the CI row's job is finished and `main` fails three of its own gates, so applying it hands the owner a red default branch
 
 **Status:** proposed, half-day-sized. **For:** the engineer and exo lanes,

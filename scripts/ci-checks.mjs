@@ -338,6 +338,29 @@ export const CHECKS = [
     passExit: [0],
   },
   {
+    id: 'fetch-exec',
+    scope: 'tooling',
+    title: 'Fetch-and-execute census (every registry fetch is deliberate or declared)',
+    argv: () => ['node', 'tools/gates/fetch-exec.mjs'],
+    // Added 2026-11-09 by security run 13, generalising F113. That finding
+    // was a flag on one call site in THIS file, and the test that closed it
+    // asserts over this file's own CHECKS array, so it could see neither the
+    // second call site in tools/stack/integrate.sh (F122) nor the surface
+    // that actually matters, which is a charter sentence telling a future
+    // seat to write a call site. HQ's exo-centralizer seat measured that
+    // class upstream and its note is why the gate reads instructions as well
+    // as code.
+    //
+    // 2 is tolerated on exactly the ground `ledger-contract` and
+    // `register-ids` tolerate it: the one finding left on `main` is in
+    // prompts/, which no seat here may edit, and a job that goes red on a
+    // line no branch can turn green is one every seat learns to ignore. The
+    // gate separates that from a seat-repairable finding, which is 1, so
+    // tolerating 2 does not tolerate a new one. tools/prompt-slots.mjs is
+    // registered red-on-main for lacking this exact distinction.
+    passExit: [0, 2],
+  },
+  {
     id: 'excuse-control',
     scope: 'tooling',
     title: 'Excused gates: the reason is executed, not read',
