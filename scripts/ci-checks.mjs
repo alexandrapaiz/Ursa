@@ -43,8 +43,32 @@
 // record in the job log of what was not checked.
 //
 // Exit codes: 0 all declared checks ran and passed. 1 at least one ran and
-// failed. 2 at least one could not be run at all, so the result is not a
-// verdict on the branch.
+// failed. 2 at least one could not be run at all, or ran and refused to
+// answer, so the result is not a verdict on the branch.
+//
+// F138, 2026-11-09, security run 17. The second clause of exit 2 is new and
+// the reason is a defect this file and run 16 built between them. Run 16 gave
+// three ledger gates a GROUND verdict -- `tools/ledger/ground.mjs`, exit 3,
+// "I could not establish the facts" as distinct from "the thing I checked is
+// defective". This file had no slot for it. `state` was
+// `passExit.includes(status) ? 'passed' : 'failed'`, so a gate that refused
+// landed under `failed`, the aggregate came out 1, and 1 means "ran and
+// failed", which is a verdict on the branch. Measured in a worktree of this
+// branch with `tools/ledger/drivers.json` removed: the gate printed
+// `check-attributes: NO VERDICT (exit 3)` and the summary printed
+// `failed ledger-attributes exit 3`, exit 1.
+//
+// The general shape, because it is not about exit codes. This file does not
+// forward a gate's result, it RE-ENCODES it, into a state word and one
+// aggregate code. A refusal survives the stream it was printed on -- `stdio:
+// 'inherit'` below puts the gate's stderr in the job log verbatim -- and then
+// dies in the translation, because the vocabulary it is translated into has
+// no word for it. Ursa's frontend seat sent this lane the neighbouring half
+// on 2026-11-09: that whether a refusal belongs on stdout or stderr is
+// decided by the CHANNEL KIND and not by the gate's preference, a value
+// channel (`$(cmd)`) needing stdout empty and a report channel needing a
+// headline. A consumer that re-encodes is a third kind, and it needs neither:
+// it needs a slot. `noVerdict` below is that slot.
 
 import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -61,6 +85,14 @@ export const SCOPES = ['tooling', 'product', 'site']
 // `passExit` lists every exit code that counts as a pass, and each entry
 // that is not just [0] carries the reason inline, because an unexplained
 // tolerated exit code is how a gate becomes a no-op.
+//
+// `noVerdict` lists the exit codes with which this check says it could not
+// answer. It is declared per check rather than globally, because 3 is the
+// house's refusal code for gates this repository wrote and means nothing of
+// the sort to `npx tsc`, `vitest` or `npm`. A code may not appear in both
+// lists, which `ci-checks.test.mjs` holds.
+export const HOUSE_NO_VERDICT = 3
+
 export const CHECKS = [
   {
     id: 'tooling-suites',
@@ -430,6 +462,10 @@ export const CHECKS = [
     // pay once instead of once per gate, so the two move here.
     argv: () => ['node', 'tools/ledger/check-attributes.mjs'],
     passExit: [0],
+    // This gate refuses through `tools/ledger/ground.mjs` when its driver
+    // registry is absent or unparseable, or when the git read it needs fails.
+    // Its own exit 1 is a clone-locus finding, which is a different thing.
+    noVerdict: [HOUSE_NO_VERDICT],
   },
   {
     id: 'ledger-closures',
@@ -440,6 +476,11 @@ export const CHECKS = [
     // current tree over closure markers in `docs/ideas.md` and `docs/runs/`.
     argv: () => ['node', 'tools/ledger/check-closures.mjs'],
     passExit: [0, 2],
+    // Refuses through `tools/ledger/ground.mjs` on an absent ledger, a ledger
+    // that parses to zero entries, and outside a repository. Before F138 a
+    // refusal here read as `failed`, which is the one outcome this gate's
+    // whole repair exists to stop it being confused with.
+    noVerdict: [HOUSE_NO_VERDICT],
   },
   {
     id: 'doc-model-drift',
@@ -569,11 +610,26 @@ export function parseArgs(argv) {
   return opts
 }
 
+// The state of one check that ran, from its exit code. Pulled out of `main`
+// by F138 so that the no-verdict branch is reachable from a test without a
+// second copy of this repository to run the real gates against.
+//
+// Order matters. `noVerdict` is read before `passExit`, so a check that
+// declared the same code in both would read as a refusal; the suite forbids
+// declaring it, and this ordering makes the forbidden case fail loudly rather
+// than silently resolve to a pass.
+export function stateFor(check, status) {
+  if (check.noVerdict?.includes(status)) return 'no-verdict'
+  return check.passExit.includes(status) ? 'passed' : 'failed'
+}
+
 // Exit 2 beats exit 1: an unrunnable check means the run is not a verdict on
 // the branch at all, which the caller needs to be able to tell apart from a
-// branch that genuinely failed a gate.
+// branch that genuinely failed a gate. A check that ran and refused to answer
+// is the same kind of thing (F138): the gate established nothing, so neither
+// did the run.
 export function exitCodeFor(results) {
-  if (results.some((r) => r.state === 'unrunnable')) return 2
+  if (results.some((r) => r.state === 'unrunnable' || r.state === 'no-verdict')) return 2
   if (results.some((r) => r.state === 'failed')) return 1
   return 0
 }
@@ -649,10 +705,14 @@ function main(argv) {
       })
       continue
     }
+    const ranState = stateFor(check, run.status)
     results.push({
       ...check,
-      state: check.passExit.includes(run.status) ? 'passed' : 'failed',
-      why: '',
+      state: ranState,
+      why: ranState === 'no-verdict'
+        ? `the gate ran and refused to answer (exit ${run.status}); its reason is above, `
+          + 'on stderr. This is not a finding about the branch'
+        : '',
       exit: run.status,
     })
   }
@@ -663,7 +723,10 @@ function main(argv) {
     if (!inScope.length) continue
     process.stdout.write(`${scope}:\n`)
     for (const r of inScope) {
-      const detail = r.state === 'passed' || r.state === 'failed' ? `exit ${r.exit}` : r.why
+      const ran = r.state === 'passed' || r.state === 'failed'
+      const detail = ran ? `exit ${r.exit}`
+        : r.state === 'no-verdict' ? `exit ${r.exit}: ${r.why}`
+          : r.why
       process.stdout.write(`  ${r.state.padEnd(10)} ${r.id.padEnd(22)} ${detail}\n`)
     }
   }
@@ -674,9 +737,16 @@ function main(argv) {
     + `${Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(', ')}. exit ${code}\n`,
   )
   if (code === 2) {
+    const refused = results.filter((r) => r.state === 'no-verdict').map((r) => r.id)
     process.stdout.write(
       'At least one check could not be run, so this is not a verdict on the branch.\n',
     )
+    if (refused.length) {
+      process.stdout.write(
+        `${refused.length} of them ran and refused to answer: ${refused.join(', ')}. `
+        + 'A refusal is about this checkout, not about this branch.\n',
+      )
+    }
   }
   return code
 }

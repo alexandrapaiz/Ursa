@@ -9,10 +9,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { CHECKS, SCOPES, classify, exitCodeFor, parseArgs, toolingSuites } from './ci-checks.mjs'
+import { CHECKS, SCOPES, classify, exitCodeFor, parseArgs, stateFor, toolingSuites } from './ci-checks.mjs'
 
 const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), 'ci-checks.mjs')
 
@@ -213,4 +214,66 @@ test('a run that could not check the product exits 2 and says so, end to end', (
     'a product check must exit 0 when it passes, 1 when it ran and failed, '
     + 'or 2 when it could not run; nothing else is a defined state')
   assert.match(stdout, /not a verdict on the branch/)
+})
+
+// F138, security run 17. A gate that ran and refused to answer was reported
+// under `failed`, and the aggregate came out 1, which means "ran and failed"
+// and is a verdict on the branch. Measured before the repair in a worktree of
+// the branch with `tools/ledger/drivers.json` removed: `check-attributes: NO
+// VERDICT (exit 3)` on stderr, `failed ledger-attributes exit 3` in the
+// summary, exit 1. These cases are the repair's floor.
+
+test('a check that ran and refused to answer is a no-verdict, not a failure', () => {
+  const gate = { id: 'g', passExit: [0], noVerdict: [3] }
+  assert.equal(stateFor(gate, 0), 'passed')
+  assert.equal(stateFor(gate, 1), 'failed')
+  assert.equal(stateFor(gate, 3), 'no-verdict')
+  // A check with no `noVerdict` is unchanged, which is most of them.
+  assert.equal(stateFor({ id: 'h', passExit: [0, 2] }, 3), 'failed')
+  assert.equal(stateFor({ id: 'h', passExit: [0, 2] }, 2), 'passed')
+})
+
+test('a no-verdict outranks a failure, because the gate established nothing', () => {
+  assert.equal(exitCodeFor([{ state: 'passed' }, { state: 'no-verdict' }]), 2)
+  assert.equal(exitCodeFor([{ state: 'failed' }, { state: 'no-verdict' }]), 2)
+  assert.equal(exitCodeFor([{ state: 'no-verdict' }, { state: 'unrunnable' }]), 2)
+})
+
+test('no check declares one exit code as both a pass and a refusal', () => {
+  for (const c of CHECKS) {
+    for (const code of c.noVerdict ?? []) {
+      assert.ok(
+        !c.passExit.includes(code),
+        `${c.id} declares exit ${code} as both a pass and a no-verdict; `
+        + 'stateFor reads noVerdict first, so the pass would be unreachable',
+      )
+      assert.notEqual(code, 0, `${c.id} cannot refuse with exit 0`)
+    }
+  }
+})
+
+test('every registered gate that can refuse declares the code it refuses with', () => {
+  // The invariant rather than the two literals. A gate importing
+  // `tools/ledger/ground.mjs` can exit 3 by construction, and a future one
+  // added without `noVerdict` would regress F138 silently.
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+  let examined = 0
+  for (const c of CHECKS) {
+    const argv = c.argv()
+    if (argv[0] !== 'node' || !argv[1]?.endsWith('.mjs')) continue
+    const file = path.join(root, argv[1])
+    if (!existsSync(file)) continue
+    const src = readFileSync(file, 'utf8')
+    if (!/ground\.mjs['"]/.test(src)) continue
+    examined += 1
+    assert.ok(
+      c.noVerdict?.includes(3),
+      `${c.id} runs ${argv[1]}, which imports ground.mjs and so exits 3 to `
+      + 'refuse, but declares no noVerdict; a refusal from it would be '
+      + 'reported as a failing branch',
+    )
+  }
+  assert.ok(examined >= 2,
+    `expected at least the two ledger gates to import ground.mjs, examined ${examined}; `
+    + 'if the import moved, this case stopped checking anything')
 })
