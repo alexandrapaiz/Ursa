@@ -45,8 +45,42 @@ function json(root, args = []) {
 // A copy of the guard and of everything the sweep scans that carries a
 // suppressed finding today: `tools/` for the markers and the tooling, and
 // `.github/workflows/` for the two baseline entries.
+// Every instance is removed when the process exits, and the prefix carries
+// this process's pid.
+//
+// Both halves were added 2026-11-09 by Ursa's security seat, measured. There
+// are 17 calls to `instance()` in this file and nothing deleted any of them,
+// so each run of this suite left about 49 MB under `os.tmpdir()` for good.
+// `node tools/seat/env-facts.mjs` carries two facts that make that expensive
+// rather than untidy. `bootstrap-allocates-and-a-full-disk-is-silent`: every
+// repair in a seat's bootstrap acquires something, so on a full disk the
+// clone stays shallow and no error names the disk. And `tmp-is-shared-
+// between-seats`: `/tmp` is one filesystem for every seat on this host, so
+// the cost is not paid by the run that leaked it.
+//
+// This host was at 97 per cent with 1.5 GB free while that was measured, and
+// the tasks filesystem of the run doing the measuring filled and started
+// losing command output mid-sweep.
+//
+// The pid is in the prefix for the second fact rather than the first. A bare
+// `ursa-exempt-` glob is every concurrent seat's path too, so a cleanup
+// written for this suite reaches another run's live instance. The run that
+// measured this did exactly that, with `rm -rf /tmp/ursa-exempt-*`, before
+// noticing that the prefix it was clearing was not only its own.
+const INSTANCES = []
+process.on('exit', () => {
+  for (const dir of INSTANCES) {
+    try {
+      fs.rmSync(dir, { recursive: true, force: true })
+    } catch {
+      // A teardown that throws would report a disk fault as a test failure.
+    }
+  }
+})
+
 function instance() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ursa-exempt-'))
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), `ursa-exempt-${process.pid}-`))
+  INSTANCES.push(dir)
   fs.cpSync(path.join(ROOT, 'tools'), path.join(dir, 'tools'), { recursive: true })
   fs.cpSync(path.join(ROOT, '.github/workflows'), path.join(dir, '.github/workflows'),
     { recursive: true })
