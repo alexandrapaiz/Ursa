@@ -232,24 +232,63 @@ workflow runs: 60 success, 0 failure, all `redaction-gate`. The other eleven
 are dispatch-only, which is PWC-15's standing finding rather than a new one.
 
 **Prompt injection.** `tools/prompt-slots.mjs` still reports 11 of 11
-untrusted slots in a fence a payload could step out of, and still exits 0
-while saying so. F116 stands, and this run's gate is a worked demonstration
-of the exit code it is missing.
+untrusted slots in a fence a payload could step out of. The slots are the
+owner's and are untouched. What changed is the gate, below.
+
+## F116 — closed, and closed second on purpose
+
+Run 11 filed F116: `tools/prompt-slots.mjs` had no exit code for a
+prompt-injection finding only the owner can repair. Run 12 carried it
+forward unchanged. This run built that exit code for `fetch-exec` first and
+then applied it here, which is cheaper than designing it twice and is why
+the order looks backwards.
+
+The defect, precisely. The tool discarded its own verdict unless `--strict`
+was passed. So the bare command printed `11 of 11 untrusted slot(s) sit in a
+fence a payload could step out of` and **exited 0**, and `--strict` exited 1
+on a backlog no branch can clear. One is a green tick next to eleven open
+slots, the other is a red every seat learns to ignore, and neither is
+registrable. That is why the gate registry carried it as `red-on-main`.
+
+Now:
+
+| exit | meaning | state on `main` |
+|---|---|---|
+| 0 | no untrusted slot is open | not today |
+| 1 | an untrusted interpolation inside a `run:` block, which is shell injection and the owner's immediate action | **none today, so this code is green and fires on a regression** |
+| 2 | the owner's standing prompt-layer backlog | what `main` carries |
+| 3 | the workflow directory could not be read, which is no verdict | not today |
+
+`--strict` keeps the meaning it had, by escalating 2 to 1.
+
+**Why 1 stays reachable rather than everything routing to 2.** A gate whose
+failure code cannot be reached is the defect `tools/gates/code-census.mjs`
+watches for. Shell injection is both severe and currently absent, so routing
+it to 2 would have traded one blind spot for another.
+
+Registered as `prompt-slots` with `passExit: [0, 2]`, and the `red-on-main`
+excuse deleted from the registry baseline. The registry reads 63 candidates,
+**26** run by a check and 37 excused in writing, up from 24 run when this
+run started.
+
+Three cases added. Two fail against the pre-fix file, with the
+owner-reserved verdict returning 1 there and the two causes sharing a code.
+The third is a regression net over the shell-injection path, discriminates
+nothing, and is named here rather than counted.
+
+**The eleven open slots are untouched and still the owner's.** This closes
+the gate's blindness, not the exposure it reports.
 
 ## What this run did not fix, and whose it is
 
 1. **F121**, above. The owner's, or Ursa's ExO seat, which is the one seat
    here that edits charters. Filed urgent.
-2. **F116.** `tools/prompt-slots.mjs` has no exit code for a finding only
-   the owner can repair. The slots themselves are in
-   `.github/workflows/`. The exit code is a seat's to add, and
-   `tools/gates/fetch-exec.mjs` now shows the shape.
-3. **PWC-15.** Nothing in `.github/workflows/` runs
-   `scripts/ci-checks.mjs` on a pull request, so all 25 registered gates
+2. **PWC-15.** Nothing in `.github/workflows/` runs
+   `scripts/ci-checks.mjs` on a pull request, so all 26 registered gates
    including this run's still run only when a seat runs them. The largest
    remaining gap in this repository's defensive posture, and not a seat's
    to close.
-4. **Seven excuse kinds** in the gate registry still have no executed
+3. **Seven excuse kinds** in the gate registry still have no executed
    control, from run 12. Each says which second host, network-less sandbox
    or real merge it would need.
 
