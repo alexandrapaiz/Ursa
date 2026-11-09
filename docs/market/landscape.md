@@ -1228,6 +1228,54 @@ Machine Scale](https://cocient.com/), [Ask HN: Who is hiring?
 [JobPilot: Data Scientist (AI training & evaluation) at
 Cocient](https://jobpilot.suxrobgm.net/jobs/data-scientist-ai-training-evaluation-at-cocient-5c477e).
 
+### Preference Model
+
+What it is: a reinforcement-learning-environment vendor whose specific
+pitch is grader-hardening rather than task authoring — it sells RL
+environments built to resist the exact reward-hacking moves (reading
+the answer key, crashing the grader, launching fork bombs, rewriting
+tests) that the 24th-26th runs' three-lab disclosure pattern and this
+run's contagion/auditor findings (below) describe labs discovering the
+hard way. New entry, found via its 2026-10-07 stealth exit. Founded by
+Jennifer Zhou (early Anthropic, built pretraining data infrastructure
+and tokenizers used for Claude) and Ning Cao (early DatologyAI); backed
+by a16z-led $16M seed, with SignalFire, South Park Commons, Scale
+Angels, and angels Fei-Fei Li, Ian Goodfellow, and Julian Schrittwieser.
+Who it serves: frontier labs building their own post-training
+pipelines, named partner Fireworks AI (teams that post-train their own
+models), unnamed frontier-lab customers over "the past year." Pricing:
+not disclosed; the company self-reports its shipped environments stood
+behind "$15M in revenue over the last month," a figure every source
+checked (Digg, aifrontierpost) flags as self-reported and not
+independently verified, the same sourcing caveat this file applies to
+other vendor-authored figures. Strengths: credible pedigree (an
+Anthropic pretraining alum as CEO), real production deployment
+claimed rather than a prototype, and it open-sourced the underlying
+framework (Karotte, "hardened through more than a million evaluation
+runs and controlled red-teaming") rather than keeping the defense
+proprietary, which is a genuine credibility signal this category rarely
+offers. Weakness against Ursa: this is the market's own, well-funded,
+technically serious attempt at exactly the rebuttal this run's findings
+1-2 (below) argue does not close the gap. Hardening the grader against
+known cheats (fork bombs, answer-key reads) answers last month's attack
+shapes; it does not touch the contagion paper's finding that a
+successful exploit against any grader can spread to models that never
+saw it, and it does not touch the auditor false-alarm study's finding
+that catching most misbehavior at scale still floods reviewers. A
+better-defended grader is still a constructed grader, and Ursa Minor's
+pitch is that no grader is the object a real deliverable's own outcome
+record replaces, not improves. Preference Model is the clearest single
+named company this file has found yet for stating that comparison
+directly against. Last observed 2026-11-09: [dealroom.co: a16z leads
+$16M seed for AI data startup Preference
+Model](https://dealroom.co/news/160734-a16z-leads-16m-seed-for-ai-data-startup-preference-model/),
+[Preference Model](https://preferencemodel.com/), [aifrontierpost:
+Preference Model emerges from stealth with a $16M a16z seed — and
+open-sources
+Karotte](https://aifrontierpost.com/articles/preference-model-16m-seed-karotte/),
+[Digg: Karotte goes open source for building reinforcement-learning
+environments](https://digg.com/ai/3pgtrsli).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -2759,3 +2807,15 @@ agentmemoryprotocol/agentmemoryprotocol](https://github.com/agentmemoryprotocol/
   than per-hour, next to Mercor's ~$85/hr and Cocient's $60-130/hr.
   No positioning consequence beyond the already-filed dual-market
   exposure note this entry exists to close out.
+- 2026-11-09 (message, 27th run) — added Preference Model (Category
+  1, environments-and-verifiers sub-category, 30th entry), a
+  2026-10-07 stealth exit ($16M a16z-led seed, Anthropic-pretraining-
+  alum CEO) selling RL environments hardened specifically against
+  reward hacking, with a self-reported (unverified) $15M in revenue
+  over its most recent month. The clearest named company yet for the
+  26th run's "auditing the grader does not remove the grader"
+  argument: it is the market's own well-funded, technically serious
+  attempt at the better-grader rebuttal, and the same run's contagion
+  and auditor-false-alarm findings describe exactly why that rebuttal
+  does not close Minor's gap. Positioning consequence in
+  docs/market/positioning.md.

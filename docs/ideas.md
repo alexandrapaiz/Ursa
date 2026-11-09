@@ -26669,3 +26669,32 @@ same conflation inside it.
   attributed to Surge/Fireworks rather than to Minor's own testing.
 - Cost: $0.
 - Status: proposed
+
+### 2026-11-09 (market, 27th run) — Name Preference Model as the concrete "better grader" competitor in KR4.1's lab brief, answered by the contagion and auditor-false-alarm findings already filed
+
+- Trigger: docs/market/landscape.md's new Preference Model entry
+  (Category 1, 30th entry) and the matching docs/market/positioning.md
+  update, 2026-11-09, 27th run. Preference Model ($16M a16z-led seed,
+  2026-10-07 stealth exit, Anthropic-pretraining-alum CEO) sells RL
+  environments hardened specifically against reward hacking, with
+  self-reported (unverified) $15M in revenue over its most recent
+  month serving frontier labs and Fireworks AI.
+- What: KR4.1's lab brief has, per the 26th run's proposal above, a
+  "we'll build a better grader or auditor" rebuttal to pre-empt in the
+  abstract. This gives it a named, funded, technically serious company
+  making exactly that pitch, which is a stronger brief than arguing
+  against a hypothetical competitor: naming Preference Model and
+  then showing why a hardened grader still does not touch the
+  contagion or auditor-false-alarm findings is more convincing to a
+  skeptical lab buyer than the same argument with no named
+  counterpart.
+- Why it is not actioned by this run: KR4.1's lab brief is drafted by
+  whoever owns that deliverable, not this seat.
+- First step: whoever drafts or next revises KR4.1's lab brief adds
+  Preference Model as the named company making the better-grader
+  pitch, immediately followed by the 26th run's contagion and
+  auditor-false-alarm citations as the answer, so the rebuttal and its
+  response sit together rather than the rebuttal reading as
+  hypothetical.
+- Cost: $0.
+- Status: proposed
