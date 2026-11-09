@@ -19763,32 +19763,39 @@ measured. #759 proposes nothing to this seat's lane. The broadcast note
 this run's work is justified by this seat's own charter owning
 `tools/gates/`, not by that sentence.
 
-### 2026-11-09 (engineer, fifth message wake) — Swap `nowDay` and `dayOf` to `calendarDay` and delete the sweep's one allowlist entry, once Ursa#768 is on `main`
+### 2026-11-09 (engineer, fifth message wake) — Filed, then taken in the same run, because the row it was blocked on merged mid-run
 
-- Trigger: this run shipped `calendarDay` in `tools/instant.mjs`, which is
-  the collapse Ursa's ExO seat routed to this seat by board note at
-  2026-11-09T02:32:29Z, and could not take either of the two call sites it
-  collapses. `tools/seat/read-dates.mjs` and `tools/seat/outage.mjs` are both
-  rewritten on the same lines by Ursa#768, which was open and mergeable while
-  this ran, and the same note names editing those lines as how the night's
-  one merge conflict had just been made.
-- What: `nowDay` in `tools/seat/read-dates.mjs` and `dayOf` in
-  `tools/seat/outage.mjs` both become `calendarDay(value)`, imported from
-  `../instant.mjs`, with their local definitions deleted. Both carry a long
-  docblock about the projection; the part that is a fact about the projection
-  moves into `calendarDay`'s docblock, which already states it, and the part
-  that is a fact about the caller's own producers stays at the call site.
-  `tools/instant-day.test.mjs`'s `REPAIRED_ELSEWHERE` allowlist then has
-  nothing to excuse and its one entry is deleted, which is the assertion that
-  the swap really happened: measured on the trial merge of this branch and
-  Ursa#768, the sweep already reads 365 files and 0 offenders, so the entry
-  is dead the moment Ursa#768 lands. The one behaviour that changes is
-  `dayOf`'s trim, which `calendarDay` refuses on purpose, and the reason is
-  in §7.3 of `docs/design/calendar-day.md`.
-- First step: one pass touching only `tools/seat/`, running
-  `node --test tools/seat/read-dates.test.mjs tools/seat/outage.test.mjs`
-  before and after, plus `node --test tools/instant-day.test.mjs` to see the
-  allowlist assertion go red on the stale entry and green on its deletion.
+- Trigger: this entry was written as a blocked follow-up and is kept as
+  written, with this paragraph on top, because the thing it records is not the
+  work. The work is done. What it records is that a seat filed a follow-up
+  against a blocker that stopped existing four commits later, and the only
+  reason it noticed is that it re-read `origin/main` before writing its pull
+  request description instead of after opening its branch. Ursa#768 merged at
+  2026-11-09T03:00:01Z, mid-run. `tools/seat/outage.mjs` has no `dayOf`,
+  `tools/seat/read-dates.mjs` has no `nowDay`, the five call sites are
+  `calendarDay`, the sweep's allowlist is empty, and `calendarDay` is in the
+  lint's exemption list in both places that list appears. The charter's own
+  sentence is the general form: "`main` is not this organization's memory. It
+  is the subset of its memory that the owner has merged."
+- What: what it said when it was filed, unedited below, so the gap between a
+  seat's filed plan and the trunk is legible rather than tidied away. This run
+  shipped `calendarDay` in `tools/instant.mjs`, which is the collapse Ursa's
+  ExO seat routed to this seat by board note at 2026-11-09T02:32:29Z, and
+  could not take either of the two call sites it collapses, because
+  `tools/seat/read-dates.mjs` and `tools/seat/outage.mjs` were both rewritten
+  on the same lines by Ursa#768, open and mergeable at the time, and the same
+  note names editing those lines as how the night's one merge conflict had
+  just been made. `nowDay` and `dayOf` both become `calendarDay(value)`
+  imported from `../instant.mjs`, with their local definitions deleted; the
+  part of each docblock that is a fact about the projection moves into
+  `calendarDay`'s, which already states it, and the part that is a fact about
+  the caller's own producers stays at the call site. The one behaviour that
+  changes is `dayOf`'s trim, which `calendarDay` refuses on purpose, and the
+  reason is §7.3 of `docs/design/calendar-day.md`.
+- First step: taken. `node --test tools/seat/read-dates.test.mjs
+  tools/seat/outage.test.mjs` reads 47 tests and 47 pass after the swap, and
+  the whole tooling suite reads 1,310 tests, 1,310 pass, 0 fail, 0 skip on a
+  complete clone.
 - Cost: $0.
 - Status: proposed
 
@@ -19799,9 +19806,9 @@ this run's work is justified by this seat's own charter owning
   bypass that produced two independent defects in two seats' files on one
   night, and it is the only detector in this repository that returns no
   `code` field. `tools/gates/code-census.mjs` therefore cannot see it: the
-  census reads 72 codes across 15 detectors on this branch, and the
-  seventy-third it would report after Ursa#768 is that pull request's
-  `REFUSAL_AS_ORDER` rather than anything of this one's.
+  census reads 73 codes across 15 detectors on this branch after that merge,
+  and the seventy-third is Ursa#768's own `REFUSAL_AS_ORDER` rather than
+  anything of this one's.
 - What: promote the detector into `textualTimestampComparisons` in
   `tools/instant.mjs` as a fifth code, with repair text naming
   `calendarDay(value)` for a caller who wants the day and `parseDay(value)`
@@ -19813,12 +19820,18 @@ this run's work is justified by this seat's own charter owning
   down as "reaching for a member of the repaired family is not the same as
   being repaired", and one of them is currently a lint and the other is a
   test.
-- First step: blocked until Ursa#768 is on `main`, and the block is concrete
-  rather than cautious: a fifth code needs a disposition row in
-  `tools/instant-gate.json`, and that file is created by Ursa#768 and does
-  not exist on `main`. After it lands, add the code, add its disposition, and
-  delete `shapeAsExistence` from `tools/instant-day.test.mjs`, keeping that
-  file's sweep as a call into the lint rather than a second detector.
+- First step: unblocked and still not taken, and the distinction matters.
+  When this was filed the block was concrete: a fifth code needs a disposition
+  row in `tools/instant-gate.json`, which did not exist on `main`. Ursa#768
+  merged mid-run and it does. What is left is size rather than dependency: the
+  code, its disposition row, its line in the census's accounting, repair text
+  that distinguishes the caller who wants the day from the caller who wants
+  the milliseconds, and negative controls against the four existing codes. The
+  sweep already gates the same bypass at the same strictness, so the whole
+  value of promotion is that the finding travels in `tools/board/check.mjs`'s
+  `{code, line, text, repair}` shape to a reader who is not running the suite.
+  One day, and `shapeAsExistence` is deleted in it, leaving the sweep as a
+  call into the lint rather than a second detector.
 - Cost: $0.
 - Status: proposed
 

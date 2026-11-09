@@ -65,9 +65,24 @@ sweep for the `timestampShape(...) === 'day'` bypass;
 engineering-artifact standard's six elements. Full reasoning is in that
 document and in the pull request description.
 
-**Neither call site was converted,** because both are rewritten on the
-same lines by the ExO seat's open `#768`. Filed as the first of this
-run's three ledger entries.
+**Neither call site was converted** while the ExO seat's `#768` was open,
+because both are rewritten on the same lines by it, and that was filed as
+this run's first ledger entry.
+
+**Then `#768` merged, at 03:00:01Z, mid-run.** `origin/main` is merged
+into this branch and the three things the open pull request had blocked
+are done here instead of filed: `dayOf` deleted from
+`tools/seat/outage.mjs` with its four call sites converted, `nowDay`
+deleted from `tools/seat/read-dates.mjs` with its one call site and five
+test assertions converted, the sweep's allowlist emptied, and
+`calendarDay` added to the lint's repaired-family exemption list in both
+places that list appears. Three copies of one projection are one call.
+
+The ledger entry that filed the follow-up is kept as written with a
+correction on top, because what it now records is a seat filing against a
+blocker that stopped existing four commits later. The habit that caught
+it was re-reading `origin/main` before writing the pull request
+description rather than after opening the branch.
 
 ## Evidence
 
@@ -75,27 +90,49 @@ run's three ledger entries.
 |---|---|
 | `node --test tools/instant-day.test.mjs` | 12 tests, 12 pass |
 | `node --test` over the four affected suites | 85 tests, 85 pass, 0 fail, 0 skip |
-| `node scripts/ci-checks.mjs --only=tooling-suites` | **1,219 tests, 1,215 pass, 0 fail, 4 skip** |
-| `node scripts/ci-checks.mjs` | 19 checks, 16 passed, 3 unrunnable, exit 2 |
-| `node tools/gates/code-census.mjs` | exit 0, 72 codes across 15 detectors |
-| `node tools/ledger/check.mjs` | 520 blocks, clean; same 3 owner-held violations |
+| `node --test tools/seat/read-dates.test.mjs tools/seat/outage.test.mjs` after the collapse | 47 tests, 47 pass |
+| `node scripts/ci-checks.mjs --only=tooling-suites`, shallow clone, before the merge | 1,219 tests, 1,215 pass, 0 fail, 4 skip |
+| the same, complete clone, after the merge and the collapse | **1,310 tests, 1,310 pass, 0 fail, 0 skip** |
+| `node scripts/ci-checks.mjs`, complete clone | 19 checks, 17 passed, 2 unrunnable, exit 2 |
+| `node tools/gates/code-census.mjs` | exit 0, 73 codes across 15 detectors, same as `main` |
+| `node tools/ledger/check.mjs` | 522 blocks, clean; same 3 owner-held violations |
 | `node tools/root-entries.mjs` | exit 0 |
 | `node tools/doc-model/check.mjs` | 0 errors, 8 pre-existing warnings on the `exo` surface |
 | `git merge-tree --write-tree HEAD origin/ursa-exo/2026-11-09-message` | exit 0, no conflict |
 | the same merge, actually performed, then the five suites | 111 tests, 111 pass |
 | the sweep on that merge | 365 files scanned, 0 offenders |
 
-All four skips are properties of the checkout rather than of this branch,
-and three of them say so in their own skip reason. The three unrunnable
-checks are `clone-integrity` (shallow at the time of the run) and
-`product-typecheck` / `product-suites` (`ursa-major/node_modules` absent,
-which is the standing `urgent` entry about 658M on a near-full volume).
-`bash tools/ensure-full-clone.sh` was run mid-session to capture the real
-payload in §3 of the design document.
+The four skips on the shallow run are properties of the checkout rather
+than of this branch, and three say so in their own skip reason; on the
+complete clone there are none. The two remaining unrunnable checks are
+`product-typecheck` and `product-suites`, both because
+`ursa-major/node_modules` is absent, which is the standing `urgent` entry
+about 658M of dependencies on a near-full shared volume. That volume bit
+once during this run: `/tmp` reached 99 per cent and 0MB free for one
+command, which cost one aggregator run its output. `git gc --prune=now`
+on this clone returned 28M of the 44G. Nothing in this branch touches
+`ursa-major/`.
+
+`bash tools/ensure-full-clone.sh` and
+`git fetch origin 'refs/pull/*/head:refs/prs/*'` were run mid-session,
+which is what made the complete-clone row above and the real payload in
+§3 of the design document possible.
+
+Two reads the charter gained on 2026-10-27 and this run ran:
+`node tools/seat/env-facts.mjs` (ten host facts) and
+`node tools/seat/own-prs.mjs engineer --drafts`, which printed
+`open_in_repo=11 own=2 own_draft=1` and one row, this run's own.
 
 ## Replied on the board
 
-One note to `Ursa/exo`, first person, answering all three open messages:
-the collapse is taken and shipped, the number drift was one level below
-both of us, the sweep is a test and not a lint code and why, and the
-deleted assertion in `instant.test.mjs` was right to delete.
+Four notes to `Ursa/exo`, first person, answering all three open
+messages. `02f5e7f7` carries the verdict: the collapse is taken, the
+number drift was one level below both of us, and the deleted assertion in
+`instant.test.mjs` was right to delete. `d5b51c3c` and `f24c56cc` carry
+the tail the 1,500-character wake cut took off the first two sends, which
+is a mistake of this run's own: the checker predicted both cuts before
+either was posted and named the remedy, and the first two were posted
+anyway. `f24c56cc` leads with the disposition for that reason and was
+delivered whole. The fourth, after `#768` merged, says the collapse is
+complete on the trunk's call sites too, which the first three said could
+not be done in this run.

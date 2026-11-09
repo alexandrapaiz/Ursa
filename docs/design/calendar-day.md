@@ -47,8 +47,8 @@ is a verb phrase standing in for data.
 | `instant.mjs:epochMillis` | A module-private guard added by this change; not exported, because a second exported number-taking function is the problem being closed | `tools/instant.mjs` |
 | `instant-day.test.mjs` | The new `node:test` suite: twelve tests, including the repository sweep | `tools/instant-day.test.mjs` |
 | `charter-lag.mjs:dayCell` | The first caller converted to `calendarDay`; renders one column of a plain-text table | `tools/seat/charter-lag.mjs` |
-| `read-dates.mjs:nowDay` | A caller **not** converted by this change, because the ExO seat's open pull request Ursa#768 rewrites the same lines | `tools/seat/read-dates.mjs` |
-| `outage.mjs:dayOf` | A caller **not** converted, and one that does not exist on `main` at all: it is introduced by Ursa#768 | `tools/seat/outage.mjs` |
+| `read-dates.mjs:gradeEntry` | The second caller converted: it held `nowDay`, the second copy, which this change deletes | `tools/seat/read-dates.mjs` |
+| `outage.mjs:readVerdict`, `outage.mjs:completedBetween` | The third and fourth callers converted: four call sites that held `dayOf`, the first copy, which this change deletes | `tools/seat/outage.mjs` |
 | `git ls-files` | The git subcommand the sweep drives to enumerate tracked source, invoked as a child process | the `git` binary, version in §5 |
 | `code-census.mjs` | The pre-existing gate that counts every defect code the repository's detectors can emit and checks each is watched | `tools/gates/code-census.mjs` |
 
@@ -68,20 +68,23 @@ is a verb phrase standing in for data.
 | `calendarDay` | caller | `string \| null`: `YYYY-MM-DD`, or `null` meaning "this module will not place this value on a calendar" |
 | `calendarDay` | `dayCell` | `string \| null`; `dayCell` substitutes the single character `?` for `null`, because the placeholder is a rendering choice belonging to the table |
 | `dayCell` | `formatTable` | `string`: one cell of the `charter on main` column, for example `2026-10-09` or `?` |
+| `calendarDay` | `readVerdict`, `completedBetween`, `gradeEntry` | `string \| null`; all three treat `null` as a fault and raise a `TypeError` naming the unplaceable value, because each is about to grade a date against "today" |
 | `instant-day.test.mjs` | `git ls-files` | the argument vector `['ls-files', '-z', '*.mjs', '*.js', '*.cjs', '*.ts', '*.tsx']`, through `execFileSync` with `cwd` set to the repository root |
 | `git ls-files` | `instant-day.test.mjs` | one NUL-separated list of repository-relative paths on standard output, 482 entries today |
 | `instant-day.test.mjs` | `node:test` | a process exit code: `0` when the sweep finds no offender, `1` with the offending `path:line text` printed |
 
-**The one edge that is deliberately absent.** There is no edge from
-`calendarDay` into the lint in the same file. `textualTimestampComparisons`
-keeps a list of "repaired family" function names at
-`tools/instant.mjs:618`, and a line calling one of them is exempt from
-every lint code. `calendarDay` is **not** on that list in this change,
-and §8 says why: that line sits inside Ursa#768's diff, and editing it
-here would manufacture the merge conflict this change exists to avoid
-repeating. The sweep in `tools/instant-day.test.mjs` is the standalone
-substitute, and adding the name to the exemption list is the named
-follow-up.
+**The edge that was deliberately absent for most of this run, and is not
+absent now.** `textualTimestampComparisons` in the same file keeps a list
+of "repaired family" function names, and a line calling one of them is
+exempt from every lint code. `calendarDay` was left off that list while
+Ursa#768 was open, because the line sits inside that pull request's diff
+and editing it would have manufactured the merge conflict this change
+exists to stop repeating. Ursa#768 merged at 2026-11-09T03:00:01Z, during
+this run, so the name is on the list in both places it appears: the
+detector at `tools/instant.mjs:692`, and the deliberate transcription of
+the same pattern in `tools/instant.test.mjs`, which Ursa#768 added as a
+red-rehearsal for the ordering of its own `REFUSAL_AS_ORDER` check and
+which would silently stop matching if only one copy moved.
 
 ---
 
@@ -133,13 +136,15 @@ declare const REPAIRED_ELSEWHERE: Array<{
 **Why `shapeAsExistence` returns no `code` field**, which every other
 detector in this repository does. `tools/gates/code-census.mjs` counts
 the defect codes the repository's detectors emit and requires each to be
-named by a test or carry a written baseline entry; a code is therefore an
+named by a test or carry a written baseline entry, so a code is an
 obligation and not a label. This detector has exactly one caller, in the
-same file, and promoting it to a named code belongs in the lint beside
-the other four, after Ursa#768 lands. Measured: the census reads 72 codes
-across 15 detectors on this branch and 73 across 15 on the trial merge
-with Ursa#768, which is Ursa#768's own `REFUSAL_AS_ORDER` and not
-anything of this change's.
+same file, and promoting it to a named code belongs in the lint beside the
+other four. Measured rather than promised: `node tools/gates/code-census.mjs`
+reads **73 codes across 15 detectors** on this branch, which is the same
+73 as `main`, and the seventy-third is Ursa#768's own `REFUSAL_AS_ORDER`
+rather than anything of this change's. §9 says why promotion is filed and
+not taken, and it is a reason of size now that Ursa#768 has merged, not a
+dependency.
 
 ---
 
@@ -150,11 +155,20 @@ no stored record. It is three source files and one document:
 
 | Path | Format | Lines after this change |
 |---|---|---|
-| `tools/instant.mjs` | ES module, plain `.mjs`, no dependencies | 666 (was 539) |
-| `tools/instant-day.test.mjs` | ES module driving `node:test`, new file | 290 |
+| `tools/instant.mjs` | ES module, plain `.mjs`, no dependencies | 740 (was 601 after the merge of Ursa#768) |
+| `tools/instant-day.test.mjs` | ES module driving `node:test`, new file | 297 |
+| `tools/instant.test.mjs` | ES module driving `node:test` | 33 tests; one existing regex literal gained one alternative |
 | `tools/seat/charter-lag.mjs` | ES module | 645 (was 629) |
-| `tools/seat/charter-lag.test.mjs` | ES module driving `node:test` | 25 tests, up from 25 (one test gained four assertions) |
+| `tools/seat/charter-lag.test.mjs` | ES module driving `node:test` | 25 tests; one test gained four assertions |
+| `tools/seat/outage.mjs` | ES module | 631 (was 650): `dayOf` deleted, four call sites converted |
+| `tools/seat/read-dates.mjs` | ES module | 617 (was 638): `nowDay` deleted, one call site converted |
+| `tools/seat/read-dates.test.mjs` | ES module driving `node:test` | 25 tests; five assertions moved from `nowDay` to `calendarDay` and one added |
 | `docs/design/calendar-day.md` | GitHub-flavoured Markdown, this file | — |
+
+Whole-diff shape against `main`, which is the number a reviewer wants
+before reading any of it: **8 files, 560 insertions, 113 deletions**, of
+which the deletions are almost entirely the two hand-written copies and
+their docblocks.
 
 **The real payload, which is the one surface a human reads.** The
 `charter on main` column below is `dayCell`'s return value, one cell per
@@ -197,7 +211,10 @@ merged state: scanned 365 offenders []
 
 365 is the count of non-test source files read; `[]` is the offender
 list. The positive control inside the test asserts `scanned > 300`, so a
-sweep that silently read nothing cannot produce this line.
+sweep that silently read nothing cannot produce this line. The same
+sweep on this branch after Ursa#768 merged and the two call sites were
+converted reads the same `[]` for a different reason: then the one
+offending line was excused by name, now there is no offending line.
 
 ---
 
@@ -240,11 +257,16 @@ node --test tools/instant.test.mjs tools/instant-day.test.mjs \
              tools/seat/read-dates.test.mjs
 git checkout ursa-engineer/2026-11-09-message-5 && git branch -D trial/merge-768
 
-# 8. Reproducing the defect on the trunk, which is the one command a
-#    reviewer should run to see it rather than read about it.
+# 8. Reproducing the defect, which is the one command a reviewer should run
+#    to see it rather than read about it. Run against the parent of this
+#    branch's first commit, since the branch itself is repaired.
 git stash
 node -e "import('./tools/instant.mjs').then(m => console.log(m.utcDay(20261109), m.toUtcInstant(1794196800)))"
 git stash pop
+
+# 9. The two reads the new charter text added on 2026-10-27, both run.
+node tools/seat/env-facts.mjs
+node tools/seat/own-prs.mjs engineer --drafts
 ```
 
 Command 8 prints `1970-01-01 1970-01-21T18:23:16Z` before this change and
@@ -386,56 +408,71 @@ real inputs and is a refusal rather than a guess on the input that is not.
 
 ---
 
-## 8. Sequencing against Ursa#768, measured rather than assumed
+## 8. Sequencing against Ursa#768, which stopped being a question mid-run
 
-The ExO seat's pull request Ursa#768 is open, mergeable and waiting on the
-owner. It edits `tools/instant.mjs`, `tools/instant.test.mjs`,
+**The situation this section was written for.** The ExO seat's pull
+request Ursa#768 edited `tools/instant.mjs`, `tools/instant.test.mjs`,
 `tools/seat/read-dates.mjs` and `tools/seat/outage.mjs` — four of the
-files this change is about. The board note that routed this work to this
-seat is explicit about the hazard: "moving your exported API on a row that
-has to merge tonight is how tonight's conflict got made, so it is routed
-and not performed."
+files this change is about — and it was open and waiting on the owner
+when this run began. The board note that routed this work to this seat is
+explicit about the hazard: "moving your exported API on a row that has to
+merge tonight is how tonight's conflict got made, so it is routed and not
+performed."
 
-So the two branches were kept disjoint by construction and then measured,
-not reasoned about:
+So the two branches were kept disjoint by construction and then measured
+rather than reasoned about:
 
 | Question | Command | Answer |
 |---|---|---|
 | Do the two branches conflict? | `git merge-tree --write-tree HEAD origin/ursa-exo/2026-11-09-message` | exit 0, no conflict, in either direction |
-| Does the merged tree pass? | `node --test` over the five affected suites on `trial/merge-768` | 111 tests, 111 pass, 0 fail, 0 skip |
+| Does the merged tree pass? | `node --test` over the five affected suites on a throwaway `trial/merge-768` | 111 tests, 111 pass, 0 fail, 0 skip |
 | Does the merged tree gain an unwatched defect code? | `node tools/gates/code-census.mjs` on the merge | 73 codes across 15 detectors, exit 0 |
-| Does the sweep's allowlist entry survive the merge? | the sweep, on the merge | 365 files scanned, 0 offenders: the entry is dead and removable |
+| Did the sweep's one allowlist entry survive the merge? | the sweep, on the merge | 365 files scanned, 0 offenders: the entry was dead and removable, and it is deleted |
 
-**Merge order does not matter, and that is a measurement and not a
-courtesy.** Three disjointness facts make it so. This change does not
-touch a line inside Ursa#768's diff in `tools/instant.mjs`: its hunks
-begin at line 418 of the pre-change file and every edit here is above
-line 400 or is a new block at the foot of the day family. It adds no
-assertion to `tools/instant.test.mjs`, which is why the new suite is a
-new file. And its sweep allowlist is keyed by **file** rather than by
-line, so Ursa#768's rewrite of `nowDay` does not strand a line number.
+**Then Ursa#768 merged, at 2026-11-09T03:00:01Z, while this run was
+working.** `origin/main` is merged into this branch and the three things
+the open pull request had blocked are done here rather than filed:
 
-**The one thing this change cannot do until Ursa#768 lands**, stated so
-the gap is visible rather than discovered: `calendarDay` is not added to
-the lint's repaired-family exemption list at `tools/instant.mjs:618`,
-because that line is inside Ursa#768's diff. No line written here is
-reported by the lint today — verified by running it over the tree — but a
-future caller writing `calendarDay(entryDate)` on a line that also slices
-or compares could be. The follow-up is one line.
+1. **Both call sites are converted.** `dayOf` is deleted from
+   `tools/seat/outage.mjs` and its four call sites call `calendarDay`;
+   `nowDay` is deleted from `tools/seat/read-dates.mjs` and its one call
+   site and five test assertions call `calendarDay`. Three copies of one
+   projection are one call.
+2. **The sweep's allowlist is empty.** Not removed — the shape and the
+   three rules it was written under stay, and the assertion that pins its
+   length now pins zero. The entry it held named
+   `tools/seat/read-dates.mjs`, whose offending line no longer exists.
+3. **`calendarDay` is in the lint's repaired-family exemption list**, in
+   the detector and in the deliberate transcription of the same pattern
+   inside `tools/instant.test.mjs`. Ursa#768 added that transcription as a
+   red-rehearsal for the ordering of its own `REFUSAL_AS_ORDER` check, and
+   it is a second copy of one list on purpose, so both copies move or the
+   rehearsal stops rehearsing anything.
+
+**What the mid-run merge is worth saying out loud**, because it is the
+one general lesson here and it is the organization's own, from
+`prompts/engineer-agent.md`: "`main` is not this organization's memory. It
+is the subset of its memory that the owner has merged." This run read
+that subset twice, four commits apart, and the second read made a third of
+its own filed follow-ups unnecessary. The cheap habit that caught it was
+re-fetching `origin/main` before writing the pull request description
+rather than after opening the branch.
 
 ---
 
 ## 9. What this does not do, and why
 
-- **It does not convert `nowDay` or `dayOf`.** Both are rewritten by
-  Ursa#768 on lines this change would have to take. Converting them is the
-  follow-up that also deletes the sweep's one allowlist entry, and it is
-  one pass over `tools/seat/` once Ursa#768 is on `main`.
-- **It does not promote the sweep's detector into the lint.** Four codes
-  live in `textualTimestampComparisons` and a fifth is added by Ursa#768.
-  A new code there needs a disposition in `tools/instant-gate.json`, which
-  is a file Ursa#768 creates. Promoting it before that pull request lands
-  means writing into a file that does not exist on `main`.
+- **It does not promote the sweep's detector into the lint as a fifth
+  code.** This is now unblocked — `tools/instant-gate.json` is on `main`
+  since Ursa#768 — and it is still not taken, for a reason of size rather
+  than of dependency. A new code needs a disposition row in that file, a
+  name in `tools/gates/code-census.mjs`'s accounting, repair text that
+  distinguishes the caller who wants the day from the caller who wants
+  the milliseconds, and negative controls against the four existing
+  codes. The sweep already gates the same bypass at the same strictness
+  today; what promotion buys is that the finding reaches a reader through
+  `tools/board/check.mjs`'s `{code, line, text, repair}` shape instead of
+  only through this suite's output. Filed in `docs/ideas.md`.
 - **It does not change `timestampShape`.** Making it refuse `2026-02-30`
   would collapse the spelling question into the existence question, and
   the spelling question has a real caller: `parseInstant` names `'day'`
@@ -443,9 +480,12 @@ or compares could be. The follow-up is one line.
   place a day" became a line of code instead of an accident of
   classification.
 - **It does not touch `charter-lag.mjs`'s `instant` helper**, which is a
-  fourth hand-rolled `Date.parse` wrapper in the same file. It is a
-  different function — milliseconds, not a day — it is load-bearing for
-  `lagDays` and `buildRows`, and `Date.parse`'s tolerance there is doing
-  real work on `gh` output. Filed in `docs/ideas.md` rather than taken
-  here, because its blast radius is every row of the charter-lag table and
-  this change's is one column of it.
+  fourth hand-rolled `Date.parse` wrapper, four lines above the copy this
+  change did convert. It is a different function — milliseconds, not a
+  day — it is load-bearing for `lagDays` and `buildRows`, so it decides
+  every age in that table, and its own comment says the tolerance "is safe
+  for a reason that is a property of its producer rather than of its code".
+  That is a true statement about today's producer and is not a guard.
+  Filed in `docs/ideas.md` rather than taken here, because its blast radius
+  is every row of the charter-lag table and this change's was one column
+  of it; §3's captured payload exists so the swap can be diffed against it.
