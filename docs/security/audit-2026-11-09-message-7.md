@@ -75,6 +75,30 @@ is non-empty and reaches the exit-2 branch only when it is empty. So
 `passExit: [0, 2]` is the right policy and `main` is simply red: the gate
 is reporting a real defect, correctly.
 
+**The whole set, run end to end on this tree.** `node scripts/ci-checks.mjs`
+on `main`, this run:
+
+```
+21 check(s): 16 tooling, 2 product, 3 site. 2 failed, 2 unrunnable, 17 passed. exit 2
+  failed     tooling-suites         exit 1
+  failed     ledger-contract        exit 1
+  unrunnable product-typecheck      ursa-major/node_modules is absent
+  unrunnable product-suites         ursa-major/node_modules is absent
+```
+
+The two `unrunnable` rows are this sandbox and not the branch: the job
+PWC-15 asks for carries `npm ci` in `ursa-major`, so on a real runner both
+would run. The two failures would not change. So the job's verdict on
+`main` today is red, and `ci-checks.mjs` is correct to report it: it
+refuses to call an unrunnable check a pass, which is the property the file
+was written to hold.
+
+One number in the entry's own prose has drifted the same way the exit code
+did: the eleventh-run amendment says `ci-checks.mjs` "declares 14 checks
+across three scopes", and it declares 21 today. The scopes are unchanged.
+Worth one line only because it is the same failure mode as the tolerance
+list, a measurement of the tree kept as a literal in prose.
+
 **The window is four hours wide and seven days old.** PWC-15 landed at
 2026-11-02T02:14Z in `f2ea8336`, when the claim was exact. The first of
 the 21 seat-held violations arrived at 2026-11-02T05:52Z in `ea817aa3`,
