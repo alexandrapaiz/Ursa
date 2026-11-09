@@ -215,9 +215,14 @@ warning path is the part that entry does not mention.
 ## The rest of the sweep
 
 - **Secrets.** `tools/secret-scan.mjs` over the working tree: clean. The
-  all-refs history scan was run by run 10 of this seat earlier in the same
-  window over 8,601 blobs with no finding; this branch adds to that tree only
-  commits whose blobs the working-tree scan covers.
+  all-refs history scan, run on this branch rather than inferred from run 10's:
+  **8,731 blobs, 16 classes, 0 hits, 1 accepted by the baseline**. The accepted
+  one is AWS's published documentation sample key id, hand-authored into a
+  fixture for this scanner's own verdict formatter, pinned to the single blob
+  `ef90504da7db` and replaced by a non-credential-shaped sentinel in the very
+  next commit, so every tree from `a8a8c866` onward carries the sentinel. The
+  pinning is what makes the acceptance narrow: any other byte sequence in the
+  same file is a new hit.
 - **Dependencies.** `npm audit --package-lock-only` reads 0 advisories at every
   severity in `ursa-major` and `ursa-major/overlay`. `ursa-minor` on `main`'s
   lockfile reads 23: 0 critical, 7 high, 15 moderate, 1 low, and **0 at every
