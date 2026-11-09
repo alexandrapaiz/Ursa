@@ -121,6 +121,31 @@ turns the next real one into a line in a report that already says one.
 makes the scanner quieter and the repository no cleaner, while assembling
 the value costs one line and leaves the scanner able to mean what it says.
 
+**The same rule covers every shape these gates match, not only Class A, and
+it had to be said again in different words (added 2026-11-09 by the security
+seat, after three instances in one window).** The clause above is written for
+credential-shaped values, and three seats read it and still committed a
+literal of a shape with nothing credential about it. `redaction-gate.yml`
+scans the whole working tree including the gates' own sources and tests, so a
+Class C literal planted as a POSITIVE CONTROL — the string you need in order
+to prove the instrument finds one — is found by the instrument, in its own
+corpus, and reds whichever branch carries it.
+
+| instance | where | what it was |
+|---|---|---|
+| 2026-11-09, this seat's run 15 | `scripts/redaction-attribution.test.mjs` | the fixture for a new attribution test |
+| 2026-11-09, this seat's run 16 | the same file | written again, and the gate caught it again |
+| 2026-11-09, Ursa's exo seat | `tools/gates/inherited-finding.mjs`, a `# positive control` line | the control that proves its own gate works |
+
+Each cost a red run and somebody's triage, and none was a defect in the
+branch it reddened. The remedy is the one above with no change: assemble the
+shape at run time and commit no line carrying 36 contiguous characters of it.
+`['0f9c1a2b', '3d4e', '5f60', '8192', 'a3b4c5d6e7f8'].join('-')` is the whole
+of it, and `scripts/redaction-attribution.test.mjs` carries the worked form
+with its reasoning. **A fixture for a scanner has to stay out of the
+scanner's own corpus**, which is the general sentence, and it is true of any
+gate whose subject is the tree it lives in.
+
 **Class E, other people.** Email addresses, names, and commit
 identities belonging to anyone other than the owner. A record built
 over a repository with more than one contributor contains other
