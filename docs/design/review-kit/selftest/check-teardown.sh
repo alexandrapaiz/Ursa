@@ -146,7 +146,30 @@ if printf '%s\n' "$out" | grep -q "would stop  $$"; then
   bad "teardown.sh listed its own caller"
 else ok; fi
 
-# 10. A pid that exits between the `ls /proc` listing and the read of its
+# 10 and 11. The directory half, added 2026-11-09 after this seat ran the
+#    script with FE_RUN pointing at the checkout and lost `ursa-minor/`
+#    source and all. The guard has to refuse a tracked tree and still take
+#    an untracked scratch directory, and both arms are asserted, because a
+#    guard that refuses everything passes the first test alone.
+GITTED="$TMP/a-work-tree"
+mkdir -p "$GITTED"
+git -C "$GITTED" init -q 2>/dev/null
+echo hello > "$GITTED/tracked.txt"
+git -C "$GITTED" add tracked.txt 2>/dev/null
+out="$(FE_RUN="$GITTED" bash "$KIT/teardown.sh" 2>&1)"
+if [ -f "$GITTED/tracked.txt" ] && printf '%s\n' "$out" | grep -q "REFUSED  $GITTED"; then
+  ok
+else bad "teardown.sh removed, or did not refuse, a directory holding tracked files"; fi
+
+SCRATCH="$TMP/scratch-run"
+mkdir -p "$SCRATCH/nested"
+echo x > "$SCRATCH/nested/f"
+out="$(FE_RUN="$SCRATCH" bash "$KIT/teardown.sh" 2>&1)"
+if [ ! -e "$SCRATCH" ] && printf '%s\n' "$out" | grep -q "removed  $SCRATCH"; then
+  ok
+else bad "teardown.sh refused an untracked scratch directory it was meant to remove"; fi
+
+# 12. A pid that exits between the `ls /proc` listing and the read of its
 #     cmdline must not put a shell error in the middle of the output.
 #
 #     Reproduced on this host 2026-11-09, both halves at the same instant:
@@ -164,9 +187,9 @@ else ok; fi
 #     shared box, and hung the suite. So the race is not driven here. What is
 #     checked instead is the property the fix rests on, against a real
 #     missing path, plus the fact that teardown.sh still uses the form that
-#     has it. Remove the braces and 10b fails.
+#     has it. Remove the braces and 12b fails.
 #
-# 10a. The shell reports a failed redirection itself, before the
+# 12a. The shell reports a failed redirection itself, before the
 #      `2>/dev/null` on the same command can suppress it. The braces are
 #      what put the redirection inside the suppression.
 MISSING="$TMP/no-such-cmdline"
@@ -175,13 +198,14 @@ wrapped="$( { { tr '\0' '\n' < "$MISSING"; } 2>/dev/null | head -1; } 2>&1 )"
 if [ -n "$bare" ] && [ -z "$wrapped" ]; then ok
 else bad "redirection suppression: bare=[$bare] wrapped=[$wrapped]"; fi
 
-# 10b. And teardown.sh reads a cmdline through the wrapped form.
+# 12b. And teardown.sh reads a cmdline through the wrapped form.
 if grep -q 'argv0() { { tr ' "$KIT/teardown.sh"; then ok
 else bad "argv0 does not wrap its redirection, so a vanished pid leaks a shell error"; fi
 
-# 11. A whole run writes nothing to stderr on the ordinary path.
+# 13. A whole run writes nothing to stderr on the ordinary path.
 err="$(bash "$KIT/teardown.sh" --dry-run 2>&1 >/dev/null)"
 if [ -z "$err" ]; then ok; else bad "teardown.sh wrote to stderr: $err"; fi
+
 
 echo "check-teardown: $pass_count passed, $fail_count failed"
 [ "$fail_count" = 0 ]

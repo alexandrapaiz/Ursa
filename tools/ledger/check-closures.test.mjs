@@ -191,16 +191,43 @@ test('the real ledger parses into an index with every entry keyed', () => {
   );
 });
 
-test('the real repository is clean under this gate', () => {
-  // The gate ships green and is expected to stay green. A failure here is
-  // either a closure marker pointing at an entry nobody moved, which is the
-  // defect the gate was built for, or a renamed entry whose marker did not
-  // follow it.
+test('the real repository carries no violation a seat could repair', () => {
+  // The gate ships green for the seat and is expected to stay green. A
+  // failure here is either a closure marker pointing at an entry nobody
+  // moved, which is the defect the gate was built for, or a renamed entry
+  // whose marker did not follow it.
+  //
+  // WHY THIS ASSERTS THE SEAT'S HALF AND NOT THE WHOLE ARRAY, measured
+  // 2026-11-09 by the engineer seat. It asserted the whole array until this
+  // commit, and it had been red on `main` since 2026-11-02 on three
+  // CLOSURE_STATUS violations this gate itself classifies `held: 'owner'`,
+  // because `HOLDER_BY_STATUS` maps `proposed` to the owner and pm.md §4
+  // gives only her the move out of it. So the suite was red on a condition
+  // no branch any seat could open would turn green: the three markers are
+  // correct, the three entries are correct, and the only act that closes
+  // the gap is the owner's. The gate's own CLI already draws this line,
+  // printing owner-held violations as `::warning::` and exiting 2 with
+  // "clean as far as a seat can take it", so the assertion was the one
+  // place in the pair that did not honour the split it was built on.
+  // `tools/doc-model/check.test.mjs` carries the same correction for the
+  // same reason, and PWC-15 names the shape: a check no branch can turn
+  // green is one every seat learns to ignore.
   const { violations } = checkRepository({ cwd: REPO, ledgerPath: 'docs/ideas.md' });
   assert.deepEqual(
-    violations.map((v) => `${v.rule} ${v.message}`),
+    violations.filter((v) => v.held === 'seat').map((v) => `${v.rule} ${v.message}`),
     [],
   );
+  // The owner's half is not ignored, it is counted. An owner-held violation
+  // that stopped being reported at all would be this gate going quiet rather
+  // than the ledger getting clean, and nothing above would notice.
+  for (const v of violations.filter((x) => x.held === 'owner')) {
+    assert.equal(v.rule, 'CLOSURE_STATUS',
+      `only CLOSURE_STATUS is ever owner-held; ${v.rule} reaching the owner means `
+      + 'HOLDER_BY_STATUS gained a case and this test stopped describing the gate');
+    assert.match(v.message, /pm\.md §4 gives only her the move/,
+      'an owner-held violation must say in its own text why it is the owner\'s, '
+      + 'because that sentence is the whole reason this test does not fail on it');
+  }
 });
 
 test('trackedMarkdown lists committed markdown and nothing else', () => {

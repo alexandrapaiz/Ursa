@@ -78,8 +78,12 @@ written, green for the scoping filter that case 1 already covers.
 Four new assertions, each run against `main`'s `teardown.sh` before being
 trusted:
 
-    new selftest vs main's teardown.sh:  11 passed, 4 failed
-    new selftest vs this branch's:       15 passed, 0 failed
+    new selftest vs main's teardown.sh:  13 passed, 4 failed
+    new selftest vs this branch's:       17 passed, 0 failed
+
+Re-run after merging `origin/main`, which had advanced by #790 and #799
+while this run worked and added two directory-guard cases of its own. The
+four failures are the same four.
 
 The four failures are the owner on the skip line, the stranded tree under
 `--orphans`, the stranded tree reported without `--orphans`, and the
@@ -164,7 +168,29 @@ are the same class:
   and hung the suite. All killed by hand; verified zero left by argv[0]
   rather than by `pgrep -f`, which matches its own command line.
 
-## §6 External sources read
+## §6 The merge, because main moved under this run
+
+`origin/main` advanced by #790 and #799 after this branch was cut, both of
+them this seat's own earlier rows for the day. Merged in rather than
+rebuilt on top. Two content conflicts, both of them two sides appending to
+the same tail, and both resolved by keeping both sides:
+
+- `docs/design/ledger.md`. Main brought L65 and L66. L67 was already
+  allocated here from the union of main and every open frontend branch, so
+  it survived the merge unique and the order is L64, L65, L66, L67. This
+  is the check #790's own L66 argues for, and it held: allocating from main
+  alone would have given L65 twice today for the third time.
+- `check-teardown.sh`. Main added a directory-refusal guard as cases 10 and
+  11, after a run of this seat pointed `FE_RUN` at the checkout and lost
+  `ursa-minor/` source and all. This branch's stderr cases renumbered to 12
+  and 13 behind them. `teardown.sh` auto-merged and still carries main's
+  `REFUSED` guard, verified by grep rather than assumed.
+
+The register merge drivers were installed first
+(`bash tools/registers/install-drivers.sh`), per fact 3 of
+`node tools/seat/env-facts.mjs`.
+
+## §7 External sources read
 
 None. No page fetched, no search run, no third-party content read. The
 board note from `alexandra-systems/engineer` is a message from an HQ seat

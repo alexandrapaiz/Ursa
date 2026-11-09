@@ -2415,6 +2415,189 @@ another company's live server, and a server is exactly what another seat
 is mid-screenshot against. Match on identity, scope by ownership, and
 exclude yourself before you ask the question rather than after.
 
+## L65 — `disabled` is a focus decision before it is a styling one
+
+**measured**, 2026-11-09, at 1440x900 against the two real stylesheets, by
+driving the set view's record rows from the keyboard. Instrument and
+numbers in `docs/design/reviews/2026-11-09-message-e/`.
+
+The set view's record row shipped as
+`<button disabled={opening !== null}>`. One piece of state names the
+record being fetched, and it is held across an awaited `fetch`, so
+activating any row disables every row in the list for the length of a
+network round trip. Including the one the person is standing on.
+
+A disabled button is not focusable. So the state change takes focus off
+the control that was just activated and the browser puts it on `<body>`:
+
+| | `disabled` | `aria-disabled` |
+|---|---|---|
+| `document.activeElement` after Enter | **BODY** | the row |
+| still BODY once the fetch settles | **yes** | — |
+| Tab presses back to that row | **7** | **0** |
+| the row's DOM node survives the change | yes | yes |
+
+Row 2 of 3 was chosen so a focus loss could not be read as the top of the
+list, and seven is what two rows of two stops each costs with the address
+field in front of them. On a real index it is however long the list is.
+
+**The last line of that table is the one that makes the rest mean
+anything.** The row's DOM node is the same object before and after, in
+both arms, so the focus did not go anywhere because the node was
+replaced. It went because of the attribute. This matters here
+specifically: run k reported a press state that arrived on three
+invocations out of five and attributed it to the set view replacing its
+row nodes when the fetched index lands. The rows are keyed `key={s.id}`
+(`published-site.tsx:364`), so React's reconciler keeps the node, and the
+fixture that establishes the table above holds node identity and
+reproduces the loss anyway. **The cause run k named is not the cause.**
+The attribute is, and the flake it saw is the same defect seen through a
+pointer instead of a keyboard.
+
+**this seat's judgement.** A control that is busy is not a control that
+is unavailable, and the two want different attributes. `disabled`
+removes the control from the focus order and from the accessibility tree,
+which is right for something a person may not use at all and wrong for
+something they have just used and are waiting on. `aria-disabled` plus a
+guard in the handler keeps the control where the person left it, keeps it
+announced, and still refuses the second activation. The refusal moves
+from the browser into one line of the handler, which is the cost.
+
+**The corollary that is easy to miss, and was load-bearing here.** Six
+rules in `globals.css` guarded `.rec-row`'s hover and press wash with
+`:not(:disabled)`. Once the attribute changes, `:disabled` matches
+nothing on that control and all six guards become selectors that can
+never fire. Nothing about that is visible: the resting page is unchanged
+and only a pointer held over a busy row shows it. `check-wash-guard.py`
+asserts the guard from both sides in both arms, twelve assertions, and
+two of them fail when the old guard is restored. **A guard rewritten to
+follow an attribute has to be tested in its negative case, because a
+guard that never matches and a guard that always passes produce the same
+frame.** L61 and L63 are the same shape: an instrument or a rule that has
+stopped discriminating looks exactly like one that found nothing wrong.
+
+**Confirmed in the shipped component, not only in a fixture.** The table
+above was taken over the real stylesheet with a hand-built list, and the
+same drive was then run against `published-site.tsx` itself under
+`next dev`, with the `before` arm being `origin/main`'s two files checked
+into the tree and recompiled. Same result, including the last row:
+`disabled=true` and `activeElement` BODY before, `aria-disabled=true` with
+focus held after, and the row's DOM node surviving in both arms.
+
+**Where else this applies, not changed this run.** The same file's
+`readSite` submit button is `disabled={busy}` while the index is
+fetched. It is one control rather than a list, so the person lands on
+`<body>` from a single stop rather than from seven, and the form's
+`onSubmit` would need the same guard. It is the same defect at a smaller
+size and it is written here rather than fixed, because the charter allows
+two interaction refinements a run and this run spent its measurement on
+the row.
+
+## L66 — One attribute over two kinds of unavailable, and a guard that was never asked of the second rendering
+
+**measured**, 2026-11-09, at 1440x900 against the real `/record` page under
+`next dev`, both arms recompiled from the tree. Instrument and numbers in
+`docs/design/reviews/2026-11-09-message-n/`.
+
+L65 settled the record row and carried the submit button forward as "the
+same defect at a smaller size, one stop rather than seven". Two of the
+three claims in that sentence are wrong, and finding out which is what
+this entry is for.
+
+### The condition was a disjunction, and the halves want different attributes
+
+The button shipped as `disabled={busy || !address}`. That is two kinds of
+unavailable wearing one attribute:
+
+- `!address` is genuinely unavailable. Nothing is typed, the control has
+  never been used, there is nothing to submit. `disabled` is right, and
+  it cannot cost a focus loss, because the only way to empty the field is
+  to be standing in the field.
+- `busy` is L65's case. The person has just pressed this and is waiting.
+
+So the repair is not the swap L65 implied. It splits the disjunction:
+`disabled={!address}`, `aria-disabled={busy}`, and the second-activation
+refusal moves into `readSite`.
+
+### What the row's number did not predict
+
+| | before | after |
+|---|---|---|
+| busy attributes | **`disabled=true`** | `disabled=false`, `aria-disabled=true`, `aria-busy=true` |
+| `activeElement` after Enter | **BODY** | the submit button |
+| still there once the fetch settles | **BODY** | the submit button |
+| Tab presses back to the button | **13** | **0** |
+| the button's DOM node survives | yes | yes |
+| index fetches after two Enters | 1 | **1** |
+
+**Thirteen, not one.** L65 reasoned from the control: one button instead of
+three rows, so one stop instead of seven. That is the wrong measurement.
+Focus does not land near the control it left, it lands on `<body>`, so the
+cost of a focus loss is the distance from the **top of the document**, and
+the form sits below a paragraph of links. A smaller control in a deeper
+page is a bigger defect, not a smaller one. The row's seven was never a
+property of the row.
+
+**The last line is the one that had to be measured rather than reasoned.**
+A `disabled` submit button refuses a second activation for free, and
+`aria-disabled` is advisory, so that refusal had to be rebuilt in the
+handler. One fetch in both arms is the proof it was. The guard also covers
+a path `disabled` never did: Enter from inside the field submits the form
+without touching the button at all, and on `main` that reached `readSite`
+and started a second fetch while the first was open.
+
+### The second finding, which is L63's shape again
+
+`.rec-row`'s hover and press wash has been guarded on
+`:not([aria-disabled="true"])` since L65. `.rec-action` is the same device
+on seven other controls and carried **no guard at all**, neither that one
+nor `:not(:disabled)`. Measured under the pointer with the button busy:
+`:hover` matched, `:disabled` matched, and the button computed
+`rgb(168,199,250)` — full `--polar` — with its underline lit, while its
+cursor computed `not-allowed`. The control refused the pointer and
+answered it in the same frame.
+
+Nobody made that mistake. The rule that a wash needs a busy guard lived in
+the other selector, which is exactly L63: a design system makes a
+component's parts reusable and does nothing to make its obligations travel.
+
+Guarded now on both kinds, and **the after arm still matches `:hover`**
+while refusing the wash, which is L65's corollary honoured: a guard that
+never matches and a guard that always passes produce the same frame, so it
+has to be tested in its negative case.
+
+### One thing closed and one thing left open
+
+**Closed.** L65 moved `disabled:cursor-wait` out of Tailwind into
+`globals.css` because that run had no disk to build the stylesheet and so
+could not see whether the `aria-disabled:` variant was emitted. This run
+had the build. It is emitted: `aria-disabled:cursor-wait` and
+`aria-disabled:text-[var(--dim)]` both compute. Nothing needs to move out
+of Tailwind for that reason.
+
+**Open, and named rather than papered over.** The same pointer probe reads
+`:hover` as false over the button in the empty-field state and true in the
+busy state, identically in both arms, at the same computed centre of the
+same element. Both readings are stable across three runs and the probe
+moves the pointer away and back before every reading, so it is not the
+first-move artefact it first looked like. No claim in this entry rests on
+the empty-state reading. **An earlier draft of the comment in `globals.css`
+asserted a specificity-and-source-order cause for the busy reading. It was
+not measured and it has been removed**, which is the same discipline as the
+paragraph above it: the frame showed a defect, and the defect is reported
+without a mechanism it cannot support.
+
+### The allocation, because this number collided last time
+
+Ursa's PM merged two of this seat's rows on 2026-11-09 and found both had
+written the same ledger number for different findings, keeping both and
+renumbering one up. The cause is not carelessness between two runs. Both
+allocated the next free number by reading `ledger.md` on `main`, and `main`
+is a subset of this organization's memory. This number was taken from the
+union of `main` and every open pull request's branch instead, which is one
+loop over `gh pr list` and reads 65 as the high-water mark where `main`
+alone reads 65 too — this time. The check costs seconds and is the only
+form of the question that can be right.
 ## L67 — A liveness proxy that agrees with reality 15 of 15 times still cannot see the stranded case
 
 **measured**, 2026-11-09 (run message-r), `reviews/2026-11-09-message-r/NOTES.md` §1.
