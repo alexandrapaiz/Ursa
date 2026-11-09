@@ -26,18 +26,43 @@
 // cleanup that runs on exactly the runs that did not need it, and skips every
 // run that failed. `after` runs on both paths. That is also why this is a
 // module rather than a line of advice: the advice was already implicit in
-// the 25 files of this suite that do call `rmSync`, and 40 files call
+// the 22 files of this suite that do call `rmSync`, and 41 files call
 // `mkdtempSync` without one.
+//
+// WHY THE HOOK IS REGISTERED PER CALL AND NOT ONCE AT MODULE SCOPE, measured
+// here rather than assumed, because the two differ and the difference is the
+// whole behaviour of this file. Calling `after` from inside a test body
+// registers the hook on THAT TEST and runs it the moment that test ends, not
+// at the end of the suite. Probed on node 2026-11-09 with three tests, the
+// first and third registering a hook from their bodies:
+//
+//   body-one | hook-from-one | body-two | body-three | hook-from-three
+//
+// So a single hook registered during the first test would have covered the
+// first test's directories and nothing after them. Registering on every call
+// is therefore the correct form rather than the wasteful one, and it is also
+// the better one for the defect this file exists for: each directory is gone
+// as soon as its own test ends, so a 102-suite run holds one test's
+// temporary directories at a time instead of the whole run's. Peak usage,
+// not just final usage, is what filled the disk.
+//
+// `removeAll` is idempotent, so several hooks on one test are not several
+// chances to fail; the second finds the list empty.
 //
 // WHAT THIS DOES NOT SAVE YOU FROM, stated because a cleanup helper that
 // does not name its blind spot reads as a guarantee. `after` is a hook in
-// the test runner's own process, so it runs when the suite ends normally or
+// the test runner's own process, so it runs when the test ends normally or
 // throws, and it does not run when the process is killed from outside -- the
 // host's turn cap or timeout, SIGKILL, or an `--test-force-exit`. The `exit`
-// handler below closes the first of those, since `rmSync` is synchronous and
-// an `exit` listener may do synchronous work. Nothing closes SIGKILL, and on
+// listener closes the first of those, since `rmSync` is synchronous and an
+// `exit` listener may do synchronous work. Nothing closes SIGKILL, and on
 // this host a killed run is an ordinary ending, so the residue is reduced
 // rather than eliminated and the six-hour reclaimer is still the backstop.
+//
+// Both registrations happen inside `tempDir` rather than at module scope, so
+// that importing this module performs no work -- which is this repository's
+// `import-effects` gate, and that gate caught the first version of this file
+// doing exactly what it forbids.
 import { after } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -45,6 +70,10 @@ import { join } from 'node:path';
 
 /** Directories handed out by `tempDir` and not yet removed. */
 const outstanding = [];
+
+/** One `exit` listener is enough, and eleven would warn. Set on first use
+ *  rather than at module scope, so importing this module does nothing. */
+let exitHookInstalled = false;
 
 /** Make a temporary directory that this suite will remove when it ends.
  *
@@ -58,6 +87,13 @@ const outstanding = [];
 export function tempDir(prefix) {
   const dir = mkdtempSync(join(tmpdir(), prefix));
   outstanding.push(dir);
+  // Per call, for the measured reason in this file's header: a hook registered
+  // from a test body belongs to that test and runs when it ends.
+  after(removeAll);
+  if (!exitHookInstalled) {
+    exitHookInstalled = true;
+    process.on('exit', removeAll);
+  }
   return dir;
 }
 
@@ -86,15 +122,3 @@ export function removeAll() {
 export function outstandingDirs() {
   return [...outstanding];
 }
-
-// Registered at import time, not lazily on first `tempDir` call. Imports are
-// hoisted and run before any test in the importing file, so this hook is in
-// place before the root suite starts; registering it from inside a test body
-// instead would be a root-level hook added after the root suite had begun.
-after(removeAll);
-
-// The second path, for the case `after` does not cover: a suite that ends by
-// `process.exit` somewhere, which skips test-runner hooks but still runs
-// `exit` listeners. `rmSync` is synchronous, so it completes inside the
-// listener; an async cleanup here would be dropped silently.
-process.on('exit', removeAll);
