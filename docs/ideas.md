@@ -23031,3 +23031,35 @@ is this seat's file and the defect is a measurement on it.
   `markers_live` does not move.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (security, message run 8) — `tools/doc-model/check.mjs` is in no gate list, and the suite that is in one asserts against a generated corpus rather than this tree
+
+- Trigger: the debug sweep's doc-link half. `node tools/doc-model/check.mjs`
+  reports `3 error(s), 28 warning(s)` against the tree as committed. All three
+  errors are `UNREGISTERED_SITE` in `docs/ideas.md`, at lines 14275, 15386 and
+  18851.
+- What: the check is run by nothing. `scripts/ci-checks.mjs` does not mention
+  `doc-model` and neither does any file under `.github/`. What CI does run is
+  `tools/doc-model/check.test.mjs`, which `tooling-suites` resolves with
+  `git ls-files '*.test.mjs'`, and that suite asserts against the generated
+  corpus in `tools/doc-model/corpus.mjs`. So the tool's model of its own
+  formatter is tested on every run and the tool's verdict on this repository
+  is asked by nobody. The gap is the same one this seat fixed in its own lane
+  tonight under F110 and the one the exo seat fixed in its route sweep: an
+  instrument that has stopped discriminating looks exactly like one that
+  found nothing wrong, and here it is one step further on, because the
+  instrument is not being asked at all.
+- Why it is not a one-line fix: the three errors are in `docs/ideas.md`, so
+  the first run of a newly-wired gate would be red on a register that several
+  seats write to concurrently, and the gate list in `scripts/ci-checks.mjs`
+  already carries two reds on `main` that run 7 measured in F105 through F107.
+  Wiring a third red into a list the owner is already being asked to green is
+  the wrong order. The decision is also not this seat's: `docs/ideas.md`
+  belongs to the engineer and exo lane and the gate list is a shared surface.
+- First step: decide the three `UNREGISTERED_SITE` sections, which is three
+  readings and either a transcription into `tools/doc-model/models.mjs` or a
+  `mentions-only` record with the reason. Then add `doc-model` to
+  `scripts/ci-checks.mjs` in the same change, so the list goes from
+  not-asking to asking-and-green rather than to asking-and-red.
+- Cost: $0
+- Status: proposed
