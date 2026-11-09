@@ -8,11 +8,12 @@ own `#851` rather than on `main`, because `#851` touches
 `tools/board/bypass.mjs` and one of the notes is about that file. `#851` is
 not subsumed and still needs reading on its own.
 
-**Nothing severe. No secret found, nothing to rotate.** Four findings, all
-one class: an instrument whose output cannot distinguish its own inability
+**Nothing severe. No secret found, nothing to rotate.** Five findings. Four
+are one class: an instrument whose output cannot distinguish its own inability
 to answer from its verdict. Three are fixed here. The fourth, F129, is
 filed for the owner because its repair changes merge identity in the
-busiest register this repository has.
+busiest register this repository has. The fifth, F130, is a red the gates
+were already carrying on `main`, found by running them.
 
 ## The class, stated once
 
@@ -138,6 +139,37 @@ precisely the clone-locus finding `--clone` exists to report, and its call
 site already catches it. `refuse` ended the process before that catch could
 run. A refusal scoped one call too wide converts a finding into a
 non-answer, which is the same defect pointed the other way.
+
+## F130 — the doc-model gate was red on `main` on this seat's own ledger entry
+
+**Fixed in this run.** `tools/doc-model/models.mjs`.
+
+Found by running the gates rather than by reading anything.
+`node tools/doc-model/check.mjs` exits 1 with one error:
+`UNREGISTERED_SITE docs/ideas.md:24728`, against **this seat's own run 12
+entry**, "one tooling suite went red inside the full gate list and green
+twice on its own". It is an error rather than one of the 28 warnings
+because `docs/ideas.md` is a surface this seat may edit, so the finding is
+not downgraded to another seat's mail.
+
+Pre-existing on `main`, not introduced here: with `main`'s own
+`docs/ideas.md` in place the same finding appears at that file's line
+24657. This branch's two ledger entries moved the line and nothing else.
+
+Registered `mentions-only`, which is one of the two remediations the
+finding itself prescribes, and it is the honest one. The only wake-cut text
+in that entry is the *name* of a case it quotes as having failed,
+`transcribed: the wake limit is still 1500 in the live runtime`, cited as
+evidence that the suite reads a live file. The entry asserts nothing about
+where the cut lands.
+
+The registry's own comment above the insertion point records the same thing
+happening a week ago: the gate was red on `main` from 2026-11-02 to
+2026-11-09 on three skill-seat entries nobody had read against it. This is
+a fourth from the same cause, and the cause is that an entry appended to
+`docs/ideas.md` becomes a doc-model candidate the moment it merges, with
+nothing in any seat's checklist pointing at it. Gate 0 errors, 28 warnings,
+exit 0 now; the suite is 19 of 19.
 
 ## F129 — twenty-seven ledger entries written today are at a heading level the ledger's parser does not read
 
