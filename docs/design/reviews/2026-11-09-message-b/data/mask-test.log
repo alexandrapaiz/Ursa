@@ -1,0 +1,24 @@
+Captured stdout of data/mask-test.mjs, run 2026-11-09 against the SHIPPED
+PRE-FIX build of ursa-minor served at 127.0.0.1:4982, before any edit in
+this run. It is not re-runnable as-is against the current tree, because
+the fix is now in the page and the "as shipped" row would read 694.
+
+The element is the first pre.rec-cmd on the home page at 390x844, focused
+from the keyboard (Shift+Tab then Tab, with :focus-visible asserted), the
+neighbourhood photographed focused and blurred, and every pixel that
+differs between the two frames counted. That is measure-focus.mjs's own
+definition of the indicator.
+
+as shipped                     focus-visible=true  indicator px=0
+mask removed                   focus-visible=true  indicator px=694
+ring on the whole card         focus-visible=true  indicator px=512
+ring on a tight unmasked wrapper focus-visible=true  indicator px=694
+
+The whole-card row is there to say why it was rejected rather than to
+leave the rejection unexplained. It draws a ring, but around the bordered
+card, so it rings the copy button too and sits 19px off the command box.
+The tight frame is the one that reproduces "mask removed" exactly.
+
+An earlier version of this script reported 0 for both wrapper rows. That
+was a crop and not a result: the pad was 8px, and an outline on a parent
+falls outside an 8px pad. The pad is per case now.

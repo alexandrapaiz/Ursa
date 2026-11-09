@@ -1,0 +1,42 @@
+
+=== phone 390x844 ===
+pre.rec-cmd on the page: 3
+  [0] client=292 scroll=357 overflow=65px  tabindex-attr=null  .tabIndex=-1  role=null  aria-label=null  overflow-x=auto
+       text: "git clone https://github.com/alexandrapa"
+       a11y: {"role":"generic","name":"","ignored":false}
+  [1] client=292 scroll=469 overflow=177px  tabindex-attr=null  .tabIndex=-1  role=null  aria-label=null  overflow-x=auto
+       text: "npx tsx src/bin/ursa.ts run ~/code/your-"
+       a11y: {"role":"generic","name":"","ignored":false}
+  [2] client=292 scroll=1029 overflow=737px  tabindex-attr=null  .tabIndex=-1  role=null  aria-label=null  overflow-x=auto
+       text: "mkdir -p .github/workflows
+curl -fsSL ht"
+       a11y: {"role":"generic","name":"","ignored":false}
+  Tab landed on pre indices: [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2]
+
+=== tablet 820x1180 ===
+pre.rec-cmd on the page: 3
+  [0] client=574 scroll=574 overflow=0px  tabindex-attr=null  .tabIndex=-1  role=null  aria-label=null  overflow-x=auto
+       text: "git clone https://github.com/alexandrapa"
+       a11y: {"role":"generic","name":"","ignored":false}
+  [1] client=574 scroll=574 overflow=0px  tabindex-attr=null  .tabIndex=-1  role=null  aria-label=null  overflow-x=auto
+       text: "npx tsx src/bin/ursa.ts run ~/code/your-"
+       a11y: {"role":"generic","name":"","ignored":false}
+  [2] client=574 scroll=1029 overflow=455px  tabindex-attr=null  .tabIndex=-1  role=null  aria-label=null  overflow-x=auto
+       text: "mkdir -p .github/workflows
+curl -fsSL ht"
+       a11y: {"role":"generic","name":"","ignored":false}
+  Tab landed on pre indices: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+
+=== desktop 1440x900 ===
+pre.rec-cmd on the page: 3
+  [0] client=493 scroll=493 overflow=0px  tabindex-attr=null  .tabIndex=-1  role=null  aria-label=null  overflow-x=auto
+       text: "git clone https://github.com/alexandrapa"
+       a11y: {"role":"generic","name":"","ignored":false}
+  [1] client=493 scroll=493 overflow=0px  tabindex-attr=null  .tabIndex=-1  role=null  aria-label=null  overflow-x=auto
+       text: "npx tsx src/bin/ursa.ts run ~/code/your-"
+       a11y: {"role":"generic","name":"","ignored":false}
+  [2] client=493 scroll=1029 overflow=536px  tabindex-attr=null  .tabIndex=-1  role=null  aria-label=null  overflow-x=auto
+       text: "mkdir -p .github/workflows
+curl -fsSL ht"
+       a11y: {"role":"generic","name":"","ignored":false}
+  Tab landed on pre indices: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
