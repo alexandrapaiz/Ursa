@@ -1,0 +1,17 @@
+[   0.0s] writing to docs/design/reviews/2026-11-09-message-z/data/contrast.txt/contrast.txt, 5 page(s) against http://127.0.0.1:4488
+[   0.0s] launching chromium
+[  12.2s] phone/home   38 runs  goto 1437ms  collect 201ms  shotA 985ms  backdrop 3615ms  score 1793ms
+[  16.2s] phone/record   39 runs  goto 1402ms  collect 78ms  shotA 500ms  backdrop 1617ms  score 365ms
+[  20.2s] phone/record-mini-fixture   56 runs  goto 1295ms  collect 48ms  shotA 219ms  backdrop 1704ms  score 768ms
+[  24.5s] phone/record-at   27 runs  goto 1357ms  collect 35ms  shotA 356ms  backdrop 2016ms  score 521ms
+[  30.9s] phone/this-page-does-not-exist   11 runs  goto 1137ms  collect 557ms  shotA 943ms  backdrop 3432ms  score 291ms
+[  45.1s] tablet/home   40 runs  goto 1498ms  collect 1571ms  shotA 2716ms  backdrop 5991ms  score 1838ms
+[  52.3s] tablet/record   41 runs  goto 2490ms  collect 107ms  shotA 832ms  backdrop 2978ms  score 727ms
+[  58.8s] tablet/record-mini-fixture   58 runs  goto 1887ms  collect 289ms  shotA 974ms  backdrop 2425ms  score 937ms
+[  62.9s] tablet/record-at   29 runs  goto 1304ms  collect 38ms  shotA 303ms  backdrop 1670ms  score 746ms
+[  70.4s] tablet/this-page-does-not-exist   13 runs  goto 1102ms  collect 364ms  shotA 1233ms  backdrop 4139ms  score 672ms
+[  84.6s] desktop/home   40 runs  goto 1196ms  collect 1041ms  shotA 1996ms  backdrop 5995ms  score 2972ms
+[  90.6s] desktop/record   41 runs  goto 2021ms  collect 202ms  shotA 1324ms  backdrop 1809ms  score 671ms
+[  96.0s] desktop/record-mini-fixture   58 runs  goto 1262ms  collect 78ms  shotA 901ms  backdrop 1718ms  score 1393ms
+[ 101.8s] desktop/record-at   29 runs  goto 1336ms  collect 103ms  shotA 1146ms  backdrop 2582ms  score 686ms
+[ 110.4s] desktop/this-page-does-not-exist   13 runs  goto 1084ms  collect 861ms  shotA 1481ms  backdrop 4718ms  score 456ms

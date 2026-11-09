@@ -1,0 +1,8 @@
+[   0.0s] writing to docs/design/reviews/2026-11-09-message-w/data/cells/measure-contrast-wrong/contrast.txt, 2 page(s) against http://127.0.0.1:4871
+[   0.0s] launching chromium
+[  13.4s] phone/no-such-route-9d1f   11 runs  goto 2635ms  collect 120ms  shotA 557ms  backdrop 3056ms  score 383ms
+[  17.2s] phone/no-such-route-9d1f   11 runs  goto 1751ms  collect 35ms  shotA 178ms  backdrop 1719ms  score 83ms
+[  22.7s] tablet/no-such-route-9d1f   13 runs  goto 1862ms  collect 41ms  shotA 232ms  backdrop 2243ms  score 339ms
+[  27.0s] tablet/no-such-route-9d1f   13 runs  goto 1564ms  collect 52ms  shotA 329ms  backdrop 2167ms  score 236ms
+[  34.8s] desktop/no-such-route-9d1f   13 runs  goto 2618ms  collect 176ms  shotA 572ms  backdrop 3013ms  score 611ms
+[  39.2s] desktop/no-such-route-9d1f   13 runs  goto 1785ms  collect 25ms  shotA 317ms  backdrop 2080ms  score 181ms

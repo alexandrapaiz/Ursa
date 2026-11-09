@@ -1,0 +1,3 @@
+phone    box 17.92px  overlay 44px  clearance above 6.71px  below 2.96px  ::after ""
+tablet   box 17.92px  overlay 44px  clearance above 6.71px  below 2.96px  ::after ""
+desktop  box 17.92px  overlay 44px  clearance above 6.71px  below 2.96px  ::after ""

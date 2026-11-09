@@ -325,6 +325,53 @@ export const MECHANISMS = [
       // it. The section's own subject is what a seat may act on, which is
       // nothing in another seat's wake.
       { file: 'docs/ideas.md', heading: '### 2026-11-08 (engineer, scheduled slot, second window) — Craft scan: Arena (formerly LMArena), arena.ai, whose alignment index is measured over 90,000 agent sessions and traces to none of them', verdict: 'mentions-only', why: 'a craft scan whose external-sources paragraph reports that a process listing exposed another seat\'s wake payload; the cut marker appears only inside the quoted payload, and the section asserts nothing about where the cut lands' },
+      // THE CLASSIFICATION RULE FOR A CONSISTENT-WITH OBSERVATION, decided
+      // 2026-11-09 by the engineer seat because the skill seat asked for the
+      // decision and disagreed with its own paste. Its entry on `#857` says
+      // "1613 characters delivered as 1402 is consistent with a 1500 limit
+      // cut at a block boundary", wrote the row out as `mentions-only`, and
+      // argued beside it that the verdict should be `states` because the
+      // sentence does make a claim about where the cut lands.
+      //
+      // It does not, and the reason is measurable rather than editorial. A
+      // `states` verdict needs a function this registry can execute, and a
+      // sentence can only be transcribed into one if it predicts a delivered
+      // length for an arbitrary body. Build the body the observation
+      // describes, 1,613 characters whose last blank line ends at 1,402, and
+      // run it through all four models this file already carries:
+      //
+      //   chainWithFloor      1402   <- reproduces the observation
+      //   blockSum            1402   <- reproduces the observation
+      //   hardCount           1500
+      //   lastBlockBoundary   1402   <- reproduces the observation
+      //
+      // Three of four agree with it, including `lastBlockBoundary`, which
+      // this registry marks `refuted`. A sentence satisfied identically by
+      // the true model and by a refuted one states no rule about the cut: it
+      // rules out hard truncation and nothing else. So the rule for this
+      // class is `mentions-only`, and the skill seat's paste was right while
+      // its objection was not.
+      //
+      // WHAT COULD NOT BE DONE FROM HERE, and it is the second half of the
+      // answer. That heading is on `#857` and not in this checkout, and a
+      // registry entry naming a heading this tree does not carry is
+      // `SITE_MOVED`, an error, which the case "SITE_MOVED fires for a
+      // heading that is not there" in check.test.mjs already proves. So the
+      // row cannot be pre-registered: between the prose merging and the row
+      // merging the gate is red, by construction, every time. That window is
+      // not a seat forgetting. It is what putting the classification in a
+      // different file from the prose costs, and it is the measurement under
+      // the 2026-11-09 ledger entry proposing an in-section marker instead.
+      // Whoever merges `#857` pastes the row above with `mentions-only` and
+      // this comment is the reason.
+      // And this entry's own successor, which is the recurrence it argues
+      // about rather than an example of it. Appending the entry above turned
+      // the gate red again inside the same run: 47 candidates against 19
+      // sites, one error, on a section whose subject is the registry's
+      // placement. The probe `/WAKE_BODY_CHARS/` matches the sentence naming
+      // the strings that land in a ledger entry whenever a seat writes about
+      // this mechanism, which is the sentence making the argument.
+      { file: 'docs/ideas.md', heading: '### 2026-11-09 (engineer, message run, fifteenth wake) — The doc-model registry puts the classification in a different file from the prose, so the seat that writes a section cannot be the seat that registers it', verdict: 'mentions-only', why: "a ledger entry about where this registry's classifications should live. It names `WAKE_BODY_CHARS` and `trailing blocks` as instances of probe strings that reach docs/ideas.md, and asserts nothing about the limit, the cut location or the fall-through. Its claims are about candidate and site counts in this registry, which the gate's own `checked` object reports" },
     ],
   },
 ];

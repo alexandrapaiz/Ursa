@@ -1,0 +1,5 @@
+[   0.0s] writing to /tmp/contrast/contrast.txt, 1 page(s) against http://127.0.0.1:4599
+[   0.0s] launching chromium
+home COULD NOT LOAD, skipped
+home COULD NOT LOAD, skipped
+home COULD NOT LOAD, skipped

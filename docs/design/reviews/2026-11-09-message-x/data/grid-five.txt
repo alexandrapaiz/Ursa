@@ -1,0 +1,57 @@
+phone	home	   32	  172	wordmark	mark font-[family-name:var(--font-inter-tight)] text-[0.95re
+phone	home	  223	  358	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+phone	home	   32	  358	h1	text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralig
+phone	home	   32	  358	firstSectionInner	mb-9 font-mono text-[0.68rem] uppercase tracking-[0.28em] te
+phone	set	   32	  167	wordmark	mark-link
+phone	set	  223	  358	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+phone	set	   32	  358	h1	mt-9 text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-ext
+phone	set	   32	  358	firstSectionInner	font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[v
+phone	record	   32	  167	wordmark	mark-link
+phone	record	  223	  358	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+phone	record	   32	  358	h1	mt-9 text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-ext
+phone	record	   32	  358	firstSectionInner	font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[v
+phone	address	   32	  167	wordmark	mark-link
+phone	address	  223	  358	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+phone	address	   32	  358	h1	mt-9 text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-ext
+phone	address	   32	  358	firstSectionInner	font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[v
+phone	notFound	   32	  167	wordmark	mark-link
+phone	notFound	  223	  358	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+phone	notFound	   32	  358	h1	mt-9 text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leadi
+tablet	home	   66	  205	wordmark	mark font-[family-name:var(--font-inter-tight)] text-[0.95re
+tablet	home	  620	  754	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+tablet	home	   66	  754	h1	text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralig
+tablet	home	   66	  754	firstSectionInner	mb-9 font-mono text-[0.68rem] uppercase tracking-[0.28em] te
+tablet	set	   66	  200	wordmark	mark-link
+tablet	set	  620	  754	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+tablet	set	   66	  754	h1	mt-9 text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-ext
+tablet	set	   66	  754	firstSectionInner	font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[v
+tablet	record	   66	  200	wordmark	mark-link
+tablet	record	  620	  754	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+tablet	record	   66	  754	h1	mt-9 text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-ext
+tablet	record	   66	  754	firstSectionInner	font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[v
+tablet	address	   66	  200	wordmark	mark-link
+tablet	address	  620	  754	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+tablet	address	   66	  754	h1	mt-9 text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-ext
+tablet	address	   66	  754	firstSectionInner	font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[v
+tablet	notFound	   66	  200	wordmark	mark-link
+tablet	notFound	  620	  754	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+tablet	notFound	   66	  754	h1	mt-9 text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leadi
+desktop	home	   96	  236	wordmark	mark font-[family-name:var(--font-inter-tight)] text-[0.95re
+desktop	home	 1209	 1344	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+desktop	home	   96	  758	h1	text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralig
+desktop	home	  416	 1024	firstSectionInner	mb-9 font-mono text-[0.68rem] uppercase tracking-[0.28em] te
+desktop	set	   96	  231	wordmark	mark-link
+desktop	set	 1209	 1344	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+desktop	set	  240	 1200	h1	mt-9 text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-ext
+desktop	set	  240	 1200	firstSectionInner	font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[v
+desktop	record	   96	  231	wordmark	mark-link
+desktop	record	 1209	 1344	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+desktop	record	  240	 1200	h1	mt-9 text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-ext
+desktop	record	  240	 1200	firstSectionInner	font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[v
+desktop	address	   96	  231	wordmark	mark-link
+desktop	address	 1209	 1344	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+desktop	address	  240	 1200	h1	mt-9 text-balance text-[clamp(1.7rem,3.8vw,2.7rem)] font-ext
+desktop	address	  240	 1200	firstSectionInner	font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[v
+desktop	notFound	   96	  231	wordmark	mark-link
+desktop	notFound	 1209	 1344	tagline	font-mono text-[0.72rem] whitespace-nowrap tracking-[0.08em]
+desktop	notFound	   96	  800	h1	mt-9 text-[clamp(1.7rem,3.8vw,2.7rem)] font-extralight leadi

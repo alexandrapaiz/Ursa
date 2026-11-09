@@ -60,6 +60,7 @@
  */
 import { launch, VIEWPORTS } from "./lib/browser.mjs";
 import { writeFileSync } from "node:fs";
+import { tracker } from "./lib/reached.mjs";
 
 // Promoted into the kit on 2026-10-24g from the review that wrote it,
 // `reviews/2026-10-24e/`, because a second surface needed it the same
@@ -111,6 +112,14 @@ const PAGES = arg(
     const i = p.indexOf("=");
     return [p.slice(0, i), p.slice(i + 1)];
   });
+// The not-found page is in the default list on purpose and its status is
+// the subject, so it is declared. A caller passing its own `--pages`
+// declares its own with `--expect-404`.
+const EXPECT_404 = arg(
+  "expect-404",
+  PAGES.some(([, p]) => p === "/this-page-does-not-exist") ? "/this-page-does-not-exist" : "",
+).split(",").filter(Boolean);
+const reach = tracker({ expect404: EXPECT_404, label: "page" });
 
 const probe = (MIN) => {
   /* A press "owns" a control if it lands on the control, on something
@@ -259,7 +268,9 @@ for (const [vname, w, h] of VIEWPORTS) {
   });
   const page = await ctx.newPage();
   for (const [name, path] of PAGES) {
-    await page.goto(BASE + path, { waitUntil: "networkidle" });
+    // Only the navigation is wrapped. Everything below it is the measuring,
+    // and a refusal scoped over that would turn a finding into a non-answer.
+    if (!(await reach.visit(page, BASE + path, path)).ok) continue;
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 });
     if (enterState) await enterState(page, name);
     await page.waitForTimeout(250);
@@ -357,7 +368,15 @@ lines.push(
     `, on ${[...new Set(Object.entries(all).filter(([, rs]) => rs.some((r) => r.doc)).map(([k]) => k.split("/")[1]))].sort().join(", ") || "no page"}`,
 );
 
-const text = lines.join("\n") + "\n";
+// The reach verdict goes into the committed report and not only into this
+// session's stdout, because the file is what a later run reads.
+const reachReport = reach.lines().join("\n");
+const text = (reach.code()
+  ? `${reachReport}\n\nno claim about hit areas: the pages above were not reached.`
+  : `${lines.join("\n")}\n${reachReport}`) + "\n";
 writeFileSync(OUT, text);
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(all, null, 2));
 console.log(text);
+// A verdict about the INSTRUMENT. The findings stay exit 0 however bad
+// they are, because selftest/check-hit-areas.mjs reads them from the JSON.
+if (reach.code()) process.exit(reach.code());

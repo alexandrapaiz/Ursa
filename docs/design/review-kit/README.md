@@ -207,6 +207,7 @@ rather than the install. A prefix nothing else owns is immune to both.
 | `measure-swatches.mjs` | The WCAG 1.4.11 ratio of every swatch in a legend against the pixels behind it, and of each swatch's marks against each other. Samples **every pixel** of the swatch rather than its centre column, which is the only sample a 1px ring inside the box cannot fool, and reports the share of the area clearing 3:1 alongside the ratio, because one bright pixel in a flat box passes a ratio on its own. Promoted 2026-10-27 from the probe that found the dashboard's fourth provenance key at 1.20:1; L36, L43. |
 | `measure-floor.py` | How much of a frame set is actually deterministic, over **N** independent shoots rather than a pair. Reports how many of the C(N,2) pairs drawn from them would have seen no floor at all, which is the number a two-shoot diff cannot produce and the reason this file exists; L48. Selftest `selftest/check-floor.py`, 12 assertions. |
 | `verify-hover.mjs` | Every hover state on the site, photographed as a **pair**: one frame at rest and one hovered and settled, over the same frozen sky, plus what the computed style did. `diff-frames.py rest hover` then says how many pixels the hover is worth. The pair is the point: three of this site's hover rules style a descendant rather than the hovered element, so a computed-style read alone reports "nothing changed" for them, and a wash too faint to register in a PNG is what the property read catches instead. A `disabled` control gets the verdict `by-design-disabled`, because a correctly inert hover and a broken spring print the same `none`. |
+| `lib/reached.mjs` | Did the instrument reach its subject, and does it say so in BOTH channels a caller can read. `tracker()` records every navigation, `visit()` wraps the one call that establishes the premise, `code()` is 2 when anything was unreached, and `refused()` is the headline for the case where nothing was reached at all. Covers the quiet absence (a live server whose every path answers 404) and, since 2026-11-09 run z, the loud one (a dead port, which used to throw out of five of the six tools). A declared `--expect-404` path is reached, because this site's not-found page is a page under review. Selftest `selftest/check-reached.mjs`, 27 assertions. |
 | `lib/freeze.mjs` | Pins the animation clock and seeds `Math.random` before any page script runs, so the starfield draws the same sky twice. Without it 6 of the 15 review frames differ from themselves by up to 19,140 pixels. Since 2026-11-02 it also pins the page's `Date` on request, which is `shoot.mjs --pin-now`. |
 | `lib/pin-clock.mjs` | Pins `Date` in a **server** process, as a `node --import` preload, so a timestamp the server stamps into a payload stops moving between two shoots. Written 2026-11-02 out of L47: the overlay dashboard's `read at HH:MM:SS` comes from `serve.ts`, not from the browser, so no init script can reach it. Refuses rather than defaulting, because a preload that quietly does nothing is the defect it exists to repair. |
 | `diff-frames.py` | Counts the pixels that differ between two frame sets, per frame, with the row and column range. Only meaningful on frozen frames. |
@@ -252,6 +253,7 @@ runnable on its own with no server and no network:
 | `selftest/check-contrast.mjs` | 17 hand-computable ratios for `measure-contrast.mjs`, over `selftest/contrast.html`. |
 | `selftest/check-hit-areas.mjs` | That `measure-hit-areas.mjs` can still fail. Eighteen expectations since 2026-11-09, the last two being that words in a sibling `<span>` exempt an inline link the way a bare text node does, and that two abutting controls with no prose between them are still held to the floor. Its headline on the real site went to zero on 2026-10-25b, and zero is also what a tool that had stopped looking would print, so this serves `selftest/hit-areas.html`, whose right answers are built in, and asserts each of the four verdicts actually fires. |
 | `selftest/check-focus.mjs` | 31 assertions for `measure-focus.mjs`, including a focus trap it has to report as unreachable controls rather than a short clean ring, L36's two hand-taken ratios recomputed by a different code path, and a 4000px page whose three undeclared stops all land at the same viewport coordinate, which the walk has to run to the end of. That last fixture fails five of its six assertions on the code of 2026-11-02, which is how it was checked. `after-drive.html` is the same discipline for the walk's starting point: five controls, a drive that clicks the fourth, and three of its four assertions fail on the code of 2026-11-09 morning, reporting one stop and four false unreachables. |
+| `selftest/check-reached.mjs` | 27 assertions for `lib/reached.mjs`: nine units, seven of them added 2026-11-09 (run z) for the loud absence, and three end-to-end cases over a real 404-serving fixture. The load-bearing ones are that a declared 404 still exits 0, so the repair is not "exit non-zero on any 404", and that ONE subject reached out of two does NOT withhold the headline, which is the too-wide-refusal trap as an expectation. |
 | `selftest/check-teardown.sh` | 9 assertions for `teardown.sh`, with real processes rather than mocked paths, since the subject reads `/proc`. The two load-bearing ones are a live server in another seat's tree, which must be left alone under `--orphans` as well as without it, and a process that only names a server on its command line, which is what the `pgrep -f` version matched and would have killed. Every decoy is detached from the test's stdout: a background process holding the pipe open makes a finished test look like a hung one. |
 | `selftest/check-floor.py` | 12 assertions for `measure-floor.py`, the load-bearing one being that six shoots split four and two report seven blind pairs of fifteen. |
 | `selftest/check-pin-now.mjs` | That `shoot.mjs --pin-now` pins the page's clock and refuses the two ways it can be asked for what it cannot do. It needs its own fixture because neither product reads the wall clock client-side, so no page here would prove the flag works. |
@@ -358,6 +360,46 @@ its frames are not pixel-comparable between two runs of it. The run that
 wrote it published no diff for them and said so. If you need a pixel
 comparison across arms, clip to something that does not move, or do not
 scroll.
+
+## What every tool here does when it cannot reach its subject
+
+**Exit 2, and the refusal in the slot a reader scans.** All six
+browser-driving tools now examine their premise instead of letting the
+navigation error escape. Before 2026-11-09 (run z) five of the six ended
+at exit 1 with an **empty stdout** and a node stack trace on stderr, which
+is a non-zero status by accident: 1 is what node sets for any uncaught
+throw, so it carried no information about what failed. Both columns, one
+directory per tool, are in `../reviews/2026-11-09-message-z/data/`.
+
+Use `reach.visit(page, url, path)` from `lib/reached.mjs` for every
+navigation. It wraps the **one** call that establishes the premise and
+nothing else, which matters: a refusal scoped one call too wide converts a
+finding into a non-answer. `verify-hover.mjs`'s harness probe was the arm
+nobody had covered, because it navigates before the loop that holds the
+tracker.
+
+**Empty stdout and say-it-on-stdout are the same rule.** They look
+opposite and they are one rule applied to two kinds of channel, which is
+L74 and worth knowing before you write the next instrument:
+
+| the caller does | so a refusal must | because |
+|---|---|---|
+| `$(cmd)` — stdout is a **value** | print **nothing** on stdout | every byte is taken as the value |
+| reads the output — stdout is a **report** | print the **refusal headline** | silence reads as a tool that did not run |
+
+What holds in both: **the verdict slot carries the refusal, never a number
+computed over nothing.** This kit is the report kind, so its tools print
+`NOT MEASURED` and `NO VERDICT` where the headline would go, rather than
+`0 of 0 below the floor`, which is a true sentence inside the legal range
+of the real answer and reads as a pass.
+
+**The code is 2 here and 3 in `tools/board/`, deliberately.** 3 is the
+house no-verdict code in `bypass.mjs`, `post-verdict.mjs` and
+`spend.mjs`, where 1 and 2 were already spent on findings. In this kit
+findings are exit 0 (a verdict about the site belongs to the reader of the
+table) with `measure-focus.mjs` the one exception at 1, so 2 is free and
+is `UNREACHED` in `lib/reached.mjs`. Adopting 3 would leave two
+no-verdict codes where there is one. If you add a tool, take 2.
 
 ## Three things to know before you trust a number out of this
 

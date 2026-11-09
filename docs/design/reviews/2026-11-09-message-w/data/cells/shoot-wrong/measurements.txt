@@ -1,0 +1,11 @@
+# frozen at t=2000ms, seeded Math.random, CSS animations rewound.
+# the page clock is NOT pinned: a surface that reads it differs from itself.
+# this covers the clock inside the page only. A timestamp a server stamps into a payload is pinned by lib/pin-clock.mjs, in the serving process, or not at all.
+# settled 400ms after networkidle before each shutter.
+# viewports phone 390x844, tablet 820x1180, desktop 1440x900
+no-such-route-9d1f-phone         404    390/390   overflow    0px  height   844px
+no-such-route-9d1f-phone         404    390/390   overflow    0px  height   844px
+no-such-route-9d1f-tablet        404    820/820   overflow    0px  height  1180px
+no-such-route-9d1f-tablet        404    820/820   overflow    0px  height  1180px
+no-such-route-9d1f-desktop       404   1440/1440  overflow    0px  height   900px
+no-such-route-9d1f-desktop       404   1440/1440  overflow    0px  height   900px
