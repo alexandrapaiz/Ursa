@@ -97,10 +97,10 @@ argv0() { { tr '\0' '\n' < "/proc/$1/cmdline"; } 2>/dev/null | head -1; }
 # read instead, and /proc already answers it.
 #
 # What the old question got right, and the denominator, because this is a
-# replacement and not a bug report: across all 15 `epito-*` seat trees on
-# this host at 2026-11-09T05:33Z, every tree that existed had a live owning
-# `claude` process, so `tree exists` and `a sibling is working` agreed 15 of
-# 15 times. The proxy was sound. It is still only a proxy: the host deleting
+# replacement and not a bug report: across all 13 seat checkouts on this
+# host at 2026-11-09T05:45:21Z, every one had a live owning `claude`
+# process, so `tree exists` and `a sibling is working` agreed 13 of 13 times
+# with 0 stranded. The proxy was sound. It is still only a proxy: the host deleting
 # a tree when its run ends is a behaviour of the host, not an invariant, and
 # HQ's engineer measured six stranded directories on this same box the same
 # night from a tool whose own teardown is skipped by a kill. A stranded tree
