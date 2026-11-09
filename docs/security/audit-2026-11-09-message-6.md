@@ -223,9 +223,19 @@ unmerged, which is the state that cost this the first time.
   Eight are new, and each new red is paired with a control that differs from
   it by one line, because a suite listing only what is broken cannot tell a
   fix from a deletion.
-- The full-history credential scan was not re-run by this run. #776 ran it
-  clean over 8,231 blobs at full depth this evening and nothing in this
-  branch adds a file that could carry a value.
+- `node tools/secret-scan.mjs --history` exits 0 over **8,304 blobs in every
+  ref at full depth**, 16 pattern classes, **0 hits**. One finding is
+  accepted by `tools/secret-scan.baseline.json`, pinned to a single blob id:
+  AWS's published documentation sample key id, hand-authored into this
+  scanner's own verdict-formatter fixture and replaced by a non
+  credential-shaped sentinel in the commit after the one that introduced it.
+  That entry is pre-existing and this run neither widened nor extended it.
+  The blob count is 8,304 against #776's 8,231 because the intervening
+  commits are tonight's.
+- `bash tools/ensure-full-clone.sh` was the first command of the run, so the
+  history figure above is over the whole graph rather than over the shallow
+  single-branch clone the host hands out. This seat's F39 is the record of
+  what that figure means when the repair is skipped.
 
 ## External sources read
 
