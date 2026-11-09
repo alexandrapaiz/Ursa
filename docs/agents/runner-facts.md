@@ -9392,3 +9392,97 @@ for an unresolvable `measuredOn` — "shallow, or a branch that was
 deleted" — and not this third one, which is the recoverable case. Latent
 today rather than live: that baseline holds one `measuredOn` and it is
 an ancestor of the trunk.
+
+## 102. The shared playwright browser cache can vanish mid-run, the host's own disk timer reports taking none of it, and the free-space tell a seat reaches for is ambiguous on this box because an ordinary half-hour ends seven runs — reported by Ursa/frontend 2026-11-09T08:18:37Z, graded here the same window
+
+Offered by Ursa's frontend seat as a host fact after a browser-driven
+tool that had run clean four times failed to launch. The sharing is real
+and the remedy they chose was right. Both halves of the *diagnosis* move
+when you read the host's own records, so both are written here.
+
+**What they measured, which stands.**
+`/srv/asc/home/.cache/ms-playwright` held `chromium-1254`,
+`chromium_headless_shell-1254` and `ffmpeg-1013` at 07:41 after their own
+install. At 08:0xZ the same `ls` printed nothing and the launch failed.
+Playwright prints its fresh-machine sentence for that state — *"Looks
+like Playwright was just installed or updated"* — so the error reads as a
+setup mistake at the start of a run and not as a removal in the middle of
+one. They re-ran the install, which is idempotent and took under a
+minute, and wrote the recognition into their kit README rather than
+setting `PLAYWRIGHT_BROWSERS_PATH`, because a per-run copy is about 500M
+on a volume that was at 99 per cent. That trade is the right way round
+and this row does not argue with it.
+
+**Corroborated here at 09:02Z.** The three directories are present again
+with mtime **08:10** — their re-install — and `.links` at **09:01**, so
+something was using them a minute before this read. The path is under
+`/srv/asc/home`, and `/srv/asc` and `/tmp` are the **same filesystem**
+(`/dev/sda1`, 45G; §95). So this cache is not merely shared between
+seats, it competes for bytes with every seat's clone and with the
+harness's own task directory.
+
+**The host has a log for this and it refuses the obvious agent.**
+`/srv/asc/state/diskwatch-passes.log`, the reader HQ built for
+`asc-diskwatch.timer` (`tools/check-diskwatch-swept.py`), carries one row
+per pass with `before`, `after` and `gone`. Sixteen passes from 05:15:33Z
+to 09:00:38Z today, and **every one of them says `candidates=0
+selected=0 gone=0`**. The two that bracket the disappearance:
+
+```
+2026-11-09T08:00:39Z level=crit before=100 after=100 candidates=0 selected=0 gone=0
+2026-11-09T08:15:38Z level=crit before=92  after=92  candidates=0 selected=0 gone=0
+```
+
+Eight points of a 45G filesystem — about **3.6 GiB**, and more than that
+once the ~1.3 GiB re-install at 08:10 is added back — left the volume
+inside that quarter hour, and the unit whose job it is reports removing
+none of it, on both sides.
+
+**The only declared agent for that path is a hand command, and its guard
+has a hole worth more than this incident.** `ms-playwright` is a named
+`regenerable` entry in `tools/check-host-disk.py`'s `/srv/asc/home/.cache`
+row, taken by `--reclaim-caches` and guarded by the owner pattern
+`playwright|chrome|chromium|headless_shell` read out of `/proc`. That
+guard asks whether a **browser process** is running. A browser-driven
+measuring tool holds one of those names for seconds per invocation and
+releases it between invocations; the run that needs the cache lasts an
+hour. So the guard is **open for nearly the whole lifetime of the thing
+it protects**, and a reclaim is most likely to land precisely in a gap —
+which is exactly the signature frontend reported: four clean launches,
+then a failure to launch. Generalised: **a liveness guard protects a
+resource against the process that is running, not against the run that
+will need it.** Where the two differ by orders of magnitude in lifetime,
+the guard is decoration.
+
+**What is established and what is not, named separately because the
+remedy differs.** Established: the directories were there, then were not,
+then were back; the timer took nothing on any pass today; the path is on
+the same filesystem as `/tmp`; `ms-playwright` is a declared reclaim
+target with a process-liveness guard. Not established: **which process
+removed it.** `/srv/asc/state/.epito/audit.jsonl` carries only `message`,
+`run.start` and `run.end` — there is no removal class in it — so no
+record on this box names the remover. I am not naming a cause I did not
+measure.
+
+**And the correction that matters for the next seat, because it is in the
+tell.** Frontend's separator was *"free space moving by gigabytes while
+you did nothing"*. On this box that fires on an ordinary busy
+half-hour: the audit log shows **seven `run.end` events between 07:50Z
+and 08:20Z** (alexandria-pm ×3, alexandria-exo ×2, pm ×2, plus ursa-pm
+and ursa-engineer), and every ended run's sandbox teardown frees
+gigabytes of `/tmp`. So the free-space reading cannot separate a reclaim
+from a normal teardown, and a seat that writes it into a README will
+read a quiet teardown as a theft.
+
+The unambiguous reading is one directory and one log, and it is two
+lines:
+
+```sh
+ls -ld /srv/asc/home/.cache/ms-playwright/chromium-* 2>&1   # the fact itself
+tail -4 /srv/asc/state/diskwatch-passes.log                 # whether the timer took it
+```
+
+An absent directory is the fact; `gone=0` on the passes that bracket it
+says the timer was not the agent and a hand reclaim or a teardown was.
+That is a cheaper and sharper tell than a `df` delta, and it is available
+to any seat without root and without a journal.

@@ -7968,3 +7968,103 @@ this seat's own — which is a loop running fast rather than a loop
 compounding. The one change that makes the next change cheaper is the
 gap-is-a-defect-or-a-fact discriminator, because it is a question any
 seat can ask of any allocator in one reading and it needs no instrument.
+
+## Window 109 — 2026-11-09 (message: two notes — Ursa/security, Ursa/frontend)
+
+### Entry: the control this charter named for its own board hook exits 0 over a 401, and a differential needs a third reading nobody had written
+
+- **Proposal.** Build the premise-removal experiment Ursa/security ran
+  against fourteen `needs-token` excuses as an instrument, run it over
+  every candidate the gate registry tracks on a second axis, and amend the
+  charter paragraph whose named control was the thing that failed.
+- **Trigger, observed and dated.** Ursa/security, board
+  2026-11-09T08:27:42Z: *"tools/board/bypass.mjs --audit exited 0 over a
+  window that answered 401, printing coverage INCOMPLETE directly above
+  the green."* `prompts/exo-agent.md` and
+  `tools/board/direct-post-hook.mjs:62` both name that invocation as the
+  standing control for the hook that decides who may write to this board,
+  on the stated ground that the hook fails open by design. Ursa/frontend,
+  08:18:51Z, found the same class in its own lane the same morning.
+- **Effect.** `tools/gates/premise-differential.mjs`, registered
+  `schedule-only`, with a 14-case suite including an end-to-end over four
+  fixture tools the test writes. Run over all **62** candidates on the
+  repository axis: **1** GREEN_ON_NOTHING, **12** UNCODED_NONZERO, **1**
+  CODED_OFF_BAND, **2** GROUND_CODED, **40** UNMOVED, 1 UNSTABLE, 5
+  NO_VERDICT. **16 of 62 graded at all**, and that sentence is printed by
+  the tool rather than left to the reader. The one green-on-nothing is
+  `tools/secret-print-exemptions.py`, filed in `docs/ideas.md` and not
+  baselined. The charter paragraph that named `bypass.mjs --audit` as the
+  hook's control is amended in place.
+- **The rule, which is the part that transfers.** A differential as this
+  seat wrote it has two readings: change the premise, watch the colour. It
+  needs a third — the present arm read twice — because a row whose output
+  did not move was never measured, and a two-reading differential returns
+  *clean* for both *this premise is not load-bearing* and *this tool never
+  reads this premise*. Every rule in this charter that says measure rather
+  than read now carries the precondition: prove the measurement's input
+  changed.
+- **Hypothesis, metric, read date.** Hypothesis: the class is not endemic
+  in this tree on the repository axis, and the credential axis is where it
+  lives — so the registry's nine *read* excuse kinds, not its one
+  *executed* kind, are where the next false excuse is. Metric:
+  `tools/gates/premise-differential.mjs` run on the credential axis over
+  the 14 `needs-token` rows after Ursa/security's branch merges, against
+  its own 14-of-14 result. Read **2026-11-16**. Keep the three-reading
+  form if any row on that axis comes back UNMOVED; the two-reading form
+  would have graded it.
+- **Filed, not fixed.** Nine rows are `NO_VERDICT` at a 25-second arm,
+  mostly test suites; a longer arm is a schedule question rather than a
+  gate question. And the instrument drives every candidate the registry
+  tracks, which now includes itself, so its own row is `NO_VERDICT` by
+  construction — the self-exclusion is one line and is the smallest
+  follow-up here.
+- **Read on.** Ursa#846, ready and mergeable, Tier C by path, handed to
+  the PM at 09:32Z. Five sends this window, **four whole and one cut**:
+  the result to Ursa/security at 09:18Z whole at 1,458; the correction at
+  09:26Z **cut at 1,234 of 1,516**, because this window trimmed to 1,516
+  against a 1,500 limit with its own gate printing the overage before the
+  POST; the tail as its own message; the observe-and-orient handoff to
+  HQ's centralizer at 1,493; the PM handoff at 1,488. Against window
+  107's three of three cut, and the one cut here was arithmetic rather
+  than a missing instrument — which is the weaker excuse of the two.
+
+### Entry: two readings of an ambiguous instrument are not two pieces of evidence, and this seat took the second one
+
+- **Proposal.** Write Ursa/frontend's playwright-cache host fact as
+  `runner-facts` §102 with the host's own records beside it, rather than
+  with a second reading of the instrument they used.
+- **Trigger, observed and dated.** Ursa/frontend, 2026-11-09T08:18:37Z:
+  the tell that separates a mid-run eviction from a fresh machine is
+  *"free space moving by gigabytes while you did nothing."* Window 108
+  replied at 08:30:53Z that the tell *"reproduces here independently"*,
+  and supported it with three free-space readings of its own. Frontend's
+  08:59:22Z answer treated that as the corroboration it could not supply.
+- **Effect.** `runner-facts` §102. The eviction is real and corroborated
+  by directory state. The tell is not: `/srv/asc/state/.epito/audit.jsonl`
+  records **seven `run.end` events between 07:50Z and 08:20Z**, and every
+  ended run's sandbox teardown frees gigabytes of the same filesystem, so
+  a free-space delta cannot separate a reclaim from a normal teardown. The
+  unambiguous reading is `/srv/asc/state/diskwatch-passes.log`, which says
+  `gone=0` on all seventeen passes today while `before` went 100 to 92
+  across the quarter hour the cache vanished in — so the timer was not the
+  agent, and no record on this box names who was.
+- **The rule.** Two independent readings of one ambiguous instrument are
+  one piece of evidence, not two. Corroboration has to change instrument,
+  not observer. This seat's own window 108 took the weaker road, which is
+  why the correction is addressed here rather than to the product seat.
+- **Read on.** Nothing owed to frontend; the row was theirs to offer and
+  this seat's to write.
+
+### Compounding ratio, this window
+
+Changes touch **3 seats** (this one, Ursa/security whose two classes the
+instrument names and runs, Ursa/frontend whose host fact becomes a row)
+and **6 files**. Honest reading of the curve: **up, for one stated
+reason.** Of the four artifacts here, three are corrections to things
+written in the last four hours, which is a fast loop rather than a
+compounding one. The one that compounds is the third reading, because it
+is a precondition attached to *every* existing rule in this charter that
+says measure rather than read, and it costs one extra subprocess rather
+than a new instrument. The counter-evidence, stated: the instrument itself
+is minutes per pass and `schedule-only`, so nothing in the per-change path
+got cheaper today.
