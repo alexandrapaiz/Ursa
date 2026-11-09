@@ -146,6 +146,30 @@ with its reasoning. **A fixture for a scanner has to stay out of the
 scanner's own corpus**, which is the general sentence, and it is true of any
 gate whose subject is the tree it lives in.
 
+**Why the clause that was already here did not stop any of the three (added
+2026-11-09 by the security seat, from Ursa's exo seat's reading of its own
+instance).** That seat's sentence, which is the transferable half and is
+better than the paragraph above it: the clause was written for credential
+shapes, none of the three of us saw ourselves in it, and that is the shape of
+a rule that names a motivating example rather than the property. So the
+property is the heading of the rule now and the credential case is one
+instance of it, rather than the other way round. A reader planting a Class C
+control in a gate's own test had to generalise the credential clause by
+themselves in order to be warned, and three readers in one window did not.
+
+**And the third row was repaired before this rule reached its author, which
+is the part worth recording.** Ursa's exo seat fixed
+`tools/gates/inherited-finding.mjs` in `5bd65ca8`, the commit immediately
+after the one that reddened, by assembling the planted value at run time.
+That is the same remedy, reached independently and within the same morning,
+so this is not a finding handed over and accepted. It is two seats arriving
+at one answer, which is what makes it a class rather than three accidents.
+The reason that seat could not simply read this section and stop is that
+everything above this subsection is on a branch of this seat's and not on
+`main`, so the copy of §3 it could see is the credential-only one. A rule is
+authored when it is committed and it binds when it is merged, and those are
+different instants.
+
 **Class E, other people.** Email addresses, names, and commit
 identities belonging to anyone other than the owner. A record built
 over a repository with more than one contributor contains other

@@ -179,6 +179,21 @@ Contract in docs/standards/pm.md §4.
 - First step: `excuse-control.mjs --unreachable`, one arm, keyed on a
   refusing loopback port, printing per row the exit code and whether the
   output names the reach. Print the ungraded count beside every total.
+- A fourth premise, from the producer end (added 2026-11-09 by the security
+  seat, handed here by Ursa's exo seat). **DECLINED: the caller deliberately
+  waived the premise.** Not absent, not empty, not out of reach. Waived,
+  through a documented flag in the tool's own interface, which is why it reads
+  as a supported mode rather than as a hole and why no sweep on the other
+  three axes found it. That seat measured
+  `tools/seat/duplicate-repair.mjs --no-board --audit --hours 48` exiting 0
+  over twelve INDETERMINATE rows and one real duplication, and found in the
+  same file the 401 arm of the same shape: a failed board read passed on as
+  `rows: []`, truthy, so the grader ran its test over zero rows and published
+  "no message passed" where the fact was "I could not look". Both repaired on
+  `#879` with seven cases. The axis this adds to the arm is that a flag which
+  removes a gate's subject has to make the gate refuse, exactly as a missing
+  file does, because a waiver is the one premise failure the caller chose and
+  therefore the one nobody audits.
 
 ### 2026-11-09 — The locus enum cannot say that a repair is in another repository, so the nearest value points at this branch
 - Status: proposed
