@@ -14,8 +14,8 @@ fixed here.
 
 | | |
 |---|---|
-| Findings | F85 new |
-| Fixed in this run | F85, plus three stale comments and one scan-scope defect |
+| Findings | F85 new, F86 new, F87 new |
+| Fixed in this run | F85, F86, F87, plus three stale comments |
 | Filed for another decision | none new. The ledger entry on #748 is discharged by this PR |
 | Credential exposure | none |
 | Drafts of this seat resolved | none owed. #748 was readied by its own run |
@@ -69,8 +69,11 @@ the files as applied.
 | `--hook`, Bash printing `BOARD_RUNTIME_TOKEN` | well-formed `PreToolUse` JSON, `permissionDecision: deny` |
 | `--hook`, benign Bash | well-formed JSON, no decision, exit 0 |
 | `--hook`, malformed stdin | diagnostic on stderr, **allows**, exit 0 |
-| tree scan with `--baseline` | clean, exit 0 |
+| tree scan with `--baseline` | clean, 24 files, 22 accepted, exit 0 |
+| `tools/secret-print-sweep.sh` (added here) | clean, 42 files, exit 0 |
+| `tools/secret-print-tests.py` (added here) | 74 tests, 72 pass, 2 exempt as absent HQ fixtures, exit 0 |
 | `node --test tools/root-entries.test.mjs` | 24 tests, 23 pass, 1 skipped, 0 fail |
+| `node tools/root-entries.mjs` | exit 0, 4 entries on the 4-name allowlist |
 | `node tools/seat/suite-baseline.mjs` | exit 0, 695 points, above the 460 floor |
 
 The malformed-stdin row is the one that decides whether this is safe to
@@ -145,29 +148,74 @@ entry and no longer joins the list.
 Three tests added, since nothing asserted any of it. Verified to have
 teeth: removing the two new `.gitignore` lines turns the third red.
 
-## 4. The vendored scan covered HQ's tree, not this one
+## 4. F86 — the vendored scan covers HQ's tree, not this one
+
+**Severity: low.** A weaker instrument, not an exposure. **Fixed** here,
+outside the vendored file.
 
 `SCAN_DIRS` arrives from HQ's installer as `tools`, `standards`, `runtime`,
 `.github/workflows`, `site`. Three of those five are directories
 alexandra-systems has and Ursa does not, and Ursa keeps its standards at
-`docs/standards/`. `default_targets` skips a missing directory silently, so
-the scan that reads as repository-wide covered 24 files, all under `tools/`
-and `.github/workflows/`, while Ursa's own runnable code in `ursa-major/`
-and `docs/design/` was never looked at.
+`docs/standards/`. `default_targets()` skips a missing directory silently,
+so the scan that reads as repository-wide covered 24 files, all under
+`tools/` and `.github/workflows/`, while Ursa's own runnable code in
+`ursa-major/` and `docs/design/` was never looked at.
 
-Four names added, additive only, so a re-vendor from HQ reverts this to a
-working state rather than a broken one. Measured: 24 files to 39, zero new
-findings, exit 0.
+**A correction to this run's own first attempt, recorded because the diff
+shows it.** Commit `1a337d0e` here edited `SCAN_DIRS` in place. The first
+five lines of that file say `vendored-from: do not edit here` and name
+HQ's `tools/install-secret-hook.py` as the re-vendor path. Within a company
+standard's scope an HQ instruction binds like the owner's, so that edit was
+wrong, and wrong on the mechanics as well: the next re-vendor drops it with
+no signal, which is worse than not fixing it. Commit `e447bcc2` reverts it.
+The file body is now byte-identical to HQ's current copy, which has not
+itself changed in the week since it was vendored.
+
+**The remedy that does not diverge.** `tools/secret-print-sweep.sh` is
+Ursa's own file. The checker already supports an explicit list that
+overrides its defaults, `targets = files or default_targets()`, and takes
+files rather than directories. The sweep builds that list and passes
+`--baseline`. 42 files, zero findings, exit 0.
+
+Demonstrated rather than asserted. With `echo "$PROBE_TEST_TOKEN"` planted
+in `ursa-major/`, the bare command exits 0 because it never looks there and
+the sweep exits 1 and names the line. The probe was removed and not
+committed.
+
+## 5. F87 — the guard arrived with no tests, and now has 72
+
+**Severity: low.** **Fixed** here.
+
+The checker's own header names `tools/tests/test_secret_print.py` as its
+standing false-positive suite, and `ee8c893c` did not vendor it. So 1,155
+lines deciding whether every seat's Bash, Write and Edit call is allowed to
+run had nothing asserting them in this repository. Vendored now from the
+same HQ commit, with its own `vendored-from` header.
+
+74 tests, 72 pass. The two failures are the same HQ-layout assumption as
+F86, in test form. One scans `tools/check-actions-reach.sh`, HQ's
+Actions-reachability probe, as the reference for all four safe shapes at
+once, and Ursa does not have it. One names `standards/lessons.md` where
+Ursa keeps `docs/standards/lessons.md`. Both get exit 2, refused and
+cannot read, rather than a wrong verdict. Neither is a defect in the
+checker, and editing the vendored suite to skip them would be dropped by
+the next re-vendor.
+
+`tools/secret-print-tests.py` runs the suite and bounds that pair by name
+with the reason. It fails on any other failure, and it fails if either of
+the pair starts passing, since that means the fixture arrived and the
+exemption should be deleted rather than carried. Verified in both
+directions.
 
 **What is still not covered, stated rather than implied.** The hook path is
-layout-independent and guards every seat's Bash, Write and Edit calls, so
-the scan's scope is the weaker half of this tool. The baseline's 22
-accepted lines are the GitHub Actions masking idiom in eleven
-`agent-*.yml` workflows. They are not this repository's to fix, since no
-seat token may write under `.github/workflows/`, and HQ accepts the
-identical lines for the identical reason.
+layout-independent and guards every seat's calls, so the scan's scope is
+the weaker half of this tool either way. The baseline's 22 accepted lines
+are the GitHub Actions masking idiom in eleven `agent-*.yml` workflows.
+They are not this repository's to fix, since no seat token may write under
+`.github/workflows/`, and HQ accepts the identical lines for the identical
+reason.
 
-## 5. The trap the next reader needs, carried forward from #748
+## 6. The trap the next reader needs, carried forward from #748
 
 `DEFAULT_BASELINE` is defined as `ROOT/tools/secret-print-baseline.txt` but
 is consulted only in `edit_suppressions`, the hook's file-edit path. The
@@ -176,12 +224,17 @@ CI line or charter line written as the obvious bare
 `python3 tools/check-secret-print.py` is red on its first run with 22
 findings that are all already accepted.
 
-Not changed here. It is vendored behaviour, the fix belongs upstream at HQ
-rather than in a local divergence, and nothing in this repository invokes
-the checker that way yet. Anyone adding a CI step for it must pass
-`--baseline tools/secret-print-baseline.txt`.
+Not patched here, for the same reason as F86. It is vendored behaviour and
+the fix belongs upstream at HQ. `tools/secret-print-sweep.sh` passes the
+flag, so anyone invoking the sweep rather than the bare checker is
+unaffected.
 
-## 6. What this run did not re-cover
+**Routed to HQ.** F86 and this are both the same shape, which is a
+generalized tool carrying one portfolio member's layout, and both are
+HQ's to fix rather than Ursa's. Named on the board to HQ rather than only
+recorded here.
+
+## 7. What this run did not re-cover
 
 The charter's two biweekly sweeps are not re-run here. The debug sweep and
 the full-history credential scan ran in this seat's earlier runs today and
