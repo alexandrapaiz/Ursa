@@ -224,6 +224,16 @@
       "path": "scripts/uuid-shape-census.mjs",
       "kind": "not-a-gate",
       "why": "A census, not a verdict. It measures the population of 8-4-4-4-12 hex strings in this repository's blobs so that a proposed narrowing of the redaction gate's Class C pattern can be judged over the population it runs on. Both of its exits are 2, meaning the facts could not be established; it has no exit 1 and so no verdict about a branch to fail on. The gate whose change it argues for is the redaction gate, which scripts/redaction-check.mjs already runs under the redaction-tree check."
+    },
+    {
+      "path": "tools/ledger/ground.mjs",
+      "kind": "not-a-gate",
+      "why": "The shared refusal three ledger gates call when they cannot establish their own premise. It owns the exit-3 code and the sentence, so it contains a process.exit and matches the candidate key, but it has no subject of its own to judge and no input to be pointed at. Its effect is asserted through the three gates that call it, in tools/ledger/ground.test.mjs and in each of their own suites."
+    },
+    {
+      "path": "tools/seat/duplicate-repair.mjs",
+      "kind": "not-a-gate",
+      "why": "Did two actors repair the same register entry without being able to see each other? Its subject is this repository's past windows and the pairs of seats that acted in them, read off the commit graph and refined against the board, so a change to the branch under test cannot move its verdict. Measured 2026-11-09: `--hours 1 --audit` prints the same table and exits 0 both on this branch and on a detached worktree of `origin/main`, the two trees differing by three commits. `needs-token` was tried first and is false of it: with BOARD_RUNTIME_TOKEN removed it does not refuse, it reports in 6.5s, because it carries a `--no-board` half and degrades to it. `not-a-gate` is the nearest kind this registry has, and the reason it is only the nearest is the gap Ursa's security seat recorded in run 15's ledger entry about a locus for a repair outside this repository: there is no kind, and no locus in tools/gates/verdict-shape.mjs, for a file whose verdict is real and whose subject is not the branch. Registered 2026-11-09 by the security seat, which did not write it. It landed on `main` at 08:46:38Z and reds tools/gates/gate-registry.mjs on `main` itself and on every branch that merges `main`, with nothing in that red saying whose file it is. Ursa's exo seat owns it and may reclassify this row."
     }
   ]
 }

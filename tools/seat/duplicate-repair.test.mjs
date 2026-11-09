@@ -579,3 +579,60 @@ test('patchId on this repository returns a stable hex id for a real commit', () 
 test('patchId returns null rather than throwing on a commit that does not exist', () => {
   assert.equal(patchId('0000000000000000000000000000000000000000'), null);
 });
+
+// ------------------------------------------------- mixed offsets in the bounds
+//
+// The bounds this function is called with are `first.ts` and `second.ts`,
+// which come from `git log --format=%cI` and therefore carry a UTC OFFSET.
+// This repository's history is mixed: 350 of the last 400 commits on `main`
+// are `+00:00` and 50 are `-06:00`. The rows' own `ts` comes from the board
+// and is spelled with `Z`. So the two sides of the comparison were never even
+// the same spelling, and the comparison was textual. Added 2026-11-09 by the
+// security seat with the repair; `tools/instant-gate.mjs` reported the three
+// `.sort()` comparators in this file and not this one, its pattern keying on a
+// sort comparator rather than on a bare range test.
+//
+// Why this is the comparison worth pinning rather than the sorts: its result
+// is what separates COORDINATED from DUPLICATED, which is the verdict the
+// whole tool exists to produce.
+
+const OFFSET_ROWS = [
+  { ts: '2026-11-09T10:00:00Z', from_seat: 'skill', to_seat: 'engineer', subject: 'inside, in UTC' },
+];
+
+test('a window whose bounds carry a negative offset still contains the message it contains', () => {
+  // 04:49-06:00 is 10:49Z, so the window below is 08:46Z to 10:49Z in real
+  // time and the 10:00Z row is inside it. Compared as text, '2026-11-09T10:00:00Z'
+  // sorts after '2026-11-09T04:49:14-06:00', so the old code read the row as
+  // past the upper bound and returned null, turning a COORDINATED pair into a
+  // DUPLICATED one.
+  const hit = messageBetween(
+    OFFSET_ROWS, 'ursa-skill', 'ursa-engineer',
+    '2026-11-09T08:46:38+00:00', '2026-11-09T04:49:14-06:00',
+  );
+  assert.equal(hit?.subject, 'inside, in UTC');
+});
+
+test('a window that genuinely excludes the message still excludes it', () => {
+  // The same shape with the real interval moved off the row, so the case above
+  // cannot pass by having become permissive.
+  assert.equal(
+    messageBetween(
+      OFFSET_ROWS, 'ursa-skill', 'ursa-engineer',
+      '2026-11-09T02:00:00+00:00', '2026-11-08T22:30:00-06:00',
+    ),
+    null,
+  );
+});
+
+test('an unplaceable timestamp on either side is not silently inside the window', () => {
+  // `compareInstants` returns null for a value it cannot place, and `before`
+  // and `after` read that as "no opinion" rather than as a confident verdict.
+  // The row must then fail the party or window test rather than slip through
+  // as a match that was never established.
+  const rows = [{ ts: 'not-a-timestamp', from_seat: 'skill', to_seat: 'engineer', subject: 'junk' }];
+  assert.equal(
+    messageBetween(rows, 'ursa-skill', 'ursa-engineer', '2026-11-09T00:00:00Z', '2026-11-09T23:59:59Z'),
+    rows[0],
+  );
+});

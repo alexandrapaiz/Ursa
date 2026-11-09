@@ -11,7 +11,9 @@
 // by nothing and excused by nothing, or a baseline entry has outlived its
 // reason, or a registered check names a file this tree does not have. Exit 2
 // the facts could not be established, meaning not a git checkout, or the
-// candidate sweep matched nothing, which must not read like a clean sweep.
+// candidate sweep matched nothing, which must not read like a clean sweep, or
+// (F141) every finding this run has is a baseline entry whose file is tracked
+// with no committed blob, which this gate cannot read and so cannot judge.
 //
 // WHY THIS FILE EXISTS. The board item behind `scripts/ci-checks.mjs` asks
 // that every test and gate we have built run before a change can reach the
@@ -64,7 +66,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { CANDIDATE_LANGS, gateCandidatePaths } from './enumerate-verdicts.mjs'
+import { CANDIDATE_LANGS, CANDIDATE_ROOTS, gateCandidatePaths } from './enumerate-verdicts.mjs'
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const BASELINE = join(REPO_ROOT, 'tools', 'gates', 'gate-registry.baseline.json')
@@ -158,10 +160,19 @@ export function registeredPaths(checks) {
  *
  *  Pure, so the suite can assert each class without a git checkout or a
  *  subprocess. `candidates` is the discovered set, `registered` is the map
- *  above, `baseline` is the parsed file, and `exists` answers whether a path
- *  is in the tree.
+ *  above, `baseline` is the parsed file, `exists` answers whether a path is
+ *  tracked, and `committed` answers whether it has a blob in `HEAD`.
+ *
+ *  `committed` defaults to agreeing with `exists`, which is what a caller
+ *  that cannot ask the object store should assume, and it is the pre-F141
+ *  behaviour for every caller that does not pass it. `roots` is the sweep's
+ *  own list, imported rather than restated, because this function has to be
+ *  able to say that a path is somewhere the sweep does not look.
  */
-export function decide({ candidates, registered, baseline, exists, checkIds, ledgerHeadings = [] }) {
+export function decide({
+  candidates, registered, baseline, exists, committed = exists, checkIds, ledgerHeadings = [],
+  roots = CANDIDATE_ROOTS,
+}) {
   const byPath = new Map((baseline.entries ?? []).map((e) => [e.path, e]))
   const rows = []
   const problems = []
@@ -236,6 +247,62 @@ export function decide({ candidates, registered, baseline, exists, checkIds, led
   const discovered = new Set(candidates.map((c) => c.path))
   for (const entry of baseline.entries ?? []) {
     if (discovered.has(entry.path)) continue
+    // THREE STATES, NOT TWO (F141, 2026-11-09, found by Ursa's exo seat and
+    // handed here after it retracted a larger claim about the enumerator).
+    // `gateCandidatePaths` reads each candidate's source out of the object
+    // store, so a file that is tracked and has no blob in `HEAD` is invisible
+    // to it, on purpose and documented there. This loop then saw a baseline
+    // row whose path was not discovered and concluded the row decides
+    // nothing. It does not: it decides something the sweep could not yet look
+    // at. An author adding a tool and its excuse in one change is exactly the
+    // reader who gets that message, at the one moment the premise is a
+    // transient state of their own index, and the instruction they are given
+    // is to delete the row they just wrote.
+    //
+    // So the deleted-it instruction now requires both halves of its premise,
+    // and the third state carries the opposite instruction.
+    // AND THE SAME SHAPE WITH A DURABLE CAUSE (F142, 2026-11-09, found in the
+    // debug sweep by reading what landed on `main`). Ursa's skill seat
+    // measured this arm from the other side and wrote it into
+    // `skills/gate-registration.test.mjs` and the ledger: the gate-list route
+    // is order-safe because `registeredPaths` is consulted per candidate, so
+    // an entry for a path the sweep cannot yet see costs nothing and goes
+    // live when the sweep widens, while the baseline route is order-unsafe
+    // because this loop calls any undiscovered path stale. The consequence is
+    // concrete rather than theoretical: `skills/relocate-anchors.mjs` is a
+    // repair tool that wants a `write-action` row, the row cannot land until
+    // `roots` widens, and that seat declined to invent a verdict mode for it
+    // to satisfy a registry. It was right to decline.
+    //
+    // So the same repair as F141 on the other premise. The sweep visits
+    // `roots` and nothing else, so a tracked, committed file outside them was
+    // never looked at either, and an entry about it is unswept rather than
+    // stale. Reported, not inert: a row that excuses a path this gate does
+    // not visit should be visible, because the alternative is a baseline that
+    // can accumulate rows nobody is accountable for.
+    if (exists(entry.path) && !underRoots(entry.path, roots)) {
+      problems.push({
+        kind: 'out-of-scope-entry',
+        path: entry.path,
+        why: `${entry.path} is excused by the baseline and is tracked under none of the trees `
+          + `the candidate sweep visits (${roots.join(', ')}), so the sweep never looked at it `
+          + 'and this gate cannot say the entry decides nothing. Either widen the sweep\'s '
+          + 'roots in tools/gates/enumerate-verdicts.mjs, which is Ursa/exo\'s call and has a '
+          + 'stated ordering, or delete the row if the file is genuinely not a gate candidate',
+      })
+      continue
+    }
+    if (exists(entry.path) && !committed(entry.path)) {
+      problems.push({
+        kind: 'pending-entry',
+        path: entry.path,
+        why: `${entry.path} is excused by the baseline and is tracked with no committed blob, `
+          + 'so the candidate sweep reads its source out of the object store and finds nothing '
+          + 'there. This is not a finding about the entry: it is this gate being unable to look '
+          + 'at the file the entry is about. Commit it, then run this gate again',
+      })
+      continue
+    }
     problems.push({
       kind: 'stale-entry',
       path: entry.path,
@@ -257,6 +324,20 @@ export function decide({ candidates, registered, baseline, exists, checkIds, led
   }
 
   return { rows, problems }
+}
+
+/** The two problem kinds that mean "the sweep never looked", not "the row is
+ *  wrong". Kept as a set next to `verdict` so a third one cannot be added to
+ *  `decide` without this file deciding what it does to the exit code. */
+export const UNSWEPT_KINDS = new Set(['pending-entry', 'out-of-scope-entry'])
+
+/** Whether `path` is inside one of the sweep's roots.
+ *
+ *  Compared on path segments, not with `startsWith`, so a root of `tools`
+ *  does not claim a sibling directory whose name merely begins with it.
+ */
+export function underRoots(path, roots) {
+  return roots.some((r) => path === r || path.startsWith(`${r}/`))
 }
 
 export function verdict({ rows, problems, candidates }) {
@@ -281,12 +362,65 @@ export function verdict({ rows, problems, candidates }) {
   const byKind = {}
   for (const p of problems) byKind[p.kind] = (byKind[p.kind] ?? 0) + 1
   const named = Object.entries(byKind).map(([k, n]) => `${n} ${k}`).join(', ')
+
+  // F141 and F142: neither of these is a finding about this branch, so neither
+  // may be aggregated with the ones that are. Exit 1 here means at least one
+  // gate we built is reached by nothing, which is a claim about the tree. Exit
+  // 2 is already this file's "the facts could not be established", and that is
+  // precisely what an unswept file leaves this gate in. Mixed is exit 1: a
+  // real finding outranks a refusal about one row, because the finding is
+  // established and the branch owes it.
+  if (problems.every((p) => UNSWEPT_KINDS.has(p.kind))) {
+    return {
+      exitCode: 2,
+      cause: 'entries-unswept',
+      line: `gate-registry: NO VERDICT (exit 2). ${candidates} gate candidate(s) and `
+        + `${problems.length} baseline entry/entries about a file the candidate sweep did not `
+        + 'look at, either because it has no committed blob yet or because it is outside the '
+        + 'sweep\'s roots. Each one is named above with what to do about it. Nothing above is '
+        + 'a finding about this branch.',
+    }
+  }
   return {
     exitCode: 1,
     cause: 'registry-incomplete',
     line: `gate-registry: ${candidates} gate candidate(s) and ${problems.length} finding(s): `
       + `${named}. A gate reached by nothing is a gate we did not build.`,
   }
+}
+
+// Whether `path` has a blob in `HEAD`, which is the question
+// `gateCandidatePaths` actually asks of every candidate: it reads the source
+// with `git show HEAD:<path>` and skips the file when that fails. F141's third
+// state needs the same question asked of a baseline row's path, and asked the
+// same way, or the two could disagree.
+//
+// A repository with no commits at all has no `HEAD`, and there `cat-file`
+// fails for every path. Treated as committed in that case rather than as
+// pending for all of them, because `gateCandidatePaths` would then have
+// returned an empty set and `verdict` already refuses on that with
+// `no-candidates`, which is the better message for it.
+function committedInHead(path) {
+  try {
+    execFileSync('git', ['-C', REPO_ROOT, 'cat-file', '-e', `HEAD:${path}`],
+      { stdio: ['ignore', 'ignore', 'ignore'] })
+    return true
+  } catch {
+    return !headExists()
+  }
+}
+
+let headCache = null
+function headExists() {
+  if (headCache !== null) return headCache
+  try {
+    execFileSync('git', ['-C', REPO_ROOT, 'rev-parse', '--verify', 'HEAD'],
+      { stdio: ['ignore', 'ignore', 'ignore'] })
+    headCache = true
+  } catch {
+    headCache = false
+  }
+  return headCache
 }
 
 function main(argv) {
@@ -339,6 +473,7 @@ function main(argv) {
     registered: registeredPaths(checks),
     baseline,
     exists: (p) => tracked.has(p),
+    committed: (p) => committedInHead(p),
     checkIds: checks.map((c) => c.id),
     ledgerHeadings,
   })

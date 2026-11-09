@@ -121,6 +121,55 @@ turns the next real one into a line in a report that already says one.
 makes the scanner quieter and the repository no cleaner, while assembling
 the value costs one line and leaves the scanner able to mean what it says.
 
+**The same rule covers every shape these gates match, not only Class A, and
+it had to be said again in different words (added 2026-11-09 by the security
+seat, after three instances in one window).** The clause above is written for
+credential-shaped values, and three seats read it and still committed a
+literal of a shape with nothing credential about it. `redaction-gate.yml`
+scans the whole working tree including the gates' own sources and tests, so a
+Class C literal planted as a POSITIVE CONTROL — the string you need in order
+to prove the instrument finds one — is found by the instrument, in its own
+corpus, and reds whichever branch carries it.
+
+| instance | where | what it was |
+|---|---|---|
+| 2026-11-09, this seat's run 15 | `scripts/redaction-attribution.test.mjs` | the fixture for a new attribution test |
+| 2026-11-09, this seat's run 16 | the same file | written again, and the gate caught it again |
+| 2026-11-09, Ursa's exo seat | `tools/gates/inherited-finding.mjs`, a `# positive control` line | the control that proves its own gate works |
+
+Each cost a red run and somebody's triage, and none was a defect in the
+branch it reddened. The remedy is the one above with no change: assemble the
+shape at run time and commit no line carrying 36 contiguous characters of it.
+`['0f9c1a2b', '3d4e', '5f60', '8192', 'a3b4c5d6e7f8'].join('-')` is the whole
+of it, and `scripts/redaction-attribution.test.mjs` carries the worked form
+with its reasoning. **A fixture for a scanner has to stay out of the
+scanner's own corpus**, which is the general sentence, and it is true of any
+gate whose subject is the tree it lives in.
+
+**Why the clause that was already here did not stop any of the three (added
+2026-11-09 by the security seat, from Ursa's exo seat's reading of its own
+instance).** That seat's sentence, which is the transferable half and is
+better than the paragraph above it: the clause was written for credential
+shapes, none of the three of us saw ourselves in it, and that is the shape of
+a rule that names a motivating example rather than the property. So the
+property is the heading of the rule now and the credential case is one
+instance of it, rather than the other way round. A reader planting a Class C
+control in a gate's own test had to generalise the credential clause by
+themselves in order to be warned, and three readers in one window did not.
+
+**And the third row was repaired before this rule reached its author, which
+is the part worth recording.** Ursa's exo seat fixed
+`tools/gates/inherited-finding.mjs` in `5bd65ca8`, the commit immediately
+after the one that reddened, by assembling the planted value at run time.
+That is the same remedy, reached independently and within the same morning,
+so this is not a finding handed over and accepted. It is two seats arriving
+at one answer, which is what makes it a class rather than three accidents.
+The reason that seat could not simply read this section and stop is that
+everything above this subsection is on a branch of this seat's and not on
+`main`, so the copy of §3 it could see is the credential-only one. A rule is
+authored when it is committed and it binds when it is merged, and those are
+different instants.
+
 **Class E, other people.** Email addresses, names, and commit
 identities belonging to anyone other than the owner. A record built
 over a repository with more than one contributor contains other

@@ -18,7 +18,7 @@ import { execFileSync } from 'node:child_process'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { KINDS, decide, registeredPaths, verdict } from './gate-registry.mjs'
+import { KINDS, UNSWEPT_KINDS, decide, registeredPaths, underRoots, verdict } from './gate-registry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const CANDIDATE = { path: 'tools/x.mjs', lang: 'javascript', exitCalls: 1 }
@@ -121,6 +121,131 @@ test('an entry that is no longer a candidate is stale, and says which way', () =
   }))
   assert.equal(stillThere.problems[0].kind, 'stale-entry')
   assert.match(stillThere.problems[0].why, /no longer a gate candidate/)
+})
+
+test('F141: an entry whose file is tracked and not committed is pending, not stale', () => {
+  const row = { path: 'tools/just-written.mjs', kind: 'not-a-gate', why: 'a reason long enough to pass' }
+  const base = { candidates: [], baseline: { entries: [row] } }
+
+  // The case that was wrong: the author staged the tool and its excuse in one
+  // change, so the path is tracked, the object store has no blob for it, and
+  // `gateCandidatePaths` therefore did not discover it.
+  const pending = decide(args({ ...base, exists: () => true, committed: () => false }))
+  assert.equal(pending.problems.length, 1)
+  assert.equal(pending.problems[0].kind, 'pending-entry')
+  assert.match(pending.problems[0].why, /Commit it/)
+  assert.doesNotMatch(pending.problems[0].why, /Delete it/)
+
+  // Tracked and committed is the real stale case and keeps its instruction.
+  const stale = decide(args({ ...base, exists: () => true, committed: () => true }))
+  assert.equal(stale.problems[0].kind, 'stale-entry')
+  assert.match(stale.problems[0].why, /no longer a gate candidate/)
+
+  // Not tracked at all is stale whatever the object store says, and the
+  // `committed` default must not turn this one into a pending row.
+  const absent = decide(args({ ...base, exists: () => false }))
+  assert.equal(absent.problems[0].kind, 'stale-entry')
+  assert.match(absent.problems[0].why, /is not in this tree/)
+})
+
+test('F141: pending alone is exit 2, and pending beside a real finding is exit 1', () => {
+  const pendingOnly = verdict({
+    rows: [],
+    problems: [{ kind: 'pending-entry', path: 'tools/a.mjs', why: 'x' }],
+    candidates: 61,
+  })
+  assert.equal(pendingOnly.exitCode, 2)
+  assert.equal(pendingOnly.cause, 'entries-unswept')
+  assert.match(pendingOnly.line, /NO VERDICT/)
+  assert.match(pendingOnly.line, /Nothing above is a finding about this branch/)
+
+  // Mixed must not downgrade a finding the branch owes into a refusal.
+  const mixed = verdict({
+    rows: [],
+    problems: [
+      { kind: 'pending-entry', path: 'tools/a.mjs', why: 'x' },
+      { kind: 'unreached', path: 'tools/b.mjs', why: 'y' },
+    ],
+    candidates: 61,
+  })
+  assert.equal(mixed.exitCode, 1)
+  assert.equal(mixed.cause, 'registry-incomplete')
+
+  // And a clean run is still 0, so the new arm did not widen the refusal.
+  assert.equal(verdict({ rows: [], problems: [], candidates: 61 }).exitCode, 0)
+})
+
+test('F141: gate-registry declares exit 2 as a refusal in scripts/ci-checks.mjs', () => {
+  // The second instance of F138 in this seat's own registration. This file's
+  // exit 2 has meant "the facts could not be established" since it was
+  // written -- not a git checkout, or a candidate sweep that matched nothing
+  // -- and the check that runs it declared `passExit: [0]` and no refusal
+  // code, so all of those read as a failing branch.
+  const out = execFileSync(process.execPath, ['-e',
+    `import(${JSON.stringify(new URL('../../scripts/ci-checks.mjs', import.meta.url).href)})`
+    + '.then((m) => { const c = m.CHECKS.find((c) => c.id === "gate-registry");'
+    + ' console.log(JSON.stringify({ passExit: c.passExit, noVerdict: c.noVerdict })) })',
+  ], { encoding: 'utf8', cwd: ROOT })
+  const c = JSON.parse(out)
+  assert.ok(c.noVerdict?.includes(2),
+    'gate-registry exits 2 to refuse, so its check must declare 2 in noVerdict')
+  assert.ok(!c.passExit.includes(2),
+    'declaring 2 in both would make the pass unreachable; stateFor reads noVerdict first')
+})
+
+test('F142: an entry about a tracked file outside the sweep\'s roots is unswept, not stale', () => {
+  // Ursa's skill seat measured this arm from the other side and landed the
+  // measurement on main in skills/gate-registration.test.mjs: the baseline
+  // route is order-unsafe, so the one row the widening commit has to carry
+  // cannot land before the widening. The red it produces today is a wrong
+  // instruction, Delete it, aimed at the author who wrote the row correctly.
+  const row = { path: 'skills/relocate-anchors.mjs', kind: 'write-action', why: 'a repair tool, not a gate at all' }
+  const base = { candidates: [], baseline: { entries: [row] }, exists: () => true, committed: () => true }
+
+  const unswept = decide(args({ ...base, roots: ['tools', 'scripts'] }))
+  assert.equal(unswept.problems.length, 1)
+  assert.equal(unswept.problems[0].kind, 'out-of-scope-entry')
+  assert.match(unswept.problems[0].why, /outside|none of the trees/)
+  assert.doesNotMatch(unswept.problems[0].why.split('or delete the row')[0], /Delete it/)
+
+  // Widen the roots and the same row becomes a real stale-entry, because now
+  // the sweep did look and did not find a candidate.
+  const swept = decide(args({ ...base, roots: ['tools', 'scripts', 'skills'] }))
+  assert.equal(swept.problems[0].kind, 'stale-entry')
+
+  // A path inside the roots is unaffected, which is every row in the file today.
+  const inside = decide(args({
+    ...base,
+    baseline: { entries: [{ ...row, path: 'tools/gone.mjs' }] },
+    roots: ['tools', 'scripts'],
+  }))
+  assert.equal(inside.problems[0].kind, 'stale-entry')
+})
+
+test('F142: underRoots compares segments, so a sibling prefix is not a root', () => {
+  assert.equal(underRoots('tools/a.mjs', ['tools']), true)
+  assert.equal(underRoots('tools', ['tools']), true)
+  assert.equal(underRoots('toolshed/a.mjs', ['tools']), false)
+  assert.equal(underRoots('skills/a.mjs', ['tools', 'scripts']), false)
+})
+
+test('F142: an unswept row never makes a real finding read as a refusal', () => {
+  // The whole risk of adding a refusal class is that it swallows a finding.
+  for (const kind of UNSWEPT_KINDS) {
+    const mixed = verdict({
+      rows: [],
+      problems: [{ kind, path: 'a', why: 'x' }, { kind: 'unreached', path: 'b', why: 'y' }],
+      candidates: 61,
+    })
+    assert.equal(mixed.exitCode, 1, `${kind} beside a real finding must stay exit 1`)
+  }
+  const alone = verdict({
+    rows: [],
+    problems: [...UNSWEPT_KINDS].map((kind) => ({ kind, path: 'a', why: 'x' })),
+    candidates: 61,
+  })
+  assert.equal(alone.exitCode, 2)
+  assert.equal(alone.cause, 'entries-unswept')
 })
 
 test('a check that invokes a file this tree does not have is a finding', () => {

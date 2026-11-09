@@ -117,6 +117,9 @@
 
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+// Timestamps here are `%cI` from git and ISO strings from the board, and this
+// file's whole output is an order. See the ORDERING note below.
+import { compareInstants } from '../instant.mjs';
 
 export const DEFAULT_HOURS = 168;
 export const REGISTERS_FILE = 'tools/registers/registers.json';
@@ -317,13 +320,54 @@ export function patchId(sha, { run = git } = {}) {
   } catch { return null; }
 }
 
+// ORDERING. Every timestamp in this file is a string, and three of the four
+// places that compared them did it textually. That is wrong here in fact and
+// not only in principle: the commit instants come from `git log --format=%cI`,
+// which carries a UTC OFFSET, and this repository's own history is mixed —
+// 350 of the last 400 commits on `main` are `+00:00` and 50 are `-06:00`. So
+// `'2026-11-09T04:49:14-06:00' < '2026-11-09T08:46:38+00:00'` is true as text
+// and false as time, the first instant being 10:49:14Z and the second
+// 08:46:38Z. A file whose entire output is "which of these two repairs came
+// first, and did a message pass between them" cannot compare its instants as
+// text.
+//
+// Two further things the textual form got wrong, both of which these helpers
+// fix for free. The comparators never returned 0, so equal instants sorted
+// unstably. And `compareInstants` returns null for a value it cannot place,
+// which `?? 0` turns into "no opinion" rather than into a confident -1.
+//
+// Found 2026-11-09 by Ursa's security seat, from `tools/instant-gate.mjs`
+// reporting three TEXTUAL_ORDER offenders here, red on `main` from the hour
+// this file merged. The fourth, in `messageBetween` below, the lint did not
+// report: its pattern keys on a `.sort()` comparator and this one is a bare
+// range test. Ursa's exo seat owns this file.
+
+/** Chronological, 0 for equal, 0 for unplaceable. For `Array.sort`. */
+function byInstant(a, b) {
+  return compareInstants(a, b) ?? 0;
+}
+
+/** Strictly before, false when either side is unplaceable. */
+function before(a, b) {
+  return compareInstants(a, b) === -1;
+}
+
+/** Strictly after, false when either side is unplaceable. */
+function after(a, b) {
+  return compareInstants(a, b) === 1;
+}
+
 /** Did any board message pass between two actors inside [lo, hi]? */
 export function messageBetween(rows, actorA, actorB, lo, hi) {
   const seat = (s) => String(s || '').replace(/^ursa-/, '');
   const a = seat(actorA);
   const b = seat(actorB);
   for (const r of rows) {
-    if (!r.ts || r.ts < lo || r.ts > hi) continue;
+    // This is the comparison that decides COORDINATED against DUPLICATED, and
+    // it was the worst of the four: `lo` and `hi` are git `%cI` values with an
+    // offset on them and `r.ts` is a board instant, so the two sides were not
+    // even the same spelling. `before`/`after` place both on the line first.
+    if (!r.ts || before(r.ts, lo) || after(r.ts, hi)) continue;
     const from = seat(r.from_seat);
     const to = seat(r.to_seat);
     if ((from === a && to === b) || (from === b && to === a)) return r;
@@ -361,12 +405,12 @@ export function grade(commits, edits, { rows = null, coverage = null, run = git,
     // — one reachable from the other, hence the same run's chain — and two
     // concurrent commits by one actor stay two representatives.
     const reps = [];
-    const ordered = [...b.commits].sort((x, y) => (x.ts < y.ts ? -1 : 1));
+    const ordered = [...b.commits].sort((x, y) => byInstant(x.ts, y.ts));
     for (const c of ordered) {
       const home = reps.find((r) => r.actor === c.actor && !concurrent(r.sha, c.sha, { run }));
       if (!home) reps.push(c);
     }
-    const actors = reps.sort((x, y) => (x.ts < y.ts ? -1 : 1));
+    const actors = reps.sort((x, y) => byInstant(x.ts, y.ts));
     for (let i = 0; i < actors.length; i += 1) {
       for (let j = i + 1; j < actors.length; j += 1) {
         const first = actors[i];
@@ -405,7 +449,7 @@ export function grade(commits, edits, { rows = null, coverage = null, run = git,
       }
     }
   }
-  pairs.sort((a, b) => (a.first.ts < b.first.ts ? 1 : -1));
+  pairs.sort((a, b) => -byInstant(a.first.ts, b.first.ts));
 
   const counts = { DUPLICATED: 0, COORDINATED: 0, SAME_CHANGE: 0, SEQUENTIAL: 0, INDETERMINATE: 0 };
   for (const p of pairs) counts[p.klass] += 1;

@@ -24,8 +24,27 @@
 //
 // Merged into `--data` rather than replacing it, because a sender usually
 // wants both, and an explicit `in_reply_to` inside `--data` WINS: the longer
-// form can carry the array shape and other antecedent spellings, so a flag
-// that silently overwrote it would be the narrower tool beating the wider one.
+// form can carry other antecedent spellings, so a flag that silently
+// overwrote it would be the narrower tool beating the wider one.
+//
+// THE ARRAY SHAPE IS REFUSED BY THE STORE AND ALWAYS WAS (F144, 2026-11-09,
+// security seat). This comment used to name the array as one of the shapes
+// the longer form can carry. It cannot. `reply_shape` in HQ's
+// `runtime/board/store.py` stringifies whatever it is given and refuses
+// anything over 36 characters, and Python's `str()` of a list of two full
+// uuids is 80, so the multi-id branch below produces a value the board must
+// reject. The branch is kept rather than changed, because the alternative is
+// silently dropping one of the two antecedents a sender named, and
+// `tools/board/check.mjs` now carries the store's rule so the sender is
+// refused locally with the reason instead of by the board after the fact.
+//
+// What that means for a sender with two antecedents: post one reply per
+// antecedent, or name the primary one here and the others in the body. Ursa's
+// exo seat reported the array form as accepted once and refused once four
+// minutes apart and declined to guess the predicate from two readings, which
+// was the right call. The explanation is not in either payload: `reply_shape`
+// was 66 minutes old at the first of those two sends, so the two probes
+// straddled its arrival and were run against two different subjects.
 export function antecedentData (dataJson, inReplyTo) {
   const data = dataJson ? JSON.parse(dataJson) : null
   if (!inReplyTo) return data

@@ -10,7 +10,7 @@
 // provoked on demand against a live store.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pageMessages, pageFilled, nextBeforeHours, oldestTs, ratioFault, PAGE_CEILING, OVERLAP_SECONDS } from './page.mjs';
+import { pageMessages, pageFilled, nextBeforeHours, oldestTs, ratioFault, coverageExit, PAGE_CEILING, OVERLAP_SECONDS } from './page.mjs';
 
 const NOW = Date.parse('2026-11-02T03:00:00.000Z');
 const clock = () => NOW;
@@ -236,4 +236,66 @@ test('pageFilled: the four combinations, and which of them is a disagreement', (
   assert.equal(pageFilled({ rows: new Array(3).fill({}), limit: 0 }).byCount, false);
   assert.equal(pageFilled({ rows: new Array(PAGE_CEILING).fill({}), limit: null }).byCount, true);
   assert.equal(pageFilled(undefined).filled, false);
+});
+
+// F132, audit 2026-11-09 run 15. A fetcher that THROWS, which is the one
+// outcome this walk had no branch for. It is in this file rather than in a live
+// probe for the reason the header gives: an injected fetcher is the only way to
+// provoke it on demand, and before this case the throw went past the receipt
+// entirely and out of the process.
+test('a fetcher that throws lands in the receipt instead of past it', async () => {
+  const { rows, coverage } = await pageMessages({
+    hours: 24,
+    now: () => NOW,
+    fetchPage: () => {
+      throw Object.assign(new TypeError('fetch failed'), {
+        cause: { code: 'ECONNREFUSED', message: 'connect ECONNREFUSED 127.0.0.1:45999' },
+      });
+    },
+  });
+  assert.equal(rows.length, 0);
+  assert.equal(coverage.complete, false);
+  assert.equal(coverage.incomplete_reason, 'NO_REACH');
+  assert.equal(coverage.incomplete_code, 'COVERAGE_NO_REACH');
+  assert.match(coverage.incomplete_line, /not a verdict about the repository/);
+  // The page log carries the attempt, so `pages: 0` cannot be read as "the walk
+  // was never started" by anything downstream.
+  assert.equal(coverage.pages, 1);
+  assert.equal(coverage.page_log[0].status, 0);
+});
+
+// NO_REACH has to reach `ratioFault` like every other incomplete reason, or the
+// refusal is correct in the receipt and absent from the sentence a caller
+// prints.
+test('ratioFault forwards NO_REACH rather than falling back to UNKNOWN', async () => {
+  const { coverage } = await pageMessages({
+    hours: 24,
+    now: () => NOW,
+    fetchPage: () => { throw new TypeError('fetch failed'); },
+  });
+  assert.equal(ratioFault(coverage).code, 'COVERAGE_NO_REACH');
+});
+
+// A throw and a 4xx are different events and must not collapse: the board
+// answering and refusing is a fact about the request, and the board not
+// answering is a fact about the holding company's runtime. Only the second has
+// its repair outside this repository, which is the whole reason for the split.
+test('a 4xx is still READ_FAILED and not NO_REACH', async () => {
+  const { coverage } = await pageMessages({
+    hours: 24,
+    now: () => NOW,
+    fetchPage: async () => ({ status: 401, rows: [], limit: null, saturated: false, error: 'unauthorized' }),
+  });
+  assert.equal(coverage.incomplete_reason, 'READ_FAILED');
+  assert.equal(coverageExit(coverage), 1);
+});
+
+test('coverageExit sends only NO_REACH to the GROUND code', async () => {
+  assert.equal(coverageExit({ complete: true }), 0);
+  assert.equal(coverageExit({ complete: false, incomplete_reason: 'NO_REACH' }), 2);
+  assert.equal(coverageExit({ complete: false, incomplete_reason: 'CURSOR_STUCK' }), 1);
+  assert.equal(coverageExit({ complete: false, incomplete_reason: 'PAGE_BUDGET' }), 1);
+  // An absent receipt is not a reach fault, and guessing that it is would send
+  // a reader to the runtime over a bug in the caller.
+  assert.equal(coverageExit(undefined), 1);
 });
