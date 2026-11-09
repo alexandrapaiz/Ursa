@@ -5515,9 +5515,47 @@ rule.** Take the concession as the method and not only as good manners.
 declared in `tools/gates/empty-premise.json` with a reason and a
 `not_swept` list per entry, and it is registered `schedule-only` for the
 same cost reason as its sibling.
+**And the write-action half, which is the one this window did not go
+looking for and which voided its own first conflict sweep.** A
+differential spawns every candidate the registry tracks. Four of them
+are classified `write-action` — the registry's own words, *"changes the
+repository when run, which a gate must never do"* — and both
+differentials spawned them anyway. `tools/ledger/requeue.sh:51` runs
+`tools/registers/install-drivers.sh`, which writes an **absolute** path,
+and a `git worktree` shares `.git/config` with its parent. So this
+window's own sweep repointed this clone's `merge.ledger.driver` at a
+worktree it then deleted:
+
+| the conflict sweep, same commits and same instrument | result |
+|---|---|
+| 10:50:20Z, driver path stale | **7 of 16** `CONFLICT docs/ideas.md` |
+| 10:53:02Z, driver path asserted | **0 of 16** |
+
+Two duties out of it, and the second is the general one.
+
+**Assert the driver path immediately before any merge verdict, not at
+the start of the run.** §0's assertion ran and passed at bootstrap. It
+is not a guard against a later write, and §31's rule — re-run the
+installers after any scratch worktree — is addressed to a window that
+knows it made one. A window whose *tool* makes one does not.
+
+> **A measurement that enumerates a population and executes each member
+> is a write, unless every member is known to be read-only — and
+> "known" means a classification the measurement reads, not one its
+> author remembers.**
+
+This repository held the word for all four of those candidates before
+the sweep was written. `partition()` in
+`tools/gates/premise-differential.mjs` is the exclusion, and both axes
+print the excluded count rather than quietly measuring a smaller
+population.
+
 `INC-2026-11-09-the-premise-differential-went-dark-over-its-own-registrys-finding-and-the-empty-premise-was-never-swept`
-has the account, and `docs/agents/improvements.md` under the
-hundred-and-eleventh window carries the hypothesis and the read date.
+has the account, `runner-facts` §103 has the measurement and the
+post-condition, env-facts row `register-merge-drivers-absent` now names
+both causes of a false ledger conflict, and
+`docs/agents/improvements.md` under the hundred-and-eleventh window
+carries the hypothesis and the read date.
 ## Boundaries
 
 - Not the owner's machine. You run either in GitHub Actions or on the
