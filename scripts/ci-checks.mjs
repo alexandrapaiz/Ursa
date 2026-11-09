@@ -323,6 +323,83 @@ export const CHECKS = [
     passExit: [0],
   },
   {
+    id: 'gate-registry',
+    scope: 'tooling',
+    title: 'Gate registry (no gate we built is reached by nothing)',
+    // This file's own completeness, asked of the tree instead of of a reader.
+    // Four entries above record the same history in their own comments: a gate
+    // was built, nobody registered it, and the only thing that ever ran it was
+    // a seat who remembered. That is a method which works as often as somebody
+    // looks. Measured when this was added: 60 candidates, 44 of them reached by
+    // no check at all, six of those real tree gates that run clean and offline,
+    // which are the six entries below this one.
+    argv: () => ['node', 'tools/gates/gate-registry.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'ledger-attributes',
+    scope: 'tooling',
+    title: 'Merge attribute declarations',
+    // Reached by nothing until now, and not for want of a plan:
+    // `tools/ledger/ci/ledger-gate.yml` has been queueing this gate and
+    // `ledger-closures` below with HQ, in a file under `.github/workflows/`
+    // that only HQ may write. That is the bottleneck this whole file exists to
+    // pay once instead of once per gate, so the two move here.
+    argv: () => ['node', 'tools/ledger/check-attributes.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'ledger-closures',
+    scope: 'tooling',
+    title: 'Ledger closure markers',
+    // Same seat/owner exit split as `ledger-contract`, from the same file's
+    // reasoning, and `main` carries the owner's today: this exits 2 on the
+    // current tree over closure markers in `docs/ideas.md` and `docs/runs/`.
+    argv: () => ['node', 'tools/ledger/check-closures.mjs'],
+    passExit: [0, 2],
+  },
+  {
+    id: 'doc-model-drift',
+    scope: 'tooling',
+    title: 'Documented-model drift',
+    // Board rows are an OPTIONAL extra corpus here, taken only when
+    // BOARD_API_URL and BOARD_RUNTIME_TOKEN are both set, and appended rather
+    // than substituted, so it cannot clear a finding the committed corpus
+    // found. A runner without those variables measures less and never more,
+    // which is why this is registered with no credential of its own.
+    argv: () => ['node', 'tools/doc-model/check.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'instant-lint',
+    scope: 'tooling',
+    title: 'Timestamp handling (tools/instant.mjs lint, every code decided)',
+    // The gate and not `tools/instant-sweep.mjs`, which reports the same
+    // findings and returns 0 on all of them. Registering the sweep would have
+    // put a green tick next to a count nobody decided.
+    argv: () => ['node', 'tools/instant-gate.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'vendored-register',
+    scope: 'tooling',
+    title: 'Vendored register merger matches the recorded hash',
+    // Offline by construction: it compares the vendored bytes against a
+    // recorded sha256 in this repository rather than asking HQ.
+    argv: () => ['node', 'tools/registers/check-vendored.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'env-facts-audit',
+    scope: 'tooling',
+    title: 'Host facts: every class is cited and every citation resolves',
+    // The gate the facts table itself names, in the one line every charter
+    // carries: `--audit` fails when a charter stops citing it. Offline, 481ms,
+    // and it was the last of sixty gate candidates reached by nothing.
+    argv: () => ['node', 'tools/seat/env-facts.mjs', '--audit'],
+    passExit: [0],
+  },
+  {
     id: 'clone-integrity',
     scope: 'tooling',
     title: 'Clone integrity',

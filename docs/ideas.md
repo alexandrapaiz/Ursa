@@ -24030,3 +24030,67 @@ same conflation inside it.
   one later run could drain it in a single section-only branch.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (security) — the prompt-injection gate has no exit code for a finding only the owner can repair
+
+- Trigger: registering every unreached gate in `scripts/ci-checks.mjs` this
+  run, and finding that `tools/prompt-slots.mjs` could not be registered in
+  either of its two modes. Measured: `node tools/prompt-slots.mjs --strict`
+  exits 1 on this tree with `11 of 11 untrusted slot(s) sit in a fence a
+  payload could step out of`, and the same command without `--strict` returns
+  0 on every input, including that one.
+- What: this is the gate over the surface my own charter calls the prompt
+  injection surface, and it is the only one of sixty gate candidates that
+  could not be registered for a reason that is about the gate rather than
+  about the environment. The repair it asks for is in `.github/workflows/`,
+  which docs/standards/pm.md §15 reserves to HQ, so no branch a seat can
+  write will ever clear it. Two gates in this repository already solved
+  exactly this and stated the rule: `tools/ledger/check.mjs` and
+  `tools/ledger/check-closures.mjs` exit 2 when every remaining violation is
+  the owner's and none is a seat's, and `scripts/ci-checks.mjs` tolerates 2
+  for both on the written ground that a gate whose red light can only be
+  cleared by somebody who never runs the gate is read by nobody.
+  `prompt-slots.mjs` has the same two populations and one failing code for
+  both, so a seat who adds a twelfth unfenced slot and a seat who adds none
+  get the same answer.
+- First step: give `verdict()` a third branch, keyed on who holds the repair
+  and not on severity, in the shape the two ledger gates already use: exit 1
+  when at least one finding is a seat's, exit 2 when every finding is in
+  `.github/workflows/` and none is a seat's, exit 0 when there are none. The
+  `untrusted-in-run-step` cause stays exit 1 regardless, because shell
+  injection in a `run:` block is the owner's immediate action and not a
+  tolerated backlog. Then register it in `scripts/ci-checks.mjs` with
+  `passExit: [0, 2]` and delete its `red-on-main` row from
+  `tools/gates/gate-registry.baseline.json`, which is the observation that
+  closes this entry.
+- Cost: $0. One function, its suite, and one row deleted.
+- Status: proposed
+
+### 2026-11-09 (security) — two seat gates are red on main for a backlog no branch caused
+
+- Trigger: the same sweep. `node tools/seat/read-dates.mjs --gate` exits 1
+  with 106 register read dates due, and `node tools/seat/answered.mjs --gate`
+  exits 1 over 64 board notes that its predecessor's time-keyed guard had
+  called already answered. Both are real gates, both are offline, both run in
+  under nine seconds, and both are red on `main` at `f7b89ff8`.
+- What: these two are the reason `tools/gates/gate-registry.baseline.json`
+  needed a `red-on-main` kind at all, and that kind is the one in the file
+  that can rot into an excuse, which is why the gate executes its reason by
+  requiring this heading to exist. Registering either one today would make
+  every branch red for a backlog that branch did not cause, which is the
+  failure mode `tools/ledger/check.mjs`'s header records costing a seat an
+  hour. Leaving them out means the two gates run only when a seat remembers,
+  which is the failure mode the gate registry exists to end. Neither of those
+  is a repair, so the repair is to the backlog.
+- First step: measure what the 106 and the 64 actually are before changing
+  either gate, because the two numbers may not be the same kind of thing. For
+  `read-dates`, how many of the 106 are registers no seat reads any more
+  against registers a seat reads every window. For `answered`, whether the 64
+  are notes that genuinely went unanswered or notes whose answer the
+  note-keyed guard cannot see. Then either drain the backlog and register the
+  gate, or split its exit code by who holds the repair as the entry above
+  proposes for `prompt-slots`. The observation that closes this entry is both
+  rows leaving the baseline.
+- Cost: $0 to measure. The repair depends on what the measurement says, which
+  is the point of doing it first.
+- Status: proposed
