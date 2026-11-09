@@ -1,0 +1,61 @@
+# hover and transition craft, read as computed style
+# dur = transition-duration, ease = transition-timing-function, props = transition-property
+
+## linear  https://linear.app/
+   x33   dur=0.1s                   ease=ease                                           props=color
+         e.g. "Intake"
+   x7    dur=0.1s                   ease=cubic-bezier(0.25, 0.46, 0.45, 0.94)           props=color, background
+         e.g. "Product"
+   x6    dur=0.2s                   ease=cubic-bezier(0.165, 0.84, 0.44, 1)             props=filter
+         e.g. "Learn more→"
+   x5    dur=0.16s                  ease=cubic-bezier(0.25, 0.46, 0.45, 0.94)           props=filter
+         e.g. "NewLoops →"
+   x4    dur=0.16s                  ease=cubic-bezier(0.25, 0.46, 0.45, 0.94)           props=border, background-color, color, box-sha
+         e.g. "Sign up"
+   x4    dur=0.1s                   ease=ease                                           props=filter
+         e.g. "Mobile DiffsNov 4, 2026"
+   curves declared in stylesheets this document could read: 5
+     cubic-bezier(0.32, 0.72, 0, 1)
+     cubic-bezier(0.66, 0, 0, 1)
+     cubic-bezier(.55, .085, .68, .53)
+     cubic-bezier(0.43, 0.07, 0.59, 0.94)
+     cubic-bezier(0.45, 1.45, 0.8, 1)
+
+## vercel  https://vercel.com/
+   x77   dur=0.1s                   ease=cubic-bezier(0.4, 0, 0.2, 1)                   props=color, background-color, border-color, o
+         e.g. "AI SDK"
+   x35   dur=0.15s                  ease=cubic-bezier(0.4, 0, 0.2, 1)                   props=color, background-color, border-color, o
+         e.g. "AI SDK"
+   x10   dur=0.15s                  ease=cubic-bezier(0.4, 0, 0.2, 1)                   props=all
+         e.g. "Get a Demo"
+   x1    dur=1s                     ease=ease                                           props=opacity
+         e.g. "Cookie Preferences"
+   curves declared in stylesheets this document could read: 8
+     cubic-bezier(.4, 0, 1, 1)
+     cubic-bezier(.6, .3, .98, .5)
+     cubic-bezier(.175, .885, .32, 1.1)
+     cubic-bezier(0.455, 0.03, 0.515, 0.955)
+     cubic-bezier(0.32, 0.72, 0, 1)
+     cubic-bezier(0.4, 0, 0.2, 1)
+     cubic-bezier(.4, 0, .2, 1)
+     cubic-bezier(0.8, 0, 1, 1)
+
+## elicit  https://elicit.com/
+   x1    dur=0.2s                   ease=ease-in-out                                    props=transform
+         e.g. "Skip to main content"
+   x1    dur=0.2s                   ease=ease                                           props=opacity
+         e.g. "button"
+   curves declared in stylesheets this document could read: 0
+
+## ursa-minor (ours)  http://127.0.0.1:3914/
+   x4    dur=0.16s, 0.16s, 0.34s    ease=cubic-bezier(0.25, 0.46, 0.45, 0.94), cubic-be props=border-color, background-color, transfor
+         e.g. "Get Polaris"
+   x2    dur=0.16s, 0.16s           ease=cubic-bezier(0.25, 0.46, 0.45, 0.94), cubic-be props=text-decoration-color, color
+         e.g. "the record viewer"
+   curves declared in stylesheets this document could read: 5
+     cubic-bezier(.4, 0, .2, 1)
+     cubic-bezier(.25,.46,.45,.94)
+     linear(0 0%, .0606 4.3478%, .1964 8.6957%, .3579 13.0435%, .5155 17.3913%, .6537 21.7391%,
+     cubic-bezier(0.25, 0.46, 0.45, 0.94)
+     cubic-bezier(.25, .46, .45, .94)
+

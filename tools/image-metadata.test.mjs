@@ -15,10 +15,10 @@
 import assert from 'node:assert/strict'
 import { crc32 } from 'node:zlib'
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, it } from 'node:test'
+import { tempDir } from './testing/tmpdir.mjs'
 import { LOCUS } from './gates/verdict-shape.mjs'
 import { GATE, TEXT_CHUNKS, carrierLine, unusable, verdict } from './image-metadata-verdict.mjs'
 import { icoChunks, looksBinary, pngChunks, scan, trackedImages, unreadBinaries } from './image-metadata.mjs'
@@ -50,7 +50,7 @@ function png(...extra) {
  *  something to answer. Nothing is committed: the index is what ls-files
  *  reads, and staging is enough. */
 function repoWith(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'image-metadata-'))
+  const dir = tempDir('image-metadata-')
   execFileSync('git', ['init', '-q'], { cwd: dir })
   for (const [path, body] of Object.entries(files)) {
     const full = join(dir, path)
@@ -204,7 +204,7 @@ describe('the scan', () => {
   })
 
   it('refuses a directory that is not a git repository', () => {
-    const { ground } = scan(mkdtempSync(join(tmpdir(), 'image-metadata-bare-')))
+    const { ground } = scan(tempDir('image-metadata-bare-'))
     assert.equal(ground.cause, 'SCAN_GROUND_UNUSABLE')
   })
 

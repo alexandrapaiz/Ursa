@@ -70,6 +70,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { launch, VIEWPORTS } from './lib/browser.mjs'
 import { freezeContext } from './lib/freeze.mjs'
+import { tracker } from './lib/reached.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const OUT = arg('out', '/tmp/contrast')
@@ -92,6 +93,11 @@ const PAGES = arg('pages', '/,/record,/record/mini-fixture,/record/at,/this-page
       ? [p === '/' ? 'home' : p.replace(/^\/|\/$/g, '').replace(/\//g, '-'), p]
       : [p.slice(0, i), p.slice(i + 1)]
   })
+// The not-found page is in the default list on purpose and its status is
+// the subject, so it is declared. A caller passing its own `--pages`
+// declares its own with `--expect-404`.
+const EXPECT_404 = arg('expect-404', PAGES.some(([, p]) => p === '/this-page-does-not-exist') ? '/this-page-does-not-exist' : '').split(',').filter(Boolean)
+const reach = tracker({ expect404: EXPECT_404, label: 'page' })
 
 mkdirSync(OUT, { recursive: true })
 
@@ -344,11 +350,19 @@ for (const [vname, w, h] of VIEWPORTS) {
       lap.push(`${stage} ${Date.now() - at}ms`)
       return out
     }
-    await mark('goto', async () => {
-      await page.goto(BASE + path, { waitUntil: 'networkidle' })
+    // Only the navigation is wrapped. The settle and everything after it are
+    // the measuring, and a refusal scoped over those would turn a finding
+    // into a non-answer.
+    const reached = await mark('goto', async () => {
+      if (!(await reach.visit(page, BASE + path, path)).ok) return false
       if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
       await page.waitForTimeout(WAIT)
+      return true
     })
+    if (!reached) {
+      process.stderr.write(`${name} COULD NOT LOAD, skipped\n`)
+      continue
+    }
     const items = await mark('collect', () => page.evaluate(COLLECT))
     const shotA = await mark('shotA', async () =>
       `data:image/png;base64,${(await page.screenshot(opts)).toString('base64')}`)
@@ -415,7 +429,17 @@ const driftReport = moved.length
   ? '\nthese pages moved between the two shutters, so nothing above is a measurement of them:\n' +
     moved.map((d) => `  ${d.page}/${d.viewport}  ${(d.drift * 100).toFixed(2)}% of the frame outside its text changed`).join('\n') + '\n'
   : `\nevery page held still between the two shutters (worst drift ${((Math.max(0, ...drifts.map((d) => d.drift))) * 100).toFixed(3)}% of the frame), so the backdrops above are the backdrops a reader sees.\n`
-const report = `${headline}\n${driftReport}\n${lines.join('\n') || 'nothing below threshold'}\n`
+// The reach verdict is part of the report rather than printed after it,
+// so it survives into the committed file a later run reads and not only
+// into this session's stdout.
+const reachReport = reach.lines().join('\n')
+const report = reach.code()
+  ? `${reachReport}\n\nno claim about contrast: the pages above were not reached.\n`
+  : `${headline}\n${driftReport}${reachReport}\n\n${lines.join('\n') || 'nothing below threshold'}\n`
 writeFileSync(`${OUT}/contrast.txt`, report)
 if (JSON_I !== -1) writeFileSync(JSON_OUT || `${OUT}/contrast.json`, JSON.stringify(rows, null, 1))
 console.log(report)
+// A verdict about the INSTRUMENT, which no caller can make from outside.
+// The findings themselves stay exit 0 however bad they are, because
+// selftest/check-contrast.mjs reads them out of the JSON above.
+if (reach.code()) process.exit(reach.code())

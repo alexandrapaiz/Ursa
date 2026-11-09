@@ -1,96 +1,139 @@
-# Merge order — measured 2026-11-09 03:01Z, ninety-ninth exo window
+# Merge order — measured 2026-11-09 08:3xZ, hundred-and-eighth exo window
 
-Replaces the previous plan. Written by Ursa's exo seat under
-`prompts/exo-agent.md` §5b. **Measuring the queue and naming the order
-is information for the owner. Merging is hers alone, and nothing here
-loosens that.**
+Replaces the previous plan, which was measured at 03:01Z by the
+ninety-ninth window and says nothing about either collision below.
+Written by Ursa's exo seat under `prompts/exo-agent.md` §5b.
+**Measuring the queue and naming the order is information for the owner.
+Merging is hers alone, and nothing here loosens that.**
 
-Both merge drivers were registered in this clone before any verdict
-below was taken, and the path was asserted against this checkout rather
-than the exit status read:
+## The instrument, asserted against this checkout rather than assumed
+
+Both merge drivers were registered before any verdict below was taken,
+and the path was asserted against this clone:
 
 ```
-git config --get-regexp 'merge\.(ledger|register)\.'          # 6 lines
-git config --get-regexp 'merge\.(ledger|register)\.driver' | grep -q "$PWD"
+$ bash tools/ledger/install-driver.sh && bash tools/registers/install-drivers.sh
+$ git config --get-regexp 'merge\.(ledger|register)\.'          # 6 lines
+$ git config --get-regexp 'merge\.(ledger|register)\.driver' | grep -q "$PWD"
 ```
+
+**Every verdict here comes from performing the merge, in a scratch
+worktree, not from `gh pr list`'s `mergeable` field and not from `git
+merge-tree`.** `merge-tree` is the wrong instrument for this
+repository and this window re-learned it the expensive way: run over
+the three exo branches it reported a conflict on `docs/agents/improvements.md`
+for **all six** ordered pairs. With the drivers installed and the merge
+actually performed, **two of those six are clean.** `merge-tree` does
+not run custom merge drivers, so every conflict verdict it gives on a
+driver-managed path is a claim about the instrument.
+
+**And the positive control, because an all-clean table is the shape a
+dead instrument prints.** Before trusting the clean rows, the same
+harness was pointed at a pair known to collide — `#817` then `#833`
+before the repair below — and it returned exit 1, named
+`docs/agents/runner-facts.md`, and printed the register driver's refusal
+reason. The instrument reports conflicts. The clean rows are therefore
+measurements and not silence.
 
 `refs/prs/*` was re-fetched **after** this window opened its own pull
-request, because §0 runs before ship-first and cannot contain the
-identifier ship-first creates.
+request and again after it pushed its last commit, because §0's
+bootstrap runs before ship-first and cannot contain the identifier
+ship-first creates.
 
-## The queue
+## Against the trunk: the whole queue is clean
 
-| | |
-|---|---|
-| open pull requests | **10** |
-| merged in the last 7 days | **76** |
-| oldest open | `#711`, 2026-11-02T06:55Z |
-| newest merge | **2026-11-09T03:00:01Z** (`#768`, this seat's) |
-| merges per day, last 7 rows present | 10-25 14, 10-26 45, 10-27 22, 11-01 4, 11-02 74, 11-08 5, 11-09 22 |
+12 open pull requests at 2026-11-09T08:36:00Z. **12 of 12 merge clean
+against `origin/main` individually**, real merge, both drivers
+registered.
 
-**Neither depth predicate fires.** Open does not outnumber the week's
-merges (10 against 76), and the newest merge is one minute old rather
-than a day. The gate is working.
+| pull request | seat | vs `main` | instrument |
+|---|---|---|---|
+| #817 | exo (window 105) | clean | performed merge, drivers on |
+| #822 | market | clean | performed merge, drivers on |
+| #824 | market | clean | performed merge, drivers on |
+| #826 | exo (window 106) | clean | performed merge, drivers on |
+| #833 | exo (window 107) | clean | performed merge, drivers on |
+| #836 | frontend | clean | performed merge, drivers on |
+| #837 | security (draft) | clean | performed merge, drivers on |
+| #838 | skill (draft) | clean | performed merge, drivers on |
+| #840 | engineer (draft) | clean | performed merge, drivers on |
+| #841 | pm | clean | performed merge, drivers on |
+| #842 | exo (window 108, this run) | clean | performed merge, drivers on |
+| #843 | frontend (draft) | clean | performed merge, drivers on |
 
-**Five of the last seven calendar days have no row at all**, which the
-per-day column shows and a weekly sum would hide. That is the provider
-outage of 2026-11-03 to 11-07, routed to the owner this window with the
-instant attached. It is not a queue problem and nothing in this file can
-act on it.
+So **nothing in this queue is blocked on a conflict with the trunk.**
+The order below matters only because branches collide with *each other*
+once one of them lands.
 
-## The conflict sweep
+## Containment: two lanes are shorter than they look
 
-Exit codes read as codes and never as a sign, and the containment
-discriminator run **before** `merge-tree`, because an absorbed branch
-reads clean on every conflict instrument there is.
+`git merge-base --is-ancestor` over all 132 ordered pairs of open heads:
 
-| row | verdict |
-|---|---|
-| `#711` | CLEAN |
-| `#765` | CLEAN |
-| `#766` | CLEAN |
-| `#767` | CLEAN |
-| `#770` | CLEAN |
-| `#771` | CLEAN |
-| `#772` | CLEAN |
-| `#773` | CLEAN |
-| `#774` | CLEAN |
-| `#775` | CLEAN |
+- **#822 is contained in #824** (market). Merging #824 closes #822.
+- **#836 is contained in #843** (frontend). Merging #843 closes #836.
 
-**Ten of ten clean, zero already-contained, zero unresolvable.** No row
-in this queue needs its owning seat before it can be read.
+The other eight are independent lanes. There is no deep stack in this
+queue, so the depth is real rather than an artifact of seats branching
+off each other.
 
-## The order, and the reason for it
+## The one collision left, and ordering cannot fix it
 
-1. **`#775`** — this seat's. It carries eleven charters and the seven
-   `tools/seat` instruments those charters cite. It is first not because
-   it is this seat's but because **every other seat's next window reads
-   one of those eleven files**, and ten of the eleven currently instruct
-   a seat to hand-roll a query against a tool that lands here. The cost
-   of its waiting is paid by every window of every seat, once per window.
-2. **`#771`, `#774`, `#765`** — the three drafts. Not mergeable at all
-   while they are drafts, so they occupy a queue slot and answer no
-   decision. Their own seats resolve them; nothing here can.
-3. **`#766`, `#767`, `#772`** — the PM's three. Its own lane, its own
-   merge authority under §21 for the Tier B rows among them.
-4. **`#770`, `#773`** — engineer and market, both clean, neither blocking
-   anything else in this sweep.
-5. **`#711`** — oldest at seven days, and the only row in this queue
-   whose age is worth a sentence. The skill seat's. Age alone is not the
-   measure this file uses, and it is last here because it blocks nothing
-   and conflicts with nothing, not because it is unimportant.
+Pairwise over this seat's four branches, both directions, performed
+merges with drivers on:
 
-## What this window changed about the order itself
+| pair | both directions | file | repair |
+|---|---|---|---|
+| #817 ↔ #826 | clean | — | — |
+| #817 ↔ #833 | **clean, after the repair below** | `runner-facts.md` | done, at source |
+| #826 ↔ #833 | **CONFLICT both ways** | `improvements.md` | hand resolution, keep both appends |
+| #842 ↔ #817, #826, #833 | clean | — | — |
 
-`#730` left the queue. It was this seat's charter lane, open since
-2026-11-02, and it was the only row in the last three sweeps carrying
-conflicts. It is closed, and its unlanded content is `#775`.
+**The repaired one.** Windows 105 and 107 each read the tail of
+`docs/agents/runner-facts.md`, each saw 98 as the highest, and each
+minted section **99**. Concurrent by the graph: neither head is an
+ancestor of the other, so neither window could have seen the other's
+work. The register driver refused the merge **by name**, in both
+directions, rather than publishing two sections under one citable
+number — which is exactly the event
+`tools/registers/registers.json` predicted in writing in its own
+`why_identifier` field for this register. This window renumbered the
+newer entry 99 → 100 on window 107's branch and moved its one citation,
+which is the refusal message's own prescription. Re-measured after:
+clean in both directions.
 
-**The reason it sat is the entry this file should carry forward.** Its
-four register conflicts held **zero** lines absent from `main`. Every
-one was the `register` driver refusing a heading present on *both*
-sides, which is a redundant fork rather than a disagreement. A conflict
-count does not measure unlanded content, and on an append-only register
-it is close to independent of it. Before any later window resolves a
-register conflict in this queue, run the set difference against `main`
-and read the number.
+**The structural one, which is not an ordering problem.** #826 and #833
+both append different `###` sub-entries to the same `## Week of
+2026-11-09` heading in `docs/agents/improvements.md`. That heading is
+the driver's merge unit and the sub-entry is the seats' write unit, so
+the write unit is finer than the merge unit and **there is no second
+legal key**: unlike a numbered entry, a dated container offers the
+loser nothing to renumber to. Both orders conflict. Whichever lands
+second needs a hand resolution, and the resolution is always the same —
+**keep both appends**, since they are different sub-entries of one
+container and neither side is defending text the other also has.
+
+This window sidestepped it by filing its own delta as `## Window 108`,
+a unique heading the driver merges without help, which is the
+per-window form the register was built for. That is a workaround and
+not the repair; the repair is finer merge granularity on this register
+and it is Ursa's engineer's surface, handed over with the measurement.
+
+## The order
+
+1. **Anything but the three exo branches, in any order.** All clean
+   against the trunk and against each other. Taking **#824** and
+   **#843** closes **#822** and **#836** as a side effect.
+2. **#817** (exo window 105). Tier A/B: no `prompts/` path in its diff.
+   Independent of both remaining collisions.
+3. **#826** or **#833** — either, but **one of them only**, then a hand
+   resolution on `improvements.md` for the second. Both are **Tier C**,
+   because each diff contains `prompts/exo-agent.md`.
+4. **#842** (this window). Clean against all three siblings in every
+   order, so it is not an ordering constraint on anything.
+
+**Two charter-editing pull requests now sit in the owner's queue, not
+one.** Ursa's PM reported at 07:25:12Z that no other open pull request
+touched `prompts/exo-agent.md`, which was **true when written**: the
+charter edit on #833's branch landed at **07:56:03Z**, thirty-one
+minutes later. The claim expired rather than being wrong, and the PM
+dated it correctly. Corrected to that seat on the board at 08:3xZ.

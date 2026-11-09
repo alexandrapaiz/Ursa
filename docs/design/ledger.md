@@ -2827,3 +2827,412 @@ union of `main` and every open pull-request branch rather than from
 The allocation paragraph at the end of L66 says why that is the only
 form of the question that can be right, and this is the first run to owe
 it a number it would otherwise have got wrong.
+
+## L69 — The instrument that handled its own failure is the one whose exit status lied about it
+
+**measured**, 2026-11-09 (run 2026-11-09-message-t).
+`reviews/2026-11-09-message-t/NOTES.md` §"The defect, stated".
+
+`measure-narrow.mjs` was pointed at its default port while this run's
+server was on another one. All twenty cells failed to load. It printed
+
+    NOT MEASURED: 20 of 20 page-by-width cells could not be loaded or
+    never came to rest, so this run makes no claim about them.
+
+and exited 0.
+
+Both halves were already the tool's own work. The comment above that line
+cites L23 and says the headline "refuses to report a pass while any cell is
+unmeasured". The refusal was written in prose and never in the number a
+caller gates on, because the exit status was whatever the last statement
+left behind and the last statement is a successful `writeFileSync`.
+
+**The control, and the part worth keeping.** Against a dead port:
+
+| tool | exit |
+|---|---|
+| `measure-narrow.mjs` | **0** |
+| `measure-contrast.mjs` | 1 |
+| `measure-hit-areas.mjs` | 1 |
+| `measure-focus.mjs` | 1 |
+| `verify-hover.mjs` | 1 |
+
+The four that are right are right **by accident**. They let the navigation
+error escape and node sets the status for them. `measure-narrow.mjs` is the
+only one of the five that catches the failure and reports it, and catching
+it is exactly what let the run continue to a success exit. So the care is
+what broke it, and the four that look correct here are one `try` away from
+the same defect without anything in them changing. That is the general
+claim and it is why this is a ledger entry rather than a line in a diff:
+**error handling converts a crash into a pass unless the handler also owns
+the exit status.**
+
+**The line the repair does not cross.** Exit 2 for blindness and no exit 1
+for a finding. `selftest/check-contrast.mjs` runs `measure-contrast.mjs`
+over a fixture built to fail and asserts a non-zero exit is an error,
+because it reads the findings as JSON. A tool whose findings are data must
+exit 0 when it measured, however bad the findings. Whether a cell puts
+content out of reach is a verdict about the **site**, made by the reader of
+the table. Whether anything was measured is a verdict about the
+**instrument**, which no caller can make from outside. Only the second is
+this file's to state, and conflating them would have broken a selftest that
+was right.
+
+`selftest/check-narrow.mjs` proves both directions, because case 1 alone is
+satisfied by a tool that always fails: blind exits 2 and still says so in
+words, measured exits 0 and prints the passing headline.
+
+This is `runner-facts` §48, reached by Ursa's exo, security and engineer
+seats in one night and now by this seat's instrument rather than its site.
+The witness detail: this run's own transcript records `narrow exit=0` after
+that invocation, so it came one careless step from entering a clean sweep
+over a matrix it never loaded.
+
+## L70 — Proposal: the home page is the only page that leaves the site's one-column grid, and only at desktop
+
+**measured, not decided**, 2026-11-09 (run 2026-11-09-message-t).
+`reviews/2026-11-09-message-t/data/grid.txt`.
+
+Content edges, every page, the three charter viewports:
+
+| viewport | home | the other three |
+|---|---|---|
+| phone 390 | 32..358 | 32..358 |
+| tablet 820 | 66..754 | 66..754 |
+| desktop 1440 | **416..1024** | 240..1200 |
+
+At phone and tablet the site has exactly one left edge and the wordmark,
+the `h1` and the section content all sit on it, across all four pages. That
+is the designed system and it holds. At desktop the home page takes a
+column 176px narrower on each side than the one the rest of the site uses.
+
+Two differences in the markup rather than one, and the second is the one a
+reader would miss:
+
+    app/page.tsx:103              lg:mx-auto lg:max-w-2xl lg:px-8
+    app/record/page.tsx:23        xl:mx-auto xl:max-w-6xl
+    app/record/[id]/page.tsx:38   xl:mx-auto xl:max-w-6xl
+    app/record/at/…/page.tsx:60   xl:mx-auto xl:max-w-6xl
+
+The container differs **and so does the breakpoint it starts at**, so
+between 1024 and 1280 the home page has already centred into a 608px column
+while the other three are still full-bleed on the clamp padding.
+
+**Not changed by this run, and the reason is the charter rather than
+doubt.** A marketing page with a narrower measure than a data page is a
+legitimate design decision, and the charter routes bigger ideas into a
+proposal instead of into this seat's diff. What is offered here is the
+measurement, which did not exist before, and one observation: whichever
+column the owner wants, the two breakpoints should probably be the same
+one, because the 1024-to-1280 band is a width nobody chose and both pages
+pass through it.
+
+## L71 — A max-width behind a breakpoint prefix does not apply between the two, and the band in between is the only place it matters
+
+**fixed**, 2026-11-09 (run 2026-11-09-message-v).
+`reviews/2026-11-09-message-v/data/sweep-grid.txt` and `sweep-grid-after.txt`.
+
+L70 offered the measurement and left the column choice to the owner, with
+one observation attached: the two breakpoints should probably become the
+same one, because the band between them is a width nobody chose. This run
+took that card and found the observation understated. The band is not
+merely unchosen. Inside it the record pages' column was **wider than the
+maximum the markup declares for it**, and `max-w-6xl` is the thing that
+declares it.
+
+`xl:max-w-6xl` names a 1152px column and gates it behind the 1280px
+breakpoint. A `max-width` is inert whenever it exceeds the space available,
+so the prefix buys nothing below 1152 and the only widths it changes are
+1152 to 1279, which are exactly the widths where the clamp was needed and
+absent. At 1200 the column ran 1008px wide against a declared maximum of
+1152 minus its padding, 960.
+
+**The sweep that found it.** The three charter viewports cannot see this:
+820 is below both breakpoints and 1440 is above both, so the band had never
+been photographed or measured. 960 to 1440 in 16px steps, plus the four
+breakpoints probed at single-pixel resolution, four pages. A left edge that
+moves further than the viewport moved is a discontinuity:
+
+| page | at | viewport | left edge |
+|---|---|---|---|
+| home | 1023 to 1024 | +1px | **+126px** |
+| set | 1279 to 1280 | +1px | +64px |
+| record | 1279 to 1280 | +1px | +64px |
+| address | 1279 to 1280 | +1px | +64px |
+
+**The repair is the prefix and nothing else.** `xl:mx-auto xl:max-w-6xl`
+became `mx-auto max-w-6xl` on the three record pages and in the footer's
+`wide` measure. No measure width changed, so the owner's open decision from
+L70 is still open and still has the same two options. Three of the four
+discontinuities are gone and the record pages' column is now continuous
+from 960 to 1440.
+
+**The evidence that the fix is confined to the band.** `diff-frames.py`
+over six viewports times three pages: phone 390, tablet 820, desktop 1440
+and 1152 are **0px, identical** on every page, and only 1200 and 1279 move,
+and only on the two record pages. A change invisible at every width anyone
+has ever reviewed is the shape this repair should have, and it is reported
+as a measurement rather than as an intention.
+
+**What it also does to L70's number.** The home-to-record divergence is 176px
+by design above both breakpoints. Before, it drifted from 126 to 240 across
+1024 to 1279 and only settled at 1280. Now it reaches 176 at 1200 and holds.
+
+### The cost, which this run went looking for and found
+
+`data/header-offset.txt`. `site-header.tsx` carries page padding and no
+max-width, so the wordmark sits on the page edge while the body column may
+be centred: at 1440 the body sits 144px inside the header, which reads as a
+rail and a column and is the design. The gap has to get from 0 to 144
+somehow, and this change decides how.
+
+| | widths sharing one left edge | widths with a gap under 48px, non-zero |
+|---|---|---|
+| before | 25 of 37 | **0** |
+| after | 16 of 37 | **6** |
+
+Before, the gap was 0 up to 1279 and 64 at 1280. Now it ramps 1, 8, 16, 24,
+32, 40, 48, 56, 64 across 1153 to 1279. **A small non-zero stagger is the
+one that reads as a mistake**, and six sampled widths now have one where
+none did before. This is named rather than buried because it is the part of
+the change a reviewer might want reversed. The judgement for keeping it:
+the thing it replaces is a 64px jump at one pixel of viewport, which is
+visible as a snap while resizing and is the symptom of a clamp that was not
+applying. A continuous ramp expressing a real design intent is better than a
+discontinuity hiding a defect. The third option, giving the header the body's
+measure so the two always share one edge, would change every page at every
+width and belongs to the owner, like L70's column.
+
+## L72 — Padding cannot separate two inline boxes, because each one paints across its own
+
+**fixed**, 2026-11-09 (run 2026-11-09-message-x).
+`reviews/2026-11-09-message-x/data/diff-gap-before.txt` and `diff-gap-after.txt`.
+
+The record viewer's inspector is where this product's central claim is
+rendered. The mutation is the correction, expressed as an edit rather than
+as a complaint, and the diff is how a reader sees that. On the fixture's
+one mutated span that diff read `and nonot by any`.
+
+A previous run had seen the same string and written a rule for it:
+
+```css
+/* A word diff puts a removal and its replacement side by side with no
+   separator between them … A tenth of an em on each side is the smallest
+   gap that separates the struck words from the kept ones */
+.rec-diff ins,
+.rec-diff del { padding: 0 0.1em; }
+```
+
+The comment names the exact string it was written for, and the string was
+still on the page three weeks later, because padding is inside the inline
+box and an inline box paints its `text-decoration` and its
+`background-color` across its own padding. Measured at 1440: the `del` ran
+to 975.81 and the `ins` began at 975.81. **A box gap of exactly 0.00px.**
+What the 0.1em bought instead was 1.216px of extra struck paint and 1.216px
+of extra highlight on each side, so the two runs did not merely touch, they
+each grew toward the other.
+
+This is the shape this repository keeps finding under other names: a guard
+that is silently inert (L45), a check whose failure mode is to measure
+something else, a repair whose own comment is the only evidence it worked.
+What is specific to this one is that the evidence was a screenshot anybody
+could have taken, of a string the comment itself quotes.
+
+**The repair, in two halves, because the CSS alone does not do it.**
+
+`margin` rather than `padding`, which is outside the box, so neither the
+strike nor the highlight reaches it. That alone takes the gap from 0.00px
+to 2.41px, and 2.41px is a third of this font's 7.28px advance and still
+read as one word at 4x magnification. So the gap is also spent where it is
+needed rather than everywhere:
+
+```css
+.rec-diff del + ins,
+.rec-diff ins + del { margin-left: 0.5em; }
+```
+
+A removal and the insertion that replaces it are the one adjacency in a
+word diff with no whitespace on either side of it in either version of the
+text. The fixture's is `itself, ` + del `and no` + ins `not by any` +
+` human grader`: the space before `and` and the space after `any` both
+belong to the kept runs. `del + ins` goes 0.00px to **7.28px**, exactly one
+character advance, and no comma anywhere else in the sentence moves.
+
+**The second half is in the component and could not be done in CSS.** A
+word diff puts the space between two words inside one of the runs. The
+fixture's removal is `" is involved at any point"`, leading space included,
+and `text-decoration: line-through` drawn through that space met the `r` of
+`grader`, so the two read as one hyphenated word. `record-inspector.tsx`
+now splits boundary whitespace out of an `ins` or `del` run and emits it as
+plain text. The run's own value is untouched, so nothing about what was
+added or removed is restated by the renderer.
+
+**Containment.** All fifteen page frames are byte-identical before and
+after (`data/frame-diff-pages.txt`). Only the inspector's open state moves.
+
+### The surface this was found on had never been driven
+
+The inspector renders only when a passage is selected, the selection lives
+in React state in `record-view.tsx`, and nothing puts it in the address. So
+no instrument in the kit had ever reached it. It was photographed once, at
+desktop only, on 2026-10-18, and measured by nothing, ever.
+
+`data/state-span-selected.mjs` is the drive. On its first outing
+`measure-hit-areas.mjs` reported `button.rec-action "See it inside the
+generation →"` **SHORT by 26**, an 18px box against the 44px floor, at all
+three viewports. It is the inspector's only control and the only standalone
+`.rec-action` on this site without `.rec-hit`, which every other one has
+carried since 2026-10-24.
+
+Six hit-area sweeps had been clean over this page. None of them was wrong.
+Each measured a page from which this control was absent and reported a
+floor met over a denominator that did not contain it. **The control was not
+missed; it was out of frame.** That is the README's denominator warning
+(L19, L23) arriving through the one door it did not name: not a zero count
+over a zero denominator, but a full count over a complete-looking page in
+one of its two states.
+
+Fixed with `rec-hit` and `mt-4`, the remedy the 44px floor block already
+prescribes for the three form buttons, since the overlay reaches 13px past
+the box and a 12px gap does not hold it off the line above.
+`data/jump-clearance.txt` reads the real rects: overlay 44px, clearance
+6.71px above and 2.96px below, identical at all three viewports. After:
+0 short of 12 standalone, over the same 12 and the same 33 targets seen.
+
+**What this asks of the next run.** Every page on this site that holds
+state has states no instrument has entered. `/record` has a loaded set view
+and a loaded record; `/record/at` has an opened record and four error
+states; this page has a selected span and an expanded generation. Driving
+them is cheap now that `--state` exists and one worked module is committed.
+Carded.
+
+## L73 — The grid measurement in front of the owner counted four of this site's five surfaces
+
+**observed, not changed**, 2026-11-09 (run 2026-11-09-message-x).
+`reviews/2026-11-09-message-x/data/grid-five.txt`.
+
+L70 is a measurement offered to the owner, and its headline is that **the
+home page is the only page that leaves the site's one-column grid**. Board
+card `847b443e` carries that sentence and is in Review.
+
+The script that produced it measures `home`, `set`, `record` and `address`.
+The site has a fifth rendered surface, and this seat's own `shoot.mjs` has
+carried it in its default page list the whole time: the not-found page,
+which the kit reviews like any other page and photographs at all three
+viewports every run.
+
+Measured with the same script and the fifth path added, at 1440:
+
+| surface | left | right |
+|---|---|---|
+| home, hero | 96 | 758 |
+| home, sections | 416 | 1024 |
+| set, record, address | 240 | 1200 |
+| not-found | 96 | 800 |
+
+So there are **three** left edges at desktop and not two, and the 404 sits
+on the first of them with the home page's hero.
+
+**Nothing here is a defect and nothing is changed.** The 404's measure is
+deliberate and `site-footer.tsx` says so in prose that predates this run:
+`"page"` is `the page's own left edge. The 404 needs this: it has no centred
+column for a footer to agree with.` This entry exists because the owner is
+being asked to pick a column, and the sentence she was handed says three of
+four pages agree. Four of five do not agree; three of five do, one is the
+open question, and one is a third convention already argued for in the
+code. Whichever column she picks, that is the shape of what is left.
+
+## L74 — Empty stdout and say-it-on-stdout are the same rule, and the channel kind is what picks between them
+
+**measured**, 2026-11-09 (run `2026-11-09-message-z`).
+`reviews/2026-11-09-message-z/data/deadport/` and `deadport-after/`,
+one directory per tool, both columns, stdout and stderr kept apart.
+
+L69 left a claim open. It said the four tools that exit non-zero at a dead
+port are right **by accident**, and that `measure-narrow.mjs` was one `try`
+away from the same defect. This run measured the claim on today's code and
+then closed it.
+
+**Before.** Five of six browser-driving tools, against a dead port:
+
+| tool | exit | stdout | stderr |
+|---|---|---|---|
+| `shoot.mjs` | 1 | **0 bytes** | node stack trace |
+| `measure-contrast.mjs` | 1 | **0 bytes** | node stack trace |
+| `measure-hit-areas.mjs` | 1 | **0 bytes** | node stack trace |
+| `measure-focus.mjs` | 1 | **0 bytes** | node stack trace |
+| `verify-hover.mjs` | 1 | **0 bytes** | node stack trace |
+| `measure-narrow.mjs` | 2 | the refusal, in words | — |
+
+**After.** All six exit 2 and print the refusal on stdout.
+
+### The part that is new, and it came from two seats disagreeing
+
+Ursa's exo seat sent the case for printing an absence **on stdout**: its
+register allocator emitted git's own correct `fatal:` on stderr and
+`Window 1` at exit 0 on stdout, and `--next` exists to be read as
+`$(... --next Window --heads)`. The warning was present, correct, and on
+the one channel the consumer does not read.
+
+Ursa's security seat sent the opposite-looking requirement, from three
+gates it repaired the same window: a refusal is exit 3 **and an empty
+stdout**, because a reader and a CI log both scan stdout for the verdict
+line, so a refusal that prints a sentence there has put something in the
+slot a verdict occupies.
+
+Both are right, about different consumers, and the thing that decides is
+not the gate's preference but **how the caller consumes the channel**.
+
+- **stdout as a value channel** — substituted, `$(cmd)`. Every byte is
+  taken as the value, so the only safe refusal is to print nothing. Exo's
+  allocator is this kind.
+- **stdout as a report channel** — read by a person, scanned by a CI log
+  for a headline. Nothing is read as a value, and silence is
+  indistinguishable from a tool that did not run. This kit is this kind.
+
+What generalises across both is neither rule as stated. It is: **the
+verdict slot must carry the refusal, and never a number computed over
+nothing.** Empty stdout guarantees that for a value channel. A refusal
+headline guarantees it for a report channel. `measure-narrow.mjs` already
+had the second form, which is why it was the one tool that read correctly.
+
+The corollary is the thing to check for, because it is invisible: the
+dangerous value is the one **inside the legal range of the real answer**.
+`0 of 0 text runs below their threshold` is a true sentence, a passing
+headline, and a claim about nothing. `lib/reached.mjs` grew
+`nothingReached()` and `refused()` for exactly that slot.
+
+### The exit code, and why this kit keeps 2 where the board tools use 3
+
+Security's house code for a no-verdict is **3**, in `tools/board/bypass.mjs`,
+`post-verdict.mjs` and `tools/seat/spend.mjs`, and its reason is sound:
+those gates already spend 1 and 2 on findings, so a premise failure was
+wearing whichever was free.
+
+That collision does not exist here, and adopting 3 for symmetry would
+create one. In this kit a verdict about the **site** is exit 0 however bad
+it is, because the selftests read findings out of JSON and treat non-zero
+as a broken instrument; `measure-focus.mjs` is the one tool that spends 1,
+on its own findings. So 2 is free, it is already `UNREACHED` in
+`lib/reached.mjs` with its reasoning written beside it, and two tools and
+their selftests already use it. Moving to 3 would leave
+`check-redaction.mjs`'s "cannot parse the gate" on 2 and the dead port on
+3, which is two no-verdict codes where there was one.
+
+The divergence is deliberate and named rather than silent. Same meaning,
+different number, because the number was chosen against a different set of
+occupied codes.
+
+### The trap, which security named before this run walked into it
+
+A refusal scoped one call too wide converts a finding into a non-answer.
+So `reach.visit()` wraps the **one** navigation that establishes the
+premise and nothing below it. Checked rather than asserted: after the
+repair the live site still reports 533 text runs, 80 tab stops, 48
+standalone controls, 16 narrow cells and 15 frames, every number identical
+to the run before it. `check-reached.mjs` holds the line as an expectation
+of its own — one subject reached out of two must still print the headline.
+
+`verify-hover.mjs` carried the uncovered arm: a harness probe navigating
+before the target loop that held the tracker. One premise was guarded and
+the earlier one was not, which is the shape of exo's note one level in.

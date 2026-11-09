@@ -24,6 +24,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { launch, VIEWPORTS } from './lib/browser.mjs'
 import { freezeContext, PINNED_MS } from './lib/freeze.mjs'
+import { tracker } from './lib/reached.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const OUT = arg('out', '/tmp/shots')
@@ -45,6 +46,12 @@ const MATRIX = VIEWPORT_ARG
     })
   : VIEWPORTS
 const PAGES = arg('pages', '/,/record,/record/mini-fixture,/record/at,/this-page-does-not-exist').split(',')
+// The not-found page is a page of this site and is reviewed like any
+// other, so its status is the subject rather than a failure. Declared
+// here because the default page list above asks for it; a caller passing
+// its own `--pages` declares its own.
+const EXPECT_404 = arg('expect-404', PAGES.includes('/this-page-does-not-exist') ? '/this-page-does-not-exist' : '').split(',').filter(Boolean)
+const reach = tracker({ expect404: EXPECT_404, label: 'frame' })
 const LIVE = process.argv.includes('--live')
 // `--pin-now <iso>` pins the page's `Date` to one instant, so two shoots of a
 // surface that reads the clock can be compared. Opt-in, because a run that is
@@ -121,7 +128,14 @@ for (const [vname, w, h] of MATRIX) {
   const page = await ctx.newPage()
   for (const path of PAGES) {
     const name = `${slug(path)}-${vname}`
-    const status = (await page.goto(BASE + path, { waitUntil: 'networkidle' }))?.status()
+    // The status was already read here and printed in every row, and
+    // nothing ever gated on it, so a run over a site whose every route
+    // had been renamed photographed five not-found pages and reported
+    // `no frame overflows its viewport`. Measured 2026-11-09.
+    // Only the navigation is wrapped; the shutter below is the measuring.
+    const visit = await reach.visit(page, BASE + path, path)
+    if (!visit.ok) continue
+    const status = visit.status
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
     if (enterState) await enterState(page, name)
     // Ask the page what time it thinks it is, rather than trusting that the
@@ -188,4 +202,14 @@ const report = rows.map(line).join('\n')
 writeFileSync(`${OUT}/measurements.txt`, `${header}\n${settle}\n${matrixLine}\n${report}\n`)
 console.log(report)
 const bad = rows.filter((r) => r.scrollWidth > r.clientWidth)
+// The reach verdict comes FIRST, because the overflow headline is only
+// meaningful over frames of the pages that were asked for.
+const reachLines = reach.lines()
+if (reachLines.length) console.log(reachLines.join('\n'))
+if (reach.code()) {
+  console.log('\nno claim about overflow: see above.')
+  process.exit(reach.code())
+}
+// A verdict about the SITE stays exit 0 however bad it is, because the
+// reader of the table makes that call. See lib/reached.mjs.
 console.log(bad.length ? `\n${bad.length} frame(s) overflow` : '\nno frame overflows its viewport')

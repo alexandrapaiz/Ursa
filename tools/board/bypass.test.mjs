@@ -1,8 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
 import {
   CONTROL_ROWS, ESCAPABLE_WITHOUT_TRACE,
-  asMessage, control, grade, gradeRow, lawInstant,
+  asMessage, control, grade, gradeRow, lawInstant, verdictFault,
 } from './bypass.mjs';
 
 const LAWS = { QUANTITY_UNSCOPED: '2026-11-02T00:34:52.000Z', WAKE_TRUNCATION: '2026-11-02T00:34:52.000Z' };
@@ -129,4 +134,128 @@ test('lawInstant returns null rather than guessing when the code is not there', 
 test('lawInstant survives a clone where git refuses, because a gauge is not a repair', () => {
   const run = () => { throw new Error('fatal: not a git repository'); };
   assert.equal(lawInstant('QUANTITY_UNSCOPED', { run }), null);
+});
+
+// --- The exit code, which until 2026-11-09 no case here reached ---
+//
+// Everything above this line asserts a pure function, so the whole suite was
+// green on the day `--audit` returned 0 over a window it had not read. These
+// cases drive the process, through `--rows-file` so that they need no network
+// and no credential, and the receipt is the input rather than the weather.
+//
+// Ursa/frontend's order, obeyed and reported in the pull request: each of
+// these was run against the pre-fix file first, and the three that go red
+// there are behaviour failures and not absences, because the old file exists
+// and answers 0.
+
+const HERE = new URL('.', import.meta.url).pathname;
+
+function receipt(over = {}) {
+  return {
+    complete: true,
+    pages: 1,
+    rows: 2,
+    rows_fetched: 2,
+    requested_hours: 200,
+    covered_hours: 200,
+    oldest_ts: '2026-11-01T00:00:00Z',
+    newest_ts: '2026-11-09T00:00:00Z',
+    incomplete_code: null,
+    incomplete_line: null,
+    ...over,
+  };
+}
+
+function runBypass(payload, args = []) {
+  const file = join(tmpdir(), `bypass-exit-${randomUUID()}.json`);
+  writeFileSync(file, JSON.stringify(payload));
+  try {
+    const r = spawnSync(process.execPath, [join(HERE, 'bypass.mjs'), '--rows-file', file, ...args], {
+      encoding: 'utf8',
+      // No token and no URL: a case about the exit code must not be able to
+      // reach the live board, or it grades the board's mood.
+      env: { ...process.env, BOARD_RUNTIME_TOKEN: '', BOARD_API_URL: '' },
+      timeout: 30_000,
+    });
+    return { code: r.status, out: `${r.stdout}${r.stderr}` };
+  } finally {
+    rmSync(file, { force: true });
+  }
+}
+
+test('verdictFault is null only when the receipt says the whole window was read', () => {
+  assert.equal(verdictFault({ coverage: receipt() }), null);
+  assert.equal(verdictFault(receipt()), null);
+  const blocked = verdictFault({ coverage: receipt({ complete: false, incomplete_code: 'PAGE_401', incomplete_line: 'page 1 answered 401' }) });
+  assert.equal(blocked.code, 'PAGE_401');
+  // A saved page with no receipt grounds no share either, and the old file
+  // read this case as cleanly as the complete one.
+  assert.equal(verdictFault(null).code, 'NO_COVERAGE');
+});
+
+test('--audit over a window that could not be read exits 3 and not 0', () => {
+  const r = runBypass({ rows: [], coverage: receipt({ complete: false, rows: 0, pages: 1, incomplete_code: 'PAGE_401', incomplete_line: 'page 1 answered 401: bearer BOARD_RUNTIME_TOKEN required' }) }, ['--audit']);
+  assert.equal(r.code, 3, r.out);
+  assert.match(r.out, /NO VERDICT \(PAGE_401\)/);
+});
+
+test('the same incomplete read exits 3 without --audit, because the read did not succeed', () => {
+  const r = runBypass({ rows: [], coverage: receipt({ complete: false, rows: 0, incomplete_code: 'PAGE_401', incomplete_line: 'page 1 answered 401' }) });
+  assert.equal(r.code, 3, r.out);
+});
+
+test('--json carries the fault in the document as well as in the exit code', () => {
+  const r = runBypass({ rows: [], coverage: receipt({ complete: false, incomplete_code: 'PAGE_401', incomplete_line: 'page 1 answered 401' }) }, ['--audit', '--json']);
+  assert.equal(r.code, 3, r.out);
+  const doc = JSON.parse(r.out);
+  assert.equal(doc.verdict_fault.code, 'PAGE_401');
+});
+
+test('a complete read still returns the verdict it always did: 0 clean, 1 under --audit on a CERTAIN row', () => {
+  const clean = runBypass({ rows: [row()], coverage: receipt({ rows: 1 }) }, ['--audit']);
+  assert.equal(clean.code, 0, clean.out);
+  const certain = runBypass({
+    rows: [row({ body: 'A body long enough for the store to keep it, which carries a reason word, and 874 rows of it.' })],
+    coverage: receipt({ rows: 1 }),
+  }, ['--audit']);
+  assert.equal(certain.code, 1, certain.out);
+});
+
+test('the positive control passes in exactly the invocation that has no verdict, which is why the exit code had to change', () => {
+  // Ursa/exo, 2026-11-09: a positive control validates the instrument and not
+  // the inference. Both halves of this case ran green before the fix, and one
+  // of them was a lie about the board.
+  const ctl = spawnSync(process.execPath, [join(HERE, 'bypass.mjs'), '--control'], {
+    encoding: 'utf8',
+    env: { ...process.env, BOARD_RUNTIME_TOKEN: '', BOARD_API_URL: '' },
+    timeout: 30_000,
+  });
+  assert.equal(ctl.status, 0, `${ctl.stdout}${ctl.stderr}`);
+  assert.match(ctl.stdout, /control: 2 of 2 graded as expected/);
+  const audit = runBypass({ rows: [], coverage: receipt({ complete: false, incomplete_code: 'PAGE_401', incomplete_line: 'page 1 answered 401' }) }, ['--audit']);
+  assert.equal(audit.code, 3, audit.out);
+});
+
+// THE INPUT F119's FIX DID NOT REACH. F119 moved an unread page to exit 3,
+// which covers a 401. It did not cover there being no route to ask at all:
+// with BOARD_API_URL unset, pageMessages threw ERR_INVALID_URL out of undici
+// and node exited 1, which is this file's own code for CERTAIN findings. So
+// removing the credential gave the right answer and removing the whole
+// environment gave the strongest verdict this tool has, from a stack trace
+// rather than from any code it contains.
+//
+// Reported by Ursa's exo seat on 2026-11-09, which ran the same
+// premise-removal on a second axis. This case fails against the pre-fix file
+// with actual 1 against expected 3.
+test('no route to ask is exit 3, not exit 1 out of a stack trace', () => {
+  const env = { ...process.env };
+  delete env.BOARD_API_URL;
+  delete env.BOARD_RUNTIME_TOKEN;
+  const r = spawnSync(process.execPath, [new URL('./bypass.mjs', import.meta.url).pathname, '--audit'],
+    { env, encoding: 'utf8', timeout: 30_000 });
+  assert.equal(r.status, 3, `expected the no-verdict code, got ${r.status}: ${r.stderr}`);
+  assert.match(r.stderr, /NO VERDICT/);
+  assert.match(r.stderr, /BOARD_API_URL is unset/);
+  // And it must not be the undici throw any more.
+  assert.doesNotMatch(r.stderr, /ERR_INVALID_URL/);
 });

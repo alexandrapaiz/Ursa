@@ -1,0 +1,195 @@
+install: npm i --no-save playwright --cache /tmp/epito-ursa-frontend-2rH8dY/.fe-run-m2/npm-cache
+cwd: /tmp/epito-ursa-frontend-2rH8dY/.fe-run-m2/pw
+exit: 0  wall_ms: 13708  polls_every_ms: 40
+
+pids whose /proc cmdline mentioned npm at any poll, and what the
+shipped anchor on argv[0] said about each:
+
+pid=113029
+  first seen at      78 ms, argv[0]="claude" fields=11
+  argv[0] at the end "claude"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=1136175
+  first seen at      78 ms, argv[0]="/bin/bash" fields=3
+  argv[0] at the end "/bin/bash"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=193374
+  first seen at      78 ms, argv[0]="/bin/bash" fields=3
+  argv[0] at the end "/bin/bash"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=222806
+  first seen at      78 ms, argv[0]="/bin/bash" fields=3
+  argv[0] at the end "/bin/bash"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=335865
+  first seen at      78 ms, argv[0]="/bin/bash" fields=3
+  argv[0] at the end "/bin/bash"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=361110
+  first seen at      78 ms, argv[0]="claude" fields=11
+  argv[0] at the end "claude"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=370281
+  first seen at      78 ms, argv[0]="/bin/bash" fields=3
+  argv[0] at the end "/bin/bash"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=381790
+  first seen at      78 ms, argv[0]="/bin/bash" fields=3
+  argv[0] at the end "/bin/bash"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=429282
+  first seen at      78 ms, argv[0]="claude" fields=11
+  argv[0] at the end "claude"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=440416
+  first seen at      78 ms, argv[0]="/bin/bash" fields=3
+  argv[0] at the end "/bin/bash"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=440579
+  first seen at      78 ms, argv[0]="/bin/bash" fields=3
+  argv[0] at the end "/bin/bash"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=441299
+  first seen at      78 ms, argv[0]="node" fields=7
+  argv[0] at the end "npm i playwright"
+  shipped anchor first said yes at 394 ms
+  blind window       316 ms
+pid=441325
+  first seen at      269 ms, argv[0]="pgrep" fields=3
+  argv[0] at the end "pgrep"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=441516
+  first seen at      1584 ms, argv[0]="/bin/bash" fields=3
+  argv[0] at the end "/bin/bash"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=441517
+  first seen at      1584 ms, argv[0]="pgrep" fields=3
+  argv[0] at the end "pgrep"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=441530
+  first seen at      1772 ms, argv[0]="pgrep" fields=3
+  argv[0] at the end "pgrep"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=441657
+  first seen at      2693 ms, argv[0]="/bin/bash" fields=3
+  argv[0] at the end "pgrep"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=441904
+  first seen at      5416 ms, argv[0]="pgrep" fields=3
+  argv[0] at the end "pgrep"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=442117
+  first seen at      6550 ms, argv[0]="claude" fields=11
+  argv[0] at the end "claude"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=442190
+  first seen at      6925 ms, argv[0]="/bin/bash" fields=3
+  argv[0] at the end "/bin/bash"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=442191
+  first seen at      6925 ms, argv[0]="pgrep" fields=3
+  argv[0] at the end "pgrep"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=442218
+  first seen at      7048 ms, argv[0]="pgrep" fields=3
+  argv[0] at the end "pgrep"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=442366
+  first seen at      7695 ms, argv[0]="pgrep" fields=3
+  argv[0] at the end "pgrep"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=442433
+  first seen at      8065 ms, argv[0]="pgrep" fields=3
+  argv[0] at the end "pgrep"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=442446
+  first seen at      8109 ms, argv[0]="pgrep" fields=3
+  argv[0] at the end "pgrep"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=443216
+  first seen at      12312 ms, argv[0]="/bin/bash" fields=3
+  argv[0] at the end "/bin/bash"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=443217
+  first seen at      12312 ms, argv[0]="pgrep" fields=3
+  argv[0] at the end "pgrep"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=443250
+  first seen at      12400 ms, argv[0]="pgrep" fields=3
+  argv[0] at the end "pgrep"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+pid=443396
+  first seen at      13295 ms, argv[0]="pgrep" fields=3
+  argv[0] at the end "pgrep"
+  shipped anchor first said yes at NEVER
+  blind window       the whole install
+
+transitions:
+      78 ms  first-seen      pid=113029 detected=false fields=11 argv[0]="claude"
+      78 ms  first-seen      pid=1136175 detected=false fields=3 argv[0]="/bin/bash"
+      78 ms  first-seen      pid=193374 detected=false fields=3 argv[0]="/bin/bash"
+      78 ms  first-seen      pid=222806 detected=false fields=3 argv[0]="/bin/bash"
+      78 ms  first-seen      pid=335865 detected=false fields=3 argv[0]="/bin/bash"
+      78 ms  first-seen      pid=361110 detected=false fields=11 argv[0]="claude"
+      78 ms  first-seen      pid=370281 detected=false fields=3 argv[0]="/bin/bash"
+      78 ms  first-seen      pid=381790 detected=false fields=3 argv[0]="/bin/bash"
+      78 ms  first-seen      pid=429282 detected=false fields=11 argv[0]="claude"
+      78 ms  first-seen      pid=440416 detected=false fields=3 argv[0]="/bin/bash"
+      78 ms  first-seen      pid=440579 detected=false fields=3 argv[0]="/bin/bash"
+      78 ms  first-seen      pid=441299 detected=false fields=7 argv[0]="node"
+     269 ms  first-seen      pid=441325 detected=false fields=3 argv[0]="pgrep"
+     394 ms  first-detected  pid=441299 detected=true fields=99 argv[0]="npm"
+     394 ms  argv0-changed   pid=441299 detected=true fields=99 argv[0]="npm"
+    1584 ms  argv0-changed   pid=441299 detected=true fields=86 argv[0]="npm i playwright"
+    1584 ms  first-seen      pid=441516 detected=false fields=3 argv[0]="/bin/bash"
+    1584 ms  first-seen      pid=441517 detected=false fields=3 argv[0]="pgrep"
+    1772 ms  first-seen      pid=441530 detected=false fields=3 argv[0]="pgrep"
+    2693 ms  first-seen      pid=441657 detected=false fields=3 argv[0]="/bin/bash"
+    2733 ms  argv0-changed   pid=441657 detected=false fields=3 argv[0]="pgrep"
+    5416 ms  first-seen      pid=441904 detected=false fields=3 argv[0]="pgrep"
+    6550 ms  first-seen      pid=442117 detected=false fields=11 argv[0]="claude"
+    6925 ms  first-seen      pid=442190 detected=false fields=3 argv[0]="/bin/bash"
+    6925 ms  first-seen      pid=442191 detected=false fields=3 argv[0]="pgrep"
+    7048 ms  first-seen      pid=442218 detected=false fields=3 argv[0]="pgrep"
+    7695 ms  first-seen      pid=442366 detected=false fields=3 argv[0]="pgrep"
+    8065 ms  first-seen      pid=442433 detected=false fields=3 argv[0]="pgrep"
+    8109 ms  first-seen      pid=442446 detected=false fields=3 argv[0]="pgrep"
+   12312 ms  first-seen      pid=443216 detected=false fields=3 argv[0]="/bin/bash"
+   12312 ms  first-seen      pid=443217 detected=false fields=3 argv[0]="pgrep"
+   12400 ms  first-seen      pid=443250 detected=false fields=3 argv[0]="pgrep"
+   13295 ms  first-seen      pid=443396 detected=false fields=3 argv[0]="pgrep"
+
+npm said:
+  added 2 packages in 12s
+  npm notice
+  npm notice New major version of npm available! 10.9.8 -> 12.2.2
+  npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  npm notice To update run: npm install -g npm@12.2.2
+  npm notice

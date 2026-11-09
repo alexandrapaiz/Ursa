@@ -8,8 +8,8 @@ import { execFileSync } from 'node:child_process'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
-import { mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { writeFileSync } from 'node:fs'
+import { tempDir } from '../testing/tmpdir.mjs'
 
 import {
   BLOCKER_PHRASES,
@@ -173,7 +173,7 @@ test('the clean line names the scope it could not look up', () => {
 })
 
 test('the CLI exits 0 over a fixture whose named row is open, and 1 when it is not', () => {
-  const dir = mkdtempSync(resolve(tmpdir(), 'ursa-blockers-'))
+  const dir = tempDir('ursa-blockers-')
   const path = resolve(dir, 'ideas.md')
   writeFileSync(path, ONE_CLAIM)
   const run = (open) => {
@@ -210,7 +210,7 @@ test('--grade exits non-zero on a hit nobody has classified', () => {
   // A grading nobody re-derived is the defect the flag exists to find, and
   // this is the assertion that keeps the flag itself honest: it found this
   // file's own first published numbers wrong within the hour.
-  const dir = mkdtempSync(resolve(tmpdir(), 'ursa-grade-'))
+  const dir = tempDir('ursa-grade-')
   const path = resolve(dir, 'ideas.md')
   writeFileSync(path, ONE_CLAIM)
   assert.throws(

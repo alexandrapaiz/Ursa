@@ -6,6 +6,8 @@
 //   node tools/registers/check-ids.mjs --base HEAD            # another single ref
 //   node tools/registers/check-ids.mjs --heads                # and every open pull request head
 //   node tools/registers/check-ids.mjs --next ADR --heads     # the allocator
+//   node tools/registers/check-ids.mjs --next Window --heads  # prints `Window 106`
+//   node tools/registers/check-ids.mjs --next RunnerFact --heads  # prints `100`
 //   node tools/registers/check-ids.mjs --json out.json        # the findings as data
 //   node tools/registers/check-ids.mjs --no-fetch --heads     # use the refs already here
 //   node tools/registers/check-ids.mjs --repo <dir> --base main  # another checkout
@@ -18,8 +20,13 @@
 // clone. The two exit-2 branches are distinguishable by `derivedFrom` in
 // `--json`, never by the code alone.
 //
-// The namespaces, the registers that define them, and every burned identifier
-// with its reason live in tools/registers/id-namespaces.json. The reasoning
+// The namespaces, the registers that define them, the spelling each one uses
+// and every burned identifier with its reason live in
+// tools/registers/id-namespaces.json. HOW AN IDENTIFIER IS SPELLED is that
+// file's `spell`, not this program's: the two allocator examples above print
+// `Window 106` and `100` rather than `Window-106` and `RunnerFact-100`, and
+// until 2026-11-09 `NAME-<digits>` was the only form this gate could allocate
+// in. tools/registers/id-verdict.mjs's header has the measurement. The reasoning
 // behind the gate is in tools/registers/id-verdict.mjs's header and the full
 // specification is docs/design/register-id-allocation.md.
 //
@@ -42,7 +49,7 @@ import { execFileSync } from 'node:child_process'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { renderVerdict } from '../gates/verdict-shape.mjs'
-import { manifestFault, manifestUnusable, scopeUnreadable, verdict } from './id-verdict.mjs'
+import { manifestFault, manifestUnusable, scopeUnreadable, spellId, unspellId, verdict } from './id-verdict.mjs'
 
 const argv = process.argv.slice(2)
 
@@ -207,9 +214,25 @@ if (wantHeads) {
 // The scan.
 // ---------------------------------------------------------------------------
 
-/** @type {Map<string, {ns: object, occurrences: {ref: string, label: string, line: number, text: string}[]}>} */
+// WHY THE KEY IS THE NAMESPACE AND THE IDENTIFIER, not the identifier alone.
+// Every namespace this file held before 2026-11-09 spelled its identifiers
+// with its own prefix, so an identifier string was globally unique and one map
+// keyed on it was correct by accident. `RunnerFact` spells its identifiers as
+// bare numbers, so a second bare-numbered register would make this register's
+// section 93 and that one's section 93 one key with two texts: a reported
+// collision between two files that have nothing to do with each other, in the
+// namespace whose repair is a seat's. The identifier is carried in the value
+// because it is what the finding has to print.
+/** @type {Map<string, {ns: object, id: string, occurrences: {ref: string, label: string, line: number, number: number, text: string}[]}>} */
 const defined = new Map()
 let registersRead = 0
+// Per namespace, how many refs actually yielded a register file. The global
+// count above was computed and never read by any branch of this program, which
+// is why the do-nothing verdict below went unmeasured for a day: the gate
+// counted the one quantity that proves it opened anything and then discarded
+// it.
+/** @type {Map<string, number>} */
+const readsPerNamespace = new Map()
 
 for (const ns of manifest.namespaces) {
   // Compiled once per namespace and applied per line rather than per file.
@@ -225,23 +248,87 @@ for (const ns of manifest.namespaces) {
       // A ref that does not carry the register is not a finding. Branches are
       // built off older roots here and a register file that postdates a root
       // is absent for a reason that has nothing to do with identifiers.
+      //
+      // That reasoning is sound PER REF and says nothing about the set. If
+      // NONE of the refs carried it, the explanation is not an old root, it is
+      // a path that resolves to no file anywhere -- which the loop below
+      // refuses rather than scanning past. Same shape as HEAD_UNREADABLE
+      // above: an unmeasurable scope is not an absent finding.
       continue
     }
     registersRead += 1
+    readsPerNamespace.set(ns.name, (readsPerNamespace.get(ns.name) ?? 0) + 1)
     const lines = text.split('\n')
     for (const [index, line] of lines.entries()) {
       const match = pattern.exec(line)
       if (match === null) continue
       const id = match[1]
-      if (!defined.has(id)) defined.set(id, { ns, occurrences: [] })
-      defined.get(id).occurrences.push({ ref, label, line: index + 1, text: line.trim() })
+      // The number comes from capture group 2, which the manifest validator
+      // guarantees exists, rather than from slicing the identifier against the
+      // namespace's name. The slice was the allocator's only source of a
+      // number until 2026-11-09 and it returns "" for a bare-numbered
+      // identifier, which `Number()` reads as 0 rather than as NaN.
+      const number = Number(match[2])
+      const key = `${ns.name}\u0000${id}`
+      if (!defined.has(key)) defined.set(key, { ns, id, occurrences: [] })
+      defined.get(key).occurrences.push({ ref, label, line: index + 1, number, text: line.trim() })
     }
   }
+}
+
+// THE DO-NOTHING CONTROL, and it is this gate's own rule turned on itself
+// (added 2026-11-09, window 110, measured before it was believed).
+//
+// Ask what the instrument returns when it does nothing, and whether that value
+// is in band. Measured on a fixture whose register was renamed and whose
+// manifest was left alone -- the one-commit mistake this repository makes
+// routinely -- both answers were in band and at the reassuring end:
+//
+//   findings:  `0 identifier(s) in 1 namespace(s) across 1 ref(s), every one
+//               defined once and no burned one reissued. Exit 0.`
+//   allocator: `Window 1`, exit 0.
+//
+// The findings line is the strongest reassurance this gate has, over a file it
+// never opened. The allocator is worse than reassuring: `Window 1` is held by
+// a real entry in the real register, so the do-nothing value of an allocator
+// whose job is to avoid collisions is a GUARANTEED collision, issued at exit
+// 0. git's own `fatal: path ... does not exist` goes to stderr, and `--next`
+// exists to be consumed as `$(... --next Window --heads)`, which reads stdout
+// alone; a caller in that command substitution received `Window 1` and a zero
+// status with nothing else to read.
+//
+// `example` in the manifest does not cover this. It proves `define` matches a
+// string the manifest carries, which is a check against the author's typo in
+// the pattern. This is a check against the world moving under a path that was
+// correct when it was written, and only a read at a real ref can see it.
+const unreadNamespaces = manifest.namespaces.filter((ns) => (readsPerNamespace.get(ns.name) ?? 0) === 0)
+if (unreadNamespaces.length > 0) {
+  finish(
+    scopeUnreadable({
+      code: 'REGISTER_UNREAD',
+      detail:
+        `${unreadNamespaces.length} namespace(s) had no register file at any of the ${refs.length} ref(s) in scope, ` +
+        `so a clean verdict and an allocated number would both be computed from nothing: ` +
+        unreadNamespaces.map((ns) => `${ns.name} (${ns.register})`).join(', '),
+    }),
+  )
 }
 
 // ---------------------------------------------------------------------------
 // The allocator.
 // ---------------------------------------------------------------------------
+
+/**
+ * A burned identifier's number, read through the namespace's own spelling.
+ * The manifest validator has already refused any burn this cannot parse, so
+ * the fault branch here is unreachable and throws rather than returning a
+ * number that would silently shrink the allocator's range.
+ */
+const unspelledNumber = (ns, id) => {
+  const parsed = unspellId(ns, id)
+  if ('fault' in parsed) throw new Error(`burned id ${id} is unspellable in ${ns.name}, which the validator should have refused`)
+  return parsed.n
+}
 
 if (nextOf !== undefined) {
   const ns = manifest.namespaces.find((n) => n.name === nextOf)
@@ -254,20 +341,21 @@ if (nextOf !== undefined) {
     )
   }
   const numbers = []
-  for (const [id, entry] of defined) {
+  for (const entry of defined.values()) {
     if (entry.ns.name !== ns.name) continue
-    numbers.push(Number(id.slice(ns.name.length + 1)))
+    numbers.push(entry.occurrences[0].number)
   }
-  for (const b of ns.burned ?? []) numbers.push(Number(b.id.slice(ns.name.length + 1)))
+  for (const b of ns.burned ?? []) numbers.push(unspelledNumber(ns, b.id))
   // Highest plus one, never the lowest gap. A gap in this repository is a
   // burned identifier, and filling one makes an old citation resolve silently
   // to a new decision, which is strictly worse than a citation that dangles.
   const highest = numbers.length === 0 ? 0 : Math.max(...numbers)
   const n = highest + 1
-  const padded = String(n).padStart(ns.pad, '0')
-  console.log(`${ns.name}-${padded}`)
+  console.log(spellId(ns, n))
   console.log(
-    `  computed from ${numbers.length} identifier(s) defined or burned across ${refs.length} ref(s): highest is ${highest}, so the next free one is ${n}.`,
+    `  computed from ${numbers.length} identifier(s) defined or burned across ${refs.length} ref(s) ` +
+      `and ${readsPerNamespace.get(ns.name) ?? 0} copy/copies of ${ns.register}: ` +
+      `highest is ${highest}, so the next free one is ${n}.`,
   )
   console.log(`  register: ${ns.register}`)
   process.exit(0)
@@ -283,7 +371,9 @@ const lines = []
 const burnedOf = (ns) => new Set((ns.burned ?? []).map((b) => b.id))
 const reasonOf = (ns, id) => (ns.burned ?? []).find((b) => b.id === id)?.why ?? ''
 
-for (const [id, { ns, occurrences }] of [...defined].sort((a, b) => a[0].localeCompare(b[0]))) {
+for (const { ns, id, occurrences } of [...defined.values()].sort((a, b) =>
+  `${a.ns.name} ${a.id}`.localeCompare(`${b.ns.name} ${b.id}`),
+)) {
   const texts = new Set(occurrences.map((o) => o.text))
   const perRef = new Map()
   for (const o of occurrences) perRef.set(o.ref, (perRef.get(o.ref) ?? 0) + 1)
@@ -317,6 +407,7 @@ finish(
     ids: defined.size,
     namespaces: manifest.namespaces.length,
     refs: refs.length,
+    registers: registersRead,
     scope: wantHeads ? `${base} and every open pull request head` : base,
   }),
   lines,

@@ -35,6 +35,8 @@ const MANIFEST = {
       register: 'docs/decisions.md',
       pad: 3,
       define: '^## (ADR-(\\d+)) \\u2014 (.+)$',
+      spell: 'ADR-{n}',
+      example: '## ADR-001 \u2014 the first',
       repair: 'owner',
       why: 'the fixture register',
       burned: [{ id: 'ADR-002', why: 'burned in the fixture so a reissue is detectable' }],
@@ -44,8 +46,28 @@ const MANIFEST = {
       register: 'docs/queue.md',
       pad: 1,
       define: '^## (PWC-(\\d+)) \\u2014 (.+)$',
+      spell: 'PWC-{n}',
+      example: '## PWC-1 \u2014 a queued change',
       repair: 'seat',
       why: 'the fixture queue, repaired by a seat rather than the owner',
+      burned: [],
+    },
+    // The namespace whose identifiers are bare numbers, which is the shape
+    // `docs/agents/runner-facts.md` really has and the shape that was
+    // inexpressible until `spell` existed. It is in the default fixture
+    // rather than in one case's own manifest so that every case above runs
+    // with a bare-numbered namespace present: that is what proves the scan's
+    // key is the namespace and the identifier rather than the identifier
+    // alone, since `ADR-001` and section `1` must not become one finding.
+    {
+      name: 'Section',
+      register: 'docs/sections.md',
+      pad: 1,
+      define: '^## ((\\d+)[a-z]?)\\. (.+)$',
+      spell: '{n}',
+      example: '## 1. the first section',
+      repair: 'seat',
+      why: 'the fixture register that spells its identifiers as bare numbers',
       burned: [],
     },
   ],
@@ -70,11 +92,43 @@ function fixture(branches) {
   mkdirSync(join(dir, 'tools/registers'), { recursive: true })
   mkdirSync(join(dir, 'docs'), { recursive: true })
   writeFileSync(join(dir, 'tools/registers/id-namespaces.json'), JSON.stringify(MANIFEST, null, 2))
+  // EVERY DECLARED REGISTER EXISTS ON EVERY BRANCH, supplied by the case or
+  // stubbed here (added 2026-11-09, window 110, and it is a correction to this
+  // file rather than a convenience).
+  //
+  // The comment on `Section` above says it sits in the default manifest "so
+  // that every case above runs with a bare-numbered namespace present". It did
+  // not. A case supplies only the files it names, `docs/sections.md` is named
+  // by four of them, and the gate skipped a ref that does not carry a
+  // register -- so in every other case that namespace was declared and never
+  // read, contributing nothing and proving nothing. The suite asserted a
+  // property it believed it was exercising.
+  //
+  // What found it was this gate's own REGISTER_UNREAD control, written the
+  // same hour, which is window 106's rule arriving at its author's own test
+  // suite: a positive control validates the instrument and not the inference.
+  //
+  // The stub is heading-free on purpose. It makes the namespace READ rather
+  // than populated, so every identifier count asserted below is unchanged and
+  // the only thing that moves is whether the gate opened the file at all.
+  const stub = (path) => `# ${path}\n\nNo entries; stubbed so the declared namespace is read.\n`
+  const declared = MANIFEST.namespaces.map((ns) => ns.register)
   let first = true
   for (const [branch, files] of Object.entries(branches)) {
     if (first) first = false
     else git('checkout', '--quiet', '-B', branch, 'main')
-    for (const [path, body] of Object.entries(files)) writeFileSync(join(dir, path), body)
+    // `null` as a body means DELIBERATELY ABSENT HERE, and it exists because
+    // stubbing by default would otherwise have silently deleted the coverage
+    // of the per-ref skip: the case named "absent at a ref" had one branch and
+    // relied on two registers simply never being written, so a blanket stub
+    // turned it into "present but empty" without failing.
+    for (const path of declared) {
+      if (!(path in files)) writeFileSync(join(dir, path), stub(path))
+    }
+    for (const [path, body] of Object.entries(files)) {
+      if (body === null) rmSync(join(dir, path), { force: true })
+      else writeFileSync(join(dir, path), body)
+    }
     git('add', '-A')
     // --allow-empty because two branches in the head-copy fixture carry
     // byte-identical content on purpose, which is the case under test.
@@ -113,7 +167,7 @@ describe('the scan', () => {
     })
     const { code, stdout } = run(dir)
     assert.equal(code, 0)
-    assert.match(stdout, /3 identifier\(s\) in 2 namespace\(s\) across 1 ref\(s\)/)
+    assert.match(stdout, /3 identifier\(s\) over 3 register file\(s\) in 3 namespace\(s\) across 1 ref\(s\)/)
     assert.match(stdout, /every one defined once and no burned one reissued\. Exit 0\./)
   })
 
@@ -159,7 +213,7 @@ describe('the scan', () => {
     git('update-ref', 'refs/prs/2', 'seat/b')
     const { code, stdout } = run(dir, '--heads')
     assert.equal(code, 0)
-    assert.match(stdout, /1 identifier\(s\) in 2 namespace\(s\) across 3 ref\(s\)/)
+    assert.match(stdout, /1 identifier\(s\) over 9 register file\(s\) in 3 namespace\(s\) across 3 ref\(s\)/)
   })
 
   it('catches the same heading twice inside one ref, which text identity alone would hide', () => {
@@ -188,10 +242,60 @@ describe('the scan', () => {
   })
 
   it('treats a register absent at a ref as nothing to say, not as a finding', () => {
-    const dir = fixture({ main: { 'docs/queue.md': `# Queue\n\n${heading('PWC-1', 'x')}\n` } })
+    // ABSENT AT A REF, which is the per-ref skip and the only thing this case
+    // ever meant to assert. Written as one branch until 2026-11-09, where it
+    // passed because NO ref carried two of the three registers -- so it was
+    // also, silently, the only coverage of the whole-namespace case, and it
+    // asserted exit 0 over it. Those are two different rules with two
+    // different answers and this case now drives the first one alone: the
+    // queue is on main and gone from the head, which is a branch cut before
+    // the register existed.
+    const dir = fixture({
+      main: { 'docs/queue.md': `# Queue\n\n${heading('PWC-1', 'x')}\n` },
+      'seat/older-root': { 'docs/queue.md': null },
+    })
+    const git = (...a) => execFileSync('git', ['-C', dir, ...a], { encoding: 'utf8' })
+    git('update-ref', 'refs/prs/1', 'seat/older-root')
+    const { code, stdout } = run(dir, '--heads')
+    assert.equal(code, 0, stdout)
+    // One identifier, read from the one ref that has the register, over the
+    // five (ref, register) pairs that exist rather than the six in scope.
+    assert.match(stdout, /1 identifier\(s\) over 5 register file\(s\) in 3 namespace\(s\) across 2 ref\(s\)/)
+  })
+
+  it('refuses the whole scope when a namespace has no register at ANY ref', () => {
+    // The other half of the rule above, and the reason this gate's do-nothing
+    // value was in band for a day. Absent at one ref of several is an older
+    // root. Absent at every ref is a path that resolves nowhere, and the two
+    // answers a clean scan would give over it are both wrong and both
+    // reassuring: `0 identifier(s) ... every one defined once` at exit 0, and
+    // an allocated `1` -- a number the real register already holds, so the
+    // do-nothing value of a collision allocator was a guaranteed collision.
+    const dir = fixture({
+      main: { 'docs/decisions.md': adr([heading('ADR-001', 'the first')]), 'docs/queue.md': null },
+    })
     const { code, stdout } = run(dir)
-    assert.equal(code, 0)
-    assert.match(stdout, /1 identifier\(s\) in 2 namespace\(s\)/)
+    assert.equal(code, 2)
+    assert.match(stdout, /REGISTER_UNREAD/)
+    assert.match(stdout, /PWC \(docs\/queue\.md\)/)
+    // The count is in the detail, so a reader sees the denominator it was
+    // measured over rather than only the name of the namespace.
+    assert.match(stdout, /no register file at any of the 1 ref\(s\)/)
+  })
+
+  it('refuses to allocate a number when the namespace was read from no ref', () => {
+    // Measured separately from the findings path because it is the worse of
+    // the two and it is consumed differently: `--next` exists to be read as
+    // `$(... --next PWC --heads)`, which is stdout alone, so git's own
+    // `fatal: path ... does not exist` on stderr is invisible exactly where
+    // the number is used.
+    const dir = fixture({ main: { 'docs/queue.md': null } })
+    const git = (...a) => execFileSync('git', ['-C', dir, ...a], { encoding: 'utf8' })
+    git('update-ref', 'refs/prs/1', 'main')
+    const { code, stdout } = run(dir, '--next', 'PWC', '--heads')
+    assert.equal(code, 2)
+    assert.match(stdout, /REGISTER_UNREAD/)
+    assert.doesNotMatch(stdout, /^PWC-1$/m)
   })
 
   it('does not read a mention in a paragraph as a definition', () => {
@@ -206,6 +310,85 @@ describe('the scan', () => {
     })
     const { code } = run(dir)
     assert.equal(code, 0)
+  })
+})
+
+describe('the spelling, which is the half of this gate a manifest alone could not express', () => {
+  const sections = (lines) => `# Sections\n\n${lines.join('\n\n')}\n`
+
+  it('does not merge a bare-numbered identifier with a prefixed one that shares its text', () => {
+    // `ADR-001` and section `1` are two identifiers in two namespaces. Keyed
+    // on the identifier alone they stay apart only because their strings
+    // differ; the case that breaks is two bare-numbered namespaces, which is
+    // what the next register added here would be. This fixture pins the
+    // weaker form that is cheap to run: both are defined, both are clean, and
+    // the census counts two of them rather than one.
+    const dir = fixture({
+      main: {
+        'docs/decisions.md': adr([heading('ADR-001', 'the first')]),
+        'docs/queue.md': '# Queue\n',
+        'docs/sections.md': sections(['## 1. the first section']),
+      },
+    })
+    const { code, stdout } = run(dir)
+    assert.equal(code, 0)
+    assert.match(stdout, /2 identifier\(s\) over 3 register file\(s\) in 3 namespace\(s\)/)
+  })
+
+  it('allocates in the register\'s own spelling, not in NAME-<digits>', () => {
+    // The measured defect this field exists for. Before `spell`, the
+    // allocator printed `${name}-${padded}`, so this namespace would have
+    // answered `Section-4` — a string no heading in the register is spelled
+    // like, which a seat pasting it turns into a definition the `define`
+    // pattern cannot see, so the next allocation collides with it.
+    const dir = fixture({
+      main: {
+        'docs/decisions.md': '# Decisions\n',
+        'docs/queue.md': '# Queue\n',
+        'docs/sections.md': sections(['## 1. the first', '## 2. the second', '## 3. the third']),
+      },
+    })
+    const { code, stdout } = run(dir, '--next', 'Section', '--heads', '--no-fetch')
+    assert.equal(code, 0)
+    assert.match(stdout, /^4$/m)
+    assert.doesNotMatch(stdout, /Section-/)
+    assert.match(stdout, /highest is 3, so the next free one is 4/)
+  })
+
+  it('reads the number from the pattern, not from slicing the identifier against the name', () => {
+    // The silent half. `"93".slice("Section".length + 1)` is `""` and
+    // `Number("")` is 0, not NaN, so the old allocator would have reported
+    // "highest is 0, so the next free one is 1" over a register whose tail is
+    // 93 — a confident answer that reissues every number in the file.
+    const dir = fixture({
+      main: {
+        'docs/decisions.md': '# Decisions\n',
+        'docs/queue.md': '# Queue\n',
+        'docs/sections.md': sections(['## 93. the ninety-third']),
+      },
+    })
+    const { stdout } = run(dir, '--next', 'Section', '--heads', '--no-fetch')
+    assert.match(stdout, /^94$/m)
+    assert.match(stdout, /highest is 93, so the next free one is 94/)
+  })
+
+  it('treats a letter-suffixed section as its own identifier sharing a number', () => {
+    // `1b` is how a section is inserted next to a related one without
+    // renumbering the file, so it is a distinct identifier (no collision with
+    // `1`) whose allocating number is still 1 (so the next free one is 2, not
+    // 1b+1).
+    const dir = fixture({
+      main: {
+        'docs/decisions.md': '# Decisions\n',
+        'docs/queue.md': '# Queue\n',
+        'docs/sections.md': sections(['## 1. the first', '## 1b. inserted beside it']),
+      },
+    })
+    const { code, stdout } = run(dir)
+    assert.equal(code, 0)
+    assert.match(stdout, /2 identifier\(s\) over 3 register file\(s\) in 3 namespace\(s\)/)
+    const next = run(dir, '--next', 'Section', '--heads', '--no-fetch')
+    assert.match(next.stdout, /^2$/m)
   })
 })
 
@@ -252,7 +435,7 @@ describe('the allocator', () => {
     const { code, stdout } = run(dir(), '--next', 'INC', '--heads', '--no-fetch')
     assert.equal(code, 2)
     assert.match(stdout, /NAMESPACE_UNKNOWN/)
-    assert.match(stdout, /it declares ADR, PWC/)
+    assert.match(stdout, /it declares ADR, PWC, Section/)
   })
 })
 

@@ -65,11 +65,62 @@ test('a check whose dependencies are absent is unrunnable, never passing and nev
   assert.equal(got.state, 'unrunnable')
   assert.match(got.why, /node_modules is absent/)
   // And it becomes runnable once the dependency is there, so the gate is not
-  // permanently stuck.
+  // permanently stuck. Both inputs now, because the directory is not the
+  // condition: see the next case.
   assert.equal(
-    classify(check, { installedPackages: ['ursa-major'], skip: [], shallow: false }).state,
+    classify(check, {
+      installedPackages: ['ursa-major'],
+      installedBins: [`ursa-major/${check.needsBin}`],
+      skip: [],
+      shallow: false,
+    }).state,
     'runnable',
   )
+})
+
+// A PARTIAL INSTALL IS NOT AN INSTALL, AND npx FILLS THE GAP FROM THE PUBLIC
+// REGISTRY (added 2026-11-09, security seat, measured)
+//
+// `needsNodeModules` tested for the DIRECTORY. A tree where `node_modules/`
+// exists and the binary does not passed that test, and the check then ran
+// `npx tsc`, which without `--no-install` fetches and executes a registry
+// package of that name.
+//
+// Measured in this check, not reasoned about: it printed `npm warn exec The
+// following package was not found and will be installed: tsc@2.0.4` and ran
+// it, in a seat sandbox with live tokens in the environment. `npx
+// --no-install` refuses instead, with `npx canceled due to missing packages
+// and no YES option: ["tsc@2.0.4"]`, which also names what would have been
+// fetched.
+//
+// The partial tree is not hypothetical. `node tools/seat/env-facts.mjs`
+// carries it as a measured npm failure mode on this host under
+// `npm-cache-is-a-shared-home-path`: `exit 0 with no node_modules/.bin`.
+test('a package installed but missing the binary is unrunnable, not attempted against the registry', () => {
+  for (const check of CHECKS.filter((c) => c.needsBin)) {
+    const got = classify(check, {
+      installedPackages: [check.needsNodeModules],
+      installedBins: [],
+      skip: [],
+      shallow: false,
+    })
+    assert.equal(got.state, 'unrunnable', check.id)
+    assert.match(got.why, /\.bin\/\w/)
+    // The message has to separate a partial install from a missing one,
+    // because the remedy differs and the first one looks like the second.
+    assert.match(got.why, /partial rather than missing/)
+  }
+})
+
+test('every npx check refuses to install, so a missing binary cannot be served by the registry', () => {
+  const npxChecks = CHECKS.filter((c) => c.argv().includes('npx'))
+  assert.ok(npxChecks.length > 0, 'expected at least one npx check')
+  for (const c of npxChecks) {
+    assert.ok(c.argv().includes('--no-install'),
+      `${c.id} runs npx without --no-install, so a missing binary is fetched and executed`)
+    // And it declares which binary it needs, or the guard above cannot fire.
+    assert.ok(c.needsBin, `${c.id} runs npx and declares no needsBin`)
+  }
 })
 
 test('a history-dependent check is unrunnable on a shallow clone rather than blamed on the branch', () => {
@@ -144,6 +195,22 @@ test('a run that could not check the product exits 2 and says so, end to end', (
     assert.match(stdout, /passed|failed/)
     return
   }
-  assert.equal(status, 2, 'a product check that could not run must exit 2, not 0 and not 1')
+  // The third premise, which this case used to fold into its own failure
+  // message (added 2026-11-09, security seat, hit rather than foreseen).
+  // Exit 1 means the check RAN and failed, so the tree was complete at
+  // classify time and changed underneath it: a concurrent install or
+  // teardown. Reporting that as "a product check that could not run must
+  // exit 2" names the wrong thing, which is the defect this run spent its
+  // length on. This seat hit it by deleting node_modules while this very
+  // case was running.
+  if (status === 1) {
+    assert.match(stdout, /failed/)
+    assert.ok(!/unrunnable/.test(stdout),
+      'exit 1 with an unrunnable check means the exit code and the states disagree')
+    return
+  }
+  assert.equal(status, 2,
+    'a product check must exit 0 when it passes, 1 when it ran and failed, '
+    + 'or 2 when it could not run; nothing else is a defined state')
   assert.match(stdout, /not a verdict on the branch/)
 })

@@ -65,10 +65,25 @@ export function RecordInspector({
             {typeof span.score === "number" ? (
               <span className="text-[var(--dim)]"> · similarity {span.score.toFixed(3)}</span>
             ) : null}
+            {/* `rec-hit` and a 16px gap above it, which every other standalone
+                `.rec-action` on this site has carried since 2026-10-24 and
+                this one did not. Its drawn box is 18px tall against the 44px
+                floor, measured SHORT by 26 at all three viewports.
+
+                Why it survived six hit-area sweeps: this panel only exists
+                once a passage is selected, and nothing had ever driven the
+                viewer into that state to measure it. The control was not
+                missed, it was out of frame. See
+                reviews/2026-11-09-message-x/data/hit-areas-selected.txt.
+
+                `mt-4` rather than `mt-3` for the reason the 44px floor block
+                in globals.css gives for the three form buttons: the overlay
+                reaches 13px past the box, and a 12px gap does not hold it off
+                the line above. 16px clears it by 3. */}
             <button
               type="button"
               onClick={() => onJump(src.generationIndex, { start: src.start, end: src.end })}
-              className="rec-action mt-3 block font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)]"
+              className="rec-action rec-hit mt-4 block font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)]"
             >
               See it inside the generation →
             </button>
@@ -96,15 +111,25 @@ export function RecordInspector({
         {span.diff?.length ? (
           <Field label="Your edit">
             <p className="rec-diff font-mono text-[0.76rem] leading-[1.8]">
-              {span.diff.map((part, i) =>
-                part.added ? (
-                  <ins key={i}>{part.value}</ins>
-                ) : part.removed ? (
-                  <del key={i}>{part.value}</del>
-                ) : (
-                  <span key={i}>{part.value}</span>
-                ),
-              )}
+              {span.diff.flatMap((part, i) => {
+                if (!part.added && !part.removed) return [<span key={i}>{part.value}</span>];
+                // The space a word diff puts inside a run belongs to neither
+                // side of the change, and drawing a strike or a highlight
+                // through it welds the run to the word next to it. The
+                // fixture's removal is " is involved at any point", with its
+                // leading space, and the strike through that space met the "r"
+                // of "grader", so the two read as one hyphenated word. Emitted
+                // as plain text, the space separates them the way it does in
+                // the sentence it came from. The run itself is unchanged, so
+                // nothing about what was added or removed is restated here.
+                const [, lead, core, tail] = /^(\s*)([\s\S]*?)(\s*)$/.exec(part.value)!;
+                const Tag = part.added ? "ins" : "del";
+                return [
+                  lead ? <span key={`${i}l`}>{lead}</span> : null,
+                  core ? <Tag key={i}>{core}</Tag> : null,
+                  tail ? <span key={`${i}t`}>{tail}</span> : null,
+                ].filter(Boolean);
+              })}
             </p>
             <p className="mt-3 text-[0.78rem] text-[var(--dim)]">
               Struck text is the model&rsquo;s wording you removed. The change itself is the

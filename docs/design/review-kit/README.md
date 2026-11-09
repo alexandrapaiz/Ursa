@@ -16,13 +16,25 @@ will ever touch, and point `PW_ROOT` at it:
 export FE_RUN="$PWD/.fe-run-<id>"
 mkdir -p "$FE_RUN/pw"
 
+# The cache as a VARIABLE and not as a --cache flag, and it is exported once
+# here so every npm this run issues inherits it. Two reasons, and the second
+# is the one that is not obvious. First, it covers `npx` and anything npm
+# shells out to, which a flag on one command does not. Second, it is the only
+# form in which the check below can SEE this run's installs: npm overwrites
+# its own argv about 358 ms in and the flags are gone from /proc after that,
+# while /proc/<pid>/environ keeps the variable for the whole install.
+# Measured both ways in ../reviews/2026-11-09-message-2/data/.
+export NPM_CONFIG_CACHE="$FE_RUN/npm-cache"
+
 # BEFORE any npm, and before every later one: would it race one already
 # running, in this tree, elsewhere in this checkout, or on this cache?
-# Exits 3 if so, and prints a count line either way.
-bash docs/design/review-kit/check-installs.sh --cache "$FE_RUN/npm-cache" || exit 3
+# Exits 3 if so, and prints a count line either way. ONE INSTALL AT A TIME
+# is the point of it; the private cache is a second guard for a different
+# case. Do not background an install and start another.
+bash docs/design/review-kit/check-installs.sh || exit 3
 
 cd "$FE_RUN/pw" \
-  && npm i --no-save playwright --cache "$FE_RUN/npm-cache" \
+  && npm i --no-save playwright \
   && npx playwright install chromium
 export PW_ROOT="$FE_RUN/pw/node_modules"
 cd -
@@ -30,6 +42,57 @@ cd -
 # and at the end of the run: stop what you started, THEN delete what you
 # wrote. One command does both and prints a count line either way.
 bash docs/design/review-kit/teardown.sh            # --dry-run to look first
+```
+
+**A free branch name is not a free review directory.** The runtime names
+your branch after the trigger and tells you to append a suffix if the
+branch exists. The review directory under `../reviews/` takes the same
+name and has to be checked separately, because a merged branch is deleted
+and its directory is not: on 2026-11-09 the branch
+`ursa-frontend/2026-11-09-message` was free, `reviews/2026-11-09-message/`
+was not, and opening the run's `NOTES.md` there replaced a previous run's
+278-line one with three lines. Nothing failed and nothing conflicted; the
+merge took one side and the loss would have reached `main` as a clean
+diff. Check `ls ../reviews/` before you write the first file, not
+`gh pr list`:
+
+```bash
+ls -d docs/design/reviews/<trigger>* 2>/dev/null   # pick the first free suffix
+```
+
+**The browser you installed can disappear while you are still using it
+(2026-11-09, run t).** `npx playwright install chromium` writes into
+`/srv/asc/home/.cache/ms-playwright`, which is under the shared home every
+seat runs as, and this host's watcher reclaims that volume on a threshold
+rather than on ownership. Measured in one window: the install succeeded at
+07:41 and `ls` showed `chromium-1254`, `chromium_headless_shell-1254` and
+`ffmpeg-1013`; at 08:1x the same `ls` printed nothing and free space on
+`/tmp` had gone from 715M to 4.6G, with no install of this run's in
+between. A tool that had run clean four times then died with
+
+    browserType.launch: Executable doesn't exist at
+    …/chromium_headless_shell-1254/chrome-headless-shell-linux-arm64/…
+
+**The failure names the wrong cause**, which is why this is written down.
+Playwright's message is the one it prints for a fresh machine, "Looks like
+Playwright was just installed or updated", so it reads as a setup mistake
+at the start of a run rather than as an eviction in the middle of one. The
+tell that separates them is free space moving by gigabytes while you did
+nothing: a setup mistake cannot do that.
+
+This is `runner-facts` §97 one directory over. That section is about
+`/srv/asc/home/.npm` and names a per-run `NPM_CONFIG_CACHE` as the second
+guard; the browser cache has the same shape, the same parent, and no such
+variable in this kit's block above. `PLAYWRIGHT_BROWSERS_PATH` is the
+variable that would move it, and this run did not take that step, because
+a per-run copy of chromium is roughly 500M on a volume that was at 99 per
+cent when the eviction happened, so it trades a stall for a different
+stall. **The remedy that is free is to recognise it**: re-run the install,
+which is idempotent and took under a minute, and do not spend the window
+looking for what you broke.
+
+```bash
+ls /srv/asc/home/.cache/ms-playwright/ && df -h /tmp | tail -1
 ```
 
 **Run the teardown even if you wrote nothing**, because the server is the
@@ -78,6 +141,41 @@ was keyed on `$PWD`, so it missed the install six directories away
 sharing the same cache; and it exited 1 when clean and 0 while refusing,
 so nothing could gate on it. L68.
 
+**The repair of 2026-11-09 (run 2), and the honest size of it.** The
+version above anchored on field 0 of `/proc/<pid>/cmdline` alone, and a
+5 ms poll on a real install showed that is one of THREE shapes npm
+presents: for the first 358 ms /proc holds the seven fields the kernel was
+handed, `node /usr/bin/npm i --no-save playwright --cache x`, with argv[0]
+`node`. The anchor said yes 316 ms after the process appeared. So the guard
+read clean exactly while an install was beginning, which is the same shape
+as the `_cacache` detection line it replaced, and the exo seat's correction
+on that one is why this was gone looking for.
+
+The window is narrow and it does not explain the incident: the three
+concurrent installs of that morning started 33 s and 78 s apart, so none of
+them was inside another's 358 ms. What the run actually bought is three
+other things, and they are worth more than the window.
+
+- The cache a live install is using went from `UNREADABLE` to a path, by
+  reading `/proc/<pid>/environ` as well as the argv. Confirmed end to end
+  against a real install in `data/endtoend-env.txt`: three paired readings,
+  the old tool saying `cache=UNREADABLE` each time and the new one naming
+  the path and adding `same-cache`, which is a refusal reason the old one
+  could not produce.
+- The `--cache` flag became `NPM_CONFIG_CACHE` in the block above, because
+  legibility turns out to be a property of how the cache was SET and not of
+  when you look. The flag is readable for 358 ms; the variable is readable
+  for the whole install.
+- The guard's own latency, 0.9 to 1.7 s and up to 3.6 s under load, down to
+  0.31 to 0.61 s, by reading each `cmdline` with a NUL `mapfile` in the
+  shell instead of a subshell and a `tr` per pid, of which /proc here held
+  312. This is the one that matters most for a check a run is told to make
+  immediately before it installs, and it is also why the end-to-end
+  CANNOT see the 358 ms window: a scan costs longer than the window lasts,
+  so the unit cases against a real process in that argv shape are the
+  evidence for that half, and `data/endtoend-flag.txt` is the run that
+  tried and is reported as not discriminating.
+
 **The question it needs to answer is not the one L51 asks.** L51 is two
 installs in one `node_modules`. The resource that actually failed on
 2026-11-09 is the cache, and Ursa's exo seat established from npm's own
@@ -109,6 +207,7 @@ rather than the install. A prefix nothing else owns is immune to both.
 | `measure-swatches.mjs` | The WCAG 1.4.11 ratio of every swatch in a legend against the pixels behind it, and of each swatch's marks against each other. Samples **every pixel** of the swatch rather than its centre column, which is the only sample a 1px ring inside the box cannot fool, and reports the share of the area clearing 3:1 alongside the ratio, because one bright pixel in a flat box passes a ratio on its own. Promoted 2026-10-27 from the probe that found the dashboard's fourth provenance key at 1.20:1; L36, L43. |
 | `measure-floor.py` | How much of a frame set is actually deterministic, over **N** independent shoots rather than a pair. Reports how many of the C(N,2) pairs drawn from them would have seen no floor at all, which is the number a two-shoot diff cannot produce and the reason this file exists; L48. Selftest `selftest/check-floor.py`, 12 assertions. |
 | `verify-hover.mjs` | Every hover state on the site, photographed as a **pair**: one frame at rest and one hovered and settled, over the same frozen sky, plus what the computed style did. `diff-frames.py rest hover` then says how many pixels the hover is worth. The pair is the point: three of this site's hover rules style a descendant rather than the hovered element, so a computed-style read alone reports "nothing changed" for them, and a wash too faint to register in a PNG is what the property read catches instead. A `disabled` control gets the verdict `by-design-disabled`, because a correctly inert hover and a broken spring print the same `none`. |
+| `lib/reached.mjs` | Did the instrument reach its subject, and does it say so in BOTH channels a caller can read. `tracker()` records every navigation, `visit()` wraps the one call that establishes the premise, `code()` is 2 when anything was unreached, and `refused()` is the headline for the case where nothing was reached at all. Covers the quiet absence (a live server whose every path answers 404) and, since 2026-11-09 run z, the loud one (a dead port, which used to throw out of five of the six tools). A declared `--expect-404` path is reached, because this site's not-found page is a page under review. Selftest `selftest/check-reached.mjs`, 27 assertions. |
 | `lib/freeze.mjs` | Pins the animation clock and seeds `Math.random` before any page script runs, so the starfield draws the same sky twice. Without it 6 of the 15 review frames differ from themselves by up to 19,140 pixels. Since 2026-11-02 it also pins the page's `Date` on request, which is `shoot.mjs --pin-now`. |
 | `lib/pin-clock.mjs` | Pins `Date` in a **server** process, as a `node --import` preload, so a timestamp the server stamps into a payload stops moving between two shoots. Written 2026-11-02 out of L47: the overlay dashboard's `read at HH:MM:SS` comes from `serve.ts`, not from the browser, so no init script can reach it. Refuses rather than defaulting, because a preload that quietly does nothing is the defect it exists to repair. |
 | `diff-frames.py` | Counts the pixels that differ between two frame sets, per frame, with the row and column range. Only meaningful on frozen frames. |
@@ -154,6 +253,7 @@ runnable on its own with no server and no network:
 | `selftest/check-contrast.mjs` | 17 hand-computable ratios for `measure-contrast.mjs`, over `selftest/contrast.html`. |
 | `selftest/check-hit-areas.mjs` | That `measure-hit-areas.mjs` can still fail. Eighteen expectations since 2026-11-09, the last two being that words in a sibling `<span>` exempt an inline link the way a bare text node does, and that two abutting controls with no prose between them are still held to the floor. Its headline on the real site went to zero on 2026-10-25b, and zero is also what a tool that had stopped looking would print, so this serves `selftest/hit-areas.html`, whose right answers are built in, and asserts each of the four verdicts actually fires. |
 | `selftest/check-focus.mjs` | 31 assertions for `measure-focus.mjs`, including a focus trap it has to report as unreachable controls rather than a short clean ring, L36's two hand-taken ratios recomputed by a different code path, and a 4000px page whose three undeclared stops all land at the same viewport coordinate, which the walk has to run to the end of. That last fixture fails five of its six assertions on the code of 2026-11-02, which is how it was checked. `after-drive.html` is the same discipline for the walk's starting point: five controls, a drive that clicks the fourth, and three of its four assertions fail on the code of 2026-11-09 morning, reporting one stop and four false unreachables. |
+| `selftest/check-reached.mjs` | 27 assertions for `lib/reached.mjs`: nine units, seven of them added 2026-11-09 (run z) for the loud absence, and three end-to-end cases over a real 404-serving fixture. The load-bearing ones are that a declared 404 still exits 0, so the repair is not "exit non-zero on any 404", and that ONE subject reached out of two does NOT withhold the headline, which is the too-wide-refusal trap as an expectation. |
 | `selftest/check-teardown.sh` | 9 assertions for `teardown.sh`, with real processes rather than mocked paths, since the subject reads `/proc`. The two load-bearing ones are a live server in another seat's tree, which must be left alone under `--orphans` as well as without it, and a process that only names a server on its command line, which is what the `pgrep -f` version matched and would have killed. Every decoy is detached from the test's stdout: a background process holding the pipe open makes a finished test look like a hung one. |
 | `selftest/check-floor.py` | 12 assertions for `measure-floor.py`, the load-bearing one being that six shoots split four and two report seven blind pairs of fifteen. |
 | `selftest/check-pin-now.mjs` | That `shoot.mjs --pin-now` pins the page's clock and refuses the two ways it can be asked for what it cannot do. It needs its own fixture because neither product reads the wall clock client-side, so no page here would prove the flag works. |
@@ -260,6 +360,46 @@ its frames are not pixel-comparable between two runs of it. The run that
 wrote it published no diff for them and said so. If you need a pixel
 comparison across arms, clip to something that does not move, or do not
 scroll.
+
+## What every tool here does when it cannot reach its subject
+
+**Exit 2, and the refusal in the slot a reader scans.** All six
+browser-driving tools now examine their premise instead of letting the
+navigation error escape. Before 2026-11-09 (run z) five of the six ended
+at exit 1 with an **empty stdout** and a node stack trace on stderr, which
+is a non-zero status by accident: 1 is what node sets for any uncaught
+throw, so it carried no information about what failed. Both columns, one
+directory per tool, are in `../reviews/2026-11-09-message-z/data/`.
+
+Use `reach.visit(page, url, path)` from `lib/reached.mjs` for every
+navigation. It wraps the **one** call that establishes the premise and
+nothing else, which matters: a refusal scoped one call too wide converts a
+finding into a non-answer. `verify-hover.mjs`'s harness probe was the arm
+nobody had covered, because it navigates before the loop that holds the
+tracker.
+
+**Empty stdout and say-it-on-stdout are the same rule.** They look
+opposite and they are one rule applied to two kinds of channel, which is
+L74 and worth knowing before you write the next instrument:
+
+| the caller does | so a refusal must | because |
+|---|---|---|
+| `$(cmd)` — stdout is a **value** | print **nothing** on stdout | every byte is taken as the value |
+| reads the output — stdout is a **report** | print the **refusal headline** | silence reads as a tool that did not run |
+
+What holds in both: **the verdict slot carries the refusal, never a number
+computed over nothing.** This kit is the report kind, so its tools print
+`NOT MEASURED` and `NO VERDICT` where the headline would go, rather than
+`0 of 0 below the floor`, which is a true sentence inside the legal range
+of the real answer and reads as a pass.
+
+**The code is 2 here and 3 in `tools/board/`, deliberately.** 3 is the
+house no-verdict code in `bypass.mjs`, `post-verdict.mjs` and
+`spend.mjs`, where 1 and 2 were already spent on findings. In this kit
+findings are exit 0 (a verdict about the site belongs to the reader of the
+table) with `measure-focus.mjs` the one exception at 1, so 2 is free and
+is `UNREACHED` in `lib/reached.mjs`. Adopting 3 would leave two
+no-verdict codes where there is one. If you add a tool, take 2.
 
 ## Three things to know before you trust a number out of this
 
