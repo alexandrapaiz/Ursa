@@ -1897,3 +1897,80 @@ measuring format survival, not whether a deliverable used the output);
 it does not change the pricing or landscape structure on its own, but
 it is a real example worth having on hand next time the pitch needs
 one.
+
+## Even a "real" verifier leaks, a complication Minor's own pitch should absorb rather than ignore (2026-11-02, message, 15th run)
+
+CLAUDE.md §1 and this file's own entries so far draw a clean line:
+math and code have a verifier (a deterministic check), open-ended work
+does not, and Minor exists to fill the second gap. A preregistered
+academic study found this run (Zhang, "When the Reward Suite Is Leaky:
+A Preregistered Causal Contrast of Natural Verifier False Positives in
+RLVR," arXiv 2607.11022) complicates the first half of that line rather
+than the second. Studying RLVR on MBPP coding tasks, it finds unit-test
+reward suites themselves contain persistent false positives: a static
+leakiness audit run before training correlates (Spearman 0.80) with
+how much rewarded signal turns out to be a test-suite artifact rather
+than genuinely correct code, leaky tasks carry a 43.8-point higher
+false-positive share than clean ones, and human auditing found 47.57%
+of rewarded false positives (record-weighted) were code that was
+actually wrong, not just an artifact of a lenient suite. The paper's
+own headline result is reassuring on held-out performance (a
+preregistered, bounded 0.20-point gap, "non-inferior" under its own
+margin) and its own read is that models exploit pre-existing error
+patterns rather than learning to game the leak — so this is not a
+case of RLVR collapsing.
+
+So what for Minor: the thesis should not claim verified domains hand
+labs clean ground truth while only open-ended domains are messy. Even
+a unit test, the cleanest verifier there is, rewards wrong code close
+to half the time it is wrong at all, on a widely-used benchmark
+dataset, and nobody notices until someone audits the suite itself. The
+sharper and more defensible claim, closer to what CLAUDE.md §1 already
+argues, is narrower: verified domains have a *mechanism* for catching
+and auditing reward errors (a static leakiness check, a human audit of
+the suite) that open-ended domains structurally lack, not that the
+verifier itself is flawless. Worth building into the next methodology
+draft as the version of this argument that survives a technical
+reader's pushback, rather than letting a lab's own research team find
+this paper first and use it to puncture an overclaimed version of the
+pitch.
+
+## This file's own living map was seeded by an OKR, not by the charter's literal seed set — and the charter's literal text still names alexandria's categories (2026-11-02, message, 15th run)
+
+Checked the charter's own instructions (prompts/market-agent.md §1)
+against what landscape.md actually contains, while trying to decide
+where this run's digest/newsletter-comp research should land. §1 names
+a specific seed set: "research tools (Elicit, Consensus, Semantic
+Scholar, Exa), digests and newsletters (TLDR AI, Import AI, The Batch,
+AlphaSignal, Last Week in AI, Latent Space, The Pragmatic Engineer as a
+paid-newsletter comp), and agent-knowledge ecosystems (Anthropic's
+skills ecosystem, prompt and skill marketplaces)." None of those three
+categories, or any name inside them, appears anywhere in landscape.md
+— not Elicit, not TLDR AI, not a single AI newsletter, not a skill
+marketplace. grep confirms zero hits for all of them.
+
+This is not an oversight this run should fix by adding them. Reading
+landscape.md's own opening note: the file was seeded by "the three
+categories the KR names" (O2 KR2.3, 2026-09-26) — preference-data
+vendors, evaluation/arena products, and memory/personalization layers
+— which are the right three for Ursa's actual business (RLHF data
+vendors compete with Minor directly; memory layers compete with Major)
+and have nothing to do with research tools or AI newsletters, which
+were alexandria's competitive set. Every run since has correctly built
+on the KR's three categories and ignored the charter's literal seed
+set, which is the right call substantively. What's left stale is the
+charter text itself: §0 still states the business this seat researches
+for as "a $10 digest and $30 full-library subscription" (alexandria's
+consumer product), when CLAUDE.md §4 is explicit that Minor has no
+consumer price at all and sells six-to-seven-figure enterprise
+contracts instead. This file already corrected its own language once
+for the same conflation (2026-10-25, "a correction to this file's own
+language," above) but that fix was to this file's prose, not to the
+charter's. The charter's own top-of-file note says adaptation happened
+"by the owner's merge" at activation and that "alexandria-specific
+references... do not apply here" — true in spirit and evidently
+already true in practice (three months of correct KR-driven work
+prove it), but §0 and §1's literal sentences were never edited to
+match. Charters are outside this seat's writable surface (per this
+seat's own charter), so this is reported rather than fixed. Ledger
+proposal below.

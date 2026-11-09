@@ -796,6 +796,41 @@ positioning consequence; this is a structural fix to the living map,
 recorded here rather than silently, per this charter's "add and
 retire entries with dated notes; never silently delete."
 
+### Centific
+
+What it is: a frontier AI data foundry (founded 2020) selling almost
+everything on the human side of model development under one roof —
+RLHF and preference data, human evaluation, multilingual annotation,
+red-teaming, synthetic data, and, since mid-2025, "RL
+Environments-as-a-Service" (RLEaaS). New entry, found this run via the
+demand-signals ceremony while checking a different search term
+entirely. Who it serves: a named customer list broader than any other
+Category 1 entry in this file — OpenAI, Anthropic, xAI, Mistral AI,
+Microsoft, Google, Nvidia, Dell, Lenovo, and AWS, per its own
+funding-announcement coverage (SiliconANGLE, 2025-06-25) — a claim this
+run did not independently verify against any of the named labs'
+own disclosures, same caveat this file applies to every self-reported
+customer list elsewhere (Handshake AI, Mercor). Pricing: not public.
+Scale: 1.8M+ domain experts claimed, 350+ languages, a $60M Series A
+(2025-06-25, led by Granite Asia) on top of prior funding, no
+valuation disclosed. Strengths: RLEaaS is explicit about what it is
+not — Centific's own product page describes a "Simulation Enterprise
+Builder" generating "fully stateful digital companies complete with
+org charts, ERP and CRM data environments" and an "Expert
+Human-in-the-Loop layer" where domain experts "author evaluation
+rubrics and generate structured reward signals" — the same
+authored-task-and-rubric structure as the rl-list.com-mapped
+42-company market this file's Category 1 cross-cutting note already
+tracks (2026-10-26, 29th/31st runs), confirming Centific belongs beside
+that cohort rather than inside Protege's or Taste Labs' real-data or
+solicited-opinion categories. Weakness against Ursa: identical to the
+rest of this category and stated by the vendor's own marketing more
+plainly than most — a constructed simulation with an expert-authored
+rubric, not a deliverable that existed because real work needed it,
+and no generation-to-outcome join of any kind. Last observed
+2026-11-02: [SiliconANGLE: AI data foundry provider Centific lands $60M to grow enterprise footprint](https://siliconangle.com/2025/06/25/ai-data-foundry-provider-centific-lands-60m-grow-enterprise-footprint/),
+[Centific: Centific Launches RL Environments-as-a-Service](https://www.centific.com/blog/centific-launches-rl-environments-as-a-service-the-first-industry-authentic-training-infrastructure-for-enterprise-ai-agents).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -1632,6 +1667,38 @@ verifier," except here the proxy is a leaderboard number a vendor
 tuned to the test rather than a stated preference, and the market's
 own correction mechanism is a GitHub issue thread, not a repeatable
 process. Last observed 2026-11-02: [Show HN: MemPalace](https://news.ycombinator.com/item?id=47672792).
+
+### Mnemory-class decay-based memory (unnamed Show HN entrant)
+
+What it is: a memory layer for AI agents applying the Ebbinghaus
+forgetting curve — memories decay over time unless reinforced through
+recall, with unused data pruned to cut token waste — plus a graph layer
+over vector storage. New entry, found this run via the demand-signals
+ceremony: a Show HN post (98 points, 53 comments, above even
+MemPalace's 67/17), making it the highest-engagement memory Show HN
+this file has tracked. Who it serves: individual developers; notable
+only as a demand signal, not a frontier-lab or enterprise comp.
+Pricing: not established (early Show HN stage). Strengths against
+Ursa: none claimed. The claimed numbers moved between the post and its
+own updates — "52% Recall@5, nearly double...stateless vector stores,"
+84% token-waste reduction, later "84.8%...recall top 5 and 86.8% nDCG"
+against LongMemEval — the same self-reported-benchmark pattern already
+flagged for MemoryLake and MemPalace above, unverified by any third
+party as of this run. The more load-bearing finding is in the comment
+thread rather than the product: one commenter rejects agent memory as
+a category outright ("I've stopped trying to achieve general
+memory...The agent is not my friend"), proposing comprehensive
+markdown documentation instead as cheaper and more reliable, and a
+separate commenter calls the "biological memory" framing "marketing
+fluff on basic cache mechanisms." A third sums up the thread's
+consensus: "Everyone trying, no one making a clean breakthrough." So
+what: this is the demand-signal half of the same point MemPalace's
+entry makes on the supply side — not just that vendors self-report
+gameable scores, but that practitioners closest to the problem are
+openly skeptical any current memory product, named or not, has solved
+it, which is corroborating evidence for CLAUDE.md §1's "no verifier"
+claim from the buyer side rather than the vendor side. Last observed
+2026-11-02: [Show HN: AI memory with biological decay](https://news.ycombinator.com/item?id=47914367).
 
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
