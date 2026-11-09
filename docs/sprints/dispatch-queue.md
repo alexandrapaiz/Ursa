@@ -1,44 +1,46 @@
-# Dispatch queue — 2026-11-02, message-triggered (twenty-fifth pass)
+# Dispatch queue — 2026-11-09, message-triggered (six-hour pass)
 
-`DEFAULT_WORKFLOW_TOKEN` and `PM_DISPATCH_ENABLED` are both unset in
-this run's environment, the same wall every pass since the eighteenth
-has found. Nothing below can fire from this run even if it qualified.
+`PM_DISPATCH_ENABLED` cannot be read on this run's token (`gh variable
+get` 403s, the same wall every host pass has found since 2026-10-17's
+host six-hour pass); `DEFAULT_WORKFLOW_TOKEN` is empty, since this is a
+host run, not a GitHub Actions run, so the `gh workflow run` mechanism
+in pm.md §11.5 does not apply here regardless of the switch. Nothing
+below could fire from this run even if it qualified.
 
 ## Checked against the criteria table (pm.md §11.3) and Ursa's own three (§0b)
 
-- **Two or more open PRs on one scope, none merged:** resolved this
-  pass. `#731` (engineer) merged under Tier B, auto-closing `#716` and
-  `#727` (both verified ancestors) as `MERGED`.
-- **A seat's open draft with failing CI or an unanswered review
-  comment older than 24h:** `check-draft-prs.sh` reports three drafts
-  open right now (`#732` this seat's own, `#730` exo, `#729`
-  security), all idle inside their workflows' own timeout windows. No
-  orphans. Nothing fires.
-- **A ruling or ADR merged since the last run names a seat and no run
-  followed:** nothing new in `docs/decisions.md` since the
-  twenty-fourth pass's own check.
-- **A milestone due within three days with open items:** `gh api
-  repos/alexandrapaiz/Ursa/milestones` returns none.
-- **An owner-merge PR older than seven days:** none; checked
-  `gh pr list` against `createdAt` directly, nothing over seven days.
-- **Charter-wide PRs waiting on Tier C by established practice:**
-  `#699` (exo) closed itself this morning, contained in `#714`. `#714`
-  still edits `prompts/` broadly; `check-tier.sh` reads an ordinary
-  charter edit as Tier B under §21, but exo's own notes and three prior
-  passes' reading both call it the owner's call. Kept at that reading:
-  named in `pending.md`, not a dispatch criterion either way.
-- **Ursa's own three criteria (§0b):** no tuning/trial run with
-  unrecorded ledger results; no failing check on an open Minor-site or
-  Major-resolver PR; no ADR naming an experiment with no run started
-  within two days.
+- **A seat run failed in the last 24h, diagnosable from its log:**
+  zero `run.end` events with a non-zero exit for any Ursa seat in the
+  last six hours (`audit.jsonl`). One CI check is red on security's
+  own still-open, still-running draft (`#748`); its own live run is
+  the one to fix it, not a dispatch into a seat that already has a
+  run going.
+- **A seat's open draft has failing CI, or a review comment
+  unanswered >24h:** `#748` (security) and `#747` (exo) are both
+  drafts from live runs started this pass's own window, neither old
+  enough to qualify, and neither waiting on a question.
+- **A sprint item due this week with no run from its owning seat:**
+  the board's own current-sprint object is the known duplicate
+  record (flagged 2026-10-12, unchanged); "This sprint" holds no
+  items right now to be late against.
+- **A seat has two or more open PRs on one scope, none merged:**
+  none now. This pass closed two of this seat's own stale rows and
+  merged two others; nothing else open repeats a seat on one scope.
+- **A ruling or ADR merged since the last run names a seat with no
+  run following:** nothing new in `docs/decisions.md` since the last
+  pass's own check.
+- **A milestone due within three days with open items:** none
+  (`gh api repos/alexandrapaiz/Ursa/milestones` empty, unchanged).
+- **Ursa's own three (§0b):** no tuning or trial run with unrecorded
+  ledger results; no failing check on an open Minor-site or
+  Major-resolver PR (the one failing check this pass is security's
+  own gate, not the product); no ADR naming an experiment with no run
+  started within two days.
 
 ## Nothing to fire this run
 
-This pass's own work was one Tier B merge (`#731`, which auto-closed
-`#716` and `#727`), a correction accepted to this seat's own pass-24
-attribution (two of four conflicting files were exo's, not security's,
-per `git log` authorship), independent re-verification of the
-backward-compatibility claim behind `#731`'s one remaining risk
-(`formatTable`/`cloneFitness` in `tools/seat/charter-lag.mjs`), and one
-`done` reply to the engineer on the board. See
-`docs/agents/pm-2026-11-02-message-25-run.md` for the full account.
+Everything actionable this pass was handled directly rather than
+dispatched: two Tier B merges (`#724`, `#725`), two closes (`#700`,
+`#701`), one handoff to security naming a never-merged secret-print
+guard orphaned on the row this seat closed. See
+`docs/agents/pm-2026-11-09-message-2-run.md` for the full account.

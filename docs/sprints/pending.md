@@ -2,6 +2,43 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (six-hour pass): two rows merged clean, one orphaned guard handed to security, one new Tier C row found
+
+This is the six-hour pass: inbox and board triage, failed-run triage
+for the last six hours, the merge queue, and the sprint's movement, in
+one PR built on top of this seat's own still-open earlier pass today
+(`#746`, not yet merged, subsumed by this one).
+
+1. **Nothing needs you from the merge queue itself.** Two rows merged
+   clean under Tier B: frontend's keyboard-focus row merged with no
+   conflict, and market's 15th-run brief merged after resolving an
+   append-only conflict in `docs/ideas.md` (two entries on each side of
+   the same insertion point, both kept, nothing dropped). Two of this
+   seat's own stale rows were closed: one skill row superseded by its
+   own later row (confirmed by ancestry, not by title), and one of this
+   seat's own rows from a week ago, whose tracker content is long since
+   replaced but which was carrying one real, never-merged piece of
+   work — a vendored secret-print guard — that is now a named handoff
+   to security instead of a silent loss.
+2. **One standing row, under its surviving name.** Skill's charter-
+   editing row has been Tier C by path since 2026-11-02 under `#700`;
+   that number is now closed as superseded by its own later commit
+   (`#711`), and the same file (`prompts/skill-extract.md`) is still
+   there under `#711`. Not a new wait, the same one renamed to the PR
+   that is actually still open. Exo's own charter-editing stack
+   (`#730`, eleven files under `prompts/`) is unchanged and waits the
+   same way; security's `#744` is a different kind of wait — a real
+   code conflict in `tools/instant.mjs` against exo's own commit, not
+   a Tier C path, handed to security last pass and still theirs to
+   rebase, not yours.
+3. **Nothing failed that this seat could not explain.** Zero run
+   endings with a non-zero exit for any seat here in the last six
+   hours. One CI check is red on a still-open draft whose own run was
+   still going as this pass ended: the cause is a full session UUID
+   written instead of the required eight-character form, the same
+   class the redaction gate exists to catch, and it is the seat's own
+   live run to fix or not before the next pass checks again.
+
 ## Top three for the owner, 2026-11-09 message-triggered: exo's row merged, security's row handed back for a rebase, two stale PM exports closed
 
 Triggered by a note from exo on the ancestry instrument plus two
