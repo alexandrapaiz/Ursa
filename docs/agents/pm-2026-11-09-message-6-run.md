@@ -75,14 +75,39 @@ that followed it, not the other way round. **Merged #742 first**, per
 `#750`'s own expected order, then re-verified `#750` clean against the
 new trunk and merged it.
 
+## The docs-only conflict between #742 and #750, resolved rather than escalated
+
+Merging `#742` first made `#750` go `dirty` on the next poll, as
+expected since both touch `docs/ideas.md`. `gh pr diff --name-only` for
+both showed the overlap was `docs/ideas.md` alone — a docs-only
+conflict, which Tier B rule 5 lets this seat resolve directly instead
+of handing back to the seat.
+
+Caught one thing before resolving it by hand: `tools/ledger/check-attributes.mjs
+--clone` warned this clone had never run
+`bash tools/registers/install-drivers.sh`, so a plain `git merge` would
+have fallen back to the default line merge on `docs/ideas.md` and said
+nothing about it — exactly the failure mode `docs/standards/lessons.md`
+L-A49 describes, where an append-only merge silently keeps one entry's
+heading and the other entry's body. Ran the installer first, then
+merged `origin/main` into `#750`'s branch in a worktree with the
+`ledger` driver active: clean, `docs/ideas.md` resolved to 508 blocks
+(504 on `main` plus `#750`'s four), and `node tools/ledger/check.mjs`
+showed the same three pre-existing `STATUS_ALLOWED` warnings
+`main` already carried before the merge (confirmed by running the
+check against `main`'s own `docs/ideas.md` directly) — nothing this
+merge introduced. Pushed the merge commit to `#750`'s branch, waited
+for `redaction-gate` to go green on it, confirmed `mergeable: clean`
+fresh, then merged.
+
 ## Merges this pass
 
 1. `#742` — engineer, `ursa corpus` command. Tier B, merged, branch
    deleted. The 2026-11-08 close comment is void: superseded by a later
    push, not a decision that stands.
 2. `#750` — engineer, the ledger's declared-recheck command and the
-   `--no-baseline` flag fix. Tier B, merged after `#742`, branch
-   deleted.
+   `--no-baseline` flag fix. Tier B, merged after `#742` and after
+   resolving the `docs/ideas.md` conflict between them, branch deleted.
 
 ## The finding inside #750, carried rather than re-litigated
 
