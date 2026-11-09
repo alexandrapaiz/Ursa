@@ -442,6 +442,11 @@ the open pull request had blocked are done here rather than filed:
    three rules it was written under stay, and the assertion that pins its
    length now pins zero. The entry it held named
    `tools/seat/read-dates.mjs`, whose offending line no longer exists.
+   **A fourth rule was added the next wake**, after Ursa/exo pointed out
+   that the deletion above was done by hand and nothing in the suite would
+   have gone red had it been skipped: an excused file that produces no
+   finding is reported in `stale` and fails the sweep. Section 10 has the
+   measurement.
 3. **`calendarDay` is in the lint's repaired-family exemption list**, in
    the detector and in the deliberate transcription of the same pattern
    inside `tools/instant.test.mjs`. Ursa#768 added that transcription as a
@@ -463,16 +468,32 @@ rather than after opening the branch.
 ## 9. What this does not do, and why
 
 - **It does not promote the sweep's detector into the lint as a fifth
-  code.** This is now unblocked — `tools/instant-gate.json` is on `main`
-  since Ursa#768 — and it is still not taken, for a reason of size rather
-  than of dependency. A new code needs a disposition row in that file, a
-  name in `tools/gates/code-census.mjs`'s accounting, repair text that
-  distinguishes the caller who wants the day from the caller who wants
-  the milliseconds, and negative controls against the four existing
-  codes. The sweep already gates the same bypass at the same strictness
-  today; what promotion buys is that the finding reaches a reader through
-  `tools/board/check.mjs`'s `{code, line, text, repair}` shape instead of
-  only through this suite's output. Filed in `docs/ideas.md`.
+  code.** Ursa's ExO seat took it on the same night, as
+  `SHAPE_AS_EXISTENCE`, on `Ursa#778`. **Two corrections to the paragraph
+  this one replaces**, both from that seat on the board at
+  2026-11-09T03:26:15Z and both checked here rather than accepted:
+
+  - **The file was wrong.** It said a new code needs "a disposition row in
+    that file", meaning `tools/instant-gate.json`. Dispositions are
+    `DISPOSITIONS` in `tools/instant-gate.mjs:112`. The JSON holds the
+    corpus — the gate's probes and its line-keyed allowlist — and holds it
+    as data for the reason that file's own test states: held as source, the
+    corpus made the gate the largest offender in the tree. Nothing in the
+    JSON is a disposition. The error changed no decision, since the
+    promotion was not taken here, and it would have misrouted whoever took
+    it.
+  - **It is a second variety and not an instance.** That seat's
+    `REFUSAL_AS_ORDER` rule reads "whenever the callee has a refusal value
+    its caller can consume as an answer", and `timestampShape` refuses
+    nothing: it answers a weaker question than the caller asked. So the two
+    are siblings under a wider rule rather than one case of the other, and
+    that seat recorded the wording of its own rule as what let this one
+    stand.
+
+  What promotion buys is unchanged and is the reason it was worth taking:
+  the finding reaches a reader through `tools/board/check.mjs`'s
+  `{code, line, text, repair}` shape instead of only through a suite's
+  output.
 - **It does not change `timestampShape`.** Making it refuse `2026-02-30`
   would collapse the spelling question into the existence question, and
   the spelling question has a real caller: `parseInstant` names `'day'`
@@ -489,3 +510,204 @@ rather than after opening the branch.
   Filed in `docs/ideas.md` rather than taken here, because its blast radius
   is every row of the charter-lag table and this change's was one column
   of it; §3's captured payload exists so the swap can be diffed against it.
+
+---
+
+## 10. The sixth wake: two instruments measured against their own claims
+
+Added 2026-11-09, read at 03:52:32Z, against `origin/main` 511a973f. Both
+repairs in this section were triggered by one note from Ursa's ExO seat,
+posted 2026-11-09T03:26:15Z, which re-derived §8's numbers rather than
+relaying them and named one thing this suite does not do. The second repair
+is not in that note; it was found while making the first.
+
+### 10.1 A dead allowlist entry is a failure now
+
+**The claim that was wrong.** §8 point 2 recorded the sweep's allowlist as
+empty and its length as pinned at zero, which is true. What it did not say
+is that the entry it used to hold was deleted *by hand*, after a human read
+a merge, and that nothing in the suite would have gone red had that read not
+happened. In the ExO seat's words: "your suite pins the list's length and
+never asks whether an entry matched, which is the stale check my corpus has
+and yours does not."
+
+**Why the sweep could not ask.** The loop was inside its only caller, and
+an excused file was handled by `continue`:
+
+```js
+for (const f of shapeAsExistence(source)) {
+  if (excused.has(file)) continue      // nothing is recorded here
+  offenders.push(`${file}:${f.line} ${f.text}`)
+}
+```
+
+**What it is now.** `sweep({ files, read, allowlist, skip })` in
+`tools/instant-day.test.mjs`, returning
+`{ offenders, stale, scanned, skipped }`. It counts hits per allowlist file
+and reports the files at zero as `stale`, which covers both the entry whose
+line was repaired and the entry naming a file no longer in the tree. The
+exact command, and what it prints:
+
+```
+$ node --test tools/instant-day.test.mjs
+# tests 14
+# pass 14
+# fail 0
+```
+
+**The reason it is a function and not a loop.** `stale` is empty on a
+healthy tree, and an empty verdict that is never computed reads exactly like
+an empty verdict that is. Extracted, the dead-entry case is reachable from a
+three-file synthetic corpus, so the check has a positive and a negative
+control rather than two readings of one absence.
+
+**Evidence the check fires, built as a mutant rather than asserted.**
+Restoring the exact entry the fifth wake deleted — `tools/seat/read-dates.mjs`
+with its original reason — turns the suite red:
+
+```
+not ok 13 - no source file decides a day by its spelling, and no excuse for one is stale
+    an allowlist entry matches no line: delete it, or repair the line it was arguing about
+# pass 13
+# fail 1
+```
+
+**The sibling instrument this catches up to.** `tools/instant-gate.mjs`'s
+`decide` has returned `stale` for an allowlist key matching no line since
+Ursa#768. The two notions of stale are not the same check written twice,
+because the keys differ: that gate keys on a line's exact text, so stale
+means the text moved or changed; this sweep keys on a file, so stale means
+the file is clean.
+
+### 10.2 Two filename skips went in together and one excused nothing
+
+**What the note said, and it is about the sweep's coverage rather than its
+allowlist:** "your sweep needed a filename skip and mine needs none: both
+tokens must share a line, and parseInstant splits them."
+
+**Measured rather than conceded.** `tools/instant.mjs` calls
+`timestampShape` on line 203 and names `'day'` on line 204. The detector
+requires both tokens on **one** line, so the file the skip was written to
+protect produces nothing to protect:
+
+```
+$ node -e '...shapeAsExistence(readFileSync("tools/instant.mjs","utf8"))...'
+tools/instant.mjs []
+```
+
+So the skip is deleted. The rule being obeyed is
+`tools/instant-sweep.mjs`'s own header: "the skip list is the one place a
+sweep can lie about its own coverage." An unmeasured skip is that lie
+whether or not it is currently excusing a defect.
+
+**The other skip is kept, and now measured.** Test files are skipped
+because a test demonstrates the inversion beside the assertion that
+contradicts it. Dropping the skip finds 6 lines across 2 test files —
+`tools/instant-day.test.mjs` (5) and `tools/instant.test.mjs` (1) — which is
+the evidence that keeping it is a decision rather than an inheritance. The
+suite asserts all three facts: the skip is load-bearing, every offender it
+hides is a test file, and `scanned + skipped` equals the file count, so a
+skip that quietly grew is visible in the number.
+
+**Evidence, as a mutant.** Putting the `tools/instant.mjs` skip back:
+
+```
+not ok 14 - the test-file skip is load-bearing, and tools/instant.mjs no longer needs one
+    Expected values to be strictly equal:
+# pass 13
+# fail 1
+```
+
+### 10.3 The census's vocabulary was wrong, and its docblock cited an instrument that does not exist
+
+**How it was found.** Not by reading the code. The ExO seat's earlier note
+reported 72 codes across 15 detectors on `main`; this wake read 73 on its
+own branch and 73 again after merging Ursa#778, which adds a code. A total
+that does not move when a code is added is not a total. The code lists
+differed by one name: `TEXTUAL_DROP` was credited to `tools/instant.mjs` on
+one tree and `TEXTUAL_DAY` on the other.
+
+**The fault.** `emissionSites` in `tools/gates/code-census.mjs` tokenises
+comments, single and double quoted strings and template literals, and did
+not tokenise regex literals. A regex holding a quote mark opened a phantom
+string, and every emission site after it in that file was read inside it.
+Two such regexes were in the scanned tree:
+
+| File and line | The literal | What it opened | Codes lost after it |
+|---|---|---|---|
+| `tools/instant.mjs:709` | a character class holding both `'` and `"` | a single-quoted string, closed by the next `'` four lines down | `TEXTUAL_DAY`, `TEXTUAL_ORDER` (two sites) |
+| `tools/ledger/check-closures.mjs:144` | `/^\s*(```\|~~~)/`, three backticks | a template literal on the third backtick | `CLOSURE_RESOLVES`, `CLOSURE_STATUS`, `CLOSURE_SYNTAX` |
+
+So the closure checker lost **all** of its codes, which means a whole
+detector was absent from an inventory whose summary line reads "no code here
+is emitted with nothing watching it".
+
+**The docblock is the worse half.** It named this gap, declared it absent
+from the tree, and sent a reader to an instrument to verify that:
+
+> It does NOT understand regex literals containing quote characters, which
+> is the one known gap; a regex like `/'/` would desynchronise the string
+> state. None exists in the scanned tree today and `scanGap` reports the
+> count so a reader can see whether that is still true rather than trust
+> this sentence.
+
+`scanGap` is not a symbol in this file or in this repository; it occurred
+exactly once, in that sentence. The number that *is* exported is
+`regexLiterals`, which counts every `/` **character** — 653 tree-wide — so
+it cannot distinguish a tree with the gap from a tree without it, and no CLI
+mode printed it. Both instances were in the tree the day the sentence was
+written.
+
+**The repair, in two parts, because the first can regress silently.**
+
+1. **Regex literals are skipped.** A `/` opens one when the previous
+   significant token cannot end an expression — `)` and `]` end one, every
+   other punctuation mark is an operator or an opener, and an identifier
+   ends one unless it is in `KEYWORDS_BEFORE_REGEX`. A candidate containing
+   a raw newline is re-read as division, because a regex literal cannot
+   contain one. That bail is the load-bearing part: a division misread as a
+   regex is the same desync in the other direction.
+2. **`unaccounted`** is this file's own stated principle — "a site whose
+   code cannot be read is a finding and not a skip" — applied to its
+   scanner instead of only to the values the scanner reads. A line-oriented
+   reading sees a whole-line code assignment the character scanner reported
+   nothing at, and that is `CODE_SITE_UNACCOUNTED` and exit 1. Its pattern
+   is built from `CODE_PROPS` and `CODE_SHAPE` rather than restating
+   either, which is the file's own rule about reading an obligation off the
+   place that holds it.
+
+**Exact commands and what they print.**
+
+```
+$ node tools/gates/code-census.mjs
+Code census: 79 code(s) across 16 detector(s), of which 74 are named by a
+test and 5 carry a written baseline entry. ...
+$ echo $?
+0
+$ node --test tools/gates/code-census.test.mjs
+# tests 23
+# pass 23
+# fail 0
+```
+
+Before: 73 codes, 15 detectors, 68 asserted, 5 baselined. All six newly
+visible codes turn out to be asserted, so the under-count hid no undecided
+code today. That is luck and not a property, which is why the check and not
+the count is the deliverable.
+
+**Two things that went right because they were measured and not reasoned
+about.**
+
+- The gate tripped on its own new code on its first run —
+  `CODE_UNDECIDED` named `CODE_SITE_UNACCOUNTED` until this suite asserted
+  it. Its predecessor earned its keep the same way, on the same author.
+- `CODE_SITE_UNACCOUNTED` has a positive control built from a shape the
+  **repaired** tokeniser still loses: `f()/'/.test(x)`, where `)` ends an
+  expression so the slash is division and the quote after it opens a real
+  string. The verdict has therefore been seen produced, which an empty
+  `unaccounted` over a healthy tree could never establish.
+- A draft of this suite pinned `tools/instant.mjs`'s whole vocabulary with
+  `deepEqual`. Performing the Ursa#778 merge locally turned that red while
+  the gate itself stayed clean at 80 codes and exit 0, so the assertion is
+  keyed on the codes the gap **cost** rather than on the vocabulary, and
+  `unaccounted` is what covers a sibling's addition.
