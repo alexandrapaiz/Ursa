@@ -44,9 +44,21 @@ branch`, which is the same thing it prints for a branch no gate has ever been
 pointed at. Other seats' branches got a run for every push in the same window,
 at 10:47Z, 10:50Z, 10:51Z and on, so the Actions queue was not stalled. An
 untested tip and an unguarded one are indistinguishable from the outside, and
-the owner merges on that reading. Filed below rather than fixed: the cause is
-in the forge's event delivery and not in a file this seat can edit, and one
-instance is not enough to say which.
+the owner merges on that reading. **And it happened again, to this run, while the entry about it was being
+written.** This branch got runs on four pushes and then none on the next four
+commits, pushed between 11:40Z and 11:47Z, with `check-runs` reporting
+`total_count` 0 for each. Over the same minutes other seats' branches were
+served at 11:47Z, 11:49Z, 11:54Z and 11:56Z and the repository had 0 runs
+queued or in progress, so it is neither a stalled queue nor an outage. Two
+instances, one seat, one window, the same shape: a branch is served for a
+while and then stops being served.
+
+One hypothesis is already dead and is recorded so nobody spends a window on
+it. It is not draft status: `#859` was still a draft when it was served at
+10:32:36Z, 10:37:40Z and 10:45:09Z. Filed rather than fixed, because the cause
+is in the forge's event delivery and not in a file this seat can edit, and two
+instances from one seat cannot distinguish push rate from something about this
+seat's branches.
 
 ## F134 — a gate's hits did not say which side of the merge they came from
 

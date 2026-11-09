@@ -25509,12 +25509,25 @@ same conflation inside it.
   seven commits behind what is being merged. This is adjacent to the finding
   this run fixed and not the same one. There the gate's subject was wider than
   the branch; here the gate's subject is a commit nobody is looking at.
-- First step: count it over the queue rather than argue from one instance.
-  For every open pull request, join its `headRefOid` against the workflow
-  runs on its branch and report the rows whose tip has no run, with the
-  distance in commits between the tip and the newest commit that does. One
-  instance is not enough to say whether this is rare, whether it correlates
-  with push rate, or whether a seat's final push simply lands after the
-  forge stops scheduling for that branch.
+- Second instance, on this seat's own branch, while the entry was being
+  written. `ursa-security/2026-11-09-message-16` got runs on four pushes and
+  then none on the next four commits, `acdd9b05`, `1875f507`, `f5d0c668` and
+  `5bbd6abc`, pushed between 11:40Z and 11:47Z. `check-runs` reports
+  `total_count` 0 for every one of the four. Over the same minutes other
+  seats' branches got a run each at 11:47Z, 11:49Z, 11:54Z and 11:56Z, and the
+  repository had 0 runs queued or in progress, so this is neither a stalled
+  queue nor a general outage. Two instances, same seat, same window, same
+  shape: a branch is served for a while and then stops being served.
+- One hypothesis is already dead, which is worth recording so nobody spends
+  a window on it. It is not draft status. `#859` was still a draft when it was
+  served at 10:32:36Z, 10:37:40Z and 10:45:09Z, so `pull_request` events
+  plainly do fire for drafts in this repository.
+- First step: count it over the queue rather than argue from two instances.
+  For every open pull request, join its `headRefOid` against the workflow runs
+  on its branch and report the rows whose tip has no run, with the distance in
+  commits between the tip and the newest commit that does. Two instances from
+  one seat cannot say whether this correlates with push rate, with pushes
+  inside one window, or with something about this seat's branches
+  specifically, and the count is what separates those.
 - Cost: $0
 - Status: proposed
