@@ -51,6 +51,21 @@
 // classifies the type in the table here, which is an edit to a tracked file,
 // while a text chunk is in `main` and comes off in a commit.
 //
+// WHY A BINARY NOTHING PARSES IS GROUND, AND WHY THAT IS A WIDER QUESTION
+// THAN THE ONE ABOVE. The clause after this one is about an IMAGE whose
+// format has no reader. This one is about a tracked file that is binary and
+// is not an image at all, which until 2026-11-02 was outside this gate's
+// enumerator entirely rather than refused by it. Both gates missed it: the
+// extension list here did not select it, and the redaction gate's `grep -I`
+// treats a binary file as holding no match, so a string in a font or an
+// archive or a compiled artifact was read by nothing in this repository.
+// PWC-13 names that surface and is HQ's to land; this is the half that can be
+// held here, which is that the gate says so instead of reporting a clean it
+// did not establish. It is ground and not a finding because the repair is a
+// reader or a landed flag, not a commit removing a chunk, and because the
+// gate genuinely does not know what the file holds -- it knows only that
+// nobody looked.
+//
 // WHY A FORMAT WITH NO PARSER IS GROUND. Today the tree holds PNG and one ICO,
 // and both are walked. SVG is text, so the redaction gate's own patterns
 // already read all five of them and this gate leaves them alone by name
@@ -238,6 +253,15 @@ export const GATE = describeGate({
           'CONTAINER_UNWALKABLE',
           "1 tracked image's chunk lengths run past the end of the file, so its chunk list is unknown",
           'docs/design/reviews/2026-11-02/after/home.png — truncated, or not the format its name claims',
+        ),
+    },
+    {
+      name: 'a tracked binary in no format this gate parses, which nothing else reads either',
+      call: () =>
+        unusable(
+          'BINARY_UNREAD',
+          "1 tracked binary file is in no format this gate parses, and the redaction gate's `-I` skips binaries, so nothing reads it",
+          'docs/brand/Inter.woff2 — parse it here, or land PWC-13 so the redaction gate reaches it',
         ),
     },
     {

@@ -48,6 +48,29 @@
 // it would hang the page this is meant to photograph. Nothing either product
 // renders is computed from it.
 //
+// THE FOURTH THING, ADDED 2026-11-02 (run h), AND WHY IT IS ALSO OPT-IN.
+// `ursa-minor/app/globals.css` declares `html { scroll-behavior: smooth }`,
+// so any scroll the browser performs on the page's behalf is an animation
+// of a few hundred milliseconds. Nothing above touches it: it is not driven
+// by `requestAnimationFrame` callbacks the page owns, so pinning rAF's
+// timestamp does not stop it, and Playwright's `animations: 'disabled'`
+// does not reach it either.
+//
+// That matters to any instrument that takes an element's box and then does
+// something that scrolls before it opens the shutter. `measure-focus.mjs`
+// does exactly that: it drives Tab, the browser scrolls the focused control
+// into view, and the two frames it diffs were photographed at two different
+// scroll offsets. Measured on 2026-11-02 over `/record` at 820x1180, the
+// "indicator" it reported for the `mini-fixture` link was 655 pixels of
+// page text that had slid, and the magnified frames show one shutter on the
+// link and the other on a passage three sections away. The verdict it
+// printed from that was a contrast ratio.
+//
+// So `scroll` pins `scroll-behavior` to `auto` for the whole document. It is
+// opt-in for the same reason `now` is: a run that is only photographing a
+// still should get the page the product actually ships, and an instrument
+// that needs the page to hold still while it works should have to say so.
+//
 // **This half pins the page's clock and no other process's.** The overlay's
 // dashboard prints `read at HH:MM:SS` from `readAt`, which
 // `ursa-major/src/serve.ts` stamps with `new Date().toISOString()` in the
@@ -65,7 +88,7 @@ export const SEED = 0x9e3779b9
  * through addInitScript rather than closing over them, because the
  * function is serialised across the process boundary.
  */
-export function freezeInit({ t, seed, clock = true, random = true, now = null }) {
+export function freezeInit({ t, seed, clock = true, random = true, now = null, scroll = false }) {
   let s = seed >>> 0
   // xorshift32. Any seeded generator would do; this one is three lines and
   // needs no dependency in a page we are only photographing.
@@ -82,6 +105,22 @@ export function freezeInit({ t, seed, clock = true, random = true, now = null })
   if (clock && typeof globalThis.requestAnimationFrame === 'function') {
     const raf = globalThis.requestAnimationFrame.bind(globalThis)
     globalThis.requestAnimationFrame = (cb) => raf(() => cb(t))
+  }
+  if (scroll) {
+    // `!important` on the universal selector, because the declaration this
+    // overrides is on `html` and a later author rule on any element could
+    // reintroduce it. Appended rather than written into an existing sheet,
+    // so nothing the page ships is edited.
+    const pin = () => {
+      const el = document.createElement('style')
+      el.setAttribute('data-freeze', 'scroll')
+      el.textContent = '*, html, body { scroll-behavior: auto !important; }'
+      ;(document.head ?? document.documentElement).appendChild(el)
+    }
+    // An init script can run before `documentElement` exists, so the call
+    // that fails silently has to be the one that does not happen.
+    if (document.documentElement) pin()
+    else document.addEventListener('readystatechange', pin, { once: true })
   }
   if (now !== null) {
     const Native = globalThis.Date
@@ -115,8 +154,8 @@ export function freezeInit({ t, seed, clock = true, random = true, now = null })
  * Make every page in this context render the same frame twice. Call before
  * the first navigation; addInitScript applies to each one.
  */
-export async function freezeContext(ctx, { t = PINNED_MS, seed = SEED, clock = true, random = true, now = null } = {}) {
-  await ctx.addInitScript(freezeInit, { t, seed, clock, random, now })
+export async function freezeContext(ctx, { t = PINNED_MS, seed = SEED, clock = true, random = true, now = null, scroll = false } = {}) {
+  await ctx.addInitScript(freezeInit, { t, seed, clock, random, now, scroll })
   return ctx
 }
 

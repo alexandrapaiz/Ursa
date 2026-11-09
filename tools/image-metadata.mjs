@@ -9,6 +9,21 @@
 // one does, or at least one holds a chunk type this gate cannot classify.
 // Exit 2 the facts could not be established, so nothing is reported clean.
 //
+// WHY IT ENUMERATES BINARIES AND NOT ONLY IMAGES. The question this gate was
+// built for is a text channel in an image, so its enumerator was an extension
+// list. That makes the clean report narrower than it reads: a tracked file
+// that is binary and is not one of those extensions -- a font, an archive, a
+// compiled artifact -- is not parsed here, and the redaction gate's `grep -I`
+// does not read it either, so nothing in this repository looks at it. Measured
+// on 2026-11-02 against a tree holding one PNG and one `.woff2` carrying a
+// fabricated home path: this gate reported clean and counted `images: 1` over
+// two binary files, and the gate's own flags reported nothing. That is a clean
+// report from a scan that did not happen, which is the one failure the whole
+// `verdict-shape` family exists to refuse. So the binary set is enumerated
+// too, and anything in it this gate cannot parse is ground rather than
+// silence. Today the set is 1,332 PNG and one ICO and nothing else, so this
+// changes no exit code here. It changes the first day one arrives.
+//
 // The reasoning for all of it, including why this is not a second copy of
 // PWC-13, is in `tools/image-metadata-verdict.mjs`. This file is the driver:
 // it finds the tracked images, walks their containers, and prints what the
@@ -29,7 +44,7 @@
 // published, and would miss nothing that is.
 
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { closeSync, openSync, readFileSync, readSync } from 'node:fs'
 import { LOCUS } from './gates/verdict-shape.mjs'
 import { INERT_CHUNKS, TEXT_CHUNKS, carrierLine, unusable, verdict } from './image-metadata-verdict.mjs'
 
@@ -104,12 +119,63 @@ export function icoChunks(buf) {
 const INERT = new Set([...INERT_CHUNKS, 'DIB'])
 const CARRIES_TEXT = new Set(TEXT_CHUNKS)
 
-export function trackedImages(cwd = '.') {
+function trackedPaths(cwd) {
   const out = execFileSync('git', ['ls-files', '-z'], { cwd, encoding: 'buffer' })
-  return out
-    .toString('latin1')
-    .split('\0')
-    .filter((p) => p !== '' && IMAGE_EXT.test(p))
+  return out.toString('latin1').split('\0').filter((p) => p !== '')
+}
+
+export function trackedImages(cwd = '.') {
+  return trackedPaths(cwd).filter((p) => IMAGE_EXT.test(p))
+}
+
+/** How many leading bytes decide whether a file is binary. A NUL in the first
+ *  block is the test git itself applies, and it is the test that matters here
+ *  because it is also what makes GNU grep call a file binary and skip it under
+ *  `-I`. Reading a prefix rather than the whole file keeps this cheap over a
+ *  tree of 1,333 binaries. */
+const SNIFF_BYTES = 8000
+
+/**
+ * Is this tracked file binary? Decided by a NUL byte in the leading block, the
+ * same way git and grep decide it, so this gate's idea of the binary set is
+ * the same one the redaction gate's `-I` acts on rather than a second
+ * definition that could drift from it.
+ *
+ * A file that cannot be read is reported as binary on purpose. The caller
+ * turns an unparsed binary into a ground fault, and an unreadable file is
+ * exactly as unestablished as an unparsed one. Returning false would hide it.
+ *
+ * @param {string} full absolute path on disk.
+ * @returns {boolean}
+ */
+export function looksBinary(full) {
+  let fd
+  try {
+    fd = openSync(full, 'r')
+    const buf = Buffer.alloc(SNIFF_BYTES)
+    const n = readSync(fd, buf, 0, SNIFF_BYTES, 0)
+    return buf.subarray(0, n).includes(0)
+  } catch {
+    return true
+  } finally {
+    if (fd !== undefined) closeSync(fd)
+  }
+}
+
+/**
+ * Tracked files that are binary and are not images this gate parses or text
+ * formats it deliberately leaves alone. This is the set nothing in this
+ * repository reads, so it is the set the gate has to refuse over.
+ *
+ * @param {string} [cwd]
+ * @returns {string[]}
+ */
+export function unreadBinaries(cwd = '.') {
+  return trackedPaths(cwd).filter((path) => {
+    const ext = path.slice(path.lastIndexOf('.') + 1).toLowerCase()
+    if (PARSED.has(ext) || TEXT_FORMATS.has(ext)) return false
+    return looksBinary(`${cwd}/${path}`)
+  })
 }
 
 /**
@@ -168,6 +234,29 @@ export function scan(cwd = '.') {
     }
   }
 
+  // AFTER the image walk, never before, so that a format with no parser is
+  // still reported as FORMAT_UNPARSED. That cause names the image and the
+  // reader it needs, which is a sharper repair than "nothing reads this".
+  let unread
+  try {
+    unread = unreadBinaries(cwd)
+  } catch (err) {
+    return { ground: { cause: 'SCAN_GROUND_UNUSABLE', why: 'git could not list the tracked files here', detail: err.message.split('\n')[0] } }
+  }
+  if (unread.length > 0) {
+    return {
+      ground: {
+        cause: 'BINARY_UNREAD',
+        why: `${unread.length} tracked binary ${unread.length === 1 ? 'file is' : 'files are'} in no format this gate parses, and the redaction gate's \`-I\` skips binaries, so nothing reads ${unread.length === 1 ? 'it' : 'them'}`,
+        detail: `${unread[0]} — parse it here, or land PWC-13 so the redaction gate reaches it${unread.length > 1 ? `, and ${unread.length - 1} more` : ''}`,
+      },
+    }
+  }
+
+  // Reaching here means every tracked binary was one of the images walked
+  // above, so `images` is now a coverage claim and not only a count. That
+  // equality is what the ground fault above buys; it is asserted in the suite
+  // against this repository's own tree rather than left as a comment.
   return { carriers, tally, seen: { images, chunks, formats: [...formats].sort() } }
 }
 

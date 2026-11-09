@@ -4,7 +4,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
+  compareByInstant,
   episodesFromPullRequest,
+  instantBefore,
   pairsFromPullRequest,
   parseHunkRanges,
   statedCorrectionsFor,
@@ -377,7 +379,10 @@ describe('replay against Ursa pull requests that really merged', () => {
 
     const between = snap.commits.find((c) => c.sha.startsWith('c5484dabc'))!
     expect(between.parentCount).toBe(2)
-    expect(between.authoredAt > snap.commits.find((c) => c.sha.startsWith('57a750abe'))!.authoredAt).toBe(true)
+    // By instant, not by text: `>` between two of these strings orders
+    // spellings, which is the defect `compareByInstant` exists for.
+    expect(compareByInstant(between.authoredAt, snap.commits.find((c) => c.sha.startsWith('57a750abe'))!.authoredAt))
+      .toBeGreaterThan(0)
     expect(between.files.some((f) => pairs[0].paths.includes(f))).toBe(false)
 
     expect(pairs[0].interveningMerges).toEqual([])
@@ -620,5 +625,154 @@ describe('a merge inside the pull request deletes a generation', () => {
     const episodes = episodesFromPullRequest(pairsFromPullRequest(snap, gitRepoReader(dir)), dir)
     expect(episodes[0].unreadableMerges).toBeUndefined()
     expect(resolveEpisode(dir, episodes[0])!.stats.generated.unknownDeletedChars).toBe(0)
+  })
+})
+
+describe('timestamps are compared as instants and not as text', () => {
+  // The real pair, measured on this repository on 2026-11-02: commit
+  // 9c3c52dc, Unix second 1793594097, as git prints it and as GitHub's REST
+  // API prints it. The two strings do not agree on the hour or the day.
+  const GIT_FORM = '2026-11-01T23:34:57-05:00'
+  const API_FORM = '2026-11-02T04:34:57Z'
+
+  it('the two producers spell one instant two ways, and text comparison inverts it', () => {
+    expect(GIT_FORM).not.toEqual(API_FORM)
+    expect(Date.parse(GIT_FORM)).toEqual(Date.parse(API_FORM))
+    const earlier = '2026-11-02T01:00:00Z'
+    // As text the earlier instant sorts after the later one.
+    expect(earlier > GIT_FORM).toBe(true)
+    expect(instantBefore(earlier, GIT_FORM)).toBe(true)
+    expect(compareByInstant(earlier, GIT_FORM)).toBeLessThan(0)
+  })
+
+  it('an unplaceable timestamp is neither before nor sorted confidently', () => {
+    // A zoneless string: `Date.parse` would read it as UTC, which is a guess.
+    expect(instantBefore('2026-11-02T04:34:57', API_FORM)).toBe(false)
+    expect(instantBefore(API_FORM, '2026-11-02T04:34:57')).toBe(false)
+    // In a sort it goes last rather than being dropped, because a dropped
+    // commit is a generation that silently loses its provenance.
+    const order = ['2026-11-02T04:34:57', API_FORM, '2026-11-02T01:00:00Z']
+      .sort(compareByInstant)
+    expect(order[2]).toEqual('2026-11-02T04:34:57')
+  })
+
+  it('pairsFromPullRequest orders a branch whose dates are in two spellings', () => {
+    // Both offsets below are shapes this repository's own history actually
+    // has: 1,804 of the 2,134 commits on `origin/main` are `+00:00`, and 36
+    // are `-05:00`. The human commit is the later instant, 05:00Z, written
+    // the way git prints it for a committer five hours west; the generation
+    // is 04:00Z written as `Z`.
+    const asGit = [
+      commit({ sha: 'gen0000', authoredAt: '2026-11-02T04:00:00Z', files: ['a.md'] }),
+      commit({
+        sha: 'fix0000', authoredAt: '2026-11-02T00:00:00-05:00', authorName: 'Human Owner',
+        trailers: '', files: ['a.md'],
+      }),
+    ]
+    const asApi = [
+      commit({ sha: 'gen0000', authoredAt: '2026-11-02T04:00:00Z', files: ['a.md'] }),
+      commit({
+        sha: 'fix0000', authoredAt: '2026-11-02T05:00:00Z', authorName: 'Human Owner',
+        trailers: '', files: ['a.md'],
+      }),
+    ]
+    // As text the human commit sorts BEFORE the generation, which would make
+    // it the generation's predecessor instead of its closure, and the pair
+    // would not form at all.
+    expect(asGit[1].authoredAt < asGit[0].authoredAt).toBe(true)
+    expect(instantBefore(asGit[1].authoredAt, asGit[0].authoredAt)).toBe(false)
+
+    const reader: RepoReader = { parents: () => [], blobId: () => null }
+    const fromGit = pairsFromPullRequest(snapshot({ commits: asGit, mergeCommitSha: null }), reader)
+    const fromApi = pairsFromPullRequest(snapshot({ commits: asApi, mergeCommitSha: null }), reader)
+    expect(fromApi).toHaveLength(1)
+    expect(fromApi[0].generatedSha).toEqual('gen0000')
+    expect(fromApi[0].finalSha).toEqual('fix0000')
+    // The spelling of the input does not change the pair.
+    expect(fromGit.map((p) => [p.generatedSha, p.finalSha]))
+      .toEqual(fromApi.map((p) => [p.generatedSha, p.finalSha]))
+  })
+
+  it('statedCorrectionsFor picks the first commit that truly follows the comment', () => {
+    // The second comparison in this function, which the first version of
+    // these tests left uncovered: a rehearsal reverted it to `<` and nothing
+    // went red.
+    //
+    // The comment is 10:00Z. `early0` is 11:00Z written for a committer five
+    // hours west, `2026-11-02T06:00:00-05:00`, so it genuinely follows the
+    // comment and is the commit that answered it. As text its string starts
+    // `...T06`, which sorts before `...T10`, so it was skipped as predating
+    // the comment and the credit went to `late000` an hour later instead.
+    // The record then names the wrong commit as the one that acted on the
+    // correction, which is the field a lab would join on.
+    const commentAt = '2026-11-02T10:00:00Z'
+    const earlyAt = '2026-11-02T06:00:00-05:00'    // = 11:00Z
+    expect(earlyAt < commentAt).toBe(true)
+    expect(instantBefore(earlyAt, commentAt)).toBe(false)
+
+    const snap = snapshot({
+      commits: [
+        commit({ sha: 'gen0000', authoredAt: '2026-11-02T09:00:00Z', files: ['a.md'] }),
+        commit({
+          sha: 'early0', authoredAt: earlyAt, authorName: 'Human Owner',
+          trailers: '', files: ['a.md'],
+        }),
+        commit({
+          sha: 'late000', authoredAt: '2026-11-02T12:00:00Z', authorName: 'Human Owner',
+          trailers: '', files: ['a.md'],
+        }),
+      ],
+      reviewComments: [
+        { id: 3, path: 'a.md', line: null, body: 'tighten this', createdAt: commentAt },
+      ],
+    })
+    const found = statedCorrectionsFor(snap, ['a.md'], 'gen0000')
+    expect(found).toHaveLength(1)
+    expect(found[0].answeredBySha).toEqual('early0')
+  })
+
+  it('statedCorrectionsFor drops a comment written before the generation, in either spelling', () => {
+    // The generation is 09:00Z, written the way git prints it for a
+    // committer five hours west: `2026-11-02T04:00:00-05:00`. The comment is
+    // 06:00Z, three hours BEFORE the text was generated, so it cannot be a
+    // correction of it.
+    //
+    // As text the comparison inverts: `'2026-11-02T06:00:00Z'` is greater
+    // than `'2026-11-02T04:00:00-05:00'`, so the comment reads as later than
+    // the generation and survives the filter. The outcome record then carries
+    // a stated correction for text that did not exist when the comment was
+    // written, which is a fabricated entry in the one field of the artifact
+    // that claims a person said something.
+    const genAt = '2026-11-02T04:00:00-05:00'          // = 09:00Z
+    const commentAt = '2026-11-02T06:00:00Z'
+    expect(commentAt < genAt).toBe(false)              // text: not before
+    expect(instantBefore(commentAt, genAt)).toBe(true)  // instant: before
+
+    const snap = snapshot({
+      commits: [
+        commit({ sha: 'gen0000', authoredAt: genAt, files: ['a.md'] }),
+        commit({
+          sha: 'fix0000', authoredAt: '2026-11-02T12:00:00Z', authorName: 'Human Owner',
+          trailers: '', files: ['a.md'],
+        }),
+      ],
+      reviewComments: [
+        { id: 1, path: 'a.md', line: null, body: 'tighten this', createdAt: commentAt },
+      ],
+    })
+    expect(statedCorrectionsFor(snap, ['a.md'], 'gen0000')).toEqual([])
+
+    // And the same comment, one hour after the generation instead of three
+    // hours before, is still reported: the repair is an ordering, not a
+    // filter that drops everything.
+    const after = snapshot({
+      ...snap,
+      reviewComments: [
+        { id: 2, path: 'a.md', line: null, body: 'tighten this', createdAt: '2026-11-02T10:00:00Z' },
+      ],
+    })
+    const found = statedCorrectionsFor(after, ['a.md'], 'gen0000')
+    expect(found).toHaveLength(1)
+    expect(found[0].answeredBySha).toEqual('fix0000')
   })
 })
