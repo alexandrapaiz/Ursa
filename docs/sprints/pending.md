@@ -8,6 +8,52 @@ for why).** Nothing open was dropped in the move; still-open items are
 carried forward in this file's own current entries, not left only in the
 archive.
 
+## Top three for the owner, 2026-11-09 message-triggered (thirty-fourth pass): #852 (security) reviewed against the merge rule and closed as superseded, not merged; two standing conditions checked fresh and found already stale
+
+Wake named one event: review `#852` (security) against the merge rule,
+merge it or hand what it still needs to its seat. A standing block
+attached to the wake also named `#871` (this seat's own Monday-ceremony
+draft) as an orphaned draft with no live run behind it. Full account in
+`docs/agents/pm-2026-11-09-message-34-run.md`, stacked on pass 33's own
+open `#874`, per the own-PR-first rule.
+
+1. **`#852` does not merge clean, so it was not merged.** `git
+   merge-tree` against current `main` shows a real content conflict in
+   `tools/gates/gate-registry.baseline.json` — not a merge-driver
+   artifact, since `docs/ideas.md` merges clean through the installed
+   `merge=ledger` driver and the baseline file carries no driver at
+   all. `#852`'s own change there is two lines; `main` has grown the
+   same file by roughly 180 lines from other work landing in between.
+   Confirmed by ancestry that `#852` is fully contained in `#859`
+   (also security, also open), so `#852` was closed as superseded
+   rather than asked to rebase twice, and a handoff naming the exact
+   conflict path went to `Ursa/security` on the board asking it to
+   rebase `#859`. Not a verdict against the findings themselves, which
+   read as sound; only the merge is blocked.
+2. **The `#871` standing note was already stale before this run acted
+   on it.** `#871` is not a draft (`isDraft: false`, confirmed with
+   both `gh pr view` and `node tools/seat/own-prs.mjs pm --drafts`,
+   which reports zero open drafts for this seat). The note had been
+   attached to a wake queued behind a run whose condition had already
+   been resolved by this seat's own later pass before this run started.
+3. **A fresh `GET /api/standing` read (pm.md's own standing instrument)
+   named a second, current condition instead: `#866` (skill), an
+   orphaned-looking draft with its run reported ended 5 minutes
+   earlier.** Checked against the host's own disposition tool
+   (`/srv/asc/hq/tools/check-draft-prs.sh --repo alexandrapaiz/Ursa`)
+   rather than acted on directly: it reports `#866` as idle but still
+   possibly live, and `#875` — the skill seat's own next draft, itself
+   still open and still being written — already states in its own body
+   that it subsumes `#866` and will resolve it. Left alone rather than
+   readied or closed, because the owning seat already has a live run
+   inheriting it; acting on it now would have been the seizure the
+   standing note's own courtesy line warns against.
+
+**Unchanged from pass 33:** this seat's own Tier B work (`#864`, `#869`,
+`#871`, `#874`, now also this PR) still needs a merger other than
+Ursa's own PM, per pm.md §20. Not re-asked of `alexandra-systems/pm`
+this pass, to avoid repeating an unanswered ask inside the same hour.
+
 ## Top three for the owner, 2026-11-09 message-triggered (thirty-third pass): #865 and #867 merged under Tier B, #858 and #862 closed as superseded (one of them by GitHub itself), the own-PR stack still waits on another merger
 
 Wake named four events: two notes from frontend about a `redaction-gate`
