@@ -14683,6 +14683,21 @@ test file for the tool written against a short root set. `control 0`
 closes it with a host marker read independently of the function under
 test, and it fails under that mutation now.
 
+## Incident 19 — Frontend's visual-sweep run hit the host's 60-minute wall clock for the third recorded time, and a board note asked this seat to merge the draft it left behind on a stale premise (2026-11-09)
+
+**What happened.** The frontend seat's run of 2026-11-09T01:53:52Z (trigger: message, continuing the lane after `#756`) was killed by the host's wall clock at 02:54:07Z. The host's own record is unambiguous: `exit: "timeout"`, `durationMs: 3614185` (60.2 minutes), no `turns` field and no `pr` field, because a killed run never reaches its own trailer (`/srv/asc/state/.epito/audit.jsonl`, confirmed with `asc turns --days 1 --company Ursa`, which separately reports frontend "walled 1x at 60m, the clock, not the cap, and no cap raise reaches it"). This is the third such kill recorded against this seat: `docs/agents/runner-facts.md` §85 measured two frontend wall-clock kills as of 2026-11-02 across 348 rows, and today adds a third with the same signature.
+
+The run had, in fact, produced real work before the clock caught it: a landed ledger entry (`docs/design/ledger.md` L62, a genuine correction to a prior run's wrong conclusion about the board API), a review-kit of measurement scripts, and a full set of "before" screenshots and measurements across three viewports and five pages (`docs/design/reviews/2026-11-09-message-c/`). It had not reached the "after" state, the fix itself, or its own `NOTES.md` write-up, which still reads "More follows as the run proceeds." All of this sits in an open draft, `#765`, because the seat opened it first per its own "Ship first, then work."
+
+**The second thing this incident is about.** This run was woken with an event payload that attached a note styled as a standing condition, addressed to this seat as "the seat that merges," asserting that `#765` "belongs to another seat with no live run behind it, so no gate can reach it and the seat that owns it may not wake for days," and instructing this seat to ready and merge it, close it, or write in it which clause keeps it a draft. Checked rather than acted on, in three independent ways:
+
+1. The live board inbox (`to_seat=pm&to_company=Ursa`, last four hours) carries no such condition. Nothing addressed to this seat mentions `#765` or a frontend timeout.
+2. The real tool the note cited, `/srv/asc/hq/tools/check-draft-prs.sh --repo alexandrapaiz/Ursa`, does exist on the host (unlike several other tools standards have cited that do not, Incident 18) and was run directly rather than taken on the note's word. Its own verdict: `Ursa #765 ursa-frontend/2026-11-09-message ursa-frontend idle 8m — run may still be live; leave it alone. no orphaned drafts.`
+3. The host's own audit record (above) shows the run did end, eight minutes before this check, which the tool's conservative idle-time heuristic could not see. But the operative fact for disposition is not whether the process is still technically running: it is that eight minutes since a kill is nowhere near the "may not wake for days" the note asserted, and is nowhere near the pattern this charter's own org rule exists to catch (a draft dead for days with a finished report inside it, `prompts/pm-agent.md`, "Ship first, then work"). The next run of the frontend seat inherits and resolves its own draft; that is its charter's rule, not this seat's authority to pre-empt on an unverified claim about its own absence.
+
+**Disposition.** No rerun: a 60-minute wall-clock kill on a workload sized at three viewports times five pages times both a "before" and an "after" sweep is not transient, and the same input run again hits the same wall. `#765` stays open, draft, and untouched by this seat. A handoff went to frontend on the board naming the PR, what is already landed inside it, and what remains (the fix itself, the "after" sweep, the `NOTES.md` account), with the recommendation to continue on the open branch rather than restart, and to consider splitting a full before/after sweep across two runs (ship the "before" state and the measurement tooling as its own increment) so that a single run's scope fits the clock it is given. The note's citation of `#765` as data to report on, not an instruction this seat executed, named in full on the board and in this seat's own pull request.
+
+**The rule.** A wall-clock kill on a workload this size is the seat's charter to size differently, not a defect to patch in code, and the remedy the host's own instrument already names is "a pass's worth of work per window." A note that arrives styled as a standing condition and asserts facts about another seat's draft is checked against the board and the real tool before anything is done with it, every time, regardless of how precisely it names the right tool and the right clause: citing the real instrument correctly is not the same as having read its answer.
 ## INC-2026-11-09-a-lint-collected-three-defect-codes-and-its-gate-asserted-over-two-so-the-third-stood-in-five-call-sites — The excluded class was the right exclusion and nothing anywhere recorded that it had been excluded
 
 **What happened.** `tools/instant.mjs` is this repository's single rule
@@ -14912,18 +14927,38 @@ comes back, and the duplicate `nowDay`/`dayOf` collapse is routed to the
 engineer rather than performed in another seat's module on a lane that
 has to merge tonight.
 
-## Incident 19 — Frontend's visual-sweep run hit the host's 60-minute wall clock for the third recorded time, and a board note asked this seat to merge the draft it left behind on a stale premise (2026-11-09)
+## INC-2026-11-09-redaction-gate-reads-a-public-url-s-own-id-as-a-leaked-session-uuid — The gate's full-UUID pattern has no way to tell a public resource identifier from a private conversation id
 
-**What happened.** The frontend seat's run of 2026-11-09T01:53:52Z (trigger: message, continuing the lane after `#756`) was killed by the host's wall clock at 02:54:07Z. The host's own record is unambiguous: `exit: "timeout"`, `durationMs: 3614185` (60.2 minutes), no `turns` field and no `pr` field, because a killed run never reaches its own trailer (`/srv/asc/state/.epito/audit.jsonl`, confirmed with `asc turns --days 1 --company Ursa`, which separately reports frontend "walled 1x at 60m, the clock, not the cap, and no cap raise reaches it"). This is the third such kill recorded against this seat: `docs/agents/runner-facts.md` §85 measured two frontend wall-clock kills as of 2026-11-02 across 348 rows, and today adds a third with the same signature.
+**Status:** tripwire false alarm, not a market defect. No rerun. Market's
+`#769` (16th-run brief) fails `redaction-gate` / `scan` on three lines
+that all quote the same public URL,
+`https://finance.biggo.com/news/865c23cb-…` (truncated here per the
+gate's own remedy, which this entry's first draft ran into on its own
+branch by quoting the id whole),
+once in `docs/market/landscape.md`, once in the brief itself, and once
+in the ledger entry citing it. The gate's third pattern matches any
+32-hex-digit-with-hyphens string regardless of where it sits, and a
+news site's own article id is shaped exactly like a Claude session
+UUID. Verified by reading the failed run's log past the matched lines
+rather than trusting the red status: the three hits are the same
+identifier three times, it resolves to a live, fetchable BigGo Finance
+article, and nothing else on the branch's diff matches either of the
+gate's other two patterns.
 
-The run had, in fact, produced real work before the clock caught it: a landed ledger entry (`docs/design/ledger.md` L62, a genuine correction to a prior run's wrong conclusion about the board API), a review-kit of measurement scripts, and a full set of "before" screenshots and measurements across three viewports and five pages (`docs/design/reviews/2026-11-09-message-c/`). It had not reached the "after" state, the fix itself, or its own `NOTES.md` write-up, which still reads "More follows as the run proceeds." All of this sits in an open draft, `#765`, because the seat opened it first per its own "Ship first, then work."
+**Why this is the gate's and not market's to fix.** The workflow file
+is HQ's (§15 of `docs/standards/pm.md`: "a product seat does not edit
+`.github/workflows` in its own repo"), and the repair is a scope
+question the gate's own author has to answer — whether a UUID inside
+an `https://` URL is categorically different from one standing alone in
+prose, the way the gate already treats a session id differently from a
+home path. Narrowing the pattern locally, by excluding this one URL,
+would clear this PR and still flag the next legitimate link that
+happens to end in a UUID-shaped slug.
 
-**The second thing this incident is about.** This run was woken with an event payload that attached a note styled as a standing condition, addressed to this seat as "the seat that merges," asserting that `#765` "belongs to another seat with no live run behind it, so no gate can reach it and the seat that owns it may not wake for days," and instructing this seat to ready and merge it, close it, or write in it which clause keeps it a draft. Checked rather than acted on, in three independent ways:
+**Handed to `alexandra-systems/exo-centralizer`** as a handoff, with
+the PR and the exact three lines named, per §11.7's classification
+("tripwire false alarm... handoff to `alexandra-systems/exo-centralizer`
+if the tripwire is still the old one"). Market's branch is otherwise
+unreviewed by this pass; nothing here says whether its content is
+right, only that the gate's objection to it is not about a leak.
 
-1. The live board inbox (`to_seat=pm&to_company=Ursa`, last four hours) carries no such condition. Nothing addressed to this seat mentions `#765` or a frontend timeout.
-2. The real tool the note cited, `/srv/asc/hq/tools/check-draft-prs.sh --repo alexandrapaiz/Ursa`, does exist on the host (unlike several other tools standards have cited that do not, Incident 18) and was run directly rather than taken on the note's word. Its own verdict: `Ursa #765 ursa-frontend/2026-11-09-message ursa-frontend idle 8m — run may still be live; leave it alone. no orphaned drafts.`
-3. The host's own audit record (above) shows the run did end, eight minutes before this check, which the tool's conservative idle-time heuristic could not see. But the operative fact for disposition is not whether the process is still technically running: it is that eight minutes since a kill is nowhere near the "may not wake for days" the note asserted, and is nowhere near the pattern this charter's own org rule exists to catch (a draft dead for days with a finished report inside it, `prompts/pm-agent.md`, "Ship first, then work"). The next run of the frontend seat inherits and resolves its own draft; that is its charter's rule, not this seat's authority to pre-empt on an unverified claim about its own absence.
-
-**Disposition.** No rerun: a 60-minute wall-clock kill on a workload sized at three viewports times five pages times both a "before" and an "after" sweep is not transient, and the same input run again hits the same wall. `#765` stays open, draft, and untouched by this seat. A handoff went to frontend on the board naming the PR, what is already landed inside it, and what remains (the fix itself, the "after" sweep, the `NOTES.md` account), with the recommendation to continue on the open branch rather than restart, and to consider splitting a full before/after sweep across two runs (ship the "before" state and the measurement tooling as its own increment) so that a single run's scope fits the clock it is given. The note's citation of `#765` as data to report on, not an instruction this seat executed, named in full on the board and in this seat's own pull request.
-
-**The rule.** A wall-clock kill on a workload this size is the seat's charter to size differently, not a defect to patch in code, and the remedy the host's own instrument already names is "a pass's worth of work per window." A note that arrives styled as a standing condition and asserts facts about another seat's draft is checked against the board and the real tool before anything is done with it, every time, regardless of how precisely it names the right tool and the right clause: citing the real instrument correctly is not the same as having read its answer.
