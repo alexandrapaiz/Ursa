@@ -7,17 +7,17 @@
 // a predicate, it was in the fact that no caller asked.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync, copyFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { fixtureDir } from './tmp-fixture.mjs'
 import { readLibraryDirs, unreadDirs, indexedRows } from './library-dirs.mjs'
 
 const FRONTMATTER = '---\nversion: 0.1.0\nstatus: draft\nvalidated: false\n---\n'
 
 /** A skills/ directory holding whatever each entry of `dirs` describes. */
 function library(dirs) {
-  const dir = mkdtempSync(join(tmpdir(), 'library-dirs-'))
+  const dir = fixtureDir('library-dirs-')
   for (const [slug, files] of Object.entries(dirs)) {
     mkdirSync(join(dir, slug), { recursive: true })
     for (const [name, body] of Object.entries(files)) writeFileSync(join(dir, slug, name), body)
@@ -52,6 +52,19 @@ test('a directory with frontmatter but no near miss is still reported, more quie
   const [d] = unreadDirs(dir)
   assert.equal(d.nearMiss, null)
   assert.equal(d.frontmatter, true)
+})
+
+test('a non-markdown file whose first line is a fence is not frontmatter', () => {
+  // The 2026-11-09 mutation survey's one real survivor here. The frontmatter
+  // probe reads `.md` files only, and swapping the `||` in its guard for `&&`
+  // sends it into every other file in the directory instead. A `record.json`
+  // or a `notes.txt` whose first line is `---` would then make a scratch
+  // directory look like a skill with a claim in it, which is the one thing
+  // this signal exists to distinguish.
+  const dir = library({ fixtures: { 'record.yml': '---\nkind: fixture\n', 'notes.txt': '---\nnote\n' } })
+  const [d] = unreadDirs(dir)
+  assert.equal(d.frontmatter, false)
+  assert.equal(d.nearMiss, null)
 })
 
 test('a plain directory trips neither signal and is reported with both false', () => {
@@ -102,7 +115,7 @@ test('a row with no ref count reads as null and not as zero', () => {
 test('check-evidence.mjs exits 1 on a library whose skill file is misnamed', () => {
   // The regression that matters. Before 2026-10-26 this exited 0 and printed
   // "sources resolved", with the citation in the misnamed file counted nowhere.
-  const root = mkdtempSync(join(tmpdir(), 'library-dirs-e2e-'))
+  const root = fixtureDir('library-dirs-e2e-')
   mkdirSync(join(root, 'skills', 'alpha'), { recursive: true })
   mkdirSync(join(root, 'skills', 'decoy'), { recursive: true })
   mkdirSync(join(root, 'src'), { recursive: true })
