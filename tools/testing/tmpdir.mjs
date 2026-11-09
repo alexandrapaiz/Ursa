@@ -63,6 +63,19 @@
 // that importing this module performs no work -- which is this repository's
 // `import-effects` gate, and that gate caught the first version of this file
 // doing exactly what it forbids.
+// WHAT RUNNER THIS IS FOR, and it is not all of them. This imports `after`
+// from `node:test`, so it works in the 28 `.test.mjs` suites that runner
+// executes and NOT in the `ursa-major/src/*.test.ts` suites, which are vitest
+// (36 of them import from `vitest`, and `scripts/ci-checks.mjs` runs them
+// behind `npx vitest run`). 30 of the 41 files in the baseline beside this
+// one are in that half, so most of the remaining repair needs a vitest
+// sibling of this module using that runner's own `afterEach`, not this one.
+// Stated here because the first version of the ledger entry accompanying
+// this file named the ursa-major group as the cheapest first step, and it is
+// the one group this helper cannot repair. vitest is not installed in the
+// seat sandbox that wrote this, so the sibling is proposed rather than
+// shipped: writing an untested cleanup helper for the half of the suite that
+// holds 30 of the 41 leaks is how the next 3.4G gets written.
 import { after } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';

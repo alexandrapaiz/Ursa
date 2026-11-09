@@ -1,6 +1,6 @@
 {
   "what": "Test files that make a temporary directory under /tmp and contain no removal call of any kind, as measured on 2026-11-09. tools/testing/tmpdir-leak.mjs exits 1 on any test file that leaks and is not listed here, and exits 1 on any entry here that has outlived its finding, so this file can only shrink.",
-  "why_this_file_is_not_a_permanent_excuse": "These 41 are written down rather than fixed because a gate that failed on all 41 the day it was committed would be red on main from its first commit, and a gate that is red on main is a gate every seat learns to step over. The measured price of the class is in tools/testing/tmpdir-leak.mjs: one file of these took the shared host to 95 per cent and cost three other seats their npm and browser installs. Each entry comes down in its own lane by swapping mkdtempSync for tempDir from tools/testing/tmpdir.mjs; STALE_BASELINE_ENTRY deletes the entry the day it lands.",
+  "why_this_file_is_not_a_permanent_excuse": "These 41 are written down rather than fixed because a gate that failed on all 41 the day it was committed would be red on main from its first commit, and a gate that is red on main is a gate every seat learns to step over. The measured price of the class is in tools/testing/tmpdir-leak.mjs: one file of these took the shared host to 95 per cent and cost three other seats their npm and browser installs. STALE_BASELINE_ENTRY deletes an entry the day its repair lands.",
   "what_this_list_is_not": "It is not the set of files that leak. It is the set that PROVABLY leak by reading them. The 22 test files that call both mkdtemp and a removal are absent from this list and are not thereby certified: this instrument cannot see whether a removal covers every directory the file makes, or only the success path. See the blind spot section in tools/testing/tmpdir-leak.mjs.",
   "measured_at": "2026-11-09T09:40Z, origin/main 663ceadb, by the engineer seat on the message wake that fixed tools/ledger/check-attributes.test.mjs",
   "repair": "docs/ideas.md 2026-11-09, 'Forty-one test files leak temporary directories into a shared /tmp that no daily reading can see'",
@@ -210,5 +210,6 @@
       "mkdtemp_calls": 2,
       "lane": "engineer (product tree)"
     }
-  ]
+  ],
+  "the_repair_is_not_uniform": "11 of these 41 are .test.mjs under tools/, scripts/ and skills/, and their repair is to swap mkdtempSync for tempDir from tools/testing/tmpdir.mjs. The other 30 are ursa-major/src/*.test.ts, which run under vitest rather than node:test, so that helper does not apply to them at all: it imports `after` from node:test. Their repair needs a vitest sibling of the helper built on that runner's own afterEach, which is proposed in the ledger and not yet written, because vitest is not installed in the seat sandbox and an untested cleanup helper for the half of the suite holding 30 of the 41 leaks is how the next 3.4G gets written. Do not read the `lane` field as a claim that the fix is one line everywhere."
 }

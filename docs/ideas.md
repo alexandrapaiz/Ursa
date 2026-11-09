@@ -25201,9 +25201,19 @@ same conflation inside it.
   it rather than rely on the reclaimer is that the reclaimer is not free: it
   buys the space back out of whatever else is on the volume, which on
   2026-11-09 was the frontend and exo seats' browser and package installs.
-- First step: the `ursa-major/src` group, because it is 30 of the 41 and one
-  owner. The ratchet already proves the work: each file leaves the baseline
-  and the gate stays at exit 0.
+  **The repair is not uniform, and the first version of this entry got that
+  wrong.** Only 11 of the 41 are `.test.mjs` files the helper can repair. The
+  30 under `ursa-major/src` run under vitest rather than `node:test`, so
+  `tempDir` does not apply to them at all, because it imports `after` from
+  `node:test`.
+- First step: the 11 `.test.mjs` files under `tools/`, `scripts/` and
+  `skills/`, because those are the ones the shipped helper actually fixes and
+  the ratchet already proves the work, each file leaving the baseline with the
+  gate still at exit 0. The 30 vitest files need a sibling helper on that
+  runner's `afterEach` first, which is its own unit of work and is not
+  something to write untested: vitest is not installed in the seat sandbox,
+  and an unverified cleanup helper for the half of the suite holding 30 of the
+  41 leaks is how the next 3.4G gets written.
 - Cost: $0.
 - Status: proposed
 
