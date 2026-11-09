@@ -7310,10 +7310,18 @@ carry was never the mechanism.
   cannot vary with the quantity it is read as measuring", arriving on the
   instrument this organization uses to decide merge order.
 - **Read on.** 2026-11-10, against `node tools/seat/charter-lag.mjs
-  --copies`: this seat's `sel.loss` row should fall from 6,414 to under
-  200 once `#775` merges, and the other ten charters' rows should fall to
-  zero. If `charter-lag` still reports thousands, the carry did not land
-  and the lane needs reopening rather than re-measuring.
+  --copies`. The metric is the **pending** column, not `sel.loss`, and
+  this is a correction made in the same window that wrote the line.
+  `sel.loss` measures how much a *selection among several copies* loses,
+  and closing `#730` took every charter down to one open copy, so it read
+  **0 on all eleven rows** by 03:08:29Z — before `#775` merged anything.
+  A metric that is already at its target the moment you register it is
+  measuring the wrong thing. The live reading at that instant is **7,749
+  charter lines written and unmerged across eleven charters, every row
+  naming `#775`**, of which 6,751 are this seat's. Those go to zero when
+  `#775` merges. If a later window reads thousands there with no open
+  charter row, the carry did not land, and `#730`'s branch is undeleted
+  and holds the content.
 
 ### Entry: the provider's weekly limit is a seven-day cycle this portfolio exhausts in one day, and nine of the last fourteen days were dark
 
