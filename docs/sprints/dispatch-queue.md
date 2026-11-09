@@ -1,81 +1,65 @@
-# Dispatch queue — 2026-11-09, message-triggered (twelfth pass)
+# Dispatch queue — 2026-11-09, message-triggered (pass 28)
 
-**Twelfth message pass of today.** Rechecked fresh against the
-criteria table below rather than carried forward. This pass also
-absorbed `#766`/`#767`/`#772` (the seventh/eighth/ninth-pass sections
-of this file and `pending.md`, which had been stuck in an open PR this
-seat cannot merge itself) and merged two Tier B pull requests
-(`#765` frontend, `#773` market). None of that changes anything below.
+Rechecked fresh against the criteria table below rather than carried
+forward, per every prior pass's own practice.
 
-`PM_DISPATCH_ENABLED` cannot be read on this run's token (`gh variable
-get` 403s, the same wall every host pass has found since 2026-10-17).
-This is a host run, not a GitHub Actions run, so `gh workflow run
-agent-<seat>.yml` (pm.md §11.5) does not apply here regardless of the
-switch. Nothing below could fire from this run even if it qualified.
+`gh variable get PM_DISPATCH_ENABLED` returns HTTP 403 on this run's
+token, the same wall every host pass has hit since 2026-10-17, and
+`GITHUB_ACTIONS` is unset, confirming this is a host run rather than a
+GitHub Actions run. `gh workflow run agent-<seat>.yml` would not apply
+here even if the switch read `true`. This is logged as queue
+information for the owner, not as a plan this run executes.
 
 ## Checked against the criteria table (pm.md §11.3) and Ursa's own three (§0b)
 
 - **A seat run failed in the last 24h, diagnosable from its log:**
-  `gh run list --limit 20` shows no non-success run. None.
+  `gh run list --limit 20` showed exactly one failure, and it was this
+  pass's own: a full UUID citation left in
+  `docs/agents/pm-2026-11-09-message-27-run.md` by the prior pass
+  tripped the redaction gate's own false-positive on cited identifiers
+  (the exact class `#840` already diagnosed and could not fully fix,
+  since the workflow fix is outside engineer's writable surface).
+  Fixed in this branch by truncating it to 8 characters, the
+  convention other seats already use. No other seat's run failed.
 - **A seat's open draft has failing CI, or a review comment unanswered
-  >24h:** `#774` (engineer), `#776` (security), `#778` (exo) are open
-  drafts. `/srv/asc/hq/tools/check-draft-prs.sh --repo alexandrapaiz/Ursa`
-  reports all three "idle 1-11m, run may still be live; leave it
-  alone. no orphaned drafts." None qualify.
+  >24h:** four drafts open (`#857` ursa-skill, `#854` ursa-exo, `#853`
+  ursa-engineer, `#852` ursa-security), all opened or updated within
+  the last few minutes of this run, all "opening, no work yet" or a
+  fresh finding — live runs, not orphans. None qualify.
 - **A sprint item due this week with no run from its owning seat:**
-  unchanged — the newest sprint file is `sprint-2026-10-12.md`, 28 days
-  old, a ceremony-grooming finding already carried in `pending.md`,
-  not this pass's to open.
+  unchanged. The newest sprint file is still `sprint-2026-10-12.md`,
+  28 days old; the ceremony gap stays escalated in `docs/decisions.md`
+  (pass 25) rather than repeated here.
 - **A seat has two or more open PRs on one scope, none merged:** none
-  newly found this pass.
+  found this pass, beyond this seat's own now-closed chain (see
+  `pending.md`).
 - **A ruling or ADR merged since the last run names a seat with no run
-  following:** nothing new in `docs/decisions.md` since the last
-  pass's own check.
-- **A milestone due within three days with open items:** none.
+  following:** nothing new in `docs/decisions.md` since pass 25's
+  ceremony-gap finding.
+- **A milestone due within three days with open items:** none found.
 - **Ursa's own three (§0b):** no tuning or trial run with unrecorded
   ledger results; no failing check on an open Minor-site or
   Major-resolver PR (none open); no ADR naming an experiment with no
   run started within two days.
 
-## Logged, not fired (dispatch unavailable from this run regardless)
+## Logged, not fired
 
-1. **The redaction-gate's UUID pattern will false-positive again on
-   any future cited URL with a UUID-shaped slug.** Observed trigger:
-   market worked around it twice today (`#769`, superseded by `#773`)
-   by percent-encoding the literal character rather than touching the
-   pattern, since the pattern lives in `.github/workflows/redaction-gate.yml`
-   and narrowing it is outside market's (and this seat's) writable
-   surface. `alexandra-systems/exo-centralizer` confirmed this on the
-   board (message `d5fc2d4d`) and named the engineer seat as the owner
-   of the gate, with a reader who is not its author. Cost of skipping:
-   the same false positive recurs on the next news citation with a
-   UUID-shaped slug, and whichever seat hits it next spends a pass
-   working around it instead of fixing it. Not fired: engineer's only
-   open row (`#774`) is a live draft, and dispatching into a seat with
-   an open PR is the standard's own stop. Candidate command once clear:
-   `gh workflow run agent-engineer.yml -f owner_instructions='narrow
-   .github/workflows/redaction-gate.yml's UUID pattern to exclude URL
-   path segments (see board message d5fc2d4d and PR #773's own
-   write-up); this likely needs owner or HQ review since it touches a
-   workflow file'`.
-2. **Security's dependency finding (F93) needs an engineer bump this
-   seat cannot verify.** `ursa-minor`'s 608 dev dependencies carry 23
-   advisories (7 high, 0 reaching the 33 production packages),
-   unaudited until security's pass tonight (board message `c028ba97`).
-   Security could not bump the lockfile itself: the sandbox's disk had
-   too little room to install and verify the result is
-   behaviour-preserving. Cost of skipping: a known-vulnerable set of
-   dev dependencies sits beside live tokens on every seat's machine
-   for one more day. Not fired: same stop as above, engineer's open
-   draft. Candidate command once clear:
-   `gh workflow run agent-engineer.yml -f owner_instructions='bump the
-   ursa-minor dev-dependency lockfile to clear the 23 advisories in
-   F93 (board message c028ba97), verified by a build; do not touch the
-   33 production dependencies, which are already clean'`.
+`#846` (exo, window 109) is Tier C by path (`prompts/exo-agent.md`
+amended) and waits on the owner, logged in `docs/sprints/pending.md`
+rather than here, since it needs a merge decision and not a dispatch.
+Replied to exo's handoff on the board (message `9b221269`) confirming
+this and that nothing more is owed back to that seat on this row.
 
-## Nothing to fire this run
+The redaction-gate workflow patch
+(`docs/security/redaction-gate-uuid-narrowing.patch`, landed by `#840`)
+still needs the owner or HQ to run `git apply`. Logged in `pending.md`
+and already routed as a board handoff to
+`alexandra-systems/exo-centralizer` by an earlier pass; it is an
+application step, not something a dispatch would produce, and nobody
+has applied it yet.
 
-Two pull requests merged under Tier B this pass (`#765`, `#773`) did
-not need a dispatch to exist; merging an existing PR is not a
-dispatch. See `docs/agents/pm-2026-11-09-message-12-run.md` for the
-full account.
+## Dispatched by the PM
+
+None this pass. The token cannot read the switch, this is not a
+GitHub Actions run, and the criteria table above found nothing that
+would have qualified regardless.
