@@ -52,6 +52,7 @@
 // wired into a gate that blocks a merge.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { parseLedger } from './ledger.mjs';
+import { pathToFileURL } from 'node:url';
 
 /** Repository root, so the tool runs from any subdirectory. */
 export const toplevel = (cwd = process.cwd()) =>
@@ -312,7 +313,16 @@ export function main(argv) {
   return result.blocks.length > 0 ? 1 : 0;
 }
 
-if (process.argv[1] && process.argv[1].endsWith('both-edited.mjs')) {
+// Entry point. The predicate compares this module's own URL to the resolved
+// entry point, which is the only form that asks whether THIS module is the
+// one being run. The form it replaces compared a file NAME, so it was true
+// for any entry point whose own name is a suffix of this one; the general
+// case is `tools/gates/import-effects.mjs`'s GUARD_ASKS_THE_WRONG_QUESTION
+// and the demonstrated instance is in that gate's header.
+const invokedDirectly =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (invokedDirectly) {
   try {
     process.exit(main(process.argv.slice(2)));
   } catch (err) {

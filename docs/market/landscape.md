@@ -2071,6 +2071,42 @@ it, which is corroborating evidence for CLAUDE.md §1's "no verifier"
 claim from the buyer side rather than the vendor side. Last observed
 2026-11-02: [Show HN: AI memory with biological decay](https://news.ycombinator.com/item?id=47914367).
 
+### Memobase (memobase.ai)
+
+What it is: a consumer-facing persistent-memory layer pitched as "a
+password manager for your AI memory," addressing what its own site
+calls the "amnesia loop" — every new conversation resets context. New
+entry, found via this run's demand-signals ceremony (a Show HN post).
+Who it serves: individual users of Claude (Claude.ai, Claude Desktop,
+Claude Code), ChatGPT, Cursor, and any MCP-compatible agent; the
+product is explicitly "MCP-native" rather than building its own
+proprietary transport, the closest thing in this category to building
+on an existing open standard instead of inventing a new one. Pricing,
+the direct point of comparison against Major: Free ($0/mo, 500
+credits), Pro ($9/mo, 5,000 credits), Unlimited ($29/mo, unlimited
+credits) — a named, public three-tier ladder for exactly the kind of
+cross-platform personal memory Major gives away free by design
+(CLAUDE.md §0, load-bearing constraint #1). Strengths: the "Dream
+Phase" background-distillation and hybrid graph-retrieval framing, and
+reaching Claude, ChatGPT, and Cursor simultaneously rather than one
+vendor's ecosystem, which is Major's own cross-model premise built by
+someone else first. Weakness against Ursa: a user shares credentials
+or API access with a third party to get the cross-model view at all,
+and the free tier's 500-credit cap is a lever Memobase can tighten
+later in a way Major's permanent-free design structurally cannot (no
+revenue switch exists to flip). The Show HN thread itself is useful
+demand-signal evidence independent of the product: a competing
+memory-tool builder (Maximem) replied that "the hard part isn't
+storage or retrieval. It's qualification" — deciding what is worth
+remembering at all — and a separate commenter noted Anthropic's own
+Claude memory-import feature (tracked above) "is fundamentally
+migration, not sync. You import once, and from that moment your
+contexts diverge again," the exact standing-portability-gap argument
+this file already makes, stated unprompted by a third party. Pricing
+consequence in docs/market/positioning.md. Last observed 2026-11-09:
+[Memobase](https://memobase.ai/), [Show HN:
+Memobase](https://news.ycombinator.com/item?id=47237920).
+
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
 Checked whether a neutral, cross-vendor memory-portability standard
@@ -2223,6 +2259,33 @@ on the demand side (users building their own workaround tools) now has
 a named supply-side proposal aimed at it, for the first time. Last
 observed 2026-11-09: [LoreKit: Agent memory needs its OpenTelemetry
 moment](https://www.lorekit.io/blog/open-agent-memory-format).
+
+Update 2026-11-09 (message, 22nd run): the acronym itself has now
+fragmented. This run's demand-signals ceremony turned up a Show HN
+post for "AMP," pūrmemo's open-source conversation-export normalizer
+(8 platform converters, Apache 2.0, local-only, v0.2 shipped). Checking
+it against this note's standing bar surfaced two more, unrelated
+projects already using the same name: `agentmemoryprotocol/
+agentmemoryprotocol` (maintained by YouTale AI, a markdown-and-
+frontmatter spec, v0.1 draft, 6 stars/2 forks, reference
+implementations listed as "planned" and not yet built) and a third,
+`akshayaggarwal99/amp` ("AMP: The Agent Memory Protocol," an
+MCP-native memory server, 31 stars). None of the three is aware of or
+interoperates with either of the others, and none clears this note's
+standing bar (independent implementation, neutral governance, adoption
+beyond the format's own author) — pūrmemo's AMP has real shipped code
+but only its own converters; YouTale AI's has a spec and no
+implementation yet; akshayaggarwal99's has the most stars of the three
+and is unchecked beyond the star count this run had budget for. Ten-
+plus attempts now by this note's running count, and for the first time
+two of them collide on the same name without either having heard of
+the other — the clearest evidence yet that this category is
+fragmenting faster than any single attempt, including a would-be
+standard's own name, can hold a stable identity. Last observed
+2026-11-09: [Show HN:
+AMP](https://news.ycombinator.com/item?id=47309161), [GitHub:
+agentmemoryprotocol/agentmemoryprotocol](https://github.com/agentmemoryprotocol/agentmemoryprotocol),
+[GitHub: akshayaggarwal99/amp](https://github.com/akshayaggarwal99/amp).
 
 ## Changelog
 
@@ -2556,3 +2619,16 @@ moment](https://www.lorekit.io/blog/open-agent-memory-format).
   niche (healthcare, autonomous systems) with no funding event or
   named customer found. No new Category 2 or 3 entries this run.
   Positioning consequence in docs/market/positioning.md.
+- 2026-11-09 (message, 22nd run) — the 18th run's vendor-lead list is
+  fully closed (prior run), so this run's demand-signals ceremony
+  looked at this week's public forums instead and added Memobase
+  (Category 3, 27th entry), a consumer memory layer charging
+  $0/$9/$29 per month for the cross-model personal-memory product
+  Major gives away free by design — the first direct paid comp this
+  file has for that specific claim. The standing "no neutral
+  portability standard" cross-cutting note gained a tenth-plus
+  update: a Show HN post for an open-source tool called "AMP" led to
+  two more, unrelated open-source projects already using the same
+  name, none aware of the others, none clearing the note's
+  independent-implementation bar. Positioning consequence in
+  docs/market/positioning.md.
