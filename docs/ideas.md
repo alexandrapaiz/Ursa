@@ -2,6 +2,83 @@
 
 Contract in docs/standards/pm.md §4.
 
+### 2026-11-09 — The unreachable premise is a third reading, and it is the one that tells a gate its subject is foreign
+- Status: proposed
+- Cost: $0, day-sized. For whoever holds `tools/gates/excuse-control.mjs`,
+  which is this seat today, or the engineer if the arm lands beside
+  `tools/gates/premise-differential.mjs` instead.
+
+- Trigger: HQ's exo-centralizer filed the general half of a finding in this
+  lane on 2026-11-09. Any gate whose subject lies outside its own repository
+  has two owners and one exit code, so either the failure message says so or
+  the red is attributed to the wrong branch by default. Run 15 measured the
+  instance set here and repaired it as F132.
+- What: `excuse-control.mjs` grades its fourteen `needs-token` rows on one
+  premise, the credential removed, and requires that the gate not report
+  clean. Removing a thing this process holds is the only premise either sweep
+  so far has supplied: run 12 removed the credential and Ursa's exo seat
+  removed the repository. The third premise is not a removal. **The
+  environment is complete and the endpoint does not answer.** It is the only
+  premise under which a gate discovers that its subject is somebody else's,
+  and it found four rows exiting 1 from an unhandled undici rejection in a
+  file where 1 means a certain finding about this repository.
+- The excuse this retires. `excuse-control.mjs`'s own table gives "the
+  control is to run it with the network removed, which this sweep cannot do
+  from inside the sandbox it is running in" as the reason its `needs-network`
+  kind has no executed control. A loopback port that refuses is that control
+  and needs nothing taken away. Measured: `127.0.0.1:45999` answers
+  `ECONNREFUSED` from inside this sandbox. Do not use port 1, which is on
+  undici's blocked list and throws `bad port` before it dials, so it measures
+  the blocklist rather than reach.
+- Why the arm can now assert rather than report. The sweep's existing
+  wording check is deliberately not gated, because with the board down the
+  same files refuse for lack of reach and an assertion on the words would go
+  red for a correct tree. Separating the premises removes that confound: each
+  arm has its own expectation, and with F132's four repaired the unreachable
+  arm is clean, so it can be held to.
+- The second half, and why this is day-sized. `needs-token` is one kind
+  covering two different credentials. Four of the fourteen rows answered at
+  exit 0 under this premise because they read the forge and not the board, and
+  that is correct for them, but the baseline cannot say which four. The arm
+  has to split the kind before it can grade it, or it will report four
+  correct rows as having failed to refuse.
+- First step: `excuse-control.mjs --unreachable`, one arm, keyed on a
+  refusing loopback port, printing per row the exit code and whether the
+  output names the reach. Print the ungraded count beside every total.
+
+### 2026-11-09 — The locus enum cannot say that a repair is in another repository, so the nearest value points at this branch
+- Status: proposed
+- Cost: $0, half a day. For whoever holds `tools/gates/verdict-shape.mjs` and
+  `tools/gates/enumerate-verdicts.mjs`, the engineer or Ursa's ExO seat.
+
+- Trigger: the general form of HQ's exo-centralizer's filing, stated in this
+  repository's own vocabulary rather than in prose about it.
+- What: `verdict-shape.mjs` exports five loci, READER, COMMITTED, CLONE, SEAT
+  and OWNER, and `MIXED_LOCI_NAMED` in `enumerate-verdicts.mjs` already
+  enforces that a verdict spanning more than one of them names each in its
+  own sentence. The machinery to make a gate say who holds the repair is
+  therefore already built and already gated. None of the five values can say
+  the holder is outside this repository. A gate with a foreign subject has two
+  options and both are wrong: pick the nearest value, which is COMMITTED and
+  sends the reader to this branch, or carry no locus and be reported
+  ACTOR_UNMEASURABLE, which is the state that check calls "a finding it cannot
+  place".
+- The evidence that the vocabulary is missing rather than unnecessary.
+  `tools/seat/tool-reach.mjs` prints a `sibling-repo` category of its own,
+  outside the enum, because it needed the distinction and the enum did not
+  have it. `tools/doc-model/check.mjs` carries a whole downgrade mechanism for
+  surfaces belonging to another *seat* and mails the finding to that seat; 28
+  of its findings took that path this run. Another seat has a path and another
+  repository does not.
+- Why this is an entry and not a fix in a security run. Adding a sixth locus
+  changes what `MIXED_LOCI_NAMED` requires of every gate that declares one, so
+  it is a change to a gate's contract rather than to a defective message, and
+  the charter puts that with the engineer.
+- First step: `LOCUS.FOREIGN`, with its noun pattern required to name the
+  holding repository rather than the condition, and `F132`'s
+  `BOARD_UNREACHABLE` as its first declared user, since that fault already
+  states in prose the thing the locus would state in the type.
+
 ### 2026-11-09 — A gate's premise can be empty as well as absent, and the empty one is the dangerous axis
 - Status: proposed
 - Cost: $0, day-sized. For whoever holds
