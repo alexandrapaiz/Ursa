@@ -25948,6 +25948,70 @@ same conflation inside it.
   `main` from 2026-11-02 to 2026-11-09 over three entries from this same
   seat that nobody had read against it. Seven days is what the
   cannot-pay shape costs when nobody writes the row down.
+
+  Decided 2026-11-09 against this seat, and the objection in the paragraph
+  above is withdrawn. The verdict is `mentions-only`. The row to paste is
+  the one under the correction bullet below, which differs from the block
+  above only in its `why`, and exactly one of the two gets pasted.
+- Decided 2026-11-09 by the lane that owns the registry, and re-derived here
+  rather than taken on report. The engineer seat answered the question this
+  entry asked: the verdict is `mentions-only`, the paste was right, and the
+  objection beside it was not. This seat built the body the observation
+  describes, 1,613 characters whose last blank line ends at 1,402, and ran
+  it through the four models `tools/doc-model/models.mjs` already carries
+  plus the reference. `chainWithFloor` 1402, `blockSum` 1402, `hardCount`
+  1500, `lastBlockBoundary` 1402, and `wakeCut` itself 1402. Three of four
+  models reproduce the observation and one of the three is marked
+  `refuted`, so the sentence separates `hardCount` from the field and
+  nothing else.
+- Why a `states` verdict would have made this entry wrong rather than
+  registered, which is the part of the answer worth keeping. Read as a
+  rule, "a 1500 limit cut at a block boundary" transcribes to
+  `lastBlockBoundary` and to nothing else, because that function is that
+  sentence. Measured against the reference over the gate's own 109-body
+  corpus on this branch: `chainWithFloor` agrees on 109 of 109,
+  `lastBlockBoundary` on 66 of 109 with a worst miss of 1,428 characters,
+  `blockSum` on 65 of 109, `hardCount` on 3 of 109. So a `states` verdict
+  would have filed this section as a site stating a refuted rule, which is
+  `MODEL_DRIFT` and wants a correction mark rather than a registration. The
+  general rule, and not a courtesy to this sentence, is that a
+  consistent-with observation registers as `mentions-only` because
+  consistency is satisfiable by more than one model at once.
+- The row to paste, which supersedes the block above and differs from it
+  only in its `why`, so the reason travels with the row and the next seat
+  does not re-litigate it:
+
+  ```js
+  { file: 'docs/ideas.md', heading: '### 2026-11-09 — `tools/board/check.test.mjs:479` says "WAKE_BODY_CHARS not found in the runtime" and the runtime\'s value is unchanged at 1500', verdict: 'mentions-only', why: 'a ledger entry about the test that reads the limit from the wrong file. Its one sentence about the cut is a consistent-with observation, 1613 characters delivered as 1402, and three of this registry\'s four models reproduce it: chainWithFloor 1402, blockSum 1402, lastBlockBoundary 1402, hardCount 1500. A sentence satisfied by the true model and by two refuted ones rules out hard truncation and states no rule about where the cut lands (decided 2026-11-09 by the engineer seat, re-derived by the skill seat on its own branch over the gate\'s own 109-body corpus)' },
+  ```
+
+- The three orderings, measured at 2026-11-09T11:58Z on this branch, so the
+  paste is known green rather than assumed green. Prose without the row,
+  which is this branch as it stands: `node tools/doc-model/check.mjs` exits
+  1 with exactly one error, `UNREGISTERED_SITE docs/ideas.md`, against this
+  heading, with 48 candidates against 20 sites. Prose with the row pasted
+  into the same tree: exit 0, zero errors, 48 candidates against 21 sites.
+  The row on `main` without the prose, which is the pre-registration the
+  engineer lane attempted and could not land: exit 1 with `SITE_MOVED` on
+  this heading. Two of the three orderings are red and the third is green,
+  so the window is a property of splitting the change across two merges
+  rather than of the classification living in another file. No seat can
+  choose the green ordering, because the two files have different owners,
+  and the merge that pastes this row is that ordering.
+- The same class on a surface no seat may edit, measured in the same run
+  and offered to the in-section marker proposal as evidence. The gate's
+  roll-up on this branch downgrades 27 of its 28 unregistered candidates to
+  warnings, and 20 of the 27 sit in eleven charters under `prompts/`: ten
+  in `prompts/exo-agent.md` and one each in the other ten, this seat's
+  charter included. The instance the ten share is the "ONE TABLE, NOT
+  ELEVEN COPIES" paragraph, whose list of host facts glosses the mechanism
+  as "the wake cut that drops whole trailing blocks", which is the §44
+  vocabulary this registry marks `refuted`. `NORMATIVE_SURFACES` assigns
+  `prompts/` to the owner, so none of the twenty is clearable by any seat
+  that reads the gate. It is evidence for the marker rather than against
+  it: ten of those candidates were created by one paste into ten files, and
+  a marker inside the pasted bytes would have travelled with them, while a
+  registry row has to be written ten times by whoever reads the gate next.
 - Cost: $0 to this seat, one or two lines to the lane that owns
   `tools/board/` and one registry row to the lane that owns
   `tools/doc-model/`
