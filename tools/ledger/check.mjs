@@ -33,8 +33,31 @@ import {
 import { verdict } from './contract-verdict.mjs';
 
 const path = process.argv[2] ?? 'docs/ideas.md';
-const source = readFileSync(path, 'utf8');
+// The read is guarded because an absent ledger used to leave an uncaught
+// ENOENT stack trace on stderr and exit 1, which is this gate's code for "a
+// seat must repair", with no line naming what. The exit code is unchanged on
+// purpose: a branch that removed the ledger did cause this and can fix it.
+// The only thing that changes is that the output says so. Found 2026-11-09
+// by the security seat while reproducing the empty-premise instance Ursa's
+// exo seat reported in `tools/gates/empty-premise.mjs`.
+let source;
+try {
+  source = readFileSync(path, 'utf8');
+} catch (err) {
+  if (err.code !== 'ENOENT') throw err;
+  console.error(
+    `::error::LEDGER_ABSENT: ${path}: the ledger this gate's contract is about does not exist. ` +
+      'pm.md §4 is asserted against that file, so with the file gone there is no contract to check ' +
+      'and no clean verdict to report. Restore it, or pass the path of the ledger you meant.',
+  );
+  console.error(`Ledger contract: ${path} not found. Exit 1.`);
+  process.exit(1);
+}
 const blocks = parseLedger(source);
+// `parseLedger` keeps index 0 unconditionally, because the preamble is a block
+// whether or not it has text, so `blocks.length` is 1 over a zero-byte file and
+// never 0. The idea count is therefore the one to reason about for emptiness.
+const ideaBlocks = blocks.filter((b) => b.kind !== 'preamble');
 
 /** @type {Array<{ held: 'seat' | 'owner', rule: string, message: string }>} */
 const violations = [];
@@ -253,6 +276,26 @@ for (const block of blocks) {
       );
     }
   }
+}
+
+// Rule EMPTY_LEDGER, held by the seat. Every rule above is quantified over the
+// blocks, so all of them are vacuously satisfied by a ledger that has none, and
+// the gate then reports the strongest verdict it has for the weakest evidence it
+// could have had. Measured 2026-11-09 against `HEAD` in a worktree: the real
+// file exits 2 with eight owner-held warnings, and the same file truncated to
+// zero bytes exits 0 printing "1 blocks in docs/ideas.md, clean", so emptying
+// the subject is the one edit that makes this gate greener. `ledger-contract`
+// in `scripts/ci-checks.mjs` passes on exit 0 and 2 alike, which is correct for
+// the owner remainder and is why the clean path had to be the one that moved.
+// Held by the seat: a branch that emptied the ledger caused this and can revert
+// it. Reported to this seat by Ursa's exo seat, from `empty-premise.mjs`.
+if (ideaBlocks.length === 0) {
+  violation(
+    'seat',
+    'EMPTY_LEDGER',
+    `parses to 0 idea blocks, so every rule in this gate is vacuously true and ` +
+      `"clean" would mean "nothing was checked". A ledger has at least one entry.`,
+  );
 }
 
 // Rule CONFLICT_MARKER, held by the seat. Conflict markers committed by
