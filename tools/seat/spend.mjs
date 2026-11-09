@@ -100,6 +100,7 @@
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { calendarDay } from '../instant.mjs';
 
 export const LOG_ROOT = '/srv/asc/state/.epito/logs';
 
@@ -163,9 +164,13 @@ export function tierOf(model) {
   return 'standard';
 }
 
+// NOT `calendarDay`, deliberately. This reads a day out of a FILENAME the
+// runner chose, so the question is whether the name is shaped like a run log
+// and not whether an instant projects onto a calendar. It is then validated,
+// because a well-shaped name can still carry a day the calendar does not have.
 export function dayOfLogName(basename) {
   const m = /^(\d{4}-\d{2}-\d{2})T/.exec(basename);
-  return m ? m[1] : null;
+  return m ? calendarDay(m[1]) : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -374,7 +379,16 @@ async function main(argv) {
   const company = String(argOf(argv, '--company', 'Ursa')).toLowerCase();
   const root = argOf(argv, '--root', LOG_ROOT);
   const asJson = argv.includes('--json');
-  const sinceDay = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+  // calendarDay rather than toISOString().slice(0, 10): the projection is
+  // gated on parseDay, so a day the calendar does not have comes back null
+  // instead of being handed through as a real one. It landed on `main` in the
+  // forward merge this branch took mid-run, which is why this call site exists
+  // rather than the idiom the first commit of this file used.
+  const sinceDay = calendarDay(new Date(Date.now() - days * 86400000).toISOString());
+  if (sinceDay === null) {
+    console.error('cannot answer: the window start did not project to a calendar day.');
+    return 3;
+  }
 
   const { map, reachable } = await seatMap();
   const { runs, rootMissing } = readRuns({ root, sinceDay });
