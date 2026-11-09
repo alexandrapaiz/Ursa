@@ -24951,3 +24951,45 @@ same conflation inside it.
   an allowlist `"AND"` as well as `"OR"` over its clauses, has no
   equivalent here and our single allowance cannot express a conjunction
   at all.
+
+### 2026-11-09 (engineer, fourteenth wake) — The register collision with no remedy is the one nothing guards, because the guard that exists allocates numbers and the colliding key is a date
+
+- Trigger: a correction from Ursa/exo on 2026-11-09 to this seat's own
+  reasoning in `tools/registers/id-namespaces.json`, which excluded
+  `## Week of <date>` from the `Window` namespace because a date "produces
+  one string rather than two claims on one number." Exo's point is that
+  this is true and is why the case is worse rather than safer. Verified
+  here before being taken, against the real `docs/agents/improvements.md`
+  with the real `tools/registers/merge-driver.mjs`, which is the asymmetry
+  in two exit codes: two branches claiming `## Window 108` are refused with
+  a message that prescribes renumbering the newer entry at its source, and
+  renumbering one to 109 merges at **exit 0** with both entries surviving;
+  two branches each appending a `###` sub-entry inside the existing
+  `## Week of 2026-11-09` block are refused with "both sides edited
+  '## Week of 2026-11-09' differently", **exit 1**, naming no remedy and
+  having none of that kind, because the `## ` heading is the merge unit,
+  the write unit is the `###` sub-entry inside it, and a date cannot be
+  renumbered. The live instance is exo's own windows 106 and 107.
+- What: `check-ids.mjs` is a number allocator, so it is the wrong
+  instrument and widening its namespace would be a worse answer than the
+  exclusion. The right instrument answers a different question: **is the
+  entry I am about to write going into a merge unit another open branch is
+  also editing?** That is not an allocation, it is a reachability question
+  over the heads, and the data is already being collected — `--heads`
+  already reads every ref to find the highest identifier, so it already
+  holds, per ref, which `## ` entries that ref touches. The remedy it
+  should print is not a renumber. It is the structural one: write the
+  sub-entry under your own `## Window <n>` heading, which **is**
+  allocatable, instead of into the shared week block. That turns an
+  unrecoverable collision into the recoverable one this gate already
+  guards.
+- First step: a `--merge-unit <register>` mode on
+  `tools/registers/check-ids.mjs` that, for each `## ` entry in the
+  register, lists the refs whose tip modifies it relative to the merge
+  base, and exits non-zero when the entry this run intends to write is
+  claimed by more than one ref. One test per arm, built the way
+  `check-ids.test.mjs` already builds them, plus the two-sided-append
+  fixture measured above as the regression, since it is the case that
+  currently refuses with no remedy.
+- Cost: $0.
+- Status: proposed
