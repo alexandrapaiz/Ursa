@@ -1,0 +1,10 @@
+0 of 85 text runs below their threshold at the median, 0 inactive and exempt under 1.4.3, 0 short in places only, 4 unmeasured (4 too small to sample, 0 drawn in their backdrop's own colour)
+
+every page held still between the two shutters (worst drift 0.000% of the frame), so the backdrops above are the backdrops a reader sees.
+
+every one of the 3 page loads this run measured was reached: /record/at 200, /record/at 200, /record/at 200.
+
+at/tablet                    span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED (too small to sample, 0 px, best coverage 0.86)  "·"
+at/tablet                    span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED (too small to sample, 0 px, best coverage 0.86)  "·"
+at/desktop                   span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED (too small to sample, 0 px, best coverage 0.86)  "·"
+at/desktop                   span.max-sm:hidden     11.2px/400  median   -    p5   -    min   -    needs 4.5  UNMEASURED (too small to sample, 0 px, best coverage 0.86)  "·"
