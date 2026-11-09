@@ -20,8 +20,8 @@ actually run.
 
 **What it costs, measured here rather than argued.** Before the repair, `git
 log` over a test file returned one commit, so the question this run was sent
-to answer — when was this test renamed, and did the rename reach the trunk —
-had no answer in the clone at all. `git log -L` over the test's own line
+to answer, which was when this test was renamed and whether the rename
+reached the trunk, had no answer in the clone at all. `git log -L` over the test's own line
 returned nothing. The charter's own first-run instruction is a full-history
 secret scan, and `--history` on the clone as handed over would have had
 almost nothing to walk. The scan refuses rather than lying, which is the
