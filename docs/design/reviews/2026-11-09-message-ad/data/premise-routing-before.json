@@ -1,0 +1,152 @@
+{
+ "premises": [
+  "reached",
+  "hydrated"
+ ],
+ "rows": [
+  {
+   "file": "hover.mjs",
+   "premise": "reached",
+   "acquired": true,
+   "read": false,
+   "exempt": null,
+   "verdict": "UNROUTED"
+  },
+  {
+   "file": "hover.mjs",
+   "premise": "hydrated",
+   "acquired": true,
+   "read": false,
+   "exempt": null,
+   "verdict": "UNROUTED"
+  },
+  {
+   "file": "measure-contrast.mjs",
+   "premise": "reached",
+   "acquired": true,
+   "read": true,
+   "exempt": null,
+   "verdict": "routed"
+  },
+  {
+   "file": "measure-contrast.mjs",
+   "premise": "hydrated",
+   "acquired": true,
+   "read": false,
+   "exempt": null,
+   "verdict": "UNROUTED"
+  },
+  {
+   "file": "measure-focus.mjs",
+   "premise": "reached",
+   "acquired": true,
+   "read": true,
+   "exempt": null,
+   "verdict": "routed"
+  },
+  {
+   "file": "measure-focus.mjs",
+   "premise": "hydrated",
+   "acquired": true,
+   "read": false,
+   "exempt": null,
+   "verdict": "UNROUTED"
+  },
+  {
+   "file": "measure-hit-areas.mjs",
+   "premise": "reached",
+   "acquired": true,
+   "read": true,
+   "exempt": null,
+   "verdict": "routed"
+  },
+  {
+   "file": "measure-hit-areas.mjs",
+   "premise": "hydrated",
+   "acquired": true,
+   "read": false,
+   "exempt": null,
+   "verdict": "UNROUTED"
+  },
+  {
+   "file": "measure-narrow.mjs",
+   "premise": "reached",
+   "acquired": true,
+   "read": true,
+   "exempt": null,
+   "verdict": "routed"
+  },
+  {
+   "file": "measure-narrow.mjs",
+   "premise": "hydrated",
+   "acquired": true,
+   "read": false,
+   "exempt": null,
+   "verdict": "UNROUTED"
+  },
+  {
+   "file": "measure-swatches.mjs",
+   "premise": "reached",
+   "acquired": true,
+   "read": false,
+   "exempt": null,
+   "verdict": "UNROUTED"
+  },
+  {
+   "file": "measure-swatches.mjs",
+   "premise": "hydrated",
+   "acquired": true,
+   "read": false,
+   "exempt": null,
+   "verdict": "UNROUTED"
+  },
+  {
+   "file": "sample-motion.mjs",
+   "premise": "reached",
+   "acquired": true,
+   "read": false,
+   "exempt": null,
+   "verdict": "UNROUTED"
+  },
+  {
+   "file": "sample-motion.mjs",
+   "premise": "hydrated",
+   "acquired": true,
+   "read": false,
+   "exempt": null,
+   "verdict": "UNROUTED"
+  },
+  {
+   "file": "shoot.mjs",
+   "premise": "reached",
+   "acquired": true,
+   "read": true,
+   "exempt": null,
+   "verdict": "routed"
+  },
+  {
+   "file": "shoot.mjs",
+   "premise": "hydrated",
+   "acquired": true,
+   "read": true,
+   "exempt": null,
+   "verdict": "routed"
+  },
+  {
+   "file": "verify-hover.mjs",
+   "premise": "reached",
+   "acquired": true,
+   "read": true,
+   "exempt": null,
+   "verdict": "routed"
+  },
+  {
+   "file": "verify-hover.mjs",
+   "premise": "hydrated",
+   "acquired": true,
+   "read": false,
+   "exempt": null,
+   "verdict": "UNROUTED"
+  }
+ ]
+}
