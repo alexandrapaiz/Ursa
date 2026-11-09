@@ -8,7 +8,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { seatOfBranch, lagDays, buildRows, formatTable, formatSummary, cloneFitness, utcDay, copiesOf, selectCopies, selectionFaults, queueScan, lineCount } from './charter-lag.mjs'
+import { seatOfBranch, lagDays, buildRows, formatTable, formatSummary, cloneFitness, dayCell, copiesOf, selectCopies, selectionFaults, queueScan, lineCount } from './charter-lag.mjs'
 
 test('seatOfBranch takes the whole first segment, with or without a company prefix', () => {
   assert.equal(seatOfBranch('ursa-skill/2026-11-02-message'), 'skill')
@@ -196,14 +196,28 @@ test('at zero offset the suffix decides, and `+` sorts below `Z`', () => {
 })
 
 test('the day column is the UTC day of the instant, not its leading ten characters', () => {
-  assert.equal(utcDay('2026-11-01T23:34:57-05:00'), '2026-11-02')
-  assert.equal(utcDay('2026-10-09T12:28:03-06:00'), '2026-10-09')
-  assert.equal(utcDay('2026-10-18T18:50:50+00:00'), '2026-10-18')
-  assert.equal(utcDay('not a date'), '?')
+  // RENAMED FROM `utcDay` TO `dayCell` ON 2026-11-09, and the rename is the
+  // finding rather than cosmetics. `tools/instant.mjs` exports its own
+  // `utcDay`, which answers `null` where this one answers `'?'`, so this file
+  // imported one of two same-named functions and nothing but the import line
+  // said which. `dayCell` now delegates to `calendarDay` and keeps the `'?'`,
+  // because the placeholder is a rendering choice belonging to `formatTable`.
+  assert.equal(dayCell('2026-11-01T23:34:57-05:00'), '2026-11-02')
+  assert.equal(dayCell('2026-10-09T12:28:03-06:00'), '2026-10-09')
+  assert.equal(dayCell('2026-10-18T18:50:50+00:00'), '2026-10-18')
+  assert.equal(dayCell('not a date'), '?')
+  // Narrowed by the delegation, in the one direction worth narrowing. The
+  // local `Date.parse` read a zoneless timestamp in the RUNNER's timezone and
+  // answered a day that depended on where the process ran. `calendarDay`
+  // refuses it, so the cell says it does not know.
+  assert.equal(dayCell('2026-11-02T04:34:57'), '?')
+  // And a bare day passes through, which the old one also did by way of
+  // `Date.parse` reading it as UTC midnight. Same answer, now on purpose.
+  assert.equal(dayCell('2026-11-02'), '2026-11-02')
 })
 
 test('formatTable itself renders the UTC day, and not the string it was handed', () => {
-  // Rehearsed red separately from the utcDay test above: that one asserts on
+  // Rehearsed red separately from the dayCell test above: that one asserts on
   // the exported helper, so it stays green while the formatter regresses.
   const out = formatTable(buildRows({
     charters: [{
