@@ -22,6 +22,7 @@ import {
   patchId,
   runControl,
   NON_SEAT_AUTHORS,
+  UNPLACEABLE_WINDOW,
 } from './duplicate-repair.mjs';
 
 // ---------------------------------------------------------------- the control
@@ -277,6 +278,50 @@ test('a message to a third party does not count', () => {
   assert.equal(messageBetween(ROWS, 'ursa-skill', 'ursa-pm', '2026-11-09T05:16:00Z', '2026-11-09T05:19:00Z'), null);
 });
 
+// THE ZONED CASES, WHICH ARE WHY THIS FILE WENT RED ON MAIN (exo, window
+// 114). Every `ts` above is spelled `Z`, and a textual comparison is correct
+// on a corpus where every instant is spelled the same way, so the whole
+// suite passed over a function that ordered instants as text. The real
+// operands are not spelled the same way: the window bounds come from `git
+// log --format=%cI`, which carries the COMMITTER'S zone offset, and the rows
+// come from the board, which is always `Z`. Measured on `origin/main` on
+// 2026-11-09: 447 of 3,396 commits carry a non-UTC offset.
+//
+// A test corpus drawn from one producer cannot see a defect that only
+// appears between two producers. These cases use both spellings on purpose.
+
+test('a message inside a window whose bounds carry a zone offset is found', () => {
+  // lo = 06:16Z, hi = 07:33Z, the row = 06:20Z, so the row is inside.
+  // As text, "06:20:00Z" sorts ABOVE "01:33:00-06:00", so the old textual
+  // test read the row as past the end of the window and returned null —
+  // and null is what grades a pair DUPLICATED.
+  const rows = [{ ts: '2026-11-09T06:20:00Z', from_seat: 'skill', to_seat: 'engineer', subject: 'in window' }];
+  const hit = messageBetween(rows, 'ursa-skill', 'ursa-engineer',
+    '2026-11-09T00:16:00-06:00', '2026-11-09T01:33:00-06:00');
+  assert.equal(hit?.subject, 'in window', 'a zoned window must place a Z row');
+});
+
+test('a message outside a zoned window is still excluded, so the repair did not just widen it', () => {
+  const rows = [{ ts: '2026-11-09T08:00:00Z', from_seat: 'skill', to_seat: 'engineer', subject: 'after' }];
+  assert.equal(messageBetween(rows, 'ursa-skill', 'ursa-engineer',
+    '2026-11-09T00:16:00-06:00', '2026-11-09T01:33:00-06:00'), null);
+});
+
+test('an unplaceable window bound is refused, never answered as "no message passed"', () => {
+  // Answering null here would grade the pair DUPLICATED over an interval
+  // nobody can place, which is the direction that manufactures the finding.
+  assert.equal(messageBetween(ROWS, 'ursa-skill', 'ursa-engineer', 'whenever', '2026-11-09T05:33:00Z'),
+    UNPLACEABLE_WINDOW);
+  assert.equal(messageBetween(ROWS, 'ursa-skill', 'ursa-engineer', '2026-11-09T05:16:00Z', ''),
+    UNPLACEABLE_WINDOW);
+});
+
+test('an unplaceable row is skipped rather than admitted to the window', () => {
+  const rows = [{ ts: 'soon', from_seat: 'skill', to_seat: 'engineer', subject: 'unplaceable' }];
+  assert.equal(messageBetween(rows, 'ursa-skill', 'ursa-engineer',
+    '2026-11-09T05:16:00Z', '2026-11-09T05:33:00Z'), null);
+});
+
 test('the ursa- prefix on a git author is stripped to a board seat name', () => {
   // The two surfaces name the same actor differently: git says `ursa-skill`
   // and the board says `skill`. Without the strip, every pair would grade
@@ -296,6 +341,56 @@ test('two concurrent actors on one entry with no message grade DUPLICATED', () =
   assert.equal(g.counts.DUPLICATED, 1);
   assert.equal(g.pairs[0].gap_seconds, 600);
   assert.equal(g.pairs[0].same_actor, false);
+});
+
+test('a zone offset does not decide which actor was first', () => {
+  // `a` is 2026-11-09T23:00:00Z. `b` is 2026-11-09T18:30:00-06:00, which is
+  // 2026-11-10T00:30:00Z, so `a` really is first by ninety minutes. As text
+  // "18:30:00-06:00" sorts BELOW "23:00:00+00:00", so the old ordering made
+  // `b` the first actor, credited the wrong seat with starting the
+  // collision, and reported a NEGATIVE gap. Both halves are pinned here
+  // because the sign is the half a reader notices and the attribution is
+  // the half that is wrong about a person.
+  const commits = [
+    C('a', '2026-11-09T23:00:00+00:00', 'ursa-skill'),
+    C('b', '2026-11-09T18:30:00-06:00', 'ursa-engineer'),
+  ];
+  const edits = new Map([['a', [{ path: 'r.md', id: 'E' }]], ['b', [{ path: 'r.md', id: 'E' }]]]);
+  const g = grade(commits, edits, { rows: [], run: () => { throw new Error('no'); } });
+  assert.equal(g.pairs.length, 1);
+  assert.equal(g.pairs[0].first.actor, 'ursa-skill', 'the earlier instant is the first actor');
+  assert.equal(g.pairs[0].second.actor, 'ursa-engineer');
+  assert.equal(g.pairs[0].gap_seconds, 5400);
+});
+
+test('input order does not decide it either, so the sort is doing the work', () => {
+  // The same pair with the array reversed must grade identically. Without
+  // this the test above passes on a tool that simply kept input order.
+  const commits = [
+    C('b', '2026-11-09T18:30:00-06:00', 'ursa-engineer'),
+    C('a', '2026-11-09T23:00:00+00:00', 'ursa-skill'),
+  ];
+  const edits = new Map([['a', [{ path: 'r.md', id: 'E' }]], ['b', [{ path: 'r.md', id: 'E' }]]]);
+  const g = grade(commits, edits, { rows: [], run: () => { throw new Error('no'); } });
+  assert.equal(g.pairs[0].first.actor, 'ursa-skill');
+  assert.equal(g.pairs[0].gap_seconds, 5400);
+});
+
+test('a zoned window finds the message that makes a pair COORDINATED', () => {
+  // The end-to-end case: the same two commits, with a board message that
+  // really did pass between them. Under the textual window test the message
+  // read as outside the interval, so this pair came back DUPLICATED — the
+  // gauge's headline class, manufactured by the comparison rather than
+  // observed.
+  const commits = [
+    C('a', '2026-11-09T23:00:00+00:00', 'ursa-skill'),
+    C('b', '2026-11-09T18:30:00-06:00', 'ursa-engineer'),
+  ];
+  const edits = new Map([['a', [{ path: 'r.md', id: 'E' }]], ['b', [{ path: 'r.md', id: 'E' }]]]);
+  const rows = [{ ts: '2026-11-09T23:30:00Z', from_seat: 'skill', to_seat: 'engineer', subject: 'I am taking this one' }];
+  const g = grade(commits, edits, { rows, run: () => { throw new Error('no'); } });
+  assert.equal(g.counts.COORDINATED, 1);
+  assert.equal(g.counts.DUPLICATED, 0);
 });
 
 test('two actors on DIFFERENT entries are not a pair', () => {

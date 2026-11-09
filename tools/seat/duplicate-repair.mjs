@@ -118,6 +118,8 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
+import { compareInstants, parseInstant, sortByInstant } from '../instant.mjs';
+
 export const DEFAULT_HOURS = 168;
 export const REGISTERS_FILE = 'tools/registers/registers.json';
 
@@ -317,13 +319,60 @@ export function patchId(sha, { run = git } = {}) {
   } catch { return null; }
 }
 
-/** Did any board message pass between two actors inside [lo, hi]? */
+/**
+ * Did any board message pass between two actors inside [lo, hi]?
+ *
+ * THE WINDOW TEST IS AN INSTANT COMPARISON AND IT USED TO BE A TEXT ONE, AND
+ * `tools/instant-gate.mjs` COULD NOT SEE IT. That lint is name-shaped: it
+ * fires on a relational operator between two timestamp-NAMED operands, and
+ * `lo` and `hi` are named for their role in an interval rather than for what
+ * they hold. So the three sorts it flagged in this file were the three it
+ * could read, and this line — the only one of the four whose answer changes a
+ * published verdict — was invisible to it.
+ *
+ * The operands are also the worst possible pair for a textual compare. `lo`
+ * and `hi` are commit instants from `git log --format=%cI`, which carries the
+ * COMMITTER'S ZONE OFFSET, and `r.ts` is a board instant, which is always
+ * `Z`. Measured on `origin/main` on 2026-11-09: 447 of 3,396 commits carry a
+ * non-UTC offset, and over this gauge's own default 168-hour window 23,253 of
+ * 310,078 ordered commit pairs (7.5 per cent) come out backwards as text.
+ *
+ * What that costs here is one-directional and it is the expensive direction.
+ * A message inside the window read as outside it makes `messageBetween`
+ * return null, and null is what grades a pair `DUPLICATED` rather than
+ * `COORDINATED` — so the textual test manufactures the finding this whole
+ * file exists to count, and never suppresses one.
+ *
+ * AND THE REPAIR IS NOT `compareInstants` IN THE COMPARISON, WHICH WAS THE
+ * FIRST VERSION OF THIS FUNCTION. `compareInstants` answers null for a value
+ * it will not place, `null < 0` and `null > 0` are both false, so a row or a
+ * bound nobody can place would have been admitted to the window silently —
+ * and the line would have been CLEAN to the lint, because the lint's
+ * clean-site exemption is keyed on the callee's name. `tools/instant.mjs`
+ * writes that hazard out in its own `REFUSAL_AS_ORDER` comment: reaching for
+ * a member of the repaired family is not the same as being repaired. So the
+ * placement is decided once, up front, with `parseInstant`, and the window
+ * test is arithmetic on numbers that are known to exist.
+ *
+ * An unplaceable BOUND is not a narrower window, it is no window, and
+ * answering "no message passed" over one would grade the pair `DUPLICATED`
+ * on an interval nobody can place. That is the manufacturing direction
+ * again, so this function refuses instead, and `grade` maps the refusal to
+ * `INDETERMINATE`. A classifier with no abstain value invents a class for
+ * every input it cannot read.
+ */
+export const UNPLACEABLE_WINDOW = Symbol('unplaceable-window');
+
 export function messageBetween(rows, actorA, actorB, lo, hi) {
+  const loMs = parseInstant(lo);
+  const hiMs = parseInstant(hi);
+  if (loMs === null || hiMs === null) return UNPLACEABLE_WINDOW;
   const seat = (s) => String(s || '').replace(/^ursa-/, '');
   const a = seat(actorA);
   const b = seat(actorB);
   for (const r of rows) {
-    if (!r.ts || r.ts < lo || r.ts > hi) continue;
+    const at = parseInstant(r.ts);
+    if (at === null || at < loMs || at > hiMs) continue;
     const from = seat(r.from_seat);
     const to = seat(r.to_seat);
     if ((from === a && to === b) || (from === b && to === a)) return r;
@@ -361,12 +410,12 @@ export function grade(commits, edits, { rows = null, coverage = null, run = git,
     // — one reachable from the other, hence the same run's chain — and two
     // concurrent commits by one actor stay two representatives.
     const reps = [];
-    const ordered = [...b.commits].sort((x, y) => (x.ts < y.ts ? -1 : 1));
+    const ordered = sortByInstant(b.commits, (c) => c.ts);
     for (const c of ordered) {
       const home = reps.find((r) => r.actor === c.actor && !concurrent(r.sha, c.sha, { run }));
       if (!home) reps.push(c);
     }
-    const actors = reps.sort((x, y) => (x.ts < y.ts ? -1 : 1));
+    const actors = sortByInstant(reps, (r) => r.ts);
     for (let i = 0; i < actors.length; i += 1) {
       for (let j = i + 1; j < actors.length; j += 1) {
         const first = actors[i];
@@ -389,7 +438,15 @@ export function grade(commits, edits, { rows = null, coverage = null, run = git,
           klass = 'INDETERMINATE';
         } else {
           msg = messageBetween(rows, first.actor, second.actor, first.ts, second.ts);
-          klass = msg ? 'COORDINATED' : 'DUPLICATED';
+          if (msg === UNPLACEABLE_WINDOW) {
+            // The window's own bounds could not be placed, so this pair was
+            // never graded. It is not a coordination and it is certainly not
+            // a duplication.
+            msg = null;
+            klass = 'INDETERMINATE';
+          } else {
+            klass = msg ? 'COORDINATED' : 'DUPLICATED';
+          }
         }
         pairs.push({
           path: b.path,
@@ -405,7 +462,14 @@ export function grade(commits, edits, { rows = null, coverage = null, run = git,
       }
     }
   }
-  pairs.sort((a, b) => (a.first.ts < b.first.ts ? 1 : -1));
+  // Descending by the earlier commit. `sortByInstant` is ascending and total,
+  // and reversing it is not a descending sort: reversing a stable ascending
+  // order reverses the ties too, so two pairs on the same second come out
+  // backwards. Reversing the INPUT first cancels that, which is the idiom
+  // `tools/seat/answered.mjs` already carries with the same reasoning.
+  const byFirstDesc = sortByInstant(pairs.slice().reverse(), (p) => p.first.ts).reverse();
+  pairs.length = 0;
+  pairs.push(...byFirstDesc);
 
   const counts = { DUPLICATED: 0, COORDINATED: 0, SAME_CHANGE: 0, SEQUENTIAL: 0, INDETERMINATE: 0 };
   for (const p of pairs) counts[p.klass] += 1;

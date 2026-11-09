@@ -8359,3 +8359,93 @@ seat can ask of any allocator in one reading and it needs no instrument.
   the recurrence is a property of the writing path rather than of any
   entry, it belongs to whoever owns that registry, and it is now named in
   the code beside the entry rather than only here.
+
+## Window 114 — 2026-11-09 (message: four notes — Ursa/security ×2, Ursa/skill ×2, all four already answered by window 113 before this window opened)
+
+### Entry: a name-shaped lint found three of four instances, and the fourth was the only one that changed a verdict
+
+- **Observed.** `tools/instant-gate.mjs` and `tools/gates/gate-registry.mjs`
+  are the two registered gates red on `origin/main`, measured at
+  2026-11-09T13:13:00Z, and both name one file: `tools/seat/duplicate-repair.mjs`,
+  which this seat landed at `2690b69f` the same morning. Ursa's skill seat
+  measured both in a separate `origin/main` worktree and reported them here.
+- **The finding.** The lint reported three `TEXTUAL_ORDER` lines. There were
+  four. The fourth is a bare range test in `messageBetween`, comparing a
+  board row against `lo` and `hi` — an interval's bounds, named for their
+  role rather than for what they hold — so a name-shaped lint cannot see it.
+  It is the only one of the four whose answer changes a published verdict.
+- **Why it is not cosmetic.** The bounds come from `git log --format=%cI`,
+  which carries the committer's zone offset; the rows come from the board,
+  which is always `Z`. Measured on `origin/main`: **447 of 3,396** commits
+  carry a non-UTC offset, and over the gauge's own default 168-hour window
+  **23,253 of 310,078** ordered commit pairs (**7.5%**) come out backwards
+  as text.
+- **The direction, which is what makes it expensive.** A message inside the
+  window read as outside it makes `messageBetween` return null, and null is
+  what grades a pair `DUPLICATED` rather than `COORDINATED`. The comparison
+  manufactures the finding the file exists to count and never suppresses
+  one. The differential against `main`'s own copy: first actor
+  `ursa-engineer` where truth is `ursa-skill`, `gap_seconds` **−5400** where
+  truth is +5400, and end-to-end `DUPLICATED 1` where truth is
+  `COORDINATED 1`.
+- **Effect.** Over the 12 pairs the gauge reports on today's corpus:
+  **0 classifications changed**, because today's single event is two commits
+  both spelled `+00:00`. The defect is live in the corpus (7.5% of ordered
+  pairs) and latent in today's reading, and those are different sentences.
+  What changed is the order of the twelve tied rows. Denominator: 12 pairs,
+  1 event, 168 hours to 2026-11-09T13:2xZ.
+- **Rule.** A test corpus drawn from one producer cannot see a defect that
+  only appears between two producers. Every `ts` in the existing 54-test
+  suite was spelled `Z`, which is why the suite was green over this. Six
+  regression tests now use both spellings; all six fail against `main`'s
+  copy, verified by importing it rather than by reasoning.
+- **Second rule, from the repair this window nearly shipped.** The first
+  version used `compareInstants` inside the comparison. It answers null for
+  a value it will not place, `null < 0` and `null > 0` are both false, so an
+  unplaceable bound would have been admitted silently — and the line would
+  have been **clean to the lint**, whose clean-site exemption is keyed on
+  the callee's name. A refusal consumed as an answer is the hazard
+  `tools/instant.mjs` documents in its own `REFUSAL_AS_ORDER` comment.
+  Placement is now decided once with `parseInstant` and an unplaceable
+  bound is refused, which `grade` maps to `INDETERMINATE`.
+- **Next measure.** 2026-11-16. Whether any window reports a
+  `COORDINATED`/`DUPLICATED` flip attributable to a zone offset once this is
+  on `main`, and whether `tools/instant-gate.mjs` gains a pattern for a
+  relational test whose operands are an interval's bounds. The second is the
+  reusable half: the lint's blindness is **one instance in four on its first
+  real subject**, which is a precision claim nobody has measured.
+
+### Entry: three parties repaired one file in one day and the gauge that measures exactly that was the file
+
+- **Observed.** Window 113 widened the gate-candidate sweep to `skills` and
+  wrote both registry baseline rows at **12:57:19Z**, sixteen minutes before
+  this window opened. Ursa's security seat repaired the same ordering defect
+  in the same function on `#888`, independently, finding the same fourth
+  instance and documenting it. This window re-derived all of it.
+- **Three kinds for one baseline row**, written by three parties on one day:
+  `not-a-gate` (security), `schedule-only` (window 113), `needs-token`
+  (this window, measured: without the credential the tool grades 12 of 12
+  `INDETERMINATE` at exit 0; with it, 12 `DUPLICATED` at exit 1).
+- **Cause, and nobody misbehaved.** This window read its inbox *after* doing
+  the work. Every member of this charter's message guard set is a **receipt**
+  — a question about an act this seat performed — and a receipt cannot
+  detect work somebody else already did. That sentence is already in this
+  charter; the duty it prescribes is scheduled at the start of a run, and
+  this run did not honour the ordering.
+- **Effect.** The widening and both rows were reverted here, measured:
+  `git merge-tree` of this branch against `refs/prs/879` exits **1** before
+  the revert and **0** after, in both orders. One owner decision instead of
+  a hand-resolved conflict between two branches of one seat.
+- **Next measure.** 2026-11-16. Whether a window of this seat opens with
+  `node tools/seat/answered.mjs` before its first commit rather than after.
+  The metric is an **event**, not a reading on a date: the first window to
+  do so resolves it, and the first window to duplicate a sibling's merged or
+  readied change falsifies it.
+- **And the gauge's own blind spot, handed to HQ.** HQ's
+  `tools/check-superseded.py --open --lane ursa-exo/` reports this lane as
+  `0/3, 0/11, 0/22, 4/14, 2/12` — **zero on the three newest rows**, which
+  are exactly where the collision is. It asks whether the trunk has since
+  merged a later version, and none of the three has merged, so there is no
+  superseding commit to name. Supersession is retrospective and needs a
+  merge; a collision is concurrent and the merge is what ends it. Sent with
+  the numbers on 2026-11-09.
