@@ -1,0 +1,70 @@
+{
+  "comment": "The declared population for the SUBJECT axis. Every entry is a gate whose scan scope is the whole working tree and whose report is attributed, by every surface the company reads, to one branch. The three sibling axes ask what a gate does when its premise is damaged; this one asks whose fault a gate's correct finding is. Nothing here is derived, for the same reason empty-premise.json declares its set rather than sweeping for it: a population that moves under the experiment cannot be compared with its own previous run.",
+  "why_this_axis": "Measured on 2026-11-09 over every redaction-gate failure in a 24-minute window: 17 of 17 reds, one cause, one line of one file. 16 were pull_request runs naming 10 branches across 5 seats, and the file belonged to none of them except the one branch that wrote it. L-A31 gives a red two states, `never started` (machinery) and `ran` (yours), and HQ's tools/check-run-ran.py answers the first. Both of this seat's reds answered `ran`, which is true and routes the reader straight at their own diff. The third state is `ran, real finding, not yours`, and no instrument in this repository computed it.",
+  "not_swept": [
+    {
+      "what": "every check needing node_modules or a network: product-typecheck, product-suites",
+      "why": "This axis builds two worktrees and installs nothing in either, so a dependency-resolved arm is not available and a row graded without one would be measuring the install and not the subject."
+    },
+    {
+      "what": "the site checks under ursa-minor/",
+      "why": "Their scope is one subdirectory, so they are not whole-tree gates and the attribution question does not arise for them in the same form. Named rather than dropped, because an unnamed exclusion is how a partial sweep reads as a complete one."
+    },
+    {
+      "what": "tooling-suites",
+      "why": "A unit-suite run is tree-scoped in the same sense, but it is minutes per arm here and this tool runs three arms. The cost belongs to a scheduled sweep and not to this entry."
+    }
+  ],
+  "gates": [
+    {
+      "id": "redaction-tree",
+      "defines": [".github/workflows/redaction-gate.yml", "scripts/redaction-check.mjs"],
+      "why": "The row with ground truth behind it. The workflow is the authority and the script reads its patterns, so `defines` names both: a change to either is a change to the gate and not to the tree it judges."
+    },
+    {
+      "id": "secret-scan-tree",
+      "defines": ["tools/secret-scan.mjs", "tools/secret-scan.baseline.json"],
+      "why": "Whole-tree, and its baseline is a second definition surface, so an edit to the baseline alone moves the colour without moving the tree."
+    },
+    {
+      "id": "secret-print-tree",
+      "defines": ["tools/secret-print-sweep.sh", "tools/check-secret-print.py", "tools/secret-print-baseline.txt"],
+      "why": "Whole-tree, and the one gate in this set whose verdict line was measured byte-identical with the repository absent while the line below it moved from 44 marker lines to 0 (premise-differential, window 109). A gate half of whose answer ignores its own ground is exactly where a misattributed finding is cheapest to produce."
+    },
+    {
+      "id": "image-metadata",
+      "defines": ["tools/image-metadata.mjs"],
+      "why": "Whole-tree over binary blobs, which is the scope no diff-scoped reading of a gate covers."
+    },
+    {
+      "id": "root-entries",
+      "defines": ["tools/root-entries.mjs"],
+      "why": "Whole-tree over the repository root. An entry another seat adds at the root turns this red for every open branch at once, which is this axis in its simplest form."
+    },
+    {
+      "id": "doc-model-drift",
+      "defines": ["tools/doc-model/check.mjs"],
+      "why": "Reads every normative section in the tree against one registry. Ursa/engineer measured 28 unaccounted sections on the trunk on 2026-11-09 and 27 of them sat on a register belonging to a different seat than the branch under test."
+    },
+    {
+      "id": "instant-lint",
+      "defines": ["tools/instant-gate.mjs", "tools/instant-gate.json"],
+      "why": "Whole-tree. Window 111 recorded three textual instant sorts that had this gate red on main while no branch had touched them, so the inherited case is already in this repository's own record for this gate."
+    },
+    {
+      "id": "ledger-attributes",
+      "defines": ["tools/ledger/check-attributes.mjs"],
+      "why": "The ledger is a shared append-only register that any seat may edit, which makes it the single likeliest source of a finding attributed to whichever branch is tested next."
+    },
+    {
+      "id": "register-closure",
+      "defines": ["tools/registers/check-closure.mjs"],
+      "why": "Same shape as the ledger row, over the register set rather than the ledger."
+    },
+    {
+      "id": "code-census",
+      "defines": ["tools/gates/code-census.mjs", "tools/gates/code-census.baseline.json"],
+      "why": "Whole-tree census with a baseline, so it carries both surfaces this axis has to separate: tree content and gate definition."
+    }
+  ]
+}
