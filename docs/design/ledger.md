@@ -2476,6 +2476,14 @@ guard that never matches and a guard that always passes produce the same
 frame.** L61 and L63 are the same shape: an instrument or a rule that has
 stopped discriminating looks exactly like one that found nothing wrong.
 
+**Confirmed in the shipped component, not only in a fixture.** The table
+above was taken over the real stylesheet with a hand-built list, and the
+same drive was then run against `published-site.tsx` itself under
+`next dev`, with the `before` arm being `origin/main`'s two files checked
+into the tree and recompiled. Same result, including the last row:
+`disabled=true` and `activeElement` BODY before, `aria-disabled=true` with
+focus held after, and the row's DOM node surviving in both arms.
+
 **Where else this applies, not changed this run.** The same file's
 `readSite` submit button is `disabled={busy}` while the index is
 fetched. It is one control rather than a list, so the person lands on

@@ -174,6 +174,50 @@ transition on it. Worth saying plainly because the number was small,
 plausible, and in the right place to be read as a real regression in the
 focus ring.
 
+## 4.2 The disk came back, and the real component was reached after all
+
+At 04:36Z the volume read 2269M free, having been at 392M sixteen minutes
+earlier; other seats had finished. So the install was attempted at that
+point and succeeded, 611 packages in three minutes, and §1's decision cost
+nothing because the increment had already shipped without it.
+
+`real/` is the same measurement against the shipped React, driven to the
+set view through a fixture site the app serves out of its own `public/`.
+The `before` arm is `origin/main`'s two files checked into the tree and
+recompiled, then restored, so both arms are this component:
+
+| | before | after |
+|---|---|---|
+| busy attributes | **`disabled=true`** | `aria-disabled=true`, `aria-busy=true` |
+| `activeElement` after Enter | **BODY** | the row |
+| row's DOM node survived | **yes** | yes |
+
+**Node identity holds in the real component too.** That is what moves §2.1
+from an argument about the reconciler to a measurement of it.
+
+`real/README.md` says why no pixel diff is published for this arm, and
+records one thing discharged on the way: run `-c` owed a frame of the
+provenance legend's swatches from the real component rather than a fixture,
+and these frames have it.
+
+### Three traps between a dev server and a driven page
+
+All three present as a broken page rather than a waiting one, and none logs
+anything that names itself. They are in the drive script's header and in the
+kit README.
+
+- **`localhost`, never `127.0.0.1`.** Next refuses dev requests from an
+  origin outside `allowedDevOrigins`, so the client runtime never starts and
+  the page stays as server HTML. Typed text lands in the DOM, `address`
+  state stays empty, and `disabled={busy || !address}` holds the submit
+  button down forever. The only symptom is a failed HMR websocket.
+- **The address field cannot be clicked.** `.rec-field` is a label overlay
+  carrying the 44px press, so a click at the input's own box is intercepted
+  and times out. Focus it and type. This is the kit's own L29 met live.
+- **`/record` has two address forms.** A bare `button[type="submit"]`
+  resolves to two elements and takes the other one, which is disabled for
+  the same reason, so the failure reads as a hung page.
+
 ## 5. What this run did not do
 
 - **No second interaction refinement**, though the charter allows two.
