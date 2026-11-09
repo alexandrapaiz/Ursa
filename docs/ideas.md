@@ -110,14 +110,22 @@ would fail on the module's own correct line. That is a reason to treat the
 code as needing judgement, not a reason to drop it on the floor with no
 record that it was dropped.
 
-**The four sites, and why none is a live defect today.**
+**The four sites, and why none is a live defect today.** Keyed on each line's
+own text and not on its line number, which is a correction made on
+2026-11-09 after the seat that took this entry pointed out that its repair
+carries no line numbers at all, so the four numbers this table used to print
+would go stale on the next edit above any of them while the gate's keys
+would not. The numbers were `outage.mjs` 252, 262 and 263 and
+`measure-claims.mjs` 225 when this entry was filed; they are recorded here
+as the state of one day and are not maintained. The live set is the gate's
+own corpus file.
 
-| file:line | in | the line |
+| file | in | the line, which is the key |
 |---|---|---|
-| `tools/seat/outage.mjs:252` | `readVerdict` | `const d = String(readDate).slice(0, 10);` |
-| `tools/seat/outage.mjs:262` | `completedBetween` | `const a = String(fromISO).slice(0, 10);` |
-| `tools/seat/outage.mjs:263` | `completedBetween` | `const b = String(toISO).slice(0, 10);` |
-| `tools/board/measure-claims.mjs:225` | the report block | `on: String(readAt).slice(0, 10),` |
+| `tools/seat/outage.mjs` | `readVerdict` | `const d = String(readDate).slice(0, 10);` |
+| `tools/seat/outage.mjs` | `completedBetween` | `const a = String(fromISO).slice(0, 10);` |
+| `tools/seat/outage.mjs` | `completedBetween` | `const b = String(toISO).slice(0, 10);` |
+| `tools/board/measure-claims.mjs` | the report block | `on: String(readAt).slice(0, 10),` |
 
 A fifth slice sits on `outage.mjs:253`, `String(now).slice(0, 10)`, and the
 lint does NOT report it, because `now` is not a timestamp-shaped name. It is
@@ -153,6 +161,27 @@ merge the result. Reaching into a sibling's hot file to make a change that is
 latent rather than live, in the pull request that settles that exact
 collision, is the mistake this run was sent to clean up. Measured, cited,
 handed over.
+
+**Discharged, and by whom, recorded 2026-11-09.** The exo seat took all four
+the same night and reported that the fifth site this entry could not reach
+was real, which is the `now` blind spot named above. Repairing it found a
+sixth in a tool that seat had written the same day this entry was filed and
+that was hidden for the same reason, so the name-shape gap cost two sites and
+not one. The gate shipped in the shape this entry proposed: it decides every
+code the detector can emit and reads that set off the detector rather than
+listing it, so a fourth code goes red instead of standing uncovered, and its
+allowlist is keyed on each line's own text, so a moved line stays cleared and
+a changed line costs a fresh argument. A stale entry is a failure too.
+
+**Written, not merged.** That work is on an open pull request and not on
+`main` as this is recorded, so the live corpus named above is the gate's
+`tools/instant-gate.json` on that branch. This entry stays in the ledger
+until the owner merges it, because an open pull request is not this
+repository's memory. Two things from building it are worth carrying into any
+gate here, and both are general: a gate cannot hold a corpus of defective
+lines as its own source without becoming its own worst offender, so the
+corpus belongs in data; and the gate's own first run should be expected to
+find a wrong assumption of its author's, which exo's did.
 
 ## Ledger entry — 2026-11-08 (security, message run): the resident runtime hands every seat a shallow single-branch clone, and no seat's charter tells it to repair one
 
