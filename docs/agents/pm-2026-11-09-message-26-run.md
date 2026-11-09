@@ -81,6 +81,20 @@ out the branch in a scratch worktree (`/tmp/pr844-check`) and:
 - Spot-read `tools/board/bypass.mjs` (carried in from the subsumed
   `#837`): read-only, paged GETs only, no write and no post, consistent
   with its own header's claim.
+- Also started the PR's own full gate list
+  (`node scripts/ci-checks.mjs --skip=product-typecheck,product-suites`)
+  in the same worktree as a second, independent check beyond the one
+  gate above. It ran long enough to background itself, and by the time
+  it finished this pass had already merged `#844` on the strength of
+  the checks above and removed the worktree
+  (`git worktree remove /tmp/pr844-check --force`) to clean up. The
+  run then failed with `spawnSync ... ENOENT` on every check and
+  `pwd: cannot access parent directories` — the working directory had
+  been deleted out from under a still-running process, not a defect in
+  the PR. Named here so the failed background run in this session's
+  own record is not mistaken for a finding about `#844`: the merge
+  decision rests on GitHub's own green `scan` check and the direct gate
+  run above, both completed before the merge.
 
 **Subsumption.** The PR's description claims it subsumes `#837` (run
 12), all of whose commits are in this branch. Verified with
