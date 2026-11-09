@@ -480,3 +480,108 @@ supersedes: []`))
   // not answer whether the ratio separates the verdicts.
   assert.match(out, /supports\s+1\s+0\.500/)
 })
+
+// A `what` field with no content word in it. Until 2026-10-26 the ratio for
+// one of these was `0`, which on this scale is the best score there is, so the
+// three places that read the ratio all agreed and all three were wrong: the
+// queue put it last, `--signal` printed it beside the confirmed refs, and the
+// distribution the WORDLESS threshold is argued from counted it as a zero. The
+// three tests below are one per reader, and the fourth holds the line that
+// matters most: a ref that genuinely measures zero must still measure zero.
+//
+// The `what` used here, "two, not one", is not a contrived string. Every word
+// in it is under four letters, which is all it takes, and a terse `what` of
+// exactly that shape is what a run writes when the claim is about the number
+// of something rather than about its vocabulary.
+
+/** A library whose three refs are a measured zero, a measured one, and no comparand. */
+function scales() {
+  const dir = mkdtempSync(join(tmpdir(), 'relevance-sweep-scales-'))
+  mkdirSync(join(dir, 'src'), { recursive: true })
+  mkdirSync(join(dir, 'skills', 'alpha'), { recursive: true })
+  for (const f of ['relevance-sweep.mjs', 'source-line.mjs', 'citing-files.mjs'])
+    copyFileSync(here(f), join(dir, 'skills', f))
+  writeFileSync(join(dir, 'src', 'b.ts'), [
+    'export const threshold = 0.6',        // 1
+    'const covered = total - skipped',     // 2
+  ].join('\n') + '\n')
+  writeFileSync(join(dir, 'skills', 'alpha', 'SKILL.md'), `---
+name: alpha
+description: a fixture
+evidence:
+  - ref: E1
+    what: threshold
+    source: src/b.ts:1
+  - ref: E2
+    what: absent vocabulary entirely
+    source: src/b.ts:1
+  - ref: E3
+    what: two, not one
+    source: src/b.ts:2
+supersedes: []
+---
+
+# Alpha
+
+The threshold is there [E1], these words are not [E2], and there are two [E3].
+`)
+  return dir
+}
+
+test('a what field with no content word is not a ratio of zero', () => {
+  const out = run(scales(), ['--signal'])
+  // The measured zero still prints as a zero. This is the assertion the fix
+  // exists to keep true: unfolding the two cases must not move the real one.
+  assert.match(out, /0\.000\s+0\/1\s+1\s+unread\s+alpha\/E1/)
+  // The measured one still prints as a one.
+  assert.match(out, /1\.000\s+3\/3\s+1\s+unread\s+alpha\/E2/)
+  // And the one with nothing to divide prints neither, under its own name.
+  assert.match(out, /-\s+0\/0\s+1\s+unread\s+alpha\/E3\s+\(no word to measure\)/)
+  assert.doesNotMatch(out, /0\.000\s+0\/0/)
+})
+
+test('an unmeasurable ref is counted out of the distribution the threshold is argued from', () => {
+  const out = run(scales(), ['--signal'])
+  // Two rows in the table, not three, and the minimum is E1's real zero. If
+  // E3 were folded in as a zero the n would read 3 and the minimum would be
+  // the same number for the wrong reason, which is how a fold hides.
+  assert.match(out, /unread\s+2\s+0\.000\s+1\.000\s+1\.000/)
+  assert.match(out, /1 ref is left out of that table/)
+  assert.match(out, /That is not a ratio of zero/)
+  assert.match(out, /-\s+two, not one\s+alpha\/E3/)
+})
+
+test('an unmeasurable ref leaves the queue instead of sorting to the bottom of it', () => {
+  const out = run(scales(), [])
+  // The queue is the two refs the signal can rank, ordered by it.
+  assert.match(out, /relevance sweep: 3 refs, 0 read/)
+  assert.match(out, /2 unread with a line range and a measurable claim/)
+  // E3 is not in the ranked block at all, which is the behaviour change: it
+  // used to be the last line of it, reading as the best defended ref here.
+  const ranked = out.slice(out.indexOf('miss  dens'), out.indexOf('unread ref'))
+  assert.match(ranked, /alpha\/E2/)
+  assert.match(ranked, /alpha\/E1/)
+  assert.doesNotMatch(ranked, /alpha\/E3/)
+  // And it is listed apart with its own instruction and its own claim shown,
+  // the way an unrangeable ref already was at the other end of the scale.
+  assert.match(out, /1 unread ref has a `what` field with no content word in it/)
+  assert.match(out, /two, not one\s+\(alpha\/E3\)/)
+})
+
+test('a ref that is both unrangeable and unmeasurable is classed unrangeable, once', () => {
+  const dir = scales()
+  writeFileSync(join(dir, 'skills', 'alpha', 'SKILL.md'),
+    readFileSync(join(dir, 'skills', 'alpha', 'SKILL.md'), 'utf8')
+      .replace('supersedes: []', `  - ref: E4
+    what: two, not one
+    source: docs/vision.md "The four principles"
+supersedes: []`))
+  const out = run(dir, [])
+  // It appears under the document-citation heading, because a reader sent to
+  // check that a named section still exists is doing the right work whatever
+  // its `what` field says, and it must not also be reported as a second,
+  // different absence in the same run.
+  assert.match(out, /cite a document and a section name rather than lines/)
+  const wordless = out.slice(out.indexOf('no content word'))
+  assert.doesNotMatch(wordless, /alpha\/E4/)
+})

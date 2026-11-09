@@ -39,6 +39,27 @@ export const stripFrontmatter = (text) => {
   return fm ? text.slice(fm[0].length) : text
 }
 
+/**
+ * Every ref the evidence table DECLARES, as `{ ref, sourceLine }`, in table
+ * order, read out of SKILL.md's frontmatter and nowhere else.
+ *
+ * The other direction from `refsIn`, which reads the tags that cite a ref. Both
+ * live here for the reason the header gives: when two tools disagree about
+ * which refs exist, the ref they disagree about is the one nobody is told
+ * about. This function was lifted out of check-evidence.mjs on 2026-10-27,
+ * unchanged, when a second tool needed the same count — `trigger-coverage.mjs`
+ * checking the `Refs` column of `skills/README.md`, which had been wrong for
+ * three of ten rows with every guard green.
+ */
+export function declaredRefs(text) {
+  const fm = text.match(/^---\n([\s\S]*?)\n---\n/)
+  if (!fm) return []
+  const out = []
+  for (const m of fm[1].matchAll(/- ref:\s*(\S+)\n(?:.*\n)*?\s*source:\s*(.+)/g))
+    out.push({ ref: m[1], sourceLine: m[2] })
+  return out
+}
+
 /** Every ref named by a citation tag in one body, in order of appearance. */
 export function refsIn(text) {
   const out = []
