@@ -154,6 +154,8 @@ would be the defect this audit is about wearing the opposite costume.
 `trigger-coverage.mjs`'s 61 entry-function sites are not closed here. The
 repair is not a test, it is a decision about how that suite is written, and it
 is filed in `docs/ideas.md` rather than taken in the same run that measured it.
+**Closed on 2026-11-09 by the next run of this seat; see "The entry functions,
+re-measured" below, which also retracts the 61.**
 `grep-dialect.mjs` at 55 per cent and `forge-citations.mjs` at 60 per cent are
 also left: both have real gaps among their survivors, and one skill per run is
 this seat's rule for a reason. `check-evidence.mjs` has two gaps beyond the
@@ -196,3 +198,79 @@ themselves.** Running a suite once per mutant multiplied a per-pass leak of
 with 0 bytes free. That is fixed in `tmp-fixture.mjs`, in the same branch, and
 the per-pass count is now 0. A survey of a library is also a load test of it,
 which is a second thing the method is good for and was not designed for.
+
+## The entry functions, re-measured
+
+Added 2026-11-09, the run after the one above. `skills/trigger-coverage.test.mjs`
+now runs the gate as a program, eighteen tests on
+`check-evidence.test.mjs`'s fixture shape, and the region this file reported at
+zero was re-measured before and after.
+
+| | sites | killed | survived | kill rate |
+|---|---|---|---|---|
+| before, the suite as it stood | 35 | 0 | 35 | 0% |
+| after, by exit status alone | 35 | 34 | 1 | 97% |
+| after, harness also checking the suite ran | 35 | 35 | 0 | 100% |
+
+**The denominator is 35 and the table above says 61, and the 35 is the one to
+trust.** Not a repair of the region and not a recount of it: the harness was
+never committed, so this run rebuilt it from the method stated above and its
+site enumeration does not agree with the first one's. The rebuilt harness is
+the auditable one, because the number it produces can be reproduced from a
+file in this repository, and 61 cannot. The audit's own closing paragraph
+predicted this in as many words, that a measurement nobody can re-run expires,
+and it expired in one day.
+
+What that costs a reader: the nine per-gate rates in the survey table carry the
+same exposure, and nothing here re-measures them. The three totals in this
+section were produced by one harness in one sitting and are internally
+comparable, which is what the before-and-after needs them to be.
+
+**The arrow is not a relational operator.** The rebuilt harness's first pass
+reported 19 of 54 killed in this region, and all nineteen were the `>` of a
+`=>` mutated into `=>=`. A suite going red at a parse failure is not a suite
+detecting a mutant, and nineteen false kills in a region whose true rate was
+zero would have shown as 35 per cent. The guard is one line and it belongs in
+the method, so it is stated here: a `>` preceded by `=` is skipped.
+
+### Three things the re-measurement found, in rising order of how much they cost
+
+**One. `--test-force-exit` truncates a large suite, silently and at random.**
+Three identical runs of `node --test --test-force-exit
+skills/trigger-coverage.test.mjs` reported 98, 38 and 44 of its 98 tests, all
+at exit 0. Synthetic files of empty tests put the onset between 40 and 60:
+five runs each at 20, 30 and 40 tests reported the full count every time, and
+at 60 and 80 one run in five truncated. The first baseline in this run was
+measured under that flag, so its zero was a number nobody had measured; the
+flag is gone from the harness and the zero was re-measured without it. Nothing
+committed in this repository passes the flag, which is why this is a hazard for
+the next harness and not a live defect.
+
+**Two. The entry guard's mutant does not fail the suite, it deletes it.**
+Inverting line 1659, the entry guard comparing `import.meta.url` against
+`process.argv[1]`, makes
+the module run the whole gate at import time. The suite's first import exits
+the process before a single test is registered, and `node --test` reports that
+as `1..1`, `# tests 1`, `# pass 1`, exit 0. So the one survivor at 97 per cent
+was never a gap in the tests: it is a mutant no test in any suite can see,
+because the mutant's effect is that no test runs. It is killed by the harness
+asserting the expected test count rather than the exit status, which is the
+third row of the table.
+
+This is the same shape as the defect this whole audit was written for. A zero
+read out of an absence, where the absence is a missing `not ok` and the thing
+nobody checked is whether the suite ran at all.
+
+**Three. The instrument that counts test points cannot see one suite vanish,
+except this one.** `tools/seat/suite-baseline.mjs` already names the general
+case in its own header, that its floor is a floor on volume and cannot see
+incompleteness, and the hole it closed is a run with no `1..N` plan line. The
+mutant above produces a complete plan line and a complete `# tests` summary, so
+that guard reads it as finished. The floor is what is left: `minPoints` 610
+against a recorded `mainPoints` of 681. Counting top-level `test(` calls as a
+proxy, the repository's 81 suites hold 1,171 of them and exactly one — this one,
+at 98 — exceeds the 71-point cushion. The other 80 do not, so any one of them
+collapsing to a one-test green TAP clears the floor. The proxy and the
+baseline's own quantity do not agree, 1,171 against 681, so which suites cross
+the floor is for the seat that owns that file to settle; the part that needs no
+settling is that the cushion is 71 and 80 suites are smaller than it.
