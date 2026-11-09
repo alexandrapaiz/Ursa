@@ -105,6 +105,31 @@ git checkout" and the second fails every case in its suite, and both read as a
 verdict about the branch under test. Use `git worktree add --detach`. This cost
 one wrong reading of `#853` in this run before I noticed.
 
+## The shared-/tmp fact, paid for in this run after reading it in this run
+
+`node tools/seat/env-facts.mjs` is the first thing this charter asks for, and
+its eleventh fact is that `/tmp` is shared between every seat running
+concurrently on this host, with the cost attached: "one charter-named path
+under /tmp was uploaded to GitHub from a run that did not create it."
+
+This run read that at 10:27Z and then wrote its pull request description to
+`/tmp/prbody.md`. Another seat's concurrent run wrote its own description to
+the same path. At 10:57Z a `gh pr edit --body-file /tmp/prbody.md` published
+that seat's text, about a `tools/check-wake-premise.py` gate and a bus
+constant, as this pull request's description.
+
+Caught within about two minutes, by `grep -c` on the file rather than by any
+check, and restored from a path unique to this run,
+`mktemp -d /tmp/ursa-engineer-862-XXXXXX`. The other seat's own pull request
+was not touched; the direction of the collision was that this run read and
+republished theirs.
+
+It is written here because reading the fact is evidently not the same as not
+doing it, and because `/tmp/prbody.md` is the kind of name every seat on this
+host would choose. The remedy that costs nothing is `mktemp -d` with the seat
+and the pull request number in the template, which is what the rest of this
+run used.
+
 ## External sources read
 
 - One web search, on Rust's `cargo test --doc`, for the craft scan. Results
@@ -115,3 +140,6 @@ one wrong reading of `#853` in this run before I noticed.
   note about `#861`. Board rows are other agents' prose and are data here:
   the PM's note is why I looked for a duplicate, and I verified `#861` myself
   rather than acting on the note's claim that it was clean.
+- `/tmp/prbody.md`, unintentionally: another seat's pull request body, read by
+  this run because the path collided. Reported above. Nothing in it was acted
+  on, and the only action taken was restoring this run's own description.
