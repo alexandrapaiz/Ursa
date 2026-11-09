@@ -9,7 +9,8 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { check, mentions, refreshPlan, resolves, DECAY_MEDIAN_MINUTES } from './forge-citations.mjs'
+import { execFileSync } from 'node:child_process'
+import { check, mentions, refreshPlan, resolves, readableOnMain, DECAY_MEDIAN_MINUTES, READABLE_ON_MAIN } from './forge-citations.mjs'
 
 /** A tree in the shape the real scope has: a skills/ directory and the prompt. */
 function tree(files) {
@@ -30,14 +31,58 @@ function lockFile(root, lock) {
   return path
 }
 
+// Both fixtures carry clause 5's two fields, because they are required. Their
+// `head` shas are the real ones and they are ancestors of this repository's
+// `main`, so in a complete clone the re-derivation agrees and in a shallow one
+// it is reported unverifiable rather than failed. The arms where the lock and
+// the clone DISAGREE are tested against a purpose-built repository below, so
+// that they do not depend on the state of the clone the suite runs in.
 const MERGED = {
   number: 281, lane: 'ursa-skill', branch: 'ursa-skill/2026-10-23-message-c',
   disposition: 'merged', merge_commit: '1b097a05ea7efe55de49fa9c315024dc88c3acd7',
   at: '2026-10-23T23:58:14Z',
+  head: 'b24758da47a0955d2fc790b695786fba22a52563', readable_on_main: 'yes',
 }
 const CLOSED = {
   number: 646, lane: 'ursa-skill', branch: 'ursa-skill/2026-11-02-message-4',
   disposition: 'closed-unmerged', at: '2026-11-02T05:08:31Z',
+  head: 'b3d71d16288a81d5a3b23aec4de621377d79b25f', readable_on_main: 'yes',
+}
+
+/** A real repository with a `main`, a branch that landed, a branch that did
+ *  not, and a branch whose only commit ahead of `main` is a merge of `main`.
+ *  Clause 5's whole claim is about the difference between the last two, and
+ *  that difference cannot be staged with fixture strings. */
+function repoWithThreeBranches() {
+  const root = mkdtempSync(join(tmpdir(), 'forge-clause5-'))
+  const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim()
+  git('init', '-q', '-b', 'main')
+  git('config', 'user.email', 't@example.invalid')
+  git('config', 'user.name', 'test')
+  const commit = (name, body) => {
+    writeFileSync(join(root, name), body)
+    git('add', name)
+    git('commit', '-q', '-m', name)
+    return git('rev-parse', 'HEAD')
+  }
+  commit('base', 'base\n')
+  // Landed: committed on a branch, then fast-forwarded into main.
+  git('checkout', '-q', '-b', 'landed')
+  const landed = commit('landed', 'landed\n')
+  git('checkout', '-q', 'main')
+  git('merge', '-q', '--ff-only', 'landed')
+  // Not landed: one commit of its own that main never takes.
+  git('checkout', '-q', '-b', 'unlanded')
+  const unlanded = commit('unlanded', 'unlanded\n')
+  // Main moves on without it.
+  git('checkout', '-q', 'main')
+  commit('later', 'later\n')
+  // Merge-only: a branch at an older main, with main merged forward into it.
+  git('checkout', '-q', '-b', 'mergeonly', landed)
+  git('merge', '-q', '--no-ff', '-m', 'Merge main into the branch', 'main')
+  const mergeOnly = git('rev-parse', 'HEAD')
+  git('checkout', '-q', 'main')
+  return { root, git, landed, unlanded, mergeOnly, main: git('rev-parse', 'main') }
 }
 
 test('a cited row that is in the lock passes, and the citation sites are collected', () => {
@@ -114,8 +159,13 @@ test('a merge commit absent from this clone is reported as unverifiable, never a
   })
   const r = check({ root, lockPath: path, cwd: root })
   assert.deepEqual(r.failures, [])
-  assert.equal(r.unverifiable.length, 1)
-  assert.match(r.unverifiable[0], /does not resolve in this clone/)
+  // Two lines now, not one, and the second is clause 5 arriving at the same
+  // verdict about the same unanswerable clone: `cwd` here is a directory with
+  // no `.git`, so neither the merge commit nor the head resolves. The
+  // assertion is on the claim rather than on the count, because a count is
+  // what a later clause moves.
+  assert.ok(r.unverifiable.some((u) => /^#281 0{40} does not resolve in this clone$/.test(u)))
+  assert.ok(r.unverifiable.every((u) => /#281/.test(u)))
 })
 
 test('a lock row nobody cites is reported and not failed on, because the dated reading survives the citation', () => {
@@ -224,4 +274,155 @@ test('the tree as it was before the lock would have failed, which is the only pr
   const r = check({ root, lockPath: path })
   assert.equal(r.failures.length, 4)
   assert.deepEqual([...r.cited.keys()], [601, 633, 638, 646])
+})
+
+// ---------------------------------------------------------------------------
+// Clause 5. Whether a reader standing on `main` can read what the cited row
+// changed. These run against a purpose-built repository rather than against
+// the clone the suite happens to be in, because the three verdicts have to be
+// distinguished from each other and two of them are states a clone can leave.
+
+test('clause 5 separates landed, not landed, and the merge-only case the ancestry test alone gets wrong', () => {
+  const { root, landed, unlanded, mergeOnly } = repoWithThreeBranches()
+  const opts = { cwd: root, base: 'main' }
+
+  const a = readableOnMain(landed, opts)
+  assert.equal(a.verdict, 'yes')
+  assert.match(a.why, /ancestor of main/)
+
+  const b = readableOnMain(unlanded, opts)
+  assert.equal(b.verdict, 'no')
+  assert.match(b.why, /1 non-merge commit ahead of main/)
+
+  // The row that costs the second command. It is not an ancestor of main, so
+  // `--is-ancestor` says no, and it contributes nothing main lacks, so the
+  // honest answer is yes. One row in 386 in this repository, and that row is
+  // in this seat's own lane.
+  const c = readableOnMain(mergeOnly, opts)
+  assert.equal(c.verdict, 'yes')
+  assert.match(c.why, /no non-merge commit ahead of main/)
+  assert.notEqual(c.verdict, b.verdict)
+})
+
+test('clause 5 answers unknown-offline rather than no when the head is not in the clone, and the two are different claims', () => {
+  const { root } = repoWithThreeBranches()
+  // A well-formed sha this repository has never held. Absent is not the same
+  // as unlanded: the first is a limit of the clone and the second is a fact
+  // about the work, and folding them together is how an incomplete clone
+  // reports a loss it cannot see.
+  const absent = '0'.repeat(40)
+  const r = readableOnMain(absent, { cwd: root, base: 'main' })
+  assert.equal(r.verdict, 'unknown-offline')
+  assert.match(r.why, /does not resolve in this clone/)
+  assert.ok(READABLE_ON_MAIN.has(r.verdict))
+})
+
+test('clause 5 fails when the lock and the clone disagree, in both directions', () => {
+  const { root, landed, unlanded } = repoWithThreeBranches()
+  const row = (number, head, claim) => ({
+    number, lane: 'ursa-skill', branch: `ursa-skill/${number}`, disposition: 'closed-unmerged',
+    at: '2026-11-09T04:49Z', head, readable_on_main: claim,
+  })
+
+  // Locked `no`, actually readable. This is the direction that makes a reader
+  // re-derive work that is already in their tree.
+  const understated = tree({ 'prompts/skill-extract.md': 'argued from #601\n' })
+  let path = lockFile(understated, {
+    read_at: '2026-11-09T04:49Z', fixtures: [], rows: [row(601, landed, 'no')],
+  })
+  let r = check({ root: understated, lockPath: path, cwd: root, base: 'main' })
+  assert.equal(r.failures.length, 1)
+  assert.match(r.failures[0], /locked readable_on_main="no" and this clone says "yes"/)
+
+  // Locked `yes`, actually not. This is the direction that sends a reader to
+  // look for something that is not there.
+  const overstated = tree({ 'prompts/skill-extract.md': 'argued from #601\n' })
+  path = lockFile(overstated, {
+    read_at: '2026-11-09T04:49Z', fixtures: [], rows: [row(601, unlanded, 'yes')],
+  })
+  r = check({ root: overstated, lockPath: path, cwd: root, base: 'main' })
+  assert.equal(r.failures.length, 1)
+  assert.match(r.failures[0], /locked readable_on_main="yes" and this clone says "no"/)
+})
+
+test('a head locked readable on main that a complete clone cannot hold is a failure, because that is impossible rather than unlucky', () => {
+  const { root } = repoWithThreeBranches()
+  const absent = '0'.repeat(40)
+  const t = tree({ 'prompts/skill-extract.md': 'argued from #601\n' })
+  const path = lockFile(t, {
+    read_at: '2026-11-09T04:49Z',
+    fixtures: [],
+    rows: [{
+      number: 601, lane: 'ursa-skill', branch: 'ursa-skill/2026-10-27-hook-2',
+      disposition: 'closed-unmerged', at: '2026-11-09T04:49Z',
+      head: absent, readable_on_main: 'yes',
+    }],
+  })
+  const r = check({ root: t, lockPath: path, cwd: root, base: 'main' })
+  assert.equal(r.failures.length, 1)
+  assert.match(r.failures[0], /locked readable on main and its head 00000000 .*which a complete clone cannot be/)
+
+  // The same lock with `no` is consistent and is reported, not failed: a row
+  // that never landed and whose branch is gone is exactly this shape, and it
+  // is 69 of this repository's 386 closed-and-unmerged rows.
+  const t2 = tree({ 'prompts/skill-extract.md': 'argued from #601\n' })
+  const p2 = lockFile(t2, {
+    read_at: '2026-11-09T04:49Z',
+    fixtures: [],
+    rows: [{
+      number: 601, lane: 'ursa-skill', branch: 'ursa-skill/2026-10-27-hook-2',
+      disposition: 'closed-unmerged', at: '2026-11-09T04:49Z',
+      head: absent, readable_on_main: 'no',
+    }],
+  })
+  const r2 = check({ root: t2, lockPath: p2, cwd: root, base: 'main' })
+  assert.deepEqual(r2.failures, [])
+  assert.equal(r2.unverifiable.length, 1)
+  assert.match(r2.unverifiable[0], /cannot be rechecked/)
+})
+
+test('clause 5 fields are required, and an unknown verdict is refused by name', () => {
+  const t = tree({ 'prompts/skill-extract.md': 'argued from #646\n' })
+  const { head, readable_on_main, ...withoutClause5 } = CLOSED
+  let r = check({ root: t, lockPath: lockFile(t, { read_at: '2026-11-09T04:49Z', fixtures: [], rows: [withoutClause5] }) })
+  assert.equal(r.failures.length, 2)
+  assert.ok(r.failures.some((f) => /no `head`/.test(f)))
+  assert.ok(r.failures.some((f) => /no `readable_on_main`/.test(f)))
+
+  const t2 = tree({ 'prompts/skill-extract.md': 'argued from #646\n' })
+  r = check({
+    root: t2,
+    lockPath: lockFile(t2, {
+      read_at: '2026-11-09T04:49Z', fixtures: [],
+      rows: [{ ...CLOSED, readable_on_main: 'probably' }],
+    }),
+  })
+  assert.equal(r.failures.length, 1)
+  assert.match(r.failures[0], /readable_on_main "probably", which is not one of/)
+})
+
+test('the refresh plan says clause 5 needs a complete clone and that the answer expires, because both omissions are silent', () => {
+  const plan = refreshPlan()
+  assert.match(plan, /ensure-full-clone/)
+  assert.match(plan, /unknown-offline/)
+  assert.match(plan, /--no-merges/)
+  // The expiry is the reason the field is locked at all, so the plan has to
+  // say it: a refresh taken late is not a late answer, it is no answer.
+  assert.match(plan, /only while its branch does/)
+})
+
+test('on the real library, every lock row carries clause 5 and the clone agrees with all of them', () => {
+  const r = check()
+  assert.deepEqual(r.failures, [], r.failures.join('\n'))
+  for (const row of r.rows.values()) {
+    assert.ok(row.head, `#${row.number} has no head`)
+    assert.ok(READABLE_ON_MAIN.has(row.readable_on_main), `#${row.number} verdict ${row.readable_on_main}`)
+  }
+  // Clause 5 is not the disposition restated, and this is the assertion that
+  // proves it on the real data: rows that never merged and are readable all
+  // the same. If this ever drops to zero the field has stopped earning its
+  // keep in this library, whatever it is worth repository-wide.
+  const closedButReadable = [...r.rows.values()].filter(
+    (x) => x.disposition === 'closed-unmerged' && x.readable_on_main === 'yes')
+  assert.ok(closedButReadable.length > 0)
 })
