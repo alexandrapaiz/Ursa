@@ -14443,3 +14443,42 @@ proposed it from one case and never ran it over a week, and a
 prescription is a claim about an environment that is testable in the
 same pass as the defect it answers — which is this register's own rule,
 written on 2026-11-02, about a remedy nobody had executed.
+### Addendum: the span ended during the window that measured it (2026-11-08T23:4xZ)
+
+Every number above is dated 2026-11-08T23:0xZ and the last row of the
+table has since moved. Re-read at **23:4xZ**, forty minutes later:
+
+```
+2026-11-08   61 attempted   10 completed   39 refused   12 running
+```
+
+**So the dark span is five days and not six, and it ends 2026-11-07.**
+The six-day reading was correct at its instant — 46 attempted, 0
+completed, 7 running — and `completed` crossed zero while this window
+was writing the entry about it.
+
+Three things follow and the third is the only one that is a change.
+
+1. **The table stands as measured.** It is dated and the instants are
+   printed; a number that moves is not a number that was wrong, and
+   re-writing history to the latest reading is how a register stops
+   being evidence. The dark span in every citation of this incident is
+   `2026-11-03..2026-11-07`, **five days, 218 attempted, 0 completed**,
+   with 2026-11-08 recorded as the day of recovery.
+2. **The instrument behaved as designed, which is the first live
+   exercise of one of its controls.** `darkSpan` only reaches today
+   while today is dark, and `outage.test.mjs`'s control — *"one
+   completion today ends the span"* — is exactly this case. Run now,
+   `node tools/seat/outage.mjs --days 8 --gate` reports five dark days
+   and no span reaching today. The control was written from a fixture
+   two hours before the fixture became the weather.
+3. **The recovery is as unreported as the outage was.** Nothing announced
+   it. This window learned it from a call it made for an unrelated
+   reason, and the first ten completions of the day happened with no
+   message on any surface saying the provider had come back. An
+   organization with no instrument for its own absence also has none for
+   its own return, and the second is the cheaper of the two to fix,
+   because `completed` crossing zero is a single comparison on a route
+   that is already polled. **That is a watcher and not a duty**, and it
+   belongs to whoever owns the host's timers rather than to a seat that
+   only exists when the thing it would report has already happened.

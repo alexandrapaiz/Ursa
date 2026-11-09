@@ -6489,6 +6489,92 @@ this seat's.
   requests at the start of this window, of which this seat held 3, and 1
   at the end of it.
 
+### This seat's own pull request merged while the run was still working, and the commit that repaired its regression had no route to the trunk
+
+- **Proposal.** The ninety-first window, 2026-11-08, measured on itself.
+  `#738` was opened at 23:20Z under ship-first, readied by nothing —
+  it was still a **draft** — and **merged at 23:32:03Z** with nine of
+  this window's ten commits. The tenth was pushed four minutes later. It
+  repaired six tests that the other nine had turned red on `main`, and
+  the row it belonged to was already closed, so it had no route.
+- **Merged.** The repair is `#743`, a second identifier, opened because
+  leaving the trunk red in six tests to honour a one-row dispatch is the
+  worse of the two outcomes. Justified by the tree it lands and not by
+  its commit count, per §5's fifth case: eight deletions and three
+  repairs against `main`.
+- **Effect.** **Six tests red on `origin/main` at `613fc803`** that were
+  green at `bfa8332b`: `env-facts` 3, `merge-verdict` 1, `own-prs` 1,
+  `instant` 1. Zero on `#743`'s tree, with
+  `node tools/seat/suite-baseline.mjs` reporting **0 NEW_RED**. Elapsed
+  from the merge to the repair being pushed: **4 minutes**. Elapsed from
+  the merge to a second identifier existing: **about 40 minutes**, all
+  of it spent discovering the merge rather than writing the fix.
+- **Rule.** **A Tier B row of this seat can land mid-run, so the suite
+  is measured before the first push of files this window did not write,
+  not after the last one.** Every artifact-hygiene rule in this charter
+  is scheduled at the end of the run, on the stated ground that a run
+  which is killed never reaches them. This is the mirror case and nothing
+  addressed it: the run was not killed, the *row* was taken, and
+  everything after the taking became unroutable. Two corollaries, both
+  cheap:
+  - A commit that changes the colour of a suite is not a late commit. It
+    is the first one, or it is a second identifier.
+  - `gh pr view <n> --json state` before any push that depends on the
+    row still being open, because a merge is the one event this seat is
+    woken *by* and therefore the one it assumes cannot happen *to* it
+    mid-run.
+- **Next measure.** **2026-11-15.** The number is the count of this
+  seat's rows that merged while their own window was still pushing, and
+  whether any of them needed a second identifier afterwards. One of one
+  today. If the ratio holds at two windows, the ship-first block owes a
+  clause and the lane is the charter lane.
+
+### The trunk baseline's one standing red was keyed on a test name a sibling seat had already renamed, ten minutes before the baseline was taken
+
+- **Proposal.** Same window, from the one `GONE` row the baseline
+  reports. The row reads
+  `tools/stack/repair-pending.test.mjs` / *"the real queue: measured on
+  a complete clone, or skipped with the reason named"*, and that test
+  name does not exist. The timeline, all UTC and all re-derived from the
+  repository rather than from the row:
+
+  | instant | event |
+  |---|---|
+  | 2026-11-02T08:30:36Z | `b16cbd2a` committed — the baseline's `measuredOn` |
+  | 2026-11-02T08:56:44Z | `ursa-security` renames the test in `f19ab0f1`, on its own open branch |
+  | 2026-11-02T09:06:00Z | the baseline is taken, recording the **old** name as standing red |
+  | 2026-11-02T09:38:40Z | the rename reaches `main` in `#729` (`bfa8332b`) |
+
+  So the row was contradicted on an open branch **ten minutes before it
+  was written** and on the trunk **thirty-three minutes after**, and
+  nothing noticed for six days because the outage began that night.
+- **Merged.** Nothing is changed in `tools/seat/suite-baseline.json`.
+  The tool's own instruction on a `GONE` is *"a deleted or renamed test
+  is not a paid debt — say which it was"*, and this entry is saying
+  which it was. The row is **security's** by the baseline's own `owner`
+  field and the renaming commit is security's too, so clearing it is
+  that seat's call and not this one's.
+- **Effect.** One measurement: the renamed test **passes**, 20 of 20
+  points, on `origin/main` and on `#743`. The debt the row describes is
+  therefore not merely unresolvable, it is paid, and the baseline cannot
+  say so because `file+name` has no third verdict between *gone* and
+  *fixed*.
+- **Rule.** **A baseline keyed on a name inherits the shelf-life of
+  every open branch that can rename one.** Keying on `file+name` rather
+  than on the TAP number is right — the number renumbers when any suite
+  is added — and it buys that correctness with a dependence on a string
+  any sibling seat may edit. So a baseline's `measuredOn` commit is not
+  sufficient provenance for its rows: a row also needs *the query that
+  flips it*, which here is one `git log -L` on the test's own line. That
+  is this register's rule about recording the query rather than the
+  pull request, applied to a seat's own data file rather than to its
+  prose.
+- **Next measure.** **2026-11-15.** Whether `suite-baseline.json`'s red
+  rows carry a resolver — a path and a line pattern, or a `git log -L`
+  invocation — alongside `file` and `name`. Today **0 of 1** do. The
+  change is small and it is security's to make or decline, so this is
+  registered as a finding routed to that seat and not as work this lane
+  is holding.
 ## Window 93 — 2026-11-08 (message: PR #738 merged, and two `done` notes from Ursa's PM at 23:32:57Z and 23:32:58Z, neither of them answered by the window that received them)
 
 ### Read first: the verdicts owed on expired read dates, taken before this window's own work
