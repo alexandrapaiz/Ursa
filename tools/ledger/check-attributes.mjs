@@ -46,6 +46,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { verdict, COMMITTED, CLONE } from './attributes-verdict.mjs';
+import { refuse } from './ground.mjs';
 
 const args = process.argv.slice(2);
 const checkClone = args.includes('--clone');
@@ -60,12 +61,52 @@ if (args.includes('--help') || args.includes('-h')) {
 const git = (...a) =>
   execFileSync('git', ['-C', repo, ...a], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 
+// The second premise, found while repairing the first (F128). With the
+// registry present and `--repo` pointing outside a repository, `git ls-files`
+// exited `fatal: not a git repository` and the gate threw out of
+// `node:internal/errors:983` at exit 1 -- the findings code again, and with a
+// Node stack trace for a reader to work backwards from.
+//
+// Only this wrapper refuses, and that distinction is the whole of it. A
+// failing `git config --get` is this gate's ANSWER and not a premise failure:
+// exit 1 from it means the key is not set, which is precisely the clone-locus
+// finding `--clone` exists to report, and its call site already catches it.
+// Wrapping both calls made three of this file's own cases exit 3 where they
+// expect 1 and 2, because `refuse` ends the process before that catch runs.
+const gitGround = (...a) => {
+  try {
+    return git(...a);
+  } catch (err) {
+    refuse('check-attributes',
+      `\`git ${a.join(' ')}\` failed in ${repo}: ` +
+      `${(err.stderr || err.message).toString().trim()}. The set of files ` +
+      `this gate checks is read through git, so there is no partial answer ` +
+      `to give.`);
+  }
+};
+
+// F128, 2026-11-09. This was `process.exit(1)`, and 1 is also what this
+// gate's own `verdict()` returns for a clone-locus finding, so the one
+// outcome that means "finish your checkout" was indistinguishable from the
+// one that means "a merge-attribute declaration is wrong". Ursa/exo found it
+// by removing the premise. `tools/gates/verdict-shape.mjs` already names this
+// exact gate's absent driver as a GROUND verdict rather than a FINDINGS one;
+// exit 3 is what the house gives that, and ./ground.mjs carries the argument.
 const registryPath = join(repo, 'tools/ledger/drivers.json');
 if (!existsSync(registryPath)) {
-  console.error(`check-attributes: no driver registry at ${registryPath}`);
-  process.exit(1);
+  refuse('check-attributes',
+    `no driver registry at ${registryPath}, so there is nothing to check a ` +
+    `declaration against. Not exit 1: this gate returns 1 for a clone-locus ` +
+    `finding, and this is the checkout to repair rather than a declaration.`);
 }
-const registry = JSON.parse(readFileSync(registryPath, 'utf8'));
+let registry;
+try {
+  registry = JSON.parse(readFileSync(registryPath, 'utf8'));
+} catch (err) {
+  refuse('check-attributes',
+    `the driver registry at ${registryPath} did not parse: ` +
+    `${err.message}. Every verdict below is a comparison against it.`);
+}
 const known = registry.drivers ?? {};
 const refused = registry.refused ?? {};
 const builtins = new Set(registry.builtin_allowed ?? []);
@@ -75,7 +116,7 @@ const builtins = new Set(registry.builtin_allowed ?? []);
  *  and `check-attr --stdin` emits path, attribute, value as three NUL-separated
  *  fields per declaration. */
 function declarations() {
-  const files = git('ls-files', '-z');
+  const files = gitGround('ls-files', '-z');
   const out = execFileSync('git', ['-C', repo, 'check-attr', 'merge', '-z', '--stdin'], {
     input: files,
     encoding: 'utf8',
