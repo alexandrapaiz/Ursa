@@ -25458,3 +25458,63 @@ same conflation inside it.
   half that took a 95-per-cent-full disk to discover.
 - Cost: $0.
 - Status: proposed
+
+### 2026-11-09 (security, sixteenth run) — The attribution note this run shipped has no locus to carry, and the enum change is already filed
+
+- Trigger: wiring `tools/gates/hit-attribution.mjs` into
+  `scripts/redaction-check.mjs` this run. The line it prints locates a repair
+  outside the branch under test, which is a claim
+  `tools/gates/verdict-shape.mjs` has no vocabulary for: its five loci are
+  READER, COMMITTED, CLONE, SEAT and OWNER, and the nearest of them, COMMITTED,
+  points the reader at this branch, which is the error the line exists to
+  prevent.
+- What: run 15 filed the enum change itself, as "a locus for a repair in
+  another repository", and this entry is the follow-on rather than a second
+  copy of it, because the two are a day's work in sequence and not in
+  parallel. Once that locus exists, `attributionLines()` should emit it, and
+  `MIXED_LOCI_NAMED` in `tools/gates/enumerate-verdicts.mjs` can then assert
+  that a gate whose finding is inherited names the foreign locus, instead of
+  the note being a string nothing grades. The reason to do it in that order is
+  that adding a locus changes what that gate requires of every gate declaring
+  one, and the attribution module is the first caller that would need it, so
+  it is the cheapest proof the new locus is the right shape before eleven
+  other gates depend on it. The same gap is visible one layer down in
+  `tools/gates/gate-registry.baseline.json`, where this run had to register
+  `tools/seat/duplicate-repair.mjs` as `not-a-gate` while writing in the row
+  that `not-a-gate` is only the nearest kind available, there being none for a
+  file whose verdict is real and whose subject is not the branch.
+- First step: add the locus to `verdict-shape.mjs` with no caller, and emit it
+  from `attributionLines()` alone, so exactly one gate declares it and the
+  blast radius of getting its name wrong is one file.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (security, sixteenth run) — A pull request whose tip no workflow ran is indistinguishable from one no gate watches
+
+- Trigger: confirming the two red-workflow events this run was woken for,
+  under L-A31, before repairing anything. Both were already fixed by a later
+  commit of this seat's own, which is what L-A31 predicts. The thing that was
+  not expected was in the same output.
+- What: `#859`'s `redaction-gate` ran on `89ccc558` (red, 10:32:36Z),
+  `7548def2` (red, 10:37:40Z) and `c5e1fecb` (green, 10:45:09Z). The tip of
+  that branch is `762d2e7a`, seven commits and sixteen minutes later, and no
+  workflow ran on it at all. `gh pr checks 859` therefore prints `no checks
+  reported on the 'ursa-security/2026-11-09-message-15' branch`, which is
+  byte-for-byte what it prints for a branch no gate has ever been pointed at.
+  Other seats' branches got a run for every push through the same window, at
+  10:47Z, 10:50Z, 10:51Z and on, so the queue was not stalled and this is not
+  a general outage. The consequence is specific: an untested tip and an
+  unguarded one read identically, and the owner merges on that reading, so a
+  branch can be merged on the strength of a green that was about a commit
+  seven commits behind what is being merged. This is adjacent to the finding
+  this run fixed and not the same one. There the gate's subject was wider than
+  the branch; here the gate's subject is a commit nobody is looking at.
+- First step: count it over the queue rather than argue from one instance.
+  For every open pull request, join its `headRefOid` against the workflow
+  runs on its branch and report the rows whose tip has no run, with the
+  distance in commits between the tip and the newest commit that does. One
+  instance is not enough to say whether this is rare, whether it correlates
+  with push rate, or whether a seat's final push simply lands after the
+  forge stops scheduling for that branch.
+- Cost: $0
+- Status: proposed

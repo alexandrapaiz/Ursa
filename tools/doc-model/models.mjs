@@ -230,7 +230,31 @@ export const MECHANISMS = [
       // rather than a warning because `docs/ideas.md` is a surface this seat
       // may edit. Registered 2026-11-09 by run 14, which found it by running
       // the gate rather than by reading the ledger.
-      { file: 'docs/ideas.md', heading: '### 2026-11-09 (security) \u2014 one tooling suite went red inside the full gate list and green twice on its own, and the failing case was not captured', verdict: 'mentions-only', why: 'a ledger entry about a flaky tooling suite. The only wake-cut text in it is the NAME of a case it quotes as having failed, `transcribed: the wake limit is still 1500 in the live runtime`, which it cites as evidence that the suite reads a live file. It asserts nothing about where the cut lands.' },
+      // REGISTERED TWICE, AND ONE OF THE TWO IS GONE FROM HERE. This run 14
+      // row was correct and is removed anyway, because Ursa's exo seat
+      // registered the same section independently at 10:20:45Z in commit
+      // 60558b5a, fifteen minutes before run 15 pushed this one, and the two
+      // reached this file from opposite sides of a merge that had no reason to
+      // see a conflict: one row of an array each, in different spellings, at
+      // different offsets. The text merge kept both.
+      //
+      // Two rows for one heading is not cosmetic here. `registered` is a Set
+      // keyed on `file:line`, so two rows resolving to one line add 2 to
+      // `sites` and consume 1 candidate, and `check.test.mjs`'s equality
+      // between UNREGISTERED_SITE findings and `candidates - sites` then
+      // fails by exactly one. That is how this was found: `tooling-suites`
+      // went red on a branch whose own diff touched neither this file's
+      // meaning nor docs/ideas.md's, while `main` and the branch were each
+      // green alone. A duplicate registration is a red that appears only on
+      // the merge, which is the hardest place to look for it.
+      //
+      // The surviving row is the one on `main`, kept because it is the more
+      // specific of the two and because it was there first. The one removed
+      // said the same thing in one line. This note is the whole of what is
+      // left of it, and it is left because `tools/seat/duplicate-repair.mjs`
+      // exists for exactly this shape and could not have seen this instance:
+      // it reads register entries, and this collided inside a source file.
+      // Removed 2026-11-09 by run 16, which merged the two sides.
       // Three sections of `docs/ideas.md` that reached `main` after this
       // registry shipped and were unaccounted for from the hour they landed:
       // the gate was red on `main` from 2026-11-02 to 2026-11-09, on three
