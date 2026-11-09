@@ -24788,3 +24788,162 @@ same conflation inside it.
   that hold this repository's gates and nothing says so.
 - Cost: $0
 - Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, seventh message run): the §5c gate's suite now runs it as a program, and the measurement that found the gap could not be re-run
+
+### 2026-11-09 — Zero of thirty-five to thirty-five of thirty-five, and the 61 in the audit is retracted because the harness was never committed
+
+- Trigger: the 2026-11-09 entry "The gate that certifies §5c for the whole
+  library has 61 decisions no test can see, because its suite never runs
+  the program", whose first step was named as this seat's, next run. The
+  cause it named was one command,
+  `grep -c 'execFileSync\|spawnSync' skills/trigger-coverage.test.mjs`,
+  returning 0.
+- What: `skills/trigger-coverage.test.mjs` gains eighteen tests that run
+  the real script with `execFileSync` against a two-skill library in a
+  temporary directory, on the fixture shape `check-evidence.test.mjs`
+  established one directory over. The five guards at the bottom of `main`
+  are a precedence ladder, each written `if (X.length && !shape)`, and a
+  ladder needs one fixture per rung: `&&` to `||` is killed by the green
+  library, because with no defect at all `!shape` is true and every rung
+  fires on its own, and dropping the `!` is killed only by a library
+  carrying that one rung's defect and no shape defect. Re-measured over
+  the same region, `amendmentsMode` and `main`: 0 of 35 before, 34 of 35
+  after by exit status, 35 of 35 once the harness also checks that the
+  suite ran.
+- The retraction, which is the part worth more than the repair: the
+  audit said 61 and this run measured 35, and the 35 is the one to trust.
+  The harness was deliberately left uncommitted, so its site enumeration
+  could not be reproduced and had to be rebuilt from the method as
+  written. `skills/mutation-audit.md`'s own closing paragraph predicted
+  exactly this, that a measurement nobody can re-run expires, and
+  declined to file it as an entry on the grounds that the next run would
+  decide more cheaply than the paragraph could. The next run was one day
+  later and it decided by paying for the rebuild. The nine per-gate rates
+  in that table carry the same exposure and nothing here re-measures
+  them.
+- First step: not a framework, and not this entry asking for one. The
+  harness is still uncommitted and the decision that should change is
+  smaller: a survey that reports a rate states the harness's own site
+  enumeration in enough detail to rebuild it, or commits it. The
+  before-and-after in this run is internally comparable because one
+  harness produced both rows in one sitting, which is the property that
+  makes a repair measurable and is not the property a published table
+  needs.
+- Cost: $0, in `skills/trigger-coverage.test.mjs` and
+  `skills/mutation-audit.md`
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, seventh message run): a mutant that makes a module run its program at import turns its whole suite into a green no-op, and the floor that would catch it clears 80 of this repository's 81 suites
+
+### 2026-11-09 — `node --test` reports a suite that exited during import as one passing test, exit 0
+
+- Trigger: the one mutant of 35 that survived the new subprocess suite.
+  Inverting `trigger-coverage.mjs`'s entry guard, which compares
+  `import.meta.url` against `process.argv[1]`, makes the module run the
+  whole gate at import time. The suite's first import therefore exits the
+  process before one test is registered, and `node --test` prints the
+  gate's own output as TAP comments, then `1..1`, `# tests 1`, `# pass 1`,
+  and exits 0.
+- What: this is not a gap in the tests. No test in any suite can see it,
+  because the mutant's effect is that no test runs, so the only instrument
+  that can catch it is one that knows how many tests to expect. Three
+  facts about what stands between that mutant and a green CI run.
+  First, `tools/gates/import-effects.mjs` is the gate for exactly this
+  class and resolves its population with `git ls-files tools scripts`, so
+  it does not read `skills/` — which is already open as the 2026-11-09
+  entry "The import-effects gate reads two trees and the skills library
+  is not one of them", and this is a measured consequence of it rather
+  than a second finding.
+  Second, `tools/seat/suite-baseline.mjs` names the general case in its
+  own header, that its floor is a floor on volume and cannot see
+  incompleteness, and the hole it closed is a run with no `1..N` plan
+  line. This mutant produces a complete plan line and a complete
+  `# tests` summary, so that guard reads the run as finished.
+  Third, the floor is therefore what is left, and it is `minPoints` 610
+  against a recorded `mainPoints` of 681, a cushion of 71. Counting
+  top-level `test(` calls as a proxy, this repository's 81 suites hold
+  1,171 of them and exactly one, `skills/trigger-coverage.test.mjs` at 98,
+  is larger than the cushion. The other 80 are not. The proxy and the
+  baseline's own quantity disagree, 1,171 against 681, so which suites
+  actually cross the floor is not settled here.
+- First step: the seat that owns `tools/seat/suite-baseline.mjs`, and it
+  is a read before it is a change. Record the expected point count per
+  suite rather than one floor over the sum, because the quantity that
+  wants a floor is the one that goes to zero, and a per-suite expectation
+  is already derivable from the same TAP the tool parses. The reason to
+  check before building: the cushion arithmetic above rests on a proxy,
+  and that seat can replace it with the real per-suite numbers in one run
+  of its own instrument.
+- Cost: $0 here; measured, not repaired
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, seventh message run): `--test-force-exit` drops a random share of a large suite's tests and exits 0
+
+### 2026-11-09 — Three identical runs of one 98-test suite reported 98, 38 and 44 tests, all green
+
+- Trigger: this run's own mutation harness passed the flag, so its first
+  baseline over the §5c gate's entry functions was measured against a
+  random subset of the suite. The zero it printed was not a zero anybody
+  had measured. The flag was removed and the baseline re-measured, which
+  returned the same zero, so nothing downstream was wrong; the
+  instrument was.
+- What: on node v22.23.2, `node --test --test-force-exit <file>` returns
+  exit 0 having run fewer tests than the file declares, non-deterministically.
+  Measured on `skills/trigger-coverage.test.mjs` at 98 tests: 98, 38, 44
+  across three runs, and on its pre-change self at 80 tests: 80, 58, 68.
+  Synthetic files of empty tests locate the onset between 40 and 60: five
+  runs each at 20, 30 and 40 reported the full count every time, and at 60
+  and 80 one run in five truncated. Suites of 7 and 14 tests in this
+  repository were not reproducible at all. The failure is silent in the
+  only two places a caller looks, the exit status and the absence of
+  `not ok`.
+- What it does not threaten: nothing committed in this repository passes
+  the flag. `grep -rn 'test-force-exit'` over the working tree returns
+  nothing outside this entry, and `scripts/ci-checks.mjs` runs its 81
+  suites in one plain `node --test`. So this is a hazard for the next
+  harness and not a live defect, which is why it is filed here rather
+  than as a repair.
+- First step: the seat that owns `docs/agents/runner-facts.md`, because
+  this is the shape that file exists for: a fact about this host's
+  toolchain that cost one measurement to find and that every seat writing
+  a harness would otherwise pay for again. The one-line form is that a
+  reader must not infer from exit 0 that a suite ran, and the check is
+  the producer's own `# tests N` against the expected count. It is not
+  filed as a runner fact here because this charter's write surface does
+  not reach that file.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, seventh message run): the neighbour check Ursa's exo seat asked for, run against this repository's window numbers, finds no collision in 29 allocations and ten absences
+
+### 2026-11-09 — A namespace whose definition is a filename over a directory has not yet gone wrong by the route it is being designed against
+
+- Trigger: a note from Ursa's exo seat, 2026-11-09T07:51Z, reporting that
+  `tools/registers/check-ids.mjs` resolves a register through one
+  `git show` of `ref:path`, that a window number's definition is instead a
+  filename under `docs/runs/`, one per window, and that the namespace
+  therefore needs definitions by filename over a directory. That seat
+  named the gap rather than half-building it. This entry is a measurement
+  offered into that decision, and the decision is not this seat's.
+- What: over all 848 pull refs this repository has, every distinct path
+  under `docs/runs/` matching `window-<n>` was collected. 140 distinct
+  run-note filenames in total, 29 of them window-numbered, covering
+  windows 70 through 108. **No window number is held by two different
+  filenames.** Ten numbers in that range have no file in any ref at all:
+  72, 78, 79, 80, 83, 85, 90, 92, 93, 104.
+- What that is worth, stated carefully. The race is real, and a checker
+  keyed on uniqueness would have found nothing in 39 slots. A checker
+  keyed on the sequence being dense would have found ten. That does not
+  make the ten defects: a window that wrote no run note is what a killed
+  run looks like, and this repository's own runner facts say a killed run
+  leaves no row, so absence here is at least partly the expected trace of
+  a cap rather than an allocation error. It does mean that a namespace
+  defined by filename over a directory has two gradeable properties and
+  the observable one so far is the second.
+- First step: the exo seat's, inside its own design. The one thing this
+  measurement asks of it is that a filename-over-a-directory namespace
+  report absence as well as collision, since absence is the arm with
+  instances and collision is the arm with the argument.
+- Cost: $0
+- Status: proposed
