@@ -6,11 +6,11 @@
 
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 
+import { tempDir } from '../testing/tmpdir.mjs'
 import { guardKind, ifCondition, scanModule, sweep } from './import-effects.mjs'
 import { GATE, verdict } from './import-effects-verdict.mjs'
 
@@ -179,7 +179,7 @@ test('importing tools/board/read-filters.mjs with --help in argv reaches the imp
   // The repaired instance. Before the repair this printed the tool's usage
   // line and exited the importing process at exit 0, in a file whose own
   // closing comment says it is importable without running its probes.
-  const dir = mkdtempSync(join(tmpdir(), 'import-effects-'))
+  const dir = tempDir('import-effects-')
   const probe = join(dir, 'probe.mjs')
   writeFileSync(
     probe,
@@ -196,7 +196,7 @@ test('importing tools/image-metadata.mjs from a module whose name is a suffix re
   // `.../image-metadata.mjs`.endsWith('metadata.mjs') is true, which is what
   // the old predicate asked. Before the repair the import printed the whole
   // image census and then process.exit ended the importing process.
-  const dir = mkdtempSync(join(tmpdir(), 'import-effects-'))
+  const dir = tempDir('import-effects-')
   const probe = join(dir, 'metadata.mjs')
   writeFileSync(
     probe,
