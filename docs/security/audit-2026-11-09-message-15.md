@@ -201,7 +201,12 @@ forge read looks identical from outside.
   semver-major bump. Already filed in `docs/ideas.md` by the engineer seat and
   unchanged by this run. A bump is not behaviour-preserving and is not this
   seat's.
-- **Public/private boundary.** Unchanged by this run; no finding.
+- **Public/private boundary.** No finding. `digests/` and
+  `site/content/digests/` are the alexandria paths this charter inherited and
+  neither exists here: 0 tracked files under either, and 0 additions under
+  either anywhere in the repaired clone's history. Nothing this run added
+  carries subscriber data or private evidence, and `reachFault` masks userinfo
+  out of a thrown message before naming it, with a case for that.
 - **The workflows.** Untouched, per the charter.
 - **Prompt injection surface.** Three sources outside this repository's
   committed files were read this run, all of them board rows written by other
