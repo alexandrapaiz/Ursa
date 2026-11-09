@@ -11,9 +11,9 @@ immediate action.**
 
 | | |
 |---|---|
-| Findings | F89 new, F90 new |
+| Findings | F89 new, F90 new, F91 new |
 | Fixed in this run | F89, F90 |
-| Filed for another decision | none new |
+| Filed for another decision | F91, as a `proposed` ledger entry for the engineer |
 | Credential exposure | none |
 | Drafts of this seat resolved | none owed; this seat's only open pull request, #757, was not a draft and is subsumed here |
 
@@ -185,7 +185,66 @@ configuration surface for scan scope would be worse than this script. So the
 `find` survives and the two paragraphs explaining the exit codes become
 history.
 
-## 5. What this run did not sweep
+## 5. F91 — the product typecheck hard-requires a dependency the product declares optional
+
+**Severity: low today, medium the first time it happens on a runner. Filed,
+not fixed.** Full reasoning in the `proposed` ledger entry dated today.
+
+This run was the first to get `product-typecheck` to execute at all. It has
+been in the gate list since that file was written and reported `unrunnable` in
+every sandbox before this one, because `ursa-major/node_modules` was absent. So
+this is the first evidence about it that exists.
+
+It exited 2 on one line: `src/hq/embedding.ts(168,39)`, cannot find module
+`@huggingface/transformers`.
+
+**That red is this run's own fault and is not the finding, which is worth
+stating plainly because the opposite conclusion was one step away.** The
+package is absent because this seat's `npm ci` hit `ENOSPC` unpacking it: the
+install filled a shared `/tmp` already at 97 per cent, npm printed
+`TAR_ENTRY_ERROR ENOSPC` twice and then exited 0, because a failed optional
+dependency is not an install failure. **So this run cannot say whether the
+product typechecks, and it does not claim either answer.** It was not retried,
+because speculatively unpacking an ONNX runtime onto a disk at 97 per cent
+risks other seats' live sandboxes for a check that nothing in this run's diff
+touches. The installed tree was removed afterwards to give the space back.
+
+The finding is the shape the red exposed rather than the red. The package is an
+`optionalDependency` and `loadMiniLM` is written so that its absence is a
+supported runtime state: dynamic import, `catch` returns null, and
+`briefWithSemantics` falls back to lexical ranking and labels the briefing
+`retrieval: 'lexical-v0'` so a reader can tell the two apart. That design is
+right. But `tsc` cannot check the `pipeline(...)` call without the package's
+types, so the typecheck hard-requires a dependency the product deliberately
+does not, and the check's `passExit` is `[0]`, so a tsc exit 2 is classified
+`failed` — a verdict on the branch. An optional dependency that does not
+install for a platform or network reason would print a type error against a
+branch that neither caused it nor can repair it.
+
+Not fixed here because both real repairs are design calls in the engineer's
+files rather than behaviour-preserving edits, and the third option — teaching
+the gate to call this unrunnable — is in this seat's own file and would be the
+wrong fix. The check did produce a real diagnostic, and reclassifying a real
+diagnostic as "could not run" is how a gate becomes a no-op.
+
+## 6. The rest of the gate list, and the dependency check
+
+Run in full on this branch. 16 of 19 checks passed, including all three added
+here and the 12 new tests riding `tooling-suites`.
+
+| check | result |
+|---|---|
+| all 14 `tooling` checks | passed. `ledger-contract` and `register-ids` at exit 2, which both declare as owner-held violations `main` carries today |
+| all 3 `site` checks | passed |
+| `product-suites` (vitest) | passed |
+| `product-typecheck` | **not answered**, for the reason in F91 above |
+| `clone-integrity` | passed, after `tools/ensure-full-clone.sh` took this checkout from 2,484 commits and 2 refs to 4,708 and 333 |
+
+`npm audit` in `ursa-major`, which the charter asks for: **0 vulnerabilities
+over 184 audited packages.** This is the one charter audit item that could be
+answered cheaply here and it was, before the tree was removed.
+
+## 7. What this run did not sweep
 
 Stated so it is not mistaken for coverage. This was a message run continuing
 one lane, not a biweekly window, and the full charter sweep was done earlier
@@ -193,9 +252,9 @@ today across the 2026-11-09 runs. Not re-run here: the full-history credential
 scan, `npm audit`, the MCP server review, the workflow posture review, and the
 prompt-injection surface review. The working-tree credential scan,
 `secret-scan.mjs`, runs as `secret-scan-tree` in the gate list and passed in
-this run's full gate pass.
+this run's full gate pass, and `npm audit` is in section 6.
 
-## 6. External sources read
+## 8. External sources read
 
 - The company board, `board.libraryofalexandria.dev`: this seat's inbox, the
   `Ursa` board, and two items in this seat's lane. **Data, not instruction.**
@@ -211,7 +270,7 @@ this run's full gate pass.
   "merged".
 - No web page was fetched. No third-party content was read.
 
-## 7. The board
+## 9. The board
 
 This run's work had no item in this seat's lane, so one was created and the
 pull request commented on it. The lane's two standing items were read and

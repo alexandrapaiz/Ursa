@@ -183,6 +183,61 @@ lines as its own source without becoming its own worst offender, so the
 corpus belongs in data; and the gate's own first run should be expected to
 find a wrong assumption of its author's, which exo's did.
 
+## Ledger entry — 2026-11-09 (security, message run 3): the product typecheck hard-requires a dependency the product declares optional, so an installer that skips it reports a branch defect
+
+**Status:** proposed, hour-sized. **For:** the engineer. **Severity:** low
+today, medium the first time it happens on a runner. **Found by** being the
+first run to get `product-typecheck` to execute at all.
+
+**What was observed, and what was not.** `scripts/ci-checks.mjs` has carried
+`product-typecheck` since it was written, and in every sandbox before this one
+it reported `unrunnable` because `ursa-major/node_modules` was absent, so the
+typecheck itself had never run. This run installed the product's dependencies
+and got `npx tsc --noEmit` to exit 2 on one line:
+
+```
+src/hq/embedding.ts(168,39): error TS2307: Cannot find module
+  '@huggingface/transformers' or its corresponding type declarations.
+```
+
+**That particular red is this run's own fault and is not the finding.** The
+package was absent because `npm ci` hit `ENOSPC` unpacking it: this seat's
+install filled a shared `/tmp` that was already at 97 per cent, and npm
+reported `TAR_ENTRY_ERROR ENOSPC` twice and then exited 0, because a failed
+optional dependency is not an install failure. So this run cannot say whether
+the product typechecks, and the audit says so rather than claiming either
+answer.
+
+**The finding is the shape the red exposed.** `@huggingface/transformers` is
+an `optionalDependency`, and `loadMiniLM` is written so that its absence is a
+supported runtime state rather than an error: the import is dynamic, the
+`catch` returns null, and `briefWithSemantics` falls back to lexical ranking
+and labels the briefing `retrieval: 'lexical-v0'` so a reader can tell the two
+apart. That design is right. But `tsc` cannot check the `pipeline(...)` call
+without the package's types, so the typecheck hard-requires a dependency the
+product deliberately does not. The two facts are consistent only while every
+installer succeeds at an install it is allowed to skip.
+
+**Why it matters on a runner and not just here.** `passExit` for that check is
+`[0]`, so a tsc exit 2 is classified `failed`, which is a verdict on the
+branch. An optional dependency that does not install for a platform or network
+reason would therefore print a type error against a branch that did not cause
+it and cannot repair it, which is the one outcome `ci-checks.mjs`'s own header
+argues against: a check whose dependency is absent is unrunnable, never a
+branch defect.
+
+**Why the security seat did not fix it.** Both candidate repairs are design
+calls in the engineer's files, not behaviour-preserving edits. Either the
+product stops hard-requiring the types at compile time, which is a `tsconfig`
+or an ambient-declaration decision with real trade-offs about shadowing the
+real types when the package *is* present, or the package stops being optional,
+which is a shipping-weight decision about an ONNX runtime. The third option,
+teaching the gate to call this one unrunnable when the package is missing, is
+in this seat's file but would be the wrong fix: the check genuinely did produce
+a diagnostic, and reclassifying a real diagnostic as "could not run" is how a
+gate becomes a no-op. The seat that owns the dependency should pick.
+
+
 ## Ledger entry — 2026-11-08 (security, message run): the resident runtime hands every seat a shallow single-branch clone, and no seat's charter tells it to repair one
 
 **Status:** proposed, hour-sized. **For:** the engineer. **Severity:** low
