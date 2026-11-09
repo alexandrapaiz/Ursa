@@ -161,6 +161,19 @@ ledger entry of 2026-11-02, "the sandbox disk is full at 99 per cent, and it
 fails commands by losing their output rather than by refusing them", observed
 again rather than newly discovered.
 
+The repository's canonical runner settles it:
+
+```
+$ node tools/seat/suite-baseline.mjs ; echo exit=$?
+suite: 762 top-level points (node's 1..N), 1172 collected (floor 610 points)
+Green, and the baseline is empty — the trunk owes nothing.
+exit=0
+```
+
+So on this branch the suite `scripts/ci-checks.mjs -> toolingSuites()` defines
+is green, and the trunk-red baseline is empty, meaning this branch neither
+inherits a failure nor adds one.
+
 ## What this run did not do
 
 The stronger property — the detector driven and its emitted set compared with
