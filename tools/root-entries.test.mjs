@@ -22,9 +22,13 @@
 //
 //   2. ZERO FALSE POSITIVES, over the whole history rather than over today's
 //      tree. The inversion is only cheap if nothing legitimate has ever lived
-//      at a root dot-entry outside the three. That is checked against every
-//      object in every ref, and skipped with a named reason on an incomplete
-//      clone rather than passing on a truncated graph.
+//      at a root dot-entry outside the four. That is checked against every
+//      object reachable from `HEAD`, and skipped with a named reason on an
+//      incomplete clone rather than passing on a truncated graph. Entries
+//      that exist only on other refs are reported as a diagnostic and not
+//      asserted on, for the reason the test itself records: an entry and its
+//      allowlist line arrive together, on one branch, and no other branch can
+//      answer for them.
 //
 //   3. THIS REPOSITORY, LIVE. The last test runs the gate on the real
 //      checkout. It is a tripwire, not a unit test: it is what fails on the
@@ -76,7 +80,7 @@ const COMMITTED_SCRATCH = [
  *  not asserted. */
 const OLD_PATTERNS = ['.scratch/', '*-scratch', '*.scratch', '.scratch-*', 'scratch/']
 
-const ALLOWLIST = ['.gitignore', '.gitattributes', '.github']
+const ALLOWLIST = ['.gitignore', '.gitattributes', '.github', '.claude']
 
 /** `git check-ignore -q` exits 1 for a path that is not ignored, and
  *  `execFileSync` throws on a non-zero exit, so the question has to be asked
@@ -148,15 +152,52 @@ describe('allowlistFrom reads .gitignore and refuses to invent an allowlist', ()
   })
 
   test('the rule plus its negations is the allowlist', () => {
-    assert.deepEqual(allowlistFrom('/.*\n!/.gitignore\n!/.gitattributes\n!/.github/\n'), ALLOWLIST)
+    assert.deepEqual(allowlistFrom('/.*\n!/.gitignore\n!/.gitattributes\n!/.github/\n!/.claude/\n'), ALLOWLIST)
   })
 
   test('a trailing slash on a negated directory is not part of the name', () => {
     assert.deepEqual(allowlistFrom('/.*\n!/.github/\n'), ['.github'])
   })
 
-  test("the repository's own .gitignore yields exactly the three it commits", () => {
+  test("the repository's own .gitignore yields exactly the four it commits", () => {
     assert.deepEqual(allowlistFrom(readFileSync(join(REPO, '.gitignore'), 'utf8')), ALLOWLIST)
+  })
+
+  // The next two pin the `.claude/` spelling, which is the only negation here
+  // that exists to track one file rather than a whole entry, and which had
+  // nothing asserting it before 2026-11-09.
+  test('a negation naming a path inside a directory is not a root entry', () => {
+    assert.deepEqual(
+      allowlistFrom('/.*\n!/.claude/\n/.claude/*\n!/.claude/settings.json\n'),
+      ['.claude'],
+    )
+  })
+
+  test('re-ignoring a negated directory does not remove it from the allowlist', () => {
+    // `/.claude/*` is not a negation, so it must not subtract `.claude`: the
+    // entry is still committed, and the gate still has to know that.
+    assert.ok(allowlistFrom('/.*\n!/.claude/\n/.claude/*\n').includes('.claude'))
+  })
+})
+
+describe('the .claude/ carve-out tracks one file and keeps the session out', () => {
+  // The guard's PreToolUse registration has to be tracked or every clone
+  // drops it. Everything else the harness writes under `.claude/` is private
+  // session state, and the redaction gate exists because one of those paths
+  // reached a committed file before. So this asserts both halves against the
+  // real `.gitignore` rather than a fixture.
+  test('settings.json is trackable and the private siblings are not', () => {
+    assert.equal(ignores(REPO, '.claude/settings.json'), false,
+      'the hook registration is ignored, so no clone would run the guard')
+    for (const p of [
+      '.claude/settings.local.json',
+      '.claude/history.jsonl',
+      '.claude/todos/one.json',
+      '.claude/projects/-Users-you-Desktop/session.jsonl',
+      '.claude/shell-snapshots/snapshot.sh',
+    ]) {
+      assert.equal(ignores(REPO, p), true, `${p} is not ignored, so a run could commit it`)
+    }
   })
 })
 
@@ -167,7 +208,7 @@ describe('the gate fails on planted scratch, in both shapes', () => {
     assert.equal(r.code, 0)
     assert.equal(
       r.stdout.trim(),
-      'root-entries: 3 root-level dot-entries, all of them on the 3-name allowlist in .gitignore.',
+      'root-entries: 3 root-level dot-entries, all of them on the 4-name allowlist in .gitignore.',
     )
   })
 
@@ -252,9 +293,9 @@ describe('a gate that cannot establish its rule never reports clean', () => {
 
 describe('the verdict renders to the lines the gate prints', () => {
   test('clean, pinned against a literal', () => {
-    const v = verdict([], { scanned: 3, allowlist: ALLOWLIST })
+    const v = verdict([], { scanned: 4, allowlist: ALLOWLIST })
     assert.deepEqual(renderable(v, []), [
-      'root-entries: 3 root-level dot-entries, all of them on the 3-name allowlist in .gitignore.',
+      'root-entries: 4 root-level dot-entries, all of them on the 4-name allowlist in .gitignore.',
     ])
   })
 
@@ -301,7 +342,7 @@ describe('the measurement behind the inverted rule, re-runnable', () => {
     )
   })
 
-  test('the three on the allowlist are not ignored, so the inversion did not take the repository with it', () => {
+  test('the four on the allowlist are not ignored, so the inversion did not take the repository with it', () => {
     for (const name of ALLOWLIST) {
       assert.equal(ignores(REPO, name), false, `${name} is ignored, so a change to it could not be staged`)
     }
@@ -345,7 +386,7 @@ describe('the measurement behind the inverted rule, re-runnable', () => {
   // because the information is worth having, but they are a diagnostic
   // addressed to whoever owns that branch rather than a red in a suite that
   // cannot fix them.
-  test('nothing legitimate has ever lived at a root dot-entry outside the three', (t) => {
+  test('nothing legitimate has ever lived at a root dot-entry outside the four', (t) => {
     const dotRoots = (args) => {
       const objects = execFileSync('git', ['-C', REPO, 'rev-list', ...args, '--objects'], {
         encoding: 'utf8',
@@ -398,6 +439,6 @@ describe('this repository, live', () => {
   test('the real checkout passes its own gate', () => {
     const r = run(REPO)
     assert.equal(r.code, 0, `${r.stdout}${r.stderr}`)
-    assert.match(r.stdout, /all of them on the 3-name allowlist/)
+    assert.match(r.stdout, /all of them on the 4-name allowlist/)
   })
 })

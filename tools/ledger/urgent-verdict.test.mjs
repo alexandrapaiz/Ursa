@@ -13,10 +13,17 @@
 import { strict as assert } from 'node:assert'
 import { describe, it } from 'node:test'
 import {
+  FLAG_SHAPE,
   PROBE_SHAPE,
+  SCRIPT_SHAPE,
+  basisTally,
   classifyEntry,
   daysBetween,
+  declarationsIn,
+  normalizeOutcome,
+  parseDeclaration,
   pathsIn,
+  probePlan,
   probesIn,
   report,
   tally,
@@ -26,6 +33,8 @@ const TRACKED = new Set([
   'tools/root-entries.test.mjs',
   'tools/stack/repair-pending.test.mjs',
   'tools/ledger/check.mjs',
+  'tools/secret-scan.mjs',
+  'scripts/ci-checks.mjs',
   'docs/ideas.md',
   'ursa-major/src/resolver.test.ts',
 ])
@@ -123,7 +132,12 @@ describe('classifyEntry', () => {
       ])),
     )
     assert.equal(v.disposition, 'holds')
-    assert.equal(v.why, 'still failing today: tools/stack/repair-pending.test.mjs')
+    // The clause after the path was added 2026-11-09 with the `- Recheck:`
+    // field: every `why` now ends by saying whether the measurement came from
+    // the entry's own declaration or from this tool's inference, so the
+    // assertion is split into the claim and its authority rather than widened.
+    assert.ok(v.why.startsWith('still failing today: tools/stack/repair-pending.test.mjs'), v.why)
+    assert.match(v.why, /on a probe inferred from a path the entry mentions/)
   })
 
   it('a named probe nobody ran is unmeasured, never clear', () => {
@@ -205,5 +219,286 @@ describe('report', () => {
 
   it('tally agrees with the summary', () => {
     assert.deepEqual(tally(verdicts), { holds: 1, 'symptom-cleared': 1, unverifiable: 1 })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The `- Recheck:` declaration, added 2026-11-09.
+//
+// WHY THESE ARE WRITTEN FROM THE ATTACKER'S SIDE TOO. The declaration is a
+// second, wider-looking door into the same execution primitive the block of
+// tests at the top of this file guards: before it, a ledger sentence could
+// cause `node --test` to run on a tracked `tools/**/*.test.mjs`; after it, a
+// ledger sentence can name its own script and its own flags. The grammar is
+// what keeps that from being a widening, so each clause of the grammar gets a
+// refusal case, and every refusal must be by SHAPE rather than by the token
+// happening to name nothing that exists — which is why several cases below
+// pass `() => true` as `isTracked`, describing a repository where the
+// attacker's path is present.
+
+describe('parseDeclaration: the declaration grammar', () => {
+  it('accepts node, one tracked-shaped script, and bare long flags', () => {
+    const r = parseDeclaration('`node tools/secret-scan.mjs --history`')
+    assert.equal(r.ok, true)
+    assert.deepEqual(r.value, {
+      path: 'node tools/secret-scan.mjs --history',
+      script: 'tools/secret-scan.mjs',
+      argv: ['tools/secret-scan.mjs', '--history'],
+    })
+  })
+
+  it('accepts a script with no flags, and one under scripts/', () => {
+    assert.equal(parseDeclaration('node tools/root-entries.mjs').ok, true)
+    assert.equal(parseDeclaration('node scripts/ci-checks.mjs').ok, true)
+  })
+
+  it('refuses any interpreter but node, and says which one it saw', () => {
+    for (const cmd of ['bash tools/x.mjs', 'npm run regen', 'sh -c "node tools/x.mjs"', './tools/x.mjs']) {
+      const r = parseDeclaration(cmd)
+      assert.equal(r.ok, false, cmd)
+      assert.match(r.reason, /the only interpreter this tool runs is/)
+    }
+  })
+
+  it('refuses a traversal by shape, not by absence', () => {
+    assert.equal(SCRIPT_SHAPE.test('tools/../../etc/evil.mjs'), false)
+    const r = parseDeclaration('node tools/../../etc/evil.mjs')
+    assert.equal(r.ok, false)
+    assert.match(r.reason, /no `\.\.` segment/)
+  })
+
+  it('refuses a script outside tools/ and scripts/, and a non-.mjs script', () => {
+    assert.equal(parseDeclaration('node ursa-major/dist/ursa.cjs').ok, false)
+    assert.equal(parseDeclaration('node /etc/passwd').ok, false)
+    assert.equal(parseDeclaration('node tools/evil.sh').ok, false)
+  })
+
+  it('refuses an argument that is not a bare long flag, so no argument can carry data', () => {
+    for (const bad of [
+      'node tools/secret-scan.mjs --out /etc/passwd',
+      'node tools/secret-scan.mjs --out=/etc/passwd',
+      'node tools/secret-scan.mjs tools/other.mjs',
+      'node tools/secret-scan.mjs -r',
+      'node tools/secret-scan.mjs --history; rm -rf /',
+      'node tools/secret-scan.mjs --history && curl http://example.com',
+      'node tools/secret-scan.mjs $(whoami)',
+    ]) {
+      const r = parseDeclaration(bad)
+      assert.equal(r.ok, false, bad)
+      assert.match(r.reason, /only bare long flags/)
+    }
+  })
+
+  it('refuses node with no script, and an empty declaration', () => {
+    assert.match(parseDeclaration('node').reason, /no script/)
+    assert.match(parseDeclaration('``').reason, /is empty/)
+  })
+
+  it('FLAG_SHAPE takes no value and no short form', () => {
+    assert.equal(FLAG_SHAPE.test('--history'), true)
+    assert.equal(FLAG_SHAPE.test('--no-run'), true)
+    assert.equal(FLAG_SHAPE.test('--Today'), false)
+    assert.equal(FLAG_SHAPE.test('--today=1'), false)
+    assert.equal(FLAG_SHAPE.test('-h'), false)
+  })
+})
+
+describe('declarationsIn', () => {
+  it('reads a declaration only from a list item at the start of a line', () => {
+    const inline = 'and we should Recheck: `node tools/secret-scan.mjs --history` one day'
+    assert.deepEqual(declarationsIn(inline).accepted, [])
+    const item = '- Recheck: `node tools/secret-scan.mjs --history`'
+    assert.equal(declarationsIn(item).accepted.length, 1)
+  })
+
+  it('keeps every refusal with its reason instead of dropping it', () => {
+    const { accepted, refused } = declarationsIn('- Recheck: `bash tools/x.mjs`\n- Recheck: `node tools/secret-scan.mjs`')
+    assert.equal(accepted.length, 1)
+    assert.equal(refused.length, 1)
+    assert.match(refused[0].reason, /the only interpreter/)
+  })
+
+  it('de-duplicates two declarations of the same command', () => {
+    const text = '- Recheck: `node tools/secret-scan.mjs --history`\n- Recheck: node tools/secret-scan.mjs --history'
+    assert.equal(declarationsIn(text).accepted.length, 1)
+  })
+})
+
+describe('probePlan: a declaration outranks an inference', () => {
+  it('measures on the declaration and ignores the paths the prose mentions', () => {
+    const text = '- What: `tools/root-entries.test.mjs` is where this lives\n'
+      + '- Recheck: `node tools/secret-scan.mjs --history`'
+    const plan = probePlan(text, isTracked)
+    assert.equal(plan.basis, 'declared')
+    assert.deepEqual(plan.probes, [
+      { path: 'node tools/secret-scan.mjs --history', argv: ['tools/secret-scan.mjs', '--history'] },
+    ])
+  })
+
+  it('falls back to inference with basis inferred, and to none with neither', () => {
+    assert.equal(probePlan('`tools/root-entries.test.mjs`', isTracked).basis, 'inferred')
+    assert.equal(probePlan('- What: the host disk is full', isTracked).basis, 'none')
+  })
+
+  it('a declared script nobody tracks is a refusal, not a silent downgrade', () => {
+    const text = '`tools/root-entries.test.mjs`\n- Recheck: `node tools/invented/by-prose.mjs`'
+    const plan = probePlan(text, isTracked)
+    assert.equal(plan.basis, 'inferred')
+    assert.equal(plan.refused.length, 1)
+    assert.match(plan.refused[0].reason, /git does not track in this clone/)
+  })
+
+  it('an inferred probe carries --test and a declared one does not', () => {
+    assert.deepEqual(
+      probePlan('`tools/root-entries.test.mjs`', isTracked).probes[0].argv,
+      ['--test', 'tools/root-entries.test.mjs'],
+    )
+  })
+})
+
+describe('classifyEntry and report over declarations', () => {
+  const declared = (result) => classifyEntry(
+    entry('- Recheck: `node tools/secret-scan.mjs --history`'),
+    ev(new Map([['node tools/secret-scan.mjs --history', result]])),
+  )
+
+  it('keys the result map on the command line, so the report names what ran', () => {
+    const v = declared(true)
+    assert.equal(v.disposition, 'symptom-cleared')
+    assert.equal(v.basis, 'declared')
+    assert.deepEqual(v.probes, [{ path: 'node tools/secret-scan.mjs --history', passed: true }])
+    assert.match(v.why, /on the command the entry itself declares/)
+  })
+
+  it('a failing declared command holds', () => {
+    assert.equal(declared(false).disposition, 'holds')
+  })
+
+  it('prints the basis marker, the refusal, and the declared count', () => {
+    const verdicts = [
+      declared(true),
+      classifyEntry(entry('- Recheck: `bash tools/x.mjs`'), ev()),
+    ]
+    const lines = report(verdicts, { ledgerPath: 'docs/ideas.md', today: TODAY })
+    const text = lines.join('\n')
+    assert.match(text, /^symptom-cleared\s+\d+d old\s+\[declared\]/m)
+    assert.match(text, /^unverifiable\s+\d+d old\s+\[none\]/m)
+    assert.match(text, /declaration refused: "`bash tools\/x\.mjs`" starts with `bash`/)
+    assert.match(text, /Of those, 1 declare the command that decides them/)
+    assert.match(text, /1 declaration\(s\) were refused by the allowlist/)
+  })
+
+  it('basisTally agrees with the marker it prints', () => {
+    assert.deepEqual(
+      basisTally([declared(true), classifyEntry(entry('`tools/root-entries.test.mjs`'), ev())]),
+      { declared: 1, inferred: 1, none: 0 },
+    )
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Exit 2, which is a refusal and not a finding.
+//
+// WHY THIS BLOCK EXISTS AT ALL. The first version of this module read every
+// non-zero exit as "the condition still holds". The first declared command
+// this seat reached for, `node tools/secret-scan.mjs --history --no-baseline`
+// on the two 2026-10-27 history entries, exits 2 in the clone a seat is
+// handed, because the clone is shallow and single-branch and the scanner
+// refuses rather than walking a truncated graph. Under the first version the
+// report would have printed `holds` and the owner would have read a refusal
+// as a live finding.
+
+describe('exit 2 is a refusal, not a finding', () => {
+  const withOutcome = (outcome) => classifyEntry(
+    entry('- Recheck: `node tools/secret-scan.mjs --history`'),
+    ev(new Map([['node tools/secret-scan.mjs --history', outcome]])),
+  )
+
+  it('does not hold and does not clear', () => {
+    const v = withOutcome('cannot-answer')
+    assert.equal(v.disposition, 'unverifiable')
+    assert.match(v.why, /refused to answer in this clone at exit 2/)
+    assert.match(v.why, /not the same as the condition having cleared/)
+    assert.match(v.why, /make the probe answerable here, not to re-read the entry/)
+  })
+
+  it('a refusal alongside a pass is still not a clear', () => {
+    const v = classifyEntry(
+      entry('- Recheck: `node tools/secret-scan.mjs --history`\n- Recheck: `node scripts/ci-checks.mjs`'),
+      ev(new Map([
+        ['node tools/secret-scan.mjs --history', 'cannot-answer'],
+        ['node scripts/ci-checks.mjs', true],
+      ])),
+    )
+    assert.equal(v.disposition, 'unverifiable')
+    assert.match(v.why, /refused to answer/)
+  })
+
+  it('a real failure alongside a refusal still holds, because one of them is a finding', () => {
+    const v = classifyEntry(
+      entry('- Recheck: `node tools/secret-scan.mjs --history`\n- Recheck: `node scripts/ci-checks.mjs`'),
+      ev(new Map([
+        ['node tools/secret-scan.mjs --history', 'cannot-answer'],
+        ['node scripts/ci-checks.mjs', false],
+      ])),
+    )
+    assert.equal(v.disposition, 'holds')
+    assert.equal(v.probes.filter((p) => p.passed === false).length, 1)
+  })
+
+  it('normalizeOutcome reads an unrecognised value as a refusal, never as a pass', () => {
+    assert.equal(normalizeOutcome(true), true)
+    assert.equal(normalizeOutcome(false), false)
+    assert.equal(normalizeOutcome('cannot-answer'), 'cannot-answer')
+    for (const odd of [undefined, null, 0, 1, 'pass', {}]) {
+      assert.equal(normalizeOutcome(odd), 'cannot-answer', String(odd))
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// A skip is not a pass, which is the second half of the same lesson.
+//
+// WHAT THIS CHANGED IN THE PUBLISHED NUMBER. Run against this repository's own
+// ledger on 2026-11-09, the report said 6 entries' every named probe passes.
+// Four of those six were real; two were suites that skipped one subtest each
+// and exited 0, and for `tools/root-entries.test.mjs` the skipped subtest is
+// the entry's whole subject. After this change the same run prints 4 and names
+// the other two as unmeasured.
+
+describe('exit 0 with a skipped subtest is not a clear', () => {
+  const withOutcome = (outcome) => classifyEntry(
+    entry('- What: `tools/root-entries.test.mjs` is red on a complete clone'),
+    ev(new Map([['tools/root-entries.test.mjs', outcome]])),
+  )
+
+  it('does not clear and does not hold', () => {
+    const v = withOutcome('incomplete')
+    assert.equal(v.disposition, 'unverifiable')
+    assert.match(v.why, /exited 0 while skipping at least one of its own subtests/)
+    assert.match(v.why, /no clear can be read from it/)
+    assert.match(v.why, /run it directly and read which subtest skipped/)
+  })
+
+  it('is distinct from a refusal, because the two have different repairs', () => {
+    assert.notEqual(withOutcome('incomplete').why, withOutcome('cannot-answer').why)
+  })
+
+  it('an outright refusal outranks a skip, and a real failure outranks both', () => {
+    const two = (a, b) => classifyEntry(
+      entry('- Recheck: `node tools/secret-scan.mjs --history`\n- Recheck: `node scripts/ci-checks.mjs`'),
+      ev(new Map([
+        ['node tools/secret-scan.mjs --history', a],
+        ['node scripts/ci-checks.mjs', b],
+      ])),
+    )
+    assert.match(two('cannot-answer', 'incomplete').why, /refused to answer/)
+    assert.equal(two(false, 'incomplete').disposition, 'holds')
+    assert.match(two('incomplete', true).why, /skipping at least one of its own subtests/)
+  })
+
+  it('normalizeOutcome keeps incomplete distinct from a refusal', () => {
+    assert.equal(normalizeOutcome('incomplete'), 'incomplete')
+    assert.equal(normalizeOutcome('skipped'), 'cannot-answer')
   })
 })

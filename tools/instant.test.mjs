@@ -6,6 +6,7 @@ import { partition } from './instant-sweep.mjs'
 import {
   timestampShape, parseInstant, parseEpochSeconds, toUtcInstant,
   compareInstants, isAfter, isBefore, utcDay, sortByInstant,
+  parseDay, compareDays, isDayAfter, isDayBefore, sortByDay,
   textualTimestampComparisons
 } from './instant.mjs'
 
@@ -40,10 +41,91 @@ test('a zoneless timestamp is refused rather than read as UTC', () => {
   assert.equal(Number.isNaN(Date.parse('2026-11-02T04:34:57')), false)
 })
 
-test('a calendar day is not an instant', () => {
-  assert.equal(timestampShape('2026-11-02'), 'invalid')
+test('a calendar day is not an instant, and as of 2026-11-09 it is not invalid either', () => {
+  // The classification changed and the BEHAVIOUR did not. That is the whole
+  // point of the change: a bare day gets its own name so a caller can route
+  // on it, while every instant function goes on refusing it.
+  assert.equal(timestampShape('2026-11-02'), 'day')
   assert.equal(parseInstant('2026-11-02'), null)
   assert.equal(utcDay('2026-11-02'), null)
+})
+
+test('the contract the ExO seat pinned against this module still holds, on purpose', () => {
+  // tools/seat/read-dates.mjs asserts these three answers and says that the
+  // day they change is the day its private `compareDays` is deleted. They do
+  // not change. The repair shipped today is a new function beside these, not a
+  // loosening of them, so that test stays green and the deletion is a choice
+  // somebody makes rather than a failure that forces it. Said here so a future
+  // reader of this module cannot conclude the pin was simply forgotten.
+  assert.equal(compareInstants('2026-11-09', '2026-11-15'), null)
+  assert.equal(isAfter('2026-11-15', '2026-11-09'), false)
+  assert.equal(isBefore('2026-11-09', '2026-11-15'), false)
+})
+
+test('parseDay refuses an instant, so the projection has to be written out loud', () => {
+  assert.equal(parseDay('2026-11-02'), Date.UTC(2026, 10, 2))
+  assert.equal(parseDay(API), null)
+  assert.equal(parseDay(GIT), null)
+  assert.equal(parseDay('2026-11-02T04:34:57'), null)
+  assert.equal(parseDay(null), null)
+  assert.equal(parseDay('2026-11-2'), null)
+  // The bridge, which is the supported way to get from an instant to a day.
+  assert.equal(compareDays(utcDay(GIT), utcDay('2026-11-01T22:00:00Z')), 1)
+})
+
+test('parseDay refuses a day that does not exist, which Date.parse does not', () => {
+  // Date.parse answers for both of these: it rolls February 30 forward to
+  // March 2 and tells nobody. That silent roll is the only reason parseDay
+  // round-trips instead of comparing text.
+  assert.equal(Number.isNaN(Date.parse('2026-02-30')), false)
+  assert.equal(parseDay('2026-02-30'), null)
+  assert.equal(parseDay('2026-13-01'), null)
+  assert.equal(parseDay('2026-00-10'), null)
+  // Date.UTC(0, 0, 1) is 1900-01-01, a legacy two-digit-year mapping, so this
+  // would otherwise have been placeable 1900 years from where it was written.
+  assert.equal(parseDay('0000-01-01'), null)
+  // A real leap day stays real.
+  assert.equal(parseDay('2028-02-29'), Date.UTC(2028, 1, 29))
+  assert.equal(parseDay('2026-02-29'), null)
+})
+
+test('the day comparators order days and refuse instants in both directions', () => {
+  assert.equal(compareDays('2026-11-09', '2026-11-15'), -1)
+  assert.equal(compareDays('2026-11-15', '2026-11-09'), 1)
+  assert.equal(compareDays('2026-11-09', '2026-11-09'), 0)
+  assert.equal(isDayAfter('2026-11-15', '2026-11-09'), true)
+  assert.equal(isDayBefore('2026-11-09', '2026-11-15'), true)
+  // Symmetric refusal: the instant functions refuse a day, these refuse an
+  // instant, and neither coerces. An unplaceable side is absent, not true.
+  assert.equal(compareDays(API, '2026-11-09'), null)
+  assert.equal(isDayAfter(API, '2026-11-09'), false)
+  assert.equal(isDayBefore(API, '2026-11-09'), false)
+  assert.equal(isDayAfter('2026-11-09', API), false)
+  assert.equal(isDayBefore('2026-11-09', API), false)
+})
+
+test('sortByDay is the repair for the finding that produced the day family', () => {
+  // The shape the lint caught in tools/seat/read-dates.mjs: a sort over a
+  // field named `date` that holds bare days.
+  const rows = [
+    { entry: 'c', date: '2026-11-15' },
+    { entry: 'a', date: '2026-10-27' },
+    { entry: 'b', date: '2026-11-09' }
+  ]
+  assert.deepEqual(sortByDay(rows, (r) => r.date).map((r) => r.entry), ['a', 'b', 'c'])
+  // sortByInstant would have refused every row and left the array untouched,
+  // which is the silent non-ordering the instant repair produces on this class.
+  assert.deepEqual(sortByInstant(rows, (r) => r.date).map((r) => r.entry), ['c', 'a', 'b'])
+})
+
+test('sortByDay is stable and keeps unplaceable rows last rather than dropping them', () => {
+  const rows = [
+    { id: 'u1', date: API },
+    { id: 'a', date: '2026-10-27' },
+    { id: 'u2', date: '2026-02-30' },
+    { id: 'b', date: '2026-10-27' }
+  ]
+  assert.deepEqual(sortByDay(rows, (r) => r.date).map((r) => r.id), ['a', 'b', 'u1', 'u2'])
 })
 
 test('text comparison and instant comparison disagree on the real pair', () => {
@@ -135,6 +217,45 @@ test('the lint catches localeCompare, which is the sort form of the same defect'
   assert.equal(found.length, 1)
   assert.equal(found[0].code, 'TEXTUAL_ORDER')
   assert.match(found[0].repair, /sortByInstant/)
+})
+
+test('the TEXTUAL_ORDER repair names both value classes, because the lint cannot see which', () => {
+  const [order] = textualTimestampComparisons('if (comment.createdAt < genAt) continue')
+  assert.equal(order.code, 'TEXTUAL_ORDER')
+  // The instant branch, which was all this line used to say.
+  assert.match(order.repair, /isAfter\/isBefore\/compareInstants/)
+  // The day branch, which is the repair the ExO seat's register field needed
+  // and could not find on 2026-11-09.
+  assert.match(order.repair, /isDayAfter\/isDayBefore\/compareDays/)
+  // And the reason, so a reader does not have to try the wrong one to find out.
+  assert.match(order.repair, /refuse a day/)
+
+  const [sorted] = textualTimestampComparisons('commits.sort((a, b) => a.authoredAt.localeCompare(b.authoredAt))')
+  assert.match(sorted.repair, /sortByInstant\(rows, key\)/)
+  assert.match(sorted.repair, /sortByDay\(rows, key\)/)
+})
+
+test('the shape that defeats evidence-based narrowing, as code rather than as a comment', () => {
+  // instant.mjs's lint docblock explains why TEXTUAL_ORDER's repair is not
+  // narrowed to one branch by reading the line for a day literal. This is the
+  // counter-example it refers to, kept here because written into that docblock
+  // it is a finding of the lint itself.
+  const line = "const stale = a.createdAt < b.createdAt && a.date !== '2026-11-09'"
+  const [found] = textualTimestampComparisons(line)
+  // A genuine instant comparison. The day literal on the line is incidental,
+  // so narrowing on it would print the day repair for an instant defect.
+  assert.equal(found.code, 'TEXTUAL_ORDER')
+  assert.match(found.repair, /isAfter\/isBefore\/compareInstants/)
+  assert.match(found.repair, /isDayAfter\/isDayBefore\/compareDays/)
+})
+
+test('a site repaired with the day family is clean, which is what makes the repair followable', () => {
+  // If this fails, the lint reports the exact line its own repair text
+  // prescribes, and the only way to obey it is to suppress the lint.
+  assert.deepEqual(textualTimestampComparisons('rows.sort((a, b) => compareDays(a.date, b.date))'), [])
+  assert.deepEqual(textualTimestampComparisons('const asc = sortByDay(rows, (r) => r.date)'), [])
+  assert.deepEqual(textualTimestampComparisons('if (isDayAfter(entry.date, now.date)) return'), [])
+  assert.deepEqual(textualTimestampComparisons('const ms = parseDay(field.date)'), [])
 })
 
 test('the lint does not fire on arithmetic, on counts, or on a repaired call site', () => {

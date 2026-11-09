@@ -248,8 +248,29 @@ const ACTIVE = () => {
   const el = document.activeElement
   if (!el || el === document.body || el === document.documentElement) return null
   const r = el.getBoundingClientRect()
+  /* A stop the enumeration never declared has no probe, so until
+     2026-11-09 the walk identified it by its tag and its coordinates, and
+     the walk stops when an identity repeats because that is how a closed
+     ring is detected. The box is VIEWPORT-relative and Tab scrolls each
+     stop into view, so two undeclared stops of the same tag on a tall page
+     land at the same x,y. On this site's home page at 390 the first and
+     third <pre> both land at 49,401 while sitting 694px apart in the
+     document, measured this run. The walk read the third as the first
+     returning, stopped one stop early, and reported the copy button behind
+     it as a control the keyboard cannot reach. It is reachable.
+
+     So the identity is stamped on the element on first sight instead of
+     computed from where it happens to be. Two elements cannot share it,
+     and one element keeps it however far the page scrolls under it. L61. */
+  let mark = el.getAttribute('data-focus-walk')
+  if (mark === null) {
+    mark = String(Number(document.documentElement.dataset.focusWalk ?? 0))
+    document.documentElement.dataset.focusWalk = String(Number(mark) + 1)
+    el.setAttribute('data-focus-walk', mark)
+  }
   return {
     probe: el.hasAttribute('data-focus-probe') ? Number(el.getAttribute('data-focus-probe')) : null,
+    mark: Number(mark),
     tag: el.tagName.toLowerCase(),
     box: { x: r.x, y: r.y, w: r.width, h: r.height },
     matchesFocusVisible: el.matches(':focus-visible'),
@@ -355,7 +376,10 @@ for (const [vpName, width, height] of VPS) {
     for (let n = 0; n < MAX_STOPS; n++) {
       const act = await page.evaluate(ACTIVE)
       if (!act) break
-      const id = act.probe !== null ? `p${act.probe}` : `${act.tag}@${Math.round(act.box.x)},${Math.round(act.box.y)}`
+      // `u<mark>` and not a coordinate: see the note in ACTIVE. A repeat
+      // here now means the keyboard genuinely came back to a stop it had
+      // already been on, which is the only thing that should end the walk.
+      const id = act.probe !== null ? `p${act.probe}` : `u${act.mark}`
       if (seen.has(id)) break // the ring closed
       seen.add(id)
       reached.push({ stop: n, id, ...act })

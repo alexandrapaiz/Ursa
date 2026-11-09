@@ -1,0 +1,8 @@
+tall.html
+  ok    11. the DOM offers three buttons
+  FAIL  11. the walk runs to the end of the page, six stops  got 2
+  FAIL  11. and no button is reported unreachable  got ["copy 2","copy 3"]
+  FAIL  11. all three undeclared pre stops get a row, not one  got ["UNDECLARED"]
+  FAIL  11. all three buttons are photographed and ringed  got [["copy 1","ok"]]
+  FAIL  11. the three stops that collided are three identities  got [0]
+5 assertion(s) failed

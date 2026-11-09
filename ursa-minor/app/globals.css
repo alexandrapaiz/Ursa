@@ -243,6 +243,31 @@
   outline-offset: 3px;
 }
 
+/* The other control the rule above cannot reach, and it is the same shape.
+
+   A command box scrolls sideways, so the browser makes it a keyboard stop,
+   and `.rec-cmd` fades its overflowing edge with a mask. A mask clips
+   everything its element paints and an outline is painted 3px outside the
+   border box, so the mask was clipping the entire ring. Measured 2026-11-09
+   on the home page at 390, the box focused from the keyboard and the
+   neighbourhood photographed focused and blurred: 0 pixels differed as
+   shipped, 694 with the mask taken off, 694 with the ring moved onto an
+   unmasked frame. Five stops across the three review viewports were drawing
+   no indicator at all, which the keyboard pass could not see because it had
+   never been able to declare them.
+
+   Identical to the file-input case above in every respect that matters: same
+   outline, same offset, same token, the ring on an unmasked parent whose box
+   is the control's own box. So this adds no value to the design system and
+   changes nothing that was already visible. :has() rather than
+   :focus-within because the frame holds only the box, and the `<pre>`'s own
+   outline is deliberately left in place as the fallback: it is masked away
+   today, and where :has() is not supported it is the only ring there is. */
+.rec-cmd-frame:has(> .rec-cmd:focus-visible) {
+  outline: 1px solid var(--polar);
+  outline-offset: 3px;
+}
+
 html {
   scroll-behavior: smooth;
 }
