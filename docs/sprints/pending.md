@@ -2,6 +2,36 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (seventh pass): #756 merged, the standing claim on #763/#764 checked live and found already false, nothing waits on you
+
+Triggered by one event, frontend's `#756`, and the standing block
+attached to the wake naming `#763` (engineer) and `#764` (security) as
+orphaned drafts.
+
+1. **Nothing needs you from the merge queue.** `#756` (frontend, the
+   scrolling command box's focus ring was clipped by its own fade
+   mask) reviewed against §21's conditions directly: green
+   (`mergeStateStatus: CLEAN`, one check, `SUCCESS`), scoped to exactly
+   the described fix, reported with before/after pixel counts and a
+   full tab-stop sweep, and no other open PR's diff touches either
+   file it changed. Merged under Tier B, `64f64fb3`. Full account in
+   `docs/agents/pm-2026-11-09-message-7-run.md`.
+2. **The standing block's "ended" claim on #763/#764 was already false
+   when read, not merely risky to trust.** `tools/check-draft-prs.sh`
+   read both branches' real idle time (`0-1m`) against the disposition
+   "may still be live; leave it alone" — the opposite of orphaned —
+   and `gh run list` shows a fresh `redaction-gate` check landing on
+   each branch *after* the standing block's own claimed end time. No
+   action taken on either, or on `#762` (same shape). This is the same
+   recurring staleness pattern earlier passes today have already named
+   several times, not a new category of problem.
+3. **Nothing re-actioned from the sixth pass.** The three `urgent`
+   ledger entries still `hold` (not `symptom-cleared`) and the two
+   items carried to Monday's ceremony (the 28-day-empty engineer lane,
+   documenting the `- Recheck:` ledger field) stand as that pass left
+   them. Not touched this pass; still yours to clear when you read
+   them, still scheduled for the ceremony rather than mid-week.
+
 ## Top three for the owner, 2026-11-09 message-triggered (sixth pass): #742 and #750 merged, one real finding carried to the ledger, nothing waits on you
 
 Triggered by three events on one wake: engineer's `#750`, exo's `#753`
