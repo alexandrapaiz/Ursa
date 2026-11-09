@@ -369,6 +369,29 @@ export function ratioFault(c) {
   };
 }
 
+/**
+ * The exit code a caller whose GROUND code is 2 should use for this receipt.
+ *
+ * WHY THE TWO NON-ZERO CODES ARE NOT INTERCHANGEABLE HERE. Both `page.mjs` and
+ * `measure-claims.mjs` declare "exit 1 the window was not covered" and "exit 2
+ * no live board to measure", and both ended with `coverage.complete ? 0 : 1`,
+ * which can only ever reach the first of the two. An unanswered board is
+ * literally a window that was not covered, so the line was not wrong; it was
+ * unable to say the more specific thing it had already promised to say. Exit 1
+ * sends a reader to the pager's arithmetic and to this repository. NO_REACH is
+ * the one incomplete reason whose repair is in neither.
+ *
+ * `bypass.mjs` is deliberately not a caller of this: its own header reserves 3
+ * for NO VERDICT, so it already routes every incomplete receipt to a GROUND
+ * code and has nothing to choose between.
+ *
+ * @param {Coverage} coverage @returns {0 | 1 | 2}
+ */
+export function coverageExit(coverage) {
+  if (coverage?.complete) return 0
+  return coverage?.incomplete_reason === 'NO_REACH' ? 2 : 1
+}
+
 /** @typedef {object} Coverage */
 
 if (process.argv[1] === new URL(import.meta.url).pathname) {
@@ -392,5 +415,5 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
     const rf = ratioFault(coverage);
     console.log(rf ? `\n${rf.code}: ${rf.line}` : '\ncomplete: a share computed over these rows is a share of the whole window');
   }
-  process.exit(coverage.complete ? 0 : 1);
+  process.exit(coverageExit(coverage));
 }
