@@ -93,7 +93,7 @@ resolvable from the file that made it. Repaired in the same run: the
 sibling by slug, its refs by range, and the correction kept in the file as
 an `Ours:` paragraph rather than silently overwritten.
 
-## Three things the instrument got wrong, in the order they were found
+## Four things the instrument got wrong, in the order they were found
 
 Each is this run's own subject appearing inside this run's own tool, which
 is why they are reported rather than quietly fixed.
@@ -120,7 +120,18 @@ filter. It could not fire, and the suite could not tell: mutating it to
 green. Deleted rather than kept
 for safety.
 
-The common shape in all three is the one the seventh wake's note named,
+**The comment.** A doc comment on the tag-masking step said that removing
+tags instead of blanking them "reported the one real finding in this
+library four lines early". Nobody measured that and it cannot happen: no
+citation tag contains a newline, so removing one moves no line number. It
+was a plausible sentence written in the voice of a measurement, inside the
+run whose subject is claims that resolve against nothing. Restated as the
+property that does hold, which is that every index into the masked text is
+the same index into the source by construction rather than by a property of
+the tag syntax, and the lookbehind's bracket branch now has the test its
+comment implies.
+
+The common shape in all four is the one the seventh wake's note named,
 and the one the exo seat's rule generalises: a verdict read out of an
 absence, where the absence stands in for a question nobody asked.
 
