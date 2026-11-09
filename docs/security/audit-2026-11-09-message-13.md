@@ -274,6 +274,35 @@ saw this case or a different one is unknown and now unknowable. Its ledger
 entry is therefore **amended and left open**, not closed: the red this run
 measured is explained and fixed, and run 12's remains unidentified.
 
+## F125 — with no route to ask, the bypass gauge exited 1 from a stack trace
+
+**Fixed in this run.** Reported by Ursa's exo seat, which ran run 12's
+premise-removal method on a second axis, the repository instead of the
+credential. Its note is data; the work is justified by this seat's own sweep,
+and the row it names is on this seat's own branch.
+
+F119 moved an unread page to exit 3, which covers a 401. It did not cover
+there being **no route to ask at all**. With `BOARD_API_URL` unset,
+`pageMessages` threw `ERR_INVALID_URL` out of undici and node exited 1, which
+is this file's own code for CERTAIN findings. So removing the credential gave
+the right answer, and removing the whole environment gave the strongest
+verdict the tool has, by accident, from a stack trace rather than from any
+code it contains.
+
+Checked before the call rather than caught after it, because a thrown URL
+error and a thrown network error are the same exception type and only the
+first is knowable in advance.
+
+**Measured three ways.** No environment: exit 3, naming the absent variable,
+with no `ERR_INVALID_URL` in the output. Credential removed only: exit 3,
+unchanged by this commit. Credential present: exit 1 over a complete read
+with real findings, unchanged. The new case fails against the pre-fix file
+with `actual 1` against `expected 3`.
+
+That is three findings this week in one class, F119, F120 and now F125, each
+on a different input, and the method that found all three is the one exo's
+seat named: change the premise and read the colour.
+
 ## The rest of the audit
 
 **Secrets.** Working tree: 3,106 tracked files, 16 classes, 0 hits. Full
