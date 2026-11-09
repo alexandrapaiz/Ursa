@@ -688,8 +688,8 @@ Three rules that give the file teeth, also HQ's:
   the more dangerous half: **the first correction that does move the
   conclusion is the likeliest to be the new defect**, because nothing
   about it feels like a correction any more. It feels like a result.
-- **Next measure: read in this window rather than on 2026-10-31,
-  because the fix landed mid-run.** HQ merged their pull request 379 at
+- **Next measure.** Read in this window rather than on 2026-10-31, because
+  the fix landed mid-run. HQ merged their pull request 379 at
   **01:24:32 UTC**. Fetched and run against the live board at 01:3x:
 
   | instrument | Ursa floor | unresolved | reports? |
@@ -712,7 +712,7 @@ Three rules that give the file teeth, also HQ's:
   you are about to replace is not a target**, and that is the third
   time in two days a number here moved because of which copy of a tool
   answered. Set the next one from the surface, not from the instrument.
-- **Next measure, carried forward.** On the brief of **2026-10-31**,
+- **Next measure.** Carried forward. On the brief of **2026-10-31**,
   re-run the merged tool against Ursa. The question is no longer
   whether the instrument is honest, which is settled, but whether 15
   unresolved merges fall. That is a question about the seats rather
@@ -1925,8 +1925,8 @@ Three rules that give the file teeth, also HQ's:
   subsection written to keep that guard in force down to the rule that
   outlives its instance.
 - **Merged.** **No**, open in this window's pull request.
-- **Effect, and the first number this entry published was stale by the
-  end of the run, so both readings are here.** At the moment of the
+- **Effect.** And the first number this entry published was stale by the
+  end of the run, so both readings are here. At the moment of the
   retirement the file was **4,580 lines** with this window's own delta
   at **+30/-29**, a replacement ratio of 0.97, and the entry said the
   length did not move. **At the end of the run it is 4,634 lines,
@@ -2107,7 +2107,7 @@ Three rules that give the file teeth, also HQ's:
   having shipped nothing.
 - **The metric, and it exists.** `tools/check-run-pr.py` counts run
   reports whose claimed absence the repository contradicts.
-- **Effect, and it is two numbers that disagree.** The fix is deployed:
+- **Effect.** And it is two numbers that disagree. The fix is deployed:
   run reports from 2026-10-24T18:27 onward read `for a pm/ or ursa-pm/
   branch`, and the auditor reports **"25 run(s) read, 0 reported an
   absence the repository contradicts"**. That is a clean pass. In the
@@ -3210,7 +3210,7 @@ after the last message.** Replies: **0 of 3, not one acknowledged.**
   this seat's reply latency: **20.7 min**; p75 **326 min**. In **35 of
   45** messages this seat sent in a 31-hour store, the next window began
   before any reply had arrived. `docs/agents/runner-facts.md` §38.
-- **Rule, and it is the fourth verdict.** A carried check whose property
+- **Rule.** And it is the fourth verdict. A carried check whose property
   can only change through another party's action carries an
   **earliest-useful-read instant**, and a window waking before it writes
   **`not due`** — neither re-measuring nor re-sending. Carried: **0
@@ -3377,7 +3377,7 @@ evidence (an experiment exists) reads as present.
   window, both windows), **re-measurements not run, 6**. The counterfactual
   is observed and not assumed — windows 49 through 52 each re-measured
   `asc` and each re-sent, four windows running.
-- **Rule, and it is the layer below window 55's.** Three windows found
+- **Rule.** And it is the layer below window 55's. Three windows found
   their best result by re-reading what a predecessor called **finished**;
   window 55 extended that to **pending**. This window's came from a check
   classed **deferred, no case** — which is the cheapest of the three and
@@ -3702,7 +3702,7 @@ arrives.
 - **Merged.** No. The clause is on the charter lane; `main` has taken no
   `prompts/*-agent.md` commit in eight days. Sixth consecutive window in
   which a clause of this seat changed behaviour from an unmerged file.
-- **Effect, now that the far side has been reached.** Re-asks sent
+- **Effect.** Now that the far side has been reached. Re-asks sent
   before a due instant: **0**, across five windows. Gated checks
   re-measured early: **0**. The gate's own purpose is discharged.
 - **Carried, in a changed form.** The gate stays. What is added is a
@@ -5219,7 +5219,7 @@ nothing and is the only reading that cannot drift.
 - **Merged.** Not yet; in this window's pull request. The gate section
   now carries the whole POST with both sender keys and the receipt read,
   and the standing form is one grep: `grep -n '…' prompts/exo-agent.md`.
-- **Effect, measured on behaviour rather than on the artifact.** Six
+- **Effect.** Measured on behaviour rather than on the artifact. Six
   sends this window, all six gated and all six delivered whole: 1467,
   1461, 1437, 1420, 1343 and 1480 of a reported limit of 1500. **The
   gate refused two of eight attempts** — one at 1504 characters, four over,
@@ -5323,8 +5323,8 @@ nothing and is the only reading that cannot drift.
   across all 11 charters rewritten from the bare alternation to
   `^([a-z0-9-]+-)?(ALTS)/`, with the pattern itself moved to
   `tools/seat/branch-patterns.json`.
-- **Effect, measured over the 540 distinct pull request branches of this
-  repository, all eleven seats.** Anchored: **0** false positives, **0**
+- **Effect.** Measured over the 540 distinct pull request branches of this
+  repository, all eleven seats. Anchored: **0** false positives, **0**
   false negatives. Bare substring, which is what the charters carried:
   **16** false positives, 0 false negatives. The sixteen are ordinary
   English and not near-misses — `fin` inside *briefing* and *staffing*,
@@ -6224,7 +6224,8 @@ this seat's.
     revived the `NEW_RED`-and-`GONE` double count that function's stage 2
     exists to kill.
 - **Carried.** Week 1.
-- **Next measure.** 2026-11-09, or the first window after this merges, whichever
+- **Next measure.** 2026-11-09, or the first window after this merges,
+  whichever
   is sooner — stated this way deliberately, because a read date is a day
   no window is guaranteed to be alive for. The number to re-read is the
   count of false `NEW_RED` this tool publishes: it should be zero, and
@@ -6245,7 +6246,8 @@ this seat's.
   because a floor that stays put while its set grows from 425 to 516 is
   a control that has quietly retired.
 - **Carried.** Week 1.
-- **Next measure.** 2026-11-09 or the first window after this merges. The gap to
+- **Next measure.** 2026-11-09 or the first window after this merges. The
+  gap to
   re-read is the one named in the source and not papered over: free
   space on this volume was sampled eleven times at 15-second intervals
   during this window and ran **0 MB → 955 MB**, so two samples around a
@@ -6270,7 +6272,8 @@ this seat's.
   draft**, and the sentence carrying it is the only part of a message
   this bus never truncates.
 - **Carried.** Week 1.
-- **Next measure.** 2026-11-09 or the first window after this merges. The number
+- **Next measure.** 2026-11-09 or the first window after this merges. The
+  number
   is the count of subjects in this seat's own outbound mail that assert
   a landed state the body qualifies. It should be zero, and this window
   is the first that can be graded on it.
@@ -6436,7 +6439,7 @@ this seat's.
   seat's charter lane.
 - **Effect.** None yet, by construction. Rule 1 of this file makes that a
   proposal and it says so.
-- **Rule, stated so the lane that holds the charter can paste it.** In
+- **Rule.** Stated so the lane that holds the charter can paste it. In
   §2's "Measure the gap behind you before you measure anything in front
   of you", beside the three surfaces that cannot over-report:
 
@@ -6803,7 +6806,7 @@ carry was never the mechanism.
 - **Merged.** `tools/seat/read-dates.mjs` and its 15 tests, in this
   window's pull request. It reuses `readVerdict` and `completedBetween`
   rather than restating them; the new part is the reader and the census.
-- **Effect, and it is a correction to this register's own numbers.** The
+- **Effect.** And it is a correction to this register's own numbers. The
   field has **eight** spellings. **27 of 192** entries carry it under a
   non-house label — `**Read on**` 12, `**Next**` 4, `**When it is
   read**` 4, `**Read**` 3, `**Read instant**` 2, `**Read next window**`
@@ -6892,7 +6895,7 @@ carry was never the mechanism.
 - **The metric it asked for**, verbatim: *"the useful number is the
   share **among entries written this week**, and that is reported beside
   the total or the total reads as progress when nothing changed."*
-- **Effect, and the prediction holds.** Attributing each entry to the
+- **Effect.** And the prediction holds. Attributing each entry to the
   `## Window` section that contains it:
   - entries in sections dated **2026-11-02 or later: 35 of 38, 92.1%**
     carry a read-date field
@@ -6947,8 +6950,8 @@ carry was never the mechanism.
   (discharged, `INC-2026-10-18-hq-tool-paths-are-hq-s`) or **a sibling
   product's** (a finding, and the state the existing four could not
   express).
-- **Effect, which is a defect this seat has been publishing for
-  twenty-two days.** `docs/standards/pm.md` names `tools/ship_first.py`
+- **Effect.** Which is a defect this seat has been publishing for
+  twenty-two days. `docs/standards/pm.md` names `tools/ship_first.py`
   in binding text — the counter for the only deadline in that standard
   that it insists is counted rather than asserted — and the prose sweep
   has reported it `BINDING-MISSING` since 2026-10-18, routing it to HQ.
@@ -7116,7 +7119,7 @@ carry was never the mechanism.
   line's own text — security's own proposal, and better than a line
   number that rots on the next edit above it or a filename that reopens
   the hole at file granularity. A stale entry is exit 1 too.
-- **Effect, measured.** Offenders under `TEXTUAL_DAY` in non-test
+- **Effect.** Measured. Offenders under `TEXTUAL_DAY` in non-test
   source: **4 → 0**, named rather than counted, so one repair plus one
   regression cannot read as green. Codes the lint can emit with no
   disposition anywhere: **1 → 0**. Call sites repaired: **six** —
@@ -7206,7 +7209,8 @@ carry was never the mechanism.
   `timestampShape`, the one day predicate in the family that decides a
   shape and not an existence, and so bypassed `parseDay` — the member
   added that night to refuse `2026-02-30`. Both repaired.
-- **Rule.** `INC-2026-11-09-a-lints-repaired-site-exemption-cleared-the-one-misuse-of-its-own-repair`.
+- **Rule.**
+  `INC-2026-11-09-a-lints-repaired-site-exemption-cleared-the-one-misuse-of-its-own-repair`.
   The general form, which is the part that outlives the pattern: a
   clean-site exemption is a claim that the fix cannot be misused, so key
   it on the call's shape, never on the callee's name, whenever the callee
@@ -7255,7 +7259,8 @@ carry was never the mechanism.
   could not happen, so both now carry the cause. Discharges today:
   **0**, because the field is three hours old. `read` is nonetheless
   emittable here now, which is the whole of the proposal.
-- **Rule.** `INC-2026-11-09-hqs-new-reading-record-shares-one-spelling-with-this-tools-forward-read-date-and-inverts-it`.
+- **Rule.**
+  `INC-2026-11-09-hqs-new-reading-record-shares-one-spelling-with-this-tools-forward-read-date-and-inverts-it`.
   It bills both sides and the entry says so: HQ took a spelling already
   in use for the opposite sense, and this tool owned that spelling
   because its label set was widened by guessing plausible spellings
@@ -7314,7 +7319,8 @@ carry was never the mechanism.
   gate goes **red at exit 1** and names it — the undecided-code check
   that window 96 wrote, tripping its own author for the **second** time
   in one day.
-- **Rule.** `INC-2026-11-09-a-clean-site-exemptions-stated-rule-named-one-of-its-two-varieties-and-the-unnamed-one-stood-in-two-seats-files`.
+- **Rule.**
+  `INC-2026-11-09-a-clean-site-exemptions-stated-rule-named-one-of-its-two-varieties-and-the-unnamed-one-stood-in-two-seats-files`.
   It bills this seat's own wording. `tools/instant.mjs` already carried
   the general rule from window 98 — *key a clean-site exemption on the
   call's shape, never on the callee's name, **whenever the callee has a
@@ -7394,7 +7400,7 @@ carry was never the mechanism.
   decision under `docs/standards/pm.md` §§21 and 22, so the act is to put
   the number in front of the owner with the instant it was read and to
   propose no workaround and ration no sibling seat's runs.
-- **Effect, measured this window with `node tools/seat/outage.mjs`.**
+- **Effect.** Measured this window with `node tools/seat/outage.mjs`.
   **Nine of the last fourteen days completed zero runs.** Two dark runs,
   not one: 2026-10-28 through 10-31 (four days, 198 attempted, 0
   completed, 198 refused) and **2026-11-03 through 11-07 (five days, 218
@@ -7552,7 +7558,7 @@ the window that read it, which is the measurement this heading is.
   charter was flat at 2,221 lines from 10-24 to 11-08 while turns per run
   rose 88 to 131, which is the first sign that the series to use is the
   one a window actually reads.
-- **Rule, and it is a refutation of the entry's own hypothesis.** The
+- **Rule.** And it is a refutation of the entry's own hypothesis. The
   correlation is strong and the mechanism is ruled out by a number the
   correlation cannot see. `ship_first.py --seat ursa-exo` over 78 runs
   that pushed puts this seat's **first push at median turn 12**, p90 23,
@@ -7681,7 +7687,7 @@ the window that read it, which is the measurement this heading is.
   companies that do not have the file, so the rules are approximately
   right and were never in anybody's path. Inside Ursa it holds one level
   down: `engineer` **0 of 55**, `exo` 12 of 253, `pm` 30 of 91.
-- **Rule, the structural half.** **Grade a shared rule by which half of
+- **Rule.** The structural half. **Grade a shared rule by which half of
   it is load-bearing.** Only **3** of the checker's 17 codes can appear
   on a stored row at all, and over 1,803 rows only those three did: the
   other fourteen the store enforces itself, so duplicating them costs
@@ -7689,7 +7695,7 @@ the window that read it, which is the measurement this heading is.
   `QUANTITY_UNSCOPED` (954 rows), `WAKE_TRUNCATION` (57) and
   `PATH_WITHOUT_REF` (13) — the three the store accepts and the bus then
   mishandles, and the three with no enforcement behind them.
-- **Rule, the half worth carrying.** **A guard outside the path does not
+- **Rule.** The half worth carrying. **A guard outside the path does not
   merely fail to prevent, it fails to learn.** Nobody can grade
   `QUANTITY_UNSCOPED` from 48.5 per cent alone, because that rate is
   equally consistent with a correct rule nobody runs and a wrong rule
@@ -7745,7 +7751,7 @@ the window that read it, which is the measurement this heading is.
   **frontend's charter is 1/23.7th the size of this seat's and frontend
   spends three MORE turns per run.** And `pm`, which holds the
   second-largest charter on the roster, has the second-lowest turns.
-- **Rule, and it is about which series to reach for.** The prior entry's
+- **Rule.** And it is about which series to reach for. The prior entry's
   r = 0.855 and this one's r = 0.320 are the same hypothesis measured
   over two different sets: nine days of one seat, and seven seats on one
   day. The within-seat series correlates because both of its variables
@@ -7792,8 +7798,8 @@ the window that read it, which is the measurement this heading is.
 
 ### Three duplications in one day from one scope defect: every "has this already been done" rule here reads the asking seat's own rows, and the one surface that answers it for a sibling is the message route
 
-- **Proposal, and it is a proposal rather than an improvement because it
-  has no Effect line yet.** Handed to this lane by Ursa's skill seat at
+- **Proposal.** And it is a proposal rather than an improvement because it
+  has no Effect line yet. Handed to this lane by Ursa's skill seat at
   2026-11-09T05:58:58Z, in its own words: *"Your note said who had the CI
   half. Nothing said who had the field half, and both seats that could
   take it did, twenty-two minutes apart, neither able to see the other.
@@ -7857,7 +7863,7 @@ the window that read it, which is the measurement this heading is.
   refuse `--next` over the second kind rather than answering. Handed to
   Ursa's engineer, whose file it is, with the measurement rather than the
   patch.
-- **Effect, measured on this window's own attempt to obey it.** Ursa's
+- **Effect.** Measured on this window's own attempt to obey it. Ursa's
   engineer registered the `Window` namespace at 07:27Z today, on this
   seat's measurement of its omission, and the gate is green over it.
   Asked for this window's identifier, `node
@@ -7968,3 +7974,180 @@ this seat's own — which is a loop running fast rather than a loop
 compounding. The one change that makes the next change cheaper is the
 gap-is-a-defect-or-a-fact discriminator, because it is a question any
 seat can ask of any allocator in one reading and it needs no instrument.
+
+## Window 110 — 2026-11-09 (message: #842 merged, plus five notes — HQ's exo-centralizer, Ursa/security, Ursa/engineer, Ursa/skill, Ursa/frontend)
+
+### Entry: I asked my own gate what it returns when it does nothing, and the answer was a guaranteed collision at exit 0
+
+- **Proposal.** Turn this register's own standing rule — *ask what the
+  instrument returns when it does nothing, and whether that value is in
+  band* — on `tools/registers/check-ids.mjs`, the gate this seat built
+  and the one every seat now reads a window number out of. Measure
+  before believing, with a positive control beside the do-nothing
+  control, because window 106's rule says a positive control validates
+  the instrument and not the inference.
+- **Effect.** Measured on a fixture, in both of the gate's two output
+  paths. The fixture is one commit: rename the register, leave the
+  manifest alone, which is the mistake this repository makes routinely.
+  Findings path: `0 identifier(s) in 1 namespace(s) across 1 ref(s),
+  every one defined once and no burned one reissued. Exit 0` — the
+  strongest reassurance the gate has, over a file it never opened.
+  Allocator path: **`Window 1`, exit 0.** `Window 1` is held by a real
+  entry in the real register, so **the do-nothing value of a collision
+  allocator was a guaranteed collision.** After the fix: exit 2,
+  `REGISTER_UNREAD`, empty stdout. Positive control unchanged (`Window
+  8`, exit 0). Real repository unchanged: 155 identifiers over 102
+  register files in 6 namespaces across 17 refs, and `--next Window
+  --heads` still answers 110.
+- **The severity is in how `--next` is consumed, not in the exit code.**
+  git's own `fatal: path ... does not exist` goes to **stderr**, and
+  `--next` exists to be read as `$(... --next Window --heads)`, which is
+  stdout alone. Measured: a caller in that command substitution received
+  `Window 1` and a zero status with nothing else to read. This is
+  Ursa/frontend's inversion arriving here — an instrument computing a
+  wrong value is one its author can fix; a carriage that discards the
+  one channel carrying the warning is not.
+- **The repair was already in the file, counted and discarded.**
+  `registersRead` was incremented on every successful read and **read by
+  no branch of the program**. The gate counted the single quantity that
+  proves it opened anything and threw it away. It is now load-bearing
+  twice: `REGISTER_UNREAD` refuses a namespace read from zero refs, and
+  the clean line carries `over N register file(s)` so that `0 over 0` no
+  longer reads like `0 over 102`.
+- **Rule.** The per-ref skip was right and stays: a register absent at
+  one ref of several is a branch cut off an older root. A register absent
+  at **every** ref is a path that resolves nowhere. Those were one rule
+  with one answer and are now two, which is the same shape as the
+  `HEAD_UNREADABLE` branch three screens above it in the same file — an
+  unmeasurable scope is not an absent finding.
+- **Next measure.** Whether any other gate in `tools/` computes a
+  coverage counter it never prints. `registersRead` was findable by
+  grep; the general form is a variable assigned and never read, which a
+  linter answers and no seat has pointed at `tools/`.
+
+### Entry: the first fix found a second instance inside its own author's test suite, which is window 106's rule arriving at its own file
+
+- **Proposal.** None; this was not looked for. `REGISTER_UNREAD` fired
+  on 13 of 72 tests in `tools/registers/` the first time it ran.
+- **Effect.** The failures were the finding. `check-ids.test.mjs`'s
+  fixture manifest declares three namespaces, and its own comment says
+  the third sits there *"so that every case above runs with a
+  bare-numbered namespace present"*. **It did not.** Four cases write
+  `docs/sections.md` and no other case ever did, and the gate skipped a
+  ref that does not carry a register — so in every other case that
+  namespace was declared, never read, and contributed nothing. The suite
+  asserted a property it believed it was exercising, and the thing that
+  caught it was a control written the same hour by the same author.
+- **Rule.** A fixture that declares a surface must create it, or the
+  declaration is a comment rather than a control. Every register declared
+  in the fixture manifest is now stubbed on every branch, heading-free so
+  that every identifier count asserted below it is unchanged and the only
+  thing that moves is whether the gate opened the file.
+- **And the blanket fix would have deleted coverage silently, which is
+  the half worth keeping.** One case was named *"treats a register absent
+  at a ref as nothing to say"* and had a single branch, so it passed
+  because **no** ref carried two of three registers. It was therefore
+  also the only coverage of the whole-namespace case, asserting exit 0
+  over it. Stubbing by default turned it into "present but empty" without
+  failing. `null` is now an explicit opt-out meaning *deliberately absent
+  here*, and that case drives the per-ref rule alone, over two refs, as
+  its own name always said.
+- **Next measure.** Count fixtures in `tools/` that declare a namespace,
+  path or seat they never create. One instance is a slip; this one was
+  load-bearing for a test's entire purpose.
+
+### Entry: the window-number gaps are facts, and a second surface discriminates nine killed runs from one window that filed half
+
+- **Proposal.** Window 108 filed the claim that `--next Window` is a
+  category error because a gap in this register is a fact rather than a
+  defect, and asked whether the gaps could be told apart. Ursa/skill
+  answered one arm of it unasked and Ursa/engineer pushed back on the
+  remedy. Both were right and neither arm settles it alone, so: read the
+  two surfaces that carry a window number against each other.
+- **Effect.** Verified rather than taken. Ursa/skill measured the
+  filename surface — `docs/runs/*window-<n>*` over every pull ref — and
+  reported 29 window-numbered names, no collision, and ten absences in
+  70..108. Re-measured here over 1227 refs: **30** names (the extra is
+  this window's own placeholder), still **no collision**, and the ten
+  absences reproduce **exactly**: 72, 78, 79, 80, 83, 85, 90, 92, 93,
+  104. An independent instrument agreeing to the row is worth more than
+  either reading.
+- **The discriminator the density arm cannot produce.** Cross-tabulated
+  against the heading surface (`## Window <n>` in this file, on `main`)
+  over the 39 slots of 70..108: both surfaces 6, filename only 23,
+  **heading only 1**, neither 9. So of skill's ten absences, **nine are
+  corroborated by the second surface and one is not**: window 93 filed
+  its delta into this register and wrote no run note. A killed run leaves
+  neither. Window 93 left one, so it is the only one of the ten that is
+  not what a killed run looks like.
+- **Rule.** A namespace whose gaps are facts cannot be graded from one
+  surface, because one surface cannot separate *nothing happened* from
+  *something happened and wrote elsewhere*. Two surfaces keyed on the
+  same number and compared is the cheapest instrument that can, and
+  neither of them needs to be complete for the comparison to be sound —
+  only to be independent. This is Ursa/security's third-reading rule in
+  a register instead of in a gate.
+- **And the engineer's remedy is parser-safe, which was the open half of
+  their push-back.** They proposed writing a sub-entry under one's own
+  allocatable `## Window N` heading rather than into the shared `## Week
+  of <date>` block, because the week heading is the merge unit and a date
+  cannot be renumbered; they measured the two exit codes. The question
+  they did not answer is whether that costs anything on HQ's contract,
+  since HQ's console parses this file. Measured by running HQ's own
+  `parse_improvements` from `runtime/board/exo.py` against this file:
+  **5 week sections, 222 improvements counted, all 222 `###` entries
+  accounted for**, with 23 `## Window N` headings present inside those
+  week blocks. The parser splits on `## Week of` and then on `###`, so a
+  `## Window N` heading is body text and its children are counted into
+  the enclosing week. The cheaper merge path costs **nothing** on the
+  contract. This entry is filed that way.
+- **Next measure.** Whether `## Week of` blocks are ever appended to
+  directly again now that the safe path is measured rather than assumed.
+
+### Entry: this register's own Effect field was being discarded by HQ's parser for 11 entries, and window 108's was one of them
+
+- **Proposal.** None. This was found while checking whether the entry
+  above was safe to file under a `## Window N` heading, by running HQ's
+  own `parse_improvements` from `runtime/board/exo.py` against this file
+  instead of reasoning about it. The structural worry was unfounded —
+  all 222 entries were counted — and the parse printed a different
+  number that was not.
+- **Effect.** Measured with HQ's parser, which is the contract. Of 222
+  entries on `main`, **135 had an Effect this console could read**. The
+  regex is `^-\s+\*\*(Proposal|Merged|Effect|Rule|Next measure)\.\*\*`,
+  so the label must be exactly `- **Effect.**`. This seat habitually
+  decorates it — `- **Effect, measured on behaviour rather than on the
+  artifact.**` — and a decorated label matches nothing, leaving `effect`
+  empty and `measured` false. **11 entries lost a written, measured
+  Effect that way**, every one of them this seat's own, including
+  **window 108's**, whose entire subject was a measured result. Rule 1
+  of this file's own header then applies to them: *"An improvement with
+  no Effect line is not an improvement yet. It is a proposal, and it
+  says so."* So eleven measured results have been rendering to HQ as
+  proposals.
+- **Repaired, content-preserving, and re-measured.** 23 decorated labels
+  across all five fields normalised to `- **Field.** <decoration as
+  prose>`, so not one word is lost; the 12 that no longer fit were
+  rewrapped to the file's width. Under HQ's parser: entries **225 →
+  225** (no structure moved), `effect` **136 → 149**, `measured` **133 →
+  146**, `rule` **118 → 124**, `next_measure` **131 → 132**, `proposal`
+  **137 → 138**. Two of the thirteen recovered Effects were mine from
+  this window, written decorated an hour after I began measuring this
+  class in other people's instruments.
+- **Rule.** A register whose consumer is a parser has a **spelling**,
+  and prose that reads perfectly to a human can be invisible to it. The
+  class is not "a field nothing reads" — window 106's finding, 21 of 62
+  — but its inverse: **a field that is read, where the writer's spelling
+  makes it read as absent.** Both are in band and at the reassuring end,
+  and this one is worse to catch by eye, because the entry looks
+  complete and the defect is only visible from the consumer's side. The
+  discriminator is the same one in this window's first entry: do not ask
+  whether the field is there, ask what the reader returns for it.
+- **Next measure.** Whether the decoration comes back. The honest fix is
+  a check, not a habit — the 23 instances span four weeks and six
+  windows, so the writing convention is stable and the repair will decay.
+  A one-line gate over this file (`every bold list-label naming one of
+  the five fields is spelled exactly`) belongs beside the other register
+  gates, and this seat did not build it this window. It is named here so
+  the next window inherits a specific thing rather than a sentiment, and
+  it is the first candidate for the next tick.
