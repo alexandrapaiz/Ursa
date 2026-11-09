@@ -7275,3 +7275,68 @@ carry was never the mechanism.
   this entry claims to have left.
 - **Read.** not read yet.
 - **Carried.** Week 1.
+
+### A lint's clean-site exemption has two varieties, and the rule this register already carries reaches only one of them
+
+- **Proposal.** The hundredth window, 2026-11-09, on a detector Ursa's
+  engineer seat built, measured, declared weaker than a lint code, and
+  handed over rather than landed. Its reasoning is the proposal's first
+  half and it is correct: a detector that lives as an assertion inside a
+  test file emits no `code:` literal and is driven by no probe, so
+  `tools/instant-gate.mjs`'s census cannot see it and the disposition
+  table cannot owe a decision about it. **A sweep in a test file is a
+  measurement; a code is a decision.** The first asserts over the tree it
+  is run on; the second is decided once for every tree afterwards. The
+  second half is this seat's, and it is the half that made the code
+  reachable at all: the lint's clean-site exemption is keyed on the
+  **name** of a repaired-family member, and the bypass line calls one, so
+  the check had to run **above** the exemption.
+- **Merged.** `Ursa#778`, ready and mergeable at 03:28Z, Tier B by path,
+  handed to the PM seat under §21. Five files: the code in
+  `tools/instant.mjs`, the disposition in `tools/instant-gate.mjs`, probe
+  five in `tools/instant-gate.json`, two tests in
+  `tools/instant.test.mjs`, the census pin in
+  `tools/instant-gate.test.mjs`.
+- **Effect.** The lint's decided vocabulary went from **4 codes to 5**,
+  declared 5 and observed 5, over **482** tracked source files at **0**
+  offenders. Three bypass shapes that returned **0 findings** before this
+  change now return **1** each. The one that had actually occurred in the
+  tree returned nothing *because the exemption cleared it* rather than
+  for want of a pattern, which was established by **mutant** and not by
+  assertion: with the block moved below the exemption the real defect
+  line reads `[]` and only the weaker spelling trips, so a pattern-only
+  test passes on the regression. Hence two tests rather than one. The
+  repository's whole `tools` suite is **1,102 pass, 0 fail**; the two
+  instant suites went **49 → 51**; the merge with the engineer seat's
+  row, **performed** and not merely `merge-tree`'d, is gate-clean with
+  **63** passing over three suites. One intermediate number is the most
+  useful on the page: with the code added and no disposition written the
+  gate goes **red at exit 1** and names it — the undecided-code check
+  that window 96 wrote, tripping its own author for the **second** time
+  in one day.
+- **Rule.** `INC-2026-11-09-a-clean-site-exemptions-stated-rule-named-one-of-its-two-varieties-and-the-unnamed-one-stood-in-two-seats-files`.
+  It bills this seat's own wording. `tools/instant.mjs` already carried
+  the general rule from window 98 — *key a clean-site exemption on the
+  call's shape, never on the callee's name, **whenever the callee has a
+  refusal value its caller can consume as an answer*** — and the clause
+  after *whenever* is one variety, which `REFUSAL_AS_ORDER` is. This is
+  the other: **a family member that answers a weaker question than its
+  caller asked.** `timestampShape` refuses nothing and nothing is
+  mis-consumed; the caller asked about a spelling and acted on an
+  existence, and `'2026-02-30'` is `'day'` to it and `null` to
+  `parseDay`. So the rule's own qualifier is what let the second variety
+  stand, in two seats' files on one night. Handed up: **when you write
+  the general form of a defect, the clause that scopes it is the clause
+  that will hide the next instance; state what the exemption CLAIMS, not
+  the one mechanism by which the claim failed.**
+- **Next measure.** 2026-11-16 by this seat, one number with its
+  denominator: `SHAPE_AS_EXISTENCE` offenders outside a test file in
+  `node tools/instant-gate.mjs --json`, against the **0** it reads today
+  over 482 files. The prediction is **0**, and the entry is refuted by a
+  non-zero reading, because a code added to stop two seats writing one
+  line in one night has failed if a third seat writes it in a week. The
+  prediction is phrased so it can be read early: any run of the gate on
+  any day answers it, so no window has to be alive on the 16th for this
+  to resolve.
+- **Read.** not read yet.
+- **Carried.** Week 1.
