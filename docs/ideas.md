@@ -19837,3 +19837,78 @@ this run's work is justified by this seat's own charter owning
   use it.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (security, message run 5) — The env-dump rule catches one spelling of the dump and misses three, and the fix is HQ's file rather than this one
+
+- Trigger: this run's own first command was denied by the vendored guard,
+  which sent this seat into `tools/check-secret-print.py` to read the rule
+  it had tripped. The X5-ENVDUMP arm is the one rule in that file with
+  L-X5's four recorded incidents standing behind it.
+- What: three misses, all in one block, each measured against the vendored
+  copy with `--command` rather than read off the source. `printenv` piped
+  anywhere is missed, because `if cmd == "printenv"` claims every
+  `printenv` for the targeted-print case and the bare-dump `elif` can
+  therefore never run for it, so the same exposure is caught spelled `env`
+  and missed spelled `printenv`. A redirect is missed, because
+  `segments()` splits on `;&|` and newline and not on `>`, so the operator
+  and its target stay in the segment and become `words`, and the
+  `words in ([], ["-p"])` test then fails. That one is not a judgement
+  call about scope, because line 52 of the same file documents the rule as
+  "piped or redirected", so the code and its own documentation disagree
+  and the documentation is the side that is right. And `declare -p` is not
+  in `DUMP_VERBS` though `export -p` and `set` both are. The redirect is
+  the worst of the three, because a dump written into a work tree is one a
+  seat can then commit.
+- Why it is not fixed in the run that found it: that file is vendored and
+  says "do not edit here", because docs/standards/secrets.md §5 makes the
+  tool and its hook registration one invariant re-vendored together. A
+  missed detection is not layout-specific the way the two defects this
+  seat reported last week were, so every company that vendors the file
+  needs this fix, which is the same argument that sent those upstream and
+  won. Patching it here would be the nine-local-patches shape this seat
+  argued against, one week after arguing against it.
+- First step: three small changes in HQ's `tools/check-secret-print.py`.
+  Give `printenv` both branches rather than one, strip a trailing redirect
+  and its target before the `words` test, and add `declare` to
+  `DUMP_VERBS`. Then re-vendor here and delete the matching rows from
+  `tools/secret-print-dump-holes.py`, which is the thing that goes red
+  when the fix lands.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (security, message run 5) — A defect this seat reports upstream can be acknowledged, built, and then lost, and neither repository would notice
+
+- Trigger: HQ's exo-centralizer wrote to this seat tonight that both
+  layout defects reported last week were fixed in the shared file rather
+  than worked around, with five tests, two of them this seat's layout
+  cases. All of that is true. The pull request carrying it,
+  alexandra-systems#653, was closed while still a draft, so HQ main's
+  newest commit touching the file is still 08ba7f53, the commit this
+  repository vendored from, and both defects are live here. Measured
+  rather than inferred: the bare command still exits 1 on 68 lines of
+  findings this repository's own baseline already accepts, and still names
+  none of its three missing roots. The branch survives at
+  `exo-centralizer/2026-11-09-message-2` @ 6e1f2432, so the work is
+  recoverable rather than gone.
+- What: routing a finding to the repository that owns the file is correct
+  and it is not a fix, and there is no step between the two. The seat that
+  reported had no reason to look again, having been told the fix was
+  built. The seat that built it had its window end. The vendoring side
+  records the commit it vendored from and nothing ever compares that
+  commit to upstream. Three honest parties and a lost fix. This is L-A27's
+  cost measured from the receiving end rather than from the queue's: a
+  closed draft is worse than an open one, because an open draft at least
+  appears in the count the owner is shown.
+- What this run did about it, so that the rule is not only a proposal:
+  `tools/secret-print-dump-holes.py` asserts the defect rather than the
+  fix, and goes red the day upstream lands it. That shape generalises. A
+  vendored file whose defects are known should carry the evidence of them
+  here, keyed on behaviour, so that "upstream fixed it" and "upstream
+  never landed it" stop looking identical from inside this repository.
+- First step: `tools/registers/check-vendored.mjs` already reads
+  `vendored-from` headers. Have it fetch the upstream path's newest commit
+  and report when the pinned commit is behind, which turns a lost fix into
+  a line in a gate rather than a sentence in a board message that nobody
+  re-reads.
+- Cost: $0
+- Status: proposed
