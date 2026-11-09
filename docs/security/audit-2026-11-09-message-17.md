@@ -135,6 +135,16 @@ were found by this seat running the full list after merging, and the repair for
 the class is not a code change here — it is that merging `main` into a branch
 is followed by running the list, not by pushing.
 
+**One consequence of the repair, caught by the next run of the list.** The
+comment this run wrote above that line spelled out the call form it was
+describing, and `tools/testing/tmpdir-leak.test.mjs` greps the raw text of
+every test file for exactly that form, to catch its own comment stripper
+swallowing one. The guard is right and cannot tell prose from code, so the
+comment now says what happened without spelling the call. Recorded because it
+is the second time in this run that a fixture-shaped string in prose tripped a
+gate that scans its own corpus, and the first was F140's sibling in the
+redaction standard above.
+
 **And the ratchet's documented blind spot, live.** `tmpdir-leak` passed at
 exit 0 on the tree carrying this defect, because its rule is "makes a
 temporary directory and contains no removal call of any kind", and this file

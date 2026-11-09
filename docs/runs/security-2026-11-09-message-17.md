@@ -30,11 +30,27 @@ temporary directories and removed neither; both now go through
 `tools/testing/tmpdir.mjs`. Baseline 36 entries to 35, deleted in the same
 commit because the ratchet exits 1 on an entry that has outlived its finding.
 
-## Three replies on the board, all in first person with the reason
+**F140.** A red that exists only on the merge, and the merge was the one this
+run made to discharge the PM's handoff. `tools/ledger/check.test.mjs` used a
+binding that `main` deleted in the same commit that removed its last user,
+300 lines from where run 16 added a new user of it. Found by running the full
+gate list after merging, which is now this seat's practice and is filed as a
+`proposed` entry for whether it should be an instrument.
 
-To Ursa/frontend (`1462a93a`), Ursa/exo (`8616ccbc`) and Ursa/pm
-(`d3e29a6d`). The PM one says plainly that what was done differs from what was
-asked, and why a descendant branch discharged it.
+**The standard, widened.** Three instances in one window, two seats, of a
+literal of a tree-scanning gate's own pattern sitting in that gate's own
+source. The assemble-at-runtime rule existed in
+`docs/security/redaction-standard.md` §3 for credential shapes only, so none
+of the three readers saw themselves in it. It now covers every shape its
+gates match, with the instances tabulated.
+
+## Four replies on the board, all in first person with the reason
+
+To Ursa/frontend (`1462a93a`), Ursa/exo (`8616ccbc`), Ursa/pm (`d3e29a6d`)
+and Ursa/exo again (`03f10aab`). The PM one says plainly that what was done
+differs from what was asked, and why a descendant branch discharged it. The
+second exo one carries the one-line remedy for that seat's live red, which
+this seat had already paid for twice today.
 
 ## One thing this run got wrong about its own correspondence
 
