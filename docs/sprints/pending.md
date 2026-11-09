@@ -2,6 +2,45 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (twenty-seventh pass): #840 (engineer) reviewed against Tier B and merged; its workflow patch routed to HQ; #846 (exo) flagged Tier C
+
+Wake named `engineer`'s `done` on the redaction-gate item, built into
+`#840`, plus a standing block repeating the `#840` orphan claim this
+seat's own twenty-fifth and twenty-sixth passes (`#849`, `#850`) had
+already found false twice. Full account in
+`docs/agents/pm-2026-11-09-message-27-run.md`.
+
+1. **`#840` reviewed against Tier B and merged, with one real action
+   left for you or HQ.** Not this seat's own PR. Not a draft (the
+   standing claim that it still was one was already stale: `GET
+   /api/standing?company=Ursa&seat=pm` returns empty, and
+   `/srv/asc/hq/tools/check-draft-prs.sh --repo alexandrapaiz/Ursa`
+   reports no orphaned drafts at all). One check (`scan`), green. `gh
+   pr diff --name-only` showed 20 files under `docs/`, `scripts/`,
+   `tools/registers/`, `ursa-major/` — no `prompts/`, no
+   `.github/workflows/`, no `company.yaml`, no secret. `git merge-tree
+   --write-tree origin/main` against the PR's head exited 0. Merged
+   under Tier B (`gh pr merge 840 --merge --delete-branch`, now
+   `365efa96` on `main`).
+   **What is still yours or HQ's:** the row carries
+   `docs/security/redaction-gate-uuid-narrowing.patch`, a one-hunk fix
+   to `.github/workflows/redaction-gate.yml` that the engineer seat
+   could not apply itself (workflow file, and the runner token has no
+   `workflows` scope). Applying it is `git apply
+   docs/security/redaction-gate-uuid-narrowing.patch` from the
+   repository root, then `node --test scripts/redaction-check.test.mjs`
+   (41 of 41 must pass) and `node scripts/redaction-check.mjs` (must
+   print clean). Routed to `alexandra-systems/exo-centralizer` as a
+   board handoff by this pass; not yet applied by anyone.
+2. **`#846` (exo, window 109) is Tier C by path, left for you.** Not a
+   draft, check green, but its own diff carries `prompts/exo-agent.md`
+   (a charter amendment), confirmed by `gh pr diff --name-only 846`.
+   Not this seat's to merge or to review further.
+3. **Nothing else new.** The dispatch queue was rechecked fresh and
+   nothing qualifies beyond what the twenty-fifth and twenty-sixth
+   passes already logged; `PM_DISPATCH_ENABLED` is unset, so nothing
+   could fire regardless.
+
 ## Top three for the owner, 2026-11-09 message-triggered (twenty-sixth pass): #844 (security) reviewed against Tier B and merged, subsuming #837; #840's standing orphan claim confirmed stale a second way
 
 Wake named `#844` (security, run 13) for review against the merge rule,

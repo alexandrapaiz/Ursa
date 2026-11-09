@@ -1,4 +1,4 @@
-# Dispatch queue — 2026-11-09, message-triggered (twenty-fifth pass)
+# Dispatch queue — 2026-11-09, message-triggered (twenty-seventh pass)
 
 Rechecked fresh against the criteria table below rather than carried
 forward, per every prior pass's own practice.
@@ -9,44 +9,44 @@ as queue information for the owner, not as a plan this run executes.
 
 ## Checked against the criteria table (pm.md §11.3) and Ursa's own three (§0b)
 
-- **A seat run failed in the last 24h, diagnosable from its log:** one
-  — `ursa-engineer`, `2026-11-09T07-52-20-692Z-message`, `exit=timeout`
-  after 60 minutes. Diagnosed and triaged in this pass's own PR and in
-  `docs/sprints/pending.md`'s top entry: the run shipped a complete,
-  valuable unit of work before timing out, a follow-up run started two
-  seconds later and is still live, and three of the four most recent
-  engineer runs today exited 0. Not a pattern, not a defect. No
-  dispatch; nothing to rerun that is not already running.
+- **A seat run failed in the last 24h, diagnosable from its log:**
+  nothing new since the last pass's own check; the one timeout already
+  triaged there (`ursa-engineer`, `2026-11-09T07-52-20-692Z-message`)
+  stays not-a-pattern, and its follow-up is the run that produced this
+  pass's own `#840` merge.
 - **A seat's open draft has failing CI, or a review comment unanswered
-  >24h:** `#840` (engineer), `#844` (security), `#845` (skill), `#846`
-  (exo), `#848` (frontend) are open or draft. `/srv/asc/hq/tools/check-draft-prs.sh
-  --repo alexandrapaiz/Ursa` reports every one "idle 3-10m, run may
-  still be live; leave it alone. no orphaned drafts." None qualify.
+  >24h:** rechecked fresh with `/srv/asc/hq/tools/check-draft-prs.sh
+  --repo alexandrapaiz/Ursa`. Four drafts now (`#854` ursa-exo, `#853`
+  ursa-engineer, `#852` ursa-security, `#848` ursa-frontend), all idle
+  1–21 minutes, all "run may still be live; leave it alone," and "no
+  orphaned drafts." `#840` has merged since the last pass and no
+  longer appears here at all. None qualify.
 - **A sprint item due this week with no run from its owning seat:**
-  there is no current sprint item — the newest sprint file is
-  `sprint-2026-10-12.md`, 28 days old. This is the ceremony gap, now
-  escalated in `docs/decisions.md` rather than logged here again.
+  unchanged. The newest sprint file is still `sprint-2026-10-12.md`,
+  28 days old; the ceremony gap stays escalated in
+  `docs/decisions.md` rather than repeated here.
 - **A seat has two or more open PRs on one scope, none merged:**
-  market holds `#824` and `#822`, both open. Checked whether they
-  share a scope before counting it as a hit: `#824` is a market brief
-  entry (Anthropic reward-hacking disclosure, Turing entry) and `#822`
-  is a different brief entry (Cocient, verifier-gap hedge) — two
-  different ledger entries in the same file, not one stuck scope. Not
-  a hit.
+  unchanged from the last pass's check (market's `#824`/`#822` are two
+  different ledger entries, not one stuck scope).
 - **A ruling or ADR merged since the last run names a seat with no run
   following:** nothing merged to `docs/decisions.md` since the last
-  pass before this one's own addition.
+  pass.
 - **A milestone due within three days with open items:** none found.
 - **Ursa's own three (§0b):** no tuning or trial run with unrecorded
   ledger results; no failing check on an open Minor-site or
-  Major-resolver PR (`#843`'s own check was green before it merged);
-  no ADR naming an experiment with no run started within two days.
+  Major-resolver PR; no ADR naming an experiment with no run started
+  within two days.
 
 ## Logged, not fired
 
-Nothing new to log this pass beyond what `docs/sprints/pending.md`
-already carries (the redaction-gate UUID pattern, which engineer's own
-live run is already working as its next unit, per its own run note).
+`#846` (exo, window 109) is Tier C by path (`prompts/exo-agent.md`
+amended) and waits on the owner, logged in `docs/sprints/pending.md`
+rather than here, since it needs a merge decision and not a dispatch.
+The redaction-gate workflow patch (`docs/security/redaction-gate-uuid-narrowing.patch`,
+landed by `#840`) needs the owner or HQ to run `git apply`, also logged
+in `pending.md` and routed as a board handoff to
+`alexandra-systems/exo-centralizer`; it is an application step, not
+something a dispatch would produce.
 
 ## Dispatched by the PM
 
