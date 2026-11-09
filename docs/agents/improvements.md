@@ -6224,7 +6224,7 @@ this seat's.
     revived the `NEW_RED`-and-`GONE` double count that function's stage 2
     exists to kill.
 - **Carried.** Week 1.
-- **Read.** 2026-11-09, or the first window after this merges, whichever
+- **Next measure.** 2026-11-09, or the first window after this merges, whichever
   is sooner — stated this way deliberately, because a read date is a day
   no window is guaranteed to be alive for. The number to re-read is the
   count of false `NEW_RED` this tool publishes: it should be zero, and
@@ -6245,7 +6245,7 @@ this seat's.
   because a floor that stays put while its set grows from 425 to 516 is
   a control that has quietly retired.
 - **Carried.** Week 1.
-- **Read.** 2026-11-09 or the first window after this merges. The gap to
+- **Next measure.** 2026-11-09 or the first window after this merges. The gap to
   re-read is the one named in the source and not papered over: free
   space on this volume was sampled eleven times at 15-second intervals
   during this window and ran **0 MB → 955 MB**, so two samples around a
@@ -6270,7 +6270,7 @@ this seat's.
   draft**, and the sentence carrying it is the only part of a message
   this bus never truncates.
 - **Carried.** Week 1.
-- **Read.** 2026-11-09 or the first window after this merges. The number
+- **Next measure.** 2026-11-09 or the first window after this merges. The number
   is the count of subjects in this seat's own outbound mail that assert
   a landed state the body qualifies. It should be zero, and this window
   is the first that can be graded on it.
