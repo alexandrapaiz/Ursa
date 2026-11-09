@@ -18,6 +18,7 @@ import {
   repairCommits,
   concurrent,
   messageBetween,
+  UNPLACEABLE,
   grade,
   patchId,
   runControl,
@@ -625,14 +626,55 @@ test('a window that genuinely excludes the message still excludes it', () => {
   );
 });
 
-test('an unplaceable timestamp on either side is not silently inside the window', () => {
-  // `compareInstants` returns null for a value it cannot place, and `before`
-  // and `after` read that as "no opinion" rather than as a confident verdict.
-  // The row must then fail the party or window test rather than slip through
-  // as a match that was never established.
+test('F146: an unplaceable row is skipped, not admitted as a match', () => {
+  // THE CASE THAT WAS WRONG, and it was wrong in the test and not only in the
+  // code. This test's title said the row is not silently inside the window,
+  // its comment said the row must fail the window test, and its assertion
+  // asserted the row comes back. The assertion is the part that runs, so the
+  // suite pinned the defect. Found by Ursa's exo seat on a worktree of this
+  // branch, measured rather than read.
+  //
+  // `before` and `after` are both false for a value they cannot place, by
+  // their own documented contract, so the skip condition was false and the row
+  // was returned. A returned row is COORDINATED to the caller, so this
+  // manufactured a coordination verdict out of a timestamp nobody could place.
   const rows = [{ ts: 'not-a-timestamp', from_seat: 'skill', to_seat: 'engineer', subject: 'junk' }];
   assert.equal(
     messageBetween(rows, 'ursa-skill', 'ursa-engineer', '2026-11-09T00:00:00Z', '2026-11-09T23:59:59Z'),
-    rows[0],
+    null,
+  );
+
+  // And one placeable row beside it still answers, so the skip drops the row
+  // it cannot place rather than abandoning the call.
+  const mixed = [
+    { ts: 'not-a-timestamp', from_seat: 'skill', to_seat: 'engineer', subject: 'junk' },
+    { ts: '2026-11-09T12:00:00Z', from_seat: 'skill', to_seat: 'engineer', subject: 'real' },
+  ];
+  assert.equal(
+    messageBetween(mixed, 'ursa-skill', 'ursa-engineer', '2026-11-09T00:00:00Z', '2026-11-09T23:59:59Z').subject,
+    'real',
+  );
+});
+
+test('F146: an unplaceable window bound refuses rather than answering', () => {
+  // The other direction, and the one that needs a third return value: a good
+  // row inside a window whose own bounds cannot be placed used to come back as
+  // the match. `null` was not available for it, because `null` already means
+  // "I looked and no message passed" and the caller turns that into
+  // DUPLICATED, so either answer would have been a verdict about the pair.
+  const rows = [{ ts: '2026-11-09T12:00:00Z', from_seat: 'skill', to_seat: 'engineer', subject: 'real' }];
+  assert.equal(
+    messageBetween(rows, 'ursa-skill', 'ursa-engineer', 'not-a-timestamp', '2026-11-09T23:59:59Z'),
+    UNPLACEABLE,
+  );
+  assert.equal(
+    messageBetween(rows, 'ursa-skill', 'ursa-engineer', '2026-11-09T00:00:00Z', 'not-a-timestamp'),
+    UNPLACEABLE,
+  );
+  // Both bounds placeable is still an ordinary answer, so the refusal did not
+  // widen to the common case.
+  assert.equal(
+    messageBetween(rows, 'ursa-skill', 'ursa-engineer', '2026-11-09T00:00:00Z', '2026-11-09T23:59:59Z').subject,
+    'real',
   );
 });

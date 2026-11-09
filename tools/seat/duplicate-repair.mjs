@@ -119,7 +119,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 // Timestamps here are `%cI` from git and ISO strings from the board, and this
 // file's whole output is an order. See the ORDERING note below.
-import { compareInstants } from '../instant.mjs';
+import { compareInstants, parseInstant } from '../instant.mjs';
 
 export const DEFAULT_HOURS = 168;
 export const REGISTERS_FILE = 'tools/registers/registers.json';
@@ -357,17 +357,54 @@ function after(a, b) {
   return compareInstants(a, b) === 1;
 }
 
-/** Did any board message pass between two actors inside [lo, hi]? */
+/** `messageBetween`'s third answer: the window test could not be performed.
+ *
+ *  A distinct value rather than `null`, because `null` already means "I
+ *  looked and no message passed", and the caller turns that into DUPLICATED.
+ *  An unplaceable bound has to reach the caller as something it can map to
+ *  INDETERMINATE, or the gauge publishes a verdict over evidence nobody
+ *  established. This is the absent/empty/unreachable distinction this seat
+ *  has been applying to gates, applied to a function's return value.
+ */
+export const UNPLACEABLE = Symbol('messageBetween: window could not be placed');
+
+/** Did any board message pass between two actors inside [lo, hi]?
+ *
+ *  Three answers, not two: the row, `null` for looked-and-found-nothing, and
+ *  `UNPLACEABLE` for could-not-look.
+ *
+ *  F146, 2026-11-09, found by Ursa's exo seat on a worktree of this branch and
+ *  taken whole. `before` and `after` are both false for an unplaceable value,
+ *  by their own documented contract, so `!r.ts || before(...) || after(...)`
+ *  was false for a row that could not be placed at all and the row was
+ *  ADMITTED. The caller then reads a returned row as COORDINATED. So the
+ *  repair that removed a manufactured DUPLICATED added a manufactured
+ *  COORDINATED, which is the same defect pointing the other way and quieter,
+ *  because a suppressed finding leaves nothing for a reader to disagree with.
+ *
+ *  Placement is now decided once, with `parseInstant`, rather than inferred
+ *  from a comparator that answers false in two different situations.
+ */
 export function messageBetween(rows, actorA, actorB, lo, hi) {
   const seat = (s) => String(s || '').replace(/^ursa-/, '');
   const a = seat(actorA);
   const b = seat(actorB);
+  // The bounds first, because no row can be tested against a window that is
+  // not on the line. Refusing here rather than per row: an unplaceable bound
+  // is one fact about the call, not a fact about each row in it.
+  if (parseInstant(lo) === null || parseInstant(hi) === null) return UNPLACEABLE;
   for (const r of rows) {
     // This is the comparison that decides COORDINATED against DUPLICATED, and
     // it was the worst of the four: `lo` and `hi` are git `%cI` values with an
     // offset on them and `r.ts` is a board instant, so the two sides were not
     // even the same spelling. `before`/`after` place both on the line first.
-    if (!r.ts || before(r.ts, lo) || after(r.ts, hi)) continue;
+    //
+    // A row this function cannot place is skipped and not admitted. It is not
+    // evidence of a message inside the window, and it is not evidence of one
+    // outside it either; it is one row the window test could not reach, and
+    // the right answer about the PAIR is still whatever the other rows say.
+    if (!r.ts || parseInstant(r.ts) === null) continue;
+    if (before(r.ts, lo) || after(r.ts, hi)) continue;
     const from = seat(r.from_seat);
     const to = seat(r.to_seat);
     if ((from === a && to === b) || (from === b && to === a)) return r;
@@ -432,8 +469,16 @@ export function grade(commits, edits, { rows = null, coverage = null, run = git,
         } else if (coverage && !coverage.covers(first.ts)) {
           klass = 'INDETERMINATE';
         } else {
-          msg = messageBetween(rows, first.actor, second.actor, first.ts, second.ts);
-          klass = msg ? 'COORDINATED' : 'DUPLICATED';
+          const found = messageBetween(rows, first.actor, second.actor, first.ts, second.ts);
+          // F146: three answers, and only two of them are verdicts about the
+          // pair. UNPLACEABLE means this gauge could not perform the window
+          // test, which is INDETERMINATE for the same reason `!rows` above is.
+          if (found === UNPLACEABLE) {
+            klass = 'INDETERMINATE';
+          } else {
+            msg = found;
+            klass = msg ? 'COORDINATED' : 'DUPLICATED';
+          }
         }
         pairs.push({
           path: b.path,
