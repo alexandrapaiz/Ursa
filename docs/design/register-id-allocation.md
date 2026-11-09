@@ -346,7 +346,7 @@ decides how an identifier is written; `example` is the line that holds `define`,
 with `name`, which is why `name` could stand in for `spell` for as long as
 every namespace looked like `ADR`.
 
-### 6.3 The output, verbatim, measured 2026-11-09T07:15:57Z on this branch over `origin/main` at `f7b89ff8`
+### 6.3 The output, verbatim, measured 2026-11-09T10:05:42Z on this branch at `e0ddfd22`
 
 ```
 $ node tools/registers/check-ids.mjs --base HEAD
@@ -356,16 +356,30 @@ $ node tools/registers/check-ids.mjs --base HEAD
   ADR-006: 2 distinct definition(s), 2 occurrence(s). Repair held by the owner.
       docs/decisions.md:92 (HEAD) ## ADR-006 — Ursa is a subcompany of Alexandra Systems Company; HQ's reach is legitimate (2026-09-24)
       docs/decisions.md:172 (HEAD) ## ADR-006 — Linear abandoned; secrets move to Infisical (2026-09-25)
-Register identifiers: 148 identifier(s) in 6 namespace(s) across 1 ref(s), from HEAD, clean as far as a seat can take it. 2 collision(s) above need the owner, not a seat. Exit 2.
+Register identifiers: 151 identifier(s) over 6 register file(s) in 6 namespace(s) across 1 ref(s), from HEAD, clean as far as a seat can take it. 2 collision(s) above need the owner, not a seat. Exit 2.
 $ echo $?
 2
 ```
 
 The two ADR collisions are the same two this document was written for and they
 are unchanged. What changed is the census: 24 identifiers in 4 namespaces when
-this document was written, 148 in 6 now, because the two namespaces added on
-2026-11-09 cover 100 numbered sections and 24 window deltas that the gate had
-never read. Both are clean, which is the point worth stating plainly: the
+this document was written, 151 in 6 now, because the two namespaces added on
+2026-11-09 cover 100 numbered sections and the window deltas that the gate had
+never read.
+
+**`over 6 register file(s)` is new in this line and is the denominator of
+every other number in it (added 2026-11-09, window 110).** The gate already
+counted how many `(ref, register)` pairs it had opened and read that count in
+no branch of the program, so `0 identifier(s)` and `0 identifier(s) over 0
+register file(s)` were the same output. They are not the same fact: the first
+reads as a clean register and the second as a gate that found nothing to
+grade. Measured on a fixture whose register was renamed with the manifest left
+alone, both of this gate's paths were in band and at the reassuring end --
+findings said `every one defined once` at exit 0, and `--next Window` answered
+`Window 1` at exit 0 over a number a real entry already holds. A namespace
+readable at **no** ref in scope is now `REGISTER_UNREAD`, exit 2, under
+`scopeUnreadable`; a register absent at one ref of several is still skipped,
+because that is a branch cut off an older root. Both are clean, which is the point worth stating plainly: the
 addition found no collision to repair and the gate it extends was green over
 them the day it landed. The exposure it closes is the next pair of concurrent
 windows, and one such pair has already happened — two windows of the exo seat
