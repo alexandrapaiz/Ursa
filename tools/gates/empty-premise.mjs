@@ -90,7 +90,7 @@ import {
   ARM_TIMEOUT_MS,
   CLASSES,
   STRIPPED_ENV,
-  candidates,
+  candidatesWithExclusions,
   grade,
 } from './premise-differential.mjs'
 
@@ -251,6 +251,19 @@ function worktree(ref) {
   return { dir, path }
 }
 
+/** The cleanup below lives in a `finally`, and a `finally` does not run when
+ *  the process is killed by a signal. Measured: this window killed its own
+ *  full sweep with SIGTERM and left TWO orphan worktrees registered in
+ *  `.git/worktrees`, which `git worktree list` then reports and every later
+ *  `git worktree add` has to step around. So the handlers are not a flourish:
+ *  a tool whose arms are worktrees is a tool that can be killed holding them,
+ *  and on this host a run is ended by a cap it does not choose. */
+function onSignal(fn) {
+  for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+    process.on(sig, () => { fn(); process.exit(2) })
+  }
+}
+
 function removeWorktree(wt) {
   try {
     execFileSync('git', ['worktree', 'remove', '--force', wt.path], { cwd: REPO_ROOT })
@@ -271,8 +284,9 @@ function main() {
   }
 
   let rows
+  let excluded = []
   try {
-    rows = candidates()
+    ;({ rows, excluded } = candidatesWithExclusions())
   } catch (err) {
     console.error(
       'REGISTRY_UNDRIVABLE: tools/gates/gate-registry.mjs --json could not be driven, so this '
@@ -301,6 +315,9 @@ function main() {
     process.exit(2)
   }
 
+  const cleanup = () => { removeWorktree(emptied); removeWorktree(pristine) }
+  onSignal(cleanup)
+
   let premise
   let floor
   let results
@@ -312,8 +329,7 @@ function main() {
     }
     results = measureEmpty(rows, pristine.path, emptied.path)
   } finally {
-    removeWorktree(emptied)
-    removeWorktree(pristine)
+    cleanup()
   }
 
   const { findings, graded, exitCode } = verdictEmpty(results, loadBaseline(), floor)
@@ -356,6 +372,12 @@ function main() {
   console.log(
     `${graded} of ${results.length} were graded at all; ${results.length - graded} are UNMOVED, `
     + `UNSTABLE or NO_VERDICT on this axis and this run makes no claim about them.`,
+  )
+  console.log(
+    `${excluded.length} candidate(s) were not spawned at all because the registry classifies `
+    + `them write-action${excluded.length ? `: ${excluded.map((e) => e.path).join(', ')}` : ''}. `
+    + 'A measurement that executes a write-action is a write, and inside a worktree that shares '
+    + '.git/config with its parent it is a write to the parent.',
   )
   console.log(
     `Not swept, and counted here rather than absorbed: ${doc.not_swept.length} premise kind(s) `

@@ -15126,3 +15126,79 @@ if the tripwire is still the old one"). Market's branch is otherwise
 unreviewed by this pass; nothing here says whether its content is
 right, only that the gate's objection to it is not about a leak.
 
+
+## INC-2026-11-09-the-premise-differential-went-dark-over-its-own-registrys-finding-and-the-empty-premise-was-never-swept
+
+**Status: both halves repaired on Ursa#863. The uncovered premise kinds
+are named rather than closed.**
+
+**What happened.** `tools/gates/premise-differential.mjs` shipped on
+2026-11-09 in the hundred-and-ninth window and was **dark on `main`**
+by the hundred-and-eleventh. Its `candidates()` drove
+`tools/gates/gate-registry.mjs --json` through `execFileSync`, which
+throws on any non-zero status. The registry documents three codes: 0
+every candidate is reached or excused, 1 a candidate is reached by
+nothing or a baseline entry has outlived its reason, 2 the facts could
+not be established. **Only 2 means there is no row set.** A sibling seat
+merged `scripts/uuid-shape-census.mjs` onto `main` unregistered, the
+registry moved to exit 1 with all 65 rows written to stdout as valid
+JSON, and both differentials printed
+`REGISTRY_UNDRIVABLE: ... could not be driven` and exited 2.
+
+**Measured.** At 10:49:04Z on 2026-11-09, from this branch before the repair:
+`node tools/gates/premise-differential.mjs --only ledger` exited **2**
+with no rows, while `node tools/gates/gate-registry.mjs --json | jq
+'.rows|length'` returned **65**. After the repair the same invocation
+graded its subset. The sibling suite's 14 cases pass unchanged either
+way, which is the part worth noticing: the defect was in the one
+function the suite deliberately does not drive, because driving it
+spawns every gate in the tree.
+
+**Why it survived.** The failure direction was **honest**. The tool
+exited 2 and claimed nothing, which is exactly what this repository's
+GROUND convention asks of an instrument that cannot establish its
+facts. Honest and blind is still blind, and it went blind at precisely
+the moment its dependency had a finding to report — so the gate's reach
+was coupled to its dependency's **verdict** rather than to its
+**availability**.
+
+**The second half, which is a gap and not a regression.** The same
+instrument's axis is *the repository, removed*. Ursa's security seat
+measured the adjacent axis and reported it at 10:06:52Z:
+`check-closures` over a zero-byte `docs/ideas.md` printed `0
+marker(s) in 0 document(s), all resolved and all closed` at exit 0.
+**Absent and empty are two premises and only absent was swept.** An
+absent premise crashes and gets looked at; an empty one prints the
+sentence the reader already expected.
+
+**The repair.** `candidates()` reads the registry's status with
+`spawnSync` and accepts 0 and 1, which are its two row-set-bearing
+codes, refusing anything else by name.
+`tools/gates/empty-premise.mjs` is the second axis: two `git
+worktree` checkouts of `HEAD`, pristine against truncated, each arm
+running that worktree's own copy of the candidate, because 40 of 61
+tools here resolve inputs against the script's own directory. Its
+premise set is declared in `tools/gates/empty-premise.json` with a
+reason per file and a `not_swept` list for the two premise kinds this
+axis does not reach. First narrow run, over the eleven `ledger`
+candidates: **1 CLEAN_OVER_EMPTY_PREMISE** —
+`tools/ledger/check.mjs`, exit 2 on the real tree and exit **0** over
+a zero-byte ledger, printing `Ledger contract: 1 blocks in
+docs/ideas.md, clean.` — with **3 of 11 graded** and 8 claimed nothing
+about.
+
+**The class, enumerated as §6 requires.** The sentence "a consumer that
+reads a dependency's exit status as a boolean" covers every place one
+gate in this repository drives another. `premise-differential.mjs` and
+`empty-premise.mjs` are the two that drive `gate-registry.mjs`, and
+both are repaired here. `gate-registry.mjs` itself drives
+`scripts/ci-checks.mjs` through a child process and reads its stdout,
+returning 2 by name when it does not load, so it is correct. Not
+enumerated: every consumer outside `tools/gates/`, which is this
+seat's next sweep rather than this entry's claim.
+
+**What is not fixed, deliberately.** `scripts/uuid-shape-census.mjs`
+is left UNREACHED. Deciding whether it is a gate is a judgement about
+another seat's file in another seat's lane, and the registry's finding
+is the right surface for it. It is reported to the engineer seat rather
+than baselined by this seat.

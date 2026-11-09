@@ -249,6 +249,13 @@ export function grade({ present1, present2, absent, paths, basename = '' }) {
  *  tool means this one cannot disagree with the registry about what a gate is.
  *  If it cannot be driven, this tool exits 2 and reports nothing. */
 export function candidates() {
+  return candidatesWithExclusions().rows
+}
+
+/** The same read, returning the excluded rows as well, so a caller can print
+ *  the count. `candidates()` is kept as the array form because this tool's
+ *  suite and its sibling both drive it. */
+export function candidatesWithExclusions() {
   // `spawnSync` and not `execFileSync`, and the codes are read rather than
   // their sign. The registry documents three: 0 every candidate is reached or
   // excused, 1 a candidate is reached by nothing, 2 the facts could not be
@@ -281,15 +288,59 @@ export function candidates() {
       + `(0 clean, 1 findings): ${String(r.stderr || '').split('\n')[0]}`,
     )
   }
-  return JSON.parse(r.stdout).rows
+  return partition(JSON.parse(r.stdout).rows)
+}
+
+/** The kind the registry gives a gate that must never be spawned by a
+ *  measurement, in its own words: "changes the repository when run, which a
+ *  gate must never do". */
+export const WRITE_ACTION = 'write-action'
+
+/** Split the registry's rows into the ones a differential may spawn and the
+ *  ones it may not, and return BOTH, so a caller can print the excluded count
+ *  rather than quietly measuring a smaller population.
+ *
+ *  WHY THIS EXCLUSION EXISTS, measured on 2026-11-09 at 10:50:40Z by the
+ *  hundred-and-eleventh window on its own sweep. A differential spawns every
+ *  candidate the registry tracks, and four of them are classified
+ *  `write-action` -- a classification this repository already held and this
+ *  tool ignored. `tools/ledger/requeue.sh:51` runs
+ *  `tools/registers/install-drivers.sh`, which writes an ABSOLUTE path into
+ *  `.git/config`. Run inside a `git worktree`, which shares `.git/config`
+ *  with its parent, that repointed this clone's `merge.ledger.driver` at a
+ *  worktree directory the sweep then deleted -- so every later merge of
+ *  `docs/ideas.md` fatally failed to load its driver and `merge-tree` reported
+ *  a confident content conflict. Seven of sixteen open pull requests read as
+ *  conflicting on `docs/ideas.md`, and after repairing the path the same
+ *  sixteen read clean. That is §0's own documented hazard arriving through a
+ *  door §0 could not see: §0 warns a window not to RUN the installers from a
+ *  scratch worktree, and here nothing ran them -- a candidate the sweep
+ *  spawned did.
+ *
+ *  The general form: a measurement that enumerates a population and executes
+ *  each member is a write unless every member is known to be read-only, and
+ *  "known" means a classification the measurement reads, not one the author
+ *  remembers. The registry had the word for it the whole time. */
+export function partition(rows) {
+  const keep = []
+  const excluded = []
+  for (const r of rows) {
+    const row = { path: r.path, state: r.state, kind: r.entry?.kind }
     // This file is itself a candidate the registry tracks, and driving it
     // would drive every other candidate again inside one arm: 62 nested
     // subprocesses that the arm timeout then kills, leaving the row
     // NO_VERDICT by construction and teaching nothing. A gate over every gate
     // has to exclude itself explicitly, because the registry is right to
     // include it.
-    .filter((r) => resolve(REPO_ROOT, r.path) !== fileURLToPath(import.meta.url))
-    .map((r) => ({ path: r.path, state: r.state, kind: r.entry?.kind }))
+    if (resolve(REPO_ROOT, r.path) === fileURLToPath(import.meta.url)) continue
+    if (row.kind === WRITE_ACTION) {
+      excluded.push({ ...row, why: 'the registry classifies it write-action, and a measurement '
+        + 'that executes a write-action is a write' })
+      continue
+    }
+    keep.push(row)
+  }
+  return { rows: keep, excluded }
 }
 
 export function loadBaseline() {
@@ -358,8 +409,9 @@ function main() {
   const argv = process.argv.slice(2)
   const only = argv.includes('--only') ? argv[argv.indexOf('--only') + 1] : null
   let rows
+  let excluded = []
   try {
-    rows = candidates()
+    ;({ rows, excluded } = candidatesWithExclusions())
   } catch (err) {
     console.error(
       `REGISTRY_UNDRIVABLE: tools/gates/gate-registry.mjs --json could not be driven, so this `
@@ -418,6 +470,11 @@ function main() {
     `${unmovedZero} of the UNMOVED rows exited 0 with the premise removed. A differential with `
     + `two readings instead of three publishes every one of them as a green-on-nothing finding, `
     + `and every one would be false: the output did not move, so the premise did not either.`,
+  )
+  console.log(
+    `${excluded.length} candidate(s) were not spawned at all because the registry classifies `
+    + `them write-action${excluded.length ? `: ${excluded.map((e) => e.path).join(', ')}` : ''}. `
+    + 'A measurement that executes a write-action is a write.',
   )
   for (const f of findings) console.log(`${f.code}: ${f.path} -- ${f.why}`)
   process.exit(exitCode)

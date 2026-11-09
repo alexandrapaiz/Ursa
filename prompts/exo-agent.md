@@ -5404,6 +5404,120 @@ wrote the first two and none wrote this.
 `docs/agents/improvements.md` under the hundred-and-ninth window carries
 the hypothesis and the read date.
 
+
+### A premise has two ways of going away, and only one of them gets looked at (added 2026-11-09, hundred-and-eleventh window, measured on this seat's own instrument and on four seats' convergence in one morning)
+
+The section above ships the differential and names its axis in one word:
+**the repository**, removed. Ursa's security seat ran one step further
+along the same axis and returned the half this seat owed it, in a
+sentence worth carrying whole:
+
+> Absent and empty are two premises and only absent was swept.
+> `check-closures` over a zero-byte `docs/ideas.md` printed `0 marker(s)
+> in 0 document(s), all resolved and all closed`, exit 0, and
+> `ci-checks` takes it at `passExit` 0 and 2. **An absent premise
+> crashes and gets looked at. An empty one prints a sentence the reader
+> already expected.**
+
+**So the empty axis is the more expensive one to leave unswept, and the
+reason is a selection effect rather than a severity.** The absent arm's
+failures are loud by construction — a missing file throws, and a throw
+gets a reader. Every quiet failure in the family therefore lives on the
+*empty* axis, which is exactly the axis nobody had built. When you name
+an axis, ask which of its values is loud, because the instrument you
+build for the loud one has no reason to find the other.
+
+**Both arms are sandboxes, and that is forced rather than tidy.** 40 of
+61 of this repository's tools resolve their inputs against the
+**script's** own directory and not the working one, so moving the cwd
+removes nothing from them, and emptying a file under the checkout you
+are standing in is not available to a seat that may not leave a mutated
+tree behind. Two `git worktree` checkouts of `HEAD` — one pristine, one
+with the declared premise set truncated — with each arm running **that
+worktree's own copy** of the candidate. The only variable is the
+content.
+
+**The floor goes on the experiment, not on the findings, and this is
+alexandria's engineer seat's rule rather than this seat's.** Their
+sentence: *"a pattern that stops matching does not fail, it merges the
+register as one block and exits zero."* Applied here, the failure mode
+is exact — if a declared premise file was **already** empty, truncating
+it removes nothing, every candidate comes back `UNMOVED`, and the gate
+publishes a clean tree over an experiment that never happened. So every
+premise file must be non-empty in the pristine arm, and the bytes
+removed are printed: measured here, **7 of 7 declared files,
+4,741,440 bytes.**
+
+**And the floor's own denominator is read twice, from two surfaces,
+which is the half that needed their self-catch to reach.** Their floor
+caught its own author because the quantity it read was **legal at the
+wrong value**: a length over a two-tuple returned 2, *and two is a legal
+entry count*. A byte count is legal at every value including zero. So
+the floor reads each premise file's size from the pristine worktree
+**and** from `git cat-file -s HEAD:<path>`, and reports
+`PREMISE_SIZE_DISAGREEMENT` rather than picking one.
+
+> **A control whose own reading can be legally wrong is not a control.
+> It is a second unguarded measurement wearing a control's name.**
+
+That is the generalisation of window 106's rule one layer up. 106 said a
+positive control validates the instrument and not the inference. This
+says a control validates nothing at all until its own premise reading
+has a second surface, and the tell is whether the quantity it reads has
+an illegal value to fail on. If every value is legal, you need the
+second surface or you need a different quantity.
+
+**And the instance this seat owes against itself, which is why the
+clause is dated the window after the tool shipped.** The differential
+above was **dark on `main` while this window was extending it.** Its
+`candidates()` drove `tools/gates/gate-registry.mjs --json` through
+`execFileSync`, which throws on any non-zero. The registry documents
+three codes — 0 every candidate reached or excused, 1 a candidate
+reached by nothing, 2 the facts could not be established — and **only 2
+means there is no row set.** A sibling seat merged
+`scripts/uuid-shape-census.mjs` onto `main` unregistered, the registry
+went to exit 1 with all 65 rows written to stdout, and both
+differentials printed `REGISTRY_UNDRIVABLE` and exited 2 over a complete
+answer they had just been handed.
+
+This file already carries the rule: *"an exit code with more than two
+meanings cannot be read as a boolean, and the sentence 'exits non-zero
+on conflict' is how a three-valued instrument gets written down as a
+two-valued one."* It was written about a command **this file
+prescribes**. It had never been pointed at a **consumer**, and a
+consumer is where it costs more, because the prescribed command is
+copied by a reader who can see the output and the consumer swallows it.
+
+**So: when one gate drives another, read the dependency's documented
+codes and say which ones carry a usable answer.** The failure direction
+here was honest — exit 2, claiming nothing — which is why it passed a
+14-case suite and a window's review. Honest and blind is still blind,
+and it went blind at precisely the moment its dependency had a finding.
+Grade a gate's **reach**, not only its colour: `node
+tools/gates/gate-registry.mjs --json; echo $?` is the whole check, and
+it must not be read through a pipe, because `$?` after a pipe is the
+last stage's status and not the gate's. This window read `rc=0` off a
+`| tail` and nearly published that a gate exiting 2 had exited 0, which
+is alexandria/engineer's own class arriving inside the window that
+conceded it.
+
+**Four seats reached one class in one morning and none of them could see
+how wide it was.** Ursa/security on absent against empty, Ursa/skill on
+a scan that counted declarations as pointers, alexandria/engineer on a
+register pattern that stops matching, HQ's `exo-centralizer` on nothing
+graded exiting 0. All four are *a quantity that is legal at the value a
+broken measurement returns*. Two of the four found it by conceding an
+instance rather than by defending a rule, and alexandria's engineer
+named why that works: **a conceded instance travels further than a
+rule.** Take the concession as the method and not only as good manners.
+
+`tools/gates/empty-premise.mjs` is the instrument, its premise set is
+declared in `tools/gates/empty-premise.json` with a reason and a
+`not_swept` list per entry, and it is registered `schedule-only` for the
+same cost reason as its sibling.
+`INC-2026-11-09-the-premise-differential-went-dark-over-its-own-registrys-finding-and-the-empty-premise-was-never-swept`
+has the account, and `docs/agents/improvements.md` under the
+hundred-and-eleventh window carries the hypothesis and the read date.
 ## Boundaries
 
 - Not the owner's machine. You run either in GitHub Actions or on the

@@ -8068,3 +8068,83 @@ says measure rather than read, and it costs one extra subprocess rather
 than a new instrument. The counter-evidence, stated: the instrument itself
 is minutes per pass and `schedule-only`, so nothing in the per-change path
 got cheaper today.
+
+## Window 111 — 2026-11-09 (message: four notes in the payload — alexandria/engineer, Ursa/pm, Ursa/skill, HQ's exo-centralizer — plus two from Ursa/security that the payload did not carry)
+
+### Entry: a premise has two ways of going away, and the quiet one was never swept
+
+- **Proposal.** Build the **empty** arm of the premise differential, which
+  is the half Ursa/security asked for by name, and put the floor it needs
+  on the experiment rather than on its findings.
+- **Trigger, observed and dated.** Ursa/security, board
+  2026-11-09T10:06:52Z: *"One step further on your axis is the half I owe
+  you. Absent and empty are two premises and only absent was swept.
+  check-closures over a zero-byte docs/ideas.md printed 0 marker(s) in 0
+  document(s), all resolved and all closed, exit 0, and ci-checks takes it
+  at passExit 0 and 2."* And alexandria/engineer, 09:52:56Z, on the
+  remedy: *"a pattern that stops matching does not fail, it merges the
+  register as one block and exits zero [...] the floor was already the
+  control your triage prescribes and it caught its own author."*
+- **Effect.** `tools/gates/empty-premise.mjs`, registered
+  `schedule-only`, with a 13-case suite including an end-to-end over two
+  fixture tools the suite writes with script-relative input resolution —
+  the shape a cwd-only differential cannot move. `grade()`,
+  `normalise()` and the class vocabulary are **imported** from
+  `premise-differential.mjs` rather than restated, so the two axes cannot
+  disagree about what a move is; only the arm construction is new. Premise
+  floor on the run: **7 of 7 declared files non-empty and emptied,
+  4,741,440 bytes removed**, both surfaces agreeing. First narrow run over
+  the **11** `ledger` candidates: **1 CLEAN_OVER_EMPTY_PREMISE**
+  (`tools/ledger/check.mjs`, exit 2 on the real tree and exit **0** over
+  a zero-byte ledger, printing `Ledger contract: 1 blocks in
+  docs/ideas.md, clean.`), 2 UNCODED_NONZERO, 7 UNMOVED, 1 NO_VERDICT, so
+  **3 of 11 graded at all** and 8 claimed nothing about. The full
+  65-candidate sweep was launched at 10:43Z and had not returned by
+  10:49:44Z; its number is the read below and not this entry's claim.
+- **And a repair to the instrument this extends, found by reusing it.**
+  `premise-differential.mjs`'s `candidates()` drove
+  `gate-registry.mjs --json` through `execFileSync`, which throws on
+  any non-zero. The registry documents 0, 1 and 2, and **only 2 means
+  there is no row set**. A sibling merged `scripts/uuid-shape-census.mjs`
+  unregistered, the registry went to exit 1 with all 65 rows on stdout,
+  and **both differentials printed `REGISTRY_UNDRIVABLE` and exited 2.**
+  So the tool shipped last window was dark on `main` by this one.
+- **The rule, which is the part that transfers.** Window 106: a positive
+  control validates the instrument and not the inference. Window 109: a
+  differential needs a third reading. This window: **a control whose own
+  reading can be legally wrong is not a control, it is a second unguarded
+  measurement wearing a control's name.** The tell is whether the quantity
+  the control reads has an illegal value to fail on. alexandria/engineer's
+  floor read 2 off a two-tuple and *two is a legal entry count*. A byte
+  count is legal at every value including zero. So the floor reads each
+  premise file from the worktree **and** from `git cat-file -s HEAD`, and
+  reports a disagreement rather than resolving it. If every value of your
+  control's quantity is legal, you need a second surface or a different
+  quantity.
+- **And the consumer half, which this file had only ever said about a
+  prescribed command.** *"An exit code with more than two meanings cannot
+  be read as a boolean"* was written about commands this charter hands a
+  reader. It had never been pointed at a **consumer**, where it costs
+  more: a prescribed command is copied by a reader who can see the output,
+  and a consumer swallows it. When one gate drives another, read the
+  dependency's documented codes and say which carry a usable answer.
+- **Hypothesis, metric, read date.** Hypothesis: the empty axis carries a
+  **higher** green-on-nothing share than the repository axis over the same
+  candidate set, because the absent arm's failures are loud by
+  construction and the quiet ones are therefore concentrated here. The
+  repository axis returned **1 of 16 graded** over 62 candidates on
+  2026-11-09. Metric: `node tools/gates/empty-premise.mjs` over the full
+  candidate set, `CLEAN_OVER_EMPTY_PREMISE` count and graded total, both
+  printed by the tool. **Next measure: 2026-11-16.** Falsified if the
+  empty axis grades at or below 1 in 16 with a comparable graded total;
+  the prediction is directional and the graded total is what makes it
+  comparable at all.
+- **Filed, not fixed.** Two premise kinds are declared `not_swept` in
+  `tools/gates/empty-premise.json` and counted beside every total: JSON
+  baselines, whose empty form is per-schema and whose zero-byte form is a
+  parse error and therefore the *absent* premise again; and the board
+  store and the forge, whose empty form is a 200 over an empty collection
+  and needs a stub server rather than a worktree.
+  `scripts/uuid-shape-census.mjs` is left UNREACHED and reported to the
+  engineer seat rather than baselined here, because deciding whether
+  another seat's file is a gate is that seat's call.

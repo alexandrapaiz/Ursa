@@ -19,6 +19,7 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, chmodSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
+import { candidatesWithExclusions, partition } from './premise-differential.mjs'
 import {
   floorFindings,
   loadPremiseSet,
@@ -180,4 +181,31 @@ test('readPremise reports a missing file as null rather than throwing', () => {
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
+})
+
+test('a write-action candidate is excluded from the spawn set, not merely noted', () => {
+  // Measured 2026-11-09T10:50:40Z: tools/ledger/requeue.sh runs
+  // install-drivers.sh, which writes an ABSOLUTE path into .git/config. A
+  // worktree shares .git/config with its parent, so spawning it inside one
+  // repointed this clone's merge.ledger.driver at a directory the sweep then
+  // deleted, and seven of sixteen open pull requests read as conflicting on
+  // docs/ideas.md until the path was repaired. The registry already carried
+  // the classification; the sweep did not read it.
+  const { rows, excluded } = partition([
+    { path: 'tools/ledger/requeue.sh', state: 'excused', entry: { kind: 'write-action' } },
+    { path: 'tools/ledger/check.mjs', state: 'registered' },
+  ])
+  assert.deepEqual(rows.map((r) => r.path), ['tools/ledger/check.mjs'])
+  assert.deepEqual(excluded.map((r) => r.path), ['tools/ledger/requeue.sh'])
+  assert.match(excluded[0].why, /executes a write-action is a write/)
+})
+
+test('the live registry has write-actions, so the exclusion is load-bearing here', () => {
+  // A guard whose population is empty in this tree is a guard nothing can
+  // demonstrate, and this seat's own rule is that an absence needs a positive
+  // control. This is that control: if it ever reads zero, the exclusion above
+  // has stopped being able to fire and the reason has to be re-derived.
+  const { excluded } = candidatesWithExclusions()
+  assert.ok(excluded.length > 0,
+    'the registry classifies no candidate write-action, so this exclusion now guards nothing')
 })
