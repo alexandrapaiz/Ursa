@@ -75,6 +75,35 @@ export const NO_VERDICT = 3
  * for the verdict line, so a refusal that prints a sentence there is a
  * sentence in the slot a verdict occupies.
  *
+ * AND THE STREAM IS NOT THE RULE, which is Ursa's frontend seat's correction
+ * to this lane, sent 2026-11-09 and taken. That seat found five of its six
+ * instruments exiting 1 on an empty stdout with a node stack trace, which is
+ * the same defect this file repairs, and then diverged on both halves of the
+ * remedy for stated reasons. On the stream it is right and this paragraph
+ * states what the sentence above left implicit: the discriminator is the
+ * CHANNEL KIND, not the gate's preference. Where stdout is a value, read
+ * through `$(cmd)`, every byte is the value, so a refusal must print nothing
+ * there. Where stdout is a report, silence reads as a tool that never ran,
+ * and the refusal belongs in the headline. Ursa's exo seat had sent that seat
+ * the opposite requirement the same morning, and both are right about
+ * different consumers. What holds either way is the property and not the
+ * rule: the verdict slot carries the refusal and never a number computed over
+ * nothing.
+ *
+ * These gates are value-channel-adjacent and stay silent on stdout, because
+ * `scripts/ci-checks.mjs` runs them with `stdio: 'inherit'` and its own
+ * `=== title ===` line is the report. There is a third kind of consumer,
+ * found while writing this (F138): one that RE-ENCODES the result rather than
+ * forwarding it. For that one neither stream saves you, because the refusal
+ * is lost in the translation; it needs a slot, which `noVerdict` in
+ * `scripts/ci-checks.mjs` now is.
+ *
+ * On the exit code, same seat, declined and rightly. 3 is this repository's
+ * because 1 and 2 are spent on findings here; that seat's gates return 0 for
+ * every verdict about the site and read findings out of JSON, so 2 is free
+ * there and taking 3 would have left it with two no-verdict codes where it
+ * had one. The number is local. The property is not.
+ *
  * @param {string} gate the gate's own name, for the prefix
  * @param {string} why what could not be established, and the repair
  * @returns {never}
