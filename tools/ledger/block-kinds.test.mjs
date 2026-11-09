@@ -8,7 +8,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { parseLedger } from './ledger.mjs';
-import { IDEA_FIELDS, classifyBlock, presentIdeaFields } from './block-kinds.mjs';
+import { IDEA_FIELDS, classifyBlock, nearMissFieldLine, presentIdeaFields } from './block-kinds.mjs';
 
 const LEDGER = new URL('../../docs/ideas.md', import.meta.url).pathname;
 
@@ -328,5 +328,44 @@ test('the real file has exactly one tag-announced scan, and it is the one measur
   );
   if (tagAnnounced.length === 1) {
     assert.match(tagAnnounced[0], /^### 2026-11-02 \(engineer, craft scan\) —/);
+  }
+});
+
+test('nearMissFieldLine finds a label whose separator is not a colon, and nothing else', () => {
+  const near = (text, field) => nearMissFieldLine(text, field);
+  // The three shapes that were on `main` for seven days, verbatim.
+  assert.equal(
+    near('- What, measured across the queue rather than from this one case.', 'What'),
+    '- What, measured across the queue rather than from this one case.',
+  );
+  assert.equal(
+    near('- What. Every one of the 109 closed and unmerged rows was tested.', 'What'),
+    '- What. Every one of the 109 closed and unmerged rows was tested.',
+  );
+  assert.equal(
+    near("- First step, in the lanes that write these comments: name the branch.", 'First step'),
+    "- First step, in the lanes that write these comments: name the branch.",
+  );
+  // A correctly spelled field is not a near miss, which is the whole point:
+  // this reports only where the verdict is already a violation.
+  assert.equal(near('- What: one concrete paragraph', 'What'), null);
+  // A different field whose name merely starts with this one's.
+  assert.equal(near('- Whatever happened to the queue: nothing', 'What'), null);
+  assert.equal(near('- Costs, plural, of the three options: $0', 'Cost'), null);
+  // A bold label, because the ledger writes those too.
+  assert.equal(near('- **First step** taken already in this run', 'First step'),
+    '- **First step** taken already in this run');
+  // Absent entirely.
+  assert.equal(near('- Trigger: x\n- Cost: $0', 'What'), null);
+  // The first offender wins, so the message names one line and not a list.
+  assert.equal(near('- What. first\n- What, second', 'What'), '- What. first');
+});
+
+test('every §4 field name is also checkable for a near miss', () => {
+  // A field added to IDEA_FIELDS with a space or a regex character in it
+  // would throw here rather than silently matching nothing in the gate.
+  for (const f of IDEA_FIELDS) {
+    assert.equal(nearMissFieldLine(`- ${f}: fine`, f), null, f);
+    assert.equal(nearMissFieldLine(`- ${f}. not fine`, f), `- ${f}. not fine`, f);
   }
 });

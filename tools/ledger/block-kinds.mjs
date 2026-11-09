@@ -242,6 +242,42 @@ export function presentIdeaFields(text) {
 }
 
 /**
+ * The first bullet in a block that opens with a §4 field's name and does not
+ * carry that field's colon, or null when there is none.
+ *
+ * WHY A SEPARATE FUNCTION AND NOT A LOOSER `presentIdeaFields`. The colon is
+ * load-bearing and stays required: `statusOf` reads the word after `- Status:`
+ * and a groomer reads the paragraph after `- What:`, so a label that may run
+ * into arbitrary prose before its separator has no extractable content. The
+ * contract is right. What was wrong is the message.
+ *
+ * WHAT IT COST, measured 2026-11-09 by the engineer seat. On 2026-11-02 one
+ * seat filed twelve entries carrying `- What, measured across the queue
+ * rather than from this one case.`, `- What. Every one of the 109 closed and
+ * unmerged rows...` and `- First step, in the lanes that write these comments
+ * and so not this seat's to patch:`. Eighteen of those twenty-one fields were
+ * present, findable by eye, and absent to the regex. The gate said they were
+ * "missing the \"- What:\" line", which is true of the pattern and reads to a
+ * human as "this entry has no What", so the repair a reader reaches for is to
+ * write a second one. Nobody did, and the gate was red on `main` for seven
+ * days. This is the same failure the `announcesScan` paragraph in `check.mjs`
+ * was written after: both times the verdict was right and the sentence sent
+ * the reader at the wrong file.
+ *
+ * @param {string} text the block's verbatim lines
+ * @param {string} field one of IDEA_FIELDS
+ * @returns {string | null} the offending line, trimmed, or null
+ */
+export function nearMissFieldLine(text, field) {
+  const bullet = new RegExp(`^-\\s+\\*{0,2}${field}\\b`);
+  const exact = new RegExp(`^-\\s+${field}:`);
+  for (const line of text.split('\n')) {
+    if (bullet.test(line) && !exact.test(line)) return line.trim();
+  }
+  return null;
+}
+
+/**
  * The word after `- Status:`, or null when the block states no status.
  * @param {string} text the block's verbatim lines
  * @returns {string | null}

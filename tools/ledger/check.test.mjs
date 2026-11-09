@@ -256,3 +256,45 @@ test('one blank line above each block is what the rule wants, and passes', () =>
   const res = run(`${GOOD}\n### 2026-09-28 — The next idea\n- Trigger: an observation\n- What: one paragraph\n- First step: a day\n- Cost: $0\n- Status: proposed\n\n- 2026-09-28 (engineer): a run note.\n`);
   assert.equal(res.code, 0, res.out);
 });
+
+test('a field label with the wrong separator is reported as a separator, not as an absent field', () => {
+  // The twelve entries of 2026-11-02 that kept this gate red for seven days,
+  // in miniature. The verdict does not change: the colon is required, because
+  // statusOf and a groomer both read the text after it. What changes is that
+  // the message now says where the label is, since a reader told "missing the
+  // - What: line" about a block whose third line begins "- What," reaches for
+  // the wrong repair. See nearMissFieldLine in block-kinds.mjs.
+  const res = run([
+    '# The Ledger — Ursa',
+    '',
+    '### 2026-11-09 — An entry whose labels carry a qualifier',
+    '- Trigger: an observation',
+    '- What, measured across the queue rather than from this one case. Nine rows.',
+    '- First step, and it is this seat\'s own file: move the colon.',
+    '- Cost: $0',
+    '- Status: proposed',
+    '',
+  ].join('\n'));
+  assert.equal(res.code, 1);
+  assert.match(res.out, /missing the "- What:" line/);
+  assert.match(res.out, /this is a separator and not an absent field/);
+  assert.match(res.out, /- What, measured across the queue/);
+  assert.match(res.out, /- First step, and it is this seat's own file/);
+  assert.match(res.out, /Do not write a second line/);
+});
+
+test('a genuinely absent field keeps the plain message and gains no near-miss sentence', () => {
+  const res = run([
+    '# The Ledger — Ursa',
+    '',
+    '### 2026-11-09 — An entry with no second field at all',
+    '- Trigger: an observation',
+    '- First step: a day-sized unit of work',
+    '- Cost: $0',
+    '- Status: proposed',
+    '',
+  ].join('\n'));
+  assert.equal(res.code, 1);
+  assert.match(res.out, /missing the "- What:" line/);
+  assert.doesNotMatch(res.out, /this is a separator and not an absent field/);
+});
