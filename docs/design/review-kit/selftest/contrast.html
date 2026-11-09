@@ -16,7 +16,12 @@
       --only desktop --out /tmp/x --json /tmp/x/contrast.json
 
   Expected, and asserted by `check-contrast.mjs` beside this file:
-  2 ok, 3 SHORT, 1 inactive and exempt, 1 short in places, 1 UNMEASURED.
+  2 ok, 5 SHORT, 1 inactive and exempt, 1 short in places, 1 UNMEASURED.
+
+  Cases (9) and (10) were added 2026-11-09 with `--state`. Until that flag
+  existed this tool could not photograph a page with anything typed into
+  it, so neither a field's value nor the placeholder branch beside it had
+  ever been asserted, and the value was collected by nothing at all.
 -->
 <style>
   body {
@@ -68,6 +73,21 @@
   /* (8) #0a0a0a on #0a0a0a. Invisible, and invisible is what the failing
      case looks like, so this must come back UNMEASURED and never ok. */
   #invisible { color: #0a0a0a; background: #0a0a0a; }
+
+  /* (9) and (10) two fields at the same 4.31:1 grey, one carrying a value
+     and one carrying only a placeholder. Both are SHORT. The field is
+     stripped of its own chrome so the backdrop under the glyphs is the
+     page's black and the ratio stays hand-computable; what is under test
+     is which rows come back, not what a user agent draws around a box.
+
+     The one carrying a value also carries a placeholder it is covering,
+     and that placeholder must NOT come back as a row: a placeholder the
+     reader cannot see is not text the reader has to read. */
+  #typed, #empty {
+    color: #717171; background: none; border: 0; font: inherit; padding: 0;
+    width: 44ch;
+  }
+  #empty::placeholder { color: #717171; opacity: 1; }
 </style>
 
 <p id="pass-body">White body text on black, twenty one to one.</p>
@@ -78,3 +98,5 @@
 <div id="dim-parent"><p>White text under an ancestor carrying opacity.</p></div>
 <p id="patch">White text crossing a lighter patch near the end of its own line here.</p>
 <p id="invisible">Invisible text, which is not the same thing as passing text.</p>
+<p><input id="typed" value="Typed value at the same grey as case two" placeholder="A covered placeholder nobody can read"></p>
+<p><input id="empty" placeholder="Placeholder grey, which a reader does read"></p>

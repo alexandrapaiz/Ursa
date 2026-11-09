@@ -1,0 +1,8 @@
+ 1 line(s)  paint      485  glyphs      485  overhang      0px  none           "# Field Notes on Provenance"
+ 2 line(s)  paint      773  glyphs      765  overhang      8px  none           "The resolver joins finished work b"
+ 2 line(s)  paint      789  glyphs      781  overhang      8px  none           "Provenance is established by the a"
+ 2 line(s)  paint      773  glyphs      765  overhang      8px  none           "I wrote this closing sentence enti"
+ 2 line(s)  paint      781  glyphs      773  overhang      8px  none           "Outcome records give labs a verifi"
+ 1 line(s)  paint      829  glyphs      829  overhang      0px  none           "The resolver joins finished work b"
+ 2 line(s)  paint     1101  glyphs     1093  overhang      8px  none           "Provenance is established by the a"
+ 2 line(s)  paint     1173  glyphs     1165  overhang      8px  line-through   "This throwaway filler sentence abo"
