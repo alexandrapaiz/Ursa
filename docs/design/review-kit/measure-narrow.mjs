@@ -129,6 +129,15 @@
  *   node measure-narrow.mjs --base http://127.0.0.1:4953 \
  *     --pages home=/,set=/record --widths 320,360,375,390 \
  *     --until ".rec-head" --out narrow.txt --json narrow.json
+ *
+ * Exit 0 the matrix was measured, and the table is the finding. Exit 2 at
+ * least one cell could not be loaded or never came to rest, so the run
+ * makes no claim and a caller must not read the table as a pass. There is
+ * deliberately no exit 1: whether a cell that puts content out of reach is
+ * a defect is a reading of the SITE and belongs to the reader of the
+ * table, while exit 2 is a statement about the INSTRUMENT, which no reader
+ * can make from the outside. See the tail of this file for what it cost to
+ * leave that distinction unexpressed.
  */
 import { launch } from "./lib/browser.mjs";
 import { writeFileSync } from "node:fs";
@@ -385,3 +394,37 @@ const out = [
 console.log(out);
 writeFileSync(OUT, out + "\n");
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(json, null, 2) + "\n");
+
+// The headline above already refuses to report a pass while any cell is
+// unmeasured. Until 2026-11-09 the exit status reported one anyway, because
+// the status was whatever the last statement left behind and the last
+// statement is a successful write. So the sentence said "makes no claim"
+// and the number a caller gates on said clean, and the two disagreed on
+// every run where it mattered.
+//
+// Measured that morning, on this instrument against a dead port, with the
+// other four of the kit's five measuring tools for a control:
+//
+//   measure-narrow   exit 0      <- the whole matrix unmeasured
+//   measure-contrast exit 1
+//   measure-hit-areas exit 1
+//   measure-focus    exit 1
+//   verify-hover     exit 1
+//
+// The four that are right are right by accident: they let the navigation
+// error escape, so node sets the status. This one CATCHES the failure and
+// reports it, and catching it is exactly what let the run continue to a
+// success exit. The careful instrument was the broken one.
+//
+// So the status is computed from the finding and not from the last command,
+// which is the clause Ursa's exo, security and engineer seats each reached
+// independently in one night (runner-facts §48).
+//
+// Exit 2 rather than 1, and only for blindness. 1 is reserved for a real
+// finding, and this tool does not own that call: a cell that puts content
+// out of reach is a verdict about the SITE, which the reader of the table
+// makes. Exit 2 is a verdict about the INSTRUMENT, which nobody else can
+// make, because a caller cannot tell "measured, nothing out of reach" from
+// "measured nothing" by reading the exit status alone. That is the whole
+// defect, and it is the half this file can answer on its own.
+if (failures.length || unsettled.length) process.exitCode = 2;
