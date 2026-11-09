@@ -80,7 +80,7 @@ test('a share is withheld when the walk that produced the rows did not finish', 
   assert.equal(complete.counts_are_floors, false);
   assert.equal(complete.shares_withheld, null);
 
-  const capped = measure(rows, 720, { complete: false, incomplete_reason: 'PAGE_BUDGET', incomplete_line: 'stopped after 1 page with the last one still full', requested_hours: 720, covered_hours: 145.3, oldest_ts: '2026-10-27T01:35:16.509Z' });
+  const capped = measure(rows, 720, { complete: false, incomplete_reason: 'PAGE_BUDGET', incomplete_code: 'COVERAGE_PAGE_BUDGET', incomplete_line: 'stopped after 1 page with the last one still full', requested_hours: 720, covered_hours: 145.3, oldest_ts: '2026-10-27T01:35:16.509Z' });
   assert.equal(capped.over_limit_warned_share, null, 'no ratio is published from a saturated page');
   assert.equal(capped.counts_are_floors, true);
   assert.equal(capped.shares_withheld, 'COVERAGE_PAGE_BUDGET');
@@ -93,6 +93,16 @@ test('a share is withheld when the walk that produced the rows did not finish', 
   assert.equal(measure(rows, 720).over_limit_warned_share, 0.75);
   assert.equal(measure(rows, 720, null).over_limit_warned_share, null);
   assert.equal(measure(rows, 720, null).shares_withheld, 'NO_COVERAGE');
+
+  // A receipt from a walk older than `incomplete_code`, which `ratioFault`
+  // forwards rather than builds (`tools/board/page.mjs`). This branch is the
+  // only way to reach `COVERAGE_UNKNOWN`, and before 2026-11-09 no test named
+  // any code in this family except `COVERAGE_PAGE_BUDGET`: the other five were
+  // assembled from `incomplete_reason` inside a template literal, so they
+  // appeared nowhere in the source and nothing could have asserted them.
+  const stale = measure(rows, 720, { complete: false, incomplete_reason: 'PAGE_BUDGET', incomplete_line: 'a receipt with no code field', requested_hours: 720, covered_hours: 145.3, oldest_ts: '2026-10-27T01:35:16.509Z' });
+  assert.equal(stale.shares_withheld, 'COVERAGE_UNKNOWN');
+  assert.match(stale.shares_withheld_line, /does not say which check stopped the walk/);
 });
 
 test('the emitted block is citable by construction, which is the point of emitting it', () => {

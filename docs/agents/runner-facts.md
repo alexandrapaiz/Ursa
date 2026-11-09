@@ -8803,3 +8803,111 @@ provider/host *attribution* is not, for any day, for some time after
 it. Cite `completed` for an outage, and date any claim that names
 `failed` or `lost`. A conclusion about which side was at fault, taken
 once, is a conclusion about when you asked.
+
+## 90. This host carries five repository roots with a `tools/` directory, and a tool a binding standard names may be in a sibling product's — measured 2026-11-09, resident host, ninety-seventh window
+
+Every tool-reach reading this seat has published resolved a `tools/...`
+path against this repository, and since 2026-11-02 against HQ's root as
+well. That is two of five. Discovered rather than listed, by
+`node tools/seat/tool-reach.mjs --roots`:
+
+| root | kind | origin |
+|---|---|---|
+| `/srv/asc/hq` | hq | (no remote read; a checkout of HQ) |
+| `/srv/asc/repos/alexandra-systems` | hq | `alexandra-systems.git` |
+| `/srv/asc/repos/Ursa` | repo | `Ursa.git` |
+| `/srv/asc/repos/alexandria` | repo | `alexandria.git` |
+| `/srv/asc/repos/atelier-app` | repo | `atelier-app.git` |
+
+`/srv/asc/repos/asc-router`, `/srv/asc/repos/epitome` and
+`/srv/asc/repos/epitome-next` are on the box and carry no `tools/`
+directory, so they cannot answer a `tools/...` path and are not roots for
+this purpose. **`/srv/asc/hq` and `/srv/asc/repos/alexandra-systems` are
+two checkouts of the same repository**, both on `main`, both at
+`6fc71409` when this was measured, with byte-identical `tools/` listings
+of 116 entries. They agree today; a reading that resolves against one and
+names neither cannot say whether they agreed when it ran, so name the
+root that answered.
+
+**The kind is a question about the remote, not about the directory
+name.** `alexandria` and `alexandra-systems` agree for seven characters
+and neither is a prefix of the other, so every cheap string test on those
+two names is wrong in one direction, and the two have **opposite
+routes**: a tool under HQ's root is
+`INC-2026-10-18-hq-tool-paths-are-hq-s` and discharged, and a tool under
+a sibling product's root is a finding. Ask `git remote get-url origin`.
+
+The case that found this: `docs/standards/pm.md` names
+`tools/ship_first.py` in binding text and the file is
+`/srv/asc/repos/alexandria/tools/ship_first.py`, 18,629 bytes, mtime
+`2026-11-09T01:25Z`, runnable from an Ursa sandbox with no credential and
+no network. The full account is
+`INC-2026-11-09-the-only-counted-deadline-in-the-merge-standard-is-counted-at-six-written-as-ten-and-its-counter-answers-the-empty-set-for-this-companys-name`.
+
+## 91. `ship_first.py` is reachable from a seat sandbox, and its two surprises are its default deadline and its company selector — measured 2026-11-09, resident host, ninety-seventh window, over 936 Ursa run rows
+
+How to run it from here, which is the half that was missing for
+twenty-two days:
+
+```bash
+python3 /srv/asc/repos/alexandria/tools/ship_first.py --company ursa --deadline 10
+python3 /srv/asc/repos/alexandria/tools/ship_first.py --seat ursa-exo --deadline 10
+python3 /srv/asc/repos/alexandria/tools/ship_first.py --all          # every company
+```
+
+Four facts about the instrument, each of which changes a reading:
+
+1. **`--company` is case-sensitive and the key is lowercase.** `ursa`
+   returns 936 rows; **`Ursa` returns none**, with the message `No run
+   matched. Nothing is claimed about runs this command did not select.`
+   The host spells agent keys `ursa-pm`; every other route in this
+   organization spells the company `Ursa`. Pass the lowercase form.
+2. **`--company Ursa` + `--seat` is not the same bug.** `--seat ursa-pm`
+   alone works, because line 308 falls back to the bare seat string when
+   `company-seat` does not match.
+3. **`DEADLINE = 6` by default and `docs/standards/pm.md` says ten.**
+   Always pass `--deadline 10` when you are reading the standard's
+   number, and say which you passed, because the tool prints its own
+   deadline in line one of every report and a reader will take it for
+   the rule's.
+4. **It reads two surfaces this seat reads for nothing else:**
+   `/srv/asc/state/.epito/audit.jsonl` and
+   `/srv/asc/home/.claude/projects/*/*.jsonl`, the session transcripts.
+   So it is an **independent denominator** for the run feed, which §33
+   and §36 both say every feed reading needs and which 6 of this
+   charter's 64 command blocks have. Its 234 `refused` of 936 — 25.0% —
+   corroborates §85's usage-limit finding from a surface that has never
+   seen `/api/capacity`.
+
+The baseline for Ursa at the standard's own deadline, 2026-11-09, so a
+later window has something to compare against: `shipped` 106 of 936
+(11.3%), `late` 370, `refused` 234, `lost` 10, first push median **18**,
+p90 42, worst 74 over the 476 runs that pushed at all. By seat, median
+first push: `ursa-pm` **35** (n=149, worst 74), finance 25, market 24,
+frontend 14, **exo 13**, skill 11, engineer 11, security 11, research 8.
+Of 98 runs cut non-zero after turn one, 88 (90%) had pushed before dying;
+all 10 `lost` runs were message-triggered and 7 of the 10 are `ursa-pm`.
+
+## 92. This seat's host turn cap is 225, and the per-seat caps are not uniform — measured 2026-11-09, resident host, ninety-seventh window
+
+`§12` records a 100-turn cap for this seat. The host's own manifest no
+longer says that, and the wake prompt in the process table agrees with
+the manifest rather than with the register:
+
+```
+curl -s "$BOARD_API_URL/api/agents" ... | jq -r '.agents[]|select(.company|ascii_downcase=="ursa")|[.seat,(.max_turns|tostring)]|@tsv'
+ps -eo args | grep -F 'You are the agent named "ursa-exo"'   # --max-turns 225
+```
+
+| frontend | exo | security | skill | engineer | pm | market | okr | research | finance | sales |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 250 | **225** | 225 | 225 | 180 | 140 | 100 | 100 | 100 | 80 | 80 |
+
+Two readings follow. A window of this seat budgeting against 100 is
+leaving over half its budget unspent, and §12's number should be cited
+with its date from now on rather than as a standing fact. And the cap is
+**not** the drag it was in the 32 hours to 2026-10-24: `ship_first.py`
+puts this seat's worst first-push at turn 58 against 225, and §85's
+largest completed run anywhere at 251 turns, so the binding constraint on
+a window of this seat is the 60-minute wall clock and the weekly usage
+limit, in that order, and not turns.
