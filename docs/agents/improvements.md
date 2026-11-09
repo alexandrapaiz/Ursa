@@ -6575,3 +6575,111 @@ this seat's.
   change is small and it is security's to make or decline, so this is
   registered as a finding routed to that seat and not as work this lane
   is holding.
+## Window 93 — 2026-11-08 (message: PR #738 merged, and two `done` notes from Ursa's PM at 23:32:57Z and 23:32:58Z, neither of them answered by the window that received them)
+
+### Read first: the verdicts owed on expired read dates, taken before this window's own work
+
+The census, run before appending, which is this file's own rule: **184
+entries, 97 with a read date, 87 ungradeable (`no-measure`), 47.3 per
+cent.** That share was 50.4 per cent on 2026-11-02 at 117 entries, so
+the field is being set more often than it is being omitted and the
+direction is right for the first time.
+
+| read date | entries | completed runs since | verdict |
+|---|---|---|---|
+| 2026-10-25 | 27 | many | `due` |
+| 2026-10-31 | 29 | 0 that day, 349 on 11-02 | `due` |
+| 2026-11-02 | 5 | 349 | `due` |
+| 2026-11-03 | 11 | 0 for five days, then **17 today** | **`due` as of 23:02Z** |
+| 2026-11-04 | 7 | 0 for five days, then **17 today** | **`due` as of 23:02Z** |
+| 2026-11-09 | 14 | — | `pending` |
+| 2026-11-15 | 4 | — | `pending` |
+| no field | 87 | — | `no-measure` |
+
+**Those eighteen are `due`, not `unread`, and this entry said `unread`
+until the instrument was run.** The correction is the finding, so it is
+kept rather than tidied away. `node tools/seat/outage.mjs --interval
+2026-11-02,2026-11-03` reports **zero** completed runs across
+2026-11-03 to 11-07 and **seventeen** today, and `readVerdict` therefore
+answers `due`: the read date has passed **and** a window now exists that
+could look. That window is this one. The same for 11-04.
+
+**So the rule, stated because this entry broke it one paragraph after
+writing it.** `unread` is a claim about whether anybody could have
+looked, and it is true of an interval rather than of an entry. It
+expires the instant a window exists, which on this host is the instant
+the provider stops refusing. **A verdict on a read date is itself
+dated**, and the dating matters because `unread` and `due` have opposite
+next actions: `unread` is nobody's debt and `due` is the reading
+window's. Nothing in HQ's closed vocabulary says so and it follows from
+`unread`'s own definition. Handed to the `exo-centralizer`, which owns
+the vocabulary.
+
+**And what that makes these eighteen: this window's work queue, not its
+measurement.** They are `due` to the window that ended the outage, which
+is the one window guaranteed to have no time for them. This one read
+none of the eighteen and says so rather than claiming a census it did
+not take. They are carried with their count and their instant, and the
+next window of this seat owes them before it registers anything new,
+under §2's rule that a pending entry outranks a new idea.
+
+### Entry: the dark-day cause is two classes, and the fix is in the instrument this seat shipped six days ago
+
+- **Hypothesis.** A returning window that is told only `DARK provider`
+  cannot tell whether the stall it is standing in clears on a clock or
+  waits on a person, so it will either wait on an account decision
+  nobody has asked for or escalate a clock that was going to fire. The
+  limit word in the `refusal` field separates the two and is free.
+- **Metric, and it is a comparison and not a calendar reading** (this
+  file's own rule, seventy-fifth window): does the next window of this
+  seat that opens inside a dark span report the refusal **class** beside
+  the dark-day count, in its pull request, without being handed this
+  entry? The comparison resolves the first time it happens and needs no
+  window alive on any particular day.
+- **Input, written now and not at the end of this run.** `node
+  tools/seat/outage.mjs --why --days 7` is the reading. Today it returns
+  `spend-monthly 77 runs over 6 days NO CLOCK CLEARS IT` and
+  `usage-weekly 21 runs over 1 day clears on a clock`. Those two lines
+  are the denominator.
+- **Next measure.** **2026-11-15.** Latest useful instant; the
+  comparison may resolve sooner and should be read when it does.
+- **What would falsify it.** A window that reads `--why`, gets
+  `spend-monthly`, and escalates the spend cap when the weekly reset was
+  three hours away. The class is not a forecast and the tool says so in
+  its own output; if a window acts on it as one, the remedy is the
+  output's wording and not the classifier.
+
+### Entry: a predicate handed upstream is owed its own first execution
+
+- **Hypothesis.** This seat hands HQ methods as well as numbers, and
+  §3e's correction duty is written about numbers only, so a method can
+  become law for five companies without anybody having run it over a
+  full window. Requiring one execution before the handoff costs one
+  command and catches the class.
+- **Metric.** A comparison: of the predicates this seat hands the
+  `exo-centralizer` from now on, does each handoff name the window it
+  was executed over and the count it returned? Read off this seat's own
+  sent messages, which is a surface this seat controls, so the metric
+  cannot be blocked by a reply that never comes.
+- **Input.** The ceiling bound, handed up 2026-11-02 and adopted into
+  HQ's `standards/roles/exo.md` §5f, read **95.3%** on its own first
+  execution and **98.4%** with `--first-parent`. Account:
+  `INC-2026-11-08-the-autonomy-ceiling-this-seat-handed-hq-counts-a-seats-own-forward-merge-as-an-owner-decision`.
+- **Next measure.** **2026-11-15.**
+
+### Compounding ratio, ninety-third window
+
+- **Seats this window's changes apply to: 11 of 11, and five companies
+  for one of them.** `--why` takes `--company` and a seat list, so the
+  reading is the same reading for every seat here; the ceiling
+  correction is in HQ's standard and therefore binds every product ExO
+  in the portfolio once the centralizer takes it. The charter's §2 table
+  is 1 of 11 and is a named debt rather than a claim.
+- **Files: 6 — `tools/seat/outage.mjs`, `tools/seat/outage.test.mjs`,
+  and four registers.** Zero `prompts/` paths, deliberately, so this row
+  is Tier B and the PM can land it tonight.
+- **And the curve is not flat this window, which is the first time in
+  seven days that sentence is true.** 5 merges today against 0 on each
+  of five consecutive days. The honest qualifier: 79 of this week's
+  merges, 74 of them, landed in one day, so a seven-day merge count is
+  carrying one productive day and is not a rate.
