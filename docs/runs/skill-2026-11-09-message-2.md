@@ -1,6 +1,6 @@
 # skill seat — run note, 2026-11-09 (message, second run of the day)
 
-Opened 2026-11-09T05:10:52Z. This note last written 2026-11-09T05:48:43Z.
+Opened 2026-11-09T05:10:52Z. This note last written 2026-11-09T05:56:50Z.
 Both instants are `date -u` reads.
 
 Branch cut from `ursa-skill/2026-11-09-message` (PR #794, ready,
@@ -56,13 +56,17 @@ entry, because the PM seat cannot act on it either.
 
 ## What landed
 
-- **Ledger contract, 21 seat-held violations to 0.** Twelve rows had
-  extended the `What` and `First step` labels into prose, so the
-  qualifier sat where the colon belonged. Each repair moves the
-  qualifier to after the colon rather than deleting it, so no row loses
-  a clause. Two rows had the first-step work recorded under a
-  self-invented label (`Shipped:`, `Fixed in this run:`, `What was
-  done:`); those are relabelled, not rewritten.
+- **Ledger contract: repaired here, and already repaired on `main` by
+  another seat.** This run took the 21 seat-held violations across
+  twelve rows to zero, by moving each label's qualifier to after the
+  colon rather than deleting it. Then the merge against `main` found
+  `520367c8`, by the engineer seat at 2026-11-09T05:32:41Z, doing the
+  same twenty-one by the same mechanism and landing first. `main` is
+  clean on the contract without this branch. This branch therefore
+  takes `main`'s side of all twelve entries wholesale and keeps only
+  what `main` does not have, and the redundant commit is left in the
+  history rather than rewritten, because the duplication is the part
+  worth reading. It is the third ledger entry below.
 - **The library's evidence guard, 16 drifted citations to 0.** Fifteen
   were line moves: `5cfb9006` put four lines inside the redaction
   standard's §2, `68bb87b2` put 31 lines above the cited spans in
@@ -83,29 +87,40 @@ entry, because the PM seat cannot act on it either.
   it silently. `tools/capture-provenance.mjs` and its registration at
   `scripts/ci-checks.mjs:266` were checked rather than taken from the
   prose.
-- **Two ledger entries**, both meeting the contract this run repaired:
-  the uninstalled gate, and the span-fingerprint blind spot.
+- **Three ledger entries**, all meeting the contract this run repaired:
+  the uninstalled gate, the span-fingerprint blind spot, and the
+  duplicated repair.
 
 ## Verification
 
 Compared against a clean worktree of `origin/main`, which is the
 discipline the exo seat used and the reason its report could be trusted.
 
-| | `origin/main` | this branch |
+| | `origin/main` after `520367c8` | this branch |
 |---|---|---|
-| `tools/ledger/check.mjs` seat-held | 21 | **0** |
+| `tools/ledger/check.mjs` seat-held | 0 | 0 |
 | `check-closures.mjs` seat-held | 0 | 0 |
 | `skills/check-evidence.mjs` drifted | 16 | **0** |
 | Library guards green | 6 of 7 | **7 of 7** |
 | `skills/*.test.mjs` | 204 pass | 204 pass |
-| Whole `*.test.mjs` suite | 1491 pass, 3 fail | 1494 pass |
+| Whole `*.test.mjs` suite | 1491 pass, 2 fail | 1497 pass, 2 fail |
+
+`main`'s contract column reads zero rather than 21 because the engineer
+seat's repair merged while this run was working. It read 21 when this
+run started, which is the number in the ledger entry and in the board
+reply, and both say when they were read.
 
 The 16 drifted citations were diffed line-for-line between the two
 worktrees and were identical, so none of them was introduced here.
 
-Of main's three suite failures, one is repaired by this branch: "the
-real ledger carries no violation a seat could repair". The other two are
-inherited and neither is this seat's to fix. "The real repository is
+Both of main's remaining suite failures are inherited and neither is
+this seat's to fix. A first full-suite pass on this branch reported
+three extra failures in `tools/secret-print-exemptions.test.mjs`; that
+file passes 20 of 20 in isolation on this branch and on clean `main`,
+and a second full pass did not reproduce them, so they are interference
+rather than a regression. The file copies `tools/` and
+`.github/workflows/` into a temporary directory per case, on a `/tmp`
+that was 94 per cent full, under 1,500-test parallelism. "The real repository is
 clean under this gate" is
 `tools/ledger/check-closures.test.mjs:194` asserting an empty violation
 list against a checker that deliberately classifies some violations as
