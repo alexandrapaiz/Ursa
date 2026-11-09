@@ -70,7 +70,7 @@ try {
   // Each expectation names the case in the fixture it reads, so a failure
   // says which half is wrong rather than only that a count moved.
   const want = [
-    ["text runs seen", rows.length, 8],
+    ["text runs seen", rows.length, 10],
     ["(1) white on black is ok", verdict(by("White body text")), "ok"],
     ["(1) and it reads 21.0:1", near(by("White body text").median, 21, 0.3), true],
     ["(2) 4.31:1 body text is SHORT", verdict(by("Grey body text")), "SHORT"],
@@ -87,6 +87,17 @@ try {
     ["(7) and its fifth percentile down at 3.45", near(by("White text crossing").p5, 3.45, 0.1), true],
     ["(8) invisible text is UNMEASURED, never ok", verdict(by("Invisible text")), "UNMEASURED"],
     ["(8) and it is the dangerous reason, not a small glyph", by("Invisible text").maxCov, 0],
+    // (9) and (10). A value and a placeholder are both text a reader reads,
+    // and until 2026-11-09 the tool collected one of them. The value's
+    // absence did not show up as a missing row, which is why it survived:
+    // it showed up as DRIFT, because pixels in no collected box make the
+    // backdrop frame look like a page that moved.
+    ["(9) a field's value comes back as a row at all", by("Typed value").tag, "input[value]"],
+    ["(9) and it is judged, not exempted", verdict(by("Typed value")), "SHORT"],
+    ["(9) and the arithmetic matches case two's grey", near(by("Typed value").median, 4.31, 0.06), true],
+    ["(9) and the placeholder it covers is not also a row", rows.filter((r) => r.tag.endsWith("::placeholder")).length, 1],
+    ["(10) a placeholder with no value is still measured", by("Placeholder grey").tag, "input::placeholder"],
+    ["(10) and it is judged against the body floor", verdict(by("Placeholder grey")), "SHORT"],
   ];
 
   let bad = 0;
