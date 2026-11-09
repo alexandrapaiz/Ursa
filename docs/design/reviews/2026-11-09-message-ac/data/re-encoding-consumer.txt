@@ -1,0 +1,64 @@
+The re-encoding consumer, measured over this kit's selftests
+============================================================
+Measured 2026-11-09 (run ac) in scratch copies of docs/design/review-kit,
+each with one subject tool replaced by its own refusal arm: a script that
+prints the real NOT MEASURED and NO VERDICT lines that lib/reached.mjs
+produces, then exits 2 (UNREACHED). Nothing else about the kit changed.
+
+The question came from Ursa's security seat on the board, out of its F138:
+a consumer that RE-ENCODES a result into a different vocabulary loses a
+refusal whenever that vocabulary has no word for it, and neither the
+status channel nor the prose channel reaches it. Its instance was
+scripts/ci-checks.mjs. The seat asked this one to check its six.
+
+The six browser-driving tools are producers and were repaired in run z.
+Their consumers are the selftests, and a selftest is exactly the
+re-encoding kind: it translates a spawn into ok / FAIL plus one aggregate
+status whose contract each file's own header states as "exit 0 on pass, 1
+on fail, and it says which expectation missed".
+
+ARM 1: subject refuses (exit 2, NO VERDICT on stdout)
+
+  selftest              before            after
+  check-contrast.mjs    exit 1            exit 2
+                        Error: measure-contrast.mjs exited 2
+  check-hit-areas.mjs   exit 1            exit 2
+                        Error: measure-hit-areas.mjs exited 2
+  check-focus.mjs       exit 1            exit 2
+                        ENOENT stack trace for the JSON the subject never
+                        wrote, which does not mention the status at all
+
+  occurrences of the string "NO VERDICT" in the selftest's whole output:
+                        before: 0 0 0      after: 2 2 2
+
+ARM 2 (control): subject RAN and failed (exit 1, wrote valid JSON)
+
+  check-contrast.mjs    exit 1            exit 1
+  occurrences of "NO VERDICT":  0 before, 0 after
+
+So the slot is occupied only by a refusal, and a real failed expectation
+still reads as one. 2 and not 3 because 0 and 1 are the only codes a
+selftest here spends, and 2 is already this kit's not-a-verdict code in
+lib/reached.mjs; tools/board/ uses 3 because 1 and 2 are spent there, and
+that divergence is recorded in the kit README.
+
+TWO CHANNELS DIED, NOT ONE. check-contrast.mjs and check-hit-areas.mjs
+spawned with stdio: "ignore", so the refusal prose was destroyed at the
+consumer rather than merely untranslated. That is one worse than the
+instance security measured, where the CI log carried the words verbatim
+and only the translation lost them. Both now pipe, and the subject's own
+lines are forwarded under "what <tool> said", because the subject is the
+only party that knows which premise was missing.
+
+WHAT EXIT 1 MEANT HERE. Not a neutral non-zero. It is each selftest's own
+code for an expectation missed, which is a claim that the INSTRUMENT is
+broken, published at the moment the instrument was the one component
+behaving correctly. Same shape as security's aggregate 1 meaning
+ran-and-failed, which is a claim about the branch.
+
+NOT AN INSTANCE, CHECKED: check-reached.mjs, check-narrow.mjs,
+check-pin-now.mjs and check-redaction.mjs all assert their subject's
+non-zero code as an expected value, so the word exists in them already.
+check-narrow.mjs's assertion is "a matrix it could not load exits
+non-zero". There is no aggregate runner over the selftests; the README
+says each is runnable on its own, so there was no aggregate slot to add.

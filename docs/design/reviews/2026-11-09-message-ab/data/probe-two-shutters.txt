@@ -1,0 +1,6 @@
+phone    page  scrollLeft    0  caret  56  field 392/326  doc  1541  focus BODY           "read the record"
+phone    back  scrollLeft    0  caret  56  field 392/326  doc  1541  focus BODY           "read the record"
+tablet   page  scrollLeft    0  caret  56  field 554/554  doc  1180  focus BODY           "read the record"
+tablet   back  scrollLeft    0  caret  56  field 554/554  doc  1180  focus BODY           "read the record"
+desktop  page  scrollLeft    0  caret  56  field 825/825  doc  1127  focus BODY           "read the record"
+desktop  back  scrollLeft    0  caret  56  field 825/825  doc  1127  focus BODY           "read the record"

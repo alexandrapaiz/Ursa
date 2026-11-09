@@ -1,0 +1,2150 @@
+[
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 0,
+  "inactive": false,
+  "tag": "span",
+  "cls": "mark.font-[family-name:var(--font-inter-tight)]",
+  "text": "Ursa Minor",
+  "fontSize": 15.2,
+  "weight": 200,
+  "colour": [
+   232,
+   237,
+   247,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 58,
+    "w": 140,
+    "h": 19
+   }
+  ],
+  "drift": 0,
+  "pixels": 20,
+  "maxCov": 0.97,
+  "min": 17.552444905783716,
+  "p5": 17.552444905783716,
+  "median": 17.552444905783716,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 1,
+  "inactive": false,
+  "tag": "span",
+  "cls": "font-mono.text-[0.72rem]",
+  "text": "for frontier labs",
+  "fontSize": 11.5,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 223,
+    "y": 61,
+    "w": 135,
+    "h": 15
+   }
+  ],
+  "drift": 0,
+  "pixels": 33,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 2,
+  "inactive": false,
+  "tag": "div",
+  "cls": "font-mono.text-[0.68rem]",
+  "text": "A record at its address",
+  "fontSize": 10.9,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 44,
+    "y": 113,
+    "w": 242,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 68,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 3,
+  "inactive": false,
+  "tag": "span",
+  "cls": "text-[var(--polar)]",
+  "text": "✦",
+  "fontSize": 10.9,
+  "weight": 400,
+  "colour": [
+   168,
+   199,
+   250,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 113,
+    "w": 13,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 7,
+  "maxCov": 1,
+  "min": 11.985685008047135,
+  "p5": 11.985685008047135,
+  "median": 11.985685008047135,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 4,
+  "inactive": false,
+  "tag": "h1",
+  "cls": "mt-9.text-balance",
+  "text": "The address says where the bytes are. Noth",
+  "fontSize": 27.2,
+  "weight": 200,
+  "colour": [
+   232,
+   237,
+   247,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 166,
+    "w": 288,
+    "h": 31
+   },
+   {
+    "x": 32,
+    "y": 201,
+    "w": 258,
+    "h": 31
+   },
+   {
+    "x": 32,
+    "y": 237,
+    "w": 248,
+    "h": 31
+   }
+  ],
+  "drift": 0,
+  "pixels": 1943,
+  "maxCov": 1,
+  "min": 17.552444905783716,
+  "p5": 17.552444905783716,
+  "median": 17.552444905783716,
+  "threshold": 3
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 5,
+  "inactive": false,
+  "tag": "p",
+  "cls": "mt-8.measure",
+  "text": "A record id is a directory name, a date an",
+  "fontSize": 15.2,
+  "weight": 400,
+  "colour": [
+   183,
+   192,
+   212,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 306,
+    "w": 299,
+    "h": 17
+   },
+   {
+    "x": 32,
+    "y": 332,
+    "w": 308,
+    "h": 17
+   },
+   {
+    "x": 32,
+    "y": 358,
+    "w": 275,
+    "h": 17
+   },
+   {
+    "x": 32,
+    "y": 383,
+    "w": 270,
+    "h": 17
+   },
+   {
+    "x": 32,
+    "y": 409,
+    "w": 316,
+    "h": 17
+   },
+   {
+    "x": 32,
+    "y": 435,
+    "w": 318,
+    "h": 17
+   },
+   {
+    "x": 32,
+    "y": 461,
+    "w": 305,
+    "h": 17
+   },
+   {
+    "x": 32,
+    "y": 487,
+    "w": 231,
+    "h": 17
+   }
+  ],
+  "drift": 0,
+  "pixels": 658,
+  "maxCov": 1,
+  "min": 11.288257244893144,
+  "p5": 11.288257244893144,
+  "median": 11.288257244893144,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 6,
+  "inactive": false,
+  "tag": "button",
+  "cls": "rec-action.rec-hit",
+  "text": "read the record",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   168,
+   199,
+   250,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 584,
+    "w": 116,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 23,
+  "maxCov": 1,
+  "min": 11.985685008047135,
+  "p5": 11.985685008047135,
+  "median": 11.985685008047135,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 7,
+  "inactive": false,
+  "tag": "p",
+  "cls": "mt-7.measure",
+  "text": "Your browser could not read https://alexan",
+  "fontSize": 13.6,
+  "weight": 400,
+  "colour": [
+   232,
+   237,
+   247,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 632,
+    "w": 170,
+    "h": 15
+   },
+   {
+    "x": 32,
+    "y": 655,
+    "w": 216,
+    "h": 15
+   },
+   {
+    "x": 32,
+    "y": 678,
+    "w": 308,
+    "h": 15
+   },
+   {
+    "x": 32,
+    "y": 701,
+    "w": 301,
+    "h": 15
+   },
+   {
+    "x": 32,
+    "y": 724,
+    "w": 322,
+    "h": 15
+   },
+   {
+    "x": 32,
+    "y": 747,
+    "w": 325,
+    "h": 15
+   },
+   {
+    "x": 32,
+    "y": 770,
+    "w": 325,
+    "h": 15
+   },
+   {
+    "x": 32,
+    "y": 793,
+    "w": 312,
+    "h": 15
+   },
+   {
+    "x": 32,
+    "y": 817,
+    "w": 307,
+    "h": 15
+   },
+   {
+    "x": 32,
+    "y": 840,
+    "w": 180,
+    "h": 15
+   }
+  ],
+  "drift": 0,
+  "pixels": 896,
+  "maxCov": 1,
+  "min": 17.552444905783716,
+  "p5": 17.552444905783716,
+  "median": 17.552444905783716,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 8,
+  "inactive": false,
+  "tag": "h2",
+  "cls": "font-mono.text-[0.68rem]",
+  "text": "What an address cannot do",
+  "fontSize": 10.9,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 44,
+    "y": 957,
+    "w": 262,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 60,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 9,
+  "inactive": false,
+  "tag": "span",
+  "cls": "text-[var(--polar)]",
+  "text": "✦",
+  "fontSize": 10.9,
+  "weight": 400,
+  "colour": [
+   168,
+   199,
+   250,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 957,
+    "w": 13,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 7,
+  "maxCov": 1,
+  "min": 11.985685008047135,
+  "p5": 11.985685008047135,
+  "median": 11.985685008047135,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 10,
+  "inactive": false,
+  "tag": "p",
+  "cls": "mt-7.measure",
+  "text": "It cannot prove the record is the one that",
+  "fontSize": 15.2,
+  "weight": 400,
+  "colour": [
+   183,
+   192,
+   212,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 1004,
+    "w": 304,
+    "h": 17
+   },
+   {
+    "x": 32,
+    "y": 1030,
+    "w": 304,
+    "h": 17
+   },
+   {
+    "x": 32,
+    "y": 1056,
+    "w": 310,
+    "h": 17
+   },
+   {
+    "x": 32,
+    "y": 1082,
+    "w": 304,
+    "h": 17
+   },
+   {
+    "x": 32,
+    "y": 1107,
+    "w": 269,
+    "h": 17
+   },
+   {
+    "x": 310,
+    "y": 1133,
+    "w": 37,
+    "h": 17
+   },
+   {
+    "x": 32,
+    "y": 1159,
+    "w": 317,
+    "h": 17
+   },
+   {
+    "x": 32,
+    "y": 1185,
+    "w": 174,
+    "h": 17
+   }
+  ],
+  "drift": 0,
+  "pixels": 641,
+  "maxCov": 1,
+  "min": 11.288257244893144,
+  "p5": 11.288257244893144,
+  "median": 11.288257244893144,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 11,
+  "inactive": false,
+  "tag": "a",
+  "cls": "rec-action.text-[var(--polar)]",
+  "text": "Opening the same record through its site",
+  "fontSize": 15.2,
+  "weight": 400,
+  "colour": [
+   168,
+   199,
+   250,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 1133,
+    "w": 275,
+    "h": 17
+   }
+  ],
+  "drift": 0,
+  "pixels": 92,
+  "maxCov": 1,
+  "min": 11.985685008047135,
+  "p5": 11.985685008047135,
+  "median": 11.985685008047135,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 12,
+  "inactive": false,
+  "tag": "span",
+  "cls": "whitespace-nowrap",
+  "text": "Alexandra Paiz Delgado",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 1329,
+    "w": 179,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 52,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 13,
+  "inactive": false,
+  "tag": "span",
+  "cls": "block.text-balance",
+  "text": "Systems Engineer",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 1346,
+    "w": 130,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 42,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 14,
+  "inactive": false,
+  "tag": "span",
+  "cls": "whitespace-nowrap",
+  "text": "Fatima Michel Giron",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 1378,
+    "w": 155,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 44,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 15,
+  "inactive": false,
+  "tag": "span",
+  "cls": "block.text-balance",
+  "text": "Computer & Artificial Intelligence Enginee",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 1395,
+    "w": 171,
+    "h": 14
+   },
+   {
+    "x": 32,
+    "y": 1412,
+    "w": 171,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 119,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 16,
+  "inactive": false,
+  "tag": "span",
+  "cls": "",
+  "text": "© ursa",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 32,
+    "y": 1445,
+    "w": 49,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 12,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "phone",
+  "id": 17,
+  "tag": "input[value]",
+  "cls": "w-full.min-w-0",
+  "text": "pages/alexandrapaiz/ursa-records/ursa-2026",
+  "fontSize": 11.5,
+  "weight": 400,
+  "colour": [
+   232,
+   237,
+   247,
+   1
+  ],
+  "inactive": false,
+  "rects": [
+   {
+    "x": 32,
+    "y": 541,
+    "w": 326,
+    "h": 27
+   }
+  ],
+  "drift": 0,
+  "pixels": 85,
+  "maxCov": 1,
+  "min": 17.552444905783716,
+  "p5": 17.552444905783716,
+  "median": 17.552444905783716,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 0,
+  "inactive": false,
+  "tag": "span",
+  "cls": "mark.font-[family-name:var(--font-inter-tight)]",
+  "text": "Ursa Minor",
+  "fontSize": 15.2,
+  "weight": 200,
+  "colour": [
+   232,
+   237,
+   247,
+   1
+  ],
+  "rects": [
+   {
+    "x": 65,
+    "y": 58,
+    "w": 140,
+    "h": 19
+   }
+  ],
+  "drift": 0,
+  "pixels": 20,
+  "maxCov": 0.97,
+  "min": 17.552444905783716,
+  "p5": 17.552444905783716,
+  "median": 17.552444905783716,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 1,
+  "inactive": false,
+  "tag": "span",
+  "cls": "font-mono.text-[0.72rem]",
+  "text": "for frontier labs",
+  "fontSize": 11.5,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 619,
+    "y": 61,
+    "w": 135,
+    "h": 15
+   }
+  ],
+  "drift": 0,
+  "pixels": 33,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 2,
+  "inactive": false,
+  "tag": "div",
+  "cls": "font-mono.text-[0.68rem]",
+  "text": "A record at its address",
+  "fontSize": 10.9,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 77,
+    "y": 113,
+    "w": 242,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 68,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 3,
+  "inactive": false,
+  "tag": "span",
+  "cls": "text-[var(--polar)]",
+  "text": "✦",
+  "fontSize": 10.9,
+  "weight": 400,
+  "colour": [
+   168,
+   199,
+   250,
+   1
+  ],
+  "rects": [
+   {
+    "x": 65,
+    "y": 113,
+    "w": 13,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 7,
+  "maxCov": 1,
+  "min": 11.985685008047135,
+  "p5": 11.985685008047135,
+  "median": 11.985685008047135,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 4,
+  "inactive": false,
+  "tag": "h1",
+  "cls": "mt-9.text-balance",
+  "text": "The address says where the bytes are. Noth",
+  "fontSize": 31.2,
+  "weight": 200,
+  "colour": [
+   232,
+   237,
+   247,
+   1
+  ],
+  "rects": [
+   {
+    "x": 65,
+    "y": 166,
+    "w": 460,
+    "h": 35
+   },
+   {
+    "x": 65,
+    "y": 206,
+    "w": 457,
+    "h": 35
+   }
+  ],
+  "drift": 0,
+  "pixels": 2819,
+  "maxCov": 1,
+  "min": 17.552444905783716,
+  "p5": 17.552444905783716,
+  "median": 17.552444905783716,
+  "threshold": 3
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 5,
+  "inactive": false,
+  "tag": "p",
+  "cls": "mt-8.measure",
+  "text": "A record id is a directory name, a date an",
+  "fontSize": 15.2,
+  "weight": 400,
+  "colour": [
+   183,
+   192,
+   212,
+   1
+  ],
+  "rects": [
+   {
+    "x": 65,
+    "y": 281,
+    "w": 640,
+    "h": 17
+   },
+   {
+    "x": 65,
+    "y": 307,
+    "w": 620,
+    "h": 17
+   },
+   {
+    "x": 65,
+    "y": 333,
+    "w": 638,
+    "h": 17
+   },
+   {
+    "x": 65,
+    "y": 358,
+    "w": 438,
+    "h": 17
+   }
+  ],
+  "drift": 0,
+  "pixels": 696,
+  "maxCov": 1,
+  "min": 11.288257244893144,
+  "p5": 11.288257244893144,
+  "median": 11.288257244893144,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 6,
+  "inactive": false,
+  "tag": "button",
+  "cls": "rec-action.rec-hit",
+  "text": "read the record",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   168,
+   199,
+   250,
+   1
+  ],
+  "rects": [
+   {
+    "x": 639,
+    "y": 414,
+    "w": 116,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 23,
+  "maxCov": 1,
+  "min": 11.985685008047135,
+  "p5": 11.985685008047135,
+  "median": 11.985685008047135,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 7,
+  "inactive": false,
+  "tag": "p",
+  "cls": "mt-7.measure",
+  "text": "Your browser could not read https://alexan",
+  "fontSize": 13.6,
+  "weight": 400,
+  "colour": [
+   232,
+   237,
+   247,
+   1
+  ],
+  "rects": [
+   {
+    "x": 65,
+    "y": 471,
+    "w": 592,
+    "h": 15
+   },
+   {
+    "x": 65,
+    "y": 495,
+    "w": 595,
+    "h": 15
+   },
+   {
+    "x": 65,
+    "y": 518,
+    "w": 548,
+    "h": 15
+   },
+   {
+    "x": 65,
+    "y": 541,
+    "w": 576,
+    "h": 15
+   },
+   {
+    "x": 65,
+    "y": 564,
+    "w": 471,
+    "h": 15
+   }
+  ],
+  "drift": 0,
+  "pixels": 894,
+  "maxCov": 1,
+  "min": 17.552444905783716,
+  "p5": 17.552444905783716,
+  "median": 17.552444905783716,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 8,
+  "inactive": false,
+  "tag": "h2",
+  "cls": "font-mono.text-[0.68rem]",
+  "text": "What an address cannot do",
+  "fontSize": 10.9,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 77,
+    "y": 681,
+    "w": 262,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 60,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 9,
+  "inactive": false,
+  "tag": "span",
+  "cls": "text-[var(--polar)]",
+  "text": "✦",
+  "fontSize": 10.9,
+  "weight": 400,
+  "colour": [
+   168,
+   199,
+   250,
+   1
+  ],
+  "rects": [
+   {
+    "x": 65,
+    "y": 681,
+    "w": 13,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 7,
+  "maxCov": 1,
+  "min": 11.985685008047135,
+  "p5": 11.985685008047135,
+  "median": 11.985685008047135,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 10,
+  "inactive": false,
+  "tag": "p",
+  "cls": "mt-7.measure",
+  "text": "It cannot prove the record is the one that",
+  "fontSize": 15.2,
+  "weight": 400,
+  "colour": [
+   183,
+   192,
+   212,
+   1
+  ],
+  "rects": [
+   {
+    "x": 65,
+    "y": 728,
+    "w": 663,
+    "h": 17
+   },
+   {
+    "x": 65,
+    "y": 754,
+    "w": 632,
+    "h": 17
+   },
+   {
+    "x": 65,
+    "y": 780,
+    "w": 204,
+    "h": 17
+   },
+   {
+    "x": 551,
+    "y": 780,
+    "w": 182,
+    "h": 17
+   },
+   {
+    "x": 65,
+    "y": 806,
+    "w": 349,
+    "h": 17
+   }
+  ],
+  "drift": 0,
+  "pixels": 643,
+  "maxCov": 1,
+  "min": 11.288257244893144,
+  "p5": 11.288257244893144,
+  "median": 11.288257244893144,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 11,
+  "inactive": false,
+  "tag": "a",
+  "cls": "rec-action.text-[var(--polar)]",
+  "text": "Opening the same record through its site",
+  "fontSize": 15.2,
+  "weight": 400,
+  "colour": [
+   168,
+   199,
+   250,
+   1
+  ],
+  "rects": [
+   {
+    "x": 273,
+    "y": 780,
+    "w": 275,
+    "h": 17
+   }
+  ],
+  "drift": 0,
+  "pixels": 83,
+  "maxCov": 1,
+  "min": 11.985685008047135,
+  "p5": 11.985685008047135,
+  "median": 11.985685008047135,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 12,
+  "inactive": false,
+  "tag": "span",
+  "cls": "whitespace-nowrap",
+  "text": "Alexandra Paiz Delgado",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 65,
+    "y": 950,
+    "w": 179,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 52,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 13,
+  "inactive": false,
+  "tag": "span",
+  "cls": "max-sm:hidden",
+  "text": "·",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 244,
+    "y": 950,
+    "w": 25,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 0,
+  "maxCov": 0.86,
+  "unmeasured": true,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 14,
+  "inactive": false,
+  "tag": "span",
+  "cls": "block.text-balance",
+  "text": "Systems Engineer",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 268,
+    "y": 950,
+    "w": 130,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 42,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 15,
+  "inactive": false,
+  "tag": "span",
+  "cls": "whitespace-nowrap",
+  "text": "Fatima Michel Giron",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 65,
+    "y": 974,
+    "w": 155,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 44,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 16,
+  "inactive": false,
+  "tag": "span",
+  "cls": "max-sm:hidden",
+  "text": "·",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 219,
+    "y": 974,
+    "w": 25,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 0,
+  "maxCov": 0.86,
+  "unmeasured": true,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 17,
+  "inactive": false,
+  "tag": "span",
+  "cls": "block.text-balance",
+  "text": "Computer & Artificial Intelligence Enginee",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 244,
+    "y": 974,
+    "w": 350,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 119,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 18,
+  "inactive": false,
+  "tag": "span",
+  "cls": "",
+  "text": "© ursa",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 65,
+    "y": 999,
+    "w": 49,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 12,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "tablet",
+  "id": 19,
+  "tag": "input[value]",
+  "cls": "w-full.min-w-0",
+  "text": "pages/alexandrapaiz/ursa-records/ursa-2026",
+  "fontSize": 12.2,
+  "weight": 400,
+  "colour": [
+   232,
+   237,
+   247,
+   1
+  ],
+  "inactive": false,
+  "rects": [
+   {
+    "x": 65,
+    "y": 412,
+    "w": 554,
+    "h": 28
+   }
+  ],
+  "drift": 0,
+  "pixels": 150,
+  "maxCov": 1,
+  "min": 17.552444905783716,
+  "p5": 17.552444905783716,
+  "median": 17.552444905783716,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 0,
+  "inactive": false,
+  "tag": "span",
+  "cls": "mark.font-[family-name:var(--font-inter-tight)]",
+  "text": "Ursa Minor",
+  "fontSize": 15.2,
+  "weight": 200,
+  "colour": [
+   232,
+   237,
+   247,
+   1
+  ],
+  "rects": [
+   {
+    "x": 96,
+    "y": 58,
+    "w": 140,
+    "h": 19
+   }
+  ],
+  "drift": 0,
+  "pixels": 20,
+  "maxCov": 0.97,
+  "min": 17.552444905783716,
+  "p5": 17.552444905783716,
+  "median": 17.552444905783716,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 1,
+  "inactive": false,
+  "tag": "span",
+  "cls": "font-mono.text-[0.72rem]",
+  "text": "for frontier labs",
+  "fontSize": 11.5,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 1209,
+    "y": 61,
+    "w": 135,
+    "h": 15
+   }
+  ],
+  "drift": 0,
+  "pixels": 33,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 2,
+  "inactive": false,
+  "tag": "div",
+  "cls": "font-mono.text-[0.68rem]",
+  "text": "A record at its address",
+  "fontSize": 10.9,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 252,
+    "y": 113,
+    "w": 242,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 68,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 3,
+  "inactive": false,
+  "tag": "span",
+  "cls": "text-[var(--polar)]",
+  "text": "✦",
+  "fontSize": 10.9,
+  "weight": 400,
+  "colour": [
+   168,
+   199,
+   250,
+   1
+  ],
+  "rects": [
+   {
+    "x": 240,
+    "y": 113,
+    "w": 13,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 7,
+  "maxCov": 1,
+  "min": 11.985685008047135,
+  "p5": 11.985685008047135,
+  "median": 11.985685008047135,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 4,
+  "inactive": false,
+  "tag": "h1",
+  "cls": "mt-9.text-balance",
+  "text": "The address says where the bytes are. Noth",
+  "fontSize": 43.2,
+  "weight": 200,
+  "colour": [
+   232,
+   237,
+   247,
+   1
+  ],
+  "rects": [
+   {
+    "x": 240,
+    "y": 168,
+    "w": 638,
+    "h": 48
+   },
+   {
+    "x": 240,
+    "y": 224,
+    "w": 633,
+    "h": 48
+   }
+  ],
+  "drift": 0,
+  "pixels": 6859,
+  "maxCov": 1,
+  "min": 17.552444905783716,
+  "p5": 17.552444905783716,
+  "median": 17.552444905783716,
+  "threshold": 3
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 5,
+  "inactive": false,
+  "tag": "p",
+  "cls": "mt-8.measure",
+  "text": "A record id is a directory name, a date an",
+  "fontSize": 15.2,
+  "weight": 400,
+  "colour": [
+   183,
+   192,
+   212,
+   1
+  ],
+  "rects": [
+   {
+    "x": 240,
+    "y": 312,
+    "w": 640,
+    "h": 17
+   },
+   {
+    "x": 240,
+    "y": 338,
+    "w": 620,
+    "h": 17
+   },
+   {
+    "x": 240,
+    "y": 364,
+    "w": 638,
+    "h": 17
+   },
+   {
+    "x": 240,
+    "y": 390,
+    "w": 438,
+    "h": 17
+   }
+  ],
+  "drift": 0,
+  "pixels": 679,
+  "maxCov": 1,
+  "min": 11.288257244893144,
+  "p5": 11.288257244893144,
+  "median": 11.288257244893144,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 6,
+  "inactive": false,
+  "tag": "button",
+  "cls": "rec-action.rec-hit",
+  "text": "read the record",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   124,
+   142,
+   179,
+   1
+  ],
+  "rects": [
+   {
+    "x": 1084,
+    "y": 446,
+    "w": 116,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 5,
+  "maxCov": 1.24,
+  "min": 6.257554828269574,
+  "p5": 6.257554828269574,
+  "median": 6.257554828269574,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 7,
+  "inactive": false,
+  "tag": "p",
+  "cls": "mt-7.measure",
+  "text": "Your browser could not read https://alexan",
+  "fontSize": 13.6,
+  "weight": 400,
+  "colour": [
+   232,
+   237,
+   247,
+   1
+  ],
+  "rects": [
+   {
+    "x": 240,
+    "y": 503,
+    "w": 592,
+    "h": 15
+   },
+   {
+    "x": 240,
+    "y": 526,
+    "w": 595,
+    "h": 15
+   },
+   {
+    "x": 240,
+    "y": 549,
+    "w": 548,
+    "h": 15
+   },
+   {
+    "x": 240,
+    "y": 572,
+    "w": 576,
+    "h": 15
+   },
+   {
+    "x": 240,
+    "y": 595,
+    "w": 471,
+    "h": 15
+   }
+  ],
+  "drift": 0,
+  "pixels": 908,
+  "maxCov": 1,
+  "min": 17.552444905783716,
+  "p5": 17.552444905783716,
+  "median": 17.552444905783716,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 8,
+  "inactive": false,
+  "tag": "h2",
+  "cls": "font-mono.text-[0.68rem]",
+  "text": "What an address cannot do",
+  "fontSize": 10.9,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 252,
+    "y": 712,
+    "w": 262,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 60,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 9,
+  "inactive": false,
+  "tag": "span",
+  "cls": "text-[var(--polar)]",
+  "text": "✦",
+  "fontSize": 10.9,
+  "weight": 400,
+  "colour": [
+   168,
+   199,
+   250,
+   1
+  ],
+  "rects": [
+   {
+    "x": 240,
+    "y": 712,
+    "w": 13,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 7,
+  "maxCov": 1,
+  "min": 11.985685008047135,
+  "p5": 11.985685008047135,
+  "median": 11.985685008047135,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 10,
+  "inactive": false,
+  "tag": "p",
+  "cls": "mt-7.measure",
+  "text": "It cannot prove the record is the one that",
+  "fontSize": 15.2,
+  "weight": 400,
+  "colour": [
+   183,
+   192,
+   212,
+   1
+  ],
+  "rects": [
+   {
+    "x": 240,
+    "y": 760,
+    "w": 663,
+    "h": 17
+   },
+   {
+    "x": 240,
+    "y": 785,
+    "w": 632,
+    "h": 17
+   },
+   {
+    "x": 240,
+    "y": 811,
+    "w": 204,
+    "h": 17
+   },
+   {
+    "x": 726,
+    "y": 811,
+    "w": 182,
+    "h": 17
+   },
+   {
+    "x": 240,
+    "y": 837,
+    "w": 349,
+    "h": 17
+   }
+  ],
+  "drift": 0,
+  "pixels": 646,
+  "maxCov": 1,
+  "min": 11.288257244893144,
+  "p5": 11.288257244893144,
+  "median": 11.288257244893144,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 11,
+  "inactive": false,
+  "tag": "a",
+  "cls": "rec-action.text-[var(--polar)]",
+  "text": "Opening the same record through its site",
+  "fontSize": 15.2,
+  "weight": 400,
+  "colour": [
+   168,
+   199,
+   250,
+   1
+  ],
+  "rects": [
+   {
+    "x": 447,
+    "y": 811,
+    "w": 275,
+    "h": 17
+   }
+  ],
+  "drift": 0,
+  "pixels": 98,
+  "maxCov": 1,
+  "min": 11.985685008047135,
+  "p5": 11.985685008047135,
+  "median": 11.985685008047135,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 12,
+  "inactive": false,
+  "tag": "span",
+  "cls": "whitespace-nowrap",
+  "text": "Alexandra Paiz Delgado",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 240,
+    "y": 981,
+    "w": 179,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 52,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 13,
+  "inactive": false,
+  "tag": "span",
+  "cls": "max-sm:hidden",
+  "text": "·",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 418,
+    "y": 981,
+    "w": 25,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 0,
+  "maxCov": 0.86,
+  "unmeasured": true,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 14,
+  "inactive": false,
+  "tag": "span",
+  "cls": "block.text-balance",
+  "text": "Systems Engineer",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 443,
+    "y": 981,
+    "w": 130,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 42,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 15,
+  "inactive": false,
+  "tag": "span",
+  "cls": "whitespace-nowrap",
+  "text": "Fatima Michel Giron",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 240,
+    "y": 1006,
+    "w": 155,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 44,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 16,
+  "inactive": false,
+  "tag": "span",
+  "cls": "max-sm:hidden",
+  "text": "·",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 394,
+    "y": 1006,
+    "w": 25,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 0,
+  "maxCov": 0.86,
+  "unmeasured": true,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 17,
+  "inactive": false,
+  "tag": "span",
+  "cls": "block.text-balance",
+  "text": "Computer & Artificial Intelligence Enginee",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 418,
+    "y": 1006,
+    "w": 350,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 119,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 18,
+  "inactive": false,
+  "tag": "span",
+  "cls": "",
+  "text": "© ursa",
+  "fontSize": 11.2,
+  "weight": 400,
+  "colour": [
+   112,
+   127,
+   160,
+   1
+  ],
+  "rects": [
+   {
+    "x": 240,
+    "y": 1031,
+    "w": 49,
+    "h": 14
+   }
+  ],
+  "drift": 0,
+  "pixels": 12,
+  "maxCov": 1,
+  "min": 5.13418371296321,
+  "p5": 5.13418371296321,
+  "median": 5.13418371296321,
+  "threshold": 4.5
+ },
+ {
+  "page": "at",
+  "viewport": "desktop",
+  "id": 19,
+  "tag": "input[value]",
+  "cls": "w-full.min-w-0",
+  "text": "pages/alexandrapaiz/ursa-records/ursa-2026",
+  "fontSize": 12.2,
+  "weight": 400,
+  "colour": [
+   232,
+   237,
+   247,
+   1
+  ],
+  "inactive": false,
+  "rects": [
+   {
+    "x": 240,
+    "y": 444,
+    "w": 825,
+    "h": 28
+   }
+  ],
+  "drift": 0,
+  "pixels": 150,
+  "maxCov": 1,
+  "min": 17.552444905783716,
+  "p5": 17.552444905783716,
+  "median": 17.552444905783716,
+  "threshold": 4.5
+ }
+]

@@ -21,7 +21,11 @@ import {
   grade,
   patchId,
   runControl,
+  auditVerdict,
+  boardCanDecide,
+  BOARD_STATES,
   NON_SEAT_AUTHORS,
+  UNPLACEABLE_WINDOW,
 } from './duplicate-repair.mjs';
 
 // ---------------------------------------------------------------- the control
@@ -277,6 +281,50 @@ test('a message to a third party does not count', () => {
   assert.equal(messageBetween(ROWS, 'ursa-skill', 'ursa-pm', '2026-11-09T05:16:00Z', '2026-11-09T05:19:00Z'), null);
 });
 
+// THE ZONED CASES, WHICH ARE WHY THIS FILE WENT RED ON MAIN (exo, window
+// 114). Every `ts` above is spelled `Z`, and a textual comparison is correct
+// on a corpus where every instant is spelled the same way, so the whole
+// suite passed over a function that ordered instants as text. The real
+// operands are not spelled the same way: the window bounds come from `git
+// log --format=%cI`, which carries the COMMITTER'S zone offset, and the rows
+// come from the board, which is always `Z`. Measured on `origin/main` on
+// 2026-11-09: 447 of 3,396 commits carry a non-UTC offset.
+//
+// A test corpus drawn from one producer cannot see a defect that only
+// appears between two producers. These cases use both spellings on purpose.
+
+test('a message inside a window whose bounds carry a zone offset is found', () => {
+  // lo = 06:16Z, hi = 07:33Z, the row = 06:20Z, so the row is inside.
+  // As text, "06:20:00Z" sorts ABOVE "01:33:00-06:00", so the old textual
+  // test read the row as past the end of the window and returned null —
+  // and null is what grades a pair DUPLICATED.
+  const rows = [{ ts: '2026-11-09T06:20:00Z', from_seat: 'skill', to_seat: 'engineer', subject: 'in window' }];
+  const hit = messageBetween(rows, 'ursa-skill', 'ursa-engineer',
+    '2026-11-09T00:16:00-06:00', '2026-11-09T01:33:00-06:00');
+  assert.equal(hit?.subject, 'in window', 'a zoned window must place a Z row');
+});
+
+test('a message outside a zoned window is still excluded, so the repair did not just widen it', () => {
+  const rows = [{ ts: '2026-11-09T08:00:00Z', from_seat: 'skill', to_seat: 'engineer', subject: 'after' }];
+  assert.equal(messageBetween(rows, 'ursa-skill', 'ursa-engineer',
+    '2026-11-09T00:16:00-06:00', '2026-11-09T01:33:00-06:00'), null);
+});
+
+test('an unplaceable window bound is refused, never answered as "no message passed"', () => {
+  // Answering null here would grade the pair DUPLICATED over an interval
+  // nobody can place, which is the direction that manufactures the finding.
+  assert.equal(messageBetween(ROWS, 'ursa-skill', 'ursa-engineer', 'whenever', '2026-11-09T05:33:00Z'),
+    UNPLACEABLE_WINDOW);
+  assert.equal(messageBetween(ROWS, 'ursa-skill', 'ursa-engineer', '2026-11-09T05:16:00Z', ''),
+    UNPLACEABLE_WINDOW);
+});
+
+test('an unplaceable row is skipped rather than admitted to the window', () => {
+  const rows = [{ ts: 'soon', from_seat: 'skill', to_seat: 'engineer', subject: 'unplaceable' }];
+  assert.equal(messageBetween(rows, 'ursa-skill', 'ursa-engineer',
+    '2026-11-09T05:16:00Z', '2026-11-09T05:33:00Z'), null);
+});
+
 test('the ursa- prefix on a git author is stripped to a board seat name', () => {
   // The two surfaces name the same actor differently: git says `ursa-skill`
   // and the board says `skill`. Without the strip, every pair would grade
@@ -296,6 +344,56 @@ test('two concurrent actors on one entry with no message grade DUPLICATED', () =
   assert.equal(g.counts.DUPLICATED, 1);
   assert.equal(g.pairs[0].gap_seconds, 600);
   assert.equal(g.pairs[0].same_actor, false);
+});
+
+test('a zone offset does not decide which actor was first', () => {
+  // `a` is 2026-11-09T23:00:00Z. `b` is 2026-11-09T18:30:00-06:00, which is
+  // 2026-11-10T00:30:00Z, so `a` really is first by ninety minutes. As text
+  // "18:30:00-06:00" sorts BELOW "23:00:00+00:00", so the old ordering made
+  // `b` the first actor, credited the wrong seat with starting the
+  // collision, and reported a NEGATIVE gap. Both halves are pinned here
+  // because the sign is the half a reader notices and the attribution is
+  // the half that is wrong about a person.
+  const commits = [
+    C('a', '2026-11-09T23:00:00+00:00', 'ursa-skill'),
+    C('b', '2026-11-09T18:30:00-06:00', 'ursa-engineer'),
+  ];
+  const edits = new Map([['a', [{ path: 'r.md', id: 'E' }]], ['b', [{ path: 'r.md', id: 'E' }]]]);
+  const g = grade(commits, edits, { rows: [], run: () => { throw new Error('no'); } });
+  assert.equal(g.pairs.length, 1);
+  assert.equal(g.pairs[0].first.actor, 'ursa-skill', 'the earlier instant is the first actor');
+  assert.equal(g.pairs[0].second.actor, 'ursa-engineer');
+  assert.equal(g.pairs[0].gap_seconds, 5400);
+});
+
+test('input order does not decide it either, so the sort is doing the work', () => {
+  // The same pair with the array reversed must grade identically. Without
+  // this the test above passes on a tool that simply kept input order.
+  const commits = [
+    C('b', '2026-11-09T18:30:00-06:00', 'ursa-engineer'),
+    C('a', '2026-11-09T23:00:00+00:00', 'ursa-skill'),
+  ];
+  const edits = new Map([['a', [{ path: 'r.md', id: 'E' }]], ['b', [{ path: 'r.md', id: 'E' }]]]);
+  const g = grade(commits, edits, { rows: [], run: () => { throw new Error('no'); } });
+  assert.equal(g.pairs[0].first.actor, 'ursa-skill');
+  assert.equal(g.pairs[0].gap_seconds, 5400);
+});
+
+test('a zoned window finds the message that makes a pair COORDINATED', () => {
+  // The end-to-end case: the same two commits, with a board message that
+  // really did pass between them. Under the textual window test the message
+  // read as outside the interval, so this pair came back DUPLICATED — the
+  // gauge's headline class, manufactured by the comparison rather than
+  // observed.
+  const commits = [
+    C('a', '2026-11-09T23:00:00+00:00', 'ursa-skill'),
+    C('b', '2026-11-09T18:30:00-06:00', 'ursa-engineer'),
+  ];
+  const edits = new Map([['a', [{ path: 'r.md', id: 'E' }]], ['b', [{ path: 'r.md', id: 'E' }]]]);
+  const rows = [{ ts: '2026-11-09T23:30:00Z', from_seat: 'skill', to_seat: 'engineer', subject: 'I am taking this one' }];
+  const g = grade(commits, edits, { rows, run: () => { throw new Error('no'); } });
+  assert.equal(g.counts.COORDINATED, 1);
+  assert.equal(g.counts.DUPLICATED, 0);
 });
 
 test('two actors on DIFFERENT entries are not a pair', () => {
@@ -578,4 +676,83 @@ test('patchId on this repository returns a stable hex id for a real commit', () 
 
 test('patchId returns null rather than throwing on a commit that does not exist', () => {
   assert.equal(patchId('0000000000000000000000000000000000000000'), null);
+});
+
+// ------------------------------------------------- the audit verdict and exit
+//
+// Added 2026-11-09, hundred-and-thirteenth window. Every case here failed
+// against the pre-fix source, where the exit code was the single expression
+// `--audit && event_counts.DUPLICATED > 0`, so a window with nothing decided
+// exited 0. The measurement that found it is in the file's own header.
+
+const G = (counts) => ({
+  event_counts: {
+    DUPLICATED: 0, COORDINATED: 0, SAME_CHANGE: 0, SEQUENTIAL: 0, INDETERMINATE: 0, ...counts,
+  },
+});
+
+test('only complete and partial board halves may decide a pair', () => {
+  assert.deepEqual(BOARD_STATES.filter(boardCanDecide), ['complete', 'partial']);
+  assert.deepEqual(BOARD_STATES.filter((s) => !boardCanDecide(s)), ['unestablished', 'declined']);
+});
+
+test('a declined board half with undecided pairs exits 2, never 0', () => {
+  // The measured false green: --hours 48 --no-board --audit printed twelve
+  // INDETERMINATE rows and exited 0 because nothing graded DUPLICATED.
+  const v = auditVerdict(G({ INDETERMINATE: 1 }), { state: 'declined', note: 'board not read (--no-board)' });
+  assert.equal(v.exit, 2);
+  assert.equal(v.code, 'UNDECIDED');
+  assert.match(v.line, /cannot decide/);
+  assert.match(v.line, /declined/);
+  // The refusal says the count is a floor, because the count still prints.
+  assert.match(v.line, /floor and not a finding/);
+});
+
+test('an unestablished board half with undecided pairs exits 2 and names the receipt', () => {
+  const v = auditVerdict(
+    G({ INDETERMINATE: 3 }),
+    { state: 'unestablished', note: 'COVERAGE_READ_FAILED: the read reached no rows at all' },
+  );
+  assert.equal(v.exit, 2);
+  assert.match(v.line, /unestablished/);
+  assert.match(v.line, /COVERAGE_READ_FAILED/);
+});
+
+test('a found duplication takes precedence over undecided pairs', () => {
+  // 1 over 2 on purpose: the duplication is a repair a seat can make today and
+  // the undecided pairs are a fact about this run's reach.
+  const v = auditVerdict(G({ DUPLICATED: 2, INDETERMINATE: 5 }), { state: 'partial', note: null });
+  assert.equal(v.exit, 1);
+  assert.equal(v.code, 'DUPLICATED');
+  assert.match(v.line, /2 blind duplication/);
+});
+
+test('a declined board half with nothing concurrent is clean, not a refusal', () => {
+  // The over-refusal this fix had to avoid. The graph decides SEQUENTIAL and
+  // SAME_CHANGE with no board call, so a missing board half costs no verdict
+  // when no pair was concurrent.
+  const v = auditVerdict(G({ SEQUENTIAL: 4, SAME_CHANGE: 1 }), { state: 'declined', note: null });
+  assert.equal(v.exit, 0);
+  assert.equal(v.code, 'CLEAN');
+  assert.match(v.line, /declined board half/);
+});
+
+test('a clean window over a complete board half exits 0 and says which half answered', () => {
+  const v = auditVerdict(G({ COORDINATED: 1 }), { state: 'complete', note: null });
+  assert.equal(v.exit, 0);
+  assert.match(v.line, /complete board half/);
+  assert.match(v.line, /1 coordinated/);
+});
+
+test('an empty row set cannot be graded as no message passed', () => {
+  // The second measured fault, at the grader's own boundary. A 401 handed
+  // `rows: []` to grade(), which is truthy, so the !rows arm never ran and two
+  // concurrent commits were called DUPLICATED from a read that reached nothing.
+  // boardRows now hands null for that state; this asserts the arm it reaches.
+  const commits = [C('a', '2026-11-09T05:00:00Z', 'ursa-skill'), C('b', '2026-11-09T05:10:00Z', 'ursa-engineer')];
+  const edits = new Map([['a', [{ path: 'r.md', id: 'E' }]], ['b', [{ path: 'r.md', id: 'E' }]]]);
+  const stub = () => { throw new Error('no'); };
+  assert.equal(grade(commits, edits, { rows: [], run: stub }).counts.DUPLICATED, 1);
+  assert.equal(grade(commits, edits, { rows: null, run: stub }).counts.INDETERMINATE, 1);
+  assert.equal(grade(commits, edits, { rows: null, run: stub }).counts.DUPLICATED, 0);
 });

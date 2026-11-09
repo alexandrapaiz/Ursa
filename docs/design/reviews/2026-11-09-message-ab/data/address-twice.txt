@@ -1,0 +1,3 @@
+phone    same string true  gap    72.8px  field 11.52px/"Geist Mono"  echo 12.16px/"Geist Mono"  "pages/alexandrapaiz/ursa-records/ursa-2026-10-18-abc1234"
+tablet   same string true  gap      40px  field 12.16px/"Geist Mono"  echo 12.16px/"Geist Mono"  "pages/alexandrapaiz/ursa-records/ursa-2026-10-18-abc1234"
+desktop  same string true  gap      40px  field 12.16px/"Geist Mono"  echo 12.16px/"Geist Mono"  "pages/alexandrapaiz/ursa-records/ursa-2026-10-18-abc1234"

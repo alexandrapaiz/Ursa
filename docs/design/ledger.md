@@ -3236,3 +3236,241 @@ of its own — one subject reached out of two must still print the headline.
 `verify-hover.mjs` carried the uncovered arm: a harness probe navigating
 before the target loop that held the tracker. One premise was guarded and
 the earlier one was not, which is the shape of exo's note one level in.
+
+## L75 — An instrument that cannot enter a state measures the page in its other state, and the hole that hid here was a field's own value
+
+**measured**, 2026-11-09 (run `2026-11-09-message-ab`).
+`reviews/2026-11-09-message-ab/data/contrast-*/`, one directory per
+driven state, and `probe-two-shutters.txt` for the hypothesis that was
+wrong before the one that was right.
+
+The previous run of this seat found a control that six clean hit-area
+sweeps had never seen, and named the reason exactly: the control was not
+missed, it was **out of frame**. This entry is the next layer of the same
+fault, and it is worth separating from it, because here the tool could
+not be pointed at the frame at all.
+
+`--state <module.mjs>` has existed since 2026-10-26. On 2026-11-09 four of
+the kit's page-measuring tools carried it and one did not:
+
+| tool | `--state` before today |
+|---|---|
+| `shoot.mjs` | yes, since 2026-10-26 |
+| `measure-hit-areas.mjs` | yes, since 2026-10-26 |
+| `measure-narrow.mjs` | yes, since 2026-10-26b |
+| `measure-focus.mjs` | yes, since 2026-11-02f |
+| `measure-contrast.mjs` | **no** |
+
+So every driven state on this site had a frame, a narrow sweep, a hit
+area and a tab ring, and none of them had a contrast number, and none
+could get one. The inspector's selected panel was photographed on
+2026-10-18 and its ratios were measured by nothing. The four refusal
+states of `/record/at` had been entered by no instrument at all.
+
+### The second defect, which the first one was hiding
+
+The flag is nine lines. What it bought in its first outing is the thing
+worth writing down.
+
+This tool photographs the page twice, once as it is and once in a second
+context whose init script paints every glyph transparent, and it refuses
+to answer for a page whose frame **outside every collected text box**
+moved between the two. Driven into `/record/at`'s refusals it refused
+immediately:
+
+| state | phone | tablet | desktop | limit |
+|---|---|---|---|---|
+| the parser refused (23-char address typed) | 0.160% | 0.160% | under | 0.2% |
+| the host answered 404 (62-char) | **0.31%** | **0.28%** | under | 0.2% |
+| the answer was not a record (62-char) | **0.31%** | **0.28%** | under | 0.2% |
+| the browser could not read the host (56-char) | **0.28%** | **0.25%** | under | 0.2% |
+
+The first hypothesis was the field's horizontal scroll, since the two
+viewports that moved are the two where the typed address does not fit.
+It is in `probe-two-shutters.txt` and it is **wrong**: `scrollLeft`,
+caret, document height and focus are identical on both pages at all three
+viewports. A no-op drive was then clean at 0.000%, which cleared the
+machinery and the timing.
+
+The cause is in `COLLECT`. It walks text nodes, and it has a second pass
+for placeholders, which are not text nodes, opening `if (el.value)
+continue`. That line is right about a placeholder and it left **a field's
+value collected by nothing at all.** Pixels in no collected box are
+outside the drift mask, so the backdrop frame hides them and the
+comparison reads them as the page having moved. That is why the number
+tracked the length of the typed address, and why desktop stayed under the
+limit on the same glyphs: a larger frame, the same numerator.
+
+Collected now, in the field's own `-webkit-text-fill-color` or `color`,
+with the covered placeholder suppressed. Every driven state is back to
+**0.000%** drift, and the value is measured rather than merely not
+counted: 17.55:1 at all three viewports on `/record/at`.
+
+**The general form.** A missing collection does not present as a missing
+row. It presents as the instrument's own self-check firing, because
+anything the tool does not know about is in the residual that the
+self-check is made of. Read a refusal as a question about the tool's
+model of the page, not only about the page.
+
+**And the reason it survived.** No page this tool ever photographed had
+anything in a field, because entering that state is exactly what it could
+not do. The two defects were each other's cover.
+
+## L76 — Proposal: the removal paints eight pixels of strike past its last glyph where the line wraps, and the remedy that worked in the inspector does not transfer
+
+**measured**, 2026-11-09 (run `2026-11-09-message-ab`).
+`reviews/2026-11-09-message-ab/data/struck-trailing.txt`, every
+multi-line run in the expanded generation panel and the document, at
+1440. The crop that triggered it is
+`data/crops/expanded-desktop-2x.png`.
+
+Eight runs, four of them two lines. Every multi-line run paints **8.00px**
+past its own last glyph on the line that wraps, which is the trailing
+space inside the inline box. For seven of the eight that 8px carries a
+background highlight only, and it is invisible against this palette. The
+eighth has `text-decoration-line: line-through`, so the strike is drawn
+through it, and the removal ends in a short rule hanging in empty space.
+
+This is L72's property, one component over: an inline box paints its
+decoration and its background across its own trailing space. The remedy
+there was to move the space out of the `del`, in the component that
+builds the diff.
+
+**That remedy must not be copied here, and the reason is the product.**
+These spans are not a diff this site computes. They are the record's own
+span classification, addressed by character offsets into the finished
+work, and the inspector resolves a selection back through those offsets.
+Trimming a space out of a rendered span to tidy a decoration would edit
+the thing the offsets index. The artifact is the claim; the rendering is
+downstream of it.
+
+So this is raised and not fixed. The three candidates, for the owner:
+
+1. Leave it. One struck run in one panel, 8px, visible at 2x.
+2. Draw the removal's strike as a background rather than a decoration,
+   inset by the trailing advance. CSS only, no change to any offset, and
+   it adds a rule the ban list would have to be checked against.
+3. Render the trailing space as a sibling of the span rather than its
+   last character, which keeps the offsets intact and splits the element
+   the inspector's click handler is attached to.
+
+This seat's judgement is (1) until the owner says otherwise, because the
+cost is 8px at a wrap and every other option touches either the offsets
+or the identity.
+
+## L77 — Proposal: a record opened at its address shows the same address twice, forty pixels apart, and the second copy is larger on a phone
+
+**measured**, 2026-11-09 (run `2026-11-09-message-ab`).
+`reviews/2026-11-09-message-ab/data/address-twice.txt`, all three
+viewports.
+
+When a record opens, `RecordAtAddress` writes the canonical address into
+the field, because that is what a person copies out of it, and
+`OpenedAtAddress` prints the canonical address again as the record's
+identity. The two strings are byte-identical, by construction: both are
+`formatRecordAddress(address)`.
+
+| viewport | gap | field | echo |
+|---|---|---|---|
+| phone | 72.80px | 11.52px Geist Mono | 12.16px Geist Mono |
+| tablet | 40.00px | 12.16px | 12.16px |
+| desktop | 40.00px | 12.16px | 12.16px |
+
+Both justifications are good on their own and they were written for
+different jobs. Held together on one screen, the page whose whole
+argument is that an address is exact prints the same address twice in the
+same typeface, and on a phone prints the second one **larger**, which is
+the one viewport where a reader is most likely to read them as two
+different values.
+
+Not changed here. Which copy is load-bearing is a product decision: the
+field is a control a reader edits and the line is the record's identity,
+and removing either costs something real. Raised with the numbers so the
+owner is choosing rather than inheriting.
+
+---
+
+## L78 — A frame of a page that never ran is, on three of four pages here, byte-for-byte a frame of a page that did
+
+**measured**, 2026-11-09 (run ac), `ursa-minor` at 1440x900, the same
+probe three seconds after networkidle against `next dev` and against
+`next build && next start`.
+
+| | React fibers | fiber on the body | CopyLine's `--fade-r` | its `tabIndex` |
+|---|---|---|---|---|
+| `next dev` | 3 of 114 | no | effect never ran | -1 |
+| `next start` | 88 of 103 | yes | 32px | 0 |
+
+Four pages shot both ways at desktop and diffed: `/record`,
+`/record/at` and `/record/mini-fixture` came out **identical, 0 pixels
+different**, and `/` differed by 1,338,864 pixels, 32.1 per cent, off the
+frames as committed (1,310,196 and 31.4 per cent off the uncompressed
+originals; the committed frames are quantised to 256 colours and that
+moves the one non-zero figure, not the three zeros). The
+home page is the only one that announces the fault, and only because its
+hero is a WebGL constellation that is simply not drawn. On the other
+three the dead frame and the live frame are the same image while every
+client behaviour on the page is absent.
+
+How this run met it, which is the part worth keeping. The home page's
+`curl` line was cut flush at the edge of its box with 536px of command
+hidden behind it, no fade, no scrollbar, and a final glyph that reads
+like the end of a path. That looked like a clear visual defect and it
+was written up as one. It is not: the component builds a fade, a tab
+stop and an aria-label from its own measurement of the box, a previous
+run measured all three working, and all three were dead because nothing
+had hydrated. The instrument's premise was wrong and the site was right.
+
+**this seat's judgement.** This is the third time in four runs that a
+verdict about this site turned out to be a verdict about the apparatus,
+and the pattern across all three is one thing: the do-nothing value sits
+inside the legal range of the real answer, at the reassuring end. A
+server that is up and 404s everything reports a clean sweep. A hover tool
+with no exit status reports zero findings. A page that was served and
+never ran photographs as a site that never built the feature. None of
+them looks like a failure, which is what makes the class expensive.
+
+The remedy is the same every time and it is the one that generalises:
+ask the instrument what it returns when it does nothing, and if that
+value is a legal answer, make it refuse instead. `lib/hydrated.mjs` is
+that for this instance, at exit 2 and with the refusal in the slot a
+reader scans, and it is narrow on purpose, since a `file://` fixture with
+no client runtime must not be a refusal.
+
+**What is still open and is not this entry's to decide.** The gate is
+wired into `shoot.mjs` only. The other five browser-driving tools still
+measure whatever they are pointed at, so a contrast or hit-area number
+taken off `next dev` is a number about the pre-hydration DOM and nothing
+says so. That is a small mechanical change per tool and the next run's
+first item.
+
+## L79 — Proposal: the kit's README knew this a fortnight ago, and prose does not refuse
+
+**measured**, 2026-11-09 (run ac). Since 2026-10-24 the review-kit README
+has carried a paragraph headed "`next dev` and `next start` are not
+interchangeable for this", naming the failed HMR handshake and the silent
+non-hydration. It was correct. This run shot fifteen frames against
+`next dev` anyway, read them as the site, and spent most of a session
+tracing a defect that does not exist.
+
+Two properties of where the fact lived, rather than of the fact:
+
+- **It was scoped to one app.** The sentence said "every frame of that
+  app", meaning `ursa-major/overlay`, so it read as a fact about the
+  other product. It is equally true of `ursa-minor`, which is the app
+  this seat photographs every run.
+- **It was prose, so nothing refused.** Every instrument reported success
+  over those fifteen frames, including the reach tracker, which was
+  right: all fifteen loads were reached. Reached is not ran.
+
+**this seat's judgement, offered as a proposal and not as a rule.** When
+a run pays for a fact, the artifact that keeps the next run from paying
+again is a gate and not a paragraph, and the test for whether a README
+line should become one is whether an instrument could have asked the
+question. Here it could, in one `page.evaluate`. The kit's own index is
+the right home for the prose afterwards, but the prose is the
+explanation and the gate is the memory.
+
+This is a candidate for canon rather than canon, per this file's header,
+and it generalises past the frontend lane, so it is worth the owner's eye
+before anyone states it as a standard.

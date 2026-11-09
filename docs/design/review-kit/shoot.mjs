@@ -25,6 +25,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { launch, VIEWPORTS } from './lib/browser.mjs'
 import { freezeContext, PINNED_MS } from './lib/freeze.mjs'
 import { tracker } from './lib/reached.mjs'
+import { gate, waitForHydration } from './lib/hydrated.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const OUT = arg('out', '/tmp/shots')
@@ -121,6 +122,11 @@ const slug = (p) => {
 
 const browser = await launch()
 const rows = []
+// Reached is not the same question as ran. A page can answer 200 with the
+// right HTML and never execute a line of client JavaScript, and then every
+// frame below is a photograph of a site that does nothing. See
+// lib/hydrated.mjs for the measurement that put this here.
+const hydration = gate({ label: 'frame' })
 for (const [vname, w, h] of MATRIX) {
   if (ONLY && ONLY !== vname) continue
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1 })
@@ -137,6 +143,12 @@ for (const [vname, w, h] of MATRIX) {
     if (!visit.ok) continue
     const status = visit.status
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
+    // After `--until` and before the state drive, so a tool that was told to
+    // wait for something has done its waiting before this asks. Asked once
+    // per frame rather than once per run: `next dev` hydrates some routes
+    // and not others, so a single sample would generalise from whichever
+    // page happened to come first.
+    hydration.saw(`${path} at ${vname}`, await waitForHydration(page))
     if (enterState) await enterState(page, name)
     // Ask the page what time it thinks it is, rather than trusting that the
     // init script ran. L37: a flag accepted is not a flag applied, and the
@@ -209,6 +221,17 @@ if (reachLines.length) console.log(reachLines.join('\n'))
 if (reach.code()) {
   console.log('\nno claim about overflow: see above.')
   process.exit(reach.code())
+}
+// Then hydration, for the same reason and one layer in: the overflow table
+// above is a true measurement either way, because overflow is a fact about
+// the served HTML. What is NOT true over a dead page is what a reader takes
+// from a frame set, which is that the frames show the site. So this gates
+// the run without retracting the table.
+const hydrationLines = hydration.lines()
+if (hydrationLines.length) console.log(hydrationLines.join('\n'))
+if (hydration.code()) {
+  console.log(`\n${hydration.nothingRan() ? hydration.refused() : 'the frames named above show a page that never ran, so no claim here covers anything a client component draws.'}`)
+  process.exit(hydration.code())
 }
 // A verdict about the SITE stays exit 0 however bad it is, because the
 // reader of the table makes that call. See lib/reached.mjs.
