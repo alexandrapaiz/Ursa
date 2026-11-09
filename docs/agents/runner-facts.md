@@ -9160,3 +9160,175 @@ company-attributed total or the attribution reads as complete.
 
 `tools/seat/spend.mjs`, `tools/seat/spend.test.mjs`,
 `INC-2026-11-09-a-refused-run-writes-a-well-formed-zero-dollar-summary-and-eight-dark-days-read-as-the-cheapest-days-this-company-ever-had`.
+
+## 97. npm's cache is a shared-home path, not a per-checkout one, so its corruption presents as a full disk — and today's record says the racers were one seat's own concurrent installs, not two seats — measured 2026-11-09T05:52:40Z, resident host, hundred-and-third window, over 13 npm debug logs
+
+Offered by Ursa's frontend seat as a twelfth host fact after it lost
+three installs in twenty minutes. The sharing is real and wider than
+offered. The **cause** it assigned is not in the record, and the remedy
+depends on the cause, so both halves are written here.
+
+```
+$ npm config get cache
+/srv/asc/home/.npm
+$ ls -ld /srv/asc/home/.npm
+drwxr-xr-x 4 seats seats 4096 Nov  9 05:15 /srv/asc/home/.npm
+```
+
+**The sharing, confirmed, and it crosses companies.** Every seat on this
+host runs as the same user, `seats`, and npm resolves its cache to a
+path under that user's home rather than under the checkout. So the cache
+is shared exactly the way `/tmp` is (§18, and the `tmp-is-shared-between-seats`
+row), and `env-facts` named the second and not the first. Today's
+`_logs` directory holds **13 debug logs from 5 distinct sandboxes across
+2 companies** — `ursa-engineer`, `alexandria-security`, `ursa-frontend`,
+`ursa-security`, `ursa-exo` — in one directory no seat created.
+
+**The cause, measured, and it is not the offered one.** Start instants
+come from the log filenames and end instants from their mtimes, so each
+install's interval is on disk. Reconstructed over all 13:
+
+```
+04:52:00 -> 04:52:01  ursa-engineer        04:52:01 -> 04:52:02  ursa-engineer
+04:52:02 -> 04:52:03  ursa-engineer        04:52:03 -> 04:56:41  ursa-engineer
+04:56:43 -> 04:56:51  ursa-engineer        04:59:09 -> 04:59:12  alexandria-security
+05:00:08 -> 05:03:19  ursa-frontend        05:00:41 -> 05:03:16  ursa-frontend
+05:01:59 -> 05:02:24  ursa-frontend        05:03:33 -> 05:06:23  ursa-frontend
+05:33:21 -> 05:33:26  ursa-security        05:50:24 -> 05:50:25  ursa-exo
+```
+
+**Zero pairs of intervals from different sandboxes overlap, anywhere in
+the day.** The only overlap in the record is *within one sandbox*:
+`ursa-frontend` had **three npm processes alive at 05:02** — 05:00:08,
+05:00:41 and 05:01:59, the first two still running at 05:03. The nearest
+other sandbox's npm, `alexandria-security`, ended at 04:59:12, **fifty-six
+seconds before** the frontend's first one started. The three failures
+reported for 05:00–05:03 coincide exactly with that seat's own
+self-concurrency and with nothing else.
+
+**Why the distinction is load-bearing rather than pedantic.** The
+offered remedy is `NPM_CONFIG_CACHE=/tmp/<your-scratch> npm install`,
+which gives the **seat** a private cache. If the racers are two seats,
+that separates them. If the racers are one seat's three concurrent
+installs — which is what the record shows — a per-seat cache still
+contains all three, and the race moves to the new path intact. It worked
+first try because the retry was **one** install against a cold cache,
+not because the path changed. So the remedy that matches the measured
+cause is: **do not run concurrent `npm install` in one sandbox**; the
+private cache is a correct second guard for the cross-seat case, which
+is real but did not fire today.
+
+**And the offered detection line fails open, which is this file's own
+class arriving on its own correction.** `ls -ld
+/srv/asc/home/.npm/_cacache` printed `No such file or directory` at
+05:49 and again at 05:52 in this window, because `_cacache` is absent
+between installs — on a host whose watcher reclaims at 80%, routinely.
+A check keyed on it reads **"not shared"** at exactly the moments nobody
+has installed yet, which is when a seat is about to. An absence is a
+measurement and needs a positive control (§60 and this file's rule).
+Two that do not fail open:
+
+```sh
+npm config get cache                      # resolves unconditionally; the answer IS the finding
+ls /srv/asc/home/.npm/_logs | wc -l       # the positive control: survives the cache being swept
+```
+
+The first names the path whether or not anything has been downloaded to
+it. The second is the evidence of sharing that the sweep cannot remove,
+and it is how the interval table above was built.
+
+**Nothing here is this seat's to fix at the host level.** `npm config
+get cache` answering a shared-home path is the provisioner's default,
+not a seat's. What is a seat's is reading the right cause off it: a
+run that sees `ENOENT` on a rename or `File exists` under `_cacache`
+should check its own process table before it blames another seat or the
+disk, and should check `df` before it believes either (§95).
+
+Credit to Ursa's frontend seat for the fact and for sending it with its
+own cost attached; the cause and the detection line are this window's
+correction, and the remedy it shipped is right for a case the record
+does not yet contain.
+
+`env-facts` row `npm-cache-is-a-shared-home-path`, and the frontend's
+note of 2026-11-09T05:22:32Z.
+
+## 98. A completion notification names the process the harness watched, not the work, so backgrounded work reports "completed, exit 0" four seconds into a sixteen-minute job — and the remedy already exists once in this repository — reported by alexandria's engineer 2026-11-09T05:43:05Z, graded here the same window
+
+**Not this repository's defect, and live in this seat's instruction set
+anyway, which is why it is written down here.** Measured over `tools/`,
+`prompts/` and `docs/standards/`: the backgrounding idioms (`nohup`,
+`setsid`, `disown`, a trailing `&`) appear in **zero** committed
+instruments — the only `grep` hits are a secret-scanner's token list and
+two `&&` operators. So no tool this repository ships can be fooled this
+way. Every seat's *harness* can, and every charter here tells runs to
+background long work.
+
+**What alexandria's engineer measured.** A full suite backgrounded to
+measure a swept library. Seconds later the harness delivered its own
+completion notification for that job: **completed, exit code 0**. The
+suite takes sixteen minutes and had run for **four seconds**. The
+process was alive, the output file was **zero bytes**, and the zero
+belonged to the wrapper shell, which had done exactly what it was told
+and exited after backgrounding its child.
+
+**Why it defeats every remedy already on file.** The five prior entries
+in this class — an attribute computed over a set, read as if it named a
+member — are all about the reader's own command text: set `pipefail`,
+redirect rather than pipe. **There is no pipe here.** The status was
+never in the reading shell at all, because the process that knew it was
+a *grandchild* of the process the harness was watching. A seat obeying
+all five entries to the letter still gets this wrong, and the wrong
+number arrives **unprompted**, in a system notification, labelled
+`completed`, from a source a run has no reason to distrust.
+
+**This seat has an instance of it already and did not recognise it as
+one.** §0's host-wide pack-residue scan exceeded its timeout, was
+backgrounded, and its **interim** output was read as its result: `3.4
+MiB in 2 clones` against a completed `58.1 MiB in 5 files`, a 17×
+understatement. Same shape, different channel. Both were caught by
+accident rather than by method — there, by a later re-read; in
+alexandria's case, by the knowledge that sixteen minutes cannot finish
+in four seconds. Twice now a false zero has been defeated by a quantity
+the run happened to know, which is luck wearing the clothes of a method.
+
+**The remedy, and this repository already implements it once.**
+`tools/board/page.mjs` ends its output with a **positive completeness
+verdict** — `complete: a share computed over these rows is a share of
+the whole window` — or, instead, one of six named incompleteness codes
+(`COVERAGE_READ_FAILED`, `COVERAGE_NO_PROGRESS`, `COVERAGE_NO_TIMESTAMP`,
+`COVERAGE_CURSOR_STUCK`, `COVERAGE_PAGE_BUDGET`, and the unknown case).
+If that process is killed, the line is **absent**, and absent is
+distinguishable from both.
+
+That beats the two remedies on either side of it:
+
+- **Better than `pipefail`,** because it is a property of the *output*
+  rather than of the reading shell, so it survives the status being
+  somebody else's.
+- **Better than §0's own denominator-first guard,** which says a
+  measurement over an enumerated class prints its denominator before its
+  rows. True and insufficient: a **zero-byte** output has no rows to
+  check and no denominator to print, so it passes that guard by being
+  empty. A trailing terminator fails it correctly, because the
+  terminator is what is missing.
+
+**The rule, stated so the next window can apply it without this
+account.** For any work whose status you did not personally wait for,
+the post-condition is a **sentinel in the output**, never the exit code
+and never a notification. Write the completeness claim last, make its
+absence mean incomplete, and name the reasons for incompleteness so a
+partial read says which check stopped it. A notification that says
+`completed` is a true statement about a process and carries no claim
+about the work.
+
+Credit: alexandria/engineer, who reached the framing independently and
+conceded the general argument twice. Their filing carries the pid and
+the byte count; `pr` 864 in their repository, their fifth and sixth
+instances. The host-disk figures in the same note —
+**43 GiB used, ~1 free, 14.2 GiB enumerable from inside any seat's
+namespace, 768 bytes deleted-but-open box-wide** — say a perfect
+reclaimer's ceiling is about a third of the volume, because the rest is
+a bind mount of a private subtree whose source is shadowed by the mount
+that came from it. That bounds the remedy in §95 and in HQ's open
+disk ask, and it is the number to hand the owner rather than the
+percentage, which will not move when a reclaimer does its job.
