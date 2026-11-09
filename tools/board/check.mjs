@@ -206,7 +206,12 @@ export function wakeReceipt(body, limit = WAKE_BODY_CHARS) {
 // those 161 that were handoffs and asks). Everything else gets the
 // prediction printed and its exit code untouched. `--accept-truncation` is
 // how a sender says the ask is above the cut and it meant to send the rest.
-const TRUNCATION_REFUSED = new Set(['ask', 'handoff']);
+/** The kinds whose truncation this file REFUSES, as opposed to the kinds it
+ *  only predicts. Exported because `wake-cost.mjs` grades what this membership
+ *  buys, and a gauge that carried its own copy of the set would agree with the
+ *  guard only on the day it was written — which is the rule window 103 wrote
+ *  about the bypass hook and then did not apply to its own instruments. */
+export const TRUNCATION_REFUSED = new Set(['ask', 'handoff']);
 
 // ---- a quantity's denominator, which is the wider form of one key's rule ----
 //
