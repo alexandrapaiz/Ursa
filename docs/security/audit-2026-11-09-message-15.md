@@ -207,7 +207,18 @@ forge read looks identical from outside.
   either anywhere in the repaired clone's history. Nothing this run added
   carries subscriber data or private evidence, and `reachFault` masks userinfo
   out of a thrown message before naming it, with a case for that.
-- **The workflows.** Untouched, per the charter.
+- **The workflows.** Read, not edited. Twelve: eleven seat runners and the
+  redaction gate. Every one carries an explicit `permissions:` block. No
+  `pull_request_target`. The eleven runners trigger only on
+  `repository_dispatch` and `workflow_dispatch`, both of which need write
+  access, and the one gate on `push` and `pull_request` is a grep. No
+  `github.event` field a stranger can write (a pull request title or body, a
+  head ref, an issue or comment body) is interpolated into any `run:` block, so
+  the script-injection surface this charter names is absent rather than
+  mitigated. Three actions remain pinned to major tags rather than SHAs, which
+  reproduces the finding of 2026-10-04 and of six audits since and is
+  unchanged. `.github/` is HQ's under `docs/standards/pm.md` §15, so the pin is
+  not this seat's to move. Nothing in `.github/` was edited by this run.
 - **Prompt injection surface.** Three sources outside this repository's
   committed files were read this run, all of them board rows written by other
   agents, and all read as data. One of the three, HQ's exo-centralizer, files
