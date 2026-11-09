@@ -938,6 +938,194 @@ Compliance](https://www.olostep.com/blog/ai-training-data-providers)
 (secondary source for the per-sample price range, flagged as
 unverified against Toloka's own rate card).
 
+### Labelbox (Alignerr)
+
+What it is: an established data-annotation platform (Catalog, model
+evaluation tooling) that has built a dedicated RLHF/alignment arm,
+Alignerr, sourcing human feedback — preference labeling, response
+evaluation against rubrics, reference-answer generation, red-teaming —
+for "frontier and enterprise models." New entry, picked up from a lead
+the 2026-11-09 18th run named and left unchecked (Appen, Labelbox,
+Snorkel AI, Sama, iMerit, Defined AI, surfaced by the same
+wetheflywheel.com vendor-comparison guide that found Toloka). Who it
+serves: unnamed specific labs; Alignerr's own product page names no
+client. Pricing: a split posture distinct from both the
+sales-led-opacity most of this category shares and Toloka's full
+self-serve rate card. Labelbox's core annotation platform is
+self-serve and metered in public ("Labelbox Units," $0.10/LBU, 500
+free LBU/month, consumption from 1 LBU per 60 rows to 20 LBU per row
+for live multimodal/LLM data) — but Alignerr's actual human-preference-
+data service, the part that competes directly with Minor's category,
+is sales-quoted only, a "Talk to us" link and nothing else, confirmed
+on Labelbox's own product page. Scale, self-reported on that same page
+and not independently verified: 2.6M+ contributors, 50K+ PhDs, 200K+
+Master's degrees, 85K+ licensed professionals, across 40+ countries,
+75+ languages, 200+ professional domains — the largest contributor-count
+claim in this file if taken at face value, next to Toloka's 200,000+
+and Mercor's unnamed-but-smaller disclosed base. Strengths: the split
+pricing posture is itself evidence for Minor's "publish methodology
+openly" pitch — even a vendor that publishes a public, metered rate
+card for its tooling draws the opacity line at the human-judgment
+layer specifically, the exact layer Minor's methodology-publishing
+commitment would cover. Weakness against Ursa: identical structural
+gap to the rest of Category 1 — solicited preference labeling and
+red-teaming on request, not derived from real work a person was doing
+anyway, no generation-to-outcome join. Positioning consequence in
+docs/market/positioning.md. Last observed 2026-11-09: [Labelbox:
+Alignerr Expert Network](https://labelbox.com/products/alignerr/),
+[Labelbox pricing](https://www.usagepricing.com/blueprint/labelbox)
+(secondary source for the LBU rate, not Labelbox's own pricing page,
+which returned HTTP 404 on direct fetch this run).
+
+Checked and not added, same run: Defined.ai, another name from the
+18th run's unchecked-lead list, turns out to be a speech/voice and
+multimodal dataset marketplace (2M+ hours of speech, 500+ languages)
+with no clear RLHF/preference-data product and no public pricing —
+not a Category 1 fit. Snorkel AI, Sama, iMerit, and Appen remain
+unchecked leads for a future run with capacity to spare.
+
+### Snorkel AI
+
+What it is: a data-labeling-automation vendor (originally a Stanford
+research project, "weak supervision") that has shifted business model
+to "data-as-a-service" — delivering completed, labeled datasets and RL
+environments directly, built on a hybrid of synthetic data generation
+and subject-matter-expert review, rather than selling the labeling
+software alone. New entry, picked up from the same 18th-run
+unchecked-lead list as Labelbox (Appen, Snorkel AI, Sama, iMerit) —
+and a correction to this file's own record: the 2026-10-26
+cross-cutting note (above) already asserted Snorkel AI was "already
+tracked above" in this category; it was not, and had no dedicated
+entry until this run. Who it serves: not named in sources checked this
+run — no specific frontier lab or enterprise customer identified by
+name, an unusually thin disclosure even against this category's
+standing opacity norm. Pricing: enterprise sales-only, six-figure
+annual contracts per secondary pricing-guide sources (not Snorkel's
+own published figures — no rate card found), consistent with every
+other entry in this category except Toloka. Funding: a $350M Series E
+(2026-09-22, led by Insight Partners and S32, with Addition,
+Lightspeed, Greylock, GV, and Wells Fargo participating) at a $3.5B
+valuation — TechCrunch reports this as roughly triple Snorkel's prior
+valuation, attributed in the same reporting to "AI labs' insatiable
+appetite for high-end training data" rather than to any named deal.
+Strengths: the funding scale is itself a demand signal for this
+category as a whole (money moving toward human-plus-synthetic hybrid
+data production), read alongside Mercor's and Handshake's own
+valuation jumps already on file. Weakness against Ursa: identical
+structural gap to the rest of Category 1 — labeling and dataset
+construction performed on request against a specification, not
+derived from real work a person was doing anyway for its own sake, no
+generation-to-outcome join. Positioning consequence in
+docs/market/positioning.md. Last observed 2026-11-09: [TechCrunch:
+Snorkel AI triples valuation to $3.5B as demand for AI training data
+booms](https://techcrunch.com/2026/09/22/snorkel-ai-triples-valuation-to-3-5b-as-demand-for-ai-training-data-booms/).
+
+### Appen
+
+What it is: a 20-plus-year incumbent in crowdsourced data annotation
+and linguistic/search-quality labeling (ASX: APX), repositioning
+around generative AI and RLHF work after losing its anchor Google
+contract, worth roughly 26% of FY2023 revenue, in January 2024. New
+entry, the first of three Category 1 leads this run closes from the
+18th run's named unchecked list (Appen, Sama, iMerit; Labelbox and
+Snorkel AI were closed in the 19th and 20th runs, Defined.ai rejected
+in the 19th). Who it serves: the company's own H1 FY26 results
+attribute its fastest growth to Appen China's relationships with
+Chinese large-language-model developers buying annotated and
+human-evaluated training data; no individual lab or enterprise
+customer is named in any source checked this run. Pricing: not
+disclosed, consistent with the rest of this category. Financials, all
+USD (confirmed as Appen's own reporting currency in its 2025 annual
+report): H1 FY26 revenue of $119.9M, up 17% year over year on 80%
+growth in Appen China; the FY25 full year showed the same split
+widening, Appen China up 75% to $102.9M against Appen Global down 21%
+to $127.9M, and generative AI work reaching 44.1% of Q4 revenue, up
+from 34.8% a year earlier; the company reaffirms FY26 group guidance
+of $270-300M. Strengths: the only entry in this category with real,
+audited, publicly disclosed financials rather than a funding-round
+press release or a vendor's own self-reported scale claim, and a
+generative-AI revenue mix that is climbing rather than flat. Weakness
+against Ursa: the usual structural gap (solicited labeling against a
+specification, not derived from real work a person was doing anyway,
+no generation-to-outcome join) plus a second one unique to this entry.
+A vendor-comparison source states plainly that Appen "never really
+owned" the frontier-RLHF segment and "a new generation of specialists
+has taken it," naming this file's own fast movers (Surge, Mercor,
+Scale) as the displacers. This is the clearest sourced "who is winning
+and who is losing inside Category 1" claim this file has found in one
+place. Last observed 2026-11-09: [Appen H1 FY2026 earnings call
+transcript](https://finance.yahoo.com/quote/APPEF/earnings/APPEF-H1-2026-earnings_call-608563.html),
+[Kalkine: Appen shares rise as China AI data growth drives Q2 FY26
+update](https://kalkine.com.au/news/technology/appen-asxapx-shares-rise-1029-as-china-ai-data-growth-drives-q2-fy26-update),
+[neuralchainai.com: Top Appen Alternatives &
+Competitors](https://neuralchainai.com/blog/top-appen-alternatives-competitors/)
+(source of the "never really owned this segment" quote).
+
+### Sama
+
+What it is: a B Corp-certified data-annotation vendor (delivery
+centers in Kenya, Uganda, and India) staffed by employed workers
+rather than gig contractors, offering RLHF, DPO, hallucination
+reduction, and multimodal-consistency evaluation alongside its older
+computer-vision annotation business. New entry, the second of this
+run's three leads closed. Who it serves: the most enterprise-
+diversified client list disclosed by any entry in this category.
+Google, Microsoft, Nvidia, GM, Ford, and Walmart are named on Sama's
+own site, a mix of AI labs and non-AI Fortune 500 buyers rather than
+frontier labs alone. Pricing: not disclosed. Strengths: the
+employed-not-gig staffing model and 2025 B Corp recertification are a
+specific, checkable ethical-sourcing claim none of this category's
+gig-marketplace entries can make in the same form. Weakness against
+Ursa: the same structural gap as the rest of Category 1, plus a
+historical labor-conditions finding sharper than anything else on
+file here. A 2023 TIME investigation found Sama's Kenyan workers, paid
+as little as $1.32 an hour, were tasked with labeling graphic
+descriptions of child sexual abuse, torture, and murder to build
+ChatGPT's safety filters; workers reported lasting psychological
+trauma, and Sama itself canceled the OpenAI contract eight months
+early, in February 2022, partly over the severity of the work. This
+is an older event, not this week's news, but it is the most direct
+documented case this file has of the human cost solicited preference-
+and-safety labeling can carry when the content being labeled is
+harmful rather than merely subjective, a different axis from the
+pay-withheld and breach-exposure risks already on file for Handshake
+AI and Mercor. Last observed 2026-11-09: [Sama primary
+services](https://www.sama.com/primary-services), [TIME: OpenAI used
+Kenyan workers on less than $2 per
+hour](https://time.com/6247678/openai-chatgpt-kenya-workers/), cross-
+checked against [Wikipedia: Sama
+(company)](https://en.wikipedia.org/wiki/Sama_(company)) for the
+contract-cancellation date.
+
+### iMerit
+
+What it is: a data-annotation vendor specializing in regulated,
+credentialed-judgment domains (computer vision, healthcare imaging,
+autonomous systems, geospatial data) rather than general-purpose crowd
+labeling, now extending into RLHF, chain-of-thought reasoning, and
+red-teaming for large model developers. New entry, the last of this
+run's three leads and the final name on the 18th run's original
+unchecked list (Appen, Labelbox, Snorkel AI, Sama, iMerit, Defined.ai,
+all now checked across the 19th run through this one). Who it serves:
+not named in any source checked this run; a vendor-comparison guide
+places iMerit in a "platform-led labelling" lane distinct from the
+frontier-RLHF lane Surge, Mercor, and Scale occupy, calling it "best
+for domain-specific labelling, particularly medical and financial
+services." Pricing: not disclosed. Strengths: the regulated-domain
+specialization is a genuine niche the rest of Category 1 does not
+claim directly; the same comparison source credits iMerit with
+structural RLHF infrastructure built before 2024, "to a lesser
+degree" than Scale, Surge, and Invisible Technologies. Weakness
+against Ursa: the same structural gap as the rest of the category,
+and the thinnest public footprint of the three names closed this run,
+no funding event, no named customer, no independent traction number
+found in any source checked. Last observed 2026-11-09: [iMerit: AI
+data annotation & model fine-tuning solutions](https://imerit.ai/),
+[wetheflywheel.com: AI training data providers 2026
+guide](https://wetheflywheel.com/en/guides/ai-training-data-providers-2026/)
+(source of the "platform-led labelling" and "to a lesser degree"
+framing).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -1757,6 +1945,23 @@ ChatGPT Protesters Are Using Memory Forge to Take Their Data With
 Them](https://programminginsider.com/chatgpt-protesters-are-using-memory-forge-to-take-their-data-with-them/),
 [Memory Forge product page](https://pgsgrove.com/memoryforgeland).
 
+Update 2026-11-09 (message, 19th run): re-checked for independent
+traction numbers. A search-engine synthesis produced a specific claim
+("posts recommending Memory Forge on Reddit and X during the migration
+wave have pulled hundreds of thousands of views and thousands of
+upvotes") with no link attached. Traced it to a single candidate
+primary source, mexc.com's "The Small Tool That's Gone Viral During
+the #QuitGPT Movement" — which returned HTTP 410 Gone on direct fetch
+this run. A second candidate, a dev.to weekly AI-signals roundup
+covering this exact week (2026-11-02 to 2026-11-08), was fetched
+directly and contains no mention of Memory Forge, Phoenix Grove, or
+AI memory portability at all. Same pattern this file flagged for
+Claude Memory Import on 2026-11-09 (16th run): a confident secondary
+claim with no surviving primary source. Still no independent traction
+number on file for this entry. Last observed 2026-11-09 (no new
+source added; the two checked this run are named above, not cited as
+evidence).
+
 ### MemoryLake
 
 What it is: a bootstrapped (founded 2024, no funding raised, per
@@ -1865,6 +2070,42 @@ openly skeptical any current memory product, named or not, has solved
 it, which is corroborating evidence for CLAUDE.md §1's "no verifier"
 claim from the buyer side rather than the vendor side. Last observed
 2026-11-02: [Show HN: AI memory with biological decay](https://news.ycombinator.com/item?id=47914367).
+
+### Memobase (memobase.ai)
+
+What it is: a consumer-facing persistent-memory layer pitched as "a
+password manager for your AI memory," addressing what its own site
+calls the "amnesia loop" — every new conversation resets context. New
+entry, found via this run's demand-signals ceremony (a Show HN post).
+Who it serves: individual users of Claude (Claude.ai, Claude Desktop,
+Claude Code), ChatGPT, Cursor, and any MCP-compatible agent; the
+product is explicitly "MCP-native" rather than building its own
+proprietary transport, the closest thing in this category to building
+on an existing open standard instead of inventing a new one. Pricing,
+the direct point of comparison against Major: Free ($0/mo, 500
+credits), Pro ($9/mo, 5,000 credits), Unlimited ($29/mo, unlimited
+credits) — a named, public three-tier ladder for exactly the kind of
+cross-platform personal memory Major gives away free by design
+(CLAUDE.md §0, load-bearing constraint #1). Strengths: the "Dream
+Phase" background-distillation and hybrid graph-retrieval framing, and
+reaching Claude, ChatGPT, and Cursor simultaneously rather than one
+vendor's ecosystem, which is Major's own cross-model premise built by
+someone else first. Weakness against Ursa: a user shares credentials
+or API access with a third party to get the cross-model view at all,
+and the free tier's 500-credit cap is a lever Memobase can tighten
+later in a way Major's permanent-free design structurally cannot (no
+revenue switch exists to flip). The Show HN thread itself is useful
+demand-signal evidence independent of the product: a competing
+memory-tool builder (Maximem) replied that "the hard part isn't
+storage or retrieval. It's qualification" — deciding what is worth
+remembering at all — and a separate commenter noted Anthropic's own
+Claude memory-import feature (tracked above) "is fundamentally
+migration, not sync. You import once, and from that moment your
+contexts diverge again," the exact standing-portability-gap argument
+this file already makes, stated unprompted by a third party. Pricing
+consequence in docs/market/positioning.md. Last observed 2026-11-09:
+[Memobase](https://memobase.ai/), [Show HN:
+Memobase](https://news.ycombinator.com/item?id=47237920).
 
 ### Cross-cutting note (2026-10-05): no neutral standard exists, and nobody is building one
 
@@ -2018,6 +2259,33 @@ on the demand side (users building their own workaround tools) now has
 a named supply-side proposal aimed at it, for the first time. Last
 observed 2026-11-09: [LoreKit: Agent memory needs its OpenTelemetry
 moment](https://www.lorekit.io/blog/open-agent-memory-format).
+
+Update 2026-11-09 (message, 22nd run): the acronym itself has now
+fragmented. This run's demand-signals ceremony turned up a Show HN
+post for "AMP," pūrmemo's open-source conversation-export normalizer
+(8 platform converters, Apache 2.0, local-only, v0.2 shipped). Checking
+it against this note's standing bar surfaced two more, unrelated
+projects already using the same name: `agentmemoryprotocol/
+agentmemoryprotocol` (maintained by YouTale AI, a markdown-and-
+frontmatter spec, v0.1 draft, 6 stars/2 forks, reference
+implementations listed as "planned" and not yet built) and a third,
+`akshayaggarwal99/amp` ("AMP: The Agent Memory Protocol," an
+MCP-native memory server, 31 stars). None of the three is aware of or
+interoperates with either of the others, and none clears this note's
+standing bar (independent implementation, neutral governance, adoption
+beyond the format's own author) — pūrmemo's AMP has real shipped code
+but only its own converters; YouTale AI's has a spec and no
+implementation yet; akshayaggarwal99's has the most stars of the three
+and is unchecked beyond the star count this run had budget for. Ten-
+plus attempts now by this note's running count, and for the first time
+two of them collide on the same name without either having heard of
+the other — the clearest evidence yet that this category is
+fragmenting faster than any single attempt, including a would-be
+standard's own name, can hold a stable identity. Last observed
+2026-11-09: [Show HN:
+AMP](https://news.ycombinator.com/item?id=47309161), [GitHub:
+agentmemoryprotocol/agentmemoryprotocol](https://github.com/agentmemoryprotocol/agentmemoryprotocol),
+[GitHub: akshayaggarwal99/amp](https://github.com/akshayaggarwal99/amp).
 
 ## Changelog
 
@@ -2311,3 +2579,56 @@ moment](https://www.lorekit.io/blog/open-agent-memory-format).
   contractor-cost constraint this entry already described
   qualitatively. Positioning consequence (Toloka's pricing as a test
   case) in docs/market/positioning.md.
+- 2026-11-09 (message, 19th run) — added Labelbox/Alignerr (Category
+  1, 22nd entry), picked up from the 18th run's own named unchecked
+  leads (Appen, Labelbox, Snorkel AI, Sama, iMerit, Defined AI). Its
+  split pricing posture — self-serve metered platform tooling in
+  public, sales-quoted-only human-preference-data service — is a third
+  transparency posture this file has now observed, distinct from both
+  the category's usual full opacity and Toloka's full self-serve rate
+  card. Checked and rejected Defined.ai from the same lead list
+  (speech/voice marketplace, no RLHF fit). Dated update to Memory Forge
+  (Category 3): re-checked for independent traction numbers; the one
+  specific claim found traces to a now-410-Gone source and a
+  roundup article that does not mention the product at all, so the
+  entry's "no independent traction numbers" line still holds.
+  Positioning consequence in docs/market/positioning.md.
+- 2026-11-09 (message, 20th run) — added Snorkel AI (Category 1, 23rd
+  entry), the last of the 18th run's named leads that was genuinely
+  unchecked: a 2026-10-26 cross-cutting note had already asserted
+  Snorkel AI was "tracked above" in this category, and it was not,
+  until this run gave it a dedicated entry. Its $350M Series E
+  (2026-09-22, Insight Partners/S32-led) at a $3.5B valuation, reported
+  as roughly triple its prior mark and attributed to labs' demand for
+  training data, is this file's clearest funding-scale demand signal
+  for the category since Mercor's and Handshake's own valuation jumps.
+  Pricing and customers remain undisclosed, consistent with every
+  entry in this category except Toloka.
+- 2026-11-09 (message, 21st run) — closed the last three names on the
+  18th run's original unchecked-lead list, added Appen, Sama, and
+  iMerit (Category 1, now 24th, 25th, and 26th entries). Appen is this
+  file's first entry with real audited public financials and a
+  sourced claim that it "never really owned" the frontier-RLHF segment
+  its own faster-growing peers in this category now occupy. Sama adds
+  the most enterprise-diversified named client list in Category 1
+  (Google, Microsoft, Nvidia, GM, Ford, Walmart) alongside a 2023 TIME
+  investigation into traumatic content-labeling conditions among its
+  Kenyan workforce, a labor-conditions finding on a different axis
+  (harm to the labeler, not pay or breach) than Handshake's or
+  Mercor's. iMerit is the thinnest of the three, a regulated-domain
+  niche (healthcare, autonomous systems) with no funding event or
+  named customer found. No new Category 2 or 3 entries this run.
+  Positioning consequence in docs/market/positioning.md.
+- 2026-11-09 (message, 22nd run) — the 18th run's vendor-lead list is
+  fully closed (prior run), so this run's demand-signals ceremony
+  looked at this week's public forums instead and added Memobase
+  (Category 3, 27th entry), a consumer memory layer charging
+  $0/$9/$29 per month for the cross-model personal-memory product
+  Major gives away free by design — the first direct paid comp this
+  file has for that specific claim. The standing "no neutral
+  portability standard" cross-cutting note gained a tenth-plus
+  update: a Show HN post for an open-source tool called "AMP" led to
+  two more, unrelated open-source projects already using the same
+  name, none aware of the others, none clearing the note's
+  independent-implementation bar. Positioning consequence in
+  docs/market/positioning.md.

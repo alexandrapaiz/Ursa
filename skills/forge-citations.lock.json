@@ -1,7 +1,7 @@
 {
-  "note": "One row per pull request number this library cites. The forge is outside this tree, so a number's disposition cannot be checked from a clone; this file is the dated snapshot that makes the check offline, and `node skills/forge-citations.mjs --refresh` prints the commands that re-take it. See the methodology section on what a pull request citation owes.",
+  "note": "One row per pull request number this library cites. The forge is outside this tree, so a number's disposition cannot be checked from a clone; this file is the dated snapshot that makes the check offline, and `node skills/forge-citations.mjs --refresh` prints the commands that re-take it. `readable_on_main` is clause 5 and it is a different kind of field: it is a git question, re-derived from `head` by any COMPLETE clone, locked because the evidence for a row that never landed expires when its branch is deleted. See the methodology sections on what a pull request citation owes.",
   "repository": "alexandrapaiz/Ursa",
-  "read_at": "2026-11-02T07:05Z",
+  "read_at": "2026-11-09T04:52Z",
   "fixtures": [
     {
       "number": 618,
@@ -21,12 +21,24 @@
   ],
   "rows": [
     {
+      "number": 258,
+      "lane": "ursa-skill",
+      "branch": "ursa-skill/2026-10-18-message-f",
+      "disposition": "closed-unmerged",
+      "head": "49ee6230a4832708bf32f6cd2c0ab773229ee011",
+      "readable_on_main": "no",
+      "at": "2026-11-09T04:52Z",
+      "why_cited": "Clause 5's `no` control. Cited in the header of forge-citations.mjs as the example that `no` is a claim about commits and not about delivery: 607 of its 613 commits have patch-identical equivalents on main and 6 do not."
+    },
+    {
       "number": 281,
       "lane": "ursa-skill",
       "branch": "ursa-skill/2026-10-23-message-c",
       "disposition": "merged",
       "merge_commit": "1b097a05ea7efe55de49fa9c315024dc88c3acd7",
-      "at": "2026-10-23T23:58:14Z"
+      "at": "2026-10-23T23:58:14Z",
+      "head": "b24758da47a0955d2fc790b695786fba22a52563",
+      "readable_on_main": "yes"
     },
     {
       "number": 413,
@@ -34,7 +46,9 @@
       "branch": "ursa-engineer/2026-10-25-hook",
       "disposition": "merged",
       "merge_commit": "e3f14d9050c35dcece69bd5748632aa6e3ca5e03",
-      "at": "2026-10-25T03:00:43Z"
+      "at": "2026-10-25T03:00:43Z",
+      "head": "63b7d711e036c896cbdfe7fe33e0a3bad7b9715f",
+      "readable_on_main": "yes"
     },
     {
       "number": 477,
@@ -42,7 +56,9 @@
       "branch": "ursa-skill/2026-10-26-message-c",
       "disposition": "merged",
       "merge_commit": "a55b8c676763f8fdf124db484bf77520e437907c",
-      "at": "2026-10-26T09:08:24Z"
+      "at": "2026-10-26T09:08:24Z",
+      "head": "4efceab07b0860628f702c6847563ae38d525148",
+      "readable_on_main": "yes"
     },
     {
       "number": 540,
@@ -50,42 +66,64 @@
       "branch": "ursa-engineer/2026-10-26-message-9",
       "disposition": "merged",
       "merge_commit": "2cbffd2c920587dcd462f41d1089bd4c304d2b21",
-      "at": "2026-10-26T20:19:34Z"
+      "at": "2026-10-26T20:19:34Z",
+      "head": "2e281733af985bcd239cb2dd5adff44736480bef",
+      "readable_on_main": "yes"
     },
     {
       "number": 601,
       "lane": "ursa-skill",
       "branch": "ursa-skill/2026-10-27-hook-2",
       "disposition": "closed-unmerged",
-      "at": "2026-11-02T04:36:42Z"
+      "at": "2026-11-02T04:36:42Z",
+      "head": "cfff0399ede3b77a0d9aff8eca3a9cc9e9ca4e10",
+      "readable_on_main": "yes"
+    },
+    {
+      "number": 608,
+      "lane": "ursa-skill",
+      "branch": "ursa-skill/2026-10-27-message-3",
+      "disposition": "closed-unmerged",
+      "head": "cb84f9a4521922240f0c86f10e39735763e9f3e9",
+      "readable_on_main": "yes",
+      "at": "2026-11-09T04:52Z",
+      "why_cited": "Clause 5's merge-only control, and the one row in 386 that `git merge-base --is-ancestor` alone answers wrongly. One commit ahead of main, and it is a merge of main into the branch, so it contributes nothing main lacks."
     },
     {
       "number": 633,
       "lane": "ursa-skill",
       "branch": "ursa-skill/2026-11-02-message-2",
       "disposition": "closed-unmerged",
-      "at": "2026-11-02T05:08:21Z"
+      "at": "2026-11-02T05:08:21Z",
+      "head": "9b8aae321f1006d363e02822deeebd1761680401",
+      "readable_on_main": "yes"
     },
     {
       "number": 638,
       "lane": "ursa-skill",
       "branch": "ursa-skill/2026-11-02-message-3",
       "disposition": "closed-unmerged",
-      "at": "2026-11-02T05:08:25Z"
+      "at": "2026-11-02T05:08:25Z",
+      "head": "f696cf164971c2377fa12c6add9314147b6d4c7f",
+      "readable_on_main": "yes"
     },
     {
       "number": 646,
       "lane": "ursa-skill",
       "branch": "ursa-skill/2026-11-02-message-4",
       "disposition": "closed-unmerged",
-      "at": "2026-11-02T05:08:31Z"
+      "at": "2026-11-02T05:08:31Z",
+      "head": "b3d71d16288a81d5a3b23aec4de621377d79b25f",
+      "readable_on_main": "yes"
     },
     {
       "number": 684,
       "lane": "ursa-skill",
       "branch": "ursa-skill/2026-11-02-message-10",
       "disposition": "closed-unmerged",
-      "at": "2026-11-02T05:41:23Z"
+      "at": "2026-11-02T05:41:23Z",
+      "head": "2741f63c23b5412d5b0ad376154c0dc309d0475f",
+      "readable_on_main": "yes"
     },
     {
       "number": 689,
@@ -93,23 +131,32 @@
       "branch": "ursa-skill/2026-11-02-message-11",
       "disposition": "closed-unmerged",
       "at": "2026-11-02T06:35:17Z",
-      "note": "Read as open at 06:16Z and closed as contained in #700 at 06:35Z, nineteen minutes later, by the project manager's sweep with its own ancestor proof. The first refresh this lock ever needed, inside the 45-minute median this run measured, and the reason the disposition is a dated field rather than a fact."
+      "note": "Read as open at 06:16Z and closed as contained in #700 at 06:35Z, nineteen minutes later, by the project manager's sweep with its own ancestor proof. The first refresh this lock ever needed, inside the 45-minute median this run measured, and the reason the disposition is a dated field rather than a fact.",
+      "head": "360f4b090cce95566dd1e1ab09f00daf1de10552",
+      "readable_on_main": "yes"
     },
     {
       "number": 700,
       "lane": "ursa-skill",
       "branch": "ursa-skill/2026-11-02-message-13",
-      "disposition": "open",
-      "at": "2026-11-02T06:37:42Z",
-      "note": "The row that added the cap-before-filter section. Cited by the next section as the ancestor this branch contains, which is how the ordering clause is paid from an open stack rather than from a merged trunk."
+      "disposition": "closed-unmerged",
+      "at": "2026-11-09T04:51Z",
+      "note": "The row that added the cap-before-filter section. Cited by the next section as the ancestor this branch contains, which is how the ordering clause is paid from an open stack rather than from a merged trunk.",
+      "head": "affbd67f3cf4a9bd33506afbe74034e4ef823a2c",
+      "readable_on_main": "yes",
+      "was": "open"
     },
     {
       "number": 711,
       "lane": "ursa-skill",
       "branch": "ursa-skill/2026-11-02-message-14",
-      "disposition": "open",
-      "at": "2026-11-02T07:00:00Z",
-      "note": "This run's own row, read as open from inside the run that opened it, which is the one disposition in this lock that needs no forge call to be true."
+      "disposition": "merged",
+      "at": "2026-11-09T04:51Z",
+      "note": "This run's own row, read as open from inside the run that opened it, which is the one disposition in this lock that needs no forge call to be true.",
+      "head": "9880c15e47b3d46c5419a1e19fa8400a0da12f44",
+      "merge_commit": "bfcd41826ede1dd86448f2298af789ca8edfc2e4",
+      "readable_on_main": "yes",
+      "was": "open"
     }
   ]
 }

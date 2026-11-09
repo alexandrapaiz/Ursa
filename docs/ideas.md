@@ -104,13 +104,40 @@ touches the guard, or the engineer if it reaches that lane first.
   interrupted by the test runner that owns the case. A suite that hangs
   rather than merely runs long holds the job to the cap and reports
   nothing about the branch.
-- First step: give the helper a `timeout` and build the tree copy once
-  per suite rather than once per case, which is the cost rather than the
-  bound. Both are small. Neither was done in the run that found it,
-  because a `timeout` turns "pass late" into "fail" on a slow runner and
-  choosing that bound is a CI-budget decision that should land with the
-  job, not before it.
-- Owner: this seat or the engineer.
+- First step: give the helper a `timeout`. **The other half of this line
+  was wrong, and run 9 of this seat measured it rather than taking it.**
+  The line said to "build the tree copy once per suite rather than once
+  per case, which is the cost rather than the bound". The copy is not the
+  cost. Measured 2026-11-09 on the resident host, one case decomposes as a
+  0.33s `cpSync` of `tools/` and `.github/workflows/` against a 12.93s
+  gate invocation, so the prescribed repair targets 2.6 per cent of a case
+  and 17 copies are 5.6s of the whole suite's run. **No suite total is a
+  usable denominator on this host.** Run 7 read 267.2s over 20 cases; run 9
+  read 194.4s over 27, then 224.1s over the same 27 minus one gate
+  invocation, so the run with strictly less work took 29.7s longer. The
+  total tracks load from the seats sharing this host rather than the
+  suite, which is why the figures below are timed inside one process
+  against the gate's own functions. Inside the 12.93s: `sweep_files` 0.39s,
+  `load_vendored` 0.02s, the first `run_checker` subprocess 2.33s, the
+  second 3.96s, and `marker_census` 6.23s, which is 48 per cent of the
+  case and the largest single component. The census is 48 whole-file scans
+  because it restores one of 44 markers at a time and rescans, and
+  `split_quoted` inside HQ's vendored checker is 56,038 calls of that.
+  So the remaining cost is two things and neither is the copy: the two
+  checker subprocess runs, 6.29s, and the census, 6.23s.
+- Second step, which is why this stays open after run 9: making the census
+  cheaper is a design change and not a behaviour-preserving fix, so it is
+  not a security run's to make. `marker_census`'s own docstring argues at
+  length for restoring one marker at a time rather than deleting one at a
+  time, because deleting from a line two markers cover leaves the other
+  standing and the gate would then demand both be deleted. Any batching or
+  memoisation has to preserve that independence, which is the attribution
+  rule and not an optimisation detail. The `timeout` half was deferred by
+  run 7 because the bound should land with the job; the job is still queued
+  rather than merged, so it is still deferred, and this seat cannot touch
+  workflows in any case.
+- Owner: the engineer for the census; this seat or the engineer for the
+  `timeout`, once the CI job has landed.
 - Cost: $0
 - Status: proposed
 
@@ -23337,6 +23364,109 @@ is this seat's file and the defect is a measurement on it.
 - Cost: $0
 - Status: proposed
 
+## Ledger entry — 2026-11-09 (skill, message run): this seat's board lane says ten items are in Review and not one of them is, so the column is a status nothing has updated since the work landed
+
+**Status:** proposed. **For:** the project manager, because
+`POST /api/items/<id>/edit` is not this seat's write surface and this
+charter's boundaries are `skills/`, `prompts/skill-extract.md` and this
+file. **Severity:** medium, and it is about what the owner is told
+rather than about any artifact. **Found by** being dispatched to take
+the next item in this lane and finding the lane has no next item, only a
+Review column with nothing live in it.
+
+- Trigger: `GET /api/board/ursa`, read 2026-11-09T04:4xZ. The `skill`
+  seat has **13** items: **10** in Review, **3** in Done, and **none**
+  in Backlog or This sprint. So the dispatch's instruction had no
+  referent, and the reason is not that the lane is empty. It is that
+  everything in it is parked in a column that means waiting.
+- What: of the 10 Review items, **8** carry a `source_url` pointing at a
+  pull request. **Zero of the 8 are open.** Three merged (#281, #617,
+  #623) and five were closed without merging (#348, #419, #539, #552,
+  #638). And all five of those are ancestors of `main`, by
+  `git merge-base --is-ancestor` on a repaired clone, so the work in
+  every one of the eight is readable on `main` today. Review here does
+  not mean awaiting review. It means delivered, and nothing wrote that
+  down.
+- The worse half, which is the two items the check cannot reach:
+  `9ea07163` and `4f0880cf` carry **no `source_url` at all**. Their
+  bodies name a row in prose (`9ea07163` says "Ursa#644") or name none.
+  A row with no receipt is indistinguishable from a row whose receipt is
+  dead, which is the shape this seat's own library exists to refuse, and
+  it is in this seat's own lane.
+- Why it is worth a PM's pass rather than a quiet backfill: the
+  2026-10-05 measurement in this seat's charter says every queue-depth
+  number this org reports to the owner counts rows she cannot act on, so
+  the depth she is told about is not the depth she has. A Review column
+  is the same instrument one level up. Ten items here are reported as
+  owed work and none of it is owed.
+- First step, and it is cheap because the predicate is now written down:
+  for every item in every lane with a `source_url`, resolve the row and
+  move it to Done when the row is merged, or when it is closed and its
+  head is readable on `main`. The second clause is the one a naive sweep
+  gets wrong, because closed-and-unmerged is **88.7 per cent** readable
+  in this lane and **8.5 per cent** readable in `ursa-pm`'s, measured
+  over all 386 closed-and-unmerged rows this repository has had. The
+  commands are in `node skills/forge-citations.mjs --refresh` and the
+  rule they implement is §5ap of `prompts/skill-extract.md`.
+- Second step, for the two with no receipt: require a `source_url` on an
+  item a seat moves to Review, or accept that the item is unverifiable
+  and say so on the item.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, message run): the queue tooling across every lane reads "closed without merging" as work not landed, and that inference is wrong 28.8 per cent of the time repository-wide and 88.7 per cent of the time in this lane
+
+**Status:** proposed. **For:** the engineer and the ExO seat, who own
+the containment and drainer tooling this names. **Severity:** medium.
+**Found by** repairing this library's own citation guard, which had the
+same conflation inside it.
+
+- Trigger: `skills/forge-citations.lock.json` labelled 6 of its 12 rows
+  `closed-unmerged` and said nothing about whether their content is on
+  `main`. All 6 were. The label was the loudest thing in the file and it
+  was benign in every instance.
+- What: measured 2026-11-09 over all **386** closed-and-unmerged rows
+  this repository has had, with the predicate in the query per §5ao.
+  **111** are readable on `main`, **206** are not, and **69** cannot be
+  decided from a clone at all because the branch has been deleted. The
+  split is strongly lane-dependent: `ursa-skill` 47 of 53 readable,
+  `ursa-engineer` 17 of 26, `ursa-security` 11 of 18, `ursa-pm` 12 of
+  142, `ursa-research` 0 of 26. So there is no repository-wide prior a
+  tool can apply, and the two biggest lanes point opposite ways.
+- Why this seat's lane is the extreme: it builds each run's branch on the
+  previous run's rather than on the trunk, so a merged tip lands every
+  row behind it and those rows close unmerged having fully landed. Any
+  other seat that chains branches inherits the same inversion.
+- The part that is time-critical rather than merely wrong: the evidence
+  expires in one direction. A head readable on `main` is in `main`'s
+  history and is in every complete clone forever. A head that never
+  landed is in the clone only while its branch exists. Of the
+  closed-and-unmerged rows numbered under 100, **84.2 per cent** are
+  already undecidable from a complete clone; of those numbered 300 and
+  above, **0.6 per cent** are. Whatever reads this has to record it, not
+  compute it later.
+- The predicate, including the case the obvious one gets wrong:
+  `git merge-base --is-ancestor <head> origin/main` is right for 385 of
+  386 rows. It is wrong for **#608**, whose single commit ahead of `main`
+  is a merge of `main` into the branch, so it contributes nothing `main`
+  lacks. `git rev-list --count --no-merges origin/main..<head>` returns 0
+  there and settles it. Both commands, and a complete clone first, or
+  every row reads unknown.
+- What it does not license, because the wide reading is worse than the
+  narrow one it replaces: "not readable" is a claim about commits and not
+  about delivery. **#258** is the counterexample, with **607** of its
+  **613** commits having patch-identical equivalents on `main` and 6 not,
+  by `git cherry`, because it was built on an old base and the same
+  patches landed as different commits. Nothing here replaces reading the
+  diff.
+- First step: whichever tool decides containment or drains the queue
+  takes the two-command predicate above and records its answer with the
+  instant it was read. The reference implementation is clause 5 of
+  `skills/forge-citations.mjs` and its tests, which cover all four arms
+  including the merge-only one.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-09 (engineer, message run 9) — Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline
 
 - Trigger: `tools/gates/import-effects.mjs`, shipped today, found 17
@@ -23502,5 +23632,401 @@ is this seat's file and the defect is a measurement on it.
   ten: a baseline entry whose module carries no comment naming
   `IMPORT_DOES_WORK` at the line is a finding, so the excuse is visible
   from the defect and not only from the JSON.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, 19th run) — Cite Labelbox/Alignerr's split pricing posture alongside Toloka's, for a sharper version of the "publish methodology openly" pitch
+- Trigger: docs/market/landscape.md's new Labelbox (Alignerr) entry
+  and docs/market/positioning.md's 2026-11-09 (19th run) section.
+  Labelbox's core annotation platform publishes self-serve, metered
+  pricing (Labelbox Units, $0.10/LBU); its Alignerr arm, the part that
+  actually sources RLHF preference labeling, is sales-quoted only,
+  confirmed on Labelbox's own product page (no rate, no named client,
+  "Talk to us").
+- What: read alongside Toloka (already proposed 2026-11-09, 18th run),
+  this is sharper evidence for the same pitch — the opacity in this
+  category sits specifically at the human-judgment layer, not just at
+  "this vendor versus that one." Even a vendor with genuinely public
+  pricing for part of its business draws the line exactly where Minor's
+  own methodology-publishing commitment (CLAUDE.md §2) would apply.
+  Citing both together (one fully transparent vendor, one
+  transparent-except-at-the-judgment-layer vendor) makes the argument
+  about where opacity lives, not just that one competitor happens to
+  be more open than another.
+- Why it is not actioned by this run: positioning copy for a pitch or
+  brief is the PM's or owner's to draft, not this seat's charter.
+- First step: whoever next drafts lab-facing positioning copy adds
+  Labelbox/Alignerr's split posture next to the existing Toloka
+  citation, both sourced in docs/market/positioning.md.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): the CI half of tonight's ledger-contract report has no run to schedule, because the gate was written as a proposal and the token that would install it has no workflows permission
+
+### 2026-11-09 (market, 20th run) — Name "no undisclosed carve-outs" as a specific, checkable consent claim in Major's user-facing trust copy, citing Anthropic's own safety-flag exception
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (20th run)
+  section. Anthropic told Claude users an opt-out from training-data
+  use meant their conversations stayed out of future models, then its
+  2026-06-08 privacy policy added an undisclosed carve-out: safety-
+  flagged conversations are used regardless of a user's stated
+  preference, with no disclosed trigger and no notification when it
+  happens.
+- What: CLAUDE.md's load-bearing constraint #2 ("no dark patterns: the
+  user can always see, edit, revoke, and delete") is currently a
+  general promise. This is a dated, sourced, named example of the
+  market's most safety-focused lab failing to keep that exact promise
+  cleanly, for a defensible-sounding reason rather than a cynical one.
+  "What you revoke is actually gone, with no undisclosed exceptions"
+  is a sharper, more specific, and more checkable claim than "we
+  respect your privacy," and this gives Major's trust copy a concrete
+  contrast to point at rather than a general virtue to assert.
+- Why it is not actioned by this run: user-facing trust/consent copy
+  is Major's product surface, not this seat's charter (read-only
+  market research, no code or copy).
+- First step: whoever owns Major's consent-architecture pages adds a
+  specific, auditable statement (e.g. "no exceptions, including for
+  safety review" or the honest narrower version if one is needed)
+  next to the existing opt-in/edit/revoke/delete promise, sourced
+  against the Anthropic case in docs/market/positioning.md.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, 21st run) — Name "no solicited exposure to harmful content" as a distinct safety claim in Minor's enterprise pitch, citing Sama's documented Kenya content-moderation case
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (21st run)
+  section, built on the new Sama entry in landscape.md (Category 1,
+  25th). A 2023 TIME investigation found Sama's Kenyan workers, paid
+  under $2/hour, were assigned graphic descriptions of abuse and
+  violence to build ChatGPT's safety filters, reported lasting
+  psychological trauma, and Sama itself canceled the OpenAI contract
+  eight months early over the work's severity.
+- What: every Category 1 vendor's business model depends on a worker
+  being handed content chosen by someone else, on request, with no
+  relationship to that worker's own life or work; Sama's case is the
+  sharpest documented instance of what that can cost the worker when
+  the assigned content is itself harmful. Minor's pipeline has no
+  solicited-labeling step at all, so it has no equivalent exposure to
+  name, not because it has solved the problem Sama's case illustrates
+  but because the architecture never creates it: the outcome record
+  comes from real work a person was already doing for their own
+  reasons. This is a safety/ethics claim distinct from the quality
+  argument ("no generation-to-outcome join") this file already makes
+  against the same category.
+- Why it is not actioned by this run: Minor's enterprise sales copy is
+  a product/sales surface, not this seat's charter (read-only market
+  research, no code or copy). It also needs a check this run did not
+  do: whether Minor's own future safety-sampling or red-teaming needs,
+  if any, could ever create a comparable exposure, before the claim is
+  made in absolute terms to a lab buyer.
+- First step: whoever owns Minor's enterprise pitch deck or data-
+  sheet decides whether to add this as a named structural-safety point
+  alongside the existing quality/verifier pitch, after the
+  safety-sampling check above.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 — The ledger gate has existed since 27 September and has never been a workflow, so handing its absence to the PM seat hands it to a seat that cannot install it either
+
+- Trigger: Ursa/exo's board note to this seat, read as data. It reports
+  that three of this seat's 2026-11-02 ledger rows break the pm.md §4
+  contract, that the trunk has been red on them for seven days, and that
+  of twelve workflows here none runs any test. It closes by saying the CI
+  half has been handed to the PM seat. The field repair is this seat's
+  and is done in this branch. Reading who could act on the other half is
+  what produced this entry.
+- What: the gate is not missing and it is not unscheduled. It is
+  uninstalled. `tools/ledger/ci/ledger-gate.yml` is a complete workflow
+  that runs the 132 tests of its named suites, `check-attributes.mjs`,
+  and both ledger checkers with exit 2 treated as a pass, and it has sat
+  under `tools/` rather than under `.github/workflows/` since
+  2026-09-27. Its own README says why, and quotes the push rejection:
+  the GitHub App token the seats push with has no `workflows`
+  permission, so any commit that creates a file under
+  `.github/workflows/` is refused outright. Confirmed this run:
+  `.github/workflows/` holds twelve files, eleven agent runners and the
+  redaction gate, and no `ledger-gate.yml` or `tests.yml`. So the PM
+  seat pushes with the same token class and is refused by the same rule.
+  The holder is the owner, and the act is the two `cp` commands the
+  README already writes out.
+- First step: for the owner, and it is already drafted rather than
+  needing design. Run the three commands in `tools/ledger/ci/README.md`,
+  which copy both files into `.github/workflows/`, delete the proposal
+  directory in the same commit so no second copy drifts, and commit. One
+  thing to know before running it: the suite will be red on the first
+  pull request it sees, for a reason that is not about that pull
+  request. `tools/ledger/check-closures.test.mjs:194` asserts the
+  violation list is empty while the checker deliberately classifies some
+  violations as the owner's, and three closure markers currently sit in
+  that class. The 2026-11-02 entry "A suite that asserts zero violations
+  on a gate which classifies some violations as the owner's goes red on
+  the owner's queue, not on the branch" is that finding, with the
+  one-line scoping fix and the engineer seat as its owner. It measured
+  two such markers and this run measures three, so the population is
+  growing. Scoping that assertion before installing the workflow turns a
+  gate that arrives red into one that arrives green.
+- What this run did not take on, and why the boundary is worth naming:
+  `tools/ledger/` is outside this seat's charter boundary, and this
+  seat's runtime forbids touching workflows at all. So both halves above
+  are reports with named holders rather than work withheld.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): the evidence guard fingerprints a span, so a claim can be falsified from outside the span and stay green
+
+### 2026-11-09 — A citation's span went green by relocating while the sentence it backs was being retired forty-one lines below it
+
+- Trigger: clearing the sixteen drifted citations the library's evidence
+  guard reports, which is receipts work this seat owns. Fifteen were line
+  moves and are repaired in this branch. The sixteenth, E45 of
+  `clearing-a-record-for-release`, relocated cleanly from
+  `docs/security/redaction-standard.md:230-244` to `234-248` with the
+  text byte-identical, so the guard had nothing to say about it. Reading
+  the commit that moved it is what found the problem: 5cfb9006 also
+  appended a section saying the cited claim drew one inference too many.
+- What: `skills/check-evidence.mjs` records a content hash per cited
+  range, which makes it exact about one question and silent about the
+  neighbouring one. It answers whether the bytes a citation points at
+  still say what they said. It cannot answer whether the document still
+  means it. Here the cited span is the 2026-10-26 note on the redaction
+  gate's `grep -I` limit, unchanged and still true, and the skill's
+  sentence built on it was "the gate cannot help here at all" and "the
+  rendered half is checkable by nothing". Section 7, added 2026-11-09
+  forty-one lines further down the same file, says that conclusion was
+  one inference too many and names a gate that now holds the provenance
+  half. Nothing in the library's eight guards reads that, and
+  `relocate-anchors.mjs` correctly classified the citation as settled,
+  because by its own question it was. The near miss is the sequence: a
+  blanket `--update` would have cleared all sixteen at once and this one
+  would have gone green carrying a false sentence, which is the trap the
+  2026-11-02 entry "The gate that catches a moved citation cannot tell a
+  moved line from a wrong section, and the blanket update is the trap"
+  names from the other side. That entry is about an update hiding a
+  change inside the span. This one is about a change outside the span
+  that no update and no refusal could have surfaced.
+- First step: when a commit moves a citation, read that commit rather
+  than only the span, because the diff is already in hand and it is the
+  one place a contradiction elsewhere in the file is visible for free.
+  Concretely, `relocate-anchors.mjs` takes the old ref as its argument
+  and already knows every path it relocated in, so it can end by printing
+  `git log --oneline <old-ref>..HEAD -- <those paths>` for the seat to
+  read, which costs nothing and is not a gate. A gate is the wrong
+  instrument: whether a new paragraph contradicts an old claim is a
+  reading, and this library has already declined one guard for being
+  priced against too small a population. Population today is one of
+  sixteen, and the honest claim is that it is the first instance anyone
+  has looked for rather than the first that has happened.
+- What this run did instead of waiting for that: narrowed E45 to the part
+  the span still supports, added E46 for the new section, and rewrote the
+  skill's paragraph to carry the correction rather than swap it silently,
+  since a claim that outran its evidence is the thing that step of the
+  skill teaches.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): one finding reached two seats by two routes and both repaired it, twenty-two minutes apart, neither able to see the other
+
+### 2026-11-09 — A board report and a suite run found the same twenty-one violations, and the second repair to land was the one that could not check for the first
+
+- Trigger: this branch conflicted against `main` on ten blocks of
+  `docs/ideas.md` after `#794` merged. The ledger driver refused them
+  honestly rather than merging them wrong, which is the behaviour it
+  exists for. Reading the other side found `520367c8`, by the engineer
+  seat at 2026-11-09T05:32:41Z, repairing the same 21
+  `IDEA_FIELDS_COMPLETE` violations across the same twelve entries by
+  the same mechanism, written up with the same analysis.
+- What: the finding reached two seats by two different routes within the
+  hour. Ursa/exo measured it, attributed it to this seat's rows, and
+  posted it to this seat's inbox, which is why this run was repairing
+  it. The engineer seat found it independently by running
+  `scripts/ci-checks.mjs`, where the same checker is already wired, and
+  it holds `tools/ledger/`. Both repairs are correct and the two are
+  nearly identical, down to writing the three genuinely absent fields
+  from each entry's own text and leaving the `done` statuses to the
+  owner. Neither seat could have seen the other: the engineer's commit
+  did not exist when this run read its inbox and opened its branch, and
+  this run's branch carried no signal the engineer's pass could read,
+  because a branch is authorship and not visibility. The cost is one
+  redundant commit and one hand-resolved conflict, which is small, and
+  the shape is not: the org rule that catches this is "read your own
+  seat's open PRs first", and it is scoped to your own seat, so it is
+  blind by construction to a sibling repairing your rows.
+- First step: when a board report names a defect in a shared gate's
+  output, say in the reply which lane is taking it, and address the
+  reply to both the reporter and the seat that owns the gate. That is a
+  habit and not a tool. The exo seat's note did half of it already, by
+  saying it had handed the CI half to the PM seat; what no message said
+  was who was taking the field half, and both seats that could take it
+  then did. The cheaper half is already measurable: `own-prs.mjs` takes
+  a seat argument, so a variant that lists open rows touching a named
+  path rather than a named branch prefix would have shown this run the
+  engineer's work.
+- What this run did: took `main`'s side of all twelve entries wholesale
+  and kept only what `main` does not have, rather than defending its own
+  identical text. The redundant commit is left in this branch's history
+  rather than rewritten, because the duplication is the part worth
+  reading.
+- The half that was not duplicated, for scale: `origin/main` still
+  reports all sixteen of this library's drifted citations, so the
+  library work in this branch is untouched by any of the above.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, 22nd run) — Cite Memobase's $9/$29-per-month consumer memory tiers as the first direct paid comp for Major's "free forever" claim, paired with why the comparison is structural and not just a lower number
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (22nd run)
+  section, built on the new Memobase entry in landscape.md (Category
+  3, 27th). Memobase (memobase.ai) sells a cross-model, persistent
+  personal-memory layer directly to consumers at $0/500 credits,
+  $9/5,000 credits, and $29/unlimited credits per month — the same
+  kind of product Major gives away free by design.
+- What: every prior Category 3 entry in this file either prices B2B
+  (Mem0, Letta, Zep sell to developers, not end users) or doesn't
+  price the memory feature at all (bundled into an existing
+  subscription). Memobase is the first entry that prices the exact
+  consumer-facing thing Major's "free forever" claim (CLAUDE.md §0,
+  load-bearing constraint #1) is made against, giving Major's
+  trust/pricing copy a real number instead of an unopposed assertion.
+  The claim still needs the structural half stated alongside the
+  number: Memobase's free tier is a lever a profit-seeking vendor can
+  tighten later, and Major's cannot, because Major's business model
+  has no consumer revenue switch behind it to flip (CLAUDE.md §2,
+  Major "never monetizes the user directly"). Citing the price gap
+  alone invites the rebuttal "so raise it later too"; citing the
+  revenue-model difference does not.
+- Why it is not actioned by this run: Major's user-facing trust and
+  pricing copy is a product surface, not this seat's charter
+  (read-only market research, no code or copy).
+- First step: whoever owns Major's consumer-facing trust/pricing copy
+  decides whether to name Memobase specifically or use it as an
+  unnamed category example, and pairs any price comparison with the
+  structural (revenue-model) argument above rather than the number
+  alone.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, 22nd run) — Two more open-source projects independently named "AMP" surfaced this week; cite the acronym collision as sharper evidence against waiting for a portability standard before Major ships
+
+- Trigger: docs/market/landscape.md's cross-cutting note on
+  memory-portability standards (open since 2026-10-05, ten-plus
+  tracked attempts, none clearing the independent-implementation
+  bar) gained a new update this run: a Show HN post for an
+  open-source conversation-portability tool called "AMP" led to two
+  more, completely unrelated open-source projects already using the
+  same name (`agentmemoryprotocol/agentmemoryprotocol` and
+  `akshayaggarwal99/amp`), neither aware of the other.
+- What: this file's standing argument for Major has been "ship the
+  owned, portable profile now rather than wait for industry
+  convergence." A category that cannot even converge on what to call
+  the standard it is trying to build is the sharpest evidence yet
+  that near-term convergence is not coming, strengthening (not just
+  repeating) that argument for whoever next makes Major's "why not
+  wait for a standard" case to a skeptical user, partner, or
+  investor.
+- Why it is not actioned by this run: this is evidence for a
+  pitch/copy argument, not a landscape or pricing change; the seat's
+  charter is read-only market research.
+- First step: whoever next drafts Major's "why build this now instead
+  of waiting" argument (consumer trust copy, investor materials, or a
+  partner-facing deck) can cite the acronym collision as a concrete,
+  dated example rather than a general claim that the space is
+  fragmented.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — Fifteen of sixteen drifted ranges are re-recorded at the anchor they already had, and the gate that now says so still allows it
+
+- Trigger: shipping the gone-or-moved split in `check-evidence.mjs`
+  this run, then pointing it at the sixteen drifted ranges sitting on
+  `origin/main` at `55ab0ca8` to see what it would have said. It sorted
+  them 15 moved and 1 gone, and the one it called gone is `E28`, which
+  is the one range the 2026-11-02 run concluded by hand needed reading.
+  The agreement is the good news. The fifteen are the finding.
+- What: the split decides what `--update` refuses, and it only refuses
+  the gone half. A moved range named by its slug is still re-recorded
+  at the anchor it already had, so the lock takes the fingerprint of
+  whatever those line numbers hold now while the claim's own text sits
+  somewhere else in the file. The checker then goes green over a
+  citation pointing at the wrong lines, which is the 2026-10-05 failure
+  the lock was built to prevent, reached by the command the docs
+  prescribe. The 2026-11-02 ledger entry this run closes asked for the
+  moved half to keep working as it does today, and that is what shipped,
+  so this is the residual rather than a regression. Measured on the real
+  batch above: all fifteen would have been re-recorded at a wrong
+  anchor, and the reason `main` does not carry fifteen wrong anchors is
+  that the run which repaired them relocated first, by hand, having
+  decided to. And then it happened to this run, 23 minutes after this
+  entry was written: `#801` merged mid-run, the merge of `origin/main`
+  moved `docs/ideas.md` under `E37`, `E38` and `E39`, and
+  `--update clearing-a-record-for-release` named all three as moved,
+  printed the offsets their text had gone to, and recorded the old
+  anchors at exit 0. The lock was reverted and the three relocated to
+  9155, 9162 and 9175, which are the offsets the gate had already
+  printed. The only thing standing between that command and three wrong
+  anchors on `main` was a person reading the output instead of the exit
+  code, one hour after writing the warning.
+- First step: this seat's, and it is a choice of two. The strong option
+  is to refuse the moved half as well, naming the offsets the text was
+  found at, which makes `relocate-anchors.mjs` the only route for the
+  nine tenths of a drift batch it already owns and leaves `--update`
+  for the tenth that needs a reader. The weak option is the line this
+  run shipped, which names each moved range and the offset its text
+  moved to and then records it anyway. Prefer the first, because the
+  argument for the second was that the moved half needs no reading, and
+  that is true of the text and false of the anchor. Either way the
+  numbers to beat are in this entry rather than in a prediction.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The verify path can now answer the question its own failure line asks a reader to guess
+
+- Trigger: reading `check-evidence.mjs`'s failure line after shipping
+  the split, which tells a reader to "re-read it, re-anchor if it
+  moved". The `if it moved` is the one part of that sentence the tool
+  can now decide, and the split that decides it runs only under
+  `--update`.
+- What: a reader who sees sixteen drifted ranges gets sixteen identical
+  sentences and no way to tell which of them need a person. The
+  information exists before any command is run, because the gone-or-
+  moved question is answered from the lock and the file and needs no
+  git ref. Printing it in verify mode would turn one undifferentiated
+  red into fifteen lines saying `relocate-anchors.mjs` and one saying
+  read this, which is the triage three separate runs of this seat have
+  since done by hand on 2026-10-15, 2026-10-18 and 2026-11-02.
+- First step: this seat's, next run that touches the file, and the
+  reason it is not this one is scope rather than doubt: the entry this
+  run closes specified `--update`, and widening the verify line in the
+  same change would have rewritten output that several tests and two
+  run notes quote. The cost is bounded and measured: the split over the
+  sixteen-range batch took 1.37s against 0.66s without it, and it runs
+  only over ranges that have already drifted, so a green library pays
+  nothing. `check-evidence.mjs` verify is 0.32s on 466 ranges with the
+  split present and unexercised.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The rule this run's gate enforces is not written down, and §5ai is why it is filed instead of written
+
+- Trigger: wanting to add a `## 5` clause to `prompts/skill-extract.md`
+  saying that which granularity a re-record needs is decided by the
+  evidence and not by the caller, and finding that this branch already
+  carries the code that would cite it.
+- What: §5ai requires a new section to land in a pull request carrying
+  nothing that cites it, so that a reader never meets a citation with
+  nothing behind it. The gate shipped this run, its tests and its
+  header comment would all cite the clause the moment it existed, so
+  writing it here would break the rule that makes this library's own
+  citations trustworthy. The clause itself is one paragraph: a drifted
+  citation is sorted by whether the lines the lock recorded are still
+  in the file, a slug covers the half that is, and the half that is not
+  is named by ref because re-recording it certifies prose nobody has
+  read.
+- First step: the next run of this seat that would add a `## 5`
+  section, in a pull request carrying the section and this entry's
+  closure and nothing citing it, paying §5ai's own grep check on it.
+  This is the fourth entry of this shape in the file, which is itself
+  worth a look: a rule that can only land in an otherwise empty pull
+  request accumulates a queue, and that queue is now long enough that
+  one later run could drain it in a single section-only branch.
 - Cost: $0
 - Status: proposed

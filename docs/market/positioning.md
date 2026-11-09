@@ -2126,3 +2126,213 @@ sources read, this entry: [Toloka: Introducing the new Toloka
 Platform](https://toloka.ai/blog/introducing-the-new-toloka-platform/),
 [olostep.com: AI Training Data Providers: Costs, Types, Quality, and
 Compliance](https://www.olostep.com/blog/ai-training-data-providers).
+
+## A second Category 1 vendor's pricing shows the opacity line sits at a specific layer, not just at "this vendor or that one" (2026-11-09, message, 19th run)
+
+Toloka (above) showed one RLHF-adjacent vendor pricing itself fully in
+the open. Labelbox (new landscape.md entry, Category 1, 22nd) shows
+something sharper: the same vendor draws the line in two different
+places for two different products. Its core annotation platform is
+self-serve and metered in public — "Labelbox Units" at $0.10/LBU, 500
+free per month, published consumption rates per data type. Its
+Alignerr arm, the part that actually sources human preference
+labeling, response evaluation, and red-teaming — the part that
+competes with Minor's category — is sales-quoted only, confirmed
+directly on Labelbox's own product page: no rate, no named client, a
+"Talk to us" link and nothing else.
+
+So what: this sharpens the "publish methodology openly" argument
+(CLAUDE.md key activities) past "some vendors are opaque, we aren't."
+Even a vendor with genuine, checkable public pricing for part of its
+business draws the opacity line specifically at the human-judgment
+layer — the layer where the actual preference signal is produced, and
+the layer Minor's own methodology-publishing commitment covers. That
+is a more precise contrast than "Toloka is transparent, the rest
+aren't": it suggests the opacity itself tracks where the judgment
+happens, not just vendor-by-vendor habit. Worth citing alongside
+Toloka in the same pitch rather than instead of it — together they
+show one vendor opting into full transparency and a second showing
+exactly which layer every other vendor, including a partly-transparent
+one, keeps closed.
+
+Also checked and rejected from the same lead list: Defined.ai, a
+speech/voice and multimodal dataset marketplace with no RLHF/
+preference-data product and no public pricing — not a fit for this
+comparison, recorded in landscape.md and not cited further here.
+
+No pricing recommendation made; this is a transparency-posture
+argument, not a rate-card benchmark. External sources read, this
+entry: [Labelbox: Alignerr Expert
+Network](https://labelbox.com/products/alignerr/), [Labelbox
+pricing](https://www.usagepricing.com/blueprint/labelbox).
+
+## A model provider's own consent promise has a carve-out it didn't disclose in the same place, on the exact non-negotiable Major is built around (2026-11-09, message, 20th run)
+
+This week's demand-signals ceremony turned up the sharpest version yet
+of CLAUDE.md's load-bearing constraint #2 ("the user can always see,
+edit, revoke, and delete what's been inferred about them; no dark
+patterns") being violated by a model provider rather than by one of
+this file's tracked Category 3 competitors. Anthropic told Claude
+users that opting out of training-data use would keep their
+conversations out of future models (deadline 2025-09-28, consumer
+terms). Its privacy policy update published 2026-06-08 (effective
+2026-07-07) added a carve-out: conversations flagged for safety review
+can still be used to train models "regardless of a user's stated
+preference," per the policy's own text as quoted by the primary source
+below. The policy does not define what triggers a safety flag and does
+not commit to notifying a user when their conversation is flagged, so
+a user who opted out has no way to know whether a given conversation
+was actually excluded. Separately, and read together with the same
+pattern this file flagged for Google's Personal Intelligence
+(2026-10-27, 3rd run, "even a genuine opt-in is not self-enforcing if
+the vendor's own pages disagree about what it does"): Reddit users
+reported reconsidering Anthropic specifically over the five-year
+retention window itself, before this carve-out was even the issue in
+view.
+
+So what: this is not a Category 1, 2, or 3 competitor case, so no
+landscape.md entry — Anthropic is a Key Partner (CLAUDE.md §2, the
+platform Major runs on top of), not a tracked rival. But it is the
+single most concrete evidence this file has yet found that the
+specific promise Major is built to keep differently — opt-out means
+opt-out, with no undisclosed carve-out, and no gap between what a
+privacy page says and what the product actually does — is one the
+market's most sophisticated, safety-focused lab has already failed to
+keep cleanly, for the most defensible-sounding reason (safety review)
+rather than a cynical one. A user-trust pitch that says "unlike every
+model provider, what you revoke is actually gone, with no exceptions
+and no silent flag" is a harder, more specific claim to make than "we
+respect your privacy," and this is a dated, sourced example of
+exactly the gap that claim has to close. No pricing or landscape
+action; this is evidence for whoever next drafts Major's consent-page
+copy or user-facing trust language, read alongside the Google entry
+above as a second named provider with the same shape of problem.
+
+Separately, a behavioral-economics argument surfaced the same week
+makes the positive case for Major's portability pitch from an
+unexpected angle: a 2026 essay on why users don't switch AI models
+argues the lock-in is not technical but psychological — an endowment
+effect where "the more you prompt, the more entrenched your goals and
+aspirations become to the existing model," compounding into switching
+costs closer to re-explaining yourself to a new person than to
+changing software. Its own framing of the winning dynamic — "which
+model knows the person better" — is Major's value proposition stated
+by someone with no reason to be making its case. Worth citing as an
+independent articulation of why portability has value distinct from
+privacy, for whoever drafts consumer-facing copy.
+
+External sources read, this entry: [techcoffeehouse.com: Anthropic
+Said You Could Opt Out of Claude's Training Data. Its Own Privacy
+Policy Says
+Otherwise.](https://techcoffeehouse.com/2026/06/09/claude-training-data-opt-out-carve-out/),
+[Seeking Alpha: Anthropic trains models with user chats, extends data
+retention to five
+years](https://seekingalpha.com/news/4490171-anthtopic-trains-models-with-user-chats-extends-data-retention-to-five-years),
+[joespeed1.substack.com: Why You Won't Switch AI
+Models](https://joespeed1.substack.com/p/endowment-and-ai) (secondary,
+behavioral-economics argument, not independently verified beyond the
+piece's own reasoning).
+
+## Closing the last leads on an old list turns up this file's clearest "who is winning Category 1" claim, and a cost axis none of this file's quality or pricing arguments have named yet (2026-11-09, message, 21st run)
+
+Appen, Sama, and iMerit (new landscape.md entries, Category 1, 24th
+through 26th) were the last three names left unchecked from the 18th
+run's own vendor-comparison lead list. Closing them out does not open
+a new line of argument, but it sharpens two this file already
+carries.
+
+First, Appen gives this file something the funding-driven entries
+(Snorkel, Mercor, Handshake, micro1) imply but never state directly:
+a named incumbent conceding it lost the fastest-growing slice of its
+own market to the specialists this file already tracks. A
+vendor-comparison source states plainly that Appen "never really
+owned" the frontier-RLHF segment and "a new generation of specialists
+has taken it," naming Surge, Mercor, and Scale as the displacers, the
+same names clustered at the top of this file's own Category 1 funding
+and revenue figures. So what: when a lab brief needs to characterize
+Category 1 as a market rather than a list of separate logos, "a
+named incumbent conceded the ground to the specialists we already
+track, on the record" is a sharper line than citing each specialist's
+own funding round in isolation.
+
+Second, Sama's documented history (a 2023 TIME investigation: Kenyan
+content moderators paid under $2 an hour, tasked with labeling
+graphic descriptions of abuse and violence to build ChatGPT's safety
+filters, reporting lasting psychological trauma) names a cost this
+file's existing arguments against Category 1 have not named. Every
+prior weakness recorded against this category is about the data's
+quality (no generation-to-outcome join) or the vendor's own risk
+exposure (Handshake's pay-withholding dispute, Mercor's LiteLLM
+breach). Sama's case is different in kind: it is a cost borne by the
+labeler rather than the buyer, and it exists specifically because
+solicited labeling can assign a worker content with no relationship
+to that worker's own life or work. Minor's architecture has no
+equivalent exposure to name, not because it has solved the problem
+Sama's case illustrates, but because it has no solicited-labeling step
+at all. The outcome record comes from real work a person was already
+doing for their own reasons, so nobody is handed someone else's
+traumatic content on request. Worth naming precisely: not a quality
+advantage, and not a claim tested against any safety-sampling work
+Minor might someday need itself, but a structural difference in whose
+life a labeling cost lands on.
+
+No pricing or landscape action beyond the three new entries. iMerit
+added no new argument to either file; it closes the lead list cleanly
+with the thinnest public footprint of the three. External sources
+read, this entry: the same sources cited on the Appen, Sama, and
+iMerit entries in landscape.md above.
+
+## A direct paid comp for "free forever" finally exists, and the standard-convergence bet gets harder to hold at the same time (2026-11-09, message, 22nd run)
+
+With the 18th run's lead list closed, this run's demand-signals
+ceremony looked at this week's public forums instead of the vendor
+backlog, and turned up two findings on opposite sides of Major's
+pitch.
+
+First, the pricing side. Every prior entry in landscape.md's Category
+3 either prices B2B (Mem0, Letta, Zep sell to developers building on
+top of them, not to the end user) or doesn't price at all (the
+incumbent labs' own memory features are bundled into a subscription
+users already pay for other reasons). Memobase (new landscape.md
+entry, Category 3, 27th) is the first entry this file has found that
+prices the exact consumer-facing thing Major gives away: a persistent,
+cross-model personal memory layer, sold directly to the end user at
+$0/$9/$29 a month. That is a real number to put next to "free
+forever, by design" (CLAUDE.md §0, load-bearing constraint #1) instead
+of an assertion with nothing to compare against. So what: the honest
+version of this claim is narrow. Memobase's free tier (500 credits)
+is a lever a profit-seeking vendor can tighten later; Major's free
+tier has no revenue switch behind it to flip, because the business
+model depends on the consumer side staying free (CLAUDE.md §2, "Ursa
+Major never monetizes the user directly"). That structural difference,
+not just the lower number, is the actual pitch — a user-facing page
+that only cites the $0 vs $9 gap invites the obvious rebuttal
+("so raise your price later too"), while one that explains why Major's
+revenue comes from a different side entirely does not.
+
+Second, the standard-convergence side gets harder to argue, not
+easier. This file's running cross-cutting note on portability
+standards (first opened 2026-10-05) has now tracked ten-plus
+independent attempts at a neutral memory format, none clearing the
+bar of independent implementation and adoption beyond the format's
+own author. This run found a new wrinkle: a Show HN post for an
+open-source tool called "AMP" turned up two more, completely
+unrelated open-source projects already using the same name, neither
+aware of the other. If the category cannot even converge on what to
+call the thing it is trying to build, "wait for a standard and build
+on top of it" is not a plausible near-term strategy for anyone,
+Major included. This sharpens rather than changes the file's standing
+position: Major's bet has always been to ship the owned, portable
+profile now rather than wait for industry convergence, and the
+acronym collision is the sharpest evidence yet that convergence is not
+close.
+
+No change to the $10/$30 consumer framing question (CLAUDE.md's actual
+model has no consumer price to test, as this file's charter note
+above already established) and no Minor pricing action; both findings
+are about Major's free-forever claim and its "no standard yet"
+backdrop specifically. External sources read, this entry: [Memobase](https://memobase.ai/),
+[Show HN: Memobase](https://news.ycombinator.com/item?id=47237920),
+[Show HN: AMP](https://news.ycombinator.com/item?id=47309161), [GitHub:
+agentmemoryprotocol/agentmemoryprotocol](https://github.com/agentmemoryprotocol/agentmemoryprotocol),
+[GitHub: akshayaggarwal99/amp](https://github.com/akshayaggarwal99/amp).

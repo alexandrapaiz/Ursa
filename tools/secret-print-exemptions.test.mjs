@@ -27,26 +27,100 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const GATE = 'tools/secret-print-exemptions.py'
 const BASELINE = 'tools/secret-print-baseline.txt'
 
-function run(root, args = []) {
-  const out = spawnSync('python3', [path.join(root, GATE), ...args], {
+// `spawnSync` reports two classes of outcome through two different channels,
+// and only one of them is an exit status. A process that RAN and refused sets
+// `status` to 2, which is the channel every case below reads. A process that
+// never ran, or that was killed, sets `status` to null and puts the cause in
+// `error`: ENOENT when `python3` is not on the path, ENOBUFS when the gate's
+// output passes `maxBuffer`, and a signal name when something killed it.
+//
+// Added 2026-11-09 by Ursa's security seat, measured. This helper read only
+// `status`, so the whole second channel was dropped, and the drop landed
+// inside the one guard written to catch it: `json()`'s
+// `assert.notEqual(got.code, 2, 'gate could not run')` compares null against
+// 2, which passes. The case then reached `JSON.parse('')` and the suite's
+// report for an absent interpreter was `Unexpected end of JSON input`. The
+// interpolated `got.stderr` was `undefined` in that case too, so even had
+// the guard fired it would have named nothing.
+//
+// Why that is a security defect and not a tidiness one. This suite is the
+// only thing asserting that `tools/secret-print-exemptions.py` makes a
+// secret-print exemption come due. An environment where it cannot run must
+// say so in those words, because a guard suite that fails with a JSON parse
+// error reads as a broken test, and the ordinary response to a broken test
+// nobody can reproduce is to skip it — which retires the staleness gate over
+// every secret-print exemption without one line saying that is what happened.
+// Finding F110 of the run before this one was the same shape one layer down:
+// an exemption whose premise nothing read.
+//
+// The vendored side already does this correctly, which is what made the
+// omission visible. `run_checker` in the gate itself raises `CannotRun` on
+// both a refusing exit status and an unparseable document. Only the
+// JavaScript helper trusted the status alone.
+function run(root, args = [], opts = {}) {
+  const interpreter = opts.interpreter || 'python3'
+  const out = spawnSync(interpreter, [path.join(root, GATE), ...args], {
     cwd: root,
     encoding: 'utf8',
-    maxBuffer: 32 * 1024 * 1024,
+    maxBuffer: opts.maxBuffer || 32 * 1024 * 1024,
   })
+  if (out.error || out.status === null) {
+    const why = out.error ? `${out.error.code || out.error.name}: ${out.error.message}`
+      : `killed by ${out.signal}`
+    throw new Error(
+      `the gate could not run (${interpreter} ${GATE}): ${why}. `
+      + 'This is not a verdict about the exemptions; it is the suite being '
+      + 'unable to ask. Do not skip or exempt this case on it.',
+    )
+  }
   return { code: out.status, stdout: out.stdout || '', stderr: out.stderr || '' }
 }
 
-function json(root, args = []) {
-  const got = run(root, ['--json', ...args])
-  assert.notEqual(got.code, 2, `gate could not run: ${got.stderr}`)
+function json(root, args = [], opts = {}) {
+  const got = run(root, ['--json', ...args], opts)
+  assert.notEqual(got.code, 2, `gate refused to run: ${got.stderr}`)
   return { ...got, report: JSON.parse(got.stdout) }
 }
 
 // A copy of the guard and of everything the sweep scans that carries a
 // suppressed finding today: `tools/` for the markers and the tooling, and
 // `.github/workflows/` for the two baseline entries.
+// Every instance is removed when the process exits, and the prefix carries
+// this process's pid.
+//
+// Both halves were added 2026-11-09 by Ursa's security seat, measured. There
+// are 17 calls to `instance()` in this file and nothing deleted any of them,
+// so each run of this suite left about 49 MB under `os.tmpdir()` for good.
+// `node tools/seat/env-facts.mjs` carries two facts that make that expensive
+// rather than untidy. `bootstrap-allocates-and-a-full-disk-is-silent`: every
+// repair in a seat's bootstrap acquires something, so on a full disk the
+// clone stays shallow and no error names the disk. And `tmp-is-shared-
+// between-seats`: `/tmp` is one filesystem for every seat on this host, so
+// the cost is not paid by the run that leaked it.
+//
+// This host was at 97 per cent with 1.5 GB free while that was measured, and
+// the tasks filesystem of the run doing the measuring filled and started
+// losing command output mid-sweep.
+//
+// The pid is in the prefix for the second fact rather than the first. A bare
+// `ursa-exempt-` glob is every concurrent seat's path too, so a cleanup
+// written for this suite reaches another run's live instance. The run that
+// measured this did exactly that, with `rm -rf /tmp/ursa-exempt-*`, before
+// noticing that the prefix it was clearing was not only its own.
+const INSTANCES = []
+process.on('exit', () => {
+  for (const dir of INSTANCES) {
+    try {
+      fs.rmSync(dir, { recursive: true, force: true })
+    } catch {
+      // A teardown that throws would report a disk fault as a test failure.
+    }
+  }
+})
+
 function instance() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ursa-exempt-'))
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), `ursa-exempt-${process.pid}-`))
+  INSTANCES.push(dir)
   fs.cpSync(path.join(ROOT, 'tools'), path.join(dir, 'tools'), { recursive: true })
   fs.cpSync(path.join(ROOT, '.github/workflows'), path.join(dir, '.github/workflows'),
     { recursive: true })
@@ -402,4 +476,159 @@ test('the marker census conserves, so a marker cannot go uncounted', () => {
   assert.ok(report.markers_incidental <= report.markers_inert,
     'an incidental marker is a kind of inert one')
   assert.ok(report.markers > 0, 'a tree with no markers would not test this')
+})
+
+// ---------------------------------------------------------------------------
+// THE FOURTH DIRECTION: an exemption whose premise has gone false.
+//
+// The three directions above are all about an exemption's SUBJECT. Undecided,
+// expired, stale and inert each ask whether the thing the exemption was
+// written over is still there. This one asks a different question, and the
+// surface it asks it on is the one surface where the exemption is not keyed
+// on the tree at all.
+//
+// `EXPECTED_ABSENT_FIXTURES` is keyed on a test NAME, and its reason is a
+// claim that a path does not exist. Nothing read the claim until 2026-11-09.
+// Measured that day, before the repair: a file created at
+// `standards/lessons.md` made the exempted test fail for a reason that was
+// not absence, `tools/secret-print-tests.py` printed `2 exempt as absent
+// fixtures, 0 unexpected` and then `the vendored checker passes every test
+// that is about the checker`, and exited 0. This gate was green beside it,
+// because the only direction it read on that surface was the `review_by`
+// date, which was a month away.
+//
+// The NOW GREEN check in the runner does not cover it. That fires when an
+// exempted test starts PASSING, so it catches the fixture arriving clean and
+// cannot catch the fixture arriving broken. For the first of the two entries
+// that is the serious case: `tools/check-actions-reach.sh` is the standing
+// false-positive reference for all four safe shapes at once, so if Ursa
+// vendors it and it genuinely prints a value, the test goes red for exactly
+// the reason the suite exists and the runner calls it an absent fixture.
+//
+// `standards/lessons.md` is used as the fixture here rather than the other
+// entry's path, because it sits outside `tools/` and `.github/workflows/` and
+// so is not on the sweep's file list. The case therefore moves the premise
+// and nothing else.
+
+function claimedAbsent(dir, rel) {
+  fs.mkdirSync(path.join(dir, path.dirname(rel)), { recursive: true })
+  fs.writeFileSync(path.join(dir, rel),
+    '# Lessons\n\nA placeholder register with no idiom in it.\n')
+}
+
+test('an exemption whose claimed-absent path now exists is stale', () => {
+  // One gate run per case, deliberately. Finding F108 of 2026-11-09 is that
+  // this suite already takes 4m27s for 20 cases, so the "copy is green
+  // first" pre-check that belongs here is left to the committed-tree case
+  // above rather than paid for twice.
+  const dir = instance()
+  claimedAbsent(dir, 'standards/lessons.md')
+  const { code, report } = json(dir)
+  assert.equal(code, 1)
+  const p = report.problems.find(
+    (x) => x.kind === 'stale' && x.what.includes('EXPECTED_ABSENT_FIXTURES'))
+  assert.ok(p, JSON.stringify(report.problems))
+  assert.match(p.why, /standards\/lessons\.md exists/)
+  // Stale and not expired. The date is still in the future, which is exactly
+  // why the date direction could not reach this.
+  assert.equal(report.problems.filter((x) => x.kind === 'expired').length, 0)
+})
+
+test('an exemption that names no absent_path is undecided, not trusted', () => {
+  const dir = instance()
+  const p = path.join(dir, 'tools', 'secret-print-tests.py')
+  // Drop the key from both entries without touching anything else, which is
+  // what an edit to this dict that forgets the premise would look like.
+  fs.writeFileSync(p, fs.readFileSync(p, 'utf8')
+    .replace(/^\s*"absent_path": .*$/gm, ''))
+  const { code, report } = json(dir)
+  assert.equal(code, 1)
+  const mine = report.problems.filter(
+    (x) => x.kind === 'undecided' && x.what.includes('EXPECTED_ABSENT_FIXTURES'))
+  assert.equal(mine.length, 2, JSON.stringify(report.problems))
+  assert.match(mine[0].why, /cannot be read/)
+})
+
+// The runner is the thing that actually absorbed the failure, so it is
+// asserted directly rather than through the gate that reads it. Its
+// `premise_failures()` is called instead of running all 74 vendored tests,
+// because the classification is the subject and the suite takes 40 seconds.
+function premiseFailures(dir) {
+  const out = spawnSync('python3', ['-c', [
+    'import importlib.util, json, sys',
+    'spec = importlib.util.spec_from_file_location("w", sys.argv[1])',
+    'm = importlib.util.module_from_spec(spec)',
+    'spec.loader.exec_module(m)',
+    'print(json.dumps(m.premise_failures()))',
+  ].join('\n'), path.join(dir, 'tools', 'secret-print-tests.py')],
+  { cwd: dir, encoding: 'utf8' })
+  assert.equal(out.status, 0, out.stderr)
+  return JSON.parse(out.stdout)
+}
+
+test('the runner reads its premise off the filesystem, both ways', () => {
+  const dir = instance()
+  assert.deepEqual(premiseFailures(dir), [],
+    'both fixtures are absent in a fresh copy, so both exemptions apply')
+  claimedAbsent(dir, 'standards/lessons.md')
+  const got = premiseFailures(dir)
+  assert.equal(got.length, 1, JSON.stringify(got))
+  assert.match(got[0][0], /test_the_register_is_still_scannable/)
+  assert.match(got[0][1], /standards\/lessons\.md exists/)
+})
+
+test('the two entries name paths, and this tree really lacks both', () => {
+  // The exemptions are only honest while this holds, and if a later run
+  // vendors either fixture it should find this case red rather than discover
+  // the entry by reading it.
+  const got = premiseFailures(ROOT)
+  assert.deepEqual(got, [], JSON.stringify(got))
+})
+
+// THE SUITE'S OWN INABILITY TO RUN, ASSERTED RATHER THAN RECOMMENDED
+//
+// Three cases, added 2026-11-09 by Ursa's security seat. Each drives `run()`
+// into one of `spawnSync`'s non-status outcomes and asserts the suite says
+// which one, in words naming the gate. The third is the one that was leaking:
+// it goes through `json()`, which is where the old guard lived.
+
+test('an interpreter that is not there is named, not parsed as a verdict', () => {
+  assert.throws(
+    () => run(ROOT, [], { interpreter: 'python3-not-installed-here' }),
+    (err) => {
+      assert.match(err.message, /could not run/)
+      assert.match(err.message, /ENOENT/)
+      assert.match(err.message, /secret-print-exemptions\.py/)
+      assert.ok(!/Unexpected end of JSON/.test(err.message),
+        'the old report for this case was a JSON parse error')
+      return true
+    },
+  )
+})
+
+test('output past maxBuffer is a refusal to answer, not a truncated answer', () => {
+  // The gate prints a multi-line verdict, so 8 bytes cannot hold it. ENOBUFS
+  // leaves `stdout` populated but cut, which is the dangerous shape: the
+  // bytes look like an answer.
+  assert.throws(
+    () => run(ROOT, [], { maxBuffer: 8 }),
+    (err) => {
+      assert.match(err.message, /could not run/)
+      assert.match(err.message, /ENOBUFS/)
+      return true
+    },
+  )
+})
+
+test('the json path refuses too, which is where the old guard let it through', () => {
+  // `assert.notEqual(got.code, 2)` was the guard, and a process that never
+  // ran has `code === null`, so it passed on every one of these inputs.
+  assert.throws(
+    () => json(ROOT, [], { interpreter: 'python3-not-installed-here' }),
+    /could not run/,
+  )
+  // The healthy path is NOT re-asserted here. `json(ROOT)` is the suite's
+  // first case already, and a second copy would cost a full 12.93s gate
+  // invocation to learn nothing. Run 8 dropped a redundant pre-check for the
+  // same reason, and F114 of run 9 is the measurement that reason rests on.
 })

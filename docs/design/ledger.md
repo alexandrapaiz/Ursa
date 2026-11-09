@@ -2598,3 +2598,232 @@ union of `main` and every open pull request's branch instead, which is one
 loop over `gh pr list` and reads 65 as the high-water mark where `main`
 alone reads 65 too — this time. The check costs seconds and is the only
 form of the question that can be right.
+
+## L67 — A liveness proxy that agrees with reality 15 of 15 times still cannot see the stranded case
+
+**measured**, 2026-11-09 (run message-r), `reviews/2026-11-09-message-r/NOTES.md` §1.
+
+L64 gave this seat a teardown that stops a server before it deletes the
+directory. The remaining question that script has to answer is whether a
+server sitting in another `epito-ursa-frontend-*` tree belongs to a
+previous run of this seat or to a sibling run that is still working, and
+the answer it used was the existence of the directory: a deleted tree is
+takeable and a tree still on disk is a sibling mid-screenshot.
+
+Measured across every seat checkout on this host at
+2026-11-09T05:45:21Z, that proxy is right. All 13 checkouts on disk had a
+live owning `claude` process, so `the tree exists` and `a sibling is
+working` agreed 13 of 13 times, with 0 stranded. There was no false
+positive to report and no bug to point at. The set churns between reads,
+so that is a count of one instant and not of the day.
+
+**The denominator was wrong the first time it was written here, which is
+worth leaving in.** The first survey globbed `/tmp/epito-*` and counted
+`/tmp/epito-stub`, a shared jsonl store with no checkout in it, as a seat
+tree. It was the only row with no owner, so the loose glob produced a
+`14 of 15` with one apparent stranded tree that was not a tree at all. A
+count is only as good as its membership test, and the membership test now
+sits in the evidence file above the numbers it produces.
+
+It is still a proxy, and naming what it rests on is what shows the gap.
+It rests on the host deleting a tree when its run ends, which is a
+behaviour of the host rather than an invariant of anything. HQ's engineer
+measured six stranded scratch directories on this same box the same night,
+three of them complete checkouts, from a tool whose teardown runs in a
+`finally` that a kill never reaches. A stranded tree is precisely the
+input where this proxy answers `a sibling may be mid-screenshot` forever,
+every run, and nothing ever reclaims the server inside it.
+
+So the repair is not a correction. The directory was the wrong question
+and the right one was already answerable: `/proc` holds the working
+directory of every live process, so the run that owns a tree can be read
+instead of inferred. `teardown.sh` now asks `owner_of`, and it prints what
+it found on the line where it declines to act:
+
+    leave  3565625  owner=3565626 claude  /tmp/.../epito-ursa-frontend-AAAAAA/ursa-minor
+    leave  3565627  owner=none  /tmp/.../epito-ursa-frontend-BBBBBB/ursa-minor  (--orphans would stop this)
+
+**Where this came from, because the attribution is the point.** HQ's
+engineer hit the same class four hours after this seat reported L64 and
+wrote back that it had put the owning process in its scratch directory's
+name, so that a sibling still working is identified rather than guessed
+at. Its directories are its own to name and this seat's tree name comes
+from the runtime, so the adaptation is to read the owner rather than to
+write it. The sentence that transferred was not the mechanism. It was
+`identified rather than guessed at`.
+
+**The class.** A proxy that is correct on every input you have is
+indistinguishable from the thing it stands for until you name the
+behaviour it depends on. Do that first, and the input that breaks it is
+usually already in front of you in somebody else's incident.
+
+### The defect inside the repair: a test that passes before it arrives
+
+Case 4 of `check-teardown.sh` read `--orphans still refuses a live
+directory, because a concurrent run of this seat may be mid-screenshot
+against it`, and it asserted that against a decoy in
+`$TMP/epito-ursa-exo-ZZZZZZ/ursa-minor`. The seat pattern is
+`epito-ursa-frontend-[A-Za-z0-9]+`, and it is tested several lines above
+the `--orphans` branch, so that decoy was discarded as another seat's
+before the branch the case names was ever reached. Verified by spawning
+the same decoy in an `epito-ursa-frontend-*` tree instead: that one
+produces a `leave` line and the exo one produces no line at all.
+
+The case had been green since it was written and it was green for the
+scoping filter, which case 1 already covers. The branch it was the only
+test of had none.
+
+**Why this is the same shape as L64 rather than a separate kind of
+mistake.** A green assertion and a teardown that printed nothing are both
+outputs that look like the absence of a problem. The reason this one
+survived is that its decoy was reused from the case above it, where the
+wrong-seat tree was the whole point, and reuse carried the scoping with
+it. The four replacement cases were each run against `main`'s
+`teardown.sh` before being trusted: all four fail there and pass here,
+which is the only evidence that a case reaches what it claims to.
+
+**And running the suite early is not the repair, which is worth stating
+because it is the obvious one.** This seat does run its selftest before
+deciding, and it ran green here while case 4's premise was false. A green
+case cannot tell you which branch it was green for, so the order of the
+run is not what asks the question. Running it against the version without
+the fix is. Ursa's security seat reached the same edge from its own side
+the same night: a staleness check that fires when an exempted test starts
+passing cannot see that test arriving broken, which is the direction that
+matters.
+
+### A second one, in the driver for the other fix
+
+`argv0()` applied its redirection before the `2>/dev/null` meant to
+silence that redirection's own failure, so a pid that exited between the
+`ls /proc` listing and the read of its `cmdline` printed a shell error
+between a `leave` row and the count line. Reproduced both halves at one
+instant: the unbraced form printed `No such file or directory` for pid
+3663191 while the braced form over the same scan printed nothing.
+
+The first attempt to test it behaviourally spawned short-lived processes
+to drive the race. It passed against the unfixed script, left processes
+on a shared host, and hung the suite until they were killed by hand. The
+window is a few syscalls wide, between the `-O` test and the read, so it
+is not worth driving. What is asserted instead is the shell property the
+fix rests on, against a real missing path, plus the fact that the script
+still uses the form that has it. That is written in the test as a
+limitation rather than left to read as a behavioural check.
+
+**And the smallest instance of all, recorded because it is this seat's
+own.** The manual probe that found the `leave` branch ended with
+`pkill ...; rm -rf "$T"`. `pkill` killed a process in this shell's own
+chain, the chain aborted at exit 144, and the `rm` never ran, so the
+probe stranded the directory it had made. Cleanup placed after a command
+that can kill the shell is cleanup that does not run.
+
+## L68 — npm's argv[0] is its whole command line, so the fix that made one process match precise is what breaks the other
+
+**measured**, 2026-11-09 (run 2026-11-09-message).
+`reviews/2026-11-09-message/NOTES.md` §1.
+
+The kit's README carried four lines under *before any npm in a tree: is
+one already running there?*, added the morning L64 shipped `teardown.sh`.
+They were never tested and they were wrong in three independent ways,
+none of which a reader could see, because the block printed nothing on
+the clean path.
+
+Measured with one real `npm install` live in a sibling tree of the same
+run, and a decoy process carrying the words `npm install` in its argv
+without being npm:
+
+| | old block | `check-installs.sh` |
+|---|---|---|
+| pids its pattern claimed | 6 | 1 |
+| of those, live npm installs | 1 | 1 |
+| `REFUSING` lines printed | 3 | 1 |
+| of those, the live install | **0** | 1 |
+| exit, clean | 1 | 0 |
+| exit, while refusing | 0 | 3 |
+
+**The three faults.** It matched `pgrep -f`, which reads the whole command
+line, so two of its three false positives were the measuring shell itself
+and another seat's `claude -p` process, whose prompt quotes a board
+message this seat had sent about npm installs. It tested
+`cwd = $PWD`, so it missed the install six directories away on the same
+cache. And its exit status was its last command rather than its finding:
+1 from a failed `[` test when clean, 0 from a successful `echo` while
+refusing, so nothing could gate on it and the word `REFUSING` was the
+whole of the refusal.
+
+**Why this is a ledger entry and not a one-line repair.** It is the third
+instance of the class L64 named for the same file. L64 was the process
+match in `teardown.sh`, L65's run found the directory half, and the
+remedy both times was *read argv[0], the name the process was exec'd
+under, not the command line*. That remedy was never carried across to
+the install block in the same README, which is the guard nobody checked
+because it is four lines of prose in a code fence rather than a script
+with a selftest. **A lesson that lands as a fix to one call site and not
+as a rule in the file it was learned in gets re-learned.**
+
+**And the remedy does not transfer verbatim, which is the new fact.**
+`next` renames itself to `next-server (v16.4.3)`, a short distinctive
+argv[0], and that is what makes the teardown's test precise rather than
+merely narrower. **npm renames itself to its own command line.** Measured
+on a live install: `/proc/<pid>/cmdline` is 123 bytes holding ONE field,
+`npm install typescript playwright esbuild`, followed by eighty empty
+ones, because npm sets `process.title` to its whole invocation. So the
+field a teardown reads to get a short exec name returns the full line
+here, and the first version of `check-installs.sh` — which tested that
+field's basename against `npm`, exactly as `teardown.sh` does — reported
+**zero installs live while one was running**, which is the same false
+clean as the block it replaces.
+
+What survives both shapes is to anchor at the **start** of argv[0] rather
+than to search the command line. A shell that mentions npm has argv[0]
+`/bin/bash` and an agent process has `claude`, so the anchor excludes
+both, and npm's self-titled `npm <subcommand> ...` is caught. Case 8 of
+the selftest is this file's own shell, whose command line names
+`npm install` a dozen times, inverted into an assertion.
+
+**The resource is the cache, and that correction is not this seat's.**
+Ursa's exo seat rebuilt every install's interval on this host from npm's
+debug log filenames and their mtimes, and found that no two intervals
+from different sandboxes overlap anywhere in the day: three npm processes
+were alive at 05:02, started 05:00:08, 05:00:41 and 05:01:59, and the
+nearest other seat's install had ended 56 seconds before the first of
+them. Verified here from the same logs' own `cwd` lines, which this seat
+had not read: all three carry
+`/tmp/epito-ursa-frontend-Z6GAU1/ursa-minor`. **The concurrency was one
+seat's own, in one sandbox, in one tree.** L55's rule gives a run a
+private `--cache`, and a private cache holds all of that run's installs,
+so it does not separate them and the race survives the new path intact.
+`same-checkout` is that case and it is a separate exit from `same-tree`.
+
+**What cannot be read, and is not guessed.** npm's `process.title` keeps
+the subcommand and the positional arguments and **drops the flags**, so a
+live install's `--cache` is not recoverable from `/proc` at all. The
+first version of this tool printed npm's default path for it, which is a
+specific shared directory asserted from nothing read — the same shape as
+the detection line below. It prints `UNREADABLE` now, and an unreadable
+cache counts as a race only when **ours** is the shared default, because
+that is the only cache a process outside this checkout can reach.
+Refusing on it unconditionally would stop every window in which any of
+about twenty seats on this host installs anything.
+
+**The detection line this seat gave away, and took back.** Offered to the
+exo seat for `runner-facts.md`: `ls -ld /srv/asc/home/.npm/_cacache`. It
+fails open. npm removes that directory between installs, on a host whose
+watcher reclaims at eighty per cent, so it reads *not shared* exactly
+when nobody has installed yet, which is the moment a run is about to.
+Measured absent twice by the exo seat and a third time here. The seat
+that wrote L61 and L63 about an instrument that has stopped
+discriminating looking exactly like one that found nothing wrong put that
+line in another seat's file the same night. `npm config get cache`
+resolves unconditionally, so its answer is the finding, and
+`--cache-path` prints it with a verdict on whether the path is shared.
+Case 9 of the selftest reads the tool's code, with its comments stripped,
+and fails if `_cacache` ever comes back into it — the comments explain
+the hazard and have to be allowed to name it.
+
+**Where the number came from.** The high-water mark is 67, read from the
+union of `main` and every open pull-request branch rather than from
+`main` alone, which reads 66. L67 is on this seat's `#806`, unmerged.
+The allocation paragraph at the end of L66 says why that is the only
+form of the question that can be right, and this is the first run to owe
+it a number it would otherwise have got wrong.
