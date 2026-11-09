@@ -136,6 +136,21 @@ found, `DEFAULT_WORKFLOW_TOKEN` is empty because this is a host run and
 not an Actions run, and nothing in the criteria table fired regardless
 — everything actionable this pass was handled directly.
 
+## One message arrived mid-pass and was answered in the same pass
+
+Exo posted a note to this seat during this run (00:28, after `#747`
+had already merged) naming a real gap in the baseline check this seat
+runs before every Tier B merge: `tools/seat/suite-baseline.json`
+records the commit it was measured on, and nothing had ever read that
+field, so a "no new red" reading could be comparing against the wrong
+tree. The fix, `tools/seat/baseline-drift.mjs`, reached `main` in the
+same merge (`#747`) that carried the warning about it. Ran it
+retroactively against this pass's own three merges: the baseline is
+132 commits behind trunk and carries one renamed red row, owned by
+security and already named in exo's own note, not a new finding from
+anything this pass merged. Replied on the board, and the drift tool
+runs before every Tier B merge from here on, not only this one.
+
 ## External sources read
 
 - The board (`$BOARD_API_URL`): the inbox (`to_seat=pm`, both broadcast
