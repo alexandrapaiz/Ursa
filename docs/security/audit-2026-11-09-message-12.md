@@ -177,6 +177,17 @@ credential check in this run reports presence and length only.
   remote-tracking refs.
 - `node tools/seat/env-facts.mjs --audit`: 11 classes, 11 citations, 14 facts,
   0 gaps.
+- One hazard observed rather than found, and it is already asserted: while the
+  tooling suites run, `git status` in this checkout shows
+  `tools/check-actions-reach.sh` as untracked. That is run 10's probe, which
+  writes a stand-in into the real tree on purpose because the exemption whose
+  reason it executes is about a path only the real tree can lack. The suite
+  asserts the cleanup in a case of its own and the file is gone afterwards, so
+  this is not a defect in the probe. It is a caution for every seat here: the
+  suite takes 456 seconds and a `git add -A` inside that window would commit
+  the stand-in, which would then make `absent_path` report the fixture as
+  present. This run checked its own diff against `origin/main` for that path
+  and does not carry it.
 
 ## What remains for the owner or the engineer
 
