@@ -17,6 +17,7 @@ import { readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { requireVerdict } from "../lib/subject.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const port = process.argv[2] ?? "4972";
@@ -58,9 +59,18 @@ try {
       "--out", tmpdir(),
       "--json", out,
     ],
-    { stdio: "ignore" },
+    // Piped, not ignored: a subject that refuses says WHICH premise it was
+    // missing, and `ignore` destroyed that before `requireVerdict` could
+    // forward it.
+    { stdio: ["ignore", "pipe", "pipe"] },
   );
+  let said = "";
+  run.stdout.on("data", (b) => { said += b });
+  run.stderr.on("data", (b) => { said += b });
   const code = await new Promise((r) => run.on("exit", r));
+  // Before the JSON is read, and before any expectation runs: a subject that
+  // reached nothing is not a failed expectation. See lib/subject.mjs.
+  requireVerdict("measure-contrast.mjs", code, { out: said, json: out, cleanup: stop });
   if (code !== 0) throw new Error(`measure-contrast.mjs exited ${code}`);
 
   const rows = JSON.parse(readFileSync(out, "utf8"));
