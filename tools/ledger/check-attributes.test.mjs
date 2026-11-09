@@ -8,9 +8,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync, mkdirSync, readFileSync, cpSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { writeFileSync, mkdirSync, readFileSync, cpSync } from 'node:fs';
 import { join } from 'node:path';
+import { tempDir } from '../testing/tmpdir.mjs';
 
 const GATE = new URL('./check-attributes.mjs', import.meta.url).pathname;
 const REPO_ROOT = new URL('../..', import.meta.url).pathname.replace(/\/$/, '');
@@ -27,7 +27,7 @@ function gate(cwd, ...extra) {
 /** A throwaway repository with a `.gitattributes` and a driver registry of our
  *  choosing. `registry` null means copy this repository's real one. */
 function fixture({ attributes, registry = null, table = null }) {
-  const dir = mkdtempSync(join(tmpdir(), 'attrs-'));
+  const dir = tempDir('attrs-');
   git(dir, 'init', '-q', '-b', 'main', '.');
   git(dir, 'config', 'user.email', 'seat@ursa.invalid');
   git(dir, 'config', 'user.name', 'test');
@@ -188,7 +188,7 @@ test('this repository passes its own committed check', () => {
 
 test('the registry cannot lie: every driver it lists is set by the installer it names', () => {
   const registry = JSON.parse(readFileSync(REAL_REGISTRY, 'utf8'));
-  const dir = mkdtempSync(join(tmpdir(), 'clone-'));
+  const dir = tempDir('clone-');
   const clone = join(dir, 'repo');
   // A real clone, not a worktree: a linked worktree shares .git/config with the
   // clone that made it, so installing into one would mutate the caller's config
