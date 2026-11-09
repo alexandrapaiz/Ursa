@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs'
 import {
   parseTap, toRepoPath, keyOf, compare, formatReport, exitCodeFor,
   readSummary, BASELINE_PATH, RETIRED_SUITE_GLOB, suiteRoots, canonicalSuites,
-  resetSuitesCache, whyRefused, whyUntrusted, freeMB
+  resetSuitesCache, whyRefused, whyUntrusted, freeMB, flipLines
 } from './suite-baseline.mjs'
 
 // The set every path assertion below resolves against, pinned so this file
@@ -312,6 +312,14 @@ test('one test file renamed is not the same test, because the key carries the fi
 })
 
 test('a baseline entry that now passes is FIXED, and says so without blocking', () => {
+  // THIS FIXTURE IS NOT THE REALISTIC SHAPE, and saying so is the point of
+  // the comment. Rewriting `not ok 149` to `ok 149` keeps the failure's
+  // `location:` line, so this exercises the exact file+name match — a path
+  // real `node --test` output never takes for a pass, because it prints no
+  // location for one. The test is kept, because the exact match is still the
+  // match for a point that does carry a file; it is no longer the only one.
+  // See REAL_GREEN at the end of this file for the shape that was missing,
+  // and `compare`'s own header for what its absence cost.
   const green = TAP.replace('not ok 149 -', 'ok 149 -')
   const baseline = { minPoints: 1, red: ONE_RED }
   const cmp = compare(parseTap(green), baseline, readSummary(green))
@@ -488,6 +496,17 @@ test('the committed baseline is well formed, and every entry is attributable', (
     assert.match(e.since, /^\d{4}-\d{2}-\d{2}$/, 'a standing failure needs the day it started standing')
     assert.ok(e.owner, 'every entry names an owner or says UNOWNED; it never omits the question')
     assert.ok(e.note, 'and says what it measured, so the next run need not re-derive it')
+    assert.ok(e.dependsOn, 'and what its colour is a function of, so green is read correctly')
+    // The 2026-11-08 field, on the claim it was REDUCED to on 2026-11-09.
+    // A row keyed on a string any seat may edit needs something that decides
+    // its current state. This file originally said that something had to be
+    // `flipQuery`, because `measuredOn` could not detect a rename. exo
+    // corrected that: `measuredOn` plus the commits to the tip can, and
+    // `tools/seat/baseline-drift.mjs` does it for every row at once. So the
+    // field is still required, for the narrower reason that survives -- a row
+    // whose colour is not a function of the tree is one no commit-walk can
+    // settle, and that is the case a hand-authored query is for.
+    assert.ok(e.flipQuery, 'every entry carries the one command that decides whether it still holds')
   }
   // The retired glob is kept as a named constant, not invoked, because the
   // baseline's recorded history cites the numbers it produced and a reader
@@ -495,6 +514,46 @@ test('the committed baseline is well formed, and every entry is attributable', (
   assert.equal(RETIRED_SUITE_GLOB, 'tools/**/*.test.mjs')
   assert.ok(b.suiteSet && b.suiteSet.source, 'the baseline names the set it was measured over')
   assert.ok(b.suiteSet.suites > 0 && b.suiteSet.points > 0, 'with its size, so a count is comparable')
+})
+
+test('every resolved row says which commit resolved it, and `repaired` is checked as hard as `red`', () => {
+  // NOTHING ASSERTED OVER `repaired` UNTIL 2026-11-09, and on that day it
+  // became the larger half of the file: the trunk went green, `red` emptied,
+  // and all eleven rows this baseline has ever held moved across. A block the
+  // tool does not read and no test checks is a block that decays, and the one
+  // thing every reader of it needs is the same thing `flipQuery` gives a red
+  // row -- the evidence that decides whether the row is still resolved.
+  //
+  // `repairedOnTrunk` is allowed to be null ON PURPOSE. Five of these rows
+  // were resolved by their tests being MOVED OFF the trunk rather than by a
+  // commit repairing them, so there is no repairing commit to name and
+  // inventing one would be the lie this field exists to prevent. What is
+  // required is that `resolution` says which of the two happened.
+  const b = JSON.parse(readFileSync(BASELINE_PATH, 'utf8'))
+  assert.ok(Array.isArray(b.repaired) && b.repaired.length > 0)
+  for (const e of b.repaired) {
+    assert.ok(e.file && e.name, `${e.name}: a row with no file or name cannot be matched to a run`)
+    assert.ok(e.owner, `${e.name}: a resolved row still names who owned it`)
+    assert.ok(e.dependsOn, `${e.name}: and what its colour was a function of`)
+    assert.ok(e.verifiedGreen, `${e.name}: and the measurement that says it is resolved`)
+    assert.ok(
+      e.repairedOnTrunk || e.resolution,
+      `${e.name}: a row with no repairing commit must say in \`resolution\` why there is none`
+    )
+  }
+})
+
+test('a red row and a resolved row are never both present for the same test', () => {
+  // The failure mode this guards is the one the 2026-11-09 window was sent to
+  // settle one level up: two records of the same subject, each honest on its
+  // own, disagreeing. Here it would read as a debt that is simultaneously
+  // standing and paid, and `compare` only consults `red`, so the resolved
+  // copy would be the one nobody saw.
+  const b = JSON.parse(readFileSync(BASELINE_PATH, 'utf8'))
+  const resolved = new Set(b.repaired.map((e) => keyOf(e)))
+  for (const e of b.red) {
+    assert.ok(!resolved.has(keyOf(e)), `${e.file} ${e.name} is in both \`red\` and \`repaired\``)
+  }
 })
 
 // THE STARVED RUN, which is the bound on the control added beside it rather
@@ -539,4 +598,168 @@ test('the live volume reads as a positive number, so the probe is wired to a rea
 test('the committed baseline carries the environment floor it documents', () => {
   const b = JSON.parse(readFileSync(BASELINE_PATH, 'utf8'))
   assert.ok(Number.isInteger(b.minFreeMB) && b.minFreeMB > 0)
+})
+
+// THE RENAME, which is the case `measuredOn` ALONE cannot see and this seat
+// caused. Alone is the 2026-11-09 correction: see suite-baseline.mjs.
+// This tool keys on file and name because the TAP number renumbers on any new
+// suite, and that is right. The cost is a dependence on a string a sibling
+// seat may edit, and on 2026-11-02 the sibling was this seat: it renamed the
+// test its own row was keyed on at 08:56:44Z, ten minutes before the row was
+// written at 09:06:00Z, and the rename reached the trunk at 09:38:40Z. The
+// row then described a real failure under a key nothing collected.
+//
+// The verdict was already right — GONE, never FIXED, so the debt was not
+// written off. What was missing was any way to ANSWER it. GONE asks "deleted
+// or renamed?" and six days passed without a reply.
+test('GONE names the row\'s owner and the query that answers it', () => {
+  const baseline = {
+    minPoints: 1,
+    red: [{
+      file: 'tools/stack/repair-pending.test.mjs',
+      name: 'a name no run collects any more',
+      since: '2026-11-02',
+      owner: 'security',
+      dependsOn: 'forge-queue',
+      flipQuery: "git log -L 252,252:tools/stack/repair-pending.test.mjs origin/main",
+      note: 'the measured row'
+    }]
+  }
+  // A complete run that simply does not contain the row's key.
+  const tap = 'TAP version 13\nok 1 - something else entirely\n1..1\n# tests 1\n'
+  const cmp = compare(parseTap(tap), baseline, readSummary(tap))
+  assert.equal(cmp.vanished.length, 1)
+  assert.equal(cmp.fixed.length, 0, 'a vanished row is not a paid one')
+  const out = formatReport(cmp, baseline)
+  assert.match(out, /GONE {2}1/)
+  assert.match(out, /owner: security — theirs to resolve/)
+  assert.match(out, /flips on: git log -L 252,252/)
+  // And it is still not the running seat's fault, so it still does not block.
+  assert.equal(exitCodeFor(cmp, baseline), 0)
+})
+
+test('STILL_RED carries the flip query too, so a stale row is checkable in place', () => {
+  const baseline = {
+    minPoints: 1,
+    red: [{
+      file: 'tools/board/read-filters.test.mjs',
+      name: 'the test that fails',
+      since: '2026-11-02',
+      owner: 'security',
+      dependsOn: 'tree',
+      flipQuery: 'node --test tools/board/read-filters.test.mjs',
+      flipExpect: 'the assertion still names the spelling and not the property',
+      note: 'the measured row'
+    }]
+  }
+  const tap = 'TAP version 13\nnot ok 1 - the test that fails\n  ---\n  location: \'/x/tools/board/read-filters.test.mjs:3:1\'\n  ...\n1..1\n# tests 1\n'
+  const cmp = compare(parseTap(tap), baseline, readSummary(tap))
+  assert.equal(cmp.stillRed.length, 1)
+  const out = formatReport(cmp, baseline)
+  assert.match(out, /flips on: node --test/)
+  assert.match(out, /still red while: the assertion still names the spelling/)
+})
+
+test('a row with no flip query is reported as lacking one, never silently', () => {
+  // The absence is the finding. A row nobody can check without archaeology
+  // is how this tool's own standing row went six days unresolved.
+  assert.deepEqual(flipLines({ owner: 'security' }),
+    ['      flipQuery: NONE — this row cannot be checked without archaeology'])
+  // And the optional half stays optional.
+  assert.deepEqual(flipLines({ flipQuery: 'git log' }), ['      flips on: git log'])
+})
+
+// FIXED WAS UNREACHABLE AGAINST REAL OUTPUT, which is the defect underneath
+// the stale key above. `node --test` (v22.23.2, measured 2026-11-08) prints
+// `location:` in a point's YAML block for FAILURES ONLY, so a passing point
+// has no file, `keyOf` gives it `?\0<name>`, and no baseline row naming a real
+// path could ever match one. Every repaired row therefore reported GONE.
+//
+// It survived the suite because the FIXED fixture was made by rewriting
+// `not ok 149` to `ok 149`, which KEEPS the failure's `location:` line. The
+// two real passes in that same fixture carry none. So the fixture was
+// self-contradictory and the only realistic shape was the untested one.
+//
+// This is the realistic shape: a pass with duration and type and no location.
+const REAL_GREEN = [
+  'TAP version 13',
+  '# Subtest: transcribed: the events read refuses unknown filters',
+  'ok 149 - transcribed: the events read refuses unknown filters, so the INERT finding was acted on',
+  '  ---',
+  '  duration_ms: 2.5',
+  "  type: 'test'",
+  '  ...',
+  '1..1',
+  '# tests 1',
+  '# pass 1',
+  '# fail 0'
+].join('\n')
+
+test('a real passing point carries no file, which is the trap', () => {
+  const [p] = parseTap(REAL_GREEN)
+  assert.equal(p.ok, true)
+  assert.equal(p.file, null, 'node prints `location:` for failures only')
+  assert.equal(keyOf(p), `?\u0000${ONE_RED[0].name}`, 'so its key can never equal a row naming a path')
+})
+
+test('a baseline row whose test now passes is FIXED and not GONE', () => {
+  const baseline = { minPoints: 1, red: ONE_RED }
+  const cmp = compare(parseTap(REAL_GREEN), baseline, readSummary(REAL_GREEN))
+  assert.equal(cmp.fixed.length, 1, 'this is the assertion that failed before the name fallback')
+  assert.equal(cmp.vanished.length, 0, 'a collected, passing test has not vanished')
+  assert.equal(cmp.fixed[0].matchedBy, 'name')
+  const out = formatReport(cmp, baseline)
+  assert.match(out, /FIXED {2}1/)
+  assert.match(out, /matched on the name/)
+})
+
+test('an ambiguous name says how many files it matched', () => {
+  // The cost of the fallback, stated in the report rather than hidden. Two
+  // files may legitimately hold "the happy path".
+  const two = REAL_GREEN.replace('1..1', 'ok 150 - transcribed: the events read refuses unknown filters, so the INERT finding was acted on\n1..2')
+  const cmp = compare(parseTap(two), { minPoints: 1, red: ONE_RED }, readSummary(two))
+  assert.equal(cmp.fixed[0].nameMatches, 2)
+  assert.match(formatReport(cmp, { minPoints: 1, red: ONE_RED }), /matched on the NAME in 2 files/)
+})
+
+test('the name fallback does not resurrect a row whose failure merely moved file', () => {
+  // The fallback consults PASSING points only. A failure at a new path is
+  // still a new failure and the old row is still GONE, which is the property
+  // the file-keyed test above asserts and this must not undo.
+  const moved = TAP.replace('tools/board/read-filters.test.mjs', 'tools/board/filters.test.mjs')
+  const cmp = compare(parseTap(moved), { minPoints: 1, red: ONE_RED }, readSummary(moved))
+  assert.equal(cmp.fixed.length, 0)
+  assert.equal(cmp.vanished.length, 1)
+  assert.equal(cmp.newRed.length, 1)
+})
+
+test('a skip with no location is UNRUNNABLE, not GONE', () => {
+  // Same absent-location trap in the other verdict: a skip is printed as `ok`
+  // and carries no location either, so without the fallback a debt that
+  // merely cannot be run here would read as one no longer collected.
+  const realSkip = REAL_GREEN.replace(
+    'ok 149 - transcribed: the events read refuses unknown filters, so the INERT finding was acted on',
+    'ok 149 - transcribed: the events read refuses unknown filters, so the INERT finding was acted on # SKIP no board source on this host')
+  const baseline = { minPoints: 1, red: ONE_RED }
+  const cmp = compare(parseTap(realSkip), baseline, readSummary(realSkip))
+  assert.equal(cmp.unrunnable.length, 1, 'the debt stays open')
+  assert.equal(cmp.fixed.length, 0, 'a skip is not a pass')
+  assert.equal(cmp.vanished.length, 0)
+  assert.match(formatReport(cmp, baseline), /no board source on this host/)
+})
+
+test('FIXED on a row that is not a function of the tree still refuses to be a repair', () => {
+  // The 2026-11-02 rule, now printed at the point of temptation rather than
+  // only in the baseline's header. `tools/doc-model/check.test.mjs` went green
+  // on the trunk while its fix was an open pull request, because the content
+  // it reads changed under it.
+  const row = [{ ...ONE_RED[0], dependsOn: 'repo-content', note: 'x', flipQuery: 'q' }]
+  const cmp = compare(parseTap(REAL_GREEN), { minPoints: 1, red: row }, readSummary(REAL_GREEN))
+  const out = formatReport(cmp, { minPoints: 1, red: row })
+  assert.match(out, /NOT CURRENTLY REPRODUCIBLE/)
+  // And a tree-dependent row gets no such caveat, so the warning means something.
+  const treeRow = [{ ...ONE_RED[0], dependsOn: 'tree', note: 'x', flipQuery: 'q' }]
+  assert.doesNotMatch(formatReport(
+    compare(parseTap(REAL_GREEN), { minPoints: 1, red: treeRow }, readSummary(REAL_GREEN)),
+    { minPoints: 1, red: treeRow }), /NOT CURRENTLY REPRODUCIBLE/)
 })

@@ -2,6 +2,196 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (security, message run): HQ's secret-print guard has never been on this trunk, it still works, and the one PR this run may open is the wrong one to carry it
+
+**Status:** proposed, hour-sized, and it is **this seat's own next first
+act** rather than the engineer's, because it is secrets tooling.
+**Severity:** medium. Nothing is exposed by its absence, and what is absent
+is the only instrument that would have caught four recorded incidents.
+**Found by** a named handoff from the PM seat on the board, 2026-11-09T00:36Z,
+after that seat closed `#701` as superseded and noticed the one piece of
+real, never-merged content it was carrying.
+
+**Where it is, so it cannot be lost a third time.** Commit **`ee8c893c`**,
+"tools: install HQ's secret-print guard (checker + harness hook), carve out
+.claude/ in .gitignore", authored 2026-11-02T04:35:26Z by the PM seat on
+branch `ursa-pm/2026-11-02-message-17`, pull request **`#701`, CLOSED
+unmerged** on 2026-11-09 after a week stuck in conflict. Five files, 1,212
+lines: `tools/check-secret-print.py` (1,155), `tools/secret-print-baseline.txt`
+(31), `.claude/settings.json` (the PreToolUse registration, 17),
+`.gitignore` (one `!/.claude/` negation, without which the registration is
+dropped from every clone) and `tools/root-entries.test.mjs` (the hardcoded
+three-entry allowlist becomes four).
+
+**Confirmed absent from the trunk, not merely unmerged.** At origin/main
+a5cef3d8, `tools/check-secret-print.py` and `tools/secret-print-baseline.txt`
+do not exist and `.claude/settings.json` is not tracked. So no seat run in
+this repository has ever had a command checked before it ran, which is what
+`standards/secrets.md` §5 and lesson L-X5 require, and the checker's own
+header lists the four violations that happened anyway with the rule open in
+the editor: incidents 3, 4 and 15 on `EXO_TOKEN` and one unnumbered on
+`BOARD_RUNTIME_TOKEN`.
+
+**Re-verified in this run, a week after it was written, from `ee8c893c`
+read-only and never staged.** The handoff is worth more with the viability
+question already answered:
+
+| check | result |
+|---|---|
+| `ast.parse` of the checker | parses clean |
+| `--command 'echo "$GH_TOKEN"'` | one `X5-PRINT` finding, with the `printf` presence-and-length fix |
+| `--command 'git status --short'` | no finding |
+| `--hook` on a Bash payload printing a token | well-formed `PreToolUse` JSON, `permissionDecision: deny` |
+| tree scan, `--baseline tools/secret-print-baseline.txt` | clean, 24 files, 22 accepted, **exit 0** |
+| tree scan, no flag | same 22 reported as findings, **exit 1** |
+
+**Two things the next run needs that are not in the commit message.**
+
+1. **The baseline is not applied by default, and the code reads as though it
+   is.** `DEFAULT_BASELINE` is defined as `ROOT/tools/secret-print-baseline.txt`
+   but it is consulted only in `edit_suppressions`, the hook's file-edit path.
+   The repository scan takes the baseline only from an explicit `--baseline`.
+   So any CI line or charter line written as the obvious
+   `python3 tools/check-secret-print.py` is red on its first run with 22
+   findings that are all already accepted. The 22 are the GitHub Actions
+   masking idiom, two lines in each of eleven `agent-*.yml` workflows, and
+   they are not this repository's to fix: no seat token may write under
+   `.github/workflows/`. The baseline's own comment says HQ accepts the
+   identical two lines for the identical reason.
+
+2. **The hook fails safe, which is the fact that decides whether this is
+   safe to land.** `run_hook`'s docstring is "Never raises, never exits
+   non-zero: a guard that breaks the session is worse than the failure it
+   guards." A false positive therefore denies one command rather than
+   breaking a session. It is still a `deny` across `Bash|Write|Edit|MultiEdit|NotebookEdit`
+   for all eleven seats, which is why it wants its own review and not a
+   corner of somebody else's pull request.
+
+**Why this run did not land it, stated plainly because the whole point of
+the entry is that it was already lost once.** The PM seat asked for "a fresh
+branch of your own rather than a reopen of the one I closed", and it is
+right: a 1,212-line fleet-wide harness hook is a single reviewable decision.
+This run is permitted exactly one pull request and that pull request's
+subject is settling two colliding one-line fixes in two files. Putting the
+guard inside it would make the owner's one merge decision cover two
+unrelated things, one of which changes how every seat's Bash call is
+intercepted. So the handoff is accepted and recorded here with the commit
+id, the file list and the verification, and the next run of this seat lands
+it as its first act under its own number.
+
+## Ledger entry — 2026-11-09 (security, message run): the timestamp gate asserts over two of its three codes, so four live `TEXTUAL_DAY` findings sit on the trunk unobserved
+
+**Status:** proposed, hour-sized. **For:** the engineer, or exo for the three
+in its own file. **Severity:** low, and latent rather than live today, which
+is the whole reason it needs writing down instead of fixing. **Found by**
+running the gate's detector over the trunk by hand while verifying a
+different row, not by any check that exists.
+
+**The gap.** `tools/instant.mjs` defines three defect codes and the module's
+header argues all three: `TEXTUAL_ORDER`, `TEXTUAL_DROP` and `TEXTUAL_DAY`.
+The gate test in `tools/instant.test.mjs`, "no source file outside a test
+orders timestamps as text", collects findings from every scanned file and
+then keeps only two of them:
+
+```
+if (f.code === 'TEXTUAL_ORDER' || f.code === 'TEXTUAL_DROP') offenders.push(...)
+```
+
+So `TEXTUAL_DAY` is detected on every run and asserted on never. Measured at
+origin/main a5cef3d8 over the non-test scanned set: **0 `TEXTUAL_ORDER`, 0
+`TEXTUAL_DROP`, 4 `TEXTUAL_DAY`.** The trunk reads green and holds four
+findings of a class the same file calls a defect.
+
+**The exclusion is right and the silence is not.** `TEXTUAL_DAY` cannot be a
+gate the way the other two can, because `utcDay` itself slices and the
+module says so: a `slice(0, 10)` on a value already normalised to UTC is
+correct, and the lint reports it anyway. A bare assertion over this code
+would fail on the module's own correct line. That is a reason to treat the
+code as needing judgement, not a reason to drop it on the floor with no
+record that it was dropped.
+
+**The four sites, and why none is a live defect today.**
+
+| file:line | in | the line |
+|---|---|---|
+| `tools/seat/outage.mjs:252` | `readVerdict` | `const d = String(readDate).slice(0, 10);` |
+| `tools/seat/outage.mjs:262` | `completedBetween` | `const a = String(fromISO).slice(0, 10);` |
+| `tools/seat/outage.mjs:263` | `completedBetween` | `const b = String(toISO).slice(0, 10);` |
+| `tools/board/measure-claims.mjs:225` | the report block | `on: String(readAt).slice(0, 10),` |
+
+A fifth slice sits on `outage.mjs:253`, `String(now).slice(0, 10)`, and the
+lint does NOT report it, because `now` is not a timestamp-shaped name. It is
+the same defect class as the line above it and the gate is blind to it for an
+unrelated reason, which is worth one sentence here: the name-shape lint is
+the only instrument available in plain `.mjs`, and a variable called `now`
+holding an instant is exactly its blind spot.
+
+Each is correct on today's inputs and wrong on tomorrow's. `outage.mjs` is
+called with `now: now.toISOString()`, which is always `Z`, and with read
+dates that are bare `YYYY-MM-DD` strings, and for both of those a
+`slice(0, 10)` IS the UTC day. The one condition that makes all four wrong at
+once is a `%cI` value reaching them, and `%cI` never prints `Z`: this
+repository's own measurement is that 330 of its commits carry a non-zero
+offset and 143 of them start with a local calendar day that is not the UTC
+day of the instant they name. `measure-claims.mjs` is the nearest to live,
+because it writes `read_at` and `on` into the same block, which is the "two
+calendars in one row" case the module's header names explicitly.
+
+**The shape.** Replace the slices with `utcDay`, which needs the one thing a
+slice does not have: a null branch, since `utcDay` returns null for a value
+it cannot place where `slice` returns four garbage characters. Then give the
+gate a third arm that is a judgement and not a bare assertion, in whichever
+form that file's owner prefers: an allowlist of the lines where slicing is
+provably already-UTC, keyed on file and line text, so a new one has to be
+argued for rather than merely added.
+
+**Why this run did not fix it.** Three of the four sites are in
+`tools/seat/outage.mjs`, which exo added hours before this run, and the
+fourth is board tooling. This run exists because two seats rewrote the same
+lines of the same two files on the same evening and the PM seat could not
+merge the result. Reaching into a sibling's hot file to make a change that is
+latent rather than live, in the pull request that settles that exact
+collision, is the mistake this run was sent to clean up. Measured, cited,
+handed over.
+
+## Ledger entry — 2026-11-08 (security, message run): the resident runtime hands every seat a shallow single-branch clone, and no seat's charter tells it to repair one
+
+**Status:** proposed, hour-sized. **For:** the engineer. **Severity:** low
+in the general case, medium for this seat specifically. **Found by** hitting
+it: this run's checkout arrived at 2 commits and 2 remote-tracking refs, and
+`tools/ensure-full-clone.sh` took it to 4554 commits and 324 refs.
+
+**Why it is not already closed, since two halves of it are.** The tools that
+most need history already defend themselves. `tools/secret-scan.mjs` refuses
+on a shallow or single-branch clone, names `ensure-full-clone.sh` as the
+repair, and asks `git rev-parse --is-shallow-repository` rather than testing
+for `.git/shallow`, which is the reading that survives a linked worktree.
+`agent-security.yml` checks out at `fetch-depth: 0`, so a GitHub run never
+sees the fault. Neither covers the resident host, which is where seats now
+actually run.
+
+**What it costs, measured here rather than argued.** Before the repair, `git
+log` over a test file returned one commit, so the question this run was sent
+to answer, which was when this test was renamed and whether the rename
+reached the trunk, had no answer in the clone at all. `git log -L` over the test's own line
+returned nothing. The charter's own first-run instruction is a full-history
+secret scan, and `--history` on the clone as handed over would have had
+almost nothing to walk. The scan refuses rather than lying, which is the
+closed half; what remains is that every run pays the repair by noticing, and
+a run that does not notice asks history questions of a clone that answers
+from a truncated graph at exit 0.
+
+**The shape.** Either the resident runtime completes the clone before the
+seat starts, which is one line and the right place, or every charter gains a
+first-act line telling the seat to run `bash tools/ensure-full-clone.sh`.
+The first is strictly better: the repair is identical for all eleven seats,
+it is already written, and a charter line is a thing a run can skip.
+
+**Not filed as a security finding.** Nothing is exposed by it. It is a
+correctness fault in the evidence seats reason from, and it belongs to
+whoever owns the resident checkout rather than to this repository's
+workflows. Full reading: `docs/security/audit-2026-11-08-message.md` §3.
+
 ## Ledger entry — 2026-11-02 (security, thirteenth run): a full disk makes `ci-checks.mjs` report exit 1, which means the branch failed a gate, for a condition that is not about the branch
 
 **Status:** proposed, hour-sized. **For:** the engineer. **Severity:** low
