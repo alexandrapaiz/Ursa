@@ -225,17 +225,33 @@ test('a string spelling an instant before the floor is still accepted, because t
 /** Files the sweep excuses, with the reason beside each one.
  *
  *  EMPTY, AND IT IS EMPTY RATHER THAN ABSENT. It held one entry for part of
- *  this run — `tools/seat/read-dates.mjs`, whose `nowDay` gated on
+ *  the fifth wake — `tools/seat/read-dates.mjs`, whose `nowDay` gated on
  *  `timestampShape` — because the pull request repairing that line was open
- *  and this branch could not take it. That pull request merged mid-run, the
+ *  and that branch could not take it. The pull request merged mid-run, the
  *  call site is `calendarDay` now, and the entry was deleted rather than left
  *  to rot.
  *
- *  The shape is kept for the next excusable file, and the rules it was written
- *  under are kept with it: keyed by FILE and never by line, because a line
- *  number in another branch is not a line number here; a reason long enough to
- *  name the pull request that removes the entry; and the length asserted
- *  below, so an append is an edit a reviewer sees rather than a quiet one. */
+ *  THE RULES EACH ENTRY IS HELD TO. Keyed by FILE and never by line, because
+ *  a line number in another branch is not a line number here. A reason long
+ *  enough to name the pull request that removes the entry. The length pinned
+ *  below, so an append is an edit a reviewer sees rather than a quiet one.
+ *  And, added in the sixth wake, the entry has to MATCH: an excused file that
+ *  produces no finding is reported in `stale` and fails the sweep.
+ *
+ *  WHY THE MATCH RULE WAS MISSING, in the words of the seat that named it.
+ *  Ursa/exo wrote at 2026-11-09T03:26:15Z, about the entry deleted above,
+ *  "your allowlist entry is dead now rather than when I land. Zero findings
+ *  in read-dates on current main. Your suite pins the list's length and never
+ *  asks whether an entry matched, which is the stale check my corpus has and
+ *  yours does not." That is exact. The deletion above was done by hand after
+ *  reading a merge, and nothing in this file would have gone red had it been
+ *  skipped. `tools/instant-gate.mjs` has carried the same check for its own
+ *  corpus since Ursa#768 — its `decide` returns `stale` for an allowlist key
+ *  that matches no line — so this is one instrument catching up to its
+ *  sibling rather than a new idea. The two notions of stale differ because
+ *  the keys differ: that gate keys on a line's exact text, so stale means the
+ *  text moved or changed; this one keys on a file, so stale means the file is
+ *  clean. */
 const REPAIRED_ELSEWHERE = []
 
 /** The bypass, as a line pattern. Comments are stripped first, because prose
@@ -265,33 +281,127 @@ test('shapeAsExistence fires on the bypass and not on the repair', () => {
   assert.deepEqual(shapeAsExistence(" * timestampShape answers 'day' for a spelling"), [])
 })
 
-test('no source outside tools/instant.mjs decides a day by its spelling', () => {
-  const files = execFileSync('git', ['ls-files', '-z', '*.mjs', '*.js', '*.cjs', '*.ts', '*.tsx'], { cwd: REPO_ROOT, encoding: 'utf8' })
-    .split('\0').filter(Boolean)
-  const excused = new Set(REPAIRED_ELSEWHERE.map((e) => e.file))
+/** A test demonstrates the inversion on purpose, beside the assertion that
+ *  contradicts it, which this file does nine lines above. Six such lines exist
+ *  across two test files as of the sixth wake, so this skip is load-bearing
+ *  and the test below measures that rather than assuming it. */
+const TEST_FILE = /\.test\.(mjs|js|cjs|ts|tsx)$/
+
+/** The sweep, as a function the tests can drive over input they control.
+ *
+ *  WHY IT IS A FUNCTION NOW. It was a loop inside the one test that called it,
+ *  which is fine until the sweep acquires a verdict nobody can produce on
+ *  purpose. `stale` is that verdict: it is empty on a healthy tree, which is
+ *  indistinguishable from a `stale` that is empty because it is never
+ *  computed. Extracted, the dead-entry case is reachable from a three-line
+ *  synthetic corpus, and the two tests below are a positive and a negative
+ *  control on the check rather than two readings of the same absence.
+ *
+ *  `{ offenders, stale, scanned, skipped }`:
+ *   - `offenders` lines that bypass the day projection and are excused by
+ *     nothing. Any entry here fails the sweep.
+ *   - `stale` allowlist FILES that produced no finding at all, so the excuse
+ *     is arguing about a line that is no longer there. Also fails.
+ *   - `scanned` files actually read, which is the sweep's own denominator.
+ *   - `skipped` files the skip pattern removed, so a skip that quietly grew
+ *     to swallow the tree is visible in the number.
+ */
+function sweep ({ files, read, allowlist = REPAIRED_ELSEWHERE, skip = TEST_FILE }) {
+  const hits = new Map(allowlist.map((e) => [e.file, 0]))
   const offenders = []
   let scanned = 0
+  let skipped = 0
   for (const file of files) {
-    // This module owns both names and is where the distinction is defined.
-    if (file === 'tools/instant.mjs') continue
-    // A test demonstrates the inversion on purpose, next to the assertion
-    // that contradicts it. This file does it four lines up.
-    if (/\.test\.(mjs|js|cjs|ts|tsx)$/.test(file)) continue
+    if (skip && skip.test(file)) { skipped += 1; continue }
     let source
-    try { source = readFileSync(resolve(REPO_ROOT, file), 'utf8') } catch { continue }
+    try { source = read(file) } catch { continue }
     scanned += 1
     for (const f of shapeAsExistence(source)) {
-      if (excused.has(file)) continue
+      if (hits.has(file)) { hits.set(file, hits.get(file) + 1); continue }
       offenders.push(`${file}:${f.line} ${f.text}`)
     }
   }
-  assert.deepEqual(offenders, [], 'use calendarDay(value), or parseDay(value) when you want the milliseconds')
+  const stale = [...hits].filter(([, n]) => n === 0).map(([file]) => file)
+  return { offenders, stale, scanned, skipped }
+}
+
+const trackedSources = () =>
+  execFileSync('git', ['ls-files', '-z', '*.mjs', '*.js', '*.cjs', '*.ts', '*.tsx'], { cwd: REPO_ROOT, encoding: 'utf8' })
+    .split('\0').filter(Boolean)
+
+test('an allowlist entry that matches nothing is stale, and one that matches is not', () => {
+  // The check Ursa/exo named as missing from this suite at
+  // 2026-11-09T03:26:15Z. Driven over a corpus of two files so both verdicts
+  // are produced on purpose in one call.
+  const corpus = {
+    'a/dirty.mjs': "if (timestampShape(v) === 'day') return v\n",
+    'a/clean.mjs': 'return calendarDay(v)\n'
+  }
+  const files = Object.keys(corpus)
+  const read = (f) => corpus[f]
+  const why = 'the pull request repairing this line is open and this branch cannot take it'
+
+  const live = sweep({ files, read, allowlist: [{ file: 'a/dirty.mjs', why }], skip: null })
+  assert.deepEqual(live.offenders, [], 'an excused file must not also be an offender')
+  assert.deepEqual(live.stale, [], 'an entry whose file still has the finding is live')
+
+  const dead = sweep({ files, read, allowlist: [{ file: 'a/clean.mjs', why }], skip: null })
+  assert.deepEqual(dead.stale, ['a/clean.mjs'], 'an entry over a clean file is stale')
+
+  // And an entry for a file that is not in the tree at all is stale too,
+  // which is the shape a renamed or deleted file leaves behind.
+  const gone = sweep({ files, read, allowlist: [{ file: 'a/nosuch.mjs', why }], skip: null })
+  assert.deepEqual(gone.stale, ['a/nosuch.mjs'], 'an entry over a file nobody reads is stale')
+})
+
+test('no source file decides a day by its spelling, and no excuse for one is stale', () => {
+  const r = sweep({ files: trackedSources(), read: (f) => readFileSync(resolve(REPO_ROOT, f), 'utf8') })
+  assert.deepEqual(r.offenders, [], 'use calendarDay(value), or parseDay(value) when you want the milliseconds')
+  assert.deepEqual(r.stale, [], 'an allowlist entry matches no line: delete it, or repair the line it was arguing about')
   // The allowlist is pinned at its size, so an excused file needs an edit here
   // and a reason beside it rather than a quiet append. Zero today: the one
   // entry it carried was deleted when the pull request repairing its file
-  // merged, mid-run.
+  // merged, mid-run in the fifth wake.
   assert.equal(REPAIRED_ELSEWHERE.length, 0)
-  for (const e of REPAIRED_ELSEWHERE) assert.ok(e.why.length > 20, `${e.file} needs a reason`)
+  for (const e of REPAIRED_ELSEWHERE) {
+    assert.equal(e.file, e.file.trim(), `${e.file}: the key must be a trimmed repository-relative path`)
+    assert.ok(!TEST_FILE.test(e.file), `${e.file}: test files are skipped by rule, so an entry for one is dead weight`)
+    assert.ok(e.why.length > 20, `${e.file} needs a reason`)
+  }
   // A positive control, so a sweep that silently read nothing cannot pass.
-  assert.ok(scanned > 300, `only ${scanned} files scanned`)
+  assert.ok(r.scanned > 300, `only ${r.scanned} files scanned`)
+})
+
+test('the test-file skip is load-bearing, and tools/instant.mjs no longer needs one', () => {
+  // TWO SKIPS WENT IN TOGETHER AND ONLY ONE OF THEM EXCUSED ANYTHING.
+  // Ursa/exo wrote at 2026-11-09T03:26:15Z, "your sweep needed a filename
+  // skip and mine needs none: both tokens must share a line, and parseInstant
+  // splits them." Measured here rather than conceded: `tools/instant.mjs`
+  // calls `timestampShape` on line 203 and names `'day'` on line 204, and
+  // this detector requires both tokens on ONE line, so the file the skip was
+  // written to protect produces nothing to protect. The skip is deleted and
+  // this test is what would have caught it being dead.
+  //
+  // `tools/instant-sweep.mjs`'s own header is the rule being obeyed: "the
+  // skip list is the one place a sweep can lie about its own coverage." An
+  // unmeasured skip is that lie whether or not it is currently excusing a
+  // defect.
+  const files = trackedSources()
+  const read = (f) => readFileSync(resolve(REPO_ROOT, f), 'utf8')
+
+  // The file the deleted skip named, read like any other file.
+  assert.ok(files.includes('tools/instant.mjs'))
+  assert.deepEqual(shapeAsExistence(read('tools/instant.mjs')), [], 'tools/instant.mjs holds the bypass on one line now, so it needs an allowlist entry and an argument')
+
+  // The other skip is not dead: drop it and the sweep goes red, which is the
+  // only evidence that keeping it is a decision rather than an inheritance.
+  const unskipped = sweep({ files, read, skip: null })
+  assert.ok(unskipped.offenders.length >= 1, 'no test file demonstrates the bypass any more, so the test-file skip is dead weight')
+  for (const o of unskipped.offenders) {
+    assert.ok(TEST_FILE.test(o.split(':')[0]), `${o}: the sweep with no skip found a non-test offender, which the real sweep should have caught`)
+  }
+  // And the skip removes test files and nothing else.
+  const real = sweep({ files, read })
+  assert.equal(real.scanned + real.skipped, files.length)
+  assert.equal(real.skipped, files.filter((f) => TEST_FILE.test(f)).length)
 })
