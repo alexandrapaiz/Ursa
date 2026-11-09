@@ -8,12 +8,56 @@
 //   node tools/seat/duplicate-repair.mjs --json          # machine-readable
 //   node tools/seat/duplicate-repair.mjs --control       # positive control only
 //   node tools/seat/duplicate-repair.mjs --no-board      # graph half alone
-//   node tools/seat/duplicate-repair.mjs --audit         # exit 1 on DUPLICATED
+//   node tools/seat/duplicate-repair.mjs --audit         # exit 1 DUPLICATED, 2 undecided
 //
-// Exit 0 the table printed. Exit 1 under --audit with at least one DUPLICATED
-// pair, or if the positive control fails. Exit 2 this clone cannot answer
-// (shallow, or no refs beyond the trunk) — never 0 with an empty table, which
-// is the whole defect this file was written against.
+// Exit 0 the table printed and every concurrent pair was decided. Exit 1 under
+// --audit with at least one DUPLICATED pair, or if the positive control fails.
+// Exit 2 this run cannot answer — a shallow clone, no refs beyond the trunk,
+// or a board half that was declined or never established, leaving concurrent
+// pairs INDETERMINATE — never 0 with an empty table, which is the defect this
+// file was written against, and never 0 with an UNDECIDED one, which is the
+// defect it shipped with and is corrected below.
+//
+// THE GUARD I WROTE FOR MYSELF COVERED THE EMPTY TABLE AND NOT THE UNDECIDED
+// ONE (2026-11-09, hundred-and-thirteenth window, measured three ways on this
+// clone over --hours 48, one real DUPLICATED event spanning 12 entries).
+//
+//   board half            rows      coverage   verdict           --audit
+//   live, complete        1014      set        DUPLICATED 1      1
+//   --no-board            null      null       INDETERMINATE 1   0   <- false green
+//   token unset, 401      []        null       DUPLICATED 1      1   <- right by luck
+//
+// Two separate faults, and the second is the worse one.
+//
+// The DECLINED read exited 0 under --audit while printing twelve
+// INDETERMINATE rows. The table was not empty, so the one guard this file had
+// did not look at it, and `DUPLICATED 0` sat in the verdict slot as a count
+// computed over nothing. Ursa's frontend seat stated the rule this breaks on
+// the board at 11:19Z the same day: the verdict slot carries the refusal and
+// never a number computed over nothing, and for a report channel the refusal
+// has to occupy the slot because silence cannot be told from a tool that never
+// ran. An exit code is a value channel and 0 is in band.
+//
+// The FAILED read graded confidently from a premise it never had. With no
+// token `pageMessages` answers a 401, `ratioFault` says COVERAGE_READ_FAILED
+// and `the read reached no rows at all`, and `boardRows` passed that on as
+// `rows: []` — an empty array, which is truthy, so `grade` skipped its `!rows`
+// arm and ran the message test over zero rows. `no message passed between the
+// actors` and `I could not look for one` are different facts and that read
+// published the first. It happened to print the true verdict today only
+// because the real event is a duplication, so the no-information answer and
+// the right answer coincide. Flip one real pair to COORDINATED and the same
+// run accuses two seats in writing. The receipt naming the fault was already
+// in hand, on `board.note`, and nothing read it.
+//
+// So the board half now reports WHICH of four states it is in, and only
+// `complete` and `partial` may decide a pair:
+//
+//   complete       the walk covered the window. Decide every pair.
+//   partial        the walk reached rows and not the whole window. Decide the
+//                  pairs inside `coverage.covers`, INDETERMINATE outside it.
+//   unestablished  a read was attempted and reached no rows. Decide nothing.
+//   declined       --no-board. Decide nothing.
 //
 // WHY THIS EXISTS. On 2026-11-09 Ursa's skill seat and Ursa's engineer seat
 // repaired the same twelve `docs/ideas.md` entries sixteen minutes apart,
@@ -544,14 +588,36 @@ export function runControl() {
 // read. That is this charter's own clause on a default inside a status check
 // being that check's own blind spot, committed by the tool written to
 // measure a blind spot. Assert the receipt is there rather than defaulting.
+/** The four states of the board half, and the two that may decide a pair.
+ *
+ *  `rows` is `null` for every state that may not, because that is the input
+ *  `grade` already keys its INDETERMINATE arm on. Returning `[]` for a read
+ *  that reached no rows is what let a 401 be graded as "no message passed":
+ *  an empty array is truthy, so the arm never ran. See the ORDERING-adjacent
+ *  note at the top of this file for the measurement.
+ */
+export const BOARD_STATES = ['complete', 'partial', 'unestablished', 'declined'];
+
+/** @returns {boolean} may a pair be decided from a board half in this state? */
+export function boardCanDecide(state) {
+  return state === 'complete' || state === 'partial';
+}
+
 async function boardRows(hours) {
   const { pageMessages, ratioFault } = await import('../board/page.mjs');
   const walk = await pageMessages({ hours });
   const c = walk.coverage;
   if (!c) throw new Error('pageMessages returned no coverage receipt; its shape has changed');
   const fault = ratioFault(c);
+  const rows = walk.rows || [];
+  // `oldest_ts` is the field that says a window was established at all, and it
+  // is the one `ratioFault` itself keys its "reached no rows" wording on.
+  const established = Boolean(c.oldest_ts) && rows.length > 0;
+  const state = c.complete === true ? 'complete' : established ? 'partial' : 'unestablished';
   return {
-    rows: walk.rows || [],
+    state,
+    rows: boardCanDecide(state) ? rows : null,
+    row_count: rows.length,
     complete: c.complete === true,
     oldest: c.oldest_ts || null,
     pages: c.pages,
@@ -562,6 +628,58 @@ async function boardRows(hours) {
 function arg(flag, fallback) {
   const i = process.argv.indexOf(flag);
   return i === -1 ? fallback : process.argv[i + 1];
+}
+
+/** The one place the exit code is decided, so that the printed verdict and the
+ *  status a caller reads cannot disagree.
+ *
+ *  Keyed on EVENTS and not pairs: a gate whose threshold moves with how many
+ *  entries a collision happened to span is a gate on entry width.
+ *
+ *  Precedence is 1 over 2. A found duplication is a repair somebody can make
+ *  today, and it stays actionable even when other pairs are undecided; the
+ *  undecided ones are a fact about this run's reach and not about the tree.
+ *
+ *  @param {{event_counts: Record<string,number>}} g the grading
+ *  @param {{state: string, note: ?string}} board the board half
+ *  @returns {{exit: 0|1|2, code: string, line: string}}
+ */
+export function auditVerdict(g, board) {
+  const dup = g.event_counts.DUPLICATED;
+  const ind = g.event_counts.INDETERMINATE;
+  if (dup > 0) {
+    return {
+      exit: 1,
+      code: 'DUPLICATED',
+      line: `${dup} blind duplication event(s) in this window; a seat must repair`,
+    };
+  }
+  if (ind > 0) {
+    return {
+      exit: 2,
+      code: 'UNDECIDED',
+      line: `cannot decide: ${ind} concurrent event(s) are INDETERMINATE because the board half is `
+        + `${board.state}, so DUPLICATED 0 below is a floor and not a finding`
+        + (board.note ? `. ${board.note}` : ''),
+    };
+  }
+  // No third arm on `!boardCanDecide(board.state)` alone, and the reason is
+  // worth as much as the fix. A missing board half only costs a verdict when a
+  // pair was CONCURRENT, because the graph decides SEQUENTIAL and SAME_CHANGE
+  // on its own with no board call at all. So `declined` with zero
+  // INDETERMINATE events means the board was never needed, and refusing there
+  // would be the opposite defect: a tool that says it could not look when it
+  // did not have to. Over-refusal is as wrong as a false green, and it is the
+  // failure mode a guard written in reaction to a false green reaches for
+  // first. The CLEAN line therefore names the board state rather than hiding
+  // it, so the reader can see which half carried the answer.
+  return {
+    exit: 0,
+    code: 'CLEAN',
+    line: `no blind duplication in this window, over a ${board.state} board half; `
+      + `${g.event_counts.COORDINATED} coordinated, ${g.event_counts.SEQUENTIAL} sequential, `
+      + `${g.event_counts.SAME_CHANGE} same-change`,
+  };
 }
 
 async function main() {
@@ -606,9 +724,15 @@ async function main() {
     if (list.length) edits.set(c.sha, list);
   }
 
-  let board = { rows: null, complete: false, oldest: null, note: 'board not read (--no-board)' };
+  let board = { state: 'declined', rows: null, row_count: 0, complete: false, oldest: null, note: 'board not read (--no-board)' };
   if (!noBoard) {
-    try { board = await boardRows(hours); } catch (e) { board = { rows: null, complete: false, oldest: null, note: `board read failed: ${e.message}` }; }
+    try {
+      board = await boardRows(hours);
+    } catch (e) {
+      // A throw is `unestablished` and not `declined`. The two print the same
+      // empty board half and mean opposite things about whether anybody asked.
+      board = { state: 'unestablished', rows: null, row_count: 0, complete: false, oldest: null, note: `board read failed: ${e.message}` };
+    }
   }
   const coverage = board.oldest ? { covers: (ts) => ts >= board.oldest } : null;
   const g = grade(commits, edits, { rows: board.rows, coverage });
@@ -620,7 +744,8 @@ async function main() {
       commits_scanned: commits.length,
       commits_touching_an_old_entry: edits.size,
       entries: g.entries,
-      board: { complete: board.complete, oldest: board.oldest, pages: board.pages ?? null, rows: board.rows ? board.rows.length : 0, note: board.note },
+      board: { state: board.state, can_decide: boardCanDecide(board.state), complete: board.complete, oldest: board.oldest, pages: board.pages ?? null, rows: board.row_count ?? (board.rows ? board.rows.length : 0), note: board.note },
+      verdict: auditVerdict(g, board),
       event_counts: g.event_counts,
       counts: g.counts,
       events: g.events,
@@ -633,9 +758,16 @@ async function main() {
     console.log(`window ${hours}h  refs ${refCount}  registers ${regs.length}  `
       + `commits ${commits.length} (${edits.size} touched a pre-existing entry)  `
       + `entries ${g.entries}`);
-    console.log(`board: ${board.rows ? `${board.rows.length} rows over ${board.pages} page(s), ${board.complete ? 'complete' : 'INCOMPLETE'}, oldest ${board.oldest}` : board.note}`);
+    console.log(`board: ${board.state}${board.rows ? `, ${board.rows.length} rows over ${board.pages} page(s), oldest ${board.oldest}` : `, ${board.note}`}`);
     if (board.note && board.rows) console.log(`  ${board.note}`);
-    console.log(`events: ${Object.entries(g.event_counts).map(([k, v]) => `${k} ${v}`).join('  ')}`);
+    // The verdict slot, and it carries the refusal rather than a count taken
+    // over nothing. Ursa's frontend seat's rule for a report channel: silence
+    // is indistinguishable from a tool that never ran, so the refusal has to
+    // occupy the slot. The counts still print, below this line and not instead
+    // of it, because a floor is worth reading once it is labelled as one.
+    const v = auditVerdict(g, board);
+    console.log(`VERDICT: ${v.line}`);
+    console.log(`events: ${Object.entries(g.event_counts).map(([k, v2]) => `${k} ${v2}`).join('  ')}`);
     console.log(`pairs : ${Object.entries(g.counts).map(([k, v]) => `${k} ${v}`).join('  ')}`
       + '   (an event is one commit pair; pairs count the entries it spans)');
     for (const e of g.events) {
@@ -652,9 +784,7 @@ async function main() {
     }
   }
 
-  // Keyed on events, not pairs: a gate whose threshold moves with how many
-  // entries a collision happened to span is a gate on entry width.
-  if (process.argv.includes('--audit') && g.event_counts.DUPLICATED > 0) process.exit(1);
+  if (process.argv.includes('--audit')) process.exit(auditVerdict(g, board).exit);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

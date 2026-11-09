@@ -21,6 +21,9 @@ import {
   grade,
   patchId,
   runControl,
+  auditVerdict,
+  boardCanDecide,
+  BOARD_STATES,
   NON_SEAT_AUTHORS,
 } from './duplicate-repair.mjs';
 
@@ -578,4 +581,83 @@ test('patchId on this repository returns a stable hex id for a real commit', () 
 
 test('patchId returns null rather than throwing on a commit that does not exist', () => {
   assert.equal(patchId('0000000000000000000000000000000000000000'), null);
+});
+
+// ------------------------------------------------- the audit verdict and exit
+//
+// Added 2026-11-09, hundred-and-thirteenth window. Every case here failed
+// against the pre-fix source, where the exit code was the single expression
+// `--audit && event_counts.DUPLICATED > 0`, so a window with nothing decided
+// exited 0. The measurement that found it is in the file's own header.
+
+const G = (counts) => ({
+  event_counts: {
+    DUPLICATED: 0, COORDINATED: 0, SAME_CHANGE: 0, SEQUENTIAL: 0, INDETERMINATE: 0, ...counts,
+  },
+});
+
+test('only complete and partial board halves may decide a pair', () => {
+  assert.deepEqual(BOARD_STATES.filter(boardCanDecide), ['complete', 'partial']);
+  assert.deepEqual(BOARD_STATES.filter((s) => !boardCanDecide(s)), ['unestablished', 'declined']);
+});
+
+test('a declined board half with undecided pairs exits 2, never 0', () => {
+  // The measured false green: --hours 48 --no-board --audit printed twelve
+  // INDETERMINATE rows and exited 0 because nothing graded DUPLICATED.
+  const v = auditVerdict(G({ INDETERMINATE: 1 }), { state: 'declined', note: 'board not read (--no-board)' });
+  assert.equal(v.exit, 2);
+  assert.equal(v.code, 'UNDECIDED');
+  assert.match(v.line, /cannot decide/);
+  assert.match(v.line, /declined/);
+  // The refusal says the count is a floor, because the count still prints.
+  assert.match(v.line, /floor and not a finding/);
+});
+
+test('an unestablished board half with undecided pairs exits 2 and names the receipt', () => {
+  const v = auditVerdict(
+    G({ INDETERMINATE: 3 }),
+    { state: 'unestablished', note: 'COVERAGE_READ_FAILED: the read reached no rows at all' },
+  );
+  assert.equal(v.exit, 2);
+  assert.match(v.line, /unestablished/);
+  assert.match(v.line, /COVERAGE_READ_FAILED/);
+});
+
+test('a found duplication takes precedence over undecided pairs', () => {
+  // 1 over 2 on purpose: the duplication is a repair a seat can make today and
+  // the undecided pairs are a fact about this run's reach.
+  const v = auditVerdict(G({ DUPLICATED: 2, INDETERMINATE: 5 }), { state: 'partial', note: null });
+  assert.equal(v.exit, 1);
+  assert.equal(v.code, 'DUPLICATED');
+  assert.match(v.line, /2 blind duplication/);
+});
+
+test('a declined board half with nothing concurrent is clean, not a refusal', () => {
+  // The over-refusal this fix had to avoid. The graph decides SEQUENTIAL and
+  // SAME_CHANGE with no board call, so a missing board half costs no verdict
+  // when no pair was concurrent.
+  const v = auditVerdict(G({ SEQUENTIAL: 4, SAME_CHANGE: 1 }), { state: 'declined', note: null });
+  assert.equal(v.exit, 0);
+  assert.equal(v.code, 'CLEAN');
+  assert.match(v.line, /declined board half/);
+});
+
+test('a clean window over a complete board half exits 0 and says which half answered', () => {
+  const v = auditVerdict(G({ COORDINATED: 1 }), { state: 'complete', note: null });
+  assert.equal(v.exit, 0);
+  assert.match(v.line, /complete board half/);
+  assert.match(v.line, /1 coordinated/);
+});
+
+test('an empty row set cannot be graded as no message passed', () => {
+  // The second measured fault, at the grader's own boundary. A 401 handed
+  // `rows: []` to grade(), which is truthy, so the !rows arm never ran and two
+  // concurrent commits were called DUPLICATED from a read that reached nothing.
+  // boardRows now hands null for that state; this asserts the arm it reaches.
+  const commits = [C('a', '2026-11-09T05:00:00Z', 'ursa-skill'), C('b', '2026-11-09T05:10:00Z', 'ursa-engineer')];
+  const edits = new Map([['a', [{ path: 'r.md', id: 'E' }]], ['b', [{ path: 'r.md', id: 'E' }]]]);
+  const stub = () => { throw new Error('no'); };
+  assert.equal(grade(commits, edits, { rows: [], run: stub }).counts.DUPLICATED, 1);
+  assert.equal(grade(commits, edits, { rows: null, run: stub }).counts.INDETERMINATE, 1);
+  assert.equal(grade(commits, edits, { rows: null, run: stub }).counts.DUPLICATED, 0);
 });
