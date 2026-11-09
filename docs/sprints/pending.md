@@ -8,6 +8,51 @@ for why).** Nothing open was dropped in the move; still-open items are
 carried forward in this file's own current entries, not left only in the
 archive.
 
+## Top three for the owner, 2026-11-09 message-triggered (thirty-seventh pass, the six-hour pass): four Tier B merges landed, three more closed by ancestry, #870/#833/#826 (exo, Tier C) are still yours
+
+Wake asked for the six-hour sweep: inbox and board, failed-run triage,
+a merge pass, a sprint-state check, and one board note. Full account
+in `docs/agents/pm-2026-11-09-message-37-run.md`.
+
+1. **#870, #833 and #826 (exo) are still the three decisions that are
+   actually yours.** All three are Tier C by path (`prompts/exo-agent.md`
+   in each diff), unchanged by anything this pass merged. `#870`
+   contains `#846` and `#863` by ancestry (both already closed); `#833`
+   and `#826` are the real collision named in `docs/agents/merge-order.md`
+   — both touch the same heading in `docs/agents/improvements.md`, so
+   whichever you merge second needs a one-line hand resolution that
+   keeps both appends, not a reorder. Nothing new to add past what
+   pass 36 already told you about this row.
+2. **Four Tier B merges landed this pass, cleanly, and three more
+   closed on their own as a side effect.** `#875` (skill), `#824` and
+   `#822` (market, `#822` was already contained in `#824`), and `#880`
+   (skill's own live successor to `#875`) all passed the six-point
+   check — not a draft, not this seat's own, checks green, no Tier C
+   path, a real merge performed in a scratch worktree with both
+   drivers installed (not GitHub's cached field), and under seven days
+   old. `#824` needed a docs-only ledger conflict resolved by hand
+   (pushed a merged-with-driver commit onto its own branch before
+   GitHub's merge button would take it, since GitHub does not run our
+   merge driver) — within this seat's own remit under criterion 5.
+   `#857`, `#845` and `#838` (skill) turned out to already be ancestors
+   of `#875` and closed themselves as merged once it landed. Nothing
+   lost; checked by `git merge-base --is-ancestor`, not assumed.
+3. **Nothing new to triage from the last six hours of runs.** Five
+   `redaction-gate` failures fall in the window; all five are already
+   accounted for by an earlier pass or by the owning seat itself — the
+   three on this seat's own earlier branches were the leaked-session-id
+   shape already fixed on `main` in `#861`, and the two on
+   `ursa-security` and `ursa-exo` branches are already named in open
+   PRs `#870` and the now-closed `#868` by their own seats. No seat is
+   silently broken.
+
+This seat's own Tier B backlog is now **seven open, non-draft PRs**
+stacked on each other (`#864`, `#869`, `#874`, `#876`, `#878`, `#881`,
+and this pass's own once it is readied), plus `#871` (the Monday
+ceremony, contained in the stack by ancestry). None of them is this
+seat's to merge under §10's own rule. They still need a merger other
+than Ursa's own PM: you, or HQ's PM.
+
 ## Top three for the owner, 2026-11-09 message-triggered (thirty-sixth pass): both wake events were already resolved by earlier passes, #846 closed as superseded by #870, PWC-EXO-9 does not exist yet
 
 Wake named two events: an exo note (PWC-EXO-9 pricing, and a claim that
