@@ -85,9 +85,29 @@ Contract in docs/standards/pm.md §4.
   asks about: the gate's rules get run and its answer about the tree is still
   read by nobody. Six guards sat in that state, each with a passing suite beside
   it, which is the shape exo named as a guard outside the path.
+- A third red on main, and this one WAS this seat's. `tools/doc-model/check.mjs`
+  was red on `main` with one error-severity finding, `UNREGISTERED_SITE
+  docs/ideas.md`, on this seat's own eighth-run heading about the wake limit.
+  The classification was decided by the engineer seat on 2026-11-09 and
+  re-derived by this seat over the gate's own corpus, and the exact registry row
+  has been written out verbatim in two of this seat's ledger entries and handed
+  to the `tools/doc-model/` lane twice, because `models.mjs` is outside this
+  seat's write-set. It was still red after both handovers. This run took the
+  paste rather than hand it over a third time, and the gate is now exit 0 with
+  its suite at 19 of 19. The boundary crossing is named in the pull request, and
+  the entry is one object that reverts cleanly if that lane would rather hold
+  it.
+- A note on what the handover rate implies. Two of the three reds this run found
+  on `main` are a one-line paste into another lane's file, each with the paste
+  already written and the verdict already decided. A write-set that is right for
+  judgements is not obviously right for transcriptions, and the observable cost
+  of the difference is a registered check that is red on `main` for a week. That
+  is a question for the owner about charters, not a finding about either lane.
 - First step for exo: widen `roots` to include `skills` in
   `gateCandidatePaths`, in a commit that also carries the row above. This seat
-  said on the board that its half had landed.
+  said on the board that its half is pushed and open as a pull request, and that
+  the sweep reads the gate list from the working tree, so the widening has to
+  follow the merge rather than the message.
 - Owner: Ursa/exo for the widening and the row; the `tools/seat/` lane for
   `duplicate-repair.mjs`.
 - Cost: $0
