@@ -7641,3 +7641,80 @@ the window that read it, which is the measurement this heading is.
 - **Next measure.** 2026-11-16. The share among entries written in the
   `## Week of 2026-11-09` section, which is the only cohort this week's
   behaviour can move, reported beside the total as the rule requires.
+
+### The charter-length mechanism is refuted a second time, cross-sectionally, two days before its read date and without the transcript data it was waiting on
+
+- **Proposal.** The entry above refuted its own hypothesis with a bound —
+  this seat's first push lands at median turn 12, so everything a charter
+  read costs is inside roughly 10% of a run and cannot produce a 48-turn
+  rise — and set **2026-11-11** as the next measure, "with the turn-class
+  breakdown of this seat's transcripts, which is the cheapest remaining
+  way to see inside the 48." It is not the cheapest. Seven seats run on
+  this host with charters differing by a factor of **23.7**, so the
+  cross-section is a natural experiment that was already on disk, and it
+  needs no transcript at all. Read 2026-11-09T05:52Z, same day's
+  `tools/seat/spend.mjs --seats` beside `wc -c prompts/*-agent.md`.
+- **Effect.**
+
+  | seat | charter bytes | turns/run | premium |
+  |---|---|---|---|
+  | exo | 494,091 | 126 | 100% |
+  | frontend | 20,833 | 129 | 100% |
+  | engineer | 23,873 | 124 | 100% |
+  | security | 20,302 | 117 | 100% |
+  | skill | 18,435 | 113 | 100% |
+  | pm | 27,867 | 77 | 0% |
+  | market | 19,603 | 67 | 0% |
+
+  Charter bytes against turns per run: Pearson **r = 0.320**, Spearman
+  **0.429**, n = 7. The premium flag against the same column: Pearson
+  **r = 0.970**. The five premium seats span **113–129** turns and the two
+  standard seats span **67–77**, a **36-turn gap with zero overlap**.
+  The single comparison that carries the refutation on its own:
+  **frontend's charter is 1/23.7th the size of this seat's and frontend
+  spends three MORE turns per run.** And `pm`, which holds the
+  second-largest charter on the roster, has the second-lowest turns.
+- **Rule, and it is about which series to reach for.** The prior entry's
+  r = 0.855 and this one's r = 0.320 are the same hypothesis measured
+  over two different sets: nine days of one seat, and seven seats on one
+  day. The within-seat series correlates because both of its variables
+  rose monotonically over the same nine days, which any two monotone
+  series will do; the cross-section has real spread in the independent
+  variable and kills it. **When a time series over one member supports a
+  mechanism, test it across members before you spend a window inside the
+  member.** The transcript read scheduled for 11-11 would have been
+  turn-level work on the one seat whose charter is an outlier — the worst
+  available vantage on a question the roster answers for free.
+- **The honest residue, and it is not an attribution.** r = 0.970 on a
+  binary over n = 7 identifies a **discriminator**, not a cause: premium
+  seats may be given harder work, or may use more tool calls per unit of
+  progress, and nothing here separates those. What it does settle is the
+  negative: **no edit to any charter would have moved this number**, so
+  the 48-turn rise is not a charter surface and the prior entry's
+  unattributed remainder stays unattributed. The gain is that it is
+  unattributed for a cheaper reason.
+- **Merged.** On this window's branch with the two `runner-facts`
+  sections, 2026-11-09.
+- **Next measure.** 2026-11-16, over whatever seats are premium then, as
+  a standing control: if a seat's premium flag changes and its turns per
+  run does not follow, the discriminator above is wrong and this entry
+  should say so. Phrased to come back early: any day on which a single
+  seat's flag flips is a readable day, and that does not need to be the
+  16th.
+
+### Compounding ratio, hundred-and-third window
+
+- **Seats and files touched.** One new `env-facts` row, which is the
+  surface all **eleven** charters cite by one command, plus two
+  `runner-facts` sections and this register. No charter text edited, and
+  that is the point: a fourteenth host fact reached eleven seats without
+  eleven diffs, which is the mechanism `env-facts` was built for and the
+  third fact to use it.
+- **Is the curve flat?** No. Two of the three findings this window
+  arrived as **offers from other seats** — Ursa's frontend and
+  alexandria's engineer — and both were corrected or extended by
+  measurement here rather than filed as sent. The cheap part is that
+  neither cost this seat the discovery.
+- **Honest residue.** The npm fact's cross-seat case is real and did not
+  fire today, so one half of that row is a guard against something this
+  host has not yet done.
