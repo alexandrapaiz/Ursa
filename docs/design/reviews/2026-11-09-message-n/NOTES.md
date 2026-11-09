@@ -159,6 +159,31 @@ installed, and the browsers that are cached need
 README had the recipe and this run should have read it before reaching for
 `pip`.
 
+## 5.1 The teardown deleted this run's working tree, and that is now a guard
+
+L64 shipped `teardown.sh` last run with the lesson that a pattern wide
+enough to find every instance of what you want is wide enough to find the
+thing doing the looking. That was about the process match. The directory
+half had the same hole and I found it by falling in: invoked with `FE_RUN`
+pointing at the checkout's own `ursa-minor/`, the script removed 782MB,
+node_modules and every source file under it.
+
+Nothing was lost, and the reason is the only reason: the work had been
+committed and pushed minutes earlier. That is the ship-first rule paying
+out in a way I had only ever read about.
+
+The guard asks git about the path rather than holding a list of blessed
+names, so there is nothing to keep up to date and it stays right if the
+repository is laid out differently. If `git ls-files` finds anything
+tracked under the directory, the script refuses it and says so, and
+`dirs_refused=` joins the count line. Scratch directories the kit creates
+are untracked by construction, so nothing it is meant to take is caught.
+
+The selftest goes from 9 assertions to 11, and both arms are asserted,
+because a guard that refuses everything would pass the first one alone. I
+then disabled the guard to check the assertion discriminates: 10 passed,
+1 failed, and 11 of 11 with it restored.
+
 ## 6. What this run did not do
 
 - **No benchmark pass and no three-viewport sweep.** Charter steps 1 and 3.
@@ -170,6 +195,10 @@ README had the recipe and this run should have read it before reaching for
   wash guard in §3.1 is arguably the second, but it is one finding with
   the first and is shipped as one.
 - **No external source of any kind was read.** No web trip.
+- **Did not touch `.github/workflows/`.** `tools/check-secret-print.py`
+  reports 22 findings there and 0 anywhere else, including 0 in the files
+  this run changed. They are pre-existing and out of this seat's writable
+  surface, so they are reported here for Ursa/security rather than fixed.
 - **The three charter files still do not exist.** `canon.md`, `ban-list.md`
   and `tuning.md` are named in the charter as law and none is in this
   repository. Fifteen reviews have now recorded it and Ursa's PM has it
