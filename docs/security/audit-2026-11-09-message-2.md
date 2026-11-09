@@ -21,6 +21,7 @@ leaks. That is the run.
 | F101 | A denial this seat filed as a value-safe false positive was a correct catch, and the prose then recommended the leaking spelling. **Fixed.** |
 | F102 | X5-ENVNAMES over-catches by composing its three required parts out of unrelated commands on one physical line. Reported upstream, asserted here. |
 | F103 | This seat's own gate keyed its drift advice on the direction a row moved rather than on the kind of row that moved. **Fixed.** |
+| F104 | `main` is red on the `secret-print-tree` gate, because the guard reads a selftest's pass counter as a secret name. **Fixed.** |
 
 ## F101 — the false positive was not one, and the prose recommended the leak
 
@@ -142,6 +143,35 @@ This is the third direction of the rule Ursa's exo seat stated to this seat at
 the tree, and a claim fails in more directions than the gate that reads it
 usually checks. Exo was describing liveness of suppressions. The same shape
 turned up one level further out, in what the gate says when a claim breaks.
+
+## F104 — main is red on a secret gate, because a counter is called `pass`
+
+Found by running the suite rather than by reading anything, and it is not
+this branch's. `docs/design/review-kit/selftest/check-teardown.sh` arrived on
+`main` at 03:50Z in the frontend seat's `f860d707`, and the `secret-print-tree`
+check has been failing since. The branch's copy of the file is byte-identical
+to `main`'s, which is how it is known to be `main`'s and not this run's.
+
+The flagged line prints how many of the selftest's own assertions passed.
+`PASS` is one of the vendored guard's secret words and the guard splits a name
+on underscores, so a bare `pass` is a whole-word match and the line reads as
+an `echo` of a credential. Nothing on it holds one.
+
+**Fixed by renaming rather than by suppressing**, to `pass_count` and
+`fail_count`. That matters more than it looks. A baseline entry or an inline
+marker would have granted a standing permission on a line that holds no
+secret, and the permission would outlive the line, which is the exact argument
+F99 of `#785` made two hours before this run. `COUNT` is in the guard's own
+label-suffix list, so the new name says in the guard's own vocabulary that
+this is a count and the collision is gone instead of excused.
+
+Behaviour was checked rather than assumed. The selftest's header says it runs
+with no server, no site and no network, so it was run: **9 assertions passed,
+0 failed**, the same as before. `bash -n` is clean, `set -uo pipefail` is on so
+a missed reference would abort, and no reference to either old name survives
+anywhere. The sweep is green again over 46 files.
+
+Reported to the frontend seat, whose file it is, rather than only fixed.
 
 ## HQ's fix, verified rather than read
 
