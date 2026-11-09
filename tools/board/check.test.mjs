@@ -254,6 +254,56 @@ test('a handoff and an ask over the limit are refused; a note is told and sent',
   }
 });
 
+test('the other two arms of the disposition split, which no test named before today', () => {
+  // `tools/gates/code-census.mjs`, written 2026-11-09, measured that
+  // `WAKE_DISPOSITION_LOST` and `WAKE_DISPOSITION_SAFE` were named by no test
+  // file in tools/ or scripts/, while their sibling `WAKE_DISPOSITION_UNKNOWN`
+  // was asserted directly above. So the three-way split had one arm checked
+  // and the other two detected on every run and decided by nothing. The
+  // sibling's own test says asserting UNKNOWN "proves the three-way split is
+  // not collapsing", and with two arms unasserted it could not have.
+  const filler = (n) => 'w'.repeat(n);
+  const verdict = 'So I merged it and the queue is clear.';
+
+  // LOST: the disposition sentence falls past the cut, so the recipient is
+  // woken with the evidence and none of the verdict.
+  const lost = ok({ body: `${filler(1400)}\n\n${verdict}${filler(400)}` });
+  assert.ok(wakeReceipt(lost.body).body_truncated);
+  assert.deepEqual(notices(lost).map((n) => n.code),
+    ['WAKE_TRUNCATION_PREDICTED', 'WAKE_DISPOSITION_LOST']);
+  assert.match(notices(lost)[1].line, /none of the verdict/);
+  assert.match(notices(lost)[1].repair, /move the disposition above the cut/);
+
+  // SAFE: the same loss, with the verdict first. Nothing to repair, and the
+  // sender is told so rather than asked to rewrite a message already right.
+  const safe = ok({ body: `${verdict}\n\n${filler(1400)}\n\nMore evidence follows and none of it changes the verdict above.${filler(200)}` });
+  assert.ok(wakeReceipt(safe.body).body_truncated);
+  assert.deepEqual(notices(safe).map((n) => n.code),
+    ['WAKE_TRUNCATION_PREDICTED', 'WAKE_DISPOSITION_SAFE']);
+  assert.match(notices(safe)[1].repair, /nothing to do/);
+
+  // And all three arms are reachable, so the split is a split.
+  assert.deepEqual(
+    [lost, safe, ok({ body: LONG_BODY })].map((m) => notices(m)[1].code),
+    ['WAKE_DISPOSITION_LOST', 'WAKE_DISPOSITION_SAFE', 'WAKE_DISPOSITION_UNKNOWN'],
+  );
+});
+
+test('a body that states a path is in some state and names no ref is refused', () => {
+  // `PATH_WITHOUT_REF` has been in `violations()` since 2026-11-02 and was
+  // named by no test until the code census found it on 2026-11-09. It is the
+  // rule standing between this board and Ursa incident 9, in which four seats
+  // in one week read an unmerged thing against `main` and concluded it did not
+  // exist, so a silent regression in it is expensive and was undetectable.
+  const bare = ok({ body: 'tools/doc-model/check.mjs is green now, which it was not this morning.\n\nI am writing this down because the failure is silent on both sides.' });
+  assert.deepEqual(codes(bare), ['PATH_WITHOUT_REF']);
+  assert.match(violations(bare)[0].line, /equally true of a working tree, of a branch and of the trunk/);
+  assert.match(violations(bare)[0].repair, /name where it is readable/);
+
+  // Named on main, so the sentence is readable from somewhere: no finding.
+  assert.deepEqual(codes(ok({ body: 'tools/doc-model/check.mjs is green on main now, which it was not this morning.\n\nI am writing this down because the failure is silent on both sides.' })), []);
+});
+
 test('--accept-truncation turns the refusal into the same prediction as a note', () => {
   const m = ok({ kind: 'handoff', body: LONG_BODY, acceptTruncation: true });
   assert.deepEqual(codes(m), []);
