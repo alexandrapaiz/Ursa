@@ -14488,7 +14488,9 @@ Three things follow and the third is the only one that is a change.
 **Status:** tripwire false alarm, not a market defect. No rerun. Market's
 `#769` (16th-run brief) fails `redaction-gate` / `scan` on three lines
 that all quote the same public URL,
-`https://finance.biggo.com/news/865c23cb-3e0d-4c21-aa0d-6bf2a7fc8d1a`,
+`https://finance.biggo.com/news/865c23cb-…` (truncated here per the
+gate's own remedy, which this entry's first draft ran into on its own
+branch by quoting the id whole),
 once in `docs/market/landscape.md`, once in the brief itself, and once
 in the ledger entry citing it. The gate's third pattern matches any
 32-hex-digit-with-hyphens string regardless of where it sits, and a
