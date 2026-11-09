@@ -215,6 +215,39 @@ Both of this run's instruments are written against it:
 run on it measures fixtures over the real stylesheet and has to say so;
 see that run's notes §1 for where the line falls.
 
+## Three ways a driven dev server looks broken when it is only refusing
+
+Measured 2026-11-09 (run e), reaching `/record`'s set view. Each of these
+presents as a hung or dead page, and none of them logs anything that names
+itself. Together they cost more of that run than the defect it was chasing.
+
+- **Drive `localhost`, never `127.0.0.1`.** Next refuses dev requests from
+  an origin outside `allowedDevOrigins`, so the client runtime never starts
+  and the page stays as server-rendered HTML. Typed text still lands in the
+  DOM and still reads back correctly from `input.value`, but no React state
+  updates, so anything gated on state — here `disabled={busy || !address}`
+  — stays gated forever. The only symptom is a failed HMR websocket, which
+  looks like an unrelated dev-tooling complaint. **Check hydration by
+  asserting on a control that state controls, not on the value you typed.**
+- **A field under a tap-target overlay cannot be clicked.** `.rec-field` is
+  a label carrying the 44px press over the input, so a click at the input's
+  own box is intercepted and times out at 30s. `page.focus()` then type.
+  This is L29 arriving as an instrument failure rather than a site one.
+- **Scope the submit button to its own form.** `/record` renders two
+  address forms, so a bare `button[type="submit"]` resolves to two elements,
+  takes the first, and waits 30s for a button that is disabled because its
+  own field is empty.
+
+`reviews/2026-11-09-message-e/data/drive-real-set-view.py` carries all
+three in its header and is the worked example.
+
+**And one about the frames, not the drive.** That script clips to the row
+after `scrollIntoView`, which lands at a different offset on each load, so
+its frames are not pixel-comparable between two runs of it. The run that
+wrote it published no diff for them and said so. If you need a pixel
+comparison across arms, clip to something that does not move, or do not
+scroll.
+
 ## Three things to know before you trust a number out of this
 
 **Calibrate first.** Point `sample-motion.mjs` and `fit-motion.mjs` at
