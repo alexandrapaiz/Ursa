@@ -18,8 +18,12 @@ to name a field label used as a separator. Re-run in a clean worktree at
 tools/ledger/check.test.mjs`, 41 pass 0 fail. Resolved by readying it with a
 real body, not by closing or absorbing it.
 
-`node scripts/ci-checks.mjs` on `main` exits 0, so there was no break-fix to
-outrank the day's work.
+`node scripts/ci-checks.mjs` was run on `main` at the start of this window and
+reported no failing check, so there was no break-fix to outrank the day's
+work. That first run's output was lost when the command was moved to the
+background, so the authoritative measurement in this run is the one on this
+branch below, and the claim here is the weaker one it supports: nothing was
+red, rather than a quoted exit code.
 
 ## Unit of work
 
@@ -48,3 +52,11 @@ were tested and its answer about the tree was never asked for.
 | `node tools/gates/code-census.mjs` | exit 0, 85 codes across 19 detectors |
 | `node tools/gates/enumerate-verdicts.mjs` | exit 0, the new gate's 7 branches derived |
 | `node tools/ledger/check.mjs` | exit 2, clean as far as a seat can take it |
+| `node --test tools/gates/enumerate-verdicts.test.mjs` | 18 pass, 0 fail, after the probe count stopped being a literal |
+| `node scripts/ci-checks.mjs` on this branch | 23 checks: **21 passed, 0 failed**, 2 unrunnable |
+
+The two unrunnable are `product-typecheck` and `product-suites`, both because
+`ursa-major/node_modules` is absent. That is a fact about a fresh clone and not
+about this branch, and it is why the run's overall code is 2: ci-checks reports
+that a result over an incomplete set is not a verdict, which is the honest
+answer and the same answer it gives on `main` in this clone.
