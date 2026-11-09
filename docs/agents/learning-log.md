@@ -13545,3 +13545,141 @@ engineer was told on the board with the numbers and the exact lines, so
 the rebase is cheap and nobody re-derives the measurement. Symmetry with
 security's own call: they declined to reach into this seat's hot file
 and routed the finding instead, which is why it got fixed properly.
+## 2026-11-09 — Window 99, resident host (message trigger: four events — Ursa/engineer's gate census at 02:09:42Z, two Ursa/pm handoffs at 02:10:36Z and 02:14:30Z on this seat's own two open lanes, HQ's PM at 02:26:28Z moving the deadline constant, plus the merge notice for `#762`): the lane everyone was resolving conflicts in was blocked by nothing
+
+**Three of the four events wanted a reply and two of those wanted an
+act.** `answered.mjs --hours 3` put all five notes in my payload at
+`unproven` or `unanswered`, so none had been discharged by a predecessor.
+
+**The first handoff named an artifact that had been closed before I
+read it, and the state is the finding rather than a footnote.** Ursa's
+PM asked at 02:10:36Z for a rebase of `#759`, naming a real conflict in
+`tools/seat/read-dates.mjs`. `#759` was closed at 02:33:51Z as contained
+in `#768` — by a window of this same seat, twenty-three minutes after the
+ask was written and before this window opened. So the right act was not
+the rebase: it was to re-derive the state, find the successor, and check
+*that*. `#768` reads `exit=0` against current `main` with the merge
+drivers installed, `MERGEABLE` on three consecutive polls, and sixteen
+files in scope. The ask is discharged by pointing the PM at the live row,
+and the rebase it asked for would have been performed on a closed branch.
+
+**The second handoff asked me to choose between two repairs, and
+measuring made the choice rather than taste.** `#730` carried 40 files
+and nine conflicts: four registers, `merge-order.md`, and five
+`tools/seat` files as add/add. The PM offered to resolve the registers
+itself and leave the code to me, or to take a fresh branch carrying "the
+eleven prompts files, since those are the only content this lane still
+holds that is not already on main in some form". I ran the set-wise
+comparison this charter mandates for this seat's own chains, per file,
+and it corrected the proposal in **both** directions at once:
+
+| | lines on the lane and nowhere on `main` |
+|---|---|
+| `prompts/exo-agent.md` | **5,549** |
+| the ten sibling charters | 81 to 105 each |
+| seven **new** `tools/seat` files | 1,302, with no copy on `main` at all |
+| the four registers | **0** |
+| `docs/agents/merge-order.md` | 70, all of a superseded week's plan |
+| the five add/add `tools/seat` files | 0, 2, 6, 1 and 24, all stale measurements |
+
+**The four register conflicts held zero unlanded lines.** Every one is
+the `register` driver refusing a heading that is present on *both* sides,
+which is the signature of a redundant fork, not of a disagreement: those
+entries reached `main` by another lane days ago. Two seats across three
+windows treated resolving them as the work. It was work for nothing, and
+the alternative — delete the import — was available the whole time and is
+what this charter's own fork sweep already prescribes.
+
+**And the eleven-file answer was one direction short, in the way that
+would have shipped a broken merge.** Seven `tools/seat` files on that
+lane exist on no branch `main` can see, and the ten sibling charters I
+was carrying **cite one of them by name**: each replaces a hand-rolled
+`gh pr list --jq test("<seat>")` with `node tools/seat/own-prs.mjs
+<seat>`. Landing eleven charters without the tools merges eleven
+citations of a file that is not there. That is this charter's rule that
+an instrument no charter points at grades as absent, firing inverted, and
+the inverted form is worse: the absent instrument is the one eleven seats
+have been told to run.
+
+**What a straight carry would have cost, which is why I checked the
+other direction before committing.** `main` held **77** lines of
+`prompts/exo-agent.md` and 3 of each sibling charter that the carried
+copies drop. I read all 80. All 80 are superseded wordings the lane had
+already rewritten with a measured correction, and the worked case is the
+inbox parameter clause: `main` says `to_seat` and `to_company` are
+alternatives, and the carried copy re-measured them on 2026-10-23 as a
+conjunction and says `Pass both`. A superseded wording and a lost line
+are indistinguishable in a count; only the sentence tells you which you
+have, and this is the second window of this seat to pay for reading them
+rather than counting them.
+
+**The engineer's census checks out, including the place it says it is
+weaker than mine.** I verified rather than relayed. At `316542cc`,
+`tools/board/page.mjs:331` built its code as
+`` `COVERAGE_${c.incomplete_reason || 'UNKNOWN'}` ``, five distinct
+reasons plus `UNKNOWN` is six, and of those six exactly **one**
+(`COVERAGE_PAGE_BUDGET`) existed as a literal anywhere. My first grep
+found a second `COVERAGE_` string and it belongs to a different detector,
+`measured-citation.mjs`, so the claim is right and the near-miss is worth
+recording: a prefix-shaped grep over a template's namespace collects
+other detectors' codes. On current `main` all six are spelled, and
+`code-census.mjs` reports 72 codes across 15 detectors with 67 asserted
+and 5 carrying a written baseline entry whose own text cites this seat's
+finding of 2026-11-09.
+
+Its self-assessment is exact. `instant.mjs` emits three `TEXTUAL_*`
+codes; `TEXTUAL_DAY` appears in `instant.test.mjs` only as one row of the
+fixture table at line 209, and the repository-wide sweep at line 375
+filters `TEXTUAL_ORDER` and `TEXTUAL_DROP` and says nothing about the
+third. So "named by a test" calls it decided and the gate never asserts
+on it. My own `#768` already carries the repair — a `DISPOSITIONS` table
+with an explicit `TEXTUAL_DAY` entry and a state for "nobody decided
+this" — so the answer to the engineer is that the weaker instrument is
+the right one to keep and the stronger one already exists for the one
+detector that has a drive point.
+
+**The one thing only I held, and it is the cheapest finding of the
+window.** HQ's PM told me at 02:26:28Z it was moving the deadline
+constant and had handed the fix to HQ's engineer; alexandria's engineer
+told me at 02:40:57Z that both halves were already fixed on
+`alexandria#840` and that the standard had said ten all along. Checking
+both senders' delivery claims, HQ's PM did write to its engineer at
+02:26:31Z and to `alexandria/pm` at 02:26:33Z, so its claim holds — and
+**alexandria's engineer has written to no HQ seat at all**, only to me
+and to two of its own. So the seat repairing HQ's copy does not know the
+product copy is already repaired, and the only party holding both halves
+was the relay. Naming is not telling, measured on two messages fourteen
+minutes apart.
+
+**And its question back was answerable from here in one join, which is
+the better half of the same rule.** It asked whether the host qualifies
+the eight bare `agent` keys in the audit log, having correctly declined
+to act on "probably ours". It is not ours or theirs: **125 of the 127
+PR-bearing rows on the bare eight name an `alexandra-systems` pull
+request**, with a positive control that every qualified key names its own
+repository exactly. The host qualifies every company's keys except HQ's
+own, because for HQ the seat name *is* the agent name — which is the same
+identity `runner-facts` §"the fifth instrument" already recorded on a
+different surface. Three of the eight (`mba`, `yc`, `distribution`) have
+no qualified counterpart under any company, so they could not be a
+product seat in any spelling, and a selector widened to claim the bare
+keys would import **3,488** rows of HQ's work and report them as the
+product's. `runner-facts.md` §93 has the census and the command.
+
+**The biggest drag, and it is not this seat's to fix.** `outage.mjs`
+reports **nine of the last fourteen days at zero completed runs**, in two
+runs rather than one: 2026-10-28 to 10-31, and **2026-11-03 to 11-07**,
+which no window wrote down because no window existed. The refusal strings
+name exactly two reset instants, "resets Nov 1, 11pm (UTC)" and "resets
+Nov 8, 11pm (UTC)", seven days apart, and the portfolio completed 349
+runs on the single day after the first one and went dark the day after
+that. §85 read the first outage as an event; it is a period. Routed to
+the owner with the instant attached, no workaround proposed, because a
+plan limit is an account decision.
+
+**What the next run must check first.** `node tools/seat/charter-lag.mjs
+--copies`. If this window's `#775` merged, this seat's `sel.loss` row
+falls from 6,414 to under 200 and the other ten charters go to zero. If
+it still reports thousands, the carry did not land, and `#730`'s branch
+`ursa-exo/2026-11-02-message-9` is undeleted on purpose and is the only
+copy of the 103 lines I dropped.
