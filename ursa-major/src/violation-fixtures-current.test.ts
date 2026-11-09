@@ -87,7 +87,7 @@ function runCheck(cwd: string): { status: number; out: string } {
     cwd,
     encoding: 'utf8',
     // The script prints one line per fixture plus one per drifted file.
-    // 47 files cannot approach the 1MB default; naming it keeps a longer
+    // 49 files cannot approach the 1MB default; naming it keeps a longer
     // directory from turning into a truncation mystery later.
     maxBuffer: 16 * 1024 * 1024,
   })
@@ -103,24 +103,24 @@ describe('the committed violation fixtures are what the generator writes', () =>
     // script exits 0 on two different outcomes that read alike from a
     // status alone: nothing drifted, and nothing was compared. The count
     // is in the message, so the message is the stronger assertion.
-    expect(out).toContain('47 files match what this script would write.')
+    expect(out).toContain('49 files match what this script would write.')
     expect(status).toBe(0)
   })
 
-  it('counts 47 files, which is the base record plus two per counterexample', () => {
+  it('counts 49 files, which is the base record plus two per counterexample', () => {
     const { out } = runCheck(process.cwd())
 
-    // 1 + 23 * 2. `base.json` has no note of its own, and each of the
-    // twenty-three counterexamples is a `.json` the gate must refuse and
+    // 1 + 24 * 2. `base.json` has no note of its own, and each of the
+    // twenty-four counterexamples is a `.json` the gate must refuse and
     // a `.md` that quotes what the gate said about it.
     //
     // Pinned here as arithmetic rather than as a second literal because
     // `invariants.violations.test.ts` already asserts `SLUGS` has length
-    // 23 by reading the directory. A fixture added without its note, or a
+    // 24 by reading the directory. A fixture added without its note, or a
     // note added without its fixture, makes these two numbers disagree and
     // fails one of the two files instead of passing both.
-    expect(out).toContain('47 files match')
-    expect(1 + 23 * 2).toBe(47)
+    expect(out).toContain('49 files match')
+    expect(1 + 24 * 2).toBe(49)
   })
 
   it('holds no file the generator does not write, besides the hand-written README', () => {
@@ -185,7 +185,7 @@ describe('the committed violation fixtures are what the generator writes', () =>
     // threw on write would have passed every `--check` assertion above.
     const tmp = mkdtempSync(join(tmpdir(), 'ursa-violation-drift-'))
     const written = spawnSync(process.execPath, [tsxCli(), SCRIPT], { cwd: tmp, encoding: 'utf8' })
-    expect(written.stdout + written.stderr).toContain('Wrote 47 files under fixtures/violations')
+    expect(written.stdout + written.stderr).toContain('Wrote 49 files under fixtures/violations')
     expect(written.status).toBe(0)
     expect(runCheck(tmp).status, 'a freshly generated directory is current').toBe(0)
 
@@ -198,6 +198,6 @@ describe('the committed violation fixtures are what the generator writes', () =>
     // only said "something drifted" would send the next reader to diff
     // forty-seven files by hand.
     expect(out).toContain('drifted: fixtures/violations/base.json')
-    expect(out).toContain('1 of 47 files differ. Re-run without --check to rewrite them.')
+    expect(out).toContain('1 of 49 files differ. Re-run without --check to rewrite them.')
   })
 })

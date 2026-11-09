@@ -1,4 +1,4 @@
-// `fixtures/violations/` — twenty-three committed records, each of which the
+// `fixtures/violations/` — twenty-four committed records, each of which the
 // gate must refuse, read off disk exactly as a buyer or a CLI would read them.
 //
 // Why this file exists rather than more cases in `src/invariants.test.ts`.
@@ -115,8 +115,8 @@ describe('the base record every counterexample is one edit away from', () => {
 })
 
 describe('each committed record fires exactly the bounds its note names', () => {
-  it('found twenty-three fixtures beside the base', () => {
-    expect(SLUGS).toHaveLength(23)
+  it('found twenty-four fixtures beside the base', () => {
+    expect(SLUGS).toHaveLength(24)
   })
 
   for (const slug of SLUGS) {
@@ -207,7 +207,7 @@ describe('the directory covers the gate rather than a corner of it', () => {
     expect(expectedCodes('rival-not-after-final-unreadable-horizon'))
       .toEqual(['RIVAL_NOT_AFTER_FINAL', 'EXCLUSION_NOT_CLASSIFIED'])
     const single = SLUGS.filter((s) => expectedCodes(s).length === 1)
-    expect(single).toHaveLength(19)
+    expect(single).toHaveLength(20)
   })
 })
 
@@ -220,8 +220,8 @@ describe('the gate reaches these records through the two surfaces that read reco
     // one at test time, which proves the plumbing and leaves nothing a
     // reviewer can read.
     const { violations, lines } = runGate(DIR)
-    // 23 fixtures, plus the clean base. Three fire two bounds each and one
-    // fires three, which is 28 violations: `final-spans-in-file` and
+    // 24 fixtures, plus the clean base. Three fire two bounds each and one
+    // fires three, which is 29 violations: `final-spans-in-file` and
     // `gen-claim-bounded` each gained CLAIM_NOT_WIDER on 2026-10-13, when
     // that bound started checking the byte-identity its own sentence had
     // always stated instead of only the two extents' lengths,
@@ -233,11 +233,15 @@ describe('the gate reaches these records through the two surfaces that read reco
     // also turned `rival-not-after-final-unreadable-horizon` into a
     // two-bound fixture, because the unreadable clock it breaks is the one
     // both levels order against, and `gate-identified` arrived on
-    // 2026-10-16 with the eighteenth bound and fires it alone. Each
+    // 2026-10-16 with the eighteenth bound and fires it alone, and
+    // `exclusion-not-classified-false-refusal` arrived on 2026-11-09 with
+    // that bound's fourth clause, which re-derives a stated size refusal
+    // from the record's own two sizes and is the first clause of the four
+    // that checks arithmetic rather than a commit. Each
     // fixture's `.md` says which bounds it fires and why, and the
     // per-fixture assertion above is what holds this total honest.
-    expect(violations).toBe(28)
-    expect(lines.join('\n')).toContain('28 violations')
+    expect(violations).toBe(29)
+    expect(lines.join('\n')).toContain('29 violations')
     expect(lines.join('\n')).toContain('OK — every stated bound holds')
   })
 

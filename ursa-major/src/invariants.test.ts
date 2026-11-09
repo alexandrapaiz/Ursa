@@ -899,6 +899,168 @@ describe('an excluded file\'s copy is not a copy of the work that excluded it', 
 })
 
 // ---------------------------------------------------------------------------
+// The same bound's fourth clause, added 2026-11-09 with the
+// `over_size_ceiling` reason. The three clauses above all police an exclusion
+// that CLAIMS something about a commit, and a reader checks those by looking
+// the commit up. This one polices an exclusion that claims nothing about any
+// commit: the resolver declined to read a blob because of its size, so the
+// only thing a reader can check is the arithmetic, and the arithmetic has to
+// be in the record for them to check it.
+//
+// Why the clause is both ways round. A size refusal wearing an import's
+// relation would assert a byte-identity or a trailer that was never read; an
+// import wearing `refused` would drop a whole file from every figure in the
+// record while naming no evidence at all. Neither direction is reachable
+// through the declared type and both are reachable in a JSON file, which is
+// the same reason the date clause reads its field as `unknown`.
+// ---------------------------------------------------------------------------
+
+describe('a size refusal states the arithmetic that refused it', () => {
+  /**
+   * A record with one `over_size_ceiling` exclusion on a path that is not
+   * among its classified files, so the first three clauses stay quiet and
+   * only the fourth can speak. The numbers are this repository's own at
+   * 2026-11-09: `docs/sprints/pending.md` was 313,856 characters at `main`,
+   * 4.2% over a ceiling of 300,000, which is the shape that made the silent
+   * skip worth repairing rather than a round invented one.
+   */
+  const refused = (patch: Record<string, unknown> = {}): OutcomeRecord =>
+    resolvedRecord([{
+      path: 'docs/sprints/pending.md',
+      reason: 'over_size_ceiling',
+      sha: '3c929d00',
+      subject: 'Merge pull request #817 from ursa-exo/2026-11-09-message-8',
+      relation: 'refused',
+      chars: 313_856,
+      ceiling: 300_000,
+      generatedChars: 264_111,
+      ...patch,
+    } as unknown as Exclusion])
+  const codesOf = (patch: Record<string, unknown> = {}) =>
+    checkRecord(refused(patch)).map((v) => v.code)
+  const fired = (patch: Record<string, unknown> = {}) =>
+    checkRecord(refused(patch)).find((v) => v.code === 'EXCLUSION_NOT_CLASSIFIED')
+
+  it('accepts the refusal a run actually writes', () => {
+    expect(codesOf()).toEqual([])
+  })
+
+  it('accepts the asymmetric case, where the generated blob is the one over', () => {
+    // An agent that wrote 400,000 characters the person then cut to 200.
+    // `chars` is the finished blob and is well under the ceiling; the
+    // refusal is still honest, and a clause reading `chars` alone would
+    // report this record as the false one. This is why `generatedChars` is
+    // required rather than inferred.
+    expect(codesOf({ chars: 200, generatedChars: 400_000 })).toEqual([])
+  })
+
+  it('fires when neither side exceeds the ceiling the record names', () => {
+    expect(codesOf({ chars: 1_200, generatedChars: 900 })).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    const v = fired({ chars: 1_200, generatedChars: 900 })!
+    // Both sides and the ceiling, which is this module's rule for a message:
+    // everything the reader needs to re-run the decision themselves.
+    expect(v.observed).toContain('300,000')
+    expect(v.observed).toContain('1,200')
+    expect(v.observed).toContain('900')
+    expect(v.where).toContain('docs/sprints/pending.md')
+  })
+
+  it('fires on a ceiling exactly equal to both sides, because the skip is strict', () => {
+    // `src/resolve-episode.ts` refuses on `length > MAX_BLOB_CHARS`, so a
+    // blob of exactly the ceiling is read and classified. A record claiming
+    // it was refused is claiming something that build does not do.
+    expect(codesOf({ chars: 300_000, generatedChars: 300_000 }))
+      .toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    expect(codesOf({ chars: 300_001, generatedChars: 1 })).toEqual([])
+  })
+
+  it('fires on a ceiling or a generated size the record cannot be checked against', () => {
+    for (const patch of [
+      { ceiling: undefined },
+      { generatedChars: undefined },
+      // The types a JSON file holds and TypeScript does not. A string
+      // ceiling is the dangerous one: `313856 <= "300000"` is false by
+      // string coercion, so a truthiness test would have passed this file.
+      { ceiling: '300000' },
+      { ceiling: 0 },
+      { ceiling: -1 },
+      { ceiling: null },
+      { generatedChars: 'lots' },
+    ]) {
+      expect(codesOf(patch), JSON.stringify(patch)).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    }
+    expect(fired({ ceiling: '300000' })!.observed).toContain('no positive ceiling')
+    expect(fired({ generatedChars: 'lots' })!.observed).toContain('no generated size')
+  })
+
+  it('fires when a refusal and an import wear each other\'s relation', () => {
+    // A size refusal with an import's relation, both directions.
+    for (const relation of ['pre_existing', 'sibling', 'declared']) {
+      expect(codesOf({ relation }), relation).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    }
+    expect(fired({ relation: 'sibling' })!.observed)
+      .toContain('wearing each other\'s clothes')
+    // And an import claiming `refused`, which would drop a file from every
+    // figure on no evidence whatever.
+    const importRefused = resolvedRecord([{
+      path: 'docs/standards/pm.md',
+      reason: 'imported_whole',
+      sha: '96ed4e5',
+      subject: 'Re-vendor docs/standards/pm.md from HQ main @ 683c7dd',
+      relation: 'refused',
+      chars: 21_656,
+    } as unknown as Exclusion])
+    expect(checkRecord(importRefused).map((v) => v.code)).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+  })
+
+  it('fires on an import that states a ceiling it never applied', () => {
+    const r = resolvedRecord([{
+      path: 'docs/standards/pm.md',
+      reason: 'imported_whole',
+      sha: '96ed4e5',
+      subject: 'Re-vendor docs/standards/pm.md from HQ main @ 683c7dd',
+      relation: 'sibling',
+      chars: 21_656,
+      ceiling: 300_000,
+      generatedChars: 10,
+    } as unknown as Exclusion])
+    const v = checkRecord(r)
+    expect(v.map((x) => x.code)).toEqual(['EXCLUSION_NOT_CLASSIFIED'])
+    expect(v[0].observed).toContain('ceiling and generatedChars')
+  })
+
+  it('reconciles like any other exclusion, so the refused characters are still addable', () => {
+    const m = measure(refused())
+    expect(m.excludedPaths).toBe(1)
+    expect(m.excludedChars).toBe(313_856)
+    expect(m.consideredChars).toBe(refused().stats.finalChars + 313_856)
+  })
+
+  it('reaches stats.perFile as a row naming the reason, like every other exclusion', () => {
+    // The property PERFILE_ENUMERATES_PATHS exists for: a refused path that
+    // produced no row would be a path that silently does not exist from the
+    // row-level view, which is the defect this whole change repairs one
+    // level up.
+    const row = refused().stats.perFile.find((f) => f.path === 'docs/sprints/pending.md')
+    expect(row).toBeDefined()
+    expect(row!.excluded).toBe('over_size_ceiling')
+    expect(row!.coveredChars).toBe(0)
+  })
+
+  it('fires through the CLI on a record written to disk, like every other bound', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'ursa-exclusion-over-size-'))
+    writeFileSync(
+      join(dir, 'outcome_record.json'),
+      JSON.stringify(refused({ chars: 1_200, generatedChars: 900 }), null, 2),
+    )
+    const { violations, lines } = runGate(dir)
+    expect(violations).toBe(1)
+    expect(lines.join('\n')).toContain('EXCLUSION_NOT_CLASSIFIED')
+    expect(lines.join('\n')).toContain('300,000')
+  })
+})
+
+// ---------------------------------------------------------------------------
 // The fourteenth and fifteenth bounds. Both are about a record that states a
 // true number and does not state which question it answers.
 //
