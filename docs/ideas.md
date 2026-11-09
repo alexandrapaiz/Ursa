@@ -23765,3 +23765,100 @@ same conflation inside it.
   fragmented.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (skill) — Fifteen of sixteen drifted ranges are re-recorded at the anchor they already had, and the gate that now says so still allows it
+
+- Trigger: shipping the gone-or-moved split in `check-evidence.mjs`
+  this run, then pointing it at the sixteen drifted ranges sitting on
+  `origin/main` at `55ab0ca8` to see what it would have said. It sorted
+  them 15 moved and 1 gone, and the one it called gone is `E28`, which
+  is the one range the 2026-11-02 run concluded by hand needed reading.
+  The agreement is the good news. The fifteen are the finding.
+- What: the split decides what `--update` refuses, and it only refuses
+  the gone half. A moved range named by its slug is still re-recorded
+  at the anchor it already had, so the lock takes the fingerprint of
+  whatever those line numbers hold now while the claim's own text sits
+  somewhere else in the file. The checker then goes green over a
+  citation pointing at the wrong lines, which is the 2026-10-05 failure
+  the lock was built to prevent, reached by the command the docs
+  prescribe. The 2026-11-02 ledger entry this run closes asked for the
+  moved half to keep working as it does today, and that is what shipped,
+  so this is the residual rather than a regression. Measured on the real
+  batch above: all fifteen would have been re-recorded at a wrong
+  anchor, and the reason `main` does not carry fifteen wrong anchors is
+  that the run which repaired them relocated first, by hand, having
+  decided to. And then it happened to this run, 23 minutes after this
+  entry was written: `#801` merged mid-run, the merge of `origin/main`
+  moved `docs/ideas.md` under `E37`, `E38` and `E39`, and
+  `--update clearing-a-record-for-release` named all three as moved,
+  printed the offsets their text had gone to, and recorded the old
+  anchors at exit 0. The lock was reverted and the three relocated to
+  9155, 9162 and 9175, which are the offsets the gate had already
+  printed. The only thing standing between that command and three wrong
+  anchors on `main` was a person reading the output instead of the exit
+  code, one hour after writing the warning.
+- First step: this seat's, and it is a choice of two. The strong option
+  is to refuse the moved half as well, naming the offsets the text was
+  found at, which makes `relocate-anchors.mjs` the only route for the
+  nine tenths of a drift batch it already owns and leaves `--update`
+  for the tenth that needs a reader. The weak option is the line this
+  run shipped, which names each moved range and the offset its text
+  moved to and then records it anyway. Prefer the first, because the
+  argument for the second was that the moved half needs no reading, and
+  that is true of the text and false of the anchor. Either way the
+  numbers to beat are in this entry rather than in a prediction.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The verify path can now answer the question its own failure line asks a reader to guess
+
+- Trigger: reading `check-evidence.mjs`'s failure line after shipping
+  the split, which tells a reader to "re-read it, re-anchor if it
+  moved". The `if it moved` is the one part of that sentence the tool
+  can now decide, and the split that decides it runs only under
+  `--update`.
+- What: a reader who sees sixteen drifted ranges gets sixteen identical
+  sentences and no way to tell which of them need a person. The
+  information exists before any command is run, because the gone-or-
+  moved question is answered from the lock and the file and needs no
+  git ref. Printing it in verify mode would turn one undifferentiated
+  red into fifteen lines saying `relocate-anchors.mjs` and one saying
+  read this, which is the triage three separate runs of this seat have
+  since done by hand on 2026-10-15, 2026-10-18 and 2026-11-02.
+- First step: this seat's, next run that touches the file, and the
+  reason it is not this one is scope rather than doubt: the entry this
+  run closes specified `--update`, and widening the verify line in the
+  same change would have rewritten output that several tests and two
+  run notes quote. The cost is bounded and measured: the split over the
+  sixteen-range batch took 1.37s against 0.66s without it, and it runs
+  only over ranges that have already drifted, so a green library pays
+  nothing. `check-evidence.mjs` verify is 0.32s on 466 ranges with the
+  split present and unexercised.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The rule this run's gate enforces is not written down, and §5ai is why it is filed instead of written
+
+- Trigger: wanting to add a `## 5` clause to `prompts/skill-extract.md`
+  saying that which granularity a re-record needs is decided by the
+  evidence and not by the caller, and finding that this branch already
+  carries the code that would cite it.
+- What: §5ai requires a new section to land in a pull request carrying
+  nothing that cites it, so that a reader never meets a citation with
+  nothing behind it. The gate shipped this run, its tests and its
+  header comment would all cite the clause the moment it existed, so
+  writing it here would break the rule that makes this library's own
+  citations trustworthy. The clause itself is one paragraph: a drifted
+  citation is sorted by whether the lines the lock recorded are still
+  in the file, a slug covers the half that is, and the half that is not
+  is named by ref because re-recording it certifies prose nobody has
+  read.
+- First step: the next run of this seat that would add a `## 5`
+  section, in a pull request carrying the section and this entry's
+  closure and nothing citing it, paying §5ai's own grep check on it.
+  This is the fourth entry of this shape in the file, which is itself
+  worth a look: a rule that can only land in an otherwise empty pull
+  request accumulates a queue, and that queue is now long enough that
+  one later run could drain it in a single section-only branch.
+- Cost: $0
+- Status: proposed
