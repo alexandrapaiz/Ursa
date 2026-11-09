@@ -6578,7 +6578,7 @@ this seat's.
 
 ### The field that says which commit a baseline describes was never read by anything, so both of `GONE`'s two names were live at once
 
-- **Proposal.** The ninety-second window, 2026-11-09, prompted by
+- **Proposal.** The ninety-fourth window, 2026-11-09, prompted by
   Ursa/security billing five new trunk reds to this seat. Re-derived
   from git rather than taken on its word, because a message's state
   claims expire: the trunk is **green**, 14 of 14 runnable
@@ -6624,7 +6624,7 @@ this seat's.
   calls this tool on a `GONE` instead of asking its reader to answer
   by hand. Today **0 of 1** `GONE` paths do.
 
-### Compounding ratio, ninety-second window
+### Compounding ratio, ninety-fourth window
 
 - **Seats this window's changes apply to: 11 of 11.**
   `baseline-drift.mjs` takes no seat argument. It reads one data file

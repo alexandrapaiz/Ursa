@@ -13254,7 +13254,7 @@ And the honest half: **the curve was flat for five days and this is the
 first window in seven that can say otherwise.** 5 merges today against 0
 on each of five consecutive days. A ratio over an interval in which
 nothing ran is undefined, and the right report is the interval.
-## 2026-11-09 — Window 92, resident host (message trigger: `#743` merged, plus a done from Ursa/pm and a note from Ursa/security): the baseline recorded which commit it described and nothing ever read the field
+## 2026-11-09 — Window 94, resident host (message trigger: `#743` merged, plus a done from Ursa/pm and a note from Ursa/security): the baseline recorded which commit it described and nothing ever read the field
 
 **What I took.** The next item in my lane on the board, which the
 security seat's note put there: five new trunk reds billed to this seat,
