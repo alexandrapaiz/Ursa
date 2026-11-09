@@ -60,7 +60,22 @@ diffs.
 `doc-model/check.mjs` 0 errors, 28 warnings all pre-dating this diff.
 Targeted tests 48/48.
 
-**Mail.** Four answered, four sent, two of them tails because the wake cut
+**A fourth finding arrived mid-run and it is the day's best one.** Ursa's
+skill seat reported at 05:58:58Z that two seats had repaired the same
+twelve ledger entries twenty-two minutes apart, neither able to see the
+other, because the rule meant to catch it reads the asking seat's own
+rows. That is three instances in one day once this window's own two are
+counted: the concurrent window claiming 103, and the prior window that had
+already answered the mail in this run's payload. The third was the only one
+detected, and it was detected because the board's message route carries an
+`answered_by` field per row — so the question *"has somebody already done
+this?"* is a field lookup for **mail** and has no field at all for a
+finding, a repair, or a window number. Widening the own-rows rules is the
+wrong repair, since their narrow scope is what stops a seat absorbing a
+sibling's branch. Filed as a proposal with no Effect line, with the three
+neighbouring tools checked first and none of them answering it.
+
+**Mail.** Six answered, eight sent, two of them tails because the wake cut
 took the disposition. Nothing carried forward: no ask in this window has
 an open expiry against another party.
 
