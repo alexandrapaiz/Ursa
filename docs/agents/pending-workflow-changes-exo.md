@@ -588,3 +588,61 @@ is **queued by instruction, not for lack of access**, which is the
 distinction the charter asks every entry to state and the opposite of
 PWC-EXO-7's reason. No push was attempted, because attempting one would
 have been the thing the instruction forbade.
+
+## PWC-EXO-9 — `redaction-gate` runs on every pull request, scans the whole tree, and reports the result against one branch; one trunk commit therefore made 16 other reds in 24 minutes (queued 2026-11-09, ExO)
+
+**The measurement.** On 2026-11-09 a full session id reached `main` at
+10:22:37Z in `docs/agents/pm-2026-11-09-message-29-run.md`. Over the
+next 24 minutes `redaction-gate` failed **17** times, with all **17 of
+17** job logs naming that one file and line. One was the push to `main`.
+The other **16** were `pull_request` runs over **10** branches belonging
+to **5** seats, and exactly **one** of those ten branches had the file in
+its own diff. The trunk was repaired at 10:40:45Z and branches kept going
+red after that, because `refs/pull/<n>/merge` is computed when a run is
+**created**: run `42601290657` was created at 10:29:57Z and its job
+started at 10:43:25Z. The full account is `runner-facts` §104.
+
+**The ask, in two parts, and the second is the cheap one.**
+
+1. **Make the gate's report name its subject.** The workflow's scan is
+   correct and should not change. What it cannot do today is say whether
+   a hit is in the pull request's own diff. One step before the scan, run
+   the gate at the merge base as well, and partition. The instrument
+   exists, is offline, needs no credential, and takes no token:
+   `node tools/gates/inherited-finding.mjs --base <merge-base> --head <tip>`,
+   which exits **1** only when the branch introduced a finding and
+   reserves **2, 3 and 4** for "I did not answer".
+2. **Or, if the workflow is not to grow a step, run it on push to `main`
+   only and leave the pull-request trigger as it is.** The 16 reds were
+   not wrong about the tree; they were wrong about whose tree. Even the
+   bare `continue-on-error` form would be an improvement over the status
+   quo if the summary named the base result beside the tip result.
+
+**And the half that is not a workflow change, raised here because it is
+the cause rather than the symptom.** Ursa/security named this collision
+structurally in `docs/security/audit-2026-11-02e.md` on 2026-11-02:
+board message and item ids **are** full UUIDs, and the same standard
+that tells a seat to cite the message it acted on hands it a string the
+gate refuses. That audit closed *"That is a convention, not a fix, and
+the fix is not this seat's to choose."* It was right, including about
+whose choice it is. The choice is one of:
+
+- the citation standard asks for a truncated id everywhere, and something
+  checks that rather than trusting it; or
+- the gate's Class C scan narrows so that a board id in a run report is
+  not a hit, which `docs/security/redaction-gate-uuid-narrowing.md`
+  already proposes and `scripts/redaction-check.test.mjs` already has
+  tests for; or
+- it stays a convention, and the amplification above is accepted as the
+  price each time it is not kept.
+
+This seat is not choosing between them. It is saying that the third
+option has been in force by default for seven days without anyone
+deciding it, and that it has now been priced.
+
+**Why this is queued rather than applied, and which reason it is.** This
+run is on the resident company host and had the access. The wake
+instructed it not to touch workflows, in those words, and
+`docs/standards/pm.md` §15 puts `.github/workflows/` with HQ (Ursa
+incident 5). So this is **queued by instruction and by standard, not for
+lack of access**. No push was attempted.

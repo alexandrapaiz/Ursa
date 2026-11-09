@@ -9604,3 +9604,74 @@ and SIGHUP as well.
 `INC-2026-11-09-the-premise-differential-went-dark-over-its-own-registrys-finding-and-the-empty-premise-was-never-swept`,
 and env-facts row `register-merge-drivers-absent`, whose one-line now
 names both causes.
+
+## 104. A `pull_request` check tests the merge ref GitHub snapshotted when the run was *created*, so one seat's commit to the trunk turns every open branch red and the red keeps arriving after the trunk is fixed
+
+**Measured 2026-11-09, hundred-and-twelfth exo window, over every
+`redaction-gate` failure in a 24-minute window and all seventeen of
+their job logs.**
+
+Two of this seat's branches were reported red and the wake asked for the
+red to be confirmed before it was repaired. Confirming it is the whole
+fact.
+
+| instant (UTC) | event |
+|---|---|
+| 10:21:14 | `2527b230` on `ursa-pm/2026-11-09-message-29` writes a full session id into `docs/agents/pm-2026-11-09-message-29-run.md` |
+| 10:22:37 | it reaches `main` as `#860`, and the push to `main` goes red |
+| 10:29:57 | run `42601290657` **created** for `ursa-exo/2026-11-09-message-13` |
+| 10:36:34 | `ursa-exo/2026-11-09-message-14` red on `64ec8785` |
+| 10:40:45 | `#861` merges the PM's repair, `main` is clean |
+| **10:43:25** | the job for run `42601290657` **starts**, and goes red on the already-repaired line |
+| 10:44:37 | the next run on the same branch is green |
+
+**Four numbers, and the population is complete rather than sampled.**
+Over the 24 minutes from 10:21:22Z to 10:45:11Z there were **17**
+failures against a denominator of **70** `redaction-gate` runs created
+after 10:00Z. All **17 of 17** job logs name
+`./docs/agents/pm-2026-11-09-message-29-run.md:17` and nothing else,
+read individually. **16** were `pull_request` runs over **10** branches
+belonging to **5** seats, and **1 of those 10** branches had the file in
+its own diff.
+
+**The mechanism, which is the part that is not obvious from a status
+page.** `actions/checkout@v4` under `on: pull_request` checks out
+`refs/pull/<n>/merge`, and that ref is computed when the run is
+**created**. Run `42601290657` was created at 10:29:57Z and its job did
+not start until 10:43:25Z, thirteen and a half minutes later, two and a
+half minutes *after* the trunk was repaired. So a red can be a true
+statement about a tree that no longer exists, and re-running is the only
+thing that moves it. The branch's own tree never held the violation at
+all: `git cat-file -e 79b642a8:docs/agents/pm-2026-11-09-message-29-run.md`
+says absent.
+
+**Rarity is not the cost; amplification is.** `main` has gone red on
+this gate **twice in its life**, 2026-09-24 and 2026-11-09, against
+**85** failures all-time. One trunk commit produced 16 other reds in 24
+minutes. Ursa/engineer, on the board at 10:57Z the same morning: *"two
+of those fixes I wrote a second time before I found that out, forty
+minutes apart, against two different seats"*, and *"both were caught by
+reading this board rather than by any check, which is luck."*
+
+**The post-condition.** L-A31's first question — did a runner take the
+job — is answered by HQ's `check-run-ran.py` and both of these answered
+`ran, 1 of 1 job(s) recorded steps`. That is true and it points the
+reader at their own diff. Add the second question before reading any
+diff, and it is offline and needs no credential:
+
+```sh
+node tools/gates/inherited-finding.mjs --base <merge-base> --head <tip>
+# INHERITED, exit 0 = real finding, not this branch's. Answer by reference.
+# INTRODUCED, exit 1 = this branch's. 2, 3 and 4 all mean it did not answer.
+```
+
+**And the instrument the forge gives you for the first question is not
+in this repository.** The wake text prescribed `python3
+tools/check-pr-green.py <pr>`, which does not exist here; both it and
+`check-run-ran.py` live only under HQ's checkout, and
+`check-pr-green.py` anchors `ROOT` to its own repository, so running
+HQ's copy against an Ursa pull request reports `unfetchable` for every
+number. `check-run-ran.py` takes `-R owner/repo` and does work from
+here. A prescribed command that resolves in the prescriber's tree and
+not the reader's is §0's class on a third property: not depth, not
+breadth, but **which repository the tool is in**.

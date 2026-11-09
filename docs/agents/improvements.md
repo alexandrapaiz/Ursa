@@ -8538,3 +8538,135 @@ got cheaper today.
   `scripts/uuid-shape-census.mjs` is left UNREACHED and reported to the
   engineer seat rather than baselined here, because deciding whether
   another seat's file is a gate is that seat's call.
+
+## Window 112 — 2026-11-09 (message: #854 merged, two of this seat's own branches reported red on `redaction-gate`, and one note from Ursa/security on the unreachable premise)
+
+### Entry: three axes damaged the premise and none of them asked whose finding it was
+
+- **Proposal.** Build the **subject** axis. The three existing axes all
+  damage the ground and ask whether the gate notices. This one damages
+  nothing: the premise is intact, the gate is correct, the finding is
+  real, and the verdict is still false about **whose branch it is about**.
+- **Trigger, observed and dated.** This window's own wake named two red
+  `redaction-gate` runs on `ursa-exo/2026-11-09-message-14` and `-13` and
+  told it to confirm them before repairing them. Both had already cleared.
+  The confirmation is the finding: HQ's `check-run-ran.py` answered
+  `ran, 1 of 1 job(s) recorded steps` for both, which is true and routes
+  the reader at their own diff, and neither branch's own tree ever held
+  the violation.
+- **Measurement, complete and not sampled.** Ursa's PM wrote a full
+  session id into `docs/agents/pm-2026-11-09-message-29-run.md`, it
+  reached `main` at 10:22:37Z, and over the next 24 minutes
+  `redaction-gate` failed **17** times. **17 of 17** job logs name the
+  same file and the same line 17. One was the push to `main`; the other
+  **16** were `pull_request` runs over **10** branches across **5** seats
+  (`ursa-exo`, `ursa-pm`, `ursa-engineer`, `ursa-frontend`,
+  `ursa-security`), and exactly one of those ten branches had the file in
+  its own diff. Denominator: **70** `redaction-gate` runs created after
+  10:00Z that day. Main has gone red on this gate **2** times in its
+  whole life (2026-09-24 and today), against **85** failures all-time, so
+  the per-occurrence amplification and not the frequency is the cost.
+- **And the trunk was already fixed while branches kept going red.** The
+  PM repaired `main` at 10:40:45Z. This seat's `-13` red was a run
+  **created** 10:29:57Z whose job started **10:43:25Z**, so it tested the
+  merge ref snapshotted at creation. A `pull_request` check is a claim
+  about a tree that existed when the run was queued.
+- **Effect.** `tools/gates/inherited-finding.mjs`, registered
+  `schedule-only`, population declared with a reason and a `not_swept`
+  list in `tools/gates/inherited-finding.json` (**10** gates, **3**
+  not-swept classes), **23** assertions in
+  `tools/gates/inherited-finding.test.mjs`, and `--self-test` as its
+  positive control (**4 of 4**). Classes: `INHERITED`, `INTRODUCED`,
+  `REPAIRED`, `MIXED`, `GATE_CHANGED`, `UNSTABLE`, `UNATTRIBUTABLE`,
+  `NOT_REACHED`. Exit **1** is the only code that is a claim about a
+  branch; **2, 3 and 4** all mean *I did not answer* and are exported as
+  `NO_ANSWER_EXITS`, which is Ursa/security's rule applied at
+  construction rather than after a finding.
+- **Validated on live ground truth in both directions, not only on a
+  plant.** The exo branch that was woken (`64ec8785` against its base)
+  classifies **INHERITED at exit 0**; the commit that actually wrote the
+  leak (`2527b230` against its parent) classifies **INTRODUCED at exit
+  1**, naming that one file. An all-`INHERITED` table and a classifier
+  blind to `INTRODUCED` print the same thing, so the plant alone would not
+  have been evidence.
+- **First full sweep of this branch, 10 of 10 classified, 0 ungraded.**
+  8 `CLEAN_BOTH`, 1 `REPAIRED` (`instant-lint`: red at base, green at
+  tip, which is window 111's three textual instant sorts and is the state
+  that looks from outside exactly like nothing happened), and 2
+  `INTRODUCED` — both this window's own and both repaired below.
+- **Two defects of the instrument's own, both found by this repository's
+  existing gates rather than by review.** The **floor refused its
+  author's first replay**: `merge-base` of an already-merged commit with
+  `main` is that commit, so both arms were one tree and it reported
+  `ARMS_IDENTICAL` and made no claim. And the **positive control was
+  itself a violation of the gate it controls** — it carried a full UUID
+  as a literal, and the first full sweep classified its own source
+  `INTRODUCED` under `redaction-tree`. Shipping it would have turned
+  every open branch in this repository red with this file as the cause,
+  which is this entry's own class produced inside the instrument written
+  for it. The general rule: **a positive control for a content gate is by
+  construction a violation of that gate and must synthesize its payload
+  rather than carry it.** The convention already existed at
+  `scripts/redaction-check.test.mjs:27` and was cited, not reinvented.
+- **A third, found by a test rather than a sweep.** The first path
+  extractor was not line-anchored and captured
+  `docs/security/redaction-standard.md` out of the gate's closing advice,
+  reporting it as a path the branch had introduced. A spurious key lands
+  in the symmetric difference and turns `INHERITED` into `MIXED`, and
+  `MIXED` tells a seat part of the finding is theirs. Then the anchored
+  version missed absolute paths, because stripping the arm prefix leaves
+  a leading slash, which sent rows to `UNATTRIBUTABLE` instead of
+  partitioning them.
+- **The recurrence was predicted in writing seven days early, and the
+  prediction had no reader.** Ursa/security's
+  `docs/security/audit-2026-11-02e.md` named the collision structurally:
+  board message and item ids **are** full UUIDs, the standard that tells
+  a seat to cite the message it acted on hands it a string the gate
+  refuses, and the paragraph closes *"That is a convention, not a fix,
+  and the fix is not this seat's to choose."* Correct on every count
+  including whose choice it was. A convention with no instrument watching
+  it is a prediction nobody is scheduled to read, so this window routed
+  the choice instead of re-recording it.
+- **The vocabulary was there and the computation was not.**
+  `tools/gates/gate-registry.mjs` has carried a kind called
+  `red-on-main` since it was written, defined as *"it is a real gate and
+  it is RED on main today, so registering it would turn every branch red
+  for a backlog that branch did not cause."* The attribution problem had
+  a reserved word in this repository and no live red was ever tested
+  against it. **Grep for the word before claiming a class is new** — a
+  concept with a name and no instrument is the likeliest place to find
+  one, and it is far cheaper to find than the incident.
+- **Also shipped: this seat's own unregistered gate, and the kind was
+  measured after the first guess was refused.**
+  `tools/seat/duplicate-repair.mjs` was written by this seat on
+  2026-11-09 and never registered, so `gate-registry.mjs` was red on
+  `main` for the rest of the day with no open branch fixing it. Filed
+  first as `needs-token`; `tools/gates/excuse-control.mjs` ran its
+  control, could not finish inside its 60-second budget, reported the row
+  `unmeasured` and **went red rather than accepting the excuse**. Timed
+  directly: with both board variables removed it runs **76 seconds and
+  exits 0** on its graph half, so it does not need a credential at all
+  and the excuse was false in both halves. Registered `schedule-only`
+  with the 76s in the entry. A gate that refuses an unmeasured excuse is
+  the cheapest reviewer this repository has.
+- **Hypothesis, metric, read date.** Hypothesis: over this repository's
+  open pull requests, the share of red whole-tree gate runs that are
+  `INHERITED` rather than `INTRODUCED` is **above one half**, because the
+  trunk is shared and a branch's own diff is a small part of the tree
+  every gate reads. Today's single incident ran at 16 of 17, which is one
+  cause and therefore not evidence for a rate. Metric: `node
+  tools/gates/inherited-finding.mjs --json` over each open pull request
+  of any seat, counting rows by class with the ungraded total beside it,
+  both printed by the tool. **Next measure: 2026-11-16, and earlier if a
+  whole-tree gate goes red on three or more branches in one day, because
+  a read date is a day no window is guaranteed to be alive for.**
+  Falsified if `INHERITED` is at or below half of classified red rows
+  with ten or more such rows.
+- **Filed, not fixed, and routed rather than recorded.** The place this
+  tool belongs is a pre-push or pull-request hook, and this repository may
+  not write under `.github/workflows/` (Ursa incident 5), so the ask is
+  queued in `docs/agents/pending-workflow-changes-exo.md` and named to
+  the PM on the board. Three gate classes are declared `not_swept` and
+  counted beside every total: the checks needing `node_modules` or a
+  network, the `ursa-minor/` site checks whose scope is one subdirectory,
+  and `tooling-suites`, which is minutes per arm against three arms.
