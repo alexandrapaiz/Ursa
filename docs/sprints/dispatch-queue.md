@@ -1,10 +1,9 @@
-# Dispatch queue — 2026-11-09, message-triggered (six-hour pass)
+# Dispatch queue — 2026-11-09, message-triggered (fifth pass)
 
-**Third message pass of today: re-checked fresh, unchanged.** The
-only new run activity since the prior pass closed is two
-`redaction-gate` failures, both on security's own still-live draft
-(`#748`), already named below as that seat's own thing to fix
-mid-session. Nothing else moved, so nothing below changes.
+**Fifth message pass of today.** Rechecked fresh against the criteria
+table below rather than carried forward: the merge queue moved twice
+this pass (`#748`, `#753`) and one row closed (`#744`), none of which
+changes anything in this section.
 
 `PM_DISPATCH_ENABLED` cannot be read on this run's token (`gh variable
 get` 403s, the same wall every host pass has found since 2026-10-17's
@@ -16,37 +15,34 @@ below could fire from this run even if it qualified.
 ## Checked against the criteria table (pm.md §11.3) and Ursa's own three (§0b)
 
 - **A seat run failed in the last 24h, diagnosable from its log:**
-  zero `run.end` events with a non-zero exit for any Ursa seat in the
-  last six hours (`audit.jsonl`). One CI check is red on security's
-  own still-open, still-running draft (`#748`); its own live run is
-  the one to fix it, not a dispatch into a seat that already has a
-  run going.
+  zero non-success runs in the last fifteen (`gh run list --limit
+  15`), all `success`.
 - **A seat's open draft has failing CI, or a review comment
-  unanswered >24h:** `#748` (security) and `#747` (exo) are both
-  drafts from live runs started this pass's own window, neither old
-  enough to qualify, and neither waiting on a question.
+  unanswered >24h:** four drafts open (`#756` frontend, `#757`
+  security, `#758` engineer, `#759` exo), all from live runs started
+  this pass's own window, none old enough to qualify and none waiting
+  on an unanswered question.
 - **A sprint item due this week with no run from its owning seat:**
   the board's own current-sprint object is the known duplicate
   record (flagged 2026-10-12, unchanged); "This sprint" holds no
   items right now to be late against.
-- **A seat has two or more open PRs on one scope, none merged:**
-  none now. This pass closed two of this seat's own stale rows and
-  merged two others; nothing else open repeats a seat on one scope.
+- **A seat has two or more open PRs on one scope, none merged:** none
+  now. Frontend and security each hold exactly one open draft, their
+  own next pull request, not a stack.
 - **A ruling or ADR merged since the last run names a seat with no
   run following:** nothing new in `docs/decisions.md` since the last
   pass's own check.
 - **A milestone due within three days with open items:** none
-  (`gh api repos/alexandrapaiz/Ursa/milestones` empty, unchanged).
+  (unchanged).
 - **Ursa's own three (§0b):** no tuning or trial run with unrecorded
   ledger results; no failing check on an open Minor-site or
-  Major-resolver PR (the one failing check this pass is security's
-  own gate, not the product); no ADR naming an experiment with no run
-  started within two days.
+  Major-resolver PR (none open right now); no ADR naming an
+  experiment with no run started within two days.
 
 ## Nothing to fire this run
 
-Everything actionable this pass was handled directly rather than
-dispatched: two Tier B merges (`#724`, `#725`), two closes (`#700`,
-`#701`), one handoff to security naming a never-merged secret-print
-guard orphaned on the row this seat closed. See
-`docs/agents/pm-2026-11-09-message-2-run.md` for the full account.
+Everything actionable this pass was handled directly: two Tier B
+merges (`#748`, `#753`), one close already done by another seat's own
+live run before this pass reached it (`#744`), one board reply to
+exo's note, one `done` summarizing the pass. See
+`docs/agents/pm-2026-11-09-message-5-run.md` for the full account.
