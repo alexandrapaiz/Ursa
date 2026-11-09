@@ -44,6 +44,15 @@
 import { writeFileSync } from 'node:fs'
 import { launch } from './lib/browser.mjs'
 import { seedRandomContext } from './lib/freeze.mjs'
+// This tool had no premise routed at all, and it is the one where the
+// do-nothing value is most obviously in band and most obviously plausible: a
+// page that was served and never ran has no motion on it, so a motion sample
+// over it comes back with every element at rest and nothing animating, which
+// is a legal reading and reads as a site with no entrance animation. The
+// comment below about hydration competing with the frame clock has been in
+// this file since it was written; what it did about it was wait 1500ms. See
+// lib/verdict.mjs.
+import { premises } from './lib/verdict.mjs'
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`)
@@ -98,18 +107,37 @@ const page = await ctx.newPage()
 // that holds a connection open never goes idle, and one run of this lost a
 // whole measurement to the timeout rather than to anything about the page.
 // Fall back to `load` and settle on the clock instead.
-try {
-  await page.goto(URL_, { waitUntil: 'networkidle', timeout: 45000 })
-} catch (err) {
-  if (!/Timeout/.test(String(err))) throw err
+const gates = premises({ label: 'sample' })
+const probePath = new URL(URL_).pathname
+// The fallback is a SECOND navigation and both of them are the premise, which
+// is the shape exo's note is about one level in: a tool with two acquisition
+// paths routes the first and forgets the second. Both go through the tracker.
+let visit = await gates.reach.visit(page, URL_, probePath, { waitUntil: 'networkidle', timeout: 45000 })
+if (!visit.ok && /Timeout/.test(String(visit.error))) {
   process.stderr.write('networkidle never arrived; falling back to load\n')
-  await page.goto(URL_, { waitUntil: 'load', timeout: 45000 })
+  visit = await gates.reach.visit(page, URL_, probePath, { waitUntil: 'load', timeout: 45000 })
   await page.waitForTimeout(3000)
+}
+if (!visit.ok) {
+  console.log(gates.reach.refused())
+  console.log(gates.reach.lines().join('\n'))
+  await browser.close()
+  process.exit(gates.code())
 }
 // Entrance animations, lazy images and hydration all compete with the
 // frame clock. On a heavy page 1.2s was not enough and the rAF series came
 // back at 10Hz; wait for the clock itself to steady instead of guessing.
 await page.waitForTimeout(1500)
+// Then ASK, rather than assume the 1500ms above bought it. The wait comes
+// first and the reading second, because hydration is a race this gate reports
+// on and does not win.
+await gates.probed(page, probePath)
+if (gates.code()) {
+  console.log(gates.hydration.nothingRan() ? gates.hydration.refused() : gates.hydration.lines().join('\n'))
+  console.log('\nnothing was written: a motion sample over a page that never ran reads as a page with no motion, which is a legal value of the real answer.')
+  await browser.close()
+  process.exit(gates.code())
+}
 const settleCadence = await page.evaluate(() => new Promise((resolve) => {
   const seen = []
   let last = performance.now()

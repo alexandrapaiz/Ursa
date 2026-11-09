@@ -70,7 +70,13 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { launch, VIEWPORTS } from './lib/browser.mjs'
 import { freezeContext } from './lib/freeze.mjs'
-import { tracker } from './lib/reached.mjs'
+// The premise bundle, not the reach tracker alone. Contrast is mostly a fact
+// about the served stylesheet, so this tool's numbers survive a page that
+// never ran better than most of the kit's do. What does NOT survive is the
+// SET of items it collects: anything a client component renders is simply
+// not in `COLLECT`'s output, so the denominator shrinks silently and the
+// headline is a true ratio over the wrong population. See lib/verdict.mjs.
+import { premises } from './lib/verdict.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const OUT = arg('out', '/tmp/contrast')
@@ -120,7 +126,8 @@ const PAGES = arg('pages', '/,/record,/record/mini-fixture,/record/at,/this-page
 // the subject, so it is declared. A caller passing its own `--pages`
 // declares its own with `--expect-404`.
 const EXPECT_404 = arg('expect-404', PAGES.some(([, p]) => p === '/this-page-does-not-exist') ? '/this-page-does-not-exist' : '').split(',').filter(Boolean)
-const reach = tracker({ expect404: EXPECT_404, label: 'page' })
+const gates = premises({ expect404: EXPECT_404, label: 'page' })
+const reach = gates.reach
 
 mkdirSync(OUT, { recursive: true })
 
@@ -403,9 +410,13 @@ for (const [vname, w, h] of VIEWPORTS) {
     // the measuring, and a refusal scoped over those would turn a finding
     // into a non-answer.
     const reached = await mark('goto', async () => {
-      if (!(await reach.visit(page, BASE + path, path)).ok) return false
+      if (!(await gates.visit(page, BASE + path, path)).ok) return false
       if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
       await page.waitForTimeout(WAIT)
+      // After `--until` and the settle, because hydration is a race and a
+      // tool told to wait has to do its waiting before the premise is read.
+      // Replaces the reading `gates.visit` took for this path.
+      await gates.probed(page, path)
       if (enterState) await enterState(page, name)
       return true
     })
@@ -486,18 +497,20 @@ const driftReport = moved.length
 // The reach verdict is part of the report rather than printed after it,
 // so it survives into the committed file a later run reads and not only
 // into this session's stdout.
-const reachReport = reach.lines().join('\n')
 // The drive's path belongs in the committed file and not only in this
 // session's stdout: a contrast number taken in a state nobody can name is a
 // number nobody can re-take.
 const stateReport = STATE ? `\nevery page above was driven by ${STATE} before both shutters.\n` : ''
-const report = reach.code()
-  ? `${reachReport}\n\nno claim about contrast: the pages above were not reached.\n`
-  : `${headline}\n${driftReport}${stateReport}${reachReport}\n\n${lines.join('\n') || 'nothing below threshold'}\n`
+// One call decides the status and fills the slot, so the committed file and
+// the exit status cannot disagree. A verdict about the INSTRUMENT is one no
+// caller can make from outside; the findings themselves stay exit 0 however
+// bad they are, because selftest/check-contrast.mjs reads them out of the
+// JSON above.
+const decision = gates.decide({ headline, siteCode: 0 })
+const report = decision.refused
+  ? `${decision.headline}\n${decision.lines.join('\n')}\n\nno claim about contrast: see above.\n`
+  : `${decision.headline}\n${driftReport}${stateReport}${decision.lines.join('\n')}\n\n${lines.join('\n') || 'nothing below threshold'}\n`
 writeFileSync(`${OUT}/contrast.txt`, report)
 if (JSON_I !== -1) writeFileSync(JSON_OUT || `${OUT}/contrast.json`, JSON.stringify(rows, null, 1))
 console.log(report)
-// A verdict about the INSTRUMENT, which no caller can make from outside.
-// The findings themselves stay exit 0 however bad they are, because
-// selftest/check-contrast.mjs reads them out of the JSON above.
-if (reach.code()) process.exit(reach.code())
+if (decision.code) process.exit(decision.code)
