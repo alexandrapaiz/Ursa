@@ -44,7 +44,7 @@
 // merge on the boundary can be shown to have destroyed the text.
 
 import { blobLookup, type MergeEvent } from './pairfinder'
-import { normalize } from './normalize'
+import { normText } from './normalize'
 import type { DeletionAttribution, UnknownDeletionReason } from './types'
 
 export interface DeletionAttributor {
@@ -104,26 +104,39 @@ export function gitDeletionAttributor(
     ? unknown('unreadable_merge_commit', { sha: blind[0] })
     : HUMAN
 
-  const lookups = new Map<string, ReturnType<typeof blobLookup>>()
+  /**
+   * One blob per (sha, path), with its normalized text alongside the raw
+   * read. The raw read was cached here from the start and the
+   * normalization of it was not, so a merge boundary's blob was refolded
+   * once per deleted span tested against it. Same shape and same repair as
+   * `src/corroborate.ts`'s cache; the measurement that found it is in
+   * docs/design/resolve-cost.md.
+   *
+   * `normText` and not `normalize`: `holds` compares strings and never
+   * points back into the original, so the offset map was built and
+   * discarded.
+   */
+  const lookups = new Map<string, { got: ReturnType<typeof blobLookup>; norm: string | null }>()
   const read = (sha: string, path: string) => {
     const key = `${sha}:${path}`
-    let got = lookups.get(key)
-    if (!got) {
-      got = blobLookup(projectPath, sha, path)
-      lookups.set(key, got)
+    let entry = lookups.get(key)
+    if (!entry) {
+      const got = blobLookup(projectPath, sha, path)
+      entry = { got, norm: got.kind === 'present' ? normText(got.text) : null }
+      lookups.set(key, entry)
     }
-    return got
+    return entry
   }
   /** Normalized containment, three-state like the read it is built on. */
   const holds = (sha: string, path: string, needle: string): boolean | 'unreadable' => {
-    const got = read(sha, path)
+    const { got, norm } = read(sha, path)
     if (got.kind === 'unreadable') return 'unreadable'
     if (got.kind === 'absent') return false
-    return normalize(got.text).norm.includes(needle)
+    return norm !== null && norm.includes(needle)
   }
 
   return (filePath, spanText) => {
-    const needle = normalize(spanText).norm
+    const needle = normText(spanText)
     if (needle.length === 0) return HUMAN
 
     // The first hole found, returned only if no later merge explains the

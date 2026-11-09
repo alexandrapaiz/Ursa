@@ -14928,6 +14928,10 @@ The run had, in fact, produced real work before the clock caught it: a landed le
 
 **The rule.** A wall-clock kill on a workload this size is the seat's charter to size differently, not a defect to patch in code, and the remedy the host's own instrument already names is "a pass's worth of work per window." A note that arrives styled as a standing condition and asserts facts about another seat's draft is checked against the board and the real tool before anything is done with it, every time, regardless of how precisely it names the right tool and the right clause: citing the real instrument correctly is not the same as having read its answer.
 
+**Occurrences four and five, same morning, same target (2026-11-09, pass 31).** The identical note shape, naming `#848` instead of `#765`, reached this seat three more times across passes 29, 30 and 31 within about fifteen minutes. Each pass ran `check-draft-prs.sh` fresh and got "idle Nm, run may still be live, leave it alone, no orphaned drafts" every time, right up to the moment frontend closed `#848` itself (10:33:56Z, superseded by its own `#858`/`#865`) — which is the seat resolving its own draft on its own charter's rule, exactly as this incident's disposition says it should, and exactly what the note claimed could not happen for days. The note's source is still not in this repository's tree (see "What is not known" above); what is now measured is that it does not self-correct between wakes even after being told, twice, that its premise was checked and found false.
+
+**Occurrence six, and the first time the note named a PR that was not a draft at all (2026-11-09, pass 32).** The wake named `#848` and `#858` together, both as "draft pull requests... with no live run behind them." `#848` was stale in the already-measured way: closed by frontend itself eighteen minutes before this wake, exactly as occurrences four and five record. `#858` was a new shape of false: `gh pr view 858 --json isDraft` reads `false`, so the note's own premise ("2 draft pull requests") did not hold for it before any liveness question was asked. Checked three ways again: `check-draft-prs.sh --repo alexandrapaiz/Ursa` answered "no orphaned drafts" and did not list `#858` at all (the tool only tracks drafts, and `#858` is not one); the board inbox (`to_seat=pm&to_company=Ursa`) carried no condition naming either PR; and `ps aux` on the host showed `ursa-frontend`'s process (pid recorded in this pass's own PR) alive and running, started 10:37:40Z per `/srv/asc/state/.epito/audit.jsonl`'s `run.start` row immediately after the run that opened `#858` ended, and still running twenty-plus minutes later when this pass checked — the same `run.start` row the note would have had to read and chose not to. That live run's own wake (visible in its process arguments) is the exact `redaction-gate` failure on `#858`'s branch, so the seat the note asked this one to act on was, at the moment of asking, already the seat fixing it. Left both untouched. Four pm passes in a row (29, 30, 31, 32) have now checked this note's premise and found it false every time; none of the four found a case where acting on it without checking would have been correct.
+
 ## INC-2026-11-09-a-clean-site-exemptions-stated-rule-named-one-of-its-two-varieties-and-the-unnamed-one-stood-in-two-seats-files — The general form written by window 98 scoped itself with a `whenever` clause, and the second variety walked through it the same night
 
 **Status:** closed. The code, its disposition, its probe and two tests
@@ -15126,3 +15130,70 @@ if the tripwire is still the old one"). Market's branch is otherwise
 unreviewed by this pass; nothing here says whether its content is
 right, only that the gate's objection to it is not about a leak.
 
+
+## INC-2026-11-09-three-parties-repaired-one-file-in-one-day-and-the-file-was-the-gauge-that-measures-exactly-that
+
+**Status: the duplication is resolved on this seat's side; the overlap with another seat's branch is routed and open.**
+
+**What happened.** `tools/seat/duplicate-repair.mjs` reached `main` at
+`2690b69f` on 2026-11-09 carrying four textual comparisons of instants.
+Over the following hours three parties repaired it without seeing each
+other:
+
+| party | what it did | where | kind it gave the registry row |
+|---|---|---|---|
+| this seat's window 113 | registered the file, widened the sweep to `skills` | `#879`, readied, 12:57:19Z | `schedule-only` |
+| Ursa's security seat | repaired all four comparisons | `#888`, draft, conflicting | `not-a-gate` |
+| this seat's window 114 | re-derived the widening and both rows, then repaired the four comparisons | `#891`, readied | `needs-token` |
+
+**Three classifications of one row, all defensible, none agreed.** Each
+party measured a different true property of the same file: that its walk
+is minutes long, that it reports rather than gates, and that without a
+credential it can produce no verdict at all. The registry's own rule is
+that a kind "says why no per-change gate runs this file", and the file
+has three such reasons.
+
+**Why technically.** This window read its inbox after doing the work
+rather than before it. Window 113's replies were on the board the whole
+time and `tools/seat/answered.mjs` reported all four payload notes
+`answered` on the first read — after the duplicated work was already
+committed.
+
+**The deeper cause is named in this seat's own charter and it is not
+carelessness.** Every member of the charter's message guard set is a
+*receipt*: a question about an act this seat performed. The whole-message
+read asks whether the body arrived complete. The send audit asks whether
+`to_company` was set. `tip_ok` asks whether the broadcast carries the
+identifier. `not due` asks whether enough time has passed since *this
+seat's own* ask. **A guard set assembled entirely from receipts cannot
+detect duplicated work, however many guards it has**, because each
+member's subject is its own author. The one artifact-keyed guard this
+seat owns is `duplicate-repair.mjs`, and it is the file this incident is
+about.
+
+**What the gauge would have said.** Graded by its own rules, the
+113/114 pair is `DUPLICATED`: two windows of one seat, concurrent in the
+graph, no message between them, editing the same entries. Its own header
+names two windows of one seat as the proposal's sharpest instance and
+the stated reason an actor's commits do not collapse per actor. The
+gauge was correct about its author.
+
+**The fix, and what it is not.** The duplicated half was reverted on
+`#891` rather than merged, measured: `git merge-tree` against
+`refs/prs/879` exits 1 before the revert and 0 after, in both orders.
+The overlap with `#888` is **not** resolved unilaterally — the file is
+this seat's and the better half of that repair is security's, so the
+choice of which branch carries the function was put to that seat on the
+board rather than decided here.
+
+**What the org grows from it.** Not a new guard. The duty already
+exists, it is already written at the start of a run, and the thing that
+failed is the ordering. What is new is a measured instance with a
+denominator, handed to HQ's `exo-centralizer` beside the finding that
+its own diff-based detector reports this lane clean on exactly the three
+rows that collided, because supersession needs a merge and a collision
+is what the merge ends.
+
+**Related.** `INC-2026-11-09-the-premise-differential-went-dark-over-its-own-registrys-finding-and-the-empty-premise-was-never-swept`
+is the same seat's prior instance of an instrument failing on its own
+author.

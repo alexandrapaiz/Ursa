@@ -125,6 +125,30 @@ has a provenance axis too" entry for the dated follow-up. Last
 observed 2026-10-27: [Townhall: New report scrutinizes US AI data
 sales to China](https://townhall.com/news/tayte-christensen/2026/10/26/new-report-scrutinizes-us-ai-data-sales-to-china-n2685323).
 
+Update 2026-11-09 (message, 26th run): third-party validation of the
+2026-10-07 DAYJOB finding, plus the first concrete scores this file
+has recorded for it. Fireworks AI added six Surge benchmarks (DAYJOB:
+Healthcare, Finance, Tax, Accounting, Data Science, plus "sudo L7")
+to its own "Specialized Intelligence Index," an external, standardized
+leaderboard — a different company choosing to host Surge's
+constructed-realism benchmarks rather than Surge hosting them alone,
+which is the same convergence the 2026-10-07 entry already named,
+now with a second vendor's endorsement. The scores themselves
+undercut any read of this as solved territory: on DAYJOB: Healthcare
+the strongest model (Claude Opus 5.5) tops the board at a 24.7%
+task-success rate ($7.1/task), and on DAYJOB: Finance the strongest
+model succeeds on 23.9% of assignments. So what: even Category 1's
+own best attempt at a "realistic, economically valuable work"
+benchmark puts frontier models under one-quarter success, which is
+the gap CLAUDE.md §1 names stated as a number rather than an
+argument — and it is still a constructed, graded task set scored
+against Surge's own rubric, not a real deliverable's own outcome.
+Last observed 2026-11-09: [Surge AI: Six Surge Benchmarks Join the
+Fireworks Specialized Intelligence
+Index](https://surgehq.ai/blog/fireworks-specialized-intelligence-index),
+[Fireworks: DAYJOB: Healthcare
+leaderboard](https://fireworks.ai/specialized-intelligence-index/benchmarks/healthcare/dayjob-healthcare).
+
 ### Scale AI (incl. Outlier)
 
 What it is: the largest commercial RLHF/data-labeling platform,
@@ -389,6 +413,46 @@ entry above, since this is also a UUID-shaped BigGo article slug that
 trips the redaction gate's private-session-UUID check on an unencoded
 public URL; verified the encoded URL still resolves to the same
 article before committing).
+
+### Turing (turing.com)
+
+What it is: a Palo Alto developer-talent marketplace (4M+ developers
+and professionals in its network) that pivoted a chunk of its business
+into commissioned AI training data: RLHF datasets, direct-preference-
+optimization data, and packaged "LLM Lab" modules for coding,
+reasoning, multimodal, and agentic tasks, plus a tool (ALAN) to
+accelerate fine-tuning and measure gains. New entry, found this run
+not via a fresh lead but by closing a name this file had cited three
+times without ever giving it one: the 2026-10-07 and 2026-10-27
+updates to the Surge AI and Mercor entries both name Turing, alongside
+Surge, Mercor, and AfterQuery, as one of four vendors a Forbes
+investigation found collectively selling ~$500M/year of training data
+to Chinese AI labs, and this file never followed that citation back to
+what Turing's own AI-data business is. Who it serves: OpenAI,
+Anthropic, Google, and Meta are reported customers, the same frontier-
+lab cohort as Surge and Mercor. Pricing: no public rate card; engagement-
+priced, with one disclosed example (coding data) pricing a modern
+codebase's worth of work at $1,000-$10,000 per pull request and a
+legacy-codebase (COBOL, .NET, Java) engagement at $10,000-$100,000+ —
+a third labor-pricing data point on a different axis (per-deliverable,
+not per-hour) than Mercor's ~$85/hr or Cocient's $60-130/hr. Scale: a
+$111M Series E (closed 2025-03-06, led by Khazanah Nasional Berhad,
+Malaysia's sovereign wealth fund) at a $2.2B valuation, on top of
+$376.9M raised across 10 rounds total including a further $97M round
+reported November 2025; the AI-data pivot reportedly tripled revenue
+to a ~$300M annualized run-rate while reaching profitability.
+Strengths: the same structural strength as Surge and Mercor — real
+frontier-lab spend at meaningful scale, confirmed independently rather
+than only by Turing's own marketing. Weakness against Ursa: identical
+to every other Category 1 entry, plus the same dual-market exposure
+already on file for Surge, Mercor, and AfterQuery — a vendor serving
+US frontier labs and Chinese labs from the same network at the same
+time, the fact this entry exists specifically to close out. Last
+observed 2026-11-09: [SiliconANGLE: AI training data provider Turing
+closes $111M investment](https://siliconangle.com/2025/03/06/ai-training-data-provider-turing-closes-111m-investment/),
+[aiweekly.co: Forbes — Surge AI, Mercor, AfterQuery and Turing sold
+~$500M/year of training data to Chinese labs](https://aiweekly.co/alerts/forbes-surge-ai-mercor-afterquery-and-turing-sold-500myear-of-training-data-to),
+[Troveo: RLHF Data Providers](https://www.troveo.ai/resources/rlhf-data-providers).
 
 ### Prolific
 
@@ -1125,6 +1189,44 @@ data annotation & model fine-tuning solutions](https://imerit.ai/),
 guide](https://wetheflywheel.com/en/guides/ai-training-data-providers-2026/)
 (source of the "platform-led labelling" and "to a lesser degree"
 framing).
+
+### Cocient
+
+What it is: a domain-expert solicited-feedback vendor contracting
+doctors, lawyers, engineers, scientists, and other credentialed
+professionals to write hard, realistic problems in their own field,
+grade model answers against them, and flag where a model's reasoning
+breaks. New entry, found via a Hacker News "Who is hiring?" posting
+from November 2026, not a vendor-lead list this time. Who it serves:
+not named on the company's own site or in any source checked this
+run; the pitch ("AI development is downstream of high quality data")
+is addressed to AI labs generically. Pricing: not disclosed on the
+buyer side; the labor side is public and specific, a rarity in this
+category — job postings advertise $60-130/hr for remote, contract-
+basis "Data Scientist (AI training & evaluation)" roles, framed as
+"pay rates reflect the value of your expertise." That figure is a
+useful new price-ladder data point: it brackets tightly against
+Mercor's already-tracked ~$85/hr average ($200+/hr for senior
+specialists), both naming domain expertise as the reason the rate
+clears ordinary crowd-labeling pay. Strengths: the pitch leans
+entirely on credentialed-expert depth rather than scale or
+cost, the same differentiation Mercor and Handshake AI already claim
+in this file, so Cocient reads as another entrant in an already-
+crowded expert-labor niche rather than a new approach. Weakness
+against Ursa: the same structural gap as the rest of Category 1 —
+experts are paid to produce a judgment on request, not to do their
+own real work and have an outcome recorded. A second, category-wide
+weakness this entry sharpens rather than introduces: "writing hard,
+realistic problems" and "grading model answers" is the same
+authored-task-and-rubric structure the rl-list.com cross-cutting note
+above already maps across 42 named companies, so Cocient is this
+file's clearest case yet of a Category 1 entry and that Category 2-
+adjacent construction describing the identical business in one
+sentence. Last observed 2026-11-09: [Cocient — Human Expertise,
+Machine Scale](https://cocient.com/), [Ask HN: Who is hiring?
+(November 2026)](https://news.ycombinator.com/item?id=50338728),
+[JobPilot: Data Scientist (AI training & evaluation) at
+Cocient](https://jobpilot.suxrobgm.net/jobs/data-scientist-ai-training-evaluation-at-cocient-5c477e).
 
 ## Category 2 — Evaluation and arena products
 
@@ -2632,3 +2734,28 @@ agentmemoryprotocol/agentmemoryprotocol](https://github.com/agentmemoryprotocol/
   name, none aware of the others, none clearing the note's
   independent-implementation bar. Positioning consequence in
   docs/market/positioning.md.
+- 2026-11-09 (message, 23rd run) — added Cocient (Category 1, 28th
+  entry), a domain-expert solicited-feedback vendor found via a
+  November 2026 Hacker News hiring post rather than a prior lead
+  list. Its $60-130/hr contractor pay is a new labor-side price-
+  ladder figure that brackets tightly against Mercor's already-
+  tracked range, and its own pitch ("write hard, realistic problems,"
+  "grade model answers") is the clearest case yet of a Category 1
+  entry describing the same authored-task-and-rubric structure the
+  rl-list.com cross-cutting note already maps across 42 names.
+  Positioning consequence in docs/market/positioning.md.
+- 2026-11-09 (message, 24th run) — added Turing (Category 1, 29th
+  entry), not a fresh find but a name this file had cited three times
+  since 2026-10-07 (alongside Surge AI, Mercor, and AfterQuery, as one
+  of four vendors reportedly selling ~$500M/year of training data to
+  Chinese AI labs) without ever giving it its own entry. Its AI-data
+  pivot (RLHF datasets, direct-preference-optimization data) tripled
+  revenue to a ~$300M annualized run-rate on a $111M Series E at a
+  $2.2B valuation, with OpenAI, Anthropic, Google, and Meta as
+  reported customers — the same frontier-lab cohort already on file
+  for Surge and Mercor. Its one disclosed pricing example (coding
+  data, $1,000-$10,000 per pull request, up to $100,000+ for legacy
+  codebases) is a third labor-pricing axis, per-deliverable rather
+  than per-hour, next to Mercor's ~$85/hr and Cocient's $60-130/hr.
+  No positioning consequence beyond the already-filed dual-market
+  exposure note this entry exists to close out.

@@ -249,11 +249,46 @@ if [ "$RUN_TESTS" = 1 ]; then
   # pull-request adapter (#33), and three stats fields plus `artifact`
   # (#66, #16) missing in the HQ briefing fixture (#22).
   echo ""
-  echo "ursa-major: npm ci && npx tsc --noEmit"
-  if ( cd "$WORKTREE/ursa-major" && npm ci --silent >/dev/null 2>&1 && npx tsc --noEmit >"$LOGDIR/types.log" 2>&1 ); then
-    TYPES_RESULT="pass (0 type errors)"
+  echo "ursa-major: npm ci, then npx --no-install tsc --noEmit"
+  # `npx` WITHOUT `--no-install` resolves a missing binary against the PUBLIC
+  # REGISTRY: it downloads a package of that name and executes it. On the
+  # registry `tsc` is an unrelated long-dead package and not the TypeScript
+  # compiler, so what would run here is whatever that name serves, inside a
+  # seat sandbox with live tokens in the environment. Security finding F113
+  # (2026-11-09) fixed the same call in scripts/ci-checks.mjs; this is the
+  # second call site, and the test that closed F113 asserts over that file's
+  # own check list, so it could never see this one.
+  #
+  # The `npm ci` above is NOT a guard against it. This host's measured npm
+  # failure mode is `npm ci` exiting 0 with no `node_modules/.bin` at all
+  # (`node tools/seat/env-facts.mjs`, npm-cache-is-a-shared-home-path), which
+  # is exactly the tree where the fetch happens. So the install is reported
+  # separately from the typecheck, and the typecheck refuses rather than
+  # fetching.
+  if ( cd "$WORKTREE/ursa-major" && npm ci --silent >/dev/null 2>&1 ); then
+    if [ -x "$WORKTREE/ursa-major/node_modules/.bin/tsc" ]; then
+      if ( cd "$WORKTREE/ursa-major" && npx --no-install tsc --noEmit >"$LOGDIR/types.log" 2>&1 ); then
+        TYPES_RESULT="pass (0 type errors)"
+      else
+        # grep -c prints its count and exits 1 when the count is zero, so the
+        # old `|| echo '?'` ran as well as the count and the report carried
+        # both values. One value now, and `?` only when there is no log to
+        # count at all.
+        TYPES_ERRS=$(grep -c 'error TS' "$LOGDIR/types.log" 2>/dev/null || true)
+        TYPES_RESULT="FAIL (${TYPES_ERRS:-?} type errors, see $LOGDIR/types.log)"
+        FAILED=1
+      fi
+    else
+      # A third answer, distinct from pass and from fail: the install left no
+      # binary, so nothing typechecked anything. The old chain folded this
+      # into the FAIL branch and counted type errors in an empty log, so an
+      # install that produced no compiler was reported as the compiler's
+      # verdict on the union.
+      TYPES_RESULT="UNRUNNABLE (npm ci exited 0 and node_modules/.bin/tsc is absent, so the install is partial rather than missing; no typecheck ran)"
+      FAILED=1
+    fi
   else
-    TYPES_RESULT="FAIL ($(grep -c 'error TS' "$LOGDIR/types.log" 2>/dev/null || echo '?') type errors, see $LOGDIR/types.log)"
+    TYPES_RESULT="UNRUNNABLE (npm ci failed in ursa-major, so no typecheck ran)"
     FAILED=1
   fi
   echo "  $TYPES_RESULT"
@@ -346,7 +381,7 @@ if [ -n "$REPORT" ]; then
       fi
     done
     echo ""
-    echo "- \`ursa-major\` \`npx tsc --noEmit\` on the union: $TYPES_RESULT"
+    echo "- \`ursa-major\` \`npx --no-install tsc --noEmit\` on the union: $TYPES_RESULT"
     echo "- \`ursa-major\` \`npm test\` on the union: $MAJOR_RESULT"
     echo "- \`ursa-minor\` \`npm run build\` on the union: $MINOR_RESULT"
     echo "- \`docs/ideas.md\` committed conflict markers: $MARKERS"

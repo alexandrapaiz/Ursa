@@ -78,7 +78,14 @@ export const CHECKS = [
     title: 'Product typecheck (ursa-major)',
     cwd: 'ursa-major',
     needsNodeModules: 'ursa-major',
-    argv: () => ['npx', 'tsc', '--noEmit'],
+    // The binary, not just the directory. See needsBin below.
+    needsBin: 'tsc',
+    // `--no-install` is load-bearing and not tidiness: without it a missing
+    // local binary makes npx FETCH AND RUN a package of that name from the
+    // public registry. Measured 2026-11-09, in this check: it printed
+    // `the following package was not found and will be installed: tsc@2.0.4`
+    // and executed it.
+    argv: () => ['npx', '--no-install', 'tsc', '--noEmit'],
     passExit: [0],
   },
   {
@@ -87,7 +94,8 @@ export const CHECKS = [
     title: 'Product unit suites (ursa-major, vitest)',
     cwd: 'ursa-major',
     needsNodeModules: 'ursa-major',
-    argv: () => ['npx', 'vitest', 'run'],
+    needsBin: 'vitest',
+    argv: () => ['npx', '--no-install', 'vitest', 'run'],
     passExit: [0],
   },
   {
@@ -322,10 +330,170 @@ export const CHECKS = [
     passExit: [0],
   },
   {
+    id: 'tmpdir-leak',
+    scope: 'tooling',
+    // In the path because the leak it watches is invisible from inside the
+    // lane that causes it. The host's reclaimer sweeps /tmp on a six-hour
+    // floor, so this class never accumulates into anything a daily reading
+    // can see; it presents as a disk that is full again, and it presents to
+    // OTHER seats as their browser and package installs being evicted
+    // mid-run. One file of this repository's suite took the shared host to 95
+    // per cent on 2026-11-09 at 91M a run, and the seat that found it was HQ's
+    // engineer reading a disk, not any gate of ours.
+    title: 'Temp-dir leaks (no test file joins the set that removes nothing)',
+    argv: () => ['node', 'tools/testing/tmpdir-leak.mjs'],
+    passExit: [0],
+  },
+  {
     id: 'verdict-shapes',
     scope: 'tooling',
     title: 'Verdict shapes',
     argv: () => ['node', 'tools/gates/enumerate-verdicts.mjs', '--census'],
+    passExit: [0],
+  },
+  {
+    id: 'gate-registry',
+    scope: 'tooling',
+    title: 'Gate registry (no gate we built is reached by nothing)',
+    // This file's own completeness, asked of the tree instead of of a reader.
+    // Four entries above record the same history in their own comments: a gate
+    // was built, nobody registered it, and the only thing that ever ran it was
+    // a seat who remembered. That is a method which works as often as somebody
+    // looks. Measured when this was added: 60 candidates and 16 run by a check,
+    // so 44 reached by nothing; six of those are real tree gates that run clean
+    // and offline, and they are the six entries below this one. Adding this file
+    // makes 61, because the registry is a candidate for its own sweep.
+    argv: () => ['node', 'tools/gates/gate-registry.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'prompt-slots',
+    scope: 'tooling',
+    title: 'Prompt slots (untrusted event text cannot step out of its fence)',
+    argv: () => ['node', 'tools/prompt-slots.mjs'],
+    // Registered 2026-11-09 by security run 13, closing F116. It was excused
+    // as red-on-main until today for a real reason: every finding it reports
+    // is in .github/workflows/, which no seat here may edit, and the tool had
+    // no exit code for that, so registering it meant either a permanent red
+    // or a green tick next to eleven open slots.
+    //
+    // It has one now. 2 is the owner's standing prompt-layer backlog, which
+    // is what `main` carries. 1 is an untrusted interpolation inside a
+    // `run:` block, which is shell injection rather than a prompt-layer
+    // finding, and there are none today, so that code is green now and fires
+    // on a regression a change introduces. 3 is an unreadable workflow
+    // directory, which is no verdict at all and so is not tolerated here.
+    passExit: [0, 2],
+  },
+  {
+    id: 'fetch-exec',
+    scope: 'tooling',
+    title: 'Fetch-and-execute census (every registry fetch is deliberate or declared)',
+    argv: () => ['node', 'tools/gates/fetch-exec.mjs'],
+    // Added 2026-11-09 by security run 13, generalising F113. That finding
+    // was a flag on one call site in THIS file, and the test that closed it
+    // asserts over this file's own CHECKS array, so it could see neither the
+    // second call site in tools/stack/integrate.sh (F122) nor the surface
+    // that actually matters, which is a charter sentence telling a future
+    // seat to write a call site. HQ's exo-centralizer seat measured that
+    // class upstream and its note is why the gate reads instructions as well
+    // as code.
+    //
+    // 2 is tolerated on exactly the ground `ledger-contract` and
+    // `register-ids` tolerate it: the one finding left on `main` is in
+    // prompts/, which no seat here may edit, and a job that goes red on a
+    // line no branch can turn green is one every seat learns to ignore. The
+    // gate separates that from a seat-repairable finding, which is 1, so
+    // tolerating 2 does not tolerate a new one. tools/prompt-slots.mjs is
+    // registered red-on-main for lacking this exact distinction.
+    passExit: [0, 2],
+  },
+  {
+    id: 'excuse-control',
+    scope: 'tooling',
+    title: 'Excused gates: the reason is executed, not read',
+    // The layer above `gate-registry`. That gate requires every unreached
+    // candidate to carry a reason under one of ten kinds; this one EXECUTES
+    // the reason for the largest kind. `needs-token` claims the file answers
+    // nothing without a credential, so the control is to run it with the
+    // credential removed and require that it does not report clean.
+    //
+    // Two of the fourteen were false when this was added, in the two ways a
+    // claim of that shape can be false: `tools/board/bypass.mjs --audit`
+    // exited 0 over a window that answered 401, and
+    // `tools/stack/repair-pending.mjs` exited 1, its own code for a finding
+    // about the queue, from an uncaught `gh` failure. Both are fixed in the
+    // same pull request, so this arrives green rather than as a red gate
+    // every seat learns to ignore.
+    //
+    // Runs here and not on a schedule because its subject is this tree and
+    // its environment is the one a pull request gate actually gets: it
+    // REMOVES the credentials, so it needs none, and on a runner with no
+    // network every row still refuses.
+    argv: () => ['node', 'tools/gates/excuse-control.mjs', '--gate'],
+    passExit: [0],
+  },
+  {
+    id: 'ledger-attributes',
+    scope: 'tooling',
+    title: 'Merge attribute declarations',
+    // Reached by nothing until now, and not for want of a plan:
+    // `tools/ledger/ci/ledger-gate.yml` has been queueing this gate and
+    // `ledger-closures` below with HQ, in a file under `.github/workflows/`
+    // that only HQ may write. That is the bottleneck this whole file exists to
+    // pay once instead of once per gate, so the two move here.
+    argv: () => ['node', 'tools/ledger/check-attributes.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'ledger-closures',
+    scope: 'tooling',
+    title: 'Ledger closure markers',
+    // Same seat/owner exit split as `ledger-contract`, from the same file's
+    // reasoning, and `main` carries the owner's today: this exits 2 on the
+    // current tree over closure markers in `docs/ideas.md` and `docs/runs/`.
+    argv: () => ['node', 'tools/ledger/check-closures.mjs'],
+    passExit: [0, 2],
+  },
+  {
+    id: 'doc-model-drift',
+    scope: 'tooling',
+    title: 'Documented-model drift',
+    // Board rows are an OPTIONAL extra corpus here, taken only when
+    // BOARD_API_URL and BOARD_RUNTIME_TOKEN are both set, and appended rather
+    // than substituted, so it cannot clear a finding the committed corpus
+    // found. A runner without those variables measures less and never more,
+    // which is why this is registered with no credential of its own.
+    argv: () => ['node', 'tools/doc-model/check.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'instant-lint',
+    scope: 'tooling',
+    title: 'Timestamp handling (tools/instant.mjs lint, every code decided)',
+    // The gate and not `tools/instant-sweep.mjs`, which reports the same
+    // findings and returns 0 on all of them. Registering the sweep would have
+    // put a green tick next to a count nobody decided.
+    argv: () => ['node', 'tools/instant-gate.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'vendored-register',
+    scope: 'tooling',
+    title: 'Vendored register merger matches the recorded hash',
+    // Offline by construction: it compares the vendored bytes against a
+    // recorded sha256 in this repository rather than asking HQ.
+    argv: () => ['node', 'tools/registers/check-vendored.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'env-facts-audit',
+    scope: 'tooling',
+    title: 'Host facts: every class is cited and every citation resolves',
+    // The gate the facts table itself names, in the one line every charter
+    // carries: `--audit` fails when a charter stops citing it. Offline, 481ms,
+    // and it was the last of sixty gate candidates reached by nothing.
+    argv: () => ['node', 'tools/seat/env-facts.mjs', '--audit'],
     passExit: [0],
   },
   {
@@ -339,6 +507,106 @@ export const CHECKS = [
     // 1 a gate failure would blame the branch for the runner's checkout.
     needsFullClone: true,
     argv: () => ['bash', 'tools/ensure-full-clone.sh', '--check'],
+    passExit: [0],
+  },
+
+  // ------------------------------------------------------------------------
+  // The skills library's own guards, registered 2026-11-09 by Ursa/skill.
+  //
+  // WHY THESE SIX ARRIVE AS A BLOCK, AND WHY THEY ARRIVE BEFORE THE SWEEP
+  // THAT WOULD HAVE FOUND THEM. `gateCandidatePaths` in
+  // tools/gates/enumerate-verdicts.mjs defaults `roots` to tools and scripts,
+  // so `gate-registry` above has never swept `skills/` and this library's
+  // guards were reached by nothing without being counted as unreached either.
+  // Ursa/exo measured the gap from the other side: widening that default takes
+  // the candidate set from 58 to 64 on origin/main, and the six new candidates
+  // are these. It declined to widen it in the same window, because a
+  // whole-tree gate that goes red names whichever branch is tested next rather
+  // than the one that caused it, and one commit cost 17 reds across 5 seats
+  // that way today.
+  //
+  // So registration comes first and the root widens second, and these entries
+  // are the first half. Each was run against origin/main and against the
+  // branch carrying it, offline, in the time noted. None writes to the tree.
+  //
+  // THE SEVENTH FILE, because a count that disagrees with another seat's is
+  // worth settling in the file rather than in a message. Ursa/exo measured six
+  // and this seat measured seven using the SAME discriminator; the difference
+  // is the tree, not the criterion. `skills/bare-refs.mjs` is new on this
+  // seat's branch and absent from the tree exo swept. It is registered below,
+  // so the widening absorbs seven and not six.
+  //
+  // THE ONE THAT IS NOT HERE. `skills/relocate-anchors.mjs` has no invocation
+  // that renders a verdict about the tree: with no argument it prints usage and
+  // exits 2, and its working mode takes `--write`. It is a repair tool, so it
+  // wants a `write-action` entry in tools/gates/gate-registry.baseline.json
+  // instead -- and that entry CANNOT land before the root widens, because
+  // `decide()` reports a baseline entry whose path is not a discovered
+  // candidate as `stale-entry`. Measured, not assumed; see
+  // skills/gate-registration.test.mjs. That is the one row the widening commit
+  // has to carry with it, and its text is in the ledger entry "The registry's
+  // two registration routes have opposite orderings".
+  // ------------------------------------------------------------------------
+  {
+    id: 'skill-evidence',
+    scope: 'tooling',
+    title: 'Skill evidence (every citation resolves and still says what it said)',
+    // The receipt half of "skills with receipts": path exists, range in bounds,
+    // cited lines still hash to what they hashed to. 1.2s, offline.
+    argv: () => ['node', 'skills/check-evidence.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'skill-relevance',
+    scope: 'tooling',
+    title: 'Skill relevance (every verdict is bound to the lines it was read against)',
+    // The reading half. A range can pass check-evidence and still fail to
+    // support the sentence citing it, which shipped once in this library.
+    // `--stale` is the gate mode; the bare command prints a queue and exits 0,
+    // so registering that would register nothing. 3.7s, offline.
+    argv: () => ['node', 'skills/relevance-sweep.mjs', '--stale'],
+    passExit: [0],
+  },
+  {
+    id: 'skill-triggers',
+    scope: 'tooling',
+    title: 'Skill triggers (every skill meets the near-miss budget of §5c)',
+    // The budget is one near miss per adjacent skill, so landing one skill puts
+    // every sibling short in files that run's diff never touched. Arithmetic,
+    // not forgetfulness, which is why a reader cannot hold it. 1.1s, offline.
+    argv: () => ['node', 'skills/trigger-coverage.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'skill-bare-refs',
+    scope: 'tooling',
+    title: 'Skill bare refs (no evidence identifier is cited outside the tag form)',
+    // A bare `E33` in prose is on no guard's path: not a tag, so refsIn skips
+    // it, no range, so no lock row, not frontmatter, so declaredRefs cannot see
+    // it. 0.5s, offline.
+    argv: () => ['node', 'skills/bare-refs.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'skill-forge-citations',
+    scope: 'tooling',
+    title: 'Skill forge citations (every cited pull request is locked with a disposition)',
+    // `--check` reads the lock and reaches nothing; `--refresh` is the mode
+    // that needs the forge and a token, and it is not what is registered here.
+    // About half of all rows this repository has had were closed unmerged and
+    // so never acquire a sha, which is why the lock exists at all.
+    argv: () => ['node', 'skills/forge-citations.mjs', '--check'],
+    passExit: [0],
+  },
+  {
+    id: 'skill-grep-dialect',
+    scope: 'tooling',
+    title: 'Skill grep dialect (a receipt\'s grep means the same thing to every reader)',
+    // `--scan` is the branch-facing mode and fails on a call site whose result
+    // is dialect-dependent. `--engine` is deliberately NOT registered: its
+    // verdict is about the host rather than the branch, so two runners would
+    // answer differently about an unchanged tree. 0.9s, offline.
+    argv: () => ['node', 'skills/grep-dialect.mjs', '--scan', 'skills', 'prompts'],
     passExit: [0],
   },
 ]
@@ -356,7 +624,11 @@ export function toolingSuites() {
 // A check whose dependencies are absent is unrunnable, not passing. Kept as
 // a pure function so the test suite can assert the classification without
 // executing anything.
-export function classify(check, { installedPackages, skip, shallow }) {
+// `installedBins` defaults to none rather than to all. A caller that forgets
+// it gets `unrunnable`, which is red; defaulting the other way would make a
+// forgotten argument read as a passing check, and the bias has to run toward
+// the refusal here for the same reason it does in the npx call above.
+export function classify(check, { installedPackages, installedBins = [], skip, shallow }) {
   if (skip.includes(check.id)) return { state: 'skipped', why: 'named in --skip' }
   if (check.needsFullClone && shallow) {
     return {
@@ -370,6 +642,27 @@ export function classify(check, { installedPackages, skip, shallow }) {
       state: 'unrunnable',
       why: `${check.needsNodeModules}/node_modules is absent, so this check cannot run; `
         + `run \`npm ci\` in ${check.needsNodeModules} first, or pass --skip=${check.id} to record it as unchecked`,
+    }
+  }
+  // The directory is not the condition. A tree where `node_modules/` exists
+  // and the binary does not passes the test above, and then the check runs
+  // `npx <tool>`, which without `--no-install` FETCHES AND EXECUTES a
+  // registry package of that name. That tree is not hypothetical: it is the
+  // documented npm failure mode on this host, `exit 0 with no
+  // node_modules/.bin` (node tools/seat/env-facts.mjs,
+  // npm-cache-is-a-shared-home-path), and this run hit it while an install
+  // was still in flight. So the condition is read off the binary the check
+  // actually needs. Same correction as the one made to
+  // EXPECTED_ABSENT_FIXTURES today: a condition keyed on a name near the
+  // thing, rather than on the thing.
+  if (check.needsBin && !installedBins.includes(`${check.needsNodeModules}/${check.needsBin}`)) {
+    return {
+      state: 'unrunnable',
+      why: `${check.needsNodeModules}/node_modules/.bin/${check.needsBin} is absent, so this `
+        + 'check cannot run. The directory exists, so the install is partial rather than '
+        + `missing; re-run \`npm ci\` in ${check.needsNodeModules}, or pass --skip=${check.id} `
+        + 'to record it as unchecked. It is reported unrunnable rather than attempted because '
+        + `\`npx ${check.needsBin}\` on a tree without it resolves against the public registry`,
     }
   }
   return { state: 'runnable', why: '' }
@@ -403,6 +696,16 @@ function installedPackages() {
   return ['ursa-major', 'ursa-minor'].filter((p) => existsSync(path.join(ROOT, p, 'node_modules')))
 }
 
+// Which declared binaries actually exist, as `<package>/<bin>`. Read off the
+// filesystem here, so `classify` stays a pure function of what it is handed
+// and its suite does not depend on whether this sandbox happens to have run
+// `npm ci`.
+function installedBins() {
+  return CHECKS.filter((c) => c.needsBin).map((c) => `${c.needsNodeModules}/${c.needsBin}`)
+    .filter((k) => existsSync(path.join(ROOT, k.split('/')[0], 'node_modules', '.bin',
+      k.split('/')[1])))
+}
+
 function isShallow() {
   const out = spawnSync('git', ['rev-parse', '--is-shallow-repository'], { cwd: ROOT, encoding: 'utf8' })
   return out.stdout.trim() === 'true'
@@ -429,11 +732,14 @@ function main(argv) {
   }
 
   const installed = installedPackages()
+  const bins = installedBins()
   const shallow = isShallow()
   const results = []
 
   for (const check of selected) {
-    const { state, why } = classify(check, { installedPackages: installed, skip: opts.skip, shallow })
+    const { state, why } = classify(check, {
+      installedPackages: installed, installedBins: bins, skip: opts.skip, shallow,
+    })
     if (state !== 'runnable') {
       process.stdout.write(`\n=== ${check.title} [${state}] ===\n${why}\n`)
       results.push({ ...check, state, why, exit: null })

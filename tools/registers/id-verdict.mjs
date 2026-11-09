@@ -60,6 +60,58 @@ const REPAIRS = new Set([LOCUS.SEAT, LOCUS.OWNER])
  */
 
 /**
+ * HOW AN IDENTIFIER IS SPELLED, and why this is a field rather than a format
+ * string in the allocator. Until 2026-11-09 the allocator computed a
+ * namespace's number as `id.slice(ns.name.length + 1)` and printed
+ * `${ns.name}-${padded}`, so `NAME-<digits>` was the only spelling this gate
+ * could allocate in. Measured on the two namespaces that were missing from
+ * the manifest on that day: for `Window 103` the slice happens to return
+ * "103" and the print returns `Window-104`, which no heading in
+ * `docs/agents/improvements.md` is spelled like, so a seat pasting it mints a
+ * heading the `define` pattern cannot see and the next window collides again.
+ * For a bare-number register like `docs/agents/runner-facts.md` it is worse
+ * and silent: the slice of `"93"` is `""`, `Number("")` is `0` rather than
+ * NaN, so the allocator reports "highest is 0, so the next free one is 1"
+ * over a file with 98 sections and the gate sounds certain while it does it.
+ *
+ * So the spelling is declared once, next to the pattern that reads it, and
+ * the two are checked against a real heading from the register before any ref
+ * is touched. `{n}` is the zero-padded number and everything else is literal.
+ *
+ * @param {{spell: string, pad: number}} ns
+ * @param {number} n
+ * @returns {string} the identifier as the register itself spells it.
+ */
+export function spellId(ns, n) {
+  return ns.spell.replace('{n}', String(n).padStart(ns.pad, '0'))
+}
+
+/**
+ * The inverse, used by the burn-list validator and by nothing that reads a
+ * ref: a scanned definition's number comes from the `define` pattern's second
+ * capture group, which is authoritative where this function is only a parse.
+ *
+ * The two faults are kept apart because they have different repairs. A
+ * spelling that does not fit the namespace at all is an identifier filed
+ * against the wrong namespace; a tail that is not a number is a typo in the
+ * one it belongs to.
+ *
+ * @param {{spell: string, pad: number}} ns
+ * @param {string} id
+ * @returns {{n: number} | {fault: 'SHAPE' | 'NUMBER'}}
+ */
+export function unspellId(ns, id) {
+  const cut = ns.spell.indexOf('{n}')
+  const prefix = ns.spell.slice(0, cut)
+  const suffix = ns.spell.slice(cut + '{n}'.length)
+  if (!id.startsWith(prefix)) return { fault: 'SHAPE' }
+  if (suffix !== '' && !id.endsWith(suffix)) return { fault: 'SHAPE' }
+  const middle = id.slice(prefix.length, suffix === '' ? undefined : id.length - suffix.length)
+  if (!/^\d+$/.test(middle)) return { fault: 'NUMBER' }
+  return { n: Number(middle) }
+}
+
+/**
  * Validate the whole manifest before a single ref is read, and return the
  * fault as data rather than throwing, because the caller exits at module
  * scope. This is the shape `senderFault()` in tools/board/sender.mjs and
@@ -121,6 +173,15 @@ export function manifestFault(manifest) {
       // citation in this repository is a string match.
       return fault('NAMESPACE_PAD_UNUSABLE', `${at} (${ns.name}) has pad=${JSON.stringify(ns.pad)}; expected a positive integer`)
     }
+    if (typeof ns.spell !== 'string' || ns.spell.split('{n}').length !== 2) {
+      // Exactly one `{n}`, never zero and never two. Zero makes the allocator
+      // print the same identifier forever; two makes `spellId` substitute only
+      // the first and leave a literal `{n}` in a heading a seat pastes.
+      return fault(
+        'NAMESPACE_SPELL_UNUSABLE',
+        `${at} (${ns.name}) has spell=${JSON.stringify(ns.spell)}; expected a string containing exactly one {n}`,
+      )
+    }
     if (typeof ns.define !== 'string' || ns.define === '') {
       return fault('NAMESPACE_NO_DEFINE', `${at} (${ns.name}) has no \`define\` pattern`)
     }
@@ -154,6 +215,35 @@ export function manifestFault(manifest) {
       )
     }
 
+    // WHY A REAL HEADING IS A REQUIRED FIELD. `define`, `spell` and `pad` are
+    // three declarations of one convention, and nothing read them against each
+    // other until this check existed: a pattern that matches no heading in its
+    // own register makes the gate report zero identifiers and exit 0, and a
+    // `spell` that disagrees with the pattern makes the allocator hand out a
+    // string the pattern cannot see. One heading copied from the register
+    // closes both, before any ref is read, at the cost of one line per
+    // namespace.
+    if (typeof ns.example !== 'string' || ns.example === '') {
+      return fault(
+        'NAMESPACE_NO_EXAMPLE',
+        `${at} (${ns.name}) has no \`example\`, so nothing checks \`define\` against a heading its register really carries`,
+      )
+    }
+    const shown = new RegExp(ns.define).exec(ns.example)
+    if (shown === null) {
+      return fault(
+        'EXAMPLE_NOT_DEFINED',
+        `${at} (${ns.name}): pattern ${JSON.stringify(ns.define)} does not match its own example ${JSON.stringify(ns.example)}`,
+      )
+    }
+    const spelled = spellId(ns, Number(shown[2]))
+    if (shown[1] !== spelled) {
+      return fault(
+        'EXAMPLE_SPELLING_DISAGREES',
+        `${at} (${ns.name}): the example defines ${JSON.stringify(shown[1])} but spell=${JSON.stringify(ns.spell)} with pad=${ns.pad} writes number ${shown[2]} as ${JSON.stringify(spelled)}`,
+      )
+    }
+
     const burned = ns.burned ?? []
     if (!Array.isArray(burned)) {
       return fault('BURNED_NOT_AN_ARRAY', `${at} (${ns.name}) has a \`burned\` that is not an array`)
@@ -174,16 +264,22 @@ export function manifestFault(manifest) {
         return fault('BURNED_DUPLICATED', `${where} burns ${entry.id} a second time`)
       }
       burnedIds.add(entry.id)
-      if (!entry.id.startsWith(`${ns.name}-`)) {
+      // Read against the namespace's own `spell` rather than against
+      // `${ns.name}-`. The two agreed for all four namespaces this file held
+      // before 2026-11-09 and disagree for every namespace whose register does
+      // not spell its identifiers as `NAME-<digits>`, which is both of the
+      // namespaces added that day.
+      const parsed = unspellId(ns, entry.id)
+      if ('fault' in parsed && parsed.fault === 'SHAPE') {
         return fault(
           'BURNED_OUT_OF_NAMESPACE',
-          `${where} burns ${entry.id}, which does not start with ${ns.name}-`,
+          `${where} burns ${entry.id}, which is not spelled ${JSON.stringify(ns.spell)} as ${ns.name} is`,
         )
       }
-      if (!/^\d+$/.test(entry.id.slice(ns.name.length + 1))) {
+      if ('fault' in parsed) {
         return fault(
           'BURNED_NOT_NUMBERED',
-          `${where} burns ${entry.id}, whose tail is not a number this allocator can skip`,
+          `${where} burns ${entry.id}, whose number is not a number this allocator can skip`,
         )
       }
     }
@@ -194,13 +290,19 @@ export function manifestFault(manifest) {
 /**
  * @param {Finding[]} findings every collision, each already printed by the
  *   caller as one line.
- * @param {{ids?: number, namespaces?: number, refs?: number, scope?: string}} seen
- *   the census, for the clean line.
+ * @param {{ids?: number, namespaces?: number, refs?: number, registers?: number, scope?: string}} seen
+ *   the census, for the clean line. `registers` is how many (ref, register)
+ *   pairs were actually opened, and it is in the line rather than in a
+ *   `--json` field because it is the denominator of every other number here:
+ *   `0 identifier(s)` reads as a clean register and `0 identifier(s) over 0
+ *   register file(s)` reads as a gate that found nothing to grade. check-ids
+ *   counted this and printed neither until 2026-11-09.
  * @returns {import('../gates/verdict-shape.mjs').Verdict}
  */
 export function verdict(findings, seen = {}) {
-  const { ids = 0, namespaces = 0, refs = 1, scope = 'origin/main' } = seen
-  const counted = `${ids} identifier(s) in ${namespaces} namespace(s) across ${refs} ref(s), from ${scope}`
+  const { ids = 0, namespaces = 0, refs = 1, registers, scope = 'origin/main' } = seen
+  const over = registers === undefined ? '' : ` over ${registers} register file(s)`
+  const counted = `${ids} identifier(s)${over} in ${namespaces} namespace(s) across ${refs} ref(s), from ${scope}`
 
   const byOwner = findings.filter((f) => f.held === LOCUS.OWNER)
   // Anything not explicitly the owner's lands on the seat, which is the louder

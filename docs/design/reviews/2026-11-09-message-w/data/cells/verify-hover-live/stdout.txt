@@ -1,0 +1,15 @@
+harness: (hover:hover)=true  (any-hover:hover)=true  (pointer:fine)=true  (prefers-reduced-motion:reduce)=false
+viewport: 1440x900   settle: 520ms   frames: frozen (clock pinned, Math.random seeded)
+
+rec-action-home      changes                .rec-action on http://127.0.0.1:4871/  (2 matches, a, box 541x43)
+                      self.text-decoration-color: rgba(168, 199, 250, 0.4) -> rgb(168, 199, 250)
+
+A verdict of `changes` is not yet a verified hover. It says the computed
+style moved. Whether a reader can see it moving is the pixel count from
+  python3 diff-frames.py docs/design/reviews/2026-11-09-message-w/data/cells/verify-hover-live/rest docs/design/reviews/2026-11-09-message-w/data/cells/verify-hover-live/hover
+and a hover worth fewer pixels than the hairline it draws is a finding.
+
+every one of the 1 targets this run asked for was reached.
+
+every one of the 1 target load loads this run measured was reached: / 200.
+

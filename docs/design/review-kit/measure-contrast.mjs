@@ -70,6 +70,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { launch, VIEWPORTS } from './lib/browser.mjs'
 import { freezeContext } from './lib/freeze.mjs'
+import { tracker } from './lib/reached.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const OUT = arg('out', '/tmp/contrast')
@@ -77,6 +78,29 @@ const BASE = arg('base', 'http://127.0.0.1:4488')
 const ONLY = arg('only', null)
 const UNTIL = arg('until', null)
 const WAIT = Number(arg('wait', 400))
+// `--state <module.mjs>`, the same flag `shoot.mjs`, `measure-hit-areas.mjs`
+// and `measure-narrow.mjs` have carried since 2026-10-26, arriving here last
+// and for a reason worth stating rather than apologising for.
+//
+// This tool photographs the page TWICE, once as it is and once with every
+// text run hidden, and the second frame is taken in a second browser context
+// that navigated on its own. A drive applied to one of those two and not the
+// other does not produce a wrong number, it produces a page that moved
+// between the shutters: the drift check sees the difference between a driven
+// page and an undriven one, exceeds its limit, and the whole page is reported
+// as untrustworthy. So `enterState` runs on BOTH pages, at the same point in
+// each, and the drift check is what proves the two drives agreed.
+//
+// Until this flag existed, no driven state on this site had a contrast
+// number and none could get one. The inspector's selected panel was
+// photographed on 2026-10-18 and measured by nothing; the four refusal
+// states of `/record/at` had been entered by no instrument at all. Each of
+// those draws text this tool is the only judge of, which is what makes the
+// absence a hole in the sweep rather than a missing convenience.
+const STATE = arg('state', null)
+const enterState = STATE
+  ? (await import(new URL(STATE, `file://${process.cwd()}/`).href)).default
+  : null
 // `--json` alone writes beside the report; `--json <path>` writes where the
 // caller asks, which is what the self-test needs.
 const JSON_I = process.argv.indexOf('--json')
@@ -92,6 +116,11 @@ const PAGES = arg('pages', '/,/record,/record/mini-fixture,/record/at,/this-page
       ? [p === '/' ? 'home' : p.replace(/^\/|\/$/g, '').replace(/\//g, '-'), p]
       : [p.slice(0, i), p.slice(i + 1)]
   })
+// The not-found page is in the default list on purpose and its status is
+// the subject, so it is declared. A caller passing its own `--pages`
+// declares its own with `--expect-404`.
+const EXPECT_404 = arg('expect-404', PAGES.some(([, p]) => p === '/this-page-does-not-exist') ? '/this-page-does-not-exist' : '').split(',').filter(Boolean)
+const reach = tracker({ expect404: EXPECT_404, label: 'page' })
 
 mkdirSync(OUT, { recursive: true })
 
@@ -182,11 +211,37 @@ const COLLECT = () => {
   // `::placeholder` colour and the field's box: the pixel test below only
   // counts pixels that sit on the line between that colour and the
   // measured backdrop, so the rest of the field's box costs nothing.
-  for (const el of document.querySelectorAll('input[placeholder], textarea[placeholder]')) {
-    if (el.value) continue
+  // A VALUE is the same kind of text and was the hole beside it. The branch
+  // below used to read `if (el.value) continue`, which is correct for a
+  // placeholder and left the typed text collected by nothing at all. That
+  // was invisible for as long as this tool could not enter a driven state,
+  // because no page it ever photographed had anything in a field. The first
+  // run with `--state` found it as DRIFT rather than as a missing row: the
+  // value's pixels are in no collected box, so the backdrop frame hides them
+  // and the shutter comparison reads that as the page having moved. Measured
+  // on `/record/at` driven into its four refusals, 2026-11-09: 0.31% at phone
+  // and 0.28% at tablet against a 0.2% limit, with desktop under it only
+  // because the same glyphs are a smaller share of a larger frame, and 0.160%
+  // for the state whose typed address is 33 characters shorter. The number
+  // tracked the length of the value, which is what named the cause.
+  //
+  // On this site the value matters more than the placeholder it replaces:
+  // `/record/at` shows a reader their own address back, in 11px monospace, on
+  // the page whose whole argument is that an address is exact.
+  const TEXTUAL = new Set(['text', 'search', 'url', 'email', 'tel', 'number', ''])
+  for (const el of document.querySelectorAll('input, textarea')) {
+    const isInput = el.tagName === 'INPUT'
+    if (isInput && !TEXTUAL.has((el.getAttribute('type') || '').toLowerCase())) continue
+    if (!el.value.trim() && !el.getAttribute('placeholder')) continue
+    const showsValue = Boolean(el.value.trim())
     const cs = getComputedStyle(el)
     if (cs.visibility === 'hidden' || cs.display === 'none') continue
-    const ph = getComputedStyle(el, '::placeholder')
+    // The value is drawn in the field's own colour, and `-webkit-text-fill-color`
+    // wins over `color` where both are set, which is the pair HIDE_CSS turns
+    // off and so the pair a reader's renderer obeys.
+    const ph = showsValue
+      ? { color: cs.webkitTextFillColor || cs.color, fontSize: cs.fontSize, fontWeight: cs.fontWeight }
+      : getComputedStyle(el, '::placeholder')
     const b = el.getBoundingClientRect()
     if (b.width < 1 || b.height < 1) continue
     let op = 1
@@ -194,9 +249,9 @@ const COLLECT = () => {
     const colour = parseRgb(ph.color || cs.color) || [255, 255, 255, 1]
     out.push({
       id: id++,
-      tag: el.tagName.toLowerCase() + '::placeholder',
+      tag: el.tagName.toLowerCase() + (showsValue ? '[value]' : '::placeholder'),
       cls: String(el.getAttribute('class') || '').split(/\s+/).filter(Boolean).slice(0, 2).join('.'),
-      text: el.getAttribute('placeholder').slice(0, 42),
+      text: (showsValue ? el.value : el.getAttribute('placeholder')).slice(0, 42),
       fontSize: Math.round(parseFloat(ph.fontSize || cs.fontSize) * 10) / 10,
       weight: Number(ph.fontWeight || cs.fontWeight) || 400,
       colour: [colour[0], colour[1], colour[2], colour[3] * op],
@@ -344,11 +399,20 @@ for (const [vname, w, h] of VIEWPORTS) {
       lap.push(`${stage} ${Date.now() - at}ms`)
       return out
     }
-    await mark('goto', async () => {
-      await page.goto(BASE + path, { waitUntil: 'networkidle' })
+    // Only the navigation is wrapped. The settle and everything after it are
+    // the measuring, and a refusal scoped over those would turn a finding
+    // into a non-answer.
+    const reached = await mark('goto', async () => {
+      if (!(await reach.visit(page, BASE + path, path)).ok) return false
       if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
       await page.waitForTimeout(WAIT)
+      if (enterState) await enterState(page, name)
+      return true
     })
+    if (!reached) {
+      process.stderr.write(`${name} COULD NOT LOAD, skipped\n`)
+      continue
+    }
     const items = await mark('collect', () => page.evaluate(COLLECT))
     const shotA = await mark('shotA', async () =>
       `data:image/png;base64,${(await page.screenshot(opts)).toString('base64')}`)
@@ -356,6 +420,10 @@ for (const [vname, w, h] of VIEWPORTS) {
       await back.goto(BASE + path, { waitUntil: 'networkidle' })
       if (UNTIL) await back.waitForSelector(UNTIL, { timeout: 30000 })
       await back.waitForTimeout(WAIT)
+      // Before the text is hidden, because a drive that waits on a selector
+      // waits on text, and a drive run after `HIDE_CSS` would wait on an
+      // element the stylesheet has just made invisible.
+      if (enterState) await enterState(back, name)
       // Belt and braces: the init script runs before the page's own scripts,
       // and this covers a page that replaces <head> wholesale after it.
       await back.addStyleTag({ content: HIDE_CSS })
@@ -415,7 +483,21 @@ const driftReport = moved.length
   ? '\nthese pages moved between the two shutters, so nothing above is a measurement of them:\n' +
     moved.map((d) => `  ${d.page}/${d.viewport}  ${(d.drift * 100).toFixed(2)}% of the frame outside its text changed`).join('\n') + '\n'
   : `\nevery page held still between the two shutters (worst drift ${((Math.max(0, ...drifts.map((d) => d.drift))) * 100).toFixed(3)}% of the frame), so the backdrops above are the backdrops a reader sees.\n`
-const report = `${headline}\n${driftReport}\n${lines.join('\n') || 'nothing below threshold'}\n`
+// The reach verdict is part of the report rather than printed after it,
+// so it survives into the committed file a later run reads and not only
+// into this session's stdout.
+const reachReport = reach.lines().join('\n')
+// The drive's path belongs in the committed file and not only in this
+// session's stdout: a contrast number taken in a state nobody can name is a
+// number nobody can re-take.
+const stateReport = STATE ? `\nevery page above was driven by ${STATE} before both shutters.\n` : ''
+const report = reach.code()
+  ? `${reachReport}\n\nno claim about contrast: the pages above were not reached.\n`
+  : `${headline}\n${driftReport}${stateReport}${reachReport}\n\n${lines.join('\n') || 'nothing below threshold'}\n`
 writeFileSync(`${OUT}/contrast.txt`, report)
 if (JSON_I !== -1) writeFileSync(JSON_OUT || `${OUT}/contrast.json`, JSON.stringify(rows, null, 1))
 console.log(report)
+// A verdict about the INSTRUMENT, which no caller can make from outside.
+// The findings themselves stay exit 0 however bad they are, because
+// selftest/check-contrast.mjs reads them out of the JSON above.
+if (reach.code()) process.exit(reach.code())

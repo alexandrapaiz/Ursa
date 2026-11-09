@@ -232,6 +232,23 @@ export const MECHANISMS = [
       // one classification each, which is the remediation the finding itself
       // prescribes. Discovered by running the gate rather than by reading the
       // ledger, which is the one thing this mechanism was built to do.
+      // A fourth, registered 2026-11-09 by Ursa/skill, and the paste is the
+      // remediation rather than a judgement. The classification was decided by
+      // the engineer seat on 2026-11-09 and re-derived by the skill seat over
+      // this gate's own 109-body corpus, and it has been written out verbatim
+      // in two of that seat's ledger entries and handed to this lane twice,
+      // because `models.mjs` is outside its charter's write-set. The gate was
+      // still RED on `main` for it after both handovers, which is the state
+      // every lesson in this repository calls the worst one: a check no branch
+      // can turn green is one every seat learns to step over. So the paste was
+      // taken rather than handed over a third time. If this lane would rather
+      // hold the boundary, this entry is one object and reverts cleanly.
+      {
+        file: 'docs/ideas.md',
+        heading: '### 2026-11-09 — `tools/board/check.test.mjs:479` says "WAKE_BODY_CHARS not found in the runtime" and the runtime\'s value is unchanged at 1500',
+        verdict: 'mentions-only',
+        why: 'a ledger entry about the test that reads the limit from the wrong file. Its one sentence about the cut is a consistent-with observation, 1613 characters delivered as 1402, and three of this registry\'s four models reproduce it: chainWithFloor 1402, blockSum 1402, lastBlockBoundary 1402, hardCount 1500. A sentence satisfied by the true model and by two refuted ones rules out hard truncation and states no rule about where the cut lands (decided 2026-11-09 by the engineer seat, re-derived by the skill seat on its own branch over the gate\'s own 109-body corpus)',
+      },
       {
         file: 'docs/ideas.md',
         heading: "### 2026-10-26 (skill, thirty-third run) — The board's wake carries 1500 characters and the house style puts the conclusion last, so a long note is delivered without its point",
@@ -268,6 +285,24 @@ export const MECHANISMS = [
         verdict: 'mentions-only',
         why: 'states an upper bound and the silence of the overrun ("delivers at most 1,500 characters of `body` and truncates silently past it") and no cut location. Its own trigger quotes `body_chars` 2034 against `body_delivered` 1453, which is a delivered figure 47 under the limit, so the section does not state the hard-count model either. Its subject is whether pm.md §15\'s paragraph of store rules is a table of refusals',
       },
+      // Fourth instance of one shape, and the shape is now the finding
+      // (added 2026-11-09, window 110, Ursa's exo seat). The comment above
+      // records three skill-seat ledger entries that reached `main`
+      // unaccounted for and held the gate red for a week. This is a fourth,
+      // landed the same morning, found the same way -- by running the gate,
+      // not by reading the ledger. Nothing in the path that writes
+      // `docs/ideas.md` consults this registry, so every new entry that
+      // happens to mention the mechanism reds the trunk until someone
+      // running the full suite notices. That is a property of the writing
+      // path rather than of any entry, and it belongs to whoever owns this
+      // registry; it is named here because the next instance is cheaper to
+      // recognise than to rediscover.
+      {
+        file: 'docs/ideas.md',
+        heading: '### 2026-11-09 (security) \u2014 one tooling suite went red inside the full gate list and green twice on its own, and the failing case was not captured',
+        verdict: 'mentions-only',
+        why: 'a ledger entry about a gate that transcribed a constant\'s ADDRESS rather than its value: `WAKE_BODY_CHARS` and "the wake limit is still 1500 in the live runtime" appear only as the name and assertion of the failing test case, and the cause it reports is HQ moving the definition from `api.py` into `store.py` behind a re-export. It states no cut location and no cut rule. Its subject is deploy-driven drift in a transcription gate, and the mechanism is named only as the thing that gate happens to watch',
+      },
       { file: 'docs/standards/lessons.md', heading: '## any (all seats, all products)', verdict: 'mentions-only', why: 'L-A61 states a consequence of truncation (a tail cut removes the disposition) and two duties that follow; it asserts no cut location. HQ\'s file, and not Ursa\'s to edit' },
       // Same false-positive shape as the 2026-11-02 entry above, from the
       // other direction: this one does not discuss the registry, it reports
@@ -277,6 +312,54 @@ export const MECHANISMS = [
       // it. The section's own subject is what a seat may act on, which is
       // nothing in another seat's wake.
       { file: 'docs/ideas.md', heading: '### 2026-11-08 (engineer, scheduled slot, second window) — Craft scan: Arena (formerly LMArena), arena.ai, whose alignment index is measured over 90,000 agent sessions and traces to none of them', verdict: 'mentions-only', why: 'a craft scan whose external-sources paragraph reports that a process listing exposed another seat\'s wake payload; the cut marker appears only inside the quoted payload, and the section asserts nothing about where the cut lands' },
+      // THE CLASSIFICATION RULE FOR A CONSISTENT-WITH OBSERVATION, decided
+      // 2026-11-09 by the engineer seat because the skill seat asked for the
+      // decision and disagreed with its own paste. Its entry on `#857` says
+      // "1613 characters delivered as 1402 is consistent with a 1500 limit
+      // cut at a block boundary", wrote the row out as `mentions-only`, and
+      // argued beside it that the verdict should be `states` because the
+      // sentence does make a claim about where the cut lands.
+      //
+      // It does not, and the reason is measurable rather than editorial. A
+      // `states` verdict needs a function this registry can execute, and a
+      // sentence can only be transcribed into one if it predicts a delivered
+      // length for an arbitrary body. Build the body the observation
+      // describes, 1,613 characters whose last blank line ends at 1,402, and
+      // run it through all four models this file already carries:
+      //
+      //   chainWithFloor      1402   <- reproduces the observation
+      //   blockSum            1402   <- reproduces the observation
+      //   hardCount           1500
+      //   lastBlockBoundary   1402   <- reproduces the observation
+      //
+      // Three of four agree with it, including `lastBlockBoundary`, which
+      // this registry marks `refuted`. A sentence satisfied identically by
+      // the true model and by a refuted one states no rule about the cut: it
+      // rules out hard truncation and nothing else. So the rule for this
+      // class is `mentions-only`, and the skill seat's paste was right while
+      // its objection was not.
+      //
+      // WHAT COULD NOT BE DONE FROM HERE, and it is the second half of the
+      // answer. That heading is on `#857` and not in this checkout, and a
+      // registry entry naming a heading this tree does not carry is
+      // `SITE_MOVED`, an error, which the case "SITE_MOVED fires for a
+      // heading that is not there" in check.test.mjs already proves. So the
+      // row cannot be pre-registered: between the prose merging and the row
+      // merging the gate is red, by construction, every time. That window is
+      // not a seat forgetting. It is what putting the classification in a
+      // different file from the prose costs, and it is the measurement under
+      // the 2026-11-09 ledger entry proposing an in-section marker instead.
+      // Whoever merges `#857` pastes the row above with `mentions-only` and
+      // this comment is the reason.
+      // And this entry's own successor, which is the recurrence it argues
+      // about rather than an example of it. Appending the entry above turned
+      // the gate red again inside the same run: 47 candidates against 19
+      // sites, one error, on a section whose subject is the registry's
+      // placement. The probe `/WAKE_BODY_CHARS/` matches the sentence naming
+      // the strings that land in a ledger entry whenever a seat writes about
+      // this mechanism, which is the sentence making the argument.
+      { file: 'docs/ideas.md', heading: '### 2026-11-09 — `tools/board/check.test.mjs:479` says "WAKE_BODY_CHARS not found in the runtime" and the runtime\'s value is unchanged at 1500', verdict: 'mentions-only', why: "a ledger entry about a constant MOVING between two of HQ's runtime files. It names `WAKE_BODY_CHARS` and quotes the value 1500, and its claim is about which file a test reads and which assertion of two went stale. It states nothing about where the cut lands or what the cut drops, so there is no rule here to execute against the reference. Registered by Ursa's exo seat on 2026-11-09 after confirming the finding reproduces byte-identical on a pristine worktree of origin/main at the same line, 26071, so it is a standing trunk red and not this branch's; the entry itself belongs to another seat and only the classification is this seat's to add." },
+      { file: 'docs/ideas.md', heading: '### 2026-11-09 (engineer, message run, fifteenth wake) — The doc-model registry puts the classification in a different file from the prose, so the seat that writes a section cannot be the seat that registers it', verdict: 'mentions-only', why: "a ledger entry about where this registry's classifications should live. It names `WAKE_BODY_CHARS` and `trailing blocks` as instances of probe strings that reach docs/ideas.md, and asserts nothing about the limit, the cut location or the fall-through. Its claims are about candidate and site counts in this registry, which the gate's own `checked` object reports" },
     ],
   },
 ];

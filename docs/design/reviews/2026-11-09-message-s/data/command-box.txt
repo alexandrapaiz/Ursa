@@ -1,0 +1,12 @@
+{
+ "text": "mkdir -p .github/workflows\ncurl -fsSL https://raw.githubusercontent.com/alexandrapaiz/Ursa/main/ursa-major/examples/resolve-on-merge.yml -o .github/workflows/ursa-resolve.yml",
+ "textLen": 174,
+ "scrollW": 1029,
+ "clientW": 493,
+ "scrollable": true,
+ "maxScroll": 536,
+ "tabIndex": 0,
+ "role": "group",
+ "ariaLabel": "command, scrolls sideways",
+ "copyBtn": "copy"
+}

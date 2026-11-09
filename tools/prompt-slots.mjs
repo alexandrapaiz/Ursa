@@ -2,12 +2,37 @@
 // Which slots in a workflow's `prompt:` block carry text from outside this
 // repository, and whether the fence around each one can be stepped out of.
 //
-//   node tools/prompt-slots.mjs                  # the table
+//   node tools/prompt-slots.mjs                  # the table, and the verdict
 //   node tools/prompt-slots.mjs --json           # machine-readable
-//   node tools/prompt-slots.mjs --strict         # exit 1 if any slot is open
+//   node tools/prompt-slots.mjs --strict         # the owner's backlog is a hard fail too
 //
-// Exit 0 the table printed. Exit 1 under --strict with at least one finding.
-// Exit 2 this tool could not read the workflows at all.
+// EXIT CODES (rewritten 2026-11-09, run 13, closing finding F116).
+//
+//   0  no untrusted slot is open.
+//   1  an untrusted interpolation sits inside a `run:` block. That is shell
+//      injection rather than a prompt-layer finding, the repair is the
+//      owner's IMMEDIATE action, and there are none today, so this code is
+//      green now and fires on a regression a change introduces.
+//   2  clean as far as a seat can take it. Prompt-layer slots are open and
+//      every one of them is in .github/workflows/, which no seat here may
+//      edit. Under --strict this escalates to 1, which is what --strict
+//      meant before this rewrite.
+//   3  NO VERDICT. The workflows could not be read, so the scope measured is
+//      not the scope that was asked for. This was exit 2 until run 13, and
+//      it moved because 2 now carries a verdict and an unread scope is not
+//      one. 3 is this repository's convention for it, declared as
+//      `no_verdict_exit` by four tools in tools/gates/gate-registry.baseline.json.
+//
+// WHY THIS CHANGED, which is finding F116 in one paragraph. Every finding
+// this tool reports is reserved to the owner, so under the old scheme the
+// bare command returned 0 while printing "11 of 11 untrusted slot(s) sit in
+// a fence a payload could step out of", and `--strict` returned 1 on a
+// backlog no branch can clear. A gate every branch inherits red is one every
+// seat learns to ignore, and a gate that prints a finding and exits 0 is a
+// green tick next to it. Neither is registrable. The split above is what
+// `tools/gates/fetch-exec.mjs` established the same day and what
+// `ledger-contract` and `register-ids` in scripts/ci-checks.mjs already do
+// for owner-held violations.
 //
 // PURE AND LOCAL. One `readdirSync` plus `readFileSync` of
 // `.github/workflows/`. No network, no token, and it never writes: the repair
@@ -285,8 +310,11 @@ export function verdict(found) {
       line: `prompt-slots: ${found.length} untrusted slot(s), every one labelled, fenced, unforgeably closed and last in its prompt.`,
     };
   }
+  // 2, not 1. Every slot this branch reports is in a directory no seat may
+  // edit, so 1 would paint every branch red for a backlog no branch caused.
+  // F116.
   return {
-    exitCode: 1,
+    exitCode: 2,
     cause: 'untrusted-slot-not-contained',
     line: `prompt-slots: ${open.length} of ${found.length} untrusted slot(s) sit in a fence a payload could step out of. The repair is reserved to the owner: ${WORKFLOW_DIR}/ is not a seat's to edit.`,
   };
@@ -300,7 +328,8 @@ function main(argv) {
     files = readdirSync(WORKFLOW_DIR).filter((f) => f.endsWith('.yml') || f.endsWith('.yaml')).sort();
   } catch (err) {
     console.error(`prompt-slots: cannot do its job: ${WORKFLOW_DIR} is not readable (${err.code}), so the scope it would have measured is not the scope that was asked for.`);
-    return 2;
+    console.error('  NO VERDICT. Not read as clean: a scan over no workflows finds no open slot in exactly the way a repaired tree does.');
+    return 3;
   }
   const found = [];
   for (const f of files) {
@@ -326,7 +355,12 @@ function main(argv) {
     console.log('');
     console.log(v.line);
   }
-  return strict ? v.exitCode : 0;
+  // The verdict always decides the exit code now. It used to be discarded
+  // unless --strict was passed, so the bare command printed a finding and
+  // reported success, which is F116's own shape. --strict keeps the meaning
+  // it had: the owner's backlog is a hard failure too.
+  if (strict && v.exitCode === 2) return 1;
+  return v.exitCode;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

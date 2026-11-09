@@ -54,3 +54,17 @@ test('a hyphenated path keeps its hyphens and its date-shaped name', () => {
   assert.deepEqual(sourcePaths('docs/okrs/2026-q4.md, O1 KR1.1'),
     [{ path: 'docs/okrs/2026-q4.md', ranges: undefined }])
 })
+
+test('a descending range keeps its own end, so the bounds check can reject it', () => {
+  // `nums[1] ?? nums[0]` and `nums[1] || nums[0]` agree on every range in the
+  // library and disagree on exactly one shape: `N-0`, where `??` keeps the
+  // zero and `||` falls back to N. The 2026-11-09 mutation survey found that
+  // no suite in the library noticed the swap, and it is not cosmetic. With the
+  // fallback, `5-0` arrives downstream as the well-formed single line `5-5`
+  // and gets a fingerprint; with the nullish form it arrives as `from` 5 and
+  // `to` 0, which every bounds check in the library rejects. A malformed
+  // citation that silently becomes a valid one is the failure the lock exists
+  // to prevent.
+  assert.deepEqual(ranges('5-0').map((r) => [r.from, r.to]), [[5, 0]])
+  assert.deepEqual(ranges('0-0').map((r) => [r.from, r.to]), [[0, 0]])
+})

@@ -1,0 +1,23 @@
+# frozen at t=2000ms, seeded Math.random, CSS animations rewound.
+# the page clock is NOT pinned: a surface that reads it differs from itself.
+# this covers the clock inside the page only. A timestamp a server stamps into a payload is pinned by lib/pin-clock.mjs, in the serving process, or not at all.
+# settled 400ms after networkidle before each shutter.
+# viewports phone 390x844, tablet 820x1180, desktop 1440x900, band1152 1152x900, band1200 1200x900, band1279 1279x900 (--viewports, not the charter default)
+home-phone                       200    390/390   overflow    0px  height  3818px
+record-phone                     200    390/390   overflow    0px  height  2638px
+record-mini-fixture-phone        200    390/390   overflow    0px  height  2637px
+home-tablet                      200    820/820   overflow    0px  height  3478px
+record-tablet                    200    820/820   overflow    0px  height  1960px
+record-mini-fixture-tablet       200    820/820   overflow    0px  height  2071px
+home-desktop                     200   1440/1440  overflow    0px  height  2900px
+record-desktop                   200   1440/1440  overflow    0px  height  1943px
+record-mini-fixture-desktop      200   1440/1440  overflow    0px  height  1927px
+home-band1152                    200   1152/1152  overflow    0px  height  2900px
+record-band1152                  200   1152/1152  overflow    0px  height  1919px
+record-mini-fixture-band1152     200   1152/1152  overflow    0px  height  1927px
+home-band1200                    200   1200/1200  overflow    0px  height  2900px
+record-band1200                  200   1200/1200  overflow    0px  height  1919px
+record-mini-fixture-band1200     200   1200/1200  overflow    0px  height  1927px
+home-band1279                    200   1279/1279  overflow    0px  height  2900px
+record-band1279                  200   1279/1279  overflow    0px  height  1919px
+record-mini-fixture-band1279     200   1279/1279  overflow    0px  height  1866px

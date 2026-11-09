@@ -1,0 +1,43 @@
+{
+  "base": "http://127.0.0.1:4871",
+  "harness": {
+    "hover": true,
+    "anyHover": true,
+    "pointer": true,
+    "reduced": false
+  },
+  "settleMs": 520,
+  "blind": 0,
+  "scoped": 0,
+  "reached": [
+    {
+      "path": "/",
+      "status": 200,
+      "declared": false
+    }
+  ],
+  "rows": [
+    {
+      "label": "rec-action-home",
+      "path": "/",
+      "sel": ".rec-action",
+      "verdict": "changes",
+      "count": 2,
+      "meta": {
+        "disabled": false,
+        "pointerEvents": "auto",
+        "tag": "a"
+      },
+      "deltas": [
+        "self.text-decoration-color: rgba(168, 199, 250, 0.4) -> rgb(168, 199, 250)"
+      ],
+      "clip": {
+        "x": 406,
+        "y": 418,
+        "width": 561,
+        "height": 63
+      },
+      "gate": "none"
+    }
+  ]
+}

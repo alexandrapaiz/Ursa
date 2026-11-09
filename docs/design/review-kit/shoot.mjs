@@ -24,6 +24,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { launch, VIEWPORTS } from './lib/browser.mjs'
 import { freezeContext, PINNED_MS } from './lib/freeze.mjs'
+import { tracker } from './lib/reached.mjs'
+import { gate, waitForHydration } from './lib/hydrated.mjs'
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i === -1 ? d : process.argv[i + 1] }
 const OUT = arg('out', '/tmp/shots')
@@ -45,6 +47,12 @@ const MATRIX = VIEWPORT_ARG
     })
   : VIEWPORTS
 const PAGES = arg('pages', '/,/record,/record/mini-fixture,/record/at,/this-page-does-not-exist').split(',')
+// The not-found page is a page of this site and is reviewed like any
+// other, so its status is the subject rather than a failure. Declared
+// here because the default page list above asks for it; a caller passing
+// its own `--pages` declares its own.
+const EXPECT_404 = arg('expect-404', PAGES.includes('/this-page-does-not-exist') ? '/this-page-does-not-exist' : '').split(',').filter(Boolean)
+const reach = tracker({ expect404: EXPECT_404, label: 'frame' })
 const LIVE = process.argv.includes('--live')
 // `--pin-now <iso>` pins the page's `Date` to one instant, so two shoots of a
 // surface that reads the clock can be compared. Opt-in, because a run that is
@@ -114,6 +122,11 @@ const slug = (p) => {
 
 const browser = await launch()
 const rows = []
+// Reached is not the same question as ran. A page can answer 200 with the
+// right HTML and never execute a line of client JavaScript, and then every
+// frame below is a photograph of a site that does nothing. See
+// lib/hydrated.mjs for the measurement that put this here.
+const hydration = gate({ label: 'frame' })
 for (const [vname, w, h] of MATRIX) {
   if (ONLY && ONLY !== vname) continue
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1 })
@@ -121,8 +134,21 @@ for (const [vname, w, h] of MATRIX) {
   const page = await ctx.newPage()
   for (const path of PAGES) {
     const name = `${slug(path)}-${vname}`
-    const status = (await page.goto(BASE + path, { waitUntil: 'networkidle' }))?.status()
+    // The status was already read here and printed in every row, and
+    // nothing ever gated on it, so a run over a site whose every route
+    // had been renamed photographed five not-found pages and reported
+    // `no frame overflows its viewport`. Measured 2026-11-09.
+    // Only the navigation is wrapped; the shutter below is the measuring.
+    const visit = await reach.visit(page, BASE + path, path)
+    if (!visit.ok) continue
+    const status = visit.status
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
+    // After `--until` and before the state drive, so a tool that was told to
+    // wait for something has done its waiting before this asks. Asked once
+    // per frame rather than once per run: `next dev` hydrates some routes
+    // and not others, so a single sample would generalise from whichever
+    // page happened to come first.
+    hydration.saw(`${path} at ${vname}`, await waitForHydration(page))
     if (enterState) await enterState(page, name)
     // Ask the page what time it thinks it is, rather than trusting that the
     // init script ran. L37: a flag accepted is not a flag applied, and the
@@ -188,4 +214,25 @@ const report = rows.map(line).join('\n')
 writeFileSync(`${OUT}/measurements.txt`, `${header}\n${settle}\n${matrixLine}\n${report}\n`)
 console.log(report)
 const bad = rows.filter((r) => r.scrollWidth > r.clientWidth)
+// The reach verdict comes FIRST, because the overflow headline is only
+// meaningful over frames of the pages that were asked for.
+const reachLines = reach.lines()
+if (reachLines.length) console.log(reachLines.join('\n'))
+if (reach.code()) {
+  console.log('\nno claim about overflow: see above.')
+  process.exit(reach.code())
+}
+// Then hydration, for the same reason and one layer in: the overflow table
+// above is a true measurement either way, because overflow is a fact about
+// the served HTML. What is NOT true over a dead page is what a reader takes
+// from a frame set, which is that the frames show the site. So this gates
+// the run without retracting the table.
+const hydrationLines = hydration.lines()
+if (hydrationLines.length) console.log(hydrationLines.join('\n'))
+if (hydration.code()) {
+  console.log(`\n${hydration.nothingRan() ? hydration.refused() : 'the frames named above show a page that never ran, so no claim here covers anything a client component draws.'}`)
+  process.exit(hydration.code())
+}
+// A verdict about the SITE stays exit 0 however bad it is, because the
+// reader of the table makes that call. See lib/reached.mjs.
 console.log(bad.length ? `\n${bad.length} frame(s) overflow` : '\nno frame overflows its viewport')

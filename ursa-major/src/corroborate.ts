@@ -165,7 +165,7 @@
 // person, and a buyer can filter on it.
 
 import { blobLookup, commitsTouchingPath, type CommitInfo, type PathCommit } from './pairfinder'
-import { normalize } from './normalize'
+import { normText } from './normalize'
 import { MIN_VERBATIM_LEN } from './match'
 import type { DescentEvidence } from './types'
 
@@ -352,19 +352,40 @@ export function gitDescentCorroborator(
     return rivals
   }
 
-  const blobCache = new Map<string, ReturnType<typeof blobLookup>>()
+  /**
+   * One blob per (sha, path), with its NORMALIZED text alongside the raw
+   * read.
+   *
+   * The normalized half is the whole reason this is a record rather than a
+   * `BlobLookup`, and it is where this module's cost was (measured
+   * 2026-11-09, docs/design/resolve-cost.md). The raw read was already
+   * cached; the normalization of it was not, so a blob read once was
+   * refolded once per span that asked about it. On this repository's
+   * `docs/sprints/pending.md` — 207,964 characters, 4,139 prose segments,
+   * the file that stalled the thirty-pull-request sweep — four spans cost
+   * 48 `normalize` calls over 9,902,350 characters and 2,599ms each, 73%
+   * of it inside `normalize`. The blob text does not change between spans,
+   * so 4,138 of every 4,139 of those folds answered a question already
+   * answered.
+   *
+   * `normText` and not `normalize`: nothing here points back into the
+   * original text, so the offset map is built and discarded. For a blob
+   * this size that map is a 201,665-element array.
+   */
+  const blobCache = new Map<string, { got: ReturnType<typeof blobLookup>; norm: string | null }>()
   const read = (sha: string, path: string) => {
     const key = `${sha}:${path}`
-    let got = blobCache.get(key)
-    if (!got) {
-      got = blobLookup(projectPath, sha, path)
-      blobCache.set(key, got)
+    let entry = blobCache.get(key)
+    if (!entry) {
+      const got = blobLookup(projectPath, sha, path)
+      entry = { got, norm: got.kind === 'present' ? normText(got.text) : null }
+      blobCache.set(key, entry)
     }
-    return got
+    return entry
   }
 
   return (filePath, spanText) => {
-    const needle = normalize(spanText).norm
+    const needle = normText(spanText)
     // The same floor the verbatim pass uses. Below it, containment in
     // another blob is coincidence: `return null` normalizes to eleven
     // characters and appears in every file in a TypeScript project, so a
@@ -378,9 +399,9 @@ export function gitDescentCorroborator(
     // so it is never allowed to lose a race to a sibling that git happened
     // to list first.
     for (const p of parents) {
-      const got = read(p, filePath)
-      if (got.kind !== 'present') continue
-      if (!normalize(got.text).norm.includes(needle)) continue
+      const { got, norm } = read(p, filePath)
+      if (got.kind !== 'present' || norm === null) continue
+      if (!norm.includes(needle)) continue
       return {
         basis: 'rival',
         sha: p.slice(0, SHORT),
@@ -409,7 +430,7 @@ export function gitDescentCorroborator(
         // looked at.
         return { basis: 'unverified', reason: 'rival_search_capped' }
       }
-      const got = read(c.sha, filePath)
+      const { got, norm } = read(c.sha, filePath)
       // A path git reported as touched can still be absent at a given
       // commit: the commit that deleted it touched it. That is a definite
       // answer and not a hole.
@@ -419,7 +440,7 @@ export function gitDescentCorroborator(
         continue
       }
       searched++
-      if (!normalize(got.text).norm.includes(needle)) continue
+      if (norm === null || !norm.includes(needle)) continue
       return {
         basis: 'rival',
         sha: c.sha.slice(0, SHORT),

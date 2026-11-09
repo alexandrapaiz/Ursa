@@ -16,13 +16,25 @@ will ever touch, and point `PW_ROOT` at it:
 export FE_RUN="$PWD/.fe-run-<id>"
 mkdir -p "$FE_RUN/pw"
 
+# The cache as a VARIABLE and not as a --cache flag, and it is exported once
+# here so every npm this run issues inherits it. Two reasons, and the second
+# is the one that is not obvious. First, it covers `npx` and anything npm
+# shells out to, which a flag on one command does not. Second, it is the only
+# form in which the check below can SEE this run's installs: npm overwrites
+# its own argv about 358 ms in and the flags are gone from /proc after that,
+# while /proc/<pid>/environ keeps the variable for the whole install.
+# Measured both ways in ../reviews/2026-11-09-message-2/data/.
+export NPM_CONFIG_CACHE="$FE_RUN/npm-cache"
+
 # BEFORE any npm, and before every later one: would it race one already
 # running, in this tree, elsewhere in this checkout, or on this cache?
-# Exits 3 if so, and prints a count line either way.
-bash docs/design/review-kit/check-installs.sh --cache "$FE_RUN/npm-cache" || exit 3
+# Exits 3 if so, and prints a count line either way. ONE INSTALL AT A TIME
+# is the point of it; the private cache is a second guard for a different
+# case. Do not background an install and start another.
+bash docs/design/review-kit/check-installs.sh || exit 3
 
 cd "$FE_RUN/pw" \
-  && npm i --no-save playwright --cache "$FE_RUN/npm-cache" \
+  && npm i --no-save playwright \
   && npx playwright install chromium
 export PW_ROOT="$FE_RUN/pw/node_modules"
 cd -
@@ -30,6 +42,57 @@ cd -
 # and at the end of the run: stop what you started, THEN delete what you
 # wrote. One command does both and prints a count line either way.
 bash docs/design/review-kit/teardown.sh            # --dry-run to look first
+```
+
+**A free branch name is not a free review directory.** The runtime names
+your branch after the trigger and tells you to append a suffix if the
+branch exists. The review directory under `../reviews/` takes the same
+name and has to be checked separately, because a merged branch is deleted
+and its directory is not: on 2026-11-09 the branch
+`ursa-frontend/2026-11-09-message` was free, `reviews/2026-11-09-message/`
+was not, and opening the run's `NOTES.md` there replaced a previous run's
+278-line one with three lines. Nothing failed and nothing conflicted; the
+merge took one side and the loss would have reached `main` as a clean
+diff. Check `ls ../reviews/` before you write the first file, not
+`gh pr list`:
+
+```bash
+ls -d docs/design/reviews/<trigger>* 2>/dev/null   # pick the first free suffix
+```
+
+**The browser you installed can disappear while you are still using it
+(2026-11-09, run t).** `npx playwright install chromium` writes into
+`/srv/asc/home/.cache/ms-playwright`, which is under the shared home every
+seat runs as, and this host's watcher reclaims that volume on a threshold
+rather than on ownership. Measured in one window: the install succeeded at
+07:41 and `ls` showed `chromium-1254`, `chromium_headless_shell-1254` and
+`ffmpeg-1013`; at 08:1x the same `ls` printed nothing and free space on
+`/tmp` had gone from 715M to 4.6G, with no install of this run's in
+between. A tool that had run clean four times then died with
+
+    browserType.launch: Executable doesn't exist at
+    …/chromium_headless_shell-1254/chrome-headless-shell-linux-arm64/…
+
+**The failure names the wrong cause**, which is why this is written down.
+Playwright's message is the one it prints for a fresh machine, "Looks like
+Playwright was just installed or updated", so it reads as a setup mistake
+at the start of a run rather than as an eviction in the middle of one. The
+tell that separates them is free space moving by gigabytes while you did
+nothing: a setup mistake cannot do that.
+
+This is `runner-facts` §97 one directory over. That section is about
+`/srv/asc/home/.npm` and names a per-run `NPM_CONFIG_CACHE` as the second
+guard; the browser cache has the same shape, the same parent, and no such
+variable in this kit's block above. `PLAYWRIGHT_BROWSERS_PATH` is the
+variable that would move it, and this run did not take that step, because
+a per-run copy of chromium is roughly 500M on a volume that was at 99 per
+cent when the eviction happened, so it trades a stall for a different
+stall. **The remedy that is free is to recognise it**: re-run the install,
+which is idempotent and took under a minute, and do not spend the window
+looking for what you broke.
+
+```bash
+ls /srv/asc/home/.cache/ms-playwright/ && df -h /tmp | tail -1
 ```
 
 **Run the teardown even if you wrote nothing**, because the server is the
@@ -78,6 +141,41 @@ was keyed on `$PWD`, so it missed the install six directories away
 sharing the same cache; and it exited 1 when clean and 0 while refusing,
 so nothing could gate on it. L68.
 
+**The repair of 2026-11-09 (run 2), and the honest size of it.** The
+version above anchored on field 0 of `/proc/<pid>/cmdline` alone, and a
+5 ms poll on a real install showed that is one of THREE shapes npm
+presents: for the first 358 ms /proc holds the seven fields the kernel was
+handed, `node /usr/bin/npm i --no-save playwright --cache x`, with argv[0]
+`node`. The anchor said yes 316 ms after the process appeared. So the guard
+read clean exactly while an install was beginning, which is the same shape
+as the `_cacache` detection line it replaced, and the exo seat's correction
+on that one is why this was gone looking for.
+
+The window is narrow and it does not explain the incident: the three
+concurrent installs of that morning started 33 s and 78 s apart, so none of
+them was inside another's 358 ms. What the run actually bought is three
+other things, and they are worth more than the window.
+
+- The cache a live install is using went from `UNREADABLE` to a path, by
+  reading `/proc/<pid>/environ` as well as the argv. Confirmed end to end
+  against a real install in `data/endtoend-env.txt`: three paired readings,
+  the old tool saying `cache=UNREADABLE` each time and the new one naming
+  the path and adding `same-cache`, which is a refusal reason the old one
+  could not produce.
+- The `--cache` flag became `NPM_CONFIG_CACHE` in the block above, because
+  legibility turns out to be a property of how the cache was SET and not of
+  when you look. The flag is readable for 358 ms; the variable is readable
+  for the whole install.
+- The guard's own latency, 0.9 to 1.7 s and up to 3.6 s under load, down to
+  0.31 to 0.61 s, by reading each `cmdline` with a NUL `mapfile` in the
+  shell instead of a subshell and a `tr` per pid, of which /proc here held
+  312. This is the one that matters most for a check a run is told to make
+  immediately before it installs, and it is also why the end-to-end
+  CANNOT see the 358 ms window: a scan costs longer than the window lasts,
+  so the unit cases against a real process in that argv shape are the
+  evidence for that half, and `data/endtoend-flag.txt` is the run that
+  tried and is reported as not discriminating.
+
 **The question it needs to answer is not the one L51 asks.** L51 is two
 installs in one `node_modules`. The resource that actually failed on
 2026-11-09 is the cache, and Ursa's exo seat established from npm's own
@@ -104,11 +202,14 @@ rather than the install. A prefix nothing else owns is immune to both.
 | `shoot.mjs` | Full-page PNGs at 1x across the page by viewport matrix, measuring horizontal overflow on each and naming the widest element when a frame overflows. Frames are frozen by default; `--live` lets the sky animate. `--wait <ms>` sets the settle, `--until <selector>` gates the shutter on content, which any page that fetches after hydration needs, and `--state <module.mjs>` drives the page into a state first. `--viewports name=WxH,…` replaces the three-viewport matrix outright, which is how anything below 390 gets photographed at all; the set's `measurements.txt` records which matrix produced it. `--pin-now <iso>` pins the page's `Date`, verified in the page before each shutter, for a surface that reads the clock. |
 | `measure-hit-areas.mjs` | The real tappable area of every control, probed outward one CSS pixel at a time so an `::after` overlay is seen rather than parsed. Promoted here on 2026-10-24g from `reviews/2026-10-24e/`, where it was written; `--base`, `--pages name=/path,…`, `--out`, `--json`, `--until`, and `--state` since 2026-10-26. Since 2026-11-09 (run c) the 2.5.8 sentence test counts words in an inline, non-interactive sibling **element** as well as in a bare text node, because an inline link whose neighbouring words are wrapped in a `<span>` is in the same sentence and the same line box; it was reporting the set view's record address link as a standalone control short of the floor, six times. The fixture's case 9, two abutting inline-block buttons, is what keeps that from exempting a row of controls. |
 | `measure-narrow.mjs` | What every surface does below 390, which is the narrowest viewport the charter reviews. Reports a clipped edge (unreachable) separately from an overflow (scrollable), attributes offenders to the nearest scroll container, and exempts full-bleed decoration, screen-reader text and closed drawers. Waits for the geometry to stop changing rather than for a settle somebody guessed. Written 2026-10-26b out of L25; its six exemptions and how each was earned are in its own header. `--base`, `--pages`, `--widths`, `--height`, `--until`, `--state`, `--out`, `--json`. |
-| `measure-contrast.mjs` | The WCAG ratio of every run of text against the pixels actually behind it, including placeholders. The backdrop is photographed, never read off the stylesheet, so a starfield, a gradient and an ancestor's `opacity` are all in the number. Reports a per-pixel median, fifth percentile and worst, exempts inactive components under 1.4.3, and refuses to answer for a page that moved between its two frames. Written 2026-10-25c. Since 2026-11-02e it narrates on **stderr**, one line per page with the five stage timings, because until then it wrote nothing at all until after `browser.close()` and a run making progress was indistinguishable from a wedged one. That cost a whole review its contrast number; L53. `--base`, `--pages name=/path,…`, `--only`, `--out`, `--json [path]`, `--until`. |
+| `measure-contrast.mjs` | The WCAG ratio of every run of text against the pixels actually behind it, including placeholders. The backdrop is photographed, never read off the stylesheet, so a starfield, a gradient and an ancestor's `opacity` are all in the number. Reports a per-pixel median, fifth percentile and worst, exempts inactive components under 1.4.3, and refuses to answer for a page that moved between its two frames. Written 2026-10-25c. Since 2026-11-02e it narrates on **stderr**, one line per page with the five stage timings, because until then it wrote nothing at all until after `browser.close()` and a run making progress was indistinguishable from a wedged one. That cost a whole review its contrast number; L53. Since 2026-11-09 (run ab) it takes `--state`, last of the four page-measuring tools to get it, so until then no driven state on this site had a contrast number and none could get one. The drive runs on BOTH pages, at the same point in each, because a drive applied to one of the two shutters is reported as the page having moved rather than as a wrong number. Its first outing found the hole it had been hiding: a field's VALUE was collected by nothing, so its pixels sat in no text box and the backdrop frame read them as drift, 0.31% at phone against a 0.2% limit and tracking the length of the typed address. Values are collected now, the way the placeholder beside them already was, and a covered placeholder is not also a row. L75. `--base`, `--pages name=/path,…`, `--only`, `--out`, `--json [path]`, `--until`, `--state`. |
 | `measure-focus.mjs` | The keyboard pass, written 2026-11-02 (run f). Walks the tab ring with real Tab presses, compares what Tab reaches against every focusable element the DOM offers, and names the controls in the difference. Then photographs each stop focused and blurred: the indicator is whatever pixels differ, so an outline, a box-shadow, a wash and a pseudo-element all answer without being named in advance, and each indicator pixel's ratio is taken against its own unfocused colour, which is the adjacency 1.4.11 asks for. Carries the SHARE of the indicator above 3:1 as well as its median, because a ring visible on one edge and invisible on the other three is what no single statistic shows. A third blurred frame gates on drift: a stop whose neighbourhood moves is UNSTABLE rather than given a number. The 2.4.11 area column is reported and never failed on, since the ring's weight is identity. Since 2026-11-02 (run h), after its first outing on the real site: the context pins `scroll-behavior`, because the site declares `smooth` and the tool was photographing a rectangle the control had scrolled out of (L58); the box is re-read after the focus lands rather than before; a stop that cannot be photographed is a row rather than the end of the run, which cost a whole viewport's table the first time; a stop Tab reaches that the DOM never declared gets a row too, instead of the silent `continue` that was reporting one direction of a set difference; a control under 8px on a side is photographed over its nearest ancestor, because an `sr-only` input's ring is drawn on its label and a crop around the input contains none of it; and a ring plus a low-contrast wash is `COMPOSITE` rather than `BELOW_FLOOR` when the clearing pixels alone cover a 1px perimeter of the control (L60). Since 2026-11-09: a stop the enumeration never declared is identified by a mark stamped on the element rather than by its coordinates, because `getBoundingClientRect` is viewport-relative and Tab scrolls each stop into view, so two undeclared stops of the same tag on a tall page hand the walk one identity and it stops short, reporting everything behind them as unreachable (L61). `--base`, `--pages`, `--only`, `--viewports`, `--until`, `--state`, `--out`, `--json`, `--frames`. Since 2026-11-09 (run c): the walk resets the **sequential focus navigation starting point** before its first Tab instead of calling `blur()`, which clears the focused element and does not move that point. Under `--state` the walk therefore used to begin wherever the drive left the focus and report everything above it as unreachable: on the set view, 3 stops of 11 and five false unreachables. No committed number was wrong, because the only `--state` module used with this tool before then set attributes and never moved focus. Selftest `selftest/check-focus.mjs`, 31 assertions. |
 | `measure-swatches.mjs` | The WCAG 1.4.11 ratio of every swatch in a legend against the pixels behind it, and of each swatch's marks against each other. Samples **every pixel** of the swatch rather than its centre column, which is the only sample a 1px ring inside the box cannot fool, and reports the share of the area clearing 3:1 alongside the ratio, because one bright pixel in a flat box passes a ratio on its own. Promoted 2026-10-27 from the probe that found the dashboard's fourth provenance key at 1.20:1; L36, L43. |
 | `measure-floor.py` | How much of a frame set is actually deterministic, over **N** independent shoots rather than a pair. Reports how many of the C(N,2) pairs drawn from them would have seen no floor at all, which is the number a two-shoot diff cannot produce and the reason this file exists; L48. Selftest `selftest/check-floor.py`, 12 assertions. |
 | `verify-hover.mjs` | Every hover state on the site, photographed as a **pair**: one frame at rest and one hovered and settled, over the same frozen sky, plus what the computed style did. `diff-frames.py rest hover` then says how many pixels the hover is worth. The pair is the point: three of this site's hover rules style a descendant rather than the hovered element, so a computed-style read alone reports "nothing changed" for them, and a wash too faint to register in a PNG is what the property read catches instead. A `disabled` control gets the verdict `by-design-disabled`, because a correctly inert hover and a broken spring print the same `none`. |
+| `lib/hydrated.mjs` | Did the page RUN, or was it only served? One layer under `lib/reached.mjs`: the server is up, the path answers 200, the HTML is right, and no client JavaScript ever executed, so every client component is absent from the frame and the frame looks like a site that never built the behaviour. `gate()` records a reading per load, `waitForHydration()` gives the race a bounded chance before asking, `code()` is 2 when anything shipped a client runtime that never ran, and `refused()` is the headline when nothing ran at all. Deliberately narrow: a page with no client runtime, which is every `file://` fixture in `selftest/`, is not a refusal. Written 2026-11-09 (run ac) after a review's own 15 frames turned out to be photographs of a dead page. Selftest `selftest/check-hydrated.mjs`, 15 expectations. |
+| `lib/subject.mjs` | The slot a selftest needs when its subject refuses. A selftest re-encodes a spawn into `ok`/`FAIL` plus one aggregate, and that vocabulary had no third word, so three of them turned a subject's exit 2 into their own exit 1, which is their code for an expectation missed and therefore a claim that the instrument is broken. `requireVerdict()` is `NO_VERDICT = 2`, outranking a failed expectation, forwarding the subject's own words. Written 2026-11-09 (run ac) from Ursa's security seat's F138, which is the same shape in `scripts/ci-checks.mjs`. |
+| `lib/reached.mjs` | Did the instrument reach its subject, and does it say so in BOTH channels a caller can read. `tracker()` records every navigation, `visit()` wraps the one call that establishes the premise, `code()` is 2 when anything was unreached, and `refused()` is the headline for the case where nothing was reached at all. Covers the quiet absence (a live server whose every path answers 404) and, since 2026-11-09 run z, the loud one (a dead port, which used to throw out of five of the six tools). A declared `--expect-404` path is reached, because this site's not-found page is a page under review. Selftest `selftest/check-reached.mjs`, 27 assertions. |
 | `lib/freeze.mjs` | Pins the animation clock and seeds `Math.random` before any page script runs, so the starfield draws the same sky twice. Without it 6 of the 15 review frames differ from themselves by up to 19,140 pixels. Since 2026-11-02 it also pins the page's `Date` on request, which is `shoot.mjs --pin-now`. |
 | `lib/pin-clock.mjs` | Pins `Date` in a **server** process, as a `node --import` preload, so a timestamp the server stamps into a payload stops moving between two shoots. Written 2026-11-02 out of L47: the overlay dashboard's `read at HH:MM:SS` comes from `serve.ts`, not from the browser, so no init script can reach it. Refuses rather than defaulting, because a preload that quietly does nothing is the defect it exists to repair. |
 | `diff-frames.py` | Counts the pixels that differ between two frame sets, per frame, with the row and column range. Only meaningful on frozen frames. |
@@ -120,6 +221,15 @@ rather than the install. A prefix nothing else owns is immune to both.
 | `check-redaction.mjs` | The repository's redaction gate, run locally before pushing. Reads the three patterns, the exclusions and the allowlist out of `.github/workflows/redaction-gate.yml` on every run rather than holding a copy, and matches with the same `grep -rInE` the gate calls, so it cannot drift from the thing it predicts. Exits 2 and says so if it cannot parse the gate, because a checker that reports zero rules and a checker that reports zero hits print the same word. `--root`, `--json`. Written 2026-10-27 after the gate was red three times on one fixture line with nothing local able to see it. |
 | `read-spring.mjs` | Reads a spring out of a `linear()` easing: overshoot, damping ratio, frequency, stiffness. |
 | `make-spring.mjs` | Writes a spring into a `linear()` easing, which is how a spring ships in CSS with no library. |
+
+**`--out` is a directory for some of these tools and a file for others,
+and nothing says which (2026-11-09).** `measure-contrast.mjs` writes
+`<out>/contrast.txt` and `measure-focus.mjs` writes `<out>` itself, so a
+caller who passes the same shape to both gets `EISDIR` from the second,
+**after** the measurement has run and printed. Nothing is lost, because the
+table is already on stdout, but the file is not written and the run reads as
+a crash. Directories: `shoot.mjs`, `measure-contrast.mjs`, `verify-hover.mjs`.
+Files: `measure-focus.mjs`, `measure-hit-areas.mjs`, `measure-narrow.mjs`.
 
 **`--state` measures a surface rather than a path.** A module whose
 default export is `async (page, name) => {}`, run after the navigation
@@ -154,6 +264,8 @@ runnable on its own with no server and no network:
 | `selftest/check-contrast.mjs` | 17 hand-computable ratios for `measure-contrast.mjs`, over `selftest/contrast.html`. |
 | `selftest/check-hit-areas.mjs` | That `measure-hit-areas.mjs` can still fail. Eighteen expectations since 2026-11-09, the last two being that words in a sibling `<span>` exempt an inline link the way a bare text node does, and that two abutting controls with no prose between them are still held to the floor. Its headline on the real site went to zero on 2026-10-25b, and zero is also what a tool that had stopped looking would print, so this serves `selftest/hit-areas.html`, whose right answers are built in, and asserts each of the four verdicts actually fires. |
 | `selftest/check-focus.mjs` | 31 assertions for `measure-focus.mjs`, including a focus trap it has to report as unreachable controls rather than a short clean ring, L36's two hand-taken ratios recomputed by a different code path, and a 4000px page whose three undeclared stops all land at the same viewport coordinate, which the walk has to run to the end of. That last fixture fails five of its six assertions on the code of 2026-11-02, which is how it was checked. `after-drive.html` is the same discipline for the walk's starting point: five controls, a drive that clicks the fourth, and three of its four assertions fail on the code of 2026-11-09 morning, reporting one stop and four false unreachables. |
+| `selftest/check-hydrated.mjs` | 15 expectations for `lib/hydrated.mjs`: a hydrated page, a served-but-dead page, a page with no client runtime at all, and one of each. The load-bearing one is the third, because every other selftest here drives hand-written HTML over `file://` where no framework ever loads, so a gate that refused there would convert ten working selftests into ten non-answers. |
+| `selftest/check-reached.mjs` | 27 assertions for `lib/reached.mjs`: nine units, seven of them added 2026-11-09 (run z) for the loud absence, and three end-to-end cases over a real 404-serving fixture. The load-bearing ones are that a declared 404 still exits 0, so the repair is not "exit non-zero on any 404", and that ONE subject reached out of two does NOT withhold the headline, which is the too-wide-refusal trap as an expectation. |
 | `selftest/check-teardown.sh` | 9 assertions for `teardown.sh`, with real processes rather than mocked paths, since the subject reads `/proc`. The two load-bearing ones are a live server in another seat's tree, which must be left alone under `--orphans` as well as without it, and a process that only names a server on its command line, which is what the `pgrep -f` version matched and would have killed. Every decoy is detached from the test's stdout: a background process holding the pipe open makes a finished test look like a hung one. |
 | `selftest/check-floor.py` | 12 assertions for `measure-floor.py`, the load-bearing one being that six shoots split four and two report seven blind pairs of fifteen. |
 | `selftest/check-pin-now.mjs` | That `shoot.mjs --pin-now` pins the page's clock and refuses the two ways it can be asked for what it cannot do. It needs its own fixture because neither product reads the wall clock client-side, so no page here would prove the flag works. |
@@ -261,6 +373,46 @@ wrote it published no diff for them and said so. If you need a pixel
 comparison across arms, clip to something that does not move, or do not
 scroll.
 
+## What every tool here does when it cannot reach its subject
+
+**Exit 2, and the refusal in the slot a reader scans.** All six
+browser-driving tools now examine their premise instead of letting the
+navigation error escape. Before 2026-11-09 (run z) five of the six ended
+at exit 1 with an **empty stdout** and a node stack trace on stderr, which
+is a non-zero status by accident: 1 is what node sets for any uncaught
+throw, so it carried no information about what failed. Both columns, one
+directory per tool, are in `../reviews/2026-11-09-message-z/data/`.
+
+Use `reach.visit(page, url, path)` from `lib/reached.mjs` for every
+navigation. It wraps the **one** call that establishes the premise and
+nothing else, which matters: a refusal scoped one call too wide converts a
+finding into a non-answer. `verify-hover.mjs`'s harness probe was the arm
+nobody had covered, because it navigates before the loop that holds the
+tracker.
+
+**Empty stdout and say-it-on-stdout are the same rule.** They look
+opposite and they are one rule applied to two kinds of channel, which is
+L74 and worth knowing before you write the next instrument:
+
+| the caller does | so a refusal must | because |
+|---|---|---|
+| `$(cmd)` — stdout is a **value** | print **nothing** on stdout | every byte is taken as the value |
+| reads the output — stdout is a **report** | print the **refusal headline** | silence reads as a tool that did not run |
+
+What holds in both: **the verdict slot carries the refusal, never a number
+computed over nothing.** This kit is the report kind, so its tools print
+`NOT MEASURED` and `NO VERDICT` where the headline would go, rather than
+`0 of 0 below the floor`, which is a true sentence inside the legal range
+of the real answer and reads as a pass.
+
+**The code is 2 here and 3 in `tools/board/`, deliberately.** 3 is the
+house no-verdict code in `bypass.mjs`, `post-verdict.mjs` and
+`spend.mjs`, where 1 and 2 were already spent on findings. In this kit
+findings are exit 0 (a verdict about the site belongs to the reader of the
+table) with `measure-focus.mjs` the one exception at 1, so 2 is free and
+is `UNREACHED` in `lib/reached.mjs`. Adopting 3 would leave two
+no-verdict codes where there is one. If you add a tool, take 2.
+
 ## Three things to know before you trust a number out of this
 
 **Calibrate first.** Point `sample-motion.mjs` and `fit-motion.mjs` at
@@ -303,6 +455,29 @@ way and worse: it reported `0 targets seen` instead of erroring.
 2026-10-24 host the overlay's client components never hydrated under the
 dev server, with a failed HMR handshake and no error on the page, so
 every frame of that app has to come from `next build && next start`.
+
+**It is not the overlay's problem, and since 2026-11-09 (run ac) it is a
+gate rather than this paragraph.** The same thing is true of `ursa-minor`,
+which is the app this seat photographs every run, and scoping the sentence
+above to one app is most of why: it read as a fact about somewhere else.
+Measured at 1440x900 three seconds after networkidle, same probe on both
+servers, `next dev` had 3 of 114 elements carrying a React fiber and no
+fiber on the body, `next start` had 88 of 103 and a fiber on the body.
+
+What that is worth knowing in one number: of four pages shot both ways at
+desktop, **three were pixel-identical** and the fourth differed by 32.1 per
+cent. So on `/record`, `/record/at` and `/record/mini-fixture` a frame of a
+page that never ran a line of JavaScript is byte-for-byte a frame of a page
+that did, while every client behaviour on it is dead. The home page differs
+only because its hero is a WebGL constellation that simply is not drawn, so
+the one page that announces the fault is the one with a canvas in it.
+
+`lib/hydrated.mjs` asks the question, `shoot.mjs` waits for the answer and
+then refuses at exit 2 over a page that never arrived, and
+`selftest/check-hydrated.mjs` holds it to four states. The wait is there
+because hydration is a race and not only a server setting: with the gate
+reporting rather than waiting, 1 of 15 frames off the **production** build
+caught the home page mid-hydration at 2 of 102 fibers.
 
 **A frame rate measured in a sandbox is a fact about the sandbox.** With
 no GPU, chromium falls back to SwiftShader and rasterises on the CPU, and

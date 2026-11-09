@@ -72,6 +72,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { requireVerdict } from '../lib/subject.mjs'
 
 const KIT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const dir = mkdtempSync(resolve(tmpdir(), 'focus-selftest-'))
@@ -211,6 +212,7 @@ writeFileSync(
 const run = (file, state = null) => {
   const json = resolve(dir, `${file}.json`)
   let status = 0
+  let said = ''
   try {
     execFileSync(
       process.execPath,
@@ -226,7 +228,17 @@ const run = (file, state = null) => {
     )
   } catch (e) {
     status = e.status
+    // Captured so a refusal's own words can be forwarded. `execFileSync`
+    // puts them on the error, not on the return value, which is why this
+    // only exists in the catch.
+    said = String(e.stdout || '') + String(e.stderr || '')
   }
+  // Before the JSON is parsed, which is the ordering that was the fault
+  // here: the status was already in a variable and the parse ran first, so a
+  // subject that wrote no JSON surfaced as an ENOENT about this file's own
+  // tmpdir and never mentioned the subject's status at all. See
+  // lib/subject.mjs.
+  requireVerdict(`measure-focus.mjs on ${file}`, status, { out: said, json })
   return { status, ...JSON.parse(readFileSync(json, 'utf8')) }
 }
 

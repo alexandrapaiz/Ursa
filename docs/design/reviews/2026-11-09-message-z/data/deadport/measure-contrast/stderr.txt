@@ -1,0 +1,20 @@
+[   0.0s] writing to /tmp/contrast/contrast.txt, 1 page(s) against http://127.0.0.1:4599
+[   0.0s] launching chromium
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4599/
+Call log:
+  - navigating to "http://127.0.0.1:4599/", waiting until "networkidle"
+
+    at /tmp/epito-ursa-frontend-Qw60dt/docs/design/review-kit/measure-contrast.mjs:354:34
+    at mark (/tmp/epito-ursa-frontend-Qw60dt/docs/design/review-kit/measure-contrast.mjs:349:25)
+    at /tmp/epito-ursa-frontend-Qw60dt/docs/design/review-kit/measure-contrast.mjs:353:11 {
+  log: [
+    '  - navigating to "http://127.0.0.1:4599/", waiting until "networkidle"'
+  ],
+  name: 'Error'
+}
+
+Node.js v22.23.2
