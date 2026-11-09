@@ -37,11 +37,21 @@ Same probe, three seconds after networkidle, 1440x900:
 Four pages shot both ways at desktop and diffed in `data/frame-diff.txt`:
 
 ```
-home-desktop.png                1310196 px   31.374%
+home-desktop.png                1338864 px   32.061%
 record-at-desktop.png                 0 px    identical
 record-desktop.png                    0 px    identical
 record-mini-fixture-desktop.png       0 px    identical
 ```
+
+Those are the numbers off the frames as committed, so re-running
+`diff-frames.py` over the two directories here reproduces them. Off the
+uncompressed originals the home figure was 1,310,196 px and 31.374 per
+cent; the frames in this repository are quantised to a 256-colour palette
+to keep it light, and quantisation is per image, so that one number moves
+by about seven tenths of a point. The three zeros do not move, which is
+the claim this review rests on, and they are a stronger result after
+compression than before it: two images quantised independently came out
+identical, so they were genuinely the same image.
 
 Three of four identical. On those three, a frame of a page that never ran
 a line of JavaScript is the same image as a frame of a page that did,

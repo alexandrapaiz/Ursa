@@ -3403,7 +3403,10 @@ probe three seconds after networkidle against `next dev` and against
 
 Four pages shot both ways at desktop and diffed: `/record`,
 `/record/at` and `/record/mini-fixture` came out **identical, 0 pixels
-different**, and `/` differed by 1,310,196 pixels, 31.4 per cent. The
+different**, and `/` differed by 1,338,864 pixels, 32.1 per cent, off the
+frames as committed (1,310,196 and 31.4 per cent off the uncompressed
+originals; the committed frames are quantised to 256 colours and that
+moves the one non-zero figure, not the three zeros). The
 home page is the only one that announces the fault, and only because its
 hero is a WebGL constellation that is simply not drawn. On the other
 three the dead frame and the live frame are the same image while every

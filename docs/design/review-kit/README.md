@@ -465,7 +465,7 @@ servers, `next dev` had 3 of 114 elements carrying a React fiber and no
 fiber on the body, `next start` had 88 of 103 and a fiber on the body.
 
 What that is worth knowing in one number: of four pages shot both ways at
-desktop, **three were pixel-identical** and the fourth differed by 31.4 per
+desktop, **three were pixel-identical** and the fourth differed by 32.1 per
 cent. So on `/record`, `/record/at` and `/record/mini-fixture` a frame of a
 page that never ran a line of JavaScript is byte-for-byte a frame of a page
 that did, while every client behaviour on it is dead. The home page differs
