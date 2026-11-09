@@ -252,6 +252,21 @@ DRIFT_ADVICE = {
                        "being fixed. Report it upstream.",
 }
 
+# The two verdicts are one fact and they read as two different facts depending
+# on the row. "Missed" on a hole row is the defect. "Missed" on a form the
+# guard is supposed to accept is the guard working, and printing the word
+# "missed" beside it invites exactly the misreading this file's own prose fell
+# into once: a reader taking the gate's output for a list of defects. Display
+# only, so the stored verdict and the JSON stay one vocabulary.
+VERDICT_WORD = {
+    ("hole", MISSED): "missed", ("hole", CAUGHT): "caught",
+    ("control", CAUGHT): "caught", ("control", MISSED): "missed",
+    ("intended", MISSED): "not flagged", ("intended", CAUGHT): "flagged",
+    ("safe", MISSED): "passes", ("safe", CAUGHT): "DENIED",
+    ("clean", MISSED): "passes", ("clean", CAUGHT): "flagged",
+    ("overcatch", CAUGHT): "flagged", ("overcatch", MISSED): "passes",
+}
+
 
 def verdict_for(command, checker=None):
     """What a checker says about one command string."""
@@ -315,8 +330,9 @@ def main():
     else:
         for r in results:
             mark = "ok   " if r["got"] == r["verdict"] else "DRIFT"
+            word = VERDICT_WORD.get((r["kind"], r["verdict"]), r["verdict"])
             print(f"  {mark} {r['kind']:<9} {r['hole'] or '  ':<3} "
-                  f"{r['verdict']:<7} {r['command']}")
+                  f"{word:<11} {r['command']}")
         counts = {}
         for r in results:
             counts[r["kind"]] = counts.get(r["kind"], 0) + 1
