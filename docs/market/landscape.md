@@ -1246,6 +1246,65 @@ current export. Worth a direct product test before leaning further on
 either "one-directional" or "symmetric" as the precise word. Last
 observed 2026-10-14: [Claude support: Importing and exporting your memory from Claude](https://support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude).
 
+Update 2026-11-09 (message, 16th run), re-checked at the monthly cadence
+since this was the most stale entry on the map (26 days): Anthropic's
+own support page, re-fetched this run, states the same mechanism as the
+2026-10-14 update — export is still "copying and pasting" text "into a
+local file on your computer," with no named file format or API, and the
+page still neither states nor implies a competitor could read a Claude
+export back in automatically. No material change. Separately, a search
+this run surfaced secondary coverage (an unverified aggregator article,
+not independently corroborated, that returned HTTP 403 on direct
+refetch) claiming a stronger story — that a "legacy" export expired
+2026-09-09 and that current exports "can't be imported into another
+personal Claude account" at all. Neither claim appears on Anthropic's
+own page, so this file is not acting on them; recorded here as a
+discrepancy between a secondary source and the primary one rather than
+as a finding, per this file's standing practice of sourcing every claim.
+Last observed 2026-11-09: [Claude support: Importing and exporting your
+memory from Claude](https://support.claude.com/en/articles/12123587-importing-and-exporting-your-memory-from-claude).
+
+### Claude agent memory architecture — notes, dreaming, wiki representations (Anthropic)
+
+What it is: Anthropic's own published architecture for how Claude
+retains knowledge between sessions, distinct from the Claude Memory
+Import entry above (that entry is the cross-platform import/export
+*feature*; this is the underlying memory *architecture* Anthropic
+itself researches and builds). New entry, added this run. Published as
+"The components of agent memory" (2026-11-06): four layers (a small
+block of injected context, memory notes Claude writes, wiki-style
+representations linking those notes, and raw transcripts), plus
+"dreaming," a between-session review pass where Claude rereads its own
+logs, corrects stale notes, and promotes or reorganizes memory into
+linked representations. Anthropic's own reported result: a wiki built
+from roughly 350,000 files raised one evaluation's graded-criteria
+score from 13% to 48%. Who it serves: Claude's own long-running-agent
+users (the post frames this around coding and research agents working
+over many sessions, not the consumer memory-import audience). Pricing:
+included with Claude access. Strengths: this is a materially deeper,
+self-correcting memory architecture than any single-layer "store a
+fact, retrieve a fact" competitor in this category, and Anthropic
+publishing the mechanism (rather than only a benchmark number) gives
+outside readers, including this file, something concrete to check
+claims against. Weakness against Ursa, and the sharpest one: this is
+the highest-engagement memory-category post this file has tracked —
+174 points, 99 comments on Hacker News, beating this file's prior
+high-water mark (the 2026-11-02 decay-memory Show HN thread at 98/53)
+— and its own top comments converge on exactly Major's thesis rather
+than praising the architecture. One commenter built a separate,
+version-controlled plain-markdown memory tool specifically to survive
+switching between Claude Code and other tools; another states plainly
+that Anthropic's design "cover[s] a huge breadth of usecases... but are
+distractingly inferior to alternatives the user takes an active part in
+shaping." The pattern repeats from the 2026-11-02 brief's memory
+finding: the deeper a vendor's own memory architecture gets, the more
+its own users' top comments ask for portability and user control
+instead, not better architecture. Last observed 2026-11-06: [Anthropic:
+The components of agent
+memory](https://www.anthropic.com/research/components-of-agent-memory),
+[Hacker News discussion, 174 points/99
+comments](https://news.ycombinator.com/item?id=50402212).
+
 ### Gemini Personal Intelligence (Google)
 
 What it is: a cross-app memory layer, reaching all free Google accounts
@@ -1821,6 +1880,38 @@ docs/market/positioning.md. Last observed 2026-10-26: [arXiv
 2609.05339: Does Your Agent's Memory Survive a Model
 Upgrade?](https://arxiv.org/abs/2609.05339).
 
+Update 2026-11-09 (message, 16th run): a ninth attempt, but a different
+kind than the first eight — not a new format joining the pile, but the
+first entrant naming the pile itself as the problem and saying what
+would fix it. Mads Thines, LoreKit's maintainer (and, separately, an
+engineer at observability vendor Dash0), published "Agent memory needs
+its OpenTelemetry moment" (2026-11-07), arguing the shortage is not a
+missing tool but a missing agreement across four layers: a data model,
+semantic conventions, a protocol, and reference implementations — the
+same four-layer shape OpenTelemetry used to unify observability vendors
+after the 2019 OpenTracing/OpenCensus merger. LoreKit's own MIT-licensed
+schema is offered only as "one concrete input," with the author stating
+outright "this isn't a pitch that LoreKit has solved memory" and
+explicitly inviting the community to "compare notes." Checked against
+this note's standing bar (independent implementation, neutral
+governance, adoption beyond the format's own author): unmet, same as
+all eight prior attempts — and unlike those eight, this one does not
+claim otherwise. It is a call to convergence, not a competing format.
+Worth tracking on its own because it reframes a pattern this note has
+repeated eight times running (another entrant, same gap) as something
+one of the entrants is now naming out loud, by a person with direct
+experience building the exact kind of cross-vendor standard (OpenTelemetry)
+this category still lacks. Nine attempts/calls now, zero that clear the
+bar. Read together with the new Claude agent memory architecture entry
+above, published one day earlier: the dominant lab is going deeper into
+its own proprietary memory architecture at the same moment a smaller
+open-source maintainer is calling for the cross-vendor standard that
+would make that depth portable — the gap this file has been tracking
+on the demand side (users building their own workaround tools) now has
+a named supply-side proposal aimed at it, for the first time. Last
+observed 2026-11-09: [LoreKit: Agent memory needs its OpenTelemetry
+moment](https://www.lorekit.io/blog/open-agent-memory-format).
+
 ## Changelog
 
 - 2026-09-26 — initial map, 12 entries (5 preference-data vendors, 3
@@ -2085,3 +2176,16 @@ Upgrade?](https://arxiv.org/abs/2609.05339).
   premise found in this file from a named, tracked competitor, run
   point-by-point against CLAUDE.md's own constraints rather than
   dismissed. Positioning consequence in docs/market/positioning.md.
+- 2026-11-09 (message, 16th run) — re-checked Claude Memory Import
+  (Category 3), the map's most stale entry at 26 days: no material
+  change on re-fetch of Anthropic's own page, an unverified secondary
+  source's stronger claim recorded but not acted on. Added a new
+  Category 3 entry, Claude agent memory architecture (notes, dreaming,
+  wiki representations), Anthropic's own 2026-11-06 research post —
+  the highest-engagement memory post this file has tracked (174
+  points/99 comments), whose own top comments ask for portability and
+  user control rather than praising the architecture. Dated update to
+  the Category 3 "no neutral standard" cross-cutting note: a ninth
+  attempt, but the first to name the fragmentation itself as the
+  problem rather than add to it (LoreKit's "agent memory needs its
+  OpenTelemetry moment," 2026-11-07).

@@ -19060,6 +19060,39 @@ docs the Observe step names. No board read this pass. GitHub pull request
 metadata for the twelve open rows was read via `gh` and is cited only as
 evidence of what other seats have open.
 
+### 2026-11-09 (market, message, 16th run) — Cite named, reproducible HN evidence of users building DIY portable-memory tools the next time Major's case needs a demand-side example
+- Trigger: docs/market/positioning.md, this run's entry on Anthropic's
+  "The components of agent memory" (2026-11-06) and its Hacker News
+  thread (174 points, 99 comments, the highest-engagement memory post
+  this file has tracked). Reading the thread rather than the
+  announcement found that its own top comments did not debate the
+  architecture; one commenter described building a separate tool that
+  manages memory through version-controlled plain-markdown files
+  specifically so it survives switching between Claude Code and other
+  agents, and another stated plainly that Anthropic's design "cover[s]
+  a huge breadth of usecases... but [is] distractingly inferior to
+  alternatives that the user takes an active part in shaping."
+- What: this is the fourth time this file has found a tracked
+  product's own users or its own named critic independently asking for
+  portability/control instead of praising depth (2026-10-25 Zep CEO
+  critique, two from 2026-11-02, now this one), which has stopped
+  looking incidental. It is also unusually citable: a named comment on
+  a public, permanent HN thread under the dominant lab's own
+  announcement, not a paraphrase of a vendor's marketing or an
+  anonymous forum post. The next time Major's case for user-owned,
+  portable memory needs a concrete "the demand is real, not assumed"
+  example, this thread is a stronger citation than a general market
+  trend claim, precisely because it is a user reacting to the
+  state-of-the-art competing approach rather than to Major itself.
+- First step: whoever drafts the next Major-facing methodology or
+  evangelism piece keeps
+  https://news.ycombinator.com/item?id=50402212 on hand and quotes the
+  two comments named above (or re-reads the thread for a sharper one),
+  the same discipline the 14th and 15th runs' proposals already apply
+  to specific papers and benchmark-gaming cases.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-09 — `parseInstant` places an instant that does not exist
 - Trigger: measured while building `parseDay` today.
   `Date.parse('2026-02-30T00:00:00Z')` answers `1772409600000`, silently
