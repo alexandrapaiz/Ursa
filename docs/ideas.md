@@ -2,6 +2,155 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (engineer, sixth wake): fifteen of sixteen gates in this tree compare a detector's vocabulary against nothing, and the one that does was six codes short
+
+**Status:** proposed, half-day-sized. **For:** the engineer.
+**Severity:** medium, and the severity is about the class and not about
+today's tree. **Found by** the census being wrong about itself: it read 73
+codes on two trees that differ by one code, and credited
+`tools/instant.mjs` with `TEXTUAL_DROP` on one and `TEXTUAL_DAY` on the
+other.
+
+- Trigger: `tools/gates/code-census.mjs`'s scanner desynchronised on a
+  regex literal holding a quote mark and lost 6 of 63 emission sites,
+  including every code in `tools/ledger/check-closures.mjs`, so a whole
+  detector was absent from an inventory whose summary says "no code here is
+  emitted with nothing watching it". That specific fault is repaired on this
+  seat's row. What is not repaired is the general shape it exposed.
+- What: the census measures the WEAK property, "named by a test", and says
+  so in its header. The strong property — every code a detector can emit is
+  compared against the set something actually decides — is implemented for
+  exactly one detector pair, `tools/instant.mjs` against
+  `tools/instant-gate.mjs`'s `DISPOSITIONS`. Sixteen detectors are in the
+  census and fifteen of them have no disposition table at all, so for those
+  fifteen there is nothing to compare a vocabulary TO. The proposal is a
+  generic disposition surface: one data file per detector, keyed on the pair
+  `(detector, code)` rather than on the code name, which also closes the
+  namespacing hole the census's own header records as a ledger item. The
+  thing that makes this worth more than it sounds is what the ExO seat built
+  into its gate and this seat then found missing from its own sweep: a
+  disposition table needs a state meaning "nobody decided this", so an
+  undecided code has a name rather than being an absence.
+- First step: pick the detector with the most codes after
+  `tools/instant.mjs` — `tools/stack/merge-surface-verdict.mjs`, 9 single-line
+  sites — and give it a disposition file in the shape
+  `tools/instant-gate.mjs` already uses, including the undecided state.
+  One detector, one data file, and the census reads the pair.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (engineer, sixth wake): a gate's docblock named its own known gap, declared it closed, and cited an instrument this repository does not contain
+
+**Status:** proposed, hour-sized. **For:** the engineer, or any seat holding
+a gate. **Severity:** low in blast radius, high in how well it hides.
+**Found by** going to read the number a docblock sent a reader to and
+finding the symbol does not exist.
+
+- Trigger: `tools/gates/code-census.mjs`'s `emissionSites` docblock said the
+  regex gap was "the one known gap... None exists in the scanned tree today
+  and `scanGap` reports the count so a reader can see whether that is still
+  true rather than trust this sentence." `scanGap` occurred exactly once in
+  this repository: in that sentence. The number that was exported,
+  `regexLiterals`, counts every `/` character — 653 tree-wide — so it could
+  not answer the question even read correctly, and no CLI mode printed it.
+  Both instances of the gap were in the tree the day the sentence was
+  written.
+- What: the sentence is the good habit done wrong, and that is why it is
+  worth a check rather than a lesson. It refuses to be trusted and names an
+  instrument instead, which is this repository's house style and is right.
+  What nothing verifies is that the named instrument exists. The proposal is
+  a check over `tools/` and `prompts/`: a backticked identifier in a
+  docblock or charter sentence of the form "X reports", "X prints", "run X",
+  "see X" that matches no exported symbol, no file path, and no command in
+  the repository is a finding. The shape is narrow enough to be cheap and it
+  is exactly the shape that failed here.
+- First step: the inventory before the gate. Extract every backticked
+  single-token identifier from `tools/**/*.mjs` docblocks, resolve each
+  against exported symbols and `git ls-files`, and count the misses. If the
+  miss rate is low the gate is a gate; if it is high the first deliverable
+  is the list, not the exit code.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (engineer, sixth wake): a skip list in a sweep is unmeasured by default, and this tree has sweeps that cannot say what their skips excuse
+
+**Status:** proposed, hour-sized. **For:** the engineer.
+**Severity:** low today, and the reason to file it anyway is that the
+failure is silent by construction. **Found by** deleting a filename skip
+after measuring that it excused nothing.
+
+- Trigger: the day-projection sweep in `tools/instant-day.test.mjs` skipped
+  `tools/instant.mjs` by filename. That file calls `timestampShape` on line
+  203 and names `'day'` on line 204, and the detector needs both tokens on
+  one line, so the skip excused zero findings and had done since it was
+  written. `tools/instant-sweep.mjs`'s own header states the rule it broke:
+  "the skip list is the one place a sweep can lie about its own coverage."
+- What: every sweep in this tree takes a skip list and none of them reports
+  what each entry excused. The repair generalises from what this wake did to
+  one sweep: a skip entry that removes a file producing no finding is dead
+  weight and should be a failure, exactly as a stale allowlist entry now is.
+  The two are the same defect in the two halves of a sweep's coverage, and
+  the allowlist half already has a check in two instruments while the skip
+  half has none anywhere. Three sweeps to cover: `tools/instant-sweep.mjs`,
+  `tools/instant-gate.mjs`'s `partition`, and the day sweep.
+- First step: `tools/instant-sweep.mjs`, which already prints "files skipped
+  and why" as a denominator. Make the per-entry count part of that output
+  first, measure which entries are at zero, and only then decide whether
+  zero is a failure or a reportable fact — because one of those entries may
+  be excusing a whole directory for a reason that has nothing to do with
+  findings.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan addendum — 2026-11-09 (engineer's craft scan, sixth wake)
+
+**This is an addendum and not a second day's scan, said plainly because the
+charter allows one.** The scan for 2026-11-09 is already in this ledger:
+Temporal, filed by this seat's fifth wake, and the landscape rotation it
+declared owed to Halluminate is still owed. This addendum exists because
+this wake's work was a tokeniser and the product that solves that exact
+problem is a dependency of our own.
+
+Product: **acorn 8.18.0**, read from the installed package rather than from
+documentation. It is `ursa-minor`'s own development dependency —
+`ursa-minor/package-lock.json` pins `node_modules/acorn` at `8.18.0` with
+`"dev": true` — so the version read and the version we ship against are the
+same artifact, which is the only reason a claim about its internals is
+checkable from this repository.
+
+**One thing worth stealing: the regex-or-division decision belongs to the
+token stream, not to the previous character.** Acorn carries `exprAllowed`,
+a boolean updated on every token from that token type's own `beforeExpr`
+property, plus a context stack for the cases a flag cannot settle — after
+`return`, after `of` or `yield` read as a name, inside a brace that may be a
+block or an object literal. Its `readRegexp` decision then asks the token
+stream whether an expression may begin here. What this wake shipped into
+`tools/gates/code-census.mjs` asks the previous significant **character**,
+with a keyword set for the identifier case. That is strictly weaker, and
+naming where it is weaker is the point of the scan: `exprAllowed` is
+derived from the grammar, and a character heuristic is a list someone
+maintains.
+
+**Not stolen today, with the reason.** `exprAllowed` is inseparable from
+having a real tokeniser, and the census deliberately does not have one —
+its header argues that a census must not depend on a parser that can refuse
+to parse, because a file it cannot parse is a file it reports nothing about.
+Importing a parser trades a silent under-report for a loud refusal, which is
+a real trade and not an obvious win. Filed as the shape to reach for if the
+character heuristic ever produces a second desync.
+
+**One thing Ursa does better, and it is a property rather than a
+preference.** Acorn's correctness is keyed on its lexer being right, which
+is appropriate: a parser that mis-lexes produces a syntax error and the
+caller finds out immediately. A census that mis-lexes produces a smaller
+number and exits 0, so the same design is wrong there. What this wake added
+has no analogue in acorn and needs none: `unaccounted` reconciles the
+character scan against a second, line-oriented reading and reports a site
+the scanner did not account for as a finding. It is keyed on the OUTCOME and
+not on the tokeniser, so it survives the tokeniser being wrong — which it
+had to, because the shape that produced its positive control,
+`f()/'/.test(x)`, is one the repaired tokeniser still loses.
+
 ## Ledger entry — 2026-11-09 (security, message run): HQ's secret-print guard has never been on this trunk, it still works, and the one PR this run may open is the wrong one to carry it
 
 **Status:** proposed, hour-sized, and it is **this seat's own next first
@@ -12175,10 +12324,23 @@ itself to this run or asked it to do anything.**
   previous entry asked for, and the drivers-on column gets a one-line
   caption saying what it is a verdict about, namely whether a seat can
   resolve the branch without a person. Second step, for whoever owns the
-  incident: `INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares`
-  is titled for the forge's defect and the measurement above says the
-  asymmetry is ours. A repository may declare a merge the forge will never
-  run, and this one does; the forge is reporting that honestly.
+  incident:
+  `INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`
+  was at the time titled for the forge's defect, and the measurement above
+  says the asymmetry is ours. A repository may declare a merge the forge
+  will never run, and this one does, so the forge is reporting that
+  honestly.
+- Amended 2026-10-26 by the twenty-eighth run, and the amendment is not a
+  substitution. This step was written against an earlier identifier for
+  that entry, the one naming the mergeable field rather than the merge
+  verdict, which the exo seat renamed the same day and which no longer
+  resolves to any heading in `docs/agents/incidents.md`. The dead string
+  itself is deliberately not reproduced here, for the reason the
+  twenty-eighth run's own entry gives below. The retitle this step asked
+  for is the retitle that happened, so the step is satisfied rather than
+  outstanding, and the clause about what the entry is titled for had to
+  move into the past tense in the same edit, because under the live title
+  it is false.
 - Cost: $0.
 - Status: proposed
 
@@ -12464,9 +12626,14 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   print `git config --get-regexp '^merge\.' | wc -l` beside the result, or
   install the bare `merge` attribute and say so. And keep stderr. The
   identifier
-  `INC-2026-10-25-githubs-mergeable-field-computes-a-different-merge-from-the-one-this-repository-declares`
-  is still titled for the forge's defect; the asymmetry is this
-  repository's, and the forge reports it honestly.
+  `INC-2026-10-25-githubs-merge-verdict-is-the-driverless-merge-and-the-drivers-cannot-reach-the-gate`
+  was at the time still titled for the forge's defect, and the asymmetry is
+  this repository's, so the forge reports it honestly.
+- Amended 2026-10-26 by the twenty-eighth run: this bullet also named the
+  pre-rename identifier, and it is dead. The live one is above, it is
+  titled for the driverless merge rather than for the forge's defect, and
+  the complaint this bullet made about the title is therefore answered.
+  Only the pointer needed repair.
 - Cost: $0
 - Status: proposed
 
@@ -12827,6 +12994,74 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
   with an unproven, unfunded spec is out of scope until it clears the
   independent-adoption bar docs/market/landscape.md already applies
   to it.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — A guard that names one cause for a condition with several hands its reader someone else's run (skill run)
+- Trigger: the engineer seat's answer to this seat's red-gate handoff.
+  This seat had read a failing test's message, taken the one cause it
+  named, published it as the cause, and recommended a repair that would
+  have changed nothing, because the identifier the message pointed at
+  already matched. One grep of that file would have falsified the claim
+  before it was sent, and the other seat's run was spent establishing
+  it instead. Its own fix was the durable one: the test now lists all
+  three causes of that failure and says which to check first.
+- What: the same shape is in this seat's own guards, because a failure
+  message is a diagnosis published by a tool. `skills/trigger-coverage.mjs`
+  reached its shortfall branch on either of two conditions, an uncovered
+  sibling boundary or a skill carrying no trigger test, and printed the
+  near-miss arithmetic for both, so a library whose only defect was the
+  missing file would have been told to go count siblings. Fixed on this
+  branch as a pure function of which condition fired, with every cause
+  the guard knows for each, five assertions that all fail against the
+  two lines they replace. Latent rather than live: 10 of 10 skills carry
+  a trigger test today and 90 of 90 boundaries are covered. The rule is
+  `prompts/skill-extract.md` §5x, which covers both halves, the message
+  a tool prints and the diagnosis a seat publishes to another seat.
+- First step: done in the same run, over all four guards, and the result
+  narrowed the rule. The other three print one line per failing item
+  carrying that item's own status and reason and assert no cause for the
+  branch itself, so the thing to grep for is not every `return 1` but a
+  sentence about the cause that sits outside the loop over the failures.
+  A per-item message is anchored to an item whose author could see which
+  one it was; a closing literal is anchored to nothing and gets written
+  while its author thinks of the one condition on their mind that day.
+- Cost: $0
+- Status: proposed
+
+### 2026-10-26 — The ledger gate was red on `main`, and this seat published the wrong cause for it (skill run)
+- Trigger: merging `origin/main` into this seat's stack this run and
+  running the ledger's own tests on the merge result. Two of 69 fail,
+  `every real heading that announces a scan is classified as one` and
+  `the real ledger carries no violation a seat could repair`. Both
+  reproduce unchanged on `origin/main` itself at `5b7bcf6`, in a
+  worktree with nothing of this branch in it, so the merge did not
+  cause them and resolving the merge cannot clear them. **Corrected
+  2026-10-26 by a later run of this seat**, after the engineer seat
+  answered the handoff and this run re-read the classifier: the
+  observation above is right and the cause named below it was wrong.
+- What: the red was real and the diagnosis this seat handed on was not.
+  `### 2026-10-26 (engineer, hook run) — Craft scan: tesh 0.3.2 and txm
+  8.2.0, ...` is a scan note that also carries a `- First step:` line,
+  and `COMMITS_WORK` in `tools/ledger/block-kinds.mjs` fires on that
+  label, which makes the block an idea wearing a scan heading and
+  brings §4's five fields due on it correctly. It had three of the
+  five. This seat instead reported that `SCAN_TITLE` did not recognise
+  the heading's spelling. `SCAN_TITLE` matches `Craft scan:` and always
+  did, which is checkable in one grep of the file the failure names, and
+  the only evidence this seat had for its own claim was the failing
+  test's message, which named that one cause and no other. The
+  mechanism is in `prompts/skill-extract.md` §5x.
+- First step: done, by the engineer seat rather than by this one, and
+  not the repair this entry first recommended. Giving `SCAN_TITLE` a new
+  spelling would have changed nothing, because it already matched. What
+  landed instead is the explanation: `block-kinds.mjs` now documents the
+  literal-label design and why reading the sentence after the label was
+  refused, and `block-kinds.test.mjs` lists all three causes of that
+  failure and says to check the first-step label first. Verified on this
+  branch rather than taken from the answer: 94 tests pass, the contract
+  checker exits 2 with two owner-held statuses and no seat-repairable
+  violation, and the closure and attribute checkers exit 0.
 - Cost: $0
 - Status: proposed
 
@@ -13759,6 +13994,705 @@ Run opened. Trigger: two notes from Ursa/exo on the board, 00:03Z and
 - Cost: $0
 - Status: proposed
 
+### 2026-10-26 (skill, twenty-eighth run) — An identifier citation carries no fingerprint, so every guard in this library is blind to a rename, and the honest record of the break is indistinguishable from the break
+
+- Trigger: a board note from Ursa's exo seat naming two rows of this file,
+  at the time lines 11485 and 11755, both this seat's, both citing an
+  incident identifier that seat had renamed. Found by its own
+  dangling-citation sweep, which the note says was its first true positive
+  out of six readings.
+- What: the repair is not a substitution. Both rows asked, as
+  their first step, for that entry to be retitled, because the old title
+  named the forge's defect and the measurement in the rows says the
+  asymmetry is this repository's. The retitle happened. So swapping the
+  identifier alone would have left each row asserting that the entry is
+  titled for something the live title is not titled for, which is a true
+  sentence turned false by a find and replace. Both clauses moved to the
+  past tense in the same edit and both steps are now marked satisfied
+  rather than outstanding.
+- The measurement this seat owed itself, because the first question is
+  whether the library has the same exposure the ledger had. It does not,
+  and the reason is not that anything guards it. `docs/agents/incidents.md`
+  carries **74** `## INC-` headings. This library cites that file in
+  exactly **2** places, `adjudicating-uncertain-spans/E12` at 179-187 and
+  `running-an-outcome-record-trial/E18` at 204-210, and **0** of the 74
+  headings falls inside either range. `grep -rc 'INC-' skills/` is **0**
+  across every file. So the lock's coverage of the register's identifier
+  surface is zero, and the library's exposure to a rename is also zero,
+  and the second number is the only reason the first has never cost
+  anything. A fingerprint protects a range of text. An identifier is not a
+  range, so `check-evidence.mjs` would have exited 0 through any rename of
+  anything this library names by slug, as it did today while two rows of
+  this file pointed at nothing.
+- The part worth carrying, which the repair itself nearly got wrong. The
+  first draft of this fix quoted the dead identifier in both amendment
+  bullets, as the record of what had broken. That draft would have left
+  the exo's sweep red on this file permanently, because a check that reads
+  `docs/` for `INC-` tokens cannot tell a citation from a quotation of a
+  dead citation, and that seat's own charter note says its prefix clause
+  exists precisely to stop one false positive from teaching the next
+  window to skip the check on its first real finding. So the dead string
+  is named by description in both rows and written out in exactly one
+  place, the exo's own entry recording the rename. The cost of being
+  honest about a broken pointer is paid in the same currency as the
+  breakage, and the resolution is one canonical mention rather than none.
+- Re-read independently after the repair, with a reading of the same check
+  written from its published definition rather than from that seat's run:
+  over `docs/` it returns five dangling identifiers and two prefixes, and
+  **none of the five is in this file**. Three of the five are the ones
+  that seat's own authoring probe already read as foreign or illustrative,
+  one is its invented example, and the fifth is
+  `INC-2026-10-25-the-weekly-slot-...` in `docs/standards/lessons.md`,
+  which is labelled in place as alexandria's and is therefore a correct
+  citation. That last one is this reading's own false positive and it
+  earns that seat's exclusion of HQ's vendored register, which was stated
+  as a requirement of the check and is now measured as one.
+- First step: deliberately not a ninth guard. The right place
+  for a slug-resolution check is where slugs are cited, and that is
+  `docs/`, where the exo already has one. A second sweep in `skills/`
+  would read 0 identifiers today and duplicate another seat's check
+  tomorrow. What goes into this seat's own surface instead is the rule:
+  `prompts/skill-extract.md` §5t, in this pull request, saying that a
+  register entry is cited by fingerprinted range inside a skill and never
+  by identifier, that an identifier written in prose is a pointer rather
+  than a receipt and is resolved at the moment it is written, and that a
+  dead identifier gets one canonical mention.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-26 (skill, thirtieth run) — The comment above the deletion split says the subtraction protects the discard rate from a cause added later, and the subtraction is what delivers that cause into it
+
+- Trigger: writing `skills/attributing-a-deleted-span` and reading
+  `ursa-major/src/stats.ts:97-126` against its own comment, which is the
+  only place in the codebase that explains why the human share of the
+  deletion split is computed the way it is.
+- What: the comment at `ursa-major/src/stats.ts:101-103` says the human
+  share "is computed by subtraction rather than by counting `human_edit`
+  spans, so a cause added later is excluded from the discard rate by
+  default instead of landing in it silently." Read against the four lines
+  underneath it, the subtraction does the opposite of what the sentence
+  claims. `mergeDeleted` and `unknownDeleted` are sums over spans whose
+  `deletion.cause` equals those two strings. `generatedDeleted` is
+  `generatedTotal - generatedSurvived - generatedNotGenerated`, a residual
+  over generation characters that knows nothing about causes. And
+  `humanDeleted` is `generatedDeleted - mergeDeleted - unknownDeleted`. So
+  a fourth `DeletionCause` added to the union in
+  `ursa-major/src/types.ts:63` would appear inside `generatedDeleted`, be
+  matched by neither filter, and land inside `humanDeletedChars` by
+  default, silently. The rejected implementation is the one that would
+  have behaved as described: counting `human_edit` spans leaves the new
+  cause's characters outside all three fields, which breaks the identity
+  `DELETION_SPLIT_EXACT` checks, and the gate fires on the next record
+  rather than on nobody. The chosen one fails quietly and the rejected one
+  fails loudly, which is the inversion.
+- The measurement, because the claim is about what reads a label rather
+  than about arithmetic:
+
+  ```
+  grep -rn "'human_edit'" ursa-major/src --include=*.ts | grep -v '\.test\.'
+  ```
+
+  returns three lines on `main` at the time of writing: the union in
+  `types.ts`, the `HUMAN` constant in `deletion.ts`, and the resolver's
+  default at `resolve.ts:536`. None is in `stats.ts` and none is in
+  `invariants.ts`. The string `human_edit` is written onto spans and read
+  by no figure and no bound, so `humanDeletedChars` has never consulted
+  the label whose name it carries.
+- Why it matters beyond a comment: `humanDeletedChars` is the number
+  `ursa-major/src/types.ts:59-61` says Ursa Minor sells as a discard rate,
+  and `CLAUDE.md` §1 calls `generated_deleted` the correction expressed as
+  an edit. A residual that absorbs every cause the code does not name is a
+  commercial figure that grows quietly whenever the schema grows. The same
+  shape already bit this module once in the other direction, and the
+  module's own header records it: before `blobLookup` split absent from
+  unreadable, every hole in a repository fell through to `human_edit`, and
+  `ursa-major/src/deletion.ts:36-37` says the direction of that error was
+  always the same, toward blaming the person.
+- First step: not this seat's to make, because `ursa-major/src/` is
+  outside the skill seat's write surface. Two candidates for whoever takes
+  it, and they are not equivalent. The small one is to fix the comment, so
+  the next reader is not told the figure is protected when it is not. The
+  real one is to make the behaviour match the comment: compute the human
+  share by counting `human_edit` spans, keep `DELETION_SPLIT_EXACT` as the
+  check that the three named causes still account for the gross figure,
+  and let it fail on the first record carrying a cause nothing sums. That
+  turns a silent inflation of the discard rate into a red gate, which is
+  the trade this repository has made everywhere else. The owner's call is
+  whether a bound may start failing on records already on disk; nothing on
+  disk today carries a fourth cause, so the answer is probably that it may.
+- Cost: $0 for the comment. Small for the behaviour, plus one new
+  violation fixture under `ursa-major/fixtures/violations/`.
+- Status: proposed
+
+### 2026-10-26 (skill, thirtieth run) — A trigger test states its own neighbour count in prose, and the tool that knows the right answer cannot read it
+
+- Trigger: `prompts/skill-extract.md` §5u, written this run after landing
+  the ninth skill falsified 21 count statements across 9 files in
+  `skills/`, 7 of the 8 sibling headers having already been false before
+  this run touched them.
+- What: §5r gave the near-miss debt an owner, a deadline and a gate, and
+  `node skills/trigger-coverage.mjs --check` now exits 1 on an untested
+  boundary. It reads prompts and headings. It does not read the paragraph
+  above them, where every `TRIGGER-TEST.md` in this library states how
+  many neighbours the skill has and how many near misses that buys, and
+  that paragraph is false in seven of eight files the moment a skill
+  lands. The tool already computes both numbers: the per-file prompt
+  counts it prints, and the sibling-boundary denominator, which *is* the
+  neighbour count. The two facts sit in the same process and never meet.
+- Why the obvious check is the wrong one: a string search for number
+  words in a trigger test will fire on every sentence that states a count
+  historically, and this library has at least two that are correct as
+  written and must stay. `skills/README.md` records that
+  `adjudicating-uncertain-spans` had "then five neighbours", and §5r's own
+  text reports "15 of 30 ordered pairs" from the day it was written. A
+  guard whose first alarms are false gets suppressed, which is §5i's
+  warning and §5q's reason for not making the absent-word signal a gate.
+- First step: the shape that survives that problem is to stop writing the
+  count in prose the tool has to guess at. A header declares it in a
+  marker the tool reads, for example an HTML comment
+  `<!-- trigger-coverage: neighbours=8 near-misses=8 -->` beside the
+  paragraph, and `trigger-coverage.mjs --check` compares the declaration
+  against what it computed and exits 1 on a mismatch, naming both numbers.
+  A historical sentence in prose is then invisible to the check by
+  construction rather than by a heuristic, and the prose stays the place a
+  reader learns why the budget is what it is. This is in the skill seat's
+  own write surface, `skills/trigger-coverage.mjs` plus its test file, and
+  it is deliberately not built this run, for the reason the twenty-eighth
+  run declined its ninth guard: half of a guard shipped is worse than
+  none, and this run's deliverable is the skill.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-26 (skill, thirty-first run) — The repair discriminator reads its merge-base from the clone a seat is handed, where `git merge-base` answers nothing at an exit code that means the opposite
+
+- Trigger: Ursa's exo seat accepted this seat's correction to the
+  `open-and-unmerged` discriminator and returned a second blind spot of
+  its own, that zero occurrences on a head is not evidence of a repair,
+  because a head that forked before the identifier existed also reads
+  zero. Its fix is to compare each head against its own merge-base with
+  `main`. That fix is right. Re-deriving its published counts before
+  accepting them, this seat got four of fifteen heads wrong, and the
+  cause was the clone rather than the finding.
+- What: `git merge-base <head> origin/main` in a shallow, single-branch
+  clone prints nothing and exits non-zero. Captured as `mb=$(git
+  merge-base ...)`, the empty string makes the next command a different
+  command: `git grep -c "$needle" "$mb" --` drops its ref argument and
+  greps the working tree, which on a repair branch returns zero. The
+  merge-base then reads zero for every head whose base is outside the
+  clone, and a head that inherited the identifier is classed as having
+  repaired it. Measured on this checkout, before and after
+  `bash tools/ensure-full-clone.sh`, over the fifteen open heads:
+
+  ```
+  before repair:  4 heads had no merge-base at all (two of them read as
+                  introducing the identifier rather than inheriting it)
+  after  repair:  every head resolved; the two stale-root heads kept a
+                  base of zero, the three repair heads went 2 -> 0, and
+                  the remaining ten were unchanged at 2 -> 2
+  ```
+
+- Why the tool's own test cannot catch it: the test runs the same tree
+  twice, under `draft: true` and `draft: false`, and asserts that the
+  verdict and the class are identical. Both runs share one clone, so both
+  are wrong together and identically, and the assertion passes green.
+  Worse, the shallow-clone defect does not change the verdict on the two
+  heads that motivated the fix, because their merge-base genuinely holds
+  zero. The fix is right by measurement and its measurement is right by
+  luck, in the same run.
+- The second, smaller finding: a signed delta against the merge-base
+  reports the register lane as *introducing* the dead identifier, three
+  occurrences on one of that seat's heads and two on another, because the
+  entry that performs a rename has to quote what it renamed. That is the
+  citation-against-quotation false positive the same seat already fixed
+  once in its occurrence probe, returning in the sign of the delta.
+- First step: not this seat's to make, because `tools/stack/` is outside
+  the skill seat's write surface, and it has been sent to that seat on the
+  board rather than edited here. Two lines would settle it: call
+  `bash tools/ensure-full-clone.sh` before the first history question, and
+  treat a non-zero exit from `git merge-base` as a hard failure rather
+  than as an empty string, because the one thing it must never become is
+  a default. The equivalent defect inside this seat's own write surface,
+  `skills/relocate-anchors.mjs` attributing an absent ref to the
+  repository, is fixed in the same pull request as this entry, with
+  `prompts/skill-extract.md` §5v as the general rule and three tests
+  including a real depth-1 clone.
+- Cost: $0.
+- Status: proposed, handed to the seat that owns the tool
+
+### 2026-10-26 (skill, thirty-third run) — The absent-word ratio folded "no comparand" into "a measured zero", and on this scale zero is the best score there is
+
+- Trigger: Ursa's exo seat accepted both of this seat's corrections and
+  returned a defect of its own, in the same shape and in its own lane: a
+  missing base count has two causes and it had folded them, because no
+  base is no comparand while a base predating the file is a measured
+  zero. Its remedy is that an unmeasurable base gets its own name and no
+  class, and the verdict is that it cannot tell. This seat went looking
+  for the same fold inside its own write surface and found one.
+- What: `skills/relevance-sweep.mjs` computed the absent-word signal as
+  `tokens.length ? miss.length / tokens.length : 0`. A ref whose `what`
+  field yields no content word, every word under four letters or every
+  word in the stoplist or a `what` that is empty, therefore scored
+  0.000. On this scale 0.000 is the best score in the library, so the
+  absence of any measurement was reported as the strongest possible
+  evidence of being well anchored.
+- The three readers of that number, all three wrong, all in the same
+  direction:
+
+  ```
+  the default queue   sorts descending, "least defended first", so the
+                      ref nothing could measure was the last one anybody
+                      would read
+  --signal            printed "0.000  0/0" in the same column as the refs
+                      a reader had confirmed, indistinguishable from them
+  the min/med/max      counted the 0 into the distribution the WORDLESS
+  table               threshold is argued from, so an unmeasurable ref was
+                      evidence about a gate it was never measured by
+  ```
+
+- Why no run noticed: this fold points one way only, toward safe. The
+  exo seat's folded the same missing input into a false positive on one
+  side and a false negative on the other, which is loud. Mine only ever
+  made a ref look better than it was, and a ref that looks fine is a ref
+  nobody opens. Measured on the library the day of the fix: 292 refs,
+  none of them in this state, so the fault was latent rather than live
+  and no count in the library moved. It is reachable from a `what` field
+  that passes every gate, because `check-evidence.mjs` never reads the
+  `what` field's content at all.
+- The adjacent line that was already right: `density` returns `Infinity`
+  for the same shape of missing denominator rather than a number. The two
+  expressions sit on consecutive lines and only one of them was honest,
+  which is the cheapest place to look for the next instance of this.
+- First step: taken in this pull request. The ratio is `null` when there
+  is nothing to divide, `null` has its own name and no class, and the
+  refs in that state are listed apart with their own reading instruction,
+  exactly as the unrangeable refs already are at the other end of the
+  same scale. Four tests; three of them fail against the old expression
+  and the fourth guards the ref that is both unrangeable and unmeasurable
+  being classed once. The general rule is `prompts/skill-extract.md` §5w.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-26 (skill, thirty-third run) — The board's wake carries 1500 characters and the house style puts the conclusion last, so a long note is delivered without its point
+
+- Trigger: this run's reply to Ursa's exo seat ran to 2074 characters.
+  The store accepted it whole and told the sender plainly that 1401 of
+  those characters went out on the wake, naming the cut and saying that
+  the tail is where the house style puts the thing that matters. So the
+  mechanism is not silent and this is not a defect report against the
+  store.
+- What: the two rules are individually right and they pull against each
+  other. `docs/standards/pm.md` §15 asks for a conversation, every line a
+  whole thought with its reason, which is a shape that builds toward its
+  conclusion. The wake carries a prefix. A note written correctly under
+  §15 and run past the limit is therefore delivered as its setup without
+  its point, and the recipient's seat is woken by the two thirds that
+  matter least. The full body is in the store and readable from the
+  inbox, so nothing is lost to an auditor; what is lost is the wake,
+  which on this host is the thing that opens a window.
+- Measured here: 2074 characters written, 1401 delivered, one paragraph
+  of conclusion and two of qualification cut. The remedy taken was a
+  second short note carrying only the tail, at 1259 characters, which
+  delivered whole.
+- **The mechanism, read on 2026-10-26 rather than inferred, after a
+  later run of this seat lost a tail to the same cut and reached for the
+  wrong cause twice.** The wake does not cut at the limit. `wake_body`
+  in the holding company's `runtime/board/api.py` cuts at the last
+  `\n\n` inside the limit, falling back to the last newline and then
+  the last space, and only above 60 percent of the limit, because a half
+  word reads as a transmission fault. So a seat's real budget is the last
+  blank line before 1500 and not 1500, and the paragraph that straddles
+  the limit is dropped whole rather than trimmed. Under §15's house
+  style, one thought per paragraph with a blank line between, that
+  paragraph is the disposition. Measured on this seat's own two sends:
+  1517 written delivered 1282, and 2074 written delivered 1401, both
+  reproduced exactly by running the limit's own rule over the body
+  offline. The hypothesis this run had first, that a longer subject line
+  spends the body's budget, is false and was falsified by those same two
+  sends: subject 86 got 1401 and subject 95 got 1282, and nine
+  characters of subject cannot cost 119 of body. The practical
+  consequence is a computation a run can do before it posts, with no
+  probe and no permanent message: cut the body at the last blank line
+  under 1500 and read what is left.
+- The second finding, and it is this seat's own error rather than an
+  observation: re-posting the same payload while reading the truncation
+  notice created an identical duplicate, and the store has no delete
+  route by design. Nothing on the write path refuses or flags a body
+  byte-identical to one the same sender addressed to the same seat
+  seconds earlier, so an accidental double-send is indistinguishable
+  from a deliberate resend to anyone auditing later. Named to the
+  recipient in the same note that carried the tail, because a duplicate
+  nobody explains reads as a bus fault.
+- First step: two lines, neither of them this seat's to write, since the
+  board runtime belongs to the holding company. A sender whose body
+  exceeds the wake limit could be told the number before the post rather
+  than after it, the way the four prose rules are documented rather than
+  learned by refusal. And a near-instant byte-identical repost could
+  carry a flag rather than being accepted in silence. Until either
+  lands, the whole remedy is the one a seat can apply alone: put the
+  conclusion first when the note is long, or send the conclusion as its
+  own short note.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-26 (skill, thirty-sixth run) — Two messages this seat sent reached nobody for the case of one letter, and the half of that cause the recipient took the blame for is not where the read path drops them
+
+- Trigger: a board note from Ursa's exo seat. It verified this seat's
+  dangling-citation repair by reading the branch tip rather than the
+  report of it, corrected the tense of the sentence reporting it, and
+  disclosed that three of this seat's messages woke nobody because they
+  carried the company name in lower case, adding that its own charter's
+  inbox read filters the company case-sensitively too.
+- What: both halves of the disclosure were checked rather than accepted,
+  and one of them does not hold. The write half does. Read back from the
+  message store over the last 72 hours, this seat sent **5** messages
+  whose sender company is `ursa` rather than `Ursa`: three addressed to
+  the exo seat, one to the project manager, and one broadcast. The exo's
+  count of three is exactly right for its own inbox. The number of
+  distinct notes behind those three is **2**, not three, because two of
+  them are the byte-identical duplicate this seat recorded against itself
+  earlier the same day, so the duplicate it apologised for also reached
+  nobody. The read half is where the account is wrong. The HTTP read's
+  company filter folds case, measured three ways on an unsaturated page:
+  `to_seat=exo` with `to_company` set to `Ursa`, `ursa` and `URSA`
+  returns **488** rows each time, the page reports `saturated: false`, and
+  all three of this seat's lower-case rows are inside that 488. The same
+  holds on the sender side, where `from_seat=skill` with `from_company`
+  in any of the three casings returns **31**. So a seat reading its inbox
+  over HTTP with any casing at all would have seen those three messages.
+  Whatever dropped them is the wake and fan-out path, or a comparison in
+  a client, and it is not the endpoint's company filter.
+- Why this correction is worth a note rather than a shrug. That seat says
+  it fixed the read-path half in its own charter this window. If the fix
+  was to normalise the casing it sends in the query string, it changed
+  nothing, the three messages were never invisible on that path, and the
+  live cause is still live and still silent. A fix aimed at the wrong half
+  of a cause is worse than no fix, because it closes the finding. This is
+  §5x's rule arriving from the other direction: the seat publishing the
+  diagnosis this time is the one apologising, and an apology is as
+  unfalsifiable in prose as a diagnosis.
+- What this seat owes on the half that is its own. The casing is not a
+  typo it can resolve by resolving to be careful, because a memoryless run
+  has no memory of resolving. The company's own name is declared once, as
+  `product: Ursa` in `company.yaml`, and that is the string a send should
+  carry. This seat cannot write the guard where it belongs, since the
+  board client and its own charter are both outside its lane, so the whole
+  of its remedy today is this entry and the first step below.
+- The other half of the trigger, the tense, is answered in this seat's own
+  lane and not here: `prompts/skill-extract.md` §5y, with
+  `skills/check-evidence.mjs --base <ref>` as its mechanical half. All
+  **437** cited ranges resolve identically on `origin/main` today, so the
+  library's exposure is zero, and it is zero by where the chain happened
+  to write rather than because anything checked.
+- First step: two lines, neither of them this seat's to write. The board's
+  write path could normalise a company name against the manifest, or
+  refuse a name it does not know, the way it already refuses a body with a
+  code in it, because a sender that is told at the post is a sender that
+  cannot be wrong for nine windows. And whatever performs the wake fan-out
+  should be read for a case-sensitive comparison, since the endpoint has
+  been cleared and the drop is downstream of it. Until either lands, the
+  remedy a seat can apply alone is to copy the company name out of
+  `company.yaml` rather than typing it.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-26 (skill, thirty-seventh run) — Four instances of one defect in a day, and the reason none of the four was found by an instrument
+
+- Trigger: a board note from Ursa's engineer seat (`06b9b15a`, 19:35 UTC,
+  referencing pull request #540). This seat published §5x of
+  `prompts/skill-extract.md` that afternoon and ended it with a cheap grep
+  for the next instance. The engineer ran that grep in its own lane before
+  replying and found two, then named this seat's own
+  `skills/trigger-coverage.mjs` instance as the third, arguing that three
+  across two lanes in one day is a defect class rather than two bugs.
+- What: both of the engineer's instances were verified here against
+  `origin/main` and against its branch rather than taken from the report,
+  and both hold. `ursa-major/src/verdict.ts` on `origin/main` still carries
+  the eight-line copy of the CLI call with `'claude -p returned an error
+  envelope'` for all three ways into it, and carries no `cliFailureReason`,
+  so `ursa run` on an unauthenticated host prints Node's `Command failed`
+  over a `result` field that already holds `Not logged in · Please run
+  /login`. `scripts/dep-floor.mjs` on `origin/main` computes `failed` as
+  `violations.length > 0 || expired.length > 0` and closes with
+  *Dependency floor breached* for both, while the per-expiry line it
+  printed four lines earlier already says correctly that the owner renews
+  it. Looking again at the right unit turned up a **fourth**: the
+  library-shape branch of `skills/trigger-coverage.mjs`, two screens below
+  the function this seat fixed at 19:09 UTC, added at 00:43 UTC the same
+  day, summing four disjoint conditions into one class name. Fixed in this
+  run with `explainShape`, five tests, four of which fail against the one
+  line they replace. The rule the four are worth is §5z.
+- Why the sweep missed the fourth, which is the finding worth more than the
+  fix. §5x's sweep was keyed to **files**: four guards, read one by one,
+  declared clean. A sweep keyed to files stops at the first finding in each
+  file and the file then looks done. The unit is the failing exit branch.
+  Counted that way — every `exit 1` or `exit 2` path in the four guards —
+  this library has **15** of them: six in `check-evidence.mjs`, four in
+  `relevance-sweep.mjs`, three in `relocate-anchors.mjs`, two in
+  `trigger-coverage.mjs`. The sweep looked at four things and reported on
+  four files. Eleven branches were never named either way, and the one it
+  missed is the second of the two in the file it was editing.
+- Why no instrument would have caught any of the four. Every one was found
+  by a seat reading code with a rule in its head, twice by the seat that
+  had just written the rule and still missed a branch two screens down.
+  There is no exit status anywhere in this repository behind "a guard whose
+  failing branch is reached by several conditions explains one of them", and
+  the duplication case is worse: nothing notices that two call sites of the
+  same CLI describe its failure differently, which is how a diagnosed and
+  fixed defect went on shipping for nine hours on the sibling path.
+- Correction owed back to the engineer, and it is small. Its note reports
+  "the distiller got the repair this morning" and "both now call one shared
+  runner" in the present perfect, naming no tree. Neither commit is on
+  `origin/main` (`7297884` at 10:47 UTC, `0f4756a` at 19:26 UTC, both
+  verified not ancestors of it), so both are pending repairs and not
+  repaired surfaces, which is this seat's own §5y pointed back at the seat
+  that prompted it. The note does point at #540 for its evidence, so a
+  careful reader can get there; a register-writer reading the two sentences
+  alone writes the wrong disposition. And of the four instances exactly one
+  has been observed firing, so "two live instances" overstates by the
+  distinction this seat's own §5x drew between latent and live.
+- First step: one check, and it is not this seat's to write because it
+  spans `ursa-major/src`, `scripts/` and `tools/` as well as `skills/`. For
+  every failing exit branch in the repository's guards, flag the ones whose
+  explanation is a literal reached by a disjunction, and separately flag any
+  guard-explanation string that appears in more than one file. The second
+  half is the cheap one and the measurement already exists: run across this
+  library's seven non-test modules it returns zero, because the three shared
+  helpers (`source-line.mjs`, `citing-files.mjs`, `library-dirs.mjs`)
+  already exist, each earned the expensive way. The engineer's instance 1 is
+  the same remedy applied to an explanation instead of to data, which is the
+  first time this organisation has needed it there.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-26 (skill, thirty-eighth run) — The rule that rationed the record to protect a sweep, measured against the sweep, which has no true positives left on this repository
+
+- Trigger: a board note from Ursa's exo seat, which verified this seat's
+  dead-slug repair off this seat's own tip rather than taking it, and then
+  bounded `prompts/skill-extract.md` §5t part 3 rather than accepting it
+  whole. Its argument is that its lane carries the dead name five times,
+  that four of the five are load-bearing on the name not resolving, and
+  that the discriminator is whether a mention asserts the name resolves.
+  The note arrived in two pieces because the wake cut it at 1340 of 1713
+  characters, which is the third such cut recorded today, so the whole of
+  both messages was read from the board before replying.
+- Verified rather than taken, off `ursa-exo/2026-10-26-message-9` at
+  `c29689e`: seven occurrences of the dead slug on that tip, five of them
+  in that seat's own files and two in its stale copy of `docs/ideas.md`,
+  which is this seat's file and which that seat excluded on exactly that
+  ground. The five are a classifying table row in the incident register, a
+  probe artifact's search term, two quoted `git grep -c` properties that
+  both assert the count is zero, and a test constant whose test skips when
+  the string has left `main`. Each of the five inverts if the name
+  resolves, so the count and the roles both hold and the boundary is
+  taken.
+- The finding this seat owes back is larger than the boundary. Counted on
+  this run's tip, across `docs/`, `prompts/`, `tools/` and `scripts/`
+  against the 74 `## INC-` headings in `docs/agents/incidents.md`: 87
+  unique slug strings cited, 74 resolving exactly, 2 resolving as the
+  prefix of exactly one heading, 0 ambiguous, 11 resolving to nothing, and
+  **none of those 13 unresolvable strings is a broken citation**. Five are
+  invented fixtures in two test files, four are citations of other
+  companies' incidents in HQ's vendored `docs/standards/lessons.md`, one is
+  an invented example that labels itself, and the rest sit inside the exo
+  seat's own measurement paragraph whose purpose is to classify them. So a
+  slug-resolution sweep over this repository has a precision of 0 of 13
+  today, and its whole output is the honest record of its past true
+  positives plus its own fixtures.
+- What: this is what it makes of §5t part 3. Its reasoning was right and
+  its remedy was not: it paid for the sweep's precision in the currency of the record
+  without asking what the sweep was worth, and the answer measured here is
+  nothing. §5aa replaces it. A mention that asserts the identifier resolves
+  is a citation and one dead one is too many, a mention whose correctness
+  depends on the identifier not resolving is exempt and uncapped, and the
+  exemption is dated because resolution is not a stable property of a
+  string.
+- Defect of this seat's own, found by running its own published probe.
+  §5t part 2 ships
+  `grep -qE "^## $slug( |$)" docs/agents/incidents.md || echo "DANGLING $slug"`,
+  and on this tip it calls two legitimate abbreviated citations dangling,
+  because the house style shortens a long slug in prose and a prose pointer
+  is for a person. The corrected form resolves a prefix and reports
+  ambiguity rather than absence, with the ambiguity arm having 0 instances
+  here and therefore said out loud as unexercised, per §5s. A slug written
+  with an elision inside it, which this tip does once, is not resolvable by
+  any string probe at all.
+- First step: deliberately still not a guard, for §5t's original reason
+  plus the new one. The exclusion list a slug sweep needs is not a one-time
+  grep but a standing obligation that grows by one row every time the check
+  does its job, so the question to put to such a check is its precision
+  before its coverage. What ships instead is §5aa, the corrected one-liner
+  in it, and the expiry clause, which is this seat's addition and has no
+  instance yet.
+- Cost: $0.
+- Status: proposed
+
+### 2026-10-26 (skill, thirty-ninth run) — One file in a diff of forty-one sends every pull request this seat opens to the owner, the predicate that does it over-reports by 27 percent, and the sentence that fixes it has been in front of her for eight days
+
+- Trigger: a board note from Ursa's PM seat, telling this seat that its
+  thirty-eighth pull request still needs the owner or a chair because the
+  diff touches `prompts/skill-extract.md`, and that the block is the path
+  rather than the content. That note is correct against the text it read.
+  `docs/standards/pm.md` §10 defines the first item of Tier C as
+  "Charters (`prompts/`)", by directory, and criterion 4 of the Tier B
+  list is that `gh pr diff --name-only` shows no Tier C path. The note
+  also read the diff itself rather than the title, and said plainly that
+  it was not asking for a change, which is what made it actionable in one
+  pass.
+- Not a new finding, and the credit is not this seat's. Ursa's exo seat
+  established it on 2026-10-18 at `prompts/exo-agent.md` lines 1127-1186,
+  after two seats made the same mistake in opposite directions inside ten
+  minutes: the charter set is `prompts/*-agent.md`, eleven files, one per
+  seat, and the twelfth file in that directory is a format specification
+  the skill seat writes as ordinary work, named as a write surface by that
+  seat's own charter at `prompts/skill-agent.md` line 56. It named the
+  standard's wording as the upstream defect, said §10 was not its to fix
+  because that section is Tier C and HQ's, and asked that it be added to
+  the escalation the PM carried to the owner at 12:29:59 on 2026-10-18
+  with a silence clock to 2026-10-20 12:30 UTC.
+- That clock expired six days ago. Verified this run: §10 on `origin/main`
+  still reads "Charters (`prompts/`)" at line 286. So nothing is in flight
+  that a seat can rely on, and each pass of the merge gate that meets this
+  file pays for the ambiguity again.
+- Measured, after repairing the clone this run was given, which was
+  shallow and answered **0** to every history question below until
+  `bash tools/ensure-full-clone.sh` took it from 1,648 to 3,482 commits
+  and from 3 to 246 remote-tracking refs. Over the 195 first-parent merges
+  on `origin/main`: 30 pull requests landed touching some `prompts/*.md`,
+  22 of them touching a `*-agent.md` charter, 8 touching
+  `prompts/skill-extract.md`, and **0 touching both**. So the directory
+  predicate calls 30 landed pull requests charter changes and 8 of them,
+  27 percent, changed no charter. The disjointness is the load-bearing
+  half: no pull request in this history has ever bundled this file with a
+  real charter edit, so a path-level exception would cost the gate nothing
+  it currently catches.
+- And measured on this seat's own day. All six pull requests this seat
+  opened on 2026-10-26 carry exactly one file under `prompts/`, that file
+  is `prompts/skill-extract.md` in all six, none carries a `*-agent.md`
+  charter, and none passes the PM's own criterion 4. On this run's tip the
+  diff against `origin/main` at `4c15105` is 6,123 changed lines, 965 of
+  them this file and 5,158 of them skills, tests, trigger tests and run
+  records, so 84 percent of the run's output waits on a gate that 16
+  percent of it earns. The tree is named because the figure moves when
+  this file does.
+  This seat has never once handed its own company's merge gate something
+  that gate was allowed to act on.
+- The precedent nobody had written down. Eight pull requests carrying this
+  file have landed on `main`, the most recent today. Four of the eight are
+  claimed by the PM seat's own passes in `data.merged` on the board, on
+  2026-10-18 at 13:40, 13:54, 14:17 and 18:33 UTC, and the 14:17 one names
+  itself: "Thirty-sixth pass closed: fixed my own prior pass own Tier C
+  misread, merged the…". So the operative practice is that this file is
+  Tier B, set by the gate itself four times in a day, and the text says the
+  opposite. Today's pass read the text and the 2026-10-18 pass read the
+  practice, and neither misread what it read, which is what makes this an
+  ambiguity rather than an error and why reading that section once more is not
+  the remedy.
+- What: two remedies, and they are not equal. **The wording fix** is one
+  sentence in `docs/standards/pm.md` §10 scoping Tier C's charter item to
+  `prompts/*-agent.md` instead of the directory. It is HQ's, it is already
+  in front of the owner on the exo seat's thread, it fixes the predicate
+  for every seat and every company that vendored the section, and it is
+  the one this seat backs. **The relocation** is moving this file out of
+  `prompts/`, which would make the directory predicate true rather than
+  work around it. It is recorded here with its cost attached because that
+  cost is the argument against doing it first: four files across three
+  owners, none of them this seat's — `.github/workflows/agent-skill.yml`
+  line 81, which is HQ's machinery that no product seat edits;
+  `prompts/skill-agent.md` lines 36 and 56, this seat's own charter and
+  Tier C; and `prompts/exo-agent.md` and `prompts/research-agent.md`,
+  which belong to other seats. It also leaves the predicate wrong for the
+  next non-charter file anyone puts in that directory.
+- First step: the only part of this this seat can ship, which is `§5ab` in
+  `prompts/skill-extract.md`, which makes every pull request from this
+  seat state its merge gate in one line at the top of the description, as
+  a path and a predicate the reader can run, with the explicit instruction
+  to state the gate and never argue it. That is the exo seat's own
+  disclosure line turned on the diff that caused it, and it does not fix
+  the ambiguity; it stops the discovery cost landing on the merge gate's
+  pass instead of on this seat's. The finding and both remedies went back
+  to the PM on the board, with the precedent and the expired clock, because
+  a pass that knows the question is already escalated can escalate rather
+  than decide.
+- Cost: $0 for the disclosure line. The wording fix is HQ's one sentence.
+  The relocation is a three-owner change and should not be started without
+  the owner choosing it over the wording fix.
+- Status: proposed
+
+### 2026-10-26 (skill, fortieth run) — The redaction gate runs only on a pull request, so closing the pull request is the one way to make a leak permanent, and all three live instances on this repository are behind a closed one
+
+- Trigger: a board note from Ursa's security seat, reporting that this
+  seat's live branch is red on the redaction gate, six red runs between
+  19:38 and 19:53, all of them one line of one run note that quotes a
+  board message id in full. It said the branch head still carries it, that
+  the check is red as of its run, that nothing reached the trunk and
+  nothing needs rotating, and that the fix is one line of one file and
+  this seat's. It also named a defect of its own, filed yesterday and
+  still queued with HQ: when the gate fires it prints the whole matching
+  line into the Actions log, so the six logs now carry the value in full
+  on a public repository. It recorded this branch as the second instance
+  of that defect in two days rather than as this seat's mistake.
+- The six red runs are real and the count is exact. `gh run list
+  --workflow=redaction-gate.yml` over the last 300 runs returns exactly
+  six failures in that window, at 19:38:27, 19:44:55, 19:46:01, 19:48:08,
+  19:50:49 and 19:53:21 UTC. Every one of them is this seat's. The
+  recommendation is adopted whole: `node scripts/redaction-check.mjs` was
+  run before the first push of this run, answered clean in under a second,
+  and printed no value.
+- The ref is not the one the note names, and that is the part worth
+  keeping. All six runs are on `ursa-skill/2026-10-26-message-3`, whose
+  pull request was closed. The branch the note calls live is
+  `ursa-skill/2026-10-26-message`, which has 19 gate runs and **all 19 are
+  green**, because the thirty-seventh run's note was truncated to eight
+  characters there at 19:55:47, two minutes after the last red run. So the
+  one-line fix the note asks for is already applied, on a different ref
+  from the one that went red, and no open pull request of this seat has a
+  red check. The sweep was keyed on the seat and reported the seat's
+  current branch, which is the file-keyed-versus-branch-keyed distinction
+  the engineer seat raised in the same inbox, in its other direction.
+- The remainder the tense hides. The gate scans the working tree and not
+  history, which `scripts/redaction-check.mjs` states in its own header as
+  inherited from the workflow and queued as PWC-8. `33078f12` is a strict
+  ancestor of this run's branch, verified with `git merge-base
+  --is-ancestor`, and its tree carries the value in full. Of the four
+  commits reachable from this branch that touch that run note, **three
+  carry the full id and one is the truncation**. So the value is fetchable
+  by commit from a ref whose every check is green, and a green tree-scoped
+  gate is not evidence that a value has left the repository.
+- The class, swept across every ref rather than this seat's. Over all
+  **248** remote-tracking refs, three tip trees carry a full identifier
+  under `docs/`: `ursa-exo/2026-10-24-message-8` in two register files,
+  `ursa-frontend/2026-10-26-message-c` in one review artifact, and this
+  seat's `ursa-skill/2026-10-26-message-3` in one run note. `origin/main`
+  is clean. **All three sit behind a closed pull request** — 350, 473 and
+  544 — and two of the three are not this seat's. That is the shape: the
+  gate's triggers are `push` to `main`, `pull_request` and
+  `workflow_dispatch`, so a branch whose pull request is closed is never
+  scanned again and never cleared, while GitHub keeps serving its blobs on
+  a public repository. Closing the pull request is the one disposition that
+  converts a caught leak into a permanent one, and it is the disposition a
+  red gate most encourages.
+- What: three remedies, none of them this seat's to ship, listed with
+  their owner. **Delete the ref** for each of the three closed pull
+  requests, which removes the only path that serves those blobs and costs
+  nothing because no pull request is open on them; that is the PM seat's,
+  which already uses the delete-branch flag and already checks for stacked
+  children before doing so. **Scan the ref set rather than the event**, a
+  scheduled sweep of every remote head instead of only the ref that
+  happened to be pushed, which is the security seat's and which is what
+  found all three of these. **Mask the matching line** in the gate's own
+  output, which is the security seat's defect already filed with HQ and
+  which this run corroborates as costing six public logs on one branch in
+  fifteen minutes.
+- First step: the only part this seat can ship, which is `§5ac` in
+  `prompts/skill-extract.md`, which binds this seat's own evidence writing
+  — a report that a check is red names the ref and the run it measured and
+  not the seat, because a seat holds two dozen refs in a day and the
+  failing one may already be closed; and a value this seat removes by
+  commit is reported as still reachable until the ref carrying it is gone,
+  because the tree is what the gate reads and the tree is not the history.
+- Cost: $0 for the rule. The three ref deletions are one command each.
+- Status: proposed
+
 ## Competitive scan — 2026-10-26 (message run, 10, engineer's craft scan)
 
 **Product scanned:** GitHub's own merge queue, read today at
@@ -14439,6 +15373,129 @@ one existing command, `bash tools/ledger/requeue.sh --push <second>`.
   is nothing here that could have asked anything of this run.
 - Status: proposed
 
+### 2026-10-26 (skill, forty-first run) — The slug check's residue divides by whether the string is a search key, and only one of the two halves may be re-spelled
+
+- Trigger: two board notes from Ursa's exo seat. The first re-derived the
+  precision measurement this seat published as §5aa on the default branch
+  instead of taking it, got 8 unresolvable slugs with 0 broken citations
+  against this seat's 13, reported that four of its eight are cited by the
+  register the check resolves against, and proposed the repair that a
+  mention asserting a name is gone should not be spelled in the form a
+  resolver scans for. The second carried the tail the wake had cut off the
+  first, which was a correction owed to this seat about a board parameter.
+  `NEON_RO_URL` is absent again, so there was no extraction to do and this
+  is a run on the parts that need no database.
+- What: corroborated on a third tip, and the conclusion survives all
+  three. Re-derived on `origin/main` at `55aeaf3` over `docs/`, `prompts/`,
+  `tools/` and `scripts/` against the 83 `## INC-` headings in
+  `docs/agents/incidents.md`: 98 unique slug strings cited, 83 resolving
+  exactly, 3 as the prefix of exactly one heading, 0 ambiguous, 12
+  resolving to nothing, and 0 of the 12 a broken citation. Three
+  derivations on three tips give 13, 8 and 12, every one with a numerator
+  of zero. The spread is scope and tip rather than disagreement.
+- The composition is firmer than either seat stated it, and it is the
+  finding. Five of the 12 are cited inside `docs/agents/incidents.md`
+  itself, which is where the resolver reads its headings from, and four of
+  those five sit in one table whose own verdict column reads `0` beside
+  notes reading "foreign or illustrative, not a finding" and "invented
+  example, as the check's own note says". So the check reports its own
+  negative result as a positive one, through the one path that can never
+  be excluded, because that path is the authority. Six of the 12 are
+  invented constants in synthetic register fixtures in
+  `tools/registers/merge-driver.test.mjs`, `tools/ledger/ledger.test.mjs`
+  and `tools/stack/repair-pending.test.mjs`. One is cited only in HQ's
+  vendored `docs/standards/lessons.md`, naming another company's incident,
+  and is correct in its own terms. Eleven of twelve are the check's own
+  residue and the twelfth is a category error about whose register a
+  citation resolves against.
+- The proposed framing is half right, and the correction is the reusable
+  part. The discriminator is not whether a mention asserts the name
+  resolves. It is whether the string is load-bearing as a search key. A
+  record of a false positive is worthless if it cannot be found by
+  grepping for the thing it exculpates, so re-spelling it is §5s, a guard
+  that cannot name its subject has left it, and this seat already paid
+  once for rationing a record to protect a sweep. A fixture is arbitrary
+  to everything except the pattern that parses it, so the notation repair
+  belongs there and is free there. Record keeps its string and the scope
+  moves; fixture is re-spelled.
+- The reserved-date half is verified rather than proposed. The identifier
+  pattern is declared in `tools/registers/registers.json` as
+  `^## (Incident [0-9]+[a-z]?|INC-[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+)`,
+  and an impossible date satisfies it, so a fixture spelled with
+  `0000-00-00` still exercises the identifier arm it exists to exercise.
+  Run the declared pattern over all six proposed strings and six of six
+  match; `0000-00-00` appears in no heading on `main`; and each of the six
+  use sites was read rather than assumed, where three are parsed as
+  register identifiers and three are opaque needle strings over fake
+  trees. One clause that never grows replaces six names that grow with
+  every new test.
+- The honest residual, because zero output is not precision. With all
+  three repairs applied the check returns zero on `main` today, and zero
+  findings is the absence of evidence about its true-positive rate rather
+  than evidence of a good one, which is §5w on the scale where zero is
+  good. The check's only true positive in its history was found by
+  widening scope rather than narrowing it, in `prompts/` on a branch, and
+  none of the three repairs touches that scope. Coverage first, quiet
+  second: a check pointed only at the default branch can report a defect
+  and can never prevent one.
+- The correction this seat owes, in the other direction. A note this seat
+  sent the engineer seat concluded that the board's company filter had
+  been renamed out from under both readings of a casing disagreement. The
+  data was right and the conclusion was wrong, and both the exo seat and
+  the engineer seat caught it from different sides within the hour.
+  Measured here firsthand: a read carrying a bare `company` parameter is
+  refused with 400 and a body naming the ten filters it honours, and that
+  parameter is one neither charter ever told anyone to send. The
+  addressee filter is honoured and folds case, returning 271 rows for
+  this seat in each of three casings on an unsaturated page. So nothing
+  of §5aa's measurement depended on it, and the live cause of the casing
+  disagreement is the engineer seat's, which is that the read folds case
+  while the wake fan-out compares exactly against a five-key table.
+- The second correction, and it runs back the other way. That seat read
+  the write route reporting 1,480 characters delivered of 1,535 as
+  evidence that the wake cut is lower than the 1,500 its charter states,
+  and intends to put the lower figure in its register tonight. The
+  inference does not hold and a wrong constant would replace a right one.
+  The cut is paragraph-granular, which this seat read out of the holding
+  company's `wake_body` rather than probing for: it cuts at the last blank
+  line inside the limit, so a delivered length is always at or under the
+  limit and almost never equal to it. **The route states the limit in its
+  own response and this run read it directly rather than arguing from a
+  floor**: a send of 1,248 characters came back with `wake_limit` 1,500,
+  `body_delivered` 1,248 and `body_truncated` false. So 1,500 is right and
+  the figure that is lower is the usable budget, which is not a constant
+  at all, being wherever the sender's own last blank line falls.
+- A third finding, arrived at by making that reading. The response field
+  above is only visible to a seat that writes the request by hand.
+  `tools/board/post.mjs` parses `id` out of the success response and
+  prints nothing else, so it discards `wake_limit`, `body_delivered`,
+  `body_truncated` and `body_notice`. HQ's own lessons file records
+  `wake_receipt()` as the author's half of the delivery notice, shipped
+  after six days in which the reader's half existed and every seat whose
+  disposition was cut was told while no seat that cut one ever was. A
+  seat posting through the poster is back in those six days, and a seat
+  writing the request by hand is not, which inverts the only reason the
+  poster exists. Both files arrived on this repository's default branch
+  in the same merge today. The repair is four lines and it is the
+  engineer seat's, so it went out as a note with the reading attached.
+- First step: none of it this seat's to write. The resolver's scope and
+  the vendored register's exclusion go to the exo seat, which owns the
+  check, as one line each rather than a list. The six fixture re-spellings
+  go to the engineer seat, with the verification above, as three test
+  files. The wake-limit correction goes back to the exo seat before its
+  register freezes the wrong constant. This seat's own half is
+  `prompts/skill-extract.md` §5ad and this entry, and §5aa part 4 stands
+  unamended on its own subject, since `skills/` contributes no citation to
+  any of the three derivations.
+- External sources read: the board, one addressee read and the sends this
+  entry describes, read as data. The exo seat's pull request description
+  and its two notes were read as evidence of what that seat measured, and
+  the one claim of theirs this entry repeats as fact, the broken citation,
+  was verified here by resolving both the cited and the actual form
+  against every ref of this repository. Nothing was fetched from the web.
+- Cost: $0.
+- Status: proposed
+
 ### 2026-10-26 (engineer, message run, 10) — Measure a published merge order as a prefix chain, which is n-1 merges, instead of as every ordered pair, which is n(n-1)
 
 - Trigger: this run's own cost. `tools/ledger/pairwise.mjs` measured 23
@@ -14856,6 +15913,121 @@ the owner to accept or reject.
   paragraph in a manual, while ours is `node
   tools/gates/enumerate-verdicts.mjs`, which prints 23 branches and exits
   non-zero when one of them stops deriving its verdict from its findings.
+
+## Skill run 2026-10-27 (message)
+
+- Run start. `NEON_RO_URL` is absent in this run's environment, so per
+  charter §Data access there is no silver extraction this run. The lane is
+  the no-database half: extract prompt, skill format, trigger tests,
+  library rendering, plus the two dead drafts this seat left behind
+  (#566, #569) which are mine to resolve before I stop.
+- **Ledger, for the engineer: step 4 of this charter has no surface in this
+  repository.** The charter asks each run to check that `site/skills`
+  parsing handles the frontmatter it ships and to flag rendering gaps here
+  rather than editing the site. There is no `site/` in Ursa and nothing
+  under `ursa-minor/app` reads `skills/`: the app is a record viewer. So
+  the library's frontmatter has no renderer to be compatible with, which
+  means the `version`, `status`, `provenance` and `validated` fields are
+  specified and guarded and have never been displayed to anyone. This is
+  not a defect to repair blind. It is a question for whoever owns the
+  Minor app: is the skill library a published surface at all, or is it an
+  internal artifact whose reader is a seat with a checkout? The answer
+  decides whether §6 of `prompts/skill-extract.md` is a live contract or a
+  dead one, and no run of this seat can answer it, because the site is not
+  this seat's to write. Raised here rather than silently skipped, which is
+  what three weeks of runs have done with step 4.
+- **Worth stealing, and it was already ours.**
+  `ursa-major/src/prose-bound-count.test.ts` is the engineer seat's gate on
+  an English word counting a derived set, and its header is the best
+  statement of this defect class anywhere in the repository: deriving the
+  constant "fixed every place that could read a constant. It fixed nothing
+  in prose, because a sentence cannot import a module, and prose is where
+  the stale number was in the first place." It also records that two seats
+  had written the drift down seven days before anybody failed a test over
+  it, and names the reason: "noticing produced a note and not a failing
+  test, and a note is read by whoever goes looking for it." That sentence
+  is the argument for this run's §5af shipping with an exit status instead
+  of a rule, and for §5ae's general rule one run earlier. Two seats
+  arrived at the same finding in two directories within ten days, which
+  suggests the right home for it is `docs/standards/`, not two prompt
+  files. Not this seat's to put there.
+- **Ledger, for the engineer: the board poster defaults the sender to one
+  seat's name.** `tools/board/post.mjs` reads the sender as
+  `flag('--seat', process.env.ASC_SEAT || 'engineer')`. `ASC_SEAT` is not
+  set in this seat's run environment, so a run of any seat but one that
+  posts without `--seat` posts **as the engineer**, with a 201 and a clean
+  dry-run. This run's first dry-run printed `"seat": "engineer"` under a
+  subject written in the first person by the skill seat, and the only
+  reason it did not ship that way is that the dry-run prints the payload
+  and I read it. That is the same silent-misaddressing failure the file's
+  own header was written against, one field over: the company name was
+  read out of a committed table precisely so nobody would type it from
+  memory, and the sender is still a default. Two repairs, and the second
+  is the one that holds: make `--seat` required, or have the runtime set
+  `ASC_SEAT` the way it sets `BOARD_API_URL` and the token. Not this
+  seat's file. Worth checking the store for rows whose sender is the
+  engineer and whose body is written in another seat's voice, because that
+  is what this defect looks like after the fact and the board has no
+  delete route.
+- **What that gate deliberately leaves to us, and the line is the useful
+  part.** It puts `skills/` out of its own scope partly because a skill's
+  count is often a quotation of another file's prose, and "correcting a
+  quotation to match today's count would falsify the record of what the
+  quoted file said." E29 in this library is exactly that: a skill quoting
+  a document that was wrong, correctly. So the two gates had to meet
+  without overlapping, and the trigger this run chose, the library naming
+  itself as a set, is what keeps them apart. Any future count check over
+  `skills/` should inherit that trigger rather than reach for a number
+  pattern.
+
+### 2026-10-27 (skill) — A header saying it amends another section is a claim that the two agree, and nothing checks it
+
+- Trigger: measured, not recalled. `prompts/skill-extract.md` §5r's header
+  reads "(Added 2026-10-24, seventeenth run, amending §5c and §5e.)" and it
+  did amend §5e, 750 lines further down. §5e's worked example kept the counts
+  that amendment superseded: it said `distilling-a-tuning-record` has three
+  neighbours, which was the whole library on 2026-10-05 and is nine now, and
+  that "its three boundaries are one edge counted three times", while §5r's
+  own amendment says two of that skill's neighbours name no shared file at
+  all. One file disagreeing with itself across a cross-reference that
+  announces the agreement. The counts half is repaired and graded by `node
+  skills/trigger-coverage.mjs` as of this run, per §5ag. The cross-reference
+  half is not, and it is the general case: the counts were only the part a
+  denominator could catch.
+- What: six headers in this file declare in their own text which earlier
+  section they amend, naming §5, §5c, §5c and §5e, §5k and §5q, §5t part 3,
+  and §5aa part 4. (Written as members rather than as a share, because the
+  first draft of this entry said "most of the later ones" over thirty-three
+  sections, and the file holds thirty-two of which six declare an amendment.
+  Checking a count inside the ledger entry about counts is the whole point,
+  and this one was wrong in both numbers.) That header is load-bearing,
+  because a reader who finds §5e first and stops there gets
+  the superseded rule, which is exactly what happened here for twenty-two
+  days. Nothing links the two in either direction: §5e did not know it had
+  been amended until this run read §5r. The shape worth building is the back
+  pointer, mechanically: a section whose header names §N causes §N to carry a
+  line naming it, generated rather than typed, so the amended section cannot
+  be read without its amendments.
+- First step: a check that parses the "amending §N" clause out of every
+  section header in `prompts/skill-extract.md`, resolves §N, and exits 1 when
+  §N's body carries no reference back. One day's work, and it starts by
+  printing the current graph, because the number of unlinked amendments is
+  the measurement that says whether the back pointer should be generated or
+  merely required.
+- Cost: $0
+- Owner and deadline, per §5ae's general rule: this seat, and the next run
+  of this seat that edits `prompts/skill-extract.md`. Named here rather than
+  left to whoever is unlucky, because §5ae's own ledger entry proposing the
+  count check sat unbuilt for one run and two sections while two runs paid
+  the visible half of it, which is the cost that rule exists to stop.
+- Built 2026-10-27 by the run after this one, as §5ah: the graph printed
+  first as asked, zero of seven amended sections carrying a back pointer,
+  which is what decided that the line is generated rather than required.
+  `node skills/trigger-coverage.mjs --amendments` prints the graph and exits
+  1; `--write` generates the paragraph. The status is left where it is
+  because this entry is `proposed` and pm.md §4 gives `proposed` to the owner
+  and only `accepted` to the building seat.
+- Status: proposed
 
 ### 2026-10-27 — The board should derive `from_seat` from the token that posted, because a client-side guard cannot bind the other four companies
 
@@ -16445,6 +17617,182 @@ the owner to accept or reject.
 - Cost: $0, half a day, in `tools/secret-scan.mjs` and its verdict module
 - Status: proposed
 
+### 2026-10-27 (skill) — The README states counts of the library in prose, and the detector built for skill bodies finds nine of them and none of the defect
+
+- Trigger: measured while building §5ah, not recalled. `skills/README.md` said
+  the coverage tool "reads all 30 ordered pairs". It reads 90, and has since
+  the library reached ten skills, because the figure is `n(n-1)` and the
+  sentence was written when the library held six. Three count rules now scope
+  three surfaces, the trigger tests and the index table under §5ae, the
+  `SKILL.md` bodies under §5af, and `prompts/skill-extract.md` under §5ag.
+  The README's prose is the fourth and is scoped by none of them, even though
+  the index table inside the same file is the single most-checked surface of
+  the four.
+- What: the obvious repair is to point `libraryCountsInBody` at
+  `skills/README.md`, and this run ran that before proposing it. It returns
+  nine hits and the live defect is not one of them, because the detector
+  matches spelled number words and this one was written as a digit. Of the
+  nine, two are the file's own dated record of what the tool scored when it
+  was first run, one is the quotation of §5e that §5af's rule exists to
+  protect, and the rest are prose about numbers rather than claims about the
+  library. So the finding is not "widen the scope". It is that the README is a
+  different kind of document from a skill body: its job includes recording and
+  quoting counts, so the discriminator that works on a body, which is that any
+  present-tense count of the library is wrong there, is false here. What is
+  wanted is the §5ag shape rather than the §5af shape, which is one gradeable
+  construct with a computable denominator, not a pattern over prose.
+- First step: list every present-tense claim in `skills/README.md` whose
+  subject is the library and whose value the tool already computes, as this run
+  did by hand for one of them, and see whether more than one construct repeats.
+  One construct repeating twice is a check. One construct appearing once is a
+  hand repair and a note, which is what this run did, and the entry should then
+  be closed as answered rather than built. The measurement decides, and it is
+  half a day.
+- Cost: $0
+- Owner and deadline, per §5ae's general rule: this seat, and the next run of
+  this seat that edits `skills/README.md`. Named rather than left open because
+  §5ag's own entry sat one run before it was built and said in its own text
+  that naming an owner is what stops that.
+- Status: proposed
+
+### 2026-11-02 (skill) — A knowledge surface that cites a charter edit cannot be split from it, so the methodology has to land in an earlier pull request than the work citing it
+
+- Trigger: measured while landing #601, not recalled. The exo seat's note of
+  this morning gives the repair for the charter freeze as "if your run produces
+  both a knowledge surface and a charter edit, that is two branches, since the
+  cheap one can land the same day". That is right about the tier mechanism:
+  `docs/standards/pm.md` §10 makes Tier C `prompts/`, and Tier B condition 4
+  refuses a merge when any path in the diff is Tier C, so one prompt file moved
+  55 other files of #601 into the owner's queue with it for six days.
+- What: the split was not available here, and the reason generalises. #601's
+  two skills, `skills/trigger-coverage.mjs` and `skills/check-evidence.mjs`
+  cite `prompts/skill-extract.md` §5y, §5ae, §5af, §5ag and §5ah 29 times, and
+  the rewritten `trigger-coverage.mjs` *implements* those sections. Dropping
+  the prompt from the branch would land guard tooling citing five sections of a
+  methodology document that does not have them, which is a dangling citation in
+  the one library whose stated differentiator is that every claim traces. So
+  the two halves of #601 are not separable after the fact, and the branch stays
+  Tier C.
+- The measured cost of not splitting earlier: `auditing-an-untraced-share`
+  landed on main in the one window where the ninth skill existed and §5ae's
+  counts convention did not, so it shipped stating all four of its counts in
+  prose and was the only file in the library the new guard could not check.
+  Four sibling boundaries were untested in both directions for the same reason.
+  Both were repaired in this run, and neither was a defect of authorship.
+- First step: the rule is ordering, not splitting. A run that needs a new
+  methodology section writes that section in its own pull request first,
+  carrying nothing that cites it, and the work citing it goes in the next run.
+  That makes the prompt file the only path in a one-file Tier C branch the
+  owner can read in a minute, and leaves every later branch Tier B. Cheap to
+  state in §5 and worth one run to try.
+- Cost: $0, and the next run of this seat that would add a §5 section
+- Status: proposed
+
+### 2026-11-02 (skill) — The README construct repeats, so the count claim 2026-10-27 left as a hand repair is a check after all
+
+- Trigger: this entry answers the 2026-10-27 entry above, which named "this
+  seat, and the next run of this seat that edits `skills/README.md`" as its
+  owner and deadline, and left one question open: whether the construct
+  repeats twice, which it said would make it a check rather than a hand repair.
+- What: it repeats. The first instance is the one that entry found, the prose
+  sentence stating the ordered-pair count, which this run replaced with a
+  sentence that states no number and defers to the tool. The second is the
+  section heading. `skills/README.md` carried `## Seven areas` over six
+  `**The ... area.**` labels, because the run that added the ninth skill moved
+  the heading and placed that skill inside an existing area in the same breath.
+  Both of that run's own sentences about the skill put it inside the span area,
+  so the heading was the outlier rather than the list, and this run set the
+  heading to eight over the eight labels the merge lands.
+- Why it is the §5ag shape and not the §5af shape: the number of *areas* is a
+  judgement no tool can derive, which is why it sits in the `counts` block by
+  hand. The number of **labelled** areas is a count of `**The ... area.**`
+  headings, so "heading ordinal equals label count" is one gradeable construct
+  with a computable denominator, which is what the 2026-10-27 entry asked for
+  and did not find.
+- First step: assert it where the counts block is already read, in
+  `skills/trigger-coverage.mjs --check`, as one more stated-count row beside
+  the existing three. The ordinal is a spelled word in the heading and the
+  denominator is a grep, so it is an hour, not a day.
+- Cost: $0, in `skills/trigger-coverage.mjs`
+- Status: proposed
+
+### 2026-11-02 (skill, third run) — The check the two hand repairs asked for is built, and the defect it was built from is live on the trunk while it is being built
+
+<!-- closes: docs/ideas.md 2026-11-02 "The README construct repeats, so the count claim 2026-10-27 left as a hand repair is a check after all" -->
+<!-- closes: docs/ideas.md 2026-10-27 "The README states counts of the library in prose, and the detector built for skill bodies finds nine of them and none of the defect" -->
+
+- Trigger: the two entries above, in order. The 2026-10-27 one named this seat
+  and "the next run of this seat that edits `skills/README.md`" as its owner and
+  deadline, and set one condition for building rather than hand-repairing: that
+  the construct repeat twice. The 2026-11-02 one reported that it repeated and
+  proposed the check. This run built it, which is the first time in this lane a
+  proposal has been built by the run named in it rather than by a later run
+  rediscovering the finding.
+- What: `areaHeadingDefects` in `skills/trigger-coverage.mjs`, with
+  `explainAreas` beside it and ten tests. The denominator is the list of
+  `**The ... area.**` paragraph openers, which is a grep; the two claims graded
+  against it are the `## <N> areas` heading ordinal and the `areas` key in the
+  `counts` block. It prints with the other stated counts and exits 1 on its own.
+- The measurement that makes this worth more than the fix: the check was run
+  backwards over every commit that has ever touched `skills/README.md`, nineteen
+  of them. Clean through 2026-10-26. **Red from the commit that landed the ninth
+  skill, and still red on `main` right now:** `## Seven areas` standing over six
+  labelled areas. So the defect this seat found by hand on one branch is on the
+  trunk, and the branch that repairs it is #633, which is in the owner's queue.
+  A guard written on a branch cannot be red about a trunk nobody runs it on.
+- Wider than the proposal in exactly one place, named here because the proposal
+  is a committed file and a silent widening of it is the thing this library
+  grades other files for. The proposal graded the heading ordinal and left the
+  `areas` key alone, on the reasoning that an area is a §5e judgement. That
+  reasoning is right about the judgement and wrong about the number: the
+  judgement is expressed by which labels exist, so the labels are a list and the
+  key is a restatement of its length. Measured: on `main` there is no `counts`
+  block at all, so the proposal as written catches `main`'s defect and says
+  nothing about the key, and grading the heading alone would certify an ordinal
+  while leaving the key free to contradict it.
+- Two things the proposal got right that this run would not have guessed. The
+  first is that pointing `libraryCountsInBody` at the index returns nine hits
+  with the live defect not among them, because the index's job includes
+  recording and quoting counts; that measurement is why this is a construct and
+  not a pattern. The second is that the detector matched spelled words and the
+  defect was written as a digit, so the ordinal here is read as either, and a
+  word the map does not hold is reported as unreadable rather than skipped.
+- First step: none left in this lane. The code, the ten tests, the index prose
+  and the history sweep are in this pull request, and the two entries above are
+  closed by marker rather than by status, because `docs/standards/pm.md` §4
+  gives only the owner the move out of `proposed`. What remains for a reader is
+  the one judgement a seat should not make for her: whether grading the `areas`
+  key is the widening argued above or an overreach, which is a two-line revert
+  in `areaHeadingDefects` if she reads it the other way.
+- Cost: $0, spent
+- Status: proposed
+
+### 2026-11-02 (skill, third run) — A guard about `main` cannot be red about `main` from the branch that defines it, and this lane now has four such guards
+
+- Trigger: measured while closing the two entries above, not recalled. The
+  check built this run is green on this branch and red on `origin/main`, and the
+  only reason the trunk is not failing is that the file defining the check is
+  not on the trunk either. The same is true of `countDefects`, of
+  `bodyCountDefects` and of `specNeighbourDefects`: all four landed in this
+  seat's branches, and `main`'s copy of `skills/trigger-coverage.mjs` is 364
+  lines against this branch's 1,420 and contains none of them.
+- What: this is not an argument for merging faster, which is not a seat's call.
+  It is an argument that a guard's receipt has to state which tree it was run
+  against, because "green" from a branch that holds both the guard and the
+  repair says nothing about the tree the owner is protecting. This seat's run
+  records already measure every guard against `origin/main` in a worktree, which
+  is the right instrument and was adopted for a different reason. What is
+  missing is the third column: green here, red there, and **the date the
+  defect-on-the-trunk started**, which is a sweep over the file's own history
+  and took one command.
+- First step: when a run in this lane builds a guard, it runs that guard over
+  the history of the file the guard reads and reports the first commit it is red
+  on, in the pull request. Nineteen commits took under a second here. The reason
+  to make it a habit rather than a rule is that it converts "this check would
+  have caught it" from a claim into a date.
+- Cost: $0, one command per guard built
+- Status: proposed
+
 ### 2026-11-02 (engineer, second message pass) — A wrong rule that passes against every real body: validate a documented model on a corpus the house voice cannot produce
 
 - Trigger: this pass transcribed `docs/agents/runner-facts.md` §44's
@@ -17149,6 +18497,588 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-02 (skill) — An absence receipt that searches tests is falsifiable by a test, and no guard in this library can see it go false
+- Trigger: this run re-ran one receipt from `skills/relevance-audit.md`
+  in order to compare two grep dialects, and found the receipt had gone
+  false by an unrelated route. `distilling-a-tuning-record` said the
+  distillation watermark "is never set to true by anything", with
+  `grep -rn 'distilled: true\|\.distilled = true' ursa-major/src
+  --include=*.ts` recorded as returning nothing on 2026-10-18. It
+  returns one line today, a `serve` test's fixture. The writing paths
+  still only write `false`, so the claim survived and its wording did
+  not.
+- What: this is a hole in the library's guard set rather than one stale
+  sentence. `check-evidence.mjs` hashes the cited range and `E25`'s
+  range is byte-for-byte unchanged, so it was green throughout.
+  `relevance-sweep.mjs` hashes the `what`, the passages and the lines,
+  all three unchanged. The claim that went false is an **absence**, and
+  §5l already says an absence is carried by a search rather than by a
+  range, which is exactly why nothing in the library watches it: the
+  search is written in prose in the audit row and is never executed
+  again. Measured on this branch: of 376 audit rows, 9 quote a search
+  command and 5 distinct refs use one to carry an absence. This run
+  re-ran the other four by hand and all four still hold exactly as
+  recorded, so one of five had rotted in two weeks and nothing reported
+  it. Two properties made that one rot and both are cheap to test for:
+  the search's scope included files the claim was never about (here,
+  tests), and nothing re-ran it.
+- First step: one `§5` section of `prompts/skill-extract.md`, written in
+  its own pull request carrying nothing that cites it, per §5ai. It
+  should say that an absence receipt is written as a command with its
+  scope narrowed to the files the claim is about, excluded paths stated
+  rather than implied, and that the command belongs in a block a tool
+  can execute rather than in prose a reader must retype. The run that
+  writes it owns the first version; the tool that re-runs the blocks is
+  a later item and should not be bundled with it, because the section is
+  Tier C and the tool is not.
+- Owner: the next run of this seat that would add a `§5` section.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — The divergent grep dialect on this host lives in one shell frame and reaches nothing below it
+- Trigger: Ursa's exo seat corrected a precision figure on the board and
+  asked this seat for one version check in its own lane, because an arm
+  of its own command had never fired and half the reason was that the
+  `grep` it was calling is not GNU.
+- What: the check ran and the claim needs narrowing in a way that
+  changes who is exposed. Both engines are on this host. `/usr/bin/grep`
+  is GNU 3.11; the `grep` an agent types resolves to a shell function
+  the harness installs, which execs ugrep 7.8.4. The function is not
+  exported, measured three ways, so a script, a guard, CI and even a
+  bash the seat's own shell launches all get GNU. The divergent dialect
+  therefore lives in exactly one frame, the top one a person or an agent
+  types into. Two things diverge there: the exit status of
+  quiet-plus-invert, which is inverted, and the file population, because
+  the harness form honours `.gitignore` and skips binaries and drops the
+  `./` prefix. Measured on a throwaway tree with one needle in each of
+  five files, the same `grep -rl` returned two files in one frame and
+  five in the other. For this lane the consequence is specific: the
+  committed tooling is safe and the hand-run receipt is not, which is
+  the opposite of where this seat would have looked.
+- First step: `skills/grep-dialect.mjs` exists as of this run and
+  reports both halves. What it does not do is run anywhere by itself.
+  Wiring it into whatever becomes the library's standing check is a
+  later item, and deliberately not this one, because a scanner that
+  reports its own probe and its own fixtures needs the exemption written
+  somewhere a reader sees it, which today is its test file.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — Eleven charters prescribe an ancestry check that lies in the clone every seat is handed, and the repair is named in none of them
+- Trigger: this run's first git question, asked under its charter's own
+  opening rule, reported that pull request #646 has no common ancestor
+  with `main` and that its diff is 81 files with 11,510 deletions,
+  including whole `SKILL.md` files removed. The truth, after
+  `git fetch --unshallow`, is 63 files with 11,387 insertions and 260
+  deletions. The next decision in front of the run was whether to close
+  #646 as damaged, and the wrong answer carried exit status 0.
+- What: the defect is not the clone and not the instrument, both of
+  which are already written down. `tools/ensure-full-clone.sh` exists,
+  `docs/design/clone-completeness.md` specifies it, L-A55 and L-A77 in
+  `docs/standards/lessons.md` name it by path, and
+  `prompts/skill-extract.md` §5v says plainly that the first act of any
+  run that will compare branches is to run it. Sixty-five files in this
+  repository name that path, counted 2026-11-02 and drifting upward
+  with every run that cites it. The defect is **where the rule is not**.
+  Measured on this branch: of the eleven files under `prompts/` that
+  print the `git merge-base --is-ancestor refs/prs/<old> refs/prs/<new>`
+  paragraph, **one** carries a shallow-clone warning beside it, which is
+  `prompts/exo-agent.md`, and **zero** name
+  `tools/ensure-full-clone.sh`. So every seat is told to ask the
+  question at step 0 and told how to ask it safely in a file it opens
+  later, or never.
+- The reason it survives, which is the part worth a charter edit rather
+  than a lesson: a plain `git fetch origin 'refs/pull/N/head:refs/prs/N'`
+  into a depth-1 clone deepens that ref and leaves `main` at one commit.
+  In that state the PR-to-PR form the charters literally print is
+  **correct**, and every comparison against `main` is wrong. The printed
+  command returns a true answer and signals nothing. Three clones made
+  from scratch on 2026-11-02 and the four spellings of the comparison,
+  three of which fail loudly at 128 and one of which exits 0 with a
+  plausible wrong number, are tabulated in `prompts/skill-extract.md`
+  §5aj.
+- Why no tool closes it: this seat built a scanner for it this run and
+  then deleted it, because `skills/relocate-anchors.mjs` already detects
+  the shallow clone and names the repair at three call sites, and the
+  failure happens in the top shell frame of a run, before any committed
+  guard executes. The preceding run reached the same conclusion about
+  `grep` dialects from the other direction. Two instruments, one frame,
+  no exit status available there.
+- First step: not this seat's to take, and it is to add to the all-seats
+  "Read your own seat's open PRs first" paragraph, in each of the eleven
+  `prompts/*-agent.md` files that carry it, one line placing
+  `bash tools/ensure-full-clone.sh` before the first `merge-base` call,
+  and quote the substitution in L-A77's worked example so the lesson
+  stops printing the one form that fails quietly. Charters are outside
+  every seat's own boundary, so this is addressed to the owner. Owner:
+  the owner, as the only merger of Tier C paths. Cheapest honest
+  alternative if the charter edit waits: `tools/seat/charter-lag.mjs`
+  already reads charters, so a check that fails when a charter prints
+  `merge-base` without naming the repair would put the rule under an
+  exit status without editing eleven files.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — A text guard's precision decays in proportion to how well the organisation documents itself, and the surface it found a hit on is the missing field
+- Trigger: the ExO seat's second note on the board, which graded this
+  seat's `skills/grep-dialect.mjs` against its own clone and this one.
+  Twenty-six findings between them, of which **two** were genuine call
+  sites. Both were in that seat's own unmerged charter branch and the
+  tool found them exactly, so recall was never in question. Of the seven
+  on `main`, two were a demonstration of the defect and a quotation of
+  the broken instrument, three were English sentences about the flag
+  pair, and two were that seat's own carried check,
+  `grep -c '<the pair>'`, where the pair is the string being searched
+  for. On its own corpus the tool reported sixteen fixtures in its test
+  file and one line in its implementation. The seat stated the
+  generalisation better than this one had: a register that records every
+  defect by quoting it is the densest carrier of every pattern a guard
+  searches for, so precision decays in proportion to how well we
+  document ourselves.
+- What: the fix shipped in this run is specific to one tool, and the
+  rule behind it is not. Every guard in this library that decides by
+  matching text against a tree has the same hole, because none of them
+  records **where** a hit was found before deciding what it means. Four
+  surfaces are enough and all four are derivable without a file list: a
+  line a program executes, a command a reader runs by hand (the fenced
+  block in markdown, the commented command in a script), prose, and a
+  corpus that declares itself. Only the first two can carry a defect.
+  Alongside it, one shape that is not a surface but a class: a pattern
+  occurring as the **search string** of a command rather than as the
+  command, which is never the defect the pattern names. The library's
+  guards that would be graded by this are `relevance-sweep.mjs`,
+  `trigger-coverage.mjs` and `check-evidence.mjs`, each of which reads a
+  tree that includes this seat's own prose about them.
+- First step: a `## 5` section of `prompts/skill-extract.md` stating the
+  rule as the house standard for a text guard, written in a pull request
+  that carries nothing citing it, per §5ai. It is deliberately not in
+  this run's branch, which carries 60-plus files of tooling that would
+  cite it the moment the section existed, and §5ai's whole content is
+  the order. Owner: the next run of this seat that would add a §5
+  section. The second step, which belongs to the run after it, is to
+  lift `surfacesForText` out of `grep-dialect.mjs` into a module the
+  other three guards import, because three copies of a fence tracker is
+  the defect this entry would have caused.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — The gate that catches a moved citation cannot tell a moved line from a wrong section, and the blanket update is the trap
+- Trigger: this run's own mistake, caught by the tool that exists to
+  catch it. `check-evidence.mjs` reported nine stale citations in
+  `clearing-a-record-for-release`, and this run ran
+  `--update <slug>` before reading seven of them, which re-recorded as
+  verified a set of claims nobody had re-read. The tool's own output
+  warns about exactly that in the sentence after the one that tells you
+  the command. Reading the seven afterwards showed the warning was not
+  theoretical: four of them had stopped pointing at a shifted copy of
+  their text and started pointing at a **different section** of
+  `docs/security/redaction-standard.md`, and three had moved from one
+  ledger entry to an unrelated one. The claims all still held somewhere
+  in the file, which is why the repair was cheap, and nothing in the
+  blanket update would have told anyone that.
+- What: `--update <slug>` is the wrong granularity for a re-read, and
+  the asymmetry is the argument. A citation whose text was reflowed in
+  place needs no reading. A citation whose range now covers different
+  prose needs all of it. The lock cannot tell them apart, but the tool
+  can: it already computes both fingerprints, so it can say whether the
+  cited text still *appears* anywhere in the file at a different offset.
+  When it does, the move is mechanical and `relocate-anchors.mjs`
+  already owns it. When it does not, the citation is pointing somewhere
+  new and `--update` should refuse it by slug and require it by ref.
+- First step: `check-evidence.mjs --update <slug>` refuses, naming the
+  refs whose cited text is no longer findable in the file, and tells the
+  caller to pass those refs explicitly after reading them. The refs
+  whose text moved in place keep working as they do today. One test
+  writes a source, cites it, edits a distant line to shift the range,
+  and asserts the slug-scoped update still succeeds; a second edits the
+  cited text itself and asserts the refusal names that ref. Owner: the
+  next run of this seat that touches `check-evidence.mjs`.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — The containment gate in front of "close this one as superseded" passes by construction in the two cases it exists for
+- Trigger: a note on the board from this company's ExO seat, addressed to
+  this seat, naming pull request #601 as the merge queue's oldest real
+  conflict, twelve files all under `skills/`, and handing the rebase to
+  this seat as the only one that can clear it. The measurement was
+  correct and reproduced here exactly. The first question it raised was
+  whether #601 still carries anything, so this run reached for
+  `tools/stack/absent-text.py`, which that file's own header offers as
+  "the gate in front of 'close this one as superseded'". Asked the
+  question twice, the gate gave opposite answers, and the answer that
+  would have been acted on was the one that examined nothing.
+- What: two defects, both reproduced rather than inferred, in the same
+  twenty lines of `main()`.
+  The first is the base. `base` defaults to `git merge-base OLD TIP`
+  (`tools/stack/absent-text.py:244`) and the file list is
+  `git diff --name-only base old` (`:251`). When `old` is an ancestor of
+  `tip`, `merge-base` returns `old`, so that diff is empty, the per-file
+  loop never runs, and the function returns `0` having printed nothing.
+  Measured on the real pair this run was sent to resolve:
+  `absent-text.py refs/prs/601 refs/prs/660` exits **0** with no output
+  and zero lines examined, while the same pair given the base the
+  question actually needs, `--base $(git merge-base refs/prs/601
+  origin/main)`, examines **56 files and 33,226 lines** and exits **1**
+  on 43 of them. Same question, opposite exit codes. The silent pass is
+  indistinguishable at the exit code from a full-coverage pass, which is
+  the one distinction the header's four classes were invented to draw.
+  The second is the ref scan, and it is the worse of the two. A path
+  missing from the tip is looked for on `refs/prs`, `refs/remotes/origin`
+  and `refs/heads` before being called `at-risk`, and the only ref
+  excluded from that search is the tip (`:263`). `old` is not excluded,
+  and `old` is reachable under `refs/heads` or `refs/prs` in every real
+  invocation. So a file that exists on the retiring branch and nowhere
+  else is found on the retiring branch, classified `elsewhere`, printed
+  as "not at risk", and given exit `0`. Reproduced on a throwaway branch
+  off `main` carrying one file present on exactly one ref, confirmed by
+  scanning all three namespaces by hand: the gate answered
+  `skills/ZZ-only-on-this-branch.md: missing from the tip, present on 1
+  other ref(s) -- not at risk (e.g.
+  refs/heads/repro/absent-text-self-carrier)`, naming the branch being
+  closed as the reassurance for closing it. `at-risk` is the only class
+  that earns an exit code, and it can never fire for the only case where
+  closing the branch actually loses the text.
+- Why it matters here and not in general: this seat closes its own older
+  pull requests as contained in its newer tip, and that file's header
+  says so in its first paragraph of rationale. It is the gate on a
+  destructive decision, and both defects fail in the permissive
+  direction. The measurement that mattered this run came out right only
+  because the explicit base was passed by hand: #601 holds **2,296 lines
+  absent from `main` and 2,615 rewritten**, plus **24 files `main` does
+  not have at all**, among them two complete skills
+  (`attributing-a-deleted-span`, `excluding-a-file-from-an-outcome-record`,
+  `SKILL.md` and `TRIGGER-TEST.md` each) and twenty run reports. Those 24
+  came back `elsewhere`, correctly, because branches 633 through 660 do
+  carry them. Had they not, the same class and the same exit code would
+  have been printed.
+- First step: exclude `old` from the ref scan alongside `tip`, so the
+  branch under test cannot vouch for itself, and print one line plus a
+  distinct exit when the file list is empty, saying that `old` is an
+  ancestor of `tip` and that nothing was examined. Both are one-line
+  changes with a one-test receipt each: a fixture where `old` is an
+  ancestor of `tip` must not report a bare `0`, and a fixture with a file
+  on `old` alone must exit non-zero. The file's own closing line, "a
+  count is not evidence, only the sentence tells you which you have", is
+  the standard the empty case fails, because in the empty case there is
+  no sentence. Owner: the engineer seat. `tools/stack/` is outside this
+  seat's boundary, so this is a ledger entry rather than an edit.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — A suite that asserts zero violations on a gate which classifies some violations as the owner's goes red on the owner's queue, not on the branch
+- Trigger: running the repository's own test suites over this seat's
+  stack after merging its tip, to check the merge rather than to trust
+  it. `tools/ledger` came back 124 passed and 2 failed on the stack
+  where `origin/main` is 126 passed and 0 failed, so two gates were red
+  on this seat's work and nothing had reported it. One was this seat's to
+  repair and is repaired in this branch. The other cannot be repaired by
+  any seat, and the gate it belongs to says so itself.
+- What: `tools/ledger/check-closures.mjs` sorts its findings into ones a
+  seat must repair and ones only the owner can, and prints the split:
+  "clean as far as a seat can take it. 2 violation(s) above need the
+  owner, not a seat." Both remaining findings are `CLOSURE_STATUS` on
+  entries whose status line reads `proposed`, and the gate's own message
+  names the holder: "Held by the owner: pm.md §4 gives only her the move
+  out of 'proposed'." The test at
+  `tools/ledger/check-closures.test.mjs:194` then asserts the violation
+  list is empty, with no such scoping, so it fails on exactly those two.
+  Its sibling in the same family is written the other way, and its name
+  is the whole fix: `check.test.mjs`'s case is "the real ledger carries
+  no violation a seat could repair", and that one passes.
+- Why it matters, and the direction: the normal and correct sequence is
+  that a seat ships the work and writes the closure marker, and the owner
+  moves the status afterwards. So this suite is red for the whole
+  interval between a correct ship and an owner merge, which on this queue
+  is days. A red check is a hard stop under `docs/standards/pm.md` §10
+  Tier B criterion 3 regardless of why it is red, so a gate that goes red
+  on the owner's latency blocks merges for a reason that is not about the
+  branch. It also trains the reading this organisation has already paid
+  for twice: a suite that is red for a known harmless reason is a suite
+  whose red stops being read.
+- First step: scope the assertion the way its sibling is scoped, to the
+  violations a seat could repair, and add a second case asserting that an
+  owner-held violation is reported and does not fail the suite. The split
+  already exists in the gate's return value, so the test is reading the
+  wrong field rather than needing a new one. Owner: the engineer seat,
+  `tools/ledger/` being outside this seat's boundary.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — A containment verdict should name what it examined, and §5ai is why this run filed the rule instead of writing it
+- Trigger: this run needed a §5 section of `prompts/skill-extract.md`
+  and did not write one, which is itself worth recording, because §5ai
+  landed in this seat's own stack hours earlier and forbids it. §5ai's
+  operative clause is that a run needing a new section writes it in a
+  pull request carrying nothing that cites it, section first and
+  citations second, never the same branch. This run's pull request
+  carries seven of this seat's pull requests merged together, which is
+  the opposite shape, so the section cannot land here without breaking
+  the rule on the branch that would introduce it.
+- What: the rule the section would state, kept here so the next run does
+  not have to re-derive it from the pull request. A containment verdict
+  in this library states what it examined before it states what it
+  found, and a verdict that examined nothing says so in place of a
+  number. The two readings behind it are measured in the sibling entry on
+  `tools/stack/absent-text.py` filed under this date: the same tool, the
+  same pair of refs, exit 0 on zero lines and exit 1 on 33,226, and the
+  passing run is the one that looked at nothing. The generalisation is
+  not about that tool. §5j already says a lock proves the lines did not
+  change rather than that they support the claim, and §5s already says a
+  guard that skips its subject reports on the subject it has left. This
+  is the third face of the same shape, and the one this library has no
+  section for: a gate whose scope is computed from its own arguments can
+  compute an empty scope, and an empty scope is reported as success by
+  every gate in this repository that returns an exit code.
+- First step: write the section, in a pull request that carries the
+  section and its ledger closure and nothing citing it, per §5ai, and
+  pay §5ai's own grep check on it. Then, and only in a later run, the
+  guards under `skills/` that could carry it. Owner: the next run of
+  this seat that would add a §5 section, which is the same owner §5ai
+  itself was filed with.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — The board enforces a rule by truncation that its documented table of refusals cannot hold, and the table never says it is a table of refusals
+- Trigger: this run's own board reply, posted to answer the ExO seat's
+  note about the merge conflict. The POST returned `HTTP 201` with a
+  message id, so by the only signal most seats check it succeeded. Its
+  response body says `"body_chars": 2034, "body_delivered": 1453,
+  "body_truncated": true, "wake_limit": 1500`, and carries a notice
+  stating that the tail was cut and that "the tail is where the house
+  style puts your disposition". Which it was. The half of the message
+  addressed to that seat, including what this run decided and what it
+  was handing back, was not delivered on the wake.
+- What: `docs/standards/pm.md` §15 has a paragraph headed "The rules the
+  store actually enforces, written down because a seat should not have to
+  find them by being refused", and it says "Four": the 420-character
+  paragraph limit, the reason word, the 40-character minimum, and no
+  codes in the prose. There is a fifth. The wake delivers at most 1,500
+  characters of `body` and truncates silently past it. It is absent from
+  that paragraph and from the rest of §15, which is consistent, because
+  §15's paragraph is scoped to what the store **refuses** and this rule
+  does not refuse anything.
+- Why that scoping is the defect rather than an excuse for it: the four
+  documented rules all fail loudly, so the cost of not knowing them is a
+  wasted turn and a probe left in someone's inbox, which is what that
+  paragraph was written to spare. This one fails quietly and in the
+  expensive direction. A seat that posts with `curl ... | tail -1`, or
+  that branches on the HTTP status, or that pipes the response through a
+  key lookup for the id, sees a success and moves on, and the rule the
+  house style sets up guarantees that what is lost is the disposition
+  rather than the preamble. The same silent-success shape is already
+  recorded against this board twice under this date: the paged message
+  read that returned the newest 500 rows without saying so, and the
+  events route that answers 500 to every parameter it documents with a
+  real error only in the response body. This is the third instance, and
+  all three are read correctly only by a caller that prints the raw
+  response.
+- First step: **corrected 2026-11-02 by Ursa's exo seat on the board, and
+  the correction is taken.** Not a fifth row. That seat's words are that
+  "the four you counted it against are refusals, where the write does not
+  happen. A truncation is not a refusal, since the store keeps the whole
+  body and cuts only the notification. So it is not a fifth row of that
+  table. The table's real defect is that it never says it is a table of
+  refusals." That is right, and it is right against this entry's own
+  analysis one bullet above, which had already found the scoping and
+  called it consistent before proposing a repair that breaks it. Adding
+  the wake limit as a fifth member of a list of refusals would make the
+  list wrong in order to make it complete, and it would do so in the one
+  paragraph whose value is that a seat can trust what the list means.
+  So the repair is two sentences and not a recount: give §15's paragraph
+  a heading or a clause that says it enumerates what the store
+  **refuses**, and name the wake limit separately as the one rule that
+  reports instead of refusing. Four stays four. The handoff already
+  posted to `alexandra-systems/exo-centralizer` carries the old first
+  step; this correction goes back on the board under the same thread, so
+  HQ reads the repair this entry now asks for rather than the one it
+  asked for at 03:44. This entry's title was amended in the same edit for
+  the same reason, and it read "The board documents four store rules it
+  enforces by refusal and has a fifth it enforces by truncation, which
+  arrives as a success"; the old wording is kept here because the title
+  is what the owner reads in a list and leaving a corrected claim
+  standing there is not a small cost. What is unchanged is the finding,
+  the measured figures, and the owner. The repair this run used in the meantime,
+  and the one the store's notice itself recommends, is to split: the cut
+  tail went out as a second message naming the first by id, since the
+  store has no delete route and a truncated record is the honest one to
+  leave standing. Owner: HQ, via a handoff to
+  `alexandra-systems/exo-centralizer`. `docs/standards/` is HQ's and the
+  runtime that enforces the limit is HQ's, so no Ursa seat can repair
+  either side of this; the handoff is posted on the board with the
+  measured figures.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill, eighth run) — The rule for a check that read none of its population is written, and the ordering clause it was written under is blind to the one thing that makes a citation dangle
+
+<!-- closes: docs/ideas.md 2026-11-02 "A containment verdict should name what it examined, and §5ai is why this run filed the rule instead of writing it" -->
+
+- Trigger: a note on the board from this company's ExO seat, addressed to
+  this seat, reporting two call sites in its own self-classification sweep
+  that could never fire and offering the shared shape as the thing worth
+  more than either case: a check that silently drops part of its
+  population has no failing output, so it can contradict nothing, and is
+  reachable only by a second instrument over the same ground returning a
+  different number. That is the generalisation the entry this marker
+  closes had asked a later run to write, arriving from a different lane
+  the same night with an independent case behind it.
+- What: the methodology section the closed entry owed, in
+  `prompts/skill-extract.md`, stated at the width the cases share rather
+  than at the width of a containment verdict. Five clauses. A check states
+  the size of the population it examined in the same line as its verdict;
+  an empty population is not a pass and does not share an exit code with a
+  full one; a drop is found by a second instrument and not by reading the
+  check; an instrument agreeing with its own earlier run is not evidence;
+  and a repair of one of these is controlled both ways in the same run,
+  because fixing a silent drop can produce a silent over-report. Every
+  figure in it was measured in this clone, including both of the ExO
+  seat's, which were re-derived from the commits rather than taken from
+  the note.
+- What it found while being paid, which is the part worth a reader's time:
+  the gate that enforces the amendment rule had the same defect, in this
+  seat's own write surface. `skills/trigger-coverage.mjs --amendments`
+  read an amendment claim out of a section's dated note by matching the
+  gerund alone, where the rule it enforces is stated as a note that "says
+  it amends" the other section. The note added by this run spelled the
+  claim `Amends`, so it declared an edge the gate could not see, and the
+  mode printed "every amended section names its amendments" over a
+  population that note had been dropped from. Measured: 32 of the file's
+  43 numbered sections carry a dated note, 31 spell the claim `amending`,
+  and the one that did not was the one being added, so the drop was 1 of
+  32 and the only output was the clean line. Repaired here: three
+  inflections, case-insensitive, with the negative control in the tests so
+  a widened verb cannot read the file's commentary about itself as a
+  claim, and the verdict line now names its population in three parts,
+  separating what the graph cannot speak for from what it read and found
+  nothing in.
+- First step: not this seat's to take, and it is to scope one clause. The
+  ordering clause this section landed under reads its own check tier-blind. §5ai says the branch
+  introducing a section must carry nothing that cites it, and the check is
+  a grep over the whole tree. The risk the clause exists to stop is
+  narrower than the grep: a citation dangles only when the citing path can
+  merge while `prompts/` waits, and under `docs/standards/pm.md` §10
+  `prompts/` is Tier C while `docs/ideas.md` grooming is Tier A and
+  everything else here is Tier B. Measured on this branch: the file holds
+  37 `## 5` sections and `origin/main` holds 19, so 17 exist only on this
+  seat's open pull requests, and all 17 are cited from `docs/ideas.md`,
+  all 17 from paths under `docs/runs/` and `skills/`, across 36 files, and
+  15 from inside the prompt file itself. The grep that is supposed to
+  guarantee no dangling citation therefore passes nothing today and the
+  exposure is 17 of 17, every one of it from a path of a lower tier than
+  the file it points into. A same-file mention can never dangle and should
+  not count; a mention from a Tier A or Tier B path is the whole defect
+  and counts twice. The repair is one sentence in §5ai scoping its check
+  to paths outside the prompt file, plus the tier reading, and `prompts/`
+  is a charter path. Owner: the owner, since §5ai is in a Tier C file this
+  seat may propose but not unilaterally rescope; the next run of this seat
+  that would add a §5 section pays the stricter reading by hand in the
+  meantime, as this run did.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — The board's disposition gate reports honestly about one of its two arms, and widening the list did not change which arm that is
+- Trigger: Ursa's exo seat ran this seat's 2,034-character `done` of
+  03:43 through `tools/board/check.mjs` and reported that the gate could
+  not tell which side the disposition fell on, then graded that arm for
+  the first time over a complete walk of 4,200 rows. Confirmed in this
+  clone before being written down, and the tree it was measured on is
+  named because the answer depends on it: against `275623bd`, this
+  stack's tip when the note arrived, `dispositionRisk(body, 1453)`
+  returns `markers_found: 0` on that body, while its two decisions sit at
+  offsets **233** and **729**, "I did not rebase it" and "So I merged my
+  tip instead". That `MARKERS` carried `not merged` and `I took` and
+  `I decided`, and carried neither an `I did not <verb>` form nor an
+  affirmative `I merged`, so it held the negations of actions and not the
+  actions.
+- Corrected before shipping, because the first draft of this entry read
+  as though nothing had been fixed: **the list is already repaired on
+  `main`.** The reporting seat's widening landed in `e951ca88` at
+  04:13:28Z, two minutes before its note was sent and before this run read
+  the board, so it was never this entry's to propose. Against
+  `origin/main` the same body returns `in_delivered: true` with three
+  markers, at 233, 729 and 732. What this entry is about is what that
+  repair left: `lost_only` is still `lost.length > 0 && !inDelivered`, the
+  keying is unchanged, and no caller is told what list the verdict was
+  read against. The seat's own `GRADED` block agrees in its own words,
+  that the edit "narrowed the blind spot and did not close it", and puts
+  the residue at 249 `none` verdicts of 1,016 against 371 before.
+- What: `tools/board/disposition.mjs` argues in its own header that a
+  word list is acceptable here because "a miss costs a seat nothing it
+  was not already paying", and it keeps that promise for one of its two
+  arms. `markers_missing` exists precisely so the `none` verdict prints
+  as "no marker found" and never as "no disposition present". The
+  `lost_only` arm next to it makes a positive claim about the delivered
+  head out of the same silence, and it is not reported as a reading. The
+  reporting seat's figures for the grading: **154** of **1,016** verdicts
+  move, and **32** bodies were told their verdict had been cut while it
+  sat at offset zero. Those are that seat's numbers, reported as that
+  seat's; the confirmation above is this seat's.
+- Why it matters more than a missed finding: a presence-keyed list that
+  is incomplete produces a false negative and the operator sees nothing,
+  which is cheap and is reachable only by a second instrument. An
+  absence-keyed list that is incomplete produces a false positive with a
+  named subject, a non-zero exit and a prescribed repair, all of them
+  wrong. The same list is therefore cheap in one direction and expensive
+  in the other, and this gate has priced only the cheap half. The
+  expensive direction also runs toward the behaviour the gate exists to
+  encourage: the seats most likely to be falsely accused are the ones
+  that put the verdict first, in their own words, rather than in this
+  list's.
+- First step: not this seat's to take. `tools/` is not in this charter's
+  write surface and the seat that owns the file has already graded and
+  widened the arm. What is filed here is the general form, written as
+  `prompts/skill-extract.md` §5al and paid on this library's own
+  amendment graph in the same pull request, plus the one suggestion the
+  widening does not cover: a wider list has the same property one
+  spelling further out, so the repair that generalises is to report
+  `lost_only` as a reading of the vocabulary and to print the vocabulary
+  beside the verdict, which is exactly what `markers_missing` already
+  does for the arm next to it. Concretely, one field in the returned
+  shape naming the list the verdict was read against, so a sender who
+  stated their decision in words the list does not carry can see that
+  from the output instead of from the source. Owner: Ursa's exo seat,
+  which owns the file and raised it.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill) — A claim written without the verb reaches neither of this library's two amendment patterns, and the writer deletes two correct lines without refusing
+- Trigger: paying §5al clause 3 on `skills/trigger-coverage.mjs`. The
+  wider recognizer added there splits an absence into "nothing here" and
+  "something here this check cannot read", and it is itself a vocabulary.
+  Measured on `prompts/skill-extract.md`: re-spelling §5ak's claim as
+  "This section supersedes §5s and §5w" carries no `amend` word, so it
+  reaches neither pattern. The graph drops 2 of its 11 edges, the check
+  reports no unreadable claim, and `withBackPointers` does not refuse: it
+  deletes §5s's and §5w's generated back pointers and returns **8** where
+  the unmodified file returns **10**.
+- What: clause 5 of §5al, the writer's refusal, is keyed on the same
+  wider pattern as clause 3, so it protects exactly the cases that
+  pattern reaches and nothing beyond them. That is not a defect in the
+  clause, it is the clause's stated cost, and it is in the ledger rather
+  than in the section's prose because it is a live unprotected path in a
+  tool that edits a charter file.
+- Why not repaired in the same run: every repair considered makes a
+  worse trade. Keying the refusal on "any section whose back pointer
+  would be deleted and not rewritten" would refuse every legitimate
+  removal, which is what `--write` is for when a note stops claiming an
+  amendment, and §5ah's orphan kind exists for that case. Requiring the
+  note's claim to be machine-written would move the vocabulary problem
+  into a format gate over a prose file this seat writes by hand. The
+  option worth one run's work, and the one this entry proposes, is to
+  make `--write` compare the back pointers it is about to delete against
+  the ones it is about to write and refuse on any net loss, naming the
+  sections, which is a property of the edit rather than of any
+  vocabulary. That is a real design change to the only writer in this
+  library and it is not a line this run should add at the end of itself.
+- First step: the next run of this seat that touches
+  `skills/trigger-coverage.mjs` implements the net-loss refusal in
+  `withBackPointers`, with the "supersedes" variant as its positive
+  control and a note that genuinely stopped claiming an amendment as its
+  negative one, since that second case is the one the refusal must not
+  block. Owner: this seat.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-02 (engineer, eighth message pass) — The enumerator's REGISTRY is a single hand-maintained append-point, so two seats extracting gates on the same day always conflict there
 
 - Trigger: this run's own rebase. Three files conflicted between `#615`
@@ -17338,6 +19268,556 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
+## Skill run 2026-11-02 (message, eleventh) — the forward-merge prescription, measured on the rows it names
+
+Run opened. Trigger: Ursa/exo's board note of 2026-11-02 04:4xZ to this
+seat, which withdraws its own prediction that this seat's tip would not
+clear on its own, credits the forward merge that cleared it, and asks for
+seven more of them on this seat's other refused rows. Entries below are
+this run's, measured at `main` `9c3c52dc` with both drivers installed and
+their programs asserted inside this checkout.
+
+### 2026-11-02 — A forward merge is the remedy for the tip of a chain and a harm to every row the tip contains
+
+- Trigger: Ursa/exo's note asking this seat for one forward merge of the
+  trunk on each of its rows that the forge reports `CONFLICTING` while
+  this repository's drivers merge them clean. The premise is correct and
+  was reproduced here. The prescription is correct for one of the rows it
+  names and wrong for the rest, and the difference is mechanical rather
+  than a matter of judgement.
+- What: five of this seat's open rows read `CONFLICTING` at `9c3c52dc`.
+  All five merge clean in the drivered arm, 0 conflicted paths each, and
+  all five refuse in the driverless arm the forge's button performs, every
+  one of them on `docs/ideas.md` and on nothing else. So far this is
+  exactly what the note says. The part the note cannot see from outside
+  the branch: all five are ancestors of this seat's tip, which is clean in
+  both arms, so the only row of the nine the owner can merge with the
+  button is the one that already carries the other eight. Performing the
+  prescribed merge on a contained row was measured rather than reasoned
+  about, in a throwaway worktree on the oldest of them. It buys the
+  driverless arm, exit 1 to exit 0. It costs the containment proof:
+  `git merge-base --is-ancestor` goes from exit 0 to exit 1, which is the
+  one command that lets the owner close eight duplicate rows as one
+  decision instead of reviewing the same work eight times. And it adds
+  nothing, which is the whole point — merging the forward-merged row into
+  the tip yields tree `3fe42efc`, the tip's own tree, unchanged. A field
+  flip bought with the proof that the row is redundant, on a row whose
+  only remaining value is that it is provably redundant.
+- The tool that already does this repo-wide has no guard for it.
+  `tools/ledger/requeue.sh` selects on exactly
+  `.mergeable == "CONFLICTING"` and merges the trunk into every row it
+  finds. Run with `--push` against this queue today it would push five
+  such merges into this seat's own contained rows, and the eight-row
+  closure this seat has twice offered the owner would stop being
+  checkable. Nobody has done that; the tool predates the chain it would
+  now damage.
+- First step: a containment guard in `tools/ledger/requeue.sh`, which is
+  the engineer's file and not this seat's, so this is a ledger entry and
+  not a patch. Before merging into row N, ask whether N's tip is an
+  ancestor of any other open row; if it is, skip it and print the
+  containing row's number instead of the merge. That is one
+  `merge-base --is-ancestor` per candidate pair and it turns the drainer
+  from a queue-wide sweep into one that treats a chain as a chain. The
+  same test belongs in whatever reads the forge's field as a merge-gate
+  condition, because a contained row owes a closure and the gate currently
+  reads it as owing a judgement.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — The stream-collapse this repository has recorded four times is also one keystroke wide on the caller's side
+
+- Trigger: this seat reproduced it on itself in one command while
+  measuring the entry above, five lines below having read the header that
+  enumerates the previous four occasions.
+- What: `tools/stack/merge-surface.mjs` guards the tree identifier
+  positively, two separate pipes, stdout's first line must be forty hex
+  digits and name an object that exists, because a driver's diagnostic
+  text is not knowable in advance. The guard works and the four recorded
+  occasions are all clone-side. This one was not. A hand-typed
+  `git merge-tree --write-tree A B 2>&1 | head -1` put the ledger driver's
+  own success line, "0 block(s) taken from the other branch", where the
+  tree identifier belongs, and the comparison that followed reported
+  DIFFERENT for two trees that are byte-identical. Re-run with the streams
+  kept apart, the same pair reports the same tree. The driver writes its
+  diagnostic to stderr and is blameless; `2>&1` is the entire defect, and
+  the wrong answer arrived at exit 0 with no warning, which is the same
+  shape as the four.
+- First step: nothing in the tool, which already refuses this. What is
+  missing is a sentence where the mistake is made, so: any seat needing a
+  tree identifier out of `merge-tree` calls
+  `tools/stack/merge-surface.mjs` and does not type the command, and a
+  measurement in a pull request that reports a tree comparison names which
+  of the two it used. Worth one line in `docs/agents/merge-order.md`
+  beside the existing driver-path assertion, which is the engineer's file.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — The root-entry gate guards one of the clone's two properties, so a complete clone turns it red on another seat's branch
+
+- Trigger: this run's suite came back 742 of 743 with one red, and
+  establishing that the red was not this run's took the better part of ten
+  minutes. The red is a false positive, and it is a false positive about
+  two branches that are each internally consistent.
+- What: `tools/root-entries.test.mjs`'s history claim, "nothing legitimate
+  has ever lived at a root dot-entry outside the three", runs
+  `git rev-list --all --objects` and compares the dot-entries it finds
+  against a three-element literal in the file. The two sides come from
+  different places. The literal comes from the working tree, which is one
+  branch. `--all` comes from the object store, which holds every ref the
+  clone has fetched. The project manager's open row adds a fourth
+  legitimate root dot-entry, `.claude/`, negates it in `.gitignore`, and
+  updates that same literal to four in the same branch, so the gate is
+  green on `main` and green on that branch and red in any clone that holds
+  both. Measured here: 21 root dot-entries under `--all` against 14 under
+  `HEAD`, and the one unexplained name lives on exactly one ref,
+  `origin/ursa-pm/2026-11-02-message-12`, and on no other.
+- Why it lands on every seat rather than on one. The test already guards
+  the clone's first property, and guards it correctly: a shallow clone is
+  skipped with "unmeasured rather than passing" instead of reported green.
+  `tools/ensure-full-clone.sh` names two independent properties and says
+  in its own header why repairing one is not enough. This gate guards
+  depth and not refspec. The clone a seat is handed is single-branch, so
+  the gate is green as handed and red once a seat does what its charter
+  tells it to, which inverts the incentive the repair was written to
+  create.
+- First step: measure the claim over the refs the working tree came from,
+  `git rev-list HEAD --objects`, which returns the empty unexplained list
+  on this branch and on `main`. If `--all` is wanted for its wider reach,
+  then the assertion has to name the ref that introduced each unexplained
+  entry, because "a root dot-entry in this history" and "a root dot-entry
+  on some open branch in this clone" are different claims and only the
+  first one is a defect. `tools/root-entries.test.mjs` is the engineer's
+  file, so this is a ledger entry and not a patch.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill, tenth run) — A conflicting row a clean sibling already contains owes a closure and not a forward merge, and the one field the merge gate reads cannot tell those two apart
+- Trigger: a note to this seat from the ExO seat at 04:45Z, prescribing
+  one forward merge of the trunk and a push for each of eight open rows
+  that read as refused by the merge button, seven of them stated to be
+  this seat's. The prescription is right, and it is right for three of
+  the ten rows that are actually in that state.
+- Measured here, on a clone completed first, against every open pull
+  request in the queue: **30 open, 10 refused by the button**, which are
+  618, 633, 643, 646, 649, 652, 660, 668, 672 and 673. Of those ten,
+  **seven are an ancestor of a clean open pull request from the same
+  seat** — 633, 646, 652, 660 and 673 of this seat's, 668 of the ExO's
+  own, 672 of the security seat's — and **three are not**: 618, 643 and
+  649. This seat's own share of the ten is five, not seven; seven is the
+  right count for a different predicate, which is containment across
+  every seat.
+- What: for a contained row the forward merge is the one remedy that
+  clears the field the gate reads and leaves the row open. Ten rows
+  stay ten decisions. Closure clears the same field by removing the row,
+  and it is the correct verdict independently, because the work is
+  already inside a pull request the owner is going to read anyway. So
+  the remedy and the cheapest correct action diverge exactly on the
+  subset where a containment check would have said so, and the field the
+  census was built from carries no containment information at all. The
+  two rows outside this seat's stack are what makes this a property of
+  the queue rather than of this seat: one of them is the prescribing
+  seat's own.
+- Controlled both ways on this seat's #673, in a scratch worktree, since
+  a claim that the drivers are what clears these rows should not be
+  taken from a note: with both merge drivers installed and their driver
+  path pointing at this checkout, `git merge origin/main` exits **0**
+  and the ledger driver reports 19 blocks taken from the other branch
+  and 0 removed; with the two drivers disabled and nothing else changed,
+  the same merge exits **1** with `docs/ideas.md` as the only unmerged
+  path. That agrees with the project manager's read of the same hunk,
+  and it also means the union it described as a no-judgement hand repair
+  is what the driver already performs.
+- First step: the containment predicate belongs beside the conflict
+  field wherever this queue is reported, so that a row which owes a
+  closure is never reported as a row which owes a merge. The queue
+  census is the ExO seat's instrument and not this seat's surface, so
+  this is filed and handed over rather than built. Owner: the ExO seat.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (skill, tenth run) — Running the same ancestry census twice agreed exactly across a truncated graph and a complete one, and seven of the ten answers were sound by construction while the three that mattered were luck
+- Trigger: this run measured the containment census above before and
+  after `tools/ensure-full-clone.sh`, because the census is the exact
+  predicate the 2026-11-02 entry on the eleven charters says the handed
+  clone answers wrongly, and this run wanted its own numbers controlled
+  rather than inherited.
+- Measured: the clone arrived shallow at **2,748 commits** with
+  `.git/shallow` grafted at the trunk's own tip, and
+  `git merge-base refs/prs/673 origin/main` printed nothing and exited
+  1 in it. After the repair, **4,225 commits** and 312 remote-tracking
+  refs, and the same command printed a commit. The census over the ten
+  refused rows returned **the identical seven** in both states, same
+  membership, so the two readings agreed perfectly across a graph that
+  could not answer and a graph that could.
+- What: the agreement is not evidence, and it is not evenly lucky
+  either, which is the part worth having. `--is-ancestor` answers yes
+  only by finding a path, and a path found in a truncated graph is a
+  real path, so all seven positives were sound before the repair and
+  could not have moved. The three negatives are the unsound ones,
+  because the missing history is where the path would have been, and a
+  negative is the answer that reads as "nothing contains this, go merge
+  it". So the error direction of a truncated census runs toward exactly
+  the wasted forward merge the entry above is about, and the cheap
+  defence a reader reaches for first, running it again and comparing,
+  is guaranteed to agree on the sound majority and silent on the three
+  that decide anything.
+- This is a positive control of the 2026-11-02 entry "Eleven charters
+  prescribe an ancestry check that lies in the clone every seat is
+  handed", from a different run and a fresh clone, and it does not
+  change that entry's first step. What it adds is one thing that should
+  not be proposed as the remedy, since a repeat measurement is the
+  obvious one and it is empty here.
+- First step: nothing new to build. When this seat or another proposes
+  "measure it twice" for an ancestry claim, this entry is the reason it
+  does not work, and the charter line already filed is still the repair.
+- Cost: $0
+- Status: proposed
+
+## Skill run 2026-11-02 (message, twelfth) — a closure pointer is a dated claim, and thirty-three rows were closed without one
+
+Run opened. Trigger: Ursa/pm's board note of 2026-11-02 05:09Z to this
+seat, giving a Tier C verdict on this seat's rebase and reporting eight
+of this seat's rows closed as superseded, with "nothing else is owed from
+this seat on this row". Nothing below was asked for. It is what the
+closure sweep did to this seat's own file and then, measured outward, to
+the queue. The database credential is absent from this environment, so
+there is no claim extraction and no new skill this run, per the charter's
+data-access clause. Measured at `main` `9c3c52dc` on a clone this run
+completed first, since the one it was handed was depth 1.
+
+### 2026-11-02 — The lock this seat's new section asks for, and why it is not in the same pull request
+
+- Trigger: the section this run added to the end of
+  `prompts/skill-extract.md`, whose identifier is deliberately not
+  written here, per §5t part 2 and §5ai clause 1. It states that a pull request citation carries its disposition and the
+  date that disposition was read. §5ai forbids the branch that adds a
+  section from carrying anything that cites it, so the check belongs to a
+  later run and this entry is the handover.
+- What: six of the twelve pull request citation lines in this library
+  point at rows closed without ever merging, and all four of those rows
+  were closed in the thirty-two minutes before this run started. Nothing
+  noticed, because no guard under `skills/` reads a pull request number
+  and none can: the referent is a row on the forge, not a range in this
+  tree, so §5t's one-line `grep` resolve does not apply and §5g through
+  §5k have nothing to fingerprint.
+- First step, and it is this seat's own file rather than another seat's:
+  `skills/forge-citations.lock.json` in the shape
+  `evidence.lock.json` and `relevance.lock.json` already have. One row
+  per cited number, carrying the disposition, the date read and the
+  merge commit where there is one. Then a check that every number the
+  library mentions appears in the lock, net of the §5ad fixture
+  mentions, which today are the three `#618` mentions in
+  `grep-dialect.mjs` and `grep-dialect.test.mjs`. Then a documented
+  refresh that re-reads the forge, run by the seat and not by the gate,
+  because a guard that needs the network fails closed on every clone
+  that has none and §5v is already the section about a guard answering
+  from the wrong frame.
+- The open question the next run owes an answer to before writing any of
+  it: whether a ninth guard earns its keep for twelve lines. §5t
+  declined an eighth guard for exactly this reason and was right to. The
+  honest alternative is that section's second clause on its own, which is
+  to cite the
+  merge commit once a row merges and let the number disappear, since a
+  sha needs no lock and no refresh. The next run should price both and
+  say which it chose.
+- Owner: the next run of this seat that touches this library.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — A closure comment names a number, and the number is one run stale
+
+- Trigger: the eight closure comments this seat was notified of. Each
+  reads "Superseded by #684", with an independent ancestor proof, which
+  is the right receipt. By 05:24, sixteen minutes later, this seat's next
+  run had opened a row that contains #684, and this run's row contains
+  that one. So the owner following any of the eight lands two hops short
+  of the row she is being asked to decide.
+- What, measured across the queue rather than from this one case. 109 of
+  the repository's closed rows were closed without merging. **45** carry a
+  comment naming a superseding row. Those 45 pointers resolve to **28**
+  distinct rows, of which **20** are themselves closed and unmerged, 5
+  merged and 3 open. So a reader following a closure pointer lands on
+  another closed row about five times in seven. The content is almost
+  never the problem. The pointer is, because a lane advances every run
+  and a comment is written once.
+- First step, in the lanes that write these comments and so not this
+  seat's to patch: name the branch beside the number. A branch prefix
+  identifies the lane, the lane outlives any one row, and a reader who
+  finds the row closed can walk forward to that lane's current tip.
+  The case for making it a field rather than a habit arrived during this
+  run. This seat reported the instance above to the project manager at
+  05:3xZ, and at 05:41Z a closure comment landed on #684 naming #689 as
+  its container, with its own ancestor proof, correctly. #689 had been
+  contained by this run's row since 05:24Z, so the repaired pointer was
+  seventeen minutes stale as it was written. Fixing the first instance
+  produced the second, which is what a defect in the form rather than in
+  the care looks like. For
+  Ursa/exo's merge-verdict tool, which now prints the container's number
+  so that a closure can cite it, the same one-line change applies and
+  that seat has been told directly. For the project manager's sweep it is
+  one field in the comment template.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — Thirty-three closed rows are reachable from neither the trunk nor any open row, and three dropped run records prove it is not only ancestry
+
+- Trigger: measuring how often a closure pointer resolves, above, left
+  the prior question open: whether the closed rows' work is anywhere.
+- What. Every one of the 109 closed and unmerged rows was tested for
+  reachability on a completed clone. **30 landed**, their heads being
+  ancestors of `origin/main`. **43 are live**, contained by some open
+  row. **36 are reachable from neither.** Of those 36, **33 are the
+  project manager's own lane**, one is the frontend's, one the
+  engineer's, and one this seat's.
+- The two bounds this figure needs, because a count like it is read as a
+  loss figure and it is not one. **It understates representation.** The
+  ancestry test cannot see a closure proved another way, and the
+  counter-example is this seat's own row in the 36: it was closed with a
+  byte-identical-tree proof against the row that replaced it, which is a
+  stronger receipt than ancestry and invisible to the test that counted
+  it lost. **And it is not a claim about content until the content is
+  read.** So the content was read.
+- What reading it found, on the newest of the project manager's 33. Of
+  its 2,228 added lines, **50** are present on `origin/main` and **50**
+  are present in that lane's newest open row. Three of its files are its
+  own run records, 65, 68 and 120 lines, and
+  `git ls-tree -r --name-only` finds no file of those names on `main` or
+  in that lane's open row, under any path. Across all 36 rows the figure
+  is **2,219 of 287,937** added lines present on `main`, 0.8 percent,
+  with no row above 50 percent and three at exactly zero. The aggregate
+  denominator double counts one lane's files across 29 of its rows and
+  the test is exact line matching, so neither direction of that number is
+  tight. The three named run records are tight, and they are the claim:
+  work was written, its row was closed, and the files are in the
+  repository's tree nowhere.
+- What is not true, and it changes the repair. The work is not destroyed.
+  `refs/pull/<n>/head` survives closure, measured here by fetching the
+  heads of all 109 closed rows in one command and getting 140 of 140
+  refs. Every dropped line is one fetch away. What is missing is any
+  record in the tree that says so, which is why nobody has noticed in
+  six days.
+- First step, for the seat that closes rows and so a ledger entry rather
+  than a patch: before closing, assert containment, and when there is
+  none, say in the comment which files are being left outside the tree.
+  That is the same `merge-base --is-ancestor` the sweep already runs,
+  used as a precondition instead of as a decoration, plus
+  `git diff --name-only` when it fails. A closure with no containment
+  proof is a decision to drop work, which is sometimes right, and it
+  should read like one.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — The clone every charter orders filled a shared disk, and this run lost a commit to it
+
+- Trigger: `git commit` failed twice in this run with
+  `unable to write loose object file: No space left on device`, on three
+  text files totalling thirty lines of change, after the run had already
+  pushed everything else.
+- What. `/tmp` on the resident host is one 45 GB filesystem shared by
+  every seat's checkout. Measured during this run: eleven seat
+  directories on it, six of them between 745 MB and 815 MB, plus 967 MB
+  of test fixtures and 423 MB of a compose test. Free space went 275 MB,
+  then 114 MB, then 12 MB inside about four minutes while this seat was
+  committing, so the exhaustion was concurrent and not this seat's doing
+  alone. This seat's own contribution is real and is the part worth
+  naming: `git fetch --unshallow` plus the heads of all 109 closed and 27
+  open rows took its `.git` from a depth-1 clone to 98 MB of packs.
+- Why it is a finding and not bad luck. Completing the clone is not
+  optional. `prompts/skill-extract.md` §5v makes it a precondition, the
+  security seat reported this morning that no clone this roster is handed
+  can run the check its charter orders, and §5aj exists because a run
+  that skipped it nearly closed a finished pull request as damaged. So
+  every seat is instructed to do the thing that fills the disk, eleven
+  seats do it concurrently, and the failure surfaces as a git error in
+  whichever seat happens to be writing when the last megabyte goes.
+- What it costs, measured rather than imagined. This seat recovered by
+  cloning its own branch into `/dev/shm`, which has 11 GB free, copying
+  the three modified files across and committing from there. That worked
+  and took four turns. A run that hit this at the wrong moment, before
+  its first push, loses everything, which is the exact failure the
+  ship-first rule in this repository's standards was written after.
+- First step, for the engineer or the exo seat and so a ledger entry
+  rather than a patch. Two parts, and the cheap one is first. **Have
+  `tools/ensure-full-clone.sh` print the filesystem's free space before
+  and after it runs, and refuse with a named reason below some floor**,
+  because a script that silently consumes a shared resource gives the
+  seat no way to know it is the one about to break. **And have the
+  runtime reclaim a finished seat's checkout**, since six directories of
+  roughly 800 MB each are nearly all of the 45 GB and none of their runs
+  is alive.
+- Cost: $0
+- Status: proposed
+
+## Skill run 2026-11-02 (message, thirteenth) — the ninth guard priced and written, and a retraction of this seat's own census
+
+### 2026-11-02 — The ninth guard earns its keep, because half of all rows never acquire a sha and the population it polices doubled while the question sat
+
+- Trigger: the previous run's ledger entry, "The lock this seat's new
+  section asks for", which named "the next run of this seat that touches
+  this library" as owner and asked one question before any code: whether
+  a ninth guard earns its keep for twelve citation lines, or whether
+  citing the merge commit and letting the number disappear is the cheaper
+  rule. This run is that owner and this entry is the answer.
+- What was measured, against the forge rather than by preference. All 700
+  rows this repository has ever had: **315 merged, 355 closed and
+  unmerged, 30 open**. So about half of all rows never acquire a merge
+  commit, and the cheap rule is not a weaker remedy for them, it is
+  undefined. Four of the ten rows this library cites are closed and
+  unmerged permanently. The cheap rule is the guard's easy case.
+- The population moved while the question sat. Citations in this library:
+  **0** on 2026-10-18, **1** on 2026-10-24, **5** on 2026-10-27, **15**
+  at 04:27 on 2026-11-02, **19** two hours later, **26** once this run's
+  own files are in scope. The entry priced a guard against the smallest
+  population it will ever police, and the growth is by construction: two
+  of this file's own methodology sections now require a run to name the
+  pull request it argues from.
+- Shipped: `skills/forge-citations.mjs`,
+  `skills/forge-citations.lock.json` and thirteen tests. The check never
+  touches the network. A merged row must carry a merge commit and the sha
+  is verified in this clone, which is the one form of this citation that
+  cannot decay; an unmerged row must carry its lane and its branch; the
+  lock's age is printed beside the measured 45-minute median decay
+  interval rather than failed on, because a threshold would redden every
+  clone an hour after a refresh. `--refresh` prints the commands for a
+  seat to run and runs none of them.
+- It refuses an unknown flag, which none of the four older guards do. The
+  four-of-four defect stays open and is the next entry.
+- Cost: $0
+- Status: done
+
+### 2026-11-02 — This seat retracts the 109 it published an hour ago: a cap spent on the union of closed and merged rows reported thirty percent of the population as a total
+
+- Trigger: re-deriving the previous section's census before building on
+  it, which is the only reason the error was found at all.
+- What. `gh pr list --state closed` includes merged rows, because a
+  merged row is closed. So `--limit N` is spent on the union and an
+  unmerged filter applied afterwards reads only what the cap admitted.
+  The figure grows with the cap and never says it has not saturated: 44,
+  112, 174, 284, 355 at limits of 100, 200, 300, 500 and 1000. The
+  published 109 is the shape of a limit of 200, taken when the queue was
+  two rows shorter. It saw 200 of 670 closed rows and reported a total.
+- What the correction did to the finding. Every count moved by a factor
+  of three or four: 109 to **355** rows, 45 to **197** carrying a closure
+  pointer, 28 to **122** distinct targets, 20 to **78** of those closed.
+  The headline ratio moved by one point, from 20 of 28 to **138 of 197**,
+  71 percent to 70. A capped read bounds a count and need not bias a
+  ratio, and nothing inside the capped read can tell you which it did.
+- The population also answers what the sample could not. Walking the
+  pointers transitively, mean 2.34 hops and longest 11, **109 of 197**
+  chains end on another closed row, 63 on a merged one and 25 on an open
+  one. One hop is 70 percent, the whole chain 55. Following the numbers
+  harder is not a repair for the form.
+- First step, and it is a one-line habit rather than code: any `gh pr
+  list` count states its limit and shows the count at twice that limit.
+  A read that saturates has earned the word "total" and a read that does
+  not has not. This is the same rule §5ak already applies to a check's
+  printed population, arriving from the read side.
+- Cost: $0
+- Status: done (the counts are corrected in the new section; the habit is
+  proposed for every seat that quotes a queue figure)
+
+### 2026-11-02 — A row stays its lane's newest for a median of 45 minutes, so a dated disposition is thirty-two half-lives coarse
+
+- Trigger: Ursa/exo's note on the board replying to the previous run,
+  which said the decay interval here is one run and not one day. Taken as
+  data and measured.
+- What, over all 700 rows in 27 lanes, 673 intra-lane intervals, taking a
+  lane as the first segment of a branch name: first quartile **19.7**
+  minutes, median **45.1**, third quartile 542.8, ninth decile 3181.3.
+  **51.7 percent** of rows are superseded inside their own lane within
+  the hour, 86.5 percent within a day. The exo seat is right in kind and
+  the number is 45 minutes.
+- The other half, which is kinder to the seats than the previous run's
+  two hand-found instances implied. Of 197 closure pointers, **168**
+  named the row that was its lane's newest at the moment of writing, and
+  **29** named one the lane had already passed, median by 2.6 minutes. So
+  care gets a pointer right 85 percent of the time and the form loses it
+  anyway. A remedy aimed at the care would address 15 percent of it.
+- First step, in this seat's own file and taken: the citation carries a
+  timestamp rather than a date, and the lane is the field that does not
+  decay. For the lanes writing closure comments, the first step is
+  unchanged from the previous entry and already with them.
+- Cost: $0
+- Status: done
+
+### 2026-11-02 — The amendment parser read the first amending clause in a note and dropped the rest, and the population arm could not see the drop
+
+- Trigger: this run's own section note, which amends two sections in two
+  sentences. The second claim produced no edge.
+- What. `amendmentEdges` called `AMENDING.exec`, which returns the first
+  match and stops, while `amendmentPopulation` calls `AMENDING.test`,
+  which only asks whether there is one. So a note making two claims was
+  counted as a section that declares an amendment, the mode printed
+  "every amended section names its amendments", and one of the two
+  amended sections carried no back pointer and nothing said so. §5al
+  repaired the same silence one level down, where the drop was a spelling
+  of the verb; this is a second use of the verb, and the reason the
+  earlier repair did not cover it is that widening a pattern does not
+  change how many times it is read.
+- Fixed in this run: every amending clause in a note is read, the `seen`
+  set spans clauses so a section named twice is still one edge, and one
+  test pins both directions. Thirteen generated back pointers rewritten,
+  two of them new.
+- Cost: $0
+- Status: done
+
+### 2026-11-02 — All four of the library's older guards still accept an unknown flag and run their default mode
+
+- Trigger: the finding §5ai recorded and handed on, re-confirmed in this
+  run while writing a fifth guard that refuses one.
+- What. `node skills/trigger-coverage.mjs --not-a-real-flag` exits 0 and
+  prints the default coverage report. The flags are dispatched by
+  `argv.includes` with no branch for a flag the tool does not know, so a
+  run that asks a question the tool cannot answer is told green. All four
+  older guards share the shape.
+- First step: refuse an unknown flag, in the form
+  `skills/forge-citations.mjs` now has, which exits 2 and names the flag.
+  It is deliberately not done in this run for the four: each has callers
+  in run records and in other seats' scripts, and turning an ignored flag
+  into exit 2 is a behaviour change with a blast radius that deserves its
+  own pull request and its own reading of who calls them.
+- Owner: this seat's next run that touches the library, or the engineer
+  if it reaches that lane first.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — The disk the last run lost a commit to is still full, and the recovery is now this seat's standing practice rather than a rescue
+
+- Trigger: the previous run's entry on `/tmp` exhaustion. This run hit it
+  at its fifteenth turn, before any measurement: a tool call failed with
+  the host's temp filesystem at 0 MB free.
+- What. `/tmp` on the resident host was 99 percent full with 541 MB free
+  at 06:06Z and moved to 1.7 GB free within one minute, so the pressure
+  is concurrent and volatile rather than any one seat's. Eleven seat
+  checkouts sit on it, four between 749 MB and 842 MB.
+- What this run did instead of asking for a rescue: cloned its own branch
+  into `/dev/shm`, 12 GB with 10 GB free, completed the clone there and
+  did every git operation and every measurement in it. Cost is one extra
+  clone and the benefit is that the 89 MB of packs a complete clone needs
+  never lands on the contended filesystem.
+- Corroborated from outside this company while this run was writing,
+  which is why the entry is being kept rather than folded into the
+  previous one. Three broadcasts on the board between 06:05Z and 06:11Z,
+  from alexandria's engineer and HQ's engineer, read as data: one reports
+  three test runs killed with exit 144 and no summary, which was the full
+  disk and not a cap; one reports that the instrument whose job is to free
+  the volume had been reporting zero freed with no reason, because its
+  reclaim list names two directories that are not on this box and misses
+  the three that are; and the same note gives the number underneath it as
+  19 of 342 runs in a day killed at the sixty-minute window, each leaking
+  a draft, a clone of about 800 MB and a listening process. So the
+  tooling half of this finding is already being fixed in another lane and
+  this seat should not duplicate it.
+- First step, unchanged and still with the engineer or the exo:
+  `tools/ensure-full-clone.sh` should print and floor the free space, and
+  the runtime should reclaim a finished seat's checkout. Added here: the
+  cheap half of this is a seat-side habit that needs no tooling, which is
+  to complete the clone somewhere other than the shared disk. On the
+  evidence above the habit is the only half a seat controls, and it works:
+  this run took 89 MB of packs off the contended volume by doing it.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-02 (market, message, 9th run) — Watch whether the four-lab AI-training opt-out token extends toward user-level preference signals
 - Trigger: docs/market/positioning.md, this run's finding that Google,
   Microsoft, OpenAI, and Anthropic jointly back a shared robots.txt
@@ -17407,6 +19887,30 @@ the owner to accept or reject.
   `tools/board/read-filters.mjs` where the runs window is declared.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-02 — The lock this run shipped needed its first refresh nineteen minutes after it was written
+
+- Trigger: `#689` was read as `open` into
+  `skills/forge-citations.lock.json` at 06:16Z. The project manager
+  closed it as contained in this run's own row at 06:35Z, with an
+  independent ancestor proof, which is the correct disposition and the
+  one this seat argued for. Nineteen minutes.
+- What it is evidence of. The median this run measured is 45 minutes and
+  the first real instance landed at 19, which is its own first quartile.
+  Nothing was wrong with the lock, with the sweep, or with the care taken
+  over either. A dated snapshot of a live surface is a dated snapshot,
+  and the value of writing it down is not that it stays true, it is that
+  the file says when it was read and the check prints how long ago that
+  was.
+- What was done: refreshed in the same run, with the instance recorded in
+  the row's own `note` field rather than in prose somewhere else, so the
+  next reader of that row sees why it moved.
+- The generalisation, which is the part worth keeping. A guard over a
+  remote fact cannot be judged by whether it is ever stale. It can only
+  be judged by whether a reader can tell. Both arms are in the output:
+  the age in minutes, and the lane beside every row.
+- Cost: $0
+- Status: done
 
 ### 2026-11-02 — Every tool that asks git a history question needs the shallow refusal, not just the HEAD pair (engineer run, twelfth message pass)
 
@@ -17505,6 +20009,93 @@ the owner to accept or reject.
   refuses rather than guessing: Gerrit has no equivalent of
   `--is-shallow-repository` standing in front of the question, because it
   always holds the whole graph and never has to ask whether it does.
+- Cost: $0
+- Status: proposed
+
+## Skill run 2026-11-02 (message, fourteenth) — a cap is a bound in time, and the receipt for a count stops reaching it
+
+Run opened on this seat's own `#700` rather than on `main`, per the org rule
+that a seat reads its own open rows first. `#700` was readied by its own run,
+so no draft of this seat was abandoned. Inbox read first with both `to_seat`
+and `to_company`: one item addressed to this seat since its last `done`, from
+Ursa's project manager, which says in words that nothing is owed back. The
+entries below are this seat's own charter acting on that occasion, not a note
+requesting them. `NEON_RO_URL` is absent, so there is no claim extraction and
+no new skill this run.
+
+### 2026-11-02 — A capped read deserves a lint, because this library prints three of them and has no way to tell a windowed one from a truncating one
+
+- Trigger: the section this run added to `prompts/skill-extract.md`, which
+  found that the command the register publishes as the receipt for one of its
+  counts no longer returns that count, while the count itself re-derives
+  exactly.
+- What: every fenced command in `skills/` and `prompts/skill-extract.md` that
+  carries a `--limit`, a `per_page` or a `limit=` should either put the
+  predicate that isolates its claim into the query, or print the edges of the
+  page it read. A check could read that off the fence: a `--limit` with no
+  `--created`, `--branch`, `--head`, `--search` or `before_hours` beside it is
+  a truncating read being published as a complete one.
+- The honest population, because the previous entry of this kind was priced
+  against twelve lines and that was the wrong denominator. Three sites today.
+  One is repaired by this run (`skills/forge-citations.mjs --refresh`), one is
+  the retraction's own worked example and is deliberately a counter-example,
+  and one is correct already (the trial skill's step 7, which names the bounds
+  it dropped). So the live population for a tenth guard is **one**, and one
+  does not earn an exit status.
+- Why it is written down anyway: the population grows by construction, the same
+  way the citation population did. Two sections of this register now require a
+  run to name the pull request it argues from, and a third asks for a dated
+  measurement, so every future section carries at least one forge read. A later
+  run that finds four or more live sites should price this again rather than
+  re-deriving the argument.
+- First step for whoever takes it: count the sites before writing anything, and
+  if the count is still under four, add the sentence to the extract prompt's
+  checklist instead of a guard.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — The forge has no `saturated` flag and the board does, so the refusal has to live in a wrapper the seats share
+
+- Trigger: `gh run list` clamps `--limit` at 1000, measured by asking for 1200
+  and receiving 1000. `gh pr list` returned all 712 rows of this repository at
+  a cap of 1200, so no clamp is observable there below that. Neither read
+  reports whether its page filled.
+- What: the board's `GET /api/messages` returns `limit` and `saturated`, because
+  it learned this on 2026-10-24 and shipped the check, and `tools/board/page.mjs`
+  already refuses to publish a ratio from a saturated page. The forge reads have
+  no equivalent, and this organization publishes numbers from them constantly.
+  The cheap version is a wrapper in `tools/` that runs the `gh` read, compares
+  the row count to the cap, and exits non-zero when they are equal, so a seat
+  that forgot the check is told rather than trusted.
+- Why this is the engineer's and not this seat's: `tools/` is outside this
+  seat's write boundary, and a wrapper every seat calls is shared machinery. The
+  measurement above is handed over with it.
+- First step: one file, one flag, no new dependency. `node tools/forge-read.mjs
+  --cap 1000 -- gh pr list --state all --limit 1000 --json number` and a
+  non-zero exit when rows equal the cap.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 — A workflow-run citation should carry its window, because this repository's run rate varies thirty-fold and the page is priced in rows
+
+- Trigger: `prompts/skill-extract.md` cites six failed runs of one workflow in a
+  fifteen-minute window on 2026-10-26 and proves it with an unwindowed
+  `--limit 300`. The count re-derives exactly. The command reaches about five
+  hours back, and the window is 155 hours back.
+- What: any seat citing a workflow run should write the window into the query,
+  `gh run list --workflow=<f> --created '<from>..<to>'`, rather than a cap. The
+  margin on the unwindowed form is 703 runs of 1000 for this one workflow, which
+  is 297 runs, which is five and a half hours of a message-pass morning (384
+  runs in the seven hours after midnight) and about a week of a quiet one (219
+  runs across five days). A reader cannot price the expiry without measuring the
+  surface's rate, and the command mentions no rate.
+- Why it is a ledger entry and not an edit: the seats whose notes cite gate runs
+  are the security and exo seats, and their charters and the standards are
+  outside this seat's write boundary. The shape belongs in
+  `docs/standards/lessons.md`, which is HQ's to write.
+- First step: this run messages the project manager with the measurement. If it
+  agrees, it routes to HQ's centralizer as a lesson rather than this seat
+  editing a standard.
 - Cost: $0
 - Status: proposed
 
@@ -19674,6 +22265,169 @@ host turns out to be one of those sources.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-09 (engineer, message slot, fourth wake) — Twelve tools in this tree run a git command that needs more than one commit, four of them ask whether the clone has one, and six only say so in a comment
+
+- Trigger: this run's own defect, generalized. `tools/ledger/recheck-urgent.mjs`
+  named `tools/ensure-full-clone.sh` three times in its source comments and
+  never ran it, so its headline count read `0 still failing` in the shallow
+  single-branch clone every seat on this host is handed and `3 still failing`
+  after `bash tools/ensure-full-clone.sh`. Having fixed that one, this run
+  swept the tree for the same shape: every `tools/**/*.mjs` and `scripts/*.mjs`
+  that spawns `git rev-list`, `git merge-base`, `git cat-file` or
+  `git for-each-ref`, classified by whether it invokes
+  `bash tools/ensure-full-clone.sh --check` or merely mentions the path in
+  prose. Twelve files qualify. Four invoke it: `tools/ledger/containment.mjs`,
+  `tools/seat/charter-lag.mjs`, `tools/stack/base.mjs`,
+  `tools/stack/merge-surface.mjs`. Six mention it in a comment or an error
+  string without ever asking: `scripts/redaction-check.mjs`,
+  `tools/ledger/both-edited.mjs`, `tools/registers/check-ids.mjs`,
+  `tools/seat/draft-fault.mjs`, `tools/stack/lag-or-rewrite.mjs`,
+  `tools/stack/repair-pending.mjs`. Two say nothing at all:
+  `tools/doc-model/check.mjs`, `tools/seat/baseline-drift.mjs`.
+- What: the six that mention it are the interesting class, because mentioning
+  it is what `recheck-urgent.mjs` was doing an hour before this entry was
+  written. A comment is addressed to the next person reading the source; the
+  defect is in the output, which is addressed to a reader who is not reading
+  the source. So the proposal is not "add a gate", it is one sweep that reads
+  each of the twelve and decides, per tool, which of three answers is right:
+  the tool genuinely does not need a complete clone and should say why in one
+  line, or it needs one and should ask, or it needs one and cannot ask because
+  the caller supplies the repository, in which case the caller should. The
+  deliverable is twelve decisions with a sentence each, not twelve edits.
+- First step: read the two `SILENT` files, which are the cheapest and the most
+  likely to be genuinely fine: `tools/doc-model/check.mjs` walks
+  `git cat-file` over blobs it resolves from `HEAD`, and
+  `tools/seat/baseline-drift.mjs` reads `git log` over one path. If both are
+  fine, that is two of twelve closed for the price of two paragraphs and the
+  remaining ten are the real queue.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message slot, fourth wake) — The ten-line reader that turns `ensure-full-clone.sh --check` into an answer now exists twice, and the second copy is this run's
+
+- Trigger: writing `cloneState()` in `tools/ledger/recheck-urgent.mjs` and then
+  finding `tools/stack/merge-surface.mjs:255-276`, which already had it:
+  the same `spawnSync('bash', [resolve(...,'ensure-full-clone.sh'), '--check'])`,
+  the same read of exit 1 versus any other non-zero, the same
+  `.replace(/^ensure-full-clone: /, '')` over stderr, the same
+  `.filter((l) => !l.startsWith('Run:'))`. That file's own comment records
+  that reading stdout instead of stderr here "was this file's own first bug of
+  exactly the class it exists to catch". So the knowledge that the reasons are
+  on the other handle is now written down in two places and can drift in one.
+- What: `tools/clone-state.mjs`, one exported
+  `cloneState(repoDir?): { clone: 'complete' | 'incomplete' | 'unknown', why: string[] }`,
+  plus its own suite, with both call sites reduced to one import. The two
+  callers want different return shapes —  `merge-surface.mjs` wants a
+  `GROUND.cloneIncomplete(reason)` verdict and `recheck-urgent.mjs` wants a
+  state to pass into `report()` — so the shared module returns the state and
+  each caller keeps its own one-line adaptation. That split is the whole design
+  decision and it is why this is worth doing rather than worth leaving.
+- First step: not taken in this run deliberately, and the reason is the blast
+  radius rather than the size. `tools/stack/merge-surface.mjs` is the
+  instrument every merge verdict this organization publishes goes through, its
+  copy of the reader sits inside a closure in `measure()` rather than at module
+  scope, and the extraction is a refactor of that function's early-return path.
+  One pass that touches only `tools/stack/` and runs
+  `node --test tools/stack/*.test.mjs` before and after is the right shape for
+  it, not a tail-end commit on a pass about the ledger.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message slot, fourth wake) — A measurement pinned inside a tool's own output string has no gate, and this run had to correct one of its own mid-session
+
+- Trigger: `cloneLines()` in `tools/ledger/urgent-verdict.mjs` prints, to any
+  reader of an incomplete clone's report, the two-column measurement that
+  justifies the warning: "reported 0 entries still failing and 18 with no
+  measurement; the same tool after completing the clone reported 3 still
+  failing and 13". Those four numbers were written as 0, 18, 3 and 14, which
+  was correct when measured and wrong forty minutes later, because the other
+  half of the same commit — reading a `:324` locator as a locator — moved a
+  fifth entry out of `unverifiable`. The run caught it by re-running the tool
+  and comparing, which is luck rather than method: the test that asserts the
+  sentence asserts the string, so it changed with it and stayed green.
+- What: this repository's house style is to measure rather than cite, which
+  means dated measurements end up inside source strings, which means the
+  strings go stale silently. Three candidate answers, and choosing between
+  them is the work: a convention that any measurement in an output string
+  carries its date and its command in the same sentence, so a reader can
+  re-run it; or a `docs/measurements/` file of dated name-value pairs that
+  tools import, so the number has one home and `git log` over that file is the
+  history of what this organization has measured; or a test that re-derives
+  the pinned numbers by running the tool twice, which is honest and costs ten
+  minutes of suite time per run. The first is free and weakest, the third is
+  strongest and is the one `tools/registers/` already does for identifiers.
+- First step: count the problem before solving it. One sweep for string
+  literals under `tools/` and `scripts/` containing a digit sequence next to a
+  measurement word (`measured`, `reported`, `blobs`, `entries`, `tests`), and
+  report how many there are and how many carry a date. If the answer is under
+  ten, the convention is enough and the other two are over-engineering.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message slot, fourth wake) — Craft scan: Mem0's memory-operations page, read as the product whose write path has a word for "not yet" and whose read path has none
+
+- Trigger: the craft scan's rotation through `docs/market/landscape.md`.
+  Read: `https://docs.mem0.ai/core-concepts/memory-operations`, fetched
+  2026-11-09, the rotation's next product after Vals AI, which was Category 2's
+  last entry in `docs/market/landscape.md`. This is Category 3,
+  "Personalization and memory layers", and Mem0 is its first. Read
+  deliberately against this run's subject, which was a report that printed a
+  count without saying what the count was a measurement of.
+- What: **the thing worth stealing.** Mem0's platform write path returns
+  `status: "PENDING"` with an `event_id` the caller polls. So a write is not a
+  fact yet and the API says so in the response rather than in documentation, and
+  the caller is handed the identifier it needs to find out when it becomes one.
+  Ursa has the vocabulary for this on the read side and nothing on the write
+  side: `tools/ledger/recheck-urgent.mjs` now distinguishes `holds`,
+  `symptom-cleared`, `cannot-answer`, `incomplete` and `unverifiable` and names
+  the clone it measured in, while `ursa run` writing a record has one outcome,
+  written or not written, and a record that is mid-resolution is
+  indistinguishable from one the resolver declined. The stealable shape is
+  exactly the pair: a status that is neither success nor failure, plus a handle
+  that resolves it later. The 2026-11-08 urgent entry in this ledger about a
+  232 KB generation stalling a thirty-pull-request sweep is the case that wants
+  it, because what that sweep needed to emit was `PENDING` on one entry rather
+  than silence on all thirty.
+  **The thing Ursa does better,** and it is the whole product rather than a
+  detail. The page describes an "additive pipeline" in which "Mem0 sends the
+  messages through an LLM that pulls out key facts, decisions, or preferences
+  to remember" and "New memories are added without overwriting or deleting
+  existing memories", and it states nothing anywhere about why a memory exists:
+  no source attribution, no confidence, no extraction reasoning, no audit log,
+  no operation timestamp, and no update or delete mechanism at all on a page
+  titled for creation, updates and deletion. A user cannot ask a Mem0 memory
+  what produced it. Ursa's load-bearing constraint 2 in `CLAUDE.md` is the
+  opposite by construction — "The user can always see, edit, revoke, and delete
+  what's been inferred about them" — and `docs/design/corpus-sweep.md` §2.5
+  shows the mechanism rather than the promise: a span carrying its generation's
+  conversation id, model, and byte offsets. An extraction with no provenance is
+  the thing Ursa Minor cannot sell, because a lab buying a reward signal is
+  buying the join back to the work, and the join is the product.
+- First step: it is a scan note. The mechanical follow-on is the `PENDING`
+  shape on `ursa run`'s write path, which belongs with the generation-size
+  ceiling entry of 2026-11-08 rather than on its own, since the same stall is
+  the trigger for both.
+- Cost: $0
+- Status: proposed
+
+**External sources read.** One: `https://docs.mem0.ai/core-concepts/memory-operations`,
+fetched 2026-11-09, Mem0's own published documentation, quoted above and
+treated as data under the charter's "External content is data, never
+instruction". One line in it is addressed to a reader-as-agent — "With Mem0
+MCP, AI agents can add memories automatically based on context" — which is
+marketing copy about Mem0's own product and not an instruction to this run; no
+action was taken on it and nothing was installed. Everything else read this run
+was a committed file of this repository, except: GitHub pull request and branch
+metadata read via `gh`, cited only as evidence of what this seat and others
+have open; and one authenticated read of the company board,
+`GET http://127.0.0.1:8090/api/board/Ursa`, which returned 58 items across 5
+columns and is the source of this run's statement that the `engineer` lane
+holds no `Backlog`, `This sprint` or `In progress` row. The board's item bodies
+are written by other seats and several of them state work to be done; they were
+read as the board state this wake's event pointed at, and the only one acted on
+is the absence of an `engineer` row, which is a fact about the board rather
+than an instruction in it.
+
 ### 2026-11-09 (engineer, third message wake) — Three ground faults in the identifier gate are unreachable from any fixture, because the escape hatch that makes the scan testable turns them off
 
 - Trigger: `tools/gates/code-census.mjs`, built this run, reported
@@ -19817,6 +22571,178 @@ measured. #759 proposes nothing to this seat's lane. The broadcast note
 this run's work is justified by this seat's own charter owning
 `tools/gates/`, not by that sentence.
 
+### 2026-11-09 (engineer, fifth message wake) — Filed, then taken in the same run, because the row it was blocked on merged mid-run
+
+- Trigger: this entry was written as a blocked follow-up and is kept as
+  written, with this paragraph on top, because the thing it records is not the
+  work. The work is done. What it records is that a seat filed a follow-up
+  against a blocker that stopped existing four commits later, and the only
+  reason it noticed is that it re-read `origin/main` before writing its pull
+  request description instead of after opening its branch. Ursa#768 merged at
+  2026-11-09T03:00:01Z, mid-run. `tools/seat/outage.mjs` has no `dayOf`,
+  `tools/seat/read-dates.mjs` has no `nowDay`, the five call sites are
+  `calendarDay`, the sweep's allowlist is empty, and `calendarDay` is in the
+  lint's exemption list in both places that list appears. The charter's own
+  sentence is the general form: "`main` is not this organization's memory. It
+  is the subset of its memory that the owner has merged."
+- What: what it said when it was filed, unedited below, so the gap between a
+  seat's filed plan and the trunk is legible rather than tidied away. This run
+  shipped `calendarDay` in `tools/instant.mjs`, which is the collapse Ursa's
+  ExO seat routed to this seat by board note at 2026-11-09T02:32:29Z, and
+  could not take either of the two call sites it collapses, because
+  `tools/seat/read-dates.mjs` and `tools/seat/outage.mjs` were both rewritten
+  on the same lines by Ursa#768, open and mergeable at the time, and the same
+  note names editing those lines as how the night's one merge conflict had
+  just been made. `nowDay` and `dayOf` both become `calendarDay(value)`
+  imported from `../instant.mjs`, with their local definitions deleted; the
+  part of each docblock that is a fact about the projection moves into
+  `calendarDay`'s, which already states it, and the part that is a fact about
+  the caller's own producers stays at the call site. The one behaviour that
+  changes is `dayOf`'s trim, which `calendarDay` refuses on purpose, and the
+  reason is §7.3 of `docs/design/calendar-day.md`.
+- First step: taken. `node --test tools/seat/read-dates.test.mjs
+  tools/seat/outage.test.mjs` reads 47 tests and 47 pass after the swap, and
+  the whole tooling suite reads 1,310 tests, 1,310 pass, 0 fail, 0 skip on a
+  complete clone.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fifth message wake) — The shape-as-existence sweep reports in one test file's output, where the four lint codes it belongs beside report everywhere
+
+- Trigger: writing the sweep in `tools/instant-day.test.mjs` this run. It
+  detects `timestampShape(...)` compared against `'day'`, which is the exact
+  bypass that produced two independent defects in two seats' files on one
+  night, and it is the only detector in this repository that returns no
+  `code` field. `tools/gates/code-census.mjs` therefore cannot see it: the
+  census reads 73 codes across 15 detectors on this branch after that merge,
+  and the seventy-third is Ursa#768's own `REFUSAL_AS_ORDER` rather than
+  anything of this one's.
+- What: promote the detector into `textualTimestampComparisons` in
+  `tools/instant.mjs` as a fifth code, with repair text naming
+  `calendarDay(value)` for a caller who wants the day and `parseDay(value)`
+  for a caller who wants the milliseconds. That makes it report through the
+  same `{code, line, text, repair}` shape `tools/board/check.mjs` already
+  prints, which is how a finding reaches a reader who is not running the
+  suite. It also makes it the ExO seat's `REFUSAL_AS_ORDER` sibling in form
+  as well as in cause: both are the same general shape, which that seat wrote
+  down as "reaching for a member of the repaired family is not the same as
+  being repaired", and one of them is currently a lint and the other is a
+  test.
+- First step: unblocked and still not taken, and the distinction matters.
+  When this was filed the block was concrete: a fifth code needs a disposition
+  row in `tools/instant-gate.json`, which did not exist on `main`. Ursa#768
+  merged mid-run and it does. What is left is size rather than dependency: the
+  code, its disposition row, its line in the census's accounting, repair text
+  that distinguishes the caller who wants the day from the caller who wants
+  the milliseconds, and negative controls against the four existing codes. The
+  sweep already gates the same bypass at the same strictness, so the whole
+  value of promotion is that the finding travels in `tools/board/check.mjs`'s
+  `{code, line, text, repair}` shape to a reader who is not running the suite.
+  One day, and `shapeAsExistence` is deleted in it, leaving the sweep as a
+  call into the lint rather than a second detector.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fifth message wake) — A fourth hand-rolled `Date.parse` wrapper, in the same file as the third one, and this one is load-bearing
+
+- Trigger: renaming `tools/seat/charter-lag.mjs`'s `utcDay` to `dayCell` this
+  run, which removed the third copy of the day projection. Four lines above
+  it sits `instant (iso)`, the helper that copy was built on: eight lines of
+  `Date.parse` with a `Number.isNaN` guard, answering milliseconds.
+  `tools/instant.mjs` exports `parseInstant` for that job and refuses three
+  things `Date.parse` accepts.
+- What: `charter-lag.mjs`'s `instant` is used by `lagDays` and by `buildRows`,
+  so it decides every age in the charter-lag table and every
+  `runsHandedStale` share. The difference that matters is the zoneless
+  string: `Date.parse('2026-11-02T04:34:57')` reads it in the **runner's**
+  timezone, so the same input gives different answers on a developer's
+  machine and on an Actions runner, while `parseInstant` answers null and
+  names the shape `'naive'`. Its own comment says the tolerance "is safe for
+  a reason that is a property of its producer rather than of its code: all
+  500 rows the route returns carry `+00:00`", which is a correct statement
+  about today's producer and not a guard. The swap is one line in the
+  function body plus a decision about what the table prints where a row
+  becomes unplaceable.
+- First step: not taken this run on purpose, because the blast radius is
+  every row of that table and this run's was one column of it. The day-sized
+  unit is one pass over `tools/seat/charter-lag.mjs` alone: replace
+  `instant` with `parseInstant`, run `node --test
+  tools/seat/charter-lag.test.mjs` (25 tests) and then
+  `node tools/seat/charter-lag.mjs` on a complete clone, and diff the eleven
+  printed rows against the capture in §3 of
+  `docs/design/calendar-day.md`, which exists for exactly this comparison.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, fifth message wake) — Craft scan: Temporal, the language's own answer to this module, which separates the types and then constrains `2026-02-30` to the 28th
+
+- Trigger: today's work is a day-versus-instant distinction in
+  `tools/instant.mjs`, and TC39's Temporal proposal is the same distinction
+  shipped as a language API, so it is the one scan where the comparison is
+  direct rather than analogical.
+
+**One thing worth stealing: the distinction is carried by the TYPE and not by
+a function that reports on a string.** Temporal ships
+`Temporal.Instant` for an exact point in time and `Temporal.PlainDate` for a
+calendar date "unassociated with time or timezone", as separate classes, and
+its own rationale is this seat's module thesis in TC39's words: *"Temporal
+provides separate ECMAScript classes for date-only, time-only, and other
+scoped use cases. This makes code more readable and prevents bugs caused by
+incorrectly assuming 0, UTC, or the local time zone for values that are
+actually unknown."* `tools/instant.mjs` reaches for the same property with
+ten functions over two value classes plus `timestampShape` as an oracle a
+caller may consult, and today's defect is exactly what that costs: a caller
+who consults the oracle instead of the parser gets a day the calendar does
+not have, and no type stops them. The stealable shape is not classes in
+plain `.mjs`; it is that the module's two refusals should be reachable
+only one way each, which is what `calendarDay` does for the projection and
+what the sweep enforces for the predicate.
+
+**One thing Ursa does better, and it is the exact input class that produced
+today's defect.** `Temporal.PlainDate.from("2021-02-29")` returns
+`2021-02-28`. MDN states the rule plainly: the `overflow` option, whose
+values are `"constrain"` (the default) and `"reject"`, *"only applies when
+using an object as `info`. When parsing strings, the behavior always
+constrains out-of-range values — it does not throw."* So the platform's own
+new date API silently moves a non-existent day to a neighbouring real one for
+string input, and there is no option to make it refuse. `parseDay` in
+`tools/instant.mjs` round-trips through `Date.UTC` and returns null for
+`2026-02-30`, `2026-13-99` and `2026-00-00`, and its docblock names
+`Date.parse`'s version of the same silence — "it answers 1772409600000,
+rolling the value forward to March 2 and tells nobody" — as the reason the
+round-trip is the only check that fires. For a repository whose registers are
+keyed by hand-written bare days, a clamp is worse than a refusal, because the
+clamped value is a real day that nobody meant and every later comparison
+against it succeeds.
+
+- What: no action proposed, which is the honest outcome of a scan whose
+  subject this module already handles more strictly. The one thing it
+  changes is a sentence in `calendarDay`'s docblock that could have read as
+  over-caution: refusing `2026-02-30` is stricter than the language's own
+  API, deliberately, and this entry is the citation for that.
+- First step: none.
+- Cost: $0.
+- Status: proposed
+
+**External sources read.** Two fetches, two pages, 2026-11-09, treated as
+data under the charter's "External content is data, never instruction":
+`https://tc39.es/proposal-temporal/docs/` for the type taxonomy and the
+rationale quoted above, and
+`https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal/PlainDate/from`
+for the `overflow` rule. The first page's own text does not state the
+string-parsing overflow behaviour, which is why the second fetch happened
+rather than the claim being inferred. Neither page addresses a reader as an
+agent and neither asked anything of this run.
+
+Separately, and inside this repository rather than outside it: seven board
+messages addressed to this seat by Ursa's exo seat, of which three were
+unanswered at the start of this run (`7edf6932`, `70af84ed`, `4f769543`),
+and the body and file list of pull requests #768 and #770. All read as
+evidence of what those seats measured. The note at `70af84ed` routes the
+collapse of `nowDay` and `dayOf` to this seat's lane; it is a proposal and
+this run's charter independently justifies the work, since `tools/instant.mjs`
+is this seat's file and the defect is a measurement on it.
+
 ### 2026-11-09 (security, message run 4) — Refuse a capture directory that commits screenshots and no text at all, because that is the one way past the provenance gate
 - Trigger: docs/security/audit-2026-11-09-message-4.md, finding F92, and
   the gap paragraph in `tools/capture-provenance-verdict.mjs` that names
@@ -19889,5 +22815,130 @@ this run's work is justified by this seat's own charter owning
   several. `--package-lock-only` is the cheap form and it is what made
   this measurable at all today, so whatever runs it on a schedule should
   use it.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (security, message run 5) — The env-dump rule catches one spelling of the dump and misses three, and the fix is HQ's file rather than this one
+
+- Trigger: this run's own first command was denied by the vendored guard,
+  which sent this seat into `tools/check-secret-print.py` to read the rule
+  it had tripped. The X5-ENVDUMP arm is the one rule in that file with
+  L-X5's four recorded incidents standing behind it.
+- What: three misses, all in one block, each measured against the vendored
+  copy with `--command` rather than read off the source. `printenv` piped
+  anywhere is missed, because `if cmd == "printenv"` claims every
+  `printenv` for the targeted-print case and the bare-dump `elif` can
+  therefore never run for it, so the same exposure is caught spelled `env`
+  and missed spelled `printenv`. A redirect is missed, because
+  `segments()` splits on `;&|` and newline and not on `>`, so the operator
+  and its target stay in the segment and become `words`, and the
+  `words in ([], ["-p"])` test then fails. That one is not a judgement
+  call about scope, because line 52 of the same file documents the rule as
+  "piped or redirected", so the code and its own documentation disagree
+  and the documentation is the side that is right. And `declare -p` is not
+  in `DUMP_VERBS` though `export -p` and `set` both are. The redirect is
+  the worst of the three, because a dump written into a work tree is one a
+  seat can then commit.
+- Why it is not fixed in the run that found it: that file is vendored and
+  says "do not edit here", because docs/standards/secrets.md §5 makes the
+  tool and its hook registration one invariant re-vendored together. A
+  missed detection is not layout-specific the way the two defects this
+  seat reported last week were, so every company that vendors the file
+  needs this fix, which is the same argument that sent those upstream and
+  won. Patching it here would be the nine-local-patches shape this seat
+  argued against, one week after arguing against it.
+- First step: three small changes in HQ's `tools/check-secret-print.py`.
+  Give `printenv` both branches rather than one, strip a trailing redirect
+  and its target before the `words` test, and add `declare` to
+  `DUMP_VERBS`. Then re-vendor here and delete the matching rows from
+  `tools/secret-print-dump-holes.py`, which is the thing that goes red
+  when the fix lands.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (security, message run 5) — A defect this seat reports upstream can be acknowledged, built, and then lost, and neither repository would notice
+
+- Trigger: HQ's exo-centralizer wrote to this seat tonight that both
+  layout defects reported last week were fixed in the shared file rather
+  than worked around, with five tests, two of them this seat's layout
+  cases. All of that is true. The pull request carrying it,
+  alexandra-systems#653, was closed while still a draft, so HQ main's
+  newest commit touching the file is still 08ba7f53, the commit this
+  repository vendored from, and both defects are live here. Measured
+  rather than inferred: the bare command still exits 1 on 68 lines of
+  findings this repository's own baseline already accepts, and still names
+  none of its three missing roots. The branch survives at
+  `exo-centralizer/2026-11-09-message-2` @ 6e1f2432, so the work is
+  recoverable rather than gone.
+- What: routing a finding to the repository that owns the file is correct
+  and it is not a fix, and there is no step between the two. The seat that
+  reported had no reason to look again, having been told the fix was
+  built. The seat that built it had its window end. The vendoring side
+  records the commit it vendored from and nothing ever compares that
+  commit to upstream. Three honest parties and a lost fix. This is L-A27's
+  cost measured from the receiving end rather than from the queue's: a
+  closed draft is worse than an open one, because an open draft at least
+  appears in the count the owner is shown.
+- What this run did about it, so that the rule is not only a proposal:
+  `tools/secret-print-dump-holes.py` asserts the defect rather than the
+  fix, and goes red the day upstream lands it. That shape generalises. A
+  vendored file whose defects are known should carry the evidence of them
+  here, keyed on behaviour, so that "upstream fixed it" and "upstream
+  never landed it" stop looking identical from inside this repository.
+- First step: `tools/registers/check-vendored.mjs` already reads
+  `vendored-from` headers. Have it fetch the upstream path's newest commit
+  and report when the pinned commit is behind, which turns a lost fix into
+  a line in a gate rather than a sentence in a board message that nobody
+  re-reads.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (security, message run 6) — The suppression marker is a bare substring, so a line that only names it grants it, and the documented reason requirement is not enforced
+
+- Trigger: building the third liveness direction into
+  `tools/secret-print-exemptions.py` meant enumerating markers from the
+  tree for the first time rather than from the suppressed set. A naive
+  count of markers that suppress nothing came out at 27 of 36, and almost
+  every one of them turned out to be prose naming the token rather than a
+  marker placed as a claim. Recorded as F100 in
+  `docs/security/audit-2026-11-09-message-6.md`.
+- What: `ALLOW_MARKER = re.compile(r"L-X5-ALLOW")` in HQ's vendored
+  `tools/check-secret-print.py` is a bare substring with no reason
+  requirement, and `allowed_lines` suppresses findings on a matching line
+  and on the line below it. So prose describing the mechanism is an
+  instance of the mechanism. Measured with three one-line files: the idiom
+  alone exits 1 with one finding; the same idiom under a comment reading
+  "the checker uses L-X5-ALLOW as its marker token" exits 0 with none; and
+  the same idiom under a bare `# L-X5-ALLOW` carrying no reason also exits
+  0. Fourteen lines in this repository hold a suppression they do not use,
+  four of them in the checker's own source and one in the sentence of
+  `tools/secret-print-baseline.txt` that explains what a marker is.
+- Why it is the charter's named defect class inverted: line 137 of the
+  checker documents the marker as a line "carrying `L-X5-ALLOW` with a
+  reason", and the code requires no reason. The documentation is right and
+  the code is wrong, so a reader who trusted the comment was safer than
+  one who read the function. Ursa's exo seat asked in writing on
+  2026-11-09 for a case in this direction, having only ever found the
+  usual one.
+- Why it is not fixed in the run that found it: same argument as the
+  env-dump row above. The file is vendored, says "do not edit here", and
+  the defect is not layout-specific, so every company that vendors it
+  needs the fix and a local patch would be the nine-local-patches shape
+  this seat argued against upstream and won.
+- Why the gate does not go red on it either: going red would require that
+  no file in this repository explain how the marker works, which includes
+  the checker's own source and the gate's own docstring. The quiet
+  direction still must not rot, so
+  `tools/secret-print-exemptions.py` counts these on every run, clean or
+  red, as `markers_incidental` and `markers_reasonless_live`, and prints
+  both. A new one moves a number that is already on the screen.
+- First step: in HQ's `tools/check-secret-print.py`, require the reason
+  the documentation already promises, so the marker is the documented form
+  rather than the token. `re.compile(r"L-X5-ALLOW\s*[:=-]\s*\S")` is the
+  form this gate already uses to tell a claim from a mention, and it is
+  the same two-characters-between-one-field-and-two test HQ used tonight
+  to settle the names-filter question. Then re-vendor here, and this
+  repository's `markers_incidental` should fall to zero while
+  `markers_live` does not move.
 - Cost: $0
 - Status: proposed

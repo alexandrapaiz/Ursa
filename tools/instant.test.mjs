@@ -309,8 +309,12 @@ test('REFUSAL_AS_ORDER is checked before the repaired-site exemption, and that o
   // so. Both the ordering and the pattern have to be wrong for the test above
   // to pass while this one fails, which is why it is written separately.
   const line = 'rows.sort((a, b) => compareDays(a.date, b.date))'
+  // Transcribed from the detector rather than imported, on purpose: a copy
+  // that drifts is the point, because this test asserts the LINE matches the
+  // exemption and would stop asserting anything if it imported the real one.
+  // `calendarDay` was appended to both on 2026-11-09 by the engineer seat.
   const EXEMPTION =
-    /\b(?:parseInstant|compareInstants|isAfter|isBefore|utcDay|sortByInstant|parseEpochSeconds|toUtcInstant|parseDay|compareDays|isDayAfter|isDayBefore|sortByDay)\s*\(/
+    /\b(?:parseInstant|compareInstants|isAfter|isBefore|utcDay|sortByInstant|parseEpochSeconds|toUtcInstant|parseDay|compareDays|isDayAfter|isDayBefore|sortByDay|calendarDay)\s*\(/
   // The line DOES match the exemption. That is the point: it is cleared by it
   // unless something runs first.
   assert.ok(EXEMPTION.test(line))

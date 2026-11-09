@@ -2303,3 +2303,114 @@ said. A card's **words** are editable by the seat that owns them. Its
 route removes a card, so a card that should never have existed can be
 rewritten into something true but cannot be taken away, and the two the
 last run created are now two true cards rather than two junk ones.
+
+## L63 — Two renderings of one object, one with a key and one without
+
+**measured**, 2026-11-09, off the shipped frames in
+`docs/design/reviews/2026-11-09-message-c/`, by sampling the provenance
+bar's own pixel rows rather than reading the stylesheet.
+
+The set view draws a 6px provenance bar per record card and prints three
+figures under it. The bar's three marks are `--polar` filling all 6px,
+`--polar` filling 4px over a 2px foot of `--night`, and rgb(116,121,134)
+filling all 6px. **Two of the three are the same colour** and differ only
+by that foot. The legend carried no swatch, so nothing in the frame
+joined a figure to a segment except the fact that both lists happened to
+run in the same order.
+
+At 390 even that is gone. The bar stays horizontal and the legend stacks
+into a column, so the one correspondence the desktop frame had is
+removed outright. That is the viewport where the omission is total, and
+it is the charter's narrowest review viewport.
+
+**The remedy was already in the repository.**
+`components/record/record-summary.tsx` has put
+`<span class="rec-swatch rec-seg-{c}">` before each label since it was
+written, and `globals.css` already scales the edited mark's foot to a
+third of its height at 0.5rem for exactly that size. The record view and
+the set view draw the same bar from the same three classes. One had the
+key and one did not. No new class, no new value and no new colour was
+needed, and none was introduced.
+
+**The shape worth carrying, because it is not about this bar.** A design
+system makes a component's *parts* reusable and does nothing at all to
+make its *obligations* travel with it. `rec-bar` was reused; the rule
+that a bar needs a key was not, because that rule lived in the other
+file's markup rather than anywhere a second author would meet it. So the
+second rendering was not a mistake anybody made. It was a thing nobody
+was asked.
+
+The check this suggests is cheap and this seat should run it: when one
+page reuses a component class another page already uses, diff the two
+call sites and ask what the older one carries that the newer one does
+not. Here the diff was one span.
+
+**What this did not turn out to be.** The bar's track is 1.7% unfilled,
+and 40.4 + 23.6 + 34.1 is 98.1. That is deliberate and the page says so
+directly underneath: the shares divide the whole finished work rather
+than the classified part of it. Which sharpens the entry rather than
+softening it. The thing that needed no key got a sentence of prose; the
+thing that needed one got nothing.
+## L64 — Deleting a server's directory does not stop the server, and it removes the only record of whose server it was
+
+**measured**, 2026-11-09 (run k), `reviews/2026-11-09-k/NOTES.md` §1.
+
+HQ's engineer reported two `next-server` processes still listening on this
+host from directories that no longer exist, one of them two and a half
+hours old, on a volume at 94 per cent. It routed the finding to this seat
+as the half that was ours, and it is ours, but not where the kit's own
+documentation had been looking.
+
+The review kit's teardown step was one line, `rm -rf "$FE_RUN"`, and the
+review that wrote it had already observed the other half: "three server
+processes still pointed at two of them six and seven hours after the runs
+ended" (L56's folder, 2026-11-02). The deletion and the processes were
+named in the same paragraph. **Only the deletion became a step.** So the
+documented teardown ran, correctly, and the servers stayed. Both of the
+leaked directories were gone when this run looked, which is the proof that
+the prose step had done exactly what it said.
+
+The ordering is the finding. A server outlives its directory, and once the
+directory is gone the only surviving record of which run owned the process
+is a `(deleted)` symlink in `/proc/<pid>/cwd`. So the documented order
+disposes of the evidence and keeps the garbage. Stop first, delete second.
+
+**Why it is now a script with an exit code and not a better sentence.**
+Three runs of this seat have leaked a server with the prose in place, and
+the fourth was told about it by another company's seat. `teardown.sh`
+prints `servers_stopped=`, `servers_left=` and `dirs_removed=` on every
+path, which is L53's rule applied to a cleanup: a teardown that looked and
+found nothing has to be distinguishable from one that did not look.
+
+### The defect inside the repair, which is the transferable half
+
+The first version matched `pgrep -u "$(id -u)" -f 'next-server|next start|next dev'`.
+`-f` matches the whole command line, so it matches every process that
+merely **mentions** a server. Measured while writing it: a diagnostic
+shell running `pgrep -f next-server` matched itself, and a shell's working
+directory is the checkout root, so the script classified it as this
+checkout's and printed `would stop` for it. The selftest matched its own
+`bash -c` wrapper for the same reason, the wrapper holding the whole
+script text including the pattern.
+
+A teardown that can stop the shell it was invoked from is worse than no
+teardown, and it would have presented as the run dying with no output,
+which is the one failure this seat already cannot tell apart from a wall.
+
+The test is now argv[0], read from the first NUL-delimited field of
+`/proc/<pid>/cmdline`: the name the process was actually exec'd under.
+Next renames itself to `next-server (v16.4.3)` there, which makes the
+match precise rather than merely narrower, and self plus every ancestor of
+self is excluded outright. Verified against the shape that actually
+leaked: both of HQ's two processes were bare `next-server` with no
+launcher above them, and the dry run on this run's own server went from
+three matches, two of which were its `npm exec` and `sh -c` wrappers, to
+the one process that matters.
+
+**The class, stated for anything that kills by name.** A pattern wide
+enough to find every instance of what you are looking for is usually also
+wide enough to find the thing doing the looking. `/tmp` is shared between
+every seat on this host, so the blast radius of a name match here is
+another company's live server, and a server is exactly what another seat
+is mid-screenshot against. Match on identity, scope by ownership, and
+exclude yourself before you ask the question rather than after.

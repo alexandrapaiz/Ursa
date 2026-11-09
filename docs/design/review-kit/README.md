@@ -29,9 +29,21 @@ ps -eo pid,args | grep -v grep | grep -q "npm" && \
       echo "REFUSING: npm $pid is live in this tree"; \
   done
 
-# and at the end of the run, the whole directory and not just the cache
-rm -rf "$FE_RUN"
+# and at the end of the run: stop what you started, THEN delete what you
+# wrote. One command does both and prints a count line either way.
+bash docs/design/review-kit/teardown.sh            # --dry-run to look first
 ```
+
+**Run the teardown even if you wrote nothing**, because the server is the
+half that outlives the directory. `rm -rf "$FE_RUN"` was this step for a
+week and it is not sufficient on its own: deleting a server's working
+directory does not stop the server, it only removes the record of which
+run owned it, since from then on the only trace is a `(deleted)` symlink
+in `/proc`. Measured 2026-11-09: two `next-server` processes were still
+listening on this box from `/tmp/epito-ursa-frontend-BBhu7I/ursa-minor`
+and `/tmp/epito-ursa-frontend-ZIcHr7/ursa-minor`, both deleted, aged 2h54m
+and 1h24m, on a volume at 94 per cent. Both runs' directories were gone,
+so the documented step had run and done its half correctly. L63.
 
 `--cache` is not optional and `PW_ROOT` does not cover it: `PW_ROOT`
 isolates `node_modules` and the cache is a separate shared resource one
@@ -91,6 +103,7 @@ rather than the install. A prefix nothing else owns is immune to both.
 | `hover.mjs` | Hovers an element and scrubs its transition to an exact millisecond, or `--curve` to sweep the whole thing. Host-independent, which is the point. |
 | `sample-motion.mjs` | Captures a hover three ways: a frame series, the inline style writes a library makes, and the browser's own animation engine. |
 | `fit-motion.mjs` | Characterises a capture. Fits start time and duration as free parameters, names the curve, and says `UNRESOLVED` rather than guessing when the capture is too sparse. |
+| `teardown.sh` | Stops this checkout's dev servers and deletes the run directory, in that order, and prints `servers_stopped=/servers_left=/dirs_removed=` on every path so a teardown that looked and found nothing is distinguishable from one that did not look. Scoped by `/proc/<pid>/cwd` to paths matching `epito-ursa-frontend-*`, because /tmp is shared between every seat on this host and a sibling's server is exactly what a sibling is mid-screenshot against; `--orphans` additionally takes a previous run of this seat, but only where that run's directory is already deleted. Matches **argv[0]** and never `pgrep -f`: a command line that merely mentions a server belongs to a shell, and the first version of this script printed `would stop` for the shell it was invoked from. Selftest `selftest/check-teardown.sh`, 9 assertions. Written 2026-11-09 out of L63. |
 | `check-redaction.mjs` | The repository's redaction gate, run locally before pushing. Reads the three patterns, the exclusions and the allowlist out of `.github/workflows/redaction-gate.yml` on every run rather than holding a copy, and matches with the same `grep -rInE` the gate calls, so it cannot drift from the thing it predicts. Exits 2 and says so if it cannot parse the gate, because a checker that reports zero rules and a checker that reports zero hits print the same word. `--root`, `--json`. Written 2026-10-27 after the gate was red three times on one fixture line with nothing local able to see it. |
 | `read-spring.mjs` | Reads a spring out of a `linear()` easing: overshoot, damping ratio, frequency, stiffness. |
 | `make-spring.mjs` | Writes a spring into a `linear()` easing, which is how a spring ships in CSS with no library. |
@@ -128,6 +141,7 @@ runnable on its own with no server and no network:
 | `selftest/check-contrast.mjs` | 17 hand-computable ratios for `measure-contrast.mjs`, over `selftest/contrast.html`. |
 | `selftest/check-hit-areas.mjs` | That `measure-hit-areas.mjs` can still fail. Eighteen expectations since 2026-11-09, the last two being that words in a sibling `<span>` exempt an inline link the way a bare text node does, and that two abutting controls with no prose between them are still held to the floor. Its headline on the real site went to zero on 2026-10-25b, and zero is also what a tool that had stopped looking would print, so this serves `selftest/hit-areas.html`, whose right answers are built in, and asserts each of the four verdicts actually fires. |
 | `selftest/check-focus.mjs` | 31 assertions for `measure-focus.mjs`, including a focus trap it has to report as unreachable controls rather than a short clean ring, L36's two hand-taken ratios recomputed by a different code path, and a 4000px page whose three undeclared stops all land at the same viewport coordinate, which the walk has to run to the end of. That last fixture fails five of its six assertions on the code of 2026-11-02, which is how it was checked. `after-drive.html` is the same discipline for the walk's starting point: five controls, a drive that clicks the fourth, and three of its four assertions fail on the code of 2026-11-09 morning, reporting one stop and four false unreachables. |
+| `selftest/check-teardown.sh` | 9 assertions for `teardown.sh`, with real processes rather than mocked paths, since the subject reads `/proc`. The two load-bearing ones are a live server in another seat's tree, which must be left alone under `--orphans` as well as without it, and a process that only names a server on its command line, which is what the `pgrep -f` version matched and would have killed. Every decoy is detached from the test's stdout: a background process holding the pipe open makes a finished test look like a hung one. |
 | `selftest/check-floor.py` | 12 assertions for `measure-floor.py`, the load-bearing one being that six shoots split four and two report seven blind pairs of fifteen. |
 | `selftest/check-pin-now.mjs` | That `shoot.mjs --pin-now` pins the page's clock and refuses the two ways it can be asked for what it cannot do. It needs its own fixture because neither product reads the wall clock client-side, so no page here would prove the flag works. |
 | `selftest/check-redaction.mjs` | That each of the gate's three rules still fires, that the allowlist still forgives what the gate forgives, and that an unparseable gate is a refusal. |
