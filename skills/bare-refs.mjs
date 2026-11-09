@@ -51,9 +51,11 @@ import { join } from 'node:path'
 import { TAG_RE, citingTexts, refsIn } from './citing-files.mjs'
 import { readLibraryDirs } from './library-dirs.mjs'
 
-/** A bare evidence identifier: `E` and digits, not inside a `[...]` tag and
- *  not part of a longer word. The tags are masked out before this runs, so
- *  the lookbehind only has to rule out the half of `[E3` the mask leaves. */
+/** A bare evidence identifier: `E` and digits, not immediately after a `[`
+ *  and not part of a longer word. `TAG_RE`'s matches are already masked out
+ *  when this runs, so a `[` still standing in front of one is a bracketed
+ *  form that `TAG_RE` did not accept, an unclosed `[E3` or a link label, and
+ *  those are left to whatever rule governs them rather than reported here. */
 export const BARE_RE = /(?<![[\w])(E\d+)\b/g
 
 /** A fenced code block, including the fence lines. Tilde fences too, because
@@ -65,10 +67,11 @@ const blank = (s) => s.replace(/[^\n]/g, ' ')
 /**
  * Every bare evidence mention in one body, as `{ ref, line, fenced }`.
  *
- * Tags are blanked rather than removed, so the line numbers this returns are
- * the line numbers of the file a reader will open. Replacing them with the
- * empty string instead was the first draft, and it reported the one real
- * finding in this library four lines early.
+ * Tags are blanked rather than removed, so every index into `masked` is the
+ * same index into `text`. No tag contains a newline, so removal would not in
+ * fact move a line number, and that is the point: the equality holds by
+ * construction instead of by a property of the tag syntax, so a later change
+ * that reports a column rather than a line is right without re-deriving it.
  *
  * Fences are NOT blanked, and the first draft of this function did blank them,
  * which made its own `fenced` cell unreachable: nothing was left to match

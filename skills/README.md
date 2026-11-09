@@ -552,7 +552,7 @@ node --test skills/tmp-fixture.test.mjs
 node --test skills/bare-refs.test.mjs
 ```
 
-Eleven suites and 286 tests as of 2026-11-09, which is a dated measurement
+Eleven suites and 287 tests as of 2026-11-09, which is a dated measurement
 rather than a claim about the suite, for the reason
 `prompts/skill-extract.md` §5ag
 gives about a count with no date on it. The 131 it said on 2026-10-27

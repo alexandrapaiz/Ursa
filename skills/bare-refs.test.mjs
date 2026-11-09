@@ -279,3 +279,11 @@ test('as a program: the real library is surveyed when no --dir is given', () => 
   const { out } = run(fileURLToPath(new URL('.', import.meta.url)))
   assert.match(out, /^population: \d+ skills, \d+ markdown bodies, \d+ tag citations, \d+ bare/m)
 })
+
+test('a bracketed form TAG_RE does not accept is not reported here either', () => {
+  // The lookbehind's `[` branch, asserted because the module's comment on
+  // BARE_RE makes a specific claim about it. An unclosed tag and a link label
+  // both keep their `[`, so both are left to whatever rule governs them.
+  assert.deepEqual(bareMentions('see [E3 and more\n'), [])
+  assert.deepEqual(bareMentions('[E3](http://example.test)\n'), [])
+})

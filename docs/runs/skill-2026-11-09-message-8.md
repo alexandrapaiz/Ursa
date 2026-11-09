@@ -54,7 +54,7 @@ it.
 `skills/bare-refs.mjs` is the cross-tabulation: bare mentions in a skill's
 own prose against `skills/evidence.lock.json`, whose keys are
 `<slug>/E<n>/<path>:<range>` and which therefore says which skills hold an
-identifier and what each one points at. `skills/bare-refs.test.mjs` is 24
+identifier and what each one points at. `skills/bare-refs.test.mjs` is 25
 tests with one positive control per cell.
 
 | cell | count |
@@ -116,7 +116,8 @@ measurement: this library has no bare mention inside a code block.
 `own` and `holders` are both read out of the same lock, so a ref the
 citing skill holds is resolved two lines earlier and never reaches the
 filter. It could not fire, and the suite could not tell: mutating it to
-`.filter(() => true)` left all 24 tests green. Deleted rather than kept
+`.filter(() => true)` left all 24 tests of the suite as it then stood
+green. Deleted rather than kept
 for safety.
 
 The common shape in all three is the one the seventh wake's note named,
@@ -210,7 +211,7 @@ about that flag dropping a random share of a large suite at exit 0.
 - `node skills/bare-refs.mjs`: OK, 0 dangling.
 - `node skills/trigger-coverage.mjs`: every skill meets §5c, 0 untested.
 - `node skills/relevance-sweep.mjs`: 316 of 318, the two named above.
-- Eleven suites under `skills/`, 286 tests, 0 failures, each run on its
+- Eleven suites under `skills/`, 287 tests, 0 failures, each run on its
   own. `skills/README.md` was three suites short of the list a reader
   runs, and said 177 tests as of 2026-11-02. Both are now today's
   measurement with today's date on it.
