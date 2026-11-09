@@ -187,6 +187,50 @@ export const CHECKS = [
     passExit: [0],
   },
   {
+    id: 'secret-print-tree',
+    scope: 'tooling',
+    title: 'Secret-print shapes, working tree',
+    // Added 2026-11-09, and the reason is the same one that added
+    // `register-ids` a week earlier: this seat landed HQ's vendored L-X5
+    // checker with three runners beside it and registered none of them, so
+    // the only thing that ever ran them was a seat who remembered to. That
+    // is this file's own board item committed by the seat that filed it.
+    //
+    // The sweep and not the bare checker. `tools/check-secret-print.py`'s
+    // default scan roots are HQ's five, three of which Ursa does not have,
+    // and a missing root is skipped in silence, so the bare command reads
+    // as repository-wide while covering 24 files. The sweep builds Ursa's
+    // list and passes the baseline. Both of those are upstream defects this
+    // seat reported; HQ has fixed them in a pull request of its own, and
+    // the wrapper comes out at the next re-vendor rather than now.
+    argv: () => ['bash', 'tools/secret-print-sweep.sh'],
+    passExit: [0],
+  },
+  {
+    id: 'secret-print-exempt',
+    scope: 'tooling',
+    title: 'Secret-print exemptions are decided and in date',
+    // The sweep above is green only because 32 findings are suppressed. This
+    // asks whether anybody is still on the hook for having argued for them.
+    // It is a separate check and not a flag on the sweep, because the two
+    // fail for unrelated reasons: the sweep goes red when the tree gains a
+    // defect, this goes red when an argument about the tree comes due.
+    argv: () => ['python3', 'tools/secret-print-exemptions.py'],
+    passExit: [0],
+  },
+  {
+    id: 'secret-print-suite',
+    scope: 'tooling',
+    title: 'Secret-print checker suite (vendored, 74 tests)',
+    // `toolingSuites()` resolves `*.test.mjs`, so this Python suite was
+    // reachable by nothing. The runner wrapper rather than unittest
+    // directly: two of the 74 tests assert against HQ's directory layout
+    // and the wrapper holds that knowledge, including the half that fails
+    // when either of them starts passing.
+    argv: () => ['python3', 'tools/secret-print-tests.py'],
+    passExit: [0],
+  },
+  {
     id: 'board-message-rules',
     scope: 'tooling',
     title: 'Board message rules',
