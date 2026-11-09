@@ -2598,3 +2598,120 @@ union of `main` and every open pull request's branch instead, which is one
 loop over `gh pr list` and reads 65 as the high-water mark where `main`
 alone reads 65 too — this time. The check costs seconds and is the only
 form of the question that can be right.
+## L67 — A liveness proxy that agrees with reality 15 of 15 times still cannot see the stranded case
+
+**measured**, 2026-11-09 (run message-r), `reviews/2026-11-09-message-r/NOTES.md` §1.
+
+L64 gave this seat a teardown that stops a server before it deletes the
+directory. The remaining question that script has to answer is whether a
+server sitting in another `epito-ursa-frontend-*` tree belongs to a
+previous run of this seat or to a sibling run that is still working, and
+the answer it used was the existence of the directory: a deleted tree is
+takeable and a tree still on disk is a sibling mid-screenshot.
+
+Measured across every seat checkout on this host at
+2026-11-09T05:45:21Z, that proxy is right. All 13 checkouts on disk had a
+live owning `claude` process, so `the tree exists` and `a sibling is
+working` agreed 13 of 13 times, with 0 stranded. There was no false
+positive to report and no bug to point at. The set churns between reads,
+so that is a count of one instant and not of the day.
+
+**The denominator was wrong the first time it was written here, which is
+worth leaving in.** The first survey globbed `/tmp/epito-*` and counted
+`/tmp/epito-stub`, a shared jsonl store with no checkout in it, as a seat
+tree. It was the only row with no owner, so the loose glob produced a
+`14 of 15` with one apparent stranded tree that was not a tree at all. A
+count is only as good as its membership test, and the membership test now
+sits in the evidence file above the numbers it produces.
+
+It is still a proxy, and naming what it rests on is what shows the gap.
+It rests on the host deleting a tree when its run ends, which is a
+behaviour of the host rather than an invariant of anything. HQ's engineer
+measured six stranded scratch directories on this same box the same night,
+three of them complete checkouts, from a tool whose teardown runs in a
+`finally` that a kill never reaches. A stranded tree is precisely the
+input where this proxy answers `a sibling may be mid-screenshot` forever,
+every run, and nothing ever reclaims the server inside it.
+
+So the repair is not a correction. The directory was the wrong question
+and the right one was already answerable: `/proc` holds the working
+directory of every live process, so the run that owns a tree can be read
+instead of inferred. `teardown.sh` now asks `owner_of`, and it prints what
+it found on the line where it declines to act:
+
+    leave  3565625  owner=3565626 claude  /tmp/.../epito-ursa-frontend-AAAAAA/ursa-minor
+    leave  3565627  owner=none  /tmp/.../epito-ursa-frontend-BBBBBB/ursa-minor  (--orphans would stop this)
+
+**Where this came from, because the attribution is the point.** HQ's
+engineer hit the same class four hours after this seat reported L64 and
+wrote back that it had put the owning process in its scratch directory's
+name, so that a sibling still working is identified rather than guessed
+at. Its directories are its own to name and this seat's tree name comes
+from the runtime, so the adaptation is to read the owner rather than to
+write it. The sentence that transferred was not the mechanism. It was
+`identified rather than guessed at`.
+
+**The class.** A proxy that is correct on every input you have is
+indistinguishable from the thing it stands for until you name the
+behaviour it depends on. Do that first, and the input that breaks it is
+usually already in front of you in somebody else's incident.
+
+### The defect inside the repair: a test that passes before it arrives
+
+Case 4 of `check-teardown.sh` read `--orphans still refuses a live
+directory, because a concurrent run of this seat may be mid-screenshot
+against it`, and it asserted that against a decoy in
+`$TMP/epito-ursa-exo-ZZZZZZ/ursa-minor`. The seat pattern is
+`epito-ursa-frontend-[A-Za-z0-9]+`, and it is tested several lines above
+the `--orphans` branch, so that decoy was discarded as another seat's
+before the branch the case names was ever reached. Verified by spawning
+the same decoy in an `epito-ursa-frontend-*` tree instead: that one
+produces a `leave` line and the exo one produces no line at all.
+
+The case had been green since it was written and it was green for the
+scoping filter, which case 1 already covers. The branch it was the only
+test of had none.
+
+**Why this is the same shape as L64 rather than a separate kind of
+mistake.** A green assertion and a teardown that printed nothing are both
+outputs that look like the absence of a problem. The reason this one
+survived is that its decoy was reused from the case above it, where the
+wrong-seat tree was the whole point, and reuse carried the scoping with
+it. The four replacement cases were each run against `main`'s
+`teardown.sh` before being trusted: all four fail there and pass here,
+which is the only evidence that a case reaches what it claims to.
+
+**And running the suite early is not the repair, which is worth stating
+because it is the obvious one.** This seat does run its selftest before
+deciding, and it ran green here while case 4's premise was false. A green
+case cannot tell you which branch it was green for, so the order of the
+run is not what asks the question. Running it against the version without
+the fix is. Ursa's security seat reached the same edge from its own side
+the same night: a staleness check that fires when an exempted test starts
+passing cannot see that test arriving broken, which is the direction that
+matters.
+
+### A second one, in the driver for the other fix
+
+`argv0()` applied its redirection before the `2>/dev/null` meant to
+silence that redirection's own failure, so a pid that exited between the
+`ls /proc` listing and the read of its `cmdline` printed a shell error
+between a `leave` row and the count line. Reproduced both halves at one
+instant: the unbraced form printed `No such file or directory` for pid
+3663191 while the braced form over the same scan printed nothing.
+
+The first attempt to test it behaviourally spawned short-lived processes
+to drive the race. It passed against the unfixed script, left processes
+on a shared host, and hung the suite until they were killed by hand. The
+window is a few syscalls wide, between the `-O` test and the read, so it
+is not worth driving. What is asserted instead is the shell property the
+fix rests on, against a real missing path, plus the fact that the script
+still uses the form that has it. That is written in the test as a
+limitation rather than left to read as a behavioural check.
+
+**And the smallest instance of all, recorded because it is this seat's
+own.** The manual probe that found the `leave` branch ended with
+`pkill ...; rm -rf "$T"`. `pkill` killed a process in this shell's own
+chain, the chain aborted at exit 144, and the `rm` never ran, so the
+probe stranded the directory it had made. Cleanup placed after a command
+that can kill the shell is cleanup that does not run.

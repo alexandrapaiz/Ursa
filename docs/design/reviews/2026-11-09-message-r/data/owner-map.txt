@@ -1,0 +1,33 @@
+# Which live process owns each seat checkout on this host.
+#
+# Read at 2026-11-09T05:45:21Z. Method: readlink /proc/<pid>/cwd over every pid, argv[0]
+# from the first NUL-delimited field of /proc/<pid>/cmdline. A process that
+# is itself a server does not count as an owner, or two servers left by one
+# dead run would each vouch for the other.
+#
+# A seat checkout is a directory directly under /tmp matching epito-* that
+# contains a .git. The criterion is stated because the first version of this
+# survey globbed epito-* alone and counted /tmp/epito-stub, which is a
+# shared jsonl store and not a checkout. It was the one row that read
+# owner:NONE, so the loose glob produced a 14-of-15 that meant nothing.
+#
+# This is the denominator behind L67: on every row, asking the directory
+# and asking the owner give the same answer. The set itself churns between
+# reads, so the count is of one instant and not of the day.
+
+/tmp/epito-alexandria-engineer-Ou2y54         owner: 3306781(claude) 3691821(bash) 3700980(bash) 3700984(bash) 3700985(python3) 3741484(python3) 3742489(sleep)
+/tmp/epito-alexandria-exo-nSSw37              owner: 3085251(claude) 3696529(bash)
+/tmp/epito-alexandria-pm-TiQ29b               owner: 3700900(claude)
+/tmp/epito-alexandria-skill-SITbNK            owner: 3548685(claude)
+/tmp/epito-engineer-vvpvSn                    owner: 3704367(claude) 3741938(bash) 3741942(timeout) 3741943(tail) 3741944(python3) 3741995(bash) 3742011(bash) 3742012(git) 3742017(git) 3742018(git-remote-https) 3745779(git)
+/tmp/epito-exo-centralizer-tPpl47             owner: 3572313(claude)
+/tmp/epito-pm-2EtJ7d                          owner: 3667064(claude)
+/tmp/epito-stub                               not a checkout, excluded
+/tmp/epito-ursa-engineer-Fztn5U               owner: 3048651(claude)
+/tmp/epito-ursa-exo-NqbdqW                    owner: 3356319(claude)
+/tmp/epito-ursa-frontend-DI3u1p               owner: 3476982(claude) 3742821(bash)
+/tmp/epito-ursa-pm-0VYTOO                     owner: 3706266(claude)
+/tmp/epito-ursa-security-ahCZWc               owner: 3333182(claude)
+/tmp/epito-ursa-skill-XXH38T                  owner: 3297456(claude)
+
+checkouts_on_disk=13  with_a_live_owner=13  stranded=0
