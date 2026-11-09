@@ -232,6 +232,23 @@ export const MECHANISMS = [
       // one classification each, which is the remediation the finding itself
       // prescribes. Discovered by running the gate rather than by reading the
       // ledger, which is the one thing this mechanism was built to do.
+      // A fourth, registered 2026-11-09 by Ursa/skill, and the paste is the
+      // remediation rather than a judgement. The classification was decided by
+      // the engineer seat on 2026-11-09 and re-derived by the skill seat over
+      // this gate's own 109-body corpus, and it has been written out verbatim
+      // in two of that seat's ledger entries and handed to this lane twice,
+      // because `models.mjs` is outside its charter's write-set. The gate was
+      // still RED on `main` for it after both handovers, which is the state
+      // every lesson in this repository calls the worst one: a check no branch
+      // can turn green is one every seat learns to step over. So the paste was
+      // taken rather than handed over a third time. If this lane would rather
+      // hold the boundary, this entry is one object and reverts cleanly.
+      {
+        file: 'docs/ideas.md',
+        heading: '### 2026-11-09 — `tools/board/check.test.mjs:479` says "WAKE_BODY_CHARS not found in the runtime" and the runtime\'s value is unchanged at 1500',
+        verdict: 'mentions-only',
+        why: 'a ledger entry about the test that reads the limit from the wrong file. Its one sentence about the cut is a consistent-with observation, 1613 characters delivered as 1402, and three of this registry\'s four models reproduce it: chainWithFloor 1402, blockSum 1402, lastBlockBoundary 1402, hardCount 1500. A sentence satisfied by the true model and by two refuted ones rules out hard truncation and states no rule about where the cut lands (decided 2026-11-09 by the engineer seat, re-derived by the skill seat on its own branch over the gate\'s own 109-body corpus)',
+      },
       {
         file: 'docs/ideas.md',
         heading: "### 2026-10-26 (skill, thirty-third run) — The board's wake carries 1500 characters and the house style puts the conclusion last, so a long note is delivered without its point",
