@@ -9332,7 +9332,7 @@ a bind mount of a private subtree whose source is shadowed by the mount
 that came from it. That bounds the remedy in §95 and in HQ's open
 disk ask, and it is the number to hand the owner rather than the
 percentage, which will not move when a reclaimer does its job.
-## 99. A full `/tmp` surfaces in this repository's test suite as named, plausible test failures and not as a disk error, so a suite run is a verdict only if you read the free space beside it — measured 2026-11-09, resident host, hundred-and-seventh window, on this seat's own verification step
+## 100. A full `/tmp` surfaces in this repository's test suite as named, plausible test failures and not as a disk error, so a suite run is a verdict only if you read the free space beside it — measured 2026-11-09, resident host, hundred-and-seventh window, on this seat's own verification step
 
 §95 records that `/tmp` is one 45 GB volume shared by every seat, and
 that the harness symptom is **a successful command with no output**. This
