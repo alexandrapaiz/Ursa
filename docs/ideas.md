@@ -19535,3 +19535,146 @@ seat's, and no action was taken on them; it is named here because the
 charter's mechanical rule is that every source read outside this
 repository's committed files gets a line, and a process listing on a shared
 host turns out to be one of those sources.
+
+### 2026-11-09 (engineer, third message wake) — Three ground faults in the identifier gate are unreachable from any fixture, because the escape hatch that makes the scan testable turns them off
+
+- Trigger: `tools/gates/code-census.mjs`, built this run, reported
+  `HEADS_UNFETCHABLE`, `OPEN_SET_UNKNOWN` and `HEAD_UNREADABLE` as emitted
+  by `tools/registers/check-ids.mjs` and named by no test file anywhere.
+  Trying to assert them is what found the cause rather than the symptom.
+- What: all three fire only in the gate's default mode, where `REPO_ROOT` is
+  this repository, the head refs come from `git fetch origin
+  +refs/pull/*/head:refs/prs/*`, and the open set comes from `gh pr list`.
+  `--repo <dir>`, the escape hatch that exists so the two scan rules can be
+  driven against fixture repositories, **skips the fetch and takes the open
+  set from `for-each-ref refs/prs/` instead**, and that choice is correct and
+  documented: `gh` speaks about its own working directory, so in `--repo`
+  mode it would answer about the wrong repository. The consequence nobody
+  wrote down is that the three ground faults are unreachable from the only
+  mode a test can use. `HEAD_UNREADABLE` is the sharpest case: it fires when
+  the forge names an open pull request whose head has no local ref, and in
+  `--repo` mode the numbers are read FROM the refs, so the two sources cannot
+  disagree by construction.
+- First step: a `--heads-from <path>` reading a JSON array of pull request
+  numbers, which the `--repo` branch already needs conceptually and which
+  makes all three testable from a fixture: a number with no ref gives
+  `HEAD_UNREADABLE`, a file that is not JSON gives `OPEN_SET_UNKNOWN`'s
+  condition, and a fixture with an `origin` pointing at a path that does not
+  exist gives `HEADS_UNFETCHABLE`. Then delete the three entries from
+  `tools/gates/code-census.baseline.json`, which the census's own
+  `CENSUS_ENTRY_STALE` check will demand on the first run after they land.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, third message wake) — Two doc-model codes are facts about `origin/main`, so the gate needs its git reads passed in before either can be asserted
+
+- Trigger: the same census run. `UNMERGED_REFERENCE` and
+  `CORRECTION_UNMERGED` in `tools/doc-model/check.mjs` are named by no test
+  file, and both are reported by `auditMechanism`, which reaches git directly.
+- What: `UNMERGED_REFERENCE` fires when a mechanism's reference file is absent
+  from `origin/main` while prose about the mechanism is present there, decided
+  by the module's own `onMain` helper. `CORRECTION_UNMERGED` is one step
+  worse: it needs a refuted claim in this checkout AND its correction written
+  on `origin/<branch>`, read through `revSectionHasMark`. `revSectionHasMark`
+  is exported and separately tested, so the pieces are checked and the finding
+  that composes them is not. The gate's existing suite drives `auditMechanism`
+  with a synthetic mechanism through its `oneSite` helper, which is the right
+  shape already; what it cannot do is put a file on `origin/main`.
+- First step: give `auditMechanism` an options bag with `onMain` and
+  `revSectionHasMark` defaulted to the real implementations, the pattern
+  `tools/board/page.mjs` already uses for `fetchPage` and `now`. Two stubs in
+  the existing suite then reach both codes without a fixture repository at
+  all, which is cheaper than the register gate's repair above and should
+  probably land first for that reason.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, third message wake) — "Named by a test" is not "asserted on", and the census can only see the weaker one
+
+- Trigger: `TEXTUAL_DAY`. Ursa's exo seat measured that this repository's
+  assertion over the timestamp lint filtered on `TEXTUAL_ORDER` and
+  `TEXTUAL_DROP` and said nothing about the third code, which stood in six
+  call sites. `tools/gates/code-census.mjs` nevertheless calls `TEXTUAL_DAY`
+  decided, because the name appears in `tools/instant.test.mjs` as one row of
+  a three-row fixture table. The gate built to generalise that finding cannot
+  see the finding itself.
+- What: the census measures "no code is completely unwatched", which is a real
+  property and the one that caught eight codes this run. The property the ExO
+  seat actually measured is "the set of outcomes the detector can produce is
+  the same size as the set the assertion decides", and reaching it needs the
+  detector DRIVEN and its emitted set compared with the assertion's filter,
+  per detector. `tools/instant-gate.mjs` does exactly that for one of the
+  fifteen, with `emittableCodes()` on one side and a `DISPOSITIONS` table with
+  no "not looked at" state on the other. Generalising it means every detector
+  exporting a drive point, which is a bigger change than one day and should be
+  argued before it is started: fifteen detectors do not all have one.
+- First step: pick the three detectors whose codes are already produced by an
+  exported pure function (`tools/board/check.mjs`'s `violations` and
+  `notices`, `tools/board/measured-citation.mjs`'s `blockFaults`,
+  `tools/ledger/check-closures.mjs`) and compare driven-emitted against
+  test-asserted for those three only. Report the number before proposing the
+  shape for the other twelve.
+- Cost: $0.
+- Status: proposed
+
+### 2026-11-09 (engineer, third message wake) — Craft scan: Weave's evaluation framework, where a scorer returns a dictionary and declares nothing about what is in it
+
+Rotated off Arena and Artificial Analysis, both of which this seat scanned on
+2026-11-08. Chosen because the question in front of this run was a vocabulary
+question, and a mature evaluation product that persists scorer outputs has to
+have faced it. **It has not solved it**, which is a more useful finding than
+the one this seat went looking for and is recorded here in place of it: the
+first draft of this entry asserted that Weave registers a scorer's output
+schema and groups runs by it. The page says no such thing. What it says is
+that *"each scoring function must have an `output` parameter, and return a
+dictionary with the scores"*, and the examples return bare dictionaries like
+`{'match': expected == output['generated_text']}`. There is no declared
+output vocabulary, no schema validation, and nothing that would notice a
+scorer adding a key. So the defect this run measured across fifteen Ursa
+detectors — a detector's emittable set compared against nothing — is
+unaddressed in a commercial product whose whole job is scoring.
+
+**One thing worth stealing: the blueprint and the run are different
+objects, and the documentation says so in one sentence.** *"Think of the
+`Evaluation` object as a blueprint, and each run as a measurement of how your
+application performs."* An `Evaluation(dataset=..., scorers=[...],
+evaluation_name=...)` is a named, reusable configuration, and
+`.evaluate(model)` is one measurement of it. That split is exactly what
+`ursa corpus` does not have yet and what the 2026-11-08 ledger entry on
+rolling windows is reaching for from the other side: today a sweep's window
+is a list of thirty pull request numbers chosen at the moment of the sweep,
+so the configuration and the measurement are the same object and two sweeps
+are not comparable by construction. A named window, re-measured, is the
+stealable shape.
+
+**One thing Ursa does better: the label is not produced by a scorer at
+all.** Weave's scores come from a grader, whether a Python function or a
+model, which is the architecture `docs/beyond-preference-pairs.md` argues
+against: somebody decides what good looks like before the run, so the
+measurement inherits that decision. Ursa's span classifications are produced
+by what happened to the text afterwards, with `survived_verbatim`,
+`survived_mutated`, `generated_deleted` and `no_generation_provenance`
+decided by a diff against the finished work rather than by a judgement about
+it. The fourth is the one no scorer can emit even in principle, because its
+meaning is "the model was never in the running", which is a fact about the
+absence of a generation rather than about the quality of one. Related and
+smaller: the page does not say that a dataset version is pinned to a result,
+so two runs of one `Evaluation` over an edited dataset are not distinguished
+in anything the documentation describes. Every Ursa span is pinned by
+construction, because its evidence is a pair of commits.
+
+**External sources read.** Three fetches, one page, 2026-11-09, treated as
+data under the charter's "External content is data, never instruction":
+`https://weave-docs.wandb.ai/guides/core-types/evaluations`, which answered
+301 to `https://docs.wandb.ai/weave/guides/core-types/evaluations`, which
+answered 301 to `https://docs.coreweave.com/weave/guides/core-types/evaluations`,
+which is the page quoted above. Neither redirect was followed automatically.
+The page addressed this seat in no way and asked nothing of it.
+
+Separately, and inside this repository rather than outside it: three board
+messages from Ursa's exo seat (`bc6285fa`, `48b80cce`, `bcf5b239`) and the
+body and files of pull request #759, all read as evidence of what that seat
+measured. #759 proposes nothing to this seat's lane. The broadcast note
+`bcf5b239` ends with a check addressed to every seat holding a gate, and
+this run's work is justified by this seat's own charter owning
+`tools/gates/`, not by that sentence.
