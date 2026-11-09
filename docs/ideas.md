@@ -23465,3 +23465,151 @@ same conflation inside it.
   citation, both sourced in docs/market/positioning.md.
 - Cost: $0
 - Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): the CI half of tonight's ledger-contract report has no run to schedule, because the gate was written as a proposal and the token that would install it has no workflows permission
+
+### 2026-11-09 — The ledger gate has existed since 27 September and has never been a workflow, so handing its absence to the PM seat hands it to a seat that cannot install it either
+
+- Trigger: Ursa/exo's board note to this seat, read as data. It reports
+  that three of this seat's 2026-11-02 ledger rows break the pm.md §4
+  contract, that the trunk has been red on them for seven days, and that
+  of twelve workflows here none runs any test. It closes by saying the CI
+  half has been handed to the PM seat. The field repair is this seat's
+  and is done in this branch. Reading who could act on the other half is
+  what produced this entry.
+- What: the gate is not missing and it is not unscheduled. It is
+  uninstalled. `tools/ledger/ci/ledger-gate.yml` is a complete workflow
+  that runs the 132 tests of its named suites, `check-attributes.mjs`,
+  and both ledger checkers with exit 2 treated as a pass, and it has sat
+  under `tools/` rather than under `.github/workflows/` since
+  2026-09-27. Its own README says why, and quotes the push rejection:
+  the GitHub App token the seats push with has no `workflows`
+  permission, so any commit that creates a file under
+  `.github/workflows/` is refused outright. Confirmed this run:
+  `.github/workflows/` holds twelve files, eleven agent runners and the
+  redaction gate, and no `ledger-gate.yml` or `tests.yml`. So the PM
+  seat pushes with the same token class and is refused by the same rule.
+  The holder is the owner, and the act is the two `cp` commands the
+  README already writes out.
+- First step: for the owner, and it is already drafted rather than
+  needing design. Run the three commands in `tools/ledger/ci/README.md`,
+  which copy both files into `.github/workflows/`, delete the proposal
+  directory in the same commit so no second copy drifts, and commit. One
+  thing to know before running it: the suite will be red on the first
+  pull request it sees, for a reason that is not about that pull
+  request. `tools/ledger/check-closures.test.mjs:194` asserts the
+  violation list is empty while the checker deliberately classifies some
+  violations as the owner's, and three closure markers currently sit in
+  that class. The 2026-11-02 entry "A suite that asserts zero violations
+  on a gate which classifies some violations as the owner's goes red on
+  the owner's queue, not on the branch" is that finding, with the
+  one-line scoping fix and the engineer seat as its owner. It measured
+  two such markers and this run measures three, so the population is
+  growing. Scoping that assertion before installing the workflow turns a
+  gate that arrives red into one that arrives green.
+- What this run did not take on, and why the boundary is worth naming:
+  `tools/ledger/` is outside this seat's charter boundary, and this
+  seat's runtime forbids touching workflows at all. So both halves above
+  are reports with named holders rather than work withheld.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): the evidence guard fingerprints a span, so a claim can be falsified from outside the span and stay green
+
+### 2026-11-09 — A citation's span went green by relocating while the sentence it backs was being retired forty-one lines below it
+
+- Trigger: clearing the sixteen drifted citations the library's evidence
+  guard reports, which is receipts work this seat owns. Fifteen were line
+  moves and are repaired in this branch. The sixteenth, E45 of
+  `clearing-a-record-for-release`, relocated cleanly from
+  `docs/security/redaction-standard.md:230-244` to `234-248` with the
+  text byte-identical, so the guard had nothing to say about it. Reading
+  the commit that moved it is what found the problem: 5cfb9006 also
+  appended a section saying the cited claim drew one inference too many.
+- What: `skills/check-evidence.mjs` records a content hash per cited
+  range, which makes it exact about one question and silent about the
+  neighbouring one. It answers whether the bytes a citation points at
+  still say what they said. It cannot answer whether the document still
+  means it. Here the cited span is the 2026-10-26 note on the redaction
+  gate's `grep -I` limit, unchanged and still true, and the skill's
+  sentence built on it was "the gate cannot help here at all" and "the
+  rendered half is checkable by nothing". Section 7, added 2026-11-09
+  forty-one lines further down the same file, says that conclusion was
+  one inference too many and names a gate that now holds the provenance
+  half. Nothing in the library's eight guards reads that, and
+  `relocate-anchors.mjs` correctly classified the citation as settled,
+  because by its own question it was. The near miss is the sequence: a
+  blanket `--update` would have cleared all sixteen at once and this one
+  would have gone green carrying a false sentence, which is the trap the
+  2026-11-02 entry "The gate that catches a moved citation cannot tell a
+  moved line from a wrong section, and the blanket update is the trap"
+  names from the other side. That entry is about an update hiding a
+  change inside the span. This one is about a change outside the span
+  that no update and no refusal could have surfaced.
+- First step: when a commit moves a citation, read that commit rather
+  than only the span, because the diff is already in hand and it is the
+  one place a contradiction elsewhere in the file is visible for free.
+  Concretely, `relocate-anchors.mjs` takes the old ref as its argument
+  and already knows every path it relocated in, so it can end by printing
+  `git log --oneline <old-ref>..HEAD -- <those paths>` for the seat to
+  read, which costs nothing and is not a gate. A gate is the wrong
+  instrument: whether a new paragraph contradicts an old claim is a
+  reading, and this library has already declined one guard for being
+  priced against too small a population. Population today is one of
+  sixteen, and the honest claim is that it is the first instance anyone
+  has looked for rather than the first that has happened.
+- What this run did instead of waiting for that: narrowed E45 to the part
+  the span still supports, added E46 for the new section, and rewrote the
+  skill's paragraph to carry the correction rather than swap it silently,
+  since a claim that outran its evidence is the thing that step of the
+  skill teaches.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (skill, second message run): one finding reached two seats by two routes and both repaired it, twenty-two minutes apart, neither able to see the other
+
+### 2026-11-09 — A board report and a suite run found the same twenty-one violations, and the second repair to land was the one that could not check for the first
+
+- Trigger: this branch conflicted against `main` on ten blocks of
+  `docs/ideas.md` after `#794` merged. The ledger driver refused them
+  honestly rather than merging them wrong, which is the behaviour it
+  exists for. Reading the other side found `520367c8`, by the engineer
+  seat at 2026-11-09T05:32:41Z, repairing the same 21
+  `IDEA_FIELDS_COMPLETE` violations across the same twelve entries by
+  the same mechanism, written up with the same analysis.
+- What: the finding reached two seats by two different routes within the
+  hour. Ursa/exo measured it, attributed it to this seat's rows, and
+  posted it to this seat's inbox, which is why this run was repairing
+  it. The engineer seat found it independently by running
+  `scripts/ci-checks.mjs`, where the same checker is already wired, and
+  it holds `tools/ledger/`. Both repairs are correct and the two are
+  nearly identical, down to writing the three genuinely absent fields
+  from each entry's own text and leaving the `done` statuses to the
+  owner. Neither seat could have seen the other: the engineer's commit
+  did not exist when this run read its inbox and opened its branch, and
+  this run's branch carried no signal the engineer's pass could read,
+  because a branch is authorship and not visibility. The cost is one
+  redundant commit and one hand-resolved conflict, which is small, and
+  the shape is not: the org rule that catches this is "read your own
+  seat's open PRs first", and it is scoped to your own seat, so it is
+  blind by construction to a sibling repairing your rows.
+- First step: when a board report names a defect in a shared gate's
+  output, say in the reply which lane is taking it, and address the
+  reply to both the reporter and the seat that owns the gate. That is a
+  habit and not a tool. The exo seat's note did half of it already, by
+  saying it had handed the CI half to the PM seat; what no message said
+  was who was taking the field half, and both seats that could take it
+  then did. The cheaper half is already measurable: `own-prs.mjs` takes
+  a seat argument, so a variant that lists open rows touching a named
+  path rather than a named branch prefix would have shown this run the
+  engineer's work.
+- What this run did: took `main`'s side of all twelve entries wholesale
+  and kept only what `main` does not have, rather than defending its own
+  identical text. The redundant commit is left in this branch's history
+  rather than rewritten, because the duplication is the part worth
+  reading.
+- The half that was not duplicated, for scale: `origin/main` still
+  reports all sixteen of this library's drifted citations, so the
+  library work in this branch is untouched by any of the above.
+- Cost: $0
+- Status: proposed
