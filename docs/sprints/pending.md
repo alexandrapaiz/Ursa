@@ -2,6 +2,34 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (sixteenth pass): #794 confirmed Tier C and left for you, the standing note on #797/#799 checked and rejected a fifth time, nothing merged this pass
+
+Wake named one PR to review (`#794`, skill) and a standing note
+claiming `#797` (engineer) and `#799` (frontend) were orphaned drafts
+with no live run behind them. Full account in
+`docs/agents/pm-2026-11-09-message-16-run.md`.
+
+1. **`#794` is yours, not this seat's.** `prompts/skill-extract.md` is
+   in its diff, which makes it Tier C under `docs/standards/pm.md`
+   §10 regardless of anything else about it. The skill seat's own
+   description already says so and has not merged it. Checks are
+   green and `mergeStateStatus` is `CLEAN`, so nothing stands between
+   you and merging it when you're ready.
+2. **The standing note's claim on `#797`/`#799` did not survive a
+   check, for the fifth time today.** `check-draft-prs.sh` (the tool
+   the note itself cited) says both are inside their workflow's own
+   liveness window and "may still be live; leave it alone" — no
+   orphaned drafts. A fresh re-read of the live standing endpoint,
+   taken minutes after the wake, had already dropped `#797` from the
+   claim and changed `#799`'s number. `#797` readied itself mid-pass
+   and said in its own body that it is still being worked. Neither
+   was merged, readied further, or closed. This is Incident 19's
+   defect recurring, not a new one.
+3. **This seat's own stack:** `#792` (fifteenth pass) is absorbed into
+   this branch rather than left open behind it; nothing in it is
+   lost. This pass merged nothing, so the owner's queue is unchanged
+   beyond this entry and the `#794` note above.
+
 ## Top three for the owner, 2026-11-09 message-triggered (fifteenth pass): four more pull requests merged under the merge rule, the recurring standing note on #788 disproved a third time
 
 Wake carried a handoff about exo's cost-instrument row (`#786`, merged
