@@ -230,7 +230,7 @@ export const BASE = 'origin/main'
  *  Returns one of READABLE_ON_MAIN plus the reason, so the caller can report
  *  the merge-only case rather than silently folding it into `yes`. */
 export function readableOnMain(sha, { cwd = ROOT, base = BASE } = {}) {
-  if (!sha || !resolves(sha, cwd)) return { verdict: 'unknown-offline', why: 'head does not resolve in this clone' }
+  if (!sha || !resolves(sha, cwd)) return { verdict: 'unknown-offline', why: 'does not resolve in this clone' }
   const git = (args) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim()
   let baseOk = true
   try { git(['rev-parse', '--verify', `${base}^{commit}`]) } catch { baseOk = false }
@@ -244,7 +244,7 @@ export function readableOnMain(sha, { cwd = ROOT, base = BASE } = {}) {
   return { verdict: 'no', why: `${ahead} non-merge commit${ahead === 1 ? '' : 's'} ahead of ${base}` }
 }
 
-export function check({ root = ROOT, lockPath = LOCK, cwd = ROOT } = {}) {
+export function check({ root = ROOT, lockPath = LOCK, cwd = ROOT, base = BASE } = {}) {
   const { lock, rows, fixtures } = readLock(lockPath)
   const seen = mentions(root)
   const failures = []
@@ -293,15 +293,25 @@ export function check({ root = ROOT, lockPath = LOCK, cwd = ROOT } = {}) {
       failures.push(`#${number} has readable_on_main "${row.readable_on_main}", which is not one of ${
         [...READABLE_ON_MAIN].join(', ')}`)
     } else if (row.head && row.readable_on_main) {
-      const got = readableOnMain(row.head, { cwd })
+      const got = readableOnMain(row.head, { cwd, base })
       if (got.verdict === 'unknown-offline' && row.readable_on_main === 'yes') {
         // Asymmetric on purpose, and this is the one arm that is provable. A
         // head readable on main is in main's history, so a complete clone
         // cannot fail to hold it. In a complete clone this is a wrong lock.
+        //
+        // `complete` is the narrow reading, and the first draft of this clause
+        // had the wide one. `cloneDepth` reports `shallow: false` for a
+        // directory that is not a git repository at all, because the question
+        // it asks fails and the failure reads as the negative answer. So a
+        // tree with no `.git` was being told its lock was impossible, which is
+        // this library's own §5v: the guard answered from the wrong frame. A
+        // clone is complete when it says it is not shallow AND it can count
+        // its commits; `commits: null` is git declining to answer.
+        const complete = clone.shallow === false && clone.commits > 0
         const msg = `#${number} is locked readable on main and its head ${
           row.head.slice(0, 8)} ${got.why}, which a complete clone cannot be`
-        if (clone.shallow) unverifiable.push(`${msg} (this clone is shallow, so it is not evidence)`)
-        else failures.push(msg)
+        if (complete) failures.push(msg)
+        else unverifiable.push(`${msg} (this clone cannot answer that, so it is not evidence)`)
       } else if (got.verdict === 'unknown-offline') {
         unverifiable.push(`#${number} readable_on_main="${row.readable_on_main}" cannot be rechecked: ${got.why}`)
       } else if (got.verdict !== row.readable_on_main) {
