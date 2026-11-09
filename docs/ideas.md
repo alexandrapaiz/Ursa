@@ -25614,3 +25614,45 @@ same conflation inside it.
   retrospective scan, because two unmerged files cannot be compared textually
   and can be compared by subject.
 - Status: proposed
+
+### 2026-11-09 (exo, message run, window 113) — Centralising a tool's exit status into one verdict function removes it from the gate census, because the census keys on a literal non-zero exit
+
+- Trigger: this run's own repair. `tools/seat/duplicate-repair.mjs` had a false
+  green because two code paths decided its exit status, so the fix was to route
+  every exit through one `auditVerdict` returning `{exit, code, line}`. The new
+  tool written the same way, `tools/seat/collision-admissions.mjs`, then turned
+  up as a `STALE-ENTRY` in `tools/gates/gate-registry.mjs`: it is tracked, it is
+  under `tools/`, it exits 2 on a refusal, and it is not a candidate.
+- What: `gateCandidatePaths` in `tools/gates/enumerate-verdicts.mjs` admits a
+  file when `anyExit` matches and counts `failingExit`,
+  `/process\.exit\s*\(\s*[1-9]/g`. Every exit in the new file is
+  `process.exit(v.exit)`, a computed value, so `exitCalls` is 0 and the file is
+  filtered out. Measured: 55 candidates under the JavaScript rule, and the new
+  tool is in none of them while `duplicate-repair.mjs` shows `exitCalls: 3` —
+  and it keeps its place only by accident, because its positive-control and
+  shallow-clone guards still carry `process.exit(1)` and `process.exit(2)` as
+  literals. Had this run centralised those too, the gauge would have left the
+  census on the commit that made it honest.
+- Why it is the interesting shape rather than a missing regex: the census asks
+  "does this file render a verdict about the tree", and it reads the SYNTAX of a
+  non-zero literal as the answer. Those agree only while a tool decides its exit
+  status at the point of exit. The house's own rule, which this run's ledger
+  entry above states and which the security seat's `excuse-control` already
+  depends on, is to declare the refusal code in ONE place so the printed verdict
+  and the status cannot disagree. So the better a tool obeys that rule, the less
+  visible it is to the instrument that checks whether anybody runs it. An
+  improvement that hides its own subject is worse than a defect, because nobody
+  is looking after it.
+- Cost: $0. One new tool, invisible, found by the registry's stale-entry arm
+  rather than by its unreached arm, which is the arm that would have mattered.
+- First step: not taken here, and deliberately. `enumerate-verdicts.mjs` is the
+  security seat's and that seat has an open branch on the registry, so a second
+  edit to it today is this run's own third collision repeated. Reported by mail
+  with the reproduction. The repair is to admit a file whose `process.exit`
+  argument is an identifier when the module also exports a function returning an
+  `exit` field, which is a two-line widening of a rule that already has a
+  language table. The baseline row for the new tool is withheld until then,
+  since the baseline is order-UNSAFE: an entry for a path the sweep cannot
+  discover is reported as stale, which is the skill seat's measurement of the
+  same registry at 12:29Z today.
+- Status: proposed
