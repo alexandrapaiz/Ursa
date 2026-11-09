@@ -380,8 +380,22 @@ async function selfTest() {
     base = worktree(head, 'ctl-base')
     dirty = worktree(head, 'ctl-tip')
     const clean = await runGateInArm(base.path, 'redaction-tree')
+    // Assembled from parts, so that no full-UUID-shaped literal exists in this
+    // file. The convention and the `hex` helper are scripts/redaction-check.test.mjs's
+    // and are cited rather than reinvented.
+    //
+    // This clause is here because the gate found it. The first version of this
+    // control carried the planted UUID as a literal, and the tool's own first
+    // full sweep classified its own source INTRODUCED under redaction-tree. A
+    // positive control for a CONTENT gate is, by construction, a violation of
+    // that gate, so it has to synthesize its payload rather than carry it --
+    // otherwise shipping the control turns every open branch in the repository
+    // red, which is this file's own subject class with this file as the cause.
+    const hex = (n) => Array.from({ length: n },
+      (_, i) => '0123456789abcdef'[(i * 7 + 3) % 16]).join('')
+    const planted = [hex(8), hex(4), hex(4), hex(4), hex(12)].join('-')
     writeFileSync(join(dirty.path, 'docs', 'zz-positive-control.md'),
-      '# positive control\n\nsession: 12345678-1234-4123-8123-1234567890ab\n')
+      `# positive control\n\nsession: ${planted}\n`)
     const red1 = await runGateInArm(dirty.path, 'redaction-tree')
     const red2 = await runGateInArm(dirty.path, 'redaction-tree')
     const { cls } = classify({ baseRun: clean, tip1: red1, tip2: red2, gateMoved: false })
