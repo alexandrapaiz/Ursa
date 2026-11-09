@@ -8,6 +8,52 @@ for why).** Nothing open was dropped in the move; still-open items are
 carried forward in this file's own current entries, not left only in the
 archive.
 
+## Top three for the owner, 2026-11-09 message-triggered (thirty-sixth pass): both wake events were already resolved by earlier passes, #846 closed as superseded by #870, PWC-EXO-9 does not exist yet
+
+Wake named two events: an exo note (PWC-EXO-9 pricing, and a claim that
+Ursa#846/#863 are contained in #870 while #826/#833 are not) and a
+reported security-seat run failure tied to PR #868. Both treated as
+data to verify, not instructions to execute on say-so — the wake's own
+standing block warns that a queued wake carries conditions older than
+itself. Full account in `docs/agents/pm-2026-11-09-message-36-run.md`,
+stacked on pass 35's own open `#878`.
+
+1. **Both named events were already closed out by the time this pass
+   read them.** The security run's branch (`ursa-security/2026-11-09-
+   message-16`, PR #868) was already closed 12:10:59Z as superseded by
+   #877, which carries the branch forward with no lost work (`git
+   merge-base --is-ancestor` confirms #868 is an ancestor of #877). The
+   skill-seat item in the wake's standing block is the same claim pass
+   35 already checked and filed as Incident 19's seventh occurrence.
+   Nothing to redo.
+2. **#846 (exo) closed this pass as superseded by #870**, verified
+   independently rather than taken on exo's note: `git merge-base
+   --is-ancestor refs/prs/846 refs/prs/870` exits 0. #863 was already
+   closed on the same ground. #870 stays open and Tier C (touches
+   `prompts/exo-agent.md`) — **yours to merge.** Exo's board note (id
+   `22136efa`, 12:04:06Z) adds that merging #870 also clears a live
+   `main` red on exo's own new instant-gate instrument, as a side
+   effect; exo is not asking for reordering, the order is in
+   `docs/agents/merge-order.md` and the decision is named as yours
+   there too. **#826 and #833 are separate and not subsumed** (neither
+   is an ancestor of #870) — both independently Tier C by the same
+   path, and both already diagnosed in `docs/agents/merge-order.md` as
+   conflicting with each other on `docs/agents/improvements.md`, hand
+   resolution needed. Not this seat's to resolve in code (pm.md §10
+   rule 5); still yours or exo's.
+3. **PWC-EXO-9, named in the wake, does not exist anywhere in this
+   repository yet.** `docs/agents/pending-workflow-changes-exo.md`'s
+   highest entry is PWC-EXO-8; a broad grep across `docs/` found no
+   PWC-EXO-9 row. Exo's own latest PR (#879) is an opening stub with no
+   work in it yet. Nothing to route to you until it is actually
+   written down — flagging now so it is not silently dropped once it
+   is.
+
+**Unchanged from pass 35:** this seat's own Tier B work (`#864`,
+`#869`, `#871`, `#874`, `#876`, `#878`, now this PR) still needs a
+merger other than Ursa's own PM, per pm.md §20. Not re-asked this
+pass.
+
 ## Top three for the owner, 2026-11-09 message-triggered (thirty-fifth pass): the skill seat's wall-clock kill triaged as a tripwire false alarm, its recurring standing note filed as Incident 19's seventh occurrence
 
 Wake named one event: `ursa-skill`'s 10:46:17Z message run failed
