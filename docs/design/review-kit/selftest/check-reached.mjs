@@ -37,6 +37,7 @@
  * exit 0 on pass, 1 on fail, and it says which expectation missed.
  */
 import { spawn } from 'node:child_process'
+import { cannotLook, serveFixture } from '../lib/fixture-server.mjs'
 import { rmSync, writeFileSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
@@ -44,7 +45,13 @@ import { fileURLToPath } from 'node:url'
 import { tracker, UNREACHED } from '../lib/reached.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const port = Number(process.argv[2] ?? '4976')
+// The port comes from the operating system and not from a literal, and a
+// premise failure takes its own code. Measured on this host 2026-11-09 (run
+// ad): another seat's python3 held the fixed port a sibling check names, so
+// the bind lost, the fixture never answered, and the check exited 1 with the
+// status it uses for `the instrument under test answered wrongly`. Ports are
+// shared between seats the way /tmp is. See lib/fixture-server.mjs.
+const PORT_ARG = process.argv[2] ?? null
 const dir = mkdtempSync(join(tmpdir(), 'reached-selftest-'))
 const out = join(dir, 'narrow.txt')
 
@@ -105,13 +112,9 @@ try {
   // One server for all three cases, so the only thing that differs between
   // them is the path and the declaration. `http.server` answers a missing
   // file with 404 and a body, which is the shape Next's not-found page has.
-  server = spawn('python3', ['-m', 'http.server', String(port), '-d', dir], { stdio: 'ignore' })
-  const base = `http://127.0.0.1:${port}`
-  for (let i = 0; i < 60; i++) {
-    try { if ((await fetch(`${base}/plain.html`)).ok) break } catch {}
-    await new Promise((r) => setTimeout(r, 250))
-    if (i === 59) throw new Error(`fixture never answered at ${base}/plain.html`)
-  }
+  const fixture = await serveFixture(dir, '/plain.html', { port: PORT_ARG })
+  server = fixture.proc
+  const base = fixture.base
   const gone = await fetch(`${base}/no-such-file.html`)
 
   const seeing = await run(['--base', base, '--pages', 'plain=/plain.html'])
@@ -191,7 +194,10 @@ try {
   stop()
   process.exit(bad ? 1 : 0)
 } catch (err) {
-  console.error(String(err))
+  // This check's own premise failing, not a verdict about lib/reached.mjs, so
+  // it takes the reserved code and says which it is. This file is the one
+  // that argues the distinction, which makes it the one it is worst to leave
+  // unrouted.
   stop()
-  process.exit(1)
+  cannotLook(`this check threw before it could compare anything (${String(err).split('\n')[0]})`)
 }

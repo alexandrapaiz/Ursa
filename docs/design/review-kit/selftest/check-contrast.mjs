@@ -18,16 +18,22 @@ import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { requireVerdict } from "../lib/subject.mjs";
+import { cannotLook, serveFixture } from "../lib/fixture-server.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const port = process.argv[2] ?? "4972";
+// The port comes from the operating system and not from a literal, and a
+// premise failure takes its own code. Measured on this host 2026-11-09 (run
+// ad): another seat's python3 held the fixed port a sibling check names, so
+// the bind lost, the fixture never answered, and the check exited 1 with the
+// status it uses for `the instrument under test answered wrongly`. Ports are
+// shared between seats the way /tmp is. See lib/fixture-server.mjs.
+const PORT_ARG = process.argv[2] ?? null;
 const out = join(tmpdir(), `contrast-selftest-${process.pid}.json`);
 
-const server = spawn("python3", ["-m", "http.server", port, "-d", here], {
-  stdio: "ignore",
-});
+const fixture = await serveFixture(here, "/contrast.html", { port: PORT_ARG });
+const port = String(fixture.port);
 const stop = () => {
-  server.kill();
+  fixture.proc.kill();
   try { rmSync(out); } catch {}
 };
 
@@ -40,15 +46,6 @@ const verdict = (r) =>
   : "SHORT";
 
 try {
-  const url = `http://127.0.0.1:${port}/contrast.html`;
-  for (let i = 0; i < 60; i++) {
-    try {
-      if ((await fetch(url)).ok) break;
-    } catch {}
-    await new Promise((r) => setTimeout(r, 250));
-    if (i === 59) throw new Error(`fixture never answered at ${url}`);
-  }
-
   const run = spawn(
     process.execPath,
     [
@@ -120,7 +117,8 @@ try {
   stop();
   process.exit(bad ? 1 : 0);
 } catch (err) {
-  console.error(String(err));
+  // This check's own premise failing, not a verdict about measure-contrast,
+  // so it takes the reserved code and says which it is.
   stop();
-  process.exit(1);
+  cannotLook(`this check threw before it could compare anything (${String(err).split("\n")[0]})`);
 }

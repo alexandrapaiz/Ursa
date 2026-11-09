@@ -61,6 +61,12 @@
  * value is not the drawn one.
  */
 import { launch } from './lib/browser.mjs'
+// This tool had no premise routed either, and its one guard is the legend
+// selector, which is a narrower question than either premise: the legend is
+// server-rendered, so it appears on a page that never ran and the guard
+// passes over it. A swatch read off such a page is a true colour sampled from
+// a page whose other swatches were never drawn. See lib/verdict.mjs.
+import { premises } from './lib/verdict.mjs'
 import { execFileSync } from 'node:child_process'
 import { writeFileSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -99,17 +105,34 @@ const ratio = (a, b) => {
 const browser = await launch()
 const ctx = await browser.newContext({ viewport: { width: VW, height: VH }, deviceScaleFactor: 1 })
 const page = await ctx.newPage()
-try {
-  await page.goto(`${BASE}${PAGE}`, { waitUntil: GOTO, timeout: 60000 })
-} catch (e) {
-  console.error(`  note: navigation did not reach ${GOTO} (${String(e).split('\n')[0]}); waiting on ${UNTIL} instead`)
+const gates = premises({ label: 'legend page' })
+// The catch here is deliberate and stays: `networkidle` is not always
+// reachable and the legend wait below is the better premise for that case.
+// What is NEW is that the navigation's status is recorded either way, so a
+// path that answers 404 is not laundered into "waiting on the selector
+// instead". That reading reached nothing before today.
+const visit = await gates.reach.visit(page, `${BASE}${PAGE}`, PAGE, { waitUntil: GOTO, timeout: 60000 })
+if (!visit.ok) {
+  console.error(`  note: navigation did not reach ${GOTO} (${String(visit.error).split('\n')[0]}); waiting on ${UNTIL} instead`)
 }
 try {
   await page.waitForSelector(UNTIL, { timeout: 45000 })
 } catch {
   await browser.close()
-  console.error(`no ${UNTIL} on ${BASE}${PAGE}: the legend this tool measures was not drawn, which is an environment fault and not a verdict`)
+  console.log(`NO VERDICT: no ${UNTIL} on ${BASE}${PAGE}, so the legend this tool measures was not drawn and no swatch below was sampled.`)
+  console.log(gates.reach.lines().join('\n'))
   process.exit(2)
+}
+// The legend being drawn is not the page having run. Asked after the wait,
+// because hydration is a race, and before the first swatch is read, because
+// a swatch is the thing the refusal is about.
+await gates.probed(page, PAGE)
+if (gates.code()) {
+  console.log(gates.hydration.nothingRan() ? gates.hydration.refused() : gates.hydration.lines().join('\n'))
+  console.log(gates.reach.lines().join('\n'))
+  console.log('\nnothing was sampled: a swatch read off a page that never ran is a true colour from a legend whose other swatches are absent.')
+  await browser.close()
+  process.exit(gates.code())
 }
 // The legend is below the fold on this page at every viewport it is
 // reviewed at, and a screenshot clipped to the viewport cannot sample a
@@ -255,4 +278,9 @@ if (JSONOUT !== false) {
   const payload = JSON.stringify({ base: BASE, page: PAGE, viewport: [VW, VH], ground, swatches: scored }, null, 2)
   if (JSONOUT) writeFileSync(JSONOUT, payload + '\n'); else process.stdout.write(payload + '\n')
 }
-process.exit(under.length ? 1 : 0)
+// One call, so the words and the status cannot disagree. The premises passed
+// above or this line is unreachable; `decide` is still the thing that sets
+// the status, so a premise added to lib/verdict.mjs later lands here too.
+const decision = gates.decide({ headline: '', siteCode: under.length ? 1 : 0 })
+if (decision.lines.length) console.log(decision.lines.join('\n'))
+process.exit(decision.code)

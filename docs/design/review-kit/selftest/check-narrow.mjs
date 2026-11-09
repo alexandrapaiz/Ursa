@@ -31,13 +31,20 @@
  * exit 0 on pass, 1 on fail, and it says which expectation missed.
  */
 import { spawn } from "node:child_process";
+import { cannotLook, deadPort, serveFixture } from "../lib/fixture-server.mjs";
 import { rmSync, writeFileSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const port = process.argv[2] ?? "4974";
+// The port comes from the operating system and not from a literal, and a
+// premise failure takes its own code. Measured on this host 2026-11-09 (run
+// ad): another seat's python3 held the port one of these checks names, so the
+// bind lost, the fixture never answered, and the check exited 1 with the
+// status it uses for `the instrument under test answered wrongly`. The ports
+// are shared between seats the same way /tmp is. See lib/fixture-server.mjs.
+const port = process.argv[2] ?? null;
 const dir = mkdtempSync(join(tmpdir(), "narrow-selftest-"));
 const out = join(dir, "narrow.txt");
 
@@ -81,19 +88,12 @@ try {
   // Case 1: nothing is listening on this port. Picked one above the range
   // the kit's other tools default to, so a stray server from another run
   // cannot turn this case into a pass.
-  const blind = await run(["--base", `http://127.0.0.1:${port}`]);
+  const blind = await run(["--base", `http://127.0.0.1:${port ?? (await deadPort())}`]);
 
   // Case 2: the same tool, the same flags, over a page that is really there.
-  server = spawn("python3", ["-m", "http.server", String(Number(port) + 1), "-d", dir], {
-    stdio: "ignore",
-  });
-  const url = `http://127.0.0.1:${Number(port) + 1}/plain.html`;
-  for (let i = 0; i < 60; i++) {
-    try { if ((await fetch(url)).ok) break; } catch {}
-    await new Promise((r) => setTimeout(r, 250));
-    if (i === 59) throw new Error(`fixture never answered at ${url}`);
-  }
-  const seeing = await run(["--base", `http://127.0.0.1:${Number(port) + 1}`]);
+  const fixture = await serveFixture(dir, "/plain.html");
+  server = fixture.proc;
+  const seeing = await run(["--base", fixture.base]);
 
   const want = [
     ["(1) a matrix it could not load exits non-zero", blind.code !== 0, true],
@@ -115,7 +115,8 @@ try {
   stop();
   process.exit(bad ? 1 : 0);
 } catch (err) {
-  console.error(String(err));
+  // A throw here is this check's own premise failing and not a verdict about
+  // `measure-narrow.mjs`, so it takes the reserved code and says which it is.
   stop();
-  process.exit(1);
+  cannotLook(`this check threw before it could compare anything (${String(err).split("\n")[0]})`);
 }
