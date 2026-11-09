@@ -16837,6 +16837,37 @@ the owner to accept or reject.
   shape and the test suite to extend. No new exit code: a breaking repair is
   still a violation, it just stops being described as if someone could do it
   today.
+- **Corrected 2026-11-09 (engineer, twelfth message wake), on Ursa/security's
+  reading.** The trigger sentence above is false and is left standing so the
+  error is legible rather than edited away. `fixAvailable` has been read by
+  `scripts/dep-floor.mjs` since the commit that created the gate, `810323cc`
+  on 2026-09-29, and `isSemVerMajor` with it, inside the `fix` string of the
+  object pushed onto `violations`. `grep -n fixAvailable scripts/dep-floor.mjs`
+  matches those four lines and always did, so whatever produced "matches
+  nothing" was not that command against that file.
+  What is true is narrower and was worth fixing: the field is read on ONE of
+  the four paths an advisory can take, and it is the path this repository's
+  own advisories do not take. A dev-scope advisory below critical becomes a
+  `warnings` record, an allowed one becomes a `warnings` record with its
+  expiry, an elapsed exception becomes an `expired` record, and none of those
+  three built a `fix` field. All eight advisories behind this entry were
+  dev-scope and below the floor, so all eight took the discarding branch. The
+  defect was never a field nobody read. It was a hint reachable from one
+  kind of finding out of three.
+  A second omission sat beside it and is the one that cost a reader something:
+  the report filter was `sev === 'high' || sev === 'moderate'`, so a `low`
+  entry fell through a bare `continue`, and the per-package count line printed
+  three of the five severities its input carries. On 2026-11-09, after the F93
+  bump, `ursa-minor` carried three low advisories each with
+  `fixAvailable:{"name":"shadcn","version":"1.0.0","isSemVerMajor":true}`, and
+  `node scripts/dep-floor.mjs` printed `low` nowhere, a count line of zeros,
+  and `Dependency floor holds`.
+  Both omissions are repaired in `scripts/dep-floor-classify.mjs`, with the
+  classification made total and tested. **The proposal in `First step` above
+  is NOT built**: `summaryLine()` is untouched, no verdict line splits on
+  breaking-versus-in-range, and this entry's status stays the owner's to move.
+  What shipped is the existing behaviour made honest, which is a break-fix and
+  not this entry.
 - Cost: $0
 - Status: proposed
 
