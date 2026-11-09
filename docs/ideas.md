@@ -24160,3 +24160,127 @@ same conflation inside it.
   run paid by hand, which was two minutes per gate.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (skill) — The fixture leak this run fixed under skills/ has 124 call sites outside it, and only some of them leak
+
+- Trigger: running a mutation survey of the eight suites under `skills/`,
+  which runs a suite once per mutant and so multiplied a per-pass leak by
+  the mutant count until `/tmp` reached 45G of 45G with 0 bytes free and
+  the survey died at 129 of about 380 verdicts. The repair under
+  `skills/` is in this run's branch. The scope outside it is not this
+  seat's to write.
+- What: `mkdtempSync` has 124 call sites in 69 files outside `skills/`,
+  across `tools/`, `scripts/`, `ursa-major/src/` and
+  `docs/design/review-kit/`. The defect is not universal, which is the
+  part worth knowing before anyone writes a sweep: measured with `TMPDIR`
+  pointed at an empty private directory, one pass of
+  `tools/ledger/check.test.mjs` leaves 20 directories behind and
+  `tools/seat/env-facts.test.mjs` leaves 5, while
+  `tools/ledger/ledger.test.mjs`,
+  `tools/registers/merge-driver.test.mjs` and `tools/secret-scan.test.mjs`
+  leave none. So two of five measured suites leak, and a blanket rewrite
+  of 124 call sites would be mostly churn.
+  The cost is charged to whoever runs next rather than to the run that
+  made it, because `/tmp` is shared between every seat on this host
+  (`docs/agents/runner-facts.md` §18), and a full `/tmp` is the failure
+  §82 says does not name itself.
+- First step: the engineer's, and it is a measurement before a change.
+  Run each suite outside `skills/` that calls `mkdtempSync` with `TMPDIR`
+  set to an empty directory, count what is left, and fix only the ones
+  with a non-zero count. The shape of the repair is already in this
+  branch and is two files: one maker that registers what it made and
+  removes it on process exit, and one test that greps its siblings and
+  fails when a call site reappears. Under `skills/` that took the per-pass
+  count from 102 to 0 and the guard was confirmed to go red when a direct
+  call was put back.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The mutation survey wants a clause in the extract prompt, and §5ai is why this branch must not write it
+
+- Trigger: this run surveyed the library by inverting one decision at a
+  time, and the standard it was applying is nowhere written down. The
+  measured instance that started it is the 2026-11-09 entry "A test of
+  this run's own change passed with the thing it tested deliberately
+  broken", where a test for a memoization key collision passed with the
+  key broken. Writing a test and never watching it fail is a habit, not
+  an accident, and this library has no clause that names it.
+- What: the clause is one sentence with a payment attached. A test written
+  for a specific decision in a gate is not finished until that decision
+  has been inverted and the test watched going red, and the pull request
+  says which inversion it watched. This run paid it three times by hand:
+  8 of 8 mutants killed for the new `skills/citing-files.test.mjs`, the
+  `mkdtempSync` guard confirmed red by appending a direct call to a
+  sibling suite and reverting, and the harness's own earlier version
+  caught matching the function's name rather than a call to it, whose
+  only offender was the file that forbids it.
+- First step: this seat's, and the ordering is the operative part rather
+  than the writing. §5ai requires a methodology section to land in its own
+  pull request with nothing citing it, and this branch already carries the
+  three artifacts that would cite it, so writing the section here would
+  break the rule it is written under. Next run: one branch, one new §5
+  section, zero mentions from outside it, and the `grep` §5ai asks for
+  stated in the pull request. The same restraint `#830` applied to the
+  third `#814` entry, for the same clause.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The gate that certifies §5c for the whole library has 61 decisions no test can see, because its suite never runs the program
+
+- Trigger: the mutation survey in `skills/mutation-audit.md`. Of
+  `trigger-coverage.mjs`'s 201 mutation sites, the 140 inside its
+  exported functions kill 107, which is 76 per cent and ordinary. The 61
+  inside `amendmentsMode` (line 1420) and `main` (line 1474) kill **zero**.
+  Not a low rate. Every one of them survives.
+- What: the cause is one command,
+  `grep -c 'execFileSync\|spawnSync' skills/trigger-coverage.test.mjs`,
+  which returns 0. The suite imports the module and exercises what it
+  exports, and never invokes the program. So every decision about what
+  the gate reports, which defects it groups, what it prints and what exit
+  status it returns is undefended. That is not a cosmetic region: line
+  1442 decides whether the spec file is written, 1651 decides the green
+  verdict, and 1659 is the entry guard itself. The comparison is
+  available in the same library rather than hypothetical:
+  `relocate-anchors.test.mjs` makes 19 subprocess calls and scores 65 per
+  cent, `check-evidence.test.mjs` makes 3 and scores 70, and
+  `trigger-coverage.mjs` is the gate that certifies §5c compliance for
+  all eleven skills.
+- First step: this seat's, next run, and it is a fixture rather than a
+  pile of tests. `check-evidence.test.mjs` already shows the shape: copy
+  the gate and its imports into a temporary library, build a small
+  fixture library beside it, run the real script with `execFileSync` and
+  assert on exit status and output. One such test kills a large fraction
+  of 61 at once, because every one of those decisions is reachable from
+  one invocation. The number to beat is 0 of 61, and the number to report
+  is the kill rate over the same 61 sites, which the audit lists by line.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (skill) — The import-effects gate reads two trees and the skills library is not one of them, and one gate there runs its whole program on import
+
+- Trigger: this run added a module under `skills/` that registered a
+  `process.on('exit')` handler at module scope, and `scripts/ci-checks.mjs`
+  passed, because `tools/gates/import-effects.mjs` resolves its population
+  with `git ls-files tools scripts`. The effect was found by importing the
+  gate's own `scanModule` and pointing it at `skills/`, not by any gate.
+  The module was changed to arm on first use and now reports 0.
+- What: the same detector over the ten non-test modules in `skills/`
+  reports 2 that do work at module scope across 12 statements. One was
+  this run's and is fixed. The other is `check-evidence.mjs` with 11, and
+  it is not an oversight of the same kind: that file is a top-to-bottom
+  script with no `main` and no `import.meta.url` guard, so importing it to
+  reach one function runs the entire evidence check. Its own suite works
+  around this by invoking it as a subprocess, which is why nothing ever
+  noticed. The gate's header argues that a guard outside the path does not
+  merely fail to prevent, it fails to learn, and `skills/` is outside the
+  path.
+- First step: the engineer's, and the measurement is already done above so
+  the first step is a decision about scope. Either widen the gate's
+  population to `git ls-files tools scripts skills` and give
+  `check-evidence.mjs` a baseline entry naming why a script with no guard
+  is allowed to be one, or write down that `skills/` is deliberately out
+  of scope and say where that rule lives. What should not stand is the
+  present state, where the rule is enforced on two trees out of the three
+  that hold this repository's gates and nothing says so.
+- Cost: $0
+- Status: proposed
