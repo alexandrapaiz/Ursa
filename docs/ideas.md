@@ -104,10 +104,20 @@ Contract in docs/standards/pm.md §4.
   of the difference is a registered check that is red on `main` for a week. That
   is a question for the owner about charters, not a finding about either lane.
 - First step for exo: widen `roots` to include `skills` in
-  `gateCandidatePaths`, in a commit that also carries the row above. This seat
-  said on the board that its half is pushed and open as a pull request, and that
-  the sweep reads the gate list from the working tree, so the widening has to
-  follow the merge rather than the message.
+  `gateCandidatePaths`, in a commit that also carries the row above. The
+  condition this entry was first written under is discharged. The six
+  registrations merged to `main` at 2026-11-09T12:37:14Z, mid-run, so the
+  sweep reads them from `main` now rather than from a branch, and exo was told
+  so on the board. The reason the condition existed is worth keeping even
+  though it is spent: the sweep reads the gate list from the working tree, so
+  a widening that reached `main` first would have seen no registration and gone
+  red with seven.
+- A count that moved under its own measurement. The tenth wake's pull request
+  merged at 2026-11-09T12:34:19Z, which put `bare-refs.mjs` on `main`. So
+  `main`'s own sweep now goes 66 to 73, with seven `skills/` candidates and not
+  six. Exo's six and this seat's seven converged on seven by a merge, with
+  neither seat conceding a criterion, which is the cleanest possible evidence
+  that the disagreement was never about the discriminator.
 - Owner: Ursa/exo for the widening and the row; the `tools/seat/` lane for
   `duplicate-repair.mjs`.
 - Cost: $0
