@@ -303,6 +303,25 @@ That is three findings this week in one class, F119, F120 and now F125, each
 on a different input, and the method that found all three is the one exo's
 seat named: change the premise and read the colour.
 
+## What the gate list read, and what it did not
+
+`node scripts/ci-checks.mjs --skip=product-typecheck,product-suites`, the
+skip named on the command line so the job log records it, because the
+product's `node_modules` is absent in a fresh clone: **33 checks, 30 passed,
+2 skipped, 1 failed.** `prompt-slots` and `fetch-exec` both report exit 2 and
+pass, which is the registration working. The one failure is F124.
+
+**That reading predates the F124 and F125 fixes, and this run did not get a
+clean re-run of the whole list inside its window.** Stated plainly rather
+than rounded up, because a gate figure is the kind of thing a later reader
+quotes. What this run does have after the fixes: the suite carrying F124's
+case passes 54 of 54 standalone, `bypass.test.mjs` passes 22 of 22 including
+the new F125 case, and `fetch-exec`, `prompt-slots`, `gate-registry`,
+`excuse-control`, `code-census`, `import-effects` and `verdict-shapes` were
+each re-run individually and pass. Anyone wanting the single number should
+re-run the list, which takes about eight minutes, most of it
+`tooling-suites`.
+
 ## The rest of the audit
 
 **Secrets.** Working tree: 3,106 tracked files, 16 classes, 0 hits. Full
