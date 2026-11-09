@@ -77,7 +77,54 @@ done
 # argv[0] of a process, which is the name it was exec'd under rather than
 # the whole command line. A server renames itself here; a shell that merely
 # mentions one does not.
-argv0() { tr '\0' '\n' < "/proc/$1/cmdline" 2>/dev/null | head -1; }
+# The braces matter. A redirection is applied before the `2>/dev/null` that
+# would hide its own failure, so `tr <"/proc/$1/cmdline" 2>/dev/null` lets the
+# shell print `No such file or directory` for a pid that exited between the
+# `ls /proc` listing and this read. Measured 2026-11-09 on this host: one such
+# line landed in the middle of a real teardown's output, between a `leave` row
+# and the count line, where a reader has to decide whether the sweep failed.
+# Pids churn constantly here, so that is the routine path and not the rare one.
+argv0() { { tr '\0' '\n' < "/proc/$1/cmdline"; } 2>/dev/null | head -1; }
+
+# The live run that owns a seat tree, as `<pid> <argv0>`, or empty if nothing
+# is working in it. This replaces asking whether the DIRECTORY still exists.
+#
+# Why the directory was the wrong question (HQ's engineer, 2026-11-09, on its
+# own leaking teardown: "I put the owning process in the directory name so
+# that a sibling still working is identified rather than guessed at"). Its
+# scratch directories are its own to name, so it could carry the owner in the
+# name. This seat's tree name comes from the runtime, so the owner has to be
+# read instead, and /proc already answers it.
+#
+# What the old question got right, and the denominator, because this is a
+# replacement and not a bug report: across all 15 `epito-*` seat trees on
+# this host at 2026-11-09T05:33Z, every tree that existed had a live owning
+# `claude` process, so `tree exists` and `a sibling is working` agreed 15 of
+# 15 times. The proxy was sound. It is still only a proxy: the host deleting
+# a tree when its run ends is a behaviour of the host, not an invariant, and
+# HQ's engineer measured six stranded directories on this same box the same
+# night from a tool whose own teardown is skipped by a kill. A stranded tree
+# is the case where the proxy says `a sibling may be mid-screenshot` forever
+# and nothing ever reclaims the server inside it.
+#
+# Processes that are themselves servers do not count as owners, or two
+# servers left by one dead run would each vouch for the other.
+owner_of() {
+  local root="$1" skip="$2" pid c a
+  for pid in $(ls -1 /proc 2>/dev/null | grep -E '^[0-9]+$'); do
+    [ "$pid" = "$skip" ] && continue
+    case "$SELF_CHAIN" in *" $pid "*) continue ;; esac
+    c="$(readlink "/proc/$pid/cwd" 2>/dev/null)" || continue
+    [ -z "$c" ] && continue
+    [ "${c% (deleted)}" != "$c" ] && continue   # a deleted cwd owns nothing
+    case "$c" in "$root"|"$root"/*) ;; *) continue ;; esac
+    a="$(argv0 "$pid")"
+    is_server "$a" && continue
+    printf '%s %s' "$pid" "${a##*/}"
+    return 0
+  done
+  return 1
+}
 
 is_server() {
   case "$1" in
@@ -109,12 +156,29 @@ for pid in $(ls -1 /proc 2>/dev/null | grep -E '^[0-9]+$'); do
   case "$path" in "$HERE"/*|"$HERE") mine=1 ;; esac
 
   # A live server in THIS checkout is always ours to stop. One in another
-  # `epito-ursa-frontend-*` tree is a previous run of this seat only if
-  # that tree is gone; if it still exists, a concurrent run of this seat
-  # may be using it, and a seat does not stop its sibling's server.
+  # `epito-ursa-frontend-*` tree belongs to a sibling run, and the question
+  # is whether that run is still working. Ask the owner, not the directory:
+  # a tree with a live owning process is a sibling mid-screenshot and a tree
+  # with none is a previous run of this seat, whether it was deleted or
+  # stranded. See `owner_of` above for why the directory was the wrong
+  # question and what the old form got right.
   if [ "$mine" = 0 ]; then
-    if [ "$ORPHANS" = 0 ] || [ "$dead" = 0 ]; then
-      echo "leave  $pid  $cwd"
+    root="$(printf '%s' "$path" | sed -E "s|(.*/${SEAT_RE})(/.*)?$|\\1|")"
+    if [ "$dead" = 1 ]; then
+      owner=""                      # a deleted tree can hold no live run
+    else
+      owner="$(owner_of "$root" "$pid" || true)"
+    fi
+    # Name the owner on the skip line. A bare `leave` tells a reader a
+    # server was spared and not why, and this is the line a reviewer reads
+    # when the volume is full and the sweep reclaimed nothing.
+    if [ -n "$owner" ]; then
+      echo "leave  $pid  owner=$owner  $cwd"
+      skipped=$((skipped + 1))
+      continue
+    fi
+    if [ "$ORPHANS" = 0 ]; then
+      echo "leave  $pid  owner=none  $cwd  (--orphans would stop this)"
       skipped=$((skipped + 1))
       continue
     fi

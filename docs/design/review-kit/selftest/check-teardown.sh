@@ -31,7 +31,9 @@ PIDS=""
 cleanup() { for p in $PIDS; do kill "$p" 2>/dev/null; done; rm -rf "$TMP"; }
 trap cleanup EXIT
 
-mkdir -p "$TMP/epito-ursa-exo-ZZZZZZ/ursa-minor" "$TMP/other/ursa-minor"
+mkdir -p "$TMP/epito-ursa-exo-ZZZZZZ/ursa-minor" "$TMP/other/ursa-minor" \
+         "$TMP/epito-ursa-frontend-AAAAAA/ursa-minor" \
+         "$TMP/epito-ursa-frontend-BBBBBB/ursa-minor"
 
 # A decoy that is indistinguishable from a Next server by argv[0].
 spawn() {
@@ -44,9 +46,26 @@ mention() {
   echo $!
 }
 
+# A decoy standing in for the `claude` process that owns a seat tree: a real
+# process with a real cwd in the tree, exec'd under a name that is not a
+# server's. The liveness test under test reads /proc, so nothing here is
+# patched or stubbed.
+owner() {
+  ( cd "$1" && exec -a 'claude' sleep 120 ) </dev/null >/dev/null 2>&1 &
+  echo $!
+}
+
 OTHER_SEAT=$(spawn "$TMP/epito-ursa-exo-ZZZZZZ/ursa-minor"); PIDS="$PIDS $OTHER_SEAT"
 NO_MATCH=$(spawn "$TMP/other/ursa-minor");                   PIDS="$PIDS $NO_MATCH"
 MENTIONER=$(mention "$TMP/epito-ursa-exo-ZZZZZZ/ursa-minor"); PIDS="$PIDS $MENTIONER"
+# A sibling run of THIS seat that is still working: its tree holds a server
+# and the process that owns the tree.
+SIB_SERVER=$(spawn "$TMP/epito-ursa-frontend-AAAAAA/ursa-minor"); PIDS="$PIDS $SIB_SERVER"
+SIB_OWNER=$(owner "$TMP/epito-ursa-frontend-AAAAAA");             PIDS="$PIDS $SIB_OWNER"
+# A stranded tree of this seat: the directory is still there and nothing is
+# working in it. This is the case the directory-existence proxy could not
+# tell apart from the one above.
+STRANDED=$(spawn "$TMP/epito-ursa-frontend-BBBBBB/ursa-minor");   PIDS="$PIDS $STRANDED"
 sleep 0.5
 
 out="$(bash "$KIT/teardown.sh" --dry-run 2>&1)"
@@ -64,14 +83,40 @@ else ok; fi
 # 3. A dry run stops nothing for real.
 if kill -0 "$OTHER_SEAT" 2>/dev/null; then ok; else bad "dry run killed a process"; fi
 
-# 4. --orphans still refuses a live directory, because a concurrent run of
-#    this seat may be mid-screenshot against it. Only a deleted directory
-#    is takeable: that is the distinction between an abandoned clone and a
-#    live seat's worktree, and reading the name alone cannot make it.
+# 4. --orphans refuses a sibling run of this seat that is still working,
+#    because it may be mid-screenshot against that tree.
+#
+#    This case used to assert the same thing against $OTHER_SEAT, whose tree
+#    is `epito-ursa-exo-*`. That tree fails the seat pattern several lines
+#    earlier, so the assertion was satisfied by the scoping filter and the
+#    --orphans branch it names was never reached. Verified 2026-11-09 by
+#    spawning a decoy in an `epito-ursa-frontend-*` tree instead: that one
+#    reaches the branch and the exo one produces no line at all. A test that
+#    passes before it arrives at the code it describes.
 out2="$(bash "$KIT/teardown.sh" --orphans --dry-run 2>&1)"
-if printf '%s\n' "$out2" | grep -q "would stop  $OTHER_SEAT"; then
-  bad "--orphans took a live sibling checkout"
+if printf '%s\n' "$out2" | grep -q "would stop  $SIB_SERVER"; then
+  bad "--orphans took the server of a sibling run that is still working"
 else ok; fi
+
+# 4b. And it refuses it for the stated reason rather than by accident: the
+#     skip line names the owning process, so a reader can check the claim.
+if printf '%s\n' "$out2" | grep -qE "^leave  $SIB_SERVER  owner=$SIB_OWNER claude "; then
+  ok
+else bad "skip line did not identify the owning process: $(printf '%s\n' "$out2" | grep "leave  $SIB_SERVER")"; fi
+
+# 4c. The case the directory-existence proxy leaked forever. The tree is
+#     still on disk and nothing is working in it, so the server inside it is
+#     this seat's to reclaim. Under the old rule this printed `leave` on
+#     every run and was never collected.
+if printf '%s\n' "$out2" | grep -q "would stop  $STRANDED"; then
+  ok
+else bad "--orphans left a server in a stranded tree with no live owner"; fi
+
+# 4d. Without --orphans it is left, and the line says the flag would take it,
+#     so the reclaimable case is visible without running the reclaiming form.
+if printf '%s\n' "$out" | grep -qE "^leave  $STRANDED  owner=none .*--orphans would stop this"; then
+  ok
+else bad "stranded server was not reported as reclaimable without --orphans"; fi
 
 # 5. The count line prints on every path, so "nothing to stop" and "did not
 #    look" are different outputs (L53).
@@ -100,6 +145,43 @@ else ok; fi
 if printf '%s\n' "$out" | grep -q "would stop  $$"; then
   bad "teardown.sh listed its own caller"
 else ok; fi
+
+# 10. A pid that exits between the `ls /proc` listing and the read of its
+#     cmdline must not put a shell error in the middle of the output.
+#
+#     Reproduced on this host 2026-11-09, both halves at the same instant:
+#     the unbraced form printed `/bin/bash: line 1: /proc/3663191/cmdline:
+#     No such file or directory` while the braced form over the same scan
+#     printed nothing. In a real teardown that line lands between a `leave`
+#     row and the count line, which is where a reader has to decide whether
+#     the sweep failed.
+#
+#     This is two assertions and not one behavioural test, and the reason is
+#     worth stating rather than hiding. The window is between the `-O` test
+#     and the cmdline read, a few syscalls wide, so driving it requires a pid
+#     to die inside it. A first version spawned short-lived processes to make
+#     that likely; it passed against the unfixed script, left processes on a
+#     shared box, and hung the suite. So the race is not driven here. What is
+#     checked instead is the property the fix rests on, against a real
+#     missing path, plus the fact that teardown.sh still uses the form that
+#     has it. Remove the braces and 10b fails.
+#
+# 10a. The shell reports a failed redirection itself, before the
+#      `2>/dev/null` on the same command can suppress it. The braces are
+#      what put the redirection inside the suppression.
+MISSING="$TMP/no-such-cmdline"
+bare="$( { tr '\0' '\n' < "$MISSING" 2>/dev/null | head -1; } 2>&1 )"
+wrapped="$( { { tr '\0' '\n' < "$MISSING"; } 2>/dev/null | head -1; } 2>&1 )"
+if [ -n "$bare" ] && [ -z "$wrapped" ]; then ok
+else bad "redirection suppression: bare=[$bare] wrapped=[$wrapped]"; fi
+
+# 10b. And teardown.sh reads a cmdline through the wrapped form.
+if grep -q 'argv0() { { tr ' "$KIT/teardown.sh"; then ok
+else bad "argv0 does not wrap its redirection, so a vanished pid leaks a shell error"; fi
+
+# 11. A whole run writes nothing to stderr on the ordinary path.
+err="$(bash "$KIT/teardown.sh" --dry-run 2>&1 >/dev/null)"
+if [ -z "$err" ]; then ok; else bad "teardown.sh wrote to stderr: $err"; fi
 
 echo "check-teardown: $pass_count passed, $fail_count failed"
 [ "$fail_count" = 0 ]
