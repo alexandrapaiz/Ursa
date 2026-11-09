@@ -316,6 +316,33 @@ is the right direction for a secret guard, and the cost is one rewritten
 command rather than a wrong answer. A ledger entry would be the place for
 it if a second seat pays the same cost.
 
+## 3b. The merge of `main`, and its two real conflicts
+
+The forge read `CONFLICTING` and was right this time, which is worth
+saying because the standing advice here is not to trust that flag.
+`merge-tree --write-tree` with the register drivers installed also exited
+1, and both revisions were proved to resolve first, so that exit status
+is a verdict and not a 128.
+
+- **`docs/ideas.md`** — both sides added entries immediately after the
+  header, so the `__preamble__` block was edited on both sides and the
+  ledger driver refused it, correctly. Resolved as the **union**, by
+  replaying this branch's own 370 added lines onto `main`'s file at their
+  two anchors. 26,523 + 370 = 26,893 lines, headings 731 to 741, and the
+  file's two pre-existing duplicate headings unchanged. The first attempt
+  took `main`'s whole conflict region and duplicated 27 headings, which
+  is why these counts are stated rather than asserted.
+- **`tools/testing/tmpdir-leak.baseline.json`** — resolved as the
+  **intersection**, not the union, because this is a ratchet: an entry
+  that has outlived its finding makes the gate exit 1, so a side still
+  carrying a repaired row is the stale side rather than the authoritative
+  one. `main` had the skill seat's six `skills/` rows deleted and this
+  seat's one `security` row still present; this branch had the opposite.
+  Neither was wrong and both were incomplete. 35 and 30 intersect at 29,
+  and the gate reads 29 of 29 written down as found at exit 0.
+
+`merge-tree --write-tree HEAD origin/main` exits 0 after it.
+
 ## 4. What this run did not do
 
 - It did not widen the candidate sweep's roots. See F142.
@@ -324,6 +351,10 @@ it if a second seat pays the same cost.
 - It did not re-file the `deepmerge` advisory, which is already logged
   for the engineer seat.
 - It did not edit `skills/gate-registration.test.mjs`. See F143.
+- It did not build the lint F145 asks for. That is a ledger entry for the
+  engineer, "A written rule cannot stop a fixture entering its own
+  scanner's corpus, and the fourth instance proves it", because it is a
+  new gate and gates are not this seat's to build as fixes.
 
 ## 5. External sources read
 
