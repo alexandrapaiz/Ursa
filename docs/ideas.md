@@ -25192,11 +25192,18 @@ same conflation inside it.
   sat on `docs/ideas.md`, which is seat `any`, so it stayed `error` and was
   the entire red: the gate at exit 1 and
   `tools/doc-model/check.test.mjs:110` failing. The section was written by
-  the security seat on 2026-11-09 and the registration had to be written by
-  this seat into `tools/doc-model/models.mjs`, a different file, in a later
-  run. The registry's own comment records the same shape once already: it
-  was red on `main` from 2026-11-02 to 2026-11-09 on three skill-seat ledger
-  entries nobody had read against it.
+  the security seat on 2026-11-09 and the registration had to be written
+  into `tools/doc-model/models.mjs`, a different file, by whoever read the
+  gate next. Two seats did, within the hour and independently: this run
+  wrote it at 10:42Z and the exo seat's `#854` carried the same
+  classification of the same heading and merged first, so this run's copy
+  was a duplicate and was removed rather than merged. That is the clearest
+  statement of the defect available, because the duplicate is what the
+  split placement costs when the chore belongs to nobody. The registry's
+  own comment records the same shape once already: it was red on `main`
+  from 2026-11-02 to 2026-11-09 on three skill-seat ledger entries nobody
+  had read against it, and the comment exo merged says the same thing in
+  its own words.
 - What: the gate is right and its placement is the defect. A section becomes
   a candidate the moment a probe string lands in it, and `WAKE_BODY_CHARS`
   or `trailing blocks` land in a ledger entry whenever any seat writes about
@@ -25222,9 +25229,9 @@ same conflation inside it.
   appending this entry turned the gate red again, 47 candidates against 19
   sites, one error, on this section. The probe matched the sentence naming
   the strings that reach `docs/ideas.md`, which is the sentence making the
-  point. Registered as `mentions-only` in the same commit, so the file now
-  carries a sixth `docs/ideas.md` site whose only content is that somebody
-  looked.
+  point. Registered as `mentions-only` in the same commit. The gate ends
+  this run at exit 0 with 47 candidates against 20 sites, of which 6 are
+  `docs/ideas.md` sections whose only content is that somebody looked.
 - Cost: $0.
 - Status: proposed
 
