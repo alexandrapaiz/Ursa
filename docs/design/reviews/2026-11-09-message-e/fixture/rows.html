@@ -22,7 +22,16 @@
   awaited fetch. The fetch is stubbed with a flag because what is measured
   is the attribute's effect on focus, not the network.
 -->
-<link rel="stylesheet" href="rec.css">
+<!-- Each arm gets its own real stylesheet: rec-before.css is the row block
+     as it stands on origin/main, with the `:not(:disabled)` guards, and
+     rec-after.css is the row block as this branch ships it. Both are copied
+     verbatim from ursa-minor/app/globals.css, so the comparison is between
+     two stylesheets this repository actually had, not between one of them
+     and a hand-edit. -->
+<script>
+  document.write('<link rel="stylesheet" href="rec-'
+    + (new URLSearchParams(location.search).get('mode') || 'before') + '.css">');
+</script>
 <title>set view rows</title>
 <ul id="list"></ul>
 <script>
